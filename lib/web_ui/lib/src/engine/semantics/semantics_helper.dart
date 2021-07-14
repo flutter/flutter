@@ -334,7 +334,7 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
       case 'pointerdown':
       case 'pointerup':
         final html.PointerEvent touch = event as html.PointerEvent;
-        activationPoint = new html.Point(touch.client.x, touch.client.y);
+        activationPoint = new html.Point<num>(touch.client.x, touch.client.y);
         break;
       default:
         // The event is not relevant, forward to framework as normal.

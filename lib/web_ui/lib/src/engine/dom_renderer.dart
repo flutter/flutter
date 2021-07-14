@@ -398,7 +398,7 @@ class DomRenderer {
         .instance.semanticsHelper
         .prepareAccessibilityPlaceholder();
 
-    glassPaneElementHostNode.nodes.addAll([
+    glassPaneElementHostNode.nodes.addAll(<html.Node>[
       semanticsHostElement,
       _accessibilityPlaceholder,
       _sceneHostElement!,
@@ -489,7 +489,7 @@ class DomRenderer {
       // CommonJS is being used, and we shouldn't have any problems.
       js.JsFunction objectConstructor = js.context['Object'];
       if (js.context['exports'] == null) {
-        js.JsObject exportsAccessor = js.JsObject.jsify({
+        js.JsObject exportsAccessor = js.JsObject.jsify(<String, dynamic>{
           'get': js.allowInterop(() {
             if (html.document.currentScript == _canvasKitScript) {
               return js.JsObject(objectConstructor);
@@ -506,7 +506,7 @@ class DomRenderer {
             <dynamic>[js.context, 'exports', exportsAccessor]);
       }
       if (js.context['module'] == null) {
-        js.JsObject moduleAccessor = js.JsObject.jsify({
+        js.JsObject moduleAccessor = js.JsObject.jsify(<String, dynamic>{
           'get': js.allowInterop(() {
             if (html.document.currentScript == _canvasKitScript) {
               return js.JsObject(objectConstructor);
@@ -650,7 +650,7 @@ class DomRenderer {
       if (!unsafeIsNull(screenOrientation)) {
         if (orientations.isEmpty) {
           screenOrientation!.unlock();
-          return Future.value(true);
+          return Future<bool>.value(true);
         } else {
           String? lockType = _deviceOrientationToLockType(orientations.first);
           if (lockType != null) {
@@ -664,7 +664,7 @@ class DomRenderer {
                 completer.complete(false);
               });
             } catch (_) {
-              return Future.value(false);
+              return Future<bool>.value(false);
             }
             return completer.future;
           }
@@ -672,7 +672,7 @@ class DomRenderer {
       }
     }
     // API is not supported on this browser return false.
-    return Future.value(false);
+    return Future<bool>.value(false);
   }
 
   // Converts device orientation to w3c OrientationLockType enum.

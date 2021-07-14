@@ -73,7 +73,7 @@ class IntervalTree<T> {
     IntervalTreeNode<T> root = _makeBalancedTree(intervals)!;
     _computeHigh(root);
 
-    return IntervalTree._(root);
+    return IntervalTree<T>._(root);
   }
 
   /// Returns the list of objects which have been associated with intervals that

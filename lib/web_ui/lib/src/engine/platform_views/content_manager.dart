@@ -38,10 +38,10 @@ typedef PlatformViewFactory = html.Element Function(int viewId);
 /// CRUD Platform Views as needed, regardless of the rendering backend.
 class PlatformViewManager {
   // The factory functions, indexed by the viewType
-  final Map<String, Function> _factories = {};
+  final Map<String, Function> _factories = <String, Function>{};
 
   // The references to content tags, indexed by their framework-given ID.
-  final Map<int, html.Element> _contents = {};
+  final Map<int, html.Element> _contents = <int, html.Element>{};
 
   /// Returns `true` if the passed in `viewType` has been registered before.
   ///

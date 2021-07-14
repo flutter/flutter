@@ -195,8 +195,8 @@ class GradientLinear extends EngineGradient {
     if (matrix4 != null) {
       // The matrix is relative to shaderBounds so we shift center by
       // shaderBounds top-left origin.
-      final centerX = (from.dx + to.dx) / 2.0 - shaderBounds.left;
-      final centerY = (from.dy + to.dy) / 2.0 - shaderBounds.top;
+      final double centerX = (from.dx + to.dx) / 2.0 - shaderBounds.left;
+      final double centerY = (from.dy + to.dy) / 2.0 - shaderBounds.top;
 
       matrix4.transform(from.dx - centerX, from.dy - centerY);
       final double fromX = matrix4.transformedX + centerX;

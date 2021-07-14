@@ -51,7 +51,7 @@ class ChromeEnvironment implements BrowserEnvironment {
 /// Any errors starting or running the process are reported through [onExit].
 class Chrome extends Browser {
   @override
-  final name = 'Chrome';
+  final String name = 'Chrome';
 
   @override
   final Future<Uri> remoteDebuggerUrl;
@@ -60,7 +60,7 @@ class Chrome extends Browser {
   /// [Uri] or a [String].
   factory Chrome(Uri url, {bool debug = false}) {
     String version = ChromeArgParser.instance.version;
-    var remoteDebuggerCompleter = Completer<Uri>.sync();
+    Completer<Uri> remoteDebuggerCompleter = Completer<Uri>.sync();
     return Chrome._(() async {
       final BrowserInstallation installation = await getOrInstallChrome(
         version,
@@ -80,7 +80,7 @@ class Chrome extends Browser {
       final bool isChromeNoSandbox =
           Platform.environment['CHROME_NO_SANDBOX'] == 'true';
       final String dir = environment.webUiDartToolDir.createTempSync('test_chrome_user_data_').resolveSymbolicLinksSync();
-      var args = [
+      List<String> args = <String>[
         '--user-data-dir=$dir',
         url.toString(),
         if (!debug)
@@ -218,7 +218,7 @@ class ChromeScreenshotManager extends ScreenshotManager {
   /// [region] is used to decide which part of the web content will be used in
   /// test image. It includes starting coordinate x,y as well as height and
   /// width of the area to capture.
-  Future<Image> capture(math.Rectangle? region) async {
+  Future<Image> capture(math.Rectangle<num>? region) async {
     final wip.ChromeConnection chromeConnection =
         wip.ChromeConnection('localhost', kDevtoolsPort);
     final wip.ChromeTab? chromeTab = await chromeConnection.getTab(

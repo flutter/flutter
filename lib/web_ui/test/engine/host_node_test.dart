@@ -55,7 +55,7 @@ void _runDomTests(HostNode hostNode) {
     final html.Element target = html.document.createElement('div')..id = 'yep';
 
     setUp(() {
-      hostNode.nodes.addAll([
+      hostNode.nodes.addAll(<html.Node>[
         html.document.createElement('div'),
         target,
         html.document.createElement('span'),

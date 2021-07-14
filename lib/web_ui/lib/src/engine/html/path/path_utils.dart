@@ -118,7 +118,7 @@ class QuadRoots {
 
   /// Returns roots as list.
   List<double> get roots => (root0 == null)
-      ? []
+      ? <double>[]
       : (root1 == null ? <double>[root0!] : <double>[root0!, root1!]);
 
   int findRoots(double a, double b, double c) {

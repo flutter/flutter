@@ -21,7 +21,7 @@ class MacOSInfo {
   Future<void> _printSafariApplications() async {
     final ProcessManager systemProfiler = await startProcess(
       'system_profiler',
-      ['SPApplicationsDataType', '-json'],
+      <String>['SPApplicationsDataType', '-json'],
       evalOutput: true,
     );
     final String systemProfileJson = await systemProfiler.evalStdout();
@@ -44,7 +44,7 @@ class MacOSInfo {
   Future<void> _printSafariDefaults() async {
     final ProcessManager defaults = await startProcess(
       '/usr/bin/defaults',
-      ['find', 'Safari'],
+      <String>['find', 'Safari'],
       evalOutput: true,
     );
     print('Safari related defaults:\n ${await defaults.evalStdout()}');
@@ -52,11 +52,11 @@ class MacOSInfo {
 
   /// Print user limits (file and process).
   Future<void> _printUserLimits() async {
-    ProcessManager ulimit = await startProcess('ulimit', ['-n'], evalOutput: true);
+    ProcessManager ulimit = await startProcess('ulimit', <String>['-n'], evalOutput: true);
     final String fileLimit = await ulimit.evalStdout();
     print('MacOS file limit: $fileLimit');
 
-    ulimit = await startProcess('ulimit', ['-u'], evalOutput: true);
+    ulimit = await startProcess('ulimit', <String>['-u'], evalOutput: true);
     final String processLimit = await ulimit.evalStdout();
     print('MacOS process limit: $processLimit');
   }

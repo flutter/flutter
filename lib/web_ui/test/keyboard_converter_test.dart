@@ -51,7 +51,7 @@ void testMain() {
       return key.type == ui.KeyEventType.down;
     });
     bool preventedDefault = false;
-    final onPreventDefault = () { preventedDefault = true; };
+    final ui.VoidCallback onPreventDefault = () { preventedDefault = true; };
 
     converter.handleEvent(keyDownEvent('KeyA', 'a')
       ..timeStamp = 1
@@ -115,7 +115,7 @@ void testMain() {
       return key.type == ui.KeyEventType.down;
     });
     bool preventedDefault = false;
-    final onPreventDefault = () { preventedDefault = true; };
+    final ui.VoidCallback onPreventDefault = () { preventedDefault = true; };
 
     converter.handleEvent(keyDownEvent('ShiftLeft', 'Shift', kShift, kLocationLeft)
       ..onPreventDefault = onPreventDefault
@@ -356,7 +356,7 @@ void testMain() {
       return true;
     });
     bool preventedDefault = false;
-    final onPreventDefault = () { preventedDefault = true; };
+    final ui.VoidCallback onPreventDefault = () { preventedDefault = true; };
 
     converter.handleEvent(keyDownEvent('ShiftLeft', 'Shift', kShift, kLocationLeft)
       ..onPreventDefault = onPreventDefault
@@ -392,7 +392,7 @@ void testMain() {
       return true;
     });
     bool preventedDefault = false;
-    final onPreventDefault = () { preventedDefault = true; };
+    final ui.VoidCallback onPreventDefault = () { preventedDefault = true; };
 
     // A KeyDown of ShiftRight is missed due to loss of focus.
     converter.handleEvent(keyUpEvent('ShiftRight', 'Shift', 0, kLocationRight)
@@ -447,7 +447,7 @@ void testMain() {
       return true;
     }, onMacOs: true);
     bool preventedDefault = false;
-    final onPreventDefault = () { preventedDefault = true; };
+    final ui.VoidCallback onPreventDefault = () { preventedDefault = true; };
 
     // A KeyDown of ShiftRight is missed due to loss of focus.
     converter.handleEvent(keyDownEvent('CapsLock', 'CapsLock')
@@ -886,10 +886,10 @@ class MockKeyboardEvent implements FlutterHtmlKeyboardEvent {
 }
 
 // Flags used for the `modifiers` argument of `key***Event` functions.
-const kAlt = 0x1;
-const kCtrl = 0x2;
-const kShift = 0x4;
-const kMeta = 0x8;
+const int kAlt = 0x1;
+const int kCtrl = 0x2;
+const int kShift = 0x4;
+const int kMeta = 0x8;
 
 // Utility functions to make code more concise.
 //
@@ -935,9 +935,9 @@ MockKeyboardEvent keyRepeatedDownEvent(String code, String key, [int modifiers =
 }
 
 // Flags used for the `activeLocks` argument of expectKeyData.
-const kCapsLock = 0x1;
-const kNumlLock = 0x2;
-const kScrollLock = 0x4;
+const int kCapsLock = 0x1;
+const int kNumlLock = 0x2;
+const int kScrollLock = 0x4;
 
 void expectKeyData(
   ui.KeyData target, {

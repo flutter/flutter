@@ -37,7 +37,7 @@ void testMain() {
       expect(response, isNotNull);
       expect(
         codec.decodeEnvelope(response!),
-        [true],
+        <bool>[true],
       );
     });
     // TODO: https://github.com/flutter/flutter/issues/60040

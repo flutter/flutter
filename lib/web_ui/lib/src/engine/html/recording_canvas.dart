@@ -538,7 +538,7 @@ class RecordingCanvas {
     _didDraw = true;
     final double left = offset.dx;
     final double top = offset.dy;
-    final command = PaintDrawImage(image, offset, paint.paintData);
+    final PaintDrawImage command = PaintDrawImage(image, offset, paint.paintData);
     _paintBounds.growLTRB(
         left, top, left + image.width, top + image.height, command);
     _commands.add(command);

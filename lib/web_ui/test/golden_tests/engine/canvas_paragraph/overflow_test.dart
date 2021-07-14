@@ -31,7 +31,7 @@ void testMain() async {
 
     paragraph = rich(
       EngineParagraphStyle(fontFamily: 'Roboto', fontSize: fontSize, ellipsis: '...'),
-      (builder) {
+      (CanvasParagraphBuilder builder) {
         builder.pushStyle(EngineTextStyle.only(color: blue));
         builder.addText('Lorem ');
         builder.pushStyle(EngineTextStyle.only(color: green));
@@ -43,7 +43,7 @@ void testMain() async {
 
     paragraph = rich(
       EngineParagraphStyle(fontFamily: 'Roboto', fontSize: fontSize, ellipsis: '...'),
-      (builder) {
+      (CanvasParagraphBuilder builder) {
         builder.pushStyle(EngineTextStyle.only(color: blue));
         builder.addText('Lorem\n');
         builder.pushStyle(EngineTextStyle.only(color: green));
@@ -57,7 +57,7 @@ void testMain() async {
 
     paragraph = rich(
       EngineParagraphStyle(fontFamily: 'Roboto', fontSize: fontSize, ellipsis: '...'),
-      (builder) {
+      (CanvasParagraphBuilder builder) {
         builder.pushStyle(EngineTextStyle.only(color: blue));
         builder.addText('Lorem\n');
         builder.pushStyle(EngineTextStyle.only(color: green));
@@ -87,7 +87,7 @@ void testMain() async {
 
     paragraph = rich(
       EngineParagraphStyle(fontFamily: 'Roboto', fontSize: fontSize, maxLines: 2, ellipsis: '...'),
-      (builder) {
+      (CanvasParagraphBuilder builder) {
         builder.pushStyle(EngineTextStyle.only(color: blue));
         builder.addText('Lorem');
         builder.pushStyle(EngineTextStyle.only(color: green));

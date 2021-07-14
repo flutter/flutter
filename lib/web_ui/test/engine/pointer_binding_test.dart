@@ -404,7 +404,7 @@ void testMain() {
   // ALL ADAPTERS
 
   _testEach<_BasicEventContext>(
-    [
+    <_BasicEventContext>[
       _PointerEventContext(),
       _MouseEventContext(),
       _TouchEventContext(),
@@ -425,7 +425,7 @@ void testMain() {
   );
 
   _testEach<_BasicEventContext>(
-    [
+    <_BasicEventContext>[
       _PointerEventContext(),
       _MouseEventContext(),
       _TouchEventContext(),
@@ -449,7 +449,7 @@ void testMain() {
   );
 
   _testEach<_ButtonedEventMixin>(
-    [
+    <_ButtonedEventMixin>[
       if (!isIosSafari) _PointerEventContext(),
       if (!isIosSafari) _MouseEventContext(),
     ],
@@ -523,7 +523,7 @@ void testMain() {
   // BUTTONED ADAPTERS
 
   _testEach<_ButtonedEventMixin>(
-    [
+    <_ButtonedEventMixin>[
       _PointerEventContext(),
       _MouseEventContext(),
     ],
@@ -547,7 +547,7 @@ void testMain() {
   );
 
   _testEach<_ButtonedEventMixin>(
-    [
+    <_ButtonedEventMixin>[
       _PointerEventContext(),
       _MouseEventContext(),
     ],
@@ -584,7 +584,7 @@ void testMain() {
   );
 
   _testEach<_ButtonedEventMixin>(
-    [
+    <_ButtonedEventMixin>[
       if (!isIosSafari) _PointerEventContext(),
       if (!isIosSafari) _MouseEventContext(),
     ],
@@ -703,7 +703,7 @@ void testMain() {
   );
 
   _testEach<_ButtonedEventMixin>(
-    [
+    <_ButtonedEventMixin>[
       if (!isIosSafari) _PointerEventContext(),
       if (!isIosSafari) _MouseEventContext()
     ],
@@ -831,7 +831,7 @@ void testMain() {
   );
 
   _testEach<_ButtonedEventMixin>(
-    [
+    <_ButtonedEventMixin>[
       if (!isIosSafari) _PointerEventContext(),
       if (!isIosSafari) _MouseEventContext(),
     ],
@@ -1001,7 +1001,7 @@ void testMain() {
   );
 
   _testEach<_ButtonedEventMixin>(
-    [
+    <_ButtonedEventMixin>[
       _PointerEventContext(),
       _MouseEventContext(),
     ],
@@ -1066,7 +1066,7 @@ void testMain() {
   );
 
   _testEach<_ButtonedEventMixin>(
-    [
+    <_ButtonedEventMixin>[
       if (!isIosSafari) _PointerEventContext(),
       if (!isIosSafari) _MouseEventContext(),
     ],
@@ -1149,7 +1149,7 @@ void testMain() {
   );
 
   _testEach<_ButtonedEventMixin>(
-    [
+    <_ButtonedEventMixin>[
       _PointerEventContext(),
       _MouseEventContext(),
     ],
@@ -1222,7 +1222,7 @@ void testMain() {
   );
 
   _testEach<_ButtonedEventMixin>(
-    [
+    <_ButtonedEventMixin>[
       _PointerEventContext(),
     ],
     'correctly handles missing right mouse button up when followed by move',
@@ -1273,7 +1273,7 @@ void testMain() {
   );
 
   _testEach<_ButtonedEventMixin>(
-    [
+    <_ButtonedEventMixin>[
       _PointerEventContext(),
       _MouseEventContext(),
     ],
@@ -1309,7 +1309,7 @@ void testMain() {
   );
 
   _testEach<_ButtonedEventMixin>(
-    [
+    <_ButtonedEventMixin>[
       _PointerEventContext(),
       _MouseEventContext(),
     ],
@@ -1366,7 +1366,7 @@ void testMain() {
   );
 
   _testEach<_ButtonedEventMixin>(
-    [
+    <_ButtonedEventMixin>[
       _PointerEventContext(),
       _MouseEventContext(),
     ],
@@ -1435,7 +1435,7 @@ void testMain() {
   );
 
   _testEach<_ButtonedEventMixin>(
-    [
+    <_ButtonedEventMixin>[
       _PointerEventContext(),
       _MouseEventContext(),
     ],
@@ -1508,7 +1508,7 @@ void testMain() {
   );
 
   _testEach<_ButtonedEventMixin>(
-    [
+    <_ButtonedEventMixin>[
       _PointerEventContext(),
       _MouseEventContext(),
     ],
@@ -1591,7 +1591,7 @@ void testMain() {
   );
 
   _testEach<_ButtonedEventMixin>(
-    [
+    <_ButtonedEventMixin>[
       _PointerEventContext(),
       _MouseEventContext(),
     ],
@@ -1661,7 +1661,7 @@ void testMain() {
   );
 
   _testEach<_ButtonedEventMixin>(
-    [
+    <_ButtonedEventMixin>[
       _PointerEventContext(),
       _MouseEventContext(),
     ],
@@ -1745,7 +1745,7 @@ void testMain() {
   );
 
   _testEach<_ButtonedEventMixin>(
-    [
+    <_ButtonedEventMixin>[
       if (!isIosSafari) _PointerEventContext(),
       if (!isIosSafari) _MouseEventContext(),
     ],
@@ -1812,7 +1812,7 @@ void testMain() {
   // MULTIPOINTER ADAPTERS
 
   _testEach<_MultiPointerEventMixin>(
-    [
+    <_MultiPointerEventMixin>[
       if (!isIosSafari) _PointerEventContext(),
       if (!isIosSafari) _TouchEventContext(),
     ],
@@ -2003,7 +2003,7 @@ void testMain() {
   );
 
   _testEach<_MultiPointerEventMixin>(
-    [
+    <_MultiPointerEventMixin>[
       if (!isIosSafari) _PointerEventContext(),
       if (!isIosSafari) _TouchEventContext(),
     ],
@@ -2050,7 +2050,7 @@ void testMain() {
   // POINTER ADAPTER
 
   _testEach<_PointerEventContext>(
-    [
+    <_PointerEventContext>[
       if (!isIosSafari) _PointerEventContext(),
     ],
     'does not synthesize pointer up if from different device',
@@ -2090,7 +2090,7 @@ void testMain() {
   );
 
   _testEach<_PointerEventContext>(
-    [
+    <_PointerEventContext>[
       _PointerEventContext(),
     ],
     'handles random pointer id on up events',
@@ -2145,8 +2145,8 @@ void testMain() {
 
   // TOUCH ADAPTER
 
-  _testEach(
-    [
+  _testEach<_TouchEventContext>(
+    <_TouchEventContext>[
       if (!isIosSafari) _TouchEventContext(),
     ],
     'does calculate delta and pointer identifier correctly',

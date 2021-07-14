@@ -130,9 +130,9 @@ class ClipboardAPICopyStrategy implements CopyToClipboardStrategy {
       await html.window.navigator.clipboard!.writeText(text!);
     } catch (error) {
       print('copy is not successful $error');
-      return Future.value(false);
+      return Future<bool>.value(false);
     }
-    return Future.value(true);
+    return Future<bool>.value(true);
   }
 }
 
@@ -153,7 +153,7 @@ class ClipboardAPIPasteStrategy implements PasteFromClipboardStrategy {
 class ExecCommandCopyStrategy implements CopyToClipboardStrategy {
   @override
   Future<bool> setData(String? text) {
-    return Future.value(_setDataSync(text));
+    return Future<bool>.value(_setDataSync(text));
   }
 
   bool _setDataSync(String? text) {
@@ -204,7 +204,7 @@ class ExecCommandPasteStrategy implements PasteFromClipboardStrategy {
   @override
   Future<String> getData() {
     // TODO(nurhan): https://github.com/flutter/flutter/issues/48581
-    return Future.error(
+    return Future<String>.error(
         UnimplementedError('Paste is not implemented for this browser.'));
   }
 }

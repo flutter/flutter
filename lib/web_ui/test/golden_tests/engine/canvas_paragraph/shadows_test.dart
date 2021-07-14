@@ -20,15 +20,15 @@ void testMain() async {
   setUpStableTestFonts();
 
   test('paints multiple shadows', () {
-    final canvas = BitmapCanvas(bounds, RenderStrategy());
+    final BitmapCanvas canvas = BitmapCanvas(bounds, RenderStrategy());
 
     final CanvasParagraph paragraph = rich(
       EngineParagraphStyle(fontFamily: 'Roboto'),
-      (builder) {
+      (CanvasParagraphBuilder builder) {
         builder.pushStyle(EngineTextStyle.only(
           fontSize: 32.0,
           color: blue,
-          shadows: [
+          shadows: <Shadow>[
             Shadow(color: red, blurRadius:2.0, offset: Offset(4.0, 2.0)),
             Shadow(color: green, blurRadius: 3.0),
           ],
@@ -37,7 +37,7 @@ void testMain() async {
         builder.pushStyle(EngineTextStyle.only(
           color: green,
           background: Paint()..color = yellow,
-          shadows: [
+          shadows: <Shadow>[
             Shadow(color: black, blurRadius: 10.0),
           ],
         ));

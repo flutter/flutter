@@ -70,7 +70,7 @@ void testMain() async {
       expect(
         () =>codec.decodeEnvelope(result),
         throwsA(TypeMatcher<PlatformException>()
-          .having((e) => e.code, 'code', equals('copy_fail'))));
+          .having((PlatformException e) => e.code, 'code', equals('copy_fail'))));
     });
 
     test('get data successful', () async {

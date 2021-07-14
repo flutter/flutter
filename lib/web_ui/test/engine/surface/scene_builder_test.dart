@@ -496,7 +496,7 @@ void testMain() {
 
       // Watches DOM mutations and counts deletions and additions to the child
       // list of the `<flt-scene>` element.
-      final html.MutationObserver observer = html.MutationObserver((List mutations, _) {
+      final html.MutationObserver observer = html.MutationObserver((List<dynamic> mutations, _) {
         for (html.MutationRecord record in mutations.cast<html.MutationRecord>()) {
           actualDeletions.addAll(record.removedNodes!);
           actualAdditions.addAll(record.addedNodes!);
@@ -513,10 +513,10 @@ void testMain() {
       final List<html.Element> pTags = scene.webOnlyRootElement!.querySelectorAll('p');
       expect(pTags, hasLength(string.length));
       expect(
-        scene.webOnlyRootElement!.querySelectorAll('p').map((p) => p.innerText).join(''),
+        scene.webOnlyRootElement!.querySelectorAll('p').map((html.Element p) => p.innerText).join(''),
         string,
       );
-      renderedLayers.removeWhere((key, value) => !string.contains(key));
+      renderedLayers.removeWhere((String key, ui.EngineLayer value) => !string.contains(key));
 
       // Inject a zero-duration timer to allow mutation observers to receive notification.
       return Future<void>.delayed(Duration.zero).then((_) {
@@ -821,10 +821,12 @@ ui.Picture _drawPicture() {
   final RecordingCanvas canvas =
   recorder.beginRecording(const ui.Rect.fromLTRB(0, 0, 400, 400));
   ui.Shader gradient = ui.Gradient.radial(
-      ui.Offset(100, 100), 50, [
-    const ui.Color.fromARGB(255, 0, 0, 0),
-    const ui.Color.fromARGB(255, 0, 0, 255)
-  ]);
+    ui.Offset(100, 100), 50,
+    <ui.Color>[
+      const ui.Color.fromARGB(255, 0, 0, 0),
+      const ui.Color.fromARGB(255, 0, 0, 255),
+    ],
+  );
   canvas.drawCircle(
       ui.Offset(offsetX + 10, offsetY + 10), 10,
       SurfacePaint()
@@ -864,10 +866,12 @@ EnginePicture _drawPathImagePath() {
   final RecordingCanvas canvas =
   recorder.beginRecording(const ui.Rect.fromLTRB(0, 0, 400, 400));
   ui.Shader gradient = ui.Gradient.radial(
-      ui.Offset(100, 100), 50, [
-    const ui.Color.fromARGB(255, 0, 0, 0),
-    const ui.Color.fromARGB(255, 0, 0, 255)
-  ]);
+    ui.Offset(100, 100), 50,
+    <ui.Color>[
+      const ui.Color.fromARGB(255, 0, 0, 0),
+      const ui.Color.fromARGB(255, 0, 0, 255),
+    ],
+  );
   canvas.drawCircle(
       ui.Offset(offsetX + 10, offsetY + 10), 10,
       SurfacePaint()

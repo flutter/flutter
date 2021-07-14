@@ -197,7 +197,7 @@ class FontManager {
         //
         // TODO(mdebbar): Revert this once the dart:html type is fixed.
         //                https://github.com/dart-lang/sdk/issues/45676
-        js_util.callMethod(html.document.fonts!, 'add', [fontFace]);
+        js_util.callMethod(html.document.fonts!, 'add', <dynamic>[fontFace]);
       }, onError: (dynamic e) {
         printWarning('Error while trying to load font family "$family":\n$e');
       }));

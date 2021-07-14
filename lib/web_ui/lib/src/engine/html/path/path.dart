@@ -535,7 +535,7 @@ class SurfacePath implements ui.Path {
     // 180..270 -> quadrant 2
     // 270..360 -> quadrant 3
 
-    const List<ui.Offset> quadPoints = [
+    const List<ui.Offset> quadPoints = <ui.Offset>[
       ui.Offset(1, 0),
       ui.Offset(1, 1),
       ui.Offset(0, 1),
@@ -564,7 +564,7 @@ class SurfacePath implements ui.Path {
       }
     }
 
-    List<Conic> conics = [];
+    final List<Conic> conics = <Conic>[];
 
     const double quadrantWeight = SPath.scalarRoot2Over2;
     int conicCount = quadrant;
@@ -1242,7 +1242,7 @@ class SurfacePath implements ui.Path {
     // points have identical tangents.
     final PathIterator iter = PathIterator(pathRef, true);
     final Float32List _buffer = Float32List(8 + 10);
-    List<ui.Offset> tangents = [];
+    final List<ui.Offset> tangents = <ui.Offset>[];
     bool done = false;
     do {
       int oldCount = tangents.length;

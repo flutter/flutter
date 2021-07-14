@@ -74,8 +74,8 @@ class OffScreenCanvas {
     final Completer<String> completer = Completer<String>();
     if (offScreenCanvas != null) {
       offScreenCanvas!.convertToBlob().then((html.Blob value) {
-        final fileReader = html.FileReader();
-        fileReader.onLoad.listen((event) {
+        final html.FileReader fileReader = html.FileReader();
+        fileReader.onLoad.listen((html.ProgressEvent event) {
           completer.complete(js_util.getProperty(
               js_util.getProperty(event, 'target')!, 'result')!);
         });
@@ -83,7 +83,7 @@ class OffScreenCanvas {
       });
       return completer.future;
     } else {
-      return Future.value(canvasElement!.toDataUrl());
+      return Future<String>.value(canvasElement!.toDataUrl());
     }
   }
 

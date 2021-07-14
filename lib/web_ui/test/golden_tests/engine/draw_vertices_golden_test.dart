@@ -73,7 +73,7 @@ void testMain() async {
       () async {
     final Vertices vertices = Vertices.raw(
         VertexMode.triangles,
-        Float32List.fromList([
+        Float32List.fromList(<double>[
           20.0,
           20.0,
           220.0,
@@ -111,7 +111,7 @@ void testMain() async {
     ]);
     final Vertices vertices = Vertices.raw(
         VertexMode.triangles,
-        Float32List.fromList([
+        Float32List.fromList(<double>[
           20.0,
           20.0,
           220.0,
@@ -150,7 +150,7 @@ void testMain() async {
     ]);
     final Vertices vertices = Vertices.raw(
         VertexMode.triangles,
-        Float32List.fromList([
+        Float32List.fromList(<double>[
           20.0,
           20.0,
           220.0,
@@ -176,7 +176,7 @@ void testMain() async {
   test('Should draw hairline triangleFan.', () async {
     final Vertices vertices = Vertices.raw(
         VertexMode.triangleFan,
-        Float32List.fromList([
+        Float32List.fromList(<double>[
           150.0,
           150.0,
           20.0,
@@ -198,7 +198,7 @@ void testMain() async {
   test('Should draw hairline triangleStrip.', () async {
     final Vertices vertices = Vertices.raw(
         VertexMode.triangleStrip,
-        Float32List.fromList([
+        Float32List.fromList(<double>[
           20.0,
           20.0,
           220.0,
@@ -227,7 +227,7 @@ void testMain() async {
     ]);
     final Vertices vertices = Vertices.raw(
         VertexMode.triangles,
-        Float32List.fromList([
+        Float32List.fromList(<double>[
           150.0,
           150.0,
           20.0,
@@ -257,7 +257,7 @@ void testMain() async {
 
     final Vertices vertices = Vertices.raw(
         VertexMode.triangles,
-        Float32List.fromList([
+        Float32List.fromList(<double>[
           210.0,
           150.0,
           30.0,
@@ -289,7 +289,7 @@ void testMain() async {
     ]);
     final Vertices vertices = Vertices.raw(
         VertexMode.triangleFan,
-        Float32List.fromList([
+        Float32List.fromList(<double>[
           150.0,
           150.0,
           20.0,
@@ -320,7 +320,7 @@ void testMain() async {
     ]);
     final Vertices vertices = Vertices.raw(
         VertexMode.triangleStrip,
-        Float32List.fromList([
+        Float32List.fromList(<double>[
           20.0,
           20.0,
           220.0,
@@ -347,7 +347,7 @@ void testMain() async {
 
     final Vertices vertices = Vertices.raw(
         VertexMode.triangles,
-        Float32List.fromList([
+        Float32List.fromList(<double>[
           210.0,
           150.0,
           0.0,
@@ -402,8 +402,8 @@ Future<HtmlImage> createTestImage({int width = 50, int height = 40}) {
   ctx.fillRect(2 * width / 3, 0, width / 3, height);
   ctx.fill();
   html.ImageElement imageElement = html.ImageElement();
-  Completer<HtmlImage> completer = Completer();
-  imageElement.onLoad.listen((event) {
+  Completer<HtmlImage> completer = Completer<HtmlImage>();
+  imageElement.onLoad.listen((html.Event event) {
     completer.complete(HtmlImage(imageElement, width, height));
   });
   imageElement.src = js_util.callMethod(canvas, 'toDataURL', <dynamic>[]);

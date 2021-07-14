@@ -235,20 +235,20 @@ void testMain() async {
   });
 
   test('hit test on the nested text span and returns correct span offset', () {
-    const fontFamily = 'sans-serif';
-    const fontSize = 20.0;
-    final style = TextStyle(fontFamily: fontFamily, fontSize: fontSize);
+    const String fontFamily = 'sans-serif';
+    const double fontSize = 20.0;
+    final TextStyle style = TextStyle(fontFamily: fontFamily, fontSize: fontSize);
     final DomParagraphBuilder builder = DomParagraphBuilder(EngineParagraphStyle(
       fontFamily: fontFamily,
       fontSize: fontSize,
     ));
 
-    const text00 = 'test test test test test te00 ';
-    const text010 = 'test010 ';
-    const text02 = 'test test test test te02 ';
-    const text030 = 'test030 ';
-    const text04 = 'test test test test test test test test test test te04 ';
-    const text050 = 'test050 ';
+    const String text00 = 'test test test test test te00 ';
+    const String text010 = 'test010 ';
+    const String text02 = 'test test test test te02 ';
+    const String text030 = 'test030 ';
+    const String text04 = 'test test test test test test test test test test te04 ';
+    const String text050 = 'test050 ';
 
     /* Logical arrangement: Tree
 
@@ -329,10 +329,10 @@ void testMain() async {
     paragraph.layout(ParagraphConstraints(width: 800));
 
     // Reference the offsets with the output of `Display arrangement`.
-    const offset010 = text00.length;
-    const offset030 = offset010 + text010.length + text02.length;
-    const offset04 = offset030 + text030.length;
-    const offset050 = offset04 + text04.length;
+    const int offset010 = text00.length;
+    const int offset030 = offset010 + text010.length + text02.length;
+    const int offset04 = offset030 + text030.length;
+    const int offset050 = offset04 + text04.length;
     // Tap text010.
     expect(paragraph.getPositionForOffset(Offset(700, 10)).offset, offset010);
     // Tap text030
