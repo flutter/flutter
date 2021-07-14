@@ -728,7 +728,6 @@ void main() {
     await tester.pump(const Duration(milliseconds: 50));
     await tester.tapAt(textOffsetToPosition(tester, index));
     await tester.pumpAndSettle();
-    expect(controller.selection.isCollapsed, isFalse);
     expect(editableTextState.selectionOverlay!.handlesAreVisible, isTrue);
     expect(controller.selection.baseOffset, 4);
     expect(controller.selection.extentOffset, 7);
