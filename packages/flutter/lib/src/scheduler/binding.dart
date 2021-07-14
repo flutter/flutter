@@ -18,16 +18,18 @@ export 'dart:ui' show AppLifecycleState, VoidCallback, FrameTiming;
 /// Slows down animations by this factor to help in development.
 double get timeDilation => _timeDilation;
 double _timeDilation = 1.0;
-/// Setting the time dilation automatically calls [SchedulerBinding.resetEpoch]
-/// to ensure that time stamps seen by consumers of the scheduler binding are
-/// always increasing.
+/// If the [SchedulerBinding] has been initialized, setting the time dilation
+/// automatically calls [SchedulerBinding.resetEpoch] to ensure that time stamps
+/// seen by consumers of the scheduler binding are always increasing.
+///
+/// It is safe to set this before initializing the binding.
 set timeDilation(double value) {
   assert(value > 0.0);
   if (_timeDilation == value)
     return;
-  // We need to resetEpoch first so that we capture start of the epoch with the
-  // current time dilation.
-  SchedulerBinding.instance.resetEpoch();
+  // If the binding has been created, we need to resetEpoch first so that we
+  // capture start of the epoch with the current time dilation.
+  SchedulerBinding._instance?.resetEpoch();
   _timeDilation = value;
 }
 
