@@ -1,0 +1,8 @@
+name: failure_example
+
+environment:
+  sdk: '>=2.12.0 <3.0.0'
+
+dependencies:
+  crypto: 2.0.0
+  archive: 3.0.0
