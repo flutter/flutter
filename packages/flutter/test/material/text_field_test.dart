@@ -833,8 +833,7 @@ void main() {
         ),
       ),
     );
-
-    final EditableText editableTextWidget = tester.widget(find.byType(EditableText));
+    
     final EditableTextState editableTextState = tester.state(find.byType(EditableText));
 
     // Double tap to select the first word.
