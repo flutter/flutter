@@ -378,6 +378,9 @@ public class FlutterActivityAndFragmentDelegateTest {
     // Declare that the host does NOT want Flutter to attach to the surrounding Activity.
     when(mockHost.shouldAttachEngineToActivity()).thenReturn(false);
 
+    // getActivity() returns null if the activity is not attached
+    when(mockHost.getActivity()).thenReturn(null);
+
     // Create the real object that we're testing.
     FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
 
@@ -385,14 +388,21 @@ public class FlutterActivityAndFragmentDelegateTest {
     // Flutter is attached to the surrounding Activity in onAttach.
     delegate.onAttach(RuntimeEnvironment.application);
 
-    // Verify that the ActivityControlSurface was NOT told to attach to an Activity.
-    verify(mockFlutterEngine.getActivityControlSurface(), never())
-        .attachToActivity(any(Activity.class), any(Lifecycle.class));
+    // Make sure all of the other lifecycle methods can run safely as well
+    // without a valid Activity
+    delegate.onCreateView(null, null, null);
+    delegate.onStart();
+    delegate.onResume();
+    delegate.onPause();
+    delegate.onStop();
+    delegate.onDestroyView();
 
     // Flutter is detached from the surrounding Activity in onDetach.
     delegate.onDetach();
 
-    // Verify that the ActivityControlSurface was NOT told to detach from the Activity.
+    // Verify that the ActivityControlSurface was NOT told to attach or detach to an Activity.
+    verify(mockFlutterEngine.getActivityControlSurface(), never())
+        .attachToActivity(any(Activity.class), any(Lifecycle.class));
     verify(mockFlutterEngine.getActivityControlSurface(), never()).detachFromActivity();
   }
 
