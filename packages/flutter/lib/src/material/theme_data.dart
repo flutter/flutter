@@ -475,7 +475,7 @@ class ThemeData with Diagnosticable {
     switchTheme ??= const SwitchThemeData();
     progressIndicatorTheme ??= const ProgressIndicatorThemeData();
 
-    fixTextFieldOutlineLabel ??= false;
+    fixTextFieldOutlineLabel ??= true;
     useTextSelectionTheme ??= true;
 
     return ThemeData.raw(
