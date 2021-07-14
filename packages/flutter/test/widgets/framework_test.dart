@@ -1328,24 +1328,28 @@ void main() {
     expect(key.currentState, isNotNull);
     expect(state.didChangeDependenciesCount, 1);
     expect(state.deactivatedCount, 0);
+    expect(state.activatedCount, 0);
 
     /// Rebuild with updated value - should call didChangeDependencies
     await tester.pumpWidget(Inherited(2, child: DependentStatefulWidget(key: key)));
     expect(key.currentState, isNotNull);
     expect(state.didChangeDependenciesCount, 2);
     expect(state.deactivatedCount, 0);
+    expect(state.activatedCount, 0);
 
-    // reparent it - should call deactivate and didChangeDependencies
+    // reparent it - should call deactivate, reactivate, didChangeDependencies
     await tester.pumpWidget(Inherited(3, child: SizedBox(child: DependentStatefulWidget(key: key))));
     expect(key.currentState, isNotNull);
     expect(state.didChangeDependenciesCount, 3);
     expect(state.deactivatedCount, 1);
+    expect(state.activatedCount, 1);
 
-    // Remove it - should call deactivate, but not didChangeDependencies
+    // Remove it - should call deactivate, but not reactivate or didChangeDependencies
     await tester.pumpWidget(const Inherited(4, child: SizedBox()));
     expect(key.currentState, isNull);
     expect(state.didChangeDependenciesCount, 3);
     expect(state.deactivatedCount, 2);
+    expect(state.activatedCount, 1);
   });
 
   testWidgets('StatefulElement subclass can decorate State.build', (WidgetTester tester) async {
@@ -1388,17 +1392,21 @@ void main() {
       expect(debugDoingBuildOnBuild, isTrue);
     });
     testWidgets('StatefulWidget', (WidgetTester tester) async {
+      final Key key = GlobalKey();
+
       late bool debugDoingBuildOnBuild;
       late bool debugDoingBuildOnInitState;
       late bool debugDoingBuildOnDidChangeDependencies;
       late bool debugDoingBuildOnDidUpdateWidget;
       bool? debugDoingBuildOnDispose;
       bool? debugDoingBuildOnDeactivate;
+      bool? debugDoingBuildOnReactivate;
 
       await tester.pumpWidget(
         Inherited(
           0,
           child: StatefulWidgetSpy(
+            key: key,
             onInitState: (BuildContext context) {
               debugDoingBuildOnInitState = context.debugDoingBuild;
             },
@@ -1424,6 +1432,7 @@ void main() {
         Inherited(
           1,
           child: StatefulWidgetSpy(
+            key: key,
             onDidUpdateWidget: (BuildContext context) {
               debugDoingBuildOnDidUpdateWidget = context.debugDoingBuild;
             },
@@ -1439,6 +1448,9 @@ void main() {
             onDeactivate: (BuildContext context) {
               debugDoingBuildOnDeactivate = context.debugDoingBuild;
             },
+            onActivate: (BuildContext context) {
+              debugDoingBuildOnReactivate = context.debugDoingBuild;
+            },
           ),
         ),
       );
@@ -1448,6 +1460,35 @@ void main() {
       expect(debugDoingBuildOnDidUpdateWidget, isFalse);
       expect(debugDoingBuildOnDidChangeDependencies, isFalse);
       expect(debugDoingBuildOnDeactivate, isNull);
+      expect(debugDoingBuildOnReactivate, isNull);
+      expect(debugDoingBuildOnDispose, isNull);
+
+      await tester.pumpWidget(
+        Inherited(
+          1,
+          child: SizedBox(
+            child: StatefulWidgetSpy(
+              key: key,
+              onBuild: (BuildContext context) {
+                debugDoingBuildOnBuild = context.debugDoingBuild;
+              },
+              onDispose: (BuildContext context) {
+                debugDoingBuildOnDispose = context.debugDoingBuild;
+              },
+              onDeactivate: (BuildContext context) {
+                debugDoingBuildOnDeactivate = context.debugDoingBuild;
+              },
+              onActivate: (BuildContext context) {
+                debugDoingBuildOnReactivate = context.debugDoingBuild;
+              },
+            ),
+          ),
+        ),
+      );
+
+      expect(debugDoingBuildOnBuild, isTrue);
+      expect(debugDoingBuildOnDeactivate, isFalse);
+      expect(debugDoingBuildOnReactivate, isFalse);
       expect(debugDoingBuildOnDispose, isNull);
 
       await tester.pumpWidget(Container());
@@ -1789,6 +1830,7 @@ class DependentStatefulWidget extends StatefulWidget {
 class DependentState extends State<DependentStatefulWidget> {
   int didChangeDependenciesCount = 0;
   int deactivatedCount = 0;
+  int activatedCount = 0;
 
   @override
   void didChangeDependencies() {
@@ -1806,6 +1848,12 @@ class DependentState extends State<DependentStatefulWidget> {
   void deactivate() {
     super.deactivate();
     deactivatedCount += 1;
+  }
+
+  @override
+  void activate() {
+    super.activate();
+    activatedCount += 1;
   }
 }
 
