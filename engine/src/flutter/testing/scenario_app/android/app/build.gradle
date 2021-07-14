@@ -47,6 +47,7 @@ dependencies {
     implementation 'com.google.android.material:material:1.0.0'
     implementation 'androidx.lifecycle:lifecycle-common-java8:2.2.0-alpha01'
     implementation "com.squareup.leakcanary:leakcanary-android:$leakcanary_version"
+    implementation 'com.google.guava:guava:28.1-android'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test:rules:1.2.0'
