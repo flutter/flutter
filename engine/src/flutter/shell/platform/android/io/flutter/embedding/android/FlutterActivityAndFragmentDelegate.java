@@ -276,15 +276,15 @@ import java.util.Arrays;
     if (host.getRenderMode() == RenderMode.surface) {
       FlutterSurfaceView flutterSurfaceView =
           new FlutterSurfaceView(
-              host.getContext(), host.getTransparencyMode() == TransparencyMode.transparent);
+              host.getActivity(), host.getTransparencyMode() == TransparencyMode.transparent);
 
       // Allow our host to customize FlutterSurfaceView, if desired.
       host.onFlutterSurfaceViewCreated(flutterSurfaceView);
 
       // Create the FlutterView that owns the FlutterSurfaceView.
-      flutterView = new FlutterView(host.getContext(), flutterSurfaceView);
+      flutterView = new FlutterView(host.getActivity(), flutterSurfaceView);
     } else {
-      FlutterTextureView flutterTextureView = new FlutterTextureView(host.getContext());
+      FlutterTextureView flutterTextureView = new FlutterTextureView(host.getActivity());
 
       flutterTextureView.setOpaque(host.getTransparencyMode() == TransparencyMode.opaque);
 
@@ -292,7 +292,7 @@ import java.util.Arrays;
       host.onFlutterTextureViewCreated(flutterTextureView);
 
       // Create the FlutterView that owns the FlutterTextureView.
-      flutterView = new FlutterView(host.getContext(), flutterTextureView);
+      flutterView = new FlutterView(host.getActivity(), flutterTextureView);
     }
 
     // Add listener to be notified when Flutter renders its first frame.
