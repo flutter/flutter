@@ -562,7 +562,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
        // This is a URI, not a file path, so the forward slash is correct even on Windows.
        sdkRoot = sdkRoot.endsWith('/') ? sdkRoot : '$sdkRoot/',
        // Make a copy, we might need to modify it later.
-       fileSystemRoots = List.from(fileSystemRoots);
+       fileSystemRoots = List<String>.from(fileSystemRoots);
 
   final Logger _logger;
   final ProcessManager _processManager;
