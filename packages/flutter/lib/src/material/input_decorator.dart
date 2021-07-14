@@ -373,8 +373,8 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
     assert(widget.helperText != null);
     return Semantics(
       container: true,
-      child: Opacity(
-        opacity: 1.0 - _controller.value,
+      child: FadeTransition(
+        opacity: Tween<double>(begin: 1.0, end: 0.0).animate(_controller),
         child: Text(
           widget.helperText!,
           style: widget.helperStyle,
@@ -391,8 +391,8 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
     return Semantics(
       container: true,
       liveRegion: true,
-      child: Opacity(
-        opacity: _controller.value,
+      child: FadeTransition(
+        opacity: _controller,
         child: FractionalTranslation(
           translation: Tween<Offset>(
             begin: const Offset(0.0, -0.25),
@@ -441,8 +441,8 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
     if (widget.errorText != null) {
       return Stack(
         children: <Widget>[
-          Opacity(
-            opacity: 1.0 - _controller.value,
+          FadeTransition(
+            opacity: Tween<double>(begin: 1.0, end: 0.0).animate(_controller),
             child: _helper,
           ),
           _buildError(),
@@ -454,8 +454,8 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
       return Stack(
         children: <Widget>[
           _buildHelper(),
-          Opacity(
-            opacity: _controller.value,
+          FadeTransition(
+            opacity: _controller,
             child: _error,
           ),
         ],
