@@ -671,11 +671,9 @@ class CanvasParagraphBuilder implements ui.ParagraphBuilder {
     // - https://github.com/flutter/engine/blob/c0f7e8acf9318d264ad6a235facd097de597ffcc/third_party/txt/src/txt/paragraph_txt.cc#L325-L350
 
     // Require a baseline to be specified if using a baseline-based alignment.
-    assert((alignment == ui.PlaceholderAlignment.aboveBaseline ||
+    assert(!(alignment == ui.PlaceholderAlignment.aboveBaseline ||
             alignment == ui.PlaceholderAlignment.belowBaseline ||
-            alignment == ui.PlaceholderAlignment.baseline)
-        ? baseline != null
-        : true);
+            alignment == ui.PlaceholderAlignment.baseline) || baseline != null);
 
     _placeholderCount++;
     _placeholderScales.add(scale);

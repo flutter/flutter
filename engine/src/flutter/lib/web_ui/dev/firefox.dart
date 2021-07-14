@@ -92,8 +92,9 @@ user_pref("dom.max_script_run_time", 0);
           '--headless',
         '-width $kMaxScreenshotWidth',
         '-height $kMaxScreenshotHeight',
-        isMac ? '--new-window' : '-new-window',
-        isMac ? '--new-instance' : '-new-instance',
+        // On Mac Firefox uses the -- option prefix, while elsewhere it uses the - prefix.
+        '${isMac ? '-' : ''}-new-window',
+        '${isMac ? '-' : ''}-new-instance',
         '--start-debugger-server $kDevtoolsPort',
       ];
 

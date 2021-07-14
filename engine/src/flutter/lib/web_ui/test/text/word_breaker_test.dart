@@ -75,7 +75,7 @@ void testMain() {
       expectWords("Students' grades", <String>['Students', "'", ' ', 'grades']);
       expectWords(
         'Joe said: "I\'m here"',
-        <String>['Joe', ' ', 'said', ':', ' ', '"', "I\'m", ' ', 'here', '"'],
+        <String>['Joe', ' ', 'said', ':', ' ', '"', "I'm", ' ', 'here', '"'],
       );
     });
 

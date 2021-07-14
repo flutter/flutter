@@ -9,6 +9,7 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart' show domRenderer, window;
 import 'package:ui/src/engine/browser_detection.dart';
+import 'package:ui/src/engine/dom_renderer.dart';
 import 'package:ui/src/engine/pointer_binding.dart';
 import 'package:ui/ui.dart' as ui;
 
@@ -49,9 +50,7 @@ void testMain() {
   double dpi = 1.0;
 
   setUp(() {
-    // Touching domRenderer creates PointerBinding.instance.
-    domRenderer;
-
+    ensureDomRendererInitialized();
     ui.window.onPointerDataPacket = null;
     dpi = window.devicePixelRatio;
   });

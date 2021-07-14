@@ -389,9 +389,8 @@ void initializeEngine() {
 
   _engineInitialized = true;
 
-  // Calling this getter to force the DOM renderer to initialize before we
-  // initialize framework bindings.
-  domRenderer;
+  // Initialize the DomRenderer before initializing framework bindings.
+  ensureDomRendererInitialized();
 
   WebExperiments.ensureInitialized();
 

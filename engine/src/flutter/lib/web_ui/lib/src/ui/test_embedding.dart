@@ -24,7 +24,7 @@ Future<void>? _platformInitializedFuture;
 
 Future<void> webOnlyInitializeTestDomRenderer({double devicePixelRatio = 3.0}) {
   // Force-initialize DomRenderer so it doesn't overwrite test pixel ratio.
-  engine.domRenderer;
+  engine.ensureDomRendererInitialized();
 
   // The following parameters are hard-coded in Flutter's test embedder. Since
   // we don't have an embedder yet this is the lowest-most layer we can put
