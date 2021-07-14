@@ -171,6 +171,64 @@ void main() {
     expect(mockOnEndFunction.called, 1);
   });
 
+   testWidgets('AnimatedOffset onEnd callback test', (WidgetTester tester) async {
+    await tester.pumpWidget(wrap(
+      child: TestAnimatedWidget(
+        callback: mockOnEndFunction.handler,
+        switchKey: switchKey,
+        state: _TestAnimatedOffsetWidgetState(),
+      ),
+    ));
+
+    final Finder widgetFinder = find.byKey(switchKey);
+
+    await tester.tap(widgetFinder);
+    await tester.pump();
+    expect(mockOnEndFunction.called, 0);
+    await tester.pump(animationDuration);
+    expect(mockOnEndFunction.called, 0);
+    await tester.pump(additionalDelay);
+    expect(mockOnEndFunction.called, 1);
+  });
+  
+  testWidgets('AnimatedOffset transition test', (WidgetTester tester) async {
+    await tester.pumpWidget(wrap(
+      child: TestAnimatedWidget(
+        switchKey: switchKey,
+        state: _TestAnimatedOffsetWidgetState(),
+      ),
+    ));
+
+    final RebuildCountingState<StatefulWidget> state = tester.widget<TestAnimatedWidget>(
+      find.byType(TestAnimatedWidget)
+    ).rebuildState!;
+    final Finder switchFinder = find.byKey(switchKey);
+    final SlideTransition offsetWidget = tester.widget<SlideTransition>(
+      find.ancestor(
+        of: find.byType(Placeholder),
+        matching: find.byType(SlideTransition),
+      ).first,
+    );
+
+    expect(state.builds, equals(1));
+
+    await tester.tap(switchFinder);
+    expect(state.builds, equals(1));
+    await tester.pump();
+    expect(offsetWidget.position.value, equals(Offset(0,0)));
+    expect(state.builds, equals(2));
+
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(offsetWidget.position.value, equals(Offset(0.5,0.5)));
+    expect(state.builds, equals(2));
+    await tester.pump(const Duration(milliseconds: 250));
+    expect(offsetWidget.position.value, equals(Offset(0.75,0.75)));
+    expect(state.builds, equals(2));
+    await tester.pump(const Duration(milliseconds: 250));
+    expect(offsetWidget.position.value, equals(Offset(1,1)));
+    expect(state.builds, equals(2));
+  });
+
   testWidgets('AnimatedScale onEnd callback test', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
       child: TestAnimatedWidget(
@@ -660,6 +718,18 @@ class _TestAnimatedPositionedDirectionalWidgetState extends _TestAnimatedWidgetS
   }
 }
 
+class _TestAnimatedOffsetWidgetState extends _TestAnimatedWidgetState {
+  @override
+  Widget getAnimatedWidget() {
+    return AnimatedOffset(
+      duration: duration,
+      onEnd: widget.callback,
+      offset: toggle ? Offset(1,1) : Offset(0,0),
+      child: child,
+    );
+  }
+}
+
 class _TestAnimatedScaleWidgetState extends _TestAnimatedWidgetState {
   @override
   Widget getAnimatedWidget() {
@@ -790,4 +860,4 @@ class _TestAnimatedThemeWidgetState extends _TestAnimatedWidgetState {
       child: child,
     );
   }
-}
+} 
