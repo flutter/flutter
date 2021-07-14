@@ -974,7 +974,7 @@ class _AnimatedPaddingState extends AnimatedWidgetBaseState<AnimatedPadding> {
 ///  * [AnimatedContainer], which can transition more values at once.
 ///  * [AnimatedPadding], which can animate the padding instead of the
 ///    alignment.
-///  * [AnimatedOffset], which can animate the translation of child by a given offset.
+///  * [AnimatedOffset], which can animate the translation of child by a given offset relative to its size.
 ///  * [AnimatedPositioned], which, as a child of a [Stack], automatically
 ///    transitions its child's position over a given duration whenever the given
 ///    position changes.
