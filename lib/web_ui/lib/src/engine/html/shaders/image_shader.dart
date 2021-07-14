@@ -99,8 +99,8 @@ class EngineImageShader implements ui.ImageShader {
         }
         js_util.callMethod(renderContext, 'drawImage', <dynamic>[
           image.imgElement,
-          x == 0 ? 0 : -2 * imageWidth,
-          y == 0 ? 0 : -2 * imageHeight
+          if (x == 0) 0 else -2 * imageWidth,
+          if (y == 0) 0 else -2 * imageHeight,
         ]);
         if (flipX != 1 || flipY != 1) {
           /// Restore transform. This is faster than save/restore on context.

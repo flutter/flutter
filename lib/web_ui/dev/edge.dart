@@ -15,7 +15,7 @@ import 'edge_installation.dart';
 class EdgeEnvironment implements BrowserEnvironment {
   @override
   Browser launchBrowserInstance(Uri url, {bool debug = false}) {
-    return Edge(url, debug: debug);
+    return Edge(url);
   }
 
   @override
@@ -46,7 +46,7 @@ class Edge extends Browser {
 
   /// Starts a new instance of Safari open to the given [url], which may be a
   /// [Uri] or a [String].
-  factory Edge(Uri url, {bool debug = false}) {
+  factory Edge(Uri url) {
     final String version = EdgeArgParser.instance.version;
 
     return Edge._(() async {

@@ -103,7 +103,7 @@ void testMain() {
           expect(fontFamilyList, contains('/Ahem'));
         } else {
           expect(fontFamilyList.length, equals(1));
-          expect(fontFamilyList.first, '\"/Ahem\"');
+          expect(fontFamilyList.first, '"/Ahem"');
         }
       },
           // TODO(nurhan): https://github.com/flutter/flutter/issues/50770
@@ -129,7 +129,7 @@ void testMain() {
           expect(fontFamilyList, contains('Ahem!!ahem'));
         } else {
           expect(fontFamilyList.length, equals(1));
-          expect(fontFamilyList.first, '\"Ahem!!ahem\"');
+          expect(fontFamilyList.first, '"Ahem!!ahem"');
         }
       },
           // TODO(nurhan): https://github.com/flutter/flutter/issues/50770
@@ -155,7 +155,7 @@ void testMain() {
           expect(fontFamilyList, contains('Ahem ,ahem'));
         } else {
           expect(fontFamilyList.length, equals(1));
-          expect(fontFamilyList.first, '\"Ahem ,ahem\"');
+          expect(fontFamilyList.first, '"Ahem ,ahem"');
         }
       },
           // TODO(nurhan): https://github.com/flutter/flutter/issues/50770
@@ -182,7 +182,7 @@ void testMain() {
           expect(fontFamilyList, contains('\'Ahem 1998\''));
         } else {
           expect(fontFamilyList.length, equals(1));
-          expect(fontFamilyList.first, '\"Ahem 1998\"');
+          expect(fontFamilyList.first, '"Ahem 1998"');
         }
       },
           // TODO(nurhan): https://github.com/flutter/flutter/issues/50770
