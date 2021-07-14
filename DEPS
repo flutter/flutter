@@ -433,9 +433,6 @@ deps = {
   'src/third_party/pkg/googleapis':
   Var('github_git') + '/google/googleapis.dart.git' + '@' + '07f01b7aa6985e4cafd0fd4b98724841bc9e85a1', # various
 
-  'src/third_party/pkg/isolate':
-  Var('github_git') + '/dart-lang/isolate.git' + '@' + 'ca133acb5af3a60a026fa2aab12b81e60048b3be', # 2.0.3
-
   'src/third_party/pkg/platform':
   Var('github_git') + '/google/platform.dart.git' + '@' + 'f63fd0bc3021354a0687dc935962c9acc003f47e', # 3.0.1
 
