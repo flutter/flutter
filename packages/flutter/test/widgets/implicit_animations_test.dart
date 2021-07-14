@@ -171,12 +171,12 @@ void main() {
     expect(mockOnEndFunction.called, 1);
   });
 
-   testWidgets('AnimatedOffset onEnd callback test', (WidgetTester tester) async {
+   testWidgets('AnimatedSlide onEnd callback test', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
       child: TestAnimatedWidget(
         callback: mockOnEndFunction.handler,
         switchKey: switchKey,
-        state: _TestAnimatedOffsetWidgetState(),
+        state: _TestAnimatedSlideWidgetState(),
       ),
     ));
 
@@ -191,11 +191,11 @@ void main() {
     expect(mockOnEndFunction.called, 1);
   });
   
-  testWidgets('AnimatedOffset transition test', (WidgetTester tester) async {
+  testWidgets('AnimatedSlide transition test', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
       child: TestAnimatedWidget(
         switchKey: switchKey,
-        state: _TestAnimatedOffsetWidgetState(),
+        state: _TestAnimatedSlideWidgetState(),
       ),
     ));
 
@@ -718,10 +718,10 @@ class _TestAnimatedPositionedDirectionalWidgetState extends _TestAnimatedWidgetS
   }
 }
 
-class _TestAnimatedOffsetWidgetState extends _TestAnimatedWidgetState {
+class _TestAnimatedSlideWidgetState extends _TestAnimatedWidgetState {
   @override
   Widget getAnimatedWidget() {
-    return AnimatedOffset(
+    return AnimatedSlide(
       duration: duration,
       onEnd: widget.callback,
       offset: toggle ? Offset(1,1) : Offset(0,0),
@@ -860,4 +860,4 @@ class _TestAnimatedThemeWidgetState extends _TestAnimatedWidgetState {
       child: child,
     );
   }
-} 
+}
