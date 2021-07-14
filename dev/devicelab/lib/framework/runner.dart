@@ -17,14 +17,14 @@ import 'task_result.dart';
 import 'utils.dart';
 
 /// Run a list of tasks.
-/// 
+///
 /// For each task, an auto rerun will be triggered when task fails.
-/// 
+///
 /// If the task succeeds the first time, it will be recorded as successful.
-/// 
+///
 /// If the task fails first, but gets passed in the end, the
 /// test will be recorded as successful but with a flake flag.
-/// 
+///
 /// If the task fails all reruns, it will be recorded as failed.
 Future<void> runTasks(
   List<String> taskNames, {
@@ -85,7 +85,7 @@ Future<void> runTasks(
 }
 
 /// A rerun wrapper for `runTask`.
-/// 
+///
 /// This separates reruns in separate sections.
 Future<TaskResult> rerunTask(
   String taskName, {
