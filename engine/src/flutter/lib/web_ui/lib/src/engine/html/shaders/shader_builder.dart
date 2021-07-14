@@ -30,8 +30,8 @@ import '../../util.dart';
 class ShaderBuilder {
   /// WebGL version.
   final int version;
-  final List<ShaderDeclaration> declarations = [];
-  final List<ShaderMethod> _methods = [];
+  final List<ShaderDeclaration> declarations = <ShaderDeclaration>[];
+  final List<ShaderMethod> _methods = <ShaderMethod>[];
 
   /// Precision for integer variables.
   int? integerPrecision;
@@ -241,7 +241,7 @@ class ShaderMethod {
 
   final String returnType = 'void';
   final String name;
-  final List<String> _statements = [];
+  final List<String> _statements = <String>[];
   int _indentLevel = 1;
 
   void indent() {
@@ -362,7 +362,7 @@ class ShaderDeclaration {
 
 // These are used only in debug mode to assert if used as variable name.
 // https://www.khronos.org/registry/OpenGL/specs/gl/GLSLangSpec.4.10.pdf
-const List<String> _kReservedWords = [
+const List<String> _kReservedWords = <String>[
   'attribute',
   'const',
   'uniform',

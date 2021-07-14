@@ -242,7 +242,7 @@ void _testEngineSemanticsOwner() {
     // Verify the interactions.
     expect(
       mockSemanticsEnabler.shouldEnableSemanticsEvents,
-      [pointerEvent],
+      <html.Event>[pointerEvent],
     );
   });
 

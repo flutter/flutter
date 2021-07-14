@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:io' as io;
+import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
 import 'package:archive/archive_io.dart';
@@ -220,7 +221,7 @@ class ChromeInstaller {
       final Stopwatch stopwatch = Stopwatch()..start();
 
       // Read the Zip file from disk.
-      final bytes = downloadedFile.readAsBytesSync();
+      final Uint8List bytes = downloadedFile.readAsBytesSync();
 
       final Archive archive = ZipDecoder().decodeBytes(bytes);
 
@@ -228,7 +229,7 @@ class ChromeInstaller {
       for (final ArchiveFile file in archive) {
         final String filename = file.name;
         if (file.isFile) {
-          final data = file.content as List<int>;
+          final List<int> data = file.content as List<int>;
           io.File(path.join(versionDir.path, filename))
             ..createSync(recursive: true)
             ..writeAsBytesSync(data);

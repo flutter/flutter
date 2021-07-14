@@ -96,7 +96,7 @@ class CanvasPool extends _SaveStackTracking {
     if (_canvas != null) {
       _restoreContextSave();
       _contextHandle!.reset();
-      _activeCanvasList ??= [];
+      _activeCanvasList ??= <html.CanvasElement>[];
       _activeCanvasList!.add(_canvas!);
       _canvas = null;
       _context = null;
@@ -317,7 +317,7 @@ class CanvasPool extends _SaveStackTracking {
     if (_canvas != null) {
       _restoreContextSave();
       _contextHandle!.reset();
-      _activeCanvasList ??= [];
+      _activeCanvasList ??= <html.CanvasElement>[];
       _activeCanvasList!.add(_canvas!);
       _context = null;
       _contextHandle = null;

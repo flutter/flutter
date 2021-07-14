@@ -35,7 +35,7 @@ void testMain() {
       expect(response, isNotNull);
       expect(
         codec.decodeEnvelope(response!),
-        [true],
+        <bool>[true],
       );
     });
 

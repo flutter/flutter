@@ -29,7 +29,7 @@ const int _kLogicalMetaLeft = 0x0300000109;
 const int _kLogicalMetaRight = 0x0400000109;
 // Map logical keys for modifier keys to the functions that can get their
 // modifier flag out of an event.
-final Map<int, _ModifierGetter> _kLogicalKeyToModifierGetter = {
+final Map<int, _ModifierGetter> _kLogicalKeyToModifierGetter = <int, _ModifierGetter>{
   _kLogicalAltLeft: (FlutterHtmlKeyboardEvent event) => event.altKey,
   _kLogicalAltRight: (FlutterHtmlKeyboardEvent event) => event.altKey,
   _kLogicalControlLeft: (FlutterHtmlKeyboardEvent event) => event.ctrlKey,

@@ -174,7 +174,7 @@ class EngineAutofillForm {
     formElement.noValidate = true;
     formElement.method = 'post';
     formElement.action = '#';
-    formElement.addEventListener('submit', (e) {
+    formElement.addEventListener('submit', (html.Event e) {
       e.preventDefault();
     });
 
@@ -182,7 +182,7 @@ class EngineAutofillForm {
 
     // We keep the ids in a list then sort them later, in case the text fields'
     // locations are re-ordered on the framework side.
-    final List<String> ids = List.empty(growable: true);
+    final List<String> ids = List<String>.empty(growable: true);
 
     // The focused text editing element will not be created here.
     final AutofillInfo focusedElement =
@@ -1311,7 +1311,7 @@ class FirefoxTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
     //
     // After each keyup, the start/end values of the selection is compared to
     // the previously saved editing state.
-    subscriptions.add(activeDomElement.onKeyUp.listen((event) {
+    subscriptions.add(activeDomElement.onKeyUp.listen((html.KeyboardEvent event) {
       handleChange(event);
     }));
 

@@ -140,7 +140,7 @@ void _tests() {
         spy.fakeAsync.elapse(const Duration(seconds: 2));
         expect(
           spy.printLog,
-          [
+          <String>[
             'Engine counters:\n'
                 '  TestSkDeletable created: 1\n'
           ],
@@ -167,7 +167,7 @@ void _tests() {
         spy.fakeAsync.elapse(const Duration(seconds: 2));
         expect(
           spy.printLog,
-          [
+          <String>[
             'Engine counters:\n'
                 '  TestSkDeletable created: 1\n'
                 '  TestSkDeletable deleted: 1\n'

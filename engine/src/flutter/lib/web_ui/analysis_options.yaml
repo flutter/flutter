@@ -13,7 +13,6 @@ analyzer:
 
 linter:
   rules:
-    always_specify_types: false
     annotate_overrides: false
     avoid_classes_with_only_static_members: false
     avoid_empty_else: false

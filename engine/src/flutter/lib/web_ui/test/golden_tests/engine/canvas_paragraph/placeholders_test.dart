@@ -24,13 +24,13 @@ void testMain() async {
   setUpStableTestFonts();
 
   test('draws paragraphs with placeholders', () {
-    final canvas = BitmapCanvas(bounds, RenderStrategy());
+    final BitmapCanvas canvas = BitmapCanvas(bounds, RenderStrategy());
 
     Offset offset = Offset.zero;
     for (PlaceholderAlignment placeholderAlignment in PlaceholderAlignment.values) {
       final CanvasParagraph paragraph = rich(
         EngineParagraphStyle(fontFamily: 'Roboto', fontSize: 14.0),
-        (builder) {
+        (CanvasParagraphBuilder builder) {
           builder.pushStyle(TextStyle(color: black));
           builder.addText('Lorem ipsum');
           builder.addPlaceholder(
@@ -58,7 +58,7 @@ void testMain() async {
   });
 
   test('draws paragraphs with placeholders and text align', () {
-    final canvas = BitmapCanvas(bounds, RenderStrategy());
+    final BitmapCanvas canvas = BitmapCanvas(bounds, RenderStrategy());
 
     const List<TextAlign> aligns = <TextAlign>[
       TextAlign.left,
@@ -70,7 +70,7 @@ void testMain() async {
     for (TextAlign align in aligns) {
       final CanvasParagraph paragraph = rich(
         EngineParagraphStyle(fontFamily: 'Roboto', fontSize: 14.0, textAlign: align),
-        (builder) {
+        (CanvasParagraphBuilder builder) {
           builder.pushStyle(TextStyle(color: black));
           builder.addText('Lorem');
           builder.addPlaceholder(80.0, 50.0, PlaceholderAlignment.bottom);
@@ -92,7 +92,7 @@ void testMain() async {
   });
 
   test('draws paragraphs with placeholders and text align in DOM mode', () {
-    final canvas = DomCanvas(domRenderer.createElement('flt-picture'));
+    final DomCanvas canvas = DomCanvas(domRenderer.createElement('flt-picture'));
 
     const List<TextAlign> aligns = <TextAlign>[
       TextAlign.left,
@@ -104,7 +104,7 @@ void testMain() async {
     for (TextAlign align in aligns) {
       final CanvasParagraph paragraph = rich(
         EngineParagraphStyle(fontFamily: 'Roboto', fontSize: 14.0, textAlign: align),
-        (builder) {
+        (CanvasParagraphBuilder builder) {
           builder.pushStyle(TextStyle(color: black));
           builder.addText('Lorem');
           builder.addPlaceholder(80.0, 50.0, PlaceholderAlignment.bottom);
@@ -127,14 +127,14 @@ void testMain() async {
 
   test('draws paragraphs starting or ending with a placeholder', () {
     const Rect bounds = Rect.fromLTWH(0, 0, 420, 300);
-    final canvas = BitmapCanvas(bounds, RenderStrategy());
+    final BitmapCanvas canvas = BitmapCanvas(bounds, RenderStrategy());
 
     Offset offset = Offset(10, 10);
 
     // First paragraph with a placeholder at the beginning.
     final CanvasParagraph paragraph1 = rich(
       EngineParagraphStyle(fontFamily: 'Roboto', fontSize: 24.0, textAlign: TextAlign.center),
-      (builder) {
+      (CanvasParagraphBuilder builder) {
         builder.addPlaceholder(80.0, 50.0, PlaceholderAlignment.baseline, baseline: TextBaseline.alphabetic);
         builder.pushStyle(TextStyle(color: black));
         builder.addText(' Lorem ipsum.');
@@ -151,7 +151,7 @@ void testMain() async {
     // Second paragraph with a placeholder at the end.
     final CanvasParagraph paragraph2 = rich(
       EngineParagraphStyle(fontFamily: 'Roboto', fontSize: 24.0, textAlign: TextAlign.center),
-      (builder) {
+      (CanvasParagraphBuilder builder) {
         builder.pushStyle(TextStyle(color: black));
         builder.addText('Lorem ipsum ');
         builder.addPlaceholder(80.0, 50.0, PlaceholderAlignment.baseline, baseline: TextBaseline.alphabetic);
@@ -168,7 +168,7 @@ void testMain() async {
     // Third paragraph with a placeholder alone in the second line.
     final CanvasParagraph paragraph3 = rich(
       EngineParagraphStyle(fontFamily: 'Roboto', fontSize: 24.0, textAlign: TextAlign.center),
-      (builder) {
+      (CanvasParagraphBuilder builder) {
         builder.pushStyle(TextStyle(color: black));
         builder.addText('Lorem ipsum ');
         builder.addPlaceholder(80.0, 50.0, PlaceholderAlignment.baseline, baseline: TextBaseline.alphabetic);

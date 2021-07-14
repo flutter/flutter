@@ -224,12 +224,12 @@ class PathWinding {
   }
 
   void _computeConicWinding(double weight) {
-    Conic conic = Conic(_buffer[0], _buffer[1], _buffer[2], _buffer[3],
+    final Conic conic = Conic(_buffer[0], _buffer[1], _buffer[2], _buffer[3],
         _buffer[4], _buffer[5], weight);
     // If the data points are very large, the conic may not be monotonic but may also
     // fail to chop. Then, the chopper does not split the original conic in two.
-    bool isMono = _isQuadMonotonic(_buffer);
-    List<Conic> conics = [];
+    final bool isMono = _isQuadMonotonic(_buffer);
+    final List<Conic> conics = <Conic>[];
     conic.chopAtYExtrema(conics);
     _computeMonoConicWinding(conics[0]);
     if (!isMono && conics.length == 2) {

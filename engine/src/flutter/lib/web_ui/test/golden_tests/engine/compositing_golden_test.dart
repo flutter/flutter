@@ -871,7 +871,7 @@ void _testCullRectComputation() {
       expect(
         sceneElement
             .querySelectorAll('p')
-            .map<String>((e) => e.innerText)
+            .map<String>((html.Element e) => e.innerText)
             .toList(),
         <String>['Am I blurry?', 'Am I blurry?'],
         reason: 'Expected to render text using HTML',

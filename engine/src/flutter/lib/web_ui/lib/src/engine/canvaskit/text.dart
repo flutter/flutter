@@ -428,7 +428,7 @@ class CkTextStyle implements ui.TextStyle {
     if (shadows != null) {
       List<SkTextShadow> ckShadows = <SkTextShadow>[];
       for (ui.Shadow shadow in shadows) {
-        final ckShadow = SkTextShadow();
+        final SkTextShadow ckShadow = SkTextShadow();
         ckShadow.color = makeFreshSkColor(shadow.color);
         ckShadow.offset = toSkPoint(shadow.offset);
         ckShadow.blurRadius = shadow.blurRadius;
@@ -516,7 +516,7 @@ class CkStrutStyle implements ui.StrutStyle {
 }
 
 SkFontStyle toSkFontStyle(ui.FontWeight? fontWeight, ui.FontStyle? fontStyle) {
-  final style = SkFontStyle();
+  final SkFontStyle style = SkFontStyle();
   if (fontWeight != null) {
     style.weight = toSkFontWeight(fontWeight);
   }
@@ -573,7 +573,7 @@ class CkParagraph extends SkiaObject<SkParagraph> implements ui.Paragraph {
     // existing object.
     bool didRebuildSkiaObject = false;
     if (paragraph == null) {
-      final builder = CkParagraphBuilder(_paragraphStyle);
+      final CkParagraphBuilder builder = CkParagraphBuilder(_paragraphStyle);
       for (_ParagraphCommand command in _paragraphCommands) {
         switch (command.type) {
           case _ParagraphCommandType.addText:
@@ -893,7 +893,7 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
     double baselineOffset,
     ui.TextBaseline baseline,
   ) {
-    final properties = _CkParagraphPlaceholder(
+    final _CkParagraphPlaceholder properties = _CkParagraphPlaceholder(
       width: width,
       height: height,
       alignment: toSkPlaceholderAlignment(alignment),
@@ -920,7 +920,7 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
 
   @override
   CkParagraph build() {
-    final builtParagraph = _buildSkParagraph();
+    final SkParagraph builtParagraph = _buildSkParagraph();
     return CkParagraph(builtParagraph, _style, _commands);
   }
 
@@ -1054,7 +1054,7 @@ List<String> _getEffectiveFontFamilies(String? fontFamily,
     fontFamilies.add(fontFamily);
   }
   if (fontFamilyFallback != null &&
-      !fontFamilyFallback.every((font) => fontFamily == font)) {
+      !fontFamilyFallback.every((String font) => fontFamily == font)) {
     fontFamilies.addAll(fontFamilyFallback);
   }
   fontFamilies.addAll(FontFallbackData.instance.globalFontFallbacks);

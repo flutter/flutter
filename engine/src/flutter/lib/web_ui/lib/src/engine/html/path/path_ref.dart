@@ -421,8 +421,8 @@ class PathRef {
     resetToSize(verbCount, pointCount, weightCount, additionalReserveVerbs,
         additionalReservePoints);
 
-    js_util.callMethod(_fVerbs, 'set', [ref._fVerbs]);
-    js_util.callMethod(fPoints, 'set', [ref.fPoints]);
+    js_util.callMethod(_fVerbs, 'set', <dynamic>[ref._fVerbs]);
+    js_util.callMethod(fPoints, 'set', <dynamic>[ref.fPoints]);
     if (ref._conicWeights == null) {
       _conicWeights = null;
     } else {
