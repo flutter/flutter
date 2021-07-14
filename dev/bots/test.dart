@@ -722,7 +722,7 @@ Future<void> _runFrameworkTests() async {
   Future<void> runMisc() async {
     print('${green}Running package tests$reset for directories other than packages/flutter');
     await _pubRunTest(path.join(flutterRoot, 'dev', 'bots'));
-    await _pubRunTest(path.join(flutterRoot, 'dev', 'devicelab'), ensurePrecompiledTool: false);
+    await _pubRunTest(path.join(flutterRoot, 'dev', 'devicelab'), ensurePrecompiledTool: false); // See https://github.com/flutter/flutter/issues/86209
     await _pubRunTest(path.join(flutterRoot, 'dev', 'snippets'));
     // TODO(fujino): Move this to its own test shard
     await _pubRunTest(path.join(flutterRoot, 'dev', 'conductor'), forceSingleCore: true);
