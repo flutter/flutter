@@ -257,6 +257,7 @@ class TextStyleTween extends Tween<TextStyle> {
 ///    [DefaultTextStyle].
 ///  * [AnimatedScale], which is an implicitly animated version of [Transform.scale].
 ///  * [AnimatedRotation], which is an implicitly animated version of [Transform.rotate].
+///  * [AnimatedOffset], which is an implicitly animated version of [Transform.translate].
 ///  * [AnimatedOpacity], which is an implicitly animated version of [Opacity].
 ///  * [AnimatedPadding], which is an implicitly animated version of [Padding].
 ///  * [AnimatedPhysicalModel], which is an implicitly animated version of
@@ -973,6 +974,7 @@ class _AnimatedPaddingState extends AnimatedWidgetBaseState<AnimatedPadding> {
 ///  * [AnimatedContainer], which can transition more values at once.
 ///  * [AnimatedPadding], which can animate the padding instead of the
 ///    alignment.
+///  * [AnimatedOffset], which can animate the translation of child by a given offset.
 ///  * [AnimatedPositioned], which, as a child of a [Stack], automatically
 ///    transitions its child's position over a given duration whenever the given
 ///    position changes.
@@ -1464,6 +1466,7 @@ class _AnimatedPositionedDirectionalState extends AnimatedWidgetBaseState<Animat
 ///  * [AnimatedRotation], for animating the rotation of a child.
 ///  * [AnimatedSize], for animating the resize of a child based on changes
 ///    in layout.
+///  * [AnimatedOffset], for animating the translation of a child by given offset.
 ///  * [ScaleTransition], an explicitly animated version of this widget, where
 ///    an [Animation] is provided by the caller instead of being built in.
 class AnimatedScale extends ImplicitlyAnimatedWidget {
@@ -1666,6 +1669,130 @@ class _AnimatedRotationState extends ImplicitlyAnimatedWidgetState<AnimatedRotat
       turns: _turnsAnimation,
       alignment: widget.alignment,
       filterQuality: widget.filterQuality,
+      child: widget.child,
+    );
+  }
+}
+
+/// Animated version of [Transform.translate] which automatically transitions the child's
+/// offset relative to its normal position whenever the given offset changes.
+///
+/// The translation is expressed as an [Offset] scaled to the child's size. For
+/// example, an [Offset] with a `dx` of 0.25 will result in a horizontal
+/// translation of one quarter the width of the child.
+///
+/// {@tool snippet}
+///
+/// This code defines a widget that uses [AnimatedOffset] to translate a [FlutterLogo]
+/// up or down by the amount of it's height with each press of the corresponding button.
+///
+/// ```dart
+/// class LogoTranslate extends StatefulWidget {
+///   const LogoTranslate({Key? key}) : super(key: key);
+///
+///   @override
+///   State<LogoTranslate> createState() => LogoTranslateState();
+/// }
+///
+/// class LogoTranslateState extends State<LogoTranslate> {
+///  Offset offset = Offset(0, 0);
+///
+///  void _moveUp() {
+///    setState(() => offset -= Offset(0, 1));
+///  }
+/// 
+///  void _moveDown() {
+///    setState(() => offset += Offset(0, 1));
+///  }
+///
+///  @override
+///  Widget build(BuildContext context) {
+///    return Column(
+///      mainAxisSize: MainAxisSize.min,
+///      children: <Widget>[
+///        ElevatedButton(
+///          child: const Text('Translate up'),
+///          onPressed: _moveUp,
+///        ),
+///        ElevatedButton(
+///          child: const Text('Translate down'),
+///          onPressed: _moveDown,
+///        ),
+///        Padding(
+///          padding: const EdgeInsets.all(50),
+///          child: AnimatedOffset(
+///            offset: offset,
+///            duration: const Duration(milliseconds: 500),
+///            curve: Curves.easeInOut,
+///            child: const FlutterLogo(),
+///          ),
+///        ),
+///      ],
+///    );
+///  }
+/// }
+/// ```
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [AnimatedPositioned], which, as a child of a [Stack], automatically
+///    transitions its child's position over a given duration whenever the given
+///    position changes.
+///  * [AnimatedAlign], which automatically transitions its child's
+///    position over a given duration whenever the given [alignment] changes.
+class AnimatedOffset extends ImplicitlyAnimatedWidget {
+  /// Creates a widget that animates its offset translation implicitly.
+  ///
+  /// The [offset] and [duration] arguments must not be null.
+  const AnimatedOffset({
+    Key? key,
+    this.child,
+    required this.offset,
+    Curve curve = Curves.linear,
+    required Duration duration,
+    VoidCallback? onEnd,
+  }) :
+        super(key: key, curve: curve, duration: duration, onEnd: onEnd);
+
+  /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.ProxyWidget.child}
+  final Widget? child;
+
+  /// The target offset. 
+  /// The child will be translated horizontally by `width * dx` and vertically by `height * dy`
+  ///
+  /// The offset must not be null.
+  final Offset offset;
+
+  @override
+  _AnimatedOffsetState createState() => _AnimatedOffsetState();
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+  }
+}
+
+class _AnimatedOffsetState extends ImplicitlyAnimatedWidgetState<AnimatedOffset> {
+  Tween<Offset>? _offset;
+  late Animation<Offset> _offsetAnimation;
+
+  @override
+  void forEachTween(TweenVisitor<dynamic> visitor) {
+    _offset = visitor(_offset, widget.offset, (dynamic value) => Tween<Offset>(begin: value as Offset)) as Tween<Offset>?;
+  }
+
+  @override
+  void didUpdateTweens() {
+    _offsetAnimation = animation.drive(_offset!);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SlideTransition(
+      position: _offsetAnimation,
       child: widget.child,
     );
   }
