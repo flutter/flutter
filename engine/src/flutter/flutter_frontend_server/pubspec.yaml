@@ -7,7 +7,6 @@ publish_to: none
 version: 0.1.1-dev
 description: Communication pipe to Dart Frontend
 homepage: https://flutter.dev
-author: Flutter Authors <flutter-dev@googlegroups.com>
 
 # Do not add any dependencies that require more than what is provided in
 # //third_party/pkg, //third_party/dart/pkg or
