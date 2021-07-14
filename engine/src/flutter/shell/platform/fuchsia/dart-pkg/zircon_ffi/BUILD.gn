@@ -1,0 +1,23 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/fuchsia/sdk.gni")
+
+config("zircon_ffi_config") {
+  include_dirs = [ "." ]
+}
+
+shared_library("zircon_ffi") {
+  public_configs = [ ":zircon_ffi_config" ]
+
+  sources = [
+    "clock.cc",
+    "clock.h",
+  ]
+
+  deps = [
+    "$fuchsia_sdk_root/pkg:zx",
+    "//third_party/dart/runtime:dart_api",
+  ]
+}

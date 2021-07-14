@@ -151,6 +151,14 @@ runner_sources("flutter_runner_sources_product") {
   product = true
 }
 
+# Loaded via FFI
+_common_runner_libs = common_libs + [
+                        {
+                          name = "libzircon_ffi.so"
+                          path = rebase_path("$root_out_dir")
+                        },
+                      ]
+
 # Things that explicitly being excluded:
 # 1. Kernel snapshot framework mode.
 # 2. Profiler symbols.
@@ -194,6 +202,9 @@ template("flutter_runner") {
              "$fuchsia_sdk_root/pkg:trace",
              "$fuchsia_sdk_root/pkg:trace-provider-so",
            ] + extra_deps
+
+    # For `libzircon_ffi` see _common_runner_libs.
+    public_deps = [ "../dart-pkg/zircon_ffi:zircon_ffi" ]
 
     # The flags below are needed so that Dart's CPU profiler can walk the
     # C++ stack.
@@ -331,7 +342,7 @@ template("jit_runner") {
     ]
 
     _vulkan_icds = []
-    _libs = common_libs
+    _libs = _common_runner_libs
     if (enable_vulkan_validation_layers) {
       _libs += vulkan_validation_libs
       _vulkan_icds += vulkan_icds
@@ -389,7 +400,7 @@ template("aot_runner") {
     }
 
     _vulkan_icds = []
-    _libs = common_libs
+    _libs = _common_runner_libs
     if (enable_vulkan_validation_layers) {
       _libs += vulkan_validation_libs
       _vulkan_icds += vulkan_icds

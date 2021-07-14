@@ -236,7 +236,15 @@ class System extends NativeFieldWrapperClass1 {
   static MapResult vmoMap(Handle vmo) native 'System_VmoMap';
 
   // Time operations.
-  static int clockGetMonotonic() native 'System_ClockGetMonotonic';
+  static int clockGetMonotonic() {
+    if (zirconFFIBindings == null) {
+      return _nativeClockGetMonotonic();
+    } else {
+      return zirconFFIBindings!.zircon_dart_clock_get_monotonic();
+    }
+  }
+
+  static int _nativeClockGetMonotonic() native 'System_ClockGetMonotonic';
 
   // TODO(edcoyne): Remove this, it is required to safely do an API transition across repos.
   static int reboot() { return -2; /*ZX_ERR_NOT_SUPPORTED*/ }

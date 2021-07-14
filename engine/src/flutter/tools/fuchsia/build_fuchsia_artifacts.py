@@ -125,6 +125,10 @@ def CopyFlutterTesterBinIfExists(source, destination):
   destination_base = os.path.join(destination, 'flutter_binaries')
   FindFileAndCopyTo('flutter_tester', source_root, destination_base)
 
+def CopyZirconFFILibIfExists(source, destination):
+  source_root = os.path.join(_out_dir, source)
+  destination_base = os.path.join(destination, 'flutter_binaries')
+  FindFileAndCopyTo('libzircon_ffi.so', source_root, destination_base)
 
 def CopyToBucketWithMode(source, destination, aot, product, runner_type):
   mode = 'aot' if aot else 'jit'
@@ -146,6 +150,7 @@ def CopyToBucketWithMode(source, destination, aot, product, runner_type):
     CopyPath(patched_sdk_dir, dest_sdk_path)
   CopyGenSnapshotIfExists(source_root, destination)
   CopyFlutterTesterBinIfExists(source_root, destination)
+  CopyZirconFFILibIfExists(source_root, destination)
 
 
 def CopyToBucket(src, dst, product=False):
