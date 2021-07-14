@@ -393,7 +393,7 @@ class _Icon {
     if (shortId == b.shortId) {
       return id.length - b.id.length;
     }
-    return flutterId.compareTo(b.flutterId);
+    return shortId.compareTo(b.shortId);
   }
 
   String _replaceLast(String string, String toReplace) {
