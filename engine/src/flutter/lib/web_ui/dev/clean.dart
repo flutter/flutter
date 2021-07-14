@@ -11,7 +11,7 @@ import 'package:path/path.dart' as path;
 import 'environment.dart';
 import 'utils.dart';
 
-class CleanCommand extends Command<bool> with ArgUtils {
+class CleanCommand extends Command<bool> with ArgUtils<bool> {
   CleanCommand() {
     argParser
       ..addFlag(

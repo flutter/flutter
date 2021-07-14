@@ -23,8 +23,8 @@ void testMain() {
       expect(vertices.createDefault(), isNotNull);
       expect(vertices.resurrect(), isNotNull);
 
-      final recorder = CkPictureRecorder();
-      final canvas = recorder.beginRecording(const ui.Rect.fromLTRB(0, 0, 100, 100));
+      final CkPictureRecorder recorder = CkPictureRecorder();
+      final CkCanvas canvas = recorder.beginRecording(const ui.Rect.fromLTRB(0, 0, 100, 100));
       canvas.drawVertices(
         vertices,
         ui.BlendMode.srcOver,

@@ -40,7 +40,7 @@ void testMain() async {
 
   group('$CanvasParagraph.getBoxesForRange', () {
     test('return empty list for invalid ranges', () {
-      final CanvasParagraph paragraph = rich(ahemStyle, (builder) {
+      final CanvasParagraph paragraph = rich(ahemStyle, (CanvasParagraphBuilder builder) {
         builder.addText('Lorem ipsum');
       })
         ..layout(constrain(double.infinity));
@@ -53,7 +53,7 @@ void testMain() async {
     });
 
     test('handles single-line multi-span paragraphs', () {
-      final CanvasParagraph paragraph = rich(ahemStyle, (builder) {
+      final CanvasParagraph paragraph = rich(ahemStyle, (CanvasParagraphBuilder builder) {
         builder.pushStyle(EngineTextStyle.only(color: blue));
         builder.addText('Lorem ');
         builder.pushStyle(EngineTextStyle.only(color: green));
@@ -147,7 +147,7 @@ void testMain() async {
     });
 
     test('handles multi-line single-span paragraphs', () {
-      final CanvasParagraph paragraph = rich(ahemStyle, (builder) {
+      final CanvasParagraph paragraph = rich(ahemStyle, (CanvasParagraphBuilder builder) {
         builder.addText('Lorem ipsum dolor sit');
       })
         ..layout(constrain(90.0));
@@ -219,7 +219,7 @@ void testMain() async {
     });
 
     test('handles multi-line multi-span paragraphs', () {
-      final CanvasParagraph paragraph = rich(ahemStyle, (builder) {
+      final CanvasParagraph paragraph = rich(ahemStyle, (CanvasParagraphBuilder builder) {
         builder.pushStyle(EngineTextStyle.only(color: blue));
         builder.addText('Lorem ipsum ');
         builder.pushStyle(EngineTextStyle.only(color: green));
@@ -309,7 +309,7 @@ void testMain() async {
     });
 
     test('handles spans with varying heights/baselines', () {
-      final CanvasParagraph paragraph = rich(ahemStyle, (builder) {
+      final CanvasParagraph paragraph = rich(ahemStyle, (CanvasParagraphBuilder builder) {
         builder.pushStyle(EngineTextStyle.only(fontSize: 20.0));
         // width = 20.0 * 6 = 120.0
         // baseline = 20.0 * 80% = 16.0
@@ -380,7 +380,7 @@ void testMain() async {
 
   group('$CanvasParagraph.getPositionForOffset', () {
     test('handles single-line multi-span paragraphs', () {
-      final CanvasParagraph paragraph = rich(ahemStyle, (builder) {
+      final CanvasParagraph paragraph = rich(ahemStyle, (CanvasParagraphBuilder builder) {
         builder.pushStyle(EngineTextStyle.only(color: blue));
         builder.addText('Lorem ');
         builder.pushStyle(EngineTextStyle.only(color: green));
@@ -448,7 +448,7 @@ void testMain() async {
     });
 
     test('handles multi-line single-span paragraphs', () {
-      final CanvasParagraph paragraph = rich(ahemStyle, (builder) {
+      final CanvasParagraph paragraph = rich(ahemStyle, (CanvasParagraphBuilder builder) {
         builder.addText('Lorem ipsum dolor sit');
       })
         ..layout(constrain(90.0));
@@ -543,7 +543,7 @@ void testMain() async {
     });
 
     test('handles multi-line multi-span paragraphs', () {
-      final CanvasParagraph paragraph = rich(ahemStyle, (builder) {
+      final CanvasParagraph paragraph = rich(ahemStyle, (CanvasParagraphBuilder builder) {
         builder.pushStyle(EngineTextStyle.only(color: blue));
         builder.addText('Lorem ipsum ');
         builder.pushStyle(EngineTextStyle.only(color: green));
@@ -635,7 +635,7 @@ void testMain() async {
 
   group('$CanvasParagraph.getLineBoundary', () {
     test('single-line', () {
-      final CanvasParagraph paragraph = rich(ahemStyle, (builder) {
+      final CanvasParagraph paragraph = rich(ahemStyle, (CanvasParagraphBuilder builder) {
         builder.addText('One single line');
       })
         ..layout(constrain(400.0));
@@ -651,7 +651,7 @@ void testMain() async {
     });
 
     test('multi-line', () {
-      final CanvasParagraph paragraph = rich(ahemStyle, (builder) {
+      final CanvasParagraph paragraph = rich(ahemStyle, (CanvasParagraphBuilder builder) {
         builder.addText('First line\n');
         builder.addText('Second line\n');
         builder.addText('Third line');

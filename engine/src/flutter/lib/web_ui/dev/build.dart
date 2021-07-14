@@ -7,12 +7,13 @@ import 'dart:async';
 
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
+import 'package:watcher/src/watch_event.dart';
 
 import 'environment.dart';
 import 'utils.dart';
 import 'watcher.dart';
 
-class BuildCommand extends Command<bool> with ArgUtils {
+class BuildCommand extends Command<bool> with ArgUtils<bool> {
   BuildCommand() {
     argParser
       ..addFlag(
@@ -48,7 +49,7 @@ class BuildCommand extends Command<bool> with ArgUtils {
         dir: libPath.absolute,
         pipeline: buildPipeline,
         // Ignore font files that are copied whenever tests run.
-        ignore: (event) => event.path.endsWith('.ttf'),
+        ignore: (WatchEvent event) => event.path.endsWith('.ttf'),
       ).start();
     }
     return true;

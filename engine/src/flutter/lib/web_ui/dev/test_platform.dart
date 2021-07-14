@@ -250,7 +250,7 @@ class BrowserPlatform extends PlatformPlugin {
     final Map<String, dynamic> region =
         requestData['region'] as Map<String, dynamic>;
     final PixelComparison pixelComparison = PixelComparison.values.firstWhere(
-        (value) => value.toString() == requestData['pixelComparison']);
+        (PixelComparison value) => value.toString() == requestData['pixelComparison']);
     final String result = await _diffScreenshot(
         filename, write, maxDiffRate, region, pixelComparison);
     return shelf.Response.ok(json.encode(result));
@@ -285,7 +285,7 @@ class BrowserPlatform extends PlatformPlugin {
       );
     }
 
-    final Rectangle regionAsRectange = Rectangle(
+    final Rectangle<num> regionAsRectange = Rectangle<num>(
       region['x'] as num,
       region['y'] as num,
       region['width'] as num,
@@ -325,7 +325,7 @@ class BrowserPlatform extends PlatformPlugin {
           <script src="packages/test/dart.js"></script>
         </head>
         </html>
-      ''', headers: {'Content-Type': 'text/html'});
+      ''', headers: <String, String>{'Content-Type': 'text/html'});
     }
 
     return shelf.Response.notFound('Not found.');
@@ -371,7 +371,7 @@ class BrowserPlatform extends PlatformPlugin {
     return suite;
   }
 
-  StreamChannel loadChannel(String path, SuitePlatform platform) =>
+  StreamChannel<dynamic> loadChannel(String path, SuitePlatform platform) =>
       throw UnimplementedError();
 
   Future<BrowserManager?>? _browserManager;
@@ -448,10 +448,10 @@ class BrowserPlatform extends PlatformPlugin {
 /// invalid and don't need to have a persistent URL.
 class OneOffHandler {
   /// A map from URL paths to handlers.
-  final _handlers = Map<String, shelf.Handler>();
+  final Map<String, shelf.Handler> _handlers = Map<String, shelf.Handler>();
 
   /// The counter of handlers that have been activated.
-  var _counter = 0;
+  int _counter = 0;
 
   /// The actual [shelf.Handler] that dispatches requests.
   shelf.Handler get handler => _onRequest;
@@ -463,7 +463,7 @@ class OneOffHandler {
   ///
   /// [handler] will be unmounted as soon as it receives a request.
   String create(shelf.Handler handler) {
-    var path = _counter.toString();
+    String path = _counter.toString();
     _handlers[path] = handler;
     _counter++;
     return path;
@@ -471,13 +471,13 @@ class OneOffHandler {
 
   /// Dispatches [request] to the appropriate handler.
   FutureOr<shelf.Response> _onRequest(shelf.Request request) {
-    var components = p.url.split(request.url.path);
+    List<String> components = p.url.split(request.url.path);
     if (components.isEmpty) {
       return shelf.Response.notFound(null);
     }
 
-    var path = components.removeAt(0);
-    var handler = _handlers.remove(path);
+    String path = components.removeAt(0);
+    shelf.Handler? handler = _handlers.remove(path);
     if (handler == null) {
       return shelf.Response.notFound(null);
     }
@@ -501,7 +501,7 @@ class BrowserManager {
   /// The channel used to communicate with the browser.
   ///
   /// This is connected to a page running `static/host.dart`.
-  late final MultiChannel _channel;
+  late final MultiChannel<dynamic> _channel;
 
   /// A pool that ensures that limits the number of initial connections the
   /// manager will wait for at once.
@@ -510,7 +510,7 @@ class BrowserManager {
   /// loaded in the same browser. However, the browser can only load so many at
   /// once, and we want a timeout in case they fail so we only wait for so many
   /// at once.
-  final _pool = Pool(8);
+  final Pool _pool = Pool(8);
 
   /// The ID of the next suite to be loaded.
   ///
@@ -525,10 +525,10 @@ class BrowserManager {
   ///
   /// This will be `null` as long as the browser isn't displaying a pause
   /// screen.
-  CancelableCompleter? _pauseCompleter;
+  CancelableCompleter<void>? _pauseCompleter;
 
   /// The controller for [_BrowserEnvironment.onRestart].
-  final _onRestartController = StreamController<dynamic>.broadcast();
+  final StreamController<dynamic> _onRestartController = StreamController<dynamic>.broadcast();
 
   /// The environment to attach to each suite.
   late final Future<_BrowserEnvironment> _environment;
@@ -537,7 +537,7 @@ class BrowserManager {
   ///
   /// These are used to mark suites as debugging or not based on the browser's
   /// pings.
-  final _controllers = Set<RunnerSuiteController>();
+  final Set<RunnerSuiteController> _controllers = Set<RunnerSuiteController>();
 
   // A timer that's reset whenever we receive a message from the browser.
   //
@@ -563,9 +563,9 @@ class BrowserManager {
     required PackageConfig packageConfig,
     bool debug = false,
   }) {
-    var browser = _newBrowser(url, browserEnvironment, debug: debug);
+    Browser browser = _newBrowser(url, browserEnvironment, debug: debug);
 
-    var completer = Completer<BrowserManager>();
+    Completer<BrowserManager> completer = Completer<BrowserManager>();
 
     // For the cases where we use a delegator such as `adb` (for Android) or
     // `xcrun` (for IOS), these delegator processes can shut down before the
@@ -579,7 +579,7 @@ class BrowserManager {
       completer.completeError(error, stackTrace);
     });
 
-    future.then((webSocket) {
+    future.then((WebSocketChannel webSocket) {
       if (completer.isCompleted) {
         return;
       }
@@ -612,7 +612,7 @@ class BrowserManager {
     // Start this canceled because we don't want it to start ticking until we
     // get some response from the iframe.
     _timer = RestartableTimer(Duration(seconds: 3), () {
-      for (var controller in _controllers) {
+      for (RunnerSuiteController controller in _controllers) {
         controller.setDebugging(true);
       }
     })
@@ -621,12 +621,12 @@ class BrowserManager {
     // Whenever we get a message, no matter which child channel it's for, we the
     // know browser is still running code which means the user isn't debugging.
     _channel = MultiChannel<dynamic>(
-        webSocket.cast<String>().transform(jsonDocument).changeStream((stream) {
-      return stream.map((message) {
+        webSocket.cast<String>().transform(jsonDocument).changeStream((Stream<Object?> stream) {
+      return stream.map((Object? message) {
         if (!_closed) {
           _timer.reset();
         }
-        for (var controller in _controllers) {
+        for (RunnerSuiteController controller in _controllers) {
           controller.setDebugging(false);
         }
 
@@ -636,7 +636,7 @@ class BrowserManager {
 
     _environment = _loadBrowserEnvironment();
     _channel.stream
-        .listen((dynamic message) => _onMessage(message as Map), onDone: close);
+        .listen((dynamic message) => _onMessage(message as Map<dynamic, dynamic>), onDone: close);
   }
 
   /// Loads [_BrowserEnvironment].
@@ -658,28 +658,28 @@ class BrowserManager {
       'browser': _browserEnvironment.packageTestRuntime.identifier
     })));
 
-    var suiteID = _suiteID++;
+    int suiteID = _suiteID++;
     RunnerSuiteController? controller;
     void closeIframe() {
       if (_closed) {
         return;
       }
       _controllers.remove(controller);
-      _channel.sink.add({'command': 'closeSuite', 'id': suiteID});
+      _channel.sink.add(<String, dynamic>{'command': 'closeSuite', 'id': suiteID});
     }
 
     // The virtual channel will be closed when the suite is closed, in which
     // case we should unload the iframe.
-    var virtualChannel = _channel.virtualChannel();
-    var suiteChannelID = virtualChannel.id;
-    var suiteChannel = virtualChannel.transformStream(
-        StreamTransformer<dynamic, dynamic>.fromHandlers(handleDone: (sink) {
+    VirtualChannel<dynamic> virtualChannel = _channel.virtualChannel();
+    int suiteChannelID = virtualChannel.id;
+    StreamChannel<dynamic> suiteChannel = virtualChannel.transformStream(
+        StreamTransformer<dynamic, dynamic>.fromHandlers(handleDone: (EventSink<dynamic> sink) {
       closeIframe();
       sink.close();
     }));
 
     return _pool.withResource<RunnerSuite>(() async {
-      _channel.sink.add({
+      _channel.sink.add(<String, dynamic>{
         'command': 'loadSuite',
         'url': url.toString(),
         'id': suiteID,
@@ -697,8 +697,8 @@ class BrowserManager {
         final String mapPath = p.join(env.environment.webUiRootDir.path,
             'build', pathToTest, sourceMapFileName);
 
-        Map<String, Uri> packageMap = {
-          for (var p in packageConfig.packages) p.name: p.packageUriRoot
+        Map<String, Uri> packageMap = <String, Uri>{
+          for (Package p in packageConfig.packages) p.name: p.packageUriRoot
         };
         final JSStackTraceMapper mapper = JSStackTraceMapper(
           await File(mapPath).readAsString(),
@@ -719,14 +719,14 @@ class BrowserManager {
   }
 
   /// An implementation of [Environment.displayPause].
-  CancelableOperation _displayPause() {
-    CancelableCompleter? pauseCompleter = _pauseCompleter;
+  CancelableOperation<void> _displayPause() {
+    CancelableCompleter<void>? pauseCompleter = _pauseCompleter;
     if (pauseCompleter != null) {
       return pauseCompleter.operation;
     }
 
     pauseCompleter = CancelableCompleter<void>(onCancel: () {
-      _channel.sink.add({'command': 'resume'});
+      _channel.sink.add(<String, String>{'command': 'resume'});
       _pauseCompleter = null;
     });
     _pauseCompleter = pauseCompleter;
@@ -735,13 +735,13 @@ class BrowserManager {
       _pauseCompleter = null;
     });
 
-    _channel.sink.add({'command': 'displayPause'});
+    _channel.sink.add(<String, String>{'command': 'displayPause'});
 
     return pauseCompleter.operation;
   }
 
   /// The callback for handling messages received from the host page.
-  void _onMessage(Map message) {
+  void _onMessage(Map<dynamic, dynamic> message) {
     switch (message['command'] as String) {
       case 'ping':
         break;
@@ -763,7 +763,7 @@ class BrowserManager {
 
   /// Closes the manager and releases any resources it owns, including closing
   /// the browser.
-  Future close() => _closeMemoizer.runOnce(() {
+  Future<void> close() => _closeMemoizer.runOnce(() {
         _closed = true;
         _timer.cancel();
         _pauseCompleter?.complete();
@@ -780,18 +780,18 @@ class BrowserManager {
 class _BrowserEnvironment implements Environment {
   final BrowserManager _manager;
 
-  final supportsDebugging = true;
+  final bool supportsDebugging = true;
 
   final Uri? observatoryUrl;
 
   final Uri? remoteDebuggerUrl;
 
-  final Stream onRestart;
+  final Stream<dynamic> onRestart;
 
   _BrowserEnvironment(this._manager, this.observatoryUrl,
       this.remoteDebuggerUrl, this.onRestart);
 
-  CancelableOperation displayPause() => _manager._displayPause();
+  CancelableOperation<void> displayPause() => _manager._displayPause();
 }
 
 bool get isCirrus => Platform.environment['CIRRUS_CI'] == 'true';

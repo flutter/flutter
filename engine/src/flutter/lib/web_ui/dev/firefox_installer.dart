@@ -308,7 +308,7 @@ Future<String> _findSystemFirefoxExecutable() async {
   if (!found) {
     if (io.Platform.isMacOS &&
         io.File(fireFoxDefaultInstallPath).existsSync()) {
-      return Future.value(fireFoxDefaultInstallPath);
+      return Future<String>.value(fireFoxDefaultInstallPath);
     }
     throw BrowserInstallerException(
         'Failed to locate system Firefox installation.');

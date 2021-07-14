@@ -327,9 +327,9 @@ class Conic {
       double p0, double p1, double p2, double w, double t) {
     assert(t >= 0 && t <= 1);
     final double src2w = p1 * w;
-    final C = p0;
-    final A = p2 - 2 * src2w + C;
-    final B = 2 * (src2w - C);
+    final double C = p0;
+    final double A = p2 - 2 * src2w + C;
+    final double B = 2 * (src2w - C);
     return polyEval(A, B, C, t);
   }
 

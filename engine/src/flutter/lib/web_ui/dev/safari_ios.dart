@@ -51,7 +51,7 @@ class SafariIosEnvironment implements BrowserEnvironment {
 /// Any errors starting or running the process are reported through [onExit].
 class SafariIos extends Browser {
   @override
-  final name = 'Safari iOS';
+  final String name = 'Safari iOS';
 
   /// Starts a new instance of Safari open to the given [url], which may be a
   /// [Uri].
@@ -61,7 +61,7 @@ class SafariIos extends Browser {
       // Uses `xcrun simctl`. It is a command line utility to control the
       // Simulator. For more details on interacting with the simulator:
       // https://developer.apple.com/library/archive/documentation/IDEs/Conceptual/iOS_Simulator_Guide/InteractingwiththeiOSSimulator/InteractingwiththeiOSSimulator.html
-      var process = await io.Process.start('xcrun', [
+      io.Process process = await io.Process.start('xcrun', <String>[
         'simctl',
         'openurl', // Opens the url on Safari installed on the simulator.
         'booted', // The simulator is already booted.
@@ -154,7 +154,7 @@ class SafariIosScreenshotManager extends ScreenshotManager {
   /// width of the area to capture.
   ///
   /// Uses simulator tool `xcrun simctl`'s 'screenshot' command.
-  Future<Image> capture(math.Rectangle? region) async {
+  Future<Image> capture(math.Rectangle<num>? region) async {
     final String filename = 'screenshot${_fileNameCounter}.png';
     _fileNameCounter++;
 
@@ -186,7 +186,7 @@ class SafariIosScreenshotManager extends ScreenshotManager {
     if (region == null) {
       return content;
     } else {
-      final math.Rectangle scaledRegion = _scaleScreenshotRegion(region);
+      final math.Rectangle<num> scaledRegion = _scaleScreenshotRegion(region);
       return copyCrop(
         content,
         scaledRegion.left.toInt(),
@@ -200,8 +200,8 @@ class SafariIosScreenshotManager extends ScreenshotManager {
   /// Perform a linear transform on the screenshot region to convert its
   /// dimensions from linear coordinated to coordinated on the phone screen.
   /// This uniform/isotropic scaling is done using [_scaleFactor].
-  math.Rectangle _scaleScreenshotRegion(math.Rectangle region) {
-    return math.Rectangle(
+  math.Rectangle<num> _scaleScreenshotRegion(math.Rectangle<num> region) {
+    return math.Rectangle<num>(
       region.left * _scaleFactor,
       region.top * _scaleFactor,
       region.width * _scaleFactor,

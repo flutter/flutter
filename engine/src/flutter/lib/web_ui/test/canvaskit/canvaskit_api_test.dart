@@ -332,10 +332,10 @@ void _shaderTests() {
   test('MakeRadialGradient', () {
     expect(
         canvasKit.Shader.MakeRadialGradient(
-          Float32List.fromList([1, 1]),
+          Float32List.fromList(<double>[1, 1]),
           10.0,
           Uint32List.fromList(<int>[0xff000000, 0xffffffff]),
-          Float32List.fromList([0, 1]),
+          Float32List.fromList(<double>[0, 1]),
           canvasKit.TileMode.Repeat,
           toSkMatrixFromFloat32(Matrix4.identity().storage),
           0,
@@ -346,12 +346,12 @@ void _shaderTests() {
   test('MakeTwoPointConicalGradient', () {
     expect(
         canvasKit.Shader.MakeTwoPointConicalGradient(
-          Float32List.fromList([1, 1]),
+          Float32List.fromList(<double>[1, 1]),
           10.0,
-          Float32List.fromList([1, 1]),
+          Float32List.fromList(<double>[1, 1]),
           10.0,
           Uint32List.fromList(<int>[0xff000000, 0xffffffff]),
-          Float32List.fromList([0, 1]),
+          Float32List.fromList(<double>[0, 1]),
           canvasKit.TileMode.Repeat,
           toSkMatrixFromFloat32(Matrix4.identity().storage),
           0,
@@ -362,10 +362,10 @@ void _shaderTests() {
 
 SkShader _makeTestShader() {
   return canvasKit.Shader.MakeLinearGradient(
-    Float32List.fromList([0, 0]),
-    Float32List.fromList([1, 1]),
+    Float32List.fromList(<double>[0, 0]),
+    Float32List.fromList(<double>[1, 1]),
     Uint32List.fromList(<int>[0xff0000ff]),
-    Float32List.fromList([0, 1]),
+    Float32List.fromList(<double>[0, 1]),
     canvasKit.TileMode.Repeat,
     null,
   );
@@ -414,7 +414,7 @@ void _colorFilterTests() {
   test('MakeBlend', () {
     expect(
       canvasKit.ColorFilter.MakeBlend(
-        Float32List.fromList([0, 0, 0, 1]),
+        Float32List.fromList(<double>[0, 0, 0, 1]),
         canvasKit.BlendMode.SrcATop,
       ),
       isNotNull,
@@ -584,11 +584,11 @@ void _toSkMatrixFromFloat32Tests() {
 
 void _toSkRectTests() {
   test('toSkRect', () {
-    expect(toSkRect(ui.Rect.fromLTRB(1, 2, 3, 4)), [1, 2, 3, 4]);
+    expect(toSkRect(ui.Rect.fromLTRB(1, 2, 3, 4)), <double>[1, 2, 3, 4]);
   });
 
   test('fromSkRect', () {
-    expect(fromSkRect(Float32List.fromList([1, 2, 3, 4])),
+    expect(fromSkRect(Float32List.fromList(<double>[1, 2, 3, 4])),
         ui.Rect.fromLTRB(1, 2, 3, 4));
   });
 
@@ -604,7 +604,7 @@ void _toSkRectTests() {
         bottomRight: ui.Radius.elliptical(9, 10),
         bottomLeft: ui.Radius.elliptical(11, 12),
       )),
-      [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+      <double>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
     );
   });
 }
@@ -851,10 +851,10 @@ void _pathTests() {
 SkVertices _testVertices() {
   return canvasKit.MakeVertices(
     canvasKit.VertexMode.Triangles,
-    Float32List.fromList([0, 0, 10, 10, 0, 20]),
-    Float32List.fromList([0, 0, 10, 10, 0, 20]),
-    Uint32List.fromList([0xffff0000, 0xff00ff00, 0xff0000ff]),
-    Uint16List.fromList([0, 1, 2]),
+    Float32List.fromList(<double>[0, 0, 10, 10, 0, 20]),
+    Float32List.fromList(<double>[0, 0, 10, 10, 0, 20]),
+    Uint32List.fromList(<int>[0xffff0000, 0xff00ff00, 0xff0000ff]),
+    Uint16List.fromList(<int>[0, 1, 2]),
   );
 }
 
@@ -913,7 +913,7 @@ void _canvasTests() {
   });
 
   test('clear', () {
-    canvas.clear(Float32List.fromList([0, 0, 0, 0]));
+    canvas.clear(Float32List.fromList(<double>[0, 0, 0, 0]));
   });
 
   test('clipPath', () {
@@ -926,7 +926,7 @@ void _canvasTests() {
 
   test('clipRRect', () {
     canvas.clipRRect(
-      Float32List.fromList([0, 0, 100, 100, 1, 2, 3, 4, 5, 6, 7, 8]),
+      Float32List.fromList(<double>[0, 0, 100, 100, 1, 2, 3, 4, 5, 6, 7, 8]),
       canvasKit.ClipOp.Intersect,
       true,
     );
@@ -934,7 +934,7 @@ void _canvasTests() {
 
   test('clipRect', () {
     canvas.clipRect(
-      Float32List.fromList([0, 0, 100, 100]),
+      Float32List.fromList(<double>[0, 0, 100, 100]),
       canvasKit.ClipOp.Intersect,
       true,
     );
@@ -942,7 +942,7 @@ void _canvasTests() {
 
   test('drawArc', () {
     canvas.drawArc(
-      Float32List.fromList([0, 0, 100, 50]),
+      Float32List.fromList(<double>[0, 0, 100, 50]),
       0,
       100,
       true,
@@ -955,8 +955,8 @@ void _canvasTests() {
         canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage)!;
     canvas.drawAtlas(
       image.makeImageAtCurrentFrame(),
-      Float32List.fromList([0, 0, 1, 1]),
-      Float32List.fromList([1, 0, 2, 3]),
+      Float32List.fromList(<double>[0, 0, 1, 1]),
+      Float32List.fromList(<double>[1, 0, 2, 3]),
       SkPaint(),
       canvasKit.BlendMode.SrcOver,
       Uint32List.fromList(<int>[0xff000000, 0xffffffff]),
@@ -973,8 +973,8 @@ void _canvasTests() {
 
   test('drawDRRect', () {
     canvas.drawDRRect(
-      Float32List.fromList([0, 0, 100, 100, 1, 2, 3, 4, 5, 6, 7, 8]),
-      Float32List.fromList([20, 20, 80, 80, 1, 2, 3, 4, 5, 6, 7, 8]),
+      Float32List.fromList(<double>[0, 0, 100, 100, 1, 2, 3, 4, 5, 6, 7, 8]),
+      Float32List.fromList(<double>[20, 20, 80, 80, 1, 2, 3, 4, 5, 6, 7, 8]),
       SkPaint(),
     );
   });
@@ -1010,8 +1010,8 @@ void _canvasTests() {
         canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage)!;
     canvas.drawImageRectOptions(
       image.makeImageAtCurrentFrame(),
-      Float32List.fromList([0, 0, 1, 1]),
-      Float32List.fromList([0, 0, 1, 1]),
+      Float32List.fromList(<double>[0, 0, 1, 1]),
+      Float32List.fromList(<double>[0, 0, 1, 1]),
       canvasKit.FilterMode.Linear,
       canvasKit.MipmapMode.None,
       SkPaint(),
@@ -1023,8 +1023,8 @@ void _canvasTests() {
         canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage)!;
     canvas.drawImageRectCubic(
       image.makeImageAtCurrentFrame(),
-      Float32List.fromList([0, 0, 1, 1]),
-      Float32List.fromList([0, 0, 1, 1]),
+      Float32List.fromList(<double>[0, 0, 1, 1]),
+      Float32List.fromList(<double>[0, 0, 1, 1]),
       0.3,
       0.3,
       SkPaint(),
@@ -1036,8 +1036,8 @@ void _canvasTests() {
         canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage)!;
     canvas.drawImageNine(
       image.makeImageAtCurrentFrame(),
-      Float32List.fromList([0, 0, 1, 1]),
-      Float32List.fromList([0, 0, 1, 1]),
+      Float32List.fromList(<double>[0, 0, 1, 1]),
+      Float32List.fromList(<double>[0, 0, 1, 1]),
       canvasKit.FilterMode.Linear,
       SkPaint(),
     );
@@ -1048,7 +1048,7 @@ void _canvasTests() {
   });
 
   test('drawOval', () {
-    canvas.drawOval(Float32List.fromList([0, 0, 1, 1]), SkPaint());
+    canvas.drawOval(Float32List.fromList(<double>[0, 0, 1, 1]), SkPaint());
   });
 
   test('drawPaint', () {
@@ -1065,21 +1065,21 @@ void _canvasTests() {
   test('drawPoints', () {
     canvas.drawPoints(
       canvasKit.PointMode.Lines,
-      Float32List.fromList([0, 0, 10, 10, 0, 10]),
+      Float32List.fromList(<double>[0, 0, 10, 10, 0, 10]),
       SkPaint(),
     );
   });
 
   test('drawRRect', () {
     canvas.drawRRect(
-      Float32List.fromList([0, 0, 100, 100, 1, 2, 3, 4, 5, 6, 7, 8]),
+      Float32List.fromList(<double>[0, 0, 100, 100, 1, 2, 3, 4, 5, 6, 7, 8]),
       SkPaint(),
     );
   });
 
   test('drawRect', () {
     canvas.drawRect(
-      Float32List.fromList([0, 0, 100, 100]),
+      Float32List.fromList(<double>[0, 0, 100, 100]),
       SkPaint(),
     );
   });
@@ -1155,7 +1155,7 @@ void _canvasTests() {
   test('drawPicture', () {
     final SkPictureRecorder otherRecorder = SkPictureRecorder();
     final SkCanvas otherCanvas =
-        otherRecorder.beginRecording(Float32List.fromList([0, 0, 100, 100]));
+        otherRecorder.beginRecording(Float32List.fromList(<double>[0, 0, 100, 100]));
     otherCanvas.drawLine(0, 0, 10, 10, SkPaint());
     canvas.drawPicture(otherRecorder.finishRecordingAsPicture());
   });
@@ -1181,9 +1181,9 @@ void _canvasTests() {
     browserSupportsFinalizationRegistry = true;
     final SkPictureRecorder otherRecorder = SkPictureRecorder();
     final SkCanvas otherCanvas =
-        otherRecorder.beginRecording(Float32List.fromList([0, 0, 1, 1]));
+        otherRecorder.beginRecording(Float32List.fromList(<double>[0, 0, 1, 1]));
     otherCanvas.drawRect(
-      Float32List.fromList([0, 0, 1, 1]),
+      Float32List.fromList(<double>[0, 0, 1, 1]),
       SkPaint(),
     );
     final CkPicture picture =
@@ -1423,8 +1423,8 @@ void _paragraphTests() {
         canvasKit.RectHeightStyle.Strut,
         canvasKit.RectWidthStyle.Tight,
       ),
-      [
-        [0, 0, 13.770000457763672, 75],
+      <List<double>>[
+        <double>[0, 0, 13.770000457763672, 75],
       ],
     );
   });

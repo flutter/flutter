@@ -15,15 +15,15 @@ void main() {
 void testMain() {
   group('$IntervalTree', () {
     test('is balanced', () {
-      var ranges = <String, List<CodeunitRange>>{
-        'A': [CodeunitRange(0, 5), CodeunitRange(6, 10)],
-        'B': [CodeunitRange(4, 6)],
+      Map<String, List<CodeunitRange>> ranges = <String, List<CodeunitRange>>{
+        'A': <CodeunitRange>[CodeunitRange(0, 5), CodeunitRange(6, 10)],
+        'B': <CodeunitRange>[CodeunitRange(4, 6)],
       };
 
       // Should create a balanced 3-node tree with a root with a left and right
       // child.
-      var tree = IntervalTree<String>.createFromRanges(ranges);
-      var root = tree.root;
+      IntervalTree<String> tree = IntervalTree<String>.createFromRanges(ranges);
+      IntervalTreeNode<String> root = tree.root;
       expect(root.left, isNotNull);
       expect(root.right, isNotNull);
       expect(root.left!.left, isNull);
@@ -32,8 +32,8 @@ void testMain() {
       expect(root.right!.right, isNull);
 
       // Should create a balanced 15-node tree (4 layers deep).
-      var ranges2 = <String, List<CodeunitRange>>{
-        'A': [
+      Map<String, List<CodeunitRange>> ranges2 = <String, List<CodeunitRange>>{
+        'A': <CodeunitRange>[
           CodeunitRange(1, 1),
           CodeunitRange(2, 2),
           CodeunitRange(3, 3),
@@ -54,8 +54,8 @@ void testMain() {
 
       // Should create a balanced 3-node tree with a root with a left and right
       // child.
-      var tree2 = IntervalTree<String>.createFromRanges(ranges2);
-      var root2 = tree2.root;
+      IntervalTree<String> tree2 = IntervalTree<String>.createFromRanges(ranges2);
+      IntervalTreeNode<String> root2 = tree2.root;
 
       expect(root2.left!.left!.left, isNotNull);
       expect(root2.left!.left!.right, isNotNull);
@@ -68,16 +68,16 @@ void testMain() {
     });
 
     test('finds values whose intervals overlap with a given point', () {
-      var ranges = <String, List<CodeunitRange>>{
-        'A': [CodeunitRange(0, 5), CodeunitRange(7, 10)],
-        'B': [CodeunitRange(4, 6)],
+      Map<String, List<CodeunitRange>> ranges = <String, List<CodeunitRange>>{
+        'A': <CodeunitRange>[CodeunitRange(0, 5), CodeunitRange(7, 10)],
+        'B': <CodeunitRange>[CodeunitRange(4, 6)],
       };
-      var tree = IntervalTree<String>.createFromRanges(ranges);
+      IntervalTree<String> tree = IntervalTree<String>.createFromRanges(ranges);
 
-      expect(tree.intersections(1), ['A']);
-      expect(tree.intersections(4), ['A', 'B']);
-      expect(tree.intersections(6), ['B']);
-      expect(tree.intersections(7), ['A']);
+      expect(tree.intersections(1), <String>['A']);
+      expect(tree.intersections(4), <String>['A', 'B']);
+      expect(tree.intersections(6), <String>['B']);
+      expect(tree.intersections(7), <String>['A']);
       expect(tree.intersections(11), <String>[]);
     });
   });

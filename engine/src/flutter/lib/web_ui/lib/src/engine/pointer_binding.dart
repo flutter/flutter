@@ -682,7 +682,7 @@ class _TouchAdapter extends _BaseAdapter {
       final Duration timeStamp = _BaseAdapter._eventTimeStampToDuration(event.timeStamp!);
       final List<ui.PointerData> pointerData = <ui.PointerData>[];
       for (html.Touch touch in event.changedTouches!) {
-        final nowPressed = _isTouchPressed(touch.identifier!);
+        final bool nowPressed = _isTouchPressed(touch.identifier!);
         if (!nowPressed) {
           _pressTouch(touch.identifier!);
           _convertEventToPointerData(
@@ -702,7 +702,7 @@ class _TouchAdapter extends _BaseAdapter {
       final Duration timeStamp = _BaseAdapter._eventTimeStampToDuration(event.timeStamp!);
       final List<ui.PointerData> pointerData = <ui.PointerData>[];
       for (html.Touch touch in event.changedTouches!) {
-        final nowPressed = _isTouchPressed(touch.identifier!);
+        final bool nowPressed = _isTouchPressed(touch.identifier!);
         if (nowPressed) {
           _convertEventToPointerData(
             data: pointerData,
@@ -723,7 +723,7 @@ class _TouchAdapter extends _BaseAdapter {
       final Duration timeStamp = _BaseAdapter._eventTimeStampToDuration(event.timeStamp!);
       final List<ui.PointerData> pointerData = <ui.PointerData>[];
       for (html.Touch touch in event.changedTouches!) {
-        final nowPressed = _isTouchPressed(touch.identifier!);
+        final bool nowPressed = _isTouchPressed(touch.identifier!);
         if (nowPressed) {
           _unpressTouch(touch.identifier!);
           _convertEventToPointerData(
@@ -742,7 +742,7 @@ class _TouchAdapter extends _BaseAdapter {
       final Duration timeStamp = _BaseAdapter._eventTimeStampToDuration(event.timeStamp!);
       final List<ui.PointerData> pointerData = <ui.PointerData>[];
       for (html.Touch touch in event.changedTouches!) {
-        final nowPressed = _isTouchPressed(touch.identifier!);
+        final bool nowPressed = _isTouchPressed(touch.identifier!);
         if (nowPressed) {
           _unpressTouch(touch.identifier!);
           _convertEventToPointerData(

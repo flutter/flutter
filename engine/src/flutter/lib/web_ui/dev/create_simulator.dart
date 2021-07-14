@@ -10,7 +10,7 @@ import 'package:simulators/simulator_manager.dart';
 import 'safari_installation.dart';
 import 'utils.dart';
 
-class CreateSimulatorCommand extends Command<bool> with ArgUtils {
+class CreateSimulatorCommand extends Command<bool> with ArgUtils<bool> {
   CreateSimulatorCommand() {
     IosSafariArgParser.instance.populateOptions(argParser);
     argParser

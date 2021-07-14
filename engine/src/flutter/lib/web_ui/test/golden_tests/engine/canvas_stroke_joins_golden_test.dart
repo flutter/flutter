@@ -48,13 +48,13 @@ void paintStrokeJoins(BitmapCanvas canvas) {
   Offset mid = Offset(120, 10);
   Offset end = Offset(120, 20);
 
-  var strokeCaps = [StrokeCap.butt, StrokeCap.round, StrokeCap.square];
+  List<StrokeCap> strokeCaps = <StrokeCap>[StrokeCap.butt, StrokeCap.round, StrokeCap.square];
   for (StrokeCap cap in strokeCaps) {
-    var joints = [StrokeJoin.miter, StrokeJoin.bevel, StrokeJoin.round];
-    var colors = [Color(0xFFF44336), Color(0xFF4CAF50), Color(0xFF2196F3)]; // red, green, blue
+    List<StrokeJoin> joints = <StrokeJoin>[StrokeJoin.miter, StrokeJoin.bevel, StrokeJoin.round];
+    List<Color> colors = <Color>[Color(0xFFF44336), Color(0xFF4CAF50), Color(0xFF2196F3)]; // red, green, blue
     for (int i = 0; i < joints.length; i++) {
-      var join = joints[i];
-      var color = colors[i % colors.length];
+      StrokeJoin join = joints[i];
+      Color color = colors[i % colors.length];
 
       Path path = new Path();
       path.moveTo(start.dx, start.dy);

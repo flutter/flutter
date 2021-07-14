@@ -370,7 +370,7 @@ void testMain() {
   });
 
   test('cannot set url strategy after it is initialized', () async {
-    final testStrategy = TestUrlStrategy.fromEntry(
+    final TestUrlStrategy testStrategy = TestUrlStrategy.fromEntry(
       TestHistoryEntry('initial state', null, '/'),
     );
     await window.debugInitializeHistory(testStrategy, useSingle: true);

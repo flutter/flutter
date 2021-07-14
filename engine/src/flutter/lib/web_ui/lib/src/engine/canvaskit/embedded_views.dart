@@ -99,14 +99,14 @@ class HtmlViewEmbedder {
     if (_viewsUsingBackupSurface.contains(viewId)) {
       if (_backupPictureRecorder == null) {
         // Only initialize the picture recorder for the backup surface once.
-        final pictureRecorder = CkPictureRecorder();
+        final CkPictureRecorder pictureRecorder = CkPictureRecorder();
         pictureRecorder.beginRecording(ui.Offset.zero & _frameSize);
         pictureRecorder.recordingCanvas!.clear(ui.Color(0x00000000));
         _backupPictureRecorder = pictureRecorder;
       }
       _pictureRecorders[viewId] = _backupPictureRecorder!;
     } else {
-      final pictureRecorder = CkPictureRecorder();
+      final CkPictureRecorder pictureRecorder = CkPictureRecorder();
       pictureRecorder.beginRecording(ui.Offset.zero & _frameSize);
       pictureRecorder.recordingCanvas!.clear(ui.Color(0x00000000));
       _pictureRecorders[viewId] = pictureRecorder;
@@ -477,7 +477,7 @@ class HtmlViewEmbedder {
 
   /// Deletes SVG clip paths, useful for tests.
   void debugCleanupSvgClipPaths() {
-    _svgPathDefs?.children.single.children.forEach((element) {
+    _svgPathDefs?.children.single.children.forEach((html.Element element) {
       element.remove();
     });
     _svgClipDefs.clear();

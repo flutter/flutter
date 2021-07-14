@@ -26,13 +26,13 @@ void testMain() async {
   setUpStableTestFonts();
 
   test('paints spans and lines correctly', () {
-    final canvas = BitmapCanvas(bounds, RenderStrategy());
+    final BitmapCanvas canvas = BitmapCanvas(bounds, RenderStrategy());
 
     Offset offset = Offset.zero;
     CanvasParagraph paragraph;
 
     // Single-line multi-span.
-    paragraph = rich(EngineParagraphStyle(fontFamily: 'Roboto'), (builder) {
+    paragraph = rich(EngineParagraphStyle(fontFamily: 'Roboto'), (CanvasParagraphBuilder builder) {
       builder.pushStyle(EngineTextStyle.only(color: blue));
       builder.addText('Lorem ');
       builder.pushStyle(EngineTextStyle.only(
@@ -48,7 +48,7 @@ void testMain() async {
     offset = offset.translate(0, paragraph.height + 10);
 
     // Multi-line single-span.
-    paragraph = rich(EngineParagraphStyle(fontFamily: 'Roboto'), (builder) {
+    paragraph = rich(EngineParagraphStyle(fontFamily: 'Roboto'), (CanvasParagraphBuilder builder) {
       builder.addText('Lorem ipsum dolor sit');
     })
       ..layout(constrain(90.0));
@@ -56,7 +56,7 @@ void testMain() async {
     offset = offset.translate(0, paragraph.height + 10);
 
     // Multi-line multi-span.
-    paragraph = rich(EngineParagraphStyle(fontFamily: 'Roboto'), (builder) {
+    paragraph = rich(EngineParagraphStyle(fontFamily: 'Roboto'), (CanvasParagraphBuilder builder) {
       builder.pushStyle(EngineTextStyle.only(color: blue));
       builder.addText('Lorem ipsum ');
       builder.pushStyle(EngineTextStyle.only(background: Paint()..color = red));
@@ -73,7 +73,7 @@ void testMain() async {
   });
 
   test('respects alignment', () {
-    final canvas = BitmapCanvas(bounds, RenderStrategy());
+    final BitmapCanvas canvas = BitmapCanvas(bounds, RenderStrategy());
 
     Offset offset = Offset.zero;
     CanvasParagraph paragraph;
@@ -114,7 +114,7 @@ void testMain() async {
   });
 
   test('respects alignment in DOM mode', () {
-    final canvas = DomCanvas(domRenderer.createElement('flt-picture'));
+    final DomCanvas canvas = DomCanvas(domRenderer.createElement('flt-picture'));
 
     Offset offset = Offset.zero;
     CanvasParagraph paragraph;
@@ -186,13 +186,13 @@ void testMain() async {
   }
 
   test('alignment and transform', () {
-    final canvas = BitmapCanvas(bounds, RenderStrategy());
+    final BitmapCanvas canvas = BitmapCanvas(bounds, RenderStrategy());
     testAlignAndTransform(canvas);
     return takeScreenshot(canvas, bounds, 'canvas_paragraph_align_transform');
   });
 
   test('alignment and transform (DOM)', () {
-    final canvas = DomCanvas(domRenderer.createElement('flt-picture'));
+    final DomCanvas canvas = DomCanvas(domRenderer.createElement('flt-picture'));
     testAlignAndTransform(canvas);
     return takeScreenshot(canvas, bounds, 'canvas_paragraph_align_transform_dom');
   });
@@ -214,14 +214,14 @@ void testMain() async {
 
   test('giant paragraph style', () {
     const Rect bounds = Rect.fromLTWH(0, 0, 300, 200);
-    final canvas = BitmapCanvas(bounds, RenderStrategy());
+    final BitmapCanvas canvas = BitmapCanvas(bounds, RenderStrategy());
     testGiantParagraphStyles(canvas);
     return takeScreenshot(canvas, bounds, 'canvas_paragraph_giant_paragraph_style');
   });
 
   test('giant paragraph style (DOM)', () {
     const Rect bounds = Rect.fromLTWH(0, 0, 300, 200);
-    final canvas = DomCanvas(domRenderer.createElement('flt-picture'));
+    final DomCanvas canvas = DomCanvas(domRenderer.createElement('flt-picture'));
     testGiantParagraphStyles(canvas);
     return takeScreenshot(canvas, bounds, 'canvas_paragraph_giant_paragraph_style_dom');
   });
@@ -233,7 +233,7 @@ void testMain() async {
     final String oldBodyFontSize = html.document.body!.style.fontSize;
     html.document.body!.style.fontSize = '100px';
 
-    final canvas = DomCanvas(domRenderer.createElement('flt-picture'));
+    final DomCanvas canvas = DomCanvas(domRenderer.createElement('flt-picture'));
     Offset offset = Offset(10.0, 10.0);
 
     final CanvasParagraph paragraph = rich(
@@ -284,11 +284,11 @@ void testMain() async {
   });
 
   test('paints spans with varying heights/baselines', () {
-    final canvas = BitmapCanvas(bounds, RenderStrategy());
+    final BitmapCanvas canvas = BitmapCanvas(bounds, RenderStrategy());
 
     final CanvasParagraph paragraph = rich(
       EngineParagraphStyle(fontFamily: 'Roboto'),
-      (builder) {
+      (CanvasParagraphBuilder builder) {
         builder.pushStyle(EngineTextStyle.only(fontSize: 20.0));
         builder.addText('Lorem ');
         builder.pushStyle(EngineTextStyle.only(
@@ -319,11 +319,11 @@ void testMain() async {
   });
 
   test('respects letter-spacing', () {
-    final canvas = BitmapCanvas(bounds, RenderStrategy());
+    final BitmapCanvas canvas = BitmapCanvas(bounds, RenderStrategy());
 
     final CanvasParagraph paragraph = rich(
       EngineParagraphStyle(fontFamily: 'Roboto'),
-      (builder) {
+      (CanvasParagraphBuilder builder) {
         builder.pushStyle(EngineTextStyle.only(color: blue));
         builder.addText('Lorem ');
         builder.pushStyle(EngineTextStyle.only(color: green, letterSpacing: 1));
@@ -338,7 +338,7 @@ void testMain() async {
   });
 
   test('draws text decorations', () {
-    final canvas = BitmapCanvas(bounds, RenderStrategy());
+    final BitmapCanvas canvas = BitmapCanvas(bounds, RenderStrategy());
     final List<TextDecorationStyle> decorationStyles = <TextDecorationStyle>[
       TextDecorationStyle.solid,
       TextDecorationStyle.double,
@@ -349,7 +349,7 @@ void testMain() async {
 
     final CanvasParagraph paragraph = rich(
       EngineParagraphStyle(fontFamily: 'Roboto'),
-      (builder) {
+      (CanvasParagraphBuilder builder) {
         for (TextDecorationStyle decorationStyle in decorationStyles) {
           builder.pushStyle(EngineTextStyle.only(
             color: const Color.fromRGBO(50, 50, 255, 1.0),
@@ -455,14 +455,14 @@ void testMain() async {
 
   test('font features', () {
     const Rect bounds = Rect.fromLTWH(0, 0, 600, 500);
-    final canvas = BitmapCanvas(bounds, RenderStrategy());
+    final BitmapCanvas canvas = BitmapCanvas(bounds, RenderStrategy());
     testFontFeatures(canvas);
     return takeScreenshot(canvas, bounds, 'canvas_paragraph_font_features');
   });
 
   test('font features (DOM)', () {
     const Rect bounds = Rect.fromLTWH(0, 0, 600, 500);
-    final canvas = DomCanvas(domRenderer.createElement('flt-picture'));
+    final DomCanvas canvas = DomCanvas(domRenderer.createElement('flt-picture'));
     testFontFeatures(canvas);
     return takeScreenshot(canvas, bounds, 'canvas_paragraph_font_features_dom');
   });
@@ -491,14 +491,14 @@ void testMain() async {
 
   test('background style', () {
     const Rect bounds = Rect.fromLTWH(0, 0, 300, 200);
-    final canvas = BitmapCanvas(bounds, RenderStrategy());
+    final BitmapCanvas canvas = BitmapCanvas(bounds, RenderStrategy());
     testBackgroundStyle(canvas);
     return takeScreenshot(canvas, bounds, 'canvas_paragraph_background_style');
   });
 
   test('background style (DOM)', () {
     const Rect bounds = Rect.fromLTWH(0, 0, 300, 200);
-    final canvas = DomCanvas(domRenderer.createElement('flt-picture'));
+    final DomCanvas canvas = DomCanvas(domRenderer.createElement('flt-picture'));
     testBackgroundStyle(canvas);
     return takeScreenshot(canvas, bounds, 'canvas_paragraph_background_style_dom');
   });

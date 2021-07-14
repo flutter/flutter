@@ -180,7 +180,7 @@ class PersistedSurfaceException implements Exception {
 bool debugAssertSurfaceState(
     PersistedSurface surface, PersistedSurfaceState state1,
     [PersistedSurfaceState? state2, PersistedSurfaceState? state3]) {
-  final List<PersistedSurfaceState?> validStates = [state1, state2, state3];
+  final List<PersistedSurfaceState?> validStates = <PersistedSurfaceState?>[state1, state2, state3];
 
   if (validStates.contains(surface.state)) {
     return true;

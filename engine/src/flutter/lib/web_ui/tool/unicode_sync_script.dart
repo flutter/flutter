@@ -305,7 +305,7 @@ class PropertyCollection {
         .toList();
     // Insert the default property if it doesn't exist.
     final EnumValue? found = enumCollection.values.cast<EnumValue?>().firstWhere(
-      (property) => property!.name == defaultProperty,
+      (EnumValue? property) => property!.name == defaultProperty,
       orElse: () => null,
     );
     if (found == null) {

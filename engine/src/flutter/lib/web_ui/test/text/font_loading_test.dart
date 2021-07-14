@@ -93,7 +93,7 @@ void testMain() async {
       window.onPlatformMessage = (String name, ByteData? data,
           ui.PlatformMessageResponseCallback? callback) {
         actualName = name;
-        final buffer = data!.buffer;
+        final ByteBuffer buffer = data!.buffer;
         final Uint8List list =
             buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
         message = utf8.decode(list);
@@ -103,7 +103,7 @@ void testMain() async {
           responseType: 'arraybuffer');
       await ui.loadFontFromList(Uint8List.view(response.response),
           fontFamily: 'Blehm');
-      final Completer<void> completer = Completer();
+      final Completer<void> completer = Completer<void>();
       html.window.requestAnimationFrame( (_) { completer.complete(); } );
       await(completer.future);
       window.onPlatformMessage = oldHandler;

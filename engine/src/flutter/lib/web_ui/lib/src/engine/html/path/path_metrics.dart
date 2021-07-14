@@ -56,7 +56,7 @@ class _SurfacePathMeasure {
   final double resScale;
   final PathRef _path;
   PathIterator _pathIterator;
-  final List<_PathContourMeasure> _contours = [];
+  final List<_PathContourMeasure> _contours = <_PathContourMeasure>[];
 
   // If the contour ends with a call to [Path.close] (which may
   // have been implied when using [Path.addRect])
@@ -138,7 +138,7 @@ class _PathContourMeasure {
 
   final PathRef pathRef;
   int _verbEndIndex = 0;
-  final List<_PathSegment> _segments = [];
+  final List<_PathSegment> _segments = <_PathSegment>[];
   // Allocate buffer large enough for returning cubic curve chop result.
   // 2 floats for each coordinate x (start, end & control point 1 & 2).
   static final Float32List _buffer = Float32List(8);
@@ -152,7 +152,7 @@ class _PathContourMeasure {
   bool _isClosed = false;
 
   ui.Tangent? getTangentForOffset(double distance) {
-    final segmentIndex = _segmentIndexAtDistance(distance);
+    final int segmentIndex = _segmentIndexAtDistance(distance);
     if (segmentIndex == -1) {
       return null;
     }
@@ -297,8 +297,9 @@ class _PathContourMeasure {
       // actually made it larger, since a very small delta might be > 0, but
       // still have no effect on distance (if distance >>> delta).
       if (distance > prevDistance) {
-        _segments
-            .add(_PathSegment(SPath.kLineVerb, distance, [fromX, fromY, x, y]));
+        _segments.add(
+          _PathSegment(SPath.kLineVerb, distance, <double>[fromX, fromY, x, y]),
+        );
       }
     };
     int verb = 0;

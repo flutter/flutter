@@ -119,7 +119,7 @@ class FontFallbackData {
     final List<int> codeUnits = runesToCheck.toList();
 
     List<SkFont> fonts = <SkFont>[];
-    for (var font in fontFamilies) {
+    for (String font in fontFamilies) {
       List<SkFont>? typefacesForFamily =
           skiaFontCollection.familyToFontMap[font];
       if (typefacesForFamily != null) {
@@ -136,7 +136,7 @@ class FontFallbackData {
       }
     }
 
-    if (codeUnitsSupported.any((x) => !x)) {
+    if (codeUnitsSupported.any((bool x) => !x)) {
       List<int> missingCodeUnits = <int>[];
       for (int i = 0; i < codeUnitsSupported.length; i++) {
         if (!codeUnitsSupported[i]) {
@@ -476,7 +476,7 @@ Set<NotoFont> findMinimumFontsForCodeUnits(
   while (codeUnits.isNotEmpty) {
     int maxCodeUnitsCovered = 0;
     bestFonts.clear();
-    for (var font in fonts) {
+    for (NotoFont font in fonts) {
       int codeUnitsCovered = 0;
       for (int codeUnit in codeUnits) {
         if (font.resolvedFont?.tree.containsDeep(codeUnit) == true) {
@@ -499,7 +499,7 @@ Set<NotoFont> findMinimumFontsForCodeUnits(
     // on locale. Otherwise just choose the first font.
     NotoFont bestFont = bestFonts.first;
     if (bestFonts.length > 1) {
-      if (bestFonts.every((font) => _cjkFonts.contains(font))) {
+      if (bestFonts.every((NotoFont font) => _cjkFonts.contains(font))) {
         if (language == 'zh-Hans' ||
             language == 'zh-CN' ||
             language == 'zh-SG' ||
@@ -524,7 +524,7 @@ Set<NotoFont> findMinimumFontsForCodeUnits(
         }
       }
     }
-    codeUnits.removeWhere((codeUnit) {
+    codeUnits.removeWhere((int codeUnit) {
       return bestFont.resolvedFont!.tree.containsDeep(codeUnit);
     });
     minimumFonts.addAll(bestFonts);

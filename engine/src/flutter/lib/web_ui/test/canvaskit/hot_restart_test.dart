@@ -26,7 +26,7 @@ void testMain() {
           assetManager: WebOnlyMockAssetManager());
       expect(windowFlutterCanvasKit, isNotNull);
 
-      var firstCanvasKitInstance = windowFlutterCanvasKit;
+      CanvasKit? firstCanvasKitInstance = windowFlutterCanvasKit;
 
       // Triggers a reset of the CanvasKit script element.
       DomRenderer();

@@ -40,14 +40,14 @@ class SkiaFontCollection {
     fontProvider = canvasKit.TypefaceFontProvider.Make();
     familyToFontMap.clear();
 
-    for (var font in _registeredFonts) {
+    for (RegisteredFont font in _registeredFonts) {
       fontProvider!.registerFont(font.bytes, font.family);
       familyToFontMap
           .putIfAbsent(font.family, () => <SkFont>[])
           .add(SkFont(font.typeface));
     }
 
-    for (var font in FontFallbackData.instance.registeredFallbackFonts) {
+    for (RegisteredFont font in FontFallbackData.instance.registeredFallbackFonts) {
       fontProvider!.registerFont(font.bytes, font.family);
       familyToFontMap
           .putIfAbsent(font.family, () => <SkFont>[])
@@ -162,7 +162,7 @@ class SkiaFontCollection {
   }
 
   String? _readActualFamilyName(Uint8List bytes) {
-    final SkFontMgr tmpFontMgr = canvasKit.FontMgr.FromData([bytes])!;
+    final SkFontMgr tmpFontMgr = canvasKit.FontMgr.FromData(<Uint8List>[bytes])!;
     String? actualFamily = tmpFontMgr.getFamilyName(0);
     tmpFontMgr.delete();
     return actualFamily;
@@ -195,6 +195,6 @@ class RegisteredFont {
   RegisteredFont(this.bytes, this.family, this.typeface) {
     // This is a hack which causes Skia to cache the decoded font.
     SkFont skFont = SkFont(typeface);
-    skFont.getGlyphBounds([0], null, null);
+    skFont.getGlyphBounds(<int>[0], null, null);
   }
 }

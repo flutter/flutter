@@ -52,7 +52,7 @@ void testMain() async {
 
   test('basic bidi starting with ltr', () {
     const Rect bounds = Rect.fromLTWH(0, 0, 340, 600);
-    final canvas = BitmapCanvas(bounds, RenderStrategy());
+    final BitmapCanvas canvas = BitmapCanvas(bounds, RenderStrategy());
 
     const double height = 40;
 
@@ -91,7 +91,7 @@ void testMain() async {
 
   test('basic bidi starting with ltr (DOM)', () {
     const Rect bounds = Rect.fromLTWH(0, 0, 340, 600);
-    final canvas = DomCanvas(domRenderer.createElement('flt-picture'));
+    final DomCanvas canvas = DomCanvas(domRenderer.createElement('flt-picture'));
 
     const double height = 40;
 
@@ -156,7 +156,7 @@ void testMain() async {
 
   test('basic bidi starting with rtl', () {
     const Rect bounds = Rect.fromLTWH(0, 0, 340, 600);
-    final canvas = BitmapCanvas(bounds, RenderStrategy());
+    final BitmapCanvas canvas = BitmapCanvas(bounds, RenderStrategy());
 
     const double height = 40;
 
@@ -195,7 +195,7 @@ void testMain() async {
 
   test('basic bidi starting with rtl (DOM)', () {
     const Rect bounds = Rect.fromLTWH(0, 0, 340, 600);
-    final canvas = DomCanvas(domRenderer.createElement('flt-picture'));
+    final DomCanvas canvas = DomCanvas(domRenderer.createElement('flt-picture'));
 
     const double height = 40;
 
@@ -264,7 +264,7 @@ void testMain() async {
 
   test('multiline bidi', () {
     final Rect bounds = Rect.fromLTWH(0, 0, 400, 500);
-    final canvas = BitmapCanvas(bounds, RenderStrategy());
+    final BitmapCanvas canvas = BitmapCanvas(bounds, RenderStrategy());
 
     const double height = 95;
 
@@ -303,7 +303,7 @@ void testMain() async {
 
   test('multiline bidi (DOM)', () {
     const Rect bounds = Rect.fromLTWH(0, 0, 400, 500);
-    final canvas = DomCanvas(domRenderer.createElement('flt-picture'));
+    final DomCanvas canvas = DomCanvas(domRenderer.createElement('flt-picture'));
 
     const double height = 95;
 
@@ -357,7 +357,7 @@ void testMain() async {
     // $_rtlWord2 34 ipsum
     // dolor 56
     // '''
-    final CanvasParagraph paragraph = rich(paragraphStyle, (builder) {
+    final CanvasParagraph paragraph = rich(paragraphStyle, (CanvasParagraphBuilder builder) {
       builder.pushStyle(EngineTextStyle.only(color: blue));
       builder.addText('Lorem ');
       builder.pushStyle(EngineTextStyle.only(color: green));
@@ -378,7 +378,7 @@ void testMain() async {
 
   test('multi span bidi', () {
     const Rect bounds = Rect.fromLTWH(0, 0, 400, 900);
-    final canvas = BitmapCanvas(bounds, RenderStrategy());
+    final BitmapCanvas canvas = BitmapCanvas(bounds, RenderStrategy());
 
     const double height = 95;
 
@@ -417,7 +417,7 @@ void testMain() async {
 
   test('multi span bidi (DOM)', () {
     const Rect bounds = Rect.fromLTWH(0, 0, 400, 900);
-    final canvas = DomCanvas(domRenderer.createElement('flt-picture'));
+    final DomCanvas canvas = DomCanvas(domRenderer.createElement('flt-picture'));
 
     const double height = 95;
 
@@ -497,7 +497,7 @@ void testMain() async {
 
   test('bidi with selection', () {
     const Rect bounds = Rect.fromLTWH(0, 0, 400, 500);
-    final canvas = BitmapCanvas(bounds, RenderStrategy());
+    final BitmapCanvas canvas = BitmapCanvas(bounds, RenderStrategy());
 
     const double height = 95;
 
@@ -536,7 +536,7 @@ void testMain() async {
 
   test('bidi with selection (DOM)', () {
     const Rect bounds = Rect.fromLTWH(0, 0, 400, 500);
-    final canvas = DomCanvas(domRenderer.createElement('flt-picture'));
+    final DomCanvas canvas = DomCanvas(domRenderer.createElement('flt-picture'));
 
     const double height = 95;
 

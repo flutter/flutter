@@ -18,7 +18,7 @@ import '../util.dart';
 /// whenever possible.
 ///
 /// Currently implemented by [CkImageFilter] and [CkColorFilter].
-abstract class CkManagedSkImageFilterConvertible<T extends Object>
+abstract class CkManagedSkImageFilterConvertible
     implements ui.ImageFilter {
   ManagedSkiaObject<SkImageFilter> get imageFilter;
 }
@@ -27,7 +27,7 @@ abstract class CkManagedSkImageFilterConvertible<T extends Object>
 ///
 /// Currently only supports `blur`, `matrix`, and ColorFilters.
 abstract class CkImageFilter extends ManagedSkiaObject<SkImageFilter>
-    implements CkManagedSkImageFilterConvertible<SkImageFilter> {
+    implements CkManagedSkImageFilterConvertible {
   factory CkImageFilter.blur(
       {required double sigmaX,
       required double sigmaY,

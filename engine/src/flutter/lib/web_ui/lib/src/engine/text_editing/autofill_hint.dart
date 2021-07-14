@@ -16,7 +16,7 @@ class BrowserAutofillHints {
   final Map<String, String> _flutterToEngineMap;
 
   BrowserAutofillHints._()
-      : _flutterToEngineMap = {
+      : _flutterToEngineMap = <String, String>{
           'birthday': 'bday',
           'birthdayDay': 'bday-day',
           'birthdayMonth': 'bday-month',

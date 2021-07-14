@@ -138,7 +138,7 @@ class IosSafariArgParser extends BrowserArgParser {
 
   @override
   void populateOptions(ArgParser argParser) {
-    final pinnedIosVersion =
+    final String pinnedIosVersion =
         '${_pinnedIosMajorVersion}.${_pinnedIosMinorVersion}';
     argParser
       ..addOption('version',

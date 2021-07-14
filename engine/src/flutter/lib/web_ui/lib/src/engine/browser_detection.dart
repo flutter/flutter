@@ -189,7 +189,7 @@ OperatingSystem detectOperatingSystem({
 ///
 /// These devices tend to behave differently on many core issues such as events,
 /// screen readers, input devices.
-const Set<OperatingSystem> _desktopOperatingSystems = {
+const Set<OperatingSystem> _desktopOperatingSystems = <OperatingSystem>{
   OperatingSystem.macOs,
   OperatingSystem.linux,
   OperatingSystem.windows,

@@ -33,7 +33,7 @@ void testMain() async {
     final SurfacePaint paint = SurfacePaint()..shader = Gradient.linear(
         Offset(shaderRect.left, shaderRect.top),
         Offset(shaderRect.right, shaderRect.bottom),
-        [Color(0xFFcfdfd2), Color(0xFF042a85)]);
+        <Color>[Color(0xFFcfdfd2), Color(0xFF042a85)]);
     rc.drawRect(shaderRect, paint);
     expect(rc.renderStrategy.hasArbitraryPaint, isTrue);
     await canvasScreenshot(rc, 'linear_gradient_rect',
@@ -44,7 +44,7 @@ void testMain() async {
   test('Should draw linear gradient with transform.', () async {
     final RecordingCanvas rc =
         RecordingCanvas(const Rect.fromLTRB(0, 0, 500, 500));
-    List<double> angles = [0.0, 90.0, 180.0];
+    List<double> angles = <double>[0.0, 90.0, 180.0];
     double yOffset = 0;
     for (double angle in angles) {
       final Rect shaderRect = Rect.fromLTWH(50, 50 + yOffset, 100, 100);
@@ -59,7 +59,7 @@ void testMain() async {
         ..shader = Gradient.linear(
             Offset(shaderRect.left, shaderRect.top),
             Offset(shaderRect.right, shaderRect.bottom),
-            [Color(0xFFFF0000), Color(0xFF042a85)],
+            <Color>[Color(0xFFFF0000), Color(0xFF042a85)],
             null,
             TileMode.clamp,
             matrix.toFloat64());
@@ -82,7 +82,7 @@ void testMain() async {
     final SurfacePaint paint = SurfacePaint()..shader = Gradient.linear(
         Offset(shaderRect.left, shaderRect.top),
         Offset(shaderRect.right, shaderRect.bottom),
-        [Color(0xFFcfdfd2), Color(0xFF042a85)]);
+        <Color>[Color(0xFFcfdfd2), Color(0xFF042a85)]);
     rc.drawRRect(RRect.fromRectAndRadius(shaderRect, Radius.circular(16)), paint);
     expect(rc.renderStrategy.hasArbitraryPaint, isTrue);
     await canvasScreenshot(rc, 'linear_gradient_rounded_rect',
@@ -93,7 +93,7 @@ void testMain() async {
   test('Should draw tiled repeated linear gradient with transform.', () async {
     final RecordingCanvas rc =
     RecordingCanvas(const Rect.fromLTRB(0, 0, 500, 500));
-    List<double> angles = [0.0, 30.0, 210.0];
+    List<double> angles = <double>[0.0, 30.0, 210.0];
     double yOffset = 0;
     for (double angle in angles) {
       final Rect shaderRect = Rect.fromLTWH(50, 50 + yOffset, 100, 100);
@@ -101,7 +101,7 @@ void testMain() async {
         ..shader = Gradient.linear(
             Offset(shaderRect.left, shaderRect.top),
             Offset(shaderRect.left + shaderRect.width / 2, shaderRect.top),
-            [Color(0xFFFF0000), Color(0xFF042a85)],
+            <Color>[Color(0xFFFF0000), Color(0xFF042a85)],
             null,
             TileMode.repeated,
             Matrix4
@@ -120,7 +120,7 @@ void testMain() async {
   test('Should draw tiled mirrored linear gradient with transform.', () async {
     final RecordingCanvas rc =
     RecordingCanvas(const Rect.fromLTRB(0, 0, 500, 500));
-    List<double> angles = [0.0, 30.0, 210.0];
+    List<double> angles = <double>[0.0, 30.0, 210.0];
     double yOffset = 0;
     for (double angle in angles) {
       final Rect shaderRect = Rect.fromLTWH(50, 50 + yOffset, 100, 100);
@@ -128,7 +128,7 @@ void testMain() async {
         ..shader = Gradient.linear(
             Offset(shaderRect.left, shaderRect.top),
             Offset(shaderRect.left + shaderRect.width / 2, shaderRect.top),
-            [Color(0xFFFF0000), Color(0xFF042a85)],
+            <Color>[Color(0xFFFF0000), Color(0xFF042a85)],
             null,
             TileMode.mirror,
             Matrix4

@@ -29,7 +29,7 @@ void testMain() {
     test('embeds interactive platform views', () async {
       ui.platformViewRegistry.registerViewFactory(
         'test-platform-view',
-        (viewId) => html.DivElement()..id = 'view-0',
+        (int viewId) => html.DivElement()..id = 'view-0',
       );
       await _createPlatformView(0, 'test-platform-view');
 
@@ -43,10 +43,10 @@ void testMain() {
       // The platform view is now split in two parts. The contents live
       // as a child of the glassPane, and the slot lives in the glassPane
       // shadow root. The slot is the one that has pointer events auto.
-      final contents = domRenderer.glassPaneElement!.querySelector('#view-0')!;
-      final slot = domRenderer.sceneElement!.querySelector('slot')!;
-      final contentsHost = contents.parent!;
-      final slotHost = slot.parent!;
+      final html.Element contents = domRenderer.glassPaneElement!.querySelector('#view-0')!;
+      final html.Element slot = domRenderer.sceneElement!.querySelector('slot')!;
+      final html.Element contentsHost = contents.parent!;
+      final html.Element slotHost = slot.parent!;
 
       expect(contents, isNotNull,
           reason: 'The view from the factory is injected in the DOM.');
@@ -63,7 +63,7 @@ void testMain() {
     test('clips platform views with RRects', () async {
       ui.platformViewRegistry.registerViewFactory(
         'test-platform-view',
-        (viewId) => html.DivElement()..id = 'view-0',
+        (int viewId) => html.DivElement()..id = 'view-0',
       );
       await _createPlatformView(0, 'test-platform-view');
 
@@ -100,7 +100,7 @@ void testMain() {
     test('correctly transforms platform views', () async {
       ui.platformViewRegistry.registerViewFactory(
         'test-platform-view',
-        (viewId) => html.DivElement()..id = 'view-0',
+        (int viewId) => html.DivElement()..id = 'view-0',
       );
       await _createPlatformView(0, 'test-platform-view');
 
@@ -145,7 +145,7 @@ void testMain() {
       window.debugOverrideDevicePixelRatio(4);
       ui.platformViewRegistry.registerViewFactory(
         'test-platform-view',
-        (viewId) => html.DivElement()..id = 'view-0',
+        (int viewId) => html.DivElement()..id = 'view-0',
       );
       await _createPlatformView(0, 'test-platform-view');
 
@@ -172,7 +172,7 @@ void testMain() {
       window.debugOverrideDevicePixelRatio(4);
       ui.platformViewRegistry.registerViewFactory(
         'test-platform-view',
-        (viewId) => html.DivElement()..id = 'view-0',
+        (int viewId) => html.DivElement()..id = 'view-0',
       );
       await _createPlatformView(0, 'test-platform-view');
 
@@ -213,7 +213,7 @@ void testMain() {
       for (int i = 0; i < HtmlViewEmbedder.maximumOverlaySurfaces * 2; i++) {
         ui.platformViewRegistry.registerViewFactory(
           'test-platform-view',
-          (viewId) => html.DivElement()..id = 'view-$i',
+          (int viewId) => html.DivElement()..id = 'view-$i',
         );
         await _createPlatformView(i, 'test-platform-view');
         platformViewIds.add(i);
@@ -284,7 +284,7 @@ void testMain() {
       //   Render: deleted platform views.
       //   Expect: error.
       for (final int id in platformViewIds) {
-        final codec = StandardMethodCodec();
+        final StandardMethodCodec codec = StandardMethodCodec();
         final Completer<void> completer = Completer<void>();
         ui.window.sendPlatformMessage(
           'flutter/platform_views',
@@ -318,7 +318,7 @@ void testMain() {
     test('embeds and disposes of a platform view', () async {
       ui.platformViewRegistry.registerViewFactory(
         'test-platform-view',
-        (viewId) => html.DivElement()..id = 'view-0',
+        (int viewId) => html.DivElement()..id = 'view-0',
       );
       await _createPlatformView(0, 'test-platform-view');
 
@@ -358,7 +358,7 @@ void testMain() {
     test('removed the DOM node of an unrendered platform view', () async {
       ui.platformViewRegistry.registerViewFactory(
         'test-platform-view',
-        (viewId) => html.DivElement()..id = 'view-0',
+        (int viewId) => html.DivElement()..id = 'view-0',
       );
       await _createPlatformView(0, 'test-platform-view');
 
@@ -416,7 +416,7 @@ void testMain() {
         () async {
       ui.platformViewRegistry.registerViewFactory(
         'test-platform-view',
-        (viewId) => html.DivElement()..id = 'test-view',
+        (int viewId) => html.DivElement()..id = 'test-view',
       );
       await _createPlatformView(0, 'test-platform-view');
 
@@ -454,7 +454,7 @@ void testMain() {
 
 // Sends a platform message to create a Platform View with the given id and viewType.
 Future<void> _createPlatformView(int id, String viewType) {
-  final completer = Completer<void>();
+  final Completer<void> completer = Completer<void>();
   window.sendPlatformMessage(
     'flutter/platform_views',
     codec.encodeMethodCall(MethodCall(
@@ -470,7 +470,7 @@ Future<void> _createPlatformView(int id, String viewType) {
 }
 
 Future<void> _disposePlatformView(int id) {
-  final completer = Completer<void>();
+  final Completer<void> completer = Completer<void>();
   window.sendPlatformMessage(
     'flutter/platform_views',
     codec.encodeMethodCall(MethodCall('dispose', id)),

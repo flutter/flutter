@@ -110,7 +110,7 @@ void testMain() async {
       paint.color = ui.Color(0xFF6500C9);
       rc.drawRawPoints(
         ui.PointMode.points,
-        Float32List.fromList([-10, -10, -10, 10, 10, -10, 10, 10]),
+        Float32List.fromList(<double>[-10, -10, -10, 10, 10, -10, 10, 10]),
         paint,
       );
 

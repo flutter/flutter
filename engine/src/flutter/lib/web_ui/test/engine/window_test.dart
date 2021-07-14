@@ -270,7 +270,7 @@ void testMain() {
       window.sendPlatformMessage(
         'flutter/debug-echo',
         inputData,
-        (outputData) {
+        (ByteData? outputData) {
           expect(Zone.current, innerZone);
           completer.complete();
         },
@@ -288,7 +288,7 @@ void testMain() {
     window.sendPlatformMessage(
       'flutter/__unknown__channel__',
       null,
-      (outputData) {
+      (ByteData? outputData) {
         responded = true;
         expect(outputData, isNull);
       },
@@ -311,7 +311,7 @@ void testMain() {
     window.sendPlatformMessage(
       'flutter/platform',
           inputData,
-          (outputData) {
+          (ByteData? outputData) {
         completer.complete(true);
       },
     );
@@ -355,7 +355,7 @@ void testMain() {
       window.sendPlatformMessage(
         'flutter/service_worker',
         ByteData(0),
-        (outputData) { },
+        (ByteData? outputData) { },
       );
     });
 

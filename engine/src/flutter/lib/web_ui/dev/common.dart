@@ -221,7 +221,7 @@ class DevNull implements StringSink {
   void write(Object? obj) {}
 
   @override
-  void writeAll(Iterable objects, [String separator = ""]) {}
+  void writeAll(Iterable<dynamic> objects, [String separator = ""]) {}
 
   @override
   void writeCharCode(int charCode) {}

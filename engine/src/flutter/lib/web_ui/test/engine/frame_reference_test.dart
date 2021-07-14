@@ -13,14 +13,14 @@ void main() {
 void testMain() {
   group('CrossFrameCache', () {
     test('Reuse returns no object when cache empty', () {
-      final CrossFrameCache<TestItem> cache = CrossFrameCache();
+      final CrossFrameCache<TestItem> cache = CrossFrameCache<TestItem>();
       cache.commitFrame();
       TestItem? requestedItem = cache.reuse('item1');
       expect(requestedItem, null);
     });
 
     test('Reuses object across frames', () {
-      final CrossFrameCache<TestItem> cache = CrossFrameCache();
+      final CrossFrameCache<TestItem> cache = CrossFrameCache<TestItem>();
       final TestItem testItem1 = TestItem('item1');
       cache.cache(testItem1.label, testItem1);
       cache.commitFrame();
@@ -31,7 +31,7 @@ void testMain() {
     });
 
     test('Reuses objects that have same key across frames', () {
-      final CrossFrameCache<TestItem> cache = CrossFrameCache();
+      final CrossFrameCache<TestItem> cache = CrossFrameCache<TestItem>();
       final TestItem testItem1 = TestItem('sameLabel');
       final TestItem testItem2 = TestItem('sameLabel');
       final TestItem testItemX = TestItem('X');
@@ -48,7 +48,7 @@ void testMain() {
     });
 
     test('Values don\'t survive beyond next frame', () {
-      final CrossFrameCache<TestItem> cache = CrossFrameCache();
+      final CrossFrameCache<TestItem> cache = CrossFrameCache<TestItem>();
       final TestItem testItem1 = TestItem('item1');
       cache.cache(testItem1.label, testItem1);
       cache.commitFrame();
@@ -58,8 +58,8 @@ void testMain() {
     });
 
     test('Values are evicted when not reused', () {
-      final Set<TestItem> _evictedItems = {};
-      final CrossFrameCache<TestItem> cache = CrossFrameCache();
+      final Set<TestItem> _evictedItems = <TestItem>{};
+      final CrossFrameCache<TestItem> cache = CrossFrameCache<TestItem>();
       final TestItem testItem1 = TestItem('item1');
       final TestItem testItem2 = TestItem('item2');
       cache.cache(testItem1.label, testItem1, (TestItem item) {_evictedItems.add(item);});

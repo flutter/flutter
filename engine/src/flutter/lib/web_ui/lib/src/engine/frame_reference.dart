@@ -66,8 +66,8 @@ class CrossFrameCache<T> {
   }
 
   void _addToCache(String key, _CrossFrameCacheItem<T> item) {
-    _cache ??= {};
-    (_cache![key] ??= [])..add(item);
+    _cache ??= <String, List<_CrossFrameCacheItem<T>>>{};
+    (_cache![key] ??= <_CrossFrameCacheItem<T>>[])..add(item);
   }
 
   /// Given a key, consumes an item that has been cached in a prior frame.

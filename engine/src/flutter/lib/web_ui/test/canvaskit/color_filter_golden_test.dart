@@ -48,7 +48,7 @@ void testMain() {
       builder.addPicture(ui.Offset.zero, redCircle);
 
       // Apply a "greyscale" color filter.
-      builder.pushColorFilter(ui.ColorFilter.matrix([
+      builder.pushColorFilter(ui.ColorFilter.matrix(<double>[
         0.2126, 0.7152, 0.0722, 0, 0, //
         0.2126, 0.7152, 0.0722, 0, 0, //
         0.2126, 0.7152, 0.0722, 0, 0, //
