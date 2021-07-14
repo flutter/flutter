@@ -462,15 +462,38 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// The [pointerEventSource] is set as the `source` parameter of
   /// [handlePointerEventForSource] and can be used in the immediate enclosing
   /// [dispatchEvent].
+  ///
+  /// When [handlePointerEvent] is called directly, [pointerEventSource]
+  /// is [TestBindingEventSource.device].
   TestBindingEventSource get pointerEventSource => _pointerEventSource;
   TestBindingEventSource _pointerEventSource = TestBindingEventSource.device;
 
   /// Dispatch an event to the targets found by a hit test on its position,
   /// and remember its source as [pointerEventSource].
   ///
-  /// This method sets [pointerEventSource] to `source`, runs
+  /// This method sets [pointerEventSource] to `source`, forwards the call to
   /// [handlePointerEvent], then resets [pointerEventSource] to the previous
   /// value.
+  ///
+  /// If `source` is [TestBindingEventSource.device], then the `event`
+  /// is based in the global coordinate system and the event is likely
+  /// triggered by the user physically interacting with the screen during a
+  /// live test on a real device (see [LiveTestWidgetsFlutterBinding]).
+  ///
+  /// If `source` is [TestBindingEventSource.test], then the `event`
+  /// is based in the local coordinate system and the event is likely
+  /// triggered by programatically simulated pointer event, such as:
+  ///
+  ///  * [WidgetController.tap] and alike methods, as well as directly using
+  ///    [TestGesture]. They are usually used in
+  ///    [AutomatedTestWidgetsFlutterBinding] but sometimes in live tests too.
+  ///  * [WidgetController.timedDrag] and alike methods. They are usually used
+  ///    in macrobenchmarks.
+  ///
+  /// See also:
+  ///
+  ///  * [localToGlobal] and [globalToLocal] for transforming between coordinate
+  ///    systems.
   void handlePointerEventForSource(
     PointerEvent event, {
     TestBindingEventSource source = TestBindingEventSource.device,
@@ -482,7 +505,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// to the previous value.
   @protected
   void withPointerEventSource(TestBindingEventSource source, VoidCallback task) {
-    final TestBindingEventSource previousSource = source;
+    final TestBindingEventSource previousSource = _pointerEventSource;
     _pointerEventSource = source;
     try {
       task();
@@ -1497,11 +1520,15 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   /// Events dispatched by [TestGesture] are not affected by this.
   HitTestDispatcher? deviceEventDispatcher;
 
-
   /// Dispatch an event to the targets found by a hit test on its position.
   ///
-  /// Apart from forwarding the event to [GestureBinding.dispatchEvent],
-  /// This also paint all events that's down on the screen.
+  /// If the [pointerEventSource] is [TestBindingEventSource.test], then
+  /// the event is forwarded to [GestureBinding.dispatchEvent] as normal,
+  /// and down events are also painted on the screen.
+  ///
+  /// If the [pointerEventSource] is [TestBindingEventSource.device], then
+  /// the event, after being transformed to the local coordinate system, is
+  /// forwarded to [deviceEventDispatcher].
   @override
   void handlePointerEvent(PointerEvent event) {
     switch (pointerEventSource) {
@@ -1523,8 +1550,9 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         break;
       case TestBindingEventSource.device:
         if (deviceEventDispatcher != null) {
+          final PointerEvent localEvent = event.copyWith(position: globalToLocal(event.position));
           withPointerEventSource(TestBindingEventSource.device,
-            () => super.handlePointerEvent(event)
+            () => super.handlePointerEvent(localEvent)
           );
         }
         break;
@@ -1538,9 +1566,10 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         super.dispatchEvent(event, hitTestResult);
         break;
       case TestBindingEventSource.device:
-        assert(hitTestResult != null);
+        assert(hitTestResult != null || event is PointerAddedEvent || event is PointerRemovedEvent);
         assert(deviceEventDispatcher != null);
-        deviceEventDispatcher!.dispatchEvent(event, hitTestResult!);
+        if (hitTestResult != null)
+          deviceEventDispatcher!.dispatchEvent(event, hitTestResult);
         break;
     }
   }
@@ -1773,15 +1802,6 @@ class _LiveTestRenderView extends RenderView {
     _label!.text = TextSpan(text: value, style: _labelStyle);
     _label!.layout();
     onNeedPaint();
-  }
-
-  @override
-  bool hitTest(HitTestResult result, { required Offset position }) {
-    final Matrix4 transform = configuration.toHitTestMatrix();
-    final double det = transform.invert();
-    assert(det != 0.0);
-    position = MatrixUtils.transformPoint(transform, position);
-    return super.hitTest(result, position: position);
   }
 
   @override
