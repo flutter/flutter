@@ -676,16 +676,16 @@ class Icons {
   static const IconData sixty_fps_outlined = IconData(0xee1a, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">60fps_select</i> &#x2014; material icon named "60fps select".
-  static const IconData thirty_fps_select = IconData(0xe029, fontFamily: 'MaterialIcons');
+  static const IconData sixty_fps_select = IconData(0xe029, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">60fps_select</i> &#x2014; material icon named "60fps select sharp".
-  static const IconData thirty_fps_select_sharp = IconData(0xe728, fontFamily: 'MaterialIcons');
+  static const IconData sixty_fps_select_sharp = IconData(0xe728, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">60fps_select</i> &#x2014; material icon named "60fps select rounded".
-  static const IconData thirty_fps_select_rounded = IconData(0xf508, fontFamily: 'MaterialIcons');
+  static const IconData sixty_fps_select_rounded = IconData(0xf508, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">60fps_select</i> &#x2014; material icon named "60fps select outlined".
-  static const IconData thirty_fps_select_outlined = IconData(0xee1b, fontFamily: 'MaterialIcons');
+  static const IconData sixty_fps_select_outlined = IconData(0xee1b, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">6_ft_apart</i> &#x2014; material icon named "6 ft apart".
   static const IconData six_ft_apart = IconData(0xe02a, fontFamily: 'MaterialIcons');
@@ -19513,64 +19513,64 @@ class Icons {
   static const IconData swipe_outlined = IconData(0xf40c, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">switch_account</i> &#x2014; material icon named "switch account".
-  static const IconData switch__account = IconData(0xe62a, fontFamily: 'MaterialIcons');
+  static const IconData switch_account = IconData(0xe62a, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">switch_account</i> &#x2014; material icon named "switch account sharp".
-  static const IconData switch__account_sharp = IconData(0xed20, fontFamily: 'MaterialIcons');
+  static const IconData switch_account_sharp = IconData(0xed20, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">switch_account</i> &#x2014; material icon named "switch account rounded".
-  static const IconData switch__account_rounded = IconData(0xf01ff, fontFamily: 'MaterialIcons');
+  static const IconData switch_account_rounded = IconData(0xf01ff, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">switch_account</i> &#x2014; material icon named "switch account outlined".
-  static const IconData switch__account_outlined = IconData(0xf40d, fontFamily: 'MaterialIcons');
+  static const IconData switch_account_outlined = IconData(0xf40d, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">switch_camera</i> &#x2014; material icon named "switch camera".
-  static const IconData switch__camera = IconData(0xe62b, fontFamily: 'MaterialIcons');
+  static const IconData switch_camera = IconData(0xe62b, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">switch_camera</i> &#x2014; material icon named "switch camera sharp".
-  static const IconData switch__camera_sharp = IconData(0xed21, fontFamily: 'MaterialIcons');
+  static const IconData switch_camera_sharp = IconData(0xed21, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">switch_camera</i> &#x2014; material icon named "switch camera rounded".
-  static const IconData switch__camera_rounded = IconData(0xf0200, fontFamily: 'MaterialIcons');
+  static const IconData switch_camera_rounded = IconData(0xf0200, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">switch_camera</i> &#x2014; material icon named "switch camera outlined".
-  static const IconData switch__camera_outlined = IconData(0xf40e, fontFamily: 'MaterialIcons');
+  static const IconData switch_camera_outlined = IconData(0xf40e, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">switch_left</i> &#x2014; material icon named "switch left".
-  static const IconData switch__left = IconData(0xe62c, fontFamily: 'MaterialIcons');
+  static const IconData switch_left = IconData(0xe62c, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">switch_left</i> &#x2014; material icon named "switch left sharp".
-  static const IconData switch__left_sharp = IconData(0xed22, fontFamily: 'MaterialIcons');
+  static const IconData switch_left_sharp = IconData(0xed22, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">switch_left</i> &#x2014; material icon named "switch left rounded".
-  static const IconData switch__left_rounded = IconData(0xf0201, fontFamily: 'MaterialIcons');
+  static const IconData switch_left_rounded = IconData(0xf0201, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">switch_left</i> &#x2014; material icon named "switch left outlined".
-  static const IconData switch__left_outlined = IconData(0xf40f, fontFamily: 'MaterialIcons');
+  static const IconData switch_left_outlined = IconData(0xf40f, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">switch_right</i> &#x2014; material icon named "switch right".
-  static const IconData switch__right = IconData(0xe62d, fontFamily: 'MaterialIcons');
+  static const IconData switch_right = IconData(0xe62d, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">switch_right</i> &#x2014; material icon named "switch right sharp".
-  static const IconData switch__right_sharp = IconData(0xed23, fontFamily: 'MaterialIcons');
+  static const IconData switch_right_sharp = IconData(0xed23, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">switch_right</i> &#x2014; material icon named "switch right rounded".
-  static const IconData switch__right_rounded = IconData(0xf0202, fontFamily: 'MaterialIcons');
+  static const IconData switch_right_rounded = IconData(0xf0202, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">switch_right</i> &#x2014; material icon named "switch right outlined".
-  static const IconData switch__right_outlined = IconData(0xf410, fontFamily: 'MaterialIcons');
+  static const IconData switch_right_outlined = IconData(0xf410, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">switch_video</i> &#x2014; material icon named "switch video".
-  static const IconData switch__video = IconData(0xe62e, fontFamily: 'MaterialIcons');
+  static const IconData switch_video = IconData(0xe62e, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">switch_video</i> &#x2014; material icon named "switch video sharp".
-  static const IconData switch__video_sharp = IconData(0xed24, fontFamily: 'MaterialIcons');
+  static const IconData switch_video_sharp = IconData(0xed24, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">switch_video</i> &#x2014; material icon named "switch video rounded".
-  static const IconData switch__video_rounded = IconData(0xf0203, fontFamily: 'MaterialIcons');
+  static const IconData switch_video_rounded = IconData(0xf0203, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">switch_video</i> &#x2014; material icon named "switch video outlined".
-  static const IconData switch__video_outlined = IconData(0xf411, fontFamily: 'MaterialIcons');
+  static const IconData switch_video_outlined = IconData(0xf411, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">sync</i> &#x2014; material icon named "sync".
   static const IconData sync = IconData(0xe62f, fontFamily: 'MaterialIcons');
