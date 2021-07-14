@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   setUp(() {
     WidgetsFlutterBinding.ensureInitialized();
-    WidgetsBinding.instance!.resetEpoch();
+    WidgetsBinding.instance.resetEpoch();
   });
 
   test('AnimationController with mutating listener', () {
