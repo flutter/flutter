@@ -834,12 +834,24 @@ void main() {
       ),
     );
 
-    final Offset textfieldStart = tester.getTopLeft(find.byKey(const Key('field0')));
+    final EditableText editableTextWidget = tester.widget(find.byType(EditableText));
+    final EditableTextState editableTextState = tester.state(find.byType(EditableText));
 
-    await tester.longPressAt(textfieldStart + const Offset(50.0, 2.0));
+    // Double tap to select the first word.
+    const int index = 4;
+    await tester.tapAt(textOffsetToPosition(tester, index));
     await tester.pump(const Duration(milliseconds: 50));
-    await tester.tapAt(textfieldStart + const Offset(100.0, 107.0));
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.tapAt(textOffsetToPosition(tester, index));
+    await tester.pumpAndSettle();
+    expect(editableTextState.selectionOverlay!.handlesAreVisible, isTrue);
+    expect(controller.selection.baseOffset, 0);
+    expect(controller.selection.extentOffset, 7);
+
+    // Use toolbar to select all text.
+    await tester.tap(find.text('Select all'));
+    await tester.pump();
+    expect(controller.selection.baseOffset, 0);
+    expect(controller.selection.extentOffset, controller.text.length);
 
     await expectLater(
       find.byType(MaterialApp),
