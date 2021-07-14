@@ -15,6 +15,581 @@
 version: 1
 transforms:
 
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'buttonColor'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'buttonColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'buttonColor'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'buttonColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'buttonColor'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'buttonColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'accentIconTheme'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'accentIconTheme'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'accentIconTheme'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'accentIconTheme'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'accentIconTheme'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'accentIconTheme'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'accentTextTheme'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'accentTextTheme'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'accentTextTheme'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'accentTextTheme'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'accentTextTheme'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'accentTextTheme'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'accentColorBrightness'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'accentColorBrightness'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'accentColorBrightness'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'accentColorBrightness'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'accentColorBrightness'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'accentColorBrightness'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Migrate to 'ColorScheme.secondary'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      field: 'accentColor'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'rename'
+        newName: 'colorScheme.secondary'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Migrate to 'ColorScheme.secondary'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    oneOf:
+    - if: "accentColor != '' && primarySwatch == '' && colorScheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: 'ColorScheme.fromSwatch().copyWith(secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch == '' && colorScheme ==''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+    - if: "accentColor != '' && primarySwatch != '' && colorScheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: 'ColorScheme.fromSwatch(primarySwatch: {% primarySwatch %}).copyWith(secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch != '' && colorScheme == ''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    - if: "accentColor != '' && primarySwatch == '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch == '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+    - if: "accentColor != '' && primarySwatch != '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(primarySwatch: {% primarySwatch %}, secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch != '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    variables:
+      accentColor:
+        kind: 'fragment'
+        value: 'arguments[accentColor]'
+      primarySwatch:
+        kind: 'fragment'
+        value: 'arguments[primarySwatch]'
+      colorScheme:
+        kind: 'fragment'
+        value: 'arguments[colorScheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Migrate to 'ColorScheme.secondary'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    oneOf:
+    - if: "accentColor != '' && primarySwatch == '' && colorScheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: 'ColorScheme.fromSwatch().copyWith(secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch == '' && colorScheme ==''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+    - if: "accentColor != '' && primarySwatch != '' && colorScheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: 'ColorScheme.fromSwatch(primarySwatch: {% primarySwatch %}).copyWith(secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch != '' && colorScheme == ''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    - if: "accentColor != '' && primarySwatch == '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch == '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+    - if: "accentColor != '' && primarySwatch != '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(primarySwatch: {% primarySwatch %}, secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch != '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    variables:
+      accentColor:
+        kind: 'fragment'
+        value: 'arguments[accentColor]'
+      primarySwatch:
+        kind: 'fragment'
+        value: 'arguments[primarySwatch]'
+      colorScheme:
+        kind: 'fragment'
+        value: 'arguments[colorScheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Migrate to 'ColorScheme.secondary'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    oneOf:
+    - if: "accentColor != '' && primarySwatch == '' && colorScheme == ''"
+      changes:
+        - kind: 'addParameter'
+          index: 56
+          name: 'colorScheme'
+          style: optional_named
+          argumentValue:
+            expression: 'ColorScheme.fromSwatch().copyWith(secondary: {% accentColor %})'
+            requiredIf: "accentColor != '' && primarySwatch == '' && colorScheme ==''"
+        - kind: 'removeParameter'
+          name: 'accentColor'
+    - if: "accentColor != '' && primarySwatch != '' && colorScheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: 'ColorScheme.fromSwatch(primarySwatch: {% primarySwatch %}).copyWith(secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch != '' && colorScheme == ''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    - if: "accentColor != '' && primarySwatch == '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch == '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+    - if: "accentColor != '' && primarySwatch != '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(primarySwatch: {% primarySwatch %}, secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch != '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    variables:
+      accentColor:
+        kind: 'fragment'
+        value: 'arguments[accentColor]'
+      primarySwatch:
+        kind: 'fragment'
+        value: 'arguments[primarySwatch]'
+      colorScheme:
+        kind: 'fragment'
+        value: 'arguments[colorScheme]'
+
+  # Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  - title: "Migrate to 'clipBehavior'"
+    date: 2020-08-20
+    element:
+      uris: [ 'rendering.dart' ]
+      field: 'clipToSize'
+      inClass: 'RenderListWheelViewport'
+    changes:
+      - kind: 'rename'
+        newName: 'clipBehavior'
+
+  # Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  - title: "Migrate to 'clipBehavior'"
+    date: 2020-08-20
+    element:
+      uris: [ 'rendering.dart' ]
+      constructor: ''
+      inClass: 'RenderListWheelViewport'
+    oneOf:
+    - if: "clipToSize == 'true'"
+      changes:
+        - kind: 'addParameter'
+          index: 13
+          name: 'clipBehavior'
+          style: optional_named
+          argumentValue:
+            expression: 'Clip.hardEdge'
+            requiredIf: "clipToSize == 'true'"
+        - kind: 'removeParameter'
+          name: 'clipToSize'
+    - if: "clipToSize == 'false'"
+      changes:
+        - kind: 'addParameter'
+          index: 13
+          name: 'clipBehavior'
+          style: optional_named
+          argumentValue:
+            expression: 'Clip.none'
+            requiredIf: "clipToSize == 'false'"
+        - kind: 'removeParameter'
+          name: 'clipToSize'
+    variables:
+      clipToSize:
+        kind: 'fragment'
+        value: 'arguments[clipToSize]'
+
+  # Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  - title: "Migrate to 'clipBehavior'"
+    date: 2020-08-20
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      field: 'clipToSize'
+      inClass: 'ListWheelViewport'
+    changes:
+    - kind: 'rename'
+      newName: 'clipBehavior'
+
+  # Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  - title: "Migrate to 'clipBehavior'"
+    date: 2020-08-20
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'ListWheelViewport'
+    oneOf:
+    - if: "clipToSize == 'true'"
+      changes:
+      - kind: 'addParameter'
+        index: 13
+        name: 'clipBehavior'
+        style: optional_named
+        argumentValue:
+          expression: 'Clip.hardEdge'
+          requiredIf: "clipToSize == 'true'"
+      - kind: 'removeParameter'
+        name: 'clipToSize'
+    - if: "clipToSize == 'false'"
+      changes:
+      - kind: 'addParameter'
+        index: 13
+        name: 'clipBehavior'
+        style: optional_named
+        argumentValue:
+          expression: 'Clip.none'
+          requiredIf: "clipToSize == 'false'"
+      - kind: 'removeParameter'
+        name: 'clipToSize'
+    variables:
+      clipToSize:
+        kind: 'fragment'
+        value: 'arguments[clipToSize]'
+
+  # Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  - title: "Migrate to 'clipBehavior'"
+    date: 2020-08-20
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      constructor: 'useDelegate'
+      inClass: 'ListWheelScrollView'
+    oneOf:
+    - if: "clipToSize == 'true'"
+      changes:
+        - kind: 'addParameter'
+          index: 13
+          name: 'clipBehavior'
+          style: optional_named
+          argumentValue:
+            expression: 'Clip.hardEdge'
+            requiredIf: "clipToSize == 'true'"
+        - kind: 'removeParameter'
+          name: 'clipToSize'
+    - if: "clipToSize == 'false'"
+      changes:
+        - kind: 'addParameter'
+          index: 13
+          name: 'clipBehavior'
+          style: optional_named
+          argumentValue:
+            expression: 'Clip.none'
+            requiredIf: "clipToSize == 'false'"
+        - kind: 'removeParameter'
+          name: 'clipToSize'
+    variables:
+      clipToSize:
+        kind: 'fragment'
+        value: 'arguments[clipToSize]'
+
+  # Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  - title: "Migrate to 'clipBehavior'"
+    date: 2020-08-20
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      field: 'clipToSize'
+      inClass: 'ListWheelScrollView'
+    changes:
+      - kind: 'rename'
+        newName: 'clipBehavior'
+
+  # Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  - title: "Migrate to 'clipBehavior'"
+    date: 2020-08-20
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'ListWheelScrollView'
+    oneOf:
+    - if: "clipToSize == 'true'"
+      changes:
+        - kind: 'addParameter'
+          index: 13
+          name: 'clipBehavior'
+          style: optional_named
+          argumentValue:
+            expression: 'Clip.hardEdge'
+            requiredIf: "clipToSize == 'true'"
+        - kind: 'removeParameter'
+          name: 'clipToSize'
+    - if: "clipToSize == 'false'"
+      changes:
+        - kind: 'addParameter'
+          index: 13
+          name: 'clipBehavior'
+          style: optional_named
+          argumentValue:
+            expression: 'Clip.none'
+            requiredIf: "clipToSize == 'false'"
+        - kind: 'removeParameter'
+          name: 'clipToSize'
+    variables:
+      clipToSize:
+        kind: 'fragment'
+        value: 'arguments[clipToSize]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/66305
+  - title: "Migrate to 'clipBehavior'"
+    date: 2020-09-22
+    element:
+      uris: [ 'rendering.dart' ]
+      field: 'overflow'
+      inClass: 'RenderStack'
+    changes:
+      - kind: 'rename'
+        newName: 'clipBehavior'
+
+  # Changes made in https://github.com/flutter/flutter/pull/66305
+  - title: "Migrate to 'clipBehavior'"
+    date: 2020-09-22
+    element:
+      uris: [ 'rendering.dart' ]
+      constructor: ''
+      inClass: 'RenderStack'
+    oneOf:
+      - if: "overflow == 'Overflow.clip'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'clipBehavior'
+            style: optional_named
+            argumentValue:
+              expression: 'Clip.hardEdge'
+              requiredIf: "overflow == 'Overflow.clip'"
+          - kind: 'removeParameter'
+            name: 'overflow'
+      - if: "overflow == 'Overflow.visible'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'clipBehavior'
+            style: optional_named
+            argumentValue:
+              expression: 'Clip.none'
+              requiredIf: "overflow == 'Overflow.visible'"
+          - kind: 'removeParameter'
+            name: 'overflow'
+    variables:
+      overflow:
+        kind: 'fragment'
+        value: 'arguments[overflow]'
+
   # Changes made in https://github.com/flutter/flutter/pull/81303
   - title: "Migrate to 'setEnabledSystemUIMode'"
     date: 2021-06-08

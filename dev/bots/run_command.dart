@@ -129,7 +129,7 @@ Future<Command> startCommand(String executable, List<String> arguments, {
   switch (outputMode) {
     case OutputMode.print:
       stdoutSource.listen(io.stdout.add);
-      process.stderr.listen(io.stderr.add);
+      process.stderr.listen(io.stdout.add);
       break;
     case OutputMode.capture:
       savedStdout = stdoutSource.toList();
@@ -190,7 +190,7 @@ Future<CommandResult> runCommand(String executable, List<String> arguments, {
         break;
       case OutputMode.capture:
         io.stdout.writeln(result.flattenedStdout);
-        io.stderr.writeln(result.flattenedStderr);
+        io.stdout.writeln(result.flattenedStderr);
         break;
     }
     exitWithError(<String>[
@@ -213,7 +213,7 @@ String _flattenToString(List<List<int>> chunks) =>
 /// Specifies what to do with the command output from [runCommand] and [startCommand].
 enum OutputMode {
   /// Forwards standard output and standard error streams to the test process'
-  /// respective standard streams.
+  /// standard output stream (i.e. stderr is redirected to stdout).
   ///
   /// Use this mode if all you want is print the output of the command to the
   /// console. The output is no longer available after the process exits.

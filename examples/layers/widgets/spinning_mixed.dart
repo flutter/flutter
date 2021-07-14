@@ -73,7 +73,7 @@ void attachWidgetTreeToRenderTree(RenderProxyBox container) {
         ),
       ),
     ),
-  ).attachToRenderTree(WidgetsBinding.instance!.buildOwner!, element);
+  ).attachToRenderTree(WidgetsBinding.instance.buildOwner!, element);
 }
 
 Duration? timeBase;
@@ -86,7 +86,7 @@ void rotate(Duration timeStamp) {
   transformBox.setIdentity();
   transformBox.rotateZ(delta);
 
-  WidgetsBinding.instance!.buildOwner!.buildScope(element!);
+  WidgetsBinding.instance.buildOwner!.buildScope(element!);
 }
 
 void main() {
