@@ -1934,9 +1934,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
     }
 
+    final ValueChanged<String>? onSubmitted = widget.onSubmitted;
+    if (onSubmitted == null) {
+      return;
+    }
+
     // Invoke optional callback with the user's submitted content.
     try {
-      widget.onSubmitted?.call(_value.text);
+      onSubmitted(_value.text);
     } catch (exception, stack) {
       FlutterError.reportError(FlutterErrorDetails(
         exception: exception,
@@ -1944,6 +1949,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         library: 'widgets',
         context: ErrorDescription('while calling onSubmitted for $action'),
       ));
+    }
+
+    // Create a new TextInputConnection to replace the current one. This
+    // on iOS switches to a new input view and on Android restarts the
+    // input method. In both cases this call resets the IME.
+    //
+    // We do this for fidelity reasons, in case the developer calls
+    // requestFocus in the onSubmitted callback to undo the focus change.
+    // See https://github.com/flutter/flutter/issues/84240.
+    if (shouldUnfocus) {
+      _restartConnectionIfNeeded();
     }
   }
 
@@ -2086,6 +2102,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           textAlign: widget.textAlign,
         )
         ..setEditingState(localValue);
+        _lastKnownRemoteTextEditingValue = localValue;
     } else {
       _textInputConnection!.show();
     }
@@ -2107,6 +2124,33 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       widget.controller.clearComposing();
     }
   }
+
+  void _restartConnectionIfNeeded() {
+    if (!_hasInputConnection || !_shouldCreateInputConnection) {
+      return;
+    }
+    _textInputConnection!.close();
+    _textInputConnection = null;
+    _lastKnownRemoteTextEditingValue = null;
+
+    final AutofillScope? currentAutofillScope = _needsAutofill ? this.currentAutofillScope : null;
+    final TextInputConnection newConnection = currentAutofillScope?.attach(this, textInputConfiguration)
+      ?? TextInput.attach(this, _createTextInputConfiguration(_isInAutofillContext || _needsAutofill));
+    _textInputConnection = newConnection;
+
+    final TextStyle style = widget.style;
+    newConnection
+      ..setStyle(
+        fontFamily: style.fontFamily,
+        fontSize: style.fontSize,
+        fontWeight: style.fontWeight,
+        textDirection: _textDirection,
+        textAlign: widget.textAlign,
+      )
+      ..setEditingState(_value);
+    _lastKnownRemoteTextEditingValue = _value;
+  }
+
 
   @override
   void connectionClosed() {
