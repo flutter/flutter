@@ -47,7 +47,9 @@ Future<void> runTasks(
         retry++;
       } else {
         if (retry > 0) {
-          print('Flaky: true');
+          section('Flaky status for "$taskName"');
+          print('Total ${retry+1} executions: $retry failures and 1 success');
+          print('flaky: true');
         }
         break;
       }
