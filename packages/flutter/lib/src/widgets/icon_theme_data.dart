@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui show lerpDouble;
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
@@ -23,23 +24,25 @@ class IconThemeData with Diagnosticable {
   ///
   /// The opacity applies to both explicit and default icon colors. The value
   /// is clamped between 0.0 and 1.0.
-  const IconThemeData({this.color, double? opacity, this.size}) : _opacity = opacity;
+  const IconThemeData({this.color, double? opacity, this.size, this.shadows}) : _opacity = opacity;
 
   /// Creates an icon theme with some reasonable default values.
   ///
   /// The [color] is black, the [opacity] is 1.0, and the [size] is 24.0.
   const IconThemeData.fallback()
-    : color = const Color(0xFF000000),
-      _opacity = 1.0,
-      size = 24.0;
+      : color = const Color(0xFF000000),
+        _opacity = 1.0,
+        size = 24.0,
+        shadows = null;
 
   /// Creates a copy of this icon theme but with the given fields replaced with
   /// the new values.
-  IconThemeData copyWith({ Color? color, double? opacity, double? size }) {
+  IconThemeData copyWith({Color? color, double? opacity, double? size, List<Shadow>? shadows}) {
     return IconThemeData(
       color: color ?? this.color,
       opacity: opacity ?? this.opacity,
       size: size ?? this.size,
+      shadows: shadows ?? this.shadows,
     );
   }
 
@@ -53,6 +56,7 @@ class IconThemeData with Diagnosticable {
       color: other.color,
       opacity: other.opacity,
       size: other.size,
+      shadows: other.shadows,
     );
   }
 
@@ -87,6 +91,9 @@ class IconThemeData with Diagnosticable {
   /// The default size for icons.
   final double? size;
 
+  /// The default shadow for icons.
+  final List<Shadow>? shadows;
+
   /// Linearly interpolate between two icon theme data objects.
   ///
   /// {@macro dart.ui.shadow.lerp}
@@ -96,6 +103,7 @@ class IconThemeData with Diagnosticable {
       color: Color.lerp(a?.color, b?.color, t),
       opacity: ui.lerpDouble(a?.opacity, b?.opacity, t),
       size: ui.lerpDouble(a?.size, b?.size, t),
+      shadows: Shadow.lerpList(a?.shadows, b?.shadows, t),
     );
   }
 
@@ -106,7 +114,8 @@ class IconThemeData with Diagnosticable {
     return other is IconThemeData
         && other.color == color
         && other.opacity == opacity
-        && other.size == size;
+        && other.size == size
+        && const ListEquality<Shadow>().equals(other.shadows, shadows);
   }
 
   @override
@@ -118,5 +127,6 @@ class IconThemeData with Diagnosticable {
     properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(DoubleProperty('opacity', opacity, defaultValue: null));
     properties.add(DoubleProperty('size', size, defaultValue: null));
+    properties.add(IterableProperty<Shadow>('shadows', shadows, defaultValue: null));
   }
 }
