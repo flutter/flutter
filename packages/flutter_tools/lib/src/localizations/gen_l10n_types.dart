@@ -336,26 +336,22 @@ class Message {
     }
 
     if (attributes == null) {
-      final RegExpMatch? pluralRegExp = _pluralRE.firstMatch(
-          _value(bundle, resourceId));
-      final bool isPlural = pluralRegExp != null &&
-          pluralRegExp.groupCount == 1;
-      if (isPlural) {
-        throw L10nException(
-            'Resource attribute "@$resourceId" was not found. Please '
-                'ensure that plural resources have a corresponding @resource.'
-        );
+
+      void _throwEmptyAttributes(final RegExp regExp, final String type) {
+        final RegExpMatch? match = regExp.firstMatch(
+            _value(bundle, resourceId));
+        final bool isMatch = match != null &&
+            match.groupCount == 1;
+        if (isMatch) {
+          throw L10nException(
+              'Resource attribute "@$resourceId" was not found. Please '
+                  'ensure that $type resources have a corresponding @resource.'
+          );
+        }
       }
-      final RegExpMatch? selectRegExp = _selectRE.firstMatch(
-          _value(bundle, resourceId));
-      final bool isSelect = selectRegExp != null &&
-          selectRegExp.groupCount == 1;
-      if (isSelect) {
-        throw L10nException(
-            'Resource attribute "@$resourceId" was not found. Please '
-                'ensure that select resources have a corresponding @resource.'
-        );
-      }
+
+      _throwEmptyAttributes(_pluralRE, 'plural');
+      _throwEmptyAttributes(_selectRE, 'select');
     }
 
     return attributes as Map<String, Object?>?;

@@ -285,7 +285,6 @@ String _generateSelectMethod(Message message, String translationForMessage) {
     final RegExp patternRE = RegExp(r'\s*([\w\d]+)\s*\{(.*?)\}');
     for (final RegExpMatch patternMatch in patternRE.allMatches(pattern)) {
       if (patternMatch.groupCount == 2) {
-        print('value before ${patternMatch.group(2)}');
         final String value = patternMatch.group(2)!
             .replaceAll(r"'", r"\'")
             .replaceAll(r'"', r'\"');
