@@ -1,0 +1,4 @@
+# This configuration file specifies test suites along with their gtest filters
+# to be passed as test arguments for flutter on FEMU tests.
+
+test_suites:
