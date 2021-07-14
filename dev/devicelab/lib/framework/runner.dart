@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+// import 'dart:core' as core;
 import 'dart:io';
 
 import 'package:flutter_devicelab/common.dart';
@@ -15,6 +16,16 @@ import 'devices.dart';
 import 'task_result.dart';
 import 'utils.dart';
 
+/// Run a list of tasks.
+/// 
+/// For each task, an auto rerun will be triggered when task fails.
+/// 
+/// If the task succeeds the first time, it will be recorded as successful.
+/// 
+/// If the task fails first, but gets passed in the end, the
+/// test will be recorded as successful but with a flake flag.
+/// 
+/// If the task fails all reruns, it will be recorded as failed.
 Future<void> runTasks(
   List<String> taskNames, {
   bool exitOnFirstTestFailure = false,
@@ -26,9 +37,12 @@ Future<void> runTasks(
   String? luciBuilder,
   String? resultsPath,
   List<String>? taskArgs,
+  @visibleForTesting Map<String, String>? isolateParams,
+  @visibleForTesting Function(String)? print,
+  @visibleForTesting List<String>? logs,
 }) async {
   for (final String taskName in taskNames) {
-    TaskResult result;
+    TaskResult result = TaskResult.success(null);
     int retry = 0;
     while (retry <= Cocoon.retryNumber) {
       result = await rerunTask(
@@ -41,21 +55,27 @@ Future<void> runTasks(
         resultsPath: resultsPath,
         gitBranch: gitBranch,
         luciBuilder: luciBuilder,
+        isolateParams: isolateParams,
       );
 
+      section('Flaky status for "$taskName"');
       if (!result.succeeded) {
         retry++;
       } else {
         if (retry > 0) {
-          section('Flaky status for "$taskName"');
-          print('Total ${retry+1} executions: $retry failures and 1 success');
+          print!('Total ${retry+1} executions: $retry failures and 1 success');
           print('flaky: true');
+        } else {
+          print!('Total ${retry+1} executions: 1 success');
+          print('flaky: false');
         }
         break;
       }
     }
 
     if (!result.succeeded) {
+      print!('Total $retry executions: 0 success');
+      print('flaky: false');
       exitCode = 1;
       if (exitOnFirstTestFailure) {
         return;
@@ -64,16 +84,20 @@ Future<void> runTasks(
   }
 }
 
+/// A rerun wrapper for `runTask`.
+/// 
+/// This separates reruns in separate sections.
 Future<TaskResult> rerunTask(
   String taskName, {
-  String deviceId,
-  String localEngine,
-  String localEngineSrcPath,
+  String? deviceId,
+  String? localEngine,
+  String? localEngineSrcPath,
   bool silent = false,
-  List<String> taskArgs,
-  String resultsPath,
-  String gitBranch,
-  String luciBuilder,
+  List<String>? taskArgs,
+  String? resultsPath,
+  String? gitBranch,
+  String? luciBuilder,
+  @visibleForTesting Map<String, String>? isolateParams,
 }) async {
   section('Running task "$taskName"');
   final TaskResult result = await runTask(
@@ -83,6 +107,7 @@ Future<TaskResult> rerunTask(
     localEngineSrcPath: localEngineSrcPath,
     silent: silent,
     taskArgs: taskArgs,
+    isolateParams: isolateParams,
   );
 
   print('Task result:');

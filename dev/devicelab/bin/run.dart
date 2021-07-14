@@ -114,6 +114,7 @@ Future<void> main(List<String> rawArgs) async {
       gitBranch: gitBranch,
       luciBuilder: luciBuilder,
       resultsPath: resultsPath,
+      print: print,
     );
   }
 }
