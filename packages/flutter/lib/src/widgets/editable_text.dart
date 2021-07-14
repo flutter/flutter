@@ -2275,6 +2275,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void didChangeMetrics() {
     if (_lastBottomViewInset < WidgetsBinding.instance!.window.viewInsets.bottom) {
       _scheduleShowCaretOnScreen();
+      SchedulerBinding.instance!.addPostFrameCallback((Duration _) {
+        _selectionOverlay?.updateForScroll();
+      });
     }
     _lastBottomViewInset = WidgetsBinding.instance!.window.viewInsets.bottom;
   }
