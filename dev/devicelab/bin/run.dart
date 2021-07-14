@@ -21,7 +21,7 @@ List<String> _taskNames = <String>[];
 String? deviceId;
 
 /// The git branch being tested on.
-late String gitBranch;
+String? gitBranch;
 
 /// The build of the local engine to use.
 ///
@@ -68,7 +68,7 @@ Future<void> main(List<String> rawArgs) async {
 
   deviceId = args['device-id'] as String?;
   exitOnFirstTestFailure = (args['exit'] as bool?) ?? false;
-  gitBranch = args['git-branch'] as String;
+  gitBranch = args['git-branch'] as String?;
   localEngine = args['local-engine'] as String?;
   localEngineSrcPath = args['local-engine-src-path'] as String?;
   luciBuilder = args['luci-builder'] as String?;
