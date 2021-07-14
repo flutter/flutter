@@ -38,7 +38,7 @@ Future<void> runTasks(
   String? resultsPath,
   List<String>? taskArgs,
   @visibleForTesting Map<String, String>? isolateParams,
-  @visibleForTesting Function(String)? print,
+  @visibleForTesting Function(String) print = print,
   @visibleForTesting List<String>? logs,
 }) async {
   for (final String taskName in taskNames) {
@@ -63,10 +63,10 @@ Future<void> runTasks(
         retry++;
       } else {
         if (retry > 0) {
-          print!('Total ${retry+1} executions: $retry failures and 1 success');
+          print('Total ${retry+1} executions: $retry failures and 1 success');
           print('flaky: true');
         } else {
-          print!('Total ${retry+1} executions: 1 success');
+          print('Total ${retry+1} executions: 1 success');
           print('flaky: false');
         }
         break;
@@ -74,7 +74,7 @@ Future<void> runTasks(
     }
 
     if (!result.succeeded) {
-      print!('Total $retry executions: 0 success');
+      print('Total $retry executions: 0 success');
       print('flaky: false');
       exitCode = 1;
       if (exitOnFirstTestFailure) {
