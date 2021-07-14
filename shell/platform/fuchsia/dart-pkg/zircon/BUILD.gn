@@ -30,6 +30,7 @@ source_set("zircon") {
     "$fuchsia_sdk_root/pkg:async-loop-cpp",
     "$fuchsia_sdk_root/pkg:fdio",
     "$fuchsia_sdk_root/pkg:zx",
+    "../zircon_ffi",
     "//flutter/fml",
     "//flutter/third_party/tonic",
   ]
