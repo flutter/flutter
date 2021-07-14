@@ -194,13 +194,13 @@ abstract class ShortcutActivator {
   /// event.
   ///
   /// For example, for `Ctrl-A`, it has to check if the event is a
-  /// [RawKeyDownEvent], if either side of the Ctrl key is pressed, and none of
+  /// [KeyDownEvent], if either side of the Ctrl key is pressed, and none of
   /// the Shift keys, Alt keys, or Meta keys are pressed; it doesn't have to
   /// check if KeyA is pressed, since it's already guaranteed.
   ///
   /// This method must not cause any side effects for the `state`. Typically
-  /// this is only used to query whether [RawKeyboard.keysPressed] contains
-  /// a key.
+  /// this is only used to query whether [HardwareKeyboard.logicalKeysPressed]
+  /// contains a key.
   ///
   /// Since [ShortcutActivator] accepts all event types, subclasses might want
   /// to check the event type in [accepts].
@@ -209,7 +209,7 @@ abstract class ShortcutActivator {
   ///
   ///  * [LogicalKeyboardKey.collapseSynonyms], which helps deciding whether a
   ///    modifier key is pressed when the side variation is not important.
-  bool accepts(RawKeyEvent event, RawKeyboard state);
+  bool accepts(KeyEvent event, HardwareKeyboard state);
 
   /// Returns a description of the key set that is short and readable.
   ///
@@ -313,12 +313,12 @@ class LogicalKeySet extends KeySet<LogicalKeyboardKey> with Diagnosticable
   ).toSet();
 
   @override
-  bool accepts(RawKeyEvent event, RawKeyboard state) {
+  bool accepts(KeyEvent event, HardwareKeyboard state) {
     final Set<LogicalKeyboardKey> collapsedRequired = LogicalKeyboardKey.collapseSynonyms(keys);
-    final Set<LogicalKeyboardKey> collapsedPressed = LogicalKeyboardKey.collapseSynonyms(state.keysPressed);
+    final Set<LogicalKeyboardKey> collapsedPressed = LogicalKeyboardKey.collapseSynonyms(state.logicalKeysPressed);
     final bool keysEqual = collapsedRequired.difference(collapsedPressed).isEmpty
       && collapsedRequired.length == collapsedPressed.length;
-    return event is RawKeyDownEvent && keysEqual;
+    return event is KeyDownEvent && keysEqual;
   }
 
   static final Set<LogicalKeyboardKey> _modifiers = <LogicalKeyboardKey>{
@@ -425,7 +425,8 @@ class ShortcutMapProperty extends DiagnosticsProperty<Map<ShortcutActivator, Int
 ///  * [CharacterActivator], an activator that represents key combinations
 ///    that result in the specified character, such as question mark.
 class SingleActivator with Diagnosticable implements ShortcutActivator {
-  /// Create an activator of a trigger key and modifiers.
+  /// Triggered when the [trigger] key is pressed or repeated when the
+  /// modifiers are held.
   ///
   /// The `trigger` should be the non-modifier key that is pressed after all the
   /// modifiers, such as [LogicalKeyboardKey.keyC] as in `Ctrl+C`. It must not be
@@ -433,6 +434,9 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
   ///
   /// The `control`, `shift`, `alt`, and `meta` flags represent whether
   /// the respect modifier keys should be held (true) or released (false)
+  ///
+  /// On each [KeyDownEvent] or [KeyRepeatEvent] of the [trigger] key, this
+  /// activator checks whether the specified modifier conditions are met.
   ///
   /// {@tool dartpad --template=stateful_widget_scaffold_center}
   /// In the following example, the shortcut `Control + C` increases the counter:
@@ -560,9 +564,9 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
   }
 
   @override
-  bool accepts(RawKeyEvent event, RawKeyboard state) {
-    final Set<LogicalKeyboardKey> pressed = state.keysPressed;
-    return event is RawKeyDownEvent
+  bool accepts(KeyEvent event, HardwareKeyboard state) {
+    final Set<LogicalKeyboardKey> pressed = state.logicalKeysPressed;
+    return (event is KeyDownEvent || event is KeyRepeatEvent)
       && (control == (pressed.contains(LogicalKeyboardKey.controlLeft) || pressed.contains(LogicalKeyboardKey.controlRight)))
       && (shift == (pressed.contains(LogicalKeyboardKey.shiftLeft) || pressed.contains(LogicalKeyboardKey.shiftRight)))
       && (alt == (pressed.contains(LogicalKeyboardKey.altLeft) || pressed.contains(LogicalKeyboardKey.altRight)))
@@ -672,15 +676,15 @@ class CharacterActivator with Diagnosticable implements ShortcutActivator {
   ///
   /// See also:
   ///
-  ///  * [RawKeyEvent.character], the character of a key event.
+  ///  * [KeyEvent.character], the character of a key event.
   final String character;
 
   @override
   Iterable<LogicalKeyboardKey>? get triggers => null;
 
   @override
-  bool accepts(RawKeyEvent event, RawKeyboard state) {
-    return event is RawKeyDownEvent
+  bool accepts(KeyEvent event, HardwareKeyboard state) {
+    return (event is KeyDownEvent || event is KeyRepeatEvent)
         && event.character == character;
   }
 
@@ -777,9 +781,9 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
   ///
   /// Returns null if no intent matches the current set of pressed keys.
   ///
-  /// Defaults to a set derived from [RawKeyboard.keysPressed] if `keysPressed`
+  /// Defaults to a set derived from [HardwareKeyboard.logicalKeysPressed] if `keysPressed`
   /// is not supplied.
-  Intent? _find(RawKeyEvent event, RawKeyboard state) {
+  Intent? _find(KeyEvent event, HardwareKeyboard state) {
     final List<_ActivatorIntentPair>? candidatesByKey = _indexedShortcuts[event.logicalKey];
     final List<_ActivatorIntentPair>? candidatesByNull = _indexedShortcuts[null];
     final List<_ActivatorIntentPair> candidates = <_ActivatorIntentPair>[
@@ -810,19 +814,9 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
   /// returned), a pressed [KeySet] must be mapped to an [Intent], the [Intent]
   /// must be mapped to an [Action], and the [Action] must be enabled.
   @protected
-  KeyEventResult handleKeypress(BuildContext context, RawKeyEvent event) {
-    if (event is! RawKeyDownEvent) {
-      return KeyEventResult.ignored;
-    }
+  KeyEventResult handleKeypress(BuildContext context, KeyEvent event) {
     assert(context != null);
-    assert(
-      RawKeyboard.instance.keysPressed.isNotEmpty,
-      'Received a key down event when no keys are in keysPressed. '
-      "This state can occur if the key event being sent doesn't properly "
-      'set its modifier flags. This was the event: $event and its data: '
-      '${event.data}',
-    );
-    final Intent? matchedIntent = _find(event, RawKeyboard.instance);
+    final Intent? matchedIntent = _find(event, HardwareKeyboard.instance);
     if (matchedIntent != null) {
       final BuildContext? primaryContext = primaryFocus?.context;
       if (primaryContext != null) {
@@ -1168,7 +1162,7 @@ class _ShortcutsState extends State<Shortcuts> {
     manager.shortcuts = widget.shortcuts;
   }
 
-  KeyEventResult _handleOnKey(FocusNode node, RawKeyEvent event) {
+  KeyEventResult _handleOnKeyEvent(FocusNode node, KeyEvent event) {
     if (node.context == null) {
       return KeyEventResult.ignored;
     }
@@ -1180,7 +1174,7 @@ class _ShortcutsState extends State<Shortcuts> {
     return Focus(
       debugLabel: '$Shortcuts',
       canRequestFocus: false,
-      onKey: _handleOnKey,
+      onKeyEvent: _handleOnKeyEvent,
       child: _ShortcutsMarker(
         manager: manager,
         child: widget.child,
@@ -1261,8 +1255,8 @@ class CallbackShortcuts extends StatelessWidget {
   // A helper function to make the stack trace more useful if the callback
   // throws, by providing the activator and event as arguments that will appear
   // in the stack trace.
-  bool _applyKeyBinding(ShortcutActivator activator, RawKeyEvent event) {
-    if (activator.accepts(event, RawKeyboard.instance)) {
+  bool _applyKeyBinding(ShortcutActivator activator, KeyEvent event) {
+    if (activator.accepts(event, HardwareKeyboard.instance)) {
       bindings[activator]!.call();
       return true;
     }
@@ -1274,7 +1268,7 @@ class CallbackShortcuts extends StatelessWidget {
     return Focus(
       canRequestFocus: false,
       skipTraversal: true,
-      onKey: (FocusNode node, RawKeyEvent event) {
+      onKeyEvent: (FocusNode node, KeyEvent event) {
         KeyEventResult result = KeyEventResult.ignored;
         // Activates all key bindings that match, returns "handled" if any handle it.
         for (final ShortcutActivator activator in bindings.keys) {
