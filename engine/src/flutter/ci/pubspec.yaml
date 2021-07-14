@@ -20,7 +20,6 @@ dependencies:
   args: any
   meta: any
   path: any
-  isolate: any
   process_runner: any
 
 dependency_overrides:
@@ -32,8 +31,6 @@ dependency_overrides:
     path: ../../third_party/dart/third_party/pkg/collection
   file:
     path: ../../third_party/pkg/file/packages/file
-  isolate:
-    path: ../../third_party/pkg/isolate
   meta:
     path: ../../third_party/dart/pkg/meta
   path:
