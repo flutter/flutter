@@ -6,7 +6,9 @@
 # More information at:
 #  * https://github.com/flutter/cocoon/blob/master/CI_YAML.md
 enabled_branches:
-  - master
+  - dev
+  - beta
+  - flutter-2.4-candidate.4
 
 targets:
   - name: Linux analyze
