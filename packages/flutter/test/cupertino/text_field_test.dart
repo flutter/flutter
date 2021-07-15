@@ -4779,4 +4779,21 @@ void main() {
       expect(disabledColor, isSameColorAs(const Color(0xFFFAFAFA)));
     },
   );
+
+  testWidgets('autofill info has placeholder text', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CupertinoTextField(
+          placeholder: 'placeholder text',
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(CupertinoTextField));
+
+    expect(
+      tester.testTextInput.setClientArgs?['autofill'],
+      containsPair('hint_text', 'placeholder text'),
+    );
+  });
 }

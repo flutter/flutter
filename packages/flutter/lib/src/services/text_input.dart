@@ -465,7 +465,7 @@ class TextInputConfiguration {
     this.inputAction = TextInputAction.done,
     this.keyboardAppearance = Brightness.light,
     this.textCapitalization = TextCapitalization.none,
-    this.autofillConfiguration,
+    this.autofillConfiguration = AutofillConfiguration.disabled,
   }) : assert(inputType != null),
        assert(obscureText != null),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
@@ -500,7 +500,7 @@ class TextInputConfiguration {
   /// to the platform. This will prevent the corresponding input field from
   /// participating in autofills triggered by other fields. Additionally, on
   /// Android and web, setting [autofillConfiguration] to null disables autofill.
-  final AutofillConfiguration? autofillConfiguration;
+  final AutofillConfiguration autofillConfiguration;
 
   /// {@template flutter.services.TextInputConfiguration.smartDashesType}
   /// Whether to allow the platform to automatically format dashes.
@@ -590,8 +590,40 @@ class TextInputConfiguration {
   /// Defaults to [Brightness.light].
   final Brightness keyboardAppearance;
 
+  /// Creates a copy of this [TextInputConfiguration] with the given fields
+  /// replaced with new values.
+  TextInputConfiguration copyWith({
+    TextInputType? inputType,
+    bool? readOnly,
+    bool? obscureText,
+    bool? autocorrect,
+    SmartDashesType? smartDashesType,
+    SmartQuotesType? smartQuotesType,
+    bool? enableSuggestions,
+    String? actionLabel,
+    TextInputAction? inputAction,
+    Brightness? keyboardAppearance,
+    TextCapitalization? textCapitalization,
+    AutofillConfiguration? autofillConfiguration,
+  }) {
+    return TextInputConfiguration(
+      inputType: inputType ?? this.inputType,
+      readOnly: readOnly ?? this.readOnly,
+      obscureText: obscureText ?? this.obscureText,
+      autocorrect: autocorrect ?? this.autocorrect,
+      smartDashesType: smartDashesType ?? this.smartDashesType,
+      smartQuotesType: smartQuotesType ?? this.smartQuotesType,
+      enableSuggestions: enableSuggestions ?? this.enableSuggestions,
+      inputAction: inputAction ?? this.inputAction,
+      textCapitalization: textCapitalization ?? this.textCapitalization,
+      keyboardAppearance: keyboardAppearance ?? this.keyboardAppearance,
+      autofillConfiguration: autofillConfiguration ?? this.autofillConfiguration,
+    );
+  }
+
   /// Returns a representation of this object as a JSON object.
   Map<String, dynamic> toJson() {
+    final Map<String, dynamic>? autofill = autofillConfiguration.toJson();
     return <String, dynamic>{
       'inputType': inputType.toJson(),
       'readOnly': readOnly,
@@ -604,7 +636,7 @@ class TextInputConfiguration {
       'inputAction': inputAction.toString(),
       'textCapitalization': textCapitalization.toString(),
       'keyboardAppearance': keyboardAppearance.toString(),
-      if (autofillConfiguration != null) 'autofill': autofillConfiguration!.toJson(),
+      if (autofill != null) 'autofill': autofill,
     };
   }
 }
@@ -1341,7 +1373,10 @@ class TextInput {
         final TextEditingValue textEditingValue = TextEditingValue.fromJSON(
           editingValue[tag] as Map<String, dynamic>,
         );
-        scope?.getAutofillClient(tag)?.updateEditingValue(textEditingValue);
+        final AutofillClient? client = scope?.getAutofillClient(tag);
+        if (client != null && client.textInputConfiguration.autofillConfiguration.enabled) {
+          client.autofill(textEditingValue);
+        }
       }
 
       return;
