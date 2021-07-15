@@ -4,7 +4,7 @@
 
 import("//flutter/testing/scenario_app/runtime_mode.gni")
 
-action("android") {
+action("build_apk") {
   script = "run_gradle.py"
 
   inputs = [ "$root_out_dir/flutter.jar" ]
@@ -47,4 +47,10 @@ action("android") {
     "//flutter/shell/platform/android:android_jar",
     "//flutter/testing/scenario_app:scenario_app_snapshot",
   ]
+}
+
+copy("android") {
+  sources = get_target_outputs(":build_apk")
+  outputs = [ "$root_out_dir/firebase_apks/scenario_app.apk" ]
+  deps = [ ":build_apk" ]
 }
