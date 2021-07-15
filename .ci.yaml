@@ -1854,6 +1854,24 @@ targets:
         ["devicelab"]
     scheduler: luci
 
+  - name: Mac_ios flutter_gallery_ios_sksl_warmup__transition_perf
+    builder: Mac_ios flutter_gallery_ios_sksl_warmup__transition_perf
+    bringup: true
+    presubmit: false
+    properties:
+      tags: >
+        ["devicelab"]
+    scheduler: luci
+
+  - name: Mac_ios cubic_bezier_perf_ios_sksl_warmup__timeline_summary
+    builder: Mac_ios cubic_bezier_perf_ios_sksl_warmup__timeline_summary
+    bringup: true
+    presubmit: false
+    properties:
+      tags: >
+        ["devicelab"]
+    scheduler: luci
+
   - name: Mac_ios flutter_view_ios__start_up
     builder: Mac_ios flutter_view_ios__start_up
     presubmit: false
