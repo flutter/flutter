@@ -68,7 +68,7 @@ class AccessibilityBridgeTest : public testing::Test {
     loop_.ResetQuit();
   }
 
-  void RunPromiseToCompletion(fit::promise<> promise) {
+  void RunPromiseToCompletion(fpromise::promise<> promise) {
     bool done = false;
     executor_.schedule_task(
         std::move(promise).and_then([&done]() { done = true; }));
@@ -1013,11 +1013,11 @@ TEST_F(AccessibilityBridgeTest, InspectData) {
   accessibility_bridge_->AddSemanticsNodeUpdate(std::move(updates), 1.f);
   RunLoopUntilIdle();
 
-  fit::result<inspect::Hierarchy> hierarchy;
+  fpromise::result<inspect::Hierarchy> hierarchy;
   ASSERT_FALSE(hierarchy.is_ok());
   RunPromiseToCompletion(
       inspect::ReadFromInspector(*inspector_)
-          .then([&hierarchy](fit::result<inspect::Hierarchy>& result) {
+          .then([&hierarchy](fpromise::result<inspect::Hierarchy>& result) {
             hierarchy = std::move(result);
           }));
   ASSERT_TRUE(hierarchy.is_ok());

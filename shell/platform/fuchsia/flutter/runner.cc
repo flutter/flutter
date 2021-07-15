@@ -172,7 +172,7 @@ Runner::Runner(fml::RefPtr<fml::TaskRunner> task_runner,
           name = out[0].name;
         }
         inspector.GetRoot().CreateString("vm_service_port", name, &inspector);
-        return fit::make_ok_promise(inspector);
+        return fpromise::make_ok_promise(inspector);
       },
       inspector);
 

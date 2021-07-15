@@ -273,7 +273,7 @@ AccessibilityBridge::AccessibilityBridge(
               inspector.GetRoot().CreateChild(kTreeDumpInspectRootName),
               &inspector);
         }
-        return fit::make_ok_promise(std::move(inspector));
+        return fpromise::make_ok_promise(std::move(inspector));
       });
 #endif  // !FLUTTER_RELEASE
 
