@@ -136,7 +136,7 @@ class DateUtils {
   /// 1582. It will not give valid results for dates prior to that time.
   static int getDaysInMonth(int year, int month) {
     if (month == DateTime.february) {
-      final bool isLeapYear = (year % 4 == 0) && (year % 100 != 0) || (year % 400 == 0);
+      final bool isLeapYear = (year % 4 == 0) && (year % 100 != 0);
       return isLeapYear ? 29 : 28;
     }
     const List<int> daysInMonth = <int>[31, -1, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
