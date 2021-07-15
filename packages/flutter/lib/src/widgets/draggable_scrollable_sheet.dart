@@ -250,6 +250,7 @@ class _DraggableSheetExtent {
   _DraggableSheetExtent({
     required this.minExtent,
     required this.maxExtent,
+    required this.snap,
     required this.snapTargets,
     required this.initialExtent,
     required VoidCallback listener,
@@ -266,6 +267,7 @@ class _DraggableSheetExtent {
 
   final double minExtent;
   final double maxExtent;
+  final bool snap;
   final List<double> snapTargets;
   final double initialExtent;
   final ValueNotifier<double> _currentExtent;
@@ -327,11 +329,12 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
     _extent = _DraggableSheetExtent(
       minExtent: widget.minChildSize,
       maxExtent: widget.maxChildSize,
-      snapTargets: <double>{
+      snap: widget.snap,
+      snapTargets: <double>[
         widget.minChildSize,
         ...widget.snapTargets ?? <double>[],
         widget.maxChildSize,
-      },
+      ],
       initialExtent: widget.initialChildSize,
       listener: _setExtent,
     );
