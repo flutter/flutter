@@ -278,7 +278,7 @@ abstract class Gradient extends Shader {
     TileMode tileMode = TileMode.clamp,
     Float64List? matrix4,
   ]) {
-    Float32List? matrix = matrix4 == null ? null : engine.toMatrix32(matrix4);
+    final Float32List? matrix = matrix4 == null ? null : engine.toMatrix32(matrix4);
     return engine.useCanvasKit
         ? engine.CkGradientLinear(
         from, to, colors, colorStops, tileMode, matrix)
@@ -594,7 +594,7 @@ void decodeImageFromPixels(
     return;
   }
 
-  void Function(Codec) callbacker = (Codec codec) {
+  final void Function(Codec) callbacker = (Codec codec) {
     codec.getNextFrame().then((FrameInfo frameInfo) {
       callback(frameInfo.image);
     });

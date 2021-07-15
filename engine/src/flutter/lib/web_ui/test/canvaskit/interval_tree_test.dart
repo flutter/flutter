@@ -15,15 +15,15 @@ void main() {
 void testMain() {
   group('$IntervalTree', () {
     test('is balanced', () {
-      Map<String, List<CodeunitRange>> ranges = <String, List<CodeunitRange>>{
+      final Map<String, List<CodeunitRange>> ranges = <String, List<CodeunitRange>>{
         'A': <CodeunitRange>[CodeunitRange(0, 5), CodeunitRange(6, 10)],
         'B': <CodeunitRange>[CodeunitRange(4, 6)],
       };
 
       // Should create a balanced 3-node tree with a root with a left and right
       // child.
-      IntervalTree<String> tree = IntervalTree<String>.createFromRanges(ranges);
-      IntervalTreeNode<String> root = tree.root;
+      final IntervalTree<String> tree = IntervalTree<String>.createFromRanges(ranges);
+      final IntervalTreeNode<String> root = tree.root;
       expect(root.left, isNotNull);
       expect(root.right, isNotNull);
       expect(root.left!.left, isNull);
@@ -32,7 +32,7 @@ void testMain() {
       expect(root.right!.right, isNull);
 
       // Should create a balanced 15-node tree (4 layers deep).
-      Map<String, List<CodeunitRange>> ranges2 = <String, List<CodeunitRange>>{
+      final Map<String, List<CodeunitRange>> ranges2 = <String, List<CodeunitRange>>{
         'A': <CodeunitRange>[
           CodeunitRange(1, 1),
           CodeunitRange(2, 2),
@@ -54,8 +54,8 @@ void testMain() {
 
       // Should create a balanced 3-node tree with a root with a left and right
       // child.
-      IntervalTree<String> tree2 = IntervalTree<String>.createFromRanges(ranges2);
-      IntervalTreeNode<String> root2 = tree2.root;
+      final IntervalTree<String> tree2 = IntervalTree<String>.createFromRanges(ranges2);
+      final IntervalTreeNode<String> root2 = tree2.root;
 
       expect(root2.left!.left!.left, isNotNull);
       expect(root2.left!.left!.right, isNotNull);
@@ -68,11 +68,11 @@ void testMain() {
     });
 
     test('finds values whose intervals overlap with a given point', () {
-      Map<String, List<CodeunitRange>> ranges = <String, List<CodeunitRange>>{
+      final Map<String, List<CodeunitRange>> ranges = <String, List<CodeunitRange>>{
         'A': <CodeunitRange>[CodeunitRange(0, 5), CodeunitRange(7, 10)],
         'B': <CodeunitRange>[CodeunitRange(4, 6)],
       };
-      IntervalTree<String> tree = IntervalTree<String>.createFromRanges(ranges);
+      final IntervalTree<String> tree = IntervalTree<String>.createFromRanges(ranges);
 
       expect(tree.intersections(1), <String>['A']);
       expect(tree.intersections(4), <String>['A', 'B']);

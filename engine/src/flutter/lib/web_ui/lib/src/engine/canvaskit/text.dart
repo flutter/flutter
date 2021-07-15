@@ -86,7 +86,7 @@ class CkParagraphStyle implements ui.ParagraphStyle {
 
   static SkStrutStyleProperties toSkStrutStyleProperties(
       ui.StrutStyle value, ui.TextHeightBehavior? paragraphHeightBehavior) {
-    CkStrutStyle style = value as CkStrutStyle;
+    final CkStrutStyle style = value as CkStrutStyle;
     final SkStrutStyleProperties skStrutStyle = SkStrutStyleProperties();
     skStrutStyle.fontFamilies =
         _getEffectiveFontFamilies(style._fontFamily, style._fontFamilyFallback);
@@ -426,7 +426,7 @@ class CkTextStyle implements ui.TextStyle {
     }
 
     if (shadows != null) {
-      List<SkTextShadow> ckShadows = <SkTextShadow>[];
+      final List<SkTextShadow> ckShadows = <SkTextShadow>[];
       for (ui.Shadow shadow in shadows) {
         final SkTextShadow ckShadow = SkTextShadow();
         ckShadow.color = makeFreshSkColor(shadow.color);
@@ -438,9 +438,9 @@ class CkTextStyle implements ui.TextStyle {
     }
 
     if (fontFeatures != null) {
-      List<SkFontFeature> skFontFeatures = <SkFontFeature>[];
+      final List<SkFontFeature> skFontFeatures = <SkFontFeature>[];
       for (ui.FontFeature fontFeature in fontFeatures) {
-        SkFontFeature skFontFeature = SkFontFeature();
+        final SkFontFeature skFontFeature = SkFontFeature();
         skFontFeature.name = fontFeature.feature;
         skFontFeature.value = fontFeature.value;
         skFontFeatures.add(skFontFeature);
@@ -722,7 +722,7 @@ class CkParagraph extends SkiaObject<SkParagraph> implements ui.Paragraph {
   }
 
   List<ui.TextBox> skRectsToTextBoxes(List<dynamic> skRects) {
-    List<ui.TextBox> result = <ui.TextBox>[];
+    final List<ui.TextBox> result = <ui.TextBox>[];
 
     for (int i = 0; i < skRects.length; i++) {
       final List<double> rect = skRects[i];
@@ -905,8 +905,8 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
 
   @override
   void addText(String text) {
-    List<String> fontFamilies = <String>[];
-    CkTextStyle style = _peekStyle();
+    final List<String> fontFamilies = <String>[];
+    final CkTextStyle style = _peekStyle();
     if (style.fontFamily != null) {
       fontFamilies.add(style.fontFamily!);
     }
@@ -1049,7 +1049,7 @@ enum _ParagraphCommandType {
 
 List<String> _getEffectiveFontFamilies(String? fontFamily,
     [List<String>? fontFamilyFallback]) {
-  List<String> fontFamilies = <String>[];
+  final List<String> fontFamilies = <String>[];
   if (fontFamily != null) {
     fontFamilies.add(fontFamily);
   }

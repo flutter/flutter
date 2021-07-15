@@ -64,21 +64,21 @@ void testMain() async {
       ..strokeWidth = 1
       ..color = Color(0xFF000000);
 
-    List<Color> colors = <Color>[
+    final List<Color> colors = <Color>[
       Color(0xFF000000),
       Color(0xFFFF3C38),
       Color(0xFFFF8C42),
       Color(0xFFFFF275),
       Color(0xFF6699CC),
       Color(0xFF656D78),];
-    List<double> stops = <double>[0.0, 0.05, 0.4, 0.6, 0.9, 1.0];
+    final List<double> stops = <double>[0.0, 0.05, 0.4, 0.6, 0.9, 1.0];
 
     GradientSweep sweepGradient = GradientSweep(Offset(0.5, 0.5),
         colors, stops, TileMode.clamp,
         0, 360.0 / 180.0 * math.pi,
         Matrix4.rotationZ(math.pi / 6.0).storage);
 
-    GradientSweep sweepGradientRotated = GradientSweep(Offset(0.5, 0.5),
+    final GradientSweep sweepGradientRotated = GradientSweep(Offset(0.5, 0.5),
         colors, stops, TileMode.clamp,
         0, 360.0 / 180.0 * math.pi,
         Matrix4.rotationZ(math.pi / 6.0).storage);
@@ -143,21 +143,21 @@ void testMain() async {
       ..strokeWidth = 1
       ..color = Color(0xFF000000);
 
-    List<Color> colors = <Color>[
+    final List<Color> colors = <Color>[
       Color(0xFF000000),
       Color(0xFFFF3C38),
       Color(0xFFFF8C42),
       Color(0xFFFFF275),
       Color(0xFF6699CC),
       Color(0xFF656D78),];
-    List<double> stops = <double>[0.0, 0.05, 0.4, 0.6, 0.9, 1.0];
+    final List<double> stops = <double>[0.0, 0.05, 0.4, 0.6, 0.9, 1.0];
 
     GradientSweep sweepGradient = GradientSweep(Offset(0.5, 0.5),
         colors, stops, TileMode.clamp,
         0, 360.0 / 180.0 * math.pi,
         Matrix4.rotationZ(math.pi / 6.0).storage);
 
-    GradientSweep sweepGradientRotated = GradientSweep(Offset(0.5, 0.5),
+    final GradientSweep sweepGradientRotated = GradientSweep(Offset(0.5, 0.5),
         colors, stops, TileMode.clamp,
         0, 360.0 / 180.0 * math.pi,
         Matrix4.rotationZ(math.pi / 6.0).storage);
@@ -222,21 +222,21 @@ void testMain() async {
       ..strokeWidth = 1
       ..color = Color(0xFF000000);
 
-    List<Color> colors = <Color>[
+    final List<Color> colors = <Color>[
       Color(0xFF000000),
       Color(0xFFFF3C38),
       Color(0xFFFF8C42),
       Color(0xFFFFF275),
       Color(0xFF6699CC),
       Color(0xFF656D78),];
-    List<double> stops = <double>[0.0, 0.05, 0.4, 0.6, 0.9, 1.0];
+    final List<double> stops = <double>[0.0, 0.05, 0.4, 0.6, 0.9, 1.0];
 
     GradientSweep sweepGradient = GradientSweep(Offset(0.5, 0.5),
         colors, stops, TileMode.clamp,
         0, 360.0 / 180.0 * math.pi,
         Matrix4.rotationZ(math.pi / 6.0).storage);
 
-    GradientSweep sweepGradientRotated = GradientSweep(Offset(0.5, 0.5),
+    final GradientSweep sweepGradientRotated = GradientSweep(Offset(0.5, 0.5),
         colors, stops, TileMode.clamp,
         0, 360.0 / 180.0 * math.pi,
         Matrix4.rotationZ(math.pi / 6.0).storage);
@@ -307,14 +307,14 @@ void testMain() async {
       ..strokeWidth = 1
       ..color = Color(0xFF000000);
 
-    List<Color> colors = <Color>[
+    final List<Color> colors = <Color>[
       Color(0xFF000000),
       Color(0xFFFF3C38),
       Color(0xFFFF8C42),
       Color(0xFFFFF275),
       Color(0xFF6699CC),
       Color(0xFF656D78),];
-    List<double> stops = <double>[0.0, 0.05, 0.4, 0.6, 0.9, 1.0];
+    final List<double> stops = <double>[0.0, 0.05, 0.4, 0.6, 0.9, 1.0];
 
     GradientLinear linearGradient = GradientLinear(Offset(50, 50),
         Offset(200,130),
@@ -355,12 +355,12 @@ void testMain() async {
       ..strokeWidth = 1
       ..color = Color(0xFF000000);
 
-    List<Color> colors = <Color>[
+    final List<Color> colors = <Color>[
       Color(0xFF000000),
       Color(0xFFFF3C38)];
-    List<double> stops = <double>[0.0, 10.0];
+    final List<double> stops = <double>[0.0, 10.0];
 
-    GradientLinear linearGradient = GradientLinear(Offset(50, 50),
+    final GradientLinear linearGradient = GradientLinear(Offset(50, 50),
         Offset(200,130),
         colors, stops, TileMode.clamp,
         Matrix4.identity().storage);
@@ -368,7 +368,7 @@ void testMain() async {
     const double kBoxWidth = 150;
     const double kBoxHeight = 80;
     // Gradient with default center.
-    Rect rectBounds = Rect.fromLTWH(10, 20, kBoxWidth, kBoxHeight);
+    final Rect rectBounds = Rect.fromLTWH(10, 20, kBoxWidth, kBoxHeight);
     canvas.drawRect(rectBounds,
         SurfacePaint()..shader = engineLinearGradientToShader(linearGradient, rectBounds));
     canvas.drawRect(rectBounds, borderPaint);
@@ -390,14 +390,14 @@ void testMain() async {
       ..strokeWidth = 1
       ..color = Color(0xFF000000);
 
-    List<Color> colors = <Color>[
+    final List<Color> colors = <Color>[
       Color(0xFF000000),
       Color(0xFFFF3C38),
       Color(0xFFFF8C42),
       Color(0xFFFFF275),
       Color(0xFF6699CC),
       Color(0xFF656D78),];
-    List<double> stops = <double>[0.0, 0.05, 0.4, 0.6, 0.9, 1.0];
+    final List<double> stops = <double>[0.0, 0.05, 0.4, 0.6, 0.9, 1.0];
 
     GradientLinear linearGradient = GradientLinear(Offset(50, 50),
         Offset(200,130),

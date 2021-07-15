@@ -93,7 +93,7 @@ void testMain() {
       path = SurfacePath();
       path.moveTo(10, 20);
       path.lineTo(200, 20);
-      Rect r = path.toStraightLine()!;
+      final Rect r = path.toStraightLine()!;
       expect(r, equals(Rect.fromLTRB(10, 20, 200, 20)));
     });
 
@@ -101,7 +101,7 @@ void testMain() {
       final SurfacePath path = SurfacePath();
       path.moveTo(10, 20);
       path.lineTo(10, 200);
-      Rect r = path.toStraightLine()!;
+      final Rect r = path.toStraightLine()!;
       expect(r, equals(Rect.fromLTRB(10, 20, 10, 200)));
     });
 
@@ -565,8 +565,8 @@ void testMain() {
         ..lineTo(150, 200)
         ..close();
       final SurfacePath path2 = Path.from(path1) as SurfacePath;
-      Rect bounds = path2.pathRef.getBounds();
-      SurfacePath transformedPath = path2.transform(
+      final Rect bounds = path2.pathRef.getBounds();
+      final SurfacePath transformedPath = path2.transform(
           Matrix4.identity().scaled(0.5, 0.5).toFloat64());
       expect(transformedPath.pathRef.getBounds(), isNot(bounds));
     });

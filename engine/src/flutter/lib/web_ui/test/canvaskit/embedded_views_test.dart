@@ -108,7 +108,7 @@ void testMain() {
           ui.window.platformDispatcher as EnginePlatformDispatcher;
       final LayerSceneBuilder sb = LayerSceneBuilder();
       sb.pushOffset(0, 0);
-      Matrix4 scaleMatrix = Matrix4.identity()
+      final Matrix4 scaleMatrix = Matrix4.identity()
         ..scale(5, 5)
         ..translate(100, 100);
       sb.pushTransform(scaleMatrix.toFloat64());
@@ -223,7 +223,7 @@ void testMain() {
           ui.window.platformDispatcher as EnginePlatformDispatcher;
 
       void renderTestScene({required int viewCount}) {
-        LayerSceneBuilder sb = LayerSceneBuilder();
+        final LayerSceneBuilder sb = LayerSceneBuilder();
         sb.pushOffset(0, 0);
         for (int i = 0; i < viewCount; i++) {
           sb.addPicture(ui.Offset.zero, testPicture);
@@ -424,7 +424,7 @@ void testMain() {
           ui.window.platformDispatcher as EnginePlatformDispatcher;
 
       void renderTestScene() {
-        LayerSceneBuilder sb = LayerSceneBuilder();
+        final LayerSceneBuilder sb = LayerSceneBuilder();
         sb.pushOffset(0, 0);
         sb.pushClipRRect(
             ui.RRect.fromLTRBR(0, 0, 10, 10, ui.Radius.circular(3)));

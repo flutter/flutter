@@ -199,10 +199,10 @@ class EngineAutofillForm {
         ids.add(autofill.uniqueIdentifier);
 
         if (autofill.uniqueIdentifier != focusedElement.uniqueIdentifier) {
-          EngineInputType engineInputType =
+          final EngineInputType engineInputType =
               EngineInputType.fromName(field['inputType']['name']);
 
-          html.HtmlElement htmlElement = engineInputType.createDomElement();
+          final html.HtmlElement htmlElement = engineInputType.createDomElement();
           autofill.editingState.applyToDomElement(htmlElement);
           autofill.applyToDomElement(htmlElement);
           _hideAutofillElements(htmlElement);
@@ -232,7 +232,7 @@ class EngineAutofillForm {
 
     // If a form with the same Autofill elements is already on the dom, remove
     // it from DOM.
-    html.FormElement? form = formsOnTheDom[formIdentifier];
+    final html.FormElement? form = formsOnTheDom[formIdentifier];
     form?.remove();
 
     // In order to submit the form when Framework sends a `TextInput.commit`
@@ -273,8 +273,8 @@ class EngineAutofillForm {
   /// [TextEditingStrategy.addEventHandlers] method call and all
   /// listeners are removed during [TextEditingStrategy.disable] method call.
   List<StreamSubscription<html.Event>> addInputEventListeners() {
-    Iterable<String> keys = elements!.keys;
-    List<StreamSubscription<html.Event>> subscriptions =
+    final Iterable<String> keys = elements!.keys;
+    final List<StreamSubscription<html.Event>> subscriptions =
         <StreamSubscription<html.Event>>[];
     keys.forEach((String key) {
       final html.Element element = elements![key]!;
@@ -292,7 +292,7 @@ class EngineAutofillForm {
   }
 
   void handleChange(html.Element domElement, AutofillInfo autofillInfo) {
-    EditingState newEditingState = EditingState.fromDomElement(
+    final EditingState newEditingState = EditingState.fromDomElement(
         domElement as html.HtmlElement?);
 
     _sendAutofillEditingState(autofillInfo.uniqueIdentifier, newEditingState);
@@ -376,7 +376,7 @@ class AutofillInfo {
       {bool focusedElement = false}) {
     domElement.id = hint;
     if (domElement is html.InputElement) {
-      html.InputElement element = domElement;
+      final html.InputElement element = domElement;
       element.name = hint;
       element.id = hint;
       element.autocomplete = hint;
@@ -386,7 +386,7 @@ class AutofillInfo {
         element.type = 'text';
       }
     } else if (domElement is html.TextAreaElement) {
-      html.TextAreaElement element = domElement;
+      final html.TextAreaElement element = domElement;
       element.name = hint;
       element.id = hint;
       element.setAttribute('autocomplete', hint);
@@ -441,13 +441,13 @@ class EditingState {
   /// the [InputType] of the text field.
   factory EditingState.fromDomElement(html.HtmlElement? domElement) {
     if (domElement is html.InputElement) {
-      html.InputElement element = domElement;
+      final html.InputElement element = domElement;
       return EditingState(
           text: element.value,
           baseOffset: element.selectionStart,
           extentOffset: element.selectionEnd);
     } else if (domElement is html.TextAreaElement) {
-      html.TextAreaElement element = domElement;
+      final html.TextAreaElement element = domElement;
       return EditingState(
           text: element.value,
           baseOffset: element.selectionStart,
@@ -516,11 +516,11 @@ class EditingState {
   ///  * [applyTextToDomElement], which is used for non-focused elements.
   void applyToDomElement(html.HtmlElement? domElement) {
     if (domElement is html.InputElement) {
-      html.InputElement element = domElement;
+      final html.InputElement element = domElement;
       element.value = text;
       element.setSelectionRange(baseOffset!, extentOffset!);
     } else if (domElement is html.TextAreaElement) {
-      html.TextAreaElement element = domElement;
+      final html.TextAreaElement element = domElement;
       element.value = text;
       element.setSelectionRange(baseOffset!, extentOffset!);
     } else {
@@ -537,10 +537,10 @@ class EditingState {
   ///  * [applyToDomElement], which is used for focused elements.
   void applyTextToDomElement(html.HtmlElement? domElement) {
     if (domElement is html.InputElement) {
-      html.InputElement element = domElement;
+      final html.InputElement element = domElement;
       element.value = text;
     } else if (domElement is html.TextAreaElement) {
-      html.TextAreaElement element = domElement;
+      final html.TextAreaElement element = domElement;
       element.value = text;
     } else {
       throw UnsupportedError('Unsupported DOM element type');
@@ -976,7 +976,7 @@ abstract class DefaultTextEditingStrategy implements TextEditingStrategy {
   void handleChange(html.Event event) {
     assert(isEnabled);
 
-    EditingState newEditingState = EditingState.fromDomElement(activeDomElement);
+    final EditingState newEditingState = EditingState.fromDomElement(activeDomElement);
 
     if (newEditingState != lastEditingState) {
       lastEditingState = newEditingState;

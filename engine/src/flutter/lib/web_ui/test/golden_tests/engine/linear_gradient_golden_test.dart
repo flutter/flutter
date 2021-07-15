@@ -29,7 +29,7 @@ void testMain() async {
   test('Should draw linear gradient using rectangle.', () async {
     final RecordingCanvas rc =
         RecordingCanvas(const Rect.fromLTRB(0, 0, 500, 500));
-    Rect shaderRect = const Rect.fromLTRB(50, 50, 300, 300);
+    final Rect shaderRect = const Rect.fromLTRB(50, 50, 300, 300);
     final SurfacePaint paint = SurfacePaint()..shader = Gradient.linear(
         Offset(shaderRect.left, shaderRect.top),
         Offset(shaderRect.right, shaderRect.bottom),
@@ -44,15 +44,15 @@ void testMain() async {
   test('Should draw linear gradient with transform.', () async {
     final RecordingCanvas rc =
         RecordingCanvas(const Rect.fromLTRB(0, 0, 500, 500));
-    List<double> angles = <double>[0.0, 90.0, 180.0];
+    final List<double> angles = <double>[0.0, 90.0, 180.0];
     double yOffset = 0;
     for (double angle in angles) {
       final Rect shaderRect = Rect.fromLTWH(50, 50 + yOffset, 100, 100);
-      Matrix4 matrix = Matrix4.identity();
+      final Matrix4 matrix = Matrix4.identity();
       matrix.translate(shaderRect.left, shaderRect.top);
       matrix.multiply(Matrix4
           .rotationZ((angle / 180) * math.pi));
-      Matrix4 post = Matrix4.identity();
+      final Matrix4 post = Matrix4.identity();
       post.translate(-shaderRect.left, -shaderRect.top);
       matrix.multiply(post);
       final SurfacePaint paint = SurfacePaint()
@@ -78,7 +78,7 @@ void testMain() async {
   test('Should draw linear gradient using rounded rect.', () async {
     final RecordingCanvas rc =
         RecordingCanvas(const Rect.fromLTRB(0, 0, 500, 500));
-    Rect shaderRect = const Rect.fromLTRB(50, 50, 300, 300);
+    final Rect shaderRect = const Rect.fromLTRB(50, 50, 300, 300);
     final SurfacePaint paint = SurfacePaint()..shader = Gradient.linear(
         Offset(shaderRect.left, shaderRect.top),
         Offset(shaderRect.right, shaderRect.bottom),
@@ -93,7 +93,7 @@ void testMain() async {
   test('Should draw tiled repeated linear gradient with transform.', () async {
     final RecordingCanvas rc =
     RecordingCanvas(const Rect.fromLTRB(0, 0, 500, 500));
-    List<double> angles = <double>[0.0, 30.0, 210.0];
+    final List<double> angles = <double>[0.0, 30.0, 210.0];
     double yOffset = 0;
     for (double angle in angles) {
       final Rect shaderRect = Rect.fromLTWH(50, 50 + yOffset, 100, 100);
@@ -120,7 +120,7 @@ void testMain() async {
   test('Should draw tiled mirrored linear gradient with transform.', () async {
     final RecordingCanvas rc =
     RecordingCanvas(const Rect.fromLTRB(0, 0, 500, 500));
-    List<double> angles = <double>[0.0, 30.0, 210.0];
+    final List<double> angles = <double>[0.0, 30.0, 210.0];
     double yOffset = 0;
     for (double angle in angles) {
       final Rect shaderRect = Rect.fromLTWH(50, 50 + yOffset, 100, 100);

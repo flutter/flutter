@@ -71,7 +71,7 @@ void testMain() async {
       expect(frameInfo.image.debugDisposed, isTrue);
     });
     test('provides image loading progress', () async {
-      StringBuffer buffer = new StringBuffer();
+      final StringBuffer buffer = new StringBuffer();
       final HtmlCodec codec = HtmlCodec('sample_image1.png',
           chunkCallback: (int loaded, int total) {
         buffer.write('$loaded/$total,');
@@ -109,7 +109,7 @@ void testMain() async {
     });
     test('provides image loading progress from web', () async {
       final Uri uri = Uri.base.resolve('sample_image1.png');
-      StringBuffer buffer = new StringBuffer();
+      final StringBuffer buffer = new StringBuffer();
       final HtmlCodec codec = await ui.webOnlyInstantiateImageCodecFromUrl(uri,
           chunkCallback: (int loaded, int total) {
         buffer.write('$loaded/$total,');

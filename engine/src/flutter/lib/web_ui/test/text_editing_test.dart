@@ -742,7 +742,7 @@ void testMain() {
 
       // Form is added to DOM.
       expect(defaultTextEditingRoot.querySelectorAll('form'), isNotEmpty);
-      FormElement formElement = defaultTextEditingRoot.querySelector('form') as FormElement;
+      final FormElement formElement = defaultTextEditingRoot.querySelector('form') as FormElement;
       final Completer<bool> submittedForm = Completer<bool>();
       formElement.addEventListener(
           'submit', (Event event) => submittedForm.complete(true));
@@ -795,7 +795,7 @@ void testMain() {
 
       // Form is added to DOM.
       expect(defaultTextEditingRoot.querySelectorAll('form'), isNotEmpty);
-      FormElement formElement = defaultTextEditingRoot.querySelector('form') as FormElement;
+      final FormElement formElement = defaultTextEditingRoot.querySelector('form') as FormElement;
       final Completer<bool> submittedForm = Completer<bool>();
       formElement.addEventListener(
           'submit', (Event event) => submittedForm.complete(true));
@@ -1381,7 +1381,7 @@ void testMain() {
 
       input.setSelectionRange(2, 5);
       if (browserEngine == BrowserEngine.firefox) {
-        Event keyup = KeyboardEvent('keyup');
+        final Event keyup = KeyboardEvent('keyup');
         textEditing!.strategy.domElement!.dispatchEvent(keyup);
       } else {
         document.dispatchEvent(Event.eventType('Event', 'selectionchange'));
@@ -1447,7 +1447,7 @@ void testMain() {
       expect(formElement.childNodes, hasLength(5));
 
       // Autofill one of the form elements.
-      InputElement element = formElement.childNodes.first as InputElement;
+      final InputElement element = formElement.childNodes.first as InputElement;
       if (browserEngine == BrowserEngine.firefox) {
         expect(element.name,
             BrowserAutofillHints.instance.flutterToEngine(hintForFirstElement));
@@ -1994,12 +1994,12 @@ void testMain() {
       input.selectionStart = 1;
       input.selectionEnd = 2;
 
-      EditingState editingState1 = EditingState.fromDomElement(input);
-      EditingState editingState2 = EditingState.fromDomElement(input);
+      final EditingState editingState1 = EditingState.fromDomElement(input);
+      final EditingState editingState2 = EditingState.fromDomElement(input);
 
       input.setSelectionRange(1, 3);
 
-      EditingState editingState3 = EditingState.fromDomElement(input);
+      final EditingState editingState3 = EditingState.fromDomElement(input);
 
       expect(editingState1 == editingState2, isTrue);
       expect(editingState1 != editingState3, isTrue);
@@ -2074,7 +2074,7 @@ void checkInputEditingState(
 
 /// In case of an exception backup DOM element(s) can still stay on the DOM.
 void clearBackUpDomElementIfExists() {
-  List<Node> domElementsToRemove = <Node>[];
+  final List<Node> domElementsToRemove = <Node>[];
   if (defaultTextEditingRoot.querySelectorAll('input').length > 0) {
     domElementsToRemove..addAll(defaultTextEditingRoot.querySelectorAll('input'));
   }

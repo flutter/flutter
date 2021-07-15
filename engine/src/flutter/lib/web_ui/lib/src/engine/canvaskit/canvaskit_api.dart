@@ -330,7 +330,7 @@ final List<SkTextHeightBehavior> _skTextHeightBehaviors =
 ];
 
 SkTextHeightBehavior toSkTextHeightBehavior(ui.TextHeightBehavior behavior) {
-  int index = (behavior.applyHeightToFirstAscent ? 0 : 1 << 0) |
+  final int index = (behavior.applyHeightToFirstAscent ? 0 : 1 << 0) |
       (behavior.applyHeightToLastDescent ? 0 : 1 << 1);
   return _skTextHeightBehaviors[index];
 }

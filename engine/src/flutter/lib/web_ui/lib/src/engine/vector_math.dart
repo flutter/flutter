@@ -1020,8 +1020,8 @@ class Matrix4 {
   /// This transformation forgets the final Z component. If you need the
   /// Z component, see [transform3].
   void transform2(Float32List vector) {
-    double x = vector[0];
-    double y = vector[1];
+    final double x = vector[0];
+    final double y = vector[1];
     vector[0] = (_m4storage[0] * x) +
         (_m4storage[4] * y) +
         _m4storage[12];

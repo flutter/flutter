@@ -42,14 +42,14 @@ void paintPaths(BitmapCanvas canvas) {
         ..color = Color(0xFFFFFFFF)
         ..style = PaintingStyle.fill); // white
 
-  SurfacePaint paintFill = SurfacePaint()
+  final SurfacePaint paintFill = SurfacePaint()
     ..style = PaintingStyle.fill
     ..color = Color(0xFF00B0FF);
-  SurfacePaint paintStroke = SurfacePaint()
+  final SurfacePaint paintStroke = SurfacePaint()
     ..style = PaintingStyle.stroke
     ..strokeWidth = 2
     ..color = Color(0xFFE00000);
-  Path path1 = Path()
+  final Path path1 = Path()
     ..fillType = PathFillType.evenOdd
     ..moveTo(50, 0)
     ..lineTo(21, 90)
@@ -59,7 +59,7 @@ void paintPaths(BitmapCanvas canvas) {
     ..close()
     ..addRect(Rect.fromLTWH(20, 100, 200, 50))
     ..addRect(Rect.fromLTWH(40, 120, 160, 10));
-  Path path2 = Path()
+  final Path path2 = Path()
     ..fillType = PathFillType.nonZero
     ..moveTo(50, 200)
     ..lineTo(21, 290)

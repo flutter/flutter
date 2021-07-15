@@ -215,10 +215,10 @@ void testMain() {
 void _expectDrawDRRectCall(
     MockEngineCanvas mock, Map<String, dynamic> expectedArguments) {
   expect(mock.methodCallLog.length, equals(2));
-  MockCanvasCall mockCall = mock.methodCallLog[0];
+  final MockCanvasCall mockCall = mock.methodCallLog[0];
   expect(mockCall.methodName, equals('drawPath'));
-  Map<String, dynamic> argMap = mockCall.arguments as Map<String, dynamic>;
-  Map<String, dynamic> argContents = <String, dynamic>{};
+  final Map<String, dynamic> argMap = mockCall.arguments as Map<String, dynamic>;
+  final Map<String, dynamic> argContents = <String, dynamic>{};
   argMap.forEach((String key, dynamic value) {
     argContents[key] = value is SurfacePath ? value.toString() : value;
   });

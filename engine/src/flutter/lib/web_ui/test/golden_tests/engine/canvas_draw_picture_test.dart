@@ -38,7 +38,7 @@ void testMain() async {
       _drawTestPicture(builder, 100, false);
       builder.pop();
 
-      html.Element elm1 = builder
+      final html.Element elm1 = builder
           .build()
           .webOnlyRootElement!;
       html.document.body!.append(elm1);
@@ -68,7 +68,7 @@ void testMain() async {
       _drawTestPicture(builder, 100, true);
       builder.pop();
 
-      html.Element elm1 = builder
+      final html.Element elm1 = builder
           .build()
           .webOnlyRootElement!;
       html.document.body!.append(elm1);

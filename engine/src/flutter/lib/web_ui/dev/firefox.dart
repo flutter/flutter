@@ -56,7 +56,7 @@ class Firefox extends Browser {
   /// [Uri] or a [String].
   factory Firefox(Uri url, {bool debug = false}) {
     final String version = FirefoxArgParser.instance.version;
-    Completer<Uri> remoteDebuggerCompleter = Completer<Uri>.sync();
+    final Completer<Uri> remoteDebuggerCompleter = Completer<Uri>.sync();
     return Firefox._(() async {
       final BrowserInstallation installation = await getOrInstallFirefox(
         version,
@@ -83,8 +83,8 @@ user_pref("dom.max_script_run_time", 0);
 
       File(path.join(temporaryProfileDirectory.path, 'prefs.js'))
           .writeAsStringSync(_profile);
-      bool isMac = Platform.isMacOS;
-      List<String> args = <String>[
+      final bool isMac = Platform.isMacOS;
+      final List<String> args = <String>[
         url.toString(),
         '--profile',
         '${temporaryProfileDirectory.path}',

@@ -70,12 +70,12 @@ class LayerTree {
   ///
   /// This picture does not contain any platform views.
   ui.Picture flatten() {
-    CkPictureRecorder recorder = CkPictureRecorder();
-    CkCanvas canvas = recorder.beginRecording(ui.Rect.largest);
+    final CkPictureRecorder recorder = CkPictureRecorder();
+    final CkCanvas canvas = recorder.beginRecording(ui.Rect.largest);
     final PrerollContext prerollContext = PrerollContext(null, null);
     rootLayer.preroll(prerollContext, Matrix4.identity());
 
-    CkNWayCanvas internalNodesCanvas = CkNWayCanvas();
+    final CkNWayCanvas internalNodesCanvas = CkNWayCanvas();
     internalNodesCanvas.addCanvas(canvas);
     final PaintContext paintContext =
         PaintContext(internalNodesCanvas, canvas, null, null);

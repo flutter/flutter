@@ -15,7 +15,7 @@ void testMain() {
     test('Reuse returns no object when cache empty', () {
       final CrossFrameCache<TestItem> cache = CrossFrameCache<TestItem>();
       cache.commitFrame();
-      TestItem? requestedItem = cache.reuse('item1');
+      final TestItem? requestedItem = cache.reuse('item1');
       expect(requestedItem, null);
     });
 
@@ -53,7 +53,7 @@ void testMain() {
       cache.cache(testItem1.label, testItem1);
       cache.commitFrame();
       cache.commitFrame();
-      TestItem? requestedItem = cache.reuse('item1');
+      final TestItem? requestedItem = cache.reuse('item1');
       expect(requestedItem, null);
     });
 

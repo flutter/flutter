@@ -85,12 +85,12 @@ class EngineImageShader implements ui.ImageShader {
     final int imageHeight = image.height;
     final int newWidth = imageWidth * mirrorX;
     final int newHeight = imageHeight * mirrorY;
-    OffScreenCanvas offscreenCanvas = OffScreenCanvas(newWidth, newHeight);
-    Object renderContext = offscreenCanvas.getContext2d()!;
+    final OffScreenCanvas offscreenCanvas = OffScreenCanvas(newWidth, newHeight);
+    final Object renderContext = offscreenCanvas.getContext2d()!;
     for (int y = 0; y < mirrorY; y++) {
       for (int x = 0; x < mirrorX; x++) {
-        int flipX = x != 0 ? -1 : 1;
-        int flipY = y != 0 ? -1 : 1;
+        final int flipX = x != 0 ? -1 : 1;
+        final int flipY = y != 0 ? -1 : 1;
 
         /// To draw image flipped we set translate and scale and pass
         /// negative width/height to drawImage.
@@ -115,7 +115,7 @@ class EngineImageShader implements ui.ImageShader {
         offscreenCanvas.transferToImageBitmapSupported) {
       return offscreenCanvas.transferToImageBitmap();
     } else {
-      html.CanvasElement canvas =
+      final html.CanvasElement canvas =
           html.CanvasElement(width: newWidth, height: newHeight);
       final html.CanvasRenderingContext2D ctx = canvas.context2D;
       offscreenCanvas.transferImage(ctx);
@@ -129,8 +129,8 @@ class EngineImageShader implements ui.ImageShader {
     final Matrix4 transform = Matrix4.fromFloat32List(matrix4);
     final double dpr = ui.window.devicePixelRatio;
 
-    int widthInPixels = (shaderBounds.width * dpr).ceil();
-    int heightInPixels = (shaderBounds.height * dpr).ceil();
+    final int widthInPixels = (shaderBounds.width * dpr).ceil();
+    final int heightInPixels = (shaderBounds.height * dpr).ceil();
 
     assert(widthInPixels > 0 && heightInPixels > 0);
 
@@ -142,17 +142,17 @@ class EngineImageShader implements ui.ImageShader {
         isWebGl2, tileModeX, tileModeY);
 
     /// Render gradient into a bitmap and create a canvas pattern.
-    OffScreenCanvas offScreenCanvas =
+    final OffScreenCanvas offScreenCanvas =
         OffScreenCanvas(widthInPixels, heightInPixels);
-    GlContext gl = GlContext(offScreenCanvas);
+    final GlContext gl = GlContext(offScreenCanvas);
     gl.setViewportSize(widthInPixels, heightInPixels);
 
-    GlProgram glProgram = gl.cacheProgram(vertexShader, fragmentShader);
+    final GlProgram glProgram = gl.cacheProgram(vertexShader, fragmentShader);
     gl.useProgram(glProgram);
 
     const int vertexCount = 6;
     final Float32List vertices = Float32List(vertexCount * 2);
-    ui.Rect vRect = shaderBounds.translate(-shaderBounds.left, -shaderBounds.top);
+    final ui.Rect vRect = shaderBounds.translate(-shaderBounds.left, -shaderBounds.top);
     vertices[0] = vRect.left;
     vertices[1] = vRect.top;
     vertices[2] = vRect.right;
@@ -166,7 +166,7 @@ class EngineImageShader implements ui.ImageShader {
     vertices[10] = vRect.left;
     vertices[11] = vRect.top;
 
-    Object? positionAttributeLocation =
+    final Object positionAttributeLocation =
         gl.getAttributeLocation(glProgram.program, 'position');
 
     setupVertexTransforms(gl, glProgram, 0, 0,
@@ -187,7 +187,7 @@ class EngineImageShader implements ui.ImageShader {
     /// Setup geometry.
     ///
     /// Create buffer for vertex coordinates.
-    Object positionsBuffer = gl.createBuffer()!;
+    final Object positionsBuffer = gl.createBuffer()!;
     assert(positionsBuffer != null); // ignore: unnecessary_null_comparison
 
     Object? vao;
@@ -215,7 +215,7 @@ class EngineImageShader implements ui.ImageShader {
     ]);
 
     /// Copy image to the texture.
-    Object? texture = gl.createTexture();
+    final Object? texture = gl.createTexture();
     /// Texture units are a global array of references to the textures.
     /// By setting activeTexture, we associate the bound texture to a unit.
     /// Every time we call a texture function such as texImage2D with a target
@@ -260,7 +260,7 @@ class EngineImageShader implements ui.ImageShader {
       gl.unbindVertexArray();
     }
 
-    Object? bitmapImage = gl.readPatternData();
+    final Object? bitmapImage = gl.readPatternData();
     gl.bindArrayBuffer(null);
     gl.bindElementArrayBuffer(null);
     return context!.createPattern(bitmapImage!, 'no-repeat')!;

@@ -160,7 +160,7 @@ class PersistedClipRRect extends PersistedContainerSurface
 
   @override
   void apply() {
-    html.CssStyleDeclaration style = rootElement!.style;
+    final html.CssStyleDeclaration style = rootElement!.style;
     style
       ..left = '${rrect.left}px'
       ..top = '${rrect.top}px'
@@ -412,7 +412,7 @@ class PersistedPhysicalShape extends PersistedContainerSurface
   @override
   void update(PersistedPhysicalShape oldSurface) {
     super.update(oldSurface);
-    bool pathChanged = oldSurface.path != path;
+    final bool pathChanged = oldSurface.path != path;
     if (pathChanged) {
       localClipBounds = null;
     }

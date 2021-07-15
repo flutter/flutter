@@ -42,7 +42,7 @@ void testMain() async {
     shaderRect = shaderRect.translate(-210, 120);
 
     /// Path.
-    Path path = Path()
+    final Path path = Path()
       ..moveTo(shaderRect.center.dx, shaderRect.top)
       ..lineTo(shaderRect.right, shaderRect.bottom)
       ..lineTo(shaderRect.left, shaderRect.bottom)
@@ -67,7 +67,7 @@ void testMain() async {
     final RecordingCanvas rc =
         RecordingCanvas(const Rect.fromLTRB(0, 0, screenWidth, screenHeight));
     //Rect shaderRect = const Rect.fromLTRB(20, 20, 100, 100);
-    Rect shaderRect = const Rect.fromLTRB(0, 0, 100, 100);
+    final Rect shaderRect = const Rect.fromLTRB(0, 0, 100, 100);
     final SurfacePaint paint = Paint() as SurfacePaint;
     paint.shader =
         ImageShader(testImage, tmx, tmy, Matrix4.identity().toFloat64()
@@ -126,9 +126,9 @@ HtmlImage createTestImage() {
   const int width = 16;
   const int width2 = width ~/ 2;
   const int height = 16;
-  html.CanvasElement canvas =
+  final html.CanvasElement canvas =
       new html.CanvasElement(width: width, height: height);
-  html.CanvasRenderingContext2D ctx = canvas.context2D;
+  final html.CanvasRenderingContext2D ctx = canvas.context2D;
   ctx.fillStyle = '#E04040';
   ctx.fillRect(0, 0, width2, width2);
   ctx.fill();
@@ -138,7 +138,7 @@ HtmlImage createTestImage() {
   ctx.fillStyle = '#2040E0';
   ctx.fillRect(width2, width2, width2, width2);
   ctx.fill();
-  html.ImageElement imageElement = html.ImageElement();
+  final html.ImageElement imageElement = html.ImageElement();
   imageElement.src = js_util.callMethod(canvas, 'toDataURL', <dynamic>[]);
   return HtmlImage(imageElement, width, height);
 }

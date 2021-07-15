@@ -55,7 +55,7 @@ class LicensesCommand extends Command<bool> {
       RegExp(r'// Copyright 2013 The Flutter Authors\. All rights reserved\.');
 
   void _expectLicenseHeader(io.File file) {
-    List<String> head = file.readAsStringSync().split('\n').take(3).toList();
+    final List<String> head = file.readAsStringSync().split('\n').take(3).toList();
 
     _expect(head.length >= 3, 'File too short: ${file.path}');
     _expect(

@@ -75,11 +75,11 @@ class CrossFrameCache<T> {
     if (_reusablePool == null) {
       return null;
     }
-    List<_CrossFrameCacheItem<T>>? items = _reusablePool![key];
+    final List<_CrossFrameCacheItem<T>>? items = _reusablePool![key];
     if (items == null || items.isEmpty) {
       return null;
     }
-    _CrossFrameCacheItem<T> item = items.removeAt(0);
+    final _CrossFrameCacheItem<T> item = items.removeAt(0);
     _addToCache(key, item);
     return item.value;
   }

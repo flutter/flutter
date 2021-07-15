@@ -206,10 +206,10 @@ void testMain() {
       }
 
       for (int index = 0; index < (11 * axisAlignedPointsCount); ++index) {
-        int f = index % axisAlignedPointsCount;
-        int g = (f + 1) % axisAlignedPointsCount;
+        final int f = index % axisAlignedPointsCount;
+        final int g = (f + 1) % axisAlignedPointsCount;
         path.reset();
-        int curveSelect = index % 11;
+        final int curveSelect = index % 11;
         switch (curveSelect) {
           case 0:
             path.moveTo(axisAlignedPts[f].dx, axisAlignedPts[f].dy);
@@ -285,13 +285,13 @@ void testMain() {
             break;
         }
         if (curveSelect != 7 && curveSelect != 10) {
-          int result = path.convexityType;
+          final int result = path.convexityType;
           expect(result, SPathConvexityType.kConvex);
         } else {
           // we make a copy so that we don't cache the result on the passed
           // in path.
-          SurfacePath path2 = SurfacePath.from(path);
-          int c = path2.convexityType;
+          final SurfacePath path2 = SurfacePath.from(path);
+          final int c = path2.convexityType;
           assert(SPathConvexityType.kUnknown == c ||
               SPathConvexityType.kConcave == c);
         }
@@ -414,8 +414,8 @@ void testMain() {
     test('degenerate segments1', () {
       final SurfacePath strokedSin = SurfacePath();
       for (int i = 0; i < 2000; i++) {
-        double x = i.toDouble() / 2.0;
-        double y = 500 - (x + math.sin(x / 100) * 40) / 3;
+        final double x = i.toDouble() / 2.0;
+        final double y = 500 - (x + math.sin(x / 100) * 40) / 3;
         if (0 == i) {
           strokedSin.moveTo(x, y);
         } else {
@@ -452,7 +452,7 @@ class LineTestCase {
 /// with moveTo/lineTo instructions for points.
 void setFromString(SurfacePath path, String value) {
   bool first = true;
-  List<String> points = value.split(' ');
+  final List<String> points = value.split(' ');
   if (points.length < 2) {
     return;
   }

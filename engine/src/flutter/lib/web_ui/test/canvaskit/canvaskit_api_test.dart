@@ -1097,9 +1097,9 @@ void _canvasTests() {
       final double shadowY = bounds.top - 600.0;
 
       const ui.Color color = ui.Color(0xAABBCCDD);
-      ui.Color inAmbient =
+      final ui.Color inAmbient =
           color.withAlpha((color.alpha * ambientAlpha).round());
-      ui.Color inSpot = color.withAlpha((color.alpha * spotAlpha).round());
+      final ui.Color inSpot = color.withAlpha((color.alpha * spotAlpha).round());
 
       final SkTonalColors inTonalColors = SkTonalColors(
         ambient: makeFreshSkColor(inAmbient),
@@ -1390,7 +1390,7 @@ void _paragraphTests() {
   });
 
   test('RectHeightStyle', () {
-    SkParagraphStyleProperties props = SkParagraphStyleProperties();
+    final SkParagraphStyleProperties props = SkParagraphStyleProperties();
     props.heightMultiplier = 3;
     props.textAlign = canvasKit.TextAlign.Start;
     props.textDirection = canvasKit.TextDirection.LTR;

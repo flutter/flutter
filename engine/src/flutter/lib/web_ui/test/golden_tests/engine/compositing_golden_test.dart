@@ -186,7 +186,7 @@ void testMain() async {
   });
 
   test('pushPhysicalShape with path and elevation', () async {
-    ui.Path cutCornersButton = ui.Path()
+    final ui.Path cutCornersButton = ui.Path()
       ..moveTo(15, 10)
       ..lineTo(60, 10)
       ..lineTo(60, 60)
@@ -246,7 +246,7 @@ void testMain() async {
   });
 
   test('pushPhysicalShape should update across frames', () async {
-    ui.Path cutCornersButton = ui.Path()
+    final ui.Path cutCornersButton = ui.Path()
       ..moveTo(15, 10)
       ..lineTo(60, 10)
       ..lineTo(60, 60)
@@ -256,7 +256,7 @@ void testMain() async {
 
     /// Start with shape that has elevation and red color.
     final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
-    ui.PhysicalShapeEngineLayer oldShapeLayer = builder.pushPhysicalShape(
+    final ui.PhysicalShapeEngineLayer oldShapeLayer = builder.pushPhysicalShape(
       path: cutCornersButton,
       clipBehavior: ui.Clip.hardEdge,
       color: const ui.Color(0xFFFF0000),
@@ -265,14 +265,14 @@ void testMain() async {
     _drawTestPicture(builder);
     builder.pop();
 
-    html.Element viewElement = builder.build().webOnlyRootElement!;
+    final html.Element viewElement = builder.build().webOnlyRootElement!;
     html.document.body!.append(viewElement);
     await matchGoldenFile('compositing_physical_update_1.png', region: region);
     viewElement.remove();
 
     /// Update color to green.
     final SurfaceSceneBuilder builder2 = SurfaceSceneBuilder();
-    ui.PhysicalShapeEngineLayer oldShapeLayer2 = builder2.pushPhysicalShape(
+    final ui.PhysicalShapeEngineLayer oldShapeLayer2 = builder2.pushPhysicalShape(
       path: cutCornersButton,
       clipBehavior: ui.Clip.hardEdge,
       color: const ui.Color(0xFF00FF00),
@@ -282,14 +282,14 @@ void testMain() async {
     _drawTestPicture(builder2);
     builder2.pop();
 
-    html.Element viewElement2 = builder2.build().webOnlyRootElement!;
+    final html.Element viewElement2 = builder2.build().webOnlyRootElement!;
     html.document.body!.append(viewElement2);
     await matchGoldenFile('compositing_physical_update_2.png', region: region);
     viewElement2.remove();
 
     /// Update elevation.
     final SurfaceSceneBuilder builder3 = SurfaceSceneBuilder();
-    ui.PhysicalShapeEngineLayer oldShapeLayer3 = builder3.pushPhysicalShape(
+    final ui.PhysicalShapeEngineLayer oldShapeLayer3 = builder3.pushPhysicalShape(
       path: cutCornersButton,
       clipBehavior: ui.Clip.hardEdge,
       color: const ui.Color(0xFF00FF00),
@@ -299,7 +299,7 @@ void testMain() async {
     _drawTestPicture(builder3);
     builder3.pop();
 
-    html.Element viewElement3 = builder3.build().webOnlyRootElement!;
+    final html.Element viewElement3 = builder3.build().webOnlyRootElement!;
     html.document.body!.append(viewElement3);
     await matchGoldenFile('compositing_physical_update_3.png',
         region: region, maxDiffRatePercent: 0.8);
@@ -307,7 +307,7 @@ void testMain() async {
 
     /// Update shape from arbitrary path to rect.
     final SurfaceSceneBuilder builder4 = SurfaceSceneBuilder();
-    ui.PhysicalShapeEngineLayer oldShapeLayer4 = builder4.pushPhysicalShape(
+    final ui.PhysicalShapeEngineLayer oldShapeLayer4 = builder4.pushPhysicalShape(
       path: ui.Path()..addOval(ui.Rect.fromLTRB(10, 10, 60, 60)),
       clipBehavior: ui.Clip.hardEdge,
       color: const ui.Color(0xFF00FF00),
@@ -317,14 +317,14 @@ void testMain() async {
     _drawTestPicture(builder4);
     builder4.pop();
 
-    html.Element viewElement4 = builder4.build().webOnlyRootElement!;
+    final html.Element viewElement4 = builder4.build().webOnlyRootElement!;
     html.document.body!.append(viewElement4);
     await matchGoldenFile('compositing_physical_update_4.png', region: region);
     viewElement4.remove();
 
     /// Update shape back to arbitrary path.
     final SurfaceSceneBuilder builder5 = SurfaceSceneBuilder();
-    ui.PhysicalShapeEngineLayer oldShapeLayer5 = builder5.pushPhysicalShape(
+    final ui.PhysicalShapeEngineLayer oldShapeLayer5 = builder5.pushPhysicalShape(
       path: cutCornersButton,
       clipBehavior: ui.Clip.hardEdge,
       color: const ui.Color(0xFF00FF00),
@@ -334,7 +334,7 @@ void testMain() async {
     _drawTestPicture(builder5);
     builder5.pop();
 
-    html.Element viewElement5 = builder5.build().webOnlyRootElement!;
+    final html.Element viewElement5 = builder5.build().webOnlyRootElement!;
     html.document.body!.append(viewElement5);
     await matchGoldenFile('compositing_physical_update_3.png',
         region: region,
@@ -354,7 +354,7 @@ void testMain() async {
     _drawTestPicture(builder6);
     builder6.pop();
 
-    html.Element viewElement6 = builder6.build().webOnlyRootElement!;
+    final html.Element viewElement6 = builder6.build().webOnlyRootElement!;
     html.document.body!.append(viewElement6);
     await matchGoldenFile('compositing_physical_update_5.png', region: region);
     viewElement6.remove();

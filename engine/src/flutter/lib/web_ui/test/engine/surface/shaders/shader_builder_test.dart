@@ -12,12 +12,12 @@ void main() {
 }
 
 void testMain() {
-  String mat2Sample = 'mat2(1.1, 2.1, 1.2, 2.2)';
-  String mat3Sample = 'mat3(1.1, 2.1, 3.1, // first column (not row!)\n'
+  final String mat2Sample = 'mat2(1.1, 2.1, 1.2, 2.2)';
+  final String mat3Sample = 'mat3(1.1, 2.1, 3.1, // first column (not row!)\n'
       '1.2, 2.2, 3.2, // second column\n'
       '1.3, 2.3, 3.3  // third column\n'
       ')';
-  String mat4Sample = 'mat3(1.1, 2.1, 3.1, 4.1,\n'
+  final String mat4Sample = 'mat3(1.1, 2.1, 3.1, 4.1,\n'
       '1.2, 2.2, 3.2, 4.2,\n'
       '1.3, 2.3, 3.3, 4.3,\n'
       '1.4, 2.4, 3.4, 4.4,\n'
@@ -29,7 +29,7 @@ void testMain() {
 
   group('Shader Declarations', () {
     test('Constant declaration WebGL1', () {
-      ShaderBuilder builder = ShaderBuilder(WebGLVersion.webgl1);
+      final ShaderBuilder builder = ShaderBuilder(WebGLVersion.webgl1);
       builder.addConst(ShaderType.kBool, 'false');
       builder.addConst(ShaderType.kInt, '0');
       builder.addConst(ShaderType.kFloat, '1.0');
@@ -67,7 +67,7 @@ void testMain() {
     });
 
     test('Constant declaration WebGL2', () {
-      ShaderBuilder builder = ShaderBuilder(WebGLVersion.webgl2);
+      final ShaderBuilder builder = ShaderBuilder(WebGLVersion.webgl2);
       builder.addConst(ShaderType.kBool, 'false');
       builder.addConst(ShaderType.kInt, '0');
       builder.addConst(ShaderType.kFloat, '1.0');
@@ -106,7 +106,7 @@ void testMain() {
     });
 
     test('Attribute declaration WebGL1', () {
-      ShaderBuilder builder = ShaderBuilder(WebGLVersion.webgl1);
+      final ShaderBuilder builder = ShaderBuilder(WebGLVersion.webgl1);
       builder.addIn(ShaderType.kVec4, name: 'position');
       builder.addIn(ShaderType.kVec4);
       expect(
@@ -116,7 +116,7 @@ void testMain() {
     });
 
     test('in declaration WebGL1', () {
-      ShaderBuilder builder = ShaderBuilder.fragment(WebGLVersion.webgl1);
+      final ShaderBuilder builder = ShaderBuilder.fragment(WebGLVersion.webgl1);
       builder.addIn(ShaderType.kVec4, name: 'position');
       builder.addIn(ShaderType.kVec4);
       expect(
@@ -126,7 +126,7 @@ void testMain() {
     });
 
     test('Attribute declaration WebGL2', () {
-      ShaderBuilder builder = ShaderBuilder(WebGLVersion.webgl2);
+      final ShaderBuilder builder = ShaderBuilder(WebGLVersion.webgl2);
       builder.addIn(ShaderType.kVec4, name: 'position');
       builder.addIn(ShaderType.kVec4);
       expect(
@@ -137,8 +137,8 @@ void testMain() {
     });
 
     test('Uniform declaration WebGL1', () {
-      ShaderBuilder builder = ShaderBuilder(WebGLVersion.webgl1);
-      ShaderDeclaration variable =
+      final ShaderBuilder builder = ShaderBuilder(WebGLVersion.webgl1);
+      final ShaderDeclaration variable =
           builder.addUniform(ShaderType.kVec4, name: 'v1');
       expect(variable.name, 'v1');
       expect(variable.dataType, ShaderType.kVec4);
@@ -151,8 +151,8 @@ void testMain() {
     });
 
     test('Uniform declaration WebGL2', () {
-      ShaderBuilder builder = ShaderBuilder(WebGLVersion.webgl2);
-      ShaderDeclaration variable =
+      final ShaderBuilder builder = ShaderBuilder(WebGLVersion.webgl2);
+      final ShaderDeclaration variable =
           builder.addUniform(ShaderType.kVec4, name: 'v1');
       expect(variable.name, 'v1');
       expect(variable.dataType, ShaderType.kVec4);
@@ -166,7 +166,7 @@ void testMain() {
     });
 
     test('Float precision', () {
-      ShaderBuilder builder = ShaderBuilder(WebGLVersion.webgl2);
+      final ShaderBuilder builder = ShaderBuilder(WebGLVersion.webgl2);
       builder.floatPrecision = ShaderPrecision.kLow;
       builder.addUniform(ShaderType.kFloat, name: 'f1');
       expect(
@@ -177,7 +177,7 @@ void testMain() {
     });
 
     test('Integer precision', () {
-      ShaderBuilder builder = ShaderBuilder(WebGLVersion.webgl2);
+      final ShaderBuilder builder = ShaderBuilder(WebGLVersion.webgl2);
       builder.integerPrecision = ShaderPrecision.kLow;
       builder.addUniform(ShaderType.kInt, name: 'i1');
       expect(
@@ -188,11 +188,11 @@ void testMain() {
     });
 
     test('Method', () {
-      ShaderBuilder builder = ShaderBuilder(WebGLVersion.webgl2);
+      final ShaderBuilder builder = ShaderBuilder(WebGLVersion.webgl2);
       builder.floatPrecision = ShaderPrecision.kMedium;
-      ShaderDeclaration variable =
+      final ShaderDeclaration variable =
           builder.addUniform(ShaderType.kFloat, name: 'f1');
-      ShaderMethod m = builder.addMethod('main');
+      final ShaderMethod m = builder.addMethod('main');
       m.addStatement('f1 = 5.0;');
       expect(
           builder.build(),

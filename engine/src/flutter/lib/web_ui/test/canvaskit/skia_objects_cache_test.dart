@@ -36,7 +36,7 @@ void _tests() {
 
   group(ManagedSkiaObject, () {
     test('implements create, cache, delete, resurrect, delete lifecycle', () {
-      FakeRasterizer fakeRasterizer = FakeRasterizer();
+      final FakeRasterizer fakeRasterizer = FakeRasterizer();
       EnginePlatformDispatcher.instance.rasterizer = fakeRasterizer;
 
       // Trigger first create
@@ -82,11 +82,11 @@ void _tests() {
     });
 
     test('is added to SkiaObjects cache if expensive', () {
-      TestSkiaObject object1 = TestSkiaObject(isExpensive: true);
+      final TestSkiaObject object1 = TestSkiaObject(isExpensive: true);
       expect(SkiaObjects.expensiveCache.length, 1);
       expect(SkiaObjects.expensiveCache.debugContains(object1), isTrue);
 
-      TestSkiaObject object2 = TestSkiaObject(isExpensive: true);
+      final TestSkiaObject object2 = TestSkiaObject(isExpensive: true);
       expect(SkiaObjects.expensiveCache.length, 2);
       expect(SkiaObjects.expensiveCache.debugContains(object2), isTrue);
 

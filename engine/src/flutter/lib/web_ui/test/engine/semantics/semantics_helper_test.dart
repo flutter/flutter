@@ -74,10 +74,10 @@ void testMain() {
     test(
         'Relevants events targeting placeholder should not be forwarded to the framework',
         () async {
-      html.Event event = html.MouseEvent('mousedown');
+      final html.Event event = html.MouseEvent('mousedown');
       _placeholder!.dispatchEvent(event);
 
-      bool shouldForwardToFramework =
+      final bool shouldForwardToFramework =
           desktopSemanticsEnabler.tryEnableSemantics(event);
 
       expect(shouldForwardToFramework, isFalse);
@@ -132,7 +132,7 @@ void testMain() {
           event = html.MouseEvent('mousemove');
         }
 
-        bool shouldForwardToFramework =
+        final bool shouldForwardToFramework =
             mobileSemanticsEnabler.tryEnableSemantics(event);
 
         expect(shouldForwardToFramework, isTrue);

@@ -19,12 +19,12 @@ void main() {
 void testMain() {
   group('PathMetric length', () {
     test('empty path', () {
-      Path path = Path();
+      final Path path = Path();
       expect(path.computeMetrics().isEmpty, isTrue);
     });
 
     test('simple line', () {
-      Path path = Path();
+      final Path path = Path();
       path.moveTo(100.0, 50.0);
       path.lineTo(200.0, 100.0);
       expect(path.computeMetrics().isEmpty, isFalse);
@@ -34,7 +34,7 @@ void testMain() {
     });
 
     test('2 lines', () {
-      Path path = Path();
+      final Path path = Path();
       path.moveTo(100.0, 50.0);
       path.lineTo(200.0, 50.0);
       path.lineTo(100.0, 200.0);
@@ -45,7 +45,7 @@ void testMain() {
     });
 
     test('2 lines forceClosed', () {
-      Path path = Path();
+      final Path path = Path();
       path.moveTo(100.0, 50.0);
       path.lineTo(200.0, 50.0);
       path.lineTo(100.0, 200.0);
@@ -57,7 +57,7 @@ void testMain() {
     });
 
     test('2 subpaths', () {
-      Path path = Path();
+      final Path path = Path();
       path.moveTo(100.0, 50.0);
       path.lineTo(200.0, 100.0);
       path.moveTo(200.0, 100.0);
@@ -69,7 +69,7 @@ void testMain() {
     });
 
     test('quadratic curve', () {
-      Path path = Path();
+      final Path path = Path();
       path.moveTo(20, 100);
       path.quadraticBezierTo(80, 10, 140, 110);
       final List<double> contourLengths = computeLengths(path.computeMetrics());
@@ -78,7 +78,7 @@ void testMain() {
     });
 
     test('cubic curve', () {
-      Path path = Path();
+      final Path path = Path();
       path.moveTo(20, 100);
       path.cubicTo(80, 10, 120, 90, 140, 40);
       final List<double> contourLengths = computeLengths(path.computeMetrics());
@@ -87,7 +87,7 @@ void testMain() {
     });
 
     test('addRect', () {
-      Path path = Path();
+      final Path path = Path();
       path.addRect(Rect.fromLTRB(20, 30, 220, 130));
       final List<double> contourLengths = computeLengths(path.computeMetrics());
       expect(contourLengths.length, 1);
@@ -95,7 +95,7 @@ void testMain() {
     });
 
     test('addRRect with zero radius', () {
-      Path path = Path();
+      final Path path = Path();
       path.addRRect(RRect.fromLTRBR(20, 30, 220, 130, Radius.circular(0)));
       final List<double> contourLengths = computeLengths(path.computeMetrics());
       expect(contourLengths.length, 1);
@@ -103,7 +103,7 @@ void testMain() {
     });
 
     test('addRRect with elliptical radius', () {
-      Path path = Path();
+      final Path path = Path();
       path.addRRect(RRect.fromLTRBR(20, 30, 220, 130, Radius.elliptical(8, 4)));
       final List<double> contourLengths = computeLengths(path.computeMetrics());
       expect(contourLengths.length, 1);
@@ -117,8 +117,8 @@ void testMain() {
       const double cy = 100;
       const double startAngle = 0.0;
       const double endAngle = 90.0;
-      double startRad = startAngle * math.pi / 180.0;
-      double endRad = endAngle * math.pi / 180.0;
+      final double startRad = startAngle * math.pi / 180.0;
+      final double endRad = endAngle * math.pi / 180.0;
 
       final double startX = cx + (rx * math.cos(startRad));
       final double startY = cy + (ry * math.sin(startRad));
@@ -146,8 +146,8 @@ void testMain() {
       const double cy = 100;
       const double startAngle = 0.0;
       const double endAngle = 180.0;
-      double startRad = startAngle * math.pi / 180.0;
-      double endRad = endAngle * math.pi / 180.0;
+      final double startRad = startAngle * math.pi / 180.0;
+      final double endRad = endAngle * math.pi / 180.0;
 
       final double startX = cx + (rx * math.cos(startRad));
       final double startY = cy + (ry * math.sin(startRad));
@@ -175,8 +175,8 @@ void testMain() {
       const double cy = 100;
       const double startAngle = 0.0;
       const double endAngle = 270.0;
-      double startRad = startAngle * math.pi / 180.0;
-      double endRad = endAngle * math.pi / 180.0;
+      final double startRad = startAngle * math.pi / 180.0;
+      final double endRad = endAngle * math.pi / 180.0;
 
       final double startX = cx + (rx * math.cos(startRad));
       final double startY = cy + (ry * math.sin(startRad));
@@ -204,8 +204,8 @@ void testMain() {
       const double cy = 100;
       const double startAngle = 0.0;
       const double endAngle = 270.0;
-      double startRad = startAngle * math.pi / 180.0;
-      double endRad = endAngle * math.pi / 180.0;
+      final double startRad = startAngle * math.pi / 180.0;
+      final double endRad = endAngle * math.pi / 180.0;
 
       final double startX = cx + (rx * math.cos(startRad));
       final double startY = cy + (ry * math.sin(startRad));

@@ -36,7 +36,7 @@ void testMain() async {
         BitmapCanvas(canvasBounds, RenderStrategy());
     final RecordingCanvas canvas = RecordingCanvas(canvasBounds);
 
-    bool enableFill =
+    final bool enableFill =
         mode == PaintMode.kStrokeAndFill || mode == PaintMode.kFill;
     if (enableFill) {
       paint ??= SurfacePaint()

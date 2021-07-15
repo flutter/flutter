@@ -57,8 +57,8 @@ void testMain() async {
     path.moveTo(50, 130);
     path.lineTo(150, 20);
 
-    PathMetric metric = path.computeMetrics().first;
-    Tangent t = metric.getTangentForOffset(50.0)!;
+    final PathMetric metric = path.computeMetrics().first;
+    final Tangent t = metric.getTangentForOffset(50.0)!;
     expect(t.position.dx, within(from: 83.633, distance: 0.01));
     expect(t.position.dy, within(from: 93.0, distance: 0.01));
     expect(t.vector.dx, within(from: 0.672, distance: 0.01));
@@ -67,14 +67,14 @@ void testMain() async {
 
   test('Should calculate tangent on cubic curve', () async {
     final Path path = Path();
-    double p1x = 240;
-    double p1y = 120;
-    double p2x = 320;
-    double p2y = 25;
+    final double p1x = 240;
+    final double p1y = 120;
+    final double p2x = 320;
+    final double p2y = 25;
     path.moveTo(150, 20);
     path.quadraticBezierTo(p1x, p1y, p2x, p2y);
-    PathMetric metric = path.computeMetrics().first;
-    Tangent t = metric.getTangentForOffset(50.0)!;
+    final PathMetric metric = path.computeMetrics().first;
+    final Tangent t = metric.getTangentForOffset(50.0)!;
     expect(t.position.dx, within(from: 187.25, distance: 0.01));
     expect(t.position.dy, within(from: 53.33, distance: 0.01));
     expect(t.vector.dx, within(from: 0.82, distance: 0.01));
@@ -83,14 +83,14 @@ void testMain() async {
 
   test('Should calculate tangent on quadratic curve', () async {
     final Path path = Path();
-    double p0x = 150;
-    double p0y = 20;
-    double p1x = 320;
-    double p1y = 25;
+    final double p0x = 150;
+    final double p0y = 20;
+    final double p1x = 320;
+    final double p1y = 25;
     path.moveTo(150, 20);
     path.quadraticBezierTo(p0x, p0y, p1x, p1y);
-    PathMetric metric = path.computeMetrics().first;
-    Tangent t = metric.getTangentForOffset(50.0)!;
+    final PathMetric metric = path.computeMetrics().first;
+    final Tangent t = metric.getTangentForOffset(50.0)!;
     expect(t.position.dx, within(from: 199.82, distance: 0.01));
     expect(t.position.dy, within(from: 21.46, distance: 0.01));
     expect(t.vector.dx, within(from: 0.99, distance: 0.01));
@@ -114,23 +114,23 @@ void testMain() async {
     final SurfacePath path = SurfacePath();
     path.moveTo(50, 130);
     path.lineTo(150, 20);
-    double p1x = 240;
-    double p1y = 120;
-    double p2x = 320;
-    double p2y = 25;
+    final double p1x = 240;
+    final double p1y = 120;
+    final double p2x = 320;
+    final double p2y = 25;
     path.quadraticBezierTo(p1x, p1y, p2x, p2y);
 
     rc.drawPath(path, paint);
 
-    double t0 = 0.2;
-    double t1 = 0.7;
+    final double t0 = 0.2;
+    final double t1 = 0.7;
 
-    List<PathMetric> metrics = path.computeMetrics().toList();
+    final List<PathMetric> metrics = path.computeMetrics().toList();
     double totalLength = 0;
     for (PathMetric m in metrics) {
       totalLength += m.length;
     }
-    Path dashedPath = Path();
+    final Path dashedPath = Path();
     for (final PathMetric measurePath in path.computeMetrics()) {
       double distance = totalLength * t0;
       bool draw = true;
@@ -166,25 +166,25 @@ void testMain() async {
     final Path path = Path();
     path.moveTo(50, 130);
     path.lineTo(150, 20);
-    double p1x = 40;
-    double p1y = 120;
-    double p2x = 300;
-    double p2y = 130;
-    double p3x = 320;
-    double p3y = 25;
+    final double p1x = 40;
+    final double p1y = 120;
+    final double p2x = 300;
+    final double p2y = 130;
+    final double p3x = 320;
+    final double p3y = 25;
     path.cubicTo(p1x, p1y, p2x, p2y, p3x, p3y);
 
     rc.drawPath(path, paint);
 
-    double t0 = 0.2;
-    double t1 = 0.7;
+    final double t0 = 0.2;
+    final double t1 = 0.7;
 
-    List<PathMetric> metrics = path.computeMetrics().toList();
+    final List<PathMetric> metrics = path.computeMetrics().toList();
     double totalLength = 0;
     for (PathMetric m in metrics) {
       totalLength += m.length;
     }
-    Path dashedPath = Path();
+    final Path dashedPath = Path();
     for (final PathMetric measurePath in path.computeMetrics()) {
       double distance = totalLength * t0;
       bool draw = true;

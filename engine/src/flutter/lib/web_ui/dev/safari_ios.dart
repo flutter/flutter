@@ -61,7 +61,7 @@ class SafariIos extends Browser {
       // Uses `xcrun simctl`. It is a command line utility to control the
       // Simulator. For more details on interacting with the simulator:
       // https://developer.apple.com/library/archive/documentation/IDEs/Conceptual/iOS_Simulator_Guide/InteractingwiththeiOSSimulator/InteractingwiththeiOSSimulator.html
-      io.Process process = await io.Process.start('xcrun', <String>[
+      final io.Process process = await io.Process.start('xcrun', <String>[
         'simctl',
         'openurl', // Opens the url on Safari installed on the simulator.
         'booted', // The simulator is already booted.

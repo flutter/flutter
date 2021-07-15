@@ -59,11 +59,11 @@ class Edge extends Browser {
       // Debug is not a valid option for Edge. Remove it.
       String pathToOpen = url.toString();
       if(pathToOpen.contains('debug')) {
-        int index = pathToOpen.indexOf('debug');
+        final int index = pathToOpen.indexOf('debug');
         pathToOpen = pathToOpen.substring(0, index-1);
       }
 
-      Process process = await Process.start(
+      final Process process = await Process.start(
         installation.executable,
         <String>['$pathToOpen','-k'],
       );

@@ -33,14 +33,14 @@ class VertexShaders {
   ///     }
   static String writeBaseVertexShader() {
     if (_baseVertexShader == null) {
-      ShaderBuilder builder = ShaderBuilder(webGLVersion);
+      final ShaderBuilder builder = ShaderBuilder(webGLVersion);
       builder.addIn(ShaderType.kVec4, name: 'position');
       builder.addIn(ShaderType.kVec4, name: 'color');
       builder.addUniform(ShaderType.kMat4, name: 'u_ctransform');
       builder.addUniform(ShaderType.kVec4, name: 'u_scale');
       builder.addUniform(ShaderType.kVec4, name: 'u_shift');
       builder.addOut(ShaderType.kVec4, name: 'v_color');
-      ShaderMethod method = builder.addMethod('main');
+      final ShaderMethod method = builder.addMethod('main');
       method.addStatement(
           'gl_Position = ((u_ctransform * position) * u_scale) + u_shift;');
       method.addStatement('v_color = color.zyxw;');
@@ -51,14 +51,14 @@ class VertexShaders {
 
   static String writeTextureVertexShader() {
     if (_textureVertexShader == null) {
-      ShaderBuilder builder = ShaderBuilder(webGLVersion);
+      final ShaderBuilder builder = ShaderBuilder(webGLVersion);
       builder.addIn(ShaderType.kVec4, name: 'position');
       builder.addUniform(ShaderType.kMat4, name: 'u_ctransform');
       builder.addUniform(ShaderType.kVec4, name: 'u_scale');
       builder.addUniform(ShaderType.kVec4, name: 'u_textransform');
       builder.addUniform(ShaderType.kVec4, name: 'u_shift');
       builder.addOut(ShaderType.kVec2, name: 'v_texcoord');
-      ShaderMethod method = builder.addMethod('main');
+      final ShaderMethod method = builder.addMethod('main');
       method.addStatement(
           'gl_Position = ((u_ctransform * position) * u_scale) + u_shift;');
       method.addStatement('v_texcoord = vec2((u_textransform.z + position.x) * u_textransform.x, '
@@ -72,11 +72,11 @@ class VertexShaders {
 class FragmentShaders {
   static String writeTextureFragmentShader(
       bool isWebGl2, ui.TileMode? tileModeX, ui.TileMode? tileModeY) {
-    ShaderBuilder builder = ShaderBuilder.fragment(webGLVersion);
+    final ShaderBuilder builder = ShaderBuilder.fragment(webGLVersion);
     builder.floatPrecision = ShaderPrecision.kMedium;
     builder.addIn(ShaderType.kVec2, name: 'v_texcoord');
     builder.addUniform(ShaderType.kSampler2D, name: 'u_texture');
-    ShaderMethod method = builder.addMethod('main');
+    final ShaderMethod method = builder.addMethod('main');
     if (isWebGl2 ||
         tileModeX == null ||
         tileModeY == null ||

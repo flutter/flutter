@@ -48,15 +48,15 @@ void paintStrokeJoins(BitmapCanvas canvas) {
   Offset mid = Offset(120, 10);
   Offset end = Offset(120, 20);
 
-  List<StrokeCap> strokeCaps = <StrokeCap>[StrokeCap.butt, StrokeCap.round, StrokeCap.square];
+  final List<StrokeCap> strokeCaps = <StrokeCap>[StrokeCap.butt, StrokeCap.round, StrokeCap.square];
   for (StrokeCap cap in strokeCaps) {
-    List<StrokeJoin> joints = <StrokeJoin>[StrokeJoin.miter, StrokeJoin.bevel, StrokeJoin.round];
-    List<Color> colors = <Color>[Color(0xFFF44336), Color(0xFF4CAF50), Color(0xFF2196F3)]; // red, green, blue
+    final List<StrokeJoin> joints = <StrokeJoin>[StrokeJoin.miter, StrokeJoin.bevel, StrokeJoin.round];
+    final List<Color> colors = <Color>[Color(0xFFF44336), Color(0xFF4CAF50), Color(0xFF2196F3)]; // red, green, blue
     for (int i = 0; i < joints.length; i++) {
-      StrokeJoin join = joints[i];
-      Color color = colors[i % colors.length];
+      final StrokeJoin join = joints[i];
+      final Color color = colors[i % colors.length];
 
-      Path path = new Path();
+      final Path path = new Path();
       path.moveTo(start.dx, start.dy);
       path.lineTo(mid.dx, mid.dy);
       path.lineTo(end.dx, end.dy);

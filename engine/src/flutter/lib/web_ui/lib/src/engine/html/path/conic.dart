@@ -154,7 +154,7 @@ class Conic {
   }
 
   void chopAtYExtrema(List<Conic> dst) {
-    double? t = _findYExtrema();
+    final double? t = _findYExtrema();
     if (t == null) {
       dst.add(this);
       return;
@@ -204,7 +204,7 @@ class Conic {
     final double coeff1 = p20 - 2 * wP10;
     final double coeff2 = wP10;
     final QuadRoots quadRoots = QuadRoots();
-    int rootCount = quadRoots.findRoots(coeff0, coeff1, coeff2);
+    final int rootCount = quadRoots.findRoots(coeff0, coeff1, coeff2);
     assert(rootCount == 0 || rootCount == 1);
     if (rootCount == 1) {
       return quadRoots.root0;
@@ -308,18 +308,18 @@ class Conic {
         (t == 1 && p1x == p2x && p1y == p2y)) {
       return ui.Offset(p2x - p0x, p2y - p0y);
     }
-    double p20x = p2x - p0x;
-    double p20y = p2y - p0y;
-    double p10x = p1x - p0x;
-    double p10y = p1y - p0y;
+    final double p20x = p2x - p0x;
+    final double p20y = p2y - p0y;
+    final double p10x = p1x - p0x;
+    final double p10y = p1y - p0y;
 
-    double cx = fW * p10x;
-    double cy = fW * p10y;
-    double ax = fW * p20x - p20x;
-    double ay = fW * p20y - p20y;
-    double bx = p20x - cx - cx;
-    double by = p20y - cy - cy;
-    SkQuadCoefficients quadC = SkQuadCoefficients(ax, ay, bx, by, cx, cy);
+    final double cx = fW * p10x;
+    final double cy = fW * p10y;
+    final double ax = fW * p20x - p20x;
+    final double ay = fW * p20y - p20y;
+    final double bx = p20x - cx - cx;
+    final double by = p20y - cy - cy;
+    final SkQuadCoefficients quadC = SkQuadCoefficients(ax, ay, bx, by, cx, cy);
     return ui.Offset(quadC.evalX(t), quadC.evalY(t));
   }
 
@@ -334,9 +334,9 @@ class Conic {
   }
 
   static double evalDenominator(double w, double t) {
-    double B = 2 * (w - 1);
-    double C = 1;
-    double A = -B;
+    final double B = 2 * (w - 1);
+    final double C = 1;
+    final double A = -B;
     return polyEval(A, B, C, t);
   }
 }
@@ -426,13 +426,13 @@ class ConicBounds {
     // ------------------------------------------------
     //       {t^2 (2 - 2 w), t (-2 + 2 w), 1}
     // Calculate coefficients and solve root.
-    QuadRoots roots = QuadRoots();
+    final QuadRoots roots = QuadRoots();
     final double P20x = x2 - x1;
     final double P10x = cpX - x1;
     final double wP10x = w * P10x;
-    double ax = w * P20x - P20x;
-    double bx = P20x - 2 * wP10x;
-    double cx = wP10x;
+    final double ax = w * P20x - P20x;
+    final double bx = P20x - 2 * wP10x;
+    final double cx = wP10x;
     int n = roots.findRoots(ax, bx, cx);
     if (n != 0) {
       final double t1 = roots.root0!;
@@ -452,9 +452,9 @@ class ConicBounds {
     final double P20y = y2 - y1;
     final double P10y = cpY - y1;
     final double wP10y = w * P10y;
-    double a = w * P20y - P20y;
-    double b = P20y - 2 * wP10y;
-    double c = wP10y;
+    final double a = w * P20y - P20y;
+    final double b = P20y - 2 * wP10y;
+    final double c = wP10y;
     n = roots.findRoots(a, b, c);
 
     if (n != 0) {

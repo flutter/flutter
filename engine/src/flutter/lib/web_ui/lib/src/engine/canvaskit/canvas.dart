@@ -126,7 +126,7 @@ class CkCanvas {
   }
 
   void drawImage(CkImage image, ui.Offset offset, CkPaint paint) {
-    ui.FilterQuality filterQuality = paint.filterQuality;
+    final ui.FilterQuality filterQuality = paint.filterQuality;
     if (filterQuality == ui.FilterQuality.high) {
       skCanvas.drawImageCubic(
         image.skImage,
@@ -149,7 +149,7 @@ class CkCanvas {
   }
 
   void drawImageRect(CkImage image, ui.Rect src, ui.Rect dst, CkPaint paint) {
-    ui.FilterQuality filterQuality = paint.filterQuality;
+    final ui.FilterQuality filterQuality = paint.filterQuality;
     if (filterQuality == ui.FilterQuality.high) {
       skCanvas.drawImageRectCubic(
         image.skImage,
@@ -983,7 +983,7 @@ class CkDrawImageCommand extends CkPaintCommand {
 
   @override
   void apply(SkCanvas canvas) {
-    ui.FilterQuality filterQuality = paint.filterQuality;
+    final ui.FilterQuality filterQuality = paint.filterQuality;
     if (filterQuality == ui.FilterQuality.high) {
       canvas.drawImageCubic(
         image.skImage,
@@ -1022,7 +1022,7 @@ class CkDrawImageRectCommand extends CkPaintCommand {
 
   @override
   void apply(SkCanvas canvas) {
-    ui.FilterQuality filterQuality = paint.filterQuality;
+    final ui.FilterQuality filterQuality = paint.filterQuality;
     if (filterQuality == ui.FilterQuality.high) {
       canvas.drawImageRectCubic(
         image.skImage,

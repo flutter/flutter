@@ -102,10 +102,10 @@ abstract class Browser {
     // for the process to actually start. They should just wait for the HTTP
     // request instead.
     runZonedGuarded(() async {
-      Process process = await startBrowser();
+      final Process process = await startBrowser();
       _processCompleter.complete(process);
 
-      Uint8Buffer output = Uint8Buffer();
+      final Uint8Buffer output = Uint8Buffer();
       void drainOutput(Stream<List<int>> stream) {
         try {
           _ioSubscriptions
@@ -117,7 +117,7 @@ abstract class Browser {
       drainOutput(process.stdout);
       drainOutput(process.stderr);
 
-      int exitCode = await process.exitCode;
+      final int exitCode = await process.exitCode;
 
       // This hack dodges an otherwise intractable race condition. When the user
       // presses Control-C, the signal is sent to the browser and the test
@@ -134,7 +134,7 @@ abstract class Browser {
       }
 
       if (!_closed && exitCode != 0) {
-        String outputString = utf8.decode(output);
+        final String outputString = utf8.decode(output);
         String message = '$name failed with exit code $exitCode.';
         if (outputString.isNotEmpty) {
           message += '\nStandard output:\n$outputString';

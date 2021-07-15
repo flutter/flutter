@@ -823,7 +823,7 @@ class ParagraphRuler {
     int position = 0;
     final List<html.Node> stack = nodes.reversed.toList();
     while (true) {
-      html.Node node = stack.removeLast();
+      final html.Node node = stack.removeLast();
       stack.addAll(node.childNodes.reversed);
       if (node == endNode) {
         break;

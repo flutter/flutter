@@ -93,7 +93,7 @@ DirectionalPosition getDirectionalBlockEnd(
     return DirectionalPosition(end, null, true);
   }
 
-  ui.TextDirection? blockDirection = _textDirectionLookup.find(text, start.index);
+  final ui.TextDirection? blockDirection = _textDirectionLookup.find(text, start.index);
   int i = start.index + 1;
 
   while (i < end.indexWithoutTrailingSpaces) {

@@ -1044,7 +1044,7 @@ void testMain()  async {
     );
 
     test('handles textAlign', () {
-      TextMeasurementService instance = TextMeasurementService.canvasInstance;
+      final TextMeasurementService instance = TextMeasurementService.canvasInstance;
       DomParagraph p;
       MeasurementResult result;
 
@@ -1101,7 +1101,7 @@ void testMain()  async {
     testMeasurements(
       'handles rtl with textAlign',
       (TextMeasurementService instance) {
-        TextMeasurementService instance = TextMeasurementService.canvasInstance;
+        final TextMeasurementService instance = TextMeasurementService.canvasInstance;
         DomParagraph p;
         MeasurementResult result;
 

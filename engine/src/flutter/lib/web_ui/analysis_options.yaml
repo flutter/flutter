@@ -54,7 +54,6 @@ linter:
     prefer_const_literals_to_create_immutables: false
     prefer_contains: false
     prefer_equal_for_default_values: false
-    prefer_final_locals: false
     prefer_foreach: false
     prefer_generic_function_type_aliases: false
     prefer_initializing_formals: false

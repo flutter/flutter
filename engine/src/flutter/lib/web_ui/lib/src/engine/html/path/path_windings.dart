@@ -66,7 +66,7 @@ class PathWinding {
     int dir = 1;
     // Swap so that y0 <= y1 holds.
     if (y0 > y1) {
-      double temp = y0;
+      final double temp = y0;
       y0 = y1;
       y1 = temp;
       dir = -1;
@@ -150,7 +150,7 @@ class PathWinding {
       return 0;
     }
 
-    QuadRoots quadRoots = QuadRoots();
+    final QuadRoots quadRoots = QuadRoots();
     final int n = quadRoots.findRoots(
         startY - 2 * y1 + endY, 2 * (y1 - startY), startY - y);
     assert(n <= 1);
@@ -184,15 +184,15 @@ class PathWinding {
     final double y1 = buffer[3];
     final double x2 = buffer[4];
     final double y2 = buffer[5];
-    double? tValueAtExtrema = validUnitDivide(y0 - y1, y0 - y1 - y1 + y2);
+    final double? tValueAtExtrema = validUnitDivide(y0 - y1, y0 - y1 - y1 + y2);
     if (tValueAtExtrema != null) {
       // Chop quad at t value by interpolating along p0-p1 and p1-p2.
-      double p01x = x0 + (tValueAtExtrema * (x1 - x0));
-      double p01y = y0 + (tValueAtExtrema * (y1 - y0));
-      double p12x = x1 + (tValueAtExtrema * (x2 - x1));
-      double p12y = y1 + (tValueAtExtrema * (y2 - y1));
-      double cx = p01x + (tValueAtExtrema * (p12x - p01x));
-      double cy = p01y + (tValueAtExtrema * (p12y - p01y));
+      final double p01x = x0 + (tValueAtExtrema * (x1 - x0));
+      final double p01y = y0 + (tValueAtExtrema * (y1 - y0));
+      final double p12x = x1 + (tValueAtExtrema * (x2 - x1));
+      final double p12y = y1 + (tValueAtExtrema * (y2 - y1));
+      final double cx = p01x + (tValueAtExtrema * (p12x - p01x));
+      final double cy = p01y + (tValueAtExtrema * (p12y - p01y));
       buffer[2] = p01x;
       buffer[3] = p01y;
       buffer[4] = cx;
@@ -267,7 +267,7 @@ class PathWinding {
     B -= C;
     C -= y;
     final QuadRoots quadRoots = QuadRoots();
-    int n = quadRoots.findRoots(A, 2 * B, C);
+    final int n = quadRoots.findRoots(A, 2 * B, C);
     assert(n <= 1);
     double xt;
     if (0 == n) {
@@ -292,7 +292,7 @@ class PathWinding {
   }
 
   void _computeCubicWinding() {
-    int n = chopCubicAtYExtrema(_buffer, _buffer);
+    final int n = chopCubicAtYExtrema(_buffer, _buffer);
     for (int i = 0; i <= n; ++i) {
       _windingMonoCubic(i * 3 * 2);
     }
@@ -341,11 +341,11 @@ class PathWinding {
       return;
     }
     // Compute the actual x(t) value.
-    double? t = chopMonoAtY(_buffer, bufferStartPos, y);
+    final double? t = chopMonoAtY(_buffer, bufferStartPos, y);
     if (t == null) {
       return;
     }
-    double xt = evalCubicPts(px0, px1, px2, px3, t);
+    final double xt = evalCubicPts(px0, px1, px2, px3, t);
     if (SPath.nearlyEqual(xt, x)) {
       if (x != px3 || y != py3) {
         // don't test end points; they're start points

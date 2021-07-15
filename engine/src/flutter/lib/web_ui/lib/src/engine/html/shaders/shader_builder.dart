@@ -83,7 +83,7 @@ class ShaderBuilder {
   /// series of graphics primitives are rendered. The value is only accessible
   /// in the vertex shader.
   ShaderDeclaration addIn(int dataType, {String? name}) {
-    ShaderDeclaration attrib = ShaderDeclaration(
+    final ShaderDeclaration attrib = ShaderDeclaration(
         name ?? 'attr_${_attribCounter++}',
         dataType,
         ShaderStorageQualifier.kAttribute);
@@ -93,7 +93,7 @@ class ShaderBuilder {
 
   /// Adds a constant.
   ShaderDeclaration addConst(int dataType, String value, {String? name}) {
-    ShaderDeclaration declaration = ShaderDeclaration.constant(
+    final ShaderDeclaration declaration = ShaderDeclaration.constant(
         name ?? 'c_${_constCounter++}', dataType, value);
     declarations.add(declaration);
     return declaration;
@@ -105,7 +105,7 @@ class ShaderBuilder {
   /// It is accessible in both the vertex and fragment shaders.
   ///
   ShaderDeclaration addUniform(int dataType, {String? name}) {
-    ShaderDeclaration uniform = ShaderDeclaration(
+    final ShaderDeclaration uniform = ShaderDeclaration(
         name ?? 'uni_${_uniformCounter++}',
         dataType,
         ShaderStorageQualifier.kUniform);
@@ -120,7 +120,7 @@ class ShaderBuilder {
   /// input to a fragment shader.
   /// It can be used in a fragment shader, but not changed.
   ShaderDeclaration addOut(int dataType, {String? name}) {
-    ShaderDeclaration varying = ShaderDeclaration(
+    final ShaderDeclaration varying = ShaderDeclaration(
         name ?? 'output_${_varyingCounter++}',
         dataType,
         ShaderStorageQualifier.kVarying);

@@ -188,7 +188,7 @@ class CkImageShader extends CkShader implements ui.ImageShader {
   ui.FilterQuality? _cachedQuality;
   @override
   SkShader withQuality(ui.FilterQuality contextualQuality) {
-    ui.FilterQuality quality = filterQuality ?? contextualQuality;
+    final ui.FilterQuality quality = filterQuality ?? contextualQuality;
     SkShader? shader = rawSkiaObject;
     if (_cachedQuality != quality || shader == null) {
       if (quality == ui.FilterQuality.high) {

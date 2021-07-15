@@ -770,7 +770,7 @@ class DomParagraph implements EngineParagraph {
 
   @override
   ui.TextRange getWordBoundary(ui.TextPosition position) {
-    ui.TextPosition textPosition = position;
+    final ui.TextPosition textPosition = position;
     final String? text = _plainText;
     if (text == null) {
       return ui.TextRange(start: textPosition.offset, end: textPosition.offset);
@@ -1845,12 +1845,13 @@ String _shadowListToCss(List<ui.Shadow> shadows) {
   // Shadows are applied front-to-back with first shadow on top.
   // Color is optional. offsetx,y are required. blur-radius is optional as well
   // and defaults to 0.
-  StringBuffer sb = new StringBuffer();
-  for (int i = 0, len = shadows.length; i < len; i++) {
+  final StringBuffer sb = new StringBuffer();
+  final int len = shadows.length;
+  for (int i = 0; i < len; i++) {
     if (i != 0) {
       sb.write(',');
     }
-    ui.Shadow shadow = shadows[i];
+    final ui.Shadow shadow = shadows[i];
     sb.write('${shadow.offset.dx}px ${shadow.offset.dy}px '
         '${shadow.blurRadius}px ${colorToCssString(shadow.color)}');
   }
@@ -1862,12 +1863,13 @@ String _fontFeatureListToCss(List<ui.FontFeature> fontFeatures) {
 
   // For more details, see:
   // * https://developer.mozilla.org/en-US/docs/Web/CSS/font-feature-settings
-  StringBuffer sb = new StringBuffer();
-  for (int i = 0, len = fontFeatures.length; i < len; i++) {
+  final StringBuffer sb = new StringBuffer();
+  final int len = fontFeatures.length;
+  for (int i = 0; i < len; i++) {
     if (i != 0) {
       sb.write(',');
     }
-    ui.FontFeature fontFeature = fontFeatures[i];
+    final ui.FontFeature fontFeature = fontFeatures[i];
     sb.write('"${fontFeature.feature}" ${fontFeature.value}');
   }
   return sb.toString();

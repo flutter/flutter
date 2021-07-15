@@ -116,7 +116,7 @@ class _SurfacePathMeasure {
     if (_verbIterIndex == _path.countVerbs()) {
       return false;
     }
-    _PathContourMeasure measure =
+    final _PathContourMeasure measure =
         _PathContourMeasure(_path, _pathIterator, forceClosed);
     _verbIterIndex = measure.verbEndIndex;
     _contours.add(measure);
@@ -178,7 +178,7 @@ class _PathContourMeasure {
     int lo = 0;
     int hi = _segments.length - 1;
     while (lo < hi) {
-      int mid = (lo + hi) >> 1;
+      final int mid = (lo + hi) >> 1;
       if (_segments[mid].distance < distance) {
         lo = mid + 1;
       } else {
@@ -192,7 +192,7 @@ class _PathContourMeasure {
   }
 
   _SurfaceTangent _getPosTan(int segmentIndex, double distance) {
-    _PathSegment segment = _segments[segmentIndex];
+    final _PathSegment segment = _segments[segmentIndex];
     // Compute distance to segment. Since distance is cumulative to find
     // t = 0..1 on the segment, we need to calculate start distance using prior
     // segment.
@@ -217,8 +217,8 @@ class _PathContourMeasure {
     if (startDistance > stopDistance || _segments.isEmpty) {
       return path;
     }
-    int startSegmentIndex = _segmentIndexAtDistance(startDistance);
-    int stopSegmentIndex = _segmentIndexAtDistance(stopDistance);
+    final int startSegmentIndex = _segmentIndexAtDistance(startDistance);
+    final int stopSegmentIndex = _segmentIndexAtDistance(stopDistance);
     if (startSegmentIndex == -1 || stopSegmentIndex == -1) {
       return path;
     }
@@ -337,9 +337,9 @@ class _PathContourMeasure {
         case SPath.kConicVerb:
           assert(haveSeenMoveTo);
           final double w = iter.conicWeight;
-          Conic conic = Conic(points[0], points[1], points[2], points[3],
+          final Conic conic = Conic(points[0], points[1], points[2], points[3],
               points[4], points[5], w);
-          List<ui.Offset> conicPoints = conic.toQuads();
+          final List<ui.Offset> conicPoints = conic.toQuads();
           final int len = conicPoints.length;
           double startX = conicPoints[0].dx;
           double startY = conicPoints[0].dy;

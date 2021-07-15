@@ -43,7 +43,7 @@ class PersistedOpacity extends PersistedContainerSurface
 
   @override
   html.Element createElement() {
-    html.Element element = domRenderer.createElement('flt-opacity');
+    final html.Element element = domRenderer.createElement('flt-opacity');
     DomRenderer.setElementStyle(element, 'position', 'absolute');
     DomRenderer.setElementStyle(element, 'transform-origin', '0 0 0');
     return element;
@@ -51,7 +51,7 @@ class PersistedOpacity extends PersistedContainerSurface
 
   @override
   void apply() {
-    html.Element element = rootElement!;
+    final html.Element element = rootElement!;
     DomRenderer.setElementStyle(element, 'opacity', '${alpha / 255}');
     DomRenderer.setElementTransform(element, 'translate(${offset.dx}px, ${offset.dy}px)');
   }

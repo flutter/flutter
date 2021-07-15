@@ -56,7 +56,7 @@ class PathIterator {
       ++verbIndex;
     }
     while (verbIndex < _verbCount) {
-      int verb = pathRef.atVerb(verbIndex++);
+      final int verb = pathRef.atVerb(verbIndex++);
       if (SPath.kMoveVerb == verb) {
         break;
       }
@@ -143,8 +143,8 @@ class PathIterator {
         if (_verbIndex == _verbCount) {
           return SPath.kDoneVerb;
         }
-        double offsetX = pathRef.points[_pointIndex++];
-        double offsetY = pathRef.points[_pointIndex++];
+        final double offsetX = pathRef.points[_pointIndex++];
+        final double offsetY = pathRef.points[_pointIndex++];
         _moveToX = offsetX;
         _moveToY = offsetY;
         outPts[0] = offsetX;
@@ -156,8 +156,8 @@ class PathIterator {
         break;
       case SPath.kLineVerb:
         final ui.Offset start = _constructMoveTo();
-        double offsetX = pathRef.points[_pointIndex++];
-        double offsetY = pathRef.points[_pointIndex++];
+        final double offsetX = pathRef.points[_pointIndex++];
+        final double offsetY = pathRef.points[_pointIndex++];
         outPts[0] = start.dx;
         outPts[1] = start.dy;
         outPts[2] = offsetX;

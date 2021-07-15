@@ -64,7 +64,7 @@ class SafariMacOs extends Browser {
       // persistent state and wait until it opens.
       // The details copied from `man open` on macOS.
       // TODO(nurhan): https://github.com/flutter/flutter/issues/50809
-      Process process = await Process.start(installation.executable, <String>[
+      final Process process = await Process.start(installation.executable, <String>[
         // These are flags for `open` command line tool.
         '-F', // Open a fresh Safari with no persistent state.
         '-W', // Wait until the Safari opens.
