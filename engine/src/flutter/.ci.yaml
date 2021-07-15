@@ -63,6 +63,7 @@ targets:
 
   - name: Linux Android Scenarios
     builder: Linux Android Scenarios
+    bringup: true # Recipe issue https://github.com/flutter/flutter/issues/86427
     recipe: engine/scenarios
     properties:
       upload_packages: "true"
