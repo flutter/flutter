@@ -431,6 +431,45 @@ void main() {
     expect(focusNodeB.hasFocus, true);
   }, variant: TargetPlatformVariant.desktop());
 
+  testWidgets('A Focused text-field will not lose focus when clicking on its decoration', (WidgetTester tester) async {
+    final FocusNode focusNodeA = FocusNode();
+    final Key iconKey = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: <Widget>[
+              TextField(
+                focusNode: focusNodeA,
+                decoration: InputDecoration(
+                  icon: Icon(Icons.copy_all, key: iconKey),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture down1 = await tester.startGesture(tester.getCenter(find.byType(TextField).first), kind: PointerDeviceKind.mouse);
+    await tester.pump();
+    await tester.pumpAndSettle();
+    await down1.up();
+    await down1.removePointer();
+
+    expect(focusNodeA.hasFocus, true);
+
+    // Click on the icon which has a different RO than the text field's focus node context
+    final TestGesture down2 = await tester.startGesture(tester.getCenter(find.byKey(iconKey)), kind: PointerDeviceKind.mouse);
+    await tester.pump();
+    await tester.pumpAndSettle();
+    await down2.up();
+    await down2.removePointer();
+
+    expect(focusNodeA.hasFocus, true);
+  }, variant: TargetPlatformVariant.desktop());
+
   testWidgets('A Focused text-field will lose focus when clicking outside of its hitbox with a mouse on desktop after tab navigation', (WidgetTester tester) async {
     final FocusNode focusNodeA = FocusNode();
     final FocusNode focusNodeB = FocusNode();

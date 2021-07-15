@@ -41,7 +41,7 @@ class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage>
     _filterType = widget.initialFilterType;
     _complexChild = widget.initialComplexChild;
     _useRepaintBoundary = widget.initialUseRepaintBoundary;
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       final RenderBox childBox = _childKey.currentContext!.findRenderObject()! as RenderBox;
       _childCenter = childBox.paintBounds.center;
     });

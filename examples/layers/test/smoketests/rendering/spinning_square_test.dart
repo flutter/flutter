@@ -13,6 +13,6 @@ void main() {
   test('layers smoketest for rendering/spinning_square.dart', () {
     FlutterError.onError = (FlutterErrorDetails details) { throw details.exception; };
     demo.main();
-    expect(SchedulerBinding.instance!.hasScheduledFrame, true);
+    expect(SchedulerBinding.instance.hasScheduledFrame, true);
   });
 }

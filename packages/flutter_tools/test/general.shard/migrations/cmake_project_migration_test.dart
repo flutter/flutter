@@ -40,7 +40,6 @@ void main () {
         testLogger = BufferLogger(
           terminal: Terminal.test(),
           outputPreferences: OutputPreferences.test(),
-          machine: false,
         );
 
         mockCmakeProject = FakeCmakeProject(managedCmakeFile);
