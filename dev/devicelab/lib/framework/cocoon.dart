@@ -83,29 +83,30 @@ class Cocoon {
     await _sendUpdateTaskRequest(resultsJson);
   }
 
-  /// Send [TaskResult] to Cocoon.
-  // TODO(chillers): Remove when sendResultsPath is used in prod. https://github.com/flutter/flutter/issues/72457
-  Future<void> sendTaskResult({
-    required String builderName,
-    required TaskResult result,
-    required String gitBranch,
-  }) async {
-    assert(builderName != null);
-    assert(gitBranch != null);
-    assert(result != null);
-
-    // Skip logging on test runs
-    Logger.root.level = Level.ALL;
-    Logger.root.onRecord.listen((LogRecord rec) {
-      print('${rec.level.name}: ${rec.time}: ${rec.message}');
-    });
-
-    final Map<String, dynamic> updateRequest = _constructUpdateRequest(
-      gitBranch: gitBranch,
-      builderName: builderName,
-      result: result,
-    );
-    await _sendUpdateTaskRequest(updateRequest);
+  /// Update test flaky status to Cocoon.
+  /// 
+  /// A flaky flag means the test has run multiple times via test runner, and a final test passes. So the status
+  /// of the task will always be `Succeeded`.
+  Future<void> updateTestFlaky({
+    bool? isTestFlaky,
+    String? builderName,
+    String? commitSha,
+    String? gitBranch,
+    }) async {
+    final Map<String, dynamic> request = <String, dynamic>{
+      'NewStatus': 'Succeeded',
+      'CommitBranch': gitBranch,
+      'CommitSha': commitSha,
+      'BuilderName': builderName,
+      'TestFlaky': isTestFlaky,
+    };
+    final Map<String, dynamic> response = await _sendCocoonRequest('update-task-status', request);
+    if (response['Name'] != null) {
+      logger.info('Updated Cocoon TestFlaky status.');
+    } else {
+      logger.info(response);
+      logger.severe('Failed to updated Cocoon TestFlaky status.');
+    }
   }
 
   /// Write the given parameters into an update task request and store the JSON in [resultsPath].

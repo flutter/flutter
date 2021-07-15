@@ -9,13 +9,15 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 
 import 'package:flutter_devicelab/command/test.dart';
+import 'package:flutter_devicelab/command/update_test_flaky.dart';
 import 'package:flutter_devicelab/command/upload_metrics.dart';
 import 'package:flutter_devicelab/common.dart';
 
 final CommandRunner<void> runner =
     CommandRunner<void>('devicelab_runner', 'DeviceLab test runner for recording performance metrics on applications')
       ..addCommand(TestCommand())
-      ..addCommand(UploadMetricsCommand());
+      ..addCommand(UploadMetricsCommand())
+      ..addCommand(UpdateTestFlakyCommand());
 
 Future<void> main(List<String> rawArgs) async {
   unawaited(runner.run(rawArgs).catchError((dynamic error) {
