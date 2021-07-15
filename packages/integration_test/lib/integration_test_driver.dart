@@ -68,7 +68,7 @@ Future<void> writeResponseData(
 ///
 /// `onScreenshot` can be used to process the screenshots taken during the test.
 /// An example could be that this callback compares the byte array against a baseline image,
-/// and it return `true` if both images are equal.
+/// and it returns `true` if both images are equal.
 ///
 /// As a result, returning `false` from `onScreenshot` will make the test fail.
 Future<void> integrationDriver({
