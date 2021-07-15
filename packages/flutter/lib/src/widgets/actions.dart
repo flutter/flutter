@@ -704,11 +704,7 @@ class CallbackAction<T extends Intent> extends Action<T> {
   ///
   /// The `intentKey` and [onInvoke] parameters must not be null.
   /// The [onInvoke] parameter is required.
-  CallbackAction({
-    required this.onInvoke,
-    bool Function()? isActionEnabled,
-  }) : _isActionEnabled = isActionEnabled,
-       assert(onInvoke != null);
+  CallbackAction({required this.onInvoke}) : assert(onInvoke != null);
 
   /// The callback to be called when invoked.
   ///
@@ -716,14 +712,8 @@ class CallbackAction<T extends Intent> extends Action<T> {
   @protected
   final OnInvokeCallback<T> onInvoke;
 
-  @protected
-  final bool Function()? _isActionEnabled;
-
   @override
   Object? invoke(T intent) => onInvoke(intent);
-
-  @override
-  bool get isActionEnabled => _isActionEnabled?.call() ?? true;
 }
 
 /// An action dispatcher that simply invokes the actions given to it.
@@ -1113,6 +1103,34 @@ class Actions extends StatefulWidget {
       final Action<T>? result = _castAction(actions, intent: intent);
       if (result != null) {
         context.dependOnInheritedElement(element);
+        action = result;
+        return true;
+      }
+      return false;
+    });
+
+    return action;
+  }
+
+  static Action<T>? _maybeFindWithoutDependingOn<T extends Intent>(BuildContext context, { T? intent }) {
+    Action<T>? action;
+
+    // Specialize the type if a runtime example instance of the intent is given.
+    // This allows this function to be called by code that doesn't know the
+    // concrete type of the intent at compile time.
+    final Type type = intent?.runtimeType ?? T;
+    assert(
+      type != Intent,
+      'The type passed to "find" resolved to "Intent": either a non-Intent '
+      'generic type argument or an example intent derived from Intent must be '
+      'specified. Intent may be used as the generic type as long as the optional '
+      '"intent" argument is passed.',
+    );
+
+    _visitActionsAncestors(context, (InheritedElement element) {
+      final _ActionsMarker actions = element.widget as _ActionsMarker;
+      final Action<T>? result = _castAction(actions, intent: intent);
+      if (result != null) {
         action = result;
         return true;
       }
@@ -1945,8 +1963,10 @@ mixin _OverridableActionMixin<T extends Intent> on Action<T> {
   // How to invoke [defaultAction], given the caller [fromAction].
   Object? invokeDefaultAction(T intent, Action<T>? fromAction, BuildContext? context);
 
-  Action<T>? get overrideAction {
-    final Action<T>? override = Actions.maybeFind(lookupContext);
+  Action<T>? getOverrideAction({ bool declareDependency = false }) {
+    final Action<T>? override = declareDependency
+     ? Actions.maybeFind(lookupContext)
+     : Actions._maybeFindWithoutDependingOn(lookupContext);
     assert(!identical(override, this));
     return override;
   }
@@ -1977,7 +1997,7 @@ mixin _OverridableActionMixin<T extends Intent> on Action<T> {
 
   @override
   Object? invoke(T intent, [BuildContext? context]) {
-    final Action<T>? overrideAction = this.overrideAction;
+    final Action<T>? overrideAction = getOverrideAction();
     final Object? returnValue = overrideAction == null
       ? invokeDefaultAction(intent, callingAction, context)
       : _invokeOverride(overrideAction, intent, context);
@@ -2002,7 +2022,7 @@ mixin _OverridableActionMixin<T extends Intent> on Action<T> {
 
   @override
   bool get isActionEnabled {
-    final Action<T>? overrideAction = this.overrideAction;
+    final Action<T>? overrideAction = getOverrideAction(declareDependency: true);
     final bool returnValue = overrideAction != null
       ? isOverrideActionEnabled(overrideAction)
       : defaultAction.isActionEnabled;
@@ -2017,7 +2037,7 @@ mixin _OverridableActionMixin<T extends Intent> on Action<T> {
       return true;
     }());
 
-    final Action<T>? overrideAction = this.overrideAction;
+    final Action<T>? overrideAction = getOverrideAction();
     overrideAction?._callingAction = defaultAction;
     final bool returnValue = (overrideAction ?? defaultAction).isEnabled(intent);
     overrideAction?._callingAction = null;
@@ -2035,7 +2055,7 @@ mixin _OverridableActionMixin<T extends Intent> on Action<T> {
       debugAssertConsumeKeyMutuallyRecursive = true;
       return true;
     }());
-    final Action<T>? overrideAction = this.overrideAction;
+    final Action<T>? overrideAction = getOverrideAction();
     overrideAction?._callingAction = defaultAction;
     final bool isEnabled = (overrideAction ?? defaultAction).consumesKey(intent);
     overrideAction?._callingAction = null;
