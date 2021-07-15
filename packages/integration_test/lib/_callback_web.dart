@@ -55,11 +55,6 @@ class WebCallbackManager implements CallbackManager {
     // Noop on Web.
   }
 
-  @override
-  Future<void> revertFlutterImage() async {
-    // Noop on Web.
-  }
-
   Future<void> _sendWebDriverCommand(WebDriverCommand command) async {
     try {
       _webDriverCommandPipe.complete(command);

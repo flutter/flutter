@@ -34,9 +34,6 @@ void main() {
     // Takes a screenshot of the native UI.
     print(await binding.takeScreenshot('platform_name'));
 
-    await binding.revertFlutterImage();
-    await tester.pumpAndSettle();
-
     // Verify that platform version is retrieved.
     expect(
       find.byWidgetPredicate(

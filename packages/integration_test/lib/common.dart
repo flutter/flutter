@@ -291,9 +291,6 @@ abstract class CallbackManager {
   /// Android only. Converts the Flutter surface to an image view.
   Future<void> convertFlutterSurfaceToImage();
 
-  /// Android only. Reverts the Flutter image view.
-  Future<void> revertFlutterImage();
-
   /// Cleanup and completers or locks used during the communication.
   void cleanup();
 }

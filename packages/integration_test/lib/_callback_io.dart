@@ -5,6 +5,7 @@
 import 'dart:ui';
 
 import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'common.dart';
 import 'src/channel.dart';
@@ -70,16 +71,15 @@ class IOCallbackManager implements CallbackManager {
       null,
     );
     _usesFlutterImage = true;
-  }
 
-  @override
-  Future<void> revertFlutterImage() async {
-    assert(_usesFlutterImage, 'Surface is not an image');
-    await integrationTestChannel.invokeMethod<void>(
-      'revertFlutterImage',
-      null,
-    );
-    _usesFlutterImage = false;
+    addTearDown(() async {
+      assert(_usesFlutterImage, 'Surface is not an image');
+      await integrationTestChannel.invokeMethod<void>(
+        'revertFlutterImage',
+        null,
+      );
+      _usesFlutterImage = false;
+    });
   }
 
   @override
