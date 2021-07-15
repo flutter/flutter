@@ -328,13 +328,16 @@ class RadioListTile<T> extends StatelessWidget {
     this.shape,
     this.tileColor,
     this.selectedTileColor,
-  }) : assert(toggleable != null),
-       assert(isThreeLine != null),
-       assert(!isThreeLine || subtitle != null),
-       assert(selected != null),
-       assert(controlAffinity != null),
-       assert(autofocus != null),
-       super(key: key);
+    this.horizontalTitleGap,
+    this.minVerticalPadding,
+    this.minLeadingWidth,
+  })  : assert(toggleable != null),
+        assert(isThreeLine != null),
+        assert(!isThreeLine || subtitle != null),
+        assert(selected != null),
+        assert(controlAffinity != null),
+        assert(autofocus != null),
+        super(key: key);
 
   /// The value represented by this radio button.
   final T value;
@@ -500,6 +503,24 @@ class RadioListTile<T> extends StatelessWidget {
   /// If non-null, defines the background color when [RadioListTile.selected] is true.
   final Color? selectedTileColor;
 
+  /// The horizontal gap between the titles and the leading/trailing widgets.
+  ///
+  /// If null, then the value of [ListTileTheme.horizontalTitleGap] is used. If
+  /// that is also null, then a default value of 16 is used.
+  final double? horizontalTitleGap;
+
+  /// The minimum padding on the top and bottom of the title and subtitle widgets.
+  ///
+  /// If null, then the value of [ListTileTheme.minVerticalPadding] is used. If
+  /// that is also null, then a default value of 4 is used.
+  final double? minVerticalPadding;
+
+  /// The minimum width allocated for the [ListTile.leading] widget.
+  ///
+  /// If null, then the value of [ListTileTheme.minLeadingWidth] is used. If
+  /// that is also null, then a default value of 40 is used.
+  final double? minLeadingWidth;
+
   @override
   Widget build(BuildContext context) {
     final Widget control = Radio<T>(
@@ -537,18 +558,23 @@ class RadioListTile<T> extends StatelessWidget {
           shape: shape,
           tileColor: tileColor,
           selectedTileColor: selectedTileColor,
-          onTap: onChanged != null ? () {
-            if (toggleable && checked) {
-              onChanged!(null);
-              return;
-            }
-            if (!checked) {
-              onChanged!(value);
-            }
-          } : null,
+          onTap: onChanged != null
+              ? () {
+                  if (toggleable && checked) {
+                    onChanged!(null);
+                    return;
+                  }
+                  if (!checked) {
+                    onChanged!(value);
+                  }
+                }
+              : null,
           selected: selected,
           autofocus: autofocus,
           contentPadding: contentPadding,
+          horizontalTitleGap: horizontalTitleGap,
+          minVerticalPadding: minVerticalPadding,
+          minLeadingWidth: minLeadingWidth,
         ),
       ),
     );

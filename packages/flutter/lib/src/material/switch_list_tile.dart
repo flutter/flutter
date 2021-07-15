@@ -280,13 +280,16 @@ class SwitchListTile extends StatelessWidget {
     this.controlAffinity = ListTileControlAffinity.platform,
     this.shape,
     this.selectedTileColor,
-  }) : _switchListTileType = _SwitchListTileType.material,
-       assert(value != null),
-       assert(isThreeLine != null),
-       assert(!isThreeLine || subtitle != null),
-       assert(selected != null),
-       assert(autofocus != null),
-       super(key: key);
+    this.horizontalTitleGap,
+    this.minVerticalPadding,
+    this.minLeadingWidth,
+  })  : _switchListTileType = _SwitchListTileType.material,
+        assert(value != null),
+        assert(isThreeLine != null),
+        assert(!isThreeLine || subtitle != null),
+        assert(selected != null),
+        assert(autofocus != null),
+        super(key: key);
 
   /// Creates a Material [ListTile] with an adaptive [Switch], following
   /// Material design's
@@ -322,13 +325,16 @@ class SwitchListTile extends StatelessWidget {
     this.controlAffinity = ListTileControlAffinity.platform,
     this.shape,
     this.selectedTileColor,
-  }) : _switchListTileType = _SwitchListTileType.adaptive,
-       assert(value != null),
-       assert(isThreeLine != null),
-       assert(!isThreeLine || subtitle != null),
-       assert(selected != null),
-       assert(autofocus != null),
-       super(key: key);
+    this.horizontalTitleGap,
+    this.minVerticalPadding,
+    this.minLeadingWidth,
+  })  : _switchListTileType = _SwitchListTileType.adaptive,
+        assert(value != null),
+        assert(isThreeLine != null),
+        assert(!isThreeLine || subtitle != null),
+        assert(selected != null),
+        assert(autofocus != null),
+        super(key: key);
 
   /// Whether this switch is checked.
   ///
@@ -458,6 +464,24 @@ class SwitchListTile extends StatelessWidget {
   /// If non-null, defines the background color when [SwitchListTile.selected] is true.
   final Color? selectedTileColor;
 
+  /// The horizontal gap between the titles and the leading/trailing widgets.
+  ///
+  /// If null, then the value of [ListTileTheme.horizontalTitleGap] is used. If
+  /// that is also null, then a default value of 16 is used.
+  final double? horizontalTitleGap;
+
+  /// The minimum padding on the top and bottom of the title and subtitle widgets.
+  ///
+  /// If null, then the value of [ListTileTheme.minVerticalPadding] is used. If
+  /// that is also null, then a default value of 4 is used.
+  final double? minVerticalPadding;
+
+  /// The minimum width allocated for the [ListTile.leading] widget.
+  ///
+  /// If null, then the value of [ListTileTheme.minLeadingWidth] is used. If
+  /// that is also null, then a default value of 40 is used.
+  final double? minLeadingWidth;
+
   @override
   Widget build(BuildContext context) {
     final Widget control;
@@ -517,12 +541,19 @@ class SwitchListTile extends StatelessWidget {
           dense: dense,
           contentPadding: contentPadding,
           enabled: onChanged != null,
-          onTap: onChanged != null ? () { onChanged!(!value); } : null,
+          onTap: onChanged != null
+              ? () {
+                  onChanged!(!value);
+                }
+              : null,
           selected: selected,
           selectedTileColor: selectedTileColor,
           autofocus: autofocus,
           shape: shape,
           tileColor: tileColor,
+          horizontalTitleGap: horizontalTitleGap,
+          minVerticalPadding: minVerticalPadding,
+          minLeadingWidth: minLeadingWidth,
         ),
       ),
     );
