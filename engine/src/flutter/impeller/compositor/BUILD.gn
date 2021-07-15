@@ -73,7 +73,7 @@ impeller_component("compositor") {
     "../shader_glue",
   ]
 
-  libs = [ "Metal.framework" ]
+  frameworks = [ "Metal.framework" ]
 }
 
 source_set("compositor_unittests") {

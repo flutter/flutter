@@ -83,6 +83,19 @@ MTLTextureDescriptor* ToMTLTextureDescriptor(const TextureDescriptor& desc) {
   mtl_desc.width = desc.size.width;
   mtl_desc.height = desc.size.height;
   mtl_desc.mipmapLevelCount = desc.mip_count;
+  mtl_desc.usage = MTLTextureUsageUnknown;
+  if (desc.usage & static_cast<TextureUsageMask>(TextureUsage::kUnknown)) {
+    mtl_desc.usage |= MTLTextureUsageUnknown;
+  }
+  if (desc.usage & static_cast<TextureUsageMask>(TextureUsage::kShaderRead)) {
+    mtl_desc.usage |= MTLTextureUsageShaderRead;
+  }
+  if (desc.usage & static_cast<TextureUsageMask>(TextureUsage::kShaderWrite)) {
+    mtl_desc.usage |= MTLTextureUsageShaderWrite;
+  }
+  if (desc.usage & static_cast<TextureUsageMask>(TextureUsage::kRenderTarget)) {
+    mtl_desc.usage |= MTLTextureUsageRenderTarget;
+  }
   return mtl_desc;
 }
 
