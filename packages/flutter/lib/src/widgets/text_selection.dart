@@ -119,12 +119,12 @@ abstract class TextSelectionControls {
   /// interaction is allowed. As a counterexample, the default selection handle
   /// on iOS [cupertinoTextSelectionControls] does not call [onTap] at all,
   /// since its handles are not meant to be tapped.
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]);
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap, double? startGlyphHeight, double? endGlyphHeight]);
 
   /// Get the anchor point of the handle relative to itself. The anchor point is
   /// the point that is aligned with a specific point in the text. A handle
   /// often visually "points to" that location.
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight);
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight, [double? startGlyphHeight, double? endGlyphHeight]);
 
   /// Builds a toolbar near a text selection.
   ///
@@ -824,40 +824,25 @@ class _TextSelectionHandleOverlayState
         break;
     }
 
-    final double preferredLineHeight;
-
-    // On iOS we want to calculate the start and end handles separately so they
-    // scale for the selected content.
+    // On some platforms we may want to calculate the start and end handles
+    // separately so they scale for the selected content.
     //
     // For the start handle we compute the rectangles that encompass the beginning
     // of the selection.
     //
     // For the end handle we compute the rectangles that encompass the end of
     // the selection.
-    if (defaultTargetPlatform == TargetPlatform.iOS) {
-      switch (type) {
-        case TextSelectionHandleType.left:
-          final Rect? startHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.selection.start, end: widget.selection.start + 1));
-          preferredLineHeight = startHandleRect!.height;
-          break;
-        case TextSelectionHandleType.right:
-          final Rect? endHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.selection.end, end: widget.selection.end - 1));
-          preferredLineHeight = endHandleRect!.height;
-          break;
-        case TextSelectionHandleType.collapsed:
-          preferredLineHeight = widget.renderObject.preferredLineHeight;
-          break;
-      }
-    } else {
-      preferredLineHeight = widget.renderObject.preferredLineHeight;
-    }
+    final Rect? startHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.selection.start, end: widget.selection.start + 1));
+    final Rect? endHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.selection.end, end: widget.selection.end - 1));
 
     final Offset handleAnchor = widget.selectionControls.getHandleAnchor(
       type,
-      preferredLineHeight,
+      widget.renderObject.preferredLineHeight,
+      startHandleRect?.height ?? widget.renderObject.preferredLineHeight,
+      endHandleRect?.height ?? widget.renderObject.preferredLineHeight,
     );
     final Size handleSize = widget.selectionControls.getHandleSize(
-      preferredLineHeight,
+      widget.renderObject.preferredLineHeight,
     );
 
     final Rect handleRect = Rect.fromLTWH(
@@ -903,8 +888,10 @@ class _TextSelectionHandleOverlayState
               child: widget.selectionControls.buildHandle(
                 context,
                 type,
-                preferredLineHeight,
+                widget.renderObject.preferredLineHeight,
                 widget.onSelectionHandleTapped,
+                startHandleRect?.height ?? widget.renderObject.preferredLineHeight,
+                endHandleRect?.height ?? widget.renderObject.preferredLineHeight,
               ),
             ),
           ),
