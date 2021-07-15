@@ -402,11 +402,14 @@ import java.util.Arrays;
     if (host.shouldHandleDeeplinking()) {
       Uri data = intent.getData();
       if (data != null && !data.getPath().isEmpty()) {
-        String pathAndQuery = data.getPath();
+        String fullRoute = data.getPath();
         if (data.getQuery() != null && !data.getQuery().isEmpty()) {
-          pathAndQuery += "?" + data.getQuery();
+          fullRoute += "?" + data.getQuery();
         }
-        return pathAndQuery;
+        if (data.getFragment() != null && !data.getFragment().isEmpty()) {
+          fullRoute += "#" + data.getFragment();
+        }
+        return fullRoute;
       }
     }
     return null;
