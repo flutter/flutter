@@ -1342,7 +1342,7 @@ Future<void> testTextStyle(
   }
 
   // Render once to trigger font downloads.
-  CkPicture picture = await generatePictureWhenFontsStable(renderPicture);
+  final CkPicture picture = await generatePictureWhenFontsStable(renderPicture);
   await matchPictureGolden(
     'canvaskit_text_styles_${name.replaceAll(' ', '_')}.png',
     picture,

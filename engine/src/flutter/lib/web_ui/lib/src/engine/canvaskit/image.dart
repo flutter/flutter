@@ -42,7 +42,7 @@ void debugRestoreHttpRequestFactory() {
 /// requesting from URI.
 Future<ui.Codec> skiaInstantiateWebImageCodec(
     String url, WebOnlyImageCodecChunkCallback? chunkCallback) {
-  Completer<ui.Codec> completer = Completer<ui.Codec>();
+  final Completer<ui.Codec> completer = Completer<ui.Codec>();
 
   final html.HttpRequest request = httpRequestFactory();
   request.open('GET', url, async: true);
@@ -307,7 +307,7 @@ class CkImage implements ui.Image, StackTraceDebugger {
     ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba,
   }) {
     assert(_debugCheckIsNotDisposed());
-    ByteData? data = _encodeImage(
+    final ByteData? data = _encodeImage(
       skImage: skImage,
       format: format,
       alphaType: canvasKit.AlphaType.Premul,

@@ -361,7 +361,7 @@ void testMain() async {
         ]),
         indices: indices);
 
-    Float32List matrix4 = Matrix4.identity().storage;
+    final Float32List matrix4 = Matrix4.identity().storage;
 
     final HtmlImage img = await createTestImage();
     final SurfacePaint paint = SurfacePaint();
@@ -389,9 +389,9 @@ void testMain() async {
 }
 
 Future<HtmlImage> createTestImage({int width = 50, int height = 40}) {
-  html.CanvasElement canvas =
+  final html.CanvasElement canvas =
       new html.CanvasElement(width: width, height: height);
-  html.CanvasRenderingContext2D ctx = canvas.context2D;
+  final html.CanvasRenderingContext2D ctx = canvas.context2D;
   ctx.fillStyle = '#E04040';
   ctx.fillRect(0, 0, width / 3, height);
   ctx.fill();
@@ -401,8 +401,8 @@ Future<HtmlImage> createTestImage({int width = 50, int height = 40}) {
   ctx.fillStyle = '#2040E0';
   ctx.fillRect(2 * width / 3, 0, width / 3, height);
   ctx.fill();
-  html.ImageElement imageElement = html.ImageElement();
-  Completer<HtmlImage> completer = Completer<HtmlImage>();
+  final html.ImageElement imageElement = html.ImageElement();
+  final Completer<HtmlImage> completer = Completer<HtmlImage>();
   imageElement.onLoad.listen((html.Event event) {
     completer.complete(HtmlImage(imageElement, width, height));
   });

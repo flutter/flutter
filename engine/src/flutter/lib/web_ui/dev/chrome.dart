@@ -59,8 +59,8 @@ class Chrome extends Browser {
   /// Starts a new instance of Chrome open to the given [url], which may be a
   /// [Uri] or a [String].
   factory Chrome(Uri url, {bool debug = false}) {
-    String version = ChromeArgParser.instance.version;
-    Completer<Uri> remoteDebuggerCompleter = Completer<Uri>.sync();
+    final String version = ChromeArgParser.instance.version;
+    final Completer<Uri> remoteDebuggerCompleter = Completer<Uri>.sync();
     return Chrome._(() async {
       final BrowserInstallation installation = await getOrInstallChrome(
         version,
@@ -80,7 +80,7 @@ class Chrome extends Browser {
       final bool isChromeNoSandbox =
           Platform.environment['CHROME_NO_SANDBOX'] == 'true';
       final String dir = environment.webUiDartToolDir.createTempSync('test_chrome_user_data_').resolveSymbolicLinksSync();
-      List<String> args = <String>[
+      final List<String> args = <String>[
         '--user-data-dir=$dir',
         url.toString(),
         if (!debug)

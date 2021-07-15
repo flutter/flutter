@@ -590,7 +590,7 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
   ///
   /// Later the extra files will be deleted in [_cleanupExtraFilesUnderTestDir].
   Future<bool> _buildTest(TestBuildInput input) async {
-    String targetFileName = path.join(
+    final String targetFileName = path.join(
       environment.webUiBuildDir.path,
       '${input.path.relativeToWebUi}.browser_test.dart.js',
     );
@@ -603,7 +603,7 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
       directoryToTarget.createSync(recursive: true);
     }
 
-    List<String> arguments = <String>[
+    final List<String> arguments = <String>[
       '--no-minify',
       '--disable-inlining',
       '--enable-asserts',

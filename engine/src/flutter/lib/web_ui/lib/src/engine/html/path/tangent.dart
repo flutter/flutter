@@ -47,13 +47,13 @@ void tangentQuad(
     return;
   }
   final QuadRoots roots = QuadRoots();
-  int n = roots.findRoots(y0 - 2 * y1 + y2, 2 * (y1 - y0), y0 - y);
+  final int n = roots.findRoots(y0 - 2 * y1 + y2, 2 * (y1 - y0), y0 - y);
   for (int index = 0; index < n; ++index) {
-    double t = index == 0 ? roots.root0! : roots.root1!;
-    double C = x0;
-    double A = x2 - 2 * x1 + C;
-    double B = 2 * (x1 - C);
-    double xt = polyEval(A, B, C, t);
+    final double t = index == 0 ? roots.root0! : roots.root1!;
+    final double C = x0;
+    final double A = x2 - 2 * x1 + C;
+    final double B = 2 * (x1 - C);
+    final double xt = polyEval(A, B, C, t);
     if (!SPath.nearlyEqual(x, xt)) {
       continue;
     }
@@ -73,12 +73,12 @@ ui.Offset _evalQuadTangentAt(double x0, double y0, double x1, double y1,
   }
   assert(t >= 0 && t <= 1.0);
 
-  double bx = x1 - x0;
-  double by = y1 - y0;
-  double ax = x2 - x1 - bx;
-  double ay = y2 - y1 - by;
-  double tx = ax * t + bx;
-  double ty = ay * t + by;
+  final double bx = x1 - x0;
+  final double by = y1 - y0;
+  final double ax = x2 - x1 - bx;
+  final double ay = y2 - y1 - by;
+  final double tx = ax * t + bx;
+  final double ty = ay * t + by;
   return ui.Offset(tx * 2, ty * 2);
 }
 
@@ -107,15 +107,15 @@ void tangentConic(Float32List pts, double x, double y, double weight,
   B -= C;
   C -= y;
   final QuadRoots quadRoots = QuadRoots();
-  int n = quadRoots.findRoots(A, 2 * B, C);
+  final int n = quadRoots.findRoots(A, 2 * B, C);
   for (int index = 0; index < n; ++index) {
-    double t = index == 0 ? quadRoots.root0! : quadRoots.root1!;
-    double xt = Conic.evalNumerator(x0, x1, x2, weight, t) /
+    final double t = index == 0 ? quadRoots.root0! : quadRoots.root1!;
+    final double xt = Conic.evalNumerator(x0, x1, x2, weight, t) /
         Conic.evalDenominator(weight, t);
     if (!SPath.nearlyEqual(x, xt)) {
       continue;
     }
-    Conic conic = Conic(x0, y0, x1, y1, x2, y2, weight);
+    final Conic conic = Conic(x0, y0, x1, y1, x2, y2, weight);
     tangents.add(conic.evalTangentAt(t));
   }
 }
@@ -142,14 +142,14 @@ void tangentCubic(
     return;
   }
   final Float32List dst = Float32List(20);
-  int n = chopCubicAtYExtrema(pts, dst);
+  final int n = chopCubicAtYExtrema(pts, dst);
   for (int i = 0; i <= n; ++i) {
-    int bufferPos = i * 6;
-    double? t = chopMonoAtY(dst, i * 6, y);
+    final int bufferPos = i * 6;
+    final double? t = chopMonoAtY(dst, i * 6, y);
     if (t == null) {
       continue;
     }
-    double xt = evalCubicPts(dst[bufferPos], dst[bufferPos + 2],
+    final double xt = evalCubicPts(dst[bufferPos], dst[bufferPos + 2],
         dst[bufferPos + 4], dst[bufferPos + 6], t);
     if (!SPath.nearlyEqual(x, xt)) {
       continue;

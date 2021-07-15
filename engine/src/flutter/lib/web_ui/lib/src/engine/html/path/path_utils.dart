@@ -137,7 +137,7 @@ class QuadRoots {
       return 0;
     }
 
-    double q = (b < 0) ? -(b - dr) / 2 : -(b + dr) / 2;
+    final double q = (b < 0) ? -(b - dr) / 2 : -(b + dr) / 2;
     double? res = validUnitDivide(q, a);
     if (res != null) {
       root0 = res;
@@ -295,9 +295,9 @@ class Convexicator {
     // Cross product = ||lastVec|| * ||curVec|| * sin(theta) * N
     // sin(theta) angle between two vectors is positive for angles 0..180 and
     // negative for greater, providing left or right direction.
-    double lastX = lastVecX!;
-    double lastY = lastVecY!;
-    double cross = lastX * curVecY - lastY * curVecX;
+    final double lastX = lastVecX!;
+    final double lastY = lastVecY!;
+    final double cross = lastX * curVecY - lastY * curVecX;
     if (!cross.isFinite) {
       return DirChange.kUnknown;
     }
@@ -328,7 +328,7 @@ class Convexicator {
   }
 
   bool _addVector(double curVecX, double curVecY) {
-    DirChange dir = _directionChange(curVecX, curVecY);
+    final DirChange dir = _directionChange(curVecX, curVecY);
     final bool isDirectionRight = dir == DirChange.kRight;
     if (dir == DirChange.kLeft || isDirectionRight) {
       if (_expectedDirection == DirChange.kInvalid) {
@@ -366,18 +366,18 @@ class Convexicator {
   // Quick test to detect concave by looking at number of changes in direction
   // of vectors formed by path points (excluding control points).
   static int bySign(PathRef pathRef, int pointIndex, int numPoints) {
-    int lastPointIndex = pointIndex + numPoints;
+    final int lastPointIndex = pointIndex + numPoints;
     int currentPoint = pointIndex++;
-    int firstPointIndex = currentPoint;
+    final int firstPointIndex = currentPoint;
     int signChangeCountX = 0;
     int signChangeCountY = 0;
     int lastSx = kValueNeverReturnedBySign;
     int lastSy = kValueNeverReturnedBySign;
     for (int outerLoop = 0; outerLoop < 2; ++outerLoop) {
       while (pointIndex != lastPointIndex) {
-        double vecX = pathRef.pointXAt(pointIndex) -
+        final double vecX = pathRef.pointXAt(pointIndex) -
             pathRef.pointXAt(currentPoint);
-        double vecY = pathRef.pointYAt(pointIndex) -
+        final double vecY = pathRef.pointYAt(pointIndex) -
             pathRef.pointYAt(currentPoint);
         if (!(vecX == 0 && vecY == 0)) {
           // Give up if vector construction failed.
@@ -385,8 +385,8 @@ class Convexicator {
           if (!(vecX.isFinite && vecY.isFinite)) {
             return SPathConvexityType.kUnknown;
           }
-          int sx = vecX < 0 ? 1 : 0;
-          int sy = vecY < 0 ? 1 : 0;
+          final int sx = vecX < 0 ? 1 : 0;
+          final int sy = vecY < 0 ? 1 : 0;
           signChangeCountX += (sx != lastSx) ? 1 : 0;
           signChangeCountY += (sy != lastSy) ? 1 : 0;
           if (signChangeCountX > 3 || signChangeCountY > 3) {

@@ -881,7 +881,7 @@ class SemanticsObject {
     _updateRole(Role.labelAndValue, (hasLabel || hasValue) && !isTextField && !isVisualOnly);
     _updateRole(Role.textField, isTextField);
 
-    bool shouldUseTappableRole =
+    final bool shouldUseTappableRole =
       (hasAction(ui.SemanticsAction.tap) || hasFlag(ui.SemanticsFlag.isButton)) &&
       // Text fields manage their own focus/tap interactions. We don't need the
       // tappable role manager. It only confuses AT.

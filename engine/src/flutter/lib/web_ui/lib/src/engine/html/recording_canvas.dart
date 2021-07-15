@@ -30,8 +30,8 @@ const bool _debugDumpPaintCommands = false;
 // negative radii (which Skia assumes to be 0), see:
 // https://skia.org/user/api/SkRRect_Reference#SkRRect_inset
 double _measureBorderRadius(double x, double y) {
-  double clampedX = x < 0 ? 0 : x;
-  double clampedY = y < 0 ? 0 : y;
+  final double clampedX = x < 0 ? 0 : x;
+  final double clampedY = y < 0 ? 0 : y;
   return clampedX * clampedX + clampedY * clampedY;
 }
 
@@ -186,13 +186,15 @@ class RecordingCanvas {
         if (rectContainsOther(clipRect, _pictureBounds!)) {
           // No need to check if commands fit in the clip rect if we already
           // know that the entire picture fits it.
-          for (int i = 0, len = _commands.length; i < len; i++) {
+          final int len = _commands.length;
+          for (int i = 0; i < len; i++) {
             _commands[i].apply(engineCanvas);
           }
         } else {
           // The picture doesn't fit the clip rect. Check that drawing commands
           // fit before applying them.
-          for (int i = 0, len = _commands.length; i < len; i++) {
+          final int len = _commands.length;
+          for (int i = 0; i < len; i++) {
             final PaintCommand command = _commands[i];
             if (command is DrawCommand) {
               if (command.isInvisible(clipRect)) {
@@ -408,8 +410,8 @@ class RecordingCanvas {
     assert(!_recordingEnded);
     // Check the inner bounds are contained within the outer bounds
     // see: https://cs.chromium.org/chromium/src/third_party/skia/src/core/SkCanvas.cpp?l=1787-1789
-    ui.Rect innerRect = inner.outerRect;
-    ui.Rect outerRect = outer.outerRect;
+    final ui.Rect innerRect = inner.outerRect;
+    final ui.Rect outerRect = outer.outerRect;
     if (outerRect == innerRect || outerRect.intersect(innerRect) != innerRect) {
       return; // inner is not fully contained within outer
     }
@@ -498,7 +500,7 @@ class RecordingCanvas {
     if (paint.shader == null) {
       // For Rect/RoundedRect paths use drawRect/drawRRect code paths for
       // DomCanvas optimization.
-      SurfacePath sPath = path as SurfacePath;
+      final SurfacePath sPath = path as SurfacePath;
       final ui.Rect? rect = sPath.toRect();
       if (rect != null) {
         drawRect(rect, paint);
@@ -510,7 +512,7 @@ class RecordingCanvas {
         return;
       }
     }
-    SurfacePath sPath = path as SurfacePath;
+    final SurfacePath sPath = path as SurfacePath;
     if (!sPath.pathRef.isEmpty) {
       renderStrategy.hasArbitraryPaint = true;
       _didDraw = true;
@@ -648,7 +650,8 @@ class RecordingCanvas {
     double minValueX, maxValueX, minValueY, maxValueY;
     minValueX = maxValueX = points[0];
     minValueY = maxValueY = points[1];
-    for (int i = 2, len = points.length; i < len; i += 2) {
+    final int len = points.length;
+    for (int i = 2; i < len; i += 2) {
       final double x = points[i];
       final double y = points[i + 1];
       if (x.isNaN || y.isNaN) {

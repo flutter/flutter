@@ -39,8 +39,8 @@ class IntervalTree<T> {
       if (nodes.length == 1) {
         return nodes.single;
       }
-      int mid = nodes.length ~/ 2;
-      IntervalTreeNode<T> root = nodes[mid];
+      final int mid = nodes.length ~/ 2;
+      final IntervalTreeNode<T> root = nodes[mid];
       root.left = _makeBalancedTree(nodes.sublist(0, mid));
       root.right = _makeBalancedTree(nodes.sublist(mid + 1));
       return root;
@@ -70,7 +70,7 @@ class IntervalTree<T> {
       }
     }
 
-    IntervalTreeNode<T> root = _makeBalancedTree(intervals)!;
+    final IntervalTreeNode<T> root = _makeBalancedTree(intervals)!;
     _computeHigh(root);
 
     return IntervalTree<T>._(root);
@@ -79,7 +79,7 @@ class IntervalTree<T> {
   /// Returns the list of objects which have been associated with intervals that
   /// intersect with [x].
   List<T> intersections(int x) {
-    List<T> results = <T>[];
+    final List<T> results = <T>[];
     root.searchForPoint(x, results);
     return results;
   }

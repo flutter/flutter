@@ -72,9 +72,9 @@ int combineSurrogatePair(String text, int index) {
   final int hi = text.codeUnitAt(index);
   final int lo = text.codeUnitAt(index + 1);
 
-  int x = (hi & ((1 << 6) - 1)) << 10 | lo & ((1 << 10) - 1);
-  int w = (hi >> 6) & ((1 << 5) - 1);
-  int u = w + 1;
+  final int x = (hi & ((1 << 6) - 1)) << 10 | lo & ((1 << 10) - 1);
+  final int w = (hi >> 6) & ((1 << 5) - 1);
+  final int u = w + 1;
   return u << 16 | x;
 }
 

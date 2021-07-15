@@ -100,9 +100,9 @@ void testMain() async {
     rc.save();
     rc.translate(50.0, 100.0);
     rc.rotate(math.pi / 4.0);
-    Image testImage = createTestImage();
-    double testWidth = testImage.width.toDouble();
-    double testHeight = testImage.height.toDouble();
+    final Image testImage = createTestImage();
+    final double testWidth = testImage.width.toDouble();
+    final double testHeight = testImage.height.toDouble();
     rc.drawImageRect(testImage, Rect.fromLTRB(0, 0, testWidth, testHeight),
         Rect.fromLTRB(100, 30, 2 * testWidth, 2 * testHeight), SurfacePaint());
     rc.restore();
@@ -113,9 +113,9 @@ void testMain() async {
     final RecordingCanvas rc =
         RecordingCanvas(const Rect.fromLTRB(0, 0, 400, 300));
     rc.save();
-    Image testImage = createTestImage();
-    double testWidth = testImage.width.toDouble();
-    double testHeight = testImage.height.toDouble();
+    final Image testImage = createTestImage();
+    final double testWidth = testImage.width.toDouble();
+    final double testHeight = testImage.height.toDouble();
     rc.drawImageRect(
         testImage,
         Rect.fromLTRB(testWidth / 2, 0, testWidth, testHeight),
@@ -128,9 +128,9 @@ void testMain() async {
   test('Paints image with source and destination and round clip', () async {
     final RecordingCanvas rc =
         RecordingCanvas(const Rect.fromLTRB(0, 0, 400, 300));
-    Image testImage = createTestImage();
-    double testWidth = testImage.width.toDouble();
-    double testHeight = testImage.height.toDouble();
+    final Image testImage = createTestImage();
+    final double testWidth = testImage.width.toDouble();
+    final double testHeight = testImage.height.toDouble();
     rc.save();
     rc.clipRRect(RRect.fromLTRBR(
         100, 30, 2 * testWidth, 2 * testHeight, Radius.circular(16)));
@@ -149,9 +149,9 @@ void testMain() async {
     rc.save();
     rc.translate(50.0, 100.0);
     rc.rotate(math.pi / 6.0);
-    Image testImage = createTestImage();
-    double testWidth = testImage.width.toDouble();
-    double testHeight = testImage.height.toDouble();
+    final Image testImage = createTestImage();
+    final double testWidth = testImage.width.toDouble();
+    final double testHeight = testImage.height.toDouble();
     rc.drawImageRect(
         testImage,
         Rect.fromLTRB(testWidth / 2, 0, testWidth, testHeight),
@@ -167,9 +167,9 @@ void testMain() async {
     final RecordingCanvas rc =
         RecordingCanvas(const Rect.fromLTRB(0, 0, 400, 300));
     rc.save();
-    Image testImage = createTestImage();
-    double testWidth = testImage.width.toDouble();
-    double testHeight = testImage.height.toDouble();
+    final Image testImage = createTestImage();
+    final double testWidth = testImage.width.toDouble();
+    final double testHeight = testImage.height.toDouble();
     rc.drawImageRect(testImage, Rect.fromLTRB(0, 0, testWidth, testHeight),
         Rect.fromLTRB(100, 30, 2 * testWidth, 2 * testHeight), SurfacePaint());
     rc.drawCircle(
@@ -188,9 +188,9 @@ void testMain() async {
     final RecordingCanvas rc =
         RecordingCanvas(const Rect.fromLTRB(0, 0, 400, 300));
     rc.save();
-    Image testImage = createTestImage();
-    double testWidth = testImage.width.toDouble();
-    double testHeight = testImage.height.toDouble();
+    final Image testImage = createTestImage();
+    final double testWidth = testImage.width.toDouble();
+    final double testHeight = testImage.height.toDouble();
     rc.drawCircle(
         Offset(100, 100),
         50.0,
@@ -209,9 +209,9 @@ void testMain() async {
     final RecordingCanvas rc =
         RecordingCanvas(const Rect.fromLTRB(0, 0, 400, 300));
     rc.save();
-    Image testImage = createTestImage();
-    double testWidth = testImage.width.toDouble();
-    double testHeight = testImage.height.toDouble();
+    final Image testImage = createTestImage();
+    final double testWidth = testImage.width.toDouble();
+    final double testHeight = testImage.height.toDouble();
     rc.clipRect(Rect.fromLTRB(75, 75, 160, 160), ClipOp.intersect);
     rc.drawImageRect(testImage, Rect.fromLTRB(0, 0, testWidth, testHeight),
         Rect.fromLTRB(100, 30, 2 * testWidth, 2 * testHeight), SurfacePaint());
@@ -231,9 +231,9 @@ void testMain() async {
     final RecordingCanvas rc =
         RecordingCanvas(const Rect.fromLTRB(0, 0, 400, 300));
     rc.save();
-    Image testImage = createTestImage();
-    double testWidth = testImage.width.toDouble();
-    double testHeight = testImage.height.toDouble();
+    final Image testImage = createTestImage();
+    final double testWidth = testImage.width.toDouble();
+    final double testHeight = testImage.height.toDouble();
     // Rotate around center of circle.
     rc.translate(100, 100);
     rc.rotate(math.pi / 4.0);
@@ -257,9 +257,9 @@ void testMain() async {
     final RecordingCanvas rc =
         RecordingCanvas(const Rect.fromLTRB(0, 0, 400, 300));
     rc.save();
-    Image testImage = createTestImage();
-    double testWidth = testImage.width.toDouble();
-    double testHeight = testImage.height.toDouble();
+    final Image testImage = createTestImage();
+    final double testWidth = testImage.width.toDouble();
+    final double testHeight = testImage.height.toDouble();
     // Rotate around center of circle.
     rc.translate(100, 100);
     rc.rotate(-math.pi / 4.0);
@@ -285,9 +285,9 @@ void testMain() async {
     final RecordingCanvas rc =
         RecordingCanvas(const Rect.fromLTRB(0, 0, 400, 300));
     rc.save();
-    Image testImage = createTestImage();
-    double testWidth = testImage.width.toDouble();
-    double testHeight = testImage.height.toDouble();
+    final Image testImage = createTestImage();
+    final double testWidth = testImage.width.toDouble();
+    final double testHeight = testImage.height.toDouble();
     rc.clipRRect(RRect.fromLTRBR(75, 75, 160, 160, Radius.circular(5)));
     rc.drawImageRect(testImage, Rect.fromLTRB(0, 0, testWidth, testHeight),
         Rect.fromLTRB(100, 30, 2 * testWidth, 2 * testHeight), SurfacePaint());
@@ -307,9 +307,9 @@ void testMain() async {
     final RecordingCanvas rc =
         RecordingCanvas(const Rect.fromLTRB(0, 0, 400, 300));
     rc.save();
-    Image testImage = createTestImage();
-    double testWidth = testImage.width.toDouble();
-    double testHeight = testImage.height.toDouble();
+    final Image testImage = createTestImage();
+    final double testWidth = testImage.width.toDouble();
+    final double testHeight = testImage.height.toDouble();
     final Path path = Path();
     // Triangle.
     path.moveTo(118, 57);
@@ -338,9 +338,9 @@ void testMain() async {
     final RecordingCanvas rc =
         RecordingCanvas(const Rect.fromLTRB(0, 0, 400, 300));
     rc.save();
-    Image testImage = createTestImage();
-    double testWidth = testImage.width.toDouble();
-    double testHeight = testImage.height.toDouble();
+    final Image testImage = createTestImage();
+    final double testWidth = testImage.width.toDouble();
+    final double testHeight = testImage.height.toDouble();
     final Color orange = Color(0xFFFF9800);
     final Paragraph paragraph1 = createTestParagraph(
         'Should be below below below below below',
@@ -371,14 +371,14 @@ void testMain() async {
 
   // Creates a picture
   test('Paints nine slice image', () async {
-    Rect region = const Rect.fromLTWH(0, 0, 500, 500);
-    EnginePictureRecorder recorder = EnginePictureRecorder();
+    final Rect region = const Rect.fromLTWH(0, 0, 500, 500);
+    final EnginePictureRecorder recorder = EnginePictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
-    Image testImage = createNineSliceImage();
+    final Image testImage = createNineSliceImage();
     canvas.clipRect(Rect.fromLTWH(0, 0, 420, 200));
     canvas.drawImageNine(testImage, Rect.fromLTWH(20, 20, 20, 20),
         Rect.fromLTWH(20, 20, 400, 400), SurfacePaint());
-    Picture picture = recorder.endRecording();
+    final Picture picture = recorder.endRecording();
 
     final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
     builder.addPicture(Offset(0, 0), picture);
@@ -401,17 +401,17 @@ void testMain() async {
   // Tests for correct behavior when using drawImageNine with a destination
   // size that is too small to render the center portion of the original image.
   test('Paints nine slice image', () async {
-    Rect region = const Rect.fromLTWH(0, 0, 100, 100);
-    EnginePictureRecorder recorder = EnginePictureRecorder();
+    final Rect region = const Rect.fromLTWH(0, 0, 100, 100);
+    final EnginePictureRecorder recorder = EnginePictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
-    Image testImage = createNineSliceImage();
+    final Image testImage = createNineSliceImage();
     canvas.clipRect(Rect.fromLTWH(0, 0, 100, 100));
     // The testImage is 60x60 and the center slice is 20x20 so the edges
     // of the image are 40x40. Drawing into a destination that is smaller
     // than that will not provide enough room to draw the center portion.
     canvas.drawImageNine(testImage, Rect.fromLTWH(20, 20, 20, 20),
         Rect.fromLTWH(20, 20, 36, 36), SurfacePaint());
-    Picture picture = recorder.endRecording();
+    final Picture picture = recorder.endRecording();
 
     final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
     builder.addPicture(Offset(0, 0), picture);
@@ -457,7 +457,7 @@ void testMain() async {
     final RecordingCanvas canvas = RecordingCanvas(region);
     canvas.translate(10, 10);
     canvas.drawImage(createTestImage(), Offset(0, 0), SurfacePaint());
-    Matrix4 transform = Matrix4.identity()
+    final Matrix4 transform = Matrix4.identity()
       ..setRotationY(0.8)
       ..setEntry(3, 2, 0.0005); // perspective
     canvas.transform(transform.storage);
@@ -475,7 +475,7 @@ void testMain() async {
     canvas.drawRect(region, SurfacePaint()..color = Color(0xFFE0E0E0));
     canvas.translate(10, 10);
     canvas.drawImage(createTestImage(), Offset(0, 0), SurfacePaint());
-    Matrix4 transform = Matrix4.identity()
+    final Matrix4 transform = Matrix4.identity()
       ..setRotationY(0.8)
       ..setEntry(3, 2, 0.0005); // perspective
     canvas.transform(transform.storage);
@@ -496,7 +496,7 @@ void testMain() async {
     canvas.translate(20, 20);
     canvas.drawRect(Rect.fromLTWH(0, 0, 100, 40),
         SurfacePaint()..color = Color(0xFF000000));
-    Matrix4 transform = Matrix4.identity()
+    final Matrix4 transform = Matrix4.identity()
       ..setRotationY(0.8)
       ..setEntry(3, 2, 0.001); // perspective
     canvas.transform(transform.storage);
@@ -521,7 +521,7 @@ void testMain() async {
     canvas.translate(20, 20);
     canvas.drawRect(Rect.fromLTWH(0, 0, 100, 40),
         SurfacePaint()..color = Color(0xFF000000));
-    Matrix4 transform = Matrix4.identity()
+    final Matrix4 transform = Matrix4.identity()
       ..setRotationY(0.8)
       ..setEntry(3, 2, 0.001); // perspective
     canvas.transform(transform.storage);
@@ -546,7 +546,7 @@ void testMain() async {
     canvas.translate(20, 20);
     canvas.drawRect(Rect.fromLTWH(0, 0, 100, 20),
         SurfacePaint()..color = Color(0xFF000000));
-    Matrix4 transform = Matrix4.identity()
+    final Matrix4 transform = Matrix4.identity()
       ..setRotationY(0.8)
       ..setEntry(3, 2, 0.001); // perspective
     canvas.transform(transform.storage);
@@ -554,7 +554,7 @@ void testMain() async {
         SurfacePaint()..color = Color(0x801080E0));
     canvas.drawOval(Rect.fromLTWH(300, 290, 90, 40),
         SurfacePaint()..color = Color(0x80E010E0));
-    Path path = Path();
+    final Path path = Path();
     path.moveTo(50, 50);
     path.lineTo(100, 50);
     path.lineTo(100, 100);
@@ -578,7 +578,7 @@ void testMain() async {
     canvas.translate(20, 20);
     canvas.drawRect(Rect.fromLTWH(0, 0, 100, 20),
         SurfacePaint()..color = Color(0xFF000000));
-    Matrix4 transform = Matrix4.identity()
+    final Matrix4 transform = Matrix4.identity()
       ..setRotationY(0.8)
       ..setEntry(3, 2, 0.001); // perspective
     canvas.transform(transform.storage);
@@ -587,7 +587,7 @@ void testMain() async {
         SurfacePaint()..color = Color(0x801080E0));
     canvas.drawOval(Rect.fromLTWH(300, 290, 90, 40),
         SurfacePaint()..color = Color(0x80E010E0));
-    Path path = Path();
+    final Path path = Path();
     path.moveTo(50, 50);
     path.lineTo(100, 50);
     path.lineTo(100, 100);
@@ -743,9 +743,9 @@ HtmlImage createNineSliceImage() {
 }
 
 HtmlImage createTestImage({int width = 100, int height = 50}) {
-  html.CanvasElement canvas =
+  final html.CanvasElement canvas =
       new html.CanvasElement(width: width, height: height);
-  html.CanvasRenderingContext2D ctx = canvas.context2D;
+  final html.CanvasRenderingContext2D ctx = canvas.context2D;
   ctx.fillStyle = '#E04040';
   ctx.fillRect(0, 0, 33, 50);
   ctx.fill();
@@ -755,7 +755,7 @@ HtmlImage createTestImage({int width = 100, int height = 50}) {
   ctx.fillStyle = '#2040E0';
   ctx.fillRect(66, 0, 33, 50);
   ctx.fill();
-  html.ImageElement imageElement = html.ImageElement();
+  final html.ImageElement imageElement = html.ImageElement();
   imageElement.src = js_util.callMethod(canvas, 'toDataURL', <dynamic>[]);
   return HtmlImage(imageElement, width, height);
 }

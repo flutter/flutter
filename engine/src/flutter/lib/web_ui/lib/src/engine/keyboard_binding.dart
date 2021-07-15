@@ -480,7 +480,7 @@ class KeyboardConverter {
       synthesized: false,
     );
 
-    bool primaryHandled = dispatchKeyData(keyData);
+    final bool primaryHandled = dispatchKeyData(keyData);
     if (primaryHandled) {
       event.preventDefault();
     }

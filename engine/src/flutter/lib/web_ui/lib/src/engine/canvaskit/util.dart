@@ -166,9 +166,9 @@ void drawSkShadow(
       ? SkiaShadowFlags.kTransparentOccluderShadowFlags
       : SkiaShadowFlags.kDefaultShadowFlags;
 
-  ui.Color inAmbient =
+  final ui.Color inAmbient =
       color.withAlpha((color.alpha * ckShadowAmbientAlpha).round());
-  ui.Color inSpot = color.withAlpha((color.alpha * ckShadowSpotAlpha).round());
+  final ui.Color inSpot = color.withAlpha((color.alpha * ckShadowSpotAlpha).round());
 
   final SkTonalColors inTonalColors = SkTonalColors(
     ambient: makeFreshSkColor(inAmbient),

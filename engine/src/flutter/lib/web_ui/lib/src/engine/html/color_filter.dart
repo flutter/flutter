@@ -50,8 +50,8 @@ class PersistedColorFilter extends PersistedContainerSurface
 
   @override
   html.Element createElement() {
-    html.Element element = defaultCreateElement('flt-color-filter');
-    html.Element container = html.Element.tag('flt-filter-interior');
+    final html.Element element = defaultCreateElement('flt-color-filter');
+    final html.Element container = html.Element.tag('flt-filter-interior');
     container.style.position = 'absolute';
     _childContainer = container;
     element.append(_childContainer!);
@@ -79,9 +79,9 @@ class PersistedColorFilter extends PersistedContainerSurface
   }
 
   void _applyBlendModeFilter(CkBlendModeColorFilter colorFilter) {
-    ui.Color filterColor = colorFilter.color;
+    final ui.Color filterColor = colorFilter.color;
     ui.BlendMode colorFilterBlendMode = colorFilter.blendMode;
-    html.CssStyleDeclaration style = rootElement!.style;
+    final html.CssStyleDeclaration style = rootElement!.style;
     switch (colorFilterBlendMode) {
       case ui.BlendMode.clear:
       case ui.BlendMode.dstOut:
@@ -125,7 +125,7 @@ class PersistedColorFilter extends PersistedContainerSurface
     }
 
     // Use SVG filter for blend mode.
-    String? svgFilter =
+    final String? svgFilter =
         svgFilterFromBlendMode(filterColor, colorFilterBlendMode);
     if (svgFilter != null) {
       _filterElement =
@@ -141,7 +141,7 @@ class PersistedColorFilter extends PersistedContainerSurface
   }
 
   void _applyMatrixColorFilter(CkMatrixColorFilter colorFilter) {
-    String? svgFilter = svgFilterFromColorMatrix(colorFilter.matrix);
+    final String? svgFilter = svgFilterFromColorMatrix(colorFilter.matrix);
     if (svgFilter != null) {
       _filterElement =
           html.Element.html(svgFilter, treeSanitizer: NullTreeSanitizer());

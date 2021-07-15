@@ -69,15 +69,15 @@ void testMain() async {
     final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
     final Picture backgroundPicture = _drawBackground(region);
     builder.addPicture(Offset.zero, backgroundPicture);
-    ClipRectEngineLayer clipEngineLayer = builder.pushClipRect(
+    final ClipRectEngineLayer clipEngineLayer = builder.pushClipRect(
       const Rect.fromLTRB(10, 10, 180, 120),
     );
     final Picture circles1 = _drawTestPictureWithCircles(region, 30, 30);
     builder.addPicture(Offset.zero, circles1);
-    ClipRectEngineLayer clipEngineLayer2 = builder.pushClipRect(
+    final ClipRectEngineLayer clipEngineLayer2 = builder.pushClipRect(
       const Rect.fromLTRB(60, 10, 180, 120),
     );
-    BackdropFilterEngineLayer oldBackdropFilterLayer =
+    final BackdropFilterEngineLayer oldBackdropFilterLayer =
         builder.pushBackdropFilter(ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
         oldLayer: null);
     final Picture circles2 = _drawTestPictureWithCircles(region, 90, 30);

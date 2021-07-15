@@ -73,8 +73,8 @@ class PersistedShaderMask extends PersistedContainerSurface
 
   @override
   html.Element createElement() {
-    html.Element element = defaultCreateElement('flt-shader-mask');
-    html.Element container = html.Element.tag('flt-mask-interior');
+    final html.Element element = defaultCreateElement('flt-shader-mask');
+    final html.Element container = html.Element.tag('flt-mask-interior');
     container.style..position = 'absolute';
     _childContainer = container;
     element.append(_childContainer!);
@@ -107,7 +107,7 @@ class PersistedShaderMask extends PersistedContainerSurface
 
   void _applyGradientShader() {
     if (shader is EngineGradient) {
-      EngineGradient gradientShader = shader as EngineGradient;
+      final EngineGradient gradientShader = shader as EngineGradient;
       final String imageUrl =
           gradientShader.createImageBitmap(maskRect, 1, true) as String;
       ui.BlendMode blendModeTemp = blendMode;
@@ -154,7 +154,7 @@ class PersistedShaderMask extends PersistedContainerSurface
           break;
       }
 
-      String code = svgMaskFilterFromImageAndBlendMode(
+      final String code = svgMaskFilterFromImageAndBlendMode(
           imageUrl, blendModeTemp, maskRect.width, maskRect.height)!;
 
       _shaderElement =
