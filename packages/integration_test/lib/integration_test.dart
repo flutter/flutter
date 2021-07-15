@@ -19,7 +19,7 @@ import 'package:vm_service/vm_service_io.dart' as vm_io;
 import '_callback_io.dart' if (dart.library.html) '_callback_web.dart' as driver_actions;
 import '_extension_io.dart' if (dart.library.html) '_extension_web.dart';
 import 'channel.dart';
-import 'common.dart';
+import 'src/common.dart';
 
 const String _success = 'success';
 

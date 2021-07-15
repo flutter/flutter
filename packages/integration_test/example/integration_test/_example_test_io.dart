@@ -33,16 +33,17 @@ void main() {
     // Trace the timeline of the following operation. The timeline result will
     // be written to `build/integration_response_data.json` with the key
     // `timeline`.
-    // Trigger a frame.
-    await tester.pumpAndSettle();
 
     await Future<void>.delayed(const Duration(seconds: 3));
 
     // On Android, this is required prior to taking the screenshot.
     await binding.convertFlutterSurfaceToImage();
 
+    // Trigger a frame.
+    await tester.pumpAndSettle();
+
     // Takes a screenshot of the native UI.
-    await binding.takeScreenshot('platform_name');
+    print(await binding.takeScreenshot('platform_name'));
 
     // Verify that platform version is retrieved.
     expect(

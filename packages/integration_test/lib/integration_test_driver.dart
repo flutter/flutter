@@ -8,7 +8,7 @@ import 'dart:io';
 
 import 'package:flutter_driver/flutter_driver.dart';
 
-import 'package:integration_test/common.dart';
+import 'package:integration_test/src/common.dart';
 import 'package:path/path.dart' as path;
 
 /// Flutter Driver test output directory.
@@ -91,13 +91,12 @@ Future<void> integrationDriver({
       try {
         ok = await onScreenshot(screenshotName, screenshotBytes.cast<int>());
       } catch (exception) {
-        throw 'Screenshot failure:\n'
-            'onScreenshot("$screenshotName", <bytes>) threw an exception: $exception';
+        throw StateError('Screenshot failure:\n'
+            'onScreenshot("$screenshotName", <bytes>) threw an exception: $exception');
       }
       if (!ok) {
-        print('Screenshot failure:\n'
+        throw StateError('Screenshot failure:\n'
             'Expected onScreenshot("$screenshotName", <bytes>) to return true, but it returned false');
-        exit(1);
       }
     }
   }

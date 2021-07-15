@@ -33,7 +33,7 @@ import java.lang.StringBuilder;
  * that includes both Android views and the Flutter UI.
  *
  * To take screenshots, the rendering surface must be changed to {@code FlutterImageView},
- * since surfaces like {@code FlutterSurfaceView} or {@code FlutterTextureView} are opaque
+ * since surfaces like {@code FlutterSurfaceView} and {@code FlutterTextureView} are opaque
  * when the view hierarchy is rendered to a bitmap.
  *
  * It's also necessary to ask the framework to schedule a frame, and then add a listener
@@ -83,7 +83,7 @@ class FlutterDeviceScreenshot {
   /**
    * Converts the Flutter surface to an image view.
    * This allows to render the view hierarchy to a bitmap since
-   * {@code FlutterSurfaceView} or {@code FlutterTextureView} cannot be rendered to a bitmap.
+   * {@code FlutterSurfaceView} and {@code FlutterTextureView} cannot be rendered to a bitmap.
    *
    * @param activity typically {@code FlutterActivity}.
    */
@@ -94,7 +94,6 @@ class FlutterDeviceScreenshot {
       flutterView.convertToImageView();
     }
   }
-
 
   // Handlers use to capture a view.
   private static Handler backgroundHandler;

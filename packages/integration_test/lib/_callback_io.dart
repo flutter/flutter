@@ -7,7 +7,7 @@ import 'dart:ui';
 import 'package:flutter/services.dart';
 
 import 'channel.dart';
-import 'common.dart';
+import 'src/common.dart';
 
 /// The dart:io implementation of [CallbackManager].
 ///
@@ -64,6 +64,7 @@ class IOCallbackManager implements CallbackManager {
 
   @override
   Future<void> convertFlutterSurfaceToImage() async {
+    assert(!_usesFlutterImage, 'Surface already converted to an image');
     await integrationTestChannel.invokeMethod<void>(
       'convertFlutterSurfaceToImage',
       null,
@@ -74,7 +75,7 @@ class IOCallbackManager implements CallbackManager {
   @override
   Future<Map<String, dynamic>> takeScreenshot(String screenshot) async {
     if (!_usesFlutterImage) {
-      throw 'Please call convertFlutterSurfaceToImage() before taking a screenshot';
+      throw StateError('Call convertFlutterSurfaceToImage() before taking a screenshot');
     }
     integrationTestChannel.setMethodCallHandler(_onMethodChannelCall);
     final List<int>? rawBytes = await integrationTestChannel.invokeMethod<List<int>>(
@@ -82,7 +83,7 @@ class IOCallbackManager implements CallbackManager {
       null,
     );
     if (rawBytes == null) {
-      throw 'Expected a list of bytes, but instead captureScreenshot returned null';
+      throw StateError('Expected a list of bytes, but instead captureScreenshot returned null');
     }
     return <String, dynamic>{
       'screenshotName': screenshot,
