@@ -133,7 +133,7 @@ void main() {
           '"ResultData":{},'
           '"BenchmarkScoreKeys":[]}';
       fs.file(resultsPath).writeAsStringSync(updateTaskJson);
-      await cocoon.sendResultsPath(resultsPath);
+      await cocoon.sendResultsPath(resultsPath: resultsPath);
     });
 
     test('uploads expected update task payload from results file', () async {
@@ -155,35 +155,7 @@ void main() {
           '"ResultData":{"i":0.0,"j":0.0,"not_a_metric":"something"},'
           '"BenchmarkScoreKeys":["i","j"]}';
       fs.file(resultsPath).writeAsStringSync(updateTaskJson);
-      await cocoon.sendResultsPath(resultsPath);
-    });
-
-    test('updates test flaky status from successful task', () async {
-      mockClient = MockClient((Request request) async => Response('{}', 200));
-
-      cocoon = Cocoon(
-        serviceAccountTokenPath: serviceAccountTokenPath,
-        fs: fs,
-        httpClient: mockClient,
-        requestRetryLimit: 0,
-      );
-      await cocoon.updateTestFlaky(
-          isTestFlaky: true, commitSha: 'shaAbc', builderName: 'builderAbc', gitBranch: 'branchAbc');
-    });
-
-    test('throws client exception on non-200 responses', () async {
-      mockClient = MockClient((Request request) async => Response('', 500));
-
-      cocoon = Cocoon(
-        serviceAccountTokenPath: serviceAccountTokenPath,
-        fs: fs,
-        httpClient: mockClient,
-        requestRetryLimit: 0,
-      );
-
-      expect(() => cocoon.updateTestFlaky(
-          isTestFlaky: true, commitSha: 'shaAbc', builderName: 'builderAbc', gitBranch: 'branchAbc'),
-          throwsA(isA<ClientException>()));
+      await cocoon.sendResultsPath(resultsPath: resultsPath);
     });
   });
 

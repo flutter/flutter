@@ -77,36 +77,26 @@ class Cocoon {
   /// 1. Run DeviceLab test, writing results to a known path
   /// 2. Request service account token from luci auth (valid for at least 3 minutes)
   /// 3. Upload results from (1) to Cocoon
-  Future<void> sendResultsPath(String resultsPath) async {
-    final File resultFile = fs.file(resultsPath);
-    final Map<String, dynamic> resultsJson = json.decode(await resultFile.readAsString()) as Map<String, dynamic>;
-    await _sendUpdateTaskRequest(resultsJson);
-  }
-
-  /// Update test flaky status to Cocoon.
-  ///
-  /// A flaky flag means the test has run multiple times via test runner, and a final test passes. So the status
-  /// of the task will always be `Succeeded`.
-  Future<void> updateTestFlaky({
+  /// 
+  /// The `resultsPath` is not available for all tests. When it doesn't show up, we
+  /// need to append `CommitBranch`, `CommitSha`, and `BuilderName`.
+  Future<void> sendResultsPath({
+    String? resultsPath,
     bool? isTestFlaky,
-    String? builderName,
-    String? commitSha,
     String? gitBranch,
-    }) async {
-    final Map<String, dynamic> request = <String, dynamic>{
-      'NewStatus': 'Succeeded',
-      'CommitBranch': gitBranch,
-      'CommitSha': commitSha,
-      'BuilderName': builderName,
-      'TestFlaky': isTestFlaky,
-    };
-    final Map<String, dynamic> response = await _sendCocoonRequest('update-task-status', request);
-    if (response['Name'] != null) {
-      logger.info('Updated Cocoon TestFlaky status.');
+    String? builderName,
+  }) async {
+    Map<String, dynamic> resultsJson = <String, dynamic>{};
+    if (resultsPath != null) {
+      final File resultFile = fs.file(resultsPath);
+      resultsJson = json.decode(await resultFile.readAsString()) as Map<String, dynamic>;
     } else {
-      logger.info(response);
-      logger.severe('Failed to updated Cocoon TestFlaky status.');
+      resultsJson['CommitBranch'] = gitBranch;
+      resultsJson['CommitSha'] = commitSha;
+      resultsJson['BuilderName'] = builderName;
     }
+    resultsJson['NewStatus'] = isTestFlaky ?? false;
+    await _sendUpdateTaskRequest(resultsJson);
   }
 
   /// Write the given parameters into an update task request and store the JSON in [resultsPath].
