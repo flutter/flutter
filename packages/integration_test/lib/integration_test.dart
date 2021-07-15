@@ -182,9 +182,8 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
 
   /// Takes a screenshot.
   ///
-  /// On Android, you need to call `convertFlutterSurfaceToImage()`, and set the
-  /// `framePolicy` to `LiveTestWidgetsFlutterBindingFramePolicy.fullyLive`
-  /// prior to taking a screenshot.
+  /// On Android, you need to call `convertFlutterSurfaceToImage()`, and
+  /// pump a frame before taking a screenshot.
   Future<List<int>> takeScreenshot(String screenshotName) async {
     reportData ??= <String, dynamic>{};
     reportData!['screenshots'] ??= <dynamic>[];
