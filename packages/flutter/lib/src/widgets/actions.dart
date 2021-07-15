@@ -74,8 +74,8 @@ typedef ActionListenerCallback = void Function(Action<Intent> action);
 ///
 /// ### Action Overriding
 ///
-/// An overridable [Action] is a special kind of [Action] that is created using
-/// the [Action.overridable] constructor. It has access to a default [Action],
+/// An overridable [Action] is a special kind of [Action] created using the
+/// [Action.overridable] constructor. It has access to a default [Action],
 /// and a nullable override [Action]. It the same behavior as its override
 /// if that exists, and mirrors the behavior of its `defaultAction` otherwise.
 ///
@@ -83,11 +83,17 @@ typedef ActionListenerCallback = void Function(Action<Intent> action);
 /// a [BuildContext] to find a suitable override in its ancestor [Actions]
 /// widget. This can be used to provide a default implementation when creating a
 /// general purpose leaf widget, and later override it when building a more
-/// specialized widget using that widget. For instance, [TextField]'s
-/// [SelectAllTextIntent] by default selects the text it current contains, but
-/// in a US phone number widget that consists of 3 different [TextField]s (see
-/// the example in [Action.overridable]), [SelectAllTextIntent] should instead
-/// select the text within all 3 [TextField]s.
+/// specialized widget using that widget.
+///
+/// For instance, [TextField]'s [SelectAllTextIntent] by default selects the
+/// text it currently contains, but in a US phone number widget that consists of
+/// 3 different [TextField]s (area code, prefix and line number),
+/// [SelectAllTextIntent] should instead select the text within all 3
+/// [TextField]s. The [TextField] widget maps [SelectAllTextIntent] to an
+/// overridable [Action] so the widget has a sensible default handling of that
+/// [Intent], while still allows app develpers to change the handling by
+/// adding an ancestor [Actions] widget that maps [SelectAllTextIntent] to an
+/// different [Action].
 ///
 /// See also:
 ///
@@ -130,23 +136,25 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// to allow further overriding, or to allow the [Intent] to propagate to
   /// parent widgets that also support this [Intent].
   ///
-  /// {@tool snippet --template=stateful_widget_material}
+  /// {@tool snippet --template=freeform}
   /// This sample implements a custom text input field that handles the
   /// [DeleteTextIntent] intent, as well as a US telephone number input widget
-  /// that uses multiple text fields for area code, prefix and line number, and
-  /// wish to send the focus to the preceding text field when the currently
-  /// focused field becomes empty.
+  /// that consists of multiple text fields for area code, prefix and line
+  /// number. When the backspace key is pressed, the phone number input widget
+  /// sends the focus to the preceding text field when the currently focused
+  /// field becomes empty.
   ///
   /// ```dart preamble
   /// // This implements a custom phone number input field that handles the
   /// // [DeleteTextIntent] intent.
   /// class DigitInput extends StatefulWidget {
   ///   const DigitInput({
-  ///       required this.controller,
-  ///       required this.focusNode,
-  ///       this.maxLength,
-  ///       this.textInputAction = TextInputAction.next,
-  ///   });
+  ///     Key? key,
+  ///     required this.controller,
+  ///     required this.focusNode,
+  ///     this.maxLength,
+  ///     this.textInputAction = TextInputAction.next,
+  ///   }) : super(key: key);
   ///
   ///   final int? maxLength;
   ///   final TextEditingController controller;
@@ -157,7 +165,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// }
   ///
   /// class DigitInputState extends State<DigitInput> {
-  ///   late final Action<DeleteTextIntent> deleteTextAction = CallbackAction<DeleteTextIntent>(
+  ///   late final Action<DeleteTextIntent> _deleteTextAction = CallbackAction<DeleteTextIntent>(
   ///     onInvoke: (DeleteTextIntent intent) {
   ///       // For simplicity we delete everything in the section.
   ///       widget.controller.clear();
@@ -169,14 +177,14 @@ abstract class Action<T extends Intent> with Diagnosticable {
   ///     return Actions(
   ///       actions: <Type, Action<Intent>>{
   ///         // Make the default `DeleteTextIntent` handler overridable.
-  ///         DeleteTextIntent: Action<DeleteTextIntent>.overridable(defaultAction: deleteTextAction, context: context),
+  ///         DeleteTextIntent: Action<DeleteTextIntent>.overridable(defaultAction: _deleteTextAction, context: context),
   ///       },
   ///       child: TextField(
   ///         controller: widget.controller,
   ///         textInputAction: TextInputAction.next,
   ///         keyboardType: TextInputType.phone,
   ///         focusNode: widget.focusNode,
-  ///         decoration: InputDecoration(
+  ///         decoration: const InputDecoration(
   ///           border: OutlineInputBorder(),
   ///         ),
   ///         inputFormatters: <TextInputFormatter>[
@@ -187,11 +195,18 @@ abstract class Action<T extends Intent> with Diagnosticable {
   ///     );
   ///   }
   /// }
+  /// ```
+  ///
+  /// ``` dart
+  /// class SimpleUSPhoneNumberEntry extends StatefulWidget {
+  ///   State<SimpleUSPhoneNumberEntry> createState() => _SimpleUSPhoneNumberEntryState();
+  /// }
+  ///
   ///
   /// class _DeleteDigit extends Action<DeleteTextIntent> {
   ///   _DeleteDigit(this.state);
   ///
-  ///   final SimpleUSPhoneNumberEntryState state;
+  ///   final _SimpleUSPhoneNumberEntryState state;
   ///   @override
   ///   Object? invoke(DeleteTextIntent intent) {
   ///     assert(callingAction != null);
@@ -212,32 +227,33 @@ abstract class Action<T extends Intent> with Diagnosticable {
   ///   bool get isActionEnabled => callingAction?.isActionEnabled ?? false;
   /// }
   ///
-  /// ``` dart
-  /// final FocusNode areaCodeFocusNode = FocusNode();
-  /// final TextEditingController areaCodeController = TextEditingController();
-  /// final FocusNode prefixFocusNode = FocusNode();
-  /// final TextEditingController prefixController = TextEditingController();
-  /// final FocusNode lineNumberFocusNode = FocusNode();
-  /// final TextEditingController lineNumberController = TextEditingController();
+  /// class _SimpleUSPhoneNumberEntryState extends State<SimpleUSPhoneNumberEntry> {
+  ///   final FocusNode areaCodeFocusNode = FocusNode();
+  ///   final TextEditingController areaCodeController = TextEditingController();
+  ///   final FocusNode prefixFocusNode = FocusNode();
+  ///   final TextEditingController prefixController = TextEditingController();
+  ///   final FocusNode lineNumberFocusNode = FocusNode();
+  ///   final TextEditingController lineNumberController = TextEditingController();
   ///
-  /// @override
-  /// Widget build(BuildContext context) {
-  ///   return Actions(
-  ///     actions: <Type, Action<Intent>>{
-  ///       DeleteTextIntent : _DeleteDigit(this),
-  ///     },
-  ///     child: Row(
-  ///       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  ///       children: <Widget>[
-  ///         Expanded(child: Text('(', textAlign: TextAlign.center,), flex: 1),
-  ///         Expanded(child: DigitInput(focusNode: areaCodeFocusNode, controller: areaCodeController, maxLength: 3), flex: 3),
-  ///         Expanded(child: Text(')', textAlign: TextAlign.center,), flex: 1),
-  ///         Expanded(child: DigitInput(focusNode: prefixFocusNode, controller: prefixController, maxLength: 3), flex: 3),
-  ///         Expanded(child: Text('-', textAlign: TextAlign.center,), flex: 1),
-  ///         Expanded(child: DigitInput(focusNode: lineNumberFocusNode, controller: lineNumberController, textInputAction: TextInputAction.done, maxLength: 4), flex: 4),
-  ///       ],
-  ///     ),
-  ///   );
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Actions(
+  ///       actions: <Type, Action<Intent>>{
+  ///         DeleteTextIntent : _DeleteDigit(this),
+  ///       },
+  ///       child: Row(
+  ///         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  ///         children: <Widget>[
+  ///           Expanded(child: Text('(', textAlign: TextAlign.center,), flex: 1),
+  ///           Expanded(child: DigitInput(focusNode: areaCodeFocusNode, controller: areaCodeController, maxLength: 3), flex: 3),
+  ///           Expanded(child: Text(')', textAlign: TextAlign.center,), flex: 1),
+  ///           Expanded(child: DigitInput(focusNode: prefixFocusNode, controller: prefixController, maxLength: 3), flex: 3),
+  ///           Expanded(child: Text('-', textAlign: TextAlign.center,), flex: 1),
+  ///           Expanded(child: DigitInput(focusNode: lineNumberFocusNode, controller: lineNumberController, textInputAction: TextInputAction.done, maxLength: 4), flex: 4),
+  ///         ],
+  ///       ),
+  ///     );
+  ///   }
   /// }
   /// ```
   /// {@end-tool}
@@ -306,19 +322,20 @@ abstract class Action<T extends Intent> with Diagnosticable {
 
   /// Returns true if the action is enabled and is ready to be invoked.
   ///
-  /// If [isActionEnabled] is false, then this method must return false.
-  ///
   /// This will be called by the [ActionDispatcher] before attempting to invoke
   /// the action.
   bool isEnabled(T intent) => isActionEnabled;
 
   /// Whether this [Action] is inherently enabled.
   ///
-  /// If [isActionEanbled] is false, then this [Action] is disabled for any
+  /// If [isActionEnabled] is false, then this [Action] is disabled for any
   /// given [Intent].
   //
   /// If the enabled state changes, overriding subclasses must call
   /// [notifyActionListeners] to notify any listeners of the change.
+  ///
+  /// In the case of an overridable `Action`, accessing this property creates
+  /// an dependency on the overridable `Action`s `lookupContext`.
   bool get isActionEnabled => true;
 
   /// Indicates whether this action should treat key events mapped to this
