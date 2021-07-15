@@ -203,7 +203,7 @@ void main() {
       find.byType(TestAnimatedWidget)
     ).rebuildState!;
     final Finder switchFinder = find.byKey(switchKey);
-    final SlideTransition offsetWidget = tester.widget<SlideTransition>(
+    final SlideTransition slideWidget = tester.widget<SlideTransition>(
       find.ancestor(
         of: find.byType(Placeholder),
         matching: find.byType(SlideTransition),
@@ -215,17 +215,17 @@ void main() {
     await tester.tap(switchFinder);
     expect(state.builds, equals(1));
     await tester.pump();
-    expect(offsetWidget.position.value, equals(Offset(0,0)));
+    expect(slideWidget.position.value, equals(const Offset(0,0)));
     expect(state.builds, equals(2));
 
     await tester.pump(const Duration(milliseconds: 500));
-    expect(offsetWidget.position.value, equals(Offset(0.5,0.5)));
+    expect(slideWidget.position.value, equals(const Offset(0.5,0.5)));
     expect(state.builds, equals(2));
     await tester.pump(const Duration(milliseconds: 250));
-    expect(offsetWidget.position.value, equals(Offset(0.75,0.75)));
+    expect(slideWidget.position.value, equals(const Offset(0.75,0.75)));
     expect(state.builds, equals(2));
     await tester.pump(const Duration(milliseconds: 250));
-    expect(offsetWidget.position.value, equals(Offset(1,1)));
+    expect(slideWidget.position.value, equals(const Offset(1,1)));
     expect(state.builds, equals(2));
   });
 
@@ -724,7 +724,7 @@ class _TestAnimatedSlideWidgetState extends _TestAnimatedWidgetState {
     return AnimatedSlide(
       duration: duration,
       onEnd: widget.callback,
-      offset: toggle ? Offset(1,1) : Offset(0,0),
+      offset: toggle ? const Offset(1,1) : const Offset(0,0),
       child: child,
     );
   }
