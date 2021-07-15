@@ -20,7 +20,7 @@ impeller_component("playground") {
   ]
 
   if (is_mac) {
-    libs = [
+    frameworks = [
       "AppKit.framework",
       "QuartzCore.framework",
     ]
