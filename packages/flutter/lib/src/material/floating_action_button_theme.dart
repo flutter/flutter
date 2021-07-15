@@ -241,7 +241,6 @@ class FloatingActionButtonThemeData with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    const FloatingActionButtonThemeData defaultData = FloatingActionButtonThemeData();
 
     properties.add(ColorProperty('foregroundColor', foregroundColor, defaultValue: null));
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));

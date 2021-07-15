@@ -421,14 +421,14 @@ void main() {
     expect(getRawMaterialButtonWidget().shape, const CircleBorder());
 
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
           floatingActionButton: FloatingActionButton.extended(
-            label: const SizedBox(
+            label: SizedBox(
               width: 100.0,
               child: Text('label'),
             ),
-            icon: const Icon(Icons.android),
+            icon: Icon(Icons.android),
             onPressed: null,
           ),
         ),
@@ -475,10 +475,10 @@ void main() {
     }
 
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
           floatingActionButton: FloatingActionButton.extended(
-            label: const SizedBox(
+            label: SizedBox(
               width: 100.0,
               child: Text('label'),
             ),
