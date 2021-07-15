@@ -34,7 +34,7 @@ public class EngineLaunchE2ETest {
     // as @UiThreadTest because having the message handler and the CompletableFuture both being
     // on the same thread will create deadlocks.
     UiThreadStatement.runOnUiThread(() -> engine.set(new FlutterEngine(applicationContext)));
-    SettableFuture<Boolean> statusReceived = new SettableFuture<>();
+    SettableFuture<Boolean> statusReceived = SettableFuture.create();
 
     // Resolve locale to `en_US`.
     // This is required, so `window.locale` in populated in dart.

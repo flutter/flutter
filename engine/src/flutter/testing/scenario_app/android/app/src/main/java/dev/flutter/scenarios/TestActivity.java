@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.engine.loader.FlutterLoader;
@@ -28,11 +29,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class TestActivity extends TestableFlutterActivity {
+public abstract class TestActivity extends TestableFlutterActivity {
   static final String TAG = "Scenarios";
 
   @Override
-  protected void onCreate(Bundle savedInstanceState) {
+  protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     final Intent launchIntent = getIntent();
     if ("com.google.intent.action.TEST_LOOP".equals(launchIntent.getAction())) {
@@ -80,7 +81,7 @@ public class TestActivity extends TestableFlutterActivity {
     channel.invokeMethod("set_scenario", test);
   }
 
-  private void writeTimelineData(Uri logFile) {
+  protected void writeTimelineData(@Nullable Uri logFile) {
     if (logFile == null) {
       throw new IllegalArgumentException();
     }
@@ -112,7 +113,7 @@ public class TestActivity extends TestableFlutterActivity {
    * io.flutter.embedding.engine.loader.FlutterLoader#ensureInitializationCompleteAsync(Context,
    * String[], Handler, Runnable)} invokes its callback when called after initialization.
    */
-  private void testFlutterLoaderCallbackWhenInitializedTwice() {
+  protected void testFlutterLoaderCallbackWhenInitializedTwice() {
     FlutterLoader flutterLoader = new FlutterLoader();
 
     // Flutter is probably already loaded in this app based on

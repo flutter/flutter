@@ -9,6 +9,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Xml;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnitRunner;
 import com.facebook.testing.screenshot.ScreenshotRunner;
@@ -41,7 +43,8 @@ public class ScreenshotUtil {
   private static ScreenshotUtil instance;
   private static int BUFFER_SIZE = 1 << 16; // 64K
 
-  private static ScreenshotUtil getInstance() {
+  @NonNull
+  protected static ScreenshotUtil getInstance() {
     synchronized (ScreenshotUtil.class) {
       if (instance == null) {
         instance = new ScreenshotUtil();
@@ -132,7 +135,7 @@ public class ScreenshotUtil {
    *
    * <p>The activity must be already launched.
    */
-  public static void capture(TestableFlutterActivity activity)
+  public static void capture(@NonNull TestableFlutterActivity activity)
       throws InterruptedException, ExecutionException, IOException {
     // Yield and wait for the engine to render the first Flutter frame.
     activity.waitUntilFlutterRendered();
@@ -177,7 +180,7 @@ public class ScreenshotUtil {
    *
    * <p>Call this method from {@code AndroidJUnitRunner#onCreate}.
    */
-  public static void onCreate(AndroidJUnitRunner runner, Bundle arguments) {
+  public static void onCreate(@NonNull AndroidJUnitRunner runner, @Nullable Bundle arguments) {
     ScreenshotRunner.onCreate(runner, arguments);
     ScreenshotUtil.getInstance().init();
   }
