@@ -5,6 +5,7 @@
 package dev.flutter.scenarios;
 
 import android.content.Context;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import io.flutter.plugin.common.MessageCodec;
 import io.flutter.plugin.common.StringCodec;
@@ -35,7 +36,8 @@ public final class TextPlatformViewFactory extends PlatformViewFactory {
 
   @SuppressWarnings("unchecked")
   @Override
-  public PlatformView create(Context context, int id, Object args) {
+  @NonNull
+  public PlatformView create(@NonNull Context context, int id, @Nullable Object args) {
     String params = (String) args;
     return new TextPlatformView(context, id, params);
   }

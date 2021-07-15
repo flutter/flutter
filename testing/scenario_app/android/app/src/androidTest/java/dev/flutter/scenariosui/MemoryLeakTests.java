@@ -5,6 +5,7 @@
 package dev.flutter.scenariosui;
 
 import android.content.Intent;
+import androidx.annotation.NonNull;
 import androidx.test.filters.LargeTest;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.runner.AndroidJUnit4;
@@ -17,7 +18,7 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class MemoryLeakTests {
-  @Rule
+  @Rule @NonNull
   public ActivityTestRule<TextPlatformViewActivity> activityRule =
       new ActivityTestRule<>(
           TextPlatformViewActivity.class, /*initialTouchMode=*/ false, /*launchActivity=*/ false);
