@@ -101,6 +101,7 @@ const Map<String, String> identifierRewrites = <String, String>{
   '23mp': 'twenty_three_mp',
   '24mp': 'twenty_four_mp',
   'class': 'class_',
+  'new': 'new_',
   'switch': 'switch_',
   'try': 'try_sms_star',
 };
