@@ -377,8 +377,8 @@ WindowWin32::HandleMessage(UINT const message,
       // to properly produce key down events even though `MapVirtualKey` returns
       // a valid character. See https://github.com/flutter/flutter/issues/85587.
       unsigned int character = MapVirtualKey(wparam, MAPVK_VK_TO_CHAR);
-      if (character > 0 && is_keydown_message && GetKeyState(VK_CONTROL) == 0 &&
-          GetKeyState(VK_LWIN) == 0 && GetKeyState(VK_RWIN) == 0) {
+      if (character > 0 && is_keydown_message && GetKeyState(VK_CONTROL) >= 0 &&
+          GetKeyState(VK_LWIN) >= 0 && GetKeyState(VK_RWIN) >= 0) {
         keycode_for_char_message_ = wparam;
         break;
       }
