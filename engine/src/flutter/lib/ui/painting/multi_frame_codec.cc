@@ -174,6 +174,17 @@ Dart_Handle MultiFrameCodec::getNextFrame(Dart_Handle callback_handle) {
 
   const auto& task_runners = dart_state->GetTaskRunners();
 
+  if (state_->frameCount_ == 0) {
+    FML_LOG(ERROR) << "Could not provide any frame.";
+    task_runners.GetUITaskRunner()->PostTask(fml::MakeCopyable(
+        [trace_id,
+         callback = std::make_unique<DartPersistentValue>(
+             tonic::DartState::Current(), callback_handle)]() mutable {
+          InvokeNextFrameCallback(nullptr, 0, std::move(callback), trace_id);
+        }));
+    return Dart_Null();
+  }
+
   task_runners.GetIOTaskRunner()->PostTask(fml::MakeCopyable(
       [callback = std::make_unique<DartPersistentValue>(
            tonic::DartState::Current(), callback_handle),
