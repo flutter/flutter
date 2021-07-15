@@ -1062,12 +1062,6 @@ bool PlatformView::HandleFlutterPlatformViewsChannelPlatformMessage(
     on_destroy_view_callback_(view_id_raw, std::move(on_view_unbound));
   } else if (method.rfind("View.focus", 0) == 0) {
     return focus_delegate_->HandlePlatformMessage(root, message->response());
-  } else if (method == "HostView.getCurrentFocusState") {
-    return focus_delegate_->CompleteCurrentFocusState(message->response());
-  } else if (method == "HostView.getNextFocusState") {
-    return focus_delegate_->CompleteNextFocusState(message->response());
-  } else if (method == "View.requestFocus") {
-    return focus_delegate_->RequestFocus(root, message->response());
   } else {
     FML_DLOG(ERROR) << "Unknown " << message->channel() << " method " << method;
   }
