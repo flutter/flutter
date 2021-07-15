@@ -1681,7 +1681,7 @@ class _AnimatedRotationState extends ImplicitlyAnimatedWidgetState<AnimatedRotat
 /// example, an [Offset] with a `dx` of 0.25 will result in a horizontal
 /// translation of one quarter the width of the child.
 ///
-/// {@tool snippet}
+/// {@tool dartpad --template=stateful_widget_scaffold}
 ///
 /// This code defines a widget that uses [AnimatedSlide] to translate a [FlutterLogo]
 /// up or down by the amount of it's height with each press of the corresponding button.
