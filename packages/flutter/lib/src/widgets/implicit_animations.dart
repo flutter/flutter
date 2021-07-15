@@ -1766,7 +1766,7 @@ class AnimatedSlide extends ImplicitlyAnimatedWidget {
   final Offset offset;
 
   @override
-  _AnimatedSlideState createState() => _AnimatedSlideState();
+  ImplicitlyAnimatedWidgetState<AnimatedSlide> createState() => _AnimatedSlideState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
