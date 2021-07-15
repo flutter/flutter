@@ -1752,8 +1752,7 @@ class AnimatedSlide extends ImplicitlyAnimatedWidget {
     Curve curve = Curves.linear,
     required Duration duration,
     VoidCallback? onEnd,
-  }) :
-        super(key: key, curve: curve, duration: duration, onEnd: onEnd);
+  }) : super(key: key, curve: curve, duration: duration, onEnd: onEnd);
 
   /// The widget below this widget in the tree.
   ///
