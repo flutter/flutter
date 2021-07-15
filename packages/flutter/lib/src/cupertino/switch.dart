@@ -149,8 +149,6 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
   late AnimationController _reactionController;
   late Animation<double> _reaction;
 
-  bool get isInteractive => widget.onChanged != null;
-
   // A non-null boolean value that changes to true at the end of a drag if the
   // switch must be animated to the position indicated by the widget's value.
   bool needsPositionAnimation = false;
@@ -216,52 +214,42 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
   }
 
   void _handleTapDown(TapDownDetails details) {
-    if (isInteractive)
-      needsPositionAnimation = false;
-      _reactionController.forward();
+    needsPositionAnimation = false;
+    _reactionController.forward();
   }
 
   void _handleTap() {
-    if (isInteractive) {
-      widget.onChanged!(!widget.value);
-      _emitVibration();
-    }
+    widget.onChanged!(!widget.value);
+    _emitVibration();
   }
 
   void _handleTapUp(TapUpDetails details) {
-    if (isInteractive) {
-      needsPositionAnimation = false;
-      _reactionController.reverse();
-    }
+    needsPositionAnimation = false;
+    _reactionController.reverse();
   }
 
   void _handleTapCancel() {
-    if (isInteractive)
-      _reactionController.reverse();
+    _reactionController.reverse();
   }
 
   void _handleDragStart(DragStartDetails details) {
-    if (isInteractive) {
-      needsPositionAnimation = false;
-      _reactionController.forward();
-      _emitVibration();
-    }
+    needsPositionAnimation = false;
+    _reactionController.forward();
+    _emitVibration();
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
-    if (isInteractive) {
-      position
-        ..curve = Curves.linear
-        ..reverseCurve = Curves.linear;
-      final double delta = details.primaryDelta! / _kTrackInnerLength;
-      switch (Directionality.of(context)) {
-        case TextDirection.rtl:
-          _positionController.value -= delta;
-          break;
-        case TextDirection.ltr:
-          _positionController.value += delta;
-          break;
-      }
+    position
+      ..curve = Curves.linear
+      ..reverseCurve = Curves.linear;
+    final double delta = details.primaryDelta! / _kTrackInnerLength;
+    switch (Directionality.of(context)) {
+      case TextDirection.rtl:
+        _positionController.value -= delta;
+        break;
+      case TextDirection.ltr:
+        _positionController.value += delta;
+        break;
     }
   }
 
