@@ -106,5 +106,29 @@ TEST(MockWin32Window, KeyDownWithCtrl) {
   SetKeyboardState(keyboard_state);
 }
 
+TEST(MockWin32Window, KeyDownWithCtrlToggled) {
+  MockWin32Window window;
+
+  // Simulate CONTROL toggled
+  BYTE keyboard_state[256];
+  memset(keyboard_state, 0, 256);
+  keyboard_state[VK_CONTROL] = 1;
+  SetKeyboardState(keyboard_state);
+
+  LPARAM lparam = CreateKeyEventLparam(30);
+
+  // OnKey shouldn't be called until the WM_CHAR message.
+  EXPECT_CALL(window, OnKey(65, 30, WM_KEYDOWN, 65, false, true)).Times(0);
+  // send a "A" key down event.
+  window.InjectWindowMessage(WM_KEYDOWN, 65, lparam);
+
+  EXPECT_CALL(window, OnKey(65, 30, WM_KEYDOWN, 65, false, true)).Times(1);
+  EXPECT_CALL(window, OnText(_)).Times(1);
+  window.InjectWindowMessage(WM_CHAR, 65, lparam);
+
+  memset(keyboard_state, 0, 256);
+  SetKeyboardState(keyboard_state);
+}
+
 }  // namespace testing
 }  // namespace flutter
