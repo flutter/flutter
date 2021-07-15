@@ -72,6 +72,23 @@ typedef ActionListenerCallback = void Function(Action<Intent> action);
 /// The [ActionDispatcher] can invoke an [Action] on the primary focus, or
 /// without regard for focus.
 ///
+/// ### Action Overriding
+///
+/// An overridable [Action] is a special kind of [Action] that is created using
+/// the [Action.overridable] constructor. It has access to a default [Action],
+/// and a nullable override [Action]. It the same behavior as its override
+/// if that exists, and mirrors the behavior of its `defaultAction` otherwise.
+///
+/// The [Action.overridable] constructor creates overridable [Action]s that use
+/// a [BuildContext] to find a suitable override in its ancestor [Actions]
+/// widget. This can be used to provide a default implementation when creating a
+/// general purpose leaf widget, and later override it when building a more
+/// specialized widget using that widget. For instance, [TextField]'s
+/// [SelectAllTextIntent] by default selects the text it current contains, but
+/// in a US phone number widget that consists of 3 different [TextField]s (see
+/// the example in [Action.overridable]), [SelectAllTextIntent] should instead
+/// select the text within all 3 [TextField]s.
+///
 /// See also:
 ///
 ///  * [Shortcuts], which is a widget that contains a key map, in which it looks
@@ -85,7 +102,8 @@ abstract class Action<T extends Intent> with Diagnosticable {
   Action();
 
   /// Creates an [Action] that allows itself to be overridden by the closest
-  /// ancestor [Action] in the given [context], if one exists.
+  /// ancestor [Action] in the given [context] that handles the same [Intent],
+  /// if one exists.
   ///
   /// When invoked, the resulting [Action] tries to find the closest [Action] in
   /// the given `context` that handles the same type of [Intent] as the
@@ -114,27 +132,111 @@ abstract class Action<T extends Intent> with Diagnosticable {
   ///
   /// {@tool snippet --template=stateful_widget_material}
   /// This sample implements a custom text input field that handles the
-  /// [DeleteTextIntent] intent. The default implmentation is to remove all text
-  /// within the text field. If you're implementing a telephone number input
-  /// widget that uses separate text fields for area code, prefix and line
-  /// number, and wish to send the focus to the preceding text field when the
-  /// currently focused field becomes empty, one option is to override the
-  /// default [Action] that handles [DeleteTextIntent].
+  /// [DeleteTextIntent] intent, as well as a US telephone number input widget
+  /// that uses multiple text fields for area code, prefix and line number, and
+  /// wish to send the focus to the preceding text field when the currently
+  /// focused field becomes empty.
   ///
-  /// ```dart
-  /// final TextEditingController textEditingController = TextEditingController();
-  /// late final Action<DeleteTextIntent> deleteTextAction = CallbackAction<DeleteTextIntent>(
-  ///   onInvoke: (DeleteTextIntent intent) => textEditingController.clear(),
-  /// );
+  /// ```dart preamble
+  /// // This implements a custom phone number input field that handles the
+  /// // [DeleteTextIntent] intent.
+  /// class DigitInput extends StatefulWidget {
+  ///   const DigitInput({
+  ///       required this.controller,
+  ///       required this.focusNode,
+  ///       this.maxLength,
+  ///       this.textInputAction = TextInputAction.next,
+  ///   });
+  ///
+  ///   final int? maxLength;
+  ///   final TextEditingController controller;
+  ///   final TextInputAction textInputAction;
+  ///   final FocusNode focusNode;
+  ///   @override
+  ///   DigitInputState createState() => DigitInputState();
+  /// }
+  ///
+  /// class DigitInputState extends State<DigitInput> {
+  ///   late final Action<DeleteTextIntent> deleteTextAction = CallbackAction<DeleteTextIntent>(
+  ///     onInvoke: (DeleteTextIntent intent) {
+  ///       // For simplicity we delete everything in the section.
+  ///       widget.controller.clear();
+  ///     },
+  ///   );
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Actions(
+  ///       actions: <Type, Action<Intent>>{
+  ///         // Make the default `DeleteTextIntent` handler overridable.
+  ///         DeleteTextIntent: Action<DeleteTextIntent>.overridable(defaultAction: deleteTextAction, context: context),
+  ///       },
+  ///       child: TextField(
+  ///         controller: widget.controller,
+  ///         textInputAction: TextInputAction.next,
+  ///         keyboardType: TextInputType.phone,
+  ///         focusNode: widget.focusNode,
+  ///         decoration: InputDecoration(
+  ///           border: OutlineInputBorder(),
+  ///         ),
+  ///         inputFormatters: <TextInputFormatter>[
+  ///           FilteringTextInputFormatter.digitsOnly,
+  ///           LengthLimitingTextInputFormatter(widget.maxLength),
+  ///         ],
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  ///
+  /// class _DeleteDigit extends Action<DeleteTextIntent> {
+  ///   _DeleteDigit(this.state);
+  ///
+  ///   final SimpleUSPhoneNumberEntryState state;
+  ///   @override
+  ///   Object? invoke(DeleteTextIntent intent) {
+  ///     assert(callingAction != null);
+  ///     callingAction?.invoke(intent);
+  ///
+  ///     if (state.lineNumberController.text.isEmpty && state.lineNumberFocusNode.hasFocus) {
+  ///       state.prefixFocusNode.requestFocus();
+  ///     }
+  ///
+  ///     if (state.prefixController.text.isEmpty && state.prefixFocusNode.hasFocus) {
+  ///       state.areaCodeFocusNode.requestFocus();
+  ///     }
+  ///   }
+  ///
+  ///   // This action is only enabled when the `callingAction` exists and is
+  ///   // enabled.
+  ///   @override
+  ///   bool get isActionEnabled => callingAction?.isActionEnabled ?? false;
+  /// }
+  ///
+  /// ``` dart
+  /// final FocusNode areaCodeFocusNode = FocusNode();
+  /// final TextEditingController areaCodeController = TextEditingController();
+  /// final FocusNode prefixFocusNode = FocusNode();
+  /// final TextEditingController prefixController = TextEditingController();
+  /// final FocusNode lineNumberFocusNode = FocusNode();
+  /// final TextEditingController lineNumberController = TextEditingController();
   ///
   /// @override
   /// Widget build(BuildContext context) {
   ///   return Actions(
   ///     actions: <Type, Action<Intent>>{
-  ///       // Make the default `DeleteTextIntent` handler overridable.
-  ///       DeleteTextIntent: Action<DeleteTextIntent>.overridable(defaultAction: deleteTextAction, context: context),
+  ///       DeleteTextIntent : _DeleteDigit(this),
   ///     },
-  ///     child: TextField(controller: textEditingController),
+  ///     child: Row(
+  ///       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  ///       children: <Widget>[
+  ///         Expanded(child: Text('(', textAlign: TextAlign.center,), flex: 1),
+  ///         Expanded(child: DigitInput(focusNode: areaCodeFocusNode, controller: areaCodeController, maxLength: 3), flex: 3),
+  ///         Expanded(child: Text(')', textAlign: TextAlign.center,), flex: 1),
+  ///         Expanded(child: DigitInput(focusNode: prefixFocusNode, controller: prefixController, maxLength: 3), flex: 3),
+  ///         Expanded(child: Text('-', textAlign: TextAlign.center,), flex: 1),
+  ///         Expanded(child: DigitInput(focusNode: lineNumberFocusNode, controller: lineNumberController, textInputAction: TextInputAction.done, maxLength: 4), flex: 4),
+  ///       ],
+  ///     ),
   ///   );
   /// }
   /// ```
@@ -156,7 +258,18 @@ abstract class Action<T extends Intent> with Diagnosticable {
     assert(newAction == null || _currentCallingAction == null);
     _currentCallingAction = newAction;
   }
-  /// The overridable [Action] overridden by this [Action].
+  /// The [Action] overridden by this [Action].
+  ///
+  /// The [Action.overridable] constructor creates an overridable [Action] that
+  /// allows itself to be overridden by the closest ancestor [Action], and falls
+  /// back to its own `defaultAction` when no overrides can be found. An
+  /// overridable [Action] looks for an override and forwards all incoming
+  /// method calls to the override. The override also has access to the
+  /// `defaultAction` so
+  ///
+  /// Before forwarding the call to the override,
+  /// the overridable [Action] is responsible for setting [callingAction] to
+  /// its `defaultAction`.
   ///
   /// This property is only non-null when this [Action] is an override of the
   /// [callingAction], and is currently being invoked from [callingAction].
@@ -165,7 +278,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// allowed and does not introduce infinite loops or infinite recursions.
   ///
   /// {@tool snippet}
-  /// An `Action` that handles [PasteTextIntent] but has mostly the same
+  /// An example `Action` that handles [PasteTextIntent] but has mostly the same
   /// behavior as the overridable action. It's OK to call
   /// `callingAction?.isActionEnabled` in the implementation of this `Action`.
   ///
@@ -591,7 +704,11 @@ class CallbackAction<T extends Intent> extends Action<T> {
   ///
   /// The `intentKey` and [onInvoke] parameters must not be null.
   /// The [onInvoke] parameter is required.
-  CallbackAction({required this.onInvoke}) : assert(onInvoke != null);
+  CallbackAction({
+    required this.onInvoke,
+    bool Function()? isActionEnabled,
+  }) : _isActionEnabled = isActionEnabled,
+       assert(onInvoke != null);
 
   /// The callback to be called when invoked.
   ///
@@ -599,8 +716,14 @@ class CallbackAction<T extends Intent> extends Action<T> {
   @protected
   final OnInvokeCallback<T> onInvoke;
 
+  @protected
+  final bool Function()? _isActionEnabled;
+
   @override
-  Object? invoke(covariant T intent) => onInvoke(intent);
+  Object? invoke(T intent) => onInvoke(intent);
+
+  @override
+  bool get isActionEnabled => _isActionEnabled?.call() ?? true;
 }
 
 /// An action dispatcher that simply invokes the actions given to it.
@@ -1916,7 +2039,6 @@ mixin _OverridableActionMixin<T extends Intent> on Action<T> {
     overrideAction?._callingAction = defaultAction;
     final bool isEnabled = (overrideAction ?? defaultAction).consumesKey(intent);
     overrideAction?._callingAction = null;
-    assert(!debugAssertConsumeKeyMutuallyRecursive);
     assert(() {
       debugAssertConsumeKeyMutuallyRecursive = false;
       return true;
