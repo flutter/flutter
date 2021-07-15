@@ -706,48 +706,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     );
   }
 
-  // Deletes the current non-empty selection.
-  //
-  // Operates on the text/selection contained in textSelectionDelegate, and does
-  // not depend on `RenderEditable.selection`.
-  //
-  // If the selection is currently non-empty, this method deletes the selected
-  // text and returns true. Otherwise this method does nothing and returns
-  // false.
-  bool _deleteNonEmptySelection(SelectionChangedCause cause) {
-    // TODO(LongCatIsLooong): remove this method from `RenderEditable`
-    // https://github.com/flutter/flutter/issues/80226.
-    assert(!readOnly);
-    final TextEditingValue controllerValue = textSelectionDelegate.textEditingValue;
-    final TextSelection selection = controllerValue.selection;
-    assert(selection.isValid);
-
-    if (selection.isCollapsed) {
-      return false;
-    }
-
-    final String textBefore = selection.textBefore(controllerValue.text);
-    final String textAfter = selection.textAfter(controllerValue.text);
-    final TextSelection newSelection = TextSelection.collapsed(offset: selection.start);
-    final TextRange composing = controllerValue.composing;
-    final TextRange newComposingRange = !composing.isValid || composing.isCollapsed
-      ? TextRange.empty
-      : TextRange(
-        start: composing.start - (composing.start - selection.start).clamp(0, selection.end - selection.start),
-        end: composing.end - (composing.end - selection.start).clamp(0, selection.end - selection.start),
-      );
-
-    _setTextEditingValue(
-      TextEditingValue(
-        text: textBefore + textAfter,
-        selection: newSelection,
-        composing: newComposingRange,
-      ),
-      cause,
-    );
-    return true;
-  }
-
   // Deletes the from the current collapsed selection to the start of the field.
   //
   // The given SelectionChangedCause indicates the cause of this change and
@@ -835,37 +793,13 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     final TextEditingValue controllerValue = textSelectionDelegate.textEditingValue;
     final TextSelection selection = controllerValue.selection;
 
-    if (!selection.isValid || readOnly || _deleteNonEmptySelection(cause)) {
+    if (!selection.isValid || readOnly) {
       return;
     }
 
-    assert(selection.isCollapsed);
-    final String textBefore = selection.textBefore(controllerValue.text);
-    if (textBefore.isEmpty) {
-      return;
-    }
+    final TextEditingValue nextValue = TextEditingModel(value: controllerValue).delete(cause);
 
-    final String textAfter = selection.textAfter(controllerValue.text);
-
-    final int characterBoundary = TextEditingModel.previousCharacter(textBefore.length, textBefore);
-    final TextSelection newSelection = TextSelection.collapsed(offset: characterBoundary);
-    final TextRange composing = controllerValue.composing;
-    assert(textBefore.length >= characterBoundary);
-    final TextRange newComposingRange = !composing.isValid || composing.isCollapsed
-      ? TextRange.empty
-      : TextRange(
-        start: composing.start - (composing.start - characterBoundary).clamp(0, textBefore.length - characterBoundary),
-        end: composing.end - (composing.end - characterBoundary).clamp(0, textBefore.length - characterBoundary),
-      );
-
-    _setTextEditingValue(
-      TextEditingValue(
-        text: textBefore.substring(0, characterBoundary) + textAfter,
-        selection: newSelection,
-        composing: newComposingRange,
-      ),
-      cause,
-    );
+    _setTextEditingValue(nextValue, cause);
   }
 
   /// Deletes a word backwards from the current selection.

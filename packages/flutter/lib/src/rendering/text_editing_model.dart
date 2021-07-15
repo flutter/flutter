@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
-
 import 'package:characters/characters.dart';
+import 'package:flutter/foundation.dart' show immutable;
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 
@@ -13,79 +12,19 @@ import 'package:flutter/services.dart';
 ///
 /// Contains only generic text editing logic and purposely excludes specific
 /// business logic related to platforms and widgets.
+@immutable
 class TextEditingModel {
-  // TODO(justinmc): Fields should probably be private.
   /// Create an instance of TextEditingModel.
-  TextEditingModel({
-    required this.textPainter,
-    required TextSelectionDelegate textSelectionDelegate,
-  }) : assert(textPainter != null),
-       assert(textSelectionDelegate != null),
-       _textSelectionDelegate = textSelectionDelegate;
+  const TextEditingModel({
+    required this.value,
+  }) : assert(value != null);
 
-  /// The [TextPainter] for the text represented by this [TextEditingModel].
-  final TextPainter textPainter;
+  /// The [TextEditingValue] that this TextEditingModel operates on.
+  final TextEditingValue value;
 
-  // The object that controls the text selection, used by this render object
-  // for implementing cut, copy, and paste keyboard shortcuts.
-  //
-  // It must not be null. It will make cut, copy and paste functionality work
-  // with the most recently set [TextSelectionDelegate].
-  final TextSelectionDelegate _textSelectionDelegate;
-
-  String? _cachedPlainText;
-  // Returns a plain text version of the text in the painter.
-  //
-  // Returns the obscured text when [obscureText] is true. See
-  // [obscureText] and [obscuringCharacter].
-  String get _plainText {
-    _cachedPlainText ??= textPainter.text!.toPlainText(includeSemanticsLabels: false);
-    return _cachedPlainText!;
-  }
-
-  TextEditingValue get _textEditingValue {
-    return _textSelectionDelegate.textEditingValue;
-  }
-
-  void _setTextEditingValue(TextEditingValue newValue, SelectionChangedCause cause) {
-    _textSelectionDelegate.textEditingValue = newValue;
-    _textSelectionDelegate.userUpdateTextEditingValue(newValue, cause);
-  }
-
-  TextSelection get _selection {
-    return _textEditingValue.selection;
-  }
-
-  void _setSelection(TextSelection nextSelection, SelectionChangedCause cause) {
-    if (nextSelection.isValid) {
-      // The nextSelection is calculated based on _plainText, which can be out
-      // of sync with the textSelectionDelegate.textEditingValue by one frame.
-      // This is due to the render editable and editable text handle pointer
-      // event separately. If the editable text changes the text during the
-      // event handler, the render editable will use the outdated text stored in
-      // the _plainText when handling the pointer event.
-      //
-      // If this happens, we need to make sure the new selection is still valid.
-      final int textLength = _textEditingValue.text.length;
-      nextSelection = nextSelection.copyWith(
-        baseOffset: math.min(nextSelection.baseOffset, textLength),
-        extentOffset: math.min(nextSelection.extentOffset, textLength),
-      );
-    }
-    // Changes made by the keyboard can sometimes be "out of band" for listening
-    // components, so always send those events, even if we didn't think it
-    // changed. Also, focusing an empty field is sent as a selection change even
-    // if the selection offset didn't change.
-    final bool focusingEmpty = nextSelection.baseOffset == 0 && nextSelection.extentOffset == 0 && !hasFocus;
-    if (nextSelection == _selection && cause != SelectionChangedCause.keyboard && !focusingEmpty) {
-      return;
-    }
-    onSelectionChanged?.call(nextSelection, this, cause);
-    _setTextEditingValue(
-      _textEditingValue.copyWith(selection: nextSelection),
-      cause,
-    );
-  }
+  TextRange get _composing => value.composing;
+  TextSelection get _selection => value.selection;
+  String get _text => value.text;
 
   /// Return the given [TextSelection] with its [TextSelection.extentOffset]
   /// moved left by one character.
@@ -409,14 +348,93 @@ class TextEditingModel {
   /// See also:
   ///
   ///   * [extendSelectionToStart]
-  void extendSelectionToEnd(SelectionChangedCause cause) {
-    if (_selection.extentOffset == _plainText.length) {
-      return;
+  TextSelection extendSelectionToEnd() {
+    if (_selection.extentOffset == _text.length) {
+      return _selection;
     }
 
-    final TextSelection nextSelection = _selection.copyWith(
-      extentOffset: _plainText.length,
+    return _selection.copyWith(
+      extentOffset: _text.length,
     );
-    _setSelection(nextSelection, cause);
+  }
+
+  /// Deletes backwards from the selection in [textSelectionDelegate].
+  ///
+  /// This method operates on the text/selection contained in
+  /// [textSelectionDelegate], and does not depend on [selection].
+  ///
+  /// If the selection is collapsed, deletes a single character before the
+  /// cursor.
+  ///
+  /// If the selection is not collapsed, deletes the selection.
+  ///
+  /// {@template flutter.rendering.RenderEditable.cause}
+  /// The given [SelectionChangedCause] indicates the cause of this change and
+  /// will be passed to [onSelectionChanged].
+  /// {@endtemplate}
+  ///
+  /// See also:
+  ///
+  ///   * [deleteForward], which is same but in the opposite direction.
+  TextEditingValue delete(SelectionChangedCause cause) {
+    if (!_selection.isValid) {
+      return value;
+    }
+    if (!_selection.isCollapsed) {
+      return _deleteNonEmptySelection();
+    }
+
+    final String textBefore = _selection.textBefore(value.text);
+    if (textBefore.isEmpty) {
+      return value;
+    }
+
+    final String textAfter = _selection.textAfter(value.text);
+
+    final int characterBoundary = TextEditingModel.previousCharacter(textBefore.length, textBefore);
+    final TextSelection newSelection = TextSelection.collapsed(offset: characterBoundary);
+    final TextRange composing = value.composing;
+    assert(textBefore.length >= characterBoundary);
+    final TextRange newComposingRange = !composing.isValid || composing.isCollapsed
+      ? TextRange.empty
+      : TextRange(
+        start: composing.start - (composing.start - characterBoundary).clamp(0, textBefore.length - characterBoundary),
+        end: composing.end - (composing.end - characterBoundary).clamp(0, textBefore.length - characterBoundary),
+      );
+
+    return TextEditingValue(
+      text: textBefore.substring(0, characterBoundary) + textAfter,
+      selection: newSelection,
+      composing: newComposingRange,
+    );
+  }
+
+  // Deletes the current non-empty selection.
+  //
+  // Operates on the text/selection contained in textSelectionDelegate, and does
+  // not depend on `RenderEditable.selection`.
+  //
+  // If the selection is currently non-empty, this method deletes the selected
+  // text and returns true. Otherwise this method does nothing and returns
+  // false.
+  TextEditingValue _deleteNonEmptySelection() {
+    assert(_selection.isValid);
+    assert(!_selection.isCollapsed);
+
+    final String textBefore = _selection.textBefore(_text);
+    final String textAfter = _selection.textAfter(_text);
+    final TextSelection newSelection = TextSelection.collapsed(offset: _selection.start);
+    final TextRange newComposingRange = !_composing.isValid || _composing.isCollapsed
+      ? TextRange.empty
+      : TextRange(
+        start: _composing.start - (_composing.start - _selection.start).clamp(0, _selection.end - _selection.start),
+        end: _composing.end - (_composing.end - _selection.start).clamp(0, _selection.end - _selection.start),
+      );
+
+    return TextEditingValue(
+      text: textBefore + textAfter,
+      selection: newSelection,
+      composing: newComposingRange,
+    );
   }
 }
