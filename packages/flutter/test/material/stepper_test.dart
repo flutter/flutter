@@ -449,7 +449,7 @@ void main() {
   });
 
   testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async {
-    
+
     int currentStep = 0;
     void setContinue() {
       currentStep += 1;
@@ -464,7 +464,7 @@ void main() {
       // step.
       if (!details.isActive)
         return Container();
-      
+
       return Container(
         margin: const EdgeInsets.only(top: 16.0),
         child: ConstrainedBox(

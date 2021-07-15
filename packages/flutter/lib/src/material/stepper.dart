@@ -55,7 +55,7 @@ enum StepperType {
   horizontal,
 }
 
-/// Container for all the information necessary to build a Stepper widget's 
+/// Container for all the information necessary to build a Stepper widget's
 /// foward and backward controls for any given step.
 @immutable
 class ControlsDetails {
@@ -70,7 +70,7 @@ class ControlsDetails {
   /// different from [stepIndex] if the user has just changed steps and we are
   /// currently animating toward that step.
   final int currentStep;
-  
+
   /// Index of the step for which these controls are being built. This is
   /// not necessarily the active index, if the user has just changed steps and
   /// this step is animating away.
@@ -230,7 +230,7 @@ class Stepper extends StatefulWidget {
     this.onStepCancel,
     @Deprecated(
       'Migrate to indexedControlsBuilder. '
-      'This builder was deprecated after v2.4.0-1.0.pre.126.',
+      'This feature was deprecated after v2.4.0-1.0.pre.126.',
     )
     this.controlsBuilder,
     this.indexedControlsBuilder,
@@ -329,8 +329,8 @@ class Stepper extends StatefulWidget {
   /// ```
   /// {@end-tool}
   @Deprecated(
-    'Migrate to indexedControlsBuilder. '
-    'This builder was deprecated after v2.4.0-1.0.pre.126.',
+    'Use indexedControlsBuilder instead. '
+    'This feature was deprecated after v2.4.0-1.0.pre.126.',
   )
   final ControlsWidgetBuilder? controlsBuilder;
 
