@@ -43,7 +43,7 @@ import java.util.ArrayList;
  * The most obvious example of when this may come in handy is if an application wishes to subclass
  * the Android v4 support library's {@code FragmentActivity}.
  *
- * <h3>Usage:</h3>
+ * <p><b>Usage:</b></p>
  *
  * <p>To wire this class up to your activity, simply forward the events defined in {@link
  * FlutterActivityEvents} from your activity to an instance of this class. Optionally, you can make
