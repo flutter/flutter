@@ -35,9 +35,9 @@ class GitStatusFailed implements Exception {
 /// First check env variable LUCI_BRANCH, then refer to the currently
 /// checked out git branch.
 String getChannelName() {
-  final String? envReleaseChannel = Platform.environment['LUCI_BRANCH'];
-  if (envReleaseChannel != null) {
-    return envReleaseChannel;
+  final String? envReleaseChannel = Platform.environment['LUCI_BRANCH']?.trim();
+  if (<String>['master', 'stable'].contains(envReleaseChannel)) {
+    return envReleaseChannel!;
   }
   final RegExp gitBranchRegexp = RegExp(r'^## (?<branch>.*)');
   final ProcessResult gitResult = Process.runSync('git', <String>['status', '-b', '--porcelain'],
