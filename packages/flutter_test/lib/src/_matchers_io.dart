@@ -48,6 +48,21 @@ class MatchesGoldenFile extends AsyncMatcher {
 
   @override
   Future<String?> matchAsync(dynamic item) async {
+    final Uri testNameUri = goldenFileComparator.getTestUri(key, version);
+
+    if (item is Future<Uint8List>) {
+      final Uint8List buffer = await item;
+      if (autoUpdateGoldenFiles) {
+        await goldenFileComparator.update(testNameUri, buffer);
+        return null;
+      }
+      try {
+        final bool success = await goldenFileComparator.compare(buffer, testNameUri);
+        return success ? null : 'does not match';
+      } on TestFailure catch (ex) {
+        return ex.message;
+      }
+    }
     Future<ui.Image?> imageFuture;
     if (item is Future<ui.Image?>) {
       imageFuture = item;
@@ -64,8 +79,6 @@ class MatchesGoldenFile extends AsyncMatcher {
     } else {
       throw 'must provide a Finder, Image, or Future<Image>';
     }
-
-    final Uri testNameUri = goldenFileComparator.getTestUri(key, version);
 
     final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
     return binding.runAsync<String?>(() async {

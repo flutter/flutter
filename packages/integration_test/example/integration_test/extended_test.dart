@@ -4,8 +4,7 @@
 
 // This is a Flutter widget test can take a screenshot.
 //
-// NOTE: Screenshots are only supported on Web for now. For Web, this needs to
-// be executed with the `test_driver/integration_test_extended_driver.dart`.
+// For Web, this needs to be executed with the `test_driver/integration_test_extended_driver.dart`.
 //
 // To perform an interaction with a widget in your test, use the WidgetTester
 // utility that Flutter provides. For example, you can send tap and scroll

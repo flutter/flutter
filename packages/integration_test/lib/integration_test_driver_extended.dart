@@ -9,9 +9,6 @@ import 'package:flutter_driver/flutter_driver.dart';
 
 import 'common.dart';
 
-/// A callback to use with [integrationDriver].
-typedef ScreenshotCallback = Future<bool> Function(String name, List<int> image);
-
 /// Example Integration Test which can also run WebDriver command depending on
 /// the requests coming from the test methods.
 Future<void> integrationDriver(
