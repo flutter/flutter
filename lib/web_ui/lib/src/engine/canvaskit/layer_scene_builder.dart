@@ -23,7 +23,7 @@ class LayerScene implements ui.Scene {
 
   @override
   Future<ui.Image> toImage(int width, int height) {
-    ui.Picture picture = layerTree.flatten();
+    final ui.Picture picture = layerTree.flatten();
     return picture.toImage(width, height);
   }
 }

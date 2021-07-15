@@ -454,7 +454,7 @@ class DomRenderer {
       _canvasKitScript = html.ScriptElement();
       _canvasKitScript!.src = canvasKitJavaScriptBindingsUrl;
 
-      Completer<void> canvasKitLoadCompleter = Completer<void>();
+      final Completer<void> canvasKitLoadCompleter = Completer<void>();
       _canvasKitLoaded = canvasKitLoadCompleter.future;
 
       late StreamSubscription<html.Event> loadSubscription;
@@ -487,9 +487,9 @@ class DomRenderer {
 
       // First check if `exports` and `module` are already defined. If so, then
       // CommonJS is being used, and we shouldn't have any problems.
-      js.JsFunction objectConstructor = js.context['Object'];
+      final js.JsFunction objectConstructor = js.context['Object'];
       if (js.context['exports'] == null) {
-        js.JsObject exportsAccessor = js.JsObject.jsify(<String, dynamic>{
+        final js.JsObject exportsAccessor = js.JsObject.jsify(<String, dynamic>{
           'get': js.allowInterop(() {
             if (html.document.currentScript == _canvasKitScript) {
               return js.JsObject(objectConstructor);
@@ -506,7 +506,7 @@ class DomRenderer {
             <dynamic>[js.context, 'exports', exportsAccessor]);
       }
       if (js.context['module'] == null) {
-        js.JsObject moduleAccessor = js.JsObject.jsify(<String, dynamic>{
+        final js.JsObject moduleAccessor = js.JsObject.jsify(<String, dynamic>{
           'get': js.allowInterop(() {
             if (html.document.currentScript == _canvasKitScript) {
               return js.JsObject(objectConstructor);
@@ -652,7 +652,7 @@ class DomRenderer {
           screenOrientation!.unlock();
           return Future<bool>.value(true);
         } else {
-          String? lockType = _deviceOrientationToLockType(orientations.first);
+          final String? lockType = _deviceOrientationToLockType(orientations.first);
           if (lockType != null) {
             final Completer<bool> completer = Completer<bool>();
             try {

@@ -190,7 +190,7 @@ class MultiEntriesBrowserHistory extends BrowserHistory {
 
     // Restores the html browser history.
     assert(_hasSerialCount(currentState));
-    int backCount = _currentSerialCount;
+    final int backCount = _currentSerialCount;
     if (backCount > 0) {
       await urlStrategy!.go(-backCount);
     }

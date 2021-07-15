@@ -65,7 +65,7 @@ void testMain() {
     expect(window.defaultRouteName, '/initial');
     expect(window.defaultRouteName, '/initial');
 
-    Completer<void> callback = Completer<void>();
+    final Completer<void> callback = Completer<void>();
     window.sendPlatformMessage(
       'flutter/navigation',
       JSONMethodCodec().encodeMethodCall(MethodCall(
@@ -302,7 +302,7 @@ void testMain() {
     // initialized to "/" in tests.
     expect(window.defaultRouteName, '/');
 
-    Completer<void> callback = Completer<void>();
+    final Completer<void> callback = Completer<void>();
     window.sendPlatformMessage(
       'flutter/navigation',
       JSONMethodCodec().encodeMethodCall(MethodCall(
@@ -327,7 +327,7 @@ void testMain() {
     // initialized to "/" in tests.
     expect(window.defaultRouteName, '/');
 
-    Completer<void> callback = Completer<void>();
+    final Completer<void> callback = Completer<void>();
     window.sendPlatformMessage(
       'flutter/navigation',
       JSONMethodCodec().encodeMethodCall(MethodCall(

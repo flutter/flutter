@@ -117,7 +117,7 @@ class Surface {
     if (surface.context != null) {
       canvasKit.setCurrentContext(surface.context!);
     }
-    SubmitCallback submitCallback =
+    final SubmitCallback submitCallback =
         (SurfaceFrame surfaceFrame, CkCanvas canvas) {
       return _presentSurface();
     };
@@ -342,7 +342,7 @@ class Surface {
           htmlCanvas!, 'Failed to initialize WebGL context');
     } else {
       canvasKit.setCurrentContext(_glContext!);
-      SkSurface? skSurface = canvasKit.MakeOnScreenGLSurface(
+      final SkSurface? skSurface = canvasKit.MakeOnScreenGLSurface(
         _grContext!,
         size.width.ceil(),
         size.height.ceil(),

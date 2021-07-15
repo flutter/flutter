@@ -463,7 +463,7 @@ class OneOffHandler {
   ///
   /// [handler] will be unmounted as soon as it receives a request.
   String create(shelf.Handler handler) {
-    String path = _counter.toString();
+    final String path = _counter.toString();
     _handlers[path] = handler;
     _counter++;
     return path;
@@ -471,13 +471,13 @@ class OneOffHandler {
 
   /// Dispatches [request] to the appropriate handler.
   FutureOr<shelf.Response> _onRequest(shelf.Request request) {
-    List<String> components = p.url.split(request.url.path);
+    final List<String> components = p.url.split(request.url.path);
     if (components.isEmpty) {
       return shelf.Response.notFound(null);
     }
 
-    String path = components.removeAt(0);
-    shelf.Handler? handler = _handlers.remove(path);
+    final String path = components.removeAt(0);
+    final shelf.Handler? handler = _handlers.remove(path);
     if (handler == null) {
       return shelf.Response.notFound(null);
     }
@@ -563,9 +563,9 @@ class BrowserManager {
     required PackageConfig packageConfig,
     bool debug = false,
   }) {
-    Browser browser = _newBrowser(url, browserEnvironment, debug: debug);
+    final Browser browser = _newBrowser(url, browserEnvironment, debug: debug);
 
-    Completer<BrowserManager> completer = Completer<BrowserManager>();
+    final Completer<BrowserManager> completer = Completer<BrowserManager>();
 
     // For the cases where we use a delegator such as `adb` (for Android) or
     // `xcrun` (for IOS), these delegator processes can shut down before the
@@ -658,7 +658,7 @@ class BrowserManager {
       'browser': _browserEnvironment.packageTestRuntime.identifier
     })));
 
-    int suiteID = _suiteID++;
+    final int suiteID = _suiteID++;
     RunnerSuiteController? controller;
     void closeIframe() {
       if (_closed) {
@@ -670,9 +670,9 @@ class BrowserManager {
 
     // The virtual channel will be closed when the suite is closed, in which
     // case we should unload the iframe.
-    VirtualChannel<dynamic> virtualChannel = _channel.virtualChannel();
-    int suiteChannelID = virtualChannel.id;
-    StreamChannel<dynamic> suiteChannel = virtualChannel.transformStream(
+    final VirtualChannel<dynamic> virtualChannel = _channel.virtualChannel();
+    final int suiteChannelID = virtualChannel.id;
+    final StreamChannel<dynamic> suiteChannel = virtualChannel.transformStream(
         StreamTransformer<dynamic, dynamic>.fromHandlers(handleDone: (EventSink<dynamic> sink) {
       closeIframe();
       sink.close();
@@ -697,7 +697,7 @@ class BrowserManager {
         final String mapPath = p.join(env.environment.webUiRootDir.path,
             'build', pathToTest, sourceMapFileName);
 
-        Map<String, Uri> packageMap = <String, Uri>{
+        final Map<String, Uri> packageMap = <String, Uri>{
           for (Package p in packageConfig.packages) p.name: p.packageUriRoot
         };
         final JSStackTraceMapper mapper = JSStackTraceMapper(

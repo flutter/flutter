@@ -199,7 +199,7 @@ void testMain() {
 
       // Creating this paragraph should cause us to start to download the
       // fallback font.
-      CkParagraphBuilder pb = CkParagraphBuilder(
+      final CkParagraphBuilder pb = CkParagraphBuilder(
         CkParagraphStyle(),
       );
       pb.addText('مرحبا');
@@ -320,7 +320,7 @@ void testMain() {
         }
         final Set<NotoFont> fonts = <NotoFont>{};
         for (int codeUnit in codeUnits) {
-          List<NotoFont> fontsForUnit = notoTree.intersections(codeUnit);
+          final List<NotoFont> fontsForUnit = notoTree.intersections(codeUnit);
 
           // All code units are extracted from the same tree, so there must
           // be at least one font supporting each code unit

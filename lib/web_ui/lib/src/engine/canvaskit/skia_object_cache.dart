@@ -69,7 +69,7 @@ class SkiaObjectCache {
 
   /// Records that [object] was used in the most recent frame.
   void markUsed(SkiaObject<Object> object) {
-    DoubleLinkedQueueEntry<SkiaObject<Object>> item = _itemMap[object]!;
+    final DoubleLinkedQueueEntry<SkiaObject<Object>> item = _itemMap[object]!;
     item.remove();
     _itemQueue.addFirst(object);
     _itemMap[object] = _itemQueue.firstEntry()!;

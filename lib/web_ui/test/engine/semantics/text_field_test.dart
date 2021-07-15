@@ -113,14 +113,14 @@ void testMain() {
       );
 
       // Create
-      SemanticsObject textFieldSemantics = createTextFieldSemantics(
+      final SemanticsObject textFieldSemantics = createTextFieldSemantics(
         value: 'hello',
         label: 'greeting',
         isFocused: true,
         rect: ui.Rect.fromLTWH(0, 0, 10, 15),
       );
 
-      TextField textField = textFieldSemantics.debugRoleManagerFor(Role.textField) as TextField;
+      final TextField textField = textFieldSemantics.debugRoleManagerFor(Role.textField) as TextField;
       expect(html.document.activeElement, domRenderer.glassPaneElement);
       expect(appHostNode.activeElement, strategy.domElement);
       expect(textField.editableElement, strategy.domElement);

@@ -154,7 +154,7 @@ void testMain() {
     test('dispatches repeat events', () {
       Keyboard.initialize();
 
-      List<Map<String, dynamic>> messages = <Map<String, dynamic>>[];
+      final List<Map<String, dynamic>> messages = <Map<String, dynamic>>[];
       ui.window.onPlatformMessage = (String channel, ByteData? data,
           ui.PlatformMessageResponseCallback? callback) {
         messages.add(const JSONMessageCodec().decodeMessage(data));
@@ -258,7 +258,7 @@ void testMain() {
       ui.window.onPlatformMessage = (String channel, ByteData? data,
           ui.PlatformMessageResponseCallback? callback) {
         count += 1;
-        ByteData response = const JSONMessageCodec().encodeMessage(<String, dynamic>{'handled': false})!;
+        final ByteData response = const JSONMessageCodec().encodeMessage(<String, dynamic>{'handled': false})!;
         callback!(response);
       };
 
@@ -305,7 +305,7 @@ void testMain() {
       ui.window.onPlatformMessage = (String channel, ByteData? data,
           ui.PlatformMessageResponseCallback? callback) {
         count += 1;
-        ByteData response = const JSONMessageCodec().encodeMessage(<String, dynamic>{'handled': true})!;
+        final ByteData response = const JSONMessageCodec().encodeMessage(<String, dynamic>{'handled': true})!;
         callback!(response);
       };
 
@@ -336,7 +336,7 @@ void testMain() {
         // `keyup(i)` event.
         Keyboard.initialize();
 
-        List<Map<String, dynamic>> messages = <Map<String, dynamic>>[];
+        final List<Map<String, dynamic>> messages = <Map<String, dynamic>>[];
         ui.window.onPlatformMessage = (String channel, ByteData? data,
             ui.PlatformMessageResponseCallback? callback) {
           messages.add(const JSONMessageCodec().decodeMessage(data));
@@ -439,7 +439,7 @@ void testMain() {
       (FakeAsync async) {
         Keyboard.initialize();
 
-        List<Map<String, dynamic>> messages = <Map<String, dynamic>>[];
+        final List<Map<String, dynamic>> messages = <Map<String, dynamic>>[];
         ui.window.onPlatformMessage = (String channel, ByteData? data,
             ui.PlatformMessageResponseCallback? callback) {
           messages.add(const JSONMessageCodec().decodeMessage(data));
@@ -511,7 +511,7 @@ void testMain() {
       (FakeAsync async) {
         Keyboard.initialize();
 
-        List<Map<String, dynamic>> messages = <Map<String, dynamic>>[];
+        final List<Map<String, dynamic>> messages = <Map<String, dynamic>>[];
         ui.window.onPlatformMessage = (String channel, ByteData? data,
             ui.PlatformMessageResponseCallback? callback) {
           messages.add(const JSONMessageCodec().decodeMessage(data));
@@ -541,7 +541,7 @@ void testMain() {
     testFakeAsync('do not synthesize keyup for meta keys', (FakeAsync async) {
       Keyboard.initialize();
 
-      List<Map<String, dynamic>> messages = <Map<String, dynamic>>[];
+      final List<Map<String, dynamic>> messages = <Map<String, dynamic>>[];
       ui.window.onPlatformMessage = (String channel, ByteData? data,
           ui.PlatformMessageResponseCallback? callback) {
         messages.add(const JSONMessageCodec().decodeMessage(data));

@@ -133,11 +133,11 @@ class HtmlViewEmbedder {
 
   void _compositeWithParams(int viewId, EmbeddedViewParams params) {
     // If we haven't seen this viewId yet, cache it for clips/transforms.
-    ViewClipChain clipChain = _viewClipChains.putIfAbsent(viewId, () {
+    final ViewClipChain clipChain = _viewClipChains.putIfAbsent(viewId, () {
       return ViewClipChain(view: createPlatformViewSlot(viewId));
     });
 
-    html.Element slot = clipChain.slot;
+    final html.Element slot = clipChain.slot;
 
     // See `apply()` in the PersistedPlatformView class for the HTML version
     // of this code.
@@ -150,8 +150,8 @@ class HtmlViewEmbedder {
     final int currentClippingCount = _countClips(params.mutators);
     final int previousClippingCount = clipChain.clipCount;
     if (currentClippingCount != previousClippingCount) {
-      html.Element oldPlatformViewRoot = clipChain.root;
-      html.Element newPlatformViewRoot = _reconstructClipViewsChain(
+      final html.Element oldPlatformViewRoot = clipChain.root;
+      final html.Element newPlatformViewRoot = _reconstructClipViewsChain(
         currentClippingCount,
         slot,
         oldPlatformViewRoot,
@@ -196,7 +196,7 @@ class HtmlViewEmbedder {
     }
     // If there weren't enough existing clip views, add more.
     while (clipIndex < numClips) {
-      html.Element clippingView = html.Element.tag('flt-clip');
+      final html.Element clippingView = html.Element.tag('flt-clip');
       clippingView.append(head);
       head = clippingView;
       clipIndex++;
@@ -248,7 +248,7 @@ class HtmlViewEmbedder {
         case MutatorType.clipRect:
         case MutatorType.clipRRect:
         case MutatorType.clipPath:
-          html.Element clipView = head.parent!;
+          final html.Element clipView = head.parent!;
           clipView.style.clip = '';
           clipView.style.clipPath = '';
           headTransform = Matrix4.identity();
@@ -261,11 +261,11 @@ class HtmlViewEmbedder {
             final CkPath path = CkPath();
             path.addRRect(mutator.rrect!);
             _ensureSvgPathDefs();
-            html.Element pathDefs =
+            final html.Element pathDefs =
                 _svgPathDefs!.querySelector('#sk_path_defs')!;
             _clipPathCount += 1;
             final String clipId = 'svgClip$_clipPathCount';
-            html.Node newClipPath = html.DocumentFragment.svg(
+            final html.Node newClipPath = html.DocumentFragment.svg(
               '<clipPath id="$clipId">'
               '<path d="${path.toSvgString()}">'
               '</path></clipPath>',
@@ -280,11 +280,11 @@ class HtmlViewEmbedder {
           } else if (mutator.path != null) {
             final CkPath path = mutator.path as CkPath;
             _ensureSvgPathDefs();
-            html.Element pathDefs =
+            final html.Element pathDefs =
                 _svgPathDefs!.querySelector('#sk_path_defs')!;
             _clipPathCount += 1;
             final String clipId = 'svgClip$_clipPathCount';
-            html.Node newClipPath = html.DocumentFragment.svg(
+            final html.Node newClipPath = html.DocumentFragment.svg(
               '<clipPath id="$clipId">'
               '<path d="${path.toSvgString()}">'
               '</path></clipPath>',
@@ -352,11 +352,11 @@ class HtmlViewEmbedder {
   void submitFrame() {
     bool _didPaintBackupSurface = false;
     for (int i = 0; i < _compositionOrder.length; i++) {
-      int viewId = _compositionOrder[i];
+      final int viewId = _compositionOrder[i];
       if (_viewsUsingBackupSurface.contains(viewId)) {
         // Only draw the picture to the backup surface once.
         if (!_didPaintBackupSurface) {
-          SurfaceFrame backupFrame =
+          final SurfaceFrame backupFrame =
               SurfaceFactory.instance.backupSurface.acquireFrame(_frameSize);
           backupFrame.skiaCanvas
               .drawPicture(_backupPictureRecorder!.endRecording());
@@ -384,7 +384,7 @@ class HtmlViewEmbedder {
 
     List<int>? debugInvalidViewIds;
     for (int i = 0; i < _compositionOrder.length; i++) {
-      int viewId = _compositionOrder[i];
+      final int viewId = _compositionOrder[i];
 
       if (assertionsEnabled) {
         if (!platformViewManager.knowsViewId(viewId)) {
@@ -395,8 +395,8 @@ class HtmlViewEmbedder {
       }
 
       unusedViews.remove(viewId);
-      html.Element platformViewRoot = _viewClipChains[viewId]!.root;
-      html.Element overlay = _overlays[viewId]!.htmlElement;
+      final html.Element platformViewRoot = _viewClipChains[viewId]!.root;
+      final html.Element overlay = _overlays[viewId]!.htmlElement;
       platformViewRoot.remove();
       skiaSceneHost!.append(platformViewRoot);
       overlay.remove();
@@ -421,7 +421,7 @@ class HtmlViewEmbedder {
   void disposeViews(Set<int> viewsToDispose) {
     for (final int viewId in viewsToDispose) {
       // Remove viewId from the _viewClipChains Map, and then from the DOM.
-      ViewClipChain? clipChain = _viewClipChains.remove(viewId);
+      final ViewClipChain? clipChain = _viewClipChains.remove(viewId);
       clipChain?.root.remove();
       // More cleanup
       _releaseOverlay(viewId);
@@ -434,7 +434,7 @@ class HtmlViewEmbedder {
 
   void _releaseOverlay(int viewId) {
     if (_overlays[viewId] != null) {
-      Surface overlay = _overlays[viewId]!;
+      final Surface overlay = _overlays[viewId]!;
       if (overlay == SurfaceFactory.instance.backupSurface) {
         assert(_viewsUsingBackupSurface.contains(viewId));
         _viewsUsingBackupSurface.remove(viewId);

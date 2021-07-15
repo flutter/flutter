@@ -34,9 +34,9 @@ void testMain() async {
     final engine.RecordingCanvas rc =
         engine.RecordingCanvas(const Rect.fromLTRB(0, 0, 500, 500));
     rc.save();
-    Image testImage = createTestImage();
-    double testWidth = testImage.width.toDouble();
-    double testHeight = testImage.height.toDouble();
+    final Image testImage = createTestImage();
+    final double testWidth = testImage.width.toDouble();
+    final double testHeight = testImage.height.toDouble();
     final Path path = Path();
     path.addOval(Rect.fromLTWH(100, 30, testWidth, testHeight));
     rc.clipPath(path);
@@ -52,8 +52,8 @@ void testMain() async {
     final engine.RecordingCanvas rc =
         engine.RecordingCanvas(const Rect.fromLTRB(0, 0, 500, 500));
     rc.save();
-    double testWidth = 200;
-    double testHeight = 150;
+    final double testWidth = 200;
+    final double testHeight = 150;
     final Path path = Path();
     path.addOval(Rect.fromLTWH(100, 30, testWidth, testHeight));
     rc.clipPath(path);
@@ -77,8 +77,8 @@ void testMain() async {
     final engine.RecordingCanvas rc =
     engine.RecordingCanvas(const Rect.fromLTRB(0, 0, 500, 500));
     rc.save();
-    double testWidth = 200;
-    double testHeight = 150;
+    final double testWidth = 200;
+    final double testHeight = 150;
 
     final Path paintPath = new Path();
     paintPath.addRect(Rect.fromLTWH(-50, 0, testWidth, testHeight));
@@ -105,8 +105,8 @@ void testMain() async {
     final engine.RecordingCanvas rc =
     engine.RecordingCanvas(const Rect.fromLTRB(0, 0, 500, 500));
     rc.save();
-    double testWidth = 200;
-    double testHeight = 150;
+    final double testWidth = 200;
+    final double testHeight = 150;
 
     final Path paintPath = new Path();
     paintPath.addRect(Rect.fromLTWH(-50, 0, testWidth, testHeight));
@@ -127,9 +127,9 @@ void testMain() async {
 }
 
 engine.HtmlImage createTestImage({int width = 200, int height = 150}) {
-  html.CanvasElement canvas =
+  final html.CanvasElement canvas =
       new html.CanvasElement(width: width, height: height);
-  html.CanvasRenderingContext2D ctx = canvas.context2D;
+  final html.CanvasRenderingContext2D ctx = canvas.context2D;
   ctx.fillStyle = '#E04040';
   ctx.fillRect(0, 0, width / 3, height);
   ctx.fill();
@@ -139,7 +139,7 @@ engine.HtmlImage createTestImage({int width = 200, int height = 150}) {
   ctx.fillStyle = '#2040E0';
   ctx.fillRect(2 * width / 3, 0, width / 3, height);
   ctx.fill();
-  html.ImageElement imageElement = html.ImageElement();
+  final html.ImageElement imageElement = html.ImageElement();
   imageElement.src = js_util.callMethod(canvas, 'toDataURL', <dynamic>[]);
   return engine.HtmlImage(imageElement, width, height);
 }

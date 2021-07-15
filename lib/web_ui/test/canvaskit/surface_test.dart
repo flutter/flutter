@@ -24,7 +24,7 @@ void testMain() {
 
     test('Surface allocates canvases efficiently', () {
       final Surface surface = SurfaceFactory.instance.getSurface();
-      CkSurface originalSurface =
+      final CkSurface originalSurface =
           surface.acquireFrame(ui.Size(9, 19)).skiaSurface;
       final html.CanvasElement original = surface.htmlCanvas!;
 
@@ -37,7 +37,7 @@ void testMain() {
       expect(originalSurface.height(), 19);
 
       // Shrinking reuses the existing canvas straight-up.
-      CkSurface shrunkSurface =
+      final CkSurface shrunkSurface =
           surface.acquireFrame(ui.Size(5, 15)).skiaSurface;
       final html.CanvasElement shrunk = surface.htmlCanvas!;
       expect(shrunk, same(original));
@@ -49,7 +49,7 @@ void testMain() {
 
       // The first increase will allocate a new canvas, but will overallocate
       // by 40% to accommodate future increases.
-      CkSurface firstIncreaseSurface =
+      final CkSurface firstIncreaseSurface =
           surface.acquireFrame(ui.Size(10, 20)).skiaSurface;
       final html.CanvasElement firstIncrease = surface.htmlCanvas!;
       expect(firstIncrease, isNot(same(original)));
@@ -64,7 +64,7 @@ void testMain() {
       expect(firstIncreaseSurface.height(), 20);
 
       // Subsequent increases within 40% reuse the old canvas.
-      CkSurface secondIncreaseSurface =
+      final CkSurface secondIncreaseSurface =
           surface.acquireFrame(ui.Size(11, 22)).skiaSurface;
       final html.CanvasElement secondIncrease = surface.htmlCanvas!;
       expect(secondIncrease, same(firstIncrease));
@@ -73,7 +73,7 @@ void testMain() {
       expect(secondIncreaseSurface.height(), 22);
 
       // Increases beyond the 40% limit will cause a new allocation.
-      CkSurface hugeSurface = surface.acquireFrame(ui.Size(20, 40)).skiaSurface;
+      final CkSurface hugeSurface = surface.acquireFrame(ui.Size(20, 40)).skiaSurface;
       final html.CanvasElement huge = surface.htmlCanvas!;
       expect(huge, isNot(same(secondIncrease)));
       expect(hugeSurface, isNot(same(secondIncreaseSurface)));
@@ -87,7 +87,7 @@ void testMain() {
       expect(hugeSurface.height(), 40);
 
       // Shrink again. Reuse the last allocated surface.
-      CkSurface shrunkSurface2 =
+      final CkSurface shrunkSurface2 =
           surface.acquireFrame(ui.Size(5, 15)).skiaSurface;
       final html.CanvasElement shrunk2 = surface.htmlCanvas!;
       expect(shrunk2, same(huge));

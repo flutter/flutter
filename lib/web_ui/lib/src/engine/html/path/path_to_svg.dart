@@ -35,9 +35,9 @@ void pathToSvg(PathRef pathRef, StringBuffer sb,
         break;
       case SPath.kConicVerb:
         final double w = iter.conicWeight;
-        Conic conic = Conic(outPts[0], outPts[1], outPts[2], outPts[3],
+        final Conic conic = Conic(outPts[0], outPts[1], outPts[2], outPts[3],
             outPts[4], outPts[5], w);
-        List<ui.Offset> points = conic.toQuads();
+        final List<ui.Offset> points = conic.toQuads();
         final int len = points.length;
         for (int i = 1; i < len; i += 2) {
           final double p1x = points[i].dx;

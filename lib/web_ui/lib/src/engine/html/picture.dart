@@ -594,7 +594,7 @@ class PersistedPicture extends PersistedLeafSurface {
 
     _computeOptimalCullRect(oldSurface);
     if (identical(picture, oldSurface.picture)) {
-      bool densityChanged = (_canvas is BitmapCanvas &&
+      final bool densityChanged = (_canvas is BitmapCanvas &&
           _density != (_canvas as BitmapCanvas).density);
 
       // The picture is the same. Attempt to avoid repaint.
@@ -705,8 +705,8 @@ double _computePixelDensity(Matrix4? transform, double width, double height) {
   maxX = math.max(maxX, xp);
   minY = math.min(minY, yp);
   maxY = math.max(maxY, yp);
-  double scaleX = (maxX - minX) / width;
-  double scaleY = (maxY - minY) / height;
+  final double scaleX = (maxX - minX) / width;
+  final double scaleY = (maxY - minY) / height;
   double scale = math.min(scaleX, scaleY);
   // kEpsilon guards against divide by zero below.
   if (scale < kEpsilon || scale == 1) {

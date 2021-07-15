@@ -16,7 +16,7 @@ int chopCubicAtYExtrema(Float32List points, Float32List dest) {
   final double y1 = points[3];
   final double y2 = points[5];
   final double y3 = points[7];
-  QuadRoots _quadRoots = _findCubicExtrema(y0, y1, y2, y3);
+  final QuadRoots _quadRoots = _findCubicExtrema(y0, y1, y2, y3);
   final List<double> roots = _quadRoots.roots;
   if (roots.isEmpty) {
     // No roots, just use input cubic.
@@ -58,7 +58,7 @@ void _chopCubicAt(
           nextTValue > tValue, 'Expecting t value to monotonically increase');
     }
   }
-  int rootCount = tValues.length;
+  final int rootCount = tValues.length;
   if (0 == rootCount) {
     for (int i = 0; i < 8; i++) {
       outPts[i] = points[i];
@@ -185,10 +185,10 @@ double? chopMonoAtY(Float32List _buffer, int bufferStartPos, double y) {
 }
 
 double evalCubicPts(double c0, double c1, double c2, double c3, double t) {
-  double A = c3 + 3 * (c1 - c2) - c0;
-  double B = 3 * (c2 - c1 - c1 + c0);
-  double C = 3 * (c1 - c0);
-  double D = c0;
+  final double A = c3 + 3 * (c1 - c2) - c0;
+  final double B = 3 * (c2 - c1 - c1 + c0);
+  final double C = 3 * (c1 - c0);
+  final double D = c0;
   return polyEval4(A, B, C, D, t);
 }
 

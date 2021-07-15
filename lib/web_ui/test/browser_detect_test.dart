@@ -14,7 +14,7 @@ void testMain() {
   group('detectBrowserEngineByVendorAgent', () {
     test('Should detect Blink', () {
       // Chrome Version 89.0.4389.90 (Official Build) (x86_64) / MacOS
-      BrowserEngine browserEngine = detectBrowserEngineByVendorAgent(
+      final BrowserEngine browserEngine = detectBrowserEngineByVendorAgent(
           'Google Inc.',
           'mozilla/5.0 (macintosh; intel mac os x 11_2_3) applewebkit/537.36 '
               '(khtml, like gecko) chrome/89.0.4389.90 safari/537.36');
@@ -23,7 +23,7 @@ void testMain() {
 
     test('Should detect Firefox', () {
       // 85.0.2 (64-bit) / MacOS
-      BrowserEngine browserEngine = detectBrowserEngineByVendorAgent(
+      final BrowserEngine browserEngine = detectBrowserEngineByVendorAgent(
           '',
           'mozilla/5.0 (macintosh; intel mac os x 10.16; rv:85.0) '
               'gecko/20100101 firefox/85.0');
@@ -31,7 +31,7 @@ void testMain() {
     });
 
     test('Should detect Safari', () {
-      BrowserEngine browserEngine = detectBrowserEngineByVendorAgent(
+      final BrowserEngine browserEngine = detectBrowserEngineByVendorAgent(
           'Apple Computer, Inc.',
           'mozilla/5.0 (macintosh; intel mac os x 10_15_6) applewebkit/605.1.15 '
               '(khtml, like gecko) version/14.0.3 safari/605.1.15');
@@ -40,7 +40,7 @@ void testMain() {
 
     test('Should detect Samsung browser', () {
       // Samsung 13.2.1.70 on Galaxy Tab S6.
-      BrowserEngine browserEngine = detectBrowserEngineByVendorAgent(
+      final BrowserEngine browserEngine = detectBrowserEngineByVendorAgent(
           'Google Inc.',
           'mozilla/5.0 (x11; linux x86_64) applewebkit/537.36 (khtml, like gecko)'
               ' samsungbrowser/13.2 chrome/83.0.4103.106 safari/537.36');

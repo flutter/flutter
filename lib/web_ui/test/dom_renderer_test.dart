@@ -135,7 +135,7 @@ void testMain() {
   test('renders a shadowRoot by default', () {
     final DomRenderer renderer = DomRenderer();
 
-    HostNode hostNode = renderer.glassPaneShadow!;
+    final HostNode hostNode = renderer.glassPaneShadow!;
 
     expect(hostNode.node, isA<html.ShadowRoot>());
   });
@@ -148,7 +148,7 @@ void testMain() {
 
     final DomRenderer renderer = DomRenderer();
 
-    HostNode hostNode = renderer.glassPaneShadow!;
+    final HostNode hostNode = renderer.glassPaneShadow!;
 
     expect(hostNode.node, isA<html.Element>());
     expect(
