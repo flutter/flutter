@@ -41,9 +41,6 @@ group("web_sdk") {
     ":flutter_dartdevc_kernel_sdk_outline",
     ":flutter_dartdevc_kernel_sdk_outline_sound",
     ":flutter_dartdevc_kernel_sdk_sound",
-    ":web_engine_sources",
-    ":web_ui_library",
-    ":web_ui_sources",
   ]
 }
 
@@ -114,7 +111,12 @@ template("_dartdevc") {
   if (flutter_prebuilt_dart_sdk) {
     action(target_name) {
       not_needed(invoker, [ "packages" ])
-      deps = [ "//flutter:dart_sdk" ]
+      deps = [
+        ":web_engine_sources",
+        ":web_ui_library",
+        ":web_ui_sources",
+        "//flutter:dart_sdk",
+      ]
       script = "//build/gn_run_binary.py"
 
       inputs = invoker.inputs
@@ -137,6 +139,9 @@ template("_dartdevc") {
       forward_variables_from(invoker, "*")
 
       deps = [
+        ":web_engine_sources",
+        ":web_ui_library",
+        ":web_ui_sources",
         "//flutter:dart_sdk",
         "//third_party/dart/pkg:pkg_files_stamp",
         "//third_party/dart/utils/dartdevc:dartdevc_files_stamp",
@@ -160,7 +165,12 @@ template("_dartdevc") {
 template("_kernel_worker") {
   if (flutter_prebuilt_dart_sdk) {
     action(target_name) {
-      deps = [ "//flutter:dart_sdk" ]
+      deps = [
+        ":web_engine_sources",
+        ":web_ui_library",
+        ":web_ui_sources",
+        "//flutter:dart_sdk",
+      ]
       script = "//build/gn_run_binary.py"
 
       inputs = invoker.inputs
@@ -184,6 +194,9 @@ template("_kernel_worker") {
       forward_variables_from(invoker, "*")
 
       deps = [
+        ":web_engine_sources",
+        ":web_ui_library",
+        ":web_ui_sources",
         "//flutter:dart_sdk",
         "//third_party/dart/pkg:pkg_files_stamp",
         "//third_party/dart/utils/dartdevc:dartdevc_files_stamp",
