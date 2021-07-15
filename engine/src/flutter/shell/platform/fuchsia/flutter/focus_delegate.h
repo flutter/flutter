@@ -45,27 +45,6 @@ class FocusDelegate {
       rapidjson::Value request,
       fml::RefPtr<flutter::PlatformMessageResponse> response);
 
-  /// Completes the platform message request with the FocusDelegate's most
-  /// recent focus state.
-  // TODO(fxbug.dev/79740): Delete after soft transition.
-  bool CompleteCurrentFocusState(
-      fml::RefPtr<flutter::PlatformMessageResponse> response);
-
-  /// Completes the platform message request with the FocusDelegate's next focus
-  /// state.
-  ///
-  /// Only one outstanding request may exist at a time. Any others will be
-  /// completed empty.
-  // TODO(fxbug.dev/79740): Delete after soft transition.
-  bool CompleteNextFocusState(
-      fml::RefPtr<flutter::PlatformMessageResponse> response);
-
-  /// Completes a platform message request by attempting to give focus for a
-  /// given viewRef.
-  // TODO(fxbug.dev/79740): Make private after soft transition.
-  bool RequestFocus(rapidjson::Value request,
-                    fml::RefPtr<flutter::PlatformMessageResponse> response);
-
  private:
   fuchsia::ui::views::ViewRefFocusedPtr view_ref_focused_;
   fuchsia::ui::views::FocuserPtr focuser_;
@@ -76,6 +55,11 @@ class FocusDelegate {
 
   void Complete(fml::RefPtr<flutter::PlatformMessageResponse> response,
                 std::string value);
+
+  /// Completes a platform message request by attempting to give focus for a
+  /// given viewRef.
+  bool RequestFocus(rapidjson::Value request,
+                    fml::RefPtr<flutter::PlatformMessageResponse> response);
 
   FML_DISALLOW_COPY_AND_ASSIGN(FocusDelegate);
 };
