@@ -782,4 +782,85 @@ void main() {
     skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
+
+  testWidgets('iOS selection handles scale with rich text (grapheme clusters)', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: SelectableText.rich(
+            TextSpan(
+              children: <InlineSpan>[
+                TextSpan(text: 'abc ', style: TextStyle(fontSize: 100.0)),
+                TextSpan(text: 'def ', style: TextStyle(fontSize: 50.0)),
+                TextSpan(text: '👨‍👩‍👦 ', style: TextStyle(fontSize: 35.0)),
+                TextSpan(text: 'hij', style: TextStyle(fontSize: 25.0)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final EditableText editableTextWidget = tester.widget(find.byType(EditableText));
+    final EditableTextState editableTextState = tester.state(find.byType(EditableText));
+    final TextEditingController controller = editableTextWidget.controller;
+
+    // Double tap to select the second word.
+    const int index = 4;
+    await tester.tapAt(textOffsetToPosition(tester, index));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(textOffsetToPosition(tester, index));
+    await tester.pumpAndSettle();
+    expect(editableTextState.selectionOverlay!.handlesAreVisible, isTrue);
+    expect(controller.selection.baseOffset, 4);
+    expect(controller.selection.extentOffset, 7);
+
+    // Drag the right handle 2 letters to the right. Placing the end handle on
+    // the third word. We use a small offset because the endpoint is on the very
+    // corner of the handle.
+    final TextSelection selection = controller.selection;
+    final RenderEditable renderEditable = findRenderEditable(tester);
+    final List<TextSelectionPoint> endpoints = globalize(
+      renderEditable.getEndpointsForSelection(selection),
+      renderEditable,
+    );
+    expect(endpoints.length, 2);
+
+    final Offset handlePos = endpoints[1].point + const Offset(1.0, 1.0);
+    final Offset newHandlePos = textOffsetToPosition(tester, 16);
+    final TestGesture gesture = await tester.startGesture(handlePos, pointer: 7);
+    await tester.pump();
+    await gesture.moveTo(newHandlePos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    expect(controller.selection.baseOffset, 4);
+    expect(controller.selection.extentOffset, 16);
+
+    // Find start and end handles and verify their sizes.
+    expect(find.byType(Overlay), findsOneWidget);
+    expect(find.descendant(
+      of: find.byType(Overlay),
+      matching: find.byType(CustomPaint),
+    ), findsNWidgets(2));
+
+    final Iterable<RenderBox> handles = tester.renderObjectList(find.descendant(
+      of: find.byType(Overlay),
+      matching: find.byType(CustomPaint),
+    ));
+
+    // The handle height is determined by the formula:
+    // textLineHeight + _kSelectionHandleRadius * 2 - _kSelectionHandleOverlap .
+    // The text line height will be the value of the fontSize.
+    // The constant _kSelectionHandleRadius has the value of 6.
+    // The constant _kSelectionHandleOverlap has the value of 1.5.
+    // In the case of the end handle, which is located on the grapheme cluster '👨‍👩‍👦',
+    // 35.0 + 6 * 2 - 1.5 = 45.5 .
+    expect(handles.first.size.height, 60.5);
+    expect(handles.last.size.height, 45.5);
+  },
+    skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
+  );
 }
