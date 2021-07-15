@@ -190,7 +190,7 @@ void main() {
     await tester.pump(additionalDelay);
     expect(mockOnEndFunction.called, 1);
   });
-  
+
   testWidgets('AnimatedSlide transition test', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
       child: TestAnimatedWidget(
