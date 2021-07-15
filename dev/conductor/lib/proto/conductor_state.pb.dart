@@ -403,6 +403,8 @@ class ConductorState extends $pb.GeneratedMessage {
         enumValues: ReleasePhase.values)
     ..aOS(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'conductorVersion',
         protoName: 'conductorVersion')
+    ..aOS(11, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'incrementLevel',
+        protoName: 'incrementLevel')
     ..hasRequiredFields = false;
 
   ConductorState._() : super();
@@ -416,6 +418,7 @@ class ConductorState extends $pb.GeneratedMessage {
     $core.Iterable<$core.String>? logs,
     ReleasePhase? currentPhase,
     $core.String? conductorVersion,
+    $core.String? incrementLevel,
   }) {
     final _result = create();
     if (releaseChannel != null) {
@@ -444,6 +447,9 @@ class ConductorState extends $pb.GeneratedMessage {
     }
     if (conductorVersion != null) {
       _result.conductorVersion = conductorVersion;
+    }
+    if (incrementLevel != null) {
+      _result.incrementLevel = incrementLevel;
     }
     return _result;
   }
@@ -572,4 +578,16 @@ class ConductorState extends $pb.GeneratedMessage {
   $core.bool hasConductorVersion() => $_has(8);
   @$pb.TagNumber(10)
   void clearConductorVersion() => clearField(10);
+
+  @$pb.TagNumber(11)
+  $core.String get incrementLevel => $_getSZ(9);
+  @$pb.TagNumber(11)
+  set incrementLevel($core.String v) {
+    $_setString(9, v);
+  }
+
+  @$pb.TagNumber(11)
+  $core.bool hasIncrementLevel() => $_has(9);
+  @$pb.TagNumber(11)
+  void clearIncrementLevel() => clearField(11);
 }

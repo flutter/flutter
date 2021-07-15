@@ -111,4 +111,7 @@ message ConductorState {
 
   // Commit hash of the Conductor tool.
   string conductorVersion = 10;
+
+  // One of x, y, z, m, or n.
+  string incrementLevel = 11;
 }
