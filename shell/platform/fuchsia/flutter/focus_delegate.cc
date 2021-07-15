@@ -101,23 +101,4 @@ bool FocusDelegate::RequestFocus(
   return true;
 }
 
-bool FocusDelegate::CompleteCurrentFocusState(
-    fml::RefPtr<flutter::PlatformMessageResponse> response) {
-  std::string result(is_focused_ ? "[true]" : "[false]");
-  response->Complete(std::make_unique<fml::DataMapping>(
-      std::vector<uint8_t>(result.begin(), result.end())));
-  return true;
-}
-
-bool FocusDelegate::CompleteNextFocusState(
-    fml::RefPtr<flutter::PlatformMessageResponse> response) {
-  if (next_focus_request_) {
-    FML_LOG(ERROR) << "An outstanding PlatformMessageResponse already exists "
-                      "for the next focus state!";
-    return false;
-  }
-  next_focus_request_ = std::move(response);
-  return true;
-}
-
 }  // namespace flutter_runner
