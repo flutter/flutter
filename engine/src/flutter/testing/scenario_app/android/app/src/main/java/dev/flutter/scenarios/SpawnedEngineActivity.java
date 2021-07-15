@@ -13,6 +13,7 @@ public class SpawnedEngineActivity extends TestActivity {
   static final String TAG = "Scenarios";
 
   @Override
+  @NonNull
   public FlutterEngine provideFlutterEngine(@NonNull Context context) {
     FlutterEngineGroup engineGroup = new FlutterEngineGroup(context);
     engineGroup.createAndRunDefaultEngine(context);

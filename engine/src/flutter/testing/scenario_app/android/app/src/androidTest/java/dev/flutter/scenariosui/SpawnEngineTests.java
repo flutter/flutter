@@ -5,6 +5,7 @@
 package dev.flutter.scenariosui;
 
 import android.content.Intent;
+import androidx.annotation.NonNull;
 import androidx.test.filters.LargeTest;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.runner.AndroidJUnit4;
@@ -19,7 +20,7 @@ import org.junit.runner.RunWith;
 public class SpawnEngineTests {
   Intent intent;
 
-  @Rule
+  @Rule @NonNull
   public ActivityTestRule<SpawnedEngineActivity> activityRule =
       new ActivityTestRule<>(
           SpawnedEngineActivity.class, /*initialTouchMode=*/ false, /*launchActivity=*/ false);

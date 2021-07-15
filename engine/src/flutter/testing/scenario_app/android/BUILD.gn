@@ -4,49 +4,72 @@
 
 import("//flutter/testing/scenario_app/runtime_mode.gni")
 
-action("build_apk") {
-  script = "run_gradle.py"
+template("gradle_task") {
+  action(target_name) {
+    assert(defined(invoker.task), "task is a required parmaeter")
+    assert(defined(invoker.outputs), "outputs is a required parameter")
 
-  inputs = [ "$root_out_dir/flutter.jar" ]
-  sources = [
-    "app/build.gradle",
-    "app/src/androidTest/java/dev/flutter/TestRunner.java",
-    "app/src/androidTest/java/dev/flutter/scenarios/EngineLaunchE2ETest.java",
-    "app/src/androidTest/java/dev/flutter/scenarios/ExampleInstrumentedTest.java",
-    "app/src/androidTest/java/dev/flutter/scenariosui/MemoryLeakTests.java",
-    "app/src/androidTest/java/dev/flutter/scenariosui/PlatformTextureUiTests.java",
-    "app/src/androidTest/java/dev/flutter/scenariosui/PlatformViewUiTests.java",
-    "app/src/androidTest/java/dev/flutter/scenariosui/ScreenshotUtil.java",
-    "app/src/androidTest/java/dev/flutter/scenariosui/SpawnEngineTests.java",
-    "app/src/main/AndroidManifest.xml",
-    "app/src/main/java/dev/flutter/scenarios/SpawnedEngineActivity.java",
-    "app/src/main/java/dev/flutter/scenarios/StrictModeFlutterActivity.java",
-    "app/src/main/java/dev/flutter/scenarios/TestActivity.java",
-    "app/src/main/java/dev/flutter/scenarios/TestableFlutterActivity.java",
-    "app/src/main/java/dev/flutter/scenarios/TextPlatformView.java",
-    "app/src/main/java/dev/flutter/scenarios/TextPlatformViewActivity.java",
-    "app/src/main/java/dev/flutter/scenarios/TextPlatformViewFactory.java",
-    "app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java",
-    "build.gradle",
-  ]
-  outputs = [ "$root_out_dir/scenario_app/app/outputs/apk/debug/app-debug.apk" ]
+    script = "run_gradle.py"
 
-  args = [
-    "assembleDebug",
-    "--no-daemon",
-    "-Pflutter_jar=" + rebase_path("$root_out_dir/flutter.jar"),
-    "-Pout_dir=" + rebase_path("$root_out_dir/scenario_app"),
-  ]
+    inputs = [ "$root_out_dir/flutter.jar" ]
+    sources = [
+      "app/build.gradle",
+      "app/src/androidTest/java/dev/flutter/TestRunner.java",
+      "app/src/androidTest/java/dev/flutter/scenarios/EngineLaunchE2ETest.java",
+      "app/src/androidTest/java/dev/flutter/scenarios/ExampleInstrumentedTest.java",
+      "app/src/androidTest/java/dev/flutter/scenariosui/MemoryLeakTests.java",
+      "app/src/androidTest/java/dev/flutter/scenariosui/PlatformTextureUiTests.java",
+      "app/src/androidTest/java/dev/flutter/scenariosui/PlatformViewUiTests.java",
+      "app/src/androidTest/java/dev/flutter/scenariosui/ScreenshotUtil.java",
+      "app/src/androidTest/java/dev/flutter/scenariosui/SpawnEngineTests.java",
+      "app/src/main/AndroidManifest.xml",
+      "app/src/main/java/dev/flutter/scenarios/SpawnedEngineActivity.java",
+      "app/src/main/java/dev/flutter/scenarios/StrictModeFlutterActivity.java",
+      "app/src/main/java/dev/flutter/scenarios/TestActivity.java",
+      "app/src/main/java/dev/flutter/scenarios/TestableFlutterActivity.java",
+      "app/src/main/java/dev/flutter/scenarios/TextPlatformView.java",
+      "app/src/main/java/dev/flutter/scenarios/TextPlatformViewActivity.java",
+      "app/src/main/java/dev/flutter/scenarios/TextPlatformViewFactory.java",
+      "build.gradle",
+    ]
 
-  if (is_aot) {
-    args += [ "-Plibapp=" + rebase_path("$target_gen_dir/libs") ]
-    inputs += [ "$target_gen_dir/libs/$android_app_abi/libapp.so" ]
+    outputs = invoker.outputs
+
+    args = [
+      invoker.task,
+      "--no-daemon",
+      "-Pflutter_jar=" + rebase_path("$root_out_dir/flutter.jar"),
+      "-Pout_dir=" + rebase_path("$root_out_dir/scenario_app"),
+    ]
+
+    if (is_aot) {
+      args += [ "-Plibapp=" + rebase_path("$target_gen_dir/libs") ]
+      inputs += [ "$target_gen_dir/libs/$android_app_abi/libapp.so" ]
+    }
+
+    deps = [
+      "//flutter/shell/platform/android:android_jar",
+      "//flutter/testing/scenario_app:scenario_app_snapshot",
+    ]
+
+    if (defined(invoker.deps)) {
+      deps += invoker.deps
+    }
   }
+}
 
-  deps = [
-    "//flutter/shell/platform/android:android_jar",
-    "//flutter/testing/scenario_app:scenario_app_snapshot",
+gradle_task("android_lint") {
+  task = "lint"
+  outputs = [
+    "$root_out_dir/scenario_app/build/reports/lint-results.html",
+    "$root_out_dir/scenario_app/build/reports/lint-results.xml",
   ]
+}
+
+gradle_task("build_apk") {
+  task = "assembleDebug"
+  outputs = [ "$root_out_dir/scenario_app/app/outputs/apk/debug/app-debug.apk" ]
+  deps = [ ":android_lint" ]
 }
 
 copy("android") {

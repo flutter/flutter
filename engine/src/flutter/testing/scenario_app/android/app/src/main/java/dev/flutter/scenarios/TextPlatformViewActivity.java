@@ -4,13 +4,14 @@
 
 package dev.flutter.scenarios;
 
+import androidx.annotation.NonNull;
 import io.flutter.embedding.engine.FlutterEngine;
 
 public class TextPlatformViewActivity extends TestActivity {
   static final String TAG = "Scenarios";
 
   @Override
-  public void configureFlutterEngine(FlutterEngine flutterEngine) {
+  public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
     super.configureFlutterEngine(flutterEngine);
     flutterEngine
         .getPlatformViewsController()

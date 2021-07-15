@@ -9,6 +9,18 @@ screenshots {
 }
 
 android {
+    lintOptions {
+        abortOnError true
+        checkAllWarnings true
+        showAll true
+        warningsAsErrors true
+        checkTestSources true
+        // UnpackedNativeCode can break stack unwinding - see b/193408481
+        // NewerVersionAvailable and GradleDependency need to be taken care of
+        // by a roller rather than as part of CI.
+        // The others are irrelevant for a test application.
+        disable 'UnpackedNativeCode','MissingApplicationIcon','GoogleAppIndexingApiWarning','GoogleAppIndexingWarning','GradleDependency','NewerVersionAvailable'
+    }
     compileSdkVersion 30
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -41,7 +53,7 @@ android {
 
 dependencies {
     implementation files(project.property('flutter_jar'))
-    compile 'com.facebook.testing.screenshot:layout-hierarchy-common:0.12.0'
+    implementation 'com.facebook.testing.screenshot:layout-hierarchy-common:0.12.0'
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation 'com.google.android.material:material:1.0.0'

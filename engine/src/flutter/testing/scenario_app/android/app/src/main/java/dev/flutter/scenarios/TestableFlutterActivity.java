@@ -4,16 +4,17 @@
 
 package dev.flutter.scenarios;
 
+import androidx.annotation.NonNull;
 import io.flutter.embedding.android.FlutterActivity;
 import io.flutter.embedding.engine.FlutterEngine;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class TestableFlutterActivity extends FlutterActivity {
+public abstract class TestableFlutterActivity extends FlutterActivity {
   private Object flutterUiRenderedLock = new Object();
   private AtomicBoolean isScenarioReady = new AtomicBoolean(false);
 
   @Override
-  public void configureFlutterEngine(FlutterEngine flutterEngine) {
+  public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
     super.configureFlutterEngine(flutterEngine);
     flutterEngine
         .getDartExecutor()
