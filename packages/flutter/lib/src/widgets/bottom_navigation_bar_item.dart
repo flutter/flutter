@@ -99,8 +99,8 @@ class BottomNavigationBarItem {
   /// The text to display in the tooltip for this [BottomNavigationBarItem], when
   /// the user long presses the item.
   ///
-  /// The [Tooltip] will only appear on an item in a Material design [BottomNavigationBar], and
-  /// when the string is not empty.
+  /// The [Tooltip] will only appear on an item in a Material design [BottomNavigationBar],
+  /// when [BottomNavigationBar.showTooltip] is true and the string is not empty.
   ///
   /// Defaults to null, in which case the [label] text will be used.
   final String? tooltip;
