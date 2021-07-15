@@ -128,7 +128,6 @@ class DefaultSessionConnection final {
   const int kMaxFramesInFlight;
 
   int frames_in_flight_ = 0;
-  int frames_in_flight_allowed_ = 0;
   bool present_session_pending_ = false;
 
   // The time from vsync that the Flutter animator should begin its frames. This
