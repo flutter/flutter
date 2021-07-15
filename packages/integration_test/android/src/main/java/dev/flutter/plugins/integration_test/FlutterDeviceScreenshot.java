@@ -89,9 +89,25 @@ class FlutterDeviceScreenshot {
    */
   static void convertFlutterSurfaceToImage(@NonNull Activity activity) {
     final FlutterView flutterView = getFlutterView(activity);
-    if (flutterView != null) {
-      flutterSurfaceConvertedToImage = true;
+    if (flutterView != null && !flutterSurfaceConvertedToImage) {
       flutterView.convertToImageView();
+      flutterSurfaceConvertedToImage = true;
+    }
+  }
+
+  /**
+   * Restores the original Flutter surface.
+   * The new surface will either be {@code FlutterSurfaceView} or {@code FlutterTextureView}.
+   *
+   * @param activity typically {@code FlutterActivity}.
+   * @param onDone callback called once the surface has been restored.
+   */
+  static void revertFlutterImage(@NonNull Activity activity) {
+    final FlutterView flutterView = getFlutterView(activity);
+    if (flutterView != null && flutterSurfaceConvertedToImage) {
+      flutterView.revertImageView(() -> {
+        flutterSurfaceConvertedToImage = false;
+      });
     }
   }
 

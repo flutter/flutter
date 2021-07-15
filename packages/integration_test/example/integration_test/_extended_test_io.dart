@@ -17,7 +17,8 @@ import 'package:integration_test/integration_test.dart';
 import 'package:integration_test_example/main.dart' as app;
 
 void main() {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  final IntegrationTestWidgetsFlutterBinding binding =
+      IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('verify text', (WidgetTester tester) async {
     // Build our app and trigger a frame.
@@ -26,8 +27,15 @@ void main() {
     // Trigger a frame.
     await tester.pumpAndSettle();
 
-    // TODO(nturgut): https://github.com/flutter/flutter/issues/51890
-    // Add screenshot capability for mobile platforms.
+    // On Android, this is required prior to taking the screenshot.
+    await binding.convertFlutterSurfaceToImage();
+    await tester.pumpAndSettle();
+
+    // Takes a screenshot of the native UI.
+    print(await binding.takeScreenshot('platform_name'));
+
+    await binding.revertFlutterImage();
+    await tester.pumpAndSettle();
 
     // Verify that platform version is retrieved.
     expect(

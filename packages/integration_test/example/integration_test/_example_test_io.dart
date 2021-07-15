@@ -17,41 +17,27 @@ import 'package:integration_test/integration_test.dart';
 import 'package:integration_test_example/main.dart' as app;
 
 void main() {
-  final IntegrationTestWidgetsFlutterBinding binding =
-      IntegrationTestWidgetsFlutterBinding.ensureInitialized();
-
-  // This is required for screenshot to work.
-  binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
-
+  final IntegrationTestWidgetsFlutterBinding binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   testWidgets('verify text', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     app.main();
 
-    // Let app become fully idle.
-    await Future<void>.delayed(const Duration(seconds: 2));
     // Trace the timeline of the following operation. The timeline result will
     // be written to `build/integration_response_data.json` with the key
     // `timeline`.
+    await binding.traceAction(() async {
+      // Trigger a frame.
+      await tester.pumpAndSettle();
 
-    await Future<void>.delayed(const Duration(seconds: 3));
-
-    // On Android, this is required prior to taking the screenshot.
-    await binding.convertFlutterSurfaceToImage();
-
-    // Trigger a frame.
-    await tester.pumpAndSettle();
-
-    // Takes a screenshot of the native UI.
-    print(await binding.takeScreenshot('platform_name'));
-
-    // Verify that platform version is retrieved.
-    expect(
-      find.byWidgetPredicate(
-        (Widget widget) =>
-            widget is Text &&
-            widget.data!.startsWith('Platform: ${Platform.operatingSystem}'),
-      ),
-      findsOneWidget,
-    );
+      // Verify that platform version is retrieved.
+      expect(
+        find.byWidgetPredicate(
+          (Widget widget) =>
+              widget is Text &&
+              widget.data!.startsWith('Platform: ${Platform.operatingSystem}'),
+        ),
+        findsOneWidget,
+      );
+    });
   });
 }

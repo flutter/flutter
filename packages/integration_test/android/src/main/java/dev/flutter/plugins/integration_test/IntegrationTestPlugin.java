@@ -90,6 +90,14 @@ public class IntegrationTestPlugin implements MethodCallHandler, FlutterPlugin, 
         FlutterDeviceScreenshot.convertFlutterSurfaceToImage(flutterActivity);
         result.success(null);
         return;
+      case "revertFlutterImage":
+        if (flutterActivity == null) {
+          result.error("Could not revert Flutter image", "Activity not initialized", null);
+          return;
+        }
+        FlutterDeviceScreenshot.revertFlutterImage(flutterActivity);
+        result.success(null);
+        return;
       case "captureScreenshot":
         if (FlutterDeviceScreenshot.hasInstrumentation()) {
           byte[] image;

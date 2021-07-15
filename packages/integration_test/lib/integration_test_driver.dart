@@ -8,7 +8,7 @@ import 'dart:io';
 
 import 'package:flutter_driver/flutter_driver.dart';
 
-import 'package:integration_test/src/common.dart';
+import 'package:integration_test/common.dart';
 import 'package:path/path.dart' as path;
 
 /// Flutter Driver test output directory.
@@ -82,6 +82,7 @@ Future<void> integrationDriver({
 
   if (onScreenshot != null) {
     final List<dynamic> screenshots = response.data!['screenshots'] as List<dynamic>;
+    final List<String> failures = <String>[];
     for (final dynamic screenshot in screenshots) {
       final Map<String, dynamic> data = screenshot as Map<String, dynamic>;
       final List<dynamic> screenshotBytes = data['bytes'] as List<dynamic>;
@@ -95,9 +96,11 @@ Future<void> integrationDriver({
             'onScreenshot("$screenshotName", <bytes>) threw an exception: $exception');
       }
       if (!ok) {
-        throw StateError('Screenshot failure:\n'
-            'Expected onScreenshot("$screenshotName", <bytes>) to return true, but it returned false');
+        failures.add(screenshotName);
       }
+    }
+    if (failures.isNotEmpty) {
+     throw StateError('The following screenshot tests failed: ${failures.join(', ')}');
     }
   }
 

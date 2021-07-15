@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:developer' as developer;
-import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -18,8 +17,8 @@ import 'package:vm_service/vm_service_io.dart' as vm_io;
 
 import '_callback_io.dart' if (dart.library.html) '_callback_web.dart' as driver_actions;
 import '_extension_io.dart' if (dart.library.html) '_extension_web.dart';
-import 'channel.dart';
-import 'src/common.dart';
+import 'common.dart';
+import 'src/channel.dart';
 
 const String _success = 'success';
 
@@ -187,12 +186,6 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   /// `framePolicy` to `LiveTestWidgetsFlutterBindingFramePolicy.fullyLive`
   /// prior to taking a screenshot.
   Future<List<int>> takeScreenshot(String screenshotName) async {
-    if (Platform.isAndroid) {
-      assert(
-        framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.fullyLive,
-        'To take a screenshot on Android, you must set binding.framePolicy to LiveTestWidgetsFlutterBindingFramePolicy.fullyLive.',
-      );
-    }
     reportData ??= <String, dynamic>{};
     reportData!['screenshots'] ??= <dynamic>[];
     final Map<String, dynamic> data = await callbackManager.takeScreenshot(screenshotName);
@@ -206,8 +199,21 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   /// Be aware that if you are conducting a perf test, you may not want to call
   /// this method since the this is an expensive operation that affects the
   /// rendering of a Flutter app.
+  ///
+  /// Once the screenshot is taken, call `revertFlutterImage()` to restore
+  /// the original Flutter surface.
   Future<void> convertFlutterSurfaceToImage() async {
     await callbackManager.convertFlutterSurfaceToImage();
+  }
+
+  /// Android only. Restores the original Flutter surface.
+  /// This is useful when `convertFlutterSurfaceToImage()` has been called,
+  /// and the Flutter surface is an image.
+  ///
+  /// It's still required to pump a frame after calling this method to ensure
+  /// the surface has been fully restored.
+  Future<void> revertFlutterImage() async {
+    await callbackManager.revertFlutterImage();
   }
 
   /// The callback function to response the driver side input.

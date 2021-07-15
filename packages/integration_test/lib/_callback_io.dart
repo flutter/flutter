@@ -6,8 +6,8 @@ import 'dart:ui';
 
 import 'package:flutter/services.dart';
 
-import 'channel.dart';
-import 'src/common.dart';
+import 'common.dart';
+import 'src/channel.dart';
 
 /// The dart:io implementation of [CallbackManager].
 ///
@@ -70,6 +70,16 @@ class IOCallbackManager implements CallbackManager {
       null,
     );
     _usesFlutterImage = true;
+  }
+
+  @override
+  Future<void> revertFlutterImage() async {
+    assert(_usesFlutterImage, 'Surface is not an image');
+    await integrationTestChannel.invokeMethod<void>(
+      'revertFlutterImage',
+      null,
+    );
+    _usesFlutterImage = false;
   }
 
   @override
