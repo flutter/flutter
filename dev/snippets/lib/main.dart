@@ -32,10 +32,10 @@ class GitStatusFailed implements Exception {
 
 /// Get the name of the channel these docs are from.
 ///
-/// First check env variable RELEASE_CHANNEL, then refer to the currently
+/// First check env variable LUCI_BRANCH, then refer to the currently
 /// checked out git branch.
 String getChannelName() {
-  final String? envReleaseChannel = Platform.environment['RELEASE_CHANNEL'];
+  final String? envReleaseChannel = Platform.environment['LUCI_BRANCH'];
   if (envReleaseChannel != null) {
     return envReleaseChannel;
   }
