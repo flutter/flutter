@@ -215,7 +215,7 @@ void main() {
     await tester.tap(switchFinder);
     expect(state.builds, equals(1));
     await tester.pump();
-    expect(slideWidget.position.value, equals(const Offset(0,0)));
+    expect(slideWidget.position.value, equals(Offset.zero));
     expect(state.builds, equals(2));
 
     await tester.pump(const Duration(milliseconds: 500));
@@ -724,7 +724,7 @@ class _TestAnimatedSlideWidgetState extends _TestAnimatedWidgetState {
     return AnimatedSlide(
       duration: duration,
       onEnd: widget.callback,
-      offset: toggle ? const Offset(1,1) : const Offset(0,0),
+      offset: toggle ? const Offset(1,1) : Offset.zero,
       child: child,
     );
   }
