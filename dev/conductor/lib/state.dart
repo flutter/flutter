@@ -204,3 +204,28 @@ pb.ConductorState readStateFromFile(File file) {
   );
   return state;
 }
+
+bool requiresEnginePR(pb.ConductorState state) {
+  final bool hasRequiredCherrypicks = state.engine.cherrypicks.any(
+    (pb.Cherrypick cp) => cp.state != pb.CherrypickState.ABANDONED);
+  if (hasRequiredCherrypicks) {
+    return true;
+  }
+  return state.engine.dartRevision.isNotEmpty;
+}
+
+bool requiresFrameworkEnginePR(pb.ConductorState state) {
+  if (requiresEnginePR(state)) {
+    return true;
+  }
+  final bool hasRequiredCherrypicks = state.framework.cherrypicks.any(
+    (pb.Cherrypick cp) => cp.state != pb.CherrypickState.ABANDONED);
+  if (hasRequiredCherrypicks) {
+    return true;
+  }
+  if (state.incrementLevel == 'm') {
+    // requires an update to .ci.yaml
+    return true;
+  }
+  return false;
+}
