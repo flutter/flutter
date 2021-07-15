@@ -16,6 +16,8 @@ struct TextureDescriptor {
   PixelFormat format = PixelFormat::kUnknown;
   ISize size;
   size_t mip_count = 1u;  // Size::MipCount is usually appropriate.
+  TextureUsageMask usage =
+      static_cast<TextureUsageMask>(TextureUsage::kShaderRead);
 
   constexpr size_t GetSizeOfBaseMipLevel() const {
     if (!IsValid()) {

@@ -59,6 +59,15 @@ enum class StoreAction {
   kStore,
 };
 
+using TextureUsageMask = uint64_t;
+
+enum class TextureUsage : TextureUsageMask {
+  kUnknown,
+  kShaderRead,
+  kShaderWrite,
+  kRenderTarget,
+};
+
 enum class PrimitiveType {
   kTriangle,
   kTriangleStrip,
