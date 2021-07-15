@@ -92,18 +92,28 @@ final String canvasKitBuildUrl =
     canvasKitBaseUrl + (kProfileMode ? 'profiling/' : '');
 final String canvasKitJavaScriptBindingsUrl =
     canvasKitBuildUrl + 'canvaskit.js';
-String canvasKitWasmModuleUrl(String file) => canvasKitBuildUrl + file;
+String canvasKitWasmModuleUrl(String file) => _currentCanvasKitBase! + file;
+
+/// The script element which CanvasKit is loaded from.
+html.ScriptElement? _canvasKitScript;
+
+/// A [Future] which completes when the CanvasKit script has been loaded.
+Future<void>? _canvasKitLoaded;
+
+/// The currently used base URL for loading CanvasKit.
+String? _currentCanvasKitBase;
 
 /// Initialize CanvasKit.
 ///
 /// This calls `CanvasKitInit` and assigns the global [canvasKit] object.
-Future<void> initializeCanvasKit() {
+Future<void> initializeCanvasKit({String? canvasKitBase}) {
   final Completer<void> canvasKitCompleter = Completer<void>();
   if (windowFlutterCanvasKit != null) {
     canvasKit = windowFlutterCanvasKit!;
     canvasKitCompleter.complete();
   } else {
-    domRenderer.canvasKitLoaded!.then((_) {
+    _startDownloadingCanvasKit(canvasKitBase);
+    _canvasKitLoaded!.then((_) {
       final CanvasKitInitPromise canvasKitInitPromise =
           CanvasKitInit(CanvasKitInitOptions(
         locateFile: js.allowInterop(
@@ -121,6 +131,91 @@ Future<void> initializeCanvasKit() {
   skiaSceneHost = html.Element.tag('flt-scene');
   domRenderer.renderScene(skiaSceneHost);
   return canvasKitCompleter.future;
+}
+
+/// Starts downloading the CanvasKit JavaScript file at [canvasKitBase] and sets
+/// [_canvasKitLoaded].
+void _startDownloadingCanvasKit(String? canvasKitBase) {
+  final String canvasKitJavaScriptUrl = canvasKitBase != null
+      ? canvasKitBase + 'canvaskit.js'
+      : canvasKitJavaScriptBindingsUrl;
+  _currentCanvasKitBase = canvasKitBase ?? canvasKitBuildUrl;
+  // Only reset CanvasKit if it's not already available.
+  if (windowFlutterCanvasKit == null) {
+    _canvasKitScript?.remove();
+    _canvasKitScript = html.ScriptElement();
+    _canvasKitScript!.src = canvasKitJavaScriptUrl;
+
+    final Completer<void> canvasKitLoadCompleter = Completer<void>();
+    _canvasKitLoaded = canvasKitLoadCompleter.future;
+
+    late StreamSubscription<html.Event> loadSubscription;
+    loadSubscription = _canvasKitScript!.onLoad.listen((_) {
+      loadSubscription.cancel();
+      canvasKitLoadCompleter.complete();
+    });
+
+    // TODO(hterkelsen): Rather than this monkey-patch hack, we should
+    // build CanvasKit ourselves. See:
+    // https://github.com/flutter/flutter/issues/52588
+
+    // Monkey-patch the top-level `module`  and `exports` objects so that
+    // CanvasKit doesn't attempt to register itself as an anonymous module.
+    //
+    // The idea behind making these fake `exports` and `module` objects is
+    // that `canvaskit.js` contains the following lines of code:
+    //
+    //     if (typeof exports === 'object' && typeof module === 'object')
+    //       module.exports = CanvasKitInit;
+    //     else if (typeof define === 'function' && define['amd'])
+    //       define([], function() { return CanvasKitInit; });
+    //
+    // We need to avoid hitting the case where CanvasKit defines an anonymous
+    // module, since this breaks RequireJS, which DDC and some plugins use.
+    // Temporarily removing the `define` function won't work because RequireJS
+    // could load in between this code running and the CanvasKit code running.
+    // Also, we cannot monkey-patch the `define` function because it is
+    // non-configurable (it is a top-level 'var').
+
+    // First check if `exports` and `module` are already defined. If so, then
+    // CommonJS is being used, and we shouldn't have any problems.
+    final js.JsFunction objectConstructor = js.context['Object'];
+    if (js.context['exports'] == null) {
+      final js.JsObject exportsAccessor = js.JsObject.jsify(<String, dynamic>{
+        'get': js.allowInterop(() {
+          if (html.document.currentScript == _canvasKitScript) {
+            return js.JsObject(objectConstructor);
+          } else {
+            return js.context['_flutterWebCachedExports'];
+          }
+        }),
+        'set': js.allowInterop((dynamic value) {
+          js.context['_flutterWebCachedExports'] = value;
+        }),
+        'configurable': true,
+      });
+      objectConstructor.callMethod(
+          'defineProperty', <dynamic>[js.context, 'exports', exportsAccessor]);
+    }
+    if (js.context['module'] == null) {
+      final js.JsObject moduleAccessor = js.JsObject.jsify(<String, dynamic>{
+        'get': js.allowInterop(() {
+          if (html.document.currentScript == _canvasKitScript) {
+            return js.JsObject(objectConstructor);
+          } else {
+            return js.context['_flutterWebCachedModule'];
+          }
+        }),
+        'set': js.allowInterop((dynamic value) {
+          js.context['_flutterWebCachedModule'] = value;
+        }),
+        'configurable': true,
+      });
+      objectConstructor.callMethod(
+          'defineProperty', <dynamic>[js.context, 'module', moduleAccessor]);
+    }
+    html.document.head!.append(_canvasKitScript!);
+  }
 }
 
 /// The Skia font collection.
