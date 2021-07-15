@@ -74,8 +74,8 @@ typedef ActionListenerCallback = void Function(Action<Intent> action);
 ///
 /// ### Action Overriding
 ///
-/// An overridable [Action] is a special kind of [Action] that is created using
-/// the [Action.overridable] constructor. It has access to a default [Action],
+/// An overridable [Action] is a special kind of [Action] created using the
+/// [Action.overridable] constructor. It has access to a default [Action],
 /// and a nullable override [Action]. It the same behavior as its override
 /// if that exists, and mirrors the behavior of its `defaultAction` otherwise.
 ///
@@ -83,11 +83,17 @@ typedef ActionListenerCallback = void Function(Action<Intent> action);
 /// a [BuildContext] to find a suitable override in its ancestor [Actions]
 /// widget. This can be used to provide a default implementation when creating a
 /// general purpose leaf widget, and later override it when building a more
-/// specialized widget using that widget. For instance, [TextField]'s
-/// [SelectAllTextIntent] by default selects the text it current contains, but
-/// in a US phone number widget that consists of 3 different [TextField]s (see
-/// the example in [Action.overridable]), [SelectAllTextIntent] should instead
-/// select the text within all 3 [TextField]s.
+/// specialized widget using that widget.
+///
+/// For instance, [TextField]'s [SelectAllTextIntent] by default selects the
+/// text it current contains, but in a US phone number widget that consists of 3
+/// different [TextField]s (area code, prefix and line number),
+/// [SelectAllTextIntent] should instead select the text within all 3
+/// [TextField]s. The [TextField] widget maps [SelectAllTextIntent] to an
+/// overridable [Action] so the widget has a sensible default handling of that
+/// [Intent], while still allows app develpers to change the handling by
+/// adding an ancestor [Actions] widget that maps [SelectAllTextIntent] to an
+/// different [Action].
 ///
 /// See also:
 ///
@@ -133,9 +139,10 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// {@tool snippet --template=stateful_widget_material}
   /// This sample implements a custom text input field that handles the
   /// [DeleteTextIntent] intent, as well as a US telephone number input widget
-  /// that uses multiple text fields for area code, prefix and line number, and
-  /// wish to send the focus to the preceding text field when the currently
-  /// focused field becomes empty.
+  /// that consists of multiple text fields for area code, prefix and line
+  /// number. When the backspace key is pressed, the phone number input widget
+  /// sends the focus to the preceding text field when the currently focused
+  /// field becomes empty.
   ///
   /// ```dart preamble
   /// // This implements a custom phone number input field that handles the
@@ -157,7 +164,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// }
   ///
   /// class DigitInputState extends State<DigitInput> {
-  ///   late final Action<DeleteTextIntent> deleteTextAction = CallbackAction<DeleteTextIntent>(
+  ///   late final Action<DeleteTextIntent> _deleteTextAction = CallbackAction<DeleteTextIntent>(
   ///     onInvoke: (DeleteTextIntent intent) {
   ///       // For simplicity we delete everything in the section.
   ///       widget.controller.clear();
@@ -169,7 +176,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   ///     return Actions(
   ///       actions: <Type, Action<Intent>>{
   ///         // Make the default `DeleteTextIntent` handler overridable.
-  ///         DeleteTextIntent: Action<DeleteTextIntent>.overridable(defaultAction: deleteTextAction, context: context),
+  ///         DeleteTextIntent: Action<DeleteTextIntent>.overridable(defaultAction: _deleteTextAction, context: context),
   ///       },
   ///       child: TextField(
   ///         controller: widget.controller,
@@ -211,6 +218,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   ///   @override
   ///   bool get isActionEnabled => callingAction?.isActionEnabled ?? false;
   /// }
+  /// ```
   ///
   /// ``` dart
   /// final FocusNode areaCodeFocusNode = FocusNode();
@@ -306,8 +314,6 @@ abstract class Action<T extends Intent> with Diagnosticable {
 
   /// Returns true if the action is enabled and is ready to be invoked.
   ///
-  /// If [isActionEnabled] is false, then this method must return false.
-  ///
   /// This will be called by the [ActionDispatcher] before attempting to invoke
   /// the action.
   bool isEnabled(T intent) => isActionEnabled;
@@ -319,6 +325,9 @@ abstract class Action<T extends Intent> with Diagnosticable {
   //
   /// If the enabled state changes, overriding subclasses must call
   /// [notifyActionListeners] to notify any listeners of the change.
+  ///
+  /// In the case of an overridable `Action`, accessing this property creates
+  /// an dependency on the overridable `Action`s `lookupContext`.
   bool get isActionEnabled => true;
 
   /// Indicates whether this action should treat key events mapped to this
