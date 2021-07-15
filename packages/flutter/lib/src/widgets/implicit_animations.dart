@@ -1772,7 +1772,7 @@ class AnimatedSlide extends ImplicitlyAnimatedWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DoubleProperty('offset', offset));
+    properties.add(DiagnosticsProperty<Offset>('offset', offset));
   }
 }
 
