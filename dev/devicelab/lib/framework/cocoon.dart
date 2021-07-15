@@ -84,7 +84,7 @@ class Cocoon {
   }
 
   /// Update test flaky status to Cocoon.
-  /// 
+  ///
   /// A flaky flag means the test has run multiple times via test runner, and a final test passes. So the status
   /// of the task will always be `Succeeded`.
   Future<void> updateTestFlaky({
