@@ -1,4 +1,27 @@
-# This configuration file specifies test suites along with their gtest filters
-# to be passed as test arguments for flutter on FEMU tests.
+# This configuration file specifies several test suites with their package and
+# test command for femu_test.py.
 
-test_suites:
+- package: flutter_runner_tzdata_tests-0.far
+  test_command: run-test-component fuchsia-pkg://fuchsia.com/flutter_runner_tzdata_tests#meta/flutter_runner_tzdata_tests.cmx
+- package: fml_tests-0.far
+  test_command: run-test-component fuchsia-pkg://fuchsia.com/fml_tests#meta/fml_tests.cmx -- --gtest_filter=-MessageLoop.TimeSensitiveTest_*:FileTest.CanTruncateAndWrite:FileTest.CreateDirectoryStructure
+- package: flow_tests-0.far
+  test_command: run-test-component fuchsia-pkg://fuchsia.com/flow_tests#meta/flow_tests.cmx
+- package: runtime_tests-0.far
+  test_command: run-test-component fuchsia-pkg://fuchsia.com/runtime_tests#meta/runtime_tests.cmx
+- package: shell_tests-0.far
+  test_command: run-test-component fuchsia-pkg://fuchsia.com/shell_tests#meta/shell_tests.cmx -- --gtest_filter=-ShellTest.ReportTimingsIsCalledLaterInReleaseMode:ShellTest.ReportTimingsIsCalledSoonerInNonReleaseMode:ShellTest.DisallowedDartVMFlag:FuchsiaShellTest.LocaltimesVaryOnTimezoneChanges
+- package: testing_tests-0.far
+  test_command: run-test-component fuchsia-pkg://fuchsia.com/testing_tests#meta/testing_tests.cmx
+- package: txt_tests-0.far
+  test_command: run-test-component fuchsia-pkg://fuchsia.com/txt_tests#meta/txt_tests.cmx -- --gtest_filter=-ParagraphTest.*
+- package: ui_tests-0.far
+  test_command: run-test-component fuchsia-pkg://fuchsia.com/ui_tests#meta/ui_tests.cmx
+- package: embedder_tests-0.far
+  test_command: run-test-component fuchsia-pkg://fuchsia.com/embedder_tests#meta/embedder_tests.cmx
+- package: dart_utils_tests-0.far
+  test_command: run-test-component fuchsia-pkg://fuchsia.com/dart_utils_tests#meta/dart_utils_tests.cmx
+- package: flutter_runner_tests-0.far
+  test_command: run-test-component fuchsia-pkg://fuchsia.com/flutter_runner_tests#meta/flutter_runner_tests.cmx
+- package: flutter_runner_scenic_tests-0.far
+  test_command: run-test-component fuchsia-pkg://fuchsia.com/flutter_runner_scenic_tests#meta/flutter_runner_scenic_tests.cmx -- --gtest_filter=-DefaultSessionConnectionTest.*:CalculateNextLatchPointTest.*
