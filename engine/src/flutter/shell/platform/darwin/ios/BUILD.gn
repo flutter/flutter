@@ -255,6 +255,7 @@ shared_library("ios_test_flutter") {
     ":ios_gpu_configuration",
     ":ios_test_flutter_mrc",
     "//flutter/common:common",
+    "//flutter/lib/ui:ui",
     "//flutter/shell/platform/darwin/common:framework_shared",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
     "//flutter/third_party/tonic",
