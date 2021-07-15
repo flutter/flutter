@@ -27,6 +27,7 @@ Widget buildSliverAppBarApp({
           primary: true,
           slivers: <Widget>[
             SliverAppBar(
+              backwardsCompatibility: false,
               title: const Text('AppBar Title'),
               floating: floating,
               pinned: pinned,
@@ -72,6 +73,7 @@ void main() {
         theme: ThemeData(platform: TargetPlatform.android),
         home: Scaffold(
           appBar: AppBar(
+            backwardsCompatibility: false,
             title: const Text('X'),
           ),
         ),
@@ -92,6 +94,7 @@ void main() {
           theme: ThemeData(platform: platform),
           home: Scaffold(
             appBar: AppBar(
+              backwardsCompatibility: false,
               title: const Text('X'),
             ),
           ),
@@ -110,6 +113,7 @@ void main() {
           theme: ThemeData(platform: platform),
           home: Scaffold(
             appBar: AppBar(
+              backwardsCompatibility: false,
               title: const Text('X'),
               actions: const <Widget>[
                 Icon(Icons.thumb_up),
@@ -131,6 +135,7 @@ void main() {
           theme: ThemeData(platform: platform),
           home: Scaffold(
             appBar: AppBar(
+              backwardsCompatibility: false,
               title: const Text('X'),
               actions: const <Widget>[
                 Icon(Icons.thumb_up),
@@ -153,6 +158,7 @@ void main() {
         theme: ThemeData(platform: TargetPlatform.android),
         home: Scaffold(
           appBar: AppBar(
+            backwardsCompatibility: false,
             centerTitle: true,
             title: const Text('X'),
           ),
@@ -172,6 +178,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           appBar: AppBar(
+            backwardsCompatibility: false,
             centerTitle: false,
             title: const Placeholder(key: Key('X')),
           ),
@@ -191,6 +198,7 @@ void main() {
           textDirection: TextDirection.rtl,
           child: Scaffold(
             appBar: AppBar(
+              backwardsCompatibility: false,
               centerTitle: false,
               title: const Placeholder(key: Key('X')),
             ),
@@ -209,6 +217,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           appBar: AppBar(
+            backwardsCompatibility: false,
             centerTitle: false,
             titleSpacing: 32.0,
             title: const Placeholder(key: Key('X')),
@@ -229,6 +238,7 @@ void main() {
           textDirection: TextDirection.rtl,
           child: Scaffold(
             appBar: AppBar(
+              backwardsCompatibility: false,
               centerTitle: false,
               titleSpacing: 32.0,
               title: const Placeholder(key: Key('X')),
@@ -250,6 +260,7 @@ void main() {
         MaterialApp(
           home: Scaffold(
             appBar: AppBar(
+              backwardsCompatibility: false,
               centerTitle: false,
               title: const Text('X'),
             ),
@@ -272,6 +283,7 @@ void main() {
             textDirection: TextDirection.rtl,
             child: Scaffold(
               appBar: AppBar(
+                backwardsCompatibility: false,
                 centerTitle: false,
                 title: const Text('X'),
               ),
@@ -298,6 +310,7 @@ void main() {
       return MaterialApp(
         home: Scaffold(
           appBar: AppBar(
+            backwardsCompatibility: false,
             leading: leading,
             centerTitle: false,
             title: Container(
@@ -361,6 +374,7 @@ void main() {
       return MaterialApp(
         home: Scaffold(
           appBar: AppBar(
+            backwardsCompatibility: false,
             leading: leading,
             centerTitle: true,
             title: Container(
@@ -415,6 +429,7 @@ void main() {
           textDirection: TextDirection.rtl,
           child: Scaffold(
             appBar: AppBar(
+              backwardsCompatibility: false,
               leading: leading,
               centerTitle: true,
               title: Container(
@@ -460,6 +475,7 @@ void main() {
         home: SizedBox(
           height: kToolbarHeight,
           child: AppBar(
+            backwardsCompatibility: false,
             leading: const Text('L'),
             title: const Text('No Scaffold'),
             actions: const <Widget>[Text('A1'), Text('A2')],
@@ -483,6 +499,7 @@ void main() {
             width: 0.0,
             child: Scaffold(
               appBar: AppBar(
+                backwardsCompatibility: false,
                 title: const Text('X'),
               ),
             ),
@@ -506,6 +523,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           appBar: AppBar(
+            backwardsCompatibility: false,
             key: appBarKey,
             leading: SizedBox(key: leadingKey, height: 50.0),
             title: SizedBox(key: titleKey, height: 40.0),
@@ -605,6 +623,7 @@ void main() {
         theme: ThemeData(platform: TargetPlatform.android),
         home: Scaffold(
           appBar: AppBar(
+            backwardsCompatibility: false,
             title: const Text('X'),
           ),
           drawer: Column(), // Doesn't really matter. Triggers a hamburger regardless.
@@ -623,6 +642,7 @@ void main() {
         theme: ThemeData(platform: TargetPlatform.android),
         home: Scaffold(
           appBar: AppBar(
+            backwardsCompatibility: false,
             title: const Text('X'),
             actions: const <Widget> [
               IconButton(
@@ -992,6 +1012,7 @@ void main() {
         home: CustomScrollView(
           slivers: <Widget>[
             SliverAppBar(
+              backwardsCompatibility: false,
               title: const Text('Title'),
               forceElevated: forceElevated,
               elevation: elevation,
@@ -1075,6 +1096,7 @@ void main() {
             child: Scaffold(
               primary: true,
               appBar: AppBar(
+                backwardsCompatibility: false,
                 title: const Text('title'),
               ),
             ),
@@ -1100,6 +1122,7 @@ void main() {
             child: Scaffold(
               primary: false,
               appBar: AppBar(
+                backwardsCompatibility: false,
                 bottom: PreferredSize(
                   preferredSize: const Size.fromHeight(200.0),
                   child: Container(),
@@ -1127,6 +1150,7 @@ void main() {
             child: Scaffold(
               primary: true,
               appBar: AppBar(
+                backwardsCompatibility: false,
                 bottom: PreferredSize(
                   preferredSize: const Size.fromHeight(200.0),
                   child: Container(),
@@ -1152,6 +1176,7 @@ void main() {
           child: MediaQuery(
             data: topPadding100,
             child: AppBar(
+              backwardsCompatibility: false,
               primary: false,
               title: const Text('title'),
             ),
@@ -1181,6 +1206,7 @@ void main() {
               body: Column(
                 children: <Widget>[
                   AppBar(
+                    backwardsCompatibility: false,
                     title: const Text('title'),
                   ),
                 ],
@@ -1220,6 +1246,7 @@ void main() {
         home: Scaffold(
           drawer: const Drawer(),
           appBar: AppBar(
+            backwardsCompatibility: false,
             automaticallyImplyLeading: false,
           ),
         ),
@@ -1326,6 +1353,7 @@ void main() {
       MaterialApp(
         home: Center(
           child: AppBar(
+            backwardsCompatibility: false,
             title: const Text('Abc'),
             actions: <Widget>[
               IconButton(
@@ -1367,6 +1395,7 @@ void main() {
       MaterialApp(
         home: Center(
           child: AppBar(
+            backwardsCompatibility: false,
             leading: Placeholder(key: key),
             title: const Text('Abc'),
             actions: const <Widget>[
@@ -1388,6 +1417,7 @@ void main() {
       MaterialApp(
         home: Center(
           child: AppBar(
+            backwardsCompatibility: false,
             leading: Placeholder(key: key),
             title: const Text('Abc'),
             actions: const <Widget>[
@@ -1418,6 +1448,7 @@ void main() {
       MaterialApp(
         home: Center(
           child: AppBar(
+            backwardsCompatibility: false,
             leading: Placeholder(key: key),
             title: const Text('Abc'),
             actions: const <Widget>[
@@ -1459,6 +1490,7 @@ void main() {
       MaterialApp(
         home: Center(
           child: AppBar(
+            backwardsCompatibility: false,
             leading: Placeholder(key: key),
             title: const Text('Abc'),
             actions: const <Widget>[
@@ -1506,6 +1538,7 @@ void main() {
             child: Scaffold(
               primary: false,
               appBar: AppBar(
+                backwardsCompatibility: false,
                 leading: Placeholder(key: leadingKey), // Forced to 56x56, see _kLeadingWidth in app_bar.dart.
                 title: Placeholder(key: titleKey, fallbackHeight: kToolbarHeight),
                 actions: <Widget>[ Placeholder(key: trailingKey, fallbackWidth: 10) ],
@@ -1551,6 +1584,7 @@ void main() {
               primary: true,
               slivers: <Widget>[
                 SliverAppBar(
+                  backwardsCompatibility: false,
                   leading: Placeholder(key: leadingKey),
                   title: Placeholder(key: titleKey, fallbackHeight: kToolbarHeight),
                   actions: <Widget>[ Placeholder(key: trailingKey) ],
@@ -1589,6 +1623,7 @@ void main() {
               primary: true,
               slivers: <Widget>[
                 SliverAppBar(
+                  backwardsCompatibility: false,
                   leading: Placeholder(key: leadingKey),
                   title: Placeholder(key: titleKey),
                   actions: <Widget>[ Placeholder(key: trailingKey) ],
@@ -1611,6 +1646,7 @@ void main() {
       MaterialApp(
         home: Center(
           child: AppBar(
+            backwardsCompatibility: false,
             leading: const Text('Leading'),
             title: const Text('Title'),
             actions: const <Widget>[
@@ -1696,6 +1732,7 @@ void main() {
             textDirection: TextDirection.rtl,
             child: Center(
               child: AppBar(
+                backwardsCompatibility: false,
                 leading: const Text('Leading'),
                 title: const Text('Title'),
                 actions: const <Widget>[
@@ -1784,6 +1821,7 @@ void main() {
       MaterialApp(
         home: Center(
           child: AppBar(
+            backwardsCompatibility: false,
             leading: const Text('Leading'),
             title: const ExcludeSemantics(child: Text('Title')),
             excludeHeaderSemantics: true,
@@ -1841,6 +1879,7 @@ void main() {
         home: CustomScrollView(
           slivers: <Widget>[
             SliverAppBar(
+              backwardsCompatibility: false,
               leading: Text('Leading'),
               flexibleSpace: ExcludeSemantics(child: Text('Title')),
               actions: <Widget>[Text('Action 1')],
@@ -1911,6 +1950,7 @@ void main() {
         home: CustomScrollView(
           slivers: <Widget>[
             SliverAppBar(
+              backwardsCompatibility: false,
               leading: Text('Leading'),
               flexibleSpace: Text('Flexible space'),
               actions: <Widget>[Text('Action 1')],
@@ -1985,6 +2025,7 @@ void main() {
       theme: darkTheme,
       home: Scaffold(
         appBar: AppBar(
+          backwardsCompatibility: false,
           title: const Text('test'),
         ),
       ),
@@ -2005,6 +2046,7 @@ void main() {
         theme: lightTheme,
         home: Scaffold(
           appBar: AppBar(
+            backwardsCompatibility: false,
             title: const Text('test'),
           ),
         ),
@@ -2025,6 +2067,7 @@ void main() {
       theme: lightTheme,
       home: Scaffold(
         appBar: AppBar(
+          backwardsCompatibility: false,
           title: const Text('test'),
         ),
       ),
@@ -2045,6 +2088,7 @@ void main() {
         theme: darkTheme,
         home: Scaffold(
           appBar: AppBar(
+            backwardsCompatibility: false,
             title: const Text('test'),
           ),
         ),
@@ -2072,6 +2116,7 @@ void main() {
               body: CustomScrollView(
                 slivers: <Widget>[
                   SliverAppBar(
+                    backwardsCompatibility: false,
                     expandedHeight: appBarHeight,
                     pinned: false,
                     floating: true,
@@ -2125,6 +2170,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: AppBar(
+          backwardsCompatibility: false,
           leading: const Text('L'),
           title: const Text('No Scaffold'),
           actions: const <Widget>[Text('A1'), Text('A2')],
@@ -2148,6 +2194,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: AppBar(
+          backwardsCompatibility: false,
           leading: const Text('L'),
           title: const Text('No Scaffold'),
           actions: const <Widget>[Text('A1'), Text('A2')],
@@ -2171,6 +2218,7 @@ void main() {
         home: CustomScrollView(
           slivers: <Widget>[
             SliverAppBar(
+              backwardsCompatibility: false,
               leading: Text('L'),
               title: Text('No Scaffold'),
               actions: <Widget>[Text('A1'), Text('A2')],
@@ -2198,6 +2246,7 @@ void main() {
         home: CustomScrollView(
           slivers: <Widget>[
             SliverAppBar(
+              backwardsCompatibility: false,
               leading: Text('L'),
               title: Text('No Scaffold'),
               actions: <Widget>[Text('A1'), Text('A2')],
@@ -2228,6 +2277,7 @@ void main() {
               data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
               child: Scaffold(
                 appBar: AppBar(
+                  backwardsCompatibility: false,
                   centerTitle: false,
                   title: const Text('Jumbo', style: TextStyle(fontSize: 18)),
                 ),
@@ -2268,6 +2318,7 @@ void main() {
                 builder: (BuildContext context) {
                   return Scaffold(
                     appBar: AppBar(
+                      backwardsCompatibility: false,
                       centerTitle: centerTitle,
                       title: MediaQuery(
                         data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
@@ -2328,6 +2379,7 @@ void main() {
           home: CustomScrollView(
             slivers: <Widget>[
               SliverAppBar(
+                backwardsCompatibility: false,
                 title: const Text('Jumbo'),
                 pinned: pinned,
                 floating: floating,
@@ -2361,6 +2413,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           appBar: AppBar(
+            backwardsCompatibility: false,
             title: const Text('Title'),
             toolbarHeight: 48,
           ),
@@ -2438,6 +2491,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         appBar: AppBar(
+          backwardsCompatibility: false,
           leading: const Placeholder(key: key),
           leadingWidth: 100,
           title: const Text('Title'),
@@ -2455,6 +2509,7 @@ void main() {
       home: CustomScrollView(
         slivers: <Widget>[
           SliverAppBar(
+            backwardsCompatibility: false,
             leading: Placeholder(key: key),
             leadingWidth: 100,
             title: Text('Title'),
@@ -2517,6 +2572,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           appBar: AppBar(
+            backwardsCompatibility: false,
             foregroundColor: foregroundColor,
             backgroundColor: backgroundColor,
             leading: Icon(Icons.add_circle, key: leadingIconKey),
@@ -2603,6 +2659,7 @@ void main() {
           body: CustomScrollView(
             slivers: <Widget>[
               SliverAppBar(
+                backwardsCompatibility: false,
                 elevation: 0,
                 backgroundColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
                   return states.contains(MaterialState.scrolledUnder) ? scrolledColor : defaultColor;
@@ -2663,6 +2720,7 @@ void main() {
           body: CustomScrollView(
             slivers: <Widget>[
               SliverAppBar(
+                backwardsCompatibility: false,
                 elevation: 0,
                 backgroundColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
                   return states.contains(MaterialState.scrolledUnder) ? scrolledColor : defaultColor;
@@ -2724,6 +2782,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           appBar: AppBar(
+            backwardsCompatibility: false,
             elevation: 0,
             backgroundColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
               return states.contains(MaterialState.scrolledUnder) ? scrolledColor : defaultColor;
@@ -2775,6 +2834,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           appBar: AppBar(
+            backwardsCompatibility: false,
             elevation: 0,
             backgroundColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
               return states.contains(MaterialState.scrolledUnder) ? scrolledColor : defaultColor;
@@ -2830,6 +2890,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           appBar: AppBar(
+            backwardsCompatibility: false,
             title: const Text('AppBar'),
           ),
           body: Scrollbar(
@@ -2857,6 +2918,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           appBar: AppBar(
+            backwardsCompatibility: false,
             elevation: 0,
             backgroundColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
               return states.contains(MaterialState.scrolledUnder) ? scrolledColor : defaultColor;
