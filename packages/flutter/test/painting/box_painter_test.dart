@@ -175,4 +175,94 @@ void main() {
       matchesGoldenFile('boxShadow.boxStyle.solid.0.0.png'),
     );
   });
+
+  testWidgets('BoxShadow BoxStyle.outer', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    await tester.pumpWidget(
+      Center(
+        child: RepaintBoundary(
+          key: key,
+          child: Container(
+            color: Colors.white,
+            width: 50,
+            height: 50,
+            child: Center(
+              child: Container(
+                decoration: const BoxDecoration(
+                  boxShadow: <BoxShadow>[BoxShadow(blurRadius: 8.0, blurStyle: BlurStyle.outer)],
+                ),
+                width: 20,
+                height: 20,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byKey(key),
+      matchesGoldenFile('boxShadow.boxStyle.outer.0.0.png'),
+    );
+  });
+
+  testWidgets('BoxShadow BoxStyle.inner', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    await tester.pumpWidget(
+      Center(
+        child: RepaintBoundary(
+          key: key,
+          child: Container(
+            color: Colors.white,
+            width: 50,
+            height: 50,
+            child: Center(
+              child: Container(
+                decoration: const BoxDecoration(
+                  boxShadow: <BoxShadow>[BoxShadow(blurRadius: 4.0, blurStyle: BlurStyle.inner)],
+                ),
+                width: 20,
+                height: 20,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byKey(key),
+      matchesGoldenFile('boxShadow.boxStyle.inner.0.0.png'),
+    );
+  });
+
+  testWidgets('BoxShadow BoxStyle.normal', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    await tester.pumpWidget(
+      Center(
+        child: RepaintBoundary(
+          key: key,
+          child: Container(
+            color: Colors.white,
+            width: 50,
+            height: 50,
+            child: Center(
+              child: Container(
+                decoration: const BoxDecoration(
+                  boxShadow: <BoxShadow>[BoxShadow(blurRadius: 4.0, blurStyle: BlurStyle.normal)],
+                ),
+                width: 20,
+                height: 20,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byKey(key),
+      matchesGoldenFile('boxShadow.boxStyle.normal.0.0.png'),
+    );
+  });
 }
