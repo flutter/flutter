@@ -178,6 +178,8 @@ DefaultSessionConnection::DefaultSessionConnection(
       on_frame_presented_callback_(std::move(on_frame_presented_callback)),
       kMaxFramesInFlight(max_frames_in_flight),
       vsync_offset_(vsync_offset) {
+  FML_CHECK(kMaxFramesInFlight > 0);
+
   next_presentation_info_.set_presentation_time(0);
 
   session_wrapper_.set_error_handler(
@@ -187,14 +189,16 @@ DefaultSessionConnection::DefaultSessionConnection(
   // fire every time a set of one or more frames is presented.
   session_wrapper_.set_on_frame_presented_handler(
       [this](fuchsia::scenic::scheduling::FramePresentedInfo info) {
+        std::lock_guard<std::mutex> lock(mutex_);
+
         // Update Scenic's limit for our remaining frames in flight allowed.
         size_t num_presents_handled = info.presentation_infos.size();
-        frames_in_flight_allowed_ = info.num_presents_allowed;
 
         // A frame was presented: Update our |frames_in_flight| to match the
         // updated unfinalized present requests.
         frames_in_flight_ -= num_presents_handled;
-        TRACE_DURATION("gfx", "OnFramePresented", "frames_in_flight",
+
+        TRACE_DURATION("gfx", "OnFramePresented5", "frames_in_flight",
                        frames_in_flight_, "max_frames_in_flight",
                        kMaxFramesInFlight, "num_presents_handled",
                        num_presents_handled);
@@ -203,19 +207,16 @@ DefaultSessionConnection::DefaultSessionConnection(
         last_presentation_time_ = fml::TimePoint::FromEpochDelta(
             fml::TimeDelta::FromNanoseconds(info.actual_presentation_time));
 
-        // Call the client-provided callback once we are done using |info|.
-        on_frame_presented_callback_(std::move(info));
+        if (fire_callback_request_pending_) {
+          FireCallbackMaybe();
+        }
 
         if (present_session_pending_) {
           PresentSession();
         }
 
-        {
-          std::lock_guard<std::mutex> lock(mutex_);
-          if (fire_callback_request_pending_) {
-            FireCallbackMaybe();
-          }
-        }
+        // Call the client-provided callback once we are done using |info|.
+        on_frame_presented_callback_(std::move(info));
       }  // callback
   );
 
@@ -225,10 +226,7 @@ DefaultSessionConnection::DefaultSessionConnection(
   session_wrapper_.RequestPresentationTimes(
       /*requested_prediction_span=*/0,
       [this](fuchsia::scenic::scheduling::FuturePresentationTimes info) {
-        frames_in_flight_allowed_ = info.remaining_presents_in_flight_allowed;
-
-        // If Scenic alloted us 0 frames to begin with, we should fail here.
-        FML_CHECK(frames_in_flight_allowed_ > 0);
+        std::lock_guard<std::mutex> lock(mutex_);
 
         next_presentation_info_ =
             UpdatePresentationInfo(std::move(info), next_presentation_info_);
@@ -244,12 +242,14 @@ DefaultSessionConnection::DefaultSessionConnection(
 DefaultSessionConnection::~DefaultSessionConnection() = default;
 
 void DefaultSessionConnection::Present() {
+  std::lock_guard<std::mutex> lock(mutex_);
+
   TRACE_DURATION("gfx", "DefaultSessionConnection::Present", "frames_in_flight",
                  frames_in_flight_, "max_frames_in_flight", kMaxFramesInFlight);
 
   TRACE_FLOW_BEGIN("gfx", "DefaultSessionConnection::PresentSession",
                    next_present_session_trace_id_);
-  next_present_session_trace_id_++;
+  ++next_present_session_trace_id_;
 
   present_requested_time_ = fml::TimePoint::Now();
 
@@ -286,29 +286,21 @@ void DefaultSessionConnection::AwaitVsyncForSecondaryCallback(
   fire_callback_(times.frame_start, times.frame_target);
 }
 
+// Precondition: |mutex_| is held
 void DefaultSessionConnection::PresentSession() {
   TRACE_DURATION("gfx", "DefaultSessionConnection::PresentSession");
-
-  // If we cannot call Present2() because we have no more Scenic frame budget,
-  // then we must wait until the OnFramePresented() event fires so we can
-  // continue our work.
-  if (frames_in_flight_allowed_ == 0) {
-    FML_CHECK(!initialized_ || present_session_pending_);
-    return;
-  }
 
   present_session_pending_ = false;
 
   while (processed_present_session_trace_id_ < next_present_session_trace_id_) {
     TRACE_FLOW_END("gfx", "DefaultSessionConnection::PresentSession",
                    processed_present_session_trace_id_);
-    processed_present_session_trace_id_++;
+    ++processed_present_session_trace_id_;
   }
   TRACE_FLOW_BEGIN("gfx", "Session::Present", next_present_trace_id_);
-  next_present_trace_id_++;
+  ++next_present_trace_id_;
 
   ++frames_in_flight_;
-
   // Flush all session ops. Paint tasks may not yet have executed but those are
   // fenced. The compositor can start processing ops while we finalize paint
   // tasks.
@@ -329,6 +321,8 @@ void DefaultSessionConnection::PresentSession() {
           .ToNanoseconds(),
       /*requested_prediction_span=*/presentation_interval.ToNanoseconds() * 10,
       [this](fuchsia::scenic::scheduling::FuturePresentationTimes info) {
+        std::lock_guard<std::mutex> lock(mutex_);
+
         // Clear |future_presentation_infos_| and replace it with the updated
         // information.
         std::deque<std::pair<fml::TimePoint, fml::TimePoint>>().swap(
@@ -343,15 +337,16 @@ void DefaultSessionConnection::PresentSession() {
                    presentation_info.presentation_time()))});
         }
 
-        frames_in_flight_allowed_ = info.remaining_presents_in_flight_allowed;
         next_presentation_info_ =
             UpdatePresentationInfo(std::move(info), next_presentation_info_);
       });
 }
 
+// Precondition: |mutex_| is held.
+//
 // Postcondition: Either a frame is scheduled or fire_callback_request_pending_
 // is set to true, meaning we will attempt to schedule a frame on the next
-// |OnVsync|.
+// |OnFramePresented|.
 void DefaultSessionConnection::FireCallbackMaybe() {
   TRACE_DURATION("flutter", "FireCallbackMaybe");
 
@@ -368,6 +363,8 @@ void DefaultSessionConnection::FireCallbackMaybe() {
   }
 }
 
+// Precondition: |mutex_| is held
+//
 // A helper function for GetTargetTimes(), since many of the fields it takes
 // have to be derived from other state.
 FlutterFrameTimes DefaultSessionConnection::GetTargetTimesHelper(
@@ -412,6 +409,7 @@ DefaultSessionConnection::UpdatePresentationInfo(
   return new_presentation_info;
 }
 
+// Precondition: |mutex_| is held
 VsyncInfo DefaultSessionConnection::GetCurrentVsyncInfo() const {
   return {fml::TimePoint::FromEpochDelta(fml::TimeDelta::FromNanoseconds(
               next_presentation_info_.presentation_time())),
