@@ -1700,7 +1700,7 @@ class _AnimatedRotationState extends ImplicitlyAnimatedWidgetState<AnimatedRotat
 ///  void _slideUp() {
 ///    setState(() => offset -= Offset(0, 1));
 ///  }
-/// 
+///
 ///  void _slideDown() {
 ///    setState(() => offset += Offset(0, 1));
 ///  }
@@ -1760,7 +1760,7 @@ class AnimatedSlide extends ImplicitlyAnimatedWidget {
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
-  /// The target offset. 
+  /// The target offset.
   /// The child will be translated horizontally by `width * dx` and vertically by `height * dy`
   ///
   /// The offset must not be null.
