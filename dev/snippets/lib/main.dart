@@ -30,7 +30,15 @@ class GitStatusFailed implements Exception {
   String toString() => 'git status exited with a non-zero exit code: ${gitResult.exitCode}:\n${gitResult.stderr}\n${gitResult.stdout}';
 }
 
+/// Get the name of the channel these docs are from.
+///
+/// First check env variable RELEASE_CHANNEL, then refer to the currently
+/// checked out git branch.
 String getChannelName() {
+  final String? envReleaseChannel = Platform.environment['RELEASE_CHANNEL'];
+  if (envReleaseChannel != null) {
+    return envReleaseChannel;
+  }
   final RegExp gitBranchRegexp = RegExp(r'^## (?<branch>.*)');
   final ProcessResult gitResult = Process.runSync('git', <String>['status', '-b', '--porcelain'],
     environment: <String, String>{
