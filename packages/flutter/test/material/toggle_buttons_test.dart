@@ -665,6 +665,126 @@ void main() {
     expect(material.type, MaterialType.button);
   });
 
+  testWidgets('Custom button fillColor - Non MaterialState', (WidgetTester tester) async {
+    Material buttonColor(String text) {
+      return tester.widget<Material>(
+        find.descendant(
+          of: find.byType(RawMaterialButton),
+          matching: find.widgetWithText(Material, text),
+        ),
+      );
+    }
+
+    final ThemeData theme = ThemeData();
+    const Color selectedFillColor = Colors.yellow;
+
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: ToggleButtons(
+            fillColor: selectedFillColor,
+            isSelected: const <bool>[false, true],
+            onPressed: (int index) {},
+            children: const <Widget>[
+              Text('First child'),
+              Text('Second child'),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(buttonColor('First child').color, theme.colorScheme.surface.withOpacity(0.0));
+    expect(buttonColor('Second child').color, selectedFillColor);
+
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: ToggleButtons(
+            fillColor: selectedFillColor,
+            isSelected: const <bool>[false, true],
+            onPressed: null,
+            children: const <Widget>[
+              Text('First child'),
+              Text('Second child'),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(buttonColor('First child').color, theme.colorScheme.surface.withOpacity(0.0));
+    expect(buttonColor('Second child').color, theme.colorScheme.surface.withOpacity(0.0));
+  });
+
+  testWidgets('Custom button fillColor - MaterialState', (WidgetTester tester) async {
+    Material buttonColor(String text) {
+      return tester.widget<Material>(
+        find.descendant(
+          of: find.byType(RawMaterialButton),
+          matching: find.widgetWithText(Material, text),
+        ),
+      );
+    }
+
+    const Color selectedFillColor = Colors.orange;
+    const Color defaultFillColor = Colors.blue;
+
+    Color getFillColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.selected)) {
+        return selectedFillColor;
+      }
+      return defaultFillColor;
+    }
+
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: ToggleButtons(
+            fillColor: MaterialStateColor.resolveWith(getFillColor),
+            isSelected: const <bool>[false, true],
+            onPressed: (int index) {},
+            children: const <Widget>[
+              Text('First child'),
+              Text('Second child'),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(buttonColor('First child').color, defaultFillColor);
+    expect(buttonColor('Second child').color, selectedFillColor);
+
+    // disabled
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: ToggleButtons(
+            fillColor: MaterialStateColor.resolveWith(getFillColor),
+            isSelected: const <bool>[false, true],
+            onPressed: null,
+            children: const <Widget>[
+              Text('First child'),
+              Text('Second child'),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(buttonColor('First child').color, defaultFillColor);
+    expect(buttonColor('Second child').color, defaultFillColor);
+  });
+
   testWidgets('Default InkWell colors - unselected', (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
     final FocusNode focusNode = FocusNode();
@@ -1609,7 +1729,7 @@ void main() {
 
     await tester.pump();
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     // Test default cursor
     await tester.pumpWidget(
@@ -1630,7 +1750,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
 
     // Test default cursor when disabled
     await tester.pumpWidget(
@@ -1650,7 +1770,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
   testWidgets('ToggleButtons focus, hover, and highlight elevations are 0', (WidgetTester tester) async {

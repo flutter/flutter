@@ -610,7 +610,7 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// When a named route is pushed with [Navigator.pushNamed], the route name is
   /// looked up in this map. If the name is present, the associated
-  /// [WidgetBuilder] is used to construct a [PageRoute] specified by
+  /// [widgets.WidgetBuilder] is used to construct a [PageRoute] specified by
   /// [pageRouteBuilder] to perform an appropriate transition, including [Hero]
   /// animations, to the new route.
   ///
@@ -1257,16 +1257,16 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   // If window.defaultRouteName isn't '/', we should assume it was set
   // intentionally via `setInitialRoute`, and should override whatever is in
   // [widget.initialRoute].
-  String get _initialRouteName => WidgetsBinding.instance!.window.defaultRouteName != Navigator.defaultRouteName
-    ? WidgetsBinding.instance!.window.defaultRouteName
-    : widget.initialRoute ?? WidgetsBinding.instance!.window.defaultRouteName;
+  String get _initialRouteName => WidgetsBinding.instance.window.defaultRouteName != Navigator.defaultRouteName
+    ? WidgetsBinding.instance.window.defaultRouteName
+    : widget.initialRoute ?? WidgetsBinding.instance.window.defaultRouteName;
 
   @override
   void initState() {
     super.initState();
     _updateRouting();
-    _locale = _resolveLocales(WidgetsBinding.instance!.window.locales, widget.supportedLocales);
-    WidgetsBinding.instance!.addObserver(this);
+    _locale = _resolveLocales(WidgetsBinding.instance.window.locales, widget.supportedLocales);
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
@@ -1277,7 +1277,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
   @override
   void dispose() {
-    WidgetsBinding.instance!.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
     _defaultRouteInformationProvider?.dispose();
     super.dispose();
   }
@@ -1681,7 +1681,7 @@ class _MediaQueryFromWindowsState extends State<_MediaQueryFromWindow> with Widg
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance!.addObserver(this);
+    WidgetsBinding.instance.addObserver(this);
   }
 
   // ACCESSIBILITY
@@ -1725,7 +1725,7 @@ class _MediaQueryFromWindowsState extends State<_MediaQueryFromWindow> with Widg
 
   @override
   Widget build(BuildContext context) {
-    MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance!.window);
+    MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance.window);
     if (!kReleaseMode) {
       data = data.copyWith(platformBrightness: debugBrightnessOverride);
     }
@@ -1737,7 +1737,7 @@ class _MediaQueryFromWindowsState extends State<_MediaQueryFromWindow> with Widg
 
   @override
   void dispose() {
-    WidgetsBinding.instance!.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 }

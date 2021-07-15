@@ -6,8 +6,8 @@ import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/logger.dart';
 import '../../base/project_migrator.dart';
-import '../../project.dart';
 import '../../reporting/reporting.dart';
+import '../../xcode_project.dart';
 
 // Remove the linking and embedding logic from the Xcode project to give the tool more control over these.
 class RemoveMacOSFrameworkLinkAndEmbeddingMigration extends ProjectMigrator {

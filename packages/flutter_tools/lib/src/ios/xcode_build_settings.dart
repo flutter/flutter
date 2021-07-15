@@ -190,8 +190,9 @@ List<String> _xcodeBuildSettingsLines({
       String arch;
       if (localEngineName.endsWith('_arm')) {
         arch = 'armv7';
+      } else if (localEngineName.contains('_arm64')) {
+        arch = 'arm64';
       } else if (localEngineName.contains('_sim')) {
-        // Apple Silicon ARM simulators not yet supported.
         arch = 'x86_64';
       } else {
         arch = 'arm64';
@@ -203,8 +204,7 @@ List<String> _xcodeBuildSettingsLines({
     // ARM not yet supported https://github.com/flutter/flutter/issues/69221
     xcodeBuildSettings.add('EXCLUDED_ARCHS=arm64');
   } else {
-    // Apple Silicon ARM simulators not yet supported.
-    xcodeBuildSettings.add('EXCLUDED_ARCHS[sdk=iphonesimulator*]=arm64 i386');
+    xcodeBuildSettings.add('EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386');
   }
 
   for (final MapEntry<String, String> config in buildInfo.toEnvironmentConfig().entries) {

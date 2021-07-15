@@ -162,7 +162,7 @@ void main() {
 
       final Widget target = _AlwaysAnimating(
         onPaint: () {
-          final int current = SchedulerBinding.instance!.currentFrameTimeStamp.inMicroseconds;
+          final int current = SchedulerBinding.instance.currentFrameTimeStamp.inMicroseconds;
           initial ??= current;
           logPaints.add(current - initial!);
         },
@@ -706,11 +706,11 @@ void main() {
     int numberOfVariationsRun = 0;
     TargetPlatform? origTargetPlatform;
 
-    setUpAll((){
+    setUpAll(() {
       origTargetPlatform = debugDefaultTargetPlatformOverride;
     });
 
-    tearDownAll((){
+    tearDownAll(() {
       expect(debugDefaultTargetPlatformOverride, equals(origTargetPlatform));
     });
 
@@ -751,7 +751,7 @@ void main() {
         flutterErrorDetails = details;
       };
 
-      final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
+      final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
       await binding.runTest(() async {
         final Timer timer = Timer(const Duration(seconds: 1), () {});
         expect(timer.isActive, true);

@@ -84,7 +84,7 @@ class _DummyLocalizationsDelegate extends LocalizationsDelegate<DummyLocalizatio
   bool shouldReload(_DummyLocalizationsDelegate old) => true;
 }
 
-class DummyLocalizations {}
+class DummyLocalizations { }
 
 class LocalizationTracker extends StatefulWidget {
   const LocalizationTracker({Key? key}) : super(key: key);

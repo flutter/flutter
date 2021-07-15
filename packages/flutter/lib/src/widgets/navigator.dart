@@ -933,20 +933,20 @@ abstract class TransitionDelegate<T> {
   ///
   /// For example, consider the following case.
   ///
-  /// newPageRouteHistory = [A, B, C]
+  /// `newPageRouteHistory = [A, B, C]`
   ///
-  /// locationToExitingPageRoute = {A -> D, C -> E}
+  /// `locationToExitingPageRoute = {A -> D, C -> E}`
   ///
   /// The following outputs are valid.
   ///
-  /// result = [A, B ,C ,D ,E] is valid.
-  /// result = [D, A, B ,C ,E] is also valid because exiting route can be
+  /// `result = [A, B ,C ,D ,E]` is valid.
+  /// `result = [D, A, B ,C ,E]` is also valid because exiting route can be
   /// inserted in any place.
   ///
   /// The following outputs are invalid.
   ///
-  /// result = [B, A, C ,D ,E] is invalid because B must be after A.
-  /// result = [A, B, C ,E] is invalid because results must include D.
+  /// `result = [B, A, C ,D ,E]` is invalid because B must be after A.
+  /// `result = [A, B, C ,E]` is invalid because results must include D.
   ///
   /// See also:
   ///
@@ -3363,7 +3363,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   @override
   void initState() {
     super.initState();
-    assert((){
+    assert(() {
       if (widget.pages != const <Page<dynamic>>[]) {
         // This navigator uses page API.
         if (widget.pages.isEmpty) {
@@ -3513,7 +3513,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
           // controller at the end of the build.
           if (newHeroController.navigator != null) {
             final NavigatorState previousOwner = newHeroController.navigator!;
-            ServicesBinding.instance!.addPostFrameCallback((Duration timestamp) {
+            ServicesBinding.instance.addPostFrameCallback((Duration timestamp) {
               // We only check if this navigator still owns the hero controller.
               if (_heroControllerFromScope == newHeroController) {
                 final bool hasHeroControllerOwnerShip = _heroControllerFromScope!._navigator == this;
@@ -3564,7 +3564,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   @override
   void didUpdateWidget(Navigator oldWidget) {
     super.didUpdateWidget(oldWidget);
-    assert((){
+    assert(() {
       if (widget.pages != const <Page<dynamic>>[]) {
         // This navigator uses page API.
         if (widget.pages.isEmpty) {
@@ -3603,7 +3603,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       _updateEffectiveObservers();
     }
     if (oldWidget.pages != widget.pages && !restorePending) {
-      assert((){
+      assert(() {
         if (widget.pages.isEmpty) {
           FlutterError.reportError(
             FlutterErrorDetails(
@@ -3626,7 +3626,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   }
 
   void _debugCheckDuplicatedPageKeys() {
-    assert((){
+    assert(() {
       final Set<Key> keyReservation = <Key>{};
       for (final Page<dynamic> page in widget.pages) {
         final LocalKey? key = page.key;
@@ -4513,7 +4513,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   }
 
   bool _debugCheckIsPagelessRoute(Route<dynamic> route) {
-    assert((){
+    assert(() {
       if (route.settings is Page) {
         FlutterError.reportError(
           FlutterErrorDetails(
@@ -5319,7 +5319,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
   void _cancelActivePointers() {
     // TODO(abarth): This mechanism is far from perfect. See https://github.com/flutter/flutter/issues/4770
-    if (SchedulerBinding.instance!.schedulerPhase == SchedulerPhase.idle) {
+    if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.idle) {
       // If we're between frames (SchedulerPhase.idle) then absorb any
       // subsequent pointers from this frame. The absorbing flag will be
       // reset in the next frame, see build().
@@ -5330,7 +5330,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         // to false on the next frame.
       });
     }
-    _activePointers.toList().forEach(WidgetsBinding.instance!.cancelPointer);
+    _activePointers.toList().forEach(WidgetsBinding.instance.cancelPointer);
   }
 
   @override

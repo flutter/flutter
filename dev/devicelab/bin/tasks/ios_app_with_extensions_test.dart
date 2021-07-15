@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:convert';
 import 'dart:io';
 
@@ -18,8 +16,8 @@ Future<void> main() async {
   await task(() async {
     section('Copy test Flutter App with watchOS Companion');
 
-    String watchDeviceID;
-    String phoneDeviceID;
+    String? watchDeviceID;
+    String? phoneDeviceID;
     final Directory tempDir = Directory.systemTemp
         .createTempSync('flutter_ios_app_with_extensions_test.');
     final Directory projectDir =
@@ -31,10 +29,6 @@ Future<void> main() async {
             'ios_app_with_extensions')),
         projectDir,
       );
-
-      // For some reason devicelab machines have really old spec snapshots.
-      // TODO(jmagman): Remove this if this test is moved to a machine that installs CocoaPods on every run.
-      await eval('pod', <String>['repo', 'update', '--verbose']);
 
       section('Create release build');
 
@@ -131,8 +125,8 @@ Future<void> main() async {
       //    iOS 13.4 (13.4 - 17E255) - com.apple.CoreSimulator.SimRuntime.iOS-13-4
       //    tvOS 13.4 (13.4 - 17L255) - com.apple.CoreSimulator.SimRuntime.tvOS-13-4
       //    watchOS 6.2 (6.2 - 17T256) - com.apple.CoreSimulator.SimRuntime.watchOS-6-2
-      String iOSSimRuntime;
-      String watchSimRuntime;
+      String? iOSSimRuntime;
+      String? watchSimRuntime;
 
       final RegExp iOSRuntimePattern = RegExp(r'iOS .*\) - (.*)');
       final RegExp watchOSRuntimePattern = RegExp(r'watchOS .*\) - (.*)');
@@ -140,14 +134,14 @@ Future<void> main() async {
       for (final String runtime in LineSplitter.split(availableRuntimes)) {
         // These seem to be in order, so allow matching multiple lines so it grabs
         // the last (hopefully latest) one.
-        final RegExpMatch iOSRuntimeMatch = iOSRuntimePattern.firstMatch(runtime);
+        final RegExpMatch? iOSRuntimeMatch = iOSRuntimePattern.firstMatch(runtime);
         if (iOSRuntimeMatch != null) {
-          iOSSimRuntime = iOSRuntimeMatch.group(1).trim();
+          iOSSimRuntime = iOSRuntimeMatch.group(1)!.trim();
           continue;
         }
-        final RegExpMatch watchOSRuntimeMatch = watchOSRuntimePattern.firstMatch(runtime);
+        final RegExpMatch? watchOSRuntimeMatch = watchOSRuntimePattern.firstMatch(runtime);
         if (watchOSRuntimeMatch != null) {
-          watchSimRuntime = watchOSRuntimeMatch.group(1).trim();
+          watchSimRuntime = watchOSRuntimeMatch.group(1)!.trim();
         }
       }
       if (iOSSimRuntime == null || watchSimRuntime == null) {

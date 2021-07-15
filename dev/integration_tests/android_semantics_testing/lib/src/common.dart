@@ -19,7 +19,7 @@ import 'constants.dart';
 /// See also:
 ///
 ///   * [AccessibilityNodeInfo](https://developer.android.com/reference/android/view/accessibility/AccessibilityNodeInfo)
-class AndroidSemanticsNode  {
+class AndroidSemanticsNode {
   AndroidSemanticsNode._(this._values);
 
   /// Deserializes a new [AndroidSemanticsNode] from a json map.

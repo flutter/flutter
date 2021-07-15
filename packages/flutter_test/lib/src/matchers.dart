@@ -265,12 +265,12 @@ Matcher offsetMoreOrLessEquals(Offset value, { double epsilon = precisionErrorTo
 /// Asserts that two [String]s are equal after normalizing likely hash codes.
 ///
 /// A `#` followed by 5 hexadecimal digits is assumed to be a short hash code
-/// and is normalized to #00000.
+/// and is normalized to `#00000`.
 ///
 /// See Also:
 ///
 ///  * [describeIdentity], a method that generates short descriptions of objects
-///    with ids that match the pattern #[0-9a-f]{5}.
+///    with ids that match the pattern `#[0-9a-f]{5}`.
 ///  * [shortHash], a method that generates a 5 character long hexadecimal
 ///    [String] based on [Object.hashCode].
 ///  * [DiagnosticableTree.toStringDeep], a method that returns a [String]
@@ -1677,7 +1677,7 @@ class _MatchesReferenceImage extends AsyncMatcher {
       imageFuture = captureImage(elements.single);
     }
 
-    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
+    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
     return binding.runAsync<String?>(() async {
       final ui.Image image = await imageFuture;
       final ByteData? bytes = await image.toByteData();
