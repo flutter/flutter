@@ -179,7 +179,7 @@ void main() {
   testWidgets('FloatingActionButton.extended uses custom constraints and spacing when specified in the theme', (WidgetTester tester) async {
     const Key iconKey = Key('icon');
     const Key labelKey = Key('label');
-    const BoxConstraints constraints = BoxConstraints(minHeight: 100.0, maxHeight: 100.0);
+    const BoxConstraints constraints = BoxConstraints.tightFor(height: 100.0);
     const double spacing = 33.0;
 
     await tester.pumpWidget(MaterialApp(

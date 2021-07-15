@@ -101,19 +101,16 @@ class FloatingActionButtonThemeData with Diagnosticable {
   /// ignored.
   final bool? enableFeedback;
 
-  /// The size constraints for the [FloatingActionButton].
+  /// Overrides the default size constraints for the [FloatingActionButton].
   final BoxConstraints? sizeConstraints;
 
-  /// The size constraints for the [FloatingActionButton] when using the small
-  /// constructor.
+  /// Overrides the default size constraints for [FloatingActionButton.small].
   final BoxConstraints? smallSizeConstraints;
 
-  /// The size constraints for the [FloatingActionButton] when using the large
-  /// constructor.
+  /// Overrides the default size constraints for [FloatingActionButton.large].
   final BoxConstraints? largeSizeConstraints;
 
-  /// The size constraints for the [FloatingActionButton] when using the
-  /// extended constructor.
+  /// Overrides the default size constraints for [FloatingActionButton.extended].
   final BoxConstraints? extendedSizeConstraints;
 
   /// The spacing between the icon and the label for an extended
@@ -246,22 +243,22 @@ class FloatingActionButtonThemeData with Diagnosticable {
     super.debugFillProperties(properties);
     const FloatingActionButtonThemeData defaultData = FloatingActionButtonThemeData();
 
-    properties.add(ColorProperty('foregroundColor', foregroundColor, defaultValue: defaultData.foregroundColor));
-    properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: defaultData.backgroundColor));
-    properties.add(ColorProperty('focusColor', focusColor, defaultValue: defaultData.focusColor));
-    properties.add(ColorProperty('hoverColor', hoverColor, defaultValue: defaultData.hoverColor));
-    properties.add(ColorProperty('splashColor', splashColor, defaultValue: defaultData.splashColor));
-    properties.add(DoubleProperty('elevation', elevation, defaultValue: defaultData.elevation));
-    properties.add(DoubleProperty('focusElevation', focusElevation, defaultValue: defaultData.focusElevation));
-    properties.add(DoubleProperty('hoverElevation', hoverElevation, defaultValue: defaultData.hoverElevation));
-    properties.add(DoubleProperty('disabledElevation', disabledElevation, defaultValue: defaultData.disabledElevation));
-    properties.add(DoubleProperty('highlightElevation', highlightElevation, defaultValue: defaultData.highlightElevation));
-    properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: defaultData.shape));
-    properties.add(DiagnosticsProperty<bool>('enableFeedback', enableFeedback, defaultValue: defaultData.enableFeedback));
-    properties.add(DiagnosticsProperty<BoxConstraints>('sizeConstraints', sizeConstraints, defaultValue: defaultData.sizeConstraints));
-    properties.add(DiagnosticsProperty<BoxConstraints>('smallSizeConstraints', smallSizeConstraints, defaultValue: defaultData.smallSizeConstraints));
-    properties.add(DiagnosticsProperty<BoxConstraints>('largeSizeConstraints', largeSizeConstraints, defaultValue: defaultData.largeSizeConstraints));
-    properties.add(DiagnosticsProperty<BoxConstraints>('extendedSizeConstraints', extendedSizeConstraints, defaultValue: defaultData.extendedSizeConstraints));
-    properties.add(DoubleProperty('extendedIconLabelSpacing', extendedIconLabelSpacing, defaultValue: defaultData.extendedIconLabelSpacing));
+    properties.add(ColorProperty('foregroundColor', foregroundColor, defaultValue: null));
+    properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
+    properties.add(ColorProperty('focusColor', focusColor, defaultValue: null));
+    properties.add(ColorProperty('hoverColor', hoverColor, defaultValue: null));
+    properties.add(ColorProperty('splashColor', splashColor, defaultValue: null));
+    properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
+    properties.add(DoubleProperty('focusElevation', focusElevation, defaultValue: null));
+    properties.add(DoubleProperty('hoverElevation', hoverElevation, defaultValue: null));
+    properties.add(DoubleProperty('disabledElevation', disabledElevation, defaultValue: null));
+    properties.add(DoubleProperty('highlightElevation', highlightElevation, defaultValue: null));
+    properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('enableFeedback', enableFeedback, defaultValue: null));
+    properties.add(DiagnosticsProperty<BoxConstraints>('sizeConstraints', sizeConstraints, defaultValue: null));
+    properties.add(DiagnosticsProperty<BoxConstraints>('smallSizeConstraints', smallSizeConstraints, defaultValue: null));
+    properties.add(DiagnosticsProperty<BoxConstraints>('largeSizeConstraints', largeSizeConstraints, defaultValue: null));
+    properties.add(DiagnosticsProperty<BoxConstraints>('extendedSizeConstraints', extendedSizeConstraints, defaultValue: null));
+    properties.add(DoubleProperty('extendedIconLabelSpacing', extendedIconLabelSpacing, defaultValue: null));
   }
 }
