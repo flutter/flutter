@@ -1042,7 +1042,7 @@ class _TappableColorWidget extends StatefulWidget {
 class _TappableColorWidgetState extends State<_TappableColorWidget> {
 
   Color? color;
-  
+
   @override
   void initState() {
     super.initState();
