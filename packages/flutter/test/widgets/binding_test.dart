@@ -52,17 +52,17 @@ void main() {
 
   testWidgets('didHaveMemoryPressure callback', (WidgetTester tester) async {
     final MemoryPressureObserver observer = MemoryPressureObserver();
-    WidgetsBinding.instance!.addObserver(observer);
+    WidgetsBinding.instance.addObserver(observer);
     final ByteData message = const JSONMessageCodec().encodeMessage(<String, dynamic>{'type': 'memoryPressure'})!;
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/system', message, (_) { });
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/system', message, (_) { });
     expect(observer.sawMemoryPressure, true);
-    WidgetsBinding.instance!.removeObserver(observer);
+    WidgetsBinding.instance.removeObserver(observer);
   });
 
   testWidgets('handleLifecycleStateChanged callback', (WidgetTester tester) async {
-    final BinaryMessenger defaultBinaryMessenger = ServicesBinding.instance!.defaultBinaryMessenger;
+    final BinaryMessenger defaultBinaryMessenger = ServicesBinding.instance.defaultBinaryMessenger;
     final AppLifecycleStateObserver observer = AppLifecycleStateObserver();
-    WidgetsBinding.instance!.addObserver(observer);
+    WidgetsBinding.instance.addObserver(observer);
 
     ByteData message = const StringCodec().encodeMessage('AppLifecycleState.paused')!;
     await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
@@ -83,19 +83,19 @@ void main() {
 
   testWidgets('didPushRoute callback', (WidgetTester tester) async {
     final PushRouteObserver observer = PushRouteObserver();
-    WidgetsBinding.instance!.addObserver(observer);
+    WidgetsBinding.instance.addObserver(observer);
 
     const String testRouteName = 'testRouteName';
     final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('pushRoute', testRouteName));
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     expect(observer.pushedRoute, testRouteName);
 
-    WidgetsBinding.instance!.removeObserver(observer);
+    WidgetsBinding.instance.removeObserver(observer);
   });
 
   testWidgets('didPushRouteInformation calls didPushRoute by default', (WidgetTester tester) async {
     final PushRouteObserver observer = PushRouteObserver();
-    WidgetsBinding.instance!.addObserver(observer);
+    WidgetsBinding.instance.addObserver(observer);
 
     const Map<String, dynamic> testRouteInformation = <String, dynamic>{
       'location': 'testRouteName',
@@ -105,14 +105,14 @@ void main() {
     final ByteData message = const JSONMethodCodec().encodeMethodCall(
       const MethodCall('pushRouteInformation', testRouteInformation),
     );
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     expect(observer.pushedRoute, 'testRouteName');
-    WidgetsBinding.instance!.removeObserver(observer);
+    WidgetsBinding.instance.removeObserver(observer);
   });
 
   testWidgets('didPushRouteInformation callback', (WidgetTester tester) async {
     final PushRouteInformationObserver observer = PushRouteInformationObserver();
-    WidgetsBinding.instance!.addObserver(observer);
+    WidgetsBinding.instance.addObserver(observer);
 
     const Map<String, dynamic> testRouteInformation = <String, dynamic>{
       'location': 'testRouteName',
@@ -121,16 +121,16 @@ void main() {
     final ByteData message = const JSONMethodCodec().encodeMethodCall(
       const MethodCall('pushRouteInformation', testRouteInformation),
     );
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     expect(observer.pushedRouteInformation.location, 'testRouteName');
     expect(observer.pushedRouteInformation.state, 'state');
-    WidgetsBinding.instance!.removeObserver(observer);
+    WidgetsBinding.instance.removeObserver(observer);
   });
 
 
   testWidgets('didPushRouteInformation callback with null state', (WidgetTester tester) async {
     final PushRouteInformationObserver observer = PushRouteInformationObserver();
-    WidgetsBinding.instance!.addObserver(observer);
+    WidgetsBinding.instance.addObserver(observer);
 
     const Map<String, dynamic> testRouteInformation = <String, dynamic>{
       'location': 'testRouteName',
@@ -139,14 +139,14 @@ void main() {
     final ByteData message = const JSONMethodCodec().encodeMethodCall(
       const MethodCall('pushRouteInformation', testRouteInformation),
     );
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     expect(observer.pushedRouteInformation.location, 'testRouteName');
     expect(observer.pushedRouteInformation.state, null);
-    WidgetsBinding.instance!.removeObserver(observer);
+    WidgetsBinding.instance.removeObserver(observer);
   });
 
   testWidgets('Application lifecycle affects frame scheduling', (WidgetTester tester) async {
-    final BinaryMessenger defaultBinaryMessenger = ServicesBinding.instance!.defaultBinaryMessenger;
+    final BinaryMessenger defaultBinaryMessenger = ServicesBinding.instance.defaultBinaryMessenger;
     ByteData message;
     expect(tester.binding.hasScheduledFrame, isFalse);
 

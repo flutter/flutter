@@ -18,8 +18,7 @@ import 'package:integration_test_example/main.dart' as app;
 
 void main() {
   final IntegrationTestWidgetsFlutterBinding binding =
-      IntegrationTestWidgetsFlutterBinding.ensureInitialized()
-          as IntegrationTestWidgetsFlutterBinding;
+      IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   // This is required for screenshot to work.
   binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
