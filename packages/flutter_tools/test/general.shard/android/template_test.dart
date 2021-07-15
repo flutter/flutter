@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -19,7 +17,6 @@ void main() {
     final BufferLogger logger = BufferLogger.test();
     final Directory rootDir = fileSystem.systemTempDirectory.createTempSync('flutter_template_test.');
     final Directory templateSource = rootDir.childDirectory('src');
-    final Directory baseDir = templateSource;
     final Directory imageSourceDir = templateSource;
     final Directory destination = rootDir.childDirectory('dest');
 
@@ -32,7 +29,6 @@ void main() {
 
     final Template template = Template(
         templateSource,
-        baseDir,
         imageSourceDir,
         fileSystem: fileSystem,
         logger: logger,
