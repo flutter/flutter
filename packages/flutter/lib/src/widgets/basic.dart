@@ -1070,7 +1070,7 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
 ///               'Hello, World!',
 ///               style: TextStyle(
 ///                 color: Colors.white,
-///                 fontSize: 20.0
+///                 fontSize: 20.0,
 ///               ),
 ///             ),
 ///           ),
@@ -1079,7 +1079,7 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
 ///         ),
 ///         clipper: ShapeBorderClipper(
 ///           shape: RoundedRectangleBorder(
-///             borderRadius: BorderRadius.circular(10.0)
+///             borderRadius: BorderRadius.circular(10.0),
 ///           )
 ///         ),
 ///         color: Colors.orange,
