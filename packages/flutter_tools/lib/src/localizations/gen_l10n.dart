@@ -286,8 +286,8 @@ String _generateSelectMethod(Message message, String translationForMessage) {
     for (final RegExpMatch patternMatch in patternRE.allMatches(pattern)) {
       if (patternMatch.groupCount == 2) {
         final String value = patternMatch.group(2)!
-            .replaceAll(r"'", r"\'")
-            .replaceAll(r'"', r'\"');
+            .replaceAll("'", r"\'")
+            .replaceAll('"', r'\"');
         cases.add(
           "        '${patternMatch.group(1)}': '$value'",
         );
