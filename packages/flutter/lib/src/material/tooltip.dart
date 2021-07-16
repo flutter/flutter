@@ -100,7 +100,8 @@ class Tooltip extends StatefulWidget {
   /// override the default values _and_ the values in [TooltipTheme.of].
   const Tooltip({
     Key? key,
-    required this.message,
+    this.tooltip,
+    this.message,
     this.height,
     this.padding,
     this.margin,
@@ -112,11 +113,17 @@ class Tooltip extends StatefulWidget {
     this.waitDuration,
     this.showDuration,
     this.child,
-  }) : assert(message != null),
-       super(key: key);
+  })  : assert(
+          tooltip != null || message != null,
+          'A non-null message or tooltip must be provided to a Tooltip Widget.',
+        ),
+        super(key: key);
+
+  /// The widget to display in the tooltip.
+  final Widget? tooltip;
 
   /// The text to display in the tooltip.
-  final String message;
+  final String? message;
 
   /// The height of the tooltip's [child].
   ///
@@ -420,7 +427,9 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     );
     _entry = OverlayEntry(builder: (BuildContext context) => overlay);
     overlayState.insert(_entry!);
-    SemanticsService.tooltip(widget.message);
+    if (widget.message != null) {
+      SemanticsService.tooltip(widget.message!);
+    }
     Tooltip._openedToolTips.add(this);
   }
 
@@ -585,7 +594,8 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
 class _TooltipOverlay extends StatelessWidget {
   const _TooltipOverlay({
     Key? key,
-    required this.message,
+    this.tooltip,
+    this.message,
     required this.height,
     this.padding,
     this.margin,
@@ -597,9 +607,12 @@ class _TooltipOverlay extends StatelessWidget {
     required this.preferBelow,
     this.onEnter,
     this.onExit,
-  }) : super(key: key);
+  })  : assert(tooltip != null || message != null,
+            'Either tooltip or message must not be null.'),
+        super(key: key);
 
-  final String message;
+  final Widget? tooltip;
+  final String? message;
   final double height;
   final EdgeInsetsGeometry? padding;
   final EdgeInsetsGeometry? margin;
@@ -628,15 +641,16 @@ class _TooltipOverlay extends StatelessWidget {
               child: Center(
                 widthFactor: 1.0,
                 heightFactor: 1.0,
-                child: Text(
-                  message,
-                  style: textStyle,
-                ),
+                child: tooltip ??
+                    Text(
+                      message!,
+                      style: textStyle,
+                    ),
               ),
             ),
           ),
         ),
-      )
+      ),
     );
     if (onEnter != null || onExit != null) {
       result = MouseRegion(

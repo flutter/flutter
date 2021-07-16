@@ -828,8 +828,9 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
         totalNumber += 1; // optimistically assume we'll be able to describe it
 
         final Widget widget = element.widget;
-        if (widget is Tooltip) {
-          final Iterable<Element> matches = find.byTooltip(widget.message).evaluate();
+        if (widget is Tooltip && widget.message != null) {
+          final Iterable<Element> matches =
+              find.byTooltip(widget.message!).evaluate();
           if (matches.length == 1) {
             printToConsole("  find.byTooltip('${widget.message}')");
             continue;
