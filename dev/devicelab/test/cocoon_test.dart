@@ -108,7 +108,7 @@ void main() {
     test('uploads metrics sends expected post body', () async {
       _processResult = ProcessResult(1, 0, commitSha, '');
       const String uploadMetricsRequestWithSpaces =
-          '{"CommitBranch":"master","CommitSha":"a4952838bf288a81d8ea11edfd4b4cd649fa94cc","BuilderName":"builder a b c","NewStatus":"Succeeded","ResultData":{},"BenchmarkScoreKeys":[]}';
+          '{"CommitBranch":"master","CommitSha":"a4952838bf288a81d8ea11edfd4b4cd649fa94cc","BuilderName":"builder a b c","NewStatus":"Succeeded","ResultData":{},"BenchmarkScoreKeys":[],"TestFlaky":false}';
       final MockClient client = MockClient((Request request) async {
         if (request.body == uploadMetricsRequestWithSpaces) {
           return Response('{}', 200);
