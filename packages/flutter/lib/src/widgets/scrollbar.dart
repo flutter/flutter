@@ -858,7 +858,7 @@ class RawScrollbar extends StatefulWidget {
     this.thickness,
     this.thumbColor,
     this.minThumbLength = _kMinThumbExtent,
-    double? minOverscrollLength,
+    this.minOverscrollLength,
     this.fadeDuration = _kScrollbarFadeDuration,
     this.timeToFade = _kScrollbarTimeToFade,
     this.pressDuration = Duration.zero,
@@ -872,7 +872,6 @@ class RawScrollbar extends StatefulWidget {
        assert(minThumbLength >= 0),
        assert(minOverscrollLength == null || minOverscrollLength <= minThumbLength),
        assert(minOverscrollLength == null || minOverscrollLength >= 0),
-       minOverscrollLength = minOverscrollLength ?? minThumbLength,
        assert(fadeDuration != null),
        assert(timeToFade != null),
        assert(pressDuration != null),
@@ -1066,7 +1065,7 @@ class RawScrollbar extends StatefulWidget {
   ///
   /// The value is less than or equal to [minThumbLength] and greater than or equal to 0.
   /// If unspecified or set to null, it will default to the value of [minThumbLength].
-  final double minOverscrollLength;
+  final double? minOverscrollLength;
 
   /// The [Duration] of the fade animation.
   ///
@@ -1198,7 +1197,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     scrollbarPainter = ScrollbarPainter(
       color: widget.thumbColor ?? const Color(0x66BCBCBC),
       minLength: widget.minThumbLength,
-      minOverscrollLength: widget.minOverscrollLength,
+      minOverscrollLength: widget.minOverscrollLength ?? widget.minThumbLength,
       thickness: widget.thickness ?? _kScrollbarThickness,
       fadeoutOpacityAnimation: _fadeoutOpacityAnimation,
       scrollbarOrientation: widget.scrollbarOrientation,
@@ -1343,7 +1342,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       ..mainAxisMargin = widget.mainAxisMargin
       ..crossAxisMargin = widget.crossAxisMargin
       ..minLength = widget.minThumbLength
-      ..minOverscrollLength = widget.minOverscrollLength;
+      ..minOverscrollLength = widget.minOverscrollLength ?? widget.minThumbLength;
   }
 
   @override
