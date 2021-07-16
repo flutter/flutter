@@ -1628,6 +1628,14 @@ targets:
         ["devicelab"]
     scheduler: luci
 
+  - name: Mac_android integration_ui_frame_number
+    builder: Mac_android integration_ui_frame_number
+    presubmit: false
+    properties:
+      tags: >
+        ["devicelab"]
+    scheduler: luci
+
   - name: Mac_android integration_ui_screenshot
     builder: Mac_android integration_ui_screenshot
     presubmit: false
@@ -1906,6 +1914,14 @@ targets:
 
   - name: Mac_ios integration_ui_ios_keyboard_resize
     builder: Mac_ios integration_ui_ios_keyboard_resize
+    presubmit: false
+    properties:
+      tags: >
+        ["devicelab"]
+    scheduler: luci
+
+  - name: Mac_ios integration_ui_ios_frame_number
+    builder: Mac_ios integration_ui_ios_frame_number
     presubmit: false
     properties:
       tags: >
