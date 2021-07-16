@@ -106,7 +106,7 @@ TEST_F(SkiaGpuObjectTest, ObjectReset) {
       sk_make_sp<TestSkObject>(latch, &dtor_task_queue_id), unref_queue());
   // Verify that explicitly resetting the GPU object queues and unref.
   sk_object.reset();
-  ASSERT_EQ(sk_object.get(), nullptr);
+  ASSERT_EQ(sk_object.skia_object(), nullptr);
   latch->Wait();
   ASSERT_EQ(dtor_task_queue_id, unref_task_runner()->GetTaskQueueId());
 }
@@ -119,9 +119,9 @@ TEST_F(SkiaGpuObjectTest, ObjectResetTwice) {
       sk_make_sp<TestSkObject>(latch, &dtor_task_queue_id), unref_queue());
 
   sk_object.reset();
-  ASSERT_EQ(sk_object.get(), nullptr);
+  ASSERT_EQ(sk_object.skia_object(), nullptr);
   sk_object.reset();
-  ASSERT_EQ(sk_object.get(), nullptr);
+  ASSERT_EQ(sk_object.skia_object(), nullptr);
 
   latch->Wait();
   ASSERT_EQ(dtor_task_queue_id, unref_task_runner()->GetTaskQueueId());

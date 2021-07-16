@@ -30,7 +30,7 @@ class Picture : public RefCountedDartWrappable<Picture> {
   static fml::RefPtr<Picture> Create(Dart_Handle dart_handle,
                                      sk_sp<DisplayList> display_list);
 
-  sk_sp<SkPicture> picture() const { return picture_.get(); }
+  sk_sp<SkPicture> picture() const { return picture_.skia_object(); }
   sk_sp<DisplayList> display_list() const { return display_list_; }
 
   Dart_Handle toImage(uint32_t width,

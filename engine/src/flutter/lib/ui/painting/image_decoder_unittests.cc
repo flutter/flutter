@@ -200,7 +200,7 @@ TEST_F(ImageDecoderFixtureTest, InvalidImageResultsError) {
 
     ImageDecoder::ImageResult callback = [&](SkiaGPUObject<SkImage> image) {
       ASSERT_TRUE(runners.GetUITaskRunner()->RunsTasksOnCurrentThread());
-      ASSERT_FALSE(image.get());
+      ASSERT_FALSE(image.skia_object());
       latch.Signal();
     };
     decoder.Decode(image_descriptor, 0, 0, callback);
@@ -245,7 +245,7 @@ TEST_F(ImageDecoderFixtureTest, ValidImageResultsInSuccess) {
 
     ImageDecoder::ImageResult callback = [&](SkiaGPUObject<SkImage> image) {
       ASSERT_TRUE(runners.GetUITaskRunner()->RunsTasksOnCurrentThread());
-      ASSERT_TRUE(image.get());
+      ASSERT_TRUE(image.skia_object());
       EXPECT_TRUE(io_manager->did_access_is_gpu_disabled_sync_switch_);
       runners.GetIOTaskRunner()->PostTask(release_io_manager);
     };
@@ -302,8 +302,8 @@ TEST_F(ImageDecoderFixtureTest, ExifDataIsRespectedOnDecode) {
 
     ImageDecoder::ImageResult callback = [&](SkiaGPUObject<SkImage> image) {
       ASSERT_TRUE(runners.GetUITaskRunner()->RunsTasksOnCurrentThread());
-      ASSERT_TRUE(image.get());
-      decoded_size = image.get()->dimensions();
+      ASSERT_TRUE(image.skia_object());
+      decoded_size = image.skia_object()->dimensions();
       runners.GetIOTaskRunner()->PostTask(release_io_manager);
     };
     image_decoder->Decode(descriptor, descriptor->width(), descriptor->height(),
@@ -361,7 +361,7 @@ TEST_F(ImageDecoderFixtureTest, CanDecodeWithoutAGPUContext) {
 
     ImageDecoder::ImageResult callback = [&](SkiaGPUObject<SkImage> image) {
       ASSERT_TRUE(runners.GetUITaskRunner()->RunsTasksOnCurrentThread());
-      ASSERT_TRUE(image.get());
+      ASSERT_TRUE(image.skia_object());
       runners.GetIOTaskRunner()->PostTask(release_io_manager);
     };
     image_decoder->Decode(descriptor, descriptor->width(), descriptor->height(),
@@ -436,8 +436,8 @@ TEST_F(ImageDecoderFixtureTest, CanDecodeWithResizes) {
 
       ImageDecoder::ImageResult callback = [&](SkiaGPUObject<SkImage> image) {
         ASSERT_TRUE(runners.GetUITaskRunner()->RunsTasksOnCurrentThread());
-        ASSERT_TRUE(image.get());
-        final_size = image.get()->dimensions();
+        ASSERT_TRUE(image.skia_object());
+        final_size = image.skia_object()->dimensions();
         latch.Signal();
       };
       image_decoder->Decode(descriptor, target_width, target_height, callback);
@@ -534,8 +534,8 @@ TEST_F(ImageDecoderFixtureTest, DISABLED_CanResizeWithoutDecode) {
 
       ImageDecoder::ImageResult callback = [&](SkiaGPUObject<SkImage> image) {
         ASSERT_TRUE(runners.GetUITaskRunner()->RunsTasksOnCurrentThread());
-        ASSERT_TRUE(image.get());
-        final_size = image.get()->dimensions();
+        ASSERT_TRUE(image.skia_object());
+        final_size = image.skia_object()->dimensions();
         latch.Signal();
       };
       image_decoder->Decode(descriptor, target_width, target_height, callback);

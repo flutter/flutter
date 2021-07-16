@@ -49,7 +49,7 @@ void CanvasImage::dispose() {
 }
 
 size_t CanvasImage::GetAllocationSize() const {
-  if (auto image = image_.get()) {
+  if (auto image = image_.skia_object()) {
     const auto& info = image->imageInfo();
     const auto kMipmapOverhead = 4.0 / 3.0;
     const size_t image_byte_size = info.computeMinByteSize() * kMipmapOverhead;

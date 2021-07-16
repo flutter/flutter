@@ -69,7 +69,7 @@ class SkiaGPUObject {
 
   SkiaGPUObject& operator=(SkiaGPUObject&&) = default;
 
-  sk_sp<SkiaObjectType> get() const { return object_; }
+  sk_sp<SkiaObjectType> skia_object() const { return object_; }
 
   void reset() {
     if (object_ && queue_) {

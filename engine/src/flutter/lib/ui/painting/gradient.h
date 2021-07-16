@@ -63,7 +63,7 @@ class CanvasGradient : public Shader {
                            const tonic::Float64List& matrix4);
 
   sk_sp<SkShader> shader(SkSamplingOptions) override {
-    return sk_shader_.get();
+    return sk_shader_.skia_object();
   }
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);

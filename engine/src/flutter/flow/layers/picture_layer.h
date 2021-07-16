@@ -20,7 +20,7 @@ class PictureLayer : public Layer {
                bool is_complex,
                bool will_change);
 
-  SkPicture* picture() const { return picture_.get().get(); }
+  SkPicture* picture() const { return picture_.skia_object().get(); }
 
 #ifdef FLUTTER_ENABLE_DIFF_CONTEXT
 
