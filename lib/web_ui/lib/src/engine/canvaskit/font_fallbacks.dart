@@ -126,7 +126,8 @@ class FontFallbackData {
         fonts.addAll(typefacesForFamily);
       }
     }
-    final List<bool> codeUnitsSupported = List<bool>.filled(codeUnits.length, false);
+    final List<bool> codeUnitsSupported =
+        List<bool>.filled(codeUnits.length, false);
     final String testString = String.fromCharCodes(codeUnits);
     for (SkFont font in fonts) {
       final Uint8List glyphs = font.getGlyphIDs(testString);
@@ -167,11 +168,13 @@ class FontFallbackData {
     // fonts. Check them and update the cache.
     final List<int> codeUnits = _codeUnitsToCheckAgainstFallbackFonts.toList();
     _codeUnitsToCheckAgainstFallbackFonts.clear();
-    final List<bool> codeUnitsSupported = List<bool>.filled(codeUnits.length, false);
+    final List<bool> codeUnitsSupported =
+        List<bool>.filled(codeUnits.length, false);
     final String testString = String.fromCharCodes(codeUnits);
 
     for (String font in globalFontFallbacks) {
-      final List<SkFont>? fontsForFamily = skiaFontCollection.familyToFontMap[font];
+      final List<SkFont>? fontsForFamily =
+          skiaFontCollection.familyToFontMap[font];
       if (fontsForFamily == null) {
         printWarning('A fallback font was registered but we '
             'cannot retrieve the typeface for it.');
@@ -227,8 +230,20 @@ class FontFallbackData {
     final int fontFallbackTag = fontFallbackCounts[family]!;
     fontFallbackCounts[family] = fontFallbackCounts[family]! + 1;
     final String countedFamily = '$family $fontFallbackTag';
+    // Insert emoji font before all other fallback fonts so we use the emoji
+    // whenever it's available.
     registeredFallbackFonts.add(RegisteredFont(bytes, countedFamily, typeface));
-    globalFontFallbacks.add(countedFamily);
+    // Insert emoji font before all other fallback fonts so we use the emoji
+    // whenever it's available.
+    if (family == 'Noto Color Emoji Compat') {
+      if (globalFontFallbacks.first == 'Roboto') {
+        globalFontFallbacks.insert(1, countedFamily);
+      } else {
+        globalFontFallbacks.insert(0, countedFamily);
+      }
+    } else {
+      globalFontFallbacks.add(countedFamily);
+    }
   }
 }
 
@@ -351,14 +366,16 @@ _ResolvedNotoFont? _makeResolvedNotoFontFromCss(String css, String name) {
           if (startEnd.length == 1) {
             final String singleRange = startEnd.single;
             assert(singleRange.startsWith('U+'));
-            final int rangeValue = int.parse(singleRange.substring(2), radix: 16);
+            final int rangeValue =
+                int.parse(singleRange.substring(2), radix: 16);
             fontFaceUnicodeRanges.add(CodeunitRange(rangeValue, rangeValue));
           } else {
             assert(startEnd.length == 2);
             final String startRange = startEnd[0];
             final String endRange = startEnd[1];
             assert(startRange.startsWith('U+'));
-            final int startValue = int.parse(startRange.substring(2), radix: 16);
+            final int startValue =
+                int.parse(startRange.substring(2), radix: 16);
             final int endValue = int.parse(endRange, radix: 16);
             fontFaceUnicodeRanges.add(CodeunitRange(startValue, endValue));
           }
@@ -410,15 +427,15 @@ Future<void> _registerSymbolsAndEmoji() async {
     return;
   }
   data.registeredSymbolsAndEmoji = true;
-  const String symbolsUrl =
-      'https://fonts.googleapis.com/css2?family=Noto+Sans+Symbols';
   const String emojiUrl =
       'https://fonts.googleapis.com/css2?family=Noto+Color+Emoji+Compat';
+  const String symbolsUrl =
+      'https://fonts.googleapis.com/css2?family=Noto+Sans+Symbols';
 
-  final String symbolsCss =
-      await notoDownloadQueue.downloader.downloadAsString(symbolsUrl);
   final String emojiCss =
       await notoDownloadQueue.downloader.downloadAsString(emojiUrl);
+  final String symbolsCss =
+      await notoDownloadQueue.downloader.downloadAsString(symbolsUrl);
 
   String? extractUrlFromCss(String css) {
     for (final String line in LineSplitter.split(css)) {
@@ -436,21 +453,21 @@ Future<void> _registerSymbolsAndEmoji() async {
     return null;
   }
 
-  final String? symbolsFontUrl = extractUrlFromCss(symbolsCss);
   final String? emojiFontUrl = extractUrlFromCss(emojiCss);
-
-  if (symbolsFontUrl != null) {
-    notoDownloadQueue.add(_ResolvedNotoSubset(
-        symbolsFontUrl, 'Noto Sans Symbols', const <CodeunitRange>[]));
-  } else {
-    printWarning('Error parsing CSS for Noto Symbols font.');
-  }
+  final String? symbolsFontUrl = extractUrlFromCss(symbolsCss);
 
   if (emojiFontUrl != null) {
     notoDownloadQueue.add(_ResolvedNotoSubset(
         emojiFontUrl, 'Noto Color Emoji Compat', const <CodeunitRange>[]));
   } else {
     printWarning('Error parsing CSS for Noto Emoji font.');
+  }
+
+  if (symbolsFontUrl != null) {
+    notoDownloadQueue.add(_ResolvedNotoSubset(
+        symbolsFontUrl, 'Noto Sans Symbols', const <CodeunitRange>[]));
+  } else {
+    printWarning('Error parsing CSS for Noto Symbols font.');
   }
 }
 
