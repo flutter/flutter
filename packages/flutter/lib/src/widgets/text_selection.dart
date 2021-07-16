@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:characters/characters.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -827,13 +828,26 @@ class _TextSelectionHandleOverlayState
     // On some platforms we may want to calculate the start and end handles
     // separately so they scale for the selected content.
     //
-    // For the start handle we compute the rectangles that encompass the beginning
-    // of the selection.
+    // For the start handle we compute the rectangles that encompass the range
+    // of the first full selected grapheme cluster at the beginning of the selection.
     //
-    // For the end handle we compute the rectangles that encompass the end of
-    // the selection.
-    final Rect? startHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.selection.start, end: widget.selection.start + 1));
-    final Rect? endHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.selection.end, end: widget.selection.end - 1));
+    // For the end handle we compute the rectangles that encompass the range
+    // of the last full selected grapheme cluster at the end of the selection.
+    final InlineSpan span = widget.renderObject.text!;
+    final String text = span.toPlainText();
+    final String selectedGraphemes = widget.selection.textInside(text);
+    final int firstSelectedGraphemeExtent;
+    final int lastSelectedGraphemeExtent;
+    if(selectedGraphemes.length == 0){
+      firstSelectedGraphemeExtent = 1;
+      lastSelectedGraphemeExtent = 1;
+    }else{
+      firstSelectedGraphemeExtent = selectedGraphemes.characters.first.length;
+      lastSelectedGraphemeExtent = selectedGraphemes.characters.last.length;
+    }
+
+    final Rect? startHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.selection.start, end: widget.selection.start + firstSelectedGraphemeExtent));
+    final Rect? endHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.selection.end, end: widget.selection.end - lastSelectedGraphemeExtent));
 
     final Offset handleAnchor = widget.selectionControls.getHandleAnchor(
       type,

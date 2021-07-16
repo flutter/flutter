@@ -3113,7 +3113,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// Returns null if [TextRange.isValid] is false for the given `range`, or the
   /// given `range` is collapsed.
   Rect? getRectForComposingRange(TextRange range) {
-    if (!range.isValid || range.isCollapsed)
+    if (!range.isValid || range.isCollapsed || (range.end > _plainText.length || range.end < 0 || range.start < 0))
       return null;
     _computeTextMetricsIfNeeded();
 
