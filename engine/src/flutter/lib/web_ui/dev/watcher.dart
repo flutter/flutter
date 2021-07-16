@@ -10,6 +10,7 @@ import 'package:watcher/watcher.dart';
 
 import 'utils.dart';
 
+/// Describes what [Pipeline] is currently doing.
 enum PipelineStatus {
   /// The pipeline has not started yet.
   ///
