@@ -411,7 +411,7 @@ class ImageCache {
     void listener(ImageInfo? info, bool syncCall) {
       int? sizeBytes;
       if (info != null) {
-        sizeBytes = info.image.height * info.image.width * 4;
+        sizeBytes = info.sizeBytes;
         info.dispose();
       }
       final _CachedImage image = _CachedImage(
