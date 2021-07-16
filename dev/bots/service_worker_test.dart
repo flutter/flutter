@@ -55,7 +55,7 @@ Future<void> _rebuildApp({ required int version }) async {
 
 /// A drop-in replacement for `package:test` expect that can run outside the
 /// test zone.
-void expect(Object actual, Object expected) {
+void expect(Object? actual, Object? expected) {
   final Matcher matcher = wrapMatcher(expected);
   final Map<Object, Object> matchState = <Object, Object>{};
   if (matcher.matches(actual, matchState)) {
@@ -153,7 +153,7 @@ Future<void> runWebServiceWorkerTest({
           'favicon.ico': 1,
         }
     });
-    expect(reportedVersion!, '1');
+    expect(reportedVersion, '1');
     reportedVersion = null;
 
     print('With cache: test page reload');
@@ -167,7 +167,7 @@ Future<void> runWebServiceWorkerTest({
       'flutter_service_worker.js': 1,
       'CLOSE': 1,
     });
-    expect(reportedVersion!, '1');
+    expect(reportedVersion, '1');
     reportedVersion = null;
 
     print('With cache: test page reload after rebuild');
@@ -192,7 +192,7 @@ Future<void> runWebServiceWorkerTest({
         'favicon.ico': 1,
     });
 
-    expect(reportedVersion!, '2');
+    expect(reportedVersion, '2');
     reportedVersion = null;
     await server!.stop();
 
@@ -226,7 +226,7 @@ Future<void> runWebServiceWorkerTest({
         }
     });
 
-    expect(reportedVersion!, '3');
+    expect(reportedVersion, '3');
     reportedVersion = null;
 
     print('No cache: test page reload');
@@ -242,7 +242,7 @@ Future<void> runWebServiceWorkerTest({
       if (!headless)
         'manifest.json': 1,
     });
-    expect(reportedVersion!, '3');
+    expect(reportedVersion, '3');
     reportedVersion = null;
 
     print('No cache: test page reload after rebuild');
@@ -274,7 +274,7 @@ Future<void> runWebServiceWorkerTest({
         }
     });
 
-    expect(reportedVersion!, '4');
+    expect(reportedVersion, '4');
     reportedVersion = null;
   } finally {
     await _setAppVersion(1);
