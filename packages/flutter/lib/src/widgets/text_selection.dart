@@ -838,7 +838,10 @@ class _TextSelectionHandleOverlayState
     final String selectedGraphemes = widget.selection.textInside(text);
     final int firstSelectedGraphemeExtent;
     final int lastSelectedGraphemeExtent;
-    if(selectedGraphemes.length == 0){
+    if(selectedGraphemes.isEmpty){
+      // The call to selectedGraphemes.characters.first/last will throw a state
+      // error if the given string is empty, so fall back to first/last character
+      // range in this case.
       firstSelectedGraphemeExtent = 1;
       lastSelectedGraphemeExtent = 1;
     }else{
