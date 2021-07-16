@@ -1531,9 +1531,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   late AnimationController _cursorBlinkOpacityController;
 
-  /// The state and logic for text editing itself.
-  late final TextEditingModel textEditingModel;
-
   final LayerLink _toolbarLayerLink = LayerLink();
   final LayerLink _startHandleLayerLink = LayerLink();
   final LayerLink _endHandleLayerLink = LayerLink();
@@ -1562,6 +1559,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// - cmd/ctrl+a to select all.
   /// - Changing the selection using a physical keyboard.
   bool get _shouldCreateInputConnection => kIsWeb || !widget.readOnly;
+
+  // TODO(justinmc): Document. Cache.
+  @override
+  TextEditingModel get textEditingModel {
+    return TextEditingModel(
+      value: _value,
+    );
+  }
 
   // This value is an eyeball estimation of the time it takes for the iOS cursor
   // to ease in and out.
@@ -1597,6 +1602,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   // TODO(justinmc): Make this public and call from DTEA?
+  @override
   void setSelection(TextSelection nextSelection, SelectionChangedCause cause) {
     if (nextSelection.isValid) {
       // The nextSelection is calculated based on _plainText, which can be out
@@ -1632,7 +1638,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (nextSelection == textEditingValue.selection && cause != SelectionChangedCause.keyboard && !focusingEmpty) {
       return;
     }
-    _handleSelectionChange(nextSelection, cause);
+    widget.onSelectionChanged?.call(nextSelection, cause);
   }
 
   void _setTextEditingValue(TextEditingValue newValue, SelectionChangedCause cause) {
@@ -1656,19 +1662,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _floatingCursorResetController = AnimationController(vsync: this);
     _floatingCursorResetController.addListener(_onFloatingCursorResetTick);
     _cursorVisibilityNotifier.value = widget.showCursor;
-    textEditingModel = TextEditingModel(
-      textSelectionDelegate: this,
-      textPainter: TextPainter(
-        text: buildTextSpan(),
-        textAlign: widget.textAlign,
-        textDirection: widget.textDirection,
-        textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
-        locale: widget.locale,
-        strutStyle: widget.strutStyle,
-        textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.of(context),
-        textWidthBasis: widget.textWidthBasis,
-      ),
-    );
   }
 
   @override

@@ -131,8 +131,15 @@ class _DeleteForwardByLineTextAction extends TextEditingAction<DeleteForwardByLi
 class _ExpandSelectionLeftByLineTextAction extends TextEditingAction<ExpandSelectionLeftByLineTextIntent> {
   @override
   Object? invoke(ExpandSelectionLeftByLineTextIntent intent, [BuildContext? context]) {
-    // TODO(justinmc): Convert this one.
-    textEditingActionTarget!.renderEditable.expandSelectionLeftByLine(SelectionChangedCause.keyboard);
+    //textEditingActionTarget!.renderEditable.expandSelectionLeftByLine(SelectionChangedCause.keyboard);
+
+    // TODO(justinmc): Or, I could put these methods on TextEditingActionTarget,
+    // so there's no logic in here.
+    print('justin expandSelectionLeftByLine');
+    final TextSelection nextSelection = textEditingActionTarget!.renderEditable.selectionEnabled
+        ? textEditingActionTarget!.textEditingModel.expandSelectionLeftByLine(textEditingActionTarget!.renderEditable)
+        : textEditingActionTarget!.textEditingModel.moveSelectionLeftByLine();
+    textEditingActionTarget!.setSelection(nextSelection, SelectionChangedCause.keyboard);
   }
 }
 

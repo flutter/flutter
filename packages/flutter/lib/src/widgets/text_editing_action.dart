@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/rendering.dart' show RenderEditable;
+import 'package:flutter/rendering.dart' show RenderEditable, TextEditingModel;
 
 import 'actions.dart';
 import 'editable_text.dart';
@@ -25,6 +25,12 @@ abstract class TextEditingActionTarget {
   ///
   /// * [EditableTextState.renderEditable], which overrides this.
   RenderEditable get renderEditable;
+
+  // TODO(justinmc): Document.
+  // TODO(justinmc): What if I scrap the model and just use this abstract class?
+  TextEditingModel get textEditingModel;
+
+  void setSelection(TextSelection nextState, SelectionChangedCause cause);
 }
 
 /// An [Action] related to editing text.
