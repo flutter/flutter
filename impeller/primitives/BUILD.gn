@@ -7,8 +7,8 @@ import("//flutter/impeller/tools/impeller.gni")
 impeller_shaders("impeller_shaders") {
   name = "impeller"
   shaders = [
-    "box.vert",
-    "box.frag",
+    "box_fade.vert",
+    "box_fade.frag",
   ]
 }
 
