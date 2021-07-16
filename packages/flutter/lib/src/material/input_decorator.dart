@@ -2115,10 +2115,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     return themeData.fixTextFieldOutlineLabel
       ? style
         .copyWith(height: 1, color: decoration!.enabled ? color : themeData.disabledColor)
-        .merge(decoration!.floatingLabelStyle)
+        .merge(decoration!.floatingLabelStyle ?? decoration!.labelStyle)
       : style
         .copyWith(color: decoration!.enabled ? color : themeData.disabledColor)
-        .merge(decoration!.floatingLabelStyle);
+        .merge(decoration!.floatingLabelStyle ?? decoration!.labelStyle);
 
   }
 
@@ -2661,8 +2661,7 @@ class InputDecoration {
   /// The style to use for the [labelText] when the label is above (i.e.,
   /// vertically adjacent to) the input field.
   ///
-  /// If null, defaults to a value derived from the base [TextStyle] for the
-  /// input field and the current [Theme].
+  /// If null, defaults to [labelStyle].
   final TextStyle? floatingLabelStyle;
 
   /// Text that provides context about the [InputDecorator.child]'s value, such
@@ -3676,8 +3675,7 @@ class InputDecorationTheme with Diagnosticable {
   /// When the [InputDecoration.labelText] is on top of the input field, the
   /// text uses the [labelStyle] instead.
   ///
-  /// If null, defaults to a value derived from the base [TextStyle] for the
-  /// input field and the current [Theme].
+  /// If null, defaults to [labelStyle].
   final TextStyle? floatingLabelStyle;
 
   /// The style to use for [InputDecoration.helperText].
