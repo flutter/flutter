@@ -117,7 +117,12 @@ Future<void> main(List<String> args) async {
         await cache.lock();
         process.kill(io.ProcessSignal.sigkill);
       } finally {
-        tempDir.deleteSync(recursive: true);
+        try {
+          tempDir.deleteSync(recursive: true);
+        } on FileSystemException {
+          // Ignore filesystem exceptions, because Windows has a poor file
+          // locking paradigm.
+        }
         Cache.flutterRoot = oldRoot;
       }
       expect(logger.errors.single,
