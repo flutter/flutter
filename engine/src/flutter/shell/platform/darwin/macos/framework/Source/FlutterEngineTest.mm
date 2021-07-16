@@ -373,4 +373,36 @@ TEST(FlutterEngine, Compositor) {
   [engine shutDownEngine];
 }
 
+TEST(FlutterEngine, DartEntrypointArguments) {
+  NSString* fixtures = @(flutter::testing::GetFixturesPath());
+  FlutterDartProject* project = [[FlutterDartProject alloc]
+      initWithAssetsPath:fixtures
+             ICUDataPath:[fixtures stringByAppendingString:@"/icudtl.dat"]];
+
+  project.dartEntrypointArguments = @[ @"arg1", @"arg2" ];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:project];
+
+  bool called = false;
+  auto original_init = engine.embedderAPI.Initialize;
+  engine.embedderAPI.Initialize = MOCK_ENGINE_PROC(
+      Initialize, ([&called, &original_init](size_t version, const FlutterRendererConfig* config,
+                                             const FlutterProjectArgs* args, void* user_data,
+                                             FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
+        called = true;
+        EXPECT_EQ(args->dart_entrypoint_argc, 2);
+        NSString* arg1 = [[NSString alloc] initWithCString:args->dart_entrypoint_argv[0]
+                                                  encoding:NSUTF8StringEncoding];
+        NSString* arg2 = [[NSString alloc] initWithCString:args->dart_entrypoint_argv[1]
+                                                  encoding:NSUTF8StringEncoding];
+
+        EXPECT_TRUE([arg1 isEqualToString:@"arg1"]);
+        EXPECT_TRUE([arg2 isEqualToString:@"arg2"]);
+
+        return original_init(version, config, args, user_data, engine_out);
+      }));
+
+  EXPECT_TRUE([engine runWithEntrypoint:@"main"]);
+  EXPECT_TRUE(called);
+}
+
 }  // namespace flutter::testing
