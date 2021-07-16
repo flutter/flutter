@@ -18,7 +18,7 @@ import '../runner/flutter_command.dart';
 import '../version.dart';
 
 // The official docs to install Flutter.
-String get _flutterInstallDocs => 'https://flutter.dev/docs/get-started/install';
+const String _flutterInstallDocs = 'https://flutter.dev/docs/get-started/install';
 
 class UpgradeCommand extends FlutterCommand {
   UpgradeCommand({
