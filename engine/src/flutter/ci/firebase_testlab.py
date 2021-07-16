@@ -15,7 +15,7 @@ script_dir = os.path.dirname(os.path.realpath(__file__))
 buildroot_dir = os.path.abspath(os.path.join(script_dir, '..', '..'))
 out_dir = os.path.join(buildroot_dir, 'out')
 bucket = 'gs://flutter_firebase_testlab'
-error_re = re.compile('[EF]/flutter')
+error_re = re.compile(r'[EF]/flutter.+')
 
 
 def RunFirebaseTest(apk, results_dir):
@@ -47,11 +47,13 @@ def CheckLogcat(results_dir):
   logcat = subprocess.check_output([
       'gsutil', 'cat', '%s/%s/*/logcat' % (bucket, results_dir)
   ])
+  if not logcat:
+    sys.exit(1)
 
-  logcat_match = error_re.match(logcat)
-  if logcat_match:
+  logcat_matches = error_re.findall(logcat)
+  if logcat_matches:
     print('Errors in logcat:')
-    print(logcat_match)
+    print(logcat_matches)
     sys.exit(1)
 
 
