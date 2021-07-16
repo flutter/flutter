@@ -1687,14 +1687,6 @@ class _AnimatedRotationState extends ImplicitlyAnimatedWidgetState<AnimatedRotat
 /// up or down by the amount of it's height with each press of the corresponding button.
 ///
 /// ```dart
-/// class LogoSlide extends StatefulWidget {
-///   const LogoSlide({Key? key}) : super(key: key);
-///
-///   @override
-///   State<LogoSlide> createState() => LogoSlideState();
-/// }
-///
-/// class LogoSlideState extends State<LogoSlide> {
 ///  Offset offset = Offset(0, 0);
 ///
 ///  void _slideUp() {
@@ -1730,7 +1722,6 @@ class _AnimatedRotationState extends ImplicitlyAnimatedWidgetState<AnimatedRotat
 ///      ],
 ///    );
 ///  }
-/// }
 /// ```
 /// {@end-tool}
 ///
