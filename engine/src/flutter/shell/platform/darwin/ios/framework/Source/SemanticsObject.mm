@@ -207,20 +207,35 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 }
 
 - (id)accessibilityContainer {
-  if (_container == nil) {
-    _container.reset([[SemanticsObjectContainer alloc]
-        initWithSemanticsObject:(SemanticsObject*)self
-                         bridge:[_semanticsObject bridge]]);
+  if ([_semanticsObject hasChildren] || [_semanticsObject uid] == kRootNodeId) {
+    if (_container == nil) {
+      _container.reset([[SemanticsObjectContainer alloc]
+          initWithSemanticsObject:(SemanticsObject*)self
+                           bridge:[_semanticsObject bridge]]);
+    }
+    return _container.get();
   }
-  return _container.get();
+  if ([_semanticsObject parent] == nil) {
+    // This can happen when we have released the accessibility tree but iOS is
+    // still holding onto our objects. iOS can take some time before it
+    // realizes that the tree has changed.
+    return nil;
+  }
+  return [[_semanticsObject parent] accessibilityContainer];
 }
 
 - (BOOL)isAccessibilityElement {
   if (![_semanticsObject isAccessibilityBridgeAlive]) {
     return NO;
   }
+
+  if ([_semanticsObject isAccessibilityElement]) {
+    return YES;
+  }
   if (self.contentSize.width > self.frame.size.width ||
       self.contentSize.height > self.frame.size.height) {
+    // In SwitchControl or VoiceControl, the isAccessibilityElement must return YES
+    // in order to use scroll actions.
     return !_semanticsObject.bridge->isVoiceOverRunning();
   } else {
     return NO;
@@ -287,6 +302,30 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 // The following methods are explicitly forwarded to the wrapped SemanticsObject because the
 // forwarding logic above doesn't apply to them since they are also implemented in the
 // UIScrollView class, the base class.
+
+- (NSString*)accessibilityLabel {
+  return [_semanticsObject accessibilityLabel];
+}
+
+- (NSAttributedString*)accessibilityAttributedLabel {
+  return [_semanticsObject accessibilityAttributedLabel];
+}
+
+- (NSString*)accessibilityValue {
+  return [_semanticsObject accessibilityValue];
+}
+
+- (NSAttributedString*)accessibilityAttributedValue {
+  return [_semanticsObject accessibilityAttributedValue];
+}
+
+- (NSString*)accessibilityHint {
+  return [_semanticsObject accessibilityHint];
+}
+
+- (NSAttributedString*)accessibilityAttributedHint {
+  return [_semanticsObject accessibilityAttributedHint];
+}
 
 - (BOOL)accessibilityActivate {
   return [_semanticsObject accessibilityActivate];
