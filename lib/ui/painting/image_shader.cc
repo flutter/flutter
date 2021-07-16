@@ -61,12 +61,12 @@ sk_sp<SkShader> ImageShader::shader(SkSamplingOptions sampling) {
   if (sampling_is_locked_) {
     sampling = cached_sampling_;
   }
-  if (!cached_shader_.get() || cached_sampling_ != sampling) {
+  if (!cached_shader_.skia_object() || cached_sampling_ != sampling) {
     cached_sampling_ = sampling;
     cached_shader_ = UIDartState::CreateGPUObject(
         sk_image_->makeShader(tmx_, tmy_, sampling, &local_matrix_));
   }
-  return cached_shader_.get();
+  return cached_shader_.skia_object();
 }
 
 ImageShader::ImageShader() = default;

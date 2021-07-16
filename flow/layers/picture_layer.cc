@@ -49,8 +49,8 @@ void PictureLayer::Diff(DiffContext* context, const Layer* old_layer) {
 bool PictureLayer::Compare(DiffContext::Statistics& statistics,
                            const PictureLayer* l1,
                            const PictureLayer* l2) {
-  const auto& pic1 = l1->picture_.get();
-  const auto& pic2 = l2->picture_.get();
+  const auto& pic1 = l1->picture_.skia_object();
+  const auto& pic2 = l2->picture_.skia_object();
   if (pic1.get() == pic2.get()) {
     statistics.AddSameInstancePicture();
     return true;
@@ -99,7 +99,7 @@ sk_sp<SkData> PictureLayer::SerializedPicture() const {
         },
         nullptr,
     };
-    cached_serialized_picture_ = picture_.get()->serialize(&procs);
+    cached_serialized_picture_ = picture_.skia_object()->serialize(&procs);
   }
   return cached_serialized_picture_;
 }
@@ -129,7 +129,7 @@ void PictureLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
 
 void PictureLayer::Paint(PaintContext& context) const {
   TRACE_EVENT0("flutter", "PictureLayer::Paint");
-  FML_DCHECK(picture_.get());
+  FML_DCHECK(picture_.skia_object());
   FML_DCHECK(needs_painting(context));
 
   SkAutoCanvasRestore save(context.leaf_nodes_canvas, true);
