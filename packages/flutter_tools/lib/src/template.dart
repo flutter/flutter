@@ -324,9 +324,7 @@ class Template {
         final String templateContents = sourceFile.readAsStringSync();
         final String? androidIdentifier = context['androidIdentifier'] as String?;
         if (finalDestinationFile.path.endsWith('.kt') && androidIdentifier != null) {
-          final List<String> segments = androidIdentifier
-              .split('.')
-              .toList();
+          final List<String> segments = androidIdentifier.split('.');
           final List<String> reserved = <String>['when', 'in'];
           final List<String> correctedSegments = segments.map(
               (String segment) => reserved.contains(segment) ? '`$segment`' : segment
