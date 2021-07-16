@@ -189,6 +189,11 @@ class RenderSliverOpacity extends RenderProxySliver {
   }
 
   @override
+  bool hitTestChildren(SliverHitTestResult result, {required double mainAxisPosition, required double crossAxisPosition}) {
+    return _alpha != 0 && super.hitTestChildren(result, mainAxisPosition: mainAxisPosition, crossAxisPosition: crossAxisPosition);
+  }
+
+  @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DoubleProperty('opacity', opacity));
@@ -391,5 +396,11 @@ class RenderSliverAnimatedOpacity extends RenderProxySliver with RenderAnimatedO
     this.opacity = opacity;
     this.alwaysIncludeSemantics = alwaysIncludeSemantics;
     child = sliver;
+  }
+
+  @override
+  bool hitTestChildren(SliverHitTestResult result, {required double mainAxisPosition, required double crossAxisPosition}) {
+    return Color.getAlphaFromOpacity(opacity.value) != 0
+        && super.hitTestChildren(result, mainAxisPosition: mainAxisPosition, crossAxisPosition: crossAxisPosition);
   }
 }
