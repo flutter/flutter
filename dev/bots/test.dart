@@ -599,7 +599,7 @@ Future<void> _flutterBuild(
 bool _allTargetsCached(File performanceFile) {
   final Map<String, Object?> data = json.decode(performanceFile.readAsStringSync())
     as Map<String, Object?>;
-  final List<Map<String, Object>> targets = (data['targets']! as List<Object>)
+  final List<Map<String, Object>> targets = (data['targets']! as List<Object?>)
     .cast<Map<String, Object>>();
   return targets.every((Map<String, Object> element) => element['skipped'] == true);
 }
