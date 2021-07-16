@@ -100,8 +100,7 @@ class Tooltip extends StatefulWidget {
   /// override the default values _and_ the values in [TooltipTheme.of].
   const Tooltip({
     Key? key,
-    this.tooltip,
-    this.message,
+    required this.message,
     this.height,
     this.padding,
     this.margin,
@@ -113,17 +112,11 @@ class Tooltip extends StatefulWidget {
     this.waitDuration,
     this.showDuration,
     this.child,
-  })  : assert(
-          tooltip != null || message != null,
-          'A non-null message or tooltip must be provided to a Tooltip Widget',
-        ),
-        super(key: key);
-
-  /// The widget to display in the tooltip.
-  final Widget? tooltip;
+  }) : assert(message != null),
+       super(key: key);
 
   /// The text to display in the tooltip.
-  final String? message;
+  final String message;
 
   /// The height of the tooltip's [child].
   ///
@@ -217,8 +210,7 @@ class Tooltip extends StatefulWidget {
   static bool dismissAllToolTips() {
     if (_openedToolTips.isNotEmpty) {
       // Avoid concurrent modification.
-      final List<_TooltipState> openedToolTips =
-          List<_TooltipState>.from(_openedToolTips);
+      final List<_TooltipState> openedToolTips = List<_TooltipState>.from(_openedToolTips);
       for (final _TooltipState state in openedToolTips) {
         state._hideTooltip(immediately: true);
       }
@@ -235,27 +227,13 @@ class Tooltip extends StatefulWidget {
     super.debugFillProperties(properties);
     properties.add(StringProperty('message', message, showName: false));
     properties.add(DoubleProperty('height', height, defaultValue: null));
-    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('margin', margin,
-        defaultValue: null));
-    properties.add(
-        DoubleProperty('vertical offset', verticalOffset, defaultValue: null));
-    properties.add(FlagProperty('position',
-        value: preferBelow,
-        ifTrue: 'below',
-        ifFalse: 'above',
-        showName: true,
-        defaultValue: null));
-    properties.add(FlagProperty('semantics',
-        value: excludeFromSemantics,
-        ifTrue: 'excluded',
-        showName: true,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<Duration>('wait duration', waitDuration,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<Duration>('show duration', showDuration,
-        defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('margin', margin, defaultValue: null));
+    properties.add(DoubleProperty('vertical offset', verticalOffset, defaultValue: null));
+    properties.add(FlagProperty('position', value: preferBelow, ifTrue: 'below', ifFalse: 'above', showName: true, defaultValue: null));
+    properties.add(FlagProperty('semantics', value: excludeFromSemantics, ifTrue: 'excluded', showName: true, defaultValue: null));
+    properties.add(DiagnosticsProperty<Duration>('wait duration', waitDuration, defaultValue: null));
+    properties.add(DiagnosticsProperty<Duration>('show duration', showDuration, defaultValue: null));
   }
 }
 
@@ -296,10 +274,10 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       duration: _fadeInDuration,
       reverseDuration: _fadeOutDuration,
       vsync: this,
-    )..addStatusListener(_handleStatusChanged);
+    )
+      ..addStatusListener(_handleStatusChanged);
     // Listen to see when a mouse is added.
-    RendererBinding.instance!.mouseTracker
-        .addListener(_handleMouseTrackerChange);
+    RendererBinding.instance!.mouseTracker.addListener(_handleMouseTrackerChange);
     // Listen to global pointer events so that we can hide a tooltip immediately
     // if some other control is clicked on.
     GestureBinding.instance!.pointerRouter.addGlobalRoute(_handlePointerEvent);
@@ -347,8 +325,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     if (!mounted) {
       return;
     }
-    final bool mouseIsConnected =
-        RendererBinding.instance!.mouseTracker.mouseIsConnected;
+    final bool mouseIsConnected = RendererBinding.instance!.mouseTracker.mouseIsConnected;
     if (mouseIsConnected != _mouseIsConnected) {
       setState(() {
         _mouseIsConnected = mouseIsConnected;
@@ -362,7 +339,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     }
   }
 
-  void _hideTooltip({bool immediately = false}) {
+  void _hideTooltip({ bool immediately = false }) {
     _showTimer?.cancel();
     _showTimer = null;
     if (immediately) {
@@ -377,7 +354,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     _longPressActivated = false;
   }
 
-  void _showTooltip({bool immediately = false}) {
+  void _showTooltip({ bool immediately = false }) {
     _hideTimer?.cancel();
     _hideTimer = null;
     if (immediately) {
@@ -424,17 +401,12 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     final Widget overlay = Directionality(
       textDirection: Directionality.of(context),
       child: _TooltipOverlay(
-        tooltip: widget.tooltip,
         message: widget.message,
         height: height,
         padding: padding,
         margin: margin,
-        onEnter: _mouseIsConnected
-            ? (PointerEnterEvent event) => _hideTooltip(immediately: true)
-            : null,
-        onExit: _mouseIsConnected
-            ? (PointerExitEvent event) => _hideTooltip()
-            : null,
+        onEnter: _mouseIsConnected ? (PointerEnterEvent event) => _showTooltip() : null,
+        onExit: _mouseIsConnected ? (PointerExitEvent event) => _hideTooltip() : null,
         decoration: decoration,
         textStyle: textStyle,
         animation: CurvedAnimation(
@@ -448,9 +420,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     );
     _entry = OverlayEntry(builder: (BuildContext context) => overlay);
     overlayState.insert(_entry!);
-    if (widget.message != null) {
-      SemanticsService.tooltip(widget.message!);
-    }
+    SemanticsService.tooltip(widget.message);
     Tooltip._openedToolTips.add(this);
   }
 
@@ -486,10 +456,8 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
   @override
   void dispose() {
-    GestureBinding.instance!.pointerRouter
-        .removeGlobalRoute(_handlePointerEvent);
-    RendererBinding.instance!.mouseTracker
-        .removeListener(_handleMouseTrackerChange);
+    GestureBinding.instance!.pointerRouter.removeGlobalRoute(_handlePointerEvent);
+    RendererBinding.instance!.mouseTracker.removeListener(_handleMouseTrackerChange);
     _removeEntry();
     _controller.dispose();
     super.dispose();
@@ -498,7 +466,8 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   void _handleLongPress() {
     _longPressActivated = true;
     final bool tooltipCreated = ensureTooltipVisible();
-    if (tooltipCreated) Feedback.forLongPress(context);
+    if (tooltipCreated)
+      Feedback.forLongPress(context);
   }
 
   @override
@@ -531,26 +500,14 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     height = widget.height ?? tooltipTheme.height ?? _getDefaultTooltipHeight();
     padding = widget.padding ?? tooltipTheme.padding ?? _getDefaultPadding();
     margin = widget.margin ?? tooltipTheme.margin ?? _defaultMargin;
-    verticalOffset = widget.verticalOffset ??
-        tooltipTheme.verticalOffset ??
-        _defaultVerticalOffset;
-    preferBelow =
-        widget.preferBelow ?? tooltipTheme.preferBelow ?? _defaultPreferBelow;
-    excludeFromSemantics = widget.excludeFromSemantics ??
-        tooltipTheme.excludeFromSemantics ??
-        _defaultExcludeFromSemantics;
-    decoration =
-        widget.decoration ?? tooltipTheme.decoration ?? defaultDecoration;
+    verticalOffset = widget.verticalOffset ?? tooltipTheme.verticalOffset ?? _defaultVerticalOffset;
+    preferBelow = widget.preferBelow ?? tooltipTheme.preferBelow ?? _defaultPreferBelow;
+    excludeFromSemantics = widget.excludeFromSemantics ?? tooltipTheme.excludeFromSemantics ?? _defaultExcludeFromSemantics;
+    decoration = widget.decoration ?? tooltipTheme.decoration ?? defaultDecoration;
     textStyle = widget.textStyle ?? tooltipTheme.textStyle ?? defaultTextStyle;
-    waitDuration = widget.waitDuration ??
-        tooltipTheme.waitDuration ??
-        _defaultWaitDuration;
-    showDuration = widget.showDuration ??
-        tooltipTheme.showDuration ??
-        _defaultShowDuration;
-    hoverShowDuration = widget.showDuration ??
-        tooltipTheme.showDuration ??
-        _defaultHoverShowDuration;
+    waitDuration = widget.waitDuration ?? tooltipTheme.waitDuration ?? _defaultWaitDuration;
+    showDuration = widget.showDuration ?? tooltipTheme.showDuration ?? _defaultShowDuration;
+    hoverShowDuration = widget.showDuration ?? tooltipTheme.showDuration ?? _defaultHoverShowDuration;
 
     Widget result = GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -585,9 +542,9 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
     required this.target,
     required this.verticalOffset,
     required this.preferBelow,
-  })  : assert(target != null),
-        assert(verticalOffset != null),
-        assert(preferBelow != null);
+  }) : assert(target != null),
+       assert(verticalOffset != null),
+       assert(preferBelow != null);
 
   /// The offset of the target the tooltip is positioned near in the global
   /// coordinate system.
@@ -604,8 +561,7 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
   final bool preferBelow;
 
   @override
-  BoxConstraints getConstraintsForChild(BoxConstraints constraints) =>
-      constraints.loosen();
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) => constraints.loosen();
 
   @override
   Offset getPositionForChild(Size size, Size childSize) {
@@ -620,17 +576,16 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
 
   @override
   bool shouldRelayout(_TooltipPositionDelegate oldDelegate) {
-    return target != oldDelegate.target ||
-        verticalOffset != oldDelegate.verticalOffset ||
-        preferBelow != oldDelegate.preferBelow;
+    return target != oldDelegate.target
+        || verticalOffset != oldDelegate.verticalOffset
+        || preferBelow != oldDelegate.preferBelow;
   }
 }
 
 class _TooltipOverlay extends StatelessWidget {
   const _TooltipOverlay({
     Key? key,
-    this.tooltip,
-    this.message,
+    required this.message,
     required this.height,
     this.padding,
     this.margin,
@@ -642,12 +597,9 @@ class _TooltipOverlay extends StatelessWidget {
     required this.preferBelow,
     this.onEnter,
     this.onExit,
-  })  : assert(tooltip != null || message != null,
-            'Either tooltip or message must not be null'),
-        super(key: key);
+  }) : super(key: key);
 
-  final Widget? tooltip;
-  final String? message;
+  final String message;
   final double height;
   final EdgeInsetsGeometry? padding;
   final EdgeInsetsGeometry? margin;
@@ -674,17 +626,17 @@ class _TooltipOverlay extends StatelessWidget {
               padding: padding,
               margin: margin,
               child: Center(
-                  widthFactor: 1.0,
-                  heightFactor: 1.0,
-                  child: tooltip ??
-                      Text(
-                        message!,
-                        style: textStyle,
-                      )),
+                widthFactor: 1.0,
+                heightFactor: 1.0,
+                child: Text(
+                  message,
+                  style: textStyle,
+                ),
+              ),
             ),
           ),
         ),
-      ),
+      )
     );
     if (onEnter != null || onExit != null) {
       result = MouseRegion(
