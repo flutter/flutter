@@ -260,7 +260,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 /// ### Snapping [SliverAppBar]s
 ///
 /// Floating [SliverAppBar]s also have the option to perform a snapping animation.
-/// If [SliverAppBar.snap] is true, then a scroll that exposes the floating app
+/// If [SliverAppBar._snap] is true, then a scroll that exposes the floating app
 /// bar will trigger an animation that slides the entire app bar into view.
 /// Similarly if a scroll dismisses the app bar, the animation will slide the
 /// app bar completely out of view.
@@ -270,7 +270,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 /// [NestedScrollView.floatHeaderSlivers], the app bar will snap in and out
 /// without floating.
 ///
-/// The [SliverAppBar.snap] animation should be used in conjunction with the
+/// The [SliverAppBar._snap] animation should be used in conjunction with the
 /// [SliverOverlapAbsorber] and  [SliverOverlapInjector] widgets when
 /// implemented in a [NestedScrollView]. These widgets take any overlapping
 /// behavior of the [SliverAppBar] in the header and redirect it to the
@@ -337,7 +337,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 // See https://github.com/flutter/flutter/issues/59189
 /// Currently, [NestedScrollView] does not support simultaneously floating and
 /// snapping the outer scrollable, e.g. when using [SliverAppBar.floating] &
-/// [SliverAppBar.snap] at the same time.
+/// [SliverAppBar._snap] at the same time.
 ///
 /// ### Stretching [SliverAppBar]s
 ///
