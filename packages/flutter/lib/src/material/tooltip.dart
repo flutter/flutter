@@ -408,6 +408,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     final Widget overlay = Directionality(
       textDirection: Directionality.of(context),
       child: _TooltipOverlay(
+        tooltip: widget.tooltip,
         message: widget.message,
         height: height,
         padding: padding,
