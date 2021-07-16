@@ -68,12 +68,16 @@ def ArchitecturesForOS(os_name):
 
 
 # Downloads a Dart SDK to //flutter/prebuilts.
-def DownloadDartSDK(channel, version, os_name, arch):
+def DownloadDartSDK(channel, version, os_name, arch, verbose):
   file = 'dartsdk-{}-{}-release.zip'.format(os_name, arch)
   url = 'https://storage.googleapis.com/dart-archive/channels/{}/raw/{}/sdk/{}'.format(
     channel, version, file,
   )
   dest = os.path.join(FLUTTER_PREBUILTS_DIR, file)
+
+  if verbose:
+    print('Dart SDK url: "%s"' % url)
+    print('Dart SDK destination path: "%s"' % dest)
 
   stamp_file = '{}.stamp'.format(dest)
   version_stamp = None
@@ -83,22 +87,40 @@ def DownloadDartSDK(channel, version, os_name, arch):
   except:
     version_stamp = 'none'
 
+  if verbose:
+    print('Dart SDK version stamp = "%s"' % version_stamp)
+
   if version == version_stamp:
     # The prebuilt Dart SDK is already up-to-date. Indicate that the download
     # should be skipped by returning the empty string.
+    if verbose:
+      print('Dart SDK stamp files match. Skipping download.')
     return ''
 
   if os.path.isfile(dest):
     os.unlink(dest)
 
-  curl_command = ['curl', url, '-o', dest]
+  curl_command = [
+    'curl',
+    '--retry', '3',
+    '--continue-at', '-', '--location',
+    '--output', dest,
+    url,
+  ]
+  if verbose:
+    curl_command.append('--verbose')
+    print('Running: "%s"' % (' '.join(curl_command)))
   curl_result = subprocess.run(
     curl_command,
     stdout=subprocess.PIPE,
     stderr=subprocess.PIPE,
     universal_newlines=True,
   )
-  if curl_result.returncode != 0:
+  if curl_result.returncode == 0 and verbose:
+    print('curl output:stdout:\n{}\nstderr:\n{}'.format(
+      curl_result.stdout, curl_result.stderr,
+    ))
+  elif curl_result.returncode != 0:
     eprint('Failed to download: stdout:\n{}\nstderr:\n{}'.format(
       curl_result.stdout, curl_result.stderr,
     ))
@@ -122,7 +144,7 @@ class ZipFileWithPermissions(zipfile.ZipFile):
 
 
 # Extracts a Dart SDK in //fluter/prebuilts
-def ExtractDartSDK(archive, os_name, arch):
+def ExtractDartSDK(archive, os_name, arch, verbose):
   os_arch = '{}-{}'.format(os_name, arch)
   dart_sdk = os.path.join(FLUTTER_PREBUILTS_DIR, os_arch, 'dart-sdk')
   if os.path.isdir(dart_sdk):
@@ -131,17 +153,25 @@ def ExtractDartSDK(archive, os_name, arch):
   extract_dest = os.path.join(FLUTTER_PREBUILTS_DIR, os_arch)
   os.makedirs(extract_dest, exist_ok=True)
 
+  if verbose:
+    print('Extracting "%s" to "%s"' % (archive, extract_dest))
+
   with ZipFileWithPermissions(archive, "r") as z:
     z.extractall(extract_dest)
 
 
-def DownloadAndExtract(channel, version, os_name, arch):
-  archive = DownloadDartSDK(channel, version, os_name, arch)
+
+def DownloadAndExtract(channel, version, os_name, arch, verbose):
+  archive = DownloadDartSDK(channel, version, os_name, arch, verbose)
   if archive == None:
     return 1
   if archive == '':
     return 0
-  ExtractDartSDK(archive, os_name, arch)
+  try:
+    ExtractDartSDK(archive, os_name, arch, verbose)
+  except Exception as e:
+    eprint('Failed to extract Dart SDK archive:\n%s' % e)
+    return 1
   try:
     stamp_file = '{}.stamp'.format(archive)
     with open(stamp_file, "w") as fd:
@@ -157,13 +187,21 @@ def Main():
   parser.add_argument(
     '--fail-loudly',
     action='store_true',
-    default=False,
+    default='LUCI_CONTEXT' in os.environ,
     help="Return an error code if a prebuilt couldn't be fetched and extracted")
+  parser.add_argument(
+    '--verbose',
+    action='store_true',
+    default='LUCI_CONTEXT' in os.environ,
+    help='Emit verbose output')
   args = parser.parse_args()
   fail_loudly = 1 if args.fail_loudly else 0
+  verbose = args.verbose
 
   prebuilt_enabled = os.environ.get(FLUTTER_PREBUILTS_ENV_VAR, 'false')
   if prebuilt_enabled == '0' or prebuilt_enabled.lower() == 'false':
+    if verbose:
+      print('Skipping prebuild Dart SDK download.')
     return 0
 
   os.makedirs(FLUTTER_PREBUILTS_DIR, exist_ok=True)
@@ -172,14 +210,20 @@ def Main():
   # Dart SDK version.
   version = utils.ReadVersionFile()
   if version == None:
+    eprint('Failed to read the Dart VERSION file.')
     return fail_loudly
   channel = version.channel
+  if verbose:
+    print('Dart SDK channel = "%s".' % channel)
 
   # A short Dart SDK version string used in the download url.
   if channel == 'be':
     dart_git_rev = utils.GetGitRevision()
     semantic_version = 'hash/{}'.format(dart_git_rev)
-  semantic_version = utils.GetSemanticSDKVersion()
+  else:
+    semantic_version = utils.GetSemanticSDKVersion()
+  if verbose:
+    print('Semantic Dart SDK version = "%s".' % semantic_version)
 
   os_name = GuessOS()
   if os_name == None:
@@ -191,7 +235,7 @@ def Main():
 
   # Download and extract variants in parallel
   pool = multiprocessing.Pool()
-  tasks = [(channel, semantic_version, os_name, arch) for arch in architectures]
+  tasks = [(channel, semantic_version, os_name, arch, verbose) for arch in architectures]
   async_results = [pool.apply_async(DownloadAndExtract, t) for t in tasks]
   success = True
   for async_result in async_results:
