@@ -4,12 +4,14 @@
 
 import 'dart:async';
 import 'dart:developer' as developer;
+import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_driver/flutter_driver.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart' as vm;
 import 'package:vm_service/vm_service_io.dart' as vm_io;
@@ -171,7 +173,15 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   ///
   /// Called by test methods. Implementation differs for each platform.
   Future<void> takeScreenshot(String screenshotName) async {
-    await callbackManager.takeScreenshot(screenshotName);
+    try {
+      final Uint8List? data = await _channel.invokeMethod<Uint8List>('captureScreenshot');
+      // This is proof of concept, the screenshot is dropped.
+      print('Captured screenshot with ${data?.lengthInBytes} bytes');
+    } on MissingPluginException {
+      print('Warning: integration_test plugin was not detected.');
+    } on PlatformException {
+      await callbackManager.takeScreenshot(screenshotName);
+    }
   }
 
   /// The callback function to response the driver side input.
