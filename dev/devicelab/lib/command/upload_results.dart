@@ -20,6 +20,7 @@ class UploadResultsCommand extends Command<void> {
           'checkouts run in detached HEAD state, so the branch must be passed.',
     );
     argParser.addOption('luci-builder', help: '[Flutter infrastructure] Name of the LUCI builder being run on.');
+    argParser.addOption('test-status', help: 'Test status: Succeeded|Failed');
   }
 
   @override
@@ -35,6 +36,7 @@ class UploadResultsCommand extends Command<void> {
     final bool? isTestFlaky = argResults!['test-flaky'] as bool?;
     final String? gitBranch = argResults!['git-branch'] as String?;
     final String? builderName = argResults!['luci-builder'] as String?;
+    final String? testStatus = argResults!['test-status'] as String?;
 
     final Cocoon cocoon = Cocoon(serviceAccountTokenPath: serviceAccountTokenFile);
     return cocoon.sendResultsPath(
@@ -42,6 +44,7 @@ class UploadResultsCommand extends Command<void> {
       isTestFlaky: isTestFlaky,
       gitBranch: gitBranch,
       builderName: builderName,
+      testStatus: testStatus,
     );
   }
 }

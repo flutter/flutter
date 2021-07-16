@@ -85,6 +85,7 @@ class Cocoon {
     bool? isTestFlaky,
     String? gitBranch,
     String? builderName,
+    String? testStatus,
   }) async {
     Map<String, dynamic> resultsJson = <String, dynamic>{};
     if (resultsPath != null) {
@@ -94,8 +95,7 @@ class Cocoon {
       resultsJson['CommitBranch'] = gitBranch;
       resultsJson['CommitSha'] = commitSha;
       resultsJson['BuilderName'] = builderName;
-      // Test status will always be `Succeeded` when sending results to cocoon.
-      resultsJson['NewStatus'] = 'Succeeded';
+      resultsJson['NewStatus'] = testStatus;
     }
     resultsJson['TestFlaky'] = isTestFlaky ?? false;
     await _sendUpdateTaskRequest(resultsJson);

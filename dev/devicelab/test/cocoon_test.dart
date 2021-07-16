@@ -157,6 +157,29 @@ void main() {
       fs.file(resultsPath).writeAsStringSync(updateTaskJson);
       await cocoon.sendResultsPath(resultsPath: resultsPath);
     });
+
+    test('throws client exception on non-200 responses', () async {
+      mockClient = MockClient((Request request) async => Response('', 500));
+
+      cocoon = Cocoon(
+        serviceAccountTokenPath: serviceAccountTokenPath,
+        fs: fs,
+        httpClient: mockClient,
+        requestRetryLimit: 0,
+      );
+
+      const String resultsPath = 'results.json';
+      const String updateTaskJson = '{'
+          '"CommitBranch":"master",'
+          '"CommitSha":"$commitSha",'
+          '"BuilderName":"builderAbc",'
+          '"NewStatus":"Succeeded",'
+          '"ResultData":{"i":0.0,"j":0.0,"not_a_metric":"something"},'
+          '"BenchmarkScoreKeys":["i","j"]}';
+      fs.file(resultsPath).writeAsStringSync(updateTaskJson);
+      expect(() => cocoon.sendResultsPath(resultsPath: resultsPath),
+          throwsA(isA<ClientException>()));
+    });
   });
 
   group('AuthenticatedCocoonClient', () {
