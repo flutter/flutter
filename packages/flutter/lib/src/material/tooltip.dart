@@ -498,9 +498,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   void _handleLongPress() {
     _longPressActivated = true;
     final bool tooltipCreated = ensureTooltipVisible();
-    if (tooltipCreated) {
-      Feedback.forLongPress(context);
-    }
+    if (tooltipCreated) Feedback.forLongPress(context);
   }
 
   @override
@@ -665,29 +663,29 @@ class _TooltipOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget result = IgnorePointer(
-        child: FadeTransition(
-      opacity: animation,
-      child: ConstrainedBox(
-        constraints: BoxConstraints(minHeight: height),
-        child: DefaultTextStyle(
-          style: Theme.of(context).textTheme.bodyText2!,
-          child: Container(
-            decoration: decoration,
-            padding: padding,
-            margin: margin,
-            child: Center(
-              widthFactor: 1.0,
-              heightFactor: 1.0,
-              child: tooltip ??
-                  Text(
-                    message!,
-                    style: textStyle,
-                  ),
+      child: FadeTransition(
+        opacity: animation,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minHeight: height),
+          child: DefaultTextStyle(
+            style: Theme.of(context).textTheme.bodyText2!,
+            child: Container(
+              decoration: decoration,
+              padding: padding,
+              margin: margin,
+              child: Center(
+                  widthFactor: 1.0,
+                  heightFactor: 1.0,
+                  child: tooltip ??
+                      Text(
+                        message!,
+                        style: textStyle,
+                      )),
             ),
           ),
         ),
       ),
-    ));
+    );
     if (onEnter != null || onExit != null) {
       result = MouseRegion(
         onEnter: onEnter,
