@@ -1,0 +1,60 @@
+# Copyright 2021 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# A ninja action script that calls the given python script with `python3`
+# instead of the default `python` (which might be `python2`).
+#
+# Example
+#
+# ```
+# python3_action("run_this_guy_once") {
+#   script = "doprocessing.py"
+#   sources = [ "my_configuration.txt" ]
+#   outputs = [ "$target_gen_dir/insightful_output.txt" ]
+#
+#   # Our script imports this Python file so we want to rebuild if it
+#   # changes.
+#   source_prereqs = [ "helper_library.py" ]
+#
+#   # Note that we have to manually pass the sources to our script if
+#   # the script needs them as inputs.
+#   args = [ "--out", to_build_path(target_gen_dir) ] + sources
+# }
+# ```
+#
+# Parameters
+#  args
+#  data
+#  datadeps
+#  depfile
+#  deps
+#  inputs
+#  metadata
+#  outputs (required)
+#  script (required)
+#  source_prereqs
+#  sources
+template("python3_action") {
+  assert(defined(invoker.outputs), "outputs is required")
+  assert(defined(invoker.script), "script is required")
+
+  action(target_name) {
+    forward_variables_from(invoker,
+                           [
+                             "data",
+                             "datadeps",
+                             "depfile",
+                             "deps",
+                             "inputs",
+                             "metadata",
+                             "outputs",
+                             "source_prereqs",
+                             "sources",
+                           ])
+
+    script = "//flutter/tools/python/run_python3_action.py"
+
+    args = [ rebase_path(invoker.script) ] + invoker.args
+  }
+}
