@@ -1439,7 +1439,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///   }
   /// }
   /// ```
-  /// {@end-toll}
+  /// {@end-tool}
   ///
   /// {@tool snippet}
   /// If you register a callback manually, be sure to remove the callback with
