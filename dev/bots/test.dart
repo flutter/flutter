@@ -25,7 +25,7 @@ typedef ShardRunner = Future<void> Function();
 ///
 /// If the output does not match expectations, the function shall return an
 /// appropriate error message.
-typedef OutputChecker = String? Function(CommandResult?);
+typedef OutputChecker = String? Function(CommandResult);
 
 final String exe = Platform.isWindows ? '.exe' : '';
 final String bat = Platform.isWindows ? '.bat' : '';
@@ -146,7 +146,7 @@ Future<void> _validateEngineHash() async {
     return;
   }
   final String expectedVersion = File(engineVersionFile).readAsStringSync().trim();
-  final CommandResult result = (await runCommand(flutterTester, <String>['--help'], outputMode: OutputMode.capture))!;
+  final CommandResult result = await runCommand(flutterTester, <String>['--help'], outputMode: OutputMode.capture);
   final String actualVersion = result.flattenedStderr!.split('\n').firstWhere((final String line) {
     return line.startsWith('Flutter Engine Version:');
   });
@@ -197,8 +197,8 @@ Future<void> _runSmokeTests() async {
             script:
                 path.join('test_smoke_test', 'pending_timer_fail_test.dart'),
             expectFailure: true,
-            printOutput: false, outputChecker: (CommandResult? result) {
-          return result!.flattenedStdout!.contains('failingPendingTimerTest')
+            printOutput: false, outputChecker: (CommandResult result) {
+          return result.flattenedStdout!.contains('failingPendingTimerTest')
               ? null
               : 'Failed to find the stack trace for the pending Timer.';
         }),
@@ -758,8 +758,8 @@ Future<void> _runFrameworkTests() async {
       script: path.join('test', 'bindings_test_failure.dart'),
       expectFailure: true,
       printOutput: false,
-      outputChecker: (CommandResult? result) {
-        final Iterable<Match> matches = httpClientWarning.allMatches(result!.flattenedStdout!);
+      outputChecker: (CommandResult result) {
+        final Iterable<Match> matches = httpClientWarning.allMatches(result.flattenedStdout!);
         if (matches == null || matches.isEmpty || matches.length > 1) {
           return 'Failed to print warning about HttpClientUsage, or printed it too many times.\n'
                  'stdout:\n${result.flattenedStdout}';
@@ -1356,7 +1356,7 @@ Future<void> _runWebDebugTest(String target, {
 }) async {
   final String testAppDirectory = path.join(flutterRoot, 'dev', 'integration_tests', 'web');
   bool success = false;
-  final CommandResult result = (await runCommand(
+  final CommandResult result = await runCommand(
     flutter,
     <String>[
       'run',
@@ -1388,7 +1388,7 @@ Future<void> _runWebDebugTest(String target, {
     environment: <String, String>{
       'FLUTTER_WEB': 'true',
     },
-  ))!;
+  );
 
   if (success) {
     print('${green}Web stack trace integration test passed.$reset');
@@ -1529,7 +1529,6 @@ Future<void> _runFlutterTest(String workingDirectory, {
   bool printOutput = true,
   OutputChecker? outputChecker,
   List<String> options = const <String>[],
-  bool skip = false,
   Map<String, String>? environment,
   List<String> tests = const <String>[],
 }) async {
@@ -1553,8 +1552,6 @@ Future<void> _runFlutterTest(String workingDirectory, {
       print('Script: $green$script$reset');
       if (!printOutput)
         print('This is one of the tests that does not normally print output.');
-      if (skip)
-        print('This is one of the tests that is normally skipped in this configuration.');
       exit(1);
     }
     args.add(script);
@@ -1567,13 +1564,12 @@ Future<void> _runFlutterTest(String workingDirectory, {
       ? OutputMode.print
       : OutputMode.capture;
 
-    final CommandResult? result = await runCommand(
+    final CommandResult result = await runCommand(
       flutter,
       args,
       workingDirectory: workingDirectory,
       expectNonZeroExit: expectFailure,
       outputMode: outputMode,
-      skip: skip,
       environment: environment,
     );
 

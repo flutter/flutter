@@ -423,22 +423,22 @@ Future<void> verifyIntegrationTestTimeouts(String workingDirectory) async {
 }
 
 Future<void> verifyInternationalizations() async {
-  final EvalResult materialGenResult = (await _evalCommand(
+  final EvalResult materialGenResult = await _evalCommand(
     dart,
     <String>[
       path.join('dev', 'tools', 'localization', 'bin', 'gen_localizations.dart'),
       '--material',
     ],
     workingDirectory: flutterRoot,
-  ))!;
-  final EvalResult cupertinoGenResult = (await _evalCommand(
+  );
+  final EvalResult cupertinoGenResult = await _evalCommand(
     dart,
     <String>[
       path.join('dev', 'tools', 'localization', 'bin', 'gen_localizations.dart'),
       '--cupertino',
     ],
     workingDirectory: flutterRoot,
-  ))!;
+  );
 
   final String materialLocalizationsFile = path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'generated_material_localizations.dart');
   final String cupertinoLocalizationsFile = path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'generated_cupertino_localizations.dart');
@@ -1027,11 +1027,11 @@ bool _listEquals<T>(List<T> a, List<T> b) {
 }
 
 Future<List<File>> _gitFiles(String workingDirectory, {bool runSilently = true}) async {
-  final EvalResult evalResult = (await _evalCommand(
+  final EvalResult evalResult = await _evalCommand(
     'git', <String>['ls-files', '-z'],
     workingDirectory: workingDirectory,
     runSilently: runSilently,
-  ))!;
+  );
   if (evalResult.exitCode != 0) {
     exitWithError(<String>[
       'git ls-files failed with exit code ${evalResult.exitCode}',
@@ -1112,19 +1112,14 @@ class EvalResult {
 }
 
 // TODO(ianh): Refactor this to reuse the code in run_command.dart
-Future<EvalResult?> _evalCommand(String executable, List<String> arguments, {
+Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
   required String workingDirectory,
   Map<String, String>? environment,
-  bool skip = false,
   bool allowNonZeroExit = false,
   bool runSilently = false,
 }) async {
   final String commandDescription = '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
   final String relativeWorkingDir = path.relative(workingDirectory);
-  if (skip) {
-    printProgress('SKIPPING', relativeWorkingDir, commandDescription);
-    return null;
-  }
 
   if (!runSilently) {
     printProgress('RUNNING', relativeWorkingDir, commandDescription);
@@ -1220,11 +1215,11 @@ Future<void> _checkConsumerDependencies() async {
 Future<CommandResult> _runFlutterAnalyze(String workingDirectory, {
   List<String> options = const <String>[],
 }) async {
-  return (await runCommand(
+  return runCommand(
     flutter,
     <String>['analyze', ...options],
     workingDirectory: workingDirectory,
-  ))!;
+  );
 }
 
 final RegExp _importPattern = RegExp(r'''^\s*import (['"])package:flutter/([^.]+)\.dart\1''');

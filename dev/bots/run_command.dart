@@ -150,27 +150,22 @@ Future<Command> startCommand(String executable, List<String> arguments, {
 /// an indefinitely running process, for example, by waiting until the process
 /// emits certain output.
 ///
-/// Returns the result of the finished process, or null if `skip` is true.
+/// Returns the result of the finished process.
 ///
 /// `outputMode` controls where the standard output from the command process
 /// goes. See [OutputMode].
-Future<CommandResult?> runCommand(String executable, List<String> arguments, {
+Future<CommandResult> runCommand(String executable, List<String> arguments, {
   String? workingDirectory,
   Map<String, String>? environment,
   bool expectNonZeroExit = false,
   int? expectedExitCode,
   String? failureMessage,
   OutputMode outputMode = OutputMode.print,
-  bool skip = false,
   bool Function(String)? removeLine,
   void Function(String, io.Process)? outputListener,
 }) async {
   final String commandDescription = '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
   final String relativeWorkingDir = path.relative(workingDirectory ?? io.Directory.current.path);
-  if (skip) {
-    printProgress('SKIPPING', relativeWorkingDir, commandDescription);
-    return null;
-  }
 
   final Command command = await startCommand(executable, arguments,
     workingDirectory: workingDirectory,
