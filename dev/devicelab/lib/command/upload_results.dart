@@ -23,7 +23,7 @@ class UploadResultsCommand extends Command<void> {
   }
 
   @override
-  String get name => 'upload-results';
+  String get name => 'upload-metrics';
 
   @override
   String get description => '[Flutter infrastructure] Upload results data to Cocoon';
