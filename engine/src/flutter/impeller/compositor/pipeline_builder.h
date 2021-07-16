@@ -37,13 +37,13 @@ struct PipelineBuilder {
   //----------------------------------------------------------------------------
   /// @brief      Create a default pipeline descriptor using the combination
   ///             reflected shader information. The descriptor can be configured
-  ///             further before a pipline state object is created using it.
+  ///             further before a pipeline state object is created using it.
   ///
   /// @param[in]  context  The context
   ///
   /// @return     If the combination of reflected shader information is
   ///             compatible and the requisite functions can be found in the
-  ///             context, a pipeine descriptor.
+  ///             context, a pipeline descriptor.
   ///
   static std::optional<PipelineDescriptor> MakeDefaultPipelineDescriptor(
       const Context& context) {

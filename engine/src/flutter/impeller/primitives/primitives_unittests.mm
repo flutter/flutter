@@ -13,8 +13,8 @@
 #include "impeller/image/compressed_image.h"
 #include "impeller/image/image.h"
 #include "impeller/playground/playground.h"
-#include "impeller/primitives/box.frag.h"
-#include "impeller/primitives/box.vert.h"
+#include "impeller/primitives/box_fade.frag.h"
+#include "impeller/primitives/box_fade.vert.h"
 
 namespace impeller {
 namespace testing {
@@ -22,17 +22,18 @@ namespace testing {
 using PrimitivesTest = Playground;
 
 TEST_F(PrimitivesTest, CanCreateBoxPrimitive) {
+  using VS = BoxFadeVertexShader;
+  using FS = BoxFadeFragmentShader;
   auto context = GetContext();
   ASSERT_TRUE(context);
-  using BoxPipelineBuilder =
-      PipelineBuilder<BoxVertexShader, BoxFragmentShader>;
+  using BoxPipelineBuilder = PipelineBuilder<VS, FS>;
   auto desc = BoxPipelineBuilder::MakeDefaultPipelineDescriptor(*context);
   auto box_pipeline =
       context->GetPipelineLibrary()->GetRenderPipeline(std::move(desc)).get();
   ASSERT_TRUE(box_pipeline);
 
   // Vertex buffer.
-  VertexBufferBuilder<BoxVertexShader::PerVertexData> vertex_builder;
+  VertexBufferBuilder<VS::PerVertexData> vertex_builder;
   vertex_builder.SetLabel("Box");
   vertex_builder.AddVertices({
       {{100, 100, 0.0}, {0.0, 0.0}},  // 1
@@ -59,21 +60,21 @@ TEST_F(PrimitivesTest, CanCreateBoxPrimitive) {
 
     cmd.BindVertices(vertex_buffer);
 
-    BoxVertexShader::UniformBuffer uniforms;
+    VS::UniformBuffer uniforms;
     uniforms.mvp = Matrix::MakeOrthographic(surface.GetSize());
-    BoxVertexShader::BindUniformBuffer(
-        cmd, pass.GetTransientsBuffer().EmplaceUniform(uniforms));
+    VS::BindUniformBuffer(cmd,
+                          pass.GetTransientsBuffer().EmplaceUniform(uniforms));
 
-    BoxFragmentShader::FrameInfo frame_info;
+    FS::FrameInfo frame_info;
     frame_info.current_time = fml::TimePoint::Now().ToEpochDelta().ToSecondsF();
     frame_info.cursor_position = GetCursorPosition();
     frame_info.window_size.x = GetWindowSize().width;
     frame_info.window_size.y = GetWindowSize().height;
 
-    BoxFragmentShader::BindFrameInfo(
-        cmd, pass.GetTransientsBuffer().EmplaceUniform(frame_info));
-    BoxFragmentShader::BindContents1(cmd, boston, sampler);
-    BoxFragmentShader::BindContents2(cmd, bridge, sampler);
+    FS::BindFrameInfo(cmd,
+                      pass.GetTransientsBuffer().EmplaceUniform(frame_info));
+    FS::BindContents1(cmd, boston, sampler);
+    FS::BindContents2(cmd, bridge, sampler);
 
     cmd.primitive_type = PrimitiveType::kTriangle;
     if (!pass.RecordCommand(std::move(cmd))) {
@@ -85,17 +86,18 @@ TEST_F(PrimitivesTest, CanCreateBoxPrimitive) {
 }
 
 TEST_F(PrimitivesTest, CanRenderMultiplePrimitives) {
+  using VS = BoxFadeVertexShader;
+  using FS = BoxFadeFragmentShader;
   auto context = GetContext();
   ASSERT_TRUE(context);
-  using BoxPipelineBuilder =
-      PipelineBuilder<BoxVertexShader, BoxFragmentShader>;
+  using BoxPipelineBuilder = PipelineBuilder<VS, FS>;
   auto desc = BoxPipelineBuilder::MakeDefaultPipelineDescriptor(*context);
   auto box_pipeline =
       context->GetPipelineLibrary()->GetRenderPipeline(std::move(desc)).get();
   ASSERT_TRUE(box_pipeline);
 
   // Vertex buffer.
-  VertexBufferBuilder<BoxVertexShader::PerVertexData> vertex_builder;
+  VertexBufferBuilder<VS::PerVertexData> vertex_builder;
   vertex_builder.SetLabel("Box");
   vertex_builder.AddVertices({
       {{100, 100, 0.0}, {0.0, 0.0}},  // 1
@@ -123,45 +125,35 @@ TEST_F(PrimitivesTest, CanRenderMultiplePrimitives) {
 
     cmd.BindVertices(vertex_buffer);
 
-    BoxFragmentShader::FrameInfo frame_info;
+    FS::FrameInfo frame_info;
     frame_info.current_time = fml::TimePoint::Now().ToEpochDelta().ToSecondsF();
     frame_info.cursor_position = GetCursorPosition();
     frame_info.window_size.x = GetWindowSize().width;
     frame_info.window_size.y = GetWindowSize().height;
 
-    BoxFragmentShader::BindFrameInfo(
-        cmd, pass.GetTransientsBuffer().EmplaceUniform(frame_info));
-    BoxFragmentShader::BindContents1(cmd, boston, sampler);
-    BoxFragmentShader::BindContents2(cmd, bridge, sampler);
+    FS::BindFrameInfo(cmd,
+                      pass.GetTransientsBuffer().EmplaceUniform(frame_info));
+    FS::BindContents1(cmd, boston, sampler);
+    FS::BindContents2(cmd, bridge, sampler);
 
     cmd.primitive_type = PrimitiveType::kTriangle;
 
-    {
-      BoxVertexShader::UniformBuffer uniforms;
-      uniforms.mvp = Matrix::MakeOrthographic(surface.GetSize());
-      BoxVertexShader::BindUniformBuffer(
-          cmd, pass.GetTransientsBuffer().EmplaceUniform(uniforms));
-
-      if (!pass.RecordCommand(cmd)) {
-        return false;
-      }
-    }
-
-    {
-      BoxVertexShader::UniformBuffer uniforms;
-      uniforms.mvp = Matrix::MakeOrthographic(surface.GetSize()) *
-                     Matrix::MakeTranslation({100.0, 100.0, 0.0});
-      BoxVertexShader::BindUniformBuffer(
-          cmd, pass.GetTransientsBuffer().EmplaceUniform(uniforms));
-
-      if (!pass.RecordCommand(cmd)) {
-        return false;
+    for (size_t i = 0; i < 50; i++) {
+      for (size_t j = 0; j < 50; j++) {
+        VS::UniformBuffer uniforms;
+        uniforms.mvp = Matrix::MakeOrthographic(surface.GetSize()) *
+                       Matrix::MakeTranslation({i * 50.0f, j * 50.0f, 0.0f});
+        VS::BindUniformBuffer(
+            cmd, pass.GetTransientsBuffer().EmplaceUniform(uniforms));
+        if (!pass.RecordCommand(cmd)) {
+          return false;
+        }
       }
     }
 
     return true;
   };
-  // OpenPlaygroundHere(callback);
+  OpenPlaygroundHere(callback);
 }
 
 }  // namespace testing
