@@ -101,11 +101,11 @@ class AppServer {
   }
 
   final Future<String> onChromeError;
-  final io.HttpServer? _server;
-  final Chrome? chrome;
+  final io.HttpServer _server;
+  final Chrome chrome;
 
   Future<void> stop() async {
-    chrome?.stop();
-    await _server?.close();
+    chrome.stop();
+    await _server.close();
   }
 }

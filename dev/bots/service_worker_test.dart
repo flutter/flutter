@@ -157,7 +157,7 @@ Future<void> runWebServiceWorkerTest({
     reportedVersion = null;
 
     print('With cache: test page reload');
-    await server!.chrome!.reloadPage();
+    await server!.chrome.reloadPage();
     await waitForAppToLoad(<String, int>{
       'CLOSE': 1,
       'flutter_service_worker.js': 1,
@@ -174,7 +174,7 @@ Future<void> runWebServiceWorkerTest({
     await _rebuildApp(version: 2);
 
     // Since we're caching, we need to ignore cache when reloading the page.
-    await server!.chrome!.reloadPage(ignoreCache: true);
+    await server!.chrome.reloadPage(ignoreCache: true);
     await waitForAppToLoad(<String, int>{
       'CLOSE': 1,
       'flutter_service_worker.js': 2,
@@ -230,7 +230,7 @@ Future<void> runWebServiceWorkerTest({
     reportedVersion = null;
 
     print('No cache: test page reload');
-    await server!.chrome!.reloadPage();
+    await server!.chrome.reloadPage();
     await waitForAppToLoad(<String, int>{
       'CLOSE': 1,
       'flutter_service_worker.js': 1,
@@ -253,7 +253,7 @@ Future<void> runWebServiceWorkerTest({
     // refresh when running Chrome manually as normal. At the time of writing
     // this test I wasn't able to figure out what's wrong with the way we run
     // Chrome from tests.
-    await server!.chrome!.reloadPage(ignoreCache: true);
+    await server!.chrome.reloadPage(ignoreCache: true);
     await waitForAppToLoad(<String, int>{
       'CLOSE': 1,
       'flutter_service_worker.js': 1,
