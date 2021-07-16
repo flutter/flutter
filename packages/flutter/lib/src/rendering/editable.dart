@@ -130,7 +130,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     Color? selectionColor,
     double textScaleFactor = 1.0,
     TextSelection? selection,
-    required TextEditingModel textEditingModel,
     required ViewportOffset offset,
     @Deprecated(
       'Uses the textSelectionDelegate.userUpdateTextEditingValue instead. '
@@ -165,7 +164,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     List<RenderBox>? children,
   }) : assert(textAlign != null),
        assert(textDirection != null, 'RenderEditable created without a textDirection.'),
-       assert(textEditingModel != null),
        assert(maxLines == null || maxLines > 0),
        assert(minLines == null || minLines > 0),
        assert(startHandleLayerLink != null),
@@ -223,8 +221,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
        _readOnly = readOnly,
        _forceLine = forceLine,
        _clipBehavior = clipBehavior,
-       _hasFocus = hasFocus ?? false,
-       _textEditingModel = textEditingModel {
+       _hasFocus = hasFocus ?? false {
     assert(_showCursor != null);
     assert(!_showCursor.value || cursorColor != null);
 
@@ -246,8 +243,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     addAll(children);
     _extractPlaceholderSpans(text);
   }
-
-  late final TextEditingModel _textEditingModel;
 
   @override
   void setupParentData(RenderBox child) {
@@ -651,7 +646,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       extentOffset: _plainText.length,
     );
     */
-    _setSelection(_textEditingModel.extendSelectionToEnd(), cause);
+    _setSelection(TextEditingModel(value: textSelectionDelegate.textEditingValue).extendSelectionToEnd(), cause);
   }
 
   // Extend the current selection to the start of the field.

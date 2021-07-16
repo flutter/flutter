@@ -1517,7 +1517,7 @@ class EditableText extends StatefulWidget {
 }
 
 /// State for a [EditableText].
-class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin<EditableText>, WidgetsBindingObserver, TickerProviderStateMixin<EditableText>, TextSelectionDelegate implements TextInputClient, AutofillClient, TextEditingActionTarget {
+class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin<EditableText>, WidgetsBindingObserver, TickerProviderStateMixin<EditableText>, TextSelectionDelegate, TextEditingActionTarget implements TextInputClient, AutofillClient {
   Timer? _cursorTimer;
   bool _targetCursorVisibility = false;
   final ValueNotifier<bool> _cursorVisibilityNotifier = ValueNotifier<bool>(true);
@@ -1560,14 +1560,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// - Changing the selection using a physical keyboard.
   bool get _shouldCreateInputConnection => kIsWeb || !widget.readOnly;
 
-  // TODO(justinmc): Document. Cache.
-  @override
-  TextEditingModel get textEditingModel {
-    return TextEditingModel(
-      value: _value,
-    );
-  }
-
   // This value is an eyeball estimation of the time it takes for the iOS cursor
   // to ease in and out.
   static const Duration _fadeDuration = Duration(milliseconds: 250);
@@ -1601,7 +1593,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     });
   }
 
-  // TODO(justinmc): Make this public and call from DTEA?
+  // Start TextEditingActionTarget.
+
+  // TODO(justinmc): Document. Cache.
+  @override
+  TextEditingModel get textEditingModel {
+    return TextEditingModel(
+      value: _value,
+    );
+  }
+
   @override
   void setSelection(TextSelection nextSelection, SelectionChangedCause cause) {
     if (nextSelection.isValid) {
@@ -1625,6 +1626,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       cause,
     );
   }
+
+  // End TextEditingActionTarget.
 
   void _handleSelectionChange(
     TextSelection nextSelection,
@@ -2737,7 +2740,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                 expands: widget.expands,
                 strutStyle: widget.strutStyle,
                 selectionColor: widget.selectionColor,
-                textEditingModel: textEditingModel,
                 textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
                 textAlign: widget.textAlign,
                 textDirection: _textDirection,
@@ -2843,7 +2845,6 @@ class _Editable extends MultiChildRenderObjectWidget {
     this.selectionHeightStyle = ui.BoxHeightStyle.tight,
     this.selectionWidthStyle = ui.BoxWidthStyle.tight,
     this.enableInteractiveSelection = true,
-    required this.textEditingModel,
     required this.textSelectionDelegate,
     required this.devicePixelRatio,
     this.promptRectRange,
@@ -2904,7 +2905,6 @@ class _Editable extends MultiChildRenderObjectWidget {
   final ui.BoxHeightStyle selectionHeightStyle;
   final ui.BoxWidthStyle selectionWidthStyle;
   final bool enableInteractiveSelection;
-  final TextEditingModel textEditingModel;
   final TextSelectionDelegate textSelectionDelegate;
   final double devicePixelRatio;
   final TextRange? promptRectRange;
@@ -2915,7 +2915,6 @@ class _Editable extends MultiChildRenderObjectWidget {
   RenderEditable createRenderObject(BuildContext context) {
     return RenderEditable(
       text: inlineSpan,
-      textEditingModel: textEditingModel,
       cursorColor: cursorColor,
       startHandleLayerLink: startHandleLayerLink,
       endHandleLayerLink: endHandleLayerLink,

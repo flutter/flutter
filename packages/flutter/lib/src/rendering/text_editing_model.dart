@@ -342,16 +342,8 @@ class TextEditingModel {
     );
   }
 
-  // TODO(justinmc): Instead of taking a TextPainter, make it take RenderEditable
-  // but as a TextMetrics implementer, with only getters on some text info exposed.
   TextSelection expandSelectionLeftByLine(TextMetrics textMetrics) {
     assert(_selection != null);
-
-    /*
-    if (!selectionEnabled) {
-      return moveSelectionLeftByLine(cause);
-    }
-    */
 
     final int firstOffset = math.min(_selection.baseOffset, _selection.extentOffset);
     final int startPoint = TextEditingModel.previousCharacter(firstOffset, _text, false);
@@ -479,6 +471,8 @@ class TextEditingModel {
 }
 
 // TODO(justinmc): Document and move to own file.
+// TODO(justinmc): Rename to TextEditingMetrics?
+/// A read-only interface for accessing information about some editable text.
 abstract class TextMetrics {
   TextSelection getLineAtOffset(String text, TextPosition position);
 }

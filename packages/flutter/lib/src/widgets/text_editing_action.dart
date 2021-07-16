@@ -19,6 +19,7 @@ import 'framework.dart';
 ///   * [EditableTextState], which implements this and is the most typical
 ///     target of a TextEditingAction.
 abstract class TextEditingActionTarget {
+  // TODO(justinmc): Could this be made private?
   /// The renderer that handles [TextEditingAction]s.
   ///
   /// See also:
@@ -26,11 +27,17 @@ abstract class TextEditingActionTarget {
   /// * [EditableTextState.renderEditable], which overrides this.
   RenderEditable get renderEditable;
 
-  // TODO(justinmc): Document.
-  // TODO(justinmc): What if I scrap the model and just use this abstract class?
+  // TODO(justinmc): Document everything.
   TextEditingModel get textEditingModel;
 
   void setSelection(TextSelection nextState, SelectionChangedCause cause);
+
+  void expandSelectionLeftByLine() {
+    final TextSelection nextSelection = renderEditable.selectionEnabled
+        ? textEditingModel.expandSelectionLeftByLine(renderEditable)
+        : textEditingModel.moveSelectionLeftByLine();
+    setSelection(nextSelection, SelectionChangedCause.keyboard);
+  }
 }
 
 /// An [Action] related to editing text.

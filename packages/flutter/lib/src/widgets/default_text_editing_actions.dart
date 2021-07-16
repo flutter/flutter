@@ -131,15 +131,16 @@ class _DeleteForwardByLineTextAction extends TextEditingAction<DeleteForwardByLi
 class _ExpandSelectionLeftByLineTextAction extends TextEditingAction<ExpandSelectionLeftByLineTextIntent> {
   @override
   Object? invoke(ExpandSelectionLeftByLineTextIntent intent, [BuildContext? context]) {
-    //textEditingActionTarget!.renderEditable.expandSelectionLeftByLine(SelectionChangedCause.keyboard);
-
-    // TODO(justinmc): Or, I could put these methods on TextEditingActionTarget,
-    // so there's no logic in here.
-    print('justin expandSelectionLeftByLine');
+    textEditingActionTarget!.expandSelectionLeftByLine();
+    // TODO(justinmc): Rather than putting these methods in TextEditingActionTarget,
+    // I could also just put the logic here. But I think I like the idea of TextEditingActionTarget
+    // as the keeper of bare bones text editing widget logic.
+    /*
     final TextSelection nextSelection = textEditingActionTarget!.renderEditable.selectionEnabled
         ? textEditingActionTarget!.textEditingModel.expandSelectionLeftByLine(textEditingActionTarget!.renderEditable)
         : textEditingActionTarget!.textEditingModel.moveSelectionLeftByLine();
     textEditingActionTarget!.setSelection(nextSelection, SelectionChangedCause.keyboard);
+    */
   }
 }
 
