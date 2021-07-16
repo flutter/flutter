@@ -853,7 +853,7 @@ class _TextSelectionHandleOverlayState
     }
 
     final Rect? startHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.selection.start, end: widget.selection.start + firstSelectedGraphemeExtent));
-    final Rect? endHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.selection.end, end: widget.selection.end - lastSelectedGraphemeExtent));
+    final Rect? endHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.selection.end - lastSelectedGraphemeExtent, end: widget.selection.end));
 
     final Offset handleAnchor = widget.selectionControls.getHandleAnchor(
       type,
