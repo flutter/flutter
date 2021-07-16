@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:characters/characters.dart';
 import 'package:flutter/foundation.dart' show immutable;
 import 'package:flutter/painting.dart';
@@ -338,6 +340,55 @@ class TextEditingModel {
       baseOffset: rightOffset,
       extentOffset: rightOffset,
     );
+  }
+
+  TextSelection _getLineAtOffset(TextPosition position, TextPainter textPainter, bool obscureText) {
+    assert(
+      _textLayoutLastMaxWidth == constraints.maxWidth &&
+      _textLayoutLastMinWidth == constraints.minWidth,
+      'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).',
+    );
+    final TextRange line = textPainter.getLineBoundary(position);
+    if (position.offset >= line.end)
+      return TextSelection.fromPosition(position);
+    // If text is obscured, the entire string should be treated as one line.
+    if (obscureText) {
+      return TextSelection(baseOffset: 0, extentOffset: _text.length);
+    }
+    return TextSelection(baseOffset: line.start, extentOffset: line.end);
+  }
+
+  // TODO(justinmc): Instead of taking a TextPainter, make it take RenderEditable
+  // but as a TextMetrics implementer, with only getters on some text info exposed.
+  TextSelection expandSelectionLeftByLine(TextPainter textPainter, bool obscureText) {
+    assert(_selection != null);
+
+    /*
+    if (!selectionEnabled) {
+      return moveSelectionLeftByLine(cause);
+    }
+    */
+
+    final int firstOffset = math.min(_selection.baseOffset, _selection.extentOffset);
+    final int startPoint = TextEditingModel.previousCharacter(firstOffset, _text, false);
+    final TextSelection selectedLine = _getLineAtOffset(
+      TextPosition(offset: startPoint),
+      textPainter,
+      obscureText,
+    );
+
+    late final TextSelection nextSelection;
+    if (selection!.extentOffset <= selection!.baseOffset) {
+      nextSelection = selection!.copyWith(
+        extentOffset: selectedLine.baseOffset,
+      );
+    } else {
+      nextSelection = selection!.copyWith(
+        baseOffset: selectedLine.baseOffset,
+      );
+    }
+
+    return nextSelection;
   }
 
   /// Extend the current selection to the end of the field.
