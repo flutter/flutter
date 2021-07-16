@@ -24,7 +24,7 @@ platform_properties:
       caches: >-
         [
           {"name":"flutter_cocoapods","path":"cocoapods"},
-          {"name":"osx_sdk","path":"old_osx_sdk"},
+          {"name":"old_osx_sdk","path":"osx_sdk"},
           {"name":"builder_mac_engine","path":"builder"}
         ]
       os: Mac-10.15
