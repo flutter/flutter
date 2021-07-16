@@ -1687,14 +1687,14 @@ class _AnimatedRotationState extends ImplicitlyAnimatedWidgetState<AnimatedRotat
 /// up or down by the amount of it's height with each press of the corresponding button.
 ///
 /// ```dart
-///  Offset offset = Offset(0, 0);
+///  Offset offset = Offset.zero;
 ///
 ///  void _slideUp() {
-///    setState(() => offset -= Offset(0, 1));
+///    setState(() => offset -= const Offset(0, 1));
 ///  }
 ///
 ///  void _slideDown() {
-///    setState(() => offset += Offset(0, 1));
+///    setState(() => offset += const Offset(0, 1));
 ///  }
 ///
 ///  @override
