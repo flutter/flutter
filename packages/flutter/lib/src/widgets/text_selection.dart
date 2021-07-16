@@ -835,16 +835,20 @@ class _TextSelectionHandleOverlayState
     // of the last full selected grapheme cluster at the end of the selection.
     final InlineSpan span = widget.renderObject.text!;
     final String text = span.toPlainText();
-    final String selectedGraphemes = widget.selection.textInside(text);
     final int firstSelectedGraphemeExtent;
     final int lastSelectedGraphemeExtent;
-    if(selectedGraphemes.isEmpty){
+    
+    if(text.isEmpty || widget.selection.isCollapsed){
       // The call to selectedGraphemes.characters.first/last will throw a state
       // error if the given string is empty, so fall back to first/last character
       // range in this case.
+      //
+      // The call to widget.selection.textInside(text) will return a RangeError
+      // for a collapsed selection, fall back to this case when that happens.
       firstSelectedGraphemeExtent = 1;
       lastSelectedGraphemeExtent = 1;
     }else{
+      final String selectedGraphemes = widget.selection.textInside(text);
       firstSelectedGraphemeExtent = selectedGraphemes.characters.first.length;
       lastSelectedGraphemeExtent = selectedGraphemes.characters.last.length;
     }
