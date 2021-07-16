@@ -780,58 +780,73 @@ class _LargeTitleNavigationBarSliverDelegate
       border: border,
       backgroundColor: CupertinoDynamicColor.resolve(backgroundColor, context),
       brightness: brightness,
-      child: DefaultTextStyle(
-        style: CupertinoTheme.of(context).textTheme.textStyle,
-        child: Stack(
-          fit: StackFit.expand,
-          children: <Widget>[
-            Positioned(
-              top: persistentHeight,
-              left: 0.0,
-              right: 0.0,
-              bottom: 0.0,
-              child: ClipRect(
-                // The large title starts at the persistent bar.
-                // It's aligned with the bottom of the sliver and expands clipped
-                // and behind the persistent bar.
-                child: OverflowBox(
-                  minHeight: 0.0,
-                  maxHeight: double.infinity,
-                  alignment: AlignmentDirectional.bottomStart,
-                  child: Padding(
-                    padding: const EdgeInsetsDirectional.only(
-                      start: _kNavBarEdgePadding,
-                      bottom: 8.0, // Bottom has a different padding.
-                    ),
-                    child: SafeArea(
-                      top: false,
-                      bottom: false,
-                      child: AnimatedOpacity(
-                        opacity: showLargeTitle ? 1.0 : 0.0,
-                        duration: _kNavBarTitleFadeDuration,
-                        child: Semantics(
-                          header: true,
-                          child: DefaultTextStyle(
-                            style: CupertinoTheme.of(context).textTheme.navLargeTitleTextStyle,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            child: components.largeTitle!,
+      // `LayoutBuilder` provides the height of the nav bar for the large
+      // title magnification.
+      child: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          return DefaultTextStyle(
+            style: CupertinoTheme.of(context).textTheme.textStyle,
+            child: Stack(
+              fit: StackFit.expand,
+              children: <Widget>[
+                Positioned(
+                  top: persistentHeight,
+                  left: 0.0,
+                  right: 0.0,
+                  bottom: 0.0,
+                  child: ClipRect(
+                    // The large title starts at the persistent bar.
+                    // It's aligned with the bottom of the sliver and expands clipped
+                    // and behind the persistent bar.
+                    child: OverflowBox(
+                      minHeight: 0.0,
+                      maxHeight: double.infinity,
+                      alignment: AlignmentDirectional.bottomStart,
+                      child: Padding(
+                        padding: const EdgeInsetsDirectional.only(
+                          start: _kNavBarEdgePadding,
+                          bottom: 8.0, // Bottom has a different padding.
+                        ),
+                        child: SafeArea(
+                          top: false,
+                          bottom: false,
+                          child: AnimatedOpacity(
+                            opacity: showLargeTitle ? 1.0 : 0.0,
+                            duration: _kNavBarTitleFadeDuration,
+                            child: Semantics(
+                              header: true,
+                              child: DefaultTextStyle(
+                                style: CupertinoTheme.of(context).textTheme.navLargeTitleTextStyle,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                child: Transform.scale(
+                                  // This scale is estimated from the settings app in iOS 14.
+                                  // The large title scales linearly from 1.0 up to 1.15 magnification.
+                                  // The `constraints.maxHeight` value is the height of the nav bar, 
+                                  // and `maxExtent` is the default large title height the nav bar snaps back to. 
+                                  // The difference between the two heights is used to scale the title.
+                                  scale: math.max(1.0, math.min(1.15, 1 + (constraints.maxHeight - maxExtent) / maxExtent * 0.12)),
+                                  alignment: AlignmentDirectional.bottomStart,
+                                  child: components.largeTitle!,
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
+                Positioned(
+                  left: 0.0,
+                  right: 0.0,
+                  top: 0.0,
+                  child: persistentNavigationBar,
+                ),
+              ],
             ),
-            Positioned(
-              left: 0.0,
-              right: 0.0,
-              top: 0.0,
-              child: persistentNavigationBar,
-            ),
-          ],
-        ),
+          );
+        }
       ),
     );
 
