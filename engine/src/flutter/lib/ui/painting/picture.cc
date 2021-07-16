@@ -63,10 +63,11 @@ Dart_Handle Picture::toImage(uint32_t width,
         },
         width, height, raw_image_callback);
   } else {
-    if (!picture_.get()) {
+    if (!picture_.skia_object()) {
       return tonic::ToDart("Picture is null");
     }
-    return RasterizeToImage(picture_.get(), width, height, raw_image_callback);
+    return RasterizeToImage(picture_.skia_object(), width, height,
+                            raw_image_callback);
   }
 }
 
@@ -77,9 +78,9 @@ void Picture::dispose() {
 }
 
 size_t Picture::GetAllocationSize() const {
-  if (auto picture = picture_.get()) {
+  if (auto picture = picture_.skia_object()) {
     return picture->approximateBytesUsed() + sizeof(Picture);
-  } else if (auto display_list = display_list_.get()) {
+  } else if (display_list_) {
     return display_list_->bytes() + sizeof(Picture);
   } else {
     return sizeof(Picture);

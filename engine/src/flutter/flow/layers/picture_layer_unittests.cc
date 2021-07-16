@@ -28,7 +28,7 @@ TEST_F(PictureLayerTest, PaintBeforePrerollInvalidPictureDies) {
       layer_offset, SkiaGPUObject<SkPicture>(), false, false);
 
   EXPECT_DEATH_IF_SUPPORTED(layer->Paint(paint_context()),
-                            "picture_\\.get\\(\\)");
+                            "picture_\\.skia_object\\(\\)");
 }
 
 TEST_F(PictureLayerTest, PaintBeforePrerollDies) {

@@ -315,7 +315,7 @@ void ImageDecoder::Decode(fml::RefPtr<ImageDescriptor> descriptor_ref_ptr,
           auto uploaded =
               UploadRasterImage(std::move(decompressed), io_manager, flow);
 
-          if (!uploaded.get()) {
+          if (!uploaded.skia_object()) {
             FML_DLOG(ERROR) << "Could not upload image to the GPU.";
             result({}, std::move(flow));
             return;
