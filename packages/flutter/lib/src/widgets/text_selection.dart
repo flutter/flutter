@@ -837,7 +837,6 @@ class _TextSelectionHandleOverlayState
     final String text = span.toPlainText();
     final int firstSelectedGraphemeExtent;
     final int lastSelectedGraphemeExtent;
-    
     if(text.isEmpty || widget.selection.isCollapsed){
       // The call to selectedGraphemes.characters.first/last will throw a state
       // error if the given string is empty, so fall back to first/last character
