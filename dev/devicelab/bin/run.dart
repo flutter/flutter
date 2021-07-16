@@ -313,7 +313,6 @@ final ArgParser _argParser = ArgParser()
   )
   ..addOption(
     'git-branch',
-    mandatory: true,
     help: '[Flutter infrastructure] Git branch of the current commit. LUCI\n'
           'checkouts run in detached HEAD state, so the branch must be passed.',
   )
