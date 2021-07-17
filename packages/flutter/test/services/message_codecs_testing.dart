@@ -54,6 +54,8 @@ bool deepEqualsTypedData(TypedData valueA, TypedData valueB) {
     return valueB is Int32List && deepEqualsList(valueA, valueB);
   if (valueA is Int64List)
     return valueB is Int64List && deepEqualsList(valueA, valueB);
+  if (valueA is Float32List)
+    return valueB is Float32List && deepEqualsList(valueA, valueB);
   if (valueA is Float64List)
     return valueB is Float64List && deepEqualsList(valueA, valueB);
   throw 'Unexpected typed data: $valueA';
