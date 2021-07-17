@@ -249,9 +249,8 @@ class PackagesForwardCommand extends FlutterCommand {
 }
 
 class PackagesPassthroughCommand extends FlutterCommand {
-  PackagesPassthroughCommand() {
-    requiresPubspecYaml();
-  }
+  @override
+  ArgParser argParser = ArgParser.allowAnything();
 
   @override
   String get name => 'pub';

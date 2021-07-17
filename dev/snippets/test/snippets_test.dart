@@ -3,10 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:io' hide Platform;
-
+import 'dart:io' show Directory, File, Process, ProcessResult, ProcessSignal, ProcessStartMode, SystemEncoding;
 import 'package:path/path.dart' as path;
+import 'package:platform/platform.dart';
+import 'package:process/process.dart';
 import 'package:snippets/configuration.dart';
+import 'package:snippets/main.dart' show getChannelName;
 import 'package:snippets/snippets.dart';
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
@@ -215,4 +217,118 @@ void main() {
       expect(json['sourcePath'], equals('some/path.dart'));
     });
   });
+
+  group('getChannelName()', () {
+    test('does not call git if LUCI_BRANCH env var provided', () {
+      const String branch = 'stable';
+      final FakePlatform platform = FakePlatform(
+        environment: <String, String>{'LUCI_BRANCH': branch},
+      );
+      final FakeProcessManager processManager = FakeProcessManager(<FakeCommand>[]);
+      expect(
+        getChannelName(
+          platform: platform,
+          processManager: processManager,
+        ),
+        branch,
+      );
+      expect(processManager.hasRemainingExpectations, false);
+    });
+
+    test('calls git if LUCI_BRANCH env var is not provided', () {
+      const String branch = 'stable';
+      final FakePlatform platform = FakePlatform(
+        environment: <String, String>{},
+      );
+      final ProcessResult result = ProcessResult(0, 0, '## $branch...refs/heads/master', '');
+      final FakeProcessManager processManager = FakeProcessManager(
+        <FakeCommand>[FakeCommand('git status -b --porcelain', result)],
+      );
+      expect(
+        getChannelName(
+          platform: platform,
+          processManager: processManager,
+        ),
+        branch,
+      );
+      expect(processManager.hasRemainingExpectations, false);
+    });
+  });
+}
+
+const SystemEncoding systemEncoding = SystemEncoding();
+
+class FakeCommand {
+  FakeCommand(this.command, [ProcessResult? result]) : _result = result;
+  final String command;
+
+  final ProcessResult? _result;
+  ProcessResult get result => _result ?? ProcessResult(0, 0, '', '');
+}
+
+class FakeProcessManager implements ProcessManager {
+  FakeProcessManager(this.remainingExpectations);
+
+  final List<FakeCommand> remainingExpectations;
+
+  @override
+  bool canRun(dynamic command, {String? workingDirectory}) => true;
+
+  @override
+  Future<Process> start(
+    List<Object> command, {
+    String? workingDirectory,
+    Map<String, String>? environment,
+    bool includeParentEnvironment = true,
+    bool runInShell = false,
+    ProcessStartMode mode = ProcessStartMode.normal,
+  }) {
+    throw Exception('not implemented');
+  }
+
+  @override
+  Future<ProcessResult> run(
+    List<Object> command, {
+    String? workingDirectory,
+    Map<String, String>? environment,
+    bool includeParentEnvironment = true,
+    bool runInShell = false,
+    Encoding stdoutEncoding = systemEncoding,
+    Encoding stderrEncoding = systemEncoding,
+  }) {
+    throw Exception('not implemented');
+  }
+
+  @override
+  ProcessResult runSync(
+    List<Object> command, {
+    String? workingDirectory,
+    Map<String, String>? environment,
+    bool includeParentEnvironment = true,
+    bool runInShell = false,
+    Encoding stdoutEncoding = systemEncoding,
+    Encoding stderrEncoding = systemEncoding,
+  }) {
+    if (remainingExpectations.isEmpty) {
+      fail(
+        'Called FakeProcessManager with $command when no further commands were expected!',
+      );
+    }
+    final FakeCommand expectedCommand = remainingExpectations.removeAt(0);
+    final String expectedName = expectedCommand.command;
+    final String actualName = command.join(' ');
+    if (expectedName != actualName) {
+      fail(
+        'FakeProcessManager expected the command $expectedName but received $actualName',
+      );
+    }
+    return expectedCommand.result;
+  }
+
+  bool get hasRemainingExpectations => remainingExpectations.isNotEmpty;
+
+  @override
+  bool killPid(int pid, [ProcessSignal signal = ProcessSignal.sigterm]) {
+    throw Exception('not implemented');
+  }
 }

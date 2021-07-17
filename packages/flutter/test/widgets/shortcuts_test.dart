@@ -1077,4 +1077,171 @@ void main() {
       invoked = 0;
     });
   });
+
+  group('CallbackShortcuts', () {
+    testWidgets('trigger on key events', (WidgetTester tester) async {
+      int invoked = 0;
+      await tester.pumpWidget(
+        CallbackShortcuts(
+          bindings: <ShortcutActivator, VoidCallback>{
+            const SingleActivator(LogicalKeyboardKey.keyA): () {
+              invoked += 1;
+            },
+          },
+          child: const Focus(
+            autofocus: true,
+            child: Placeholder(),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
+      expect(invoked, equals(1));
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
+      expect(invoked, equals(1));
+    });
+
+    testWidgets('nested CallbackShortcuts stop propagation', (WidgetTester tester) async {
+      int invokedOuter = 0;
+      int invokedInner = 0;
+      await tester.pumpWidget(
+        CallbackShortcuts(
+          bindings: <ShortcutActivator, VoidCallback>{
+            const SingleActivator(LogicalKeyboardKey.keyA): () {
+              invokedOuter += 1;
+            },
+          },
+          child: CallbackShortcuts(
+            bindings: <ShortcutActivator, VoidCallback>{
+              const SingleActivator(LogicalKeyboardKey.keyA): () {
+                invokedInner += 1;
+              },
+            },
+            child: const Focus(
+              autofocus: true,
+              child: Placeholder(),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
+      expect(invokedOuter, equals(0));
+      expect(invokedInner, equals(1));
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
+      expect(invokedOuter, equals(0));
+      expect(invokedInner, equals(1));
+    });
+
+    testWidgets('non-overlapping nested CallbackShortcuts fire appropriately', (WidgetTester tester) async {
+      int invokedOuter = 0;
+      int invokedInner = 0;
+      await tester.pumpWidget(
+        CallbackShortcuts(
+          bindings: <ShortcutActivator, VoidCallback>{
+            const CharacterActivator('b'): () {
+              invokedOuter += 1;
+            },
+          },
+          child: CallbackShortcuts(
+            bindings: <ShortcutActivator, VoidCallback>{
+              const CharacterActivator('a'): () {
+                invokedInner += 1;
+              },
+            },
+            child: const Focus(
+              autofocus: true,
+              child: Placeholder(),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
+      expect(invokedOuter, equals(0));
+      expect(invokedInner, equals(1));
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyB);
+      expect(invokedOuter, equals(1));
+      expect(invokedInner, equals(1));
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyB);
+      expect(invokedOuter, equals(1));
+      expect(invokedInner, equals(1));
+    });
+
+    testWidgets('Works correctly with Shortcuts too', (WidgetTester tester) async {
+      int invokedCallbackA = 0;
+      int invokedCallbackB = 0;
+      int invokedActionA = 0;
+      int invokedActionB = 0;
+
+      void clear() {
+        invokedCallbackA = 0;
+        invokedCallbackB = 0;
+        invokedActionA = 0;
+        invokedActionB = 0;
+      }
+
+      await tester.pumpWidget(
+        Actions(
+          actions: <Type, Action<Intent>>{
+            TestIntent: TestAction(
+              onInvoke: (Intent intent) {
+                invokedActionA += 1;
+                return true;
+              },
+            ),
+            TestIntent2: TestAction(
+              onInvoke: (Intent intent) {
+                invokedActionB += 1;
+                return true;
+              },
+            ),
+          },
+          child: CallbackShortcuts(
+            bindings: <ShortcutActivator, VoidCallback>{
+              const CharacterActivator('b'): () {
+                invokedCallbackB += 1;
+              },
+            },
+            child: Shortcuts(
+              shortcuts: <LogicalKeySet, Intent>{
+                LogicalKeySet(LogicalKeyboardKey.keyA): const TestIntent(),
+                LogicalKeySet(LogicalKeyboardKey.keyB): const TestIntent2(),
+              },
+              child: CallbackShortcuts(
+                bindings: <ShortcutActivator, VoidCallback>{
+                  const CharacterActivator('a'): () {
+                    invokedCallbackA += 1;
+                  },
+                },
+                child: const Focus(
+                  autofocus: true,
+                  child: Placeholder(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
+      expect(invokedCallbackA, equals(1));
+      expect(invokedCallbackB, equals(0));
+      expect(invokedActionA, equals(0));
+      expect(invokedActionB, equals(0));
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
+      clear();
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyB);
+      expect(invokedCallbackA, equals(0));
+      expect(invokedCallbackB, equals(0));
+      expect(invokedActionA, equals(0));
+      expect(invokedActionB, equals(1));
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyB);
+    });
+  });
 }

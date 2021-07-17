@@ -215,6 +215,7 @@ Future<T> runInContext<T>(
       ),
       DevtoolsLauncher: () => DevtoolsServerLauncher(
         processManager: globals.processManager,
+        fileSystem: globals.fs,
         pubExecutable: globals.artifacts.getHostArtifact(HostArtifact.pubExecutable).path,
         logger: globals.logger,
         platform: globals.platform,
