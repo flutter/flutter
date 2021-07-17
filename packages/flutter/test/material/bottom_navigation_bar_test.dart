@@ -39,7 +39,7 @@ void main() {
       ),
     );
 
-    await tester.tap(find.text('Alarm'));
+    await tester.tap(find.text('Alarm'), warnIfMissed: false);
 
     expect(mutatedIndex, 1);
   });
@@ -844,21 +844,21 @@ void main() {
     Iterable<RenderBox> actions = tester.renderObjectList(find.byType(InkResponse));
     final Offset originalOrigin = actions.elementAt(3).localToGlobal(Offset.zero);
 
-    await tester.tap(find.text('AC'));
+    await tester.tap(find.text('AC'), warnIfMissed: false);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
     actions = tester.renderObjectList(find.byType(InkResponse));
     expect(actions.elementAt(3).localToGlobal(Offset.zero), equals(originalOrigin));
 
-    await tester.tap(find.text('Alarm'));
+    await tester.tap(find.text('Alarm'), warnIfMissed: false);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
     actions = tester.renderObjectList(find.byType(InkResponse));
     expect(actions.elementAt(3).localToGlobal(Offset.zero), equals(originalOrigin));
 
-    await tester.tap(find.text('Time'));
+    await tester.tap(find.text('Time'), warnIfMissed: false);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
@@ -899,7 +899,7 @@ void main() {
       ),
     );
 
-    await tester.tap(find.text('Alarm'));
+    await tester.tap(find.text('Alarm'), warnIfMissed: false);
     await tester.pump(const Duration(seconds: 1));
     expect(Theme.of(tester.element(find.text('Alarm'))).brightness, equals(Brightness.dark));
   });
@@ -937,7 +937,7 @@ void main() {
       ),
     );
 
-    await tester.tap(find.text('Alarm'));
+    await tester.tap(find.text('Alarm'), warnIfMissed: false);
     await tester.pump(const Duration(seconds: 1));
     expect(Theme.of(tester.element(find.text('Alarm'))).brightness, equals(Brightness.dark));
   });
@@ -1272,12 +1272,12 @@ void main() {
     final RenderBox box = tester.renderObject(find.byType(BottomNavigationBar));
     expect(box, isNot(paints..circle()));
 
-    await tester.tap(find.text('A'));
+    await tester.tap(find.text('A'), warnIfMissed: false);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 20));
     expect(box, paints..circle(x: 200.0));
 
-    await tester.tap(find.text('B'));
+    await tester.tap(find.text('B'), warnIfMissed: false);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 20));
     expect(box, paints..circle(x: 200.0)..translate(x: 400.0)..circle(x: 200.0));
@@ -1303,7 +1303,7 @@ void main() {
 
     expect(box, paints..translate()..save()..translate(x: 400.0)..circle(x: 200.0)..restore()..circle(x: 200.0));
 
-    await tester.tap(find.text('A'));
+    await tester.tap(find.text('A'), warnIfMissed: false);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 20));
     expect(
@@ -1571,7 +1571,7 @@ void main() {
 
     expect(_backgroundColor, Colors.red);
     expect(tester.widget<Material>(backgroundMaterial).color, Colors.red);
-    await tester.tap(find.text('green'));
+    await tester.tap(find.text('green'), warnIfMissed: false);
     await tester.pumpAndSettle();
     expect(_backgroundColor, Colors.green);
     expect(tester.widget<Material>(backgroundMaterial).color, Colors.green);
@@ -1616,7 +1616,7 @@ void main() {
     for (int pump = 1; pump < 9; pump++) {
       testWidgets('pump $pump', (WidgetTester tester) async {
         await tester.pumpWidget(runTest());
-        await tester.tap(find.text('Green'));
+        await tester.tap(find.text('Green'), warnIfMissed: false);
 
         for (int i = 0; i < pump; i++) {
           await tester.pump(const Duration(milliseconds: 30));

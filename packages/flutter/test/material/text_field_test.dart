@@ -769,7 +769,6 @@ void main() {
                 child: Column(
                   children: <Widget>[
                     TextField(
-                      key: const Key('field0'),
                       controller: controller,
                       style: const TextStyle(height: 4, color: Colors.black45),
                       toolbarOptions: const ToolbarOptions(copy: true, selectAll: true),
@@ -786,12 +785,15 @@ void main() {
       ),
     );
 
-    final Offset textfieldStart = tester.getTopLeft(find.byKey(const Key('field0')));
+    final Rect textArea = tester.getRect(find.byType(EditableText));
 
-    await tester.longPressAt(textfieldStart + const Offset(50.0, 2.0));
-    await tester.pump(const Duration(milliseconds: 50));
-    await tester.tapAt(textfieldStart + const Offset(100.0, 107.0));
-    await tester.pump(const Duration(milliseconds: 300));
+    final TestGesture longPress = await tester.startGesture(textArea.topLeft);
+    await tester.pump(kLongPressTimeout * 2);
+    await longPress.moveTo(textArea.bottomRight);
+    await tester.pump();
+    await longPress.up();
+    await tester.pump();
+    await tester.pumpAndSettle();
 
     await expectLater(
       find.byType(MaterialApp),
@@ -834,12 +836,15 @@ void main() {
       ),
     );
 
-    final Offset textfieldStart = tester.getTopLeft(find.byKey(const Key('field0')));
+    final Rect textArea = tester.getRect(find.byType(EditableText));
 
-    await tester.longPressAt(textfieldStart + const Offset(50.0, 2.0));
-    await tester.pump(const Duration(milliseconds: 50));
-    await tester.tapAt(textfieldStart + const Offset(100.0, 107.0));
-    await tester.pump(const Duration(milliseconds: 300));
+    final TestGesture longPress = await tester.startGesture(textArea.topLeft);
+    await tester.pump(kLongPressTimeout);
+    await longPress.moveTo(textArea.bottomRight);
+    await tester.pump();
+    await longPress.up();
+    await tester.pump();
+    await tester.pumpAndSettle();
 
     await expectLater(
       find.byType(MaterialApp),
@@ -2288,17 +2293,10 @@ void main() {
     await tester.enterText(find.byType(TextField), testValue);
     await skipPastScrollingAnimation(tester);
 
-    // Tap the selection handle to bring up the "paste / select all" menu.
-    await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
-    await tester.pump();
-    // Allow time for the handle to appear and for a double tap to time out.
-    await tester.pump(const Duration(milliseconds: 600));
-    final RenderEditable renderEditable = findRenderEditable(tester);
-    final List<TextSelectionPoint> endpoints = globalize(
-      renderEditable.getEndpointsForSelection(controller.selection),
-      renderEditable,
+    expect(
+      tester.state<EditableTextState>(find.byType(EditableText)).showToolbar(),
+      isTrue,
     );
-    await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
     // Pump an extra frame to allow the selection menu to read the clipboard.
     await tester.pump();
     await tester.pump();
@@ -3744,17 +3742,14 @@ void main() {
 
     await tester.tapAt(textOffsetToPosition(tester, '123'.indexOf('2')));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
-    final RenderEditable renderEditable = findRenderEditable(tester);
-    final List<TextSelectionPoint> endpoints = globalize(
-      renderEditable.getEndpointsForSelection(textController.selection),
-      renderEditable,
-    );
-    await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
 
+    expect(
+      tester.state<EditableTextState>(find.byType(EditableText)).showToolbar(),
+      isTrue,
+    );
+    await tester.pumpAndSettle();
     Clipboard.setData(const ClipboardData(text: '一4二\n5三6'));
+
     await tester.tap(find.text('Paste'));
     await tester.pump();
     // Puts 456 before the 2 in 123.
@@ -3782,15 +3777,12 @@ void main() {
 
     await tester.tapAt(textOffsetToPosition(tester, '123'.indexOf('2')));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
-    final RenderEditable renderEditable = findRenderEditable(tester);
-    final List<TextSelectionPoint> endpoints = globalize(
-      renderEditable.getEndpointsForSelection(textController.selection),
-      renderEditable,
+
+    expect(
+      tester.state<EditableTextState>(find.byType(EditableText)).showToolbar(),
+      isTrue,
     );
-    await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
+    await tester.pumpAndSettle();
 
     Clipboard.setData(const ClipboardData(text: '一4二\n5三6'));
     await tester.tap(find.text('Paste'));
@@ -9887,19 +9879,21 @@ void main() {
     int textFieldTapCount = 0;
     int prefixTapCount = 0;
     int suffixTapCount = 0;
+    final FocusNode focusNode = FocusNode();
 
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: TextField(
+            focusNode: focusNode,
             onTap: () { textFieldTapCount += 1; },
             decoration: InputDecoration(
               labelText: 'Label',
-              prefix: RaisedButton(
+              prefix: ElevatedButton(
                 onPressed: () { prefixTapCount += 1; },
                 child: const Text('prefix'),
               ),
-              suffix: RaisedButton(
+              suffix: ElevatedButton(
                 onPressed: () { suffixTapCount += 1; },
                 child: const Text('suffix'),
               ),
@@ -9908,6 +9902,9 @@ void main() {
         ),
       ),
     );
+
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
 
     await tester.tap(find.text('prefix'));
     expect(textFieldTapCount, 0);

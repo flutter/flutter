@@ -41,11 +41,13 @@ void main() {
 
     await tester.tap(find.text('Go'));
     await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(didDelete, isFalse);
 
     await tester.tap(find.text('Delete'));
     await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(didDelete, isTrue);
     expect(find.text('Delete'), findsNothing);
@@ -835,6 +837,7 @@ void main() {
 
     await tester.tap(find.text('Go'));
     await tester.pump();
+    await tester.pumpAndSettle();
 
     const Color normalButtonBackgroundColor = Color(0xCCF2F2F2);
     const Color pressedButtonBackgroundColor = Color(0xFFE1E1E1);
