@@ -72,6 +72,29 @@ typedef ActionListenerCallback = void Function(Action<Intent> action);
 /// The [ActionDispatcher] can invoke an [Action] on the primary focus, or
 /// without regard for focus.
 ///
+/// ### Action Overriding
+///
+/// An overridable [Action] is a special kind of [Action] created using the
+/// [Action.overridable] constructor. It has access to a default [Action],
+/// and a nullable override [Action]. It the same behavior as its override
+/// if that exists, and mirrors the behavior of its `defaultAction` otherwise.
+///
+/// The [Action.overridable] constructor creates overridable [Action]s that use
+/// a [BuildContext] to find a suitable override in its ancestor [Actions]
+/// widget. This can be used to provide a default implementation when creating a
+/// general purpose leaf widget, and later override it when building a more
+/// specialized widget using that widget.
+///
+/// For instance, [TextField]'s [SelectAllTextIntent] by default selects the
+/// text it currently contains, but in a US phone number widget that consists of
+/// 3 different [TextField]s (area code, prefix and line number),
+/// [SelectAllTextIntent] should instead select the text within all 3
+/// [TextField]s. The [TextField] widget maps [SelectAllTextIntent] to an
+/// overridable [Action] so the widget has a sensible default handling of that
+/// [Intent], while still allows app develpers to change the handling by
+/// adding an ancestor [Actions] widget that maps [SelectAllTextIntent] to an
+/// different [Action].
+///
 /// See also:
 ///
 ///  * [Shortcuts], which is a widget that contains a key map, in which it looks
@@ -81,7 +104,218 @@ typedef ActionListenerCallback = void Function(Action<Intent> action);
 ///  * [ActionDispatcher], a class that takes an [Action] and invokes it, passing
 ///    a given [Intent].
 abstract class Action<T extends Intent> with Diagnosticable {
+  /// Creates an [Action].
+  Action();
+
+  /// Creates an [Action] that allows itself to be overridden by the closest
+  /// ancestor [Action] in the given [context] that handles the same [Intent],
+  /// if one exists.
+  ///
+  /// When invoked, the resulting [Action] tries to find the closest [Action] in
+  /// the given `context` that handles the same type of [Intent] as the
+  /// `defaultAction`, then calls its [Action.invoke] method. When no override
+  /// [Action]s can be found, it invokes the `defaultAction`.
+  ///
+  /// An overridable action delegates everything to its override if one exists,
+  /// and has the same behavior as its `defaultAction` otherwise. For this
+  /// reason, the override has full control over whether and how an [Intent]
+  /// should be handled, or a key event should be consumed. An override
+  /// [Action]'s [callingAction] property will be set to the [Action] it
+  /// currently overrides, giving it access to the default behavior. See the
+  /// [callingAction] property for an example.
+  ///
+  /// The `context` argument is the [BuildContext] to find the override with. It
+  /// is typically a [BuildContext] above the [Actions] widget that contains
+  /// this overridable [Action].
+  ///
+  /// The `defaultAction` argument is the [Action] to be invoked where there's
+  /// no ancestor [Action]s can't be found in `context` that handle the same
+  /// type of [Intent].
+  ///
+  /// This is useful for providing a set of default [Action]s in a leaf widget
+  /// to allow further overriding, or to allow the [Intent] to propagate to
+  /// parent widgets that also support this [Intent].
+  ///
+  /// {@tool snippet --template=freeform}
+  /// This sample implements a custom text input field that handles the
+  /// [DeleteTextIntent] intent, as well as a US telephone number input widget
+  /// that consists of multiple text fields for area code, prefix and line
+  /// number. When the backspace key is pressed, the phone number input widget
+  /// sends the focus to the preceding text field when the currently focused
+  /// field becomes empty.
+  ///
+  /// ```dart preamble
+  /// // This implements a custom phone number input field that handles the
+  /// // [DeleteTextIntent] intent.
+  /// class DigitInput extends StatefulWidget {
+  ///   const DigitInput({
+  ///     Key? key,
+  ///     required this.controller,
+  ///     required this.focusNode,
+  ///     this.maxLength,
+  ///     this.textInputAction = TextInputAction.next,
+  ///   }) : super(key: key);
+  ///
+  ///   final int? maxLength;
+  ///   final TextEditingController controller;
+  ///   final TextInputAction textInputAction;
+  ///   final FocusNode focusNode;
+  ///   @override
+  ///   DigitInputState createState() => DigitInputState();
+  /// }
+  ///
+  /// class DigitInputState extends State<DigitInput> {
+  ///   late final Action<DeleteTextIntent> _deleteTextAction = CallbackAction<DeleteTextIntent>(
+  ///     onInvoke: (DeleteTextIntent intent) {
+  ///       // For simplicity we delete everything in the section.
+  ///       widget.controller.clear();
+  ///     },
+  ///   );
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Actions(
+  ///       actions: <Type, Action<Intent>>{
+  ///         // Make the default `DeleteTextIntent` handler overridable.
+  ///         DeleteTextIntent: Action<DeleteTextIntent>.overridable(defaultAction: _deleteTextAction, context: context),
+  ///       },
+  ///       child: TextField(
+  ///         controller: widget.controller,
+  ///         textInputAction: TextInputAction.next,
+  ///         keyboardType: TextInputType.phone,
+  ///         focusNode: widget.focusNode,
+  ///         decoration: const InputDecoration(
+  ///           border: OutlineInputBorder(),
+  ///         ),
+  ///         inputFormatters: <TextInputFormatter>[
+  ///           FilteringTextInputFormatter.digitsOnly,
+  ///           LengthLimitingTextInputFormatter(widget.maxLength),
+  ///         ],
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// ``` dart
+  /// class SimpleUSPhoneNumberEntry extends StatefulWidget {
+  ///   State<SimpleUSPhoneNumberEntry> createState() => _SimpleUSPhoneNumberEntryState();
+  /// }
+  ///
+  ///
+  /// class _DeleteDigit extends Action<DeleteTextIntent> {
+  ///   _DeleteDigit(this.state);
+  ///
+  ///   final _SimpleUSPhoneNumberEntryState state;
+  ///   @override
+  ///   Object? invoke(DeleteTextIntent intent) {
+  ///     assert(callingAction != null);
+  ///     callingAction?.invoke(intent);
+  ///
+  ///     if (state.lineNumberController.text.isEmpty && state.lineNumberFocusNode.hasFocus) {
+  ///       state.prefixFocusNode.requestFocus();
+  ///     }
+  ///
+  ///     if (state.prefixController.text.isEmpty && state.prefixFocusNode.hasFocus) {
+  ///       state.areaCodeFocusNode.requestFocus();
+  ///     }
+  ///   }
+  ///
+  ///   // This action is only enabled when the `callingAction` exists and is
+  ///   // enabled.
+  ///   @override
+  ///   bool get isActionEnabled => callingAction?.isActionEnabled ?? false;
+  /// }
+  ///
+  /// class _SimpleUSPhoneNumberEntryState extends State<SimpleUSPhoneNumberEntry> {
+  ///   final FocusNode areaCodeFocusNode = FocusNode();
+  ///   final TextEditingController areaCodeController = TextEditingController();
+  ///   final FocusNode prefixFocusNode = FocusNode();
+  ///   final TextEditingController prefixController = TextEditingController();
+  ///   final FocusNode lineNumberFocusNode = FocusNode();
+  ///   final TextEditingController lineNumberController = TextEditingController();
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Actions(
+  ///       actions: <Type, Action<Intent>>{
+  ///         DeleteTextIntent : _DeleteDigit(this),
+  ///       },
+  ///       child: Row(
+  ///         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  ///         children: <Widget>[
+  ///           Expanded(child: Text('(', textAlign: TextAlign.center,), flex: 1),
+  ///           Expanded(child: DigitInput(focusNode: areaCodeFocusNode, controller: areaCodeController, maxLength: 3), flex: 3),
+  ///           Expanded(child: Text(')', textAlign: TextAlign.center,), flex: 1),
+  ///           Expanded(child: DigitInput(focusNode: prefixFocusNode, controller: prefixController, maxLength: 3), flex: 3),
+  ///           Expanded(child: Text('-', textAlign: TextAlign.center,), flex: 1),
+  ///           Expanded(child: DigitInput(focusNode: lineNumberFocusNode, controller: lineNumberController, textInputAction: TextInputAction.done, maxLength: 4), flex: 4),
+  ///         ],
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  /// {@end-tool}
+  factory Action.overridable({
+    required Action<T> defaultAction,
+    required BuildContext context,
+  }) {
+    return defaultAction._makeOverridableAction(context);
+  }
+
   final ObserverList<ActionListenerCallback> _listeners = ObserverList<ActionListenerCallback>();
+
+  Action<T>? _currentCallingAction;
+  set _callingAction(Action<T>? newAction) {
+    if (newAction == _currentCallingAction) {
+      return;
+    }
+    assert(newAction == null || _currentCallingAction == null);
+    _currentCallingAction = newAction;
+  }
+  /// The [Action] overridden by this [Action].
+  ///
+  /// The [Action.overridable] constructor creates an overridable [Action] that
+  /// allows itself to be overridden by the closest ancestor [Action], and falls
+  /// back to its own `defaultAction` when no overrides can be found. An
+  /// overridable [Action] looks for an override and forwards all incoming
+  /// method calls to the override. The override also has access to the
+  /// `defaultAction` so
+  ///
+  /// Before forwarding the call to the override,
+  /// the overridable [Action] is responsible for setting [callingAction] to
+  /// its `defaultAction`.
+  ///
+  /// This property is only non-null when this [Action] is an override of the
+  /// [callingAction], and is currently being invoked from [callingAction].
+  ///
+  /// Invoking [callingAction]'s methods, or accessing its properties, is
+  /// allowed and does not introduce infinite loops or infinite recursions.
+  ///
+  /// {@tool snippet}
+  /// An example `Action` that handles [PasteTextIntent] but has mostly the same
+  /// behavior as the overridable action. It's OK to call
+  /// `callingAction?.isActionEnabled` in the implementation of this `Action`.
+  ///
+  /// ```dart
+  /// class MyPasteAction extends Action<PasteTextIntent> {
+  ///   @override
+  ///   Object? invoke(PasteTextIntent intent) {
+  ///     print(intent);
+  ///     return callingAction?.invoke(intent);
+  ///   }
+  ///
+  ///   @override
+  ///   bool get isActionEnabled => callingAction?.isActionEnabled ?? false;
+  ///
+  ///   @override
+  ///   bool consumesKey(PasteTextIntent intent) => callingAction?.consumesKey(intent) ?? false;
+  /// }
+  /// ```
+  /// {@end-tool}
+  @protected
+  Action<T>? get callingAction => _currentCallingAction;
 
   /// Gets the type of intent this action responds to.
   Type get intentType => T;
@@ -90,10 +324,19 @@ abstract class Action<T extends Intent> with Diagnosticable {
   ///
   /// This will be called by the [ActionDispatcher] before attempting to invoke
   /// the action.
+  bool isEnabled(T intent) => isActionEnabled;
+
+  /// Whether this [Action] is inherently enabled.
   ///
+  /// If [isActionEnabled] is false, then this [Action] is disabled for any
+  /// given [Intent].
+  //
   /// If the enabled state changes, overriding subclasses must call
   /// [notifyActionListeners] to notify any listeners of the change.
-  bool isEnabled(covariant T intent) => true;
+  ///
+  /// In the case of an overridable `Action`, accessing this property creates
+  /// an dependency on the overridable `Action`s `lookupContext`.
+  bool get isActionEnabled => true;
 
   /// Indicates whether this action should treat key events mapped to this
   /// action as being "handled" when it is invoked via the key event.
@@ -106,7 +349,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// widgets to receive the key event.
   ///
   /// The default implementation returns true.
-  bool consumesKey(covariant T intent) => true;
+  bool consumesKey(T intent) => true;
 
   /// Called when the action is to be performed.
   ///
@@ -143,7 +386,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// [Actions.invoke], or by invoking it using an [ActionDispatcher]. An action
   /// invoked via a [Shortcuts] widget will have its return value ignored.
   @protected
-  Object? invoke(covariant T intent);
+  Object? invoke(T intent);
 
   /// Register a callback to listen for changes to the state of this action.
   ///
@@ -233,6 +476,10 @@ abstract class Action<T extends Intent> with Diagnosticable {
         ));
       }
     }
+  }
+
+  Action<T> _makeOverridableAction(BuildContext context) {
+    return _OverridableAction<T>(defaultAction: this, lookupContext: context);
   }
 }
 
@@ -447,7 +694,12 @@ abstract class ContextAction<T extends Intent> extends Action<T> {
   /// ```
   @protected
   @override
-  Object? invoke(covariant T intent, [BuildContext? context]);
+  Object? invoke(T intent, [BuildContext? context]);
+
+  @override
+  ContextAction<T> _makeOverridableAction(BuildContext context) {
+    return _OverridableContextAction<T>(defaultAction: this, lookupContext: context);
+  }
 }
 
 /// The signature of a callback accepted by [CallbackAction].
@@ -478,7 +730,7 @@ class CallbackAction<T extends Intent> extends Action<T> {
   final OnInvokeCallback<T> onInvoke;
 
   @override
-  Object? invoke(covariant T intent) => onInvoke(intent);
+  Object? invoke(T intent) => onInvoke(intent);
 }
 
 /// An action dispatcher that simply invokes the actions given to it.
@@ -865,7 +1117,7 @@ class Actions extends StatefulWidget {
 
     _visitActionsAncestors(context, (InheritedElement element) {
       final _ActionsMarker actions = element.widget as _ActionsMarker;
-      final Action<T>? result = actions.actions[type] as Action<T>?;
+      final Action<T>? result = _castAction(actions, intent: intent);
       if (result != null) {
         context.dependOnInheritedElement(element);
         action = result;
@@ -875,6 +1127,49 @@ class Actions extends StatefulWidget {
     });
 
     return action;
+  }
+
+  static Action<T>? _maybeFindWithoutDependingOn<T extends Intent>(BuildContext context, { T? intent }) {
+    Action<T>? action;
+
+    // Specialize the type if a runtime example instance of the intent is given.
+    // This allows this function to be called by code that doesn't know the
+    // concrete type of the intent at compile time.
+    final Type type = intent?.runtimeType ?? T;
+    assert(
+      type != Intent,
+      'The type passed to "find" resolved to "Intent": either a non-Intent '
+      'generic type argument or an example intent derived from Intent must be '
+      'specified. Intent may be used as the generic type as long as the optional '
+      '"intent" argument is passed.',
+    );
+
+    _visitActionsAncestors(context, (InheritedElement element) {
+      final _ActionsMarker actions = element.widget as _ActionsMarker;
+      final Action<T>? result = _castAction(actions, intent: intent);
+      if (result != null) {
+        action = result;
+        return true;
+      }
+      return false;
+    });
+
+    return action;
+  }
+
+  // Find the [Action] that handles the given `intent` in the given
+  // `_ActionsMarker`, and verify it has the right type parameter.
+  static Action<T>? _castAction<T extends Intent>(_ActionsMarker actionsMarker, { T? intent }) {
+    final Action<Intent>? mappedAction = actionsMarker.actions[intent?.runtimeType ?? T];
+    if (mappedAction is Action<T>?) {
+      return mappedAction;
+    } else {
+      assert(
+        false,
+        '$T cannot be handled by an Action of runtime type ${mappedAction.runtimeType}.'
+      );
+      return null;
+    }
   }
 
   /// Returns the [ActionDispatcher] associated with the [Actions] widget that
@@ -896,38 +1191,33 @@ class Actions extends StatefulWidget {
   ///
   /// The `context` and `intent` arguments must not be null.
   ///
-  /// If the given `intent` doesn't map to an action, or doesn't map to one that
-  /// returns true for [Action.isEnabled] in an [Actions.actions] map it finds,
-  /// then it will look to the next ancestor [Actions] widget in the hierarchy
-  /// until it reaches the root.
+  /// If the given `intent` doesn't map to an action, then it will look to the
+  /// next ancestor [Actions] widget in the hierarchy until it reaches the root.
   ///
   /// This method will throw an exception if no ambient [Actions] widget is
-  /// found, or if the given `intent` doesn't map to an enabled action in any of
-  /// the [Actions.actions] maps that are found.
+  /// found, or when a suitable [Action] is found but it returns false for
+  /// [Action.isEnabled].
   static Object? invoke<T extends Intent>(
     BuildContext context,
     T intent,
   ) {
     assert(intent != null);
     assert(context != null);
-    Action<T>? action;
-    InheritedElement? actionElement;
+    Object? returnValue;
 
-    _visitActionsAncestors(context, (InheritedElement element) {
+    final bool actionFound = _visitActionsAncestors(context, (InheritedElement element) {
       final _ActionsMarker actions = element.widget as _ActionsMarker;
-      final Action<T>? result = actions.actions[intent.runtimeType] as Action<T>?;
-      if (result != null) {
-        actionElement = element;
-        if (result.isEnabled(intent)) {
-          action = result;
-          return true;
-        }
+      final Action<T>? result = _castAction(actions, intent: intent);
+      if (result != null && result.isEnabled(intent)) {
+        // Invoke the action we found using the relevant dispatcher from the Actions
+        // Element we found.
+        returnValue = _findDispatcher(element).invokeAction(result, intent, context);
       }
-      return false;
+      return result != null;
     });
 
     assert(() {
-      if (actionElement == null) {
+      if (!actionFound) {
         throw FlutterError(
           'Unable to find an action for an Intent with type '
           '${intent.runtimeType} in an $Actions widget in the given context.\n'
@@ -943,12 +1233,7 @@ class Actions extends StatefulWidget {
       }
       return true;
     }());
-    if (actionElement == null || action == null) {
-      return null;
-    }
-    // Invoke the action we found using the relevant dispatcher from the Actions
-    // Element we found.
-    return _findDispatcher(actionElement!).invokeAction(action!, intent, context);
+    return returnValue;
   }
 
   /// Invokes the action associated with the given [Intent] using the
@@ -956,43 +1241,34 @@ class Actions extends StatefulWidget {
   ///
   /// This method returns the result of invoking the action's [Action.invoke]
   /// method. If no action mapping was found for the specified intent, or if the
-  /// actions that were found were disabled, or the action itself returns null
+  /// first action found was disabled, or the action itself returns null
   /// from [Action.invoke], then this method returns null.
   ///
   /// The `context` and `intent` arguments must not be null.
   ///
-  /// If the given `intent` doesn't map to an action, or doesn't map to one that
-  /// returns true for [Action.isEnabled] in an [Actions.actions] map it finds,
-  /// then it will look to the next ancestor [Actions] widget in the hierarchy
-  /// until it reaches the root.
+  /// If the given `intent` doesn't map to an action, then it will look to the
+  /// next ancestor [Actions] widget in the hierarchy until it reaches the root.
+  /// If a suitable [Action] is found but its [Action.isEnabled] returns false,
+  /// the search will stop and this method will return null.
   static Object? maybeInvoke<T extends Intent>(
     BuildContext context,
     T intent,
   ) {
     assert(intent != null);
     assert(context != null);
-    Action<T>? action;
-    InheritedElement? actionElement;
+    Object? returnValue;
 
     _visitActionsAncestors(context, (InheritedElement element) {
       final _ActionsMarker actions = element.widget as _ActionsMarker;
-      final Action<T>? result = actions.actions[intent.runtimeType] as Action<T>?;
-      if (result != null) {
-        actionElement = element;
-        if (result.isEnabled(intent)) {
-          action = result;
-          return true;
-        }
+      final Action<T>? result = _castAction(actions, intent: intent);
+      if (result != null && result.isEnabled(intent)) {
+        // Invoke the action we found using the relevant dispatcher from the Actions
+        // Element we found.
+        returnValue = _findDispatcher(element).invokeAction(result, intent, context);
       }
-      return false;
+      return result != null;
     });
-
-    if (actionElement == null || action == null) {
-      return null;
-    }
-    // Invoke the action we found using the relevant dispatcher from the Actions
-    // Element we found.
-    return _findDispatcher(actionElement!).invokeAction(action!, intent, context);
+    return returnValue;
   }
 
   @override
@@ -1680,5 +1956,186 @@ class PrioritizedAction extends Action<PrioritizedIntents> {
     assert(_selectedAction != null);
     assert(_selectedIntent != null);
     _selectedAction.invoke(_selectedIntent);
+  }
+}
+
+mixin _OverridableActionMixin<T extends Intent> on Action<T> {
+  // Asserts when the override calls this action's `invoke` method when the
+  // override is currently being invoked from within the `invoke` method.
+  bool debugAssertMutuallyRecursive = false;
+  // Asserts when the override tries to access this action's `isActionEnabled`
+  // property when this action's `isActionEnabled` property depends on the
+  // override's `isActionEnabled` property.
+  bool debugAssertIsActionEnabledMutuallyRecursive = false;
+  bool debugAssertIsEnabledMutuallyRecursive = false;
+  bool debugAssertConsumeKeyMutuallyRecursive = false;
+
+  // The default action to invoke if an enabled override Action can't be found
+  // using [lookupContext];
+  Action<T> get defaultAction;
+
+  // The [BuildContext] used to find the override of this [Action].
+  BuildContext get lookupContext;
+
+  // How to invoke [defaultAction], given the caller [fromAction].
+  Object? invokeDefaultAction(T intent, Action<T>? fromAction, BuildContext? context);
+
+  Action<T>? getOverrideAction({ bool declareDependency = false }) {
+    final Action<T>? override = declareDependency
+     ? Actions.maybeFind(lookupContext)
+     : Actions._maybeFindWithoutDependingOn(lookupContext);
+    assert(!identical(override, this));
+    return override;
+  }
+
+  @override
+  set _callingAction(Action<T>? newAction) {
+    super._callingAction = newAction;
+    defaultAction._callingAction = newAction;
+  }
+
+  Object? _invokeOverride(Action<T> overrideAction, T intent, BuildContext? context) {
+    assert(!debugAssertMutuallyRecursive);
+    assert(() {
+      debugAssertMutuallyRecursive = true;
+      return true;
+    }());
+    overrideAction._callingAction = defaultAction;
+    final Object? returnValue = overrideAction is ContextAction<T>
+      ? overrideAction.invoke(intent, context)
+      : overrideAction.invoke(intent);
+    overrideAction._callingAction = null;
+    assert(() {
+      debugAssertMutuallyRecursive = false;
+      return true;
+    }());
+    return returnValue;
+  }
+
+  @override
+  Object? invoke(T intent, [BuildContext? context]) {
+    final Action<T>? overrideAction = getOverrideAction();
+    final Object? returnValue = overrideAction == null
+      ? invokeDefaultAction(intent, callingAction, context)
+      : _invokeOverride(overrideAction, intent, context);
+    return returnValue;
+  }
+
+  bool isOverrideActionEnabled(Action<T> overrideAction) {
+    assert(!debugAssertIsActionEnabledMutuallyRecursive);
+    assert(() {
+      debugAssertIsActionEnabledMutuallyRecursive = true;
+      return true;
+    }());
+    overrideAction._callingAction = defaultAction;
+    final bool isOverrideEnabled = overrideAction.isActionEnabled;
+    overrideAction._callingAction = null;
+    assert(() {
+      debugAssertIsActionEnabledMutuallyRecursive = false;
+      return true;
+    }());
+    return isOverrideEnabled;
+  }
+
+  @override
+  bool get isActionEnabled {
+    final Action<T>? overrideAction = getOverrideAction(declareDependency: true);
+    final bool returnValue = overrideAction != null
+      ? isOverrideActionEnabled(overrideAction)
+      : defaultAction.isActionEnabled;
+    return returnValue;
+  }
+
+  @override
+  bool isEnabled(T intent) {
+    assert(!debugAssertIsEnabledMutuallyRecursive);
+    assert(() {
+      debugAssertIsEnabledMutuallyRecursive = true;
+      return true;
+    }());
+
+    final Action<T>? overrideAction = getOverrideAction();
+    overrideAction?._callingAction = defaultAction;
+    final bool returnValue = (overrideAction ?? defaultAction).isEnabled(intent);
+    overrideAction?._callingAction = null;
+    assert(() {
+      debugAssertIsEnabledMutuallyRecursive = false;
+      return true;
+    }());
+    return returnValue;
+  }
+
+  @override
+  bool consumesKey(T intent) {
+    assert(!debugAssertConsumeKeyMutuallyRecursive);
+    assert(() {
+      debugAssertConsumeKeyMutuallyRecursive = true;
+      return true;
+    }());
+    final Action<T>? overrideAction = getOverrideAction();
+    overrideAction?._callingAction = defaultAction;
+    final bool isEnabled = (overrideAction ?? defaultAction).consumesKey(intent);
+    overrideAction?._callingAction = null;
+    assert(() {
+      debugAssertConsumeKeyMutuallyRecursive = false;
+      return true;
+    }());
+    return isEnabled;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Action<T>>('defaultAction', defaultAction));
+  }
+}
+
+class _OverridableAction<T extends Intent> extends ContextAction<T> with _OverridableActionMixin<T> {
+  _OverridableAction({ required this.defaultAction, required this.lookupContext }) ;
+
+  @override
+  final Action<T> defaultAction;
+
+  @override
+  final BuildContext lookupContext;
+
+  @override
+  Object? invokeDefaultAction(T intent, Action<T>? fromAction, BuildContext? context) {
+    if (fromAction == null) {
+      return defaultAction.invoke(intent);
+    } else {
+      final Object? returnValue = defaultAction.invoke(intent);
+      return returnValue;
+    }
+  }
+
+  @override
+  ContextAction<T> _makeOverridableAction(BuildContext context) {
+    return _OverridableAction<T>(defaultAction: defaultAction, lookupContext: context);
+  }
+}
+
+class _OverridableContextAction<T extends Intent> extends ContextAction<T> with _OverridableActionMixin<T> {
+  _OverridableContextAction({ required this.defaultAction, required this.lookupContext });
+
+  @override
+  final ContextAction<T> defaultAction;
+
+  @override
+  final BuildContext lookupContext;
+
+  @override
+  Object? invokeDefaultAction(T intent, Action<T>? fromAction, BuildContext? context) {
+    if (fromAction == null) {
+      return defaultAction.invoke(intent, context);
+    } else {
+      final Object? returnValue = defaultAction.invoke(intent, context);
+      return returnValue;
+    }
+  }
+
+  @override
+  ContextAction<T> _makeOverridableAction(BuildContext context) {
+    return _OverridableContextAction<T>(defaultAction: defaultAction, lookupContext: context);
   }
 }
