@@ -373,6 +373,10 @@ class DefaultTabController extends StatefulWidget {
   /// match [TabBar.tabs]'s and [TabBarView.children]'s length.
   ///
   /// The [initialIndex] argument must not be null.
+  ///
+  /// See also:
+  ///
+  ///  * [PageStorageKey] are used to remember the index.
   const DefaultTabController({
     Key? key,
     required this.length,
@@ -425,11 +429,16 @@ class _DefaultTabControllerState extends State<DefaultTabController> with Single
   @override
   void initState() {
     super.initState();
+    final int? initialIndex = PageStorage.of(context)?.readState(context) as int?;
     _controller = TabController(
       vsync: this,
       length: widget.length,
-      initialIndex: widget.initialIndex,
-    );
+      initialIndex: initialIndex ?? widget.initialIndex,
+    )..addListener(() {
+      if (mounted) {
+        PageStorage.of(context)?.writeState(context, _controller.index);
+      }
+    });
   }
 
   @override
