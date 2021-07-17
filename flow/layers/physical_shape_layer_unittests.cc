@@ -124,8 +124,8 @@ TEST_F(PhysicalShapeLayerTest, ElevationSimple) {
   // The Fuchsia system compositor handles all elevated PhysicalShapeLayers and
   // their shadows , so we do not do any painting there.
   EXPECT_EQ(layer->paint_bounds(),
-            PhysicalShapeLayer::ComputeShadowBounds(layer_path.getBounds(),
-                                                    initial_elevation, 1.0f));
+            PhysicalShapeLayer::ComputeShadowBounds(
+                layer_path, initial_elevation, 1.0f, SkMatrix()));
   EXPECT_TRUE(layer->needs_painting(paint_context()));
   EXPECT_EQ(layer->elevation(), initial_elevation);
 
@@ -174,8 +174,8 @@ TEST_F(PhysicalShapeLayerTest, ElevationComplex) {
     // there.
     EXPECT_EQ(layers[i]->paint_bounds(),
               (PhysicalShapeLayer::ComputeShadowBounds(
-                  layer_path.getBounds(), initial_elevations[i],
-                  1.0f /* pixel_ratio */)));
+                  layer_path, initial_elevations[i], 1.0f /* pixel_ratio */,
+                  SkMatrix())));
     EXPECT_TRUE(layers[i]->needs_painting(paint_context()));
   }
 
@@ -198,6 +198,93 @@ TEST_F(PhysicalShapeLayerTest, ElevationComplex) {
            MockCanvas::DrawCall{0, MockCanvas::DrawShadowData{layer_path}},
            MockCanvas::DrawCall{
                0, MockCanvas::DrawPathData{layer_path, layer_paint}}}));
+}
+
+TEST_F(PhysicalShapeLayerTest, ShadowNotDependsCtm) {
+  constexpr SkScalar elevations[] = {1, 2, 3, 4, 5, 10};
+  constexpr SkScalar scales[] = {0.5, 1, 1.5, 2, 3, 5};
+  constexpr SkScalar translates[] = {0, 1, -1, 0.5, 2, 10};
+
+  SkPath path;
+  path.addRect(0, 0, 8, 8).close();
+
+  for (SkScalar elevation : elevations) {
+    SkRect baseline_bounds = PhysicalShapeLayer::ComputeShadowBounds(
+        path, elevation, 1.0f, SkMatrix());
+    for (SkScalar scale : scales) {
+      for (SkScalar translateX : translates) {
+        for (SkScalar translateY : translates) {
+          SkMatrix ctm;
+          ctm.setScaleTranslate(scale, scale, translateX, translateY);
+          SkRect bounds = PhysicalShapeLayer::ComputeShadowBounds(
+              path, elevation, scale, ctm);
+          EXPECT_FLOAT_EQ(bounds.fLeft, baseline_bounds.fLeft);
+          EXPECT_FLOAT_EQ(bounds.fTop, baseline_bounds.fTop);
+          EXPECT_FLOAT_EQ(bounds.fRight, baseline_bounds.fRight);
+          EXPECT_FLOAT_EQ(bounds.fBottom, baseline_bounds.fBottom);
+        }
+      }
+    }
+  }
+}
+
+static int RasterizedDifferenceInPixels(
+    const std::function<void(SkCanvas*)>& actual_draw_function,
+    const std::function<void(SkCanvas*)>& expected_draw_function,
+    const SkSize& canvas_size) {
+  sk_sp<SkSurface> actual_surface =
+      SkSurface::MakeRasterN32Premul(canvas_size.width(), canvas_size.height());
+  sk_sp<SkSurface> expected_surface =
+      SkSurface::MakeRasterN32Premul(canvas_size.width(), canvas_size.height());
+
+  actual_surface->getCanvas()->drawColor(SK_ColorWHITE);
+  expected_surface->getCanvas()->drawColor(SK_ColorWHITE);
+
+  actual_draw_function(actual_surface->getCanvas());
+  expected_draw_function(expected_surface->getCanvas());
+
+  SkPixmap actual_pixels;
+  EXPECT_TRUE(actual_surface->peekPixels(&actual_pixels));
+
+  SkPixmap expected_pixels;
+  EXPECT_TRUE(expected_surface->peekPixels(&expected_pixels));
+
+  int different_pixels = 0;
+  for (int y = 0; y < canvas_size.height(); y++) {
+    const uint32_t* actual_row = actual_pixels.addr32(0, y);
+    const uint32_t* expected_row = expected_pixels.addr32(0, y);
+    for (int x = 0; x < canvas_size.width(); x++) {
+      if (actual_row[x] != expected_row[x]) {
+        different_pixels++;
+      }
+    }
+  }
+  return different_pixels;
+}
+
+TEST_F(PhysicalShapeLayerTest, ShadowNotDependsPathSize) {
+  constexpr SkRect test_cases[][2] = {
+      {{20, -100, 80, 80}, {20, -1000, 80, 80}},
+      {{20, 20, 80, 200}, {20, 20, 80, 2000}},
+  };
+
+  for (const SkRect* test_case : test_cases) {
+    EXPECT_EQ(RasterizedDifferenceInPixels(
+                  [=](SkCanvas* canvas) {
+                    SkPath path;
+                    path.addRect(test_case[0]).close();
+                    PhysicalShapeLayer::DrawShadow(canvas, path, SK_ColorBLACK,
+                                                   1.0f, false, 1.0f);
+                  },
+                  [=](SkCanvas* canvas) {
+                    SkPath path;
+                    path.addRect(test_case[1]).close();
+                    PhysicalShapeLayer::DrawShadow(canvas, path, SK_ColorBLACK,
+                                                   1.0f, false, 1.0f);
+                  },
+                  SkSize::Make(100, 100)),
+              0);
+  }
 }
 
 static bool ReadbackResult(PrerollContext* context,
