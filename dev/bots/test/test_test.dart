@@ -23,7 +23,7 @@ void expectExitCode(ProcessResult result, int expectedExitCode) {
 
 void main() {
   group('verifyVersion()', () {
-    MemoryFileSystem fileSystem;
+    late MemoryFileSystem fileSystem;
 
     setUp(() {
       fileSystem = MemoryFileSystem.test();
@@ -97,7 +97,7 @@ void main() {
     const ProcessManager processManager = LocalProcessManager();
 
     Future<ProcessResult> runScript(
-        [Map<String, String> environment, List<String> otherArgs = const <String>[]]) async {
+        [Map<String, String>? environment, List<String> otherArgs = const <String>[]]) async {
       final String dart = path.absolute(
           path.join('..', '..', 'bin', 'cache', 'dart-sdk', 'bin', 'dart'));
       final ProcessResult scriptProcess = processManager.runSync(<String>[
