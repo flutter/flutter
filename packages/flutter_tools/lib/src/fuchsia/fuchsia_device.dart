@@ -6,6 +6,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/convert.dart';
 import 'package:meta/meta.dart';
 
 import '../application_package.dart';
@@ -700,38 +701,52 @@ class FuchsiaDevice extends Device {
 
   @visibleForTesting
   Future<Iterable<String>> listDirectory(String path) async {
-    final String lsCommand = 'ls "$path"';
-    final RunResult lsResult = await shell(lsCommand);
-    if (lsResult.exitCode != 0) {
-      throwToolExit("'$lsCommand' on device $name failed, stderr: '${lsResult.stderr}");
+    final String command = 'ls "$path"';
+    final RunResult result = await shell(command);
+    if (result.exitCode != 0) {
+      throwToolExit("'$command' on device $name failed, stderr: '${result.stderr}");
     }
-    final String lsOutput = lsResult.stdout;
-    return lsOutput.trim().split('\n').where((String s) => s != '');
+    final String output = result.stdout;
+    return output.trim().split('\n').where((String s) => s != '');
   }
 
   @visibleForTesting
   Future<Iterable<String>> findByName(String path, String name) async {
-    final String findCommand = 'find "$path" -name "$name"';
-    final RunResult findResult = await shell(findCommand);
-    if (findResult.exitCode != 0) {
-      throwToolExit("'$findCommand' on device $name failed. stderr: '${findResult.stderr}'");
+    final String command = 'find "$path" -name "$name"';
+    final RunResult result = await shell(command);
+    if (result.exitCode != 0) {
+      throwToolExit("'$command' on device $name failed. stderr: '${result.stderr}'");
     }
-    final String findOutput = findResult.stdout;
-    return findOutput.trim().split('\n').where((String s) => s != '');
+    final String output = result.stdout;
+    return output.trim().split('\n').where((String s) => s != '');
   }
 
   @visibleForTesting
   Future<String> readFile(String path, { bool trim = true }) async {
-    final String readCommand = 'cat "$path"';
-    final RunResult readResult = await shell(readCommand);
-    if (readResult.exitCode != 0){
-      throwToolExit("'$readCommand' on device $name failed, stderr: '${readResult.stderr}");
+    final String command = 'cat "$path"';
+    final RunResult result = await shell(command);
+    if (result.exitCode != 0){
+      throwToolExit("'$command' on device $name failed, stderr: '${result.stderr}");
     }
-    final String readOutput = readResult.stdout;
+    final String output = result.stdout;
     if (trim){
-      return readOutput.trim();
+      return output.trim();
     }
-    return readOutput;
+    return output;
+  }
+
+  @visibleForTesting
+  Future<Map<String,int>> listVmServicePorts() async {
+    // iquery -f json selectors 'flutter_*_runner.cmx:root/*:empty_tree'
+    const String command = 'iquery -f json show  "flutter_*_runner.cmx:root:vm_service_port"';
+    final RunResult result = await shell(command);
+    final String output = result.stdout;
+    if (result.exitCode != 0){
+      throwToolExit("'$command' on device $name failed, stderr: '${result.stderr}")
+    }
+    final List<dynamic> arr = jsonDecode(output) as List<dynamic>;
+    arr.map(( dynamic e) => e as Map<String,dynamic>).map((m)=>Pair);
+
   }
 
   /// Run `command` on the Fuchsia device shell.
