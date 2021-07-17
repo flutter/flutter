@@ -722,5 +722,6 @@ class FakePub extends Fake implements Pub {
     bool generateSyntheticPackage = false,
     String flutterRootOverride,
     bool checkUpToDate = false,
+    bool shouldSkipThirdPartyGenerator = true,
   }) async { }
 }
