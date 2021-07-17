@@ -94,8 +94,8 @@ class ScaleUpdateDetails {
        assert(rotation != null),
        localFocalPoint = localFocalPoint ?? focalPoint;
 
-  /// The amount the pointer has moved in the coordinate space of the event
-  /// receiver since the previous update.
+  /// The amount the gesture's focal point has moved in the coordinate space of
+  /// the event receiver since the previous update.
   ///
   /// Defaults to zero if not specified in the constructor.
   final Offset delta;
@@ -174,7 +174,8 @@ class ScaleUpdateDetails {
     ' horizontalScale: $horizontalScale,'
     ' verticalScale: $verticalScale,'
     ' rotation: $rotation,'
-    ' pointerCount: $pointerCount)';
+    ' pointerCount: $pointerCount,'
+    ' delta: $delta)';
 }
 
 /// Details for [GestureScaleEndCallback].
@@ -325,11 +326,14 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   late double _currentHorizontalSpan;
   late double _initialVerticalSpan;
   late double _currentVerticalSpan;
+  late Offset _localFocalPoint;
   _LineBetweenPointers? _initialLine;
   _LineBetweenPointers? _currentLine;
   late Map<int, Offset> _pointerLocations;
   late List<int> _pointerQueue; // A queue to sort pointers in order of entrance
   final Map<int, VelocityTracker> _velocityTrackers = <int, VelocityTracker>{};
+  late Offset _delta;
+  bool _updated = false;
 
   double get _scaleFactor => _initialSpan > 0.0 ? _currentSpan / _initialSpan : 1.0;
 
@@ -410,11 +414,26 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   void _update() {
     final int count = _pointerLocations.keys.length;
 
+    final Offset? previousFocalPoint = _updated ? _currentFocalPoint : null;
+
     // Compute the focal point
     Offset focalPoint = Offset.zero;
     for (final int pointer in _pointerLocations.keys)
       focalPoint += _pointerLocations[pointer]!;
     _currentFocalPoint = count > 0 ? focalPoint / count.toDouble() : Offset.zero;
+
+    _localFocalPoint = PointerEvent.transformPosition(
+      _lastTransform,
+      _currentFocalPoint,
+    );
+    final Offset localPreviousFocalPoint = _updated
+        ? PointerEvent.transformPosition(
+            _lastTransform,
+            previousFocalPoint!,
+          )
+        : _localFocalPoint;
+    _updated = true;
+    _delta = _localFocalPoint - localPreviousFocalPoint;
 
     // Span is the average deviation from focal point. Horizontal and vertical
     // spans are the average deviations from the focal point's horizontal and
@@ -513,10 +532,10 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
           horizontalScale: _horizontalScaleFactor,
           verticalScale: _verticalScaleFactor,
           focalPoint: _currentFocalPoint,
-          localFocalPoint: PointerEvent.transformPosition(_lastTransform, _currentFocalPoint),
+          localFocalPoint: _localFocalPoint,
           rotation: _computeRotationFactor(),
           pointerCount: _pointerQueue.length,
-          delta: _currentFocalPoint - _initialFocalPoint,
+          delta: _delta,
         ));
       });
   }
@@ -527,7 +546,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
       invokeCallback<void>('onStart', () {
         onStart!(ScaleStartDetails(
           focalPoint: _currentFocalPoint,
-          localFocalPoint: PointerEvent.transformPosition(_lastTransform, _currentFocalPoint),
+          localFocalPoint: _localFocalPoint,
           pointerCount: _pointerQueue.length,
         ));
       });
