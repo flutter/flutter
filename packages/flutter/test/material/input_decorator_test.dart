@@ -1458,6 +1458,60 @@ void main() {
     expect(tester.getTopRight(find.text('text')).dx, lessThanOrEqualTo(tester.getTopLeft(find.byIcon(Icons.satellite)).dx));
   });
 
+  testWidgets('InputDecorator prefixIcon/suffixIcon alignments', (WidgetTester tester) async {
+    TextAlignVertical? alignment = TextAlignVertical.center;
+    late StateSetter setState;
+     await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setter) {
+            setState = setter;
+            return Material(
+              child: TextField(
+                minLines: 5,
+                maxLines: null,
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Icons.pages),
+                  prefixIconAlignment: alignment,
+                  suffixIcon: const Icon(Icons.satellite),
+                  suffixIconAlignment: alignment,
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final double prefixPosition = tester.getTopLeft(find.byIcon(Icons.pages)).dy;
+    final double suffixPosition = tester.getTopLeft(find.byIcon(Icons.satellite)).dy;
+
+    setState(() {
+      alignment = TextAlignVertical.top;
+    });
+    await tester.pump();
+
+    expect(tester.getTopLeft(find.byIcon(Icons.pages)).dy, lessThan(prefixPosition));
+    expect(tester.getTopLeft(find.byIcon(Icons.satellite)).dy, lessThan(suffixPosition));
+
+    setState(() {
+      alignment = TextAlignVertical.bottom;
+    });
+    await tester.pump();
+
+    expect(tester.getTopLeft(find.byIcon(Icons.pages)).dy, greaterThan(prefixPosition));
+    expect(tester.getTopLeft(find.byIcon(Icons.satellite)).dy, greaterThan(suffixPosition));
+
+    // Setting alignment back to null works and reverts to the default.
+    setState(() {
+      alignment = null;
+    });
+    await tester.pump();
+
+    expect(tester.getTopLeft(find.byIcon(Icons.pages)).dy, prefixPosition);
+    expect(tester.getTopLeft(find.byIcon(Icons.satellite)).dy, suffixPosition);
+  });
+
   testWidgets('InputDecorator prefixIconConstraints/suffixIconConstraints', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildInputDecorator(

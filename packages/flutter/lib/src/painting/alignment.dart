@@ -646,6 +646,10 @@ class _MixedAlignment extends AlignmentGeometry {
 ///    the parameter in TextField.
 ///  * [InputDecorator.textAlignVertical], which defines the alignment of
 ///    prefix, input, and suffix within an [InputDecorator].
+///  * [InputDecoration.prefixIconAlignment], which defines the alignment of
+///    prefixIcon within an [InputDecorator].
+///  * [InputDecoration.suffixIconAlignment], which defines the alignment of
+///    suffixIcon within an [InputDecorator].
 class TextAlignVertical {
   /// Creates a TextAlignVertical from any y value between -1.0 and 1.0.
   const TextAlignVertical({
@@ -653,8 +657,8 @@ class TextAlignVertical {
   }) : assert(y != null),
        assert(y >= -1.0 && y <= 1.0);
 
-  /// A value ranging from -1.0 to 1.0 that defines the topmost and bottommost
-  /// locations of the top and bottom of the input box.
+  /// A value ranging from -1.0 to 1.0 inclusive that defines the topmost
+  /// and bottommost locations of the top and bottom of the input box.
   final double y;
 
   /// Aligns a TextField's input Text with the topmost location within a
