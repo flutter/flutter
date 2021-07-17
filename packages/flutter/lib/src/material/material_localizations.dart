@@ -762,10 +762,10 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get dateRangeEndLabel => 'End Date';
 
   @override
-  String dateRangeStartDateSemanticLabel(String fullDate) => 'Start date $fullDate';
+  String dateRangeStartDateSemanticLabel(String formattedDate) => 'Start date $formattedDate';
 
   @override
-  String dateRangeEndDateSemanticLabel(String fullDate) => 'End date $fullDate';
+  String dateRangeEndDateSemanticLabel(String formattedDate) => 'End date $formattedDate';
 
   @override
   String get invalidDateFormatLabel => 'Invalid format.';
