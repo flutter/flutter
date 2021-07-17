@@ -909,6 +909,11 @@ class RenderOpacity extends RenderProxyBox {
   }
 
   @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+    return _alpha != 0 && super.hitTestChildren(result, position: position);
+  }
+
+  @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
     if (child != null && (_alpha != 0 || alwaysIncludeSemantics))
       visitor(child!);
@@ -1052,6 +1057,11 @@ class RenderAnimatedOpacity extends RenderProxyBox with RenderProxyBoxMixin, Ren
        super(child) {
     this.opacity = opacity;
     this.alwaysIncludeSemantics = alwaysIncludeSemantics;
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+    return _alpha != 0 && super.hitTestChildren(result, position: position);
   }
 }
 

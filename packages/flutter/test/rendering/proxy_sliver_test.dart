@@ -77,6 +77,33 @@ void main() {
     expect(renderSliverOpacity.debugLayer, same(layer));
   });
 
+  test('The child is not hittestable if RenderSliverOpacity is transparent', () {
+    // Regression test for https://github.com/flutter/flutter/issues/85108.
+    final RenderSizedBox child = RenderSizedBox(const Size(100.0, 100.0));
+
+    final RenderSliverOpacity renderSliverOpacity = RenderSliverOpacity(
+      opacity: 0.0,
+      sliver: RenderSliverToBoxAdapter(child: child),
+    );
+
+    final RenderViewport root = RenderViewport(
+      axisDirection: AxisDirection.down,
+      crossAxisDirection: AxisDirection.right,
+      offset: ViewportOffset.zero(),
+      cacheExtent: 250.0,
+      children: <RenderSliver>[renderSliverOpacity],
+    );
+
+    layout(root, phase: EnginePhase.composite);
+    final SliverHitTestResult hitTestResult = SliverHitTestResult();
+    renderSliverOpacity.hitTest(
+      hitTestResult,
+      mainAxisPosition: 10.0,
+      crossAxisPosition: 10.0,
+    );
+    expect(hitTestResult.path, isEmpty);
+  });
+
   test('RenderSliverAnimatedOpacity does not composite if it is transparent', () async {
     final Animation<double> opacityAnimation = AnimationController(
       vsync: FakeTickerProvider(),
@@ -158,5 +185,37 @@ void main() {
     pumpFrame(phase: EnginePhase.paint);
     expect(renderSliverAnimatedOpacity.debugNeedsPaint, false);
     expect(renderSliverAnimatedOpacity.debugLayer, same(layer));
+  });
+
+  test('The child is not hittestable if RenderSliverAnimatedOpacity is transparent', () {
+    // Regression test for https://github.com/flutter/flutter/issues/85108.
+    final RenderSizedBox child = RenderSizedBox(const Size(100.0, 100.0));
+
+    final Animation<double> opacityAnimation = AnimationController(
+      vsync: FakeTickerProvider(),
+    )..value = 0.0;
+
+    final RenderSliverAnimatedOpacity renderSliverAnimatedOpacity = RenderSliverAnimatedOpacity(
+      alwaysIncludeSemantics: false,
+      opacity: opacityAnimation,
+      sliver: RenderSliverToBoxAdapter(child: child),
+    );
+
+    final RenderViewport root = RenderViewport(
+      axisDirection: AxisDirection.down,
+      crossAxisDirection: AxisDirection.right,
+      offset: ViewportOffset.zero(),
+      cacheExtent: 250.0,
+      children: <RenderSliver>[renderSliverAnimatedOpacity],
+    );
+
+    layout(root, phase: EnginePhase.composite);
+    final SliverHitTestResult hitTestResult = SliverHitTestResult();
+    renderSliverAnimatedOpacity.hitTest(
+      hitTestResult,
+      mainAxisPosition: 10.0,
+      crossAxisPosition: 10.0,
+    );
+    expect(hitTestResult.path, isEmpty);
   });
 }

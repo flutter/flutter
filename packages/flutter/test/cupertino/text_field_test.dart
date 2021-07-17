@@ -1552,6 +1552,7 @@ void main() {
     );
 
     await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(find.text('Paste'), findsNothing);
     expect(find.text('Cut'), findsNothing);
@@ -4451,7 +4452,6 @@ void main() {
               child: Column(
                 children: <Widget>[
                   CupertinoTextField(
-                    key: const Key('field0'),
                     controller: controller,
                     style: const TextStyle(height: 4, color: ui.Color.fromARGB(100, 0, 0, 0)),
                     toolbarOptions: const ToolbarOptions(selectAll: true),
@@ -4467,13 +4467,12 @@ void main() {
       ),
     );
 
-    final Offset textfieldStart = tester.getTopLeft(find.byKey(const Key('field0')));
+    await tester.longPress(find.byType(EditableText));
+    await tester.pump();
+    await tester.pumpAndSettle();
 
-    await tester.longPressAt(textfieldStart + const Offset(50.0, 2.0));
-    await tester.pump(const Duration(milliseconds: 150));
-    // Tap the Select All button.
-    await tester.tapAt(textfieldStart + const Offset(20.0, 100.0));
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(find.text('Select All'));
+    await tester.pump();
 
     await expectLater(
       find.byType(CupertinoApp),
@@ -4498,7 +4497,6 @@ void main() {
               child: Column(
                 children: <Widget>[
                   CupertinoTextField(
-                    key: const Key('field0'),
                     controller: controller,
                     style: const TextStyle(height: 4, color: ui.Color.fromARGB(100, 0, 0, 0)),
                     toolbarOptions: const ToolbarOptions(selectAll: true),
@@ -4514,15 +4512,14 @@ void main() {
       ),
     );
 
-    final Offset textfieldStart = tester.getTopLeft(find.byKey(const Key('field0')));
+    await tester.longPress(find.byType(EditableText));
+    await tester.pump();
+    await tester.pumpAndSettle();
 
-    await tester.longPressAt(textfieldStart + const Offset(50.0, 2.0));
-    await tester.pump(const Duration(milliseconds: 150));
-    // Tap the Select All button.
-    await tester.tapAt(textfieldStart + const Offset(20.0, 100.0));
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(find.text('Select All'));
+    await tester.pump();
 
-    await expectLater(
+   await expectLater(
       find.byType(CupertinoApp),
       matchesGoldenFile('text_field_golden.TextSelectionStyle.2.png'),
     );

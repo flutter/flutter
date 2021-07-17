@@ -282,7 +282,7 @@ void main() {
     // by pressing the Alert's NO button.
     await tester.tap(find.byTooltip('Back'));
     await tester.pump(); // Start the pop "back" operation.
-    await tester.pump(); // Call willPop which will show an Alert.
+    await tester.pumpAndSettle(); // Call willPop which will show an Alert.
     await tester.tap(find.text('NO'));
     await tester.pump(); // Start the dismiss animation.
     await tester.pump(); // Resolve the willPop callback.
@@ -295,7 +295,7 @@ void main() {
     // didChangeDependencies() method doesn't add an extra willPop callback.
     await tester.tap(find.byTooltip('Back'));
     await tester.pump(); // Start the pop "back" operation.
-    await tester.pump(); // Call willPop which will show an Alert.
+    await tester.pumpAndSettle(); // Call willPop which will show an Alert.
     await tester.tap(find.text('NO'));
     await tester.pump(); // Start the dismiss animation.
     await tester.pump(); // Resolve the willPop callback.
@@ -306,7 +306,7 @@ void main() {
     // YES button.
     await tester.tap(find.byTooltip('Back'));
     await tester.pump(); // Start the pop "back" operation.
-    await tester.pump(); // Call willPop which will show an Alert.
+    await tester.pumpAndSettle(); // Call willPop which will show an Alert.
     await tester.tap(find.text('YES'));
     await tester.pump(); // Start the dismiss animation.
     await tester.pump(); // Resolve the willPop callback.

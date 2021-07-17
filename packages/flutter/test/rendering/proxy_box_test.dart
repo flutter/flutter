@@ -291,6 +291,17 @@ void main() {
     ));
   });
 
+  test('The child is not hittestable if RenderOpacity is transparent', () {
+    // Regression test for https://github.com/flutter/flutter/issues/85108.
+    final RenderSizedBox child = RenderSizedBox(const Size(100.0, 100.0));
+    final RenderOpacity renderOpacity = RenderOpacity(opacity: 0.0, child: child);
+
+    layout(renderOpacity, phase: EnginePhase.composite);
+    final BoxHitTestResult hitTestResult = BoxHitTestResult();
+    renderOpacity.hitTest(hitTestResult, position: const Offset(1.0, 1.0));
+    expect(hitTestResult.path, isEmpty);
+  });
+
   test('RenderAnimatedOpacity does not composite if it is transparent', () async {
     final Animation<double> opacityAnimation = AnimationController(
       vsync: FakeTickerProvider(),
@@ -330,6 +341,26 @@ void main() {
       opacity: opacityAnimation,
       child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
     ));
+  });
+
+  test('The child is not hittestable if RenderAnimatedOpacity is transparent', () {
+    // Regression test for https://github.com/flutter/flutter/issues/85108.
+    final RenderSizedBox child = RenderSizedBox(const Size(100.0, 100.0));
+
+    final Animation<double> opacityAnimation = AnimationController(
+      vsync: FakeTickerProvider(),
+    )..value = 0.0;
+
+    final RenderAnimatedOpacity renderAnimatedOpacity = RenderAnimatedOpacity(
+      alwaysIncludeSemantics: false,
+      opacity: opacityAnimation,
+      child: child, // size doesn't matter
+    );
+
+    layout(renderAnimatedOpacity, phase: EnginePhase.composite);
+    final BoxHitTestResult hitTestResult = BoxHitTestResult();
+    renderAnimatedOpacity.hitTest(hitTestResult, position: const Offset(1.0, 1.0));
+    expect(hitTestResult.path, isEmpty);
   });
 
   test('RenderShaderMask reuses its layer', () {
