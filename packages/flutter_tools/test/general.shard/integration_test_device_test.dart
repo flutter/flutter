@@ -4,6 +4,10 @@
 
 // @dart = 2.8
 
+import 'dart:convert';
+
+import 'package:file/file.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -71,8 +75,40 @@ final FakeVmServiceRequest listViewsRequest = FakeVmServiceRequest(
 
 final Uri observatoryUri = Uri.parse('http://localhost:1234');
 
+const Map<String, String> skslData = <String, String>{
+  'foo': 'bar',
+};
+
+final List<VmServiceExpectation> defaultVmServiceRequests = <VmServiceExpectation>[
+  const FakeVmServiceRequest(
+    method: 'streamListen',
+    args: <String, Object>{
+      'streamId': 'Isolate',
+    },
+  ),
+  listViewsRequest,
+  FakeVmServiceRequest(
+    method: 'getIsolate',
+    jsonResponse: isolate.toJson(),
+    args: <String, Object>{
+      'isolateId': '1',
+    },
+  ),
+  const FakeVmServiceRequest(
+    method: 'streamCancel',
+    args: <String, Object>{
+      'streamId': 'Isolate',
+    },
+  ),
+  const FakeVmServiceRequest(
+    method: 'streamListen',
+    args: <String, Object>{
+      'streamId': 'Extension',
+    },
+  ),
+];
+
 void main() {
-  FakeVmServiceHost fakeVmServiceHost;
   TestDevice testDevice;
 
   setUp(() {
@@ -88,36 +124,8 @@ void main() {
         BuildInfo.debug,
       ),
       userIdentifier: '',
+      writeSkslOnExit: null,
     );
-
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      const FakeVmServiceRequest(
-        method: 'streamListen',
-        args: <String, Object>{
-          'streamId': 'Isolate',
-        },
-      ),
-      listViewsRequest,
-      FakeVmServiceRequest(
-        method: 'getIsolate',
-        jsonResponse: isolate.toJson(),
-        args: <String, Object>{
-          'isolateId': '1',
-        },
-      ),
-      const FakeVmServiceRequest(
-        method: 'streamCancel',
-        args: <String, Object>{
-          'streamId': 'Isolate',
-        },
-      ),
-      const FakeVmServiceRequest(
-        method: 'streamListen',
-        args: <String, Object>{
-          'streamId': 'Extension',
-        },
-      ),
-    ]);
   });
 
   testUsingContext('Can start the entrypoint', () async {
@@ -135,7 +143,7 @@ void main() {
       io.CompressionOptions compression,
       Device device,
       Logger logger,
-    }) async => fakeVmServiceHost.vmService,
+    }) async => FakeVmServiceHost(httpAddress: httpUri, requests: defaultVmServiceRequests).vmService,
   });
 
   testUsingContext('Can kill the started device', () async {
@@ -153,7 +161,7 @@ void main() {
       io.CompressionOptions compression,
       Device device,
       Logger logger,
-    }) async => fakeVmServiceHost.vmService,
+    }) async => FakeVmServiceHost(httpAddress: httpUri, requests: defaultVmServiceRequests).vmService,
   });
 
   testUsingContext('when the device starts without providing an observatory URI', () async {
@@ -169,6 +177,7 @@ void main() {
         BuildInfo.debug,
       ),
       userIdentifier: '',
+      writeSkslOnExit: null,
     );
 
     expect(() => testDevice.start('entrypointPath'), throwsA(isA<TestDeviceException>()));
@@ -181,7 +190,7 @@ void main() {
       PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
       io.CompressionOptions compression,
       Device device,
-    }) async => fakeVmServiceHost.vmService,
+    }) async => FakeVmServiceHost(httpAddress: httpUri, requests: defaultVmServiceRequests).vmService,
   });
 
   testUsingContext('when the device fails to start', () async {
@@ -197,6 +206,7 @@ void main() {
         BuildInfo.debug,
       ),
       userIdentifier: '',
+      writeSkslOnExit: null,
     );
 
     expect(() => testDevice.start('entrypointPath'), throwsA(isA<TestDeviceException>()));
@@ -209,6 +219,60 @@ void main() {
       PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
       io.CompressionOptions compression,
       Device device,
-    }) async => fakeVmServiceHost.vmService,
+    }) async => FakeVmServiceHost(httpAddress: httpUri, requests: defaultVmServiceRequests).vmService,
+  });
+
+  testUsingContext('when writing to the sksl file is requested', () async {
+    final File skslFile = MemoryFileSystem().file('sksl.json');
+    final TestDevice testDevice = IntegrationTestTestDevice(
+      id: 1,
+      device: FakeDevice(
+        'ephemeral',
+        'ephemeral',
+        type: PlatformType.android,
+        launchResult: LaunchResult.succeeded(observatoryUri: observatoryUri),
+      ),
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.debug,
+      ),
+      userIdentifier: '',
+      writeSkslOnExit: skslFile,
+    );
+
+    await testDevice.start('entrypointPath');
+    await testDevice.kill();
+
+    expect(json.decode(await skslFile.readAsString()), <String, Object>{
+      'platform': 'android',
+      'name': 'ephemeral',
+      'engineRevision': 'abcdefghijklmnopqrstuvwxyz',
+      'data': skslData,
+    });
+  }, overrides: <Type, Generator>{
+    VMServiceConnector: () => (Uri httpUri, {
+      ReloadSources reloadSources,
+      Restart restart,
+      CompileExpression compileExpression,
+      GetSkSLMethod getSkSLMethod,
+      PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
+      io.CompressionOptions compression,
+      Device device,
+      Logger logger,
+    }) async => FakeVmServiceHost(
+      httpAddress: httpUri,
+      requests: <VmServiceExpectation>[
+        ...defaultVmServiceRequests,
+        listViewsRequest,
+        const FakeVmServiceRequest(
+          method: '_flutter.getSkSLs',
+          args: <String, Object>{
+            'viewId': 'a',
+          },
+          jsonResponse: <String, Map<String, Object>>{
+            'SkSLs': skslData,
+          },
+        ),
+      ],
+    ).vmService,
   });
 }

@@ -22,7 +22,7 @@ class FakeVmServiceHost {
     @required List<VmServiceExpectation> requests,
     Uri httpAddress,
     Uri wsAddress,
-  }) : _requests = requests {
+  }) : _requests = <VmServiceExpectation>[...requests] {
     _vmService = FlutterVmService(vm_service.VmService(
       _input.stream,
       _output.add,
