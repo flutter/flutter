@@ -285,7 +285,7 @@ class Stepper extends StatefulWidget {
   /// The elevation of this stepper's [Material] when [type] is [StepperType.horizontal].
   final double? elevation;
 
-  /// Default value for [Stepper.margin].
+  /// custom margin on vertical stepper.
   final EdgeInsetsGeometry? margin;
 
   @override
