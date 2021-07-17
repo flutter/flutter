@@ -7,7 +7,9 @@ import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:intl/intl.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
+import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
 import 'dartdoc_checker.dart';
@@ -252,8 +254,21 @@ ArgParser _createArgsParser() {
 
 final RegExp gitBranchRegexp = RegExp(r'^## (.*)');
 
-String getBranchName() {
-  final ProcessResult gitResult = Process.runSync('git', <String>['status', '-b', '--porcelain']);
+/// Get the name of the release branch.
+///
+/// On LUCI builds, the git HEAD is detached, so first check for the env
+/// variable "LUCI_BRANCH"; if it is not set, fall back to calling git.
+String getBranchName({
+  @visibleForTesting
+  Platform platform = const LocalPlatform(),
+  @visibleForTesting
+  ProcessManager processManager = const LocalProcessManager(),
+}) {
+  final String? luciBranch = platform.environment['LUCI_BRANCH'];
+  if (luciBranch != null && luciBranch.trim().isNotEmpty) {
+    return luciBranch.trim();
+  }
+  final ProcessResult gitResult = processManager.runSync(<String>['git', 'status', '-b', '--porcelain']);
   if (gitResult.exitCode != 0)
     throw 'git status exit with non-zero exit code: ${gitResult.exitCode}';
   final RegExpMatch? gitBranchMatch = gitBranchRegexp.firstMatch(
