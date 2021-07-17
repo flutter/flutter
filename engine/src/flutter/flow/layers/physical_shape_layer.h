@@ -17,9 +17,10 @@ class PhysicalShapeLayer : public ContainerLayer {
                      const SkPath& path,
                      Clip clip_behavior);
 
-  static SkRect ComputeShadowBounds(const SkRect& bounds,
+  static SkRect ComputeShadowBounds(const SkPath& path,
                                     float elevation,
-                                    float pixel_ratio);
+                                    SkScalar dpr,
+                                    const SkMatrix& ctm);
   static void DrawShadow(SkCanvas* canvas,
                          const SkPath& path,
                          SkColor color,
