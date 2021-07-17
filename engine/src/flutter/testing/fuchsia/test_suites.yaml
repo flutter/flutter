@@ -2,25 +2,27 @@
 # test command for femu_test.py.
 
 - package: flutter_runner_tzdata_tests-0.far
-  test_command: run-test-component fuchsia-pkg://fuchsia.com/flutter_runner_tzdata_tests#meta/flutter_runner_tzdata_tests.cmx
+  test_command: run-test-suite fuchsia-pkg://fuchsia.com/flutter_runner_tzdata_tests#meta/flutter_runner_tzdata_tests.cm
 - package: fml_tests-0.far
-  test_command: run-test-component fuchsia-pkg://fuchsia.com/fml_tests#meta/fml_tests.cmx -- --gtest_filter=-MessageLoop.TimeSensitiveTest_*:FileTest.CanTruncateAndWrite:FileTest.CreateDirectoryStructure
+  test_command: run-test-suite fuchsia-pkg://fuchsia.com/fml_tests#meta/fml_tests.cm -- --gtest_filter=-MessageLoop.TimeSensitiveTest_*:FileTest.CanTruncateAndWrite:FileTest.CreateDirectoryStructure
 - package: flow_tests-0.far
-  test_command: run-test-component fuchsia-pkg://fuchsia.com/flow_tests#meta/flow_tests.cmx
+  test_command: run-test-suite fuchsia-pkg://fuchsia.com/flow_tests#meta/flow_tests.cm
 - package: runtime_tests-0.far
-  test_command: run-test-component fuchsia-pkg://fuchsia.com/runtime_tests#meta/runtime_tests.cmx
+  test_command: run-test-suite fuchsia-pkg://fuchsia.com/runtime_tests#meta/runtime_tests.cm
 - package: shell_tests-0.far
-  test_command: run-test-component fuchsia-pkg://fuchsia.com/shell_tests#meta/shell_tests.cmx -- --gtest_filter=-ShellTest.ReportTimingsIsCalledLaterInReleaseMode:ShellTest.ReportTimingsIsCalledSoonerInNonReleaseMode:ShellTest.DisallowedDartVMFlag:FuchsiaShellTest.LocaltimesVaryOnTimezoneChanges
+  test_command: run-test-suite fuchsia-pkg://fuchsia.com/shell_tests#meta/shell_tests.cm -- --gtest_filter=-ShellTest.ReportTimingsIsCalledLaterInReleaseMode:ShellTest.ReportTimingsIsCalledSoonerInNonReleaseMode:ShellTest.DisallowedDartVMFlag:FuchsiaShellTest.LocaltimesVaryOnTimezoneChanges
 - package: testing_tests-0.far
-  test_command: run-test-component fuchsia-pkg://fuchsia.com/testing_tests#meta/testing_tests.cmx
+  test_command: run-test-suite fuchsia-pkg://fuchsia.com/testing_tests#meta/testing_tests.cm
 - package: txt_tests-0.far
-  test_command: run-test-component fuchsia-pkg://fuchsia.com/txt_tests#meta/txt_tests.cmx -- --gtest_filter=-ParagraphTest.*
+  test_command: run-test-suite fuchsia-pkg://fuchsia.com/txt_tests#meta/txt_tests.cm -- --gtest_filter=-ParagraphTest.*
 - package: ui_tests-0.far
-  test_command: run-test-component fuchsia-pkg://fuchsia.com/ui_tests#meta/ui_tests.cmx
+  test_command: run-test-suite fuchsia-pkg://fuchsia.com/ui_tests#meta/ui_tests.cm
 - package: embedder_tests-0.far
-  test_command: run-test-component fuchsia-pkg://fuchsia.com/embedder_tests#meta/embedder_tests.cmx
+  test_command: run-test-suite fuchsia-pkg://fuchsia.com/embedder_tests#meta/embedder_tests.cm
 - package: dart_utils_tests-0.far
-  test_command: run-test-component fuchsia-pkg://fuchsia.com/dart_utils_tests#meta/dart_utils_tests.cmx
+  test_command: run-test-suite fuchsia-pkg://fuchsia.com/dart_utils_tests#meta/dart_utils_tests.cm
+
+# Legacy v1 components.
 - package: flutter_runner_tests-0.far
   test_command: run-test-component fuchsia-pkg://fuchsia.com/flutter_runner_tests#meta/flutter_runner_tests.cmx
 - package: flutter_runner_scenic_tests-0.far

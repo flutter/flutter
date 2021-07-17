@@ -1,7 +1,0 @@
-# This configuration file specifies disabled tests as gtest_filters to be passed
-# as test arguments for flutter on FEMU tests.
-
-txt_tests: -ParagraphTest.*
-fml_tests: -MessageLoop.TimeSensitiveTest_*:FileTest.CanTruncateAndWrite:FileTest.CreateDirectoryStructure
-shell_tests: -ShellTest.ReportTimingsIsCalledLaterInReleaseMode:ShellTest.ReportTimingsIsCalledSoonerInNonReleaseMode:ShellTest.DisallowedDartVMFlag:FuchsiaShellTest.LocaltimesVaryOnTimezoneChanges
-flutter_runner_scenic_tests: -DefaultSessionConnectionTest.*:CalculateNextLatchPointTest.*
