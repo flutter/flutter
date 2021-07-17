@@ -59,6 +59,7 @@ Future<R> compute<Q, R>(isolates.ComputeCallback<Q, R> callback, Q message, { St
   await result.future;
   Timeline.startSync('$debugLabel: end', flow: Flow.end(flow.id));
   resultPort.close();
+  exitPort.close();
   errorPort.close();
   isolate.kill();
   Timeline.finishSync();
