@@ -140,6 +140,7 @@ class CupertinoSearchTextField extends StatefulWidget {
     this.decoration,
     this.backgroundColor,
     this.borderRadius,
+    this.keyboardType,
     this.padding = const EdgeInsetsDirectional.fromSTEB(3.8, 8, 5, 8),
     this.itemColor = CupertinoColors.secondaryLabel,
     this.itemSize = 20.0,
@@ -224,6 +225,11 @@ class CupertinoSearchTextField extends StatefulWidget {
   // TODO(DanielEdrisian): Must make border radius continuous, see
   // https://github.com/flutter/flutter/issues/13914.
   final BorderRadius? borderRadius;
+
+  /// The keyboard type for this search field.
+  ///
+  /// Defaults to TextInputType.text.
+  final TextInputType? keyboardType;
 
   /// Sets the padding insets for the text and placeholder.
   ///
@@ -420,6 +426,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
       style: widget.style,
       prefix: prefix,
       suffix: suffix,
+      keyboardType: widget.keyboardType,
       onTap: widget.onTap,
       enabled: widget.enabled,
       suffixMode: widget.suffixMode,
