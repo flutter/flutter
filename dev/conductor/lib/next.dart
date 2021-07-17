@@ -102,7 +102,7 @@ void runNext({
         }
       }
 
-      if (state.engine.cherrypicks.isEmpty && state.engine.dartRevision.isEmpty) {
+      if (!requiresEnginePR(state)) {
         stdio.printStatus(
           'This release has no engine cherrypicks. No Engine PR is necessary.\n',
         );
@@ -110,8 +110,8 @@ void runNext({
       }
 
       if (unappliedCherrypicks.isEmpty) {
-        stdio.printStatus('All engine cherrypicks have been auto-applied by '
-            'the conductor.\n');
+        stdio.printStatus(
+          'All engine cherrypicks have been auto-applied by the conductor.\n');
       } else {
         stdio.printStatus(
           'There were ${unappliedCherrypicks.length} cherrypicks that were not auto-applied.');

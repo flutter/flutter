@@ -116,6 +116,9 @@ void main() {
         expect(processManager, hasNoRemainingExpectations);
         expect(finalState.currentPhase, ReleasePhase.CODESIGN_ENGINE_BINARIES);
         expect(stdio.error, isEmpty);
+        expect(
+          stdio.stdout,
+          contains('You must now codesign the engine binaries.'));
       });
 
       test('confirms to stdout when all engine cherrypicks were auto-applied', () async {
