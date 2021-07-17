@@ -432,8 +432,9 @@ mixin SchedulerBinding on BindingBase {
   // Scheduled by _ensureEventLoopCallback.
   void _runTasks() {
     _hasRequestedAnEventLoopCallback = false;
-    if (handleEventLoopCallback())
-      _ensureEventLoopCallback(); // runs next task when there's time
+    if (handleEventLoopCallback() || _taskQueue.isNotEmpty) {
+      _ensureEventLoopCallback(); // runs next task when there's time.
+    }
   }
 
   /// Execute the highest-priority task, if it is of a high enough priority.
@@ -1161,6 +1162,13 @@ mixin SchedulerBinding on BindingBase {
       _FrameCallbackEntry.debugCurrentCallbackStack = null;
       return true;
     }());
+  }
+
+  /// When a scheduling error occurs, resets the relative state of EventLoop.
+  @visibleForTesting
+  void resetEventLoop() {
+    _hasRequestedAnEventLoopCallback = false;
+    _taskQueue.clear();
   }
 }
 
