@@ -4,7 +4,6 @@
 
 // @dart = 2.8
 
-import 'package:flutter_tools/src/base/common.dart' show ToolExit;
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -199,17 +198,14 @@ void main() {
         ),
       ]);
 
-      ToolExit err;
-      try {
-        await realCommandRunner.fetchLatestVersion();
-      } on ToolExit catch (e) {
-        err = e;
-      }
-
-      expect(err, isNotNull);
-      expect(err.toString(), contains('Unable to upgrade Flutter: HEAD does not point to a branch'));
-      expect(err.toString(), contains('Use "flutter channel" to switch to an official channel, and retry'));
-      expect(err.toString(), contains('re-install Flutter by going to https://flutter.dev/docs/get-started/install'));
+      await expectLater(
+        () async => realCommandRunner.fetchLatestVersion(),
+        throwsToolExit(message: 'Unable to upgrade Flutter: HEAD does not point '
+          'to a branch (Are you in a detached HEAD state?).\n'
+          'Use "flutter channel" to switch to an official channel, and retry. '
+          'Alternatively, re-install Flutter by going to https://flutter.dev/docs/get-started/install.'
+        ),
+      );
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
@@ -231,16 +227,13 @@ void main() {
         ),
       ]);
 
-      ToolExit err;
-      try {
-        await realCommandRunner.fetchLatestVersion();
-      } on ToolExit catch (e) {
-        err = e;
-      }
-
-      expect(err, isNotNull);
-      expect(err.toString(), contains('Unable to upgrade Flutter: No upstream repository configured'));
-      expect(err.toString(), contains('Re-install Flutter by going to https://flutter.dev/docs/get-started/install'));
+      await expectLater(
+        () async => realCommandRunner.fetchLatestVersion(),
+        throwsToolExit(message: 'Unable to upgrade Flutter: No upstream repository '
+          'configured (The current branch may not be tracking a remote repository).\n'
+          'Re-install Flutter by going to https://flutter.dev/docs/get-started/install.'
+        ),
+      );
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
