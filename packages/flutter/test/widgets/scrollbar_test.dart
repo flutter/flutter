@@ -1380,6 +1380,79 @@ void main() {
     );
   });
 
+  testWidgets('The bar can show or hide when the viewport size change', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    Widget buildFrame(double height) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            controller: scrollController,
+            isAlwaysShown: true,
+            child: SingleChildScrollView(
+                controller: scrollController,
+                child: SizedBox(width: double.infinity, height: height)
+            ),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildFrame(600.0));
+    await tester.pumpAndSettle();
+    expect(find.byType(RawScrollbar), isNot(paints..rect())); // Not shown.
+
+    await tester.pumpWidget(buildFrame(600.1));
+    await tester.pumpAndSettle();
+    expect(find.byType(RawScrollbar), paints..rect()..rect()); // Show the bar.
+
+    await tester.pumpWidget(buildFrame(600.0));
+    await tester.pumpAndSettle();
+    expect(find.byType(RawScrollbar), isNot(paints..rect())); // Hide the bar.
+  });
+
+  testWidgets('The bar can show or hide when the window size change', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    Widget buildFrame() {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: PrimaryScrollController(
+            controller: scrollController,
+            child: RawScrollbar(
+              isAlwaysShown: true,
+              controller: scrollController,
+              child: const SingleChildScrollView(
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 600.0,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+    tester.binding.window.physicalSizeTestValue = const Size(800.0, 600.0);
+    tester.binding.window.devicePixelRatioTestValue = 1;
+    addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+    addTearDown(tester.binding.window.clearDevicePixelRatioTestValue);
+
+    await tester.pumpWidget(buildFrame());
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+    expect(find.byType(RawScrollbar), isNot(paints..rect())); // Not shown.
+
+    tester.binding.window.physicalSizeTestValue = const Size(800.0, 599.0);
+    await tester.pumpAndSettle();
+    expect(find.byType(RawScrollbar), paints..rect()..rect()); // Show the bar.
+
+    tester.binding.window.physicalSizeTestValue = const Size(800.0, 600.0);
+    await tester.pumpAndSettle();
+    expect(find.byType(RawScrollbar), isNot(paints..rect())); // Not shown.
+  });
+
   testWidgets('Scrollbar thumb can be dragged in reverse', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
@@ -1435,6 +1508,7 @@ void main() {
         ),
     );
   });
+
   testWidgets('ScrollbarPainter asserts if scrollbarOrientation is used with wrong axisDirection', (WidgetTester tester) async {
     final ScrollbarPainter painter = ScrollbarPainter(
       color: _kScrollbarColor,
