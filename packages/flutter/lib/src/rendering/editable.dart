@@ -1747,6 +1747,16 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       return moveSelectionLeftByLine(cause);
     }
 
+    // If the lowest edge of the selection is at the start of a line, don't do
+    // anything.
+    final int lowestOffset = math.min(selection!.baseOffset, selection!.extentOffset);
+    final TextSelection currentLine = _getLineAtOffset(TextPosition(
+      offset: lowestOffset,
+    ));
+    if (currentLine.baseOffset == lowestOffset) {
+      return;
+    }
+
     final int firstOffset = math.min(selection!.baseOffset, selection!.extentOffset);
     final int startPoint = previousCharacter(firstOffset, _plainText, false);
     final TextSelection selectedLine = _getLineAtOffset(TextPosition(offset: startPoint));
@@ -1865,6 +1875,15 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
     if (!selectionEnabled) {
       return moveSelectionRightByLine(cause);
+    }
+
+    // If greatest edge is already at the end of a line, don't do anything.
+    final int greatestOffset = math.max(selection!.baseOffset, selection!.extentOffset);
+    final TextSelection currentLine = _getLineAtOffset(TextPosition(
+      offset: greatestOffset,
+    ));
+    if (currentLine.extentOffset == greatestOffset) {
+      return;
     }
 
     final int lastOffset = math.max(selection!.baseOffset, selection!.extentOffset);
@@ -3525,8 +3544,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).',
     );
     final TextRange line = _textPainter.getLineBoundary(position);
-    if (position.offset >= line.end)
-      return TextSelection.fromPosition(position);
     // If text is obscured, the entire string should be treated as one line.
     if (obscureText) {
       return TextSelection(baseOffset: 0, extentOffset: _plainText.length);

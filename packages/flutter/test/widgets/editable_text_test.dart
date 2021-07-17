@@ -4481,7 +4481,7 @@ void main() {
       reason: 'on $platform',
     );
 
-    // Select to the beginning of the first line.
+    // Can't move left by line because we're already at the beginning of a line.
     await sendKeys(
       tester,
       <LogicalKeyboardKey>[
@@ -4496,7 +4496,7 @@ void main() {
       selection,
       equals(
         const TextSelection(
-          baseOffset: 0,
+          baseOffset: 20,
           extentOffset: 72,
           affinity: TextAffinity.downstream,
         ),
@@ -7450,6 +7450,124 @@ void main() {
     expect(controller.selection.extentOffset, 9);
 
     // On web, using keyboard for selection is handled by the browser.
+  }, skip: kIsWeb, variant: TargetPlatformVariant.all());
+
+  testWidgets('navigating multiline text', (WidgetTester tester) async {
+    const String multilineText = 'word word word\nword word\nword';
+    final TextEditingController controller = TextEditingController(text: multilineText);
+    // wo|rd wo|rd
+    controller.selection = const TextSelection(
+      baseOffset: 17,
+      extentOffset: 22,
+      affinity: TextAffinity.upstream,
+    );
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 400,
+          child: EditableText(
+            maxLines: 10,
+            controller: controller,
+            autofocus: true,
+            focusNode: focusNode,
+            style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            keyboardType: TextInputType.text,
+          ),
+        ),
+      ),
+    ));
+
+    await tester.pump(); // Wait for autofocus to take effect.
+    expect(controller.selection.isCollapsed, false);
+    expect(controller.selection.baseOffset, 17);
+    expect(controller.selection.extentOffset, 22);
+
+    // Multiple right arrow keys only move to the end of the line and not to the
+    // next line.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowRight,
+        LogicalKeyboardKey.arrowRight,
+        LogicalKeyboardKey.arrowRight,
+      ],
+      shift: true,
+      lineModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(controller.selection.isCollapsed, false);
+    expect(controller.selection.baseOffset, 17);
+    expect(controller.selection.extentOffset, 24);
+
+    // Multiple left arrow keys only move to the start of the line and not to
+    // the previous line.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowLeft,
+        LogicalKeyboardKey.arrowLeft,
+        LogicalKeyboardKey.arrowLeft,
+      ],
+      shift: true,
+      lineModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(controller.selection.isCollapsed, false);
+    expect(controller.selection.baseOffset, 15);
+    expect(controller.selection.extentOffset, 24);
+
+    // Set the caret to the end of a line.
+    controller.selection = const TextSelection(
+      baseOffset: 24,
+      extentOffset: 24,
+      affinity: TextAffinity.upstream,
+    );
+    await tester.pump();
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, 24);
+    expect(controller.selection.extentOffset, 24);
+
+    // Can select the entire line from the end.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowLeft,
+      ],
+      shift: true,
+      lineModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(controller.selection.isCollapsed, false);
+    expect(controller.selection.baseOffset, 24);
+    expect(controller.selection.extentOffset, 15);
+
+    // Set the caret to the start of a line.
+    controller.selection = const TextSelection(
+      baseOffset: 15,
+      extentOffset: 15,
+      affinity: TextAffinity.upstream,
+    );
+    await tester.pump();
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, 15);
+    expect(controller.selection.extentOffset, 15);
+
+    // Can select the entire line from the start.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowRight,
+      ],
+      shift: true,
+      lineModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(controller.selection.isCollapsed, false);
+    expect(controller.selection.baseOffset, 15);
+    expect(controller.selection.extentOffset, 24);
   }, skip: kIsWeb, variant: TargetPlatformVariant.all());
 
   testWidgets('expanding selection to start/end', (WidgetTester tester) async {
