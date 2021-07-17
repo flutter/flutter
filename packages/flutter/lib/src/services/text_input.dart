@@ -431,6 +431,15 @@ enum TextCapitalization {
   none,
 }
 
+enum ObscureTextBehavior {
+  /// Indicates all text should be shown.
+  none,
+  /// Indicates all text should be obscured.
+  all,
+  /// Indicates all text should be obscured, but the last character is visible for a short delay.
+  delayed,
+}
+
 /// Controls the visual appearance of the text input control.
 ///
 /// Many [TextInputAction]s are common between Android and iOS. However, if an
@@ -457,6 +466,7 @@ class TextInputConfiguration {
     this.inputType = TextInputType.text,
     this.readOnly = false,
     this.obscureText = false,
+    this.obscureTextBehavior = ObscureTextBehavior.none,
     this.autocorrect = true,
     SmartDashesType? smartDashesType,
     SmartQuotesType? smartQuotesType,
@@ -468,6 +478,7 @@ class TextInputConfiguration {
     this.autofillConfiguration,
   }) : assert(inputType != null),
        assert(obscureText != null),
+       assert(obscureTextBehavior != null),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
        assert(autocorrect != null),
@@ -484,10 +495,28 @@ class TextInputConfiguration {
   /// Defaults to false.
   final bool readOnly;
 
+  @Deprecated(
+    'Use obscureTextBehavior instead.'
+  )
   /// Whether to hide the text being edited (e.g., for passwords).
   ///
   /// Defaults to false.
   final bool obscureText;
+
+  @Deprecated(
+    'Use obscureTextBehavior instead.'
+  )
+  /// {@template flutter.widgets.editableText.obscureTextBehavior}
+  /// How characters in the field are obscured, if at all.
+  /// For example, a password field may want to obscure the entered 
+  /// text so it's not readable.
+  /// When this is set to [ObscureTextBehavior.all] or 
+  /// [ObscureTextBehavior.delayed], the characters in the field 
+  /// are replaced by [obscuringCharacter].
+  ///
+  /// Defaults to [ObscureTextBehavior.none]. Cannot be null.
+  /// {@endtemplate}
+  final ObscureTextBehavior obscureTextBehavior;
 
   /// Whether to enable autocorrection.
   ///
@@ -596,6 +625,7 @@ class TextInputConfiguration {
       'inputType': inputType.toJson(),
       'readOnly': readOnly,
       'obscureText': obscureText,
+      'obscureTextBehavior': obscureTextBehavior,
       'autocorrect': autocorrect,
       'smartDashesType': smartDashesType.index.toString(),
       'smartQuotesType': smartQuotesType.index.toString(),

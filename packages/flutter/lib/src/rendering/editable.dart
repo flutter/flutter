@@ -184,6 +184,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
     String obscuringCharacter = '•',
     bool obscureText = false,
+    ObscureTextBehavior obscureTextBehavior = ObscureTextBehavior.none,
     Locale? locale,
     double cursorWidth = 1.0,
     double? cursorHeight,
@@ -223,7 +224,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
        assert(textWidthBasis != null),
        assert(paintCursorAboveText != null),
        assert(obscuringCharacter != null && obscuringCharacter.characters.length == 1),
-       assert(obscureText != null),
+       assert((obscureText != null && obscureTextBehavior == null) || (obscureText == null && obscureTextBehavior != null)),
        assert(textSelectionDelegate != null),
        assert(cursorWidth != null && cursorWidth >= 0.0),
        assert(cursorHeight == null || cursorHeight >= 0.0),
@@ -258,6 +259,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
        _endHandleLayerLink = endHandleLayerLink,
        _obscuringCharacter = obscuringCharacter,
        _obscureText = obscureText,
+       _obscureTextBehavior = obscureTextBehavior,
        _readOnly = readOnly,
        _forceLine = forceLine,
        _clipBehavior = clipBehavior,
@@ -496,6 +498,16 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     if (_obscureText == value)
       return;
     _obscureText = value;
+    markNeedsSemanticsUpdate();
+  }
+
+ /// Whether to hide the text being edited (e.g., for passwords).
+  ObscureTextBehavior get obscureTextBehavior => _obscureTextBehavior;
+  ObscureTextBehavior _obscureTextBehavior;
+  set obscureTextBehavior(ObscureTextBehavior value) {
+    if (_obscureTextBehavior == value)
+      return;
+    _obscureTextBehavior = value;
     markNeedsSemanticsUpdate();
   }
 

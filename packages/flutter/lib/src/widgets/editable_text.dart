@@ -12,6 +12,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
+import 'actions.dart';
 import 'autofill.dart';
 import 'automatic_keep_alive.dart';
 import 'basic.dart';
@@ -421,7 +422,8 @@ class EditableText extends StatefulWidget {
   /// The text cursor is not shown if [showCursor] is false or if [showCursor]
   /// is null (the default) and [readOnly] is true.
   ///
-  /// The [controller], [focusNode], [obscureText], [autocorrect], [autofocus],
+  /// The [controller], [focusNode], [obscureText], 
+  /// [obscureTextBehavior], [autocorrect], [autofocus],
   /// [showSelectionHandles], [enableInteractiveSelection], [forceLine],
   /// [style], [cursorColor], [cursorOpacityAnimates],[backgroundCursorColor],
   /// [enableSuggestions], [paintCursorAboveText], [selectionHeightStyle],
@@ -435,6 +437,7 @@ class EditableText extends StatefulWidget {
     this.readOnly = false,
     this.obscuringCharacter = '•',
     this.obscureText = false,
+    this.obscureTextBehavior = ObscureTextBehavior.none,
     this.autocorrect = true,
     SmartDashesType? smartDashesType,
     SmartQuotesType? smartQuotesType,
@@ -498,7 +501,7 @@ class EditableText extends StatefulWidget {
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
-       assert(obscureText != null),
+       assert((obscureText != null && obscureTextBehavior == null) || (obscureText == null && obscureTextBehavior != null)),
        assert(autocorrect != null),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
@@ -572,6 +575,18 @@ class EditableText extends StatefulWidget {
   /// Defaults to false. Cannot be null.
   /// {@endtemplate}
   final bool obscureText;
+  
+  /// {@template flutter.widgets.editableText.obscureTextBehavior}
+  /// How characters in the field are obscured, if at all.
+  /// For example, a password field may want to obscure the entered 
+  /// text so it's not readable.
+  /// When this is set to [ObscureTextBehavior.all] or 
+  /// [ObscureTextBehavior.delayed], the characters in the field 
+  /// are replaced by [obscuringCharacter].
+  ///
+  /// Defaults to [ObscureTextBehavior.none]. Cannot be null.
+  /// {@endtemplate}
+  final ObscureTextBehavior obscureTextBehavior;
 
   /// {@macro flutter.dart:ui.textHeightBehavior}
   final TextHeightBehavior? textHeightBehavior;
@@ -1495,6 +1510,7 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<TextEditingController>('controller', controller));
     properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode));
     properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
+    properties.add(DiagnosticsProperty<ObscureTextBehavior>('obscureTextBehavior', obscureTextBehavior, defaultValue: ObscureTextBehavior.none));
     properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
     properties.add(EnumProperty<SmartDashesType>('smartDashesType', smartDashesType, defaultValue: obscureText ? SmartDashesType.disabled : SmartDashesType.enabled));
     properties.add(EnumProperty<SmartQuotesType>('smartQuotesType', smartQuotesType, defaultValue: obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled));
@@ -2592,6 +2608,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       inputType: widget.keyboardType,
       readOnly: widget.readOnly,
       obscureText: widget.obscureText,
+      obscureTextBehavior: widget.obscureTextBehavior,
       autocorrect: widget.autocorrect,
       smartDashesType: widget.smartDashesType,
       smartQuotesType: widget.smartQuotesType,
@@ -2696,6 +2713,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                 textWidthBasis: widget.textWidthBasis,
                 obscuringCharacter: widget.obscuringCharacter,
                 obscureText: widget.obscureText,
+                obscureTextBehavior: widget.obscureTextBehavior,
                 autocorrect: widget.autocorrect,
                 smartDashesType: widget.smartDashesType,
                 smartQuotesType: widget.smartQuotesType,
@@ -2729,13 +2747,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// By default makes text in composing range appear as underlined.
   /// Descendants can override this method to customize appearance of text.
   TextSpan buildTextSpan() {
-    if (widget.obscureText) {
+    if (widget.obscureText || 
+      widget.obscureTextBehavior != ObscureTextBehavior.none) {
       String text = _value.text;
       text = widget.obscuringCharacter * text.length;
       // Reveal the latest character in an obscured field only on mobile.
-      if (defaultTargetPlatform == TargetPlatform.android ||
-          defaultTargetPlatform == TargetPlatform.iOS ||
-          defaultTargetPlatform == TargetPlatform.fuchsia) {
+      if ((defaultTargetPlatform == TargetPlatform.android ||
+              defaultTargetPlatform == TargetPlatform.iOS ||
+              defaultTargetPlatform == TargetPlatform.fuchsia) &&
+          !kIsWeb && 
+          widget.obscureTextBehavior == ObscureTextBehavior.delayed) {
         final int? o =
             _obscureShowCharTicksPending > 0 ? _obscureLatestCharIndex : null;
         if (o != null && o >= 0 && o < text.length)
@@ -2778,6 +2799,7 @@ class _Editable extends MultiChildRenderObjectWidget {
     this.locale,
     required this.obscuringCharacter,
     required this.obscureText,
+    required this.obscureTextBehavior,
     required this.autocorrect,
     required this.smartDashesType,
     required this.smartQuotesType,
@@ -2836,6 +2858,7 @@ class _Editable extends MultiChildRenderObjectWidget {
   final Locale? locale;
   final String obscuringCharacter;
   final bool obscureText;
+  final ObscureTextBehavior obscureTextBehavior;
   final TextHeightBehavior? textHeightBehavior;
   final TextWidthBasis textWidthBasis;
   final bool autocorrect;
@@ -2886,6 +2909,7 @@ class _Editable extends MultiChildRenderObjectWidget {
       ignorePointer: rendererIgnoresPointer,
       obscuringCharacter: obscuringCharacter,
       obscureText: obscureText,
+      obscureTextBehavior: obscureTextBehavior,
       textHeightBehavior: textHeightBehavior,
       textWidthBasis: textWidthBasis,
       cursorWidth: cursorWidth,
@@ -2932,6 +2956,7 @@ class _Editable extends MultiChildRenderObjectWidget {
       ..textWidthBasis = textWidthBasis
       ..obscuringCharacter = obscuringCharacter
       ..obscureText = obscureText
+      ..obscureTextBehavior = obscureTextBehavior
       ..cursorWidth = cursorWidth
       ..cursorHeight = cursorHeight
       ..cursorRadius = cursorRadius

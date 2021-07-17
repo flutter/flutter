@@ -323,7 +323,8 @@ class TextField extends StatefulWidget {
   /// to [ui.BoxHeightStyle.tight] and [ui.BoxWidthStyle.tight] respectively and
   /// must not be null.
   ///
-  /// The [textAlign], [autofocus], [obscureText], [readOnly], [autocorrect],
+  /// The [textAlign], [autofocus], [obscureText], 
+  /// [obscureTextBehavior], [readOnly], [autocorrect],
   /// [maxLengthEnforced], [scrollPadding], [maxLines], [maxLength],
   /// [selectionHeightStyle], [selectionWidthStyle], and [enableSuggestions]
   /// arguments must not be null.
@@ -351,6 +352,7 @@ class TextField extends StatefulWidget {
     this.autofocus = false,
     this.obscuringCharacter = '•',
     this.obscureText = false,
+    this.obscureTextBehavior = ObscureTextBehavior.none,
     this.autocorrect = true,
     SmartDashesType? smartDashesType,
     SmartQuotesType? smartQuotesType,
@@ -394,7 +396,7 @@ class TextField extends StatefulWidget {
        assert(readOnly != null),
        assert(autofocus != null),
        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
-       assert(obscureText != null),
+       assert((obscureText != null && obscureTextBehavior == null) || (obscureText == null && obscureTextBehavior != null)),
        assert(autocorrect != null),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
@@ -536,6 +538,9 @@ class TextField extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.obscureText}
   final bool obscureText;
+
+  /// {@macro flutter.widgets.editableText.obscureTextBehavior}
+  final ObscureTextBehavior obscureTextBehavior;
 
   /// {@macro flutter.widgets.editableText.autocorrect}
   final bool autocorrect;
@@ -836,6 +841,7 @@ class TextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
     properties.add(DiagnosticsProperty<String>('obscuringCharacter', obscuringCharacter, defaultValue: '•'));
     properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
+    properties.add(DiagnosticsProperty<ObscureTextBehavior>('obscureTextBehavior', obscureTextBehavior, defaultValue: ObscureTextBehavior.none));
     properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
     properties.add(EnumProperty<SmartDashesType>('smartDashesType', smartDashesType, defaultValue: obscureText ? SmartDashesType.disabled : SmartDashesType.enabled));
     properties.add(EnumProperty<SmartQuotesType>('smartQuotesType', smartQuotesType, defaultValue: obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled));
@@ -1226,6 +1232,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           autofocus: widget.autofocus,
           obscuringCharacter: widget.obscuringCharacter,
           obscureText: widget.obscureText,
+          obscureTextBehavior: widget.obscureTextBehavior,
           autocorrect: widget.autocorrect,
           smartDashesType: widget.smartDashesType,
           smartQuotesType: widget.smartQuotesType,
