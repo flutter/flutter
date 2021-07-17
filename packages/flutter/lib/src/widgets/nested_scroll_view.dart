@@ -11,6 +11,7 @@ import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
 import 'framework.dart';
+import 'page_storage.dart';
 import 'primary_scroll_controller.dart';
 import 'scroll_activity.dart';
 import 'scroll_configuration.dart';
@@ -1394,7 +1395,19 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
 
   @override
   void restoreScrollOffset() {
-    if (coordinator.canScrollBody)
+    // If the children of a [NestedScrollView] have [PageStorageKey], the
+    // scroll offset should be restored correctly and not controlled by
+    // [_NestedScrollCoordinator.canScrollBody].
+    Element? elementWithPageStorageKey;
+    context.storageContext.visitAncestorElements((Element element) {
+      if (element.widget.key is PageStorageKey) {
+        elementWithPageStorageKey = element;
+        return false;
+      }
+      return true;
+    });
+    final NestedScrollViewState? ancestorStateIsNestedScrollViewState = elementWithPageStorageKey?.findAncestorStateOfType<NestedScrollViewState>();
+    if (identical(ancestorStateIsNestedScrollViewState, coordinator._state) || coordinator.canScrollBody)
       super.restoreScrollOffset();
   }
 
