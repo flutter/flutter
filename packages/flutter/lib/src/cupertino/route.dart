@@ -1067,7 +1067,9 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     return CupertinoUserInterfaceLevel(
       data: CupertinoUserInterfaceLevelData.elevated,
-      child: Builder(builder: builder),
+      child: AvoidDisplayFeatures(
+        child: Builder(builder: builder),
+      ),
     );
   }
 
@@ -1253,6 +1255,9 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 /// By default, `useRootNavigator` is `true` and the dialog route created by
 /// this method is pushed to the root navigator.
 ///
+/// The [anchorPoint] argument is used to pick the closest area without
+/// [DisplayFeature]s, where the dialog will be rendered.
+///
 /// If the application has multiple [Navigator] objects, it may be necessary to
 /// call `Navigator.of(context, rootNavigator: true).pop(result)` to close the
 /// dialog rather than just `Navigator.pop(context, result)`.
@@ -1316,6 +1321,8 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 ///  * [CupertinoAlertDialog], an iOS-style alert dialog.
 ///  * [showDialog], which displays a Material-style dialog.
 ///  * [showGeneralDialog], which allows for customization of the dialog popup.
+///  * [AvoidDisplayFeatures], which is used for avoiding [DisplayFeature]s when
+///    displaying the dialog.
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/views/alerts/>
 Future<T?> showCupertinoDialog<T>({
   required BuildContext context,
@@ -1324,6 +1331,7 @@ Future<T?> showCupertinoDialog<T>({
   bool useRootNavigator = true,
   bool barrierDismissible = false,
   RouteSettings? routeSettings,
+  Offset? anchorPoint,
 }) {
   assert(builder != null);
   assert(useRootNavigator != null);
@@ -1335,6 +1343,7 @@ Future<T?> showCupertinoDialog<T>({
     barrierLabel: barrierLabel,
     barrierColor: CupertinoDynamicColor.resolve(kCupertinoModalBarrierColor, context),
     settings: routeSettings,
+    anchorPoint: anchorPoint,
   ));
 }
 
@@ -1365,12 +1374,17 @@ Future<T?> showCupertinoDialog<T>({
 /// The `settings` argument define the settings for this route. See
 /// [RouteSettings] for details.
 ///
+/// The [anchorPoint] argument is used to pick the closest area without
+/// [DisplayFeature]s, where the dialog will be rendered.
+///
 /// See also:
 ///
 ///  * [showCupertinoDialog], which is a way to display
 ///     an iOS-style dialog.
 ///  * [showGeneralDialog], which allows for customization of the dialog popup.
 ///  * [showDialog], which displays a Material dialog.
+///  * [AvoidDisplayFeatures], which is used for avoiding [DisplayFeature]s when
+///    displaying the dialog.
 class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
   /// A dialog route that shows an iOS-style dialog.
   CupertinoDialogRoute({
@@ -1383,6 +1397,7 @@ class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
     Duration transitionDuration = const Duration(milliseconds: 250),
     RouteTransitionsBuilder? transitionBuilder = _buildCupertinoDialogTransitions,
     RouteSettings? settings,
+    Offset? anchorPoint,
   }) : assert(barrierDismissible != null),
       super(
         pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
@@ -1394,5 +1409,6 @@ class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
         transitionDuration: transitionDuration,
         transitionBuilder: transitionBuilder,
         settings: settings,
+        anchorPoint: anchorPoint,
       );
 }

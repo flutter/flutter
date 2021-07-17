@@ -2323,6 +2323,9 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
 /// [hourLabelText], [minuteLabelText] and [confirmText] can be provided to
 /// override the default values.
 ///
+/// The [anchorPoint] argument is used to pick the closest area without
+/// [DisplayFeature]s, where the dialog will be rendered.
+///
 /// By default, the time picker gets its colors from the overall theme's
 /// [ColorScheme]. The time picker can be further customized by providing a
 /// [TimePickerThemeData] to the overall theme.
@@ -2367,6 +2370,8 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
 ///    date picker.
 ///  * [TimePickerThemeData], which allows you to customize the colors,
 ///    typography, and shape of the time picker.
+///  * [AvoidDisplayFeatures], which is used for avoiding [DisplayFeature]s when
+///    displaying the picker.
 Future<TimeOfDay?> showTimePicker({
   required BuildContext context,
   required TimeOfDay initialTime,
@@ -2380,6 +2385,7 @@ Future<TimeOfDay?> showTimePicker({
   String? hourLabelText,
   String? minuteLabelText,
   RouteSettings? routeSettings,
+  Offset? anchorPoint,
 }) async {
   assert(context != null);
   assert(initialTime != null);
@@ -2404,6 +2410,7 @@ Future<TimeOfDay?> showTimePicker({
       return builder == null ? dialog : builder(context, dialog);
     },
     routeSettings: routeSettings,
+    anchorPoint: anchorPoint,
   );
 }
 

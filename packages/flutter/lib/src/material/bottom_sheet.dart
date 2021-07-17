@@ -459,6 +459,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     required this.isScrollControlled,
     RouteSettings? settings,
     this.transitionAnimationController,
+    this.anchorPoint,
   }) : assert(isScrollControlled != null),
        assert(isDismissible != null),
        assert(enableDrag != null),
@@ -476,6 +477,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   final bool isDismissible;
   final bool enableDrag;
   final AnimationController? transitionAnimationController;
+  final Offset? anchorPoint;
 
   @override
   Duration get transitionDuration => _bottomSheetEnterDuration;
@@ -508,20 +510,23 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     final Widget bottomSheet = MediaQuery.removePadding(
       context: context,
       removeTop: true,
-      child: Builder(
-        builder: (BuildContext context) {
-          final BottomSheetThemeData sheetTheme = Theme.of(context).bottomSheetTheme;
-          return _ModalBottomSheet<T>(
-            route: this,
-            backgroundColor: backgroundColor ?? sheetTheme.modalBackgroundColor ?? sheetTheme.backgroundColor,
-            elevation: elevation ?? sheetTheme.modalElevation ?? sheetTheme.elevation,
-            shape: shape,
-            clipBehavior: clipBehavior,
-            constraints: constraints,
-            isScrollControlled: isScrollControlled,
-            enableDrag: enableDrag,
-          );
-        },
+      child: AvoidDisplayFeatures(
+        child: Builder(
+          builder: (BuildContext context) {
+            final BottomSheetThemeData sheetTheme = Theme.of(context).bottomSheetTheme;
+            return _ModalBottomSheet<T>(
+              route: this,
+              backgroundColor: backgroundColor ?? sheetTheme.modalBackgroundColor ?? sheetTheme.backgroundColor,
+              elevation: elevation ?? sheetTheme.modalElevation ?? sheetTheme.elevation,
+              shape: shape,
+              clipBehavior: clipBehavior,
+              constraints: constraints,
+              isScrollControlled: isScrollControlled,
+              enableDrag: enableDrag,
+            );
+          },
+        ),
+        anchorPoint: anchorPoint,
       ),
     );
     return capturedThemes.wrap(bottomSheet);
@@ -632,6 +637,9 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 /// sheet. This is particularly useful in the case that a user wants to observe
 /// [PopupRoute]s within a [NavigatorObserver].
 ///
+/// The [anchorPoint] argument is used to pick the closest area without
+/// [DisplayFeature]s, where the dialog will be rendered.
+///
 /// Returns a `Future` that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the modal bottom sheet was closed.
 ///
@@ -684,6 +692,8 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 ///    non-modal bottom sheets.
 ///  * [DraggableScrollableSheet], which allows you to create a bottom sheet
 ///    that grows and then becomes scrollable once it reaches its maximum size.
+///  * [AvoidDisplayFeatures], which is used for avoiding [DisplayFeature]s when
+///    displaying the bottom sheet.
 ///  * <https://material.io/design/components/sheets-bottom.html#modal-bottom-sheet>
 Future<T?> showModalBottomSheet<T>({
   required BuildContext context,
@@ -700,6 +710,7 @@ Future<T?> showModalBottomSheet<T>({
   bool enableDrag = true,
   RouteSettings? routeSettings,
   AnimationController? transitionAnimationController,
+  Offset? anchorPoint,
 }) {
   assert(context != null);
   assert(builder != null);
@@ -726,6 +737,7 @@ Future<T?> showModalBottomSheet<T>({
     enableDrag: enableDrag,
     settings: routeSettings,
     transitionAnimationController: transitionAnimationController,
+    anchorPoint: anchorPoint,
   ));
 }
 
