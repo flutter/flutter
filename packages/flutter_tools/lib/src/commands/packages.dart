@@ -15,6 +15,8 @@ import '../dart/generate_synthetic_packages.dart';
 import '../dart/pub.dart';
 import '../flutter_plugins.dart';
 import '../globals_null_migrated.dart' as globals;
+import '../localizations/gen_l10n.dart';
+import '../localizations/localizations_utils.dart';
 import '../plugins.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
@@ -130,6 +132,18 @@ class PackagesGetCommand extends FlutterCommand {
       await generateLocalizationsSyntheticPackage(
         environment: environment,
         buildSystem: globals.buildSystem,
+      );
+    } else if (flutterProject.directory.childFile('l10n.yaml').existsSync()) {
+      final LocalizationOptions options = parseLocalizationsOptions(
+        file: flutterProject.directory.childFile('l10n.yaml'),
+        logger: globals.logger,
+      );
+      generateLocalizations(
+        logger: globals.logger,
+        options: options,
+        projectDir: globals.fs.currentDirectory,
+        dependenciesDir: null,
+        fileSystem: globals.fs,
       );
     }
 
