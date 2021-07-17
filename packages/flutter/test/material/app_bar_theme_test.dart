@@ -19,6 +19,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           appBar: AppBar(
+            backwardsCompatibility: false,
             actions: <Widget>[
               IconButton(icon: const Icon(Icons.share), onPressed: () { }),
             ],
@@ -54,6 +55,7 @@ void main() {
         theme: ThemeData(appBarTheme: appBarTheme),
         home: Scaffold(
           appBar: AppBar(
+            backwardsCompatibility: false,
             title: const Text('App Bar Title'),
             actions: <Widget>[
               IconButton(icon: const Icon(Icons.share), onPressed: () { }),
@@ -146,6 +148,7 @@ void main() {
         ),
         home: Scaffold(
           appBar: AppBar(
+            backwardsCompatibility: false,
             backgroundColor: color,
             brightness: brightness,
             systemOverlayStyle: systemOverlayStyle,
@@ -189,6 +192,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData.from(colorScheme: const ColorScheme.light()),
       home: Scaffold(appBar: AppBar(
+        backwardsCompatibility: false,
         iconTheme: iconThemeData,
         actionsIconTheme: actionsIconThemeData,
         actions: <Widget>[
@@ -210,6 +214,7 @@ void main() {
           .copyWith(appBarTheme: _appBarTheme()),
         home: Scaffold(
           appBar: AppBar(
+            backwardsCompatibility: false,
             actions: <Widget>[
               IconButton(icon: const Icon(Icons.share), onPressed: () { }),
             ],
@@ -246,6 +251,7 @@ void main() {
             theme = Theme.of(context);
             return Scaffold(
               appBar: AppBar(
+                backwardsCompatibility: false,
                 actions: <Widget>[
                   IconButton(icon: const Icon(Icons.share), onPressed: () { }),
                 ],
@@ -322,6 +328,7 @@ void main() {
             builder: (BuildContext context) {
               return Scaffold(
                 appBar: AppBar(
+                  backwardsCompatibility: false,
                   iconTheme: IconThemeData(color: appBarIconColor),
                   actions: <Widget>[
                     IconButton(icon: const Icon(Icons.share), onPressed: () { }),
@@ -355,6 +362,7 @@ void main() {
       theme: ThemeData(appBarTheme: const AppBarTheme(centerTitle: true)),
       home: Scaffold(appBar: AppBar(
         title: const Text('Title'),
+        backwardsCompatibility: false,
       )),
     ));
 
@@ -367,6 +375,7 @@ void main() {
       theme: ThemeData(appBarTheme: const AppBarTheme(centerTitle: true)),
       home: Scaffold(
         appBar: AppBar(
+          backwardsCompatibility: false,
           title: const Text('Title'),
           centerTitle: false,
         ),
@@ -382,6 +391,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(platform: TargetPlatform.iOS),
       home: Scaffold(appBar: AppBar(
+        backwardsCompatibility: false,
         title: const Text('Title'),
       )),
     ));
@@ -397,6 +407,7 @@ void main() {
       theme: ThemeData(appBarTheme: const AppBarTheme(shadowColor: Colors.red)),
       home: Scaffold(
         appBar: AppBar(
+          backwardsCompatibility: false,
           title: const Text('Title'),
           shadowColor: Colors.yellow,
         ),
@@ -414,6 +425,7 @@ void main() {
       theme: ThemeData(appBarTheme: const AppBarTheme(titleSpacing: kTitleSpacing)),
       home: Scaffold(
         appBar: AppBar(
+          backwardsCompatibility: false,
           title: const Text('Title'),
         ),
       ),
@@ -429,6 +441,7 @@ void main() {
       theme: ThemeData(appBarTheme: const AppBarTheme(titleSpacing: kTitleSpacing)),
       home: Scaffold(
         appBar: AppBar(
+          backwardsCompatibility: false,
           title: const Text('Title'),
           titleSpacing: 40,
         ),
@@ -446,6 +459,7 @@ void main() {
       home: const CustomScrollView(
         slivers: <Widget>[
           SliverAppBar(
+            backwardsCompatibility: false,
             title: Text('Title'),
           ),
         ],
@@ -463,6 +477,7 @@ void main() {
       home: const CustomScrollView(
         slivers: <Widget>[
           SliverAppBar(
+            backwardsCompatibility: false,
             title: Text('Title'),
             titleSpacing: 40,
           ),
@@ -489,6 +504,7 @@ void main() {
   testWidgets('AppBarTheme implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const AppBarTheme(
+      backwardsCompatibility: false,
       brightness: Brightness.dark,
       backgroundColor: Color(0xff000001),
       elevation: 8.0,
@@ -509,6 +525,7 @@ void main() {
       'shadowColor: Color(0xff000002)',
       'centerTitle: true',
       'titleSpacing: 40.0',
+      'backwardsCompatibility: false',
     ]);
 
     // On the web, Dart doubles and ints are backed by the same kind of object because
