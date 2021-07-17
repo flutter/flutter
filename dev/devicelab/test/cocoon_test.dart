@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:convert';
 import 'dart:io';
 
@@ -17,14 +15,14 @@ import 'package:http/testing.dart';
 import 'common.dart';
 
 void main() {
-  ProcessResult _processResult;
+  late ProcessResult _processResult;
   ProcessResult runSyncStub(String executable, List<String> args,
-          {Map<String, String> environment,
-          bool includeParentEnvironment,
-          bool runInShell,
-          Encoding stderrEncoding,
-          Encoding stdoutEncoding,
-          String workingDirectory}) =>
+          {Map<String, String>? environment,
+          bool includeParentEnvironment = true,
+          bool runInShell = false,
+          Encoding? stderrEncoding,
+          Encoding? stdoutEncoding,
+          String? workingDirectory}) =>
       _processResult;
 
   // Expected test values.
@@ -33,9 +31,9 @@ void main() {
   const String serviceAccountToken = 'test_token';
 
   group('Cocoon', () {
-    Client mockClient;
-    Cocoon cocoon;
-    FileSystem fs;
+    late Client mockClient;
+    late Cocoon cocoon;
+    late FileSystem fs;
 
     setUp(() {
       fs = MemoryFileSystem();
@@ -186,25 +184,10 @@ void main() {
       expect(() => cocoon.sendTaskResult(builderName: 'builderAbc', gitBranch: 'branchAbc', result: result),
           throwsA(isA<ClientException>()));
     });
-
-    test('null git branch throws error', () async {
-      mockClient = MockClient((Request request) async => Response('', 500));
-
-      cocoon = Cocoon(
-        serviceAccountTokenPath: serviceAccountTokenPath,
-        fs: fs,
-        httpClient: mockClient,
-        requestRetryLimit: 0,
-      );
-
-      final TaskResult result = TaskResult.success(<String, dynamic>{});
-      expect(() => cocoon.sendTaskResult(builderName: 'builderAbc', gitBranch: null, result: result),
-          throwsA(isA<AssertionError>()));
-    });
   });
 
   group('AuthenticatedCocoonClient', () {
-    FileSystem fs;
+    late FileSystem fs;
 
     setUp(() {
       fs = MemoryFileSystem();
