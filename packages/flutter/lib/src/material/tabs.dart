@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
@@ -1308,14 +1309,28 @@ class _TabBarState extends State<TabBar> {
 
     if (widget.isScrollable) {
       _scrollController ??= _TabBarScrollController(this);
-      tabBar = SingleChildScrollView(
-        dragStartBehavior: widget.dragStartBehavior,
-        scrollDirection: Axis.horizontal,
-        controller: _scrollController,
-        padding: widget.padding,
-        physics: widget.physics,
-        child: tabBar,
-      );
+      if (Platform.isAndroid && widget.physics == null) {
+        tabBar = ScrollConfiguration(
+          behavior: _NoGlowScrollBehaviour(),
+          child: SingleChildScrollView(
+            dragStartBehavior: widget.dragStartBehavior,
+            scrollDirection: Axis.horizontal,
+            controller: _scrollController,
+            padding: widget.padding,
+            physics: widget.physics,
+            child: tabBar,
+          ),
+        );
+      } else {
+        tabBar = SingleChildScrollView(
+          dragStartBehavior: widget.dragStartBehavior,
+          scrollDirection: Axis.horizontal,
+          controller: _scrollController,
+          padding: widget.padding,
+          physics: widget.physics,
+          child: tabBar,
+        );
+      }
     } else if (widget.padding != null) {
       tabBar = Padding(
         padding: widget.padding!,
@@ -1324,6 +1339,16 @@ class _TabBarState extends State<TabBar> {
     }
 
     return tabBar;
+  }
+}
+
+/// On Android, we don't want the scroll glow to show up when the user scrolls
+/// the TabBar.
+class _NoGlowScrollBehaviour extends ScrollBehavior {
+  @override
+  Widget buildViewportChrome(
+      BuildContext context, Widget child, AxisDirection axisDirection) {
+    return child;
   }
 }
 
