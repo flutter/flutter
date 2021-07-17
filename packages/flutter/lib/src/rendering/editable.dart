@@ -2693,7 +2693,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   double get maxScrollExtent => _maxScrollExtent;
   double _maxScrollExtent = 0;
 
-  double get _caretMargin => _kCaretGap + cursorWidth;
+  double get _caretMargin => _showCursor.value ? _kCaretGap + cursorWidth : 0.0;
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
