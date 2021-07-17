@@ -603,6 +603,160 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     expect(reportedRouteInformation!.location, 'update');
   });
 
+  testWidgets('router ignore navigating events updates RouteInformationProvider', (WidgetTester tester) async {
+    RouteInformation? updatedRouteInformation;
+    late RouteInformation nextRouteInformation;
+    final SimpleRouteInformationProvider provider = SimpleRouteInformationProvider(
+      onRouterReport: (RouteInformation information) {
+        // This should never be called
+        expect(true, false);
+      },
+      onRouterUpdate: (RouteInformation information) {
+        // Makes sure we only update once after manually cleaning up.
+        expect(updatedRouteInformation, isNull);
+        updatedRouteInformation = information;
+      },
+    );
+    provider.value = const RouteInformation(
+      location: 'initial',
+    );
+    final SimpleRouterDelegate delegate = SimpleRouterDelegate(reportConfiguration: true);
+    delegate.builder = (BuildContext context, RouteInformation? information) {
+      return ElevatedButton(
+        child: Text(information!.location!),
+        onPressed: () {
+          Router.neglect(context, () {
+            if (delegate.routeInformation != nextRouteInformation)
+              delegate.routeInformation = nextRouteInformation;
+          });
+        },
+      );
+    };
+    final BackButtonDispatcher outerDispatcher = RootBackButtonDispatcher();
+
+    await tester.pumpWidget(buildBoilerPlate(
+      Router<RouteInformation>(
+        backButtonDispatcher: outerDispatcher,
+        routeInformationProvider: provider,
+        routeInformationParser: SimpleRouteInformationParser(),
+        routerDelegate: delegate,
+      ),
+    ));
+    expect(find.text('initial'), findsOneWidget);
+    expect(updatedRouteInformation, isNull);
+
+    nextRouteInformation = const RouteInformation(
+      location: 'update',
+    );
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pump();
+    expect(find.text('initial'), findsNothing);
+    expect(find.text('update'), findsOneWidget);
+    expect(updatedRouteInformation!.location, 'update');
+  });
+
+  testWidgets('router ignore navigating events updates RouteInformationProvider', (WidgetTester tester) async {
+    RouteInformation? updatedRouteInformation;
+    late RouteInformation nextRouteInformation;
+    final SimpleRouteInformationProvider provider = SimpleRouteInformationProvider(
+      onRouterReport: (RouteInformation information) {
+        // This should never be called
+        expect(true, false);
+      },
+      onRouterUpdate: (RouteInformation information) {
+        // Makes sure we only update once after manually cleaning up.
+        expect(updatedRouteInformation, isNull);
+        updatedRouteInformation = information;
+      },
+    );
+    provider.value = const RouteInformation(
+      location: 'initial',
+    );
+    final SimpleRouterDelegate delegate = SimpleRouterDelegate(reportConfiguration: true);
+    delegate.builder = (BuildContext context, RouteInformation? information) {
+      return ElevatedButton(
+        child: Text(information!.location!),
+        onPressed: () {
+          Router.neglect(context, () {
+            if (delegate.routeInformation != nextRouteInformation)
+              delegate.routeInformation = nextRouteInformation;
+          });
+        },
+      );
+    };
+    final BackButtonDispatcher outerDispatcher = RootBackButtonDispatcher();
+
+    await tester.pumpWidget(buildBoilerPlate(
+      Router<RouteInformation>(
+        backButtonDispatcher: outerDispatcher,
+        routeInformationProvider: provider,
+        routeInformationParser: SimpleRouteInformationParser(),
+        routerDelegate: delegate,
+      ),
+    ));
+    expect(find.text('initial'), findsOneWidget);
+    expect(updatedRouteInformation, isNull);
+
+    nextRouteInformation = const RouteInformation(
+      location: 'update',
+    );
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pump();
+    expect(find.text('initial'), findsNothing);
+    expect(find.text('update'), findsOneWidget);
+    expect(updatedRouteInformation!.location, 'update');
+  });
+
+  testWidgets('state change without location changes updates RouteInformationProvider', (WidgetTester tester) async {
+    RouteInformation? updatedRouteInformation;
+    late RouteInformation nextRouteInformation;
+    final SimpleRouteInformationProvider provider = SimpleRouteInformationProvider(
+      onRouterReport: (RouteInformation information) {
+        // This should never be called
+        expect(true, false);
+      },
+      onRouterUpdate: (RouteInformation information) {
+        // Makes sure we only update once after manually cleaning up.
+        expect(updatedRouteInformation, isNull);
+        updatedRouteInformation = information;
+      },
+    );
+    provider.value = const RouteInformation(
+      location: 'initial',
+      state: 'state1',
+    );
+    final SimpleRouterDelegate delegate = SimpleRouterDelegate(reportConfiguration: true);
+    delegate.builder = (BuildContext context, RouteInformation? information) {
+      return ElevatedButton(
+        child: Text(information!.location!),
+        onPressed: () {
+          delegate.routeInformation = nextRouteInformation;
+        },
+      );
+    };
+    final BackButtonDispatcher outerDispatcher = RootBackButtonDispatcher();
+
+    await tester.pumpWidget(buildBoilerPlate(
+      Router<RouteInformation>(
+        backButtonDispatcher: outerDispatcher,
+        routeInformationProvider: provider,
+        routeInformationParser: SimpleRouteInformationParser(),
+        routerDelegate: delegate,
+      ),
+    ));
+    expect(find.text('initial'), findsOneWidget);
+    expect(updatedRouteInformation, isNull);
+
+    nextRouteInformation = const RouteInformation(
+      location: 'initial',
+      state: 'state2',
+    );
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pump();
+    expect(updatedRouteInformation!.location, 'initial');
+    expect(updatedRouteInformation!.state, 'state2');
+  });
+
   testWidgets('router does not report when route information is up to date with route information provider', (WidgetTester tester) async {
     RouteInformation? reportedRouteInformation;
     final SimpleRouteInformationProvider provider = SimpleRouteInformationProvider(
@@ -689,6 +843,38 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pump();
     expect(find.text('newTestRouteName'), findsOneWidget);
+  });
+
+  testWidgets('PlatformRouteInformationProvider updates route information', (WidgetTester tester) async {
+    final List<MethodCall> log = <MethodCall>[];
+    TestDefaultBinaryMessengerBinding
+      .instance!
+      .defaultBinaryMessenger
+      .setMockMethodCallHandler(
+        SystemChannels.navigation,
+        (MethodCall methodCall) async {
+          log.add(methodCall);
+        }
+      );
+    final RouteInformationProvider provider = PlatformRouteInformationProvider(
+      initialRouteInformation: const RouteInformation(
+        location: 'initial',
+      ),
+    );
+
+    log.clear();
+    provider.routerReportsNewRouteInformation(const RouteInformation(location: 'a', state: true));
+    expect(log, <Object>[
+      isMethodCall('selectMultiEntryHistory', arguments: null),
+      isMethodCall('routeInformationUpdated', arguments: <String, dynamic>{ 'location': 'a', 'state': true, 'replace': false }),
+    ]);
+
+    log.clear();
+    provider.routerUpdatesRouteInformation(const RouteInformation(location: 'b', state: false));
+    expect(log, <Object>[
+      isMethodCall('selectMultiEntryHistory', arguments: null),
+      isMethodCall('routeInformationUpdated', arguments: <String, dynamic>{ 'location': 'b', 'state': false, 'replace': true }),
+    ]);
   });
 
   testWidgets('RootBackButtonDispatcher works', (WidgetTester tester) async {
@@ -1239,9 +1425,11 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> wit
 class SimpleRouteInformationProvider extends RouteInformationProvider with ChangeNotifier {
   SimpleRouteInformationProvider({
     this.onRouterReport,
+    this.onRouterUpdate,
   });
 
   RouterReportRouterInformation? onRouterReport;
+  RouterReportRouterInformation? onRouterUpdate;
 
   @override
   RouteInformation get value => _value;
@@ -1253,7 +1441,14 @@ class SimpleRouteInformationProvider extends RouteInformationProvider with Chang
 
   @override
   void routerReportsNewRouteInformation(RouteInformation routeInformation) {
+    _value = routeInformation;
     onRouterReport?.call(routeInformation);
+  }
+
+  @override
+  void routerUpdatesRouteInformation(RouteInformation routeInformation) {
+    _value = routeInformation;
+    onRouterUpdate?.call(routeInformation);
   }
 }
 
