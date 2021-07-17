@@ -1588,11 +1588,7 @@ class _CalendarRangePickerDialog extends StatelessWidget {
         color: onConfirm != null ? headerForeground : headerDisabledForeground,
     );
 
-    return SafeArea(
-      top: false,
-      left: false,
-      right: false,
-      child: Scaffold(
+    return Scaffold(
         appBar: AppBar(
           leading: CloseButton(
             onPressed: onCancel,
@@ -1666,7 +1662,6 @@ class _CalendarRangePickerDialog extends StatelessWidget {
           onStartDateChanged: onStartDateChanged,
           onEndDateChanged: onEndDateChanged,
         ),
-      ),
     );
   }
 }
