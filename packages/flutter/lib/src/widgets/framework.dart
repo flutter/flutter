@@ -3114,6 +3114,22 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return 0;
   }
 
+  /// Returns the [BuildRecorder] that is being used to profile widget builds on this frame.
+  ///
+  /// In profile and release mode this field will always be `null`.
+  static BuildRecorder? get debugBuildRecorder {
+    if (kDebugMode) {
+      return _debugBuildRecorder;
+    }
+    return null;
+  }
+  static BuildRecorder? _debugBuildRecorder;
+  static set debugBuildRecorder(BuildRecorder? value) {
+    if (kDebugMode) {
+      _debugBuildRecorder = value;
+    }
+  }
+
   // Return a numeric encoding of the specific `Element` concrete subtype.
   // This is used in `Element.updateChild` to determine if a hot reload modified the
   // superclass of a mounted element's configuration. The encoding of each `Element`
@@ -4702,6 +4718,10 @@ abstract class ComponentElement extends Element {
       );
       _child = updateChild(null, built, slot);
     }
+    assert(() {
+      Element.debugBuildRecorder?._recordElement(this);
+      return true;
+    }());
 
     if (!kReleaseMode && debugProfileBuildsEnabled)
       Timeline.finishSync();
@@ -5537,6 +5557,10 @@ abstract class RenderObjectElement extends Element {
       return true;
     }());
     assert(() {
+      Element.debugBuildRecorder?._recordRenderObjectElement(this);
+      return true;
+    }());
+    assert(() {
       _debugUpdateRenderObjectOwner();
       return true;
     }());
@@ -5551,6 +5575,10 @@ abstract class RenderObjectElement extends Element {
     assert(widget == newWidget);
     assert(() {
       _debugUpdateRenderObjectOwner();
+      return true;
+    }());
+    assert(() {
+      Element.debugBuildRecorder?._recordRenderObjectElement(this);
       return true;
     }());
     assert(() {
@@ -5576,6 +5604,10 @@ abstract class RenderObjectElement extends Element {
   void performRebuild() {
     assert(() {
       _debugDoingBuild = true;
+      return true;
+    }());
+    assert(() {
+      Element.debugBuildRecorder?._recordRenderObjectElement(this);
       return true;
     }());
     widget.updateRenderObject(this, renderObject);
@@ -6443,6 +6475,71 @@ class _NullElement extends Element {
 class _NullWidget extends Widget {
   @override
   Element createElement() => throw UnimplementedError();
+}
+
+/// A class that is used to record how widgets are built on each frame.
+class BuildRecorder {
+  final List<_RecorderFrameData> _frameData = <_RecorderFrameData>[];
+  _RecorderFrameData _currentFrame = _RecorderFrameData();
+
+  void _recordElement(Element element) {
+    final Widget? parent = element._parent?.widget;
+    final Widget widget = element.widget;
+    if (parent == null) {
+       _currentFrame.widgets[widget] = null;
+       return;
+    }
+    _currentFrame.widgets[widget] = parent;
+  }
+
+  void _recordRenderObjectElement(RenderObjectElement element) {
+    final Widget? parent = element._parent?.widget;
+    final Widget widget = element.widget;
+    if (parent == null) {
+       _currentFrame.widgets[widget] = null;
+       return;
+    }
+    _currentFrame.renderObjects[widget] = element.renderObject;
+    _currentFrame.widgets[widget] = parent;
+  }
+
+  /// Finish the recording of the current frame and pepare the next frame object.
+  void finishFrame(int frameNumber) {
+    _currentFrame.id = frameNumber;
+    _frameData.add(_currentFrame);
+    _currentFrame = _RecorderFrameData();
+  }
+
+  /// Convert the recorded frame data into a JSON object.
+  Map<String, Object> toJson() {
+    return <String, Object>{
+      'frames': <Object>[
+        for (_RecorderFrameData data in _frameData)
+          data.toJson(),
+      ],
+    };
+  }
+}
+
+class _RecorderFrameData {
+  _RecorderFrameData();
+
+  int id = -1;
+  final Map<Widget, Widget?> widgets = HashMap<Widget, Widget?>();
+  final Map<Widget, RenderObject> renderObjects = HashMap<Widget, RenderObject>();
+
+  Map<String, Object> toJson() {
+    return <String, Object>{
+      'id': id,
+      'widgets': <String, String?>{
+        for (MapEntry<Widget, Widget?> entry in widgets.entries)
+          '${entry.key.runtimeType}|${entry.key.hashCode}': entry.value == null
+              ? null
+              : '${entry.value.runtimeType}|${entry.value.hashCode}',
+      },
+    };
+  }
+
 }
 
 // Whether a [DebugReassembleConfig] indicates that an element holding [widget] can skip

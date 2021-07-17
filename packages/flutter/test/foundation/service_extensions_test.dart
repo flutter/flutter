@@ -167,7 +167,7 @@ void main() {
     const int disabledExtensions = kIsWeb ? 2 : 0;
     // If you add a service extension... TEST IT! :-)
     // ...then increment this number.
-    expect(binding.extensions.length, 31 + widgetInspectorExtensionCount - disabledExtensions);
+    expect(binding.extensions.length, 32 + widgetInspectorExtensionCount - disabledExtensions);
 
     expect(console, isEmpty);
     debugPrint = debugPrintThrottled;
@@ -775,5 +775,16 @@ void main() {
     result = await binding.testExtension('connectedVmServiceUri', <String, String>{'value': 'http://127.0.0.1:54000/kMUMseKAnog=/'});
     serverAddress = result['value'] as String;
     expect(serverAddress, 'http://127.0.0.1:54000/kMUMseKAnog=/');
+  });
+
+  test('Service extensions - experimentalProfile', () async {
+    Map<String, dynamic> result;
+    result = await binding.testExtension('experimentalProfile', <String, String>{});
+
+    expect(result['type'], 'Success');
+
+    result = await binding.testExtension('experimentalProfile', <String, String>{});
+
+    expect(result['data'], <String, Object>{'frames': <Object>[]});
   });
 }

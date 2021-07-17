@@ -114,7 +114,7 @@ class LocalEngineLocator {
     // Skip if sky_engine is the version in bin/cache.
     Uri? engineUri = packageConfig[kFlutterEnginePackageName]?.packageUriRoot;
     final String cachedPath = _fileSystem.path.join(_flutterRoot, 'bin', 'cache', 'pkg', kFlutterEnginePackageName, 'lib');
-    if (engineUri != null && _fileSystem.identicalSync(cachedPath, engineUri.path)) {
+    if (engineUri != null && _fileSystem.identicalSync(cachedPath, engineUri.toFilePath(windows: _platform.isWindows))) {
       _logger.printTrace('Local engine auto-detection sky_engine in $packagePath is the same version in bin/cache.');
       engineUri = null;
     }

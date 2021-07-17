@@ -153,6 +153,13 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
   }
 
   @override
+  Directory get systemTempDirectory => ErrorHandlingDirectory(
+    platform: _platform,
+    fileSystem: delegate,
+    delegate: super.systemTempDirectory,
+  );
+
+  @override
   String toString() => delegate.toString();
 }
 
