@@ -7452,6 +7452,157 @@ void main() {
     // On web, using keyboard for selection is handled by the browser.
   }, skip: kIsWeb, variant: TargetPlatformVariant.all());
 
+  testWidgets('navigating when composing on desktop', (WidgetTester tester) async {
+    // |wo|rd word word
+    final TextEditingController controller = TextEditingController.fromValue(
+      const TextEditingValue(
+        text: 'word word word',
+        selection: TextSelection(
+          baseOffset: 0,
+          extentOffset: 2,
+          affinity: TextAffinity.upstream,
+        ),
+        composing: TextRange(
+          start: 0,
+          end: 2,
+        ),
+      ),
+    );
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 400,
+          child: EditableText(
+            maxLines: 10,
+            controller: controller,
+            autofocus: true,
+            focusNode: focusNode,
+            style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            keyboardType: TextInputType.text,
+          ),
+        ),
+      ),
+    ));
+
+    await tester.pump(); // Wait for autofocus to take effect.
+    expect(controller.selection.isCollapsed, false);
+    expect(controller.selection.baseOffset, 0);
+    expect(controller.selection.extentOffset, 2);
+    expect(controller.value.composing.start, 0);
+    expect(controller.value.composing.end, 2);
+
+    // The arrow keys have no effect because a composing region is active.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.arrowLeft],
+      targetPlatform: defaultTargetPlatform,
+    );
+    await tester.pump();
+    expect(controller.selection.isCollapsed, false);
+    expect(controller.selection.baseOffset, 0);
+    expect(controller.selection.extentOffset, 2);
+    expect(controller.value.composing.start, 0);
+    expect(controller.value.composing.end, 2);
+
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.arrowRight],
+      targetPlatform: defaultTargetPlatform,
+    );
+    await tester.pump();
+    expect(controller.selection.isCollapsed, false);
+    expect(controller.selection.baseOffset, 0);
+    expect(controller.selection.extentOffset, 2);
+    expect(controller.value.composing.start, 0);
+    expect(controller.value.composing.end, 2);
+
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.arrowDown],
+      targetPlatform: defaultTargetPlatform,
+    );
+    await tester.pump();
+    expect(controller.selection.isCollapsed, false);
+    expect(controller.selection.baseOffset, 0);
+    expect(controller.selection.extentOffset, 2);
+    expect(controller.value.composing.start, 0);
+    expect(controller.value.composing.end, 2);
+
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.arrowUp],
+      targetPlatform: defaultTargetPlatform,
+    );
+    await tester.pump();
+    expect(controller.selection.isCollapsed, false);
+    expect(controller.selection.baseOffset, 0);
+    expect(controller.selection.extentOffset, 2);
+    expect(controller.value.composing.start, 0);
+    expect(controller.value.composing.end, 2);
+
+    // Remove the composing region.
+    controller.value = const TextEditingValue(
+      text: 'word word word',
+      selection: TextSelection(
+        baseOffset: 0,
+        extentOffset: 2,
+        affinity: TextAffinity.upstream,
+      ),
+    );
+
+    // Now the arrow keys work.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.arrowLeft],
+      targetPlatform: defaultTargetPlatform,
+    );
+    await tester.pump();
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, 0);
+    expect(controller.selection.extentOffset, 0);
+    expect(controller.value.composing.start, -1);
+    expect(controller.value.composing.end, -1);
+
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.arrowRight],
+      targetPlatform: defaultTargetPlatform,
+    );
+    await tester.pump();
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, 1);
+    expect(controller.selection.extentOffset, 1);
+    expect(controller.value.composing.start, -1);
+    expect(controller.value.composing.end, -1);
+
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.arrowDown],
+      targetPlatform: defaultTargetPlatform,
+    );
+    await tester.pump();
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, 14);
+    expect(controller.selection.extentOffset, 14);
+    expect(controller.value.composing.start, -1);
+    expect(controller.value.composing.end, -1);
+
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.arrowUp],
+      targetPlatform: defaultTargetPlatform,
+    );
+    await tester.pump();
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, 0);
+    expect(controller.selection.extentOffset, 0);
+    expect(controller.value.composing.start, -1);
+    expect(controller.value.composing.end, -1);
+  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.windows,  TargetPlatform.macOS, TargetPlatform.linux }));
+
   testWidgets('expanding selection to start/end', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: 'word word word');
     // word wo|rd| word
