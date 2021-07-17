@@ -24,7 +24,6 @@ import 'package:test/fake.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/fake_process_manager.dart';
 
 void main() {
   testWithoutContext('PreviewDevice defaults', () async {
