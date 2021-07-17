@@ -225,6 +225,7 @@ class Home extends StatelessWidget {
               '${localizations.singleQuotePlural(2)}',
               '${localizations.doubleQuote}',
               '${localizations.doubleQuotePlural(2)}',
+              "${localizations.vehicleSelect('truck')}",
             ]);
           },
         ),
@@ -266,6 +267,7 @@ class Home extends StatelessWidget {
               '${localizations.singleQuotePlural(2)}',
               '${localizations.doubleQuote}',
               '${localizations.doubleQuotePlural(2)}',
+              "${localizations.vehicleSelect('truck')}",
             ]);
           },
         ),
@@ -608,6 +610,14 @@ void main() {
     "placeholders": {
       "count": {}
     }
+  },
+
+  "vehicleSelect": "{vehicleType, select, sedan{Sedan} cabriolet{Solid roof cabriolet} truck{16 wheel truck} other{Other}}",
+  "@vehicleSelect": {
+    "description": "Vehicle type",
+    "placeholders": {
+      "vehicleType": {}
+    }
   }
 }
 ''';
@@ -652,7 +662,8 @@ void main() {
   "singleQuote": "ES - Flutter's amazing!",
   "singleQuotePlural": "{count,plural, =1{ES - Flutter's amazing, times 1!} other{ES - Flutter's amazing, times {count}!}}",
   "doubleQuote": "ES - Flutter is \"amazing\"!",
-  "doubleQuotePlural": "{count,plural, =1{ES - Flutter is \"amazing\", times 1!} other{ES - Flutter is \"amazing\", times {count}!}}"
+  "doubleQuotePlural": "{count,plural, =1{ES - Flutter is \"amazing\", times 1!} other{ES - Flutter is \"amazing\", times {count}!}}",
+  "vehicleSelect": "{vehicleType, select, sedan{ES - Sedan} cabriolet{ES - Solid roof cabriolet} truck{ES - 16 wheel truck} other{ES - Other}}"
 }
 ''';
 

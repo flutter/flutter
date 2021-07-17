@@ -156,6 +156,18 @@ const String pluralMethodTemplate = '''
     );
   }''';
 
+const String selectMethodTemplate = '''
+  @override
+  String @(name)(@(parameters)) {
+    return intl.Intl.select(
+      @(choice),
+      {
+        @(cases)
+      },
+      desc: '@(description)'
+    );
+  }''';
+
 const String classFileTemplate = '''
 @(header)
 
