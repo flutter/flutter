@@ -24,25 +24,31 @@ import 'build_winuwp.dart';
 
 class BuildCommand extends FlutterCommand {
   BuildCommand({ bool verboseHelp = false }) {
-    addSubcommand(BuildAarCommand(verboseHelp: verboseHelp));
-    addSubcommand(BuildApkCommand(verboseHelp: verboseHelp));
-    addSubcommand(BuildAppBundleCommand(verboseHelp: verboseHelp));
-    addSubcommand(BuildIOSCommand(verboseHelp: verboseHelp));
-    addSubcommand(BuildIOSFrameworkCommand(
+    _addSubcommand(BuildAarCommand(verboseHelp: verboseHelp));
+    _addSubcommand(BuildApkCommand(verboseHelp: verboseHelp));
+    _addSubcommand(BuildAppBundleCommand(verboseHelp: verboseHelp));
+    _addSubcommand(BuildIOSCommand(verboseHelp: verboseHelp));
+    _addSubcommand(BuildIOSFrameworkCommand(
       buildSystem: globals.buildSystem,
       verboseHelp: verboseHelp,
     ));
-    addSubcommand(BuildIOSArchiveCommand(verboseHelp: verboseHelp));
-    addSubcommand(BuildBundleCommand(verboseHelp: verboseHelp));
-    addSubcommand(BuildWebCommand(verboseHelp: verboseHelp));
-    addSubcommand(BuildMacosCommand(verboseHelp: verboseHelp));
-    addSubcommand(BuildLinuxCommand(
+    _addSubcommand(BuildIOSArchiveCommand(verboseHelp: verboseHelp));
+    _addSubcommand(BuildBundleCommand(verboseHelp: verboseHelp));
+    _addSubcommand(BuildWebCommand(verboseHelp: verboseHelp));
+    _addSubcommand(BuildMacosCommand(verboseHelp: verboseHelp));
+    _addSubcommand(BuildLinuxCommand(
       operatingSystemUtils: globals.os,
       verboseHelp: verboseHelp
     ));
-    addSubcommand(BuildWindowsCommand(verboseHelp: verboseHelp));
-    addSubcommand(BuildWindowsUwpCommand(verboseHelp: verboseHelp));
-    addSubcommand(BuildFuchsiaCommand(verboseHelp: verboseHelp));
+    _addSubcommand(BuildWindowsCommand(verboseHelp: verboseHelp));
+    _addSubcommand(BuildWindowsUwpCommand(verboseHelp: verboseHelp));
+    _addSubcommand(BuildFuchsiaCommand(verboseHelp: verboseHelp));
+  }
+
+  void _addSubcommand(BuildSubCommand command) {
+    if (command.supported) {
+      addSubcommand(command);
+    }
   }
 
   @override
@@ -62,6 +68,8 @@ abstract class BuildSubCommand extends FlutterCommand {
 
   @override
   bool get reportNullSafety => true;
+
+  bool get supported => true;
 
   /// Display a message describing the current null safety runtime mode
   /// that was selected.
