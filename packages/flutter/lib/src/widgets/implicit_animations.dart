@@ -617,7 +617,7 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 ///    transitions its child's position over a given duration whenever the given
 ///    position changes.
 ///  * [AnimatedAlign], which automatically transitions its child's
-///    position over a given duration whenever the given [alignment] changes.
+///    position over a given duration whenever the given [AnimatedAlign.alignment] changes.
 ///  * [AnimatedSwitcher], which switches out a child for a new one with a customizable transition.
 ///  * [AnimatedCrossFade], which fades between two children and interpolates their sizes.
 class AnimatedContainer extends ImplicitlyAnimatedWidget {
@@ -1731,7 +1731,7 @@ class _AnimatedRotationState extends ImplicitlyAnimatedWidgetState<AnimatedRotat
 ///    transitions its child's position over a given duration whenever the given
 ///    position changes.
 ///  * [AnimatedAlign], which automatically transitions its child's
-///    position over a given duration whenever the given alignment changes.
+///    position over a given duration whenever the given [AnimatedAlign.alignment] changes.
 class AnimatedSlide extends ImplicitlyAnimatedWidget {
   /// Creates a widget that animates its offset translation implicitly.
   ///
