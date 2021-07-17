@@ -1164,16 +1164,23 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
 
     assert(debugCheckHasMaterialLocalizations(context));
 
-    if (widget.child != null)
-      return Tooltip(
-        message: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
-        child: InkWell(
-          onTap: widget.enabled ? showButtonMenu : null,
-          canRequestFocus: _canRequestFocus,
-          enableFeedback: enableFeedback,
-          child: widget.child,
-        ),
+    if (widget.child != null) {
+      final String tooltip =
+          widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip;
+      Widget child = InkWell(
+        onTap: widget.enabled ? showButtonMenu : null,
+        canRequestFocus: _canRequestFocus,
+        enableFeedback: enableFeedback,
+        child: widget.child,
       );
+      if (tooltip.isNotEmpty) {
+        child = Tooltip(
+          message: tooltip,
+          child: child,
+        );
+      }
+      return child;
+    }
 
     return IconButton(
       icon: widget.icon ?? Icon(Icons.adaptive.more),
