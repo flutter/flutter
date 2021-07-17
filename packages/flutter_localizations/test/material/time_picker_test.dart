@@ -277,6 +277,9 @@ void main() {
         expect(dayPeriodControlFinder, findsNothing);
       }
       await finishPicker(tester);
+
+      expect(() => tester.firstWidget(find.byType(TimePickerDialog)),
+          throwsA(const TypeMatcher<StateError>()));
     }
   });
 
