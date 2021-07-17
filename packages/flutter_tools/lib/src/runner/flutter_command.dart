@@ -120,6 +120,7 @@ class FlutterOptions {
   static const String kDeferredComponents = 'deferred-components';
   static const String kAndroidProjectArgs = 'android-project-arg';
   static const String kInitializeFromDill = 'initialize-from-dill';
+  static const String kPodInstall = 'pod-install';
 }
 
 abstract class FlutterCommand extends Command<void> {
@@ -794,6 +795,13 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void addXcodeSpecificBuildOptions({ bool hide = false }) {
+    argParser.addFlag(FlutterOptions.kPodInstall,
+      defaultsTo: true,
+      help: 'Install pods if changes are detected.',
+    );
+  }
+
   void addNativeNullAssertions({ bool hide = false }) {
     argParser.addFlag('native-null-assertions',
       defaultsTo: true,
@@ -1007,6 +1015,9 @@ abstract class FlutterCommand extends Command<void> {
       ? stringsArg(FlutterOptions.kAndroidProjectArgs)
       : <String>[];
 
+    final bool shouldPodInstall = !argParser.options.containsKey(FlutterOptions.kPodInstall)
+      || boolArg(FlutterOptions.kPodInstall);
+
     if (dartObfuscation && (splitDebugInfoPath == null || splitDebugInfoPath.isEmpty)) {
       throwToolExit(
         '"--${FlutterOptions.kDartObfuscationOption}" can only be used in '
@@ -1078,6 +1089,7 @@ abstract class FlutterCommand extends Command<void> {
       initializeFromDill: argParser.options.containsKey(FlutterOptions.kInitializeFromDill)
           ? stringArg(FlutterOptions.kInitializeFromDill)
           : null,
+      shouldPodInstall: shouldPodInstall,
     );
   }
 

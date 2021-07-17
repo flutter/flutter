@@ -50,6 +50,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
     usesExtraDartFlagOptions(verboseHelp: verboseHelp);
     addNullSafetyModeOptions(hide: !verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
+    addXcodeSpecificBuildOptions();
 
     argParser
       ..addFlag('debug',
@@ -201,7 +202,9 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
           buildInfo, modeDirectory, iPhoneBuildOutput, simulatorBuildOutput);
 
       // Build and copy plugins.
-      await processPodsIfNeeded(_project.ios, getIosBuildDirectory(), buildInfo.mode);
+      if (buildInfo.shouldPodInstall) {
+        await processPodsIfNeeded(_project.ios, getIosBuildDirectory(), buildInfo.mode);
+      }
       if (hasPlugins(_project)) {
         await _producePlugins(buildInfo.mode, xcodeBuildConfiguration, iPhoneBuildOutput, simulatorBuildOutput, modeDirectory, outputDirectory);
       }
