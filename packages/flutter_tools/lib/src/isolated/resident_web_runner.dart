@@ -314,19 +314,24 @@ class ResidentWebRunner extends ResidentRunner {
           enableDevTools: enableDevTools,
         );
       });
-    } on WebSocketException {
+    } on WebSocketException catch (e,s) {
       appFailedToStart();
+      _logger.printError('Tool failed to connect to chrome: $e:$s');
       throwToolExit(kExitMessage);
-    } on ChromeDebugException {
+    } on ChromeDebugException catch (e,s) {
       appFailedToStart();
+      _logger.printError('Tool failed to connect to chrome: $e:$s');
       throwToolExit(kExitMessage);
-    } on AppConnectionException {
+    } on AppConnectionException catch (e,s) {
       appFailedToStart();
+      _logger.printError('Tool failed to connect to chrome: $e:$s');
       throwToolExit(kExitMessage);
-    } on SocketException {
+    } on SocketException catch (e,s) {
       appFailedToStart();
+      _logger.printError('Tool failed to connect to chrome: $e:$s');
       throwToolExit(kExitMessage);
-    } on Exception {
+    } on Exception catch (e,s) {
+      _logger.printError('Tool failed to connect to chrome: $e:$s');
       appFailedToStart();
       rethrow;
     }
