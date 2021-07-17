@@ -28,7 +28,7 @@ class _LargeImageChangerState extends State<LargeImageChangerPage> {
       height: (MediaQuery.of(context).size.height * 2).toInt() + imageIndex,
       allowUpscaling: true,
     );
-    _timer?.cancel();
+    _timer.cancel();
     _timer = Timer.periodic(const Duration(seconds: 3), (Timer timer) {
       currentImage.evict().then((_) {
         setState(() {
@@ -46,7 +46,7 @@ class _LargeImageChangerState extends State<LargeImageChangerPage> {
 
   @override
   void dispose() {
-    _timer?.cancel();
+    _timer.cancel();
     super.dispose();
   }
 

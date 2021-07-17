@@ -987,7 +987,7 @@ Future<void> _runFlutterDriverWebTest({
   await runCommand(
     flutter,
     <String>[
-      ...?flutterTestArgs,
+      ...flutterTestArgs,
       'drive',
       '--target=$target',
       '--browser-name=chrome',
@@ -1085,7 +1085,7 @@ Future<String> getFlutterPluginsVersion({
   fs.FileSystem fileSystem = const LocalFileSystem(),
   String pluginsVersionFile,
 }) async {
-  final File versionFile = fileSystem.file(pluginsVersionFile ?? flutterPluginsVersionFile);
+  final File versionFile = fileSystem.file(pluginsVersionFile);
   final String versionFileContents = await versionFile.readAsString();
   return versionFileContents.trim();
 }
@@ -1231,7 +1231,7 @@ Future<void> _runGalleryE2eWebTest(String buildMode, { bool canvasKit = false })
   await runCommand(
     flutter,
     <String>[
-      ...?flutterTestArgs,
+      ...flutterTestArgs,
       'drive',
       if (canvasKit)
         '--dart-define=FLUTTER_WEB_USE_SKIA=true',
@@ -1315,7 +1315,7 @@ Future<void> _runWebReleaseTest(String target, {
   await runCommand(
     flutter,
     <String>[
-      ...?flutterTestArgs,
+      ...flutterTestArgs,
       'build',
       'web',
       '--release',
@@ -1413,7 +1413,7 @@ Future<void> _runFlutterWebTest(String workingDirectory, List<String> tests) asy
       // TODO(ferhatb): Run web tests with both rendering backends.
       '--web-renderer=html', // use html backend for web tests.
       '--sound-null-safety', // web tests do not autodetect yet.
-      ...?flutterTestArgs,
+      ...flutterTestArgs,
       ...tests,
     ],
     workingDirectory: workingDirectory,
@@ -1539,7 +1539,7 @@ Future<void> _runFlutterTest(String workingDirectory, {
   final List<String> args = <String>[
     'test',
     ...options,
-    ...?flutterTestArgs,
+    ...flutterTestArgs,
   ];
 
   final bool shouldProcessOutput = useFlutterTestFormatter && !expectFailure && !options.contains('--coverage');

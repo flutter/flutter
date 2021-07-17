@@ -239,18 +239,18 @@ String _generateLicense(String prefix) {
 
 Future<void> verifyNoMissingLicense(String workingDirectory, { bool checkMinimums = true }) async {
   final int overrideMinimumMatches = checkMinimums ? null : 0;
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'dart', overrideMinimumMatches ?? 2000, _generateLicense('// '));
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'java', overrideMinimumMatches ?? 39, _generateLicense('// '));
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'h', overrideMinimumMatches ?? 30, _generateLicense('// '));
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'm', overrideMinimumMatches ?? 30, _generateLicense('// '));
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'swift', overrideMinimumMatches ?? 10, _generateLicense('// '));
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'gradle', overrideMinimumMatches ?? 80, _generateLicense('// '));
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'gn', overrideMinimumMatches ?? 0, _generateLicense('# '));
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'sh', overrideMinimumMatches ?? 1, '#!/usr/bin/env bash\n${_generateLicense('# ')}');
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'bat', overrideMinimumMatches ?? 1, '@ECHO off\n${_generateLicense('REM ')}');
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'ps1', overrideMinimumMatches ?? 1, _generateLicense('# '));
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'html', overrideMinimumMatches ?? 1, '<!DOCTYPE HTML>\n<!-- ${_generateLicense('')} -->', trailingBlank: false);
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'xml', overrideMinimumMatches ?? 1, '<!-- ${_generateLicense('')} -->');
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'dart', overrideMinimumMatches, _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'java', overrideMinimumMatches, _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'h', overrideMinimumMatches, _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'm', overrideMinimumMatches, _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'swift', overrideMinimumMatches, _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'gradle', overrideMinimumMatches, _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'gn', overrideMinimumMatches, _generateLicense('# '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'sh', overrideMinimumMatches, '#!/usr/bin/env bash\n${_generateLicense('# ')}');
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'bat', overrideMinimumMatches, '@ECHO off\n${_generateLicense('REM ')}');
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'ps1', overrideMinimumMatches, _generateLicense('# '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'html', overrideMinimumMatches, '<!DOCTYPE HTML>\n<!-- ${_generateLicense('')} -->', trailingBlank: false);
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'xml', overrideMinimumMatches, '<!-- ${_generateLicense('')} -->');
 }
 
 Future<void> _verifyNoMissingLicenseForExtension(String workingDirectory, String extension, int minimumMatches, String license, { bool trailingBlank = true }) async {
@@ -984,7 +984,6 @@ Future<void> verifyNoBinaries(String workingDirectory, { Set<Hash256> legacyBina
       .expand<int>((Hash256 hash) => <int>[hash.a, hash.b, hash.c, hash.d])
       .reduce((int value, int element) => value ^ element) == 0x606B51C908B40BFA // Please do not modify this line.
   );
-  legacyBinaries ??= _legacyBinaries;
   if (!Platform.isWindows) { // TODO(ianh): Port this to Windows
     final List<File> files = await _gitFiles(workingDirectory, runSilently: false);
     final List<String> problems = <String>[];
@@ -1251,7 +1250,6 @@ Future<Set<String>> _findFlutterDependencies(String srcPath, List<String> errors
       return result;
     })
     .reduce((Set<String> value, Set<String> element) {
-      value ??= <String>{};
       value.addAll(element);
       return value;
     });
