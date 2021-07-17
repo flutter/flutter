@@ -405,6 +405,146 @@ class FakeIosPlatformViewsController {
   }
 }
 
+class FakeGtkPlatformViewsController {
+  FakeGtkPlatformViewsController() {
+    SystemChannels.platform_views.setMockMethodCallHandler(_onMethodCall);
+  }
+
+  Iterable<FakeGtkView> get views => _views.values;
+  final Map<int, FakeGtkView> _views = <int, FakeGtkView>{};
+
+  final Set<String> _registeredViewTypes = <String>{};
+
+  // When this completer is non null, the 'create' method channel call will be
+  // delayed until it completes.
+  Completer<void>? creationDelay;
+
+  // Maps a view id to the number of gestures it accepted so far.
+  final Map<int, int> gesturesAccepted = <int, int>{};
+
+  // Maps a view id to the number of gestures it rejected so far.
+  final Map<int, int> gesturesRejected = <int, int>{};
+
+  // Maps a view id to the times of pointers entered into it so far.
+  final Map<int, int> targetEntered = <int, int>{};
+
+  // Maps a view id to the times of pointers exiting from it so far.
+  final Map<int, int> targetExited = <int, int>{};
+
+  void registerViewType(String viewType) {
+    _registeredViewTypes.add(viewType);
+  }
+
+  Future<dynamic> _onMethodCall(MethodCall call) {
+    switch(call.method) {
+      case 'create':
+        return _create(call);
+      case 'dispose':
+        return _dispose(call);
+      case 'setDirection':
+        return _setDirection(call);
+      case 'acceptGesture':
+        return _acceptGesture(call);
+      case 'rejectGesture':
+        return _rejectGesture(call);
+      case 'enter':
+        return _enter(call);
+      case 'exit':
+        return _exit(call);
+    }
+    return Future<dynamic>.sync(() => null);
+  }
+
+  Future<dynamic> _create(MethodCall call) async {
+    if (creationDelay != null)
+      await creationDelay!.future;
+    final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
+    final int id = args['id'] as int;
+    final String viewType = args['viewType'] as String;
+    final int layoutDirection = args['direction'] as int;
+    final Uint8List? creationParams = args['params'] as Uint8List?;
+
+    if (_views.containsKey(id)) {
+      throw PlatformException(
+        code: 'error',
+        message: 'Trying to create an already created platform view, view id: $id',
+      );
+    }
+
+    if (!_registeredViewTypes.contains(viewType)) {
+      throw PlatformException(
+        code: 'error',
+        message: 'Trying to create a platform view of unregistered type: $viewType',
+      );
+    }
+
+    _views[id] = FakeGtkView(id, viewType, layoutDirection, creationParams);
+    gesturesAccepted[id] = 0;
+    gesturesRejected[id] = 0;
+    targetEntered[id] = 0;
+    targetExited[id] = 0;
+    return Future<int?>.sync(() => null);
+  }
+
+  Future<dynamic> _setDirection(MethodCall call) async {
+    final List<dynamic> args = call.arguments as List<dynamic>;
+    final int id = args[0] as int;
+    final int layoutDirection = args[1] as int;
+
+    if (!_views.containsKey(id))
+      throw PlatformException(
+        code: 'error',
+        message: 'Trying to set direction of a platform view with unknown id: $id',
+      );
+
+    _views[id] = _views[id]!.copyWith(layoutDirection: layoutDirection);
+
+    return Future<dynamic>.sync(() => null);
+  }
+
+  Future<dynamic> _acceptGesture(MethodCall call) async {
+    final List<dynamic> args = call.arguments as List<dynamic>;
+    final int id = args[0] as int;
+    gesturesAccepted[id] = gesturesAccepted[id]! + 1;
+    return Future<int?>.sync(() => null);
+  }
+
+  Future<dynamic> _rejectGesture(MethodCall call) async {
+    final List<dynamic> args = call.arguments as List<dynamic>;
+    final int id = args[0] as int;
+    gesturesRejected[id] = gesturesRejected[id]! + 1;
+    return Future<int?>.sync(() => null);
+  }
+
+  Future<dynamic> _enter(MethodCall call) async {
+    final List<dynamic> args = call.arguments as List<dynamic>;
+    final int id = args[0] as int;
+    targetEntered[id] = targetEntered[id]! + 1;
+    return Future<int?>.sync(() => null);
+  }
+
+  Future<dynamic> _exit(MethodCall call) async {
+    final List<dynamic> args = call.arguments as List<dynamic>;
+    final int id = args[0] as int;
+    targetExited[id] = targetExited[id]! + 1;
+    return Future<int?>.sync(() => null);
+  }
+
+  Future<dynamic> _dispose(MethodCall call) {
+    final int id = call.arguments as int;
+
+    if (!_views.containsKey(id)) {
+      throw PlatformException(
+        code: 'error',
+        message: 'Trying to dispose a platform view with unknown id: $id',
+      );
+    }
+
+    _views.remove(id);
+    return Future<dynamic>.sync(() => null);
+  }
+}
+
 class FakeHtmlPlatformViewsController {
   FakeHtmlPlatformViewsController() {
     TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform_views, _onMethodCall);
@@ -564,6 +704,42 @@ class FakeUiKitView {
   @override
   String toString() {
     return 'FakeUiKitView(id: $id, type: $type, creationParams: $creationParams)';
+  }
+}
+
+@immutable
+class FakeGtkView {
+  const FakeGtkView(this.id, this.type, this.layoutDirection, [this.creationParams]);
+
+  final int id;
+  final String type;
+  final Uint8List? creationParams;
+  final int layoutDirection;
+
+  FakeGtkView copyWith({int? layoutDirection}) => FakeGtkView(
+    id,
+    type,
+    layoutDirection ?? this.layoutDirection,
+    creationParams,
+  );
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is FakeGtkView
+        && other.id == id
+        && other.type == type
+        && other.creationParams == creationParams
+        && other.layoutDirection == layoutDirection;
+  }
+
+  @override
+  int get hashCode => hashValues(id, type);
+
+  @override
+  String toString() {
+    return 'FakeGtkView(id: $id, type: $type, layoutDirection: $layoutDirection, creationParams: $creationParams)';
   }
 }
 

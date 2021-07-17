@@ -367,4 +367,94 @@ void main() {
       'motionEventId: 0)',
     );
   });
+
+  group('Gtk', () {
+    late FakeGtkPlatformViewsController viewsController;
+    setUp(() {
+      viewsController = FakeGtkPlatformViewsController();
+    });
+
+    test('create Gtk view of unregistered type', () async {
+      expect(
+        () {
+          return PlatformViewsService.initGtkView(
+            id: 0,
+            viewType: 'unregistered_view_type',
+            layoutDirection: TextDirection.ltr,
+          );
+        },
+        throwsA(isA<PlatformException>()),
+      );
+    });
+
+    test('create Gtk views', () async {
+      viewsController.registerViewType('webview');
+      await PlatformViewsService.initGtkView(
+          id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr);
+      await PlatformViewsService.initGtkView(
+          id: 1, viewType: 'webview', layoutDirection: TextDirection.rtl);
+      expect(
+        viewsController.views,
+        unorderedEquals(<FakeGtkView>[
+          const FakeGtkView(0, 'webview', GtkViewController.kGtkTextDirectionLtr),
+          const FakeGtkView(1, 'webview', GtkViewController.kGtkTextDirectionRtl),
+        ]),
+      );
+    });
+
+    test('reuse Gtk view id', () async {
+      viewsController.registerViewType('webview');
+      await PlatformViewsService.initGtkView(
+        id: 0,
+        viewType: 'webview',
+        layoutDirection: TextDirection.ltr,
+      );
+      expect(
+            () => PlatformViewsService.initGtkView(
+            id: 0, viewType: 'web', layoutDirection: TextDirection.ltr),
+        throwsA(isA<PlatformException>()),
+      );
+    });
+
+    test('dispose Gtk view', () async {
+      viewsController.registerViewType('webview');
+      await PlatformViewsService.initGtkView(
+          id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr);
+      final GtkViewController viewController = await PlatformViewsService.initGtkView(
+          id: 1, viewType: 'webview', layoutDirection: TextDirection.ltr);
+
+      viewController.dispose();
+      expect(
+          viewsController.views,
+          unorderedEquals(<FakeGtkView>[
+            const FakeGtkView(0, 'webview', GtkViewController.kGtkTextDirectionLtr),
+          ]));
+    });
+
+    test('dispose inexisting Gtk view', () async {
+      viewsController.registerViewType('webview');
+      await PlatformViewsService.initGtkView(id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr);
+      final GtkViewController viewController = await PlatformViewsService.initGtkView(
+          id: 1, viewType: 'webview', layoutDirection: TextDirection.ltr);
+      await viewController.dispose();
+      expect(
+          () async {
+            await viewController.dispose();
+          },
+          throwsA(isA<PlatformException>()),
+      );
+    });
+
+    test("change Gtk GtkWidget's directionality", () async {
+      viewsController.registerViewType('webview');
+      final GtkViewController viewController = await PlatformViewsService.initGtkView(
+          id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr);
+      await viewController.setLayoutDirection(TextDirection.rtl);
+      expect(
+          viewsController.views,
+          unorderedEquals(<FakeGtkView>[
+            const FakeGtkView(0, 'webview', GtkViewController.kGtkTextDirectionRtl, null),
+          ]));
+    });
+  });
 }
