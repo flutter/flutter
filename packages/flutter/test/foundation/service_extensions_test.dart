@@ -167,7 +167,7 @@ void main() {
     const int disabledExtensions = kIsWeb ? 2 : 0;
     // If you add a service extension... TEST IT! :-)
     // ...then increment this number.
-    expect(binding.extensions.length, 31 + widgetInspectorExtensionCount - disabledExtensions);
+    expect(binding.extensions.length, 32 + widgetInspectorExtensionCount - disabledExtensions);
 
     expect(console, isEmpty);
     debugPrint = debugPrintThrottled;
@@ -775,5 +775,58 @@ void main() {
     result = await binding.testExtension('connectedVmServiceUri', <String, String>{'value': 'http://127.0.0.1:54000/kMUMseKAnog=/'});
     serverAddress = result['value'] as String;
     expect(serverAddress, 'http://127.0.0.1:54000/kMUMseKAnog=/');
+  });
+
+  test('Service extensions - preHotRestartCallback', () async {
+    Map<String, dynamic> result;
+    int calledCount = 0;
+    binding.registerHotRestartCallback(() {
+      calledCount += 1;
+    });
+
+    result = await binding.testExtension('invokePreHotRestartCallbacks', <String, String>{});
+
+    expect(result, isNotNull);
+    expect(calledCount, 1);
+  });
+
+  test('Service extensions - preHotRestartCallback that throws sync expection', () async {
+    FlutterErrorDetails? lastError;
+    FlutterError.onError = (FlutterErrorDetails error) {
+      lastError = error;
+    };
+    Map<String, dynamic> result;
+    binding.registerHotRestartCallback(() {
+      throw Exception();
+    }, debugLabel: 'foo');
+
+    result = await binding.testExtension('invokePreHotRestartCallbacks', <String, String>{});
+
+    expect(result, isNotNull);
+    expect(lastError.toString(), contains(
+      'The following _Exception was thrown Failed to invoke\n'
+      'preHotRestartCallback "foo":\n'
+    ));
+  });
+
+  test('Service extensions - preHotRestartCallback that throws async expection', () async {
+    FlutterErrorDetails? lastError;
+    FlutterError.onError = (FlutterErrorDetails error) {
+      lastError = error;
+    };
+
+    Map<String, dynamic> result;
+    binding.registerHotRestartCallback(() async {
+      await null;
+      throw Exception();
+    }, debugLabel: 'foo');
+
+    result = await binding.testExtension('invokePreHotRestartCallbacks', <String, String>{});
+
+    expect(result, isNotNull);
+    expect(lastError.toString(), contains(
+      'The following _Exception was thrown Failed to invoke\n'
+      'preHotRestartCallback "foo":\n'
+    ));
   });
 }

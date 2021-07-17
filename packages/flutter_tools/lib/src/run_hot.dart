@@ -542,10 +542,29 @@ class HotRunner extends ResidentRunner {
     await Future.wait(futures);
   }
 
+  Future<void> _performPreHotRestart() async {
+    final Timer slowCallbackTimer = Timer(const Duration(seconds: 5), () async {
+      globals.printError('preHotRestartCallbacks are taking longer than expected...');
+    });
+    final List<Future<void>> preHotRestartFutures = <Future<void>>[];
+    for (final FlutterDevice device in flutterDevices) {
+      final List<FlutterView> views = await device.vmService.getFlutterViews();
+      for (final FlutterView view in views) {
+        preHotRestartFutures.add(device.vmService.flutterInvokePreHotRestartCallbacks(
+          isolateId: view.uiIsolate.id,
+        ));
+      }
+    }
+    await Future.wait(preHotRestartFutures);
+    slowCallbackTimer.cancel();
+  }
+
   Future<OperationResult> _restartFromSources({
     String reason,
   }) async {
     final Stopwatch restartTimer = Stopwatch()..start();
+    await _performPreHotRestart();
+
     final UpdateFSReport updatedDevFS = await _updateDevFS(fullRestart: true);
     if (!updatedDevFS.success) {
       for (final FlutterDevice device in flutterDevices) {

@@ -548,6 +548,15 @@ class FlutterVmService {
     return response != null ? response['data']?.toString() : '';
   }
 
+  Future<void> flutterInvokePreHotRestartCallbacks({
+    @required String isolateId,
+  }) async {
+    await invokeFlutterExtensionRpcRaw(
+      'ext.flutter.invokePreHotRestartCallbacks',
+      isolateId: isolateId,
+    );
+  }
+
   Future<String> flutterDebugDumpRenderTree({
     @required String isolateId,
   }) async {

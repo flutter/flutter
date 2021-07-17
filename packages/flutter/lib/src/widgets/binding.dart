@@ -21,6 +21,9 @@ import 'widget_inspector.dart';
 
 export 'dart:ui' show AppLifecycleState, Locale;
 
+/// A callback that can be registered with [WidgetsBinding.registerHotRestartCallback].
+typedef PreHotRestartCallback = Object? Function();
+
 /// Interface for classes that register with the Widgets layer binding.
 ///
 /// When used as a mixin, provides no-op method implementations.
@@ -493,6 +496,31 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
           },
       );
 
+      registerServiceExtension(name: 'invokePreHotRestartCallbacks', callback: (Map<String, Object> params) async {
+        Future<void> invokeAndWait(PreHotRestartCallback callback, String label) async {
+          developer.postEvent('preHotRestartCallback', <String, Object>{'label': label, 'finished': false});
+          try {
+            await Future<Object?>.value(callback());
+          } catch (error, stack) {
+            FlutterError.reportError(
+              FlutterErrorDetails(
+                exception: error,
+                stack: stack,
+                context: ErrorSummary('Failed to invoke preHotRestartCallback "$label"'),
+              )
+            );
+          } finally {
+            developer.postEvent('preHotRestartCallback', <String, Object>{'label': label, 'finished': true});
+          }
+        }
+
+        await Future.wait(<Future<void>>[
+          for (MapEntry<PreHotRestartCallback, String> entry in _hotRestartCallbacks.entries)
+            invokeAndWait(entry.key, entry.value),
+        ]);
+        return <String, Object>{};
+      });
+
       WidgetInspectorService.instance.initServiceExtensions(registerServiceExtension);
 
       return true;
@@ -505,6 +533,46 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       return endOfFrame;
     }
     return Future<void>.value();
+  }
+
+  final Map<PreHotRestartCallback, String> _hotRestartCallbacks = <PreHotRestartCallback, String>{};
+
+  /// Register a callback that will be invoked before a hot restart is called.
+  ///
+  /// In non-debug modes this method is a no-op. This can be used to release native
+  /// resources acquired through platform channels or `dart:ffi`. Future returning
+  /// callbacks will be awaited, allowing for async tear downs.
+  ///
+  /// The following sample code shows how to use registerHotRestartCallback to handle
+  /// tearing down a native resource acquired through `dart:ffi`. In this example, if
+  /// the `context` pointer is not passed through to the `_destroyContext` function before
+  /// a hot restart, the application will crash after a hot restart.
+  ///
+  /// ```dart
+  /// import 'dart:ffi';
+  /// import 'package:flutter/widgets.dart';
+  ///
+  /// final DynamicLibrary _lib = DynamicLibrary.open('some_native_lib.dll');
+  /// final Pointer Function() _createContext = _lib.lookupFunction<Pointer Function(), Pointer Function()>('Native_create');
+  /// final void Function(Pointer) _destroyContext = _lib.lookupFunction<Void Function(Pointer), void Function(Pointer)>('Native_destroy');
+  ///
+  /// class NativeResourceService {
+  ///   NativeResourceService() {
+  ///     if (kDebugMode) {
+  ///       WidgetsBinding.instance!.registerHotRestartCallback(() => _destroyContext(_context), debugLabel: 'NativeResourceService');
+  ///     }
+  ///   }
+  ///
+  ///   /// Acquire native resources that must be released before they can
+  ///   /// be re-acquired.
+  ///   late final Pointer _context = _createContext();
+  /// }
+  /// ```
+  void registerHotRestartCallback(PreHotRestartCallback callback, {String debugLabel = 'unknown'}) {
+    if (!kDebugMode) {
+      return;
+    }
+    _hotRestartCallbacks[callback] = debugLabel;
   }
 
   /// The [BuildOwner] in charge of executing the build pipeline for the
