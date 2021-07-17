@@ -9,9 +9,11 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
+import 'base/file_system.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
 import 'base/platform.dart';
+import 'cache.dart';
 import 'convert.dart';
 import 'persistent_tool_state.dart';
 import 'resident_runner.dart';
@@ -22,11 +24,13 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
   DevtoolsServerLauncher({
     @required Platform platform,
     @required ProcessManager processManager,
+    @required FileSystem fileSystem,
     @required String pubExecutable,
     @required Logger logger,
     @required PersistentToolState persistentToolState,
     @visibleForTesting io.HttpClient httpClient,
   })  : _processManager = processManager,
+        _fileSystem = fileSystem,
         _pubExecutable = pubExecutable,
         _logger = logger,
         _platform = platform,
@@ -34,6 +38,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
         _httpClient = httpClient ?? io.HttpClient();
 
   final ProcessManager _processManager;
+  final FileSystem _fileSystem;
   final String _pubExecutable;
   final Logger _logger;
   final Platform _platform;
@@ -44,8 +49,15 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
   io.Process _devToolsProcess;
 
   static final RegExp _serveDevToolsPattern =
-      RegExp(r'Serving DevTools at ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)');
+      RegExp(r'Serving DevTools at ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+?)\.?$');
   static const String _pubHostedUrlKey = 'PUB_HOSTED_URL';
+
+  static String _devtoolsVersion;
+  static String devtoolsVersion(FileSystem fs) {
+    return _devtoolsVersion ??= fs.file(
+      fs.path.join(Cache.flutterRoot, 'bin', 'internal', 'devtools.version'),
+    ).readAsStringSync();
+  }
 
   @override
   Future<void> get processStart => _processStartCompleter.future;
@@ -95,9 +107,9 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
       bool devToolsActive = await _checkForActiveDevTools();
       if (!offline) {
         await _activateDevTools(throttleUpdates: devToolsActive);
-      }
-      if (!devToolsActive && !offline) {
-        devToolsActive = await _checkForActiveDevTools();
+        if (!devToolsActive) {
+          devToolsActive = await _checkForActiveDevTools();
+        }
       }
       if (!devToolsActive) {
         // We don't have devtools installed and installing it failed;
@@ -122,15 +134,8 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
           .listen((String line) {
             final Match match = _serveDevToolsPattern.firstMatch(line);
             if (match != null) {
-              // We are trying to pull "http://127.0.0.1:9101" from "Serving
-              // DevTools at http://127.0.0.1:9101.". `match[1]` will return
-              // "http://127.0.0.1:9101.", and we need to trim the trailing period
-              // so that we don't throw an exception from `Uri.parse`.
-              String uri = match[1];
-              if (uri.endsWith('.')) {
-                uri = uri.substring(0, uri.length - 1);
-              }
-              completer.complete(Uri.parse(uri));
+              final String url = match[1];
+              completer.complete(Uri.parse(url));
             }
          });
       _devToolsProcess.stderr
@@ -178,7 +183,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
         'global',
         'activate',
         'devtools',
-        '2.4.0',
+        devtoolsVersion(_fileSystem),
       ]);
       if (_devToolsActivateProcess.exitCode != 0) {
         _logger.printError(
