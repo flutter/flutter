@@ -94,6 +94,13 @@ PipelineDescriptor& PipelineDescriptor::SetColorAttachmentDescriptor(
   return *this;
 }
 
+const ColorAttachmentDescriptor*
+PipelineDescriptor::GetColorAttachmentDescriptor(size_t index) const {
+  auto found = color_attachment_descriptors_.find(index);
+  return found == color_attachment_descriptors_.end() ? nullptr
+                                                      : &found->second;
+}
+
 PipelineDescriptor& PipelineDescriptor::SetDepthPixelFormat(
     PixelFormat format) {
   depth_pixel_format_ = format;

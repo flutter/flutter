@@ -158,7 +158,7 @@ void RenderPass::SetLabel(std::string label) {
   transients_buffer_->SetLabel(SPrintF("%s Transients", label_.c_str()));
 }
 
-bool RenderPass::FinishEncoding(Allocator& transients_allocator) const {
+bool RenderPass::Commit(Allocator& transients_allocator) const {
   if (!IsValid()) {
     return false;
   }
