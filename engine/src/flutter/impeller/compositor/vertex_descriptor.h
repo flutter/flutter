@@ -14,14 +14,23 @@
 
 namespace impeller {
 
-class VertexDescriptor final : public Comparable<VertexDescriptor> {
+//------------------------------------------------------------------------------
+/// @brief        Describes the format and layout of vertices expected by the
+///               pipeline. While it is possible to construct these descriptors
+///               manually, it would be tedious to do so. These are usually
+///               constructed using shader information reflected using
+///               `impellerc`. The usage of this class is indirectly via
+///               `PipelineBuilder<VS, FS>`.
+///
+class PipelineVertexDescriptor final
+    : public Comparable<PipelineVertexDescriptor> {
  public:
   static constexpr size_t kReservedVertexBufferIndex =
       30u;  // The final slot available. Regular buffer indices go up from 0.
 
-  VertexDescriptor();
+  PipelineVertexDescriptor();
 
-  virtual ~VertexDescriptor();
+  virtual ~PipelineVertexDescriptor();
 
   template <size_t Size>
   bool SetStageInputs(
@@ -32,13 +41,13 @@ class VertexDescriptor final : public Comparable<VertexDescriptor> {
   bool SetStageInputs(const ShaderStageIOSlot* const stage_inputs[],
                       size_t count);
 
-  MTLVertexDescriptor* GetMTLVertexDescriptor() const;
-
   //| Comparable<VertexDescriptor>|
   std::size_t GetHash() const override;
 
   // |Comparable<VertexDescriptor>|
-  bool IsEqual(const VertexDescriptor& other) const override;
+  bool IsEqual(const PipelineVertexDescriptor& other) const override;
+
+  MTLVertexDescriptor* GetMTLVertexDescriptor() const;
 
  private:
   struct StageInput {
@@ -56,7 +65,7 @@ class VertexDescriptor final : public Comparable<VertexDescriptor> {
   };
   std::vector<StageInput> stage_inputs_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(VertexDescriptor);
+  FML_DISALLOW_COPY_AND_ASSIGN(PipelineVertexDescriptor);
 };
 
 }  // namespace impeller

@@ -11,7 +11,8 @@
 namespace impeller {
 
 bool Command::BindVertices(const VertexBuffer& buffer) {
-  vertex_bindings.buffers[VertexDescriptor::kReservedVertexBufferIndex] =
+  vertex_bindings
+      .buffers[PipelineVertexDescriptor::kReservedVertexBufferIndex] =
       buffer.vertex_buffer;
   index_buffer = buffer.index_buffer;
   index_count = buffer.index_count;
