@@ -242,7 +242,8 @@ String _generatePluralMethod(Message message, String translationForMessage) {
         .replaceAll('@(none)\n', '');
   }
 
-  final String string = _replaceWithVariable(translationForMessage, 'pluralString');
+  const String variable = 'pluralString';
+  final String string = _replaceWithVariable(translationForMessage, variable);
   return pluralMethodTemplateInString
       .replaceAll('@(comment)', comment)
       .replaceAll('@(name)', message.resourceId)
@@ -250,6 +251,7 @@ String _generatePluralMethod(Message message, String translationForMessage) {
       .replaceAll('@(dateFormatting)', generateDateFormattingLogic(message))
       .replaceAll(
       '@(numberFormatting)', generateNumberFormattingLogic(message))
+      .replaceAll('@(variable)', variable)
       .replaceAll('@(count)', countPlaceholder.name)
       .replaceAll('@(pluralLogicArgs)', pluralLogicArgs.join(',\n'))
       .replaceAll('@(none)\n', '')
@@ -261,6 +263,11 @@ String _replaceWithVariable(String translation, String variable) {
   prefix = prefix.substring(0, prefix.length - 1);
   String suffix = generateString(translation.substring(translation.lastIndexOf('}') + 1));
   suffix = suffix.substring(1);
+
+  // escape variable when the suffix can be combined with the variable
+  if (suffix.isNotEmpty && !suffix.startsWith(' ')) {
+    variable = '{$variable}';
+  }
   return prefix + r'$' + variable + suffix;
 }
 
@@ -311,10 +318,12 @@ String _generateSelectMethod(Message message, String translationForMessage) {
         .replaceAll('@(description)', description);
   }
 
-  final String string = _replaceWithVariable(translationForMessage, 'selectString');
+  const String variable = 'selectString';
+  final String string = _replaceWithVariable(translationForMessage, variable);
   return selectMethodTemplateInString
       .replaceAll('@(name)', message.resourceId)
       .replaceAll('@(parameters)', parameters.join(', '))
+      .replaceAll('@(variable)', variable)
       .replaceAll('@(choice)', choice!)
       .replaceAll('@(cases)', cases.join(',\n').trim())
       .replaceAll('@(description)', description)

@@ -121,7 +121,7 @@ void main() {
       '#l10n 66 (16 wheel truck)\n'
       "#l10n 67 (Sedan's elegance)\n"
       '#l10n 68 (Cabriolet has "acceleration")\n'
-      '#l10n 69 (Indeed, she likes Flutter!)\n'
+      '#l10n 69 (Oh, she found 1 item!)\n'
       '#l10n 70 (Indeed, they like Flutter!)\n'
       '#l10n 71 (--- es ---)\n'
       '#l10n 72 (ES - Hello world)\n'
@@ -155,7 +155,7 @@ void main() {
       '#l10n 100 (ES - 16 wheel truck)\n'
       "#l10n 101 (ES - Sedan's elegance)\n"
       '#l10n 102 (ES - Cabriolet has "acceleration")\n'
-      '#l10n 103 (ES - Indeed, ES - she likes ES - Flutter!)\n'
+      '#l10n 103 (ES - Oh, she found ES - 1 itemES - !)\n'
       '#l10n 104 (ES - Indeed, ES - they like ES - Flutter!)\n'
       '#l10n 105 (--- es_419 ---)\n'
       '#l10n 106 (ES 419 - Hello World)\n'

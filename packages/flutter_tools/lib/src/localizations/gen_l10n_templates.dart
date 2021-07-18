@@ -161,7 +161,7 @@ const String pluralMethodTemplateInString = '''
   String @(name)(@(parameters)) {
 @(dateFormatting)
 @(numberFormatting)
-    final String pluralString = intl.Intl.pluralLogic(
+    final String @(variable) = intl.Intl.pluralLogic(
       @(count),
       locale: localeName,
 @(pluralLogicArgs),
@@ -185,7 +185,7 @@ const String selectMethodTemplate = '''
 const String selectMethodTemplateInString = '''
   @override
   String @(name)(@(parameters)) {
-    final String selectString = intl.Intl.select(
+    final String @(variable) = intl.Intl.select(
       @(choice),
       {
         @(cases)

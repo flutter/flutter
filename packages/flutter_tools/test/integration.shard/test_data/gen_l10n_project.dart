@@ -644,7 +644,7 @@ void main() {
     }
   },
 
-  "pluralInString": "Indeed, {count, plural, =1 {she likes} other {they like} } Flutter!",
+  "pluralInString": "Oh, she found {count, plural, =1 {1 item} other {all {count} items} }!",
   "@pluralInString": {
     "description": "A plural message with a single quote.",
     "placeholders": {
@@ -705,7 +705,7 @@ void main() {
   "vehicleSelect": "{vehicleType, select, sedan{ES - Sedan} cabriolet{ES - Solid roof cabriolet} truck{ES - 16 wheel truck} other{ES - Other}}",
   "singleQuoteSelect": "{vehicleType, select, sedan{ES - Sedan's elegance} cabriolet{ES - Cabriolet' acceleration} truck{ES - truck's heavy duty} other{ES - Other's mirrors!}}",
   "doubleQuoteSelect": "{vehicleType, select, sedan{ES - Sedan has \"elegance\"} cabriolet{ES - Cabriolet has \"acceleration\"} truck{ES - truck is \"heavy duty\"} other{ES - Other have \"mirrors\"!}}",
-  "pluralInString": "ES - Indeed, {count, plural, =1 {ES - she likes} other {ES - they like} } ES - Flutter!",
+  "pluralInString": "ES - Oh, she found {count, plural, =1 {ES - 1 item} other {ES - all {count} items} }ES - !",
   "selectInString": "ES - Indeed, {gender, select, male {ES - he likes} female {ES - she likes} other {ES - they like} } ES - Flutter!"
 }
 ''';
