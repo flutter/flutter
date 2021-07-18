@@ -419,15 +419,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
         final Widget sheet = FractionallySizedBox(
           heightFactor: _extent.currentExtent,
           alignment: Alignment.bottomCenter,
-          child: NotificationListener<ScrollEndNotification>(
-            onNotification: (ScrollEndNotification scrollEndNotification) {
-              if (widget.snap) {
-                //_scrollController._snapIfDragFinished(scrollEndNotification);
-              }
-              return false;
-            },
-            child: widget.builder(context, _scrollController),
-          ),
+          child: widget.builder(context, _scrollController),
         );
         return widget.expand ? SizedBox.expand(child: sheet) : sheet;
       },
