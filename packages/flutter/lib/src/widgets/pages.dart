@@ -116,3 +116,71 @@ class PageRouteBuilder<T> extends PageRoute<T> {
     return transitionsBuilder(context, animation, secondaryAnimation, child);
   }
 }
+
+// TODO(jamesblasco): Rethink this to no use extra mixin or a fakeSecondaryAnimation 
+/// Route that defines the transition animation of the previous route when this
+/// one is closing/opening
+mixin DefinesBottomRouteTransitionMixin<T> on Route<T> {
+  
+  Widget getBottomRouteTransition(
+    BuildContext context,
+    Animation<double> secondAnimation,
+    Widget child,
+  );
+}
+
+/// Route that allows the next route to define the animation transition of this route
+/// when the route appears back after the next one is popped
+mixin AllowsTopRouteDefineTransitionMixin<T> on PageRoute<T> {
+  
+  DefinesBottomRouteTransitionMixin<T>? _nextModalRoute;
+
+  @override
+  bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
+    return super.canTransitionTo(nextRoute) || (nextRoute is DefinesBottomRouteTransitionMixin);
+  }
+
+  @override
+  void didChangeNext(Route<dynamic>? nextRoute) {
+    if (nextRoute is DefinesBottomRouteTransitionMixin<T>) {
+      _nextModalRoute = nextRoute;
+    }
+
+    super.didChangeNext(nextRoute);
+  }
+
+  @override
+  bool didPop(T result) {
+    _nextModalRoute = null;
+    return super.didPop(result);
+  }
+
+  @override
+  Widget buildTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    if (_nextModalRoute != null) {
+      if (secondaryAnimation.isDismissed) {
+        _nextModalRoute = null;
+      } else {
+        // Avoid default transition theme to animate when a new modal view is pushed
+        final Animation<double> fakeSecondaryAnimation =
+            Tween<double>(begin: 0, end: 0).animate(secondaryAnimation);
+
+        final Widget defaultTransition =
+            super.buildTransitions(context, animation, fakeSecondaryAnimation, child);
+        return _nextModalRoute!
+            .getBottomRouteTransition(context, secondaryAnimation, defaultTransition);
+      }
+    }
+    return super.buildTransitions(
+      context,
+      animation,
+      secondaryAnimation,
+      child,
+    );
+  }
+}
