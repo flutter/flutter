@@ -80,7 +80,17 @@ class RenderPass {
 
   [[nodiscard]] bool RecordCommand(Command command);
 
-  [[nodiscard]] bool FinishEncoding(Allocator& transients_allocator) const;
+  //----------------------------------------------------------------------------
+  /// @brief      Commit the recorded commands to the underlying command buffer.
+  ///             Any completion handlers must on the underlying command buffer
+  ///             must have already been added by this point.
+  ///
+  /// @param      transients_allocator  The transients allocator.
+  ///
+  /// @return     If the commands were committed to the underlying command
+  ///             buffer.
+  ///
+  [[nodiscard]] bool Commit(Allocator& transients_allocator) const;
 
  private:
   friend class CommandBuffer;

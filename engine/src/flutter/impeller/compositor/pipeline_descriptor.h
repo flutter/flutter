@@ -44,6 +44,9 @@ class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
       size_t index,
       ColorAttachmentDescriptor desc);
 
+  const ColorAttachmentDescriptor* GetColorAttachmentDescriptor(
+      size_t index) const;
+
   PipelineDescriptor& SetDepthStencilAttachmentDescriptor(
       DepthAttachmentDescriptor desc);
 
