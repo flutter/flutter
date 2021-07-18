@@ -490,7 +490,7 @@ class _DraggableScrollableSheetScrollPosition
       debugLabel: objectRuntimeType(this, '_DraggableScrollableSheetPosition'),
       vsync: context.vsync,
     );
-    // Stop the controller if the cancel callback is called.
+    // Stop the ballistic animation if a new activity starts.
     // See: [beginActivity].
     _ballisticCancelCallback = ballisticController.stop;
     double lastDelta = 0;
