@@ -54,7 +54,7 @@ bool Renderer::Render(const Surface& surface,
     return false;
   }
 
-  if (!render_pass->FinishEncoding(*GetContext()->GetTransientsAllocator())) {
+  if (!render_pass->Commit(*GetContext()->GetTransientsAllocator())) {
     return false;
   }
 
