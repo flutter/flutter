@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
@@ -78,6 +79,7 @@ class ExpansionPanel {
     this.isExpanded = false,
     this.canTapOnHeader = false,
     this.backgroundColor,
+    this.iconColor,
   }) : assert(headerBuilder != null),
        assert(body != null),
        assert(isExpanded != null),
@@ -105,6 +107,13 @@ class ExpansionPanel {
   ///
   /// Defaults to [ThemeData.cardColor].
   final Color? backgroundColor;
+
+  /// Defines [ExpandIcon] colors, in all [MaterialState]s.
+  ///
+  /// Resolves in the following states:
+  ///  * [MaterialState.selected] when [isExpanded] is true.
+  ///  * [MaterialState.disabled] when [canTapOnHeader] is true.
+  final MaterialStateProperty<Color>? iconColor;
 }
 
 /// An expansion panel that allows for radio-like functionality.
@@ -128,12 +137,14 @@ class ExpansionPanelRadio extends ExpansionPanel {
     required Widget body,
     bool canTapOnHeader = false,
     Color? backgroundColor,
+    MaterialStateProperty<Color>? iconColor,
   }) : assert(value != null),
       super(
         body: body,
         headerBuilder: headerBuilder,
         canTapOnHeader: canTapOnHeader,
         backgroundColor: backgroundColor,
+        iconColor: iconColor,
       );
 
   /// The value that uniquely identifies a radio panel so that the currently
@@ -474,20 +485,37 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
 
     final List<MergeableMaterialItem> items = <MergeableMaterialItem>[];
 
+    
+
     for (int index = 0; index < widget.children.length; index += 1) {
       if (_isChildExpanded(index) && index != 0 && !_isChildExpanded(index - 1))
         items.add(MaterialGap(key: _SaltedKey<BuildContext, int>(context, index * 2 - 1)));
-
       final ExpansionPanel child = widget.children[index];
       final Widget headerWidget = child.headerBuilder(
         context,
         _isChildExpanded(index),
       );
 
+      final bool _isExpanded = _isChildExpanded(index);
+      final Set<MaterialState> states = <MaterialState>{};
+
+      if (_isExpanded && !child.canTapOnHeader) {
+        states.add(MaterialState.selected);
+      }
+
+      if (child.canTapOnHeader) {
+        states.add(MaterialState.disabled);
+      }
+
+      final Color? _expandIconColor = child.iconColor?.resolve(states);
+
       Widget expandIconContainer = Container(
         margin: const EdgeInsetsDirectional.only(end: 8.0),
         child: ExpandIcon(
-          isExpanded: _isChildExpanded(index),
+          color: _expandIconColor,
+          disabledColor: _expandIconColor,
+          expandedColor: _expandIconColor,
+          isExpanded: _isExpanded,
           padding: const EdgeInsets.all(16.0),
           onPressed: !child.canTapOnHeader
               ? (bool isExpanded) => _handlePressed(isExpanded, index)
