@@ -193,7 +193,7 @@ TEST_F(PrimitivesTest, CanRenderToTexture) {
   std::shared_ptr<RenderPass> r2t_pass;
 
   {
-    ColorRenderPassAttachment color0;
+    RenderPassColorAttachment color0;
     color0.load_action = LoadAction::kClear;
     color0.store_action = StoreAction::kStore;
 

@@ -25,21 +25,21 @@ class RenderPassDescriptor {
 
   std::optional<ISize> GetColorAttachmentSize(size_t index) const;
 
-  RenderPassDescriptor& SetColorAttachment(ColorRenderPassAttachment attachment,
+  RenderPassDescriptor& SetColorAttachment(RenderPassColorAttachment attachment,
                                            size_t index);
 
   RenderPassDescriptor& SetDepthAttachment(
-      DepthRenderPassAttachment attachment);
+      RenderPassDepthAttachment attachment);
 
   RenderPassDescriptor& SetStencilAttachment(
-      StencilRenderPassAttachment attachment);
+      RenderPassStencilAttachment attachment);
 
   MTLRenderPassDescriptor* ToMTLRenderPassDescriptor() const;
 
  private:
-  std::map<size_t, ColorRenderPassAttachment> colors_;
-  std::optional<DepthRenderPassAttachment> depth_;
-  std::optional<StencilRenderPassAttachment> stencil_;
+  std::map<size_t, RenderPassColorAttachment> colors_;
+  std::optional<RenderPassDepthAttachment> depth_;
+  std::optional<RenderPassStencilAttachment> stencil_;
 };
 
 }  // namespace impeller

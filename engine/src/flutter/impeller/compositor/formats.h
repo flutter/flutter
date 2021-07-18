@@ -290,15 +290,15 @@ struct RenderPassAttachment {
   constexpr operator bool() const { return static_cast<bool>(texture); }
 };
 
-struct ColorRenderPassAttachment : public RenderPassAttachment {
+struct RenderPassColorAttachment : public RenderPassAttachment {
   Color clear_color = Color::BlackTransparent();
 };
 
-struct DepthRenderPassAttachment : public RenderPassAttachment {
+struct RenderPassDepthAttachment : public RenderPassAttachment {
   double clear_depth = 0.0;
 };
 
-struct StencilRenderPassAttachment : public RenderPassAttachment {
+struct RenderPassStencilAttachment : public RenderPassAttachment {
   uint32_t clear_stencil = 0;
 };
 
