@@ -30,7 +30,7 @@ static bool ConfigureAttachment(const RenderPassAttachment& desc,
 }
 
 static bool ConfigureColorAttachment(
-    const ColorRenderPassAttachment& desc,
+    const RenderPassColorAttachment& desc,
     MTLRenderPassColorAttachmentDescriptor* attachment) {
   if (!ConfigureAttachment(desc, attachment)) {
     return false;
@@ -40,7 +40,7 @@ static bool ConfigureColorAttachment(
 }
 
 static bool ConfigureDepthAttachment(
-    const DepthRenderPassAttachment& desc,
+    const RenderPassDepthAttachment& desc,
     MTLRenderPassDepthAttachmentDescriptor* attachment) {
   if (!ConfigureAttachment(desc, attachment)) {
     return false;
@@ -50,7 +50,7 @@ static bool ConfigureDepthAttachment(
 }
 
 static bool ConfigureStencilAttachment(
-    const StencilRenderPassAttachment& desc,
+    const RenderPassStencilAttachment& desc,
     MTLRenderPassStencilAttachmentDescriptor* attachment) {
   if (!ConfigureAttachment(desc, attachment)) {
     return false;

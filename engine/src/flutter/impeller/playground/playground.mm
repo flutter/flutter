@@ -136,7 +136,7 @@ bool Playground::OpenPlaygroundHere(Renderer::RenderCallback render_callback) {
         static_cast<ISize::Type>(current_drawable.texture.width),
         static_cast<ISize::Type>(current_drawable.texture.height)};
 
-    ColorRenderPassAttachment color0;
+    RenderPassColorAttachment color0;
     color0.texture =
         std::make_shared<Texture>(color0_desc, current_drawable.texture);
     color0.clear_color = Color::SkyBlue();

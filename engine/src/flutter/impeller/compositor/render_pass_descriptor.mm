@@ -31,7 +31,7 @@ std::optional<ISize> RenderPassDescriptor::GetColorAttachmentSize(
 }
 
 RenderPassDescriptor& RenderPassDescriptor::SetColorAttachment(
-    ColorRenderPassAttachment attachment,
+    RenderPassColorAttachment attachment,
     size_t index) {
   if (attachment) {
     colors_[index] = attachment;
@@ -40,7 +40,7 @@ RenderPassDescriptor& RenderPassDescriptor::SetColorAttachment(
 }
 
 RenderPassDescriptor& RenderPassDescriptor::SetDepthAttachment(
-    DepthRenderPassAttachment attachment) {
+    RenderPassDepthAttachment attachment) {
   if (attachment) {
     depth_ = std::move(attachment);
   }
@@ -48,7 +48,7 @@ RenderPassDescriptor& RenderPassDescriptor::SetDepthAttachment(
 }
 
 RenderPassDescriptor& RenderPassDescriptor::SetStencilAttachment(
-    StencilRenderPassAttachment attachment) {
+    RenderPassStencilAttachment attachment) {
   if (attachment) {
     stencil_ = std::move(attachment);
   }
