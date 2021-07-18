@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -29,9 +31,9 @@ import 'scroll_simulation.dart';
 /// as a [SingleChildScrollView], [ListView] or [GridView], to have the whole
 /// sheet be draggable.
 typedef ScrollableWidgetBuilder = Widget Function(
-  BuildContext context,
-  ScrollController scrollController,
-);
+    BuildContext context,
+    ScrollController scrollController,
+    );
 
 /// A container for a [Scrollable] that responds to drag gestures by resizing
 /// the scrollable until a limit is reached, and then scrolling.
@@ -112,7 +114,8 @@ class DraggableScrollableSheet extends StatefulWidget {
     this.snap = false,
     this.snapTargets,
     required this.builder,
-  })  : assert(initialChildSize != null),
+  })
+      : assert(initialChildSize != null),
         assert(minChildSize != null),
         assert(maxChildSize != null),
         assert(minChildSize >= 0.0),
@@ -152,12 +155,18 @@ class DraggableScrollableSheet extends StatefulWidget {
   final bool expand;
 
   /// Whether the widget should snap between [snapTargets] when the user stops
-  /// actively dragging.
+  /// dragging.
+  ///
+  /// If the user's finger was still moving when they lifted it, the widget will
+  /// snap to the next snap target (see [snapTargets]) in the direction of the drag.
+  /// If their finger was still, the widget will snap to the nearest snap target.
   final bool snap;
 
-  /// A list of target points that the widget should snap to. [minChildSize] and
-  /// [maxChildSize] are implicitly snapped to and should not be specified here-
-  /// pass an empty list to snap the widget between min and max.
+  /// A list of target points that the widget should snap to.
+  ///
+  /// Snap targets are fractional values of the parent container's height. They
+  /// must be listed in increasing order. [minChildSize] and [maxChildSize] are
+  /// implicitly included in snap targets and do not need to be specified here.
   final List<double>? snapTargets;
 
   /// The builder that creates a child to display in this widget, which will
@@ -203,7 +212,8 @@ class DraggableScrollableNotification extends Notification
     required this.maxExtent,
     required this.initialExtent,
     required this.context,
-  })  : assert(extent != null),
+  })
+      : assert(extent != null),
         assert(initialExtent != null),
         assert(minExtent != null),
         assert(maxExtent != null),
@@ -261,7 +271,8 @@ class _DraggableSheetExtent {
     required this.snapTargets,
     required this.initialExtent,
     required VoidCallback listener,
-  })  : assert(minExtent != null),
+  })
+      : assert(minExtent != null),
         assert(maxExtent != null),
         assert(initialExtent != null),
         assert(minExtent >= 0),
@@ -280,12 +291,17 @@ class _DraggableSheetExtent {
   final ValueNotifier<double> _currentExtent;
   double availablePixels;
 
+  // Used to disable snapping until the extent has changed. We do this because
+  // we don't want to snap away from the initial extent.
+  bool hasChanged = false;
+
   bool get isAtMin => minExtent >= _currentExtent.value;
 
   bool get isAtMax => maxExtent <= _currentExtent.value;
 
   set currentExtent(double value) {
     assert(value != null);
+    hasChanged = true;
     _currentExtent.value = value.clamp(minExtent, maxExtent);
   }
 
@@ -444,20 +460,20 @@ class _DraggableScrollableSheetScrollController extends ScrollController {
     double initialScrollOffset = 0.0,
     String? debugLabel,
     required this.extent,
-  })  : assert(extent != null),
+  })
+      : assert(extent != null),
         super(
-          debugLabel: debugLabel,
-          initialScrollOffset: initialScrollOffset,
-        );
+        debugLabel: debugLabel,
+        initialScrollOffset: initialScrollOffset,
+      );
 
   final _DraggableSheetExtent extent;
 
   @override
   _DraggableScrollableSheetScrollPosition createScrollPosition(
-    ScrollPhysics physics,
-    ScrollContext context,
-    ScrollPosition? oldPosition,
-  ) {
+      ScrollPhysics physics,
+      ScrollContext context,
+      ScrollPosition? oldPosition,) {
     return _DraggableScrollableSheetScrollPosition(
       physics: physics,
       context: context,
@@ -495,15 +511,16 @@ class _DraggableScrollableSheetScrollPosition
     ScrollPosition? oldPosition,
     String? debugLabel,
     required this.extent,
-  })  : assert(extent != null),
+  })
+      : assert(extent != null),
         super(
-          physics: physics,
-          context: context,
-          initialPixels: initialPixels,
-          keepScrollOffset: keepScrollOffset,
-          oldPosition: oldPosition,
-          debugLabel: debugLabel,
-        );
+        physics: physics,
+        context: context,
+        initialPixels: initialPixels,
+        keepScrollOffset: keepScrollOffset,
+        oldPosition: oldPosition,
+        debugLabel: debugLabel,
+      );
 
   VoidCallback? _dragCancelCallback;
   final _DraggableSheetExtent extent;
@@ -533,9 +550,18 @@ class _DraggableScrollableSheetScrollPosition
     }
   }
 
+  bool get _isAtSnapTarget =>
+      extent.snapTargets.any(
+              (double snapTarget) {
+            return (extent.currentExtent - snapTarget).abs() <=
+                extent.pixelsToExtent(physics.tolerance.distance);
+          });
+
+  bool get _shouldSnap => extent.snap && extent.hasChanged && !_isAtSnapTarget;
+
   @override
   void goBallistic(double velocity) {
-    if ((velocity == 0.0) ||
+    if ((velocity == 0.0 && !_shouldSnap) ||
         (velocity < 0.0 && listShouldScroll) ||
         (velocity > 0.0 && extent.isAtMax)) {
       super.goBallistic(velocity);
@@ -547,27 +573,26 @@ class _DraggableScrollableSheetScrollPosition
     _dragCancelCallback = null;
 
     late final Simulation simulation;
-    print('ballistic!');
     if (extent.snap) {
       // Snap is enabled, simulate snapping instead of clamping scroll.
       simulation = _SnappingSimulation(
           position: extent.currentPixels,
-          velocity: velocity,
-          pixelSnapTargets: extent.pixelSnapTargets);
+          initialVelocity: velocity,
+          pixelSnapTargets: extent.pixelSnapTargets,
+          tolerance: physics.tolerance);
     } else {
       // The iOS bouncing simulation just isn't right here - once we delegate
       // the ballistic back to the ScrollView, it will use the right simulation.
-      simulation =
-          ClampingScrollSimulation(
-            // Run the simulation in terms of pixels, not extent.
-            position: extent.currentPixels,
-            velocity: velocity,
-            tolerance: physics.tolerance,
-          );
+      simulation = ClampingScrollSimulation(
+        // Run the simulation in terms of pixels, not extent.
+        position: extent.currentPixels,
+        velocity: velocity,
+        tolerance: physics.tolerance,
+      );
     }
 
     final AnimationController ballisticController =
-        AnimationController.unbounded(
+    AnimationController.unbounded(
       debugLabel: objectRuntimeType(this, '_DraggableScrollableSheetPosition'),
       vsync: context.vsync,
     );
@@ -592,9 +617,8 @@ class _DraggableScrollableSheetScrollPosition
 
     ballisticController
       ..addListener(_tick)
-      ..animateWith(simulation).whenCompleteOrCancel(
-        ballisticController.dispose,
-      );
+      ..animateWith(simulation)
+      .whenCompleteOrCancel(ballisticController.dispose);
   }
 
   @override
@@ -638,7 +662,7 @@ class DraggableScrollableActuator extends StatelessWidget {
   /// otherwise.
   static bool reset(BuildContext context) {
     final _InheritedResetNotifier? notifier =
-        context.dependOnInheritedWidgetOfExactType<_InheritedResetNotifier>();
+    context.dependOnInheritedWidgetOfExactType<_InheritedResetNotifier>();
     if (notifier == null) {
       return false;
     }
@@ -691,13 +715,13 @@ class _InheritedResetNotifier extends InheritedNotifier<_ResetNotifier> {
   /// Returns true if the notifier requested a reset, false otherwise.
   static bool shouldReset(BuildContext context) {
     final InheritedWidget? widget =
-        context.dependOnInheritedWidgetOfExactType<_InheritedResetNotifier>();
+    context.dependOnInheritedWidgetOfExactType<_InheritedResetNotifier>();
     if (widget == null) {
       return false;
     }
     assert(widget is _InheritedResetNotifier);
     final _InheritedResetNotifier inheritedNotifier =
-        widget as _InheritedResetNotifier;
+    widget as _InheritedResetNotifier;
     final bool wasCalled = inheritedNotifier.notifier!._wasCalled;
     inheritedNotifier.notifier!._wasCalled = false;
     return wasCalled;
@@ -707,41 +731,26 @@ class _InheritedResetNotifier extends InheritedNotifier<_ResetNotifier> {
 class _SnappingSimulation extends Simulation {
   _SnappingSimulation({
     required this.position,
-    required double velocity,
+    required double initialVelocity,
     required List<double> pixelSnapTargets,
     Tolerance tolerance = Tolerance.defaultTolerance,
   }) : super(tolerance: tolerance) {
-    if (velocity.abs() <= tolerance.velocity) {
-      // If we have no velocity, snap back to the original position with the
-      // default velocity.
-      velocity = defaultVelocity;
-    }
-    // Find the two closest snap targets to the position. If the velocity is
-    // non-zero, select the target in the velocity's direction. Otherwise,
-    // the last visited snap target.
-    // All values are converted from extent to pixels because velocity is in
-    // terms of pixels.
-    final int indexOfNextTarget = pixelSnapTargets
-        .indexWhere((double snapTargetPixels) => snapTargetPixels >= position);
-    if (indexOfNextTarget == 0) {
-      _pixelSnapTarget = pixelSnapTargets.first;
+    _pixelSnapTarget = _getSnapTarget(initialVelocity, pixelSnapTargets);
+    // Check the direction of the target instead of the sign of the velocity because
+    // we may snap in the opposite direction of velocity if velocity is very low.
+    if (_pixelSnapTarget < position) {
+      velocity = min(-minimumVelocity, initialVelocity);
     } else {
-      // Snap forward or backward depending on current velocity. Note that
-      // because `defaultVelocity` is negative, this will default to snapping
-      // back
-      // Behavior modeled after the Android system notification tray.
-      if (velocity <= 0) {
-        _pixelSnapTarget = pixelSnapTargets[indexOfNextTarget - 1];
-      } else {
-        _pixelSnapTarget = pixelSnapTargets[indexOfNextTarget];
-      }
+      velocity = max(minimumVelocity, initialVelocity);
     }
   }
 
-  static const double defaultVelocity = 400;
-
   final double position;
   late final double velocity;
+
+  // A minimum velocity to snap at. Used to ensure that the snapping animation
+  // does not play too slowly.
+  static const double minimumVelocity = 1600.0;
 
   late final double _pixelSnapTarget;
 
@@ -761,12 +770,37 @@ class _SnappingSimulation extends Simulation {
   @override
   double x(double time) {
     final double newPosition = position + velocity * time;
-    print('$position, $newPosition, $_pixelSnapTarget');
     if ((velocity >= 0 && newPosition > _pixelSnapTarget) ||
         (velocity < 0 && newPosition < _pixelSnapTarget)) {
       // We're passed the snap target, return it instead.
       return _pixelSnapTarget;
     }
     return newPosition;
+  }
+
+  // Find the two closest snap targets to the position. If the velocity is
+  // non-zero, select the target in the velocity's direction. Otherwise,
+  // the nearest snap target.
+  double _getSnapTarget(double initialVelocity, List<double> pixelSnapTargets) {
+    final int indexOfNextTarget = pixelSnapTargets
+        .indexWhere((double pixelSnapTarget) => pixelSnapTarget >= position);
+    if (indexOfNextTarget == 0) {
+      return pixelSnapTargets.first;
+    }
+    final double highTarget = pixelSnapTargets[indexOfNextTarget];
+    final double lowTarget = pixelSnapTargets[indexOfNextTarget - 1];
+    // Snap forward or backward depending on current velocity.
+    if (initialVelocity.abs() <= tolerance.velocity) {
+      // If velocity is zero, snap to the nearest snap point with the minimum velocity.
+      if (position - lowTarget < highTarget - position) {
+        return lowTarget;
+      } else {
+        return highTarget;
+      }
+    }
+    if (initialVelocity < 0.0) {
+      return pixelSnapTargets[indexOfNextTarget - 1];
+    }
+    return pixelSnapTargets[indexOfNextTarget];
   }
 }
