@@ -373,14 +373,14 @@ class AndroidStudio implements Comparable<AndroidStudio> {
         }
       }
     }
-    // Discover Android Studio > 4.1 
+    // Discover Android Studio > 4.1
     if (globals.platform.isWindows && globals.platform.environment.containsKey('LOCALAPPDATA')) {
       final Directory cacheDir = globals.fs.directory(globals.fs.path.join(globals.platform.environment['LOCALAPPDATA']!, 'Google'));
       if (!cacheDir.existsSync()) {
         return studios;
       }
       for (final Directory dir in cacheDir.listSync().whereType<Directory>()) {
-        final String name  = globals.fs.path.basename(dir.path); 
+        final String name  = globals.fs.path.basename(dir.path);
         AndroidStudioValidator.idToTitle.forEach((String id, String title) {
           if (name.startsWith(id)) {
             final String version = name.substring(id.length);

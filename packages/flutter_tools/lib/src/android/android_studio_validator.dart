@@ -23,7 +23,7 @@ class AndroidStudioValidator extends DoctorValidator {
 
   final AndroidStudio _studio;
   final FileSystem _fileSystem;
-  
+
   static const Map<String, String> idToTitle = <String, String>{
     _androidStudioId: _androidStudioTitle,
     _androidStudioPreviewStudioId: _androidStudioPreviewTitle,
