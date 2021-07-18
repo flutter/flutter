@@ -159,7 +159,7 @@ void main() {
         .where((String line) => line?.isNotEmpty == true)
         .skip(1); // remove `Flutter channels:` line
 
-      expect(rows, <String>['dev', 'beta', 'stable']);
+      expect(rows, <String>['dev', 'beta', 'stable', 'Currently not on an official channel.']);
     }, overrides: <Type, Generator>{
       ProcessManager: () => fakeProcessManager,
       FileSystem: () => MemoryFileSystem.test(),

@@ -47,8 +47,6 @@ class FlutterDevice {
   FlutterDevice(
     this.device, {
     @required this.buildInfo,
-    this.fileSystemRoots,
-    this.fileSystemScheme,
     TargetModel targetModel = TargetModel.flutter,
     this.targetPlatform,
     ResidentCompiler generator,
@@ -62,8 +60,8 @@ class FlutterDevice {
          ),
          buildMode: buildInfo.mode,
          trackWidgetCreation: buildInfo.trackWidgetCreation,
-         fileSystemRoots: fileSystemRoots ?? <String>[],
-         fileSystemScheme: fileSystemScheme,
+         fileSystemRoots: buildInfo.fileSystemRoots ?? <String>[],
+         fileSystemScheme: buildInfo.fileSystemScheme,
          targetModel: targetModel,
          dartDefines: buildInfo.dartDefines,
          packagesPath: buildInfo.packagesPath,
@@ -81,8 +79,6 @@ class FlutterDevice {
     @required String target,
     @required BuildInfo buildInfo,
     @required Platform platform,
-    List<String> fileSystemRoots,
-    String fileSystemScheme,
     TargetModel targetModel = TargetModel.flutter,
     List<String> experimentalFlags,
     ResidentCompiler generator,
@@ -121,7 +117,7 @@ class FlutterDevice {
         globals.artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path,
         buildMode: buildInfo.mode,
         trackWidgetCreation: buildInfo.trackWidgetCreation,
-        fileSystemRoots: fileSystemRoots ?? <String>[],
+        fileSystemRoots: buildInfo.fileSystemRoots ?? <String>[],
         // Override the filesystem scheme so that the frontend_server can find
         // the generated entrypoint code.
         fileSystemScheme: 'org-dartlang-app',
@@ -162,8 +158,8 @@ class FlutterDevice {
         ),
         buildMode: buildInfo.mode,
         trackWidgetCreation: buildInfo.trackWidgetCreation,
-        fileSystemRoots: fileSystemRoots,
-        fileSystemScheme: fileSystemScheme,
+        fileSystemRoots: buildInfo.fileSystemRoots,
+        fileSystemScheme: buildInfo.fileSystemScheme,
         targetModel: targetModel,
         dartDefines: buildInfo.dartDefines,
         extraFrontEndOptions: extraFrontEndOptions,
@@ -183,8 +179,6 @@ class FlutterDevice {
 
     return FlutterDevice(
       device,
-      fileSystemRoots: fileSystemRoots,
-      fileSystemScheme:fileSystemScheme,
       targetModel: targetModel,
       targetPlatform: targetPlatform,
       generator: generator,
@@ -204,8 +198,6 @@ class FlutterDevice {
   FlutterVmService vmService;
   DevFS devFS;
   ApplicationPackage package;
-  List<String> fileSystemRoots;
-  String fileSystemScheme;
   StreamSubscription<String> _loggingSubscription;
   bool _isListeningForObservatoryUri;
 
@@ -1376,7 +1368,7 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   Future<void> exitApp() async {
     final List<Future<void>> futures = <Future<void>>[
-      for (final FlutterDevice device in flutterDevices)  device.exitApps(),
+      for (final FlutterDevice device in flutterDevices) device.exitApps(),
     ];
     await Future.wait(futures);
     appFinished();

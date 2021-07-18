@@ -197,8 +197,8 @@ void main() {
         // output dill, filesystem scheme, and filesystem root.
         final FlutterDevice flutterDevice = hotRunnerFactory.devices.first;
 
-        expect(flutterDevice.fileSystemScheme, filesystemScheme);
-        expect(flutterDevice.fileSystemRoots, const <String>[filesystemRoot]);
+        expect(flutterDevice.buildInfo.fileSystemScheme, filesystemScheme);
+        expect(flutterDevice.buildInfo.fileSystemRoots, const <String>[filesystemRoot]);
       }, overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
         ProcessManager: () => FakeProcessManager.any(),
