@@ -89,13 +89,13 @@ PipelineDescriptor& PipelineDescriptor::SetVertexDescriptor(
 
 PipelineDescriptor& PipelineDescriptor::SetColorAttachmentDescriptor(
     size_t index,
-    ColorAttachmentDescriptor desc) {
+    PipelineColorAttachment desc) {
   color_attachment_descriptors_[index] = std::move(desc);
   return *this;
 }
 
-const ColorAttachmentDescriptor*
-PipelineDescriptor::GetColorAttachmentDescriptor(size_t index) const {
+const PipelineColorAttachment* PipelineDescriptor::GetColorAttachmentDescriptor(
+    size_t index) const {
   auto found = color_attachment_descriptors_.find(index);
   return found == color_attachment_descriptors_.end() ? nullptr
                                                       : &found->second;
@@ -114,19 +114,19 @@ PipelineDescriptor& PipelineDescriptor::SetStencilPixelFormat(
 }
 
 PipelineDescriptor& PipelineDescriptor::SetDepthStencilAttachmentDescriptor(
-    DepthAttachmentDescriptor desc) {
+    PipelineDepthAttachment desc) {
   depth_attachment_descriptor_ = desc;
   return *this;
 }
 
 PipelineDescriptor& PipelineDescriptor::SetStencilAttachmentDescriptors(
-    StencilAttachmentDescriptor front_and_back) {
+    PipelineStencilAttachment front_and_back) {
   return SetStencilAttachmentDescriptors(front_and_back, front_and_back);
 }
 
 PipelineDescriptor& PipelineDescriptor::SetStencilAttachmentDescriptors(
-    StencilAttachmentDescriptor front,
-    StencilAttachmentDescriptor back) {
+    PipelineStencilAttachment front,
+    PipelineStencilAttachment back) {
   front_stencil_attachment_descriptor_ = front;
   back_stencil_attachment_descriptor_ = back;
   return *this;

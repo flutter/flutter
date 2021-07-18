@@ -12,7 +12,7 @@ namespace impeller {
 
 MTLRenderPipelineColorAttachmentDescriptor*
 ToMTLRenderPipelineColorAttachmentDescriptor(
-    ColorAttachmentDescriptor descriptor) {
+    PipelineColorAttachment descriptor) {
   auto des = [[MTLRenderPipelineColorAttachmentDescriptor alloc] init];
   des.pixelFormat = ToMTLPixelFormat(descriptor.format);
 
@@ -35,7 +35,7 @@ ToMTLRenderPipelineColorAttachmentDescriptor(
 }
 
 MTLStencilDescriptor* ToMTLStencilDescriptor(
-    const StencilAttachmentDescriptor& descriptor) {
+    const PipelineStencilAttachment& descriptor) {
   auto des = [[MTLStencilDescriptor alloc] init];
   des.stencilCompareFunction = ToMTLCompareFunction(descriptor.stencil_compare);
   des.stencilFailureOperation =
@@ -51,11 +51,11 @@ MTLStencilDescriptor* ToMTLStencilDescriptor(
 }
 
 MTLDepthStencilDescriptor* ToMTLDepthStencilDescriptor(
-    std::optional<DepthAttachmentDescriptor> depth,
-    std::optional<StencilAttachmentDescriptor> front,
-    std::optional<StencilAttachmentDescriptor> back) {
+    std::optional<PipelineDepthAttachment> depth,
+    std::optional<PipelineStencilAttachment> front,
+    std::optional<PipelineStencilAttachment> back) {
   if (!depth) {
-    depth = DepthAttachmentDescriptor{
+    depth = PipelineDepthAttachment{
         // Always pass the depth test.
         .depth_compare = CompareFunction::kAlways,
         .depth_write_enabled = false,
