@@ -17,53 +17,6 @@
 
 namespace impeller {
 
-RenderPassDescriptor::RenderPassDescriptor() = default;
-
-RenderPassDescriptor::~RenderPassDescriptor() = default;
-
-bool RenderPassDescriptor::HasColorAttachment(size_t index) const {
-  if (auto found = colors_.find(index); found != colors_.end()) {
-    return true;
-  }
-  return false;
-}
-
-std::optional<ISize> RenderPassDescriptor::GetColorAttachmentSize(
-    size_t index) const {
-  auto found = colors_.find(index);
-
-  if (found == colors_.end()) {
-    return std::nullopt;
-  }
-
-  return found->second.texture->GetSize();
-}
-
-RenderPassDescriptor& RenderPassDescriptor::SetColorAttachment(
-    ColorRenderPassAttachment attachment,
-    size_t index) {
-  if (attachment) {
-    colors_[index] = attachment;
-  }
-  return *this;
-}
-
-RenderPassDescriptor& RenderPassDescriptor::SetDepthAttachment(
-    DepthRenderPassAttachment attachment) {
-  if (attachment) {
-    depth_ = std::move(attachment);
-  }
-  return *this;
-}
-
-RenderPassDescriptor& RenderPassDescriptor::SetStencilAttachment(
-    StencilRenderPassAttachment attachment) {
-  if (attachment) {
-    stencil_ = std::move(attachment);
-  }
-  return *this;
-}
-
 static bool ConfigureAttachment(const RenderPassAttachment& desc,
                                 MTLRenderPassAttachmentDescriptor* attachment) {
   if (!desc.texture) {

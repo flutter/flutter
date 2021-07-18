@@ -42,6 +42,8 @@ impeller_component("compositor") {
     "range.h",
     "render_pass.h",
     "render_pass.mm",
+    "render_pass_descriptor.h",
+    "render_pass_descriptor.mm",
     "renderer.h",
     "renderer.mm",
     "sampler.h",

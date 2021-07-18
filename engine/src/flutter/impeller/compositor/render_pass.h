@@ -13,6 +13,7 @@
 #include "impeller/compositor/command.h"
 #include "impeller/compositor/formats.h"
 #include "impeller/compositor/host_buffer.h"
+#include "impeller/compositor/render_pass_descriptor.h"
 #include "impeller/compositor/texture.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/size.h"
@@ -20,53 +21,6 @@
 namespace impeller {
 
 class CommandBuffer;
-
-struct RenderPassAttachment {
-  std::shared_ptr<Texture> texture;
-  LoadAction load_action = LoadAction::kDontCare;
-  StoreAction store_action = StoreAction::kStore;
-
-  constexpr operator bool() const { return static_cast<bool>(texture); }
-};
-
-struct ColorRenderPassAttachment : public RenderPassAttachment {
-  Color clear_color = Color::BlackTransparent();
-};
-
-struct DepthRenderPassAttachment : public RenderPassAttachment {
-  double clear_depth = 0.0;
-};
-
-struct StencilRenderPassAttachment : public RenderPassAttachment {
-  uint32_t clear_stencil = 0;
-};
-
-class RenderPassDescriptor {
- public:
-  RenderPassDescriptor();
-
-  ~RenderPassDescriptor();
-
-  bool HasColorAttachment(size_t index) const;
-
-  std::optional<ISize> GetColorAttachmentSize(size_t index) const;
-
-  RenderPassDescriptor& SetColorAttachment(ColorRenderPassAttachment attachment,
-                                           size_t index);
-
-  RenderPassDescriptor& SetDepthAttachment(
-      DepthRenderPassAttachment attachment);
-
-  RenderPassDescriptor& SetStencilAttachment(
-      StencilRenderPassAttachment attachment);
-
-  MTLRenderPassDescriptor* ToMTLRenderPassDescriptor() const;
-
- private:
-  std::map<size_t, ColorRenderPassAttachment> colors_;
-  std::optional<DepthRenderPassAttachment> depth_;
-  std::optional<StencilRenderPassAttachment> stencil_;
-};
 
 class RenderPass {
  public:

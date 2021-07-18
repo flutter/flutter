@@ -6,20 +6,24 @@
 
 #include <cstdint>
 #include <functional>
+#include <memory>
 #include <type_traits>
 
 #include "flutter/fml/hash_combine.h"
 #include "flutter/fml/macros.h"
+#include "impeller/geometry/color.h"
 
 namespace impeller {
 
+class Texture;
+
 enum class PixelFormat {
   kUnknown,
-  kPixelFormat_R8G8B8A8_UNormInt,
-  kPixelFormat_R8G8B8A8_UNormInt_SRGB,
-  kPixelFormat_B8G8R8A8_UNormInt,
-  kPixelFormat_B8G8R8A8_UNormInt_SRGB,
-  kPixelFormat_D32_Float_S8_UNormInt,
+  kR8G8B8A8_UNormInt,
+  kR8G8B8A8_UNormInt_SRGB,
+  kB8G8R8A8_UNormInt,
+  kB8G8R8A8_UNormInt_SRGB,
+  kD32_Float_S8_UNormInt,
 };
 
 enum class BlendFactor {
@@ -108,12 +112,12 @@ constexpr size_t BytesPerPixelForPixelFormat(PixelFormat format) {
   switch (format) {
     case PixelFormat::kUnknown:
       return 0u;
-    case PixelFormat::kPixelFormat_R8G8B8A8_UNormInt:
-    case PixelFormat::kPixelFormat_R8G8B8A8_UNormInt_SRGB:
-    case PixelFormat::kPixelFormat_B8G8R8A8_UNormInt:
-    case PixelFormat::kPixelFormat_B8G8R8A8_UNormInt_SRGB:
+    case PixelFormat::kR8G8B8A8_UNormInt:
+    case PixelFormat::kR8G8B8A8_UNormInt_SRGB:
+    case PixelFormat::kB8G8R8A8_UNormInt:
+    case PixelFormat::kB8G8R8A8_UNormInt_SRGB:
       return 4u;
-    case PixelFormat::kPixelFormat_D32_Float_S8_UNormInt:
+    case PixelFormat::kD32_Float_S8_UNormInt:
       // This is an esoteric format and implementations may use 64 bits.
       // Impeller doesn't work with these natively and this return is only here
       // for completeness. The 40 bits is as documented.
@@ -276,6 +280,26 @@ struct StencilAttachmentDescriptor {
     return fml::HashCombine(stencil_compare, stencil_failure, depth_failure,
                             depth_stencil_pass, read_mask);
   }
+};
+
+struct RenderPassAttachment {
+  std::shared_ptr<Texture> texture = nullptr;
+  LoadAction load_action = LoadAction::kDontCare;
+  StoreAction store_action = StoreAction::kStore;
+
+  constexpr operator bool() const { return static_cast<bool>(texture); }
+};
+
+struct ColorRenderPassAttachment : public RenderPassAttachment {
+  Color clear_color = Color::BlackTransparent();
+};
+
+struct DepthRenderPassAttachment : public RenderPassAttachment {
+  double clear_depth = 0.0;
+};
+
+struct StencilRenderPassAttachment : public RenderPassAttachment {
+  uint32_t clear_stencil = 0;
 };
 
 }  // namespace impeller

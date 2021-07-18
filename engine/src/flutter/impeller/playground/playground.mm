@@ -131,7 +131,7 @@ bool Playground::OpenPlaygroundHere(Renderer::RenderCallback render_callback) {
     }
 
     TextureDescriptor color0_desc;
-    color0_desc.format = PixelFormat::kPixelFormat_B8G8R8A8_UNormInt;
+    color0_desc.format = PixelFormat::kB8G8R8A8_UNormInt;
     color0_desc.size = {
         static_cast<ISize::Type>(current_drawable.texture.width),
         static_cast<ISize::Type>(current_drawable.texture.height)};
@@ -181,7 +181,7 @@ std::shared_ptr<Texture> Playground::CreateTextureForFixture(
   }
 
   auto texture_descriptor = TextureDescriptor{};
-  texture_descriptor.format = PixelFormat::kPixelFormat_R8G8B8A8_UNormInt;
+  texture_descriptor.format = PixelFormat::kR8G8B8A8_UNormInt;
   texture_descriptor.size = image.GetSize();
   texture_descriptor.mip_count = 1u;
 
