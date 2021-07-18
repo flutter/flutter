@@ -18,7 +18,7 @@ class JsonHelper {
 
   final dynamic _jsonObject;
 
-  /// Transverse the underlying object by [String] key if such object is a
+  /// Traverse the underlying object by [String] key if such object is a
   /// [Map], or [int] index if such object is a [List].
   ///
   /// Throws [TypeError] if the underlying object is not a [List] and an [int]
@@ -95,14 +95,14 @@ class JsonHelper {
     };
   }
 
-  /// Transverse the underlying object by an [int] index.
+  /// Traverse the underlying object by an [int] index.
   ///
   /// Throws [TypeError] if the underlying object is not a [List].
   JsonHelper at(int index) {
     return _at(index);
   }
 
-  /// Transverse the underlying object by a [String] key.
+  /// Traverse the underlying object by a [String] key.
   ///
   /// Throws [TypeError] if the underlying object is not a [Map].
   JsonHelper get(String key) {
