@@ -42,20 +42,20 @@ class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
 
   PipelineDescriptor& SetColorAttachmentDescriptor(
       size_t index,
-      ColorAttachmentDescriptor desc);
+      PipelineColorAttachment desc);
 
-  const ColorAttachmentDescriptor* GetColorAttachmentDescriptor(
+  const PipelineColorAttachment* GetColorAttachmentDescriptor(
       size_t index) const;
 
   PipelineDescriptor& SetDepthStencilAttachmentDescriptor(
-      DepthAttachmentDescriptor desc);
+      PipelineDepthAttachment desc);
 
   PipelineDescriptor& SetStencilAttachmentDescriptors(
-      StencilAttachmentDescriptor front_and_back);
+      PipelineStencilAttachment front_and_back);
 
   PipelineDescriptor& SetStencilAttachmentDescriptors(
-      StencilAttachmentDescriptor front,
-      StencilAttachmentDescriptor back);
+      PipelineStencilAttachment front,
+      PipelineStencilAttachment back);
 
   PipelineDescriptor& SetDepthPixelFormat(PixelFormat format);
 
@@ -76,15 +76,13 @@ class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
   std::string label_;
   size_t sample_count_ = 1;
   std::map<ShaderStage, std::shared_ptr<const ShaderFunction>> entrypoints_;
-  std::map<size_t, ColorAttachmentDescriptor> color_attachment_descriptors_;
+  std::map<size_t, PipelineColorAttachment> color_attachment_descriptors_;
   std::shared_ptr<VertexDescriptor> vertex_descriptor_;
   PixelFormat depth_pixel_format_ = PixelFormat::kUnknown;
   PixelFormat stencil_pixel_format_ = PixelFormat::kUnknown;
-  std::optional<DepthAttachmentDescriptor> depth_attachment_descriptor_;
-  std::optional<StencilAttachmentDescriptor>
-      front_stencil_attachment_descriptor_;
-  std::optional<StencilAttachmentDescriptor>
-      back_stencil_attachment_descriptor_;
+  std::optional<PipelineDepthAttachment> depth_attachment_descriptor_;
+  std::optional<PipelineStencilAttachment> front_stencil_attachment_descriptor_;
+  std::optional<PipelineStencilAttachment> back_stencil_attachment_descriptor_;
 };
 
 }  // namespace impeller
