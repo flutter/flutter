@@ -12,14 +12,24 @@ void main() {
       test('nested maps', () {
         const String str = '{"a":{"b":1}}';
         expect(JsonHelper.fromJson(str)['a']['b'].asInt, equals(1));
+        expect(JsonHelper.fromJson(str).get('a').get('b').asInt, equals(1));
       });
       test('nested arrays', () {
         const String str = '[1, [2,3, [4,5]]]';
         expect(JsonHelper.fromJson(str)[1][2][1].asInt, equals(5));
+        expect(JsonHelper.fromJson(str).at(1).at(2).at(1).asInt, equals(5));
       });
       test('nested arrays and maps', () {
         expect(
           JsonHelper.fromJson('{"a":[1,2,{"b":"c"}]}')['a'][2]['b'].asString,
+          equals('c'),
+        );
+        expect(
+          JsonHelper.fromJson('{"a":[1,2,{"b":"c"}]}')
+              .get('a')
+              .at(2)
+              .get('b')
+              .asString,
           equals('c'),
         );
       });
