@@ -8,9 +8,9 @@
 
 namespace impeller {
 
-VertexDescriptor::VertexDescriptor() = default;
+PipelineVertexDescriptor::PipelineVertexDescriptor() = default;
 
-VertexDescriptor::~VertexDescriptor() = default;
+PipelineVertexDescriptor::~PipelineVertexDescriptor() = default;
 
 static MTLVertexFormat ReadStageInputFormat(const ShaderStageIOSlot& input) {
   if (input.columns != 1) {
@@ -168,7 +168,7 @@ static MTLVertexFormat ReadStageInputFormat(const ShaderStageIOSlot& input) {
   }
 }
 
-bool VertexDescriptor::SetStageInputs(
+bool PipelineVertexDescriptor::SetStageInputs(
     const ShaderStageIOSlot* const stage_inputs[],
     size_t count) {
   stage_inputs_.clear();
@@ -188,7 +188,7 @@ bool VertexDescriptor::SetStageInputs(
   return true;
 }
 
-MTLVertexDescriptor* VertexDescriptor::GetMTLVertexDescriptor() const {
+MTLVertexDescriptor* PipelineVertexDescriptor::GetMTLVertexDescriptor() const {
   auto descriptor = [MTLVertexDescriptor vertexDescriptor];
 
   const size_t vertex_buffer_index = kReservedVertexBufferIndex;
@@ -214,7 +214,7 @@ MTLVertexDescriptor* VertexDescriptor::GetMTLVertexDescriptor() const {
 }
 
 // |Comparable<VertexDescriptor>|
-std::size_t VertexDescriptor::GetHash() const {
+std::size_t PipelineVertexDescriptor::GetHash() const {
   auto seed = fml::HashCombine();
   for (const auto& input : stage_inputs_) {
     fml::HashCombineSeed(seed, input.location, input.format);
@@ -223,7 +223,8 @@ std::size_t VertexDescriptor::GetHash() const {
 }
 
 // |Comparable<VertexDescriptor>|
-bool VertexDescriptor::IsEqual(const VertexDescriptor& other) const {
+bool PipelineVertexDescriptor::IsEqual(
+    const PipelineVertexDescriptor& other) const {
   return stage_inputs_ == other.stage_inputs_;
 }
 
