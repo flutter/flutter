@@ -69,7 +69,7 @@ void main() {
         final JsonHelper helper =
             JsonHelper.fromJson('[1,0.1,3,4,"abc","def"]');
         expect(
-          helper.filterList((dynamic p) => (p as int).isOdd).asList,
+          helper.filterByElement((dynamic p) => (p as int).isOdd).asList,
           equals(<dynamic>[1, 3]),
         );
       });
@@ -78,7 +78,7 @@ void main() {
             JsonHelper.fromJson('{"k1":"abc","a2":23,"k3":123}');
         expect(
           helper
-              .filterMap((MapEntry<String, dynamic> p) =>
+              .filterByEntry((MapEntry<String, dynamic> p) =>
                   p.key.contains('k') && (p.value as int) > 100)
               .asMap,
           equals(<String, dynamic>{'k3': 123}),

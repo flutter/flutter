@@ -39,7 +39,7 @@ class JsonHelper {
   /// Filters the underlying object as a [List] by its elements.
   ///
   /// If func throws a TypeError, it is treated as if it returns false.
-  JsonHelper filterList(bool Function(dynamic) func) {
+  JsonHelper filterByElement(bool Function(dynamic) func) {
     final List<dynamic> arr = asList;
     return JsonHelper(arr.where(_wrapTypeErrorToFalse<dynamic>(func)));
   }
@@ -47,7 +47,7 @@ class JsonHelper {
   /// Filters the underlying object as a [Map] by its entries.
   ///
   /// If func throws a TypeError, it is treated as if it returns false.
-  JsonHelper filterMap(bool Function(MapEntry<String, dynamic>) func) {
+  JsonHelper filterByEntry(bool Function(MapEntry<String, dynamic>) func) {
     final Map<String, dynamic> map = asMap;
     return JsonHelper(
       Map<String, dynamic>.fromEntries(map.entries.where(
