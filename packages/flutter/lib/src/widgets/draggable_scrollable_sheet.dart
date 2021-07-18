@@ -730,18 +730,18 @@ class _SnappingSimulation extends Simulation {
     // Check the direction of the target instead of the sign of the velocity because
     // we may snap in the opposite direction of velocity if velocity is very low.
     if (_pixelSnapTarget < position) {
-      velocity = min(-minimumVelocity, initialVelocity);
+      velocity = min(-minimumSpeed, initialVelocity);
     } else {
-      velocity = max(minimumVelocity, initialVelocity);
+      velocity = max(minimumSpeed, initialVelocity);
     }
   }
 
   final double position;
   late final double velocity;
 
-  // A minimum velocity to snap at. Used to ensure that the snapping animation
+  // A minimum speed to snap at. Used to ensure that the snapping animation
   // does not play too slowly.
-  static const double minimumVelocity = 1600.0;
+  static const double minimumSpeed = 1600.0;
 
   late final double _pixelSnapTarget;
 
