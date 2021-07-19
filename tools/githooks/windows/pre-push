@@ -1,0 +1,10 @@
+#!/bin/sh
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+RED='[31m'
+NC='[0m'
+BOLD='[1m'
+echo "${BOLD}${RED}Warning:${NC} ${BOLD}Pre-push checks not supported on Windows${NC}"
+echo "${BOLD}See: https://github.com/flutter/flutter/issues/86506${NC}"
