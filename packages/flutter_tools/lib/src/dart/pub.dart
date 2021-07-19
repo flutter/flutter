@@ -86,6 +86,10 @@ abstract class Pub {
   ///
   /// [context] provides extra information to package server requests to
   /// understand usage.
+  ///
+  /// If [shouldSkipThirdPartyGenerator] is true, the overall pub get will be
+  /// skipped if the package config file has a "generator" other than "pub".
+  /// Defaults to true.
   Future<void> get({
     required PubContext context,
     String directory,
