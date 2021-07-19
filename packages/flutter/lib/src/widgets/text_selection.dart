@@ -847,7 +847,7 @@ class _TextSelectionHandleOverlayState
       firstSelectedGraphemeExtent = 1;
       lastSelectedGraphemeExtent = 1;
     } else {
-      final String selectedGraphemes = widget.selection.textInside(text);
+      final String selectedGraphemes = widget.renderObject.selection!.textInside(text);
       firstSelectedGraphemeExtent = selectedGraphemes.characters.first.length;
       lastSelectedGraphemeExtent = selectedGraphemes.characters.last.length;
     }
