@@ -66,13 +66,64 @@ class PlaceholderSpan extends InlineSpan {
   /// This is typically the String content this placeholder is replacing.
   final String plainText;
 
-  /// [PlaceholderSpan]s are flattened to a `0xFFFC` object replacement character in the
-  /// plain text representation when `includePlaceholders` is true.
+  /// Adds an empty placeholder to the paragraph builder.
+  @override
+  void build(ui.ParagraphBuilder builder, { double textScaleFactor = 1.0, List<PlaceholderDimensions>? dimensions }) {
+    assert(debugAssertIsValid());
+    if (hasStyle) {
+      builder.pushStyle(style!.getTextStyle(textScaleFactor: textScaleFactor));
+    }
+    builder.addPlaceholder(
+      0, // width
+      0, // height
+      alignment,
+      scale: 1.0,
+      baseline: TextBaseline.alphabetic,
+      baselineOffset: 0,
+      codepointLength: plainText.length,
+    );
+    if (hasStyle) {
+      builder.pop();
+    }
+  }
+
+  /// Returns the plaintext representation of the placeholder.
+  ///
+  /// By default, [PlaceholderSpan]s are flattened to a `0xFFFC` object replacement character in the
+  /// plain text representation when `includePlaceholders` is true. This can be customized with the
+  /// `plainText` parameter in the contructor.
   @override
   void computeToPlainText(StringBuffer buffer, {bool includeSemanticsLabels = true, bool includePlaceholders = true}) {
     if (includePlaceholders) {
       buffer.write(plainText);
     }
+  }
+
+  @override
+  int? codeUnitAtVisitor(int index, Accumulator offset) {
+    return null;
+  }
+
+  @override
+  RenderComparison compareTo(InlineSpan other) {
+    if (identical(this, other))
+      return RenderComparison.identical;
+    if (other.runtimeType != runtimeType)
+      return RenderComparison.layout;
+    if (child != typedOther.child ||
+        alignment != typedOther.alignment ||
+        plainText != typedOther.plainText) {
+      return RenderComparison.layout;
+    }
+    RenderComparison result = RenderComparison.identical;
+    if (style != null) {
+      final RenderComparison candidate = style!.compareTo(other.style!);
+      if (candidate.index > result.index)
+        result = candidate;
+      if (result == RenderComparison.layout)
+        return result;
+    }
+    return result;
   }
 
   @override
@@ -100,5 +151,11 @@ class PlaceholderSpan extends InlineSpan {
 
     properties.add(EnumProperty<ui.PlaceholderAlignment>('alignment', alignment, defaultValue: null));
     properties.add(EnumProperty<TextBaseline>('baseline', baseline, defaultValue: null));
+  }
+
+  @override
+  bool debugAssertIsValid() {
+    // PlaceholderSpans are always valid
+    return true;
   }
 }
