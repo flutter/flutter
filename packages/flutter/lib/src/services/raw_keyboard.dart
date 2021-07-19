@@ -376,6 +376,7 @@ abstract class RawKeyEvent with Diagnosticable {
           data = RawKeyEventDataWeb(
             code: message['code'] as String? ?? '',
             key: key ?? '',
+            location: message['location'] as int? ?? 0,
             metaState: message['metaState'] as int? ?? 0,
           );
           if (key != null && key.isNotEmpty) {

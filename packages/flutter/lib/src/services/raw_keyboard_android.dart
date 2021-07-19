@@ -296,7 +296,6 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
     properties.add(DiagnosticsProperty<int>('keyCode', keyCode));
     properties.add(DiagnosticsProperty<int>('scanCode', scanCode));
     properties.add(DiagnosticsProperty<int>('metaState', metaState));
-    properties.add(DiagnosticsProperty<int>('eventSource', eventSource));
   }
 
   @override
@@ -311,8 +310,7 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
         && other.plainCodePoint == plainCodePoint
         && other.keyCode == keyCode
         && other.scanCode == scanCode
-        && other.metaState == metaState
-        && other.eventSource == eventSource;
+        && other.metaState == metaState;
   }
 
   @override
@@ -323,7 +321,6 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
     keyCode,
     scanCode,
     metaState,
-    eventSource,
   );
 
   // Modifier key masks.

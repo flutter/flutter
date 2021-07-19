@@ -120,6 +120,7 @@ class RawKeyEventDataLinux extends RawKeyEventData {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
+        properties.add(DiagnosticsProperty<String>('toolkit', keyHelper.toolkit));
         properties.add(DiagnosticsProperty<int>('unicodeScalarValues', unicodeScalarValues));
         properties.add(DiagnosticsProperty<int>('scanCode', scanCode));
         properties.add(DiagnosticsProperty<int>('keyCode', keyCode));
@@ -134,6 +135,7 @@ class RawKeyEventDataLinux extends RawKeyEventData {
     if (other.runtimeType != runtimeType)
       return false;
     return other is RawKeyEventDataLinux
+        && other.keyHelper.toolkit == keyHelper.toolkit
         && other.unicodeScalarValues == unicodeScalarValues
         && other.scanCode == scanCode
         && other.keyCode == keyCode
@@ -143,6 +145,7 @@ class RawKeyEventDataLinux extends RawKeyEventData {
 
   @override
   int get hashCode => hashValues(
+    keyHelper.toolkit,
     unicodeScalarValues,
     scanCode,
     keyCode,
@@ -167,6 +170,9 @@ abstract class KeyHelper {
       throw FlutterError('Window toolkit not recognized: $toolkit');
     }
   }
+
+  /// Returns the name for the toolkit.
+  String get toolkit;
 
   /// Returns a [KeyboardSide] enum value that describes which side or sides of
   /// the given keyboard modifier key were pressed at the time of this event.
@@ -230,6 +236,9 @@ class GLFWKeyHelper implements KeyHelper {
   ///
   /// {@macro flutter.services.GLFWKeyHelper.modifierCapsLock}
   static const int modifierNumericPad = 0x0020;
+
+  @override
+  String get toolkit => 'GLFW';
 
   int _mergeModifiers({required int modifiers, required int keyCode, required bool isDown}) {
     // GLFW Key codes for modifier keys.
@@ -369,6 +378,9 @@ class GtkKeyHelper implements KeyHelper {
   ///
   /// {@macro flutter.services.GtkKeyHelper.modifierShift}
   static const int modifierMeta = 1 << 26;
+
+  @override
+  String get toolkit => 'GTK';
 
   int _mergeModifiers({required int modifiers, required int keyCode, required bool isDown}) {
     // GTK Key codes for modifier keys.

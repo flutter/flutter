@@ -23,6 +23,7 @@ class RawKeyEventDataWeb extends RawKeyEventData {
   const RawKeyEventDataWeb({
     required this.code,
     required this.key,
+    this.location = 0,
     this.metaState = modifierNone,
   })  : assert(code != null),
         assert(metaState != null);
@@ -38,6 +39,12 @@ class RawKeyEventDataWeb extends RawKeyEventData {
   /// See <https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key>
   /// for more information.
   final String key;
+
+  /// The `KeyboardEvent.location` corresponding to this event.
+  ///
+  /// See <https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/location>
+  /// for more information.
+  final int location;
 
   /// The modifiers that were present when the key event occurred.
   ///
@@ -127,6 +134,7 @@ class RawKeyEventDataWeb extends RawKeyEventData {
     super.debugFillProperties(properties);
         properties.add(DiagnosticsProperty<String>('code', code));
         properties.add(DiagnosticsProperty<String>('key', key));
+        properties.add(DiagnosticsProperty<int>('location', location));
         properties.add(DiagnosticsProperty<int>('metaState', metaState));
   }
 
@@ -139,6 +147,7 @@ class RawKeyEventDataWeb extends RawKeyEventData {
     return other is RawKeyEventDataWeb
         && other.code == code
         && other.key == key
+        && other.location == location
         && other.metaState == metaState;
   }
 
@@ -146,6 +155,7 @@ class RawKeyEventDataWeb extends RawKeyEventData {
   int get hashCode => hashValues(
     code,
     key,
+    location,
     metaState,
   );
 
