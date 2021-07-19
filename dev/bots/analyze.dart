@@ -440,8 +440,8 @@ Future<void> verifyInternationalizations() async {
     workingDirectory: flutterRoot,
   );
 
-  final String materialLocalizationsFile = path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'generated_material_localizations.dart');
-  final String cupertinoLocalizationsFile = path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'generated_cupertino_localizations.dart');
+  final String materialLocalizationsFile = path.join(flutterRoot, 'packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'generated_material_localizations.dart');
+  final String cupertinoLocalizationsFile = path.join(flutterRoot, 'packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'generated_cupertino_localizations.dart');
   final String expectedMaterialResult = await File(materialLocalizationsFile).readAsString();
   final String expectedCupertinoResult = await File(cupertinoLocalizationsFile).readAsString();
 
