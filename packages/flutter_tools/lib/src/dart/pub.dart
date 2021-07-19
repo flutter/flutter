@@ -192,7 +192,7 @@ class _DefaultPub implements Pub {
       try {
         packageConfigMap = jsonDecode(
           packageConfigFile.readAsStringSync(),
-        ) as Map<Object?, Object?>;
+        ) as Map<String, Object?>;
       } on FormatException {
         packageConfigMap = <Object?, Object?>{};
       }
