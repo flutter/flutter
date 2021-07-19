@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Brightness;
+import 'dart:ui' show Brightness, DisplayFeature, DisplayFeatureState, DisplayFeatureType;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -110,6 +110,8 @@ void main() {
     expect(data.boldText, false);
     expect(data.highContrast, false);
     expect(data.platformBrightness, Brightness.light);
+    expect(data.displayFeatures, isEmpty);
+    expect(data.hinge, isNull);
   });
 
   testWidgets('MediaQueryData.copyWith defaults to source', (WidgetTester tester) async {
@@ -129,6 +131,7 @@ void main() {
     expect(copied.boldText, data.boldText);
     expect(copied.highContrast, data.highContrast);
     expect(copied.platformBrightness, data.platformBrightness);
+    expect(copied.displayFeatures, data.displayFeatures);
   });
 
   testWidgets('MediaQuery.copyWith copies specified values', (WidgetTester tester) async {
@@ -141,6 +144,13 @@ void main() {
     const EdgeInsets customViewPadding = EdgeInsets.all(11.24031);
     const EdgeInsets customViewInsets = EdgeInsets.all(1.67262);
     const EdgeInsets customSystemGestureInsets = EdgeInsets.all(1.5556);
+    const List<DisplayFeature> customDisplayFeatures = <DisplayFeature>[
+      DisplayFeature(
+        bounds: Rect.zero,
+        type: DisplayFeatureType.cutout,
+        state: DisplayFeatureState.unknown,
+      ),
+    ];
 
     final MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance!.window);
     final MediaQueryData copied = data.copyWith(
@@ -158,6 +168,7 @@ void main() {
       boldText: true,
       highContrast: true,
       platformBrightness: Brightness.dark,
+      displayFeatures: customDisplayFeatures,
     );
     expect(copied.size, customSize);
     expect(copied.devicePixelRatio, customDevicePixelRatio);
@@ -173,6 +184,7 @@ void main() {
     expect(copied.boldText, true);
     expect(copied.highContrast, true);
     expect(copied.platformBrightness, Brightness.dark);
+    expect(copied.displayFeatures, customDisplayFeatures);
   });
 
   testWidgets('MediaQuery.removePadding removes specified padding', (WidgetTester tester) async {
@@ -182,6 +194,13 @@ void main() {
     const EdgeInsets padding = EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
     const EdgeInsets viewPadding = EdgeInsets.only(top: 6.0, right: 8.0, left: 10.0, bottom: 12.0);
     const EdgeInsets viewInsets = EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
+    const List<DisplayFeature> displayFeatures = <DisplayFeature>[
+      DisplayFeature(
+        bounds: Rect.zero,
+        type: DisplayFeatureType.cutout,
+        state: DisplayFeatureState.unknown,
+      ),
+    ];
 
     late MediaQueryData unpadded;
     await tester.pumpWidget(
@@ -199,6 +218,7 @@ void main() {
           disableAnimations: true,
           boldText: true,
           highContrast: true,
+          displayFeatures: displayFeatures,
         ),
         child: Builder(
           builder: (BuildContext context) {
@@ -232,6 +252,7 @@ void main() {
     expect(unpadded.disableAnimations, true);
     expect(unpadded.boldText, true);
     expect(unpadded.highContrast, true);
+    expect(unpadded.displayFeatures, displayFeatures);
   });
 
   testWidgets('MediaQuery.removePadding only removes specified padding', (WidgetTester tester) async {
@@ -241,6 +262,13 @@ void main() {
     const EdgeInsets padding = EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
     const EdgeInsets viewPadding = EdgeInsets.only(top: 6.0, right: 8.0, left: 10.0, bottom: 12.0);
     const EdgeInsets viewInsets = EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
+    const List<DisplayFeature> displayFeatures = <DisplayFeature>[
+      DisplayFeature(
+        bounds: Rect.zero,
+        type: DisplayFeatureType.cutout,
+        state: DisplayFeatureState.unknown,
+      ),
+    ];
 
     late MediaQueryData unpadded;
     await tester.pumpWidget(
@@ -258,6 +286,7 @@ void main() {
           disableAnimations: true,
           boldText: true,
           highContrast: true,
+          displayFeatures: displayFeatures,
         ),
         child: Builder(
           builder: (BuildContext context) {
@@ -288,6 +317,7 @@ void main() {
     expect(unpadded.disableAnimations, true);
     expect(unpadded.boldText, true);
     expect(unpadded.highContrast, true);
+    expect(unpadded.displayFeatures, displayFeatures);
   });
 
   testWidgets('MediaQuery.removeViewInsets removes specified viewInsets', (WidgetTester tester) async {
@@ -297,6 +327,13 @@ void main() {
     const EdgeInsets padding = EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
     const EdgeInsets viewPadding = EdgeInsets.only(top: 6.0, right: 8.0, left: 10.0, bottom: 12.0);
     const EdgeInsets viewInsets = EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
+    const List<DisplayFeature> displayFeatures = <DisplayFeature>[
+      DisplayFeature(
+        bounds: Rect.zero,
+        type: DisplayFeatureType.cutout,
+        state: DisplayFeatureState.unknown,
+      ),
+    ];
 
     late MediaQueryData unpadded;
     await tester.pumpWidget(
@@ -314,6 +351,7 @@ void main() {
           disableAnimations: true,
           boldText: true,
           highContrast: true,
+          displayFeatures: displayFeatures,
         ),
         child: Builder(
           builder: (BuildContext context) {
@@ -347,6 +385,7 @@ void main() {
     expect(unpadded.disableAnimations, true);
     expect(unpadded.boldText, true);
     expect(unpadded.highContrast, true);
+    expect(unpadded.displayFeatures, displayFeatures);
   });
 
   testWidgets('MediaQuery.removeViewInsets removes only specified viewInsets', (WidgetTester tester) async {
@@ -356,6 +395,13 @@ void main() {
     const EdgeInsets padding = EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
     const EdgeInsets viewPadding = EdgeInsets.only(top: 6.0, right: 8.0, left: 10.0, bottom: 12.0);
     const EdgeInsets viewInsets = EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
+    const List<DisplayFeature> displayFeatures = <DisplayFeature>[
+      DisplayFeature(
+        bounds: Rect.zero,
+        type: DisplayFeatureType.cutout,
+        state: DisplayFeatureState.unknown,
+      ),
+    ];
 
     late MediaQueryData unpadded;
     await tester.pumpWidget(
@@ -373,6 +419,7 @@ void main() {
           disableAnimations: true,
           boldText: true,
           highContrast: true,
+          displayFeatures: displayFeatures,
         ),
         child: Builder(
           builder: (BuildContext context) {
@@ -403,6 +450,7 @@ void main() {
     expect(unpadded.disableAnimations, true);
     expect(unpadded.boldText, true);
     expect(unpadded.highContrast, true);
+    expect(unpadded.displayFeatures, displayFeatures);
   });
 
   testWidgets('MediaQuery.removeViewPadding removes specified viewPadding', (WidgetTester tester) async {
@@ -412,6 +460,13 @@ void main() {
     const EdgeInsets padding = EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
     const EdgeInsets viewPadding = EdgeInsets.only(top: 6.0, right: 8.0, left: 10.0, bottom: 12.0);
     const EdgeInsets viewInsets = EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
+    const List<DisplayFeature> displayFeatures = <DisplayFeature>[
+      DisplayFeature(
+        bounds: Rect.zero,
+        type: DisplayFeatureType.cutout,
+        state: DisplayFeatureState.unknown,
+      ),
+    ];
 
     late MediaQueryData unpadded;
     await tester.pumpWidget(
@@ -429,6 +484,7 @@ void main() {
           disableAnimations: true,
           boldText: true,
           highContrast: true,
+          displayFeatures: displayFeatures,
         ),
         child: Builder(
           builder: (BuildContext context) {
@@ -462,6 +518,7 @@ void main() {
     expect(unpadded.disableAnimations, true);
     expect(unpadded.boldText, true);
     expect(unpadded.highContrast, true);
+    expect(unpadded.displayFeatures, displayFeatures);
   });
 
   testWidgets('MediaQuery.removeViewPadding removes only specified viewPadding', (WidgetTester tester) async {
@@ -471,6 +528,13 @@ void main() {
     const EdgeInsets padding = EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
     const EdgeInsets viewPadding = EdgeInsets.only(top: 6.0, right: 8.0, left: 10.0, bottom: 12.0);
     const EdgeInsets viewInsets = EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
+    const List<DisplayFeature> displayFeatures = <DisplayFeature>[
+      DisplayFeature(
+        bounds: Rect.zero,
+        type: DisplayFeatureType.cutout,
+        state: DisplayFeatureState.unknown,
+      ),
+    ];
 
     late MediaQueryData unpadded;
     await tester.pumpWidget(
@@ -488,6 +552,7 @@ void main() {
           disableAnimations: true,
           boldText: true,
           highContrast: true,
+          displayFeatures: displayFeatures,
         ),
         child: Builder(
           builder: (BuildContext context) {
@@ -518,6 +583,7 @@ void main() {
     expect(unpadded.disableAnimations, true);
     expect(unpadded.boldText, true);
     expect(unpadded.highContrast, true);
+    expect(unpadded.displayFeatures, displayFeatures);
   });
 
   testWidgets('MediaQuery.textScaleFactorOf', (WidgetTester tester) async {
@@ -626,5 +692,46 @@ void main() {
 
     expect(outsideBoldTextOverride, false);
     expect(insideBoldTextOverride, true);
+  });
+
+  testWidgets('MediaQueryData.hinge returns hinge display feature', (WidgetTester tester) async {
+    const MediaQueryData data = MediaQueryData(
+      displayFeatures: <DisplayFeature>[
+        DisplayFeature(
+          bounds: Rect.zero,
+          type: DisplayFeatureType.cutout,
+          state: DisplayFeatureState.unknown,
+        ),
+        DisplayFeature(
+          bounds: Rect.zero,
+          type: DisplayFeatureType.fold,
+          state: DisplayFeatureState.unknown,
+        ),
+        DisplayFeature(
+          bounds: Rect.zero,
+          type: DisplayFeatureType.hinge,
+          state: DisplayFeatureState.unknown,
+        ),
+      ],
+    );
+    expect(data.hinge?.type, DisplayFeatureType.hinge);
+  });
+
+  testWidgets('MediaQueryData.hinge returns null', (WidgetTester tester) async {
+    const MediaQueryData data = MediaQueryData(
+      displayFeatures: <DisplayFeature>[
+        DisplayFeature(
+          bounds: Rect.zero,
+          type: DisplayFeatureType.cutout,
+          state: DisplayFeatureState.unknown,
+        ),
+        DisplayFeature(
+          bounds: Rect.zero,
+          type: DisplayFeatureType.fold,
+          state: DisplayFeatureState.unknown,
+        ),
+      ],
+    );
+    expect(data.hinge, isNull);
   });
 }

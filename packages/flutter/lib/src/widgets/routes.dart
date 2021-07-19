@@ -1841,7 +1841,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
     return Semantics(
       scopesRoute: true,
       explicitChildNodes: true,
-      child: AvoidDisplayFeatures(
+      child: DisplayFeatureSubScreen(
         child: _pageBuilder(context, animation, secondaryAnimation),
         anchorPoint: _anchorPoint,
       ),
@@ -1863,33 +1863,23 @@ class RawDialogRoute<T> extends PopupRoute<T> {
   }
 }
 
-/// Widget that can be added at the root of a popup route in order to make
-/// the contents avoid any [DisplayFeature] present on the device.
+/// Positions [child] such that it avoids overlapping any [DisplayFeature] that
+/// splits the screen into sub-screens.
 ///
-/// This widget first looks at the positioning of the [DisplayFeature]
-/// and determines where the safe areas are located, which do not overlap any
-/// of the display features. Then the [anchorPoint] paramenter is used to pick the
-/// closest area.
+/// After determining the sub-screens, the closest one to [anchorPoint] is used
+/// render the [child].
 ///
-/// If no [anchorPoint] is provided, then [Directionality] is used to pick the
-/// first area from the top, so for a [TextDirection.ltr] layout, the area from
-/// the top-left is selected.
-///
-/// For example, a device with two screens and a display cutout for cameras on
-/// the left screen will have two safe areas:
-///
-///  * One safe area will be the left screen, excluding the camera cutout,
-///  similar to how [SafeArea] works.
-///  * One safe area will be the right screen.
+/// If no [anchorPoint] is provided, then [Directionality] is used. If no
+/// [Directionality] and no [anchorPoint] are provided, then the top-left screen
+/// is used.
 ///
 /// See also:
 ///
-///  * [showGeneralDialog], which is a way to display a RawDialogRoute.
 ///  * [showDialog], which is a way to display a DialogRoute.
 ///  * [showCupertinoDialog], which displays an iOS-style dialog.
-class AvoidDisplayFeatures extends StatelessWidget {
+class DisplayFeatureSubScreen extends StatelessWidget {
   /// Creates a widget that positions its child so that it avoids display features.
-  const AvoidDisplayFeatures({
+  const DisplayFeatureSubScreen({
     Key? key,
     required this.child,
     this.anchorPoint,
@@ -1908,24 +1898,30 @@ class AvoidDisplayFeatures extends StatelessWidget {
     final List<Rect> safeAreas = _safeAreasInNavigator(context);
     final Rect safeArea = anchorPoint == null
         ? _firstSafeArea(safeAreas, context)
-        : _closestToAnchorPoint(safeAreas, anchorPoint!);
+        : _closestToAnchorPoint(safeAreas, _finiteOffset(anchorPoint!));
 
-    return Stack(
-      children: <Widget>[
-        Positioned.fromRect(rect: safeArea, child: child),
-      ],
+    return Align(
+      alignment: Alignment.topLeft,
+      child: Padding(
+        padding: EdgeInsets.only(left: safeArea.left, top: safeArea.top),
+        child: SizedBox(
+          width: safeArea.width,
+          height: safeArea.height,
+          child: child,
+        ),
+      ),
     );
   }
 
-  Rect _firstSafeArea(List<Rect> safeAreas, BuildContext context) {
-    final TextDirection? direction = Directionality.maybeOf(context);
-    if (direction == null || direction == TextDirection.ltr)
-      return _closestToAnchorPoint(safeAreas, Offset.zero);
-    else
+  static Rect _firstSafeArea(List<Rect> safeAreas, BuildContext context) {
+    final TextDirection? textDirection = Directionality.maybeOf(context);
+    if (textDirection == TextDirection.rtl)
       return _closestToAnchorPoint(safeAreas, const Offset(double.maxFinite, 0));
+    else
+      return _closestToAnchorPoint(safeAreas, Offset.zero);
   }
 
-  Rect _closestToAnchorPoint(List<Rect> safeAreas, Offset anchorPoint) {
+  static Rect _closestToAnchorPoint(List<Rect> safeAreas, Offset anchorPoint) {
     return safeAreas.fold(safeAreas.first, (Rect previousValue, Rect element) {
       final double previousDistance = (previousValue.center - anchorPoint).distanceSquared;
       final double elementDistance = (element.center - anchorPoint).distanceSquared;
@@ -1936,7 +1932,7 @@ class AvoidDisplayFeatures extends StatelessWidget {
     });
   }
 
-  List<Rect> _safeAreasInNavigator(BuildContext context) {
+  static List<Rect> _safeAreasInNavigator(BuildContext context) {
     final RenderObject? renderObject = Overlay.of(context)?.context.findRenderObject();
     Rect? navigatorBounds;
     final Vector3? translation = renderObject?.getTransformTo(null).getTranslation();
@@ -1959,12 +1955,11 @@ class AvoidDisplayFeatures extends StatelessWidget {
     return _safeAreas(Rect.fromLTWH(0, 0, navigatorBounds.width, navigatorBounds.height), avoidBounds);
   }
 
-  List<Rect> _safeAreas(Rect screen, List<Rect> avoidBounds) {
+  static List<Rect> _safeAreas(Rect screen, List<Rect> avoidBounds) {
     Iterable<Rect> areas = <Rect>[screen];
     for (final Rect bounds in avoidBounds) {
       areas = areas.expand((Rect area) sync* {
-        if (area.top >= bounds.top
-            && area.bottom <= bounds.bottom) {
+        if (area.top >= bounds.top && area.bottom <= bounds.bottom) {
           // Display feature splits the area vertically
           if (area.left < bounds.left) {
             // There is a smaller area, left of the display feature
@@ -1974,8 +1969,7 @@ class AvoidDisplayFeatures extends StatelessWidget {
             // There is a smaller area, right of the display feature
             yield Rect.fromLTWH(bounds.right, area.top, area.right - bounds.right, area.height);
           }
-        } else if (area.left >= bounds.left
-            && area.right <= bounds.right) {
+        } else if (area.left >= bounds.left && area.right <= bounds.right) {
           // Display feature splits the area horizontally
           if (area.top < bounds.top) {
             // There is a smaller area, above the display feature
@@ -1985,10 +1979,30 @@ class AvoidDisplayFeatures extends StatelessWidget {
             // There is a smaller area, below the display feature
             yield Rect.fromLTWH(area.left, bounds.bottom, area.width, area.bottom - bounds.bottom);
           }
+        } else {
+          yield area;
         }
       });
     }
     return areas.toList();
+  }
+
+  static Offset _finiteOffset(Offset offset){
+    if (offset.isFinite) {
+      return offset;
+    } else {
+      return Offset(_finiteNumber(offset.dx), _finiteNumber(offset.dy));
+    }
+  }
+
+  static double _finiteNumber(double nr){
+    if (nr.isInfinite && nr.isNegative) {
+      return -double.maxFinite;
+    } else if (nr.isInfinite && !nr.isNegative) {
+      return double.maxFinite;
+    } else {
+      return nr;
+    }
   }
 }
 

@@ -632,7 +632,7 @@ class MediaQueryData {
       accessibleNavigation,
       boldText,
       navigationMode,
-      displayFeatures,
+      hashList(displayFeatures),
     );
   }
 

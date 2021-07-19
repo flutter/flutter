@@ -2370,7 +2370,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
 ///    date picker.
 ///  * [TimePickerThemeData], which allows you to customize the colors,
 ///    typography, and shape of the time picker.
-///  * [AvoidDisplayFeatures], which is used for avoiding [DisplayFeature]s when
+///  * [DisplayFeatureSubScreen], which is used for avoiding [DisplayFeature]s when
 ///    displaying the picker.
 Future<TimeOfDay?> showTimePicker({
   required BuildContext context,

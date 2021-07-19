@@ -762,6 +762,8 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
             // There is a smaller area, below the display feature
             yield Rect.fromLTWH(area.left, bounds.bottom, area.width, area.bottom - bounds.bottom);
           }
+        } else {
+          yield area;
         }
       });
     }

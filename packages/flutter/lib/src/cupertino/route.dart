@@ -988,6 +988,10 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
 /// The `routeSettings` argument is used to provide [RouteSettings] to the
 /// created Route.
 ///
+/// The [anchorPoint] argument is used to pick the closest area without
+/// [DisplayFeature]s, where the popup will be rendered. If this is null, the
+/// closest [Directionality] widget is used.
+///
 /// See also:
 ///
 ///  * [CupertinoActionSheet], which is the widget usually returned by the
@@ -1004,6 +1008,7 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
     bool? semanticsDismissible,
     ImageFilter? filter,
     RouteSettings? settings,
+    this.anchorPoint,
   }) : super(
          filter: filter,
          settings: settings,
@@ -1045,6 +1050,11 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 
   late Tween<Offset> _offsetTween;
 
+  /// Used to pick the closest area without [DisplayFeature]s, where the popup
+  /// will be rendered. If this is null, the closest [Directionality] widget is
+  /// used.
+  final Offset? anchorPoint;
+
   @override
   Animation<double> createAnimation() {
     assert(_animation == null);
@@ -1067,8 +1077,9 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     return CupertinoUserInterfaceLevel(
       data: CupertinoUserInterfaceLevelData.elevated,
-      child: AvoidDisplayFeatures(
+      child: DisplayFeatureSubScreen(
         child: Builder(builder: builder),
+        anchorPoint: anchorPoint,
       ),
     );
   }
@@ -1321,7 +1332,7 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 ///  * [CupertinoAlertDialog], an iOS-style alert dialog.
 ///  * [showDialog], which displays a Material-style dialog.
 ///  * [showGeneralDialog], which allows for customization of the dialog popup.
-///  * [AvoidDisplayFeatures], which is used for avoiding [DisplayFeature]s when
+///  * [DisplayFeatureSubScreen], which is used for avoiding [DisplayFeature]s when
 ///    displaying the dialog.
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/views/alerts/>
 Future<T?> showCupertinoDialog<T>({
@@ -1383,7 +1394,7 @@ Future<T?> showCupertinoDialog<T>({
 ///     an iOS-style dialog.
 ///  * [showGeneralDialog], which allows for customization of the dialog popup.
 ///  * [showDialog], which displays a Material dialog.
-///  * [AvoidDisplayFeatures], which is used for avoiding [DisplayFeature]s when
+///  * [DisplayFeatureSubScreen], which is used for avoiding [DisplayFeature]s when
 ///    displaying the dialog.
 class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
   /// A dialog route that shows an iOS-style dialog.

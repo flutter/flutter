@@ -510,7 +510,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     final Widget bottomSheet = MediaQuery.removePadding(
       context: context,
       removeTop: true,
-      child: AvoidDisplayFeatures(
+      child: DisplayFeatureSubScreen(
         child: Builder(
           builder: (BuildContext context) {
             final BottomSheetThemeData sheetTheme = Theme.of(context).bottomSheetTheme;
@@ -692,7 +692,7 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 ///    non-modal bottom sheets.
 ///  * [DraggableScrollableSheet], which allows you to create a bottom sheet
 ///    that grows and then becomes scrollable once it reaches its maximum size.
-///  * [AvoidDisplayFeatures], which is used for avoiding [DisplayFeature]s when
+///  * [DisplayFeatureSubScreen], which is used for avoiding [DisplayFeature]s when
 ///    displaying the bottom sheet.
 ///  * <https://material.io/design/components/sheets-bottom.html#modal-bottom-sheet>
 Future<T?> showModalBottomSheet<T>({

@@ -194,7 +194,7 @@ const double _inputFormLandscapeHeight = 108.0;
 ///    used to select a range of dates.
 ///  * [CalendarDatePicker], which provides the calendar grid used by the date picker dialog.
 ///  * [InputDatePickerFormField], which provides a text input field for entering dates.
-///  * [AvoidDisplayFeatures], which is used for avoiding [DisplayFeature]s when
+///  * [DisplayFeatureSubScreen], which is used for avoiding [DisplayFeature]s when
 ///    displaying the picker.
 ///  * [showTimePicker], which shows a dialog that contains a material design time picker.
 ///
@@ -1035,7 +1035,7 @@ class _DatePickerHeader extends StatelessWidget {
 ///  * [showDatePicker], which shows a material design date picker used to
 ///    select a single date.
 ///  * [DateTimeRange], which is used to describe a date range.
-///  * [AvoidDisplayFeatures], which is used for avoiding [DisplayFeature]s when
+///  * [DisplayFeatureSubScreen], which is used for avoiding [DisplayFeature]s when
 ///    displaying the picker.
 Future<DateTimeRange?> showDateRangePicker({
   required BuildContext context,

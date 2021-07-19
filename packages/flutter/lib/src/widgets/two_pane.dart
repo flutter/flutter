@@ -55,7 +55,7 @@ class TwoPane extends StatelessWidget {
     this.verticalDirection = VerticalDirection.down,
     this.direction = Axis.horizontal,
     this.panePriority = TwoPanePriority.both,
-    this.padding,
+    this.padding = EdgeInsets.zero,
   }) : super(key: key);
 
   /// First pane, which can sit on the left for left to right layouts,
@@ -111,102 +111,129 @@ class TwoPane extends StatelessWidget {
   /// the height of the appbar.
   ///
   /// Defaults to [MediaQueryData.padding].
-  final EdgeInsets? padding;
+  final EdgeInsets padding;
 
-  TextDirection _textDirection(BuildContext context) =>
-      textDirection ?? Directionality.maybeOf(context) ?? TextDirection.ltr;
+  TextDirection? _textDirection(BuildContext context) =>
+      textDirection ?? Directionality.maybeOf(context);
 
   @override
   Widget build(BuildContext context) {
-    final MediaQueryData mediaQuery = MediaQuery.of(context);
+    final MediaQueryData? mediaQuery = MediaQuery.maybeOf(context);
     final DisplayFeature? displayFeature = _separatingDisplayFeature(mediaQuery);
 
-    final EdgeInsets padding = this.padding ?? mediaQuery.padding;
-    final Size size = Size(mediaQuery.size.width - padding.horizontal,
-        mediaQuery.size.height - padding.vertical);
-    final Rect? seam = displayFeature?.bounds.translate(
-        -padding.left, -padding.top);
-
-
     late Axis _direction;
-    late double _paneProportion;
+    late int pane1Flex;
+    late int pane2Flex;
     late Widget _pane1;
     late Widget _pane2;
     late Widget _delimiter;
-    if (seam == null) {
-      // There is no seam
+    const int fractionBase = 1000000000000;
+
+    if (mediaQuery == null || displayFeature == null) {
+      // The display is continuous, nothing is overridden.
       _direction = direction;
-      _paneProportion = paneProportion;
+      pane1Flex = (fractionBase * paneProportion).toInt();
+      pane2Flex = fractionBase - pane1Flex;
       _pane1 = pane1;
       _pane2 = pane2;
       _delimiter = Container();
-    } else if (seam.width < seam.height) {
-      // Seam is tall. Panels are one left and one right
-      _direction = Axis.horizontal;
-      _delimiter = Container(width: seam.size.width);
-      _paneProportion = seam.left / (size.width - seam.width);
     } else {
-      // Seam is wide. Panels are one above and one below
-      _direction = Axis.vertical;
-      _delimiter = Container(height: seam.size.height);
-      _paneProportion = seam.top / (size.height - seam.height);
+      // The display has a seam that splits it in two panels.
+      // final EdgeInsets padding = this.padding;
+      final Size size = Size(
+          mediaQuery.size.width - padding.horizontal,
+          mediaQuery.size.height - padding.vertical);
+      final Rect seam = displayFeature.bounds.translate(-padding.left, -padding.top);
+
+      if (seam.width < seam.height) {
+        // Seam is tall. Panels are left and right.
+        _direction = Axis.horizontal;
+        _delimiter = Container(width: seam.size.width);
+        assert(textDirection != null);
+        final int leftPane = (seam.left * fractionBase).toInt();
+        final int rightPane = ((size.width - seam.right) * fractionBase).toInt();
+        if (textDirection == TextDirection.ltr) {
+          pane1Flex = leftPane;
+          pane2Flex = rightPane;
+        } else {
+          pane1Flex = rightPane;
+          pane2Flex = leftPane;
+        }
+      } else {
+        // Seam is wide. Panels are above and below.
+        _direction = Axis.vertical;
+        _delimiter = Container(height: seam.size.height);
+        final int topPane = (seam.top * fractionBase).toInt();
+        final int bottomPane = ((size.height - seam.bottom) * fractionBase).toInt();
+        if (verticalDirection == VerticalDirection.down) {
+          pane1Flex = topPane;
+          pane2Flex = bottomPane;
+        } else {
+          pane1Flex = bottomPane;
+          pane2Flex = topPane;
+        }
+      }
     }
 
-    if (_direction == Axis.vertical) {
+    if (mediaQuery==null || panePriority != TwoPanePriority.both) {
+      _pane1 = pane1;
+      _pane2 = pane2;
+    } else if (_direction == Axis.vertical) {
+      final bool pane1Top = verticalDirection == VerticalDirection.down;
       _pane1 = MediaQuery(
-        data: mediaQuery.copyWith(
-          padding: mediaQuery.padding.copyWith(bottom: 0),
-          viewPadding: mediaQuery.viewPadding.copyWith(bottom: 0),
-          viewInsets: mediaQuery.viewInsets.copyWith(bottom: 0),
-          systemGestureInsets:
-          mediaQuery.systemGestureInsets.copyWith(bottom: 0),
+        data: _removeMediaQueryPaddingAndInset(
+          mediaQuery: mediaQuery,
+          removeBottom: pane1Top,
+          removeTop: !pane1Top,
         ),
         child: pane1,
       );
       _pane2 = MediaQuery(
-        data: mediaQuery.copyWith(
-          padding: mediaQuery.padding.copyWith(top: 0),
-          viewPadding: mediaQuery.viewPadding.copyWith(top: 0),
-          viewInsets: mediaQuery.viewInsets.copyWith(top: 0),
-          systemGestureInsets: mediaQuery.systemGestureInsets.copyWith(top: 0),
+        data: _removeMediaQueryPaddingAndInset(
+          mediaQuery: mediaQuery,
+          removeBottom: !pane1Top,
+          removeTop: pane1Top,
         ),
         child: pane2,
       );
     } else {
+      final TextDirection? textDirection = _textDirection(context);
+      assert(textDirection != null);
+      final bool pane1Left = textDirection == TextDirection.ltr;
       _pane1 = MediaQuery(
-        data: mediaQuery.copyWith(
-          padding: mediaQuery.padding.copyWith(right: 0),
-          viewPadding: mediaQuery.viewPadding.copyWith(right: 0),
-          viewInsets: mediaQuery.viewInsets.copyWith(right: 0),
-          systemGestureInsets:
-          mediaQuery.systemGestureInsets.copyWith(right: 0),
+        data: _removeMediaQueryPaddingAndInset(
+          mediaQuery: mediaQuery,
+          removeRight: pane1Left,
+          removeLeft: !pane1Left,
         ),
         child: pane1,
       );
       _pane2 = MediaQuery(
-        data: mediaQuery.copyWith(
-          padding: mediaQuery.padding.copyWith(left: 0),
-          viewPadding: mediaQuery.viewPadding.copyWith(left: 0),
-          viewInsets: mediaQuery.viewInsets.copyWith(left: 0),
-          systemGestureInsets: mediaQuery.systemGestureInsets.copyWith(left: 0),
+        data: _removeMediaQueryPaddingAndInset(
+          mediaQuery: mediaQuery,
+          removeRight: !pane1Left,
+          removeLeft: pane1Left,
         ),
         child: pane2,
       );
     }
 
-    const int fractionBase = 1000000;
+    // const int fractionBase = 1000000000000000000;
+    // final int pane1Flex = (fractionBase * _paneProportion).toInt();
+    // final int pane2Flex = fractionBase - pane1Flex;
+
     return Flex(
       children: <Widget>[
         if (panePriority != TwoPanePriority.pane2)
           Expanded(
-            flex: (fractionBase * _paneProportion).toInt(),
+            flex: pane1Flex,
             child: _pane1,
           ),
         if (panePriority == TwoPanePriority.both)
           _delimiter,
         if (panePriority != TwoPanePriority.pane1)
           Expanded(
-            flex: (fractionBase * (1 - _paneProportion)).toInt(),
+            flex: pane2Flex,
             child: _pane2,
           ),
       ],
@@ -214,24 +241,67 @@ class TwoPane extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       textDirection: _textDirection(context),
       verticalDirection: verticalDirection,
+      mainAxisAlignment: panePriority != TwoPanePriority.both
+          ? MainAxisAlignment.center
+          : MainAxisAlignment.start,
     );
   }
 
-  DisplayFeature? _separatingDisplayFeature(MediaQueryData mediaQuery) {
-    for (final DisplayFeature displayFeature in mediaQuery.displayFeatures) {
-      final bool largeEnough = displayFeature.bounds.width >=
-          mediaQuery.size.width ||
-          displayFeature.bounds.height >= mediaQuery.size.height;
-      final bool makesTwoVerticalAreas = displayFeature.bounds.top > 0 &&
-          displayFeature.bounds.bottom < mediaQuery.size.height;
-      final bool makesTwoHorizontalAreas = displayFeature.bounds.left > 0 &&
-          displayFeature.bounds.right < mediaQuery.size.width;
-      final bool makesTwoAreas = makesTwoHorizontalAreas || makesTwoVerticalAreas;
-      if (largeEnough && makesTwoAreas) {
-        return displayFeature;
+  DisplayFeature? _separatingDisplayFeature(MediaQueryData? mediaQuery) {
+    if (mediaQuery == null) {
+      return null;
+    } else {
+      for (final DisplayFeature displayFeature in mediaQuery.displayFeatures) {
+        final bool largeEnough = displayFeature.bounds.width >=
+            mediaQuery.size.width ||
+            displayFeature.bounds.height >= mediaQuery.size.height;
+        final bool makesTwoVerticalAreas = displayFeature.bounds.top > 0 &&
+            displayFeature.bounds.bottom < mediaQuery.size.height;
+        final bool makesTwoHorizontalAreas = displayFeature.bounds.left > 0 &&
+            displayFeature.bounds.right < mediaQuery.size.width;
+        final bool makesTwoAreas = makesTwoHorizontalAreas ||
+            makesTwoVerticalAreas;
+        if (largeEnough && makesTwoAreas) {
+          return displayFeature;
+        }
       }
+      return null;
     }
-    return null;
+  }
+
+  MediaQueryData _removeMediaQueryPaddingAndInset({
+    required MediaQueryData mediaQuery,
+    bool removeLeft = false,
+    bool removeTop = false,
+    bool removeRight = false,
+    bool removeBottom = false,
+  }){
+    return mediaQuery.copyWith(
+      padding: mediaQuery.padding.copyWith(
+        left: removeLeft ? 0.0 : null,
+        top: removeTop ? 0.0 : null,
+        right: removeRight ? 0.0 : null,
+        bottom: removeBottom ? 0.0 : null,
+      ),
+      viewPadding: mediaQuery.viewPadding.copyWith(
+        left: removeLeft ? 0.0 : null,
+        top: removeTop ? 0.0 : null,
+        right: removeRight ? 0.0 : null,
+        bottom: removeBottom ? 0.0 : null,
+      ),
+      viewInsets: mediaQuery.viewInsets.copyWith(
+        left: removeLeft ? 0.0 : null,
+        top: removeTop ? 0.0 : null,
+        right: removeRight ? 0.0 : null,
+        bottom: removeBottom ? 0.0 : null,
+      ),
+      systemGestureInsets: mediaQuery.systemGestureInsets.copyWith(
+        left: removeLeft ? 0.0 : null,
+        top: removeTop ? 0.0 : null,
+        right: removeRight ? 0.0 : null,
+        bottom: removeBottom ? 0.0 : null,
+      ),
+    );
   }
 }
 

@@ -1049,7 +1049,7 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 ///  * [Dialog], on which [SimpleDialog] and [AlertDialog] are based.
 ///  * [showCupertinoDialog], which displays an iOS-style dialog.
 ///  * [showGeneralDialog], which allows for customization of the dialog popup.
-///  * [AvoidDisplayFeatures], which is used for avoiding [DisplayFeature]s when
+///  * [DisplayFeatureSubScreen], which is used for avoiding [DisplayFeature]s when
 ///    displaying the dialog.
 ///  * <https://material.io/design/components/dialogs.html>
 Future<T?> showDialog<T>({
@@ -1138,7 +1138,7 @@ Future<T?> showDialog<T>({
 ///  * [showDialog], which is a way to display a DialogRoute.
 ///  * [showGeneralDialog], which allows for customization of the dialog popup.
 ///  * [showCupertinoDialog], which displays an iOS-style dialog.
-///  * [AvoidDisplayFeatures], which is used for avoiding [DisplayFeature]s when
+///  * [DisplayFeatureSubScreen], which is used for avoiding [DisplayFeature]s when
 ///    displaying the dialog.
 class DialogRoute<T> extends RawDialogRoute<T> {
   /// A dialog route with Material entrance and exit animations,
