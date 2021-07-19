@@ -14,7 +14,7 @@ import 'android_studio.dart';
 const String _androidStudioTitle = 'Android Studio';
 const String _androidStudioId = 'AndroidStudio';
 const String _androidStudioPreviewTitle = 'Android Studio Preview';
-const String _androidStudioPreviewStudioId = 'AndroidStudioPreview';
+const String _androidStudioPreviewId = 'AndroidStudioPreview';
 
 class AndroidStudioValidator extends DoctorValidator {
   AndroidStudioValidator(this._studio, { required FileSystem fileSystem })
@@ -26,7 +26,7 @@ class AndroidStudioValidator extends DoctorValidator {
 
   static const Map<String, String> idToTitle = <String, String>{
     _androidStudioId: _androidStudioTitle,
-    _androidStudioPreviewStudioId: _androidStudioPreviewTitle,
+    _androidStudioPreviewId: _androidStudioPreviewTitle,
   };
 
   static List<DoctorValidator> allValidators(Config config, Platform platform, FileSystem fileSystem, UserMessages userMessages) {
