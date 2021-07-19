@@ -366,9 +366,28 @@ class TextEditingModel {
     return nextSelection;
   }
 
-  // TODO(justinmc): copy over code
-  TextSelection moveSelectionLeftByLine() {
-    return TextSelection.collapsed(offset: 0);
+  TextSelection moveSelectionLeftByLine(TextMetrics textMetrics) {
+    assert(_selection != null);
+
+    // If the previous character is the edge of a line, don't do anything.
+    final int previousPoint = TextEditingModel.previousCharacter(_selection.extentOffset, _text, true);
+    final TextSelection line = textMetrics.getLineAtOffset(_text, TextPosition(offset: previousPoint));
+    if (line.extentOffset == previousPoint) {
+      return _selection;
+    }
+
+    // When going left, we want to skip over any whitespace before the line,
+    // so we go back to the first non-whitespace before asking for the line
+    // bounds, since getLineAtOffset finds the line boundaries without
+    // including whitespace (like the newline).
+    final int startPoint = TextEditingModel.previousCharacter(_selection.extentOffset, _text, false);
+    final TextSelection selectedLine = textMetrics.getLineAtOffset(
+      _text,
+      TextPosition(offset: startPoint),
+    );
+    return TextSelection.collapsed(
+      offset: selectedLine.baseOffset,
+    );
   }
 
   /// Extend the current selection to the end of the field.

@@ -1255,7 +1255,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     assert(selection != null);
 
     if (!selectionEnabled) {
-      return moveSelectionLeftByLine(cause);
+      //return moveSelectionLeftByLine(cause);
     }
 
     // When going left, we want to skip over any whitespace before the line,
@@ -1455,7 +1455,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     assert(selection != null);
 
     if (!selectionEnabled) {
-      return moveSelectionLeftByLine(cause);
+      //return moveSelectionLeftByLine(cause);
     }
 
     final int firstOffset = math.min(selection!.baseOffset, selection!.extentOffset);
@@ -1647,37 +1647,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       return;
     }
     _cursorResetLocation -= selection!.extentOffset - nextSelection.extentOffset;
-    _setSelection(nextSelection, cause);
-  }
-
-  /// Move the current [selection] to the leftmost of the current line.
-  ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
-  ///
-  /// See also:
-  ///
-  ///   * [moveSelectionRightByLine], which is the same but in the opposite
-  ///     direction.
-  void moveSelectionLeftByLine(SelectionChangedCause cause) {
-    assert(selection != null);
-
-    // If the previous character is the edge of a line, don't do anything.
-    final int previousPoint = TextEditingModel.previousCharacter(selection!.extentOffset, _plainText, true);
-    final TextSelection line = getLineAtOffset(_plainText, TextPosition(offset: previousPoint));
-    if (line.extentOffset == previousPoint) {
-      return;
-    }
-
-    // When going left, we want to skip over any whitespace before the line,
-    // so we go back to the first non-whitespace before asking for the line
-    // bounds, since getLineAtOffset finds the line boundaries without
-    // including whitespace (like the newline).
-    final int startPoint = TextEditingModel.previousCharacter(selection!.extentOffset, _plainText, false);
-    final TextSelection selectedLine = getLineAtOffset(_plainText, TextPosition(offset: startPoint));
-    final TextSelection nextSelection = TextSelection.collapsed(
-      offset: selectedLine.baseOffset,
-    );
-
     _setSelection(nextSelection, cause);
   }
 

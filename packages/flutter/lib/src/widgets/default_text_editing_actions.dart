@@ -266,7 +266,8 @@ class _MoveSelectionUpTextAction extends TextEditingAction<MoveSelectionUpTextIn
 class _MoveSelectionLeftByLineTextAction extends TextEditingAction<MoveSelectionLeftByLineTextIntent> {
   @override
   Object? invoke(MoveSelectionLeftByLineTextIntent intent, [BuildContext? context]) {
-    textEditingActionTarget!.renderEditable.moveSelectionLeftByLine(SelectionChangedCause.keyboard);
+    print('justin move left by line');
+    textEditingActionTarget!.moveSelectionLeftByLine();
   }
 }
 

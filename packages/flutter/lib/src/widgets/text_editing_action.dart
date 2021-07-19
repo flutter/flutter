@@ -39,7 +39,12 @@ abstract class TextEditingActionTarget {
   void expandSelectionLeftByLine() {
     final TextSelection nextSelection = renderEditable.selectionEnabled
         ? textEditingModel.expandSelectionLeftByLine(renderEditable)
-        : textEditingModel.moveSelectionLeftByLine();
+        : textEditingModel.moveSelectionLeftByLine(renderEditable);
+    setSelection(nextSelection, SelectionChangedCause.keyboard);
+  }
+
+  void moveSelectionLeftByLine() {
+    final TextSelection nextSelection = textEditingModel.moveSelectionLeftByLine(renderEditable);
     setSelection(nextSelection, SelectionChangedCause.keyboard);
   }
 
