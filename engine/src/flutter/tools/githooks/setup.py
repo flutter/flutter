@@ -16,15 +16,23 @@ SRC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.pa
 FLUTTER_DIR = os.path.join(SRC_ROOT, 'flutter')
 
 
+def IsWindows():
+  os_id = sys.platform
+  return os_id.startswith('win32') or os_id.startswith('cygwin')
+
+
 def Main(argv):
+  githooks = os.path.join(FLUTTER_DIR, 'tools', 'githooks')
+  if IsWindows():
+    githooks = os.path.join(githooks, 'windows')
   result = subprocess.run([
     'git',
     'config',
     'core.hooksPath',
-    os.path.join(FLUTTER_DIR, 'tools', 'githooks'),
+    githooks,
   ], cwd=FLUTTER_DIR)
   return result.returncode
 
 
 if __name__ == '__main__':
-    sys.exit(Main(sys.argv))
+  sys.exit(Main(sys.argv))

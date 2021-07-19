@@ -23,10 +23,10 @@ class PrePushCommand extends Command<bool> {
     final Stopwatch sw = Stopwatch()..start();
     final bool verbose = globalResults!['verbose']! as bool;
     final String flutterRoot = globalResults!['flutter']! as String;
-    final List<bool> checkResults = await Future.wait<bool>(<Future<bool>>[
-      _runClangTidy(flutterRoot, verbose),
-      _runFormatter(flutterRoot, verbose),
-    ]);
+    final List<bool> checkResults = <bool>[
+      await _runClangTidy(flutterRoot, verbose),
+      await _runFormatter(flutterRoot, verbose),
+    ];
     sw.stop();
     io.stdout.writeln('pre-push checks finished in ${sw.elapsed}');
     return !checkResults.contains(false);
