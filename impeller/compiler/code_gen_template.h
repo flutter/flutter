@@ -18,8 +18,8 @@ constexpr std::string_view kReflectionHeaderTemplate =
 #include "impeller/compositor/buffer_view.h"   // nogncheck
 #include "impeller/compositor/command.h"       // nogncheck
 #include "impeller/compositor/sampler.h"       // nogncheck
+#include "impeller/compositor/shader_types.h"  // nogncheck
 #include "impeller/compositor/texture.h"       // nogncheck
-#include "impeller/shader_glue/shader_types.h" // nogncheck
 
 namespace impeller {
 
