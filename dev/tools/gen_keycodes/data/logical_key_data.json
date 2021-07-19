@@ -15,6 +15,9 @@
       ],
       "android": [
         "SPACE"
+      ],
+      "glfw": [
+        "SPACE"
       ]
     },
     "values": {
@@ -29,6 +32,9 @@
       ],
       "fuchsia": [
         77309870124
+      ],
+      "glfw": [
+        32
       ]
     }
   },
@@ -55,6 +61,9 @@
       ],
       "android": [
         "APOSTROPHE"
+      ],
+      "glfw": [
+        "APOSTROPHE"
       ]
     },
     "values": {
@@ -66,6 +75,9 @@
       ],
       "fuchsia": [
         77309870132
+      ],
+      "glfw": [
+        39
       ]
     }
   },
@@ -196,6 +208,9 @@
       ],
       "android": [
         "COMMA"
+      ],
+      "glfw": [
+        "COMMA"
       ]
     },
     "values": {
@@ -207,6 +222,9 @@
       ],
       "fuchsia": [
         77309870134
+      ],
+      "glfw": [
+        44
       ]
     }
   },
@@ -223,6 +241,9 @@
       ],
       "android": [
         "MINUS"
+      ],
+      "glfw": [
+        "MINUS"
       ]
     },
     "values": {
@@ -234,6 +255,9 @@
       ],
       "fuchsia": [
         77309870125
+      ],
+      "glfw": [
+        45
       ]
     }
   },
@@ -253,6 +277,9 @@
       ],
       "android": [
         "PERIOD"
+      ],
+      "glfw": [
+        "PERIOD"
       ]
     },
     "values": {
@@ -267,6 +294,9 @@
       ],
       "fuchsia": [
         77309870135
+      ],
+      "glfw": [
+        46
       ]
     }
   },
@@ -283,6 +313,9 @@
       ],
       "android": [
         "SLASH"
+      ],
+      "glfw": [
+        "SLASH"
       ]
     },
     "values": {
@@ -294,6 +327,9 @@
       ],
       "fuchsia": [
         77309870136
+      ],
+      "glfw": [
+        47
       ]
     }
   },
@@ -307,6 +343,9 @@
       ],
       "android": [
         "0"
+      ],
+      "glfw": [
+        "0"
       ]
     },
     "values": {
@@ -315,6 +354,9 @@
       ],
       "fuchsia": [
         77309870119
+      ],
+      "glfw": [
+        48
       ]
     }
   },
@@ -328,6 +370,9 @@
       ],
       "android": [
         "1"
+      ],
+      "glfw": [
+        "1"
       ]
     },
     "values": {
@@ -336,6 +381,9 @@
       ],
       "fuchsia": [
         77309870110
+      ],
+      "glfw": [
+        49
       ]
     }
   },
@@ -349,6 +397,9 @@
       ],
       "android": [
         "2"
+      ],
+      "glfw": [
+        "2"
       ]
     },
     "values": {
@@ -357,6 +408,9 @@
       ],
       "fuchsia": [
         77309870111
+      ],
+      "glfw": [
+        50
       ]
     }
   },
@@ -370,6 +424,9 @@
       ],
       "android": [
         "3"
+      ],
+      "glfw": [
+        "3"
       ]
     },
     "values": {
@@ -378,6 +435,9 @@
       ],
       "fuchsia": [
         77309870112
+      ],
+      "glfw": [
+        51
       ]
     }
   },
@@ -391,6 +451,9 @@
       ],
       "android": [
         "4"
+      ],
+      "glfw": [
+        "4"
       ]
     },
     "values": {
@@ -399,6 +462,9 @@
       ],
       "fuchsia": [
         77309870113
+      ],
+      "glfw": [
+        52
       ]
     }
   },
@@ -412,6 +478,9 @@
       ],
       "android": [
         "5"
+      ],
+      "glfw": [
+        "5"
       ]
     },
     "values": {
@@ -420,6 +489,9 @@
       ],
       "fuchsia": [
         77309870114
+      ],
+      "glfw": [
+        53
       ]
     }
   },
@@ -433,6 +505,9 @@
       ],
       "android": [
         "6"
+      ],
+      "glfw": [
+        "6"
       ]
     },
     "values": {
@@ -441,6 +516,9 @@
       ],
       "fuchsia": [
         77309870115
+      ],
+      "glfw": [
+        54
       ]
     }
   },
@@ -454,6 +532,9 @@
       ],
       "android": [
         "7"
+      ],
+      "glfw": [
+        "7"
       ]
     },
     "values": {
@@ -462,6 +543,9 @@
       ],
       "fuchsia": [
         77309870116
+      ],
+      "glfw": [
+        55
       ]
     }
   },
@@ -475,6 +559,9 @@
       ],
       "android": [
         "8"
+      ],
+      "glfw": [
+        "8"
       ]
     },
     "values": {
@@ -483,6 +570,9 @@
       ],
       "fuchsia": [
         77309870117
+      ],
+      "glfw": [
+        56
       ]
     }
   },
@@ -496,6 +586,9 @@
       ],
       "android": [
         "9"
+      ],
+      "glfw": [
+        "9"
       ]
     },
     "values": {
@@ -504,6 +597,9 @@
       ],
       "fuchsia": [
         77309870118
+      ],
+      "glfw": [
+        57
       ]
     }
   },
@@ -530,6 +626,9 @@
       ],
       "android": [
         "SEMICOLON"
+      ],
+      "glfw": [
+        "SEMICOLON"
       ]
     },
     "values": {
@@ -541,6 +640,9 @@
       ],
       "fuchsia": [
         77309870131
+      ],
+      "glfw": [
+        59
       ]
     }
   },
@@ -567,6 +669,9 @@
       ],
       "android": [
         "EQUALS"
+      ],
+      "glfw": [
+        "EQUAL"
       ]
     },
     "values": {
@@ -578,6 +683,9 @@
       ],
       "fuchsia": [
         77309870126
+      ],
+      "glfw": [
+        61
       ]
     }
   },
@@ -619,6 +727,266 @@
       ]
     }
   },
+  "UpperA": {
+    "name": "UpperA",
+    "value": 65,
+    "keyLabel": "A",
+    "names": {
+      "web": [
+        "UpperA"
+      ]
+    }
+  },
+  "UpperB": {
+    "name": "UpperB",
+    "value": 66,
+    "keyLabel": "B",
+    "names": {
+      "web": [
+        "UpperB"
+      ]
+    }
+  },
+  "UpperC": {
+    "name": "UpperC",
+    "value": 67,
+    "keyLabel": "C",
+    "names": {
+      "web": [
+        "UpperC"
+      ]
+    }
+  },
+  "UpperD": {
+    "name": "UpperD",
+    "value": 68,
+    "keyLabel": "D",
+    "names": {
+      "web": [
+        "UpperD"
+      ]
+    }
+  },
+  "UpperE": {
+    "name": "UpperE",
+    "value": 69,
+    "keyLabel": "E",
+    "names": {
+      "web": [
+        "UpperE"
+      ]
+    }
+  },
+  "UpperF": {
+    "name": "UpperF",
+    "value": 70,
+    "keyLabel": "F",
+    "names": {
+      "web": [
+        "UpperF"
+      ]
+    }
+  },
+  "UpperG": {
+    "name": "UpperG",
+    "value": 71,
+    "keyLabel": "G",
+    "names": {
+      "web": [
+        "UpperG"
+      ]
+    }
+  },
+  "UpperH": {
+    "name": "UpperH",
+    "value": 72,
+    "keyLabel": "H",
+    "names": {
+      "web": [
+        "UpperH"
+      ]
+    }
+  },
+  "UpperI": {
+    "name": "UpperI",
+    "value": 73,
+    "keyLabel": "I",
+    "names": {
+      "web": [
+        "UpperI"
+      ]
+    }
+  },
+  "UpperJ": {
+    "name": "UpperJ",
+    "value": 74,
+    "keyLabel": "J",
+    "names": {
+      "web": [
+        "UpperJ"
+      ]
+    }
+  },
+  "UpperK": {
+    "name": "UpperK",
+    "value": 75,
+    "keyLabel": "K",
+    "names": {
+      "web": [
+        "UpperK"
+      ]
+    }
+  },
+  "UpperL": {
+    "name": "UpperL",
+    "value": 76,
+    "keyLabel": "L",
+    "names": {
+      "web": [
+        "UpperL"
+      ]
+    }
+  },
+  "UpperM": {
+    "name": "UpperM",
+    "value": 77,
+    "keyLabel": "M",
+    "names": {
+      "web": [
+        "UpperM"
+      ]
+    }
+  },
+  "UpperN": {
+    "name": "UpperN",
+    "value": 78,
+    "keyLabel": "N",
+    "names": {
+      "web": [
+        "UpperN"
+      ]
+    }
+  },
+  "UpperO": {
+    "name": "UpperO",
+    "value": 79,
+    "keyLabel": "O",
+    "names": {
+      "web": [
+        "UpperO"
+      ]
+    }
+  },
+  "UpperP": {
+    "name": "UpperP",
+    "value": 80,
+    "keyLabel": "P",
+    "names": {
+      "web": [
+        "UpperP"
+      ]
+    }
+  },
+  "UpperQ": {
+    "name": "UpperQ",
+    "value": 81,
+    "keyLabel": "Q",
+    "names": {
+      "web": [
+        "UpperQ"
+      ]
+    }
+  },
+  "UpperR": {
+    "name": "UpperR",
+    "value": 82,
+    "keyLabel": "R",
+    "names": {
+      "web": [
+        "UpperR"
+      ]
+    }
+  },
+  "UpperS": {
+    "name": "UpperS",
+    "value": 83,
+    "keyLabel": "S",
+    "names": {
+      "web": [
+        "UpperS"
+      ]
+    }
+  },
+  "UpperT": {
+    "name": "UpperT",
+    "value": 84,
+    "keyLabel": "T",
+    "names": {
+      "web": [
+        "UpperT"
+      ]
+    }
+  },
+  "UpperU": {
+    "name": "UpperU",
+    "value": 85,
+    "keyLabel": "U",
+    "names": {
+      "web": [
+        "UpperU"
+      ]
+    }
+  },
+  "UpperV": {
+    "name": "UpperV",
+    "value": 86,
+    "keyLabel": "V",
+    "names": {
+      "web": [
+        "UpperV"
+      ]
+    }
+  },
+  "UpperW": {
+    "name": "UpperW",
+    "value": 87,
+    "keyLabel": "W",
+    "names": {
+      "web": [
+        "UpperW"
+      ]
+    }
+  },
+  "UpperX": {
+    "name": "UpperX",
+    "value": 88,
+    "keyLabel": "X",
+    "names": {
+      "web": [
+        "UpperX"
+      ]
+    }
+  },
+  "UpperY": {
+    "name": "UpperY",
+    "value": 89,
+    "keyLabel": "Y",
+    "names": {
+      "web": [
+        "UpperY"
+      ]
+    }
+  },
+  "UpperZ": {
+    "name": "UpperZ",
+    "value": 90,
+    "keyLabel": "Z",
+    "names": {
+      "web": [
+        "UpperZ"
+      ]
+    }
+  },
   "BracketLeft": {
     "name": "BracketLeft",
     "value": 91,
@@ -632,6 +1000,9 @@
       ],
       "android": [
         "LEFT_BRACKET"
+      ],
+      "glfw": [
+        "LEFT_BRACKET"
       ]
     },
     "values": {
@@ -643,6 +1014,9 @@
       ],
       "fuchsia": [
         77309870127
+      ],
+      "glfw": [
+        91
       ]
     }
   },
@@ -659,6 +1033,9 @@
       ],
       "android": [
         "BACKSLASH"
+      ],
+      "glfw": [
+        "BACKSLASH"
       ]
     },
     "values": {
@@ -670,6 +1047,9 @@
       ],
       "fuchsia": [
         77309870129
+      ],
+      "glfw": [
+        92
       ]
     }
   },
@@ -686,6 +1066,9 @@
       ],
       "android": [
         "RIGHT_BRACKET"
+      ],
+      "glfw": [
+        "RIGHT_BRACKET"
       ]
     },
     "values": {
@@ -697,6 +1080,9 @@
       ],
       "fuchsia": [
         77309870128
+      ],
+      "glfw": [
+        93
       ]
     }
   },
@@ -733,6 +1119,9 @@
       ],
       "android": [
         "GRAVE"
+      ],
+      "glfw": [
+        "GRAVE_ACCENT"
       ]
     },
     "values": {
@@ -744,552 +1133,269 @@
       ],
       "fuchsia": [
         77309870133
+      ],
+      "glfw": [
+        96
       ]
     }
   },
-  "KeyA": {
-    "name": "KeyA",
+  "LowerA": {
+    "name": "LowerA",
     "value": 97,
     "keyLabel": "a",
     "names": {
       "web": [
-        "KeyA"
-      ],
-      "android": [
-        "A"
-      ]
-    },
-    "values": {
-      "android": [
-        29
-      ],
-      "fuchsia": [
-        77309870084
+        "LowerA"
       ]
     }
   },
-  "KeyB": {
-    "name": "KeyB",
+  "LowerB": {
+    "name": "LowerB",
     "value": 98,
     "keyLabel": "b",
     "names": {
       "web": [
-        "KeyB"
-      ],
-      "android": [
-        "B"
-      ]
-    },
-    "values": {
-      "android": [
-        30
-      ],
-      "fuchsia": [
-        77309870085
+        "LowerB"
       ]
     }
   },
-  "KeyC": {
-    "name": "KeyC",
+  "LowerC": {
+    "name": "LowerC",
     "value": 99,
     "keyLabel": "c",
     "names": {
       "web": [
-        "KeyC"
-      ],
-      "android": [
-        "C"
-      ]
-    },
-    "values": {
-      "android": [
-        31
-      ],
-      "fuchsia": [
-        77309870086
+        "LowerC"
       ]
     }
   },
-  "KeyD": {
-    "name": "KeyD",
+  "LowerD": {
+    "name": "LowerD",
     "value": 100,
     "keyLabel": "d",
     "names": {
       "web": [
-        "KeyD"
-      ],
-      "android": [
-        "D"
-      ]
-    },
-    "values": {
-      "android": [
-        32
-      ],
-      "fuchsia": [
-        77309870087
+        "LowerD"
       ]
     }
   },
-  "KeyE": {
-    "name": "KeyE",
+  "LowerE": {
+    "name": "LowerE",
     "value": 101,
     "keyLabel": "e",
     "names": {
       "web": [
-        "KeyE"
-      ],
-      "android": [
-        "E"
-      ]
-    },
-    "values": {
-      "android": [
-        33
-      ],
-      "fuchsia": [
-        77309870088
+        "LowerE"
       ]
     }
   },
-  "KeyF": {
-    "name": "KeyF",
+  "LowerF": {
+    "name": "LowerF",
     "value": 102,
     "keyLabel": "f",
     "names": {
       "web": [
-        "KeyF"
-      ],
-      "android": [
-        "F"
-      ]
-    },
-    "values": {
-      "android": [
-        34
-      ],
-      "fuchsia": [
-        77309870089
+        "LowerF"
       ]
     }
   },
-  "KeyG": {
-    "name": "KeyG",
+  "LowerG": {
+    "name": "LowerG",
     "value": 103,
     "keyLabel": "g",
     "names": {
       "web": [
-        "KeyG"
-      ],
-      "android": [
-        "G"
-      ]
-    },
-    "values": {
-      "android": [
-        35
-      ],
-      "fuchsia": [
-        77309870090
+        "LowerG"
       ]
     }
   },
-  "KeyH": {
-    "name": "KeyH",
+  "LowerH": {
+    "name": "LowerH",
     "value": 104,
     "keyLabel": "h",
     "names": {
       "web": [
-        "KeyH"
-      ],
-      "android": [
-        "H"
-      ]
-    },
-    "values": {
-      "android": [
-        36
-      ],
-      "fuchsia": [
-        77309870091
+        "LowerH"
       ]
     }
   },
-  "KeyI": {
-    "name": "KeyI",
+  "LowerI": {
+    "name": "LowerI",
     "value": 105,
     "keyLabel": "i",
     "names": {
       "web": [
-        "KeyI"
-      ],
-      "android": [
-        "I"
-      ]
-    },
-    "values": {
-      "android": [
-        37
-      ],
-      "fuchsia": [
-        77309870092
+        "LowerI"
       ]
     }
   },
-  "KeyJ": {
-    "name": "KeyJ",
+  "LowerJ": {
+    "name": "LowerJ",
     "value": 106,
     "keyLabel": "j",
     "names": {
       "web": [
-        "KeyJ"
-      ],
-      "android": [
-        "J"
-      ]
-    },
-    "values": {
-      "android": [
-        38
-      ],
-      "fuchsia": [
-        77309870093
+        "LowerJ"
       ]
     }
   },
-  "KeyK": {
-    "name": "KeyK",
+  "LowerK": {
+    "name": "LowerK",
     "value": 107,
     "keyLabel": "k",
     "names": {
       "web": [
-        "KeyK"
-      ],
-      "android": [
-        "K"
-      ]
-    },
-    "values": {
-      "android": [
-        39
-      ],
-      "fuchsia": [
-        77309870094
+        "LowerK"
       ]
     }
   },
-  "KeyL": {
-    "name": "KeyL",
+  "LowerL": {
+    "name": "LowerL",
     "value": 108,
     "keyLabel": "l",
     "names": {
       "web": [
-        "KeyL"
-      ],
-      "android": [
-        "L"
-      ]
-    },
-    "values": {
-      "android": [
-        40
-      ],
-      "fuchsia": [
-        77309870095
+        "LowerL"
       ]
     }
   },
-  "KeyM": {
-    "name": "KeyM",
+  "LowerM": {
+    "name": "LowerM",
     "value": 109,
     "keyLabel": "m",
     "names": {
       "web": [
-        "KeyM"
-      ],
-      "android": [
-        "M"
-      ]
-    },
-    "values": {
-      "android": [
-        41
-      ],
-      "fuchsia": [
-        77309870096
+        "LowerM"
       ]
     }
   },
-  "KeyN": {
-    "name": "KeyN",
+  "LowerN": {
+    "name": "LowerN",
     "value": 110,
     "keyLabel": "n",
     "names": {
       "web": [
-        "KeyN"
-      ],
-      "android": [
-        "N"
-      ]
-    },
-    "values": {
-      "android": [
-        42
-      ],
-      "fuchsia": [
-        77309870097
+        "LowerN"
       ]
     }
   },
-  "KeyO": {
-    "name": "KeyO",
+  "LowerO": {
+    "name": "LowerO",
     "value": 111,
     "keyLabel": "o",
     "names": {
       "web": [
-        "KeyO"
-      ],
-      "android": [
-        "O"
-      ]
-    },
-    "values": {
-      "android": [
-        43
-      ],
-      "fuchsia": [
-        77309870098
+        "LowerO"
       ]
     }
   },
-  "KeyP": {
-    "name": "KeyP",
+  "LowerP": {
+    "name": "LowerP",
     "value": 112,
     "keyLabel": "p",
     "names": {
       "web": [
-        "KeyP"
-      ],
-      "android": [
-        "P"
-      ]
-    },
-    "values": {
-      "android": [
-        44
-      ],
-      "fuchsia": [
-        77309870099
+        "LowerP"
       ]
     }
   },
-  "KeyQ": {
-    "name": "KeyQ",
+  "LowerQ": {
+    "name": "LowerQ",
     "value": 113,
     "keyLabel": "q",
     "names": {
       "web": [
-        "KeyQ"
-      ],
-      "android": [
-        "Q"
-      ]
-    },
-    "values": {
-      "android": [
-        45
-      ],
-      "fuchsia": [
-        77309870100
+        "LowerQ"
       ]
     }
   },
-  "KeyR": {
-    "name": "KeyR",
+  "LowerR": {
+    "name": "LowerR",
     "value": 114,
     "keyLabel": "r",
     "names": {
       "web": [
-        "KeyR"
-      ],
-      "android": [
-        "R"
-      ]
-    },
-    "values": {
-      "android": [
-        46
-      ],
-      "fuchsia": [
-        77309870101
+        "LowerR"
       ]
     }
   },
-  "KeyS": {
-    "name": "KeyS",
+  "LowerS": {
+    "name": "LowerS",
     "value": 115,
     "keyLabel": "s",
     "names": {
       "web": [
-        "KeyS"
-      ],
-      "android": [
-        "S"
-      ]
-    },
-    "values": {
-      "android": [
-        47
-      ],
-      "fuchsia": [
-        77309870102
+        "LowerS"
       ]
     }
   },
-  "KeyT": {
-    "name": "KeyT",
+  "LowerT": {
+    "name": "LowerT",
     "value": 116,
     "keyLabel": "t",
     "names": {
       "web": [
-        "KeyT"
-      ],
-      "android": [
-        "T"
-      ]
-    },
-    "values": {
-      "android": [
-        48
-      ],
-      "fuchsia": [
-        77309870103
+        "LowerT"
       ]
     }
   },
-  "KeyU": {
-    "name": "KeyU",
+  "LowerU": {
+    "name": "LowerU",
     "value": 117,
     "keyLabel": "u",
     "names": {
       "web": [
-        "KeyU"
-      ],
-      "android": [
-        "U"
-      ]
-    },
-    "values": {
-      "android": [
-        49
-      ],
-      "fuchsia": [
-        77309870104
+        "LowerU"
       ]
     }
   },
-  "KeyV": {
-    "name": "KeyV",
+  "LowerV": {
+    "name": "LowerV",
     "value": 118,
     "keyLabel": "v",
     "names": {
       "web": [
-        "KeyV"
-      ],
-      "android": [
-        "V"
-      ]
-    },
-    "values": {
-      "android": [
-        50
-      ],
-      "fuchsia": [
-        77309870105
+        "LowerV"
       ]
     }
   },
-  "KeyW": {
-    "name": "KeyW",
+  "LowerW": {
+    "name": "LowerW",
     "value": 119,
     "keyLabel": "w",
     "names": {
       "web": [
-        "KeyW"
-      ],
-      "android": [
-        "W"
-      ]
-    },
-    "values": {
-      "android": [
-        51
-      ],
-      "fuchsia": [
-        77309870106
+        "LowerW"
       ]
     }
   },
-  "KeyX": {
-    "name": "KeyX",
+  "LowerX": {
+    "name": "LowerX",
     "value": 120,
     "keyLabel": "x",
     "names": {
       "web": [
-        "KeyX"
-      ],
-      "android": [
-        "X"
-      ]
-    },
-    "values": {
-      "android": [
-        52
-      ],
-      "fuchsia": [
-        77309870107
+        "LowerX"
       ]
     }
   },
-  "KeyY": {
-    "name": "KeyY",
+  "LowerY": {
+    "name": "LowerY",
     "value": 121,
     "keyLabel": "y",
     "names": {
       "web": [
-        "KeyY"
-      ],
-      "android": [
-        "Y"
-      ]
-    },
-    "values": {
-      "android": [
-        53
-      ],
-      "fuchsia": [
-        77309870108
+        "LowerY"
       ]
     }
   },
-  "KeyZ": {
-    "name": "KeyZ",
+  "LowerZ": {
+    "name": "LowerZ",
     "value": 122,
     "keyLabel": "z",
     "names": {
       "web": [
-        "KeyZ"
-      ],
-      "android": [
-        "Z"
-      ]
-    },
-    "values": {
-      "android": [
-        54
-      ],
-      "fuchsia": [
-        77309870109
+        "LowerZ"
       ]
     }
   },
@@ -1364,6 +1470,9 @@
       ],
       "android": [
         "DEL"
+      ],
+      "glfw": [
+        "BACKSPACE"
       ]
     },
     "values": {
@@ -1384,6 +1493,9 @@
       ],
       "fuchsia": [
         77309870122
+      ],
+      "glfw": [
+        259
       ]
     }
   },
@@ -1411,6 +1523,9 @@
       ],
       "android": [
         "TAB"
+      ],
+      "glfw": [
+        "TAB"
       ]
     },
     "values": {
@@ -1433,6 +1548,9 @@
       ],
       "fuchsia": [
         77309870123
+      ],
+      "glfw": [
+        258
       ]
     }
   },
@@ -1460,6 +1578,9 @@
       ],
       "android": [
         "ENTER"
+      ],
+      "glfw": [
+        "ENTER"
       ]
     },
     "values": {
@@ -1482,6 +1603,9 @@
       ],
       "fuchsia": [
         77309870120
+      ],
+      "glfw": [
+        257
       ]
     }
   },
@@ -1507,6 +1631,9 @@
       ],
       "android": [
         "ESCAPE"
+      ],
+      "glfw": [
+        "ESCAPE"
       ]
     },
     "values": {
@@ -1527,6 +1654,9 @@
       ],
       "fuchsia": [
         77309870121
+      ],
+      "glfw": [
+        256
       ]
     }
   },
@@ -1552,6 +1682,9 @@
       ],
       "android": [
         "FORWARD_DEL"
+      ],
+      "glfw": [
+        "DELETE"
       ]
     },
     "values": {
@@ -1572,6 +1705,9 @@
       ],
       "fuchsia": [
         77309870156
+      ],
+      "glfw": [
+        261
       ]
     }
   },
@@ -1614,6 +1750,9 @@
       ],
       "android": [
         "CAPS_LOCK"
+      ],
+      "glfw": [
+        "CAPS_LOCK"
       ]
     },
     "values": {
@@ -1634,6 +1773,9 @@
       ],
       "fuchsia": [
         77309870137
+      ],
+      "glfw": [
+        280
       ]
     }
   },
@@ -1720,6 +1862,9 @@
       ],
       "android": [
         "NUM_LOCK"
+      ],
+      "glfw": [
+        "NUM_LOCK"
       ]
     },
     "values": {
@@ -1740,6 +1885,9 @@
       ],
       "fuchsia": [
         77309870163
+      ],
+      "glfw": [
+        282
       ]
     }
   },
@@ -1853,6 +2001,9 @@
       ],
       "android": [
         "DPAD_DOWN"
+      ],
+      "glfw": [
+        "DOWN"
       ]
     },
     "values": {
@@ -1873,6 +2024,9 @@
       ],
       "fuchsia": [
         77309870161
+      ],
+      "glfw": [
+        264
       ]
     }
   },
@@ -1897,6 +2051,9 @@
       ],
       "android": [
         "DPAD_LEFT"
+      ],
+      "glfw": [
+        "LEFT"
       ]
     },
     "values": {
@@ -1917,6 +2074,9 @@
       ],
       "fuchsia": [
         77309870160
+      ],
+      "glfw": [
+        263
       ]
     }
   },
@@ -1941,6 +2101,9 @@
       ],
       "android": [
         "DPAD_RIGHT"
+      ],
+      "glfw": [
+        "RIGHT"
       ]
     },
     "values": {
@@ -1961,6 +2124,9 @@
       ],
       "fuchsia": [
         77309870159
+      ],
+      "glfw": [
+        262
       ]
     }
   },
@@ -1985,6 +2151,9 @@
       ],
       "android": [
         "DPAD_UP"
+      ],
+      "glfw": [
+        "UP"
       ]
     },
     "values": {
@@ -2005,6 +2174,9 @@
       ],
       "fuchsia": [
         77309870162
+      ],
+      "glfw": [
+        265
       ]
     }
   },
@@ -2029,6 +2201,9 @@
       ],
       "android": [
         "MOVE_END"
+      ],
+      "glfw": [
+        "END"
       ]
     },
     "values": {
@@ -2049,6 +2224,9 @@
       ],
       "fuchsia": [
         77309870157
+      ],
+      "glfw": [
+        269
       ]
     }
   },
@@ -2073,6 +2251,9 @@
       ],
       "android": [
         "MOVE_HOME"
+      ],
+      "glfw": [
+        "HOME"
       ]
     },
     "values": {
@@ -2093,6 +2274,9 @@
       ],
       "fuchsia": [
         77309870154
+      ],
+      "glfw": [
+        268
       ]
     }
   },
@@ -2117,6 +2301,9 @@
       ],
       "android": [
         "PAGE_DOWN"
+      ],
+      "glfw": [
+        "PAGE_DOWN"
       ]
     },
     "values": {
@@ -2137,6 +2324,9 @@
       ],
       "fuchsia": [
         77309870158
+      ],
+      "glfw": [
+        267
       ]
     }
   },
@@ -2161,6 +2351,9 @@
       ],
       "android": [
         "PAGE_UP"
+      ],
+      "glfw": [
+        "PAGE_UP"
       ]
     },
     "values": {
@@ -2181,6 +2374,9 @@
       ],
       "fuchsia": [
         77309870155
+      ],
+      "glfw": [
+        266
       ]
     }
   },
@@ -2331,6 +2527,9 @@
       ],
       "android": [
         "INSERT"
+      ],
+      "glfw": [
+        "INSERT"
       ]
     },
     "values": {
@@ -2351,6 +2550,9 @@
       ],
       "fuchsia": [
         77309870153
+      ],
+      "glfw": [
+        260
       ]
     }
   },
@@ -2518,6 +2720,9 @@
       ],
       "android": [
         "MENU"
+      ],
+      "glfw": [
+        "MENU"
       ]
     },
     "values": {
@@ -2538,6 +2743,9 @@
       ],
       "fuchsia": [
         77309870181
+      ],
+      "glfw": [
+        348
       ]
     }
   },
@@ -2631,6 +2839,9 @@
       ],
       "android": [
         "BREAK"
+      ],
+      "glfw": [
+        "PAUSE"
       ]
     },
     "values": {
@@ -2645,6 +2856,9 @@
       ],
       "fuchsia": [
         77309870152
+      ],
+      "glfw": [
+        284
       ]
     }
   },
@@ -2927,6 +3141,9 @@
       ],
       "android": [
         "SYSRQ"
+      ],
+      "glfw": [
+        "PRINT_SCREEN"
       ]
     },
     "values": {
@@ -2938,6 +3155,9 @@
       ],
       "fuchsia": [
         77309870150
+      ],
+      "glfw": [
+        283
       ]
     }
   },
@@ -3525,6 +3745,9 @@
       ],
       "android": [
         "F1"
+      ],
+      "glfw": [
+        "F1"
       ]
     },
     "values": {
@@ -3546,6 +3769,9 @@
       ],
       "fuchsia": [
         77309870138
+      ],
+      "glfw": [
+        290
       ]
     }
   },
@@ -3571,6 +3797,9 @@
       ],
       "android": [
         "F2"
+      ],
+      "glfw": [
+        "F2"
       ]
     },
     "values": {
@@ -3592,6 +3821,9 @@
       ],
       "fuchsia": [
         77309870139
+      ],
+      "glfw": [
+        291
       ]
     }
   },
@@ -3617,6 +3849,9 @@
       ],
       "android": [
         "F3"
+      ],
+      "glfw": [
+        "F3"
       ]
     },
     "values": {
@@ -3638,6 +3873,9 @@
       ],
       "fuchsia": [
         77309870140
+      ],
+      "glfw": [
+        292
       ]
     }
   },
@@ -3663,6 +3901,9 @@
       ],
       "android": [
         "F4"
+      ],
+      "glfw": [
+        "F4"
       ]
     },
     "values": {
@@ -3684,6 +3925,9 @@
       ],
       "fuchsia": [
         77309870141
+      ],
+      "glfw": [
+        293
       ]
     }
   },
@@ -3708,6 +3952,9 @@
       ],
       "android": [
         "F5"
+      ],
+      "glfw": [
+        "F5"
       ]
     },
     "values": {
@@ -3728,6 +3975,9 @@
       ],
       "fuchsia": [
         77309870142
+      ],
+      "glfw": [
+        294
       ]
     }
   },
@@ -3752,6 +4002,9 @@
       ],
       "android": [
         "F6"
+      ],
+      "glfw": [
+        "F6"
       ]
     },
     "values": {
@@ -3772,6 +4025,9 @@
       ],
       "fuchsia": [
         77309870143
+      ],
+      "glfw": [
+        295
       ]
     }
   },
@@ -3796,6 +4052,9 @@
       ],
       "android": [
         "F7"
+      ],
+      "glfw": [
+        "F7"
       ]
     },
     "values": {
@@ -3816,6 +4075,9 @@
       ],
       "fuchsia": [
         77309870144
+      ],
+      "glfw": [
+        296
       ]
     }
   },
@@ -3840,6 +4102,9 @@
       ],
       "android": [
         "F8"
+      ],
+      "glfw": [
+        "F8"
       ]
     },
     "values": {
@@ -3860,6 +4125,9 @@
       ],
       "fuchsia": [
         77309870145
+      ],
+      "glfw": [
+        297
       ]
     }
   },
@@ -3884,6 +4152,9 @@
       ],
       "android": [
         "F9"
+      ],
+      "glfw": [
+        "F9"
       ]
     },
     "values": {
@@ -3904,6 +4175,9 @@
       ],
       "fuchsia": [
         77309870146
+      ],
+      "glfw": [
+        298
       ]
     }
   },
@@ -3928,6 +4202,9 @@
       ],
       "android": [
         "F10"
+      ],
+      "glfw": [
+        "F10"
       ]
     },
     "values": {
@@ -3948,6 +4225,9 @@
       ],
       "fuchsia": [
         77309870147
+      ],
+      "glfw": [
+        299
       ]
     }
   },
@@ -3972,6 +4252,9 @@
       ],
       "android": [
         "F11"
+      ],
+      "glfw": [
+        "F11"
       ]
     },
     "values": {
@@ -3992,6 +4275,9 @@
       ],
       "fuchsia": [
         77309870148
+      ],
+      "glfw": [
+        300
       ]
     }
   },
@@ -4016,6 +4302,9 @@
       ],
       "android": [
         "F12"
+      ],
+      "glfw": [
+        "F12"
       ]
     },
     "values": {
@@ -4036,6 +4325,9 @@
       ],
       "fuchsia": [
         77309870149
+      ],
+      "glfw": [
+        301
       ]
     }
   },
@@ -4057,6 +4349,9 @@
       ],
       "windows": [
         "F13"
+      ],
+      "glfw": [
+        "F13"
       ]
     },
     "values": {
@@ -4074,6 +4369,9 @@
       ],
       "fuchsia": [
         77309870184
+      ],
+      "glfw": [
+        302
       ]
     }
   },
@@ -4095,6 +4393,9 @@
       ],
       "windows": [
         "F14"
+      ],
+      "glfw": [
+        "F14"
       ]
     },
     "values": {
@@ -4112,6 +4413,9 @@
       ],
       "fuchsia": [
         77309870185
+      ],
+      "glfw": [
+        303
       ]
     }
   },
@@ -4133,6 +4437,9 @@
       ],
       "windows": [
         "F15"
+      ],
+      "glfw": [
+        "F15"
       ]
     },
     "values": {
@@ -4150,6 +4457,9 @@
       ],
       "fuchsia": [
         77309870186
+      ],
+      "glfw": [
+        304
       ]
     }
   },
@@ -4171,6 +4481,9 @@
       ],
       "windows": [
         "F16"
+      ],
+      "glfw": [
+        "F16"
       ]
     },
     "values": {
@@ -4188,6 +4501,9 @@
       ],
       "fuchsia": [
         77309870187
+      ],
+      "glfw": [
+        305
       ]
     }
   },
@@ -4209,6 +4525,9 @@
       ],
       "windows": [
         "F17"
+      ],
+      "glfw": [
+        "F17"
       ]
     },
     "values": {
@@ -4226,6 +4545,9 @@
       ],
       "fuchsia": [
         77309870188
+      ],
+      "glfw": [
+        306
       ]
     }
   },
@@ -4247,6 +4569,9 @@
       ],
       "windows": [
         "F18"
+      ],
+      "glfw": [
+        "F18"
       ]
     },
     "values": {
@@ -4264,6 +4589,9 @@
       ],
       "fuchsia": [
         77309870189
+      ],
+      "glfw": [
+        307
       ]
     }
   },
@@ -4285,6 +4613,9 @@
       ],
       "windows": [
         "F19"
+      ],
+      "glfw": [
+        "F19"
       ]
     },
     "values": {
@@ -4302,6 +4633,9 @@
       ],
       "fuchsia": [
         77309870190
+      ],
+      "glfw": [
+        308
       ]
     }
   },
@@ -4323,6 +4657,9 @@
       ],
       "windows": [
         "F20"
+      ],
+      "glfw": [
+        "F20"
       ]
     },
     "values": {
@@ -4340,6 +4677,9 @@
       ],
       "fuchsia": [
         77309870191
+      ],
+      "glfw": [
+        309
       ]
     }
   },
@@ -4355,6 +4695,9 @@
       ],
       "windows": [
         "F21"
+      ],
+      "glfw": [
+        "F21"
       ]
     },
     "values": {
@@ -4366,6 +4709,9 @@
       ],
       "fuchsia": [
         77309870192
+      ],
+      "glfw": [
+        310
       ]
     }
   },
@@ -4381,6 +4727,9 @@
       ],
       "windows": [
         "F22"
+      ],
+      "glfw": [
+        "F22"
       ]
     },
     "values": {
@@ -4392,6 +4741,9 @@
       ],
       "fuchsia": [
         77309870193
+      ],
+      "glfw": [
+        311
       ]
     }
   },
@@ -4407,6 +4759,9 @@
       ],
       "windows": [
         "F23"
+      ],
+      "glfw": [
+        "F23"
       ]
     },
     "values": {
@@ -4418,6 +4773,9 @@
       ],
       "fuchsia": [
         77309870194
+      ],
+      "glfw": [
+        312
       ]
     }
   },
@@ -7626,6 +7984,9 @@
       ],
       "android": [
         "CTRL_LEFT"
+      ],
+      "glfw": [
+        "LEFT_CONTROL"
       ]
     },
     "values": {
@@ -7647,6 +8008,9 @@
       ],
       "fuchsia": [
         77309870304
+      ],
+      "glfw": [
+        341
       ]
     }
   },
@@ -7671,6 +8035,9 @@
       ],
       "android": [
         "CTRL_RIGHT"
+      ],
+      "glfw": [
+        "RIGHT_CONTROL"
       ]
     },
     "values": {
@@ -7691,6 +8058,9 @@
       ],
       "fuchsia": [
         77309870308
+      ],
+      "glfw": [
+        345
       ]
     }
   },
@@ -7716,6 +8086,9 @@
       ],
       "android": [
         "SHIFT_LEFT"
+      ],
+      "glfw": [
+        "LEFT_SHIFT"
       ]
     },
     "values": {
@@ -7737,6 +8110,9 @@
       ],
       "fuchsia": [
         77309870305
+      ],
+      "glfw": [
+        340
       ]
     }
   },
@@ -7761,6 +8137,9 @@
       ],
       "android": [
         "SHIFT_RIGHT"
+      ],
+      "glfw": [
+        "RIGHT_SHIFT"
       ]
     },
     "values": {
@@ -7781,6 +8160,9 @@
       ],
       "fuchsia": [
         77309870309
+      ],
+      "glfw": [
+        344
       ]
     }
   },
@@ -7805,6 +8187,9 @@
       ],
       "android": [
         "ALT_LEFT"
+      ],
+      "glfw": [
+        "LEFT_ALT"
       ]
     },
     "values": {
@@ -7825,6 +8210,9 @@
       ],
       "fuchsia": [
         77309870306
+      ],
+      "glfw": [
+        342
       ]
     }
   },
@@ -7850,6 +8238,9 @@
       ],
       "android": [
         "ALT_RIGHT"
+      ],
+      "glfw": [
+        "RIGHT_ALT"
       ]
     },
     "values": {
@@ -7871,6 +8262,9 @@
       ],
       "fuchsia": [
         77309870310
+      ],
+      "glfw": [
+        346
       ]
     }
   },
@@ -7895,6 +8289,9 @@
       ],
       "android": [
         "META_LEFT"
+      ],
+      "glfw": [
+        "LEFT_SUPER"
       ]
     },
     "values": {
@@ -7915,6 +8312,9 @@
       ],
       "fuchsia": [
         77309870307
+      ],
+      "glfw": [
+        343
       ]
     }
   },
@@ -7939,6 +8339,9 @@
       ],
       "android": [
         "META_RIGHT"
+      ],
+      "glfw": [
+        "RIGHT_SUPER"
       ]
     },
     "values": {
@@ -7959,6 +8362,9 @@
       ],
       "fuchsia": [
         77309870311
+      ],
+      "glfw": [
+        347
       ]
     }
   },
@@ -8016,6 +8422,9 @@
       ],
       "android": [
         "NUMPAD_ENTER"
+      ],
+      "glfw": [
+        "KP_ENTER"
       ]
     },
     "values": {
@@ -8033,6 +8442,9 @@
       ],
       "fuchsia": [
         77309870168
+      ],
+      "glfw": [
+        335
       ]
     }
   },
@@ -8097,6 +8509,9 @@
       ],
       "android": [
         "NUMPAD_MULTIPLY"
+      ],
+      "glfw": [
+        "KP_MULTIPLY"
       ]
     },
     "values": {
@@ -8117,6 +8532,9 @@
       ],
       "fuchsia": [
         77309870165
+      ],
+      "glfw": [
+        332
       ]
     }
   },
@@ -8141,6 +8559,9 @@
       ],
       "android": [
         "NUMPAD_ADD"
+      ],
+      "glfw": [
+        "KP_ADD"
       ]
     },
     "values": {
@@ -8161,6 +8582,9 @@
       ],
       "fuchsia": [
         77309870167
+      ],
+      "glfw": [
+        334
       ]
     }
   },
@@ -8267,6 +8691,9 @@
       ],
       "android": [
         "NUMPAD_DOT"
+      ],
+      "glfw": [
+        "KP_DECIMAL"
       ]
     },
     "values": {
@@ -8287,6 +8714,9 @@
       ],
       "fuchsia": [
         77309870179
+      ],
+      "glfw": [
+        330
       ]
     }
   },
@@ -8311,6 +8741,9 @@
       ],
       "android": [
         "NUMPAD_DIVIDE"
+      ],
+      "glfw": [
+        "KP_DIVIDE"
       ]
     },
     "values": {
@@ -8331,6 +8764,9 @@
       ],
       "fuchsia": [
         77309870164
+      ],
+      "glfw": [
+        331
       ]
     }
   },
@@ -8356,6 +8792,9 @@
       ],
       "android": [
         "NUMPAD_0"
+      ],
+      "glfw": [
+        "KP_0"
       ]
     },
     "values": {
@@ -8377,6 +8816,9 @@
       ],
       "fuchsia": [
         77309870178
+      ],
+      "glfw": [
+        320
       ]
     }
   },
@@ -8402,6 +8844,9 @@
       ],
       "android": [
         "NUMPAD_1"
+      ],
+      "glfw": [
+        "KP_1"
       ]
     },
     "values": {
@@ -8423,6 +8868,9 @@
       ],
       "fuchsia": [
         77309870169
+      ],
+      "glfw": [
+        321
       ]
     }
   },
@@ -8448,6 +8896,9 @@
       ],
       "android": [
         "NUMPAD_2"
+      ],
+      "glfw": [
+        "KP_2"
       ]
     },
     "values": {
@@ -8469,6 +8920,9 @@
       ],
       "fuchsia": [
         77309870170
+      ],
+      "glfw": [
+        322
       ]
     }
   },
@@ -8494,6 +8948,9 @@
       ],
       "android": [
         "NUMPAD_3"
+      ],
+      "glfw": [
+        "KP_3"
       ]
     },
     "values": {
@@ -8515,6 +8972,9 @@
       ],
       "fuchsia": [
         77309870171
+      ],
+      "glfw": [
+        323
       ]
     }
   },
@@ -8540,6 +9000,9 @@
       ],
       "android": [
         "NUMPAD_4"
+      ],
+      "glfw": [
+        "KP_4"
       ]
     },
     "values": {
@@ -8561,6 +9024,9 @@
       ],
       "fuchsia": [
         77309870172
+      ],
+      "glfw": [
+        324
       ]
     }
   },
@@ -8585,6 +9051,9 @@
       ],
       "android": [
         "NUMPAD_5"
+      ],
+      "glfw": [
+        "KP_5"
       ]
     },
     "values": {
@@ -8605,6 +9074,9 @@
       ],
       "fuchsia": [
         77309870173
+      ],
+      "glfw": [
+        325
       ]
     }
   },
@@ -8630,6 +9102,9 @@
       ],
       "android": [
         "NUMPAD_6"
+      ],
+      "glfw": [
+        "KP_6"
       ]
     },
     "values": {
@@ -8651,6 +9126,9 @@
       ],
       "fuchsia": [
         77309870174
+      ],
+      "glfw": [
+        326
       ]
     }
   },
@@ -8676,6 +9154,9 @@
       ],
       "android": [
         "NUMPAD_7"
+      ],
+      "glfw": [
+        "KP_7"
       ]
     },
     "values": {
@@ -8697,6 +9178,9 @@
       ],
       "fuchsia": [
         77309870175
+      ],
+      "glfw": [
+        327
       ]
     }
   },
@@ -8722,6 +9206,9 @@
       ],
       "android": [
         "NUMPAD_8"
+      ],
+      "glfw": [
+        "KP_8"
       ]
     },
     "values": {
@@ -8743,6 +9230,9 @@
       ],
       "fuchsia": [
         77309870176
+      ],
+      "glfw": [
+        328
       ]
     }
   },
@@ -8768,6 +9258,9 @@
       ],
       "android": [
         "NUMPAD_9"
+      ],
+      "glfw": [
+        "KP_9"
       ]
     },
     "values": {
@@ -8789,6 +9282,9 @@
       ],
       "fuchsia": [
         77309870177
+      ],
+      "glfw": [
+        329
       ]
     }
   },
@@ -8813,6 +9309,9 @@
       ],
       "android": [
         "NUMPAD_EQUALS"
+      ],
+      "glfw": [
+        "KP_EQUAL"
       ]
     },
     "values": {
@@ -8833,6 +9332,9 @@
       ],
       "fuchsia": [
         77309870183
+      ],
+      "glfw": [
+        336
       ]
     }
   },

@@ -7303,7 +7303,7 @@ void main() {
 
       await sendKeys(
         tester,
-        <LogicalKeyboardKey>[singleActivator.trigger],
+        <LogicalKeyboardKey>[singleActivator.trigger as LogicalKeyboardKey],
         shortcutModifier: singleActivator.control,
         targetPlatform: defaultTargetPlatform,
       );
@@ -7607,7 +7607,7 @@ void main() {
 
       await sendKeys(
         tester,
-        <LogicalKeyboardKey>[singleActivator.trigger],
+        <LogicalKeyboardKey>[singleActivator.trigger as LogicalKeyboardKey],
         shortcutModifier: singleActivator.control,
         targetPlatform: defaultTargetPlatform,
       );

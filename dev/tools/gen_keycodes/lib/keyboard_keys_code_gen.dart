@@ -33,6 +33,13 @@ final List<MaskConstant> _maskConstants = <MaskConstant>[
   kGlfwPlane,
 ];
 
+final int _kUpperA = 'A'.codeUnitAt(0);
+
+String nthLetter(int i) {
+  assert(i >= 0 && i < 26);
+  return String.fromCharCode(_kUpperA + i);
+}
+
 class SynonymKeyInfo {
   SynonymKeyInfo(this.keys, this.name);
 
@@ -96,7 +103,28 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
         otherComments: _otherComments(entry.name),
       );
     }
+
     return lines.sortedJoin().trimRight();
+  }
+
+  String get _virtualKeyDefinitions {
+    final List<String> results = <String>[];
+    for (int i = 0; i < 26; i += 1) {
+      final String letter = nthLetter(i);
+      final String constantName = 'key$letter';
+      final int keyId = _kUpperA + i;
+      final String keys = <String>[
+        'LogicalKeyboardKey.lower$letter',
+        'LogicalKeyboardKey.upper$letter',
+      ].join(', ');
+      results.add('''
+  /// A virtual key that contains the upper case and lower case of key $letter.
+  static const LetterVirtualKeyboardKey $constantName = LetterVirtualKeyboardKey($keyId,
+      <LogicalKeyboardKey>[$keys],
+      debugName: kDebugMode ? 'Key $letter' : null);
+''');
+    }
+    return results.join('\n');
   }
 
   String? _otherComments(String name) {
@@ -168,6 +196,7 @@ ${_wrapString(constant.description)}  ///
     return <String, String>{
       'LOGICAL_KEY_MAP': _predefinedKeyCodeMap,
       'LOGICAL_KEY_DEFINITIONS': _logicalDefinitions,
+      'VIRTUAL_KEY_DEFINITIONS': _virtualKeyDefinitions,
       'LOGICAL_KEY_SYNONYMS': _logicalSynonyms,
       'LOGICAL_KEY_KEY_LABELS': _logicalKeyLabels,
       'PHYSICAL_KEY_MAP': _predefinedHidCodeMap,

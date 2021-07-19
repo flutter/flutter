@@ -508,7 +508,7 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
   ///
   /// For example, for `Control + C`, [trigger] should be
   /// [LogicalKeyboardKey.keyC].
-  final LogicalKeyboardKey trigger;
+  final VirtualKeyboardKey trigger;
 
   /// Whether either (or both) control keys should be held for [trigger] to
   /// activate the shortcut.
@@ -555,8 +555,8 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
   final bool meta;
 
   @override
-  Iterable<LogicalKeyboardKey> get triggers sync* {
-    yield trigger;
+  Iterable<LogicalKeyboardKey> get triggers {
+    return trigger.concreteKeys;
   }
 
   @override
