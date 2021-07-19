@@ -9,7 +9,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import 'actions.dart';
-import 'focus_manager.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'shortcuts.dart';
