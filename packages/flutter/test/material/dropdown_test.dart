@@ -1557,7 +1557,7 @@ void main() {
     (WidgetTester tester) async {
       final Key buttonKey = UniqueKey();
 
-      Widget build({ List<String>? items }){
+      Widget build({ List<String>? items }) {
         return buildFrame(
           items: items,
           buttonKey: buttonKey,
@@ -1579,7 +1579,7 @@ void main() {
   testWidgets('DropdownButton disabledHint is null by default', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
-    Widget build({ List<String>? items }){
+    Widget build({ List<String>? items }) {
       return buildFrame(
         items: items,
         buttonKey: buttonKey,

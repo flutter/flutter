@@ -23,7 +23,7 @@ void main() {
     PointerHoverEvent? hoverEvent;
     await tester.pumpWidget(MaterialApp(home: MouseRegion(
       child: const Text('Test'),
-      onHover: (PointerHoverEvent event){
+      onHover: (PointerHoverEvent event) {
         hoverEvent = event;
       },
     )));

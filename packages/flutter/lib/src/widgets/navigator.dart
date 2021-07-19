@@ -3363,7 +3363,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   @override
   void initState() {
     super.initState();
-    assert((){
+    assert(() {
       if (widget.pages != const <Page<dynamic>>[]) {
         // This navigator uses page API.
         if (widget.pages.isEmpty) {
@@ -3564,7 +3564,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   @override
   void didUpdateWidget(Navigator oldWidget) {
     super.didUpdateWidget(oldWidget);
-    assert((){
+    assert(() {
       if (widget.pages != const <Page<dynamic>>[]) {
         // This navigator uses page API.
         if (widget.pages.isEmpty) {
@@ -3603,7 +3603,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       _updateEffectiveObservers();
     }
     if (oldWidget.pages != widget.pages && !restorePending) {
-      assert((){
+      assert(() {
         if (widget.pages.isEmpty) {
           FlutterError.reportError(
             FlutterErrorDetails(
@@ -3626,7 +3626,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   }
 
   void _debugCheckDuplicatedPageKeys() {
-    assert((){
+    assert(() {
       final Set<Key> keyReservation = <Key>{};
       for (final Page<dynamic> page in widget.pages) {
         final LocalKey? key = page.key;
@@ -4513,7 +4513,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   }
 
   bool _debugCheckIsPagelessRoute(Route<dynamic> route) {
-    assert((){
+    assert(() {
       if (route.settings is Page) {
         FlutterError.reportError(
           FlutterErrorDetails(
