@@ -380,6 +380,7 @@ bool RenderPass::EncodeCommands(Allocator& allocator,
     }
     FML_DCHECK(command.index_count * sizeof(uint32_t) ==
                command.index_buffer.range.length);
+    // Returns void. All error checking must be done by this point.
     [pass drawIndexedPrimitives:ToMTLPrimitiveType(command.primitive_type)
                      indexCount:command.index_count
                       indexType:MTLIndexTypeUInt32
