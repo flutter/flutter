@@ -42,4 +42,17 @@ TEST_F(DartProjectTest, ProjectWithCustomPaths) {
   EXPECT_EQ(GetProjectAotLibraryPath(project), L"lib\\file.so");
 }
 
+TEST_F(DartProjectTest, DartEntrypointArguments) {
+  DartProject project(L"test");
+
+  std::vector<std::string> test_arguments = {"arg1", "arg2", "arg3"};
+  project.set_dart_entrypoint_arguments(test_arguments);
+
+  auto returned_arguments = project.dart_entrypoint_arguments();
+  EXPECT_EQ(returned_arguments.size(), 3U);
+  EXPECT_EQ(returned_arguments[0], "arg1");
+  EXPECT_EQ(returned_arguments[1], "arg2");
+  EXPECT_EQ(returned_arguments[2], "arg3");
+}
+
 }  // namespace flutter
