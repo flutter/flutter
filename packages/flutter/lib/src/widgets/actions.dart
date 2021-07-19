@@ -86,8 +86,8 @@ typedef ActionListenerCallback = void Function(Action<Intent> action);
 /// specialized widget using that widget.
 ///
 /// For instance, [TextField]'s [SelectAllTextIntent] by default selects the
-/// text it current contains, but in a US phone number widget that consists of 3
-/// different [TextField]s (area code, prefix and line number),
+/// text it currently contains, but in a US phone number widget that consists of
+/// 3 different [TextField]s (area code, prefix and line number),
 /// [SelectAllTextIntent] should instead select the text within all 3
 /// [TextField]s. The [TextField] widget maps [SelectAllTextIntent] to an
 /// overridable [Action] so the widget has a sensible default handling of that
@@ -136,7 +136,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// to allow further overriding, or to allow the [Intent] to propagate to
   /// parent widgets that also support this [Intent].
   ///
-  /// {@tool snippet --template=stateful_widget_material}
+  /// {@tool snippet --template=freeform}
   /// This sample implements a custom text input field that handles the
   /// [DeleteTextIntent] intent, as well as a US telephone number input widget
   /// that consists of multiple text fields for area code, prefix and line
@@ -149,11 +149,12 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// // [DeleteTextIntent] intent.
   /// class DigitInput extends StatefulWidget {
   ///   const DigitInput({
-  ///       required this.controller,
-  ///       required this.focusNode,
-  ///       this.maxLength,
-  ///       this.textInputAction = TextInputAction.next,
-  ///   });
+  ///     Key? key,
+  ///     required this.controller,
+  ///     required this.focusNode,
+  ///     this.maxLength,
+  ///     this.textInputAction = TextInputAction.next,
+  ///   }) : super(key: key);
   ///
   ///   final int? maxLength;
   ///   final TextEditingController controller;
@@ -183,7 +184,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   ///         textInputAction: TextInputAction.next,
   ///         keyboardType: TextInputType.phone,
   ///         focusNode: widget.focusNode,
-  ///         decoration: InputDecoration(
+  ///         decoration: const InputDecoration(
   ///           border: OutlineInputBorder(),
   ///         ),
   ///         inputFormatters: <TextInputFormatter>[
@@ -194,11 +195,18 @@ abstract class Action<T extends Intent> with Diagnosticable {
   ///     );
   ///   }
   /// }
+  /// ```
+  ///
+  /// ``` dart
+  /// class SimpleUSPhoneNumberEntry extends StatefulWidget {
+  ///   State<SimpleUSPhoneNumberEntry> createState() => _SimpleUSPhoneNumberEntryState();
+  /// }
+  ///
   ///
   /// class _DeleteDigit extends Action<DeleteTextIntent> {
   ///   _DeleteDigit(this.state);
   ///
-  ///   final SimpleUSPhoneNumberEntryState state;
+  ///   final _SimpleUSPhoneNumberEntryState state;
   ///   @override
   ///   Object? invoke(DeleteTextIntent intent) {
   ///     assert(callingAction != null);
@@ -220,32 +228,33 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// }
   /// ```
   ///
-  /// ``` dart
-  /// final FocusNode areaCodeFocusNode = FocusNode();
-  /// final TextEditingController areaCodeController = TextEditingController();
-  /// final FocusNode prefixFocusNode = FocusNode();
-  /// final TextEditingController prefixController = TextEditingController();
-  /// final FocusNode lineNumberFocusNode = FocusNode();
-  /// final TextEditingController lineNumberController = TextEditingController();
+  /// class _SimpleUSPhoneNumberEntryState extends State<SimpleUSPhoneNumberEntry> {
+  ///   final FocusNode areaCodeFocusNode = FocusNode();
+  ///   final TextEditingController areaCodeController = TextEditingController();
+  ///   final FocusNode prefixFocusNode = FocusNode();
+  ///   final TextEditingController prefixController = TextEditingController();
+  ///   final FocusNode lineNumberFocusNode = FocusNode();
+  ///   final TextEditingController lineNumberController = TextEditingController();
   ///
-  /// @override
-  /// Widget build(BuildContext context) {
-  ///   return Actions(
-  ///     actions: <Type, Action<Intent>>{
-  ///       DeleteTextIntent : _DeleteDigit(this),
-  ///     },
-  ///     child: Row(
-  ///       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  ///       children: <Widget>[
-  ///         Expanded(child: Text('(', textAlign: TextAlign.center,), flex: 1),
-  ///         Expanded(child: DigitInput(focusNode: areaCodeFocusNode, controller: areaCodeController, maxLength: 3), flex: 3),
-  ///         Expanded(child: Text(')', textAlign: TextAlign.center,), flex: 1),
-  ///         Expanded(child: DigitInput(focusNode: prefixFocusNode, controller: prefixController, maxLength: 3), flex: 3),
-  ///         Expanded(child: Text('-', textAlign: TextAlign.center,), flex: 1),
-  ///         Expanded(child: DigitInput(focusNode: lineNumberFocusNode, controller: lineNumberController, textInputAction: TextInputAction.done, maxLength: 4), flex: 4),
-  ///       ],
-  ///     ),
-  ///   );
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Actions(
+  ///       actions: <Type, Action<Intent>>{
+  ///         DeleteTextIntent : _DeleteDigit(this),
+  ///       },
+  ///       child: Row(
+  ///         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  ///         children: <Widget>[
+  ///           Expanded(child: Text('(', textAlign: TextAlign.center,), flex: 1),
+  ///           Expanded(child: DigitInput(focusNode: areaCodeFocusNode, controller: areaCodeController, maxLength: 3), flex: 3),
+  ///           Expanded(child: Text(')', textAlign: TextAlign.center,), flex: 1),
+  ///           Expanded(child: DigitInput(focusNode: prefixFocusNode, controller: prefixController, maxLength: 3), flex: 3),
+  ///           Expanded(child: Text('-', textAlign: TextAlign.center,), flex: 1),
+  ///           Expanded(child: DigitInput(focusNode: lineNumberFocusNode, controller: lineNumberController, textInputAction: TextInputAction.done, maxLength: 4), flex: 4),
+  ///         ],
+  ///       ),
+  ///     );
+  ///   }
   /// }
   /// ```
   /// {@end-tool}
@@ -320,7 +329,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
 
   /// Whether this [Action] is inherently enabled.
   ///
-  /// If [isActionEanbled] is false, then this [Action] is disabled for any
+  /// If [isActionEnabled] is false, then this [Action] is disabled for any
   /// given [Intent].
   //
   /// If the enabled state changes, overriding subclasses must call
@@ -2128,7 +2137,7 @@ class _OverridableContextAction<T extends Intent> extends ContextAction<T> with 
     // Wrap the default Action together with the calling context in case
     // overrideAction is not a ContextAction and thus have no access to the
     // calling BuildContext.
-    final Action<T> wrappedDefault = _ContextActionWrapperAction<T>(invokeContext: context!, action: defaultAction);
+    final Action<T> wrappedDefault = _ContextActionToActionAdapter<T>(invokeContext: context!, action: defaultAction);
     overrideAction._callingAction = wrappedDefault;
     final Object? returnValue = overrideAction is ContextAction<T>
       ? overrideAction.invoke(intent, context)
@@ -2158,8 +2167,8 @@ class _OverridableContextAction<T extends Intent> extends ContextAction<T> with 
   }
 }
 
-class _ContextActionWrapperAction<T extends Intent> extends Action<T> {
-  _ContextActionWrapperAction({required this.invokeContext, required this.action});
+class _ContextActionToActionAdapter<T extends Intent> extends Action<T> {
+  _ContextActionToActionAdapter({required this.invokeContext, required this.action});
 
   final BuildContext invokeContext;
   final ContextAction<T> action;
