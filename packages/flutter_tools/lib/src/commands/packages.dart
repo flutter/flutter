@@ -139,6 +139,7 @@ class PackagesGetCommand extends FlutterCommand {
         context: PubContext.pubGet,
         directory: directory,
         upgrade: upgrade,
+        shouldSkipThirdPartyGenerator: false,
         offline: boolArg('offline'),
         generateSyntheticPackage: flutterProject.manifest.generateSyntheticPackage,
       );
