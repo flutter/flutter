@@ -9,6 +9,7 @@ import 'dart:ui' as ui show Gradient, Shader, TextBox, PlaceholderAlignment, Tex
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
+import 'package:flutter/services.dart';
 
 import 'package:vector_math/vector_math_64.dart';
 
@@ -64,7 +65,7 @@ class PlaceholderSpanIndexSemanticsTag extends SemanticsTag {
 class RenderParagraph extends RenderBox
     with ContainerRenderObjectMixin<RenderBox, TextParentData>,
              RenderBoxContainerDefaultsMixin<RenderBox, TextParentData>,
-                  RelayoutWhenSystemFontsChangeMixin {
+                  RelayoutWhenSystemFontsChangeMixin implements Selectable {
   /// Creates a paragraph render object.
   ///
   /// The [text], [textAlign], [textDirection], [overflow], [softWrap], and
@@ -84,6 +85,7 @@ class RenderParagraph extends RenderBox
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
     ui.TextHeightBehavior? textHeightBehavior,
     List<RenderBox>? children,
+    SelectionService? selectionService,
   }) : assert(text != null),
        assert(text.debugAssertIsValid()),
        assert(textAlign != null),
@@ -95,6 +97,7 @@ class RenderParagraph extends RenderBox
        assert(textWidthBasis != null),
        _softWrap = softWrap,
        _overflow = overflow,
+       _selectionService = selectionService,
        _textPainter = TextPainter(
          text: text,
          textAlign: textAlign,
@@ -290,6 +293,102 @@ class RenderParagraph extends RenderBox
     _textPainter.textHeightBehavior = value;
     _overflowShader = null;
     markNeedsLayout();
+  }
+
+
+  /// The selection service to enable text selection, or `null` if text selection
+  /// is disabled.
+  SelectionService? get selectionService => _selectionService;
+  SelectionService? _selectionService;
+  set selectionService(SelectionService? value) {
+    if (value == selectionService)
+      return;
+    selectionService?.remove(this);
+    _selectionService = value;
+    selectionService?.add(this);
+  }
+
+  TextSelection? _textSelection;
+
+  /// Clear the current text selection, but only mark for a paint if it has
+  /// been set to a non-null value.
+  void _clearSelection() {
+    if (_textSelection != null)
+      markNeedsPaint();
+    _textSelection = null;
+  }
+
+  @override
+  String? copy() {
+    final TextSelection? textSelection = _textSelection;
+    if (textSelection == null)
+      return null;
+
+    final String plainText = text.toPlainText(includePlaceholders: true, includeSemanticsLabels: false);
+    return plainText.substring(textSelection.start, textSelection.end);
+  }
+
+  @override
+  void clear() {
+    if (_textSelection == null)
+      return;
+
+    _textSelection = null;
+    markNeedsPaint();
+  }
+
+   @override
+  bool update(Rect rect) {
+    if (!hasSize) {
+      return false;
+    }
+    final Rect boundingRect = Rect.fromLTWH(0, 0, size.width, size.height);
+    // This RO has not been laid out yet, it can't be selected.
+    if (boundingRect == null) {
+      _clearSelection();
+      return false;
+    }
+    if (rect.isInfinite) {
+      _textSelection = TextSelection(baseOffset: 0, extentOffset: getPositionForOffset(Offset.infinite).offset);
+      markNeedsPaint();
+      return true;
+    }
+    final Matrix4 transform = getTransformTo(null);
+    transform.invert();
+    Rect selectionRect = MatrixUtils.transformRect(transform, rect);
+    final Rect intersection = boundingRect.intersect(selectionRect);
+    // If width or height are negative, there is no overlap between
+    // the selection rect and the estimated bounds of this RO.
+    if (intersection.width < 0 || intersection.height < 0) {
+      _clearSelection();
+      return false;
+    }
+    // If the selection entirely clears the bounding box, expand it to the maximum width.
+    if (selectionRect.top < boundingRect.top && selectionRect.bottom > boundingRect.bottom)
+      selectionRect = Rect.fromLTRB(
+        math.min(selectionRect.left, boundingRect.left),
+        selectionRect.top,
+        math.max(selectionRect.right, boundingRect.right),
+        selectionRect.bottom,
+      );
+    TextPosition startText;
+    TextPosition endText;
+    switch (textDirection) {
+      case TextDirection.rtl:
+        startText = getPositionForOffset(selectionRect.topRight);
+        endText = getPositionForOffset(selectionRect.bottomLeft);
+        break;
+      case TextDirection.ltr:
+        startText = getPositionForOffset(selectionRect.topLeft);
+        endText = getPositionForOffset(selectionRect.bottomRight);
+        break;
+    }
+    if (startText == endText) {
+      return false;
+    }
+    _textSelection = TextSelection(baseOffset: startText.offset, extentOffset: endText.offset);
+    markNeedsPaint();
+    return true;
   }
 
   @override
@@ -695,6 +794,10 @@ class RenderParagraph extends RenderBox
     }
   }
 
+  static final Paint _selectionPaint = Paint()
+    ..style = PaintingStyle.fill
+    ..color = const Color(0xAF6694e8);
+
   @override
   void paint(PaintingContext context, Offset offset) {
     // Ideally we could compute the min/max intrinsic width/height with a
@@ -764,6 +867,13 @@ class RenderParagraph extends RenderBox
         context.canvas.drawRect(Offset.zero & size, paint);
       }
       context.canvas.restore();
+    }
+    final TextSelection? textSelection = _textSelection;
+    if (textSelection != null) {
+      for (final TextBox textBox in getBoxesForSelection(textSelection)) {
+        context.canvas.drawRect(
+          textBox.toRect().shift(offset), _selectionPaint);
+      }
     }
   }
 
@@ -975,6 +1085,18 @@ class RenderParagraph extends RenderBox
   void clearSemantics() {
     super.clearSemantics();
     _cachedChildNodes = null;
+  }
+
+  @override
+  void detach() {
+    selectionService?.remove(this);
+    super.detach();
+  }
+
+  @override
+  void attach(covariant PipelineOwner owner) {
+    selectionService?.add(this);
+    super.attach(owner);
   }
 
   @override

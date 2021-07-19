@@ -5805,6 +5805,7 @@ class RichText extends MultiChildRenderObjectWidget {
     this.strutStyle,
     this.textWidthBasis = TextWidthBasis.parent,
     this.textHeightBehavior,
+    this.selectionService,
   }) : assert(text != null),
        assert(textAlign != null),
        assert(softWrap != null),
@@ -5836,6 +5837,10 @@ class RichText extends MultiChildRenderObjectWidget {
 
   /// How the text should be aligned horizontally.
   final TextAlign textAlign;
+
+  /// The selection service used for text selection, or `null` if selection is not
+  /// enabled.
+  final SelectionService? selectionService;
 
   /// The directionality of the text.
   ///
@@ -5907,6 +5912,7 @@ class RichText extends MultiChildRenderObjectWidget {
       textWidthBasis: textWidthBasis,
       textHeightBehavior: textHeightBehavior,
       locale: locale ?? Localizations.maybeLocaleOf(context),
+      selectionService: selectionService,
     );
   }
 
@@ -5924,6 +5930,7 @@ class RichText extends MultiChildRenderObjectWidget {
       ..strutStyle = strutStyle
       ..textWidthBasis = textWidthBasis
       ..textHeightBehavior = textHeightBehavior
+      ..selectionService = selectionService
       ..locale = locale ?? Localizations.maybeLocaleOf(context);
   }
 
