@@ -198,7 +198,7 @@ class _DefaultPub implements Pub {
           packageConfigFile.readAsStringSync(),
         ) as Map<String, Object?>;
       } on FormatException {
-        packageConfigMap = <Object?, Object?>{};
+        packageConfigMap = <String, Object?>{};
       }
 
       final bool isPackageConfigGeneratedByThirdParty =
