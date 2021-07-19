@@ -1595,6 +1595,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   // Start TextEditingActionTarget.
 
+  @override
+  bool get readOnly => widget.readOnly;
+
   // TODO(justinmc): Document. Cache.
   @override
   TextEditingModel get textEditingModel {
@@ -1621,7 +1624,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       );
     }
     _handleSelectionChange(nextSelection, cause);
-    _setTextEditingValue(
+    setTextEditingValue(
       textEditingValue.copyWith(selection: nextSelection),
       cause,
     );
@@ -1644,7 +1647,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     widget.onSelectionChanged?.call(nextSelection, cause);
   }
 
-  void _setTextEditingValue(TextEditingValue newValue, SelectionChangedCause cause) {
+  // TODO(justinmc): Document.
+  void setTextEditingValue(TextEditingValue newValue, SelectionChangedCause cause) {
     textEditingValue = newValue;
     userUpdateTextEditingValue(newValue, cause);
   }

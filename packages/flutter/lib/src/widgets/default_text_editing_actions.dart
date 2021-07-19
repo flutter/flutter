@@ -89,7 +89,7 @@ class _DoNothingAndStopPropagationTextAction extends TextEditingAction<DoNothing
 class _DeleteTextAction extends TextEditingAction<DeleteTextIntent> {
   @override
   Object? invoke(DeleteTextIntent intent, [BuildContext? context]) {
-    textEditingActionTarget!.renderEditable.delete(SelectionChangedCause.keyboard);
+    textEditingActionTarget!.delete();
   }
 }
 

@@ -408,6 +408,10 @@ class TextEditingModel {
   ///
   ///   * [deleteForward], which is same but in the opposite direction.
   TextEditingValue delete(SelectionChangedCause cause) {
+    // `delete` does not depend on the text layout, and the boundary analysis is
+    // done using the `previousCharacter` method instead of ICU, we can keep
+    // deleting without having to layout the text. For this reason, we can
+    // directly delete the character before the caret in the controller.
     if (!_selection.isValid) {
       return value;
     }

@@ -19,6 +19,9 @@ import 'framework.dart';
 ///   * [EditableTextState], which implements this and is the most typical
 ///     target of a TextEditingAction.
 abstract class TextEditingActionTarget {
+  // TODO(justinmc): Document everything in this class.
+  bool get readOnly;
+
   // TODO(justinmc): Could this be made private?
   /// The renderer that handles [TextEditingAction]s.
   ///
@@ -27,16 +30,43 @@ abstract class TextEditingActionTarget {
   /// * [EditableTextState.renderEditable], which overrides this.
   RenderEditable get renderEditable;
 
-  // TODO(justinmc): Document everything.
   TextEditingModel get textEditingModel;
 
   void setSelection(TextSelection nextState, SelectionChangedCause cause);
+
+  void setTextEditingValue(TextEditingValue newValue, SelectionChangedCause cause);
 
   void expandSelectionLeftByLine() {
     final TextSelection nextSelection = renderEditable.selectionEnabled
         ? textEditingModel.expandSelectionLeftByLine(renderEditable)
         : textEditingModel.moveSelectionLeftByLine();
     setSelection(nextSelection, SelectionChangedCause.keyboard);
+  }
+
+  /// Deletes backwards from the selection in [textSelectionDelegate].
+  ///
+  /// This method operates on the text/selection contained in
+  /// [textSelectionDelegate], and does not depend on [selection].
+  ///
+  /// If the selection is collapsed, deletes a single character before the
+  /// cursor.
+  ///
+  /// If the selection is not collapsed, deletes the selection.
+  ///
+  /// {@template flutter.rendering.RenderEditable.cause}
+  /// The given [SelectionChangedCause] indicates the cause of this change and
+  /// will be passed to [onSelectionChanged].
+  /// {@endtemplate}
+  ///
+  /// See also:
+  ///
+  ///   * [deleteForward], which is same but in the opposite direction.
+  void delete() {
+    if (readOnly) {
+      return;
+    }
+    final TextEditingValue nextValue = textEditingModel.delete(SelectionChangedCause.keyboard);
+    setTextEditingValue(nextValue, SelectionChangedCause.keyboard);
   }
 }
 
