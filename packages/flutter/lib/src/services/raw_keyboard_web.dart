@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show hashValues;
 
 import 'package:flutter/foundation.dart';
 
@@ -121,6 +122,33 @@ class RawKeyEventDataWeb extends RawKeyEventData {
     return KeyboardSide.any;
   }
 
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+        properties.add(DiagnosticsProperty<String>('code', code));
+        properties.add(DiagnosticsProperty<String>('key', key));
+        properties.add(DiagnosticsProperty<int>('metaState', metaState));
+  }
+
+  @override
+  bool operator==(Object other) {
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is RawKeyEventDataWeb
+        && other.code == code
+        && other.key == key
+        && other.metaState == metaState;
+  }
+
+  @override
+  int get hashCode => hashValues(
+    code,
+    key,
+    metaState,
+  );
+
   // Modifier key masks.
 
   /// No modifier keys are pressed in the [metaState] field.
@@ -185,10 +213,4 @@ class RawKeyEventDataWeb extends RawKeyEventData {
   /// it's much easier to use [isModifierPressed] if you just want to know if
   /// a modifier is pressed.
   static const int modifierScrollLock = 0x40;
-
-  @override
-  String toString() {
-    return '${objectRuntimeType(this, 'RawKeyEventDataWeb')}(keyLabel: $keyLabel, code: $code, '
-        'metaState: $metaState, modifiers down: $modifiersPressed)';
-  }
 }

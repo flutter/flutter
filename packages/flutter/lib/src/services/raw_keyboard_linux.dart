@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show hashValues;
 
 import 'package:flutter/foundation.dart';
 
@@ -117,11 +118,37 @@ class RawKeyEventDataLinux extends RawKeyEventData {
   }
 
   @override
-  String toString() {
-    return '${objectRuntimeType(this, 'RawKeyEventDataLinux')}(keyLabel: $keyLabel, keyCode: $keyCode, scanCode: $scanCode,'
-        ' unicodeScalarValues: $unicodeScalarValues, modifiers: $modifiers, '
-        'modifiers down: $modifiersPressed)';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+        properties.add(DiagnosticsProperty<int>('unicodeScalarValues', unicodeScalarValues));
+        properties.add(DiagnosticsProperty<int>('scanCode', scanCode));
+        properties.add(DiagnosticsProperty<int>('keyCode', keyCode));
+        properties.add(DiagnosticsProperty<int>('modifiers', modifiers));
+        properties.add(DiagnosticsProperty<bool>('isDown', isDown));
   }
+
+  @override
+  bool operator==(Object other) {
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is RawKeyEventDataLinux
+        && other.unicodeScalarValues == unicodeScalarValues
+        && other.scanCode == scanCode
+        && other.keyCode == keyCode
+        && other.modifiers == modifiers
+        && other.isDown == isDown;
+  }
+
+  @override
+  int get hashCode => hashValues(
+    unicodeScalarValues,
+    scanCode,
+    keyCode,
+    modifiers,
+    isDown,
+  );
 }
 
 /// Abstract class for window-specific key mappings.

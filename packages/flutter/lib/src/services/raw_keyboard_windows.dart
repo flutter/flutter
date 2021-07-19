@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show hashValues;
+
+import 'package:flutter/foundation.dart';
 
 import 'keyboard_key.dart';
 import 'keyboard_maps.dart';
@@ -196,6 +199,36 @@ class RawKeyEventDataWindows extends RawKeyEventData {
     // will be handled by the text input API.
     return keyCode != _vkProcessKey;
   }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<int>('keyCode', keyCode));
+    properties.add(DiagnosticsProperty<int>('scanCode', scanCode));
+    properties.add(DiagnosticsProperty<int>('characterCodePoint', characterCodePoint));
+    properties.add(DiagnosticsProperty<int>('modifiers', modifiers));
+  }
+
+  @override
+  bool operator==(Object other) {
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is RawKeyEventDataWindows
+        && other.keyCode == keyCode
+        && other.scanCode == scanCode
+        && other.characterCodePoint == characterCodePoint
+        && other.modifiers == modifiers;
+  }
+
+  @override
+  int get hashCode => hashValues(
+    keyCode,
+    scanCode,
+    characterCodePoint,
+    modifiers,
+  );
 
   // These are not the values defined by the Windows header for each modifier. Since they
   // can't be packaged into a single int, we are re-defining them here to reduce the size
