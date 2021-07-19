@@ -1654,13 +1654,13 @@ void main() {
                 builder: (BuildContext context2) {
                   return Actions(
                     actions: <Type, Action<Intent>> {
-                      LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action2', enabled: false), context: context2),
+                      LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationContextAction(actionName: 'action2', enabled: false), context: context2),
                     },
                     child: Builder(
                       builder: (BuildContext context3) {
                         return Actions(
                           actions: <Type, Action<Intent>> {
-                            LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationContextAction(actionName: 'action3'), context: context3),
+                            LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action3'), context: context3),
                           },
                           child: Builder(
                             builder: (BuildContext context4) {
@@ -1688,8 +1688,8 @@ void main() {
         'action1.invokeAsOverride-post-super',
       ]);
 
-      // Action3 is a ContextAction and action1 & action2 are regular actions.
-      // Invoking action3 from action2 should still supply a non-null
+      // Action2 is a ContextAction and action1 & action2 are regular actions.
+      // Invoking action2 from action3 should still supply a non-null
       // BuildContext.
       expect(LogInvocationContextAction.invokeContext, isNotNull);
       expect(LogInvocationContextAction.invokeContext, invokingContext);
