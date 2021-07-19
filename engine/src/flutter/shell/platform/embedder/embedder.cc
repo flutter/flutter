@@ -1221,10 +1221,10 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
         }
         return texture;
       };
+      external_texture_resolver =
+          std::make_unique<ExternalTextureResolver>(external_texture_callback);
     }
   }
-  external_texture_resolver =
-      std::make_unique<ExternalTextureResolver>(external_texture_callback);
 #endif
 #ifdef SHELL_ENABLE_METAL
   flutter::EmbedderExternalTextureMetal::ExternalTextureCallback
@@ -1244,10 +1244,10 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
         }
         return texture;
       };
+      external_texture_resolver = std::make_unique<ExternalTextureResolver>(
+          external_texture_metal_callback);
     }
   }
-  external_texture_resolver = std::make_unique<ExternalTextureResolver>(
-      external_texture_metal_callback);
 #endif
 
   auto thread_host =
