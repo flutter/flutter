@@ -2651,7 +2651,7 @@ class RenderFittedBox extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (size.isEmpty || child!.size.isEmpty)
+    if (child == null || size.isEmpty || child!.size.isEmpty)
       return;
     _updatePaintData();
     if (child != null) {
