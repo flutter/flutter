@@ -10,7 +10,7 @@ import '../base/version.dart';
 import '../convert.dart';
 import '../globals_null_migrated.dart' as globals;
 import '../ios/plist_parser.dart';
-import 'android_studio_validator.dart';
+import './android_studio_validator.dart';
 
 // Android Studio layout:
 
