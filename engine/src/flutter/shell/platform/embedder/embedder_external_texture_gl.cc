@@ -27,12 +27,12 @@ void EmbedderExternalTextureGL::Paint(SkCanvas& canvas,
                                       bool freeze,
                                       GrDirectContext* context,
                                       const SkSamplingOptions& sampling) {
-  if (auto image =
-          ResolveTexture(Id(),                                           //
-                         context,                                        //
-                         SkISize::Make(bounds.width(), bounds.height())  //
-                         )) {
-    last_image_ = image;
+  if (last_image_ == nullptr) {
+    last_image_ =
+        ResolveTexture(Id(),                                           //
+                       context,                                        //
+                       SkISize::Make(bounds.width(), bounds.height())  //
+        );
   }
 
   if (last_image_) {
@@ -102,7 +102,9 @@ void EmbedderExternalTextureGL::OnGrContextCreated() {}
 void EmbedderExternalTextureGL::OnGrContextDestroyed() {}
 
 // |flutter::Texture|
-void EmbedderExternalTextureGL::MarkNewFrameAvailable() {}
+void EmbedderExternalTextureGL::MarkNewFrameAvailable() {
+  last_image_ = nullptr;
+}
 
 // |flutter::Texture|
 void EmbedderExternalTextureGL::OnTextureUnregistered() {}

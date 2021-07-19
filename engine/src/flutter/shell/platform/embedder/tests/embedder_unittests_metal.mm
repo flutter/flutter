@@ -434,5 +434,52 @@ TEST_F(EmbedderTest, CreateInvalidBackingstoreMetalTexture) {
   latch.Wait();
 }
 
+TEST_F(EmbedderTest, ExternalTextureMetalRefreshedTooOften) {
+  EmbedderTestContextMetal& context = reinterpret_cast<EmbedderTestContextMetal&>(
+      GetEmbedderContext(EmbedderTestContextType::kMetalContext));
+
+  TestMetalContext* metal_context = context.GetTestMetalContext();
+  auto metal_texture = metal_context->CreateMetalTexture(SkISize::Make(100, 100));
+
+  std::vector<FlutterMetalTextureHandle> textures{metal_texture.texture};
+
+  bool resolve_called = false;
+
+  EmbedderExternalTextureMetal::ExternalTextureCallback callback([&](int64_t id, size_t, size_t) {
+    resolve_called = true;
+    auto res = std::make_unique<FlutterMetalExternalTexture>();
+    res->struct_size = sizeof(FlutterMetalExternalTexture);
+    res->width = res->height = 100;
+    res->pixel_format = FlutterMetalExternalTexturePixelFormat::kRGBA;
+    res->textures = textures.data();
+    res->num_textures = 1;
+    return res;
+  });
+  EmbedderExternalTextureMetal texture(1, callback);
+
+  auto surface = TestMetalSurface::Create(*metal_context, SkISize::Make(100, 100));
+  auto skia_surface = surface->GetSurface();
+  auto canvas = skia_surface->getCanvas();
+
+  Texture* texture_ = &texture;
+  texture_->Paint(*canvas, SkRect::MakeXYWH(0, 0, 100, 100), false, surface->GetGrContext().get(),
+                  SkSamplingOptions(SkFilterMode::kLinear));
+
+  EXPECT_TRUE(resolve_called);
+  resolve_called = false;
+
+  texture_->Paint(*canvas, SkRect::MakeXYWH(0, 0, 100, 100), false, surface->GetGrContext().get(),
+                  SkSamplingOptions(SkFilterMode::kLinear));
+
+  EXPECT_FALSE(resolve_called);
+
+  texture_->MarkNewFrameAvailable();
+
+  texture_->Paint(*canvas, SkRect::MakeXYWH(0, 0, 100, 100), false, surface->GetGrContext().get(),
+                  SkSamplingOptions(SkFilterMode::kLinear));
+
+  EXPECT_TRUE(resolve_called);
+}
+
 }  // namespace testing
 }  // namespace flutter

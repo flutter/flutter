@@ -36,8 +36,8 @@ void EmbedderExternalTextureMetal::Paint(SkCanvas& canvas,
                                          bool freeze,
                                          GrDirectContext* context,
                                          const SkSamplingOptions& sampling) {
-  if (auto image = ResolveTexture(Id(), context, SkISize::Make(bounds.width(), bounds.height()))) {
-    last_image_ = image;
+  if (last_image_ == nullptr) {
+    last_image_ = ResolveTexture(Id(), context, SkISize::Make(bounds.width(), bounds.height()));
   }
 
   if (last_image_) {
@@ -100,7 +100,9 @@ void EmbedderExternalTextureMetal::OnGrContextCreated() {}
 void EmbedderExternalTextureMetal::OnGrContextDestroyed() {}
 
 // |flutter::Texture|
-void EmbedderExternalTextureMetal::MarkNewFrameAvailable() {}
+void EmbedderExternalTextureMetal::MarkNewFrameAvailable() {
+  last_image_ = nullptr;
+}
 
 // |flutter::Texture|
 void EmbedderExternalTextureMetal::OnTextureUnregistered() {}
