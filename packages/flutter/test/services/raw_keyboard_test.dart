@@ -799,7 +799,7 @@ void main() {
     });
 
     test('Printable keyboard keys are correctly translated', () {
-      final RawKeyEvent keyAEvent = RawKeyEvent.fromMessage(<String, dynamic>{
+      final RawKeyEventDataAndroid lowerAData = RawKeyEvent.fromMessage(<String, dynamic>{
         'type': 'keydown',
         'keymap': 'android',
         'keyCode': 29,
@@ -810,11 +810,26 @@ void main() {
         'metaState': 0x0,
         'source': 0x101, // Keyboard source.
         'deviceId': 1,
-      });
-      final RawKeyEventDataAndroid data = keyAEvent.data as RawKeyEventDataAndroid;
-      expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
-      expect(data.logicalKey, equals(LogicalKeyboardKey.keyA));
-      expect(data.keyLabel, equals('a'));
+      }).data as RawKeyEventDataAndroid;
+      expect(lowerAData.physicalKey, equals(PhysicalKeyboardKey.keyA));
+      expect(lowerAData.logicalKey, equals(LogicalKeyboardKey.lowerA));
+      expect(lowerAData.keyLabel, equals('a'));
+
+      final RawKeyEventDataAndroid upperAData = RawKeyEvent.fromMessage(<String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'android',
+        'keyCode': 29,
+        'plainCodePoint': 'a'.codeUnitAt(0),
+        'codePoint': 'A'.codeUnitAt(0),
+        'character': 'A',
+        'scanCode': 30,
+        'metaState': 0x0,
+        'source': 0x101, // Keyboard source.
+        'deviceId': 1,
+      }).data as RawKeyEventDataAndroid;
+      expect(upperAData.physicalKey, equals(PhysicalKeyboardKey.keyA));
+      expect(upperAData.logicalKey, equals(LogicalKeyboardKey.lowerA));
+      expect(upperAData.keyLabel, equals('A'));
     });
 
     test('Control keyboard keys are correctly translated', () {
@@ -1661,6 +1676,23 @@ void main() {
       expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
       expect(data.logicalKey, equals(LogicalKeyboardKey.keyA));
       expect(data.keyLabel, equals('a'));
+    });
+
+    testWidgets('Letter keys should be correctly simulated and translated', (WidgetTester tester) async {
+      final List<RawKeyEvent> events = <RawKeyEvent>[];
+      RawKeyboard.instance.addListener(events.add);
+
+      await simulateKeyDownEvent(LogicalKeyboardKey.keyA, platform: 'windows');
+      expect(events.length, 1);
+      expect(events[0].physicalKey, LogicalKeyboardKey.keyA);
+      expect(events[0].logicalKey, LogicalKeyboardKey.lowerA);
+      expect(events[0].character, 'a');
+      expect(events[0].data, const RawKeyEventDataWindows(
+        keyCode: 65,
+        scanCode: 30,
+        characterCodePoint: 97,
+        modifiers: 0,
+      ));
     });
 
     test('Control keyboard keys are correctly translated', () {
