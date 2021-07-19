@@ -355,7 +355,7 @@ void main() {
     }, variant: TargetPlatformVariant.all());
 
     for (final List<double>? snapTargets in <List<double>?>[null, <double>[]]) {
-      testWidgets('snapTargets value of $snapTargets resolves to min and max', (WidgetTester tester) async {
+      testWidgets('Setting snapTargets to $snapTargets resolves to min and max', (WidgetTester tester) async {
         const Key stackKey = ValueKey<String>('stack');
         const Key containerKey = ValueKey<String>('container');
           await tester.pumpWidget(_boilerplate(null,
