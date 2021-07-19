@@ -15,7 +15,6 @@ group("impeller") {
     "geometry",
     "image",
     "primitives",
-    "shader_glue",
   ]
 }
 
@@ -32,6 +31,5 @@ executable("impeller_unittests") {
     "image:image_unittests",
     "playground",
     "primitives:primitives_unittests",
-    "shader_glue:shader_glue_unittests",
   ]
 }

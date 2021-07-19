@@ -13,7 +13,7 @@
 #include "impeller/compositor/device_buffer.h"
 #include "impeller/compositor/formats_metal.h"
 #include "impeller/compositor/sampler.h"
-#include "impeller/shader_glue/shader_types.h"
+#include "impeller/compositor/shader_types.h"
 
 namespace impeller {
 

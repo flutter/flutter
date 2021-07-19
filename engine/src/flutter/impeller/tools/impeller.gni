@@ -169,7 +169,7 @@ template("impeller_shaders") {
 
     deps = [
       ":$impellerc_target_name",
-      "//flutter/impeller/shader_glue",
+      "//flutter/impeller/compositor",
     ]
   }
 

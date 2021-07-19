@@ -17,7 +17,7 @@
 #include "flutter/fml/macros.h"
 #include "impeller/compositor/comparable.h"
 #include "impeller/compositor/formats.h"
-#include "impeller/shader_glue/shader_types.h"
+#include "impeller/compositor/shader_types.h"
 
 namespace impeller {
 

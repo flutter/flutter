@@ -14,9 +14,9 @@
 #include "impeller/compositor/formats.h"
 #include "impeller/compositor/pipeline.h"
 #include "impeller/compositor/sampler.h"
+#include "impeller/compositor/shader_types.h"
 #include "impeller/compositor/texture.h"
 #include "impeller/compositor/vertex_buffer.h"
-#include "impeller/shader_glue/shader_types.h"
 
 namespace impeller {
 
