@@ -17,12 +17,40 @@ namespace impeller {
 
 class Texture;
 
+//------------------------------------------------------------------------------
+/// @brief      The Pixel formats supported by Impeller. The naming convention
+///             denotes the usage of the component, the bit width of that
+///             component, and then one or more qualifiers to its
+///             interpretation.
+///
+///             For instance, `kR8G8B8A8_UNormInt_SRGB` is a 32 bits-per-pixel
+///             format ordered in RGBA with 8 bits per component with each
+///             component expressed as an unsigned normalized integer and a
+///             conversion from sRGB to linear color space.
+///
+///             Key:
+///               R -> Red Component
+///               G -> Green Component
+///               B -> Blue Component
+///               D -> Depth Component
+///               S -> Stencil Component
+///               U -> Unsigned (Lack of this denotes a signed component)
+///               Norm -> Normalized
+///               SRGB -> sRGB to linear interpretation
+///
+///             While the effective bit width of the pixel can be determined by
+///             adding up the widths of each component, only the non-esoteric
+///             formats are tightly packed. Do not assume tight packing for the
+///             esoteric formats and use blit passes to convert to a
+///             non-esoteric pass.
+///
 enum class PixelFormat {
   kUnknown,
   kR8G8B8A8_UNormInt,
   kR8G8B8A8_UNormInt_SRGB,
   kB8G8R8A8_UNormInt,
   kB8G8R8A8_UNormInt_SRGB,
+  // Esoteric formats only used as render targets.
   kD32_Float_S8_UNormInt,
 };
 
