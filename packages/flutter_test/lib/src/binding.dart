@@ -499,7 +499,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// If `source` is [TestBindingEventSource.test], then the `event` is based
   /// in the local coordinate space and the event is likely triggered by
-  /// programatically simulated pointer event, such as:
+  /// programatically simulated pointer events, such as:
   ///
   ///  * [WidgetController.tap] and alike methods, as well as directly using
   ///    [TestGesture]. They are usually used in
@@ -1535,8 +1535,8 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   /// Dispatch an event to the targets found by a hit test on its position.
   ///
   /// If the [pointerEventSource] is [TestBindingEventSource.test], then
-  /// the event is forwarded to [GestureBinding.dispatchEvent] as normal,
-  /// and down events are also painted on the screen.
+  /// the event is forwarded to [GestureBinding.dispatchEvent] as usual;
+  /// additionally, down pointers are painted on the screen.
   ///
   /// If the [pointerEventSource] is [TestBindingEventSource.device], then
   /// the event, after being transformed to the local coordinate system, is
