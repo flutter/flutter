@@ -16,9 +16,14 @@ import 'text_style.dart';
 /// An immutable placeholder that is embedded inline within text.
 ///
 /// [PlaceholderSpan] represents a placeholder that acts as a stand-in for other
-/// content. A [PlaceholderSpan] by itself does not contain useful
-/// information to change a [TextSpan]. Instead, this class must be extended
-/// to define contents.
+/// content.
+///
+/// A [PlaceholderSpan] by itself does not change the text layout visually
+/// but can be used to insert invisible codepoint indexes into the text to
+/// account for rich or dynamic content that requires plaintext metadata to
+/// properly represent in a [TextEditingValue]. For example, a raw placeholder
+/// can be inserted to account for a `<b>` bold tag. The caret would properly
+/// skip over 3 indexes to account for the non-rendered bold tag string.
 ///
 /// [WidgetSpan] from the widgets library extends [PlaceholderSpan] and may be
 /// used instead to specify a widget as the contents of the placeholder.
@@ -30,7 +35,7 @@ import 'text_style.dart';
 ///  * [Text], a widget for showing uniformly-styled text.
 ///  * [RichText], a widget for finer control of text rendering.
 ///  * [TextPainter], a class for painting [TextSpan] objects on a [Canvas].
-abstract class PlaceholderSpan extends InlineSpan {
+class PlaceholderSpan extends InlineSpan {
   /// Creates a [PlaceholderSpan] with the given values.
   ///
   /// A [TextStyle] may be provided with the [style] property, but only the
@@ -39,6 +44,7 @@ abstract class PlaceholderSpan extends InlineSpan {
     this.alignment = ui.PlaceholderAlignment.bottom,
     this.baseline,
     TextStyle? style,
+    this.plainText = '\uFFFC',
   }) : super(style: style);
 
   /// How the placeholder aligns vertically with the text.
@@ -52,13 +58,72 @@ abstract class PlaceholderSpan extends InlineSpan {
   /// This is ignored when using other alignment modes.
   final TextBaseline? baseline;
 
-  /// [PlaceholderSpan]s are flattened to a `0xFFFC` object replacement character in the
-  /// plain text representation when `includePlaceholders` is true.
+  /// The plaintext respresentation of the placeholder.
+  ///
+  /// The placeholder will occupy the same number of codepoint indexes in the
+  /// laid out text as the length of this String.
+  ///
+  /// This is typically the String content this placeholder is replacing.
+  final String plainText;
+
+  /// Adds an empty placeholder to the paragraph builder.
+  @override
+  void build(ui.ParagraphBuilder builder, { double textScaleFactor = 1.0, List<PlaceholderDimensions>? dimensions }) {
+    assert(debugAssertIsValid());
+    if (hasStyle) {
+      builder.pushStyle(style!.getTextStyle(textScaleFactor: textScaleFactor));
+    }
+    builder.addPlaceholder(
+      0, // width
+      0, // height
+      alignment,
+      scale: 1.0,
+      baseline: TextBaseline.alphabetic,
+      baselineOffset: 0,
+      codepointLength: plainText.length,
+    );
+    if (hasStyle) {
+      builder.pop();
+    }
+  }
+
+  /// Returns the plaintext representation of the placeholder.
+  ///
+  /// By default, [PlaceholderSpan]s are flattened to a `0xFFFC` object replacement character in the
+  /// plain text representation when `includePlaceholders` is true. This can be customized with the
+  /// `plainText` parameter in the contructor.
   @override
   void computeToPlainText(StringBuffer buffer, {bool includeSemanticsLabels = true, bool includePlaceholders = true}) {
     if (includePlaceholders) {
-      buffer.write('\uFFFC');
+      buffer.write(plainText);
     }
+  }
+
+  @override
+  int? codeUnitAtVisitor(int index, Accumulator offset) {
+    return null;
+  }
+
+  @override
+  RenderComparison compareTo(InlineSpan other) {
+    if (identical(this, other))
+      return RenderComparison.identical;
+    if (other.runtimeType != runtimeType)
+      return RenderComparison.layout;
+    if (child != typedOther.child ||
+        alignment != typedOther.alignment ||
+        plainText != typedOther.plainText) {
+      return RenderComparison.layout;
+    }
+    RenderComparison result = RenderComparison.identical;
+    if (style != null) {
+      final RenderComparison candidate = style!.compareTo(other.style!);
+      if (candidate.index > result.index)
+        result = candidate;
+      if (result == RenderComparison.layout)
+        return result;
+    }
+    return result;
   }
 
   @override
@@ -86,5 +151,11 @@ abstract class PlaceholderSpan extends InlineSpan {
 
     properties.add(EnumProperty<ui.PlaceholderAlignment>('alignment', alignment, defaultValue: null));
     properties.add(EnumProperty<TextBaseline>('baseline', baseline, defaultValue: null));
+  }
+
+  @override
+  bool debugAssertIsValid() {
+    // PlaceholderSpans are always valid
+    return true;
   }
 }
