@@ -188,7 +188,7 @@ class _DefaultPub implements Pub {
     );
 
     if (shouldSkipThirdPartyGenerator && packageConfigFile.existsSync()) {
-      Map<Object?, Object?> packageConfigMap;
+      Map<String, Object?> packageConfigMap;
       try {
         packageConfigMap = jsonDecode(
           packageConfigFile.readAsStringSync(),
