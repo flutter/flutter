@@ -119,6 +119,20 @@ mixin TestDefaultBinaryMessengerBinding on BindingBase, ServicesBinding {
 /// that actually needs to make a network call should provide its own
 /// `HttpClient` to the code making the call, so that it can appropriately mock
 /// or fake responses.
+///
+/// ### Coordinate spaces
+///
+/// [TestWidgetsFlutterBinding] might be run on devices of different screen
+/// sizes, while the testing widget is still told the same size to ensure
+/// consistent results. Consequently, code that deals with positions (such as
+/// pointer events or painting) must distinguish between two coordinate spaces:
+///
+///  * The _local coordinate space_ is the one used by the testing widget
+///    (typically an 800 by 600 window, but can be altered by [setSurfaceSize]).
+///  * The _global coordinate space_ is the one used by the device.
+///
+/// Positions can be transformed between coordinate spaces with [localToGlobal]
+/// and [globalToLocal].
 abstract class TestWidgetsFlutterBinding extends BindingBase
   with SchedulerBinding,
        ServicesBinding,
@@ -447,14 +461,16 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     });
   }
 
-  /// Convert the given point from the global coordinate system (as used by
-  /// pointer events from the device) to the coordinate system used by the
-  /// tests (an 800 by 600 window).
+  /// Convert the given point from the global coordinate space to the local
+  /// one.
+  ///
+  /// For definitions for coordinate spaces, see [TestWidgetsFlutterBinding].
   Offset globalToLocal(Offset point) => point;
 
-  /// Convert the given point from the coordinate system used by the tests (an
-  /// 800 by 600 window) to the global coordinate system (as used by pointer
-  /// events from the device).
+  /// Convert the given point from the local coordinate space to the global
+  /// one.
+  ///
+  /// For definitions for coordinate spaces, see [TestWidgetsFlutterBinding].
   Offset localToGlobal(Offset point) => point;
 
   /// The source of the current pointer event.
@@ -475,25 +491,21 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// [handlePointerEvent], then resets [pointerEventSource] to the previous
   /// value.
   ///
-  /// If `source` is [TestBindingEventSource.device], then the `event`
-  /// is based in the global coordinate system and the event is likely
-  /// triggered by the user physically interacting with the screen during a
-  /// live test on a real device (see [LiveTestWidgetsFlutterBinding]).
+  /// If `source` is [TestBindingEventSource.device], then the `event` is based
+  /// in the global coordinate space (for definitions for coordinate spaces,
+  /// see [TestWidgetsFlutterBinding]) and the event is likely triggered by the
+  /// user physically interacting with the screen during a live test on a real
+  /// device (see [LiveTestWidgetsFlutterBinding]).
   ///
-  /// If `source` is [TestBindingEventSource.test], then the `event`
-  /// is based in the local coordinate system and the event is likely
-  /// triggered by programatically simulated pointer event, such as:
+  /// If `source` is [TestBindingEventSource.test], then the `event` is based
+  /// in the local coordinate space and the event is likely triggered by
+  /// programatically simulated pointer event, such as:
   ///
   ///  * [WidgetController.tap] and alike methods, as well as directly using
   ///    [TestGesture]. They are usually used in
   ///    [AutomatedTestWidgetsFlutterBinding] but sometimes in live tests too.
   ///  * [WidgetController.timedDrag] and alike methods. They are usually used
   ///    in macrobenchmarks.
-  ///
-  /// See also:
-  ///
-  ///  * [localToGlobal] and [globalToLocal] for transforming between coordinate
-  ///    systems.
   void handlePointerEventForSource(
     PointerEvent event, {
     TestBindingEventSource source = TestBindingEventSource.device,
@@ -1550,6 +1562,9 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         break;
       case TestBindingEventSource.device:
         if (deviceEventDispatcher != null) {
+          // The pointer events received with this source has a global position
+          // (see [handlePointerEventForSource]). Transform it to the local
+          // coordinate space used by the testing widgets.
           final PointerEvent localEvent = event.copyWith(position: globalToLocal(event.position));
           withPointerEventSource(TestBindingEventSource.device,
             () => super.handlePointerEvent(localEvent)

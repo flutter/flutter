@@ -59,15 +59,19 @@ export 'package:test_api/test_api.dart' hide
 /// Signature for callback to [testWidgets] and [benchmarkWidgets].
 typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 
-// [Iterable.lastWhere] but returns null if not found.
-T? _lastWhereOrNull<T>(Iterable<T> list, bool Function(T) condition) {
-  try {
-    return list.lastWhere(condition);
-  } catch(e) {
-    if (e is StateError) {
-      return null;
+// Return the last element that satisifes `test`, or return null if not found.
+E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
+  late E result;
+  bool foundMatching = false;
+  for (final E element in list) {
+    if (test(element)) {
+      result = element;
+      foundMatching = true;
     }
   }
+  if (foundMatching)
+    return result;
+  return null;
 }
 
 /// Runs the [callback] inside the Flutter test environment.
@@ -812,10 +816,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
         .whereType<RenderObject>()
         .first;
       final Element? innerTargetElement = _lastWhereOrNull(
-        collectAllElementsFrom(
-          binding.renderViewElement!,
-          skipOffstage: true,
-        ).cast<Element>(),
+        collectAllElementsFrom(binding.renderViewElement!, skipOffstage: true),
         (Element element) => element.renderObject == innerTarget,
       );
       if (innerTargetElement == null) {
