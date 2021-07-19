@@ -194,7 +194,7 @@ Scalar Matrix::GetDeterminant() const {
 }
 
 /*
- *  Adapted for Radar from Graphics Gems:
+ *  Adapted for Impeller from Graphics Gems:
  *  http://www.realtimerendering.com/resources/GraphicsGems/gemsii/unmatrix.c
  */
 Matrix::DecompositionResult Matrix::Decompose() const {
