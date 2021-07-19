@@ -373,6 +373,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
         }
       }
     }
+    
     // Discover Android Studio > 4.1
     if (globals.platform.isWindows && globals.platform.environment.containsKey('LOCALAPPDATA')) {
       final Directory cacheDir = globals.fs.directory(globals.fs.path.join(globals.platform.environment['LOCALAPPDATA']!, 'Google'));
