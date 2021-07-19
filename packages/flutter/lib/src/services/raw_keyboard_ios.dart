@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show hashValues;
+
 import 'package:flutter/foundation.dart';
 
 import 'keyboard_key.dart';
@@ -253,6 +255,36 @@ class RawKeyEventDataIos extends RawKeyEventData {
     }
   }
 
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+        properties.add(DiagnosticsProperty<String>('characters', characters));
+        properties.add(DiagnosticsProperty<String>('charactersIgnoringModifiers', charactersIgnoringModifiers));
+        properties.add(DiagnosticsProperty<int>('keyCode', keyCode));
+        properties.add(DiagnosticsProperty<int>('modifiers', modifiers));
+  }
+
+  @override
+  bool operator==(Object other) {
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is RawKeyEventDataIos
+        && other.characters == characters
+        && other.charactersIgnoringModifiers == charactersIgnoringModifiers
+        && other.keyCode == keyCode
+        && other.modifiers == modifiers;
+  }
+
+  @override
+  int get hashCode => hashValues(
+    characters,
+    charactersIgnoringModifiers,
+    keyCode,
+    modifiers,
+  );
+
   // Modifier key masks. See Apple's UIKey documentation
   // https://developer.apple.com/documentation/uikit/uikeymodifierflags?language=objc
   // https://opensource.apple.com/source/IOHIDFamily/IOHIDFamily-86/IOHIDSystem/IOKit/hidsystem/IOLLEvent.h.auto.html
@@ -361,11 +393,4 @@ class RawKeyEventDataIos extends RawKeyEventData {
   /// applications to mask off the device-dependent modifier flags, including
   /// event coalescing information.
   static const int deviceIndependentMask = 0xffff0000;
-
-  @override
-  String toString() {
-    return '${objectRuntimeType(this, 'RawKeyEventDataIos')}(keyLabel: $keyLabel, keyCode: $keyCode, characters: $characters,'
-        ' unmodifiedCharacters: $charactersIgnoringModifiers, modifiers: $modifiers, '
-        'modifiers down: $modifiersPressed)';
-  }
 }

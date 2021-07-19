@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show hashValues;
 
 import 'package:flutter/foundation.dart';
 
@@ -159,6 +160,33 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
     }
   }
 
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<int>('hidUsage', hidUsage));
+    properties.add(DiagnosticsProperty<int>('codePoint', codePoint));
+    properties.add(DiagnosticsProperty<int>('modifiers', modifiers));
+  }
+
+  @override
+  bool operator==(Object other) {
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is RawKeyEventDataFuchsia
+        && other.hidUsage == hidUsage
+        && other.codePoint == codePoint
+        && other.modifiers == modifiers;
+  }
+
+  @override
+  int get hashCode => hashValues(
+    hidUsage,
+    codePoint,
+    modifiers,
+  );
+
   // Keyboard modifier masks for Fuchsia modifiers.
 
   /// The [modifiers] field indicates that no modifier keys are pressed if it
@@ -272,10 +300,4 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
   /// it's much easier to use [isModifierPressed] if you just want to know if
   /// a modifier is pressed.
   static const int modifierMeta = modifierLeftMeta | modifierRightMeta;
-
-  @override
-  String toString() {
-    return '${objectRuntimeType(this, 'RawKeyEventDataFuchsia')}(hidUsage: $hidUsage, codePoint: $codePoint, modifiers: $modifiers, '
-        'modifiers down: $modifiersPressed)';
-  }
 }

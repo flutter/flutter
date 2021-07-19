@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show hashValues;
 
 import 'package:flutter/foundation.dart';
 
@@ -22,6 +23,7 @@ class RawKeyEventDataWeb extends RawKeyEventData {
   const RawKeyEventDataWeb({
     required this.code,
     required this.key,
+    this.location = 0,
     this.metaState = modifierNone,
   })  : assert(code != null),
         assert(metaState != null);
@@ -37,6 +39,12 @@ class RawKeyEventDataWeb extends RawKeyEventData {
   /// See <https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key>
   /// for more information.
   final String key;
+
+  /// The `KeyboardEvent.location` corresponding to this event.
+  ///
+  /// See <https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/location>
+  /// for more information.
+  final int location;
 
   /// The modifiers that were present when the key event occurred.
   ///
@@ -121,6 +129,36 @@ class RawKeyEventDataWeb extends RawKeyEventData {
     return KeyboardSide.any;
   }
 
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+        properties.add(DiagnosticsProperty<String>('code', code));
+        properties.add(DiagnosticsProperty<String>('key', key));
+        properties.add(DiagnosticsProperty<int>('location', location));
+        properties.add(DiagnosticsProperty<int>('metaState', metaState));
+  }
+
+  @override
+  bool operator==(Object other) {
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is RawKeyEventDataWeb
+        && other.code == code
+        && other.key == key
+        && other.location == location
+        && other.metaState == metaState;
+  }
+
+  @override
+  int get hashCode => hashValues(
+    code,
+    key,
+    location,
+    metaState,
+  );
+
   // Modifier key masks.
 
   /// No modifier keys are pressed in the [metaState] field.
@@ -185,10 +223,4 @@ class RawKeyEventDataWeb extends RawKeyEventData {
   /// it's much easier to use [isModifierPressed] if you just want to know if
   /// a modifier is pressed.
   static const int modifierScrollLock = 0x40;
-
-  @override
-  String toString() {
-    return '${objectRuntimeType(this, 'RawKeyEventDataWeb')}(keyLabel: $keyLabel, code: $code, '
-        'metaState: $metaState, modifiers down: $modifiersPressed)';
-  }
 }

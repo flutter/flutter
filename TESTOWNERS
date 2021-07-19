@@ -116,12 +116,14 @@
 /dev/devicelab/bin/tasks/complex_layout_ios__compile.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/complex_layout_ios__start_up.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/complex_layout_scroll_perf_ios__timeline_summary.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/cubic_bezier_perf_ios_sksl_warmup__timeline_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/external_ui_integration_test_ios.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/flavors_test_ios.dart @jmagman @flutter/tool
 /dev/devicelab/bin/tasks/flutter_gallery__transition_perf_e2e_ios.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/flutter_gallery_ios__compile.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/flutter_gallery_ios__start_up.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/flutter_gallery_ios__transition_perf.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/flutter_gallery_ios_sksl_warmup__transition_perf.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/flutter_view_ios__start_up.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/hello_world_ios__compile.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/hot_mode_dev_cycle_macos_target__benchmark.dart @zanderso @flutter/tool
