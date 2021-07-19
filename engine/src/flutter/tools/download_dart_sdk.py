@@ -160,6 +160,15 @@ def ExtractDartSDK(archive, os_name, arch, verbose):
     z.extractall(extract_dest)
 
 
+def PrintFileIfSmall(file):
+  if not os.path.isfile(file):
+    return
+  size = os.path.getsize(file)
+  if size < (1 << 14): # < 16KB
+    with open(file) as f:
+      contents = f.read()
+      eprint(contents)
+
 
 def DownloadAndExtract(channel, version, os_name, arch, verbose):
   archive = DownloadDartSDK(channel, version, os_name, arch, verbose)
@@ -171,6 +180,7 @@ def DownloadAndExtract(channel, version, os_name, arch, verbose):
     ExtractDartSDK(archive, os_name, arch, verbose)
   except Exception as e:
     eprint('Failed to extract Dart SDK archive:\n%s' % e)
+    PrintFileIfSmall(archive)
     return 1
   try:
     stamp_file = '{}.stamp'.format(archive)
@@ -187,7 +197,7 @@ def Main():
   parser.add_argument(
     '--fail-loudly',
     action='store_true',
-    default='LUCI_CONTEXT' in os.environ,
+    default=False,
     help="Return an error code if a prebuilt couldn't be fetched and extracted")
   parser.add_argument(
     '--verbose',

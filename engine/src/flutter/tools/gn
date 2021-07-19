@@ -334,7 +334,6 @@ def to_gn_args(args):
         print('--prebuilt-dart-sdk was specified, but an appropriate prebuilt '
               'could not be found! Try running '
               'flutter/tools/download_dart_sdk.py manually.')
-        sys.exit(1)
     elif args.target_os is None or args.target_os == 'linux':
       # dart_platform_sdk is only defined for host builds, linux arm host builds
       # specify target_os=linux.
