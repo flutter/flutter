@@ -76,6 +76,10 @@ class DomRenderer {
   html.Element? get sceneHostElement => _sceneHostElement;
   html.Element? _sceneHostElement;
 
+  /// A child element of body outside the shadowroot that hosts
+  /// global resources such svg filters and clip paths when using webkit.
+  html.Element? _resourcesHost;
+
   /// The element that contains the semantics tree.
   ///
   /// This element is created and inserted in the HTML DOM once. It is never
@@ -275,6 +279,8 @@ class DomRenderer {
 
     _styleElement?.remove();
     _styleElement = html.StyleElement();
+    _resourcesHost?.remove();
+    _resourcesHost = null;
     html.document.head!.append(_styleElement!);
     final html.CssStyleSheet sheet = _styleElement!.sheet as html.CssStyleSheet;
     applyGlobalCssRulesToSheet(
@@ -613,6 +619,33 @@ class DomRenderer {
       }
     }
     return null;
+  }
+
+  /// Add an element as a global resource to be referenced by CSS.
+  ///
+  /// This call create a global resource host element on demand and either
+  /// place it as first element of body(webkit), or as a child of
+  /// glass pane element for other browsers to make sure url resolution
+  /// works correctly when content is inside a shadow root.
+  void addResource(html.Element element) {
+    final bool isWebKit = browserEngine == BrowserEngine.webkit;
+    if (_resourcesHost == null) {
+      _resourcesHost = html.DivElement()
+        ..style.visibility = 'hidden';
+      if (isWebKit) {
+        final html.Node bodyNode = html.document.body!;
+        bodyNode.insertBefore(_resourcesHost!, bodyNode.firstChild);
+      } else {
+        _glassPaneShadow!.node.insertBefore(
+            _resourcesHost!, _glassPaneShadow!.node.firstChild);
+      }
+    }
+    _resourcesHost!.append(element);
+  }
+
+  /// Removes a global resource element.
+  void removeResource(html.Element? element) {
+    element?.remove();
   }
 
   /// Provides haptic feedback.

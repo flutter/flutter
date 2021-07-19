@@ -143,7 +143,7 @@ void testMain() {
       expect(picture.updateCount, 0);
       expect(picture.applyPaintCount, 0);
 
-      scene1.preroll();
+      scene1.preroll(PrerollSurfaceContext());
       scene1.build();
       commitScene(scene1);
       expect(picture.retainCount, 0);
@@ -162,7 +162,7 @@ void testMain() {
       opacity.state = PersistedSurfaceState.pendingRetention;
       clip2.appendChild(opacity);
 
-      scene2.preroll();
+      scene2.preroll(PrerollSurfaceContext());
       scene2.update(scene1);
       commitScene(scene2);
       expect(picture.retainCount, 1);
@@ -181,7 +181,7 @@ void testMain() {
       opacity.state = PersistedSurfaceState.pendingRetention;
       clip3.appendChild(opacity);
 
-      scene3.preroll();
+      scene3.preroll(PrerollSurfaceContext());
       scene3.update(scene2);
       commitScene(scene3);
       expect(picture.retainCount, 2);

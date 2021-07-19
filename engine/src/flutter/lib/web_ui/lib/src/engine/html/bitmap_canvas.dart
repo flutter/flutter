@@ -368,7 +368,7 @@ class BitmapCanvas extends EngineCanvas {
   ///   prefer DOM if canvas has not been allocated yet.
   ///
   bool _useDomForRenderingFill(SurfacePaintData paint) =>
-      _renderStrategy.isInsideShaderMask ||
+      _renderStrategy.isInsideSvgFilterTree ||
       (_preserveImageData == false && _contains3dTransform) ||
       (_childOverdraw &&
           _canvasPool.canvas == null &&
@@ -380,7 +380,7 @@ class BitmapCanvas extends EngineCanvas {
   ///
   /// DOM canvas is generated for simple strokes using borders.
   bool _useDomForRenderingFillAndStroke(SurfacePaintData paint) =>
-      _renderStrategy.isInsideShaderMask ||
+      _renderStrategy.isInsideSvgFilterTree ||
       (_preserveImageData == false && _contains3dTransform) ||
       ((_childOverdraw ||
               _renderStrategy.hasImageElements ||

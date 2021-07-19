@@ -2042,12 +2042,12 @@ class RenderStrategy {
   /// This is used to decide whether to use simplified DomCanvas.
   bool hasArbitraryPaint = false;
 
-  /// Whether commands are executed within a shadermask.
+  /// Whether commands are executed within a shadermask or color filter.
   ///
   /// Webkit doesn't apply filters to canvas elements in its child
   /// element tree. When this is set to true, we prevent canvas usage in
   /// bitmap canvas and instead render using dom primitives and svg only.
-  bool isInsideShaderMask = false;
+  bool isInsideSvgFilterTree = false;
 
   RenderStrategy();
 

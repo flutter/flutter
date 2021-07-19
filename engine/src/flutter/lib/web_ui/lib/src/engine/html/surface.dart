@@ -568,7 +568,7 @@ abstract class PersistedSurface implements ui.EngineLayer {
   ///
   /// This method recursively walks the surface tree calling `preroll` on all
   /// descendants.
-  void preroll() {
+  void preroll(PrerollSurfaceContext prerollContext) {
     recomputeTransformAndClip();
   }
 
@@ -651,11 +651,11 @@ abstract class PersistedContainerSurface extends PersistedSurface {
   }
 
   @override
-  void preroll() {
-    super.preroll();
+  void preroll(PrerollSurfaceContext prerollContext) {
+    super.preroll(prerollContext);
     final int length = _children.length;
     for (int i = 0; i < length; i += 1) {
-      _children[i].preroll();
+      _children[i].preroll(prerollContext);
     }
   }
 
@@ -1226,4 +1226,14 @@ class _PersistedSurfaceMatch {
       return super.toString();
     }
   }
+}
+
+/// Data used during preroll to pass rendering hints efficiently to children
+/// by optimizing (prevent parent lookups) and in cases like svg filters
+/// drive the decision on whether canvas elements can be used to render.
+class PrerollSurfaceContext {
+  /// Number of active color filters in parent surfaces.
+  int activeColorFilterCount = 0;
+  /// Number of active shader masks in parent surfaces.
+  int activeShaderMaskCount = 0;
 }
