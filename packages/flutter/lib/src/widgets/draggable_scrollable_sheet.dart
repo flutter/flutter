@@ -370,7 +370,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
     widget.snapTargets?.asMap().forEach((int index, double target) {
       assert(target >= 0.0 && target <= 1.0);
       // Snap targets must be in ascending order.
-      assert(index == 0 || target >= widget.snapTargets![index - 1]);
+      assert(index == 0 || target > widget.snapTargets![index - 1]);
     });
     // Ensure the snap targets start and end with the min and max child sizes.
     if (widget.snapTargets == null || widget.snapTargets!.isEmpty) {
@@ -400,6 +400,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
           curve: Curves.linear,
         );
       }
+      _extent.hasChanged = false;
       _extent._currentExtent.value = _extent.initialExtent;
     }
   }
@@ -781,7 +782,6 @@ class _SnappingSimulation extends Simulation {
     }
     final double highTarget = pixelSnapTargets[indexOfNextTarget];
     final double lowTarget = pixelSnapTargets[indexOfNextTarget - 1];
-    // Snap forward or backward depending on current velocity.
     if (initialVelocity.abs() <= tolerance.velocity) {
       // If velocity is zero, snap to the nearest snap point with the minimum velocity.
       if (position - lowTarget < highTarget - position) {
@@ -790,6 +790,7 @@ class _SnappingSimulation extends Simulation {
         return highTarget;
       }
     }
+    // Snap forward or backward depending on current velocity.
     if (initialVelocity < 0.0) {
       return pixelSnapTargets[indexOfNextTarget - 1];
     }
