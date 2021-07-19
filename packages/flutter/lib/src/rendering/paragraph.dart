@@ -850,10 +850,22 @@ class RenderParagraph extends RenderBox
       config.isSemanticBoundary = true;
     } else {
       final StringBuffer buffer = StringBuffer();
+      int offset = 0;
+      final List<StringAttribute> attributes = <StringAttribute>[];
       for (final InlineSpanSemanticsInformation info in _semanticsInfo!) {
-        buffer.write(info.semanticsLabel ?? info.text);
+        final String label = info.semanticsLabel ?? info.text;
+        for (final StringAttribute infoAttribute in info.stringAttributes) {
+          final TextRange originalRange = infoAttribute.range;
+          attributes.add(
+            infoAttribute.copy(
+              range: TextRange(start: offset + originalRange.start, end: offset + originalRange.end)
+            ),
+          );
+        }
+        buffer.write(label);
+        offset += label.length;
       }
-      config.label = buffer.toString();
+      config.attributedLabel = AttributedString(buffer.toString(), attributes: attributes);
       config.textDirection = textDirection;
     }
   }
@@ -932,7 +944,7 @@ class RenderParagraph extends RenderBox
         final SemanticsConfiguration configuration = SemanticsConfiguration()
           ..sortKey = OrdinalSortKey(ordinal++)
           ..textDirection = initialDirection
-          ..label = info.semanticsLabel ?? info.text;
+          ..attributedLabel = AttributedString(info.semanticsLabel ?? info.text, attributes: info.stringAttributes);
         final GestureRecognizer? recognizer = info.recognizer;
         if (recognizer != null) {
           if (recognizer is TapGestureRecognizer) {

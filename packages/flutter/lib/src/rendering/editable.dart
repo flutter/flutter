@@ -2737,10 +2737,31 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
         ..explicitChildNodes = true;
       return;
     }
+    late AttributedString attributedValue;
+    if (obscureText) {
+      attributedValue = AttributedString(obscuringCharacter * _plainText.length);
+    } else {
+      final StringBuffer buffer = StringBuffer();
+      int offset = 0;
+      final List<StringAttribute> attributes = <StringAttribute>[];
+      for (final InlineSpanSemanticsInformation info in _semanticsInfo!) {
+        final String label = info.semanticsLabel ?? info.text;
+        for (final StringAttribute infoAttribute in info.stringAttributes) {
+          final TextRange originalRange = infoAttribute.range;
+          attributes.add(
+            infoAttribute.copy(
+                range: TextRange(start: offset + originalRange.start,
+                    end: offset + originalRange.end)
+            ),
+          );
+        }
+        buffer.write(label);
+        offset += label.length;
+      }
+      attributedValue = AttributedString(buffer.toString(), attributes: attributes);
+    }
     config
-      ..value = obscureText
-          ? obscuringCharacter * _plainText.length
-          : _plainText
+      ..attributedValue = attributedValue
       ..isObscured = obscureText
       ..isMultiline = _isMultiline
       ..textDirection = textDirection
@@ -2847,7 +2868,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
         final SemanticsConfiguration configuration = SemanticsConfiguration()
           ..sortKey = OrdinalSortKey(ordinal++)
           ..textDirection = initialDirection
-          ..label = info.semanticsLabel ?? info.text;
+          ..attributedLabel = AttributedString(info.semanticsLabel ?? info.text, attributes: info.stringAttributes);
         final GestureRecognizer? recognizer = info.recognizer;
         if (recognizer != null) {
           if (recognizer is TapGestureRecognizer) {
