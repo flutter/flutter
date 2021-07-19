@@ -16,9 +16,14 @@ import 'text_style.dart';
 /// An immutable placeholder that is embedded inline within text.
 ///
 /// [PlaceholderSpan] represents a placeholder that acts as a stand-in for other
-/// content. A [PlaceholderSpan] by itself does not contain useful
-/// information to change a [TextSpan]. Instead, this class must be extended
-/// to define contents.
+/// content.
+///
+/// A [PlaceholderSpan] by itself does not change the text layout visually
+/// but can be used to insert invisible codepoint indexes into the text to
+/// account for rich or dynamic content that requires plaintext metadata to
+/// properly represent in a [TextEditingValue]. For example, a raw placeholder
+/// can be inserted to account for a `<b>` bold tag. The caret would properly
+/// skip over 3 indexes to account for the non-rendered bold tag string.
 ///
 /// [WidgetSpan] from the widgets library extends [PlaceholderSpan] and may be
 /// used instead to specify a widget as the contents of the placeholder.
@@ -30,7 +35,7 @@ import 'text_style.dart';
 ///  * [Text], a widget for showing uniformly-styled text.
 ///  * [RichText], a widget for finer control of text rendering.
 ///  * [TextPainter], a class for painting [TextSpan] objects on a [Canvas].
-abstract class PlaceholderSpan extends InlineSpan {
+class PlaceholderSpan extends InlineSpan {
   /// Creates a [PlaceholderSpan] with the given values.
   ///
   /// A [TextStyle] may be provided with the [style] property, but only the
@@ -53,6 +58,12 @@ abstract class PlaceholderSpan extends InlineSpan {
   /// This is ignored when using other alignment modes.
   final TextBaseline? baseline;
 
+  /// The plaintext respresentation of the placeholder.
+  ///
+  /// The placeholder will occupy the same number of codepoint indexes in the
+  /// laid out text as the length of this String.
+  ///
+  /// This is typically the String content this placeholder is replacing.
   final String plainText;
 
   /// [PlaceholderSpan]s are flattened to a `0xFFFC` object replacement character in the
