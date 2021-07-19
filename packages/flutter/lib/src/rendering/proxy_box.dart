@@ -2651,21 +2651,21 @@ class RenderFittedBox extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (size.isEmpty || child!.size.isEmpty)
+    if (child == null || size.isEmpty || child!.size.isEmpty)
       return;
     _updatePaintData();
-    if (child != null) {
-      if (_hasVisualOverflow! && clipBehavior != Clip.none)
-        layer = context.pushClipRect(
-          needsCompositing,
-          offset,
-          Offset.zero & size,
-          _paintChildWithTransform,
-          oldLayer: layer is ClipRectLayer ? layer! as ClipRectLayer : null,
-          clipBehavior: clipBehavior,
-        );
-      else
-        layer = _paintChildWithTransform(context, offset);
+    assert(child != null);
+    if (_hasVisualOverflow! && clipBehavior != Clip.none) {
+      layer = context.pushClipRect(
+        needsCompositing,
+        offset,
+        Offset.zero & size,
+        _paintChildWithTransform,
+        oldLayer: layer is ClipRectLayer ? layer! as ClipRectLayer : null,
+        clipBehavior: clipBehavior,
+      );
+    } else {
+      layer = _paintChildWithTransform(context, offset);
     }
   }
 
