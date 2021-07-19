@@ -265,4 +265,128 @@ void main() {
       matchesGoldenFile('boxShadow.boxStyle.normal.0.0.png'),
     );
   });
+
+  testWidgets('BoxShadow BoxStyle.normal.wide_radius', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    await tester.pumpWidget(
+      Center(
+        child: RepaintBoundary(
+          key: key,
+          child: Container(
+            color: Colors.amber,
+            width: 128,
+            height: 128,
+            child: Center(
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Colors.black,
+                  boxShadow: <BoxShadow>[BoxShadow(blurRadius: 16.0, offset: Offset(4, 4), blurStyle: BlurStyle.normal, color: Colors.green, spreadRadius: 2)],
+                ),
+                width: 64,
+                height: 64,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byKey(key),
+      matchesGoldenFile('boxShadow.boxStyle.normal.wide_radius.0.0.png'),
+    );
+  });
+
+  testWidgets('BoxShadow BoxStyle.outer.wide_radius', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    await tester.pumpWidget(
+      Center(
+        child: RepaintBoundary(
+          key: key,
+          child: Container(
+            color: Colors.amber,
+            width: 128,
+            height: 128,
+            child: Center(
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Colors.black,
+                  boxShadow: <BoxShadow>[BoxShadow(blurRadius: 16.0, offset: Offset(4, 4), blurStyle: BlurStyle.outer, color: Colors.red, spreadRadius: 2)],
+                ),
+                width: 64,
+                height: 64,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byKey(key),
+      matchesGoldenFile('boxShadow.boxStyle.outer.wide_radius.0.0.png'),
+    );
+  });
+
+  testWidgets('BoxShadow BoxStyle.solid.wide_radius', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    await tester.pumpWidget(
+      Center(
+        child: RepaintBoundary(
+          key: key,
+          child: Container(
+            color: Colors.grey,
+            width: 128,
+            height: 128,
+            child: Center(
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Colors.black,
+                  boxShadow: <BoxShadow>[BoxShadow(blurRadius: 16.0, offset: Offset(4, 4), blurStyle: BlurStyle.solid, color: Colors.purple, spreadRadius: 2)],
+                ),
+                width: 64,
+                height: 64,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byKey(key),
+      matchesGoldenFile('boxShadow.boxStyle.solid.wide_radius.0.0.png'),
+    );
+  });
+
+  testWidgets('BoxShadow BoxStyle.inner.wide_radius', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    await tester.pumpWidget(
+      Center(
+        child: RepaintBoundary(
+          key: key,
+          child: Container(
+            color: Colors.green,
+            width: 128,
+            height: 128,
+            child: Center(
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Colors.black,
+                  boxShadow: <BoxShadow>[BoxShadow(blurRadius: 16.0, offset: Offset(4, 4), blurStyle: BlurStyle.inner, color: Colors.amber, spreadRadius: 2)],
+                ),
+                width: 64,
+                height: 64,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byKey(key),
+      matchesGoldenFile('boxShadow.boxStyle.inner.wide_radius.0.0.png'),
+    );
+  });
 }
