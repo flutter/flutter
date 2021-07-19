@@ -66,9 +66,8 @@ class MockClipboard {
 
 void main() {
   final MockClipboard mockClipboard = MockClipboard();
-  TestWidgetsFlutterBinding.ensureInitialized()
-    .defaultBinaryMessenger
-    .setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
+  (TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding)
+    .defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
 
   setUp(() async {
     debugResetSemanticsIdCounter();
@@ -6508,7 +6507,7 @@ void main() {
 
     await tester.pump();
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
 
     // Test default cursor
     await tester.pumpWidget(
@@ -6533,7 +6532,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
   });
 
   testWidgets('Can access characters on editing string', (WidgetTester tester) async {

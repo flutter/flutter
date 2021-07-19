@@ -2913,6 +2913,7 @@ class LogicalKeyboardKey extends KeyboardKey implements VirtualKeyboardKey {
       <LogicalKeyboardKey>[LogicalKeyboardKey.lowerZ, LogicalKeyboardKey.upperZ],
       debugName: kDebugMode ? 'Key Z' : null);
 
+
   // A list of all predefined constant LogicalKeyboardKeys so they can be
   // searched.
   static const Map<int, LogicalKeyboardKey> _knownLogicalKeys = <int, LogicalKeyboardKey>{
