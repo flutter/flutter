@@ -68,6 +68,24 @@ void testMain() async {
         maxDiffRatePercent: 12.0);
   });
 
+  /// Regression test for https://github.com/flutter/flutter/issues/85733
+  test('Should apply mode color filter to circles', () async {
+    final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
+    final Picture backgroundPicture = _drawBackground();
+    builder.addPicture(Offset.zero, backgroundPicture);
+    builder.pushColorFilter(
+      ColorFilter.mode(
+        Color(0xFFFF0000),
+        BlendMode.srcIn,
+      ));
+    final Picture circles1 = _drawTestPictureWithCircles(30, 30);
+    builder.addPicture(Offset.zero, circles1);
+    builder.pop();
+    html.document.body!.append(builder.build().webOnlyRootElement!);
+    await matchGoldenFile('color_filter_mode.png', region: region,
+        maxDiffRatePercent: 12.0);
+  });
+
   /// Regression test for https://github.com/flutter/flutter/issues/59451.
   ///
   /// Picture with overlay blend inside a physical shape. Should show image
