@@ -4,7 +4,16 @@
 
 assert(is_fuchsia)
 
-source_set("fakes") {
+group("fakes") {
+  testonly = true
+
+  public_deps = [
+    ":focus",
+    "scenic",
+  ]
+}
+
+source_set("focus") {
   testonly = true
 
   sources = [
