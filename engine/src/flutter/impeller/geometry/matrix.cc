@@ -363,27 +363,27 @@ uint64_t Matrix::Decomposition::GetComponentsMask() const {
 
   Quaternion noRotation(0.0, 0.0, 0.0, 1.0);
   if (rotation != noRotation) {
-    mask = mask | static_cast<uint64_t>(Component::Rotation);
+    mask = mask | static_cast<uint64_t>(Component::kRotation);
   }
 
   Vector4 defaultPerspective(0.0, 0.0, 0.0, 1.0);
   if (perspective != defaultPerspective) {
-    mask = mask | static_cast<uint64_t>(Component::Perspective);
+    mask = mask | static_cast<uint64_t>(Component::kPerspective);
   }
 
   Shear noShear(0.0, 0.0, 0.0);
   if (shear != noShear) {
-    mask = mask | static_cast<uint64_t>(Component::Shear);
+    mask = mask | static_cast<uint64_t>(Component::kShear);
   }
 
   Vector3 defaultScale(1.0, 1.0, 1.0);
   if (scale != defaultScale) {
-    mask = mask | static_cast<uint64_t>(Component::Scale);
+    mask = mask | static_cast<uint64_t>(Component::kScale);
   }
 
   Vector3 defaultTranslation(0.0, 0.0, 0.0);
   if (translation != defaultTranslation) {
-    mask = mask | static_cast<uint64_t>(Component::Translation);
+    mask = mask | static_cast<uint64_t>(Component::kTranslation);
   }
 
   return mask;

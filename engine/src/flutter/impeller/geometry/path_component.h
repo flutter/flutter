@@ -13,22 +13,22 @@ namespace impeller {
 
 struct SmoothingApproximation {
   const Scalar scale;
-  const Scalar angleTolerance;
-  const Scalar cuspLimit;
-  const Scalar distanceToleranceSquare;
+  const Scalar angle_tolerance;
+  const Scalar cusp_limit;
+  const Scalar distance_tolerance_square;
 
   SmoothingApproximation(/* default */)
       : SmoothingApproximation(1.0 /* scale */,
                                0.0 /* angle tolerance */,
                                0.0 /* cusp limit */) {}
 
-  SmoothingApproximation(Scalar pScale,
-                         Scalar pAngleTolerance,
-                         Scalar pCuspLimit)
-      : scale(pScale),
-        angleTolerance(pAngleTolerance),
-        cuspLimit(pCuspLimit),
-        distanceToleranceSquare(0.5 * pScale * 0.5 * pScale) {}
+  SmoothingApproximation(Scalar p_scale,
+                         Scalar p_angle_tolerance,
+                         Scalar p_cusp_limit)
+      : scale(p_scale),
+        angle_tolerance(p_angle_tolerance),
+        cusp_limit(p_cusp_limit),
+        distance_tolerance_square(0.5 * p_scale * 0.5 * p_scale) {}
 };
 
 struct LinearPathComponent {
@@ -67,7 +67,7 @@ struct QuadraticPathComponent {
   std::vector<Point> SmoothPoints(
       const SmoothingApproximation& approximation) const;
 
-  std::vector<Point> Sxtrema() const;
+  std::vector<Point> Extrema() const;
 
   bool operator==(const QuadraticPathComponent& other) const {
     return p1 == other.p1 && cp == other.cp && p2 == other.p2;

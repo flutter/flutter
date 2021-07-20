@@ -13,10 +13,10 @@ namespace impeller {
 
 class Path {
  public:
-  enum class ComponentType : uint8_t {
-    Linear,
-    Quadratic,
-    Cubic,
+  enum class ComponentType {
+    kLinear,
+    kQuadratic,
+    kCubic,
   };
 
   Path();
@@ -61,7 +61,7 @@ class Path {
 
  private:
   struct ComponentIndexPair {
-    ComponentType type = ComponentType::Linear;
+    ComponentType type = ComponentType::kLinear;
     size_t index = 0;
 
     ComponentIndexPair() {}
