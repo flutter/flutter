@@ -16,19 +16,19 @@ size_t Path::GetComponentCount() const {
 
 Path& Path::AddLinearComponent(Point p1, Point p2) {
   linears_.emplace_back(p1, p2);
-  components_.emplace_back(ComponentType::Linear, linears_.size() - 1);
+  components_.emplace_back(ComponentType::kLinear, linears_.size() - 1);
   return *this;
 }
 
 Path& Path::AddQuadraticComponent(Point p1, Point cp, Point p2) {
   quads_.emplace_back(p1, cp, p2);
-  components_.emplace_back(ComponentType::Quadratic, quads_.size() - 1);
+  components_.emplace_back(ComponentType::kQuadratic, quads_.size() - 1);
   return *this;
 }
 
 Path& Path::AddCubicComponent(Point p1, Point cp1, Point cp2, Point p2) {
   cubics_.emplace_back(p1, cp1, cp2, p2);
-  components_.emplace_back(ComponentType::Cubic, cubics_.size() - 1);
+  components_.emplace_back(ComponentType::kCubic, cubics_.size() - 1);
   return *this;
 }
 
@@ -38,17 +38,17 @@ void Path::EnumerateComponents(Applier<LinearPathComponent> linearApplier,
   size_t currentIndex = 0;
   for (const auto& component : components_) {
     switch (component.type) {
-      case ComponentType::Linear:
+      case ComponentType::kLinear:
         if (linearApplier) {
           linearApplier(currentIndex, linears_[component.index]);
         }
         break;
-      case ComponentType::Quadratic:
+      case ComponentType::kQuadratic:
         if (quadApplier) {
           quadApplier(currentIndex, quads_[component.index]);
         }
         break;
-      case ComponentType::Cubic:
+      case ComponentType::kCubic:
         if (cubicApplier) {
           cubicApplier(currentIndex, cubics_[component.index]);
         }
@@ -64,7 +64,7 @@ bool Path::GetLinearComponentAtIndex(size_t index,
     return false;
   }
 
-  if (components_[index].type != ComponentType::Linear) {
+  if (components_[index].type != ComponentType::kLinear) {
     return false;
   }
 
@@ -79,7 +79,7 @@ bool Path::GetQuadraticComponentAtIndex(
     return false;
   }
 
-  if (components_[index].type != ComponentType::Quadratic) {
+  if (components_[index].type != ComponentType::kQuadratic) {
     return false;
   }
 
@@ -93,7 +93,7 @@ bool Path::GetCubicComponentAtIndex(size_t index,
     return false;
   }
 
-  if (components_[index].type != ComponentType::Cubic) {
+  if (components_[index].type != ComponentType::kCubic) {
     return false;
   }
 
@@ -107,7 +107,7 @@ bool Path::UpdateLinearComponentAtIndex(size_t index,
     return false;
   }
 
-  if (components_[index].type != ComponentType::Linear) {
+  if (components_[index].type != ComponentType::kLinear) {
     return false;
   }
 
@@ -122,7 +122,7 @@ bool Path::UpdateQuadraticComponentAtIndex(
     return false;
   }
 
-  if (components_[index].type != ComponentType::Quadratic) {
+  if (components_[index].type != ComponentType::kQuadratic) {
     return false;
   }
 
@@ -136,7 +136,7 @@ bool Path::UpdateCubicComponentAtIndex(size_t index,
     return false;
   }
 
-  if (components_[index].type != ComponentType::Cubic) {
+  if (components_[index].type != ComponentType::kCubic) {
     return false;
   }
 
@@ -153,17 +153,17 @@ void Path::EnumerateSmoothPoints(
 
   for (const auto& component : components_) {
     switch (component.type) {
-      case ComponentType::Linear: {
+      case ComponentType::kLinear: {
         if (!enumerator(linears_[component.index].SmoothPoints())) {
           return;
         }
       } break;
-      case ComponentType::Quadratic: {
+      case ComponentType::kQuadratic: {
         if (!enumerator(quads_[component.index].SmoothPoints(approximation))) {
           return;
         }
       } break;
-      case ComponentType::Cubic: {
+      case ComponentType::kCubic: {
         if (!enumerator(cubics_[component.index].SmoothPoints(approximation))) {
           return;
         }
@@ -180,7 +180,7 @@ Rect Path::GetBoundingBox() const {
   }
 
   for (const auto& quad : quads_) {
-    box = box.WithPoints(quad.Sxtrema());
+    box = box.WithPoints(quad.Extrema());
   }
 
   for (const auto& cubic : cubics_) {
