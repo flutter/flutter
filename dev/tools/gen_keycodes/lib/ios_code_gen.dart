@@ -43,6 +43,21 @@ class IOSCodeGenerator extends PlatformCodeGenerator {
     return lines.sortedJoin().trimRight();
   }
 
+  Iterable<PhysicalKeyEntry> get _functionKeyData {
+    final RegExp functionKeyRe = RegExp(r'^f[0-9]+$');
+    return keyData.entries.where((PhysicalKeyEntry entry) {
+      return functionKeyRe.hasMatch(entry.constantName);
+    });
+  }
+
+  String get _functionKeys {
+    final StringBuffer result = StringBuffer();
+    for (final PhysicalKeyEntry entry in _functionKeyData) {
+      result.writeln('    ${toHex(entry.iOSScanCode)},  // ${entry.constantName}');
+    }
+    return result.toString().trimRight();
+  }
+
   String get _keyCodeToLogicalMap {
     final OutputLines<int> lines = OutputLines<int>('iOS keycode map');
     for (final LogicalKeyEntry entry in logicalData.entries) {
@@ -75,7 +90,7 @@ class IOSCodeGenerator extends PlatformCodeGenerator {
   String get _keyToModifierFlagMap {
     final StringBuffer modifierKeyMap = StringBuffer();
     for (final String name in kModifiersOfInterest) {
-      final String line = '{${toHex(logicalData.entryByName(name).iOSKeyCodeValues[0])}, kModifierFlag${lowerCamelToUpperCamel(name)}},';
+      final String line ='    {${toHex(logicalData.entryByName(name).iOSKeyCodeValues[0])}, kModifierFlag${lowerCamelToUpperCamel(name)}},';
       modifierKeyMap.writeln('    ${line.padRight(42)}// $name');
     }
     return modifierKeyMap.toString().trimRight();
@@ -85,7 +100,7 @@ class IOSCodeGenerator extends PlatformCodeGenerator {
   String get _modifierFlagToKeyMap {
     final StringBuffer modifierKeyMap = StringBuffer();
     for (final String name in kModifiersOfInterest) {
-      final String line = '{kModifierFlag${lowerCamelToUpperCamel(name)}, ${toHex(logicalData.entryByName(name).iOSKeyCodeValues[0])}},';
+      final String line ='    {kModifierFlag${lowerCamelToUpperCamel(name)}, ${toHex(logicalData.entryByName(name).iOSKeyCodeValues[0])}},';
       modifierKeyMap.writeln('    ${line.padRight(42)}// $name');
     }
     return modifierKeyMap.toString().trimRight();
@@ -104,7 +119,7 @@ class IOSCodeGenerator extends PlatformCodeGenerator {
   }
 
   @override
-  String get templatePath => path.join(dataRoot, 'ios_key_code_map_cc.tmpl');
+  String get templatePath => path.join(dataRoot, 'ios_key_code_map_mm.tmpl');
 
   @override
   String outputPath(String platform) => path.join(PlatformCodeGenerator.engineRoot,
@@ -119,6 +134,7 @@ class IOSCodeGenerator extends PlatformCodeGenerator {
       'MASK_CONSTANTS': _maskConstants,
       'IOS_SCAN_CODE_MAP': _scanCodeMap,
       'IOS_KEYCODE_LOGICAL_MAP': _keyCodeToLogicalMap,
+      'IOS_FUNCTION_KEY_SET': _functionKeys,
       'KEYCODE_TO_MODIFIER_FLAG_MAP': _keyToModifierFlagMap,
       'MODIFIER_FLAG_TO_KEYCODE_MAP': _modifierFlagToKeyMap,
       'SPECIAL_KEY_CONSTANTS': _specialKeyConstants,
