@@ -197,7 +197,7 @@ class Directionality extends InheritedWidget {
 ///
 /// Animating an [Opacity] widget directly causes the widget (and possibly its
 /// subtree) to rebuild each frame, which is not very efficient. Consider using
-/// an [AnimatedOpacity] instead.
+/// an [AnimatedOpacity] or a [FadeTransition] instead.
 ///
 /// ## Transparent image
 ///
@@ -1048,6 +1048,47 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
 ///
 /// [PhysicalModel] does the same but only supports shapes that can be expressed
 /// as rectangles with rounded corners.
+///
+/// {@tool dartpad --template=stateless_widget_material}
+///
+/// This example shows how to use a [PhysicalShape] on a centered [SizedBox]
+/// to clip it to a rounded rectangle using a [ShapeBorderClipper] and give it
+/// an orange color along with a shadow.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     appBar: AppBar(
+///       title: const Text('PhysicalShape Sample'),
+///     ),
+///     body: Center(
+///       child: PhysicalShape(
+///         elevation: 5.0,
+///         child: const SizedBox(
+///           child: Center(
+///             child: Text(
+///               'Hello, World!',
+///               style: TextStyle(
+///                 color: Colors.white,
+///                 fontSize: 20.0,
+///               ),
+///             ),
+///           ),
+///           height: 200.0,
+///           width: 200.0,
+///         ),
+///         clipper: ShapeBorderClipper(
+///           shape: RoundedRectangleBorder(
+///             borderRadius: BorderRadius.circular(10.0),
+///           )
+///         ),
+///         color: Colors.orange,
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///

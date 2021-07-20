@@ -47,6 +47,9 @@ class Cocoon {
   /// Url used to send results to.
   static const String baseCocoonApiUrl = 'https://flutter-dashboard.appspot.com/api';
 
+  /// Threshold to auto retry a failed test.
+  static const int retryNumber = 2;
+
   /// Underlying [FileSystem] to use.
   final FileSystem fs;
 
@@ -74,35 +77,28 @@ class Cocoon {
   /// 1. Run DeviceLab test, writing results to a known path
   /// 2. Request service account token from luci auth (valid for at least 3 minutes)
   /// 3. Upload results from (1) to Cocoon
-  Future<void> sendResultsPath(String resultsPath) async {
-    final File resultFile = fs.file(resultsPath);
-    final Map<String, dynamic> resultsJson = json.decode(await resultFile.readAsString()) as Map<String, dynamic>;
-    await _sendUpdateTaskRequest(resultsJson);
-  }
-
-  /// Send [TaskResult] to Cocoon.
-  // TODO(chillers): Remove when sendResultsPath is used in prod. https://github.com/flutter/flutter/issues/72457
-  Future<void> sendTaskResult({
-    required String builderName,
-    required TaskResult result,
-    required String gitBranch,
+  ///
+  /// The `resultsPath` is not available for all tests. When it doesn't show up, we
+  /// need to append `CommitBranch`, `CommitSha`, and `BuilderName`.
+  Future<void> sendResultsPath({
+    String? resultsPath,
+    bool? isTestFlaky,
+    String? gitBranch,
+    String? builderName,
+    String? testStatus,
   }) async {
-    assert(builderName != null);
-    assert(gitBranch != null);
-    assert(result != null);
-
-    // Skip logging on test runs
-    Logger.root.level = Level.ALL;
-    Logger.root.onRecord.listen((LogRecord rec) {
-      print('${rec.level.name}: ${rec.time}: ${rec.message}');
-    });
-
-    final Map<String, dynamic> updateRequest = _constructUpdateRequest(
-      gitBranch: gitBranch,
-      builderName: builderName,
-      result: result,
-    );
-    await _sendUpdateTaskRequest(updateRequest);
+    Map<String, dynamic> resultsJson = <String, dynamic>{};
+    if (resultsPath != null) {
+      final File resultFile = fs.file(resultsPath);
+      resultsJson = json.decode(await resultFile.readAsString()) as Map<String, dynamic>;
+    } else {
+      resultsJson['CommitBranch'] = gitBranch;
+      resultsJson['CommitSha'] = commitSha;
+      resultsJson['BuilderName'] = builderName;
+      resultsJson['NewStatus'] = testStatus;
+    }
+    resultsJson['TestFlaky'] = isTestFlaky ?? false;
+    await _sendUpdateTaskRequest(resultsJson);
   }
 
   /// Write the given parameters into an update task request and store the JSON in [resultsPath].
