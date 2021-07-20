@@ -692,7 +692,19 @@ void AccessibilityBridge::RequestAnnounce(const std::string message) {
 
 void AccessibilityBridge::UpdateScreenRects() {
   std::unordered_set<int32_t> visited_nodes;
-  UpdateScreenRects(kRootNodeId, SkM44{}, &visited_nodes);
+
+  // The embedder applies a special pixel ratio transform to the root of the
+  // view, and the accessibility bridge applies the inverse of this transform
+  // to the root node. However, this transform is not persisted in the flutter
+  // representation of the root node, so we need to account for it explicitly
+  // here.
+  float inverse_view_pixel_ratio = 1.f / last_seen_view_pixel_ratio_;
+  SkM44 inverse_view_pixel_ratio_transform;
+  inverse_view_pixel_ratio_transform.setScale(inverse_view_pixel_ratio,
+                                              inverse_view_pixel_ratio, 1.f);
+
+  UpdateScreenRects(kRootNodeId, inverse_view_pixel_ratio_transform,
+                    &visited_nodes);
 }
 
 void AccessibilityBridge::UpdateScreenRects(

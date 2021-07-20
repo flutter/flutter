@@ -842,6 +842,41 @@ TEST_F(AccessibilityBridgeTest, HitTest) {
   EXPECT_EQ(hit_node_id, 4u);
 }
 
+TEST_F(AccessibilityBridgeTest, HitTestWithPixelRatio) {
+  flutter::SemanticsNode node0;
+  node0.id = 0;
+  node0.rect.setLTRB(0, 0, 100, 100);
+  node0.flags |= static_cast<int32_t>(flutter::SemanticsFlags::kIsFocusable);
+
+  flutter::SemanticsNode node1;
+  node1.id = 1;
+  node1.rect.setLTRB(10, 10, 20, 20);
+  // Setting platform view id ensures this node is considered focusable.
+  node1.platformViewId = 1u;
+
+  node0.childrenInTraversalOrder = {1};
+  node0.childrenInHitTestOrder = {1};
+
+  accessibility_bridge_->AddSemanticsNodeUpdate(
+      {
+          {0, node0},
+          {1, node1},
+      },
+      // Pick a very small pixel ratio so that a point within the bounds of
+      // the node's root-space coordinates will be well outside the "screen"
+      // bounds of the node.
+      .1f);
+  RunLoopUntilIdle();
+
+  uint32_t hit_node_id;
+  auto callback = [&hit_node_id](fuchsia::accessibility::semantics::Hit hit) {
+    EXPECT_TRUE(hit.has_node_id());
+    hit_node_id = hit.node_id();
+  };
+  accessibility_bridge_->HitTest({15, 15}, callback);
+  EXPECT_EQ(hit_node_id, 0u);
+}
+
 TEST_F(AccessibilityBridgeTest, HitTestUnfocusableChild) {
   flutter::SemanticsNode node0;
   node0.id = 0;
