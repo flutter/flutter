@@ -150,7 +150,9 @@ def ExtractDartSDK(archive, os_name, arch, verbose):
   if os.path.isdir(dart_sdk):
     shutil.rmtree(dart_sdk)
 
-  extract_dest = os.path.join(FLUTTER_PREBUILTS_DIR, os_arch)
+  extract_dest = os.path.join(FLUTTER_PREBUILTS_DIR, os_arch, 'temp')
+  if os.path.isdir(extract_dest):
+    shutil.rmtree(extract_dest)
   os.makedirs(extract_dest, exist_ok=True)
 
   if verbose:
@@ -158,6 +160,8 @@ def ExtractDartSDK(archive, os_name, arch, verbose):
 
   with ZipFileWithPermissions(archive, "r") as z:
     z.extractall(extract_dest)
+
+  shutil.move(os.path.join(extract_dest, 'dart-sdk'), dart_sdk)
 
 
 def PrintFileIfSmall(file):
