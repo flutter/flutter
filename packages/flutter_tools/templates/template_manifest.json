@@ -6,6 +6,7 @@
         "templates/app/pubspec.yaml.tmpl",
         "templates/app/README.md.tmpl",
         "templates/app/test/widget_test.dart.tmpl",
+        "templates/app/winuwp.tmpl/.gitignore",
 
         "templates/app_shared/.gitignore.tmpl",
         "templates/app_shared/.idea/libraries/Dart_SDK.xml.tmpl",
