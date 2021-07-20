@@ -474,8 +474,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _selectionPainter.selectionWidthStyle = value;
   }
 
-
-  // TODO(justinmc): Remove, moved to TEM.
   /// The object that controls the text selection, used by this render object
   /// for implementing cut, copy, and paste keyboard shortcuts.
   ///
@@ -511,8 +509,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   // Start TextMetrics.
 
-  // TODO(justinmc): I could almost define this in TextMetrics, except for the
-  // assert...
   @override
   TextSelection getLineAtOffset(String text, TextPosition position) {
     assert(
