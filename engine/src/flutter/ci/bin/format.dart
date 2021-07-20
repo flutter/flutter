@@ -29,8 +29,8 @@ class FormattingException implements Exception {
   String toString() {
     final StringBuffer output = StringBuffer(runtimeType.toString());
     output.write(': $message');
-    final String stderr = result?.stderr! as String;
-    if (stderr.isNotEmpty) {
+    final String? stderr = result?.stderr as String?;
+    if (stderr?.isNotEmpty == true) {
       output.write(':\n$stderr');
     }
     return output.toString();
