@@ -104,6 +104,8 @@ const Map<String, String> identifierRewrites = <String, String>{
   'new': 'new_',
   'switch': 'switch_',
   'try': 'try_sms_star',
+  'door_back': 'door_back_door',
+  'door_front': 'door_front_door',
 };
 
 const Set<String> _iconsMirroredWhenRTL = <String>{
