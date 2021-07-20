@@ -236,8 +236,8 @@ typedef InitialRouteListFactory = List<Route<dynamic>> Function(String initialRo
 /// It is used by both [MaterialApp] and [CupertinoApp] to implement base
 /// functionality for an app.
 ///
-/// If a [MediaQuery] is not available above [WidgetsApp], a [MediaQuery] is
-/// built using [MediaQuery.fromWindow].
+/// Builds a [MediaQuery] using [MediaQuery.fromWindow], reuse an existing
+/// [MediaQuery] by setting the [useExistingMediaQuery] to true.
 ///
 /// Find references to many of the widgets that [WidgetsApp] wraps in the "See
 /// also" section.
@@ -332,6 +332,7 @@ class WidgetsApp extends StatefulWidget {
     this.shortcuts,
     this.actions,
     this.restorationScopeId,
+    this.useExistingMediaQuery = false,
   }) : assert(navigatorObservers != null),
        assert(routes != null),
        assert(
@@ -428,6 +429,7 @@ class WidgetsApp extends StatefulWidget {
     this.shortcuts,
     this.actions,
     this.restorationScopeId,
+    this.useExistingMediaQuery = false,
   }) : assert(
          routeInformationParser != null &&
          routerDelegate != null,
@@ -1116,6 +1118,13 @@ class WidgetsApp extends StatefulWidget {
   /// {@endtemplate}
   final String? restorationScopeId;
 
+  /// If true, only builds a [MediaQuery] if none is available above the
+  /// [WidgetsApp].
+  ///
+  /// If set to false [WidgetsApp] build a [MediaQuery] using
+  /// [MediaQuery.fromWindow].
+  final bool useExistingMediaQuery;
+
   /// If true, forces the performance overlay to be visible in all instances.
   ///
   /// Used by the `showPerformanceOverlay` observatory extension.
@@ -1647,7 +1656,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     );
 
     final MediaQueryData? data = MediaQuery.maybeOf(context);
-    if (data == null) {
+    if (!widget.useExistingMediaQuery || data == null) {
       child = MediaQuery.fromWindow(
         child: child,
       );
