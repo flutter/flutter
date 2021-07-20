@@ -541,9 +541,9 @@ class CanvasCompareTester {
     RenderWith([=](SkCanvas* c, SkPaint&) { c->translate(5, 10); },  //
                [=](DisplayListBuilder& b) { b.translate(5, 10); },   //
                cv_renderer, dl_renderer, "Translate 5, 10");
-    RenderWith([=](SkCanvas* c, SkPaint&) { c->scale(0.95, 0.95); },  //
-               [=](DisplayListBuilder& b) { b.scale(0.95, 0.95); },   //
-               cv_renderer, dl_renderer, "Scale 95%");
+    RenderWith([=](SkCanvas* c, SkPaint&) { c->scale(1.05, 1.05); },  //
+               [=](DisplayListBuilder& b) { b.scale(1.05, 1.05); },   //
+               cv_renderer, dl_renderer, "Scale +5%");
     RenderWith([=](SkCanvas* c, SkPaint&) { c->rotate(5); },  //
                [=](DisplayListBuilder& b) { b.rotate(5); },   //
                cv_renderer, dl_renderer, "Rotate 5 degrees");
@@ -732,6 +732,45 @@ class CanvasCompareTester {
       compareToReference(test_surface.get(), &ref_pixels,
                          info + " (Sk->DL render)", nullptr, nullptr);
     }
+
+    {
+      // This sequence renders the SkCanvas calls to an SkPictureRecorder and
+      // renders the DisplayList calls to a DisplayListBuilder and then
+      // renders both back under a transform (scale(2x)) to see if their
+      // rendering is affected differently by a change of matrix between
+      // recording time and rendering time.
+      const int TestWidth2 = TestWidth * 2;
+      const int TestHeight2 = TestHeight * 2;
+      const SkScalar TestScale = 2.0;
+
+      SkPictureRecorder sk_recorder;
+      SkCanvas* ref_canvas = sk_recorder.beginRecording(TestBounds);
+      SkPaint ref_paint;
+      cv_setup(ref_canvas, ref_paint);
+      cv_render(ref_canvas, ref_paint);
+      sk_sp<SkPicture> ref_picture = sk_recorder.finishRecordingAsPicture();
+      sk_sp<SkSurface> ref_surface2 = makeSurface(bg, TestWidth2, TestHeight2);
+      SkCanvas* ref_canvas2 = ref_surface2->getCanvas();
+      ref_canvas2->scale(TestScale, TestScale);
+      ref_picture->playback(ref_canvas2);
+      SkPixmap ref_pixels2;
+      ASSERT_TRUE(ref_surface2->peekPixels(&ref_pixels2)) << info;
+      ASSERT_EQ(ref_pixels2.width(), TestWidth2) << info;
+      ASSERT_EQ(ref_pixels2.height(), TestHeight2) << info;
+      ASSERT_EQ(ref_pixels2.info().bytesPerPixel(), 4) << info;
+
+      DisplayListBuilder builder(TestBounds);
+      dl_setup(builder);
+      dl_render(builder);
+      sk_sp<DisplayList> display_list = builder.Build();
+      sk_sp<SkSurface> test_surface = makeSurface(bg, TestWidth2, TestHeight2);
+      SkCanvas* test_canvas = test_surface->getCanvas();
+      test_canvas->scale(TestScale, TestScale);
+      display_list->RenderTo(test_canvas);
+      compareToReference(test_surface.get(), &ref_pixels2,
+                         info + " (SKP/DL render scaled 2x)", nullptr, nullptr,
+                         TestWidth2, TestHeight2, false);
+    }
   }
 
   static void checkPixels(SkPixmap* ref_pixels,
@@ -760,24 +799,27 @@ class CanvasCompareTester {
                                  SkPixmap* reference,
                                  const std::string info,
                                  SkRect* bounds,
-                                 const SkColor* bg) {
+                                 const SkColor* bg,
+                                 int width = TestWidth,
+                                 int height = TestHeight,
+                                 bool printMismatches = false) {
     SkPMColor untouched = (bg) ? SkPreMultiplyColor(*bg) : 0;
     SkPixmap test_pixels;
     ASSERT_TRUE(test_surface->peekPixels(&test_pixels)) << info;
-    ASSERT_EQ(test_pixels.width(), TestWidth) << info;
-    ASSERT_EQ(test_pixels.height(), TestHeight) << info;
+    ASSERT_EQ(test_pixels.width(), width) << info;
+    ASSERT_EQ(test_pixels.height(), height) << info;
     ASSERT_EQ(test_pixels.info().bytesPerPixel(), 4) << info;
 
     int pixels_different = 0;
     int pixels_oob = 0;
-    int minX = TestWidth;
-    int minY = TestWidth;
+    int minX = width;
+    int minY = height;
     int maxX = 0;
     int maxY = 0;
-    for (int y = 0; y < TestHeight; y++) {
+    for (int y = 0; y < height; y++) {
       const uint32_t* ref_row = reference->addr32(0, y);
       const uint32_t* test_row = test_pixels.addr32(0, y);
-      for (int x = 0; x < TestWidth; x++) {
+      for (int x = 0; x < width; x++) {
         if (bounds && test_row[x] != untouched) {
           if (minX > x)
             minX = x;
@@ -792,6 +834,11 @@ class CanvasCompareTester {
           }
         }
         if (test_row[x] != ref_row[x]) {
+          if (printMismatches) {
+            FML_LOG(ERROR) << "pix[" << x << ", " << y
+                           << "] mismatch: " << std::hex << test_row[x]
+                           << "(test) != (ref)" << ref_row[x] << std::dec;
+          }
           pixels_different++;
         }
       }
@@ -809,9 +856,10 @@ class CanvasCompareTester {
     ASSERT_EQ(pixels_different, 0) << info;
   }
 
-  static sk_sp<SkSurface> makeSurface(const SkColor* bg) {
-    sk_sp<SkSurface> surface =
-        SkSurface::MakeRasterN32Premul(TestWidth, TestHeight);
+  static sk_sp<SkSurface> makeSurface(const SkColor* bg,
+                                      int width = TestWidth,
+                                      int height = TestHeight) {
+    sk_sp<SkSurface> surface = SkSurface::MakeRasterN32Premul(width, height);
     if (bg) {
       surface->getCanvas()->drawColor(*bg);
     }
