@@ -5,14 +5,18 @@
     capabilities: [
         {
             directory: "diagnostics",
-            rights: [ "connect" ],
+            rights: [
+                "connect",
+            ],
             path: "/diagnostics",
         },
     ],
     use: [
         {
             directory: "config-data",
-            rights: [ "r*" ],
+            rights: [
+                "r*",
+            ],
             path: "/config/data",
         },
         {

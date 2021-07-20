@@ -1,29 +1,29 @@
 {
-  "program": {
-    "data": "data"
-  },
-  "sandbox": {
-    "features": [
-      "config-data",
-      "root-ssl-certificates",
-      "vulkan",
-      "isolated-cache-storage"
-    ],
-    "services": [
-      "fuchsia.accessibility.SettingsManager",
-      "fuchsia.accessibility.semantics.SemanticsManager",
-      "fuchsia.deprecatedtimezone.Timezone",
-      "fuchsia.device.NameProvider",
-      "fuchsia.feedback.CrashReporter",
-      "fuchsia.fonts.Provider",
-      "fuchsia.intl.PropertyProvider",
-      "fuchsia.logger.LogSink",
-      "fuchsia.net.NameLookup",
-      "fuchsia.posix.socket.Provider",
-      "fuchsia.sysmem.Allocator",
-      "fuchsia.timezone.Timezone",
-      "fuchsia.tracing.provider.Registry",
-      "fuchsia.vulkan.loader.Loader"
-    ]
-  }
+    "program": {
+        "data": "data"
+    },
+    "sandbox": {
+        "features": [
+            "config-data",
+            "isolated-cache-storage",
+            "root-ssl-certificates",
+            "vulkan"
+        ],
+        "services": [
+            "fuchsia.accessibility.SettingsManager",
+            "fuchsia.accessibility.semantics.SemanticsManager",
+            "fuchsia.deprecatedtimezone.Timezone",
+            "fuchsia.device.NameProvider",
+            "fuchsia.feedback.CrashReporter",
+            "fuchsia.fonts.Provider",
+            "fuchsia.intl.PropertyProvider",
+            "fuchsia.logger.LogSink",
+            "fuchsia.net.NameLookup",
+            "fuchsia.posix.socket.Provider",
+            "fuchsia.sysmem.Allocator",
+            "fuchsia.timezone.Timezone",
+            "fuchsia.tracing.provider.Registry",
+            "fuchsia.vulkan.loader.Loader"
+        ]
+    }
 }
