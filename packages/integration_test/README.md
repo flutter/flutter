@@ -104,7 +104,7 @@ This feature is currently supported on Android, and Web.
 
 #### Android
 
-***integration_test/screenshot_test.dart**
+**integration_test/screenshot_test.dart**
 
 ```dart
 void main() {
@@ -128,7 +128,7 @@ void main() {
 You can use a driver script to pull in the screenshot from the device.
 This way, you can store the images locally on your computer.
 
-***test_driver/integration_test.dart**
+**test_driver/integration_test.dart**
 
 ```dart
 import 'dart:io';
@@ -148,7 +148,7 @@ Future<void> main() async {
 
 #### Web
 
-***integration_test/screenshot_test.dart**
+**integration_test/screenshot_test.dart**
 
 ```dart
 void main() {
