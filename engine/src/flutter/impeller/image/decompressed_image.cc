@@ -18,7 +18,7 @@ DecompressedImage::DecompressedImage(
     Format format,
     std::shared_ptr<const fml::Mapping> allocation)
     : size_(size), format_(format), allocation_(std::move(allocation)) {
-  if (!allocation_ || !size.IsPositive() || format_ == Format::Invalid) {
+  if (!allocation_ || !size.IsPositive() || format_ == Format::kInvalid) {
     return;
   }
   is_valid_ = true;
@@ -45,15 +45,15 @@ const std::shared_ptr<const fml::Mapping>& DecompressedImage::GetAllocation()
 
 static size_t GetBytesPerPixel(DecompressedImage::Format format) {
   switch (format) {
-    case DecompressedImage::Format::Invalid:
+    case DecompressedImage::Format::kInvalid:
       return 0u;
-    case DecompressedImage::Format::Grey:
+    case DecompressedImage::Format::kGrey:
       return 1u;
-    case DecompressedImage::Format::GreyAlpha:
+    case DecompressedImage::Format::kGreyAlpha:
       return 1u;
-    case DecompressedImage::Format::RGB:
+    case DecompressedImage::Format::kRGB:
       return 3u;
-    case DecompressedImage::Format::RGBA:
+    case DecompressedImage::Format::kRGBA:
       return 4;
   }
   return 0u;
@@ -64,7 +64,7 @@ DecompressedImage DecompressedImage::ConvertToRGBA() const {
     return {};
   }
 
-  if (format_ == Format::RGBA) {
+  if (format_ == Format::kRGBA) {
     return DecompressedImage{size_, format_, allocation_};
   }
 
@@ -84,26 +84,26 @@ DecompressedImage DecompressedImage::ConvertToRGBA() const {
 
   for (size_t i = 0, j = 0; i < source_byte_size; i += bpp, j += 4u) {
     switch (format_) {
-      case DecompressedImage::Format::Grey:
+      case DecompressedImage::Format::kGrey:
         dest[j + 0] = source[i];
         dest[j + 1] = source[i];
         dest[j + 2] = source[i];
         dest[j + 3] = std::numeric_limits<uint8_t>::max();
         break;
-      case DecompressedImage::Format::GreyAlpha:
+      case DecompressedImage::Format::kGreyAlpha:
         dest[j + 0] = std::numeric_limits<uint8_t>::max();
         dest[j + 1] = std::numeric_limits<uint8_t>::max();
         dest[j + 2] = std::numeric_limits<uint8_t>::max();
         dest[j + 3] = source[i];
         break;
-      case DecompressedImage::Format::RGB:
+      case DecompressedImage::Format::kRGB:
         dest[j + 0] = source[i + 0];
         dest[j + 1] = source[i + 1];
         dest[j + 2] = source[i + 2];
         dest[j + 3] = std::numeric_limits<uint8_t>::max();
         break;
-      case DecompressedImage::Format::Invalid:
-      case DecompressedImage::Format::RGBA:
+      case DecompressedImage::Format::kInvalid:
+      case DecompressedImage::Format::kRGBA:
         // Should never happen. The necessary checks have already been
         // performed.
         FML_CHECK(false);
@@ -112,7 +112,7 @@ DecompressedImage DecompressedImage::ConvertToRGBA() const {
   }
 
   return DecompressedImage{
-      size_, Format::RGBA,
+      size_, Format::kRGBA,
       std::make_shared<fml::NonOwnedMapping>(
           rgba_allocation->GetBuffer(),      //
           rgba_allocation->GetLength(),      //

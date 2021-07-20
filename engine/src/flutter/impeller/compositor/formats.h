@@ -23,7 +23,7 @@ class Texture;
 ///             component, and then one or more qualifiers to its
 ///             interpretation.
 ///
-///             For instance, `kR8G8B8A8_UNormInt_SRGB` is a 32 bits-per-pixel
+///             For instance, `kR8G8B8A8UNormIntSRGB` is a 32 bits-per-pixel
 ///             format ordered in RGBA with 8 bits per component with each
 ///             component expressed as an unsigned normalized integer and a
 ///             conversion from sRGB to linear color space.
@@ -46,12 +46,12 @@ class Texture;
 ///
 enum class PixelFormat {
   kUnknown,
-  kR8G8B8A8_UNormInt,
-  kR8G8B8A8_UNormInt_SRGB,
-  kB8G8R8A8_UNormInt,
-  kB8G8R8A8_UNormInt_SRGB,
+  kR8G8B8A8UNormInt,
+  kR8G8B8A8UNormIntSRGB,
+  kB8G8R8A8UNormInt,
+  kB8G8R8A8UNormIntSRGB,
   // Esoteric formats only used as render targets.
-  kD32_Float_S8_UNormInt,
+  kD32FloatS8UNormInt,
 };
 
 enum class BlendFactor {
@@ -140,12 +140,12 @@ constexpr size_t BytesPerPixelForPixelFormat(PixelFormat format) {
   switch (format) {
     case PixelFormat::kUnknown:
       return 0u;
-    case PixelFormat::kR8G8B8A8_UNormInt:
-    case PixelFormat::kR8G8B8A8_UNormInt_SRGB:
-    case PixelFormat::kB8G8R8A8_UNormInt:
-    case PixelFormat::kB8G8R8A8_UNormInt_SRGB:
+    case PixelFormat::kR8G8B8A8UNormInt:
+    case PixelFormat::kR8G8B8A8UNormIntSRGB:
+    case PixelFormat::kB8G8R8A8UNormInt:
+    case PixelFormat::kB8G8R8A8UNormIntSRGB:
       return 4u;
-    case PixelFormat::kD32_Float_S8_UNormInt:
+    case PixelFormat::kD32FloatS8UNormInt:
       // This is an esoteric format and implementations may use 64 bits.
       // Impeller doesn't work with these natively and this return is only here
       // for completeness. The 40 bits is as documented.

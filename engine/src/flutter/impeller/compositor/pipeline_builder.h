@@ -85,7 +85,7 @@ struct PipelineBuilder {
       // TODO(csg): This can be easily reflected but we are sticking to the
       // convention that the first stage output is the color output.
       PipelineColorAttachment color0;
-      color0.format = PixelFormat::kB8G8R8A8_UNormInt;
+      color0.format = PixelFormat::kB8G8R8A8UNormInt;
       desc.SetColorAttachmentDescriptor(0u, std::move(color0));
     }
 
