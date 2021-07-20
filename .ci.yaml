@@ -1179,7 +1179,7 @@ targets:
 
   - name: Linux flutter_gallery__image_cache_memory
     builder: Linux flutter_gallery__image_cache_memory
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/86685
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/86643
     presubmit: false
     properties:
       tags: >
