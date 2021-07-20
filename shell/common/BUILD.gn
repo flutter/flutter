@@ -89,7 +89,6 @@ source_set("common") {
     "shell_io_manager.h",
     "skia_event_tracer_impl.cc",
     "skia_event_tracer_impl.h",
-    "snapshot_surface_producer.h",
     "switches.cc",
     "switches.h",
     "thread_host.cc",
