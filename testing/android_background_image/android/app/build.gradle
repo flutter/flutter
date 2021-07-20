@@ -1,0 +1,47 @@
+apply plugin: 'com.android.application'
+
+android {
+    lintOptions {
+        abortOnError true
+        checkAllWarnings true
+        showAll true
+        warningsAsErrors true
+        checkTestSources true
+        // UnpackedNativeCode can break stack unwinding - see b/193408481
+        // NewerVersionAvailable and GradleDependency need to be taken care of
+        // by a roller rather than as part of CI.
+        // The others are irrelevant for a test application.
+        disable 'UnpackedNativeCode','MissingApplicationIcon','GoogleAppIndexingApiWarning','GoogleAppIndexingWarning','GradleDependency','NewerVersionAvailable'
+    }
+    compileSdkVersion 30
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    defaultConfig {
+        applicationId 'dev.flutter.android_background_image'
+        minSdkVersion 16
+        targetSdkVersion 30
+        versionCode 1
+        versionName '1.0'
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    sourceSets.main {
+        assets.srcDirs += "${project.buildDir}/assets"
+        if (project.hasProperty('libapp')) {
+            jni.srcDirs = []
+            jniLibs.srcDirs = [project.property('libapp')]
+        }
+    }
+}
+
+dependencies {
+    implementation files(project.property('flutter_jar'))
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.lifecycle:lifecycle-common-java8:2.2.0-alpha01'
+}
