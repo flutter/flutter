@@ -1031,6 +1031,10 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// the [State.didUpdateWidget] method.
   @mustCallSuper
   FocusAttachment attach(BuildContext? context, {FocusOnKeyCallback? onKey}) {
+    assert(
+      onKey == null && this.onKey != null,
+      'Overwriting `focusNode.onKey` to null may not be an intentional design.'
+    );
     _context = context;
     this.onKey = onKey;
     _attachment = FocusAttachment._(this);
