@@ -332,7 +332,7 @@ def RunJavaTests(filter, android_variant='android_debug_unopt'):
   RunCmd(command)
 
 
-def RunObjcTests(ios_variant='ios_debug_sim_unopt'):
+def RunObjcTests(ios_variant='ios_debug_sim_unopt', test_filter=None):
   """Runs Objective-C XCTest unit tests for the iOS embedding"""
   AssertExpectedXcodeVersion()
   ios_out_dir = os.path.join(out_dir, ios_variant)
@@ -352,6 +352,8 @@ def RunObjcTests(ios_variant='ios_debug_sim_unopt'):
     'test '
     'FLUTTER_ENGINE=' + ios_variant
   ]
+  if test_filter != None:
+    command[0] = command[0] + " -only-testing:%s" % test_filter
   RunCmd(command, cwd=ios_unit_test_dir, shell=True)
 
 def RunDartTests(build_dir, filter, verbose_dart_snapshot):
@@ -509,6 +511,8 @@ def main():
       help='The engine build variant to run objective-c tests for')
   parser.add_argument('--verbose-dart-snapshot', dest='verbose_dart_snapshot', action='store_true',
       default=False, help='Show extra dart snapshot logging.')
+  parser.add_argument('--objc-filter', type=str, default=None,
+      help='Filter parameter for which objc tests to run (example: "IosUnitTestsTests/SemanticsObjectTest/testShouldTriggerAnnouncement")')
 
   args = parser.parse_args()
 
@@ -546,7 +550,7 @@ def main():
 
   if 'objc' in types:
     assert IsMac(), "iOS embedding tests can only be run on macOS."
-    RunObjcTests(args.ios_variant)
+    RunObjcTests(args.ios_variant, args.objc_filter)
 
   # https://github.com/flutter/flutter/issues/36300
   if 'benchmarks' in types and not IsWindows():
