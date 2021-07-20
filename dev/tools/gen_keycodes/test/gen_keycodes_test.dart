@@ -22,20 +22,16 @@ String readDataFile(String fileName) {
   return File(path.join(dataRoot, fileName)).readAsStringSync();
 }
 
-final String dataRoot = path.canonicalize(path.join(Directory.current.absolute.path, 'data'));
 final String testPhysicalData = path.join(dataRoot, 'physical_key_data.json');
 final String testLogicalData = path.join(dataRoot,'logical_key_data.json');
 
 void main() {
-  late String oldDataRoot;
   setUp(() {
-    oldDataRoot = dataRoot;
-    testDataRoot = dataRoot;
+    testDataRoot = path.canonicalize(path.join(Directory.current.absolute.path, 'data'));
   });
 
   tearDown((){
-    testDataRoot = oldDataRoot;
-    oldDataRoot = '';
+    testDataRoot = null;
   });
 
   void checkCommonOutput(String output) {
@@ -118,8 +114,6 @@ void main() {
     expect(output, contains('keyCodeToLogicalKey'));
     expect(output, contains('keyCodeToModifierFlag'));
     expect(output, contains('modifierFlagToKeyCode'));
-    expect(output, contains('sidedModifierToAny'));
-    expect(output, contains('anyModifierToLeft'));
     expect(output, contains('functionKeyCodes'));
     expect(output, contains('kCapsLockPhysicalKey'));
     expect(output, contains('kCapsLockLogicalKey'));

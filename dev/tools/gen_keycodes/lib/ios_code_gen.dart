@@ -21,24 +21,6 @@ const List<String> kModifiersOfInterest = <String>[
   'MetaRight',
 ];
 
-const Map<String, String> sidedModifierToAny = <String, String>{
-  'ShiftLeft': 'ShiftAny',
-  'ShiftRight': 'ShiftAny',
-  'ControlLeft': 'ControlAny',
-  'ControlRight': 'ControlAny',
-  'AltLeft': 'AltAny',
-  'AltRight': 'AltAny',
-  'MetaLeft': 'MetaAny',
-  'MetaRight': 'MetaAny',
-};
-
-const Map<String, String> unsidedModifierToLeft = <String, String>{
-  'ShiftAny': 'ShiftLeft',
-  'ControlAny': 'ControlLeft',
-  'AltAny': 'AltLeft',
-  'MetaAny': 'MetaLeft',
-};
-
 // The name of keys that require special attention.
 const List<String> kSpecialPhysicalKeys = <String>['CapsLock'];
 const List<String> kSpecialLogicalKeys = <String>['CapsLock'];
@@ -114,26 +96,6 @@ class IOSCodeGenerator extends PlatformCodeGenerator {
     return modifierKeyMap.toString().trimRight();
   }
 
-  /// This generates a map from a sided modifier (e.g. LeftShift) to the
-  /// equivalent unsided modifier (e.g. ShiftAny).
-  String get _sidedModifierToAnyMap {
-    final StringBuffer modifierKeyMap = StringBuffer();
-    for (final String name in sidedModifierToAny.keys) {
-      modifierKeyMap.writeln('    {kModifierFlag$name, kModifierFlag${sidedModifierToAny[name]!}},');
-    }
-    return modifierKeyMap.toString().trimRight();
-  }
-
-  /// This generates a map from an unsided modifier (e.g. ShiftAny) to the
-  /// left-sided equivalent sided modifier (e.g. LeftShift).
-  String get _unsidedModifierToLeftMap {
-    final StringBuffer modifierKeyMap = StringBuffer();
-    for (final String name in unsidedModifierToLeft.keys) {
-      modifierKeyMap.writeln('    {kModifierFlag$name, kModifierFlag${unsidedModifierToLeft[name]!}},');
-    }
-    return modifierKeyMap.toString().trimRight();
-  }
-
   /// This generates a map from the modifier flag to the key code.
   String get _modifierFlagToKeyMap {
     final StringBuffer modifierKeyMap = StringBuffer();
@@ -174,8 +136,6 @@ class IOSCodeGenerator extends PlatformCodeGenerator {
       'IOS_KEYCODE_LOGICAL_MAP': _keyCodeToLogicalMap,
       'IOS_FUNCTION_KEY_SET': _functionKeys,
       'KEYCODE_TO_MODIFIER_FLAG_MAP': _keyToModifierFlagMap,
-      'SIDED_MODIFIER_TO_ANY_MAP': _sidedModifierToAnyMap,
-      'UNSIDED_MODIFIER_TO_LEFT_MAP': _unsidedModifierToLeftMap,
       'MODIFIER_FLAG_TO_KEYCODE_MAP': _modifierFlagToKeyMap,
       'SPECIAL_KEY_CONSTANTS': _specialKeyConstants,
     };
