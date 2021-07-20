@@ -13,7 +13,3 @@
 /captures
 .externalNativeBuild
 .cache
-
-!gradlew
-!gradlew.bat
-!gradle/wrapper/**

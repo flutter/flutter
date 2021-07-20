@@ -15,7 +15,6 @@
 #include "flutter/fml/platform/android/scoped_java_ref.h"
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/shell/common/platform_view.h"
-#include "flutter/shell/common/snapshot_surface_producer.h"
 #include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "flutter/shell/platform/android/platform_view_android_delegate/platform_view_android_delegate.h"
@@ -126,7 +125,6 @@ class PlatformViewAndroid final : public PlatformView {
   PlatformViewAndroidDelegate platform_view_android_delegate_;
 
   std::unique_ptr<AndroidSurface> android_surface_;
-
   // We use id 0 to mean that no response is expected.
   int next_response_id_ = 1;
   std::unordered_map<int, fml::RefPtr<flutter::PlatformMessageResponse>>
@@ -152,10 +150,6 @@ class PlatformViewAndroid final : public PlatformView {
 
   // |PlatformView|
   std::shared_ptr<ExternalViewEmbedder> CreateExternalViewEmbedder() override;
-
-  // |PlatformView|
-  std::unique_ptr<SnapshotSurfaceProducer> CreateSnapshotSurfaceProducer()
-      override;
 
   // |PlatformView|
   sk_sp<GrDirectContext> CreateResourceContext() const override;
