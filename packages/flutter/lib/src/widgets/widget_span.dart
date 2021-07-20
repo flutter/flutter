@@ -8,17 +8,6 @@ import 'package:flutter/painting.dart';
 
 import 'framework.dart';
 
-/// A function that generates a plain text String to represent the WidgetSpan.
-///
-/// WidgetSpans used in Editable text fields and SelectableText should be
-/// represented in the TextEditingValue by a String. This function is called
-/// to generate the plaintext representation that is expected to be found in
-/// place of the widget.
-///
-/// This function is only needed if proper caret and clipboard behavior is
-/// expected.
-typedef WidgetSpanPlainTextGenerator = String Function(Widget, ui.PlaceholderAlignment, TextBaseline?, TextStyle?);
-
 /// An immutable widget that is embedded inline within text.
 ///
 /// The [child] property is the widget that will be embedded. Children are
@@ -80,12 +69,12 @@ class WidgetSpan extends PlaceholderSpan {
   ///
   /// A [TextStyle] may be provided with the [style] property, but only the
   /// decoration, foreground, background, and spacing options will be used.
-  WidgetSpan({
+  const WidgetSpan({
     required this.child,
     ui.PlaceholderAlignment alignment = ui.PlaceholderAlignment.bottom,
     TextBaseline? baseline,
     TextStyle? style,
-    WidgetSpanPlainTextGenerator? plainTextGenerator,
+    String? plainText,
   }) : assert(child != null),
        assert(
          baseline != null || !(
@@ -98,7 +87,7 @@ class WidgetSpan extends PlaceholderSpan {
          alignment: alignment,
          baseline: baseline,
          style: style,
-         plainText: plainTextGenerator!(child, alignment, baseline, style),
+         plainText: plainText,
        );
 
   /// The widget to embed inline within text.
