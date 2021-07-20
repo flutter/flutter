@@ -8,7 +8,7 @@
 
 #include "impeller/compositor/formats.h"
 #include "impeller/geometry/size.h"
-#include "impeller/image/image.h"
+#include "impeller/image/decompressed_image.h"
 
 namespace impeller {
 

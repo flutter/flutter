@@ -8,8 +8,8 @@ impeller_component("image") {
   sources = [
     "compressed_image.cc",
     "compressed_image.h",
-    "image.cc",
-    "image.h",
+    "decompressed_image.cc",
+    "decompressed_image.h",
   ]
 
   deps = [ "../third_party/stb" ]

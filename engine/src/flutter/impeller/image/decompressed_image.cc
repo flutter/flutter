@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "impeller/image/image.h"
+#include "impeller/image/decompressed_image.h"
 
 #include <limits>
 
@@ -11,11 +11,12 @@
 
 namespace impeller {
 
-Image::Image() = default;
+DecompressedImage::DecompressedImage() = default;
 
-Image::Image(ISize size,
-             Format format,
-             std::shared_ptr<const fml::Mapping> allocation)
+DecompressedImage::DecompressedImage(
+    ISize size,
+    Format format,
+    std::shared_ptr<const fml::Mapping> allocation)
     : size_(size), format_(format), allocation_(std::move(allocation)) {
   if (!allocation_ || !size.IsPositive() || format_ == Format::Invalid) {
     return;
@@ -23,47 +24,48 @@ Image::Image(ISize size,
   is_valid_ = true;
 }
 
-Image::~Image() = default;
+DecompressedImage::~DecompressedImage() = default;
 
-bool Image::IsValid() const {
+bool DecompressedImage::IsValid() const {
   return is_valid_;
 }
 
-const ISize& Image::GetSize() const {
+const ISize& DecompressedImage::GetSize() const {
   return size_;
 }
 
-Image::Format Image::GetFormat() const {
+DecompressedImage::Format DecompressedImage::GetFormat() const {
   return format_;
 }
 
-const std::shared_ptr<const fml::Mapping>& Image::GetAllocation() const {
+const std::shared_ptr<const fml::Mapping>& DecompressedImage::GetAllocation()
+    const {
   return allocation_;
 }
 
-static size_t GetBytesPerPixel(Image::Format format) {
+static size_t GetBytesPerPixel(DecompressedImage::Format format) {
   switch (format) {
-    case Image::Format::Invalid:
+    case DecompressedImage::Format::Invalid:
       return 0u;
-    case Image::Format::Grey:
+    case DecompressedImage::Format::Grey:
       return 1u;
-    case Image::Format::GreyAlpha:
+    case DecompressedImage::Format::GreyAlpha:
       return 1u;
-    case Image::Format::RGB:
+    case DecompressedImage::Format::RGB:
       return 3u;
-    case Image::Format::RGBA:
+    case DecompressedImage::Format::RGBA:
       return 4;
   }
   return 0u;
 }
 
-Image Image::ConvertToRGBA() const {
+DecompressedImage DecompressedImage::ConvertToRGBA() const {
   if (!is_valid_) {
     return {};
   }
 
   if (format_ == Format::RGBA) {
-    return Image{size_, format_, allocation_};
+    return DecompressedImage{size_, format_, allocation_};
   }
 
   const auto bpp = GetBytesPerPixel(format_);
@@ -82,26 +84,26 @@ Image Image::ConvertToRGBA() const {
 
   for (size_t i = 0, j = 0; i < source_byte_size; i += bpp, j += 4u) {
     switch (format_) {
-      case Image::Format::Grey:
+      case DecompressedImage::Format::Grey:
         dest[j + 0] = source[i];
         dest[j + 1] = source[i];
         dest[j + 2] = source[i];
         dest[j + 3] = std::numeric_limits<uint8_t>::max();
         break;
-      case Image::Format::GreyAlpha:
+      case DecompressedImage::Format::GreyAlpha:
         dest[j + 0] = std::numeric_limits<uint8_t>::max();
         dest[j + 1] = std::numeric_limits<uint8_t>::max();
         dest[j + 2] = std::numeric_limits<uint8_t>::max();
         dest[j + 3] = source[i];
         break;
-      case Image::Format::RGB:
+      case DecompressedImage::Format::RGB:
         dest[j + 0] = source[i + 0];
         dest[j + 1] = source[i + 1];
         dest[j + 2] = source[i + 2];
         dest[j + 3] = std::numeric_limits<uint8_t>::max();
         break;
-      case Image::Format::Invalid:
-      case Image::Format::RGBA:
+      case DecompressedImage::Format::Invalid:
+      case DecompressedImage::Format::RGBA:
         // Should never happen. The necessary checks have already been
         // performed.
         FML_CHECK(false);
@@ -109,7 +111,7 @@ Image Image::ConvertToRGBA() const {
     }
   }
 
-  return Image{
+  return DecompressedImage{
       size_, Format::RGBA,
       std::make_shared<fml::NonOwnedMapping>(
           rgba_allocation->GetBuffer(),      //

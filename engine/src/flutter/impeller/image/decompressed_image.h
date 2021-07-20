@@ -13,7 +13,7 @@
 
 namespace impeller {
 
-class Image {
+class DecompressedImage {
  public:
   enum class Format {
     Invalid,
@@ -23,13 +23,13 @@ class Image {
     RGBA,
   };
 
-  Image();
+  DecompressedImage();
 
-  Image(ISize size,
-        Format format,
-        std::shared_ptr<const fml::Mapping> allocation);
+  DecompressedImage(ISize size,
+                    Format format,
+                    std::shared_ptr<const fml::Mapping> allocation);
 
-  ~Image();
+  ~DecompressedImage();
 
   const ISize& GetSize() const;
 
@@ -39,7 +39,7 @@ class Image {
 
   const std::shared_ptr<const fml::Mapping>& GetAllocation() const;
 
-  Image ConvertToRGBA() const;
+  DecompressedImage ConvertToRGBA() const;
 
  private:
   ISize size_;
