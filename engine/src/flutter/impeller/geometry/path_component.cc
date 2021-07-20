@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "path_component.h"
+
 #include <cmath>
 
 namespace impeller {
