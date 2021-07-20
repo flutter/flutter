@@ -69,12 +69,18 @@ class WidgetSpan extends PlaceholderSpan {
   ///
   /// A [TextStyle] may be provided with the [style] property, but only the
   /// decoration, foreground, background, and spacing options will be used.
+  ///
+  /// The [plainText] parameter specifies how the WidgetSpan is respresented as
+  /// a plaintext String. This String's length is also used by the text selection and
+  /// caret to properly navigate the [TextEditingValue.text].
+  ///
+  /// The default plainText is a object replacement character (0xFFFC). 
   const WidgetSpan({
     required this.child,
     ui.PlaceholderAlignment alignment = ui.PlaceholderAlignment.bottom,
     TextBaseline? baseline,
     TextStyle? style,
-    String? plainText,
+    String plainText = '\uFFFC',
   }) : assert(child != null),
        assert(
          baseline != null || !(
