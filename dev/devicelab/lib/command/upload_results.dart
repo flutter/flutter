@@ -13,7 +13,7 @@ class UploadResultsCommand extends Command<void> {
       'service-account-token-file',
       help: 'Authentication token for uploading results.',
     );
-    argParser.addOption('test-flaky', help: 'Flag to show whether the test is flaky');
+    argParser.addOption('test-flaky', help: 'Flag to show whether the test is flaky: "True" or "False"');
     argParser.addOption(
       'git-branch',
       help: '[Flutter infrastructure] Git branch of the current commit. LUCI\n'
