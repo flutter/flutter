@@ -6,8 +6,6 @@ source_set("surface") {
   sources = [
     "android_surface.cc",
     "android_surface.h",
-    "snapshot_surface_producer.cc",
-    "snapshot_surface_producer.h",
   ]
 
   public_configs = [ "//flutter:config" ]
@@ -16,7 +14,6 @@ source_set("surface") {
     ":native_window",
     "//flutter/flow",
     "//flutter/fml",
-    "//flutter/shell/common",
     "//flutter/shell/platform/android/context",
     "//flutter/shell/platform/android/jni",
     "//third_party/skia",

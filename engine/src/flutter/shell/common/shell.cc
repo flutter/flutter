@@ -634,8 +634,6 @@ bool Shell::Setup(std::unique_ptr<PlatformView> platform_view,
   // Set the external view embedder for the rasterizer.
   auto view_embedder = platform_view_->CreateExternalViewEmbedder();
   rasterizer_->SetExternalViewEmbedder(view_embedder);
-  rasterizer_->SetSnapshotSurfaceProducer(
-      platform_view_->CreateSnapshotSurfaceProducer());
 
   // The weak ptr must be generated in the platform thread which owns the unique
   // ptr.

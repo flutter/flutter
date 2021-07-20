@@ -67,6 +67,7 @@ void PlatformView::SetViewportMetrics(const ViewportMetrics& metrics) {
 
 void PlatformView::NotifyCreated() {
   std::unique_ptr<Surface> surface;
+
   // Threading: We want to use the platform view on the non-platform thread.
   // Using the weak pointer is illegal. But, we are going to introduce a latch
   // so that the platform view is not collected till the surface is obtained.
@@ -179,11 +180,6 @@ void PlatformView::UpdateAssetResolverByType(
     std::unique_ptr<AssetResolver> updated_asset_resolver,
     AssetResolver::AssetResolverType type) {
   delegate_.UpdateAssetResolverByType(std::move(updated_asset_resolver), type);
-}
-
-std::unique_ptr<SnapshotSurfaceProducer>
-PlatformView::CreateSnapshotSurfaceProducer() {
-  return nullptr;
 }
 
 }  // namespace flutter

@@ -24,7 +24,6 @@
 #include "flutter/fml/time/time_point.h"
 #include "flutter/lib/ui/snapshot_delegate.h"
 #include "flutter/shell/common/pipeline.h"
-#include "flutter/shell/common/snapshot_surface_producer.h"
 
 namespace flutter {
 
@@ -99,7 +98,7 @@ class Rasterizer final : public SnapshotDelegate {
   ///             currently only created by the shell (which also sets itself up
   ///             as the rasterizer delegate).
   ///
-  /// @param[in]  delegate                   The rasterizer delegate.
+  /// @param[in]  delegate            The rasterizer delegate.
   ///
   Rasterizer(Delegate& delegate);
 
@@ -351,17 +350,6 @@ class Rasterizer final : public SnapshotDelegate {
       const std::shared_ptr<ExternalViewEmbedder>& view_embedder);
 
   //----------------------------------------------------------------------------
-  /// @brief Set the snapshot surface producer. This is done on shell
-  ///        initialization. This is non-null on platforms that support taking
-  ///        GPU accelerated raster snapshots in the background.
-  ///
-  /// @param[in]  producer  A surface producer for raster snapshotting when the
-  ///                       onscreen surface is not available.
-  ///
-  void SetSnapshotSurfaceProducer(
-      std::unique_ptr<SnapshotSurfaceProducer> producer);
-
-  //----------------------------------------------------------------------------
   /// @brief      Returns a pointer to the compositor context used by this
   ///             rasterizer. This pointer will never be `nullptr`.
   ///
@@ -446,7 +434,6 @@ class Rasterizer final : public SnapshotDelegate {
  private:
   Delegate& delegate_;
   std::unique_ptr<Surface> surface_;
-  std::unique_ptr<SnapshotSurfaceProducer> snapshot_surface_producer_;
   std::unique_ptr<flutter::CompositorContext> compositor_context_;
   // This is the last successfully rasterized layer tree.
   std::unique_ptr<flutter::LayerTree> last_layer_tree_;

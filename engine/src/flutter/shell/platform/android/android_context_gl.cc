@@ -227,16 +227,6 @@ std::unique_ptr<AndroidEGLSurface> AndroidContextGL::CreateOffscreenSurface()
                                              resource_context_);
 }
 
-std::unique_ptr<AndroidEGLSurface> AndroidContextGL::CreatePbufferSurface()
-    const {
-  EGLDisplay display = environment_->Display();
-
-  const EGLint attribs[] = {EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE};
-
-  EGLSurface surface = eglCreatePbufferSurface(display, config_, attribs);
-  return std::make_unique<AndroidEGLSurface>(surface, display, context_);
-}
-
 fml::RefPtr<AndroidEnvironmentGL> AndroidContextGL::Environment() const {
   return environment_;
 }

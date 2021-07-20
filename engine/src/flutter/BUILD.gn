@@ -121,11 +121,6 @@ group("flutter") {
     public_deps += [ "//flutter/testing/scenario_app" ]
   }
 
-  if (is_android && flutter_runtime_mode == "profile" &&
-      current_cpu == "arm64") {
-    public_deps += [ "//flutter/testing/android_background_image" ]
-  }
-
   # Compile all unittests targets if enabled.
   if (enable_unittests) {
     public_deps += [
