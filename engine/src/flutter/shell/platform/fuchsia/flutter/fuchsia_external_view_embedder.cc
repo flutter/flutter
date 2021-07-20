@@ -109,7 +109,7 @@ FuchsiaExternalViewEmbedder::FuchsiaExternalViewEmbedder(
     std::string debug_label,
     fuchsia::ui::views::ViewToken view_token,
     scenic::ViewRefPair view_ref_pair,
-    DefaultSessionConnection& session,
+    GfxSessionConnection& session,
     VulkanSurfaceProducer& surface_producer,
     bool intercept_all_input)
     : session_(session),
