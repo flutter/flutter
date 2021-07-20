@@ -29,6 +29,12 @@ import 'theme.dart';
 /// The [onReorder] parameter is required and will be called when a child
 /// widget is dragged to a new position.
 ///
+/// A drag handle is stacked over the center of edge on
+/// [TargetPlatformVariant.desktop] platforms. On [TargetPlatformVariant.mobile]
+/// platforms, no handle is visible and a long press anywhere on the item starts
+/// a drag. To change this behavior use
+/// [ReorderableListView.buildDefaultDragHandles].
+///
 /// {@tool dartpad --template=stateful_widget_scaffold}
 ///
 /// ```dart
