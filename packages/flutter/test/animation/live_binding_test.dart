@@ -42,12 +42,12 @@ void main() {
 
     await tester.pumpFrames(target, const Duration(milliseconds: 50));
 
-    final TestGesture gesture1 = await tester.createGesture();
+    final TestGesture gesture1 = await tester.createGesture(pointer: 1);
     await gesture1.down(tester.getCenter(find.byType(InkWell)) + const Offset(10, 10));
 
     await tester.pumpFrames(target, const Duration(milliseconds: 100));
 
-    final TestGesture gesture2 = await tester.createGesture();
+    final TestGesture gesture2 = await tester.createGesture(pointer: 2);
     await gesture2.down(tester.getTopLeft(find.byType(InkWell)) + const Offset(30, -10));
     await gesture1.moveBy(const Offset(50, 50));
 
@@ -92,12 +92,12 @@ void main() {
 
     await tester.pumpFrames(target, const Duration(milliseconds: 50));
 
-    final TestGesture gesture1 = await tester.createGesture();
+    final TestGesture gesture1 = await tester.createGesture(pointer: 1);
     await gesture1.down(tester.getCenter(find.byType(InkWell)) + const Offset(10, 10));
 
     await tester.pumpFrames(target, const Duration(milliseconds: 100));
 
-    final TestGesture gesture2 = await tester.createGesture();
+    final TestGesture gesture2 = await tester.createGesture(pointer: 2);
     await gesture2.down(tester.getTopLeft(find.byType(InkWell)) + const Offset(30, -10));
     await gesture1.moveBy(const Offset(50, 50));
 
