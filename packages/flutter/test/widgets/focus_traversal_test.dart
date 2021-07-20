@@ -2015,6 +2015,11 @@ void main() {
       expect(events.length, 2);
     });
 
+    testWidgets('Focus traversal does not throw when no focusable is available in a group', (WidgetTester tester) async {
+      await tester.pumpWidget(const MaterialApp(home: Scaffold(body: ListTile(title: Text('title')))));
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    });
+
     testWidgets('Focus traversal does not break when no focusable is available on a WidgetsApp', (WidgetTester tester) async {
       final List<RawKeyEvent> events = <RawKeyEvent>[];
 
