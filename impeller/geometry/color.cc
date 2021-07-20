@@ -11,13 +11,13 @@
 namespace impeller {
 
 ColorHSB ColorHSB::FromRGB(Color rgb) {
-  double R = rgb.red;
-  double G = rgb.green;
-  double B = rgb.blue;
+  Scalar R = rgb.red;
+  Scalar G = rgb.green;
+  Scalar B = rgb.blue;
 
-  double v = 0.0;
-  double x = 0.0;
-  double f = 0.0;
+  Scalar v = 0.0;
+  Scalar x = 0.0;
+  Scalar f = 0.0;
 
   int64_t i = 0;
 
@@ -38,13 +38,13 @@ ColorHSB ColorHSB::FromRGB(Color rgb) {
 }
 
 Color ColorHSB::ToRGBA() const {
-  double h = hue * 6.0;
-  double s = saturation;
-  double v = brightness;
+  Scalar h = hue * 6.0;
+  Scalar s = saturation;
+  Scalar v = brightness;
 
-  double m = 0.0;
-  double n = 0.0;
-  double f = 0.0;
+  Scalar m = 0.0;
+  Scalar n = 0.0;
+  Scalar f = 0.0;
 
   int64_t i = 0;
 
