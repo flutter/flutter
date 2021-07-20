@@ -91,7 +91,7 @@ Future<void> integrationDriver(
     print('result $jsonResponse');
   }
 
-  if (onScreenshot != null) {
+  if (response.data != null && response.data!['screenshots'] != null && onScreenshot != null) {
     final List<dynamic> screenshots = response.data!['screenshots'] as List<dynamic>;
     final List<String> failures = <String>[];
     for (final dynamic screenshot in screenshots) {
