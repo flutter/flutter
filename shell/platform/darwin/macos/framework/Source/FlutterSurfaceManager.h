@@ -49,6 +49,12 @@
             bufferIndex:(size_t)index
                    size:(CGSize)size;
 
+/**
+ * Tells the delegate that IOSurface with given index has been released. Delegate should free
+ * all resources associated with the surface
+ */
+- (void)onSurfaceReleased:(size_t)index;
+
 @end
 
 /**
