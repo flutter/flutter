@@ -265,7 +265,7 @@ String getBranchName({
   @visibleForTesting
   ProcessManager processManager = const LocalProcessManager(),
 }) {
-  final String? luciBranch = platform.environment['LUCI_BRANCH'];
+  final String luciBranch = platform.environment['LUCI_BRANCH'];
   if (luciBranch != null && luciBranch.trim().isNotEmpty) {
     return luciBranch.trim();
   }
