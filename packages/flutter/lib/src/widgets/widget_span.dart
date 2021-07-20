@@ -136,21 +136,6 @@ class WidgetSpan extends PlaceholderSpan {
     }
   }
 
-  /// Calls `visitor` on this [WidgetSpan]. There are no children spans to walk.
-  @override
-  bool visitChildren(InlineSpanVisitor visitor) {
-    return visitor(this);
-  }
-
-  @override
-  InlineSpan? getSpanForPositionVisitor(TextPosition position, Accumulator offset) {
-    if (position.offset == offset.value) {
-      return this;
-    }
-    offset.increment(1);
-    return null;
-  }
-
   @override
   int? codeUnitAtVisitor(int index, Accumulator offset) {
     return null;
@@ -167,7 +152,7 @@ class WidgetSpan extends PlaceholderSpan {
     final WidgetSpan typedOther = other as WidgetSpan;
     if (child != typedOther.child ||
         alignment != typedOther.alignment ||
-        plainTextGenerator != typedOther.plainTextGenerator) {
+        plainText != typedOther.plainText) {
       return RenderComparison.layout;
     }
     RenderComparison result = RenderComparison.identical;

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 
-import 'dart:ui' as ui show PlaceholderAlignment;
+import 'dart:ui' as ui show ParagraphBuilder, PlaceholderAlignment;
 
 import 'package:flutter/foundation.dart';
 
@@ -70,6 +70,7 @@ class PlaceholderSpan extends InlineSpan {
   @override
   void build(ui.ParagraphBuilder builder, { double textScaleFactor = 1.0, List<PlaceholderDimensions>? dimensions }) {
     assert(debugAssertIsValid());
+    final bool hasStyle = style != null;
     if (hasStyle) {
       builder.pushStyle(style!.getTextStyle(textScaleFactor: textScaleFactor));
     }
@@ -99,6 +100,12 @@ class PlaceholderSpan extends InlineSpan {
     }
   }
 
+  /// Calls `visitor` on this [PlaceholderSpan]. There are no children spans to walk.
+  @override
+  bool visitChildren(InlineSpanVisitor visitor) {
+    return visitor(this);
+  }
+
   @override
   int? codeUnitAtVisitor(int index, Accumulator offset) {
     return null;
@@ -110,6 +117,7 @@ class PlaceholderSpan extends InlineSpan {
       return RenderComparison.identical;
     if (other.runtimeType != runtimeType)
       return RenderComparison.layout;
+    final WidgetSpan typedOther = other as PlaceholderSpan;
     if (child != typedOther.child ||
         alignment != typedOther.alignment ||
         plainText != typedOther.plainText) {
@@ -124,6 +132,20 @@ class PlaceholderSpan extends InlineSpan {
         return result;
     }
     return result;
+  }
+
+  @override
+  InlineSpan? getSpanForPositionVisitor(TextPosition position, Accumulator offset) {
+    final TextAffinity affinity = position.affinity;
+    final int targetOffset = position.offset;
+    final int endOffset = offset.value + plainText.length;
+    if (offset.value == targetOffset && affinity == TextAffinity.downstream ||
+        offset.value < targetOffset && targetOffset < endOffset ||
+        endOffset == targetOffset && affinity == TextAffinity.upstream) {
+      return this;
+    }
+    offset.increment(plainText.length);
+    return null;
   }
 
   @override
