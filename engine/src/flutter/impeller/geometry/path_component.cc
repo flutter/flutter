@@ -91,7 +91,7 @@ std::vector<Point> QuadraticPathComponent::SmoothPoints(
   return elevated.SmoothPoints(approximation);
 }
 
-std::vector<Point> QuadraticPathComponent::Sxtrema() const {
+std::vector<Point> QuadraticPathComponent::Extrema() const {
   CubicPathComponent elevated(*this);
   return elevated.Extrema();
 }
@@ -193,12 +193,12 @@ static void CubicPathSmoothenRecursive(const SmoothingApproximation& approx,
       }
 
       if (d2 > d3) {
-        if (d2 < approx.distanceToleranceSquare) {
+        if (d2 < approx.distance_tolerance_square) {
           points.emplace_back(p2);
           return;
         }
       } else {
-        if (d3 < approx.distanceToleranceSquare) {
+        if (d3 < approx.distance_tolerance_square) {
           points.emplace_back(p3);
           return;
         }
@@ -208,8 +208,9 @@ static void CubicPathSmoothenRecursive(const SmoothingApproximation& approx,
       /*
        *  p1, p2, p4 are collinear, p3 is significant.
        */
-      if (d3 * d3 <= approx.distanceToleranceSquare * (d.x * d.x + d.y * d.y)) {
-        if (approx.angleTolerance < kCurveAngleToleranceEpsilon) {
+      if (d3 * d3 <=
+          approx.distance_tolerance_square * (d.x * d.x + d.y * d.y)) {
+        if (approx.angle_tolerance < kCurveAngleToleranceEpsilon) {
           points.emplace_back(p23);
           return;
         }
@@ -224,14 +225,14 @@ static void CubicPathSmoothenRecursive(const SmoothingApproximation& approx,
           da1 = 2.0 * M_PI - da1;
         }
 
-        if (da1 < approx.angleTolerance) {
+        if (da1 < approx.angle_tolerance) {
           points.emplace_back(p2);
           points.emplace_back(p3);
           return;
         }
 
-        if (approx.cuspLimit != 0.0) {
-          if (da1 > approx.cuspLimit) {
+        if (approx.cusp_limit != 0.0) {
+          if (da1 > approx.cusp_limit) {
             points.emplace_back(p3);
             return;
           }
@@ -243,8 +244,9 @@ static void CubicPathSmoothenRecursive(const SmoothingApproximation& approx,
       /*
        *  p1,p3,p4 are collinear, p2 is significant.
        */
-      if (d2 * d2 <= approx.distanceToleranceSquare * (d.x * d.x + d.y * d.y)) {
-        if (approx.angleTolerance < kCurveAngleToleranceEpsilon) {
+      if (d2 * d2 <=
+          approx.distance_tolerance_square * (d.x * d.x + d.y * d.y)) {
+        if (approx.angle_tolerance < kCurveAngleToleranceEpsilon) {
           points.emplace_back(p23);
           return;
         }
@@ -259,14 +261,14 @@ static void CubicPathSmoothenRecursive(const SmoothingApproximation& approx,
           da1 = 2.0 * M_PI - da1;
         }
 
-        if (da1 < approx.angleTolerance) {
+        if (da1 < approx.angle_tolerance) {
           points.emplace_back(p2);
           points.emplace_back(p3);
           return;
         }
 
-        if (approx.cuspLimit != 0.0) {
-          if (da1 > approx.cuspLimit) {
+        if (approx.cusp_limit != 0.0) {
+          if (da1 > approx.cusp_limit) {
             points.emplace_back(p2);
             return;
           }
@@ -279,12 +281,12 @@ static void CubicPathSmoothenRecursive(const SmoothingApproximation& approx,
        *  Regular case.
        */
       if ((d2 + d3) * (d2 + d3) <=
-          approx.distanceToleranceSquare * (d.x * d.x + d.y * d.y)) {
+          approx.distance_tolerance_square * (d.x * d.x + d.y * d.y)) {
         /*
          *  If the curvature doesn't exceed the distance_tolerance value
          *  we tend to finish subdivisions.
          */
-        if (approx.angleTolerance < kCurveAngleToleranceEpsilon) {
+        if (approx.angle_tolerance < kCurveAngleToleranceEpsilon) {
           points.emplace_back(p23);
           return;
         }
@@ -304,7 +306,7 @@ static void CubicPathSmoothenRecursive(const SmoothingApproximation& approx,
           da2 = 2.0 * M_PI - da2;
         }
 
-        if (da1 + da2 < approx.angleTolerance) {
+        if (da1 + da2 < approx.angle_tolerance) {
           /*
            *  Finally we can stop the recursion.
            */
@@ -312,13 +314,13 @@ static void CubicPathSmoothenRecursive(const SmoothingApproximation& approx,
           return;
         }
 
-        if (approx.cuspLimit != 0.0) {
-          if (da1 > approx.cuspLimit) {
+        if (approx.cusp_limit != 0.0) {
+          if (da1 > approx.cusp_limit) {
             points.emplace_back(p2);
             return;
           }
 
-          if (da2 > approx.cuspLimit) {
+          if (da2 > approx.cusp_limit) {
             points.emplace_back(p3);
             return;
           }

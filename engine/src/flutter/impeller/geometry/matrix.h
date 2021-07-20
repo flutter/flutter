@@ -43,11 +43,11 @@ struct Matrix {
     Quaternion rotation;
 
     enum class Component {
-      Translation = 1 << 0,
-      Scale = 1 << 1,
-      Shear = 1 << 2,
-      Perspective = 1 << 3,
-      Rotation = 1 << 4,
+      kTranslation = 1 << 0,
+      kScale = 1 << 1,
+      kShear = 1 << 2,
+      kPerspective = 1 << 3,
+      kRotation = 1 << 4,
     };
 
     uint64_t GetComponentsMask() const;
