@@ -53,9 +53,8 @@ class Path {
 
   bool UpdateCubicComponentAtIndex(size_t index, CubicPathComponent& cubic);
 
-  using SmoothPointsEnumerator = std::function<bool(std::vector<Point> points)>;
-  void EnumerateSmoothPoints(SmoothPointsEnumerator enumerator,
-                             const SmoothingApproximation& approximation) const;
+  std::vector<Point> SubdivideAdaptively(
+      const SmoothingApproximation& approximation) const;
 
   Rect GetBoundingBox() const;
 
