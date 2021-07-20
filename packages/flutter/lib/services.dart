@@ -40,5 +40,6 @@ export 'src/services/system_chrome.dart';
 export 'src/services/system_navigator.dart';
 export 'src/services/system_sound.dart';
 export 'src/services/text_editing.dart';
+export 'src/services/text_editing_value.dart';
 export 'src/services/text_formatter.dart';
 export 'src/services/text_input.dart';

@@ -3,31 +3,59 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui' show
+  TextAffinity,
+  hashValues;
 
 import 'package:characters/characters.dart';
-import 'package:flutter/foundation.dart' show immutable;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 
-// TODO(justinmc): Move this all onto TextEditingValue?
-/// State and logic for transforming that state related to Flutter's text
-/// editing.
-///
-/// Contains only generic text editing logic and purposely excludes specific
-/// business logic related to platforms and widgets.
+import 'text_editing.dart';
+
+TextAffinity? _toTextAffinity(String? affinity) {
+  switch (affinity) {
+    case 'TextAffinity.downstream':
+      return TextAffinity.downstream;
+    case 'TextAffinity.upstream':
+      return TextAffinity.upstream;
+  }
+  return null;
+}
+/// The current text, selection, and composing state for editing a run of text.
 @immutable
-class TextEditingModel {
-  /// Create an instance of TextEditingModel.
-  const TextEditingModel({
-    required this.value,
-  }) : assert(value != null);
+class TextEditingValue {
+  /// Creates information for editing a run of text.
+  ///
+  /// The selection and composing range must be within the text.
+  ///
+  /// The [text], [selection], and [composing] arguments must not be null but
+  /// each have default values.
+  const TextEditingValue({
+    this.text = '',
+    this.selection = const TextSelection.collapsed(offset: -1),
+    this.composing = TextRange.empty,
+  }) : assert(text != null),
+       assert(selection != null),
+       assert(composing != null);
 
-  /// The [TextEditingValue] that this TextEditingModel operates on.
-  final TextEditingValue value;
-
-  TextRange get _composing => value.composing;
-  TextSelection get _selection => value.selection;
-  String get _text => value.text;
+  /// Creates an instance of this class from a JSON object.
+  factory TextEditingValue.fromJSON(Map<String, dynamic> encoded) {
+    return TextEditingValue(
+      text: encoded['text'] as String,
+      selection: TextSelection(
+        baseOffset: encoded['selectionBase'] as int? ?? -1,
+        extentOffset: encoded['selectionExtent'] as int? ?? -1,
+        affinity: _toTextAffinity(encoded['selectionAffinity'] as String?) ?? TextAffinity.downstream,
+        isDirectional: encoded['selectionIsDirectional'] as bool? ?? false,
+      ),
+      composing: TextRange(
+        start: encoded['composingBase'] as int? ?? -1,
+        end: encoded['composingExtent'] as int? ?? -1,
+      ),
+    );
+  }
 
   /// Return the given [TextSelection] with its [TextSelection.extentOffset]
   /// moved left by one character.
@@ -341,8 +369,57 @@ class TextEditingModel {
     );
   }
 
-  /// {@template flutter.rendering.TextEditingModel.moveSelectionRightByLine}
-  /// Move the current [_selection] to the leftmost point of the current line.
+  /// Returns a representation of this object as a JSON object.
+  Map<String, dynamic> toJSON() {
+    return <String, dynamic>{
+      'text': text,
+      'selectionBase': selection.baseOffset,
+      'selectionExtent': selection.extentOffset,
+      'selectionAffinity': selection.affinity.toString(),
+      'selectionIsDirectional': selection.isDirectional,
+      'composingBase': composing.start,
+      'composingExtent': composing.end,
+    };
+  }
+
+  /// The current text being edited.
+  final String text;
+
+  /// The range of text that is currently selected.
+  final TextSelection selection;
+
+  /// The range of text that is still being composed.
+  final TextRange composing;
+
+  /// A value that corresponds to the empty string with no selection and no composing range.
+  static const TextEditingValue empty = TextEditingValue();
+
+  /// Creates a copy of this value but with the given fields replaced with the new values.
+  TextEditingValue copyWith({
+    String? text,
+    TextSelection? selection,
+    TextRange? composing,
+  }) {
+    return TextEditingValue(
+      text: text ?? this.text,
+      selection: selection ?? this.selection,
+      composing: composing ?? this.composing,
+    );
+  }
+
+  /// Whether the [composing] range is a valid range within [text].
+  ///
+  /// Returns true if and only if the [composing] range is normalized, its start
+  /// is greater than or equal to 0, and its end is less than or equal to
+  /// [text]'s length.
+  ///
+  /// If this property is false while the [composing] range's `isValid` is true,
+  /// it usually indicates the current [composing] range is invalid because of a
+  /// programming error.
+  bool get isComposingRangeValid => composing.isValid && composing.isNormalized && composing.end <= text.length;
+
+  /// {@template flutter.rendering.TextEditingValue.moveSelectionRightByLine}
+  /// Move the current [selection] to the leftmost point of the current line.
   /// {@endtemplate}
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
@@ -352,22 +429,22 @@ class TextEditingModel {
   ///   * [moveSelectionRightByLine], which is the same but in the opposite
   ///     direction.
   TextSelection moveSelectionLeftByLine(TextMetrics textMetrics) {
-    assert(_selection != null);
+    assert(selection != null);
 
     // If the previous character is the edge of a line, don't do anything.
-    final int previousPoint = TextEditingModel.previousCharacter(_selection.extentOffset, _text, true);
-    final TextSelection line = textMetrics.getLineAtOffset(_text, TextPosition(offset: previousPoint));
+    final int previousPoint = previousCharacter(selection.extentOffset, text, true);
+    final TextSelection line = textMetrics.getLineAtOffset(text, TextPosition(offset: previousPoint));
     if (line.extentOffset == previousPoint) {
-      return _selection;
+      return selection;
     }
 
     // When going left, we want to skip over any whitespace before the line,
     // so we go back to the first non-whitespace before asking for the line
     // bounds, since getLineAtOffset finds the line boundaries without
     // including whitespace (like the newline).
-    final int startPoint = TextEditingModel.previousCharacter(_selection.extentOffset, _text, false);
+    final int startPoint = previousCharacter(selection.extentOffset, text, false);
     final TextSelection selectedLine = textMetrics.getLineAtOffset(
-      _text,
+      text,
       TextPosition(offset: startPoint),
     );
     return TextSelection.collapsed(
@@ -384,12 +461,12 @@ class TextEditingModel {
   ///
   ///   * [extendSelectionToStart]
   TextSelection extendSelectionToEnd() {
-    if (_selection.extentOffset == _text.length) {
-      return _selection;
+    if (selection.extentOffset == text.length) {
+      return selection;
     }
 
-    return _selection.copyWith(
-      extentOffset: _text.length,
+    return selection.copyWith(
+      extentOffset: text.length,
     );
   }
 
@@ -416,23 +493,22 @@ class TextEditingModel {
     // done using the `previousCharacter` method instead of ICU, we can keep
     // deleting without having to layout the text. For this reason, we can
     // directly delete the character before the caret in the controller.
-    if (!_selection.isValid) {
-      return value;
+    if (!selection.isValid) {
+      return this;
     }
-    if (!_selection.isCollapsed) {
+    if (!selection.isCollapsed) {
       return _deleteNonEmptySelection();
     }
 
-    final String textBefore = _selection.textBefore(value.text);
+    final String textBefore = selection.textBefore(text);
     if (textBefore.isEmpty) {
-      return value;
+      return this;
     }
 
-    final String textAfter = _selection.textAfter(value.text);
+    final String textAfter = selection.textAfter(text);
 
-    final int characterBoundary = TextEditingModel.previousCharacter(textBefore.length, textBefore);
+    final int characterBoundary = previousCharacter(textBefore.length, textBefore);
     final TextSelection newSelection = TextSelection.collapsed(offset: characterBoundary);
-    final TextRange composing = value.composing;
     assert(textBefore.length >= characterBoundary);
     final TextRange newComposingRange = !composing.isValid || composing.isCollapsed
       ? TextRange.empty
@@ -457,17 +533,17 @@ class TextEditingModel {
   // text and returns true. Otherwise this method does nothing and returns
   // false.
   TextEditingValue _deleteNonEmptySelection() {
-    assert(_selection.isValid);
-    assert(!_selection.isCollapsed);
+    assert(selection.isValid);
+    assert(!selection.isCollapsed);
 
-    final String textBefore = _selection.textBefore(_text);
-    final String textAfter = _selection.textAfter(_text);
-    final TextSelection newSelection = TextSelection.collapsed(offset: _selection.start);
-    final TextRange newComposingRange = !_composing.isValid || _composing.isCollapsed
+    final String textBefore = selection.textBefore(text);
+    final String textAfter = selection.textAfter(text);
+    final TextSelection newSelection = TextSelection.collapsed(offset: selection.start);
+    final TextRange newComposingRange = !composing.isValid || composing.isCollapsed
       ? TextRange.empty
       : TextRange(
-        start: _composing.start - (_composing.start - _selection.start).clamp(0, _selection.end - _selection.start),
-        end: _composing.end - (_composing.end - _selection.start).clamp(0, _selection.end - _selection.start),
+        start: composing.start - (composing.start - selection.start).clamp(0, selection.end - selection.start),
+        end: composing.end - (composing.end - selection.start).clamp(0, selection.end - selection.start),
       );
 
     return TextEditingValue(
@@ -485,19 +561,19 @@ class TextEditingModel {
   /// See also:
   ///   * [deleteToEnd]
   TextEditingValue deleteToStart() {
-    assert(_selection.isCollapsed);
+    assert(selection.isCollapsed);
 
-    if (!_selection.isValid) {
-      return value;
+    if (!selection.isValid) {
+      return this;
     }
 
-    final String textBefore = _selection.textBefore(_text);
+    final String textBefore = selection.textBefore(text);
 
     if (textBefore.isEmpty) {
-      return value;
+      return this;
     }
 
-    final String textAfter = _selection.textAfter(_text);
+    final String textAfter = selection.textAfter(text);
     const TextSelection newSelection = TextSelection.collapsed(offset: 0);
     return TextEditingValue(text: textAfter, selection: newSelection);
   }
@@ -510,25 +586,25 @@ class TextEditingModel {
   /// See also:
   ///   * [deleteToStart]
   TextEditingValue deleteToEnd() {
-    assert(_selection.isCollapsed);
+    assert(selection.isCollapsed);
 
-    if (!_selection.isValid) {
-      return value;
+    if (!selection.isValid) {
+      return this;
     }
 
-    final String textAfter = _selection.textAfter(_text);
+    final String textAfter = selection.textAfter(text);
 
     if (textAfter.isEmpty) {
-      return value;
+      return this;
     }
 
-    final String textBefore = _selection.textBefore(_text);
+    final String textBefore = selection.textBefore(text);
     final TextSelection newSelection = TextSelection.collapsed(offset: textBefore.length);
     return TextEditingValue(text: textBefore, selection: newSelection);
   }
 
   // TODO(justinmc): Update the references on this whiteSpace template.
-  /// {@template flutter.rendering.TextEditingModel.whiteSpace}
+  /// {@template flutter.rendering.TextEditingValue.whiteSpace}
   /// Deletes a word backwards from the current selection.
   ///
   /// If the [selection] is collapsed, deletes a word before the cursor.
@@ -546,30 +622,30 @@ class TextEditingModel {
   ///
   ///   * [deleteForwardByWord], which is same but in the opposite direction.
   TextEditingValue deleteByWord(TextMetrics textMetrics, [bool includeWhitespace = true]) {
-    assert(_selection != null);
+    assert(selection != null);
 
-    if (!_selection.isValid) {
-      return value;
+    if (!selection.isValid) {
+      return this;
     }
 
-    if (!_selection.isCollapsed) {
+    if (!selection.isCollapsed) {
       return _deleteNonEmptySelection();
     }
 
-    String textBefore = _selection.textBefore(_text);
+    String textBefore = selection.textBefore(text);
     if (textBefore.isEmpty) {
-      return value;
+      return this;
     }
 
-    final int characterBoundary = TextEditingModel.getLeftByWord(_text, textMetrics, textBefore.length, includeWhitespace);
+    final int characterBoundary = getLeftByWord(text, textMetrics, textBefore.length, includeWhitespace);
     textBefore = textBefore.trimRight().substring(0, characterBoundary);
 
-    final String textAfter = _selection.textAfter(_text);
+    final String textAfter = selection.textAfter(text);
     final TextSelection newSelection = TextSelection.collapsed(offset: characterBoundary);
     return TextEditingValue(text: textBefore + textAfter, selection: newSelection);
   }
 
-  /// {@template flutter.rendering.TextEditingModel.deleteByLine}
+  /// {@template flutter.rendering.TextEditingValue.deleteByLine}
   /// Deletes a line backwards from the current selection.
   ///
   /// If the [selection] is collapsed, deletes a line before the cursor.
@@ -581,36 +657,36 @@ class TextEditingModel {
   ///
   ///   * [deleteForwardByLine], which is same but in the opposite direction.
   TextEditingValue deleteByLine(TextMetrics textMetrics) {
-    assert(_selection != null);
+    assert(selection != null);
 
-    if (!_selection.isValid) {
-      return value;
+    if (!selection.isValid) {
+      return this;
     }
 
-    if (!_selection.isCollapsed) {
+    if (!selection.isCollapsed) {
       return _deleteNonEmptySelection();
     }
 
-    String textBefore = _selection.textBefore(_text);
+    String textBefore = selection.textBefore(text);
     if (textBefore.isEmpty) {
-      return value;
+      return this;
     }
 
     // When there is a line break, line delete shouldn't do anything
     final bool isPreviousCharacterBreakLine = textBefore.codeUnitAt(textBefore.length - 1) == 0x0A;
     if (isPreviousCharacterBreakLine) {
-      return value;
+      return this;
     }
 
-    final TextSelection line = textMetrics.getLineAtOffset(_text, TextPosition(offset: textBefore.length - 1));
+    final TextSelection line = textMetrics.getLineAtOffset(text, TextPosition(offset: textBefore.length - 1));
     textBefore = textBefore.substring(0, line.start);
 
-    final String textAfter = _selection.textAfter(_text);
+    final String textAfter = selection.textAfter(text);
     final TextSelection newSelection = TextSelection.collapsed(offset: textBefore.length);
     return TextEditingValue(text: textBefore + textAfter, selection: newSelection);
   }
 
-  /// {@template flutter.rendering.TextEditingModel.deleteForward}
+  /// {@template flutter.rendering.TextEditingValue.deleteForward}
   /// Deletes in the forward direction.
   ///
   /// If the selection is collapsed, deletes a single character after the
@@ -625,21 +701,20 @@ class TextEditingModel {
   ///
   ///   * [delete], which is the same but in the opposite direction.
   TextEditingValue deleteForward() {
-    if (!_selection.isValid) {
-      return value;
+    if (!selection.isValid) {
+      return this;
     }
-    if (!_selection.isCollapsed) {
+    if (!selection.isCollapsed) {
       return _deleteNonEmptySelection();
     }
 
-    final String textAfter = _selection.textAfter(_text);
+    final String textAfter = selection.textAfter(text);
     if (textAfter.isEmpty) {
-      return value;
+      return this;
     }
 
-    final String textBefore = _selection.textBefore(_text);
-    final int characterBoundary = TextEditingModel.nextCharacter(0, textAfter);
-    final TextRange composing = _composing;
+    final String textBefore = selection.textBefore(text);
+    final int characterBoundary = nextCharacter(0, textAfter);
     final TextRange newComposingRange = !composing.isValid || composing.isCollapsed
       ? TextRange.empty
       : TextRange(
@@ -648,12 +723,12 @@ class TextEditingModel {
       );
     return TextEditingValue(
       text: textBefore + textAfter.substring(characterBoundary),
-      selection: _selection,
+      selection: selection,
       composing: newComposingRange,
     );
   }
 
-  /// {@template flutter.rendering.TextEditingModel.deleteForward}
+  /// {@template flutter.rendering.TextEditingValue.deleteForward}
   /// Deletes a word in the forward direction from the current selection.
   ///
   /// If the [selection] is collapsed, deletes a word after the cursor.
@@ -669,30 +744,30 @@ class TextEditingModel {
   ///
   ///   * [deleteByWord], which is same but in the opposite direction.
   TextEditingValue deleteForwardByWord(TextMetrics textMetrics, [bool includeWhitespace = true]) {
-    assert(_selection != null);
+    assert(selection != null);
 
-    if (!_selection.isValid) {
-      return value;
+    if (!selection.isValid) {
+      return this;
     }
 
-    if (!_selection.isCollapsed) {
+    if (!selection.isCollapsed) {
       return _deleteNonEmptySelection();
     }
 
-    String textAfter = _selection.textAfter(_text);
+    String textAfter = selection.textAfter(text);
 
     if (textAfter.isEmpty) {
-      return value;
+      return this;
     }
 
-    final String textBefore = _selection.textBefore(_text);
-    final int characterBoundary = TextEditingModel.getRightByWord(_text, textMetrics, textBefore.length, includeWhitespace);
+    final String textBefore = selection.textBefore(text);
+    final int characterBoundary = getRightByWord(text, textMetrics, textBefore.length, includeWhitespace);
     textAfter = textAfter.substring(characterBoundary - textBefore.length);
 
-    return TextEditingValue(text: textBefore + textAfter, selection: _selection);
+    return TextEditingValue(text: textBefore + textAfter, selection: selection);
   }
 
-  /// {@template flutter.rendering.TextEditingModel.deleteForwardByLine}
+  /// {@template flutter.rendering.TextEditingValue.deleteForwardByLine}
   /// Deletes a line in the forward direction from the current selection.
   ///
   /// If the [selection] is collapsed, deletes a line after the cursor.
@@ -704,35 +779,35 @@ class TextEditingModel {
   ///
   ///   * [deleteByLine], which is same but in the opposite direction.
   TextEditingValue deleteForwardByLine(TextMetrics textMetrics) {
-    assert(_selection != null);
+    assert(selection != null);
 
-    if (!_selection.isValid) {
-      return value;
+    if (!selection.isValid) {
+      return this;
     }
 
-    if (!_selection.isCollapsed) {
+    if (!selection.isCollapsed) {
       return _deleteNonEmptySelection();
     }
 
-    String textAfter = _selection.textAfter(_text);
+    String textAfter = selection.textAfter(text);
     if (textAfter.isEmpty) {
-      return value;
+      return this;
     }
 
     // When there is a line break, it shouldn't do anything.
     final bool isNextCharacterBreakLine = textAfter.codeUnitAt(0) == 0x0A;
     if (isNextCharacterBreakLine) {
-      return value;
+      return this;
     }
 
-    final String textBefore = _selection.textBefore(_text);
-    final TextSelection line = textMetrics.getLineAtOffset(_text, TextPosition(offset: textBefore.length));
+    final String textBefore = selection.textBefore(text);
+    final TextSelection line = textMetrics.getLineAtOffset(text, TextPosition(offset: textBefore.length));
     textAfter = textAfter.substring(line.end - textBefore.length, textAfter.length);
 
-    return TextEditingValue(text: textBefore + textAfter, selection: _selection);
+    return TextEditingValue(text: textBefore + textAfter, selection: selection);
   }
 
-  /// {@template flutter.rendering.TextEditingModel.extendSelectionDown}
+  /// {@template flutter.rendering.TextEditingValue.extendSelectionDown}
   /// Keeping [selection]'s [TextSelection.baseOffset] fixed, move the
   /// [TextSelection.extentOffset] down by one line.
   /// {@endtemplate}
@@ -743,26 +818,26 @@ class TextEditingModel {
   ///
   ///   * [extendSelectionUp], which is same but in the opposite direction.
   TextSelection extendSelectionDown(TextMetrics textMetrics) {
-    assert(_selection != null);
+    assert(selection != null);
 
     // If the selection is collapsed at the end of the field already, then
     // nothing happens.
-    if (_selection.isCollapsed && _selection.extentOffset >= _text.length) {
-      return _selection;
+    if (selection.isCollapsed && selection.extentOffset >= text.length) {
+      return selection;
     }
 
-    final TextPosition positionBelow = textMetrics.getTextPositionBelow(_selection.extentOffset);
-    if (positionBelow.offset == _selection.extentOffset) {
-      return _selection.copyWith(
-        extentOffset: _text.length,
+    final TextPosition positionBelow = textMetrics.getTextPositionBelow(selection.extentOffset);
+    if (positionBelow.offset == selection.extentOffset) {
+      return selection.copyWith(
+        extentOffset: text.length,
       );
     }
-    return _selection.copyWith(
+    return selection.copyWith(
       extentOffset: positionBelow.offset,
     );
   }
 
-  /// {@template flutter.rendering.TextEditingModel.expandSelectionToEnd}
+  /// {@template flutter.rendering.TextEditingValue.expandSelectionToEnd}
   /// Expand the current selection to the end of the field.
   ///
   /// The selection will never shrink. The [TextSelection.extentOffset] will
@@ -776,24 +851,24 @@ class TextEditingModel {
   ///
   ///   * [expandSelectionToStart], which is same but in the opposite direction.
   TextSelection expandSelectionToEnd() {
-    assert(_selection != null);
+    assert(selection != null);
 
-    if (_selection.extentOffset == _text.length) {
-      return _selection;
+    if (selection.extentOffset == text.length) {
+      return selection;
     }
 
     final int firstOffset = math.max(0, math.min(
-      _selection.baseOffset,
-      _selection.extentOffset,
+      selection.baseOffset,
+      selection.extentOffset,
     ));
     return TextSelection(
       baseOffset: firstOffset,
-      extentOffset: _text.length,
+      extentOffset: text.length,
     );
   }
 
-  /// {@template flutter.rendering.TextEditingModel.extendSelectionLeft}
-  /// Keeping [_selection]'s [TextSelection.baseOffset] fixed, move the
+  /// {@template flutter.rendering.TextEditingValue.extendSelectionLeft}
+  /// Keeping [selection]'s [TextSelection.baseOffset] fixed, move the
   /// [TextSelection.extentOffset] left.
   /// {@endtemplate}
   ///
@@ -803,16 +878,16 @@ class TextEditingModel {
   ///
   ///   * [extendSelectionRight], which is same but in the opposite direction.
   TextSelection extendSelectionLeft() {
-    assert(_selection != null);
+    assert(selection != null);
 
     return extendGivenSelectionLeft(
-      _selection,
-      _text,
+      selection,
+      text,
     );
   }
 
-  /// {@template flutter.rendering.TextEditingModel.extendSelectionLeftByLine}
-  /// Extend the current [_selection] to the start of
+  /// {@template flutter.rendering.TextEditingValue.extendSelectionLeftByLine}
+  /// Extend the current [selection] to the start of
   /// [TextSelection.extentOffset]'s line.
   ///
   /// Uses [TextSelection.baseOffset] as a pivot point and doesn't change it.
@@ -829,27 +904,27 @@ class TextEditingModel {
   ///   * [expandSelectionRightByLine], which strictly grows the selection
   ///     regardless of the order.
   TextSelection extendSelectionLeftByLine(TextMetrics textMetrics) {
-    assert(_selection != null);
+    assert(selection != null);
 
     // When going left, we want to skip over any whitespace before the line,
     // so we go back to the first non-whitespace before asking for the line
     // bounds, since getLineAtOffset finds the line boundaries without
     // including whitespace (like the newline).
-    final int startPoint = TextEditingModel.previousCharacter(_selection.extentOffset, _text, false);
-    final TextSelection selectedLine = textMetrics.getLineAtOffset(_text, TextPosition(offset: startPoint));
+    final int startPoint = previousCharacter(selection.extentOffset, text, false);
+    final TextSelection selectedLine = textMetrics.getLineAtOffset(text, TextPosition(offset: startPoint));
 
-    if (_selection.extentOffset > _selection.baseOffset) {
-      return _selection.copyWith(
-        extentOffset: _selection.baseOffset,
+    if (selection.extentOffset > selection.baseOffset) {
+      return selection.copyWith(
+        extentOffset: selection.baseOffset,
       );
     }
-    return _selection.copyWith(
+    return selection.copyWith(
       extentOffset: selectedLine.baseOffset,
     );
   }
 
-  /// {@template flutter.rendering.TextEditingModel.extendSelectionRight}
-  /// Keeping [_selection]'s [TextSelection.baseOffset] fixed, move the
+  /// {@template flutter.rendering.TextEditingValue.extendSelectionRight}
+  /// Keeping [selection]'s [TextSelection.baseOffset] fixed, move the
   /// [TextSelection.extentOffset] right.
   /// {@endtemplate}
   ///
@@ -859,16 +934,16 @@ class TextEditingModel {
   ///
   ///   * [extendSelectionLeft], which is same but in the opposite direction.
   TextSelection extendSelectionRight() {
-    assert(_selection != null);
+    assert(selection != null);
 
-    return TextEditingModel.extendGivenSelectionRight(
-      _selection,
-      _text,
+    return extendGivenSelectionRight(
+      selection,
+      text,
     );
   }
 
-  /// {@template flutter.rendering.TextEditingModel.extendSelectionRightByLine}
-  /// Extend the current [_selection] to the end of [TextSelection.extentOffset]'s
+  /// {@template flutter.rendering.TextEditingValue.extendSelectionRightByLine}
+  /// Extend the current [selection] to the end of [TextSelection.extentOffset]'s
   /// line.
   ///
   /// Uses [TextSelection.baseOffset] as a pivot point and doesn't change it. If
@@ -885,23 +960,23 @@ class TextEditingModel {
   ///   * [expandSelectionRightByLine], which strictly grows the selection
   ///     regardless of the order.
   TextSelection extendSelectionRightByLine(TextMetrics textMetrics) {
-    assert(_selection != null);
+    assert(selection != null);
 
-    final int startPoint = TextEditingModel.nextCharacter(_selection.extentOffset, _text, false);
-    final TextSelection selectedLine = textMetrics.getLineAtOffset(_text, TextPosition(offset: startPoint));
+    final int startPoint = nextCharacter(selection.extentOffset, text, false);
+    final TextSelection selectedLine = textMetrics.getLineAtOffset(text, TextPosition(offset: startPoint));
 
-    if (_selection.extentOffset < _selection.baseOffset) {
-      return _selection.copyWith(
-        extentOffset: _selection.baseOffset,
+    if (selection.extentOffset < selection.baseOffset) {
+      return selection.copyWith(
+        extentOffset: selection.baseOffset,
       );
     }
-    return _selection.copyWith(
+    return selection.copyWith(
       extentOffset: selectedLine.extentOffset,
     );
   }
 
-  /// {@template flutter.rendering.TextEditingModel.extendSelectionUp}
-  /// Keeping [_selection]'s [TextSelection.baseOffset] fixed, move the
+  /// {@template flutter.rendering.TextEditingValue.extendSelectionUp}
+  /// Keeping [selection]'s [TextSelection.baseOffset] fixed, move the
   /// [TextSelection.extentOffset] up by one
   /// line.
   /// {@endtemplate}
@@ -913,28 +988,28 @@ class TextEditingModel {
   ///   * [extendSelectionDown], which is the same but in the opposite
   ///     direction.
   TextSelection extendSelectionUp(TextMetrics textMetrics) {
-    assert(_selection != null);
+    assert(selection != null);
 
     // If the selection is collapsed at the beginning of the field already, then
     // nothing happens.
-    if (_selection.isCollapsed && _selection.extentOffset <= 0.0) {
-      return _selection;
+    if (selection.isCollapsed && selection.extentOffset <= 0.0) {
+      return selection;
     }
 
-    final TextPosition positionAbove = textMetrics.getTextPositionAbove(_selection.extentOffset);
-    if (positionAbove.offset == _selection.extentOffset) {
-      return _selection.copyWith(
+    final TextPosition positionAbove = textMetrics.getTextPositionAbove(selection.extentOffset);
+    if (positionAbove.offset == selection.extentOffset) {
+      return selection.copyWith(
         extentOffset: 0,
       );
     }
-    return _selection.copyWith(
-      baseOffset: _selection.baseOffset,
+    return selection.copyWith(
+      baseOffset: selection.baseOffset,
       extentOffset: positionAbove.offset,
     );
   }
 
-  /// {@template flutter.rendering.TextEditingModel.expandSelectionToStart}
-  /// Expand the current [_selection] to the start of the field.
+  /// {@template flutter.rendering.TextEditingValue.expandSelectionToStart}
+  /// Expand the current [selection] to the start of the field.
   ///
   /// The selection will never shrink. The [TextSelection.extentOffset] will
   /// always be at the start of the field, regardless of the original order of
@@ -948,15 +1023,15 @@ class TextEditingModel {
   ///   * [expandSelectionToEnd], which is the same but in the opposite
   ///     direction.
   TextSelection expandSelectionToStart() {
-    assert(_selection != null);
+    assert(selection != null);
 
-    if (_selection.extentOffset == 0) {
-      return _selection;
+    if (selection.extentOffset == 0) {
+      return selection;
     }
 
     final int lastOffset = math.max(0, math.max(
-      _selection.baseOffset,
-      _selection.extentOffset,
+      selection.baseOffset,
+      selection.extentOffset,
     ));
     return TextSelection(
       baseOffset: lastOffset,
@@ -964,8 +1039,8 @@ class TextEditingModel {
     );
   }
 
-  /// {@template flutter.rendering.TextEditingModel.expandSelectionLeftByLine}
-  /// Expand the current [_selection] to the start of the line.
+  /// {@template flutter.rendering.TextEditingValue.expandSelectionLeftByLine}
+  /// Expand the current [selection] to the start of the line.
   ///
   /// The selection will never shrink. The upper offset will be expanded to the
   /// beginning of its line, and the original order of baseOffset and
@@ -979,18 +1054,18 @@ class TextEditingModel {
   ///   * [expandSelectionRightByLine], which is the same but in the opposite
   ///     direction.
   TextSelection expandSelectionLeftByLine(TextMetrics textMetrics) {
-    assert(_selection != null);
+    assert(selection != null);
 
-    final int firstOffset = math.min(_selection.baseOffset, _selection.extentOffset);
-    final int startPoint = TextEditingModel.previousCharacter(firstOffset, _text, false);
-    final TextSelection selectedLine = textMetrics.getLineAtOffset(_text, TextPosition(offset: startPoint));
+    final int firstOffset = math.min(selection.baseOffset, selection.extentOffset);
+    final int startPoint = previousCharacter(firstOffset, text, false);
+    final TextSelection selectedLine = textMetrics.getLineAtOffset(text, TextPosition(offset: startPoint));
 
-    if (_selection.extentOffset <= _selection.baseOffset) {
-      return _selection.copyWith(
+    if (selection.extentOffset <= selection.baseOffset) {
+      return selection.copyWith(
         extentOffset: selectedLine.baseOffset,
       );
     }
-    return _selection.copyWith(
+    return selection.copyWith(
       baseOffset: selectedLine.baseOffset,
     );
   }
@@ -1002,17 +1077,17 @@ class TextEditingModel {
   ///   * [extendSelectionToEnd], which is the same but in the opposite
   ///     direction.
   TextSelection extendSelectionToStart() {
-    if (_selection.extentOffset == 0) {
-      return _selection;
+    if (selection.extentOffset == 0) {
+      return selection;
     }
 
-    return _selection.copyWith(
+    return selection.copyWith(
       extentOffset: 0,
     );
   }
 
-  /// {@template flutter.rendering.TextEditingModel.expandSelectionRightByLine}
-  /// Expand the current [_selection] to the end of the line.
+  /// {@template flutter.rendering.TextEditingValue.expandSelectionRightByLine}
+  /// Expand the current [selection] to the end of the line.
   ///
   /// The selection will never shrink. The lower offset will be expanded to the
   /// end of its line and the original order of [TextSelection.baseOffset] and
@@ -1026,24 +1101,24 @@ class TextEditingModel {
   ///   * [expandSelectionLeftByLine], which is the same but in the opposite
   ///     direction.
   TextSelection expandSelectionRightByLine(TextMetrics textMetrics) {
-    assert(_selection != null);
+    assert(selection != null);
 
-    final int lastOffset = math.max(_selection.baseOffset, _selection.extentOffset);
-    final int startPoint = TextEditingModel.nextCharacter(lastOffset, _text, false);
-    final TextSelection selectedLine = textMetrics.getLineAtOffset(_text, TextPosition(offset: startPoint));
+    final int lastOffset = math.max(selection.baseOffset, selection.extentOffset);
+    final int startPoint = nextCharacter(lastOffset, text, false);
+    final TextSelection selectedLine = textMetrics.getLineAtOffset(text, TextPosition(offset: startPoint));
 
-    if (_selection.extentOffset >= _selection.baseOffset) {
-      return _selection.copyWith(
+    if (selection.extentOffset >= selection.baseOffset) {
+      return selection.copyWith(
         extentOffset: selectedLine.extentOffset,
       );
     }
-    return _selection.copyWith(
+    return selection.copyWith(
       baseOffset: selectedLine.extentOffset,
     );
   }
 
-  /// {@template flutter.rendering.TextEditingModel.moveSelectionDown}
-  /// Move the current [_selection] to the next line.
+  /// {@template flutter.rendering.TextEditingValue.moveSelectionDown}
+  /// Move the current [selection] to the next line.
   /// {@endtemplate}
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
@@ -1052,21 +1127,21 @@ class TextEditingModel {
   ///
   ///   * [moveSelectionUp], which is the same but in the opposite direction.
   TextSelection moveSelectionDown(TextMetrics textMetrics) {
-    assert(_selection != null);
+    assert(selection != null);
 
     // If the selection is collapsed at the end of the field already, then
     // nothing happens.
-    if (_selection.isCollapsed && _selection.extentOffset >= _text.length) {
-      return _selection;
+    if (selection.isCollapsed && selection.extentOffset >= text.length) {
+      return selection;
     }
 
-    final TextPosition positionBelow = textMetrics.getTextPositionBelow(_selection.extentOffset);
+    final TextPosition positionBelow = textMetrics.getTextPositionBelow(selection.extentOffset);
 
     late final TextSelection nextSelection;
-    if (positionBelow.offset == _selection.extentOffset) {
-      nextSelection = _selection.copyWith(
-        baseOffset: _text.length,
-        extentOffset: _text.length,
+    if (positionBelow.offset == selection.extentOffset) {
+      nextSelection = selection.copyWith(
+        baseOffset: text.length,
+        extentOffset: text.length,
       );
     } else {
       nextSelection = TextSelection.fromPosition(positionBelow);
@@ -1075,8 +1150,8 @@ class TextEditingModel {
     return nextSelection;
   }
 
-  /// {@template flutter.rendering.TextEditingModel.moveSelectionRightByLine}
-  /// Move the current [_selection] to the rightmost point of the current line.
+  /// {@template flutter.rendering.TextEditingValue.moveSelectionRightByLine}
+  /// Move the current [selection] to the rightmost point of the current line.
   /// {@endtemplate}
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
@@ -1086,32 +1161,32 @@ class TextEditingModel {
   ///   * [moveSelectionLeftByLine], which is the same but in the opposite
   ///     direction.
   TextSelection moveSelectionRightByLine(TextMetrics textMetrics) {
-    assert(_selection != null);
+    assert(selection != null);
 
     // If already at the right edge of the line, do nothing.
     final TextSelection currentLine = textMetrics.getLineAtOffset(
-      _text,
+      text,
       TextPosition(
-        offset: _selection.extentOffset,
+        offset: selection.extentOffset,
       ),
     );
-    if (currentLine.extentOffset == _selection.extentOffset) {
-      return _selection;
+    if (currentLine.extentOffset == selection.extentOffset) {
+      return selection;
     }
 
     // When going right, we want to skip over any whitespace after the line,
     // so we go forward to the first non-whitespace character before asking
     // for the line bounds, since getLineAtOffset finds the line
     // boundaries without including whitespace (like the newline).
-    final int startPoint = TextEditingModel.nextCharacter(_selection.extentOffset, _text, false);
-    final TextSelection selectedLine = textMetrics.getLineAtOffset(_text, TextPosition(offset: startPoint));
+    final int startPoint = nextCharacter(selection.extentOffset, text, false);
+    final TextSelection selectedLine = textMetrics.getLineAtOffset(text, TextPosition(offset: startPoint));
     return TextSelection.collapsed(
       offset: selectedLine.extentOffset,
     );
   }
 
-  /// {@template flutter.rendering.TextEditingModel.moveSelectionToEnd}
-  /// Move the current [_selection] to the end of the field.
+  /// {@template flutter.rendering.TextEditingValue.moveSelectionToEnd}
+  /// Move the current [selection] to the end of the field.
   /// {@endtemplate}
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
@@ -1121,18 +1196,18 @@ class TextEditingModel {
   ///   * [moveSelectionToStart], which is the same but in the opposite
   ///     direction.
   TextSelection moveSelectionToEnd() {
-    assert(_selection != null);
+    assert(selection != null);
 
-    if (_selection.isCollapsed && _selection.extentOffset == _text.length) {
-      return _selection;
+    if (selection.isCollapsed && selection.extentOffset == text.length) {
+      return selection;
     }
     return TextSelection.collapsed(
-      offset: _text.length,
+      offset: text.length,
     );
   }
 
-  /// {@template flutter.rendering.TextEditingModel.moveSelectionToStart}
-  /// Move the current [_selection] to the start of the field.
+  /// {@template flutter.rendering.TextEditingValue.moveSelectionToStart}
+  /// Move the current [selection] to the start of the field.
   /// {@endtemplate}
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
@@ -1141,16 +1216,16 @@ class TextEditingModel {
   ///
   ///   * [moveSelectionToEnd], which is the same but in the opposite direction.
   TextSelection moveSelectionToStart() {
-    assert(_selection != null);
+    assert(selection != null);
 
-    if (_selection.isCollapsed && _selection.extentOffset == 0) {
-      return _selection;
+    if (selection.isCollapsed && selection.extentOffset == 0) {
+      return selection;
     }
     return const TextSelection.collapsed(offset: 0);
   }
 
-  /// {@template flutter.rendering.TextEditingModel.moveSelectionUp}
-  /// Move the current [_selection] up by one line.
+  /// {@template flutter.rendering.TextEditingValue.moveSelectionUp}
+  /// Move the current [selection] up by one line.
   /// {@endtemplate}
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
@@ -1159,35 +1234,55 @@ class TextEditingModel {
   ///
   ///   * [moveSelectionDown], which is the same but in the opposite direction.
   TextSelection moveSelectionUp(TextMetrics textMetrics) {
-    assert(_selection != null);
+    assert(selection != null);
 
     // If the selection is collapsed at the beginning of the field already, then
     // nothing happens.
-    if (_selection.isCollapsed && _selection.extentOffset <= 0.0) {
-      return _selection;
+    if (selection.isCollapsed && selection.extentOffset <= 0.0) {
+      return selection;
     }
 
-    final TextPosition positionAbove = textMetrics.getTextPositionAbove(_selection.extentOffset);
-    if (positionAbove.offset == _selection.extentOffset) {
-      return _selection.copyWith(baseOffset: 0, extentOffset: 0);
+    final TextPosition positionAbove = textMetrics.getTextPositionAbove(selection.extentOffset);
+    if (positionAbove.offset == selection.extentOffset) {
+      return selection.copyWith(baseOffset: 0, extentOffset: 0);
     }
-    return _selection.copyWith(
+    return selection.copyWith(
       baseOffset: positionAbove.offset,
       extentOffset: positionAbove.offset,
     );
   }
 
-  /// {@template flutter.rendering.TextEditingModel.selectAll}
-  /// Set the current [_selection] to contain the entire text value.
+  /// {@template flutter.rendering.TextEditingValue.selectAll}
+  /// Set the current [selection] to contain the entire text value.
   /// {@endtemplate}
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   TextSelection selectAll() {
-    return _selection.copyWith(
+    return selection.copyWith(
       baseOffset: 0,
-      extentOffset: _text.length,
+      extentOffset: text.length,
     );
   }
+
+  @override
+  String toString() => '${objectRuntimeType(this, 'TextEditingValue')}(text: \u2524$text\u251C, selection: $selection, composing: $composing)';
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other))
+      return true;
+    return other is TextEditingValue
+        && other.text == text
+        && other.selection == selection
+        && other.composing == composing;
+  }
+
+  @override
+  int get hashCode => hashValues(
+    text.hashCode,
+    selection.hashCode,
+    composing.hashCode,
+  );
 }
 
 // TODO(justinmc): Document and move to own file.

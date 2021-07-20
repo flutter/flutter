@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:flutter/foundation.dart';
+import 'text_editing_value.dart';
 import 'text_input.dart';
 
 /// A collection of commonly used autofill hint strings on different platforms.

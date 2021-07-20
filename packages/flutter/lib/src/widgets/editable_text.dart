@@ -1595,19 +1595,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   // Start TextEditingActionTarget.
 
+  // TODO(justinmc): Get rid of _value getter in favor of this getter?
+  @override
+  TextEditingValue get value => _value;
+
   @override
   bool get readOnly => widget.readOnly;
 
   @override
   bool get obscureText => widget.obscureText;
-
-  // TODO(justinmc): Document. Cache.
-  @override
-  TextEditingModel get textEditingModel {
-    return TextEditingModel(
-      value: _value,
-    );
-  }
 
   @override
   void setSelection(TextSelection nextSelection, SelectionChangedCause cause) {

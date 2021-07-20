@@ -18,7 +18,6 @@ import 'custom_paint.dart';
 import 'layer.dart';
 import 'object.dart';
 import 'paragraph.dart';
-import 'text_editing_model.dart';
 import 'viewport_offset.dart';
 
 const double _kCaretGap = 1.0; // pixels
@@ -1395,7 +1394,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   bool _onlyWhitespace(TextRange range) {
     for (int i = range.start; i < range.end; i++) {
       final int codeUnit = text!.codeUnitAt(i)!;
-      if (!TextEditingModel.isWhitespace(codeUnit)) {
+      if (!TextEditingValue.isWhitespace(codeUnit)) {
         return false;
       }
     }
@@ -1890,7 +1889,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     // If the platform is Android and the text is read only, try to select the
     // previous word if there is one; otherwise, select the single whitespace at
     // the position.
-    } else if (TextEditingModel.isWhitespace(_plainText.codeUnitAt(position.offset))
+    } else if (TextEditingValue.isWhitespace(_plainText.codeUnitAt(position.offset))
         && position.offset > 0) {
       assert(defaultTargetPlatform != null);
       final TextRange? previousWord = _getPreviousWord(word.start);

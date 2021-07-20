@@ -9,7 +9,6 @@ import 'dart:ui' show
   Offset,
   Size,
   Rect,
-  TextAffinity,
   TextAlign,
   TextDirection,
   hashValues;
@@ -23,6 +22,7 @@ import 'platform_channel.dart';
 import 'system_channels.dart';
 import 'system_chrome.dart';
 import 'text_editing.dart';
+import 'text_editing_value.dart';
 
 export 'dart:ui' show TextAffinity;
 
@@ -609,16 +609,6 @@ class TextInputConfiguration {
   }
 }
 
-TextAffinity? _toTextAffinity(String? affinity) {
-  switch (affinity) {
-    case 'TextAffinity.downstream':
-      return TextAffinity.downstream;
-    case 'TextAffinity.upstream':
-      return TextAffinity.upstream;
-  }
-  return null;
-}
-
 /// A floating cursor state the user has induced by force pressing an iOS
 /// keyboard.
 enum FloatingCursorDragState {
@@ -651,110 +641,6 @@ class RawFloatingCursorPoint {
 
   /// The state of the floating cursor.
   final FloatingCursorDragState state;
-}
-
-/// The current text, selection, and composing state for editing a run of text.
-@immutable
-class TextEditingValue {
-  /// Creates information for editing a run of text.
-  ///
-  /// The selection and composing range must be within the text.
-  ///
-  /// The [text], [selection], and [composing] arguments must not be null but
-  /// each have default values.
-  const TextEditingValue({
-    this.text = '',
-    this.selection = const TextSelection.collapsed(offset: -1),
-    this.composing = TextRange.empty,
-  }) : assert(text != null),
-       assert(selection != null),
-       assert(composing != null);
-
-  /// Creates an instance of this class from a JSON object.
-  factory TextEditingValue.fromJSON(Map<String, dynamic> encoded) {
-    return TextEditingValue(
-      text: encoded['text'] as String,
-      selection: TextSelection(
-        baseOffset: encoded['selectionBase'] as int? ?? -1,
-        extentOffset: encoded['selectionExtent'] as int? ?? -1,
-        affinity: _toTextAffinity(encoded['selectionAffinity'] as String?) ?? TextAffinity.downstream,
-        isDirectional: encoded['selectionIsDirectional'] as bool? ?? false,
-      ),
-      composing: TextRange(
-        start: encoded['composingBase'] as int? ?? -1,
-        end: encoded['composingExtent'] as int? ?? -1,
-      ),
-    );
-  }
-
-  /// Returns a representation of this object as a JSON object.
-  Map<String, dynamic> toJSON() {
-    return <String, dynamic>{
-      'text': text,
-      'selectionBase': selection.baseOffset,
-      'selectionExtent': selection.extentOffset,
-      'selectionAffinity': selection.affinity.toString(),
-      'selectionIsDirectional': selection.isDirectional,
-      'composingBase': composing.start,
-      'composingExtent': composing.end,
-    };
-  }
-
-  /// The current text being edited.
-  final String text;
-
-  /// The range of text that is currently selected.
-  final TextSelection selection;
-
-  /// The range of text that is still being composed.
-  final TextRange composing;
-
-  /// A value that corresponds to the empty string with no selection and no composing range.
-  static const TextEditingValue empty = TextEditingValue();
-
-  /// Creates a copy of this value but with the given fields replaced with the new values.
-  TextEditingValue copyWith({
-    String? text,
-    TextSelection? selection,
-    TextRange? composing,
-  }) {
-    return TextEditingValue(
-      text: text ?? this.text,
-      selection: selection ?? this.selection,
-      composing: composing ?? this.composing,
-    );
-  }
-
-  /// Whether the [composing] range is a valid range within [text].
-  ///
-  /// Returns true if and only if the [composing] range is normalized, its start
-  /// is greater than or equal to 0, and its end is less than or equal to
-  /// [text]'s length.
-  ///
-  /// If this property is false while the [composing] range's `isValid` is true,
-  /// it usually indicates the current [composing] range is invalid because of a
-  /// programming error.
-  bool get isComposingRangeValid => composing.isValid && composing.isNormalized && composing.end <= text.length;
-
-  @override
-  String toString() => '${objectRuntimeType(this, 'TextEditingValue')}(text: \u2524$text\u251C, selection: $selection, composing: $composing)';
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other))
-      return true;
-    return other is TextEditingValue
-        && other.text == text
-        && other.selection == selection
-        && other.composing == composing;
-  }
-
-  @override
-  int get hashCode => hashValues(
-    text.hashCode,
-    selection.hashCode,
-    composing.hashCode,
-  );
 }
 
 /// Indicates what triggered the change in selected text (including changes to

@@ -9,7 +9,7 @@ import 'package:characters/characters.dart';
 import 'package:flutter/foundation.dart';
 
 import 'text_editing.dart';
-import 'text_input.dart';
+import 'text_editing_value.dart';
 
 /// {@template flutter.services.textFormatter.maxLengthEnforcement}
 /// ### [MaxLengthEnforcement.enforced] versus

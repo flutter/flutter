@@ -4,7 +4,7 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/rendering.dart' show RenderEditable, TextEditingModel;
+import 'package:flutter/rendering.dart' show RenderEditable;
 import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 
 import 'actions.dart';
@@ -35,7 +35,7 @@ abstract class TextEditingActionTarget {
   /// * [EditableTextState.renderEditable], which overrides this.
   RenderEditable get renderEditable;
 
-  TextEditingModel get textEditingModel;
+  TextEditingValue get value;
 
   // Holds the last cursor location the user selected in the case the user tries
   // to select vertically past the end or beginning of the field. If they do,
@@ -77,11 +77,11 @@ abstract class TextEditingActionTarget {
     if (readOnly) {
       return;
     }
-    final TextEditingValue nextValue = textEditingModel.delete();
+    final TextEditingValue nextValue = value.delete();
     setTextEditingValue(nextValue, cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingModel.deleteByWord}
+  /// {@macro flutter.rendering.TextEditingValue.deleteByWord}
   ///
   /// If [readOnly] is true, does nothing.
   ///
@@ -98,7 +98,7 @@ abstract class TextEditingActionTarget {
   ///
   /// See also:
   ///
-  ///   * [TextEditingModel.deleteByWord], which is used by this method.
+  ///   * [TextEditingValue.deleteByWord], which is used by this method.
   ///   * [deleteForwardByWord], which is same but in the opposite direction.
   void deleteByWord(SelectionChangedCause cause, [bool includeWhitespace = true]) {
     if (readOnly) {
@@ -107,13 +107,13 @@ abstract class TextEditingActionTarget {
 
     final TextEditingValue nextValue = obscureText
         // When the text is obscured, the whole thing is treated as one big line.
-        ? textEditingModel.deleteToStart()
-        : textEditingModel.deleteByWord(renderEditable);
+        ? value.deleteToStart()
+        : value.deleteByWord(renderEditable);
 
     setTextEditingValue(nextValue, cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingModel.deleteByLine}
+  /// {@macro flutter.rendering.TextEditingValue.deleteByLine}
   ///
   /// If [obscureText] is true, it treats the whole text content as
   /// a single word.
@@ -124,7 +124,7 @@ abstract class TextEditingActionTarget {
   ///
   /// See also:
   ///
-  ///   * [TextEditingModel.deleteByLine], which is used by this method.
+  ///   * [TextEditingValue.deleteByLine], which is used by this method.
   ///   * [deleteForwardByLine], which is same but in the opposite direction.
   void deleteByLine(SelectionChangedCause cause) {
     if (readOnly) {
@@ -133,13 +133,13 @@ abstract class TextEditingActionTarget {
 
     final TextEditingValue nextValue = obscureText
         // When the text is obscured, the whole thing is treated as one big line.
-        ? textEditingModel.deleteToStart()
-        : textEditingModel.deleteByLine(renderEditable);
+        ? value.deleteToStart()
+        : value.deleteByLine(renderEditable);
 
     setTextEditingValue(nextValue, cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingModel.deleteForward}
+  /// {@macro flutter.rendering.TextEditingValue.deleteForward}
   ///
   /// If [readOnly] is true, does nothing.
   ///
@@ -147,17 +147,17 @@ abstract class TextEditingActionTarget {
   ///
   /// See also:
   ///
-  ///   * [TextEditingModel.deleteForward], which is used by this method.
+  ///   * [TextEditingValue.deleteForward], which is used by this method.
   ///   * [delete], which is same but in the opposite direction.
   void deleteForward(SelectionChangedCause cause) {
     if (readOnly) {
       return;
     }
 
-    setTextEditingValue(textEditingModel.deleteForward(), cause);
+    setTextEditingValue(value.deleteForward(), cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingModel.deleteForwardByWord}
+  /// {@macro flutter.rendering.TextEditingValue.deleteForwardByWord}
   ///
   /// If [readOnly] is true, does nothing.
   ///
@@ -170,7 +170,7 @@ abstract class TextEditingActionTarget {
   ///
   /// See also:
   ///
-  ///   * [TextEditingModel.deleteForwardByWord], which is used by this method.
+  ///   * [TextEditingValue.deleteForwardByWord], which is used by this method.
   ///   * [deleteByWord], which is same but in the opposite direction.
   void deleteForwardByWord(SelectionChangedCause cause, [bool includeWhitespace = true]) {
     if (readOnly) {
@@ -179,13 +179,13 @@ abstract class TextEditingActionTarget {
 
     final TextEditingValue nextValue = obscureText
         // When the text is obscured, the whole thing is treated as one big word.
-        ? textEditingModel.deleteToEnd()
-        : textEditingModel.deleteForwardByWord(renderEditable);
+        ? value.deleteToEnd()
+        : value.deleteForwardByWord(renderEditable);
 
     setTextEditingValue(nextValue, cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingModel.deleteForwardByLine}
+  /// {@macro flutter.rendering.TextEditingValue.deleteForwardByLine}
   ///
   /// If [readOnly] is true, does nothing.
   ///
@@ -196,7 +196,7 @@ abstract class TextEditingActionTarget {
   ///
   /// See also:
   ///
-  ///   * [TextEditingModel.deleteForwardByWord], which is used by this method.
+  ///   * [TextEditingValue.deleteForwardByWord], which is used by this method.
   ///   * [deleteByLine], which is same but in the opposite direction.
   void deleteForwardByLine(SelectionChangedCause cause) {
     if (readOnly) {
@@ -205,13 +205,13 @@ abstract class TextEditingActionTarget {
 
     final TextEditingValue nextValue = obscureText
         // When the text is obscured, the whole thing is treated as one big line.
-        ? textEditingModel.deleteToEnd()
-        : textEditingModel.deleteForwardByLine(renderEditable);
+        ? value.deleteToEnd()
+        : value.deleteForwardByLine(renderEditable);
 
     setTextEditingValue(nextValue, cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingModel.expandSelectionToEnd}
+  /// {@macro flutter.rendering.TextEditingValue.expandSelectionToEnd}
   ///
   /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
   /// to the end.
@@ -226,11 +226,11 @@ abstract class TextEditingActionTarget {
       return moveSelectionToEnd(cause);
     }
 
-    final TextSelection nextSelection = textEditingModel.expandSelectionToEnd();
+    final TextSelection nextSelection = value.expandSelectionToEnd();
     setSelection(nextSelection, cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingModel.expandSelectionToStart}
+  /// {@macro flutter.rendering.TextEditingValue.expandSelectionToStart}
   ///
   /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
   /// to the start.
@@ -239,7 +239,7 @@ abstract class TextEditingActionTarget {
   ///
   /// See also:
   ///
-  ///   * [TextEditingModel.extendSelectionToStart], which is used by this method.
+  ///   * [TextEditingValue.extendSelectionToStart], which is used by this method.
   ///   * [expandSelectionToEnd], which is the same but in the opposite
   ///     direction.
   void expandSelectionToStart(SelectionChangedCause cause) {
@@ -247,11 +247,11 @@ abstract class TextEditingActionTarget {
       return moveSelectionToStart(cause);
     }
 
-    final TextSelection nextSelection = textEditingModel.expandSelectionToStart();
+    final TextSelection nextSelection = value.expandSelectionToStart();
     setSelection(nextSelection, cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingModel.expandSelectionLeftByLine}
+  /// {@macro flutter.rendering.TextEditingValue.expandSelectionLeftByLine}
   ///
   /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
   /// left by line.
@@ -260,7 +260,7 @@ abstract class TextEditingActionTarget {
   ///
   /// See also:
   ///
-  ///   * [TextEditingModel.extendSelectionLeftByLine], which is used by this method.
+  ///   * [TextEditingValue.extendSelectionLeftByLine], which is used by this method.
   ///   * [expandSelectionRightByLine], which is the same but in the opposite
   ///     direction.
   void expandSelectionLeftByLine(SelectionChangedCause cause) {
@@ -268,11 +268,11 @@ abstract class TextEditingActionTarget {
       return moveSelectionLeftByLine(cause);
     }
 
-    final TextSelection nextSelection = textEditingModel.expandSelectionLeftByLine(renderEditable);
+    final TextSelection nextSelection = value.expandSelectionLeftByLine(renderEditable);
     setSelection(nextSelection, cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingModel.expandSelectionRightByLine}
+  /// {@macro flutter.rendering.TextEditingValue.expandSelectionRightByLine}
   ///
   /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
   /// right by line.
@@ -281,7 +281,7 @@ abstract class TextEditingActionTarget {
   ///
   /// See also:
   ///
-  ///   * [TextEditingModel.expandSelectionRightByLine], which is used by this method.
+  ///   * [TextEditingValue.expandSelectionRightByLine], which is used by this method.
   ///   * [expandSelectionLeftByLine], which is the same but in the opposite
   ///     direction.
   void expandSelectionRightByLine(SelectionChangedCause cause) {
@@ -289,12 +289,12 @@ abstract class TextEditingActionTarget {
       return moveSelectionRightByLine(cause);
     }
 
-    final TextSelection nextSelection = textEditingModel.expandSelectionRightByLine(renderEditable);
+    final TextSelection nextSelection = value.expandSelectionRightByLine(renderEditable);
 
     setSelection(nextSelection, cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingModel.extendSelectionDown}
+  /// {@macro flutter.rendering.TextEditingValue.extendSelectionDown}
   ///
   /// If selectionEnabled is false, keeps the selection collapsed and just
   /// moves it down.
@@ -309,14 +309,14 @@ abstract class TextEditingActionTarget {
       return moveSelectionDown(cause);
     }
 
-    TextSelection nextSelection = textEditingModel.extendSelectionDown(renderEditable);
+    TextSelection nextSelection = value.extendSelectionDown(renderEditable);
 
     // When the selection is extended down after selecting all the way to the
     // top, the selection moves back to its previous location.
-    if (nextSelection.extentOffset == textEditingModel.value.text.length) {
+    if (nextSelection.extentOffset == value.text.length) {
       _wasSelectingVerticallyWithKeyboard = true;
     } else if (_wasSelectingVerticallyWithKeyboard) {
-      nextSelection = textEditingModel.value.selection.copyWith(
+      nextSelection = value.selection.copyWith(
         extentOffset: _cursorResetLocation,
       );
       _wasSelectingVerticallyWithKeyboard = false;
@@ -327,7 +327,7 @@ abstract class TextEditingActionTarget {
     setSelection(nextSelection, cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingModel.extendSelectionLeft}
+  /// {@macro flutter.rendering.TextEditingValue.extendSelectionLeft}
   ///
   /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
   /// left.
@@ -336,7 +336,7 @@ abstract class TextEditingActionTarget {
   ///
   /// See also:
   ///
-  ///   * [TextEditingModel.extendSelectionLeft], which is used by this method.
+  ///   * [TextEditingValue.extendSelectionLeft], which is used by this method.
   ///   * [extendSelectionRight], which is same but in the opposite direction.
   void extendSelectionLeft(SelectionChangedCause cause) {
     // TODO(justinmc): Can I get selectionEnabled from a cleaner place?
@@ -344,16 +344,16 @@ abstract class TextEditingActionTarget {
       return moveSelectionLeft(cause);
     }
 
-    final TextSelection nextSelection = textEditingModel.extendSelectionLeft();
-    if (nextSelection == textEditingModel.value.selection) {
+    final TextSelection nextSelection = value.extendSelectionLeft();
+    if (nextSelection == value.selection) {
       return;
     }
-    final int distance = textEditingModel.value.selection.extentOffset - nextSelection.extentOffset;
+    final int distance = value.selection.extentOffset - nextSelection.extentOffset;
     _cursorResetLocation -= distance;
     setSelection(nextSelection, cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingModel.extendSelectionLeftByLine}
+  /// {@macro flutter.rendering.TextEditingValue.extendSelectionLeftByLine}
   ///
   /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
   /// left by line.
@@ -362,7 +362,7 @@ abstract class TextEditingActionTarget {
   ///
   /// See also:
   ///
-  ///   * [TextEditingModel.extendSelectionLeftByLine], which is used by this method.
+  ///   * [TextEditingValue.extendSelectionLeftByLine], which is used by this method.
   ///   * [extendSelectionRightByLine], which is same but in the opposite
   ///     direction.
   ///   * [expandSelectionRightByLine], which strictly grows the selection
@@ -372,11 +372,11 @@ abstract class TextEditingActionTarget {
       return moveSelectionLeftByLine(cause);
     }
 
-    final TextSelection nextSelection = textEditingModel.extendSelectionLeftByLine(renderEditable);
+    final TextSelection nextSelection = value.extendSelectionLeftByLine(renderEditable);
     setSelection(nextSelection, cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingModel.extendSelectionRight}
+  /// {@macro flutter.rendering.TextEditingValue.extendSelectionRight}
   ///
   /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
   /// right.
@@ -385,23 +385,23 @@ abstract class TextEditingActionTarget {
   ///
   /// See also:
   ///
-  ///   * [TextEditingModel.extendSelectionRight], which is used by this method.
+  ///   * [TextEditingValue.extendSelectionRight], which is used by this method.
   ///   * [extendSelectionLeft], which is same but in the opposite direction.
   void extendSelectionRight(SelectionChangedCause cause) {
     if (!renderEditable.selectionEnabled) {
       return moveSelectionRight(cause);
     }
 
-    final TextSelection nextSelection = textEditingModel.extendSelectionRight();
-    if (nextSelection == textEditingModel.value.selection) {
+    final TextSelection nextSelection = value.extendSelectionRight();
+    if (nextSelection == value.selection) {
       return;
     }
-    final int distance = nextSelection.extentOffset - textEditingModel.value.selection.extentOffset;
+    final int distance = nextSelection.extentOffset - value.selection.extentOffset;
     _cursorResetLocation += distance;
     setSelection(nextSelection, cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingModel.extendSelectionRightByLine}
+  /// {@macro flutter.rendering.TextEditingValue.extendSelectionRightByLine}
   ///
   /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
   /// right by line.
@@ -410,7 +410,7 @@ abstract class TextEditingActionTarget {
   ///
   /// See also:
   ///
-  ///   * [TextEditingModel.extendSelectionRightByLine], which is used by this method.
+  ///   * [TextEditingValue.extendSelectionRightByLine], which is used by this method.
   ///   * [extendSelectionLeftByLine], which is same but in the opposite
   ///     direction.
   ///   * [expandSelectionRightByLine], which strictly grows the selection
@@ -420,7 +420,7 @@ abstract class TextEditingActionTarget {
       return moveSelectionRightByLine(cause);
     }
 
-    setSelection(textEditingModel.extendSelectionRightByLine(renderEditable), cause);
+    setSelection(value.extendSelectionRightByLine(renderEditable), cause);
   }
 
   // Extend the current selection to the start of the field.
@@ -439,11 +439,11 @@ abstract class TextEditingActionTarget {
       return moveSelectionToStart(cause);
     }
 
-    final TextSelection nextSelection = textEditingModel.extendSelectionToStart();
+    final TextSelection nextSelection = value.extendSelectionToStart();
     setSelection(nextSelection, cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingModel.extendSelectionLeftByWord}
+  /// {@macro flutter.rendering.TextEditingValue.extendSelectionLeftByWord}
   ///
   /// Extend the current [selection] to the previous start of a word.
   ///
@@ -460,7 +460,7 @@ abstract class TextEditingActionTarget {
   ///
   /// See also:
   ///
-  ///   * [TextEditingModel.extendSelectionLeftByWord], which is used by this method.
+  ///   * [TextEditingValue.extendSelectionLeftByWord], which is used by this method.
   ///   * [extendSelectionRightByWord], which is the same but in the opposite
   ///     direction.
   void extendSelectionLeftByWord(SelectionChangedCause cause, [bool includeWhitespace = true, bool stopAtReversal = false]) {
@@ -480,20 +480,20 @@ abstract class TextEditingActionTarget {
       'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).',
     );
     */
-    final TextSelection nextSelection = TextEditingModel.extendGivenSelectionLeftByWord(
-      textEditingModel.value.text,
+    final TextSelection nextSelection = TextEditingValue.extendGivenSelectionLeftByWord(
+      value.text,
       renderEditable,
-      textEditingModel.value.selection,
+      value.selection,
       includeWhitespace,
       stopAtReversal,
     );
-    if (nextSelection == textEditingModel.value.selection) {
+    if (nextSelection == value.selection) {
       return;
     }
     setSelection(nextSelection, cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingModel.extendSelectionRightByWord}
+  /// {@macro flutter.rendering.TextEditingValue.extendSelectionRightByWord}
   ///
   /// Extend the current [selection] to the next end of a word.
   ///
@@ -505,7 +505,7 @@ abstract class TextEditingActionTarget {
   ///
   /// See also:
   ///
-  ///   * [TextEditingModel.extendSelectionRightByWord], which is used by this method.
+  ///   * [TextEditingValue.extendSelectionRightByWord], which is used by this method.
   ///   * [extendSelectionLeftByWord], which is the same but in the opposite
   ///     direction.
   void extendSelectionRightByWord(SelectionChangedCause cause, [bool includeWhitespace = true, bool stopAtReversal = false]) {
@@ -519,21 +519,21 @@ abstract class TextEditingActionTarget {
     */
     final TextSelection nextSelection = obscureText
         // When the text is obscured, the whole thing is treated as one big word.
-        ? textEditingModel.extendSelectionToEnd()
-        : TextEditingModel.extendGivenSelectionRightByWord(
-          textEditingModel.value.text,
+        ? value.extendSelectionToEnd()
+        : TextEditingValue.extendGivenSelectionRightByWord(
+          value.text,
           renderEditable,
-          textEditingModel.value.selection,
+          value.selection,
           includeWhitespace,
           stopAtReversal,
         );
-    if (nextSelection == textEditingModel.value.selection) {
+    if (nextSelection == value.selection) {
       return;
     }
     setSelection(nextSelection, cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingModel.extendSelectionUp}
+  /// {@macro flutter.rendering.TextEditingValue.extendSelectionUp}
   ///
   /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
   /// up.
@@ -542,7 +542,7 @@ abstract class TextEditingActionTarget {
   ///
   /// See also:
   ///
-  ///   * [TextEditingModel.extendSelectionUp], which is used by this method.
+  ///   * [TextEditingValue.extendSelectionUp], which is used by this method.
   ///   * [extendSelectionDown], which is the same but in the opposite
   ///     direction.
   void extendSelectionUp(SelectionChangedCause cause) {
@@ -550,11 +550,11 @@ abstract class TextEditingActionTarget {
       return moveSelectionUp(cause);
     }
 
-    TextSelection nextSelection = textEditingModel.extendSelectionUp(renderEditable);
+    TextSelection nextSelection = value.extendSelectionUp(renderEditable);
     if (nextSelection.extentOffset == 0) {
       _wasSelectingVerticallyWithKeyboard = true;
     } else if (_wasSelectingVerticallyWithKeyboard) {
-      nextSelection = textEditingModel.value.selection.copyWith(
+      nextSelection = value.selection.copyWith(
         extentOffset: _cursorResetLocation,
       );
       _wasSelectingVerticallyWithKeyboard = false;
@@ -565,22 +565,22 @@ abstract class TextEditingActionTarget {
     setSelection(nextSelection, cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingModel.moveSelectionLeftByLine}
+  /// {@macro flutter.rendering.TextEditingValue.moveSelectionLeftByLine}
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
   /// See also:
   ///
-  ///   * [TextEditingModel.moveSelectionLeftByLine], which is used by this
+  ///   * [TextEditingValue.moveSelectionLeftByLine], which is used by this
   ///     method.
   ///   * [moveSelectionRightByLine], which is the same but in the opposite
   ///     direction.
   void moveSelectionLeftByLine(SelectionChangedCause cause) {
-    final TextSelection nextSelection = textEditingModel.moveSelectionLeftByLine(renderEditable);
+    final TextSelection nextSelection = value.moveSelectionLeftByLine(renderEditable);
     setSelection(nextSelection, cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingModel.moveSelectionDown}
+  /// {@macro flutter.rendering.TextEditingValue.moveSelectionDown}
   ///
   /// Move the current [selection] to the next line.
   ///
@@ -588,11 +588,11 @@ abstract class TextEditingActionTarget {
   ///
   /// See also:
   ///
-  ///   * [TextEditingModel.moveSelectionDown], which is used by this method.
+  ///   * [TextEditingValue.moveSelectionDown], which is used by this method.
   ///   * [moveSelectionUp], which is the same but in the opposite direction.
   void moveSelectionDown(SelectionChangedCause cause) {
-    final TextSelection nextSelection = textEditingModel.moveSelectionDown(renderEditable);
-    if (textEditingModel.value.selection.extentOffset == textEditingModel.value.text.length) {
+    final TextSelection nextSelection = value.moveSelectionDown(renderEditable);
+    if (value.selection.extentOffset == value.text.length) {
       _wasSelectingVerticallyWithKeyboard = false;
     } else {
       _cursorResetLocation = nextSelection.extentOffset;
@@ -601,7 +601,7 @@ abstract class TextEditingActionTarget {
     setSelection(nextSelection, cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingModel.moveSelectionLeft}
+  /// {@macro flutter.rendering.TextEditingValue.moveSelectionLeft}
   ///
   /// Move the current [selection] left by one character.
   ///
@@ -609,21 +609,21 @@ abstract class TextEditingActionTarget {
   ///
   /// See also:
   ///
-  ///   * [TextEditingModel.moveSelectionLeft], which is used by this method.
+  ///   * [TextEditingValue.moveSelectionLeft], which is used by this method.
   ///   * [moveSelectionRight], which is the same but in the opposite direction.
   void moveSelectionLeft(SelectionChangedCause cause) {
-    final TextSelection nextSelection = TextEditingModel.moveGivenSelectionLeft(
-      textEditingModel.value.selection,
-      textEditingModel.value.text,
+    final TextSelection nextSelection = TextEditingValue.moveGivenSelectionLeft(
+      value.selection,
+      value.text,
     );
-    if (nextSelection == textEditingModel.value.selection) {
+    if (nextSelection == value.selection) {
       return;
     }
-    _cursorResetLocation -= textEditingModel.value.selection.extentOffset - nextSelection.extentOffset;
+    _cursorResetLocation -= value.selection.extentOffset - nextSelection.extentOffset;
     setSelection(nextSelection, cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingModel.moveSelectionLeftByWord}
+  /// {@macro flutter.rendering.TextEditingValue.moveSelectionLeftByWord}
   ///
   /// Move the current [selection] to the previous start of a word.
   ///
@@ -633,7 +633,7 @@ abstract class TextEditingActionTarget {
   ///
   /// See also:
   ///
-  ///   * [TextEditingModel.moveSelectionLeftByWord], which is used by this method.
+  ///   * [TextEditingValue.moveSelectionLeftByWord], which is used by this method.
   ///   * [moveSelectionRightByWord], which is the same but in the opposite
   ///     direction.
   void moveSelectionLeftByWord(SelectionChangedCause cause, [bool includeWhitespace = true]) {
@@ -649,19 +649,19 @@ abstract class TextEditingActionTarget {
       'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).',
     );
     */
-    final TextSelection nextSelection = TextEditingModel.moveGivenSelectionLeftByWord(
-      textEditingModel.value.text,
+    final TextSelection nextSelection = TextEditingValue.moveGivenSelectionLeftByWord(
+      value.text,
       renderEditable,
-      textEditingModel.value.selection,
+      value.selection,
       includeWhitespace,
     );
-    if (nextSelection == textEditingModel.value.selection) {
+    if (nextSelection == value.selection) {
       return;
     }
     setSelection(nextSelection, cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingModel.moveSelectionRight}
+  /// {@macro flutter.rendering.TextEditingValue.moveSelectionRight}
   ///
   /// Move the current [selection] to the right by one character.
   ///
@@ -669,20 +669,20 @@ abstract class TextEditingActionTarget {
   ///
   /// See also:
   ///
-  ///   * [TextEditingModel.moveSelectionRight], which is used by this method.
+  ///   * [TextEditingValue.moveSelectionRight], which is used by this method.
   ///   * [moveSelectionLeft], which is the same but in the opposite direction.
   void moveSelectionRight(SelectionChangedCause cause) {
-    final TextSelection nextSelection = TextEditingModel.moveGivenSelectionRight(
-      textEditingModel.value.selection,
-      textEditingModel.value.text,
+    final TextSelection nextSelection = TextEditingValue.moveGivenSelectionRight(
+      value.selection,
+      value.text,
     );
-    if (nextSelection == textEditingModel.value.selection) {
+    if (nextSelection == value.selection) {
       return;
     }
     setSelection(nextSelection, cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingModel.moveSelectionRightByLine}
+  /// {@macro flutter.rendering.TextEditingValue.moveSelectionRightByLine}
   ///
   /// Move the current [selection] to the rightmost point of the current line.
   ///
@@ -690,15 +690,15 @@ abstract class TextEditingActionTarget {
   ///
   /// See also:
   ///
-  ///   * [TextEditingModel.moveSelectionRightByLine], which is used by this method.
+  ///   * [TextEditingValue.moveSelectionRightByLine], which is used by this method.
   ///   * [moveSelectionLeftByLine], which is the same but in the opposite
   ///     direction.
   void moveSelectionRightByLine(SelectionChangedCause cause) {
-    final TextSelection nextSelection = textEditingModel.moveSelectionRightByLine(renderEditable);
+    final TextSelection nextSelection = value.moveSelectionRightByLine(renderEditable);
     setSelection(nextSelection, cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingModel.moveSelectionRightByWord}
+  /// {@macro flutter.rendering.TextEditingValue.moveSelectionRightByWord}
   ///
   /// Move the current [selection] to the next end of a word.
   ///
@@ -708,7 +708,7 @@ abstract class TextEditingActionTarget {
   ///
   /// See also:
   ///
-  ///   * [TextEditingModel.moveSelectionRightByWord], which is used by this
+  ///   * [TextEditingValue.moveSelectionRightByWord], which is used by this
   ///     method.
   ///   * [moveSelectionLeftByWord], which is the same but in the opposite
   ///     direction.
@@ -725,19 +725,19 @@ abstract class TextEditingActionTarget {
       'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).',
     );
     */
-    final TextSelection nextSelection = TextEditingModel.moveGivenSelectionRightByWord(
-      textEditingModel.value.text,
+    final TextSelection nextSelection = TextEditingValue.moveGivenSelectionRightByWord(
+      value.text,
       renderEditable,
-      textEditingModel.value.selection,
+      value.selection,
       includeWhitespace,
     );
-    if (nextSelection == textEditingModel.value.selection) {
+    if (nextSelection == value.selection) {
       return;
     }
     setSelection(nextSelection, cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingModel.moveSelectionToEnd}
+  /// {@macro flutter.rendering.TextEditingValue.moveSelectionToEnd}
   ///
   /// Move the current [selection] to the end of the field.
   ///
@@ -745,14 +745,14 @@ abstract class TextEditingActionTarget {
   ///
   /// See also:
   ///
-  ///   * [TextEditingModel.moveSelectionToEnd], which is used by this method.
+  ///   * [TextEditingValue.moveSelectionToEnd], which is used by this method.
   ///   * [moveSelectionToStart], which is the same but in the opposite
   ///     direction.
   void moveSelectionToEnd(SelectionChangedCause cause) {
-    setSelection(textEditingModel.moveSelectionToEnd(), cause);
+    setSelection(value.moveSelectionToEnd(), cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingModel.moveSelectionToStart}
+  /// {@macro flutter.rendering.TextEditingValue.moveSelectionToStart}
   ///
   /// Move the current [selection] to the start of the field.
   ///
@@ -760,13 +760,13 @@ abstract class TextEditingActionTarget {
   ///
   /// See also:
   ///
-  ///   * [TextEditingModel.moveSelectionToStart], which is used by this method.
+  ///   * [TextEditingValue.moveSelectionToStart], which is used by this method.
   ///   * [moveSelectionToEnd], which is the same but in the opposite direction.
   void moveSelectionToStart(SelectionChangedCause cause) {
-    setSelection(textEditingModel.moveSelectionToStart(), cause);
+    setSelection(value.moveSelectionToStart(), cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingModel.moveSelectionUp}
+  /// {@macro flutter.rendering.TextEditingValue.moveSelectionUp}
   ///
   /// Move the current [selection] up by one line.
   ///
@@ -774,10 +774,10 @@ abstract class TextEditingActionTarget {
   ///
   /// See also:
   ///
-  ///   * [TextEditingModel.moveSelectionUp], which is used by this method.
+  ///   * [TextEditingValue.moveSelectionUp], which is used by this method.
   ///   * [moveSelectionDown], which is the same but in the opposite direction.
   void moveSelectionUp(SelectionChangedCause cause) {
-    final TextSelection nextSelection = textEditingModel.moveSelectionUp(renderEditable);
+    final TextSelection nextSelection = value.moveSelectionUp(renderEditable);
 
     if (nextSelection.extentOffset == 0) {
       _wasSelectingVerticallyWithKeyboard = false;
@@ -788,31 +788,31 @@ abstract class TextEditingActionTarget {
     setSelection(nextSelection, cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingModel.selectAll}
+  /// {@macro flutter.rendering.TextEditingValue.selectAll}
   ///
   /// Set the current [selection] to contain the entire text value.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   void selectAll(SelectionChangedCause cause) {
     setSelection(
-      textEditingModel.selectAll(),
+      value.selectAll(),
       cause,
     );
   }
 
-  /// {@macro flutter.rendering.TextEditingModel.copySelection}
+  /// {@macro flutter.rendering.TextEditingValue.copySelection}
   ///
   /// Copy current [selection] to [Clipboard].
   void copySelection() {
-    final TextSelection selection = textEditingModel.value.selection;
-    final String text = textEditingModel.value.text;
+    final TextSelection selection = value.selection;
+    final String text = value.text;
     assert(selection != null);
     if (!selection.isCollapsed) {
       Clipboard.setData(ClipboardData(text: selection.textInside(text)));
     }
   }
 
-  /// {@macro flutter.rendering.TextEditingModel.cutSelection}
+  /// {@macro flutter.rendering.TextEditingValue.cutSelection}
   /// Cut current [selection] to Clipboard.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
@@ -820,8 +820,8 @@ abstract class TextEditingActionTarget {
     if (readOnly) {
       return;
     }
-    final TextSelection selection = textEditingModel.value.selection;
-    final String text = textEditingModel.value.text;
+    final TextSelection selection = value.selection;
+    final String text = value.text;
     assert(selection != null);
     if (!selection.isCollapsed) {
       Clipboard.setData(ClipboardData(text: selection.textInside(text)));
@@ -835,7 +835,7 @@ abstract class TextEditingActionTarget {
     }
   }
 
-  /// {@macro flutter.rendering.TextEditingModel.pasteText}
+  /// {@macro flutter.rendering.TextEditingValue.pasteText}
   /// Paste text from [Clipboard].
   ///
   /// If there is currently a selection, it will be replaced.
@@ -845,8 +845,8 @@ abstract class TextEditingActionTarget {
     if (readOnly) {
       return;
     }
-    final TextSelection selection = textEditingModel.value.selection;
-    final String text = textEditingModel.value.text;
+    final TextSelection selection = value.selection;
+    final String text = value.text;
     assert(selection != null);
     // Snapshot the input before using `await`.
     // See https://github.com/flutter/flutter/issues/11427
