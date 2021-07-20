@@ -120,6 +120,9 @@ void main() {
     await tester.idle();
 
     expect(tester.testTextInput.isVisible, isTrue);
+    // Prevent the gesture recognizer from recognizing the next tap as a
+    // double-tap.
+    await tester.pump(const Duration(seconds: 1));
 
     tester.testTextInput.hide();
     final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));

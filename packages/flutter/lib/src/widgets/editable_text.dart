@@ -2448,9 +2448,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
     } else {
       WidgetsBinding.instance!.removeObserver(this);
-      // Clear the selection and composition state if this widget lost focus.
-      _value = TextEditingValue(text: _value.text);
-      _currentPromptRectRange = null;
+      setState(() {
+        _currentPromptRectRange = null;
+      });
     }
     updateKeepAlive();
   }
