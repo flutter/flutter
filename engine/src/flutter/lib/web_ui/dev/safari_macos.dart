@@ -3,13 +3,14 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert' show json;
 import 'dart:io';
 
+import 'package:path/path.dart' as pathlib;
 import 'package:test_api/src/backend/runtime.dart';
 
 import 'browser.dart';
-import 'common.dart';
-import 'safari_installation.dart';
+import 'utils.dart';
 
 /// Provides an environment for the desktop variant of Safari running on macOS.
 class SafariMacOsEnvironment implements BrowserEnvironment {
@@ -45,34 +46,44 @@ class SafariMacOs extends Browser {
   @override
   final String name = 'Safari macOS';
 
-  /// Starts a new instance of Safari open to the given [url], which may be a
-  /// [Uri].
+  /// Starts a new instance of Safari open to the given [url].
   factory SafariMacOs(Uri url) {
-    final String version = SafariArgParser.instance.version;
     return SafariMacOs._(() async {
-      // TODO(nurhan): Configure info log for LUCI.
-      final BrowserInstallation installation = await getOrInstallSafari(
-        version,
-        infoLog: DevNull(),
-      );
+      // This hack to programmatically launch a test in Safari is borrowed from
+      // Karma: https://github.com/karma-runner/karma-safari-launcher/issues/29
+      //
+      // The issue is that opening an HTML file directly causes Safari to pop up
+      // a UI prompt to confirm the opening of a file. However, files under
+      // Library/Containers/com.apple.Safari/Data are exempt from this pop up.
+      // We create a "trampoline" file in this directory. The trampoline
+      // redirects the browser to the test URL in a <script>.
+      final String homePath = Platform.environment['HOME']!;
+      final Directory safariDataDirectory = Directory(pathlib.join(
+        homePath,
+        'Library/Containers/com.apple.Safari/Data',
+      ));
+      final Directory trampolineDirectory = await safariDataDirectory.createTemp('web-engine-test-trampoline-');
 
-      // In the macOS Catalina opening Safari browser with a file brings
-      // a popup which halts the test.
-      // The following list of arguments needs to be provided to the `open`
-      // command to open Safari for a given URL. In summary, `open` tool opens
-      // a new Safari browser (even if one is already open), opens it with no
-      // persistent state and wait until it opens.
-      // The details copied from `man open` on macOS.
-      // TODO(nurhan): https://github.com/flutter/flutter/issues/50809
-      final Process process = await Process.start(installation.executable, <String>[
-        // These are flags for `open` command line tool.
-        '-F', // Open a fresh Safari with no persistent state.
-        '-W', // Wait until the Safari opens.
-        '-n', // Open a new instance of the Safari even another one is open.
-        '-b', // Specifies the bundle identifier for the application to use.
-        'com.apple.Safari', // Bundle identifier for Safari.
-        '${url.toString()}'
-      ]);
+      // Clean up trampoline files/directories before exiting felt.
+      cleanupCallbacks.add(() async {
+        if (trampolineDirectory.existsSync()) {
+          trampolineDirectory.delete(recursive: true);
+        }
+      });
+
+      final File trampoline = File(
+        pathlib.join(trampolineDirectory.path, 'trampoline.html'),
+      );
+      await trampoline.writeAsString('''
+<script>
+  location = ${json.encode(url.toString())};
+</script>
+      ''');
+
+      final Process process = await Process.start(
+        '/Applications/Safari.app/Contents/MacOS/Safari',
+        <String>[trampoline.path],
+      );
 
       return process;
     });

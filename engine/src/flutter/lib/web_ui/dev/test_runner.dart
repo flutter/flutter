@@ -39,7 +39,6 @@ import 'environment.dart';
 import 'exceptions.dart';
 import 'firefox.dart';
 import 'firefox_installer.dart';
-import 'macos_info.dart';
 import 'safari_installation.dart';
 import 'safari_ios.dart';
 import 'safari_macos.dart';
@@ -180,14 +179,8 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
     }
     GeneralTestsArgumentParser.instance.parseOptions(argResults!);
 
-    /// Collect information on the bot.
-    if (isSafariOnMacOS && isLuci) {
-      final MacOSInfo macOsInfo = new MacOSInfo();
-      await macOsInfo.printInformation();
-    }
-
     final Pipeline testPipeline = Pipeline(steps: <PipelineStep>[
-      ClearTerminalScreenStep(),
+      if (isWatchMode) ClearTerminalScreenStep(),
       TestRunnerStep(this),
     ]);
     await testPipeline.run();
