@@ -1,4 +1,4 @@
-Signature: 43f19d43fe1abfc6b7aa1367f48d7338
+Signature: 78be75ce8d374db4ac864a3927a6ab69
 
 UNUSED LICENSES:
 
@@ -3419,6 +3419,7 @@ LIBRARY: fuchsia_sdk
 ORIGIN: ../../../fuchsia/sdk/linux/dart/fidl/lib/src/codegen_common.dart + ../../../fuchsia/sdk/linux/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../fuchsia/sdk/linux/dart/fidl/lib/src/codegen_common.dart
+FILE: ../../../fuchsia/sdk/linux/dart/fidl/lib/src/wire_format.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/lib/reader.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/lib/src/reader/diagnostic_config.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/lib/src/reader/diagnostic_data.dart
