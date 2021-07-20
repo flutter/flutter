@@ -14,7 +14,7 @@ namespace impeller {
 namespace testing {
 
 TEST(GeometryTest, RotationMatrix) {
-  auto rotation = Matrix::MakeRotationZ(M_PI_4);
+  auto rotation = Matrix::MakeRotationZ(Radians{M_PI_4});
   auto expect = Matrix{0.707,  0.707, 0, 0,  //
                        -0.707, 0.707, 0, 0,  //
                        0,      0,     1, 0,  //
@@ -23,7 +23,7 @@ TEST(GeometryTest, RotationMatrix) {
 }
 
 TEST(GeometryTest, InvertMultMatrix) {
-  auto rotation = Matrix::MakeRotationZ(M_PI_4);
+  auto rotation = Matrix::MakeRotationZ(Radians{M_PI_4});
   auto invert = rotation.Invert();
   auto expect = Matrix{0.707, -0.707, 0, 0,  //
                        0.707, 0.707,  0, 0,  //
@@ -33,7 +33,7 @@ TEST(GeometryTest, InvertMultMatrix) {
 }
 
 TEST(GeometryTest, MutliplicationMatrix) {
-  auto rotation = Matrix::MakeRotationZ(M_PI_4);
+  auto rotation = Matrix::MakeRotationZ(Radians{M_PI_4});
   auto invert = rotation.Invert();
   ASSERT_MATRIX_NEAR(rotation * invert, Matrix{});
 }
@@ -60,7 +60,7 @@ TEST(GeometryTest, InvertMatrix) {
 }
 
 TEST(GeometryTest, TestDecomposition) {
-  auto rotated = Matrix::MakeRotationZ(M_PI_4);
+  auto rotated = Matrix::MakeRotationZ(Radians{M_PI_4});
 
   auto result = rotated.Decompose();
 
@@ -73,7 +73,7 @@ TEST(GeometryTest, TestDecomposition) {
 }
 
 TEST(GeometryTest, TestDecomposition2) {
-  auto rotated = Matrix::MakeRotationZ(M_PI_4);
+  auto rotated = Matrix::MakeRotationZ(Radians{M_PI_4});
   auto scaled = Matrix::MakeScale({2.0, 3.0, 1.0});
   auto translated = Matrix::MakeTranslation({-200, 750, 20});
 
@@ -100,7 +100,7 @@ TEST(GeometryTest, TestRecomposition) {
   /*
    *  Decomposition.
    */
-  auto rotated = Matrix::MakeRotationZ(M_PI_4);
+  auto rotated = Matrix::MakeRotationZ(Radians{M_PI_4});
 
   auto result = rotated.Decompose();
 
@@ -120,7 +120,7 @@ TEST(GeometryTest, TestRecomposition) {
 
 TEST(GeometryTest, TestRecomposition2) {
   auto matrix = Matrix::MakeTranslation({100, 100, 100}) *
-                Matrix::MakeRotationZ(M_PI_4) *
+                Matrix::MakeRotationZ(Radians{M_PI_4}) *
                 Matrix::MakeScale({2.0, 2.0, 2.0});
 
   auto result = matrix.Decompose();
@@ -262,6 +262,14 @@ TEST(GeometryTest, CanConvertTTypesExplicitly) {
     ASSERT_EQ(r2.origin.y, 2u);
     ASSERT_EQ(r2.size.width, 3u);
     ASSERT_EQ(r2.size.height, 4u);
+  }
+}
+
+TEST(GeometryTest, CanConvertBetweenDegressAndRadians) {
+  {
+    auto deg = Degrees{90.0};
+    Radians rad = deg;
+    ASSERT_FLOAT_EQ(rad.radians, kPiOver2);
   }
 }
 

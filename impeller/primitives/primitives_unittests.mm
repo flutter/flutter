@@ -12,7 +12,7 @@
 #include "impeller/compositor/surface.h"
 #include "impeller/compositor/vertex_buffer_builder.h"
 #include "impeller/image/compressed_image.h"
-#include "impeller/image/image.h"
+#include "impeller/image/decompressed_image.h"
 #include "impeller/playground/playground.h"
 #include "impeller/primitives/box_fade.frag.h"
 #include "impeller/primitives/box_fade.vert.h"
