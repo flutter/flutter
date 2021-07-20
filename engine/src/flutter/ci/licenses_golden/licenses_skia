@@ -1,4 +1,4 @@
-Signature: 06f4e2b87b93f34cc8e994fa51b72966
+Signature: 86365332392f30bed8c2e5e1bf81fafb
 
 UNUSED LICENSES:
 
@@ -3937,6 +3937,8 @@ FILE: ../../../third_party/skia/src/gpu/GrThreadSafePipelineBuilder.cpp
 FILE: ../../../third_party/skia/src/gpu/GrThreadSafePipelineBuilder.h
 FILE: ../../../third_party/skia/src/gpu/mock/GrMockRenderTask.h
 FILE: ../../../third_party/skia/src/gpu/mock/GrMockSurfaceProxy.h
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlFramebuffer.h
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlFramebuffer.mm
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlRenderCommandEncoder.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrAtlasRenderTask.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrAtlasRenderTask.h
@@ -5720,6 +5722,8 @@ FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeFixedCountTessellator
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeTessellator.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/shaders/GrModulateAtlasCoverageFP.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/shaders/GrModulateAtlasCoverageFP.h
+FILE: ../../../third_party/skia/src/sksl/SkSLDSLParser.cpp
+FILE: ../../../third_party/skia/src/sksl/SkSLDSLParser.h
 FILE: ../../../third_party/skia/src/sksl/SkSLMangler.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLParsedModule.h
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLBlock.cpp
