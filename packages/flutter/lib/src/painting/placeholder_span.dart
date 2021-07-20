@@ -117,9 +117,9 @@ class PlaceholderSpan extends InlineSpan {
       return RenderComparison.identical;
     if (other.runtimeType != runtimeType)
       return RenderComparison.layout;
-    final WidgetSpan typedOther = other as PlaceholderSpan;
-    if (child != typedOther.child ||
-        alignment != typedOther.alignment ||
+    final PlaceholderSpan typedOther = other as PlaceholderSpan;
+    if (alignment != typedOther.alignment ||
+        baseline != typedOther.baseline ||
         plainText != typedOther.plainText) {
       return RenderComparison.layout;
     }
