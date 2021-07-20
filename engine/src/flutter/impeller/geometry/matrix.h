@@ -53,6 +53,7 @@ struct Matrix {
     uint64_t GetComponentsMask() const;
   };
 
+  // TODO(csg): Radar restructions of C++11 don't exist. Use optionals instead.
   using DecompositionResult =
       std::pair<bool /* success */, Decomposition /* result */>;
 
@@ -126,9 +127,9 @@ struct Matrix {
     // clang-format on
   }
 
-  static Matrix MakeRotationX(Scalar radians) {
-    Scalar cosine = cos(radians);
-    Scalar sine = sin(radians);
+  static Matrix MakeRotationX(Radians r) {
+    Scalar cosine = cos(r.radians);
+    Scalar sine = sin(r.radians);
     // clang-format off
     return Matrix(
       1.0,  0.0,    0.0,    0.0,
@@ -139,9 +140,9 @@ struct Matrix {
     // clang-format on
   }
 
-  static Matrix MakeRotationY(Scalar radians) {
-    Scalar cosine = cos(radians);
-    Scalar sine = sin(radians);
+  static Matrix MakeRotationY(Radians r) {
+    Scalar cosine = cos(r.radians);
+    Scalar sine = sin(r.radians);
 
     // clang-format off
     return Matrix(
@@ -153,9 +154,9 @@ struct Matrix {
     // clang-format on
   }
 
-  static Matrix MakeRotationZ(Scalar radians) {
-    Scalar cosine = cos(radians);
-    Scalar sine = sin(radians);
+  static Matrix MakeRotationZ(Radians r) {
+    Scalar cosine = cos(r.radians);
+    Scalar sine = sin(r.radians);
 
     // clang-format off
     return Matrix (
@@ -172,8 +173,8 @@ struct Matrix {
     return Matrix(m[0], m[1], m[2], m[3],
                   m[4], m[5], m[6], m[7],
                   m[8], m[9], m[10], m[11],
-                  m[0] * t.x + m[4] * t.y + m[8] * t.z + m[12],
-                  m[1] * t.x + m[5] * t.y + m[9] * t.z + m[13],
+                  m[0] * t.x + m[4] * t.y + m[8]  * t.z + m[12],
+                  m[1] * t.x + m[5] * t.y + m[9]  * t.z + m[13],
                   m[2] * t.x + m[6] * t.y + m[10] * t.z + m[14],
                   m[15]);
     // clang-format on
@@ -181,10 +182,10 @@ struct Matrix {
 
   constexpr Matrix Scale(const Vector3& s) const {
     // clang-format off
-    return Matrix(m[0] * s.x, m[1] * s.x, m[2] * s.x , m[3] * s.x,
-                  m[4] * s.y, m[5] * s.y, m[6] * s.y , m[7] * s.y,
+    return Matrix(m[0] * s.x, m[1] * s.x, m[2]  * s.x, m[3]  * s.x,
+                  m[4] * s.y, m[5] * s.y, m[6]  * s.y, m[7]  * s.y,
                   m[8] * s.z, m[9] * s.z, m[10] * s.z, m[11] * s.z,
-                  m[12]     , m[13]     , m[14]      , m[15]);
+                  m[12]     , m[13]     , m[14]      , m[15]       );
     // clang-format on
   }
 

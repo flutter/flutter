@@ -14,7 +14,7 @@ CompressedImage::CompressedImage(
 
 CompressedImage::~CompressedImage() = default;
 
-Image CompressedImage::Decode() const {
+DecompressedImage CompressedImage::Decode() const {
   if (!source_) {
     return {};
   }
@@ -47,32 +47,32 @@ Image CompressedImage::Decode() const {
   /*
    *  Make sure we got a valid component set.
    */
-  auto components = Image::Format::Invalid;
+  auto components = DecompressedImage::Format::Invalid;
 
   switch (comps) {
     case STBI_grey:
-      components = Image::Format::Grey;
+      components = DecompressedImage::Format::Grey;
       break;
     case STBI_grey_alpha:
-      components = Image::Format::GreyAlpha;
+      components = DecompressedImage::Format::GreyAlpha;
       break;
     case STBI_rgb:
-      components = Image::Format::RGB;
+      components = DecompressedImage::Format::RGB;
       break;
     case STBI_rgb_alpha:
-      components = Image::Format::RGBA;
+      components = DecompressedImage::Format::RGBA;
       break;
     default:
-      components = Image::Format::Invalid;
+      components = DecompressedImage::Format::Invalid;
       break;
   }
 
-  if (components == Image::Format::Invalid) {
+  if (components == DecompressedImage::Format::Invalid) {
     FML_LOG(ERROR) << "Could not detect image components when decoding.";
     return {};
   }
 
-  return Image{
+  return DecompressedImage{
       ISize{width, height},       // size
       components,                 // components
       std::move(dest_allocation)  // allocation

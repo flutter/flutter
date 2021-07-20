@@ -8,7 +8,7 @@
 #include "impeller/geometry/matrix.h"
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/rect.h"
-#include "impeller/image/image.h"
+#include "impeller/image/decompressed_image.h"
 
 namespace impeller {
 
