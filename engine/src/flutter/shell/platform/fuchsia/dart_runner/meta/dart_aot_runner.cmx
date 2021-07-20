@@ -1,20 +1,20 @@
 {
-  "program": {
-    "data": "data"
-  },
-  "sandbox": {
-    "features": [
-      "config-data",
-      "root-ssl-certificates"
-    ],
-    "services": [
-      "fuchsia.deprecatedtimezone.Timezone",
-      "fuchsia.feedback.CrashReporter",
-      "fuchsia.intl.PropertyProvider",
-      "fuchsia.logger.LogSink",
-      "fuchsia.net.NameLookup",
-      "fuchsia.posix.socket.Provider",
-      "fuchsia.tracing.provider.Registry"
-    ]
-  }
+    "program": {
+        "data": "data"
+    },
+    "sandbox": {
+        "features": [
+            "config-data",
+            "root-ssl-certificates"
+        ],
+        "services": [
+            "fuchsia.deprecatedtimezone.Timezone",
+            "fuchsia.feedback.CrashReporter",
+            "fuchsia.intl.PropertyProvider",
+            "fuchsia.logger.LogSink",
+            "fuchsia.net.NameLookup",
+            "fuchsia.posix.socket.Provider",
+            "fuchsia.tracing.provider.Registry"
+        ]
+    }
 }
