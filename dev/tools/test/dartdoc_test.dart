@@ -18,7 +18,7 @@ void main() {
       },
     );
 
-    final ProcessManager processManager = FakeProcessManager.empty();
+    final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[]);
 
     expect(
       getBranchName(
