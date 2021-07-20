@@ -1598,6 +1598,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   bool get readOnly => widget.readOnly;
 
+  @override
+  bool get obscureText => widget.obscureText;
+
   // TODO(justinmc): Document. Cache.
   @override
   TextEditingModel get textEditingModel {
