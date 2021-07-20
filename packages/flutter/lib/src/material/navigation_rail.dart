@@ -535,20 +535,20 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
   void _initControllers() {
     _destinationControllers = List<AnimationController>.generate(widget.destinations.length, (int index) {
       return AnimationController(
-        duration: kThemeAnimationDuration,
+        duration: const Duration(milliseconds: 250),
         vsync: this,
       )..addListener(_rebuild);
     });
     _destinationAnimations = _destinationControllers.map((AnimationController controller) => controller.view).toList();
     _destinationControllers[widget.selectedIndex].value = 1.0;
     _extendedController = AnimationController(
-      duration: kThemeAnimationDuration,
+      duration: const Duration(milliseconds: 250),
       vsync: this,
       value: widget.extended ? 1.0 : 0.0,
     );
     _extendedAnimation = CurvedAnimation(
       parent: _extendedController,
-      curve: Curves.easeInOut,
+      curve: Curves.fastOutSlowIn,
     );
     _extendedController.addListener(() {
       _rebuild();
