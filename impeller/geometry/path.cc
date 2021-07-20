@@ -144,32 +144,30 @@ bool Path::UpdateCubicComponentAtIndex(size_t index,
   return true;
 }
 
-void Path::EnumerateSmoothPoints(
-    SmoothPointsEnumerator enumerator,
-    const SmoothingApproximation& approximation) const {
-  if (enumerator == nullptr) {
-    return;
-  }
+static void AddPoints(std::vector<Point>& dest, const std::vector<Point>& src) {
+  dest.reserve(dest.size() + src.size());
+  dest.insert(dest.end(), src.begin(), src.end());
+}
 
+std::vector<Point> Path::SubdivideAdaptively(
+    const SmoothingApproximation& approximation) const {
+  std::vector<Point> points;
   for (const auto& component : components_) {
     switch (component.type) {
-      case ComponentType::kLinear: {
-        if (!enumerator(linears_[component.index].SmoothPoints())) {
-          return;
-        }
-      } break;
-      case ComponentType::kQuadratic: {
-        if (!enumerator(quads_[component.index].SmoothPoints(approximation))) {
-          return;
-        }
-      } break;
-      case ComponentType::kCubic: {
-        if (!enumerator(cubics_[component.index].SmoothPoints(approximation))) {
-          return;
-        }
-      } break;
+      case ComponentType::kLinear:
+        AddPoints(points, linears_[component.index].SubdivideAdaptively());
+        break;
+      case ComponentType::kQuadratic:
+        AddPoints(points,
+                  quads_[component.index].SubdivideAdaptively(approximation));
+        break;
+      case ComponentType::kCubic:
+        AddPoints(points,
+                  cubics_[component.index].SubdivideAdaptively(approximation));
+        break;
     }
   }
+  return points;
 }
 
 Rect Path::GetBoundingBox() const {
