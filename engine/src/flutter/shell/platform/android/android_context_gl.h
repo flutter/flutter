@@ -94,6 +94,14 @@ class AndroidContextGL : public AndroidContext {
   std::unique_ptr<AndroidEGLSurface> CreateOffscreenSurface() const;
 
   //----------------------------------------------------------------------------
+  /// @brief      Allocates an 1x1 pbuffer surface that is used for making the
+  ///             onscreen context current for snapshotting.
+  ///
+  /// @return     The pbuffer surface.
+  ///
+  std::unique_ptr<AndroidEGLSurface> CreatePbufferSurface() const;
+
+  //----------------------------------------------------------------------------
   /// @return     The Android environment that contains a reference to the
   /// display.
   ///
