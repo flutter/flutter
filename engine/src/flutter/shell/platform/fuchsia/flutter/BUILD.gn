@@ -53,8 +53,6 @@ template("runner_sources") {
       "accessibility_bridge.h",
       "component.cc",
       "component.h",
-      "default_session_connection.cc",
-      "default_session_connection.h",
       "engine.cc",
       "engine.h",
       "flutter_runner_product_configuration.cc",
@@ -65,6 +63,8 @@ template("runner_sources") {
       "fuchsia_external_view_embedder.h",
       "fuchsia_intl.cc",
       "fuchsia_intl.h",
+      "gfx_session_connection.cc",
+      "gfx_session_connection.h",
       "isolate_configurator.cc",
       "isolate_configurator.h",
       "keyboard.cc",
@@ -449,6 +449,7 @@ executable("flutter_runner_unittests") {
     "runner_unittest.cc",
     "tests/engine_unittests.cc",
     "tests/flutter_runner_product_configuration_unittests.cc",
+    "tests/gfx_session_connection_unittests.cc",
   ]
 
   # This is needed for //third_party/googletest for linking zircon symbols.
@@ -470,6 +471,8 @@ executable("flutter_runner_unittests") {
            "tests/fakes",
            ":flutter_runner_fixtures",
            ":flutter_runner_sources",
+           "tests/fakes",
+           "//build/fuchsia/pkg:async-testing",
            "//build/fuchsia/pkg:sys_cpp_testing",
            "//flutter/testing",
          ] + flutter_deps
@@ -500,32 +503,6 @@ executable("flutter_runner_tzdata_unittests") {
          ] + flutter_deps
 }
 
-executable("flutter_runner_scenic_unittests") {
-  testonly = true
-
-  output_name = "flutter_runner_scenic_tests"
-
-  sources = [ "tests/default_session_connection_unittests.cc" ]
-
-  # This is needed for //third_party/googletest for linking zircon symbols.
-  libs = [ "$fuchsia_sdk_path/arch/$target_cpu/sysroot/lib/libzircon.so" ]
-
-  # The use of these dependencies is temporary and will be moved behind the
-  # embedder API.
-  flutter_deps = [
-    "//flutter/lib/ui",
-    "//third_party/dart/runtime:libdart_jit",
-    "//third_party/dart/runtime/platform:libdart_platform_jit",
-  ]
-
-  deps = [
-           ":flutter_runner_fixtures",
-           ":flutter_runner_sources",
-           "$fuchsia_sdk_root/fidl:fuchsia.ui.policy",
-           "//flutter/testing",
-         ] + flutter_deps
-}
-
 fuchsia_test_archive("flutter_runner_tests") {
   deps = [ ":flutter_runner_unittests" ]
 
@@ -550,21 +527,6 @@ fuchsia_test_archive("flutter_runner_tests") {
       path = rebase_path(
               "//flutter/shell/platform/fuchsia/flutter/tests/tzdata/2019a/44/le/zoneinfo64.res")
       dest = "tzdata/zoneinfo64.res"
-    },
-  ]
-
-  cmx_file = rebase_path("meta/$target_name.cmx")
-}
-
-fuchsia_test_archive("flutter_runner_scenic_tests") {
-  deps = [ ":flutter_runner_scenic_unittests" ]
-
-  binary = "$target_name"
-
-  resources = [
-    {
-      path = rebase_path("//third_party/icu/common/icudtl.dat")
-      dest = "icudtl.dat"
     },
   ]
 
@@ -825,7 +787,6 @@ group("tests") {
     ":dart_utils_tests",
     ":embedder_tests",
     ":flow_tests",
-    ":flutter_runner_scenic_tests",
     ":flutter_runner_tests",
     ":flutter_runner_tzdata_tests",
     ":fml_tests",

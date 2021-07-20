@@ -25,5 +25,3 @@
 # Legacy v1 components.
 - package: flutter_runner_tests-0.far
   test_command: run-test-component fuchsia-pkg://fuchsia.com/flutter_runner_tests#meta/flutter_runner_tests.cmx
-- package: flutter_runner_scenic_tests-0.far
-  test_command: run-test-component fuchsia-pkg://fuchsia.com/flutter_runner_scenic_tests#meta/flutter_runner_scenic_tests.cmx -- --gtest_filter=-DefaultSessionConnectionTest.*:CalculateNextLatchPointTest.*

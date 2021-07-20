@@ -1374,8 +1374,6 @@ FILE: ../../../flutter/shell/platform/fuchsia/flutter/accessibility_bridge_unitt
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/component.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/component.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/component_unittest.cc
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/default_session_connection.cc
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/default_session_connection.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/engine.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/engine.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/flutter_runner_fakes.h
@@ -1389,6 +1387,8 @@ FILE: ../../../flutter/shell/platform/fuchsia/flutter/fuchsia_external_view_embe
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/fuchsia_intl.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/fuchsia_intl.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/fuchsia_intl_unittest.cc
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/gfx_session_connection.cc
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/gfx_session_connection.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/isolate_configurator.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/isolate_configurator.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/kernel/extract_far.dart
@@ -1405,7 +1405,6 @@ FILE: ../../../flutter/shell/platform/fuchsia/flutter/meta/flutter_aot_product_r
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/meta/flutter_aot_runner.cmx
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/meta/flutter_jit_product_runner.cmx
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/meta/flutter_jit_runner.cmx
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/meta/flutter_runner_scenic_tests.cmx
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/meta/flutter_runner_tests.cmx
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/meta/jit_product_runtime
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/meta/jit_runtime

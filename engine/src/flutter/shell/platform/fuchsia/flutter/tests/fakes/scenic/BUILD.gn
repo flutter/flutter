@@ -1,0 +1,24 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+assert(is_fuchsia)
+
+source_set("scenic") {
+  testonly = true
+
+  sources = [
+    "fake_session.cc",
+    "fake_session.h",
+  ]
+
+  public_deps = [
+    "//build/fuchsia/fidl:fuchsia.scenic.scheduling",
+    "//build/fuchsia/fidl:fuchsia.ui.gfx",
+    "//build/fuchsia/fidl:fuchsia.ui.scenic",
+    "//build/fuchsia/pkg:async-cpp",
+    "//build/fuchsia/pkg:async-testing",
+    "//build/fuchsia/pkg:fidl_cpp",
+    "//flutter/fml",
+  ]
+}

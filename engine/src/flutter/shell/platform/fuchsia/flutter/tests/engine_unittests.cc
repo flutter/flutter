@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <fuchsia/scenic/scheduling/cpp/fidl.h>
-#include <fuchsia/ui/policy/cpp/fidl.h>
 #include <fuchsia/ui/scenic/cpp/fidl.h>
 #include <lib/async-loop/default.h>
 #include <lib/sys/cpp/component_context.h>
@@ -14,7 +12,7 @@
 #include "flutter/fml/message_loop_impl.h"
 #include "flutter/fml/task_runner.h"
 #include "flutter/shell/common/serialization_callbacks.h"
-#include "flutter/shell/platform/fuchsia/flutter/default_session_connection.h"
+#include "flutter/shell/platform/fuchsia/flutter/gfx_session_connection.h"
 #include "flutter/shell/platform/fuchsia/flutter/logging.h"
 #include "flutter/shell/platform/fuchsia/flutter/runner.h"
 #include "gtest/gtest.h"
@@ -66,8 +64,9 @@ class EngineTest : public ::testing::Test {
 
     context_ = sys::ComponentContext::CreateAndServeOutgoingDirectory();
     scenic_ = context_->svc()->Connect<fuchsia::ui::scenic::Scenic>();
-    scenic::Session session(scenic_.get());
-    surface_producer_ = std::make_unique<VulkanSurfaceProducer>(&session);
+    session_.emplace(scenic_.get());
+    surface_producer_ =
+        std::make_unique<VulkanSurfaceProducer>(&session_.value());
 
     Engine::WarmupSkps(&concurrent_task_runner_, &raster_task_runner_,
                        *surface_producer_, width, height, asset_manager,
@@ -81,6 +80,7 @@ class EngineTest : public ::testing::Test {
 
   std::unique_ptr<sys::ComponentContext> context_;
   fuchsia::ui::scenic::ScenicPtr scenic_;
+  std::optional<scenic::Session> session_;
 };
 
 TEST_F(EngineTest, SkpWarmup) {

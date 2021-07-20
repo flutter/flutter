@@ -24,6 +24,7 @@
 #include "third_party/skia/include/ports/SkFontMgr_fuchsia.h"
 
 #include "../runtime/dart/utils/files.h"
+#include "../runtime/dart/utils/root_inspect_node.h"
 #include "focus_delegate.h"
 #include "fuchsia_intl.h"
 #include "platform_view.h"
@@ -119,16 +120,19 @@ Engine::Engine(Delegate& delegate,
   // thread. We also need to wait for the external view embedder to be set up
   // before creating the shell.
   fml::AutoResetWaitableEvent view_embedder_latch;
+  auto session_inspect_node =
+      dart_utils::RootInspectNode::CreateRootChild("vsync_stats");
   task_runners.GetRasterTaskRunner()->PostTask(fml::MakeCopyable(
-      [this, session = std::move(session),
+      [this, &view_embedder_latch,
+       session_inspect_node = std::move(session_inspect_node),
+       session = std::move(session),
        session_error_callback = std::move(session_error_callback),
        view_token = std::move(view_token),
        view_ref_pair = std::move(view_ref_pair),
        max_frames_in_flight = product_config.get_max_frames_in_flight(),
-       &view_embedder_latch,
        vsync_offset = product_config.get_vsync_offset()]() mutable {
-        session_connection_ = std::make_shared<DefaultSessionConnection>(
-            thread_label_, std::move(session),
+        session_connection_ = std::make_shared<GfxSessionConnection>(
+            thread_label_, std::move(session_inspect_node), std::move(session),
             std::move(session_error_callback), [](auto) {},
             max_frames_in_flight, vsync_offset);
         surface_producer_.emplace(session_connection_->get());
@@ -326,7 +330,7 @@ Engine::Engine(Delegate& delegate,
                 std::move(on_semantics_node_update_callback),
                 std::move(on_request_announce_callback),
                 std::move(on_shader_warmup), external_view_embedder,
-                // Callbacks for VsyncWaiter to call into SessionConnection.
+                // Callbacks for VsyncWaiter to call into GfxSessionConnection.
                 await_vsync_callback,
                 await_vsync_for_secondary_callback_callback);
           });

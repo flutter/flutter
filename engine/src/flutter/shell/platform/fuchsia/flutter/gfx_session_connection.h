@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_DEFAULT_SESSION_CONNECTION_H_
-#define FLUTTER_SHELL_PLATFORM_FUCHSIA_DEFAULT_SESSION_CONNECTION_H_
+#ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_GFX_SESSION_CONNECTION_H_
+#define FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_GFX_SESSION_CONNECTION_H_
 
 #include <fuchsia/scenic/scheduling/cpp/fidl.h>
 #include <fuchsia/ui/scenic/cpp/fidl.h>
@@ -15,6 +15,7 @@
 #include "flutter/fml/closure.h"
 #include "flutter/fml/macros.h"
 
+#include "fml/time/time_delta.h"
 #include "vsync_waiter.h"
 
 #include <mutex>
@@ -41,7 +42,7 @@ static constexpr fml::TimeDelta kDefaultPresentationInterval =
 
 // The component residing on the raster thread that is responsible for
 // maintaining the Scenic session connection and presenting node updates.
-class DefaultSessionConnection final {
+class GfxSessionConnection final {
  public:
   static FlutterFrameTimes GetTargetTimes(fml::TimeDelta vsync_offset,
                                           fml::TimeDelta vsync_interval,
@@ -73,15 +74,16 @@ class DefaultSessionConnection final {
       fuchsia::scenic::scheduling::FuturePresentationTimes future_info,
       fuchsia::scenic::scheduling::PresentationInfo& presentation_info);
 
-  DefaultSessionConnection(
+  GfxSessionConnection(
       std::string debug_label,
+      inspect::Node inspect_node,
       fidl::InterfaceHandle<fuchsia::ui::scenic::Session> session,
       fml::closure session_error_callback,
       on_frame_presented_event on_frame_presented_callback,
       uint64_t max_frames_in_flight,
       fml::TimeDelta vsync_offset);
 
-  ~DefaultSessionConnection();
+  ~GfxSessionConnection();
 
   scenic::Session* get() { return &session_wrapper_; }
 
@@ -99,7 +101,6 @@ class DefaultSessionConnection final {
   void FireCallbackMaybe();
 
   FlutterFrameTimes GetTargetTimesHelper(bool secondary_callback);
-
   VsyncInfo GetCurrentVsyncInfo() const;
 
   scenic::Session session_wrapper_;
@@ -121,10 +122,8 @@ class DefaultSessionConnection final {
 
   on_frame_presented_event on_frame_presented_callback_;
 
-  fml::TimePoint last_latch_point_targeted_ =
-      fml::TimePoint::FromEpochDelta(fml::TimeDelta::Zero());
-  fml::TimePoint present_requested_time_ =
-      fml::TimePoint::FromEpochDelta(fml::TimeDelta::Zero());
+  fml::TimePoint last_latch_point_targeted_;
+  fml::TimePoint present_requested_time_;
 
   std::deque<std::pair<fml::TimePoint, fml::TimePoint>>
       future_presentation_infos_ = {};
@@ -152,7 +151,7 @@ class DefaultSessionConnection final {
   fml::TimeDelta vsync_offset_;
 
   // Variables for recording past and future vsync info, as reported by Scenic.
-  fml::TimePoint last_presentation_time_ = fml::TimePoint::Now();
+  fml::TimePoint last_presentation_time_;
   fuchsia::scenic::scheduling::PresentationInfo next_presentation_info_;
 
   // Flutter framework pipeline logic.
@@ -175,9 +174,9 @@ class DefaultSessionConnection final {
   // thread.
   FireCallbackCallback fire_callback_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(DefaultSessionConnection);
+  FML_DISALLOW_COPY_AND_ASSIGN(GfxSessionConnection);
 };
 
 }  // namespace flutter_runner
 
-#endif  // FLUTTER_SHELL_PLATFORM_FUCHSIA_DEFAULT_SESSION_CONNECTION_H_
+#endif  // FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_GFX_SESSION_CONNECTION_H_
