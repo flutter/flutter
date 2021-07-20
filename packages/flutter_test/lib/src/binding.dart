@@ -107,11 +107,8 @@ mixin TestDefaultBinaryMessengerBinding on BindingBase, ServicesBinding {
 
 /// Base class for bindings used by widgets library tests.
 ///
-/// The [ensureInitialized] method creates (if necessary) and returns an
-/// instance of the appropriate subclass. (If one is already created, it returns
-/// that one, even if it's not the one that it would normally create. This
-/// allows tests to force the use of [LiveTestWidgetsFlutterBinding] even in a
-/// normal unit test environment, e.g. to test that binding.)
+/// The [ensureInitialized] method creates (if necessary) and returns
+/// an instance of the appropriate subclass.
 ///
 /// When using these bindings, certain features are disabled. For
 /// example, [timeDilation] is reset to 1.0 on initialization.
@@ -122,6 +119,20 @@ mixin TestDefaultBinaryMessengerBinding on BindingBase, ServicesBinding {
 /// that actually needs to make a network call should provide its own
 /// `HttpClient` to the code making the call, so that it can appropriately mock
 /// or fake responses.
+///
+/// ### Coordinate spaces
+///
+/// [TestWidgetsFlutterBinding] might be run on devices of different screen
+/// sizes, while the testing widget is still told the same size to ensure
+/// consistent results. Consequently, code that deals with positions (such as
+/// pointer events or painting) must distinguish between two coordinate spaces:
+///
+///  * The _local coordinate space_ is the one used by the testing widget
+///    (typically an 800 by 600 window, but can be altered by [setSurfaceSize]).
+///  * The _global coordinate space_ is the one used by the device.
+///
+/// Positions can be transformed between coordinate spaces with [localToGlobal]
+/// and [globalToLocal].
 abstract class TestWidgetsFlutterBinding extends BindingBase
   with SchedulerBinding,
        ServicesBinding,
@@ -268,14 +279,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// equivalent as [Future.delayed].
   Future<void> delayed(Duration duration);
 
-  /// The current [TestWidgetsFlutterBinding], if one has been created.
-  ///
-  /// Provides access to the features exposed by this binding. The binding must
-  /// be initialized before using this getter; this is typically done by calling
-  /// [testWidgets] or [TestWidgetsFlutterBinding.ensureInitialized].
-  static TestWidgetsFlutterBinding get instance => BindingBase.checkInstance(_instance);
-  static TestWidgetsFlutterBinding? _instance;
-
   /// Creates and initializes the binding. This function is
   /// idempotent; calling it a second time will just return the
   /// previously-created instance.
@@ -294,26 +297,13 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// [LiveTestWidgetsFlutterBinding], so this function will always set up an
   /// [AutomatedTestWidgetsFlutterBinding] when run in a web browser.
   ///
-  /// The parameter `environment` is used to test the test framework
-  /// itself by checking how it reacts to different environment
-  /// variable values, and should not be used outside of this context.
-  ///
-  /// If a [TestWidgetsFlutterBinding] subclass was explicitly initialized
-  /// before calling [ensureInitialized], then that version of the binding is
-  /// returned regardless of the logic described above. This allows tests to
-  /// force a specific test binding to be used.
-  ///
-  /// This is called automatically by [testWidgets].
-  static TestWidgetsFlutterBinding ensureInitialized([@visibleForTesting Map<String, String>? environment]) {
-    if (_instance != null)
-      return _instance!;
-    return binding.ensureInitialized(environment);
-  }
+  /// The parameter `environment` is exposed to test different environment
+  /// variable values, and should not be used.
+  static WidgetsBinding ensureInitialized([@visibleForTesting Map<String, String>? environment]) => binding.ensureInitialized(environment);
 
   @override
   void initInstances() {
     super.initInstances();
-    _instance = this;
     timeDilation = 1.0; // just in case the developer has artificially changed it for development
     if (overrideHttpClient) {
       binding.setupHttpOverrides();
@@ -471,14 +461,16 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     });
   }
 
-  /// Convert the given point from the global coordinate system (as used by
-  /// pointer events from the device) to the coordinate system used by the
-  /// tests (an 800 by 600 window).
+  /// Convert the given point from the global coordinate space to the local
+  /// one.
+  ///
+  /// For definitions for coordinate spaces, see [TestWidgetsFlutterBinding].
   Offset globalToLocal(Offset point) => point;
 
-  /// Convert the given point from the coordinate system used by the tests (an
-  /// 800 by 600 window) to the global coordinate system (as used by pointer
-  /// events from the device).
+  /// Convert the given point from the local coordinate space to the global
+  /// one.
+  ///
+  /// For definitions for coordinate spaces, see [TestWidgetsFlutterBinding].
   Offset localToGlobal(Offset point) => point;
 
   /// The source of the current pointer event.
@@ -486,15 +478,34 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// The [pointerEventSource] is set as the `source` parameter of
   /// [handlePointerEventForSource] and can be used in the immediate enclosing
   /// [dispatchEvent].
+  ///
+  /// When [handlePointerEvent] is called directly, [pointerEventSource]
+  /// is [TestBindingEventSource.device].
   TestBindingEventSource get pointerEventSource => _pointerEventSource;
   TestBindingEventSource _pointerEventSource = TestBindingEventSource.device;
 
   /// Dispatch an event to the targets found by a hit test on its position,
   /// and remember its source as [pointerEventSource].
   ///
-  /// This method sets [pointerEventSource] to `source`, runs
+  /// This method sets [pointerEventSource] to `source`, forwards the call to
   /// [handlePointerEvent], then resets [pointerEventSource] to the previous
   /// value.
+  ///
+  /// If `source` is [TestBindingEventSource.device], then the `event` is based
+  /// in the global coordinate space (for definitions for coordinate spaces,
+  /// see [TestWidgetsFlutterBinding]) and the event is likely triggered by the
+  /// user physically interacting with the screen during a live test on a real
+  /// device (see [LiveTestWidgetsFlutterBinding]).
+  ///
+  /// If `source` is [TestBindingEventSource.test], then the `event` is based
+  /// in the local coordinate space and the event is likely triggered by
+  /// programatically simulated pointer events, such as:
+  ///
+  ///  * [WidgetController.tap] and alike methods, as well as directly using
+  ///    [TestGesture]. They are usually used in
+  ///    [AutomatedTestWidgetsFlutterBinding] but sometimes in live tests too.
+  ///  * [WidgetController.timedDrag] and alike methods. They are usually used
+  ///    in macrobenchmarks.
   void handlePointerEventForSource(
     PointerEvent event, {
     TestBindingEventSource source = TestBindingEventSource.device,
@@ -506,7 +517,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// to the previous value.
   @protected
   void withPointerEventSource(TestBindingEventSource source, VoidCallback task) {
-    final TestBindingEventSource previousSource = source;
+    final TestBindingEventSource previousSource = _pointerEventSource;
     _pointerEventSource = source;
     try {
       task();
@@ -918,12 +929,12 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     // tests.
     // ignore: invalid_use_of_visible_for_testing_member
     RawKeyboard.instance.clearKeysPressed();
-    assert(!RendererBinding.instance.mouseTracker.mouseIsConnected,
+    assert(!RendererBinding.instance!.mouseTracker.mouseIsConnected,
         'The MouseTracker thinks that there is still a mouse connected, which indicates that a '
         'test has not removed the mouse pointer which it added. Call removePointer on the '
         'active mouse gesture to remove the mouse pointer.');
     // ignore: invalid_use_of_visible_for_testing_member
-    RendererBinding.instance.initMouseTracker();
+    RendererBinding.instance!.initMouseTracker();
   }
 }
 
@@ -935,39 +946,11 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 ///
 /// This class assumes it is always run in checked mode (since tests are always
 /// run in checked mode).
-///
-/// See [TestWidgetsFlutterBinding] for a list of mixins that must be
-/// provided by the binding active while the test framework is
-/// running.
 class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   void initInstances() {
     super.initInstances();
-    _instance = this;
     binding.mockFlutterAssets();
-  }
-
-  /// The current [AutomatedTestWidgetsFlutterBinding], if one has been created.
-  ///
-  /// The binding must be initialized before using this getter. If you
-  /// need the binding to be constructed before calling [testWidgets],
-  /// you can ensure a binding has been constructed by calling the
-  /// [TestWidgetsFlutterBinding.ensureInitialized] function.
-  static AutomatedTestWidgetsFlutterBinding get instance => BindingBase.checkInstance(_instance);
-  static AutomatedTestWidgetsFlutterBinding? _instance;
-
-  /// Returns an instance of the binding that implements
-  /// [AutomatedTestWidgetsFlutterBinding]. If no binding has yet been
-  /// initialized, the a new instance is created.
-  ///
-  /// Generally, there is no need to call this method. Use
-  /// [TestWidgetsFlutterBinding.ensureInitialized] instead, as it
-  /// will select the correct test binding implementation
-  /// automatically.
-  static AutomatedTestWidgetsFlutterBinding ensureInitialized() {
-    if (AutomatedTestWidgetsFlutterBinding._instance == null)
-      AutomatedTestWidgetsFlutterBinding();
-    return AutomatedTestWidgetsFlutterBinding.instance;
   }
 
   FakeAsync? _currentFakeAsync; // set in runTest; cleared in postTest
@@ -1428,40 +1411,7 @@ enum LiveTestWidgetsFlutterBindingFramePolicy {
 /// [pump]. (There would be no point setting it to a value that
 /// doesn't trigger a paint, since then you could not see anything
 /// anyway.)
-///
-/// See [TestWidgetsFlutterBinding] for a list of mixins that must be
-/// provided by the binding active while the test framework is
-/// running.
 class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
-  @override
-  void initInstances() {
-    super.initInstances();
-    _instance = this;
-  }
-
-  /// The current [LiveTestWidgetsFlutterBinding], if one has been created.
-  ///
-  /// The binding must be initialized before using this getter. If you
-  /// need the binding to be constructed before calling [testWidgets],
-  /// you can ensure a binding has been constructed by calling the
-  /// [TestWidgetsFlutterBinding.ensureInitialized] function.
-  static LiveTestWidgetsFlutterBinding get instance => BindingBase.checkInstance(_instance);
-  static LiveTestWidgetsFlutterBinding? _instance;
-
-  /// Returns an instance of the binding that implements
-  /// [LiveTestWidgetsFlutterBinding]. If no binding has yet been
-  /// initialized, the a new instance is created.
-  ///
-  /// Generally, there is no need to call this method. Use
-  /// [TestWidgetsFlutterBinding.ensureInitialized] instead, as it
-  /// will select the correct test binding implementation
-  /// automatically.
-  static LiveTestWidgetsFlutterBinding ensureInitialized() {
-    if (LiveTestWidgetsFlutterBinding._instance == null)
-      LiveTestWidgetsFlutterBinding();
-    return LiveTestWidgetsFlutterBinding.instance;
-  }
-
   @override
   bool get inTest => _inTest;
   bool _inTest = false;
@@ -1582,11 +1532,15 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   /// Events dispatched by [TestGesture] are not affected by this.
   HitTestDispatcher? deviceEventDispatcher;
 
-
   /// Dispatch an event to the targets found by a hit test on its position.
   ///
-  /// Apart from forwarding the event to [GestureBinding.dispatchEvent],
-  /// This also paint all events that's down on the screen.
+  /// If the [pointerEventSource] is [TestBindingEventSource.test], then
+  /// the event is forwarded to [GestureBinding.dispatchEvent] as usual;
+  /// additionally, down pointers are painted on the screen.
+  ///
+  /// If the [pointerEventSource] is [TestBindingEventSource.device], then
+  /// the event, after being transformed to the local coordinate system, is
+  /// forwarded to [deviceEventDispatcher].
   @override
   void handlePointerEvent(PointerEvent event) {
     switch (pointerEventSource) {
@@ -1608,8 +1562,12 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         break;
       case TestBindingEventSource.device:
         if (deviceEventDispatcher != null) {
+          // The pointer events received with this source has a global position
+          // (see [handlePointerEventForSource]). Transform it to the local
+          // coordinate space used by the testing widgets.
+          final PointerEvent localEvent = event.copyWith(position: globalToLocal(event.position));
           withPointerEventSource(TestBindingEventSource.device,
-            () => super.handlePointerEvent(event)
+            () => super.handlePointerEvent(localEvent)
           );
         }
         break;
@@ -1623,9 +1581,10 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         super.dispatchEvent(event, hitTestResult);
         break;
       case TestBindingEventSource.device:
-        assert(hitTestResult != null);
+        assert(hitTestResult != null || event is PointerAddedEvent || event is PointerRemovedEvent);
         assert(deviceEventDispatcher != null);
-        deviceEventDispatcher!.dispatchEvent(event, hitTestResult!);
+        if (hitTestResult != null)
+          deviceEventDispatcher!.dispatchEvent(event, hitTestResult);
         break;
     }
   }
@@ -1858,15 +1817,6 @@ class _LiveTestRenderView extends RenderView {
     _label!.text = TextSpan(text: value, style: _labelStyle);
     _label!.layout();
     onNeedPaint();
-  }
-
-  @override
-  bool hitTest(HitTestResult result, { required Offset position }) {
-    final Matrix4 transform = configuration.toHitTestMatrix();
-    final double det = transform.invert();
-    assert(det != 0.0);
-    position = MatrixUtils.transformPoint(transform, position);
-    return super.hitTest(result, position: position);
   }
 
   @override

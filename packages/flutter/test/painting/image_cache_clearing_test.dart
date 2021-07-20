@@ -25,7 +25,7 @@ void main() {
         completer.complete();
       },
     ));
-    imageCache.clearLiveImages();
+    imageCache!.clearLiveImages();
     await completer.future;
   });
 }
