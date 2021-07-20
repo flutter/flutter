@@ -74,35 +74,10 @@ Future<void> writeResponseData(
 Future<void> integrationDriver({
   Duration timeout = const Duration(minutes: 20),
   ResponseDataCallback? responseDataCallback = writeResponseData,
-  ScreenshotCallback? onScreenshot,
 }) async {
   final FlutterDriver driver = await FlutterDriver.connect();
   final String jsonResult = await driver.requestData(null, timeout: timeout);
   final Response response = Response.fromJson(jsonResult);
-
-  if (onScreenshot != null) {
-    final List<dynamic> screenshots = response.data!['screenshots'] as List<dynamic>;
-    final List<String> failures = <String>[];
-    for (final dynamic screenshot in screenshots) {
-      final Map<String, dynamic> data = screenshot as Map<String, dynamic>;
-      final List<dynamic> screenshotBytes = data['bytes'] as List<dynamic>;
-      final String screenshotName = data['screenshotName'] as String;
-
-      bool ok = false;
-      try {
-        ok = await onScreenshot(screenshotName, screenshotBytes.cast<int>());
-      } catch (exception) {
-        throw StateError('Screenshot failure:\n'
-            'onScreenshot("$screenshotName", <bytes>) threw an exception: $exception');
-      }
-      if (!ok) {
-        failures.add(screenshotName);
-      }
-    }
-    if (failures.isNotEmpty) {
-     throw StateError('The following screenshot tests failed: ${failures.join(', ')}');
-    }
-  }
 
   await driver.close();
 
