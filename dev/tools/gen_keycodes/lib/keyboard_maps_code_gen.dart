@@ -24,8 +24,13 @@ bool _isUpperAsciiLetter(String? char) {
 /// Generates the keyboard_maps.dart files, based on the information in the key
 /// data structure given to it.
 class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
-  KeyboardMapsCodeGenerator(PhysicalKeyData keyData, LogicalKeyData logicalData)
-    : super(keyData, logicalData);
+  KeyboardMapsCodeGenerator(
+    PhysicalKeyData keyData,
+    LogicalKeyData logicalData,
+    this.numpadMap,
+  ) : super(keyData, logicalData);
+
+  final Map<String, String> numpadMap;
 
   List<PhysicalKeyEntry> get _numpadKeyData {
     return keyData.entries.where((PhysicalKeyEntry entry) {
@@ -323,6 +328,16 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
     return lines.sortedJoin().trimRight();
   }
 
+  String get _numpadKeyMap {
+    final OutputLines<int> lines = OutputLines<int>('Numpad map');
+    numpadMap.forEach((String fromName, String toName) {
+      final LogicalKeyEntry fromEntry = logicalData.entryByName(fromName);
+      final LogicalKeyEntry toEntry = logicalData.entryByName(toName);
+      lines.add(fromEntry.value, '  ${toHex(fromEntry.value, digits: 10)} /* ${fromEntry.constantName} */: LogicalKeyboardKey.${toEntry.constantName},');
+    });
+    return lines.sortedJoin().trimRight();
+  }
+
   @override
   String get templatePath => path.join(dataRoot, 'keyboard_maps.tmpl');
 
@@ -353,6 +368,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
       'WINDOWS_LOGICAL_KEY_MAP': _windowsKeyCodeMap,
       'WINDOWS_PHYSICAL_KEY_MAP': _windowsScanCodeMap,
       'WINDOWS_NUMPAD_MAP': _windowsNumpadMap,
+      'NUMPAD_MAP': _numpadKeyMap,
     };
   }
 }

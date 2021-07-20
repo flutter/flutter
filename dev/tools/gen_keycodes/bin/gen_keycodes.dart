@@ -208,6 +208,8 @@ Future<void> main(List<String> rawArguments) async {
     logicalData = LogicalKeyData.fromJson(json.decode(await File(parsedArguments['logical-data'] as String).readAsString()) as Map<String, dynamic>);
   }
 
+  final Map<String, String> numpadMap = parseMapOfString(readDataFile('numpad_map.json'));
+
   final File codeFile = File(parsedArguments['code'] as String);
   if (!codeFile.existsSync()) {
     codeFile.createSync(recursive: true);
@@ -220,7 +222,7 @@ Future<void> main(List<String> rawArguments) async {
     mapsFile.createSync(recursive: true);
   }
   print('Writing ${'key maps'.padRight(15)}${mapsFile.absolute}');
-  await mapsFile.writeAsString(KeyboardMapsCodeGenerator(physicalData, logicalData).generate());
+  await mapsFile.writeAsString(KeyboardMapsCodeGenerator(physicalData, logicalData, numpadMap).generate());
 
   final File keyCodesFile = File(path.join(PlatformCodeGenerator.engineRoot,
       'shell', 'platform', 'embedder', 'test_utils', 'key_codes.h'));

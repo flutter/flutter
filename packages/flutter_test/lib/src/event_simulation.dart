@@ -99,6 +99,18 @@ class KeyEventSimulator {
     return scanCode!;
   }
 
+  // If `key` is `upperX` or `lowerX` letter keys, return `upperX`.  Otherwise
+  // return `key`.
+  static LogicalKeyboardKey _combineLetterKeys(LogicalKeyboardKey key) {
+    final int? letterOffset =
+      _offsetIfWithinRange(key.keyId, LogicalKeyboardKey.lowerA.keyId, LogicalKeyboardKey.lowerZ.keyId) ??
+      _offsetIfWithinRange(key.keyId, LogicalKeyboardKey.upperA.keyId, LogicalKeyboardKey.upperZ.keyId);
+    if (letterOffset != null) {
+      return LogicalKeyboardKey.findKeyByKeyId(LogicalKeyboardKey.upperA.keyId + letterOffset)!;
+    }
+    return key;
+  }
+
   static int _getKeyCode(LogicalKeyboardKey key, String platform) {
     assert(_osIsSupported(platform), 'Platform $platform not supported for key simulation');
     if (kIsWeb) {
@@ -128,6 +140,7 @@ class KeyEventSimulator {
           break;
         case 'windows':
           map = kWindowsToLogicalKey;
+          key = _combineLetterKeys(key);
           break;
       }
       int? keyCode;
@@ -202,6 +215,32 @@ class KeyEventSimulator {
     return result!;
   }
 
+  // If `source` is `keyX` letter keys (not upperX or lowerX), return upperX or
+  // lowerX depending on the current keyboard state and platform. Otherwise
+  // returns `source`.
+  static LogicalKeyboardKey _separateLetterKey(LogicalKeyboardKey source, String platform) {
+    if (source is! VirtualKeyboardKey)
+      return source;
+    final int? letterOffset = _offsetIfWithinRange(
+      source.keyId,
+      LogicalKeyboardKey.keyA.keyId,
+      LogicalKeyboardKey.keyA.keyId,
+    );
+    if (letterOffset == null)
+      return source;
+    final bool shiftPressed = RawKeyboard.instance.keysPressed.intersection(
+      <LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.shiftRight}
+    ).isNotEmpty;
+    final bool capsLockPressed = RawKeyboard.instance.keysPressed.contains(LogicalKeyboardKey.capsLock);
+    // Holding Shift with CapsLock on outputs lower case letters on all
+    // platforms but macOS.
+    final bool isUpperCase = platform == 'macos' ?
+      (capsLockPressed || shiftPressed) :
+      (capsLockPressed != shiftPressed);
+    return LogicalKeyboardKey.findKeyByKeyId(
+      (isUpperCase ? LogicalKeyboardKey.upperA : LogicalKeyboardKey.lowerA).keyId + letterOffset)!;
+  }
+
   /// Get a raw key data map given a [LogicalKeyboardKey] and a platform.
   static Map<String, dynamic> getKeyData(
     LogicalKeyboardKey key, {
@@ -213,6 +252,7 @@ class KeyEventSimulator {
     assert(_osIsSupported(platform), 'Platform $platform not supported for key simulation');
 
     key = _getKeySynonym(key);
+    key = _separateLetterKey(key, platform);
 
     // Find a suitable physical key if none was supplied.
     physicalKey ??= _findPhysicalKey(key, platform);

@@ -1684,7 +1684,7 @@ void main() {
 
       await simulateKeyDownEvent(LogicalKeyboardKey.keyA, platform: 'windows');
       expect(events.length, 1);
-      expect(events[0].physicalKey, LogicalKeyboardKey.keyA);
+      expect(events[0].physicalKey, PhysicalKeyboardKey.keyA);
       expect(events[0].logicalKey, LogicalKeyboardKey.lowerA);
       expect(events[0].character, 'a');
       expect(events[0].data, const RawKeyEventDataWindows(

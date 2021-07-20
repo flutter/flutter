@@ -174,11 +174,14 @@ class LogicalKeyData {
 
       final bool isPrintable = keyLabel != null && !_isControlCharacter(keyLabel);
       data.putIfAbsent(name, () {
-        return LogicalKeyEntry.fromName(
+        final LogicalKeyEntry entry = LogicalKeyEntry.fromName(
           value: toPlane(value, _sourceToPlane(source, isPrintable)),
           name: name,
           keyLabel: keyLabel,
-        )..webNames.add(webName);
+        );
+        if (source == 'DOM')
+          entry.webNames.add(webName);
+        return entry;
       });
     }
   }
@@ -428,9 +431,11 @@ class LogicalKeyData {
   })();
 
   static int _sourceToPlane(String source, bool isPrintable) {
+    if (isPrintable)
+      return kUnicodePlane.value;
     switch (source) {
       case 'DOM':
-        return isPrintable ? kUnicodePlane.value : kUnprintablePlane.value;
+        return kUnprintablePlane.value;
       case 'FLUTTER':
         return kFlutterPlane.value;
       default:

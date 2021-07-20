@@ -189,7 +189,7 @@ class LogicalKeyboardKey extends KeyboardKey implements VirtualKeyboardKey {
 
   static String? _unicodeKeyLabel(int keyId) {
     if (_nonValueBits(keyId) == 0) {
-      return String.fromCharCode(keyId).toUpperCase();
+      return String.fromCharCode(keyId);
     }
     return null;
   }
@@ -2628,6 +2628,56 @@ class LogicalKeyboardKey extends KeyboardKey implements VirtualKeyboardKey {
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey numpadEqual = LogicalKeyboardKey(0x0020000023d);
 
+  /// Represents the logical "Numpad Arrow Up" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpadArrowUp = LogicalKeyboardKey(0x00200000281);
+
+  /// Represents the logical "Numpad Arrow Left" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpadArrowLeft = LogicalKeyboardKey(0x00200000282);
+
+  /// Represents the logical "Numpad Arrow Right" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpadArrowRight = LogicalKeyboardKey(0x00200000283);
+
+  /// Represents the logical "Numpad Arrow Down" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpadArrowDown = LogicalKeyboardKey(0x00200000284);
+
+  /// Represents the logical "Numpad Delete" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpadDelete = LogicalKeyboardKey(0x00200000285);
+
+  /// Represents the logical "Numpad Insert" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpadInsert = LogicalKeyboardKey(0x00200000286);
+
+  /// Represents the logical "Numpad End" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpadEnd = LogicalKeyboardKey(0x00200000287);
+
+  /// Represents the logical "Numpad Home" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpadHome = LogicalKeyboardKey(0x00200000288);
+
+  /// Represents the logical "Numpad Page Down" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpadPageDown = LogicalKeyboardKey(0x00200000289);
+
+  /// Represents the logical "Numpad Page Up" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpadPageUp = LogicalKeyboardKey(0x0020000028a);
+
   /// Represents the logical "Game Button 1" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
@@ -3356,6 +3406,16 @@ class LogicalKeyboardKey extends KeyboardKey implements VirtualKeyboardKey {
     0x00200000238: numpad8,
     0x00200000239: numpad9,
     0x0020000023d: numpadEqual,
+    0x00200000281: numpadArrowUp,
+    0x00200000282: numpadArrowLeft,
+    0x00200000283: numpadArrowRight,
+    0x00200000284: numpadArrowDown,
+    0x00200000285: numpadDelete,
+    0x00200000286: numpadInsert,
+    0x00200000287: numpadEnd,
+    0x00200000288: numpadHome,
+    0x00200000289: numpadPageDown,
+    0x0020000028a: numpadPageUp,
     0x00200000301: gameButton1,
     0x00200000302: gameButton2,
     0x00200000303: gameButton3,
@@ -3841,6 +3901,16 @@ class LogicalKeyboardKey extends KeyboardKey implements VirtualKeyboardKey {
     0x00200000238: 'Numpad 8',
     0x00200000239: 'Numpad 9',
     0x0020000023d: 'Numpad Equal',
+    0x00200000281: 'Numpad Arrow Up',
+    0x00200000282: 'Numpad Arrow Left',
+    0x00200000283: 'Numpad Arrow Right',
+    0x00200000284: 'Numpad Arrow Down',
+    0x00200000285: 'Numpad Delete',
+    0x00200000286: 'Numpad Insert',
+    0x00200000287: 'Numpad End',
+    0x00200000288: 'Numpad Home',
+    0x00200000289: 'Numpad Page Down',
+    0x0020000028a: 'Numpad Page Up',
     0x00200000301: 'Game Button 1',
     0x00200000302: 'Game Button 2',
     0x00200000303: 'Game Button 3',

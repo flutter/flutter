@@ -4,9 +4,6 @@
     "value": 32,
     "keyLabel": " ",
     "names": {
-      "web": [
-        "Space"
-      ],
       "gtk": [
         "KP_Space"
       ],
@@ -41,21 +38,13 @@
   "Exclamation": {
     "name": "Exclamation",
     "value": 33,
-    "keyLabel": "!",
-    "names": {
-      "web": [
-        "Exclamation"
-      ]
-    }
+    "keyLabel": "!"
   },
   "Quote": {
     "name": "Quote",
     "value": 34,
     "keyLabel": "\"",
     "names": {
-      "web": [
-        "Quote"
-      ],
       "windows": [
         "OEM_7"
       ],
@@ -86,9 +75,6 @@
     "value": 35,
     "keyLabel": "#",
     "names": {
-      "web": [
-        "NumberSign"
-      ],
       "android": [
         "POUND"
       ]
@@ -102,71 +88,38 @@
   "Dollar": {
     "name": "Dollar",
     "value": 36,
-    "keyLabel": "$",
-    "names": {
-      "web": [
-        "Dollar"
-      ]
-    }
+    "keyLabel": "$"
   },
   "Percent": {
     "name": "Percent",
     "value": 37,
-    "keyLabel": "%",
-    "names": {
-      "web": [
-        "Percent"
-      ]
-    }
+    "keyLabel": "%"
   },
   "Ampersand": {
     "name": "Ampersand",
     "value": 38,
-    "keyLabel": "&",
-    "names": {
-      "web": [
-        "Ampersand"
-      ]
-    }
+    "keyLabel": "&"
   },
   "QuoteSingle": {
     "name": "QuoteSingle",
     "value": 39,
-    "keyLabel": "'",
-    "names": {
-      "web": [
-        "QuoteSingle"
-      ]
-    }
+    "keyLabel": "'"
   },
   "ParenthesisLeft": {
     "name": "ParenthesisLeft",
     "value": 40,
-    "keyLabel": "(",
-    "names": {
-      "web": [
-        "ParenthesisLeft"
-      ]
-    }
+    "keyLabel": "("
   },
   "ParenthesisRight": {
     "name": "ParenthesisRight",
     "value": 41,
-    "keyLabel": ")",
-    "names": {
-      "web": [
-        "ParenthesisRight"
-      ]
-    }
+    "keyLabel": ")"
   },
   "Asterisk": {
     "name": "Asterisk",
     "value": 42,
     "keyLabel": "*",
     "names": {
-      "web": [
-        "Asterisk"
-      ],
       "android": [
         "STAR"
       ]
@@ -182,9 +135,6 @@
     "value": 43,
     "keyLabel": "+",
     "names": {
-      "web": [
-        "Add"
-      ],
       "android": [
         "PLUS"
       ]
@@ -200,9 +150,6 @@
     "value": 44,
     "keyLabel": ",",
     "names": {
-      "web": [
-        "Comma"
-      ],
       "windows": [
         "OEM_COMMA"
       ],
@@ -233,9 +180,6 @@
     "value": 45,
     "keyLabel": "-",
     "names": {
-      "web": [
-        "Minus"
-      ],
       "windows": [
         "OEM_MINUS"
       ],
@@ -266,9 +210,6 @@
     "value": 46,
     "keyLabel": ".",
     "names": {
-      "web": [
-        "Period"
-      ],
       "gtk": [
         "KP_Decimal"
       ],
@@ -305,9 +246,6 @@
     "value": 47,
     "keyLabel": "/",
     "names": {
-      "web": [
-        "Slash"
-      ],
       "windows": [
         "OEM_2"
       ],
@@ -338,9 +276,6 @@
     "value": 48,
     "keyLabel": "0",
     "names": {
-      "web": [
-        "Digit0"
-      ],
       "android": [
         "0"
       ],
@@ -365,9 +300,6 @@
     "value": 49,
     "keyLabel": "1",
     "names": {
-      "web": [
-        "Digit1"
-      ],
       "android": [
         "1"
       ],
@@ -392,9 +324,6 @@
     "value": 50,
     "keyLabel": "2",
     "names": {
-      "web": [
-        "Digit2"
-      ],
       "android": [
         "2"
       ],
@@ -419,9 +348,6 @@
     "value": 51,
     "keyLabel": "3",
     "names": {
-      "web": [
-        "Digit3"
-      ],
       "android": [
         "3"
       ],
@@ -446,9 +372,6 @@
     "value": 52,
     "keyLabel": "4",
     "names": {
-      "web": [
-        "Digit4"
-      ],
       "android": [
         "4"
       ],
@@ -473,9 +396,6 @@
     "value": 53,
     "keyLabel": "5",
     "names": {
-      "web": [
-        "Digit5"
-      ],
       "android": [
         "5"
       ],
@@ -500,9 +420,6 @@
     "value": 54,
     "keyLabel": "6",
     "names": {
-      "web": [
-        "Digit6"
-      ],
       "android": [
         "6"
       ],
@@ -527,9 +444,6 @@
     "value": 55,
     "keyLabel": "7",
     "names": {
-      "web": [
-        "Digit7"
-      ],
       "android": [
         "7"
       ],
@@ -554,9 +468,6 @@
     "value": 56,
     "keyLabel": "8",
     "names": {
-      "web": [
-        "Digit8"
-      ],
       "android": [
         "8"
       ],
@@ -581,9 +492,6 @@
     "value": 57,
     "keyLabel": "9",
     "names": {
-      "web": [
-        "Digit9"
-      ],
       "android": [
         "9"
       ],
@@ -606,21 +514,13 @@
   "Colon": {
     "name": "Colon",
     "value": 58,
-    "keyLabel": ":",
-    "names": {
-      "web": [
-        "Colon"
-      ]
-    }
+    "keyLabel": ":"
   },
   "Semicolon": {
     "name": "Semicolon",
     "value": 59,
     "keyLabel": ";",
     "names": {
-      "web": [
-        "Semicolon"
-      ],
       "windows": [
         "OEM_1"
       ],
@@ -649,21 +549,13 @@
   "Less": {
     "name": "Less",
     "value": 60,
-    "keyLabel": "<",
-    "names": {
-      "web": [
-        "Less"
-      ]
-    }
+    "keyLabel": "<"
   },
   "Equal": {
     "name": "Equal",
     "value": 61,
     "keyLabel": "=",
     "names": {
-      "web": [
-        "Equal"
-      ],
       "windows": [
         "OEM_PLUS"
       ],
@@ -692,31 +584,18 @@
   "Greater": {
     "name": "Greater",
     "value": 62,
-    "keyLabel": ">",
-    "names": {
-      "web": [
-        "Greater"
-      ]
-    }
+    "keyLabel": ">"
   },
   "Question": {
     "name": "Question",
     "value": 63,
-    "keyLabel": "?",
-    "names": {
-      "web": [
-        "Question"
-      ]
-    }
+    "keyLabel": "?"
   },
   "At": {
     "name": "At",
     "value": 64,
     "keyLabel": "@",
     "names": {
-      "web": [
-        "At"
-      ],
       "android": [
         "AT"
       ]
@@ -730,271 +609,138 @@
   "UpperA": {
     "name": "UpperA",
     "value": 65,
-    "keyLabel": "A",
-    "names": {
-      "web": [
-        "UpperA"
-      ]
-    }
+    "keyLabel": "A"
   },
   "UpperB": {
     "name": "UpperB",
     "value": 66,
-    "keyLabel": "B",
-    "names": {
-      "web": [
-        "UpperB"
-      ]
-    }
+    "keyLabel": "B"
   },
   "UpperC": {
     "name": "UpperC",
     "value": 67,
-    "keyLabel": "C",
-    "names": {
-      "web": [
-        "UpperC"
-      ]
-    }
+    "keyLabel": "C"
   },
   "UpperD": {
     "name": "UpperD",
     "value": 68,
-    "keyLabel": "D",
-    "names": {
-      "web": [
-        "UpperD"
-      ]
-    }
+    "keyLabel": "D"
   },
   "UpperE": {
     "name": "UpperE",
     "value": 69,
-    "keyLabel": "E",
-    "names": {
-      "web": [
-        "UpperE"
-      ]
-    }
+    "keyLabel": "E"
   },
   "UpperF": {
     "name": "UpperF",
     "value": 70,
-    "keyLabel": "F",
-    "names": {
-      "web": [
-        "UpperF"
-      ]
-    }
+    "keyLabel": "F"
   },
   "UpperG": {
     "name": "UpperG",
     "value": 71,
-    "keyLabel": "G",
-    "names": {
-      "web": [
-        "UpperG"
-      ]
-    }
+    "keyLabel": "G"
   },
   "UpperH": {
     "name": "UpperH",
     "value": 72,
-    "keyLabel": "H",
-    "names": {
-      "web": [
-        "UpperH"
-      ]
-    }
+    "keyLabel": "H"
   },
   "UpperI": {
     "name": "UpperI",
     "value": 73,
-    "keyLabel": "I",
-    "names": {
-      "web": [
-        "UpperI"
-      ]
-    }
+    "keyLabel": "I"
   },
   "UpperJ": {
     "name": "UpperJ",
     "value": 74,
-    "keyLabel": "J",
-    "names": {
-      "web": [
-        "UpperJ"
-      ]
-    }
+    "keyLabel": "J"
   },
   "UpperK": {
     "name": "UpperK",
     "value": 75,
-    "keyLabel": "K",
-    "names": {
-      "web": [
-        "UpperK"
-      ]
-    }
+    "keyLabel": "K"
   },
   "UpperL": {
     "name": "UpperL",
     "value": 76,
-    "keyLabel": "L",
-    "names": {
-      "web": [
-        "UpperL"
-      ]
-    }
+    "keyLabel": "L"
   },
   "UpperM": {
     "name": "UpperM",
     "value": 77,
-    "keyLabel": "M",
-    "names": {
-      "web": [
-        "UpperM"
-      ]
-    }
+    "keyLabel": "M"
   },
   "UpperN": {
     "name": "UpperN",
     "value": 78,
-    "keyLabel": "N",
-    "names": {
-      "web": [
-        "UpperN"
-      ]
-    }
+    "keyLabel": "N"
   },
   "UpperO": {
     "name": "UpperO",
     "value": 79,
-    "keyLabel": "O",
-    "names": {
-      "web": [
-        "UpperO"
-      ]
-    }
+    "keyLabel": "O"
   },
   "UpperP": {
     "name": "UpperP",
     "value": 80,
-    "keyLabel": "P",
-    "names": {
-      "web": [
-        "UpperP"
-      ]
-    }
+    "keyLabel": "P"
   },
   "UpperQ": {
     "name": "UpperQ",
     "value": 81,
-    "keyLabel": "Q",
-    "names": {
-      "web": [
-        "UpperQ"
-      ]
-    }
+    "keyLabel": "Q"
   },
   "UpperR": {
     "name": "UpperR",
     "value": 82,
-    "keyLabel": "R",
-    "names": {
-      "web": [
-        "UpperR"
-      ]
-    }
+    "keyLabel": "R"
   },
   "UpperS": {
     "name": "UpperS",
     "value": 83,
-    "keyLabel": "S",
-    "names": {
-      "web": [
-        "UpperS"
-      ]
-    }
+    "keyLabel": "S"
   },
   "UpperT": {
     "name": "UpperT",
     "value": 84,
-    "keyLabel": "T",
-    "names": {
-      "web": [
-        "UpperT"
-      ]
-    }
+    "keyLabel": "T"
   },
   "UpperU": {
     "name": "UpperU",
     "value": 85,
-    "keyLabel": "U",
-    "names": {
-      "web": [
-        "UpperU"
-      ]
-    }
+    "keyLabel": "U"
   },
   "UpperV": {
     "name": "UpperV",
     "value": 86,
-    "keyLabel": "V",
-    "names": {
-      "web": [
-        "UpperV"
-      ]
-    }
+    "keyLabel": "V"
   },
   "UpperW": {
     "name": "UpperW",
     "value": 87,
-    "keyLabel": "W",
-    "names": {
-      "web": [
-        "UpperW"
-      ]
-    }
+    "keyLabel": "W"
   },
   "UpperX": {
     "name": "UpperX",
     "value": 88,
-    "keyLabel": "X",
-    "names": {
-      "web": [
-        "UpperX"
-      ]
-    }
+    "keyLabel": "X"
   },
   "UpperY": {
     "name": "UpperY",
     "value": 89,
-    "keyLabel": "Y",
-    "names": {
-      "web": [
-        "UpperY"
-      ]
-    }
+    "keyLabel": "Y"
   },
   "UpperZ": {
     "name": "UpperZ",
     "value": 90,
-    "keyLabel": "Z",
-    "names": {
-      "web": [
-        "UpperZ"
-      ]
-    }
+    "keyLabel": "Z"
   },
   "BracketLeft": {
     "name": "BracketLeft",
     "value": 91,
     "keyLabel": "[",
     "names": {
-      "web": [
-        "BracketLeft"
-      ],
       "windows": [
         "OEM_4"
       ],
@@ -1025,9 +771,6 @@
     "value": 92,
     "keyLabel": "\\",
     "names": {
-      "web": [
-        "Backslash"
-      ],
       "windows": [
         "OEM_5"
       ],
@@ -1058,9 +801,6 @@
     "value": 93,
     "keyLabel": "]",
     "names": {
-      "web": [
-        "BracketRight"
-      ],
       "windows": [
         "OEM_6"
       ],
@@ -1089,31 +829,18 @@
   "Caret": {
     "name": "Caret",
     "value": 94,
-    "keyLabel": "^",
-    "names": {
-      "web": [
-        "Caret"
-      ]
-    }
+    "keyLabel": "^"
   },
   "Underscore": {
     "name": "Underscore",
     "value": 95,
-    "keyLabel": "_",
-    "names": {
-      "web": [
-        "Underscore"
-      ]
-    }
+    "keyLabel": "_"
   },
   "Backquote": {
     "name": "Backquote",
     "value": 96,
     "keyLabel": "`",
     "names": {
-      "web": [
-        "Backquote"
-      ],
       "windows": [
         "OEM_3"
       ],
@@ -1142,302 +869,152 @@
   "LowerA": {
     "name": "LowerA",
     "value": 97,
-    "keyLabel": "a",
-    "names": {
-      "web": [
-        "LowerA"
-      ]
-    }
+    "keyLabel": "a"
   },
   "LowerB": {
     "name": "LowerB",
     "value": 98,
-    "keyLabel": "b",
-    "names": {
-      "web": [
-        "LowerB"
-      ]
-    }
+    "keyLabel": "b"
   },
   "LowerC": {
     "name": "LowerC",
     "value": 99,
-    "keyLabel": "c",
-    "names": {
-      "web": [
-        "LowerC"
-      ]
-    }
+    "keyLabel": "c"
   },
   "LowerD": {
     "name": "LowerD",
     "value": 100,
-    "keyLabel": "d",
-    "names": {
-      "web": [
-        "LowerD"
-      ]
-    }
+    "keyLabel": "d"
   },
   "LowerE": {
     "name": "LowerE",
     "value": 101,
-    "keyLabel": "e",
-    "names": {
-      "web": [
-        "LowerE"
-      ]
-    }
+    "keyLabel": "e"
   },
   "LowerF": {
     "name": "LowerF",
     "value": 102,
-    "keyLabel": "f",
-    "names": {
-      "web": [
-        "LowerF"
-      ]
-    }
+    "keyLabel": "f"
   },
   "LowerG": {
     "name": "LowerG",
     "value": 103,
-    "keyLabel": "g",
-    "names": {
-      "web": [
-        "LowerG"
-      ]
-    }
+    "keyLabel": "g"
   },
   "LowerH": {
     "name": "LowerH",
     "value": 104,
-    "keyLabel": "h",
-    "names": {
-      "web": [
-        "LowerH"
-      ]
-    }
+    "keyLabel": "h"
   },
   "LowerI": {
     "name": "LowerI",
     "value": 105,
-    "keyLabel": "i",
-    "names": {
-      "web": [
-        "LowerI"
-      ]
-    }
+    "keyLabel": "i"
   },
   "LowerJ": {
     "name": "LowerJ",
     "value": 106,
-    "keyLabel": "j",
-    "names": {
-      "web": [
-        "LowerJ"
-      ]
-    }
+    "keyLabel": "j"
   },
   "LowerK": {
     "name": "LowerK",
     "value": 107,
-    "keyLabel": "k",
-    "names": {
-      "web": [
-        "LowerK"
-      ]
-    }
+    "keyLabel": "k"
   },
   "LowerL": {
     "name": "LowerL",
     "value": 108,
-    "keyLabel": "l",
-    "names": {
-      "web": [
-        "LowerL"
-      ]
-    }
+    "keyLabel": "l"
   },
   "LowerM": {
     "name": "LowerM",
     "value": 109,
-    "keyLabel": "m",
-    "names": {
-      "web": [
-        "LowerM"
-      ]
-    }
+    "keyLabel": "m"
   },
   "LowerN": {
     "name": "LowerN",
     "value": 110,
-    "keyLabel": "n",
-    "names": {
-      "web": [
-        "LowerN"
-      ]
-    }
+    "keyLabel": "n"
   },
   "LowerO": {
     "name": "LowerO",
     "value": 111,
-    "keyLabel": "o",
-    "names": {
-      "web": [
-        "LowerO"
-      ]
-    }
+    "keyLabel": "o"
   },
   "LowerP": {
     "name": "LowerP",
     "value": 112,
-    "keyLabel": "p",
-    "names": {
-      "web": [
-        "LowerP"
-      ]
-    }
+    "keyLabel": "p"
   },
   "LowerQ": {
     "name": "LowerQ",
     "value": 113,
-    "keyLabel": "q",
-    "names": {
-      "web": [
-        "LowerQ"
-      ]
-    }
+    "keyLabel": "q"
   },
   "LowerR": {
     "name": "LowerR",
     "value": 114,
-    "keyLabel": "r",
-    "names": {
-      "web": [
-        "LowerR"
-      ]
-    }
+    "keyLabel": "r"
   },
   "LowerS": {
     "name": "LowerS",
     "value": 115,
-    "keyLabel": "s",
-    "names": {
-      "web": [
-        "LowerS"
-      ]
-    }
+    "keyLabel": "s"
   },
   "LowerT": {
     "name": "LowerT",
     "value": 116,
-    "keyLabel": "t",
-    "names": {
-      "web": [
-        "LowerT"
-      ]
-    }
+    "keyLabel": "t"
   },
   "LowerU": {
     "name": "LowerU",
     "value": 117,
-    "keyLabel": "u",
-    "names": {
-      "web": [
-        "LowerU"
-      ]
-    }
+    "keyLabel": "u"
   },
   "LowerV": {
     "name": "LowerV",
     "value": 118,
-    "keyLabel": "v",
-    "names": {
-      "web": [
-        "LowerV"
-      ]
-    }
+    "keyLabel": "v"
   },
   "LowerW": {
     "name": "LowerW",
     "value": 119,
-    "keyLabel": "w",
-    "names": {
-      "web": [
-        "LowerW"
-      ]
-    }
+    "keyLabel": "w"
   },
   "LowerX": {
     "name": "LowerX",
     "value": 120,
-    "keyLabel": "x",
-    "names": {
-      "web": [
-        "LowerX"
-      ]
-    }
+    "keyLabel": "x"
   },
   "LowerY": {
     "name": "LowerY",
     "value": 121,
-    "keyLabel": "y",
-    "names": {
-      "web": [
-        "LowerY"
-      ]
-    }
+    "keyLabel": "y"
   },
   "LowerZ": {
     "name": "LowerZ",
     "value": 122,
-    "keyLabel": "z",
-    "names": {
-      "web": [
-        "LowerZ"
-      ]
-    }
+    "keyLabel": "z"
   },
   "BraceLeft": {
     "name": "BraceLeft",
     "value": 123,
-    "keyLabel": "{",
-    "names": {
-      "web": [
-        "BraceLeft"
-      ]
-    }
+    "keyLabel": "{"
   },
   "Bar": {
     "name": "Bar",
     "value": 124,
-    "keyLabel": "|",
-    "names": {
-      "web": [
-        "Bar"
-      ]
-    }
+    "keyLabel": "|"
   },
   "BraceRight": {
     "name": "BraceRight",
     "value": 125,
-    "keyLabel": "}",
-    "names": {
-      "web": [
-        "BraceRight"
-      ]
-    }
+    "keyLabel": "}"
   },
   "Tilde": {
     "name": "Tilde",
     "value": 126,
-    "keyLabel": "~",
-    "names": {
-      "web": [
-        "Tilde"
-      ]
-    }
+    "keyLabel": "~"
   },
   "Unidentified": {
     "name": "Unidentified",
@@ -7684,9 +7261,6 @@
     "name": "Suspend",
     "value": 8589934592,
     "names": {
-      "web": [
-        "Suspend"
-      ],
       "gtk": [
         "Suspend"
       ]
@@ -7703,11 +7277,6 @@
   "Resume": {
     "name": "Resume",
     "value": 8589934593,
-    "names": {
-      "web": [
-        "Resume"
-      ]
-    },
     "values": {
       "fuchsia": [
         77309411349
@@ -7718,9 +7287,6 @@
     "name": "Sleep",
     "value": 8589934594,
     "names": {
-      "web": [
-        "Sleep"
-      ],
       "gtk": [
         "Sleep"
       ],
@@ -7749,11 +7315,6 @@
   "Abort": {
     "name": "Abort",
     "value": 8589934595,
-    "names": {
-      "web": [
-        "Abort"
-      ]
-    },
     "values": {
       "fuchsia": [
         77309870235
@@ -7764,9 +7325,6 @@
     "name": "Lang1",
     "value": 8589934608,
     "names": {
-      "web": [
-        "Lang1"
-      ],
       "macos": [
         "Lang1"
       ],
@@ -7796,9 +7354,6 @@
     "name": "Lang2",
     "value": 8589934609,
     "names": {
-      "web": [
-        "Lang2"
-      ],
       "macos": [
         "Lang2"
       ],
@@ -7822,9 +7377,6 @@
     "name": "Lang3",
     "value": 8589934610,
     "names": {
-      "web": [
-        "Lang3"
-      ],
       "ios": [
         "Lang3"
       ]
@@ -7842,9 +7394,6 @@
     "name": "Lang4",
     "value": 8589934611,
     "names": {
-      "web": [
-        "Lang4"
-      ],
       "ios": [
         "Lang4"
       ]
@@ -7862,9 +7411,6 @@
     "name": "Lang5",
     "value": 8589934612,
     "names": {
-      "web": [
-        "Lang5"
-      ],
       "ios": [
         "Lang5"
       ]
@@ -7881,11 +7427,6 @@
   "IntlBackslash": {
     "name": "IntlBackslash",
     "value": 8589934624,
-    "names": {
-      "web": [
-        "IntlBackslash"
-      ]
-    },
     "values": {
       "fuchsia": [
         77309870180
@@ -7896,9 +7437,6 @@
     "name": "IntlRo",
     "value": 8589934625,
     "names": {
-      "web": [
-        "IntlRo"
-      ],
       "macos": [
         "IntlRo"
       ],
@@ -7928,9 +7466,6 @@
     "name": "IntlYen",
     "value": 8589934626,
     "names": {
-      "web": [
-        "IntlYen"
-      ],
       "macos": [
         "IntlYen"
       ],
@@ -7966,9 +7501,6 @@
     "name": "ControlLeft",
     "value": 8589934848,
     "names": {
-      "web": [
-        "ControlLeft"
-      ],
       "macos": [
         "ControlLeft"
       ],
@@ -8018,9 +7550,6 @@
     "name": "ControlRight",
     "value": 8589934849,
     "names": {
-      "web": [
-        "ControlRight"
-      ],
       "macos": [
         "ControlRight"
       ],
@@ -8068,9 +7597,6 @@
     "name": "ShiftLeft",
     "value": 8589934850,
     "names": {
-      "web": [
-        "ShiftLeft"
-      ],
       "macos": [
         "ShiftLeft"
       ],
@@ -8120,9 +7646,6 @@
     "name": "ShiftRight",
     "value": 8589934851,
     "names": {
-      "web": [
-        "ShiftRight"
-      ],
       "macos": [
         "ShiftRight"
       ],
@@ -8170,9 +7693,6 @@
     "name": "AltLeft",
     "value": 8589934852,
     "names": {
-      "web": [
-        "AltLeft"
-      ],
       "macos": [
         "AltLeft"
       ],
@@ -8220,9 +7740,6 @@
     "name": "AltRight",
     "value": 8589934853,
     "names": {
-      "web": [
-        "AltRight"
-      ],
       "macos": [
         "AltRight"
       ],
@@ -8272,9 +7789,6 @@
     "name": "MetaLeft",
     "value": 8589934854,
     "names": {
-      "web": [
-        "MetaLeft"
-      ],
       "macos": [
         "MetaLeft"
       ],
@@ -8322,9 +7836,6 @@
     "name": "MetaRight",
     "value": 8589934855,
     "names": {
-      "web": [
-        "MetaRight"
-      ],
       "macos": [
         "MetaRight"
       ],
@@ -8370,47 +7881,24 @@
   },
   "Control": {
     "name": "Control",
-    "value": 8589935088,
-    "names": {
-      "web": [
-        "Control"
-      ]
-    }
+    "value": 8589935088
   },
   "Shift": {
     "name": "Shift",
-    "value": 8589935090,
-    "names": {
-      "web": [
-        "Shift"
-      ]
-    }
+    "value": 8589935090
   },
   "Alt": {
     "name": "Alt",
-    "value": 8589935092,
-    "names": {
-      "web": [
-        "Alt"
-      ]
-    }
+    "value": 8589935092
   },
   "Meta": {
     "name": "Meta",
-    "value": 8589935094,
-    "names": {
-      "web": [
-        "Meta"
-      ]
-    }
+    "value": 8589935094
   },
   "NumpadEnter": {
     "name": "NumpadEnter",
     "value": 8589935117,
     "names": {
-      "web": [
-        "NumpadEnter"
-      ],
       "macos": [
         "NumpadEnter"
       ],
@@ -8452,9 +7940,6 @@
     "name": "NumpadParenLeft",
     "value": 8589935144,
     "names": {
-      "web": [
-        "NumpadParenLeft"
-      ],
       "android": [
         "NUMPAD_LEFT_PAREN"
       ]
@@ -8472,9 +7957,6 @@
     "name": "NumpadParenRight",
     "value": 8589935145,
     "names": {
-      "web": [
-        "NumpadParenRight"
-      ],
       "android": [
         "NUMPAD_RIGHT_PAREN"
       ]
@@ -8492,9 +7974,6 @@
     "name": "NumpadMultiply",
     "value": 8589935146,
     "names": {
-      "web": [
-        "NumpadMultiply"
-      ],
       "macos": [
         "NumpadMultiply"
       ],
@@ -8542,9 +8021,6 @@
     "name": "NumpadAdd",
     "value": 8589935147,
     "names": {
-      "web": [
-        "NumpadAdd"
-      ],
       "macos": [
         "NumpadAdd"
       ],
@@ -8592,9 +8068,6 @@
     "name": "NumpadComma",
     "value": 8589935148,
     "names": {
-      "web": [
-        "NumpadComma"
-      ],
       "macos": [
         "NumpadComma"
       ],
@@ -8630,9 +8103,6 @@
     "name": "NumpadSubtract",
     "value": 8589935149,
     "names": {
-      "web": [
-        "NumpadSubtract"
-      ],
       "macos": [
         "NumpadSubtract"
       ],
@@ -8674,9 +8144,6 @@
     "name": "NumpadDecimal",
     "value": 8589935150,
     "names": {
-      "web": [
-        "NumpadDecimal"
-      ],
       "macos": [
         "NumpadDecimal"
       ],
@@ -8724,9 +8191,6 @@
     "name": "NumpadDivide",
     "value": 8589935151,
     "names": {
-      "web": [
-        "NumpadDivide"
-      ],
       "macos": [
         "NumpadDivide"
       ],
@@ -8774,9 +8238,6 @@
     "name": "Numpad0",
     "value": 8589935152,
     "names": {
-      "web": [
-        "Numpad0"
-      ],
       "macos": [
         "Numpad0"
       ],
@@ -8826,9 +8287,6 @@
     "name": "Numpad1",
     "value": 8589935153,
     "names": {
-      "web": [
-        "Numpad1"
-      ],
       "macos": [
         "Numpad1"
       ],
@@ -8878,9 +8336,6 @@
     "name": "Numpad2",
     "value": 8589935154,
     "names": {
-      "web": [
-        "Numpad2"
-      ],
       "macos": [
         "Numpad2"
       ],
@@ -8930,9 +8385,6 @@
     "name": "Numpad3",
     "value": 8589935155,
     "names": {
-      "web": [
-        "Numpad3"
-      ],
       "macos": [
         "Numpad3"
       ],
@@ -8982,9 +8434,6 @@
     "name": "Numpad4",
     "value": 8589935156,
     "names": {
-      "web": [
-        "Numpad4"
-      ],
       "macos": [
         "Numpad4"
       ],
@@ -9034,9 +8483,6 @@
     "name": "Numpad5",
     "value": 8589935157,
     "names": {
-      "web": [
-        "Numpad5"
-      ],
       "macos": [
         "Numpad5"
       ],
@@ -9084,9 +8530,6 @@
     "name": "Numpad6",
     "value": 8589935158,
     "names": {
-      "web": [
-        "Numpad6"
-      ],
       "macos": [
         "Numpad6"
       ],
@@ -9136,9 +8579,6 @@
     "name": "Numpad7",
     "value": 8589935159,
     "names": {
-      "web": [
-        "Numpad7"
-      ],
       "macos": [
         "Numpad7"
       ],
@@ -9188,9 +8628,6 @@
     "name": "Numpad8",
     "value": 8589935160,
     "names": {
-      "web": [
-        "Numpad8"
-      ],
       "macos": [
         "Numpad8"
       ],
@@ -9240,9 +8677,6 @@
     "name": "Numpad9",
     "value": 8589935161,
     "names": {
-      "web": [
-        "Numpad9"
-      ],
       "macos": [
         "Numpad9"
       ],
@@ -9292,9 +8726,6 @@
     "name": "NumpadEqual",
     "value": 8589935165,
     "names": {
-      "web": [
-        "NumpadEqual"
-      ],
       "macos": [
         "NumpadEqual"
       ],
@@ -9338,13 +8769,50 @@
       ]
     }
   },
+  "NumpadArrowUp": {
+    "name": "NumpadArrowUp",
+    "value": 8589935233
+  },
+  "NumpadArrowLeft": {
+    "name": "NumpadArrowLeft",
+    "value": 8589935234
+  },
+  "NumpadArrowRight": {
+    "name": "NumpadArrowRight",
+    "value": 8589935235
+  },
+  "NumpadArrowDown": {
+    "name": "NumpadArrowDown",
+    "value": 8589935236
+  },
+  "NumpadDelete": {
+    "name": "NumpadDelete",
+    "value": 8589935237
+  },
+  "NumpadInsert": {
+    "name": "NumpadInsert",
+    "value": 8589935238
+  },
+  "NumpadEnd": {
+    "name": "NumpadEnd",
+    "value": 8589935239
+  },
+  "NumpadHome": {
+    "name": "NumpadHome",
+    "value": 8589935240
+  },
+  "NumpadPageDown": {
+    "name": "NumpadPageDown",
+    "value": 8589935241
+  },
+  "NumpadPageUp": {
+    "name": "NumpadPageUp",
+    "value": 8589935242
+  },
   "GameButton1": {
     "name": "GameButton1",
     "value": 8589935361,
     "names": {
-      "web": [
-        "GameButton1"
-      ],
       "android": [
         "BUTTON_1"
       ]
@@ -9362,9 +8830,6 @@
     "name": "GameButton2",
     "value": 8589935362,
     "names": {
-      "web": [
-        "GameButton2"
-      ],
       "android": [
         "BUTTON_2"
       ]
@@ -9382,9 +8847,6 @@
     "name": "GameButton3",
     "value": 8589935363,
     "names": {
-      "web": [
-        "GameButton3"
-      ],
       "android": [
         "BUTTON_3"
       ]
@@ -9402,9 +8864,6 @@
     "name": "GameButton4",
     "value": 8589935364,
     "names": {
-      "web": [
-        "GameButton4"
-      ],
       "android": [
         "BUTTON_4"
       ]
@@ -9422,9 +8881,6 @@
     "name": "GameButton5",
     "value": 8589935365,
     "names": {
-      "web": [
-        "GameButton5"
-      ],
       "android": [
         "BUTTON_5"
       ]
@@ -9442,9 +8898,6 @@
     "name": "GameButton6",
     "value": 8589935366,
     "names": {
-      "web": [
-        "GameButton6"
-      ],
       "android": [
         "BUTTON_6"
       ]
@@ -9462,9 +8915,6 @@
     "name": "GameButton7",
     "value": 8589935367,
     "names": {
-      "web": [
-        "GameButton7"
-      ],
       "android": [
         "BUTTON_7"
       ]
@@ -9482,9 +8932,6 @@
     "name": "GameButton8",
     "value": 8589935368,
     "names": {
-      "web": [
-        "GameButton8"
-      ],
       "windows": [
         "GAMEPAD_A"
       ],
@@ -9508,9 +8955,6 @@
     "name": "GameButton9",
     "value": 8589935369,
     "names": {
-      "web": [
-        "GameButton9"
-      ],
       "windows": [
         "GAMEPAD_B"
       ],
@@ -9534,9 +8978,6 @@
     "name": "GameButton10",
     "value": 8589935370,
     "names": {
-      "web": [
-        "GameButton10"
-      ],
       "windows": [
         "GAMEPAD_X"
       ],
@@ -9560,9 +9001,6 @@
     "name": "GameButton11",
     "value": 8589935371,
     "names": {
-      "web": [
-        "GameButton11"
-      ],
       "windows": [
         "GAMEPAD_Y"
       ],
@@ -9586,9 +9024,6 @@
     "name": "GameButton12",
     "value": 8589935372,
     "names": {
-      "web": [
-        "GameButton12"
-      ],
       "windows": [
         "GAMEPAD_RIGHT_SHOULDER"
       ],
@@ -9612,9 +9047,6 @@
     "name": "GameButton13",
     "value": 8589935373,
     "names": {
-      "web": [
-        "GameButton13"
-      ],
       "windows": [
         "GAMEPAD_LEFT_SHOULDER"
       ],
@@ -9638,9 +9070,6 @@
     "name": "GameButton14",
     "value": 8589935374,
     "names": {
-      "web": [
-        "GameButton14"
-      ],
       "windows": [
         "GAMEPAD_LEFT_TRIGGER"
       ],
@@ -9664,9 +9093,6 @@
     "name": "GameButton15",
     "value": 8589935375,
     "names": {
-      "web": [
-        "GameButton15"
-      ],
       "windows": [
         "GAMEPAD_RIGHT_TRIGGER"
       ],
@@ -9690,9 +9116,6 @@
     "name": "GameButton16",
     "value": 8589935376,
     "names": {
-      "web": [
-        "GameButton16"
-      ],
       "windows": [
         "GAMEPAD_DPAD_UP"
       ],
@@ -9716,9 +9139,6 @@
     "name": "GameButtonA",
     "value": 8589935377,
     "names": {
-      "web": [
-        "GameButtonA"
-      ],
       "android": [
         "BUTTON_A"
       ]
@@ -9736,9 +9156,6 @@
     "name": "GameButtonB",
     "value": 8589935378,
     "names": {
-      "web": [
-        "GameButtonB"
-      ],
       "android": [
         "BUTTON_B"
       ]
@@ -9756,9 +9173,6 @@
     "name": "GameButtonC",
     "value": 8589935379,
     "names": {
-      "web": [
-        "GameButtonC"
-      ],
       "android": [
         "BUTTON_C"
       ]
@@ -9776,9 +9190,6 @@
     "name": "GameButtonLeft1",
     "value": 8589935380,
     "names": {
-      "web": [
-        "GameButtonLeft1"
-      ],
       "android": [
         "BUTTON_L1"
       ]
@@ -9796,9 +9207,6 @@
     "name": "GameButtonLeft2",
     "value": 8589935381,
     "names": {
-      "web": [
-        "GameButtonLeft2"
-      ],
       "android": [
         "BUTTON_L2"
       ]
@@ -9816,9 +9224,6 @@
     "name": "GameButtonMode",
     "value": 8589935382,
     "names": {
-      "web": [
-        "GameButtonMode"
-      ],
       "android": [
         "BUTTON_MODE"
       ]
@@ -9836,9 +9241,6 @@
     "name": "GameButtonRight1",
     "value": 8589935383,
     "names": {
-      "web": [
-        "GameButtonRight1"
-      ],
       "android": [
         "BUTTON_R1"
       ]
@@ -9856,9 +9258,6 @@
     "name": "GameButtonRight2",
     "value": 8589935384,
     "names": {
-      "web": [
-        "GameButtonRight2"
-      ],
       "android": [
         "BUTTON_R2"
       ]
@@ -9876,9 +9275,6 @@
     "name": "GameButtonSelect",
     "value": 8589935385,
     "names": {
-      "web": [
-        "GameButtonSelect"
-      ],
       "android": [
         "BUTTON_SELECT"
       ]
@@ -9896,9 +9292,6 @@
     "name": "GameButtonStart",
     "value": 8589935386,
     "names": {
-      "web": [
-        "GameButtonStart"
-      ],
       "android": [
         "BUTTON_START"
       ]
@@ -9916,9 +9309,6 @@
     "name": "GameButtonThumbLeft",
     "value": 8589935387,
     "names": {
-      "web": [
-        "GameButtonThumbLeft"
-      ],
       "android": [
         "BUTTON_THUMBL"
       ]
@@ -9936,9 +9326,6 @@
     "name": "GameButtonThumbRight",
     "value": 8589935388,
     "names": {
-      "web": [
-        "GameButtonThumbRight"
-      ],
       "android": [
         "BUTTON_THUMBR"
       ]
@@ -9956,9 +9343,6 @@
     "name": "GameButtonX",
     "value": 8589935389,
     "names": {
-      "web": [
-        "GameButtonX"
-      ],
       "android": [
         "BUTTON_X"
       ]
@@ -9976,9 +9360,6 @@
     "name": "GameButtonY",
     "value": 8589935390,
     "names": {
-      "web": [
-        "GameButtonY"
-      ],
       "android": [
         "BUTTON_Y"
       ]
@@ -9996,9 +9377,6 @@
     "name": "GameButtonZ",
     "value": 8589935391,
     "names": {
-      "web": [
-        "GameButtonZ"
-      ],
       "android": [
         "BUTTON_Z"
       ]
