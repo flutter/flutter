@@ -38,7 +38,8 @@ Future<String> capture(AsyncVoidCallback callback, { int exitCode = 0 }) async {
 
 void main() {
   final String testRootPath = path.join('test', 'analyze-test-input', 'root');
-  final String dartPath = path.canonicalize(path.join('..', '..', 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'dart.exe' : 'dart'));
+  final String dartName = Platform.isWindows ? 'dart.exe' : 'dart';
+  final String dartPath = path.canonicalize(path.join('..', '..', 'bin', 'cache', 'dart-sdk', 'bin', dartName));
 
   test('analyze.dart - verifyDeprecations', () async {
     final String result = await capture(() => verifyDeprecations(testRootPath, minimumMatches: 2), exitCode: 1);
@@ -129,9 +130,9 @@ void main() {
     final String result = await capture(() => verifyInternationalizations(testRootPath, dartPath), exitCode: 1);
     final String genLocalizationsScript = path.join('dev', 'tools', 'localization', 'bin', 'gen_localizations.dart');
     expect(result,
-        contains('dart $genLocalizationsScript --cupertino'));
+        contains('$dartName $genLocalizationsScript --cupertino'));
     expect(result,
-        contains('dart $genLocalizationsScript --material'));
+        contains('$dartName $genLocalizationsScript --material'));
     final String generatedFile = path.join(testRootPath, 'packages', 'flutter_localizations',
         'lib', 'src', 'l10n', 'generated_material_localizations.dart');
     expect(result,
