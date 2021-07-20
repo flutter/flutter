@@ -21,15 +21,15 @@ constexpr MTLPixelFormat ToMTLPixelFormat(PixelFormat format) {
   switch (format) {
     case PixelFormat::kUnknown:
       return MTLPixelFormatInvalid;
-    case PixelFormat::kB8G8R8A8_UNormInt:
+    case PixelFormat::kB8G8R8A8UNormInt:
       return MTLPixelFormatBGRA8Unorm;
-    case PixelFormat::kB8G8R8A8_UNormInt_SRGB:
+    case PixelFormat::kB8G8R8A8UNormIntSRGB:
       return MTLPixelFormatBGRA8Unorm_sRGB;
-    case PixelFormat::kD32_Float_S8_UNormInt:
+    case PixelFormat::kD32FloatS8UNormInt:
       return MTLPixelFormatDepth32Float_Stencil8;
-    case PixelFormat::kR8G8B8A8_UNormInt:
+    case PixelFormat::kR8G8B8A8UNormInt:
       return MTLPixelFormatRGBA8Unorm;
-    case PixelFormat::kR8G8B8A8_UNormInt_SRGB:
+    case PixelFormat::kR8G8B8A8UNormIntSRGB:
       return MTLPixelFormatRGBA8Unorm_sRGB;
   }
   return MTLPixelFormatInvalid;

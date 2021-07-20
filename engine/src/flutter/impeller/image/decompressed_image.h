@@ -16,11 +16,11 @@ namespace impeller {
 class DecompressedImage {
  public:
   enum class Format {
-    Invalid,
-    Grey,
-    GreyAlpha,
-    RGB,
-    RGBA,
+    kInvalid,
+    kGrey,
+    kGreyAlpha,
+    kRGB,
+    kRGBA,
   };
 
   DecompressedImage();
@@ -43,7 +43,7 @@ class DecompressedImage {
 
  private:
   ISize size_;
-  Format format_ = Format::Invalid;
+  Format format_ = Format::kInvalid;
   std::shared_ptr<const fml::Mapping> allocation_;
   bool is_valid_ = false;
 };
