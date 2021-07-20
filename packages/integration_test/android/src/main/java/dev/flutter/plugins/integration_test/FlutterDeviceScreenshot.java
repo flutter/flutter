@@ -217,6 +217,7 @@ class FlutterDeviceScreenshot {
       final ByteArrayOutputStream output = new ByteArrayOutputStream();
       bitmap.compress(Bitmap.CompressFormat.PNG, /*quality=*/ 100, output);
       result.success(output.toByteArray());
+      return;
     }
 
     final Bitmap bitmap =

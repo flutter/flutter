@@ -21,15 +21,13 @@ import java.util.concurrent.Future;
 
 /** IntegrationTestPlugin */
 public class IntegrationTestPlugin implements MethodCallHandler, FlutterPlugin, ActivityAware {
-  private MethodChannel methodChannel;
-
+  private static final String CHANNEL = "plugins.flutter.io/integration_test";
   private static final SettableFuture<Map<String, String>> testResultsSettable =
       SettableFuture.create();
+
+  private MethodChannel methodChannel;
+  private Activity flutterActivity;
   public static final Future<Map<String, String>> testResults = testResultsSettable;
-
-  public Activity flutterActivity;
-
-  private static final String CHANNEL = "plugins.flutter.io/integration_test";
 
   /** Plugin registration. */
   @SuppressWarnings("deprecation")
