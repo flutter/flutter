@@ -1629,6 +1629,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     );
   }
 
+  // TODO(justinmc): Document.
+  void setTextEditingValue(TextEditingValue newValue, SelectionChangedCause cause) {
+    textEditingValue = newValue;
+    userUpdateTextEditingValue(newValue, cause);
+  }
+
   // End TextEditingActionTarget.
 
   void _handleSelectionChange(
@@ -1644,12 +1650,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       return;
     }
     widget.onSelectionChanged?.call(nextSelection, cause);
-  }
-
-  // TODO(justinmc): Document.
-  void setTextEditingValue(TextEditingValue newValue, SelectionChangedCause cause) {
-    textEditingValue = newValue;
-    userUpdateTextEditingValue(newValue, cause);
   }
 
   // State lifecycle:
