@@ -1,4 +1,4 @@
-Signature: c66ff552ae51eb79adde1282982186a7
+Signature: 80d84bb328c3acbb1eb2af650fdf1407
 
 UNUSED LICENSES:
 
@@ -672,7 +672,6 @@ FILE: ../../../third_party/skia/experimental/skottiekit/release.js
 FILE: ../../../third_party/skia/experimental/skottiekit/skottiekit/package.json
 FILE: ../../../third_party/skia/experimental/sktext/editor/Editor.cpp
 FILE: ../../../third_party/skia/experimental/sktext/editor/Editor.h
-FILE: ../../../third_party/skia/experimental/sktext/include/Layout.h
 FILE: ../../../third_party/skia/experimental/sktext/include/Text.h
 FILE: ../../../third_party/skia/experimental/sktext/include/Types.h
 FILE: ../../../third_party/skia/experimental/sktext/samples/Text.cpp
