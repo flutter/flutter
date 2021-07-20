@@ -3,12 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
+import 'dart:core';
+import 'dart:ffi';
+import 'dart:io';
+import 'dart:isolate';
 import 'dart:typed_data';
 import 'dart:ui';
-import 'dart:isolate';
-import 'dart:ffi';
-import 'dart:core';
-import 'dart:convert';
 
 void main() {}
 
@@ -30,6 +31,14 @@ void customEntrypoint1() {
 void sayHiFromCustomEntrypoint1() native 'SayHiFromCustomEntrypoint1';
 void sayHiFromCustomEntrypoint2() native 'SayHiFromCustomEntrypoint2';
 void sayHiFromCustomEntrypoint3() native 'SayHiFromCustomEntrypoint3';
+
+
+@pragma('vm:entry-point')
+void terminateExitCodeHandler() {
+  final ProcessResult result = Process.runSync(
+        'ls', <String>[]
+  );
+}
 
 
 @pragma('vm:entry-point')

@@ -123,6 +123,15 @@ TEST_F(EmbedderTest, CanInvokeCustomEntrypointMacro) {
   ASSERT_TRUE(engine.is_valid());
 }
 
+TEST_F(EmbedderTest, CanTerminateCleanly) {
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
+  EmbedderConfigBuilder builder(context);
+  builder.SetSoftwareRendererConfig();
+  builder.SetDartEntrypoint("terminateExitCodeHandler");
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+}
+
 std::atomic_size_t EmbedderTestTaskRunner::sEmbedderTaskRunnerIdentifiers = {};
 
 TEST_F(EmbedderTest, CanSpecifyCustomPlatformTaskRunner) {
