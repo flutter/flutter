@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 // See: https://github.com/flutter/flutter/wiki/Release-process
 
 import 'dart:io' as io;
@@ -13,6 +11,7 @@ import 'package:conductor/candidates.dart';
 import 'package:conductor/clean.dart';
 import 'package:conductor/codesign.dart';
 import 'package:conductor/globals.dart';
+import 'package:conductor/next.dart';
 import 'package:conductor/repository.dart';
 import 'package:conductor/roll_dev.dart';
 import 'package:conductor/start.dart';
@@ -73,6 +72,9 @@ Future<void> main(List<String> args) async {
     CandidatesCommand(
       checkouts: checkouts,
       flutterRoot: localFlutterRoot,
+    ),
+    NextCommand(
+      checkouts: checkouts,
     ),
   ].forEach(runner.addCommand);
 

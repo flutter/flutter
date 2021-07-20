@@ -86,6 +86,16 @@ void verifyOptions(String command, Iterable<Option> options) {
     expect(option.help, isNot(matches(_questionablePatterns)), reason: '${_header}Help for $target--${option.name}" may have a typo. (If it does not you may have to update args_test.dart, sorry. Search for "_questionablePatterns")');
     if (option.defaultsTo != null) {
       expect(option.help, isNot(contains('Default')), reason: '${_header}Help for $target--${option.name}" mentions the default value but that is redundant with the defaultsTo option which is also specified (and preferred).');
+
+      if (option.allowedHelp != null) {
+        for (final String allowedValue in option.allowedHelp.keys) {
+          expect(
+            option.allowedHelp[allowedValue],
+            isNot(anyOf(contains('default'), contains('Default'))),
+            reason: '${_header}Help for $target--${option.name} $allowedValue" mentions the default value but that is redundant with the defaultsTo option which is also specified (and preferred).',
+          );
+        }
+      }
     }
     expect(option.help, isNot(matches(_bannedArgumentReferencePatterns)), reason: '${_header}Help for $target--${option.name}" contains the string "--" in an unexpected way. If it\'s trying to mention another argument, it should be quoted, as in "--foo".');
     for (final String line in option.help.split('\n')) {

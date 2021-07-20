@@ -415,7 +415,6 @@ class TestFeatureFlags implements FeatureFlags {
     this.isIOSEnabled = true,
     this.isFuchsiaEnabled = false,
     this.areCustomDevicesEnabled = false,
-    this.isExperimentalInvalidationStrategyEnabled = false,
     this.isWindowsUwpEnabled = false,
   });
 
@@ -447,9 +446,6 @@ class TestFeatureFlags implements FeatureFlags {
   final bool areCustomDevicesEnabled;
 
   @override
-  final bool isExperimentalInvalidationStrategyEnabled;
-
-  @override
   final bool isWindowsUwpEnabled;
 
   @override
@@ -473,8 +469,6 @@ class TestFeatureFlags implements FeatureFlags {
         return isFuchsiaEnabled;
       case flutterCustomDevicesFeature:
         return areCustomDevicesEnabled;
-      case experimentalInvalidationStrategy:
-        return isExperimentalInvalidationStrategyEnabled;
       case windowsUwpEmbedding:
         return isWindowsUwpEnabled;
     }

@@ -575,6 +575,11 @@ class _FocusState extends State<Focus> {
     _canRequestFocus = focusNode.canRequestFocus;
     _descendantsAreFocusable = focusNode.descendantsAreFocusable;
     _hasPrimaryFocus = focusNode.hasPrimaryFocus;
+
+    assert(
+      widget.onKey == null && focusNode.onKey != null,
+      'Overwriting `focusNode.onKey` to null may not be an intentional design.'
+    );
     _focusAttachment = focusNode.attach(context, onKey: widget.onKey);
 
     // Add listener even if the _internalNode existed before, since it should

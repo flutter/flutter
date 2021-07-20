@@ -541,11 +541,11 @@ String _generateDelegateClass({
     useDeferredLoading ? loadBodyDeferredLoadingTemplate : loadBodyTemplate
   )
     .replaceAll('@(class)', className)
-    .replaceAll('@(lookupName)', '_lookup$className');
+    .replaceAll('@(lookupName)', 'lookup$className');
   final String lookupFunction = (useDeferredLoading ?
   lookupFunctionDeferredLoadingTemplate : lookupFunctionTemplate)
     .replaceAll('@(class)', className)
-    .replaceAll('@(lookupName)', '_lookup$className')
+    .replaceAll('@(lookupName)', 'lookup$className')
     .replaceAll('@(lookupBody)', lookupBody);
   return delegateClassTemplate
     .replaceAll('@(class)', className)

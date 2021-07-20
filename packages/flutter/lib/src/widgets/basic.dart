@@ -197,7 +197,7 @@ class Directionality extends InheritedWidget {
 ///
 /// Animating an [Opacity] widget directly causes the widget (and possibly its
 /// subtree) to rebuild each frame, which is not very efficient. Consider using
-/// an [AnimatedOpacity] instead.
+/// an [AnimatedOpacity] or a [FadeTransition] instead.
 ///
 /// ## Transparent image
 ///
@@ -1049,6 +1049,47 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
 /// [PhysicalModel] does the same but only supports shapes that can be expressed
 /// as rectangles with rounded corners.
 ///
+/// {@tool dartpad --template=stateless_widget_material}
+///
+/// This example shows how to use a [PhysicalShape] on a centered [SizedBox]
+/// to clip it to a rounded rectangle using a [ShapeBorderClipper] and give it
+/// an orange color along with a shadow.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     appBar: AppBar(
+///       title: const Text('PhysicalShape Sample'),
+///     ),
+///     body: Center(
+///       child: PhysicalShape(
+///         elevation: 5.0,
+///         child: const SizedBox(
+///           child: Center(
+///             child: Text(
+///               'Hello, World!',
+///               style: TextStyle(
+///                 color: Colors.white,
+///                 fontSize: 20.0,
+///               ),
+///             ),
+///           ),
+///           height: 200.0,
+///           width: 200.0,
+///         ),
+///         clipper: ShapeBorderClipper(
+///           shape: RoundedRectangleBorder(
+///             borderRadius: BorderRadius.circular(10.0),
+///           )
+///         ),
+///         color: Colors.orange,
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [ShapeBorderClipper], which converts a [ShapeBorder] to a [CustomClipper], as
@@ -1678,6 +1719,8 @@ class FractionalTranslation extends SingleChildRenderObjectWidget {
 /// this object applies its rotation prior to layout, which means the entire
 /// rotated box consumes only as much space as required by the rotated child.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=BFE6_UglLfQ}
+///
 /// {@tool snippet}
 ///
 /// This snippet rotates the child (some [Text]) so that it renders from bottom
@@ -2246,6 +2289,12 @@ class SizedBox extends SingleChildRenderObjectWidget {
   SizedBox.fromSize({ Key? key, Widget? child, Size? size })
     : width = size?.width,
       height = size?.height,
+      super(key: key, child: child);
+
+  /// Creates a box whose [width] and [height] are equal.
+  const SizedBox.square({Key? key, Widget? child, double? dimension})
+    : width = dimension,
+      height = dimension,
       super(key: key, child: child);
 
   /// If non-null, requires the child to have exactly this width.
@@ -7297,10 +7346,15 @@ class Semantics extends SingleChildRenderObjectWidget {
     int? maxValueLength,
     int? currentValueLength,
     String? label,
+    AttributedString? attributedLabel,
     String? value,
+    AttributedString? attributedValue,
     String? increasedValue,
+    AttributedString? attributedIncreasedValue,
     String? decreasedValue,
+    AttributedString? attributedDecreasedValue,
     String? hint,
+    AttributedString? attributedHint,
     String? onTapHint,
     String? onLongPressHint,
     TextDirection? textDirection,
@@ -7356,10 +7410,15 @@ class Semantics extends SingleChildRenderObjectWidget {
       maxValueLength: maxValueLength,
       currentValueLength: currentValueLength,
       label: label,
+      attributedLabel: attributedLabel,
       value: value,
+      attributedValue: attributedValue,
       increasedValue: increasedValue,
+      attributedIncreasedValue: attributedIncreasedValue,
       decreasedValue: decreasedValue,
+      attributedDecreasedValue: attributedDecreasedValue,
       hint: hint,
+      attributedHint: attributedHint,
       textDirection: textDirection,
       sortKey: sortKey,
       tagForChildren: tagForChildren,
@@ -7444,6 +7503,31 @@ class Semantics extends SingleChildRenderObjectWidget {
   /// an [ExcludeSemantics] widget and then another [Semantics] widget.
   final bool excludeSemantics;
 
+  AttributedString? get _effectiveAttributedLabel {
+    return properties.attributedLabel ??
+          (properties.label == null ? null : AttributedString(properties.label!));
+  }
+
+  AttributedString? get _effectiveAttributedValue {
+    return properties.attributedValue ??
+        (properties.value == null ? null : AttributedString(properties.value!));
+  }
+
+  AttributedString? get _effectiveAttributedIncreasedValue {
+    return properties.attributedIncreasedValue ??
+        (properties.increasedValue == null ? null : AttributedString(properties.increasedValue!));
+  }
+
+  AttributedString? get _effectiveAttributedDecreasedValue {
+    return properties.attributedDecreasedValue ??
+        (properties.decreasedValue == null ? null : AttributedString(properties.decreasedValue!));
+  }
+
+  AttributedString? get _effectiveAttributedHint {
+    return properties.attributedHint ??
+        (properties.hint == null ? null : AttributedString(properties.hint!));
+  }
+
   @override
   RenderSemanticsAnnotations createRenderObject(BuildContext context) {
     return RenderSemanticsAnnotations(
@@ -7473,11 +7557,11 @@ class Semantics extends SingleChildRenderObjectWidget {
       namesRoute: properties.namesRoute,
       hidden: properties.hidden,
       image: properties.image,
-      label: properties.label,
-      value: properties.value,
-      increasedValue: properties.increasedValue,
-      decreasedValue: properties.decreasedValue,
-      hint: properties.hint,
+      attributedLabel: _effectiveAttributedLabel,
+      attributedValue: _effectiveAttributedValue,
+      attributedIncreasedValue: _effectiveAttributedIncreasedValue,
+      attributedDecreasedValue: _effectiveAttributedDecreasedValue,
+      attributedHint: _effectiveAttributedHint,
       hintOverrides: properties.hintOverrides,
       textDirection: _getTextDirection(context),
       sortKey: properties.sortKey,
@@ -7510,7 +7594,10 @@ class Semantics extends SingleChildRenderObjectWidget {
     if (properties.textDirection != null)
       return properties.textDirection;
 
-    final bool containsText = properties.label != null || properties.value != null || properties.hint != null;
+    final bool containsText = properties.attributedLabel != null ||
+                              properties.label != null ||
+                              properties.value != null ||
+                              properties.hint != null;
 
     if (!containsText)
       return null;
@@ -7546,11 +7633,11 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..liveRegion = properties.liveRegion
       ..maxValueLength = properties.maxValueLength
       ..currentValueLength = properties.currentValueLength
-      ..label = properties.label
-      ..value = properties.value
-      ..increasedValue = properties.increasedValue
-      ..decreasedValue = properties.decreasedValue
-      ..hint = properties.hint
+      ..attributedLabel = _effectiveAttributedLabel
+      ..attributedValue = _effectiveAttributedValue
+      ..attributedIncreasedValue = _effectiveAttributedIncreasedValue
+      ..attributedDecreasedValue = _effectiveAttributedDecreasedValue
+      ..attributedHint = _effectiveAttributedHint
       ..hintOverrides = properties.hintOverrides
       ..namesRoute = properties.namesRoute
       ..textDirection = _getTextDirection(context)
