@@ -33,23 +33,6 @@
 namespace flutter_runner {
 namespace {
 
-void UpdateNativeThreadLabelNames(const std::string& label,
-                                  const flutter::TaskRunners& runners) {
-  auto set_thread_name = [](fml::RefPtr<fml::TaskRunner> runner,
-                            std::string prefix, std::string suffix) {
-    if (!runner) {
-      return;
-    }
-    fml::TaskRunner::RunNowOrPostTask(runner, [name = prefix + suffix]() {
-      zx::thread::self()->set_property(ZX_PROP_NAME, name.c_str(), name.size());
-    });
-  };
-  set_thread_name(runners.GetPlatformTaskRunner(), label, ".platform");
-  set_thread_name(runners.GetUITaskRunner(), label, ".ui");
-  set_thread_name(runners.GetRasterTaskRunner(), label, ".raster");
-  set_thread_name(runners.GetIOTaskRunner(), label, ".io");
-}
-
 std::unique_ptr<flutter::PlatformMessage> MakeLocalizationPlatformMessage(
     const fuchsia::intl::Profile& intl_profile) {
   return std::make_unique<flutter::PlatformMessage>(
@@ -71,6 +54,10 @@ Engine::Engine(Delegate& delegate,
                FlutterRunnerProductConfiguration product_config)
     : delegate_(delegate),
       thread_label_(std::move(thread_label)),
+      thread_host_(thread_label_ + ".",
+                   flutter::ThreadHost::Type::RASTER |
+                       flutter::ThreadHost::Type::UI |
+                       flutter::ThreadHost::Type::IO),
       intercept_all_input_(product_config.get_intercept_all_input()),
       weak_factory_(this) {
   // Get the task runners from the managed threads. The current thread will be
@@ -79,13 +66,12 @@ Engine::Engine(Delegate& delegate,
       fml::MessageLoop::GetCurrent().GetTaskRunner();
 
   const flutter::TaskRunners task_runners(
-      thread_label_,                // Dart thread labels
-      platform_task_runner,         // platform
-      threads_[0].GetTaskRunner(),  // raster
-      threads_[1].GetTaskRunner(),  // ui
-      threads_[2].GetTaskRunner()   // io
+      thread_label_,                                // Dart thread labels
+      platform_task_runner,                         // platform
+      thread_host_.raster_thread->GetTaskRunner(),  // raster
+      thread_host_.ui_thread->GetTaskRunner(),      // ui
+      thread_host_.io_thread->GetTaskRunner()       // io
   );
-  UpdateNativeThreadLabelNames(thread_label_, task_runners);
 
   // Connect to Scenic.
   auto scenic = svc->Connect<fuchsia::ui::scenic::Scenic>();
@@ -480,9 +466,6 @@ Engine::Engine(Delegate& delegate,
 
 Engine::~Engine() {
   shell_.reset();
-  for (auto& thread : threads_) {
-    thread.Join();
-  }
 }
 
 std::optional<uint32_t> Engine::GetEngineReturnCode() const {
