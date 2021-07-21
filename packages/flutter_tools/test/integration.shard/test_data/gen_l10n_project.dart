@@ -225,6 +225,11 @@ class Home extends StatelessWidget {
               '${localizations.singleQuotePlural(2)}',
               '${localizations.doubleQuote}',
               '${localizations.doubleQuotePlural(2)}',
+              "${localizations.vehicleSelect('truck')}",
+              "${localizations.singleQuoteSelect('sedan')}",
+              "${localizations.doubleQuoteSelect('cabriolet')}",
+              "${localizations.pluralInString(1)}",
+              "${localizations.selectInString('he')}",
             ]);
           },
         ),
@@ -266,6 +271,11 @@ class Home extends StatelessWidget {
               '${localizations.singleQuotePlural(2)}',
               '${localizations.doubleQuote}',
               '${localizations.doubleQuotePlural(2)}',
+              "${localizations.vehicleSelect('truck')}",
+              "${localizations.singleQuoteSelect('sedan')}",
+              "${localizations.doubleQuoteSelect('cabriolet')}",
+              "${localizations.pluralInString(1)}",
+              "${localizations.selectInString('he')}",
             ]);
           },
         ),
@@ -608,6 +618,46 @@ void main() {
     "placeholders": {
       "count": {}
     }
+  },
+
+  "vehicleSelect": "{vehicleType, select, sedan{Sedan} cabriolet{Solid roof cabriolet} truck{16 wheel truck} other{Other}}",
+  "@vehicleSelect": {
+    "description": "A select message.",
+    "placeholders": {
+      "vehicleType": {}
+    }
+  },
+
+  "singleQuoteSelect": "{vehicleType, select, sedan{Sedan's elegance} cabriolet{Cabriolet' acceleration} truck{truck's heavy duty} other{Other's mirrors!}}",
+  "@singleQuoteSelect": {
+    "description": "A select message with a single quote.",
+    "placeholders": {
+      "vehicleType": {}
+    }
+  },
+
+  "doubleQuoteSelect": "{vehicleType, select, sedan{Sedan has \"elegance\"} cabriolet{Cabriolet has \"acceleration\"} truck{truck is \"heavy duty\"} other{Other have \"mirrors\"!}}",
+  "@doubleQuoteSelect": {
+    "description": "A select message with double quote.",
+    "placeholders": {
+      "vehicleType": {}
+    }
+  },
+
+  "pluralInString": "Oh, she found {count, plural, =1 {1 item} other {all {count} items} }!",
+  "@pluralInString": {
+    "description": "A plural message with prefix and suffix strings.",
+    "placeholders": {
+      "count": {}
+    }
+  },
+
+  "selectInString": "Indeed, {gender, select, male {he likes} female {she likes} other {they like} } Flutter!",
+  "@selectInString": {
+    "description": "A select message with prefix and suffix strings.",
+    "placeholders": {
+      "gender": {}
+    }
   }
 }
 ''';
@@ -646,13 +696,18 @@ void main() {
   "helloWorldsOn": "{count,plural, =0{ES - Hello on {date}} =1{ES - Hello World, on {date}} =2{ES - Hello two worlds, on {date}} other{ES - Hello other {count} worlds, on {date}}}",
   "helloWorldPopulation": "{ES - count,plural, =1{ES - Hello World of {population} citizens} =2{ES - Hello two worlds with {population} total citizens} many{ES - Hello all {count} worlds, with a total of {population} citizens} other{ES - Hello other {count} worlds, with a total of {population} citizens}}",
   "helloWorldInterpolation": "ES - [{hello}] #{world}#",
-  "helloWorldsInterpolation": "ES - {count,plural, other {ES - [{hello}] -{world}- #{count}#}}",
+  "helloWorldsInterpolation": "{count,plural, other {ES - [{hello}] -{world}- #{count}#}}",
   "dollarSign": "ES - $!",
   "dollarSignPlural": "{count,plural, =1{ES - One $} other{ES - Many $}}",
   "singleQuote": "ES - Flutter's amazing!",
   "singleQuotePlural": "{count,plural, =1{ES - Flutter's amazing, times 1!} other{ES - Flutter's amazing, times {count}!}}",
   "doubleQuote": "ES - Flutter is \"amazing\"!",
-  "doubleQuotePlural": "{count,plural, =1{ES - Flutter is \"amazing\", times 1!} other{ES - Flutter is \"amazing\", times {count}!}}"
+  "doubleQuotePlural": "{count,plural, =1{ES - Flutter is \"amazing\", times 1!} other{ES - Flutter is \"amazing\", times {count}!}}",
+  "vehicleSelect": "{vehicleType, select, sedan{ES - Sedan} cabriolet{ES - Solid roof cabriolet} truck{ES - 16 wheel truck} other{ES - Other}}",
+  "singleQuoteSelect": "{vehicleType, select, sedan{ES - Sedan's elegance} cabriolet{ES - Cabriolet' acceleration} truck{ES - truck's heavy duty} other{ES - Other's mirrors!}}",
+  "doubleQuoteSelect": "{vehicleType, select, sedan{ES - Sedan has \"elegance\"} cabriolet{ES - Cabriolet has \"acceleration\"} truck{ES - truck is \"heavy duty\"} other{ES - Other have \"mirrors\"!}}",
+  "pluralInString": "ES - Oh, she found {count, plural, =1 {ES - 1 item} other {ES - all {count} items} }ES - !",
+  "selectInString": "ES - Indeed, {gender, select, male {ES - he likes} female {ES - she likes} other {ES - they like} } ES - Flutter!"
 }
 ''';
 

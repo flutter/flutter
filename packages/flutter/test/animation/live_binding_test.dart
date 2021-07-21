@@ -15,6 +15,7 @@ void main() {
 
   testWidgets('Should show event indicator for pointer events', (WidgetTester tester) async {
     final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(200, 200), allLayers: true);
+    int tapped = 0;
     final Widget target = Container(
       padding: const EdgeInsets.fromLTRB(20, 10, 25, 20),
       child: animationSheet.record(
@@ -25,11 +26,11 @@ void main() {
               border: Border.all(color: const Color.fromARGB(255, 0, 0, 0)),
             ),
             child: Center(
-              child: Material(
-                child: InkWell(
-                  splashColor: Colors.blue,
-                  child: const SizedBox(width: 40, height: 40),
-                  onTap: () {},
+              child: SizedBox(
+                width: 40,
+                height: 40,
+                child: GestureDetector(
+                  onTapDown: (_) { tapped += 1; },
                 ),
               ),
             ),
@@ -42,19 +43,21 @@ void main() {
 
     await tester.pumpFrames(target, const Duration(milliseconds: 50));
 
-    final TestGesture gesture1 = await tester.createGesture();
-    await gesture1.down(tester.getCenter(find.byType(InkWell)) + const Offset(10, 10));
+    final TestGesture gesture1 = await tester.createGesture(pointer: 1);
+    await gesture1.down(tester.getCenter(find.byType(GestureDetector)) + const Offset(10, 10));
 
     await tester.pumpFrames(target, const Duration(milliseconds: 100));
+    expect(tapped, 1);
 
-    final TestGesture gesture2 = await tester.createGesture();
-    await gesture2.down(tester.getTopLeft(find.byType(InkWell)) + const Offset(30, -10));
+    final TestGesture gesture2 = await tester.createGesture(pointer: 2);
+    await gesture2.down(tester.getTopLeft(find.byType(GestureDetector)) + const Offset(30, -10));
     await gesture1.moveBy(const Offset(50, 50));
 
     await tester.pumpFrames(target, const Duration(milliseconds: 100));
     await gesture1.up();
     await gesture2.up();
     await tester.pumpFrames(target, const Duration(milliseconds: 50));
+    expect(tapped, 1);
 
     await expectLater(
       animationSheet.collate(6),
@@ -64,6 +67,7 @@ void main() {
 
   testWidgets('Should show event indicator for pointer events with setSurfaceSize', (WidgetTester tester) async {
     final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(200, 200), allLayers: true);
+    int tapped = 0;
     final Widget target = Container(
       padding: const EdgeInsets.fromLTRB(20, 10, 25, 20),
       child: animationSheet.record(
@@ -74,11 +78,11 @@ void main() {
               border: Border.all(color: const Color.fromARGB(255, 0, 0, 0)),
             ),
             child: Center(
-              child: Material(
-                child: InkWell(
-                  splashColor: Colors.blue,
-                  child: const SizedBox(width: 40, height: 40),
-                  onTap: () {},
+              child: SizedBox(
+                width: 40,
+                height: 40,
+                child: GestureDetector(
+                  onTapDown: (_) { tapped += 1; },
                 ),
               ),
             ),
@@ -92,19 +96,21 @@ void main() {
 
     await tester.pumpFrames(target, const Duration(milliseconds: 50));
 
-    final TestGesture gesture1 = await tester.createGesture();
-    await gesture1.down(tester.getCenter(find.byType(InkWell)) + const Offset(10, 10));
+    final TestGesture gesture1 = await tester.createGesture(pointer: 1);
+    await gesture1.down(tester.getCenter(find.byType(GestureDetector)) + const Offset(10, 10));
 
     await tester.pumpFrames(target, const Duration(milliseconds: 100));
+    expect(tapped, 1);
 
-    final TestGesture gesture2 = await tester.createGesture();
-    await gesture2.down(tester.getTopLeft(find.byType(InkWell)) + const Offset(30, -10));
+    final TestGesture gesture2 = await tester.createGesture(pointer: 2);
+    await gesture2.down(tester.getTopLeft(find.byType(GestureDetector)) + const Offset(30, -10));
     await gesture1.moveBy(const Offset(50, 50));
 
     await tester.pumpFrames(target, const Duration(milliseconds: 100));
     await gesture1.up();
     await gesture2.up();
     await tester.pumpFrames(target, const Duration(milliseconds: 50));
+    expect(tapped, 1);
 
     await expectLater(
       animationSheet.collate(6),
