@@ -12,6 +12,9 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFakeKeyEvents.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/KeyCodeMap_Internal.h"
 #include "flutter/shell/platform/embedder/embedder.h"
+#include "flutter/shell/platform/embedder/test_utils/key_codes.h"
+
+using namespace flutter::testing::keycodes;
 
 FLUTTER_ASSERT_ARC;
 
@@ -87,24 +90,8 @@ API_AVAILABLE(ios(13.4))
 constexpr UIKeyboardHIDUsage kKeyCodeAltRight = (UIKeyboardHIDUsage)0xe6;
 
 constexpr uint64_t kPhysicalKeyUndefined = 0x00070003;
-constexpr uint64_t kPhysicalKeyA = 0x00070004;
-constexpr uint64_t kPhysicalKeyW = 0x0007001a;
-constexpr uint64_t kPhysicalShiftLeft = 0x000700e1;
-constexpr uint64_t kPhysicalShiftRight = 0x000700e5;
-constexpr uint64_t kPhysicalCapsLock = 0x00070039;
-constexpr uint64_t kPhysicalNumpad1 = 0x00070059;
-constexpr uint64_t kPhysicalF1 = 0x0007003a;
-constexpr uint64_t kPhysicalAltRight = 0x000700e6;
 
-constexpr uint64_t kLogicalKeyUndefined = 0x0100070003;
-constexpr uint64_t kLogicalKeyA = 0x0000000061;
-constexpr uint64_t kLogicalKeyW = 0x0000000077;
-constexpr uint64_t kLogicalShiftLeft = 0x3000000010d;
-constexpr uint64_t kLogicalShiftRight = 0x4000000010d;
-constexpr uint64_t kLogicalCapsLock = 0x01000000104;
-constexpr uint64_t kLogicalNumpad1 = 0x50000000031;
-constexpr uint64_t kLogicalF1 = 0x01000000801;
-constexpr uint64_t kLogicalAltRight = 0x40000000102;
+constexpr uint64_t kLogicalKeyUndefined = 0x1300000003;
 
 constexpr uint64_t kModifierFlagNone = 0x0;
 
