@@ -346,7 +346,7 @@ class Context {
 
   void buildApp() {
     final bool verbose = environment['VERBOSE_SCRIPT_LOGGING'] != null && environment['VERBOSE_SCRIPT_LOGGING'] != '';
-    final String sourceRoot = environmentEnsure('SOURCE_ROOT');
+    final String sourceRoot = environment['SOURCE_ROOT'] ?? '';
     //local project_path="${SOURCE_ROOT}/.."
     String projectPath = '$sourceRoot/..';
     //if [[ -n "$FLUTTER_APPLICATION_PATH" ]]; then
