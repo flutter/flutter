@@ -622,7 +622,7 @@ void main() {
 
   "vehicleSelect": "{vehicleType, select, sedan{Sedan} cabriolet{Solid roof cabriolet} truck{16 wheel truck} other{Other}}",
   "@vehicleSelect": {
-    "description": "Vehicle type",
+    "description": "A select message.",
     "placeholders": {
       "vehicleType": {}
     }
@@ -630,7 +630,7 @@ void main() {
 
   "singleQuoteSelect": "{vehicleType, select, sedan{Sedan's elegance} cabriolet{Cabriolet' acceleration} truck{truck's heavy duty} other{Other's mirrors!}}",
   "@singleQuoteSelect": {
-    "description": "Vehicle type",
+    "description": "A select message with a single quote.",
     "placeholders": {
       "vehicleType": {}
     }
@@ -638,7 +638,7 @@ void main() {
 
   "doubleQuoteSelect": "{vehicleType, select, sedan{Sedan has \"elegance\"} cabriolet{Cabriolet has \"acceleration\"} truck{truck is \"heavy duty\"} other{Other have \"mirrors\"!}}",
   "@doubleQuoteSelect": {
-    "description": "Vehicle type",
+    "description": "A select message with double quote.",
     "placeholders": {
       "vehicleType": {}
     }
@@ -646,7 +646,7 @@ void main() {
 
   "pluralInString": "Oh, she found {count, plural, =1 {1 item} other {all {count} items} }!",
   "@pluralInString": {
-    "description": "A plural message with a single quote.",
+    "description": "A plural message with a prefix and suffix strings.",
     "placeholders": {
       "count": {}
     }
@@ -654,6 +654,7 @@ void main() {
 
   "selectInString": "Indeed, {gender, select, male {he likes} female {she likes} other {they like} } Flutter!",
   "@selectInString": {
+    "description": "A select message with a prefix and suffix strings.",
     "placeholders": {
       "gender": {}
     }
