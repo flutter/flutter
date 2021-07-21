@@ -10,9 +10,9 @@ import 'dart:ui' show
 import 'package:characters/characters.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
-import 'package:flutter/services.dart';
 
 import 'text_editing.dart';
+import 'text_metrics.dart';
 
 TextAffinity? _toTextAffinity(String? affinity) {
   switch (affinity) {
