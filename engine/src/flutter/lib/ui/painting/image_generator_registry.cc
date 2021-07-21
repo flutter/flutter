@@ -52,7 +52,7 @@ void ImageGeneratorRegistry::AddFactory(ImageGeneratorFactory factory,
       {factory, priority, fml::tracing::TraceNonce()});
 }
 
-std::unique_ptr<ImageGenerator>
+std::shared_ptr<ImageGenerator>
 ImageGeneratorRegistry::CreateCompatibleGenerator(sk_sp<SkData> buffer) {
   if (!image_generator_factories_.size()) {
     FML_LOG(WARNING)
@@ -64,7 +64,7 @@ ImageGeneratorRegistry::CreateCompatibleGenerator(sk_sp<SkData> buffer) {
   }
 
   for (auto& factory : image_generator_factories_) {
-    std::unique_ptr<ImageGenerator> result = factory.callback(buffer);
+    std::shared_ptr<ImageGenerator> result = factory.callback(buffer);
     if (result) {
       return result;
     }

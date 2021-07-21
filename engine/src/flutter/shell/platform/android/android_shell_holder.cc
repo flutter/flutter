@@ -19,10 +19,13 @@
 #include "flutter/fml/logging.h"
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/message_loop.h"
+#include "flutter/fml/native_library.h"
 #include "flutter/fml/platform/android/jni_util.h"
+#include "flutter/lib/ui/painting/image_generator_registry.h"
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/run_configuration.h"
 #include "flutter/shell/common/thread_host.h"
+#include "flutter/shell/platform/android/android_image_generator.h"
 #include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/platform_view_android.h"
 
@@ -135,6 +138,13 @@ AndroidShellHolder::AndroidShellHolder(
         FML_LOG(ERROR) << "Failed to set Workers task runner priority";
       }
     });
+
+    shell_->RegisterImageDecoder(
+        [runner = task_runners.GetIOTaskRunner()](sk_sp<SkData> buffer) {
+          return AndroidImageGenerator::MakeFromData(buffer, runner);
+        },
+        -1);
+    FML_DLOG(INFO) << "Registered Android SDK image decoder (API level 28+)";
   }
 
   platform_view_ = weak_platform_view;
@@ -303,4 +313,5 @@ std::optional<RunConfiguration> AndroidShellHolder::BuildRunConfiguration(
   }
   return config;
 }
+
 }  // namespace flutter

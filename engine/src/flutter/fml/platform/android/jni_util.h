@@ -42,6 +42,7 @@ bool HasException(JNIEnv* env);
 
 bool ClearException(JNIEnv* env);
 
+bool CheckException(JNIEnv* env);
 std::string GetJavaExceptionInfo(JNIEnv* env, jthrowable java_throwable);
 
 }  // namespace jni

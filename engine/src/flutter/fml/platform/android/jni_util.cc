@@ -173,6 +173,17 @@ bool ClearException(JNIEnv* env) {
   return true;
 }
 
+bool CheckException(JNIEnv* env) {
+  if (!HasException(env))
+    return true;
+
+  jthrowable exception = env->ExceptionOccurred();
+  env->ExceptionClear();
+  FML_LOG(ERROR) << fml::jni::GetJavaExceptionInfo(env, exception);
+  env->DeleteLocalRef(exception);
+  return false;
+}
+
 std::string GetJavaExceptionInfo(JNIEnv* env, jthrowable java_throwable) {
   ScopedJavaLocalRef<jclass> throwable_clazz(
       env, env->FindClass("java/lang/Throwable"));

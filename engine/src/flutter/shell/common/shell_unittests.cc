@@ -1930,6 +1930,75 @@ TEST_F(ShellTest, CanDecompressImageFromAsset) {
   DestroyShell(std::move(shell));
 }
 
+/// An image generator that always creates a 1x1 single-frame green image.
+class SinglePixelImageGenerator : public ImageGenerator {
+ public:
+  SinglePixelImageGenerator()
+      : info_(SkImageInfo::MakeN32(1, 1, SkAlphaType::kOpaque_SkAlphaType)){};
+  ~SinglePixelImageGenerator() = default;
+  const SkImageInfo& GetInfo() { return info_; }
+
+  unsigned int GetFrameCount() const { return 1; }
+
+  unsigned int GetPlayCount() const { return 1; }
+
+  const ImageGenerator::FrameInfo GetFrameInfo(unsigned int frame_index) const {
+    return {std::nullopt, 0, SkCodecAnimation::DisposalMethod::kKeep};
+  }
+
+  SkISize GetScaledDimensions(float scale) {
+    return SkISize::Make(info_.width(), info_.height());
+  }
+
+  bool GetPixels(const SkImageInfo& info,
+                 void* pixels,
+                 size_t row_bytes,
+                 unsigned int frame_index,
+                 std::optional<unsigned int> prior_frame) {
+    assert(info.width() == 1);
+    assert(info.height() == 1);
+    assert(row_bytes == 4);
+
+    reinterpret_cast<uint32_t*>(pixels)[0] = 0x00ff00ff;
+    return true;
+  };
+
+ private:
+  SkImageInfo info_;
+};
+
+TEST_F(ShellTest, CanRegisterImageDecoders) {
+  fml::AutoResetWaitableEvent latch;
+  AddNativeCallback("NotifyWidthHeight", CREATE_NATIVE_ENTRY([&](auto args) {
+                      auto width = tonic::DartConverter<int>::FromDart(
+                          Dart_GetNativeArgument(args, 0));
+                      auto height = tonic::DartConverter<int>::FromDart(
+                          Dart_GetNativeArgument(args, 1));
+                      ASSERT_EQ(width, 1);
+                      ASSERT_EQ(height, 1);
+                      latch.Signal();
+                    }));
+
+  auto settings = CreateSettingsForFixture();
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("canRegisterImageDecoders");
+  std::unique_ptr<Shell> shell = CreateShell(settings);
+  ASSERT_NE(shell.get(), nullptr);
+
+  fml::TaskRunner::RunNowOrPostTask(
+      shell->GetTaskRunners().GetPlatformTaskRunner(), [&shell]() {
+        shell->RegisterImageDecoder(
+            [](sk_sp<SkData> buffer) {
+              return std::make_unique<SinglePixelImageGenerator>();
+            },
+            100);
+      });
+
+  RunEngine(shell.get(), std::move(configuration));
+  latch.Wait();
+  DestroyShell(std::move(shell));
+}
+
 TEST_F(ShellTest, OnServiceProtocolGetSkSLsWorks) {
   fml::ScopedTemporaryDirectory base_dir;
   ASSERT_TRUE(base_dir.fd().is_valid());
