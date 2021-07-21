@@ -231,31 +231,29 @@ String _generatePluralMethod(Message message, String translationForMessage) {
 
   if (translationForMessage.startsWith('{') && translationForMessage.endsWith('}')) {
     return pluralMethodTemplate
-        .replaceAll('@(comment)', comment)
-        .replaceAll('@(name)', message.resourceId)
-        .replaceAll('@(parameters)', parameters.join(', '))
-        .replaceAll('@(dateFormatting)', generateDateFormattingLogic(message))
-        .replaceAll(
-        '@(numberFormatting)', generateNumberFormattingLogic(message))
-        .replaceAll('@(count)', countPlaceholder.name)
-        .replaceAll('@(pluralLogicArgs)', pluralLogicArgs.join(',\n'))
-        .replaceAll('@(none)\n', '');
+      .replaceAll('@(comment)', comment)
+      .replaceAll('@(name)', message.resourceId)
+      .replaceAll('@(dateFormatting)', generateDateFormattingLogic(message))
+      .replaceAll('@(numberFormatting)', generateNumberFormattingLogic(message))
+      .replaceAll('@(parameters)', parameters.join(', '))
+      .replaceAll('@(count)', countPlaceholder.name)
+      .replaceAll('@(pluralLogicArgs)', pluralLogicArgs.join(',\n'))
+      .replaceAll('@(none)\n', '');
   }
 
   const String variable = 'pluralString';
   final String string = _replaceWithVariable(translationForMessage, variable);
   return pluralMethodTemplateInString
-      .replaceAll('@(comment)', comment)
-      .replaceAll('@(name)', message.resourceId)
-      .replaceAll('@(parameters)', parameters.join(', '))
-      .replaceAll('@(dateFormatting)', generateDateFormattingLogic(message))
-      .replaceAll(
-      '@(numberFormatting)', generateNumberFormattingLogic(message))
-      .replaceAll('@(variable)', variable)
-      .replaceAll('@(count)', countPlaceholder.name)
-      .replaceAll('@(pluralLogicArgs)', pluralLogicArgs.join(',\n'))
-      .replaceAll('@(none)\n', '')
-      .replaceAll('@(string)', string);
+    .replaceAll('@(comment)', comment)
+    .replaceAll('@(name)', message.resourceId)
+    .replaceAll('@(dateFormatting)', generateDateFormattingLogic(message))
+    .replaceAll('@(numberFormatting)', generateNumberFormattingLogic(message))
+    .replaceAll('@(parameters)', parameters.join(', '))
+    .replaceAll('@(variable)', variable)
+    .replaceAll('@(count)', countPlaceholder.name)
+    .replaceAll('@(pluralLogicArgs)', pluralLogicArgs.join(',\n'))
+    .replaceAll('@(none)\n', '')
+    .replaceAll('@(string)', string);
 }
 
 String _replaceWithVariable(String translation, String variable) {
@@ -293,8 +291,8 @@ String _generateSelectMethod(Message message, String translationForMessage) {
     for (final RegExpMatch patternMatch in patternRE.allMatches(pattern)) {
       if (patternMatch.groupCount == 2) {
         final String value = patternMatch.group(2)!
-            .replaceAll("'", r"\'")
-            .replaceAll('"', r'\"');
+          .replaceAll("'", r"\'")
+          .replaceAll('"', r'\"');
         cases.add(
           "        '${patternMatch.group(1)}': '$value'",
         );

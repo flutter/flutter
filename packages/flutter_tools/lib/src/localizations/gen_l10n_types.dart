@@ -338,14 +338,12 @@ class Message {
     if (attributes == null) {
 
       void _throwEmptyAttributes(final RegExp regExp, final String type) {
-        final RegExpMatch? match = regExp.firstMatch(
-            _value(bundle, resourceId));
-        final bool isMatch = match != null &&
-            match.groupCount == 1;
+        final RegExpMatch? match = regExp.firstMatch(_value(bundle, resourceId));
+        final bool isMatch = match != null && match.groupCount == 1;
         if (isMatch) {
           throw L10nException(
-              'Resource attribute "@$resourceId" was not found. Please '
-                  'ensure that $type resources have a corresponding @resource.'
+            'Resource attribute "@$resourceId" was not found. Please '
+            'ensure that $type resources have a corresponding @resource.'
           );
         }
       }

@@ -1825,10 +1825,10 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
           ..createSync(recursive: true);
         l10nDirectory.childFile(defaultTemplateArbFileName)
-            .writeAsStringSync(selectMessageWithoutPlaceholdersAttribute);
+          .writeAsStringSync(selectMessageWithoutPlaceholdersAttribute);
 
         expect(
-              () {
+          () {
             LocalizationsGenerator(
               fileSystem: fs,
               inputPathString: defaultL10nPathString,
@@ -1841,7 +1841,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
               ..writeOutputFiles(BufferLogger.test());
           },
           throwsA(isA<L10nException>().having(
-                (L10nException e) => e.message,
+            (L10nException e) => e.message,
             'message',
             contains('Check to see if the select message is in the proper ICU syntax format'),
           )),
@@ -1864,7 +1864,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
             .writeAsStringSync(selectMessageWithEmptyPlaceholdersMap);
 
         expect(
-              () {
+          () {
             LocalizationsGenerator(
               fileSystem: fs,
               inputPathString: defaultL10nPathString,
@@ -1877,7 +1877,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
               ..writeOutputFiles(BufferLogger.test());
           },
           throwsA(isA<L10nException>().having(
-                (L10nException e) => e.message,
+            (L10nException e) => e.message,
             'message',
             contains('Check to see if the select message is in the proper ICU syntax format'),
           )),
@@ -1896,7 +1896,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
             .writeAsStringSync(selectMessageWithoutResourceAttributes);
 
         expect(
-              () {
+          () {
             LocalizationsGenerator(
               fileSystem: fs,
               inputPathString: defaultL10nPathString,
@@ -1909,7 +1909,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
               ..writeOutputFiles(BufferLogger.test());
           },
           throwsA(isA<L10nException>().having(
-                (L10nException e) => e.message,
+            (L10nException e) => e.message,
             'message',
             contains('Resource attribute "@genderSelect" was not found'),
           )),
@@ -1931,7 +1931,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
             .writeAsStringSync(selectMessageWithIncorrectPlaceholderFormat);
 
         expect(
-              () {
+          () {
             LocalizationsGenerator(
               fileSystem: fs,
               inputPathString: defaultL10nPathString,
@@ -1944,7 +1944,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
               ..writeOutputFiles(BufferLogger.test());
           },
           throwsA(isA<L10nException>().having(
-                (L10nException e) => e.message,
+            (L10nException e) => e.message,
             'message',
             allOf(
               contains('is not properly formatted'),
