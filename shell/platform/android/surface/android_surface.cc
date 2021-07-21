@@ -15,4 +15,8 @@ AndroidSurface::AndroidSurface(
 
 AndroidSurface::~AndroidSurface() = default;
 
+std::unique_ptr<Surface> AndroidSurface::CreatePbufferSurface() {
+  return nullptr;
+}
+
 }  // namespace flutter
