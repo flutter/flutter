@@ -282,8 +282,7 @@ class _DraggableSheetExtent {
        assert(maxExtent <= 1),
        assert(minExtent <= initialExtent),
        assert(initialExtent <= maxExtent),
-       _currentExtent = ValueNotifier<double>(initialExtent)
-         ..addListener(listener),
+       _currentExtent = ValueNotifier<double>(initialExtent)..addListener(listener),
        availablePixels = double.infinity;
 
   final double minExtent;
@@ -408,6 +407,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
     setState(() {
       // _extent has been updated when this is called.
     });
+
   }
 
   @override
@@ -452,10 +452,10 @@ class _DraggableScrollableSheetScrollController extends ScrollController {
     String? debugLabel,
     required this.extent,
   }) : assert(extent != null),
-       super(
-       debugLabel: debugLabel,
-       initialScrollOffset: initialScrollOffset,
-     );
+         super(
+         debugLabel: debugLabel,
+         initialScrollOffset: initialScrollOffset,
+       );
 
   final _DraggableSheetExtent extent;
 
@@ -613,8 +613,7 @@ class _DraggableScrollableSheetScrollPosition
 
     ballisticController
       ..addListener(_tick)
-      ..animateWith(simulation)
-      .whenCompleteOrCancel(
+      ..animateWith(simulation).whenCompleteOrCancel(
         () {
           _ballisticCancelCallback = null;
           ballisticController.dispose();
