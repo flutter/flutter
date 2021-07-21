@@ -564,39 +564,36 @@ class HardwareKeyboard {
   }
 }
 
-/// The mode in which information of key events is delivered.
+/// The mode in which information of key messages is delivered.
 ///
-/// Different platforms deliver key events in different modes, which differ
-/// in dispatching functions, event classes, and event models. These modes are
-/// called "key event vehicles".
+/// Different platforms use different methods, classes, and models to inform the
+/// framework of native key events, which is called "transit mode".
 ///
-/// Determining the platform vehicle allows both sets of framework API (those
-/// related to [RawKeyEvent] and those to [KeyEvent]) to work on all platforms
-/// regardless of their implementation.  The vehicle of the current platform is
-/// inferred at the start of the application, and is used to guide how key
-/// event information is interpreted and dispatched, in order for the
-/// higher-level APIs to behave in the same way regardless of platform
-/// vehicles.
+/// The framework must determine which transit mode the current platform
+/// implements and behave accordingly (such as transforming and synthesizing
+/// events if necessary). Unit tests related to keyboard might also want to simulate
+/// platform of each transit mode.
+///
+/// The transit mode of the current platform is inferred by [KeyEventManager] at
+/// the start of the application.
 ///
 /// See also:
 ///
-///  * [KeyEventManager], which infers platform vehicle and guides
-///    how key messages are dispatched.
-///  * [KeyEventSimulator.vehicle], the vehicle used to simulate key events
-///    in tests, controlled by [debugKeySimulationVehicleOverride].
-///  * [debugKeySimulationVehicleOverride], the variable to control
-///    [KeyEventSimulator.vehicle].
-///  * [KeySimulationVehicleVariant], an easier way to set
-///    [debugKeySimulationVehicleOverride] in widget tests.
-enum KeyEventVehicle {
+///  * [KeyEventManager], which infers the transit mode of the current platform
+///    and guides how key messages are dispatched.
+///  * [debugKeyEventSimulatorTransitModeOverride], overrides the transit mode
+///    used to simulate key events.
+///  * [KeySimulatorTransitModeVariant], an easier way to set
+///    [debugKeyEventSimulatorTransitModeOverride] in widget tests.
+enum KeyDataTransitMode {
   /// Key event information is delivered as raw key data.
   ///
   /// Raw key data is platform's native key event information sent in JSON
   /// through a method channel, which is then interpreted as a platform subclass
   /// of [RawKeyEventData].
   ///
-  /// If the current vehicle is [rawKeyData], the raw key data is converted to
-  /// both [KeyMessage.events] and [KeyMessage.rawEvent].
+  /// If the current transit mode is [rawKeyData], the raw key data is converted
+  /// to both [KeyMessage.events] and [KeyMessage.rawEvent].
   rawKeyData,
 
   /// Key event information is delivered as converted key data, followed
@@ -610,7 +607,7 @@ enum KeyEventVehicle {
   /// through a method channel. It is interpreted by subclasses of
   /// [RawKeyEventData].
   ///
-  /// If the current vehicle is [rawKeyData], the key data is converted to
+  /// If the current transit mode is [rawKeyData], the key data is converted to
   /// [KeyMessage.events], and the raw key data is converted to
   /// [KeyMessage.rawEvent].
   keyDataThenRawKeyData,
@@ -689,7 +686,7 @@ typedef KeyMessageHandler = bool Function(KeyMessage message);
 /// [KeyEventManager] also resolves cross-platform compatibility of keyboard
 /// implementations. Legacy platforms might have not implemented the new key
 /// data API and only sends raw key data on each key message. [KeyEventManager]
-/// recognize platform types as [KeyEventVehicle] and dispatches events in
+/// recognize platform types as [KeyDataTransitMode] and dispatches events in
 /// different ways accordingly.
 ///
 /// [KeyEventManager] is typically created, owned, and invoked by
@@ -742,21 +739,21 @@ class KeyEventManager {
   final HardwareKeyboard _hardwareKeyboard;
   final RawKeyboard _rawKeyboard;
 
-  // The [KeyEventVehicle] of the current platform.
+  // The [KeyDataTransitMode] of the current platform.
   //
-  // The `_vehicle` is guaranteed to be non-null during key event callbacks.
+  // The `_transitMode` is guaranteed to be non-null during key event callbacks.
   //
-  // The `_vehicle` is null before the first event, after which it is inferred
+  // The `_transitMode` is null before the first event, after which it is inferred
   // and will not change throughout the lifecycle of the application.
   //
-  // The `_vehicle` can be reset to null in tests using [clearState].
-  KeyEventVehicle? _vehicle;
+  // The `_transitMode` can be reset to null in tests using [clearState].
+  KeyDataTransitMode? _transitMode;
 
   // The accumulated [KeyEvent]s since the last time the message is dispatched.
   //
-  // If _vehicle is [KeyEventVehicle.keyDataThenRawKeyData], then [KeyEvent]s
-  // are directly received from [handleKeyData]. If _vehicle is
-  // [KeyEventVehicle.rawKeyData], then [KeyEvent]s are converted from the raw
+  // If _transitMode is [KeyDataTransitMode.keyDataThenRawKeyData], then [KeyEvent]s
+  // are directly received from [handleKeyData]. If _transitMode is
+  // [KeyDataTransitMode.rawKeyData], then [KeyEvent]s are converted from the raw
   // key data of [handleRawKeyMessage]. Either way, the accumulated key
   // events are only dispatched along with the next [KeyMessage] when a
   // dispatchable [RawKeyEvent] is available.
@@ -766,12 +763,12 @@ class KeyEventManager {
   ///
   /// This method is the handler to the global `onKeyData` API.
   bool handleKeyData(ui.KeyData data) {
-    _vehicle ??= KeyEventVehicle.keyDataThenRawKeyData;
-    switch (_vehicle!) {
-      case KeyEventVehicle.rawKeyData:
-        assert(false, 'Should never encounter KeyData when vehicle is rawKeyData.');
+    _transitMode ??= KeyDataTransitMode.keyDataThenRawKeyData;
+    switch (_transitMode!) {
+      case KeyDataTransitMode.rawKeyData:
+        assert(false, 'Should never encounter KeyData when transitMode is rawKeyData.');
         return false;
-      case KeyEventVehicle.keyDataThenRawKeyData:
+      case KeyDataTransitMode.keyDataThenRawKeyData:
         // Postpone key event dispatching until the handleRawKeyMessage.
         _keyEventsSinceLastMessage.add(_eventFromData(data));
         return false;
@@ -784,8 +781,8 @@ class KeyEventManager {
   /// the JSON form of the native key message and returns the responds for the
   /// channel.
   Future<Map<String, dynamic>> handleRawKeyMessage(dynamic message) async {
-    if (_vehicle == null) {
-      _vehicle = KeyEventVehicle.rawKeyData;
+    if (_transitMode == null) {
+      _transitMode = KeyDataTransitMode.rawKeyData;
       // Convert raw events using a listener so that conversion only occurs if
       // the raw event should be dispatched.
       _rawKeyboard.addListener(_convertRawEventAndStore);
@@ -798,7 +795,7 @@ class KeyEventManager {
     for (final KeyEvent event in _keyEventsSinceLastMessage) {
       handled = _hardwareKeyboard.handleKeyEvent(event) || handled;
     }
-    if (_vehicle == KeyEventVehicle.rawKeyData) {
+    if (_transitMode == KeyDataTransitMode.rawKeyData) {
       assert(setEquals(_rawKeyboard.physicalKeysPressed, _hardwareKeyboard.physicalKeysPressed),
         'RawKeyboard reported ${_rawKeyboard.physicalKeysPressed}, '
         'while HardwareKeyboard reported ${_hardwareKeyboard.physicalKeysPressed}');
@@ -815,7 +812,7 @@ class KeyEventManager {
   // Convert the raw event to key events, including synthesizing events for
   // modifiers, and store the key events in `_keyEventsSinceLastMessage`.
   //
-  // This is only called when `_vehicle` is `rawKeyEvent` and if the raw event
+  // This is only called when `_transitMode` is `rawKeyEvent` and if the raw event
   // should be dispatched.
   void _convertRawEventAndStore(RawKeyEvent rawEvent) {
     final PhysicalKeyboardKey physicalKey = rawEvent.physicalKey;
@@ -876,13 +873,13 @@ class KeyEventManager {
       _keyEventsSinceLastMessage.add(mainEvent);
   }
 
-  /// Reset the inferred platform vehicle and related states.
+  /// Reset the inferred platform transit mode and related states.
   ///
   /// This method is only used in unit tests. In release mode, this is a no-op.
   @visibleForTesting
   void clearState() {
     assert(() {
-      _vehicle = null;
+      _transitMode = null;
       _rawKeyboard.removeListener(_convertRawEventAndStore);
       return true;
     }());

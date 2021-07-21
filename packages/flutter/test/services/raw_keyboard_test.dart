@@ -766,7 +766,7 @@ void main() {
         false);
       expect(logs, <int>[1, 3, 2]);
       logs.clear();
-    }, variant: KeySimulationVehicleVariant.all());
+    }, variant: KeySimulatorTransitModeVariant.all());
   });
 
   group('RawKeyEventDataAndroid', () {

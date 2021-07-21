@@ -1434,7 +1434,7 @@ void main() {
 
     await simulateKeyUpEvent(wordModifier);
     await simulateKeyUpEvent(LogicalKeyboardKey.shift);
-  }, skip: isBrowser, variant: KeySimulationVehicleVariant.all()); // https://github.com/flutter/flutter/issues/58068
+  }, skip: isBrowser, variant: KeySimulatorTransitModeVariant.all()); // https://github.com/flutter/flutter/issues/58068
 
   group('delete', () {
     test('when as a non-collapsed selection, it should delete a selection', () async {

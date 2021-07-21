@@ -4865,21 +4865,21 @@ void main() {
   }
 
   testWidgets('keyboard text selection works (RawKeyEvent)', (WidgetTester tester) async {
-    debugKeySimulationVehicleOverride = KeyEventVehicle.rawKeyData;
+    debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.rawKeyData;
 
     await testTextEditing(tester, targetPlatform: defaultTargetPlatform);
 
-    debugKeySimulationVehicleOverride = null;
+    debugKeyEventSimulatorTransitModeOverride = null;
 
     // On web, using keyboard for selection is handled by the browser.
   }, skip: kIsWeb, variant: TargetPlatformVariant.all());
 
   testWidgets('keyboard text selection works (ui.KeyData then RawKeyEvent)', (WidgetTester tester) async {
-    debugKeySimulationVehicleOverride = KeyEventVehicle.keyDataThenRawKeyData;
+    debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.keyDataThenRawKeyData;
 
     await testTextEditing(tester, targetPlatform: defaultTargetPlatform);
 
-    debugKeySimulationVehicleOverride = null;
+    debugKeyEventSimulatorTransitModeOverride = null;
 
     // On web, using keyboard for selection is handled by the browser.
   }, skip: kIsWeb, variant: TargetPlatformVariant.all());
@@ -7690,7 +7690,7 @@ void main() {
       expect(controller.selection.isCollapsed, true);
       expect(controller.selection.baseOffset, 1);
     }
-  }, variant: KeySimulationVehicleVariant.all());
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('the toolbar is disposed when selection changes and there is no selectionControls', (WidgetTester tester) async {
     late StateSetter setState;

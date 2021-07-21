@@ -404,7 +404,7 @@ void main() {
     expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
 
     debugDefaultTargetPlatformOverride = null;
-  }, variant: KeySimulationVehicleVariant.all());
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Cursor does not show when showCursor set to false', (WidgetTester tester) async {
     const Widget widget = MaterialApp(

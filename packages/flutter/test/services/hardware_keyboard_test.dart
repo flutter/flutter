@@ -63,7 +63,7 @@ void main() {
       equals(<LogicalKeyboardKey>{}));
     expect(HardwareKeyboard.instance.lockModesEnabled,
       equals(<KeyboardLockMode>{}));
-  }, variant: KeySimulationVehicleVariant.keyDataThenRawKeyData());
+  }, variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData());
 
   testWidgets('Dispatch events to all handlers', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -161,5 +161,5 @@ void main() {
       true);
     expect(logs, <int>[3, 2, 1]);
     logs.clear();
-  }, variant: KeySimulationVehicleVariant.all());
+  }, variant: KeySimulatorTransitModeVariant.all());
 }

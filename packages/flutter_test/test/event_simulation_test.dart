@@ -18,7 +18,7 @@ void _verify<T extends KeyEvent>(KeyEvent event, PhysicalKeyboardKey physical, L
 
 void main() {
   testWidgets('simulates keyboard events (RawEvent)', (WidgetTester tester) async {
-    debugKeySimulationVehicleOverride = KeyEventVehicle.rawKeyData;
+    debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.rawKeyData;
 
     final List<RawKeyEvent> events = <RawKeyEvent>[];
 
@@ -62,11 +62,11 @@ void main() {
     await tester.pumpWidget(Container());
     focusNode.dispose();
 
-    debugKeySimulationVehicleOverride = null;
+    debugKeyEventSimulatorTransitModeOverride = null;
   });
 
   testWidgets('simulates keyboard events (KeyData then RawKeyEvent)', (WidgetTester tester) async {
-    debugKeySimulationVehicleOverride = KeyEventVehicle.keyDataThenRawKeyData;
+    debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.keyDataThenRawKeyData;
 
     final List<KeyEvent> events = <KeyEvent>[];
 
@@ -202,10 +202,10 @@ void main() {
     await tester.pumpWidget(Container());
     focusNode.dispose();
 
-    debugKeySimulationVehicleOverride = null;
+    debugKeyEventSimulatorTransitModeOverride = null;
   });
 
-  testWidgets('simulates using the correct vehicle', (WidgetTester tester) async {
+  testWidgets('simulates using the correct transit mode', (WidgetTester tester) async {
     final List<Object> events = <Object>[];
 
     final FocusNode focusNode = FocusNode();
@@ -227,8 +227,8 @@ void main() {
     focusNode.requestFocus();
     await tester.idle();
 
-    /* Simulate events in rawKeyData vehicle. */
-    debugKeySimulationVehicleOverride = KeyEventVehicle.rawKeyData;
+    /* Simulate events in rawKeyData transit mode. */
+    debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.rawKeyData;
     // A (physical keyA, logical keyA) is pressed.
     await simulateKeyDownEvent(LogicalKeyboardKey.keyA);
     expect(events.length, 2);
@@ -247,8 +247,8 @@ void main() {
     expect((events[1] as RawKeyEvent).logicalKey, LogicalKeyboardKey.keyB);
     events.clear();
 
-    /* Simulate events in keyDataThenRawKeyData vehicle. */
-    debugKeySimulationVehicleOverride = KeyEventVehicle.keyDataThenRawKeyData;
+    /* Simulate events in keyDataThenRawKeyData transit mode. */
+    debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.keyDataThenRawKeyData;
     await simulateKeyDownEvent(LogicalKeyboardKey.keyA, platform: 'fuchsia');
     expect(events.length, 2);
     expect(events[0], isA<KeyEvent>());
@@ -263,8 +263,8 @@ void main() {
     expect((events[1] as RawKeyEvent).data, isA<RawKeyEventDataFuchsia>());
     events.clear();
 
-    /* Simulate events in rawKeyData vehicle again .*/
-    debugKeySimulationVehicleOverride = KeyEventVehicle.rawKeyData;
+    /* Simulate events in rawKeyData transit mode again .*/
+    debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.rawKeyData;
     // RawKeyEvents are no longer converted to KeyEvents
     // because a KeyData has been observed.
     await simulateKeyDownEvent(LogicalKeyboardKey.keyA);
@@ -277,6 +277,6 @@ void main() {
     expect(events[0], isA<RawKeyEvent>());
     events.clear();
 
-    debugKeySimulationVehicleOverride = null;
+    debugKeyEventSimulatorTransitModeOverride = null;
   });
 }

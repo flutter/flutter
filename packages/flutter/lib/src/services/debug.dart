@@ -6,13 +6,12 @@ import 'package:flutter/foundation.dart';
 
 import 'hardware_keyboard.dart';
 
-/// Override the vehicle used to simulate key events.
+/// Override the transit mode with which key events are simulated.
 ///
-/// Setting [debugKeySimulationVehicleOverride] changes
-/// [KeyEventSimulator.vehicle], and is a good way to make certain tests
-/// simulate the behavior of different type of platforms in terms of their
-/// support for keyboard API.
-KeyEventVehicle? debugKeySimulationVehicleOverride;
+/// Setting [debugKeyEventSimulatorTransitModeOverride] is a good way to make
+/// certain tests simulate the behavior of different type of platforms in terms
+/// of their extent of support for keyboard API.
+KeyDataTransitMode? debugKeyEventSimulatorTransitModeOverride;
 
 /// Returns true if none of the widget library debug variables have been changed.
 ///
@@ -22,7 +21,7 @@ KeyEventVehicle? debugKeySimulationVehicleOverride;
 /// See [the services library](services/services-library.html) for a complete list.
 bool debugAssertAllServicesVarsUnset(String reason) {
   assert(() {
-    if (debugKeySimulationVehicleOverride != null) {
+    if (debugKeyEventSimulatorTransitModeOverride != null) {
       throw FlutterError(reason);
     }
     return true;

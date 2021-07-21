@@ -50,8 +50,8 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   HardwareKeyboard get keyboard => _keyboard;
   late final HardwareKeyboard _keyboard;
 
-  /// The global singleton instance of [KeyEventManager], which can
-  /// be used to the current platform vehicle and dispatch key data.
+  /// The global singleton instance of [KeyEventManager], which is used
+  /// internally to dispatch key messages.
   KeyEventManager get keyEventManager => _keyEventManager;
   late final KeyEventManager _keyEventManager;
 

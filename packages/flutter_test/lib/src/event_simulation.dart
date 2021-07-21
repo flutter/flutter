@@ -663,25 +663,25 @@ class KeyEventSimulator {
     return result!;
   }
 
-  static const KeyEventVehicle _defaultVehicle = KeyEventVehicle.rawKeyData;
+  static const KeyDataTransitMode _defaultTransitMode = KeyDataTransitMode.rawKeyData;
 
-  /// The simulation vehicle for [simulateKeyDownEvent], [simulateKeyUpEvent],
-  /// and [simulateKeyRepeatEvent].
-  ///
-  /// Simulation vehicle is the mode that simulated key events are constructed
-  /// and delivered. For detailed introduction, see [KeyEventVehicle] and
-  /// its values.
-  ///
-  /// The [vehicle] defaults to [KeyEventVehicle.rawKeyEvent], and can be
-  /// overridden with [debugKeySimulationVehicleOverride].  In widget tests, it
-  /// is often set with [KeySimulationModeVariant].
-  static KeyEventVehicle get vehicle {
-    KeyEventVehicle? result;
+  // The simulation transit mode for [simulateKeyDownEvent], [simulateKeyUpEvent],
+  // and [simulateKeyRepeatEvent].
+  //
+  // Simulation transit mode is the mode that simulated key events are constructed
+  // and delivered. For detailed introduction, see [KeyDataTransitMode] and
+  // its values.
+  //
+  // The `_transitMode` defaults to [KeyDataTransitMode.rawKeyEvent], and can be
+  // overridden with [debugKeyEventSimulatorTransitModeOverride].  In widget tests, it
+  // is often set with [KeySimulationModeVariant].
+  static KeyDataTransitMode get _transitMode {
+    KeyDataTransitMode? result;
     assert(() {
-      result = debugKeySimulationVehicleOverride;
+      result = debugKeyEventSimulatorTransitModeOverride;
       return true;
     }());
-    return result ?? _defaultVehicle;
+    return result ?? _defaultTransitMode;
   }
 
   /// Simulates sending a hardware key down event.
@@ -713,10 +713,10 @@ class KeyEventSimulator {
         return getRawKeyData(key, platform: platform!, isDown: true, physicalKey: physicalKey, character: character);
       });
     }
-    switch (vehicle) {
-      case KeyEventVehicle.rawKeyData:
+    switch (_transitMode) {
+      case KeyDataTransitMode.rawKeyData:
         return _simulateByRawEvent();
-      case KeyEventVehicle.keyDataThenRawKeyData:
+      case KeyDataTransitMode.keyDataThenRawKeyData:
         final LogicalKeyboardKey logicalKey = _getKeySynonym(key);
         final bool resultByKeyEvent = ServicesBinding.instance!.keyEventManager.handleKeyData(
           ui.KeyData(
@@ -758,10 +758,10 @@ class KeyEventSimulator {
         return getRawKeyData(key, platform: platform!, isDown: false, physicalKey: physicalKey);
       });
     }
-    switch (vehicle) {
-      case KeyEventVehicle.rawKeyData:
+    switch (_transitMode) {
+      case KeyDataTransitMode.rawKeyData:
         return _simulateByRawEvent();
-      case KeyEventVehicle.keyDataThenRawKeyData:
+      case KeyDataTransitMode.keyDataThenRawKeyData:
         final LogicalKeyboardKey logicalKey = _getKeySynonym(key);
         final bool resultByKeyEvent = ServicesBinding.instance!.keyEventManager.handleKeyData(
           ui.KeyData(
@@ -804,10 +804,10 @@ class KeyEventSimulator {
         return getRawKeyData(key, platform: platform!, isDown: true, physicalKey: physicalKey, character: character);
       });
     }
-    switch (vehicle) {
-      case KeyEventVehicle.rawKeyData:
+    switch (_transitMode) {
+      case KeyDataTransitMode.rawKeyData:
         return _simulateByRawEvent();
-      case KeyEventVehicle.keyDataThenRawKeyData:
+      case KeyDataTransitMode.keyDataThenRawKeyData:
         final LogicalKeyboardKey logicalKey = _getKeySynonym(key);
         final bool resultByKeyEvent = ServicesBinding.instance!.keyEventManager.handleKeyData(
           ui.KeyData(
@@ -906,50 +906,50 @@ Future<bool> simulateKeyRepeatEvent(
   return KeyEventSimulator.simulateKeyRepeatEvent(key, platform: platform, physicalKey: physicalKey, character: character);
 }
 
-/// A [TestVariant] that runs tests with [KeyEventSimulator.vehicle]
-/// set to different values of [KeyEventVehicle].
-class KeySimulationVehicleVariant extends TestVariant<KeyEventVehicle> {
-  /// Creates a [KeySimulationVehicleVariant] that tests the given [values].
-  const KeySimulationVehicleVariant(this.values);
+/// A [TestVariant] that runs tests with transit modes set to different values
+/// of [KeyDataTransitMode].
+class KeySimulatorTransitModeVariant extends TestVariant<KeyDataTransitMode> {
+  /// Creates a [KeySimulatorTransitModeVariant] that tests the given [values].
+  const KeySimulatorTransitModeVariant(this.values);
 
-  /// Creates a [KeySimulationVehicleVariant] for each value option of
-  /// [KeyEventVehicle].
-  KeySimulationVehicleVariant.all()
-    : this(KeyEventVehicle.values.toSet());
+  /// Creates a [KeySimulatorTransitModeVariant] for each value option of
+  /// [KeyDataTransitMode].
+  KeySimulatorTransitModeVariant.all()
+    : this(KeyDataTransitMode.values.toSet());
 
-  /// Creates a [KeySimulationVehicleVariant] that only contains
-  /// [KeyEventVehicle.keyDataThenRawKeyData].
-  KeySimulationVehicleVariant.keyDataThenRawKeyData()
-    : this(<KeyEventVehicle>{KeyEventVehicle.keyDataThenRawKeyData});
-
-  @override
-  final Set<KeyEventVehicle> values;
+  /// Creates a [KeySimulatorTransitModeVariant] that only contains
+  /// [KeyDataTransitMode.keyDataThenRawKeyData].
+  KeySimulatorTransitModeVariant.keyDataThenRawKeyData()
+    : this(<KeyDataTransitMode>{KeyDataTransitMode.keyDataThenRawKeyData});
 
   @override
-  String describeValue(KeyEventVehicle value) {
+  final Set<KeyDataTransitMode> values;
+
+  @override
+  String describeValue(KeyDataTransitMode value) {
     switch (value) {
-      case KeyEventVehicle.rawKeyData:
+      case KeyDataTransitMode.rawKeyData:
         return 'RawKeyEvent';
-      case KeyEventVehicle.keyDataThenRawKeyData:
+      case KeyDataTransitMode.keyDataThenRawKeyData:
         return 'ui.KeyData then RawKeyEvent';
     }
   }
 
   @override
-  Future<KeyEventVehicle?> setUp(KeyEventVehicle value) async {
-    final KeyEventVehicle? previousSetting = debugKeySimulationVehicleOverride;
-    debugKeySimulationVehicleOverride = value;
+  Future<KeyDataTransitMode?> setUp(KeyDataTransitMode value) async {
+    final KeyDataTransitMode? previousSetting = debugKeyEventSimulatorTransitModeOverride;
+    debugKeyEventSimulatorTransitModeOverride = value;
     return previousSetting;
   }
 
   @override
-  Future<void> tearDown(KeyEventVehicle value, KeyEventVehicle? memento) async {
+  Future<void> tearDown(KeyDataTransitMode value, KeyDataTransitMode? memento) async {
     // ignore: invalid_use_of_visible_for_testing_member
     RawKeyboard.instance.clearKeysPressed();
     // ignore: invalid_use_of_visible_for_testing_member
     HardwareKeyboard.instance.clearState();
     // ignore: invalid_use_of_visible_for_testing_member
     ServicesBinding.instance!.keyEventManager.clearState();
-    debugKeySimulationVehicleOverride = memento;
+    debugKeyEventSimulatorTransitModeOverride = memento;
   }
 }

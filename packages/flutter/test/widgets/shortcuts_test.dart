@@ -435,7 +435,7 @@ void main() {
       invoked = 0;
 
       expect(RawKeyboard.instance.keysPressed, isEmpty);
-    }, variant: KeySimulationVehicleVariant.all());
+    }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('handles repeated events', (WidgetTester tester) async {
       int invoked = 0;
@@ -461,7 +461,7 @@ void main() {
       invoked = 0;
 
       expect(RawKeyboard.instance.keysPressed, isEmpty);
-    }, variant: KeySimulationVehicleVariant.all());
+    }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('handles Shift-Ctrl-C', (WidgetTester tester) async {
       int invoked = 0;
@@ -1101,7 +1101,7 @@ void main() {
       await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
       expect(invoked, 1);
       invoked = 0;
-    }, variant: KeySimulationVehicleVariant.all());
+    }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('handles repeated events', (WidgetTester tester) async {
       int invoked = 0;
@@ -1121,7 +1121,7 @@ void main() {
       await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
       expect(invoked, 2);
       invoked = 0;
-    }, variant: KeySimulationVehicleVariant.all());
+    }, variant: KeySimulatorTransitModeVariant.all());
   });
 
   group('CallbackShortcuts', () {
