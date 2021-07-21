@@ -383,26 +383,25 @@ class Context {
 
     // Default value of assets_path is flutter_assets
     //local assets_path="flutter_assets"
-    String assetsPath = 'flutter_assets';
     // The value of assets_path can set by add FLTAssetsPath to
     // AppFrameworkInfo.plist.
 
     //if FLTAssetsPath=$(/usr/libexec/PlistBuddy -c "Print :FLTAssetsPath" "${derived_dir}/AppFrameworkInfo.plist" 2>/dev/null); then
-    final ProcessResult plistBuddyResult = runSync(
-      '/usr/libexec/PlistBuddy',
-      <String>['-c', '"Print :FLTAssetsPath"', '"$derivedDir/AppFrameworkInfo.plist"'],
-      allowFail: true,
-    );
-    if (plistBuddyResult.exitCode == 0) {
-      final String fltAssetsPath = (plistBuddyResult.stdout as String).trim();
-      //  if [[ -n "$FLTAssetsPath" ]]; then
-      if (fltAssetsPath.isNotEmpty) {
-      //    assets_path="${FLTAssetsPath}"
-        assetsPath = fltAssetsPath;
-      //  fi
-      }
-      //fi
-    }
+    //final ProcessResult plistBuddyResult = runSync(
+    //  '/usr/libexec/PlistBuddy',
+    //  <String>['-c', '"Print :FLTAssetsPath"', '"$derivedDir/AppFrameworkInfo.plist"'],
+    //  allowFail: true,
+    //);
+    //if (plistBuddyResult.exitCode == 0) {
+    //  final String fltAssetsPath = (plistBuddyResult.stdout as String).trim();
+    //  //  if [[ -n "$FLTAssetsPath" ]]; then
+    //  if (fltAssetsPath.isNotEmpty) {
+    //  //    assets_path="${FLTAssetsPath}"
+    //    assetsPath = fltAssetsPath;
+    //  //  fi
+    //  }
+    //  //fi
+    //}
 
     //# Use FLUTTER_BUILD_MODE if it's set, otherwise use the Xcode build configuration name
     //# This means that if someone wants to use an Xcode build config other than Debug/Profile/Release,
@@ -487,7 +486,7 @@ class Context {
       //fi
     }
 
-    //# TODO(jmagman): use assemble copied engine in add-to-app.
+    // TODO(jmagman): use assemble copied engine in add-to-app.
     //if [[ -e "${project_path}/.ios" ]]; then
     if (existsDir('$projectPath/.ios')) {
       //  RunCommand rsync -av --delete --filter "- .DS_Store" "${flutter_framework}" "${derived_dir}/engine"
