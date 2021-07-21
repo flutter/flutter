@@ -8,6 +8,7 @@ import 'package:flutter_tools/src/base/io.dart';
 
 import '../../bin/xcode_backend.dart';
 import '../src/common.dart';
+import '../src/fake_process_manager.dart';
 
 void main() {
   late MemoryFileSystem fileSystem;
@@ -17,23 +18,119 @@ void main() {
   });
 
   group('build', () {
-    test('able to build', () {
-      final Directory buildDir = fileSystem.directory('/path/to/builds')..createSync(recursive: true);
-      final Directory flutterRoot = fileSystem.directory('/path/to/flutter')..createSync(recursive: true);
+    test('calls flutter assemble', () {
+      final Directory buildDir = fileSystem.directory('/path/to/builds')
+        ..createSync(recursive: true);
+      final Directory flutterRoot = fileSystem.directory('/path/to/flutter')
+        ..createSync(recursive: true);
+      const String buildMode = 'Debug';
       final TestContext context = TestContext(
         <String>['build'],
         <String, String>{
-          'CONFIGURATION': 'Debug',
           'BUILT_PRODUCTS_DIR': buildDir.path,
-          'INFOPLIST_PATH': 'Info.plist',
+          'CONFIGURATION': buildMode,
+          'ENABLE_BITCODE': 'YES',
           'FLUTTER_ROOT': flutterRoot.path,
+          'INFOPLIST_PATH': 'Info.plist',
         },
+        commands: <FakeCommand>[
+          FakeCommand(
+            command: <String>[
+              '${flutterRoot.path}/bin/flutter',
+              'assemble',
+              '--no-version-check',
+              '--output=${buildDir.path}/',
+              '-dTargetPlatform=ios',
+              '-dTargetFile=lib/main.dart',
+              '-dBuildMode=${buildMode.toLowerCase()}',
+              '-dIosArchs=',
+              '-dSdkRoot=',
+              '-dSplitDebugInfo=',
+              '-dTreeShakeIcons=',
+              '-dTrackWidgetCreation=',
+              '-dDartObfuscation=',
+              '-dEnableBitcode=',
+              '--ExtraGenSnapshotOptions=',
+              '--DartDefines=',
+              '--ExtraFrontEndOptions=',
+              'debug_ios_bundle_flutter_assets',
+            ],
+          ),
+        ],
         fileSystem: fileSystem,
       )..run();
       expect(
         context.stdout,
-        contains('Info.plist does not exist. Skipping _dartobservatory._tcp NSBonjourServices insertion.'),
+        contains('built and packaged successfully.'),
       );
+      expect(context.stderr, isEmpty);
+    });
+
+    test('forwards all env variables to flutter assemble', () {
+      final Directory buildDir = fileSystem.directory('/path/to/builds')
+        ..createSync(recursive: true);
+      final Directory flutterRoot = fileSystem.directory('/path/to/flutter')
+        ..createSync(recursive: true);
+      const String archs = 'armv7';
+      const String buildMode = 'Debug';
+      const String dartObfuscation = 'false';
+      const String dartDefines = 'flutter.inspector.structuredErrors%3Dtrue';
+      const String extraFrontEndOptions = '--some-option';
+      const String extraGenSnapshotOptions = '--obfuscate';
+      const String sdkRoot = '/path/to/sdk';
+      const String splitDebugInfo = '/path/to/split/debug/info';
+      const String trackWidgetCreation = 'true';
+      const String treeShake = 'true';
+      final TestContext context = TestContext(
+        <String>['build'],
+        <String, String>{
+          'ACTION': 'install',
+          'ARCHS': archs,
+          'BUILT_PRODUCTS_DIR': buildDir.path,
+          'CONFIGURATION': buildMode,
+          'DART_DEFINES': dartDefines,
+          'DART_OBFUSCATION': dartObfuscation,
+          'ENABLE_BITCODE': 'YES',
+          'EXTRA_FRONT_END_OPTIONS': extraFrontEndOptions,
+          'EXTRA_GEN_SNAPSHOT_OPTIONS': extraGenSnapshotOptions,
+          'FLUTTER_ROOT': flutterRoot.path,
+          'INFOPLIST_PATH': 'Info.plist',
+          'SDKROOT': sdkRoot,
+          'SPLIT_DEBUG_INFO': splitDebugInfo,
+          'TRACK_WIDGET_CREATION': trackWidgetCreation,
+          'TREE_SHAKE_ICONS': treeShake,
+        },
+        commands: <FakeCommand>[
+          FakeCommand(
+            command: <String>[
+              '${flutterRoot.path}/bin/flutter',
+              'assemble',
+              '--no-version-check',
+              '--output=${buildDir.path}/',
+              '-dTargetPlatform=ios',
+              '-dTargetFile=lib/main.dart',
+              '-dBuildMode=${buildMode.toLowerCase()}',
+              '-dIosArchs=$archs',
+              '-dSdkRoot=$sdkRoot',
+              '-dSplitDebugInfo=$splitDebugInfo',
+              '-dTreeShakeIcons=$treeShake',
+              '-dTrackWidgetCreation=$trackWidgetCreation',
+              '-dDartObfuscation=$dartObfuscation',
+              '-dEnableBitcode=true',
+              '--ExtraGenSnapshotOptions=$extraGenSnapshotOptions',
+              '--DartDefines=$dartDefines',
+              '--ExtraFrontEndOptions=$extraFrontEndOptions',
+              'debug_ios_bundle_flutter_assets',
+            ],
+          ),
+        ],
+        fileSystem: fileSystem,
+      )..run();
+      expect(
+        context.stdout,
+        contains('built and packaged successfully.'),
+      );
+      expect(context.stderr, isEmpty);
     });
   });
 
@@ -42,20 +139,21 @@ void main() {
       final Directory buildDir = fileSystem.directory('/path/to/builds');
       buildDir.createSync(recursive: true);
       final TestContext context = TestContext(
-          <String>['test_observatory_bonjour_service'],
-          <String, String>{
-            'CONFIGURATION': 'Debug',
-            'BUILT_PRODUCTS_DIR': buildDir.path,
-            'INFOPLIST_PATH': 'Info.plist',
-          },
-          fileSystem: fileSystem,
+        <String>['test_observatory_bonjour_service'],
+        <String, String>{
+          'CONFIGURATION': 'Debug',
+          'BUILT_PRODUCTS_DIR': buildDir.path,
+          'INFOPLIST_PATH': 'Info.plist',
+        },
+        commands: <FakeCommand>[],
+        fileSystem: fileSystem,
       )..run();
       expect(
-          context.stdout,
-          contains('Info.plist does not exist. Skipping _dartobservatory._tcp NSBonjourServices insertion.'),
+        context.stdout,
+        contains(
+            'Info.plist does not exist. Skipping _dartobservatory._tcp NSBonjourServices insertion.'),
       );
     });
-
   });
 }
 
@@ -64,9 +162,12 @@ class TestContext extends Context {
     List<String> arguments,
     Map<String, String> environment, {
     required this.fileSystem,
-  }) : super(arguments: arguments, environment: environment);
+    required List<FakeCommand> commands,
+  })  : processManager = FakeProcessManager.list(commands),
+        super(arguments: arguments, environment: environment);
 
   final FileSystem fileSystem;
+  final FakeProcessManager processManager;
 
   String stdout = '';
   String stderr = '';
@@ -89,7 +190,11 @@ class TestContext extends Context {
     bool allowFail = false,
     String? workingDirectory,
   }) {
-    throw Exception('Unimplemented!');
+    return processManager.runSync(
+      <dynamic>[bin, ...args],
+      workingDirectory: workingDirectory,
+      environment: environment,
+    );
   }
 
   @override
