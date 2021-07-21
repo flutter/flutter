@@ -4,26 +4,6 @@
 
 import 'dart:io';
 
-//void runCommand() {
-  //if [[ -n "$VERBOSE_SCRIPT_LOGGING" ]]; then
-  //  echo "♦ $*"
-  //fi
-  //"$@"
-  //return $?
-//}
-
-//void assertExists(String filePath) {
-  //if [[ ! -e "$1" ]]; then
-  //  if [[ -h "$1" ]]; then
-  //    EchoError "The path $1 is a symlink to a path that does not exist"
-  //  else
-  //    EchoError "The path $1 does not exist"
-  //  fi
-  //  exit -1
-  //fi
-  //return 0
-//}
-
 // Main entry point.
 void main(List<String> arguments) {
   Context(
@@ -652,5 +632,3 @@ class Context {
     //return 0
   }
 }
-
-
