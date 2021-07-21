@@ -102,7 +102,9 @@ class Context {
       workingDirectory: workingDirectory,
     );
     echo(result.stdout as String);
-    echoError(result.stderr as String);
+    if ((result.stderr as String).isNotEmpty) {
+      echoError(result.stderr as String);
+    }
     if (!allowFail && result.exitCode != 0) {
       stderr.write('${result.stderr}\n');
       throw Exception(
@@ -113,9 +115,7 @@ class Context {
   }
 
   void echoError(String message) {
-    if (message.isNotEmpty) {
-      stderr.write('$message\n');
-    }
+    stderr.write('$message\n');
   }
 
   void echo(String message) {
@@ -338,7 +338,7 @@ class Context {
           '-insert',
           'NSLocalNetworkUsageDescription',
           '-string',
-          'Allow Flutter tools on your computerto connect and debug your application. This prompt will not appear on release builds.',
+          'Allow Flutter tools on your computer to connect and debug your application. This prompt will not appear on release builds.',
           builtProductsPlist,
         ],
       );
