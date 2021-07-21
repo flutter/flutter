@@ -805,6 +805,14 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   // Return the asset manager associated with the current engine, or nullptr.
   std::shared_ptr<AssetManager> GetAssetManager();
 
+  //----------------------------------------------------------------------------
+  /// @brief      Get the `ImageGeneratorRegistry` associated with the current
+  ///             engine.
+  ///
+  /// @return     The engine's `ImageGeneratorRegistry`.
+  ///
+  fml::WeakPtr<ImageGeneratorRegistry> GetImageGeneratorRegistry();
+
   // |PointerDataDispatcher::Delegate|
   void DoDispatchPacket(std::unique_ptr<PointerDataPacket> packet,
                         uint64_t trace_flow_id) override;

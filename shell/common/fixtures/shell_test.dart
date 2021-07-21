@@ -163,6 +163,17 @@ void canDecompressImageFromAsset() {
 
 List<int> getFixtureImage() native 'GetFixtureImage';
 
+@pragma('vm:entry-point')
+void canRegisterImageDecoders() {
+  decodeImageFromList(
+    // The test ImageGenerator will always behave the same regardless of input.
+    Uint8List(1),
+    (Image result) {
+      notifyWidthHeight(result.width, result.height);
+    },
+  );
+}
+
 void notifyLocalTime(String string) native 'NotifyLocalTime';
 
 bool waitFixture() native 'WaitFixture';

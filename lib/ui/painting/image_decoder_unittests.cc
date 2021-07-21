@@ -149,7 +149,7 @@ class UnknownImageGenerator : public ImageGenerator {
  public:
   UnknownImageGenerator() : info_(SkImageInfo::MakeUnknown()){};
   ~UnknownImageGenerator() = default;
-  const SkImageInfo& GetInfo() const { return info_; }
+  const SkImageInfo& GetInfo() { return info_; }
 
   unsigned int GetFrameCount() const { return 1; }
 
@@ -159,7 +159,7 @@ class UnknownImageGenerator : public ImageGenerator {
     return {std::nullopt, 0, SkCodecAnimation::DisposalMethod::kKeep};
   }
 
-  SkISize GetScaledDimensions(float scale) const {
+  SkISize GetScaledDimensions(float scale) {
     return SkISize::Make(info_.width(), info_.height());
   }
 
@@ -167,7 +167,7 @@ class UnknownImageGenerator : public ImageGenerator {
                  void* pixels,
                  size_t row_bytes,
                  unsigned int frame_index,
-                 std::optional<unsigned int> prior_frame) const {
+                 std::optional<unsigned int> prior_frame) {
     return false;
   };
 
@@ -236,7 +236,7 @@ TEST_F(ImageDecoderFixtureTest, ValidImageResultsInSuccess) {
     ASSERT_GE(data->size(), 0u);
 
     ImageGeneratorRegistry registry;
-    std::unique_ptr<ImageGenerator> generator =
+    std::shared_ptr<ImageGenerator> generator =
         registry.CreateCompatibleGenerator(data);
     ASSERT_TRUE(generator);
 
@@ -293,7 +293,7 @@ TEST_F(ImageDecoderFixtureTest, ExifDataIsRespectedOnDecode) {
     ASSERT_GE(data->size(), 0u);
 
     ImageGeneratorRegistry registry;
-    std::unique_ptr<ImageGenerator> generator =
+    std::shared_ptr<ImageGenerator> generator =
         registry.CreateCompatibleGenerator(data);
     ASSERT_TRUE(generator);
 
@@ -352,7 +352,7 @@ TEST_F(ImageDecoderFixtureTest, CanDecodeWithoutAGPUContext) {
     ASSERT_GE(data->size(), 0u);
 
     ImageGeneratorRegistry registry;
-    std::unique_ptr<ImageGenerator> generator =
+    std::shared_ptr<ImageGenerator> generator =
         registry.CreateCompatibleGenerator(data);
     ASSERT_TRUE(generator);
 
@@ -427,7 +427,7 @@ TEST_F(ImageDecoderFixtureTest, CanDecodeWithResizes) {
       ASSERT_GE(data->size(), 0u);
 
       ImageGeneratorRegistry registry;
-      std::unique_ptr<ImageGenerator> generator =
+      std::shared_ptr<ImageGenerator> generator =
           registry.CreateCompatibleGenerator(data);
       ASSERT_TRUE(generator);
 
@@ -593,7 +593,7 @@ TEST(ImageDecoderTest, VerifySimpleDecoding) {
   ASSERT_EQ(SkISize::Make(600, 200), image->dimensions());
 
   ImageGeneratorRegistry registry;
-  std::unique_ptr<ImageGenerator> generator =
+  std::shared_ptr<ImageGenerator> generator =
       registry.CreateCompatibleGenerator(data);
   ASSERT_TRUE(generator);
 
@@ -610,7 +610,7 @@ TEST(ImageDecoderTest, VerifySubpixelDecodingPreservesExifOrientation) {
   auto data = OpenFixtureAsSkData("Horizontal.jpg");
 
   ImageGeneratorRegistry registry;
-  std::unique_ptr<ImageGenerator> generator =
+  std::shared_ptr<ImageGenerator> generator =
       registry.CreateCompatibleGenerator(data);
   ASSERT_TRUE(generator);
   auto descriptor =
@@ -662,7 +662,7 @@ TEST_F(ImageDecoderFixtureTest,
   ASSERT_TRUE(gif_mapping);
 
   ImageGeneratorRegistry registry;
-  std::unique_ptr<ImageGenerator> gif_generator =
+  std::shared_ptr<ImageGenerator> gif_generator =
       registry.CreateCompatibleGenerator(gif_mapping);
   ASSERT_TRUE(gif_generator);
 

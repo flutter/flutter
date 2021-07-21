@@ -48,7 +48,7 @@ class ImageGenerator {
   /// @note    This method is executed on the UI thread and used for layout
   ///          purposes by the framework, and so this method should not perform
   ///          long synchronous tasks.
-  virtual const SkImageInfo& GetInfo() const = 0;
+  virtual const SkImageInfo& GetInfo() = 0;
 
   /// @brief   Get the number of frames that the encoded image stores. This
   ///          method is always expected to be called before `GetFrameInfo`, as
@@ -87,9 +87,11 @@ class ImageGenerator {
   /// @note       This method is called prior to `GetPixels` in order to query
   ///             for supported sizes.
   /// @see        `GetPixels`
-  virtual SkISize GetScaledDimensions(float scale) const = 0;
+  virtual SkISize GetScaledDimensions(float scale) = 0;
 
-  /// @brief      Decode the image into a given buffer.
+  /// @brief      Decode the image into a given buffer. This method is currently
+  ///             always used for sub-pixel image decoding. For full-sized still
+  ///             images, `GetImage` is always attempted first.
   /// @param[in]  info         The desired size and color info of the decoded
   ///                          image to be returned. The implementation of
   ///                          `GetScaledDimensions` determines which sizes are
@@ -119,7 +121,12 @@ class ImageGenerator {
       void* pixels,
       size_t row_bytes,
       unsigned int frame_index = 0,
-      std::optional<unsigned int> prior_frame = std::nullopt) const = 0;
+      std::optional<unsigned int> prior_frame = std::nullopt) = 0;
+
+  /// @brief   Creates an `SkImage` based on the current `ImageInfo` of this
+  ///          `ImageGenerator`.
+  /// @return  A new `SkImage` containing the decoded image data.
+  sk_sp<SkImage> GetImage();
 };
 
 class BuiltinSkiaImageGenerator : public ImageGenerator {
@@ -129,7 +136,7 @@ class BuiltinSkiaImageGenerator : public ImageGenerator {
   BuiltinSkiaImageGenerator(std::unique_ptr<SkImageGenerator> generator);
 
   // |ImageGenerator|
-  const SkImageInfo& GetInfo() const override;
+  const SkImageInfo& GetInfo() override;
 
   // |ImageGenerator|
   unsigned int GetFrameCount() const override;
@@ -142,7 +149,7 @@ class BuiltinSkiaImageGenerator : public ImageGenerator {
       unsigned int frame_index) const override;
 
   // |ImageGenerator|
-  SkISize GetScaledDimensions(float desired_scale) const override;
+  SkISize GetScaledDimensions(float desired_scale) override;
 
   // |ImageGenerator|
   bool GetPixels(
@@ -150,7 +157,7 @@ class BuiltinSkiaImageGenerator : public ImageGenerator {
       void* pixels,
       size_t row_bytes,
       unsigned int frame_index = 0,
-      std::optional<unsigned int> prior_frame = std::nullopt) const override;
+      std::optional<unsigned int> prior_frame = std::nullopt) override;
 
   static std::unique_ptr<ImageGenerator> MakeFromGenerator(
       std::unique_ptr<SkImageGenerator> generator);
@@ -169,7 +176,7 @@ class BuiltinSkiaCodecImageGenerator : public ImageGenerator {
   BuiltinSkiaCodecImageGenerator(sk_sp<SkData> buffer);
 
   // |ImageGenerator|
-  const SkImageInfo& GetInfo() const override;
+  const SkImageInfo& GetInfo() override;
 
   // |ImageGenerator|
   unsigned int GetFrameCount() const override;
@@ -182,7 +189,7 @@ class BuiltinSkiaCodecImageGenerator : public ImageGenerator {
       unsigned int frame_index) const override;
 
   // |ImageGenerator|
-  SkISize GetScaledDimensions(float desired_scale) const override;
+  SkISize GetScaledDimensions(float desired_scale) override;
 
   // |ImageGenerator|
   bool GetPixels(
@@ -190,7 +197,7 @@ class BuiltinSkiaCodecImageGenerator : public ImageGenerator {
       void* pixels,
       size_t row_bytes,
       unsigned int frame_index = 0,
-      std::optional<unsigned int> prior_frame = std::nullopt) const override;
+      std::optional<unsigned int> prior_frame = std::nullopt) override;
 
   static std::unique_ptr<ImageGenerator> MakeFromData(sk_sp<SkData> data);
 
