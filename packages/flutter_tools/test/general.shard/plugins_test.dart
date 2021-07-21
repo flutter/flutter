@@ -771,7 +771,7 @@ dependencies:
         expect(registrant.readAsStringSync(),
           contains('flutterEngine.getPlugins().add(new plugin1.UseNewEmbedding());'));
 
-        expect(testLogger.statusText, isNot(contains('go/android-plugin-migration')));
+        expect(testLogger.errorText, isNot(contains('go/android-plugin-migration')));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -792,7 +792,7 @@ dependencies:
         expect(registrant.readAsStringSync(),
           contains('flutterEngine.getPlugins().add(new plugin4.UseBothEmbedding());'));
 
-        expect(testLogger.statusText, isNot(contains('go/android-plugin-migration')));
+        expect(testLogger.errorText, isNot(contains('go/android-plugin-migration')));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -813,7 +813,7 @@ dependencies:
         expect(registrant.readAsStringSync(),
           contains('flutterEngine.getPlugins().add(new plugin4.UseBothEmbedding());'));
 
-        expect(testLogger.statusText, isNot(contains('go/android-plugin-migration')));
+        expect(testLogger.errorText, isNot(contains('go/android-plugin-migration')));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
