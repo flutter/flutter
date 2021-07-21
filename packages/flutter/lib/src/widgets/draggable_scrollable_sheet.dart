@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math';
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -740,9 +740,9 @@ class _SnappingSimulation extends Simulation {
     // Check the direction of the target instead of the sign of the velocity because
     // we may snap in the opposite direction of velocity if velocity is very low.
     if (_pixelSnapSize < position) {
-      velocity = min(-minimumSpeed, initialVelocity);
+      velocity = math.min(-minimumSpeed, initialVelocity);
     } else {
-      velocity = max(minimumSpeed, initialVelocity);
+      velocity = math.max(minimumSpeed, initialVelocity);
     }
   }
 
