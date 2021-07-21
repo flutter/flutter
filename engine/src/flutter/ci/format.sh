@@ -27,7 +27,6 @@ function follow_links() (
   echo "$file"
 )
 
-
 SCRIPT_DIR=$(follow_links "$(dirname -- "${BASH_SOURCE[0]}")")
 SRC_DIR="$(cd "$SCRIPT_DIR/../.."; pwd -P)"
 DART_SDK_DIR="${SRC_DIR}/third_party/dart/tools/sdks/dart-sdk"
