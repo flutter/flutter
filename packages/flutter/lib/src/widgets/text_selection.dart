@@ -837,23 +837,28 @@ class _TextSelectionHandleOverlayState
     final String text = span.toPlainText();
     final int firstSelectedGraphemeExtent;
     final int lastSelectedGraphemeExtent;
-    if (text.isEmpty || widget.selection.isCollapsed) {
+    if (text.isEmpty || widget.renderObject.selection == null || !widget.renderObject.selection!.isValid || widget.renderObject.selection!.isCollapsed) {
       // The call to selectedGraphemes.characters.first/last will throw a state
       // error if the given string is empty, so fall back to first/last character
       // range in this case.
       //
       // The call to widget.selection.textInside(text) will return a RangeError
       // for a collapsed selection, fall back to this case when that happens.
-      firstSelectedGraphemeExtent = 1;
-      lastSelectedGraphemeExtent = 1;
+      firstSelectedGraphemeExtent = 0;
+      lastSelectedGraphemeExtent = 0;
     } else {
       final String selectedGraphemes = widget.renderObject.selection!.textInside(text);
       firstSelectedGraphemeExtent = selectedGraphemes.characters.first.length;
       lastSelectedGraphemeExtent = selectedGraphemes.characters.last.length;
     }
 
-    final Rect? startHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.selection.start, end: widget.selection.start + firstSelectedGraphemeExtent));
-    final Rect? endHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.selection.end - lastSelectedGraphemeExtent, end: widget.selection.end));
+    final Rect? startHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.renderObject.selection!.start, end: widget.renderObject.selection!.start + firstSelectedGraphemeExtent));
+    final Rect? endHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.renderObject.selection!.end - lastSelectedGraphemeExtent, end: widget.renderObject.selection!.end));
+
+    if (firstSelectedGraphemeExtent > 0)
+      assert(startHandleRect != null);
+    if (lastSelectedGraphemeExtent > 0)
+      assert(endHandleRect != null);
 
     final Offset handleAnchor = widget.selectionControls.getHandleAnchor(
       type,
