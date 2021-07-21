@@ -43,3 +43,4 @@ export 'src/services/text_editing.dart';
 export 'src/services/text_editing_value.dart';
 export 'src/services/text_formatter.dart';
 export 'src/services/text_input.dart';
+export 'src/services/text_metrics.dart';
