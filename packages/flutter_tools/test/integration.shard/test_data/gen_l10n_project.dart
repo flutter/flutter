@@ -646,7 +646,7 @@ void main() {
 
   "pluralInString": "Oh, she found {count, plural, =1 {1 item} other {all {count} items} }!",
   "@pluralInString": {
-    "description": "A plural message with a prefix and suffix strings.",
+    "description": "A plural message with prefix and suffix strings.",
     "placeholders": {
       "count": {}
     }
@@ -654,7 +654,7 @@ void main() {
 
   "selectInString": "Indeed, {gender, select, male {he likes} female {she likes} other {they like} } Flutter!",
   "@selectInString": {
-    "description": "A select message with a prefix and suffix strings.",
+    "description": "A select message with prefix and suffix strings.",
     "placeholders": {
       "gender": {}
     }
