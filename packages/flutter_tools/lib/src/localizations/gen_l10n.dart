@@ -832,7 +832,7 @@ class LocalizationsGenerator {
   @visibleForTesting
   final bool areResourceAttributesRequired;
 
-  static RegExp _selectRE = RegExp(r'\{([\w\s,]*),\s*select\s*,\s*([\w\d]+\s*\{.*\})+\s*\}');
+  static final RegExp _selectRE = RegExp(r'\{([\w\s,]*),\s*select\s*,\s*([\w\d]+\s*\{.*\})+\s*\}');
 
   static bool _isNotReadable(FileStat fileStat) {
     final String rawStatString = fileStat.modeString();
