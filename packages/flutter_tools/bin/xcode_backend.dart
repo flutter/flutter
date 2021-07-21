@@ -330,7 +330,7 @@ class Context {
       ],
       allowFail: true,
     );
-    if (result.exitCode == 0) {
+    if (result.exitCode != 0) {
       //  RunCommand plutil -insert NSLocalNetworkUsageDescription -string "Allow Flutter tools on your computer to connect and debug your application. This prompt will not appear on release builds." "${built_products_plist}"
       runSync(
         'plutil',
