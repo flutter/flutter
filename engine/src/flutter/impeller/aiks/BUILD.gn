@@ -8,23 +8,25 @@ impeller_component("aiks") {
   sources = [
     "canvas.cc",
     "canvas.h",
+    "image.cc",
+    "image.h",
     "paint.cc",
     "paint.h",
-    "image.cc"
-    "image.h"
   ]
 
   public_deps = [
-    ":base",
-    ":entity",
+    "../base",
+    "../entity",
+    "../geometry",
   ]
 }
 
 impeller_component("aiks_unittests") {
   testonly = true
-  sources = []
+  sources = [ "aiks_unittests.cc" ]
   deps = [
     ":aiks",
+    "../geometry:geometry_unittests",
     "//flutter/testing",
   ]
 }

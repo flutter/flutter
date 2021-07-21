@@ -10,6 +10,7 @@
 #include "impeller/aiks/paint.h"
 #include "impeller/geometry/matrix.h"
 #include "impeller/geometry/path.h"
+#include "impeller/geometry/vector.h"
 
 namespace impeller {
 
@@ -25,11 +26,13 @@ class Canvas {
 
   size_t GetSaveCount() const;
 
+  const Matrix& GetCurrentTransformation() const;
+
   void Concat(const Matrix& xformation);
 
-  void Translate(const Size& offset);
+  void Translate(const Vector3& offset);
 
-  void Scale(const Size& scale);
+  void Scale(const Vector3& scale);
 
   void Rotate(Radians radians);
 

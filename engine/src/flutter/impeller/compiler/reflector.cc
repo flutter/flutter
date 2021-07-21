@@ -20,10 +20,8 @@
 namespace impeller {
 namespace compiler {
 
-using namespace spirv_cross;
-
-static std::string BaseTypeToString(SPIRType::BaseType type) {
-  using Type = SPIRType::BaseType;
+static std::string BaseTypeToString(spirv_cross::SPIRType::BaseType type) {
+  using Type = spirv_cross::SPIRType::BaseType;
   switch (type) {
     case Type::Void:
       return "ShaderType::kVoid";
@@ -90,8 +88,8 @@ static std::string StringToShaderStage(std::string str) {
 }
 
 Reflector::Reflector(Options options,
-                     std::shared_ptr<const ParsedIR> ir,
-                     std::shared_ptr<const CompilerMSL> compiler)
+                     std::shared_ptr<const spirv_cross::ParsedIR> ir,
+                     std::shared_ptr<const spirv_cross::CompilerMSL> compiler)
     : options_(std::move(options)),
       ir_(std::move(ir)),
       compiler_(std::move(compiler)) {
@@ -226,17 +224,20 @@ std::optional<nlohmann::json> Reflector::GenerateTemplateArguments() const {
     }
 
     std::set<spirv_cross::ID> known_structs;
-    ir_->for_each_typed_id<SPIRType>([&](uint32_t, const SPIRType& type) {
-      if (known_structs.find(type.self) != known_structs.end()) {
-        // Iterating over types this way leads to duplicates which may cause
-        // duplicate struct definitions.
-        return;
-      }
-      known_structs.insert(type.self);
-      if (auto struc = ReflectStructDefinition(type.self); struc.has_value()) {
-        struct_definitions.emplace_back(EmitStructDefinition(struc.value()));
-      }
-    });
+    ir_->for_each_typed_id<spirv_cross::SPIRType>(
+        [&](uint32_t, const spirv_cross::SPIRType& type) {
+          if (known_structs.find(type.self) != known_structs.end()) {
+            // Iterating over types this way leads to duplicates which may cause
+            // duplicate struct definitions.
+            return;
+          }
+          known_structs.insert(type.self);
+          if (auto struc = ReflectStructDefinition(type.self);
+              struc.has_value()) {
+            struct_definitions.emplace_back(
+                EmitStructDefinition(struc.value()));
+          }
+        });
   }
 
   root["bind_prototypes"] = EmitBindPrototypes(shader_resources);
@@ -342,24 +343,25 @@ struct KnownType {
   size_t byte_size = 0;
 };
 
-static std::optional<KnownType> ReadKnownScalarType(SPIRType::BaseType type) {
+static std::optional<KnownType> ReadKnownScalarType(
+    spirv_cross::SPIRType::BaseType type) {
   switch (type) {
-    case SPIRType::BaseType::Boolean:
+    case spirv_cross::SPIRType::BaseType::Boolean:
       return KnownType{
           .name = "bool",
           .byte_size = sizeof(bool),
       };
-    case SPIRType::BaseType::Float:
+    case spirv_cross::SPIRType::BaseType::Float:
       return KnownType{
           .name = "Scalar",
           .byte_size = sizeof(Scalar),
       };
-    case SPIRType::BaseType::UInt:
+    case spirv_cross::SPIRType::BaseType::UInt:
       return KnownType{
           .name = "uint32_t",
           .byte_size = sizeof(uint32_t),
       };
-    case SPIRType::BaseType::Int:
+    case spirv_cross::SPIRType::BaseType::Int:
       return KnownType{
           .name = "int32_t",
           .byte_size = sizeof(int32_t),
@@ -373,7 +375,7 @@ static std::optional<KnownType> ReadKnownScalarType(SPIRType::BaseType type) {
 std::vector<Reflector::StructMember> Reflector::ReadStructMembers(
     const spirv_cross::TypeID& type_id) const {
   const auto& struct_type = compiler_->get_type(type_id);
-  FML_CHECK(struct_type.basetype == SPIRType::BaseType::Struct);
+  FML_CHECK(struct_type.basetype == spirv_cross::SPIRType::BaseType::Struct);
 
   std::vector<StructMember> result;
 
@@ -400,10 +402,10 @@ std::vector<Reflector::StructMember> Reflector::ReadStructMembers(
 
     // Tightly packed 4x4 Matrix is special cased as we know how to work with
     // those.
-    if (member.basetype == SPIRType::BaseType::Float &&  //
-        member.width == sizeof(Scalar) * 8 &&            //
-        member.columns == 4 &&                           //
-        member.vecsize == 4                              //
+    if (member.basetype == spirv_cross::SPIRType::BaseType::Float &&  //
+        member.width == sizeof(Scalar) * 8 &&                         //
+        member.columns == 4 &&                                        //
+        member.vecsize == 4                                           //
     ) {
       result.emplace_back(StructMember{
           .type = "Matrix",
@@ -416,10 +418,10 @@ std::vector<Reflector::StructMember> Reflector::ReadStructMembers(
     }
 
     // Tightly packed Point (vec2).
-    if (member.basetype == SPIRType::BaseType::Float &&  //
-        member.width == sizeof(float) * 8 &&             //
-        member.columns == 1 &&                           //
-        member.vecsize == 2                              //
+    if (member.basetype == spirv_cross::SPIRType::BaseType::Float &&  //
+        member.width == sizeof(float) * 8 &&                          //
+        member.columns == 1 &&                                        //
+        member.vecsize == 2                                           //
     ) {
       result.emplace_back(StructMember{
           .type = "Point",
@@ -432,10 +434,10 @@ std::vector<Reflector::StructMember> Reflector::ReadStructMembers(
     }
 
     // Tightly packed Vector3.
-    if (member.basetype == SPIRType::BaseType::Float &&  //
-        member.width == sizeof(float) * 8 &&             //
-        member.columns == 1 &&                           //
-        member.vecsize == 3                              //
+    if (member.basetype == spirv_cross::SPIRType::BaseType::Float &&  //
+        member.width == sizeof(float) * 8 &&                          //
+        member.columns == 1 &&                                        //
+        member.vecsize == 3                                           //
     ) {
       result.emplace_back(StructMember{
           .type = "Vector3",
@@ -448,10 +450,10 @@ std::vector<Reflector::StructMember> Reflector::ReadStructMembers(
     }
 
     // Tightly packed Vector4.
-    if (member.basetype == SPIRType::BaseType::Float &&  //
-        member.width == sizeof(float) * 8 &&             //
-        member.columns == 1 &&                           //
-        member.vecsize == 4                              //
+    if (member.basetype == spirv_cross::SPIRType::BaseType::Float &&  //
+        member.width == sizeof(float) * 8 &&                          //
+        member.columns == 1 &&                                        //
+        member.vecsize == 4                                           //
     ) {
       result.emplace_back(StructMember{
           .type = "Vector4",
@@ -501,9 +503,9 @@ std::vector<Reflector::StructMember> Reflector::ReadStructMembers(
 }
 
 std::optional<Reflector::StructDefinition> Reflector::ReflectStructDefinition(
-    const TypeID& type_id) const {
+    const spirv_cross::TypeID& type_id) const {
   const auto& type = compiler_->get_type(type_id);
-  if (type.basetype != SPIRType::BaseType::Struct) {
+  if (type.basetype != spirv_cross::SPIRType::BaseType::Struct) {
     return std::nullopt;
   }
 
@@ -541,22 +543,26 @@ struct VertexType {
   size_t byte_length = 0u;
 };
 
-static VertexType VertexTypeFromInputResource(const CompilerMSL& compiler,
-                                              const Resource* resource) {
+static VertexType VertexTypeFromInputResource(
+    const spirv_cross::CompilerMSL& compiler,
+    const spirv_cross::Resource* resource) {
   VertexType result;
   result.variable_name = resource->name;
   auto type = compiler.get_type(resource->type_id);
   const auto total_size = type.columns * type.vecsize * type.width / 8u;
   result.byte_length = total_size;
 
-  if (type.basetype == SPIRType::BaseType::Float && type.columns == 1u &&
-      type.vecsize == 2u && type.width == sizeof(float) * 8u) {
+  if (type.basetype == spirv_cross::SPIRType::BaseType::Float &&
+      type.columns == 1u && type.vecsize == 2u &&
+      type.width == sizeof(float) * 8u) {
     result.type_name = "Point";
-  } else if (type.basetype == SPIRType::BaseType::Float && type.columns == 1u &&
-             type.vecsize == 4u && type.width == sizeof(float) * 8u) {
+  } else if (type.basetype == spirv_cross::SPIRType::BaseType::Float &&
+             type.columns == 1u && type.vecsize == 4u &&
+             type.width == sizeof(float) * 8u) {
     result.type_name = "Vector4";
-  } else if (type.basetype == SPIRType::BaseType::Float && type.columns == 1u &&
-             type.vecsize == 3u && type.width == sizeof(float) * 8u) {
+  } else if (type.basetype == spirv_cross::SPIRType::BaseType::Float &&
+             type.columns == 1u && type.vecsize == 3u &&
+             type.width == sizeof(float) * 8u) {
     result.type_name = "Vector3";
   } else {
     // Catch all unknown padding.
@@ -568,7 +574,7 @@ static VertexType VertexTypeFromInputResource(const CompilerMSL& compiler,
 
 std::optional<Reflector::StructDefinition>
 Reflector::ReflectPerVertexStructDefinition(
-    const SmallVector<spirv_cross::Resource>& stage_inputs) const {
+    const spirv_cross::SmallVector<spirv_cross::Resource>& stage_inputs) const {
   // Avoid emitting a zero sized structure. The code gen templates assume a
   // non-zero size.
   if (stage_inputs.empty()) {
@@ -594,7 +600,8 @@ Reflector::ReflectPerVertexStructDefinition(
     }
   }
 
-  auto input_for_location = [&](uint32_t queried_location) -> const Resource* {
+  auto input_for_location =
+      [&](uint32_t queried_location) -> const spirv_cross::Resource* {
     for (const auto& input : stage_inputs) {
       auto location = compiler_->get_decoration(
           input.id, spv::Decoration::DecorationLocation);

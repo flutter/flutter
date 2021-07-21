@@ -18,32 +18,12 @@ class Entity {
 
   ~Entity();
 
-  /**
-   *  The transformation that is applied to the entity about its anchor point
-   *
-   *  @return the transformation applied to the node
-   */
   const Matrix& GetTransformation() const;
 
-  /**
-   *  Sets the transformation of the entity
-   *
-   *  @param transformation the new transformation
-   */
   void SetTransformation(const Matrix& transformation);
 
-  /**
-   *  The background color of the entity
-   *
-   *  @return the background color
-   */
   const Color& GetBackgroundColor() const;
 
-  /**
-   *  Set the new background color of the entity
-   *
-   *  @param backgroundColor the new background color
-   */
   void SetBackgroundColor(const Color& backgroundColor);
 
   const Color& GetStrokeColor() const;
@@ -59,9 +39,6 @@ class Entity {
   void SetPath(Path path);
 
  private:
-  Rect bounds_;
-  Point position_;
-  Point anchor_point_ = {0.5, 0.5};
   Matrix transformation_;
   Color background_color_;
 

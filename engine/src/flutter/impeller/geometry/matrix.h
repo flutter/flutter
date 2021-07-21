@@ -53,10 +53,13 @@ struct Matrix {
     uint64_t GetComponentsMask() const;
   };
 
-  // TODO(csg): Radar restructions of C++11 don't exist. Use optionals instead.
+  // TODO(csg): Radar restrictions of C++11 don't exist. Use optionals instead.
   using DecompositionResult =
       std::pair<bool /* success */, Decomposition /* result */>;
 
+  //----------------------------------------------------------------------------
+  /// Construts a default identity matrix.
+  ///
   constexpr Matrix()
       // clang-format off
       : vec{ Vector4(1.0,  0.0,  0.0,  0.0),
