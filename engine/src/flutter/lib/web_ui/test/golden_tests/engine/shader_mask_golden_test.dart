@@ -21,7 +21,7 @@ void main() async {
   if (!debugTest) {
     internalBootstrapBrowserTest(() => testMain);
   } else {
-    _renderScene(BlendMode.color);
+    _renderCirclesScene(BlendMode.color);
   }
 }
 
@@ -45,53 +45,60 @@ void testMain() async {
 
   /// Should render the picture unmodified.
   test('Renders shader mask with linear gradient BlendMode dst', () async {
-    _renderScene(BlendMode.dst);
+    _renderCirclesScene(BlendMode.dst);
     await matchGoldenFile('shadermask_linear_dst.png',
         region: Rect.fromLTWH(0, 0, 360, 200));
   }, skip: isWebkit);
 
   /// Should render the gradient only where circles have alpha channel.
   test('Renders shader mask with linear gradient BlendMode srcIn', () async {
-    _renderScene(BlendMode.srcIn);
+    _renderCirclesScene(BlendMode.srcIn);
     await matchGoldenFile('shadermask_linear_srcin.png',
         region: Rect.fromLTWH(0, 0, 360, 200));
   }, skip: isWebkit);
 
   test('Renders shader mask with linear gradient BlendMode color', () async {
-    _renderScene(BlendMode.color);
+    _renderCirclesScene(BlendMode.color);
     await matchGoldenFile('shadermask_linear_color.png',
         region: Rect.fromLTWH(0, 0, 360, 200));
   }, skip: isWebkit);
 
   test('Renders shader mask with linear gradient BlendMode xor', () async {
-    _renderScene(BlendMode.xor);
+    _renderCirclesScene(BlendMode.xor);
     await matchGoldenFile('shadermask_linear_xor.png',
         region: Rect.fromLTWH(0, 0, 360, 200));
   }, skip: isWebkit);
 
   test('Renders shader mask with linear gradient BlendMode plus', () async {
-    _renderScene(BlendMode.plus);
+    _renderCirclesScene(BlendMode.plus);
     await matchGoldenFile('shadermask_linear_plus.png',
         region: Rect.fromLTWH(0, 0, 360, 200));
   }, skip: isWebkit);
 
   test('Renders shader mask with linear gradient BlendMode modulate', () async {
-    _renderScene(BlendMode.modulate);
+    _renderCirclesScene(BlendMode.modulate);
     await matchGoldenFile('shadermask_linear_modulate.png',
         region: Rect.fromLTWH(0, 0, 360, 200));
   }, skip: isWebkit);
 
   test('Renders shader mask with linear gradient BlendMode overlay', () async {
-    _renderScene(BlendMode.overlay);
+    _renderCirclesScene(BlendMode.overlay);
     await matchGoldenFile('shadermask_linear_overlay.png',
         region: Rect.fromLTWH(0, 0, 360, 200));
   }, skip: isWebkit);
 
   /// Should render the gradient opaque on top of content.
   test('Renders shader mask with linear gradient BlendMode src', () async {
-    _renderScene(BlendMode.src);
+    _renderCirclesScene(BlendMode.src);
     await matchGoldenFile('shadermask_linear_src.png',
         region: Rect.fromLTWH(0, 0, 360, 200));
+  }, skip: isWebkit);
+
+  /// Should render text with gradient.
+  test('Renders text with linear gradient shader mask', () async {
+    _renderTextScene(BlendMode.srcIn);
+    await matchGoldenFile('shadermask_linear_text.png',
+        region: Rect.fromLTWH(0, 0, 360, 200), maxDiffRatePercent: 2.0);
   }, skip: isWebkit);
 }
 
@@ -122,7 +129,7 @@ Picture _drawTestPictureWithCircles(
   return recorder.endRecording();
 }
 
-void _renderScene(BlendMode blendMode) {
+void _renderCirclesScene(BlendMode blendMode) {
   final Rect region = Rect.fromLTWH(0, 0, 400, 400);
 
   final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
@@ -139,13 +146,73 @@ void _renderScene(BlendMode blendMode) {
   ];
   final List<double> stops = <double>[0.0, 0.05, 0.4, 0.6, 0.9, 1.0];
 
-  final EngineGradient shader = GradientLinear(Offset(200, 30), Offset(320, 150),
+  final Rect shaderBounds = Rect.fromLTWH(180, 10, 140, 140);
+
+  final EngineGradient shader = GradientLinear(
+      Offset(200 - shaderBounds.left, 30 - shaderBounds.top),
+      Offset(320 - shaderBounds.left, 150 - shaderBounds.top),
       colors, stops, TileMode.clamp, Matrix4.identity().storage);
 
-  builder.pushShaderMask(shader, Rect.fromLTWH(180, 10, 140, 140), blendMode,
+  builder.pushShaderMask(shader, shaderBounds, blendMode,
       oldLayer: null);
   final Picture circles2 = _drawTestPictureWithCircles(region, 180, 10);
   builder.addPicture(Offset.zero, circles2);
+  builder.pop();
+
+  domRenderer.sceneHostElement!.append(builder.build().webOnlyRootElement!);
+}
+
+Picture _drawTestPictureWithText(
+    Rect region, double offsetX, double offsetY) {
+  final EnginePictureRecorder recorder = EnginePictureRecorder();
+  final RecordingCanvas canvas = recorder.beginRecording(region);
+  const String text = 'Shader test';
+
+  final EngineParagraphStyle paragraphStyle = EngineParagraphStyle(
+    fontFamily: 'Roboto',
+    fontSize: 40.0,
+  );
+
+  final CanvasParagraphBuilder builder = CanvasParagraphBuilder(paragraphStyle);
+  builder.pushStyle(EngineTextStyle.only(color: Color(0xFFFF0000)));
+  builder.addText(text);
+  final CanvasParagraph paragraph = builder.build();
+
+  final double maxWidth = 200 - 10;
+  paragraph.layout(ParagraphConstraints(width: maxWidth));
+  canvas.drawParagraph(paragraph, Offset(offsetX, offsetY));
+  return recorder.endRecording();
+}
+
+void _renderTextScene(BlendMode blendMode) {
+  final Rect region = Rect.fromLTWH(0, 0, 600, 400);
+
+  final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
+  final Picture textPicture = _drawTestPictureWithText(region, 10, 10);
+  builder.addPicture(Offset.zero, textPicture);
+
+  final List<Color> colors = <Color>[
+    Color(0xFF000000),
+    Color(0xFFFF3C38),
+    Color(0xFFFF8C42),
+    Color(0xFFFFF275),
+    Color(0xFF6699CC),
+    Color(0xFF656D78),
+  ];
+  final List<double> stops = <double>[0.0, 0.05, 0.4, 0.6, 0.9, 1.0];
+
+  final Rect shaderBounds = Rect.fromLTWH(180, 10, 140, 140);
+
+  final EngineGradient shader = GradientLinear(
+      Offset(200 - shaderBounds.left, 30 - shaderBounds.top),
+      Offset(320 - shaderBounds.left, 150 - shaderBounds.top),
+      colors, stops, TileMode.clamp, Matrix4.identity().storage);
+
+  builder.pushShaderMask(shader, shaderBounds, blendMode,
+      oldLayer: null);
+
+  final Picture textPicture2 = _drawTestPictureWithText(region, 180, 10);
+  builder.addPicture(Offset.zero, textPicture2);
   builder.pop();
 
   domRenderer.sceneHostElement!.append(builder.build().webOnlyRootElement!);
