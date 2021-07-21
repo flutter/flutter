@@ -113,7 +113,9 @@ class Context {
   }
 
   void echoError(String message) {
-    stderr.write('$message\n');
+    if (message.isNotEmpty) {
+      stderr.write('$message\n');
+    }
   }
 
   void echo(String message) {
