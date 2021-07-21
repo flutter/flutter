@@ -1032,7 +1032,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   @mustCallSuper
   FocusAttachment attach(BuildContext? context, {FocusOnKeyCallback? onKey}) {
     assert(
-      onKey == null && this.onKey != null,
+      onKey != null || this.onKey == null,
       'Overwriting `focusNode.onKey` to null may not be an intentional design.'
     );
     _context = context;

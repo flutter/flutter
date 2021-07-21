@@ -1627,12 +1627,10 @@ void main() {
     });
 
     // Regression test for https://github.com/flutter/flutter/issues/83023
-    testWidgets('`Focus.onKey` has a higher priority', (WidgetTester tester) async {
+    testWidgets('Thrown if overwriting `focusNode.onKey` to null', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
-      bool? keyEventHandled;
       final FocusNode focusNode = FocusNode(
         onKey: (FocusNode node, RawKeyEvent event) {
-          keyEventHandled = true;
           return KeyEventResult.handled;
         }
       );
@@ -1640,6 +1638,27 @@ void main() {
       await tester.pumpWidget(
         Focus(
           onKey: null,
+          focusNode: focusNode,
+          child: Container(key: key1),
+        ),
+      );
+
+      expect(tester.takeException(), isAssertionError);
+    });
+
+    testWidgets('`Focus.onKey` has a higher priority', (WidgetTester tester) async {
+      final GlobalKey key1 = GlobalKey(debugLabel: '1');
+      bool? keyEventHandled;
+      final FocusNode focusNode = FocusNode(
+          onKey: (FocusNode node, RawKeyEvent event) {
+            keyEventHandled = true;
+            return KeyEventResult.handled;
+          }
+      );
+
+      await tester.pumpWidget(
+        Focus(
+          onKey: (_, __) => KeyEventResult.handled,
           focusNode: focusNode,
           child: Container(key: key1),
         ),
@@ -1653,7 +1672,7 @@ void main() {
       // Update the Focus widget.
       await tester.pumpWidget(
         Focus(
-          onKey: null,
+          onKey: (_, __) => KeyEventResult.handled,
           focusNode: focusNode,
           child: Container(key: key1),
         ),
@@ -1679,6 +1698,7 @@ void main() {
       expect(keyEventHandledByFocus, true);
     });
   });
+
   group('ExcludeFocus', () {
     testWidgets("Descendants of ExcludeFocus aren't focusable.", (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
