@@ -839,7 +839,12 @@ class _TextSelectionHandleOverlayState
     final int lastSelectedGraphemeExtent;
     final TextSelection? selection = widget.renderObject.selection;
 
-    if (selection == null || selection.isValid || selection.isCollapsed) {
+    if (selection != null && selection.isValid && !selection.isCollapsed) {
+      final String selectedGraphemes = widget.renderObject.selection!.textInside(text);
+      firstSelectedGraphemeExtent = selectedGraphemes.characters.first.length;
+      lastSelectedGraphemeExtent = selectedGraphemes.characters.last.length;
+      assert(firstSelectedGraphemeExtent <= selectedGraphemes.length && lastSelectedGraphemeExtent <= selectedGraphemes.length);
+    } else {
       // The call to selectedGraphemes.characters.first/last will throw a state
       // error if the given text is empty, so fall back to first/last character
       // range in this case.
@@ -848,11 +853,6 @@ class _TextSelectionHandleOverlayState
       // for a collapsed selection, fall back to this case when that happens.
       firstSelectedGraphemeExtent = 0;
       lastSelectedGraphemeExtent = 0;
-    } else {
-      final String selectedGraphemes = selection.textInside(text);
-      firstSelectedGraphemeExtent = selectedGraphemes.characters.first.length;
-      lastSelectedGraphemeExtent = selectedGraphemes.characters.last.length;
-      assert(firstSelectedGraphemeExtent <= selectedGraphemes.length && lastSelectedGraphemeExtent <= selectedGraphemes.length);
     }
 
     final Rect? startHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.selection.start, end: widget.selection.start + firstSelectedGraphemeExtent));
