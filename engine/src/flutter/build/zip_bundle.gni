@@ -8,6 +8,9 @@ if (flutter_runtime_mode == "jit_release") {
   android_zip_archive_dir = "android-$target_cpu-jit-release"
 } else {
   android_zip_archive_dir = "android-$target_cpu"
+  if (flutter_runtime_mode != "debug") {
+    android_zip_archive_dir += "-$flutter_runtime_mode"
+  }
 }
 
 # Creates a zip file in the $root_build_dir/zip_archives folder.
