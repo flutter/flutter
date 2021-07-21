@@ -39,7 +39,11 @@ void main() {
                 minChildSize: minChildSize,
                 initialChildSize: initialChildSize,
                 snap: snap,
+<<<<<<< HEAD
                 snapSizes: snapTargets,
+=======
+                snapTargets: snapTargets,
+>>>>>>> a94a8cc4bfb83b0950fb023e90cead24cc320367
                 builder: (BuildContext context, ScrollController scrollController) {
                   return NotificationListener<ScrollNotification>(
                     onNotification: onScrollNotification,
@@ -410,7 +414,11 @@ void main() {
     }, variant: TargetPlatformVariant.all());
 
     for (final List<double>? snapTargets in <List<double>?>[null, <double>[]]) {
+<<<<<<< HEAD
       testWidgets('Setting snapTargets to $snapTargets resolves to min and max', (WidgetTester tester) async {
+=======
+      testWidgets('snapTargets value of $snapTargets resolves to min and max', (WidgetTester tester) async {
+>>>>>>> a94a8cc4bfb83b0950fb023e90cead24cc320367
         const Key stackKey = ValueKey<String>('stack');
         const Key containerKey = ValueKey<String>('container');
           await tester.pumpWidget(_boilerplate(null,
