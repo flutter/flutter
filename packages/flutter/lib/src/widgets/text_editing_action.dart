@@ -561,7 +561,7 @@ abstract class TextEditingActionTarget {
     } else {
       _cursorResetLocation = nextSelection.extentOffset;
     }
-    
+
     setSelection(nextSelection, cause);
   }
 
