@@ -16,6 +16,7 @@
 #include "flutter/shell/platform/android/android_surface_software.h"
 #include "flutter/shell/platform/android/external_view_embedder/external_view_embedder.h"
 #include "flutter/shell/platform/android/surface/android_surface.h"
+#include "flutter/shell/platform/android/surface/snapshot_surface_producer.h"
 
 #if SHELL_ENABLE_VULKAN
 #include "flutter/shell/platform/android/android_surface_vulkan.h"
@@ -314,6 +315,15 @@ std::shared_ptr<ExternalViewEmbedder>
 PlatformViewAndroid::CreateExternalViewEmbedder() {
   return std::make_shared<AndroidExternalViewEmbedder>(
       *android_context_, jni_facade_, surface_factory_);
+}
+
+// |PlatformView|
+std::unique_ptr<SnapshotSurfaceProducer>
+PlatformViewAndroid::CreateSnapshotSurfaceProducer() {
+  if (!android_surface_) {
+    return nullptr;
+  }
+  return std::make_unique<AndroidSnapshotSurfaceProducer>(*android_surface_);
 }
 
 // |PlatformView|

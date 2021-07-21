@@ -20,6 +20,7 @@ ALL_PACKAGES = [
   os.path.join("src", "flutter", "testing", "benchmark"),
   os.path.join("src", "flutter", "testing", "dart"),
   os.path.join("src", "flutter", "testing", "litetest"),
+  os.path.join("src", "flutter", "testing", "android_background_image"),
   os.path.join("src", "flutter", "testing", "scenario_app"),
   os.path.join("src", "flutter", "testing", "smoke_test_failure"),
   os.path.join("src", "flutter", "testing", "symbols"),

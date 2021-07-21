@@ -258,11 +258,22 @@ sk_sp<SkImage> Rasterizer::DoMakeRasterSnapshot(
   sk_sp<SkImage> result;
   SkImageInfo image_info = SkImageInfo::MakeN32Premul(
       size.width(), size.height(), SkColorSpace::MakeSRGB());
-  if (surface_ == nullptr || surface_->GetContext() == nullptr) {
+
+  std::unique_ptr<Surface> pbuffer_surface;
+  Surface* snapshot_surface = nullptr;
+  if (surface_ && surface_->GetContext()) {
+    snapshot_surface = surface_.get();
+  } else if (snapshot_surface_producer_) {
+    pbuffer_surface = snapshot_surface_producer_->CreateSnapshotSurface();
+    if (pbuffer_surface && pbuffer_surface->GetContext())
+      snapshot_surface = pbuffer_surface.get();
+  }
+
+  if (!snapshot_surface) {
     // Raster surface is fine if there is no on screen surface. This might
     // happen in case of software rendering.
-    sk_sp<SkSurface> surface = SkSurface::MakeRaster(image_info);
-    result = DrawSnapshot(surface, draw_callback);
+    sk_sp<SkSurface> sk_surface = SkSurface::MakeRaster(image_info);
+    result = DrawSnapshot(sk_surface, draw_callback);
   } else {
     delegate_.GetIsGpuDisabledSyncSwitch()->Execute(
         fml::SyncSwitch::Handlers()
@@ -271,12 +282,14 @@ sk_sp<SkImage> Rasterizer::DoMakeRasterSnapshot(
               result = DrawSnapshot(surface, draw_callback);
             })
             .SetIfFalse([&] {
-              auto context_switch = surface_->MakeRenderContextCurrent();
+              FML_DCHECK(snapshot_surface);
+              auto context_switch =
+                  snapshot_surface->MakeRenderContextCurrent();
               if (!context_switch->GetResult()) {
                 return;
               }
 
-              GrRecordingContext* context = surface_->GetContext();
+              GrRecordingContext* context = snapshot_surface->GetContext();
               auto max_size = context->maxRenderTargetSize();
               double scale_factor = std::min(
                   1.0, static_cast<double>(max_size) /
@@ -294,19 +307,19 @@ sk_sp<SkImage> Rasterizer::DoMakeRasterSnapshot(
 
               // When there is an on screen surface, we need a render target
               // SkSurface because we want to access texture backed images.
-              sk_sp<SkSurface> surface =
+              sk_sp<SkSurface> sk_surface =
                   SkSurface::MakeRenderTarget(context,          // context
                                               SkBudgeted::kNo,  // budgeted
                                               image_info        // image info
                   );
-              if (!surface) {
+              if (!sk_surface) {
                 FML_LOG(ERROR)
                     << "DoMakeRasterSnapshot can not create GPU render target";
                 return;
               }
 
-              surface->getCanvas()->scale(scale_factor, scale_factor);
-              result = DrawSnapshot(surface, draw_callback);
+              sk_surface->getCanvas()->scale(scale_factor, scale_factor);
+              result = DrawSnapshot(sk_surface, draw_callback);
             }));
   }
 
@@ -698,6 +711,11 @@ void Rasterizer::SetNextFrameCallback(const fml::closure& callback) {
 void Rasterizer::SetExternalViewEmbedder(
     const std::shared_ptr<ExternalViewEmbedder>& view_embedder) {
   external_view_embedder_ = view_embedder;
+}
+
+void Rasterizer::SetSnapshotSurfaceProducer(
+    std::unique_ptr<SnapshotSurfaceProducer> producer) {
+  snapshot_surface_producer_ = std::move(producer);
 }
 
 void Rasterizer::FireNextFrameCallbackIfPresent() {
