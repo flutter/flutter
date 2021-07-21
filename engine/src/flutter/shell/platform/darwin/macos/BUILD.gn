@@ -178,6 +178,7 @@ executable("flutter_desktop_darwin_unittests") {
     "framework/Source/FlutterEngineTest.mm",
     "framework/Source/FlutterEngineTestUtils.h",
     "framework/Source/FlutterEngineTestUtils.mm",
+    "framework/Source/FlutterFrameBufferProviderUnittests.mm",
     "framework/Source/FlutterGLCompositorUnittests.mm",
     "framework/Source/FlutterKeyboardManagerUnittests.mm",
     "framework/Source/FlutterMetalCompositorUnittests.mm",
