@@ -56,6 +56,12 @@ typedef ScrollableWidgetBuilder = Widget Function(
 /// [ScrollableWidgetBuilder] does not use the provided [ScrollController], the
 /// sheet will remain at the initialChildSize.
 ///
+/// By default, the widget will stay at whatever size the user drags it to. To
+/// make the widget snap to specific sizes whenever they lift their finger
+/// during a drag, set [snap] to `true`. By default, the sheet will snap between
+/// [minChildSize] and [maxChildSize]. Use [snapSizes] to add more sizes for
+/// the sheet to snap to.
+///
 /// By default, the widget will expand its non-occupied area to fill available
 /// space in the parent. If this is not desired, e.g. because the parent wants
 /// to position sheet based on the space it is taking, the [expand] property
@@ -113,7 +119,7 @@ class DraggableScrollableSheet extends StatefulWidget {
     this.maxChildSize = 1.0,
     this.expand = true,
     this.snap = false,
-    this.snapTargets,
+    this.snapSizes,
     required this.builder,
   })
       : assert(initialChildSize != null),
@@ -155,20 +161,25 @@ class DraggableScrollableSheet extends StatefulWidget {
   /// The default value is true.
   final bool expand;
 
-  /// Whether the widget should snap between [snapTargets] when the user stops
+  /// Whether the widget should snap between [snapSizes] when the user stops
   /// dragging.
   ///
   /// If the user's finger was still moving when they lifted it, the widget will
-  /// snap to the next snap target (see [snapTargets]) in the direction of the drag.
-  /// If their finger was still, the widget will snap to the nearest snap target.
+  /// snap to the next snap size (see [snapSizes]) in the direction of the drag.
+  /// If their finger was still, the widget will snap to the nearest snap size.
   final bool snap;
 
-  /// A list of target points that the widget should snap to.
+  /// A list of target sizes that the widget should snap to.
   ///
-  /// Snap targets are fractional values of the parent container's height. They
-  /// must be listed in increasing order. [minChildSize] and [maxChildSize] are
-  /// implicitly included in snap targets and do not need to be specified here.
-  final List<double>? snapTargets;
+  /// Snap sizes are fractional values of the parent container's height. They
+  /// must be listed in increasing order and be between [minChildSize] and
+  /// [maxChildSize].
+  ///
+  /// [minChildSize] and [maxChildSize] are implicitly included in snap sizes
+  /// and do not need to be specified here. For example, `snapSizes = [.5]`
+  /// will result in a sheet that snaps between [minChildSize], `.5`, and
+  /// [maxChildSize].
+  final List<double>? snapSizes;
 
   /// The builder that creates a child to display in this widget, which will
   /// use the provided [ScrollController] to enable dragging and scrolling
@@ -268,7 +279,7 @@ class _DraggableSheetExtent {
     required this.minExtent,
     required this.maxExtent,
     required this.snap,
-    required this.snapTargets,
+    required this.snapSizes,
     required this.initialExtent,
     required VoidCallback listener,
   })
@@ -286,7 +297,7 @@ class _DraggableSheetExtent {
   final double minExtent;
   final double maxExtent;
   final bool snap;
-  final List<double> snapTargets;
+  final List<double> snapSizes;
   final double initialExtent;
   final ValueNotifier<double> _currentExtent;
   double availablePixels;
@@ -313,7 +324,7 @@ class _DraggableSheetExtent {
 
   double get additionalMaxExtent => isAtMax ? 0.0 : 1.0;
 
-  List<double> get pixelSnapTargets => snapTargets.map(extentToPixels).toList();
+  List<double> get pixelSnapSizes => snapSizes.map(extentToPixels).toList();
 
   /// The scroll position gets inputs in terms of pixels, but the extent is
   /// expected to be expressed as a number between 0..1.
@@ -357,7 +368,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
       minExtent: widget.minChildSize,
       maxExtent: widget.maxChildSize,
       snap: widget.snap,
-      snapTargets: _impliedSnapTargets(),
+      snapSizes: _impliedSnapSizes(),
       initialExtent: widget.initialChildSize,
       listener: _setExtent,
     );
@@ -366,23 +377,24 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
     );
   }
 
-  List<double> _impliedSnapTargets() {
-    widget.snapTargets?.asMap().forEach((int index, double target) {
-      assert(target >= 0.0 && target <= 1.0);
-      // Snap targets must be in ascending order.
-      assert(index == 0 || target > widget.snapTargets![index - 1]);
+  List<double> _impliedSnapSizes() {
+    widget.snapSizes?.asMap().forEach((int index, double snapSize) {
+      assert(snapSize >= widget.minChildSize && snapSize <= widget.maxChildSize,
+        'Snap sizes must be between `minChildSize` and `maxChildSize`. Invalid size: $snapSize');
+      assert(index == 0 || snapSize > widget.snapSizes![index - 1],
+        'Snap sizes must be in ascending order. Invalid size: $snapSize');
     });
-    // Ensure the snap targets start and end with the min and max child sizes.
-    if (widget.snapTargets == null || widget.snapTargets!.isEmpty) {
+    // Ensure the snap sizes start and end with the min and max child sizes.
+    if (widget.snapSizes == null || widget.snapSizes!.isEmpty) {
       return <double>[
         widget.minChildSize,
         widget.maxChildSize,
       ];
     }
     return <double>[
-      if (widget.snapTargets!.first != widget.minChildSize) widget.minChildSize,
-      ...widget.snapTargets!,
-      if (widget.snapTargets!.last != widget.maxChildSize) widget.maxChildSize,
+      if (widget.snapSizes!.first != widget.minChildSize) widget.minChildSize,
+      ...widget.snapSizes!,
+      if (widget.snapSizes!.last != widget.maxChildSize) widget.maxChildSize,
     ];
   }
 
@@ -551,14 +563,14 @@ class _DraggableScrollableSheetScrollPosition
     }
   }
 
-  bool get _isAtSnapTarget =>
-      extent.snapTargets.any(
-              (double snapTarget) {
-            return (extent.currentExtent - snapTarget).abs() <=
+  bool get _isAtSnapSize =>
+      extent.snapSizes.any(
+              (double snapSize) {
+            return (extent.currentExtent - snapSize).abs() <=
                 extent.pixelsToExtent(physics.tolerance.distance);
           });
 
-  bool get _shouldSnap => extent.snap && extent.hasChanged && !_isAtSnapTarget;
+  bool get _shouldSnap => extent.snap && extent.hasChanged && !_isAtSnapSize;
 
   @override
   void goBallistic(double velocity) {
@@ -579,7 +591,7 @@ class _DraggableScrollableSheetScrollPosition
       simulation = _SnappingSimulation(
           position: extent.currentPixels,
           initialVelocity: velocity,
-          pixelSnapTargets: extent.pixelSnapTargets,
+          pixelSnapSize: extent.pixelSnapSizes,
           tolerance: physics.tolerance);
     } else {
       // The iOS bouncing simulation just isn't right here - once we delegate
@@ -741,13 +753,13 @@ class _SnappingSimulation extends Simulation {
   _SnappingSimulation({
     required this.position,
     required double initialVelocity,
-    required List<double> pixelSnapTargets,
+    required List<double> pixelSnapSize,
     Tolerance tolerance = Tolerance.defaultTolerance,
   }) : super(tolerance: tolerance) {
-    _pixelSnapTarget = _getSnapTarget(initialVelocity, pixelSnapTargets);
+    _pixelSnapSize = _getSnapSize(initialVelocity, pixelSnapSize);
     // Check the direction of the target instead of the sign of the velocity because
     // we may snap in the opposite direction of velocity if velocity is very low.
-    if (_pixelSnapTarget < position) {
+    if (_pixelSnapSize < position) {
       velocity = min(-minimumSpeed, initialVelocity);
     } else {
       velocity = max(minimumSpeed, initialVelocity);
@@ -761,7 +773,7 @@ class _SnappingSimulation extends Simulation {
   // does not play too slowly.
   static const double minimumSpeed = 1600.0;
 
-  late final double _pixelSnapTarget;
+  late final double _pixelSnapSize;
 
   @override
   double dx(double time) {
@@ -773,43 +785,43 @@ class _SnappingSimulation extends Simulation {
 
   @override
   bool isDone(double time) {
-    return x(time) == _pixelSnapTarget;
+    return x(time) == _pixelSnapSize;
   }
 
   @override
   double x(double time) {
     final double newPosition = position + velocity * time;
-    if ((velocity >= 0 && newPosition > _pixelSnapTarget) ||
-        (velocity < 0 && newPosition < _pixelSnapTarget)) {
-      // We're passed the snap target, return it instead.
-      return _pixelSnapTarget;
+    if ((velocity >= 0 && newPosition > _pixelSnapSize) ||
+        (velocity < 0 && newPosition < _pixelSnapSize)) {
+      // We're passed the snap size, return it instead.
+      return _pixelSnapSize;
     }
     return newPosition;
   }
 
-  // Find the two closest snap targets to the position. If the velocity is
-  // non-zero, select the target in the velocity's direction. Otherwise,
-  // the nearest snap target.
-  double _getSnapTarget(double initialVelocity, List<double> pixelSnapTargets) {
-    final int indexOfNextTarget = pixelSnapTargets
-        .indexWhere((double pixelSnapTarget) => pixelSnapTarget >= position);
-    if (indexOfNextTarget == 0) {
-      return pixelSnapTargets.first;
+  // Find the two closest snap sizes to the position. If the velocity is
+  // non-zero, select the size in the velocity's direction. Otherwise,
+  // the nearest snap size.
+  double _getSnapSize(double initialVelocity, List<double> pixelSnapSizes) {
+    final int indexOfNextSize = pixelSnapSizes
+        .indexWhere((double size) => size >= position);
+    if (indexOfNextSize == 0) {
+      return pixelSnapSizes.first;
     }
-    final double highTarget = pixelSnapTargets[indexOfNextTarget];
-    final double lowTarget = pixelSnapTargets[indexOfNextTarget - 1];
+    final double nextSize = pixelSnapSizes[indexOfNextSize];
+    final double previousSize = pixelSnapSizes[indexOfNextSize - 1];
     if (initialVelocity.abs() <= tolerance.velocity) {
-      // If velocity is zero, snap to the nearest snap point with the minimum velocity.
-      if (position - lowTarget < highTarget - position) {
-        return lowTarget;
+      // If velocity is zero, snap to the nearest snap size with the minimum velocity.
+      if (position - previousSize < nextSize - position) {
+        return previousSize;
       } else {
-        return highTarget;
+        return nextSize;
       }
     }
     // Snap forward or backward depending on current velocity.
     if (initialVelocity < 0.0) {
-      return pixelSnapTargets[indexOfNextTarget - 1];
+      return pixelSnapSizes[indexOfNextSize - 1];
     }
-    return pixelSnapTargets[indexOfNextTarget];
+    return pixelSnapSizes[indexOfNextSize];
   }
 }

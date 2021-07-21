@@ -39,7 +39,7 @@ void main() {
                 minChildSize: minChildSize,
                 initialChildSize: initialChildSize,
                 snap: snap,
-                snapTargets: snapTargets,
+                snapSizes: snapTargets,
                 builder: (BuildContext context, ScrollController scrollController) {
                   return NotificationListener<ScrollNotification>(
                     onNotification: onScrollNotification,
@@ -93,6 +93,27 @@ void main() {
     await tester.drag(find.text('Item 5'), const Offset(0, -125));
     await tester.pumpAndSettle();
     expect(tester.getRect(find.byKey(key)), const Rect.fromLTRB(0.0, 325.0, 800.0, 600.0));
+  });
+
+  testWidgets('Invalid snap targets throw assertion errors.', (WidgetTester tester) async {
+    await tester.pumpWidget(_boilerplate(
+      null,
+      maxChildSize: .8,
+      snapTargets: <double>[.9],
+    ));
+    expect(tester.takeException(), isAssertionError);
+
+    await tester.pumpWidget(_boilerplate(
+      null,
+      snapTargets: <double>[.1],
+    ));
+    expect(tester.takeException(), isAssertionError);
+
+    await tester.pumpWidget(_boilerplate(
+      null,
+      snapTargets: <double>[.6, .6, .9],
+    ));
+    expect(tester.takeException(), isAssertionError);
   });
 
   for (final TargetPlatform platform in TargetPlatform.values) {
