@@ -15,6 +15,362 @@
 version: 1
 transforms:
 
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'buttonColor'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'buttonColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'buttonColor'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'buttonColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'buttonColor'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'buttonColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'accentIconTheme'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'accentIconTheme'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'accentIconTheme'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'accentIconTheme'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'accentIconTheme'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'accentIconTheme'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'accentTextTheme'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'accentTextTheme'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'accentTextTheme'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'accentTextTheme'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'accentTextTheme'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'accentTextTheme'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'accentColorBrightness'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'accentColorBrightness'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'accentColorBrightness'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'accentColorBrightness'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'accentColorBrightness'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'accentColorBrightness'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Migrate to 'ColorScheme.secondary'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      field: 'accentColor'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'rename'
+        newName: 'colorScheme.secondary'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Migrate to 'ColorScheme.secondary'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    oneOf:
+    - if: "accentColor != '' && primarySwatch == '' && colorScheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: 'ColorScheme.fromSwatch().copyWith(secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch == '' && colorScheme ==''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+    - if: "accentColor != '' && primarySwatch != '' && colorScheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: 'ColorScheme.fromSwatch(primarySwatch: {% primarySwatch %}).copyWith(secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch != '' && colorScheme == ''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    - if: "accentColor != '' && primarySwatch == '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch == '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+    - if: "accentColor != '' && primarySwatch != '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(primarySwatch: {% primarySwatch %}, secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch != '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    variables:
+      accentColor:
+        kind: 'fragment'
+        value: 'arguments[accentColor]'
+      primarySwatch:
+        kind: 'fragment'
+        value: 'arguments[primarySwatch]'
+      colorScheme:
+        kind: 'fragment'
+        value: 'arguments[colorScheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Migrate to 'ColorScheme.secondary'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    oneOf:
+    - if: "accentColor != '' && primarySwatch == '' && colorScheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: 'ColorScheme.fromSwatch().copyWith(secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch == '' && colorScheme ==''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+    - if: "accentColor != '' && primarySwatch != '' && colorScheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: 'ColorScheme.fromSwatch(primarySwatch: {% primarySwatch %}).copyWith(secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch != '' && colorScheme == ''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    - if: "accentColor != '' && primarySwatch == '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch == '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+    - if: "accentColor != '' && primarySwatch != '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(primarySwatch: {% primarySwatch %}, secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch != '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    variables:
+      accentColor:
+        kind: 'fragment'
+        value: 'arguments[accentColor]'
+      primarySwatch:
+        kind: 'fragment'
+        value: 'arguments[primarySwatch]'
+      colorScheme:
+        kind: 'fragment'
+        value: 'arguments[colorScheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Migrate to 'ColorScheme.secondary'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    oneOf:
+    - if: "accentColor != '' && primarySwatch == '' && colorScheme == ''"
+      changes:
+        - kind: 'addParameter'
+          index: 56
+          name: 'colorScheme'
+          style: optional_named
+          argumentValue:
+            expression: 'ColorScheme.fromSwatch().copyWith(secondary: {% accentColor %})'
+            requiredIf: "accentColor != '' && primarySwatch == '' && colorScheme ==''"
+        - kind: 'removeParameter'
+          name: 'accentColor'
+    - if: "accentColor != '' && primarySwatch != '' && colorScheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: 'ColorScheme.fromSwatch(primarySwatch: {% primarySwatch %}).copyWith(secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch != '' && colorScheme == ''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    - if: "accentColor != '' && primarySwatch == '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch == '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+    - if: "accentColor != '' && primarySwatch != '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(primarySwatch: {% primarySwatch %}, secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch != '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    variables:
+      accentColor:
+        kind: 'fragment'
+        value: 'arguments[accentColor]'
+      primarySwatch:
+        kind: 'fragment'
+        value: 'arguments[primarySwatch]'
+      colorScheme:
+        kind: 'fragment'
+        value: 'arguments[colorScheme]'
+
   # Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
   - title: "Migrate to 'clipBehavior'"
     date: 2020-08-20
