@@ -392,26 +392,24 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
           }
         }
       }
-      if (pluginsUsingV1.isNotEmpty) {
-        if (pluginsUsingV1.length > 1) {
-          globals.printError(
-            'The plugins `${pluginsUsingV1.join(', ')}` use a deprecated version of the Android embedding.\n'
-            'To avoid unexpected runtime failures, or future build failures, try to see if these plugins '
-            'support the Android V2 embedding. Otherwise, consider removing them since a future release '
-            'of Flutter will remove these deprecated APIs.\n'
-            'If you are plugin author, take a look at the docs for migrating the plugin to the V2 embedding: '
-            'https://flutter.dev/go/android-plugin-migration.'
-          );
-        } else {
-          globals.printError(
-            'The plugin `${pluginsUsingV1.first}` uses a deprecated version of the Android embedding.\n'
-            'To avoid unexpected runtime failures, or future build failures, try to see if this plugin '
-            'supports the Android V2 embedding. Otherwise, consider removing it since a future release '
-            'of Flutter will remove these deprecated APIs.\n'
-            'If you are plugin author, take a look at the docs for migrating the plugin to the V2 embedding: '
-            'https://flutter.dev/go/android-plugin-migration.'
-          );
-        }
+      if (pluginsUsingV1.length > 1) {
+        globals.printError(
+          'The plugins `${pluginsUsingV1.join(', ')}` use a deprecated version of the Android embedding.\n'
+          'To avoid unexpected runtime failures, or future build failures, try to see if these plugins '
+          'support the Android V2 embedding. Otherwise, consider removing them since a future release '
+          'of Flutter will remove these deprecated APIs.\n'
+          'If you are plugin author, take a look at the docs for migrating the plugin to the V2 embedding: '
+          'https://flutter.dev/go/android-plugin-migration.'
+        );
+      } else if (pluginsUsingV1.isNotEmpty) {
+        globals.printError(
+          'The plugin `${pluginsUsingV1.first}` uses a deprecated version of the Android embedding.\n'
+          'To avoid unexpected runtime failures, or future build failures, try to see if this plugin '
+          'supports the Android V2 embedding. Otherwise, consider removing it since a future release '
+          'of Flutter will remove these deprecated APIs.\n'
+          'If you are plugin author, take a look at the docs for migrating the plugin to the V2 embedding: '
+          'https://flutter.dev/go/android-plugin-migration.'
+        );
       }
       templateContent = _androidPluginRegistryTemplateNewEmbedding;
       break;
