@@ -1194,6 +1194,7 @@ FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterExter
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterExternalTextureMetal.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterFrameBufferProvider.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterFrameBufferProvider.mm
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterFrameBufferProviderUnittests.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterGLCompositor.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterGLCompositor.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterGLCompositorUnittests.mm
