@@ -3875,6 +3875,8 @@ void main() {
     ));
 
     assert(focusNode.hasFocus);
+    // Autofocus has an one frame delay.
+    await tester.pump();
 
     final RenderEditable renderEditable = findRenderEditable(tester);
     // The actual text span is split into 3 parts with the middle part underlined.
@@ -3884,6 +3886,8 @@ void main() {
     expect(textSpan.style!.decoration, TextDecoration.underline);
 
     focusNode.unfocus();
+    // Drain microtasks.
+    await tester.idle();
     await tester.pump();
 
     expect((renderEditable.text! as TextSpan).children, isNull);

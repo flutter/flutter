@@ -54,10 +54,14 @@ void main() {
   });
 
   testWidgets('Empty textSelectionTheme will use defaults', (WidgetTester tester) async {
-    const Color defaultCursorColor = Color(0x002196f3);
+    const Color defaultCursorColor = Color(0xff2196f3);
     const Color defaultSelectionColor = Color(0x662196f3);
     const Color defaultSelectionHandleColor = Color(0xff2196f3);
 
+    EditableText.debugDeterministicCursor = true;
+    addTearDown(() {
+      EditableText.debugDeterministicCursor = false;
+    });
     // Test TextField's cursor & selection color.
     await tester.pumpWidget(
       const MaterialApp(
@@ -68,6 +72,7 @@ void main() {
     );
     await tester.pump();
     await tester.pumpAndSettle();
+
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
     final RenderEditable renderEditable = editableTextState.renderEditable;
     expect(renderEditable.cursorColor, defaultCursorColor);
@@ -105,19 +110,25 @@ void main() {
       textSelectionTheme: textSelectionTheme,
     );
 
+    EditableText.debugDeterministicCursor = true;
+    addTearDown(() {
+      EditableText.debugDeterministicCursor = false;
+    });
+
     // Test TextField's cursor & selection color.
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
         home: const Material(
-          child: TextField(),
+          child: TextField(autofocus: true),
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
+
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
     final RenderEditable renderEditable = editableTextState.renderEditable;
-    expect(renderEditable.cursorColor, textSelectionTheme.cursorColor!.withAlpha(0));
+    expect(renderEditable.cursorColor, textSelectionTheme.cursorColor);
     expect(renderEditable.selectionColor, textSelectionTheme.selectionColor);
 
     // Test the selection handle color.
@@ -158,6 +169,10 @@ void main() {
       selectionHandleColor: Color(0x00ffeedd),
     );
 
+    EditableText.debugDeterministicCursor = true;
+    addTearDown(() {
+      EditableText.debugDeterministicCursor = false;
+    });
     // Test TextField's cursor & selection color.
     await tester.pumpWidget(
       MaterialApp(
@@ -165,15 +180,15 @@ void main() {
         home: const Material(
           child: TextSelectionTheme(
             data: widgetTextSelectionTheme,
-            child: TextField(),
+            child: TextField(autofocus: true),
           ),
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
     final RenderEditable renderEditable = editableTextState.renderEditable;
-    expect(renderEditable.cursorColor, widgetTextSelectionTheme.cursorColor!.withAlpha(0));
+    expect(renderEditable.cursorColor, widgetTextSelectionTheme.cursorColor);
     expect(renderEditable.selectionColor, widgetTextSelectionTheme.selectionColor);
 
     // Test the selection handle color.
