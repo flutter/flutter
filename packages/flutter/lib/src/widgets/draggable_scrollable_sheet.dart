@@ -174,8 +174,8 @@ class DraggableScrollableSheet extends StatefulWidget {
   /// must be listed in increasing order and be between [minChildSize] and
   /// [maxChildSize].
   ///
-  /// [minChildSize] and [maxChildSize] are implicitly included in snap sizes
-  /// and do not need to be specified here. For example, `snapSizes = [.5]`
+  /// The [minChildSize] and [maxChildSize] are implicitly included in snap
+  /// sizes and do not need to be specified here. For example, `snapSizes = [.5]`
   /// will result in a sheet that snaps between [minChildSize], `.5`, and
   /// [maxChildSize].
   final List<double>? snapSizes;
