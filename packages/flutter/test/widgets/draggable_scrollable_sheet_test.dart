@@ -16,7 +16,7 @@ void main() {
     double maxChildSize = 1.0,
     double minChildSize = .25,
     bool snap = false,
-    List<double>? snapTargets,
+    List<double>? snapSizes,
     double? itemExtent,
     Key? containerKey,
     Key? stackKey,
@@ -39,11 +39,7 @@ void main() {
                 minChildSize: minChildSize,
                 initialChildSize: initialChildSize,
                 snap: snap,
-<<<<<<< HEAD
-                snapSizes: snapTargets,
-=======
-                snapTargets: snapTargets,
->>>>>>> a94a8cc4bfb83b0950fb023e90cead24cc320367
+                snapSizes: snapSizes,
                 builder: (BuildContext context, ScrollController scrollController) {
                   return NotificationListener<ScrollNotification>(
                     onNotification: onScrollNotification,
@@ -103,19 +99,19 @@ void main() {
     await tester.pumpWidget(_boilerplate(
       null,
       maxChildSize: .8,
-      snapTargets: <double>[.9],
+      snapSizes: <double>[.9],
     ));
     expect(tester.takeException(), isAssertionError);
 
     await tester.pumpWidget(_boilerplate(
       null,
-      snapTargets: <double>[.1],
+      snapSizes: <double>[.1],
     ));
     expect(tester.takeException(), isAssertionError);
 
     await tester.pumpWidget(_boilerplate(
       null,
-      snapTargets: <double>[.6, .6, .9],
+      snapSizes: <double>[.6, .6, .9],
     ));
     expect(tester.takeException(), isAssertionError);
   });
@@ -382,7 +378,7 @@ void main() {
         snap: true,
         stackKey: stackKey,
         containerKey: containerKey,
-        snapTargets: <double>[.25, .5, .75, 1.0],
+        snapSizes: <double>[.25, .5, .75, 1.0],
       ));
       await tester.pumpAndSettle();
       final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
@@ -413,19 +409,15 @@ void main() {
       expect(tester.getSize(find.byKey(containerKey)).height / screenHeight, closeTo(.5, epsilon));
     }, variant: TargetPlatformVariant.all());
 
-    for (final List<double>? snapTargets in <List<double>?>[null, <double>[]]) {
-<<<<<<< HEAD
-      testWidgets('Setting snapTargets to $snapTargets resolves to min and max', (WidgetTester tester) async {
-=======
-      testWidgets('snapTargets value of $snapTargets resolves to min and max', (WidgetTester tester) async {
->>>>>>> a94a8cc4bfb83b0950fb023e90cead24cc320367
+    for (final List<double>? snapSizes in <List<double>?>[null, <double>[]]) {
+      testWidgets('Setting snapSizes to $snapSizes resolves to min and max', (WidgetTester tester) async {
         const Key stackKey = ValueKey<String>('stack');
         const Key containerKey = ValueKey<String>('container');
           await tester.pumpWidget(_boilerplate(null,
             snap: true,
             stackKey: stackKey,
             containerKey: containerKey,
-            snapTargets: snapTargets,
+            snapSizes: snapSizes,
           ));
           await tester.pumpAndSettle();
           final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
@@ -440,14 +432,14 @@ void main() {
       }, variant: TargetPlatformVariant.all());
     }
 
-    testWidgets('Min and max are implicitly added to snapTargets.', (WidgetTester tester) async {
+    testWidgets('Min and max are implicitly added to snapSizes.', (WidgetTester tester) async {
       const Key stackKey = ValueKey<String>('stack');
       const Key containerKey = ValueKey<String>('container');
       await tester.pumpWidget(_boilerplate(null,
         snap: true,
         stackKey: stackKey,
         containerKey: containerKey,
-        snapTargets: <double>[.5],
+        snapSizes: <double>[.5],
       ));
       await tester.pumpAndSettle();
       final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
@@ -468,7 +460,7 @@ void main() {
         snap: true,
         stackKey: stackKey,
         containerKey: containerKey,
-        snapTargets: <double>[.5, .75],
+        snapSizes: <double>[.5, .75],
       ));
       await tester.pumpAndSettle();
       final double screenHeight = tester.getSize(find.byKey(stackKey)).height;

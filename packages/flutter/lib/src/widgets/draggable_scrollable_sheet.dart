@@ -58,9 +58,9 @@ typedef ScrollableWidgetBuilder = Widget Function(
 ///
 /// By default, the widget will stay at whatever size the user drags it to. To
 /// make the widget snap to specific sizes whenever they lift their finger
-/// during a drag, set [snap] to `true`. By default, the sheet will snap between
+/// during a drag, set [snap] to `true`. The sheet will snap between
 /// [minChildSize] and [maxChildSize]. Use [snapSizes] to add more sizes for
-/// the sheet to snap to.
+/// the sheet to snap between.
 ///
 /// By default, the widget will expand its non-occupied area to fill available
 /// space in the parent. If this is not desired, e.g. because the parent wants
@@ -160,8 +160,8 @@ class DraggableScrollableSheet extends StatefulWidget {
   /// The default value is true.
   final bool expand;
 
-  /// Whether the widget should snap between [snapSizes] when the user stops
-  /// dragging.
+  /// Whether the widget should snap between [snapSizes] when the user lifts
+  /// their finger during a drag.
   ///
   /// If the user's finger was still moving when they lifted it, the widget will
   /// snap to the next snap size (see [snapSizes]) in the direction of the drag.
@@ -221,17 +221,17 @@ class DraggableScrollableNotification extends Notification with ViewportNotifica
     required this.maxExtent,
     required this.initialExtent,
     required this.context,
-  })  : assert(extent != null),
-        assert(initialExtent != null),
-        assert(minExtent != null),
-        assert(maxExtent != null),
-        assert(0.0 <= minExtent),
-        assert(maxExtent <= 1.0),
-        assert(minExtent <= extent),
-        assert(minExtent <= initialExtent),
-        assert(extent <= maxExtent),
-        assert(initialExtent <= maxExtent),
-        assert(context != null);
+  }) : assert(extent != null),
+       assert(initialExtent != null),
+       assert(minExtent != null),
+       assert(maxExtent != null),
+       assert(0.0 <= minExtent),
+       assert(maxExtent <= 1.0),
+       assert(minExtent <= extent),
+       assert(minExtent <= initialExtent),
+       assert(extent <= maxExtent),
+       assert(initialExtent <= maxExtent),
+       assert(context != null);
 
   /// The current value of the extent, between [minExtent] and [maxExtent].
   final double extent;
@@ -278,16 +278,16 @@ class _DraggableSheetExtent {
     required this.snapSizes,
     required this.initialExtent,
     required VoidCallback listener,
-  })  : assert(minExtent != null),
-        assert(maxExtent != null),
-        assert(initialExtent != null),
-        assert(minExtent >= 0),
-        assert(maxExtent <= 1),
-        assert(minExtent <= initialExtent),
-        assert(initialExtent <= maxExtent),
-        _currentExtent = ValueNotifier<double>(initialExtent)
-          ..addListener(listener),
-        availablePixels = double.infinity;
+  }) : assert(minExtent != null),
+       assert(maxExtent != null),
+       assert(initialExtent != null),
+       assert(minExtent >= 0),
+       assert(maxExtent <= 1),
+       assert(minExtent <= initialExtent),
+       assert(initialExtent <= maxExtent),
+       _currentExtent = ValueNotifier<double>(initialExtent)
+         ..addListener(listener),
+       availablePixels = double.infinity;
 
   final double minExtent;
   final double maxExtent;
@@ -311,17 +311,18 @@ class _DraggableSheetExtent {
   }
   double get currentExtent => _currentExtent.value;
   double get currentPixels => extentToPixels(_currentExtent.value);
+
   double get additionalMinExtent => isAtMin ? 0.0 : 1.0;
   double get additionalMaxExtent => isAtMax ? 0.0 : 1.0;
   List<double> get pixelSnapSizes => snapSizes.map(extentToPixels).toList();
 
   /// The scroll position gets inputs in terms of pixels, but the extent is
   /// expected to be expressed as a number between 0..1.
-  void addPixelDelta(double pixelDelta, BuildContext context) {
+  void addPixelDelta(double delta, BuildContext context) {
     if (availablePixels == 0) {
       return;
     }
-    updateExtent(currentExtent + pixelsToExtent(pixelDelta), context);
+    updateExtent(currentExtent + pixelsToExtent(delta), context);
   }
 
   /// Set the extent to the new value. [newExtent] should be a number between
@@ -453,11 +454,11 @@ class _DraggableScrollableSheetScrollController extends ScrollController {
     double initialScrollOffset = 0.0,
     String? debugLabel,
     required this.extent,
-  })  : assert(extent != null),
-        super(
-        debugLabel: debugLabel,
-        initialScrollOffset: initialScrollOffset,
-      );
+  }) : assert(extent != null),
+       super(
+       debugLabel: debugLabel,
+       initialScrollOffset: initialScrollOffset,
+     );
 
   final _DraggableSheetExtent extent;
 
@@ -605,8 +606,7 @@ class _DraggableScrollableSheetScrollPosition
         // Make sure we pass along enough velocity to keep scrolling - otherwise
         // we just "bounce" off the top making it look like the list doesn't
         // have more to scroll.
-        velocity = ballisticController.velocity +
-            (physics.tolerance.velocity * ballisticController.velocity.sign);
+        velocity = ballisticController.velocity + (physics.tolerance.velocity * ballisticController.velocity.sign);
         super.goBallistic(velocity);
         ballisticController.stop();
       } else if (ballisticController.isCompleted) {
