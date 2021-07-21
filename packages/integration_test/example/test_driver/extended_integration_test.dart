@@ -10,6 +10,7 @@ Future<void> main() async {
   await integrationDriver(
     driver: driver,
     onScreenshot: (String screenshotName, List<int> screenshotBytes) async {
+      // Return false if the screenshot is invalid.
       return true;
     },
   );
