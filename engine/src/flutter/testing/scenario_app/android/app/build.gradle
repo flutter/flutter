@@ -19,7 +19,7 @@ android {
         // NewerVersionAvailable and GradleDependency need to be taken care of
         // by a roller rather than as part of CI.
         // The others are irrelevant for a test application.
-        disable 'UnpackedNativeCode','MissingApplicationIcon','GoogleAppIndexingApiWarning','GoogleAppIndexingWarning','GradleDependency','NewerVersionAvailable'
+        disable 'UnpackedNativeCode','MissingApplicationIcon','GoogleAppIndexingApiWarning','GoogleAppIndexingWarning','GradleDependency','NewerVersionAvailable','Registered'
     }
     compileSdkVersion 30
     compileOptions {

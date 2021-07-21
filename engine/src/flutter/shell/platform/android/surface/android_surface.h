@@ -37,6 +37,8 @@ class AndroidSurface {
 
   virtual bool SetNativeWindow(fml::RefPtr<AndroidNativeWindow> window) = 0;
 
+  virtual std::unique_ptr<Surface> CreatePbufferSurface();
+
  protected:
   explicit AndroidSurface(
       const std::shared_ptr<AndroidContext>& android_context);
