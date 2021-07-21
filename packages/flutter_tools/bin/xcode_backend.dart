@@ -12,7 +12,7 @@ import 'dart:io';
   //return $?
 //}
 
-void assertExists(String filePath) {
+//void assertExists(String filePath) {
   //if [[ ! -e "$1" ]]; then
   //  if [[ -h "$1" ]]; then
   //    EchoError "The path $1 is a symlink to a path that does not exist"
@@ -22,7 +22,7 @@ void assertExists(String filePath) {
   //  exit -1
   //fi
   //return 0
-}
+//}
 
 // Main entry point.
 void main(List<String> arguments) {
@@ -121,7 +121,8 @@ class Context {
       args,
       workingDirectory: workingDirectory,
     );
-    print(result.stdout);
+    echo(result.stdout as String);
+    echoError(result.stderr as String);
     if (!allowFail && result.exitCode != 0) {
       stderr.write('${result.stderr}\n');
       throw Exception(
@@ -572,20 +573,20 @@ class Context {
     flutterArgs.addAll(<String>[
       'assemble',
       '--no-version-check',
-      '--output=${environment['BUILT_PRODUCTS_DIR']}/',
+      '--output=${environment['BUILT_PRODUCTS_DIR'] ?? ''}/',
       '-dTargetPlatform=ios',
       '-dTargetFile=$targetPath',
       '-dBuildMode=$buildMode',
-      '-dIosArchs=${environment['ARCHS']}',
-      '-dSdkRoot=${environment['SDKROOT']}',
-      '-dSplitDebugInfo=${environment['SPLIT_DEBUG_INFO']}',
-      '-dTreeShakeIcons=${environment['TREE_SHAKE_ICONS']}',
-      '-dTrackWidgetCreation=${environment['TRACK_WIDGET_CREATION']}',
-      '-dDartObfuscation=${environment['DART_OBFUSCATION']}',
+      '-dIosArchs=${environment['ARCHS'] ?? ''}',
+      '-dSdkRoot=${environment['SDKROOT'] ?? ''}',
+      '-dSplitDebugInfo=${environment['SPLIT_DEBUG_INFO'] ?? ''}',
+      '-dTreeShakeIcons=${environment['TREE_SHAKE_ICONS'] ?? ''}',
+      '-dTrackWidgetCreation=${environment['TRACK_WIDGET_CREATION'] ?? ''}',
+      '-dDartObfuscation=${environment['DART_OBFUSCATION'] ?? ''}',
       '-dEnableBitcode=$bitcodeFlag',
-      '--ExtraGenSnapshotOptions=${environment['EXTRA_GEN_SNAPSHOT_OPTIONS']}',
-      '--DartDefines=${environment['DART_DEFINES']}',
-      '--ExtraFrontEndOptions=${environment['EXTRA_FRONT_END_OPTIONS']}',
+      '--ExtraGenSnapshotOptions=${environment['EXTRA_GEN_SNAPSHOT_OPTIONS'] ?? ''}',
+      '--DartDefines=${environment['DART_DEFINES'] ?? ''}',
+      '--ExtraFrontEndOptions=${environment['EXTRA_FRONT_END_OPTIONS'] ?? ''}',
     ]);
 
     //if [[ -n "$PERFORMANCE_MEASUREMENT_FILE" ]]; then
@@ -608,14 +609,14 @@ class Context {
     //  flutter_args+=("-dBundleSkSLPath=${BUNDLE_SKSL_PATH}")
     //fi
     if (environment['BUNDLE_SKSL_PATH'] != null && environment['BUNDLE_SKSL_PATH']!.isNotEmpty) {
-      flutterArgs.add('--dBundleSkSLPath=${environment['BUNDLE_SKSL_PATH']}');
+      flutterArgs.add('-dBundleSkSLPath=${environment['BUNDLE_SKSL_PATH']}');
     }
 
     //if [[ -n "$CODE_SIZE_DIRECTORY" ]]; then
     //  flutter_args+=("-dCodeSizeDirectory=${CODE_SIZE_DIRECTORY}")
     //fi
     if (environment['CODE_SIZE_DIRECTORY'] != null && environment['CODE_SIZE_DIRECTORY']!.isNotEmpty) {
-      flutterArgs.add('--dCodeSizeDirectory=${environment['CODE_SIZE_DIRECTORY']}');
+      flutterArgs.add('-dCodeSizeDirectory=${environment['CODE_SIZE_DIRECTORY']}');
     }
 
     //flutter_args+=("${build_mode}_ios_bundle_flutter_assets")
@@ -647,7 +648,7 @@ class Context {
     //RunCommand popd > /dev/null
 
     //echo "Project ${project_path} built and packaged successfully."
-    print('Project $projectPath built and packaged successfully.');
+    echo('Project $projectPath built and packaged successfully.');
     //return 0
   }
 }
