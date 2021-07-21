@@ -62,15 +62,16 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
-          child: TextField(),
+          child: TextField(autofocus: true),
         ),
       ),
     );
+    await tester.pump();
     await tester.pumpAndSettle();
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
     final RenderEditable renderEditable = editableTextState.renderEditable;
     expect(renderEditable.cursorColor, defaultCursorColor);
-    expect(Color(renderEditable.selectionColor!.value), defaultSelectionColor);
+    expect(renderEditable.selectionColor?.value, defaultSelectionColor.value);
 
     // Test the selection handle color.
     await tester.pumpWidget(
