@@ -837,9 +837,10 @@ class _TextSelectionHandleOverlayState
     final String text = span.toPlainText();
     final int firstSelectedGraphemeExtent;
     final int lastSelectedGraphemeExtent;
-    if (text.isEmpty || widget.renderObject.selection == null || !widget.renderObject.selection!.isValid || widget.renderObject.selection!.isCollapsed) {
+
+    if (widget.renderObject.selection == null || !widget.renderObject.selection!.isValid || widget.renderObject.selection!.isCollapsed) {
       // The call to selectedGraphemes.characters.first/last will throw a state
-      // error if the given string is empty, so fall back to first/last character
+      // error if the given text is empty, so fall back to first/last character
       // range in this case.
       //
       // The call to widget.selection.textInside(text) will return a RangeError
@@ -850,6 +851,7 @@ class _TextSelectionHandleOverlayState
       final String selectedGraphemes = widget.renderObject.selection!.textInside(text);
       firstSelectedGraphemeExtent = selectedGraphemes.characters.first.length;
       lastSelectedGraphemeExtent = selectedGraphemes.characters.last.length;
+      assert(firstSelectedGraphemeExtent <= selectedGraphemes.length && lastSelectedGraphemeExtent <= selectedGraphemes.length);
     }
 
     final Rect? startHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.selection.start, end: widget.selection.start + firstSelectedGraphemeExtent));
