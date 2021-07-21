@@ -844,6 +844,7 @@ void main() {
           text: text,
           selection: TextSelection.collapsed(offset: 0),
         );
+    final TextEditingActionTarget target = delegate as TextEditingActionTarget;
     final ViewportOffset viewportOffset = ViewportOffset.zero();
     late TextSelection currentSelection;
 
@@ -879,7 +880,7 @@ void main() {
     pumpFrame();
 
     // Move to the end of the first line.
-    editable.moveSelectionRightByLine(SelectionChangedCause.keyboard);
+    target.moveSelectionRightByLine(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 13);
     // RenderEditable relies on its parent that passes onSelectionChanged to set
@@ -887,34 +888,34 @@ void main() {
 
     // Try moveSelectionRightByLine again and nothing happens because we're
     // already at the end of a line.
-    editable.moveSelectionRightByLine(SelectionChangedCause.keyboard);
+    target.moveSelectionRightByLine(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 13);
 
     // Move back to the start of the line.
-    editable.moveSelectionLeftByLine(SelectionChangedCause.keyboard);
+    target.moveSelectionLeftByLine(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 0);
 
     // Trying moveSelectionLeftByLine does nothing at the leftmost of the field.
-    editable.moveSelectionLeftByLine(SelectionChangedCause.keyboard);
+    target.moveSelectionLeftByLine(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 0);
 
     // Move the selection to the empty line.
-    editable.moveSelectionRightByLine(SelectionChangedCause.keyboard);
+    target.moveSelectionRightByLine(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 13);
-    editable.moveSelectionRight(SelectionChangedCause.keyboard);
+    target.moveSelectionRight(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 14);
 
     // Neither moveSelectionLeftByLine nor moveSelectionRightByLine do anything
     // here, because we're at both the beginning and end of the line.
-    editable.moveSelectionLeftByLine(SelectionChangedCause.keyboard);
+    target.moveSelectionLeftByLine(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 14);
-    editable.moveSelectionRightByLine(SelectionChangedCause.keyboard);
+    target.moveSelectionRightByLine(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 14);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
@@ -925,6 +926,7 @@ void main() {
           text: 'test',
           selection: TextSelection.collapsed(offset: 0),
         );
+    final TextEditingActionTarget target = delegate as TextEditingActionTarget;
     final ViewportOffset viewportOffset = ViewportOffset.zero();
     late TextSelection currentSelection;
 
@@ -959,15 +961,15 @@ void main() {
     editable.selection = const TextSelection.collapsed(offset: 0);
     pumpFrame();
 
-    editable.moveSelectionRight(SelectionChangedCause.keyboard);
+    target.moveSelectionRight(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 1);
 
-    editable.moveSelectionLeft(SelectionChangedCause.keyboard);
+    target.moveSelectionLeft(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 0);
 
-    editable.deleteForward(SelectionChangedCause.keyboard);
+    target.deleteForward(SelectionChangedCause.keyboard);
     expect(delegate.textEditingValue.text, 'est');
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
@@ -1009,15 +1011,15 @@ void main() {
     editable.selection = const TextSelection.collapsed(offset: 4);
     pumpFrame();
 
-    editable.moveSelectionRight(SelectionChangedCause.keyboard);
+    (delegate as TextEditingActionTarget).moveSelectionRight(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 6);
 
-    editable.moveSelectionLeft(SelectionChangedCause.keyboard);
+    (delegate as TextEditingActionTarget).moveSelectionLeft(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 4);
 
-    editable.deleteForward(SelectionChangedCause.keyboard);
+    (delegate as TextEditingActionTarget).deleteForward(SelectionChangedCause.keyboard);
     expect(delegate.textEditingValue.text, '01236789');
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
@@ -1059,15 +1061,15 @@ void main() {
     editable.selection = const TextSelection.collapsed(offset: 4);
     pumpFrame();
 
-    editable.moveSelectionRight(SelectionChangedCause.keyboard);
+    (delegate as TextEditingActionTarget).moveSelectionRight(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 12);
 
-    editable.moveSelectionLeft(SelectionChangedCause.keyboard);
+    (delegate as TextEditingActionTarget).moveSelectionLeft(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 4);
 
-    editable.deleteForward(SelectionChangedCause.keyboard);
+    (delegate as TextEditingActionTarget).deleteForward(SelectionChangedCause.keyboard);
     expect(delegate.textEditingValue.text, '01232345');
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
@@ -1108,15 +1110,15 @@ void main() {
     editable.selection = const TextSelection.collapsed(offset: 0);
     pumpFrame();
 
-    editable.moveSelectionRight(SelectionChangedCause.keyboard);
+    (delegate as TextEditingActionTarget).moveSelectionRight(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 2);
 
-    editable.moveSelectionLeft(SelectionChangedCause.keyboard);
+    (delegate as TextEditingActionTarget).moveSelectionLeft(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 0);
 
-    editable.deleteForward(SelectionChangedCause.keyboard);
+    (delegate as TextEditingActionTarget).deleteForward(SelectionChangedCause.keyboard);
     expect(delegate.textEditingValue.text, '');
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
@@ -1160,18 +1162,18 @@ void main() {
     editable.selection = const TextSelection.collapsed(offset: 0);
     pumpFrame();
 
-    editable.moveSelectionRight(SelectionChangedCause.keyboard);
-    editable.moveSelectionRight(SelectionChangedCause.keyboard);
-    editable.moveSelectionRight(SelectionChangedCause.keyboard);
-    editable.moveSelectionRight(SelectionChangedCause.keyboard);
+    (delegate as TextEditingActionTarget).moveSelectionRight(SelectionChangedCause.keyboard);
+    (delegate as TextEditingActionTarget).moveSelectionRight(SelectionChangedCause.keyboard);
+    (delegate as TextEditingActionTarget).moveSelectionRight(SelectionChangedCause.keyboard);
+    (delegate as TextEditingActionTarget).moveSelectionRight(SelectionChangedCause.keyboard);
     expect(editable.selection?.isCollapsed, true);
     expect(editable.selection?.baseOffset, 4);
 
-    editable.moveSelectionLeft(SelectionChangedCause.keyboard);
+    (delegate as TextEditingActionTarget).moveSelectionLeft(SelectionChangedCause.keyboard);
     expect(editable.selection?.isCollapsed, true);
     expect(editable.selection?.baseOffset, 3);
 
-     editable.deleteForward(SelectionChangedCause.keyboard);
+     (delegate as TextEditingActionTarget).deleteForward(SelectionChangedCause.keyboard);
     expect(delegate.textEditingValue.text, 'W Sczebrzeszynie chrząszcz brzmi w trzcinie');
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
@@ -1209,7 +1211,7 @@ void main() {
     final PipelineOwner pipelineOwner = PipelineOwner();
     editable.attach(pipelineOwner);
 
-    editable.deleteForward(SelectionChangedCause.keyboard);
+    (delegate as TextEditingActionTarget).deleteForward(SelectionChangedCause.keyboard);
     expect(delegate.textEditingValue.text, 'ow are you');
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
@@ -1247,28 +1249,28 @@ void main() {
     editable.selection = const TextSelection(baseOffset: 2, extentOffset: 4);
     pumpFrame();
 
-    editable.moveSelectionRight(SelectionChangedCause.keyboard);
+    (delegate as TextEditingActionTarget).moveSelectionRight(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 4);
 
     editable.selection = const TextSelection(baseOffset: 4, extentOffset: 2);
     pumpFrame();
 
-    editable.moveSelectionRight(SelectionChangedCause.keyboard);
+    (delegate as TextEditingActionTarget).moveSelectionRight(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 4);
 
     editable.selection = const TextSelection(baseOffset: 2, extentOffset: 4);
     pumpFrame();
 
-    editable.moveSelectionLeft(SelectionChangedCause.keyboard);
+    (delegate as TextEditingActionTarget).moveSelectionLeft(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 2);
 
     editable.selection = const TextSelection(baseOffset: 4, extentOffset: 2);
     pumpFrame();
 
-    editable.moveSelectionLeft(SelectionChangedCause.keyboard);
+    (delegate as TextEditingActionTarget).moveSelectionLeft(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 2);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/58068
@@ -1307,7 +1309,7 @@ void main() {
     editable.selection = const TextSelection(baseOffset: 2, extentOffset: 4);
     pumpFrame();
 
-    editable.extendSelectionRight(SelectionChangedCause.keyboard);
+    (delegate as TextEditingActionTarget).extendSelectionRight(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, false);
     expect(currentSelection.baseOffset, 2);
     expect(currentSelection.extentOffset, 5);
@@ -1315,7 +1317,7 @@ void main() {
     editable.selection = const TextSelection(baseOffset: 4, extentOffset: 2);
     pumpFrame();
 
-    editable.extendSelectionRight(SelectionChangedCause.keyboard);
+    (delegate as TextEditingActionTarget).extendSelectionRight(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, false);
     expect(currentSelection.baseOffset, 4);
     expect(currentSelection.extentOffset, 3);
@@ -1323,7 +1325,7 @@ void main() {
     editable.selection = const TextSelection(baseOffset: 2, extentOffset: 4);
     pumpFrame();
 
-    editable.extendSelectionLeft(SelectionChangedCause.keyboard);
+    (delegate as TextEditingActionTarget).extendSelectionLeft(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, false);
     expect(currentSelection.baseOffset, 2);
     expect(currentSelection.extentOffset, 3);
@@ -1331,7 +1333,7 @@ void main() {
     editable.selection = const TextSelection(baseOffset: 4, extentOffset: 2);
     pumpFrame();
 
-    editable.extendSelectionLeft(SelectionChangedCause.keyboard);
+    (delegate as TextEditingActionTarget).extendSelectionLeft(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, false);
     expect(currentSelection.baseOffset, 4);
     expect(currentSelection.extentOffset, 1);
@@ -1374,11 +1376,11 @@ void main() {
 
     await simulateKeyDownEvent(LogicalKeyboardKey.shift);
 
-    editable.moveSelectionRight(SelectionChangedCause.keyboard);
+    (delegate as TextEditingActionTarget).moveSelectionRight(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 3);
 
-    editable.moveSelectionLeft(SelectionChangedCause.keyboard);
+    (delegate as TextEditingActionTarget).moveSelectionLeft(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 2);
 
@@ -1387,11 +1389,11 @@ void main() {
 
     await simulateKeyDownEvent(wordModifier);
 
-    editable.moveSelectionRightByWord(SelectionChangedCause.keyboard);
+    (delegate as TextEditingActionTarget).moveSelectionRightByWord(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 6);
 
-    editable.moveSelectionLeftByWord(SelectionChangedCause.keyboard);
+    (delegate as TextEditingActionTarget).moveSelectionLeftByWord(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 0);
 
@@ -1430,7 +1432,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.delete(SelectionChangedCause.keyboard);
+      (delegate as TextEditingActionTarget).delete(SelectionChangedCause.keyboard);
       expect(delegate.textEditingValue.text, 'tt');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 1);
@@ -1466,7 +1468,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.delete(SelectionChangedCause.keyboard);
+      (delegate as TextEditingActionTarget).delete(SelectionChangedCause.keyboard);
       expect(delegate.textEditingValue.text, 'tet');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 2);
@@ -1502,7 +1504,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.delete(SelectionChangedCause.keyboard);
+      (delegate as TextEditingActionTarget).delete(SelectionChangedCause.keyboard);
       expect(delegate.textEditingValue.text, '');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 0);
@@ -1538,7 +1540,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.delete(SelectionChangedCause.keyboard);
+      (delegate as TextEditingActionTarget).delete(SelectionChangedCause.keyboard);
       expect(delegate.textEditingValue.text, '01232345');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 4);
@@ -1574,7 +1576,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.delete(SelectionChangedCause.keyboard);
+      (delegate as TextEditingActionTarget).delete(SelectionChangedCause.keyboard);
       expect(delegate.textEditingValue.text, 'test');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 0);
@@ -1612,7 +1614,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.delete(SelectionChangedCause.keyboard);
+      (delegate as TextEditingActionTarget).delete(SelectionChangedCause.keyboard);
       expect(delegate.textEditingValue.text, 'tes');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 3);
@@ -1650,7 +1652,7 @@ void main() {
         editable.hasFocus = true;
         pumpFrame();
 
-        editable.delete(SelectionChangedCause.keyboard);
+        (delegate as TextEditingActionTarget).delete(SelectionChangedCause.keyboard);
         expect(delegate.textEditingValue.text, '用多個測試');
         expect(delegate.textEditingValue.selection.isCollapsed, true);
         expect(delegate.textEditingValue.selection.baseOffset, 3);
@@ -1688,7 +1690,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.delete(SelectionChangedCause.keyboard);
+      (delegate as TextEditingActionTarget).delete(SelectionChangedCause.keyboard);
       expect(delegate.textEditingValue.text, 'برنامج أهلا بالعال');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, text.length - 1);
@@ -1728,7 +1730,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.deleteByWord(SelectionChangedCause.keyboard, false);
+      (delegate as TextEditingActionTarget).deleteByWord(SelectionChangedCause.keyboard, false);
       expect(delegate.textEditingValue.text, 'test h multiple blocks');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 5);
@@ -1766,7 +1768,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.deleteByWord(SelectionChangedCause.keyboard);
+      (delegate as TextEditingActionTarget).deleteByWord(SelectionChangedCause.keyboard);
       expect(delegate.textEditingValue.text, 'test withmultiple blocks');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 9);
@@ -1804,7 +1806,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.deleteByWord(SelectionChangedCause.keyboard, false);
+      (delegate as TextEditingActionTarget).deleteByWord(SelectionChangedCause.keyboard, false);
       expect(delegate.textEditingValue.text, 'test  multiple blocks');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 5);
@@ -1842,7 +1844,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.deleteByWord(SelectionChangedCause.keyboard, false);
+      (delegate as TextEditingActionTarget).deleteByWord(SelectionChangedCause.keyboard, false);
       expect(delegate.textEditingValue.text, 'test multiple blocks');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 5);
@@ -1880,7 +1882,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.deleteByWord(SelectionChangedCause.keyboard, false);
+      (delegate as TextEditingActionTarget).deleteByWord(SelectionChangedCause.keyboard, false);
       expect(delegate.textEditingValue.text, 'test multiple blocks');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 5);
@@ -1918,7 +1920,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.deleteByWord(SelectionChangedCause.keyboard, false);
+      (delegate as TextEditingActionTarget).deleteByWord(SelectionChangedCause.keyboard, false);
       expect(delegate.textEditingValue.text, 'test multiple blocks');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 5);
@@ -1956,7 +1958,7 @@ void main() {
         editable.hasFocus = true;
         pumpFrame();
 
-        editable.deleteByWord(SelectionChangedCause.keyboard, false);
+        (delegate as TextEditingActionTarget).deleteByWord(SelectionChangedCause.keyboard, false);
         expect(delegate.textEditingValue.text, '用多個測試');
         expect(delegate.textEditingValue.selection.isCollapsed, true);
         expect(delegate.textEditingValue.selection.baseOffset, 3);
@@ -1994,7 +1996,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.deleteByWord(SelectionChangedCause.keyboard, false);
+      (delegate as TextEditingActionTarget).deleteByWord(SelectionChangedCause.keyboard, false);
       expect(delegate.textEditingValue.text, 'برنامج أهلا ');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 12);
@@ -2033,7 +2035,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.deleteByWord(SelectionChangedCause.keyboard, false);
+      (delegate as TextEditingActionTarget).deleteByWord(SelectionChangedCause.keyboard, false);
       expect(delegate.textEditingValue.text, 'words');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 0);
@@ -2073,7 +2075,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.deleteByLine(SelectionChangedCause.keyboard);
+      (delegate as TextEditingActionTarget).deleteByLine(SelectionChangedCause.keyboard);
       expect(delegate.textEditingValue.text, '');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 0);
@@ -2111,7 +2113,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.deleteByLine(SelectionChangedCause.keyboard);
+      (delegate as TextEditingActionTarget).deleteByLine(SelectionChangedCause.keyboard);
       expect(delegate.textEditingValue.text, 'h multiple blocks');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 0);
@@ -2149,7 +2151,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.deleteByLine(SelectionChangedCause.keyboard);
+      (delegate as TextEditingActionTarget).deleteByLine(SelectionChangedCause.keyboard);
       expect(delegate.textEditingValue.text, text);
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, offset);
@@ -2187,7 +2189,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.deleteByLine(SelectionChangedCause.keyboard);
+      (delegate as TextEditingActionTarget).deleteByLine(SelectionChangedCause.keyboard);
       expect(delegate.textEditingValue.text, 'test with\n\nright here.\nmultiple blocks');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 11);
@@ -2226,7 +2228,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.deleteByLine(SelectionChangedCause.keyboard);
+      (delegate as TextEditingActionTarget).deleteByLine(SelectionChangedCause.keyboard);
       expect(delegate.textEditingValue.text, 'words');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 0);
@@ -2264,7 +2266,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.deleteForward(SelectionChangedCause.keyboard);
+      (delegate as TextEditingActionTarget).deleteForward(SelectionChangedCause.keyboard);
       expect(delegate.textEditingValue.text, 'tt');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 1);
@@ -2302,7 +2304,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.deleteForwardByWord(SelectionChangedCause.keyboard);
+      (delegate as TextEditingActionTarget).deleteForwardByWord(SelectionChangedCause.keyboard);
       expect(delegate.textEditingValue.text, 'test withmultiple blocks');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 9);
@@ -2338,7 +2340,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.deleteForward(SelectionChangedCause.keyboard);
+      (delegate as TextEditingActionTarget).deleteForward(SelectionChangedCause.keyboard);
       expect(delegate.textEditingValue.text, 'test');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 4);
@@ -2376,7 +2378,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.deleteForward(SelectionChangedCause.keyboard);
+      (delegate as TextEditingActionTarget).deleteForward(SelectionChangedCause.keyboard);
       expect(delegate.textEditingValue.text, 'est');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 0);
@@ -2414,7 +2416,7 @@ void main() {
         editable.hasFocus = true;
         pumpFrame();
 
-        editable.deleteForward(SelectionChangedCause.keyboard);
+        (delegate as TextEditingActionTarget).deleteForward(SelectionChangedCause.keyboard);
         expect(delegate.textEditingValue.text, '多個塊測試');
         expect(delegate.textEditingValue.selection.isCollapsed, true);
         expect(delegate.textEditingValue.selection.baseOffset, 0);
@@ -2452,7 +2454,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.deleteForward(SelectionChangedCause.keyboard);
+      (delegate as TextEditingActionTarget).deleteForward(SelectionChangedCause.keyboard);
       expect(delegate.textEditingValue.text, 'رنامج أهلا بالعالم');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 0);
@@ -2493,7 +2495,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.deleteForwardByWord(SelectionChangedCause.keyboard, false);
+      (delegate as TextEditingActionTarget).deleteForwardByWord(SelectionChangedCause.keyboard, false);
       expect(delegate.textEditingValue.text, 'test w multiple blocks');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, offset);
@@ -2531,7 +2533,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.deleteForwardByWord(SelectionChangedCause.keyboard, false);
+      (delegate as TextEditingActionTarget).deleteForwardByWord(SelectionChangedCause.keyboard, false);
       expect(delegate.textEditingValue.text, 'test with  blocks');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, offset);
@@ -2569,7 +2571,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.deleteForwardByWord(SelectionChangedCause.keyboard, false);
+      (delegate as TextEditingActionTarget).deleteForwardByWord(SelectionChangedCause.keyboard, false);
       expect(delegate.textEditingValue.text, 'test with blocks');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, offset);
@@ -2607,7 +2609,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.deleteForwardByWord(SelectionChangedCause.keyboard, false);
+      (delegate as TextEditingActionTarget).deleteForwardByWord(SelectionChangedCause.keyboard, false);
       expect(delegate.textEditingValue.text, 'test with blocks');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, offset);
@@ -2645,7 +2647,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.deleteForwardByWord(SelectionChangedCause.keyboard, false);
+      (delegate as TextEditingActionTarget).deleteForwardByWord(SelectionChangedCause.keyboard, false);
       expect(delegate.textEditingValue.text, 'test with blocks');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, offset);
@@ -2683,7 +2685,7 @@ void main() {
         editable.hasFocus = true;
         pumpFrame();
 
-        editable.deleteForwardByWord(SelectionChangedCause.keyboard, false);
+        (delegate as TextEditingActionTarget).deleteForwardByWord(SelectionChangedCause.keyboard, false);
         expect(delegate.textEditingValue.text, '多個塊測試');
         expect(delegate.textEditingValue.selection.isCollapsed, true);
         expect(delegate.textEditingValue.selection.baseOffset, offset);
@@ -2721,7 +2723,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.deleteForwardByWord(SelectionChangedCause.keyboard, false);
+      (delegate as TextEditingActionTarget).deleteForwardByWord(SelectionChangedCause.keyboard, false);
       expect(delegate.textEditingValue.text, ' أهلا بالعالم');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, offset);
@@ -2760,7 +2762,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.deleteForwardByWord(SelectionChangedCause.keyboard, false);
+      (delegate as TextEditingActionTarget).deleteForwardByWord(SelectionChangedCause.keyboard, false);
       expect(delegate.textEditingValue.text, 'test');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, offset);
@@ -2800,7 +2802,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.deleteForwardByLine(SelectionChangedCause.keyboard);
+      (delegate as TextEditingActionTarget).deleteForwardByLine(SelectionChangedCause.keyboard);
       expect(delegate.textEditingValue.text, 'test');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, offset);
@@ -2838,7 +2840,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.deleteForwardByLine(SelectionChangedCause.keyboard);
+      (delegate as TextEditingActionTarget).deleteForwardByLine(SelectionChangedCause.keyboard);
       expect(delegate.textEditingValue.text, 'test wit');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, offset);
@@ -2876,7 +2878,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.deleteForwardByLine(SelectionChangedCause.keyboard);
+      (delegate as TextEditingActionTarget).deleteForwardByLine(SelectionChangedCause.keyboard);
       expect(delegate.textEditingValue.text, text);
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, offset);
@@ -2914,7 +2916,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.deleteForwardByLine(SelectionChangedCause.keyboard);
+      (delegate as TextEditingActionTarget).deleteForwardByLine(SelectionChangedCause.keyboard);
       expect(delegate.textEditingValue.text, 'te\n\nMore stuff right here.\nmultiple blocks');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, offset);
@@ -2953,7 +2955,7 @@ void main() {
       editable.hasFocus = true;
       pumpFrame();
 
-      editable.deleteForwardByLine(SelectionChangedCause.keyboard);
+      (delegate as TextEditingActionTarget).deleteForwardByLine(SelectionChangedCause.keyboard);
       expect(delegate.textEditingValue.text, 'test');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, offset);
@@ -2982,48 +2984,48 @@ void main() {
 
   group('nextCharacter', () {
     test('handles normal strings correctly', () {
-      expect(RenderEditable.nextCharacter(0, '01234567'), 1);
-      expect(RenderEditable.nextCharacter(3, '01234567'), 4);
-      expect(RenderEditable.nextCharacter(7, '01234567'), 8);
-      expect(RenderEditable.nextCharacter(8, '01234567'), 8);
+      expect(TextEditingValue.nextCharacter(0, '01234567'), 1);
+      expect(TextEditingValue.nextCharacter(3, '01234567'), 4);
+      expect(TextEditingValue.nextCharacter(7, '01234567'), 8);
+      expect(TextEditingValue.nextCharacter(8, '01234567'), 8);
     });
 
     test('throws for invalid indices', () {
-      expect(() => RenderEditable.nextCharacter(-1, '01234567'), throwsAssertionError);
-      expect(() => RenderEditable.nextCharacter(9, '01234567'), throwsAssertionError);
+      expect(() => TextEditingValue.nextCharacter(-1, '01234567'), throwsAssertionError);
+      expect(() => TextEditingValue.nextCharacter(9, '01234567'), throwsAssertionError);
     });
 
     test('skips spaces in normal strings when includeWhitespace is false', () {
-      expect(RenderEditable.nextCharacter(3, '0123 5678', false), 5);
-      expect(RenderEditable.nextCharacter(4, '0123 5678', false), 5);
-      expect(RenderEditable.nextCharacter(3, '0123      0123', false), 10);
-      expect(RenderEditable.nextCharacter(2, '0123      0123', false), 3);
-      expect(RenderEditable.nextCharacter(4, '0123      0123', false), 10);
-      expect(RenderEditable.nextCharacter(9, '0123      0123', false), 10);
-      expect(RenderEditable.nextCharacter(10, '0123      0123', false), 11);
+      expect(TextEditingValue.nextCharacter(3, '0123 5678', false), 5);
+      expect(TextEditingValue.nextCharacter(4, '0123 5678', false), 5);
+      expect(TextEditingValue.nextCharacter(3, '0123      0123', false), 10);
+      expect(TextEditingValue.nextCharacter(2, '0123      0123', false), 3);
+      expect(TextEditingValue.nextCharacter(4, '0123      0123', false), 10);
+      expect(TextEditingValue.nextCharacter(9, '0123      0123', false), 10);
+      expect(TextEditingValue.nextCharacter(10, '0123      0123', false), 11);
       // If the subsequent characters are all whitespace, it returns the length
       // of the string.
-      expect(RenderEditable.nextCharacter(5, '0123      ', false), 10);
+      expect(TextEditingValue.nextCharacter(5, '0123      ', false), 10);
     });
 
     test('handles surrogate pairs correctly', () {
-      expect(RenderEditable.nextCharacter(3, '0123👨👩👦0123'), 4);
-      expect(RenderEditable.nextCharacter(4, '0123👨👩👦0123'), 6);
-      expect(RenderEditable.nextCharacter(5, '0123👨👩👦0123'), 6);
-      expect(RenderEditable.nextCharacter(6, '0123👨👩👦0123'), 8);
-      expect(RenderEditable.nextCharacter(7, '0123👨👩👦0123'), 8);
-      expect(RenderEditable.nextCharacter(8, '0123👨👩👦0123'), 10);
-      expect(RenderEditable.nextCharacter(9, '0123👨👩👦0123'), 10);
-      expect(RenderEditable.nextCharacter(10, '0123👨👩👦0123'), 11);
+      expect(TextEditingValue.nextCharacter(3, '0123👨👩👦0123'), 4);
+      expect(TextEditingValue.nextCharacter(4, '0123👨👩👦0123'), 6);
+      expect(TextEditingValue.nextCharacter(5, '0123👨👩👦0123'), 6);
+      expect(TextEditingValue.nextCharacter(6, '0123👨👩👦0123'), 8);
+      expect(TextEditingValue.nextCharacter(7, '0123👨👩👦0123'), 8);
+      expect(TextEditingValue.nextCharacter(8, '0123👨👩👦0123'), 10);
+      expect(TextEditingValue.nextCharacter(9, '0123👨👩👦0123'), 10);
+      expect(TextEditingValue.nextCharacter(10, '0123👨👩👦0123'), 11);
     });
 
     test('handles extended grapheme clusters correctly', () {
-      expect(RenderEditable.nextCharacter(3, '0123👨‍👩‍👦2345'), 4);
-      expect(RenderEditable.nextCharacter(4, '0123👨‍👩‍👦2345'), 12);
+      expect(TextEditingValue.nextCharacter(3, '0123👨‍👩‍👦2345'), 4);
+      expect(TextEditingValue.nextCharacter(4, '0123👨‍👩‍👦2345'), 12);
       // Even when extent falls within an extended grapheme cluster, it still
       // identifies the whole grapheme cluster.
-      expect(RenderEditable.nextCharacter(5, '0123👨‍👩‍👦2345'), 12);
-      expect(RenderEditable.nextCharacter(12, '0123👨‍👩‍👦2345'), 13);
+      expect(TextEditingValue.nextCharacter(5, '0123👨‍👩‍👦2345'), 12);
+      expect(TextEditingValue.nextCharacter(12, '0123👨‍👩‍👦2345'), 13);
     });
   });
 
@@ -3083,48 +3085,48 @@ void main() {
 
   group('previousCharacter', () {
     test('handles normal strings correctly', () {
-      expect(RenderEditable.previousCharacter(8, '01234567'), 7);
-      expect(RenderEditable.previousCharacter(0, '01234567'), 0);
-      expect(RenderEditable.previousCharacter(1, '01234567'), 0);
-      expect(RenderEditable.previousCharacter(5, '01234567'), 4);
-      expect(RenderEditable.previousCharacter(8, '01234567'), 7);
+      expect(TextEditingValue.previousCharacter(8, '01234567'), 7);
+      expect(TextEditingValue.previousCharacter(0, '01234567'), 0);
+      expect(TextEditingValue.previousCharacter(1, '01234567'), 0);
+      expect(TextEditingValue.previousCharacter(5, '01234567'), 4);
+      expect(TextEditingValue.previousCharacter(8, '01234567'), 7);
     });
 
     test('throws for invalid indices', () {
-      expect(() => RenderEditable.previousCharacter(-1, '01234567'), throwsAssertionError);
-      expect(() => RenderEditable.previousCharacter(9, '01234567'), throwsAssertionError);
+      expect(() => TextEditingValue.previousCharacter(-1, '01234567'), throwsAssertionError);
+      expect(() => TextEditingValue.previousCharacter(9, '01234567'), throwsAssertionError);
     });
 
     test('skips spaces in normal strings when includeWhitespace is false', () {
-      expect(RenderEditable.previousCharacter(10, '0123      0123', false), 3);
-      expect(RenderEditable.previousCharacter(11, '0123      0123', false), 10);
-      expect(RenderEditable.previousCharacter(9, '0123      0123', false), 3);
-      expect(RenderEditable.previousCharacter(4, '0123      0123', false), 3);
-      expect(RenderEditable.previousCharacter(3, '0123      0123', false), 2);
+      expect(TextEditingValue.previousCharacter(10, '0123      0123', false), 3);
+      expect(TextEditingValue.previousCharacter(11, '0123      0123', false), 10);
+      expect(TextEditingValue.previousCharacter(9, '0123      0123', false), 3);
+      expect(TextEditingValue.previousCharacter(4, '0123      0123', false), 3);
+      expect(TextEditingValue.previousCharacter(3, '0123      0123', false), 2);
       // If the previous characters are all whitespace, it returns zero.
-      expect(RenderEditable.previousCharacter(3, '          0123', false), 0);
+      expect(TextEditingValue.previousCharacter(3, '          0123', false), 0);
     });
 
     test('handles surrogate pairs correctly', () {
-      expect(RenderEditable.previousCharacter(11, '0123👨👩👦0123'), 10);
-      expect(RenderEditable.previousCharacter(10, '0123👨👩👦0123'), 8);
-      expect(RenderEditable.previousCharacter(9, '0123👨👩👦0123'), 8);
-      expect(RenderEditable.previousCharacter(8, '0123👨👩👦0123'), 6);
-      expect(RenderEditable.previousCharacter(7, '0123👨👩👦0123'), 6);
-      expect(RenderEditable.previousCharacter(6, '0123👨👩👦0123'), 4);
-      expect(RenderEditable.previousCharacter(5, '0123👨👩👦0123'), 4);
-      expect(RenderEditable.previousCharacter(4, '0123👨👩👦0123'), 3);
-      expect(RenderEditable.previousCharacter(3, '0123👨👩👦0123'), 2);
+      expect(TextEditingValue.previousCharacter(11, '0123👨👩👦0123'), 10);
+      expect(TextEditingValue.previousCharacter(10, '0123👨👩👦0123'), 8);
+      expect(TextEditingValue.previousCharacter(9, '0123👨👩👦0123'), 8);
+      expect(TextEditingValue.previousCharacter(8, '0123👨👩👦0123'), 6);
+      expect(TextEditingValue.previousCharacter(7, '0123👨👩👦0123'), 6);
+      expect(TextEditingValue.previousCharacter(6, '0123👨👩👦0123'), 4);
+      expect(TextEditingValue.previousCharacter(5, '0123👨👩👦0123'), 4);
+      expect(TextEditingValue.previousCharacter(4, '0123👨👩👦0123'), 3);
+      expect(TextEditingValue.previousCharacter(3, '0123👨👩👦0123'), 2);
     });
 
     test('handles extended grapheme clusters correctly', () {
-      expect(RenderEditable.previousCharacter(13, '0123👨‍👩‍👦2345'), 12);
+      expect(TextEditingValue.previousCharacter(13, '0123👨‍👩‍👦2345'), 12);
       // Even when extent falls within an extended grapheme cluster, it still
       // identifies the whole grapheme cluster.
-      expect(RenderEditable.previousCharacter(12, '0123👨‍👩‍👦2345'), 4);
-      expect(RenderEditable.previousCharacter(11, '0123👨‍👩‍👦2345'), 4);
-      expect(RenderEditable.previousCharacter(5, '0123👨‍👩‍👦2345'), 4);
-      expect(RenderEditable.previousCharacter(4, '0123👨‍👩‍👦2345'), 3);
+      expect(TextEditingValue.previousCharacter(12, '0123👨‍👩‍👦2345'), 4);
+      expect(TextEditingValue.previousCharacter(11, '0123👨‍👩‍👦2345'), 4);
+      expect(TextEditingValue.previousCharacter(5, '0123👨‍👩‍👦2345'), 4);
+      expect(TextEditingValue.previousCharacter(4, '0123👨‍👩‍👦2345'), 3);
     });
   });
 
@@ -3525,7 +3527,8 @@ void main() {
         selection: TextSelection.collapsed(offset: 2),
         composing: TextRange(start: 1, end: 6),
       );
-      verifyDoesNotCrashWithInconsistentTextEditingValue(editable.delete);
+      final TextEditingActionTarget target = delegate as TextEditingActionTarget;
+      verifyDoesNotCrashWithInconsistentTextEditingValue(target.delete);
       final TextEditingValue textEditingValue = editable.textSelectionDelegate.textEditingValue;
       expect(textEditingValue.text, 'ACDEF');
       expect(textEditingValue.selection.isCollapsed, isTrue);
@@ -3539,7 +3542,8 @@ void main() {
         selection: TextSelection.collapsed(offset: 2),
         composing: TextRange(start: 2, end: 6),
       );
-      verifyDoesNotCrashWithInconsistentTextEditingValue(editable.deleteForward);
+      final TextEditingActionTarget target = delegate as TextEditingActionTarget;
+      verifyDoesNotCrashWithInconsistentTextEditingValue(target.deleteForward);
       final TextEditingValue textEditingValue = editable.textSelectionDelegate.textEditingValue;
       expect(textEditingValue.text, 'ABDEF');
       expect(textEditingValue.selection.isCollapsed, isTrue);
