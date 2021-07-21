@@ -81,7 +81,7 @@ void main() {
 
     final Codec codec = await descriptor.instantiateCodec();
     expect(codec.frameCount, 1);
-  }, skip: !(Platform.isIOS || Platform.isMacOS || Platform.isWindows));
+  }, skip: !(Platform.isAndroid || Platform.isIOS || Platform.isMacOS || Platform.isWindows));
 }
 
 Future<Uint8List> readFile(String fileName, ) async {

@@ -151,6 +151,10 @@ std::shared_ptr<AssetManager> Engine::GetAssetManager() {
   return asset_manager_;
 }
 
+fml::WeakPtr<ImageGeneratorRegistry> Engine::GetImageGeneratorRegistry() {
+  return image_generator_registry_.GetWeakPtr();
+}
+
 bool Engine::UpdateAssetManager(
     std::shared_ptr<AssetManager> new_asset_manager) {
   if (asset_manager_ == new_asset_manager) {

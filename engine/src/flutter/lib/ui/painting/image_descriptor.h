@@ -123,7 +123,7 @@ class ImageDescriptor : public RefCountedDartWrappable<ImageDescriptor> {
                   const SkImageInfo& image_info,
                   std::optional<size_t> row_bytes);
   ImageDescriptor(sk_sp<SkData> buffer,
-                  std::unique_ptr<ImageGenerator> generator);
+                  std::shared_ptr<ImageGenerator> generator);
 
   sk_sp<SkData> buffer_;
   std::shared_ptr<ImageGenerator> generator_;

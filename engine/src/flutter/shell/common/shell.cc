@@ -1650,6 +1650,21 @@ double Shell::GetMainDisplayRefreshRate() {
   return display_manager_->GetMainDisplayRefreshRate();
 }
 
+void Shell::RegisterImageDecoder(ImageGeneratorFactory factory,
+                                 int32_t priority) {
+  FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+  FML_DCHECK(is_setup_);
+
+  fml::TaskRunner::RunNowOrPostTask(
+      task_runners_.GetUITaskRunner(),
+      [engine = engine_->GetWeakPtr(), factory = std::move(factory),
+       priority]() {
+        if (engine) {
+          engine->GetImageGeneratorRegistry()->AddFactory(factory, priority);
+        }
+      });
+}
+
 bool Shell::OnServiceProtocolGetSkSLs(
     const ServiceProtocol::Handler::ServiceProtocolMap& params,
     rapidjson::Document* response) {
