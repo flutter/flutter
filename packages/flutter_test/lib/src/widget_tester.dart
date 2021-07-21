@@ -158,8 +158,8 @@ E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
 void testWidgets(
   String description,
   WidgetTesterCallback callback, {
-  bool? skip,
-  bool? exclude,
+  bool skip = false,
+  bool exclude = false,
   test_package.Timeout? timeout,
   Duration? initialTimeout,
   bool semanticsEnabled = true,
@@ -207,7 +207,7 @@ void testWidgets(
           timeout: initialTimeout,
         );
       },
-      skip: exclude == true || skip == true,
+      skip: (exclude || skip) ? true : null,
       timeout: timeout ?? binding.defaultTestTimeout,
       tags: tags,
     );
