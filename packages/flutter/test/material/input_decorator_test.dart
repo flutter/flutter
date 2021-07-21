@@ -5026,49 +5026,85 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('InputDecorator label widget', (WidgetTester tester) async {
-    const Key key = Key('l');
+  testWidgets('InputDecorationTheme floatingLabelStyle overrides label widget styles when the widget is a text widget (focused)', (WidgetTester tester) async {
+    const TextStyle style16 = TextStyle(fontFamily: 'Ahem', fontSize: 16.0);
+    final TextStyle floatingLabelStyle = style16.merge(const TextStyle(color: Colors.indigo));
+
+    // This test also verifies that the default InputDecorator provides a
+    // "small concession to backwards compatibility" by not padding on
+    // the left and right. If filled is true or an outline border is
+    // provided then the horizontal padding is included.
 
     await tester.pumpWidget(
       buildInputDecorator(
-        // isEmpty: false (default)
-        // isFocused: false (default)
+        isEmpty: true,
+        isFocused: true, // Label appears floating above input field.
+        inputDecorationTheme: InputDecorationTheme(
+          floatingLabelStyle: floatingLabelStyle,
+          // filled: false (default) - don't pad by left/right 12dps
+        ),
         decoration: const InputDecoration(
           label: Text.rich(
-            TextSpan(
-              children: <InlineSpan>[
-                TextSpan(text: 'label'),
-                WidgetSpan(
-                  child: Text('*', style: TextStyle(color: Colors.red),
-                  ),
-                ),
-              ],
-            ),
-            key: key,
+            TextSpan(text: 'label'),
           ),
         ),
       ),
     );
 
-    // Overall height for this InputDecorator is 56dps because
+    // Overall height for this InputDecorator is 56dps:
     //   12 - top padding
     //   12 - floating label (ahem font size 16dps * 0.75 = 12)
     //    4 - floating label / input text gap
     //   16 - input text (ahem font size 16dps)
     //   12 - bottom padding
-
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
-    expect(tester.getSize(find.text('text')).height, 16.0);
-    expect(tester.getSize(find.byKey(key)).height, 16.0);
-    expect(tester.getSize(find.byType(RichText).first).height, 16.0);
-    expect(tester.getSize(find.text('*')).height, 16.0);
-    expect(tester.getTopLeft(find.text('text')).dy, 28.0);
-    expect(tester.getTopLeft(find.byKey(key)).dy, 12.0);
-    expect(tester.getTopLeft(find.byType(RichText).first).dy, 28.0);
-    expect(tester.getTopLeft(find.text('*')).dy, 12.0);
-    expect(tester.getBottomRight(find.text('text')).dy, 44.0);
-    expect(tester.getBottomRight(find.byKey(key)).dy, 24.0);
-    expect(tester.getBottomRight(find.text('*')).dy, 24.0);
-    expect(tester.getBottomRight(find.byType(RichText).first).dy, 44.0);
+    expect(tester.getTopLeft(find.text('label')).dy, 12.0);
+    expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
+    expect(getBorderBottom(tester), 56.0);
+    expect(getBorderWeight(tester), 2.0);
+
+    // Verify that the styles were passed along
+    expect(getLabelStyle(tester).color, floatingLabelStyle.color);
+  });
+
+  testWidgets('InputDecorationTheme labelStyle overrides label widget styles when the widget is a text widget', (WidgetTester tester) async {
+    const TextStyle style16 = TextStyle(fontFamily: 'Ahem', fontSize: 16.0);
+    final TextStyle labelStyle = style16.merge(const TextStyle(color: Colors.purple));
+
+    // This test also verifies that the default InputDecorator provides a
+    // "small concession to backwards compatibility" by not padding on
+    // the left and right. If filled is true or an outline border is
+    // provided then the horizontal padding is included.
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isEmpty: true,
+        isFocused: false, // Label appears inline, on top of the input field.
+        inputDecorationTheme: InputDecorationTheme(
+          labelStyle: labelStyle,
+          // filled: false (default) - don't pad by left/right 12dps
+        ),
+        decoration: const InputDecoration(
+          label: Text.rich(
+            TextSpan(text: 'label'),
+          ),
+        ),
+      ),
+    );
+
+    // Overall height for this InputDecorator is 56dps:
+    //   12 - top padding
+    //   12 - floating label (ahem font size 16dps * 0.75 = 12)
+    //    4 - floating label / input text gap
+    //   16 - input text (ahem font size 16dps)
+    //   12 - bottom padding
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
+    expect(tester.getTopLeft(find.text('label')).dy, 20.0);
+    expect(tester.getBottomLeft(find.text('label')).dy, 36.0);
+    expect(getBorderBottom(tester), 56.0);
+    expect(getBorderWeight(tester), 1.0);
+
+    // Verify that the styles were passed along
+    expect(getLabelStyle(tester).color, labelStyle.color);
   });
 }
