@@ -560,7 +560,7 @@ zip_bundle("android_symbols") {
   deps = [ ":flutter_shell_native" ]
 }
 
-zip_bundle("android") {
+zip_bundle("flutter_jar_zip") {
   output = "$android_zip_archive_dir/artifacts.zip"
   files = [
     {
@@ -569,11 +569,7 @@ zip_bundle("android") {
     },
   ]
 
-  deps = [
-    ":android_jar",
-    ":android_javadoc",
-    ":android_symbols",
-  ]
+  deps = [ ":android_jar" ]
 
   if (current_cpu == "x86" || current_cpu == "x64") {
     files += [
@@ -583,12 +579,6 @@ zip_bundle("android") {
       },
     ]
     deps += [ ":flutter_shell_native" ]
-  }
-
-  # We only run the robolectric tests for android_debug_unopt (arm CPU), and
-  # the target is relatively expensive to build.
-  if (flutter_runtime_mode == "debug" && current_cpu == "arm") {
-    deps += [ ":robolectric_tests" ]
   }
 }
 
@@ -623,4 +613,47 @@ zip_bundle("android_javadoc") {
     },
   ]
   deps = [ ":gen_android_javadoc" ]
+}
+
+if (target_cpu != "x86") {
+  zip_bundle("gen_snapshot") {
+    gen_snapshot_bin = "gen_snapshot"
+    gen_snapshot_path = rebase_path("$root_out_dir/clang_x64/$gen_snapshot_bin")
+
+    if (host_os == "linux") {
+      output = "$android_zip_archive_dir/linux-x64.zip"
+    } else if (host_os == "mac") {
+      output = "$android_zip_archive_dir/darwin-x64.zip"
+    } else if (host_os == "win") {
+      output = "$android_zip_archive_dir/windows-x64.zip"
+      gen_snapshot_bin = "gen_snapshot.exe"
+      gen_snapshot_path = rebase_path("$root_out_dir/$gen_snapshot_bin")
+    }
+
+    files = [
+      {
+        source = gen_snapshot_path
+        destination = gen_snapshot_bin
+      },
+    ]
+
+    deps = [ "//third_party/dart/runtime/bin:gen_snapshot($host_toolchain)" ]
+  }
+}
+
+group("android") {
+  deps = [
+    ":android_javadoc",
+    ":android_symbols",
+    ":flutter_jar_zip",
+  ]
+  if (target_cpu != "x86") {
+    deps += [ ":gen_snapshot" ]
+  }
+
+  # We only run the robolectric tests for android_debug_unopt (arm CPU), and
+  # the target is relatively expensive to build.
+  if (flutter_runtime_mode == "debug" && current_cpu == "arm") {
+    deps += [ ":robolectric_tests" ]
+  }
 }
