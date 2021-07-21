@@ -837,8 +837,9 @@ class _TextSelectionHandleOverlayState
     final String text = span.toPlainText();
     final int firstSelectedGraphemeExtent;
     final int lastSelectedGraphemeExtent;
+    final TextSelection? selection = widget.renderObject.selection;
 
-    if (widget.renderObject.selection == null || !widget.renderObject.selection!.isValid || widget.renderObject.selection!.isCollapsed) {
+    if (selection == null || selection.isValid || selection.isCollapsed) {
       // The call to selectedGraphemes.characters.first/last will throw a state
       // error if the given text is empty, so fall back to first/last character
       // range in this case.
@@ -848,7 +849,7 @@ class _TextSelectionHandleOverlayState
       firstSelectedGraphemeExtent = 0;
       lastSelectedGraphemeExtent = 0;
     } else {
-      final String selectedGraphemes = widget.renderObject.selection!.textInside(text);
+      final String selectedGraphemes = selection.textInside(text);
       firstSelectedGraphemeExtent = selectedGraphemes.characters.first.length;
       lastSelectedGraphemeExtent = selectedGraphemes.characters.last.length;
       assert(firstSelectedGraphemeExtent <= selectedGraphemes.length && lastSelectedGraphemeExtent <= selectedGraphemes.length);
