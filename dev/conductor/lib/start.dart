@@ -2,12 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
+import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:fixnum/fixnum.dart';
-import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
@@ -35,8 +33,8 @@ const String kStateOption = 'state-file';
 /// Command to print the status of the current Flutter release.
 class StartCommand extends Command<void> {
   StartCommand({
-    @required this.checkouts,
-    @required this.flutterRoot,
+    required this.checkouts,
+    required this.flutterRoot,
   })  : platform = checkouts.platform,
         processManager = checkouts.processManager,
         fileSystem = checkouts.fileSystem,
@@ -125,7 +123,7 @@ class StartCommand extends Command<void> {
   final Stdio stdio;
 
   /// Git revision for the currently running Conductor.
-  String conductorVersion;
+  late final String conductorVersion;
 
   @override
   String get name => 'start';
@@ -135,6 +133,7 @@ class StartCommand extends Command<void> {
 
   @override
   void run() {
+    final ArgResults argumentResults = argResults!;
     if (!platform.isMacOS && !platform.isLinux) {
       throw ConductorException(
         'Error! This tool is only supported on macOS and Linux',
@@ -142,64 +141,64 @@ class StartCommand extends Command<void> {
     }
 
     final File stateFile = checkouts.fileSystem.file(
-      getValueFromEnvOrArgs(kStateOption, argResults, platform.environment),
+      getValueFromEnvOrArgs(kStateOption, argumentResults, platform.environment),
     );
     if (stateFile.existsSync()) {
       throw ConductorException(
-          'Error! A persistent state file already found at ${argResults[kStateOption]}.\n\n'
+          'Error! A persistent state file already found at ${argResults![kStateOption]}.\n\n'
           'Run `conductor clean` to cancel a previous release.');
     }
     final String frameworkUpstream = getValueFromEnvOrArgs(
       kFrameworkUpstreamOption,
-      argResults,
+      argumentResults,
       platform.environment,
-    );
+    )!;
     final String frameworkMirror = getValueFromEnvOrArgs(
       kFrameworkMirrorOption,
-      argResults,
+      argumentResults,
       platform.environment,
-    );
+    )!;
     final String engineUpstream = getValueFromEnvOrArgs(
       kEngineUpstreamOption,
-      argResults,
+      argumentResults,
       platform.environment,
-    );
+    )!;
     final String engineMirror = getValueFromEnvOrArgs(
       kEngineMirrorOption,
-      argResults,
+      argumentResults,
       platform.environment,
-    );
+    )!;
     final String candidateBranch = getValueFromEnvOrArgs(
       kCandidateOption,
-      argResults,
+      argumentResults,
       platform.environment,
-    );
+    )!;
     final String releaseChannel = getValueFromEnvOrArgs(
       kReleaseOption,
-      argResults,
+      argumentResults,
       platform.environment,
-    );
+    )!;
     final List<String> frameworkCherrypickRevisions = getValuesFromEnvOrArgs(
       kFrameworkCherrypicksOption,
-      argResults,
+      argumentResults,
       platform.environment,
     );
     final List<String> engineCherrypickRevisions = getValuesFromEnvOrArgs(
       kEngineCherrypicksOption,
-      argResults,
+      argumentResults,
       platform.environment,
     );
-    final String dartRevision = getValueFromEnvOrArgs(
+    final String? dartRevision = getValueFromEnvOrArgs(
       kDartRevisionOption,
-      argResults,
+      argumentResults,
       platform.environment,
       allowNull: true,
     );
     final String incrementLetter = getValueFromEnvOrArgs(
       kIncrementOption,
-      argResults,
+      argumentResults,
       platform.environment,
-    );
+    )!;
 
     if (!releaseCandidateBranchRegex.hasMatch(candidateBranch)) {
       throw ConductorException(
@@ -270,7 +269,7 @@ class StartCommand extends Command<void> {
       cherrypicks: engineCherrypicks,
       dartRevision: dartRevision,
       upstream: pb.Remote(name: 'upstream', url: engine.upstreamRemote.url),
-      mirror: pb.Remote(name: 'mirror', url: engine.mirrorRemote.url),
+      mirror: pb.Remote(name: 'mirror', url: engine.mirrorRemote!.url),
     );
     final FrameworkRepository framework = FrameworkRepository(
       checkouts,
@@ -328,7 +327,7 @@ class StartCommand extends Command<void> {
       checkoutPath: framework.checkoutDirectory.path,
       cherrypicks: frameworkCherrypicks,
       upstream: pb.Remote(name: 'upstream', url: framework.upstreamRemote.url),
-      mirror: pb.Remote(name: 'mirror', url: framework.mirrorRemote.url),
+      mirror: pb.Remote(name: 'mirror', url: framework.mirrorRemote!.url),
     );
 
     state.currentPhase = ReleasePhase.APPLY_ENGINE_CHERRYPICKS;
@@ -344,10 +343,10 @@ class StartCommand extends Command<void> {
 
   // To minimize merge conflicts, sort the commits by rev-list order.
   List<String> _sortCherrypicks({
-    @required Repository repository,
-    @required List<String> cherrypicks,
-    @required String upstreamRef,
-    @required String releaseRef,
+    required Repository repository,
+    required List<String> cherrypicks,
+    required String upstreamRef,
+    required String releaseRef,
   }) {
     if (cherrypicks.isEmpty) {
       return cherrypicks;

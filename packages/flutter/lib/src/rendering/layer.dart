@@ -611,7 +611,7 @@ class LayerHandle<T extends Layer> {
 
   /// The [Layer] whose resources this object keeps alive.
   ///
-  /// Setting a new value will or null dispose the previously held layer if
+  /// Setting a new value or null will dispose the previously held layer if
   /// there are no other open handles to that layer.
   T? get layer => _layer;
 

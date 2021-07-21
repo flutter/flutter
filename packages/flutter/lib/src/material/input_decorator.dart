@@ -2115,10 +2115,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     return themeData.fixTextFieldOutlineLabel
       ? style
         .copyWith(height: 1, color: decoration!.enabled ? color : themeData.disabledColor)
-        .merge(decoration!.labelStyle)
+        .merge(decoration!.floatingLabelStyle ?? decoration!.labelStyle)
       : style
         .copyWith(color: decoration!.enabled ? color : themeData.disabledColor)
-        .merge(decoration!.labelStyle);
+        .merge(decoration!.floatingLabelStyle ?? decoration!.labelStyle);
 
   }
 
@@ -2524,6 +2524,7 @@ class InputDecoration {
     this.label,
     this.labelText,
     this.labelStyle,
+    this.floatingLabelStyle,
     this.helperText,
     this.helperStyle,
     this.helperMaxLines,
@@ -2591,6 +2592,7 @@ class InputDecoration {
        label = null,
        labelText = null,
        labelStyle = null,
+       floatingLabelStyle = null,
        helperText = null,
        helperStyle = null,
        helperMaxLines = null,
@@ -2694,15 +2696,21 @@ class InputDecoration {
   /// Only one of [label] and [labelText] can be specified.
   final String? labelText;
 
-  /// The style to use for the [labelText] when the label is above (i.e.,
-  /// vertically adjacent to) the input field.
+  /// The style to use for the [labelText] when the label is on top of the
+  /// input field.
   ///
-  /// When the [labelText] is on top of the input field, the text uses the
-  /// [hintStyle] instead.
+  /// When the [labelText] is above (i.e., vertically adjacent to) the input
+  /// field, the text uses the [floatingLabelStyle] instead.
   ///
   /// If null, defaults to a value derived from the base [TextStyle] for the
   /// input field and the current [Theme].
   final TextStyle? labelStyle;
+
+  /// The style to use for the [labelText] when the label is above (i.e.,
+  /// vertically adjacent to) the input field.
+  ///
+  /// If null, defaults to [labelStyle].
+  final TextStyle? floatingLabelStyle;
 
   /// Text that provides context about the [InputDecorator.child]'s value, such
   /// as how the value will be used.
@@ -3367,6 +3375,7 @@ class InputDecoration {
     Widget? label,
     String? labelText,
     TextStyle? labelStyle,
+    TextStyle? floatingLabelStyle,
     String? helperText,
     TextStyle? helperStyle,
     int? helperMaxLines,
@@ -3414,6 +3423,7 @@ class InputDecoration {
       label: label ?? this.label,
       labelText: labelText ?? this.labelText,
       labelStyle: labelStyle ?? this.labelStyle,
+      floatingLabelStyle: floatingLabelStyle ?? this.floatingLabelStyle,
       helperText: helperText ?? this.helperText,
       helperStyle: helperStyle ?? this.helperStyle,
       helperMaxLines : helperMaxLines ?? this.helperMaxLines,
@@ -3466,6 +3476,7 @@ class InputDecoration {
   InputDecoration applyDefaults(InputDecorationTheme theme) {
     return copyWith(
       labelStyle: labelStyle ?? theme.labelStyle,
+      floatingLabelStyle: floatingLabelStyle ?? theme.floatingLabelStyle,
       helperStyle: helperStyle ?? theme.helperStyle,
       helperMaxLines : helperMaxLines ?? theme.helperMaxLines,
       hintStyle: hintStyle ?? theme.hintStyle,
@@ -3504,6 +3515,7 @@ class InputDecoration {
         && other.label == label
         && other.labelText == labelText
         && other.labelStyle == labelStyle
+        && other.floatingLabelStyle == floatingLabelStyle
         && other.helperText == helperText
         && other.helperStyle == helperStyle
         && other.helperMaxLines == helperMaxLines
@@ -3553,6 +3565,7 @@ class InputDecoration {
       icon,
       label,
       labelText,
+      floatingLabelStyle,
       labelStyle,
       helperText,
       helperStyle,
@@ -3607,6 +3620,7 @@ class InputDecoration {
       if (icon != null) 'icon: $icon',
       if (label != null) 'label: $label',
       if (labelText != null) 'labelText: "$labelText"',
+      if (floatingLabelStyle != null) 'floatingLabelStyle: "$floatingLabelStyle"',
       if (helperText != null) 'helperText: "$helperText"',
       if (helperMaxLines != null) 'helperMaxLines: "$helperMaxLines"',
       if (hintText != null) 'hintText: "$hintText"',
@@ -3668,6 +3682,7 @@ class InputDecorationTheme with Diagnosticable {
   /// not be null.
   const InputDecorationTheme({
     this.labelStyle,
+    this.floatingLabelStyle,
     this.helperStyle,
     this.helperMaxLines,
     this.hintStyle,
@@ -3697,15 +3712,24 @@ class InputDecorationTheme with Diagnosticable {
        assert(filled != null),
        assert(alignLabelWithHint != null);
 
-  /// The style to use for [InputDecoration.labelText] when the label is
-  /// above (i.e., vertically adjacent to) the input field.
+  /// The style to use for [InputDecoration.labelText] when the label is on top
+  /// of the input field.
   ///
-  /// When the [InputDecoration.labelText] is on top of the input field, the
-  /// text uses the [hintStyle] instead.
+  /// When the [InputDecoration.labelText] is floating above the input field,
+  /// the text uses the [floatingLabelStyle] instead.
   ///
   /// If null, defaults to a value derived from the base [TextStyle] for the
   /// input field and the current [Theme].
   final TextStyle? labelStyle;
+
+  /// The style to use for [InputDecoration.labelText] when the label is
+  /// above (i.e., vertically adjacent to) the input field.
+  ///
+  /// When the [InputDecoration.labelText] is on top of the input field, the
+  /// text uses the [labelStyle] instead.
+  ///
+  /// If null, defaults to [labelStyle].
+  final TextStyle? floatingLabelStyle;
 
   /// The style to use for [InputDecoration.helperText].
   final TextStyle? helperStyle;
@@ -4016,6 +4040,7 @@ class InputDecorationTheme with Diagnosticable {
   /// new values.
   InputDecorationTheme copyWith({
     TextStyle? labelStyle,
+    TextStyle? floatingLabelStyle,
     TextStyle? helperStyle,
     int? helperMaxLines,
     TextStyle? hintStyle,
@@ -4043,6 +4068,7 @@ class InputDecorationTheme with Diagnosticable {
   }) {
     return InputDecorationTheme(
       labelStyle: labelStyle ?? this.labelStyle,
+      floatingLabelStyle: floatingLabelStyle ?? this.floatingLabelStyle,
       helperStyle: helperStyle ?? this.helperStyle,
       helperMaxLines: helperMaxLines ?? this.helperMaxLines,
       hintStyle: hintStyle ?? this.hintStyle,
@@ -4074,6 +4100,7 @@ class InputDecorationTheme with Diagnosticable {
   int get hashCode {
     return hashList(<dynamic>[
       labelStyle,
+      floatingLabelStyle,
       helperStyle,
       helperMaxLines,
       hintStyle,
@@ -4109,6 +4136,7 @@ class InputDecorationTheme with Diagnosticable {
       return false;
     return other is InputDecorationTheme
         && other.labelStyle == labelStyle
+        && other.floatingLabelStyle == floatingLabelStyle
         && other.helperStyle == helperStyle
         && other.helperMaxLines == helperMaxLines
         && other.hintStyle == hintStyle
@@ -4141,6 +4169,7 @@ class InputDecorationTheme with Diagnosticable {
     super.debugFillProperties(properties);
     const InputDecorationTheme defaultTheme = InputDecorationTheme();
     properties.add(DiagnosticsProperty<TextStyle>('labelStyle', labelStyle, defaultValue: defaultTheme.labelStyle));
+    properties.add(DiagnosticsProperty<TextStyle>('floatingLabelStyle', floatingLabelStyle, defaultValue: defaultTheme.floatingLabelStyle));
     properties.add(DiagnosticsProperty<TextStyle>('helperStyle', helperStyle, defaultValue: defaultTheme.helperStyle));
     properties.add(IntProperty('helperMaxLines', helperMaxLines, defaultValue: defaultTheme.helperMaxLines));
     properties.add(DiagnosticsProperty<TextStyle>('hintStyle', hintStyle, defaultValue: defaultTheme.hintStyle));

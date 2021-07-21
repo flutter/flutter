@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import '../framework/devices.dart';
 import '../framework/framework.dart';
 import '../framework/task_result.dart';
@@ -91,6 +89,13 @@ TaskFunction createEndToEndKeyboardTest() {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',
     'lib/keyboard_resize.dart',
+  );
+}
+
+TaskFunction createEndToEndFrameNumberTest() {
+  return DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/ui',
+    'lib/frame_number.dart',
   );
 }
 

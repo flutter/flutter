@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:convert' show jsonDecode, jsonEncode;
 
 import 'package:file/file.dart' show File;
@@ -29,9 +27,12 @@ String luciConsoleLink(String channel, String groupName) {
 }
 
 String defaultStateFilePath(Platform platform) {
-  assert(platform.environment['HOME'] != null);
+  final String? home = platform.environment['HOME'];
+  if (home == null) {
+    throw ConductorException(r'Environment variable $HOME must be set!');
+  }
   return <String>[
-    platform.environment['HOME'],
+    home,
     kStateFileName,
   ].join(platform.pathSeparator);
 }
@@ -170,12 +171,13 @@ String phaseInstructions(pb.ConductorState state) {
 ///
 /// Will throw a [ConductorException] if [ReleasePhase.RELEASE_COMPLETED] is
 /// passed as an argument, as there is no next phase.
-ReleasePhase getNextPhase(ReleasePhase previousPhase) {
-  assert(previousPhase != null);
-  if (previousPhase == ReleasePhase.RELEASE_COMPLETED) {
+ReleasePhase getNextPhase(ReleasePhase currentPhase) {
+  assert(currentPhase != null);
+  final ReleasePhase? nextPhase = ReleasePhase.valueOf(currentPhase.value + 1);
+  if (nextPhase == null) {
     throw ConductorException('There is no next ReleasePhase!');
   }
-  return ReleasePhase.valueOf(previousPhase.value + 1);
+  return nextPhase;
 }
 
 void writeStateToFile(File file, pb.ConductorState state, List<String> logs) {

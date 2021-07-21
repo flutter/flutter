@@ -6,7 +6,7 @@
 //  Generated code. Do not modify.
 //  source: conductor_state.proto
 //
-// @dart = 2.7
+// @dart = 2.12
 // ignore_for_file: annotate_overrides,camel_case_types,unnecessary_const,non_constant_identifier_names,library_prefixes,unused_import,unused_shown_name,return_of_invalid_type,unnecessary_this,prefer_final_fields
 
 // ignore_for_file: UNDEFINED_SHOWN_NAME
@@ -40,7 +40,7 @@ class ReleasePhase extends $pb.ProtobufEnum {
   ];
 
   static final $core.Map<$core.int, ReleasePhase> _byValue = $pb.ProtobufEnum.initByValue(values);
-  static ReleasePhase valueOf($core.int value) => _byValue[value];
+  static ReleasePhase? valueOf($core.int value) => _byValue[value];
 
   const ReleasePhase._($core.int v, $core.String n) : super(v, n);
 }
@@ -63,7 +63,7 @@ class CherrypickState extends $pb.ProtobufEnum {
   ];
 
   static final $core.Map<$core.int, CherrypickState> _byValue = $pb.ProtobufEnum.initByValue(values);
-  static CherrypickState valueOf($core.int value) => _byValue[value];
+  static CherrypickState? valueOf($core.int value) => _byValue[value];
 
   const CherrypickState._($core.int v, $core.String n) : super(v, n);
 }
