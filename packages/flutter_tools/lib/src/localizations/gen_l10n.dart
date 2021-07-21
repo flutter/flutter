@@ -280,9 +280,8 @@ String _generateSelectMethod(Message message, String translationForMessage) {
 
   final List<String> cases = <String>[];
 
-  final RegExp selectRE = RegExp(r'\{([\w\s,]*),\s*select\s*,\s*([\w\d]+\s*\{.*\})+\s*\}');
-
-  final RegExpMatch? selectMatch = selectRE.firstMatch(translationForMessage);
+  final RegExpMatch? selectMatch =
+    LocalizationsGenerator._selectRE.firstMatch(translationForMessage);
   String? choice;
   if (selectMatch != null && selectMatch.groupCount == 2) {
     choice = selectMatch.group(1);
@@ -832,6 +831,8 @@ class LocalizationsGenerator {
   /// Resource attributes provide metadata about the message.
   @visibleForTesting
   final bool areResourceAttributesRequired;
+
+  static RegExp _selectRE = RegExp(r'\{([\w\s,]*),\s*select\s*,\s*([\w\d]+\s*\{.*\})+\s*\}');
 
   static bool _isNotReadable(FileStat fileStat) {
     final String rawStatString = fileStat.modeString();
