@@ -2659,7 +2659,7 @@ class InputDecoration {
   ///       decoration: InputDecoration(
   ///         label: Text.rich(
   ///           TextSpan(
-  ///             children: [
+  ///             children: <InlineSpan>[
   ///               WidgetSpan(
   ///                 child: Text(
   ///                   'Username',
