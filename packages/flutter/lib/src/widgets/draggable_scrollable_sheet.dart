@@ -452,7 +452,7 @@ class _DraggableScrollableSheetScrollController extends ScrollController {
     String? debugLabel,
     required this.extent,
   }) : assert(extent != null),
-         super(
+       super(
          debugLabel: debugLabel,
          initialScrollOffset: initialScrollOffset,
        );
