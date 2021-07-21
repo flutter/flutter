@@ -113,18 +113,28 @@ class KeyboardKeyEmbedderHandler
   // key they're last seen.
   std::map<UINT, CriticalKey> critical_keys_;
 
-  static uint64_t getPhysicalKey(int scancode, bool extended);
-  static uint64_t getLogicalKey(int key, bool extended, int scancode);
+  static uint64_t GetPhysicalKey(int scancode, bool extended);
+  static uint64_t GetLogicalKey(int key, bool extended, int scancode);
   static void HandleResponse(bool handled, void* user_data);
   static void ConvertUtf32ToUtf8_(char* out, char32_t ch);
   static FlutterKeyEvent SynthesizeSimpleEvent(FlutterKeyEventType type,
                                                uint64_t physical,
                                                uint64_t logical,
                                                const char* character);
+  static uint64_t ApplyPlaneToId(uint64_t id, uint64_t plane);
 
   static std::map<uint64_t, uint64_t> windowsToPhysicalMap_;
   static std::map<uint64_t, uint64_t> windowsToLogicalMap_;
   static std::map<uint64_t, uint64_t> scanCodeToLogicalMap_;
+
+  // Mask for the 32-bit value portion of the key code.
+  static const uint64_t valueMask;
+
+  // The plane value for keys which have a Unicode representation.
+  static const uint64_t unicodePlane;
+
+  // The plane value for the private keys defined by the GTK embedding.
+  static const uint64_t windowsPlane;
 };
 
 }  // namespace flutter

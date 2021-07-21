@@ -237,177 +237,177 @@ std::map<uint64_t, uint64_t> xkb_to_physical_key_map = {
 };
 
 std::map<uint64_t, uint64_t> gtk_keyval_to_logical_key_map = {
-    {0x000000a5, 0x01100070089},  // yen
-    {0x0000fd06, 0x01000000405},  // 3270_EraseEOF
-    {0x0000fd0e, 0x01000000503},  // 3270_Attn
-    {0x0000fd15, 0x01000000402},  // 3270_Copy
-    {0x0000fd16, 0x01000000d2f},  // 3270_Play
-    {0x0000fd1b, 0x01000000406},  // 3270_ExSelect
-    {0x0000fd1d, 0x01000000608},  // 3270_PrintScreen
-    {0x0000fd1e, 0x0100000000d},  // 3270_Enter
-    {0x0000fe03, 0x40000000102},  // ISO_Level3_Shift
-    {0x0000fe08, 0x01000000709},  // ISO_Next_Group
-    {0x0000fe0a, 0x0100000070a},  // ISO_Prev_Group
-    {0x0000fe0c, 0x01000000707},  // ISO_First_Group
-    {0x0000fe0e, 0x01000000708},  // ISO_Last_Group
-    {0x0000fe20, 0x01000000009},  // ISO_Left_Tab
-    {0x0000fe34, 0x0100000000d},  // ISO_Enter
-    {0x0000ff08, 0x01000000008},  // BackSpace
-    {0x0000ff09, 0x01000000009},  // Tab
-    {0x0000ff0b, 0x01000000401},  // Clear
-    {0x0000ff0d, 0x0100000000d},  // Return
-    {0x0000ff13, 0x01000000509},  // Pause
-    {0x0000ff14, 0x0100000010c},  // Scroll_Lock
-    {0x0000ff1b, 0x0100000001b},  // Escape
-    {0x0000ff21, 0x01000000719},  // Kanji
-    {0x0000ff24, 0x0100000071b},  // Romaji
-    {0x0000ff25, 0x01000000716},  // Hiragana
-    {0x0000ff26, 0x0100000071a},  // Katakana
-    {0x0000ff27, 0x01000000717},  // Hiragana_Katakana
-    {0x0000ff28, 0x0100000071c},  // Zenkaku
-    {0x0000ff29, 0x01000000715},  // Hankaku
-    {0x0000ff2a, 0x0100000071d},  // Zenkaku_Hankaku
-    {0x0000ff2f, 0x01000000714},  // Eisu_Shift
-    {0x0000ff31, 0x01000000711},  // Hangul
-    {0x0000ff34, 0x01000000712},  // Hangul_Hanja
-    {0x0000ff37, 0x01000000703},  // Codeinput
-    {0x0000ff3c, 0x01000000710},  // SingleCandidate
-    {0x0000ff3e, 0x0100000070e},  // PreviousCandidate
-    {0x0000ff50, 0x01000000306},  // Home
-    {0x0000ff51, 0x01000000302},  // Left
-    {0x0000ff52, 0x01000000304},  // Up
-    {0x0000ff53, 0x01000000303},  // Right
-    {0x0000ff54, 0x01000000301},  // Down
-    {0x0000ff55, 0x01000000308},  // Page_Up
-    {0x0000ff56, 0x01000000307},  // Page_Down
-    {0x0000ff57, 0x01000000305},  // End
-    {0x0000ff60, 0x0100000050c},  // Select
-    {0x0000ff61, 0x01000000a0c},  // Print
-    {0x0000ff62, 0x01000000506},  // Execute
-    {0x0000ff63, 0x01000000407},  // Insert
-    {0x0000ff65, 0x0100000040a},  // Undo
-    {0x0000ff66, 0x01000000409},  // Redo
-    {0x0000ff67, 0x01000000505},  // Menu
-    {0x0000ff68, 0x01000000507},  // Find
-    {0x0000ff69, 0x01000000504},  // Cancel
-    {0x0000ff6a, 0x01000000508},  // Help
-    {0x0000ff7e, 0x0100000070b},  // Mode_switch
-    {0x0000ff7f, 0x0100000010a},  // Num_Lock
+    {0x000000a5, 0x00200000022},  // yen
+    {0x0000fd06, 0x00100000405},  // 3270_EraseEOF
+    {0x0000fd0e, 0x00100000503},  // 3270_Attn
+    {0x0000fd15, 0x00100000402},  // 3270_Copy
+    {0x0000fd16, 0x00100000d2f},  // 3270_Play
+    {0x0000fd1b, 0x00100000406},  // 3270_ExSelect
+    {0x0000fd1d, 0x00100000608},  // 3270_PrintScreen
+    {0x0000fd1e, 0x0010000000d},  // 3270_Enter
+    {0x0000fe03, 0x00200000105},  // ISO_Level3_Shift
+    {0x0000fe08, 0x00100000709},  // ISO_Next_Group
+    {0x0000fe0a, 0x0010000070a},  // ISO_Prev_Group
+    {0x0000fe0c, 0x00100000707},  // ISO_First_Group
+    {0x0000fe0e, 0x00100000708},  // ISO_Last_Group
+    {0x0000fe20, 0x00100000009},  // ISO_Left_Tab
+    {0x0000fe34, 0x0010000000d},  // ISO_Enter
+    {0x0000ff08, 0x00100000008},  // BackSpace
+    {0x0000ff09, 0x00100000009},  // Tab
+    {0x0000ff0b, 0x00100000401},  // Clear
+    {0x0000ff0d, 0x0010000000d},  // Return
+    {0x0000ff13, 0x00100000509},  // Pause
+    {0x0000ff14, 0x0010000010c},  // Scroll_Lock
+    {0x0000ff1b, 0x0010000001b},  // Escape
+    {0x0000ff21, 0x00100000719},  // Kanji
+    {0x0000ff24, 0x0010000071b},  // Romaji
+    {0x0000ff25, 0x00100000716},  // Hiragana
+    {0x0000ff26, 0x0010000071a},  // Katakana
+    {0x0000ff27, 0x00100000717},  // Hiragana_Katakana
+    {0x0000ff28, 0x0010000071c},  // Zenkaku
+    {0x0000ff29, 0x00100000715},  // Hankaku
+    {0x0000ff2a, 0x0010000071d},  // Zenkaku_Hankaku
+    {0x0000ff2f, 0x00100000714},  // Eisu_Shift
+    {0x0000ff31, 0x00100000711},  // Hangul
+    {0x0000ff34, 0x00100000712},  // Hangul_Hanja
+    {0x0000ff37, 0x00100000703},  // Codeinput
+    {0x0000ff3c, 0x00100000710},  // SingleCandidate
+    {0x0000ff3e, 0x0010000070e},  // PreviousCandidate
+    {0x0000ff50, 0x00100000306},  // Home
+    {0x0000ff51, 0x00100000302},  // Left
+    {0x0000ff52, 0x00100000304},  // Up
+    {0x0000ff53, 0x00100000303},  // Right
+    {0x0000ff54, 0x00100000301},  // Down
+    {0x0000ff55, 0x00100000308},  // Page_Up
+    {0x0000ff56, 0x00100000307},  // Page_Down
+    {0x0000ff57, 0x00100000305},  // End
+    {0x0000ff60, 0x0010000050c},  // Select
+    {0x0000ff61, 0x00100000a0c},  // Print
+    {0x0000ff62, 0x00100000506},  // Execute
+    {0x0000ff63, 0x00100000407},  // Insert
+    {0x0000ff65, 0x0010000040a},  // Undo
+    {0x0000ff66, 0x00100000409},  // Redo
+    {0x0000ff67, 0x00100000505},  // Menu
+    {0x0000ff68, 0x00100000507},  // Find
+    {0x0000ff69, 0x00100000504},  // Cancel
+    {0x0000ff6a, 0x00100000508},  // Help
+    {0x0000ff7e, 0x0010000070b},  // Mode_switch
+    {0x0000ff7f, 0x0010000010a},  // Num_Lock
     {0x0000ff80, 0x00000000020},  // KP_Space
-    {0x0000ff89, 0x01000000009},  // KP_Tab
-    {0x0000ff8d, 0x5000000000d},  // KP_Enter
-    {0x0000ff91, 0x01000000801},  // KP_F1
-    {0x0000ff92, 0x01000000802},  // KP_F2
-    {0x0000ff93, 0x01000000803},  // KP_F3
-    {0x0000ff94, 0x01000000804},  // KP_F4
-    {0x0000ff95, 0x50000000037},  // KP_Home
-    {0x0000ff96, 0x50000000034},  // KP_Left
-    {0x0000ff97, 0x50000000038},  // KP_Up
-    {0x0000ff98, 0x50000000036},  // KP_Right
-    {0x0000ff99, 0x50000000032},  // KP_Down
-    {0x0000ff9a, 0x50000000039},  // KP_Page_Up
-    {0x0000ff9b, 0x50000000033},  // KP_Page_Down
-    {0x0000ff9c, 0x50000000031},  // KP_End
-    {0x0000ff9e, 0x50000000030},  // KP_Insert
-    {0x0000ff9f, 0x5000000002e},  // KP_Delete
-    {0x0000ffaa, 0x5000000002a},  // KP_Multiply
-    {0x0000ffab, 0x5000000002b},  // KP_Add
-    {0x0000ffad, 0x5000000002d},  // KP_Subtract
+    {0x0000ff89, 0x00100000009},  // KP_Tab
+    {0x0000ff8d, 0x0020000020d},  // KP_Enter
+    {0x0000ff91, 0x00100000801},  // KP_F1
+    {0x0000ff92, 0x00100000802},  // KP_F2
+    {0x0000ff93, 0x00100000803},  // KP_F3
+    {0x0000ff94, 0x00100000804},  // KP_F4
+    {0x0000ff95, 0x00200000237},  // KP_Home
+    {0x0000ff96, 0x00200000234},  // KP_Left
+    {0x0000ff97, 0x00200000238},  // KP_Up
+    {0x0000ff98, 0x00200000236},  // KP_Right
+    {0x0000ff99, 0x00200000232},  // KP_Down
+    {0x0000ff9a, 0x00200000239},  // KP_Page_Up
+    {0x0000ff9b, 0x00200000233},  // KP_Page_Down
+    {0x0000ff9c, 0x00200000231},  // KP_End
+    {0x0000ff9e, 0x00200000230},  // KP_Insert
+    {0x0000ff9f, 0x0020000022e},  // KP_Delete
+    {0x0000ffaa, 0x0020000022a},  // KP_Multiply
+    {0x0000ffab, 0x0020000022b},  // KP_Add
+    {0x0000ffad, 0x0020000022d},  // KP_Subtract
     {0x0000ffae, 0x0000000002e},  // KP_Decimal
-    {0x0000ffaf, 0x5000000002f},  // KP_Divide
-    {0x0000ffb0, 0x50000000030},  // KP_0
-    {0x0000ffb1, 0x50000000031},  // KP_1
-    {0x0000ffb2, 0x50000000032},  // KP_2
-    {0x0000ffb3, 0x50000000033},  // KP_3
-    {0x0000ffb4, 0x50000000034},  // KP_4
-    {0x0000ffb5, 0x50000000035},  // KP_5
-    {0x0000ffb6, 0x50000000036},  // KP_6
-    {0x0000ffb7, 0x50000000037},  // KP_7
-    {0x0000ffb8, 0x50000000038},  // KP_8
-    {0x0000ffb9, 0x50000000039},  // KP_9
-    {0x0000ffbd, 0x5000000003d},  // KP_Equal
-    {0x0000ffbe, 0x01000000801},  // F1
-    {0x0000ffbf, 0x01000000802},  // F2
-    {0x0000ffc0, 0x01000000803},  // F3
-    {0x0000ffc1, 0x01000000804},  // F4
-    {0x0000ffc2, 0x01000000805},  // F5
-    {0x0000ffc3, 0x01000000806},  // F6
-    {0x0000ffc4, 0x01000000807},  // F7
-    {0x0000ffc5, 0x01000000808},  // F8
-    {0x0000ffc6, 0x01000000809},  // F9
-    {0x0000ffc7, 0x0100000080a},  // F10
-    {0x0000ffc8, 0x0100000080b},  // F11
-    {0x0000ffc9, 0x0100000080c},  // F12
-    {0x0000ffca, 0x0100000080d},  // F13
-    {0x0000ffcb, 0x0100000080e},  // F14
-    {0x0000ffcc, 0x0100000080f},  // F15
-    {0x0000ffcd, 0x01000000810},  // F16
-    {0x0000ffce, 0x01000000811},  // F17
-    {0x0000ffcf, 0x01000000812},  // F18
-    {0x0000ffd0, 0x01000000813},  // F19
-    {0x0000ffd1, 0x01000000814},  // F20
-    {0x0000ffd2, 0x01000000815},  // F21
-    {0x0000ffd3, 0x01000000816},  // F22
-    {0x0000ffd4, 0x01000000817},  // F23
-    {0x0000ffd5, 0x01000000818},  // F24
-    {0x0000ffe1, 0x3000000010d},  // Shift_L
-    {0x0000ffe2, 0x4000000010d},  // Shift_R
-    {0x0000ffe3, 0x30000000105},  // Control_L
-    {0x0000ffe4, 0x40000000105},  // Control_R
-    {0x0000ffe5, 0x01000000104},  // Caps_Lock
-    {0x0000ffe7, 0x30000000109},  // Meta_L
-    {0x0000ffe8, 0x40000000109},  // Meta_R
-    {0x0000ffe9, 0x30000000102},  // Alt_L
-    {0x0000ffea, 0x40000000102},  // Alt_R
-    {0x0000ffeb, 0x0100000010e},  // Super_L
-    {0x0000ffec, 0x0100000010e},  // Super_R
-    {0x0000ffed, 0x01000000108},  // Hyper_L
-    {0x0000ffee, 0x01000000108},  // Hyper_R
-    {0x0000ffff, 0x0100000007f},  // Delete
-    {0x1008ff02, 0x01000000602},  // MonBrightnessUp
-    {0x1008ff03, 0x01000000601},  // MonBrightnessDown
-    {0x1008ff10, 0x0100000060a},  // Standby
-    {0x1008ff11, 0x01000000a0f},  // AudioLowerVolume
-    {0x1008ff12, 0x01000000a11},  // AudioMute
-    {0x1008ff13, 0x01000000a10},  // AudioRaiseVolume
-    {0x1008ff14, 0x01000000d2f},  // AudioPlay
-    {0x1008ff15, 0x01000000a07},  // AudioStop
-    {0x1008ff16, 0x01000000a09},  // AudioPrev
-    {0x1008ff17, 0x01000000a08},  // AudioNext
-    {0x1008ff18, 0x01000000c04},  // HomePage
-    {0x1008ff19, 0x01000000b03},  // Mail
-    {0x1008ff1b, 0x01000000c06},  // Search
-    {0x1008ff1c, 0x01000000d30},  // AudioRecord
-    {0x1008ff20, 0x01000000b02},  // Calendar
-    {0x1008ff26, 0x01000000c01},  // Back
-    {0x1008ff27, 0x01000000c03},  // Forward
-    {0x1008ff28, 0x01000000c07},  // Stop
-    {0x1008ff29, 0x01000000c05},  // Refresh
-    {0x1008ff2a, 0x01000000607},  // PowerOff
-    {0x1008ff2b, 0x0100000060b},  // WakeUp
-    {0x1008ff2c, 0x01000000604},  // Eject
-    {0x1008ff2d, 0x01000000b07},  // ScreenSaver
-    {0x1008ff2f, 0x01100010082},  // Sleep
-    {0x1008ff30, 0x01000000c02},  // Favorites
-    {0x1008ff31, 0x01000000d2e},  // AudioPause
-    {0x1008ff3e, 0x01000000d31},  // AudioRewind
-    {0x1008ff56, 0x01000000a01},  // Close
-    {0x1008ff57, 0x01000000402},  // Copy
-    {0x1008ff58, 0x01000000404},  // Cut
-    {0x1008ff61, 0x01000000605},  // LogOff
-    {0x1008ff68, 0x01000000a0a},  // New
-    {0x1008ff6b, 0x01000000a0b},  // Open
-    {0x1008ff6d, 0x01000000408},  // Paste
-    {0x1008ff6e, 0x01000000b0d},  // Phone
-    {0x1008ff72, 0x01000000a03},  // Reply
-    {0x1008ff77, 0x01000000a0d},  // Save
-    {0x1008ff7b, 0x01000000a04},  // Send
-    {0x1008ff7c, 0x01000000a0e},  // Spell
-    {0x1008ff8b, 0x0100000050d},  // ZoomIn
-    {0x1008ff8c, 0x0100000050e},  // ZoomOut
-    {0x1008ff90, 0x01000000a02},  // MailForward
-    {0x1008ff97, 0x01000000d2c},  // AudioForward
-    {0x1008ffa7, 0x01100000014},  // Suspend
+    {0x0000ffaf, 0x0020000022f},  // KP_Divide
+    {0x0000ffb0, 0x00200000230},  // KP_0
+    {0x0000ffb1, 0x00200000231},  // KP_1
+    {0x0000ffb2, 0x00200000232},  // KP_2
+    {0x0000ffb3, 0x00200000233},  // KP_3
+    {0x0000ffb4, 0x00200000234},  // KP_4
+    {0x0000ffb5, 0x00200000235},  // KP_5
+    {0x0000ffb6, 0x00200000236},  // KP_6
+    {0x0000ffb7, 0x00200000237},  // KP_7
+    {0x0000ffb8, 0x00200000238},  // KP_8
+    {0x0000ffb9, 0x00200000239},  // KP_9
+    {0x0000ffbd, 0x0020000023d},  // KP_Equal
+    {0x0000ffbe, 0x00100000801},  // F1
+    {0x0000ffbf, 0x00100000802},  // F2
+    {0x0000ffc0, 0x00100000803},  // F3
+    {0x0000ffc1, 0x00100000804},  // F4
+    {0x0000ffc2, 0x00100000805},  // F5
+    {0x0000ffc3, 0x00100000806},  // F6
+    {0x0000ffc4, 0x00100000807},  // F7
+    {0x0000ffc5, 0x00100000808},  // F8
+    {0x0000ffc6, 0x00100000809},  // F9
+    {0x0000ffc7, 0x0010000080a},  // F10
+    {0x0000ffc8, 0x0010000080b},  // F11
+    {0x0000ffc9, 0x0010000080c},  // F12
+    {0x0000ffca, 0x0010000080d},  // F13
+    {0x0000ffcb, 0x0010000080e},  // F14
+    {0x0000ffcc, 0x0010000080f},  // F15
+    {0x0000ffcd, 0x00100000810},  // F16
+    {0x0000ffce, 0x00100000811},  // F17
+    {0x0000ffcf, 0x00100000812},  // F18
+    {0x0000ffd0, 0x00100000813},  // F19
+    {0x0000ffd1, 0x00100000814},  // F20
+    {0x0000ffd2, 0x00100000815},  // F21
+    {0x0000ffd3, 0x00100000816},  // F22
+    {0x0000ffd4, 0x00100000817},  // F23
+    {0x0000ffd5, 0x00100000818},  // F24
+    {0x0000ffe1, 0x00200000102},  // Shift_L
+    {0x0000ffe2, 0x00200000103},  // Shift_R
+    {0x0000ffe3, 0x00200000100},  // Control_L
+    {0x0000ffe4, 0x00200000101},  // Control_R
+    {0x0000ffe5, 0x00100000104},  // Caps_Lock
+    {0x0000ffe7, 0x00200000106},  // Meta_L
+    {0x0000ffe8, 0x00200000107},  // Meta_R
+    {0x0000ffe9, 0x00200000104},  // Alt_L
+    {0x0000ffea, 0x00200000105},  // Alt_R
+    {0x0000ffeb, 0x0010000010e},  // Super_L
+    {0x0000ffec, 0x0010000010e},  // Super_R
+    {0x0000ffed, 0x00100000108},  // Hyper_L
+    {0x0000ffee, 0x00100000108},  // Hyper_R
+    {0x0000ffff, 0x0010000007f},  // Delete
+    {0x1008ff02, 0x00100000602},  // MonBrightnessUp
+    {0x1008ff03, 0x00100000601},  // MonBrightnessDown
+    {0x1008ff10, 0x0010000060a},  // Standby
+    {0x1008ff11, 0x00100000a0f},  // AudioLowerVolume
+    {0x1008ff12, 0x00100000a11},  // AudioMute
+    {0x1008ff13, 0x00100000a10},  // AudioRaiseVolume
+    {0x1008ff14, 0x00100000d2f},  // AudioPlay
+    {0x1008ff15, 0x00100000a07},  // AudioStop
+    {0x1008ff16, 0x00100000a09},  // AudioPrev
+    {0x1008ff17, 0x00100000a08},  // AudioNext
+    {0x1008ff18, 0x00100000c04},  // HomePage
+    {0x1008ff19, 0x00100000b03},  // Mail
+    {0x1008ff1b, 0x00100000c06},  // Search
+    {0x1008ff1c, 0x00100000d30},  // AudioRecord
+    {0x1008ff20, 0x00100000b02},  // Calendar
+    {0x1008ff26, 0x00100000c01},  // Back
+    {0x1008ff27, 0x00100000c03},  // Forward
+    {0x1008ff28, 0x00100000c07},  // Stop
+    {0x1008ff29, 0x00100000c05},  // Refresh
+    {0x1008ff2a, 0x00100000607},  // PowerOff
+    {0x1008ff2b, 0x0010000060b},  // WakeUp
+    {0x1008ff2c, 0x00100000604},  // Eject
+    {0x1008ff2d, 0x00100000b07},  // ScreenSaver
+    {0x1008ff2f, 0x00200000002},  // Sleep
+    {0x1008ff30, 0x00100000c02},  // Favorites
+    {0x1008ff31, 0x00100000d2e},  // AudioPause
+    {0x1008ff3e, 0x00100000d31},  // AudioRewind
+    {0x1008ff56, 0x00100000a01},  // Close
+    {0x1008ff57, 0x00100000402},  // Copy
+    {0x1008ff58, 0x00100000404},  // Cut
+    {0x1008ff61, 0x00100000605},  // LogOff
+    {0x1008ff68, 0x00100000a0a},  // New
+    {0x1008ff6b, 0x00100000a0b},  // Open
+    {0x1008ff6d, 0x00100000408},  // Paste
+    {0x1008ff6e, 0x00100000b0d},  // Phone
+    {0x1008ff72, 0x00100000a03},  // Reply
+    {0x1008ff77, 0x00100000a0d},  // Save
+    {0x1008ff7b, 0x00100000a04},  // Send
+    {0x1008ff7c, 0x00100000a0e},  // Spell
+    {0x1008ff8b, 0x0010000050d},  // ZoomIn
+    {0x1008ff8c, 0x0010000050e},  // ZoomOut
+    {0x1008ff90, 0x00100000a02},  // MailForward
+    {0x1008ff97, 0x00100000d2c},  // AudioForward
+    {0x1008ffa7, 0x00200000000},  // Suspend
 };
 
 void initialize_modifier_bit_to_checked_keys(GHashTable* table) {
@@ -417,29 +417,29 @@ void initialize_modifier_bit_to_checked_keys(GHashTable* table) {
   g_hash_table_insert(table, GUINT_TO_POINTER(GDK_SHIFT_MASK), data);
   data->is_caps_lock = false;
   data->primary_physical_key = 0x0000700e1;     // shiftLeft
-  data->primary_logical_key = 0x3000000010d;    // shiftLeft
-  data->secondary_logical_key = 0x4000000010d;  // shiftRight
+  data->primary_logical_key = 0x00200000102;    // shiftLeft
+  data->secondary_logical_key = 0x00200000103;  // shiftRight
 
   data = g_new(FlKeyEmbedderCheckedKey, 1);
   g_hash_table_insert(table, GUINT_TO_POINTER(GDK_CONTROL_MASK), data);
   data->is_caps_lock = false;
   data->primary_physical_key = 0x0000700e0;     // controlLeft
-  data->primary_logical_key = 0x30000000105;    // controlLeft
-  data->secondary_logical_key = 0x40000000105;  // controlRight
+  data->primary_logical_key = 0x00200000100;    // controlLeft
+  data->secondary_logical_key = 0x00200000101;  // controlRight
 
   data = g_new(FlKeyEmbedderCheckedKey, 1);
   g_hash_table_insert(table, GUINT_TO_POINTER(GDK_MOD1_MASK), data);
   data->is_caps_lock = false;
   data->primary_physical_key = 0x0000700e2;     // altLeft
-  data->primary_logical_key = 0x30000000102;    // altLeft
-  data->secondary_logical_key = 0x40000000102;  // altRight
+  data->primary_logical_key = 0x00200000104;    // altLeft
+  data->secondary_logical_key = 0x00200000105;  // altRight
 
   data = g_new(FlKeyEmbedderCheckedKey, 1);
   g_hash_table_insert(table, GUINT_TO_POINTER(GDK_META_MASK), data);
   data->is_caps_lock = false;
   data->primary_physical_key = 0x0000700e3;     // metaLeft
-  data->primary_logical_key = 0x30000000109;    // metaLeft
-  data->secondary_logical_key = 0x40000000109;  // metaRight
+  data->primary_logical_key = 0x00200000106;    // metaLeft
+  data->secondary_logical_key = 0x00200000107;  // metaRight
 }
 
 void initialize_lock_bit_to_checked_keys(GHashTable* table) {
@@ -449,11 +449,15 @@ void initialize_lock_bit_to_checked_keys(GHashTable* table) {
   g_hash_table_insert(table, GUINT_TO_POINTER(GDK_LOCK_MASK), data);
   data->is_caps_lock = true;
   data->primary_physical_key = 0x000070039;   // capsLock
-  data->primary_logical_key = 0x01000000104;  // capsLock
+  data->primary_logical_key = 0x00100000104;  // capsLock
 
   data = g_new(FlKeyEmbedderCheckedKey, 1);
   g_hash_table_insert(table, GUINT_TO_POINTER(GDK_MOD2_MASK), data);
   data->is_caps_lock = false;
   data->primary_physical_key = 0x000070053;   // numLock
-  data->primary_logical_key = 0x0100000010a;  // numLock
+  data->primary_logical_key = 0x0010000010a;  // numLock
 }
+
+const uint64_t kValueMask = 0x000ffffffff;
+const uint64_t kUnicodePlane = 0x00000000000;
+const uint64_t kGtkPlane = 0x01500000000;

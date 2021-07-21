@@ -27,4 +27,13 @@ void initialize_modifier_bit_to_checked_keys(GHashTable* table);
 
 void initialize_lock_bit_to_checked_keys(GHashTable* table);
 
+// Mask for the 32-bit value portion of the key code.
+extern const uint64_t kValueMask;
+
+// The plane value for keys which have a Unicode representation.
+extern const uint64_t kUnicodePlane;
+
+// The plane value for the private keys defined by the GTK embedding.
+extern const uint64_t kGtkPlane;
+
 #endif  // KEYBOARD_MAP_H_
