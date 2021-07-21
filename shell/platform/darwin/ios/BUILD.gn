@@ -258,6 +258,7 @@ shared_library("ios_test_flutter") {
     "//flutter/lib/ui:ui",
     "//flutter/shell/platform/darwin/common:framework_shared",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
+    "//flutter/shell/platform/embedder:embedder_test_utils",
     "//flutter/third_party/tonic",
     "//flutter/third_party/txt",
     "//third_party/ocmock:ocmock_shared",

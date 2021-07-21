@@ -6,6 +6,7 @@
 #import <OCMock/OCMock.h>
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEmbedderKeyResponder.h"
+#include "flutter/shell/platform/embedder/test_utils/key_codes.h"
 #import "flutter/testing/testing.h"
 #include "third_party/googletest/googletest/include/gtest/gtest.h"
 
@@ -68,23 +69,7 @@ constexpr uint64_t kKeyCodeNumpad1 = 0x53;
 constexpr uint64_t kKeyCodeF1 = 0x7a;
 constexpr uint64_t kKeyCodeAltRight = 0x3d;
 
-constexpr uint64_t kPhysicalKeyA = 0x00070004;
-constexpr uint64_t kPhysicalKeyW = 0x0007001a;
-constexpr uint64_t kPhysicalShiftLeft = 0x000700e1;
-constexpr uint64_t kPhysicalShiftRight = 0x000700e5;
-constexpr uint64_t kPhysicalCapsLock = 0x00070039;
-constexpr uint64_t kPhysicalNumpad1 = 0x00070059;
-constexpr uint64_t kPhysicalF1 = 0x0007003a;
-constexpr uint64_t kPhysicalAltRight = 0x000700e6;
-
-constexpr uint64_t kLogicalKeyA = 0x00000061;
-constexpr uint64_t kLogicalKeyW = 0x00000077;
-constexpr uint64_t kLogicalShiftLeft = 0x0030000010d;
-constexpr uint64_t kLogicalShiftRight = 0x0040000010d;
-constexpr uint64_t kLogicalCapsLock = 0x00000000104;
-constexpr uint64_t kLogicalNumpad1 = 0x00200000031;
-constexpr uint64_t kLogicalF1 = 0x00000000801;
-constexpr uint64_t kLogicalAltRight = 0x00400000102;
+using namespace ::flutter::testing::keycodes;
 
 typedef void (^ResponseCallback)(bool handled);
 

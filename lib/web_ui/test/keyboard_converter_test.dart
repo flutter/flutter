@@ -5,7 +5,7 @@
 import 'package:quiver/testing/async.dart';
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-import 'package:ui/src/engine/keyboard_binding.dart';
+import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:meta/meta.dart' show isTest;
 
@@ -13,28 +13,28 @@ const int kLocationLeft = 1;
 const int kLocationRight = 2;
 const int kLocationNumpad = 3;
 
-const int kPhysicalKeyA = 0x00070004;
-const int kPhysicalKeyE = 0x00070008;
-const int kPhysicalKeyU = 0x00070018;
-const int kPhysicalDigit1 = 0x0007001e;
-const int kPhysicalNumpad1 = 0x00070059;
-const int kPhysicalShiftLeft = 0x000700e1;
-const int kPhysicalShiftRight = 0x000700e5;
-const int kPhysicalMetaLeft = 0x000700e3;
-const int kPhysicalTab = 0x0007002b;
-const int kPhysicalCapsLock = 0x00070039;
-const int kPhysicalScrollLock = 0x00070047;
+final int kPhysicalKeyA = kWebToPhysicalKey['KeyA']!;
+final int kPhysicalKeyE = kWebToPhysicalKey['KeyE']!;
+final int kPhysicalKeyU = kWebToPhysicalKey['KeyU']!;
+final int kPhysicalDigit1 = kWebToPhysicalKey['Digit1']!;
+final int kPhysicalNumpad1 = kWebToPhysicalKey['Numpad1']!;
+final int kPhysicalShiftLeft = kWebToPhysicalKey['ShiftLeft']!;
+final int kPhysicalShiftRight = kWebToPhysicalKey['ShiftRight']!;
+final int kPhysicalMetaLeft = kWebToPhysicalKey['MetaLeft']!;
+final int kPhysicalTab = kWebToPhysicalKey['Tab']!;
+final int kPhysicalCapsLock = kWebToPhysicalKey['CapsLock']!;
+final int kPhysicalScrollLock = kWebToPhysicalKey['ScrollLock']!;
 
-const int kLogicalKeyA = 0x00000000061;
-const int kLogicalKeyU = 0x00000000075;
-const int kLogicalDigit1 = 0x00000000031;
-const int kLogicalNumpad1 = 0x00200000031;
-const int kLogicalShiftLeft = 0x030000010d;
-const int kLogicalShiftRight = 0x040000010d;
-const int kLogicalMetaLeft = 0x0300000109;
-const int kLogicalTab = 0x0000000009;
-const int kLogicalCapsLock = 0x00000000104;
-const int kLogicalScrollLock = 0x0000000010c;
+final int kLogicalKeyA = 0x00000000061;
+final int kLogicalKeyU = 0x00000000075;
+final int kLogicalDigit1 = 0x00000000031;
+final int kLogicalNumpad1 = kWebLogicalLocationMap['1']![kLocationNumpad]!;
+final int kLogicalShiftLeft = kWebLogicalLocationMap['Shift']![kLocationLeft]!;
+final int kLogicalShiftRight = kWebLogicalLocationMap['Shift']![kLocationRight]!;
+final int kLogicalMetaLeft = kWebLogicalLocationMap['Meta']![kLocationLeft]!;
+final int kLogicalTab = 0x0000000009;
+final int kLogicalCapsLock = kWebToLogicalKey['CapsLock']!;
+final int kLogicalScrollLock = kWebToLogicalKey['ScrollLock']!;
 
 typedef VoidCallback = void Function();
 
@@ -283,9 +283,9 @@ void testMain() {
     });
 
     // The absolute values of the following logical keys are not guaranteed.
-    const int kLogicalAltE = 0x410800070008;
-    const int kLogicalAltU = 0x410800070018;
-    const int kLogicalAltShiftE = 0x610800070008;
+    const int kLogicalAltE = 0x1740070008;
+    const int kLogicalAltU = 0x1740070018;
+    const int kLogicalAltShiftE = 0x1760070008;
     // The values must be distinguishable.
     expect(kLogicalAltE, isNot(equals(kLogicalAltU)));
     expect(kLogicalAltE, isNot(equals(kLogicalAltShiftE)));
