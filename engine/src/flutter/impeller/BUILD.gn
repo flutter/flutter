@@ -8,6 +8,7 @@ config("impeller_public_config") {
 
 group("impeller") {
   deps = [
+    "aiks",
     "base",
     "compiler",
     "compositor",
@@ -22,6 +23,7 @@ executable("impeller_unittests") {
   testonly = true
 
   deps = [
+    "aiks:aiks_unittests",
     "base:base_unittests",
     "compiler:compiler_unittests",
     "compositor:compositor_unittests",

@@ -32,16 +32,24 @@ void Canvas::Concat(const Matrix& xformation) {
   xformation_stack_.top() = xformation_stack_.top() * xformation;
 }
 
-void Canvas::Translate(const Size& offset) {
+const Matrix& Canvas::GetCurrentTransformation() const {
+  return xformation_stack_.top();
+}
+
+void Canvas::Translate(const Vector3& offset) {
   Concat(Matrix::MakeTranslation(offset));
 }
 
-void Canvas::Scale(const Size& scale) {
+void Canvas::Scale(const Vector3& scale) {
   Concat(Matrix::MakeScale(scale));
 }
 
 void Canvas::Rotate(Radians radians) {
   Concat(Matrix::MakeRotationZ(radians));
+}
+
+size_t Canvas::GetSaveCount() const {
+  return xformation_stack_.size();
 }
 
 void Canvas::DrawPath(Path path, Paint paint) {}
