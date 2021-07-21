@@ -1535,9 +1535,17 @@ Future<void> _runFlutterTest(String workingDirectory, {
 }) async {
   assert(!printOutput || outputChecker == null, 'Output either can be printed or checked but not both');
 
+  final List<String> tags = <String>[];
+  // Recipe configured reduced test shards will only execute tests with the
+  // appropriate tag.
+  if (Platform.environment['REDUCED_TEST_SET'] as bool? ?? false) {
+    tags.addAll(<String>['-t', 'reduced-test-set']);
+  }
+
   final List<String> args = <String>[
     'test',
     ...options,
+    ...tags,
     ...flutterTestArgs,
   ];
 

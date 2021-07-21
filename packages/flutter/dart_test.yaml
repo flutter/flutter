@@ -1,0 +1,4 @@
+tags:
+  # This tag tells the test framework to run these tagged files as part of a
+  # reduced test set.
+  reduced-test-set:
