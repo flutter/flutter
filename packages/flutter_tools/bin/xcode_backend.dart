@@ -4,7 +4,6 @@
 
 import 'dart:io';
 
-// Main entry point.
 void main(List<String> arguments) {
   Context(
     arguments: arguments,
@@ -12,6 +11,10 @@ void main(List<String> arguments) {
   ).run();
 }
 
+/// Container for script arguments and environment variables.
+///
+/// All interactions with the platform are broken into individual methods that
+/// can be overridden in tests.
 class Context {
   Context({
     required this.arguments,
@@ -28,7 +31,6 @@ class Context {
   final Map<String, String> environment;
   final List<String> arguments;
 
-  // Main execution.
   void run() {
     if (arguments.isEmpty) {
       // Named entry points were introduced in Flutter v0.0.7.
@@ -130,9 +132,9 @@ class Context {
 
   RandomAccessFile? scriptOutputStreamFile;
 
+  // When provided with a pipe by the host Flutter build process, output to the
+  // pipe goes to stdout of the Flutter build process directly.
   void streamOutput(String output) {
-    // When provided with a pipe by the host Flutter build process, output to the
-    // pipe goes to stdout of the Flutter build process directly.
     scriptOutputStreamFile?.writeStringSync(output);
   }
 
