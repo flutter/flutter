@@ -286,14 +286,12 @@ void main() {
 
     // The label animates upwards from it's initial position
     // above the input text. The animation's duration is 200ms.
-    {
-      await tester.pump(const Duration(milliseconds: 50));
-      final double labelY50ms = tester.getTopLeft(find.text('label')).dy;
-      expect(labelY50ms, inExclusiveRange(12.0, 28.0));
-      await tester.pump(const Duration(milliseconds: 50));
-      final double labelY100ms = tester.getTopLeft(find.text('label')).dy;
-      expect(labelY100ms, inExclusiveRange(12.0, labelY50ms));
-    }
+    await tester.pump(const Duration(milliseconds: 50));
+    final double labelY50ms = tester.getTopLeft(find.text('label')).dy;
+    expect(labelY50ms, inExclusiveRange(12.0, 28.0));
+    await tester.pump(const Duration(milliseconds: 50));
+    final double labelY100ms = tester.getTopLeft(find.text('label')).dy;
+    expect(labelY100ms, inExclusiveRange(12.0, labelY50ms));
 
     await tester.pumpAndSettle();
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
@@ -367,7 +365,7 @@ void main() {
   testWidgets('InputDecorator input/label widget layout', (WidgetTester tester) async {
     const Key key = Key('l');
 
-    // The label appears above the input text
+    // The label appears above the input text.
     await tester.pumpWidget(
       buildInputDecorator(
         // isEmpty: false (default)
@@ -405,7 +403,7 @@ void main() {
     expect(getBorderBottom(tester), 56.0);
     expect(getBorderWeight(tester), 1.0);
 
-    // The label appears within the input when there is no text content
+    // The label appears within the input when there is no text content.
     await tester.pumpWidget(
       buildInputDecorator(
         isEmpty: true,
@@ -430,7 +428,8 @@ void main() {
 
     expect(tester.getTopLeft(find.byKey(key)).dy, 20.0);
 
-    // The label appears above the input text when there is no content and floatingLabelBehavior is always
+    // The label appears above the input text when there is no content and the
+    // floatingLabelBehavior is set to always.
     await tester.pumpWidget(
       buildInputDecorator(
         isEmpty: true,
@@ -456,7 +455,8 @@ void main() {
 
     expect(tester.getTopLeft(find.byKey(key)).dy, 12.0);
 
-    // The label appears within the input text when there is content and floatingLabelBehavior is never
+    // The label appears within the input text when there is content and
+    // the floatingLabelBehavior is set to never.
     await tester.pumpWidget(
       buildInputDecorator(
         isEmpty: false,
@@ -522,7 +522,7 @@ void main() {
     expect(getBorderBottom(tester), 56.0);
     expect(getBorderWeight(tester), 2.0);
 
-    // isEmpty: true causes the label to be aligned with the input text
+    // isEmpty: true causes the label to be aligned with the input text.
     await tester.pumpWidget(
       buildInputDecorator(
         isEmpty: true,
@@ -546,14 +546,13 @@ void main() {
 
     // The label animates downwards from it's initial position
     // above the input text. The animation's duration is 200ms.
-        {
-      await tester.pump(const Duration(milliseconds: 50));
-      final double labelY50ms = tester.getTopLeft(find.byKey(key)).dy;
-      expect(labelY50ms, inExclusiveRange(12.0, 20.0));
-      await tester.pump(const Duration(milliseconds: 50));
-      final double labelY100ms = tester.getTopLeft(find.byKey(key)).dy;
-      expect(labelY100ms, inExclusiveRange(labelY50ms, 20.0));
-    }
+    await tester.pump(const Duration(milliseconds: 50));
+    final double labelY50ms = tester.getTopLeft(find.byKey(key)).dy;
+    expect(labelY50ms, inExclusiveRange(12.0, 20.0));
+    await tester.pump(const Duration(milliseconds: 50));
+    final double labelY100ms = tester.getTopLeft(find.byKey(key)).dy;
+    expect(labelY100ms, inExclusiveRange(labelY50ms, 20.0));
+
     await tester.pumpAndSettle();
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
     expect(tester.getTopLeft(find.text('text')).dy, 28.0);
@@ -636,8 +635,8 @@ void main() {
     expect(tester.getBottomLeft(find.byKey(key)).dy, 36.0);
     expect(getBorderWeight(tester), 0.0);
 
-    // // enabled: false produces a transparent border if filled: true.
-    // // The widget's size and layout is the same as for enabled: true.
+    // enabled: false produces a transparent border if filled: true.
+    // The widget's size and layout is the same as for enabled: true.
     await tester.pumpWidget(
       buildInputDecorator(
         isEmpty: true,
