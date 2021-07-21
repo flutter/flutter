@@ -30,7 +30,6 @@ class Context {
 
   // Main execution.
   void run() {
-    // $# is number of arguments
     //if [[ $# == 0 ]]; then
     if (arguments.isEmpty) {
       // Named entry points were introduced in Flutter v0.0.7.
@@ -114,14 +113,19 @@ class Context {
     return result;
   }
 
+  /// Log message to stderr.
   void echoError(String message) {
     stderr.write('$message\n');
   }
 
+  /// Log message to stdout.
   void echo(String message) {
     print(message);
   }
 
+  /// Exit the application with the given exit code.
+  ///
+  /// Exists to allow overriding in tests.
   Never exitApp(int code) {
     exit(code);
   }
@@ -139,9 +143,9 @@ class Context {
 
   RandomAccessFile? scriptOutputStreamFile;
 
-  // When provided with a pipe by the host Flutter build process, output to the
-  // pipe goes to stdout of the Flutter build process directly.
   void streamOutput(String output) {
+    // When provided with a pipe by the host Flutter build process, output to the
+    // pipe goes to stdout of the Flutter build process directly.
     //if [[ -n "$SCRIPT_OUTPUT_STREAM_FILE" ]]; then
     //  echo "$1" > $SCRIPT_OUTPUT_STREAM_FILE
     //fi
@@ -273,8 +277,8 @@ class Context {
         '${environment['INFOPLIST_PATH'] ?? ''} does not exist. Skipping '
         '_dartobservatory._tcp NSBonjourServices insertion. Try re-building to '
         'enable "flutter attach".');
-      return;
       //  return
+      return;
       //fi
     }
 
@@ -306,7 +310,7 @@ class Context {
       );
       //else
     } else {
-      //  # Otherwise, add the NSBonjourServices key and observatory service name.
+      // Otherwise, add the NSBonjourServices key and observatory service name.
       //  RunCommand plutil -insert NSBonjourServices -json "[\"_dartobservatory._tcp\"]" "${built_products_plist}"
       runSync(
         'plutil',
@@ -382,27 +386,30 @@ class Context {
       //fi
     }
 
+    /* This code was not used
+
     // Default value of assets_path is flutter_assets
     //local assets_path="flutter_assets"
     // The value of assets_path can set by add FLTAssetsPath to
     // AppFrameworkInfo.plist.
 
     //if FLTAssetsPath=$(/usr/libexec/PlistBuddy -c "Print :FLTAssetsPath" "${derived_dir}/AppFrameworkInfo.plist" 2>/dev/null); then
-    //final ProcessResult plistBuddyResult = runSync(
-    //  '/usr/libexec/PlistBuddy',
-    //  <String>['-c', '"Print :FLTAssetsPath"', '"$derivedDir/AppFrameworkInfo.plist"'],
-    //  allowFail: true,
-    //);
-    //if (plistBuddyResult.exitCode == 0) {
-    //  final String fltAssetsPath = (plistBuddyResult.stdout as String).trim();
-    //  //  if [[ -n "$FLTAssetsPath" ]]; then
-    //  if (fltAssetsPath.isNotEmpty) {
-    //  //    assets_path="${FLTAssetsPath}"
-    //    assetsPath = fltAssetsPath;
-    //  //  fi
-    //  }
-    //  //fi
-    //}
+    final ProcessResult plistBuddyResult = runSync(
+      '/usr/libexec/PlistBuddy',
+      <String>['-c', '"Print :FLTAssetsPath"', '"$derivedDir/AppFrameworkInfo.plist"'],
+      allowFail: true,
+    );
+    if (plistBuddyResult.exitCode == 0) {
+      final String fltAssetsPath = (plistBuddyResult.stdout as String).trim();
+      //  if [[ -n "$FLTAssetsPath" ]]; then
+      if (fltAssetsPath.isNotEmpty) {
+      //    assets_path="${FLTAssetsPath}"
+        assetsPath = fltAssetsPath;
+      //  fi
+      }
+      //fi
+    }
+    */
 
     //# Use FLUTTER_BUILD_MODE if it's set, otherwise use the Xcode build configuration name
     //# This means that if someone wants to use an Xcode build config other than Debug/Profile/Release,
