@@ -497,7 +497,7 @@ class Context {
           '-av',
           '--delete',
           '--filter',
-          '"- .DS_Store"',
+          '- .DS_Store',
           flutterFramework,
           '$derivedDir/engine',
         ],
