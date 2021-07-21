@@ -12,6 +12,7 @@ import 'editable_text.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
 
+// TODO(justinmc): Should TextEditingActionTarget be in its own file?
 /// The recipient of a [TextEditingAction].
 ///
 /// TextEditingActions will only be enabled when an implementer of this class is

@@ -9,7 +9,6 @@ import 'dart:ui' show
 
 import 'package:characters/characters.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
 
 import 'text_editing.dart';
 import 'text_metrics.dart';
