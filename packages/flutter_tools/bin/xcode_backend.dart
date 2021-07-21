@@ -245,6 +245,7 @@ class Context {
     );
 
     //AddObservatoryBonjourService
+    addObservatoryBonjourService();
   }
 
   //# Add the observatory publisher Bonjour service to the produced app bundle Info.plist.
