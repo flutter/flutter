@@ -684,6 +684,8 @@ class KeyEventSimulator {
     return result ?? _defaultTransitMode;
   }
 
+  static String get _defaultPlatform => Platform.operatingSystem;
+
   /// Simulates sending a hardware key down event.
   ///
   /// This only simulates key presses coming from a physical keyboard, not from a
@@ -709,7 +711,7 @@ class KeyEventSimulator {
   }) async {
     Future<bool> _simulateByRawEvent() {
       return _simulateKeyEventByRawEvent(() {
-        platform ??= Platform.operatingSystem;
+        platform ??= _defaultPlatform;
         return getRawKeyData(key, platform: platform!, isDown: true, physicalKey: physicalKey, character: character);
       });
     }
@@ -754,7 +756,7 @@ class KeyEventSimulator {
   }) async {
     Future<bool> _simulateByRawEvent() {
       return _simulateKeyEventByRawEvent(() {
-        platform ??= Platform.operatingSystem;
+        platform ??= _defaultPlatform;
         return getRawKeyData(key, platform: platform!, isDown: false, physicalKey: physicalKey);
       });
     }
@@ -800,7 +802,7 @@ class KeyEventSimulator {
   }) async {
     Future<bool> _simulateByRawEvent() {
       return _simulateKeyEventByRawEvent(() {
-        platform ??= Platform.operatingSystem;
+        platform ??= _defaultPlatform;
         return getRawKeyData(key, platform: platform!, isDown: true, physicalKey: physicalKey, character: character);
       });
     }

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:gen_keycodes/utils.dart';
 import 'package:path/path.dart' as path;

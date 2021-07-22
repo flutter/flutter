@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('HardwareKeyboard records pressed keys and enabled locks', (WidgetTester tester) async {
-    await simulateKeyDownEvent(LogicalKeyboardKey.numLock);
+    await simulateKeyDownEvent(LogicalKeyboardKey.numLock, platform: 'windows');
     expect(HardwareKeyboard.instance.physicalKeysPressed,
       equals(<PhysicalKeyboardKey>{PhysicalKeyboardKey.numLock}));
     expect(HardwareKeyboard.instance.logicalKeysPressed,
@@ -16,7 +16,7 @@ void main() {
     expect(HardwareKeyboard.instance.lockModesEnabled,
       equals(<KeyboardLockMode>{KeyboardLockMode.numLock}));
 
-    await simulateKeyDownEvent(LogicalKeyboardKey.numpad1);
+    await simulateKeyDownEvent(LogicalKeyboardKey.numpad1, platform: 'windows');
     expect(HardwareKeyboard.instance.physicalKeysPressed,
       equals(<PhysicalKeyboardKey>{PhysicalKeyboardKey.numLock, PhysicalKeyboardKey.numpad1}));
     expect(HardwareKeyboard.instance.logicalKeysPressed,
@@ -24,7 +24,7 @@ void main() {
     expect(HardwareKeyboard.instance.lockModesEnabled,
       equals(<KeyboardLockMode>{KeyboardLockMode.numLock}));
 
-    await simulateKeyRepeatEvent(LogicalKeyboardKey.numpad1);
+    await simulateKeyRepeatEvent(LogicalKeyboardKey.numpad1, platform: 'windows');
     expect(HardwareKeyboard.instance.physicalKeysPressed,
       equals(<PhysicalKeyboardKey>{PhysicalKeyboardKey.numLock, PhysicalKeyboardKey.numpad1}));
     expect(HardwareKeyboard.instance.logicalKeysPressed,
@@ -40,7 +40,7 @@ void main() {
     expect(HardwareKeyboard.instance.lockModesEnabled,
       equals(<KeyboardLockMode>{KeyboardLockMode.numLock}));
 
-    await simulateKeyDownEvent(LogicalKeyboardKey.numLock);
+    await simulateKeyDownEvent(LogicalKeyboardKey.numLock, platform: 'windows');
     expect(HardwareKeyboard.instance.physicalKeysPressed,
       equals(<PhysicalKeyboardKey>{PhysicalKeyboardKey.numLock, PhysicalKeyboardKey.numpad1}));
     expect(HardwareKeyboard.instance.logicalKeysPressed,
@@ -48,7 +48,7 @@ void main() {
     expect(HardwareKeyboard.instance.lockModesEnabled,
       equals(<KeyboardLockMode>{}));
 
-    await simulateKeyUpEvent(LogicalKeyboardKey.numpad1);
+    await simulateKeyUpEvent(LogicalKeyboardKey.numpad1, platform: 'windows');
     expect(HardwareKeyboard.instance.physicalKeysPressed,
       equals(<PhysicalKeyboardKey>{PhysicalKeyboardKey.numLock}));
     expect(HardwareKeyboard.instance.logicalKeysPressed,
@@ -56,7 +56,7 @@ void main() {
     expect(HardwareKeyboard.instance.lockModesEnabled,
       equals(<KeyboardLockMode>{}));
 
-    await simulateKeyUpEvent(LogicalKeyboardKey.numLock);
+    await simulateKeyUpEvent(LogicalKeyboardKey.numLock, platform: 'windows');
     expect(HardwareKeyboard.instance.physicalKeysPressed,
       equals(<PhysicalKeyboardKey>{}));
     expect(HardwareKeyboard.instance.logicalKeysPressed,
