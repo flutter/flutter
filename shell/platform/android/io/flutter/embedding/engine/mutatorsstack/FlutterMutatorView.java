@@ -74,23 +74,41 @@ public class FlutterMutatorView extends FrameLayout {
     return false;
   }
 
+  @Nullable @VisibleForTesting ViewTreeObserver.OnGlobalFocusChangeListener activeFocusListener;
+
   /**
-   * Adds a focus change listener that notifies when the current view or any of its descendant views
+   * Sets a focus change listener that notifies when the current view or any of its descendant views
    * have received focus.
    *
-   * @param focusListener The focus listener.
+   * <p>If there's an active focus listener, it will first remove the current listener, and then add
+   * the new one.
+   *
+   * @param userFocusListener A user provided focus listener.
    */
-  public void addOnFocusChangeListener(@NonNull OnFocusChangeListener focusListener) {
+  public void setOnDescendantFocusChangeListener(@NonNull OnFocusChangeListener userFocusListener) {
+    unsetOnDescendantFocusChangeListener();
+
     final View mutatorView = this;
-    final ViewTreeObserver observer = this.getViewTreeObserver();
-    if (observer.isAlive()) {
-      observer.addOnGlobalFocusChangeListener(
+    final ViewTreeObserver observer = getViewTreeObserver();
+    if (observer.isAlive() && activeFocusListener == null) {
+      activeFocusListener =
           new ViewTreeObserver.OnGlobalFocusChangeListener() {
             @Override
             public void onGlobalFocusChanged(View oldFocus, View newFocus) {
-              focusListener.onFocusChange(mutatorView, childHasFocus(mutatorView));
+              userFocusListener.onFocusChange(mutatorView, childHasFocus(mutatorView));
             }
-          });
+          };
+      observer.addOnGlobalFocusChangeListener(activeFocusListener);
+    }
+  }
+
+  /** Unsets any active focus listener. */
+  public void unsetOnDescendantFocusChangeListener() {
+    final ViewTreeObserver observer = getViewTreeObserver();
+    if (observer.isAlive() && activeFocusListener != null) {
+      final ViewTreeObserver.OnGlobalFocusChangeListener currFocusListener = activeFocusListener;
+      activeFocusListener = null;
+      observer.removeOnGlobalFocusChangeListener(currFocusListener);
     }
   }
 
