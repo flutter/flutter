@@ -801,6 +801,7 @@ class KeyEventManager {
         'while HardwareKeyboard reported ${_hardwareKeyboard.physicalKeysPressed}');
     }
 
+    print('Dispatch events $_keyEventsSinceLastMessage');
     if (keyMessageHandler != null) {
       handled = keyMessageHandler!(KeyMessage(_keyEventsSinceLastMessage, rawEvent)) || handled;
     }
@@ -881,6 +882,7 @@ class KeyEventManager {
     assert(() {
       _transitMode = null;
       _rawKeyboard.removeListener(_convertRawEventAndStore);
+      _keyEventsSinceLastMessage.clear();
       return true;
     }());
   }
