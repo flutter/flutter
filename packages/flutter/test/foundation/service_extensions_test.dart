@@ -167,7 +167,7 @@ void main() {
     const int disabledExtensions = kIsWeb ? 2 : 0;
     // If you add a service extension... TEST IT! :-)
     // ...then increment this number.
-    expect(binding.extensions.length, 31 + widgetInspectorExtensionCount - disabledExtensions);
+    expect(binding.extensions.length, 30 + widgetInspectorExtensionCount - disabledExtensions);
 
     expect(console, isEmpty);
     debugPrint = debugPrintThrottled;
