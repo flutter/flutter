@@ -318,6 +318,9 @@ StandardMessageCodec::~StandardMessageCodec() = default;
 std::unique_ptr<EncodableValue> StandardMessageCodec::DecodeMessageInternal(
     const uint8_t* binary_message,
     size_t message_size) const {
+  if (!binary_message) {
+    return std::make_unique<EncodableValue>();
+  }
   ByteBufferStreamReader stream(binary_message, message_size);
   return std::make_unique<EncodableValue>(serializer_->ReadValue(&stream));
 }

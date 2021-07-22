@@ -8,9 +8,22 @@
 #include <vector>
 
 #include "flutter/shell/platform/common/client_wrapper/testing/test_codec_extensions.h"
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
 namespace flutter {
+
+namespace {
+
+class MockStandardCodecSerializer : public StandardCodecSerializer {
+ public:
+  MOCK_CONST_METHOD2(WriteValue,
+                     void(const EncodableValue& value,
+                          ByteStreamWriter* stream));
+  MOCK_CONST_METHOD2(ReadValueOfType,
+                     EncodableValue(uint8_t type, ByteStreamReader* stream));
+};
+}  // namespace
 
 // Validates round-trip encoding and decoding of |value|, and checks that the
 // encoded value matches |expected_encoding|.
@@ -66,6 +79,18 @@ static void CheckEncodeDecodeWithEncodePrefix(
 TEST(StandardMessageCodec, CanEncodeAndDecodeNull) {
   std::vector<uint8_t> bytes = {0x00};
   CheckEncodeDecode(EncodableValue(), bytes);
+}
+
+TEST(StandardMessageCodec, CanDecodeEmptyBytesAsNullWithoutCallingSerializer) {
+  std::vector<uint8_t> bytes = {};
+  const MockStandardCodecSerializer serializer;
+  const StandardMessageCodec& codec =
+      StandardMessageCodec::GetInstance(&serializer);
+
+  auto decoded = codec.DecodeMessage(bytes);
+
+  EXPECT_EQ(EncodableValue(), *decoded);
+  EXPECT_CALL(serializer, ReadValueOfType(::testing::_, ::testing::_)).Times(0);
 }
 
 TEST(StandardMessageCodec, CanEncodeAndDecodeTrue) {
