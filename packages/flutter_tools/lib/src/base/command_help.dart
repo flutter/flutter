@@ -167,12 +167,6 @@ class CommandHelp {
     'debugDumpApp',
   );
 
-  late final CommandHelpOption z = _makeOption(
-    'z',
-    'Toggle elevation checker.',
-    'debugCheckElevationsEnabled',
-  );
-
   // When updating the list above, see the notes above the list regarding order
   // and tests.
 
