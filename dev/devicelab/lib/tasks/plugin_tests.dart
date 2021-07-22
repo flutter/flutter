@@ -172,14 +172,16 @@ class _FlutterProject {
         // it's not a regression in the IPHONEOS_DEPLOYMENT_TARGET override logic.
         // The plugintest target should not have IPHONEOS_DEPLOYMENT_TARGET set.
         // See _reduceDarwinPluginMinimumVersion for details.
-        if (target == 'ios' && 'IPHONEOS_DEPLOYMENT_TARGET'.allMatches(podsProjectContent).length != 6) {
-          throw TaskResult.failure('plugintest may contain IPHONEOS_DEPLOYMENT_TARGET');
+        final int iosDeploymentTargetCount = 'IPHONEOS_DEPLOYMENT_TARGET'.allMatches(podsProjectContent).length;
+        if (target == 'ios' && iosDeploymentTargetCount != 9) {
+          throw TaskResult.failure('plugintest may contain IPHONEOS_DEPLOYMENT_TARGET, $iosDeploymentTargetCount found');
         }
 
         // Same for macOS, but 12.
         // The plugintest target should not have MACOSX_DEPLOYMENT_TARGET set.
-        if (target == 'macos' && 'MACOSX_DEPLOYMENT_TARGET'.allMatches(podsProjectContent).length != 12) {
-          throw TaskResult.failure('plugintest may contain MACOSX_DEPLOYMENT_TARGET');
+        final int macosDeploymentTargetCount = 'MACOSX_DEPLOYMENT_TARGET'.allMatches(podsProjectContent).length;
+        if (target == 'macos' && macosDeploymentTargetCount != 12) {
+          throw TaskResult.failure('plugintest may contain MACOSX_DEPLOYMENT_TARGET, $macosDeploymentTargetCount found');
         }
       }
     });
