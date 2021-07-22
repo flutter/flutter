@@ -93,7 +93,7 @@ class RoundedRectangleBorder extends OutlinedBorder {
   /// Returns a copy of this RoundedRectangleBorder with the given fields
   /// replaced with the new values.
   @override
-  RoundedRectangleBorder copyWith({ BorderSide? side, BorderRadius? borderRadius }) {
+  RoundedRectangleBorder copyWith({ BorderSide? side, BorderRadiusGeometry? borderRadius }) {
     return RoundedRectangleBorder(
       side: side ?? this.side,
       borderRadius: borderRadius ?? this.borderRadius,
@@ -272,7 +272,7 @@ class _RoundedRectangleToCircleBorder extends OutlinedBorder {
   }
 
   @override
-  _RoundedRectangleToCircleBorder copyWith({ BorderSide? side, BorderRadius? borderRadius, double? circleness }) {
+  _RoundedRectangleToCircleBorder copyWith({ BorderSide? side, BorderRadiusGeometry? borderRadius, double? circleness }) {
     return _RoundedRectangleToCircleBorder(
       side: side ?? this.side,
       borderRadius: borderRadius ?? this.borderRadius,

@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
+import 'dart:io' show exit, stderr, stdout, File, ProcessResult;
 
 import 'package:args/args.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
+import 'package:platform/platform.dart';
+import 'package:process/process.dart';
 
 import 'configuration.dart';
 import 'snippets.dart';
@@ -30,9 +33,22 @@ class GitStatusFailed implements Exception {
   String toString() => 'git status exited with a non-zero exit code: ${gitResult.exitCode}:\n${gitResult.stderr}\n${gitResult.stdout}';
 }
 
-String getChannelName() {
+/// Get the name of the channel these docs are from.
+///
+/// First check env variable LUCI_BRANCH, then refer to the currently
+/// checked out git branch.
+String getChannelName({
+  @visibleForTesting
+  Platform platform = const LocalPlatform(),
+  @visibleForTesting
+  ProcessManager processManager = const LocalProcessManager(),
+}) {
+  final String? envReleaseChannel = platform.environment['LUCI_BRANCH']?.trim();
+  if (<String>['master', 'stable'].contains(envReleaseChannel)) {
+    return envReleaseChannel!;
+  }
   final RegExp gitBranchRegexp = RegExp(r'^## (?<branch>.*)');
-  final ProcessResult gitResult = Process.runSync('git', <String>['status', '-b', '--porcelain'],
+  final ProcessResult gitResult = processManager.runSync(<String>['git', 'status', '-b', '--porcelain'],
     environment: <String, String>{
       'GIT_TRACE': '2',
       'GIT_TRACE_SETUP': '2'
@@ -64,7 +80,8 @@ String getChannelNameWithRetries() {
 /// Generates snippet dartdoc output for a given input, and creates any sample
 /// applications needed by the snippet.
 void main(List<String> argList) {
-  final Map<String, String> environment = Platform.environment;
+  const Platform platform = LocalPlatform();
+  final Map<String, String> environment = platform.environment;
   final ArgParser parser = ArgParser();
   final List<String> snippetTypes =
       SnippetType.values.map<String>((SnippetType type) => getEnumName(type)).toList();

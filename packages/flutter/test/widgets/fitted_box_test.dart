@@ -589,6 +589,24 @@ void main() {
 
     expect(outsideBox.size.height, 50.0);
   });
+
+  testWidgets('FittedBox without child does not throw', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Center(
+        child: SizedBox(
+          width: 200.0,
+          height: 200.0,
+          child: FittedBox(),
+        ),
+      ),
+    );
+
+    expect(find.byType(FittedBox), findsOneWidget);
+
+    // Tapping it also should not throw.
+    await tester.tap(find.byType(FittedBox), warnIfMissed: false);
+    expect(tester.takeException(), isNull);
+  });
 }
 
 List<Type> getLayers() {
