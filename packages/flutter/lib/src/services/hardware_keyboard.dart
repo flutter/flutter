@@ -16,8 +16,9 @@ import 'raw_keyboard.dart';
 /// with each key down of its corresponding logical key. A [KeyboardLockMode]
 /// object is used to query whether this mode is enabled on the keyboard.
 ///
-/// Only a limited number of modes are supported, which are enumerated as static
-/// members of this class. Manual constructing of this class is prohibited.
+/// Only a limited number of modes are supported, which are enumerated as
+/// static members of this class. Manual constructing of this class is
+/// prohibited.
 @immutable
 class KeyboardLockMode {
   // KeyboardLockMode has a fixed pool of supported keys, enumerated as static
@@ -43,8 +44,8 @@ class KeyboardLockMode {
 
   /// Represents the capital letters lock mode on the keyboard.
   ///
-  /// On supporting systems, enabling capital lock mode allows key
-  /// presses of the letter keys to input uppercase letters instead of lowercase.
+  /// On supporting systems, enabling capital lock mode allows key presses of
+  /// the letter keys to input uppercase letters instead of lowercase.
   static const KeyboardLockMode capsLock = KeyboardLockMode._(LogicalKeyboardKey.capsLock);
 
   static final Map<int, KeyboardLockMode> _knownLockModes = <int, KeyboardLockMode>{
@@ -62,9 +63,6 @@ class KeyboardLockMode {
 ///
 /// The [KeyEvent] provides a universal model for key event information from a
 /// hardware keyboard across platforms.
-///
-/// The [KeyEvent] is not to be created directly. Intead, use its subclasses
-/// that define the event type.
 ///
 /// See also:
 ///
@@ -282,10 +280,10 @@ typedef KeyEventCallback = bool Function(KeyEvent event);
 /// handlers, and records the keyboard state.
 ///
 /// To stay notified whenever keys are pressed, held, or released, add a
-/// handler with [addHandler]. To only be notified when a specific part of the app
-/// is focused, use a [Focus] widget's `onFocusChanged` attribute instead of [addHandler].
-/// Handlers should be removed with [removeHandler] when notification is no longer 
-/// necessary, or when the handler is being disposed.
+/// handler with [addHandler]. To only be notified when a specific part of the
+/// app is focused, use a [Focus] widget's `onFocusChanged` attribute instead
+/// of [addHandler]. Handlers should be removed with [removeHandler] when
+/// notification is no longer necessary, or when the handler is being disposed.
 ///
 /// To query whether a key is being held, or a lock mode is enabled, use
 /// [physicalKeysPressed], [logicalKeysPressed], or [lockModesEnabled].
@@ -311,21 +309,21 @@ typedef KeyEventCallback = bool Function(KeyEvent event);
 /// Example:
 ///
 ///  * Tap and hold key A, US layout:
-///     * KeyDownEvent(physicalKey: keyA, logicalKey: lowerA, character: "a")
-///     * KeyRepeatEvent(physicalKey: keyA, logicalKey: lowerA, character: "a")
-///     * KeyUpEvent(physicalKey: keyA, logicalKey: lowerA)
+///     * KeyDownEvent(physicalKey: keyA, logicalKey: keyA, character: "a")
+///     * KeyRepeatEvent(physicalKey: keyA, logicalKey: keyA, character: "a")
+///     * KeyUpEvent(physicalKey: keyA, logicalKey: keyA)
 ///  * Press ShiftLeft, tap key A, then release ShiftLeft, US layout:
 ///     * KeyDownEvent(physicalKey: shiftLeft, logicalKey: shiftLeft)
-///     * KeyDownEvent(physicalKey: keyA, logicalKey: upperA, character: "A")
-///     * KeyRepeatEvent(physicalKey: keyA, logicalKey: upperA, character: "A")
-///     * KeyUpEvent(physicalKey: keyA, logicalKey: upperA)
+///     * KeyDownEvent(physicalKey: keyA, logicalKey: keyA, character: "A")
+///     * KeyRepeatEvent(physicalKey: keyA, logicalKey: keyA, character: "A")
+///     * KeyUpEvent(physicalKey: keyA, logicalKey: keyA)
 ///     * KeyUpEvent(physicalKey: shiftLeft, logicalKey: shiftLeft)
 ///  * Tap key Q, French layout:
-///     * KeyDownEvent(physicalKey: keyA, logicalKey: lowerQ, character: "q")
-///     * KeyUpEvent(physicalKey: keyA, logicalKey: lowerQ)
-///  * Tap key ^, French layout:
-///     * KeyDownEvent(physicalKey: keyA, logicalKey: lowerQ, character: "q")
-///     * KeyUpEvent(physicalKey: keyA, logicalKey: lowerQ)
+///     * KeyDownEvent(physicalKey: keyA, logicalKey: keyQ, character: "q")
+///     * KeyUpEvent(physicalKey: keyA, logicalKey: keyQ)
+///  * Tap CapsLock:
+///     * KeyDownEvent(physicalKey: capsLock, logicalKey: capsLock)
+///     * KeyUpEvent(physicalKey: capsLock, logicalKey: capsLock)
 ///
 /// When the Flutter application starts, all keys are released, and all lock
 /// modes are disabled. Upon key events, [HardwareKeyboard] will update its
@@ -335,15 +333,26 @@ typedef KeyEventCallback = bool Function(KeyEvent event);
 /// Flutter will try to synchronize with the ground truth of keyboard states
 /// using synthesized events ([KeyEvent.synthesized]), subject to the
 /// availability of the platform. The desynchronization can be caused by
-/// non-empty initial state or a change in the focused window or application. For example, if CapsLock is
-/// enabled when the application starts, then immediately before the first key
-/// event, a synthesized [KeyDownEvent] and [KeyUpEvent] of CapsLock will be
-/// dispatched.
+/// non-empty initial state or a change in the focused window or application.
+/// For example, if CapsLock is enabled when the application starts, then
+/// immediately before the first key event, a synthesized [KeyDownEvent] and
+/// [KeyUpEvent] of CapsLock will be dispatched.
 ///
 /// The resulting event stream does not map one-to-one to the native key event
-/// stream. Some native events might be skipped, while some events
-/// might be synthesized and do not correspond to native events. Synthesized events will be indicated
-/// by [KeyEvent.synthesized].
+/// stream. Some native events might be skipped, while some events might be
+/// synthesized and do not correspond to native events. Synthesized events will
+/// be indicated by [KeyEvent.synthesized].
+///
+/// Example:
+///
+///  * Flutter starts with CapsLock on, the first press of keyA:
+///     * KeyDownEvent(physicalKey: capsLock, logicalKey: capsLock, synthesized: true)
+///     * KeyUpEvent(physicalKey: capsLock, logicalKey: capsLock, synthesized: true)
+///     * KeyDownEvent(physicalKey: keyA, logicalKey: keyA, character: "a")
+///  * While holding ShiftLeft, lose window focus, release shiftLeft, then focus
+///    back and press keyA:
+///     * KeyUpEvent(physicalKey: shiftLeft, logicalKey: shiftLeft, synthesized: true)
+///     * KeyDownEvent(physicalKey: keyA, logicalKey: keyA, character: "a")
 ///
 /// Flutter does not distinguish between multiple keyboards. Flutter will
 /// process all events as if they come from a single keyboard, and try to
@@ -455,6 +464,9 @@ class HardwareKeyboard {
   /// "handles" the event. If any handler returns true, the event
   /// will not be propagated to other native components in the add-to-app
   /// scenario.
+  ///
+  /// If an object added a handler, it must remove the handler before it is
+  /// disposed.
   ///
   /// If used during event dispatching, the addition will not take effect
   /// until after the dispatching.
@@ -572,8 +584,8 @@ class HardwareKeyboard {
 ///
 /// The framework must determine which transit mode the current platform
 /// implements and behave accordingly (such as transforming and synthesizing
-/// events if necessary). Unit tests related to keyboard might also want to simulate
-/// platform of each transit mode.
+/// events if necessary). Unit tests related to keyboard might also want to
+/// simulate platform of each transit mode.
 ///
 /// The transit mode of the current platform is inferred by [KeyEventManager] at
 /// the start of the application.
@@ -658,6 +670,8 @@ class KeyMessage {
   /// form as [RawKeyEvent]. Their stream is not as regular as [KeyEvent]'s,
   /// but keeps as much native information and structure as possible.
   ///
+  /// The [rawEvent] will be deprecated in the future.
+  ///
   /// See also:
   ///
   ///  * [RawKeyboard.addListener], [RawKeyboardListener], [Focus.onKey],
@@ -720,7 +734,9 @@ class KeyEventManager {
   /// components in the application. The return value from this handler tells
   /// the platform to either stop propagation (by returning true: "event
   /// handled"), or pass the event on to other controls (false: "event not
-  /// handled").
+  /// handled"). Some platforms might trigger special alerts if the event
+  /// is not handled by other controls either (such as the "bonk" noise on
+  /// macOS).
   ///
   /// If you are not using the [FocusManager] to manage focus, set this
   /// attribute to a [KeyMessageHandler] that returns true if the propagation
@@ -814,8 +830,8 @@ class KeyEventManager {
   // Convert the raw event to key events, including synthesizing events for
   // modifiers, and store the key events in `_keyEventsSinceLastMessage`.
   //
-  // This is only called when `_transitMode` is `rawKeyEvent` and if the raw event
-  // should be dispatched.
+  // This is only called when `_transitMode` is `rawKeyEvent` and if the raw
+  // event should be dispatched.
   void _convertRawEventAndStore(RawKeyEvent rawEvent) {
     final PhysicalKeyboardKey physicalKey = rawEvent.physicalKey;
     final LogicalKeyboardKey logicalKey = rawEvent.logicalKey;
