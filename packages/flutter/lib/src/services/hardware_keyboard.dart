@@ -554,13 +554,10 @@ class HardwareKeyboard {
   /// This is used by the testing framework to make sure tests are hermetic.
   @visibleForTesting
   void clearState() {
-    assert(() {
-      _pressedKeys.clear();
-      _lockModes.clear();
-      _handlers.clear();
-      assert(_modifiedHandlers == null);
-      return true;
-    }());
+    _pressedKeys.clear();
+    _lockModes.clear();
+    _handlers.clear();
+    assert(_modifiedHandlers == null);
   }
 }
 
