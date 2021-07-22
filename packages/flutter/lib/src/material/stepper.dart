@@ -103,7 +103,6 @@ class Step {
     required this.content,
     this.state = StepState.indexed,
     this.isActive = false,
-    this.horizontalTitlePosition = HorizontalTitlePosition.inline,
   }) : assert(title != null),
        assert(content != null),
        assert(state != null);
@@ -566,7 +565,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
 
   Widget _buildHeaderText(int index) {
     return Column(
-      crossAxisAlignment: widget.type == StepperType.horizontal && widget.steps[index].horizontalTitlePosition == HorizontalTitlePosition.bottom ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+      crossAxisAlignment: widget.type == StepperType.horizontal && widget.horizontalTitlePosition == HorizontalTitlePosition.bottom ? CrossAxisAlignment.center : CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         AnimatedDefaultTextStyle(
