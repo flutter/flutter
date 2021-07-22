@@ -75,6 +75,7 @@ void main() {
       const String buildMode = 'Debug';
       const String dartObfuscation = 'false';
       const String dartDefines = 'flutter.inspector.structuredErrors%3Dtrue';
+      const String expandedCodeSignIdentity = 'F1326572E0B71C3C8442805230CB4B33B708A2E2';
       const String extraFrontEndOptions = '--some-option';
       const String extraGenSnapshotOptions = '--obfuscate';
       const String sdkRoot = '/path/to/sdk';
@@ -87,10 +88,12 @@ void main() {
           'ACTION': 'install',
           'ARCHS': archs,
           'BUILT_PRODUCTS_DIR': buildDir.path,
+          'CODE_SIGNING_REQUIRED': 'YES',
           'CONFIGURATION': buildMode,
           'DART_DEFINES': dartDefines,
           'DART_OBFUSCATION': dartObfuscation,
           'ENABLE_BITCODE': 'YES',
+          'EXPANDED_CODE_SIGN_IDENTITY': expandedCodeSignIdentity,
           'EXTRA_FRONT_END_OPTIONS': extraFrontEndOptions,
           'EXTRA_GEN_SNAPSHOT_OPTIONS': extraGenSnapshotOptions,
           'FLUTTER_ROOT': flutterRoot.path,
@@ -120,6 +123,7 @@ void main() {
               '--ExtraGenSnapshotOptions=$extraGenSnapshotOptions',
               '--DartDefines=$dartDefines',
               '--ExtraFrontEndOptions=$extraFrontEndOptions',
+              '-dCodesignIdentity=$expandedCodeSignIdentity',
               'debug_ios_bundle_flutter_assets',
             ],
           ),
