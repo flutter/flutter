@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -801,6 +802,8 @@ class KeyEventManager {
         'while HardwareKeyboard reported ${_hardwareKeyboard.physicalKeysPressed}');
     }
 
+
+    print('Operating: ${Platform.operatingSystem}');
     print('Dispatch events $_keyEventsSinceLastMessage raw $rawEvent');
     if (keyMessageHandler != null) {
       handled = keyMessageHandler!(KeyMessage(_keyEventsSinceLastMessage, rawEvent)) || handled;
