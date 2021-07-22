@@ -9,7 +9,9 @@
 
 #include <fuchsia/ui/gfx/cpp/fidl.h>
 
+#include <algorithm>
 #include <cstring>
+#include <limits>
 #include <sstream>
 
 #include "flutter/fml/logging.h"
@@ -272,13 +274,13 @@ void PlatformView::OnScenicEvent(
           case fuchsia::ui::gfx::Event::Tag::kViewPropertiesChanged: {
             const fuchsia::ui::gfx::BoundingBox& bounding_box =
                 event.gfx().view_properties_changed().properties.bounding_box;
-            const std::pair<float, float> new_view_size = {
+            const std::array<float, 2> new_view_size = {
                 std::max(bounding_box.max.x - bounding_box.min.x, 0.0f),
                 std::max(bounding_box.max.y - bounding_box.min.y, 0.0f)};
-            if (new_view_size.first <= 0.f || new_view_size.second <= 0.f) {
+            if (new_view_size[0] <= 0.f || new_view_size[1] <= 0.f) {
               FML_DLOG(ERROR)
                   << "Got an invalid view size from Scenic; ignoring: "
-                  << new_view_size.first << " " << new_view_size.second;
+                  << new_view_size[0] << " " << new_view_size[1];
               break;
             }
 
@@ -288,11 +290,12 @@ void PlatformView::OnScenicEvent(
                 *view_logical_size_ == new_view_size) {
               FML_DLOG(ERROR)
                   << "Got an identical view size from Scenic; ignoring: "
-                  << new_view_size.first << " " << new_view_size.second;
+                  << new_view_size[0] << " " << new_view_size[1];
               break;
             }
 
             view_logical_size_ = new_view_size;
+            view_logical_origin_ = {bounding_box.min.x, bounding_box.min.y};
             metrics_changed = true;
             break;
           }
@@ -398,21 +401,21 @@ void PlatformView::OnScenicEvent(
   if (view_pixel_ratio_.has_value() && view_logical_size_.has_value() &&
       metrics_changed) {
     const float pixel_ratio = *view_pixel_ratio_;
-    const std::pair<float, float> logical_size = *view_logical_size_;
+    const std::array<float, 2> logical_size = *view_logical_size_;
     SetViewportMetrics({
-        pixel_ratio,                        // device_pixel_ratio
-        logical_size.first * pixel_ratio,   // physical_width
-        logical_size.second * pixel_ratio,  // physical_height
-        0.0f,                               // physical_padding_top
-        0.0f,                               // physical_padding_right
-        0.0f,                               // physical_padding_bottom
-        0.0f,                               // physical_padding_left
-        0.0f,                               // physical_view_inset_top
-        0.0f,                               // physical_view_inset_right
-        0.0f,                               // physical_view_inset_bottom
-        0.0f,                               // physical_view_inset_left
-        0.0f,  // p_physical_system_gesture_inset_top
-        0.0f,  // p_physical_system_gesture_inset_right
+        pixel_ratio,                    // device_pixel_ratio
+        logical_size[0] * pixel_ratio,  // physical_width
+        logical_size[1] * pixel_ratio,  // physical_height
+        0.0f,                           // physical_padding_top
+        0.0f,                           // physical_padding_right
+        0.0f,                           // physical_padding_bottom
+        0.0f,                           // physical_padding_left
+        0.0f,                           // physical_view_inset_top
+        0.0f,                           // physical_view_inset_right
+        0.0f,                           // physical_view_inset_bottom
+        0.0f,                           // physical_view_inset_left
+        0.0f,                           // p_physical_system_gesture_inset_top
+        0.0f,                           // p_physical_system_gesture_inset_right
         0.0f,  // p_physical_system_gesture_inset_bottom
         0.0f,  // p_physical_system_gesture_inset_left
     });
@@ -538,6 +541,35 @@ static trace_flow_id_t PointerTraceHACK(float fa, float fb) {
   return (((uint64_t)ia) << 32) | ib;
 }
 
+// For certain scenarios that must avoid floating-point drift, compute a
+// coordinate that falls within the logical view bounding box.
+std::array<float, 2> PlatformView::ClampToViewSpace(const float x,
+                                                    const float y) const {
+  if (!view_logical_size_.has_value() || !view_logical_origin_.has_value()) {
+    return {x, y};  // If we can't do anything, return the original values.
+  }
+
+  const auto origin = view_logical_origin_.value();
+  const auto size = view_logical_size_.value();
+  const float min_x = origin[0];
+  const float max_x = origin[0] + size[0];
+  const float min_y = origin[1];
+  const float max_y = origin[1] + size[1];
+  if (min_x <= x && x < max_x && min_y <= y && y < max_y) {
+    return {x, y};  // No clamping to perform.
+  }
+
+  // View boundary is [min_x, max_x) x [min_y, max_y). Note that min is
+  // inclusive, but max is exclusive - so we subtract epsilon.
+  const float max_x_inclusive = max_x - std::numeric_limits<float>::epsilon();
+  const float max_y_inclusive = max_y - std::numeric_limits<float>::epsilon();
+  const float& clamped_x = std::clamp(x, min_x, max_x_inclusive);
+  const float& clamped_y = std::clamp(y, min_y, max_y_inclusive);
+  FML_LOG(INFO) << "Clamped (" << x << ", " << y << ") to (" << clamped_x
+                << ", " << clamped_y << ").";
+  return {clamped_x, clamped_y};
+}
+
 bool PlatformView::OnHandlePointerEvent(
     const fuchsia::ui::input::PointerEvent& pointer) {
   TRACE_EVENT0("flutter", "PlatformView::OnHandlePointerEvent");
@@ -563,9 +595,15 @@ bool PlatformView::OnHandlePointerEvent(
   pointer_data.buttons = static_cast<uint64_t>(pointer.buttons);
 
   switch (pointer_data.change) {
-    case flutter::PointerData::Change::kDown:
+    case flutter::PointerData::Change::kDown: {
+      // Make the pointer start in the view space, despite numerical drift.
+      auto clamped_pointer = ClampToViewSpace(pointer.x, pointer.y);
+      pointer_data.physical_x = clamped_pointer[0] * pixel_ratio;
+      pointer_data.physical_y = clamped_pointer[1] * pixel_ratio;
+
       down_pointers_.insert(pointer_data.device);
       break;
+    }
     case flutter::PointerData::Change::kCancel:
     case flutter::PointerData::Change::kUp:
       down_pointers_.erase(pointer_data.device);

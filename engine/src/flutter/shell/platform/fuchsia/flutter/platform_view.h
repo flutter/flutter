@@ -14,6 +14,7 @@
 #include <lib/sys/cpp/service_directory.h>
 #include <lib/ui/scenic/cpp/id.h>
 
+#include <array>
 #include <map>
 #include <set>
 #include <unordered_map>
@@ -181,20 +182,24 @@ class PlatformView final : public flutter::PlatformView,
       OnShaderWarmup on_shader_warmup,
       std::unique_ptr<flutter::PlatformMessage> message);
 
+  // Utility function for coordinate massaging.
+  std::array<float, 2> ClampToViewSpace(const float x, const float y) const;
+
   const std::string debug_label_;
   // TODO(MI4-2490): remove once ViewRefControl is passed to Scenic and kept
   // alive there
   const fuchsia::ui::views::ViewRef view_ref_;
   std::shared_ptr<FocusDelegate> focus_delegate_;
 
-  // Logical size and logical->physical ratio.  These are optional to provide
-  // an "unset" state during program startup, before Scenic has sent any
-  // metrics-related events to provide initial values for these.
+  // Logical size and origin, and logical->physical ratio.  These are optional
+  // to provide an "unset" state during program startup, before Scenic has sent
+  // any metrics-related events to provide initial values for these.
   //
   // The engine internally uses a default size of (0.f 0.f) with a default 1.f
   // ratio, so there is no need to emit events until Scenic has actually sent a
   // valid size and ratio.
-  std::optional<std::pair<float, float>> view_logical_size_;
+  std::optional<std::array<float, 2>> view_logical_size_;
+  std::optional<std::array<float, 2>> view_logical_origin_;
   std::optional<float> view_pixel_ratio_;
 
   fidl::Binding<fuchsia::ui::scenic::SessionListener> session_listener_binding_;
