@@ -224,7 +224,7 @@ void main() {
         <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
         <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
       ];
-      expect(await simulateKeyDownEvent(LogicalKeyboardKey.controlLeft),
+      expect(await simulateKeyDownEvent(LogicalKeyboardKey.digit1),
           false);
       expect(logs, <int>[20, 21, 10, 11, 0, 1]);
       logs.clear();
@@ -235,7 +235,7 @@ void main() {
         <KeyEventResult>[KeyEventResult.handled, KeyEventResult.ignored],
         <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
       ];
-      expect(await simulateKeyUpEvent(LogicalKeyboardKey.controlLeft),
+      expect(await simulateKeyUpEvent(LogicalKeyboardKey.digit1),
           true);
       expect(logs, <int>[20, 21, 10, 11]);
       logs.clear();
@@ -246,7 +246,7 @@ void main() {
         <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.handled],
         <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
       ];
-      expect(await simulateKeyDownEvent(LogicalKeyboardKey.controlLeft),
+      expect(await simulateKeyDownEvent(LogicalKeyboardKey.digit1),
           true);
       expect(logs, <int>[20, 21, 10, 11]);
       logs.clear();
@@ -257,7 +257,7 @@ void main() {
         <KeyEventResult>[KeyEventResult.skipRemainingHandlers, KeyEventResult.ignored],
         <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
       ];
-      expect(await simulateKeyUpEvent(LogicalKeyboardKey.controlLeft),
+      expect(await simulateKeyUpEvent(LogicalKeyboardKey.digit1),
           false);
       expect(logs, <int>[20, 21, 10, 11]);
       logs.clear();
