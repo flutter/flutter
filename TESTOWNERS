@@ -116,6 +116,7 @@
 /dev/devicelab/bin/tasks/backdrop_filter_perf_ios__timeline_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/basic_material_app_ios__compile.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/channels_integration_test_ios.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/codegen_integration_mac.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/complex_layout_ios__compile.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/complex_layout_ios__start_up.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/complex_layout_scroll_perf_ios__timeline_summary.dart @zanderso @flutter/engine
