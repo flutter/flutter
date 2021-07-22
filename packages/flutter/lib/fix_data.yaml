@@ -15,6 +15,18 @@
 version: 1
 transforms:
 
+  # Changes made in https://github.com/flutter/flutter/pull/84467
+  - title: "Migrate to 'detailedControlsBuilder'"
+    date: 2021-07-22
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'Stepper'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'controlsBuilder',
+        newName: 'detailedControlsBuilder'
+
   # Changes made in https://github.com/flutter/flutter/pull/81336
   - title: "Remove 'buttonColor'"
     date: 2021-04-30
