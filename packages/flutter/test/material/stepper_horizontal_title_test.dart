@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../lib/material.dart';
+
 void main() {
   testWidgets('Stepper horizontal title [HorizontalTitlePosition.bottom] and line [HorizontalLinePosition.top]', (WidgetTester tester) async {
     int index = 0;
@@ -58,7 +60,7 @@ void main() {
         home: Material(
           child: Stepper(
             horizontalTitlePosition: HorizontalTitlePosition.bottom,
-            horizontalLinePosition: HorizontalLinePosition.center,
+            horizontalLinePosition: HorizontalLinePosition.top,
             onStepTapped: (int i) {
               index = i;
             },
