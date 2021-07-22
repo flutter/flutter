@@ -231,6 +231,8 @@ bool VulkanSurface::AllocateDeviceMemory(
     const SkISize& size,
     uint32_t buffer_id) {
   if (size.isEmpty()) {
+    FML_LOG(ERROR)
+        << "VulkanSurface: Failed to allocate surface, size is empty";
     return false;
   }
 
@@ -367,6 +369,8 @@ bool VulkanSurface::SetupSkiaSurface(sk_sp<GrDirectContext> context,
       );
 
   if (!sk_surface || sk_surface->getCanvas() == nullptr) {
+    FML_LOG(ERROR)
+        << "VulkanSurface: SkSurface::MakeFromBackendRenderTarget failed";
     return false;
   }
   sk_surface_ = std::move(sk_surface);
@@ -431,8 +435,7 @@ void VulkanSurface::Reset() {
   if (acquire_event_.signal(ZX_EVENT_SIGNALED, 0u) != ZX_OK ||
       release_event_.signal(ZX_EVENT_SIGNALED, 0u) != ZX_OK) {
     valid_ = false;
-    FML_DLOG(ERROR)
-        << "Could not reset fences. The surface is no longer valid.";
+    FML_LOG(ERROR) << "Could not reset fences. The surface is no longer valid.";
   }
 
   VkFence fence = command_buffer_fence_;
@@ -451,7 +454,7 @@ void VulkanSurface::Reset() {
   acquire_semaphore_.Reset();
   acquire_semaphore_ = SemaphoreFromEvent(acquire_event_);
   if (!acquire_semaphore_) {
-    FML_DLOG(ERROR) << "failed to create acquire semaphore";
+    FML_LOG(ERROR) << "failed to create acquire semaphore";
   }
 
   wait_.Begin(async_get_default_dispatcher());
