@@ -324,8 +324,9 @@ class Checkbox extends StatefulWidget {
   ///  * [MaterialState.disabled].
   ///
   /// If this property is not a [MaterialStateBorderSide] and it is
-  /// non-null, then it is only rendered when [value] is false. The
-  /// difference in interpretation is for backwards compatibility.
+  /// non-null, then it is only rendered when the checkbox's value is
+  /// false. The difference in interpretation is for backwards
+  /// compatibility.
   /// {@endtemplate}
   ///
   /// If this property is null then [CheckboxThemeData.side] of [ThemeData.checkboxTheme]
