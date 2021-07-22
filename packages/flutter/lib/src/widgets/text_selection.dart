@@ -840,7 +840,7 @@ class _TextSelectionHandleOverlayState
     final TextSelection? selection = widget.renderObject.selection;
 
     if (selection != null && selection.isValid && !selection.isCollapsed) {
-      final String selectedGraphemes = widget.renderObject.selection!.textInside(text);
+      final String selectedGraphemes = selection.textInside(text);
       firstSelectedGraphemeExtent = selectedGraphemes.characters.first.length;
       lastSelectedGraphemeExtent = selectedGraphemes.characters.last.length;
       assert(firstSelectedGraphemeExtent <= selectedGraphemes.length && lastSelectedGraphemeExtent <= selectedGraphemes.length);
