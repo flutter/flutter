@@ -801,7 +801,7 @@ class KeyEventManager {
         'while HardwareKeyboard reported ${_hardwareKeyboard.physicalKeysPressed}');
     }
 
-    print('Dispatch events $_keyEventsSinceLastMessage');
+    print('Dispatch events $_keyEventsSinceLastMessage raw $rawEvent');
     if (keyMessageHandler != null) {
       handled = keyMessageHandler!(KeyMessage(_keyEventsSinceLastMessage, rawEvent)) || handled;
     }
