@@ -113,7 +113,8 @@ Future<Command> startCommand(String executable, List<String> arguments, {
     environment: environment,
   );
 
-  Future<List<List<int>>>? savedStdout, savedStderr;
+  Future<List<List<int>>> savedStdout = Future<List<List<int>>>.value(<List<int>>[]);
+  Future<List<List<int>>> savedStderr = Future<List<List<int>>>.value(<List<int>>[]);
   final Stream<List<int>> stdoutSource = process.stdout
     .transform<String>(const Utf8Decoder())
     .transform(const LineSplitter())
@@ -128,8 +129,14 @@ Future<Command> startCommand(String executable, List<String> arguments, {
     .transform(const Utf8Encoder());
   switch (outputMode) {
     case OutputMode.print:
-      stdoutSource.listen(io.stdout.add);
-      process.stderr.listen(io.stdout.add);
+      stdoutSource.listen((List<int> output) {
+        io.stdout.add(output);
+        savedStdout.then((List<List<int>> list) => list.add(output));
+      });
+      process.stderr.listen((List<int> output) {
+        io.stdout.add(output);
+        savedStdout.then((List<List<int>> list) => list.add(output));
+      });
       break;
     case OutputMode.capture:
       savedStdout = stdoutSource.toList();
