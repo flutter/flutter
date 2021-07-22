@@ -806,8 +806,7 @@ class RawKeyboard {
   /// Returns the logical key that corresponds to the given pressed physical key.
   ///
   /// Returns null if the physical key is not currently pressed.
-  LogicalKeyboardKey? lookUpLayout(PhysicalKeyboardKey physicalKey) =>
-    _keysPressed[physicalKey];
+  LogicalKeyboardKey? lookUpLayout(PhysicalKeyboardKey physicalKey) => _keysPressed[physicalKey];
 
   /// Clears the list of keys returned from [keysPressed].
   ///
