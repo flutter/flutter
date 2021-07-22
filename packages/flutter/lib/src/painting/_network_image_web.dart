@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:async';
-import 'dart:html';
+import 'dart:html' as html;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -37,12 +36,14 @@ class NetworkImage
   final Map<String, String>? headers;
 
   @override
-  Future<NetworkImage> obtainKey(image_provider.ImageConfiguration configuration) {
+  Future<NetworkImage> obtainKey(
+      image_provider.ImageConfiguration configuration) {
     return SynchronousFuture<NetworkImage>(this);
   }
 
   @override
-  ImageStreamCompleter load(image_provider.NetworkImage key, image_provider.DecoderCallback decode) {
+  ImageStreamCompleter load(
+      image_provider.NetworkImage key, image_provider.DecoderCallback decode) {
     // Ownership of this controller is handed off to [_loadAsync]; it is that
     // method's responsibility to close the controller's stream when the image
     // has been loaded or an error is thrown.
@@ -58,7 +59,8 @@ class NetworkImage
     );
   }
 
-  InformationCollector? _imageStreamInformationCollector(image_provider.NetworkImage key) {
+  InformationCollector? _imageStreamInformationCollector(
+      image_provider.NetworkImage key) {
     InformationCollector? collector;
     assert(() {
       collector = () => <DiagnosticsNode>[
@@ -85,19 +87,45 @@ class NetworkImage
 
     final Uri resolved = Uri.base.resolve(key.url);
 
-    final HttpRequest response = await HttpRequest.request(key.url, method: 'GET', requestHeaders: key.headers, responseType: 'arraybuffer');
+    if (key.headers?.isEmpty ?? true) {
+      final html.HttpRequest response = await html.HttpRequest.request(key.url,
+          method: 'GET',
+          requestHeaders: key.headers,
+          responseType: 'arraybuffer');
 
-    if (response.status != HttpStatus.ok) {
-      response.abort();
-      throw image_provider.NetworkImageLoadException(statusCode: response.status ?? 400, uri: resolved);
+      final int? status = response.status;
+      final bool accepted = status! >= 200 && status < 300;
+      final bool fileUri = status == 0; // file:// URIs have status of 0.
+      final bool notModified = status == 304;
+      final bool unknownRedirect = status > 307 && status < 400;
+      final bool success =
+          accepted || fileUri || notModified || unknownRedirect;
+
+      if (!success) {
+        response.abort();
+        throw image_provider.NetworkImageLoadException(
+            statusCode: response.status ?? 400, uri: resolved);
+      }
+
+      final Uint8List bytes = (response.response as ByteBuffer).asUint8List();
+
+      if (bytes.lengthInBytes == 0)
+        throw image_provider.NetworkImageLoadException(
+            statusCode: status,
+            uri: resolved);
+
+      return decode(bytes);
+    } else {
+      // This API only exists in the web engine implementation and is not
+      // contained in the analyzer summary for Flutter.
+      return ui.webOnlyInstantiateImageCodecFromUrl(// ignore: undefined_function, avoid_dynamic_calls
+        resolved,
+        chunkCallback: (int bytes, int total) {
+          chunkEvents.add(ImageChunkEvent(
+              cumulativeBytesLoaded: bytes, expectedTotalBytes: total));
+        },
+      ) as Future<ui.Codec>;
     }
-
-    final Uint8List bytes = (response.response as ByteBuffer).asUint8List();
-
-    if (bytes.lengthInBytes == 0)
-        throw Exception('NetworkImage is an empty file: $resolved');
-
-    return decode(bytes);
   }
 
   @override
