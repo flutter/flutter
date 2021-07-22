@@ -985,7 +985,7 @@ abstract class WidgetController {
   /// supported.
   ///
   /// Whether the event is sent through [RawKeyEvent] or [KeyEvent] is
-  /// controlled by [KeyEventSimulator.defaultMode].
+  /// controlled by [debugKeyEventSimulatorTransitModeOverride].
   ///
   /// Keys that are down when the test completes are cleared after each test.
   ///
@@ -1019,7 +1019,7 @@ abstract class WidgetController {
   /// supported.
   ///
   /// Whether the event is sent through [RawKeyEvent] or [KeyEvent] is
-  /// controlled by [KeyEventSimulator.defaultMode].
+  /// controlled by [debugKeyEventSimulatorTransitModeOverride].
   ///
   /// Keys that are down when the test completes are cleared after each test.
   ///
@@ -1047,7 +1047,7 @@ abstract class WidgetController {
   /// else. May not be null.
   ///
   /// Whether the event is sent through [RawKeyEvent] or [KeyEvent] is
-  /// controlled by [KeyEventSimulator.defaultMode].
+  /// controlled by [debugKeyEventSimulatorTransitModeOverride].
   ///
   /// Returns true if the key event was handled by the framework.
   ///
@@ -1073,7 +1073,7 @@ abstract class WidgetController {
   /// null. Some platforms (e.g. Windows, iOS) are not yet supported.
   ///
   /// Whether the event is sent through [RawKeyEvent] or [KeyEvent] is
-  /// controlled by [KeyEventSimulator.defaultMode]. If through [RawKeyEvent],
+  /// controlled by [debugKeyEventSimulatorTransitModeOverride]. If through [RawKeyEvent],
   /// this method is equivalent to [sendKeyDownEvent].
   ///
   /// Keys that are down when the test completes are cleared after each test.
