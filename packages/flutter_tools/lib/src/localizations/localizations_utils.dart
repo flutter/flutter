@@ -243,8 +243,8 @@ String describeLocale(String tag) {
 /// ```
 /// foo => 'foo'
 /// foo "bar" => 'foo "bar"'
-/// foo 'bar' => "foo 'bar'"
-/// foo 'bar' "baz" => '''foo 'bar' "baz"'''
+/// foo 'bar' => 'foo \'bar\''
+/// foo 'bar' "baz" => 'foo \'bar\' \"baz\"'
 /// ```
 ///
 /// This function is used by tools that take in a JSON-formatted file to

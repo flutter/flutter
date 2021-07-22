@@ -2147,27 +2147,27 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       expect(localizationsFile, contains(r'${six}m'));
       expect(localizationsFile, contains(r'$seven'));
       expect(localizationsFile, contains(r'$eight'));
-      expect(localizationsFile, contains(r'${nine}'));
+      expect(localizationsFile, contains(r'$nine'));
     });
 
     testWithoutContext('check for string interpolation rules - plurals', () {
       const String enArbCheckList = '''
 {
-  "first": "{count,plural, =0{test {count} test} =1{哈{count}哈} =2{m{count}m} few{_{count}_} many{{count} test} other{{count}m}",
+  "first": "{count,plural, =0{test {count} test} =1{哈{count}哈} =2{m{count}m} few{_{count}_} many{{count} test} other{{count}m}}",
   "@first": {
     "description": "First set of plural messages to test.",
     "placeholders": {
       "count": {}
     }
   },
-  "second": "{count,plural, =0{test {count}} other{ {count}}",
+  "second": "{count,plural, =0{test {count}} other{ {count}}}",
   "@second": {
     "description": "Second set of plural messages to test.",
     "placeholders": {
       "count": {}
     }
   },
-  "third": "{total,plural, =0{test {total}} other{ {total}}",
+  "third": "{total,plural, =0{test {total}} other{ {total}}}",
   "@third": {
     "description": "Third set of plural messages to test, for number.",
     "placeholders": {
@@ -2184,8 +2184,8 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       // generated code for use of '${variable}' vs '$variable'
       const String esArbCheckList = '''
 {
-  "first": "{count,plural, =0{test {count} test} =1{哈{count}哈} =2{m{count}m} few{_{count}_} many{{count} test} other{{count}m}",
-  "second": "{count,plural, =0{test {count}} other{ {count}}"
+  "first": "{count,plural, =0{test {count} test} =1{哈{count}哈} =2{m{count}m} few{_{count}_} many{{count} test} other{{count}m}}",
+  "second": "{count,plural, =0{test {count}} other{ {count}}}"
 }
 ''';
 
@@ -2216,7 +2216,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       expect(localizationsFile, contains(r'${count}m'));
       expect(localizationsFile, contains(r'test $count'));
       expect(localizationsFile, contains(r' $count'));
-      expect(localizationsFile, contains(r'String totalString = totalNumberFormat'));
+      expect(localizationsFile, contains(r'String totalString = intl.NumberFormat.compactLong'));
       expect(localizationsFile, contains(r'test $totalString'));
       expect(localizationsFile, contains(r' $totalString'));
     });

@@ -493,6 +493,31 @@ class AppResourceBundle {
   }
 }
 
+class MessageToken {
+  final String literalText;
+  final String? field;
+  const MessageToken(this.literalText, this.field);
+}
+
+enum FieldType {
+  simple,
+  select,
+  plural,
+}
+
+class Field {
+  final FieldType type;
+  final String name;
+  final String params;
+  const Field(this.type, this.name, this.params);
+}
+
+class FormattingVariable {
+  final String name;
+  final Field field;
+  const FormattingVariable(this.name, this.field);
+}
+
 // Represents all of the ARB files in [directory] as [AppResourceBundle]s.
 class AppResourceBundleCollection {
   factory AppResourceBundleCollection(Directory directory) {

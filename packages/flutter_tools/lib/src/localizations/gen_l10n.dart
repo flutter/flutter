@@ -92,100 +92,263 @@ List<String> generateMethodParameters(Message message) {
   }).toList();
 }
 
-String generateDateFormattingLogic(Message message) {
-  if (message.placeholders.isEmpty || !message.placeholdersRequireFormatting) {
-    return '@(none)';
-  }
+String _generateMethod(Message message, String translationForMessage) {
+  final fields = extractFields(translationForMessage);
+  final variables = generateVariables(fields, message.placeholders, message.resourceId);
+  final formatters = generateFormatters(variables, message.placeholders);
+  final returnedMessage = makeStringValue(translationForMessage, variables);
 
-  final Iterable<String> formatStatements = message.placeholders
-    .where((Placeholder placeholder) => placeholder.isDate)
-    .map((Placeholder placeholder) {
-      final String? placeholderFormat = placeholder.format;
-      if (placeholderFormat == null) {
-        throw L10nException(
-          'The placeholder, ${placeholder.name}, has its "type" resource attribute set to '
-          'the "${placeholder.type}" type. To properly resolve for the right '
-          '${placeholder.type} format, the "format" attribute needs to be set '
-          'to determine which DateFormat to use. \n'
-          "Check the intl library's DateFormat class constructors for allowed "
-          'date formats.'
-        );
-      }
-      if (!placeholder.hasValidDateFormat) {
-        throw L10nException(
-          'Date format "$placeholderFormat" for placeholder '
-          '${placeholder.name} does not have a corresponding DateFormat '
-          "constructor\n. Check the intl library's DateFormat class "
-          'constructors for allowed date formats.'
-        );
-      }
-      return dateFormatTemplate
-        .replaceAll('@(placeholder)', placeholder.name)
-        .replaceAll('@(format)', placeholderFormat);
-    });
-
-  return formatStatements.isEmpty ? '@(none)' : formatStatements.join('');
-}
-
-String generateNumberFormattingLogic(Message message) {
-  if (message.placeholders.isEmpty || !message.placeholdersRequireFormatting) {
-    return '@(none)';
-  }
-
-  final Iterable<String> formatStatements = message.placeholders
-    .where((Placeholder placeholder) => placeholder.isNumber)
-    .map((Placeholder placeholder) {
-      final String? placeholderFormat = placeholder.format;
-      if (!placeholder.hasValidNumberFormat || placeholderFormat == null) {
-        throw L10nException(
-          'Number format $placeholderFormat for the ${placeholder.name} '
-          'placeholder does not have a corresponding NumberFormat constructor.\n'
-          "Check the intl library's NumberFormat class constructors for allowed "
-          'number formats.'
-        );
-      }
-      final Iterable<String> parameters =
-        placeholder.optionalParameters.map<String>((OptionalParameter parameter) {
-          if (parameter.value is num) {
-            return '${parameter.name}: ${parameter.value}';
-          } else {
-            return '${parameter.name}: ${generateString(parameter.value.toString())}';
-          }
-        },
-      );
-
-      if (placeholder.hasNumberFormatWithParameters) {
-        return numberFormatNamedTemplate
-            .replaceAll('@(placeholder)', placeholder.name)
-            .replaceAll('@(format)', placeholderFormat)
-            .replaceAll('@(parameters)', parameters.join(',\n      '));
-      } else {
-        return numberFormatPositionalTemplate
-            .replaceAll('@(placeholder)', placeholder.name)
-            .replaceAll('@(format)', placeholderFormat);
-      }
-    });
-
-  return formatStatements.isEmpty ? '@(none)' : formatStatements.join('');
-}
-
-String _generatePluralMethod(Message message, String translationForMessage) {
   if (message.placeholders.isEmpty) {
+    return getterTemplate
+      .replaceAll('@(name)', message.resourceId)
+      .replaceAll('@(message)', generateString(translationForMessage));
+  }
+
+  return methodTemplate
+    .replaceAll('@(name)', message.resourceId)
+    .replaceAll('@(parameters)', generateMethodParameters(message).join(', '))
+    .replaceAll('@(variables)', formatters.join("").trim())
+    .replaceAll('@(message)', returnedMessage);
+}
+
+List<MessageToken> _parseMessage(String message) {
+  final tokens = <MessageToken>[];
+
+  String literalText = "";
+  String field = "";
+  int bracesCount = 0;
+
+  for (final rune in message.runes) {
+    final char = String.fromCharCode(rune);
+
+    if (char == "{") {
+      bracesCount += 1;
+      if (bracesCount == 1) {
+        continue;
+      }
+    } else if (char == "}") {
+      bracesCount -= 1;
+      if (bracesCount == 0) {
+        final token = MessageToken(literalText, field);
+        tokens.add(token);
+        literalText = "";
+        field = "";
+        continue;
+      }
+    }
+
+    if (bracesCount == 0) {
+      literalText += char;
+    } else {
+      field += char;
+    }
+  }
+
+  final finalToken = MessageToken(literalText, null);
+  tokens.add(finalToken);
+
+  return tokens;
+}
+
+Field makeField(String field) {
+  final RegExp re = RegExp(r'\s*([^,]*)\s*,\s*([^,]*)\s*,\s*(.*)\s*');
+
+  final RegExpMatch? match = re.firstMatch(field);
+
+  if (match == null) {
+    return Field(FieldType.simple, field, "");
+  }
+
+  assert(match.groupCount == 3);
+
+  final name = match.group(1)!.trim().split(" ").last;
+  final type = match.group(2)!;
+  final params = match.group(3)!;
+
+  if (type == "select") {
+    return Field(FieldType.select, name, params);
+  } else if (type == "plural") {
+    return Field(FieldType.plural, name, params);
+  }
+
+  throw L10nException("Invalid formatting type '$type'");
+
+}
+
+List<Field> extractFields(String string) {
+  final fields = <Field>[];
+
+  for (final token in _parseMessage(string)) {
+    if (token.field == null) {
+      continue;
+    }
+
+    final field = makeField(token.field!);
+
+    switch (field.type) {
+      case FieldType.simple:
+        fields.add(field);
+        break;
+      case FieldType.plural:
+      case FieldType.select:
+      {
+        for (final token in _parseMessage(field.params)) {
+          if (token.field == null) {
+            continue;
+          }
+          fields.addAll(extractFields(token.field!));
+        }
+        fields.add(field);
+        break;
+      }
+    }
+  }
+
+  return fields;
+}
+
+List<FormattingVariable> generateVariables(List<Field> fields, List<Placeholder> placeholders, String resourceId) {
+  final variables = <FormattingVariable>[];
+  int count = 0;
+
+  for (final field in fields) {
+    if (variables.any((FormattingVariable variable) {
+      final variableField = variable.field;
+      return field.name == variableField.name && field.type == variableField.type && field.params == variableField.params;
+    })) {
+      continue;
+    }
+
+    if (!placeholders.any((Placeholder placeholder) => placeholder.name == field.name)) {
+      if (field.type == FieldType.plural) {
+        throw L10nException(
+          'Unable to find placeholders for the plural message: ${resourceId}.\n'
+          'Check to see if the plural message is in the proper ICU syntax format '
+          'and ensure that placeholders are properly specified.'
+        );
+      } else if (field.type == FieldType.select) {
+          throw L10nException(
+          'Unable to find placeholders for the select message: ${resourceId}.\n'
+          'Check to see if the select message is in the proper ICU syntax format '
+          'and ensure that placeholders are properly specified.'
+        );
+      } else {
+        continue;
+      }
+    }
+
+    final placeholder = placeholders.firstWhere((Placeholder placeholder) => placeholder.name == field.name);
+
+    if (field.type == FieldType.simple && !placeholder.isDate && (!placeholder.isNumber || placeholder.format == null)) {
+      variables.add(FormattingVariable(field.name, field));
+      continue;
+    }
+
+    String varname = "${field.name}String";
+    int count = 1;
+    while (variables.any((FormattingVariable variable) => variable.name == varname) || placeholders.any((Placeholder placeholder) => placeholder.name == varname)) {
+      count++;
+      varname = "${field.name}String$count";
+    }
+    variables.add(FormattingVariable(varname, field));
+  }
+
+  return variables;
+}
+
+List<String> generateFormatters(List<FormattingVariable> variables, List<Placeholder> placeholders) {
+  final formatters = <String>[];
+
+  for (final variable in variables) {
+    final placeholder = placeholders.firstWhere((Placeholder placeholder) => placeholder.name == variable.field.name);
+
+    switch (variable.field.type) {
+      case FieldType.simple:
+      {
+        if (placeholder.isNumber && placeholder.format != null) {
+          formatters.add(makeNumberValue(variable.name, placeholder));
+        } else if (placeholder.isDate) {
+          formatters.add(makeDateValue(variable.name, placeholder));
+        }
+        break;
+      }
+      case FieldType.plural:
+      {
+          formatters.add(makePluralValue(variable.name, variable.field.params, placeholder, variables));
+          break;
+      }
+      case FieldType.select:
+      {
+        formatters.add(makeSelectValue(variable.name, variable.field.params, placeholder, variables));
+        break;
+      }
+    }
+  }
+
+  return formatters;
+}
+
+String makeNumberValue(String varname, Placeholder placeholder) {
+  final String? placeholderFormat = placeholder.format;
+  if (!placeholder.hasValidNumberFormat || placeholderFormat == null) {
     throw L10nException(
-      'Unable to find placeholders for the plural message: ${message.resourceId}.\n'
-      'Check to see if the plural message is in the proper ICU syntax format '
-      'and ensure that placeholders are properly specified.'
+      'Number format $placeholderFormat for the ${placeholder.name} '
+      'placeholder does not have a corresponding NumberFormat constructor.\n'
+      "Check the intl library's NumberFormat class constructors for allowed "
+      'number formats.'
     );
   }
+  final Iterable<String> parameters =
+    placeholder.optionalParameters.map<String>((OptionalParameter parameter) {
+      if (parameter.value is num) {
+        return '${parameter.name}: ${parameter.value}';
+      } else {
+        return '${parameter.name}: ${generateString(parameter.value.toString())}';
+      }
+    },
+  );
 
-  // To make it easier to parse the plurals message, temporarily replace each
-  // "{placeholder}" parameter with "#placeholder#".
-  String easyMessage = translationForMessage;
-  for (final Placeholder placeholder in message.placeholders) {
-    easyMessage = easyMessage.replaceAll('{${placeholder.name}}', '#${placeholder.name}#');
+  if (placeholder.hasNumberFormatWithParameters) {
+    return numberFormatNamedTemplate
+        .replaceAll('@(varname)', varname)
+        .replaceAll('@(placeholder)', placeholder.name)
+        .replaceAll('@(format)', placeholderFormat)
+        .replaceAll('@(parameters)', parameters.join(',\n      '));
+  } else {
+    return numberFormatPositionalTemplate
+        .replaceAll('@(varname)', varname)
+        .replaceAll('@(placeholder)', placeholder.name)
+        .replaceAll('@(format)', placeholderFormat);
   }
+}
 
-  final Placeholder countPlaceholder = message.getCountPlaceholder();
+String makeDateValue(String varname, Placeholder placeholder) {
+  final String? placeholderFormat = placeholder.format;
+  if (placeholderFormat == null) {
+    throw L10nException(
+      'The placeholder, ${placeholder.name}, has its "type" resource attribute set to '
+      'the "${placeholder.type}" type. To properly resolve for the right '
+      '${placeholder.type} format, the "format" attribute needs to be set '
+      'to determine which DateFormat to use. \n'
+      "Check the intl library's DateFormat class constructors for allowed "
+      'date formats.'
+    );
+  }
+  if (!placeholder.hasValidDateFormat) {
+    throw L10nException(
+      'Date format "$placeholderFormat" for placeholder '
+      '${placeholder.name} does not have a corresponding DateFormat '
+      "constructor\n. Check the intl library's DateFormat class "
+      'constructors for allowed date formats.'
+    );
+  }
+  return dateFormatTemplate
+    .replaceAll('@(varname)', varname)
+    .replaceAll('@(placeholder)', placeholder.name)
+    .replaceAll('@(format)', placeholderFormat);
+}
+
+String makePluralValue(String varname, String params, Placeholder placeholder, List<FormattingVariable> variables) {
   const Map<String, String> pluralIds = <String, String>{
     '=0': 'zero',
     '=1': 'one',
@@ -196,217 +359,69 @@ String _generatePluralMethod(Message message, String translationForMessage) {
   };
 
   final List<String> pluralLogicArgs = <String>[];
-  for (final String pluralKey in pluralIds.keys) {
-    final RegExp expRE = RegExp('($pluralKey)\\s*{([^}]+)}');
-    final RegExpMatch? match = expRE.firstMatch(easyMessage);
-    if (match != null && match.groupCount == 2) {
-      String argValue = generateString(match.group(2)!);
-      for (final Placeholder placeholder in message.placeholders) {
-        String variable = placeholder.name;
-        if (placeholder.requiresFormatting) {
-          variable += 'String';
-        }
-        argValue = argValue.replaceAll(
-          '#${placeholder.name}#',
-          _needsCurlyBracketStringInterpolation(argValue, placeholder.name)
-            ? '\${$variable}'
-            : '\$$variable'
-        );
-      }
-      pluralLogicArgs.add('      ${pluralIds[pluralKey]}: $argValue');
+
+  for (final token in _parseMessage(params)) {
+    if (token.field == null) {
+      continue;
     }
+    final arg = token.literalText.trim();
+    if (!pluralIds.containsKey(arg)) {
+      continue;
+    }
+    final text = makeStringValue(token.field!, variables);
+    pluralLogicArgs.add('      ${pluralIds[arg]}: $text');
   }
 
-  final List<String> parameters = message.placeholders.map((Placeholder placeholder) {
-    final String? placeholderType = placeholder == countPlaceholder ? 'int' : placeholder.type;
-    return '$placeholderType ${placeholder.name}';
-  }).toList();
-
-  final String comment = message.description ?? 'No description provided in @${message.resourceId}';
-
-  if (translationForMessage.startsWith('{') && translationForMessage.endsWith('}')) {
-    return pluralMethodTemplate
-      .replaceAll('@(comment)', comment)
-      .replaceAll('@(name)', message.resourceId)
-      .replaceAll('@(dateFormatting)', generateDateFormattingLogic(message))
-      .replaceAll('@(numberFormatting)', generateNumberFormattingLogic(message))
-      .replaceAll('@(parameters)', parameters.join(', '))
-      .replaceAll('@(count)', countPlaceholder.name)
-      .replaceAll('@(pluralLogicArgs)', pluralLogicArgs.join(',\n'))
-      .replaceAll('@(none)\n', '');
-  }
-
-  const String variable = 'pluralString';
-  final String string = _replaceWithVariable(translationForMessage, variable);
-  return pluralMethodTemplateInString
-    .replaceAll('@(comment)', comment)
-    .replaceAll('@(name)', message.resourceId)
-    .replaceAll('@(dateFormatting)', generateDateFormattingLogic(message))
-    .replaceAll('@(numberFormatting)', generateNumberFormattingLogic(message))
-    .replaceAll('@(parameters)', parameters.join(', '))
-    .replaceAll('@(variable)', variable)
-    .replaceAll('@(count)', countPlaceholder.name)
-    .replaceAll('@(pluralLogicArgs)', pluralLogicArgs.join(',\n'))
-    .replaceAll('@(none)\n', '')
-    .replaceAll('@(string)', string);
+  return pluralFormatTemplate
+      .replaceAll('@(varname)', varname)
+      .replaceAll('@(placeholder)',   placeholder.name)
+      .replaceAll('@(pluralLogicArgs)', pluralLogicArgs.join(',\n').trim());
 }
 
-String _replaceWithVariable(String translation, String variable) {
-  String prefix = generateString(translation.substring(0, translation.indexOf('{')));
-  prefix = prefix.substring(0, prefix.length - 1);
-  String suffix = generateString(translation.substring(translation.lastIndexOf('}') + 1));
-  suffix = suffix.substring(1);
-
-  // escape variable when the suffix can be combined with the variable
-  if (suffix.isNotEmpty && !suffix.startsWith(' ')) {
-    variable = '{$variable}';
-  }
-  return prefix + r'$' + variable + suffix;
-}
-
-String _generateSelectMethod(Message message, String translationForMessage) {
-  if (message.placeholders.isEmpty) {
-    throw L10nException(
-      'Unable to find placeholders for the select message: ${message.resourceId}.\n'
-      'Check to see if the select message is in the proper ICU syntax format '
-      'and ensure that placeholders are properly specified.'
-    );
-  }
-
+String makeSelectValue(String varname, String params, Placeholder placeholder, List<FormattingVariable> variables) {
   final List<String> cases = <String>[];
 
-  final RegExpMatch? selectMatch =
-    LocalizationsGenerator._selectRE.firstMatch(translationForMessage);
-  String? choice;
-  if (selectMatch != null && selectMatch.groupCount == 2) {
-    choice = selectMatch.group(1);
-    final String pattern = selectMatch.group(2)!;
-    final RegExp patternRE = RegExp(r'\s*([\w\d]+)\s*\{(.*?)\}');
-    for (final RegExpMatch patternMatch in patternRE.allMatches(pattern)) {
-      if (patternMatch.groupCount == 2) {
-        final String value = patternMatch.group(2)!
-          .replaceAll("'", r"\'")
-          .replaceAll('"', r'\"');
-        cases.add(
-          "        '${patternMatch.group(1)}': '$value'",
-        );
-      }
+  for (final token in _parseMessage(params)) {
+    if (token.field == null) {
+      continue;
     }
+    final arg = token.literalText.trim();
+    final text = makeStringValue(token.field!, variables);
+    cases.add("        '${arg}': ${text}");
   }
 
-  final List<String> parameters = message.placeholders.map((Placeholder placeholder) {
-    final String placeholderType = placeholder.type ?? 'object';
-    return '$placeholderType ${placeholder.name}';
-  }).toList();
-
-  final String description = message.description ?? 'No description provided in @${message.resourceId}';
-
-  if (translationForMessage.startsWith('{') && translationForMessage.endsWith('}')) {
-    return selectMethodTemplate
-        .replaceAll('@(name)', message.resourceId)
-        .replaceAll('@(parameters)', parameters.join(', '))
-        .replaceAll('@(choice)', choice!)
-        .replaceAll('@(cases)', cases.join(',\n').trim())
-        .replaceAll('@(description)', description);
-  }
-
-  const String variable = 'selectString';
-  final String string = _replaceWithVariable(translationForMessage, variable);
-  return selectMethodTemplateInString
-      .replaceAll('@(name)', message.resourceId)
-      .replaceAll('@(parameters)', parameters.join(', '))
-      .replaceAll('@(variable)', variable)
-      .replaceAll('@(choice)', choice!)
-      .replaceAll('@(cases)', cases.join(',\n').trim())
-      .replaceAll('@(description)', description)
-      .replaceAll('@(string)', string);
+  return selectFormatTemplate
+    .replaceAll('@(varname)', varname)
+    .replaceAll('@(placeholder)', placeholder.name)
+    .replaceAll('@(cases)', cases.join(',\n').trim());
 }
 
-bool _needsCurlyBracketStringInterpolation(String messageString, String placeholder) {
-  final int placeholderIndex = messageString.indexOf(placeholder);
-  // This means that this message does not contain placeholders/parameters,
-  // since one was not found in the message.
-  if (placeholderIndex == -1) {
-    return false;
-  }
+String makeStringValue(String text, List<FormattingVariable> variables) {
+  String string = "";
+  String? pendingPlaceholder;
 
-  final bool isPlaceholderEndOfSubstring = placeholderIndex + placeholder.length + 2 == messageString.length;
-
-  if (placeholderIndex > 2 && !isPlaceholderEndOfSubstring) {
-    // Normal case
-    // Examples:
-    // "'The number of {hours} elapsed is: 44'" // no curly brackets.
-    // "'哈{hours}哈'" // no curly brackets.
-    // "'m#hours#m'" // curly brackets.
-    // "'I have to work _#hours#_' sometimes." // curly brackets.
-    final RegExp commonCaseRE = RegExp('[^a-zA-Z_][#{]$placeholder[#}][^a-zA-Z_]');
-    return !commonCaseRE.hasMatch(messageString);
-  } else if (placeholderIndex == 2) {
-    // Example:
-    // "'{hours} elapsed.'" // no curly brackets
-    // '#placeholder# ' // no curly brackets
-    // '#placeholder#m' // curly brackets
-    final RegExp startOfString = RegExp('[#{]$placeholder[#}][^a-zA-Z_]');
-    return !startOfString.hasMatch(messageString);
-  } else {
-    // Example:
-    // "'hours elapsed: {hours}'"
-    // "'Time elapsed: {hours}'" // no curly brackets
-    // ' #placeholder#' // no curly brackets
-    // 'm#placeholder#' // curly brackets
-    final RegExp endOfString = RegExp('[^a-zA-Z_][#{]$placeholder[#}]');
-    return !endOfString.hasMatch(messageString);
-  }
-}
-
-String _generateMethod(Message message, String translationForMessage) {
-  String generateMessage() {
-    String messageValue = generateString(translationForMessage);
-    for (final Placeholder placeholder in message.placeholders) {
-      String variable = placeholder.name;
-      if (placeholder.requiresFormatting) {
-        variable += 'String';
-      }
-      messageValue = messageValue.replaceAll(
-        '{${placeholder.name}}',
-        _needsCurlyBracketStringInterpolation(messageValue, placeholder.name)
-          ? '\${$variable}'
-          : '\$$variable'
-      );
+  for (final token in _parseMessage(text)) {
+    final escaped = generateString(token.literalText);
+    final unquoted = escaped.substring(1, escaped.length - 1);
+    if (pendingPlaceholder != null) {
+      final needsCurlyBracketStringInterpolation = RegExp(r"^\w").hasMatch(unquoted);
+      string += needsCurlyBracketStringInterpolation ? '\${${pendingPlaceholder}}' : '\$${pendingPlaceholder}';
     }
-
-    return messageValue;
+    string += unquoted;
+    if (token.field == null) {
+      continue;
+    }
+    final field = makeField(token.field!);
+    final variable = variables.firstWhere((FormattingVariable variable) {
+      final variableField = variable.field;
+      return field.name == variableField.name && field.type == variableField.type && field.params == variableField.params;
+    });
+    pendingPlaceholder = variable.name;
   }
 
-  if (message.isPlural) {
-    return _generatePluralMethod(message, translationForMessage);
-  }
-
-  if (message.isSelect) {
-    return _generateSelectMethod(message, translationForMessage);
-  }
-
-  if (message.placeholdersRequireFormatting) {
-    return formatMethodTemplate
-      .replaceAll('@(name)', message.resourceId)
-      .replaceAll('@(parameters)', generateMethodParameters(message).join(', '))
-      .replaceAll('@(dateFormatting)', generateDateFormattingLogic(message))
-      .replaceAll('@(numberFormatting)', generateNumberFormattingLogic(message))
-      .replaceAll('@(message)', generateMessage())
-      .replaceAll('@(none)\n', '');
-  }
-
-  if (message.placeholders.isNotEmpty) {
-    return methodTemplate
-      .replaceAll('@(name)', message.resourceId)
-      .replaceAll('@(parameters)', generateMethodParameters(message).join(', '))
-      .replaceAll('@(message)', generateMessage());
-  }
-
-  return getterTemplate
-    .replaceAll('@(name)', message.resourceId)
-    .replaceAll('@(message)', generateMessage());
+  return "'$string'";
 }
+
 
 String generateBaseClassMethod(Message message, LocaleInfo? templateArbLocale) {
   final String comment = message.description ?? 'No description provided for @${message.resourceId}.';

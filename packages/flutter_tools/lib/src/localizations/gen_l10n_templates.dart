@@ -109,21 +109,35 @@ abstract class @(class) {
 ''';
 
 const String numberFormatPositionalTemplate = '''
-    final intl.NumberFormat @(placeholder)NumberFormat = intl.NumberFormat.@(format)(localeName);
-    final String @(placeholder)String = @(placeholder)NumberFormat.format(@(placeholder));
+    final String @(varname) = intl.NumberFormat.@(format)(localeName).format(@(placeholder));
 ''';
 
 const String numberFormatNamedTemplate = '''
-    final intl.NumberFormat @(placeholder)NumberFormat = intl.NumberFormat.@(format)(
+    final String @(varname) = intl.NumberFormat.@(format)(
       locale: localeName,
       @(parameters)
-    );
-    final String @(placeholder)String = @(placeholder)NumberFormat.format(@(placeholder));
+    ).format(@(placeholder));
 ''';
 
 const String dateFormatTemplate = '''
-    final intl.DateFormat @(placeholder)DateFormat = intl.DateFormat.@(format)(localeName);
-    final String @(placeholder)String = @(placeholder)DateFormat.format(@(placeholder));
+    final String @(varname) = intl.DateFormat.@(format)(localeName).format(@(placeholder));
+''';
+
+const String selectFormatTemplate = '''
+    final String @(varname) = intl.Intl.select(
+      @(placeholder),
+      {
+        @(cases)
+      }
+    );
+''';
+
+const String pluralFormatTemplate = '''
+    final String @(varname) = intl.Intl.pluralLogic(
+      @(placeholder),
+      locale: localeName,
+      @(pluralLogicArgs),
+    );
 ''';
 
 const String getterTemplate = '''
@@ -133,6 +147,7 @@ const String getterTemplate = '''
 const String methodTemplate = '''
   @override
   String @(name)(@(parameters)) {
+    @(variables)
     return @(message);
   }''';
 
@@ -142,58 +157,6 @@ const String formatMethodTemplate = '''
 @(dateFormatting)
 @(numberFormatting)
     return @(message);
-  }''';
-
-const String pluralMethodTemplate = '''
-  @override
-  String @(name)(@(parameters)) {
-@(dateFormatting)
-@(numberFormatting)
-    return intl.Intl.pluralLogic(
-      @(count),
-      locale: localeName,
-@(pluralLogicArgs),
-    );
-  }''';
-
-const String pluralMethodTemplateInString = '''
-  @override
-  String @(name)(@(parameters)) {
-@(dateFormatting)
-@(numberFormatting)
-    final String @(variable) = intl.Intl.pluralLogic(
-      @(count),
-      locale: localeName,
-@(pluralLogicArgs),
-    );
-
-    return @(string);
-  }''';
-
-const String selectMethodTemplate = '''
-  @override
-  String @(name)(@(parameters)) {
-    return intl.Intl.select(
-      @(choice),
-      {
-        @(cases)
-      },
-      desc: '@(description)'
-    );
-  }''';
-
-const String selectMethodTemplateInString = '''
-  @override
-  String @(name)(@(parameters)) {
-    final String @(variable) = intl.Intl.select(
-      @(choice),
-      {
-        @(cases)
-      },
-      desc: '@(description)'
-    );
-
-    return @(string);
   }''';
 
 const String classFileTemplate = '''
