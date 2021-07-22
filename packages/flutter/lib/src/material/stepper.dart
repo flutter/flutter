@@ -57,17 +57,17 @@ enum StepperType {
 
 /// Defines the [Stepper]'s titles position.
 enum HorizontalTitlePosition {
-  /// A horizontal layout of the steps with their in-between the titles position.
+  /// A horizontal layout of the steps with their titles position.
   inline,
-  /// A horizontal layout of the steps with their in-between the titles position.
+  /// A horizontal layout of the steps with their titles position.
   bottom,
 }
 
 /// Defines the [Stepper]'s separator position.
 enum HorizontalLinePosition {
-  /// A horizontal layout of the steps with their in-between the separator position.
+  /// A horizontal layout of the steps with their separator position in-between the titles.
   center,
-  /// A horizontal layout of the steps with their in-between the separator position.
+  /// A horizontal layout of the steps with their separator position in-between the titles.
   top,
 }
 
