@@ -323,7 +323,7 @@ class TextField extends StatefulWidget {
   /// to [ui.BoxHeightStyle.tight] and [ui.BoxWidthStyle.tight] respectively and
   /// must not be null.
   ///
-  /// The [textAlign], [autofocus], [obscureText], 
+  /// The [textAlign], [autofocus], [obscureText],
   /// [obscureTextBehavior], [readOnly], [autocorrect],
   /// [maxLengthEnforced], [scrollPadding], [maxLines], [maxLength],
   /// [selectionHeightStyle], [selectionWidthStyle], and [enableSuggestions]
@@ -351,6 +351,9 @@ class TextField extends StatefulWidget {
     this.showCursor,
     this.autofocus = false,
     this.obscuringCharacter = '•',
+    @Deprecated(
+        'use obscureTextBehavior instead.'
+    )
     this.obscureText = false,
     this.obscureTextBehavior = ObscureTextBehavior.none,
     this.autocorrect = true,
@@ -398,8 +401,10 @@ class TextField extends StatefulWidget {
        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
        assert((obscureText != null && obscureTextBehavior == null) || (obscureText == null && obscureTextBehavior != null)),
        assert(autocorrect != null),
-       smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
-       smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
+       smartDashesType = smartDashesType ?? ((obscureText != null && obscureText) ||
+           (obscureTextBehavior != null && obscureTextBehavior != ObscureTextBehavior.none) ? SmartDashesType.disabled : SmartDashesType.enabled),
+       smartQuotesType = smartQuotesType ?? ((obscureText != null && obscureText) ||
+           (obscureTextBehavior != null && obscureTextBehavior != ObscureTextBehavior.none) ? SmartQuotesType.disabled : SmartQuotesType.enabled),
        assert(enableSuggestions != null),
        assert(enableInteractiveSelection != null),
        assert(maxLengthEnforced != null),
@@ -422,7 +427,15 @@ class TextField extends StatefulWidget {
          !expands || (maxLines == null && minLines == null),
          'minLines and maxLines must be null when expands is true.',
        ),
-       assert(!obscureText || maxLines == 1, 'Obscured fields cannot be multiline.'),
+       assert(
+         (obscureText != null && !obscureText) ||
+         (
+           obscureTextBehavior != null &&
+           obscureTextBehavior == ObscureTextBehavior.none
+         ) ||
+         maxLines == 1,
+         'Obscured fields cannot be multiline.'
+       ),
        assert(maxLength == null || maxLength == TextField.noMaxLength || maxLength > 0),
        // Assert the following instead of setting it directly to avoid surprising the user by silently changing the value they set.
        assert(
@@ -432,7 +445,8 @@ class TextField extends StatefulWidget {
          'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.',
        ),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
-       toolbarOptions = toolbarOptions ?? (obscureText ?
+       toolbarOptions = toolbarOptions ?? ((obscureText != null && obscureText) ||
+           (obscureTextBehavior != null && obscureTextBehavior != ObscureTextBehavior.none) ?
          const ToolbarOptions(
            selectAll: true,
            paste: true,
@@ -536,6 +550,9 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.obscuringCharacter}
   final String obscuringCharacter;
 
+  @Deprecated(
+      'use obscureTextBehavior instead.'
+  )
   /// {@macro flutter.widgets.editableText.obscureText}
   final bool obscureText;
 
@@ -843,8 +860,10 @@ class TextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
     properties.add(DiagnosticsProperty<ObscureTextBehavior>('obscureTextBehavior', obscureTextBehavior, defaultValue: ObscureTextBehavior.none));
     properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
-    properties.add(EnumProperty<SmartDashesType>('smartDashesType', smartDashesType, defaultValue: obscureText ? SmartDashesType.disabled : SmartDashesType.enabled));
-    properties.add(EnumProperty<SmartQuotesType>('smartQuotesType', smartQuotesType, defaultValue: obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled));
+    properties.add(EnumProperty<SmartDashesType>('smartDashesType', smartDashesType, defaultValue: (obscureText != null && obscureText) ||
+        (obscureTextBehavior != null && obscureTextBehavior != ObscureTextBehavior.none) ? SmartDashesType.disabled : SmartDashesType.enabled));
+    properties.add(EnumProperty<SmartQuotesType>('smartQuotesType', smartQuotesType, defaultValue: (obscureText != null && obscureText) ||
+        (obscureTextBehavior != null && obscureTextBehavior != ObscureTextBehavior.none) ? SmartQuotesType.disabled : SmartQuotesType.enabled));
     properties.add(DiagnosticsProperty<bool>('enableSuggestions', enableSuggestions, defaultValue: true));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: 1));
     properties.add(IntProperty('minLines', minLines, defaultValue: null));

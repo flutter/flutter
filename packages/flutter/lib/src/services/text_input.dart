@@ -465,6 +465,9 @@ class TextInputConfiguration {
   const TextInputConfiguration({
     this.inputType = TextInputType.text,
     this.readOnly = false,
+    @Deprecated(
+        'use obscureTextBehavior instead.'
+    )
     this.obscureText = false,
     this.obscureTextBehavior = ObscureTextBehavior.none,
     this.autocorrect = true,
@@ -477,10 +480,12 @@ class TextInputConfiguration {
     this.textCapitalization = TextCapitalization.none,
     this.autofillConfiguration,
   }) : assert(inputType != null),
-       assert(obscureText != null),
-       assert(obscureTextBehavior != null),
-       smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
-       smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
+
+        assert((obscureText != null && obscureTextBehavior == null) || (obscureText == null && obscureTextBehavior != null)),
+       smartDashesType = smartDashesType ?? ((obscureText != null && obscureText) ||
+           (obscureTextBehavior != null && obscureTextBehavior != ObscureTextBehavior.none) ? SmartDashesType.disabled : SmartDashesType.enabled),
+       smartQuotesType = smartQuotesType ?? ((obscureText != null && obscureText) ||
+           (obscureTextBehavior != null && obscureTextBehavior != ObscureTextBehavior.none) ? SmartQuotesType.disabled : SmartQuotesType.enabled),
        assert(autocorrect != null),
        assert(enableSuggestions != null),
        assert(keyboardAppearance != null),
@@ -503,15 +508,14 @@ class TextInputConfiguration {
   /// Defaults to false.
   final bool obscureText;
 
-  @Deprecated(
-    'Use obscureTextBehavior instead.'
-  )
   /// {@template flutter.widgets.editableText.obscureTextBehavior}
   /// How characters in the field are obscured, if at all.
-  /// For example, a password field may want to obscure the entered 
+  ///
+  /// For example, a password field may want to obscure the entered
   /// text so it's not readable.
-  /// When this is set to [ObscureTextBehavior.all] or 
-  /// [ObscureTextBehavior.delayed], the characters in the field 
+  ///
+  /// When this is set to [ObscureTextBehavior.all] or
+  /// [ObscureTextBehavior.delayed], the characters in the field
   /// are replaced by [obscuringCharacter].
   ///
   /// Defaults to [ObscureTextBehavior.none]. Cannot be null.

@@ -151,7 +151,11 @@ class CupertinoTextFormFieldRow extends FormField<String> {
     ToolbarOptions? toolbarOptions,
     bool? showCursor,
     String obscuringCharacter = '•',
+    @Deprecated(
+        'use obscureTextBehavior instead.'
+    )
     bool obscureText = false,
+    ObscureTextBehavior obscureTextBehavior = ObscureTextBehavior.none,
     bool autocorrect = true,
     SmartDashesType? smartDashesType,
     SmartQuotesType? smartQuotesType,
@@ -188,7 +192,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
         assert(autofocus != null),
         assert(readOnly != null),
         assert(obscuringCharacter != null && obscuringCharacter.length == 1),
-        assert(obscureText != null),
+        assert((obscureText != null && obscureTextBehavior == null) || (obscureText == null && obscureTextBehavior != null)),
         assert(autocorrect != null),
         assert(enableSuggestions != null),
         assert(scrollPadding != null),
@@ -203,7 +207,15 @@ class CupertinoTextFormFieldRow extends FormField<String> {
           !expands || (maxLines == null && minLines == null),
           'minLines and maxLines must be null when expands is true.',
         ),
-        assert(!obscureText || maxLines == 1, 'Obscured fields cannot be multiline.'),
+        assert(
+          (obscureText != null && !obscureText) ||
+            (
+              obscureTextBehavior != null &&
+              obscureTextBehavior == ObscureTextBehavior.none
+            ) ||
+            maxLines == 1,
+        'Obscured fields cannot be multiline.'
+        ),
         assert(maxLength == null || maxLength > 0),
         assert(enableInteractiveSelection != null),
         super(

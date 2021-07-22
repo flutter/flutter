@@ -422,7 +422,7 @@ class EditableText extends StatefulWidget {
   /// The text cursor is not shown if [showCursor] is false or if [showCursor]
   /// is null (the default) and [readOnly] is true.
   ///
-  /// The [controller], [focusNode], [obscureText], 
+  /// The [controller], [focusNode], [obscureText],
   /// [obscureTextBehavior], [autocorrect], [autofocus],
   /// [showSelectionHandles], [enableInteractiveSelection], [forceLine],
   /// [style], [cursorColor], [cursorOpacityAnimates],[backgroundCursorColor],
@@ -436,6 +436,9 @@ class EditableText extends StatefulWidget {
     required this.focusNode,
     this.readOnly = false,
     this.obscuringCharacter = '•',
+    @Deprecated(
+        'use obscureTextBehavior instead.'
+    )
     this.obscureText = false,
     this.obscureTextBehavior = ObscureTextBehavior.none,
     this.autocorrect = true,
@@ -503,8 +506,12 @@ class EditableText extends StatefulWidget {
        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
        assert((obscureText != null && obscureTextBehavior == null) || (obscureText == null && obscureTextBehavior != null)),
        assert(autocorrect != null),
-       smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
-       smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
+       smartDashesType = smartDashesType ?? ((obscureText != null && obscureText) ||
+           (obscureTextBehavior != null && obscureTextBehavior != ObscureTextBehavior.none) ?
+       SmartDashesType.disabled : SmartDashesType.enabled),
+       smartQuotesType = smartQuotesType ?? ((obscureText != null && obscureText) ||
+           (obscureTextBehavior != null && obscureTextBehavior != ObscureTextBehavior.none) ?
+       SmartQuotesType.disabled : SmartQuotesType.enabled),
        assert(enableSuggestions != null),
        assert(showSelectionHandles != null),
        assert(enableInteractiveSelection != null),
@@ -529,7 +536,15 @@ class EditableText extends StatefulWidget {
          !expands || (maxLines == null && minLines == null),
          'minLines and maxLines must be null when expands is true.',
        ),
-       assert(!obscureText || maxLines == 1, 'Obscured fields cannot be multiline.'),
+       assert(
+         (obscureText != null && !obscureText) ||
+         (
+           obscureTextBehavior != null &&
+           obscureTextBehavior == ObscureTextBehavior.none
+         ) ||
+         maxLines == 1,
+         'Obscured fields cannot be multiline.'
+       ),
        assert(autofocus != null),
        assert(rendererIgnoresPointer != null),
        assert(scrollPadding != null),
@@ -566,6 +581,9 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   final String obscuringCharacter;
 
+  @Deprecated(
+      'use obscureTextBehavior instead.'
+  )
   /// {@template flutter.widgets.editableText.obscureText}
   /// Whether to hide the text being edited (e.g., for passwords).
   ///
@@ -575,13 +593,15 @@ class EditableText extends StatefulWidget {
   /// Defaults to false. Cannot be null.
   /// {@endtemplate}
   final bool obscureText;
-  
+
   /// {@template flutter.widgets.editableText.obscureTextBehavior}
   /// How characters in the field are obscured, if at all.
-  /// For example, a password field may want to obscure the entered 
+  ///
+  /// For example, a password field may want to obscure the entered
   /// text so it's not readable.
-  /// When this is set to [ObscureTextBehavior.all] or 
-  /// [ObscureTextBehavior.delayed], the characters in the field 
+  ///
+  /// When this is set to [ObscureTextBehavior.all] or
+  /// [ObscureTextBehavior.delayed], the characters in the field
   /// are replaced by [obscuringCharacter].
   ///
   /// Defaults to [ObscureTextBehavior.none]. Cannot be null.
@@ -1512,8 +1532,10 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
     properties.add(DiagnosticsProperty<ObscureTextBehavior>('obscureTextBehavior', obscureTextBehavior, defaultValue: ObscureTextBehavior.none));
     properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
-    properties.add(EnumProperty<SmartDashesType>('smartDashesType', smartDashesType, defaultValue: obscureText ? SmartDashesType.disabled : SmartDashesType.enabled));
-    properties.add(EnumProperty<SmartQuotesType>('smartQuotesType', smartQuotesType, defaultValue: obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled));
+    properties.add(EnumProperty<SmartDashesType>('smartDashesType', smartDashesType, defaultValue: (obscureText != null && obscureText) ||
+        (obscureTextBehavior != null && obscureTextBehavior != ObscureTextBehavior.none) ? SmartDashesType.disabled : SmartDashesType.enabled));
+    properties.add(EnumProperty<SmartQuotesType>('smartQuotesType', smartQuotesType, defaultValue: (obscureText != null && obscureText) ||
+        (obscureTextBehavior != null && obscureTextBehavior != ObscureTextBehavior.none) ? SmartQuotesType.disabled : SmartQuotesType.enabled));
     properties.add(DiagnosticsProperty<bool>('enableSuggestions', enableSuggestions, defaultValue: true));
     style.debugFillProperties(properties);
     properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
@@ -1774,7 +1796,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _currentPromptRectRange = null;
 
       if (_hasInputConnection) {
-        if (widget.obscureText && value.text.length == _value.text.length + 1) {
+        if (((widget.obscureText != null && widget.obscureText) || (widget.obscureTextBehavior != null && widget.obscureTextBehavior != ObscureTextBehavior.none)) && value.text.length == _value.text.length + 1) {
           _obscureShowCharTicksPending = _kObscureShowLatestCharCursorTicks;
           _obscureLatestCharIndex = _value.selection.baseOffset;
         }
@@ -2743,7 +2765,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// By default makes text in composing range appear as underlined.
   /// Descendants can override this method to customize appearance of text.
   TextSpan buildTextSpan() {
-    if (widget.obscureText || 
+    if (widget.obscureText ||
       widget.obscureTextBehavior != ObscureTextBehavior.none) {
       String text = _value.text;
       text = widget.obscuringCharacter * text.length;
@@ -2751,7 +2773,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       if ((defaultTargetPlatform == TargetPlatform.android ||
               defaultTargetPlatform == TargetPlatform.iOS ||
               defaultTargetPlatform == TargetPlatform.fuchsia) &&
-          !kIsWeb && 
+          !kIsWeb &&
           widget.obscureTextBehavior == ObscureTextBehavior.delayed) {
         final int? o =
             _obscureShowCharTicksPending > 0 ? _obscureLatestCharIndex : null;
@@ -2794,7 +2816,10 @@ class _Editable extends MultiChildRenderObjectWidget {
     required this.textDirection,
     this.locale,
     required this.obscuringCharacter,
-    required this.obscureText,
+    @Deprecated(
+        'use obscureTextBehavior instead.'
+    )
+    this.obscureText,
     required this.obscureTextBehavior,
     required this.autocorrect,
     required this.smartDashesType,
@@ -2853,7 +2878,7 @@ class _Editable extends MultiChildRenderObjectWidget {
   final TextDirection textDirection;
   final Locale? locale;
   final String obscuringCharacter;
-  final bool obscureText;
+  final bool? obscureText;
   final ObscureTextBehavior obscureTextBehavior;
   final TextHeightBehavior? textHeightBehavior;
   final TextWidthBasis textWidthBasis;
