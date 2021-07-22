@@ -2166,6 +2166,16 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
     "placeholders": {
       "count": {}
     }
+  },
+  "third": "{total,plural, =0{test {total}} other{ {total}}",
+  "@third": {
+    "description": "Third set of plural messages to test, for number.",
+    "placeholders": {
+      "total": {
+        "type": "int",
+        "format": "compactLong"
+      }
+    }
   }
 }
 ''';
@@ -2206,6 +2216,9 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       expect(localizationsFile, contains(r'${count}m'));
       expect(localizationsFile, contains(r'test $count'));
       expect(localizationsFile, contains(r' $count'));
+      expect(localizationsFile, contains(r'String totalString = totalNumberFormat'));
+      expect(localizationsFile, contains(r'test $totalString'));
+      expect(localizationsFile, contains(r' $totalString'));
     });
 
     testWithoutContext(
@@ -2493,7 +2506,6 @@ String orderNumber(int number) {
     final String localizationsFile = fs.file(
       fs.path.join(syntheticL10nPackagePath, 'output-localization-file.dart'),
     ).readAsStringSync();
-    print(localizationsFile);
     expect(localizationsFile, containsIgnoringWhitespace(r'''
 AppLocalizations lookupAppLocalizations(Locale locale) {
 '''));
