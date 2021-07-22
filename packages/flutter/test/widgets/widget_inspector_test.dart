@@ -1887,6 +1887,13 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(await service.testExtension('getSelectedWidget', <String, String>{'objectGroup': 'my-group'}), contains('createdByLocalProject'));
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked() || isBrowser); // Test requires --track-widget-creation flag.
 
+    Map<Object, Object?> removeLastEvent(List<Map<Object, Object?>> events) {
+      final Map<Object, Object?> event = events.removeLast();
+      // Verify that the event is json encodable.
+      json.encode(event);
+      return event;
+    }
+
     testWidgets('ext.flutter.inspector.trackRebuildDirtyWidgets', (WidgetTester tester) async {
       service.rebuildCount = 0;
 
@@ -1922,7 +1929,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       await tester.pump();
 
       expect(rebuildEvents.length, equals(1));
-      Map<Object, Object?> event = rebuildEvents.removeLast();
+      Map<Object, Object?> event = removeLastEvent(rebuildEvents);
       expect(event['startTime'], isA<int>());
       List<int> data = event['events']! as List<int>;
       expect(data.length, equals(14));
@@ -1931,7 +1938,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(newLocations, isNotNull);
       expect(newLocations.length, equals(1));
       expect(newLocations.keys.first, equals(file));
-      Map<String, Map<String, List<dynamic>>> fileLocationsMap = event['locations']! as Map<String, Map<String, List<dynamic>>>;
+      Map<String, Map<String, List<Object?>>> fileLocationsMap = event['locations']! as Map<String, Map<String, List<Object?>>>;
       expect(fileLocationsMap, isNotNull);
       expect(fileLocationsMap.length, equals(1));
       expect(fileLocationsMap.keys.first, equals(file));
@@ -1939,7 +1946,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(locationsForFile.length, equals(21));
       final int numLocationEntries = locationsForFile.length ~/ 3;
       expect(numLocationEntries, equals(numDataEntries));
-      final Map<String, List<dynamic>> locations = fileLocationsMap[file]!;
+      final Map<String, List<Object?>> locations = fileLocationsMap[file]!;
       expect(locations.length, equals(4));
       expect(locations['ids']!.length, equals(7));
 
@@ -1970,7 +1977,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       state.updateTime(); // Triggers a rebuild.
       await tester.pump();
       expect(rebuildEvents.length, equals(1));
-      event = rebuildEvents.removeLast();
+      event = removeLastEvent(rebuildEvents);
       expect(event['startTime'], isA<int>());
       data = event['events']! as List<int>;
       // No new locations were rebuilt.
@@ -2009,7 +2016,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
       await tester.pump();
       expect(rebuildEvents.length, equals(1));
-      event = rebuildEvents.removeLast();
+      event = removeLastEvent(rebuildEvents);
       expect(event['startTime'], isA<int>());
       data = event['events']! as List<int>;
       // No new locations were rebuilt.
@@ -2046,7 +2053,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
       await tester.pump();
       expect(rebuildEvents.length, equals(1));
-      event = rebuildEvents.removeLast();
+      event = removeLastEvent(rebuildEvents);
       expect(event['startTime'], isA<int>());
       data = event['events']! as List<int>;
       // No new locations were rebuilt.
@@ -2064,11 +2071,11 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       state.stopClock();
       await tester.pump();
       expect(rebuildEvents.length, equals(1));
-      event = rebuildEvents.removeLast();
+      event = removeLastEvent(rebuildEvents);
       expect(event['startTime'], isA<int>());
       data = event['events']! as List<int>;
       newLocations = event['newLocations']! as Map<String, List<int>>;
-      fileLocationsMap = event['locations']! as Map<String, Map<String, List<dynamic>>>;
+      fileLocationsMap = event['locations']! as Map<String, Map<String, List<Object?>>>;
 
       expect(data.length, equals(4));
       // The second pair in data is the previously unseen rebuild location.
@@ -2135,7 +2142,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       await tester.pump();
 
       expect(repaintEvents.length, equals(1));
-      Map<Object, Object?> event = repaintEvents.removeLast();
+      Map<Object, Object?> event = removeLastEvent(repaintEvents);
       expect(event['startTime'], isA<int>());
       List<int> data = event['events']! as List<int>;
       expect(data.length, equals(18));
@@ -2144,7 +2151,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(newLocations, isNotNull);
       expect(newLocations.length, equals(1));
       expect(newLocations.keys.first, equals(file));
-      final Map<String, Map<String, List<dynamic>>> fileLocationsMap = event['locations']! as Map<String, Map<String, List<dynamic>>>;
+      final Map<String, Map<String, List<Object?>>> fileLocationsMap = event['locations']! as Map<String, Map<String, List<Object?>>>;
       expect(fileLocationsMap, isNotNull);
       expect(fileLocationsMap.length, equals(1));
       expect(fileLocationsMap.keys.first, equals(file));
@@ -2152,7 +2159,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(locationsForFile.length, equals(27));
       final int numLocationEntries = locationsForFile.length ~/ 3;
       expect(numLocationEntries, equals(numDataEntries));
-      final Map<String, List<dynamic>> locations = fileLocationsMap[file]!;
+      final Map<String, List<Object?>> locations = fileLocationsMap[file]!;
       expect(locations.length, equals(4));
       expect(locations['ids']!.length, equals(9));
 
@@ -2183,7 +2190,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       state.updateTime(); // Triggers a rebuild.
       await tester.pump();
       expect(repaintEvents.length, equals(1));
-      event = repaintEvents.removeLast();
+      event = removeLastEvent(repaintEvents);
       expect(event['startTime'], isA<int>());
       data = event['events']! as List<int>;
       // No new locations were rebuilt.
@@ -3043,9 +3050,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
 void _addToKnownLocationsMap({
   required Map<int, _CreationLocation> knownLocations,
-  required Map<String, Map<String, List<dynamic>>> newLocations,
+  required Map<String, Map<String, List<Object?>>> newLocations,
 }) {
-  newLocations.forEach((String file, Map<String, List<dynamic>> entries) {
+  newLocations.forEach((String file, Map<String, List<Object?>> entries) {
     final List<int> ids = entries['ids']!.cast<int>();
     final List<int> lines = entries['lines']!.cast<int>();
     final List<int> columns = entries['columns']!.cast<int>();

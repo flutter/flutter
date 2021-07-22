@@ -2139,11 +2139,11 @@ class _ElementLocationStatsTracker {
 
     // Encode the new locations using the newer encoding (as of v2.4.0).
     if (newLocations.isNotEmpty) {
-      final Map<String, Map<String, List<dynamic>>> fileLocationsMap = <String, Map<String, List<dynamic>>>{};
+      final Map<String, Map<String, List<Object?>>> fileLocationsMap = <String, Map<String, List<Object?>>>{};
       for (final _LocationCount entry in newLocations) {
         final _Location location = entry.location;
-        final Map<String, List<dynamic>> locations = fileLocationsMap.putIfAbsent(
-          location.file, () => <String, List<dynamic>>{
+        final Map<String, List<Object?>> locations = fileLocationsMap.putIfAbsent(
+          location.file, () => <String, List<Object?>>{
             'ids': <int>[],
             'lines': <int>[],
             'columns': <int>[],
