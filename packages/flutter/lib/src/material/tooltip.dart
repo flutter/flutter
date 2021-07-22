@@ -477,7 +477,6 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     if (widget.message.isEmpty) {
       return widget.child!;
     }
-    
     assert(Overlay.of(context, debugRequiredFor: widget) != null);
     final ThemeData theme = Theme.of(context);
     final TooltipThemeData tooltipTheme = TooltipTheme.of(context);
