@@ -135,6 +135,89 @@ Future<void> run(List<String> arguments) async {
 
 // TESTS
 
+final RegExp _findGoldenTestPattern = RegExp(r'(^\\\\)matchesGoldenFile\(');
+final RegExp _goldenTagPattern1 = RegExp(r'@Tags\(');
+final RegExp _goldenTagPattern2 = RegExp(r"'reduced-test-set");
+
+Future<void> verifyGoldenTags(String workingDirectory, { int minimumMatches = 2000 }) {
+  final List<String> errors = <String>[];
+  await for (final File file in _allFiles(workingDirectory, 'dart', minimumMatches: minimumMatches)) {
+    int lineNumber = 0;
+    final List<String> lines = file.readAsLinesSync();
+    final List<int> linesWithDeprecations = <int>[];
+    for (final String line in lines) {
+      if (line.contains(_findDeprecationPattern) &&
+          !line.endsWith(_ignoreDeprecation) &&
+          !line.contains(_legacyDeprecation)) {
+        linesWithDeprecations.add(lineNumber);
+      }
+      lineNumber += 1;
+    }
+    for (int lineNumber in linesWithDeprecations) {
+      try {
+        final Match? match1 = _deprecationPattern1.firstMatch(lines[lineNumber]);
+        if (match1 == null)
+          throw 'Deprecation notice does not match required pattern.';
+        final String indent = match1[1]!;
+        lineNumber += 1;
+        if (lineNumber >= lines.length)
+          throw 'Incomplete deprecation notice.';
+        Match? match3;
+        String? message;
+        do {
+          final Match? match2 = _deprecationPattern2.firstMatch(lines[lineNumber]);
+          if (match2 == null) {
+            String possibleReason = '';
+            if (lines[lineNumber].trimLeft().startsWith('"')) {
+              possibleReason = ' You might have used double quotes (") for the string instead of single quotes (\').';
+            }
+            throw 'Deprecation notice does not match required pattern.$possibleReason';
+          }
+          if (!lines[lineNumber].startsWith("$indent  '"))
+            throw 'Unexpected deprecation notice indent.';
+          if (message == null) {
+            final String firstChar = String.fromCharCode(match2[1]!.runes.first);
+            if (firstChar.toUpperCase() != firstChar)
+              throw 'Deprecation notice should be a grammatically correct sentence and start with a capital letter; see style guide: https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo';
+          }
+          message = match2[1];
+          lineNumber += 1;
+          if (lineNumber >= lines.length)
+            throw 'Incomplete deprecation notice.';
+          match3 = _deprecationPattern3.firstMatch(lines[lineNumber]);
+        } while (match3 == null);
+        final int v1 = int.parse(match3[1]!);
+        final int v2 = int.parse(match3[2]!);
+        final bool hasV4 = match3[4] != null;
+        if (v1 > 1 || (v1 == 1 && v2 >= 20)) {
+          if (!hasV4)
+            throw 'Deprecation notice does not accurately indicate a dev branch version number; please see https://flutter.dev/docs/development/tools/sdk/releases to find the latest dev build version number.';
+        }
+        if (!message!.endsWith('.') && !message.endsWith('!') && !message.endsWith('?'))
+          throw 'Deprecation notice should be a grammatically correct sentence and end with a period.';
+        if (!lines[lineNumber].startsWith("$indent  '"))
+          throw 'Unexpected deprecation notice indent.';
+        lineNumber += 1;
+        if (lineNumber >= lines.length)
+          throw 'Incomplete deprecation notice.';
+        if (!lines[lineNumber].contains(_deprecationPattern4))
+          throw 'End of deprecation notice does not match required pattern.';
+        if (!lines[lineNumber].startsWith('$indent)'))
+          throw 'Unexpected deprecation notice indent.';
+      } catch (error) {
+        errors.add('${file.path}:${lineNumber + 1}: $error');
+      }
+    }
+  }
+  // Fail if any errors
+  if (errors.isNotEmpty) {
+    exitWithError(<String>[
+      ...errors,
+      '${bold}See: https://github.com/flutter/flutter/wiki/Tree-hygiene#handling-breaking-changes$reset',
+    ]);
+  }
+}
+
 final RegExp _findDeprecationPattern = RegExp(r'@[Dd]eprecated');
 final RegExp _deprecationPattern1 = RegExp(r'^( *)@Deprecated\($'); // flutter_ignore: deprecation_syntax (see analyze.dart)
 final RegExp _deprecationPattern2 = RegExp(r"^ *'(.+) '$");
@@ -1051,7 +1134,7 @@ Future<List<File>> _gitFiles(String workingDirectory, {bool runSilently = true})
       .toList();
 }
 
-Stream<File> _allFiles(String workingDirectory, String? extension, { required int minimumMatches }) async* {
+Stream<File> _allFiles(String workingDirectory, String? extension, { required int minimumMatches, String? suffix }) async* {
   final Set<String> gitFileNamesSet = <String>{};
   gitFileNamesSet.addAll((await _gitFiles(workingDirectory)).map((File f) => path.canonicalize(f.absolute.path)));
 
