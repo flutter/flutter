@@ -92,12 +92,16 @@ class ControlsDetails {
 
 /// A builder that creates a widget given a ControlsDetails object.
 ///
-/// Used by [Stepper.indexedControlsBuilder].
+/// Used by [Stepper.detailedControlsBuilder].
 ///
 /// See also:
 ///
 ///  * [WidgetBuilder], which is similar but only takes a [BuildContext].
-typedef IndexedControlsBuilder = Widget Function(BuildContext context, { required ControlsDetails details });
+typedef DetailedControlsBuilder = Widget Function(
+  BuildContext context, {
+    required ControlsDetails details
+  }
+);
 
 const TextStyle _kStepStyle = TextStyle(
   fontSize: 12.0,
@@ -229,11 +233,11 @@ class Stepper extends StatefulWidget {
     this.onStepContinue,
     this.onStepCancel,
     @Deprecated(
-      'Migrate to indexedControlsBuilder. '
+      'Migrate to detailedControlsBuilder. '
       'This feature was deprecated after v2.4.0-1.0.pre.126.',
     )
     this.controlsBuilder,
-    this.indexedControlsBuilder,
+    this.detailedControlsBuilder,
     this.elevation,
   }) : assert(steps != null),
        assert(type != null),
@@ -329,7 +333,7 @@ class Stepper extends StatefulWidget {
   /// ```
   /// {@end-tool}
   @Deprecated(
-    'Use indexedControlsBuilder instead. '
+    'Use detailedControlsBuilder instead. '
     'This feature was deprecated after v2.4.0-1.0.pre.126.',
   )
   final ControlsWidgetBuilder? controlsBuilder;
@@ -350,8 +354,8 @@ class Stepper extends StatefulWidget {
   /// ```dart
   /// Widget build(BuildContext context) {
   ///   return Stepper(
-  ///     indexedControlsBuilder:
-  ///       (BuildContext context, { ControlsDetails details }) {
+  ///     detailedControlsBuilder:
+  ///       (BuildContext context, { required ControlsDetails details }) {
   ///          return Row(
   ///            children: <Widget>[
   ///              TextButton(
@@ -385,7 +389,7 @@ class Stepper extends StatefulWidget {
   /// }
   /// ```
   /// {@end-tool}
-  final IndexedControlsBuilder? indexedControlsBuilder;
+  final DetailedControlsBuilder? detailedControlsBuilder;
 
   /// The elevation of this stepper's [Material] when [type] is [StepperType.horizontal].
   final double? elevation;
@@ -542,8 +546,8 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   Widget _buildVerticalControls(int stepIndex) {
-    if (widget.indexedControlsBuilder != null)
-      return widget.indexedControlsBuilder!(
+    if (widget.detailedControlsBuilder != null)
+      return widget.detailedControlsBuilder!(
         context,
         details: ControlsDetails(
           currentStep: widget.currentStep,
@@ -555,7 +559,11 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
 
     // TODO(craiglabenz): Remove this after the deprecation period.
     if (widget.controlsBuilder != null)
-      return widget.controlsBuilder!(context, onStepContinue: widget.onStepContinue, onStepCancel: widget.onStepCancel);
+      return widget.controlsBuilder!(
+        context,
+        onStepContinue: widget.onStepContinue,
+        onStepCancel: widget.onStepCancel,
+      );
 
     final Color cancelColor;
     switch (Theme.of(context).brightness) {
