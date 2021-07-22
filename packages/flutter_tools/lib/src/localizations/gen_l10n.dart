@@ -202,21 +202,16 @@ String _generatePluralMethod(Message message, String translationForMessage) {
     if (match != null && match.groupCount == 2) {
       String argValue = generateString(match.group(2)!);
       for (final Placeholder placeholder in message.placeholders) {
-        if (placeholder != countPlaceholder && placeholder.requiresFormatting) {
-          argValue = argValue.replaceAll(
-            '#${placeholder.name}#',
-            _needsCurlyBracketStringInterpolation(argValue, placeholder.name)
-              ? '\${${placeholder.name}String}'
-              : '\$${placeholder.name}String'
-          );
-        } else {
-          argValue = argValue.replaceAll(
-            '#${placeholder.name}#',
-            _needsCurlyBracketStringInterpolation(argValue, placeholder.name)
-              ? '\${${placeholder.name}}'
-              : '\$${placeholder.name}'
-          );
+        String variable = placeholder.name;
+        if (placeholder.requiresFormatting) {
+          variable += 'String';
         }
+        argValue = argValue.replaceAll(
+          '#${placeholder.name}#',
+          _needsCurlyBracketStringInterpolation(argValue, placeholder.name)
+            ? '\${$variable}'
+            : '\$$variable'
+        );
       }
       pluralLogicArgs.add('      ${pluralIds[pluralKey]}: $argValue');
     }
@@ -368,21 +363,16 @@ String _generateMethod(Message message, String translationForMessage) {
   String generateMessage() {
     String messageValue = generateString(translationForMessage);
     for (final Placeholder placeholder in message.placeholders) {
+      String variable = placeholder.name;
       if (placeholder.requiresFormatting) {
-        messageValue = messageValue.replaceAll(
-          '{${placeholder.name}}',
-          _needsCurlyBracketStringInterpolation(messageValue, placeholder.name)
-            ? '\${${placeholder.name}String}'
-            : '\$${placeholder.name}String'
-        );
-      } else {
-        messageValue = messageValue.replaceAll(
-          '{${placeholder.name}}',
-          _needsCurlyBracketStringInterpolation(messageValue, placeholder.name)
-            ? '\${${placeholder.name}}'
-            : '\$${placeholder.name}'
-        );
+        variable += 'String';
       }
+      messageValue = messageValue.replaceAll(
+        '{${placeholder.name}}',
+        _needsCurlyBracketStringInterpolation(messageValue, placeholder.name)
+          ? '\${$variable}'
+          : '\$$variable'
+      );
     }
 
     return messageValue;
