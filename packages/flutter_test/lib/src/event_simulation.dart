@@ -684,7 +684,7 @@ class KeyEventSimulator {
     return result ?? _defaultTransitMode;
   }
 
-  static String get _defaultPlatform => Platform.operatingSystem;
+  static String get _defaultPlatform => kIsWeb ? 'web' : Platform.operatingSystem;
 
   /// Simulates sending a hardware key down event.
   ///
