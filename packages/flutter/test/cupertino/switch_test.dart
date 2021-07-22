@@ -526,8 +526,7 @@ void main() {
     expect(find.byType(CupertinoSwitch), paints..rrect(color: trackColor));
   });
 
-  testWidgets('Switch is using default thumb color', (WidgetTester
-  tester) async {
+  testWidgets('Switch is using default thumb color', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -541,7 +540,16 @@ void main() {
     );
 
     expect(find.byType(CupertinoSwitch), findsOneWidget);
-    expect(tester.widget<CupertinoSwitch>(find.byType(CupertinoSwitch)).thumbColor, CupertinoColors.white);
+    expect(tester.widget<CupertinoSwitch>(find.byType(CupertinoSwitch)).thumbColor, null);
+    expect(
+      find.byType(CupertinoSwitch),
+      paints
+        ..rrect()
+        ..rrect()
+        ..rrect()
+        ..rrect()
+        ..rrect(color: CupertinoColors.white),
+    );
   });
 
   testWidgets('Switch is using thumb color when set', (WidgetTester tester) async {
@@ -561,6 +569,15 @@ void main() {
 
     expect(find.byType(CupertinoSwitch), findsOneWidget);
     expect(tester.widget<CupertinoSwitch>(find.byType(CupertinoSwitch)).thumbColor, thumbColor);
+    expect(
+      find.byType(CupertinoSwitch),
+      paints
+        ..rrect()
+        ..rrect()
+        ..rrect()
+        ..rrect()
+        ..rrect(color: thumbColor),
+    );
   });
 
   testWidgets('Switch is opaque when enabled', (WidgetTester tester) async {
