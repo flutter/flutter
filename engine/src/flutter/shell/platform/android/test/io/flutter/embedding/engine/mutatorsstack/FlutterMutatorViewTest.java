@@ -143,7 +143,7 @@ public class FlutterMutatorViewTest {
         };
 
     final OnFocusChangeListener focusListener = mock(OnFocusChangeListener.class);
-    view.addOnFocusChangeListener(focusListener);
+    view.setOnDescendantFocusChangeListener(focusListener);
 
     final ArgumentCaptor<ViewTreeObserver.OnGlobalFocusChangeListener> focusListenerCaptor =
         ArgumentCaptor.forClass(ViewTreeObserver.OnGlobalFocusChangeListener.class);
@@ -172,7 +172,7 @@ public class FlutterMutatorViewTest {
         };
 
     final OnFocusChangeListener focusListener = mock(OnFocusChangeListener.class);
-    view.addOnFocusChangeListener(focusListener);
+    view.setOnDescendantFocusChangeListener(focusListener);
 
     final ArgumentCaptor<ViewTreeObserver.OnGlobalFocusChangeListener> focusListenerCaptor =
         ArgumentCaptor.forClass(ViewTreeObserver.OnGlobalFocusChangeListener.class);
@@ -193,6 +193,61 @@ public class FlutterMutatorViewTest {
             return viewTreeObserver;
           }
         };
-    view.addOnFocusChangeListener(mock(OnFocusChangeListener.class));
+    view.setOnDescendantFocusChangeListener(mock(OnFocusChangeListener.class));
+  }
+
+  @Test
+  public void setOnDescendantFocusChangeListener_keepsSingleListener() {
+    final ViewTreeObserver viewTreeObserver = mock(ViewTreeObserver.class);
+    when(viewTreeObserver.isAlive()).thenReturn(true);
+
+    final FlutterMutatorView view =
+        new FlutterMutatorView(RuntimeEnvironment.systemContext) {
+          @Override
+          public ViewTreeObserver getViewTreeObserver() {
+            return viewTreeObserver;
+          }
+        };
+
+    assertNull(view.activeFocusListener);
+
+    view.setOnDescendantFocusChangeListener(mock(OnFocusChangeListener.class));
+    assertNotNull(view.activeFocusListener);
+
+    final ViewTreeObserver.OnGlobalFocusChangeListener activeFocusListener =
+        view.activeFocusListener;
+
+    view.setOnDescendantFocusChangeListener(mock(OnFocusChangeListener.class));
+    assertNotNull(view.activeFocusListener);
+
+    verify(viewTreeObserver, times(1)).removeOnGlobalFocusChangeListener(activeFocusListener);
+  }
+
+  @Test
+  public void unsetOnDescendantFocusChangeListener_removesActiveListener() {
+    final ViewTreeObserver viewTreeObserver = mock(ViewTreeObserver.class);
+    when(viewTreeObserver.isAlive()).thenReturn(true);
+
+    final FlutterMutatorView view =
+        new FlutterMutatorView(RuntimeEnvironment.systemContext) {
+          @Override
+          public ViewTreeObserver getViewTreeObserver() {
+            return viewTreeObserver;
+          }
+        };
+
+    assertNull(view.activeFocusListener);
+
+    view.setOnDescendantFocusChangeListener(mock(OnFocusChangeListener.class));
+    assertNotNull(view.activeFocusListener);
+
+    final ViewTreeObserver.OnGlobalFocusChangeListener activeFocusListener =
+        view.activeFocusListener;
+
+    view.unsetOnDescendantFocusChangeListener();
+    assertNull(view.activeFocusListener);
+
+    view.unsetOnDescendantFocusChangeListener();
+    verify(viewTreeObserver, times(1)).removeOnGlobalFocusChangeListener(activeFocusListener);
   }
 }

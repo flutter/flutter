@@ -61,7 +61,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   // The texture registry maintaining the textures into which the embedded views will be rendered.
   private TextureRegistry textureRegistry;
 
-  private TextInputPlugin textInputPlugin;
+  @Nullable private TextInputPlugin textInputPlugin;
 
   // The system channel used to communicate with the framework about platform views.
   private PlatformViewsChannel platformViewsChannel;
@@ -164,8 +164,8 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
             platformViews.remove(viewId);
             platformView.dispose();
           }
-
           if (parentView != null) {
+            parentView.unsetOnDescendantFocusChangeListener();
             ((ViewGroup) parentView.getParent()).removeView(parentView);
             platformViewParent.remove(viewId);
           }
@@ -748,11 +748,11 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
         new FlutterMutatorView(
             context, context.getResources().getDisplayMetrics().density, androidTouchProcessor);
 
-    parentView.addOnFocusChangeListener(
+    parentView.setOnDescendantFocusChangeListener(
         (view, hasFocus) -> {
           if (hasFocus) {
             platformViewsChannel.invokeViewFocused(viewId);
-          } else {
+          } else if (textInputPlugin != null) {
             textInputPlugin.clearPlatformViewClient(viewId);
           }
         });
