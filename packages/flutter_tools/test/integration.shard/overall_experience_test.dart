@@ -600,7 +600,6 @@ void main() {
       'I Toggle oversized image inversion.                                     (debugInvertOversizedImages)',
       'o Simulate different operating systems.                                      (defaultTargetPlatform)',
       'b Toggle platform brightness (dark and light mode).                        (debugBrightnessOverride)',
-      'z Toggle elevation checker.                                            (debugCheckElevationsEnabled)',
       'P Toggle performance overlay.                                    (WidgetsApp.showPerformanceOverlay)',
       'a Toggle timeline events for all widget build methods.                    (debugProfileWidgetBuilds)',
       'M Write SkSL shaders to a unique file in the project directory.',
