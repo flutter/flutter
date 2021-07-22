@@ -3,7 +3,17 @@
 // found in the LICENSE file.
 
 import 'dart:math' show min, max;
-import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, PlaceholderAlignment, LineMetrics, TextHeightBehavior, BoxHeightStyle, BoxWidthStyle;
+import 'dart:ui' as ui
+    show
+        Paragraph,
+        ParagraphBuilder,
+        ParagraphConstraints,
+        ParagraphStyle,
+        PlaceholderAlignment,
+        LineMetrics,
+        TextHeightBehavior,
+        BoxHeightStyle,
+        BoxWidthStyle;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -64,11 +74,12 @@ class PlaceholderDimensions {
     required this.alignment,
     this.baseline,
     this.baselineOffset,
-  }) : assert(size != null),
-       assert(alignment != null);
+  })  : assert(size != null),
+        assert(alignment != null);
 
   /// A constant representing an empty placeholder.
-  static const PlaceholderDimensions empty = PlaceholderDimensions(size: Size.zero, alignment: ui.PlaceholderAlignment.bottom);
+  static const PlaceholderDimensions empty = PlaceholderDimensions(
+      size: Size.zero, alignment: ui.PlaceholderAlignment.bottom);
 
   /// Width and height dimensions of the placeholder.
   final Size size;
@@ -124,6 +135,7 @@ enum TextWidthBasis {
 /// nature of the calculation.
 class _CaretMetrics {
   const _CaretMetrics({required this.offset, this.fullHeight});
+
   /// The offset of the top left corner of the caret from the top left
   /// corner of the paragraph.
   final Offset offset;
@@ -169,21 +181,21 @@ class TextPainter {
     StrutStyle? strutStyle,
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
     ui.TextHeightBehavior? textHeightBehavior,
-  }) : assert(text == null || text.debugAssertIsValid()),
-       assert(textAlign != null),
-       assert(textScaleFactor != null),
-       assert(maxLines == null || maxLines > 0),
-       assert(textWidthBasis != null),
-       _text = text,
-       _textAlign = textAlign,
-       _textDirection = textDirection,
-       _textScaleFactor = textScaleFactor,
-       _maxLines = maxLines,
-       _ellipsis = ellipsis,
-       _locale = locale,
-       _strutStyle = strutStyle,
-       _textWidthBasis = textWidthBasis,
-       _textHeightBehavior = textHeightBehavior;
+  })  : assert(text == null || text.debugAssertIsValid()),
+        assert(textAlign != null),
+        assert(textScaleFactor != null),
+        assert(maxLines == null || maxLines > 0),
+        assert(textWidthBasis != null),
+        _text = text,
+        _textAlign = textAlign,
+        _textDirection = textDirection,
+        _textScaleFactor = textScaleFactor,
+        _maxLines = maxLines,
+        _ellipsis = ellipsis,
+        _locale = locale,
+        _strutStyle = strutStyle,
+        _textWidthBasis = textWidthBasis,
+        _textHeightBehavior = textHeightBehavior;
 
   ui.Paragraph? _paragraph;
   bool _needsLayout = true;
@@ -215,10 +227,8 @@ class TextPainter {
   InlineSpan? _text;
   set text(InlineSpan? value) {
     assert(value == null || value.debugAssertIsValid());
-    if (_text == value)
-      return;
-    if (_text?.style != value?.style)
-      _layoutTemplate = null;
+    if (_text == value) return;
+    if (_text?.style != value?.style) _layoutTemplate = null;
     _text = value;
     markNeedsLayout();
   }
@@ -232,8 +242,7 @@ class TextPainter {
   TextAlign _textAlign;
   set textAlign(TextAlign value) {
     assert(value != null);
-    if (_textAlign == value)
-      return;
+    if (_textAlign == value) return;
     _textAlign = value;
     markNeedsLayout();
   }
@@ -256,11 +265,11 @@ class TextPainter {
   TextDirection? get textDirection => _textDirection;
   TextDirection? _textDirection;
   set textDirection(TextDirection? value) {
-    if (_textDirection == value)
-      return;
+    if (_textDirection == value) return;
     _textDirection = value;
     markNeedsLayout();
-    _layoutTemplate = null; // Shouldn't really matter, but for strict correctness...
+    _layoutTemplate =
+        null; // Shouldn't really matter, but for strict correctness...
   }
 
   /// The number of font pixels for each logical pixel.
@@ -273,8 +282,7 @@ class TextPainter {
   double _textScaleFactor;
   set textScaleFactor(double value) {
     assert(value != null);
-    if (_textScaleFactor == value)
-      return;
+    if (_textScaleFactor == value) return;
     _textScaleFactor = value;
     markNeedsLayout();
     _layoutTemplate = null;
@@ -300,8 +308,7 @@ class TextPainter {
   String? _ellipsis;
   set ellipsis(String? value) {
     assert(value == null || value.isNotEmpty);
-    if (_ellipsis == value)
-      return;
+    if (_ellipsis == value) return;
     _ellipsis = value;
     markNeedsLayout();
   }
@@ -310,8 +317,7 @@ class TextPainter {
   Locale? get locale => _locale;
   Locale? _locale;
   set locale(Locale? value) {
-    if (_locale == value)
-      return;
+    if (_locale == value) return;
     _locale = value;
     markNeedsLayout();
   }
@@ -325,11 +331,11 @@ class TextPainter {
   /// After this is set, you must call [layout] before the next call to [paint].
   int? get maxLines => _maxLines;
   int? _maxLines;
+
   /// The value may be null. If it is not null, then it must be greater than zero.
   set maxLines(int? value) {
     assert(value == null || value > 0);
-    if (_maxLines == value)
-      return;
+    if (_maxLines == value) return;
     _maxLines = value;
     markNeedsLayout();
   }
@@ -349,8 +355,7 @@ class TextPainter {
   StrutStyle? get strutStyle => _strutStyle;
   StrutStyle? _strutStyle;
   set strutStyle(StrutStyle? value) {
-    if (_strutStyle == value)
-      return;
+    if (_strutStyle == value) return;
     _strutStyle = value;
     markNeedsLayout();
   }
@@ -362,8 +367,7 @@ class TextPainter {
   TextWidthBasis _textWidthBasis;
   set textWidthBasis(TextWidthBasis value) {
     assert(value != null);
-    if (_textWidthBasis == value)
-      return;
+    if (_textWidthBasis == value) return;
     _textWidthBasis = value;
     markNeedsLayout();
   }
@@ -372,8 +376,7 @@ class TextPainter {
   ui.TextHeightBehavior? get textHeightBehavior => _textHeightBehavior;
   ui.TextHeightBehavior? _textHeightBehavior;
   set textHeightBehavior(ui.TextHeightBehavior? value) {
-    if (_textHeightBehavior == value)
-      return;
+    if (_textHeightBehavior == value) return;
     _textHeightBehavior = value;
     markNeedsLayout();
   }
@@ -408,50 +411,57 @@ class TextPainter {
   /// placeholders will be ignored in the text layout and no valid
   /// [inlinePlaceholderBoxes] will be returned.
   void setPlaceholderDimensions(List<PlaceholderDimensions>? value) {
-    if (value == null || value.isEmpty || listEquals(value, _placeholderDimensions)) {
+    if (value == null ||
+        value.isEmpty ||
+        listEquals(value, _placeholderDimensions)) {
       return;
     }
     assert(() {
-      int placeholderCount = 0;
-      text!.visitChildren((InlineSpan span) {
-        if (span is PlaceholderSpan) {
-          placeholderCount += 1;
-        }
-        return true;
-      });
-      return placeholderCount;
-    }() == value.length);
+          int placeholderCount = 0;
+          text!.visitChildren((InlineSpan span) {
+            if (span is PlaceholderSpan) {
+              placeholderCount += 1;
+            }
+            return true;
+          });
+          return placeholderCount;
+        }() ==
+        value.length);
     _placeholderDimensions = value;
     markNeedsLayout();
   }
+
   List<PlaceholderDimensions>? _placeholderDimensions;
 
-  ui.ParagraphStyle _createParagraphStyle([ TextDirection? defaultTextDirection ]) {
+  ui.ParagraphStyle _createParagraphStyle(
+      [TextDirection? defaultTextDirection]) {
     // The defaultTextDirection argument is used for preferredLineHeight in case
     // textDirection hasn't yet been set.
     assert(textAlign != null);
-    assert(textDirection != null || defaultTextDirection != null, 'TextPainter.textDirection must be set to a non-null value before using the TextPainter.');
+    assert(textDirection != null || defaultTextDirection != null,
+        'TextPainter.textDirection must be set to a non-null value before using the TextPainter.');
     return _text!.style?.getParagraphStyle(
-      textAlign: textAlign,
-      textDirection: textDirection ?? defaultTextDirection,
-      textScaleFactor: textScaleFactor,
-      maxLines: _maxLines,
-      textHeightBehavior: _textHeightBehavior,
-      ellipsis: _ellipsis,
-      locale: _locale,
-      strutStyle: _strutStyle,
-    ) ?? ui.ParagraphStyle(
-      textAlign: textAlign,
-      textDirection: textDirection ?? defaultTextDirection,
-      // Use the default font size to multiply by as RichText does not
-      // perform inheriting [TextStyle]s and would otherwise
-      // fail to apply textScaleFactor.
-      fontSize: _kDefaultFontSize * textScaleFactor,
-      maxLines: maxLines,
-      textHeightBehavior: _textHeightBehavior,
-      ellipsis: ellipsis,
-      locale: locale,
-    );
+          textAlign: textAlign,
+          textDirection: textDirection ?? defaultTextDirection,
+          textScaleFactor: textScaleFactor,
+          maxLines: _maxLines,
+          textHeightBehavior: _textHeightBehavior,
+          ellipsis: _ellipsis,
+          locale: _locale,
+          strutStyle: _strutStyle,
+        ) ??
+        ui.ParagraphStyle(
+          textAlign: textAlign,
+          textDirection: textDirection ?? defaultTextDirection,
+          // Use the default font size to multiply by as RichText does not
+          // perform inheriting [TextStyle]s and would otherwise
+          // fail to apply textScaleFactor.
+          fontSize: _kDefaultFontSize * textScaleFactor,
+          maxLines: maxLines,
+          textHeightBehavior: _textHeightBehavior,
+          ellipsis: ellipsis,
+          locale: locale,
+        );
   }
 
   /// The height of a space in [text] in logical pixels.
@@ -472,7 +482,8 @@ class TextPainter {
         _createParagraphStyle(TextDirection.rtl),
       ); // direction doesn't matter, text is just a space
       if (text?.style != null)
-        builder.pushStyle(text!.style!.getTextStyle(textScaleFactor: textScaleFactor));
+        builder.pushStyle(
+            text!.style!.getTextStyle(textScaleFactor: textScaleFactor));
       builder.addText(' ');
       _layoutTemplate = builder.build()
         ..layout(const ui.ParagraphConstraints(width: double.infinity));
@@ -514,7 +525,9 @@ class TextPainter {
   double get width {
     assert(!_needsLayout);
     return _applyFloatingPointHack(
-      textWidthBasis == TextWidthBasis.longestLine ? _paragraph!.longestLine : _paragraph!.width,
+      textWidthBasis == TextWidthBasis.longestLine
+          ? _paragraph!.longestLine
+          : _paragraph!.width,
     );
   }
 
@@ -576,15 +589,19 @@ class TextPainter {
   ///
   /// The [text] and [textDirection] properties must be non-null before this is
   /// called.
-  void layout({ double minWidth = 0.0, double maxWidth = double.infinity }) {
-    assert(text != null, 'TextPainter.text must be set to a non-null value before using the TextPainter.');
-    assert(textDirection != null, 'TextPainter.textDirection must be set to a non-null value before using the TextPainter.');
+  void layout({double minWidth = 0.0, double maxWidth = double.infinity}) {
+    assert(text != null,
+        'TextPainter.text must be set to a non-null value before using the TextPainter.');
+    assert(textDirection != null,
+        'TextPainter.textDirection must be set to a non-null value before using the TextPainter.');
     if (!_needsLayout && minWidth == _lastMinWidth && maxWidth == _lastMaxWidth)
       return;
     _needsLayout = false;
     if (_paragraph == null) {
-      final ui.ParagraphBuilder builder = ui.ParagraphBuilder(_createParagraphStyle());
-      _text!.build(builder, textScaleFactor: textScaleFactor, dimensions: _placeholderDimensions);
+      final ui.ParagraphBuilder builder =
+          ui.ParagraphBuilder(_createParagraphStyle());
+      _text!.build(builder,
+          textScaleFactor: textScaleFactor, dimensions: _placeholderDimensions);
       _inlinePlaceholderScales = builder.placeholderScales;
       _paragraph = builder.build();
     }
@@ -663,8 +680,7 @@ class TextPainter {
   /// positioned.
   int? getOffsetAfter(int offset) {
     final int? nextCodeUnit = _text!.codeUnitAt(offset);
-    if (nextCodeUnit == null)
-      return null;
+    if (nextCodeUnit == null) return null;
     // TODO(goderbauer): doesn't handle extended grapheme clusters with more than one Unicode scalar value (https://github.com/flutter/flutter/issues/13404).
     return _isUtf16Surrogate(nextCodeUnit) ? offset + 2 : offset + 1;
   }
@@ -673,8 +689,7 @@ class TextPainter {
   /// be positioned.
   int? getOffsetBefore(int offset) {
     final int? prevCodeUnit = _text!.codeUnitAt(offset - 1);
-    if (prevCodeUnit == null)
-      return null;
+    if (prevCodeUnit == null) return null;
     // TODO(goderbauer): doesn't handle extended grapheme clusters with more than one Unicode scalar value (https://github.com/flutter/flutter/issues/13404).
     return _isUtf16Surrogate(prevCodeUnit) ? offset - 2 : offset - 1;
   }
@@ -687,23 +702,28 @@ class TextPainter {
   Rect? _getRectFromUpstream(int offset, Rect caretPrototype) {
     final String flattenedText = _text!.toPlainText(includePlaceholders: false);
     final int? prevCodeUnit = _text!.codeUnitAt(max(0, offset - 1));
-    if (prevCodeUnit == null)
-      return null;
+    if (prevCodeUnit == null) return null;
+
+    // If the upstream character is a newline, cursor is at start of next line
+    const int NEWLINE_CODE_UNIT = 10;
 
     // Check for multi-code-unit glyphs such as emojis or zero width joiner.
-    final bool needsSearch = _isUtf16Surrogate(prevCodeUnit) || _text!.codeUnitAt(offset) == _zwjUtf16 || _isUnicodeDirectionality(prevCodeUnit);
+    final bool needsSearch = _isUtf16Surrogate(prevCodeUnit) ||
+        _text!.codeUnitAt(offset) == _zwjUtf16 ||
+        _isUnicodeDirectionality(prevCodeUnit);
     int graphemeClusterLength = needsSearch ? 2 : 1;
     List<TextBox> boxes = <TextBox>[];
     while (boxes.isEmpty) {
       final int prevRuneOffset = offset - graphemeClusterLength;
       // Use BoxHeightStyle.strut to ensure that the caret's height fits within
       // the line's height and is consistent throughout the line.
-      boxes = _paragraph!.getBoxesForRange(prevRuneOffset, offset, boxHeightStyle: ui.BoxHeightStyle.strut);
+      boxes = _paragraph!.getBoxesForRange(prevRuneOffset, offset,
+          boxHeightStyle: ui.BoxHeightStyle.strut);
       // When the range does not include a full cluster, no boxes will be returned.
       if (boxes.isEmpty) {
         // When we are at the beginning of the line, a non-surrogate position will
         // return empty boxes. We break and try from downstream instead.
-        if (!needsSearch) {
+        if (!needsSearch && prevCodeUnit == NEWLINE_CODE_UNIT) {
           break; // Only perform one iteration if no search is required.
         }
         if (prevRuneOffset < -flattenedText.length) {
@@ -718,15 +738,17 @@ class TextPainter {
       }
       final TextBox box = boxes.first;
 
-      // If the upstream character is a newline, cursor is at start of next line
-      const int NEWLINE_CODE_UNIT = 10;
       if (prevCodeUnit == NEWLINE_CODE_UNIT) {
-        return Rect.fromLTRB(_emptyOffset.dx, box.bottom, _emptyOffset.dx, box.bottom + box.bottom - box.top);
+        return Rect.fromLTRB(_emptyOffset.dx, box.bottom, _emptyOffset.dx,
+            box.bottom + box.bottom - box.top);
       }
 
       final double caretEnd = box.end;
-      final double dx = box.direction == TextDirection.rtl ? caretEnd - caretPrototype.width : caretEnd;
-      return Rect.fromLTRB(min(dx, _paragraph!.width), box.top, min(dx, _paragraph!.width), box.bottom);
+      final double dx = box.direction == TextDirection.rtl
+          ? caretEnd - caretPrototype.width
+          : caretEnd;
+      return Rect.fromLTRB(min(dx, _paragraph!.width), box.top,
+          min(dx, _paragraph!.width), box.bottom);
     }
     return null;
   }
@@ -736,18 +758,21 @@ class TextPainter {
   Rect? _getRectFromDownstream(int offset, Rect caretPrototype) {
     final String flattenedText = _text!.toPlainText(includePlaceholders: false);
     // We cap the offset at the final index of the _text.
-    final int? nextCodeUnit = _text!.codeUnitAt(min(offset, flattenedText.length - 1));
-    if (nextCodeUnit == null)
-      return null;
+    final int? nextCodeUnit =
+        _text!.codeUnitAt(min(offset, flattenedText.length - 1));
+    if (nextCodeUnit == null) return null;
     // Check for multi-code-unit glyphs such as emojis or zero width joiner
-    final bool needsSearch = _isUtf16Surrogate(nextCodeUnit) || nextCodeUnit == _zwjUtf16 || _isUnicodeDirectionality(nextCodeUnit);
+    final bool needsSearch = _isUtf16Surrogate(nextCodeUnit) ||
+        nextCodeUnit == _zwjUtf16 ||
+        _isUnicodeDirectionality(nextCodeUnit);
     int graphemeClusterLength = needsSearch ? 2 : 1;
     List<TextBox> boxes = <TextBox>[];
     while (boxes.isEmpty) {
       final int nextRuneOffset = offset + graphemeClusterLength;
       // Use BoxHeightStyle.strut to ensure that the caret's height fits within
       // the line's height and is consistent throughout the line.
-      boxes = _paragraph!.getBoxesForRange(offset, nextRuneOffset, boxHeightStyle: ui.BoxHeightStyle.strut);
+      boxes = _paragraph!.getBoxesForRange(offset, nextRuneOffset,
+          boxHeightStyle: ui.BoxHeightStyle.strut);
       // When the range does not include a full cluster, no boxes will be returned.
       if (boxes.isEmpty) {
         // When we are at the end of the line, a non-surrogate position will
@@ -767,8 +792,11 @@ class TextPainter {
       }
       final TextBox box = boxes.last;
       final double caretStart = box.start;
-      final double dx = box.direction == TextDirection.rtl ? caretStart - caretPrototype.width : caretStart;
-      return Rect.fromLTRB(min(dx, _paragraph!.width), box.top, min(dx, _paragraph!.width), box.bottom);
+      final double dx = box.direction == TextDirection.rtl
+          ? caretStart - caretPrototype.width
+          : caretStart;
+      return Rect.fromLTRB(min(dx, _paragraph!.width), box.top,
+          min(dx, _paragraph!.width), box.bottom);
     }
     return null;
   }
@@ -836,20 +864,24 @@ class TextPainter {
   // version and recomputes the metrics required to position the caret.
   void _computeCaretMetrics(TextPosition position, Rect caretPrototype) {
     assert(!_needsLayout);
-    if (position == _previousCaretPosition && caretPrototype == _previousCaretPrototype)
-      return;
+    if (position == _previousCaretPosition &&
+        caretPrototype == _previousCaretPrototype) return;
     final int offset = position.offset;
     assert(position.affinity != null);
     Rect? rect;
     switch (position.affinity) {
-      case TextAffinity.upstream: {
-        rect = _getRectFromUpstream(offset, caretPrototype) ?? _getRectFromDownstream(offset, caretPrototype);
-        break;
-      }
-      case TextAffinity.downstream: {
-        rect = _getRectFromDownstream(offset, caretPrototype) ??  _getRectFromUpstream(offset, caretPrototype);
-        break;
-      }
+      case TextAffinity.upstream:
+        {
+          rect = _getRectFromUpstream(offset, caretPrototype) ??
+              _getRectFromDownstream(offset, caretPrototype);
+          break;
+        }
+      case TextAffinity.downstream:
+        {
+          rect = _getRectFromDownstream(offset, caretPrototype) ??
+              _getRectFromUpstream(offset, caretPrototype);
+          break;
+        }
     }
     _caretMetrics = _CaretMetrics(
       offset: rect != null ? Offset(rect.left, rect.top) : _emptyOffset,
