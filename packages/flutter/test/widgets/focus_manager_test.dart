@@ -180,12 +180,10 @@ void main() {
           focusNode: FocusNode(debugLabel: 'Test Node 1'),
           onKeyEvent: (_, KeyEvent event) {
             logs.add(0);
-            debugPrintStack(label: '0');
             return results[0][0];
           },
           onKey: (_, RawKeyEvent event) {
             logs.add(1);
-            debugPrintStack(label: '1');
             return results[0][1];
           },
           child: Focus(
@@ -202,12 +200,10 @@ void main() {
               focusNode: focusNode,
               onKeyEvent: (_, KeyEvent event) {
                 logs.add(20);
-                debugPrintStack(label: '20');
                 return results[2][0];
               },
               onKey: (_, RawKeyEvent event) {
                 logs.add(21);
-                debugPrintStack(label: '21');
                 return results[2][1];
               },
               child: const SizedBox(width: 200, height: 100),
