@@ -142,10 +142,13 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
   }
 
   @override
+  bool get supported => _platform.isMacOS;
+
+  @override
   Future<void> validateCommand() async {
     await super.validateCommand();
     _project = FlutterProject.current();
-    if (!_platform.isMacOS) {
+    if (!supported) {
       throwToolExit('Building frameworks for iOS is only supported on the Mac.');
     }
 
