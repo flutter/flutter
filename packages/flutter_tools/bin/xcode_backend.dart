@@ -431,9 +431,8 @@ class Context {
 
     final String? expandedCodeSignIdentity = environment['EXPANDED_CODE_SIGN_IDENTITY'];
     if (expandedCodeSignIdentity != null && expandedCodeSignIdentity.isNotEmpty && environment['CODE_SIGNING_REQUIRED'] != 'NO') {
-      flutterArgs.add('--dCodesignIdentity=$expandedCodeSignIdentity');
+      flutterArgs.add('-dCodesignIdentity=$expandedCodeSignIdentity');
     }
-
 
     if (environment['BUNDLE_SKSL_PATH'] != null && environment['BUNDLE_SKSL_PATH']!.isNotEmpty) {
       flutterArgs.add('-dBundleSkSLPath=${environment['BUNDLE_SKSL_PATH']}');
