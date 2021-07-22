@@ -44,8 +44,8 @@ class DumbLogicalActivator extends ShortcutActivator {
   Iterable<LogicalKeyboardKey>? get triggers => null;
 
   @override
-  bool accepts(KeyEvent event, HardwareKeyboard state) {
-    return event is KeyDownEvent
+  bool accepts(RawKeyEvent event, RawKeyboard state) {
+    return event is RawKeyDownEvent
         && event.logicalKey == key;
   }
 
@@ -78,8 +78,8 @@ class TestShortcutManager extends ShortcutManager {
   List<LogicalKeyboardKey> keys;
 
   @override
-  KeyEventResult handleKeypress(BuildContext context, KeyEvent event) {
-    if (event is KeyDownEvent) {
+  KeyEventResult handleKeypress(BuildContext context, RawKeyEvent event) {
+    if (event is RawKeyDownEvent) {
       keys.add(event.logicalKey);
     }
     return super.handleKeypress(context, event);
