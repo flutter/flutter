@@ -11,7 +11,6 @@ import 'android/android_device_discovery.dart';
 import 'android/android_sdk.dart';
 import 'android/android_workflow.dart';
 import 'artifacts.dart';
-import 'base/config.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
@@ -30,6 +29,7 @@ import 'ios/ios_workflow.dart';
 import 'ios/simulators.dart';
 import 'linux/linux_device.dart';
 import 'macos/macos_device.dart';
+import 'macos/macos_ipad_device.dart';
 import 'macos/macos_workflow.dart';
 import 'macos/xcdevice.dart';
 import 'tester/flutter_tester.dart';
@@ -54,7 +54,6 @@ class FlutterDeviceManager extends DeviceManager {
     @required IOSWorkflow iosWorkflow,
     @required FuchsiaWorkflow fuchsiaWorkflow,
     @required FlutterVersion flutterVersion,
-    @required Config config,
     @required Artifacts artifacts,
     @required MacOSWorkflow macOSWorkflow,
     @required UserMessages userMessages,
@@ -92,7 +91,6 @@ class FlutterDeviceManager extends DeviceManager {
       fileSystem: fileSystem,
       flutterVersion: flutterVersion,
       processManager: processManager,
-      config: config,
       logger: logger,
       artifacts: artifacts,
       operatingSystemUtils: operatingSystemUtils,
@@ -100,6 +98,14 @@ class FlutterDeviceManager extends DeviceManager {
     MacOSDevices(
       processManager: processManager,
       macOSWorkflow: macOSWorkflow,
+      logger: logger,
+      platform: platform,
+      fileSystem: fileSystem,
+      operatingSystemUtils: operatingSystemUtils,
+    ),
+    MacOSDesignedForIPadDevices(
+      processManager: processManager,
+      iosWorkflow: iosWorkflow,
       logger: logger,
       platform: platform,
       fileSystem: fileSystem,

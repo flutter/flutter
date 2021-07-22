@@ -35,7 +35,7 @@ class MockClipboard {
 
 class MockTextSelectionControls extends TextSelectionControls {
   @override
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, VoidCallback? onTap) {
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]) {
     throw UnimplementedError();
   }
 
@@ -3246,7 +3246,7 @@ void main() {
     await tester.showKeyboard(find.byType(EditableText));
     final MethodCall setClient = log.first;
     expect(setClient.method, 'TextInput.setClient');
-    expect(setClient.arguments.last['keyboardAppearance'], 'Brightness.dark');
+    expect(((setClient.arguments as List<dynamic>).last as Map<String, dynamic>)['keyboardAppearance'], 'Brightness.dark');
   });
 
   testWidgets('text field can override keyboardAppearance from theme', (WidgetTester tester) async {
@@ -3271,7 +3271,7 @@ void main() {
     await tester.showKeyboard(find.byType(EditableText));
     final MethodCall setClient = log.first;
     expect(setClient.method, 'TextInput.setClient');
-    expect(setClient.arguments.last['keyboardAppearance'], 'Brightness.light');
+    expect(((setClient.arguments as List<dynamic>).last as Map<String, dynamic>)['keyboardAppearance'], 'Brightness.light');
   });
 
   testWidgets('cursorColor respects theme', (WidgetTester tester) async {
@@ -4780,68 +4780,31 @@ void main() {
     },
   );
 
-  // Regression test for https://github.com/flutter/flutter/issues/81233
-  testWidgets('CupertinoTextField should terminate the `space` and `enter` raw key events by default', (WidgetTester tester) async {
-    final Set<FocusNode> outerReceivedAnEvent = <FocusNode>{};
-    final FocusNode outerFocusNode = FocusNode(debugLabel: 'outerFocusNode');
-    KeyEventResult outerHandleEvent(FocusNode node, RawKeyEvent event) {
-      outerReceivedAnEvent.add(node);
-      return KeyEventResult.handled;
-    }
-    outerFocusNode.onKey = outerHandleEvent;
-
-    final Set<FocusNode> innerReceivedAnEvent = <FocusNode>{};
-    final FocusNode innerFocusNode = FocusNode(debugLabel: 'innerFocusNode');
-
-    Future<void> sendEvent(LogicalKeyboardKey key) async {
-      await tester.sendKeyEvent(key, platform: 'windows');
-    }
-
-    Widget buildFrame() {
-      return CupertinoApp(
+  testWidgets('textDirection is passed to EditableText', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
         home: Center(
-          child: Focus(
-            onKey: outerFocusNode.onKey,
-            focusNode: outerFocusNode,
-            child: CupertinoTextField(
-              focusNode: innerFocusNode,
-            ),
+          child: CupertinoTextField(
+            textDirection: TextDirection.ltr,
           ),
         ),
-      );
-    }
+      ),
+    );
 
-    await tester.pumpWidget(buildFrame());
-    innerFocusNode.requestFocus();
-    await tester.pump();
+    final EditableText ltrWidget = tester.widget(find.byType(EditableText));
+    expect(ltrWidget.textDirection, TextDirection.ltr);
 
-    // The inner TextField's focus node terminal the raw key event by default.
-    await sendEvent(LogicalKeyboardKey.space);
-    expect(outerReceivedAnEvent.length, 0);
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            textDirection: TextDirection.rtl,
+          ),
+        ),
+      ),
+    );
 
-    await sendEvent(LogicalKeyboardKey.enter);
-    expect(outerReceivedAnEvent.length, 0);
-
-    // The `onKey` of the focus node of the TextField can be customized.
-    KeyEventResult innerHandleEvent(FocusNode node, RawKeyEvent event) {
-      innerReceivedAnEvent.add(node);
-      // The key event has not been handled, and the event should continue to be
-      // propagated to the outer key event handlers.
-      return KeyEventResult.ignored;
-    }
-    innerFocusNode.onKey = innerHandleEvent;
-    await tester.pumpWidget(buildFrame());
-
-    await sendEvent(LogicalKeyboardKey.space);
-
-    expect(innerReceivedAnEvent.length, 1);
-    expect(outerReceivedAnEvent.length, 1);
-
-    outerReceivedAnEvent.clear();
-    innerReceivedAnEvent.clear();
-
-    await sendEvent(LogicalKeyboardKey.enter);
-    expect(outerReceivedAnEvent.length, 1);
-    expect(innerReceivedAnEvent.length, 1);
-  }, skip: kIsWeb);
+    final EditableText rtlWidget = tester.widget(find.byType(EditableText));
+    expect(rtlWidget.textDirection, TextDirection.rtl);
+  });
 }

@@ -115,8 +115,7 @@ class CodesignCommand extends Command<void> {
       revision = (processManager.runSync(
         <String>['git', 'rev-parse', 'HEAD'],
         workingDirectory: framework.checkoutDirectory.path,
-      ).stdout as String)
-          .trim();
+      ).stdout as String).trim();
       assert(revision.isNotEmpty);
     }
 
@@ -180,12 +179,12 @@ class CodesignCommand extends Command<void> {
       'artifacts/engine/darwin-x64-release/FlutterMacOS.framework/Versions/A/FlutterMacOS',
       'artifacts/engine/darwin-x64/FlutterMacOS.framework/Versions/A/FlutterMacOS',
       'artifacts/engine/darwin-x64/font-subset',
-      'artifacts/engine/ios-profile/Flutter.xcframework/ios-armv7_arm64/Flutter.framework/Flutter',
-      'artifacts/engine/ios-profile/Flutter.xcframework/ios-x86_64-simulator/Flutter.framework/Flutter',
-      'artifacts/engine/ios-release/Flutter.xcframework/ios-armv7_arm64/Flutter.framework/Flutter',
-      'artifacts/engine/ios-release/Flutter.xcframework/ios-x86_64-simulator/Flutter.framework/Flutter',
-      'artifacts/engine/ios/Flutter.xcframework/ios-armv7_arm64/Flutter.framework/Flutter',
-      'artifacts/engine/ios/Flutter.xcframework/ios-x86_64-simulator/Flutter.framework/Flutter',
+      'artifacts/engine/ios-profile/Flutter.xcframework/ios-arm64_armv7/Flutter.framework/Flutter',
+      'artifacts/engine/ios-profile/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
+      'artifacts/engine/ios-release/Flutter.xcframework/ios-arm64_armv7/Flutter.framework/Flutter',
+      'artifacts/engine/ios-release/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
+      'artifacts/engine/ios/Flutter.xcframework/ios-arm64_armv7/Flutter.framework/Flutter',
+      'artifacts/engine/ios/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
       'artifacts/ios-deploy/ios-deploy',
     ]
         .map((String relativePath) =>
@@ -285,13 +284,13 @@ class CodesignCommand extends Command<void> {
     // First print all deviations from expectations
     if (unsignedBinaries.isNotEmpty) {
       stdio.printError('Found ${unsignedBinaries.length} unsigned binaries:');
-      unsignedBinaries.forEach(print);
+      unsignedBinaries.forEach(stdio.printError);
     }
 
     if (wrongEntitlementBinaries.isNotEmpty) {
       stdio.printError(
           'Found ${wrongEntitlementBinaries.length} binaries with unexpected entitlements:');
-      wrongEntitlementBinaries.forEach(print);
+      wrongEntitlementBinaries.forEach(stdio.printError);
     }
 
     if (unexpectedBinaries.isNotEmpty) {

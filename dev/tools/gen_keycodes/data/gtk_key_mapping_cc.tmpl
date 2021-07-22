@@ -17,21 +17,13 @@
 // Edit the template dev/tools/gen_keycodes/data/gtk_key_mapping_cc.tmpl
 // instead. See dev/tools/gen_keycodes/README.md for more information.
 
-// Insert a new entry into a hashtable from uint64 to uint64.
-//
-// Returns whether the newly added value was already in the hash table or not.
-static bool insert_record(GHashTable* table, guint64 xkb, guint64 fl_key) {
-  return g_hash_table_insert(table, uint64_to_gpointer(xkb),
-                             uint64_to_gpointer(fl_key));
-}
-
-void initialize_xkb_to_physical_key(GHashTable* table) {
+std::map<uint64_t, uint64_t> xkb_to_physical_key_map = {
 @@@XKB_SCAN_CODE_MAP@@@
-}
+};
 
-void initialize_gtk_keyval_to_logical_key(GHashTable* table) {
+std::map<uint64_t, uint64_t> gtk_keyval_to_logical_key_map = {
 @@@GTK_KEYVAL_CODE_MAP@@@
-}
+};
 
 void initialize_modifier_bit_to_checked_keys(GHashTable* table) {
   FlKeyEmbedderCheckedKey* data;
@@ -42,3 +34,5 @@ void initialize_lock_bit_to_checked_keys(GHashTable* table) {
   FlKeyEmbedderCheckedKey* data;
 @@@GTK_MODE_BIT_MAP@@@
 }
+
+@@@MASK_CONSTANTS@@@

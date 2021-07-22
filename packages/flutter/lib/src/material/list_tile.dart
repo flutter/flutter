@@ -269,7 +269,28 @@ enum ListTileControlAffinity {
 /// List tiles are typically used in [ListView]s, or arranged in [Column]s in
 /// [Drawer]s and [Card]s.
 ///
-/// Requires one of its ancestors to be a [Material] widget.
+/// One ancestor must be a [Material] widget and typically this is
+/// provided by the app's [Scaffold]. The [tileColor],
+/// [selectedTileColor], [focusColor], and [hoverColor] are not
+/// painted by the list tile itself but by the material widget
+/// ancestor. This generally has no effect. However, if an opaque
+/// widget, like `Container(color: Colors.white)`, is included in
+/// between the [ListTile] and its [Material] ancestor, then the
+/// opaque widget will obscure the material widget and its background
+/// [tileColor], etc. If this a problem, one can wrap a material
+/// widget around the list tile, e.g.:
+///
+/// ```dart
+/// Container(
+///   color: Colors.green,
+///   child: Material(
+///     child: ListTile(
+///       title: const Text('ListTile with red background'),
+///       tileColor: Colors.red,
+///     ),
+///   ),
+/// )
+/// ```
 ///
 /// {@tool snippet}
 ///
@@ -980,11 +1001,11 @@ class ListTile extends StatelessWidget {
     assert(tiles != null);
     assert(color != null || context != null);
 
-    if (tiles.isEmpty)
-      return;
-
     final Iterator<Widget> iterator = tiles.iterator;
-    final bool isNotEmpty = iterator.moveNext();
+    final bool hasNext = iterator.moveNext();
+
+    if (!hasNext)
+      return;
 
     final Decoration decoration = BoxDecoration(
       border: Border(
@@ -1001,7 +1022,7 @@ class ListTile extends StatelessWidget {
       );
       tile = iterator.current;
     }
-    if (isNotEmpty)
+    if (hasNext)
       yield tile;
   }
 

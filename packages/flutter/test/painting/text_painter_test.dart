@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -834,7 +835,7 @@ void main() {
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56308
 
   group('TextPainter line-height', () {
-    test('half-leading', (){
+    test('half-leading', () {
       const TextStyle style = TextStyle(
         height: 20,
         fontSize: 1,
@@ -857,7 +858,7 @@ void main() {
       expect(insets.top, (20 - 1) / 2);
     });
 
-    test('half-leading with small height', (){
+    test('half-leading with small height', () {
       const TextStyle style = TextStyle(
         height: 0.1,
         fontSize: 10,
@@ -881,7 +882,7 @@ void main() {
       expect(insets.top, (1 - 10) / 2);
     });
 
-    test('half-leading with leading trim', (){
+    test('half-leading with leading trim', () {
       const TextStyle style = TextStyle(
         height: 0.1,
         fontSize: 10,
@@ -907,7 +908,7 @@ void main() {
       expect(glyphBox.topLeft, Offset.zero);
     });
 
-    test('TextLeadingDistribution falls back to paragraph style', (){
+    test('TextLeadingDistribution falls back to paragraph style', () {
       const TextStyle style = TextStyle(height: 20, fontSize: 1);
       final TextPainter painter = TextPainter()
         ..textDirection = TextDirection.ltr
@@ -927,7 +928,7 @@ void main() {
       expect(insets.top, (20 - 1) / 2);
     });
 
-    test('TextLeadingDistribution does nothing if height multiplier is null', (){
+    test('TextLeadingDistribution does nothing if height multiplier is null', () {
       const TextStyle style = TextStyle(fontSize: 1);
       final TextPainter painter = TextPainter()
         ..textDirection = TextDirection.ltr
@@ -952,6 +953,24 @@ void main() {
       expect(glyphBox, newGlyphBox);
     });
   }, skip: isBrowser);
+
+  test('TextPainter handles invalid UTF-16', () {
+    Object? exception;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      exception = details.exception;
+    };
+
+    final TextPainter painter = TextPainter()
+      ..textDirection = TextDirection.ltr;
+
+    const String text = 'Hello\uD83DWorld';
+    const double fontSize = 20.0;
+    painter.text = const TextSpan(text: text, style: TextStyle(fontSize: fontSize));
+    painter.layout();
+    // The layout should include one replacement character.
+    expect(painter.width, equals(fontSize));
+    expect(exception, isNotNull);
+  }, skip: kIsWeb);
 }
 
 class MockCanvas extends Fake implements Canvas {

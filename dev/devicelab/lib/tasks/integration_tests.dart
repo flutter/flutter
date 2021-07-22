@@ -2,11 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import '../framework/devices.dart';
 import '../framework/framework.dart';
-import '../framework/host_agent.dart';
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
@@ -95,6 +92,13 @@ TaskFunction createEndToEndKeyboardTest() {
   );
 }
 
+TaskFunction createEndToEndFrameNumberTest() {
+  return DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/ui',
+    'lib/frame_number.dart',
+  );
+}
+
 TaskFunction createEndToEndDriverTest() {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',
@@ -161,8 +165,6 @@ class DriverTest {
         testTarget,
         '-d',
         deviceId,
-        '--screenshot',
-        hostAgent.dumpDirectory.path,
         ...extraOptions,
       ];
       await flutter('drive', options: options, environment: Map<String, String>.from(environment));

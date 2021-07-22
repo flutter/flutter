@@ -233,7 +233,7 @@ void main() {
         tester.firstWidget(find.byType(EditableText));
     expect(editableText.maxLines, equals(1));
     expect(tester.testTextInput.editingState!['text'], equals('test'));
-    expect(tester.testTextInput.setClientArgs!['inputType']['name'], equals('TextInputType.text'));
+    expect((tester.testTextInput.setClientArgs!['inputType'] as Map<String, dynamic>)['name'], equals('TextInputType.text'));
     expect(tester.testTextInput.setClientArgs!['inputAction'], equals('TextInputAction.done'));
   });
 
@@ -372,7 +372,7 @@ void main() {
         await tester.idle();
         expect(tester.testTextInput.editingState!['text'], equals('test'));
         expect(
-          tester.testTextInput.setClientArgs!['inputType']['name'],
+          (tester.testTextInput.setClientArgs!['inputType'] as Map<String, dynamic>)['name'],
           // On web, we don't infer the keyboard type as "name". We only infer
           // on iOS and macOS.
           kIsWeb ? equals('TextInputType.address') : equals('TextInputType.name'),
@@ -410,7 +410,7 @@ void main() {
         controller.text = 'test';
         await tester.idle();
         expect(tester.testTextInput.editingState!['text'], equals('test'));
-        expect(tester.testTextInput.setClientArgs!['inputType']['name'], equals('TextInputType.address'));
+        expect((tester.testTextInput.setClientArgs!['inputType'] as Map<String, dynamic>)['name'], equals('TextInputType.address'));
       },
     );
 
@@ -444,7 +444,7 @@ void main() {
         controller.text = 'test';
         await tester.idle();
         expect(tester.testTextInput.editingState!['text'], equals('test'));
-        expect(tester.testTextInput.setClientArgs!['inputType']['name'], equals('TextInputType.text'));
+        expect((tester.testTextInput.setClientArgs!['inputType'] as Map<String, dynamic>)['name'], equals('TextInputType.text'));
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
     );
@@ -479,7 +479,7 @@ void main() {
         controller.text = 'test';
         await tester.idle();
         expect(tester.testTextInput.editingState!['text'], equals('test'));
-        expect(tester.testTextInput.setClientArgs!['inputType']['name'], equals('TextInputType.text'));
+        expect((tester.testTextInput.setClientArgs!['inputType'] as Map<String, dynamic>)['name'], equals('TextInputType.text'));
       },
     );
   });
@@ -511,7 +511,7 @@ void main() {
     controller.text = 'test';
     await tester.idle();
     expect(tester.testTextInput.editingState!['text'], equals('test'));
-    expect(tester.testTextInput.setClientArgs!['inputType']['name'], equals('TextInputType.multiline'));
+    expect((tester.testTextInput.setClientArgs!['inputType'] as Map<String, dynamic>)['name'], equals('TextInputType.multiline'));
     expect(tester.testTextInput.setClientArgs!['inputAction'], equals('TextInputAction.newline'));
   });
 
@@ -542,7 +542,7 @@ void main() {
     controller.text = 'test';
     await tester.idle();
     expect(tester.testTextInput.editingState!['text'], equals('test'));
-    expect(tester.testTextInput.setClientArgs!['inputType']['name'], equals('TextInputType.visiblePassword'));
+    expect((tester.testTextInput.setClientArgs!['inputType'] as Map<String, dynamic>)['name'], equals('TextInputType.visiblePassword'));
     expect(tester.testTextInput.setClientArgs!['inputAction'], equals('TextInputAction.done'));
   });
 
@@ -841,7 +841,7 @@ void main() {
     controller.text = 'test';
     await tester.idle();
     expect(tester.testTextInput.editingState!['text'], equals('test'));
-    expect(tester.testTextInput.setClientArgs!['inputType']['name'], equals('TextInputType.multiline'));
+    expect((tester.testTextInput.setClientArgs!['inputType'] as Map<String, dynamic>)['name'], equals('TextInputType.multiline'));
     expect(tester.testTextInput.setClientArgs!['inputAction'], equals('TextInputAction.newline'));
   });
 
@@ -873,7 +873,7 @@ void main() {
     controller.text = 'test';
     await tester.idle();
     expect(tester.testTextInput.editingState!['text'], equals('test'));
-    expect(tester.testTextInput.setClientArgs!['inputType']['name'], equals('TextInputType.text'));
+    expect((tester.testTextInput.setClientArgs!['inputType'] as Map<String, dynamic>)['name'], equals('TextInputType.text'));
     expect(tester.testTextInput.setClientArgs!['inputAction'], equals('TextInputAction.done'));
   });
 
@@ -905,7 +905,7 @@ void main() {
     controller.text = 'test';
     await tester.idle();
     expect(tester.testTextInput.editingState!['text'], equals('test'));
-    expect(tester.testTextInput.setClientArgs!['inputType']['name'], equals('TextInputType.phone'));
+    expect((tester.testTextInput.setClientArgs!['inputType'] as Map<String, dynamic>)['name'], equals('TextInputType.phone'));
     expect(tester.testTextInput.setClientArgs!['inputAction'], equals('TextInputAction.done'));
   });
 
@@ -936,7 +936,7 @@ void main() {
     controller.text = 'test';
     await tester.idle();
     expect(tester.testTextInput.editingState!['text'], equals('test'));
-    expect(tester.testTextInput.setClientArgs!['inputType']['name'], equals('TextInputType.multiline'));
+    expect((tester.testTextInput.setClientArgs!['inputType'] as Map<String, dynamic>)['name'], equals('TextInputType.multiline'));
     expect(tester.testTextInput.setClientArgs!['inputAction'], equals('TextInputAction.newline'));
   });
 
@@ -967,7 +967,7 @@ void main() {
     controller.text = 'test';
     await tester.idle();
     expect(tester.testTextInput.editingState!['text'], equals('test'));
-    expect(tester.testTextInput.setClientArgs!['inputType']['name'], equals('TextInputType.text'));
+    expect((tester.testTextInput.setClientArgs!['inputType'] as Map<String, dynamic>)['name'], equals('TextInputType.text'));
     expect(tester.testTextInput.setClientArgs!['inputAction'], equals('TextInputAction.done'));
   });
 
@@ -1140,6 +1140,76 @@ void main() {
     expect(tester.testTextInput.editingState!['text'], equals('650123123'));
     // Widget regained the focus.
     expect(state.wantKeepAlive, true);
+  });
+
+  testWidgets(
+    'kept-alive EditableText does not crash when layout is skipped',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/84896.
+      EditableText.debugDeterministicCursor = true;
+      const Key key = ValueKey<String>('EditableText');
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: ListView(
+              children: <Widget>[
+                EditableText(
+                  key: key,
+                  backgroundCursorColor: Colors.grey,
+                  controller: controller,
+                  focusNode: focusNode,
+                  autofocus: true,
+                  maxLines: null,
+                  keyboardType: TextInputType.text,
+                  style: textStyle,
+                  textAlign: TextAlign.left,
+                  cursorColor: cursorColor,
+                  showCursor: false,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      // Wait for autofocus.
+      await tester.pump();
+      expect(focusNode.hasFocus, isTrue);
+
+      // Prepend an additional item to make EditableText invisible. It's still
+      // kept in the tree via the keepalive mechanism. Change the text alignment
+      // and showCursor. The RenderEditable now needs to relayout and repaint.
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: ListView(
+              children: <Widget>[
+                const SizedBox(height: 6000),
+                EditableText(
+                  key: key,
+                  backgroundCursorColor: Colors.grey,
+                  controller: controller,
+                  focusNode: focusNode,
+                  autofocus: true,
+                  maxLines: null,
+                  keyboardType: TextInputType.text,
+                  style: textStyle,
+                  textAlign: TextAlign.right,
+                  cursorColor: cursorColor,
+                  showCursor: true,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      EditableText.debugDeterministicCursor = false;
+      expect(tester.takeException(), isNull);
   });
 
   /// Toolbar is not used in Flutter Web. Skip this check.
@@ -3260,7 +3330,7 @@ void main() {
     await tester.showKeyboard(find.byType(EditableText));
     final MethodCall setClient = log.first;
     expect(setClient.method, 'TextInput.setClient');
-    expect(setClient.arguments.last['keyboardAppearance'], 'Brightness.light');
+    expect(((setClient.arguments as Iterable<dynamic>).last as Map<String, dynamic>)['keyboardAppearance'], 'Brightness.light');
   });
 
   testWidgets('location of widget is sent on show keyboard', (WidgetTester tester) async {
@@ -3775,7 +3845,7 @@ void main() {
     await tester.showKeyboard(find.byType(EditableText));
     final MethodCall setClient = log.first;
     expect(setClient.method, 'TextInput.setClient');
-    expect(setClient.arguments.last['keyboardAppearance'], 'Brightness.dark');
+    expect(((setClient.arguments as Iterable<dynamic>).last as Map<String, dynamic>)['keyboardAppearance'], 'Brightness.dark');
   });
 
   testWidgets('Composing text is underlined and underline is cleared when losing focus', (WidgetTester tester) async {
@@ -4065,8 +4135,10 @@ void main() {
         bool wordModifier = false,
         bool lineModifier = false,
         bool shortcutModifier = false,
-        required String platform,
+        required TargetPlatform targetPlatform,
       }) async {
+    final String targetPlatformString = targetPlatform.toString();
+    final String platform = targetPlatformString.substring(targetPlatformString.indexOf('.') + 1).toLowerCase();
     if (shift) {
       await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft, platform: platform);
     }
@@ -4118,7 +4190,9 @@ void main() {
     }
   }
 
-  Future<void> testTextEditing(WidgetTester tester, {required String platform}) async {
+  Future<void> testTextEditing(WidgetTester tester, {required TargetPlatform targetPlatform}) async {
+    final String targetPlatformString = targetPlatform.toString();
+    final String platform = targetPlatformString.substring(targetPlatformString.indexOf('.') + 1).toLowerCase();
     final TextEditingController controller = TextEditingController(text: testText);
     controller.selection = const TextSelection(
       baseOffset: 0,
@@ -4164,7 +4238,7 @@ void main() {
         LogicalKeyboardKey.arrowRight,
       ],
       shift: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(cause, equals(SelectionChangedCause.keyboard), reason: 'on $platform');
@@ -4189,7 +4263,7 @@ void main() {
         LogicalKeyboardKey.arrowLeft,
       ],
       shift: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4211,7 +4285,7 @@ void main() {
         LogicalKeyboardKey.arrowLeft,
       ],
       shift: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4235,7 +4309,7 @@ void main() {
       ],
       shift: true,
       wordModifier: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4258,7 +4332,7 @@ void main() {
       ],
       shift: true,
       wordModifier: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4280,7 +4354,7 @@ void main() {
         LogicalKeyboardKey.arrowDown,
       ],
       shift: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4300,7 +4374,7 @@ void main() {
       <LogicalKeyboardKey>[
         LogicalKeyboardKey.arrowRight,
       ],
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4322,7 +4396,7 @@ void main() {
         LogicalKeyboardKey.arrowDown,
       ],
       shift: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4347,7 +4421,7 @@ void main() {
         LogicalKeyboardKey.arrowDown,
       ],
       shift: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4369,7 +4443,7 @@ void main() {
         LogicalKeyboardKey.arrowUp,
       ],
       shift: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4392,7 +4466,7 @@ void main() {
       ],
       lineModifier: true,
       shift: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4415,7 +4489,7 @@ void main() {
       ],
       lineModifier: true,
       shift: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4437,7 +4511,7 @@ void main() {
         LogicalKeyboardKey.keyA,
       ],
       shortcutModifier: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4458,7 +4532,7 @@ void main() {
       <LogicalKeyboardKey>[
         LogicalKeyboardKey.arrowLeft,
       ],
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4481,7 +4555,7 @@ void main() {
       ],
       shift: false,
       lineModifier: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4504,7 +4578,7 @@ void main() {
       ],
       shift: false,
       lineModifier: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4529,7 +4603,7 @@ void main() {
       ],
       shift: false,
       lineModifier: false,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4551,7 +4625,7 @@ void main() {
       ],
       shift: true,
       lineModifier: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4574,7 +4648,7 @@ void main() {
       ],
       shift: true,
       lineModifier: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4597,7 +4671,7 @@ void main() {
       ],
       shift: false,
       lineModifier: false,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4620,7 +4694,7 @@ void main() {
         LogicalKeyboardKey.arrowRight,
       ],
       wordModifier: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4644,7 +4718,7 @@ void main() {
         LogicalKeyboardKey.arrowLeft,
       ],
       shift: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4667,7 +4741,7 @@ void main() {
       ],
       shift: true,
       wordModifier: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4690,7 +4764,7 @@ void main() {
         LogicalKeyboardKey.keyX,
       ],
       shortcutModifier: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4727,7 +4801,7 @@ void main() {
         LogicalKeyboardKey.keyV,
       ],
       shortcutModifier: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4751,7 +4825,7 @@ void main() {
         LogicalKeyboardKey.keyC,
       ],
       shortcutModifier: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
 
     expect(
@@ -4774,7 +4848,7 @@ void main() {
       <LogicalKeyboardKey>[
         LogicalKeyboardKey.delete,
       ],
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
     expect(
       selection,
@@ -4791,9 +4865,7 @@ void main() {
   }
 
   testWidgets('keyboard text selection works', (WidgetTester tester) async {
-    final String targetPlatform = defaultTargetPlatform.toString();
-    final String platform = targetPlatform.substring(targetPlatform.indexOf('.') + 1).toLowerCase();
-    await testTextEditing(tester, platform: platform);
+    await testTextEditing(tester, targetPlatform: defaultTargetPlatform);
     // On web, using keyboard for selection is handled by the browser.
   }, skip: kIsWeb, variant: TargetPlatformVariant.all());
 
@@ -4844,7 +4916,7 @@ void main() {
           LogicalKeyboardKey.keyV,
         ],
         shortcutModifier: true,
-        platform: platform,
+        targetPlatform: defaultTargetPlatform,
       );
 
       expect(selection, isNull, reason: 'on $platform');
@@ -4857,7 +4929,7 @@ void main() {
           LogicalKeyboardKey.keyA,
         ],
         shortcutModifier: true,
-        platform: platform,
+        targetPlatform: defaultTargetPlatform,
       );
 
       expect(
@@ -4880,7 +4952,7 @@ void main() {
           LogicalKeyboardKey.keyX,
         ],
         shortcutModifier: true,
-        platform: platform,
+        targetPlatform: defaultTargetPlatform,
       );
 
       expect(
@@ -4908,7 +4980,7 @@ void main() {
           LogicalKeyboardKey.keyC,
         ],
         shortcutModifier: true,
-        platform: platform,
+        targetPlatform: defaultTargetPlatform,
       );
 
       expect(
@@ -4935,7 +5007,7 @@ void main() {
         <LogicalKeyboardKey>[
           LogicalKeyboardKey.delete,
         ],
-        platform: platform,
+        targetPlatform: defaultTargetPlatform,
       );
       expect(
         selection,
@@ -4956,7 +5028,7 @@ void main() {
         <LogicalKeyboardKey>[
           LogicalKeyboardKey.backspace,
         ],
-        platform: platform,
+        targetPlatform: defaultTargetPlatform,
       );
       expect(
         selection,
@@ -6140,6 +6212,41 @@ void main() {
       final TextSpan textSpan = renderEditable.text! as TextSpan;
       expect(textSpan.style!.color, color);
     });
+
+    testWidgets('controller listener changes value', (WidgetTester tester) async {
+      const double maxValue = 5.5555;
+      final TextEditingController controller = TextEditingController();
+
+      controller.addListener(() {
+        final double value = double.tryParse(controller.text.trim()) ?? .0;
+        if (value > maxValue) {
+          controller.text = maxValue.toString();
+          controller.selection = TextSelection.fromPosition(
+              TextPosition(offset: maxValue.toString().length));
+        }
+      });
+      await tester.pumpWidget(MaterialApp(
+        home: EditableText(
+          controller: controller,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: Colors.blue,
+          backgroundCursorColor: Colors.grey,
+        ),
+      ));
+
+      final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+
+      state.updateEditingValue(const TextEditingValue(text: '1', selection: TextSelection.collapsed(offset: 1)));
+      await tester.pump();
+      state.updateEditingValue(const TextEditingValue(text: '12', selection: TextSelection.collapsed(offset: 2)));
+      await tester.pump();
+
+      expect(controller.text, '5.5555');
+      expect(controller.selection.baseOffset, 6);
+      expect(controller.selection.extentOffset, 6);
+    });
   });
 
   testWidgets('autofocus:true on first frame does not throw', (WidgetTester tester) async {
@@ -7136,13 +7243,20 @@ void main() {
       <LogicalKeyboardKey>[
         LogicalKeyboardKey.delete,
       ],
-      platform: 'android',
+      targetPlatform: TargetPlatform.android,
     );
 
     expect(tester.takeException(), null);
   });
 
   testWidgets('can change behavior by overriding text editing shortcuts', (WidgetTester tester) async {
+    const  Map<SingleActivator, Intent> testShortcuts = <SingleActivator, Intent>{
+      SingleActivator(LogicalKeyboardKey.arrowLeft): MoveSelectionRightTextIntent(),
+      SingleActivator(LogicalKeyboardKey.keyX, control: true): MoveSelectionRightTextIntent(),
+      SingleActivator(LogicalKeyboardKey.keyC, control: true): MoveSelectionRightTextIntent(),
+      SingleActivator(LogicalKeyboardKey.keyV, control: true): MoveSelectionRightTextIntent(),
+      SingleActivator(LogicalKeyboardKey.keyA, control: true): MoveSelectionRightTextIntent(),
+    };
     final TextEditingController controller = TextEditingController(text: testText);
     controller.selection = const TextSelection(
       baseOffset: 0,
@@ -7155,9 +7269,7 @@ void main() {
         child: SizedBox(
           width: 400,
           child: Shortcuts(
-            shortcuts: const <ShortcutActivator, Intent>{
-              SingleActivator(LogicalKeyboardKey.arrowLeft): MoveSelectionRightTextIntent(),
-            },
+            shortcuts: testShortcuts,
             child: EditableText(
               maxLines: 10,
               controller: controller,
@@ -7184,11 +7296,20 @@ void main() {
     expect(controller.selection.isCollapsed, isTrue);
     expect(controller.selection.baseOffset, 1);
 
-    // And the left arrow also moves to the right due to the Shortcuts override.
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
-    await tester.pump();
-    expect(controller.selection.isCollapsed, isTrue);
-    expect(controller.selection.baseOffset, 2);
+    // And the testShortcuts also moves to the right due to the Shortcuts override.
+    for (final SingleActivator singleActivator in testShortcuts.keys) {
+      controller.selection = const TextSelection.collapsed(offset: 0);
+      await tester.pump();
+
+      await sendKeys(
+        tester,
+        <LogicalKeyboardKey>[singleActivator.trigger],
+        shortcutModifier: singleActivator.control,
+        targetPlatform: defaultTargetPlatform,
+      );
+      expect(controller.selection.isCollapsed, isTrue);
+      expect(controller.selection.baseOffset, 1);
+    }
 
     // On web, using keyboard for selection is handled by the browser.
   }, skip: kIsWeb);
@@ -7225,15 +7346,12 @@ void main() {
     expect(controller.selection.baseOffset, 7);
     expect(controller.selection.extentOffset, 9);
 
-    final String targetPlatform = defaultTargetPlatform.toString();
-    final String platform = targetPlatform.substring(targetPlatform.indexOf('.') + 1).toLowerCase();
-
     await sendKeys(
       tester,
       <LogicalKeyboardKey>[LogicalKeyboardKey.arrowRight],
       shift: true,
       wordModifier: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
     await tester.pump();
     // word wo|rd word|
@@ -7246,7 +7364,7 @@ void main() {
       <LogicalKeyboardKey>[LogicalKeyboardKey.arrowLeft],
       shift: true,
       wordModifier: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
     // word wo|rd |word
     expect(controller.selection.isCollapsed, false);
@@ -7258,9 +7376,9 @@ void main() {
       <LogicalKeyboardKey>[LogicalKeyboardKey.arrowLeft],
       shift: true,
       wordModifier: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
-    if (platform == 'macos') {
+    if (defaultTargetPlatform == TargetPlatform.macOS) {
       // word wo|rd word
       expect(controller.selection.isCollapsed, true);
       expect(controller.selection.baseOffset, 7);
@@ -7271,7 +7389,7 @@ void main() {
         <LogicalKeyboardKey>[LogicalKeyboardKey.arrowLeft],
         shift: true,
         wordModifier: true,
-        platform: platform,
+        targetPlatform: defaultTargetPlatform,
       );
     }
 
@@ -7285,7 +7403,7 @@ void main() {
       <LogicalKeyboardKey>[LogicalKeyboardKey.arrowLeft],
       shift: true,
       wordModifier: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
     // |word wo|rd word
     expect(controller.selection.isCollapsed, false);
@@ -7297,7 +7415,7 @@ void main() {
       <LogicalKeyboardKey>[LogicalKeyboardKey.arrowRight],
       shift: true,
       wordModifier: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
     // word| wo|rd word
     expect(controller.selection.isCollapsed, false);
@@ -7309,9 +7427,9 @@ void main() {
       <LogicalKeyboardKey>[LogicalKeyboardKey.arrowRight],
       shift: true,
       wordModifier: true,
-      platform: platform,
+      targetPlatform: defaultTargetPlatform,
     );
-    if (platform == 'macos') {
+    if (defaultTargetPlatform == TargetPlatform.macOS) {
       // word wo|rd word
       expect(controller.selection.isCollapsed, true);
       expect(controller.selection.baseOffset, 7);
@@ -7322,7 +7440,7 @@ void main() {
         <LogicalKeyboardKey>[LogicalKeyboardKey.arrowRight],
         shift: true,
         wordModifier: true,
-        platform: platform,
+        targetPlatform: defaultTargetPlatform,
       );
     }
 
@@ -7334,6 +7452,90 @@ void main() {
     // On web, using keyboard for selection is handled by the browser.
   }, skip: kIsWeb, variant: TargetPlatformVariant.all());
 
+  testWidgets('expanding selection to start/end', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: 'word word word');
+    // word wo|rd| word
+    controller.selection = const TextSelection(
+      baseOffset: 7,
+      extentOffset: 9,
+      affinity: TextAffinity.upstream,
+    );
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 400,
+          child: EditableText(
+            maxLines: 10,
+            controller: controller,
+            autofocus: true,
+            focusNode: focusNode,
+            style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            keyboardType: TextInputType.text,
+          ),
+        ),
+      ),
+    ));
+
+    await tester.pump(); // Wait for autofocus to take effect.
+    expect(controller.selection.isCollapsed, false);
+    expect(controller.selection.baseOffset, 7);
+    expect(controller.selection.extentOffset, 9);
+
+    final String targetPlatform = defaultTargetPlatform.toString();
+    final String platform = targetPlatform.substring(targetPlatform.indexOf('.') + 1).toLowerCase();
+
+    // Select to the start.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.home,
+      ],
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    // |word word| word
+    expect(
+      controller.selection,
+      equals(
+        const TextSelection(
+          baseOffset: 9,
+          extentOffset: 0,
+          affinity: TextAffinity.downstream,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+
+    // Select to the end.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.home,
+      ],
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    // |word word word|
+    expect(
+      controller.selection,
+      equals(
+        const TextSelection(
+          baseOffset: 9,
+          extentOffset: 0,
+          affinity: TextAffinity.downstream,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+
+    // On web, using keyboard for selection is handled by the browser.
+  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS }));
+
   testWidgets('can change behavior by overriding text editing actions', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: testText);
     controller.selection = const TextSelection(
@@ -7341,20 +7543,35 @@ void main() {
       extentOffset: 0,
       affinity: TextAffinity.upstream,
     );
-    late final bool myIntentWasCalled;
+    bool myIntentWasCalled = false;
+    final _MyMoveSelectionRightTextAction myMoveSelectionRightTextAction =
+        _MyMoveSelectionRightTextAction(
+      onInvoke: () {
+        myIntentWasCalled = true;
+      },
+    );
+    const Iterable<SingleActivator> testSingleActivators = <SingleActivator>{
+      SingleActivator(LogicalKeyboardKey.arrowLeft),
+      SingleActivator(LogicalKeyboardKey.keyX, control: true),
+      SingleActivator(LogicalKeyboardKey.keyC, control: true),
+      SingleActivator(LogicalKeyboardKey.keyV, control: true),
+      SingleActivator(LogicalKeyboardKey.keyA, control: true),
+    };
+
+    final Map<Type, Action<Intent>> testActions = <Type, Action<Intent>>{
+      MoveSelectionLeftTextIntent: myMoveSelectionRightTextAction,
+      CutSelectionTextIntent: myMoveSelectionRightTextAction,
+      CopySelectionTextIntent: myMoveSelectionRightTextAction,
+      PasteTextIntent: myMoveSelectionRightTextAction,
+      SelectAllTextIntent: myMoveSelectionRightTextAction,
+    };
     await tester.pumpWidget(MaterialApp(
       home: Align(
         alignment: Alignment.topLeft,
         child: SizedBox(
           width: 400,
           child: Actions(
-            actions: <Type, Action<Intent>>{
-              MoveSelectionLeftTextIntent: _MyMoveSelectionRightTextAction(
-                onInvoke: () {
-                  myIntentWasCalled = true;
-                },
-              ),
-            },
+            actions: testActions,
             child: EditableText(
               maxLines: 10,
               controller: controller,
@@ -7380,13 +7597,24 @@ void main() {
     await tester.pump();
     expect(controller.selection.isCollapsed, isTrue);
     expect(controller.selection.baseOffset, 1);
+    expect(myIntentWasCalled, isFalse);
 
-    // And the left arrow also moves to the right due to the Actions override.
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
-    await tester.pump();
-    expect(controller.selection.isCollapsed, isTrue);
-    expect(controller.selection.baseOffset, 2);
-    expect(myIntentWasCalled, isTrue);
+    // And the testSingleActivators also moves to the right due to the Shortcuts override.
+    for (final SingleActivator singleActivator in testSingleActivators) {
+      myIntentWasCalled = false;
+      controller.selection = const TextSelection.collapsed(offset: 0);
+      await tester.pump();
+
+      await sendKeys(
+        tester,
+        <LogicalKeyboardKey>[singleActivator.trigger],
+        shortcutModifier: singleActivator.control,
+        targetPlatform: defaultTargetPlatform,
+      );
+      expect(controller.selection.isCollapsed, isTrue);
+      expect(controller.selection.baseOffset, 1);
+      expect(myIntentWasCalled, isTrue);
+    }
 
     // On web, using keyboard for selection is handled by the browser.
   }, skip: kIsWeb);
@@ -7569,7 +7797,7 @@ class MockTextSelectionControls extends Fake implements TextSelectionControls {
   }
 
   @override
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, VoidCallback? onTap) {
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]) {
     return Container();
   }
 

@@ -251,6 +251,7 @@ class CupertinoTextField extends StatefulWidget {
     this.strutStyle,
     this.textAlign = TextAlign.start,
     this.textAlignVertical,
+    this.textDirection,
     this.readOnly = false,
     ToolbarOptions? toolbarOptions,
     this.showCursor,
@@ -404,6 +405,7 @@ class CupertinoTextField extends StatefulWidget {
     this.strutStyle,
     this.textAlign = TextAlign.start,
     this.textAlignVertical,
+    this.textDirection,
     this.readOnly = false,
     ToolbarOptions? toolbarOptions,
     this.showCursor,
@@ -507,30 +509,6 @@ class CupertinoTextField extends StatefulWidget {
   final TextEditingController? controller;
 
   /// {@macro flutter.widgets.Focus.focusNode}
-  ///
-  /// ## Key handling
-  ///
-  /// By default, [CupertinoTextField] absorbs key events of the Space key and
-  /// Enter key, because they are commonly used as both shortcuts and text field
-  /// inputs. This means that, if these keys are pressed when
-  /// [CupertinoTextField] is the primary focus, they will not be sent to other
-  /// enclosing widgets.
-  ///
-  /// If [FocusNode.onKey] is not null, this filter is bypassed. In the likely
-  /// case that this filter is still desired, check these keys and return
-  /// [KeyEventResult.skipRemainingHandlers].
-  ///
-  /// ```dart
-  /// final FocusNode focusNode = FocusNode(
-  ///   onKey: (FocusNode node, RawKeyEvent event) {
-  ///     if (event.logicalKey == LogicalKeyboardKey.space
-  ///         || event.logicalKey == LogicalKeyboardKey.enter) {
-  ///       return KeyEventResult.skipRemainingHandlers;
-  ///     }
-  ///     // Now process the event as desired.
-  ///   },
-  /// );
-  /// ```
   final FocusNode? focusNode;
 
   /// Controls the [BoxDecoration] of the box behind the text input.
@@ -632,6 +610,9 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.material.InputDecorator.textAlignVertical}
   final TextAlignVertical? textAlignVertical;
 
+  /// {@macro flutter.widgets.editableText.textDirection}
+  final TextDirection? textDirection;
+
   /// {@macro flutter.widgets.editableText.readOnly}
   final bool readOnly;
 
@@ -660,9 +641,13 @@ class CupertinoTextField extends StatefulWidget {
   final bool enableSuggestions;
 
   /// {@macro flutter.widgets.editableText.maxLines}
+  ///  * [expands], which determines whether the field should fill the height of
+  ///    its parent.
   final int? maxLines;
 
   /// {@macro flutter.widgets.editableText.minLines}
+  ///  * [expands], which determines whether the field should fill the height of
+  ///    its parent.
   final int? minLines;
 
   /// {@macro flutter.widgets.editableText.expands}
@@ -839,6 +824,7 @@ class CupertinoTextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics, defaultValue: null));
     properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: TextAlign.start));
     properties.add(DiagnosticsProperty<TextAlignVertical>('textAlignVertical', textAlignVertical, defaultValue: null));
+    properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
   }
 }
 
@@ -1091,25 +1077,11 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     );
   }
 
-  KeyEventResult _handleRawKeyEvent(FocusNode node, RawKeyEvent event) {
-    assert(node.hasFocus);
-    // TextField uses "enter" to finish the input or create a new line, and "space" as
-    // a normal input character, so we default to terminate the handling of these
-    // two keys to avoid ancestor behaving incorrectly for handling the two keys
-    // (such as `ListTile` or `Material`).
-    if (event.logicalKey == LogicalKeyboardKey.space
-        || event.logicalKey == LogicalKeyboardKey.enter) {
-      return KeyEventResult.skipRemainingHandlers;
-    }
-    return KeyEventResult.ignored;
-  }
-
   @override
   Widget build(BuildContext context) {
     super.build(context); // See AutomaticKeepAliveClientMixin.
     assert(debugCheckHasDirectionality(context));
     final TextEditingController controller = _effectiveController;
-    final FocusNode focusNode = _effectiveFocusNode;
 
     TextSelectionControls? textSelectionControls = widget.selectionControls;
     VoidCallback? handleDidGainAccessibilityFocus;
@@ -1127,8 +1099,8 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
         handleDidGainAccessibilityFocus = () {
           // macOS automatically activated the TextField when it receives
           // accessibility focus.
-          if (!focusNode.hasFocus && focusNode.canRequestFocus) {
-            focusNode.requestFocus();
+          if (!_effectiveFocusNode.hasFocus && _effectiveFocusNode.canRequestFocus) {
+            _effectiveFocusNode.requestFocus();
           }
         };
         break;
@@ -1191,7 +1163,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
 
     final Color selectionColor = CupertinoTheme.of(context).primaryColor.withOpacity(0.2);
 
-    Widget paddedEditable = Padding(
+    final Widget paddedEditable = Padding(
       padding: widget.padding,
       child: RepaintBoundary(
         child: UnmanagedRestorationScope(
@@ -1203,13 +1175,14 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             toolbarOptions: widget.toolbarOptions,
             showCursor: widget.showCursor,
             showSelectionHandles: _showSelectionHandles,
-            focusNode: focusNode,
+            focusNode: _effectiveFocusNode,
             keyboardType: widget.keyboardType,
             textInputAction: widget.textInputAction,
             textCapitalization: widget.textCapitalization,
             style: textStyle,
             strutStyle: widget.strutStyle,
             textAlign: widget.textAlign,
+            textDirection: widget.textDirection,
             autofocus: widget.autofocus,
             obscuringCharacter: widget.obscuringCharacter,
             obscureText: widget.obscureText,
@@ -1252,15 +1225,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
         ),
       ),
     );
-
-    if (focusNode.onKey == null) {
-      paddedEditable = Focus(
-        onKey: _handleRawKeyEvent,
-        includeSemantics: false,
-        skipTraversal: true,
-        child: paddedEditable,
-      );
-    }
 
     return Semantics(
       enabled: enabled,

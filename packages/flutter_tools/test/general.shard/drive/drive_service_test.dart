@@ -70,6 +70,7 @@ final vm_service.Isolate fakePausedIsolate = vm_service.Isolate(
         tokenPos: 0,
         script: vm_service.ScriptRef(id: 'test-script', uri: 'foo.dart'),
       ),
+      enabled: true,
       resolved: true,
     ),
   ],
@@ -459,6 +460,7 @@ void main() {
   testWithoutContext('WebDriver error message includes link to documentation', () async {
     const String link = 'https://flutter.dev/docs/testing/integration-tests#running-in-a-browser';
     final DriverService driverService = WebDriverService(
+      logger: BufferLogger.test(),
       dartSdkPath: 'dart',
       processUtils: ProcessUtils(
         processManager: FakeProcessManager.empty(),
@@ -527,7 +529,7 @@ class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFa
   }) async => applicationPackage;
 }
 
-class FakeApplicationPackage extends Fake implements ApplicationPackage {}
+class FakeApplicationPackage extends Fake implements ApplicationPackage { }
 
 class FakeDevice extends Fake implements Device {
   FakeDevice(this.result, {this.supportsFlutterExit = true});

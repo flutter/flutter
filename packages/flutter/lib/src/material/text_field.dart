@@ -313,7 +313,7 @@ class TextField extends StatefulWidget {
   ///
   /// If [maxLengthEnforced] is set to false, then more than [maxLength]
   /// characters may be entered, and the error counter and divider will
-  /// switch to the [decoration.errorStyle] when the limit is exceeded.
+  /// switch to the [decoration].errorStyle when the limit is exceeded.
   ///
   /// The text cursor is not shown if [showCursor] is false or if [showCursor]
   /// is null (the default) and [readOnly] is true.
@@ -486,30 +486,6 @@ class TextField extends StatefulWidget {
   ///
   /// This widget builds an [EditableText] and will ensure that the keyboard is
   /// showing when it is tapped by calling [EditableTextState.requestKeyboard()].
-  ///
-  /// ## Key handling
-  ///
-  /// By default, [TextField] absorbs key events of the Space key and Enter key,
-  /// because they are commonly used as both shortcuts and text field inputs.
-  /// This means that, if these keys are pressed when [TextField] is the
-  /// primary focus, they will not be sent to other widgets (such as triggering
-  /// an enclosing [ListTile]).
-  ///
-  /// If [FocusNode.onKey] is not null, this filter is bypassed. In the likely
-  /// case that this filter is still desired, check these keys and return
-  /// [KeyEventResult.skipRemainingHandlers].
-  ///
-  /// ```dart
-  /// final FocusNode focusNode = FocusNode(
-  ///   onKey: (FocusNode node, RawKeyEvent event) {
-  ///     if (event.logicalKey == LogicalKeyboardKey.space
-  ///         || event.logicalKey == LogicalKeyboardKey.enter) {
-  ///       return KeyEventResult.skipRemainingHandlers;
-  ///     }
-  ///     // Now process the event as desired.
-  ///   },
-  /// );
-  /// ```
   final FocusNode? focusNode;
 
   /// The decoration to show around the text field.
@@ -574,9 +550,13 @@ class TextField extends StatefulWidget {
   final bool enableSuggestions;
 
   /// {@macro flutter.widgets.editableText.maxLines}
+  ///  * [expands], which determines whether the field should fill the height of
+  ///    its parent.
   final int? maxLines;
 
   /// {@macro flutter.widgets.editableText.minLines}
+  ///  * [expands], which determines whether the field should fill the height of
+  ///    its parent.
   final int? minLines;
 
   /// {@macro flutter.widgets.editableText.expands}
@@ -1135,19 +1115,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     }
   }
 
-  KeyEventResult _handleRawKeyEvent(FocusNode node, RawKeyEvent event) {
-    assert(node.hasFocus);
-    // TextField uses "enter" to finish the input or create a new line, and "space" as
-    // a normal input character, so we default to terminate the handling of these
-    // two keys to avoid ancestor behaving incorrectly for handling the two keys
-    // (such as `ListTile` or `Material`).
-    if (event.logicalKey == LogicalKeyboardKey.space
-        || event.logicalKey == LogicalKeyboardKey.enter) {
-      return KeyEventResult.skipRemainingHandlers;
-    }
-    return KeyEventResult.ignored;
-  }
-
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
@@ -1300,15 +1267,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       ),
     );
 
-    if (focusNode.onKey == null) {
-      child = Focus(
-        onKey: _handleRawKeyEvent,
-        includeSemantics: false,
-        skipTraversal: true,
-        child: child,
-      );
-    }
-
     if (widget.decoration != null) {
       child = AnimatedBuilder(
         animation: Listenable.merge(<Listenable>[ focusNode, controller ]),
@@ -1348,30 +1306,33 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       semanticsMaxValueLength = null;
     }
 
-    return MouseRegion(
-      cursor: effectiveMouseCursor,
-      onEnter: (PointerEnterEvent event) => _handleHover(true),
-      onExit: (PointerExitEvent event) => _handleHover(false),
-      child: IgnorePointer(
-        ignoring: !_isEnabled,
-        child: AnimatedBuilder(
-          animation: controller, // changes the _currentLength
-          builder: (BuildContext context, Widget? child) {
-            return Semantics(
-              maxValueLength: semanticsMaxValueLength,
-              currentValueLength: _currentLength,
-              onTap: widget.readOnly ? null : () {
-                if (!_effectiveController.selection.isValid)
-                  _effectiveController.selection = TextSelection.collapsed(offset: _effectiveController.text.length);
-                _requestKeyboard();
-              },
-              onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
+    return FocusTrapArea(
+      focusNode: focusNode,
+      child: MouseRegion(
+        cursor: effectiveMouseCursor,
+        onEnter: (PointerEnterEvent event) => _handleHover(true),
+        onExit: (PointerExitEvent event) => _handleHover(false),
+        child: IgnorePointer(
+          ignoring: !_isEnabled,
+          child: AnimatedBuilder(
+            animation: controller, // changes the _currentLength
+            builder: (BuildContext context, Widget? child) {
+              return Semantics(
+                maxValueLength: semanticsMaxValueLength,
+                currentValueLength: _currentLength,
+                onTap: widget.readOnly ? null : () {
+                  if (!_effectiveController.selection.isValid)
+                    _effectiveController.selection = TextSelection.collapsed(offset: _effectiveController.text.length);
+                  _requestKeyboard();
+                },
+                onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
+                child: child,
+              );
+            },
+            child: _selectionGestureDetectorBuilder.buildGestureDetector(
+              behavior: HitTestBehavior.translucent,
               child: child,
-            );
-          },
-          child: _selectionGestureDetectorBuilder.buildGestureDetector(
-            behavior: HitTestBehavior.translucent,
-            child: child,
+            ),
           ),
         ),
       ),

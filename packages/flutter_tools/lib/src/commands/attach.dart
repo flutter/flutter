@@ -24,6 +24,7 @@ import '../fuchsia/fuchsia_device.dart';
 import '../globals_null_migrated.dart' as globals;
 import '../ios/devices.dart';
 import '../ios/simulators.dart';
+import '../macos/macos_ipad_device.dart';
 import '../mdns_discovery.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
@@ -176,6 +177,9 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
   @override
   Future<void> validateCommand() async {
+    // ARM macOS as an iOS target is hidden, except for attach.
+    MacOSDesignedForIPadDevices.allowDiscovery = true;
+
     await super.validateCommand();
     if (await findTargetDevice() == null) {
       throwToolExit(null);
@@ -262,7 +266,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           }
           rethrow;
         }
-      } else if ((device is IOSDevice) || (device is IOSSimulator)) {
+      } else if ((device is IOSDevice) || (device is IOSSimulator) || (device is MacOSDesignedForIPadDevice)) {
         final Uri uriFromMdns =
           await MDnsObservatoryDiscovery.instance.getObservatoryUri(
             appId,
@@ -407,8 +411,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
-      fileSystemRoots: stringsArg(FlutterOptions.kFileSystemRoot),
-      fileSystemScheme: stringArg(FlutterOptions.kFileSystemScheme),
       target: targetFile,
       targetModel: TargetModel(stringArg('target-model')),
       buildInfo: buildInfo,
