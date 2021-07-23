@@ -10,39 +10,13 @@ import 'package:test/test.dart';
 import 'package:ui/ui.dart' hide TextStyle;
 import 'package:ui/src/engine.dart';
 
-import 'package:web_engine_tester/golden_tester.dart';
+import '../screenshot.dart';
+
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
 void testMain() async {
-  const double screenWidth = 600.0;
-  const double screenHeight = 800.0;
-  const Rect screenRect = Rect.fromLTWH(0, 0, screenWidth, screenHeight);
-
-  // Commit a recording canvas to a bitmap, and compare with the expected
-  Future<void> _checkScreenshot(RecordingCanvas rc, String fileName,
-      {Rect region = const Rect.fromLTWH(0, 0, 500, 500),
-       double maxDiffRatePercent = 0.0, bool write = false}) async {
-    final EngineCanvas engineCanvas = BitmapCanvas(screenRect,
-        RenderStrategy());
-
-    rc.endRecording();
-    rc.apply(engineCanvas, screenRect);
-
-    // Wrap in <flt-scene> so that our CSS selectors kick in.
-    final html.Element sceneElement = html.Element.tag('flt-scene');
-    try {
-      sceneElement.append(engineCanvas.rootElement);
-      html.document.body!.append(sceneElement);
-      await matchGoldenFile('$fileName.png', region: region,
-          maxDiffRatePercent: maxDiffRatePercent, write: write);
-    } finally {
-      // The page is reused across tests, so remove the element after taking the
-      // Scuba screenshot.
-      sceneElement.remove();
-    }
-  }
 
   setUp(() async {
     debugEmulateFlutterTesterEnvironment = true;
@@ -83,7 +57,9 @@ void testMain() async {
           ..style = PaintingStyle.fill
           ..color = const Color.fromARGB(128, 255, 0, 0));
     rc.restore();
-    await _checkScreenshot(rc, 'canvas_blend_circle_diff_color',
+
+    await canvasScreenshot(rc, 'canvas_blend_circle_diff_color',
+        region: const Rect.fromLTWH(0, 0, 500, 500),
         maxDiffRatePercent: operatingSystem == OperatingSystem.macOs ? 2.95 :
             operatingSystem == OperatingSystem.iOs ? 1.0 : 0);
   });
@@ -121,7 +97,8 @@ void testMain() async {
     rc.drawImage(createTestImage(), Offset(135.0, 130.0),
         SurfacePaint()..blendMode = BlendMode.multiply);
     rc.restore();
-    await _checkScreenshot(rc, 'canvas_blend_image_multiply',
+    await canvasScreenshot(rc, 'canvas_blend_image_multiply',
+        region: const Rect.fromLTWH(0, 0, 500, 500),
         maxDiffRatePercent: operatingSystem == OperatingSystem.macOs ? 2.95 :
         operatingSystem == OperatingSystem.iOs ? 2.0 : 0);
   });

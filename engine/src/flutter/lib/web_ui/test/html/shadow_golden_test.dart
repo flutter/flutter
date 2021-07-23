@@ -11,7 +11,7 @@ import 'package:ui/ui.dart';
 
 import 'package:web_engine_tester/golden_tester.dart';
 
-import 'scuba.dart';
+import 'paragraph/text_scuba.dart';
 
 const Color _kShadowColor = Color.fromARGB(255, 0, 0, 0);
 

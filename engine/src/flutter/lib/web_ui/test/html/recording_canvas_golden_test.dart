@@ -11,7 +11,7 @@ import 'package:test/test.dart';
 import 'package:ui/ui.dart' hide TextStyle;
 import 'package:ui/src/engine.dart';
 
-import '../../matchers.dart';
+import '../matchers.dart';
 import 'package:web_engine_tester/golden_tester.dart';
 
 void main() {
