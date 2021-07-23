@@ -140,6 +140,8 @@ class NavigationRail extends StatefulWidget {
     this.selectedIconTheme,
     this.minWidth,
     this.minExtendedWidth,
+    this.curve = Curves.fastOutSlowIn,
+    this.duration = const Duration(milliseconds: 250)
   }) :  assert(destinations != null && destinations.length >= 2),
         assert(selectedIndex != null),
         assert(0 <= selectedIndex && selectedIndex < destinations.length),
@@ -324,6 +326,16 @@ class NavigationRail extends StatefulWidget {
   ///
   /// The default value is 256.
   final double? minExtendedWidth;
+
+  /// The curve for animations of the [NavigationRail].
+  /// 
+  /// The default animation is fastOutSlowIn
+  final Curve curve;
+
+  /// The duration for animations of the [NavigationRail].
+  /// 
+  /// The default duration is 250 milliseconds
+  final Duration duration;
 
   /// Returns the animation that controls the [NavigationRail.extended] state.
   ///
@@ -542,13 +554,13 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
     _destinationAnimations = _destinationControllers.map((AnimationController controller) => controller.view).toList();
     _destinationControllers[widget.selectedIndex].value = 1.0;
     _extendedController = AnimationController(
-      duration: kThemeAnimationDuration,
+      duration: widget.duration,
       vsync: this,
       value: widget.extended ? 1.0 : 0.0,
     );
     _extendedAnimation = CurvedAnimation(
       parent: _extendedController,
-      curve: Curves.easeInOut,
+      curve: widget.curve,
     );
     _extendedController.addListener(() {
       _rebuild();
