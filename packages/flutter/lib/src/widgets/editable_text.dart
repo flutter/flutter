@@ -2805,7 +2805,6 @@ class _Editable extends MultiChildRenderObjectWidget {
     this.promptRectRange,
     this.promptRectColor,
     required this.clipBehavior,
-    required this.requestPrivacy,
   }) : assert(textDirection != null),
        assert(rendererIgnoresPointer != null),
        super(key: key, children: _extractChildren(inlineSpan));
@@ -2866,7 +2865,6 @@ class _Editable extends MultiChildRenderObjectWidget {
   final TextRange? promptRectRange;
   final Color? promptRectColor;
   final Clip clipBehavior;
-  final bool requestPrivacy;
 
   @override
   RenderEditable createRenderObject(BuildContext context) {
