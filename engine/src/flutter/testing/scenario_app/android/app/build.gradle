@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'com.facebook.testing.screenshot'
 
-def leakcanary_version = '2.6'
+def leakcanary_version = '2.7'
 
 screenshots {
     failureDir = "${rootProject.buildDir}/reports/diff_failures"
