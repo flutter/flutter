@@ -179,7 +179,7 @@ void main() {
           const FakeCommand(
             command: <String>['git', 'fetch', 'upstream'],
           ),
-          const FakeCommand(command: <String>['git', 'checkout', 'upstream/$workingBranch']),
+          const FakeCommand(command: <String>['git', 'checkout', workingBranch]),
           const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
             stdout: revision1,
@@ -444,13 +444,14 @@ void main() {
         stdio.stdin.add('n');
         processManager.addCommands(const <FakeCommand>[
           FakeCommand(command: <String>['git', 'fetch', 'upstream']),
+          // we want merged upstream commit, not local working commit
           FakeCommand(command: <String>['git', 'checkout', 'upstream/$candidateBranch']),
           FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
             stdout: revision1,
           ),
           FakeCommand(command: <String>['git', 'fetch', 'upstream']),
-          FakeCommand(command: <String>['git', 'checkout', 'upstream/$workingBranch']),
+          FakeCommand(command: <String>['git', 'checkout', workingBranch]),
           FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
             stdout: revision2,
@@ -512,13 +513,14 @@ void main() {
         stdio.stdin.add('n');
         processManager.addCommands(const <FakeCommand>[
           FakeCommand(command: <String>['git', 'fetch', 'upstream']),
+          // we want merged upstream commit, not local working commit
           FakeCommand(command: <String>['git', 'checkout', 'upstream/$candidateBranch']),
           FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
             stdout: revision1,
           ),
           FakeCommand(command: <String>['git', 'fetch', 'upstream']),
-          FakeCommand(command: <String>['git', 'checkout', 'upstream/$workingBranch']),
+          FakeCommand(command: <String>['git', 'checkout', workingBranch]),
           FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
             stdout: revision2,
@@ -567,6 +569,7 @@ void main() {
         processManager.addCommands(const <FakeCommand>[
           // Engine repo
           FakeCommand(command: <String>['git', 'fetch', 'upstream']),
+          // we want merged upstream commit, not local working commit
           FakeCommand(command: <String>['git', 'checkout', 'upstream/$candidateBranch']),
           FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
@@ -574,7 +577,7 @@ void main() {
           ),
           // Framework repo
           FakeCommand(command: <String>['git', 'fetch', 'upstream']),
-          FakeCommand(command: <String>['git', 'checkout', 'upstream/$workingBranch']),
+          FakeCommand(command: <String>['git', 'checkout', workingBranch]),
           FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
             stdout: revision2,

@@ -189,13 +189,15 @@ void runNext({
           break;
         }
       }
+      final Remote engineUpstreamRemote = Remote(
+        name: RemoteName.upstream,
+        url: state.engine.upstream.url,
+      );
       final EngineRepository engine = EngineRepository(
         checkouts,
-        initialRef: state.engine.candidateBranch,
-        upstreamRemote: Remote(
-          name: RemoteName.upstream,
-          url: state.engine.upstream.url,
-        ),
+        // We explicitly want to check out the merged version from upstream
+        initialRef: '${engineUpstreamRemote.name}/${state.engine.candidateBranch}',
+        upstreamRemote: engineUpstreamRemote,
         previousCheckoutLocation: state.engine.checkoutPath,
       );
 
@@ -262,7 +264,8 @@ void runNext({
       );
       final FrameworkRepository framework = FrameworkRepository(
         checkouts,
-        initialRef: state.framework.candidateBranch,
+        // We explicitly want to check out the merged version from upstream
+        initialRef: '${upstream.name}/${state.framework.candidateBranch}',
         upstreamRemote: upstream,
         previousCheckoutLocation: state.framework.checkoutPath,
       );
@@ -288,7 +291,8 @@ void runNext({
       );
       final FrameworkRepository framework = FrameworkRepository(
         checkouts,
-        initialRef: state.framework.candidateBranch,
+        // We explicitly want to check out the merged version from upstream
+        initialRef: '${upstream.name}/${state.framework.candidateBranch}',
         upstreamRemote: upstream,
         previousCheckoutLocation: state.framework.checkoutPath,
       );
