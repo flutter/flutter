@@ -14,12 +14,6 @@ import 'feedback.dart';
 import 'theme.dart';
 import 'tooltip_theme.dart';
 
-/// The default value used when a value is not provided anywhere.
-///
-/// Read the documentation on the following properties to determine all sources:
-/// [Tooltip.triggerMode] and [TooltipTheme.triggerMode]
-const TooltipTriggerMode _kTooltipTriggerMode = TooltipTriggerMode.longPress;
-
 /// A material design tooltip.
 ///
 /// Tooltips provide text labels which help explain the function of a button or
@@ -213,13 +207,15 @@ class Tooltip extends StatefulWidget {
   ///
   /// If this property is null, then [TooltipThemeData.triggerMode] is used.
   /// If [TooltipThemeData.triggerMode] is also null, the default mode is
-  /// [_kTooltipTriggerMode]
+  /// [TooltipTriggerMode.longPress]
   final TooltipTriggerMode? triggerMode;
 
   /// Whether the tooltip should provide acoustic and/or haptic feedback.
   ///
   /// For example, on Android a tap will produce a clicking sound and a
   /// long-press will produce a short vibration, when feedback is enabled.
+  ///
+  /// The default value is true.
   ///
   /// See also:
   ///
@@ -274,7 +270,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   static const Duration _defaultHoverShowDuration = Duration(milliseconds: 100);
   static const Duration _defaultWaitDuration = Duration.zero;
   static const bool _defaultExcludeFromSemantics = false;
-  static const TooltipTriggerMode _defaultTriggerMode = _kTooltipTriggerMode;
+  static const TooltipTriggerMode _defaultTriggerMode = TooltipTriggerMode.longPress;
   static const bool _defaultEnableFeedback = true;
 
   late double height;
