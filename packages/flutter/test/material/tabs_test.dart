@@ -2613,7 +2613,7 @@ void main() {
 
     await tester.pump();
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     // Test default cursor
     await tester.pumpWidget(MaterialApp(home: DefaultTabController(
@@ -2628,7 +2628,7 @@ void main() {
         ),
       ),
     ));
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
   });
 
   testWidgets('TabController changes', (WidgetTester tester) async {

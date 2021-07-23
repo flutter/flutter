@@ -1701,7 +1701,6 @@ void main() {
       state.addLocalHistory();
       // Waits for modal route to update its internal state;
       await tester.pump();
-
       // Pumps a new widget to dispose WidgetWithLocalHistory. This should cause
       // it to remove the local history entry from modal route during
       // finalizeTree.
@@ -1709,6 +1708,25 @@ void main() {
         home: Text('dummy'),
       ));
       // Waits for modal route to update its internal state;
+      await tester.pump();
+      expect(tester.takeException(), null);
+    });
+
+    testWidgets('child with no local history can be disposed', (WidgetTester tester) async {
+      await tester.pumpWidget(const MaterialApp(
+        home: WidgetWithNoLocalHistory(),
+      ));
+
+      final WidgetWithNoLocalHistoryState state = tester.state(find.byType(WidgetWithNoLocalHistory));
+      state.addLocalHistory();
+      // Waits for modal route to update its internal state;
+      await tester.pump();
+      // Pumps a new widget to dispose WidgetWithNoLocalHistory. This should cause
+      // it to remove the local history entry from modal route during
+      // finalizeTree.
+      await tester.pumpWidget(const MaterialApp(
+        home: Text('dummy'),
+      ));
       await tester.pump();
       expect(tester.takeException(), null);
     });
@@ -1972,6 +1990,33 @@ class WidgetWithLocalHistoryState extends State<WidgetWithLocalHistory> {
   }
 }
 
+class WidgetWithNoLocalHistory extends StatefulWidget {
+  const WidgetWithNoLocalHistory({Key? key}) : super(key: key);
+
+  @override
+  WidgetWithNoLocalHistoryState createState() => WidgetWithNoLocalHistoryState();
+}
+
+class WidgetWithNoLocalHistoryState extends State<WidgetWithNoLocalHistory> {
+  late LocalHistoryEntry _localHistory;
+
+  void addLocalHistory() {
+    _localHistory = LocalHistoryEntry();
+    // Not calling `route.addLocalHistoryEntry` here.
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _localHistory.remove();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const Text('dummy');
+  }
+}
+
 class TransitionDetector extends DefaultTransitionDelegate<void> {
   bool hasTransition = false;
   @override
@@ -1996,7 +2041,7 @@ Widget buildNavigator({
   TransitionDelegate<dynamic>? transitionDelegate,
 }) {
   return MediaQuery(
-    data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+    data: MediaQueryData.fromWindow(WidgetsBinding.instance!.window),
     child: Localizations(
       locale: const Locale('en', 'US'),
       delegates: const <LocalizationsDelegate<dynamic>>[

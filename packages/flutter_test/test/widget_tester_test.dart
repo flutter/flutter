@@ -162,7 +162,7 @@ void main() {
 
       final Widget target = _AlwaysAnimating(
         onPaint: () {
-          final int current = SchedulerBinding.instance.currentFrameTimeStamp.inMicroseconds;
+          final int current = SchedulerBinding.instance!.currentFrameTimeStamp.inMicroseconds;
           initial ??= current;
           logPaints.add(current - initial!);
         },
@@ -697,7 +697,10 @@ void main() {
       if (debugDefaultTargetPlatformOverride == null) {
         expect(tester.testDescription, equals('variant tests have descriptions with details'));
       } else {
-        expect(tester.testDescription, equals('variant tests have descriptions with details ($debugDefaultTargetPlatformOverride)'));
+        expect(
+          tester.testDescription,
+          equals('variant tests have descriptions with details (variant: $debugDefaultTargetPlatformOverride)'),
+        );
       }
     }, variant: TargetPlatformVariant(TargetPlatform.values.toSet()));
   });
@@ -735,6 +738,16 @@ void main() {
     });
   });
 
+  group('Skip and exclude work', () {
+    testWidgets('skipping a test skips it', (WidgetTester tester) async {
+      expect(true, false); // shouldn't get here
+    }, skip: true); // https://github.com/someissue
+
+    testWidgets('excluding a test skips it', (WidgetTester tester) async {
+      expect(true, false); // shouldn't get here
+    }, exclude: true);
+  });
+
   group('Pending timer', () {
     late TestExceptionReporter currentExceptionReporter;
     setUp(() {
@@ -751,7 +764,7 @@ void main() {
         flutterErrorDetails = details;
       };
 
-      final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+      final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
       await binding.runTest(() async {
         final Timer timer = Timer(const Duration(seconds: 1), () {});
         expect(timer.isActive, true);

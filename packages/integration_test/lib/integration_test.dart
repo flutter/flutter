@@ -17,6 +17,7 @@ import 'package:vm_service/vm_service_io.dart' as vm_io;
 import '_callback_io.dart' if (dart.library.html) '_callback_web.dart' as driver_actions;
 import '_extension_io.dart' if (dart.library.html) '_extension_web.dart';
 import 'common.dart';
+import 'src/channel.dart';
 
 const String _success = 'success';
 
@@ -51,7 +52,7 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
       }
 
       try {
-        await _channel.invokeMethod<void>(
+        await integrationTestChannel.invokeMethod<void>(
           'allTestsFinished',
           <String, dynamic>{
             'results': results.map<String, dynamic>((String name, Object result) {
@@ -132,34 +133,17 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   @override
   List<Failure> get failureMethodsDetails => results.values.whereType<Failure>().toList();
 
-  @override
-  void initInstances() {
-    super.initInstances();
-    _instance = this;
-  }
-
-  /// The singleton instance of this object.
+  /// Similar to [WidgetsFlutterBinding.ensureInitialized].
   ///
-  /// Provides access to the features exposed by this class. The binding must
-  /// be initialized before using this getter; this is typically done by calling
-  /// [IntegrationTestWidgetsFlutterBinding.ensureInitialized].
-  static IntegrationTestWidgetsFlutterBinding get instance => BindingBase.checkInstance(_instance);
-  static IntegrationTestWidgetsFlutterBinding? _instance;
-
   /// Returns an instance of the [IntegrationTestWidgetsFlutterBinding], creating and
   /// initializing it if necessary.
-  ///
-  /// See also:
-  ///
-  ///  * [WidgetsFlutterBinding.ensureInitialized], the equivalent in the widgets framework.
-  static IntegrationTestWidgetsFlutterBinding ensureInitialized() {
-    if (_instance == null)
+  static WidgetsBinding ensureInitialized() {
+    if (WidgetsBinding.instance == null) {
       IntegrationTestWidgetsFlutterBinding();
-    return _instance!;
+    }
+    assert(WidgetsBinding.instance is IntegrationTestWidgetsFlutterBinding);
+    return WidgetsBinding.instance!;
   }
-
-  static const MethodChannel _channel =
-      MethodChannel('plugins.flutter.io/integration_test');
 
   /// Test results that will be populated after the tests have completed.
   ///
@@ -181,11 +165,29 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   /// side.
   final CallbackManager callbackManager = driver_actions.callbackManager;
 
-  /// Taking a screenshot.
+  /// Takes a screenshot.
   ///
-  /// Called by test methods. Implementation differs for each platform.
-  Future<void> takeScreenshot(String screenshotName) async {
-    await callbackManager.takeScreenshot(screenshotName);
+  /// On Android, you need to call `convertFlutterSurfaceToImage()`, and
+  /// pump a frame before taking a screenshot.
+  Future<List<int>> takeScreenshot(String screenshotName) async {
+    reportData ??= <String, dynamic>{};
+    reportData!['screenshots'] ??= <dynamic>[];
+    final Map<String, dynamic> data = await callbackManager.takeScreenshot(screenshotName);
+    assert(data.containsKey('bytes'));
+
+    (reportData!['screenshots']! as List<dynamic>).add(data);
+    return data['bytes']! as List<int>;
+  }
+
+  /// Android only. Converts the Flutter surface to an image view.
+  /// Be aware that if you are conducting a perf test, you may not want to call
+  /// this method since the this is an expensive operation that affects the
+  /// rendering of a Flutter app.
+  ///
+  /// Once the screenshot is taken, call `revertFlutterImage()` to restore
+  /// the original Flutter surface.
+  Future<void> convertFlutterSurfaceToImage() async {
+    await callbackManager.convertFlutterSurfaceToImage();
   }
 
   /// The callback function to response the driver side input.

@@ -908,7 +908,7 @@ mixin WidgetInspectorService {
   /// This is expensive and should not be called except during development.
   @protected
   Future<void> forceRebuild() {
-    final WidgetsBinding binding = WidgetsBinding.instance;
+    final WidgetsBinding binding = WidgetsBinding.instance!;
     if (binding.renderViewElement != null) {
       binding.buildOwner!.reassemble(binding.renderViewElement!, null);
       return binding.endOfFrame;
@@ -992,7 +992,7 @@ mixin WidgetInspectorService {
       return true;
     }());
 
-    SchedulerBinding.instance.addPersistentFrameCallback(_onFrameStart);
+    SchedulerBinding.instance!.addPersistentFrameCallback(_onFrameStart);
 
     final FlutterExceptionHandler defaultExceptionHandler = FlutterError.presentError;
 
@@ -1061,7 +1061,7 @@ mixin WidgetInspectorService {
               renderObject.markNeedsPaint();
               renderObject.visitChildren(markTreeNeedsPaint);
             }
-            final RenderObject root = RendererBinding.instance.renderView;
+            final RenderObject root = RendererBinding.instance!.renderView;
             markTreeNeedsPaint(root);
           } else {
             debugOnProfilePaint = null;
@@ -1284,7 +1284,7 @@ mixin WidgetInspectorService {
   @protected
   bool isWidgetTreeReady([ String? groupName ]) {
     return WidgetsBinding.instance != null &&
-           WidgetsBinding.instance.debugDidSendFirstFrameEvent;
+           WidgetsBinding.instance!.debugDidSendFirstFrameEvent;
   }
 
   /// Returns the Dart object associated with a reference id.
@@ -1388,12 +1388,12 @@ mixin WidgetInspectorService {
         developer.inspect(selection.current);
       }
       if (selectionChangedCallback != null) {
-        if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.idle) {
+        if (SchedulerBinding.instance!.schedulerPhase == SchedulerPhase.idle) {
           selectionChangedCallback!();
         } else {
           // It isn't safe to trigger the selection change callback if we are in
           // the middle of rendering the frame.
-          SchedulerBinding.instance.scheduleTask(
+          SchedulerBinding.instance!.scheduleTask(
             selectionChangedCallback!,
             Priority.touch,
           );
@@ -1690,7 +1690,7 @@ mixin WidgetInspectorService {
   }
 
   Map<String, Object?>? _getRootWidget(String groupName) {
-    return _nodeToJson(WidgetsBinding.instance.renderViewElement?.toDiagnosticsNode(), InspectorSerializationDelegate(groupName: groupName, service: this));
+    return _nodeToJson(WidgetsBinding.instance?.renderViewElement?.toDiagnosticsNode(), InspectorSerializationDelegate(groupName: groupName, service: this));
   }
 
   /// Returns a JSON representation of the [DiagnosticsNode] for the root
@@ -1701,7 +1701,7 @@ mixin WidgetInspectorService {
 
   Map<String, Object?>? _getRootWidgetSummaryTree(String groupName) {
     return _nodeToJson(
-      WidgetsBinding.instance.renderViewElement?.toDiagnosticsNode(),
+      WidgetsBinding.instance?.renderViewElement?.toDiagnosticsNode(),
       InspectorSerializationDelegate(groupName: groupName, subtreeDepth: 1000000, summaryTree: true, service: this),
     );
   }
@@ -1714,7 +1714,7 @@ mixin WidgetInspectorService {
   }
 
   Map<String, Object?>? _getRootRenderObject(String groupName) {
-    return _nodeToJson(RendererBinding.instance.renderView.toDiagnosticsNode(), InspectorSerializationDelegate(groupName: groupName, service: this));
+    return _nodeToJson(RendererBinding.instance?.renderView.toDiagnosticsNode(), InspectorSerializationDelegate(groupName: groupName, service: this));
   }
 
   /// Returns a JSON representation of the subtree rooted at the
@@ -1907,7 +1907,7 @@ mixin WidgetInspectorService {
 
   void _onFrameStart(Duration timeStamp) {
     _frameStart = timeStamp;
-    SchedulerBinding.instance.addPostFrameCallback(_onFrameEnd);
+    SchedulerBinding.instance!.addPostFrameCallback(_onFrameEnd);
   }
 
   void _onFrameEnd(Duration timeStamp) {
@@ -2122,6 +2122,7 @@ class _ElementLocationStatsTracker {
       'events': events,
     };
 
+    // Encode the new locations using the older encoding.
     if (newLocations.isNotEmpty) {
       // Add all newly used location ids to the JSON.
       final Map<String, List<int>> locationsJson = <String, List<int>>{};
@@ -2136,21 +2137,26 @@ class _ElementLocationStatsTracker {
       json['newLocations'] = locationsJson;
     }
 
-    // Add in a data structure for the location names.
+    // Encode the new locations using the newer encoding (as of v2.4.0).
     if (newLocations.isNotEmpty) {
-      final Map<String, Map<int, String>> namesJson = <String, Map<int, String>>{};
+      final Map<String, Map<String, List<Object?>>> fileLocationsMap = <String, Map<String, List<Object?>>>{};
       for (final _LocationCount entry in newLocations) {
         final _Location location = entry.location;
-        final Map<int, String> jsonForFile = namesJson.putIfAbsent(
-          location.file,
-              () => <int, String>{},
+        final Map<String, List<Object?>> locations = fileLocationsMap.putIfAbsent(
+          location.file, () => <String, List<Object?>>{
+            'ids': <int>[],
+            'lines': <int>[],
+            'columns': <int>[],
+            'names': <String?>[],
+          },
         );
-        final String? name = location.name;
-        if (name != null) {
-          jsonForFile[entry.id] = name;
-        }
+
+        locations['ids']!.add(entry.id);
+        locations['lines']!.add(location.line);
+        locations['columns']!.add(location.column);
+        locations['names']!.add(location.name);
       }
-      json['newLocationsNames'] = namesJson;
+      json['locations'] = fileLocationsMap;
     }
 
     resetCounts();
@@ -2356,7 +2362,7 @@ class _WidgetInspectorState extends State<WidgetInspector>
     // on the edge of the display. If the pointer is being dragged off the edge
     // of the display we do not want to select anything. A user can still select
     // a widget that is only at the exact screen margin by tapping.
-    final Rect bounds = (Offset.zero & (WidgetsBinding.instance.window.physicalSize / WidgetsBinding.instance.window.devicePixelRatio)).deflate(_kOffScreenMargin);
+    final Rect bounds = (Offset.zero & (WidgetsBinding.instance!.window.physicalSize / WidgetsBinding.instance!.window.devicePixelRatio)).deflate(_kOffScreenMargin);
     if (!bounds.contains(_lastPointerLocation!)) {
       setState(() {
         selection.clear();

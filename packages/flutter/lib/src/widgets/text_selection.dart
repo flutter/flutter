@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:characters/characters.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -119,12 +120,12 @@ abstract class TextSelectionControls {
   /// interaction is allowed. As a counterexample, the default selection handle
   /// on iOS [cupertinoTextSelectionControls] does not call [onTap] at all,
   /// since its handles are not meant to be tapped.
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]);
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap, double? startGlyphHeight, double? endGlyphHeight]);
 
   /// Get the anchor point of the handle relative to itself. The anchor point is
   /// the point that is aligned with a specific point in the text. A handle
   /// often visually "points to" that location.
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight);
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight, [double? startGlyphHeight, double? endGlyphHeight]);
 
   /// Builds a toolbar near a text selection.
   ///
@@ -472,8 +473,8 @@ class TextSelectionOverlay {
     _handlesVisible = visible;
     // If we are in build state, it will be too late to update visibility.
     // We will need to schedule the build in next frame.
-    if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
-      SchedulerBinding.instance.addPostFrameCallback(_markNeedsBuild);
+    if (SchedulerBinding.instance!.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+      SchedulerBinding.instance!.addPostFrameCallback(_markNeedsBuild);
     } else {
       _markNeedsBuild();
     }
@@ -523,8 +524,8 @@ class TextSelectionOverlay {
     if (_value == newValue)
       return;
     _value = newValue;
-    if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
-      SchedulerBinding.instance.addPostFrameCallback(_markNeedsBuild);
+    if (SchedulerBinding.instance!.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+      SchedulerBinding.instance!.addPostFrameCallback(_markNeedsBuild);
     } else {
       _markNeedsBuild();
     }
@@ -824,9 +825,47 @@ class _TextSelectionHandleOverlayState
         break;
     }
 
+    // On some platforms we may want to calculate the start and end handles
+    // separately so they scale for the selected content.
+    //
+    // For the start handle we compute the rectangles that encompass the range
+    // of the first full selected grapheme cluster at the beginning of the selection.
+    //
+    // For the end handle we compute the rectangles that encompass the range
+    // of the last full selected grapheme cluster at the end of the selection.
+    final InlineSpan span = widget.renderObject.text!;
+    final String text = span.toPlainText();
+    final int firstSelectedGraphemeExtent;
+    final int lastSelectedGraphemeExtent;
+    final TextSelection? selection = widget.renderObject.selection;
+
+    if (selection != null && selection.isValid && !selection.isCollapsed) {
+      final String selectedGraphemes = selection.textInside(text);
+      firstSelectedGraphemeExtent = selectedGraphemes.characters.first.length;
+      lastSelectedGraphemeExtent = selectedGraphemes.characters.last.length;
+      assert(firstSelectedGraphemeExtent <= selectedGraphemes.length && lastSelectedGraphemeExtent <= selectedGraphemes.length);
+    } else {
+      // The call to selectedGraphemes.characters.first/last will throw a state
+      // error if the given text is empty, so fall back to first/last character
+      // range in this case.
+      //
+      // The call to widget.selection.textInside(text) will return a RangeError
+      // for a collapsed selection, fall back to this case when that happens.
+      firstSelectedGraphemeExtent = 0;
+      lastSelectedGraphemeExtent = 0;
+    }
+
+    final Rect? startHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.selection.start, end: widget.selection.start + firstSelectedGraphemeExtent));
+    final Rect? endHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.selection.end - lastSelectedGraphemeExtent, end: widget.selection.end));
+
+    assert(!(firstSelectedGraphemeExtent > 0 && widget.selection.isValid && !widget.selection.isCollapsed) || startHandleRect != null);
+    assert(!(lastSelectedGraphemeExtent > 0 && widget.selection.isValid && !widget.selection.isCollapsed) || endHandleRect != null);
+
     final Offset handleAnchor = widget.selectionControls.getHandleAnchor(
       type,
       widget.renderObject.preferredLineHeight,
+      startHandleRect?.height ?? widget.renderObject.preferredLineHeight,
+      endHandleRect?.height ?? widget.renderObject.preferredLineHeight,
     );
     final Size handleSize = widget.selectionControls.getHandleSize(
       widget.renderObject.preferredLineHeight,
@@ -877,6 +916,8 @@ class _TextSelectionHandleOverlayState
                 type,
                 widget.renderObject.preferredLineHeight,
                 widget.onSelectionHandleTapped,
+                startHandleRect?.height ?? widget.renderObject.preferredLineHeight,
+                endHandleRect?.height ?? widget.renderObject.preferredLineHeight,
               ),
             ),
           ),
@@ -1657,7 +1698,7 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
   @override
   void addListener(VoidCallback listener) {
     if (!hasListeners) {
-      WidgetsBinding.instance.addObserver(this);
+      WidgetsBinding.instance!.addObserver(this);
     }
     if (value == ClipboardStatus.unknown) {
       update();
@@ -1669,7 +1710,7 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
   void removeListener(VoidCallback listener) {
     super.removeListener(listener);
     if (!hasListeners) {
-      WidgetsBinding.instance.removeObserver(this);
+      WidgetsBinding.instance!.removeObserver(this);
     }
   }
 
@@ -1689,7 +1730,7 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
   @override
   void dispose() {
     super.dispose();
-    WidgetsBinding.instance.removeObserver(this);
+    WidgetsBinding.instance!.removeObserver(this);
     _disposed = true;
   }
 }

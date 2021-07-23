@@ -472,7 +472,12 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   final Color? shadowColor;
 
   /// {@template flutter.material.appbar.shape}
-  /// The shape of the app bar's material's shape as well as its shadow.
+  /// The shape of the app bar's [Material] as well as its shadow.
+  ///
+  /// If this property is null, then [AppBarTheme.shape] of
+  /// [ThemeData.appBarTheme] is used.  Both properties default to null.
+  /// If both properties are null then the shape of the app bar's [Material]
+  /// is just a simple rectangle.
   ///
   /// A shadow is only displayed if the [elevation] is greater than
   /// zero.
@@ -1129,7 +1134,7 @@ class _AppBarState extends State<AppBar> {
           shadowColor: widget.shadowColor
             ?? appBarTheme.shadowColor
             ?? _defaultShadowColor,
-          shape: widget.shape,
+          shape: widget.shape ?? appBarTheme.shape,
           child: Semantics(
             explicitChildNodes: true,
             child: appBar,

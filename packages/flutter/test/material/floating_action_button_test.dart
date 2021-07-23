@@ -421,14 +421,14 @@ void main() {
     expect(getRawMaterialButtonWidget().shape, const CircleBorder());
 
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
           floatingActionButton: FloatingActionButton.extended(
-            label: const SizedBox(
+            label: SizedBox(
               width: 100.0,
               child: Text('label'),
             ),
-            icon: const Icon(Icons.android),
+            icon: Icon(Icons.android),
             onPressed: null,
           ),
         ),
@@ -475,10 +475,10 @@ void main() {
     }
 
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
           floatingActionButton: FloatingActionButton.extended(
-            label: const SizedBox(
+            label: SizedBox(
               width: 100.0,
               child: Text('label'),
             ),
@@ -812,7 +812,7 @@ void main() {
 
     await tester.pump();
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -830,7 +830,7 @@ void main() {
     );
 
     await gesture.moveTo(tester.getCenter(find.byType(FloatingActionButton)));
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     // Test default cursor
     await tester.pumpWidget(
@@ -847,7 +847,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
 
     // Test default cursor when disabled
     await tester.pumpWidget(
@@ -864,7 +864,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
   testWidgets('Floating Action Button has no clip by default', (WidgetTester tester) async {
@@ -963,6 +963,60 @@ void main() {
     // Verify that Icon is present and label is not.
     expect(find.byKey(iconKey), findsOneWidget);
     expect(find.byKey(labelKey), findsNothing);
+  });
+
+  testWidgets('FloatingActionButton.small configures correct size', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          floatingActionButton: FloatingActionButton.small(
+            key: key,
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            onPressed: null,
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byKey(key)), const Size(40.0, 40.0));
+  });
+
+  testWidgets('FloatingActionButton.large configures correct size', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          floatingActionButton: FloatingActionButton.large(
+            key: key,
+            onPressed: null,
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byKey(key)), const Size(96.0, 96.0));
+  });
+
+  testWidgets('FloatingActionButton.extended can customize spacing between icon and label', (WidgetTester tester) async {
+    const Key iconKey = Key('icon');
+    const Key labelKey = Key('label');
+    const double spacing = 33.0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          floatingActionButton: FloatingActionButton.extended(
+            label: const Text('', key: labelKey),
+            icon: const Icon(Icons.add, key: iconKey),
+            extendedIconLabelSpacing: spacing,
+            onPressed: () {},
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getTopLeft(find.byKey(labelKey)).dx - tester.getTopRight(find.byKey(iconKey)).dx, spacing);
   });
 
   group('feedback', () {

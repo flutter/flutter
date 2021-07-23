@@ -92,6 +92,13 @@ TaskFunction createEndToEndKeyboardTest() {
   );
 }
 
+TaskFunction createEndToEndFrameNumberTest() {
+  return DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/ui',
+    'lib/frame_number.dart',
+  );
+}
+
 TaskFunction createEndToEndDriverTest() {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',

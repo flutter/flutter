@@ -100,6 +100,14 @@ typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 /// each value of the [TestVariant.values]. If [variant] is not set, the test
 /// will be run once using the base test environment.
 ///
+/// If either [exclude] or [skip] is `true`, then the test will be skipped. The
+/// difference is that [skip] is a temporary way to disable a problematic test
+/// while a fix is being developed. It should have a comment after it with a
+/// link to a tracking issue for the work on re-enabling the test.
+///
+/// [exclude] is used to indicate that the test is not designed to run under
+/// the condition given and should always be skipped when it is `true`.
+///
 /// If the [tags] are passed, they declare user-defined tags that are implemented by
 /// the `test` package.
 ///
@@ -117,11 +125,26 @@ typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 ///   expect(find.text('Success'), findsOneWidget);
 /// });
 /// ```
+///
+/// ### Excluded test
+/// ```dart
+/// testWidgets('Some test that will never make sense for the web', (WidgetTester tester) async {
+///   // test code
+/// }, exclude: isBrowser);
+/// ```
+///
+/// ### Skipped test
+/// ```dart
+/// testWidgets('Some flaky test', (WidgetTester tester) async {
+///   // test code
+/// }, skip: true); // https://github.com/flutter/flutter/issues/12345
+/// ```
 @isTest
 void testWidgets(
   String description,
   WidgetTesterCallback callback, {
-  bool? skip,
+  bool skip = false,
+  bool exclude = false,
   test_package.Timeout? timeout,
   Duration? initialTimeout,
   bool semanticsEnabled = true,
@@ -130,11 +153,17 @@ void testWidgets(
 }) {
   assert(variant != null);
   assert(variant.values.isNotEmpty, 'There must be at least one value to test in the testing variant.');
-  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
   final WidgetTester tester = WidgetTester._(binding);
   for (final dynamic value in variant.values) {
     final String variationDescription = variant.describeValue(value);
-    final String combinedDescription = variationDescription.isNotEmpty ? '$description ($variationDescription)' : description;
+    // IDEs may make assumptions about the format of this suffix in order to
+    // support running tests directly from the editor (where they may have
+    // access to only the test name, provided by the analysis server).
+    // See https://github.com/flutter/flutter/issues/86659.
+    final String combinedDescription = variationDescription.isNotEmpty
+        ? '$description (variant: $variationDescription)'
+        : description;
     test(
       combinedDescription,
       () {
@@ -163,7 +192,7 @@ void testWidgets(
           timeout: initialTimeout,
         );
       },
-      skip: skip,
+      skip: (exclude || skip) ? true : null,
       timeout: timeout ?? binding.defaultTestTimeout,
       tags: tags,
     );
@@ -404,7 +433,7 @@ Future<void> benchmarkWidgets(
     print(kDebugWarning);
     return true;
   }());
-  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
   assert(binding is! AutomatedTestWidgetsFlutterBinding);
   final WidgetTester tester = WidgetTester._(binding);
   SemanticsHandle? semanticsHandle;
