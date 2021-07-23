@@ -135,7 +135,6 @@ void AndroidImageGenerator::DoDecodeImage() {
 }
 
 bool AndroidImageGenerator::Register(JNIEnv* env) {
-  FML_DCHECK(g_flutter_jni_class->is_null());
   g_flutter_jni_class = new fml::jni::ScopedJavaGlobalRef<jclass>(
       env, env->FindClass("io/flutter/embedding/engine/FlutterJNI"));
   FML_DCHECK(!g_flutter_jni_class->is_null());
