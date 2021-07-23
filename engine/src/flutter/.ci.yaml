@@ -35,7 +35,6 @@ platform_properties:
         [
           {"name":"builder_win_engine","path":"builder"}
         ]
-      timeout: "180"
       os: Windows-10
 
 targets:
@@ -247,6 +246,7 @@ targets:
   - name: Windows Host Engine
     builder: Windows Host Engine
     recipe: engine
+    timeout: 60
     properties:
       add_recipes_cq: "true"
       build_host: "true"
