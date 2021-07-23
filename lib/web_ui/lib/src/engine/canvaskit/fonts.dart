@@ -19,6 +19,9 @@ import 'font_fallbacks.dart';
 const String _robotoUrl =
     'https://fonts.gstatic.com/s/roboto/v20/KFOmCnqEu92Fr1Me5WZLCzYlKw.ttf';
 
+// URL for the Ahem font, only used in tests.
+const String _ahemUrl = 'packages/ui/assets/ahem.ttf';
+
 /// Manages the fonts used in the Skia-based backend.
 class SkiaFontCollection {
   /// Fonts that have been registered but haven't been loaded yet.
@@ -47,7 +50,8 @@ class SkiaFontCollection {
           .add(SkFont(font.typeface));
     }
 
-    for (RegisteredFont font in FontFallbackData.instance.registeredFallbackFonts) {
+    for (RegisteredFont font
+        in FontFallbackData.instance.registeredFallbackFonts) {
       fontProvider!.registerFont(font.bytes, font.family);
       familyToFontMap
           .putIfAbsent(font.family, () => <SkFont>[])
@@ -139,6 +143,11 @@ class SkiaFontCollection {
     }
   }
 
+  Future<void> debugRegisterTestFonts() async {
+    _unloadedFonts.add(_registerFont(_ahemUrl, 'Ahem'));
+    FontFallbackData.instance.globalFontFallbacks.add('Ahem');
+  }
+
   Future<RegisteredFont?> _registerFont(String url, String family) async {
     ByteBuffer buffer;
     try {
@@ -162,7 +171,8 @@ class SkiaFontCollection {
   }
 
   String? _readActualFamilyName(Uint8List bytes) {
-    final SkFontMgr tmpFontMgr = canvasKit.FontMgr.FromData(<Uint8List>[bytes])!;
+    final SkFontMgr tmpFontMgr =
+        canvasKit.FontMgr.FromData(<Uint8List>[bytes])!;
     final String? actualFamily = tmpFontMgr.getFamilyName(0);
     tmpFontMgr.delete();
     return actualFamily;
