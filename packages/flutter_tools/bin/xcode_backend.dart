@@ -452,7 +452,9 @@ class Context {
     );
 
     if (result.exitCode != 0) {
-      echoError('Failed to package $projectPath.');
+      echo(result.stdout as String);
+      echoError(result.stderr as String);
+      echoError('\nFailed to package $projectPath.');
       exitApp(-1);
     }
 
