@@ -49,7 +49,10 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
   /// Current input configuration supplied by the "flutter/textinput" channel.
   InputConfiguration? inputConfig;
 
+  @override
   OnChangeCallback? onChange;
+
+  @override
   OnActionCallback? onAction;
 
   /// The semantics implementation does not operate on DOM nodes, but only

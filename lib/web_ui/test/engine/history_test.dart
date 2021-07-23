@@ -547,7 +547,10 @@ Future<void> systemNavigatorPop() {
 
 /// A mock implementation of [PlatformLocation] that doesn't access the browser.
 class TestPlatformLocation extends PlatformLocation {
+  @override
   String? hash;
+
+  @override
   dynamic state;
 
   @override

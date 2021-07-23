@@ -371,6 +371,7 @@ class BrowserPlatform extends PlatformPlugin {
     return suite;
   }
 
+  @override
   StreamChannel<dynamic> loadChannel(String path, SuitePlatform platform) =>
       throw UnimplementedError();
 
@@ -413,6 +414,7 @@ class BrowserPlatform extends PlatformPlugin {
   ///
   /// Note that this doesn't close the server itself. Browser tests can still be
   /// loaded, they'll just spawn new browsers.
+  @override
   Future<void> closeEphemeral() async {
     if (_browserManager != null) {
       final BrowserManager? result = await _browserManager!;
@@ -424,6 +426,7 @@ class BrowserPlatform extends PlatformPlugin {
   ///
   /// Returns a [Future] that completes once the server is closed and its
   /// resources have been fully released.
+  @override
   Future<void> close() {
     return _closeMemo.runOnce(() async {
       final List<Future<void>> futures = <Future<void>>[];
@@ -780,17 +783,22 @@ class BrowserManager {
 class _BrowserEnvironment implements Environment {
   final BrowserManager _manager;
 
+  @override
   final bool supportsDebugging = true;
 
+  @override
   final Uri? observatoryUrl;
 
+  @override
   final Uri? remoteDebuggerUrl;
 
+  @override
   final Stream<dynamic> onRestart;
 
   _BrowserEnvironment(this._manager, this.observatoryUrl,
       this.remoteDebuggerUrl, this.onRestart);
 
+  @override
   CancelableOperation<void> displayPause() => _manager._displayPause();
 }
 

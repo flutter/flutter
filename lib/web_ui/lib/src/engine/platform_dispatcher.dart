@@ -76,6 +76,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   }
 
   /// The current list of windows,
+  @override
   Iterable<ui.FlutterView> get views => _windows.values;
   Map<Object, ui.FlutterWindow> get windows => _windows;
   Map<Object, ui.FlutterWindow> _windows = <Object, ui.FlutterWindow>{};
@@ -602,6 +603,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   }
 
   /// Additional accessibility features that may be enabled by the platform.
+  @override
   ui.AccessibilityFeatures get accessibilityFeatures =>
       configuration.accessibilityFeatures;
 
@@ -609,10 +611,12 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   ///
   /// The framework invokes this callback in the same zone in which the
   /// callback was set.
+  @override
   ui.VoidCallback? get onAccessibilityFeaturesChanged =>
       _onAccessibilityFeaturesChanged;
   ui.VoidCallback? _onAccessibilityFeaturesChanged;
   Zone? _onAccessibilityFeaturesChangedZone;
+  @override
   set onAccessibilityFeaturesChanged(ui.VoidCallback? callback) {
     _onAccessibilityFeaturesChanged = callback;
     _onAccessibilityFeaturesChangedZone = Zone.current;
@@ -632,6 +636,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   ///
   /// In either case, this function disposes the given update, which means the
   /// semantics update cannot be used further.
+  @override
   void updateSemantics(ui.SemanticsUpdate update) {
     EngineSemanticsOwner.instance.updateSemantics(update);
   }
@@ -648,6 +653,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   ///
   /// * https://developer.mozilla.org/en-US/docs/Web/API/NavigatorLanguage/languages,
   ///   which explains browser quirks in the implementation notes.
+  @override
   ui.Locale get locale =>
       locales.isEmpty ? const ui.Locale.fromSubtags() : locales.first;
 
@@ -665,6 +671,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   ///
   ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
   ///    observe when this value changes.
+  @override
   List<ui.Locale> get locales => configuration.locales;
 
   /// Performs the platform-native locale resolution.
@@ -675,6 +682,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   ///
   /// This method returns synchronously and is a direct call to
   /// platform specific APIs without invoking method channels.
+  @override
   ui.Locale? computePlatformResolvedLocale(List<ui.Locale> supportedLocales) {
     // TODO(garyq): Implement on web.
     return null;
@@ -689,9 +697,11 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   ///
   ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
   ///    observe when this callback is invoked.
+  @override
   ui.VoidCallback? get onLocaleChanged => _onLocaleChanged;
   ui.VoidCallback? _onLocaleChanged;
   Zone? _onLocaleChangedZone;
+  @override
   set onLocaleChanged(ui.VoidCallback? callback) {
     _onLocaleChanged = callback;
     _onLocaleChangedZone = Zone.current;
@@ -754,12 +764,14 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   ///
   ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
   ///    observe when this value changes.
+  @override
   double get textScaleFactor => configuration.textScaleFactor;
 
   /// The setting indicating whether time should always be shown in the 24-hour
   /// format.
   ///
   /// This option is used by [showTimePicker].
+  @override
   bool get alwaysUse24HourFormat => configuration.alwaysUse24HourFormat;
 
   /// A callback that is invoked whenever [textScaleFactor] changes value.
@@ -771,9 +783,11 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   ///
   ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
   ///    observe when this callback is invoked.
+  @override
   ui.VoidCallback? get onTextScaleFactorChanged => _onTextScaleFactorChanged;
   ui.VoidCallback? _onTextScaleFactorChanged;
   Zone? _onTextScaleFactorChangedZone;
+  @override
   set onTextScaleFactorChanged(ui.VoidCallback? callback) {
     _onTextScaleFactorChanged = callback;
     _onTextScaleFactorChangedZone = Zone.current;
@@ -796,6 +810,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
   /// The setting indicating the current brightness mode of the host platform.
   /// If the platform has no preference, [platformBrightness] defaults to [Brightness.light].
+  @override
   ui.Brightness get platformBrightness => configuration.platformBrightness;
 
   /// Updates [_platformBrightness] and invokes [onPlatformBrightnessChanged]
@@ -850,10 +865,12 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   ///
   ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
   ///    observe when this callback is invoked.
+  @override
   ui.VoidCallback? get onPlatformBrightnessChanged =>
       _onPlatformBrightnessChanged;
   ui.VoidCallback? _onPlatformBrightnessChanged;
   Zone? _onPlatformBrightnessChangedZone;
+  @override
   set onPlatformBrightnessChanged(ui.VoidCallback? callback) {
     _onPlatformBrightnessChanged = callback;
     _onPlatformBrightnessChangedZone = Zone.current;
@@ -870,15 +887,18 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   ///
   /// The [onSemanticsEnabledChanged] callback is called whenever this value
   /// changes.
+  @override
   bool get semanticsEnabled => configuration.semanticsEnabled;
 
   /// A callback that is invoked when the value of [semanticsEnabled] changes.
   ///
   /// The framework invokes this callback in the same zone in which the
   /// callback was set.
+  @override
   ui.VoidCallback? get onSemanticsEnabledChanged => _onSemanticsEnabledChanged;
   ui.VoidCallback? _onSemanticsEnabledChanged;
   Zone? _onSemanticsEnabledChangedZone;
+  @override
   set onSemanticsEnabledChanged(ui.VoidCallback? callback) {
     _onSemanticsEnabledChanged = callback;
     _onSemanticsEnabledChangedZone = Zone.current;
@@ -898,9 +918,11 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   ///
   /// The framework invokes this callback in the same zone in which the
   /// callback was set.
+  @override
   ui.SemanticsActionCallback? get onSemanticsAction => _onSemanticsAction;
   ui.SemanticsActionCallback? _onSemanticsAction;
   Zone? _onSemanticsActionZone;
+  @override
   set onSemanticsAction(ui.SemanticsActionCallback? callback) {
     _onSemanticsAction = callback;
     _onSemanticsActionZone = Zone.current;
@@ -944,6 +966,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   ///  * [Navigator], a widget that handles routing.
   ///  * [SystemChannels.navigation], which handles subsequent navigation
   ///    requests from the embedder.
+  @override
   String get defaultRouteName {
     return _defaultRouteName ??=
         (_windows[0]! as EngineFlutterWindow).browserHistory.currentPath;
@@ -972,6 +995,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     });
   }
 
+  @override
   ui.FrameData get frameData => const ui.FrameData.webOnly();
 }
 
