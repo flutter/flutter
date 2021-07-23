@@ -7,7 +7,8 @@ part of ui;
 Future<void> webOnlyInitializePlatform({
   engine.AssetManager? assetManager,
 }) {
-  final Future<void> initializationFuture = _initializePlatform(assetManager: assetManager);
+  final Future<void> initializationFuture =
+      _initializePlatform(assetManager: assetManager);
   scheduleMicrotask(() {
     // Access [engine.lineLookup] to force the lazy unpacking of line break data
     // now. Removing this line won't break anything. It's just an optimization
@@ -46,7 +47,8 @@ engine.FontCollection? _fontCollection;
 bool _webOnlyIsInitialized = false;
 bool get webOnlyIsInitialized => _webOnlyIsInitialized;
 Future<void> webOnlySetAssetManager(engine.AssetManager assetManager) async {
-  assert(assetManager != null, 'Cannot set assetManager to null'); // ignore: unnecessary_null_comparison
+  assert(assetManager != null,
+      'Cannot set assetManager to null'); // ignore: unnecessary_null_comparison
   if (assetManager == _assetManager) {
     return;
   }
@@ -68,18 +70,24 @@ Future<void> webOnlySetAssetManager(engine.AssetManager assetManager) async {
     }
   }
 
-  if (debugEmulateFlutterTesterEnvironment && !engine.useCanvasKit) {
-    _fontCollection!.debugRegisterTestFonts();
+  if (debugEmulateFlutterTesterEnvironment) {
+    if (engine.useCanvasKit) {
+      engine.skiaFontCollection.debugRegisterTestFonts();
+    } else {
+      _fontCollection!.debugRegisterTestFonts();
+    }
   }
 }
 
-bool get debugEmulateFlutterTesterEnvironment => _debugEmulateFlutterTesterEnvironment;
+bool get debugEmulateFlutterTesterEnvironment =>
+    _debugEmulateFlutterTesterEnvironment;
 
 set debugEmulateFlutterTesterEnvironment(bool value) {
   _debugEmulateFlutterTesterEnvironment = value;
   if (_debugEmulateFlutterTesterEnvironment) {
     const Size logicalSize = Size(800.0, 600.0);
-    engine.window.webOnlyDebugPhysicalSizeOverride = logicalSize * window.devicePixelRatio;
+    engine.window.webOnlyDebugPhysicalSizeOverride =
+        logicalSize * window.devicePixelRatio;
   }
 }
 
