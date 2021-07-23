@@ -8,6 +8,9 @@
 
 #include <sstream>
 
+#include "third_party/cppwinrt/generated/winrt/Windows.Foundation.Collections.h"
+#include "third_party/cppwinrt/generated/winrt/Windows.System.UserProfile.h"
+
 #include "flutter/shell/platform/windows/string_conversion.h"
 
 namespace flutter {
@@ -23,12 +26,11 @@ std::vector<LanguageInfo> GetPreferredLanguageInfo() {
 
 std::vector<std::wstring> GetPreferredLanguages() {
   std::vector<std::wstring> languages;
-  // TODO(clarkezone) need to implement a complete version of this function in
-  // order to get full list of platform languages
-  // https://github.com/flutter/flutter/issues/74156
-  languages.push_back(L"en-US");
-  languages.push_back(L"en");
-
+  auto platform_langueages = winrt::Windows::System::UserProfile::
+      GlobalizationPreferences::Languages();
+  for (const auto& platform_language : platform_langueages) {
+    languages.push_back(std::wstring{platform_language});
+  }
   return languages;
 }
 
