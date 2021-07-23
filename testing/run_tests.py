@@ -105,13 +105,14 @@ def FindExecutablePath(path):
 
 
 def RunEngineExecutable(build_dir, executable_name, filter, flags=[],
-                        cwd=buildroot_dir, forbidden_output=[], expect_failure=False):
+                        cwd=buildroot_dir, forbidden_output=[], expect_failure=False, coverage=False):
   if filter is not None and executable_name not in filter:
     print('Skipping %s due to filter.' % executable_name)
     return
 
   unstripped_exe = os.path.join(build_dir, 'exe.unstripped', executable_name)
-  if IsLinux() and os.path.exists(unstripped_exe):
+  # We cannot run the unstripped binaries directly when coverage is enabled.
+  if IsLinux() and os.path.exists(unstripped_exe) and not coverage:
     # Use unstripped executables in order to get better symbolized crash
     # stack traces on Linux.
     executable = unstripped_exe
@@ -122,13 +123,21 @@ def RunEngineExecutable(build_dir, executable_name, filter, flags=[],
     executable = FindExecutablePath(os.path.join(build_dir, executable_name))
     env = None
 
+  coverage_script = os.path.join(buildroot_dir, 'flutter', 'build', 'generate_coverage.py')
+
   print('Running %s in %s' % (executable_name, cwd))
-  test_command = [ executable ] + flags
-  print(' '.join(test_command))
+
+  if coverage:
+    coverage_flags = ['-t', executable, '-o', os.path.join(build_dir, 'coverage', executable_name), '-f', 'html']
+    updated_flags = ['--args=%s' % ' '.join(flags)]
+    test_command = [ coverage_script ] + coverage_flags + updated_flags
+  else:
+    test_command = [ executable ] + flags
+
   RunCmd(test_command, cwd=cwd, forbidden_output=forbidden_output, expect_failure=expect_failure, env=env)
 
 
-def RunCCTests(build_dir, filter):
+def RunCCTests(build_dir, filter, coverage):
   print("Running Engine Unit-tests.")
 
   # Not all of the engine unit tests are designed to be run more than once.
@@ -139,22 +148,22 @@ def RunCCTests(build_dir, filter):
     "--gtest_repeat=2",
   ]
 
-  RunEngineExecutable(build_dir, 'client_wrapper_glfw_unittests', filter, shuffle_flags)
+  RunEngineExecutable(build_dir, 'client_wrapper_glfw_unittests', filter, shuffle_flags, coverage=coverage)
 
-  RunEngineExecutable(build_dir, 'common_cpp_core_unittests', filter, shuffle_flags)
+  RunEngineExecutable(build_dir, 'common_cpp_core_unittests', filter, shuffle_flags, coverage=coverage)
 
-  RunEngineExecutable(build_dir, 'common_cpp_unittests', filter, shuffle_flags)
+  RunEngineExecutable(build_dir, 'common_cpp_unittests', filter, shuffle_flags, coverage=coverage)
 
-  RunEngineExecutable(build_dir, 'client_wrapper_unittests', filter, shuffle_flags)
+  RunEngineExecutable(build_dir, 'client_wrapper_unittests', filter, shuffle_flags, coverage=coverage)
 
   # https://github.com/flutter/flutter/issues/36294
   if not IsWindows():
-    RunEngineExecutable(build_dir, 'embedder_unittests', filter, shuffle_flags)
-    RunEngineExecutable(build_dir, 'embedder_proctable_unittests', filter, shuffle_flags)
+    RunEngineExecutable(build_dir, 'embedder_unittests', filter, shuffle_flags, coverage=coverage)
+    RunEngineExecutable(build_dir, 'embedder_proctable_unittests', filter, shuffle_flags, coverage=coverage)
   else:
-    RunEngineExecutable(build_dir, 'flutter_windows_unittests', filter, non_repeatable_shuffle_flags)
+    RunEngineExecutable(build_dir, 'flutter_windows_unittests', filter, non_repeatable_shuffle_flags, coverage=coverage)
 
-    RunEngineExecutable(build_dir, 'client_wrapper_windows_unittests', filter, shuffle_flags)
+    RunEngineExecutable(build_dir, 'client_wrapper_windows_unittests', filter, shuffle_flags, coverage=coverage)
 
   flow_flags = ['--gtest_filter=-PerformanceOverlayLayer.Gold']
   if IsLinux():
@@ -162,45 +171,45 @@ def RunCCTests(build_dir, filter):
       '--golden-dir=%s' % golden_dir,
       '--font-file=%s' % roboto_font_path,
     ]
-  RunEngineExecutable(build_dir, 'flow_unittests', filter, flow_flags + shuffle_flags)
+  RunEngineExecutable(build_dir, 'flow_unittests', filter, flow_flags + shuffle_flags, coverage=coverage)
 
   # TODO(44614): Re-enable after https://github.com/flutter/flutter/issues/44614 has been addressed.
   # RunEngineExecutable(build_dir, 'fml_unittests', filter, [ fml_unittests_filter ] + shuffle_flags)
 
-  RunEngineExecutable(build_dir, 'runtime_unittests', filter, shuffle_flags)
+  RunEngineExecutable(build_dir, 'runtime_unittests', filter, shuffle_flags, coverage=coverage)
 
-  RunEngineExecutable(build_dir, 'tonic_unittests', filter, shuffle_flags)
+  RunEngineExecutable(build_dir, 'tonic_unittests', filter, shuffle_flags, coverage=coverage)
 
   if not IsWindows():
     # https://github.com/flutter/flutter/issues/36295
-    RunEngineExecutable(build_dir, 'shell_unittests', filter, shuffle_flags)
+    RunEngineExecutable(build_dir, 'shell_unittests', filter, shuffle_flags, coverage=coverage)
     # https://github.com/google/googletest/issues/2490
-    RunEngineExecutable(build_dir, 'android_external_view_embedder_unittests', filter, shuffle_flags)
-    RunEngineExecutable(build_dir, 'jni_unittests', filter, shuffle_flags)
-    RunEngineExecutable(build_dir, 'platform_view_android_delegate_unittests', filter, shuffle_flags)
+    RunEngineExecutable(build_dir, 'android_external_view_embedder_unittests', filter, shuffle_flags, coverage=coverage)
+    RunEngineExecutable(build_dir, 'jni_unittests', filter, shuffle_flags, coverage=coverage)
+    RunEngineExecutable(build_dir, 'platform_view_android_delegate_unittests', filter, shuffle_flags, coverage=coverage)
 
   # The image release unit test can take a while on slow machines.
-  RunEngineExecutable(build_dir, 'ui_unittests', filter, shuffle_flags + ['--timeout=90'])
+  RunEngineExecutable(build_dir, 'ui_unittests', filter, shuffle_flags + ['--timeout=90'], coverage=coverage)
 
-  RunEngineExecutable(build_dir, 'testing_unittests', filter, shuffle_flags)
+  RunEngineExecutable(build_dir, 'testing_unittests', filter, shuffle_flags, coverage=coverage)
 
   # The accessibility library only supports Mac for now.
   if IsMac():
-    RunEngineExecutable(build_dir, 'accessibility_unittests', filter, shuffle_flags)
+    RunEngineExecutable(build_dir, 'accessibility_unittests', filter, shuffle_flags, coverage=coverage)
 
   # These unit-tests are Objective-C and can only run on Darwin.
   if IsMac():
-    RunEngineExecutable(build_dir, 'flutter_channels_unittests', filter, shuffle_flags)
-    RunEngineExecutable(build_dir, 'flutter_desktop_darwin_unittests', filter, non_repeatable_shuffle_flags)
+    RunEngineExecutable(build_dir, 'flutter_channels_unittests', filter, shuffle_flags, coverage=coverage)
+    RunEngineExecutable(build_dir, 'flutter_desktop_darwin_unittests', filter, non_repeatable_shuffle_flags, coverage=coverage)
 
   # https://github.com/flutter/flutter/issues/36296
   if IsLinux():
     icu_flags = ['--icu-data-file-path=%s' % os.path.join(build_dir, 'icudtl.dat')]
-    RunEngineExecutable(build_dir, 'txt_unittests', filter, icu_flags + shuffle_flags)
+    RunEngineExecutable(build_dir, 'txt_unittests', filter, icu_flags + shuffle_flags, coverage=coverage)
 
   if IsLinux():
-    RunEngineExecutable(build_dir, 'flutter_linux_unittests', filter, non_repeatable_shuffle_flags)
-    RunEngineExecutable(build_dir, 'flutter_glfw_unittests', filter, non_repeatable_shuffle_flags)
+    RunEngineExecutable(build_dir, 'flutter_linux_unittests', filter, non_repeatable_shuffle_flags, coverage=coverage)
+    RunEngineExecutable(build_dir, 'flutter_glfw_unittests', filter, non_repeatable_shuffle_flags, coverage=coverage)
 
 
 def RunEngineBenchmarks(build_dir, filter):
@@ -513,6 +522,8 @@ def main():
       default=False, help='Show extra dart snapshot logging.')
   parser.add_argument('--objc-filter', type=str, default=None,
       help='Filter parameter for which objc tests to run (example: "IosUnitTestsTests/SemanticsObjectTest/testShouldTriggerAnnouncement")')
+  parser.add_argument('--coverage', action='store_true', default=None,
+      help='Generate coverage reports for each unit test framework run.')
 
   args = parser.parse_args()
 
@@ -527,7 +538,7 @@ def main():
 
   engine_filter = args.engine_filter.split(',') if args.engine_filter else None
   if 'engine' in types:
-    RunCCTests(build_dir, engine_filter)
+    RunCCTests(build_dir, engine_filter, args.coverage)
 
   if 'dart' in types:
     assert not IsWindows(), "Dart tests can't be run on windows. https://github.com/flutter/flutter/issues/36301."
