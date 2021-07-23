@@ -18,6 +18,58 @@ void main() {
   });
 
   group('build', () {
+    test('exits with useful error message when build mode not set', () {
+      final Directory buildDir = fileSystem.directory('/path/to/builds')
+        ..createSync(recursive: true);
+      final Directory flutterRoot = fileSystem.directory('/path/to/flutter')
+        ..createSync(recursive: true);
+      final File pipe = fileSystem.file('/tmp/pipe')
+        ..createSync(recursive: true);
+      const String buildMode = 'Debug';
+      final TestContext context = TestContext(
+        <String>['build'],
+        <String, String>{
+          'BUILT_PRODUCTS_DIR': buildDir.path,
+          'ENABLE_BITCODE': 'YES',
+          'FLUTTER_ROOT': flutterRoot.path,
+          'INFOPLIST_PATH': 'Info.plist',
+        },
+        commands: <FakeCommand>[
+          FakeCommand(
+            command: <String>[
+              '${flutterRoot.path}/bin/flutter',
+              'assemble',
+              '--no-version-check',
+              '--output=${buildDir.path}/',
+              '-dTargetPlatform=ios',
+              '-dTargetFile=lib/main.dart',
+              '-dBuildMode=${buildMode.toLowerCase()}',
+              '-dIosArchs=',
+              '-dSdkRoot=',
+              '-dSplitDebugInfo=',
+              '-dTreeShakeIcons=',
+              '-dTrackWidgetCreation=',
+              '-dDartObfuscation=',
+              '-dEnableBitcode=',
+              '--ExtraGenSnapshotOptions=',
+              '--DartDefines=',
+              '--ExtraFrontEndOptions=',
+              'debug_ios_bundle_flutter_assets',
+            ],
+          ),
+        ],
+        fileSystem: fileSystem,
+        scriptOutputStreamFile: pipe,
+      );
+      expect(
+          () => context.run(),
+          throwsException,
+      );
+      expect(
+        context.stderr,
+        contains('ERROR: Unknown FLUTTER_BUILD_MODE: null.\n'),
+      );
+    });
     test('calls flutter assemble', () {
       final Directory buildDir = fileSystem.directory('/path/to/builds')
         ..createSync(recursive: true);

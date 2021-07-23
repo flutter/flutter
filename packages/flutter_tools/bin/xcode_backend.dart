@@ -146,20 +146,17 @@ class Context {
     // This means that if someone wants to use an Xcode build config other than Debug/Profile/Release,
     // they _must_ set FLUTTER_BUILD_MODE so we know what type of artifact to build.
     final String? buildMode = (environment['FLUTTER_BUILD_MODE'] ?? environment['CONFIGURATION'])?.toLowerCase();
-    if (buildMode == null) {
-      throw Exception(
-        'could not determine buildMode from either FLUTTER_BUILD_MODE or '
-        'CONFIGURATION environment variables');
-    }
 
-    if (buildMode.contains('release')) {
-      return 'release';
-    }
-    if (buildMode.contains('profile')) {
-      return 'profile';
-    }
-    if (buildMode.contains('debug')) {
-      return 'debug';
+    if (buildMode != null) {
+      if (buildMode.contains('release')) {
+        return 'release';
+      }
+      if (buildMode.contains('profile')) {
+        return 'profile';
+      }
+      if (buildMode.contains('debug')) {
+        return 'debug';
+      }
     }
     echoError('========================================================================');
     echoError('ERROR: Unknown FLUTTER_BUILD_MODE: $buildMode.');
