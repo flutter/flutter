@@ -2593,7 +2593,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   TextInputConfiguration _createTextInputConfiguration(bool needsAutofillConfiguration) {
     assert(needsAutofillConfiguration != null);
-    print(widget.requestPrivacy);
     return TextInputConfiguration(
       inputType: widget.keyboardType,
       readOnly: widget.readOnly,
