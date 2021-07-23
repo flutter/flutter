@@ -689,7 +689,7 @@ class TextPainter {
     final int? prevCodeUnit = _text!.codeUnitAt(max(0, offset - 1));
     if (prevCodeUnit == null)
       return null;
-    
+
     // If the upstream character is a newline, cursor is at start of next line
     const int NEWLINE_CODE_UNIT = 10;
 
