@@ -810,7 +810,7 @@ void _testCullRectComputation() {
   //   │ └────────────────────┘│
   //   └───────────────────────┘
   //
-  // This test clips using layers. See a similar test in `canvas_golden_test.dart`,
+  // This test clips using layers. See a similar test in `bitmap_canvas_golden_test.dart`,
   // which clips using canvas.
   //
   // More details: https://github.com/flutter/flutter/issues/32274

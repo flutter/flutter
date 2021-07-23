@@ -6,7 +6,7 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:ui/ui.dart';
 import 'package:ui/src/engine.dart';
 
-import 'scuba.dart';
+import 'text_scuba.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);

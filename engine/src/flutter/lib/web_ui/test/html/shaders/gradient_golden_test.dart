@@ -13,7 +13,7 @@ import 'package:ui/src/engine.dart';
 
 import 'package:web_engine_tester/golden_tester.dart';
 
-import 'scuba.dart';
+import '../paragraph/text_scuba.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);

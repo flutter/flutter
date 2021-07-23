@@ -11,7 +11,7 @@ import 'package:test/test.dart';
 import 'package:ui/ui.dart' hide window;
 import 'package:ui/src/engine.dart';
 
-import '../scuba.dart';
+import 'text_scuba.dart';
 import 'helper.dart';
 
 typedef CanvasTest = FutureOr<void> Function(EngineCanvas canvas);
