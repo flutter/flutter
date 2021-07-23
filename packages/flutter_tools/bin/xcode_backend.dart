@@ -129,7 +129,7 @@ class Context {
     final String? value = environment[key];
     if (value == null) {
       throw Exception(
-        'Expected the environment variable "$key" to exist, but it did not!',
+        'Expected the environment variable "$key" to exist, but it was not found',
       );
     }
     return value;
