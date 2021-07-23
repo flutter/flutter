@@ -200,8 +200,8 @@ void main() {
 
       await expectLater(
         () async => realCommandRunner.fetchLatestVersion(),
-        throwsToolExit(message: 'Unable to upgrade Flutter: HEAD does not point '
-          'to a branch (Are you in a detached HEAD state?).\n'
+        throwsToolExit(message: 'Unable to upgrade Flutter: Your Flutter checkout '
+          'is currently not on a release branch.\n'
           'Use "flutter channel" to switch to an official channel, and retry. '
           'Alternatively, re-install Flutter by going to https://flutter.dev/docs/get-started/install.'
         ),
@@ -229,8 +229,8 @@ void main() {
 
       await expectLater(
         () async => realCommandRunner.fetchLatestVersion(),
-        throwsToolExit(message: 'Unable to upgrade Flutter: No upstream repository '
-          'configured (The current branch may not be tracking a remote repository).\n'
+        throwsToolExit(message: 'Unable to upgrade Flutter: The current Flutter '
+          'branch/channel is not tracking any remote repository.\n'
           'Re-install Flutter by going to https://flutter.dev/docs/get-started/install.'
         ),
       );

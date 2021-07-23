@@ -248,15 +248,15 @@ class UpgradeCommandRunner {
       final String errorString = e.toString();
       if (errorString.contains('fatal: HEAD does not point to a branch')) {
         throwToolExit(
-          'Unable to upgrade Flutter: HEAD does not point to a branch (Are you '
-          'in a detached HEAD state?).\n'
+          'Unable to upgrade Flutter: Your Flutter checkout is currently not '
+          'on a release branch.\n'
           'Use "flutter channel" to switch to an official channel, and retry. '
           'Alternatively, re-install Flutter by going to $_flutterInstallDocs.'
         );
       } else if (errorString.contains('fatal: no upstream configured for branch')) {
         throwToolExit(
-          'Unable to upgrade Flutter: No upstream repository configured (The current '
-          'branch may not be tracking a remote repository).\n'
+          'Unable to upgrade Flutter: The current Flutter branch/channel is '
+          'not tracking any remote repository.\n'
           'Re-install Flutter by going to $_flutterInstallDocs.'
         );
       } else {
