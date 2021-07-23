@@ -49,6 +49,8 @@ def main():
       required=True, help='The output directory for coverage results.')
   parser.add_argument('-f', '--format', type=str, choices=['all', 'html', 'summary', 'lcov'],
       required=True, help='The type of coverage information to be displayed.')
+  parser.add_argument('-a', '--args', nargs='+', dest='test_args',
+      required=False, help='The arguments to pass to the unit test executable being run.')
 
   args = parser.parse_args()
 
@@ -64,12 +66,19 @@ def main():
   # Run all unit tests and collect raw profiles.
   for test in args.tests:
     absolute_test_path = os.path.abspath(test)
+    absolute_test_dir = os.path.dirname(absolute_test_path)
+    test_name = os.path.basename(absolute_test_path)
 
     if not os.path.exists(absolute_test_path):
       print("Path %s does not exist." % absolute_test_path)
       return -1
 
-    binaries.append(absolute_test_path)
+    unstripped_test_path = os.path.join(absolute_test_dir, "exe.unstripped", test_name)
+
+    if os.path.exists(unstripped_test_path):
+      binaries.append(unstripped_test_path)
+    else:
+      binaries.append(absolute_test_path)
 
     raw_profile = absolute_test_path + ".rawprofile"
 
@@ -77,7 +86,14 @@ def main():
 
     print "Running test %s to gather profile." % os.path.basename(absolute_test_path)
 
-    subprocess.check_call([absolute_test_path], env={
+    test_command = [absolute_test_path]
+
+    test_args = ' '.join(args.test_args).split()
+
+    if test_args is not None:
+      test_command += test_args
+
+    subprocess.check_call(test_command, env={
       "LLVM_PROFILE_FILE":  raw_profile
     })
 
