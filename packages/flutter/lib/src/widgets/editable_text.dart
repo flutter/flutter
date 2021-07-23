@@ -1595,6 +1595,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   // Start TextEditingActionTarget.
 
+  @override
+  TextMetrics get textMetrics => renderEditable;
+
   // TODO(justinmc): Get rid of _value getter in favor of this getter?
   @override
   TextEditingValue get value => _value;
@@ -1604,6 +1607,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   bool get obscureText => widget.obscureText;
+
+  @override
+  bool get selectionEnabled => widget.selectionEnabled;
 
   @override
   void setSelection(TextSelection nextSelection, SelectionChangedCause cause) {

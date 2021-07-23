@@ -4,8 +4,7 @@
 
 import 'text_editing.dart';
 
-// TODO(justinmc): Document and move to own file.
-// TODO(justinmc): Rename to TextEditingMetrics?
+// TODO(justinmc): Document.
 /// A read-only interface for accessing information about some editable text.
 abstract class TextMetrics {
   TextSelection getLineAtOffset(String text, TextPosition position);

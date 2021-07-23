@@ -5,8 +5,7 @@
 import 'dart:math' as math;
 import 'dart:ui' show TextPosition;
 
-import 'package:flutter/rendering.dart' show RenderEditable;
-import 'package:flutter/services.dart' show Clipboard, ClipboardData;
+import 'package:flutter/services.dart' show Clipboard, ClipboardData, TextMetrics;
 
 import 'actions.dart';
 import 'editable_text.dart';
@@ -29,14 +28,15 @@ abstract class TextEditingActionTarget {
 
   bool get obscureText;
 
-  // TODO(justinmc): Turn this into TextMetrics.
+  bool get selectionEnabled;
+
   // TODO(justinmc): Could this be made private?
-  /// The renderer that handles [TextEditingAction]s.
+  /// Provides information about the text that is the target of this action.
   ///
   /// See also:
   ///
   /// * [EditableTextState.renderEditable], which overrides this.
-  RenderEditable get renderEditable;
+  TextMetrics get textMetrics;
 
   TextEditingValue get value;
 
@@ -89,7 +89,7 @@ abstract class TextEditingActionTarget {
   //
   //   * _extendSelectionToEnd
   void _extendSelectionToStart(SelectionChangedCause cause) {
-    if (!renderEditable.selectionEnabled) {
+    if (!selectionEnabled) {
       return moveSelectionToStart(cause);
     }
 
@@ -149,7 +149,7 @@ abstract class TextEditingActionTarget {
     final TextEditingValue nextValue = obscureText
         // When the text is obscured, the whole thing is treated as one big line.
         ? value.deleteToStart()
-        : value.deleteByWord(renderEditable);
+        : value.deleteByWord(textMetrics);
 
     setTextEditingValue(nextValue, cause);
   }
@@ -175,7 +175,7 @@ abstract class TextEditingActionTarget {
     final TextEditingValue nextValue = obscureText
         // When the text is obscured, the whole thing is treated as one big line.
         ? value.deleteToStart()
-        : value.deleteByLine(renderEditable);
+        : value.deleteByLine(textMetrics);
 
     setTextEditingValue(nextValue, cause);
   }
@@ -221,7 +221,7 @@ abstract class TextEditingActionTarget {
     final TextEditingValue nextValue = obscureText
         // When the text is obscured, the whole thing is treated as one big word.
         ? value.deleteToEnd()
-        : value.deleteForwardByWord(renderEditable);
+        : value.deleteForwardByWord(textMetrics);
 
     setTextEditingValue(nextValue, cause);
   }
@@ -247,7 +247,7 @@ abstract class TextEditingActionTarget {
     final TextEditingValue nextValue = obscureText
         // When the text is obscured, the whole thing is treated as one big line.
         ? value.deleteToEnd()
-        : value.deleteForwardByLine(renderEditable);
+        : value.deleteForwardByLine(textMetrics);
 
     setTextEditingValue(nextValue, cause);
   }
@@ -267,7 +267,7 @@ abstract class TextEditingActionTarget {
   ///
   ///   * [expandSelectionToStart], which is same but in the opposite direction.
   void expandSelectionToEnd(SelectionChangedCause cause) {
-    if (!renderEditable.selectionEnabled) {
+    if (!selectionEnabled) {
       return moveSelectionToEnd(cause);
     }
 
@@ -291,7 +291,7 @@ abstract class TextEditingActionTarget {
   ///   * [expandSelectionToEnd], which is the same but in the opposite
   ///     direction.
   void expandSelectionToStart(SelectionChangedCause cause) {
-    if (!renderEditable.selectionEnabled) {
+    if (!selectionEnabled) {
       return moveSelectionToStart(cause);
     }
 
@@ -311,13 +311,13 @@ abstract class TextEditingActionTarget {
   ///   * [expandSelectionRightByLine], which is the same but in the opposite
   ///     direction.
   void expandSelectionLeftByLine(SelectionChangedCause cause) {
-    if (!renderEditable.selectionEnabled) {
+    if (!selectionEnabled) {
       return moveSelectionLeftByLine(cause);
     }
 
     final int firstOffset = math.min(value.selection.baseOffset, value.selection.extentOffset);
     final int startPoint = TextEditingValue.previousCharacter(firstOffset, value.text, false);
-    final TextSelection selectedLine = renderEditable.getLineAtOffset(value.text, TextPosition(offset: startPoint));
+    final TextSelection selectedLine = textMetrics.getLineAtOffset(value.text, TextPosition(offset: startPoint));
 
     setSelection(value.expandSelectionTo(selectedLine.baseOffset), cause);
   }
@@ -335,13 +335,13 @@ abstract class TextEditingActionTarget {
   ///   * [expandSelectionLeftByLine], which is the same but in the opposite
   ///     direction.
   void expandSelectionRightByLine(SelectionChangedCause cause) {
-    if (!renderEditable.selectionEnabled) {
+    if (!selectionEnabled) {
       return moveSelectionRightByLine(cause);
     }
 
     final int lastOffset = math.max(value.selection.baseOffset, value.selection.extentOffset);
     final int startPoint = TextEditingValue.nextCharacter(lastOffset, value.text, false);
-    final TextSelection selectedLine = renderEditable.getLineAtOffset(value.text, TextPosition(offset: startPoint));
+    final TextSelection selectedLine = textMetrics.getLineAtOffset(value.text, TextPosition(offset: startPoint));
 
     setSelection(value.expandSelectionTo(selectedLine.extentOffset), cause);
   }
@@ -358,7 +358,7 @@ abstract class TextEditingActionTarget {
   ///
   ///   * [extendSelectionUp], which is same but in the opposite direction.
   void extendSelectionDown(SelectionChangedCause cause) {
-    if (!renderEditable.selectionEnabled) {
+    if (!selectionEnabled) {
       return moveSelectionDown(cause);
     }
 
@@ -368,7 +368,7 @@ abstract class TextEditingActionTarget {
       return;
     }
 
-    int index = renderEditable.getTextPositionBelow(value.selection.extentOffset).offset;
+    int index = textMetrics.getTextPositionBelow(value.selection.extentOffset).offset;
 
     if (index == value.selection.extentOffset) {
       index = value.text.length;
@@ -396,7 +396,7 @@ abstract class TextEditingActionTarget {
   ///   * [extendSelectionRight], which is same but in the opposite direction.
   void extendSelectionLeft(SelectionChangedCause cause) {
     // TODO(justinmc): Can I get selectionEnabled from a cleaner place?
-    if (!renderEditable.selectionEnabled) {
+    if (!selectionEnabled) {
       return moveSelectionLeft(cause);
     }
 
@@ -435,7 +435,7 @@ abstract class TextEditingActionTarget {
   ///   * [expandSelectionRightByLine], which strictly grows the selection
   ///     regardless of the order.
   void extendSelectionLeftByLine(SelectionChangedCause cause) {
-    if (!renderEditable.selectionEnabled) {
+    if (!selectionEnabled) {
       return moveSelectionLeftByLine(cause);
     }
 
@@ -444,7 +444,7 @@ abstract class TextEditingActionTarget {
     // bounds, since getLineAtOffset finds the line boundaries without
     // including whitespace (like the newline).
     final int startPoint = TextEditingValue.previousCharacter(value.selection.extentOffset, value.text, false);
-    final TextSelection selectedLine = renderEditable.getLineAtOffset(value.text, TextPosition(offset: startPoint));
+    final TextSelection selectedLine = textMetrics.getLineAtOffset(value.text, TextPosition(offset: startPoint));
 
     late final TextSelection nextSelection;
     // If the extent and base offsets would reverse order, then instead the
@@ -473,7 +473,7 @@ abstract class TextEditingActionTarget {
   ///   * [TextEditingValue.extendSelectionRight], which is used by this method.
   ///   * [extendSelectionLeft], which is same but in the opposite direction.
   void extendSelectionRight(SelectionChangedCause cause) {
-    if (!renderEditable.selectionEnabled) {
+    if (!selectionEnabled) {
       return moveSelectionRight(cause);
     }
 
@@ -508,12 +508,12 @@ abstract class TextEditingActionTarget {
   ///   * [expandSelectionRightByLine], which strictly grows the selection
   ///     regardless of the order.
   void extendSelectionRightByLine(SelectionChangedCause cause) {
-    if (!renderEditable.selectionEnabled) {
+    if (!selectionEnabled) {
       return moveSelectionRightByLine(cause);
     }
 
     final int startPoint = TextEditingValue.nextCharacter(value.selection.extentOffset, value.text, false);
-    final TextSelection selectedLine = renderEditable.getLineAtOffset(value.text, TextPosition(offset: startPoint));
+    final TextSelection selectedLine = textMetrics.getLineAtOffset(value.text, TextPosition(offset: startPoint));
 
     // If the extent and base offsets would reverse order, then instead the
     // selection collapses.
@@ -568,7 +568,7 @@ abstract class TextEditingActionTarget {
     */
     final TextSelection nextSelection = TextEditingValue.extendGivenSelectionLeftByWord(
       value.text,
-      renderEditable,
+      textMetrics,
       value.selection,
       includeWhitespace,
       stopAtReversal,
@@ -609,7 +609,7 @@ abstract class TextEditingActionTarget {
     }
     final TextSelection nextSelection = TextEditingValue.extendGivenSelectionRightByWord(
       value.text,
-      renderEditable,
+      textMetrics,
       value.selection,
       includeWhitespace,
       stopAtReversal,
@@ -635,7 +635,7 @@ abstract class TextEditingActionTarget {
   ///   * [extendSelectionDown], which is the same but in the opposite
   ///     direction.
   void extendSelectionUp(SelectionChangedCause cause) {
-    if (!renderEditable.selectionEnabled) {
+    if (!selectionEnabled) {
       return moveSelectionUp(cause);
     }
 
@@ -645,7 +645,7 @@ abstract class TextEditingActionTarget {
       return;
     }
 
-    final TextPosition positionAbove = renderEditable.getTextPositionAbove(value.selection.extentOffset);
+    final TextPosition positionAbove = textMetrics.getTextPositionAbove(value.selection.extentOffset);
     late final TextSelection nextSelection;
     if (positionAbove.offset == value.selection.extentOffset) {
       nextSelection = value.selection.copyWith(
@@ -682,7 +682,7 @@ abstract class TextEditingActionTarget {
   void moveSelectionLeftByLine(SelectionChangedCause cause) {
     // If the previous character is the edge of a line, don't do anything.
     final int previousPoint = TextEditingValue.previousCharacter(value.selection.extentOffset, value.text, true);
-    final TextSelection line = renderEditable.getLineAtOffset(value.text, TextPosition(offset: previousPoint));
+    final TextSelection line = textMetrics.getLineAtOffset(value.text, TextPosition(offset: previousPoint));
     if (line.extentOffset == previousPoint) {
       return;
     }
@@ -692,7 +692,7 @@ abstract class TextEditingActionTarget {
     // bounds, since getLineAtOffset finds the line boundaries without
     // including whitespace (like the newline).
     final int startPoint = TextEditingValue.previousCharacter(value.selection.extentOffset, value.text, false);
-    final TextSelection selectedLine = renderEditable.getLineAtOffset(
+    final TextSelection selectedLine = textMetrics.getLineAtOffset(
       value.text,
       TextPosition(offset: startPoint),
     );
@@ -720,7 +720,7 @@ abstract class TextEditingActionTarget {
       return;
     }
 
-    final TextPosition positionBelow = renderEditable.getTextPositionBelow(value.selection.extentOffset);
+    final TextPosition positionBelow = textMetrics.getTextPositionBelow(value.selection.extentOffset);
 
     late final TextSelection nextSelection;
     if (positionBelow.offset == value.selection.extentOffset) {
@@ -791,7 +791,7 @@ abstract class TextEditingActionTarget {
     */
     final TextSelection nextSelection = TextEditingValue.moveGivenSelectionLeftByWord(
       value.text,
-      renderEditable,
+      textMetrics,
       value.selection,
       includeWhitespace,
     );
@@ -835,7 +835,7 @@ abstract class TextEditingActionTarget {
   ///     direction.
   void moveSelectionRightByLine(SelectionChangedCause cause) {
     // If already at the right edge of the line, do nothing.
-    final TextSelection currentLine = renderEditable.getLineAtOffset(
+    final TextSelection currentLine = textMetrics.getLineAtOffset(
       value.text,
       TextPosition(
         offset: value.selection.extentOffset,
@@ -850,7 +850,7 @@ abstract class TextEditingActionTarget {
     // for the line bounds, since getLineAtOffset finds the line
     // boundaries without including whitespace (like the newline).
     final int startPoint = TextEditingValue.nextCharacter(value.selection.extentOffset, value.text, false);
-    final TextSelection selectedLine = renderEditable.getLineAtOffset(value.text, TextPosition(offset: startPoint));
+    final TextSelection selectedLine = textMetrics.getLineAtOffset(value.text, TextPosition(offset: startPoint));
     final TextSelection nextSelection = TextSelection.collapsed(
       offset: selectedLine.extentOffset,
     );
@@ -886,7 +886,7 @@ abstract class TextEditingActionTarget {
     */
     final TextSelection nextSelection = TextEditingValue.moveGivenSelectionRightByWord(
       value.text,
-      renderEditable,
+      textMetrics,
       value.selection,
       includeWhitespace,
     );
@@ -930,7 +930,7 @@ abstract class TextEditingActionTarget {
   ///   * [TextEditingValue.moveSelectionUp], which is used by this method.
   ///   * [moveSelectionDown], which is the same but in the opposite direction.
   void moveSelectionUp(SelectionChangedCause cause) {
-    final int nextIndex = renderEditable.getTextPositionAbove(value.selection.extentOffset).offset;
+    final int nextIndex = textMetrics.getTextPositionAbove(value.selection.extentOffset).offset;
 
     if (nextIndex == value.selection.extentOffset) {
       _wasSelectingVerticallyWithKeyboard = false;
