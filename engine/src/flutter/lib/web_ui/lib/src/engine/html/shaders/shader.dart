@@ -698,6 +698,7 @@ class _BlurEngineImageFilter extends EngineImageFilter {
   final ui.TileMode tileMode;
 
   // TODO(flutter_web): implement TileMode.
+  @override
   String get filterAttribute => blurSigmasToCssString(sigmaX, sigmaY);
 
   @override
@@ -728,6 +729,7 @@ class _MatrixEngineImageFilter extends EngineImageFilter {
   final ui.FilterQuality filterQuality;
 
   // TODO(flutter_web): implement FilterQuality.
+  @override
   String get transformAttribute => float64ListToCssTransform(webMatrix);
 
   @override

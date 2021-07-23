@@ -24,7 +24,7 @@ CommandRunner<bool> runner = CommandRunner<bool>(
   ..addCommand(TestCommand())
   ..addCommand(BuildCommand());
 
-void main(List<String> rawArgs) async {
+Future<void> main(List<String> rawArgs) async {
   // Remove --clean from the list as that's processed by the wrapper script.
   final List<String> args = rawArgs.where((String arg) => arg != '--clean').toList();
 
@@ -69,7 +69,7 @@ void main(List<String> rawArgs) async {
   io.exit(io.exitCode);
 }
 
-void _listenToShutdownSignals() async {
+Future<void> _listenToShutdownSignals() async {
   io.ProcessSignal.sigint.watch().listen((_) async {
     print('Received SIGINT. Shutting down.');
     await cleanup();

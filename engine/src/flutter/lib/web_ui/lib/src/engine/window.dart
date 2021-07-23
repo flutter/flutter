@@ -58,6 +58,8 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow {
   }
 
   final Object _windowId;
+
+  @override
   final ui.PlatformDispatcher platformDispatcher;
 
   /// Handles the browser history integration to allow users to use the back
@@ -367,6 +369,7 @@ class EngineFlutterWindowView extends ui.FlutterWindow {
 
   final Object _viewId;
 
+  @override
   final ui.PlatformDispatcher platformDispatcher;
 
   @override
@@ -396,8 +399,12 @@ class WindowPadding implements ui.WindowPadding {
     required this.bottom,
   });
 
+  @override
   final double left;
+  @override
   final double top;
+  @override
   final double right;
+  @override
   final double bottom;
 }

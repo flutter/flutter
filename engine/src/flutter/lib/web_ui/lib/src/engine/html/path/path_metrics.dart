@@ -551,6 +551,7 @@ class SurfacePathMetric implements ui.PathMetric {
   /// have been implied when using methods like [Path.addRect]) or if
   /// `forceClosed` was specified as true in the call to [Path.computeMetrics].
   /// Returns false otherwise.
+  @override
   final bool isClosed;
 
   /// The zero-based index of the contour.
@@ -565,6 +566,7 @@ class SurfacePathMetric implements ui.PathMetric {
   /// the contours of the path at the time the path's metrics were computed. If
   /// additional contours were added or existing contours updated, this metric
   /// will be invalid for the current state of the path.
+  @override
   final int contourIndex;
 
   final _SurfacePathMeasure _measure;
@@ -588,6 +590,7 @@ class SurfacePathMetric implements ui.PathMetric {
   ///
   /// `start` and `end` are pinned to legal values (0..[length])
   /// Begin the segment with a moveTo if `startWithMoveTo` is true.
+  @override
   ui.Path extractPath(double start, double end, {bool startWithMoveTo = true}) {
     return _measure.extractPath(contourIndex, start, end,
         startWithMoveTo: startWithMoveTo);

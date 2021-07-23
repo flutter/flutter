@@ -156,5 +156,6 @@ class DynamicColorClass extends Color {
 
   final int _newValue;
 
+  @override
   int get value => _newValue;
 }

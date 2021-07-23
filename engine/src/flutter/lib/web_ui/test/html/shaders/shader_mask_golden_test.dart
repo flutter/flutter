@@ -17,7 +17,7 @@ import 'package:web_engine_tester/golden_tester.dart';
 ///        test/golden_tests/engine/shader_mask_golden_test.dart --profile
 const bool debugTest = false;
 
-void main() async {
+Future<void> main() async {
   if (!debugTest) {
     internalBootstrapBrowserTest(() => testMain);
   } else {
@@ -29,7 +29,7 @@ void main() async {
 /// https://github.com/flutter/flutter/issues/76713
 bool get isWebkit => browserEngine == BrowserEngine.webkit;
 
-void testMain() async {
+Future<void> testMain() async {
   setUp(() async {
     debugShowClipLayers = true;
     SurfaceSceneBuilder.debugForgetFrameScene();

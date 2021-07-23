@@ -185,18 +185,22 @@ abstract class RRectRenderer {
 class RRectToCanvasRenderer extends RRectRenderer {
   final html.CanvasRenderingContext2D context;
   RRectToCanvasRenderer(this.context);
+  @override
   void beginPath() {
     context.beginPath();
   }
 
+  @override
   void moveTo(double x, double y) {
     context.moveTo(x, y);
   }
 
+  @override
   void lineTo(double x, double y) {
     context.lineTo(x, y);
   }
 
+  @override
   void ellipse(double centerX, double centerY, double radiusX, double radiusY,
       double rotation, double startAngle, double endAngle, bool antiClockwise) {
     DomRenderer.ellipse(context, centerX, centerY, radiusX, radiusY, rotation, startAngle,
@@ -208,15 +212,20 @@ class RRectToCanvasRenderer extends RRectRenderer {
 class RRectToPathRenderer extends RRectRenderer {
   final ui.Path path;
   RRectToPathRenderer(this.path);
+  @override
   void beginPath() {}
+
+  @override
   void moveTo(double x, double y) {
     path.moveTo(x, y);
   }
 
+  @override
   void lineTo(double x, double y) {
     path.lineTo(x, y);
   }
 
+  @override
   void ellipse(double centerX, double centerY, double radiusX, double radiusY,
       double rotation, double startAngle, double endAngle, bool antiClockwise) {
     path.addArc(

@@ -20,6 +20,7 @@ class SurfaceScene implements ui.Scene {
 
   /// Creates a raster image representation of the current state of the scene.
   /// This is a slow operation that is performed on a background thread.
+  @override
   Future<ui.Image> toImage(int width, int height) {
     throw UnsupportedError('toImage is not supported on the Web');
   }
@@ -27,6 +28,7 @@ class SurfaceScene implements ui.Scene {
   /// Releases the resources used by this scene.
   ///
   /// After calling this function, the scene is cannot be used further.
+  @override
   void dispose() {}
 }
 

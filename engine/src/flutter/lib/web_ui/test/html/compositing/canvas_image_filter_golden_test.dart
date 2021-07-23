@@ -16,7 +16,7 @@ void main() {
 
 SurfacePaint makePaint() => Paint() as SurfacePaint;
 
-void testMain() async {
+Future<void> testMain() async {
   const double screenWidth = 100.0;
   const double screenHeight = 100.0;
   const Rect region = Rect.fromLTWH(0, 0, screenWidth, screenHeight);

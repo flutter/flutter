@@ -15,7 +15,7 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
-void testMain() async {
+Future<void> testMain() async {
   final Rect region = Rect.fromLTWH(0, 0, 400, 600);
 
   late BitmapCanvas canvas;

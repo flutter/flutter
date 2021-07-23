@@ -39,7 +39,7 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
-void testMain() async {
+Future<void> testMain() async {
   await webOnlyInitializeTestDomRenderer();
 
   // Ahem font uses a constant ideographic/alphabetic baseline ratio.

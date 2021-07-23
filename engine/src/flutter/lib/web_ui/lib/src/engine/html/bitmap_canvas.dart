@@ -68,7 +68,7 @@ class BitmapCanvas extends EngineCanvas {
 
   /// The last CSS font string is cached to optimize the case where the font
   /// styles hasn't changed.
-  String? _cachedLastCssFont = null;
+  String? _cachedLastCssFont;
 
   /// List of extra sibling elements created for paragraphs and clipping.
   final List<html.Element> _children = <html.Element>[];

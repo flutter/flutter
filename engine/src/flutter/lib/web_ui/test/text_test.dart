@@ -16,7 +16,7 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
-void testMain() async {
+Future<void> testMain() async {
   const double baselineRatio = 1.1662499904632568;
 
   await webOnlyInitializeTestDomRenderer();

@@ -22,7 +22,7 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
-void testMain() async {
+Future<void> testMain() async {
   setUpStableTestFonts();
 
   test('paints spans and lines correctly', () {

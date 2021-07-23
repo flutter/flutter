@@ -116,7 +116,7 @@ final String lineBreakCodegen =
 /// (2) The codegen'd Dart files is located at:
 ///     lib/src/engine/text/word_break_properties.dart
 ///     lib/src/engine/text/line_break_properties.dart
-void main(List<String> arguments) async {
+Future<void> main(List<String> arguments) async {
   final ArgResults result = argParser.parse(arguments);
   final PropertiesSyncer syncer = getSyncer(
     result['words'],
@@ -177,7 +177,7 @@ abstract class PropertiesSyncer {
   /// to any known range.
   String get defaultProperty;
 
-  void perform() async {
+  Future<void> perform() async {
     final List<String> lines = await File(_src).readAsLines();
     final List<String> header = extractHeader(lines);
     final PropertyCollection data =

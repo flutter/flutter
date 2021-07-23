@@ -25,7 +25,7 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
-void testMain() async {
+Future<void> testMain() async {
   final EngineScubaTester scuba = await EngineScubaTester.initialize(
     viewportSize: const Size(800, 800),
   );

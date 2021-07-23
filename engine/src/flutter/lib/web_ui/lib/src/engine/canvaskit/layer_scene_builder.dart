@@ -146,6 +146,7 @@ class LayerSceneBuilder implements ui.SceneBuilder {
     return pushLayer<ColorFilterEngineLayer>(ColorFilterEngineLayer(filter));
   }
 
+  @override
   ImageFilterEngineLayer pushImageFilter(
     ui.ImageFilter filter, {
     ui.ImageFilterEngineLayer? oldLayer,

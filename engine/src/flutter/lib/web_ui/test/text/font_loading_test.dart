@@ -16,7 +16,7 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
-void testMain() async {
+Future<void> testMain() async {
   await ui.webOnlyInitializeTestDomRenderer();
   group('loadFontFromList', () {
     const String _testFontUrl = 'packages/ui/assets/ahem.ttf';

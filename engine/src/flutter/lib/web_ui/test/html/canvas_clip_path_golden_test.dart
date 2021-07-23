@@ -16,7 +16,7 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
-void testMain() async {
+Future<void> testMain() async {
   const double screenWidth = 500.0;
   const double screenHeight = 500.0;
   const Rect screenRect = Rect.fromLTWH(0, 0, screenWidth, screenHeight);

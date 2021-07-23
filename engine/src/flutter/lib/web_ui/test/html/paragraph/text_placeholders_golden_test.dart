@@ -19,7 +19,7 @@ void main() {
 bool get isIosSafari => browserEngine == BrowserEngine.webkit &&
           operatingSystem == OperatingSystem.iOs;
 
-void testMain() async {
+Future<void> testMain() async {
   final EngineScubaTester scuba = await EngineScubaTester.initialize(
     viewportSize: const Size(600, 600),
   );

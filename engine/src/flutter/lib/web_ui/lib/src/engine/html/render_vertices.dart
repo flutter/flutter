@@ -302,6 +302,7 @@ class _WebGlRenderer implements GlRenderer {
   ///
   /// Browsers that support OffscreenCanvas and the transferToImageBitmap api
   /// will return ImageBitmap, otherwise will return CanvasElement.
+  @override
   Object? drawRect(ui.Rect targetRect, GlContext gl, GlProgram glProgram,
       NormalizedGradient gradient, int widthInPixels, int heightInPixels) {
     drawRectToGl(
@@ -314,6 +315,7 @@ class _WebGlRenderer implements GlRenderer {
 
   /// Renders a rectangle using given program into an image resource and returns
   /// url.
+  @override
   String drawRectToImageUrl(
       ui.Rect targetRect,
       GlContext gl,

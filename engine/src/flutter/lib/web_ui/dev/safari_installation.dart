@@ -65,6 +65,7 @@ class IosSafariArgParser extends BrowserArgParser {
   /// The [IosSafariArgParser] singleton.
   static IosSafariArgParser get instance => _singletonInstance;
 
+  @override
   String get version => 'iOS ${iosMajorVersion}.${iosMinorVersion}';
 
   final int _pinnedIosMajorVersion;

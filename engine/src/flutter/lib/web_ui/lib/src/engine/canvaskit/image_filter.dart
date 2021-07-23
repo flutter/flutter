@@ -141,6 +141,7 @@ class _CkMatrixImageFilter extends CkImageFilter {
   final Float64List matrix;
   final ui.FilterQuality filterQuality;
 
+  @override
   SkImageFilter _initSkiaObject() {
     return canvasKit.ImageFilter.MakeMatrixTransform(
       toSkMatrixFromFloat64(matrix),

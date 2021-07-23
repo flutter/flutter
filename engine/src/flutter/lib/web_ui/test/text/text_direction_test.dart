@@ -16,7 +16,7 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
-void testMain() async {
+Future<void> testMain() async {
   group('$getDirectionalBlockEnd', () {
 
     test('basic cases', () {

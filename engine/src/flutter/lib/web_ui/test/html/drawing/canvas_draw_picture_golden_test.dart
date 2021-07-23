@@ -19,7 +19,7 @@ void main() {
 
 SurfacePaint makePaint() => Paint() as SurfacePaint;
 
-void testMain() async {
+Future<void> testMain() async {
   setUp(() async {
     debugShowClipLayers = true;
     SurfaceSceneBuilder.debugForgetFrameScene();

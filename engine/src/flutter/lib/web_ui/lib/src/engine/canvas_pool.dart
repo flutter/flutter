@@ -476,6 +476,7 @@ class CanvasPool extends _SaveStackTracking {
     }
   }
 
+  @override
   void clipRect(ui.Rect rect) {
     super.clipRect(rect);
     if (_canvas != null) {
@@ -489,6 +490,7 @@ class CanvasPool extends _SaveStackTracking {
     ctx.clip();
   }
 
+  @override
   void clipRRect(ui.RRect rrect) {
     super.clipRRect(rrect);
     if (_canvas != null) {
@@ -502,6 +504,7 @@ class CanvasPool extends _SaveStackTracking {
     ctx.clip();
   }
 
+  @override
   void clipPath(ui.Path path) {
     super.clipPath(path);
     if (_canvas != null) {

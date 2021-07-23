@@ -185,6 +185,7 @@ class TestCase {
     return String.fromCharCodes(charCodes);
   }
 
+  @override
   String toString() {
     return raw;
   }

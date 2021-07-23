@@ -73,6 +73,7 @@ abstract class CkColorFilter
   /// filter is used as a [ColorFilter].
   SkColorFilter _initRawColorFilter();
 
+  @override
   ManagedSkiaObject<SkImageFilter> get imageFilter =>
       CkColorFilterImageFilter(colorFilter: this);
 }

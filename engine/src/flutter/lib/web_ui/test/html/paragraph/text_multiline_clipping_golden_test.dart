@@ -16,7 +16,7 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
-void testMain() async {
+Future<void> testMain() async {
   // Scuba doesn't give us viewport smaller than 472px wide.
   final EngineScubaTester scuba = await EngineScubaTester.initialize(
     viewportSize: const Size(600, 600),

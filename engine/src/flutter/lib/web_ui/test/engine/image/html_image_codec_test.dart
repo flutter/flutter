@@ -14,7 +14,7 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
-void testMain() async {
+Future<void> testMain() async {
   await ui.webOnlyInitializeTestDomRenderer();
   group('HtmCodec', () {
     test('supports raw images - RGBA8888', () async {

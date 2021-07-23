@@ -79,6 +79,7 @@ class SafariIos extends Browser {
 ///
 /// This manager will only be created/used for macOS.
 class SafariIosScreenshotManager extends ScreenshotManager {
+  @override
   String get filenameSuffix => '.iOS_Safari';
 
   SafariIosScreenshotManager() {
@@ -154,6 +155,7 @@ class SafariIosScreenshotManager extends ScreenshotManager {
   /// width of the area to capture.
   ///
   /// Uses simulator tool `xcrun simctl`'s 'screenshot' command.
+  @override
   Future<Image> capture(math.Rectangle<num>? region) async {
     final String filename = 'screenshot${_fileNameCounter}.png';
     _fileNameCounter++;

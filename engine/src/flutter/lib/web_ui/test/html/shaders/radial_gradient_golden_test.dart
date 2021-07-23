@@ -12,7 +12,7 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
-void testMain() async {
+Future<void> testMain() async {
 
   setUp(() async {
     debugEmulateFlutterTesterEnvironment = true;
