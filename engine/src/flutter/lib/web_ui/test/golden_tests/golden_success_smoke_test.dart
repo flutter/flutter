@@ -14,7 +14,7 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
-void testMain() async {
+Future<void> testMain() async {
   debugEmulateFlutterTesterEnvironment = true;
   await webOnlyInitializePlatform(assetManager: WebOnlyMockAssetManager());
 

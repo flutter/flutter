@@ -13,11 +13,8 @@ analyzer:
 
 linter:
   rules:
-    annotate_overrides: false
     avoid_classes_with_only_static_members: false
-    avoid_empty_else: false
     avoid_function_literals_in_foreach_calls: false
-    avoid_init_to_null: false
     avoid_null_checks_in_equality_operators: false
     avoid_relative_lib_imports: false
     avoid_renaming_method_parameters: false
@@ -86,6 +83,6 @@ linter:
     unnecessary_string_interpolations: false
     cast_nullable_to_non_nullable: false
     flutter_style_todos: false
-    avoid_void_async: false
+
     # We have some legitimate use-cases for this (preserve tear-off identity)
     prefer_function_declarations_over_variables: false

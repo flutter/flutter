@@ -536,6 +536,7 @@ class EmbeddedViewParams {
   final ui.Size size;
   final MutatorsStack mutators;
 
+  @override
   bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
@@ -546,6 +547,7 @@ class EmbeddedViewParams {
         other.mutators == mutators;
   }
 
+  @override
   int get hashCode => ui.hashValues(offset, size, mutators);
 }
 
@@ -593,6 +595,7 @@ class Mutator {
 
   double get alphaFloat => alpha! / 255.0;
 
+  @override
   bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
@@ -622,6 +625,7 @@ class Mutator {
     }
   }
 
+  @override
   int get hashCode => ui.hashValues(type, rect, rrect, path, matrix, alpha);
 }
 
@@ -658,6 +662,7 @@ class MutatorsStack extends Iterable<Mutator> {
     _mutators.removeLast();
   }
 
+  @override
   bool operator ==(Object other) {
     if (identical(other, this)) {
       return true;
@@ -666,6 +671,7 @@ class MutatorsStack extends Iterable<Mutator> {
         listEquals<Mutator>(other._mutators, _mutators);
   }
 
+  @override
   int get hashCode => ui.hashList(_mutators);
 
   @override

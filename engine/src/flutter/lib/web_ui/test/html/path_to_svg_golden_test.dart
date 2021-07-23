@@ -22,7 +22,7 @@ enum PaintMode {
   kStrokeWidthOnly,
 }
 
-void testMain() async {
+Future<void> testMain() async {
   final Rect region =
       Rect.fromLTWH(8, 8, 600, 400); // Compensate for old scuba tester padding
 

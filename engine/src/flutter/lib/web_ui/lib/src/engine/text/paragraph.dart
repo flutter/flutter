@@ -421,6 +421,7 @@ class DomParagraph implements EngineParagraph {
     }
   }
 
+  @override
   bool get hasArbitraryPaint => _geometricStyle.ellipsis != null;
 
   @override
@@ -533,6 +534,7 @@ class DomParagraph implements EngineParagraph {
   /// - Paragraphs that contain decorations.
   /// - Paragraphs that have a non-null word-spacing.
   /// - Paragraphs with a background.
+  @override
   bool get drawOnCanvas {
     if (!_hasLineMetrics) {
       return false;
@@ -552,6 +554,7 @@ class DomParagraph implements EngineParagraph {
   }
 
   /// Whether this paragraph has been laid out.
+  @override
   bool get isLaidOut => _measurementResult != null;
 
   /// Asserts that the properties used to measure paragraph layout are the same

@@ -41,6 +41,7 @@ abstract class Layer implements ui.EngineLayer {
 
   // TODO(dnfield): Implement ui.EngineLayer.dispose for CanvasKit.
   // https://github.com/flutter/flutter/issues/82878
+  @override
   void dispose() {}
 }
 

@@ -66,7 +66,7 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
-void testMain()  async {
+Future<void> testMain()  async {
   await ui.webOnlyInitializeTestDomRenderer();
 
   group('$RulerManager', () {

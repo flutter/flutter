@@ -140,6 +140,7 @@ class _MacBinding implements PlatformBinding {
   String getChromeDownloadUrl(String version) =>
       '$_kBaseDownloadUrl/Mac%2F$version%2Fchrome-mac.zip?alt=media';
 
+  @override
   String getChromeExecutablePath(io.Directory versionDir) => path.join(
       versionDir.path,
       'chrome-mac',

@@ -209,6 +209,7 @@ Future<Uri> getRemoteDebuggerUrl(Uri base) async {
 /// This manager can be used for both macOS and Linux.
 // TODO: https://github.com/flutter/flutter/issues/65673
 class ChromeScreenshotManager extends ScreenshotManager {
+  @override
   String get filenameSuffix => '';
 
   /// Capture a screenshot of the web content.
@@ -218,6 +219,7 @@ class ChromeScreenshotManager extends ScreenshotManager {
   /// [region] is used to decide which part of the web content will be used in
   /// test image. It includes starting coordinate x,y as well as height and
   /// width of the area to capture.
+  @override
   Future<Image> capture(math.Rectangle<num>? region) async {
     final wip.ChromeConnection chromeConnection =
         wip.ChromeConnection('localhost', kDevtoolsPort);
@@ -230,7 +232,7 @@ class ChromeScreenshotManager extends ScreenshotManager {
     }
     final wip.WipConnection wipConnection = await chromeTab.connect();
 
-    Map<String, dynamic>? captureScreenshotParameters = null;
+    Map<String, dynamic>? captureScreenshotParameters;
     if (region != null) {
       captureScreenshotParameters = <String, dynamic>{
         'format': 'png',

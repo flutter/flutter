@@ -385,6 +385,7 @@ class _LoggingTestSurface extends PersistedContainerSurface {
 
   _LoggingTestSurface() : super(null);
 
+  @override
   void build() {
     log.add('build');
     super.build();
@@ -407,11 +408,13 @@ class _LoggingTestSurface extends PersistedContainerSurface {
     super.update(oldSurface);
   }
 
+  @override
   void adoptElements(covariant PersistedSurface oldSurface) {
     log.add('adoptElements');
     super.adoptElements(oldSurface);
   }
 
+  @override
   void retain() {
     log.add('retain');
     super.retain();
@@ -423,6 +426,7 @@ class _LoggingTestSurface extends PersistedContainerSurface {
     super.discard();
   }
 
+  @override
   void revive() {
     log.add('revive');
     super.revive();

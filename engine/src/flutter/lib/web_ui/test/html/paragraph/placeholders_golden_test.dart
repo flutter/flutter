@@ -20,7 +20,7 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
-void testMain() async {
+Future<void> testMain() async {
   setUpStableTestFonts();
 
   test('draws paragraphs with placeholders', () {

@@ -301,6 +301,7 @@ class PathRef {
         bottomLeft: radii[_Corner.kLowerLeft]);
   }
 
+  @override
   bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;

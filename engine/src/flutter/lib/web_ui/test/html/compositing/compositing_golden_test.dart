@@ -19,7 +19,7 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
-void testMain() async {
+Future<void> testMain() async {
   setUp(() async {
     // To debug test failures uncomment the following to visualize clipping
     // layers:

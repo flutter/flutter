@@ -15,7 +15,7 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
-void testMain() async {
+Future<void> testMain() async {
   final Rect region = Rect.fromLTWH(8, 8, 500, 100); // Compensate for old scuba tester padding
 
   late BitmapCanvas canvas;
