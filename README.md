@@ -56,6 +56,10 @@ and see the results instantly without restarting your app or losing its state.
 
 [![Hot reload animation][]][Hot reload]
 
+### Developer Friendly
+
+Flutter works by using it’s own library of custom widgets designed for native platforms to give native like performance as compared to other cross platform technologies such as React, which uses an abstraction layer on top of the native api’s. This also means that if we have an update which depends on some material or Cupertino libraries, developers will be easily able to provide that same experience to users who weren’t able to update to the latest OS.
+
 ### Extensible and open model
 
 Flutter works with any development tool (or none at all) but includes editor
