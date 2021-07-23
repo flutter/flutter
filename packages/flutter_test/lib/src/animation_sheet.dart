@@ -129,65 +129,6 @@ class AnimationSheetBuilder {
     return frames;
   }
 
-  bool _ephemeralRecording = false;
-  /// Wrap a procedure that records frames.
-  ///
-  /// This method overrides the `recording` argument of [record] with true.
-  /// Frames pumped during [recording] will always be recorded. (It is still
-  /// required to wrap the widget with [record].)
-  ///
-  /// This is the preferred way over using [record] with `recording` true,
-  /// because it eliminates the possibility of accidentally pumping a frame
-  /// without calling `pump`.
-  ///
-  /// {@tool snippet}
-  /// The following example shows how to record an animation sheet of an [InkWell]
-  /// being pressed then released.
-  ///
-  /// ```dart
-  /// testWidgets('Inkwell animation sheet', (WidgetTester tester) async {
-  ///   // Create instance
-  ///   final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(48, 24));
-  ///
-  ///   final Widget target = animationSheet.record(
-  ///     Material(
-  ///       child: Directionality(
-  ///         textDirection: TextDirection.ltr,
-  ///         child: InkWell(
-  ///           splashColor: Colors.blue,
-  ///           onTap: () {},
-  ///         ),
-  ///       ),
-  ///     ),
-  ///     recording: false,
-  ///   );
-  ///
-  ///   await tester.pumpWidget(target);
-  ///
-  ///   final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(InkWell)));
-  ///
-  ///   // Start recording (wrapped in `recording`)
-  ///   await animationSheet.recording(() =>
-  ///     tester.pumpFrames(targe, const Duration(seconds: 1)));
-  ///
-  ///   // Compare against golden file
-  ///   await expectLater(
-  ///     animationSheet.collate(800),
-  ///     matchesGoldenFile('inkwell.press.animation.png'),
-  ///   );
-  /// }, skip: isBrowser); // Animation sheet does not support browser https://github.com/flutter/flutter/issues/56001
-  /// ```
-  /// {@end-tool}
-  Future<void> recording(AsyncValueGetter<void> task) async {
-    final bool previousEphemeralRecording = _ephemeralRecording;
-    _ephemeralRecording = true;
-    try {
-      await task();
-    } finally {
-      _ephemeralRecording = previousEphemeralRecording;
-    }
-  }
-
   /// Returns a widget that renders a widget in a box that can be recorded.
   ///
   /// The returned widget wraps `child` in a box with a fixed size specified by
@@ -214,11 +155,7 @@ class AnimationSheetBuilder {
       key: key,
       size: frameSize,
       allLayers: allLayers,
-      handleRecorded: (AsyncValueGetter<ui.Image> getImage) async {
-        if (recording || _ephemeralRecording) {
-          _recordedFrames.add(getImage());
-        }
-      },
+      handleRecorded: recording ? _recordedFrames.add : null,
       child: child,
     );
   }
@@ -377,7 +314,7 @@ class AnimationSheetBuilder {
   static const double _kDefaultTestViewportWidth = 800.0;
 }
 
-typedef _RecordedHandler = void Function(AsyncValueGetter<ui.Image> image);
+typedef _RecordedHandler = void Function(Future<ui.Image> image);
 
 class _AnimationSheetRecorder extends StatefulWidget {
   const _AnimationSheetRecorder({
@@ -402,14 +339,12 @@ class _AnimationSheetRecorderState extends State<_AnimationSheetRecorder> {
 
   void _record(Duration duration) {
     assert(widget.handleRecorded != null);
-    widget.handleRecorded!(() {
-      final _RenderRootableRepaintBoundary boundary = boundaryKey.currentContext!.findRenderObject()! as _RenderRootableRepaintBoundary;
-      if (widget.allLayers) {
-        return boundary.allLayersToImage();
-      } else {
-        return boundary.toImage();
-      }
-    });
+    final _RenderRootableRepaintBoundary boundary = boundaryKey.currentContext!.findRenderObject()! as _RenderRootableRepaintBoundary;
+    if (widget.allLayers) {
+      widget.handleRecorded!(boundary.allLayersToImage());
+    } else {
+      widget.handleRecorded!(boundary.toImage());
+    }
   }
 
   @override
