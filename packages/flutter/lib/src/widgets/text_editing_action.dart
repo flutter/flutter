@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui' show TextPosition;
 
 import 'package:flutter/rendering.dart' show RenderEditable;
 import 'package:flutter/services.dart' show Clipboard, ClipboardData;
@@ -28,6 +29,7 @@ abstract class TextEditingActionTarget {
 
   bool get obscureText;
 
+  // TODO(justinmc): Turn this into TextMetrics.
   // TODO(justinmc): Could this be made private?
   /// The renderer that handles [TextEditingAction]s.
   ///
@@ -55,6 +57,44 @@ abstract class TextEditingActionTarget {
   void setSelection(TextSelection nextState, SelectionChangedCause cause);
 
   void setTextEditingValue(TextEditingValue newValue, SelectionChangedCause cause);
+
+  // Extend the current selection to the end of the field.
+  //
+  // If selectionEnabled is false, keeps the selection collapsed and moves it to
+  // the end.
+  //
+  // See also:
+  //
+  //   * _extendSelectionToStart
+  void _extendSelectionToEnd(SelectionChangedCause cause) {
+    if (value.selection.extentOffset == value.text.length) {
+      return;
+    }
+
+    final TextSelection nextSelection = value.selection.copyWith(
+      extentOffset: value.text.length,
+    );
+    return setSelection(nextSelection, cause);
+  }
+
+  // Extend the current selection to the start of the field.
+  //
+  // If selectionEnabled is false, keeps the selection collapsed and moves it to
+  // the start.
+  //
+  // The given [SelectionChangedCause] indicates the cause of this change and
+  // will be passed to [onSelectionChanged].
+  //
+  // See also:
+  //
+  //   * _extendSelectionToEnd
+  void _extendSelectionToStart(SelectionChangedCause cause) {
+    if (!renderEditable.selectionEnabled) {
+      return moveSelectionToStart(cause);
+    }
+
+    setSelection(value.extendSelectionTo(0), cause);
+  }
 
   /// Deletes backwards from the selection in [textSelectionDelegate].
   ///
@@ -212,7 +252,11 @@ abstract class TextEditingActionTarget {
     setTextEditingValue(nextValue, cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingValue.expandSelectionToEnd}
+  /// Expand the current selection to the end of the field.
+  ///
+  /// The selection will never shrink. The [TextSelection.extentOffset] will
+  // always be at the end of the field, regardless of the original order of
+  /// [TextSelection.baseOffset] and [TextSelection.extentOffset].
   ///
   /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
   /// to the end.
@@ -227,11 +271,14 @@ abstract class TextEditingActionTarget {
       return moveSelectionToEnd(cause);
     }
 
-    final TextSelection nextSelection = value.expandSelectionToEnd();
-    setSelection(nextSelection, cause);
+    setSelection(value.expandSelectionTo(value.text.length), cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingValue.expandSelectionToStart}
+  /// Expand the current [selection] to the start of the field.
+  ///
+  /// The selection will never shrink. The [TextSelection.extentOffset] will
+  /// always be at the start of the field, regardless of the original order of
+  /// [TextSelection.baseOffset] and [TextSelection.extentOffset].
   ///
   /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
   /// to the start.
@@ -248,8 +295,7 @@ abstract class TextEditingActionTarget {
       return moveSelectionToStart(cause);
     }
 
-    final TextSelection nextSelection = value.expandSelectionToStart();
-    setSelection(nextSelection, cause);
+    setSelection(value.expandSelectionTo(0), cause);
   }
 
   /// {@macro flutter.rendering.TextEditingValue.expandSelectionLeftByLine}
@@ -269,8 +315,11 @@ abstract class TextEditingActionTarget {
       return moveSelectionLeftByLine(cause);
     }
 
-    final TextSelection nextSelection = value.expandSelectionLeftByLine(renderEditable);
-    setSelection(nextSelection, cause);
+    final int firstOffset = math.min(value.selection.baseOffset, value.selection.extentOffset);
+    final int startPoint = TextEditingValue.previousCharacter(firstOffset, value.text, false);
+    final TextSelection selectedLine = renderEditable.getLineAtOffset(value.text, TextPosition(offset: startPoint));
+
+    setSelection(value.expandSelectionTo(selectedLine.baseOffset), cause);
   }
 
   /// {@macro flutter.rendering.TextEditingValue.expandSelectionRightByLine}
@@ -290,12 +339,15 @@ abstract class TextEditingActionTarget {
       return moveSelectionRightByLine(cause);
     }
 
-    final TextSelection nextSelection = value.expandSelectionRightByLine(renderEditable);
+    final int lastOffset = math.max(value.selection.baseOffset, value.selection.extentOffset);
+    final int startPoint = TextEditingValue.nextCharacter(lastOffset, value.text, false);
+    final TextSelection selectedLine = renderEditable.getLineAtOffset(value.text, TextPosition(offset: startPoint));
 
-    setSelection(nextSelection, cause);
+    setSelection(value.expandSelectionTo(selectedLine.extentOffset), cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingValue.extendSelectionDown}
+  /// Keeping [selection]'s [TextSelection.baseOffset] fixed, move the
+  /// [TextSelection.extentOffset] down by one line.
   ///
   /// If selectionEnabled is false, keeps the selection collapsed and just
   /// moves it down.
@@ -310,22 +362,25 @@ abstract class TextEditingActionTarget {
       return moveSelectionDown(cause);
     }
 
-    TextSelection nextSelection = value.extendSelectionDown(renderEditable);
-
-    // When the selection is extended down after selecting all the way to the
-    // top, the selection moves back to its previous location.
-    if (nextSelection.extentOffset == value.text.length) {
-      _wasSelectingVerticallyWithKeyboard = true;
-    } else if (_wasSelectingVerticallyWithKeyboard) {
-      nextSelection = value.selection.copyWith(
-        extentOffset: _cursorResetLocation,
-      );
-      _wasSelectingVerticallyWithKeyboard = false;
-    } else {
-      _cursorResetLocation = nextSelection.extentOffset;
+    // If the selection is collapsed at the end of the field already, then
+    // nothing happens.
+    if (value.selection.isCollapsed && value.selection.extentOffset >= value.text.length) {
+      return;
     }
 
-    setSelection(nextSelection, cause);
+    int index = renderEditable.getTextPositionBelow(value.selection.extentOffset).offset;
+
+    if (index == value.selection.extentOffset) {
+      index = value.text.length;
+      _wasSelectingVerticallyWithKeyboard = true;
+    } else if (_wasSelectingVerticallyWithKeyboard) {
+      index = _cursorResetLocation;
+      _wasSelectingVerticallyWithKeyboard = false;
+    } else {
+      _cursorResetLocation = index;
+    }
+
+    setSelection(value.extendSelectionTo(index), cause);
   }
 
   /// {@macro flutter.rendering.TextEditingValue.extendSelectionLeft}
@@ -345,16 +400,27 @@ abstract class TextEditingActionTarget {
       return moveSelectionLeft(cause);
     }
 
-    final TextSelection nextSelection = value.extendSelectionLeft();
-    if (nextSelection == value.selection) {
+    // If the selection is already all the way left, there is nothing to do.
+    if (value.selection.extentOffset <= 0) {
       return;
     }
-    final int distance = value.selection.extentOffset - nextSelection.extentOffset;
+
+    final int previousExtent = TextEditingValue.previousCharacter(
+      value.selection.extentOffset,
+      value.text,
+    );
+
+    final int distance = value.selection.extentOffset - previousExtent;
     _cursorResetLocation -= distance;
-    setSelection(nextSelection, cause);
+    setSelection(value.extendSelectionTo(previousExtent), cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingValue.extendSelectionLeftByLine}
+  /// Extend the current [selection] to the start of
+  /// [TextSelection.extentOffset]'s line.
+  ///
+  /// Uses [TextSelection.baseOffset] as a pivot point and doesn't change it.
+  /// If [TextSelection.extentOffset] is right of [TextSelection.baseOffset],
+  /// then the selection will be collapsed.
   ///
   /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
   /// left by line.
@@ -373,11 +439,29 @@ abstract class TextEditingActionTarget {
       return moveSelectionLeftByLine(cause);
     }
 
-    final TextSelection nextSelection = value.extendSelectionLeftByLine(renderEditable);
+    // When going left, we want to skip over any whitespace before the line,
+    // so we go back to the first non-whitespace before asking for the line
+    // bounds, since getLineAtOffset finds the line boundaries without
+    // including whitespace (like the newline).
+    final int startPoint = TextEditingValue.previousCharacter(value.selection.extentOffset, value.text, false);
+    final TextSelection selectedLine = renderEditable.getLineAtOffset(value.text, TextPosition(offset: startPoint));
+
+    late final TextSelection nextSelection;
+    // If the extent and base offsets would reverse order, then instead the
+    // selection collapses.
+    if (value.selection.extentOffset > value.selection.baseOffset) {
+      nextSelection = value.selection.copyWith(
+        extentOffset: value.selection.baseOffset,
+      );
+    } else {
+      nextSelection = value.extendSelectionTo(selectedLine.baseOffset);
+    }
+
     setSelection(nextSelection, cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingValue.extendSelectionRight}
+  /// Keeping [selection]'s [TextSelection.baseOffset] fixed, move the
+  /// [TextSelection.extentOffset] right.
   ///
   /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
   /// right.
@@ -393,16 +477,23 @@ abstract class TextEditingActionTarget {
       return moveSelectionRight(cause);
     }
 
-    final TextSelection nextSelection = value.extendSelectionRight();
-    if (nextSelection == value.selection) {
+    // If the selection is already all the way right, there is nothing to do.
+    if (value.selection.extentOffset >= value.text.length) {
       return;
     }
-    final int distance = nextSelection.extentOffset - value.selection.extentOffset;
+    final int nextExtent = TextEditingValue.nextCharacter(value.selection.extentOffset, value.text);
+
+    final int distance = nextExtent - value.selection.extentOffset;
     _cursorResetLocation += distance;
-    setSelection(nextSelection, cause);
+    setSelection(value.extendSelectionTo(nextExtent), cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingValue.extendSelectionRightByLine}
+  /// Extend the current [selection] to the end of [TextSelection.extentOffset]'s
+  /// line.
+  ///
+  /// Uses [TextSelection.baseOffset] as a pivot point and doesn't change it. If
+  /// [TextSelection.extentOffset] is left of [TextSelection.baseOffset], then
+  /// collapses the selection.
   ///
   /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
   /// right by line.
@@ -421,26 +512,20 @@ abstract class TextEditingActionTarget {
       return moveSelectionRightByLine(cause);
     }
 
-    setSelection(value.extendSelectionRightByLine(renderEditable), cause);
-  }
+    final int startPoint = TextEditingValue.nextCharacter(value.selection.extentOffset, value.text, false);
+    final TextSelection selectedLine = renderEditable.getLineAtOffset(value.text, TextPosition(offset: startPoint));
 
-  // Extend the current selection to the start of the field.
-  //
-  // If selectionEnabled is false, keeps the selection collapsed and moves it to
-  // the start.
-  //
-  // The given [SelectionChangedCause] indicates the cause of this change and
-  // will be passed to [onSelectionChanged].
-  //
-  // See also:
-  //
-  //   * _extendSelectionToEnd
-  void _extendSelectionToStart(SelectionChangedCause cause) {
-    if (!renderEditable.selectionEnabled) {
-      return moveSelectionToStart(cause);
+    // If the extent and base offsets would reverse order, then instead the
+    // selection collapses.
+    late final TextSelection nextSelection;
+    if (value.selection.extentOffset < value.selection.baseOffset) {
+      nextSelection = value.selection.copyWith(
+        extentOffset: value.selection.baseOffset,
+      );
+    } else {
+      nextSelection = value.extendSelectionTo(selectedLine.extentOffset);
     }
 
-    final TextSelection nextSelection = value.extendSelectionToStart();
     setSelection(nextSelection, cause);
   }
 
@@ -518,23 +603,26 @@ abstract class TextEditingActionTarget {
       'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).',
     );
     */
-    final TextSelection nextSelection = obscureText
-        // When the text is obscured, the whole thing is treated as one big word.
-        ? value.extendSelectionToEnd()
-        : TextEditingValue.extendGivenSelectionRightByWord(
-          value.text,
-          renderEditable,
-          value.selection,
-          includeWhitespace,
-          stopAtReversal,
-        );
+    // When the text is obscured, the whole thing is treated as one big word.
+    if (obscureText) {
+      return _extendSelectionToEnd(cause);
+    }
+    final TextSelection nextSelection = TextEditingValue.extendGivenSelectionRightByWord(
+      value.text,
+      renderEditable,
+      value.selection,
+      includeWhitespace,
+      stopAtReversal,
+    );
     if (nextSelection == value.selection) {
       return;
     }
     setSelection(nextSelection, cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingValue.extendSelectionUp}
+  /// Keeping [selection]'s [TextSelection.baseOffset] fixed, move the
+  /// [TextSelection.extentOffset] up by one
+  /// line.
   ///
   /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
   /// up.
@@ -551,22 +639,37 @@ abstract class TextEditingActionTarget {
       return moveSelectionUp(cause);
     }
 
-    TextSelection nextSelection = value.extendSelectionUp(renderEditable);
-    if (nextSelection.extentOffset == 0) {
+    // If the selection is collapsed at the beginning of the field already, then
+    // nothing happens.
+    if (value.selection.isCollapsed && value.selection.extentOffset <= 0.0) {
+      return;
+    }
+
+    final TextPosition positionAbove = renderEditable.getTextPositionAbove(value.selection.extentOffset);
+    late final TextSelection nextSelection;
+    if (positionAbove.offset == value.selection.extentOffset) {
+      nextSelection = value.selection.copyWith(
+        extentOffset: 0,
+      );
       _wasSelectingVerticallyWithKeyboard = true;
     } else if (_wasSelectingVerticallyWithKeyboard) {
       nextSelection = value.selection.copyWith(
+        baseOffset: value.selection.baseOffset,
         extentOffset: _cursorResetLocation,
       );
       _wasSelectingVerticallyWithKeyboard = false;
     } else {
+      nextSelection = value.selection.copyWith(
+        baseOffset: value.selection.baseOffset,
+        extentOffset: positionAbove.offset,
+      );
       _cursorResetLocation = nextSelection.extentOffset;
     }
 
     setSelection(nextSelection, cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingValue.moveSelectionLeftByLine}
+  /// Move the current [selection] to the leftmost point of the current line.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
@@ -577,11 +680,30 @@ abstract class TextEditingActionTarget {
   ///   * [moveSelectionRightByLine], which is the same but in the opposite
   ///     direction.
   void moveSelectionLeftByLine(SelectionChangedCause cause) {
-    final TextSelection nextSelection = value.moveSelectionLeftByLine(renderEditable);
+    // If the previous character is the edge of a line, don't do anything.
+    final int previousPoint = TextEditingValue.previousCharacter(value.selection.extentOffset, value.text, true);
+    final TextSelection line = renderEditable.getLineAtOffset(value.text, TextPosition(offset: previousPoint));
+    if (line.extentOffset == previousPoint) {
+      return;
+    }
+
+    // When going left, we want to skip over any whitespace before the line,
+    // so we go back to the first non-whitespace before asking for the line
+    // bounds, since getLineAtOffset finds the line boundaries without
+    // including whitespace (like the newline).
+    final int startPoint = TextEditingValue.previousCharacter(value.selection.extentOffset, value.text, false);
+    final TextSelection selectedLine = renderEditable.getLineAtOffset(
+      value.text,
+      TextPosition(offset: startPoint),
+    );
+    final TextSelection nextSelection = TextSelection.collapsed(
+      offset: selectedLine.baseOffset,
+    );
+
     setSelection(nextSelection, cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingValue.moveSelectionDown}
+  /// Move the current [selection] to the next line.
   ///
   /// Move the current [selection] to the next line.
   ///
@@ -592,7 +714,24 @@ abstract class TextEditingActionTarget {
   ///   * [TextEditingValue.moveSelectionDown], which is used by this method.
   ///   * [moveSelectionUp], which is the same but in the opposite direction.
   void moveSelectionDown(SelectionChangedCause cause) {
-    final TextSelection nextSelection = value.moveSelectionDown(renderEditable);
+    // If the selection is collapsed at the end of the field already, then
+    // nothing happens.
+    if (value.selection.isCollapsed && value.selection.extentOffset >= value.text.length) {
+      return;
+    }
+
+    final TextPosition positionBelow = renderEditable.getTextPositionBelow(value.selection.extentOffset);
+
+    late final TextSelection nextSelection;
+    if (positionBelow.offset == value.selection.extentOffset) {
+      nextSelection = value.selection.copyWith(
+        baseOffset: value.text.length,
+        extentOffset: value.text.length,
+      );
+    } else {
+      nextSelection = TextSelection.fromPosition(positionBelow);
+    }
+
     if (value.selection.extentOffset == value.text.length) {
       _wasSelectingVerticallyWithKeyboard = false;
     } else {
@@ -683,7 +822,7 @@ abstract class TextEditingActionTarget {
     setSelection(nextSelection, cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingValue.moveSelectionRightByLine}
+  /// Move the current [selection] to the rightmost point of the current line.
   ///
   /// Move the current [selection] to the rightmost point of the current line.
   ///
@@ -695,7 +834,26 @@ abstract class TextEditingActionTarget {
   ///   * [moveSelectionLeftByLine], which is the same but in the opposite
   ///     direction.
   void moveSelectionRightByLine(SelectionChangedCause cause) {
-    final TextSelection nextSelection = value.moveSelectionRightByLine(renderEditable);
+    // If already at the right edge of the line, do nothing.
+    final TextSelection currentLine = renderEditable.getLineAtOffset(
+      value.text,
+      TextPosition(
+        offset: value.selection.extentOffset,
+      ),
+    );
+    if (currentLine.extentOffset == value.selection.extentOffset) {
+      return;
+    }
+
+    // When going right, we want to skip over any whitespace after the line,
+    // so we go forward to the first non-whitespace character before asking
+    // for the line bounds, since getLineAtOffset finds the line
+    // boundaries without including whitespace (like the newline).
+    final int startPoint = TextEditingValue.nextCharacter(value.selection.extentOffset, value.text, false);
+    final TextSelection selectedLine = renderEditable.getLineAtOffset(value.text, TextPosition(offset: startPoint));
+    final TextSelection nextSelection = TextSelection.collapsed(
+      offset: selectedLine.extentOffset,
+    );
     setSelection(nextSelection, cause);
   }
 
@@ -738,8 +896,6 @@ abstract class TextEditingActionTarget {
     setSelection(nextSelection, cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingValue.moveSelectionToEnd}
-  ///
   /// Move the current [selection] to the end of the field.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
@@ -750,11 +906,9 @@ abstract class TextEditingActionTarget {
   ///   * [moveSelectionToStart], which is the same but in the opposite
   ///     direction.
   void moveSelectionToEnd(SelectionChangedCause cause) {
-    setSelection(value.moveSelectionToEnd(), cause);
+    setSelection(value.moveSelectionTo(value.text.length), cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingValue.moveSelectionToStart}
-  ///
   /// Move the current [selection] to the start of the field.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
@@ -764,11 +918,9 @@ abstract class TextEditingActionTarget {
   ///   * [TextEditingValue.moveSelectionToStart], which is used by this method.
   ///   * [moveSelectionToEnd], which is the same but in the opposite direction.
   void moveSelectionToStart(SelectionChangedCause cause) {
-    setSelection(value.moveSelectionToStart(), cause);
+    setSelection(value.moveSelectionTo(0), cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingValue.moveSelectionUp}
-  ///
   /// Move the current [selection] up by one line.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
@@ -778,15 +930,15 @@ abstract class TextEditingActionTarget {
   ///   * [TextEditingValue.moveSelectionUp], which is used by this method.
   ///   * [moveSelectionDown], which is the same but in the opposite direction.
   void moveSelectionUp(SelectionChangedCause cause) {
-    final TextSelection nextSelection = value.moveSelectionUp(renderEditable);
+    final int nextIndex = renderEditable.getTextPositionAbove(value.selection.extentOffset).offset;
 
-    if (nextSelection.extentOffset == 0) {
+    if (nextIndex == value.selection.extentOffset) {
       _wasSelectingVerticallyWithKeyboard = false;
-    } else {
-      _cursorResetLocation = nextSelection.extentOffset;
+      return moveSelectionToStart(cause);
     }
+    _cursorResetLocation = nextIndex;
 
-    setSelection(nextSelection, cause);
+    setSelection(value.moveSelectionTo(nextIndex), cause);
   }
 
   /// {@macro flutter.rendering.TextEditingValue.selectAll}

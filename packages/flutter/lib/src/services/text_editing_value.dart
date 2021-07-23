@@ -56,6 +56,18 @@ class TextEditingValue {
     );
   }
 
+  /// The current text being edited.
+  final String text;
+
+  /// The range of text that is currently selected.
+  final TextSelection selection;
+
+  /// The range of text that is still being composed.
+  final TextRange composing;
+
+  /// A value that corresponds to the empty string with no selection and no composing range.
+  static const TextEditingValue empty = TextEditingValue();
+
   /// Return the given [TextSelection] with its [TextSelection.extentOffset]
   /// moved left by one character.
   ///
@@ -67,19 +79,6 @@ class TextEditingValue {
     }
     final int previousExtent = previousCharacter(selection.extentOffset, text, includeWhitespace);
     return selection.copyWith(extentOffset: previousExtent);
-  }
-
-  /// Return the given [TextSelection] with its [TextSelection.extentOffset]
-  /// moved right by one character.
-  ///
-  /// {@macro flutter.rendering.RenderEditable.whiteSpace}
-  static TextSelection extendGivenSelectionRight(TextSelection selection, String text, [bool includeWhitespace = true]) {
-    // If the selection is already all the way right, there is nothing to do.
-    if (selection.extentOffset >= text.length) {
-      return selection;
-    }
-    final int nextExtent = nextCharacter(selection.extentOffset, text, includeWhitespace);
-    return selection.copyWith(extentOffset: nextExtent);
   }
 
   // TODO(gspencergoog): replace when we expose this ICU information.
@@ -368,30 +367,6 @@ class TextEditingValue {
     );
   }
 
-  /// Returns a representation of this object as a JSON object.
-  Map<String, dynamic> toJSON() {
-    return <String, dynamic>{
-      'text': text,
-      'selectionBase': selection.baseOffset,
-      'selectionExtent': selection.extentOffset,
-      'selectionAffinity': selection.affinity.toString(),
-      'selectionIsDirectional': selection.isDirectional,
-      'composingBase': composing.start,
-      'composingExtent': composing.end,
-    };
-  }
-
-  /// The current text being edited.
-  final String text;
-
-  /// The range of text that is currently selected.
-  final TextSelection selection;
-
-  /// The range of text that is still being composed.
-  final TextRange composing;
-
-  /// A value that corresponds to the empty string with no selection and no composing range.
-  static const TextEditingValue empty = TextEditingValue();
 
   /// Creates a copy of this value but with the given fields replaced with the new values.
   TextEditingValue copyWith({
@@ -417,55 +392,32 @@ class TextEditingValue {
   /// programming error.
   bool get isComposingRangeValid => composing.isValid && composing.isNormalized && composing.end <= text.length;
 
-  /// {@template flutter.rendering.TextEditingValue.moveSelectionRightByLine}
-  /// Move the current [selection] to the leftmost point of the current line.
-  /// {@endtemplate}
-  ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
-  ///
-  /// See also:
-  ///
-  ///   * [moveSelectionRightByLine], which is the same but in the opposite
-  ///     direction.
-  TextSelection moveSelectionLeftByLine(TextMetrics textMetrics) {
-    assert(selection != null);
+  // Deletes the current non-empty selection.
+  //
+  // Operates on the text/selection contained in textSelectionDelegate, and does
+  // not depend on `RenderEditable.selection`.
+  //
+  // If the selection is currently non-empty, this method deletes the selected
+  // text and returns true. Otherwise this method does nothing and returns
+  // false.
+  TextEditingValue _deleteNonEmptySelection() {
+    assert(selection.isValid);
+    assert(!selection.isCollapsed);
 
-    // If the previous character is the edge of a line, don't do anything.
-    final int previousPoint = previousCharacter(selection.extentOffset, text, true);
-    final TextSelection line = textMetrics.getLineAtOffset(text, TextPosition(offset: previousPoint));
-    if (line.extentOffset == previousPoint) {
-      return selection;
-    }
+    final String textBefore = selection.textBefore(text);
+    final String textAfter = selection.textAfter(text);
+    final TextSelection newSelection = TextSelection.collapsed(offset: selection.start);
+    final TextRange newComposingRange = !composing.isValid || composing.isCollapsed
+      ? TextRange.empty
+      : TextRange(
+        start: composing.start - (composing.start - selection.start).clamp(0, selection.end - selection.start),
+        end: composing.end - (composing.end - selection.start).clamp(0, selection.end - selection.start),
+      );
 
-    // When going left, we want to skip over any whitespace before the line,
-    // so we go back to the first non-whitespace before asking for the line
-    // bounds, since getLineAtOffset finds the line boundaries without
-    // including whitespace (like the newline).
-    final int startPoint = previousCharacter(selection.extentOffset, text, false);
-    final TextSelection selectedLine = textMetrics.getLineAtOffset(
-      text,
-      TextPosition(offset: startPoint),
-    );
-    return TextSelection.collapsed(
-      offset: selectedLine.baseOffset,
-    );
-  }
-
-  /// Extend the current selection to the end of the field.
-  ///
-  /// If selectionEnabled is false, keeps the selection collapsed and moves it to
-  /// the end.
-  ///
-  /// See also:
-  ///
-  ///   * [extendSelectionToStart]
-  TextSelection extendSelectionToEnd() {
-    if (selection.extentOffset == text.length) {
-      return selection;
-    }
-
-    return selection.copyWith(
-      extentOffset: text.length,
+    return TextEditingValue(
+      text: textBefore + textAfter,
+      selection: newSelection,
+      composing: newComposingRange,
     );
   }
 
@@ -518,35 +470,6 @@ class TextEditingValue {
 
     return TextEditingValue(
       text: textBefore.substring(0, characterBoundary) + textAfter,
-      selection: newSelection,
-      composing: newComposingRange,
-    );
-  }
-
-  // Deletes the current non-empty selection.
-  //
-  // Operates on the text/selection contained in textSelectionDelegate, and does
-  // not depend on `RenderEditable.selection`.
-  //
-  // If the selection is currently non-empty, this method deletes the selected
-  // text and returns true. Otherwise this method does nothing and returns
-  // false.
-  TextEditingValue _deleteNonEmptySelection() {
-    assert(selection.isValid);
-    assert(!selection.isCollapsed);
-
-    final String textBefore = selection.textBefore(text);
-    final String textAfter = selection.textAfter(text);
-    final TextSelection newSelection = TextSelection.collapsed(offset: selection.start);
-    final TextRange newComposingRange = !composing.isValid || composing.isCollapsed
-      ? TextRange.empty
-      : TextRange(
-        start: composing.start - (composing.start - selection.start).clamp(0, selection.end - selection.start),
-        end: composing.end - (composing.end - selection.start).clamp(0, selection.end - selection.start),
-      );
-
-    return TextEditingValue(
-      text: textBefore + textAfter,
       selection: newSelection,
       composing: newComposingRange,
     );
@@ -806,448 +729,90 @@ class TextEditingValue {
     return TextEditingValue(text: textBefore + textAfter, selection: selection);
   }
 
-  /// {@template flutter.rendering.TextEditingValue.extendSelectionDown}
-  /// Keeping [selection]'s [TextSelection.baseOffset] fixed, move the
-  /// [TextSelection.extentOffset] down by one line.
-  /// {@endtemplate}
-  ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
-  ///
-  /// See also:
-  ///
-  ///   * [extendSelectionUp], which is same but in the opposite direction.
-  TextSelection extendSelectionDown(TextMetrics textMetrics) {
+  /// Return [selection] collapsed and moved to the given index.
+  TextSelection moveSelectionTo(int index) {
     assert(selection != null);
 
-    // If the selection is collapsed at the end of the field already, then
-    // nothing happens.
-    if (selection.isCollapsed && selection.extentOffset >= text.length) {
+    // If the selection is collapsed at the position already, then nothing
+    // happens.
+    if (selection.isCollapsed && selection.extentOffset == index) {
       return selection;
     }
 
-    final TextPosition positionBelow = textMetrics.getTextPositionBelow(selection.extentOffset);
-    if (positionBelow.offset == selection.extentOffset) {
-      return selection.copyWith(
-        extentOffset: text.length,
-      );
-    }
     return selection.copyWith(
-      extentOffset: positionBelow.offset,
+      baseOffset: index,
+      extentOffset: index,
     );
   }
 
-  /// {@template flutter.rendering.TextEditingValue.expandSelectionToEnd}
-  /// Expand the current selection to the end of the field.
+  /// Return [selection] expanded to the given [TextPosition].
   ///
-  /// The selection will never shrink. The [TextSelection.extentOffset] will
-  // always be at the end of the field, regardless of the original order of
-  /// [TextSelection.baseOffset] and [TextSelection.extentOffset].
-  /// {@endtemplate}
+  /// The given [TextPosition] must be outside of [selection].
   ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
+  /// The returned selection will always be a strict superset of [selection].
   ///
-  /// See also:
-  ///
-  ///   * [expandSelectionToStart], which is same but in the opposite direction.
-  TextSelection expandSelectionToEnd() {
-    assert(selection != null);
-
-    if (selection.extentOffset == text.length) {
-      return selection;
-    }
-
-    final int firstOffset = math.max(0, math.min(
-      selection.baseOffset,
-      selection.extentOffset,
-    ));
-    return TextSelection(
-      baseOffset: firstOffset,
-      extentOffset: text.length,
-    );
-  }
-
-  /// {@template flutter.rendering.TextEditingValue.extendSelectionLeft}
-  /// Keeping [selection]'s [TextSelection.baseOffset] fixed, move the
-  /// [TextSelection.extentOffset] left.
-  /// {@endtemplate}
-  ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
+  /// If the given position is at the very beginning or end of the text, then
+  /// the [TextSelection.extentOffset] will be placed at the position,
+  /// regardless of the original order of [TextSelection.extentOffset] and
+  /// [TextSelection.baseOffset]. For any other position, the order of the two
+  /// offsets will be preserved.
   ///
   /// See also:
   ///
-  ///   * [extendSelectionRight], which is same but in the opposite direction.
-  TextSelection extendSelectionLeft() {
+  ///   * [extendSelectionTo], which is similar but only moves
+  ///     [TextSelection.extentOffset].
+  TextSelection expandSelectionTo(int index) {
     assert(selection != null);
 
-    return extendGivenSelectionLeft(
-      selection,
-      text,
-    );
-  }
+    final int upperOffset = math.min(selection.baseOffset, selection.extentOffset);
+    final int lowerOffset = math.max(selection.baseOffset, selection.extentOffset);
+    assert(index <= upperOffset || index >= lowerOffset);
 
-  /// {@template flutter.rendering.TextEditingValue.extendSelectionLeftByLine}
-  /// Extend the current [selection] to the start of
-  /// [TextSelection.extentOffset]'s line.
-  ///
-  /// Uses [TextSelection.baseOffset] as a pivot point and doesn't change it.
-  /// If [TextSelection.extentOffset] is right of [TextSelection.baseOffset],
-  /// then collapses the selection.
-  /// {@endtemplate}
-  ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
-  ///
-  /// See also:
-  ///
-  ///   * [extendSelectionRightByLine], which is same but in the opposite
-  ///     direction.
-  ///   * [expandSelectionRightByLine], which strictly grows the selection
-  ///     regardless of the order.
-  TextSelection extendSelectionLeftByLine(TextMetrics textMetrics) {
-    assert(selection != null);
-
-    // When going left, we want to skip over any whitespace before the line,
-    // so we go back to the first non-whitespace before asking for the line
-    // bounds, since getLineAtOffset finds the line boundaries without
-    // including whitespace (like the newline).
-    final int startPoint = previousCharacter(selection.extentOffset, text, false);
-    final TextSelection selectedLine = textMetrics.getLineAtOffset(text, TextPosition(offset: startPoint));
-
-    if (selection.extentOffset > selection.baseOffset) {
-      return selection.copyWith(
-        extentOffset: selection.baseOffset,
-      );
-    }
-    return selection.copyWith(
-      extentOffset: selectedLine.baseOffset,
-    );
-  }
-
-  /// {@template flutter.rendering.TextEditingValue.extendSelectionRight}
-  /// Keeping [selection]'s [TextSelection.baseOffset] fixed, move the
-  /// [TextSelection.extentOffset] right.
-  /// {@endtemplate}
-  ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
-  ///
-  /// See also:
-  ///
-  ///   * [extendSelectionLeft], which is same but in the opposite direction.
-  TextSelection extendSelectionRight() {
-    assert(selection != null);
-
-    return extendGivenSelectionRight(
-      selection,
-      text,
-    );
-  }
-
-  /// {@template flutter.rendering.TextEditingValue.extendSelectionRightByLine}
-  /// Extend the current [selection] to the end of [TextSelection.extentOffset]'s
-  /// line.
-  ///
-  /// Uses [TextSelection.baseOffset] as a pivot point and doesn't change it. If
-  /// [TextSelection.extentOffset] is left of [TextSelection.baseOffset], then
-  /// collapses the selection.
-  /// {@endtemplate}
-  ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
-  ///
-  /// See also:
-  ///
-  ///   * [extendSelectionLeftByLine], which is same but in the opposite
-  ///     direction.
-  ///   * [expandSelectionRightByLine], which strictly grows the selection
-  ///     regardless of the order.
-  TextSelection extendSelectionRightByLine(TextMetrics textMetrics) {
-    assert(selection != null);
-
-    final int startPoint = nextCharacter(selection.extentOffset, text, false);
-    final TextSelection selectedLine = textMetrics.getLineAtOffset(text, TextPosition(offset: startPoint));
-
-    if (selection.extentOffset < selection.baseOffset) {
-      return selection.copyWith(
-        extentOffset: selection.baseOffset,
-      );
-    }
-    return selection.copyWith(
-      extentOffset: selectedLine.extentOffset,
-    );
-  }
-
-  /// {@template flutter.rendering.TextEditingValue.extendSelectionUp}
-  /// Keeping [selection]'s [TextSelection.baseOffset] fixed, move the
-  /// [TextSelection.extentOffset] up by one
-  /// line.
-  /// {@endtemplate}
-  ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
-  ///
-  /// See also:
-  ///
-  ///   * [extendSelectionDown], which is the same but in the opposite
-  ///     direction.
-  TextSelection extendSelectionUp(TextMetrics textMetrics) {
-    assert(selection != null);
-
-    // If the selection is collapsed at the beginning of the field already, then
-    // nothing happens.
-    if (selection.isCollapsed && selection.extentOffset <= 0.0) {
-      return selection;
-    }
-
-    final TextPosition positionAbove = textMetrics.getTextPositionAbove(selection.extentOffset);
-    if (positionAbove.offset == selection.extentOffset) {
+    if (index == 0) {
       return selection.copyWith(
         extentOffset: 0,
+        baseOffset: lowerOffset,
       );
-    }
-    return selection.copyWith(
-      baseOffset: selection.baseOffset,
-      extentOffset: positionAbove.offset,
-    );
-  }
-
-  /// {@template flutter.rendering.TextEditingValue.expandSelectionToStart}
-  /// Expand the current [selection] to the start of the field.
-  ///
-  /// The selection will never shrink. The [TextSelection.extentOffset] will
-  /// always be at the start of the field, regardless of the original order of
-  /// [TextSelection.baseOffset] and [TextSelection.extentOffset].
-  /// {@endtemplate}
-  ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
-  ///
-  /// See also:
-  ///
-  ///   * [expandSelectionToEnd], which is the same but in the opposite
-  ///     direction.
-  TextSelection expandSelectionToStart() {
-    assert(selection != null);
-
-    if (selection.extentOffset == 0) {
-      return selection;
-    }
-
-    final int lastOffset = math.max(0, math.max(
-      selection.baseOffset,
-      selection.extentOffset,
-    ));
-    return TextSelection(
-      baseOffset: lastOffset,
-      extentOffset: 0,
-    );
-  }
-
-  /// {@template flutter.rendering.TextEditingValue.expandSelectionLeftByLine}
-  /// Expand the current [selection] to the start of the line.
-  ///
-  /// The selection will never shrink. The upper offset will be expanded to the
-  /// beginning of its line, and the original order of baseOffset and
-  /// [TextSelection.extentOffset] will be preserved.
-  /// {@endtemplate}
-  ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
-  ///
-  /// See also:
-  ///
-  ///   * [expandSelectionRightByLine], which is the same but in the opposite
-  ///     direction.
-  TextSelection expandSelectionLeftByLine(TextMetrics textMetrics) {
-    assert(selection != null);
-
-    final int firstOffset = math.min(selection.baseOffset, selection.extentOffset);
-    final int startPoint = previousCharacter(firstOffset, text, false);
-    final TextSelection selectedLine = textMetrics.getLineAtOffset(text, TextPosition(offset: startPoint));
-
-    if (selection.extentOffset <= selection.baseOffset) {
+    } else if (index == text.length) {
       return selection.copyWith(
-        extentOffset: selectedLine.baseOffset,
-      );
-    }
-    return selection.copyWith(
-      baseOffset: selectedLine.baseOffset,
-    );
-  }
-
-  /// Extend the current selection to the start of the field.
-  ///
-  /// See also:
-  ///
-  ///   * [extendSelectionToEnd], which is the same but in the opposite
-  ///     direction.
-  TextSelection extendSelectionToStart() {
-    if (selection.extentOffset == 0) {
-      return selection;
-    }
-
-    return selection.copyWith(
-      extentOffset: 0,
-    );
-  }
-
-  /// {@template flutter.rendering.TextEditingValue.expandSelectionRightByLine}
-  /// Expand the current [selection] to the end of the line.
-  ///
-  /// The selection will never shrink. The lower offset will be expanded to the
-  /// end of its line and the original order of [TextSelection.baseOffset] and
-  /// [TextSelection.extentOffset] will be preserved.
-  /// {@endtemplate}
-  ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
-  ///
-  /// See also:
-  ///
-  ///   * [expandSelectionLeftByLine], which is the same but in the opposite
-  ///     direction.
-  TextSelection expandSelectionRightByLine(TextMetrics textMetrics) {
-    assert(selection != null);
-
-    final int lastOffset = math.max(selection.baseOffset, selection.extentOffset);
-    final int startPoint = nextCharacter(lastOffset, text, false);
-    final TextSelection selectedLine = textMetrics.getLineAtOffset(text, TextPosition(offset: startPoint));
-
-    if (selection.extentOffset >= selection.baseOffset) {
-      return selection.copyWith(
-        extentOffset: selectedLine.extentOffset,
-      );
-    }
-    return selection.copyWith(
-      baseOffset: selectedLine.extentOffset,
-    );
-  }
-
-  /// {@template flutter.rendering.TextEditingValue.moveSelectionDown}
-  /// Move the current [selection] to the next line.
-  /// {@endtemplate}
-  ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
-  ///
-  /// See also:
-  ///
-  ///   * [moveSelectionUp], which is the same but in the opposite direction.
-  TextSelection moveSelectionDown(TextMetrics textMetrics) {
-    assert(selection != null);
-
-    // If the selection is collapsed at the end of the field already, then
-    // nothing happens.
-    if (selection.isCollapsed && selection.extentOffset >= text.length) {
-      return selection;
-    }
-
-    final TextPosition positionBelow = textMetrics.getTextPositionBelow(selection.extentOffset);
-
-    late final TextSelection nextSelection;
-    if (positionBelow.offset == selection.extentOffset) {
-      nextSelection = selection.copyWith(
-        baseOffset: text.length,
         extentOffset: text.length,
+        baseOffset: upperOffset,
       );
-    } else {
-      nextSelection = TextSelection.fromPosition(positionBelow);
     }
 
-    return nextSelection;
-  }
-
-  /// {@template flutter.rendering.TextEditingValue.moveSelectionRightByLine}
-  /// Move the current [selection] to the rightmost point of the current line.
-  /// {@endtemplate}
-  ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
-  ///
-  /// See also:
-  ///
-  ///   * [moveSelectionLeftByLine], which is the same but in the opposite
-  ///     direction.
-  TextSelection moveSelectionRightByLine(TextMetrics textMetrics) {
-    assert(selection != null);
-
-    // If already at the right edge of the line, do nothing.
-    final TextSelection currentLine = textMetrics.getLineAtOffset(
-      text,
-      TextPosition(
-        offset: selection.extentOffset,
-      ),
-    );
-    if (currentLine.extentOffset == selection.extentOffset) {
-      return selection;
+    if (index <= upperOffset) {
+      if (selection.baseOffset < selection.extentOffset) {
+        return selection.copyWith(
+          baseOffset: index,
+        );
+      }
+      return selection.copyWith(
+        extentOffset: index,
+      );
     }
-
-    // When going right, we want to skip over any whitespace after the line,
-    // so we go forward to the first non-whitespace character before asking
-    // for the line bounds, since getLineAtOffset finds the line
-    // boundaries without including whitespace (like the newline).
-    final int startPoint = nextCharacter(selection.extentOffset, text, false);
-    final TextSelection selectedLine = textMetrics.getLineAtOffset(text, TextPosition(offset: startPoint));
-    return TextSelection.collapsed(
-      offset: selectedLine.extentOffset,
-    );
-  }
-
-  /// {@template flutter.rendering.TextEditingValue.moveSelectionToEnd}
-  /// Move the current [selection] to the end of the field.
-  /// {@endtemplate}
-  ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
-  ///
-  /// See also:
-  ///
-  ///   * [moveSelectionToStart], which is the same but in the opposite
-  ///     direction.
-  TextSelection moveSelectionToEnd() {
-    assert(selection != null);
-
-    if (selection.isCollapsed && selection.extentOffset == text.length) {
-      return selection;
-    }
-    return TextSelection.collapsed(
-      offset: text.length,
-    );
-  }
-
-  /// {@template flutter.rendering.TextEditingValue.moveSelectionToStart}
-  /// Move the current [selection] to the start of the field.
-  /// {@endtemplate}
-  ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
-  ///
-  /// See also:
-  ///
-  ///   * [moveSelectionToEnd], which is the same but in the opposite direction.
-  TextSelection moveSelectionToStart() {
-    assert(selection != null);
-
-    if (selection.isCollapsed && selection.extentOffset == 0) {
-      return selection;
-    }
-    return const TextSelection.collapsed(offset: 0);
-  }
-
-  /// {@template flutter.rendering.TextEditingValue.moveSelectionUp}
-  /// Move the current [selection] up by one line.
-  /// {@endtemplate}
-  ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
-  ///
-  /// See also:
-  ///
-  ///   * [moveSelectionDown], which is the same but in the opposite direction.
-  TextSelection moveSelectionUp(TextMetrics textMetrics) {
-    assert(selection != null);
-
-    // If the selection is collapsed at the beginning of the field already, then
-    // nothing happens.
-    if (selection.isCollapsed && selection.extentOffset <= 0.0) {
-      return selection;
-    }
-
-    final TextPosition positionAbove = textMetrics.getTextPositionAbove(selection.extentOffset);
-    if (positionAbove.offset == selection.extentOffset) {
-      return selection.copyWith(baseOffset: 0, extentOffset: 0);
+    if (selection.baseOffset < selection.extentOffset) {
+      return selection.copyWith(
+        extentOffset: index,
+      );
     }
     return selection.copyWith(
-      baseOffset: positionAbove.offset,
-      extentOffset: positionAbove.offset,
+      baseOffset: index,
+    );
+  }
+
+  /// Keeping [selection]'s [TextSelection.baseOffset] fixed, move the
+  /// [TextSelection.extentOffset] to the given [TextPosition].
+  TextSelection extendSelectionTo(int index) {
+    assert(selection != null);
+
+    // If the selection's extent is at the position already, then nothing
+    // happens.
+    if (selection.extentOffset == index) {
+      return selection;
+    }
+
+    return selection.copyWith(
+      extentOffset: index,
     );
   }
 
@@ -1261,6 +826,19 @@ class TextEditingValue {
       baseOffset: 0,
       extentOffset: text.length,
     );
+  }
+
+  /// Returns a representation of this object as a JSON object.
+  Map<String, dynamic> toJSON() {
+    return <String, dynamic>{
+      'text': text,
+      'selectionBase': selection.baseOffset,
+      'selectionExtent': selection.extentOffset,
+      'selectionAffinity': selection.affinity.toString(),
+      'selectionIsDirectional': selection.isDirectional,
+      'composingBase': composing.start,
+      'composingExtent': composing.end,
+    };
   }
 
   @override
