@@ -466,6 +466,7 @@ class TextInputConfiguration {
     this.keyboardAppearance = Brightness.light,
     this.textCapitalization = TextCapitalization.none,
     this.autofillConfiguration,
+    this.requestPrivacy = false,
   }) : assert(inputType != null),
        assert(obscureText != null),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
@@ -474,7 +475,8 @@ class TextInputConfiguration {
        assert(enableSuggestions != null),
        assert(keyboardAppearance != null),
        assert(inputAction != null),
-       assert(textCapitalization != null);
+       assert(textCapitalization != null),
+       assert(requestPrivacy != null);
 
   /// The type of information for which to optimize the text input control.
   final TextInputType inputType;
@@ -590,6 +592,8 @@ class TextInputConfiguration {
   /// Defaults to [Brightness.light].
   final Brightness keyboardAppearance;
 
+  final bool requestPrivacy;
+
   /// Returns a representation of this object as a JSON object.
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
@@ -604,6 +608,7 @@ class TextInputConfiguration {
       'inputAction': inputAction.toString(),
       'textCapitalization': textCapitalization.toString(),
       'keyboardAppearance': keyboardAppearance.toString(),
+      'requestPrivacy': requestPrivacy,
       if (autofillConfiguration != null) 'autofill': autofillConfiguration!.toJson(),
     };
   }

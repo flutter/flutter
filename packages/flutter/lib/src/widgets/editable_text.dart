@@ -495,6 +495,7 @@ class EditableText extends StatefulWidget {
     this.clipBehavior = Clip.hardEdge,
     this.restorationId,
     this.scrollBehavior,
+    this.requestPrivacy = false,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
@@ -537,6 +538,7 @@ class EditableText extends StatefulWidget {
          !readOnly || autofillHints == null,
          "Read-only fields can't have autofill hints.",
        ),
+       assert(requestPrivacy != null),
        _strutStyle = strutStyle,
        keyboardType = keyboardType ?? _inferKeyboardType(autofillHints: autofillHints, maxLines: maxLines),
        inputFormatters = maxLines == 1
@@ -1346,6 +1348,8 @@ class EditableText extends StatefulWidget {
   /// than 1.
   final ScrollBehavior? scrollBehavior;
 
+  final bool requestPrivacy;
+
   // Infer the keyboard type of an `EditableText` if it's not specified.
   static TextInputType _inferKeyboardType({
     required Iterable<String>? autofillHints,
@@ -1513,6 +1517,7 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics, defaultValue: null));
     properties.add(DiagnosticsProperty<Iterable<String>>('autofillHints', autofillHints, defaultValue: null));
     properties.add(DiagnosticsProperty<TextHeightBehavior>('textHeightBehavior', textHeightBehavior, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('requestPrivacy', requestPrivacy, defaultValue: false));
   }
 }
 
@@ -2588,6 +2593,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   TextInputConfiguration _createTextInputConfiguration(bool needsAutofillConfiguration) {
     assert(needsAutofillConfiguration != null);
+    print(widget.requestPrivacy);
     return TextInputConfiguration(
       inputType: widget.keyboardType,
       readOnly: widget.readOnly,
@@ -2607,6 +2613,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         autofillHints: widget.autofillHints?.toList(growable: false) ?? <String>[],
         currentEditingValue: currentTextEditingValue,
       ),
+      requestPrivacy: widget.requestPrivacy,
     );
   }
 
@@ -2716,6 +2723,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                 promptRectRange: _currentPromptRectRange,
                 promptRectColor: widget.autocorrectionTextRectColor,
                 clipBehavior: widget.clipBehavior,
+                requestPrivacy: widget.requestPrivacy,
               ),
             ),
           );
@@ -2798,6 +2806,7 @@ class _Editable extends MultiChildRenderObjectWidget {
     this.promptRectRange,
     this.promptRectColor,
     required this.clipBehavior,
+    required this.requestPrivacy,
   }) : assert(textDirection != null),
        assert(rendererIgnoresPointer != null),
        super(key: key, children: _extractChildren(inlineSpan));
@@ -2858,6 +2867,7 @@ class _Editable extends MultiChildRenderObjectWidget {
   final TextRange? promptRectRange;
   final Color? promptRectColor;
   final Clip clipBehavior;
+  final bool requestPrivacy;
 
   @override
   RenderEditable createRenderObject(BuildContext context) {

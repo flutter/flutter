@@ -390,6 +390,7 @@ class TextField extends StatefulWidget {
     this.scrollPhysics,
     this.autofillHints,
     this.restorationId,
+    this.requestPrivacy = false,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -429,6 +430,7 @@ class TextField extends StatefulWidget {
          !identical(keyboardType, TextInputType.text),
          'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.',
        ),
+       assert(requestPrivacy != null),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        toolbarOptions = toolbarOptions ?? (obscureText ?
          const ToolbarOptions(
@@ -821,6 +823,8 @@ class TextField extends StatefulWidget {
   /// {@endtemplate}
   final String? restorationId;
 
+  final bool requestPrivacy;
+
   @override
   State<TextField> createState() => _TextFieldState();
 
@@ -861,6 +865,7 @@ class TextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<TextSelectionControls>('selectionControls', selectionControls, defaultValue: null));
     properties.add(DiagnosticsProperty<ScrollController>('scrollController', scrollController, defaultValue: null));
     properties.add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('requestPrivacy', requestPrivacy, defaultValue: false));
   }
 }
 
@@ -1263,6 +1268,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           autofillHints: widget.autofillHints,
           autocorrectionTextRectColor: autocorrectionTextRectColor,
           restorationId: 'editable',
+          requestPrivacy: widget.requestPrivacy,
         ),
       ),
     );
