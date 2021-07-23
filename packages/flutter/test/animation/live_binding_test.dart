@@ -36,27 +36,32 @@ void main() {
             ),
           ),
         ),
+        recording: false,
       ),
     );
 
     await tester.pumpWidget(target);
 
-    await tester.pumpFrames(target, const Duration(milliseconds: 50));
+    await animationSheet.recording(() =>
+      tester.pumpFrames(target, const Duration(milliseconds: 50)));
 
     final TestGesture gesture1 = await tester.createGesture(pointer: 1);
     await gesture1.down(tester.getCenter(find.byType(GestureDetector)) + const Offset(10, 10));
 
-    await tester.pumpFrames(target, const Duration(milliseconds: 100));
+    await animationSheet.recording(() =>
+      tester.pumpFrames(target, const Duration(milliseconds: 100)));
     expect(tapped, 1);
 
     final TestGesture gesture2 = await tester.createGesture(pointer: 2);
     await gesture2.down(tester.getTopLeft(find.byType(GestureDetector)) + const Offset(30, -10));
     await gesture1.moveBy(const Offset(50, 50));
 
-    await tester.pumpFrames(target, const Duration(milliseconds: 100));
+    await animationSheet.recording(() =>
+      tester.pumpFrames(target, const Duration(milliseconds: 100)));
     await gesture1.up();
     await gesture2.up();
-    await tester.pumpFrames(target, const Duration(milliseconds: 50));
+    await animationSheet.recording(() =>
+      tester.pumpFrames(target, const Duration(milliseconds: 50)));
     expect(tapped, 1);
 
     await expectLater(
@@ -88,28 +93,33 @@ void main() {
             ),
           ),
         ),
+        recording: false,
       ),
     );
 
     await tester.binding.setSurfaceSize(const Size(300, 300));
     await tester.pumpWidget(target);
 
-    await tester.pumpFrames(target, const Duration(milliseconds: 50));
+    await animationSheet.recording(() =>
+      tester.pumpFrames(target, const Duration(milliseconds: 50)));
 
     final TestGesture gesture1 = await tester.createGesture(pointer: 1);
     await gesture1.down(tester.getCenter(find.byType(GestureDetector)) + const Offset(10, 10));
 
-    await tester.pumpFrames(target, const Duration(milliseconds: 100));
+    await animationSheet.recording(() =>
+      tester.pumpFrames(target, const Duration(milliseconds: 100)));
     expect(tapped, 1);
 
     final TestGesture gesture2 = await tester.createGesture(pointer: 2);
     await gesture2.down(tester.getTopLeft(find.byType(GestureDetector)) + const Offset(30, -10));
     await gesture1.moveBy(const Offset(50, 50));
 
-    await tester.pumpFrames(target, const Duration(milliseconds: 100));
+    await animationSheet.recording(() =>
+      tester.pumpFrames(target, const Duration(milliseconds: 100)));
     await gesture1.up();
     await gesture2.up();
-    await tester.pumpFrames(target, const Duration(milliseconds: 50));
+    await animationSheet.recording(() =>
+      tester.pumpFrames(target, const Duration(milliseconds: 50)));
     expect(tapped, 1);
 
     await expectLater(
