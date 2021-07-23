@@ -268,7 +268,7 @@ class TestContext extends Context {
 
   @override
   void echo(String message) {
-    stdout += '$message\n';
+    stdout += message;
   }
 
   @override

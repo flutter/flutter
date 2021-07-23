@@ -114,7 +114,7 @@ class Context {
 
   /// Log message to stdout.
   void echo(String message) {
-    print(message);
+    stdout.write(message);
   }
 
   /// Exit the application with the given exit code.
