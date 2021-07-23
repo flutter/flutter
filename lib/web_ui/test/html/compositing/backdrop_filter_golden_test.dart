@@ -59,8 +59,7 @@ void testMain() async {
         .build()
         .webOnlyRootElement!);
 
-    await matchGoldenFile('backdrop_filter_clip.png', region: region,
-        maxDiffRatePercent: 0.8);
+    await matchGoldenFile('backdrop_filter_clip.png', region: region);
   });
 
   test('Background should only blur at ancestor clip boundary after move', () async {
@@ -110,8 +109,7 @@ void testMain() async {
         .build()
         .webOnlyRootElement!);
 
-    await matchGoldenFile('backdrop_filter_clip_moved.png', region: region,
-      maxDiffRatePercent: 0.8);
+    await matchGoldenFile('backdrop_filter_clip_moved.png', region: region);
   });
 
   // The blur filter should be applied to the background inside the clip even
@@ -142,8 +140,8 @@ void testMain() async {
         .build()
         .webOnlyRootElement!);
 
-    await matchGoldenFile('backdrop_filter_no_child_rendering.png', region: region,
-        maxDiffRatePercent: 0.8);
+    await matchGoldenFile('backdrop_filter_no_child_rendering.png',
+        region: region);
   });
 }
 
