@@ -361,6 +361,14 @@ bool DartIsolate::Initialize(Dart_Isolate dart_isolate) {
 
   tonic::DartIsolateScope scope(isolate());
 
+  // For the root isolate set the "AppStartUp" as soon as the root isolate
+  // has been initialized. This is to ensure that all the timeline events
+  // that have the set user-tag will be listed user AppStartUp.
+  if (IsRootIsolate()) {
+    tonic::DartApiScope api_scope;
+    Dart_SetCurrentUserTag(Dart_NewUserTag("AppStartUp"));
+  }
+
   SetMessageHandlingTaskRunner(GetTaskRunners().GetUITaskRunner());
 
   if (tonic::LogIfError(
