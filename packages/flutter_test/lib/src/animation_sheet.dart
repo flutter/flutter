@@ -337,7 +337,10 @@ class AnimationSheetBuilder {
   ///
   /// An example of using this method can be found at [AnimationSheetBuilder].
   Future<ui.Image> collate(int cellsPerRow) async {
-    return _collateFrames(await _frames, frameSize, cellsPerRow);
+    final List<ui.Image> frames = await _frames;
+    assert(frames.isNotEmpty,
+      'No frames are collected. Have you forgot to set `recording` to true?');
+    return _collateFrames(frames, frameSize, cellsPerRow);
   }
 
   /// Returns the smallest size that can contain all recorded frames.

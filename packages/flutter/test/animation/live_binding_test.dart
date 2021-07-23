@@ -11,12 +11,12 @@ void main() {
    * because [matchesGoldenFile] does not use Skia Gold in its native package.
    */
 
-  LiveTestWidgetsFlutterBinding();
+  LiveTestWidgetsFlutterBinding().framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.onlyPumps;
 
   testWidgets('Should show event indicator for pointer events', (WidgetTester tester) async {
     final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(200, 200), allLayers: true);
     int tapped = 0;
-    final Widget target = Container(
+    Widget target({bool recording = true}) => Container(
       padding: const EdgeInsets.fromLTRB(20, 10, 25, 20),
       child: animationSheet.record(
         MaterialApp(
@@ -36,32 +36,28 @@ void main() {
             ),
           ),
         ),
-        recording: false,
+        recording: recording,
       ),
     );
 
-    await tester.pumpWidget(target);
+    await tester.pumpWidget(target(recording: false));
 
-    await animationSheet.recording(() =>
-      tester.pumpFrames(target, const Duration(milliseconds: 50)));
+    await tester.pumpFrames(target(), const Duration(milliseconds: 50));
 
     final TestGesture gesture1 = await tester.createGesture(pointer: 1);
     await gesture1.down(tester.getCenter(find.byType(GestureDetector)) + const Offset(10, 10));
 
-    await animationSheet.recording(() =>
-      tester.pumpFrames(target, const Duration(milliseconds: 100)));
+    await tester.pumpFrames(target(), const Duration(milliseconds: 100));
     expect(tapped, 1);
 
     final TestGesture gesture2 = await tester.createGesture(pointer: 2);
     await gesture2.down(tester.getTopLeft(find.byType(GestureDetector)) + const Offset(30, -10));
     await gesture1.moveBy(const Offset(50, 50));
 
-    await animationSheet.recording(() =>
-      tester.pumpFrames(target, const Duration(milliseconds: 100)));
+    await tester.pumpFrames(target(), const Duration(milliseconds: 100));
     await gesture1.up();
     await gesture2.up();
-    await animationSheet.recording(() =>
-      tester.pumpFrames(target, const Duration(milliseconds: 50)));
+    await tester.pumpFrames(target(), const Duration(milliseconds: 50));
     expect(tapped, 1);
 
     await expectLater(
@@ -73,7 +69,7 @@ void main() {
   testWidgets('Should show event indicator for pointer events with setSurfaceSize', (WidgetTester tester) async {
     final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(200, 200), allLayers: true);
     int tapped = 0;
-    final Widget target = Container(
+    Widget target({bool recording = true}) => Container(
       padding: const EdgeInsets.fromLTRB(20, 10, 25, 20),
       child: animationSheet.record(
         MaterialApp(
@@ -93,21 +89,21 @@ void main() {
             ),
           ),
         ),
-        recording: false,
+        recording: recording,
       ),
     );
 
     await tester.binding.setSurfaceSize(const Size(300, 300));
-    await tester.pumpWidget(target);
+    await tester.pumpWidget(target(recording: false));
 
     await animationSheet.recording(() =>
-      tester.pumpFrames(target, const Duration(milliseconds: 50)));
+      tester.pumpFrames(target(), const Duration(milliseconds: 50)));
 
     final TestGesture gesture1 = await tester.createGesture(pointer: 1);
     await gesture1.down(tester.getCenter(find.byType(GestureDetector)) + const Offset(10, 10));
 
     await animationSheet.recording(() =>
-      tester.pumpFrames(target, const Duration(milliseconds: 100)));
+      tester.pumpFrames(target(), const Duration(milliseconds: 100)));
     expect(tapped, 1);
 
     final TestGesture gesture2 = await tester.createGesture(pointer: 2);
@@ -115,11 +111,11 @@ void main() {
     await gesture1.moveBy(const Offset(50, 50));
 
     await animationSheet.recording(() =>
-      tester.pumpFrames(target, const Duration(milliseconds: 100)));
+      tester.pumpFrames(target(), const Duration(milliseconds: 100)));
     await gesture1.up();
     await gesture2.up();
     await animationSheet.recording(() =>
-      tester.pumpFrames(target, const Duration(milliseconds: 50)));
+      tester.pumpFrames(target(), const Duration(milliseconds: 50)));
     expect(tapped, 1);
 
     await expectLater(
