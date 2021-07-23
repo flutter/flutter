@@ -400,7 +400,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
        _value = value,
        _activeColor = activeColor,
        _trackColor = trackColor,
-       _thumbColor = thumbColor,
+       _thumbPainter = CupertinoThumbPainter.switchThumb(color: thumbColor),
        _onChanged = onChanged,
        _textDirection = textDirection,
        _state = state,
@@ -441,13 +441,13 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     markNeedsPaint();
   }
 
-  Color get thumbColor => _thumbColor;
-  Color _thumbColor;
+  Color get thumbColor => _thumbPainter.color;
+  CupertinoThumbPainter _thumbPainter;
   set thumbColor(Color value) {
     assert(value != null);
-    if (value == _thumbColor)
+    if (value == thumbColor)
       return;
-    _thumbColor = value;
+    _thumbPainter = CupertinoThumbPainter.switchThumb(color: value);
     markNeedsPaint();
   }
 
