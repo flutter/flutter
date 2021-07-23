@@ -109,7 +109,7 @@ class Context {
 
   /// Log message to stderr.
   void echoError(String message) {
-    stderr.write('$message\n');
+    stderr.writeln(message);
   }
 
   /// Log message to stdout.
