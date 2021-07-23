@@ -139,6 +139,8 @@ class Template {
   static const String copyTemplateExtension = '.copy.tmpl';
   static const String imageTemplateExtension = '.img.tmpl';
   static const String testTemplateExtension = '.test.tmpl';
+  // https://kotlinlang.org/docs/keyword-reference.html
+  static const List<String> reservedKotlinKeywords = <String>['when', 'in'];
   final Pattern _kTemplateLanguageVariant = RegExp(r'(\w+)-(\w+)\.tmpl.*');
   final List<Directory> imageSourceDirectories;
 
@@ -325,9 +327,8 @@ class Template {
         final String? androidIdentifier = context['androidIdentifier'] as String?;
         if (finalDestinationFile.path.endsWith('.kt') && androidIdentifier != null) {
           final List<String> segments = androidIdentifier.split('.');
-          final List<String> reserved = <String>['when', 'in'];
           final List<String> correctedSegments = segments.map(
-              (String segment) => reserved.contains(segment) ? '`$segment`' : segment
+              (String segment) => reservedKotlinKeywords.contains(segment) ? '`$segment`' : segment
           ).toList();
           context['androidIdentifier'] = correctedSegments.join('.');
         }
