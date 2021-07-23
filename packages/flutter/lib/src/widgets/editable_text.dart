@@ -2722,7 +2722,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                 promptRectRange: _currentPromptRectRange,
                 promptRectColor: widget.autocorrectionTextRectColor,
                 clipBehavior: widget.clipBehavior,
-                requestPrivacy: widget.requestPrivacy,
               ),
             ),
           );
