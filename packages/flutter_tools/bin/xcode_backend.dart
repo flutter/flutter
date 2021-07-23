@@ -5,9 +5,15 @@
 import 'dart:io';
 
 void main(List<String> arguments) {
+  File? scriptOutputStreamFile;
+  final String? scriptOutputStreamFileEnv = Platform.environment['SCRIPT_OUTPUT_STREAM_FILE'];
+  if (scriptOutputStreamFileEnv != null && scriptOutputStreamFileEnv.isNotEmpty) {
+    scriptOutputStreamFile = File(scriptOutputStreamFileEnv);
+  }
   Context(
     arguments: arguments,
     environment: Platform.environment,
+    scriptOutputStreamFile: scriptOutputStreamFile,
   ).run();
 }
 
@@ -19,17 +25,16 @@ class Context {
   Context({
     required this.arguments,
     required this.environment,
+    File? scriptOutputStreamFile,
   }) {
-    final String? scriptOutputStreamFileEnv = environment['SCRIPT_OUTPUT_STREAM_FILE'];
-    if (scriptOutputStreamFileEnv != null && scriptOutputStreamFileEnv.isNotEmpty) {
-      scriptOutputStreamFile = File(
-        scriptOutputStreamFileEnv,
-      ).openSync(mode: FileMode.write);
+    if (scriptOutputStreamFile != null) {
+      scriptOutputStream = scriptOutputStreamFile.openSync(mode: FileMode.write);
     }
   }
 
   final Map<String, String> environment;
   final List<String> arguments;
+  RandomAccessFile? scriptOutputStream;
 
   void run() {
     if (arguments.isEmpty) {
@@ -130,14 +135,11 @@ class Context {
     return value;
   }
 
-  RandomAccessFile? scriptOutputStreamFile;
-
   // When provided with a pipe by the host Flutter build process, output to the
   // pipe goes to stdout of the Flutter build process directly.
   void streamOutput(String output) {
-    scriptOutputStreamFile?.writeStringSync(output);
+    scriptOutputStream?.writeStringSync('$output\n');
   }
-
 
   String parseFlutterBuildMode() {
     // Use FLUTTER_BUILD_MODE if it's set, otherwise use the Xcode build configuration name

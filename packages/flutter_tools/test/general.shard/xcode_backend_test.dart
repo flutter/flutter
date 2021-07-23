@@ -23,6 +23,8 @@ void main() {
         ..createSync(recursive: true);
       final Directory flutterRoot = fileSystem.directory('/path/to/flutter')
         ..createSync(recursive: true);
+      final File pipe = fileSystem.file('/tmp/pipe')
+        ..createSync(recursive: true);
       const String buildMode = 'Debug';
       final TestContext context = TestContext(
         <String>['build'],
@@ -58,7 +60,12 @@ void main() {
           ),
         ],
         fileSystem: fileSystem,
+        scriptOutputStreamFile: pipe,
       )..run();
+      final List<String> streamedLines = pipe.readAsLinesSync();
+      // Ensure after line splitting, the exact string 'done' appears
+      expect(streamedLines, contains('done'));
+      expect(streamedLines, contains(' └─Compiling, linking and signing...'));
       expect(
         context.stdout,
         contains('built and packaged successfully.'),
@@ -167,8 +174,9 @@ class TestContext extends Context {
     Map<String, String> environment, {
     required this.fileSystem,
     required List<FakeCommand> commands,
+    File? scriptOutputStreamFile,
   })  : processManager = FakeProcessManager.list(commands),
-        super(arguments: arguments, environment: environment);
+        super(arguments: arguments, environment: environment, scriptOutputStreamFile: scriptOutputStreamFile);
 
   final FileSystem fileSystem;
   final FakeProcessManager processManager;
