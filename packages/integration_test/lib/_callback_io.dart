@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' show Platform;
 import 'dart:ui';
 
 import 'package:flutter/services.dart';
@@ -60,8 +61,8 @@ class IOCallbackManager implements CallbackManager {
     // comes up in the future. For example: `WebCallbackManager.cleanup`.
   }
 
-  // Whether the Flutter surface uses an Image.
-  bool _usesFlutterImage = false;
+  // Whether the Flutter surface uses an Image (Android only).
+  bool _usesFlutterImage = false || !Platform.isAndroid;
 
   @override
   Future<void> convertFlutterSurfaceToImage() async {
