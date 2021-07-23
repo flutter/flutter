@@ -953,4 +953,60 @@ void main() {
 
      expect(material.elevation, 2.0);
    });
+
+  testWidgets('Stepper horizontal size test', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Material(
+            child: Stepper(
+              type: StepperType.horizontal,
+              horizontalTitlePosition: HorizontalTitlePosition.bottom,
+              horizontalLinePosition: HorizontalLinePosition.top,
+              steps: const <Step>[
+                Step(
+                  title: Text('Step 1'),
+                  content: SizedBox(
+                    width: 100.0,
+                    height: 100.0,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox box = tester.renderObject(find.byType(Stepper));
+    expect(box.size.height, 600.0);
+  });
+
+  testWidgets('Stepper horizontal size test', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Material(
+            child: Stepper(
+              type: StepperType.horizontal,
+              horizontalTitlePosition: HorizontalTitlePosition.bottom,
+              horizontalLinePosition: HorizontalLinePosition.center,
+              steps: const <Step>[
+                Step(
+                  title: Text('Step 1'),
+                  content: SizedBox(
+                    width: 100.0,
+                    height: 100.0,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox box = tester.renderObject(find.byType(Stepper));
+    expect(box.size.height, 600.0);
+  });
 }
