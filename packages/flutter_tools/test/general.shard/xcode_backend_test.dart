@@ -78,8 +78,8 @@ void main() {
         ..createSync(recursive: true);
       final Directory flutterRoot = fileSystem.directory('/path/to/flutter')
         ..createSync(recursive: true);
-      const String archs = 'armv7';
-      const String buildMode = 'Debug';
+      const String archs = 'arm64 armv7';
+      const String buildMode = 'Release';
       const String dartObfuscation = 'false';
       const String dartDefines = 'flutter.inspector.structuredErrors%3Dtrue';
       const String expandedCodeSignIdentity = 'F1326572E0B71C3C8442805230CB4B33B708A2E2';
@@ -131,7 +131,7 @@ void main() {
               '--DartDefines=$dartDefines',
               '--ExtraFrontEndOptions=$extraFrontEndOptions',
               '-dCodesignIdentity=$expandedCodeSignIdentity',
-              'debug_ios_bundle_flutter_assets',
+              'release_ios_bundle_flutter_assets',
             ],
           ),
         ],
