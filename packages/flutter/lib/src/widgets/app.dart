@@ -237,7 +237,7 @@ typedef InitialRouteListFactory = List<Route<dynamic>> Function(String initialRo
 /// functionality for an app.
 ///
 /// Builds a [MediaQuery] using [MediaQuery.fromWindow]. To use an inherited
-/// [MediaQuery] instead, set [useExistingMediaQuery] to true.
+/// [MediaQuery] instead, set [useInheritedMediaQuery] to true.
 ///
 /// Find references to many of the widgets that [WidgetsApp] wraps in the "See
 /// also" section.
@@ -332,7 +332,7 @@ class WidgetsApp extends StatefulWidget {
     this.shortcuts,
     this.actions,
     this.restorationScopeId,
-    this.useExistingMediaQuery = false,
+    this.useInheritedMediaQuery = false,
   }) : assert(navigatorObservers != null),
        assert(routes != null),
        assert(
@@ -429,7 +429,7 @@ class WidgetsApp extends StatefulWidget {
     this.shortcuts,
     this.actions,
     this.restorationScopeId,
-    this.useExistingMediaQuery = false,
+    this.useInheritedMediaQuery = false,
   }) : assert(
          routeInformationParser != null &&
          routerDelegate != null,
@@ -1121,7 +1121,7 @@ class WidgetsApp extends StatefulWidget {
   /// If true, an inherited MediaQuery will be used. If one if not available, or this is false, one will be built from the window.
   ///
   /// Cannot be null, defaults to false.
-  final bool useExistingMediaQuery;
+  final bool useInheritedMediaQuery;
 
   /// If true, forces the performance overlay to be visible in all instances.
   ///
@@ -1654,7 +1654,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     );
 
     final MediaQueryData? data = MediaQuery.maybeOf(context);
-    if (!widget.useExistingMediaQuery || data == null) {
+    if (!widget.useInheritedMediaQuery || data == null) {
       child = MediaQuery.fromWindow(
         child: child,
       );
