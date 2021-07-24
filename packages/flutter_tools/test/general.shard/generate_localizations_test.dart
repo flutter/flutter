@@ -1356,13 +1356,13 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
   "@@locale": "en",
   "springBegins": "Spring begins on {springStartDate}",
   "@springBegins": {
-      "description": "The first day of spring",
-      "placeholders": {
-          "springStartDate": {
-              "type": "DateTime",
-              "format": "yMd"
-          }
+    "description": "The first day of spring",
+    "placeholders": {
+      "springStartDate": {
+        "type": "DateTime",
+        "format": "yMd"
       }
+    }
   }
 }''';
         fs.currentDirectory.childDirectory('lib').childDirectory('l10n')..createSync(recursive: true)
@@ -1391,13 +1391,13 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
   "@@locale": "en",
   "springBegins": "Spring begins on {springStartDate}",
   "@springBegins": {
-      "description": "The first day of spring",
-      "placeholders": {
-          "springStartDate": {
-              "type": "DateTime",
-              "format": "asdf"
-          }
+    "description": "The first day of spring",
+    "placeholders": {
+      "springStartDate": {
+        "type": "DateTime",
+        "format": "asdf"
       }
+    }
   }
 }''';
         final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
@@ -1435,14 +1435,14 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
   "@@locale": "en",
   "springBegins": "Spring begins on {springStartDate}",
   "@springBegins": {
-      "description": "The first day of spring",
-      "placeholders": {
-          "springStartDate": {
-              "type": "DateTime",
-              "format": "yMd",
-              "isCustomDateFormat": "true"
-          }
+    "description": "The first day of spring",
+    "placeholders": {
+      "springStartDate": {
+        "type": "DateTime",
+        "format": "yMd",
+        "isCustomDateFormat": "true"
       }
+    }
   }
 }''';
         final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
@@ -1472,14 +1472,14 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
   "@@locale": "en",
   "springBegins": "Spring begins on {springStartDate}",
   "@springBegins": {
-      "description": "The first day of spring",
-      "placeholders": {
-          "springStartDate": {
-              "type": "DateTime",
-              "format": "asdf o'clock",
-              "isCustomDateFormat": "true"
-          }
+    "description": "The first day of spring",
+    "placeholders": {
+      "springStartDate": {
+        "type": "DateTime",
+        "format": "asdf o'clock",
+        "isCustomDateFormat": "true"
       }
+    }
   }
 }''';
         final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
@@ -1508,12 +1508,12 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
 {
   "springBegins": "Spring begins on {springStartDate}",
   "@springBegins": {
-      "description": "The first day of spring",
-      "placeholders": {
-          "springStartDate": {
-              "type": "DateTime"
-          }
+    "description": "The first day of spring",
+    "placeholders": {
+      "springStartDate": {
+        "type": "DateTime"
       }
+    }
   }
 }''';
         final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
