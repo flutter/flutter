@@ -1896,7 +1896,6 @@ void main() {
     expect(c1.selection.extentOffset - c1.selection.baseOffset, -6);
   });
 
-
   testWidgets('Changing focus test', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     final List<RawKeyEvent> events = <RawKeyEvent>[];

@@ -68,19 +68,6 @@ class TextEditingValue {
   /// A value that corresponds to the empty string with no selection and no composing range.
   static const TextEditingValue empty = TextEditingValue();
 
-  /// Return the given [TextSelection] with its [TextSelection.extentOffset]
-  /// moved left by one character.
-  ///
-  /// {@macro flutter.rendering.RenderEditable.whiteSpace}
-  static TextSelection extendGivenSelectionLeft(TextSelection selection, String text, [bool includeWhitespace = true]) {
-    // If the selection is already all the way left, there is nothing to do.
-    if (selection.extentOffset <= 0) {
-      return selection;
-    }
-    final int previousExtent = previousCharacter(selection.extentOffset, text, includeWhitespace);
-    return selection.copyWith(extentOffset: previousExtent);
-  }
-
   // TODO(gspencergoog): replace when we expose this ICU information.
   /// Check if the given code unit is a white space or separator
   /// character.
@@ -120,52 +107,6 @@ class TextEditingValue {
         return false;
     }
     return true;
-  }
-
-  /// Return a new selection that has been moved left once.
-  ///
-  /// If it can't be moved left, the original TextSelection is returned.
-  static TextSelection moveGivenSelectionLeft(TextSelection selection, String text) {
-    // If the selection is already all the way left, there is nothing to do.
-    if (selection.isCollapsed && selection.extentOffset <= 0) {
-      return selection;
-    }
-
-    int previousExtent;
-    if (selection.start != selection.end) {
-      previousExtent = selection.start;
-    } else {
-      previousExtent = previousCharacter(selection.extentOffset, text);
-    }
-    final TextSelection newSelection = selection.copyWith(
-      extentOffset: previousExtent,
-    );
-
-    final int newOffset = newSelection.extentOffset;
-    return TextSelection.fromPosition(TextPosition(offset: newOffset));
-  }
-
-  /// Return a new selection that has been moved right once.
-  ///
-  /// If it can't be moved right, the original TextSelection is returned.
-  static TextSelection moveGivenSelectionRight(TextSelection selection, String text) {
-    // If the selection is already all the way right, there is nothing to do.
-    if (selection.isCollapsed && selection.extentOffset >= text.length) {
-      return selection;
-    }
-
-    int nextExtent;
-    if (selection.start != selection.end) {
-      nextExtent = selection.end;
-    } else {
-      nextExtent = nextCharacter(selection.extentOffset, text);
-    }
-    final TextSelection nextSelection = selection.copyWith(extentOffset: nextExtent);
-
-    int newOffset = nextSelection.extentOffset;
-    newOffset = nextSelection.baseOffset > nextSelection.extentOffset
-        ? nextSelection.baseOffset : nextSelection.extentOffset;
-    return TextSelection.fromPosition(TextPosition(offset: newOffset));
   }
 
   /// Returns the index into the string of the next character boundary after the
@@ -274,99 +215,6 @@ class TextEditingValue {
     final TextRange nextWord = textMetrics.getWordBoundary(TextPosition(offset: startPoint));
     return nextWord.end;
   }
-
-  /// Return the given [TextSelection] extended left to the beginning of the
-  /// nearest word.
-  ///
-  /// {@macro flutter.rendering.RenderEditable.whiteSpace}
-  ///
-  /// {@macro flutter.rendering.RenderEditable.stopAtReversal}
-  static TextSelection extendGivenSelectionLeftByWord(String text, TextMetrics textMetrics, TextSelection selection, [bool includeWhitespace = true, bool stopAtReversal = false]) {
-    // If the selection is already all the way left, there is nothing to do.
-    if (selection.isCollapsed && selection.extentOffset <= 0) {
-      return selection;
-    }
-
-    final int leftOffset = getLeftByWord(text, textMetrics, selection.extentOffset, includeWhitespace);
-
-    if (stopAtReversal && selection.extentOffset > selection.baseOffset
-        && leftOffset < selection.baseOffset) {
-      return selection.copyWith(
-        extentOffset: selection.baseOffset,
-      );
-    }
-
-    return selection.copyWith(
-      extentOffset: leftOffset,
-    );
-  }
-
-  /// Return the given [TextSelection] extended right to the end of the nearest
-  /// word.
-  ///
-  /// {@macro flutter.rendering.RenderEditable.whiteSpace}
-  ///
-  /// {@macro flutter.rendering.RenderEditable.stopAtReversal}
-  static TextSelection extendGivenSelectionRightByWord(String text, TextMetrics textMetrics, TextSelection selection, [bool includeWhitespace = true, bool stopAtReversal = false]) {
-    // If the selection is already all the way right, there is nothing to do.
-    if (selection.isCollapsed && selection.extentOffset == text.length) {
-      return selection;
-    }
-
-    final int rightOffset = getRightByWord(text, textMetrics, selection.extentOffset, includeWhitespace);
-
-    if (stopAtReversal && selection.baseOffset > selection.extentOffset
-        && rightOffset > selection.baseOffset) {
-      return selection.copyWith(
-        extentOffset: selection.baseOffset,
-      );
-    }
-
-    return selection.copyWith(
-      extentOffset: rightOffset,
-    );
-  }
-
-  // TODO(justinmc): These static methods that need both the text and selection
-  // should probably just be instance methods.
-  /// Return the given [TextSelection] moved left to the end of the nearest word.
-  ///
-  /// A TextSelection that isn't collapsed will be collapsed and moved from the
-  /// extentOffset.
-  ///
-  /// {@macro flutter.rendering.RenderEditable.stopAtReversal}
-  static TextSelection moveGivenSelectionLeftByWord(String text, TextMetrics textMetrics, TextSelection selection, [bool includeWhitespace = true]) {
-    // If the selection is already all the way left, there is nothing to do.
-    if (selection.isCollapsed && selection.extentOffset <= 0) {
-      return selection;
-    }
-
-    final int leftOffset = getLeftByWord(text, textMetrics, selection.extentOffset, includeWhitespace);
-    return selection.copyWith(
-      baseOffset: leftOffset,
-      extentOffset: leftOffset,
-    );
-  }
-
-  /// Return the given [TextSelection] moved right to the end of the nearest word.
-  ///
-  /// A TextSelection that isn't collapsed will be collapsed and moved from the
-  /// extentOffset.
-  ///
-  /// {@macro flutter.rendering.RenderEditable.stopAtReversal}
-  static TextSelection moveGivenSelectionRightByWord(String text, TextMetrics textMetrics, TextSelection selection, [bool includeWhitespace = true]) {
-    // If the selection is already all the way right, there is nothing to do.
-    if (selection.isCollapsed && selection.extentOffset == text.length) {
-      return selection;
-    }
-
-    final int rightOffset = getRightByWord(text, textMetrics, selection.extentOffset, includeWhitespace);
-    return selection.copyWith(
-      baseOffset: rightOffset,
-      extentOffset: rightOffset,
-    );
-  }
-
 
   /// Creates a copy of this value but with the given fields replaced with the new values.
   TextEditingValue copyWith({

@@ -566,13 +566,21 @@ abstract class TextEditingActionTarget {
       'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).',
     );
     */
-    final TextSelection nextSelection = TextEditingValue.extendGivenSelectionLeftByWord(
-      value.text,
-      textMetrics,
-      value.selection,
-      includeWhitespace,
-      stopAtReversal,
-    );
+    // If the selection is already all the way left, there is nothing to do.
+    if (value.selection.isCollapsed && value.selection.extentOffset <= 0) {
+      return;
+    }
+
+    final int leftOffset = TextEditingValue.getLeftByWord(value.text, textMetrics, value.selection.extentOffset, includeWhitespace);
+
+    late final TextSelection nextSelection;
+    if (stopAtReversal && value.selection.extentOffset > value.selection.baseOffset
+        && leftOffset < value.selection.baseOffset) {
+      nextSelection = value.extendSelectionTo(value.selection.baseOffset);
+    } else {
+      nextSelection = value.extendSelectionTo(leftOffset);
+    }
+
     if (nextSelection == value.selection) {
       return;
     }
@@ -607,13 +615,22 @@ abstract class TextEditingActionTarget {
     if (obscureText) {
       return _extendSelectionToEnd(cause);
     }
-    final TextSelection nextSelection = TextEditingValue.extendGivenSelectionRightByWord(
-      value.text,
-      textMetrics,
-      value.selection,
-      includeWhitespace,
-      stopAtReversal,
-    );
+
+    // If the selection is already all the way right, there is nothing to do.
+    if (value.selection.isCollapsed && value.selection.extentOffset == value.text.length) {
+      return;
+    }
+
+    final int rightOffset = TextEditingValue.getRightByWord(value.text, textMetrics, value.selection.extentOffset, includeWhitespace);
+
+    late final TextSelection nextSelection;
+    if (stopAtReversal && value.selection.baseOffset > value.selection.extentOffset
+        && rightOffset > value.selection.baseOffset) {
+      nextSelection = value.moveSelectionTo(value.selection.baseOffset);
+    } else {
+      nextSelection = value.extendSelectionTo(rightOffset);
+    }
+
     if (nextSelection == value.selection) {
       return;
     }
@@ -741,9 +758,9 @@ abstract class TextEditingActionTarget {
     setSelection(nextSelection, cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingValue.moveSelectionLeft}
-  ///
   /// Move the current [selection] left by one character.
+  ///
+  /// If it can't be moved left, do nothing.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
@@ -752,10 +769,19 @@ abstract class TextEditingActionTarget {
   ///   * [TextEditingValue.moveSelectionLeft], which is used by this method.
   ///   * [moveSelectionRight], which is the same but in the opposite direction.
   void moveSelectionLeft(SelectionChangedCause cause) {
-    final TextSelection nextSelection = TextEditingValue.moveGivenSelectionLeft(
-      value.selection,
-      value.text,
-    );
+    // If the selection is already all the way left, there is nothing to do.
+    if (value.selection.isCollapsed && value.selection.extentOffset <= 0) {
+      return;
+    }
+
+    int previousExtent;
+    if (value.selection.start != value.selection.end) {
+      previousExtent = value.selection.start;
+    } else {
+      previousExtent = TextEditingValue.previousCharacter(value.selection.extentOffset, value.text);
+    }
+    final TextSelection nextSelection = value.moveSelectionTo(previousExtent);
+
     if (nextSelection == value.selection) {
       return;
     }
@@ -763,9 +789,10 @@ abstract class TextEditingActionTarget {
     setSelection(nextSelection, cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingValue.moveSelectionLeftByWord}
-  ///
   /// Move the current [selection] to the previous start of a word.
+  ///
+  /// A TextSelection that isn't collapsed will be collapsed and moved from the
+  /// extentOffset.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
@@ -789,21 +816,23 @@ abstract class TextEditingActionTarget {
       'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).',
     );
     */
-    final TextSelection nextSelection = TextEditingValue.moveGivenSelectionLeftByWord(
-      value.text,
-      textMetrics,
-      value.selection,
-      includeWhitespace,
-    );
+    // If the selection is already all the way left, there is nothing to do.
+    if (value.selection.isCollapsed && value.selection.extentOffset <= 0) {
+      return;
+    }
+
+    final int leftOffset = TextEditingValue.getLeftByWord(value.text, textMetrics, value.selection.extentOffset, includeWhitespace);
+    final TextSelection nextSelection = value.moveSelectionTo(leftOffset);
+
     if (nextSelection == value.selection) {
       return;
     }
     setSelection(nextSelection, cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingValue.moveSelectionRight}
-  ///
   /// Move the current [selection] to the right by one character.
+  ///
+  /// If it can't be moved right, do nothing.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
@@ -812,10 +841,19 @@ abstract class TextEditingActionTarget {
   ///   * [TextEditingValue.moveSelectionRight], which is used by this method.
   ///   * [moveSelectionLeft], which is the same but in the opposite direction.
   void moveSelectionRight(SelectionChangedCause cause) {
-    final TextSelection nextSelection = TextEditingValue.moveGivenSelectionRight(
-      value.selection,
-      value.text,
-    );
+    // If the selection is already all the way right, there is nothing to do.
+    if (value.selection.isCollapsed && value.selection.extentOffset >= value.text.length) {
+      return;
+    }
+
+    int nextExtent;
+    if (value.selection.start != value.selection.end) {
+      nextExtent = value.selection.end;
+    } else {
+      nextExtent = TextEditingValue.nextCharacter(value.selection.extentOffset, value.text);
+    }
+    final TextSelection nextSelection = value.moveSelectionTo(nextExtent);
+
     if (nextSelection == value.selection) {
       return;
     }
@@ -857,9 +895,10 @@ abstract class TextEditingActionTarget {
     setSelection(nextSelection, cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingValue.moveSelectionRightByWord}
-  ///
   /// Move the current [selection] to the next end of a word.
+  ///
+  /// A TextSelection that isn't collapsed will be collapsed and moved from the
+  /// extentOffset.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
@@ -884,12 +923,14 @@ abstract class TextEditingActionTarget {
       'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).',
     );
     */
-    final TextSelection nextSelection = TextEditingValue.moveGivenSelectionRightByWord(
-      value.text,
-      textMetrics,
-      value.selection,
-      includeWhitespace,
-    );
+    // If the selection is already all the way right, there is nothing to do.
+    if (value.selection.isCollapsed && value.selection.extentOffset == value.text.length) {
+      return;
+    }
+
+    final int rightOffset = TextEditingValue.getRightByWord(value.text, textMetrics, value.selection.extentOffset, includeWhitespace);
+    final TextSelection nextSelection = value.moveSelectionTo(rightOffset);
+
     if (nextSelection == value.selection) {
       return;
     }
