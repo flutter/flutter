@@ -1120,8 +1120,7 @@ class WidgetsApp extends StatefulWidget {
 
   /// If true, an inherited MediaQuery will be used. If one if not available, or this is false, one will be built from the window.
   ///
-  /// If set to false [WidgetsApp] build a [MediaQuery] using
-  /// [MediaQuery.fromWindow].
+  /// Cannot be null, defaults to false.
   final bool useExistingMediaQuery;
 
   /// If true, forces the performance overlay to be visible in all instances.
