@@ -1118,10 +1118,12 @@ class WidgetsApp extends StatefulWidget {
   /// {@endtemplate}
   final String? restorationScopeId;
 
+  /// {@template flutter.widgets.widgetsApp.useInheritedMediaQuery}
   /// If true, an inherited MediaQuery will be used. If one is not available,
   /// or this is false, one will be built from the window.
   ///
   /// Cannot be null, defaults to false.
+  /// {@endtemplate}
   final bool useInheritedMediaQuery;
 
   /// If true, forces the performance overlay to be visible in all instances.
