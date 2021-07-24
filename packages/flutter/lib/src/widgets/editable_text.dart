@@ -1599,6 +1599,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   TextMetrics get textMetrics => renderEditable;
 
   // TODO(justinmc): Get rid of _value getter in favor of this getter?
+  // There is also textEditingValue and currentTextEditingValue! All aliases of _value.
   @override
   TextEditingValue get value => _value;
 
@@ -1611,6 +1612,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   bool get selectionEnabled => widget.selectionEnabled;
 
+  // TODO(justinmc): Maybe this logic can move into TextEditingActionTarget?
   @override
   void setSelection(TextSelection nextSelection, SelectionChangedCause cause) {
     if (nextSelection.isValid) {

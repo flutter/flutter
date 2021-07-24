@@ -149,7 +149,7 @@ abstract class TextEditingActionTarget {
     final TextEditingValue nextValue = obscureText
         // When the text is obscured, the whole thing is treated as one big line.
         ? value.deleteToStart()
-        : value.deleteByWord(textMetrics);
+        : value.deleteByWord(textMetrics, includeWhitespace);
 
     setTextEditingValue(nextValue, cause);
   }
@@ -221,7 +221,7 @@ abstract class TextEditingActionTarget {
     final TextEditingValue nextValue = obscureText
         // When the text is obscured, the whole thing is treated as one big word.
         ? value.deleteToEnd()
-        : value.deleteForwardByWord(textMetrics);
+        : value.deleteForwardByWord(textMetrics, includeWhitespace);
 
     setTextEditingValue(nextValue, cause);
   }

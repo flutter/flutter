@@ -475,6 +475,7 @@ class TextEditingValue {
     );
   }
 
+  // TODO(justinmc): Possible to just use a deleteTo?
   /// Deletes the from the current collapsed selection to the start of the field.
   ///
   /// The given SelectionChangedCause indicates the cause of this change and

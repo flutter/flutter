@@ -7978,7 +7978,7 @@ class _MyMoveSelectionRightTextAction extends TextEditingAction<Intent> {
 
   @override
   Object? invoke(Intent intent, [BuildContext? context]) {
-    textEditingActionTarget!.renderEditable.moveSelectionRight(SelectionChangedCause.keyboard);
+    textEditingActionTarget!.moveSelectionRight(SelectionChangedCause.keyboard);
     onInvoke();
   }
 }
