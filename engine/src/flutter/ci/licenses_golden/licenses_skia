@@ -1,4 +1,4 @@
-Signature: 63e2626432a7547d40c0e7386615dcfa
+Signature: 8e7e18aaaed5963f3238c706442678c4
 
 UNUSED LICENSES:
 
@@ -948,6 +948,7 @@ FILE: ../../../third_party/skia/infra/lottiecap/docker/lottie-web-puppeteer/Dock
 FILE: ../../../third_party/skia/infra/project-config/cr-buildbucket.cfg
 FILE: ../../../third_party/skia/infra/project-config/project.cfg
 FILE: ../../../third_party/skia/infra/project-config/refs.cfg
+FILE: ../../../third_party/skia/infra/skcq.json
 FILE: ../../../third_party/skia/infra/wasm-common/docker/emsdk-base/Dockerfile
 FILE: ../../../third_party/skia/infra/wasm-common/docker/gold-karma-chrome-tests/Dockerfile
 FILE: ../../../third_party/skia/infra/wasm-common/docker/karma-chrome-tests/Dockerfile
@@ -3833,14 +3834,14 @@ FILE: ../../../third_party/skia/src/gpu/GrThreadSafeCache.cpp
 FILE: ../../../third_party/skia/src/gpu/GrThreadSafeCache.h
 FILE: ../../../third_party/skia/src/gpu/geometry/GrWangsFormula.h
 FILE: ../../../third_party/skia/src/gpu/mock/GrMockOpTarget.h
+FILE: ../../../third_party/skia/src/gpu/ops/GrDrawAtlasPathOp.cpp
+FILE: ../../../third_party/skia/src/gpu/ops/GrDrawAtlasPathOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrSimpleMeshDrawOpHelperWithStencil.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrSimpleMeshDrawOpHelperWithStencil.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrSmallPathAtlasMgr.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrSmallPathAtlasMgr.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrSmallPathShapeData.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrSmallPathShapeData.h
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrDrawAtlasPathOp.cpp
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrDrawAtlasPathOp.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrMiddleOutPolygonTriangulator.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeIterator.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrVectorXform.h
@@ -5097,6 +5098,8 @@ FILE: ../../../third_party/skia/src/core/SkMalloc.cpp
 FILE: ../../../third_party/skia/src/core/SkPixelRefPriv.h
 FILE: ../../../third_party/skia/src/core/SkTextBlobTrace.cpp
 FILE: ../../../third_party/skia/src/core/SkTextBlobTrace.h
+FILE: ../../../third_party/skia/src/gpu/ops/GrAtlasPathRenderer.cpp
+FILE: ../../../third_party/skia/src/gpu/ops/GrAtlasPathRenderer.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathInnerTriangulateOp.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathInnerTriangulateOp.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrTessellationPathRenderer.cpp
@@ -5439,7 +5442,7 @@ FILE: ../../../third_party/skia/gm/gpu_blur_utils.cpp
 FILE: ../../../third_party/skia/src/gpu/GrFinishCallbacks.cpp
 FILE: ../../../third_party/skia/src/gpu/GrFinishCallbacks.h
 FILE: ../../../third_party/skia/src/gpu/GrVx.h
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrAtlasInstancedHelper.cpp
+FILE: ../../../third_party/skia/src/gpu/ops/GrAtlasInstancedHelper.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeHardwareTessellator.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeHardwareTessellator.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeTessellateOp.cpp
@@ -5707,7 +5710,9 @@ FILE: ../../../third_party/skia/include/sksl/DSLWrapper.h
 FILE: ../../../third_party/skia/src/core/SkStringView.cpp
 FILE: ../../../third_party/skia/src/gpu/GrVertexChunkArray.cpp
 FILE: ../../../third_party/skia/src/gpu/GrVertexChunkArray.h
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrAtlasInstancedHelper.h
+FILE: ../../../third_party/skia/src/gpu/effects/GrModulateAtlasCoverageEffect.cpp
+FILE: ../../../third_party/skia/src/gpu/effects/GrModulateAtlasCoverageEffect.h
+FILE: ../../../third_party/skia/src/gpu/ops/GrAtlasInstancedHelper.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathCurveTessellator.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathCurveTessellator.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathStencilCoverOp.cpp
@@ -5720,8 +5725,6 @@ FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathWedgeTessellator.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeFixedCountTessellator.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeFixedCountTessellator.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeTessellator.h
-FILE: ../../../third_party/skia/src/gpu/tessellate/shaders/GrModulateAtlasCoverageFP.cpp
-FILE: ../../../third_party/skia/src/gpu/tessellate/shaders/GrModulateAtlasCoverageFP.h
 FILE: ../../../third_party/skia/src/sksl/SkSLDSLParser.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLDSLParser.h
 FILE: ../../../third_party/skia/src/sksl/SkSLMangler.cpp
