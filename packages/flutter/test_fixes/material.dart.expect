@@ -302,4 +302,61 @@ void main() {
   renderObjectToWidgetElement.insertRenderObjectChild(renderObject, object);
   renderObjectToWidgetElement.moveRenderObjectChild(renderObject, object);
   renderObjectToWidgetElement.removeRenderObjectChild(renderObject);
+
+  // Changes made in https://github.com/flutter/flutter/pull/81336
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData(colorScheme: ColorScheme.fromSwatch().copyWith(secondary: Colors.red));
+  themeData = ThemeData(colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue).copyWith(secondary: Colors.red));
+  themeData = ThemeData(colorScheme: ColorScheme.light().copyWith(secondary: Colors.red));
+  themeData = ThemeData(colorScheme: ColorScheme.light().copyWith(primarySwatch: Colors.blue, secondary: Colors.red));
+  themeData = ThemeData.raw(colorScheme: ColorScheme.fromSwatch().copyWith(secondary: Colors.red));
+  themeData = ThemeData.raw(colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue).copyWith(secondary: Colors.red));
+  themeData = ThemeData.raw(colorScheme: ColorScheme.light().copyWith(secondary: Colors.red));
+  themeData = ThemeData.raw(colorScheme: ColorScheme.light().copyWith(primarySwatch: Colors.blue, secondary: Colors.red));
+  themeData = themeData.copyWith(colorScheme: ColorScheme.fromSwatch().copyWith(secondary: Colors.red));
+  themeData = themeData.copyWith(colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue).copyWith(secondary: Colors.red));
+  themeData = themeData.copyWith(colorScheme: ColorScheme.light().copyWith(secondary: Colors.red));
+  themeData = themeData.copyWith(colorScheme: ColorScheme.light().copyWith(primarySwatch: Colors.blue, secondary: Colors.red));
+  themeData.colorScheme.secondary;
+
+  // Changes made in https://github.com/flutter/flutter/pull/81336
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData();
+  themeData = ThemeData.raw();
+  themeData = themeData.copyWith();
+  themeData.accentColorBrightness; // Removing field reference not supported.
+
+  // Changes made in https://github.com/flutter/flutter/pull/81336
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData();
+  themeData = ThemeData.raw();
+  themeData = themeData.copyWith();
+  themeData.accentTextTheme; // Removing field reference not supported.
+
+  // Changes made in https://github.com/flutter/flutter/pull/81336
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData();
+  themeData = ThemeData.raw();
+  themeData = themeData.copyWith();
+  themeData.accentIconTheme; // Removing field reference not supported.
+
+  // Changes made in https://github.com/flutter/flutter/pull/81336
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData();
+  themeData = ThemeData.raw();
+  themeData = themeData.copyWith();
+  themeData.buttonColor; // Removing field reference not supported.
+
+  // Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  ListWheelScrollView listWheelScrollView = ListWheelScrollView();
+  listWheelScrollView = ListWheelScrollView(clipBehavior: Clip.hardEdge);
+  listWheelScrollView = ListWheelScrollView(clipBehavior: Clip.none);
+  listWheelScrollView = ListWheelScrollView.useDelegate();
+  listWheelScrollView = ListWheelScrollView.useDelegate(clipBehavior: Clip.hardEdge);
+  listWheelScrollView = ListWheelScrollView.useDelegate(clipBehavior: Clip.none);
+  listWheelScrollView.clipBehavior;
+  ListWheelViewport listWheelViewport = ListWheelViewport();
+  listWheelViewport = ListWheelViewport(clipBehavior: Clip.hardEdge);
+  listWheelViewport = ListWheelViewport(clipBehavior: Clip.none);
+  listWheelViewport.clipBehavior;
 }

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:convert' show Encoding, json;
 import 'dart:io';
@@ -20,12 +18,12 @@ import 'utils.dart';
 typedef ProcessRunSync = ProcessResult Function(
   String,
   List<String>, {
-  Map<String, String> environment,
+  Map<String, String>? environment,
   bool includeParentEnvironment,
   bool runInShell,
-  Encoding stderrEncoding,
-  Encoding stdoutEncoding,
-  String workingDirectory,
+  Encoding? stderrEncoding,
+  Encoding? stdoutEncoding,
+  String? workingDirectory,
 });
 
 /// Class for test runner to interact with Flutter's infrastructure service, Cocoon.
@@ -34,8 +32,8 @@ typedef ProcessRunSync = ProcessResult Function(
 /// To retrieve these results, the test runner needs to send results back so the database can be updated.
 class Cocoon {
   Cocoon({
-    String serviceAccountTokenPath,
-    @visibleForTesting Client httpClient,
+    String? serviceAccountTokenPath,
+    @visibleForTesting Client? httpClient,
     @visibleForTesting this.fs = const LocalFileSystem(),
     @visibleForTesting this.processRunSync = Process.runSync,
     @visibleForTesting this.requestRetryLimit = 5,
@@ -49,6 +47,9 @@ class Cocoon {
   /// Url used to send results to.
   static const String baseCocoonApiUrl = 'https://flutter-dashboard.appspot.com/api';
 
+  /// Threshold to auto retry a failed test.
+  static const int retryNumber = 2;
+
   /// Underlying [FileSystem] to use.
   final FileSystem fs;
 
@@ -58,7 +59,7 @@ class Cocoon {
   final int requestRetryLimit;
 
   String get commitSha => _commitSha ?? _readCommitSha();
-  String _commitSha;
+  String? _commitSha;
 
   /// Parse the local repo for the current running commit.
   String _readCommitSha() {
@@ -76,49 +77,37 @@ class Cocoon {
   /// 1. Run DeviceLab test, writing results to a known path
   /// 2. Request service account token from luci auth (valid for at least 3 minutes)
   /// 3. Upload results from (1) to Cocoon
-  Future<void> sendResultsPath(String resultsPath) async {
-    final File resultFile = fs.file(resultsPath);
-    final Map<String, dynamic> resultsJson = json.decode(await resultFile.readAsString()) as Map<String, dynamic>;
-    await _sendUpdateTaskRequest(resultsJson);
-  }
-
-  /// Send [TaskResult] to Cocoon.
-  // TODO(chillers): Remove when sendResultsPath is used in prod. https://github.com/flutter/flutter/issues/72457
-  Future<void> sendTaskResult({
-    @required String builderName,
-    @required TaskResult result,
-    @required String gitBranch,
+  ///
+  /// The `resultsPath` is not available for all tests. When it doesn't show up, we
+  /// need to append `CommitBranch`, `CommitSha`, and `BuilderName`.
+  Future<void> sendResultsPath({
+    String? resultsPath,
+    bool? isTestFlaky,
+    String? gitBranch,
+    String? builderName,
+    String? testStatus,
   }) async {
-    assert(builderName != null);
-    assert(gitBranch != null);
-    assert(result != null);
-
-    // Skip logging on test runs
-    Logger.root.level = Level.ALL;
-    Logger.root.onRecord.listen((LogRecord rec) {
-      print('${rec.level.name}: ${rec.time}: ${rec.message}');
-    });
-
-    final Map<String, dynamic> updateRequest = _constructUpdateRequest(
-      gitBranch: gitBranch,
-      builderName: builderName,
-      result: result,
-    );
-    await _sendUpdateTaskRequest(updateRequest);
+    Map<String, dynamic> resultsJson = <String, dynamic>{};
+    if (resultsPath != null) {
+      final File resultFile = fs.file(resultsPath);
+      resultsJson = json.decode(await resultFile.readAsString()) as Map<String, dynamic>;
+    } else {
+      resultsJson['CommitBranch'] = gitBranch;
+      resultsJson['CommitSha'] = commitSha;
+      resultsJson['BuilderName'] = builderName;
+      resultsJson['NewStatus'] = testStatus;
+    }
+    resultsJson['TestFlaky'] = isTestFlaky ?? false;
+    await _sendUpdateTaskRequest(resultsJson);
   }
 
   /// Write the given parameters into an update task request and store the JSON in [resultsPath].
   Future<void> writeTaskResultToFile({
-    @required String builderName,
-    @required String gitBranch,
-    @required TaskResult result,
-    @required String resultsPath,
+    String? builderName,
+    String? gitBranch,
+    required TaskResult result,
+    required String resultsPath,
   }) async {
-    assert(builderName != null);
-    assert(gitBranch != null);
-    assert(result != null);
-    assert(resultsPath != null);
-
     final Map<String, dynamic> updateRequest = _constructUpdateRequest(
       gitBranch: gitBranch,
       builderName: builderName,
@@ -134,9 +123,9 @@ class Cocoon {
   }
 
   Map<String, dynamic> _constructUpdateRequest({
-    @required String builderName,
-    @required TaskResult result,
-    @required String gitBranch,
+    String? builderName,
+    required TaskResult result,
+    String? gitBranch,
   }) {
     final Map<String, dynamic> updateRequest = <String, dynamic>{
       'CommitBranch': gitBranch,
@@ -151,12 +140,12 @@ class Cocoon {
 
     final List<String> validScoreKeys = <String>[];
     if (result.benchmarkScoreKeys != null) {
-      for (final String scoreKey in result.benchmarkScoreKeys) {
-        final Object score = result.data[scoreKey];
+      for (final String scoreKey in result.benchmarkScoreKeys!) {
+        final Object score = result.data![scoreKey] as Object;
         if (score is num) {
           // Convert all metrics to double, which provide plenty of precision
           // without having to add support for multiple numeric types in Cocoon.
-          result.data[scoreKey] = score.toDouble();
+          result.data![scoreKey] = score.toDouble();
           validScoreKeys.add(scoreKey);
         }
       }
@@ -195,15 +184,15 @@ class Cocoon {
 class AuthenticatedCocoonClient extends BaseClient {
   AuthenticatedCocoonClient(
     this._serviceAccountTokenPath, {
-    @visibleForTesting Client httpClient,
-    @visibleForTesting FileSystem filesystem,
+    @visibleForTesting Client? httpClient,
+    @visibleForTesting FileSystem? filesystem,
   })  : _delegate = httpClient ?? Client(),
         _fs = filesystem ?? const LocalFileSystem();
 
   /// Authentication token to have the ability to upload and record test results.
   ///
   /// This is intended to only be passed on automated runs on LUCI post-submit.
-  final String _serviceAccountTokenPath;
+  final String? _serviceAccountTokenPath;
 
   /// Underlying [HttpClient] to send requests to.
   final Client _delegate;
@@ -213,7 +202,7 @@ class AuthenticatedCocoonClient extends BaseClient {
 
   /// Value contained in the service account token file that can be used in http requests.
   String get serviceAccountToken => _serviceAccountToken ?? _readServiceAccountTokenFile();
-  String _serviceAccountToken;
+  String? _serviceAccountToken;
 
   /// Get [serviceAccountToken] from the given service account file.
   String _readServiceAccountTokenFile() {

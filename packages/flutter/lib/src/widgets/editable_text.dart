@@ -1721,12 +1721,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       widget.focusNode.addListener(_handleFocusChanged);
       updateKeepAlive();
     }
+
     if (!_shouldCreateInputConnection) {
       _closeInputConnectionIfNeeded();
-    } else {
-      if (oldWidget.readOnly && _hasFocus) {
-        _openInputConnection();
-      }
+    } else if (oldWidget.readOnly && _hasFocus) {
+      _openInputConnection();
     }
 
     if (kIsWeb && _hasInputConnection) {
@@ -2340,8 +2339,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void didChangeMetrics() {
-    if (_lastBottomViewInset < WidgetsBinding.instance!.window.viewInsets.bottom) {
-      _scheduleShowCaretOnScreen();
+    if (_lastBottomViewInset != WidgetsBinding.instance!.window.viewInsets.bottom) {
+      SchedulerBinding.instance!.addPostFrameCallback((Duration _) {
+        _selectionOverlay?.updateForScroll();
+      });
+      if (_lastBottomViewInset < WidgetsBinding.instance!.window.viewInsets.bottom) {
+        _scheduleShowCaretOnScreen();
+      }
     }
     _lastBottomViewInset = WidgetsBinding.instance!.window.viewInsets.bottom;
   }

@@ -6,9 +6,11 @@
 
 import 'dart:async';
 
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/devtools_launcher.dart';
 import 'package:flutter_tools/src/resident_devtools_handler.dart';
@@ -75,6 +77,12 @@ final FakeVmServiceRequest listViews = FakeVmServiceRequest(
 );
 
 void main() {
+  Cache.flutterRoot = '';
+  final MemoryFileSystem fakefs = MemoryFileSystem.test()
+    ..directory('bin').createSync()
+    ..directory('bin/internal').createSync()
+    ..file('bin/internal/devtools.version').writeAsStringSync('1.0.0');
+
   testWithoutContext('Does not serve devtools if launcher is null', () async {
     final ResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
       null,
@@ -102,6 +110,7 @@ void main() {
   testWithoutContext('Can use devtools with existing devtools URI', () async {
     final DevtoolsServerLauncher launcher = DevtoolsServerLauncher(
       processManager: FakeProcessManager.empty(),
+      fileSystem: fakefs,
       pubExecutable: 'pub',
       logger: BufferLogger.test(),
       platform: FakePlatform(),

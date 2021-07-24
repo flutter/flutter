@@ -95,6 +95,77 @@ flutter drive \
   -d web-server
 ```
 
+### Screenshots
+
+You can use `integration_test` to take screenshots of the UI rendered on the mobile device or
+Web browser at a specific time during the test.
+
+This feature is currently supported on Android, and Web.
+
+#### Android
+
+**integration_test/screenshot_test.dart**
+
+```dart
+void main() {
+  final IntegrationTestWidgetsFlutterBinding binding =
+      IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+
+  testWidgets('screenshot', (WidgetTester tester) async {
+    // Build the app.
+    app.main();
+
+    // This is required prior to taking the screenshot.
+    await binding.convertFlutterSurfaceToImage();
+
+    // Trigger a frame.
+    await tester.pumpAndSettle();
+    await binding.takeScreenshot('screenshot-1');
+  });
+}
+```
+
+You can use a driver script to pull in the screenshot from the device.
+This way, you can store the images locally on your computer.
+
+**test_driver/integration_test.dart**
+
+```dart
+import 'dart:io';
+import 'package:integration_test/integration_test_driver_extended.dart';
+
+Future<void> main() async {
+  await integrationDriver(
+    onScreenshot: (String screenshotName, List<int> screenshotBytes) async {
+      final File image = File('$screenshotName.png');
+      image.writeAsBytesSync(screenshotBytes);
+      // Return false if the screenshot is invalid.
+      return true;
+    },
+  );
+}
+```
+
+#### Web
+
+**integration_test/screenshot_test.dart**
+
+```dart
+void main() {
+  final IntegrationTestWidgetsFlutterBinding binding =
+      IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+
+  testWidgets('screenshot', (WidgetTester tester) async {
+    // Build the app.
+    app.main();
+
+    // Trigger a frame.
+    await tester.pumpAndSettle();
+    await binding.takeScreenshot('screenshot-1');
+  });
+}
+```
+
 ## Android Device Testing
 
 Create an instrumentation test file in your application's

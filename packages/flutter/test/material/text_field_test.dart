@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' as ui show window, BoxHeightStyle, BoxWidthStyle;
+import 'dart:ui' as ui show window, BoxHeightStyle, BoxWidthStyle, WindowPadding;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -146,6 +146,26 @@ class TestFormatter extends TextInputFormatter {
     onFormatEditUpdate(oldValue, newValue);
     return newValue;
   }
+}
+
+// Used to set window.viewInsets since the real ui.WindowPadding has only a
+// private constructor.
+class _TestWindowPadding implements ui.WindowPadding {
+  const _TestWindowPadding({
+    required this.bottom,
+  });
+
+  @override
+  final double bottom;
+
+  @override
+  double get top => 0.0;
+
+  @override
+  double get left => 0.0;
+
+  @override
+  double get right => 0.0;
 }
 
 void main() {
@@ -813,13 +833,28 @@ void main() {
         ),
       ),
     );
+    final EditableTextState editableTextState = tester.state(find.byType(EditableText));
 
-    final Offset textfieldStart = tester.getTopLeft(find.byKey(const Key('field0')));
-
-    await tester.longPressAt(textfieldStart + const Offset(50.0, 2.0));
+    // Double tap to select the first word.
+    const int index = 4;
+    await tester.tapAt(textOffsetToPosition(tester, index));
     await tester.pump(const Duration(milliseconds: 50));
-    await tester.tapAt(textfieldStart + const Offset(100.0, 107.0));
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.tapAt(textOffsetToPosition(tester, index));
+    await tester.pumpAndSettle();
+    expect(editableTextState.selectionOverlay!.handlesAreVisible, isTrue);
+    expect(controller.selection.baseOffset, 0);
+    expect(controller.selection.extentOffset, 7);
+
+    // Use toolbar to select all text.
+    if (isContextMenuProvidedByPlatform) {
+      controller.selection = TextSelection(baseOffset: 0, extentOffset: controller.text.length);
+      expect(controller.selection.extentOffset, controller.text.length);
+    } else {
+      await tester.tap(find.text('Select all'));
+      await tester.pump();
+      expect(controller.selection.baseOffset, 0);
+      expect(controller.selection.extentOffset, controller.text.length);
+    }
 
     await expectLater(
       find.byType(MaterialApp),
@@ -2119,6 +2154,77 @@ void main() {
       await _showSelectionMenuAt(tester, controller, testValue.indexOf('e'));
 
       // Verify the selection toolbar position
+      toolbarTopLeft = tester.getTopLeft(find.text('Select all'));
+      textFieldTopLeft = tester.getTopLeft(find.byType(TextField));
+      expect(toolbarTopLeft.dy, lessThan(textFieldTopLeft.dy));
+    },
+    skip: isContextMenuProvidedByPlatform,
+  );
+
+  testWidgets(
+    'the toolbar adjusts its position above/below when bottom inset changes',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 48.0,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    IntrinsicHeight(
+                      child: TextField(
+                        controller: controller,
+                        expands: true,
+                        minLines: null,
+                        maxLines: null,
+                      ),
+                    ),
+                    const SizedBox(height: 325.0),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      const String testValue = 'abc def ghi';
+      await tester.enterText(find.byType(TextField), testValue);
+      await skipPastScrollingAnimation(tester);
+
+      await _showSelectionMenuAt(tester, controller, testValue.indexOf('e'));
+
+      // Verify the selection toolbar position is above the text.
+      expect(find.text('Select all'), findsOneWidget);
+      Offset toolbarTopLeft = tester.getTopLeft(find.text('Select all'));
+      Offset textFieldTopLeft = tester.getTopLeft(find.byType(TextField));
+      expect(toolbarTopLeft.dy, lessThan(textFieldTopLeft.dy));
+
+      // Add a viewInset tall enough to push the field to the top, where there
+      // is no room to display the toolbar above. This is similar to when the
+      // keyboard is shown.
+      tester.binding.window.viewInsetsTestValue = const _TestWindowPadding(
+        bottom: 500.0,
+      );
+      addTearDown(tester.binding.window.clearViewInsetsTestValue);
+      await tester.pumpAndSettle();
+
+      // Verify the selection toolbar position is below the text.
+      toolbarTopLeft = tester.getTopLeft(find.text('Select all'));
+      textFieldTopLeft = tester.getTopLeft(find.byType(TextField));
+      expect(toolbarTopLeft.dy, greaterThan(textFieldTopLeft.dy));
+
+      // Remove the viewInset, as if the keyboard were hidden.
+      tester.binding.window.clearViewInsetsTestValue();
+      await tester.pumpAndSettle();
+
+      // Verify the selection toolbar position is below the text.
       toolbarTopLeft = tester.getTopLeft(find.text('Select all'));
       textFieldTopLeft = tester.getTopLeft(find.byType(TextField));
       expect(toolbarTopLeft.dy, lessThan(textFieldTopLeft.dy));
