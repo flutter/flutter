@@ -1118,7 +1118,8 @@ class WidgetsApp extends StatefulWidget {
   /// {@endtemplate}
   final String? restorationScopeId;
 
-  /// If true, an inherited MediaQuery will be used. If one if not available, or this is false, one will be built from the window.
+  /// If true, an inherited MediaQuery will be used. If one is not available,
+  /// or this is false, one will be built from the window.
   ///
   /// Cannot be null, defaults to false.
   final bool useInheritedMediaQuery;
