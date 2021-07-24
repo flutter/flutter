@@ -17,6 +17,7 @@ import 'dart:ui' show
 import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
+import '../../services.dart';
 import 'autofill.dart';
 import 'message_codec.dart';
 import 'platform_channel.dart';
@@ -794,8 +795,8 @@ enum SelectionChangedCause {
   drag,
 }
 
-/// A mixin for manipulating the selection, to be used by the implementer
-/// of the toolbar widget.
+/// A mixin for manipulating the selection, provided for toolbar or shortcut
+/// keys.
 mixin TextSelectionDelegate {
   /// Gets the current text input.
   TextEditingValue get textEditingValue;
@@ -846,6 +847,127 @@ mixin TextSelectionDelegate {
 
   /// Whether select all is enabled, must not be null.
   bool get selectAllEnabled => true;
+
+  /// Cut current [selection] to Clipboard.
+  ///
+  /// If [cause] is [SelectionChangedCause.toolBar], the position of
+  /// [bringIntoView] to selection will be called and hide toolBar.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.cause}
+  void cutSelection(SelectionChangedCause cause) {
+    final TextSelection selection = textEditingValue.selection;
+    final String text = textEditingValue.text;
+    Clipboard.setData(ClipboardData(
+      text: selection.textInside(text),
+    ));
+    userUpdateTextEditingValue(
+      TextEditingValue(
+        text: selection.textBefore(text) + selection.textAfter(text),
+        selection: TextSelection.collapsed(
+          offset: selection.start,
+        ),
+      ),
+      cause,
+    );
+
+    if (cause == SelectionChangedCause.toolBar) {
+      bringIntoView(textEditingValue.selection.extent);
+      hideToolbar();
+    }
+  }
+
+  /// Paste text from [Clipboard].
+  ///
+  /// If there is currently a selection, it will be replaced.
+  ///
+  /// If [cause] is [SelectionChangedCause.toolBar], the position of
+  /// [bringIntoView] to selection will be called and hide toolBar.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.cause}
+  Future<void> pasteText(SelectionChangedCause cause) async {
+    final TextEditingValue value = textEditingValue; // Snapshot the input before using `await`.
+    // Snapshot the input before using `await`.
+    // See https://github.com/flutter/flutter/issues/11427
+    final ClipboardData? data = await Clipboard.getData(Clipboard.kTextPlain);
+    if (data != null) {
+      userUpdateTextEditingValue(
+        TextEditingValue(
+          text: value.selection.textBefore(value.text)
+              + data.text!
+              + value.selection.textAfter(value.text),
+          selection: TextSelection.collapsed(
+            offset: value.selection.start + data.text!.length,
+          ),
+        ),
+        cause,
+      );
+    }
+    if (cause == SelectionChangedCause.toolBar) {
+      bringIntoView(textEditingValue.selection.extent);
+      hideToolbar();
+    }
+  }
+
+  /// Set the current [selection] to contain the entire text value.
+  ///
+  /// If [cause] is [SelectionChangedCause.toolBar], the position of
+  /// [bringIntoView] to selection will be called.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.cause}
+  void selectAll(SelectionChangedCause cause) {
+    userUpdateTextEditingValue(
+      TextEditingValue(
+        text: textEditingValue.text,
+        selection: textEditingValue.selection.copyWith(
+          baseOffset: 0,
+          extentOffset: textEditingValue.text.length,
+        ),
+      ),
+      cause,
+    );
+    if (cause == SelectionChangedCause.toolBar) {
+      bringIntoView(textEditingValue.selection.extent);
+    }
+  }
+
+  /// Copy current [selection] to [Clipboard].
+  ///
+  /// If [cause] is [SelectionChangedCause.toolBar], the position of
+  /// [bringIntoView] to selection will be called and hide toolBar.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.cause}
+  void copySelection(SelectionChangedCause cause) {
+    final TextEditingValue value = textEditingValue;
+    Clipboard.setData(ClipboardData(
+      text: value.selection.textInside(value.text),
+    ));
+
+    if (cause == SelectionChangedCause.toolBar) {
+      bringIntoView(textEditingValue.selection.extent);
+
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+        // Hide the toolbar, but keep the selection and keep the handles.
+          hideToolbar(false);
+          break;
+        case TargetPlatform.macOS:
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+        // Collapse the selection and hide the toolbar and handles.
+          userUpdateTextEditingValue(
+            TextEditingValue(
+              text: value.text,
+              selection: TextSelection.collapsed(offset: value.selection.end),
+            ),
+            cause,
+          );
+          hideToolbar(false);
+          break;
+      }
+    }
+  }
 }
 
 /// An interface to receive information from [TextInput].

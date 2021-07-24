@@ -2163,23 +2163,20 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   void selectAll(SelectionChangedCause cause) {
-    _setSelection(
-      selection!.copyWith(
-        baseOffset: 0,
-        extentOffset: textSelectionDelegate.textEditingValue.text.length,
-      ),
-      cause,
-    );
+    textSelectionDelegate.selectAll(cause);
   }
 
   /// Copy current [selection] to [Clipboard].
-  void copySelection() {
+  ///
+  /// {@macro flutter.rendering.RenderEditable.cause}
+  void copySelection(SelectionChangedCause cause) {
     final TextSelection selection = textSelectionDelegate.textEditingValue.selection;
-    final String text = textSelectionDelegate.textEditingValue.text;
     assert(selection != null);
-    if (!selection.isCollapsed) {
-      Clipboard.setData(ClipboardData(text: selection.textInside(text)));
+    if (selection.isCollapsed) {
+      return;
     }
+
+    textSelectionDelegate.copySelection(cause);
   }
 
   /// Cut current [selection] to Clipboard.
@@ -2190,18 +2187,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       return;
     }
     final TextSelection selection = textSelectionDelegate.textEditingValue.selection;
-    final String text = textSelectionDelegate.textEditingValue.text;
     assert(selection != null);
-    if (!selection.isCollapsed) {
-      Clipboard.setData(ClipboardData(text: selection.textInside(text)));
-      _setTextEditingValue(
-        TextEditingValue(
-          text: selection.textBefore(text) + selection.textAfter(text),
-          selection: TextSelection.collapsed(offset: math.min(selection.start, selection.end)),
-        ),
-        cause,
-      );
+    if (selection.isCollapsed) {
+      return;
     }
+
+    textSelectionDelegate.cutSelection(cause);
   }
 
   /// Paste text from [Clipboard].
@@ -2214,22 +2205,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       return;
     }
     final TextSelection selection = textSelectionDelegate.textEditingValue.selection;
-    final String text = textSelectionDelegate.textEditingValue.text;
     assert(selection != null);
-    // Snapshot the input before using `await`.
-    // See https://github.com/flutter/flutter/issues/11427
-    final ClipboardData? data = await Clipboard.getData(Clipboard.kTextPlain);
-    if (data != null && selection.isValid) {
-      _setTextEditingValue(
-          TextEditingValue(
-            text: selection.textBefore(text) + data.text! + selection.textAfter(text),
-            selection: TextSelection.collapsed(
-                offset: math.min(selection.start, selection.end) + data.text!.length,
-            ),
-          ),
-          cause,
-      );
+    if (!selection.isValid) {
+      return;
     }
+
+    textSelectionDelegate.pasteText(cause);
   }
 
   @override
