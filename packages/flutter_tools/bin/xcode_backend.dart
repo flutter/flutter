@@ -94,9 +94,11 @@ class Context {
       args,
       workingDirectory: workingDirectory,
     );
-    echo(result.stdout as String);
+    if (verbose) {
+      print((result.stdout as String).trim());
+    }
     if ((result.stderr as String).isNotEmpty) {
-      echoError(result.stderr as String);
+      echoError((result.stderr as String).trim());
     }
     if (!allowFail && result.exitCode != 0) {
       stderr.write('${result.stderr}\n');
@@ -452,9 +454,7 @@ class Context {
     );
 
     if (result.exitCode != 0) {
-      echo(result.stdout as String);
-      echoError(result.stderr as String);
-      echoError('\nFailed to package $projectPath.');
+      echoError('Failed to package $projectPath.');
       exitApp(-1);
     }
 
