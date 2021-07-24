@@ -7504,7 +7504,7 @@ void main() {
         const TextSelection(
           baseOffset: 9,
           extentOffset: 0,
-          affinity: TextAffinity.downstream,
+          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',
@@ -7527,7 +7527,7 @@ void main() {
         const TextSelection(
           baseOffset: 9,
           extentOffset: 0,
-          affinity: TextAffinity.downstream,
+          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',

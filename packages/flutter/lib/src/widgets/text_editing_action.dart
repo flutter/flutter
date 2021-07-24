@@ -271,7 +271,7 @@ abstract class TextEditingActionTarget {
       return moveSelectionToEnd(cause);
     }
 
-    setSelection(value.expandSelectionTo(value.text.length), cause);
+    setSelection(value.expandSelectionTo(value.text.length, true), cause);
   }
 
   /// Expand the current [selection] to the start of the field.
@@ -295,7 +295,7 @@ abstract class TextEditingActionTarget {
       return moveSelectionToStart(cause);
     }
 
-    setSelection(value.expandSelectionTo(0), cause);
+    setSelection(value.expandSelectionTo(0, true), cause);
   }
 
   /// {@macro flutter.rendering.TextEditingValue.expandSelectionLeftByLine}

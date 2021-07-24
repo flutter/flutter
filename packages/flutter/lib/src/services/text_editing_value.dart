@@ -748,41 +748,36 @@ class TextEditingValue {
 
   /// Return [selection] expanded to the given [TextPosition].
   ///
-  /// The given [TextPosition] must be outside of [selection].
+  /// If the given [TextPosition] is inside of [selection], then [selection] is
+  /// returned without change.
   ///
   /// The returned selection will always be a strict superset of [selection].
   ///
-  /// If the given position is at the very beginning or end of the text, then
-  /// the [TextSelection.extentOffset] will be placed at the position,
-  /// regardless of the original order of [TextSelection.extentOffset] and
-  /// [TextSelection.baseOffset]. For any other position, the order of the two
-  /// offsets will be preserved.
+  /// If extentAtIndex is true, then the [TextSelection.extentOffset] will be
+  /// placed at the given index regardless of the original order of it and
+  /// [TextSelection.baseOffset]. Otherwise, their order will be preserved.
   ///
   /// See also:
   ///
   ///   * [extendSelectionTo], which is similar but only moves
   ///     [TextSelection.extentOffset].
-  TextSelection expandSelectionTo(int index) {
+  TextSelection expandSelectionTo(int index, [bool extentAtIndex = false]) {
     assert(selection != null);
 
     final int upperOffset = math.min(selection.baseOffset, selection.extentOffset);
     final int lowerOffset = math.max(selection.baseOffset, selection.extentOffset);
-    assert(index <= upperOffset || index >= lowerOffset);
-
-    if (index == 0) {
-      return selection.copyWith(
-        extentOffset: 0,
-        baseOffset: lowerOffset,
-      );
-    } else if (index == text.length) {
-      return selection.copyWith(
-        extentOffset: text.length,
-        baseOffset: upperOffset,
-      );
+    if (index >= upperOffset && index <= lowerOffset) {
+      return selection;
     }
 
-    if (index <= upperOffset) {
-      if (selection.baseOffset < selection.extentOffset) {
+    if (selection.baseOffset <= selection.extentOffset) {
+      if (index <= selection.baseOffset) {
+        if (extentAtIndex) {
+          return selection.copyWith(
+            baseOffset: selection.extentOffset,
+            extentOffset: index,
+          );
+        }
         return selection.copyWith(
           baseOffset: index,
         );
@@ -791,8 +786,14 @@ class TextEditingValue {
         extentOffset: index,
       );
     }
-    if (selection.baseOffset < selection.extentOffset) {
+    if (index <= selection.extentOffset) {
       return selection.copyWith(
+        extentOffset: index,
+      );
+    }
+    if (extentAtIndex) {
+      return selection.copyWith(
+        baseOffset: selection.extentOffset,
         extentOffset: index,
       );
     }
