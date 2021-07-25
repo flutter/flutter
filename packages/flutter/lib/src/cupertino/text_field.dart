@@ -219,7 +219,8 @@ class CupertinoTextField extends StatefulWidget {
   /// The [autocorrect], [autofocus], [clearButtonMode], [dragStartBehavior],
   /// [expands], [maxLengthEnforced], [obscureText], [prefixMode], [readOnly],
   /// [scrollPadding], [suffixMode], [textAlign], [selectionHeightStyle],
-  /// [selectionWidthStyle], and [enableSuggestions] properties must not be null.
+  /// [selectionWidthStyle], [enableSuggestions], and [requestPrivacy]
+  /// properties must not be null.
   ///
   /// See also:
   ///
@@ -294,6 +295,7 @@ class CupertinoTextField extends StatefulWidget {
     this.scrollPhysics,
     this.autofillHints,
     this.restorationId,
+    this.requestPrivacy = false,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -335,6 +337,7 @@ class CupertinoTextField extends StatefulWidget {
          !identical(keyboardType, TextInputType.text),
          'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.',
        ),
+       assert(requestPrivacy != null),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        toolbarOptions = toolbarOptions ?? (obscureText ?
          const ToolbarOptions(
@@ -448,6 +451,7 @@ class CupertinoTextField extends StatefulWidget {
     this.scrollPhysics,
     this.autofillHints,
     this.restorationId,
+    this.requestPrivacy = false,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -489,6 +493,7 @@ class CupertinoTextField extends StatefulWidget {
          !identical(keyboardType, TextInputType.text),
          'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.',
        ),
+       assert(requestPrivacy != null),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        toolbarOptions = toolbarOptions ?? (obscureText ?
          const ToolbarOptions(
@@ -784,6 +789,9 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.material.textfield.restorationId}
   final String? restorationId;
 
+  /// {@macro flutter.services.TextInputConfiguration.requestPrivacy}
+  final bool requestPrivacy;
+
   @override
   State<CupertinoTextField> createState() => _CupertinoTextFieldState();
 
@@ -825,6 +833,7 @@ class CupertinoTextField extends StatefulWidget {
     properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: TextAlign.start));
     properties.add(DiagnosticsProperty<TextAlignVertical>('textAlignVertical', textAlignVertical, defaultValue: null));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('requestPrivacy', requestPrivacy, defaultValue: false));
   }
 }
 
@@ -1221,6 +1230,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             enableInteractiveSelection: widget.enableInteractiveSelection,
             autofillHints: widget.autofillHints,
             restorationId: 'editable',
+            requestPrivacy: widget.requestPrivacy,
           ),
         ),
       ),
