@@ -199,6 +199,7 @@ void main() {
     expect(editableText.obscureText, isFalse);
     expect(editableText.autocorrect, isTrue);
     expect(editableText.enableSuggestions, isTrue);
+    expect(editableText.requestPrivacy, isFalse);
     expect(editableText.textAlign, TextAlign.start);
     expect(editableText.cursorWidth, 2.0);
     expect(editableText.cursorHeight, isNull);
@@ -546,9 +547,9 @@ void main() {
     expect(tester.testTextInput.setClientArgs!['inputAction'], equals('TextInputAction.done'));
   });
 
-  testWidgets('enableSuggestions flag is sent to the engine properly', (WidgetTester tester) async {
+  testWidgets('requestPrivacy flag is sent to the engine properly', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
-    const bool enableSuggestions = false;
+    const bool requestPrivacy = true;
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(devicePixelRatio: 1.0),
@@ -561,7 +562,7 @@ void main() {
               controller: controller,
               backgroundCursorColor: Colors.grey,
               focusNode: focusNode,
-              enableSuggestions: enableSuggestions,
+              requestPrivacy: requestPrivacy,
               style: textStyle,
               cursorColor: cursorColor,
             ),
@@ -573,7 +574,7 @@ void main() {
     await tester.tap(find.byType(EditableText));
     await tester.showKeyboard(find.byType(EditableText));
     await tester.idle();
-    expect(tester.testTextInput.setClientArgs!['enableSuggestions'], enableSuggestions);
+    expect(tester.testTextInput.setClientArgs!['requestPrivacy'], requestPrivacy);
   });
 
   group('smartDashesType and smartQuotesType', () {
