@@ -1194,7 +1194,6 @@ class DecoratedBoxTransition extends AnimatedWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: decoration.value,
-    
       position: position,
       child: child,
     );
@@ -1214,36 +1213,35 @@ class DecoratedBoxTransition extends AnimatedWidget {
 /// above:
 ///
 /// ```dart
-///   late final AnimationController _controller = AnimationController(
-///     duration: const Duration(seconds: 2),
-///     vsync: this,
-///   )..repeat(reverse: true);
-///   late final Animation<AlignmentGeometry> _animation = Tween<AlignmentGeometry>(
-///     begin: Alignment.bottomLeft,
-///     end: Alignment.center,
-///   ).animate(CurvedAnimation(
+/// late final AnimationController _controller = AnimationController(
+///  duration: const Duration(seconds: 2),
+///  vsync: this,
+/// )..repeat(reverse: true);
+/// late final Animation<AlignmentGeometry> _animation = Tween<AlignmentGeometry>(
+///   begin: Alignment.bottomLeft,
+///   end: Alignment.center,
+/// ).animate(
+///  CurvedAnimation(
 ///     parent: _controller,
 ///     curve: Curves.decelerate,
-///   ));
+///  ),
+/// );
 ///
-///   @override
-///   void dispose() {
-///     _controller.dispose();
-///     super.dispose();
-///   }
+/// @override
+/// void dispose() {
+///   _controller.dispose();
+///   super.dispose();
+/// }
 ///
-///   @override
-///   Widget build(BuildContext context) {
-///     return Container(
-///       color: Colors.white,
-///       child: AlignTransition(
-///         alignment: _animation,
-///         child: const Padding(padding: EdgeInsets.all(8),
-///         child: FlutterLogo(size: 150.0),
-///         ),
-///       ),
-///     );
-///   }
+/// @override
+/// Widget build(BuildContext context) {
+///    return Container(
+///      color: Colors.white,
+///      child: AlignTransition(
+///        alignment: _animation,
+///        child: const Padding(padding: EdgeInsets.all(8), child: FlutterLogo()),
+///      ),
+///    );
 /// }
 /// ```
 /// {@end-tool}
