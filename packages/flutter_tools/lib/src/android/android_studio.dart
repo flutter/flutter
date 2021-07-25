@@ -266,7 +266,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
           final String name = directory.basename;
           // An exact match, or something like 'Android Studio 3.0 Preview.app'.
           if (name.startsWith('Android Studio') && name.endsWith('.app')) {
-            candidatePaths.add(directory);   
+            candidatePaths.add(directory);
           } else if (!directory.path.endsWith('.app')) {
             _checkForStudio(directory.path);
           }
