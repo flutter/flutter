@@ -140,6 +140,11 @@ void main() {
     expect(checked, isTrue);
 
     checked = false;
+    await tester.sendKeyEvent(LogicalKeyboardKey.numpadEnter);
+    await tester.pumpAndSettle();
+    expect(checked, isTrue);
+
+    checked = false;
     await tester.sendKeyEvent(LogicalKeyboardKey.gameButtonA);
     await tester.pumpAndSettle();
     expect(checked, isTrue);

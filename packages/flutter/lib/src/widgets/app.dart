@@ -1137,6 +1137,7 @@ class WidgetsApp extends StatefulWidget {
   static const Map<ShortcutActivator, Intent> _defaultShortcuts = <ShortcutActivator, Intent>{
     // Activation
     SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
+    SingleActivator(LogicalKeyboardKey.numpadEnter): ActivateIntent(),
     SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
     SingleActivator(LogicalKeyboardKey.gameButtonA): ActivateIntent(),
 
@@ -1171,6 +1172,7 @@ class WidgetsApp extends StatefulWidget {
     ),
     // On the web, enter activates buttons, but not other controls.
     SingleActivator(LogicalKeyboardKey.enter): ButtonActivateIntent(),
+    SingleActivator(LogicalKeyboardKey.numpadEnter): ButtonActivateIntent(),
 
     // Dismissal
     SingleActivator(LogicalKeyboardKey.escape): DismissIntent(),
@@ -1192,6 +1194,7 @@ class WidgetsApp extends StatefulWidget {
   static const Map<ShortcutActivator, Intent> _defaultAppleOsShortcuts = <ShortcutActivator, Intent>{
     // Activation
     SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
+    SingleActivator(LogicalKeyboardKey.numpadEnter): ActivateIntent(),
     SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
 
     // Dismissal
