@@ -1194,6 +1194,7 @@ class DecoratedBoxTransition extends AnimatedWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: decoration.value,
+    
       position: position,
       child: child,
     );
@@ -1207,7 +1208,46 @@ class DecoratedBoxTransition extends AnimatedWidget {
 /// [Curves.decelerate]:
 ///
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/align_transition.mp4}
+/// 
+/// {@tool dartpad --template=stateful_widget_material_ticker}
+/// The following code implements the [AlignTransition] as seen in the video
+/// above:
 ///
+/// ```dart
+///   late final AnimationController _controller = AnimationController(
+///     duration: const Duration(seconds: 2),
+///     vsync: this,
+///   )..repeat(reverse: true);
+///   late final Animation<AlignmentGeometry> _animation = Tween<AlignmentGeometry>(
+///     begin: Alignment.bottomLeft,
+///     end: Alignment.center,
+///   ).animate(CurvedAnimation(
+///     parent: _controller,
+///     curve: Curves.decelerate,
+///   ));
+///
+///   @override
+///   void dispose() {
+///     _controller.dispose();
+///     super.dispose();
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return Container(
+///       color: Colors.white,
+///       child: AlignTransition(
+///         alignment: _animation,
+///         child: const Padding(padding: EdgeInsets.all(8),
+///         child: FlutterLogo(size: 150.0),
+///         ),
+///       ),
+///     );
+///   }
+/// }
+/// ```
+/// {@end-tool}
+/// 
 /// See also:
 ///
 ///  * [AnimatedAlign], which animates changes to the [alignment] without
