@@ -426,8 +426,8 @@ class EditableText extends StatefulWidget {
   /// [style], [cursorColor], [cursorOpacityAnimates],[backgroundCursorColor],
   /// [enableSuggestions], [paintCursorAboveText], [selectionHeightStyle],
   /// [selectionWidthStyle], [textAlign], [dragStartBehavior], [scrollPadding],
-  /// [dragStartBehavior], [toolbarOptions], [rendererIgnoresPointer], and
-  /// [readOnly] arguments must not be null.
+  /// [dragStartBehavior], [toolbarOptions], [rendererIgnoresPointer],
+  /// [readOnly], and [requestPrivacy] arguments must not be null.
   EditableText({
     Key? key,
     required this.controller,
@@ -1348,6 +1348,7 @@ class EditableText extends StatefulWidget {
   /// than 1.
   final ScrollBehavior? scrollBehavior;
 
+  /// {@macro flutter.services.TextInputConfiguration.requestPrivacy}
   final bool requestPrivacy;
 
   // Infer the keyboard type of an `EditableText` if it's not specified.
