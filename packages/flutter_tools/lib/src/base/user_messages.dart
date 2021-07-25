@@ -143,6 +143,7 @@ class UserMessages {
       '(or visit ${_androidSdkInstallUrl(platform)} for detailed instructions).';
 
   // Messages used in XcodeValidator
+  String xcodeVersion(String version) => 'version $version';
   String xcodeLocation(String location) => 'Xcode at $location';
 
   String xcodeOutdated(String currentVersion, String recommendedVersion) =>

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import '../base/user_messages.dart';
+import '../base/version.dart';
 import '../doctor_validator.dart';
 import 'xcode.dart';
 
@@ -21,7 +22,10 @@ class XcodeValidator extends DoctorValidator {
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
     ValidationType xcodeStatus = ValidationType.missing;
-    String? xcodeVersionInfo;
+
+    final String? xcodeVersionInfo = _xcode.currentVersion == Version.unknown
+      ? null
+      : userMessages.xcodeVersion(_xcode.currentVersion.toString());
 
     final String? xcodeSelectPath = _xcode.xcodeSelectPath;
 
