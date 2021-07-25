@@ -2644,7 +2644,13 @@ class InputDecoration {
 
   /// Optional widget that describes the input field.
   ///
-  /// {@macro flutter.material.inputDecoration.labelText}
+  /// {@template flutter.material.inputDecoration.label}
+  /// When the input field is empty and unfocused, the label is displayed on
+  /// top of the input field (i.e., at the same location on the screen where
+  /// text may be entered in the input field). When the input field receives
+  /// focus (or if the field is non-empty), the label moves above (i.e.,
+  /// vertically adjacent to) the input field.
+  /// {@endtemplate}
   ///
   /// This can be used, for example, to add multiple [TextStyle]'s to a label that would
   /// otherwise be specified using [labelText], which only takes one [TextStyle].
@@ -2688,13 +2694,7 @@ class InputDecoration {
 
   /// Optional text that describes the input field.
   ///
-  /// {@template flutter.material.inputDecoration.labelText}
-  /// When the input field is empty and unfocused, the label is displayed on
-  /// top of the input field (i.e., at the same location on the screen where
-  /// text may be entered in the input field). When the input field receives
-  /// focus (or if the field is non-empty), the label moves above (i.e.,
-  /// vertically adjacent to) the input field.
-  /// {@endtemplate}
+  /// {@macro flutter.material.inputDecoration.label}
   ///
   /// If a more elaborate label is required, consider using [label] instead.
   /// Only one of [label] and [labelText] can be specified.
