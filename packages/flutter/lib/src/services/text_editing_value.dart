@@ -174,26 +174,6 @@ class TextEditingValue {
     return 0;
   }
 
-  /// Return the offset at the start of the nearest word to the left of the
-  /// given offset.
-  ///
-  /// {@macro flutter.rendering.RenderEditable.stopAtReversal}
-  static int getLeftByWord(String text, TextMetrics textMetrics, int offset, [bool includeWhitespace = true]) {
-    // If the offset is already all the way left, there is nothing to do.
-    if (offset <= 0) {
-      return offset;
-    }
-
-    // If we can just return the start of the text without checking for a word.
-    if (offset == 1) {
-      return 0;
-    }
-
-    final int startPoint = previousCharacter(offset, text, includeWhitespace);
-    final TextRange word = textMetrics.getWordBoundary(TextPosition(offset: startPoint));
-    return word.start;
-  }
-
   /// Return the offset at the end of the nearest word to the right of the given
   /// offset.
   ///
@@ -374,25 +354,13 @@ class TextEditingValue {
     return TextEditingValue(text: textBefore, selection: newSelection);
   }
 
-  // TODO(justinmc): Update the references on this whiteSpace template.
-  /// {@template flutter.rendering.TextEditingValue.whiteSpace}
-  /// Deletes a word backwards from the current selection.
+  /// Deletes to the given index.
   ///
-  /// If the [selection] is collapsed, deletes a word before the cursor.
+  /// Returns a new TextEditingValue representing the state after the deletion.
   ///
-  /// If the [selection] is not collapsed, deletes the selection.
-  /// {@endtemplate}
-  ///
-  /// {@template flutter.rendering.RenderEditable.whiteSpace}
-  /// By default, includeWhitespace is set to true, meaning that whitespace can
-  /// be considered a word in itself.  If set to false, the selection will be
-  /// extended past any whitespace and the first word following the whitespace.
-  /// {@endtemplate}
-  ///
-  /// See also:
-  ///
-  ///   * [deleteForwardByWord], which is same but in the opposite direction.
-  TextEditingValue deleteByWord(TextMetrics textMetrics, [bool includeWhitespace = true]) {
+  /// If the selection is not collapsed, deletes the selection regardless of the
+  /// given index.
+  TextEditingValue deleteTo(int index, [bool includeWhitespace = true]) {
     assert(selection != null);
 
     if (!selection.isValid) {
@@ -403,17 +371,28 @@ class TextEditingValue {
       return _deleteNonEmptySelection();
     }
 
-    String textBefore = selection.textBefore(text);
-    if (textBefore.isEmpty) {
+    final String textAfter = selection.textAfter(text);
+    final String textBefore = selection.textBefore(text);
+    if (index == selection.extentOffset) {
       return this;
+    } else if (index < selection.extentOffset) {
+      if (textBefore.isEmpty) {
+        return this;
+      }
+      return TextEditingValue(
+        text: text.substring(0, index) + text.substring(selection.extentOffset, text.length),
+        selection: TextSelection.collapsed(offset: index),
+      );
     }
 
-    final int characterBoundary = getLeftByWord(text, textMetrics, textBefore.length, includeWhitespace);
-    textBefore = textBefore.trimRight().substring(0, characterBoundary);
-
-    final String textAfter = selection.textAfter(text);
-    final TextSelection newSelection = TextSelection.collapsed(offset: characterBoundary);
-    return TextEditingValue(text: textBefore + textAfter, selection: newSelection);
+    if (selection.textAfter(text).isEmpty) {
+      return this;
+    }
+    final String nextText = text.substring(0, selection.extentOffset) + text.substring(index, text.length);
+    return TextEditingValue(
+      text: nextText,
+      selection: TextSelection.collapsed(offset: index - text.length + nextText.length),
+    );
   }
 
   /// {@template flutter.rendering.TextEditingValue.deleteByLine}

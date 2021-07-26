@@ -5,7 +5,7 @@
 import 'dart:math' as math;
 import 'dart:ui' show TextPosition;
 
-import 'package:flutter/services.dart' show Clipboard, ClipboardData, TextMetrics;
+import 'package:flutter/services.dart' show Clipboard, ClipboardData, TextMetrics, TextRange;
 
 import 'actions.dart';
 import 'editable_text.dart';
@@ -96,6 +96,48 @@ abstract class TextEditingActionTarget {
     setSelection(value.extendSelectionTo(0), cause);
   }
 
+  /// Return the offset at the start of the nearest word to the left of the
+  /// given offset.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.stopAtReversal}
+  int _getLeftByWord(int offset, [bool includeWhitespace = true]) {
+    // If the offset is already all the way left, there is nothing to do.
+    if (offset <= 0) {
+      return offset;
+    }
+
+    // If we can just return the start of the text without checking for a word.
+    if (offset == 1) {
+      return 0;
+    }
+
+    final int startPoint = TextEditingValue.previousCharacter(offset, value.text, includeWhitespace);
+    final TextRange word = textMetrics.getWordBoundary(TextPosition(offset: startPoint));
+    return word.start;
+  }
+
+  /// Return the offset at the end of the nearest word to the right of the given
+  /// offset.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.stopAtReversal}
+  int _getRightByWord(int offset, [bool includeWhitespace = true]) {
+    // If the selection is already all the way right, there is nothing to do.
+    if (offset == value.text.length) {
+      return offset;
+    }
+
+    // If we can just return the end of the text without checking for a word.
+    if (offset == value.text.length - 1 || offset == value.text.length) {
+      return value.text.length;
+    }
+
+    final int startPoint = includeWhitespace || !TextEditingValue.isWhitespace(value.text.codeUnitAt(offset))
+        ? offset
+        : TextEditingValue.nextCharacter(offset, value.text, includeWhitespace);
+    final TextRange nextWord = textMetrics.getWordBoundary(TextPosition(offset: startPoint));
+    return nextWord.end;
+  }
+
   /// Deletes backwards from the selection in [textSelectionDelegate].
   ///
   /// This method operates on the text/selection contained in
@@ -122,7 +164,12 @@ abstract class TextEditingActionTarget {
     setTextEditingValue(nextValue, cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingValue.deleteByWord}
+  // TODO(justinmc): Update the references on this whiteSpace template.
+  /// Deletes a word backwards from the current selection.
+  ///
+  /// If the [selection] is collapsed, deletes a word before the cursor.
+  ///
+  /// If the [selection] is not collapsed, deletes the selection.
   ///
   /// If [readOnly] is true, does nothing.
   ///
@@ -146,10 +193,15 @@ abstract class TextEditingActionTarget {
       return;
     }
 
-    final TextEditingValue nextValue = obscureText
-        // When the text is obscured, the whole thing is treated as one big line.
-        ? value.deleteToStart()
-        : value.deleteByWord(textMetrics, includeWhitespace);
+    late final TextEditingValue nextValue;
+    if (obscureText) {
+      // When the text is obscured, the whole thing is treated as one big line.
+      nextValue = value.deleteToStart();
+    } else {
+      String textBefore = value.selection.textBefore(value.text);
+      final int characterBoundary = _getLeftByWord(textBefore.length, includeWhitespace);
+      nextValue = value.deleteTo(characterBoundary, includeWhitespace);
+    }
 
     setTextEditingValue(nextValue, cause);
   }
@@ -571,7 +623,7 @@ abstract class TextEditingActionTarget {
       return;
     }
 
-    final int leftOffset = TextEditingValue.getLeftByWord(value.text, textMetrics, value.selection.extentOffset, includeWhitespace);
+    final int leftOffset = _getLeftByWord(value.selection.extentOffset, includeWhitespace);
 
     late final TextSelection nextSelection;
     if (stopAtReversal && value.selection.extentOffset > value.selection.baseOffset
@@ -621,7 +673,7 @@ abstract class TextEditingActionTarget {
       return;
     }
 
-    final int rightOffset = TextEditingValue.getRightByWord(value.text, textMetrics, value.selection.extentOffset, includeWhitespace);
+    final int rightOffset = _getRightByWord(value.selection.extentOffset, includeWhitespace);
 
     late final TextSelection nextSelection;
     if (stopAtReversal && value.selection.baseOffset > value.selection.extentOffset
@@ -821,7 +873,7 @@ abstract class TextEditingActionTarget {
       return;
     }
 
-    final int leftOffset = TextEditingValue.getLeftByWord(value.text, textMetrics, value.selection.extentOffset, includeWhitespace);
+    final int leftOffset = _getLeftByWord(value.selection.extentOffset, includeWhitespace);
     final TextSelection nextSelection = value.moveSelectionTo(leftOffset);
 
     if (nextSelection == value.selection) {
@@ -928,7 +980,7 @@ abstract class TextEditingActionTarget {
       return;
     }
 
-    final int rightOffset = TextEditingValue.getRightByWord(value.text, textMetrics, value.selection.extentOffset, includeWhitespace);
+    final int rightOffset = _getRightByWord(value.selection.extentOffset, includeWhitespace);
     final TextSelection nextSelection = value.moveSelectionTo(rightOffset);
 
     if (nextSelection == value.selection) {
