@@ -232,7 +232,6 @@ targets:
 
   - name: Linux plugin_dependencies_test
     builder: Linux plugin_dependencies_test
-    bringup: true
     properties:
       tags: >
         ["devicelab","hostonly"]
