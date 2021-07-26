@@ -37,6 +37,17 @@ import 'package:meta/meta.dart';
 
 import '../ui.dart' as ui;
 
+import 'engine/dom_renderer.dart';
+import 'engine/keyboard.dart';
+import 'engine/mouse_cursor.dart';
+import 'engine/navigation/js_url_strategy.dart';
+import 'engine/navigation/url_strategy.dart';
+import 'engine/platform_dispatcher.dart';
+import 'engine/platform_views/content_manager.dart';
+import 'engine/profiler.dart';
+import 'engine/web_experiments.dart';
+import 'engine/window.dart';
+
 export 'engine/alarm_clock.dart';
 
 export 'engine/assets.dart';
@@ -45,11 +56,70 @@ export 'engine/browser_detection.dart';
 
 export 'engine/canvas_pool.dart';
 
+export 'engine/canvaskit/canvas.dart';
+
+export 'engine/canvaskit/canvaskit_api.dart';
+
+export 'engine/canvaskit/canvaskit_canvas.dart';
+
+export 'engine/canvaskit/color_filter.dart';
+
+export 'engine/canvaskit/embedded_views.dart';
+
+export 'engine/canvaskit/font_fallbacks.dart';
+
+export 'engine/canvaskit/fonts.dart';
+
+export 'engine/canvaskit/image.dart';
+
+export 'engine/canvaskit/image_filter.dart';
+
+export 'engine/canvaskit/initialization.dart';
+
+export 'engine/canvaskit/interval_tree.dart';
+
+export 'engine/canvaskit/layer.dart';
+
+export 'engine/canvaskit/layer_scene_builder.dart';
+
+export 'engine/canvaskit/layer_tree.dart';
+
+export 'engine/canvaskit/mask_filter.dart';
+
+export 'engine/canvaskit/n_way_canvas.dart';
+
+export 'engine/canvaskit/painting.dart';
+
+export 'engine/canvaskit/path.dart';
+
+export 'engine/canvaskit/path_metrics.dart';
+
+export 'engine/canvaskit/picture.dart';
+
+export 'engine/canvaskit/picture_recorder.dart';
+
+export 'engine/canvaskit/raster_cache.dart';
+
+export 'engine/canvaskit/rasterizer.dart';
+
+export 'engine/canvaskit/shader.dart';
+
+export 'engine/canvaskit/skia_object_cache.dart';
+
+export 'engine/canvaskit/surface.dart';
+
+export 'engine/canvaskit/surface_factory.dart';
+
+export 'engine/canvaskit/text.dart';
+
+export 'engine/canvaskit/util.dart';
+
+export 'engine/canvaskit/vertices.dart';
+
 export 'engine/clipboard.dart';
 
 export 'engine/color_filter.dart';
 
-import 'engine/dom_renderer.dart';
 export 'engine/dom_renderer.dart';
 
 export 'engine/engine_canvas.dart';
@@ -59,8 +129,6 @@ export 'engine/font_change_util.dart';
 export 'engine/frame_reference.dart';
 
 export 'engine/host_node.dart';
-
-export 'engine/html_image_codec.dart';
 
 export 'engine/html/backdrop_filter.dart';
 
@@ -86,13 +154,11 @@ export 'engine/html/opacity.dart';
 
 export 'engine/html/painting.dart';
 
-export 'engine/html/path/path.dart';
-
-export 'engine/html/path_to_svg_clip.dart';
-
 export 'engine/html/path/conic.dart';
 
 export 'engine/html/path/cubic.dart';
+
+export 'engine/html/path/path.dart';
 
 export 'engine/html/path/path_iterator.dart';
 
@@ -107,6 +173,8 @@ export 'engine/html/path/path_utils.dart';
 export 'engine/html/path/path_windings.dart';
 
 export 'engine/html/path/tangent.dart';
+
+export 'engine/html/path_to_svg_clip.dart';
 
 export 'engine/html/picture.dart';
 
@@ -140,34 +208,30 @@ export 'engine/html/surface_stats.dart';
 
 export 'engine/html/transform.dart';
 
-export 'engine/keyboard_binding.dart';
-
-import 'engine/keyboard.dart';
-export 'engine/keyboard.dart';
+export 'engine/html_image_codec.dart';
 
 export 'engine/key_map.dart';
 
-import 'engine/mouse_cursor.dart';
+export 'engine/keyboard.dart';
+
+export 'engine/keyboard_binding.dart';
+
 export 'engine/mouse_cursor.dart';
 
 export 'engine/navigation/history.dart';
 
-import 'engine/navigation/js_url_strategy.dart';
 export 'engine/navigation/js_url_strategy.dart';
 
-import 'engine/navigation/url_strategy.dart';
 export 'engine/navigation/url_strategy.dart';
 
 export 'engine/onscreen_logging.dart';
 
 export 'engine/picture.dart';
 
-import 'engine/platform_dispatcher.dart';
 export 'engine/platform_dispatcher.dart';
 
 export 'engine/platform_views.dart';
 
-import 'engine/platform_views/content_manager.dart';
 export 'engine/platform_views/content_manager.dart';
 
 export 'engine/platform_views/message_handler.dart';
@@ -180,7 +244,6 @@ export 'engine/pointer_binding.dart';
 
 export 'engine/pointer_converter.dart';
 
-import 'engine/profiler.dart';
 export 'engine/profiler.dart';
 
 export 'engine/rrect_renderer.dart';
@@ -219,6 +282,8 @@ export 'engine/shadow.dart';
 
 export 'engine/test_embedding.dart';
 
+export 'engine/text/canvas_paragraph.dart';
+
 export 'engine/text/font_collection.dart';
 
 export 'engine/text/layout_service.dart';
@@ -232,8 +297,6 @@ export 'engine/text/measurement.dart';
 export 'engine/text/paint_service.dart';
 
 export 'engine/text/paragraph.dart';
-
-export 'engine/text/canvas_paragraph.dart';
 
 export 'engine/text/ruler.dart';
 
@@ -259,72 +322,9 @@ export 'engine/validators.dart';
 
 export 'engine/vector_math.dart';
 
-import 'engine/web_experiments.dart';
 export 'engine/web_experiments.dart';
 
-import 'engine/window.dart';
 export 'engine/window.dart';
-
-export 'engine/canvaskit/canvas.dart';
-
-export 'engine/canvaskit/canvaskit_api.dart';
-
-export 'engine/canvaskit/canvaskit_canvas.dart';
-
-export 'engine/canvaskit/color_filter.dart';
-
-export 'engine/canvaskit/embedded_views.dart';
-
-export 'engine/canvaskit/fonts.dart';
-
-export 'engine/canvaskit/font_fallbacks.dart';
-
-export 'engine/canvaskit/image.dart';
-
-export 'engine/canvaskit/image_filter.dart';
-
-export 'engine/canvaskit/initialization.dart';
-
-export 'engine/canvaskit/interval_tree.dart';
-
-export 'engine/canvaskit/layer.dart';
-
-export 'engine/canvaskit/layer_scene_builder.dart';
-
-export 'engine/canvaskit/layer_tree.dart';
-
-export 'engine/canvaskit/mask_filter.dart';
-
-export 'engine/canvaskit/n_way_canvas.dart';
-
-export 'engine/canvaskit/painting.dart';
-
-export 'engine/canvaskit/path.dart';
-
-export 'engine/canvaskit/path_metrics.dart';
-
-export 'engine/canvaskit/picture.dart';
-
-export 'engine/canvaskit/picture_recorder.dart';
-
-export 'engine/canvaskit/rasterizer.dart';
-
-export 'engine/canvaskit/raster_cache.dart';
-
-export 'engine/canvaskit/shader.dart';
-
-export 'engine/canvaskit/skia_object_cache.dart';
-
-export 'engine/canvaskit/surface.dart';
-
-export 'engine/canvaskit/surface_factory.dart';
-
-export 'engine/canvaskit/text.dart';
-
-export 'engine/canvaskit/util.dart';
-
-export 'engine/canvaskit/vertices.dart';
-
 
 // The mode the app is running in.
 // Keep these in sync with the same constants on the framework-side under foundation/constants.dart.

@@ -85,7 +85,7 @@ Future<BrowserInstallation> getEdgeInstallation(
       version: 'system',
       executable: io.Directory(path.join(
               edgeLauncher.launcherInstallationDir.path,
-              '${PlatformBinding.instance.getCommandToRunEdge()}'))
+              PlatformBinding.instance.getCommandToRunEdge()))
           .path,
     );
   } else {

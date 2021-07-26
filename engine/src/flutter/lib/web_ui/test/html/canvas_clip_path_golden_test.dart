@@ -7,8 +7,8 @@ import 'dart:js_util' as js_util;
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-import 'package:ui/ui.dart' hide TextStyle;
 import 'package:ui/src/engine.dart' as engine;
+import 'package:ui/ui.dart' hide TextStyle;
 
 import 'screenshot.dart';
 
@@ -57,7 +57,7 @@ Future<void> testMain() async {
     final Path path = Path();
     path.addOval(Rect.fromLTWH(100, 30, testWidth, testHeight));
     rc.clipPath(path);
-    final Path paintPath = new Path();
+    final Path paintPath = Path();
     paintPath.moveTo(testWidth / 2, 0);
     paintPath.lineTo(testWidth, testHeight);
     paintPath.lineTo(0, testHeight);
@@ -80,7 +80,7 @@ Future<void> testMain() async {
     final double testWidth = 200;
     final double testHeight = 150;
 
-    final Path paintPath = new Path();
+    final Path paintPath = Path();
     paintPath.addRect(Rect.fromLTWH(-50, 0, testWidth, testHeight));
     paintPath.close();
     rc.drawPath(paintPath,
@@ -108,7 +108,7 @@ Future<void> testMain() async {
     final double testWidth = 200;
     final double testHeight = 150;
 
-    final Path paintPath = new Path();
+    final Path paintPath = Path();
     paintPath.addRect(Rect.fromLTWH(-50, 0, testWidth, testHeight));
     paintPath.close();
     rc.drawPath(paintPath,
@@ -128,7 +128,7 @@ Future<void> testMain() async {
 
 engine.HtmlImage createTestImage({int width = 200, int height = 150}) {
   final html.CanvasElement canvas =
-      new html.CanvasElement(width: width, height: height);
+      html.CanvasElement(width: width, height: height);
   final html.CanvasRenderingContext2D ctx = canvas.context2D;
   ctx.fillStyle = '#E04040';
   ctx.fillRect(0, 0, width / 3, height);

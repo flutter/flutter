@@ -177,15 +177,15 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
   }
 
   @override
-  void updateElementPlacement(EditableTextGeometry geometry) {
+  void updateElementPlacement(EditableTextGeometry textGeometry) {
     // Element placement is done by [TextField].
   }
 
   EditableTextStyle? _queuedStyle;
 
   @override
-  void updateElementStyle(EditableTextStyle style) {
-    _queuedStyle = style;
+  void updateElementStyle(EditableTextStyle textStyle) {
+    _queuedStyle = textStyle;
     _syncStyle();
   }
 

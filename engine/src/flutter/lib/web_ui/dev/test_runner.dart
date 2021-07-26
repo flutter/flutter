@@ -11,10 +11,13 @@ import 'package:pool/pool.dart';
 
 // TODO(yjbanov): remove hacks when this is fixed:
 //                https://github.com/dart-lang/test/issues/1521
-import 'package:test_api/src/backend/live_test.dart'
-    as hack;
 import 'package:test_api/src/backend/group.dart'
-    as hack;
+as hack;
+import 'package:test_api/src/backend/live_test.dart'
+as hack;
+import 'package:test_api/src/backend/runtime.dart';
+import 'package:test_core/src/executable.dart'
+as test;
 import 'package:test_core/src/runner/configuration/reporters.dart'
     as hack;
 import 'package:test_core/src/runner/engine.dart'
@@ -23,9 +26,6 @@ import 'package:test_core/src/runner/hack_register_platform.dart'
     as hack;
 import 'package:test_core/src/runner/reporter.dart'
     as hack;
-import 'package:test_api/src/backend/runtime.dart';
-import 'package:test_core/src/executable.dart'
-    as test;
 import 'package:watcher/src/watch_event.dart';
 import 'package:web_test_utils/goldens.dart';
 
@@ -611,7 +611,7 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
       '-O2',
       '-o',
       targetFileName, // target path.
-      '${input.path.relativeToWebUi}', // current path.
+      input.path.relativeToWebUi, // current path.
     ];
 
     final int exitCode = await runProcess(

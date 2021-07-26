@@ -372,13 +372,13 @@ final List<AsyncCallback> cleanupCallbacks = <AsyncCallback>[];
 /// Cleanup the remaning processes, close open browsers, delete temp files.
 Future<void> cleanup() async {
   // Cleanup remaining processes if any.
-  if (processesToCleanUp.length > 0) {
+  if (processesToCleanUp.isNotEmpty) {
     for (io.Process process in processesToCleanUp) {
       process.kill();
     }
   }
   // Delete temporary directories.
-  if (temporaryDirectories.length > 0) {
+  if (temporaryDirectories.isNotEmpty) {
     for (io.Directory directory in temporaryDirectories) {
       if (!directory.existsSync()) {
         directory.deleteSync(recursive: true);

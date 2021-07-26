@@ -15,11 +15,11 @@ import 'dom_renderer.dart';
 import 'engine_canvas.dart';
 import 'html/bitmap_canvas.dart';
 import 'html/painting.dart';
-import 'html/picture.dart';
 import 'html/path/conic.dart';
 import 'html/path/path.dart';
 import 'html/path/path_ref.dart';
 import 'html/path/path_utils.dart';
+import 'html/picture.dart';
 import 'html/shaders/image_shader.dart';
 import 'html/shaders/shader.dart';
 import 'platform_dispatcher.dart';
@@ -267,7 +267,7 @@ class CanvasPool extends _SaveStackTracking {
         } else if (clipEntry.rrect != null) {
           _clipRRect(ctx, clipEntry.rrect!);
         } else if (clipEntry.path != null) {
-          final SurfacePath path = clipEntry.path as SurfacePath;
+          final SurfacePath path = clipEntry.path! as SurfacePath;
           _runPath(ctx, path);
           if (path.fillType == ui.PathFillType.nonZero) {
             ctx.clip();
@@ -942,7 +942,7 @@ class ContextStateHandle {
 
     if (paint.shader != null) {
       if (paint.shader is EngineGradient) {
-        final EngineGradient engineShader = paint.shader as EngineGradient;
+        final EngineGradient engineShader = paint.shader! as EngineGradient;
         final Object paintStyle =
             engineShader.createPaintStyle(_canvasPool.context, shaderBounds,
                 density);
@@ -952,7 +952,7 @@ class ContextStateHandle {
         // Align pattern origin to destination.
         context.translate(shaderBounds!.left, shaderBounds.top);
       } else if (paint.shader is EngineImageShader) {
-        final EngineImageShader imageShader = paint.shader as EngineImageShader;
+        final EngineImageShader imageShader = paint.shader! as EngineImageShader;
         final Object paintStyle =
             imageShader.createPaintStyle(_canvasPool.context, shaderBounds,
                 density);

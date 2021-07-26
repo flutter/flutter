@@ -5,9 +5,9 @@
 import 'dart:async';
 import 'dart:html' as html;
 
+import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
-import 'package:test/test.dart';
 
 import 'package:web_engine_tester/golden_tester.dart';
 

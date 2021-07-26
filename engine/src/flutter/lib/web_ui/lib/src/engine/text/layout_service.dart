@@ -5,8 +5,8 @@
 import 'dart:html' as html;
 import 'dart:math' as math;
 
-import 'package:ui/ui.dart' as ui;
 import 'package:meta/meta.dart';
+import 'package:ui/ui.dart' as ui;
 
 import 'canvas_paragraph.dart';
 import 'line_breaker.dart';
@@ -1175,7 +1175,7 @@ class LineBuilder {
 
     // There's a possibility that the end of line has moved backwards, so we
     // need to remove some boxes in that case.
-    while (_boxes.length > 0 && _boxes.last.end.index > breakingPoint) {
+    while (_boxes.isNotEmpty && _boxes.last.end.index > breakingPoint) {
       _boxes.removeLast();
     }
     _currentBoxStartOffset = widthIncludingSpace;

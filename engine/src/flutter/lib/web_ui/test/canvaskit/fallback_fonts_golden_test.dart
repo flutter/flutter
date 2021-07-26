@@ -6,11 +6,12 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
-import 'package:ui/ui.dart' as ui;
-import 'package:ui/src/engine.dart';
-
-import 'package:test/test.dart';
 import 'package:test/bootstrap/browser.dart';
+import 'package:test/test.dart';
+
+import 'package:ui/src/engine.dart';
+import 'package:ui/ui.dart' as ui;
+
 import 'package:web_engine_tester/golden_tester.dart';
 
 import 'common.dart';
@@ -19,7 +20,7 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
-const ui.Rect kDefaultRegion = const ui.Rect.fromLTRB(0, 0, 100, 50);
+const ui.Rect kDefaultRegion = ui.Rect.fromLTRB(0, 0, 100, 50);
 
 Future<void> matchPictureGolden(String goldenFile, CkPicture picture,
     {ui.Rect region = kDefaultRegion, bool write = false}) async {

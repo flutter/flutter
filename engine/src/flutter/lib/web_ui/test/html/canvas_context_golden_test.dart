@@ -6,8 +6,8 @@ import 'dart:html' as html;
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-import 'package:ui/ui.dart' hide TextStyle;
 import 'package:ui/src/engine.dart' as engine;
+import 'package:ui/ui.dart' hide TextStyle;
 
 import 'package:web_engine_tester/golden_tester.dart';
 

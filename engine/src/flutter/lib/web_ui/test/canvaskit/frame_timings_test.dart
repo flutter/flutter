@@ -5,8 +5,8 @@
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 
-import 'common.dart';
 import '../frame_timings_common.dart';
+import 'common.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);

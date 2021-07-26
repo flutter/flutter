@@ -61,9 +61,9 @@ void testMain() {
           'const vec3 c_10 = vec3(1.0, 2.0, 3.0);\n'
           'const vec4 c_11 = vec4(1.0, 2.0, 3.0, 4.0);\n'
           'const mat2 c_12 = $mat2Sample;\n'
-          'const mat2 transform1 = ${mat2Sample};\n'
-          'const mat3 c_13 = ${mat3Sample};\n'
-          'const mat4 c_14 = ${mat4Sample};\n');
+          'const mat2 transform1 = $mat2Sample;\n'
+          'const mat3 c_13 = $mat3Sample;\n'
+          'const mat4 c_14 = $mat4Sample;\n');
     });
 
     test('Constant declaration WebGL2', () {
@@ -100,9 +100,9 @@ void testMain() {
           'const vec3 c_10 = vec3(1.0, 2.0, 3.0);\n'
           'const vec4 c_11 = vec4(1.0, 2.0, 3.0, 4.0);\n'
           'const mat2 c_12 = $mat2Sample;\n'
-          'const mat2 transform2 = ${mat2Sample};\n'
-          'const mat3 c_13 = ${mat3Sample};\n'
-          'const mat4 c_14 = ${mat4Sample};\n');
+          'const mat2 transform2 = $mat2Sample;\n'
+          'const mat3 c_13 = $mat3Sample;\n'
+          'const mat4 c_14 = $mat4Sample;\n');
     });
 
     test('Attribute declaration WebGL1', () {

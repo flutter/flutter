@@ -6,8 +6,8 @@ import 'dart:math' as math;
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-import 'package:ui/ui.dart' hide TextStyle;
 import 'package:ui/src/engine.dart';
+import 'package:ui/ui.dart' hide TextStyle;
 import '../screenshot.dart';
 
 void main() {

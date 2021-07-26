@@ -21,7 +21,7 @@ const int kMaxSemanticsActivationAttempts = 20;
 /// For example when a 'mousedown' targeting a placeholder received following
 /// 'mouseup' is also not sent to the framework.
 /// Otherwise these events can cause unintended gestures on the framework side.
-const Duration _periodToConsumeEvents = const Duration(milliseconds: 300);
+const Duration _periodToConsumeEvents = Duration(milliseconds: 300);
 
 /// The message in the label for the placeholder element used to enable
 /// accessibility.
@@ -334,7 +334,7 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
       case 'pointerdown':
       case 'pointerup':
         final html.PointerEvent touch = event as html.PointerEvent;
-        activationPoint = new html.Point<num>(touch.client.x, touch.client.y);
+        activationPoint = html.Point<num>(touch.client.x, touch.client.y);
         break;
       default:
         // The event is not relevant, forward to framework as normal.

@@ -6,8 +6,8 @@ import 'dart:html' as html;
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-import 'package:ui/ui.dart' hide TextStyle;
 import 'package:ui/src/engine.dart';
+import 'package:ui/ui.dart' hide TextStyle;
 
 import 'package:web_engine_tester/golden_tester.dart';
 
@@ -52,7 +52,7 @@ Future<void> testMain() async {
     sceneElement.append(engineCanvas.rootElement);
     html.document.body!.append(sceneElement);
 
-    final html.CanvasElement canvas = html.document.querySelector('canvas') as html.CanvasElement;
+    final html.CanvasElement canvas = html.document.querySelector('canvas')! as html.CanvasElement;
     // ! Since canvas is first element, it should have zIndex = -1 for correct
     // paint order.
     expect(canvas.style.zIndex , '-1');
@@ -82,7 +82,7 @@ Future<void> testMain() async {
     sceneElement.append(engineCanvas.rootElement);
     html.document.body!.append(sceneElement);
 
-    final html.CanvasElement canvas2 = html.document.querySelector('canvas') as html.CanvasElement;
+    final html.CanvasElement canvas2 = html.document.querySelector('canvas')! as html.CanvasElement;
     // ZIndex should have been cleared since we have image element preceding
     // canvas.
     expect(canvas.style.zIndex != '-1', isTrue);

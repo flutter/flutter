@@ -14,8 +14,8 @@ import '../util.dart';
 import '../vector_math.dart';
 import 'painting.dart';
 import 'shaders/image_shader.dart';
-import 'shaders/shader_builder.dart';
 import 'shaders/normalized_gradient.dart';
+import 'shaders/shader_builder.dart';
 import 'shaders/vertex_shaders.dart';
 import 'shaders/webgl_context.dart';
 
@@ -145,7 +145,7 @@ class _WebGlRenderer implements GlRenderer {
     final bool isWebGl2 = webGLVersion == WebGLVersion.webgl2;
 
     final EngineImageShader? imageShader =
-        paint.shader == null ? null : paint.shader as EngineImageShader;
+        paint.shader == null ? null : paint.shader! as EngineImageShader;
 
     final String vertexShader = imageShader == null
         ? VertexShaders.writeBaseVertexShader()

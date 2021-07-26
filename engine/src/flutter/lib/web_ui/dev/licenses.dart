@@ -75,7 +75,7 @@ class LicensesCommand extends Command<bool> {
 
   void _expect(bool value, String requirement) {
     if (!value) {
-      throw Exception('Test failed: ${requirement}');
+      throw Exception('Test failed: $requirement');
     }
   }
 

@@ -195,7 +195,7 @@ void testMain() {
         onAction: trackInputAction,
       );
 
-      final InputElement input = editingStrategy!.domElement as InputElement;
+      final InputElement input = editingStrategy!.domElement! as InputElement;
       input.value = 'foo bar';
       input.dispatchEvent(Event.eventType('Event', 'input'));
       expect(
@@ -240,7 +240,7 @@ void testMain() {
       expect(defaultTextEditingRoot.querySelectorAll('textarea'), hasLength(1));
 
       final TextAreaElement textarea =
-          defaultTextEditingRoot.querySelector('textarea') as TextAreaElement;
+          defaultTextEditingRoot.querySelector('textarea')! as TextAreaElement;
       // Now the textarea should have focus.
       expect(defaultTextEditingRoot.activeElement, textarea);
       expect(editingStrategy!.domElement, textarea);
@@ -730,7 +730,7 @@ void testMain() {
 
       // Form is added to DOM.
       expect(defaultTextEditingRoot.querySelectorAll('form'), isNotEmpty);
-      final FormElement formElement = defaultTextEditingRoot.querySelector('form') as FormElement;
+      final FormElement formElement = defaultTextEditingRoot.querySelector('form')! as FormElement;
       final Completer<bool> submittedForm = Completer<bool>();
       formElement.addEventListener(
           'submit', (Event event) => submittedForm.complete(true));
@@ -783,7 +783,7 @@ void testMain() {
 
       // Form is added to DOM.
       expect(defaultTextEditingRoot.querySelectorAll('form'), isNotEmpty);
-      final FormElement formElement = defaultTextEditingRoot.querySelector('form') as FormElement;
+      final FormElement formElement = defaultTextEditingRoot.querySelector('form')! as FormElement;
       final Completer<bool> submittedForm = Completer<bool>();
       formElement.addEventListener(
           'submit', (Event event) => submittedForm.complete(true));
@@ -908,7 +908,7 @@ void testMain() {
       checkInputEditingState(
           textEditing!.strategy.domElement, 'abcd', 2, 3);
 
-      final FormElement formElement = defaultTextEditingRoot.querySelector('form') as FormElement;
+      final FormElement formElement = defaultTextEditingRoot.querySelector('form')! as FormElement;
       // The form has one input element and one submit button.
       expect(formElement.childNodes, hasLength(2));
 
@@ -944,7 +944,7 @@ void testMain() {
       sendFrameworkMessage(codec.encodeMethodCall(show));
 
       final InputElement inputElement =
-          textEditing!.strategy.domElement as InputElement;
+          textEditing!.strategy.domElement! as InputElement;
       expect(inputElement.value, 'abcd');
       if (!(browserEngine == BrowserEngine.webkit &&
           operatingSystem == OperatingSystem.macOs)) {
@@ -1018,7 +1018,7 @@ void testMain() {
       checkInputEditingState(
           textEditing!.strategy.domElement, 'abcd', 2, 3);
 
-      final FormElement formElement = defaultTextEditingRoot.querySelector('form') as FormElement;
+      final FormElement formElement = defaultTextEditingRoot.querySelector('form')! as FormElement;
       // The form has 4 input elements and one submit button.
       expect(formElement.childNodes, hasLength(5));
 
@@ -1346,7 +1346,7 @@ void testMain() {
       const MethodCall show = MethodCall('TextInput.show');
       sendFrameworkMessage(codec.encodeMethodCall(show));
 
-      final InputElement input = textEditing!.strategy.domElement as InputElement;
+      final InputElement input = textEditing!.strategy.domElement! as InputElement;
 
       input.value = 'something';
       input.dispatchEvent(Event.eventType('Event', 'input'));
@@ -1430,7 +1430,7 @@ void testMain() {
       checkInputEditingState(
           textEditing!.strategy.domElement, 'abcd', 2, 3);
 
-      final FormElement formElement = defaultTextEditingRoot.querySelector('form') as FormElement;
+      final FormElement formElement = defaultTextEditingRoot.querySelector('form')! as FormElement;
       // The form has 4 input elements and one submit button.
       expect(formElement.childNodes, hasLength(5));
 
@@ -1479,7 +1479,7 @@ void testMain() {
       const MethodCall show = MethodCall('TextInput.show');
       sendFrameworkMessage(codec.encodeMethodCall(show));
 
-      final TextAreaElement textarea = textEditing!.strategy.domElement as TextAreaElement;
+      final TextAreaElement textarea = textEditing!.strategy.domElement! as TextAreaElement;
       checkTextAreaEditingState(textarea, '', 0, 0);
 
       // Can set editing state and preserve new lines.
@@ -1755,7 +1755,7 @@ void testMain() {
       final FormElement form = autofillForm.formElement;
       expect(form.childNodes, hasLength(4));
 
-      final FormElement formOnDom = defaultTextEditingRoot.querySelector('form') as FormElement;
+      final FormElement formOnDom = defaultTextEditingRoot.querySelector('form')! as FormElement;
       // Form is attached to the DOM.
       expect(form, equals(formOnDom));
 
@@ -1912,7 +1912,7 @@ void testMain() {
     });
 
     test('Configure input element from the editing state', () {
-      final InputElement input = defaultTextEditingRoot.querySelector('input') as InputElement;
+      final InputElement input = defaultTextEditingRoot.querySelector('input')! as InputElement;
       _editingState =
           EditingState(text: 'Test', baseOffset: 1, extentOffset: 2);
 
@@ -1932,7 +1932,7 @@ void testMain() {
       );
 
       final TextAreaElement textArea =
-          defaultTextEditingRoot.querySelector('textarea') as TextAreaElement;
+          defaultTextEditingRoot.querySelector('textarea')! as TextAreaElement;
       _editingState =
           EditingState(text: 'Test', baseOffset: 1, extentOffset: 2);
 
@@ -1944,7 +1944,7 @@ void testMain() {
     });
 
     test('Get Editing State from input element', () {
-      final InputElement input = defaultTextEditingRoot.querySelector('input') as InputElement;
+      final InputElement input = defaultTextEditingRoot.querySelector('input')! as InputElement;
       input.value = 'Test';
       input.selectionStart = 1;
       input.selectionEnd = 2;
@@ -1964,7 +1964,7 @@ void testMain() {
         onAction: trackInputAction,
       );
 
-      final TextAreaElement input = defaultTextEditingRoot.querySelector('textarea') as TextAreaElement;
+      final TextAreaElement input = defaultTextEditingRoot.querySelector('textarea')! as TextAreaElement;
       input.value = 'Test';
       input.selectionStart = 1;
       input.selectionEnd = 2;
@@ -1977,7 +1977,7 @@ void testMain() {
     });
 
     test('Compare two editing states', () {
-      final InputElement input = defaultTextEditingRoot.querySelector('input') as InputElement;
+      final InputElement input = defaultTextEditingRoot.querySelector('input')! as InputElement;
       input.value = 'Test';
       input.selectionStart = 1;
       input.selectionEnd = 2;
@@ -2053,7 +2053,7 @@ void checkInputEditingState(
     Element? element, String text, int start, int end) {
   expect(element, isNotNull);
   expect(element, isA<InputElement>());
-  final InputElement input = element as InputElement;
+  final InputElement input = element! as InputElement;
   expect(defaultTextEditingRoot.activeElement, input);
   expect(input.value, text);
   expect(input.selectionStart, start);
@@ -2063,14 +2063,16 @@ void checkInputEditingState(
 /// In case of an exception backup DOM element(s) can still stay on the DOM.
 void clearBackUpDomElementIfExists() {
   final List<Node> domElementsToRemove = <Node>[];
-  if (defaultTextEditingRoot.querySelectorAll('input').length > 0) {
+  if (defaultTextEditingRoot.querySelectorAll('input').isNotEmpty) {
     domElementsToRemove..addAll(defaultTextEditingRoot.querySelectorAll('input'));
   }
-  if (defaultTextEditingRoot.querySelectorAll('textarea').length > 0) {
+  if (defaultTextEditingRoot.querySelectorAll('textarea').isNotEmpty) {
     domElementsToRemove..addAll(defaultTextEditingRoot.querySelectorAll('textarea'));
   }
-  domElementsToRemove.forEach((Node n) => n.remove());
+  domElementsToRemove.forEach(_removeNode);
 }
+
+void _removeNode(Node n)=> n.remove();
 
 void checkTextAreaEditingState(
   TextAreaElement textarea,
@@ -2157,7 +2159,7 @@ Map<String, dynamic> createOneFieldValue(String hint, String uniqueId) =>
 
 /// In order to not leak test state, clean up the forms from dom if any remains.
 void clearForms() {
-  while (defaultTextEditingRoot.querySelectorAll('form').length > 0) {
+  while (defaultTextEditingRoot.querySelectorAll('form').isNotEmpty) {
     defaultTextEditingRoot.querySelectorAll('form').last.remove();
   }
   formsOnTheDom.clear();

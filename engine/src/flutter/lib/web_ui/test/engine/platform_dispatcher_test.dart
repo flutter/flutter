@@ -7,11 +7,10 @@ import 'dart:html' as html;
 import 'dart:js_util' as js_util;
 import 'dart:typed_data';
 
-import 'package:ui/src/engine.dart';
-import 'package:ui/ui.dart' as ui;
-
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
+import 'package:ui/src/engine.dart';
+import 'package:ui/ui.dart' as ui;
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);

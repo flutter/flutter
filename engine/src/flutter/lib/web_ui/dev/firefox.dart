@@ -5,9 +5,8 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:pedantic/pedantic.dart';
-
 import 'package:path/path.dart' as path;
+import 'package:pedantic/pedantic.dart';
 import 'package:test_api/src/backend/runtime.dart';
 import 'package:test_core/src/util/io.dart';
 
@@ -87,7 +86,7 @@ user_pref("dom.max_script_run_time", 0);
       final List<String> args = <String>[
         url.toString(),
         '--profile',
-        '${temporaryProfileDirectory.path}',
+        temporaryProfileDirectory.path,
         if (!debug)
           '--headless',
         '-width $kMaxScreenshotWidth',

@@ -79,7 +79,7 @@ Future<ui.Codec> skiaInstantiateWebImageCodec(
 
     try {
       final Uint8List list =
-          new Uint8List.view((request.response as ByteBuffer));
+          Uint8List.view((request.response as ByteBuffer));
       final CkAnimatedImage codec = CkAnimatedImage.decodeFromBytes(list, url);
       completer.complete(codec);
     } catch (error, stackTrace) {

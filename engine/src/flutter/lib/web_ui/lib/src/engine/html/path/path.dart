@@ -1288,7 +1288,7 @@ class SurfacePath implements ui.Path {
         }
       }
     } while (!done);
-    return tangents.length == 0 ? isInverse : !isInverse;
+    return tangents.isEmpty ? isInverse : !isInverse;
   }
 
   /// Returns a copy of the path with all the segments of every

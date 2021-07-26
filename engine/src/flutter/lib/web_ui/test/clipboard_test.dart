@@ -7,8 +7,8 @@ import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-import 'package:ui/ui.dart' as ui;
 import 'package:ui/src/engine.dart';
+import 'package:ui/ui.dart' as ui;
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -26,7 +26,7 @@ Future<void> testMain() async {
         MockClipboardAPIPasteStrategy();
 
     setUp(() {
-      clipboardMessageHandler = new ClipboardMessageHandler();
+      clipboardMessageHandler = ClipboardMessageHandler();
       clipboardAPICopyStrategy = MockClipboardAPICopyStrategy();
       clipboardAPIPasteStrategy = MockClipboardAPIPasteStrategy();
       clipboardMessageHandler.copyToClipboardStrategy =
