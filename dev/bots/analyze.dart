@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:core' hide print;
+import 'dart:core' ;//hide print;
 import 'dart:io' hide exit;
 import 'dart:typed_data';
 
@@ -56,6 +56,9 @@ Future<void> run(List<String> arguments) async {
 
   print('$clock Deprecations...');
   await verifyDeprecations(flutterRoot);
+
+  print('$clock Goldens...');
+  await verifyGoldenTags(flutterRoot);
 
   print('$clock Licenses...');
   await verifyNoMissingLicense(flutterRoot);
@@ -135,85 +138,55 @@ Future<void> run(List<String> arguments) async {
 
 // TESTS
 
-final RegExp _findGoldenTestPattern = RegExp(r'(^\\\\)matchesGoldenFile\(');
+final RegExp _findGoldenTestPattern = RegExp(r'matchesGoldenFile\(');
+final RegExp _findGoldenDefinitionPattern = RegExp(r'matchesGoldenFile\(Object');
+final RegExp _leadingComment = RegExp(r'\/\/');
 final RegExp _goldenTagPattern1 = RegExp(r'@Tags\(');
-final RegExp _goldenTagPattern2 = RegExp(r"'reduced-test-set");
+final RegExp _goldenTagPattern2 = RegExp(r"'reduced-test-set'");
 
-Future<void> verifyGoldenTags(String workingDirectory, { int minimumMatches = 2000 }) {
+Future<void> verifyGoldenTags(String workingDirectory, { int minimumMatches = 2000 }) async {
   final List<String> errors = <String>[];
   await for (final File file in _allFiles(workingDirectory, 'dart', minimumMatches: minimumMatches)) {
-    int lineNumber = 0;
+    bool hasGoldenTests = false;
+    bool hasTagNotation = false;
+    bool hasReducedTag = false;
     final List<String> lines = file.readAsLinesSync();
-    final List<int> linesWithDeprecations = <int>[];
     for (final String line in lines) {
-      if (line.contains(_findDeprecationPattern) &&
-          !line.endsWith(_ignoreDeprecation) &&
-          !line.contains(_legacyDeprecation)) {
-        linesWithDeprecations.add(lineNumber);
+      // If a reduced test tag is already accounted for, skip parsing the rest
+      // of the lines for golden file tests.
+      if (hasTagNotation && hasReducedTag) {
+        break;
       }
-      lineNumber += 1;
+      if (line.contains(_goldenTagPattern1)) {
+        hasTagNotation = true;
+      } else if (line.contains(_goldenTagPattern2)) {
+        hasReducedTag = true;
+      } else if (line.contains(_findGoldenTestPattern)
+          && !line.contains(_findGoldenDefinitionPattern)
+          && !line.contains(_leadingComment)) {
+        hasGoldenTests = true;
+      }
     }
-    for (int lineNumber in linesWithDeprecations) {
-      try {
-        final Match? match1 = _deprecationPattern1.firstMatch(lines[lineNumber]);
-        if (match1 == null)
-          throw 'Deprecation notice does not match required pattern.';
-        final String indent = match1[1]!;
-        lineNumber += 1;
-        if (lineNumber >= lines.length)
-          throw 'Incomplete deprecation notice.';
-        Match? match3;
-        String? message;
-        do {
-          final Match? match2 = _deprecationPattern2.firstMatch(lines[lineNumber]);
-          if (match2 == null) {
-            String possibleReason = '';
-            if (lines[lineNumber].trimLeft().startsWith('"')) {
-              possibleReason = ' You might have used double quotes (") for the string instead of single quotes (\').';
-            }
-            throw 'Deprecation notice does not match required pattern.$possibleReason';
-          }
-          if (!lines[lineNumber].startsWith("$indent  '"))
-            throw 'Unexpected deprecation notice indent.';
-          if (message == null) {
-            final String firstChar = String.fromCharCode(match2[1]!.runes.first);
-            if (firstChar.toUpperCase() != firstChar)
-              throw 'Deprecation notice should be a grammatically correct sentence and start with a capital letter; see style guide: https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo';
-          }
-          message = match2[1];
-          lineNumber += 1;
-          if (lineNumber >= lines.length)
-            throw 'Incomplete deprecation notice.';
-          match3 = _deprecationPattern3.firstMatch(lines[lineNumber]);
-        } while (match3 == null);
-        final int v1 = int.parse(match3[1]!);
-        final int v2 = int.parse(match3[2]!);
-        final bool hasV4 = match3[4] != null;
-        if (v1 > 1 || (v1 == 1 && v2 >= 20)) {
-          if (!hasV4)
-            throw 'Deprecation notice does not accurately indicate a dev branch version number; please see https://flutter.dev/docs/development/tools/sdk/releases to find the latest dev build version number.';
-        }
-        if (!message!.endsWith('.') && !message.endsWith('!') && !message.endsWith('?'))
-          throw 'Deprecation notice should be a grammatically correct sentence and end with a period.';
-        if (!lines[lineNumber].startsWith("$indent  '"))
-          throw 'Unexpected deprecation notice indent.';
-        lineNumber += 1;
-        if (lineNumber >= lines.length)
-          throw 'Incomplete deprecation notice.';
-        if (!lines[lineNumber].contains(_deprecationPattern4))
-          throw 'End of deprecation notice does not match required pattern.';
-        if (!lines[lineNumber].startsWith('$indent)'))
-          throw 'Unexpected deprecation notice indent.';
-      } catch (error) {
-        errors.add('${file.path}:${lineNumber + 1}: $error');
+    // If a reduced test tag is already accounted for, move on to the next file.
+    if (hasTagNotation && hasReducedTag) {
+      continue;
+    }
+    // If there are golden file tests, ensure they are tagged for all reduced
+    // test environments.
+    if (hasGoldenTests) {
+      if (!hasTagNotation) {
+        errors.add('${file.path}: Tests files containing golden file tests must be tagged using '
+            '`@Tags(...)` at the top of the file before import statements.');
+      } else if (!hasReducedTag) {
+        errors.add('${file.path}: Tests files containing golden file tests must be tagged with '
+            "'reduced-test-set'.");
       }
     }
   }
-  // Fail if any errors
   if (errors.isNotEmpty) {
     exitWithError(<String>[
       ...errors,
-      '${bold}See: https://github.com/flutter/flutter/wiki/Tree-hygiene#handling-breaking-changes$reset',
+      '${bold}See: https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter$reset',
     ]);
   }
 }
