@@ -2756,7 +2756,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
             _dismissedBottomSheets.remove(bottomSheet);
           });
         }
-        if (_floatingActionButtonVisibilityValue != 1.0 || _showBodyScrim) {
+        if ((widget.floatingActionButton != null && _floatingActionButtonVisibilityValue != 1.0) || _showBodyScrim) {
           FlutterError.reportError(FlutterErrorDetails(
             exception: StateError(
               'A DraggableScrollableSheet was used as a BottomSheet and '
@@ -2771,7 +2771,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
             context: ErrorDescription('while dismissing a bottom sheet'),
           ));
           showBodyScrim(false, 0.0);
-          _floatingActionButtonVisibilityValue = 1.0;
+          if (widget.floatingActionButton != null) {
+            _floatingActionButtonVisibilityValue = 1.0;
+          }
         }
       },
       builder: builder,
