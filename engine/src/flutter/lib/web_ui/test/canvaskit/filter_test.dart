@@ -91,4 +91,17 @@ void testMain() {
 
   // TODO: https://github.com/flutter/flutter/issues/60040
   }, skip: isIosSafari);
+
+  group('MaskFilter', () {
+    setUpCanvasKitTest();
+
+    test('with 0 sigma can be set on a Paint', () {
+      final ui.Paint paint = ui.Paint();
+      final ui.MaskFilter filter = ui.MaskFilter.blur(ui.BlurStyle.normal, 0);
+
+      expect(() => paint.maskFilter = filter, isNot(throwsException));
+    });
+
+  // TODO: https://github.com/flutter/flutter/issues/60040
+  }, skip: isIosSafari);
 }
