@@ -157,7 +157,6 @@ targets:
 
   - name: Linux gradle_java8_compile_test
     builder: Linux gradle_java8_compile_test
-    bringup: true
     properties:
       tags: >
         ["devicelab","hostonly"]
