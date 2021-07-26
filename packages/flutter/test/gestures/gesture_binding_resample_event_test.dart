@@ -56,7 +56,9 @@ void testResampleEvent(String description, ResampleEventTest callback) {
     fakeAsync((FakeAsync async) {
       callback(async);
     }, initialTime: DateTime.utc(2015, 1, 1));
-  }, skip: isBrowser); // Fake clock is not working with the web platform.
+  },
+  // Fake clock is not working with the web platform.
+  skip: isBrowser); // https://github.com/flutter/flutter/issues/87067
 }
 
 void main() {
