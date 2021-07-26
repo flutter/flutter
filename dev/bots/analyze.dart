@@ -18,7 +18,7 @@ import 'utils.dart';
 
 final String flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
 final String flutter = path.join(flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
-final String flutterFramework = path.join(flutterRoot, 'packages', 'flutter');
+final String flutterPackages = path.join(flutterRoot, 'packages');
 final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'dart.exe' : 'dart');
 final String pub = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'pub.bat' : 'pub');
 final String pubCache = path.join(flutterRoot, '.pub-cache');
@@ -59,7 +59,7 @@ Future<void> run(List<String> arguments) async {
   await verifyDeprecations(flutterRoot);
 
   print('$clock Goldens...');
-  await verifyGoldenTags(flutterFramework);
+  await verifyGoldenTags(flutterPackages);
 
   print('$clock Licenses...');
   await verifyNoMissingLicense(flutterRoot);
@@ -147,6 +147,7 @@ final RegExp _goldenTagPattern2 = RegExp(r"'reduced-test-set'");
 
 Future<void> verifyGoldenTags(String workingDirectory, { int minimumMatches = 2000 }) async {
   final List<String> errors = <String>[];
+  print(_allFiles(workingDirectory, 'dart', minimumMatches: minimumMatches));
   await for (final File file in _allFiles(workingDirectory, 'dart', minimumMatches: minimumMatches)) {
     bool hasGoldenTests = false;
     bool hasTagNotation = false;
