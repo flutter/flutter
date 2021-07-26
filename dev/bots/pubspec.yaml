@@ -5,7 +5,7 @@ environment:
   sdk: ">=2.12.0 <3.0.0"
 
 dependencies:
-  args: 2.1.1
+  args: 2.2.0
   crypto: 3.0.1
   flutter_devicelab:
     path: ../devicelab
@@ -66,4 +66,4 @@ dependencies:
 dev_dependencies:
   test_api: 0.4.2
 
-# PUBSPEC CHECKSUM: 0588
+# PUBSPEC CHECKSUM: 0988
