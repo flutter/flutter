@@ -1717,7 +1717,6 @@ targets:
 
   - name: Mac_android microbenchmarks
     builder: Mac_android microbenchmarks
-    bringup: true
     presubmit: false
     properties:
       tags: >
