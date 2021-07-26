@@ -13,10 +13,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:ui/ui.dart' as ui;
-
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
+import 'package:ui/ui.dart' as ui;
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);

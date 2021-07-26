@@ -342,7 +342,7 @@ class SemanticsTester {
 
   /// Locates the [TextField] role manager of the semantics object with the give [id].
   TextField getTextField(int id) {
-    return getRoleManager(id, Role.textField) as TextField;
+    return getRoleManager(id, Role.textField)! as TextField;
   }
 }
 

@@ -216,7 +216,7 @@ class PipelineWatcher {
     }
 
     final String relativePath = path.relative(event.path, from: dir);
-    print('- [${event.type}] ${relativePath}');
+    print('- [${event.type}] $relativePath');
 
     _pipelineRunCount++;
     _scheduledPipeline?.cancel();

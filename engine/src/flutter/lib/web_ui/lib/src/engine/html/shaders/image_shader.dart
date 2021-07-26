@@ -8,11 +8,11 @@ import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
 
-import '../offscreen_canvas.dart';
-import '../render_vertices.dart';
 import '../../browser_detection.dart';
 import '../../html_image_codec.dart';
 import '../../vector_math.dart';
+import '../offscreen_canvas.dart';
+import '../render_vertices.dart';
 import 'vertex_shaders.dart';
 import 'webgl_context.dart';
 

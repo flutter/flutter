@@ -10,8 +10,8 @@ import '../../engine.dart' show toMatrix32;
 import '../vector_math.dart';
 import 'layer.dart';
 import 'layer_tree.dart';
-import 'picture.dart';
 import 'path.dart';
+import 'picture.dart';
 
 class LayerScene implements ui.Scene {
   final LayerTree layerTree;

@@ -17,7 +17,7 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
-const ui.Rect region = const ui.Rect.fromLTRB(0, 0, 500, 250);
+const ui.Rect region = ui.Rect.fromLTRB(0, 0, 500, 250);
 
 Future<void> matchPictureGolden(String goldenFile, CkPicture picture,
     {bool write = false}) async {

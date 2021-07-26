@@ -472,8 +472,8 @@ void testMain() {
       paragraph.layout(ui.ParagraphConstraints(width: 1000));
       canvas.drawParagraph(paragraph, ui.Offset.zero);
       final ui.EngineLayer newLayer = useOffset
-          ? builder.pushOffset(0, 0, oldLayer: oldLayer as ui.OffsetEngineLayer)
-          : builder.pushOpacity(100, oldLayer: oldLayer as ui.OpacityEngineLayer);
+          ? builder.pushOffset(0, 0, oldLayer: oldLayer == null ? null : oldLayer as ui.OffsetEngineLayer)
+          : builder.pushOpacity(100, oldLayer: oldLayer == null ? null : oldLayer as ui.OpacityEngineLayer);
       builder.addPicture(ui.Offset.zero, recorder.endRecording());
       builder.pop();
       return newLayer;
@@ -588,7 +588,7 @@ void testMain() {
     builder.pop();
 
     final html.Element content = builder.build().webOnlyRootElement!;
-    final html.CanvasElement canvas = content.querySelector('canvas') as html.CanvasElement;
+    final html.CanvasElement canvas = content.querySelector('canvas')! as html.CanvasElement;
     final int unscaledWidth = canvas.width!;
     final int unscaledHeight = canvas.height!;
 
@@ -605,7 +605,7 @@ void testMain() {
     builder2.pop();
 
     final html.Element contentAfterScale = builder2.build().webOnlyRootElement!;
-    final html.CanvasElement canvas2 = contentAfterScale.querySelector('canvas') as html.CanvasElement;
+    final html.CanvasElement canvas2 = contentAfterScale.querySelector('canvas')! as html.CanvasElement;
     // Although we are drawing same picture, due to scaling the new canvas
     // should have fewer pixels.
     expect(canvas2.width! < unscaledWidth, isTrue);
@@ -620,7 +620,7 @@ void testMain() {
     builder.pop();
 
     final html.Element content = builder.build().webOnlyRootElement!;
-    final html.CanvasElement canvas = content.querySelector('canvas') as html.CanvasElement;
+    final html.CanvasElement canvas = content.querySelector('canvas')! as html.CanvasElement;
     final int unscaledWidth = canvas.width!;
     final int unscaledHeight = canvas.height!;
 
@@ -637,7 +637,7 @@ void testMain() {
     builder2.pop();
 
     final html.Element contentAfterScale = builder2.build().webOnlyRootElement!;
-    final html.CanvasElement canvas2 = contentAfterScale.querySelector('canvas') as html.CanvasElement;
+    final html.CanvasElement canvas2 = contentAfterScale.querySelector('canvas')! as html.CanvasElement;
     // Although we are drawing same picture, due to scaling the new canvas
     // should have more pixels.
     expect(canvas2.width! > unscaledWidth, isTrue);
@@ -906,7 +906,7 @@ EnginePicture _drawPathImagePath() {
 
 HtmlImage createTestImage({int width = 100, int height = 50}) {
   final html.CanvasElement canvas =
-  new html.CanvasElement(width: width, height: height);
+      html.CanvasElement(width: width, height: height);
   final html.CanvasRenderingContext2D ctx = canvas.context2D;
   ctx.fillStyle = '#E04040';
   ctx.fillRect(0, 0, 33, 50);

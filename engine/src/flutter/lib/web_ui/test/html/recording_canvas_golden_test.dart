@@ -8,11 +8,11 @@ import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-import 'package:ui/ui.dart' hide TextStyle;
 import 'package:ui/src/engine.dart';
+import 'package:ui/ui.dart' hide TextStyle;
+import 'package:web_engine_tester/golden_tester.dart';
 
 import '../matchers.dart';
-import 'package:web_engine_tester/golden_tester.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);

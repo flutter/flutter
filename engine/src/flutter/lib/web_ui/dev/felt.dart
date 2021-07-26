@@ -9,8 +9,8 @@ import 'package:args/command_runner.dart';
 import 'build.dart';
 import 'clean.dart';
 import 'create_simulator.dart';
-import 'licenses.dart';
 import 'exceptions.dart';
+import 'licenses.dart';
 import 'test_runner.dart';
 import 'utils.dart';
 
@@ -38,7 +38,7 @@ Future<void> main(List<String> rawArgs) async {
 
   int exitCode = -1;
   try {
-    final bool result = (await runner.run(args)) as bool;
+    final bool result = (await runner.run(args))!;
     if (result == false) {
       print('Sub-command failed: `${args.join(' ')}`');
       exitCode = 1;

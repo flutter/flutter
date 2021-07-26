@@ -82,11 +82,11 @@ void testMain() {
       final CkPaint paint = CkPaint();
       paint.imageFilter = CkImageFilter.blur(sigmaX: 5, sigmaY: 10, tileMode: ui.TileMode.clamp);
 
-      final ManagedSkiaObject<Object> managedFilter = paint.imageFilter as ManagedSkiaObject<Object>;
+      final ManagedSkiaObject<Object> managedFilter = paint.imageFilter! as ManagedSkiaObject<Object>;
       final Object skiaFilter = managedFilter.skiaObject;
 
       paint.imageFilter = CkImageFilter.blur(sigmaX: 5, sigmaY: 10, tileMode: ui.TileMode.clamp);
-      expect((paint.imageFilter as ManagedSkiaObject<Object>).skiaObject, same(skiaFilter));
+      expect((paint.imageFilter! as ManagedSkiaObject<Object>).skiaObject, same(skiaFilter));
     });
 
   // TODO: https://github.com/flutter/flutter/issues/60040

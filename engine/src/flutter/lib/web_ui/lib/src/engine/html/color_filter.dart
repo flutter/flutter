@@ -141,7 +141,7 @@ class PersistedColorFilter extends PersistedContainerSurface
           html.Element.html(svgFilter, treeSanitizer: NullTreeSanitizer());
       //rootElement!.insertBefore(_filterElement!, childContainer!);
       domRenderer.addResource(_filterElement!);
-      style.filter = 'url(#_fcf${filterIdCounter})';
+      style.filter = 'url(#_fcf$filterIdCounter)';
       if (colorFilterBlendMode == ui.BlendMode.saturation ||
           colorFilterBlendMode == ui.BlendMode.multiply ||
           colorFilterBlendMode == ui.BlendMode.modulate) {
@@ -156,7 +156,7 @@ class PersistedColorFilter extends PersistedContainerSurface
       _filterElement =
           html.Element.html(svgFilter, treeSanitizer: NullTreeSanitizer());
       domRenderer.addResource(_filterElement!);
-      childContainer!.style.filter = 'url(#_fcf${filterIdCounter})';
+      childContainer!.style.filter = 'url(#_fcf$filterIdCounter)';
     }
   }
 

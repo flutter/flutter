@@ -51,7 +51,7 @@ class DomRenderer {
 
   /// Fires when browser language preferences change.
   static const html.EventStreamProvider<html.Event> languageChangeEvent =
-      const html.EventStreamProvider<html.Event>('languagechange');
+      html.EventStreamProvider<html.Event>('languagechange');
 
   /// Listens to window resize events.
   StreamSubscription<html.Event>? _resizeSubscription;
@@ -282,7 +282,7 @@ class DomRenderer {
     _resourcesHost?.remove();
     _resourcesHost = null;
     html.document.head!.append(_styleElement!);
-    final html.CssStyleSheet sheet = _styleElement!.sheet as html.CssStyleSheet;
+    final html.CssStyleSheet sheet = _styleElement!.sheet! as html.CssStyleSheet;
     applyGlobalCssRulesToSheet(
       sheet,
       browserEngine: browserEngine,

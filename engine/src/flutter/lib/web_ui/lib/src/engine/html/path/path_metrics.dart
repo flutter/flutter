@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:collection' show IterableBase;
-import 'dart:typed_data';
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
 

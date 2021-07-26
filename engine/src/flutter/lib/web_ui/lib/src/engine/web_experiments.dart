@@ -30,7 +30,7 @@ class WebExperiments {
     _useCanvasText = enabled ?? _defaultUseCanvasText;
   }
 
-  static const bool _defaultUseCanvasText = const bool.fromEnvironment(
+  static const bool _defaultUseCanvasText = bool.fromEnvironment(
     'FLUTTER_WEB_USE_EXPERIMENTAL_CANVAS_TEXT',
     defaultValue: true,
   );
@@ -44,7 +44,7 @@ class WebExperiments {
     _useCanvasRichText = enabled ?? _defaultUseCanvasRichText;
   }
 
-  static const bool _defaultUseCanvasRichText = const bool.fromEnvironment(
+  static const bool _defaultUseCanvasRichText = bool.fromEnvironment(
     'FLUTTER_WEB_USE_EXPERIMENTAL_CANVAS_RICH_TEXT',
     defaultValue: true,
   );

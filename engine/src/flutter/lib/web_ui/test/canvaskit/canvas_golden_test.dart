@@ -25,7 +25,7 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
-const ui.Rect kDefaultRegion = const ui.Rect.fromLTRB(0, 0, 500, 250);
+const ui.Rect kDefaultRegion = ui.Rect.fromLTRB(0, 0, 500, 250);
 
 Future<void> matchPictureGolden(String goldenFile, CkPicture picture,
     {ui.Rect region = kDefaultRegion, bool write = false}) async {
@@ -78,8 +78,7 @@ void testMain() {
       await matchPictureGolden('canvaskit_picture.png', originalPicture);
 
       final ByteData originalPixels =
-          await (await originalPicture.toImage(50, 50)).toByteData()
-              as ByteData;
+          (await (await originalPicture.toImage(50, 50)).toByteData())!;
 
       // Test that a picture restored from a snapshot looks the same.
       final CkPictureSnapshot? snapshot = canvas.pictureSnapshot;
@@ -89,8 +88,7 @@ void testMain() {
       final CkPicture restoredPicture = CkPicture(
           restoredSkPicture, ui.Rect.fromLTRB(0, 0, 50, 50), snapshot);
       final ByteData restoredPixels =
-          await (await restoredPicture.toImage(50, 50)).toByteData()
-              as ByteData;
+        (await (await restoredPicture.toImage(50, 50)).toByteData())!;
 
       await matchPictureGolden('canvaskit_picture.png', restoredPicture);
       expect(restoredPixels.buffer.asUint8List(),

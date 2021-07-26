@@ -11,9 +11,9 @@ import '../../engine.dart' show toMatrix32;
 import '../picture.dart';
 import '../util.dart';
 import '../validators.dart';
+import 'painting.dart';
 import 'recording_canvas.dart';
 import 'render_vertices.dart';
-import 'painting.dart';
 
 class SurfaceCanvas implements ui.Canvas {
   RecordingCanvas _canvas;

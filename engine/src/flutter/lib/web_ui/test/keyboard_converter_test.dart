@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart' show isTest;
 import 'package:quiver/testing/async.dart';
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
-import 'package:meta/meta.dart' show isTest;
 
 const int kLocationLeft = 1;
 const int kLocationRight = 2;

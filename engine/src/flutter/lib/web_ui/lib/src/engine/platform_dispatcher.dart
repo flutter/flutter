@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:html' as html;
 import 'dart:typed_data';
-import 'dart:convert';
 
 import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
@@ -17,10 +17,10 @@ import 'canvaskit/rasterizer.dart';
 import 'clipboard.dart';
 import 'dom_renderer.dart';
 import 'html/scene.dart';
-import 'profiler.dart';
 import 'mouse_cursor.dart';
 import 'platform_views/message_handler.dart';
 import 'plugins.dart';
+import 'profiler.dart';
 import 'semantics.dart';
 import 'services.dart';
 import 'text_editing/text_editing.dart';
@@ -407,7 +407,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
             // TODO(gspencergoog): As multi-window support expands, the pop call
             // will need to include the window ID. Right now only one window is
             // supported.
-            (_windows[0] as EngineFlutterWindow)
+            (_windows[0]! as EngineFlutterWindow)
                 .browserHistory
                 .exit()
                 .then((_) {
@@ -497,7 +497,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
         // TODO(gspencergoog): As multi-window support expands, the navigation call
         // will need to include the window ID. Right now only one window is
         // supported.
-        (_windows[0] as EngineFlutterWindow)
+        (_windows[0]! as EngineFlutterWindow)
             .handleNavigationMessage(data)
             .then((bool handled) {
           if (handled) {
@@ -551,7 +551,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   @override
   void scheduleFrame() {
     if (scheduleFrameCallback == null) {
-      throw new Exception('scheduleFrameCallback must be initialized first.');
+      throw Exception('scheduleFrameCallback must be initialized first.');
     }
     scheduleFrameCallback!();
   }
@@ -708,7 +708,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   }
 
   /// The locale used when we fail to get the list from the browser.
-  static const ui.Locale _defaultLocale = const ui.Locale('en', 'US');
+  static const ui.Locale _defaultLocale = ui.Locale('en', 'US');
 
   /// Sets locales to an empty list.
   ///

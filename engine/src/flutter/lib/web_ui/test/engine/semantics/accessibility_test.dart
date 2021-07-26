@@ -45,7 +45,7 @@ void testMain() {
         isNotNull,
       );
       final LabelElement input =
-          document.getElementById('accessibility-element') as LabelElement;
+          document.getElementById('accessibility-element')! as LabelElement;
       expect(input.getAttribute('aria-live'), equals('polite'));
       expect(input.text, testMessage);
 

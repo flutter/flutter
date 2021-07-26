@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:test/bootstrap/browser.dart';
-import 'package:ui/ui.dart';
 import 'package:ui/src/engine.dart';
+import 'package:ui/ui.dart';
 
 import 'text_scuba.dart';
 

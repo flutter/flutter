@@ -33,7 +33,7 @@ class IntervalTree<T> {
 
     // Make a balanced binary search tree from the nodes sorted by low value.
     IntervalTreeNode<T>? _makeBalancedTree(List<IntervalTreeNode<T>> nodes) {
-      if (nodes.length == 0) {
+      if (nodes.isEmpty) {
         return null;
       }
       if (nodes.length == 1) {

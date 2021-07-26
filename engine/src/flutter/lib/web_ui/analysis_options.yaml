@@ -13,20 +13,6 @@ analyzer:
 
 linter:
   rules:
-    avoid_classes_with_only_static_members: false
-    avoid_function_literals_in_foreach_calls: false
-    avoid_null_checks_in_equality_operators: false
-    avoid_relative_lib_imports: false
-    avoid_renaming_method_parameters: false
-    avoid_return_types_on_setters: false
-    avoid_slow_async_io: false
-    await_only_futures: false
-    camel_case_types: false
-    cancel_subscriptions: false
-    control_flow_in_finally: false
-    directives_ordering: false
-    empty_catches: false
-    empty_constructor_bodies: false
     empty_statements: false
     hash_and_equals: false
     implementation_imports: false
@@ -40,22 +26,15 @@ linter:
     overridden_fields: false
     package_api_docs: false
     package_names: false
-    package_prefixed_library_names: false
     prefer_adjacent_string_concatenation: false
-    prefer_asserts_in_initializer_lists: false
-    prefer_collection_literals: false
     prefer_conditional_assignment: false
     prefer_const_constructors: false
     prefer_const_constructors_in_immutables: false
     prefer_const_declarations: false
     prefer_const_literals_to_create_immutables: false
-    prefer_contains: false
-    prefer_equal_for_default_values: false
     prefer_foreach: false
     prefer_generic_function_type_aliases: false
     prefer_initializing_formals: false
-    prefer_is_empty: false
-    prefer_is_not_empty: false
     prefer_single_quotes: false
     prefer_typing_uninitialized_variables: false
     public_member_api_docs: false
@@ -65,10 +44,7 @@ linter:
     test_types_in_equals: false
     throw_in_finally: false
     type_init_formals: false
-    unnecessary_brace_in_string_interps: false
-    unnecessary_const: false
     unnecessary_getters_setters: false
-    unnecessary_new: false
     unnecessary_null_aware_assignments: false
     unnecessary_null_in_if_null_operators: false
     unnecessary_overrides: false
@@ -80,8 +56,6 @@ linter:
     use_function_type_syntax_for_parameters: false
     prefer_final_in_for_each: false
     avoid_single_cascade_in_expression_statements: false
-    unnecessary_string_interpolations: false
-    cast_nullable_to_non_nullable: false
     flutter_style_todos: false
 
     # We have some legitimate use-cases for this (preserve tear-off identity)

@@ -120,7 +120,7 @@ void testMain() {
         rect: ui.Rect.fromLTWH(0, 0, 10, 15),
       );
 
-      final TextField textField = textFieldSemantics.debugRoleManagerFor(Role.textField) as TextField;
+      final TextField textField = textFieldSemantics.debugRoleManagerFor(Role.textField)! as TextField;
       expect(html.document.activeElement, domRenderer.glassPaneElement);
       expect(appHostNode.activeElement, strategy.domElement);
       expect(textField.editableElement, strategy.domElement);
@@ -172,7 +172,7 @@ void testMain() {
         isFocused: true,
       );
 
-      final TextField textField = textFieldSemantics.debugRoleManagerFor(Role.textField) as TextField;
+      final TextField textField = textFieldSemantics.debugRoleManagerFor(Role.textField)! as TextField;
       expect(textField.editableElement, strategy.domElement);
       expect(html.document.activeElement, domRenderer.glassPaneElement);
       expect(appHostNode.activeElement, strategy.domElement);
@@ -212,7 +212,7 @@ void testMain() {
       expect(strategy.domElement, isNull);
 
       // It doesn't remove the DOM element.
-      final TextField textField = textFieldSemantics.debugRoleManagerFor(Role.textField) as TextField;
+      final TextField textField = textFieldSemantics.debugRoleManagerFor(Role.textField)! as TextField;
       expect(appHostNode.contains(textField.editableElement), isTrue);
       // Editing element is not enabled.
       expect(strategy.isEnabled, isFalse);
@@ -284,7 +284,7 @@ void testMain() {
         isMultiline: true,
       );
 
-      final html.TextAreaElement textArea = strategy.domElement as html.TextAreaElement;
+      final html.TextAreaElement textArea = strategy.domElement! as html.TextAreaElement;
 
       expect(html.document.activeElement, domRenderer.glassPaneElement);
       expect(appHostNode.activeElement, strategy.domElement);

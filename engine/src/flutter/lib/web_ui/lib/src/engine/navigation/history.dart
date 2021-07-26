@@ -117,7 +117,7 @@ class MultiEntriesBrowserHistory extends BrowserHistory {
   int get _currentSerialCount {
     if (_hasSerialCount(currentState)) {
       final Map<dynamic, dynamic> stateMap =
-          currentState as Map<dynamic, dynamic>;
+          currentState! as Map<dynamic, dynamic>;
       return stateMap['serialCount'] as int;
     }
     return 0;
@@ -197,7 +197,7 @@ class MultiEntriesBrowserHistory extends BrowserHistory {
     // Unwrap state.
     assert(_hasSerialCount(currentState) && _currentSerialCount == 0);
     final Map<dynamic, dynamic> stateMap =
-        currentState as Map<dynamic, dynamic>;
+        currentState! as Map<dynamic, dynamic>;
     urlStrategy!.replaceState(
       stateMap['state'],
       'flutter',
@@ -255,7 +255,7 @@ class SingleEntryBrowserHistory extends BrowserHistory {
 
   Object? _unwrapOriginState(Object? state) {
     assert(_isOriginEntry(state));
-    final Map<dynamic, dynamic> originState = state as Map<dynamic, dynamic>;
+    final Map<dynamic, dynamic> originState = state! as Map<dynamic, dynamic>;
     return originState['state'];
   }
 

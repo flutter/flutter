@@ -3,13 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:html' as html;
-import 'dart:math' as math;
 import 'dart:js_util' as js_util;
+import 'dart:math' as math;
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-import 'package:ui/ui.dart';
 import 'package:ui/src/engine.dart';
+import 'package:ui/ui.dart';
 
 import 'package:web_engine_tester/golden_tester.dart';
 
@@ -722,7 +722,7 @@ HtmlImage createNineSliceImage() {
 
 HtmlImage createTestImage({int width = 100, int height = 50}) {
   final html.CanvasElement canvas =
-      new html.CanvasElement(width: width, height: height);
+      html.CanvasElement(width: width, height: height);
   final html.CanvasRenderingContext2D ctx = canvas.context2D;
   ctx.fillStyle = '#E04040';
   ctx.fillRect(0, 0, 33, 50);

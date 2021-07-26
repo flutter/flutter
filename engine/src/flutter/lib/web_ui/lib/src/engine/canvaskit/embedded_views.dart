@@ -27,7 +27,7 @@ class HtmlViewEmbedder {
   HtmlViewEmbedder._();
 
   /// The maximum number of overlay surfaces that can be live at once.
-  static const int maximumOverlaySurfaces = const int.fromEnvironment(
+  static const int maximumOverlaySurfaces = int.fromEnvironment(
     'FLUTTER_WEB_MAXIMUM_OVERLAYS',
     defaultValue: 8,
   );
@@ -81,7 +81,7 @@ class HtmlViewEmbedder {
   /// The size of the frame, in physical pixels.
   ui.Size _frameSize = ui.window.physicalSize;
 
-  void set frameSize(ui.Size size) {
+  set frameSize(ui.Size size) {
     _frameSize = size;
   }
 
@@ -278,7 +278,7 @@ class HtmlViewEmbedder {
             _svgClipDefs.putIfAbsent(viewId, () => <String>{}).add(clipId);
             clipView.style.clipPath = 'url(#$clipId)';
           } else if (mutator.path != null) {
-            final CkPath path = mutator.path as CkPath;
+            final CkPath path = mutator.path! as CkPath;
             _ensureSvgPathDefs();
             final html.Element pathDefs =
                 _svgPathDefs!.querySelector('#sk_path_defs')!;
@@ -477,10 +477,12 @@ class HtmlViewEmbedder {
 
   /// Deletes SVG clip paths, useful for tests.
   void debugCleanupSvgClipPaths() {
-    _svgPathDefs?.children.single.children.forEach((html.Element element) {
-      element.remove();
-    });
+    _svgPathDefs?.children.single.children.forEach(removeElement);
     _svgClipDefs.clear();
+  }
+
+  static void removeElement(html.Element element) {
+    element.remove();
   }
 
   /// Clears the state of this view embedder. Used in tests.

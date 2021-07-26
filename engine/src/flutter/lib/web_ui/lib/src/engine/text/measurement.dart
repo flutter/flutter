@@ -796,7 +796,7 @@ class LinesCalculator {
 
   double? _cachedEllipsisWidth;
   double get _ellipsisWidth => _cachedEllipsisWidth ??=
-      _roundWidth(_canvasContext.measureText(_style.ellipsis!).width as double);
+      _roundWidth(_canvasContext.measureText(_style.ellipsis!).width! as double);
 
   bool get hasEllipsis => _style.ellipsis != null;
   bool get unlimitedLines => _style.maxLines == null;

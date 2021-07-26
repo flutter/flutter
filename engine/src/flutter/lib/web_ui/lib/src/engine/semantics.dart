@@ -9,7 +9,7 @@ export 'semantics/incrementable.dart';
 export 'semantics/label_and_value.dart';
 export 'semantics/live_region.dart';
 export 'semantics/scrollable.dart';
-export 'semantics/semantics_helper.dart';
 export 'semantics/semantics.dart';
+export 'semantics/semantics_helper.dart';
 export 'semantics/tappable.dart';
 export 'semantics/text_field.dart';

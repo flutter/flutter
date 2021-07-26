@@ -25,10 +25,10 @@ import '../window.dart';
 import 'clip.dart';
 import 'color_filter.dart';
 import 'dom_canvas.dart';
-import 'recording_canvas.dart';
-import 'render_vertices.dart';
 import 'painting.dart';
 import 'path/path.dart';
+import 'recording_canvas.dart';
+import 'render_vertices.dart';
 import 'shaders/image_shader.dart';
 
 /// A raw HTML canvas that is directly written to.
@@ -336,11 +336,11 @@ class BitmapCanvas extends EngineCanvas {
   }
 
   @override
-  void clipRect(ui.Rect rect, ui.ClipOp op) {
-    if (op == ui.ClipOp.difference) {
+  void clipRect(ui.Rect rect, ui.ClipOp clipOp) {
+    if (clipOp == ui.ClipOp.difference) {
       // Create 2 rectangles inside each other that represents
       // clip area difference using even-odd fill rule.
-      final SurfacePath path = new SurfacePath();
+      final SurfacePath path = SurfacePath();
       path.fillType = ui.PathFillType.evenOdd;
       path.addRect(ui.Rect.fromLTWH(0, 0, _bounds.width, _bounds.height));
       path.addRect(rect);
@@ -857,7 +857,7 @@ class BitmapCanvas extends EngineCanvas {
     rootElement.append(filterElement);
     _children.add(filterElement);
     final html.HtmlElement imgElement = _reuseOrCreateImage(image);
-    imgElement.style.filter = 'url(#_fcf${filterIdCounter})';
+    imgElement.style.filter = 'url(#_fcf$filterIdCounter)';
     if (colorFilterBlendMode == ui.BlendMode.saturation) {
       imgElement.style.backgroundColor = colorToCssString(filterColor);
     }
@@ -874,7 +874,7 @@ class BitmapCanvas extends EngineCanvas {
     rootElement.append(filterElement);
     _children.add(filterElement);
     final html.HtmlElement imgElement = _reuseOrCreateImage(image);
-    imgElement.style.filter = 'url(#_fcf${filterIdCounter})';
+    imgElement.style.filter = 'url(#_fcf$filterIdCounter)';
     return imgElement;
   }
 
@@ -1065,10 +1065,11 @@ class BitmapCanvas extends EngineCanvas {
         _children.add(paintOrderElement);
       }
     }
-    if (rootElement.firstChild is html.HtmlElement &&
-        (rootElement.firstChild as html.HtmlElement).tagName.toLowerCase() ==
+    final html.Node? firstChild = rootElement.firstChild;
+    if (firstChild != null && firstChild is html.HtmlElement &&
+        firstChild.tagName.toLowerCase() ==
             'canvas') {
-      (rootElement.firstChild as html.HtmlElement).style.zIndex = '-1';
+      firstChild.style.zIndex = '-1';
     }
   }
 
@@ -1253,7 +1254,7 @@ List<html.Element> _clipContent(List<SaveClipEntry> clipStack,
       // Clipping optimization when we know that the path is an oval.
       // We use a div with border-radius set to 50% with a size that is
       // set to path bounds and set overflow to hidden.
-      final SurfacePath surfacePath = entry.path as SurfacePath;
+      final SurfacePath surfacePath = entry.path! as SurfacePath;
       if (surfacePath.pathRef.isOval != -1) {
         final ui.Rect ovalBounds = surfacePath.getBounds();
         final double clipOffsetX = ovalBounds.left;

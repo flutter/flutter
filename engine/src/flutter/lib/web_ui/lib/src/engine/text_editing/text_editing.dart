@@ -276,18 +276,23 @@ class EngineAutofillForm {
     final Iterable<String> keys = elements!.keys;
     final List<StreamSubscription<html.Event>> subscriptions =
         <StreamSubscription<html.Event>>[];
-    keys.forEach((String key) {
-      final html.Element element = elements![key]!;
-      subscriptions.add(element.onInput.listen((html.Event e) {
-        if (items![key] == null) {
-          throw StateError(
-              'Autofill would not work withuot Autofill value set');
-        } else {
-          final AutofillInfo autofillInfo = items![key]!;
-          handleChange(element, autofillInfo);
-        }
-      }));
-    });
+
+    final void Function(String key) addSubscriptionForKey = (String key) {
+        final html.Element element = elements![key]!;
+        subscriptions.add(
+            element.onInput.listen((html.Event e) {
+              if (items![key] == null) {
+                throw StateError(
+                    'Autofill would not work withuot Autofill value set');
+              } else {
+                final AutofillInfo autofillInfo = items![key]!;
+                handleChange(element, autofillInfo);
+              }
+            })
+        );
+    };
+
+    keys.forEach(addSubscriptionForKey);
     return subscriptions;
   }
 
@@ -1070,8 +1075,7 @@ class IOSTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
   /// in iOS is set to correct place, 100ms after focus. We use this timer for
   /// timing this delay.
   Timer? _positionInputElementTimer;
-  static const Duration _delayBeforePlacement =
-      const Duration(milliseconds: 100);
+  static const Duration _delayBeforePlacement = Duration(milliseconds: 100);
 
   /// Whether or not the input element can be positioned at this point in time.
   ///
@@ -1720,7 +1724,7 @@ final HybridTextEditing textEditing = HybridTextEditing();
 ///
 /// See: https://github.com/flutter/flutter/blob/bf9f3a3dcfea3022f9cf2dfc3ab10b120b48b19d/packages/flutter/lib/src/services/text_input.dart#L1277
 final Map<String, html.FormElement> formsOnTheDom =
-    Map<String, html.FormElement>();
+    <String, html.FormElement>{};
 
 /// Should be used as a singleton to provide support for text editing in
 /// Flutter Web.
@@ -1850,7 +1854,7 @@ class EditableTextStyle {
   String? get align => textAlignToCssValue(textAlign, textDirection);
 
   String get cssFont =>
-      '${fontWeight} ${fontSize}px ${canonicalizeFontFamily(fontFamily)}';
+      '$fontWeight ${fontSize}px ${canonicalizeFontFamily(fontFamily)}';
 
   void applyToDomElement(html.HtmlElement domElement) {
     domElement.style

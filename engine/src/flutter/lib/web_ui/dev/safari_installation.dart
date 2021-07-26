@@ -66,7 +66,7 @@ class IosSafariArgParser extends BrowserArgParser {
   static IosSafariArgParser get instance => _singletonInstance;
 
   @override
-  String get version => 'iOS ${iosMajorVersion}.${iosMinorVersion}';
+  String get version => 'iOS $iosMajorVersion.$iosMinorVersion';
 
   final int _pinnedIosMajorVersion;
   int? _iosMajorVersion;
@@ -140,10 +140,10 @@ class IosSafariArgParser extends BrowserArgParser {
   @override
   void populateOptions(ArgParser argParser) {
     final String pinnedIosVersion =
-        '${_pinnedIosMajorVersion}.${_pinnedIosMinorVersion}';
+        '$_pinnedIosMajorVersion.$_pinnedIosMinorVersion';
     argParser
       ..addOption('version',
-          defaultsTo: '$pinnedIosVersion',
+          defaultsTo: pinnedIosVersion,
           help: 'The version for the iOS operating system the iOS Simulator '
               'will use for tests. For example for testing with iOS 13.2, '
               'use `13.2`. Use command: '
@@ -152,7 +152,7 @@ class IosSafariArgParser extends BrowserArgParser {
               'If this value is not filled version locked in the '
               'browser_lock.yaml file will be user.')
       ..addOption('device',
-          defaultsTo: '$_pinnedIosDevice',
+          defaultsTo: _pinnedIosDevice,
           help: 'The device to be used for the iOS Simulator during the tests. '
               'Use `.` instead of space for separating the words. '
               'Common examples: iPhone.8, iPhone.8.Plus, iPhone.11, '

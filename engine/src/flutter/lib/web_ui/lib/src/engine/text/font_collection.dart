@@ -11,8 +11,8 @@ import 'dart:typed_data';
 import '../assets.dart';
 import '../browser_detection.dart';
 import '../util.dart';
-import 'measurement.dart';
 import 'layout_service.dart';
+import 'measurement.dart';
 
 const String ahemFontFamily = 'Ahem';
 const String ahemFontUrl = 'packages/ui/assets/ahem.ttf';

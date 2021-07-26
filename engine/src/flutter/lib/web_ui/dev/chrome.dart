@@ -103,7 +103,7 @@ class Chrome extends Browser {
           await _spawnChromiumProcess(installation.executable, args);
 
       remoteDebuggerCompleter.complete(
-          getRemoteDebuggerUrl(Uri.parse('http://localhost:${kDevtoolsPort}')));
+          getRemoteDebuggerUrl(Uri.parse('http://localhost:$kDevtoolsPort')));
 
       unawaited(process.exitCode
           .then((_) => Directory(dir).deleteSync(recursive: true)));
@@ -194,9 +194,9 @@ Future<Uri> getRemoteDebuggerUrl(Uri base) async {
     final HttpClient client = HttpClient();
     final HttpClientRequest request = await client.getUrl(base.resolve('/json/list'));
     final HttpClientResponse response = await request.close();
-    final List<dynamic> jsonObject =
-        await json.fuse(utf8).decoder.bind(response).single as List<dynamic>;
-    return base.resolve(jsonObject.first['devtoolsFrontendUrl'] as String);
+    final List<dynamic>? jsonObject =
+        await json.fuse(utf8).decoder.bind(response).single as List<dynamic>?;
+    return base.resolve(jsonObject!.first['devtoolsFrontendUrl'] as String);
   } catch (_) {
     // If we fail to talk to the remote debugger protocol, give up and return
     // the raw URL rather than crashing.

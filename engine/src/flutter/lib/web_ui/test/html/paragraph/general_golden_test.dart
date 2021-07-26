@@ -8,11 +8,11 @@ import 'dart:math' as math;
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-import 'package:ui/ui.dart' hide window;
 import 'package:ui/src/engine.dart';
+import 'package:ui/ui.dart' hide window;
 
-import 'text_scuba.dart';
 import 'helper.dart';
+import 'text_scuba.dart';
 
 typedef CanvasTest = FutureOr<void> Function(EngineCanvas canvas);
 

@@ -4,13 +4,13 @@
 
 import 'dart:async';
 import 'dart:html' as html;
-import 'dart:typed_data';
 import 'dart:js_util' as js_util;
+import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-import 'package:ui/ui.dart' hide TextStyle, ImageShader;
 import 'package:ui/src/engine.dart';
+import 'package:ui/ui.dart' hide TextStyle, ImageShader;
 
 import 'package:web_engine_tester/golden_tester.dart';
 
@@ -61,7 +61,7 @@ Future<void> testMain() async {
 
   Future<void> _testVertices(
       String fileName, Vertices vertices, BlendMode blendMode, Paint paint,
-      {bool write: false}) async {
+      {bool write = false}) async {
     final RecordingCanvas rc =
         RecordingCanvas(const Rect.fromLTRB(0, 0, 500, 500));
     rc.drawVertices(
@@ -390,7 +390,7 @@ Future<void> testMain() async {
 
 Future<HtmlImage> createTestImage({int width = 50, int height = 40}) {
   final html.CanvasElement canvas =
-      new html.CanvasElement(width: width, height: height);
+      html.CanvasElement(width: width, height: height);
   final html.CanvasRenderingContext2D ctx = canvas.context2D;
   ctx.fillStyle = '#E04040';
   ctx.fillRect(0, 0, width / 3, height);

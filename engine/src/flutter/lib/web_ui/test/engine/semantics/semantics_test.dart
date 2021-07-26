@@ -837,7 +837,7 @@ void _testIncrementables() {
   <input aria-valuenow="1" aria-valuetext="d" aria-valuemax="2" aria-valuemin="1">
 </sem>''');
 
-    final html.InputElement input = appHostNode.querySelector('input') as html.InputElement;
+    final html.InputElement input = appHostNode.querySelector('input')! as html.InputElement;
     input.value = '2';
     input.dispatchEvent(html.Event('change'));
 
@@ -871,7 +871,7 @@ void _testIncrementables() {
   <input aria-valuenow="1" aria-valuetext="d" aria-valuemax="1" aria-valuemin="0">
 </sem>''');
 
-    final html.InputElement input = appHostNode.querySelector('input') as html.InputElement;
+    final html.InputElement input = appHostNode.querySelector('input')! as html.InputElement;
     input.value = '0';
     input.dispatchEvent(html.Event('change'));
 

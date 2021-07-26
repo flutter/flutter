@@ -235,7 +235,7 @@ class KeyboardConverter {
   // first character is an alphabet, it must be either 'A' to 'Z' ( and return
   // true), or be a key name (and return false). Otherwise, return true.
   static bool _eventKeyIsKeyname(String key) {
-    assert(key.length > 0);
+    assert(key.isNotEmpty);
     return isAlphabet(key.codeUnitAt(0)) && key.length > 1;
   }
 

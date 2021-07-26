@@ -683,7 +683,7 @@ abstract class PersistedContainerSurface extends PersistedSurface {
         assert(oldLayer.rootElement != null);
         assert(debugAssertSurfaceState(
             oldLayer, PersistedSurfaceState.pendingUpdate));
-        child.update(child.oldLayer as PersistedContainerSurface);
+        child.update(oldLayer as PersistedContainerSurface);
       } else {
         assert(debugAssertSurfaceState(child, PersistedSurfaceState.created));
         assert(child.rootElement == null);
@@ -789,7 +789,7 @@ abstract class PersistedContainerSurface extends PersistedSurface {
       } else if (newChild is PersistedContainerSurface &&
           newChild.oldLayer != null) {
         final PersistedContainerSurface oldLayer =
-            newChild.oldLayer as PersistedContainerSurface;
+            newChild.oldLayer! as PersistedContainerSurface;
         assert(debugAssertSurfaceState(
             oldLayer, PersistedSurfaceState.pendingUpdate));
         newChild.update(oldLayer);
@@ -854,7 +854,7 @@ abstract class PersistedContainerSurface extends PersistedSurface {
       assert(newChild.oldLayer!.rootElement != null);
 
       final PersistedContainerSurface oldLayer =
-          newChild.oldLayer as PersistedContainerSurface;
+          newChild.oldLayer! as PersistedContainerSurface;
 
       // Move the HTML node if necessary.
       if (oldLayer.rootElement!.parent != childContainer) {
@@ -954,7 +954,7 @@ abstract class PersistedContainerSurface extends PersistedSurface {
       } else if (newChild is PersistedContainerSurface &&
           newChild.oldLayer != null) {
         final PersistedContainerSurface oldLayer =
-            newChild.oldLayer as PersistedContainerSurface;
+            newChild.oldLayer! as PersistedContainerSurface;
         isReparenting = oldLayer.rootElement!.parent != containerElement;
         matchedOldChild = oldLayer;
         assert(debugAssertSurfaceState(
@@ -1053,7 +1053,7 @@ abstract class PersistedContainerSurface extends PersistedSurface {
           indexInNew != -1 && stationaryIndices.contains(i);
       final PersistedSurface child = _children[i];
       final html.HtmlElement childElement =
-          child.rootElement as html.HtmlElement;
+          child.rootElement! as html.HtmlElement;
       assert(childElement != null); // ignore: unnecessary_null_comparison
       if (!isStationary) {
         if (refNode == null) {

@@ -110,7 +110,7 @@ class WebOnlyMockAssetManager implements AssetManager {
   String get _baseUrl => '';
 
   @override
-  String getAssetUrl(String asset) => '$asset';
+  String getAssetUrl(String asset) => asset;
 
   @override
   Future<ByteData> load(String asset) {

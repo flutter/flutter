@@ -7,8 +7,9 @@ import 'dart:js_util' as js_util;
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-import 'package:ui/ui.dart' hide TextStyle;
 import 'package:ui/src/engine.dart';
+import 'package:ui/ui.dart' hide TextStyle;
+
 import '../screenshot.dart';
 
 void main() {
@@ -127,7 +128,7 @@ HtmlImage createTestImage() {
   const int width2 = width ~/ 2;
   const int height = 16;
   final html.CanvasElement canvas =
-      new html.CanvasElement(width: width, height: height);
+      html.CanvasElement(width: width, height: height);
   final html.CanvasRenderingContext2D ctx = canvas.context2D;
   ctx.fillStyle = '#E04040';
   ctx.fillRect(0, 0, width2, width2);
