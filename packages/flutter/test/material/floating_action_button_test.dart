@@ -1001,9 +1001,8 @@ void main() {
   testWidgets('FloatingActionButton.extended can customize spacing', (WidgetTester tester) async {
     const Key iconKey = Key('icon');
     const Key labelKey = Key('label');
-    const double iconLabelSpacing = 33.0;
-    const double leadingSpacing = 13.0;
-    const double trailingSpacing = 23.0;
+    const double spacing = 33.0;
+    const EdgeInsetsDirectional padding = EdgeInsetsDirectional.only(start: 5.0, end: 6.0);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1011,18 +1010,17 @@ void main() {
           floatingActionButton: FloatingActionButton.extended(
             label: const Text('', key: labelKey),
             icon: const Icon(Icons.add, key: iconKey),
-            extendedIconLabelSpacing: iconLabelSpacing,
-            extendedLeadingSpacing: leadingSpacing,
-            extendedTrailingSpacing: trailingSpacing,
+            extendedIconLabelSpacing: spacing,
+            extendedPadding: padding,
             onPressed: () {},
           ),
         ),
       ),
     );
 
-    expect(tester.getTopLeft(find.byKey(labelKey)).dx - tester.getTopRight(find.byKey(iconKey)).dx, iconLabelSpacing);
-    expect(tester.getTopLeft(find.byKey(iconKey)).dx - tester.getTopLeft(find.byType(FloatingActionButton)).dx, leadingSpacing);
-    expect(tester.getTopRight(find.byType(FloatingActionButton)).dx - tester.getTopRight(find.byKey(labelKey)).dx, trailingSpacing);
+    expect(tester.getTopLeft(find.byKey(labelKey)).dx - tester.getTopRight(find.byKey(iconKey)).dx, spacing);
+    expect(tester.getTopLeft(find.byKey(iconKey)).dx - tester.getTopLeft(find.byType(FloatingActionButton)).dx, padding.start);
+    expect(tester.getTopRight(find.byType(FloatingActionButton)).dx - tester.getTopRight(find.byKey(labelKey)).dx, padding.end);
   });
 
   group('feedback', () {

@@ -171,8 +171,7 @@ class FloatingActionButton extends StatelessWidget {
        _floatingActionButtonType = mini ? _FloatingActionButtonType.small : _FloatingActionButtonType.regular,
        _extendedLabel = null,
        extendedIconLabelSpacing = null,
-       extendedLeadingSpacing = null,
-       extendedTrailingSpacing = null,
+       extendedPadding = null,
        super(key: key);
 
   /// Creates a small circular floating action button.
@@ -219,8 +218,7 @@ class FloatingActionButton extends StatelessWidget {
        isExtended = false,
        _extendedLabel = null,
        extendedIconLabelSpacing = null,
-       extendedLeadingSpacing = null,
-       extendedTrailingSpacing = null,
+       extendedPadding = null,
        super(key: key);
 
   /// Creates a large circular floating action button.
@@ -267,8 +265,7 @@ class FloatingActionButton extends StatelessWidget {
        isExtended = false,
        _extendedLabel = null,
        extendedIconLabelSpacing = null,
-       extendedLeadingSpacing = null,
-       extendedTrailingSpacing = null,
+       extendedPadding = null,
        super(key: key);
 
   /// Creates a wider [StadiumBorder]-shaped floating action button with
@@ -300,8 +297,7 @@ class FloatingActionButton extends StatelessWidget {
     this.focusNode,
     this.autofocus = false,
     this.extendedIconLabelSpacing,
-    this.extendedLeadingSpacing,
-    this.extendedTrailingSpacing,
+    this.extendedPadding,
     Widget? icon,
     required Widget label,
     this.enableFeedback,
@@ -526,18 +522,13 @@ class FloatingActionButton extends StatelessWidget {
   /// If that is also null, the default is 8.0.
   final double? extendedIconLabelSpacing;
 
-  /// The leading spacing for an extended [FloatingActionButton]'s content.
+  /// The padding for an extended [FloatingActionButton]'s content.
   ///
-  /// If null, [FloatingActionButtonThemeData.extendedLeadingSpacing] is used.
-  /// If that is also null, the default is 16.0 if an icon is provided, and 20.0
-  /// if not.
-  final double? extendedLeadingSpacing;
-
-  /// The trailing spacing for an extended [FloatingActionButton]'s content.
-  ///
-  /// If null, [FloatingActionButtonThemeData.extendedTrailingSpacing] is used.
-  /// If that is also null, the default is 20.0.
-  final double? extendedTrailingSpacing;
+  /// If null, [FloatingActionButtonThemeData.extendedPadding] is used. If that
+  /// is also null, the default is
+  /// `EdgeInsetsDirectional.only(start: 16.0, end: 20.0)` if an icon is
+  /// provided, and `EdgeInsetsDirectional.only(start: 20.0, end: 20.0)` if not.
+  final EdgeInsetsGeometry? extendedPadding;
 
   final _FloatingActionButtonType _floatingActionButtonType;
 
@@ -617,18 +608,20 @@ class FloatingActionButton extends StatelessWidget {
       case _FloatingActionButtonType.extended:
         sizeConstraints = floatingActionButtonTheme.extendedSizeConstraints ?? _kExtendedSizeConstraints;
         final double iconLabelSpacing = extendedIconLabelSpacing ?? floatingActionButtonTheme.extendedIconLabelSpacing ?? 8.0;
-        final double leadingSpacing = extendedLeadingSpacing ?? floatingActionButtonTheme.extendedLeadingSpacing ?? (child != null && isExtended ? 16.0 : 20.0);
-        final double trailingSpacing = extendedTrailingSpacing ?? floatingActionButtonTheme.extendedTrailingSpacing ?? 20.0;
-        final Widget leading = SizedBox(width: leadingSpacing);
-        final Widget trailing = SizedBox(width: trailingSpacing);
+        final EdgeInsetsGeometry padding = extendedPadding
+            ?? floatingActionButtonTheme.extendedPadding
+            ?? (child != null && isExtended ? const EdgeInsetsDirectional.only(start: 16.0, end: 20.0) : const EdgeInsetsDirectional.only(start: 20.0, end: 20.0));
         resolvedChild = _ChildOverflowBox(
-          child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: child == null
-                  ? <Widget>[leading, _extendedLabel!, trailing]
-                  : isExtended
-                      ? <Widget>[leading, child!, SizedBox(width: iconLabelSpacing), _extendedLabel!, trailing]
-                      : <Widget>[leading, child!, trailing],
+          child: Padding(
+            padding: padding,
+            child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: child == null
+                    ? <Widget>[_extendedLabel!]
+                    : isExtended
+                        ? <Widget>[child!, SizedBox(width: iconLabelSpacing), _extendedLabel!]
+                        : <Widget>[child!,],
+            ),
           ),
         );
         break;

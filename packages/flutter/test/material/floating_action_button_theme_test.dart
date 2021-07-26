@@ -181,16 +181,14 @@ void main() {
     const Key labelKey = Key('label');
     const BoxConstraints constraints = BoxConstraints.tightFor(height: 100.0);
     const double iconLabelSpacing = 33.0;
-    const double leadingSpacing = 13.0;
-    const double trailingSpacing = 23.0;
+    const EdgeInsetsDirectional padding = EdgeInsetsDirectional.only(start: 5.0, end: 6.0);
 
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData().copyWith(
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
           extendedSizeConstraints: constraints,
           extendedIconLabelSpacing: iconLabelSpacing,
-          extendedLeadingSpacing: leadingSpacing,
-          extendedTrailingSpacing: trailingSpacing,
+          extendedPadding: padding,
         ),
       ),
       home: Scaffold(
@@ -204,23 +202,21 @@ void main() {
 
     expect(_getRawMaterialButton(tester).constraints, constraints);
     expect(tester.getTopLeft(find.byKey(labelKey)).dx - tester.getTopRight(find.byKey(iconKey)).dx, iconLabelSpacing);
-    expect(tester.getTopLeft(find.byKey(iconKey)).dx - tester.getTopLeft(find.byType(FloatingActionButton)).dx, leadingSpacing);
-    expect(tester.getTopRight(find.byType(FloatingActionButton)).dx - tester.getTopRight(find.byKey(labelKey)).dx, trailingSpacing);
+    expect(tester.getTopLeft(find.byKey(iconKey)).dx - tester.getTopLeft(find.byType(FloatingActionButton)).dx, padding.start);
+    expect(tester.getTopRight(find.byType(FloatingActionButton)).dx - tester.getTopRight(find.byKey(labelKey)).dx, padding.end);
   });
 
   testWidgets('FloatingActionButton.extended spacing takes priority over FloatingActionButtonThemeData spacing', (WidgetTester tester) async {
     const Key iconKey = Key('icon');
     const Key labelKey = Key('label');
     const double iconLabelSpacing = 33.0;
-    const double leadingSpacing = 13.0;
-    const double trailingSpacing = 23.0;
+    const EdgeInsetsDirectional padding = EdgeInsetsDirectional.only(start: 5.0, end: 6.0);
 
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData().copyWith(
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
           extendedIconLabelSpacing: 25.0,
-          extendedLeadingSpacing: 11.0,
-          extendedTrailingSpacing: 17.0,
+          extendedPadding: EdgeInsetsDirectional.only(start: 7.0, end: 8.0),
         ),
       ),
       home: Scaffold(
@@ -229,15 +225,14 @@ void main() {
           label: const Text('Extended', key: labelKey),
           icon: const Icon(Icons.add, key: iconKey),
           extendedIconLabelSpacing: iconLabelSpacing,
-          extendedLeadingSpacing: leadingSpacing,
-          extendedTrailingSpacing: trailingSpacing,
+          extendedPadding: padding,
         ),
       ),
     ));
 
     expect(tester.getTopLeft(find.byKey(labelKey)).dx - tester.getTopRight(find.byKey(iconKey)).dx, iconLabelSpacing);
-    expect(tester.getTopLeft(find.byKey(iconKey)).dx - tester.getTopLeft(find.byType(FloatingActionButton)).dx, leadingSpacing);
-    expect(tester.getTopRight(find.byType(FloatingActionButton)).dx - tester.getTopRight(find.byKey(labelKey)).dx, trailingSpacing);
+    expect(tester.getTopLeft(find.byKey(iconKey)).dx - tester.getTopLeft(find.byType(FloatingActionButton)).dx, padding.start);
+    expect(tester.getTopRight(find.byType(FloatingActionButton)).dx - tester.getTopRight(find.byKey(labelKey)).dx, padding.end);
   });
 
   testWidgets('default FloatingActionButton debugFillProperties', (WidgetTester tester) async {
@@ -272,8 +267,7 @@ void main() {
       largeSizeConstraints: BoxConstraints.tightFor(width: 102.0, height: 102.0),
       extendedSizeConstraints: BoxConstraints(minHeight: 103.0, maxHeight: 103.0),
       extendedIconLabelSpacing: 12,
-      extendedLeadingSpacing: 13,
-      extendedTrailingSpacing: 14,
+      extendedPadding: EdgeInsetsDirectional.only(start: 7.0, end: 8.0),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -299,8 +293,7 @@ void main() {
       'largeSizeConstraints: BoxConstraints(w=102.0, h=102.0)',
       'extendedSizeConstraints: BoxConstraints(0.0<=w<=Infinity, h=103.0)',
       'extendedIconLabelSpacing: 12.0',
-      'extendedLeadingSpacing: 13.0',
-      'extendedTrailingSpacing: 14.0',
+      'extendedPadding: EdgeInsetsDirectional(7.0, 0.0, 8.0, 0.0)',
     ]);
   });
 }

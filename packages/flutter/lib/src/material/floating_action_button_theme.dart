@@ -48,8 +48,7 @@ class FloatingActionButtonThemeData with Diagnosticable {
     this.largeSizeConstraints,
     this.extendedSizeConstraints,
     this.extendedIconLabelSpacing,
-    this.extendedLeadingSpacing,
-    this.extendedTrailingSpacing,
+    this.extendedPadding,
   });
 
   /// Color to be used for the unselected, enabled [FloatingActionButton]'s
@@ -119,12 +118,8 @@ class FloatingActionButtonThemeData with Diagnosticable {
   /// [FloatingActionButton].
   final double? extendedIconLabelSpacing;
 
-
-  /// The leading spacing for an extended [FloatingActionButton]'s content.
-  final double? extendedLeadingSpacing;
-
-  /// The trailing spacing for an extended [FloatingActionButton]'s content.
-  final double? extendedTrailingSpacing;
+  /// The padding for an extended [FloatingActionButton]'s content.
+  final EdgeInsetsGeometry? extendedPadding;
 
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
@@ -146,8 +141,7 @@ class FloatingActionButtonThemeData with Diagnosticable {
     BoxConstraints? largeSizeConstraints,
     BoxConstraints? extendedSizeConstraints,
     double? extendedIconLabelSpacing,
-    double? extendedLeadingSpacing,
-    double? extendedTrailingSpacing,
+    EdgeInsetsGeometry? extendedPadding,
   }) {
     return FloatingActionButtonThemeData(
       foregroundColor: foregroundColor ?? this.foregroundColor,
@@ -167,8 +161,7 @@ class FloatingActionButtonThemeData with Diagnosticable {
       largeSizeConstraints: largeSizeConstraints ?? this.largeSizeConstraints,
       extendedSizeConstraints: extendedSizeConstraints ?? this.extendedSizeConstraints,
       extendedIconLabelSpacing: extendedIconLabelSpacing ?? this.extendedIconLabelSpacing,
-      extendedLeadingSpacing: extendedLeadingSpacing ?? this.extendedLeadingSpacing,
-      extendedTrailingSpacing: extendedTrailingSpacing ?? this.extendedTrailingSpacing,
+      extendedPadding: extendedPadding ?? this.extendedPadding,
     );
   }
 
@@ -199,8 +192,7 @@ class FloatingActionButtonThemeData with Diagnosticable {
       largeSizeConstraints: BoxConstraints.lerp(a?.largeSizeConstraints, b?.largeSizeConstraints, t),
       extendedSizeConstraints: BoxConstraints.lerp(a?.extendedSizeConstraints, b?.extendedSizeConstraints, t),
       extendedIconLabelSpacing: lerpDouble(a?.extendedIconLabelSpacing, b?.extendedIconLabelSpacing, t),
-      extendedLeadingSpacing: lerpDouble(a?.extendedLeadingSpacing, b?.extendedLeadingSpacing, t),
-      extendedTrailingSpacing: lerpDouble(a?.extendedTrailingSpacing, b?.extendedTrailingSpacing, t),
+      extendedPadding: EdgeInsetsGeometry.lerp(a?.extendedPadding, b?.extendedPadding, t),
     );
   }
 
@@ -224,8 +216,7 @@ class FloatingActionButtonThemeData with Diagnosticable {
       largeSizeConstraints,
       extendedSizeConstraints,
       extendedIconLabelSpacing,
-      extendedLeadingSpacing,
-      extendedTrailingSpacing,
+      extendedPadding,
     );
   }
 
@@ -253,8 +244,7 @@ class FloatingActionButtonThemeData with Diagnosticable {
         && other.largeSizeConstraints == largeSizeConstraints
         && other.extendedSizeConstraints == extendedSizeConstraints
         && other.extendedIconLabelSpacing == extendedIconLabelSpacing
-        && other.extendedLeadingSpacing == extendedLeadingSpacing
-        && other.extendedTrailingSpacing == extendedTrailingSpacing;
+        && other.extendedPadding == extendedPadding;
   }
 
   @override
@@ -278,7 +268,6 @@ class FloatingActionButtonThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<BoxConstraints>('largeSizeConstraints', largeSizeConstraints, defaultValue: null));
     properties.add(DiagnosticsProperty<BoxConstraints>('extendedSizeConstraints', extendedSizeConstraints, defaultValue: null));
     properties.add(DoubleProperty('extendedIconLabelSpacing', extendedIconLabelSpacing, defaultValue: null));
-    properties.add(DoubleProperty('extendedLeadingSpacing', extendedLeadingSpacing, defaultValue: null));
-    properties.add(DoubleProperty('extendedTrailingSpacing', extendedTrailingSpacing, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('extendedPadding', extendedPadding, defaultValue: null));
   }
 }
