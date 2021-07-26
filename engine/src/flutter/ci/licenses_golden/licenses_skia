@@ -1,4 +1,4 @@
-Signature: b735be25483ad1aadc685a72137f0747
+Signature: dd90d6a101f08fc37fb6836eb361917d
 
 UNUSED LICENSES:
 
@@ -3939,6 +3939,7 @@ FILE: ../../../third_party/skia/src/gpu/mock/GrMockRenderTask.h
 FILE: ../../../third_party/skia/src/gpu/mock/GrMockSurfaceProxy.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlFramebuffer.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlFramebuffer.mm
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlPipeline.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlRenderCommandEncoder.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrAtlasRenderTask.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrAtlasRenderTask.h
