@@ -3,10 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:io';
-import 'dart:ui';
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 
+import 'binding.dart';
+import 'hardware_keyboard.dart';
 import 'keyboard_key.dart';
 import 'raw_keyboard_android.dart';
 import 'raw_keyboard_fuchsia.dart';
@@ -286,16 +288,20 @@ abstract class RawKeyEvent with Diagnosticable {
     final RawKeyEventData data;
     String? character;
 
-    if (kIsWeb) {
+    RawKeyEventData _dataFromWeb() {
       final String? key = message['key'] as String?;
-      data = RawKeyEventDataWeb(
-        code: message['code'] as String? ?? '',
-        key: key ?? '',
-        metaState: message['metaState'] as int? ?? 0,
-      );
       if (key != null && key.isNotEmpty) {
         character = key;
       }
+      return RawKeyEventDataWeb(
+        code: message['code'] as String? ?? '',
+        key: key ?? '',
+        location: message['location'] as int? ?? 0,
+        metaState: message['metaState'] as int? ?? 0,
+      );
+    }
+    if (kIsWeb) {
+      data = _dataFromWeb();
     } else {
       final String keymap = message['keymap'] as String;
       switch (keymap) {
@@ -372,15 +378,7 @@ abstract class RawKeyEvent with Diagnosticable {
           }
           break;
         case 'web':
-          final String? key = message['key'] as String?;
-          data = RawKeyEventDataWeb(
-            code: message['code'] as String? ?? '',
-            key: key ?? '',
-            metaState: message['metaState'] as int? ?? 0,
-          );
-          if (key != null && key.isNotEmpty) {
-            character = key;
-          }
+          data = _dataFromWeb();
           break;
         default:
           /// This exception would only be hit on platforms that haven't yet
@@ -571,9 +569,7 @@ typedef RawKeyEventHandler = bool Function(RawKeyEvent event);
 ///  * [SystemChannels.keyEvent], the low-level channel used for receiving
 ///    events from the system.
 class RawKeyboard {
-  RawKeyboard._() {
-    SystemChannels.keyEvent.setMessageHandler(_handleKeyEvent);
-  }
+  RawKeyboard._();
 
   /// The shared instance of [RawKeyboard].
   static final RawKeyboard instance = RawKeyboard._();
@@ -604,39 +600,45 @@ class RawKeyboard {
     _listeners.remove(listener);
   }
 
-  /// A handler for hardware keyboard events that will stop propagation if the
-  /// handler returns true.
+  /// A handler for raw hardware keyboard events that will stop propagation if
+  /// the handler returns true.
   ///
-  /// Key events on the platform are given to Flutter to be handled by the
-  /// engine. If they are not handled, then the platform will continue to
-  /// distribute the keys (i.e. propagate them) to other (possibly non-Flutter)
-  /// components in the application. The return value from this handler tells
-  /// the platform to either stop propagation (by returning true: "event
-  /// handled"), or pass the event on to other controls (false: "event not
-  /// handled").
-  ///
-  /// This handler is normally set by the [FocusManager] so that it can control
-  /// the key event propagation to focused widgets.
-  ///
-  /// Most applications can use the focus system (see [Focus] and
-  /// [FocusManager]) to receive key events. If you are not using the
-  /// [FocusManager] to manage focus, then to be able to stop propagation of the
-  /// event by indicating that the event was handled, set this attribute to a
-  /// [RawKeyEventHandler]. Otherwise, key events will be assumed to not have
-  /// been handled by Flutter, and will also be sent to other (possibly
-  /// non-Flutter) controls in the application.
-  ///
-  /// See also:
-  ///
-  ///  * [Focus.onKey], a [Focus] callback attribute that will be given key
-  ///    events distributed by the [FocusManager] based on the current primary
-  ///    focus.
-  ///  * [addListener], to add passive key event listeners that do not stop event
-  ///    propagation.
-  RawKeyEventHandler? keyEventHandler;
+  /// This property is only a wrapper over [KeyEventManager.keyMessageHandler],
+  /// and is kept only for backward compatibility. New code should use
+  /// [KeyEventManager.keyMessageHandler] to set custom global key event
+  /// handler.  Setting [keyEventHandler] will cause
+  /// [KeyEventManager.keyMessageHandler] to be set with a converted handler.
+  /// If [KeyEventManager.keyMessageHandler] is set by [FocusManager] (the most
+  /// common situation), then the exact value of [keyEventHandler] is a dummy
+  /// callback and must not be invoked.
+  RawKeyEventHandler? get keyEventHandler {
+    if (ServicesBinding.instance!.keyEventManager.keyMessageHandler != _cachedKeyMessageHandler) {
+      _cachedKeyMessageHandler = ServicesBinding.instance!.keyEventManager.keyMessageHandler;
+      _cachedKeyEventHandler = _cachedKeyMessageHandler == null ?
+        null :
+        (RawKeyEvent event) {
+          assert(false,
+              'The RawKeyboard.instance.keyEventHandler assigned by Flutter is a dummy '
+              'callback kept for compatibility and should not be directly called. Use '
+              'ServicesBinding.instance!.keyMessageHandler instead.');
+          return true;
+        };
+    }
+    return _cachedKeyEventHandler;
+  }
+  RawKeyEventHandler? _cachedKeyEventHandler;
+  KeyMessageHandler? _cachedKeyMessageHandler;
+  set keyEventHandler(RawKeyEventHandler? handler) {
+    _cachedKeyEventHandler = handler;
+    _cachedKeyMessageHandler = handler == null ?
+      null :
+      (KeyMessage message) => handler(message.rawEvent);
+    ServicesBinding.instance!.keyEventManager.keyMessageHandler = _cachedKeyMessageHandler;
+  }
 
-  Future<dynamic> _handleKeyEvent(dynamic message) async {
-    final RawKeyEvent event = RawKeyEvent.fromMessage(message as Map<String, dynamic>);
+  /// Process a new [RawKeyEvent] by recording the state changes and
+  /// dispatching to listeners.
+  bool handleRawKeyEvent(RawKeyEvent event) {
     bool shouldDispatch = true;
     if (event is RawKeyDownEvent) {
       if (event.data.shouldDispatchEvent()) {
@@ -657,7 +659,7 @@ class RawKeyboard {
       }
     }
     if (!shouldDispatch) {
-      return <String, dynamic>{ 'handled': true };
+      return true;
     }
     // Make sure that the modifiers reflect reality, in case a modifier key was
     // pressed/released while the app didn't have focus.
@@ -676,12 +678,7 @@ class RawKeyboard {
       }
     }
 
-    // Send the key event to the keyEventHandler, then send the appropriate
-    // response to the platform so that it can resolve the event's handling.
-    // Defaults to false if keyEventHandler is null.
-    final bool handled = keyEventHandler != null && keyEventHandler!(event);
-    assert(handled != null, 'keyEventHandler returned null, which is not allowed');
-    return <String, dynamic>{ 'handled': handled };
+    return false;
   }
 
   static final Map<_ModifierSidePair, Set<PhysicalKeyboardKey>> _modifierKeyMap = <_ModifierSidePair, Set<PhysicalKeyboardKey>>{
@@ -806,6 +803,11 @@ class RawKeyboard {
   /// Returns the set of physical keys currently pressed.
   Set<PhysicalKeyboardKey> get physicalKeysPressed => _keysPressed.keys.toSet();
 
+  /// Returns the logical key that corresponds to the given pressed physical key.
+  ///
+  /// Returns null if the physical key is not currently pressed.
+  LogicalKeyboardKey? lookUpLayout(PhysicalKeyboardKey physicalKey) => _keysPressed[physicalKey];
+
   /// Clears the list of keys returned from [keysPressed].
   ///
   /// This is used by the testing framework to make sure tests are hermetic.
@@ -830,5 +832,5 @@ class _ModifierSidePair {
   }
 
   @override
-  int get hashCode => hashValues(modifier, side);
+  int get hashCode => ui.hashValues(modifier, side);
 }
