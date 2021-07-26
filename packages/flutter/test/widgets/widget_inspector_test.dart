@@ -139,17 +139,17 @@ class CyclicDiagnostic extends DiagnosticableTree {
 
 class _CreationLocation {
   _CreationLocation({
+    required this.id,
     required this.file,
     required this.line,
     required this.column,
-    required this.id,
-    this.name,
+    required this.name,
   });
 
+  final int id;
   final String file;
   final int line;
   final int column;
-  final int id;
   String? name;
 }
 
@@ -1891,6 +1891,13 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(await service.testExtension('getSelectedWidget', <String, String>{'objectGroup': 'my-group'}), contains('createdByLocalProject'));
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked() || isBrowser); // Test requires --track-widget-creation flag.
 
+    Map<Object, Object?> removeLastEvent(List<Map<Object, Object?>> events) {
+      final Map<Object, Object?> event = events.removeLast();
+      // Verify that the event is json encodable.
+      json.encode(event);
+      return event;
+    }
+
     testWidgets('ext.flutter.inspector.trackRebuildDirtyWidgets', (WidgetTester tester) async {
       service.rebuildCount = 0;
 
@@ -1926,7 +1933,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       await tester.pump();
 
       expect(rebuildEvents.length, equals(1));
-      Map<Object, Object?> event = rebuildEvents.removeLast();
+      Map<Object, Object?> event = removeLastEvent(rebuildEvents);
       expect(event['startTime'], isA<int>());
       List<int> data = event['events']! as List<int>;
       expect(data.length, equals(14));
@@ -1935,20 +1942,22 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(newLocations, isNotNull);
       expect(newLocations.length, equals(1));
       expect(newLocations.keys.first, equals(file));
-      final Map<String, Map<int, String>> newLocationsNames = event['newLocationsNames']! as Map<String, Map<int, String>>;
-      expect(newLocationsNames, isNotNull);
-      expect(newLocationsNames.length, equals(1));
-      expect(newLocationsNames.keys.first, equals(file));
+      Map<String, Map<String, List<Object?>>> fileLocationsMap = event['locations']! as Map<String, Map<String, List<Object?>>>;
+      expect(fileLocationsMap, isNotNull);
+      expect(fileLocationsMap.length, equals(1));
+      expect(fileLocationsMap.keys.first, equals(file));
       final List<int> locationsForFile = newLocations[file]!;
       expect(locationsForFile.length, equals(21));
       final int numLocationEntries = locationsForFile.length ~/ 3;
       expect(numLocationEntries, equals(numDataEntries));
+      final Map<String, List<Object?>> locations = fileLocationsMap[file]!;
+      expect(locations.length, equals(4));
+      expect(locations['ids']!.length, equals(7));
 
       final Map<int, _CreationLocation> knownLocations = <int, _CreationLocation>{};
       _addToKnownLocationsMap(
         knownLocations: knownLocations,
-        newLocations: newLocations,
-        newLocationsNames: newLocationsNames,
+        newLocations: fileLocationsMap,
       );
       int totalCount = 0;
       int maxCount = 0;
@@ -1972,12 +1981,12 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       state.updateTime(); // Triggers a rebuild.
       await tester.pump();
       expect(rebuildEvents.length, equals(1));
-      event = rebuildEvents.removeLast();
+      event = removeLastEvent(rebuildEvents);
       expect(event['startTime'], isA<int>());
       data = event['events']! as List<int>;
       // No new locations were rebuilt.
       expect(event, isNot(contains('newLocations')));
-      expect(event, isNot(contains('newLocationsNames')));
+      expect(event, isNot(contains('locations')));
 
       // There were two rebuilds: one for the ClockText element itself and one
       // for its child.
@@ -2011,12 +2020,12 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
       await tester.pump();
       expect(rebuildEvents.length, equals(1));
-      event = rebuildEvents.removeLast();
+      event = removeLastEvent(rebuildEvents);
       expect(event['startTime'], isA<int>());
       data = event['events']! as List<int>;
       // No new locations were rebuilt.
       expect(event, isNot(contains('newLocations')));
-      expect(event, isNot(contains('newLocationsNames')));
+      expect(event, isNot(contains('locations')));
 
       expect(data.length, equals(4));
       id = data[0];
@@ -2048,12 +2057,12 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
       await tester.pump();
       expect(rebuildEvents.length, equals(1));
-      event = rebuildEvents.removeLast();
+      event = removeLastEvent(rebuildEvents);
       expect(event['startTime'], isA<int>());
       data = event['events']! as List<int>;
       // No new locations were rebuilt.
       expect(event, isNot(contains('newLocations')));
-      expect(event, isNot(contains('newLocationsNames')));
+      expect(event, isNot(contains('locations')));
 
       expect(data.length, equals(4));
       id = data[0];
@@ -2066,10 +2075,11 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       state.stopClock();
       await tester.pump();
       expect(rebuildEvents.length, equals(1));
-      event = rebuildEvents.removeLast();
+      event = removeLastEvent(rebuildEvents);
       expect(event['startTime'], isA<int>());
       data = event['events']! as List<int>;
       newLocations = event['newLocations']! as Map<String, List<int>>;
+      fileLocationsMap = event['locations']! as Map<String, Map<String, List<Object?>>>;
 
       expect(data.length, equals(4));
       // The second pair in data is the previously unseen rebuild location.
@@ -2080,8 +2090,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(knownLocations, isNot(contains(id)));
       _addToKnownLocationsMap(
         knownLocations: knownLocations,
-        newLocations: newLocations,
-        newLocationsNames: newLocationsNames,
+        newLocations: fileLocationsMap,
       );
       // Verify the rebuild location was included in the newLocations data.
       expect(knownLocations, contains(id));
@@ -2137,7 +2146,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       await tester.pump();
 
       expect(repaintEvents.length, equals(1));
-      Map<Object, Object?> event = repaintEvents.removeLast();
+      Map<Object, Object?> event = removeLastEvent(repaintEvents);
       expect(event['startTime'], isA<int>());
       List<int> data = event['events']! as List<int>;
       expect(data.length, equals(18));
@@ -2146,21 +2155,22 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(newLocations, isNotNull);
       expect(newLocations.length, equals(1));
       expect(newLocations.keys.first, equals(file));
-      final Map<String, Map<int, String>> newLocationsNames = event['newLocationsNames']! as Map<String, Map<int, String>>;
-      expect(newLocationsNames, isNotNull);
-      expect(newLocationsNames.length, equals(1));
-      expect(newLocationsNames.keys.first, equals(file));
+      final Map<String, Map<String, List<Object?>>> fileLocationsMap = event['locations']! as Map<String, Map<String, List<Object?>>>;
+      expect(fileLocationsMap, isNotNull);
+      expect(fileLocationsMap.length, equals(1));
+      expect(fileLocationsMap.keys.first, equals(file));
       final List<int> locationsForFile = newLocations[file]!;
       expect(locationsForFile.length, equals(27));
       final int numLocationEntries = locationsForFile.length ~/ 3;
       expect(numLocationEntries, equals(numDataEntries));
+      final Map<String, List<Object?>> locations = fileLocationsMap[file]!;
+      expect(locations.length, equals(4));
+      expect(locations['ids']!.length, equals(9));
 
-      final Map<int, _CreationLocation> knownLocations =
-          <int, _CreationLocation>{};
+      final Map<int, _CreationLocation> knownLocations = <int, _CreationLocation>{};
       _addToKnownLocationsMap(
         knownLocations: knownLocations,
-        newLocations: newLocations,
-        newLocationsNames: newLocationsNames,
+        newLocations: fileLocationsMap,
       );
       int totalCount = 0;
       int maxCount = 0;
@@ -2184,12 +2194,12 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       state.updateTime(); // Triggers a rebuild.
       await tester.pump();
       expect(repaintEvents.length, equals(1));
-      event = repaintEvents.removeLast();
+      event = removeLastEvent(repaintEvents);
       expect(event['startTime'], isA<int>());
       data = event['events']! as List<int>;
       // No new locations were rebuilt.
       expect(event, isNot(contains('newLocations')));
-      expect(event, isNot(contains('newLocationsNames')));
+      expect(event, isNot(contains('locations')));
 
       // Triggering a rebuild of one widget in this app causes the whole app
       // to repaint.
@@ -3044,23 +3054,23 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
 void _addToKnownLocationsMap({
   required Map<int, _CreationLocation> knownLocations,
-  required Map<String, List<int>> newLocations,
-  required Map<String, Map<int, String>> newLocationsNames,
+  required Map<String, Map<String, List<Object?>>> newLocations,
 }) {
-  newLocations.forEach((String file, List<int> entries) {
-    assert(entries.length % 3 == 0);
-    for (int i = 0; i < entries.length; i += 3) {
-      final int id = entries[i];
-      final int line = entries[i + 1];
-      final int column = entries[i + 2];
-      assert(!knownLocations.containsKey(id));
-      knownLocations[id] =
-          _CreationLocation(file: file, line: line, column: column, id: id);
+  newLocations.forEach((String file, Map<String, List<Object?>> entries) {
+    final List<int> ids = entries['ids']!.cast<int>();
+    final List<int> lines = entries['lines']!.cast<int>();
+    final List<int> columns = entries['columns']!.cast<int>();
+    final List<String> names = entries['names']!.cast<String>();
+
+    for (int i = 0; i < ids.length; i++) {
+      final int id = ids[i];
+      knownLocations[id] = _CreationLocation(
+        id: id,
+        file: file,
+        line: lines[i],
+        column: columns[i],
+        name: names[i],
+      );
     }
-  });
-  newLocationsNames.forEach((String file, Map<int, String> namesInfo) {
-    namesInfo.forEach((int id, String name) {
-      knownLocations[id]!.name = name;
-    });
   });
 }

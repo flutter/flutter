@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:convert';
 import 'dart:io';
 
@@ -17,14 +15,14 @@ import 'package:http/testing.dart';
 import 'common.dart';
 
 void main() {
-  ProcessResult _processResult;
+  late ProcessResult _processResult;
   ProcessResult runSyncStub(String executable, List<String> args,
-          {Map<String, String> environment,
-          bool includeParentEnvironment,
-          bool runInShell,
-          Encoding stderrEncoding,
-          Encoding stdoutEncoding,
-          String workingDirectory}) =>
+          {Map<String, String>? environment,
+          bool includeParentEnvironment = true,
+          bool runInShell = false,
+          Encoding? stderrEncoding,
+          Encoding? stdoutEncoding,
+          String? workingDirectory}) =>
       _processResult;
 
   // Expected test values.
@@ -33,9 +31,9 @@ void main() {
   const String serviceAccountToken = 'test_token';
 
   group('Cocoon', () {
-    Client mockClient;
-    Cocoon cocoon;
-    FileSystem fs;
+    late Client mockClient;
+    late Cocoon cocoon;
+    late FileSystem fs;
 
     setUp(() {
       fs = MemoryFileSystem();
@@ -183,7 +181,7 @@ void main() {
   });
 
   group('AuthenticatedCocoonClient', () {
-    FileSystem fs;
+    late FileSystem fs;
 
     setUp(() {
       fs = MemoryFileSystem();

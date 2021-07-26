@@ -1574,7 +1574,7 @@ void main() {
       await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
       await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowLeft);
       expect(controller.selection.extentOffset - controller.selection.baseOffset, -1);
-    });
+    }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Shift test 2', (WidgetTester tester) async {
       await setupWidget(tester, 'abcdefghi');
@@ -1586,7 +1586,7 @@ void main() {
       await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowRight);
       await tester.pumpAndSettle();
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 1);
-    });
+    }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Control Shift test', (WidgetTester tester) async {
       await setupWidget(tester, 'their big house');
@@ -1598,7 +1598,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, -5);
-    });
+    }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Down and up test', (WidgetTester tester) async {
       await setupWidget(tester, 'a big house');
@@ -1616,7 +1616,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 0);
-    });
+    }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Down and up test 2', (WidgetTester tester) async {
       await setupWidget(tester, 'a big house\njumped over a mouse\nOne more line yay');
@@ -1667,7 +1667,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, -5);
-    });
+    }, variant: KeySimulatorTransitModeVariant.all());
   });
 
   testWidgets('Copy test', (WidgetTester tester) async {
@@ -1726,7 +1726,7 @@ void main() {
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.pumpAndSettle();
-  });
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Select all test', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -1761,7 +1761,7 @@ void main() {
 
     expect(controller.selection.baseOffset, 0);
     expect(controller.selection.extentOffset, 31);
-  });
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('keyboard selection should call onSelectionChanged', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -1808,7 +1808,7 @@ void main() {
       expect(newSelection!.extentOffset, i + 1);
       newSelection = null;
     }
-  });
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Changing positions of selectable text', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -1898,7 +1898,7 @@ void main() {
     c1 = editableTextWidget.controller;
 
     expect(c1.selection.extentOffset - c1.selection.baseOffset, -6);
-  });
+  }, variant: KeySimulatorTransitModeVariant.all());
 
 
   testWidgets('Changing focus test', (WidgetTester tester) async {
@@ -1968,7 +1968,7 @@ void main() {
 
     expect(c1.selection.extentOffset - c1.selection.baseOffset, 0);
     expect(c2.selection.extentOffset - c2.selection.baseOffset, -5);
-  });
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Caret works when maxLines is null', (WidgetTester tester) async {
     await tester.pumpWidget(
