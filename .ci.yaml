@@ -1911,7 +1911,6 @@ targets:
 
   - name: Mac_ios flutter_gallery_ios_sksl_warmup__transition_perf
     builder: Mac_ios flutter_gallery_ios_sksl_warmup__transition_perf
-    bringup: true
     presubmit: false
     properties:
       tags: >
