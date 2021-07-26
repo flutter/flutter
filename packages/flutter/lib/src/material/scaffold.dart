@@ -2756,6 +2756,23 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
             _dismissedBottomSheets.remove(bottomSheet);
           });
         }
+        if (_floatingActionButtonVisibilityValue != 1.0 || _showBodyScrim) {
+          FlutterError.reportError(FlutterErrorDetails(
+            exception: StateError(
+              'A DraggableScrollableSheet was used as a BottomSheet and '
+              'dismissed without resetting the body scrim or '
+              'FloatingActionButton visibility. This happens if the sheet has a '
+              'child that is hit testable outside of the scrollable, e.g. a '
+              'column with a nested ListView as a child.\n'
+              'Instead, consider using a CustomScrollView with a '
+              'SliverPersistentHeader.',
+            ),
+            library: 'Material',
+            context: ErrorDescription('while dismissing a bottom sheet'),
+          ));
+          showBodyScrim(false, 0.0);
+          _floatingActionButtonVisibilityValue = 1.0;
+        }
       },
       builder: builder,
       isPersistent: isPersistent,

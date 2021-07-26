@@ -11,6 +11,94 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
+  testWidgets('Scaffold reports an error and resets state when a DraggableScrollableSheet is incorrectly dismissed', (WidgetTester tester) async {
+    final UniqueKey fabKey = UniqueKey();
+    final UniqueKey buttonKey = UniqueKey();
+    Widget _badBottomSheet(BuildContext context) {
+      return DraggableScrollableSheet(
+        expand: false,
+        builder: (BuildContext context, ScrollController scrollController) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Container(
+                height: 80,
+                color: Colors.grey,
+                child: const Center(child: Text('Drag me down from top')),
+              ),
+              Flexible(
+                child: Container(
+                  color: Colors.blue[100],
+                  child: ListView.builder(
+                    controller: scrollController,
+                    itemCount: 25,
+                    itemBuilder: (BuildContext context, int index) {
+                      return ListTile(title: Text('Item $index'));
+                    },
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      );
+    }
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Align(
+          alignment: Alignment.topCenter,
+          child: ElevatedButton(
+            key: buttonKey,
+            child: const Text('BUTTON'),
+            onPressed: () {},
+          ),
+        ),
+        floatingActionButton: Builder(builder: (BuildContext context) {
+          return FloatingActionButton(
+            key: fabKey,
+            onPressed: () {
+              Scaffold.of(context).showBottomSheet<void>(_badBottomSheet);
+            },
+          );
+        }),
+      ),
+    ));
+
+    expect(find.text('Drag me down from top'), findsNothing);
+    expect(find.text('Item 1'), findsNothing);
+    expect(find.byKey(buttonKey).hitTestable(), findsOneWidget);
+
+    await tester.tap(find.byKey(fabKey));
+    await tester.pumpAndSettle();
+    expect(find.text('Drag me down from top'), findsOneWidget);
+    expect(find.text('Item 1'), findsOneWidget);
+    expect(find.byKey(buttonKey).hitTestable(), findsOneWidget);
+
+    await tester.drag(find.text('Item 1'), const Offset(0, -350));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(buttonKey).hitTestable(), findsNothing);
+
+    await tester.drag(find.text('Drag me down from top'), const Offset(0, 750));
+    await tester.pumpAndSettle();
+
+    final StateError error = tester.takeException() as StateError;
+    expect(
+      error.message,
+      'A DraggableScrollableSheet was used as a BottomSheet and '
+      'dismissed without resetting the body scrim or '
+      'FloatingActionButton visibility. This happens if the sheet has a '
+      'child that is hit testable outside of the scrollable, e.g. a '
+      'column with a nested ListView as a child.\n'
+      'Instead, consider using a CustomScrollView with a '
+      'SliverPersistentHeader.'
+    );
+    expect(find.text('Drag me down from top'), findsNothing);
+    expect(find.text('Item 1'), findsNothing);
+    expect(find.byKey(buttonKey).hitTestable(), findsOneWidget);
+  });
+
   testWidgets('Scaffold drawer callback test', (WidgetTester tester) async {
     bool isDrawerOpen = false;
     bool isEndDrawerOpen = false;
