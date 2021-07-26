@@ -6349,28 +6349,28 @@ class Icons {
   static const IconData donut_small_outlined = IconData(0xefe9, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">door_back</i> &#x2014; material icon named "door back".
-  static const IconData door_back = IconData(0xe1fb, fontFamily: 'MaterialIcons');
+  static const IconData door_back_door = IconData(0xe1fb, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">door_back</i> &#x2014; material icon named "door back sharp".
-  static const IconData door_back_sharp = IconData(0xe8f8, fontFamily: 'MaterialIcons');
+  static const IconData door_back_door_sharp = IconData(0xe8f8, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">door_back</i> &#x2014; material icon named "door back rounded".
-  static const IconData door_back_rounded = IconData(0xf6d7, fontFamily: 'MaterialIcons');
+  static const IconData door_back_door_rounded = IconData(0xf6d7, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">door_back</i> &#x2014; material icon named "door back outlined".
-  static const IconData door_back_outlined = IconData(0xefea, fontFamily: 'MaterialIcons');
+  static const IconData door_back_door_outlined = IconData(0xefea, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">door_front</i> &#x2014; material icon named "door front".
-  static const IconData door_front = IconData(0xe1fc, fontFamily: 'MaterialIcons');
+  static const IconData door_front_door = IconData(0xe1fc, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">door_front</i> &#x2014; material icon named "door front sharp".
-  static const IconData door_front_sharp = IconData(0xe8f9, fontFamily: 'MaterialIcons');
+  static const IconData door_front_door_sharp = IconData(0xe8f9, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">door_front</i> &#x2014; material icon named "door front rounded".
-  static const IconData door_front_rounded = IconData(0xf6d8, fontFamily: 'MaterialIcons');
+  static const IconData door_front_door_rounded = IconData(0xf6d8, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">door_front</i> &#x2014; material icon named "door front outlined".
-  static const IconData door_front_outlined = IconData(0xefeb, fontFamily: 'MaterialIcons');
+  static const IconData door_front_door_outlined = IconData(0xefeb, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">door_sliding</i> &#x2014; material icon named "door sliding".
   static const IconData door_sliding = IconData(0xe1fd, fontFamily: 'MaterialIcons');
