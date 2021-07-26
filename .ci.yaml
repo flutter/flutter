@@ -1920,7 +1920,6 @@ targets:
 
   - name: Mac_ios cubic_bezier_perf_ios_sksl_warmup__timeline_summary
     builder: Mac_ios cubic_bezier_perf_ios_sksl_warmup__timeline_summary
-    bringup: true
     presubmit: false
     properties:
       tags: >
