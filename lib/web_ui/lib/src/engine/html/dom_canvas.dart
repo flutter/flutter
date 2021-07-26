@@ -37,7 +37,7 @@ class DomCanvas extends EngineCanvas with SaveElementStackTracking {
   }
 
   @override
-  void clipRect(ui.Rect rect, ui.ClipOp op) {
+  void clipRect(ui.Rect rect, ui.ClipOp clipOp) {
     throw UnimplementedError();
   }
 
@@ -251,7 +251,7 @@ void applyRRectBorderRadius(html.CssStyleDeclaration style, ui.RRect rrect) {
       rrect.trRadiusX == rrect.trRadiusY &&
       rrect.blRadiusX == rrect.blRadiusY &&
       rrect.brRadiusX == rrect.brRadiusY) {
-    style.borderRadius = '${_borderStrokeToCssUnit(rrect.blRadiusX)}';
+    style.borderRadius = _borderStrokeToCssUnit(rrect.blRadiusX);
     return;
   }
   // Non-uniform. Apply each corner radius.

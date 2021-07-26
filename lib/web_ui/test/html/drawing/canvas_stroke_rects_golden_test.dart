@@ -56,7 +56,7 @@ void paintSideBySideRects(BitmapCanvas canvas) {
           ..color = Color(0x7fff0000));
 
     // Rotate 30 degrees (in rad: deg*pi/180)
-    canvas.transform(new Matrix4.rotationZ(30.0 * math.pi / 180.0).storage);
+    canvas.transform(Matrix4.rotationZ(30.0 * math.pi / 180.0).storage);
 
     canvas.drawRect(Rect.fromLTRB(100, 60, 140, 100),
         SurfacePaintData()

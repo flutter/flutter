@@ -147,11 +147,11 @@ PropertiesSyncer getSyncer(
   if (wordBreakProperties != null) {
     return dry
         ? WordBreakPropertiesSyncer.dry(wordBreakProperties)
-        : WordBreakPropertiesSyncer(wordBreakProperties, '$wordBreakCodegen');
+        : WordBreakPropertiesSyncer(wordBreakProperties, wordBreakCodegen);
   } else {
     return dry
         ? LineBreakPropertiesSyncer.dry(lineBreakProperties!)
-        : LineBreakPropertiesSyncer(lineBreakProperties!, '$lineBreakCodegen');
+        : LineBreakPropertiesSyncer(lineBreakProperties!, lineBreakCodegen);
   }
 }
 
@@ -209,7 +209,7 @@ import 'unicode_range.dart';
 
 /// For an explanation of these enum values, see:
 ///
-/// * ${enumDocLink}
+/// * $enumDocLink
 enum ${prefix}CharProperty {
   ${_getEnumValues(data.enumCollection).join('\n  ')}
 }
@@ -223,7 +223,7 @@ UnicodePropertyLookup<${prefix}CharProperty> ${prefix.toLowerCase()}Lookup =
   _packed${prefix}BreakProperties,
   ${_getSingleRangesCount(data)},
   ${prefix}CharProperty.values,
-  ${prefix}CharProperty.${defaultProperty},
+  ${prefix}CharProperty.$defaultProperty,
 );
 ''';
   }

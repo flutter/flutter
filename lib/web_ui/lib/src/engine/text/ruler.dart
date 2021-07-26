@@ -789,7 +789,7 @@ class ParagraphRuler {
       final html.Node node = textNodes[i];
       // Check if offset is within client rect bounds of text node's
       // parent element.
-      final html.Element parent = node.parentNode as html.Element;
+      final html.Element parent = node.parentNode! as html.Element;
       final html.Rectangle<num> bounds = parent.getBoundingClientRect();
       final double dx = offset.dx;
       final double dy = offset.dy;

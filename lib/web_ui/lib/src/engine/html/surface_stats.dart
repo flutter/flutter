@@ -147,7 +147,7 @@ void debugRepaintSurfaceStatsOverlay(PersistedScene scene) {
     for (DebugSurfaceStats oneSurfaceStats in statsMap.values) {
       totals.aggregate(oneSurfaceStats);
       if (oneSurfaceStats.surface is PersistedPicture) {
-        final PersistedPicture picture = oneSurfaceStats.surface as PersistedPicture;
+        final PersistedPicture picture = oneSurfaceStats.surface! as PersistedPicture;
         pixelCount += picture.bitmapPixelCount;
       }
     }

@@ -37,7 +37,7 @@ class ChromeArgParser extends BrowserArgParser {
     argParser
       ..addOption(
         'chrome-version',
-        defaultsTo: '$pinnedChromeBuildNumber',
+        defaultsTo: pinnedChromeBuildNumber,
         help: 'The Chrome version to use while running tests. If the requested '
             'version has not been installed, it will be downloaded and installed '
             'automatically. A specific Chrome build version number, such as 695653, '

@@ -333,7 +333,7 @@ class PersistedPicture extends PersistedLeafSurface {
       return 0;
     }
 
-    final BitmapCanvas bitmapCanvas = _canvas as BitmapCanvas;
+    final BitmapCanvas bitmapCanvas = _canvas! as BitmapCanvas;
     return bitmapCanvas.bitmapPixelCount;
   }
 
@@ -455,7 +455,7 @@ class PersistedPicture extends PersistedLeafSurface {
       // it in a cache for later reuse.
       _recycleCanvas(oldCanvas);
       if (_canvas is BitmapCanvas) {
-        (_canvas as BitmapCanvas).setElementCache(null);
+        (_canvas! as BitmapCanvas).setElementCache(null);
       }
       _canvas = null;
       // We cannot paint immediately because not all canvases that we may be
@@ -595,7 +595,7 @@ class PersistedPicture extends PersistedLeafSurface {
     _computeOptimalCullRect(oldSurface);
     if (identical(picture, oldSurface.picture)) {
       final bool densityChanged = (_canvas is BitmapCanvas &&
-          _density != (_canvas as BitmapCanvas).density);
+          _density != (_canvas! as BitmapCanvas).density);
 
       // The picture is the same. Attempt to avoid repaint.
       if (_requiresRepaint || densityChanged) {
@@ -631,10 +631,10 @@ class PersistedPicture extends PersistedLeafSurface {
   @override
   void debugPrintChildren(StringBuffer buffer, int indent) {
     super.debugPrintChildren(buffer, indent);
-    if (rootElement != null && rootElement!.firstChild != null) {
-      final html.Element firstChild = rootElement!.firstChild as html.Element;
+    if (rootElement != null && rootElement!.firstChild! != null) {
+      final html.Element firstChild = rootElement!.firstChild! as html.Element;
       final String canvasTag = firstChild.tagName.toLowerCase();
-      final int canvasHash = rootElement!.firstChild!.hashCode;
+      final int canvasHash = firstChild.hashCode;
       buffer.writeln('${'  ' * (indent + 1)}<$canvasTag @$canvasHash />');
     } else if (rootElement != null) {
       buffer.writeln(

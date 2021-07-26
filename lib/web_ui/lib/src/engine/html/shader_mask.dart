@@ -161,9 +161,9 @@ class PersistedShaderMask extends PersistedContainerSurface
       _shaderElement =
           html.Element.html(code, treeSanitizer: NullTreeSanitizer());
       if (isWebKit) {
-        _childContainer!.style.filter = 'url(#_fmf${_maskFilterIdCounter}';
+        _childContainer!.style.filter = 'url(#_fmf$_maskFilterIdCounter';
       } else {
-        rootElement!.style.filter = 'url(#_fmf${_maskFilterIdCounter}';
+        rootElement!.style.filter = 'url(#_fmf$_maskFilterIdCounter';
       }
       domRenderer.addResource(_shaderElement!);
     }

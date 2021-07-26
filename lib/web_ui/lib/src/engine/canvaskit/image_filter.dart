@@ -6,10 +6,10 @@ import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
 
+import '../util.dart';
 import 'canvaskit_api.dart';
 import 'color_filter.dart';
 import 'skia_object_cache.dart';
-import '../util.dart';
 
 /// An [ImageFilter] that can create a managed skia [SkImageFilter] object.
 ///

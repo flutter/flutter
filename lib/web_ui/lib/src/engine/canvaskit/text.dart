@@ -703,8 +703,8 @@ class CkParagraph extends SkiaObject<SkParagraph> implements ui.Paragraph {
   List<ui.TextBox> getBoxesForRange(
     int start,
     int end, {
-    ui.BoxHeightStyle boxHeightStyle: ui.BoxHeightStyle.tight,
-    ui.BoxWidthStyle boxWidthStyle: ui.BoxWidthStyle.tight,
+    ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,
+    ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
   }) {
     if (start < 0 || end < 0) {
       return const <ui.TextBox>[];

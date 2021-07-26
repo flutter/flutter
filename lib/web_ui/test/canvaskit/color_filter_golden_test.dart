@@ -15,7 +15,7 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
-const ui.Rect region = const ui.Rect.fromLTRB(0, 0, 500, 250);
+const ui.Rect region = ui.Rect.fromLTRB(0, 0, 500, 250);
 
 Future<void> matchSceneGolden(String goldenFile, LayerScene scene,
     {bool write = false}) async {

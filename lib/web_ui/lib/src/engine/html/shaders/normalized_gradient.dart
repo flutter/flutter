@@ -141,10 +141,10 @@ void writeUnrolledBinarySearch(ShaderMethod method, int start, int end,
     required String biasName,
     required String scaleName}) {
   if (start == end) {
-    final String biasSource = '${biasName}_${start}';
-    method.addStatement('${biasName} = ${biasSource};');
-    final String scaleSource = '${scaleName}_${start}';
-    method.addStatement('${scaleName} = ${scaleSource};');
+    final String biasSource = '${biasName}_$start';
+    method.addStatement('$biasName = $biasSource;');
+    final String scaleSource = '${scaleName}_$start';
+    method.addStatement('$scaleName = $scaleSource;');
   } else {
     // Add probe check.
     final int mid = (start + end) ~/ 2;

@@ -6,9 +6,10 @@ import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
 
-import 'shader_builder.dart';
 import '../../browser_detection.dart';
+import 'shader_builder.dart';
 
+// ignore: avoid_classes_with_only_static_members
 /// Provides common shaders used for gradients and drawVertices APIs.
 class VertexShaders {
   static final Uint16List vertexIndicesForRect =

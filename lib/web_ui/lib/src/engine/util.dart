@@ -5,8 +5,8 @@
 import 'dart:async';
 import 'dart:html' as html;
 import 'dart:js_util' as js_util;
-import 'dart:typed_data';
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
 

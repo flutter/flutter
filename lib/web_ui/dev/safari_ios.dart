@@ -65,7 +65,7 @@ class SafariIos extends Browser {
         'simctl',
         'openurl', // Opens the url on Safari installed on the simulator.
         'booted', // The simulator is already booted.
-        '${url.toString()}',
+        url.toString(),
       ]);
 
       return process;
@@ -157,7 +157,7 @@ class SafariIosScreenshotManager extends ScreenshotManager {
   /// Uses simulator tool `xcrun simctl`'s 'screenshot' command.
   @override
   Future<Image> capture(math.Rectangle<num>? region) async {
-    final String filename = 'screenshot${_fileNameCounter}.png';
+    final String filename = 'screenshot$_fileNameCounter.png';
     _fileNameCounter++;
 
     await IosSafariArgParser.instance.iosSimulator.takeScreenshot(
@@ -168,7 +168,7 @@ class SafariIosScreenshotManager extends ScreenshotManager {
     List<int> imageBytes;
     if (!file.existsSync()) {
       throw Exception('Failed to read the screenshot '
-          'screenshot${_fileNameCounter}.png.');
+          'screenshot$_fileNameCounter.png.');
     }
     imageBytes = await file.readAsBytes();
     file.deleteSync();

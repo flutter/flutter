@@ -8,13 +8,13 @@ library matchers;
 import 'dart:html' as html;
 import 'dart:math' as math;
 
-import 'package:html/parser.dart' as html_package;
 import 'package:html/dom.dart' as html_package;
+import 'package:html/parser.dart' as html_package;
 
 import 'package:test/test.dart';
 
-import 'package:ui/ui.dart';
 import 'package:ui/src/engine.dart';
+import 'package:ui/ui.dart';
 
 /// Enumerates all persisted surfaces in the tree rooted at [root].
 ///
@@ -141,7 +141,7 @@ Matcher within<T>({
   if (distanceFunction == null) {
     throw ArgumentError(
         'The specified distanceFunction was null, and a standard distance '
-        'function was not found for type ${T} of the provided '
+        'function was not found for type $T of the provided '
         '`from` argument.');
   }
 

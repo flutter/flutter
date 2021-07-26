@@ -19,13 +19,13 @@ class CkPicture extends ManagedSkiaObject<SkPicture> implements ui.Picture {
   final ui.Rect? cullRect;
   final CkPictureSnapshot? _snapshot;
 
-  CkPicture(SkPicture picture, this.cullRect, this._snapshot) : super(picture) {
+  CkPicture(SkPicture picture, this.cullRect, this._snapshot) :
     assert(
       browserSupportsFinalizationRegistry && _snapshot == null ||
           _snapshot != null,
       'If the browser does not support FinalizationRegistry (WeakRef), then we must have a picture snapshot to be able to resurrect it.',
-    );
-  }
+    ), super(picture);
+
 
   @override
   int get approximateBytesUsed => 0;

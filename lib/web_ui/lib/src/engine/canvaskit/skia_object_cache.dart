@@ -5,10 +5,10 @@
 import 'dart:collection';
 
 import 'package:meta/meta.dart';
-import '../../engine.dart' show EnginePlatformDispatcher, Instrumentation;
 
-import 'canvaskit_api.dart';
+import '../../engine.dart' show EnginePlatformDispatcher, Instrumentation;
 import '../util.dart';
+import 'canvaskit_api.dart';
 
 /// A cache of Skia objects whose memory Flutter manages.
 ///
@@ -276,7 +276,7 @@ abstract class ManagedSkiaObject<T extends Object> extends SkiaObject<T> {
 
     if (Instrumentation.enabled) {
       Instrumentation.instance.incrementCounter(
-        '${(rawSkiaObject as SkDeletable).constructor.name} deleted',
+        '${(rawSkiaObject! as SkDeletable).constructor.name} deleted',
       );
     }
     rawSkiaObject = null;
@@ -345,8 +345,8 @@ class SkiaObjectBox<R extends StackTraceDebugger, T extends Object>
   /// Creates an object box that's memory-managed using [SkFinalizationRegistry].
   ///
   /// This constructor must only be used if [browserSupportsFinalizationRegistry] is true.
-  SkiaObjectBox(R debugReferrer, T initialValue) : _resurrector = null {
-    assert(browserSupportsFinalizationRegistry);
+  SkiaObjectBox(R debugReferrer, T initialValue) :
+        assert(browserSupportsFinalizationRegistry), _resurrector = null {
     _initialize(debugReferrer, initialValue);
     Collector.instance.register(this, _skDeletable!);
   }
@@ -355,8 +355,8 @@ class SkiaObjectBox<R extends StackTraceDebugger, T extends Object>
   ///
   /// This constructor must only be used if [browserSupportsFinalizationRegistry] is false.
   SkiaObjectBox.resurrectable(
-      R debugReferrer, T initialValue, this._resurrector) {
-    assert(!browserSupportsFinalizationRegistry);
+      R debugReferrer, T initialValue, this._resurrector) :
+        assert(!browserSupportsFinalizationRegistry) {
     _initialize(debugReferrer, initialValue);
     if (Instrumentation.enabled) {
       Instrumentation.instance.incrementCounter(
@@ -509,6 +509,7 @@ class SkiaObjectBox<R extends StackTraceDebugger, T extends Object>
   }
 }
 
+// ignore: avoid_classes_with_only_static_members
 /// Singleton that manages the lifecycles of [SkiaObject] instances.
 class SkiaObjects {
   @visibleForTesting

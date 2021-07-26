@@ -5,8 +5,8 @@
 import 'dart:async';
 
 import 'package:test/bootstrap/browser.dart';
-import 'package:ui/ui.dart' hide window;
 import 'package:ui/src/engine.dart';
+import 'package:ui/ui.dart' hide window;
 
 import 'text_scuba.dart';
 

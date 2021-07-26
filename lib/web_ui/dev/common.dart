@@ -58,7 +58,7 @@ class _WindowsBinding implements PlatformBinding {
 
   @override
   String getChromeDownloadUrl(String version) =>
-      'https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o/Win%2F${version}%2Fchrome-win.zip?alt=media';
+      'https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o/Win%2F$version%2Fchrome-win.zip?alt=media';
 
   @override
   String getChromeExecutablePath(io.Directory versionDir) =>
@@ -66,11 +66,11 @@ class _WindowsBinding implements PlatformBinding {
 
   @override
   String getFirefoxDownloadUrl(String version) =>
-      'https://download-installer.cdn.mozilla.net/pub/firefox/releases/${version}/win64/en-US/'
+      'https://download-installer.cdn.mozilla.net/pub/firefox/releases/$version/win64/en-US/'
       '${getFirefoxDownloadFilename(version)}';
 
   @override
-  String getFirefoxDownloadFilename(String version) => 'firefox-${version}.exe';
+  String getFirefoxDownloadFilename(String version) => 'firefox-$version.exe';
 
   @override
   String getFirefoxExecutablePath(io.Directory versionDir) =>
@@ -105,12 +105,12 @@ class _LinuxBinding implements PlatformBinding {
 
   @override
   String getFirefoxDownloadUrl(String version) =>
-      'https://download-installer.cdn.mozilla.net/pub/firefox/releases/${version}/linux-x86_64/en-US/'
+      'https://download-installer.cdn.mozilla.net/pub/firefox/releases/$version/linux-x86_64/en-US/'
       '${getFirefoxDownloadFilename(version)}';
 
   @override
   String getFirefoxDownloadFilename(String version) =>
-      'firefox-${version}.tar.bz2';
+      'firefox-$version.tar.bz2';
 
   @override
   String getFirefoxExecutablePath(io.Directory versionDir) =>
@@ -151,11 +151,11 @@ class _MacBinding implements PlatformBinding {
 
   @override
   String getFirefoxDownloadUrl(String version) =>
-      'https://download-installer.cdn.mozilla.net/pub/firefox/releases/${version}/mac/en-US/'
+      'https://download-installer.cdn.mozilla.net/pub/firefox/releases/$version/mac/en-US/'
       '${getFirefoxDownloadFilename(version)}';
 
   @override
-  String getFirefoxDownloadFilename(String version) => 'Firefox ${version}.dmg';
+  String getFirefoxDownloadFilename(String version) => 'Firefox $version.dmg';
 
   @override
   String getFirefoxExecutablePath(io.Directory versionDir) =>

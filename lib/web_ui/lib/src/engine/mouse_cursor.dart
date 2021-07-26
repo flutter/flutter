@@ -17,7 +17,7 @@ class MouseCursor {
   static MouseCursor? get instance => _instance;
   static MouseCursor? _instance;
 
-  MouseCursor._() {}
+  MouseCursor._();
 
   // Map from Flutter's kind values to CSS's cursor values.
   //
