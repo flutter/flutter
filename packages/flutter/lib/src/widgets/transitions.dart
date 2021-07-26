@@ -1207,7 +1207,7 @@ class DecoratedBoxTransition extends AnimatedWidget {
 /// [Curves.decelerate]:
 ///
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/align_transition.mp4}
-/// 
+///
 /// {@tool dartpad --template=stateful_widget_material_ticker}
 /// The following code implements the [AlignTransition] as seen in the video
 /// above:
@@ -1245,7 +1245,7 @@ class DecoratedBoxTransition extends AnimatedWidget {
 /// }
 /// ```
 /// {@end-tool}
-/// 
+///
 /// See also:
 ///
 ///  * [AnimatedAlign], which animates changes to the [alignment] without
