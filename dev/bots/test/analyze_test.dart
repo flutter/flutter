@@ -73,9 +73,9 @@ void main() {
 
   test('analyze.dart - verifyGoldenTags', () async {
     final String result = await capture(() => verifyGoldenTags(testRootPath, minimumMatches: 6), exitCode: 1);
-    const String noTag = 'Tests files containing golden file tests must be '
+    const String noTag = 'Files containing golden tests must be '
         'tagged using `@Tags(...)` at the top of the file before import statements.';
-    const String missingTag = 'Tests files containing golden file tests must be '
+    const String missingTag = 'Files containing golden tests must be '
         "tagged with 'reduced-test-set'.";
     final String lines = <String>[
         'test/analyze-test-input/root/packages/foo/golden_missing_tag.dart: $missingTag',

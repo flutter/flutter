@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:core' ;//hide print;
+import 'dart:core' hide print;
 import 'dart:io' hide exit;
 import 'dart:typed_data';
 
@@ -175,10 +175,10 @@ Future<void> verifyGoldenTags(String workingDirectory, { int minimumMatches = 20
     // test environments.
     if (hasGoldenTests) {
       if (!hasTagNotation) {
-        errors.add('${file.path}: Tests files containing golden file tests must be tagged using '
+        errors.add('${file.path}: Files containing golden tests must be tagged using '
             '`@Tags(...)` at the top of the file before import statements.');
       } else if (!hasReducedTag) {
-        errors.add('${file.path}: Tests files containing golden file tests must be tagged with '
+        errors.add('${file.path}: Files containing golden tests must be tagged with '
             "'reduced-test-set'.");
       }
     }
@@ -1107,7 +1107,7 @@ Future<List<File>> _gitFiles(String workingDirectory, {bool runSilently = true})
       .toList();
 }
 
-Stream<File> _allFiles(String workingDirectory, String? extension, { required int minimumMatches, String? suffix }) async* {
+Stream<File> _allFiles(String workingDirectory, String? extension, { required int minimumMatches }) async* {
   final Set<String> gitFileNamesSet = <String>{};
   gitFileNamesSet.addAll((await _gitFiles(workingDirectory)).map((File f) => path.canonicalize(f.absolute.path)));
 
