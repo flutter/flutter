@@ -43,6 +43,7 @@ TEST(TaskRunnerCheckerTests, FailsTheCheckIfOnDifferentTaskRunner) {
 }
 
 TEST(TaskRunnerCheckerTests, SameTaskRunnerRunsOnTheSameThread) {
+  fml::MessageLoop::EnsureInitializedForCurrentThread();
   fml::MessageLoop& loop1 = fml::MessageLoop::GetCurrent();
   fml::MessageLoop& loop2 = fml::MessageLoop::GetCurrent();
   TaskQueueId a = loop1.GetTaskRunner()->GetTaskQueueId();
@@ -51,6 +52,7 @@ TEST(TaskRunnerCheckerTests, SameTaskRunnerRunsOnTheSameThread) {
 }
 
 TEST(TaskRunnerCheckerTests, RunsOnDifferentThreadsReturnsFalse) {
+  fml::MessageLoop::EnsureInitializedForCurrentThread();
   fml::MessageLoop& loop1 = fml::MessageLoop::GetCurrent();
   TaskQueueId a = loop1.GetTaskRunner()->GetTaskQueueId();
   fml::AutoResetWaitableEvent latch;
