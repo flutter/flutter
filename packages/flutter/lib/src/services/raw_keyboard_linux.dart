@@ -120,12 +120,12 @@ class RawKeyEventDataLinux extends RawKeyEventData {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-        properties.add(DiagnosticsProperty<String>('toolkit', keyHelper.toolkit));
-        properties.add(DiagnosticsProperty<int>('unicodeScalarValues', unicodeScalarValues));
-        properties.add(DiagnosticsProperty<int>('scanCode', scanCode));
-        properties.add(DiagnosticsProperty<int>('keyCode', keyCode));
-        properties.add(DiagnosticsProperty<int>('modifiers', modifiers));
-        properties.add(DiagnosticsProperty<bool>('isDown', isDown));
+    properties.add(DiagnosticsProperty<String>('toolkit', keyHelper.debugToolkit));
+    properties.add(DiagnosticsProperty<int>('unicodeScalarValues', unicodeScalarValues));
+    properties.add(DiagnosticsProperty<int>('scanCode', scanCode));
+    properties.add(DiagnosticsProperty<int>('keyCode', keyCode));
+    properties.add(DiagnosticsProperty<int>('modifiers', modifiers));
+    properties.add(DiagnosticsProperty<bool>('isDown', isDown));
   }
 
   @override
@@ -135,7 +135,7 @@ class RawKeyEventDataLinux extends RawKeyEventData {
     if (other.runtimeType != runtimeType)
       return false;
     return other is RawKeyEventDataLinux
-        && other.keyHelper.toolkit == keyHelper.toolkit
+        && other.keyHelper.runtimeType == keyHelper.runtimeType
         && other.unicodeScalarValues == unicodeScalarValues
         && other.scanCode == scanCode
         && other.keyCode == keyCode
@@ -145,7 +145,7 @@ class RawKeyEventDataLinux extends RawKeyEventData {
 
   @override
   int get hashCode => hashValues(
-    keyHelper.toolkit,
+    keyHelper.runtimeType,
     unicodeScalarValues,
     scanCode,
     keyCode,
@@ -172,7 +172,9 @@ abstract class KeyHelper {
   }
 
   /// Returns the name for the toolkit.
-  String get toolkit;
+  ///
+  /// This is used in debug mode to generate readable string.
+  String get debugToolkit;
 
   /// Returns a [KeyboardSide] enum value that describes which side or sides of
   /// the given keyboard modifier key were pressed at the time of this event.
@@ -238,7 +240,7 @@ class GLFWKeyHelper implements KeyHelper {
   static const int modifierNumericPad = 0x0020;
 
   @override
-  String get toolkit => 'GLFW';
+  String get debugToolkit => 'GLFW';
 
   int _mergeModifiers({required int modifiers, required int keyCode, required bool isDown}) {
     // GLFW Key codes for modifier keys.
@@ -380,7 +382,7 @@ class GtkKeyHelper implements KeyHelper {
   static const int modifierMeta = 1 << 26;
 
   @override
-  String get toolkit => 'GTK';
+  String get debugToolkit => 'GTK';
 
   int _mergeModifiers({required int modifiers, required int keyCode, required bool isDown}) {
     // GTK Key codes for modifier keys.
