@@ -1970,7 +1970,6 @@ targets:
   - name: Mac_ios integration_ui_ios_frame_number
     builder: Mac_ios integration_ui_ios_frame_number
     presubmit: false
-    bringup: true
     properties:
       tags: >
         ["devicelab"]
