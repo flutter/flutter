@@ -58,6 +58,17 @@ void main() {
       expect(result.messages.last.message, contains('Xcode 7.0.1 out of date (12.0.1 is recommended)'));
     });
 
+    testWithoutContext('Check for Xcode version in non-verbose flutter doctor', () async {
+      final ProcessManager processManager = FakeProcessManager.any();
+      final Xcode xcode = Xcode.test(
+        processManager: processManager,
+        xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager, version: Version(12, 0, 1)),
+      );
+      final XcodeValidator validator = XcodeValidator(xcode: xcode, userMessages: UserMessages());
+      final ValidationResult result = await validator.validate();
+      expect('${validator.title} (version ${result.versionInfo})', 'Xcode - develop for iOS and macOS (version 12.0.1)');
+    });
+
     testWithoutContext('Emits partial status when Xcode below recommended version', () async {
       final ProcessManager processManager = FakeProcessManager.any();
       final Xcode xcode = Xcode.test(

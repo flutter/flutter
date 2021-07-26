@@ -22,10 +22,7 @@ class XcodeValidator extends DoctorValidator {
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
     ValidationType xcodeStatus = ValidationType.missing;
-
-    final String? xcodeVersionInfo = _xcode.currentVersion == Version.unknown
-      ? null
-      : userMessages.xcodeVersion(_xcode.currentVersion.toString());
+    String? xcodeVersionInfo;
 
     final String? xcodeSelectPath = _xcode.xcodeSelectPath;
 
@@ -36,6 +33,9 @@ class XcodeValidator extends DoctorValidator {
       }
       final String? versionText = _xcode.versionText;
       if (versionText != null) {
+        xcodeVersionInfo = _xcode.currentVersion == Version.unknown
+        ? null
+        : userMessages.xcodeVersion(_xcode.currentVersion.toString());
         messages.add(ValidationMessage(versionText));
       }
 
@@ -71,6 +71,6 @@ class XcodeValidator extends DoctorValidator {
       }
     }
 
-    return ValidationResult(xcodeStatus, messages, statusInfo: xcodeVersionInfo);
+    return ValidationResult(xcodeStatus, messages, statusInfo: xcodeVersionInfo, versionInfo: _xcode.currentVersion);
   }
 }
