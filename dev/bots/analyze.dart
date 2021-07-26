@@ -18,6 +18,7 @@ import 'utils.dart';
 
 final String flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
 final String flutter = path.join(flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
+final String flutterFramework = path.join(flutterRoot, 'packages', 'flutter');
 final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'dart.exe' : 'dart');
 final String pub = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'pub.bat' : 'pub');
 final String pubCache = path.join(flutterRoot, '.pub-cache');
@@ -58,7 +59,7 @@ Future<void> run(List<String> arguments) async {
   await verifyDeprecations(flutterRoot);
 
   print('$clock Goldens...');
-  await verifyGoldenTags(flutterRoot);
+  await verifyGoldenTags(flutterFramework);
 
   print('$clock Licenses...');
   await verifyNoMissingLicense(flutterRoot);
@@ -159,9 +160,11 @@ Future<void> verifyGoldenTags(String workingDirectory, { int minimumMatches = 20
       }
       if (line.contains(_goldenTagPattern1)) {
         hasTagNotation = true;
-      } else if (line.contains(_goldenTagPattern2)) {
+      }
+      if (line.contains(_goldenTagPattern2)) {
         hasReducedTag = true;
-      } else if (line.contains(_findGoldenTestPattern)
+      }
+      if (line.contains(_findGoldenTestPattern)
           && !line.contains(_findGoldenDefinitionPattern)
           && !line.contains(_leadingComment)) {
         hasGoldenTests = true;
