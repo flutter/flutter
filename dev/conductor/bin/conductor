@@ -37,4 +37,8 @@ BIN_DIR="$(cd "${PROG_NAME%/*}" ; pwd -P)"
 REPO_DIR="$BIN_DIR/../../.."
 DART_BIN="$REPO_DIR/bin/dart"
 
+if [ ! -f "$REPO_DIR/dev/conductor/.dart_tool/package_config.json" ]; then
+  (cd "$REPO_DIR/dev/conductor; $DART_BIN" pub get)
+fi
+
 "$DART_BIN" --enable-asserts "$REPO_DIR/dev/conductor/bin/conductor.dart" "$@"
