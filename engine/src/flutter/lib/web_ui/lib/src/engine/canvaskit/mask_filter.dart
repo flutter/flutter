@@ -27,7 +27,7 @@ class CkMaskFilter extends ManagedSkiaObject<SkMaskFilter> {
       toSkBlurStyle(_blurStyle),
       _sigma,
       true,
-    );
+    )!;
   }
 
   @override

@@ -408,6 +408,16 @@ void _maskFilterTests() {
         ),
         isNotNull);
   });
+  test('MaskFilter.MakeBlur with 0 sigma returns null', () {
+    expect(
+        canvasKit.MaskFilter.MakeBlur(canvasKit.BlurStyle.Normal, 0.0, false),
+        isNull);
+  });
+  test('MaskFilter.MakeBlur with NaN sigma returns null', () {
+    expect(
+        canvasKit.MaskFilter.MakeBlur(canvasKit.BlurStyle.Normal, double.nan, false),
+        isNull);
+  });
 }
 
 void _colorFilterTests() {
@@ -1099,7 +1109,8 @@ void _canvasTests() {
       const ui.Color color = ui.Color(0xAABBCCDD);
       final ui.Color inAmbient =
           color.withAlpha((color.alpha * ambientAlpha).round());
-      final ui.Color inSpot = color.withAlpha((color.alpha * spotAlpha).round());
+      final ui.Color inSpot =
+          color.withAlpha((color.alpha * spotAlpha).round());
 
       final SkTonalColors inTonalColors = SkTonalColors(
         ambient: makeFreshSkColor(inAmbient),
@@ -1154,8 +1165,8 @@ void _canvasTests() {
 
   test('drawPicture', () {
     final SkPictureRecorder otherRecorder = SkPictureRecorder();
-    final SkCanvas otherCanvas =
-        otherRecorder.beginRecording(Float32List.fromList(<double>[0, 0, 100, 100]));
+    final SkCanvas otherCanvas = otherRecorder
+        .beginRecording(Float32List.fromList(<double>[0, 0, 100, 100]));
     otherCanvas.drawLine(0, 0, 10, 10, SkPaint());
     canvas.drawPicture(otherRecorder.finishRecordingAsPicture());
   });
@@ -1180,8 +1191,8 @@ void _canvasTests() {
     // ProductionCollector)
     browserSupportsFinalizationRegistry = true;
     final SkPictureRecorder otherRecorder = SkPictureRecorder();
-    final SkCanvas otherCanvas =
-        otherRecorder.beginRecording(Float32List.fromList(<double>[0, 0, 1, 1]));
+    final SkCanvas otherCanvas = otherRecorder
+        .beginRecording(Float32List.fromList(<double>[0, 0, 1, 1]));
     otherCanvas.drawRect(
       Float32List.fromList(<double>[0, 0, 1, 1]),
       SkPaint(),

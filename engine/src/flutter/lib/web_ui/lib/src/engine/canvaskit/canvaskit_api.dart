@@ -870,7 +870,10 @@ class SkShader {
 
 @JS()
 class SkMaskFilterNamespace {
-  external SkMaskFilter MakeBlur(
+  // Creates a blur MaskFilter.
+  //
+  // Returns `null` if [sigma] is 0 or infinite.
+  external SkMaskFilter? MakeBlur(
       SkBlurStyle blurStyle, double sigma, bool respectCTM);
 }
 
