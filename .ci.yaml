@@ -1184,6 +1184,15 @@ targets:
         ["devicelab"]
     scheduler: luci
 
+  - name: Linux devtools_profile_start_test
+    builder: Linux devtools_profile_start_test
+    bringup: true
+    presubmit: false
+    properties:
+      tags: >
+        ["devicelab"]
+    scheduler: luci
+
   - name: Linux docs_test
     builder: Linux docs_test
     presubmit: false
