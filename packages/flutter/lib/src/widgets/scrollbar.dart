@@ -1264,7 +1264,6 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     } else {
       when = 'using the Scrollbar';
     }
-
     assert(
       scrollController != null,
       'A ScrollController is required when $when. '
