@@ -958,7 +958,6 @@ targets:
 
   - name: Windows plugin_dependencies_test
     builder: Windows plugin_dependencies_test
-    bringup: true
     properties:
       tags: >
         ["devicelab","hostonly"]
