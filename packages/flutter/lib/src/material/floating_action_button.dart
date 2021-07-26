@@ -616,7 +616,6 @@ class FloatingActionButton extends StatelessWidget {
         break;
       case _FloatingActionButtonType.extended:
         sizeConstraints = floatingActionButtonTheme.extendedSizeConstraints ?? _kExtendedSizeConstraints;
-        const Widget width16 = SizedBox(width: 16.0);
         final double iconLabelSpacing = extendedIconLabelSpacing ?? floatingActionButtonTheme.extendedIconLabelSpacing ?? 8.0;
         final double leadingSpacing = extendedLeadingSpacing ?? floatingActionButtonTheme.extendedLeadingSpacing ?? (child != null && isExtended ? 16.0 : 20.0);
         final double trailingSpacing = extendedTrailingSpacing ?? floatingActionButtonTheme.extendedTrailingSpacing ?? 20.0;
