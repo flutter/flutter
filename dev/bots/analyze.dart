@@ -145,20 +145,21 @@ final RegExp _leadingComment = RegExp(r'\/\/');
 final RegExp _goldenTagPattern1 = RegExp(r'@Tags\(');
 final RegExp _goldenTagPattern2 = RegExp(r"'reduced-test-set'");
 
+/// Only golden file tests in the flutter package are subject to reduced testing,
+/// for example, invocations in flutter_test to validate comparator
+/// functionality do not require tagging.
+const String _ignoreGoldenTag = '// flutter_ignore: golden_tag (see analyze.dart)';
+const String _ignoreGoldenTagForFile = '// flutter_ignore_for_file: golden_tag (see analyze.dart)';
+
 Future<void> verifyGoldenTags(String workingDirectory, { int minimumMatches = 2000 }) async {
   final List<String> errors = <String>[];
-  print(_allFiles(workingDirectory, 'dart', minimumMatches: minimumMatches));
   await for (final File file in _allFiles(workingDirectory, 'dart', minimumMatches: minimumMatches)) {
-    bool hasGoldenTests = false;
+    bool needsTag = false;
     bool hasTagNotation = false;
     bool hasReducedTag = false;
+    bool ignoreForFile = false;
     final List<String> lines = file.readAsLinesSync();
     for (final String line in lines) {
-      // If a reduced test tag is already accounted for, skip parsing the rest
-      // of the lines for golden file tests.
-      if (hasTagNotation && hasReducedTag) {
-        break;
-      }
       if (line.contains(_goldenTagPattern1)) {
         hasTagNotation = true;
       }
@@ -167,17 +168,26 @@ Future<void> verifyGoldenTags(String workingDirectory, { int minimumMatches = 20
       }
       if (line.contains(_findGoldenTestPattern)
           && !line.contains(_findGoldenDefinitionPattern)
-          && !line.contains(_leadingComment)) {
-        hasGoldenTests = true;
+          && !line.contains(_leadingComment)
+          && !line.contains(_ignoreGoldenTag)) {
+        needsTag = true;
+      }
+      if (line.contains(_ignoreGoldenTagForFile)) {
+        ignoreForFile = true;
+      }
+      // If the file is being ignored or a reduced test tag is already accounted
+      // for, skip parsing the rest of the lines for golden file tests.
+      if (ignoreForFile || (hasTagNotation && hasReducedTag)) {
+        break;
       }
     }
     // If a reduced test tag is already accounted for, move on to the next file.
-    if (hasTagNotation && hasReducedTag) {
+    if (ignoreForFile || (hasTagNotation && hasReducedTag)) {
       continue;
     }
     // If there are golden file tests, ensure they are tagged for all reduced
     // test environments.
-    if (hasGoldenTests) {
+    if (needsTag) {
       if (!hasTagNotation) {
         errors.add('${file.path}: Files containing golden tests must be tagged using '
             '`@Tags(...)` at the top of the file before import statements.');
