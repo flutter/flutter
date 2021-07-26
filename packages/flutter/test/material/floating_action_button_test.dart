@@ -998,10 +998,12 @@ void main() {
     expect(tester.getSize(find.byKey(key)), const Size(96.0, 96.0));
   });
 
-  testWidgets('FloatingActionButton.extended can customize spacing between icon and label', (WidgetTester tester) async {
+  testWidgets('FloatingActionButton.extended can customize spacing', (WidgetTester tester) async {
     const Key iconKey = Key('icon');
     const Key labelKey = Key('label');
-    const double spacing = 33.0;
+    const double iconLabelSpacing = 33.0;
+    const double leadingSpacing = 13.0;
+    const double trailingSpacing = 23.0;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1009,14 +1011,18 @@ void main() {
           floatingActionButton: FloatingActionButton.extended(
             label: const Text('', key: labelKey),
             icon: const Icon(Icons.add, key: iconKey),
-            extendedIconLabelSpacing: spacing,
+            extendedIconLabelSpacing: iconLabelSpacing,
+            extendedLeadingSpacing: leadingSpacing,
+            extendedTrailingSpacing: trailingSpacing,
             onPressed: () {},
           ),
         ),
       ),
     );
 
-    expect(tester.getTopLeft(find.byKey(labelKey)).dx - tester.getTopRight(find.byKey(iconKey)).dx, spacing);
+    expect(tester.getTopLeft(find.byKey(labelKey)).dx - tester.getTopRight(find.byKey(iconKey)).dx, iconLabelSpacing);
+    expect(tester.getTopLeft(find.byKey(iconKey)).dx - tester.getTopLeft(find.byType(FloatingActionButton)).dx, leadingSpacing);
+    expect(tester.getTopRight(find.byType(FloatingActionButton)).dx - tester.getTopRight(find.byKey(labelKey)).dx, trailingSpacing);
   });
 
   group('feedback', () {

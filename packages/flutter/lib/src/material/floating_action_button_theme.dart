@@ -48,6 +48,8 @@ class FloatingActionButtonThemeData with Diagnosticable {
     this.largeSizeConstraints,
     this.extendedSizeConstraints,
     this.extendedIconLabelSpacing,
+    this.extendedLeadingSpacing,
+    this.extendedTrailingSpacing,
   });
 
   /// Color to be used for the unselected, enabled [FloatingActionButton]'s
@@ -117,6 +119,13 @@ class FloatingActionButtonThemeData with Diagnosticable {
   /// [FloatingActionButton].
   final double? extendedIconLabelSpacing;
 
+
+  /// The leading spacing for an extended [FloatingActionButton]'s content.
+  final double? extendedLeadingSpacing;
+
+  /// The trailing spacing for an extended [FloatingActionButton]'s content.
+  final double? extendedTrailingSpacing;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   FloatingActionButtonThemeData copyWith({
@@ -137,6 +146,8 @@ class FloatingActionButtonThemeData with Diagnosticable {
     BoxConstraints? largeSizeConstraints,
     BoxConstraints? extendedSizeConstraints,
     double? extendedIconLabelSpacing,
+    double? extendedLeadingSpacing,
+    double? extendedTrailingSpacing,
   }) {
     return FloatingActionButtonThemeData(
       foregroundColor: foregroundColor ?? this.foregroundColor,
@@ -156,6 +167,8 @@ class FloatingActionButtonThemeData with Diagnosticable {
       largeSizeConstraints: largeSizeConstraints ?? this.largeSizeConstraints,
       extendedSizeConstraints: extendedSizeConstraints ?? this.extendedSizeConstraints,
       extendedIconLabelSpacing: extendedIconLabelSpacing ?? this.extendedIconLabelSpacing,
+      extendedLeadingSpacing: extendedLeadingSpacing ?? this.extendedLeadingSpacing,
+      extendedTrailingSpacing: extendedTrailingSpacing ?? this.extendedTrailingSpacing,
     );
   }
 
@@ -186,6 +199,8 @@ class FloatingActionButtonThemeData with Diagnosticable {
       largeSizeConstraints: BoxConstraints.lerp(a?.largeSizeConstraints, b?.largeSizeConstraints, t),
       extendedSizeConstraints: BoxConstraints.lerp(a?.extendedSizeConstraints, b?.extendedSizeConstraints, t),
       extendedIconLabelSpacing: lerpDouble(a?.extendedIconLabelSpacing, b?.extendedIconLabelSpacing, t),
+      extendedLeadingSpacing: lerpDouble(a?.extendedLeadingSpacing, b?.extendedLeadingSpacing, t),
+      extendedTrailingSpacing: lerpDouble(a?.extendedTrailingSpacing, b?.extendedTrailingSpacing, t),
     );
   }
 
@@ -209,6 +224,8 @@ class FloatingActionButtonThemeData with Diagnosticable {
       largeSizeConstraints,
       extendedSizeConstraints,
       extendedIconLabelSpacing,
+      extendedLeadingSpacing,
+      extendedTrailingSpacing,
     );
   }
 
@@ -235,7 +252,9 @@ class FloatingActionButtonThemeData with Diagnosticable {
         && other.smallSizeConstraints == smallSizeConstraints
         && other.largeSizeConstraints == largeSizeConstraints
         && other.extendedSizeConstraints == extendedSizeConstraints
-        && other.extendedIconLabelSpacing == extendedIconLabelSpacing;
+        && other.extendedIconLabelSpacing == extendedIconLabelSpacing
+        && other.extendedLeadingSpacing == extendedLeadingSpacing
+        && other.extendedTrailingSpacing == extendedTrailingSpacing;
   }
 
   @override
@@ -259,5 +278,7 @@ class FloatingActionButtonThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<BoxConstraints>('largeSizeConstraints', largeSizeConstraints, defaultValue: null));
     properties.add(DiagnosticsProperty<BoxConstraints>('extendedSizeConstraints', extendedSizeConstraints, defaultValue: null));
     properties.add(DoubleProperty('extendedIconLabelSpacing', extendedIconLabelSpacing, defaultValue: null));
+    properties.add(DoubleProperty('extendedLeadingSpacing', extendedLeadingSpacing, defaultValue: null));
+    properties.add(DoubleProperty('extendedTrailingSpacing', extendedTrailingSpacing, defaultValue: null));
   }
 }
