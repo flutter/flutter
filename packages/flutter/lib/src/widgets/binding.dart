@@ -859,6 +859,11 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       firstFrameCallback = (List<FrameTiming> timings) {
         assert(sendFramesToEngine);
         if (!kReleaseMode) {
+          // Change the current user tag back to the default tag. At this point,
+          // the user tag should be set to "AppStartUp" (originally set in the
+          // engine), so we need to change it back to the default tag to mark
+          // the end of app start up for CPU profiles.
+          developer.UserTag.defaultTag.makeCurrent();
           developer.Timeline.instantSync('Rasterized first useful frame');
           developer.postEvent('Flutter.FirstFrame', <String, dynamic>{});
         }

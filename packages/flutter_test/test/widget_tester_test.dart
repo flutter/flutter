@@ -697,7 +697,10 @@ void main() {
       if (debugDefaultTargetPlatformOverride == null) {
         expect(tester.testDescription, equals('variant tests have descriptions with details'));
       } else {
-        expect(tester.testDescription, equals('variant tests have descriptions with details ($debugDefaultTargetPlatformOverride)'));
+        expect(
+          tester.testDescription,
+          equals('variant tests have descriptions with details (variant: $debugDefaultTargetPlatformOverride)'),
+        );
       }
     }, variant: TargetPlatformVariant(TargetPlatform.values.toSet()));
   });
@@ -733,6 +736,16 @@ void main() {
       final TargetPlatformVariant mobile = TargetPlatformVariant.all();
       expect(desktop.values.union(mobile.values), equals(all.values));
     });
+  });
+
+  group('Skip and exclude work', () {
+    testWidgets('skipping a test skips it', (WidgetTester tester) async {
+      expect(true, false); // shouldn't get here
+    }, skip: true); // https://github.com/someissue
+
+    testWidgets('excluding a test skips it', (WidgetTester tester) async {
+      expect(true, false); // shouldn't get here
+    }, exclude: true);
   });
 
   group('Pending timer', () {
