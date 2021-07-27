@@ -610,17 +610,20 @@ class FloatingActionButton extends StatelessWidget {
         final double iconLabelSpacing = extendedIconLabelSpacing ?? floatingActionButtonTheme.extendedIconLabelSpacing ?? 8.0;
         final EdgeInsetsGeometry padding = extendedPadding
             ?? floatingActionButtonTheme.extendedPadding
-            ?? (child != null && isExtended ? const EdgeInsetsDirectional.only(start: 16.0, end: 20.0) : const EdgeInsetsDirectional.only(start: 20.0, end: 20.0));
+            ?? EdgeInsetsDirectional.only(start: child != null && isExtended ? 16.0 : 20.0, end: 20.0);
         resolvedChild = _ChildOverflowBox(
           child: Padding(
             padding: padding,
             child: Row(
                 mainAxisSize: MainAxisSize.min,
-                children: child == null
-                    ? <Widget>[_extendedLabel!]
-                    : isExtended
-                        ? <Widget>[child!, SizedBox(width: iconLabelSpacing), _extendedLabel!]
-                        : <Widget>[child!],
+                children: <Widget>[
+                  if (child != null)
+                    child!,
+                  if (child != null && isExtended)
+                    SizedBox(width: iconLabelSpacing),
+                  if (isExtended)
+                    _extendedLabel!,
+                ],
             ),
           ),
         );
