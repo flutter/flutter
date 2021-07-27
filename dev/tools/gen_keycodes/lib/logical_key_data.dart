@@ -23,8 +23,11 @@ class _ModifierPair {
   final String right;
 }
 
-List<T> _toNonEmptyArray<T>(dynamic source) {
-  final List<dynamic>? dynamicNullableList = source as List<dynamic>?;
+// Return map[key1][key2] as a non-nullable List<T>, where both map[key1] or
+// map[key1][key2] might be null.
+List<T> _getGrandchildList<T>(Map<String, dynamic> map, String key1, String key2) {
+  final dynamic value = (map[key1] as Map<String, dynamic>?)?[key2];
+  final List<dynamic>? dynamicNullableList = value as List<dynamic>?;
   final List<dynamic> dynamicList = dynamicNullableList ?? <dynamic>[];
   return dynamicList.cast<T>();
 }
@@ -418,18 +421,18 @@ class LogicalKeyEntry {
   LogicalKeyEntry.fromJsonMapEntry(Map<String, dynamic> map)
     : value = map['value'] as int,
       name = map['name'] as String,
-      webNames = _toNonEmptyArray<String>((map['names'] as Map<String, dynamic>)['web']),
-      macOSKeyCodeNames = _toNonEmptyArray<String>((map['names'] as Map<String, dynamic>)['macos']),
-      macOSKeyCodeValues = _toNonEmptyArray<int>((map['values'] as Map<String, dynamic>?)?['macos']),
-      iOSKeyCodeNames = _toNonEmptyArray<String>((map['names'] as Map<String, dynamic>)['ios']),
-      iOSKeyCodeValues = _toNonEmptyArray<int>((map['values'] as Map<String, dynamic>?)?['ios']),
-      gtkNames = _toNonEmptyArray<String>((map['names'] as Map<String, dynamic>)['gtk']),
-      gtkValues = _toNonEmptyArray<int>((map['values'] as Map<String, dynamic>?)?['gtk']),
-      windowsNames = _toNonEmptyArray<String>((map['names'] as Map<String, dynamic>)['windows']),
-      windowsValues = _toNonEmptyArray<int>((map['values'] as Map<String, dynamic>?)?['windows']),
-      androidNames = _toNonEmptyArray<String>((map['names'] as Map<String, dynamic>)['android']),
-      androidValues = _toNonEmptyArray<int>((map['values'] as Map<String, dynamic>?)?['android']),
-      fuchsiaValues = _toNonEmptyArray<int>((map['values'] as Map<String, dynamic>?)?['fuchsia']),
+      webNames = _getGrandchildList<String>(map, 'names', 'web'),
+      macOSKeyCodeNames = _getGrandchildList<String>(map, 'names', 'macos'),
+      macOSKeyCodeValues = _getGrandchildList<int>(map, 'values', 'macos'),
+      iOSKeyCodeNames = _getGrandchildList<String>(map, 'names', 'ios'),
+      iOSKeyCodeValues = _getGrandchildList<int>(map, 'values', 'ios'),
+      gtkNames = _getGrandchildList<String>(map, 'names', 'gtk'),
+      gtkValues = _getGrandchildList<int>(map, 'values', 'gtk'),
+      windowsNames = _getGrandchildList<String>(map, 'names', 'windows'),
+      windowsValues = _getGrandchildList<int>(map, 'values', 'windows'),
+      androidNames = _getGrandchildList<String>(map, 'names', 'android'),
+      androidValues = _getGrandchildList<int>(map, 'values', 'android'),
+      fuchsiaValues = _getGrandchildList<int>(map, 'values', 'fuchsia'),
       keyLabel = map['keyLabel'] as String?;
 
   final int value;
