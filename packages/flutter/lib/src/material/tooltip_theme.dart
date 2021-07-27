@@ -91,7 +91,8 @@ class TooltipThemeData with Diagnosticable {
   /// This value is used if [Tooltip.triggerMode] is null.
   ///
   /// See Also:
-  /// * [Tooltip.triggerMode]
+  ///
+  ///   * [Tooltip.triggerMode]
   final TooltipTriggerMode? triggerMode;
 
   /// Whether the tooltip should provide acoustic and/or haptic feedback.
@@ -99,9 +100,11 @@ class TooltipThemeData with Diagnosticable {
   /// For example, on Android a tap will produce a clicking sound and a
   /// long-press will produce a short vibration, when feedback is enabled.
   ///
+  /// The default value is true.
+  ///
   /// See also:
   ///
-  ///  * [Feedback] for providing platform-specific feedback to certain actions.
+  ///   * [Feedback] for providing platform-specific feedback to certain actions.
   final bool? enableFeedback;
 
   /// Creates a copy of this object but with the given fields replaced with the
@@ -282,22 +285,22 @@ class TooltipTheme extends InheritedTheme {
 }
 
 /// The method of interaction that will trigger a tooltip.
-/// Used in [Tooltip.triggerMode] and [TooltipThemeData.triggerMode]
+/// Used in [Tooltip.triggerMode] and [TooltipThemeData.triggerMode].
 enum TooltipTriggerMode {
-  /// Tooltip will only be shown by calling `ensureTooltipVisible`
+  /// Tooltip will only be shown by calling `ensureTooltipVisible`.
   manual,
 
   /// Tooltip will be shown after a long press.
   ///
-  /// See Also:
+  /// See also:
   ///
-  /// * [GestureDetector.onLongPress]
+  ///   * [GestureDetector.onLongPress]
   longPress,
 
   /// Tooltip will be shown after a single tap.
   ///
-  /// See Also:
+  /// See also:
   ///
-  /// * [GestureDetector.onTap]
+  ///   * [GestureDetector.onTap]
   tap,
 }
