@@ -298,6 +298,6 @@ enum TooltipTriggerMode {
   /// See also:
   ///
   ///   * [GestureDetector.onTap], the event that is used for trigger.
-  ///   * [Feedback.onTap], the feedback method called when feedback is enabled.
+  ///   * [Feedback.forTap], the feedback method called when feedback is enabled.
   tap,
 }
