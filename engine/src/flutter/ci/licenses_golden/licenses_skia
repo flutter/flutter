@@ -1,4 +1,4 @@
-Signature: 138dbb2c92884e3edec99c622735a00a
+Signature: 9675b01ed9b93e22212c6effabc90586
 
 UNUSED LICENSES:
 
@@ -6620,8 +6620,6 @@ FILE: ../../../third_party/skia/infra/bots/gen_tasks_logic/nano_flags.go
 FILE: ../../../third_party/skia/infra/bots/gen_tasks_logic/schema.go
 FILE: ../../../third_party/skia/infra/bots/gen_tasks_logic/task_builder.go
 FILE: ../../../third_party/skia/infra/bots/task_drivers/canary/canary.go
-FILE: ../../../third_party/skia/infra/bots/task_drivers/cifuzz/cifuzz.go
-FILE: ../../../third_party/skia/infra/bots/task_drivers/cifuzz/cifuzz_test.go
 FILE: ../../../third_party/skia/infra/bots/task_drivers/compile_wasm_gm_tests/compile_wasm_gm_tests.go
 FILE: ../../../third_party/skia/infra/bots/task_drivers/fm_driver/fm_driver.go
 FILE: ../../../third_party/skia/infra/bots/task_drivers/g3_canary/g3_canary.go
