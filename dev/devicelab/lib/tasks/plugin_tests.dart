@@ -167,14 +167,19 @@ class _FlutterProject {
         }
 
         final String podsProjectContent = podsProject.readAsStringSync();
-        // This may be a bit brittle, IPHONEOS_DEPLOYMENT_TARGET appears in the
-        // Pods Xcode project file 6 times. If this number changes, make sure
-        // it's not a regression in the IPHONEOS_DEPLOYMENT_TARGET override logic.
-        // The plugintest target should not have IPHONEOS_DEPLOYMENT_TARGET set.
-        // See _reduceDarwinPluginMinimumVersion for details.
-        final int iosDeploymentTargetCount = 'IPHONEOS_DEPLOYMENT_TARGET'.allMatches(podsProjectContent).length;
-        if (target == 'ios' && iosDeploymentTargetCount != 9) {
-          throw TaskResult.failure('plugintest may contain IPHONEOS_DEPLOYMENT_TARGET, $iosDeploymentTargetCount found');
+        if (target == 'ios') {
+          // This may be a bit brittle, IPHONEOS_DEPLOYMENT_TARGET appears in the
+          // Pods Xcode project file 6 times. If this number changes, make sure
+          // it's not a regression in the IPHONEOS_DEPLOYMENT_TARGET override logic.
+          // The plugintest target should not have IPHONEOS_DEPLOYMENT_TARGET set.
+          // See _reduceDarwinPluginMinimumVersion for details.
+          final int iosDeploymentTargetCount = 'IPHONEOS_DEPLOYMENT_TARGET'.allMatches(podsProjectContent).length;
+          if (iosDeploymentTargetCount != 9) {
+            throw TaskResult.failure('plugintest may contain IPHONEOS_DEPLOYMENT_TARGET, $iosDeploymentTargetCount found');
+          }
+          if (!podsProjectContent.contains(r'"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "$(inherited) i386";')) {
+            throw TaskResult.failure(r'EXCLUDED_ARCHS is not "$(inherited) i386"');
+          }
         }
 
         // Same for macOS, but 12.
