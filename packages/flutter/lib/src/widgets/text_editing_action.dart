@@ -275,7 +275,11 @@ abstract class TextEditingActionTarget {
     setTextEditingValue(value.deleteTo(value.selection.end + characterBoundary), cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingValue.deleteForwardByWord}
+  /// Deletes a word in the forward direction from the current selection.
+  ///
+  /// If the [selection] is collapsed, deletes a word after the cursor.
+  ///
+  /// If the [selection] is not collapsed, deletes the selection.
   ///
   /// If [readOnly] is true, does nothing.
   ///
@@ -300,7 +304,10 @@ abstract class TextEditingActionTarget {
       // When the text is obscured, the whole thing is treated as one big word.
       return deleteToEnd(cause);
     }
-    final TextEditingValue nextValue = value.deleteForwardByWord(textMetrics, includeWhitespace);
+
+    final String textBefore = value.selection.textBefore(value.text);
+    final int characterBoundary = _getRightByWord(textBefore.length, includeWhitespace);
+    final TextEditingValue nextValue = value.deleteTo(characterBoundary, includeWhitespace);
 
     setTextEditingValue(nextValue, cause);
   }

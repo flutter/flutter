@@ -358,45 +358,6 @@ class TextEditingValue {
     );
   }
 
-  /// {@template flutter.rendering.TextEditingValue.deleteForward}
-  /// Deletes a word in the forward direction from the current selection.
-  ///
-  /// If the [selection] is collapsed, deletes a word after the cursor.
-  ///
-  /// If the [selection] is not collapsed, deletes the selection.
-  /// {@endtemplate}
-  ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
-  ///
-  /// {@macro flutter.rendering.RenderEditable.whiteSpace}
-  ///
-  /// See also:
-  ///
-  ///   * [deleteByWord], which is same but in the opposite direction.
-  TextEditingValue deleteForwardByWord(TextMetrics textMetrics, [bool includeWhitespace = true]) {
-    assert(selection != null);
-
-    if (!selection.isValid) {
-      return this;
-    }
-
-    if (!selection.isCollapsed) {
-      return _deleteNonEmptySelection();
-    }
-
-    String textAfter = selection.textAfter(text);
-
-    if (textAfter.isEmpty) {
-      return this;
-    }
-
-    final String textBefore = selection.textBefore(text);
-    final int characterBoundary = getRightByWord(text, textMetrics, textBefore.length, includeWhitespace);
-    textAfter = textAfter.substring(characterBoundary - textBefore.length);
-
-    return TextEditingValue(text: textBefore + textAfter, selection: selection);
-  }
-
   /// {@template flutter.rendering.TextEditingValue.deleteForwardByLine}
   /// Deletes a line in the forward direction from the current selection.
   ///
