@@ -2777,6 +2777,35 @@ void main() {
     });
   });
 
+  testWidgets("Tab's ink well highlight color matches Tab highlightColor", (WidgetTester tester) async {
+    await tester.pumpWidget(
+      boilerplate(
+        child: DefaultTabController(
+          length: 1,
+          child: TabBar(
+            tabs: const <Tab>[
+              Tab(text: 'A'),
+            ],
+            overlayColor: MaterialStateColor.resolveWith((Set<MaterialState> states) => Colors.transparent),
+            highlightColor: Colors.red,
+          ),
+        ),
+      ),
+    );
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+    await gesture.down(tester.getCenter(find.byType(Tab)));
+    await tester.pumpAndSettle();
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    final PaintPattern paintPattern = paints
+      // Transparent splash color
+      ..rect(rect: const Rect.fromLTRB(0.0, 276.0, 800.0, 324.0), color: Colors.transparent)
+      // Red highlight color
+      ..rect(rect: const Rect.fromLTRB(0.0, 276.0, 800.0, 324.0), color: const Color(0xfff44336));
+    expect(inkFeatures, paintPattern);
+  });
+
   group('Tab overlayColor affects ink response', () {
     testWidgets("Tab's ink well changes color on hover with Tab overlayColor", (WidgetTester tester) async {
       await tester.pumpWidget(
