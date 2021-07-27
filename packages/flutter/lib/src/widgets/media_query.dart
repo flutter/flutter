@@ -788,8 +788,8 @@ class MediaQuery extends InheritedWidget {
     );
   }
 
-  /// Creates a [_MediaQueryFromWindow] which builds and updates a
-  /// [MediaQuery] using the latest [WidgetsBinding.window] values.
+  /// Provides a [MediaQuery] which is built and updated using the latest
+  /// [WidgetsBinding.window] values.
   ///
   /// The [MediaQuery] is wrapped in a separate widget to ensure that only it
   /// and its dependents are updated when `window` changes, instead of
@@ -800,10 +800,6 @@ class MediaQuery extends InheritedWidget {
   /// longer exposed to the widget's descendants or siblings.
   ///
   /// The [child] argument is required and must not be null.
-  ///
-  /// See also:
-  ///
-  ///  * [_MediaQueryFromWindow], the underlying widget.
   static Widget fromWindow({
     Key? key,
     required Widget child,
