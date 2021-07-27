@@ -59,7 +59,7 @@ class PrerollContext {
 
   ui.Rect get cullRect {
     ui.Rect cullRect = ui.Rect.largest;
-    for (Mutator m in mutatorsStack) {
+    for (final Mutator m in mutatorsStack) {
       ui.Rect clipRect;
       switch (m.type) {
         case MutatorType.clipRect:
@@ -131,7 +131,7 @@ abstract class ContainerLayer extends Layer {
   /// [Rect] is empty.
   ui.Rect prerollChildren(PrerollContext context, Matrix4 childMatrix) {
     ui.Rect childPaintBounds = ui.Rect.zero;
-    for (Layer layer in _layers) {
+    for (final Layer layer in _layers) {
       layer.preroll(context, childMatrix);
       if (childPaintBounds.isEmpty) {
         childPaintBounds = layer.paintBounds;
@@ -146,7 +146,7 @@ abstract class ContainerLayer extends Layer {
   void paintChildren(PaintContext context) {
     assert(needsPainting);
 
-    for (Layer layer in _layers) {
+    for (final Layer layer in _layers) {
       if (layer.needsPainting) {
         layer.paint(context);
       }

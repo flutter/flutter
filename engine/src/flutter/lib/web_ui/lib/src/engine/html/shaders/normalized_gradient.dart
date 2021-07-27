@@ -59,13 +59,13 @@ class NormalizedGradient {
       bias[targetIndex++] = c.alpha / 255.0;
       thresholds[thresholdIndex++] = 0.0;
     }
-    for (ui.Color c in colors) {
+    for (final ui.Color c in colors) {
       bias[targetIndex++] = c.red / 255.0;
       bias[targetIndex++] = c.green / 255.0;
       bias[targetIndex++] = c.blue / 255.0;
       bias[targetIndex++] = c.alpha / 255.0;
     }
-    for (double stop in stops) {
+    for (final double stop in stops) {
       thresholds[thresholdIndex++] = stop;
     }
     if (addLast) {

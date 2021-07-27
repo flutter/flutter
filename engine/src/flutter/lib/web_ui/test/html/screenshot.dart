@@ -26,7 +26,7 @@ Future<void> canvasScreenshot(RecordingCanvas rc, String fileName,
     if (setupPerspective) {
       // iFrame disables perspective, set it explicitly for test.
       engineCanvas.rootElement.style.perspective = '400px';
-      for (html.Element element in engineCanvas.rootElement.querySelectorAll(
+      for (final html.Element element in engineCanvas.rootElement.querySelectorAll(
           'div')) {
         element.style.perspective = '400px';
       }

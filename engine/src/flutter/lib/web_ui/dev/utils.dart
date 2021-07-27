@@ -376,13 +376,13 @@ final List<AsyncCallback> cleanupCallbacks = <AsyncCallback>[];
 Future<void> cleanup() async {
   // Cleanup remaining processes if any.
   if (processesToCleanUp.isNotEmpty) {
-    for (io.Process process in processesToCleanUp) {
+    for (final io.Process process in processesToCleanUp) {
       process.kill();
     }
   }
   // Delete temporary directories.
   if (temporaryDirectories.isNotEmpty) {
-    for (io.Directory directory in temporaryDirectories) {
+    for (final io.Directory directory in temporaryDirectories) {
       if (!directory.existsSync()) {
         directory.deleteSync(recursive: true);
       }

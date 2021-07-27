@@ -32,7 +32,7 @@ Future<void> testMain() async {
     final RecordingCanvas recordingCanvas = RecordingCanvas(screenRect);
 
     Offset offset = Offset.zero;
-    for (PlaceholderAlignment placeholderAlignment
+    for (final PlaceholderAlignment placeholderAlignment
         in PlaceholderAlignment.values) {
       _paintTextWithPlaceholder(
         recordingCanvas,

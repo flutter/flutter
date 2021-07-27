@@ -58,16 +58,16 @@ class FontCollection {
       _assetFontManager = _PolyfillFontManager();
     }
 
-    for (Map<String, dynamic> fontFamily
+    for (final Map<String, dynamic> fontFamily
         in fontManifest.cast<Map<String, dynamic>>()) {
       final String? family = fontFamily['family'];
       final List<dynamic> fontAssets = fontFamily['fonts'];
 
-      for (dynamic fontAssetItem in fontAssets) {
+      for (final dynamic fontAssetItem in fontAssets) {
         final Map<String, dynamic> fontAsset = fontAssetItem;
         final String asset = fontAsset['asset'];
         final Map<String, String> descriptors = <String, String>{};
-        for (String descriptor in fontAsset.keys) {
+        for (final String descriptor in fontAsset.keys) {
           if (descriptor != 'asset') {
             descriptors[descriptor] = '${fontAsset[descriptor]}';
           }

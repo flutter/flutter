@@ -67,7 +67,7 @@ Future<void> testMain() async {
 
     Offset offset = Offset.zero;
 
-    for (TextDecorationStyle decorationStyle in decorationStyles) {
+    for (final TextDecorationStyle decorationStyle in decorationStyles) {
       final TextStyle textStyle = TextStyle(
         color: const Color.fromRGBO(50, 50, 255, 1.0),
         decoration: TextDecoration.underline,
@@ -106,7 +106,7 @@ Future<void> testMain() async {
 
     Offset offset = Offset.zero;
 
-    for (TextDecoration decoration in decorations) {
+    for (final TextDecoration decoration in decorations) {
       final TextStyle textStyle = TextStyle(
         color: const Color.fromRGBO(50, 50, 255, 1.0),
         decoration: decoration,

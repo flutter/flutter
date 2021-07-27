@@ -22,7 +22,7 @@ Future<void> testMain() async {
   setUp(() async {
     debugShowClipLayers = true;
     SurfaceSceneBuilder.debugForgetFrameScene();
-    for (html.Node scene in html.document.querySelectorAll('flt-scene')) {
+    for (final html.Node scene in html.document.querySelectorAll('flt-scene')) {
       scene.remove();
     }
 

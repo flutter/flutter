@@ -46,7 +46,7 @@ Future<void> testMain() async {
         RecordingCanvas(const Rect.fromLTRB(0, 0, 500, 500));
     final List<double> angles = <double>[0.0, 90.0, 180.0];
     double yOffset = 0;
-    for (double angle in angles) {
+    for (final double angle in angles) {
       final Rect shaderRect = Rect.fromLTWH(50, 50 + yOffset, 100, 100);
       final Matrix4 matrix = Matrix4.identity();
       matrix.translate(shaderRect.left, shaderRect.top);
@@ -95,7 +95,7 @@ Future<void> testMain() async {
     RecordingCanvas(const Rect.fromLTRB(0, 0, 500, 500));
     final List<double> angles = <double>[0.0, 30.0, 210.0];
     double yOffset = 0;
-    for (double angle in angles) {
+    for (final double angle in angles) {
       final Rect shaderRect = Rect.fromLTWH(50, 50 + yOffset, 100, 100);
       final SurfacePaint paint = SurfacePaint()
         ..shader = Gradient.linear(
@@ -122,7 +122,7 @@ Future<void> testMain() async {
     RecordingCanvas(const Rect.fromLTRB(0, 0, 500, 500));
     final List<double> angles = <double>[0.0, 30.0, 210.0];
     double yOffset = 0;
-    for (double angle in angles) {
+    for (final double angle in angles) {
       final Rect shaderRect = Rect.fromLTWH(50, 50 + yOffset, 100, 100);
       final SurfacePaint paint = SurfacePaint()
         ..shader = Gradient.linear(

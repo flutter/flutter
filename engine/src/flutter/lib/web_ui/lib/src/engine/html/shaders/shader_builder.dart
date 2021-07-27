@@ -220,10 +220,10 @@ class ShaderBuilder {
     if (isWebGl2 && _fragmentColorDeclaration != null) {
       _writeVariableDeclaration(_buffer, _fragmentColorDeclaration!);
     }
-    for (ShaderDeclaration decl in declarations) {
+    for (final ShaderDeclaration decl in declarations) {
       _writeVariableDeclaration(_buffer, decl);
     }
-    for (ShaderMethod method in _methods) {
+    for (final ShaderMethod method in _methods) {
       method.write(_buffer);
     }
     return _buffer.toString();
@@ -293,7 +293,7 @@ class ShaderMethod {
 
   void write(StringBuffer buffer) {
     buffer.writeln('$returnType $name() {');
-    for (String statement in _statements) {
+    for (final String statement in _statements) {
       buffer.writeln(statement);
     }
     buffer.writeln('}');

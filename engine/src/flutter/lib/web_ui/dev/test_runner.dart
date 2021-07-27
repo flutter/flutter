@@ -146,7 +146,7 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
               'finish.',
       );
 
-    for (BrowserArgParser browserArgParser in _browserArgParsers) {
+    for (final BrowserArgParser browserArgParser in _browserArgParsers) {
       browserArgParser.populateOptions(argParser);
     }
     GeneralTestsArgumentParser.instance.populateOptions(argParser);
@@ -174,7 +174,7 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
 
   @override
   Future<bool> run() async {
-    for (BrowserArgParser browserArgParser in _browserArgParsers) {
+    for (final BrowserArgParser browserArgParser in _browserArgParsers) {
       browserArgParser.parseOptions(argResults!);
     }
     GeneralTestsArgumentParser.instance.parseOptions(argResults!);
@@ -225,7 +225,7 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
     final StringBuffer message = StringBuffer(
       'The following test shards failed:\n',
     );
-    for (String failedShard in failedShards) {
+    for (final String failedShard in failedShards) {
       message.writeln(' - $failedShard');
     }
     return message.toString();
@@ -292,7 +292,7 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
     final List<FilePath> canvasKitTargets = <FilePath>[];
     final String canvasKitTestDirectory =
         path.join(environment.webUiTestDir.path, 'canvaskit');
-    for (FilePath target in allTargets) {
+    for (final FilePath target in allTargets) {
       if (path.isWithin(canvasKitTestDirectory, target.absolute)) {
         canvasKitTargets.add(target);
       } else {
@@ -432,7 +432,7 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
     final List<FilePath> screenshotTestFiles = <FilePath>[];
     final List<FilePath> unitTestFiles = <FilePath>[];
 
-    for (io.File testFile
+    for (final io.File testFile
         in testDir.listSync(recursive: true).whereType<io.File>()) {
       final FilePath testFilePath = FilePath.fromCwd(testFile.path);
       if (!testFilePath.absolute.endsWith('_test.dart')) {
@@ -476,7 +476,7 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
 
     if (isUnitTestsScreenshotsAvailable) {
       // Run screenshot tests one at a time.
-      for (FilePath testFilePath in screenshotTestFiles) {
+      for (final FilePath testFilePath in screenshotTestFiles) {
         await _runTestBatch(
           <FilePath>[testFilePath],
           concurrency: 1,
@@ -716,7 +716,7 @@ void _copyTestFontsIntoWebUi() {
     'fonts',
   );
 
-  for (String fontFile in _kTestFonts) {
+  for (final String fontFile in _kTestFonts) {
     final io.File sourceTtf = io.File(path.join(fontsPath, fontFile));
     final String destinationTtfPath =
         path.join(environment.webUiRootDir.path, 'lib', 'assets', fontFile);

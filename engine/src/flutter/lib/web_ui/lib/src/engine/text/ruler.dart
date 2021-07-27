@@ -810,7 +810,7 @@ class ParagraphRuler {
       return;
     }
     final List<html.Node> childNodes = <html.Node>[];
-    for (html.Node node in nodes) {
+    for (final html.Node node in nodes) {
       if (node.nodeType == html.Node.TEXT_NODE) {
         textNodes.add(node);
       }
@@ -902,7 +902,7 @@ class ParagraphRuler {
         : style.maxLines! * lineHeight;
 
     html.Rectangle<num>? previousRect;
-    for (html.Rectangle<num> rect in clientRects) {
+    for (final html.Rectangle<num> rect in clientRects) {
       // If [rect] is an empty box on the same line as the previous box, don't
       // include it in the result.
       if (rect.top == previousRect?.top && rect.left == rect.right) {

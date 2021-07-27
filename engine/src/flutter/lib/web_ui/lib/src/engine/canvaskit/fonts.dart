@@ -43,14 +43,14 @@ class SkiaFontCollection {
     fontProvider = canvasKit.TypefaceFontProvider.Make();
     familyToFontMap.clear();
 
-    for (RegisteredFont font in _registeredFonts) {
+    for (final RegisteredFont font in _registeredFonts) {
       fontProvider!.registerFont(font.bytes, font.family);
       familyToFontMap
           .putIfAbsent(font.family, () => <SkFont>[])
           .add(SkFont(font.typeface));
     }
 
-    for (RegisteredFont font
+    for (final RegisteredFont font
         in FontFallbackData.instance.registeredFallbackFonts) {
       fontProvider!.registerFont(font.bytes, font.family);
       familyToFontMap
@@ -66,7 +66,7 @@ class SkiaFontCollection {
       return;
     }
     final List<RegisteredFont?> loadedFonts = await Future.wait(_unloadedFonts);
-    for (RegisteredFont? font in loadedFonts) {
+    for (final RegisteredFont? font in loadedFonts) {
       if (font != null) {
         _registeredFonts.add(font);
       }
@@ -117,7 +117,7 @@ class SkiaFontCollection {
 
     bool registeredRoboto = false;
 
-    for (Map<String, dynamic> fontFamily
+    for (final Map<String, dynamic> fontFamily
         in fontManifest.cast<Map<String, dynamic>>()) {
       final String family = fontFamily['family']!;
       final List<dynamic> fontAssets = fontFamily['fonts'];
@@ -126,7 +126,7 @@ class SkiaFontCollection {
         registeredRoboto = true;
       }
 
-      for (dynamic fontAssetItem in fontAssets) {
+      for (final dynamic fontAssetItem in fontAssets) {
         final Map<String, dynamic> fontAsset = fontAssetItem;
         final String asset = fontAsset['asset'];
         _unloadedFonts

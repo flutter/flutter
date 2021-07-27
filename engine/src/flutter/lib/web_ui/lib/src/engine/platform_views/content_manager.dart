@@ -191,7 +191,7 @@ class PlatformViewManager {
   /// Returns the set of know view ids, so they can be cleaned up.
   Set<int> debugClear() {
     final Set<int> result = _contents.keys.toSet();
-    for (int viewId in result) {
+    for (final int viewId in result) {
       clearPlatformView(viewId);
     }
     _factories.clear();

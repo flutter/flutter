@@ -70,7 +70,7 @@ void testMain() {
             SPathDirection.kCW),
       ];
 
-      for (LineTestCase testCase in testCases) {
+      for (final LineTestCase testCase in testCases) {
         final SurfacePath path = SurfacePath();
         setFromString(path, testCase.pathContent);
         expect(path.convexityType, testCase.convexity);

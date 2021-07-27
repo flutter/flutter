@@ -27,7 +27,7 @@ void _testEach<T extends _BasicEventContext>(
   String description,
   _ContextTestBody<T> body,
 ) {
-  for (T context in contexts) {
+  for (final T context in contexts) {
     if (context.isSupported) {
       test('${context.name} $description', () {
         body(context);

@@ -218,12 +218,12 @@ class HtmlViewEmbedder {
           _svgPathDefs!.querySelector('#sk_path_defs')!;
       final List<html.Element> nodesToRemove = <html.Element>[];
       final Set<String> oldDefs = _svgClipDefs[viewId]!;
-      for (html.Element child in clipDefs.children) {
+      for (final html.Element child in clipDefs.children) {
         if (oldDefs.contains(child.id)) {
           nodesToRemove.add(child);
         }
       }
-      for (html.Element node in nodesToRemove) {
+      for (final html.Element node in nodesToRemove) {
         node.remove();
       }
       _svgClipDefs[viewId]!.clear();

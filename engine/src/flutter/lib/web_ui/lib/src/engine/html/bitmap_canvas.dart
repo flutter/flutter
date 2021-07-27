@@ -457,7 +457,7 @@ class BitmapCanvas extends EngineCanvas {
           element,
           ui.Offset.zero,
           transformWithOffset(_canvasPool.currentTransform, offset));
-      for (html.Element clipElement in clipElements) {
+      for (final html.Element clipElement in clipElements) {
         rootElement.append(clipElement);
         _children.add(clipElement);
       }
@@ -674,7 +674,7 @@ class BitmapCanvas extends EngineCanvas {
       imgElement.style..removeProperty('width')..removeProperty('height');
       final List<html.Element> clipElements = _clipContent(
           _canvasPool.clipStack!, imgElement, p, _canvasPool.currentTransform);
-      for (html.Element clipElement in clipElements) {
+      for (final html.Element clipElement in clipElements) {
         rootElement.append(clipElement);
         _children.add(clipElement);
       }
@@ -958,7 +958,7 @@ class BitmapCanvas extends EngineCanvas {
           paragraphElement as html.HtmlElement,
           offset,
           _canvasPool.currentTransform);
-      for (html.Element clipElement in clipElements) {
+      for (final html.Element clipElement in clipElements) {
         rootElement.append(clipElement);
         _children.add(clipElement);
       }
@@ -1057,7 +1057,7 @@ class BitmapCanvas extends EngineCanvas {
     _elementCache?.commitFrame();
     // Wrap all elements in translate3d (workaround for webkit paint order bug).
     if (_contains3dTransform && browserEngine == BrowserEngine.webkit) {
-      for (html.Element element in rootElement.children) {
+      for (final html.Element element in rootElement.children) {
         final html.DivElement paintOrderElement = html.DivElement()
           ..style.transform = 'translate3d(0,0,0)';
         paintOrderElement.append(element);

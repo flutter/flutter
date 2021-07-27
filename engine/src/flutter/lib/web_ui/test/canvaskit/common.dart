@@ -107,9 +107,9 @@ class TestCollector implements Collector {
 
   /// Deletes all Skia objects scheduled for collection.
   void collectNow() {
-    for (_TestCollection collection in _pendingCollections) {
+    for (final _TestCollection collection in _pendingCollections) {
       late final _TestFinalizerRegistration? activeRegistration;
-      for (_TestFinalizerRegistration registration in _activeRegistrations) {
+      for (final _TestFinalizerRegistration registration in _activeRegistrations) {
         if (identical(registration.deletable, collection.deletable)) {
           activeRegistration = registration;
           break;
@@ -117,7 +117,7 @@ class TestCollector implements Collector {
       }
       if (activeRegistration == null) {
         late final _TestFinalizerRegistration? collectedRegistration;
-        for (_TestFinalizerRegistration registration
+        for (final _TestFinalizerRegistration registration
             in _collectedRegistrations) {
           if (identical(registration.deletable, collection.deletable)) {
             collectedRegistration = registration;
@@ -162,12 +162,12 @@ class TestCollector implements Collector {
   /// This also deletes active objects that have not been scheduled for
   /// collection, to prevent objects leaking across tests.
   void cleanUpAfterTest() {
-    for (_TestCollection collection in _pendingCollections) {
+    for (final _TestCollection collection in _pendingCollections) {
       if (!collection.deletable.isDeleted()) {
         collection.deletable.delete();
       }
     }
-    for (_TestFinalizerRegistration registration in _activeRegistrations) {
+    for (final _TestFinalizerRegistration registration in _activeRegistrations) {
       if (!registration.deletable.isDeleted()) {
         registration.deletable.delete();
       }

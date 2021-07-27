@@ -682,7 +682,7 @@ class _TouchAdapter extends _BaseAdapter {
     _addTouchEventListener('touchstart', (html.TouchEvent event) {
       final Duration timeStamp = _BaseAdapter._eventTimeStampToDuration(event.timeStamp!);
       final List<ui.PointerData> pointerData = <ui.PointerData>[];
-      for (html.Touch touch in event.changedTouches!) {
+      for (final html.Touch touch in event.changedTouches!) {
         final bool nowPressed = _isTouchPressed(touch.identifier!);
         if (!nowPressed) {
           _pressTouch(touch.identifier!);
@@ -702,7 +702,7 @@ class _TouchAdapter extends _BaseAdapter {
       event.preventDefault(); // Prevents standard overscroll on iOS/Webkit.
       final Duration timeStamp = _BaseAdapter._eventTimeStampToDuration(event.timeStamp!);
       final List<ui.PointerData> pointerData = <ui.PointerData>[];
-      for (html.Touch touch in event.changedTouches!) {
+      for (final html.Touch touch in event.changedTouches!) {
         final bool nowPressed = _isTouchPressed(touch.identifier!);
         if (nowPressed) {
           _convertEventToPointerData(
@@ -723,7 +723,7 @@ class _TouchAdapter extends _BaseAdapter {
       event.preventDefault();
       final Duration timeStamp = _BaseAdapter._eventTimeStampToDuration(event.timeStamp!);
       final List<ui.PointerData> pointerData = <ui.PointerData>[];
-      for (html.Touch touch in event.changedTouches!) {
+      for (final html.Touch touch in event.changedTouches!) {
         final bool nowPressed = _isTouchPressed(touch.identifier!);
         if (nowPressed) {
           _unpressTouch(touch.identifier!);
@@ -742,7 +742,7 @@ class _TouchAdapter extends _BaseAdapter {
     _addTouchEventListener('touchcancel', (html.TouchEvent event) {
       final Duration timeStamp = _BaseAdapter._eventTimeStampToDuration(event.timeStamp!);
       final List<ui.PointerData> pointerData = <ui.PointerData>[];
-      for (html.Touch touch in event.changedTouches!) {
+      for (final html.Touch touch in event.changedTouches!) {
         final bool nowPressed = _isTouchPressed(touch.identifier!);
         if (nowPressed) {
           _unpressTouch(touch.identifier!);

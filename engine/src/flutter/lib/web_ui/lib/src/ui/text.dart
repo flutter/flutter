@@ -198,7 +198,7 @@ class TextDecoration {
   const TextDecoration._(this._mask);
   factory TextDecoration.combine(List<TextDecoration> decorations) {
     int mask = 0;
-    for (TextDecoration decoration in decorations) {
+    for (final TextDecoration decoration in decorations) {
       mask |= decoration._mask;
     }
     return TextDecoration._(mask);

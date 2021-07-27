@@ -615,7 +615,7 @@ class BrowserManager {
     // Start this canceled because we don't want it to start ticking until we
     // get some response from the iframe.
     _timer = RestartableTimer(Duration(seconds: 3), () {
-      for (RunnerSuiteController controller in _controllers) {
+      for (final RunnerSuiteController controller in _controllers) {
         controller.setDebugging(true);
       }
     })
@@ -629,7 +629,7 @@ class BrowserManager {
         if (!_closed) {
           _timer.reset();
         }
-        for (RunnerSuiteController controller in _controllers) {
+        for (final RunnerSuiteController controller in _controllers) {
           controller.setDebugging(false);
         }
 

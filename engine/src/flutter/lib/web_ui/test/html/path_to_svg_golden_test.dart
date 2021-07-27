@@ -124,7 +124,7 @@ Future<void> testMain() async {
           largeArc: true, clockwise: true, distance: -20)
     ];
     int sampleIndex = 0;
-    for (ArcSample sample in arcs) {
+    for (final ArcSample sample in arcs) {
       ++sampleIndex;
       final Path path = sample.createPath();
       await testPath(path, 'svg_arc_$sampleIndex');

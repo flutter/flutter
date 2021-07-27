@@ -230,7 +230,7 @@ void testMain() {
 
 List<double> computeLengths(PathMetrics pathMetrics) {
   final List<double> lengths = <double>[];
-  for (PathMetric metric in pathMetrics) {
+  for (final PathMetric metric in pathMetrics) {
     lengths.add(metric.length);
   }
   return lengths;

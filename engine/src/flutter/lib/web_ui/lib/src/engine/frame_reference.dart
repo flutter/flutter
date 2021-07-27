@@ -46,8 +46,8 @@ class CrossFrameCache<T> {
   void commitFrame() {
     // Evict unused items from prior frame.
     if (_reusablePool != null) {
-      for (List<_CrossFrameCacheItem<T>> items in _reusablePool!.values) {
-        for (_CrossFrameCacheItem<T> item in items) {
+      for (final List<_CrossFrameCacheItem<T>> items in _reusablePool!.values) {
+        for (final _CrossFrameCacheItem<T> item in items) {
           item.evict();
         }
       }

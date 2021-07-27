@@ -127,7 +127,7 @@ Future<void> testMain() async {
 
     final List<PathMetric> metrics = path.computeMetrics().toList();
     double totalLength = 0;
-    for (PathMetric m in metrics) {
+    for (final PathMetric m in metrics) {
       totalLength += m.length;
     }
     final Path dashedPath = Path();
@@ -181,7 +181,7 @@ Future<void> testMain() async {
 
     final List<PathMetric> metrics = path.computeMetrics().toList();
     double totalLength = 0;
-    for (PathMetric m in metrics) {
+    for (final PathMetric m in metrics) {
       totalLength += m.length;
     }
     final Path dashedPath = Path();
