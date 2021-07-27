@@ -516,8 +516,8 @@ class ViewClipChain {
   int _clipCount = -1;
 
   ViewClipChain({required html.Element view})
-      : this._root = view,
-        this._slot = view;
+      : _root = view,
+        _slot = view;
 
   html.Element get root => _root;
   html.Element get slot => _slot;

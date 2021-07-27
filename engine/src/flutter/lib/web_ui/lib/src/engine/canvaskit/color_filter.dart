@@ -21,15 +21,15 @@ import 'skia_object_cache.dart';
 ///   the lifecycle of its [SkColorFilter].
 class ManagedSkColorFilter extends ManagedSkiaObject<SkColorFilter> {
   ManagedSkColorFilter(CkColorFilter ckColorFilter)
-      : this.ckColorFilter = ckColorFilter;
+      : colorFilter = ckColorFilter;
 
-  final CkColorFilter ckColorFilter;
-
-  @override
-  SkColorFilter createDefault() => ckColorFilter._initRawColorFilter();
+  final CkColorFilter colorFilter;
 
   @override
-  SkColorFilter resurrect() => ckColorFilter._initRawColorFilter();
+  SkColorFilter createDefault() => colorFilter._initRawColorFilter();
+
+  @override
+  SkColorFilter resurrect() => colorFilter._initRawColorFilter();
 
   @override
   void delete() {
@@ -37,7 +37,7 @@ class ManagedSkColorFilter extends ManagedSkiaObject<SkColorFilter> {
   }
 
   @override
-  int get hashCode => ckColorFilter.hashCode;
+  int get hashCode => colorFilter.hashCode;
 
   @override
   bool operator ==(Object other) {
@@ -45,11 +45,11 @@ class ManagedSkColorFilter extends ManagedSkiaObject<SkColorFilter> {
       return false;
     }
     return other is ManagedSkColorFilter &&
-        other.ckColorFilter == ckColorFilter;
+        other.colorFilter == colorFilter;
   }
 
   @override
-  String toString() => ckColorFilter.toString();
+  String toString() => colorFilter.toString();
 }
 
 /// A [ui.ColorFilter] backed by Skia's [SkColorFilter].
@@ -152,6 +152,9 @@ class CkLinearToSrgbGammaColorFilter extends CkColorFilter {
   bool operator ==(Object other) => runtimeType == other.runtimeType;
 
   @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
   String toString() => 'ColorFilter.linearToSrgbGamma()';
 }
 
@@ -163,6 +166,9 @@ class CkSrgbToLinearGammaColorFilter extends CkColorFilter {
 
   @override
   bool operator ==(Object other) => runtimeType == other.runtimeType;
+
+  @override
+  int get hashCode => runtimeType.hashCode;
 
   @override
   String toString() => 'ColorFilter.srgbToLinearGamma()';

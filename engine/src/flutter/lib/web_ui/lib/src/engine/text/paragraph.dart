@@ -88,7 +88,7 @@ class EngineLineMetrics implements ui.LineMetrics {
     required List<RangeBox> boxes,
   })  : displayText = null,
         unscaledAscent = double.infinity,
-        this.boxes = boxes;
+        this.boxes = boxes; // ignore: unnecessary_this
 
   /// The text to be rendered on the screen representing this line.
   final String? displayText;

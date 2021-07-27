@@ -334,7 +334,7 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
   String get browser => stringArg('browser')!;
 
   /// The browser environment for the [browser].
-  BrowserEnvironment get browserEnvironment => (_browserEnvironment ??= _createBrowserEnvironment(browser));
+  BrowserEnvironment get browserEnvironment => _browserEnvironment ??= _createBrowserEnvironment(browser);
   BrowserEnvironment? _browserEnvironment;
 
   /// Whether [browser] is set to "chrome".

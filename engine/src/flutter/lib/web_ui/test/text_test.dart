@@ -381,8 +381,8 @@ Future<void> testMain() async {
   },
       // TODO(nurhan): https://github.com/flutter/flutter/issues/50771
       // TODO(nurhan): https://github.com/flutter/flutter/issues/46638
-      skip: (browserEngine == BrowserEngine.firefox ||
-          browserEngine == BrowserEngine.edge));
+      skip: browserEngine == BrowserEngine.firefox ||
+          browserEngine == BrowserEngine.edge);
 
   test('adds Arial and sans-serif as fallback fonts', () {
     // Set this to false so it doesn't default to 'Ahem' font.
@@ -403,8 +403,8 @@ Future<void> testMain() async {
   },
       // TODO(nurhan): https://github.com/flutter/flutter/issues/50771
       // TODO(nurhan): https://github.com/flutter/flutter/issues/46638
-      skip: (browserEngine == BrowserEngine.firefox ||
-          browserEngine == BrowserEngine.edge));
+      skip: browserEngine == BrowserEngine.firefox ||
+          browserEngine == BrowserEngine.edge);
 
   test('does not add fallback fonts to generic families', () {
     // Set this to false so it doesn't default to 'Ahem' font.

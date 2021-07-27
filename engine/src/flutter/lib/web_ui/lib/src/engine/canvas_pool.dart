@@ -181,7 +181,7 @@ class CanvasPool extends _SaveStackTracking {
       _canvas = null;
       return;
     }
-    _contextHandle = ContextStateHandle(this, _context!, this._density);
+    _contextHandle = ContextStateHandle(this, _context!, _density);
     _initializeViewport(requiresClearRect);
     _replayClipStack();
   }

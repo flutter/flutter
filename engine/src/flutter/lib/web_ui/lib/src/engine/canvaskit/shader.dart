@@ -79,7 +79,7 @@ class CkGradientLinear extends CkShader implements ui.Gradient {
         assert(offsetIsValid(to)),
         assert(colors != null), // ignore: unnecessary_null_comparison
         assert(tileMode != null), // ignore: unnecessary_null_comparison
-        this.matrix4 = matrix {
+        matrix4 = matrix {
     if (assertionsEnabled) {
       assert(matrix4 == null || matrix4IsValid(matrix4!));
       validateColorStops(colors, colorStops);

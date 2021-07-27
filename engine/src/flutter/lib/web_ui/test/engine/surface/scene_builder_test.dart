@@ -189,7 +189,7 @@ void testMain() {
       expect(picture.updateCount, 0);
       expect(picture.applyPaintCount, 2);
     }, // TODO(nurhan): https://github.com/flutter/flutter/issues/46638
-        skip: (browserEngine == BrowserEngine.firefox));
+        skip: browserEngine == BrowserEngine.firefox);
   });
 
   group('Compositing order', () {

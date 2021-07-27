@@ -312,6 +312,10 @@ class PathRef {
     return equals(other as PathRef);
   }
 
+  @override
+  int get hashCode => ui.hashValues(fSegmentMask,
+      fPoints, _conicWeights, _fVerbs);
+
   bool equals(PathRef ref) {
     // We explicitly check fSegmentMask as a quick-reject. We could skip it,
     // since it is only a cache of info in the fVerbs, but its a fast way to
@@ -583,7 +587,7 @@ class PathRef {
         maxX = math.max(maxX, x);
         maxY = math.max(maxY, y);
       }
-      final bool allFinite = (accum * 0 == 0);
+      final bool allFinite = accum * 0 == 0;
       if (allFinite) {
         fBounds = ui.Rect.fromLTRB(minX, minY, maxX, maxY);
         fIsFinite = true;

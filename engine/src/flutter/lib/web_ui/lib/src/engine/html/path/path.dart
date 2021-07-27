@@ -809,7 +809,7 @@ class SurfacePath implements ui.Path {
     // to start outside their marks. A round rect may lose convexity as a
     // result. If the input values are on integers, place the conic on
     // integers as well.
-    final bool expectIntegers = SPath.nearlyEqual((math.pi / 2 - thetaWidth.abs()), 0) &&
+    final bool expectIntegers = SPath.nearlyEqual(math.pi / 2 - thetaWidth.abs(), 0) &&
         SPath.isInteger(rx) &&
         SPath.isInteger(ry) &&
         SPath.isInteger(x) &&
@@ -1175,7 +1175,7 @@ class SurfacePath implements ui.Path {
       } else {
         final double x = offsetX + points[p];
         final double y = offsetY + points[p + 1];
-        points[p] = (matrix4[0] * (x)) + (matrix4[4] * y) + matrix4[12];
+        points[p] = (matrix4[0] * x) + (matrix4[4] * y) + matrix4[12];
         points[p + 1] = (matrix4[1] * x) + (matrix4[5] * y) + matrix4[13];
       }
     }
@@ -1432,7 +1432,7 @@ class SurfacePath implements ui.Path {
       }
     }
 
-    if (this._firstDirection == SPathDirection.kUnknown) {
+    if (_firstDirection == SPathDirection.kUnknown) {
       if (state.firstDirection == SPathDirection.kUnknown &&
           !pathRef.getBounds().isEmpty) {
         return _setComputedConvexity(state.reversals < 3
@@ -1540,7 +1540,7 @@ class SurfacePath implements ui.Path {
   /// as if they had been closed, even if they were not explicitly closed.
   @override
   SurfacePathMetrics computeMetrics({bool forceClosed = false}) {
-    return SurfacePathMetrics(this.pathRef, forceClosed);
+    return SurfacePathMetrics(pathRef, forceClosed);
   }
 
   /// Detects if path is rounded rectangle.

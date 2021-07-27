@@ -180,7 +180,7 @@ double? chopMonoAtY(Float32List _buffer, int bufferStartPos, double y) {
     } else {
       tPos = tMid;
     }
-  } while (((tPos - tNeg).abs() > tolerance));
+  } while ((tPos - tNeg).abs() > tolerance);
   return (tNeg + tPos) / 2;
 }
 

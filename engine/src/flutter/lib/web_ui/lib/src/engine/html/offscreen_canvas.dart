@@ -42,9 +42,9 @@ class OffScreenCanvas {
   /// Returns CanvasRenderContext2D or OffscreenCanvasRenderingContext2D to
   /// paint into.
   Object? getContext2d() {
-    return (offScreenCanvas != null
+    return offScreenCanvas != null
         ? offScreenCanvas!.getContext('2d')
-        : canvasElement!.getContext('2d'));
+        : canvasElement!.getContext('2d');
   }
 
   /// Feature detection for transferToImageBitmap on OffscreenCanvas.

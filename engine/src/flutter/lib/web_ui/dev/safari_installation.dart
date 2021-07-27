@@ -41,7 +41,7 @@ class SafariArgParser extends BrowserArgParser {
     _version = argResults['safari-version'] as String;
     assert(_version == 'system');
     final String browser = argResults['browser'] as String;
-    _isMobileBrowser = (browser == 'ios-safari');
+    _isMobileBrowser = browser == 'ios-safari';
   }
 
   @override
@@ -85,9 +85,9 @@ class IosSafariArgParser extends BrowserArgParser {
     required int pinnedIosMinorVersion,
     required String pinnedIosDevice,
   }) :
-    this._pinnedIosMajorVersion = pinnedIosMajorVersion,
-    this._pinnedIosMinorVersion = pinnedIosMinorVersion,
-    this._pinnedIosDevice = pinnedIosDevice;
+    _pinnedIosMajorVersion = pinnedIosMajorVersion,
+    _pinnedIosMinorVersion = pinnedIosMinorVersion,
+    _pinnedIosDevice = pinnedIosDevice;
 
   /// Returns [IosSimulator] if the [Platform] is `macOS` and simulator
   /// is started.

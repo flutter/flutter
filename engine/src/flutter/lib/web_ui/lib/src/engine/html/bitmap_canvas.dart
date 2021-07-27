@@ -510,7 +510,7 @@ class BitmapCanvas extends EngineCanvas {
               math.min(rect.left, rect.right), math.min(rect.top, rect.bottom)),
           paint);
       element.style.borderRadius =
-          '${(rect.width / 2.0)}px / ${(rect.height / 2.0)}px';
+          '${rect.width / 2.0}px / ${rect.height / 2.0}px';
     } else {
       setUpPaint(paint, rect);
       _canvasPool.drawOval(rect, paint.style);

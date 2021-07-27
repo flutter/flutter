@@ -1082,6 +1082,6 @@ class MeasurementResult {
         assert(maxIntrinsicWidth != null), // ignore: unnecessary_null_comparison
         assert(alphabeticBaseline != null), // ignore: unnecessary_null_comparison
         assert(ideographicBaseline != null), // ignore: unnecessary_null_comparison
-        this.textAlign = textAlign ?? ui.TextAlign.start,
-        this.textDirection = textDirection ?? ui.TextDirection.ltr;
+        this.textAlign = textAlign ?? ui.TextAlign.start,// ignore: unnecessary_this
+        this.textDirection = textDirection ?? ui.TextDirection.ltr;// ignore: unnecessary_this
 }

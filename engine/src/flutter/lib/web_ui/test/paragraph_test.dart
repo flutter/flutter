@@ -119,7 +119,7 @@ Future<void> testMain() async {
       // TODO(nurhan): https://github.com/flutter/flutter/issues/50771
       // TODO(nurhan): https://github.com/flutter/flutter/issues/46638
       // TODO(nurhan): https://github.com/flutter/flutter/issues/50590
-      skip: (browserEngine != BrowserEngine.blink));
+      skip: browserEngine != BrowserEngine.blink);
 
   testEachMeasurement('predictably lays out a multi-line rich paragraph', () {
     for (double fontSize in <double>[10.0, 20.0, 30.0, 40.0]) {
@@ -145,7 +145,7 @@ Future<void> testMain() async {
       // TODO(nurhan): https://github.com/flutter/flutter/issues/46638
       // TODO(nurhan): https://github.com/flutter/flutter/issues/50590
       // TODO(nurhan): https://github.com/flutter/flutter/issues/50771
-      skip: (browserEngine != BrowserEngine.blink));
+      skip: browserEngine != BrowserEngine.blink);
 
   testEachMeasurement('getPositionForOffset single-line', () {
     final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(

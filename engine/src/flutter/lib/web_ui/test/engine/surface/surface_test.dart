@@ -203,8 +203,8 @@ void testMain() {
     },
         // This method failed on iOS Safari.
         // TODO: https://github.com/flutter/flutter/issues/60036
-        skip: (browserEngine == BrowserEngine.webkit &&
-            operatingSystem == OperatingSystem.iOs));
+        skip: browserEngine == BrowserEngine.webkit &&
+            operatingSystem == OperatingSystem.iOs);
 
     test('is retained', () {
       final SceneBuilder builder1 = SceneBuilder();

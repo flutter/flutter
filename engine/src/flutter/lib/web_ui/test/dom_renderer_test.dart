@@ -120,8 +120,8 @@ void testMain() {
   },
       // TODO(nurhan): https://github.com/flutter/flutter/issues/46638
       // TODO(nurhan): https://github.com/flutter/flutter/issues/50828
-      skip: (browserEngine == BrowserEngine.firefox ||
-          browserEngine == BrowserEngine.edge));
+      skip: browserEngine == BrowserEngine.firefox ||
+          browserEngine == BrowserEngine.edge);
 
   test('accesibility placeholder is attached after creation', () {
     final DomRenderer renderer = DomRenderer();

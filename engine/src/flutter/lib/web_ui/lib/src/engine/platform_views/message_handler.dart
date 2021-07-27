@@ -46,8 +46,8 @@ class PlatformViewMessageHandler {
   PlatformViewMessageHandler({
     required PlatformViewManager contentManager,
     PlatformViewContentHandler? contentHandler,
-  }) : this._contentManager = contentManager,
-       this._contentHandler = contentHandler;
+  }) : _contentManager = contentManager,
+       _contentHandler = contentHandler;
 
   /// Handle a `create` Platform View message.
   ///

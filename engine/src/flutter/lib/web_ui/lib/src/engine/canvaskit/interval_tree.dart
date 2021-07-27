@@ -127,7 +127,7 @@ class IntervalTreeNode<T> {
       // Don't bother checking intervals.
       return false;
     }
-    if (this.containsShallow(x)) {
+    if (containsShallow(x)) {
       return true;
     }
     if (left?.containsDeep(x) == true) {
@@ -146,7 +146,7 @@ class IntervalTreeNode<T> {
       return;
     }
     left?.searchForPoint(x, result);
-    if (this.containsShallow(x)) {
+    if (containsShallow(x)) {
       result.add(value);
     }
     if (x < low) {

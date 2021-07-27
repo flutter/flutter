@@ -318,7 +318,7 @@ class LocaleStringAttribute extends StringAttribute {
 
   @override
   StringAttribute copy({required TextRange range}) {
-    return LocaleStringAttribute(range: range, locale: this.locale);
+    return LocaleStringAttribute(range: range, locale: locale);
   }
 
   @override

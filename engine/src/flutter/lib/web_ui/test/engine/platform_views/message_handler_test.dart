@@ -152,7 +152,7 @@ void testMain() {
 
 class _FakePlatformViewManager extends PlatformViewManager {
   _FakePlatformViewManager(void Function(int) clearFunction)
-      : this._clearPlatformView = clearFunction;
+      : _clearPlatformView = clearFunction;
 
   void Function(int) _clearPlatformView;
 
