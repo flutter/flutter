@@ -92,9 +92,11 @@ static const double kIdleDelay = 1.0;
                             size:_surfaceSize];
     }
   };
-  dispatch_async(dispatch_get_main_queue(), ^{
-    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(onIdle) object:nil];
-  });
+  [self performSelectorOnMainThread:@selector(cancelIdle) withObject:nil waitUntilDone:NO];
+}
+
+- (void)cancelIdle {
+  [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(onIdle) object:nil];
 }
 
 - (nonnull FlutterRenderBackingStore*)renderBuffer {
