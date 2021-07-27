@@ -102,9 +102,14 @@ class RawKeyEventDataWeb extends RawKeyEventData {
       return newKey;
     }
 
+    final bool isPrintable = key.length == 1;
+    if (isPrintable)
+      return LogicalKeyboardKey(key.codeUnitAt(0));
+
     // This is a non-printable key that we don't know about, so we mint a new
-    // code.
-    return LogicalKeyboardKey(code.hashCode | LogicalKeyboardKey.webPlane);
+    // key from `code`. Don't mint with `key`, because the `key` will always be
+    // "Unidentified" .
+    return LogicalKeyboardKey(code.hashCode + LogicalKeyboardKey.webPlane);
   }
 
   @override
