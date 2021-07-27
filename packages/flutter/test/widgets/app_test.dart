@@ -456,7 +456,7 @@ void main() {
     );
   });
 
-  testWidgets('WidgetsApp creates a MediaQuery if `useExistingMediaQuery` is set to false', (WidgetTester tester) async {
+  testWidgets('WidgetsApp creates a MediaQuery if `useInheritedMediaQuery` is set to false', (WidgetTester tester) async {
     late BuildContext capturedContext;
     await tester.pumpWidget(
       WidgetsApp(
@@ -471,7 +471,7 @@ void main() {
     expect(MediaQuery.of(capturedContext), isNotNull);
   });
 
-  testWidgets('WidgetsApp does not create MediaQuery if `useExistingMediaQuery` is set to true and one is available', (WidgetTester tester) async {
+  testWidgets('WidgetsApp does not create MediaQuery if `useInheritedMediaQuery` is set to true and one is available', (WidgetTester tester) async {
     late BuildContext capturedContext;
     final UniqueKey uniqueKey = UniqueKey();
     await tester.pumpWidget(
@@ -491,7 +491,7 @@ void main() {
     expect(capturedContext.dependOnInheritedWidgetOfExactType<MediaQuery>()?.key, uniqueKey);
   });
 
-  testWidgets('WidgetsApp does create a MediaQuery if `useExistingMediaQuery` is set to true and none is available', (WidgetTester tester) async {
+  testWidgets('WidgetsApp does create a MediaQuery if `useInheritedMediaQuery` is set to true and none is available', (WidgetTester tester) async {
     late BuildContext capturedContext;
     await tester.pumpWidget(
       WidgetsApp(
