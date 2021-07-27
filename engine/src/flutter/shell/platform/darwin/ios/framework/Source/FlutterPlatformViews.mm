@@ -276,8 +276,8 @@ PostPrerollResult FlutterPlatformViewsController::PostPrerollAction(
     //
     // Eventually, the frame is submitted once this method returns `kSuccess`.
     // At that point, the raster tasks are handled on the platform thread.
-    raster_thread_merger->MergeWithLease(kDefaultMergedLeaseDuration);
     CancelFrame();
+    raster_thread_merger->MergeWithLease(kDefaultMergedLeaseDuration);
     return PostPrerollResult::kSkipAndRetryFrame;
   }
   // If the post preroll action is successful, we will display platform views in the current frame.
