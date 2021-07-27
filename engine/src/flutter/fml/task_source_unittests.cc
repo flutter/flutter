@@ -7,6 +7,7 @@
 
 #include "flutter/fml/macros.h"
 #include "flutter/fml/task_source.h"
+#include "flutter/fml/time/chrono_timestamp_provider.h"
 #include "flutter/fml/time/time_delta.h"
 #include "flutter/fml/time/time_point.h"
 #include "gtest/gtest.h"
@@ -17,24 +18,24 @@ namespace testing {
 TEST(TaskSourceTests, SimpleInitialization) {
   TaskSource task_source = TaskSource(TaskQueueId(1));
   task_source.RegisterTask(
-      {1, [] {}, fml::TimePoint::Now(), TaskSourceGrade::kUnspecified});
+      {1, [] {}, ChronoTicksSinceEpoch(), TaskSourceGrade::kUnspecified});
   ASSERT_EQ(task_source.GetNumPendingTasks(), 1u);
 }
 
 TEST(TaskSourceTests, MultipleTaskGrades) {
   TaskSource task_source = TaskSource(TaskQueueId(1));
   task_source.RegisterTask(
-      {1, [] {}, fml::TimePoint::Now(), TaskSourceGrade::kUnspecified});
+      {1, [] {}, ChronoTicksSinceEpoch(), TaskSourceGrade::kUnspecified});
   task_source.RegisterTask(
-      {2, [] {}, fml::TimePoint::Now(), TaskSourceGrade::kUserInteraction});
+      {2, [] {}, ChronoTicksSinceEpoch(), TaskSourceGrade::kUserInteraction});
   task_source.RegisterTask(
-      {3, [] {}, fml::TimePoint::Now(), TaskSourceGrade::kDartMicroTasks});
+      {3, [] {}, ChronoTicksSinceEpoch(), TaskSourceGrade::kDartMicroTasks});
   ASSERT_EQ(task_source.GetNumPendingTasks(), 3u);
 }
 
 TEST(TaskSourceTests, SimpleOrdering) {
   TaskSource task_source = TaskSource(TaskQueueId(1));
-  auto time_stamp = fml::TimePoint::Now();
+  auto time_stamp = ChronoTicksSinceEpoch();
   int value = 0;
   task_source.RegisterTask(
       {1, [&] { value = 1; }, time_stamp, TaskSourceGrade::kUnspecified});
@@ -51,7 +52,7 @@ TEST(TaskSourceTests, SimpleOrdering) {
 
 TEST(TaskSourceTests, SimpleOrderingMultiTaskHeaps) {
   TaskSource task_source = TaskSource(TaskQueueId(1));
-  auto time_stamp = fml::TimePoint::Now();
+  auto time_stamp = ChronoTicksSinceEpoch();
   int value = 0;
   task_source.RegisterTask(
       {1, [&] { value = 1; }, time_stamp, TaskSourceGrade::kDartMicroTasks});
@@ -71,7 +72,7 @@ TEST(TaskSourceTests, SimpleOrderingMultiTaskHeaps) {
 
 TEST(TaskSourceTests, OrderingMultiTaskHeapsSecondaryPaused) {
   TaskSource task_source = TaskSource(TaskQueueId(1));
-  auto time_stamp = fml::TimePoint::Now();
+  auto time_stamp = ChronoTicksSinceEpoch();
   int value = 0;
   task_source.RegisterTask(
       {1, [&] { value = 1; }, time_stamp, TaskSourceGrade::kDartMicroTasks});

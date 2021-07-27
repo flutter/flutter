@@ -12,6 +12,7 @@
 
 #include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/synchronization/waitable_event.h"
+#include "flutter/fml/time/chrono_timestamp_provider.h"
 #include "gtest/gtest.h"
 
 namespace fml {
@@ -55,7 +56,7 @@ TEST(MessageLoopTaskQueue, RegisterTwoTasksAndCount) {
   auto task_queue = fml::MessageLoopTaskQueues::GetInstance();
   auto queue_id = task_queue->CreateTaskQueue();
   task_queue->RegisterTask(
-      queue_id, [] {}, fml::TimePoint::Now());
+      queue_id, [] {}, ChronoTicksSinceEpoch());
   task_queue->RegisterTask(
       queue_id, [] {}, fml::TimePoint::Max());
   ASSERT_TRUE(task_queue->HasPendingTasks(queue_id));
@@ -69,13 +70,13 @@ TEST(MessageLoopTaskQueue, PreserveTaskOrdering) {
 
   // order: 0
   task_queue->RegisterTask(
-      queue_id, [&test_val]() { test_val = 1; }, fml::TimePoint::Now());
+      queue_id, [&test_val]() { test_val = 1; }, ChronoTicksSinceEpoch());
 
   // order: 1
   task_queue->RegisterTask(
-      queue_id, [&test_val]() { test_val = 2; }, fml::TimePoint::Now());
+      queue_id, [&test_val]() { test_val = 2; }, ChronoTicksSinceEpoch());
 
-  const auto now = fml::TimePoint::Now();
+  const auto now = ChronoTicksSinceEpoch();
   int expected_value = 1;
   for (;;) {
     fml::closure invocation = task_queue->GetNextTaskToRun(queue_id, now);
@@ -124,7 +125,7 @@ TEST(MessageLoopTaskQueue, WakeUpIndependentOfTime) {
                     [&num_wakes](fml::TimePoint wake_time) { ++num_wakes; }));
 
   task_queue->RegisterTask(
-      queue_id, []() {}, fml::TimePoint::Now());
+      queue_id, []() {}, ChronoTicksSinceEpoch());
   task_queue->RegisterTask(
       queue_id, []() {}, fml::TimePoint::Max());
 
@@ -147,7 +148,7 @@ TEST(MessageLoopTaskQueue, WokenUpWithNewerTime) {
   task_queue->RegisterTask(
       queue_id, []() {}, fml::TimePoint::Max());
 
-  const auto now = fml::TimePoint::Now();
+  const auto now = ChronoTicksSinceEpoch();
   expected = now;
   task_queue->RegisterTask(
       queue_id, []() {}, now);
@@ -221,7 +222,7 @@ TEST(MessageLoopTaskQueue, ConcurrentQueueAndTaskCreatingCounts) {
           task_queue_ids[std::rand() % kTaskQueuesCount];
       const auto empty_task = []() {};
       // The timepoint doesn't matter as the queue is never going to be drained.
-      const auto task_timepoint = fml::TimePoint::Now();
+      const auto task_timepoint = ChronoTicksSinceEpoch();
 
       task_queues->RegisterTask(current_task_queue_id, empty_task,
                                 task_timepoint);
@@ -271,8 +272,8 @@ TEST(MessageLoopTaskQueue, RegisterTaskWakesUpOwnerQueue) {
                             ASSERT_FALSE(true);
                           }));
 
-  auto time1 = fml::TimePoint::Now() + fml::TimeDelta::FromMilliseconds(1);
-  auto time2 = fml::TimePoint::Now() + fml::TimeDelta::FromMilliseconds(2);
+  auto time1 = ChronoTicksSinceEpoch() + fml::TimeDelta::FromMilliseconds(1);
+  auto time2 = ChronoTicksSinceEpoch() + fml::TimeDelta::FromMilliseconds(2);
 
   ASSERT_EQ(0UL, wakes.size());
 

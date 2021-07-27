@@ -39,6 +39,10 @@ class TimePoint {
     return TimePoint(ticks.ToNanoseconds());
   }
 
+  static constexpr TimePoint FromTicks(int64_t ticks) {
+    return TimePoint(ticks);
+  }
+
   TimeDelta ToEpochDelta() const { return TimeDelta::FromNanoseconds(ticks_); }
 
   // Compute the difference between two time points.

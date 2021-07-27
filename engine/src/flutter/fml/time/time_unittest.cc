@@ -4,17 +4,17 @@
 
 #include <thread>
 
+#include "flutter/fml/time/chrono_timestamp_provider.h"
 #include "flutter/fml/time/time_delta.h"
-#include "flutter/fml/time/time_point.h"
 #include "gtest/gtest.h"
 
 namespace fml {
 namespace {
 
 TEST(Time, Now) {
-  auto start = TimePoint::Now();
+  auto start = ChronoTicksSinceEpoch();
   for (int i = 0; i < 3; ++i) {
-    auto now = TimePoint::Now();
+    auto now = ChronoTicksSinceEpoch();
     EXPECT_GE(now, start);
     std::this_thread::yield();
   }
