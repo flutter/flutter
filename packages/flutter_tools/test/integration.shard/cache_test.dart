@@ -18,71 +18,6 @@ import '../src/common.dart';
 import '../src/context.dart';
 import 'test_utils.dart';
 
-class FakeLogger extends Logger {
-  static const StopwatchFactory _stopwatchFactory = StopwatchFactory();
-
-  List<String> errors = <String>[];
-  List<String> status = <String>[];
-
-  @override
-  void clear() {}
-
-  @override
-  bool get hasTerminal => true;
-
-  @override
-  void printError(
-    String message, {
-    StackTrace stackTrace,
-    bool emphasis,
-    TerminalColor color,
-    int indent,
-    int hangingIndent,
-    bool wrap,
-  }) {
-    errors.add(message);
-  }
-
-  @override
-  void printStatus(
-    String message, {
-    bool emphasis,
-    TerminalColor color,
-    bool newline,
-    int indent,
-    int hangingIndent,
-    bool wrap,
-  }) {
-    status.add(message);
-  }
-
-  @override
-  void printTrace(String message) {}
-
-  @override
-  Status startProgress(String message,
-    {String progressId,
-    int progressIndicatorPadding = kDefaultStatusPadding,
-  }) {
-    return SilentStatus(
-      stopwatch: _stopwatchFactory.createStopwatch(),
-    )..start();
-  }
-
-  @override
-  Status startSpinner({VoidCallback onFinish}) {
-    return SilentStatus(
-      stopwatch: _stopwatchFactory.createStopwatch(),
-    )..start();
-  }
-
-  @override
-  bool get supportsColor => false;
-
-  @override
-  final Terminal terminal = Terminal.test(supportsColor: false, supportsEmoji: false);
-}
-
 final String dart = fileSystem.path
     .join(getFlutterRoot(), 'bin', platform.isWindows ? 'dart.bat' : 'dart');
 
@@ -94,7 +29,10 @@ void main() {
           'should log a message to stderr when lock is not acquired', () async {
         final String oldRoot = Cache.flutterRoot;
         final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('cache_test.');
-        final FakeLogger logger = FakeLogger();
+        final BufferLogger logger = BufferLogger(
+          terminal: Terminal.test(supportsColor: false, supportsEmoji: false),
+          outputPreferences: OutputPreferences(),
+        );
         try {
           Cache.flutterRoot = tempDir.absolute.path;
           final Cache cache = Cache.test(
@@ -133,11 +71,9 @@ Future<void> main(List<String> args) async {
           }
           Cache.flutterRoot = oldRoot;
         }
-        expect(logger.status, isEmpty);
-        expect(
-          logger.errors.single,
-          equals('Waiting for another flutter command to release the startup lock...'),
-        );
+        expect(logger.statusText, isEmpty);
+        expect(logger.errorText,
+            equals('Waiting for another flutter command to release the startup lock...\n'));
       });
     }
   });
