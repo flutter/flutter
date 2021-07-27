@@ -177,7 +177,7 @@ class CkPaint extends ManagedSkiaObject<SkPaint> implements ui.Paint {
   ui.FilterQuality _filterQuality = ui.FilterQuality.none;
 
   @override
-  ui.ColorFilter? get colorFilter => _managedColorFilter?.ckColorFilter;
+  ui.ColorFilter? get colorFilter => _managedColorFilter?.colorFilter;
   @override
   set colorFilter(ui.ColorFilter? value) {
     if (colorFilter == value) {

@@ -34,8 +34,11 @@ class SurfaceVertices implements ui.Vertices {
     List<int>? indices,
   })  : assert(mode != null), // ignore: unnecessary_null_comparison
         assert(positions != null), // ignore: unnecessary_null_comparison
+        // ignore: unnecessary_this
         this.colors = colors != null ? _int32ListFromColors(colors) : null,
+        // ignore: unnecessary_this
         this.indices = indices != null ? Uint16List.fromList(indices) : null,
+        // ignore: unnecessary_this
         this.positions = offsetListToFloat32List(positions) {
     initWebGl();
   }

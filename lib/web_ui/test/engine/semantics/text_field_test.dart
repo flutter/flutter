@@ -90,7 +90,7 @@ void testMain() {
   },  // TODO(nurhan): https://github.com/flutter/flutter/issues/46638
       // TODO(nurhan): https://github.com/flutter/flutter/issues/50590
       // TODO(nurhan): https://github.com/flutter/flutter/issues/50754
-      skip: (browserEngine != BrowserEngine.blink));
+      skip: browserEngine != BrowserEngine.blink);
 
     test('Syncs editing state from framework', () async {
       semantics()

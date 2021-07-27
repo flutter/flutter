@@ -38,8 +38,8 @@ void _testEach<T extends _BasicEventContext>(
 
 /// Some methods in this class are skipped for iOS-Safari.
 /// TODO: https://github.com/flutter/flutter/issues/60033
-bool get isIosSafari => (browserEngine == BrowserEngine.webkit &&
-    operatingSystem == OperatingSystem.iOs);
+bool get isIosSafari => browserEngine == BrowserEngine.webkit &&
+    operatingSystem == OperatingSystem.iOs;
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);

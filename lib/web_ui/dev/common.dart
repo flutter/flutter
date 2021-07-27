@@ -212,7 +212,7 @@ class BrowserLock {
   BrowserLock._() {
     final io.File lockFile = io.File(
         path.join(environment.webUiRootDir.path, 'dev', 'browser_lock.yaml'));
-    this._configuration = loadYaml(lockFile.readAsStringSync()) as YamlMap;
+    _configuration = loadYaml(lockFile.readAsStringSync()) as YamlMap;
   }
 }
 

@@ -211,6 +211,7 @@ class CallbackHandle {
   bool operator ==(Object other) => identical(this, other);
 
   @override
+  // ignore: unnecessary_overrides
   int get hashCode => super.hashCode;
 }
 

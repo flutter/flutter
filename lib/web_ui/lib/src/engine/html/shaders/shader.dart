@@ -162,7 +162,7 @@ class GradientLinear extends EngineGradient {
         assert(offsetIsValid(to)),
         assert(colors != null), // ignore: unnecessary_null_comparison
         assert(tileMode != null), // ignore: unnecessary_null_comparison
-        this.matrix4 = matrix == null ? null : FastMatrix32(matrix),
+        matrix4 = matrix == null ? null : FastMatrix32(matrix),
         super._() {
     if (assertionsEnabled) {
       validateColorStops(colors, colorStops);

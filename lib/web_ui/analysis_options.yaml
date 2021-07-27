@@ -13,10 +13,6 @@ analyzer:
 
 linter:
   rules:
-    empty_statements: false
-    hash_and_equals: false
-    implementation_imports: false
-    iterable_contains_unrelated_type: false
     library_names: false
     library_prefixes: false
     list_remove_unrelated_type: false
@@ -47,9 +43,6 @@ linter:
     unnecessary_getters_setters: false
     unnecessary_null_aware_assignments: false
     unnecessary_null_in_if_null_operators: false
-    unnecessary_overrides: false
-    unnecessary_parenthesis: false
-    unnecessary_this: false
     unrelated_type_equality_checks: false
     use_rethrow_when_possible: false
     valid_regexps: false

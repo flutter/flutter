@@ -594,8 +594,8 @@ class PersistedPicture extends PersistedLeafSurface {
 
     _computeOptimalCullRect(oldSurface);
     if (identical(picture, oldSurface.picture)) {
-      final bool densityChanged = (_canvas is BitmapCanvas &&
-          _density != (_canvas! as BitmapCanvas).density);
+      final bool densityChanged = _canvas is BitmapCanvas &&
+          _density != (_canvas! as BitmapCanvas).density;
 
       // The picture is the same. Attempt to avoid repaint.
       if (_requiresRepaint || densityChanged) {
@@ -720,7 +720,7 @@ double _computePixelDensity(Matrix4? transform, double width, double height) {
     //
     // On a fullscreen high dpi device dpi*density*resolution will demand
     // too much memory, so clamp at 4.
-    scale = math.min(4.0, ((scale / 2.0).ceil() * 2.0));
+    scale = math.min(4.0, (scale / 2.0).ceil() * 2.0);
     // Guard against webkit absolute limit.
     const double kPixelLimit = 1024 * 1024 * 4;
     if ((width * height * scale * scale) > kPixelLimit && scale > 2) {

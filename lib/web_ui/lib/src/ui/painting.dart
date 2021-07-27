@@ -33,7 +33,7 @@ Color _scaleAlpha(Color a, double factor) {
 }
 
 class Color {
-  const Color(int value) : this.value = value & 0xFFFFFFFF;
+  const Color(int value) : this.value = value & 0xFFFFFFFF;// ignore: unnecessary_this
   const Color.fromARGB(int a, int r, int g, int b)
       : value = (((a & 0xff) << 24) |
                 ((r & 0xff) << 16) |
