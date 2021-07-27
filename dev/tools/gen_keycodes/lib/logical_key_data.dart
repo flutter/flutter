@@ -165,7 +165,7 @@ class LogicalKeyData {
           name: name,
           keyLabel: keyLabel,
         );
-        if (source == 'DOM')
+        if (source == 'DOM' && !isPrintable)
           entry.webNames.add(webName);
         return entry;
       });

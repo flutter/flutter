@@ -4,9 +4,6 @@
     "value": 32,
     "keyLabel": " ",
     "names": {
-      "web": [
-        "Space"
-      ],
       "gtk": [
         "KP_Space"
       ],
@@ -35,21 +32,13 @@
   "Exclamation": {
     "name": "Exclamation",
     "value": 33,
-    "keyLabel": "!",
-    "names": {
-      "web": [
-        "Exclamation"
-      ]
-    }
+    "keyLabel": "!"
   },
   "Quote": {
     "name": "Quote",
     "value": 34,
     "keyLabel": "\"",
     "names": {
-      "web": [
-        "Quote"
-      ],
       "windows": [
         "OEM_7"
       ],
@@ -74,9 +63,6 @@
     "value": 35,
     "keyLabel": "#",
     "names": {
-      "web": [
-        "NumberSign"
-      ],
       "android": [
         "POUND"
       ]
@@ -90,71 +76,38 @@
   "Dollar": {
     "name": "Dollar",
     "value": 36,
-    "keyLabel": "$",
-    "names": {
-      "web": [
-        "Dollar"
-      ]
-    }
+    "keyLabel": "$"
   },
   "Percent": {
     "name": "Percent",
     "value": 37,
-    "keyLabel": "%",
-    "names": {
-      "web": [
-        "Percent"
-      ]
-    }
+    "keyLabel": "%"
   },
   "Ampersand": {
     "name": "Ampersand",
     "value": 38,
-    "keyLabel": "&",
-    "names": {
-      "web": [
-        "Ampersand"
-      ]
-    }
+    "keyLabel": "&"
   },
   "QuoteSingle": {
     "name": "QuoteSingle",
     "value": 39,
-    "keyLabel": "'",
-    "names": {
-      "web": [
-        "QuoteSingle"
-      ]
-    }
+    "keyLabel": "'"
   },
   "ParenthesisLeft": {
     "name": "ParenthesisLeft",
     "value": 40,
-    "keyLabel": "(",
-    "names": {
-      "web": [
-        "ParenthesisLeft"
-      ]
-    }
+    "keyLabel": "("
   },
   "ParenthesisRight": {
     "name": "ParenthesisRight",
     "value": 41,
-    "keyLabel": ")",
-    "names": {
-      "web": [
-        "ParenthesisRight"
-      ]
-    }
+    "keyLabel": ")"
   },
   "Asterisk": {
     "name": "Asterisk",
     "value": 42,
     "keyLabel": "*",
     "names": {
-      "web": [
-        "Asterisk"
-      ],
       "android": [
         "STAR"
       ]
@@ -170,9 +123,6 @@
     "value": 43,
     "keyLabel": "+",
     "names": {
-      "web": [
-        "Add"
-      ],
       "android": [
         "PLUS"
       ]
@@ -188,9 +138,6 @@
     "value": 44,
     "keyLabel": ",",
     "names": {
-      "web": [
-        "Comma"
-      ],
       "windows": [
         "OEM_COMMA"
       ],
@@ -215,9 +162,6 @@
     "value": 45,
     "keyLabel": "-",
     "names": {
-      "web": [
-        "Minus"
-      ],
       "windows": [
         "OEM_MINUS"
       ],
@@ -242,9 +186,6 @@
     "value": 46,
     "keyLabel": ".",
     "names": {
-      "web": [
-        "Period"
-      ],
       "gtk": [
         "KP_Decimal"
       ],
@@ -275,9 +216,6 @@
     "value": 47,
     "keyLabel": "/",
     "names": {
-      "web": [
-        "Slash"
-      ],
       "windows": [
         "OEM_2"
       ],
@@ -302,9 +240,6 @@
     "value": 48,
     "keyLabel": "0",
     "names": {
-      "web": [
-        "Digit0"
-      ],
       "android": [
         "0"
       ]
@@ -323,9 +258,6 @@
     "value": 49,
     "keyLabel": "1",
     "names": {
-      "web": [
-        "Digit1"
-      ],
       "android": [
         "1"
       ]
@@ -344,9 +276,6 @@
     "value": 50,
     "keyLabel": "2",
     "names": {
-      "web": [
-        "Digit2"
-      ],
       "android": [
         "2"
       ]
@@ -365,9 +294,6 @@
     "value": 51,
     "keyLabel": "3",
     "names": {
-      "web": [
-        "Digit3"
-      ],
       "android": [
         "3"
       ]
@@ -386,9 +312,6 @@
     "value": 52,
     "keyLabel": "4",
     "names": {
-      "web": [
-        "Digit4"
-      ],
       "android": [
         "4"
       ]
@@ -407,9 +330,6 @@
     "value": 53,
     "keyLabel": "5",
     "names": {
-      "web": [
-        "Digit5"
-      ],
       "android": [
         "5"
       ]
@@ -428,9 +348,6 @@
     "value": 54,
     "keyLabel": "6",
     "names": {
-      "web": [
-        "Digit6"
-      ],
       "android": [
         "6"
       ]
@@ -449,9 +366,6 @@
     "value": 55,
     "keyLabel": "7",
     "names": {
-      "web": [
-        "Digit7"
-      ],
       "android": [
         "7"
       ]
@@ -470,9 +384,6 @@
     "value": 56,
     "keyLabel": "8",
     "names": {
-      "web": [
-        "Digit8"
-      ],
       "android": [
         "8"
       ]
@@ -491,9 +402,6 @@
     "value": 57,
     "keyLabel": "9",
     "names": {
-      "web": [
-        "Digit9"
-      ],
       "android": [
         "9"
       ]
@@ -510,21 +418,13 @@
   "Colon": {
     "name": "Colon",
     "value": 58,
-    "keyLabel": ":",
-    "names": {
-      "web": [
-        "Colon"
-      ]
-    }
+    "keyLabel": ":"
   },
   "Semicolon": {
     "name": "Semicolon",
     "value": 59,
     "keyLabel": ";",
     "names": {
-      "web": [
-        "Semicolon"
-      ],
       "windows": [
         "OEM_1"
       ],
@@ -547,21 +447,13 @@
   "Less": {
     "name": "Less",
     "value": 60,
-    "keyLabel": "<",
-    "names": {
-      "web": [
-        "Less"
-      ]
-    }
+    "keyLabel": "<"
   },
   "Equal": {
     "name": "Equal",
     "value": 61,
     "keyLabel": "=",
     "names": {
-      "web": [
-        "Equal"
-      ],
       "windows": [
         "OEM_PLUS"
       ],
@@ -584,31 +476,18 @@
   "Greater": {
     "name": "Greater",
     "value": 62,
-    "keyLabel": ">",
-    "names": {
-      "web": [
-        "Greater"
-      ]
-    }
+    "keyLabel": ">"
   },
   "Question": {
     "name": "Question",
     "value": 63,
-    "keyLabel": "?",
-    "names": {
-      "web": [
-        "Question"
-      ]
-    }
+    "keyLabel": "?"
   },
   "At": {
     "name": "At",
     "value": 64,
     "keyLabel": "@",
     "names": {
-      "web": [
-        "At"
-      ],
       "android": [
         "AT"
       ]
@@ -624,9 +503,6 @@
     "value": 91,
     "keyLabel": "[",
     "names": {
-      "web": [
-        "BracketLeft"
-      ],
       "windows": [
         "OEM_4"
       ],
@@ -651,9 +527,6 @@
     "value": 92,
     "keyLabel": "\\",
     "names": {
-      "web": [
-        "Backslash"
-      ],
       "windows": [
         "OEM_5"
       ],
@@ -678,9 +551,6 @@
     "value": 93,
     "keyLabel": "]",
     "names": {
-      "web": [
-        "BracketRight"
-      ],
       "windows": [
         "OEM_6"
       ],
@@ -703,31 +573,18 @@
   "Caret": {
     "name": "Caret",
     "value": 94,
-    "keyLabel": "^",
-    "names": {
-      "web": [
-        "Caret"
-      ]
-    }
+    "keyLabel": "^"
   },
   "Underscore": {
     "name": "Underscore",
     "value": 95,
-    "keyLabel": "_",
-    "names": {
-      "web": [
-        "Underscore"
-      ]
-    }
+    "keyLabel": "_"
   },
   "Backquote": {
     "name": "Backquote",
     "value": 96,
     "keyLabel": "`",
     "names": {
-      "web": [
-        "Backquote"
-      ],
       "windows": [
         "OEM_3"
       ],
@@ -752,9 +609,6 @@
     "value": 97,
     "keyLabel": "a",
     "names": {
-      "web": [
-        "KeyA"
-      ],
       "android": [
         "A"
       ]
@@ -773,9 +627,6 @@
     "value": 98,
     "keyLabel": "b",
     "names": {
-      "web": [
-        "KeyB"
-      ],
       "android": [
         "B"
       ]
@@ -794,9 +645,6 @@
     "value": 99,
     "keyLabel": "c",
     "names": {
-      "web": [
-        "KeyC"
-      ],
       "android": [
         "C"
       ]
@@ -815,9 +663,6 @@
     "value": 100,
     "keyLabel": "d",
     "names": {
-      "web": [
-        "KeyD"
-      ],
       "android": [
         "D"
       ]
@@ -836,9 +681,6 @@
     "value": 101,
     "keyLabel": "e",
     "names": {
-      "web": [
-        "KeyE"
-      ],
       "android": [
         "E"
       ]
@@ -857,9 +699,6 @@
     "value": 102,
     "keyLabel": "f",
     "names": {
-      "web": [
-        "KeyF"
-      ],
       "android": [
         "F"
       ]
@@ -878,9 +717,6 @@
     "value": 103,
     "keyLabel": "g",
     "names": {
-      "web": [
-        "KeyG"
-      ],
       "android": [
         "G"
       ]
@@ -899,9 +735,6 @@
     "value": 104,
     "keyLabel": "h",
     "names": {
-      "web": [
-        "KeyH"
-      ],
       "android": [
         "H"
       ]
@@ -920,9 +753,6 @@
     "value": 105,
     "keyLabel": "i",
     "names": {
-      "web": [
-        "KeyI"
-      ],
       "android": [
         "I"
       ]
@@ -941,9 +771,6 @@
     "value": 106,
     "keyLabel": "j",
     "names": {
-      "web": [
-        "KeyJ"
-      ],
       "android": [
         "J"
       ]
@@ -962,9 +789,6 @@
     "value": 107,
     "keyLabel": "k",
     "names": {
-      "web": [
-        "KeyK"
-      ],
       "android": [
         "K"
       ]
@@ -983,9 +807,6 @@
     "value": 108,
     "keyLabel": "l",
     "names": {
-      "web": [
-        "KeyL"
-      ],
       "android": [
         "L"
       ]
@@ -1004,9 +825,6 @@
     "value": 109,
     "keyLabel": "m",
     "names": {
-      "web": [
-        "KeyM"
-      ],
       "android": [
         "M"
       ]
@@ -1025,9 +843,6 @@
     "value": 110,
     "keyLabel": "n",
     "names": {
-      "web": [
-        "KeyN"
-      ],
       "android": [
         "N"
       ]
@@ -1046,9 +861,6 @@
     "value": 111,
     "keyLabel": "o",
     "names": {
-      "web": [
-        "KeyO"
-      ],
       "android": [
         "O"
       ]
@@ -1067,9 +879,6 @@
     "value": 112,
     "keyLabel": "p",
     "names": {
-      "web": [
-        "KeyP"
-      ],
       "android": [
         "P"
       ]
@@ -1088,9 +897,6 @@
     "value": 113,
     "keyLabel": "q",
     "names": {
-      "web": [
-        "KeyQ"
-      ],
       "android": [
         "Q"
       ]
@@ -1109,9 +915,6 @@
     "value": 114,
     "keyLabel": "r",
     "names": {
-      "web": [
-        "KeyR"
-      ],
       "android": [
         "R"
       ]
@@ -1130,9 +933,6 @@
     "value": 115,
     "keyLabel": "s",
     "names": {
-      "web": [
-        "KeyS"
-      ],
       "android": [
         "S"
       ]
@@ -1151,9 +951,6 @@
     "value": 116,
     "keyLabel": "t",
     "names": {
-      "web": [
-        "KeyT"
-      ],
       "android": [
         "T"
       ]
@@ -1172,9 +969,6 @@
     "value": 117,
     "keyLabel": "u",
     "names": {
-      "web": [
-        "KeyU"
-      ],
       "android": [
         "U"
       ]
@@ -1193,9 +987,6 @@
     "value": 118,
     "keyLabel": "v",
     "names": {
-      "web": [
-        "KeyV"
-      ],
       "android": [
         "V"
       ]
@@ -1214,9 +1005,6 @@
     "value": 119,
     "keyLabel": "w",
     "names": {
-      "web": [
-        "KeyW"
-      ],
       "android": [
         "W"
       ]
@@ -1235,9 +1023,6 @@
     "value": 120,
     "keyLabel": "x",
     "names": {
-      "web": [
-        "KeyX"
-      ],
       "android": [
         "X"
       ]
@@ -1256,9 +1041,6 @@
     "value": 121,
     "keyLabel": "y",
     "names": {
-      "web": [
-        "KeyY"
-      ],
       "android": [
         "Y"
       ]
@@ -1277,9 +1059,6 @@
     "value": 122,
     "keyLabel": "z",
     "names": {
-      "web": [
-        "KeyZ"
-      ],
       "android": [
         "Z"
       ]
@@ -1296,42 +1075,22 @@
   "BraceLeft": {
     "name": "BraceLeft",
     "value": 123,
-    "keyLabel": "{",
-    "names": {
-      "web": [
-        "BraceLeft"
-      ]
-    }
+    "keyLabel": "{"
   },
   "Bar": {
     "name": "Bar",
     "value": 124,
-    "keyLabel": "|",
-    "names": {
-      "web": [
-        "Bar"
-      ]
-    }
+    "keyLabel": "|"
   },
   "BraceRight": {
     "name": "BraceRight",
     "value": 125,
-    "keyLabel": "}",
-    "names": {
-      "web": [
-        "BraceRight"
-      ]
-    }
+    "keyLabel": "}"
   },
   "Tilde": {
     "name": "Tilde",
     "value": 126,
-    "keyLabel": "~",
-    "names": {
-      "web": [
-        "Tilde"
-      ]
-    }
+    "keyLabel": "~"
   },
   "Unidentified": {
     "name": "Unidentified",
