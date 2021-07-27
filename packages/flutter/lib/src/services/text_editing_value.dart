@@ -303,32 +303,6 @@ class TextEditingValue {
     );
   }
 
-  // TODO(justinmc): Possible to just use a deleteTo?
-  /// Deletes the from the current collapsed selection to the start of the field.
-  ///
-  /// The given SelectionChangedCause indicates the cause of this change and
-  /// will be passed to onSelectionChanged.
-  ///
-  /// See also:
-  ///   * [deleteToEnd]
-  TextEditingValue deleteToStart() {
-    assert(selection.isCollapsed);
-
-    if (!selection.isValid) {
-      return this;
-    }
-
-    final String textBefore = selection.textBefore(text);
-
-    if (textBefore.isEmpty) {
-      return this;
-    }
-
-    final String textAfter = selection.textAfter(text);
-    const TextSelection newSelection = TextSelection.collapsed(offset: 0);
-    return TextEditingValue(text: textAfter, selection: newSelection);
-  }
-
   /// Deletes to the given index.
   ///
   /// Returns a new TextEditingValue representing the state after the deletion.

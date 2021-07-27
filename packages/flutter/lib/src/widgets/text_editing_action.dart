@@ -200,16 +200,15 @@ abstract class TextEditingActionTarget {
       return;
     }
 
-    late final TextEditingValue nextValue;
     if (obscureText) {
       // When the text is obscured, the whole thing is treated as one big line.
-      nextValue = value.deleteToStart();
-    } else {
-      String textBefore = value.selection.textBefore(value.text);
-      final int characterBoundary =
-          _getLeftByWord(textBefore.length, includeWhitespace);
-      nextValue = value.deleteTo(characterBoundary, includeWhitespace);
+      return deleteToStart(cause);
     }
+
+    String textBefore = value.selection.textBefore(value.text);
+    final int characterBoundary =
+        _getLeftByWord(textBefore.length, includeWhitespace);
+    final TextEditingValue nextValue = value.deleteTo(characterBoundary, includeWhitespace);
 
     setTextEditingValue(nextValue, cause);
   }
@@ -244,17 +243,16 @@ abstract class TextEditingActionTarget {
       return;
     }
 
-    late final TextEditingValue nextValue;
+    // When the text is obscured, the whole thing is treated as one big line.
     if (obscureText) {
-      // When the text is obscured, the whole thing is treated as one big line.
-      nextValue = value.deleteToStart();
-    } else {
-      final TextSelection line = textMetrics.getLineAtOffset(
-          value.text, TextPosition(offset: textBefore.length - 1));
-      nextValue = value.deleteTo(line.start);
+      return deleteToStart(cause);
     }
 
-    setTextEditingValue(nextValue, cause);
+    final TextSelection line = textMetrics.getLineAtOffset(
+      value.text, TextPosition(offset: textBefore.length - 1),
+    );
+
+    setTextEditingValue(value.deleteTo(line.start), cause);
   }
 
   /// {@macro flutter.rendering.TextEditingValue.deleteForward}
@@ -342,17 +340,20 @@ abstract class TextEditingActionTarget {
   void deleteToEnd(SelectionChangedCause cause) {
     assert(value.selection.isCollapsed);
 
-    if (!value.selection.isValid) {
-      return;
-    }
-
-    final String textAfter = value.selection.textAfter(value.text);
-
-    if (textAfter.isEmpty) {
-      return;
-    }
-
     setTextEditingValue(value.deleteTo(value.text.length), cause);
+  }
+
+  /// Deletes the from the current collapsed selection to the start of the field.
+  ///
+  /// The given SelectionChangedCause indicates the cause of this change and
+  /// will be passed to onSelectionChanged.
+  ///
+  /// See also:
+  ///   * [deleteToEnd]
+  void deleteToStart(SelectionChangedCause cause) {
+    assert(value.selection.isCollapsed);
+
+    setTextEditingValue(value.deleteTo(0), cause);
   }
 
   /// Expand the current selection to the end of the field.
