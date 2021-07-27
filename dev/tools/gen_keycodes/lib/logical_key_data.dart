@@ -11,7 +11,11 @@ import 'package:path/path.dart' as path;
 import 'constants.dart';
 import 'physical_key_data.dart';
 
-bool _isControlCharacter(int codeUnit) {
+bool _isControlCharacter(String label) {
+  if (label.length != 1) {
+    return false;
+  }
+  final int codeUnit = label.codeUnitAt(0);
   return (codeUnit <= 0x1f && codeUnit >= 0x00) || (codeUnit >= 0x7f && codeUnit <= 0x9f);
 }
 
@@ -85,7 +89,6 @@ class LogicalKeyData {
   ///
   /// None of the parameters may be null.
   LogicalKeyData._(this._data);
-    // : _dataById = Map<int, LogicalKeyEntry>.fromIterable(_data.values, key: (dynamic entry) => (entry as LogicalKeyEntry).value);
 
   /// Converts the data structure into a JSON structure that can be parsed by
   /// [LogicalKeyData.fromJson].
@@ -106,21 +109,11 @@ class LogicalKeyData {
     return _data[name]!;
   }
 
-  /// Find an entry from ID.
-  ///
-  /// Asserts if the ID is not found.
-  // LogicalKeyEntry entryById(int id) {
-  //   assert(_dataById.containsKey(id),
-  //       'Unable to find logical entry by ID $id.');
-  //   return _dataById[id]!;
-  // }
-
   /// All entries.
   Iterable<LogicalKeyEntry> get entries => _data.values;
 
   // Keys mapped from their names.
   final Map<String, LogicalKeyEntry> _data;
-  // final Map<int, LogicalKeyEntry> _dataById;
 
   /// Parses entries from Chromium's key mapping header file.
   ///
@@ -162,23 +155,20 @@ class LogicalKeyData {
       final int value = match.namedGroup('unicode') != null ?
         getHex(match.namedGroup('unicode')!) :
         match.namedGroup('char')!.codeUnitAt(0);
-      final String? keyLabel = (match.namedGroup('kind')! == 'UNI' && !_isControlCharacter(value)) ?
-        String.fromCharCode(value) : null;
+      final String? keyLabel = match.namedGroup('kind')! == 'UNI' ? String.fromCharCode(value) : null;
       // Skip modifier keys from DOM. They will be added with supplemental data.
       if (_chromeModifiers.containsKey(name) && source == 'DOM') {
         continue;
       }
 
-      final bool isPrintable = keyLabel != null;
+      final bool isPrintable = (keyLabel != null && !_isControlCharacter(keyLabel))
+        || printable.containsKey(name);
       data.putIfAbsent(name, () {
-        final LogicalKeyEntry entry = LogicalKeyEntry.fromName(
+        return LogicalKeyEntry.fromName(
           value: toPlane(value, _sourceToPlane(source, isPrintable)),
           name: name,
           keyLabel: keyLabel,
-        );
-        if (source == 'DOM')
-          entry.webNames.add(webName);
-        return entry;
+        )..webNames.add(webName);
       });
     }
   }
@@ -428,11 +418,9 @@ class LogicalKeyData {
   })();
 
   static int _sourceToPlane(String source, bool isPrintable) {
-    if (isPrintable)
-      return kUnicodePlane.value;
     switch (source) {
       case 'DOM':
-        return kUnprintablePlane.value;
+        return isPrintable ? kUnicodePlane.value : kUnprintablePlane.value;
       case 'FLUTTER':
         return kFlutterPlane.value;
       default:

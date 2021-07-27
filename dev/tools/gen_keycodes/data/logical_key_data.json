@@ -1633,6 +1633,7 @@
   "Backspace": {
     "name": "Backspace",
     "value": 4294967304,
+    "keyLabel": "\b",
     "names": {
       "web": [
         "Backspace"
@@ -1683,6 +1684,7 @@
   "Tab": {
     "name": "Tab",
     "value": 4294967305,
+    "keyLabel": "\t",
     "names": {
       "web": [
         "Tab"
@@ -1737,6 +1739,7 @@
   "Enter": {
     "name": "Enter",
     "value": 4294967309,
+    "keyLabel": "\r",
     "names": {
       "web": [
         "Enter"
@@ -1791,6 +1794,7 @@
   "Escape": {
     "name": "Escape",
     "value": 4294967323,
+    "keyLabel": "\u001b",
     "names": {
       "web": [
         "Escape"
@@ -1841,6 +1845,7 @@
   "Delete": {
     "name": "Delete",
     "value": 4294967423,
+    "keyLabel": "",
     "names": {
       "web": [
         "Delete"
@@ -7861,6 +7866,9 @@
     "name": "Suspend",
     "value": 8589934592,
     "names": {
+      "web": [
+        "Suspend"
+      ],
       "gtk": [
         "Suspend"
       ]
@@ -7877,6 +7885,11 @@
   "Resume": {
     "name": "Resume",
     "value": 8589934593,
+    "names": {
+      "web": [
+        "Resume"
+      ]
+    },
     "values": {
       "fuchsia": [
         77309411349
@@ -7887,6 +7900,9 @@
     "name": "Sleep",
     "value": 8589934594,
     "names": {
+      "web": [
+        "Sleep"
+      ],
       "gtk": [
         "Sleep"
       ],
@@ -7915,6 +7931,11 @@
   "Abort": {
     "name": "Abort",
     "value": 8589934595,
+    "names": {
+      "web": [
+        "Abort"
+      ]
+    },
     "values": {
       "fuchsia": [
         77309870235
@@ -7925,6 +7946,9 @@
     "name": "Lang1",
     "value": 8589934608,
     "names": {
+      "web": [
+        "Lang1"
+      ],
       "macos": [
         "Lang1"
       ],
@@ -7954,6 +7978,9 @@
     "name": "Lang2",
     "value": 8589934609,
     "names": {
+      "web": [
+        "Lang2"
+      ],
       "macos": [
         "Lang2"
       ],
@@ -7977,6 +8004,9 @@
     "name": "Lang3",
     "value": 8589934610,
     "names": {
+      "web": [
+        "Lang3"
+      ],
       "ios": [
         "Lang3"
       ]
@@ -7994,6 +8024,9 @@
     "name": "Lang4",
     "value": 8589934611,
     "names": {
+      "web": [
+        "Lang4"
+      ],
       "ios": [
         "Lang4"
       ]
@@ -8011,6 +8044,9 @@
     "name": "Lang5",
     "value": 8589934612,
     "names": {
+      "web": [
+        "Lang5"
+      ],
       "ios": [
         "Lang5"
       ]
@@ -8027,6 +8063,11 @@
   "IntlBackslash": {
     "name": "IntlBackslash",
     "value": 8589934624,
+    "names": {
+      "web": [
+        "IntlBackslash"
+      ]
+    },
     "values": {
       "fuchsia": [
         77309870180
@@ -8037,6 +8078,9 @@
     "name": "IntlRo",
     "value": 8589934625,
     "names": {
+      "web": [
+        "IntlRo"
+      ],
       "macos": [
         "IntlRo"
       ],
@@ -8066,6 +8110,9 @@
     "name": "IntlYen",
     "value": 8589934626,
     "names": {
+      "web": [
+        "IntlYen"
+      ],
       "macos": [
         "IntlYen"
       ],
@@ -8101,6 +8148,9 @@
     "name": "ControlLeft",
     "value": 8589934848,
     "names": {
+      "web": [
+        "ControlLeft"
+      ],
       "macos": [
         "ControlLeft"
       ],
@@ -8150,6 +8200,9 @@
     "name": "ControlRight",
     "value": 8589934849,
     "names": {
+      "web": [
+        "ControlRight"
+      ],
       "macos": [
         "ControlRight"
       ],
@@ -8197,6 +8250,9 @@
     "name": "ShiftLeft",
     "value": 8589934850,
     "names": {
+      "web": [
+        "ShiftLeft"
+      ],
       "macos": [
         "ShiftLeft"
       ],
@@ -8246,6 +8302,9 @@
     "name": "ShiftRight",
     "value": 8589934851,
     "names": {
+      "web": [
+        "ShiftRight"
+      ],
       "macos": [
         "ShiftRight"
       ],
@@ -8293,6 +8352,9 @@
     "name": "AltLeft",
     "value": 8589934852,
     "names": {
+      "web": [
+        "AltLeft"
+      ],
       "macos": [
         "AltLeft"
       ],
@@ -8340,6 +8402,9 @@
     "name": "AltRight",
     "value": 8589934853,
     "names": {
+      "web": [
+        "AltRight"
+      ],
       "macos": [
         "AltRight"
       ],
@@ -8389,6 +8454,9 @@
     "name": "MetaLeft",
     "value": 8589934854,
     "names": {
+      "web": [
+        "MetaLeft"
+      ],
       "macos": [
         "MetaLeft"
       ],
@@ -8436,6 +8504,9 @@
     "name": "MetaRight",
     "value": 8589934855,
     "names": {
+      "web": [
+        "MetaRight"
+      ],
       "macos": [
         "MetaRight"
       ],
@@ -8481,24 +8552,47 @@
   },
   "Control": {
     "name": "Control",
-    "value": 8589935088
+    "value": 8589935088,
+    "names": {
+      "web": [
+        "Control"
+      ]
+    }
   },
   "Shift": {
     "name": "Shift",
-    "value": 8589935090
+    "value": 8589935090,
+    "names": {
+      "web": [
+        "Shift"
+      ]
+    }
   },
   "Alt": {
     "name": "Alt",
-    "value": 8589935092
+    "value": 8589935092,
+    "names": {
+      "web": [
+        "Alt"
+      ]
+    }
   },
   "Meta": {
     "name": "Meta",
-    "value": 8589935094
+    "value": 8589935094,
+    "names": {
+      "web": [
+        "Meta"
+      ]
+    }
   },
   "NumpadEnter": {
     "name": "NumpadEnter",
     "value": 8589935117,
     "names": {
+      "web": [
+        "NumpadEnter"
+      ],
       "macos": [
         "NumpadEnter"
       ],
@@ -8540,6 +8634,9 @@
     "name": "NumpadParenLeft",
     "value": 8589935144,
     "names": {
+      "web": [
+        "NumpadParenLeft"
+      ],
       "android": [
         "NUMPAD_LEFT_PAREN"
       ]
@@ -8557,6 +8654,9 @@
     "name": "NumpadParenRight",
     "value": 8589935145,
     "names": {
+      "web": [
+        "NumpadParenRight"
+      ],
       "android": [
         "NUMPAD_RIGHT_PAREN"
       ]
@@ -8574,6 +8674,9 @@
     "name": "NumpadMultiply",
     "value": 8589935146,
     "names": {
+      "web": [
+        "NumpadMultiply"
+      ],
       "macos": [
         "NumpadMultiply"
       ],
@@ -8621,6 +8724,9 @@
     "name": "NumpadAdd",
     "value": 8589935147,
     "names": {
+      "web": [
+        "NumpadAdd"
+      ],
       "macos": [
         "NumpadAdd"
       ],
@@ -8668,6 +8774,9 @@
     "name": "NumpadComma",
     "value": 8589935148,
     "names": {
+      "web": [
+        "NumpadComma"
+      ],
       "macos": [
         "NumpadComma"
       ],
@@ -8703,6 +8812,9 @@
     "name": "NumpadSubtract",
     "value": 8589935149,
     "names": {
+      "web": [
+        "NumpadSubtract"
+      ],
       "macos": [
         "NumpadSubtract"
       ],
@@ -8744,6 +8856,9 @@
     "name": "NumpadDecimal",
     "value": 8589935150,
     "names": {
+      "web": [
+        "NumpadDecimal"
+      ],
       "macos": [
         "NumpadDecimal"
       ],
@@ -8791,6 +8906,9 @@
     "name": "NumpadDivide",
     "value": 8589935151,
     "names": {
+      "web": [
+        "NumpadDivide"
+      ],
       "macos": [
         "NumpadDivide"
       ],
@@ -8838,6 +8956,9 @@
     "name": "Numpad0",
     "value": 8589935152,
     "names": {
+      "web": [
+        "Numpad0"
+      ],
       "macos": [
         "Numpad0"
       ],
@@ -8887,6 +9008,9 @@
     "name": "Numpad1",
     "value": 8589935153,
     "names": {
+      "web": [
+        "Numpad1"
+      ],
       "macos": [
         "Numpad1"
       ],
@@ -8936,6 +9060,9 @@
     "name": "Numpad2",
     "value": 8589935154,
     "names": {
+      "web": [
+        "Numpad2"
+      ],
       "macos": [
         "Numpad2"
       ],
@@ -8985,6 +9112,9 @@
     "name": "Numpad3",
     "value": 8589935155,
     "names": {
+      "web": [
+        "Numpad3"
+      ],
       "macos": [
         "Numpad3"
       ],
@@ -9034,6 +9164,9 @@
     "name": "Numpad4",
     "value": 8589935156,
     "names": {
+      "web": [
+        "Numpad4"
+      ],
       "macos": [
         "Numpad4"
       ],
@@ -9083,6 +9216,9 @@
     "name": "Numpad5",
     "value": 8589935157,
     "names": {
+      "web": [
+        "Numpad5"
+      ],
       "macos": [
         "Numpad5"
       ],
@@ -9130,6 +9266,9 @@
     "name": "Numpad6",
     "value": 8589935158,
     "names": {
+      "web": [
+        "Numpad6"
+      ],
       "macos": [
         "Numpad6"
       ],
@@ -9179,6 +9318,9 @@
     "name": "Numpad7",
     "value": 8589935159,
     "names": {
+      "web": [
+        "Numpad7"
+      ],
       "macos": [
         "Numpad7"
       ],
@@ -9228,6 +9370,9 @@
     "name": "Numpad8",
     "value": 8589935160,
     "names": {
+      "web": [
+        "Numpad8"
+      ],
       "macos": [
         "Numpad8"
       ],
@@ -9277,6 +9422,9 @@
     "name": "Numpad9",
     "value": 8589935161,
     "names": {
+      "web": [
+        "Numpad9"
+      ],
       "macos": [
         "Numpad9"
       ],
@@ -9326,6 +9474,9 @@
     "name": "NumpadEqual",
     "value": 8589935165,
     "names": {
+      "web": [
+        "NumpadEqual"
+      ],
       "macos": [
         "NumpadEqual"
       ],
@@ -9373,6 +9524,9 @@
     "name": "GameButton1",
     "value": 8589935361,
     "names": {
+      "web": [
+        "GameButton1"
+      ],
       "android": [
         "BUTTON_1"
       ]
@@ -9390,6 +9544,9 @@
     "name": "GameButton2",
     "value": 8589935362,
     "names": {
+      "web": [
+        "GameButton2"
+      ],
       "android": [
         "BUTTON_2"
       ]
@@ -9407,6 +9564,9 @@
     "name": "GameButton3",
     "value": 8589935363,
     "names": {
+      "web": [
+        "GameButton3"
+      ],
       "android": [
         "BUTTON_3"
       ]
@@ -9424,6 +9584,9 @@
     "name": "GameButton4",
     "value": 8589935364,
     "names": {
+      "web": [
+        "GameButton4"
+      ],
       "android": [
         "BUTTON_4"
       ]
@@ -9441,6 +9604,9 @@
     "name": "GameButton5",
     "value": 8589935365,
     "names": {
+      "web": [
+        "GameButton5"
+      ],
       "android": [
         "BUTTON_5"
       ]
@@ -9458,6 +9624,9 @@
     "name": "GameButton6",
     "value": 8589935366,
     "names": {
+      "web": [
+        "GameButton6"
+      ],
       "android": [
         "BUTTON_6"
       ]
@@ -9475,6 +9644,9 @@
     "name": "GameButton7",
     "value": 8589935367,
     "names": {
+      "web": [
+        "GameButton7"
+      ],
       "android": [
         "BUTTON_7"
       ]
@@ -9492,6 +9664,9 @@
     "name": "GameButton8",
     "value": 8589935368,
     "names": {
+      "web": [
+        "GameButton8"
+      ],
       "windows": [
         "GAMEPAD_A"
       ],
@@ -9515,6 +9690,9 @@
     "name": "GameButton9",
     "value": 8589935369,
     "names": {
+      "web": [
+        "GameButton9"
+      ],
       "windows": [
         "GAMEPAD_B"
       ],
@@ -9538,6 +9716,9 @@
     "name": "GameButton10",
     "value": 8589935370,
     "names": {
+      "web": [
+        "GameButton10"
+      ],
       "windows": [
         "GAMEPAD_X"
       ],
@@ -9561,6 +9742,9 @@
     "name": "GameButton11",
     "value": 8589935371,
     "names": {
+      "web": [
+        "GameButton11"
+      ],
       "windows": [
         "GAMEPAD_Y"
       ],
@@ -9584,6 +9768,9 @@
     "name": "GameButton12",
     "value": 8589935372,
     "names": {
+      "web": [
+        "GameButton12"
+      ],
       "windows": [
         "GAMEPAD_RIGHT_SHOULDER"
       ],
@@ -9607,6 +9794,9 @@
     "name": "GameButton13",
     "value": 8589935373,
     "names": {
+      "web": [
+        "GameButton13"
+      ],
       "windows": [
         "GAMEPAD_LEFT_SHOULDER"
       ],
@@ -9630,6 +9820,9 @@
     "name": "GameButton14",
     "value": 8589935374,
     "names": {
+      "web": [
+        "GameButton14"
+      ],
       "windows": [
         "GAMEPAD_LEFT_TRIGGER"
       ],
@@ -9653,6 +9846,9 @@
     "name": "GameButton15",
     "value": 8589935375,
     "names": {
+      "web": [
+        "GameButton15"
+      ],
       "windows": [
         "GAMEPAD_RIGHT_TRIGGER"
       ],
@@ -9676,6 +9872,9 @@
     "name": "GameButton16",
     "value": 8589935376,
     "names": {
+      "web": [
+        "GameButton16"
+      ],
       "windows": [
         "GAMEPAD_DPAD_UP"
       ],
@@ -9699,6 +9898,9 @@
     "name": "GameButtonA",
     "value": 8589935377,
     "names": {
+      "web": [
+        "GameButtonA"
+      ],
       "android": [
         "BUTTON_A"
       ]
@@ -9716,6 +9918,9 @@
     "name": "GameButtonB",
     "value": 8589935378,
     "names": {
+      "web": [
+        "GameButtonB"
+      ],
       "android": [
         "BUTTON_B"
       ]
@@ -9733,6 +9938,9 @@
     "name": "GameButtonC",
     "value": 8589935379,
     "names": {
+      "web": [
+        "GameButtonC"
+      ],
       "android": [
         "BUTTON_C"
       ]
@@ -9750,6 +9958,9 @@
     "name": "GameButtonLeft1",
     "value": 8589935380,
     "names": {
+      "web": [
+        "GameButtonLeft1"
+      ],
       "android": [
         "BUTTON_L1"
       ]
@@ -9767,6 +9978,9 @@
     "name": "GameButtonLeft2",
     "value": 8589935381,
     "names": {
+      "web": [
+        "GameButtonLeft2"
+      ],
       "android": [
         "BUTTON_L2"
       ]
@@ -9784,6 +9998,9 @@
     "name": "GameButtonMode",
     "value": 8589935382,
     "names": {
+      "web": [
+        "GameButtonMode"
+      ],
       "android": [
         "BUTTON_MODE"
       ]
@@ -9801,6 +10018,9 @@
     "name": "GameButtonRight1",
     "value": 8589935383,
     "names": {
+      "web": [
+        "GameButtonRight1"
+      ],
       "android": [
         "BUTTON_R1"
       ]
@@ -9818,6 +10038,9 @@
     "name": "GameButtonRight2",
     "value": 8589935384,
     "names": {
+      "web": [
+        "GameButtonRight2"
+      ],
       "android": [
         "BUTTON_R2"
       ]
@@ -9835,6 +10058,9 @@
     "name": "GameButtonSelect",
     "value": 8589935385,
     "names": {
+      "web": [
+        "GameButtonSelect"
+      ],
       "android": [
         "BUTTON_SELECT"
       ]
@@ -9852,6 +10078,9 @@
     "name": "GameButtonStart",
     "value": 8589935386,
     "names": {
+      "web": [
+        "GameButtonStart"
+      ],
       "android": [
         "BUTTON_START"
       ]
@@ -9869,6 +10098,9 @@
     "name": "GameButtonThumbLeft",
     "value": 8589935387,
     "names": {
+      "web": [
+        "GameButtonThumbLeft"
+      ],
       "android": [
         "BUTTON_THUMBL"
       ]
@@ -9886,6 +10118,9 @@
     "name": "GameButtonThumbRight",
     "value": 8589935388,
     "names": {
+      "web": [
+        "GameButtonThumbRight"
+      ],
       "android": [
         "BUTTON_THUMBR"
       ]
@@ -9903,6 +10138,9 @@
     "name": "GameButtonX",
     "value": 8589935389,
     "names": {
+      "web": [
+        "GameButtonX"
+      ],
       "android": [
         "BUTTON_X"
       ]
@@ -9920,6 +10158,9 @@
     "name": "GameButtonY",
     "value": 8589935390,
     "names": {
+      "web": [
+        "GameButtonY"
+      ],
       "android": [
         "BUTTON_Y"
       ]
@@ -9937,6 +10178,9 @@
     "name": "GameButtonZ",
     "value": 8589935391,
     "names": {
+      "web": [
+        "GameButtonZ"
+      ],
       "android": [
         "BUTTON_Z"
       ]
