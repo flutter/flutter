@@ -882,6 +882,7 @@ void main() {
     editable.moveSelectionRightByLine(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 13);
+    expect(currentSelection.affinity, TextAffinity.upstream);
     // RenderEditable relies on its parent that passes onSelectionChanged to set
     // the selection.
 
@@ -890,21 +891,25 @@ void main() {
     editable.moveSelectionRightByLine(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 13);
+    expect(currentSelection.affinity, TextAffinity.upstream);
 
     // Move back to the start of the line.
     editable.moveSelectionLeftByLine(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 0);
+    expect(currentSelection.affinity, TextAffinity.downstream);
 
     // Trying moveSelectionLeftByLine does nothing at the leftmost of the field.
     editable.moveSelectionLeftByLine(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 0);
+    expect(currentSelection.affinity, TextAffinity.downstream);
 
     // Move the selection to the empty line.
     editable.moveSelectionRightByLine(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 13);
+    expect(currentSelection.affinity, TextAffinity.upstream);
     editable.moveSelectionRight(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 14);
@@ -914,9 +919,11 @@ void main() {
     editable.moveSelectionLeftByLine(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 14);
+    expect(currentSelection.affinity, TextAffinity.downstream);
     editable.moveSelectionRightByLine(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 14);
+    expect(currentSelection.affinity, TextAffinity.downstream);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
   test('arrow keys and delete handle simple text correctly', () async {
