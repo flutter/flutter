@@ -115,7 +115,7 @@ enum ModifierKey {
 ///    reference to [RawKeyEventData] subclasses.
 ///  * [RawKeyboard], which uses these interfaces to expose key data.
 @immutable
-abstract class RawKeyEventData {
+abstract class RawKeyEventData with Diagnosticable {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const RawKeyEventData();

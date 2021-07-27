@@ -172,7 +172,7 @@ void main() {
       rotationTween.lerp(0.5).absoluteError(a.clone()..rotateZ(0.5)),
       moreOrLessEquals(0.0),
     );
-  }, skip: isWindows); // floating point math not quite deterministic on Windows?
+  });
 
   test('ConstantTween', () {
     final ConstantTween<double> tween = ConstantTween<double>(100.0);
