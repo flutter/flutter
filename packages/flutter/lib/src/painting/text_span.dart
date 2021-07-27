@@ -225,20 +225,25 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
   /// Setting the locale of this text span affects the way that assistive
   /// technologies, such as VoiceOver or TalkBack, pronounce the text.
   ///
-  /// If this span contains other text span children, they are also inherited
-  /// the locale from this span unless explicitly set to different locales.
+  /// If this span contains other text span children, they also inherit the
+  /// locale from this span unless explicitly set to different locales.
   final ui.Locale? locale;
 
   /// Whether the assistive technologies should spell out this text character
-  /// by character
+  /// by character.
   ///
   /// If the text is 'hello world', setting this to true causes the assistive
   /// technologies, such as VoiceOver or TalkBack, to pronounce
   /// 'h-e-l-l-o-space-w-o-r-l-d' instead of complete words. This is useful for
   /// texts, such as passwords or verification codes.
   ///
-  /// If this span contains other text span children, they are also inherited
-  /// the property from this span unless explicitly set.
+  /// If this span contains other text span children, they also inherit the
+  /// property from this span unless explicitly set.
+  ///
+  /// If the property is not set, this text span inherits the spell out setting
+  /// from its parent. If this text span does not have a parent or the parent
+  /// does not have a spell out setting, this text span does not spell out the
+  /// text by default.
   final bool? spellOut;
 
   @override
