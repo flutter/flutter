@@ -87,12 +87,7 @@ class TooltipThemeData with Diagnosticable {
   final Duration? showDuration;
 
   /// The [TooltipTriggerMode] that will show the tooltip.
-  ///
   /// This value is used if [Tooltip.triggerMode] is null.
-  ///
-  /// See Also:
-  ///
-  ///   * [Tooltip.triggerMode]
   final TooltipTriggerMode? triggerMode;
 
   /// Whether the tooltip should provide acoustic and/or haptic feedback.
@@ -104,7 +99,7 @@ class TooltipThemeData with Diagnosticable {
   ///
   /// See also:
   ///
-  ///   * [Feedback] for providing platform-specific feedback to certain actions.
+  ///   * [Feedback], for providing platform-specific feedback to certain actions.
   final bool? enableFeedback;
 
   /// Creates a copy of this object but with the given fields replaced with the
@@ -294,13 +289,15 @@ enum TooltipTriggerMode {
   ///
   /// See also:
   ///
-  ///   * [GestureDetector.onLongPress]
+  ///   * [GestureDetector.onLongPress], the event that is used for trigger.
+  ///   * [Feedback.forLongPress], the feedback method called when feedback is enabled.
   longPress,
 
   /// Tooltip will be shown after a single tap.
   ///
   /// See also:
   ///
-  ///   * [GestureDetector.onTap]
+  ///   * [GestureDetector.onTap], the event that is used for trigger.
+  ///   * [Feedback.onTap], the feedback method called when feedback is enabled.
   tap,
 }

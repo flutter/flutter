@@ -219,7 +219,7 @@ class Tooltip extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [Feedback] for providing platform-specific feedback to certain actions.
+  ///  * [Feedback], for providing platform-specific feedback to certain actions.
   final bool? enableFeedback;
 
   static final Set<_TooltipState> _openedToolTips = <_TooltipState>{};
