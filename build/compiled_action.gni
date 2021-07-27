@@ -87,6 +87,9 @@ template("compiled_action") {
     if (defined(invoker.testonly)) {
       testonly = invoker.testonly
     }
+    if (defined(invoker.pool)) {
+      pool = invoker.pool
+    }
 
     script = "//build/gn_run_binary.py"
 
@@ -141,6 +144,9 @@ template("compiled_action_foreach") {
     # Otherwise this is a standalone action, define visibility if requested.
     if (defined(invoker.visibility)) {
       visibility = invoker.visibility
+    }
+    if (defined(invoker.pool)) {
+      pool = invoker.pool
     }
 
     script = "//build/gn_run_binary.py"
