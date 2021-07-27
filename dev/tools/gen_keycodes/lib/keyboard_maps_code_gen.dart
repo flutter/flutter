@@ -63,8 +63,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   String get _glfwNumpadMap {
     final OutputLines<int> lines = OutputLines<int>('GLFW numpad map');
     for (final PhysicalKeyEntry entry in _numpadKeyData) {
-      final LogicalKeyEntry logicalKey = logicalData.entryByName(entry.name);
-      for (final int code in logicalKey.glfwValues) {
+      for (final int code in entry.glfwKeyCodes) {
         lines.add(code, '  $code: LogicalKeyboardKey.${entry.constantName},');
       }
     }
@@ -74,9 +73,9 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   /// This generates the map of GLFW key codes to logical keys.
   String get _glfwKeyCodeMap {
     final OutputLines<int> lines = OutputLines<int>('GLFW key code map');
-    for (final LogicalKeyEntry entry in logicalData.entries) {
-      for (final int value in entry.glfwValues) {
-        lines.add(value, '  $value: LogicalKeyboardKey.${entry.constantName},');
+    for (final PhysicalKeyEntry entry in keyData.entries) {
+      for (final int code in entry.glfwKeyCodes) {
+        lines.add(code, '  $code: LogicalKeyboardKey.${entry.constantName},');
       }
     }
     return lines.sortedJoin().trimRight();

@@ -562,6 +562,11 @@
       "windows": 30,
       "macos": 0,
       "ios": 4
+    },
+    "keyCodes": {
+      "glfw": [
+        65
+      ]
     }
   },
   "KeyB": {
@@ -579,6 +584,11 @@
       "windows": 48,
       "macos": 11,
       "ios": 5
+    },
+    "keyCodes": {
+      "glfw": [
+        66
+      ]
     }
   },
   "KeyC": {
@@ -596,6 +606,11 @@
       "windows": 46,
       "macos": 8,
       "ios": 6
+    },
+    "keyCodes": {
+      "glfw": [
+        67
+      ]
     }
   },
   "KeyD": {
@@ -613,6 +628,11 @@
       "windows": 32,
       "macos": 2,
       "ios": 7
+    },
+    "keyCodes": {
+      "glfw": [
+        68
+      ]
     }
   },
   "KeyE": {
@@ -630,6 +650,11 @@
       "windows": 18,
       "macos": 14,
       "ios": 8
+    },
+    "keyCodes": {
+      "glfw": [
+        69
+      ]
     }
   },
   "KeyF": {
@@ -647,6 +672,11 @@
       "windows": 33,
       "macos": 3,
       "ios": 9
+    },
+    "keyCodes": {
+      "glfw": [
+        70
+      ]
     }
   },
   "KeyG": {
@@ -664,6 +694,11 @@
       "windows": 34,
       "macos": 5,
       "ios": 10
+    },
+    "keyCodes": {
+      "glfw": [
+        71
+      ]
     }
   },
   "KeyH": {
@@ -681,6 +716,11 @@
       "windows": 35,
       "macos": 4,
       "ios": 11
+    },
+    "keyCodes": {
+      "glfw": [
+        72
+      ]
     }
   },
   "KeyI": {
@@ -698,6 +738,11 @@
       "windows": 23,
       "macos": 34,
       "ios": 12
+    },
+    "keyCodes": {
+      "glfw": [
+        73
+      ]
     }
   },
   "KeyJ": {
@@ -715,6 +760,11 @@
       "windows": 36,
       "macos": 38,
       "ios": 13
+    },
+    "keyCodes": {
+      "glfw": [
+        74
+      ]
     }
   },
   "KeyK": {
@@ -732,6 +782,11 @@
       "windows": 37,
       "macos": 40,
       "ios": 14
+    },
+    "keyCodes": {
+      "glfw": [
+        75
+      ]
     }
   },
   "KeyL": {
@@ -749,6 +804,11 @@
       "windows": 38,
       "macos": 37,
       "ios": 15
+    },
+    "keyCodes": {
+      "glfw": [
+        76
+      ]
     }
   },
   "KeyM": {
@@ -766,6 +826,11 @@
       "windows": 50,
       "macos": 46,
       "ios": 16
+    },
+    "keyCodes": {
+      "glfw": [
+        77
+      ]
     }
   },
   "KeyN": {
@@ -783,6 +848,11 @@
       "windows": 49,
       "macos": 45,
       "ios": 17
+    },
+    "keyCodes": {
+      "glfw": [
+        78
+      ]
     }
   },
   "KeyO": {
@@ -800,6 +870,11 @@
       "windows": 24,
       "macos": 31,
       "ios": 18
+    },
+    "keyCodes": {
+      "glfw": [
+        79
+      ]
     }
   },
   "KeyP": {
@@ -817,6 +892,11 @@
       "windows": 25,
       "macos": 35,
       "ios": 19
+    },
+    "keyCodes": {
+      "glfw": [
+        80
+      ]
     }
   },
   "KeyQ": {
@@ -834,6 +914,11 @@
       "windows": 16,
       "macos": 12,
       "ios": 20
+    },
+    "keyCodes": {
+      "glfw": [
+        81
+      ]
     }
   },
   "KeyR": {
@@ -851,6 +936,11 @@
       "windows": 19,
       "macos": 15,
       "ios": 21
+    },
+    "keyCodes": {
+      "glfw": [
+        82
+      ]
     }
   },
   "KeyS": {
@@ -868,6 +958,11 @@
       "windows": 31,
       "macos": 1,
       "ios": 22
+    },
+    "keyCodes": {
+      "glfw": [
+        83
+      ]
     }
   },
   "KeyT": {
@@ -885,6 +980,11 @@
       "windows": 20,
       "macos": 17,
       "ios": 23
+    },
+    "keyCodes": {
+      "glfw": [
+        84
+      ]
     }
   },
   "KeyU": {
@@ -902,6 +1002,11 @@
       "windows": 22,
       "macos": 32,
       "ios": 24
+    },
+    "keyCodes": {
+      "glfw": [
+        85
+      ]
     }
   },
   "KeyV": {
@@ -919,6 +1024,11 @@
       "windows": 47,
       "macos": 9,
       "ios": 25
+    },
+    "keyCodes": {
+      "glfw": [
+        86
+      ]
     }
   },
   "KeyW": {
@@ -936,6 +1046,11 @@
       "windows": 17,
       "macos": 13,
       "ios": 26
+    },
+    "keyCodes": {
+      "glfw": [
+        87
+      ]
     }
   },
   "KeyX": {
@@ -953,6 +1068,11 @@
       "windows": 45,
       "macos": 7,
       "ios": 27
+    },
+    "keyCodes": {
+      "glfw": [
+        88
+      ]
     }
   },
   "KeyY": {
@@ -970,6 +1090,11 @@
       "windows": 21,
       "macos": 16,
       "ios": 28
+    },
+    "keyCodes": {
+      "glfw": [
+        89
+      ]
     }
   },
   "KeyZ": {
@@ -987,6 +1112,11 @@
       "windows": 44,
       "macos": 6,
       "ios": 29
+    },
+    "keyCodes": {
+      "glfw": [
+        90
+      ]
     }
   },
   "Digit1": {
@@ -1004,6 +1134,11 @@
       "windows": 2,
       "macos": 18,
       "ios": 30
+    },
+    "keyCodes": {
+      "glfw": [
+        49
+      ]
     }
   },
   "Digit2": {
@@ -1021,6 +1156,11 @@
       "windows": 3,
       "macos": 19,
       "ios": 31
+    },
+    "keyCodes": {
+      "glfw": [
+        50
+      ]
     }
   },
   "Digit3": {
@@ -1038,6 +1178,11 @@
       "windows": 4,
       "macos": 20,
       "ios": 32
+    },
+    "keyCodes": {
+      "glfw": [
+        51
+      ]
     }
   },
   "Digit4": {
@@ -1055,6 +1200,11 @@
       "windows": 5,
       "macos": 21,
       "ios": 33
+    },
+    "keyCodes": {
+      "glfw": [
+        52
+      ]
     }
   },
   "Digit5": {
@@ -1072,6 +1222,11 @@
       "windows": 6,
       "macos": 23,
       "ios": 34
+    },
+    "keyCodes": {
+      "glfw": [
+        53
+      ]
     }
   },
   "Digit6": {
@@ -1089,6 +1244,11 @@
       "windows": 7,
       "macos": 22,
       "ios": 35
+    },
+    "keyCodes": {
+      "glfw": [
+        54
+      ]
     }
   },
   "Digit7": {
@@ -1106,6 +1266,11 @@
       "windows": 8,
       "macos": 26,
       "ios": 36
+    },
+    "keyCodes": {
+      "glfw": [
+        55
+      ]
     }
   },
   "Digit8": {
@@ -1123,6 +1288,11 @@
       "windows": 9,
       "macos": 28,
       "ios": 37
+    },
+    "keyCodes": {
+      "glfw": [
+        56
+      ]
     }
   },
   "Digit9": {
@@ -1140,6 +1310,11 @@
       "windows": 10,
       "macos": 25,
       "ios": 38
+    },
+    "keyCodes": {
+      "glfw": [
+        57
+      ]
     }
   },
   "Digit0": {
@@ -1157,6 +1332,11 @@
       "windows": 11,
       "macos": 29,
       "ios": 39
+    },
+    "keyCodes": {
+      "glfw": [
+        48
+      ]
     }
   },
   "Enter": {
@@ -1174,6 +1354,11 @@
       "windows": 28,
       "macos": 36,
       "ios": 40
+    },
+    "keyCodes": {
+      "glfw": [
+        257
+      ]
     }
   },
   "Escape": {
@@ -1191,6 +1376,11 @@
       "windows": 1,
       "macos": 53,
       "ios": 41
+    },
+    "keyCodes": {
+      "glfw": [
+        256
+      ]
     }
   },
   "Backspace": {
@@ -1208,6 +1398,11 @@
       "windows": 14,
       "macos": 51,
       "ios": 42
+    },
+    "keyCodes": {
+      "glfw": [
+        259
+      ]
     }
   },
   "Tab": {
@@ -1225,6 +1420,11 @@
       "windows": 15,
       "macos": 48,
       "ios": 43
+    },
+    "keyCodes": {
+      "glfw": [
+        258
+      ]
     }
   },
   "Space": {
@@ -1242,6 +1442,11 @@
       "windows": 57,
       "macos": 49,
       "ios": 44
+    },
+    "keyCodes": {
+      "glfw": [
+        32
+      ]
     }
   },
   "Minus": {
@@ -1259,6 +1464,11 @@
       "windows": 12,
       "macos": 27,
       "ios": 45
+    },
+    "keyCodes": {
+      "glfw": [
+        45
+      ]
     }
   },
   "Equal": {
@@ -1276,6 +1486,11 @@
       "windows": 13,
       "macos": 24,
       "ios": 46
+    },
+    "keyCodes": {
+      "glfw": [
+        61
+      ]
     }
   },
   "BracketLeft": {
@@ -1293,6 +1508,11 @@
       "windows": 26,
       "macos": 33,
       "ios": 47
+    },
+    "keyCodes": {
+      "glfw": [
+        91
+      ]
     }
   },
   "BracketRight": {
@@ -1310,6 +1530,11 @@
       "windows": 27,
       "macos": 30,
       "ios": 48
+    },
+    "keyCodes": {
+      "glfw": [
+        93
+      ]
     }
   },
   "Backslash": {
@@ -1328,6 +1553,11 @@
       "windows": 43,
       "macos": 42,
       "ios": 49
+    },
+    "keyCodes": {
+      "glfw": [
+        92
+      ]
     }
   },
   "Semicolon": {
@@ -1345,6 +1575,11 @@
       "windows": 39,
       "macos": 41,
       "ios": 51
+    },
+    "keyCodes": {
+      "glfw": [
+        59
+      ]
     }
   },
   "Quote": {
@@ -1362,6 +1597,11 @@
       "windows": 40,
       "macos": 39,
       "ios": 52
+    },
+    "keyCodes": {
+      "glfw": [
+        39
+      ]
     }
   },
   "Backquote": {
@@ -1379,6 +1619,11 @@
       "windows": 41,
       "macos": 50,
       "ios": 53
+    },
+    "keyCodes": {
+      "glfw": [
+        96
+      ]
     }
   },
   "Comma": {
@@ -1396,6 +1641,11 @@
       "windows": 51,
       "macos": 43,
       "ios": 54
+    },
+    "keyCodes": {
+      "glfw": [
+        44
+      ]
     }
   },
   "Period": {
@@ -1413,6 +1663,11 @@
       "windows": 52,
       "macos": 47,
       "ios": 55
+    },
+    "keyCodes": {
+      "glfw": [
+        46
+      ]
     }
   },
   "Slash": {
@@ -1430,6 +1685,11 @@
       "windows": 53,
       "macos": 44,
       "ios": 56
+    },
+    "keyCodes": {
+      "glfw": [
+        47
+      ]
     }
   },
   "CapsLock": {
@@ -1447,6 +1707,11 @@
       "windows": 58,
       "macos": 57,
       "ios": 57
+    },
+    "keyCodes": {
+      "glfw": [
+        280
+      ]
     }
   },
   "F1": {
@@ -1464,6 +1729,11 @@
       "windows": 59,
       "macos": 122,
       "ios": 58
+    },
+    "keyCodes": {
+      "glfw": [
+        290
+      ]
     }
   },
   "F2": {
@@ -1481,6 +1751,11 @@
       "windows": 60,
       "macos": 120,
       "ios": 59
+    },
+    "keyCodes": {
+      "glfw": [
+        291
+      ]
     }
   },
   "F3": {
@@ -1498,6 +1773,11 @@
       "windows": 61,
       "macos": 99,
       "ios": 60
+    },
+    "keyCodes": {
+      "glfw": [
+        292
+      ]
     }
   },
   "F4": {
@@ -1515,6 +1795,11 @@
       "windows": 62,
       "macos": 118,
       "ios": 61
+    },
+    "keyCodes": {
+      "glfw": [
+        293
+      ]
     }
   },
   "F5": {
@@ -1532,6 +1817,11 @@
       "windows": 63,
       "macos": 96,
       "ios": 62
+    },
+    "keyCodes": {
+      "glfw": [
+        294
+      ]
     }
   },
   "F6": {
@@ -1549,6 +1839,11 @@
       "windows": 64,
       "macos": 97,
       "ios": 63
+    },
+    "keyCodes": {
+      "glfw": [
+        295
+      ]
     }
   },
   "F7": {
@@ -1566,6 +1861,11 @@
       "windows": 65,
       "macos": 98,
       "ios": 64
+    },
+    "keyCodes": {
+      "glfw": [
+        296
+      ]
     }
   },
   "F8": {
@@ -1583,6 +1883,11 @@
       "windows": 66,
       "macos": 100,
       "ios": 65
+    },
+    "keyCodes": {
+      "glfw": [
+        297
+      ]
     }
   },
   "F9": {
@@ -1600,6 +1905,11 @@
       "windows": 67,
       "macos": 101,
       "ios": 66
+    },
+    "keyCodes": {
+      "glfw": [
+        298
+      ]
     }
   },
   "F10": {
@@ -1617,6 +1927,11 @@
       "windows": 68,
       "macos": 109,
       "ios": 67
+    },
+    "keyCodes": {
+      "glfw": [
+        299
+      ]
     }
   },
   "F11": {
@@ -1634,6 +1949,11 @@
       "windows": 87,
       "macos": 103,
       "ios": 68
+    },
+    "keyCodes": {
+      "glfw": [
+        300
+      ]
     }
   },
   "F12": {
@@ -1651,6 +1971,11 @@
       "windows": 88,
       "macos": 111,
       "ios": 69
+    },
+    "keyCodes": {
+      "glfw": [
+        301
+      ]
     }
   },
   "PrintScreen": {
@@ -1667,6 +1992,11 @@
       "xkb": 107,
       "windows": 57399,
       "ios": 70
+    },
+    "keyCodes": {
+      "glfw": [
+        283
+      ]
     }
   },
   "ScrollLock": {
@@ -1700,6 +2030,11 @@
       "xkb": 127,
       "windows": 69,
       "ios": 72
+    },
+    "keyCodes": {
+      "glfw": [
+        284
+      ]
     }
   },
   "Insert": {
@@ -1717,6 +2052,11 @@
       "windows": 57426,
       "macos": 114,
       "ios": 73
+    },
+    "keyCodes": {
+      "glfw": [
+        260
+      ]
     }
   },
   "Home": {
@@ -1734,6 +2074,11 @@
       "windows": 57415,
       "macos": 115,
       "ios": 74
+    },
+    "keyCodes": {
+      "glfw": [
+        268
+      ]
     }
   },
   "PageUp": {
@@ -1752,6 +2097,11 @@
       "windows": 57417,
       "macos": 116,
       "ios": 75
+    },
+    "keyCodes": {
+      "glfw": [
+        266
+      ]
     }
   },
   "Delete": {
@@ -1769,6 +2119,11 @@
       "windows": 57427,
       "macos": 117,
       "ios": 76
+    },
+    "keyCodes": {
+      "glfw": [
+        261
+      ]
     }
   },
   "End": {
@@ -1786,6 +2141,11 @@
       "windows": 57423,
       "macos": 119,
       "ios": 77
+    },
+    "keyCodes": {
+      "glfw": [
+        269
+      ]
     }
   },
   "PageDown": {
@@ -1804,6 +2164,11 @@
       "windows": 57425,
       "macos": 121,
       "ios": 78
+    },
+    "keyCodes": {
+      "glfw": [
+        267
+      ]
     }
   },
   "ArrowRight": {
@@ -1821,6 +2186,11 @@
       "windows": 57421,
       "macos": 124,
       "ios": 79
+    },
+    "keyCodes": {
+      "glfw": [
+        262
+      ]
     }
   },
   "ArrowLeft": {
@@ -1838,6 +2208,11 @@
       "windows": 57419,
       "macos": 123,
       "ios": 80
+    },
+    "keyCodes": {
+      "glfw": [
+        263
+      ]
     }
   },
   "ArrowDown": {
@@ -1855,6 +2230,11 @@
       "windows": 57424,
       "macos": 125,
       "ios": 81
+    },
+    "keyCodes": {
+      "glfw": [
+        264
+      ]
     }
   },
   "ArrowUp": {
@@ -1872,6 +2252,11 @@
       "windows": 57416,
       "macos": 126,
       "ios": 82
+    },
+    "keyCodes": {
+      "glfw": [
+        265
+      ]
     }
   },
   "NumLock": {
@@ -1889,6 +2274,11 @@
       "windows": 57413,
       "macos": 71,
       "ios": 83
+    },
+    "keyCodes": {
+      "glfw": [
+        282
+      ]
     }
   },
   "NumpadDivide": {
@@ -1906,6 +2296,11 @@
       "windows": 57397,
       "macos": 75,
       "ios": 84
+    },
+    "keyCodes": {
+      "glfw": [
+        331
+      ]
     }
   },
   "NumpadMultiply": {
@@ -1923,6 +2318,11 @@
       "windows": 55,
       "macos": 67,
       "ios": 85
+    },
+    "keyCodes": {
+      "glfw": [
+        332
+      ]
     }
   },
   "NumpadSubtract": {
@@ -1957,6 +2357,11 @@
       "windows": 78,
       "macos": 69,
       "ios": 87
+    },
+    "keyCodes": {
+      "glfw": [
+        334
+      ]
     }
   },
   "NumpadEnter": {
@@ -1974,6 +2379,11 @@
       "windows": 57372,
       "macos": 76,
       "ios": 88
+    },
+    "keyCodes": {
+      "glfw": [
+        335
+      ]
     }
   },
   "Numpad1": {
@@ -1991,6 +2401,11 @@
       "windows": 79,
       "macos": 83,
       "ios": 89
+    },
+    "keyCodes": {
+      "glfw": [
+        321
+      ]
     }
   },
   "Numpad2": {
@@ -2008,6 +2423,11 @@
       "windows": 80,
       "macos": 84,
       "ios": 90
+    },
+    "keyCodes": {
+      "glfw": [
+        322
+      ]
     }
   },
   "Numpad3": {
@@ -2025,6 +2445,11 @@
       "windows": 81,
       "macos": 85,
       "ios": 91
+    },
+    "keyCodes": {
+      "glfw": [
+        323
+      ]
     }
   },
   "Numpad4": {
@@ -2042,6 +2467,11 @@
       "windows": 75,
       "macos": 86,
       "ios": 92
+    },
+    "keyCodes": {
+      "glfw": [
+        324
+      ]
     }
   },
   "Numpad5": {
@@ -2059,6 +2489,11 @@
       "windows": 76,
       "macos": 87,
       "ios": 93
+    },
+    "keyCodes": {
+      "glfw": [
+        325
+      ]
     }
   },
   "Numpad6": {
@@ -2076,6 +2511,11 @@
       "windows": 77,
       "macos": 88,
       "ios": 94
+    },
+    "keyCodes": {
+      "glfw": [
+        326
+      ]
     }
   },
   "Numpad7": {
@@ -2093,6 +2533,11 @@
       "windows": 71,
       "macos": 89,
       "ios": 95
+    },
+    "keyCodes": {
+      "glfw": [
+        327
+      ]
     }
   },
   "Numpad8": {
@@ -2110,6 +2555,11 @@
       "windows": 72,
       "macos": 91,
       "ios": 96
+    },
+    "keyCodes": {
+      "glfw": [
+        328
+      ]
     }
   },
   "Numpad9": {
@@ -2127,6 +2577,11 @@
       "windows": 73,
       "macos": 92,
       "ios": 97
+    },
+    "keyCodes": {
+      "glfw": [
+        329
+      ]
     }
   },
   "Numpad0": {
@@ -2144,6 +2599,11 @@
       "windows": 82,
       "macos": 82,
       "ios": 98
+    },
+    "keyCodes": {
+      "glfw": [
+        320
+      ]
     }
   },
   "NumpadDecimal": {
@@ -2161,6 +2621,11 @@
       "windows": 83,
       "macos": 65,
       "ios": 99
+    },
+    "keyCodes": {
+      "glfw": [
+        330
+      ]
     }
   },
   "IntlBackslash": {
@@ -2193,6 +2658,11 @@
       "windows": 57437,
       "macos": 110,
       "ios": 101
+    },
+    "keyCodes": {
+      "glfw": [
+        348
+      ]
     }
   },
   "Power": {
@@ -2227,6 +2697,11 @@
       "windows": 89,
       "macos": 81,
       "ios": 103
+    },
+    "keyCodes": {
+      "glfw": [
+        336
+      ]
     }
   },
   "F13": {
@@ -2244,6 +2719,11 @@
       "windows": 100,
       "macos": 105,
       "ios": 104
+    },
+    "keyCodes": {
+      "glfw": [
+        302
+      ]
     }
   },
   "F14": {
@@ -2261,6 +2741,11 @@
       "windows": 101,
       "macos": 107,
       "ios": 105
+    },
+    "keyCodes": {
+      "glfw": [
+        303
+      ]
     }
   },
   "F15": {
@@ -2278,6 +2763,11 @@
       "windows": 102,
       "macos": 113,
       "ios": 106
+    },
+    "keyCodes": {
+      "glfw": [
+        304
+      ]
     }
   },
   "F16": {
@@ -2295,6 +2785,11 @@
       "windows": 103,
       "macos": 106,
       "ios": 107
+    },
+    "keyCodes": {
+      "glfw": [
+        305
+      ]
     }
   },
   "F17": {
@@ -2312,6 +2807,11 @@
       "windows": 104,
       "macos": 64,
       "ios": 108
+    },
+    "keyCodes": {
+      "glfw": [
+        306
+      ]
     }
   },
   "F18": {
@@ -2329,6 +2829,11 @@
       "windows": 105,
       "macos": 79,
       "ios": 109
+    },
+    "keyCodes": {
+      "glfw": [
+        307
+      ]
     }
   },
   "F19": {
@@ -2346,6 +2851,11 @@
       "windows": 106,
       "macos": 80,
       "ios": 110
+    },
+    "keyCodes": {
+      "glfw": [
+        308
+      ]
     }
   },
   "F20": {
@@ -2363,6 +2873,11 @@
       "windows": 107,
       "macos": 90,
       "ios": 111
+    },
+    "keyCodes": {
+      "glfw": [
+        309
+      ]
     }
   },
   "F21": {
@@ -2379,6 +2894,11 @@
       "xkb": 199,
       "windows": 108,
       "ios": 112
+    },
+    "keyCodes": {
+      "glfw": [
+        310
+      ]
     }
   },
   "F22": {
@@ -2395,6 +2915,11 @@
       "xkb": 200,
       "windows": 109,
       "ios": 113
+    },
+    "keyCodes": {
+      "glfw": [
+        311
+      ]
     }
   },
   "F23": {
@@ -2411,6 +2936,11 @@
       "xkb": 201,
       "windows": 110,
       "ios": 114
+    },
+    "keyCodes": {
+      "glfw": [
+        312
+      ]
     }
   },
   "F24": {
@@ -2948,6 +3478,11 @@
       "windows": 29,
       "macos": 59,
       "ios": 224
+    },
+    "keyCodes": {
+      "glfw": [
+        341
+      ]
     }
   },
   "ShiftLeft": {
@@ -2965,6 +3500,11 @@
       "windows": 42,
       "macos": 56,
       "ios": 225
+    },
+    "keyCodes": {
+      "glfw": [
+        340
+      ]
     }
   },
   "AltLeft": {
@@ -2982,6 +3522,11 @@
       "windows": 56,
       "macos": 58,
       "ios": 226
+    },
+    "keyCodes": {
+      "glfw": [
+        342
+      ]
     }
   },
   "MetaLeft": {
@@ -2999,6 +3544,11 @@
       "windows": 57435,
       "macos": 55,
       "ios": 227
+    },
+    "keyCodes": {
+      "glfw": [
+        343
+      ]
     }
   },
   "ControlRight": {
@@ -3016,6 +3566,11 @@
       "windows": 57373,
       "macos": 62,
       "ios": 228
+    },
+    "keyCodes": {
+      "glfw": [
+        345
+      ]
     }
   },
   "ShiftRight": {
@@ -3033,6 +3588,11 @@
       "windows": 54,
       "macos": 60,
       "ios": 229
+    },
+    "keyCodes": {
+      "glfw": [
+        344
+      ]
     }
   },
   "AltRight": {
@@ -3050,6 +3610,11 @@
       "windows": 57400,
       "macos": 61,
       "ios": 230
+    },
+    "keyCodes": {
+      "glfw": [
+        346
+      ]
     }
   },
   "MetaRight": {
@@ -3067,6 +3632,11 @@
       "windows": 57436,
       "macos": 54,
       "ios": 231
+    },
+    "keyCodes": {
+      "glfw": [
+        347
+      ]
     }
   },
   "Info": {
