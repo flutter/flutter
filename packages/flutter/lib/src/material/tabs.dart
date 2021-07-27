@@ -724,6 +724,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.unselectedLabelStyle,
     this.dragStartBehavior = DragStartBehavior.start,
     this.overlayColor,
+    this.highlightColor,
     this.mouseCursor,
     this.enableFeedback,
     this.onTap,
@@ -880,6 +881,11 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// for [InkResponse.focusColor], [InkResponse.hoverColor], [InkResponse.splashColor]
   /// will be used instead.
   final MaterialStateProperty<Color?>? overlayColor;
+
+  /// The highlight color of the ink response when pressed. If this property is
+  /// null then the highlight color of the theme, [ThemeData.highlightColor],
+  /// will be used.
+  final Color? highlightColor;
 
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
@@ -1273,6 +1279,7 @@ class _TabBarState extends State<TabBar> {
         onTap: () { _handleTap(index); },
         enableFeedback: widget.enableFeedback ?? true,
         overlayColor: widget.overlayColor,
+        highlightColor: widget.highlightColor,
         child: Padding(
           padding: EdgeInsets.only(bottom: widget.indicatorWeight),
           child: Stack(
