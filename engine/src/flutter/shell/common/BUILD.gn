@@ -259,6 +259,7 @@ if (enable_unittests) {
       "rasterizer_unittests.cc",
       "shell_unittests.cc",
       "skp_shader_warmup_unittests.cc",
+      "switches_unittests.cc",
     ]
 
     deps = [

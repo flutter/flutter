@@ -111,7 +111,7 @@ struct Settings {
   bool start_paused = false;
   bool trace_skia = false;
   std::vector<std::string> trace_allowlist;
-  std::vector<std::string> trace_skia_allowlist;
+  std::optional<std::vector<std::string>> trace_skia_allowlist;
   bool trace_startup = false;
   bool trace_systrace = false;
   bool dump_skp_on_shader_compilation = false;

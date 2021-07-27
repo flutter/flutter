@@ -731,6 +731,7 @@ FILE: ../../../flutter/shell/common/skp_shader_warmup_unittests.cc
 FILE: ../../../flutter/shell/common/snapshot_surface_producer.h
 FILE: ../../../flutter/shell/common/switches.cc
 FILE: ../../../flutter/shell/common/switches.h
+FILE: ../../../flutter/shell/common/switches_unittests.cc
 FILE: ../../../flutter/shell/common/thread_host.cc
 FILE: ../../../flutter/shell/common/thread_host.h
 FILE: ../../../flutter/shell/common/vsync_waiter.cc
