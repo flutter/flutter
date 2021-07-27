@@ -290,12 +290,15 @@ FILE: ../../../flutter/fml/thread_local.cc
 FILE: ../../../flutter/fml/thread_local.h
 FILE: ../../../flutter/fml/thread_local_unittests.cc
 FILE: ../../../flutter/fml/thread_unittests.cc
+FILE: ../../../flutter/fml/time/chrono_timestamp_provider.cc
+FILE: ../../../flutter/fml/time/chrono_timestamp_provider.h
 FILE: ../../../flutter/fml/time/time_delta.h
 FILE: ../../../flutter/fml/time/time_delta_unittest.cc
 FILE: ../../../flutter/fml/time/time_point.cc
 FILE: ../../../flutter/fml/time/time_point.h
 FILE: ../../../flutter/fml/time/time_point_unittest.cc
 FILE: ../../../flutter/fml/time/time_unittest.cc
+FILE: ../../../flutter/fml/time/timestamp_provider.h
 FILE: ../../../flutter/fml/trace_event.cc
 FILE: ../../../flutter/fml/trace_event.h
 FILE: ../../../flutter/fml/unique_fd.cc
