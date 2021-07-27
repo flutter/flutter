@@ -49,6 +49,8 @@ class LogicalKeyData {
     String androidNameMap,
     String macosLogicalToPhysical,
     String iosLogicalToPhysical,
+    String glfwHeaderFile,
+    String glfwNameMap,
     PhysicalKeyData physicalKeyData,
   ) {
     final Map<String, LogicalKeyEntry> data = <String, LogicalKeyEntry>{};
@@ -59,6 +61,7 @@ class LogicalKeyData {
     _readMacOsKeyCodes(data, physicalKeyData, parseMapOfListOfString(macosLogicalToPhysical));
     _readIosKeyCodes(data, physicalKeyData, parseMapOfListOfString(iosLogicalToPhysical));
     _readFuchsiaKeyCodes(data, physicalKeyData);
+    _readGlfwKeyCodes(data, glfwHeaderFile, parseMapOfListOfString(glfwNameMap));
     // Sort entries by value
     final List<MapEntry<String, LogicalKeyEntry>> sortedEntries = data.entries.toList()..sort(
       (MapEntry<String, LogicalKeyEntry> a, MapEntry<String, LogicalKeyEntry> b) =>
@@ -335,6 +338,54 @@ class LogicalKeyData {
     }
   }
 
+  /// Parses entries from GLFW's keycodes.h key code data file.
+  ///
+  /// Lines in this file look like this (without the ///):
+  ///  /** Space key. */
+  ///  #define GLFW_KEY_SPACE              32,
+  ///  #define GLFW_KEY_LAST               GLFW_KEY_MENU
+  static void _readGlfwKeyCodes(Map<String, LogicalKeyEntry> data, String headerFile, Map<String, List<String>> nameMap) {
+    final Map<String, String> nameToFlutterName  = reverseMapOfListOfString(nameMap,
+        (String flutterName, String glfwName) { print('Duplicate GLFW logical name $glfwName'); });
+
+    // Only get the KEY definitions, ignore the rest (mouse, joystick, etc).
+    final RegExp definedCodes = RegExp(
+      r'define\s+'
+      r'GLFW_KEY_(?<name>[A-Z0-9_]+)\s+'
+      r'(?<value>[A-Z0-9_]+),?',
+    );
+    final Map<String, dynamic> replaced = <String, dynamic>{};
+    for (final RegExpMatch match in definedCodes.allMatches(headerFile)) {
+      final String name = match.namedGroup('name')!;
+      final String value = match.namedGroup('value')!;
+      replaced[name] = int.tryParse(value) ?? value.replaceAll('GLFW_KEY_', '');
+    }
+    final Map<String, int> glfwNameToKeyCode = <String, int>{};
+    replaced.forEach((String key, dynamic value) {
+      // Some definition values point to other definitions (e.g #define GLFW_KEY_LAST GLFW_KEY_MENU).
+      if (value is String) {
+        glfwNameToKeyCode[key] = replaced[value] as int;
+      } else {
+        glfwNameToKeyCode[key] = value as int;
+      }
+    });
+
+    glfwNameToKeyCode.forEach((String glfwName, int value) {
+      final String? name = nameToFlutterName[glfwName];
+      final LogicalKeyEntry? entry = data[nameToFlutterName[glfwName]];
+      if (entry == null) {
+        print('Invalid logical entry by name $name (from GLFW $glfwName)');
+        return;
+      }
+      addNameValue(
+        entry.glfwNames,
+        entry.glfwValues,
+        glfwName,
+        value,
+      );
+    });
+  }
+
   // Map Web key to the pair of key names
   static late final Map<String, _ModifierPair> _chromeModifiers = () {
     final String rawJson = File(path.join(dataRoot, 'chromium_modifiers.json',)).readAsStringSync();
@@ -405,7 +456,9 @@ class LogicalKeyEntry {
         windowsValues = <int>[],
         androidNames = <String>[],
         androidValues = <int>[],
-        fuchsiaValues = <int>[];
+        fuchsiaValues = <int>[],
+        glfwNames = <String>[],
+        glfwValues = <int>[];
 
   LogicalKeyEntry.fromName({
     required int value,
@@ -433,6 +486,8 @@ class LogicalKeyEntry {
       androidNames = _getGrandchildList<String>(map, 'names', 'android'),
       androidValues = _getGrandchildList<int>(map, 'values', 'android'),
       fuchsiaValues = _getGrandchildList<int>(map, 'values', 'fuchsia'),
+      glfwNames = _getGrandchildList<String>(map, 'names', 'glfw'),
+      glfwValues = _getGrandchildList<int>(map, 'values', 'glfw'),
       keyLabel = map['keyLabel'] as String?;
 
   final int value;
@@ -494,6 +549,15 @@ class LogicalKeyEntry {
 
   final List<int> fuchsiaValues;
 
+  /// The list of names that GLFW gives to this key (symbol names minus the
+  /// prefix).
+  final List<String> glfwNames;
+
+  /// The list of GLFW key codes matching this key, created by looking up the
+  /// GLFW name in the Chromium data, and substituting the GLFW key code
+  /// value.
+  final List<int> glfwValues;
+
   /// A string indicating the letter on the keycap of a letter key.
   ///
   /// This is only used to generate the key label mapping in keyboard_map.dart.
@@ -514,6 +578,7 @@ class LogicalKeyEntry {
         'gtk': gtkNames,
         'windows': windowsNames,
         'android': androidNames,
+        'glfw': glfwNames,
       },
       'values': <String, List<int>>{
         'macos': macOSKeyCodeValues,
@@ -522,6 +587,7 @@ class LogicalKeyEntry {
         'windows': windowsValues,
         'android': androidValues,
         'fuchsia': fuchsiaValues,
+        'glfw': glfwValues,
       },
     });
   }
