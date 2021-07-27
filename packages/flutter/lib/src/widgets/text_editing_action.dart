@@ -24,11 +24,17 @@ import 'framework.dart';
 ///   * [EditableTextState], which implements this and is the most typical
 ///     target of a TextEditingAction.
 abstract class TextEditingActionTarget {
-  // TODO(justinmc): Document everything in this class.
-  bool get readOnly;
-
+  /// Whether the characters in the field are obscured from the user.
+  ///
+  /// When true, the entire contents of the field are treated as one word.
   bool get obscureText;
 
+  /// Whether the field currently in a read-only state.
+  ///
+  /// When true, [value]'s text may not be modified, but its selection can be.
+  bool get readOnly;
+
+  /// Whether the [value]'s selection can be modified.
   bool get selectionEnabled;
 
   // TODO(justinmc): Could this be made private?
@@ -39,6 +45,7 @@ abstract class TextEditingActionTarget {
   /// * [EditableTextState.renderEditable], which overrides this.
   TextMetrics get textMetrics;
 
+  /// The [TextEditingValue] expressed in this field.
   TextEditingValue get value;
 
   // Holds the last cursor location the user selected in the case the user tries
@@ -55,10 +62,20 @@ abstract class TextEditingActionTarget {
   // down in a multiline text field when selecting using the keyboard.
   bool _wasSelectingVerticallyWithKeyboard = false;
 
-  void setSelection(TextSelection nextState, SelectionChangedCause cause);
+  /// {@template flutter.rendering.TextEditingAction.setSelection}
+  /// Called to update the [TextSelection] in the current [TextEditingValue].
+  /// {@endtemplate}
+  void setSelection(TextSelection nextSelection, SelectionChangedCause cause) {
+    setTextEditingValue(
+      value.copyWith(selection: nextSelection),
+      cause,
+    );
+  }
 
-  void setTextEditingValue(
-      TextEditingValue newValue, SelectionChangedCause cause);
+  /// {@template flutter.rendering.TextEditingAction.setSelection}
+  /// Called to update the current [TextEditingValue].
+  /// {@endtemplate}
+  void setTextEditingValue(TextEditingValue newValue, SelectionChangedCause cause);
 
   // Extend the current selection to the end of the field.
   //

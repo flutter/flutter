@@ -1612,7 +1612,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   bool get selectionEnabled => widget.selectionEnabled;
 
-  // TODO(justinmc): Maybe this logic can move into TextEditingActionTarget?
+  /// {@macro flutter.rendering.TextEditingActionTarget.setSelection}
   @override
   void setSelection(TextSelection nextSelection, SelectionChangedCause cause) {
     if (nextSelection.isValid) {
@@ -1631,13 +1631,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       );
     }
     _handleSelectionChange(nextSelection, cause);
-    setTextEditingValue(
-      textEditingValue.copyWith(selection: nextSelection),
-      cause,
-    );
+    return super.setSelection(nextSelection, cause);
   }
 
-  // TODO(justinmc): Document.
+  /// {@macro flutter.rendering.TextEditingActionTarget.setTextEditingValue}
+  @override
   void setTextEditingValue(TextEditingValue newValue, SelectionChangedCause cause) {
     textEditingValue = newValue;
     userUpdateTextEditingValue(newValue, cause);
