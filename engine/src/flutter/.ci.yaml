@@ -16,7 +16,13 @@ platform_properties:
     properties:
       caches: >-
         [
-          {"name":"builder_linux_engine","path":"builder"}
+          {"name":"builder_linux_engine","path":"builder"},
+          {"name":"openjdk","path":"java"}
+        ]
+      dependencies: >-
+        [
+          # CIPD flutter_internal/java/openjdk/$platform
+          {"dependency": "openjdk", "version": "1.8.0u202-b08"}
         ]
       os: Linux
   mac:
@@ -25,7 +31,13 @@ platform_properties:
         [
           {"name":"flutter_cocoapods","path":"cocoapods"},
           {"name":"old_osx_sdk","path":"osx_sdk"},
-          {"name":"builder_mac_engine","path":"builder"}
+          {"name":"builder_mac_engine","path":"builder"},
+          {"name":"openjdk","path":"java"}
+        ]
+      dependencies: >-
+        [
+          # CIPD flutter_internal/java/openjdk/$platform
+          {"dependency": "openjdk", "version": "1.8.0u202-b08"}
         ]
       os: Mac-10.15
       xcode: 12a7209 # xcode 12
@@ -33,7 +45,13 @@ platform_properties:
     properties:
       caches: >-
         [
-          {"name":"builder_win_engine","path":"builder"}
+          {"name":"builder_win_engine","path":"builder"},
+          {"name":"openjdk","path":"java"}
+        ]
+      dependencies: >-
+        [
+          # CIPD flutter_internal/java/openjdk/$platform
+          {"dependency": "openjdk", "version": "1.8.0u202-b08"}
         ]
       os: Windows-10
 
