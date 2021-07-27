@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show hashValues;
 
 import 'package:flutter/foundation.dart';
 
@@ -22,11 +23,15 @@ class RawKeyEventDataWeb extends RawKeyEventData {
   const RawKeyEventDataWeb({
     required this.code,
     required this.key,
+    this.location = 0,
     this.metaState = modifierNone,
   })  : assert(code != null),
         assert(metaState != null);
 
   /// The `KeyboardEvent.code` corresponding to this event.
+  ///
+  /// The [code] represents a physical key on the keyboard, a value that isn't
+  /// altered by keyboard layout or the state of the modifier keys.
   ///
   /// See <https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/code>
   /// for more information.
@@ -34,9 +39,22 @@ class RawKeyEventDataWeb extends RawKeyEventData {
 
   /// The `KeyboardEvent.key` corresponding to this event.
   ///
+  /// The [key] represents the key pressed by the user, taking into
+  /// consideration the state of modifier keys such as Shift as well as the
+  /// keyboard locale and layout.
+  ///
   /// See <https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key>
   /// for more information.
   final String key;
+
+  /// The `KeyboardEvent.location` corresponding to this event.
+  ///
+  /// The [location] represents the location of the key on the keyboard or other
+  /// input device, such as left or right modifier keys, or Numpad keys.
+  ///
+  /// See <https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/location>
+  /// for more information.
+  final int location;
 
   /// The modifiers that were present when the key event occurred.
   ///
@@ -65,13 +83,11 @@ class RawKeyEventDataWeb extends RawKeyEventData {
 
   @override
   LogicalKeyboardKey get logicalKey {
-    // Look to see if the keyCode is a printable number pad key, so that a
-    // difference between regular keys (e.g. ".") and the number pad version
-    // (e.g. the "." on the number pad) can be determined.
-    final LogicalKeyboardKey? numPadKey = kWebNumPadMap[code];
-    if (numPadKey != null) {
-      return numPadKey;
-    }
+    // Look to see if the keyCode is a key based on location. Typically they are
+    // numpad keys (versus main area keys) and left/right modifiers.
+    final LogicalKeyboardKey? maybeLocationKey = kWebLocationMap[key]?[location];
+    if (maybeLocationKey != null)
+      return maybeLocationKey;
 
     // Look to see if the [code] is one we know about and have a mapping for.
     final LogicalKeyboardKey? newKey = kWebToLogicalKey[code];
@@ -120,6 +136,36 @@ class RawKeyEventDataWeb extends RawKeyEventData {
     // for more information.
     return KeyboardSide.any;
   }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+        properties.add(DiagnosticsProperty<String>('code', code));
+        properties.add(DiagnosticsProperty<String>('key', key));
+        properties.add(DiagnosticsProperty<int>('location', location));
+        properties.add(DiagnosticsProperty<int>('metaState', metaState));
+  }
+
+  @override
+  bool operator==(Object other) {
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is RawKeyEventDataWeb
+        && other.code == code
+        && other.key == key
+        && other.location == location
+        && other.metaState == metaState;
+  }
+
+  @override
+  int get hashCode => hashValues(
+    code,
+    key,
+    location,
+    metaState,
+  );
 
   // Modifier key masks.
 
@@ -185,10 +231,4 @@ class RawKeyEventDataWeb extends RawKeyEventData {
   /// it's much easier to use [isModifierPressed] if you just want to know if
   /// a modifier is pressed.
   static const int modifierScrollLock = 0x40;
-
-  @override
-  String toString() {
-    return '${objectRuntimeType(this, 'RawKeyEventDataWeb')}(keyLabel: $keyLabel, code: $code, '
-        'metaState: $metaState, modifiers down: $modifiersPressed)';
-  }
 }

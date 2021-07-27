@@ -74,7 +74,7 @@ def flutter_additional_ios_build_settings(target)
 
     # Override legacy Xcode 11 style VALID_ARCHS[sdk=iphonesimulator*]=x86_64 and prefer Xcode 12 EXCLUDED_ARCHS.
     build_configuration.build_settings['VALID_ARCHS[sdk=iphonesimulator*]'] = '$(ARCHS_STANDARD)'
-    build_configuration.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'i386'
+    build_configuration.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = '$(inherited) i386'
   end
 end
 
