@@ -149,6 +149,58 @@ void verifyPaintedShadow(Finder customPaint, int elevation) {
 }
 
 void main() {
+  // Regression test for https://github.com/flutter/flutter/issues/87102
+  testWidgets('label position test', (WidgetTester tester) async {
+    int? value;
+
+    await tester.pumpWidget(
+      TestApp(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: DropdownButtonFormField<int?>(
+            decoration: const InputDecoration(
+              labelText: 'labelText',
+            ),
+            value: value,
+            hint: const Text('Hint'),
+            onChanged: (int? newValue) {
+              value = newValue;
+            },
+            items: const <DropdownMenuItem<int?>>[
+              DropdownMenuItem<int?>(
+                value: 1,
+                child: Text('One'),
+              ),
+              DropdownMenuItem<int?>(
+                value: 2,
+                child: Text('Two'),
+              ),
+              DropdownMenuItem<int?>(
+                value: 3,
+                child: Text('Three'),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(value, null);
+    final Offset hintEmptyLabel = tester.getTopLeft(find.text('labelText'));
+
+    // Select a item.
+    await tester.tap(find.text('Hint'), warnIfMissed: false);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('One').last);
+    await tester.pumpAndSettle();
+
+    expect(value, 1);
+    final Offset oneValueLabel = tester.getTopLeft(find.text('labelText'));
+
+    // The position of the label does not change.
+    expect(hintEmptyLabel, oneValueLabel);
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/82910
   testWidgets('null value test', (WidgetTester tester) async {
     int? value = 1;
