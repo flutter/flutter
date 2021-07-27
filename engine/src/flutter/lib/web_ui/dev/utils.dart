@@ -33,6 +33,9 @@ class FilePath {
   }
 
   @override
+  int get hashCode => _absolutePath.hashCode;
+
+  @override
   String toString() => _absolutePath;
 }
 

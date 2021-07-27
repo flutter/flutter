@@ -546,7 +546,7 @@ class RRect {
         assert(brRadiusY != null), // ignore: unnecessary_null_comparison
         assert(blRadiusX != null), // ignore: unnecessary_null_comparison
         assert(blRadiusY != null), // ignore: unnecessary_null_comparison
-        this.webOnlyUniformRadii = uniformRadii;
+        webOnlyUniformRadii = uniformRadii;
 
   final double left;
   final double top;

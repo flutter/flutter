@@ -106,7 +106,7 @@ double _rectDistance(Rect a, Rect b) {
 }
 
 double _sizeDistance(Size a, Size b) {
-  final Offset delta = (b - a) as Offset;
+  final Offset delta = (b - a) as Offset; // ignore: unnecessary_parenthesis
   return delta.distance;
 }
 

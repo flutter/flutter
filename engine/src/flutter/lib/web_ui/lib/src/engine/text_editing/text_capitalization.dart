@@ -39,7 +39,7 @@ class TextCapitalizationConfig {
       : textCapitalization = TextCapitalization.none;
 
   const TextCapitalizationConfig.fromInputConfiguration(String inputConfiguration)
-      : this.textCapitalization =
+      : textCapitalization =
             inputConfiguration == 'TextCapitalization.words'
                 ? TextCapitalization.words
                 : inputConfiguration == 'TextCapitalization.characters'

@@ -978,8 +978,8 @@ class CkDrawImageCommand extends CkPaintCommand {
   final ui.Offset offset;
   final CkPaint paint;
 
-  CkDrawImageCommand(CkImage image, this.offset, this.paint)
-      : this.image = image.clone();
+  CkDrawImageCommand(CkImage ckImage, this.offset, this.paint)
+      : image = ckImage.clone();
 
   @override
   void apply(SkCanvas canvas) {
@@ -1017,8 +1017,8 @@ class CkDrawImageRectCommand extends CkPaintCommand {
   final ui.Rect dst;
   final CkPaint paint;
 
-  CkDrawImageRectCommand(CkImage image, this.src, this.dst, this.paint)
-      : this.image = image.clone();
+  CkDrawImageRectCommand(CkImage ckImage, this.src, this.dst, this.paint)
+      : image = ckImage.clone();
 
   @override
   void apply(SkCanvas canvas) {
@@ -1051,8 +1051,8 @@ class CkDrawImageRectCommand extends CkPaintCommand {
 }
 
 class CkDrawImageNineCommand extends CkPaintCommand {
-  CkDrawImageNineCommand(CkImage image, this.center, this.dst, this.paint)
-      : this.image = image.clone();
+  CkDrawImageNineCommand(CkImage ckImage, this.center, this.dst, this.paint)
+      : image = ckImage.clone();
 
   final CkImage image;
   final ui.Rect center;

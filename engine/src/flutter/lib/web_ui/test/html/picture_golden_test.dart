@@ -27,7 +27,7 @@ void testMain() {
           ..color = ui.Color.fromARGB(255, 255, 100, 100),
       );
       final ui.Picture picture = recorder.endRecording();
-      final HtmlImage image = (await picture.toImage(200, 100)) as HtmlImage;
+      final HtmlImage image = await picture.toImage(200, 100) as HtmlImage;
       expect(image, isNotNull);
       html.document.body!
         ..style.margin = '0'

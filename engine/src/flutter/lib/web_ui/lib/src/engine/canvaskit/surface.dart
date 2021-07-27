@@ -235,7 +235,7 @@ class Surface {
   }
 
   void _contextLostListener(html.Event event) {
-    assert(event.target == this.htmlCanvas,
+    assert(event.target == htmlCanvas,
         'Received a context lost event for a disposed canvas');
     final SurfaceFactory factory = SurfaceFactory.instance;
     _contextLost = true;

@@ -258,7 +258,7 @@ class EngineAutofillForm {
   }
 
   void storeForm() {
-    formsOnTheDom[formIdentifier] = this.formElement;
+    formsOnTheDom[formIdentifier] = formElement;
     _hideAutofillElements(formElement, isOffScreen: true);
   }
 

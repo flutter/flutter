@@ -19,8 +19,8 @@ import 'webgl_context.dart';
 class EngineImageShader implements ui.ImageShader {
   EngineImageShader(ui.Image image, this.tileModeX, this.tileModeY,
       Float64List matrix4, this.filterQuality)
-      : this.image = image as HtmlImage,
-        this.matrix4 = Float32List.fromList(matrix4);
+      : this.image = image as HtmlImage, // ignore: unnecessary_this
+        this.matrix4 = Float32List.fromList(matrix4); // ignore: unnecessary_this
 
   final ui.TileMode tileModeX;
   final ui.TileMode tileModeY;
