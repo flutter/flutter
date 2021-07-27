@@ -79,10 +79,14 @@ class FlutterEventTracer : public SkEventTracer {
   static constexpr uint8_t kYes = 1;
   static constexpr uint8_t kNo = 0;
 
-  FlutterEventTracer(bool enabled, const std::vector<std::string>& allowlist)
+  FlutterEventTracer(bool enabled,
+                     const std::optional<std::vector<std::string>>& allowlist)
       : enabled_(enabled ? kYes : kNo), shaders_category_flag_(nullptr) {
-    for (const std::string& category : allowlist) {
-      allowlist_.insert(std::string(kTraceCategoryPrefix) + category);
+    if (allowlist.has_value()) {
+      allowlist_.emplace();
+      for (const std::string& category : *allowlist) {
+        allowlist_->insert(std::string(kTraceCategoryPrefix) + category);
+      }
     }
   };
 
@@ -274,8 +278,8 @@ class FlutterEventTracer : public SkEventTracer {
     if (flag_it == category_flag_map_.end()) {
       bool allowed;
       if (enabled_) {
-        allowed =
-            allowlist_.empty() || allowlist_.find(name) != allowlist_.end();
+        allowed = !allowlist_.has_value() ||
+                  allowlist_->find(name) != allowlist_->end();
       } else {
         allowed = false;
       }
@@ -301,15 +305,16 @@ class FlutterEventTracer : public SkEventTracer {
 
  private:
   uint8_t enabled_;
-  std::set<std::string> allowlist_;
+  std::optional<std::set<std::string>> allowlist_;
   std::map<const char*, uint8_t> category_flag_map_;
   std::map<const uint8_t*, const char*> reverse_flag_map_;
   const uint8_t* shaders_category_flag_;
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterEventTracer);
 };
 
-void InitSkiaEventTracer(bool enabled,
-                         const std::vector<std::string>& allowlist) {
+void InitSkiaEventTracer(
+    bool enabled,
+    const std::optional<std::vector<std::string>>& allowlist) {
   auto tracer = new FlutterEventTracer(enabled, allowlist);
   // Initialize the binding to Skia's tracing events. Skia will
   // take ownership of and clean up the memory allocated here.
