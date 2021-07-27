@@ -171,9 +171,15 @@ class KeyEventSimulator {
     String? result;
     for (final MapEntry<String, List<LogicalKeyboardKey?>> entry in kWebLocationMap.entries) {
       final int foundIndex = entry.value.indexOf(key);
-      if (foundIndex != -1) {
+      // If foundIndex is -1, then the key is not defined in kWebLocationMap.
+      // If foundIndex is 0, then the key is in the standard part of the keyboard,
+      // but we have to check `keyLabel` to see if it's remapped or modified.
+      if (foundIndex != -1 && foundIndex != 0) {
         return _WebKeyLocationPair(entry.key, foundIndex);
       }
+    }
+    if (keyLabel.isNotEmpty) {
+      return _WebKeyLocationPair(keyLabel, 0);
     }
     for (final String code in kWebToLogicalKey.keys) {
       if (key.keyId == kWebToLogicalKey[code]!.keyId) {
