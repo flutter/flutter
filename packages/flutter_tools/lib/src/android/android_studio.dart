@@ -10,6 +10,7 @@ import '../base/version.dart';
 import '../convert.dart';
 import '../globals_null_migrated.dart' as globals;
 import '../ios/plist_parser.dart';
+import 'android_studio_validator.dart';
 
 // Android Studio layout:
 
@@ -373,51 +374,37 @@ class AndroidStudio implements Comparable<AndroidStudio> {
       }
     }
 
-    // 4.1 has a different location for AndroidStudio installs on Windows.
+    // Discover Android Studio > 4.1
     if (globals.platform.isWindows && globals.platform.environment.containsKey('LOCALAPPDATA')) {
-      final File homeDot = globals.fs.file(globals.fs.path.join(
-        globals.platform.environment['LOCALAPPDATA']!,
-        'Google',
-        'AndroidStudio4.1',
-        '.home',
-      ));
-      if (homeDot.existsSync()) {
-        final String installPath = homeDot.readAsStringSync();
-        if (globals.fs.isDirectorySync(installPath)) {
-          final AndroidStudio studio = AndroidStudio(
-            installPath,
-            version: Version(4, 1, 0),
-            studioAppName: 'Android Studio 4.1',
-          );
-          if (studio != null && !_hasStudioAt(studio.directory, newerThan: studio.version)) {
-            studios.removeWhere((AndroidStudio other) => other.directory == studio.directory);
-            studios.add(studio);
-          }
-        }
+      final Directory cacheDir = globals.fs.directory(globals.fs.path.join(globals.platform.environment['LOCALAPPDATA']!, 'Google'));
+      if (!cacheDir.existsSync()) {
+        return studios;
       }
-    }
+      for (final Directory dir in cacheDir.listSync().whereType<Directory>()) {
+        final String name  = globals.fs.path.basename(dir.path);
+        AndroidStudioValidator.idToTitle.forEach((String id, String title) {
+          if (name.startsWith(id)) {
+            final String version = name.substring(id.length);
+            String? installPath;
 
-    // 4.2 has a different location for AndroidStudio installs on Windows.
-    if (globals.platform.isWindows && globals.platform.environment.containsKey('LOCALAPPDATA')) {
-      final File homeDot = globals.fs.file(globals.fs.path.join(
-        globals.platform.environment['LOCALAPPDATA']!,
-        'Google',
-        'AndroidStudio4.2',
-        '.home',
-      ));
-      if (homeDot.existsSync()) {
-        final String installPath = homeDot.readAsStringSync();
-        if (globals.fs.isDirectorySync(installPath)) {
-          final AndroidStudio studio = AndroidStudio(
-            installPath,
-            version: Version(4, 2, 0),
-            studioAppName: 'Android Studio 4.2',
-          );
-          if (studio != null && !_hasStudioAt(studio.directory, newerThan: studio.version)) {
-            studios.removeWhere((AndroidStudio other) => other.directory == studio.directory);
-            studios.add(studio);
+            try {
+              installPath = globals.fs.file(globals.fs.path.join(dir.path, '.home')).readAsStringSync();
+            } on FileSystemException {
+              // ignored
+            }
+            if (installPath != null && globals.fs.isDirectorySync(installPath)) {
+              final AndroidStudio studio = AndroidStudio(
+                installPath,
+                version: Version.parse(version),
+                studioAppName: title,
+              );
+              if (studio != null && !_hasStudioAt(studio.directory, newerThan: studio.version)) {
+                studios.removeWhere((AndroidStudio other) => other.directory == studio.directory);
+                studios.add(studio);
+              }
+            }
           }
-        }
+        });
       }
     }
 

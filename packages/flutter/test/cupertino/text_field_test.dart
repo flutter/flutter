@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=123"
+@Tags(<String>['no-shuffle'])
+
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, Color;
 
 import 'package:flutter/cupertino.dart';
@@ -35,7 +41,7 @@ class MockClipboard {
 
 class MockTextSelectionControls extends TextSelectionControls {
   @override
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]) {
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap, double? startGlyphHeight, double? endGlyphHeight]) {
     throw UnimplementedError();
   }
 
@@ -54,7 +60,7 @@ class MockTextSelectionControls extends TextSelectionControls {
   }
 
   @override
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight, [double? startGlyphHeight, double? endGlyphHeight]) {
     throw UnimplementedError();
   }
 
@@ -4342,7 +4348,7 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.pump();
     expect(focusNode3.hasPrimaryFocus, isTrue);
-  });
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Scrolling shortcuts are disabled in text fields', (WidgetTester tester) async {
     bool scrollInvoked = false;
@@ -4375,7 +4381,7 @@ void main() {
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     expect(scrollInvoked, isFalse);
-  });
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Cupertino text field semantics', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -4779,4 +4785,32 @@ void main() {
       expect(disabledColor, isSameColorAs(const Color(0xFFFAFAFA)));
     },
   );
+
+  testWidgets('textDirection is passed to EditableText', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            textDirection: TextDirection.ltr,
+          ),
+        ),
+      ),
+    );
+
+    final EditableText ltrWidget = tester.widget(find.byType(EditableText));
+    expect(ltrWidget.textDirection, TextDirection.ltr);
+
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            textDirection: TextDirection.rtl,
+          ),
+        ),
+      ),
+    );
+
+    final EditableText rtlWidget = tester.widget(find.byType(EditableText));
+    expect(rtlWidget.textDirection, TextDirection.rtl);
+  });
 }

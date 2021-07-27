@@ -737,6 +737,14 @@ class FutureBuilder<T> extends StatefulWidget {
   /// [AsyncSnapshot.hasError] will be true.)
   final T? initialData;
 
+  /// Whether the latest error received by the asynchronous computation should
+  /// be rethrown or swallowed. This property is useful for debugging purposes.
+  ///
+  /// When set to true, will rethrow the latest error only in debug mode.
+  ///
+  /// Defaults to `false`, resulting in swallowing of errors.
+  static bool debugRethrowError = false;
+
   @override
   State<FutureBuilder<T>> createState() => _FutureBuilderState<T>();
 }
@@ -795,6 +803,13 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
             _snapshot = AsyncSnapshot<T>.withError(ConnectionState.done, error, stackTrace);
           });
         }
+        assert(() {
+          if(FutureBuilder.debugRethrowError) {
+            Future<Object>.error(error, stackTrace);
+          }
+          return true;
+        }());
+
       });
       _snapshot = _snapshot.inState(ConnectionState.waiting);
     }

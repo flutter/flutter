@@ -458,4 +458,38 @@ void main() {
     final Text errorText = tester.widget(errorTextFinder);
     expect(errorText.data, 'Enter Value');
   });
+
+  testWidgets('Passes textDirection to underlying CupertinoTextField', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoTextFormFieldRow(
+            textDirection: TextDirection.ltr,
+          ),
+        ),
+      ),
+    );
+
+    final Finder ltrTextFieldFinder = find.byType(CupertinoTextField);
+    expect(ltrTextFieldFinder, findsOneWidget);
+
+    final CupertinoTextField ltrTextFieldWidget = tester.widget(ltrTextFieldFinder);
+    expect(ltrTextFieldWidget.textDirection, TextDirection.ltr);
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoTextFormFieldRow(
+            textDirection: TextDirection.rtl,
+          ),
+        ),
+      ),
+    );
+
+    final Finder rtlTextFieldFinder = find.byType(CupertinoTextField);
+    expect(rtlTextFieldFinder, findsOneWidget);
+
+    final CupertinoTextField rtlTextFieldWidget = tester.widget(rtlTextFieldFinder);
+    expect(rtlTextFieldWidget.textDirection, TextDirection.rtl);
+  });
 }

@@ -5,6 +5,7 @@
 import 'package:path/path.dart' as path;
 
 import 'base_code_gen.dart';
+import 'constants.dart';
 import 'logical_key_data.dart';
 import 'physical_key_data.dart';
 import 'utils.dart';
@@ -55,27 +56,27 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
     final StringBuffer result = StringBuffer();
     source.forEach((String modifierBitName, List<String> keyNames) {
       assert(keyNames.length == 2 || keyNames.length == 3);
-      final String primaryLogicalName = keyNames[0];
-      final String primaryPhysicalName = keyNames[1];
-      final String? secondaryPhysicalName = keyNames.length == 3 ? keyNames[2] : null;
-      final LogicalKeyEntry primaryLogical = logicalData.entryByName(primaryLogicalName);
+      final String primaryPhysicalName = keyNames[0];
+      final String primaryLogicalName = keyNames[1];
+      final String? secondaryLogicalName = keyNames.length == 3 ? keyNames[2] : null;
       final PhysicalKeyEntry primaryPhysical = physicalData.entryByName(primaryPhysicalName);
-      final PhysicalKeyEntry? secondaryPhysical = secondaryPhysicalName == null ? null : physicalData.entryByName(secondaryPhysicalName);
-      if (secondaryPhysical == null && secondaryPhysicalName != null) {
-        print('Unrecognized secondary physical key $secondaryPhysicalName specified for $debugFunctionName.');
+      final LogicalKeyEntry primaryLogical = logicalData.entryByName(primaryLogicalName);
+      final LogicalKeyEntry? secondaryLogical = secondaryLogicalName == null ? null : logicalData.entryByName(secondaryLogicalName);
+      if (secondaryLogical == null && secondaryLogicalName != null) {
+        print('Unrecognized secondary logical key $secondaryLogicalName specified for $debugFunctionName.');
         return;
       }
-      final String pad = secondaryPhysical == null ? '' : ' ';
+      final String pad = secondaryLogical == null ? '' : '  ';
       result.writeln('''
 
   data = g_new(FlKeyEmbedderCheckedKey, 1);
   g_hash_table_insert(table, GUINT_TO_POINTER(GDK_${modifierBitName}_MASK), data);
   data->is_caps_lock = ${primaryPhysicalName == 'CapsLock' ? 'true' : 'false'};
-  data->primary_logical_key = ${toHex(primaryLogical.value, digits: 11)};$pad  // ${primaryLogical.constantName}
-  data->primary_physical_key = ${toHex(primaryPhysical.usbHidCode, digits: 9)};$pad   // ${primaryPhysical.constantName}''');
-      if (secondaryPhysical != null) {
+  data->primary_physical_key = ${toHex(primaryPhysical.usbHidCode, digits: 9)};$pad   // ${primaryPhysical.constantName}
+  data->primary_logical_key = ${toHex(primaryLogical.value, digits: 11)};$pad  // ${primaryLogical.constantName}''');
+      if (secondaryLogical != null) {
         result.writeln('''
-  data->secondary_physical_key = ${toHex(secondaryPhysical.usbHidCode, digits: 9)};  // ${secondaryPhysical.constantName}''');
+  data->secondary_logical_key = ${toHex(secondaryLogical.value, digits: 11)};  // ${secondaryLogical.constantName}''');
       }
     });
     return result.toString().trimRight();
@@ -91,6 +92,20 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
   }
   final Map<String, List<String>> _lockBitMapping;
 
+  /// This generates the mask values for the part of a key code that defines its plane.
+  String get _maskConstants {
+    final StringBuffer buffer = StringBuffer();
+    const List<MaskConstant> maskConstants = <MaskConstant>[
+      kValueMask,
+      kUnicodePlane,
+      kGtkPlane,
+    ];
+    for (final MaskConstant constant in maskConstants) {
+      buffer.writeln('const uint64_t k${constant.upperCamelName} = ${toHex(constant.value, digits: 11)};');
+    }
+    return buffer.toString().trimRight();
+  }
+
   @override
   String get templatePath => path.join(dataRoot, 'gtk_key_mapping_cc.tmpl');
 
@@ -105,6 +120,7 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
       'GTK_KEYVAL_CODE_MAP': _gtkKeyvalCodeMap,
       'GTK_MODIFIER_BIT_MAP': _gtkModifierBitMap,
       'GTK_MODE_BIT_MAP': _gtkModeBitMap,
+      'MASK_CONSTANTS': _maskConstants,
     };
   }
 }
