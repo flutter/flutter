@@ -328,9 +328,16 @@ class TextEditingValue {
       if (textBefore.isEmpty) {
         return this;
       }
+      final TextRange nextComposingRange = !composing.isValid || composing.isCollapsed
+        ? TextRange.empty
+        : TextRange(
+          start: composing.start - (composing.start - index).clamp(0, textBefore.length - index),
+          end: composing.end - (composing.end - index).clamp(0, textBefore.length - index),
+        );
       return TextEditingValue(
         text: text.substring(0, index) + text.substring(selection.extentOffset, text.length),
         selection: TextSelection.collapsed(offset: index),
+        composing: nextComposingRange,
       );
     }
 
@@ -338,51 +345,16 @@ class TextEditingValue {
       return this;
     }
     final String nextText = text.substring(0, selection.extentOffset) + text.substring(index, text.length);
+    final TextRange nextComposingRange = !composing.isValid || composing.isCollapsed
+      ? TextRange.empty
+      : TextRange(
+        start: composing.start - (composing.start - textBefore.length).clamp(0, index),
+        end: composing.end - (composing.end - textBefore.length).clamp(0, index),
+      );
     return TextEditingValue(
       text: nextText,
       selection: TextSelection.collapsed(offset: index - text.length + nextText.length),
-    );
-  }
-
-  /// {@template flutter.rendering.TextEditingValue.deleteForward}
-  /// Deletes in the forward direction.
-  ///
-  /// If the selection is collapsed, deletes a single character after the
-  /// cursor.
-  ///
-  /// If the selection is not collapsed, deletes the selection.
-  /// {@endtemplate}
-  ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
-  ///
-  /// See also:
-  ///
-  ///   * [delete], which is the same but in the opposite direction.
-  TextEditingValue deleteForward() {
-    if (!selection.isValid) {
-      return this;
-    }
-    if (!selection.isCollapsed) {
-      return _deleteNonEmptySelection();
-    }
-
-    final String textAfter = selection.textAfter(text);
-    if (textAfter.isEmpty) {
-      return this;
-    }
-
-    final String textBefore = selection.textBefore(text);
-    final int characterBoundary = nextCharacter(0, textAfter);
-    final TextRange newComposingRange = !composing.isValid || composing.isCollapsed
-      ? TextRange.empty
-      : TextRange(
-        start: composing.start - (composing.start - textBefore.length).clamp(0, characterBoundary),
-        end: composing.end - (composing.end - textBefore.length).clamp(0, characterBoundary),
-      );
-    return TextEditingValue(
-      text: textBefore + textAfter.substring(characterBoundary),
-      selection: selection,
-      composing: newComposingRange,
+      composing: nextComposingRange,
     );
   }
 

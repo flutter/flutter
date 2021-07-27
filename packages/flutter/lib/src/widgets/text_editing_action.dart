@@ -255,7 +255,12 @@ abstract class TextEditingActionTarget {
     setTextEditingValue(value.deleteTo(line.start), cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingValue.deleteForward}
+  /// Deletes in the forward direction.
+  ///
+  /// If the selection is collapsed, deletes a single character after the
+  /// cursor.
+  ///
+  /// If the selection is not collapsed, deletes the selection.
   ///
   /// If [readOnly] is true, does nothing.
   ///
@@ -263,14 +268,11 @@ abstract class TextEditingActionTarget {
   ///
   /// See also:
   ///
-  ///   * [TextEditingValue.deleteForward], which is used by this method.
-  ///   * [delete], which is same but in the opposite direction.
+  ///   * [delete], which is the same but in the opposite direction.
   void deleteForward(SelectionChangedCause cause) {
-    if (readOnly) {
-      return;
-    }
-
-    setTextEditingValue(value.deleteForward(), cause);
+    final String textAfter = value.selection.textAfter(value.text);
+    final int characterBoundary = TextEditingValue.nextCharacter(0, textAfter);
+    setTextEditingValue(value.deleteTo(value.selection.end + characterBoundary), cause);
   }
 
   /// {@macro flutter.rendering.TextEditingValue.deleteForwardByWord}
