@@ -22,8 +22,7 @@ class SafariArgParser extends BrowserArgParser {
 
   @override
   void populateOptions(ArgParser argParser) {
-    argParser
-      ..addOption(
+    argParser.addOption(
         'safari-version',
         defaultsTo: 'system',
         help: 'The Safari version to use while running tests. The Safari '

@@ -54,7 +54,7 @@ void testMain() {
     test('Should compare equality based on ulps', () {
       // If number of floats between a=1.1 and b are below 16, equals should
       // return true.
-      final double a = 1.1;
+      const double a = 1.1;
       final int aBits = floatAs2sCompliment(a);
       double b = twosComplimentAsFloat(aBits + 1);
       expect(almostEqualUlps(a, b), isTrue);

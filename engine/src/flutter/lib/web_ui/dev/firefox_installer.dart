@@ -28,8 +28,7 @@ class FirefoxArgParser extends BrowserArgParser {
     final YamlMap browserLock = BrowserLock.instance.configuration;
     final String firefoxVersion = browserLock['firefox']['version'] as String;
 
-    argParser
-      ..addOption(
+    argParser.addOption(
         'firefox-version',
         defaultsTo: firefoxVersion,
         help: 'The Firefox version to use while running tests. If the requested '

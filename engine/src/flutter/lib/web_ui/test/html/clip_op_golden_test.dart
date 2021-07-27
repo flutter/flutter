@@ -19,7 +19,7 @@ Future<void> testMain() async {
 
   /// Regression test for https://github.com/flutter/flutter/issues/64734.
   test('Clips using difference', () async {
-    final Rect region = const Rect.fromLTRB(0, 0, 400, 300);
+    const Rect region = Rect.fromLTRB(0, 0, 400, 300);
     final RecordingCanvas canvas = RecordingCanvas(region);
     final Rect titleRect = Rect.fromLTWH(20, 0, 50, 20);
     final SurfacePaint paint = SurfacePaint()
@@ -34,7 +34,7 @@ Future<void> testMain() async {
     } finally {
       canvas.restore();
     }
-    canvas..drawRect(titleRect, paint);
+    canvas.drawRect(titleRect, paint);
     await canvasScreenshot(canvas, 'clip_op_difference',
         region: const Rect.fromLTRB(0, 0, 420, 360));
   });

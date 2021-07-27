@@ -524,11 +524,7 @@ abstract class PersistedSurface implements ui.EngineLayer {
   /// transforms as well as this layer's transform (if any).
   ///
   /// The value is update by [recomputeTransformAndClip].
-  Matrix4? get transform => _transform;
-  set transform(Matrix4? value) {
-    _transform = value;
-  }
-  Matrix4? _transform;
+  Matrix4? transform;
 
   /// The intersection at this surface level.
   ///
@@ -555,7 +551,7 @@ abstract class PersistedSurface implements ui.EngineLayer {
   ///
   /// This method is called by the [preroll] method.
   void recomputeTransformAndClip() {
-    _transform = parent!._transform;
+    transform = parent!.transform;
     localClipBounds = null;
     projectedClip = null;
   }
@@ -661,7 +657,7 @@ abstract class PersistedContainerSurface extends PersistedSurface {
 
   @override
   void recomputeTransformAndClip() {
-    _transform = parent!._transform;
+    transform = parent!.transform;
     localClipBounds = null;
     projectedClip = null;
   }

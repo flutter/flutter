@@ -68,7 +68,7 @@ Future<void> testMain() async {
     final RecordingCanvas rc =
         RecordingCanvas(const Rect.fromLTRB(0, 0, screenWidth, screenHeight));
     //Rect shaderRect = const Rect.fromLTRB(20, 20, 100, 100);
-    final Rect shaderRect = const Rect.fromLTRB(0, 0, 100, 100);
+    const Rect shaderRect = Rect.fromLTRB(0, 0, 100, 100);
     final SurfacePaint paint = Paint() as SurfacePaint;
     paint.shader =
         ImageShader(testImage, tmx, tmy, Matrix4.identity().toFloat64()

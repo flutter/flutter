@@ -16,8 +16,8 @@ void main() {
 
 void testMain() {
   group('PlatformViewManager', () {
-    final String viewType = 'forTest';
-    final int viewId = 6;
+    const String viewType = 'forTest';
+    const int viewId = 6;
 
     late PlatformViewManager contentManager;
 
@@ -78,8 +78,8 @@ void testMain() {
     });
 
     group('renderContent', () {
-      final String unregisteredViewType = 'unregisteredForTest';
-      final String anotherViewType = 'anotherViewType';
+      const String unregisteredViewType = 'unregisteredForTest';
+      const String anotherViewType = 'anotherViewType';
 
       setUp(() {
         contentManager.registerFactory(viewType, (int id) {

@@ -24,8 +24,7 @@ class EdgeArgParser extends BrowserArgParser {
 
   @override
   void populateOptions(ArgParser argParser) {
-    argParser
-      ..addOption(
+    argParser.addOption(
         'edge-version',
         defaultsTo: 'system',
         help: 'The Edge version to use while running tests. The Edge '

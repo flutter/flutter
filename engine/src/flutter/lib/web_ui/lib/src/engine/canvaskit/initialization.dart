@@ -88,9 +88,9 @@ const String canvasKitBaseUrl = String.fromEnvironment(
   'FLUTTER_WEB_CANVASKIT_URL',
   defaultValue: 'https://unpkg.com/canvaskit-wasm@0.28.1/bin/',
 );
-final String canvasKitBuildUrl =
+const String canvasKitBuildUrl =
     canvasKitBaseUrl + (kProfileMode ? 'profiling/' : '');
-final String canvasKitJavaScriptBindingsUrl =
+const String canvasKitJavaScriptBindingsUrl =
     canvasKitBuildUrl + 'canvaskit.js';
 String canvasKitWasmModuleUrl(String file) => _currentCanvasKitBase! + file;
 

@@ -29,7 +29,7 @@ Future<void> testMain() async {
   test('Should draw linear gradient using rectangle.', () async {
     final RecordingCanvas rc =
         RecordingCanvas(const Rect.fromLTRB(0, 0, 500, 500));
-    final Rect shaderRect = const Rect.fromLTRB(50, 50, 300, 300);
+    const Rect shaderRect = Rect.fromLTRB(50, 50, 300, 300);
     final SurfacePaint paint = SurfacePaint()..shader = Gradient.linear(
         Offset(shaderRect.left, shaderRect.top),
         Offset(shaderRect.right, shaderRect.bottom),
@@ -78,7 +78,7 @@ Future<void> testMain() async {
   test('Should draw linear gradient using rounded rect.', () async {
     final RecordingCanvas rc =
         RecordingCanvas(const Rect.fromLTRB(0, 0, 500, 500));
-    final Rect shaderRect = const Rect.fromLTRB(50, 50, 300, 300);
+    const Rect shaderRect = Rect.fromLTRB(50, 50, 300, 300);
     final SurfacePaint paint = SurfacePaint()..shader = Gradient.linear(
         Offset(shaderRect.left, shaderRect.top),
         Offset(shaderRect.right, shaderRect.bottom),
