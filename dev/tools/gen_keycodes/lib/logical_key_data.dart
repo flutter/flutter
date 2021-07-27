@@ -11,11 +11,7 @@ import 'package:path/path.dart' as path;
 import 'constants.dart';
 import 'physical_key_data.dart';
 
-bool _isControlCharacter(String label) {
-  if (label.length != 1) {
-    return false;
-  }
-  final int codeUnit = label.codeUnitAt(0);
+bool _isControlCharacter(int codeUnit) {
   return (codeUnit <= 0x1f && codeUnit >= 0x00) || (codeUnit >= 0x7f && codeUnit <= 0x9f);
 }
 
@@ -50,6 +46,8 @@ class LogicalKeyData {
     String androidNameMap,
     String macosLogicalToPhysical,
     String iosLogicalToPhysical,
+    String glfwHeaderFile,
+    String glfwNameMap,
     PhysicalKeyData physicalKeyData,
   ) {
     final Map<String, LogicalKeyEntry> data = <String, LogicalKeyEntry>{};
@@ -60,6 +58,7 @@ class LogicalKeyData {
     _readMacOsKeyCodes(data, physicalKeyData, parseMapOfListOfString(macosLogicalToPhysical));
     _readIosKeyCodes(data, physicalKeyData, parseMapOfListOfString(iosLogicalToPhysical));
     _readFuchsiaKeyCodes(data, physicalKeyData);
+    _readGlfwKeyCodes(data, glfwHeaderFile, parseMapOfListOfString(glfwNameMap));
     // Sort entries by value
     final List<MapEntry<String, LogicalKeyEntry>> sortedEntries = data.entries.toList()..sort(
       (MapEntry<String, LogicalKeyEntry> a, MapEntry<String, LogicalKeyEntry> b) =>
@@ -86,6 +85,7 @@ class LogicalKeyData {
   ///
   /// None of the parameters may be null.
   LogicalKeyData._(this._data);
+    // : _dataById = Map<int, LogicalKeyEntry>.fromIterable(_data.values, key: (dynamic entry) => (entry as LogicalKeyEntry).value);
 
   /// Converts the data structure into a JSON structure that can be parsed by
   /// [LogicalKeyData.fromJson].
@@ -106,11 +106,21 @@ class LogicalKeyData {
     return _data[name]!;
   }
 
+  /// Find an entry from ID.
+  ///
+  /// Asserts if the ID is not found.
+  // LogicalKeyEntry entryById(int id) {
+  //   assert(_dataById.containsKey(id),
+  //       'Unable to find logical entry by ID $id.');
+  //   return _dataById[id]!;
+  // }
+
   /// All entries.
   Iterable<LogicalKeyEntry> get entries => _data.values;
 
   // Keys mapped from their names.
   final Map<String, LogicalKeyEntry> _data;
+  // final Map<int, LogicalKeyEntry> _dataById;
 
   /// Parses entries from Chromium's key mapping header file.
   ///
@@ -152,20 +162,23 @@ class LogicalKeyData {
       final int value = match.namedGroup('unicode') != null ?
         getHex(match.namedGroup('unicode')!) :
         match.namedGroup('char')!.codeUnitAt(0);
-      final String? keyLabel = match.namedGroup('kind')! == 'UNI' ? String.fromCharCode(value) : null;
+      final String? keyLabel = (match.namedGroup('kind')! == 'UNI' && !_isControlCharacter(value)) ?
+        String.fromCharCode(value) : null;
       // Skip modifier keys from DOM. They will be added with supplemental data.
       if (_chromeModifiers.containsKey(name) && source == 'DOM') {
         continue;
       }
 
-      final bool isPrintable = (keyLabel != null && !_isControlCharacter(keyLabel))
-        || printable.containsKey(name);
+      final bool isPrintable = keyLabel != null;
       data.putIfAbsent(name, () {
-        return LogicalKeyEntry.fromName(
+        final LogicalKeyEntry entry = LogicalKeyEntry.fromName(
           value: toPlane(value, _sourceToPlane(source, isPrintable)),
           name: name,
           keyLabel: keyLabel,
-        )..webNames.add(webName);
+        );
+        if (source == 'DOM')
+          entry.webNames.add(webName);
+        return entry;
       });
     }
   }
@@ -333,6 +346,54 @@ class LogicalKeyData {
     }
   }
 
+  /// Parses entries from GLFW's keycodes.h key code data file.
+  ///
+  /// Lines in this file look like this (without the ///):
+  ///  /** Space key. */
+  ///  #define GLFW_KEY_SPACE              32,
+  ///  #define GLFW_KEY_LAST               GLFW_KEY_MENU
+  static void _readGlfwKeyCodes(Map<String, LogicalKeyEntry> data, String headerFile, Map<String, List<String>> nameMap) {
+    final Map<String, String> nameToFlutterName  = reverseMapOfListOfString(nameMap,
+        (String flutterName, String glfwName) { print('Duplicate GLFW logical name $glfwName'); });
+
+    // Only get the KEY definitions, ignore the rest (mouse, joystick, etc).
+    final RegExp definedCodes = RegExp(
+      r'define\s+'
+      r'GLFW_KEY_(?<name>[A-Z0-9_]+)\s+'
+      r'(?<value>[A-Z0-9_]+),?',
+    );
+    final Map<String, dynamic> replaced = <String, dynamic>{};
+    for (final RegExpMatch match in definedCodes.allMatches(headerFile)) {
+      final String name = match.namedGroup('name')!;
+      final String value = match.namedGroup('value')!;
+      replaced[name] = int.tryParse(value) ?? value.replaceAll('GLFW_KEY_', '');
+    }
+    final Map<String, int> glfwNameToKeyCode = <String, int>{};
+    replaced.forEach((String key, dynamic value) {
+      // Some definition values point to other definitions (e.g #define GLFW_KEY_LAST GLFW_KEY_MENU).
+      if (value is String) {
+        glfwNameToKeyCode[key] = replaced[value] as int;
+      } else {
+        glfwNameToKeyCode[key] = value as int;
+      }
+    });
+
+    glfwNameToKeyCode.forEach((String glfwName, int value) {
+      final String? name = nameToFlutterName[glfwName];
+      final LogicalKeyEntry? entry = data[nameToFlutterName[glfwName]];
+      if (entry == null) {
+        print('Invalid logical entry by name $name (from GLFW $glfwName)');
+        return;
+      }
+      addNameValue(
+        entry.glfwNames,
+        entry.glfwValues,
+        glfwName,
+        value,
+      );
+    });
+  }
+
   // Map Web key to the pair of key names
   static late final Map<String, _ModifierPair> _chromeModifiers = () {
     final String rawJson = File(path.join(dataRoot, 'chromium_modifiers.json',)).readAsStringSync();
@@ -367,9 +428,11 @@ class LogicalKeyData {
   })();
 
   static int _sourceToPlane(String source, bool isPrintable) {
+    if (isPrintable)
+      return kUnicodePlane.value;
     switch (source) {
       case 'DOM':
-        return isPrintable ? kUnicodePlane.value : kUnprintablePlane.value;
+        return kUnprintablePlane.value;
       case 'FLUTTER':
         return kFlutterPlane.value;
       default:
@@ -401,7 +464,9 @@ class LogicalKeyEntry {
         windowsValues = <int>[],
         androidNames = <String>[],
         androidValues = <int>[],
-        fuchsiaValues = <int>[];
+        fuchsiaValues = <int>[],
+        glfwNames = <String>[],
+        glfwValues = <int>[];
 
   LogicalKeyEntry.fromName({
     required int value,
@@ -429,6 +494,8 @@ class LogicalKeyEntry {
       androidNames = _toNonEmptyArray<String>((map['names'] as Map<String, dynamic>)['android']),
       androidValues = _toNonEmptyArray<int>((map['values'] as Map<String, dynamic>?)?['android']),
       fuchsiaValues = _toNonEmptyArray<int>((map['values'] as Map<String, dynamic>?)?['fuchsia']),
+      glfwNames = _toNonEmptyArray<String>((map['names'] as Map<String, dynamic>)['glfw']),
+      glfwValues = _toNonEmptyArray<int>((map['values'] as Map<String, dynamic>?)?['glfw']),
       keyLabel = map['keyLabel'] as String?;
 
   final int value;
@@ -490,6 +557,15 @@ class LogicalKeyEntry {
 
   final List<int> fuchsiaValues;
 
+  /// The list of names that GLFW gives to this key (symbol names minus the
+  /// prefix).
+  final List<String> glfwNames;
+
+  /// The list of GLFW key codes matching this key, created by looking up the
+  /// GLFW name in the Chromium data, and substituting the GLFW key code
+  /// value.
+  final List<int> glfwValues;
+
   /// A string indicating the letter on the keycap of a letter key.
   ///
   /// This is only used to generate the key label mapping in keyboard_map.dart.
@@ -510,6 +586,7 @@ class LogicalKeyEntry {
         'gtk': gtkNames,
         'windows': windowsNames,
         'android': androidNames,
+        'glfw': glfwNames,
       },
       'values': <String, List<int>>{
         'macos': macOSKeyCodeValues,
@@ -518,6 +595,7 @@ class LogicalKeyEntry {
         'windows': windowsValues,
         'android': androidValues,
         'fuchsia': fuchsiaValues,
+        'glfw': glfwValues,
       },
     });
   }
