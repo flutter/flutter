@@ -11,11 +11,7 @@ import 'package:path/path.dart' as path;
 import 'constants.dart';
 import 'physical_key_data.dart';
 
-bool _isControlCharacter(String label) {
-  if (label.length != 1) {
-    return false;
-  }
-  final int codeUnit = label.codeUnitAt(0);
+bool _isControlCharacter(int codeUnit) {
   return (codeUnit <= 0x1f && codeUnit >= 0x00) || (codeUnit >= 0x7f && codeUnit <= 0x9f);
 }
 
@@ -152,20 +148,23 @@ class LogicalKeyData {
       final int value = match.namedGroup('unicode') != null ?
         getHex(match.namedGroup('unicode')!) :
         match.namedGroup('char')!.codeUnitAt(0);
-      final String? keyLabel = match.namedGroup('kind')! == 'UNI' ? String.fromCharCode(value) : null;
+      final String? keyLabel = (match.namedGroup('kind')! == 'UNI' && !_isControlCharacter(value)) ?
+        String.fromCharCode(value) : null;
       // Skip modifier keys from DOM. They will be added with supplemental data.
       if (_chromeModifiers.containsKey(name) && source == 'DOM') {
         continue;
       }
 
-      final bool isPrintable = (keyLabel != null && !_isControlCharacter(keyLabel))
-        || printable.containsKey(name);
+      final bool isPrintable = keyLabel != null;
       data.putIfAbsent(name, () {
-        return LogicalKeyEntry.fromName(
+        final LogicalKeyEntry entry = LogicalKeyEntry.fromName(
           value: toPlane(value, _sourceToPlane(source, isPrintable)),
           name: name,
           keyLabel: keyLabel,
-        )..webNames.add(webName);
+        );
+        if (source == 'DOM')
+          entry.webNames.add(webName);
+        return entry;
       });
     }
   }
@@ -367,9 +366,11 @@ class LogicalKeyData {
   })();
 
   static int _sourceToPlane(String source, bool isPrintable) {
+    if (isPrintable)
+      return kUnicodePlane.value;
     switch (source) {
       case 'DOM':
-        return isPrintable ? kUnicodePlane.value : kUnprintablePlane.value;
+        return kUnprintablePlane.value;
       case 'FLUTTER':
         return kFlutterPlane.value;
       default:
