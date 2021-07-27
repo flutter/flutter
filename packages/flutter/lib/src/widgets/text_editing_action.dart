@@ -154,6 +154,8 @@ abstract class TextEditingActionTarget {
   ///
   /// If the selection is not collapsed, deletes the selection.
   ///
+  /// If [readOnly] is true, does nothing.
+  ///
   /// {@template flutter.rendering.RenderEditable.cause}
   /// The given [SelectionChangedCause] indicates the cause of this change and
   /// will be passed to [onSelectionChanged].
@@ -166,8 +168,17 @@ abstract class TextEditingActionTarget {
     if (readOnly) {
       return;
     }
-    final TextEditingValue nextValue = value.delete();
-    setTextEditingValue(nextValue, cause);
+
+    // `delete` does not depend on the text layout, and the boundary analysis is
+    // done using the `previousCharacter` method instead of ICU, we can keep
+    // deleting without having to layout the text. For this reason, we can
+    // directly delete the character before the caret in the controller.
+    final String textBefore = value.selection.textBefore(value.text);
+    final int characterBoundary = TextEditingValue.previousCharacter(
+      textBefore.length,
+      textBefore,
+    );
+    setTextEditingValue(value.deleteTo(characterBoundary), cause);
   }
 
   // TODO(justinmc): Update the references on this whiteSpace template.

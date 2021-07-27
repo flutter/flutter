@@ -249,60 +249,6 @@ class TextEditingValue {
     );
   }
 
-  /// Deletes backwards from the selection in [textSelectionDelegate].
-  ///
-  /// This method operates on the text/selection contained in
-  /// [textSelectionDelegate], and does not depend on [selection].
-  ///
-  /// If the selection is collapsed, deletes a single character before the
-  /// cursor.
-  ///
-  /// If the selection is not collapsed, deletes the selection.
-  ///
-  /// {@template flutter.rendering.RenderEditable.cause}
-  /// The given [SelectionChangedCause] indicates the cause of this change and
-  /// will be passed to [onSelectionChanged].
-  /// {@endtemplate}
-  ///
-  /// See also:
-  ///
-  ///   * [deleteForward], which is same but in the opposite direction.
-  TextEditingValue delete() {
-    // `delete` does not depend on the text layout, and the boundary analysis is
-    // done using the `previousCharacter` method instead of ICU, we can keep
-    // deleting without having to layout the text. For this reason, we can
-    // directly delete the character before the caret in the controller.
-    if (!selection.isValid) {
-      return this;
-    }
-    if (!selection.isCollapsed) {
-      return _deleteNonEmptySelection();
-    }
-
-    final String textBefore = selection.textBefore(text);
-    if (textBefore.isEmpty) {
-      return this;
-    }
-
-    final String textAfter = selection.textAfter(text);
-
-    final int characterBoundary = previousCharacter(textBefore.length, textBefore);
-    final TextSelection newSelection = TextSelection.collapsed(offset: characterBoundary);
-    assert(textBefore.length >= characterBoundary);
-    final TextRange newComposingRange = !composing.isValid || composing.isCollapsed
-      ? TextRange.empty
-      : TextRange(
-        start: composing.start - (composing.start - characterBoundary).clamp(0, textBefore.length - characterBoundary),
-        end: composing.end - (composing.end - characterBoundary).clamp(0, textBefore.length - characterBoundary),
-      );
-
-    return TextEditingValue(
-      text: textBefore.substring(0, characterBoundary) + textAfter,
-      selection: newSelection,
-      composing: newComposingRange,
-    );
-  }
-
   /// Deletes to the given index.
   ///
   /// Returns a new TextEditingValue representing the state after the deletion.
