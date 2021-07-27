@@ -1449,8 +1449,8 @@ void main() {
     });
 
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
-    expect(rail.size.width, equals(164.0));
+    await tester.pump(const Duration(milliseconds: 125));
+    expect(rail.size.width, equals(214.70680844783783));
 
     await tester.pumpAndSettle();
     expect(rail.size.width, equals(256.0));
@@ -1591,13 +1591,11 @@ void main() {
     });
 
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
-    expect(rail.size.width, equals(164.0));
-    expect(rail.localToGlobal(Offset.zero), equals(const Offset(636.0, 0.0)));
+    await tester.pump(const Duration(milliseconds: 125));
+    expect(rail.size.width, equals(214.70680844783783));
 
     await tester.pumpAndSettle();
     expect(rail.size.width, equals(256.0));
-    expect(rail.localToGlobal(Offset.zero), equals(const Offset(544.0, 0.0)));
 
     // The first destination is 8 from the top because of the default vertical
     // padding at the to of the rail.
@@ -1744,8 +1742,8 @@ void main() {
     });
 
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
-    expect(rail.size.width, equals(328.0));
+    await tester.pump(const Duration(milliseconds: 125));
+    expect(rail.size.width, equals(469.09720611572266));
 
     await tester.pumpAndSettle();
     expect(rail.size.width, equals(584.0));
