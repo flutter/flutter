@@ -1,4 +1,4 @@
-Signature: 628752b3d0f92ed895557d7f2b6824d5
+Signature: 598875ef3246e2e6f844b526d981d786
 
 UNUSED LICENSES:
 
@@ -3777,8 +3777,8 @@ FILE: ../../../third_party/skia/modules/skparagraph/gm/simple_gm.cpp
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGGeometryEffect.h
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGGeometryEffect.cpp
 FILE: ../../../third_party/skia/modules/skshaper/src/SkShaper_coretext.cpp
-FILE: ../../../third_party/skia/modules/skshaper/src/SkUnicode.h
-FILE: ../../../third_party/skia/modules/skshaper/src/SkUnicode_icu.cpp
+FILE: ../../../third_party/skia/modules/skunicode/include/SkUnicode.h
+FILE: ../../../third_party/skia/modules/skunicode/src/SkUnicode_icu.cpp
 FILE: ../../../third_party/skia/modules/svg/include/SkSVGFe.h
 FILE: ../../../third_party/skia/modules/svg/include/SkSVGFeBlend.h
 FILE: ../../../third_party/skia/modules/svg/include/SkSVGFeColorMatrix.h
@@ -3922,6 +3922,9 @@ FILE: ../../../third_party/skia/modules/androidkit/src/Utils.h
 FILE: ../../../third_party/skia/modules/skottie/src/effects/FractalNoiseEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/SphereEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/ThresholdEffect.cpp
+FILE: ../../../third_party/skia/modules/skunicode/src/SkUnicode_icu.h
+FILE: ../../../third_party/skia/modules/skunicode/src/SkUnicode_icu_builtin.cpp
+FILE: ../../../third_party/skia/modules/skunicode/src/SkUnicode_icu_runtime.cpp
 FILE: ../../../third_party/skia/modules/svg/include/SkSVGFeImage.h
 FILE: ../../../third_party/skia/modules/svg/include/SkSVGFeLightSource.h
 FILE: ../../../third_party/skia/modules/svg/include/SkSVGImage.h
@@ -5723,6 +5726,7 @@ FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathTessellateOp.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathTessellator.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathWedgeTessellator.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathWedgeTessellator.h
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathXform.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeFixedCountTessellator.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeFixedCountTessellator.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeTessellator.h
