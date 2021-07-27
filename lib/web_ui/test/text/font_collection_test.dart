@@ -28,7 +28,7 @@ void testMain() {
 
     group('regular special characters', () {
       test('Register Asset with no special characters', () async {
-        final String _testFontFamily = "Ahem";
+        const String _testFontFamily = "Ahem";
         final List<String> fontFamilyList = <String>[];
 
         fontManager.registerAsset(
@@ -46,7 +46,7 @@ void testMain() {
           skip: browserEngine == BrowserEngine.edge);
 
       test('Register Asset with white space in the family name', () async {
-        final String _testFontFamily = "Ahem ahem ahem";
+        const String _testFontFamily = "Ahem ahem ahem";
         final List<String> fontFamilyList = <String>[];
 
         fontManager.registerAsset(
@@ -66,7 +66,7 @@ void testMain() {
               browserEngine == BrowserEngine.webkit);
 
       test('Register Asset with capital case letters', () async {
-        final String _testFontFamily = "AhEm";
+        const String _testFontFamily = "AhEm";
         final List<String> fontFamilyList = <String>[];
 
         fontManager.registerAsset(
@@ -86,7 +86,7 @@ void testMain() {
 
     group('fonts with special characters', () {
       test('Register Asset twice with special character slash', () async {
-        final String _testFontFamily = '/Ahem';
+        const String _testFontFamily = '/Ahem';
         final List<String> fontFamilyList = <String>[];
 
         fontManager.registerAsset(
@@ -112,7 +112,7 @@ void testMain() {
               browserEngine == BrowserEngine.webkit);
 
       test('Register Asset twice with exclamation mark', () async {
-        final String _testFontFamily = 'Ahem!!ahem';
+        const String _testFontFamily = 'Ahem!!ahem';
         final List<String> fontFamilyList = <String>[];
 
         fontManager.registerAsset(
@@ -138,7 +138,7 @@ void testMain() {
               browserEngine == BrowserEngine.webkit);
 
       test('Register Asset twice with comma', () async {
-        final String _testFontFamily = 'Ahem ,ahem';
+        const String _testFontFamily = 'Ahem ,ahem';
         final List<String> fontFamilyList = <String>[];
 
         fontManager.registerAsset(
@@ -165,7 +165,7 @@ void testMain() {
 
       test('Register Asset twice with a digit at the start of a token',
           () async {
-        final String testFontFamily = 'Ahem 1998';
+        const String testFontFamily = 'Ahem 1998';
         final List<String> fontFamilyList = <String>[];
 
         fontManager.registerAsset(

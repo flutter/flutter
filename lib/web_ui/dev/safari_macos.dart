@@ -89,5 +89,5 @@ class SafariMacOs extends Browser {
     });
   }
 
-  SafariMacOs._(Future<Process> startBrowser()) : super(startBrowser);
+  SafariMacOs._(Future<Process> Function() startBrowser) : super(startBrowser);
 }

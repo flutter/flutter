@@ -270,7 +270,7 @@ Future<void> testMain() async {
     // Draw a rect in the placeholder.
     // Leave some padding around the placeholder to make the black paragraph
     // background visible.
-    final double padding = 5;
+    const double padding = 5;
     final TextBox placeholderBox = paragraph2.getBoxesForPlaceholders().single;
     canvas.drawRect(
       placeholderBox.toRect().shift(offset).deflate(padding),
@@ -371,11 +371,11 @@ Future<void> testMain() async {
   });
 
   void testFontFeatures(EngineCanvas canvas) {
-    final String text = 'Aa Bb Dd Ee Ff Difficult';
+    const String text = 'Aa Bb Dd Ee Ff Difficult';
     final FontFeature enableSmallCaps = FontFeature('smcp');
     final FontFeature disableSmallCaps = FontFeature('smcp', 0);
 
-    final String numeric = '123.4560';
+    const String numeric = '123.4560';
     final FontFeature enableOnum = FontFeature('onum');
 
     final FontFeature disableLigatures = FontFeature('liga', 0);

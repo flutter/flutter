@@ -38,7 +38,7 @@ void testMain() {
     }
 
     testCanvas('draws laid out paragraph', (EngineCanvas canvas) {
-      final ui.Rect screenRect = const ui.Rect.fromLTWH(0, 0, 100, 100);
+      const ui.Rect screenRect = ui.Rect.fromLTWH(0, 0, 100, 100);
       final RecordingCanvas recordingCanvas = RecordingCanvas(screenRect);
       final ui.ParagraphBuilder builder =
           ui.ParagraphBuilder(ui.ParagraphStyle());
@@ -63,7 +63,7 @@ void testMain() {
 
     testCanvas('ignores paragraphs that were not laid out',
         (EngineCanvas canvas) {
-      final ui.Rect screenRect = const ui.Rect.fromLTWH(0, 0, 100, 100);
+      const ui.Rect screenRect = ui.Rect.fromLTWH(0, 0, 100, 100);
       final RecordingCanvas recordingCanvas = RecordingCanvas(screenRect);
       final ui.ParagraphBuilder builder =
           ui.ParagraphBuilder(ui.ParagraphStyle());

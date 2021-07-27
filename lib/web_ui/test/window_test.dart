@@ -70,7 +70,7 @@ void testMain() {
       'flutter/navigation',
       JSONMethodCodec().encodeMethodCall(MethodCall(
         'routeUpdated',
-        <String, dynamic>{'routeName': '/bar'},
+        const <String, dynamic>{'routeName': '/bar'},
       )),
       (_) { callback.complete(); },
     );
@@ -167,6 +167,7 @@ void testMain() {
     await window.handleNavigationMessage(
       JSONMethodCodec().encodeMethodCall(MethodCall(
         'routeInformationUpdated',
+        // ignore: prefer_const_literals_to_create_immutables
         <String, dynamic>{
           'location': '/baz',
           'state': null,
@@ -197,6 +198,7 @@ void testMain() {
       'flutter/navigation',
       JSONMethodCodec().encodeMethodCall(MethodCall(
         'routeUpdated',
+        // ignore: prefer_const_literals_to_create_immutables
         <String, dynamic>{'routeName': '/bar'},
       )),
       (_) { callback.complete(); },
@@ -211,6 +213,7 @@ void testMain() {
       'flutter/navigation',
       JSONMethodCodec().encodeMethodCall(MethodCall(
         'routeInformationUpdated',
+        // ignore: prefer_const_literals_to_create_immutables
         <String, dynamic>{
           'location': '/baz',
           'state': null,
@@ -226,6 +229,7 @@ void testMain() {
     await window.handleNavigationMessage(
       JSONMethodCodec().encodeMethodCall(MethodCall(
         'routeUpdated',
+        // ignore: prefer_const_literals_to_create_immutables
         <String, dynamic>{'routeName': '/foo'},
       ))
     );
@@ -245,6 +249,7 @@ void testMain() {
       'flutter/navigation',
       JSONMethodCodec().encodeMethodCall(MethodCall(
         'routeInformationUpdated',
+        // ignore: prefer_const_literals_to_create_immutables
         <String, dynamic>{
           'location': '/baz',
           'state': '/state',
@@ -261,6 +266,7 @@ void testMain() {
       'flutter/navigation',
       JSONMethodCodec().encodeMethodCall(MethodCall(
         'routeInformationUpdated',
+        // ignore: prefer_const_literals_to_create_immutables
         <String, dynamic>{
           'location': '/baz',
           'state': '/state1',
@@ -278,6 +284,7 @@ void testMain() {
       'flutter/navigation',
       JSONMethodCodec().encodeMethodCall(MethodCall(
         'routeInformationUpdated',
+        // ignore: prefer_const_literals_to_create_immutables
         <String, dynamic>{
           'location': '/foo',
           'state': '/foostate1',
@@ -307,6 +314,7 @@ void testMain() {
       'flutter/navigation',
       JSONMethodCodec().encodeMethodCall(MethodCall(
         'routeUpdated',
+        // ignore: prefer_const_literals_to_create_immutables
         <String, dynamic>{'routeName': '/bar'},
       )),
       (_) { callback.complete(); },
@@ -332,6 +340,7 @@ void testMain() {
       'flutter/navigation',
       JSONMethodCodec().encodeMethodCall(MethodCall(
         'routeInformationUpdated',
+        // ignore: prefer_const_literals_to_create_immutables
         <String, dynamic>{
           'location': '/baz',
           'state': null,

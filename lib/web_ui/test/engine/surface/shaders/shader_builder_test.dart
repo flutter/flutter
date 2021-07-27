@@ -12,12 +12,12 @@ void main() {
 }
 
 void testMain() {
-  final String mat2Sample = 'mat2(1.1, 2.1, 1.2, 2.2)';
-  final String mat3Sample = 'mat3(1.1, 2.1, 3.1, // first column (not row!)\n'
+  const String mat2Sample = 'mat2(1.1, 2.1, 1.2, 2.2)';
+  const String mat3Sample = 'mat3(1.1, 2.1, 3.1, // first column (not row!)\n'
       '1.2, 2.2, 3.2, // second column\n'
       '1.3, 2.3, 3.3  // third column\n'
       ')';
-  final String mat4Sample = 'mat3(1.1, 2.1, 3.1, 4.1,\n'
+  const String mat4Sample = 'mat3(1.1, 2.1, 3.1, 4.1,\n'
       '1.2, 2.2, 3.2, 4.2,\n'
       '1.3, 2.3, 3.3, 4.3,\n'
       '1.4, 2.4, 3.4, 4.4,\n'

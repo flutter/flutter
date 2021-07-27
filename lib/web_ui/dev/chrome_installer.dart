@@ -34,8 +34,7 @@ class ChromeArgParser extends BrowserArgParser {
     _pinnedChromeBuildNumber =
         PlatformBinding.instance.getChromeBuild(browserLock);
 
-    argParser
-      ..addOption(
+    argParser.addOption(
         'chrome-version',
         defaultsTo: pinnedChromeBuildNumber,
         help: 'The Chrome version to use while running tests. If the requested '
@@ -234,8 +233,8 @@ class ChromeInstaller {
             ..createSync(recursive: true)
             ..writeAsBytesSync(data);
         } else {
-          io.Directory(path.join(versionDir.path, filename))
-            ..create(recursive: true);
+          io.Directory(path.join(versionDir.path, filename)).create(
+              recursive: true);
         }
       }
 

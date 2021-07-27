@@ -760,7 +760,7 @@ class MockPersistedPicture extends PersistedPicture {
     final EnginePictureRecorder recorder = EnginePictureRecorder();
     // Use the largest cull rect so that layer clips are effective. The tests
     // rely on this.
-    recorder.beginRecording(ui.Rect.largest)..drawPaint(SurfacePaint());
+    recorder.beginRecording(ui.Rect.largest).drawPaint(SurfacePaint());
     return MockPersistedPicture._(recorder.endRecording());
   }
 

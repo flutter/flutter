@@ -15,8 +15,7 @@ import 'watcher.dart';
 
 class BuildCommand extends Command<bool> with ArgUtils<bool> {
   BuildCommand() {
-    argParser
-      ..addFlag(
+    argParser.addFlag(
         'watch',
         defaultsTo: false,
         abbr: 'w',

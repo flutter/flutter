@@ -216,13 +216,13 @@ class Conic {
     // Map conic to 3D.
     final double tx0 = p0x;
     final double ty0 = p0y;
-    final double tz0 = 1;
+    const double tz0 = 1;
     final double tx1 = p1x * fW;
     final double ty1 = p1y * fW;
     final double tz1 = fW;
     final double tx2 = p2x;
     final double ty2 = p2y;
-    final double tz2 = 1;
+    const double tz2 = 1;
     // Now interpolate each dimension.
     final double dx0 = tx0 + (tx1 - tx0) * t;
     final double dx2 = tx1 + (tx2 - tx1) * t;
@@ -335,7 +335,7 @@ class Conic {
 
   static double evalDenominator(double w, double t) {
     final double B = 2 * (w - 1);
-    final double C = 1;
+    const double C = 1;
     final double A = -B;
     return polyEval(A, B, C, t);
   }

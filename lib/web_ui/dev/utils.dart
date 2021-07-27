@@ -337,8 +337,7 @@ class GeneralTestsArgumentParser {
   bool verbose = false;
 
   void populateOptions(ArgParser argParser) {
-    argParser
-      ..addFlag(
+    argParser.addFlag(
         'verbose',
         defaultsTo: false,
         help: 'Flag to indicate extra logs should also be printed.',

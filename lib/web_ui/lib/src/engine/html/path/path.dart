@@ -902,7 +902,7 @@ class SurfacePath implements ui.Path {
     assert(direction != SPathDirection.kUnknown);
     final bool isOval = _hasOnlyMoveTos();
 
-    final double weight = SPath.scalarRoot2Over2;
+    const double weight = SPath.scalarRoot2Over2;
     final double left = oval.left;
     final double right = oval.right;
     final double centerX = (left + right) / 2.0;
@@ -1018,7 +1018,7 @@ class SurfacePath implements ui.Path {
       // degenerate(oval) => line points are collapsing.
       _addOval(bounds, direction, startIndex ~/ 2);
     } else {
-      final double weight = SPath.scalarRoot2Over2;
+      const double weight = SPath.scalarRoot2Over2;
       final double left = bounds.left;
       final double right = bounds.right;
       final double top = bounds.top;

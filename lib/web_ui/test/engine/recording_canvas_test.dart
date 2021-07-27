@@ -16,7 +16,7 @@ void main() {
 void testMain() {
   late RecordingCanvas underTest;
   late MockEngineCanvas mockCanvas;
-  final Rect screenRect = Rect.largest;
+  const Rect screenRect = Rect.largest;
 
   setUp(() {
     underTest = RecordingCanvas(screenRect);
