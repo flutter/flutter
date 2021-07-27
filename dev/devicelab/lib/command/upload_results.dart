@@ -13,7 +13,7 @@ class UploadResultsCommand extends Command<void> {
       'service-account-token-file',
       help: 'Authentication token for uploading results.',
     );
-    argParser.addOption('test-flaky', help: 'Flag to show whether the test is flaky');
+    argParser.addOption('test-flaky', help: 'Flag to show whether the test is flaky: "True" or "False"');
     argParser.addOption(
       'git-branch',
       help: '[Flutter infrastructure] Git branch of the current commit. LUCI\n'
@@ -33,7 +33,7 @@ class UploadResultsCommand extends Command<void> {
   Future<void> run() async {
     final String? resultsPath = argResults!['results-file'] as String?;
     final String? serviceAccountTokenFile = argResults!['service-account-token-file'] as String?;
-    final bool? isTestFlaky = argResults!['test-flaky'] as bool?;
+    final String? testFlakyStatus = argResults!['test-flaky'] as String?;
     final String? gitBranch = argResults!['git-branch'] as String?;
     final String? builderName = argResults!['luci-builder'] as String?;
     final String? testStatus = argResults!['test-status'] as String?;
@@ -41,7 +41,7 @@ class UploadResultsCommand extends Command<void> {
     final Cocoon cocoon = Cocoon(serviceAccountTokenPath: serviceAccountTokenFile);
     return cocoon.sendResultsPath(
       resultsPath: resultsPath,
-      isTestFlaky: isTestFlaky,
+      isTestFlaky: testFlakyStatus == 'True',
       gitBranch: gitBranch,
       builderName: builderName,
       testStatus: testStatus,

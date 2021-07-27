@@ -21,6 +21,16 @@ bool _isUpperAsciiLetter(String? char) {
   return charCode >= charUpperA && charCode <= charUpperZ;
 }
 
+bool _isDigit(String? char) {
+  if (char == null)
+    return false;
+  final int charDigit0 = '0'.codeUnitAt(0);
+  final int charDigit9 = '9'.codeUnitAt(0);
+  assert(char.length == 1);
+  final int charCode = char.codeUnitAt(0);
+  return charCode >= charDigit0 && charCode <= charDigit9;
+}
+
 /// Generates the keyboard_maps.dart files, based on the information in the key
 /// data structure given to it.
 class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
@@ -173,7 +183,9 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
       // because they are not used by the embedding. Add them manually.
       final List<int>? keyCodes = entry.windowsValues.isNotEmpty
         ? entry.windowsValues
-        : (_isUpperAsciiLetter(entry.keyLabel) ? <int>[entry.keyLabel!.codeUnitAt(0)] : null);
+        : (_isUpperAsciiLetter(entry.keyLabel) ? <int>[entry.keyLabel!.codeUnitAt(0)] :
+           _isDigit(entry.keyLabel)       ? <int>[entry.keyLabel!.codeUnitAt(0)] :
+           null);
       if (keyCodes != null) {
         for (final int code in keyCodes) {
           lines.add(code, '  $code: LogicalKeyboardKey.${entry.constantName},');

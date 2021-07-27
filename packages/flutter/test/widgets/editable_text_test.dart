@@ -4864,8 +4864,23 @@ void main() {
     expect(controller.text, isEmpty, reason: 'on $platform');
   }
 
-  testWidgets('keyboard text selection works', (WidgetTester tester) async {
+  testWidgets('keyboard text selection works (RawKeyEvent)', (WidgetTester tester) async {
+    debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.rawKeyData;
+
     await testTextEditing(tester, targetPlatform: defaultTargetPlatform);
+
+    debugKeyEventSimulatorTransitModeOverride = null;
+
+    // On web, using keyboard for selection is handled by the browser.
+  }, skip: kIsWeb, variant: TargetPlatformVariant.all());
+
+  testWidgets('keyboard text selection works (ui.KeyData then RawKeyEvent)', (WidgetTester tester) async {
+    debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.keyDataThenRawKeyData;
+
+    await testTextEditing(tester, targetPlatform: defaultTargetPlatform);
+
+    debugKeyEventSimulatorTransitModeOverride = null;
+
     // On web, using keyboard for selection is handled by the browser.
   }, skip: kIsWeb, variant: TargetPlatformVariant.all());
 
@@ -7675,7 +7690,7 @@ void main() {
       expect(controller.selection.isCollapsed, true);
       expect(controller.selection.baseOffset, 1);
     }
-  });
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('the toolbar is disposed when selection changes and there is no selectionControls', (WidgetTester tester) async {
     late StateSetter setState;
@@ -7797,7 +7812,7 @@ class MockTextSelectionControls extends Fake implements TextSelectionControls {
   }
 
   @override
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]) {
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap, double? startGlyphHeight, double? endGlyphHeight]) {
     return Container();
   }
 
@@ -7807,7 +7822,7 @@ class MockTextSelectionControls extends Fake implements TextSelectionControls {
   }
 
   @override
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight, [double? startGlyphHeight, double? endGlyphHeight]) {
     return Offset.zero;
   }
 

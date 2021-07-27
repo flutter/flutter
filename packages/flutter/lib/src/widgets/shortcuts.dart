@@ -194,13 +194,13 @@ abstract class ShortcutActivator {
   /// event.
   ///
   /// For example, for `Ctrl-A`, it has to check if the event is a
-  /// [RawKeyDownEvent], if either side of the Ctrl key is pressed, and none of
+  /// [KeyDownEvent], if either side of the Ctrl key is pressed, and none of
   /// the Shift keys, Alt keys, or Meta keys are pressed; it doesn't have to
   /// check if KeyA is pressed, since it's already guaranteed.
   ///
   /// This method must not cause any side effects for the `state`. Typically
-  /// this is only used to query whether [RawKeyboard.keysPressed] contains
-  /// a key.
+  /// this is only used to query whether [HardwareKeyboard.logicalKeysPressed]
+  /// contains a key.
   ///
   /// Since [ShortcutActivator] accepts all event types, subclasses might want
   /// to check the event type in [accepts].
@@ -314,11 +314,13 @@ class LogicalKeySet extends KeySet<LogicalKeyboardKey> with Diagnosticable
 
   @override
   bool accepts(RawKeyEvent event, RawKeyboard state) {
+    if (event is! RawKeyDownEvent)
+      return false;
     final Set<LogicalKeyboardKey> collapsedRequired = LogicalKeyboardKey.collapseSynonyms(keys);
     final Set<LogicalKeyboardKey> collapsedPressed = LogicalKeyboardKey.collapseSynonyms(state.keysPressed);
     final bool keysEqual = collapsedRequired.difference(collapsedPressed).isEmpty
       && collapsedRequired.length == collapsedPressed.length;
-    return event is RawKeyDownEvent && keysEqual;
+    return keysEqual;
   }
 
   static final Set<LogicalKeyboardKey> _modifiers = <LogicalKeyboardKey>{
@@ -425,7 +427,8 @@ class ShortcutMapProperty extends DiagnosticsProperty<Map<ShortcutActivator, Int
 ///  * [CharacterActivator], an activator that represents key combinations
 ///    that result in the specified character, such as question mark.
 class SingleActivator with Diagnosticable implements ShortcutActivator {
-  /// Create an activator of a trigger key and modifiers.
+  /// Triggered when the [trigger] key is pressed or repeated when the
+  /// modifiers are held.
   ///
   /// The `trigger` should be the non-modifier key that is pressed after all the
   /// modifiers, such as [LogicalKeyboardKey.keyC] as in `Ctrl+C`. It must not be
@@ -433,6 +436,9 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
   ///
   /// The `control`, `shift`, `alt`, and `meta` flags represent whether
   /// the respect modifier keys should be held (true) or released (false)
+  ///
+  /// On each [RawKeyDownEvent] of the [trigger] key, this activator checks
+  /// whether the specified modifier conditions are met.
   ///
   /// {@tool dartpad --template=stateful_widget_scaffold_center}
   /// In the following example, the shortcut `Control + C` increases the counter:
@@ -811,17 +817,7 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
   /// must be mapped to an [Action], and the [Action] must be enabled.
   @protected
   KeyEventResult handleKeypress(BuildContext context, RawKeyEvent event) {
-    if (event is! RawKeyDownEvent) {
-      return KeyEventResult.ignored;
-    }
     assert(context != null);
-    assert(
-      RawKeyboard.instance.keysPressed.isNotEmpty,
-      'Received a key down event when no keys are in keysPressed. '
-      "This state can occur if the key event being sent doesn't properly "
-      'set its modifier flags. This was the event: $event and its data: '
-      '${event.data}',
-    );
     final Intent? matchedIntent = _find(event, RawKeyboard.instance);
     if (matchedIntent != null) {
       final BuildContext? primaryContext = primaryFocus?.context;

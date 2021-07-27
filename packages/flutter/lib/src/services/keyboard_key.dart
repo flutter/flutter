@@ -189,7 +189,7 @@ class LogicalKeyboardKey extends KeyboardKey implements VirtualKeyboardKey {
 
   static String? _unicodeKeyLabel(int keyId) {
     if (_nonValueBits(keyId) == 0) {
-      return String.fromCharCode(keyId);
+      return String.fromCharCode(keyId).toUpperCase();
     }
     return null;
   }
@@ -2964,6 +2964,9 @@ class LogicalKeyboardKey extends KeyboardKey implements VirtualKeyboardKey {
       debugName: kDebugMode ? 'Key Z' : null);
 
 
+  /// A list of all predefined constant [LogicalKeyboardKey]s.
+  static Iterable<LogicalKeyboardKey> get knownLogicalKeys => _knownLogicalKeys.values;
+
   // A list of all predefined constant LogicalKeyboardKeys so they can be
   // searched.
   static const Map<int, LogicalKeyboardKey> _knownLogicalKeys = <int, LogicalKeyboardKey>{
@@ -5547,6 +5550,9 @@ class PhysicalKeyboardKey extends KeyboardKey {
   ///
   /// See the function [RawKeyEvent.physicalKey] for more information.
   static const PhysicalKeyboardKey showAllWindows = PhysicalKeyboardKey(0x000c029f);
+
+  /// A list of all predefined constant [PhysicalKeyboardKey]s.
+  static Iterable<PhysicalKeyboardKey> get knownPhysicalKeys => _knownPhysicalKeys.values;
 
   // A list of all the predefined constant PhysicalKeyboardKeys so that they
   // can be searched.

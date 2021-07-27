@@ -35,7 +35,7 @@ class MockClipboard {
 
 class MockTextSelectionControls extends TextSelectionControls {
   @override
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]) {
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap, double? startGlyphHeight, double? endGlyphHeight]) {
     throw UnimplementedError();
   }
 
@@ -54,7 +54,7 @@ class MockTextSelectionControls extends TextSelectionControls {
   }
 
   @override
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight, [double? startGlyphHeight, double? endGlyphHeight]) {
     throw UnimplementedError();
   }
 
@@ -4342,7 +4342,7 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.pump();
     expect(focusNode3.hasPrimaryFocus, isTrue);
-  });
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Scrolling shortcuts are disabled in text fields', (WidgetTester tester) async {
     bool scrollInvoked = false;
@@ -4375,7 +4375,7 @@ void main() {
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     expect(scrollInvoked, isFalse);
-  });
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Cupertino text field semantics', (WidgetTester tester) async {
     await tester.pumpWidget(

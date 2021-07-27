@@ -973,7 +973,7 @@ abstract class WidgetController {
     return box.size;
   }
 
-  /// Simulates sending physical key down and up events through the system channel.
+  /// Simulates sending physical key down and up events.
   ///
   /// This only simulates key events coming from a physical keyboard, not from a
   /// soft keyboard.
@@ -983,6 +983,9 @@ abstract class WidgetController {
   /// that type of system. Defaults to "web" on web, and "android" everywhere
   /// else. Must not be null. Some platforms (e.g. Windows, iOS) are not yet
   /// supported.
+  ///
+  /// Whether the event is sent through [RawKeyEvent] or [KeyEvent] is
+  /// controlled by [debugKeyEventSimulatorTransitModeOverride].
   ///
   /// Keys that are down when the test completes are cleared after each test.
   ///
@@ -1004,7 +1007,7 @@ abstract class WidgetController {
     return handled;
   }
 
-  /// Simulates sending a physical key down event through the system channel.
+  /// Simulates sending a physical key down event.
   ///
   /// This only simulates key down events coming from a physical keyboard, not
   /// from a soft keyboard.
@@ -1015,13 +1018,17 @@ abstract class WidgetController {
   /// else. Must not be null. Some platforms (e.g. Windows, iOS) are not yet
   /// supported.
   ///
+  /// Whether the event is sent through [RawKeyEvent] or [KeyEvent] is
+  /// controlled by [debugKeyEventSimulatorTransitModeOverride].
+  ///
   /// Keys that are down when the test completes are cleared after each test.
   ///
   /// Returns true if the key event was handled by the framework.
   ///
   /// See also:
   ///
-  ///  - [sendKeyUpEvent] to simulate the corresponding key up event.
+  ///  - [sendKeyUpEvent] and [sendKeyRepeatEvent] to simulate the corresponding
+  ///    key up and repeat event.
   ///  - [sendKeyEvent] to simulate both the key up and key down in the same call.
   Future<bool> sendKeyDownEvent(VirtualKeyboardKey key, { String? character, String platform = _defaultPlatform }) async {
     assert(platform != null);
@@ -1039,16 +1046,49 @@ abstract class WidgetController {
   /// that type of system. Defaults to "web" on web, and "android" everywhere
   /// else. May not be null.
   ///
+  /// Whether the event is sent through [RawKeyEvent] or [KeyEvent] is
+  /// controlled by [debugKeyEventSimulatorTransitModeOverride].
+  ///
   /// Returns true if the key event was handled by the framework.
   ///
   /// See also:
   ///
-  ///  - [sendKeyDownEvent] to simulate the corresponding key down event.
+  ///  - [sendKeyDownEvent] and [sendKeyRepeatEvent] to simulate the
+  ///    corresponding key down and repeat event.
   ///  - [sendKeyEvent] to simulate both the key up and key down in the same call.
   Future<bool> sendKeyUpEvent(VirtualKeyboardKey key, { String platform = _defaultPlatform }) async {
     assert(platform != null);
     // Internally wrapped in async guard.
     return simulateKeyUpEvent(key, platform: platform);
+  }
+
+  /// Simulates sending a physical key repeat event.
+  ///
+  /// This only simulates key repeat events coming from a physical keyboard, not
+  /// from a soft keyboard.
+  ///
+  /// Specify `platform` as one of the platforms allowed in
+  /// [platform.Platform.operatingSystem] to make the event appear to be from that type
+  /// of system. Defaults to "web" on web, and "android" everywhere else. Must not be
+  /// null. Some platforms (e.g. Windows, iOS) are not yet supported.
+  ///
+  /// Whether the event is sent through [RawKeyEvent] or [KeyEvent] is
+  /// controlled by [debugKeyEventSimulatorTransitModeOverride]. If through [RawKeyEvent],
+  /// this method is equivalent to [sendKeyDownEvent].
+  ///
+  /// Keys that are down when the test completes are cleared after each test.
+  ///
+  /// Returns true if the key event was handled by the framework.
+  ///
+  /// See also:
+  ///
+  ///  - [sendKeyDownEvent] and [sendKeyUpEvent] to simulate the corresponding
+  ///    key down and up event.
+  ///  - [sendKeyEvent] to simulate both the key up and key down in the same call.
+  Future<bool> sendKeyRepeatEvent(LogicalKeyboardKey key, { String? character, String platform = _defaultPlatform }) async {
+    assert(platform != null);
+    // Internally wrapped in async guard.
+    return simulateKeyRepeatEvent(key, character: character, platform: platform);
   }
 
   /// Returns the rect of the given widget. This is only valid once

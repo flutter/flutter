@@ -18,6 +18,7 @@
 /dev/devicelab/bin/tasks/animated_placeholder_perf__e2e_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/backdrop_filter_perf__e2e_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/basic_material_app_android__compile.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/codegen_integration.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/color_filter_and_fade_perf__e2e_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/complex_layout_android__compile.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/complex_layout_android__scroll_smoothness.dart @zanderso @flutter/engine
@@ -26,6 +27,7 @@
 /dev/devicelab/bin/tasks/cubic_bezier_perf__e2e_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/cubic_bezier_perf_sksl_warmup__e2e_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/cull_opacity_perf__e2e_summary.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/devtools_profile_start_test.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/fast_scroll_heavy_gridview__memory.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/flutter_engine_group_performance.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/flutter_gallery__back_button_memory.dart @zanderso @flutter/engine
@@ -43,6 +45,7 @@
 /dev/devicelab/bin/tasks/flutter_gallery_v2_web_compile_test.dart @ferhatb @flutter/web
 /dev/devicelab/bin/tasks/flutter_test_performance.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/frame_policy_delay_test_android.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/gradle_java8_compile_test.dart @blasten @flutter/tool
 /dev/devicelab/bin/tasks/hot_mode_dev_cycle_linux__benchmark.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/image_list_jit_reported_duration.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/image_list_reported_duration.dart @zanderso @flutter/engine
@@ -53,6 +56,7 @@
 /dev/devicelab/bin/tasks/picture_cache_perf__e2e_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/platform_channels_benchmarks.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/platform_views_scroll_perf__timeline_summary.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/plugin_dependencies_test.dart @jmagman @flutter/tool
 /dev/devicelab/bin/tasks/routing_test.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/textfield_perf__e2e_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/web_size__compile_test.dart @ferhatb @flutter/web
@@ -113,6 +117,7 @@
 /dev/devicelab/bin/tasks/backdrop_filter_perf_ios__timeline_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/basic_material_app_ios__compile.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/channels_integration_test_ios.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/codegen_integration_mac.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/complex_layout_ios__compile.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/complex_layout_ios__start_up.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/complex_layout_scroll_perf_ios__timeline_summary.dart @zanderso @flutter/engine

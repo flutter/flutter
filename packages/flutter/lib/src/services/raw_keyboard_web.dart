@@ -30,17 +30,27 @@ class RawKeyEventDataWeb extends RawKeyEventData {
 
   /// The `KeyboardEvent.code` corresponding to this event.
   ///
+  /// The [code] represents a physical key on the keyboard, a value that isn't
+  /// altered by keyboard layout or the state of the modifier keys.
+  ///
   /// See <https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/code>
   /// for more information.
   final String code;
 
   /// The `KeyboardEvent.key` corresponding to this event.
   ///
+  /// The [key] represents the key pressed by the user, taking into
+  /// consideration the state of modifier keys such as Shift as well as the
+  /// keyboard locale and layout.
+  ///
   /// See <https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key>
   /// for more information.
   final String key;
 
   /// The `KeyboardEvent.location` corresponding to this event.
+  ///
+  /// The [location] represents the location of the key on the keyboard or other
+  /// input device, such as left or right modifier keys, or Numpad keys.
   ///
   /// See <https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/location>
   /// for more information.
@@ -73,13 +83,11 @@ class RawKeyEventDataWeb extends RawKeyEventData {
 
   @override
   LogicalKeyboardKey get logicalKey {
-    // Look to see if the keyCode is a printable number pad key, so that a
-    // difference between regular keys (e.g. ".") and the number pad version
-    // (e.g. the "." on the number pad) can be determined.
-    final LogicalKeyboardKey? numPadKey = kWebNumPadMap[code];
-    if (numPadKey != null) {
-      return numPadKey;
-    }
+    // Look to see if the keyCode is a key based on location. Typically they are
+    // numpad keys (versus main area keys) and left/right modifiers.
+    final LogicalKeyboardKey? maybeLocationKey = kWebLocationMap[key]?[location];
+    if (maybeLocationKey != null)
+      return maybeLocationKey;
 
     // Look to see if the [code] is one we know about and have a mapping for.
     final LogicalKeyboardKey? newKey = kWebToLogicalKey[code];

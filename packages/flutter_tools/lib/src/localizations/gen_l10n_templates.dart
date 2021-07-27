@@ -156,6 +156,46 @@ const String pluralMethodTemplate = '''
     );
   }''';
 
+const String pluralMethodTemplateInString = '''
+  @override
+  String @(name)(@(parameters)) {
+@(dateFormatting)
+@(numberFormatting)
+    final String @(variable) = intl.Intl.pluralLogic(
+      @(count),
+      locale: localeName,
+@(pluralLogicArgs),
+    );
+
+    return @(string);
+  }''';
+
+const String selectMethodTemplate = '''
+  @override
+  String @(name)(@(parameters)) {
+    return intl.Intl.select(
+      @(choice),
+      {
+        @(cases)
+      },
+      desc: '@(description)'
+    );
+  }''';
+
+const String selectMethodTemplateInString = '''
+  @override
+  String @(name)(@(parameters)) {
+    final String @(variable) = intl.Intl.select(
+      @(choice),
+      {
+        @(cases)
+      },
+      desc: '@(description)'
+    );
+
+    return @(string);
+  }''';
+
 const String classFileTemplate = '''
 @(header)
 
