@@ -207,7 +207,7 @@ class Tooltip extends StatefulWidget {
   ///
   /// If this property is null, then [TooltipThemeData.triggerMode] is used.
   /// If [TooltipThemeData.triggerMode] is also null, the default mode is
-  /// [TooltipTriggerMode.longPress]
+  /// [TooltipTriggerMode.longPress].
   final TooltipTriggerMode? triggerMode;
 
   /// Whether the tooltip should provide acoustic and/or haptic feedback.
@@ -215,7 +215,7 @@ class Tooltip extends StatefulWidget {
   /// For example, on Android a tap will produce a clicking sound and a
   /// long-press will produce a short vibration, when feedback is enabled.
   ///
-  /// The default value is true.
+  /// When null, the default value is true.
   ///
   /// See also:
   ///

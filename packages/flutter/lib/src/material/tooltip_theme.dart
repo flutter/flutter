@@ -87,7 +87,6 @@ class TooltipThemeData with Diagnosticable {
   final Duration? showDuration;
 
   /// The [TooltipTriggerMode] that will show the tooltip.
-  /// This value is used if [Tooltip.triggerMode] is null.
   final TooltipTriggerMode? triggerMode;
 
   /// Whether the tooltip should provide acoustic and/or haptic feedback.
@@ -95,7 +94,8 @@ class TooltipThemeData with Diagnosticable {
   /// For example, on Android a tap will produce a clicking sound and a
   /// long-press will produce a short vibration, when feedback is enabled.
   ///
-  /// The default value is true.
+  /// This value is used if [Tooltip.enableFeedback] is null.
+  /// If this value is null, the default is true.
   ///
   /// See also:
   ///
