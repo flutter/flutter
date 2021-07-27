@@ -299,13 +299,18 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
 #if !FLUTTER_RELEASE
   settings.trace_skia = true;
 
-  std::string trace_skia_allowlist;
-  command_line.GetOptionValue(FlagForSwitch(Switch::TraceSkiaAllowlist),
-                              &trace_skia_allowlist);
-  if (trace_skia_allowlist.size()) {
-    settings.trace_skia_allowlist = ParseCommaDelimited(trace_skia_allowlist);
+  if (command_line.HasOption(FlagForSwitch(Switch::TraceSkia))) {
+    // If --trace-skia is specified, then log all Skia events.
+    settings.trace_skia_allowlist.reset();
   } else {
-    settings.trace_skia_allowlist = {"skia.shaders"};
+    std::string trace_skia_allowlist;
+    command_line.GetOptionValue(FlagForSwitch(Switch::TraceSkiaAllowlist),
+                                &trace_skia_allowlist);
+    if (trace_skia_allowlist.size()) {
+      settings.trace_skia_allowlist = ParseCommaDelimited(trace_skia_allowlist);
+    } else {
+      settings.trace_skia_allowlist = {"skia.shaders"};
+    }
   }
 #endif  // !FLUTTER_RELEASE
 
