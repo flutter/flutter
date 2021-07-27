@@ -954,59 +954,89 @@ void main() {
      expect(material.elevation, 2.0);
    });
 
-  testWidgets('Stepper horizontal size test', (WidgetTester tester) async {
+  testWidgets('Stepper horizontal title [HorizontalTitlePosition.bottom] and line [HorizontalLinePosition.top]', (WidgetTester tester) async {
+    int index = 0;
+
     await tester.pumpWidget(
       MaterialApp(
-        home: Center(
-          child: Material(
-            child: Stepper(
-              type: StepperType.horizontal,
-              horizontalTitlePosition: HorizontalTitlePosition.bottom,
-              horizontalLinePosition: HorizontalLinePosition.top,
-              steps: const <Step>[
-                Step(
-                  title: Text('Step 1'),
-                  content: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+        home: Material(
+          child: Stepper(
+            horizontalTitlePosition: HorizontalTitlePosition.bottom,
+            horizontalLinePosition: HorizontalLinePosition.top,
+            onStepTapped: (int i) {
+              index = i;
+            },
+            steps: const <EnhanceStep>[
+              Step(
+                title: Text('Step 1'),
+                content: SizedBox(
+                  width: 100.0,
+                  height: 100.0,
                 ),
-              ],
-            ),
+              ),
+              Step(
+                title: Text('Step 2'),
+                content: SizedBox(
+                  width: 100.0,
+                  height: 100.0,
+                ),
+              ),
+              Step(
+                title: Text('Step 3'),
+                content: SizedBox(
+                  width: 100.0,
+                  height: 100.0,
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
-
-    final RenderBox box = tester.renderObject(find.byType(Stepper));
-    expect(box.size.height, 600.0);
+    await tester.tap(find.text('Step 2'));
+    expect(index, 1);
   });
 
-  testWidgets('Stepper horizontal size test', (WidgetTester tester) async {
+  testWidgets('Stepper horizontal title [HorizontalTitlePosition.bottom] and line [HorizontalLinePosition.center]', (WidgetTester tester) async {
+    int index = 0;
+
     await tester.pumpWidget(
       MaterialApp(
-        home: Center(
-          child: Material(
-            child: Stepper(
-              type: StepperType.horizontal,
-              horizontalTitlePosition: HorizontalTitlePosition.bottom,
-              horizontalLinePosition: HorizontalLinePosition.center,
-              steps: const <Step>[
-                Step(
-                  title: Text('Step 1'),
-                  content: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+        home: Material(
+          child: Stepper(
+            horizontalTitlePosition: HorizontalTitlePosition.bottom,
+            horizontalLinePosition: HorizontalLinePosition.center,
+            onStepTapped: (int i) {
+              index = i;
+            },
+            steps: const <Step>[
+              Step(
+                title: Text('Step 1'),
+                content: SizedBox(
+                  width: 100.0,
+                  height: 100.0,
                 ),
-              ],
-            ),
+              ),
+              Step(
+                title: Text('Step 2'),
+                content: SizedBox(
+                  width: 100.0,
+                  height: 100.0,
+                ),
+              ),
+              Step(
+                title: Text('Step 3'),
+                content: SizedBox(
+                  width: 100.0,
+                  height: 100.0,
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
-
-    final RenderBox box = tester.renderObject(find.byType(Stepper));
-    expect(box.size.height, 600.0);
+    await tester.tap(find.text('Step 2'));
+    expect(index, 1);
   });
 }
