@@ -148,7 +148,7 @@ deps = {
    Var('chromium_git') + '/chromium/src/ios.git' + '@' + Var('ios_tools_revision'),
 
   'src/third_party/icu':
-   Var('chromium_git') + '/chromium/deps/icu.git' + '@' + '7e7574bd479497a5f8aa99310e83511d08a8ceef',
+   Var('chromium_git') + '/chromium/deps/icu.git' + '@' + '2a822c5626ab1ed40366758e4740b4f0ea40237d',
 
   'src/third_party/khronos':
    Var('chromium_git') + '/chromium/src/third_party/khronos.git' + '@' + '7122230e90547962e0f0c627f62eeed3c701f275',
