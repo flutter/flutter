@@ -927,6 +927,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// Dispatches a notification that the [ScrollMetrics] have changed.
   void didUpdateScrollMetrics() {
     assert(SchedulerBinding.instance!.schedulerPhase != SchedulerPhase.persistentCallbacks);
+    assert(_haveScheduledUpdateNotification);
     _haveScheduledUpdateNotification = false;
     if (context.notificationContext != null)
       ScrollMetricsNotification(metrics: copyWith(), context: context.notificationContext!).dispatch(context.notificationContext);
@@ -1049,7 +1050,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
 /// }
 /// ```
 /// {@end-tool}
-class ScrollMetricsNotification extends LayoutChangedNotification with ViewportNotificationMixin {
+class ScrollMetricsNotification extends Notification with ViewportNotificationMixin {
   /// Creates a notification that the scrollable widget's [ScrollMetrics] have
   /// changed.
   ScrollMetricsNotification({

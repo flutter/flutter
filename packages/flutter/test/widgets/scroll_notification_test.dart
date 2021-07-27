@@ -8,10 +8,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('ScrollMetricsNotification test', (WidgetTester tester) async {
-    final List<LayoutChangedNotification> events = <LayoutChangedNotification>[];
+    final List<Notification> events = <Notification>[];
     Widget buildFrame(double height) {
-      return NotificationListener<LayoutChangedNotification>(
-        onNotification: (LayoutChangedNotification value) {
+      return NotificationListener<Notification>(
+        onNotification: (Notification value) {
           events.add(value);
           return false;
         },
