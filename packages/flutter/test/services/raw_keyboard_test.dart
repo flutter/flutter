@@ -2400,6 +2400,7 @@ void main() {
         'keymap': 'web',
         'code': 'KeyA',
         'key': 'a',
+        'location': 0,
         'metaState': 0x0,
       });
       final RawKeyEventDataWeb data = keyAEvent.data as RawKeyEventDataWeb;
@@ -2413,6 +2414,8 @@ void main() {
         'type': 'keydown',
         'keymap': 'web',
         'code': 'Escape',
+        'key': 'Escape',
+        'location': 0,
         'metaState': 0x0,
       });
       final RawKeyEventDataWeb data = escapeKeyEvent.data as RawKeyEventDataWeb;
@@ -2426,6 +2429,8 @@ void main() {
         'type': 'keydown',
         'keymap': 'web',
         'code': 'ShiftLeft',
+        'key': 'Shift',
+        'location': 1,
         'metaState': RawKeyEventDataWeb.modifierShift,
       });
       final RawKeyEventDataWeb data = shiftKeyEvent.data as RawKeyEventDataWeb;
@@ -2439,6 +2444,8 @@ void main() {
         'type': 'keydown',
         'keymap': 'web',
         'code': 'ArrowDown',
+        'key': 'ArrowDown',
+        'location': 0,
         'metaState': 0x0,
       });
       final RawKeyEventDataWeb data = arrowKeyDown.data as RawKeyEventDataWeb;

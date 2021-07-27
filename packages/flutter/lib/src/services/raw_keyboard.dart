@@ -290,7 +290,7 @@ abstract class RawKeyEvent with Diagnosticable {
 
     RawKeyEventData _dataFromWeb() {
       final String? key = message['key'] as String?;
-      if (key != null && key.isNotEmpty) {
+      if (key != null && key.isNotEmpty && key.length == 1) {
         character = key;
       }
       return RawKeyEventDataWeb(

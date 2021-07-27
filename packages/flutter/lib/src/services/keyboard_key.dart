@@ -16,9 +16,9 @@ import 'package:flutter/foundation.dart';
 /// See also:
 ///
 ///  * [PhysicalKeyboardKey], a class with static values that describe the keys
-///    that are returned from [RawKeyEvent.physicalKey].
+///    that are returned from [RawKeyEvent.physicalKey] or [KeyEvent.physicalKey].
 ///  * [LogicalKeyboardKey], a class with static values that describe the keys
-///    that are returned from [RawKeyEvent.logicalKey].
+///    that are returned from [RawKeyEvent.logicalKey] or [KeyEvent.logicalKey].
 abstract class KeyboardKey with Diagnosticable {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -26,7 +26,7 @@ abstract class KeyboardKey with Diagnosticable {
 }
 
 /// A class with static values that describe the keys that are returned from
-/// [RawKeyEvent.logicalKey].
+/// [RawKeyEvent.logicalKey] or [KeyEvent.logicalKey].
 ///
 /// These represent *logical* keys, which are keys which are interpreted in the
 /// context of any modifiers, modes, or keyboard layouts which may be in effect.
@@ -170,7 +170,8 @@ class LogicalKeyboardKey extends KeyboardKey {
     return null;
   }
 
-  /// A description representing the character produced by a [RawKeyEvent].
+  /// A description representing the character produced by a [RawKeyEvent]
+  /// or [KeyEvent].
   ///
   /// This value is useful for providing readable strings for keys or keyboard
   /// shortcuts. Do not use this value to compare equality of keys; compare
@@ -187,7 +188,8 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// string if there's no key label data for a key.
   ///
   /// For the printable representation that takes into consideration the
-  /// modifiers and combining keys, see [RawKeyEvent.character].
+  /// modifiers and combining keys, see [RawKeyEvent.character] or
+  /// [KeyEvent.character].
   ///
   /// {@macro flutter.services.RawKeyEventData.keyLabel}
   String get keyLabel {
@@ -204,9 +206,9 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// also return accented letters (such as 'Key Ù') for keys labeled as so.
   ///
   /// For other keys, this looks up the full key name from a predefined map (the
-  /// same value as [keyLabel]), such as 'F1', 'Shift Left', or 'Media Down'. If
-  /// there's no key label data for a key, this returns a name that explains the
-  /// ID (such as 'Key with ID 0x00100012345').
+  /// same value as [keyLabel]), such as 'F1', 'Shift Left', or 'Audio Volume
+  /// Down'. If there's no key label data for a key, this returns a name that
+  /// explains the ID (such as 'Key with ID 0x00100012345').
   String? get debugName {
     String? result;
     assert(() {
@@ -3537,7 +3539,7 @@ class LogicalKeyboardKey extends KeyboardKey {
 }
 
 /// A class with static values that describe the keys that are returned from
-/// [RawKeyEvent.physicalKey].
+/// [RawKeyEvent.physicalKey] or [KeyEvent.physicalKey].
 ///
 /// These represent *physical* keys, which are keys which represent a particular
 /// key location on a QWERTY keyboard. It ignores any modifiers, modes, or
