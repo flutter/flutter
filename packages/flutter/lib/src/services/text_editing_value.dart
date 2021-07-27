@@ -329,31 +329,6 @@ class TextEditingValue {
     return TextEditingValue(text: textAfter, selection: newSelection);
   }
 
-  /// Deletes the from the current collapsed selection to the end of the field.
-  ///
-  /// The given SelectionChangedCause indicates the cause of this change and
-  /// will be passed to onSelectionChanged.
-  ///
-  /// See also:
-  ///   * [deleteToStart]
-  TextEditingValue deleteToEnd() {
-    assert(selection.isCollapsed);
-
-    if (!selection.isValid) {
-      return this;
-    }
-
-    final String textAfter = selection.textAfter(text);
-
-    if (textAfter.isEmpty) {
-      return this;
-    }
-
-    final String textBefore = selection.textBefore(text);
-    final TextSelection newSelection = TextSelection.collapsed(offset: textBefore.length);
-    return TextEditingValue(text: textBefore, selection: newSelection);
-  }
-
   /// Deletes to the given index.
   ///
   /// Returns a new TextEditingValue representing the state after the deletion.
@@ -393,47 +368,6 @@ class TextEditingValue {
       text: nextText,
       selection: TextSelection.collapsed(offset: index - text.length + nextText.length),
     );
-  }
-
-  /// {@template flutter.rendering.TextEditingValue.deleteByLine}
-  /// Deletes a line backwards from the current selection.
-  ///
-  /// If the [selection] is collapsed, deletes a line before the cursor.
-  ///
-  /// If the [selection] is not collapsed, deletes the selection.
-  /// {@endtemplate}
-  ///
-  /// See also:
-  ///
-  ///   * [deleteForwardByLine], which is same but in the opposite direction.
-  TextEditingValue deleteByLine(TextMetrics textMetrics) {
-    assert(selection != null);
-
-    if (!selection.isValid) {
-      return this;
-    }
-
-    if (!selection.isCollapsed) {
-      return _deleteNonEmptySelection();
-    }
-
-    String textBefore = selection.textBefore(text);
-    if (textBefore.isEmpty) {
-      return this;
-    }
-
-    // When there is a line break, line delete shouldn't do anything
-    final bool isPreviousCharacterBreakLine = textBefore.codeUnitAt(textBefore.length - 1) == 0x0A;
-    if (isPreviousCharacterBreakLine) {
-      return this;
-    }
-
-    final TextSelection line = textMetrics.getLineAtOffset(text, TextPosition(offset: textBefore.length - 1));
-    textBefore = textBefore.substring(0, line.start);
-
-    final String textAfter = selection.textAfter(text);
-    final TextSelection newSelection = TextSelection.collapsed(offset: textBefore.length);
-    return TextEditingValue(text: textBefore + textAfter, selection: newSelection);
   }
 
   /// {@template flutter.rendering.TextEditingValue.deleteForward}
