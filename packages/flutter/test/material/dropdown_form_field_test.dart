@@ -883,4 +883,56 @@ void main() {
       selectedItemBox.localToGlobal(Offset(selectedItemBox.size.width / 2.0, selectedItemBox.size.height / 2.0)),
     );
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/86336
+  testWidgets('`Form.onChanged` should Called when a form field has changed', (WidgetTester tester) async {
+    int? value = 1;
+    int? checkedValue;
+
+    await tester.pumpWidget(
+      TestApp(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: Form(
+            onChanged: () => checkedValue = value,
+            child: DropdownButtonFormField<int?>(
+              decoration: const InputDecoration(
+                labelText: 'labelText',
+              ),
+              value: value,
+              onChanged: (int? newValue) {
+                value = newValue;
+              },
+              items: const <DropdownMenuItem<int?>>[
+                DropdownMenuItem<int?>(
+                  value: 1,
+                  child: Text('One'),
+                ),
+                DropdownMenuItem<int?>(
+                  value: 2,
+                  child: Text('Two'),
+                ),
+                DropdownMenuItem<int?>(
+                  value: 3,
+                  child: Text('Three'),
+                )
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(value, 1);
+    expect(checkedValue, null);
+
+    // Select the item two.
+    await tester.tap(find.text('One'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Two').last);
+    await tester.pump();
+
+    expect(value, 2);
+    expect(checkedValue, 2);
+  });
 }
