@@ -28,7 +28,7 @@ Future<void> testMain() async {
   setUpStableTestFonts();
 
   testEachCanvas('draws paragraphs with placeholders', (EngineCanvas canvas) {
-    final Rect screenRect = const Rect.fromLTWH(0, 0, 600, 600);
+    const Rect screenRect = Rect.fromLTWH(0, 0, 600, 600);
     final RecordingCanvas recordingCanvas = RecordingCanvas(screenRect);
 
     Offset offset = Offset.zero;
@@ -51,7 +51,7 @@ Future<void> testMain() async {
   });
 
   testEachCanvas('text alignment and placeholders', (EngineCanvas canvas) {
-    final Rect screenRect = const Rect.fromLTWH(0, 0, 600, 600);
+    const Rect screenRect = Rect.fromLTWH(0, 0, 600, 600);
     final RecordingCanvas recordingCanvas = RecordingCanvas(screenRect);
 
     Offset offset = Offset.zero;

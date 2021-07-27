@@ -19,8 +19,8 @@ final MethodCodec codec = StandardMethodCodec();
 void testMain() {
   group('PlatformViewMessageHandler', () {
     group('handlePlatformViewCall', () {
-      final String viewType = 'forTest';
-      final int viewId = 6;
+      const String viewType = 'forTest';
+      const int viewId = 6;
       late PlatformViewManager contentManager;
       late Completer<ByteData?> completer;
       late Completer<html.Element> contentCompleter;

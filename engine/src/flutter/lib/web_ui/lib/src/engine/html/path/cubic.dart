@@ -163,7 +163,7 @@ double? chopMonoAtY(Float32List _buffer, int bufferStartPos, double y) {
   }
 
   // Bisection / linear convergance.
-  final double tolerance = 1.0 / 65536;
+  const double tolerance = 1.0 / 65536;
   do {
     final double tMid = (tPos + tNeg) / 2.0;
     final double y01 = ycrv0 + (ycrv1 - ycrv0) * tMid;

@@ -25,7 +25,7 @@ Future<void> testMain() async {
   setUpStableTestFonts();
 
   void paintTest(EngineCanvas canvas, PaintTest painter) {
-    final Rect screenRect = const Rect.fromLTWH(0, 0, 600, 600);
+    const Rect screenRect = Rect.fromLTWH(0, 0, 600, 600);
     final RecordingCanvas recordingCanvas = RecordingCanvas(screenRect);
     painter(recordingCanvas);
     recordingCanvas.endRecording();

@@ -52,8 +52,8 @@ Future<void> testMain() async {
     final engine.RecordingCanvas rc =
         engine.RecordingCanvas(const Rect.fromLTRB(0, 0, 500, 500));
     rc.save();
-    final double testWidth = 200;
-    final double testHeight = 150;
+    const double testWidth = 200;
+    const double testHeight = 150;
     final Path path = Path();
     path.addOval(Rect.fromLTWH(100, 30, testWidth, testHeight));
     rc.clipPath(path);
@@ -77,8 +77,8 @@ Future<void> testMain() async {
     final engine.RecordingCanvas rc =
     engine.RecordingCanvas(const Rect.fromLTRB(0, 0, 500, 500));
     rc.save();
-    final double testWidth = 200;
-    final double testHeight = 150;
+    const double testWidth = 200;
+    const double testHeight = 150;
 
     final Path paintPath = Path();
     paintPath.addRect(Rect.fromLTWH(-50, 0, testWidth, testHeight));
@@ -105,8 +105,8 @@ Future<void> testMain() async {
     final engine.RecordingCanvas rc =
     engine.RecordingCanvas(const Rect.fromLTRB(0, 0, 500, 500));
     rc.save();
-    final double testWidth = 200;
-    final double testHeight = 150;
+    const double testWidth = 200;
+    const double testHeight = 150;
 
     final Path paintPath = Path();
     paintPath.addRect(Rect.fromLTWH(-50, 0, testWidth, testHeight));

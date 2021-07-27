@@ -314,7 +314,7 @@ class Convexicator {
         math.max(curVecX, math.max(curVecY, math.max(lastX, lastY))),
         -smallest);
     if (SPath.nearlyEqual(largest, largest + cross)) {
-      final double nearlyZeroSquared =
+      const double nearlyZeroSquared =
           SPath.scalarNearlyZero * SPath.scalarNearlyZero;
       if (SPath.nearlyEqual(lengthSquared(lastX, lastY), nearlyZeroSquared) ||
           SPath.nearlyEqual(lengthSquared(curVecX, curVecY), nearlyZeroSquared)) {

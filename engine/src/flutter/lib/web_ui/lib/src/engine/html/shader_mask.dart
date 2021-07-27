@@ -76,7 +76,7 @@ class PersistedShaderMask extends PersistedContainerSurface
   html.Element createElement() {
     final html.Element element = defaultCreateElement('flt-shader-mask');
     final html.Element container = html.Element.tag('flt-mask-interior');
-    container.style..position = 'absolute';
+    container.style.position = 'absolute';
     _childContainer = container;
     element.append(_childContainer!);
     return element;

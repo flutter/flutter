@@ -349,7 +349,7 @@ Future<void> testMain() async {
 
   // Creates a picture
   test('Paints nine slice image', () async {
-    final Rect region = const Rect.fromLTWH(0, 0, 500, 500);
+    const Rect region = Rect.fromLTWH(0, 0, 500, 500);
     final EnginePictureRecorder recorder = EnginePictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
     final Image testImage = createNineSliceImage();
@@ -379,7 +379,7 @@ Future<void> testMain() async {
   // Tests for correct behavior when using drawImageNine with a destination
   // size that is too small to render the center portion of the original image.
   test('Paints nine slice image', () async {
-    final Rect region = const Rect.fromLTWH(0, 0, 100, 100);
+    const Rect region = Rect.fromLTWH(0, 0, 100, 100);
     final EnginePictureRecorder recorder = EnginePictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
     final Image testImage = createNineSliceImage();
@@ -414,7 +414,7 @@ Future<void> testMain() async {
   // the image we did not apply `transform-origin: 0 0 0` to the clipping
   // element which resulted in an undesirable offset.
   test('Paints clipped and transformed image', () async {
-    final Rect region = const Rect.fromLTRB(0, 0, 60, 70);
+    const Rect region = Rect.fromLTRB(0, 0, 60, 70);
     final RecordingCanvas canvas = RecordingCanvas(region);
     canvas.translate(10, 10);
     canvas.transform(Matrix4.rotationZ(0.4).storage);
@@ -431,7 +431,7 @@ Future<void> testMain() async {
 
   /// Regression test for https://github.com/flutter/flutter/issues/61245
   test('Should render image with perspective', () async {
-    final Rect region = const Rect.fromLTRB(0, 0, 200, 200);
+    const Rect region = Rect.fromLTRB(0, 0, 200, 200);
     final RecordingCanvas canvas = RecordingCanvas(region);
     canvas.translate(10, 10);
     canvas.drawImage(createTestImage(), Offset(0, 0), SurfacePaint());
@@ -448,7 +448,7 @@ Future<void> testMain() async {
 
   /// Regression test for https://github.com/flutter/flutter/issues/61245
   test('Should render image with perspective inside clip area', () async {
-    final Rect region = const Rect.fromLTRB(0, 0, 200, 200);
+    const Rect region = Rect.fromLTRB(0, 0, 200, 200);
     final RecordingCanvas canvas = RecordingCanvas(region);
     canvas.drawRect(region, SurfacePaint()..color = Color(0xFFE0E0E0));
     canvas.translate(10, 10);
@@ -468,7 +468,7 @@ Future<void> testMain() async {
   });
 
   test('Should render rect with perspective transform', () async {
-    final Rect region = const Rect.fromLTRB(0, 0, 400, 400);
+    const Rect region = Rect.fromLTRB(0, 0, 400, 400);
     final RecordingCanvas canvas = RecordingCanvas(region);
     canvas.drawRect(region, SurfacePaint()..color = Color(0xFFE0E0E0));
     canvas.translate(20, 20);
@@ -492,7 +492,7 @@ Future<void> testMain() async {
   });
 
   test('Should render color and ovals with perspective transform', () async {
-    final Rect region = const Rect.fromLTRB(0, 0, 400, 400);
+    const Rect region = Rect.fromLTRB(0, 0, 400, 400);
     final RecordingCanvas canvas = RecordingCanvas(region);
     canvas.drawRect(region, SurfacePaint()..color = Color(0xFFFF0000));
     canvas.drawColor(Color(0xFFE0E0E0), BlendMode.src);
@@ -517,7 +517,7 @@ Future<void> testMain() async {
   });
 
   test('Should render path with perspective transform', () async {
-    final Rect region = const Rect.fromLTRB(0, 0, 400, 400);
+    const Rect region = Rect.fromLTRB(0, 0, 400, 400);
     final RecordingCanvas canvas = RecordingCanvas(region);
     canvas.drawRect(region, SurfacePaint()..color = Color(0xFFFF0000));
     canvas.drawColor(Color(0xFFE0E0E0), BlendMode.src);
@@ -549,7 +549,7 @@ Future<void> testMain() async {
   });
 
   test('Should render path with perspective transform', () async {
-    final Rect region = const Rect.fromLTRB(0, 0, 400, 400);
+    const Rect region = Rect.fromLTRB(0, 0, 400, 400);
     final RecordingCanvas canvas = RecordingCanvas(region);
     canvas.drawRect(region, SurfacePaint()..color = Color(0xFFFF0000));
     canvas.drawColor(Color(0xFFE0E0E0), BlendMode.src);

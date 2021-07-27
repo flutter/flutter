@@ -25,9 +25,9 @@ Future<void> testMain() async {
     Offset offset = Offset.zero;
     CanvasParagraph paragraph;
 
-    final double fontSize = 22.0;
-    final double width = 126.0;
-    final double padding = 20.0;
+    const double fontSize = 22.0;
+    const double width = 126.0;
+    const double padding = 20.0;
 
     paragraph = rich(
       EngineParagraphStyle(fontFamily: 'Roboto', fontSize: fontSize, ellipsis: '...'),

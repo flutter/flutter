@@ -646,7 +646,7 @@ class CanvasTextMeasurementService extends TextMeasurementService {
       maxIntrinsicWidth: maxIntrinsicCalculator.value,
       width: constraints.width,
       lines: linesCalculator.lines,
-      placeholderBoxes: <ui.TextBox>[],
+      placeholderBoxes: const <ui.TextBox>[],
       textAlign: paragraph.textAlign,
       textDirection: paragraph.textDirection,
     );

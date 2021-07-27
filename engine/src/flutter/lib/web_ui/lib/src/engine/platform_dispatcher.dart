@@ -1012,7 +1012,7 @@ bool _handleWebTestEnd2EndMessage(MethodCodec codec, ByteData? data) {
 }
 
 /// Invokes [callback] inside the given [zone].
-void invoke(void callback()?, Zone? zone) {
+void invoke(void Function()? callback, Zone? zone) {
   if (callback == null) {
     return;
   }
@@ -1027,7 +1027,7 @@ void invoke(void callback()?, Zone? zone) {
 }
 
 /// Invokes [callback] inside the given [zone] passing it [arg].
-void invoke1<A>(void callback(A a)?, Zone? zone, A arg) {
+void invoke1<A>(void Function(A a)? callback, Zone? zone, A arg) {
   if (callback == null) {
     return;
   }

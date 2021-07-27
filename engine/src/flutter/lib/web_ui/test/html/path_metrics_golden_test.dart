@@ -67,10 +67,10 @@ Future<void> testMain() async {
 
   test('Should calculate tangent on cubic curve', () async {
     final Path path = Path();
-    final double p1x = 240;
-    final double p1y = 120;
-    final double p2x = 320;
-    final double p2y = 25;
+    const double p1x = 240;
+    const double p1y = 120;
+    const double p2x = 320;
+    const double p2y = 25;
     path.moveTo(150, 20);
     path.quadraticBezierTo(p1x, p1y, p2x, p2y);
     final PathMetric metric = path.computeMetrics().first;
@@ -83,10 +83,10 @@ Future<void> testMain() async {
 
   test('Should calculate tangent on quadratic curve', () async {
     final Path path = Path();
-    final double p0x = 150;
-    final double p0y = 20;
-    final double p1x = 320;
-    final double p1y = 25;
+    const double p0x = 150;
+    const double p0y = 20;
+    const double p1x = 320;
+    const double p1y = 25;
     path.moveTo(150, 20);
     path.quadraticBezierTo(p0x, p0y, p1x, p1y);
     final PathMetric metric = path.computeMetrics().first;
@@ -114,16 +114,16 @@ Future<void> testMain() async {
     final SurfacePath path = SurfacePath();
     path.moveTo(50, 130);
     path.lineTo(150, 20);
-    final double p1x = 240;
-    final double p1y = 120;
-    final double p2x = 320;
-    final double p2y = 25;
+    const double p1x = 240;
+    const double p1y = 120;
+    const double p2x = 320;
+    const double p2y = 25;
     path.quadraticBezierTo(p1x, p1y, p2x, p2y);
 
     rc.drawPath(path, paint);
 
-    final double t0 = 0.2;
-    final double t1 = 0.7;
+    const double t0 = 0.2;
+    const double t1 = 0.7;
 
     final List<PathMetric> metrics = path.computeMetrics().toList();
     double totalLength = 0;
@@ -135,7 +135,7 @@ Future<void> testMain() async {
       double distance = totalLength * t0;
       bool draw = true;
       while (distance < measurePath.length * t1) {
-        final double length = kDashLength;
+        const double length = kDashLength;
         if (draw) {
           dashedPath.addPath(
               measurePath.extractPath(distance, distance + length),
@@ -166,18 +166,18 @@ Future<void> testMain() async {
     final Path path = Path();
     path.moveTo(50, 130);
     path.lineTo(150, 20);
-    final double p1x = 40;
-    final double p1y = 120;
-    final double p2x = 300;
-    final double p2y = 130;
-    final double p3x = 320;
-    final double p3y = 25;
+    const double p1x = 40;
+    const double p1y = 120;
+    const double p2x = 300;
+    const double p2y = 130;
+    const double p3x = 320;
+    const double p3y = 25;
     path.cubicTo(p1x, p1y, p2x, p2y, p3x, p3y);
 
     rc.drawPath(path, paint);
 
-    final double t0 = 0.2;
-    final double t1 = 0.7;
+    const double t0 = 0.2;
+    const double t1 = 0.7;
 
     final List<PathMetric> metrics = path.computeMetrics().toList();
     double totalLength = 0;
@@ -189,7 +189,7 @@ Future<void> testMain() async {
       double distance = totalLength * t0;
       bool draw = true;
       while (distance < measurePath.length * t1) {
-        final double length = kDashLength;
+        const double length = kDashLength;
         if (draw) {
           dashedPath.addPath(
               measurePath.extractPath(distance, distance + length),

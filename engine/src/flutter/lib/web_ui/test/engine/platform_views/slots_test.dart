@@ -14,7 +14,7 @@ void main() {
 
 void testMain() {
   group('PlatformViewManager', () {
-    final int viewId = 6;
+    const int viewId = 6;
 
     group('createPlatformViewSlot', () {
       test(

@@ -25,14 +25,14 @@ final int kPhysicalTab = kWebToPhysicalKey['Tab']!;
 final int kPhysicalCapsLock = kWebToPhysicalKey['CapsLock']!;
 final int kPhysicalScrollLock = kWebToPhysicalKey['ScrollLock']!;
 
-final int kLogicalKeyA = 0x00000000061;
-final int kLogicalKeyU = 0x00000000075;
-final int kLogicalDigit1 = 0x00000000031;
+const int kLogicalKeyA = 0x00000000061;
+const int kLogicalKeyU = 0x00000000075;
+const int kLogicalDigit1 = 0x00000000031;
 final int kLogicalNumpad1 = kWebLogicalLocationMap['1']![kLocationNumpad]!;
 final int kLogicalShiftLeft = kWebLogicalLocationMap['Shift']![kLocationLeft]!;
 final int kLogicalShiftRight = kWebLogicalLocationMap['Shift']![kLocationRight]!;
 final int kLogicalMetaLeft = kWebLogicalLocationMap['Meta']![kLocationLeft]!;
-final int kLogicalTab = 0x0000000009;
+const int kLogicalTab = 0x0000000009;
 final int kLogicalCapsLock = kWebToLogicalKey['CapsLock']!;
 final int kLogicalScrollLock = kWebToLogicalKey['ScrollLock']!;
 

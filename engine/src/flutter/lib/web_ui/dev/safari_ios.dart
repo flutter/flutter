@@ -72,7 +72,7 @@ class SafariIos extends Browser {
     });
   }
 
-  SafariIos._(Future<io.Process> startBrowser()) : super(startBrowser);
+  SafariIos._(Future<io.Process> Function() startBrowser) : super(startBrowser);
 }
 
 /// [ScreenshotManager] implementation for Safari.

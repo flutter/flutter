@@ -309,7 +309,7 @@ class PathRef {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return equals(other as PathRef);
+    return other is PathRef && equals(other);
   }
 
   @override
@@ -876,7 +876,7 @@ class PathRef {
       for (int i = 0; i < len; i += 2) {
         final double pointX = fPoints[i];
         final double pointY = fPoints[i + 1];
-        final double tolerance = 0.0001;
+        const double tolerance = 0.0001;
         final bool pointIsFinite = pointX.isFinite && pointY.isFinite;
         if (pointIsFinite &&
             (pointX + tolerance < boundsLeft ||

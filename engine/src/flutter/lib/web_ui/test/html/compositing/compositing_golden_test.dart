@@ -666,7 +666,7 @@ void _testCullRectComputation() {
   test('pushClipPath', () async {
     final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
     final ui.Path path = ui.Path();
-    path..addRect(const ui.Rect.fromLTRB(10, 10, 60, 60));
+    path.addRect(const ui.Rect.fromLTRB(10, 10, 60, 60));
     builder.pushClipPath(
       path,
     );

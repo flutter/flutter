@@ -72,5 +72,5 @@ class Edge extends Browser {
     });
   }
 
-  Edge._(Future<Process> startBrowser()) : super(startBrowser);
+  Edge._(Future<Process> Function() startBrowser) : super(startBrowser);
 }

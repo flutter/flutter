@@ -37,7 +37,7 @@ Future<void> testMain() async {
   }
 
   test('Should draw centered radial gradient.', () async {
-    final Rect shaderRect = const Rect.fromLTRB(50, 50, 300, 300);
+    const Rect shaderRect = Rect.fromLTRB(50, 50, 300, 300);
     await _testGradient(
         'radial_gradient_centered',
         Gradient.radial(
@@ -53,7 +53,7 @@ Future<void> testMain() async {
   });
 
   test('Should draw right bottom centered radial gradient.', () async {
-    final Rect shaderRect = const Rect.fromLTRB(50, 50, 300, 300);
+    const Rect shaderRect = Rect.fromLTRB(50, 50, 300, 300);
     await _testGradient(
       'radial_gradient_right_bottom',
       Gradient.radial(
@@ -70,7 +70,7 @@ Future<void> testMain() async {
   });
 
   test('Should draw with radial gradient with TileMode.clamp.', () async {
-    final Rect shaderRect = const Rect.fromLTRB(50, 50, 100, 100);
+    const Rect shaderRect = Rect.fromLTRB(50, 50, 100, 100);
     await _testGradient(
       'radial_gradient_tilemode_clamp',
       Gradient.radial(
@@ -99,7 +99,7 @@ Future<void> testMain() async {
   const List<double> colorStops = <double>[0.0, 0.05, 0.4, 0.6, 0.9, 1.0];
 
   test('Should draw with radial gradient with TileMode.repeated.', () async {
-    final Rect shaderRect = const Rect.fromLTRB(50, 50, 100, 100);
+    const Rect shaderRect = Rect.fromLTRB(50, 50, 100, 100);
     await _testGradient(
         'radial_gradient_tilemode_repeated',
         Gradient.radial(
@@ -114,7 +114,7 @@ Future<void> testMain() async {
   });
 
   test('Should draw with radial gradient with TileMode.mirrored.', () async {
-    final Rect shaderRect = const Rect.fromLTRB(50, 50, 100, 100);
+    const Rect shaderRect = Rect.fromLTRB(50, 50, 100, 100);
     await _testGradient(
         'radial_gradient_tilemode_mirror',
         Gradient.radial(
