@@ -284,9 +284,9 @@ void testMain() {
       final Set<int> supportedUniqueCodeUnits = <int>{};
       final IntervalTree<NotoFont> notoTree =
           FontFallbackData.instance.notoTree;
-      for (NotoFont font in notoTree.root.enumerateAllElements()) {
+      for (final NotoFont font in notoTree.root.enumerateAllElements()) {
         testedFonts.add(font.name);
-        for (CodeunitRange range in font.approximateUnicodeRanges) {
+        for (final CodeunitRange range in font.approximateUnicodeRanges) {
           for (int codeUnit = range.start;
               codeUnit < range.end;
               codeUnit += 1) {
@@ -343,7 +343,7 @@ void testMain() {
           codeUnits.add(supportedCodeUnits[i]);
         }
         final Set<NotoFont> fonts = <NotoFont>{};
-        for (int codeUnit in codeUnits) {
+        for (final int codeUnit in codeUnits) {
           final List<NotoFont> fontsForUnit = notoTree.intersections(codeUnit);
 
           // All code units are extracted from the same tree, so there must

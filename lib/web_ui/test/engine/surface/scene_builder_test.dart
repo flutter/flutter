@@ -268,7 +268,7 @@ void testMain() {
     final html.Element content = builder.build().webOnlyRootElement!;
     html.document.body!.append(content);
     List<html.ImageElement> list = content.querySelectorAll('img');
-    for (html.ImageElement image in list) {
+    for (final html.ImageElement image in list) {
       image.alt = 'marked';
     }
 
@@ -284,7 +284,7 @@ void testMain() {
 
     final html.Element contentAfterReuse = builder2.build().webOnlyRootElement!;
     list = contentAfterReuse.querySelectorAll('img');
-    for (html.ImageElement image in list) {
+    for (final html.ImageElement image in list) {
       expect(image.alt, 'marked');
     }
     expect(list.length, 1);
@@ -497,7 +497,7 @@ void testMain() {
       // Watches DOM mutations and counts deletions and additions to the child
       // list of the `<flt-scene>` element.
       final html.MutationObserver observer = html.MutationObserver((List<dynamic> mutations, _) {
-        for (html.MutationRecord record in mutations.cast<html.MutationRecord>()) {
+        for (final html.MutationRecord record in mutations.cast<html.MutationRecord>()) {
           actualDeletions.addAll(record.removedNodes!);
           actualAdditions.addAll(record.addedNodes!);
         }

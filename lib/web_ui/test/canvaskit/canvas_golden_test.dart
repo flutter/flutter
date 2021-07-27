@@ -646,8 +646,8 @@ void testMain() {
       final CkCanvas canvas = recorder.beginRecording(ui.Rect.largest);
       canvas.translate(10, 10);
 
-      for (ParagraphFactory from in variations) {
-        for (ParagraphFactory to in variations) {
+      for (final ParagraphFactory from in variations) {
+        for (final ParagraphFactory to in variations) {
           canvas.save();
           final CkParagraph fromParagraph = from();
           canvas.drawParagraph(fromParagraph, ui.Offset.zero);

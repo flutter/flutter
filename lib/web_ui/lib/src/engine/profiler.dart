@@ -298,7 +298,7 @@ class Instrumentation {
           ..sort((MapEntry<String, int> a, MapEntry<String, int> b) {
             return a.key.compareTo(b.key);
           });
-        for (MapEntry<String, int> entry in entries) {
+        for (final MapEntry<String, int> entry in entries) {
           message.writeln('  ${entry.key}: ${entry.value}');
         }
         print(message);

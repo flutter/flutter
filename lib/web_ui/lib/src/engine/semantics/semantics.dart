@@ -1070,7 +1070,7 @@ class SemanticsObject {
     if (_previousChildrenInTraversalOrder == null ||
         _previousChildrenInTraversalOrder!.isEmpty) {
       _previousChildrenInTraversalOrder = _childrenInTraversalOrder;
-      for (int id in _previousChildrenInTraversalOrder!) {
+      for (final int id in _previousChildrenInTraversalOrder!) {
         final SemanticsObject child = owner.getOrCreateObject(id);
         containerElement!.append(child.element);
         owner._attachObject(parent: this, child: child);
@@ -1290,7 +1290,7 @@ class EngineSemanticsOwner {
   /// the one-time callbacks scheduled via the [addOneTimePostUpdateCallback]
   /// method.
   void _finalizeTree() {
-    for (SemanticsObject? object in _detachments) {
+    for (final SemanticsObject? object in _detachments) {
       final SemanticsObject? parent = _attachments[object!.id];
       if (parent == null) {
         // Was not reparented and is removed permanently from the tree.
@@ -1306,7 +1306,7 @@ class EngineSemanticsOwner {
     _attachments = <int?, SemanticsObject>{};
 
     if (_oneTimePostUpdateCallbacks.isNotEmpty) {
-      for (ui.VoidCallback callback in _oneTimePostUpdateCallbacks) {
+      for (final ui.VoidCallback callback in _oneTimePostUpdateCallbacks) {
         callback();
       }
       _oneTimePostUpdateCallbacks = <ui.VoidCallback>[];
@@ -1575,7 +1575,7 @@ class EngineSemanticsOwner {
     }
 
     final SemanticsUpdate update = uiUpdate as SemanticsUpdate;
-    for (SemanticsNodeUpdate nodeUpdate in update._nodeUpdates!) {
+    for (final SemanticsNodeUpdate nodeUpdate in update._nodeUpdates!) {
       final SemanticsObject object = getOrCreateObject(nodeUpdate.id);
       object.updateWith(nodeUpdate);
     }
@@ -1596,7 +1596,7 @@ class EngineSemanticsOwner {
         // Ensure child ID list is consistent with the parent-child
         // relationship of the semantics tree.
         if (object!._childrenInTraversalOrder != null) {
-          for (int childId in object._childrenInTraversalOrder!) {
+          for (final int childId in object._childrenInTraversalOrder!) {
             final SemanticsObject? child = _semanticsTree[childId];
             if (child == null) {
               throw AssertionError('Child #$childId is missing in the tree.');
@@ -1616,7 +1616,7 @@ class EngineSemanticsOwner {
       });
 
       // Validate that all updates were applied
-      for (SemanticsNodeUpdate update in update._nodeUpdates!) {
+      for (final SemanticsNodeUpdate update in update._nodeUpdates!) {
         // Node was added to the tree.
         assert(_semanticsTree.containsKey(update.id));
       }

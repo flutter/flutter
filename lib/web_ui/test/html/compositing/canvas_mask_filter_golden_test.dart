@@ -140,7 +140,7 @@ Future<void> testMain() async {
         ui.Color(0xFF6500C9),
       ];
 
-      for (ui.Color color in colors) {
+      for (final ui.Color color in colors) {
         paint.color = color;
         rc.rotate(math.pi / 4);
         rc.drawRect(
@@ -157,7 +157,7 @@ Future<void> testMain() async {
   testMaskFilterBlur(isWebkit: false);
   testMaskFilterBlur(isWebkit: true);
 
-  for (int testDpr in <int>[1, 2, 4]) {
+  for (final int testDpr in <int>[1, 2, 4]) {
     test('MaskFilter.blur blurs correctly for device-pixel ratio $testDpr', () async {
       window.debugOverrideDevicePixelRatio(testDpr.toDouble());
       const ui.Rect screenRect = ui.Rect.fromLTWH(0, 0, 150, 150);

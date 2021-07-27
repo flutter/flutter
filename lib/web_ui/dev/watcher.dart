@@ -116,7 +116,7 @@ class Pipeline {
   Future<void> run() async {
     _status = PipelineStatus.started;
     try {
-      for (PipelineStep step in steps) {
+      for (final PipelineStep step in steps) {
         if (status != PipelineStatus.started) {
           break;
         }

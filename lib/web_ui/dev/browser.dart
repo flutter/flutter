@@ -176,7 +176,7 @@ abstract class Browser {
     // If we don't manually close the stream the test runner can hang.
     // For example this happens with Chrome Headless.
     // See SDK issue: https://github.com/dart-lang/sdk/issues/31264
-    for (StreamSubscription<void> stream in _ioSubscriptions) {
+    for (final StreamSubscription<void> stream in _ioSubscriptions) {
       unawaited(stream.cancel());
     }
 

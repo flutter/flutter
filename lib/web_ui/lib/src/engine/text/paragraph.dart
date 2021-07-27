@@ -324,7 +324,7 @@ class DomParagraph implements EngineParagraph {
   double get longestLine {
     if (_hasLineMetrics) {
       double maxWidth = 0.0;
-      for (ui.LineMetrics metrics in _measurementResult!.lines!) {
+      for (final ui.LineMetrics metrics in _measurementResult!.lines!) {
         if (maxWidth < metrics.width) {
           maxWidth = metrics.width;
         }

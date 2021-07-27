@@ -479,7 +479,7 @@ void verifyNoOverlappingRanges(List<UnicodeRange> data) {
 
 List<String> extractHeader(List<String> lines) {
   final List<String> headerLines = <String>[];
-  for (String line in lines) {
+  for (final String line in lines) {
     if (line.trim() == '#' || line.trim().isEmpty) {
       break;
     }

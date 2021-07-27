@@ -321,7 +321,7 @@ List<Line> split(String text) {
   final List<Line> lines = <Line>[];
 
   int lastIndex = 0;
-  for (LineBreakResult brk in findBreaks(text)) {
+  for (final LineBreakResult brk in findBreaks(text)) {
     lines.add(Line(text.substring(lastIndex, brk.index), brk.type));
     lastIndex = brk.index;
   }

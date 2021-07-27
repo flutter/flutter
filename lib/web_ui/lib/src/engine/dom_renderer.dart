@@ -140,7 +140,7 @@ class DomRenderer {
 
   void _clearOnHotRestart() {
     if (_staleHotRestartState!.isNotEmpty) {
-      for (html.Element? element in _staleHotRestartState!) {
+      for (final html.Element? element in _staleHotRestartState!) {
         element?.remove();
       }
       _staleHotRestartState!.clear();
@@ -328,7 +328,7 @@ class DomRenderer {
     // engine are complete.
     bodyElement.spellcheck = false;
 
-    for (html.Element viewportMeta
+    for (final html.Element viewportMeta
         in html.document.head!.querySelectorAll('meta[name="viewport"]')) {
       if (assertionsEnabled) {
         // Filter out the meta tag that we ourselves placed on the page. This is
@@ -613,7 +613,7 @@ class DomRenderer {
   /// The element corresponding to the only child of the root surface.
   html.Element? get _rootApplicationElement {
     final html.Element lastElement = rootElement.children.last;
-    for (html.Element child in lastElement.children) {
+    for (final html.Element child in lastElement.children) {
       if (child.tagName == 'FLT-SCENE') {
         return child;
       }

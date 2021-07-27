@@ -22,7 +22,7 @@ class IntervalTree<T> {
     // Get a list of all the ranges ordered by start index.
     final List<IntervalTreeNode<T>> intervals = <IntervalTreeNode<T>>[];
     rangesMap.forEach((T key, List<CodeunitRange> rangeList) {
-      for (CodeunitRange range in rangeList) {
+      for (final CodeunitRange range in rangeList) {
         intervals.add(IntervalTreeNode<T>(key, range.start, range.end));
       }
     });

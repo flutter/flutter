@@ -189,7 +189,8 @@ class EngineAutofillForm {
         AutofillInfo.fromFrameworkMessage(focusedElementAutofill);
 
     if (fields != null) {
-      for (Map<String, dynamic> field in fields.cast<Map<String, dynamic>>()) {
+      for (final Map<String, dynamic> field in
+          fields.cast<Map<String, dynamic>>()) {
         final Map<String, dynamic> autofillInfo = field['autofill'];
         final AutofillInfo autofill = AutofillInfo.fromFrameworkMessage(
             autofillInfo,
@@ -1571,7 +1572,7 @@ void saveForms() {
 ///
 /// Called when the form is finalized.
 void cleanForms() {
-  for (html.FormElement form in formsOnTheDom.values) {
+  for (final html.FormElement form in formsOnTheDom.values) {
     form.remove();
   }
   formsOnTheDom.clear();

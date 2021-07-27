@@ -41,13 +41,9 @@ linter:
     throw_in_finally: false
     type_init_formals: false
     unnecessary_getters_setters: false
-    unnecessary_null_aware_assignments: false
-    unnecessary_null_in_if_null_operators: false
-    unrelated_type_equality_checks: false
     use_rethrow_when_possible: false
     valid_regexps: false
     use_function_type_syntax_for_parameters: false
-    prefer_final_in_for_each: false
     avoid_single_cascade_in_expression_statements: false
     flutter_style_todos: false
 

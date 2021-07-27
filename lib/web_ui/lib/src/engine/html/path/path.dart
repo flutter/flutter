@@ -612,7 +612,7 @@ class SurfacePath implements ui.Path {
     final double scaleY = rect.height / 2;
     final double centerX = rect.center.dx;
     final double centerY = rect.center.dy;
-    for (Conic conic in conics) {
+    for (final Conic conic in conics) {
       double x = conic.p0x;
       double y = ccw ? -conic.p0y : conic.p0y;
       conic.p0x = (cosStart * x - sinStart * y) * scaleX + centerX;

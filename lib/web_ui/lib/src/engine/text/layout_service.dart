@@ -342,7 +342,7 @@ class TextLayoutService {
     // We could do a binary search here but it's not worth it because the number
     // of line is typically low, and each iteration is a cheap comparison of
     // doubles.
-    for (EngineLineMetrics line in lines) {
+    for (final EngineLineMetrics line in lines) {
       if (y <= line.height) {
         return line;
       }
