@@ -14,7 +14,9 @@ import 'package:flutter/scheduler.dart';
 
 import 'asset_bundle.dart';
 import 'binary_messenger.dart';
+import 'hardware_keyboard.dart';
 import 'message_codec.dart';
+import 'raw_keyboard.dart';
 import 'restoration.dart';
 import 'system_channels.dart';
 
@@ -31,6 +33,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     _instance = this;
     _defaultBinaryMessenger = createBinaryMessenger();
     _restorationManager = createRestorationManager();
+    _initKeyboard();
     initLicenses();
     SystemChannels.system.setMessageHandler((dynamic message) => handleSystemMessage(message as Object));
     SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
@@ -41,6 +44,23 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   /// The current [ServicesBinding], if one has been created.
   static ServicesBinding? get instance => _instance;
   static ServicesBinding? _instance;
+
+  /// The global singleton instance of [HardwareKeyboard], which can be used to
+  /// query keyboard states.
+  HardwareKeyboard get keyboard => _keyboard;
+  late final HardwareKeyboard _keyboard;
+
+  /// The global singleton instance of [KeyEventManager], which is used
+  /// internally to dispatch key messages.
+  KeyEventManager get keyEventManager => _keyEventManager;
+  late final KeyEventManager _keyEventManager;
+
+  void _initKeyboard() {
+    _keyboard = HardwareKeyboard();
+    _keyEventManager = KeyEventManager(_keyboard, RawKeyboard.instance);
+    window.onKeyData = _keyEventManager.handleKeyData;
+    SystemChannels.keyEvent.setMessageHandler(_keyEventManager.handleRawKeyMessage);
+  }
 
   /// The default instance of [BinaryMessenger].
   ///
