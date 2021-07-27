@@ -330,4 +330,61 @@ void main() {
   renderObjectToWidgetElement.insertChildRenderObject(renderObject, object);
   renderObjectToWidgetElement.moveChildRenderObject(renderObject, object);
   renderObjectToWidgetElement.removeChildRenderObject(renderObject);
+
+  // Changes made in https://github.com/flutter/flutter/pull/81336
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData(accentColor: Colors.red);
+  themeData = ThemeData(accentColor: Colors.red, primarySwatch: Colors.blue);
+  themeData = ThemeData(accentColor: Colors.red, colorScheme: ColorScheme.light());
+  themeData = ThemeData(accentColor: Colors.red, colorScheme: ColorScheme.light(), primarySwatch: Colors.blue);
+  themeData = ThemeData.raw(accentColor: Colors.red);
+  themeData = ThemeData.raw(accentColor: Colors.red, primarySwatch: Colors.blue);
+  themeData = ThemeData.raw(accentColor: Colors.red, colorScheme: ColorScheme.light());
+  themeData = ThemeData.raw(accentColor: Colors.red, colorScheme: ColorScheme.light(), primarySwatch: Colors.blue);
+  themeData = themeData.copyWith(accentColor: Colors.red);
+  themeData = themeData.copyWith(accentColor: Colors.red, primarySwatch: Colors.blue);
+  themeData = themeData.copyWith(accentColor: Colors.red, colorScheme: ColorScheme.light());
+  themeData = themeData.copyWith(accentColor: Colors.red, colorScheme: ColorScheme.light(), primarySwatch: Colors.blue);
+  themeData.accentColor;
+
+  // Changes made in https://github.com/flutter/flutter/pull/81336
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData(accentColorBrightness: Brightness.dark);
+  themeData = ThemeData.raw(accentColorBrightness: Brightness.dark);
+  themeData = themeData.copyWith(accentColorBrightness: Brightness.dark);
+  themeData.accentColorBrightness; // Removing field reference not supported.
+
+  // Changes made in https://github.com/flutter/flutter/pull/81336
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData(accentTextTheme: TextTheme());
+  themeData = ThemeData.raw(accentTextTheme: TextTheme());
+  themeData = themeData.copyWith(accentTextTheme: TextTheme());
+  themeData.accentTextTheme; // Removing field reference not supported.
+
+  // Changes made in https://github.com/flutter/flutter/pull/81336
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData(accentIconTheme: IconThemeData());
+  themeData = ThemeData.raw(accentIconTheme: IconThemeData());
+  themeData = themeData.copyWith(accentIconTheme: IconThemeData());
+  themeData.accentIconTheme; // Removing field reference not supported.
+
+  // Changes made in https://github.com/flutter/flutter/pull/81336
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData(buttonColor: Colors.red);
+  themeData = ThemeData.raw(buttonColor: Colors.red);
+  themeData = themeData.copyWith(buttonColor: Colors.red);
+  themeData.buttonColor; // Removing field reference not supported.
+
+  // Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  ListWheelScrollView listWheelScrollView = ListWheelScrollView();
+  listWheelScrollView = ListWheelScrollView(clipToSize: true);
+  listWheelScrollView = ListWheelScrollView(clipToSize: false);
+  listWheelScrollView = ListWheelScrollView.useDelegate();
+  listWheelScrollView = ListWheelScrollView.useDelegate(clipToSize: true);
+  listWheelScrollView = ListWheelScrollView.useDelegate(clipToSize: false);
+  listWheelScrollView.clipToSize;
+  ListWheelViewport listWheelViewport = ListWheelViewport();
+  listWheelViewport = ListWheelViewport(clipToSize: true);
+  listWheelViewport = ListWheelViewport(clipToSize: false);
+  listWheelViewport.clipToSize;
 }

@@ -46,7 +46,7 @@ void main() {
     await tester.pumpWidget(display);
 
     await expectLater(find.byWidget(display), matchesGoldenFile('test.animation_sheet_builder.records.png'));
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42767
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
   testWidgets('correctly wraps a row', (WidgetTester tester) async {
     final AnimationSheetBuilder builder = AnimationSheetBuilder(frameSize: _DecuplePixels.size);
@@ -64,7 +64,7 @@ void main() {
     await tester.pumpWidget(display);
 
     await expectLater(find.byWidget(display), matchesGoldenFile('test.animation_sheet_builder.wraps.png'));
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42767
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
   testWidgets('correctly records frames using collate', (WidgetTester tester) async {
     final AnimationSheetBuilder builder = AnimationSheetBuilder(frameSize: _DecuplePixels.size);
@@ -99,7 +99,7 @@ void main() {
       builder.collate(5),
       matchesGoldenFile('test.animation_sheet_builder.collate.png'),
     );
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42767
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
   testWidgets('use allLayers to record out-of-subtree contents', (WidgetTester tester) async {
     final AnimationSheetBuilder builder = AnimationSheetBuilder(
@@ -130,7 +130,7 @@ void main() {
       builder.collate(5),
       matchesGoldenFile('test.animation_sheet_builder.out_of_tree.png'),
     );
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42767
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
 }
 

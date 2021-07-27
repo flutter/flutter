@@ -80,11 +80,6 @@ BuildApp() {
     derived_dir="${project_path}/.ios/Flutter"
   fi
 
-  local bundle_sksl_path=""
-  if [[ -n "$BUNDLE_SKSL_PATH" ]]; then
-    bundle_sksl_path="-dBundleSkSLPath=${BUNDLE_SKSL_PATH}"
-  fi
-
   # Default value of assets_path is flutter_assets
   local assets_path="flutter_assets"
   # The value of assets_path can set by add FLTAssetsPath to
@@ -113,13 +108,7 @@ is set to release or run \"flutter build ios --release\", then re-run Archive fr
   fi
 
   local framework_path="${FLUTTER_ROOT}/bin/cache/artifacts/engine/${artifact_variant}"
-  local flutter_engine_flag=""
-  local local_engine_flag=""
   local flutter_framework="${framework_path}/Flutter.xcframework"
-
-  if [[ -n "$FLUTTER_ENGINE" ]]; then
-    flutter_engine_flag="--local-engine-src-path=${FLUTTER_ENGINE}"
-  fi
 
   if [[ -n "$LOCAL_ENGINE" ]]; then
     if [[ $(echo "$LOCAL_ENGINE" | tr "[:upper:]" "[:lower:]") != *"$build_mode"* ]]; then
@@ -134,7 +123,6 @@ is set to release or run \"flutter build ios --release\", then re-run Archive fr
       EchoError "========================================================================"
       exit -1
     fi
-    local_engine_flag="--local-engine=${LOCAL_ENGINE}"
     flutter_framework="${FLUTTER_ENGINE}/out/${LOCAL_ENGINE}/Flutter.xcframework"
   fi
   local bitcode_flag=""
@@ -149,51 +137,53 @@ is set to release or run \"flutter build ios --release\", then re-run Archive fr
 
   RunCommand pushd "${project_path}" > /dev/null
 
-  local verbose_flag=""
+  # Construct the "flutter assemble" argument array. Arguments should be added
+  # as quoted string elements of the flutter_args array, otherwise an argument
+  # (like a path) with spaces in it might be interpreted as two separate
+  # arguments.
+  local flutter_args=("${FLUTTER_ROOT}/bin/flutter")
   if [[ -n "$VERBOSE_SCRIPT_LOGGING" ]]; then
-    verbose_flag="--verbose"
+    flutter_args+=('--verbose')
   fi
-
-  local performance_measurement_option=""
+  if [[ -n "$FLUTTER_ENGINE" ]]; then
+    flutter_args+=("--local-engine-src-path=${FLUTTER_ENGINE}")
+  fi
+  if [[ -n "$LOCAL_ENGINE" ]]; then
+    flutter_args+=("--local-engine=${LOCAL_ENGINE}")
+  fi
+  flutter_args+=(
+    "assemble"
+    "--no-version-check"
+    "--output=${BUILT_PRODUCTS_DIR}/"
+    "-dTargetPlatform=ios"
+    "-dTargetFile=${target_path}"
+    "-dBuildMode=${build_mode}"
+    "-dIosArchs=${ARCHS}"
+    "-dSdkRoot=${SDKROOT}"
+    "-dSplitDebugInfo=${SPLIT_DEBUG_INFO}"
+    "-dTreeShakeIcons=${TREE_SHAKE_ICONS}"
+    "-dTrackWidgetCreation=${TRACK_WIDGET_CREATION}"
+    "-dDartObfuscation=${DART_OBFUSCATION}"
+    "-dEnableBitcode=${bitcode_flag}"
+    "--ExtraGenSnapshotOptions=${EXTRA_GEN_SNAPSHOT_OPTIONS}"
+    "--DartDefines=${DART_DEFINES}"
+    "--ExtraFrontEndOptions=${EXTRA_FRONT_END_OPTIONS}"
+  )
   if [[ -n "$PERFORMANCE_MEASUREMENT_FILE" ]]; then
-    performance_measurement_option="--performance-measurement-file=${PERFORMANCE_MEASUREMENT_FILE}"
+    flutter_args+=("--performance-measurement-file=${PERFORMANCE_MEASUREMENT_FILE}")
   fi
-
-  local code_size_directory=""
-  if [[ -n "$CODE_SIZE_DIRECTORY" ]]; then
-    code_size_directory="-dCodeSizeDirectory=${CODE_SIZE_DIRECTORY}"
-  fi
-
-  local codesign_identity_flag=""
   if [[ -n "${EXPANDED_CODE_SIGN_IDENTITY:-}" && "${CODE_SIGNING_REQUIRED:-}" != "NO" ]]; then
-    codesign_identity_flag="-dCodesignIdentity=${EXPANDED_CODE_SIGN_IDENTITY}"
+    flutter_args+=("-dCodesignIdentity=${EXPANDED_CODE_SIGN_IDENTITY}")
   fi
+  if [[ -n "$BUNDLE_SKSL_PATH" ]]; then
+    flutter_args+=("-dBundleSkSLPath=${BUNDLE_SKSL_PATH}")
+  fi
+  if [[ -n "$CODE_SIZE_DIRECTORY" ]]; then
+    flutter_args+=("-dCodeSizeDirectory=${CODE_SIZE_DIRECTORY}")
+  fi
+  flutter_args+=("${build_mode}_ios_bundle_flutter_assets")
 
-  RunCommand "${FLUTTER_ROOT}/bin/flutter"                                \
-    ${verbose_flag}                                                       \
-    ${flutter_engine_flag}                                                \
-    ${local_engine_flag}                                                  \
-    assemble                                                              \
-    --no-version-check                                                    \
-    --output="${BUILT_PRODUCTS_DIR}/"                                     \
-    ${performance_measurement_option}                                     \
-    -dTargetPlatform=ios                                                  \
-    -dTargetFile="${target_path}"                                         \
-    -dBuildMode=${build_mode}                                             \
-    -dIosArchs="${ARCHS}"                                                 \
-    -dSdkRoot="${SDKROOT}"                                                \
-    -dSplitDebugInfo="${SPLIT_DEBUG_INFO}"                                \
-    -dTreeShakeIcons="${TREE_SHAKE_ICONS}"                                \
-    -dTrackWidgetCreation="${TRACK_WIDGET_CREATION}"                      \
-    -dDartObfuscation="${DART_OBFUSCATION}"                               \
-    -dEnableBitcode="${bitcode_flag}"                                     \
-    ${codesign_identity_flag}                                             \
-    ${bundle_sksl_path}                                                   \
-    ${code_size_directory}                                                \
-    --ExtraGenSnapshotOptions="${EXTRA_GEN_SNAPSHOT_OPTIONS}"             \
-    --DartDefines="${DART_DEFINES}"                                       \
-    --ExtraFrontEndOptions="${EXTRA_FRONT_END_OPTIONS}"                   \
-    "${build_mode}_ios_bundle_flutter_assets"
+  RunCommand "${flutter_args[@]}"
 
   if [[ $? -ne 0 ]]; then
     EchoError "Failed to package ${project_path}."

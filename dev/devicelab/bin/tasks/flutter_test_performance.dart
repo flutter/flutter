@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 // This test runs `flutter test` on the `trivial_widget_test.dart` four times.
 //
 // The first time, the result is ignored, on the basis that it's warming the
@@ -67,11 +65,11 @@ Future<int> runTest({bool coverage = false, bool noPub = false}) async {
       // we have a blank line at the start
       step = TestStep.testWritesFirstCarriageReturn;
     } else {
-      final Match match = testOutputPattern.matchAsPrefix(entry);
+      final Match? match = testOutputPattern.matchAsPrefix(entry);
       if (match == null) {
         badLines += 1;
       } else {
-        if (step.index >= TestStep.testWritesFirstCarriageReturn.index && step.index <= TestStep.testLoading.index && match.group(1).startsWith('loading ')) {
+        if (step.index >= TestStep.testWritesFirstCarriageReturn.index && step.index <= TestStep.testLoading.index && match.group(1)!.startsWith('loading ')) {
           // first the test loads
           step = TestStep.testLoading;
         } else if (step.index <= TestStep.testRunning.index && match.group(1) == 'A trivial widget test') {
