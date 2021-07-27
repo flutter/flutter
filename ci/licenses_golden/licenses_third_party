@@ -1,4 +1,4 @@
-Signature: 25e6b63e2a9b9aabe41f593d402b6783
+Signature: 65f4daa7686ebedf77d5fcaf7ca46727
 
 UNUSED LICENSES:
 
@@ -16798,6 +16798,8 @@ FILE: ../../../third_party/icu/fuzzers/icu_number_format_fuzzer.cc
 FILE: ../../../third_party/icu/fuzzers/icu_to_case_fuzzer.cc
 FILE: ../../../third_party/icu/fuzzers/icu_ucasemap_fuzzer.cc
 FILE: ../../../third_party/icu/ios/icudtl.dat
+FILE: ../../../third_party/icu/patches/Collator_getKeywordValues.patch
+FILE: ../../../third_party/icu/patches/ICUService_getKey.patch
 FILE: ../../../third_party/icu/patches/ardatepattern.patch
 FILE: ../../../third_party/icu/patches/atomic_template_instantiation.patch
 FILE: ../../../third_party/icu/patches/cjdict.patch
@@ -16810,7 +16812,9 @@ FILE: ../../../third_party/icu/patches/isvalidenum.patch
 FILE: ../../../third_party/icu/patches/khmer-dictbe.patch
 FILE: ../../../third_party/icu/patches/locale1.patch
 FILE: ../../../third_party/icu/patches/locale_google.patch
+FILE: ../../../third_party/icu/patches/locid_operators.patch
 FILE: ../../../third_party/icu/patches/restrace.patch
+FILE: ../../../third_party/icu/patches/ultag_parse_Null.patch
 FILE: ../../../third_party/icu/patches/wordbrk.patch
 FILE: ../../../third_party/icu/patches/wpo.patch
 FILE: ../../../third_party/icu/source/data/in/coll/ucadata-implicithan.icu
@@ -16924,6 +16928,8 @@ FILE: ../../../third_party/icu/fuzzers/icu_number_format_fuzzer.cc
 FILE: ../../../third_party/icu/fuzzers/icu_to_case_fuzzer.cc
 FILE: ../../../third_party/icu/fuzzers/icu_ucasemap_fuzzer.cc
 FILE: ../../../third_party/icu/ios/icudtl.dat
+FILE: ../../../third_party/icu/patches/Collator_getKeywordValues.patch
+FILE: ../../../third_party/icu/patches/ICUService_getKey.patch
 FILE: ../../../third_party/icu/patches/ardatepattern.patch
 FILE: ../../../third_party/icu/patches/atomic_template_instantiation.patch
 FILE: ../../../third_party/icu/patches/cjdict.patch
@@ -16936,7 +16942,9 @@ FILE: ../../../third_party/icu/patches/isvalidenum.patch
 FILE: ../../../third_party/icu/patches/khmer-dictbe.patch
 FILE: ../../../third_party/icu/patches/locale1.patch
 FILE: ../../../third_party/icu/patches/locale_google.patch
+FILE: ../../../third_party/icu/patches/locid_operators.patch
 FILE: ../../../third_party/icu/patches/restrace.patch
+FILE: ../../../third_party/icu/patches/ultag_parse_Null.patch
 FILE: ../../../third_party/icu/patches/wordbrk.patch
 FILE: ../../../third_party/icu/patches/wpo.patch
 FILE: ../../../third_party/icu/source/data/in/coll/ucadata-implicithan.icu
@@ -17055,6 +17063,8 @@ FILE: ../../../third_party/icu/fuzzers/icu_number_format_fuzzer.cc
 FILE: ../../../third_party/icu/fuzzers/icu_to_case_fuzzer.cc
 FILE: ../../../third_party/icu/fuzzers/icu_ucasemap_fuzzer.cc
 FILE: ../../../third_party/icu/ios/icudtl.dat
+FILE: ../../../third_party/icu/patches/Collator_getKeywordValues.patch
+FILE: ../../../third_party/icu/patches/ICUService_getKey.patch
 FILE: ../../../third_party/icu/patches/ardatepattern.patch
 FILE: ../../../third_party/icu/patches/atomic_template_instantiation.patch
 FILE: ../../../third_party/icu/patches/cjdict.patch
@@ -17067,7 +17077,9 @@ FILE: ../../../third_party/icu/patches/isvalidenum.patch
 FILE: ../../../third_party/icu/patches/khmer-dictbe.patch
 FILE: ../../../third_party/icu/patches/locale1.patch
 FILE: ../../../third_party/icu/patches/locale_google.patch
+FILE: ../../../third_party/icu/patches/locid_operators.patch
 FILE: ../../../third_party/icu/patches/restrace.patch
+FILE: ../../../third_party/icu/patches/ultag_parse_Null.patch
 FILE: ../../../third_party/icu/patches/wordbrk.patch
 FILE: ../../../third_party/icu/patches/wpo.patch
 FILE: ../../../third_party/icu/source/data/in/coll/ucadata-implicithan.icu
@@ -17185,6 +17197,8 @@ FILE: ../../../third_party/icu/fuzzers/icu_number_format_fuzzer.cc
 FILE: ../../../third_party/icu/fuzzers/icu_to_case_fuzzer.cc
 FILE: ../../../third_party/icu/fuzzers/icu_ucasemap_fuzzer.cc
 FILE: ../../../third_party/icu/ios/icudtl.dat
+FILE: ../../../third_party/icu/patches/Collator_getKeywordValues.patch
+FILE: ../../../third_party/icu/patches/ICUService_getKey.patch
 FILE: ../../../third_party/icu/patches/ardatepattern.patch
 FILE: ../../../third_party/icu/patches/atomic_template_instantiation.patch
 FILE: ../../../third_party/icu/patches/cjdict.patch
@@ -17197,7 +17211,9 @@ FILE: ../../../third_party/icu/patches/isvalidenum.patch
 FILE: ../../../third_party/icu/patches/khmer-dictbe.patch
 FILE: ../../../third_party/icu/patches/locale1.patch
 FILE: ../../../third_party/icu/patches/locale_google.patch
+FILE: ../../../third_party/icu/patches/locid_operators.patch
 FILE: ../../../third_party/icu/patches/restrace.patch
+FILE: ../../../third_party/icu/patches/ultag_parse_Null.patch
 FILE: ../../../third_party/icu/patches/wordbrk.patch
 FILE: ../../../third_party/icu/patches/wpo.patch
 FILE: ../../../third_party/icu/source/data/in/coll/ucadata-implicithan.icu
@@ -17321,6 +17337,8 @@ FILE: ../../../third_party/icu/fuzzers/icu_number_format_fuzzer.cc
 FILE: ../../../third_party/icu/fuzzers/icu_to_case_fuzzer.cc
 FILE: ../../../third_party/icu/fuzzers/icu_ucasemap_fuzzer.cc
 FILE: ../../../third_party/icu/ios/icudtl.dat
+FILE: ../../../third_party/icu/patches/Collator_getKeywordValues.patch
+FILE: ../../../third_party/icu/patches/ICUService_getKey.patch
 FILE: ../../../third_party/icu/patches/ardatepattern.patch
 FILE: ../../../third_party/icu/patches/atomic_template_instantiation.patch
 FILE: ../../../third_party/icu/patches/cjdict.patch
@@ -17333,7 +17351,9 @@ FILE: ../../../third_party/icu/patches/isvalidenum.patch
 FILE: ../../../third_party/icu/patches/khmer-dictbe.patch
 FILE: ../../../third_party/icu/patches/locale1.patch
 FILE: ../../../third_party/icu/patches/locale_google.patch
+FILE: ../../../third_party/icu/patches/locid_operators.patch
 FILE: ../../../third_party/icu/patches/restrace.patch
+FILE: ../../../third_party/icu/patches/ultag_parse_Null.patch
 FILE: ../../../third_party/icu/patches/wordbrk.patch
 FILE: ../../../third_party/icu/patches/wpo.patch
 FILE: ../../../third_party/icu/source/data/in/coll/ucadata-implicithan.icu
@@ -17456,6 +17476,8 @@ FILE: ../../../third_party/icu/fuzzers/icu_number_format_fuzzer.cc
 FILE: ../../../third_party/icu/fuzzers/icu_to_case_fuzzer.cc
 FILE: ../../../third_party/icu/fuzzers/icu_ucasemap_fuzzer.cc
 FILE: ../../../third_party/icu/ios/icudtl.dat
+FILE: ../../../third_party/icu/patches/Collator_getKeywordValues.patch
+FILE: ../../../third_party/icu/patches/ICUService_getKey.patch
 FILE: ../../../third_party/icu/patches/ardatepattern.patch
 FILE: ../../../third_party/icu/patches/atomic_template_instantiation.patch
 FILE: ../../../third_party/icu/patches/cjdict.patch
@@ -17468,7 +17490,9 @@ FILE: ../../../third_party/icu/patches/isvalidenum.patch
 FILE: ../../../third_party/icu/patches/khmer-dictbe.patch
 FILE: ../../../third_party/icu/patches/locale1.patch
 FILE: ../../../third_party/icu/patches/locale_google.patch
+FILE: ../../../third_party/icu/patches/locid_operators.patch
 FILE: ../../../third_party/icu/patches/restrace.patch
+FILE: ../../../third_party/icu/patches/ultag_parse_Null.patch
 FILE: ../../../third_party/icu/patches/wordbrk.patch
 FILE: ../../../third_party/icu/patches/wpo.patch
 FILE: ../../../third_party/icu/source/data/in/coll/ucadata-implicithan.icu
@@ -17587,6 +17611,8 @@ FILE: ../../../third_party/icu/fuzzers/icu_number_format_fuzzer.cc
 FILE: ../../../third_party/icu/fuzzers/icu_to_case_fuzzer.cc
 FILE: ../../../third_party/icu/fuzzers/icu_ucasemap_fuzzer.cc
 FILE: ../../../third_party/icu/ios/icudtl.dat
+FILE: ../../../third_party/icu/patches/Collator_getKeywordValues.patch
+FILE: ../../../third_party/icu/patches/ICUService_getKey.patch
 FILE: ../../../third_party/icu/patches/ardatepattern.patch
 FILE: ../../../third_party/icu/patches/atomic_template_instantiation.patch
 FILE: ../../../third_party/icu/patches/cjdict.patch
@@ -17599,7 +17625,9 @@ FILE: ../../../third_party/icu/patches/isvalidenum.patch
 FILE: ../../../third_party/icu/patches/khmer-dictbe.patch
 FILE: ../../../third_party/icu/patches/locale1.patch
 FILE: ../../../third_party/icu/patches/locale_google.patch
+FILE: ../../../third_party/icu/patches/locid_operators.patch
 FILE: ../../../third_party/icu/patches/restrace.patch
+FILE: ../../../third_party/icu/patches/ultag_parse_Null.patch
 FILE: ../../../third_party/icu/patches/wordbrk.patch
 FILE: ../../../third_party/icu/patches/wpo.patch
 FILE: ../../../third_party/icu/source/data/in/coll/ucadata-implicithan.icu
@@ -17717,6 +17745,8 @@ FILE: ../../../third_party/icu/fuzzers/icu_number_format_fuzzer.cc
 FILE: ../../../third_party/icu/fuzzers/icu_to_case_fuzzer.cc
 FILE: ../../../third_party/icu/fuzzers/icu_ucasemap_fuzzer.cc
 FILE: ../../../third_party/icu/ios/icudtl.dat
+FILE: ../../../third_party/icu/patches/Collator_getKeywordValues.patch
+FILE: ../../../third_party/icu/patches/ICUService_getKey.patch
 FILE: ../../../third_party/icu/patches/ardatepattern.patch
 FILE: ../../../third_party/icu/patches/atomic_template_instantiation.patch
 FILE: ../../../third_party/icu/patches/cjdict.patch
@@ -17729,7 +17759,9 @@ FILE: ../../../third_party/icu/patches/isvalidenum.patch
 FILE: ../../../third_party/icu/patches/khmer-dictbe.patch
 FILE: ../../../third_party/icu/patches/locale1.patch
 FILE: ../../../third_party/icu/patches/locale_google.patch
+FILE: ../../../third_party/icu/patches/locid_operators.patch
 FILE: ../../../third_party/icu/patches/restrace.patch
+FILE: ../../../third_party/icu/patches/ultag_parse_Null.patch
 FILE: ../../../third_party/icu/patches/wordbrk.patch
 FILE: ../../../third_party/icu/patches/wpo.patch
 FILE: ../../../third_party/icu/source/data/in/coll/ucadata-implicithan.icu
@@ -17820,6 +17852,8 @@ FILE: ../../../third_party/icu/fuzzers/icu_number_format_fuzzer.cc
 FILE: ../../../third_party/icu/fuzzers/icu_to_case_fuzzer.cc
 FILE: ../../../third_party/icu/fuzzers/icu_ucasemap_fuzzer.cc
 FILE: ../../../third_party/icu/ios/icudtl.dat
+FILE: ../../../third_party/icu/patches/Collator_getKeywordValues.patch
+FILE: ../../../third_party/icu/patches/ICUService_getKey.patch
 FILE: ../../../third_party/icu/patches/ardatepattern.patch
 FILE: ../../../third_party/icu/patches/atomic_template_instantiation.patch
 FILE: ../../../third_party/icu/patches/cjdict.patch
@@ -17832,7 +17866,9 @@ FILE: ../../../third_party/icu/patches/isvalidenum.patch
 FILE: ../../../third_party/icu/patches/khmer-dictbe.patch
 FILE: ../../../third_party/icu/patches/locale1.patch
 FILE: ../../../third_party/icu/patches/locale_google.patch
+FILE: ../../../third_party/icu/patches/locid_operators.patch
 FILE: ../../../third_party/icu/patches/restrace.patch
+FILE: ../../../third_party/icu/patches/ultag_parse_Null.patch
 FILE: ../../../third_party/icu/patches/wordbrk.patch
 FILE: ../../../third_party/icu/patches/wpo.patch
 FILE: ../../../third_party/icu/source/data/in/coll/ucadata-implicithan.icu
@@ -17990,6 +18026,8 @@ FILE: ../../../third_party/icu/fuzzers/icu_number_format_fuzzer.cc
 FILE: ../../../third_party/icu/fuzzers/icu_to_case_fuzzer.cc
 FILE: ../../../third_party/icu/fuzzers/icu_ucasemap_fuzzer.cc
 FILE: ../../../third_party/icu/ios/icudtl.dat
+FILE: ../../../third_party/icu/patches/Collator_getKeywordValues.patch
+FILE: ../../../third_party/icu/patches/ICUService_getKey.patch
 FILE: ../../../third_party/icu/patches/ardatepattern.patch
 FILE: ../../../third_party/icu/patches/atomic_template_instantiation.patch
 FILE: ../../../third_party/icu/patches/cjdict.patch
@@ -18002,7 +18040,9 @@ FILE: ../../../third_party/icu/patches/isvalidenum.patch
 FILE: ../../../third_party/icu/patches/khmer-dictbe.patch
 FILE: ../../../third_party/icu/patches/locale1.patch
 FILE: ../../../third_party/icu/patches/locale_google.patch
+FILE: ../../../third_party/icu/patches/locid_operators.patch
 FILE: ../../../third_party/icu/patches/restrace.patch
+FILE: ../../../third_party/icu/patches/ultag_parse_Null.patch
 FILE: ../../../third_party/icu/patches/wordbrk.patch
 FILE: ../../../third_party/icu/patches/wpo.patch
 FILE: ../../../third_party/icu/source/data/in/coll/ucadata-implicithan.icu
