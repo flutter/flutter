@@ -114,5 +114,5 @@ void main() {
     await tester.pump();
     expect(leftCalled, isFalse);
     expect(rightCalled, isTrue);
-  });
+  }, variant: KeySimulatorTransitModeVariant.all());
 }

@@ -124,5 +124,5 @@ void main() {
       animationSheet.collate(6),
       matchesGoldenFile('LiveBinding.press.animation.2.png'),
     );
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42767
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 }

@@ -525,7 +525,7 @@ Future<void> expectLater(
 /// Class that programmatically interacts with widgets and the test environment.
 ///
 /// For convenience, instances of this class (such as the one provided by
-/// `testWidget`) can be used as the `vsync` for `AnimationController` objects.
+/// `testWidgets`) can be used as the `vsync` for `AnimationController` objects.
 class WidgetTester extends WidgetController implements HitTestDispatcher, TickerProvider {
   WidgetTester._(TestWidgetsFlutterBinding binding) : super(binding) {
     if (binding is LiveTestWidgetsFlutterBinding)
