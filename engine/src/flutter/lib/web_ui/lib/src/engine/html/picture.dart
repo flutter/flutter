@@ -631,7 +631,7 @@ class PersistedPicture extends PersistedLeafSurface {
   @override
   void debugPrintChildren(StringBuffer buffer, int indent) {
     super.debugPrintChildren(buffer, indent);
-    if (rootElement != null && rootElement!.firstChild! != null) {
+    if (rootElement != null && rootElement!.firstChild != null) {
       final html.Element firstChild = rootElement!.firstChild! as html.Element;
       final String canvasTag = firstChild.tagName.toLowerCase();
       final int canvasHash = firstChild.hashCode;

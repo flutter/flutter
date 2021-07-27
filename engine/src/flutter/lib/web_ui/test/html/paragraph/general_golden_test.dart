@@ -350,7 +350,7 @@ Future<void> testMain() async {
     final CanvasParagraph paragraph = rich(
       EngineParagraphStyle(fontFamily: 'Roboto'),
       (CanvasParagraphBuilder builder) {
-        for (TextDecorationStyle decorationStyle in decorationStyles) {
+        for (final TextDecorationStyle decorationStyle in decorationStyles) {
           builder.pushStyle(EngineTextStyle.only(
             color: const Color.fromRGBO(50, 50, 255, 1.0),
             decoration: TextDecoration.underline,

@@ -46,7 +46,7 @@ Future<void> testMain() async {
   const double kAhemBaselineRatio = 1.25;
 
   testEachMeasurement('predictably lays out a single-line paragraph', () {
-    for (double fontSize in <double>[10.0, 20.0, 30.0, 40.0]) {
+    for (final double fontSize in <double>[10.0, 20.0, 30.0, 40.0]) {
       final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
         fontFamily: 'Ahem',
         fontStyle: FontStyle.normal,
@@ -70,7 +70,7 @@ Future<void> testMain() async {
   });
 
   testEachMeasurement('predictably lays out a multi-line paragraph', () {
-    for (double fontSize in <double>[10.0, 20.0, 30.0, 40.0]) {
+    for (final double fontSize in <double>[10.0, 20.0, 30.0, 40.0]) {
       final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
         fontFamily: 'Ahem',
         fontStyle: FontStyle.normal,
@@ -97,7 +97,7 @@ Future<void> testMain() async {
   });
 
   testEachMeasurement('predictably lays out a single-line rich paragraph', () {
-    for (double fontSize in <double>[10.0, 20.0, 30.0, 40.0]) {
+    for (final double fontSize in <double>[10.0, 20.0, 30.0, 40.0]) {
       final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
         fontFamily: 'Ahem',
         fontStyle: FontStyle.normal,
@@ -122,7 +122,7 @@ Future<void> testMain() async {
       skip: browserEngine != BrowserEngine.blink);
 
   testEachMeasurement('predictably lays out a multi-line rich paragraph', () {
-    for (double fontSize in <double>[10.0, 20.0, 30.0, 40.0]) {
+    for (final double fontSize in <double>[10.0, 20.0, 30.0, 40.0]) {
       final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
         fontFamily: 'Ahem',
         fontStyle: FontStyle.normal,

@@ -427,7 +427,7 @@ class CkTextStyle implements ui.TextStyle {
 
     if (shadows != null) {
       final List<SkTextShadow> ckShadows = <SkTextShadow>[];
-      for (ui.Shadow shadow in shadows) {
+      for (final ui.Shadow shadow in shadows) {
         final SkTextShadow ckShadow = SkTextShadow();
         ckShadow.color = makeFreshSkColor(shadow.color);
         ckShadow.offset = toSkPoint(shadow.offset);
@@ -439,7 +439,7 @@ class CkTextStyle implements ui.TextStyle {
 
     if (fontFeatures != null) {
       final List<SkFontFeature> skFontFeatures = <SkFontFeature>[];
-      for (ui.FontFeature fontFeature in fontFeatures) {
+      for (final ui.FontFeature fontFeature in fontFeatures) {
         final SkFontFeature skFontFeature = SkFontFeature();
         skFontFeature.name = fontFeature.feature;
         skFontFeature.value = fontFeature.value;
@@ -574,7 +574,7 @@ class CkParagraph extends SkiaObject<SkParagraph> implements ui.Paragraph {
     bool didRebuildSkiaObject = false;
     if (paragraph == null) {
       final CkParagraphBuilder builder = CkParagraphBuilder(_paragraphStyle);
-      for (_ParagraphCommand command in _paragraphCommands) {
+      for (final _ParagraphCommand command in _paragraphCommands) {
         switch (command.type) {
           case _ParagraphCommandType.addText:
             builder.addText(command.text!);

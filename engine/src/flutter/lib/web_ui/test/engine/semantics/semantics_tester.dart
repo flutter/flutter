@@ -278,7 +278,7 @@ class SemanticsTester {
     ui.Rect effectiveRect = rect ?? ui.Rect.zero;
     if (children != null && children.isNotEmpty) {
       effectiveRect = childRect(children.first);
-      for (SemanticsNodeUpdate child in children.skip(1)) {
+      for (final SemanticsNodeUpdate child in children.skip(1)) {
         effectiveRect = effectiveRect.expandToInclude(childRect(child));
       }
     }

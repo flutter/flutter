@@ -140,7 +140,7 @@ void expectWords(String text, List<String> expectedWords) {
   int strIndex = 0;
 
   // Forward word break lookup.
-  for (String word in expectedWords) {
+  for (final String word in expectedWords) {
     final int nextBreak = WordBreaker.nextBreakIndex(text, strIndex);
     expect(
       nextBreak, strIndex + word.length,
@@ -151,7 +151,7 @@ void expectWords(String text, List<String> expectedWords) {
 
   // Backward word break lookup.
   strIndex = text.length;
-  for (String word in expectedWords.reversed) {
+  for (final String word in expectedWords.reversed) {
     final int prevBreak = WordBreaker.prevBreakIndex(text, strIndex);
     expect(
       prevBreak, strIndex - word.length,

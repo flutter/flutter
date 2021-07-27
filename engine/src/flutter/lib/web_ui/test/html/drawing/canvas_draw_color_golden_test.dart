@@ -25,7 +25,7 @@ Future<void> testMain() async {
   });
 
   tearDown(() {
-    for (html.Node scene in html.document.querySelectorAll('flt-scene')) {
+    for (final html.Node scene in html.document.querySelectorAll('flt-scene')) {
       scene.remove();
     }
   });

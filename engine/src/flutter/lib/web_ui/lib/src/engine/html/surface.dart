@@ -56,7 +56,7 @@ void commitScene(PersistedScene scene) {
         });
       }
 
-      for (PaintRequest request in paintQueue) {
+      for (final PaintRequest request in paintQueue) {
         request.paintCallback();
       }
     } finally {

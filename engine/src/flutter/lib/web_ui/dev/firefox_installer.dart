@@ -273,7 +273,7 @@ class FirefoxInstaller {
   // Parses volume from mount result.
   // Output is of form: {devicename} /Volumes/{name}.
   String? _volumeFromMountResult(List<String> lines) {
-    for (String line in lines) {
+    for (final String line in lines) {
       final int pos = line.indexOf('/Volumes');
       if (pos != -1) {
         return line.substring(pos);
