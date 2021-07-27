@@ -25,6 +25,12 @@
 // @dart = 2.8
 // This file is ready to transition, just uncomment /*?*/, /*!*/, and /*late*/.
 
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=1000"
+@Tags(<String>['no-shuffle'])
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
