@@ -358,46 +358,6 @@ class TextEditingValue {
     );
   }
 
-  /// {@template flutter.rendering.TextEditingValue.deleteForwardByLine}
-  /// Deletes a line in the forward direction from the current selection.
-  ///
-  /// If the [selection] is collapsed, deletes a line after the cursor.
-  ///
-  /// If the [selection] is not collapsed, deletes the selection.
-  /// {@endtemplate}
-  ///
-  /// See also:
-  ///
-  ///   * [deleteByLine], which is same but in the opposite direction.
-  TextEditingValue deleteForwardByLine(TextMetrics textMetrics) {
-    assert(selection != null);
-
-    if (!selection.isValid) {
-      return this;
-    }
-
-    if (!selection.isCollapsed) {
-      return _deleteNonEmptySelection();
-    }
-
-    String textAfter = selection.textAfter(text);
-    if (textAfter.isEmpty) {
-      return this;
-    }
-
-    // When there is a line break, it shouldn't do anything.
-    final bool isNextCharacterBreakLine = textAfter.codeUnitAt(0) == 0x0A;
-    if (isNextCharacterBreakLine) {
-      return this;
-    }
-
-    final String textBefore = selection.textBefore(text);
-    final TextSelection line = textMetrics.getLineAtOffset(text, TextPosition(offset: textBefore.length));
-    textAfter = textAfter.substring(line.end - textBefore.length, textAfter.length);
-
-    return TextEditingValue(text: textBefore + textAfter, selection: selection);
-  }
-
   /// Return [selection] collapsed and moved to the given index.
   TextSelection moveSelectionTo(int index) {
     assert(selection != null);

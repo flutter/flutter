@@ -312,7 +312,11 @@ abstract class TextEditingActionTarget {
     setTextEditingValue(nextValue, cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingValue.deleteForwardByLine}
+  /// Deletes a line in the forward direction from the current selection.
+  ///
+  /// If the [selection] is collapsed, deletes a line after the cursor.
+  ///
+  /// If the [selection] is not collapsed, deletes the selection.
   ///
   /// If [readOnly] is true, does nothing.
   ///
@@ -323,7 +327,6 @@ abstract class TextEditingActionTarget {
   ///
   /// See also:
   ///
-  ///   * [TextEditingValue.deleteForwardByWord], which is used by this method.
   ///   * [deleteByLine], which is same but in the opposite direction.
   void deleteForwardByLine(SelectionChangedCause cause) {
     if (readOnly) {
@@ -334,9 +337,19 @@ abstract class TextEditingActionTarget {
       // When the text is obscured, the whole thing is treated as one big line.
       return deleteToEnd(cause);
     }
-    final TextEditingValue nextValue = value.deleteForwardByLine(textMetrics);
 
-    setTextEditingValue(nextValue, cause);
+
+    // When there is a line break, it shouldn't do anything.
+    String textAfter = value.selection.textAfter(value.text);
+    final bool isNextCharacterBreakLine = textAfter.codeUnitAt(0) == 0x0A;
+    if (isNextCharacterBreakLine) {
+      return;
+    }
+
+    final String textBefore = value.selection.textBefore(value.text);
+    final TextSelection line = textMetrics.getLineAtOffset(value.text, TextPosition(offset: textBefore.length));
+
+    setTextEditingValue(value.deleteTo(line.end), cause);
   }
 
   /// Deletes the from the current collapsed selection to the end of the field.
