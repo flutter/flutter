@@ -63,7 +63,6 @@ export 'src/widgets/inherited_model.dart';
 export 'src/widgets/inherited_notifier.dart';
 export 'src/widgets/inherited_theme.dart';
 export 'src/widgets/interactive_viewer.dart';
-export 'src/widgets/keyboard_listener.dart';
 export 'src/widgets/layout_builder.dart';
 export 'src/widgets/list_wheel_scroll_view.dart';
 export 'src/widgets/localizations.dart';

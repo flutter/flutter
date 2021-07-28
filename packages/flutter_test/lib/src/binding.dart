@@ -863,9 +863,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     assert(debugAssertAllSchedulerVarsUnset(
       'The value of a scheduler debug variable was changed by the test.',
     ));
-    assert(debugAssertAllServicesVarsUnset(
-      'The value of a services debug variable was changed by the test.',
-    ));
   }
 
   void _verifyAutoUpdateGoldensUnset(bool valueBeforeTest) {
@@ -932,10 +929,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     // tests.
     // ignore: invalid_use_of_visible_for_testing_member
     RawKeyboard.instance.clearKeysPressed();
-    // ignore: invalid_use_of_visible_for_testing_member
-    HardwareKeyboard.instance.clearState();
-    // ignore: invalid_use_of_visible_for_testing_member
-    keyEventManager.clearState();
     assert(!RendererBinding.instance!.mouseTracker.mouseIsConnected,
         'The MouseTracker thinks that there is still a mouse connected, which indicates that a '
         'test has not removed the mouse pointer which it added. Call removePointer on the '

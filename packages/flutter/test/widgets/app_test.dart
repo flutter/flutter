@@ -143,7 +143,7 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.gameButtonA);
     await tester.pumpAndSettle();
     expect(checked, isTrue);
-  }, variant: KeySimulatorTransitModeVariant.all());
+  });
 
   group('error control test', () {
     Future<void> expectFlutterError({
