@@ -10,7 +10,6 @@ import 'package:platform/platform.dart';
 import './globals.dart';
 import './proto/conductor_state.pb.dart' as pb;
 import './proto/conductor_state.pbenum.dart' show ReleasePhase;
-import './state.dart' show githubAccount;
 
 const String kStateFileName = '.flutter_conductor_state.json';
 
