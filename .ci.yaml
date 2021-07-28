@@ -19,9 +19,9 @@ platform_properties:
           {"name":"builder_linux_engine","path":"builder"},
           {"name":"openjdk","path":"java"}
         ]
+      # CIPD flutter_internal/java/openjdk/$platform
       dependencies: >-
         [
-          # CIPD flutter_internal/java/openjdk/$platform
           {"dependency": "openjdk", "version": "1.8.0u202-b08"}
         ]
       os: Linux
@@ -34,9 +34,9 @@ platform_properties:
           {"name":"builder_mac_engine","path":"builder"},
           {"name":"openjdk","path":"java"}
         ]
+      # CIPD flutter_internal/java/openjdk/$platform
       dependencies: >-
         [
-          # CIPD flutter_internal/java/openjdk/$platform
           {"dependency": "openjdk", "version": "1.8.0u202-b08"}
         ]
       os: Mac-10.15
@@ -48,9 +48,9 @@ platform_properties:
           {"name":"builder_win_engine","path":"builder"},
           {"name":"openjdk","path":"java"}
         ]
+      # CIPD flutter_internal/java/openjdk/$platform
       dependencies: >-
         [
-          # CIPD flutter_internal/java/openjdk/$platform
           {"dependency": "openjdk", "version": "1.8.0u202-b08"}
         ]
       os: Windows-10
@@ -318,4 +318,11 @@ targets:
       ios_release: "true"
       jazzy_version: 0.9.5
     timeout: 90
+    scheduler: luci
+
+  - name: Linux ci_yaml engine roller
+    builder: Linux ci_yaml engine roller
+    bringup: true
+    presubmit: false
+    recipe: infra/ci_yaml
     scheduler: luci
