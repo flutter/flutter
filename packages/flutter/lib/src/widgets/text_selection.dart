@@ -855,11 +855,13 @@ class _TextSelectionHandleOverlayState
       lastSelectedGraphemeExtent = 0;
     }
 
-    final Rect? startHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.selection.start, end: widget.selection.start + firstSelectedGraphemeExtent));
-    final Rect? endHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.selection.end - lastSelectedGraphemeExtent, end: widget.selection.end));
+    final Rect? startHandleRect = null;
+    final Rect? endHandleRect = null;
 
-    assert(!(firstSelectedGraphemeExtent > 0 && widget.selection.isValid && !widget.selection.isCollapsed) || startHandleRect != null);
-    assert(!(lastSelectedGraphemeExtent > 0 && widget.selection.isValid && !widget.selection.isCollapsed) || endHandleRect != null);
+    if (selection != null && selection.isValid && !selection.isCollapsed ) {
+      startHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: selection.start, end: selection.start + firstSelectedGraphemeExtent));
+      endHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: selection.end - lastSelectedGraphemeExtent, end: selection.end));
+    }
 
     final Offset handleAnchor = widget.selectionControls.getHandleAnchor(
       type,
