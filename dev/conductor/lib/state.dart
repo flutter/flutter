@@ -267,7 +267,7 @@ bool requiresEnginePR(pb.ConductorState state) {
 /// This release will require a new Framework PR.
 ///
 /// The logic is if there was an Engine PR OR there are framework cherrypicks
-/// that have not been abandoned OR there is a new Dart revision, then return
+/// that have not been abandoned OR the increment level is 'm', then return
 /// true, else false.
 bool requiresFrameworkPR(pb.ConductorState state) {
   if (requiresEnginePR(state)) {
