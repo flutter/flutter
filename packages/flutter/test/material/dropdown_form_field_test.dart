@@ -150,7 +150,7 @@ void verifyPaintedShadow(Finder customPaint, int elevation) {
 
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/87102
-  testWidgets('label position test', (WidgetTester tester) async {
+  testWidgets('label position test - hint', (WidgetTester tester) async {
     int? value;
 
     await tester.pumpWidget(
@@ -178,7 +178,7 @@ void main() {
               DropdownMenuItem<int?>(
                 value: 3,
                 child: Text('Three'),
-              )
+              ),
             ],
           ),
         ),
@@ -199,6 +199,44 @@ void main() {
 
     // The position of the label does not change.
     expect(hintEmptyLabel, oneValueLabel);
+  });
+
+  testWidgets('label position test - disabledHint', (WidgetTester tester) async {
+    int? value;
+
+    await tester.pumpWidget(
+      TestApp(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: DropdownButtonFormField<int?>(
+            decoration: const InputDecoration(
+              labelText: 'labelText',
+            ),
+            value: value,
+            disabledHint: const Text('disabledHint'),
+            onChanged: null, // disable the menu to show the disabledHint.
+            items: const <DropdownMenuItem<int?>>[
+              DropdownMenuItem<int?>(
+                value: 1,
+                child: Text('One'),
+              ),
+              DropdownMenuItem<int?>(
+                value: 2,
+                child: Text('Two'),
+              ),
+              DropdownMenuItem<int?>(
+                value: 3,
+                child: Text('Three'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(value, null); // disabledHint shown.
+    final Offset hintEmptyLabel = tester.getTopLeft(find.text('labelText'));
+    expect(hintEmptyLabel, const Offset(0.0, 12.0));
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/82910
@@ -233,7 +271,7 @@ void main() {
               DropdownMenuItem<int?>(
                 value: 3,
                 child: Text('Three'),
-              )
+              ),
             ],
           ),
         ),
