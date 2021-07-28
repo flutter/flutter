@@ -23,8 +23,20 @@ const CommonFinders find = CommonFinders._();
 class CommonFinders {
   const CommonFinders._();
 
-  /// Finds [Text] and [EditableText] widgets containing string equal to the
-  /// `text` argument.
+  /// Finds [Text], [EditableText], and optionally [RichText] widgets
+  /// containing string equal to the [text] argument.
+  ///
+  /// If [skipRichText] is disabled, [RichText] widgets (and therefore also
+  /// [Text] and [Text.rich] widgets) are matched by comparing the
+  /// [InlineSpan.toPlainText] with the given [text].
+  /// If [skipRichText] is enabled, all standalone [RichText] widgets are
+  /// ignored and [Text] matching shortcuts to [Text.data].
+  ///
+  /// For [EditableText] widgets, the [text] is always compared to the current
+  /// value of the [EditableText.controller].
+  ///
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// nodes that are [Offstage] or that are from inactive [Route]s.
   ///
   /// ## Sample code
   ///
@@ -32,9 +44,21 @@ class CommonFinders {
   /// expect(find.text('Back'), findsOneWidget);
   /// ```
   ///
-  /// If the `skipOffstage` argument is true (the default), then this skips
-  /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder text(String text, { bool skipOffstage = true }) => _TextFinder(text, skipOffstage: skipOffstage);
+  /// This will match [Text], [Text.rich], and [EditableText] widgets that
+  /// contain the "Back" string.
+  ///
+  /// ```dart
+  /// expect(find.text('Close', skipRichText: false), findsOneWidget);
+  /// ```
+  ///
+  /// This will match [Text], [Text.rich], [EditableText], as well as standalone
+  /// [RichText] widgets that contain the "Close" string.
+  Finder text(
+    String text, {
+    bool skipRichText = true,
+    bool skipOffstage = true,
+  }) =>
+      _TextFinder(text, skipRichText: skipRichText, skipOffstage: skipOffstage);
 
   /// Finds [Text] and [EditableText] widgets which contain the given
   /// `pattern` argument.
@@ -548,9 +572,27 @@ abstract class MatchFinder extends Finder {
 }
 
 class _TextFinder extends MatchFinder {
-  _TextFinder(this.text, { bool skipOffstage = true }) : super(skipOffstage: skipOffstage);
+  _TextFinder(
+    this.text, {
+    this.skipRichText = true,
+    bool skipOffstage = true,
+  }) : super(skipOffstage: skipOffstage);
 
   final String text;
+
+  /// Whether standalone [RichText] widgets should be skipped or not.
+  ///
+  /// Defaults to `true`.
+  ///
+  /// If enabled, only [Text] widgets will be considered. These of course also
+  /// insert a [RichText] widget, however, that is ignored and so are all
+  /// standalone [RichText] widgets.
+  /// If disabled, only [RichText] widgets will be considered. This *implicitly*
+  /// considers [Text] widgets as well since they always insert a [RichText]
+  /// child.
+  ///
+  /// In either case, [EditableText] widgets will also be considered.
+  final bool skipRichText;
 
   @override
   String get description => 'text "$text"';
@@ -558,15 +600,37 @@ class _TextFinder extends MatchFinder {
   @override
   bool matches(Element candidate) {
     final Widget widget = candidate.widget;
+    if (widget is EditableText)
+      return _matchesEditableText(widget);
+
+    if (skipRichText)
+      return _matchesNonRichText(widget);
+    // It would be sufficient to always use _matchesRichText if we wanted to
+    // match both standalone RichText widgets as well as Text widgets. However,
+    // the find.text() finder used to always ignore standalone RichText widgets,
+    // which is why we need the _matchesNonRichText method in order to not be
+    // backwards-compatible and not break existing tests.
+    return _matchesRichText(widget);
+  }
+
+  bool _matchesRichText(Widget widget) {
+    if (widget is RichText)
+      return widget.text.toPlainText() == text;
+    return false;
+  }
+
+  bool _matchesNonRichText(Widget widget) {
     if (widget is Text) {
       if (widget.data != null)
         return widget.data == text;
       assert(widget.textSpan != null);
       return widget.textSpan!.toPlainText() == text;
-    } else if (widget is EditableText) {
-      return widget.controller.text == text;
     }
     return false;
+  }
+
+  bool _matchesEditableText(EditableText widget) {
+    return widget.controller.text == text;
   }
 }
 
