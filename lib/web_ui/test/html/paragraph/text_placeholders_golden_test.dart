@@ -135,5 +135,5 @@ Paragraph _createParagraphWithPlaceholder(
   );
   builder.pushStyle(TextStyle(color: blue, fontFamily: 'Roboto', fontSize: 14));
   builder.addText(after);
-  return builder.build()..layout(ParagraphConstraints(width: 200.0));
+  return builder.build()..layout(const ParagraphConstraints(width: 200.0));
 }

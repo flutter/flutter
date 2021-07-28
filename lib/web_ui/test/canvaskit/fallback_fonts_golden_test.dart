@@ -96,9 +96,9 @@ void testMain() {
       pb.addText('مرحبا');
       pb.pop();
       final CkParagraph paragraph = pb.build();
-      paragraph.layout(ui.ParagraphConstraints(width: 1000));
+      paragraph.layout(const ui.ParagraphConstraints(width: 1000));
 
-      canvas.drawParagraph(paragraph, ui.Offset(0, 0));
+      canvas.drawParagraph(paragraph, const ui.Offset(0, 0));
 
       await matchPictureGolden(
           'canvaskit_font_fallback_arabic.png', recorder.endRecording());
@@ -153,7 +153,7 @@ void testMain() {
       pb.addText('Hello 😊 مرحبا');
       pb.pop();
       final CkParagraph paragraph = pb.build();
-      paragraph.layout(ui.ParagraphConstraints(width: 1000));
+      paragraph.layout(const ui.ParagraphConstraints(width: 1000));
 
       EnginePlatformDispatcher.instance.rasterizer!
           .debugRunPostFrameCallbacks();
@@ -203,9 +203,9 @@ void testMain() {
       pb.addText('Hello 😊');
       pb.pop();
       final CkParagraph paragraph = pb.build();
-      paragraph.layout(ui.ParagraphConstraints(width: 1000));
+      paragraph.layout(const ui.ParagraphConstraints(width: 1000));
 
-      canvas.drawParagraph(paragraph, ui.Offset(0, 0));
+      canvas.drawParagraph(paragraph, const ui.Offset(0, 0));
 
       await matchPictureGolden(
           'canvaskit_font_fallback_emoji.png', recorder.endRecording());

@@ -32,7 +32,7 @@ Future<void> testMain() async {
   // the clip boundary around backdrop filter. However there should be only
   // one red dot since the other one should be blurred by filter.
   test('Background should only blur at ancestor clip boundary', () async {
-    final Rect region = Rect.fromLTWH(0, 0, 190, 130);
+    const Rect region = Rect.fromLTWH(0, 0, 190, 130);
 
     final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
     final Picture backgroundPicture = _drawBackground(region);
@@ -63,7 +63,7 @@ Future<void> testMain() async {
   });
 
   test('Background should only blur at ancestor clip boundary after move', () async {
-    final Rect region = Rect.fromLTWH(0, 0, 190, 130);
+    const Rect region = Rect.fromLTWH(0, 0, 190, 130);
 
     final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
     final Picture backgroundPicture = _drawBackground(region);
@@ -115,7 +115,7 @@ Future<void> testMain() async {
   // The blur filter should be applied to the background inside the clip even
   // though there are no children of the backdrop filter.
   test('Background should blur even if child does not paint', () async {
-    final Rect region = Rect.fromLTWH(0, 0, 190, 130);
+    const Rect region = Rect.fromLTWH(0, 0, 190, 130);
 
     final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
     final Picture backgroundPicture = _drawBackground(region);
@@ -180,7 +180,7 @@ Picture _drawBackground(Rect region) {
       region.deflate(8.0),
       SurfacePaint()
         ..style = PaintingStyle.fill
-        ..color = Color(0xFFE0FFE0)
+        ..color = const Color(0xFFE0FFE0)
       );
   return recorder.endRecording();
 }

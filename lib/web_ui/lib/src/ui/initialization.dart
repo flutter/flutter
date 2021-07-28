@@ -47,8 +47,9 @@ engine.FontCollection? _fontCollection;
 bool _webOnlyIsInitialized = false;
 bool get webOnlyIsInitialized => _webOnlyIsInitialized;
 Future<void> webOnlySetAssetManager(engine.AssetManager assetManager) async {
+  // ignore: unnecessary_null_comparison
   assert(assetManager != null,
-      'Cannot set assetManager to null'); // ignore: unnecessary_null_comparison
+      'Cannot set assetManager to null');
   if (assetManager == _assetManager) {
     return;
   }

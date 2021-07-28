@@ -23,26 +23,26 @@ void testMain() {
 
     test('Circle should be convex', () {
       final SurfacePath path = SurfacePath();
-      path.addOval(Rect.fromLTRB(0, 0, 20, 20));
+      path.addOval(const Rect.fromLTRB(0, 0, 20, 20));
       expect(path.isConvex, isTrue);
       // 2nd circle.
-      path.addOval(Rect.fromLTRB(0, 0, 20, 20));
+      path.addOval(const Rect.fromLTRB(0, 0, 20, 20));
       expect(path.isConvex, isFalse);
     });
 
     test('addRect should be convex', () {
       SurfacePath path = SurfacePath();
-      path.addRect(Rect.fromLTRB(0, 0, 20, 20));
+      path.addRect(const Rect.fromLTRB(0, 0, 20, 20));
       expect(path.isConvex, isTrue);
 
       path = SurfacePath();
       path.addRectWithDirection(
-          Rect.fromLTRB(0, 0, 20, 20), SPathDirection.kCW, 0);
+          const Rect.fromLTRB(0, 0, 20, 20), SPathDirection.kCW, 0);
       expect(path.isConvex, isTrue);
 
       path = SurfacePath();
       path.addRectWithDirection(
-          Rect.fromLTRB(0, 0, 20, 20), SPathDirection.kCCW, 0);
+          const Rect.fromLTRB(0, 0, 20, 20), SPathDirection.kCCW, 0);
       expect(path.isConvex, isTrue);
     });
 
@@ -78,7 +78,7 @@ void testMain() {
     });
 
     test('Convexity of path with infinite points should return unknown', () {
-      final List<Offset> nonFinitePts = <Offset>[
+      const List<Offset> nonFinitePts = <Offset>[
         Offset(double.infinity, 0),
         Offset(0, double.infinity),
         Offset(double.infinity, double.infinity),
@@ -93,7 +93,7 @@ void testMain() {
       ];
       final int nonFinitePointsCount = nonFinitePts.length;
 
-      final List<Offset> axisAlignedPts = <Offset>[
+      const List<Offset> axisAlignedPts = <Offset>[
         Offset(kScalarMax, 0),
         Offset(0, kScalarMax),
         Offset(kScalarMin, 0),
@@ -434,9 +434,9 @@ void testMain() {
       path.quadraticBezierTo(0.0, 200.0, 0.0, 100.0);
       path.quadraticBezierTo(0.0, 0.0, 100.0, 0.0);
       path.close();
-      expect(path.contains(Offset(100, 20)), isTrue);
-      expect(path.contains(Offset(100, 120)), isTrue);
-      expect(path.contains(Offset(100, -10)), isFalse);
+      expect(path.contains(const Offset(100, 20)), isTrue);
+      expect(path.contains(const Offset(100, 120)), isTrue);
+      expect(path.contains(const Offset(100, -10)), isFalse);
     });
   });
 }

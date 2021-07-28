@@ -17,7 +17,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  final Rect region = Rect.fromLTWH(0, 0, 300, 300);
+  const Rect region = Rect.fromLTWH(0, 0, 300, 300);
 
   late BitmapCanvas canvas;
 
@@ -40,31 +40,31 @@ Future<void> testMain() async {
 }
 
 void paintSideBySideRects(BitmapCanvas canvas) {
-  canvas.drawRect(Rect.fromLTRB(0, 0, 300, 300),
+  canvas.drawRect(const Rect.fromLTRB(0, 0, 300, 300),
       SurfacePaintData()
-        ..color = Color(0xFFFFFFFF)
+        ..color = const Color(0xFFFFFFFF)
         ..style = PaintingStyle.fill); // white
 
-    canvas.drawRect(Rect.fromLTRB(0, 20, 40, 60),
+    canvas.drawRect(const Rect.fromLTRB(0, 20, 40, 60),
         SurfacePaintData()
           ..style = PaintingStyle.fill
-          ..color = Color(0x7f0000ff));
-    canvas.drawRect(Rect.fromLTRB(40, 20, 80, 60),
+          ..color = const Color(0x7f0000ff));
+    canvas.drawRect(const Rect.fromLTRB(40, 20, 80, 60),
         SurfacePaintData()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 4
-          ..color = Color(0x7fff0000));
+          ..color = const Color(0x7fff0000));
 
     // Rotate 30 degrees (in rad: deg*pi/180)
     canvas.transform(Matrix4.rotationZ(30.0 * math.pi / 180.0).storage);
 
-    canvas.drawRect(Rect.fromLTRB(100, 60, 140, 100),
+    canvas.drawRect(const Rect.fromLTRB(100, 60, 140, 100),
         SurfacePaintData()
           ..style = PaintingStyle.fill
-          ..color = Color(0x7fff00ff));
-    canvas.drawRect(Rect.fromLTRB(140, 60, 180, 100),
+          ..color = const Color(0x7fff00ff));
+    canvas.drawRect(const Rect.fromLTRB(140, 60, 180, 100),
         SurfacePaintData()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 4
-          ..color = Color(0x7fffff00));
+          ..color = const Color(0x7fffff00));
 }

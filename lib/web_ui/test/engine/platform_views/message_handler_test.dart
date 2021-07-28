@@ -14,7 +14,7 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
-final MethodCodec codec = StandardMethodCodec();
+const MethodCodec codec = StandardMethodCodec();
 
 void testMain() {
   group('PlatformViewMessageHandler', () {

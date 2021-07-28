@@ -13,7 +13,7 @@ import 'package:web_engine_tester/golden_tester.dart';
 
 import '../../matchers.dart';
 
-final ui.Rect region = ui.Rect.fromLTWH(0, 0, 500, 100);
+const ui.Rect region = ui.Rect.fromLTWH(0, 0, 500, 100);
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -76,7 +76,7 @@ Future<void> testMain() async {
     builder.pushTransform(
       Matrix4.diagonal3Values(1, -1, 1).toFloat64(),
     );
-    builder.pushClipRect(ui.Rect.fromLTRB(10, 10, 60, 60),
+    builder.pushClipRect(const ui.Rect.fromLTRB(10, 10, 60, 60),
         clipBehavior: ui.Clip.none);
     _drawTestPicture(builder);
     builder.pop();
@@ -217,7 +217,7 @@ Future<void> testMain() async {
 
     builder.pushOffset(140, 0);
     builder.pushPhysicalShape(
-      path: ui.Path()..addOval(ui.Rect.fromLTRB(10, 10, 60, 60)),
+      path: ui.Path()..addOval(const ui.Rect.fromLTRB(10, 10, 60, 60)),
       clipBehavior: ui.Clip.hardEdge,
       color: const ui.Color(0xFFA0FFFF),
       elevation: 4,
@@ -230,7 +230,7 @@ Future<void> testMain() async {
     builder.pushPhysicalShape(
       path: ui.Path()
         ..addRRect(ui.RRect.fromRectAndRadius(
-            ui.Rect.fromLTRB(10, 10, 60, 60), ui.Radius.circular(10.0))),
+            const ui.Rect.fromLTRB(10, 10, 60, 60), const ui.Radius.circular(10.0))),
       clipBehavior: ui.Clip.hardEdge,
       color: const ui.Color(0xFFA0FFFF),
       elevation: 4,
@@ -308,7 +308,7 @@ Future<void> testMain() async {
     /// Update shape from arbitrary path to rect.
     final SurfaceSceneBuilder builder4 = SurfaceSceneBuilder();
     final ui.PhysicalShapeEngineLayer oldShapeLayer4 = builder4.pushPhysicalShape(
-      path: ui.Path()..addOval(ui.Rect.fromLTRB(10, 10, 60, 60)),
+      path: ui.Path()..addOval(const ui.Rect.fromLTRB(10, 10, 60, 60)),
       clipBehavior: ui.Clip.hardEdge,
       color: const ui.Color(0xFF00FF00),
       elevation: 6,

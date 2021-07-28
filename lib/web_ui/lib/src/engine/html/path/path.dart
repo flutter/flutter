@@ -1270,7 +1270,7 @@ class SurfacePath implements ui.Path {
         final int last = tangents.length - 1;
         final ui.Offset tangent = tangents[last];
         if (SPath.nearlyEqual(lengthSquaredOffset(tangent), 0)) {
-          tangents.remove(last);
+          tangents.removeAt(last);
         } else {
           for (int index = 0; index < last; ++index) {
             final ui.Offset test = tangents[index];

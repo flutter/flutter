@@ -88,7 +88,7 @@ void testMain() {
 
     test('addRect', () {
       final Path path = Path();
-      path.addRect(Rect.fromLTRB(20, 30, 220, 130));
+      path.addRect(const Rect.fromLTRB(20, 30, 220, 130));
       final List<double> contourLengths = computeLengths(path.computeMetrics());
       expect(contourLengths.length, 1);
       expect(contourLengths[0], within(distance: kTolerance, from: 600.0));
@@ -96,7 +96,7 @@ void testMain() {
 
     test('addRRect with zero radius', () {
       final Path path = Path();
-      path.addRRect(RRect.fromLTRBR(20, 30, 220, 130, Radius.circular(0)));
+      path.addRRect(RRect.fromLTRBR(20, 30, 220, 130, const Radius.circular(0)));
       final List<double> contourLengths = computeLengths(path.computeMetrics());
       expect(contourLengths.length, 1);
       expect(contourLengths[0], within(distance: kTolerance, from: 600.0));
@@ -104,7 +104,7 @@ void testMain() {
 
     test('addRRect with elliptical radius', () {
       final Path path = Path();
-      path.addRRect(RRect.fromLTRBR(20, 30, 220, 130, Radius.elliptical(8, 4)));
+      path.addRRect(RRect.fromLTRBR(20, 30, 220, 130, const Radius.elliptical(8, 4)));
       final List<double> contourLengths = computeLengths(path.computeMetrics());
       expect(contourLengths.length, 1);
       expect(contourLengths[0], within(distance: kTolerance, from: 590.408));

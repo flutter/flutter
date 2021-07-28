@@ -20,22 +20,22 @@ void testMain() {
       final ui.TextStyle textStyleWithShadows = ui.TextStyle(
         fontSize: 16,
         shadows: <ui.Shadow>[
-          ui.Shadow(
+          const ui.Shadow(
             color: ui.Color.fromARGB(255, 0, 0, 0),
             blurRadius: 3.0,
             offset: ui.Offset(3.0, 3.0),
           ),
-          ui.Shadow(
+          const ui.Shadow(
             color: ui.Color.fromARGB(255, 0, 0, 0),
             blurRadius: 3.0,
             offset: ui.Offset(-3.0, 3.0),
           ),
-          ui.Shadow(
+          const ui.Shadow(
             color: ui.Color.fromARGB(255, 0, 0, 0),
             blurRadius: 3.0,
             offset: ui.Offset(3.0, -3.0),
           ),
-          ui.Shadow(
+          const ui.Shadow(
             color: ui.Color.fromARGB(255, 0, 0, 0),
             blurRadius: 3.0,
             offset: ui.Offset(-3.0, -3.0),

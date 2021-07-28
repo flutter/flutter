@@ -47,7 +47,7 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow {
     final EnginePlatformDispatcher engineDispatcher =
         platformDispatcher as EnginePlatformDispatcher;
     engineDispatcher.windows[_windowId] = this;
-    engineDispatcher.windowConfigurations[_windowId] = ui.ViewConfiguration();
+    engineDispatcher.windowConfigurations[_windowId] = const ui.ViewConfiguration();
     if (_isUrlStrategySet) {
       _browserHistory =
           MultiEntriesBrowserHistory(urlStrategy: _customUrlStrategy);
@@ -151,7 +151,7 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow {
 
   Future<bool> handleNavigationMessage(ByteData? data) async {
     return _waitInTheLine(() async {
-      final MethodCall decoded = JSONMethodCodec().decodeMethodCall(data);
+      final MethodCall decoded = const JSONMethodCodec().decodeMethodCall(data);
       final Map<String, dynamic>? arguments = decoded.arguments;
       switch (decoded.method) {
         case 'selectMultiEntryHistory':
@@ -185,7 +185,7 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow {
         platformDispatcher as EnginePlatformDispatcher;
     assert(engineDispatcher.windowConfigurations.containsKey(_windowId));
     return engineDispatcher.windowConfigurations[_windowId] ??
-        ui.ViewConfiguration();
+        const ui.ViewConfiguration();
   }
 
   @override
@@ -338,7 +338,7 @@ external set jsSetUrlStrategy(_JsSetUrlStrategy? newJsSetUrlStrategy);
 
 UrlStrategy? _createDefaultUrlStrategy() {
   return ui.debugEmulateFlutterTesterEnvironment
-      ? TestUrlStrategy.fromEntry(TestHistoryEntry('default', null, '/'))
+      ? TestUrlStrategy.fromEntry(const TestHistoryEntry('default', null, '/'))
       : const HashUrlStrategy();
 }
 
@@ -378,7 +378,7 @@ class EngineFlutterWindowView extends ui.FlutterWindow {
         platformDispatcher as EnginePlatformDispatcher;
     assert(engineDispatcher.windowConfigurations.containsKey(_viewId));
     return engineDispatcher.windowConfigurations[_viewId] ??
-        ui.ViewConfiguration();
+        const ui.ViewConfiguration();
   }
 }
 

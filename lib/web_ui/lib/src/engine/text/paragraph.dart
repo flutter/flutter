@@ -686,7 +686,7 @@ class DomParagraph implements EngineParagraph {
 
     // [offset] is above all the lines.
     if (offset.dy < 0) {
-      return ui.TextPosition(
+      return const ui.TextPosition(
         offset: 0,
         affinity: ui.TextAffinity.downstream,
       );

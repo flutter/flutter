@@ -362,7 +362,7 @@ void testMain() {
           isMetaPressed: true,
           isAltPressed: true,
         );
-        async.elapse(Duration(milliseconds: 10));
+        async.elapse(const Duration(milliseconds: 10));
         dispatchKeyboardEvent(
           'keyup',
           key: 'Meta',
@@ -416,10 +416,10 @@ void testMain() {
         messages.clear();
 
         // Still too eary to synthesize a keyup event.
-        async.elapse(Duration(milliseconds: 50));
+        async.elapse(const Duration(milliseconds: 50));
         expect(messages, isEmpty);
 
-        async.elapse(Duration(seconds: 3));
+        async.elapse(const Duration(seconds: 3));
         expect(messages, <Map<String, dynamic>>[
           <String, dynamic>{
             'type': 'keyup',
@@ -465,7 +465,7 @@ void testMain() {
           isMetaPressed: true,
           isAltPressed: true,
         );
-        async.elapse(Duration(milliseconds: 10));
+        async.elapse(const Duration(milliseconds: 10));
         dispatchKeyboardEvent(
           'keyup',
           key: 'Meta',
@@ -480,7 +480,7 @@ void testMain() {
         // Spend more than 2 seconds sending repeat events and make sure no
         // keyup was synthesized.
         for (int i = 0; i < 20; i++) {
-          async.elapse(Duration(milliseconds: 100));
+          async.elapse(const Duration(milliseconds: 100));
           dispatchKeyboardEvent(
             'keydown',
             key: 'i',
@@ -531,7 +531,7 @@ void testMain() {
 
         // Wait for a long-enough period of time and no events
         // should be synthesized
-        async.elapse(Duration(seconds: 3));
+        async.elapse(const Duration(seconds: 3));
         expect(messages, hasLength(0));
 
         Keyboard.instance!.dispose();
@@ -567,7 +567,7 @@ void testMain() {
         isMetaPressed: true,
         isAltPressed: true,
       );
-      async.elapse(Duration(milliseconds: 10));
+      async.elapse(const Duration(milliseconds: 10));
       dispatchKeyboardEvent(
         'keyup',
         key: 'Meta',
@@ -580,7 +580,7 @@ void testMain() {
 
       // There has been no repeat events for "AltLeft" nor "i". Only "i" should
       // synthesize a keyup event.
-      async.elapse(Duration(seconds: 3));
+      async.elapse(const Duration(seconds: 3));
       expect(messages, <Map<String, dynamic>>[
         <String, dynamic>{
           'type': 'keyup',

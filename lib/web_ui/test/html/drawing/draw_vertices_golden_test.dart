@@ -88,7 +88,7 @@ Future<void> testMain() async {
           420.0
         ]));
     await _testVertices('draw_vertices_hairline_triangle', vertices,
-        BlendMode.srcOver, Paint()..color = Color.fromARGB(255, 0, 128, 0));
+        BlendMode.srcOver, Paint()..color = const Color.fromARGB(255, 0, 128, 0));
   });
 
   test(
@@ -192,7 +192,7 @@ Future<void> testMain() async {
         ]));
 
     await _testVertices('draw_vertices_hairline_triangle_fan', vertices,
-        BlendMode.srcOver, Paint()..color = Color.fromARGB(255, 0, 128, 0));
+        BlendMode.srcOver, Paint()..color = const Color.fromARGB(255, 0, 128, 0));
   });
 
   test('Should draw hairline triangleStrip.', () async {
@@ -213,7 +213,7 @@ Future<void> testMain() async {
           420.0
         ]));
     await _testVertices('draw_vertices_hairline_triangle_strip', vertices,
-        BlendMode.srcOver, Paint()..color = Color.fromARGB(255, 0, 128, 0));
+        BlendMode.srcOver, Paint()..color = const Color.fromARGB(255, 0, 128, 0));
   });
 
   test('Should draw triangles with colors.', () async {
@@ -244,7 +244,7 @@ Future<void> testMain() async {
         colors: colors);
 
     await _testVertices('draw_vertices_triangles', vertices, BlendMode.srcOver,
-        Paint()..color = Color.fromARGB(255, 0, 128, 0));
+        Paint()..color = const Color.fromARGB(255, 0, 128, 0));
   });
 
   test('Should draw triangles with colors and indices.', () async {
@@ -306,7 +306,7 @@ Future<void> testMain() async {
         colors: colors);
 
     await _testVertices('draw_vertices_triangle_fan', vertices,
-        BlendMode.srcOver, Paint()..color = Color.fromARGB(255, 0, 128, 0));
+        BlendMode.srcOver, Paint()..color = const Color.fromARGB(255, 0, 128, 0));
   });
 
   test('Should draw triangleStrip with colors.', () async {
@@ -336,7 +336,7 @@ Future<void> testMain() async {
         ]),
         colors: colors);
     await _testVertices('draw_vertices_triangle_strip', vertices,
-        BlendMode.srcOver, Paint()..color = Color.fromARGB(255, 0, 128, 0));
+        BlendMode.srcOver, Paint()..color = const Color.fromARGB(255, 0, 128, 0));
   });
 
   Future<void> testTexture(TileMode tileMode, String filename) async {

@@ -145,11 +145,11 @@ void testMain() {
       expect(window.onPointerDataPacket, same(callback));
     });
 
-    EnginePlatformDispatcher.instance.invokeOnPointerDataPacket(ui.PointerDataPacket());
+    EnginePlatformDispatcher.instance.invokeOnPointerDataPacket(const ui.PointerDataPacket());
   });
 
   test('invokeOnKeyData returns normally when onKeyData is null', () {
-    final ui.KeyData keyData = ui.KeyData(
+    const  ui.KeyData keyData = ui.KeyData(
       timeStamp: Duration(milliseconds: 1),
       type: ui.KeyEventType.repeat,
       physical: kPhysicalKeyA,
@@ -179,7 +179,7 @@ void testMain() {
       expect(window.onKeyData, same(onKeyData));
     });
 
-    final ui.KeyData keyData = ui.KeyData(
+    const  ui.KeyData keyData = ui.KeyData(
       timeStamp: Duration(milliseconds: 1),
       type: ui.KeyEventType.repeat,
       physical: kPhysicalKeyA,
@@ -304,9 +304,9 @@ void testMain() {
     js_util.setProperty(screen, 'orientation', null);
 
     final Completer<bool> completer = Completer<bool>();
-    final ByteData inputData = JSONMethodCodec().encodeMethodCall(MethodCall(
+    final ByteData inputData = const JSONMethodCodec().encodeMethodCall(const MethodCall(
         'SystemChrome.setPreferredOrientations',
-        const <dynamic>[]))!;
+        <dynamic>[]))!;
 
     window.sendPlatformMessage(
       'flutter/platform',

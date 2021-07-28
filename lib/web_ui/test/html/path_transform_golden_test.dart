@@ -80,7 +80,7 @@ Future<void> testMain() async {
     final RecordingCanvas rc =
         RecordingCanvas(const Rect.fromLTRB(0, 0, 500, 500));
     final Path path = Path();
-    path.addRect(Rect.fromLTRB(50, 40, 300, 100));
+    path.addRect(const Rect.fromLTRB(50, 40, 300, 100));
     rc.drawPath(
         path,
         SurfacePaint()
@@ -170,8 +170,8 @@ Future<void> testMain() async {
 
     final Path path = Path();
     path.moveTo(350, 280);
-    path.arcToPoint(Offset(450, 90),
-        radius: Radius.elliptical(200, 50),
+    path.arcToPoint(const Offset(450, 90),
+        radius: const Radius.elliptical(200, 50),
         rotation: -math.pi / 6.0,
         largeArc: true,
         clockwise: true);
@@ -204,7 +204,7 @@ Future<void> testMain() async {
         RecordingCanvas(const Rect.fromLTRB(0, 0, 500, 500));
 
     final Path path = Path();
-    path.addRRect(RRect.fromLTRBR(50, 50, 300, 200, Radius.elliptical(4, 8)));
+    path.addRRect(RRect.fromLTRBR(50, 50, 300, 200, const Radius.elliptical(4, 8)));
 
     rc.drawPath(
         path,

@@ -57,7 +57,7 @@ Future<void> testMain() async {
     const double height = 40;
 
     // Border for ltr paragraphs.
-    final Rect ltrBox = Rect.fromLTWH(0, 0, 320, 5 * height).inflate(5).translate(10, 10);
+    final Rect ltrBox = const Rect.fromLTWH(0, 0, 320, 5 * height).inflate(5).translate(10, 10);
     canvas.drawRect(
       ltrBox,
       SurfacePaintData()
@@ -96,7 +96,7 @@ Future<void> testMain() async {
     const double height = 40;
 
     // Border for ltr paragraphs.
-    final Rect ltrBox = Rect.fromLTWH(0, 0, 320, 5 * height).inflate(5).translate(10, 10);
+    final Rect ltrBox = const Rect.fromLTWH(0, 0, 320, 5 * height).inflate(5).translate(10, 10);
     canvas.drawRect(
       ltrBox,
       SurfacePaintData()
@@ -161,7 +161,7 @@ Future<void> testMain() async {
     const double height = 40;
 
     // Border for ltr paragraphs.
-    final Rect ltrBox = Rect.fromLTWH(0, 0, 320, 5 * height).inflate(5).translate(10, 10);
+    final Rect ltrBox = const Rect.fromLTWH(0, 0, 320, 5 * height).inflate(5).translate(10, 10);
     canvas.drawRect(
       ltrBox,
       SurfacePaintData()
@@ -200,7 +200,7 @@ Future<void> testMain() async {
     const double height = 40;
 
     // Border for ltr paragraphs.
-    final Rect ltrBox = Rect.fromLTWH(0, 0, 320, 5 * height).inflate(5).translate(10, 10);
+    final Rect ltrBox = const Rect.fromLTWH(0, 0, 320, 5 * height).inflate(5).translate(10, 10);
     canvas.drawRect(
       ltrBox,
       SurfacePaintData()
@@ -263,13 +263,13 @@ Future<void> testMain() async {
   }
 
   test('multiline bidi', () {
-    final Rect bounds = Rect.fromLTWH(0, 0, 400, 500);
+    const Rect bounds = Rect.fromLTWH(0, 0, 400, 500);
     final BitmapCanvas canvas = BitmapCanvas(bounds, RenderStrategy());
 
     const double height = 95;
 
     // Border for ltr paragraphs.
-    final Rect ltrBox = Rect.fromLTWH(0, 0, 150, 5 * height).inflate(5).translate(10, 10);
+    final Rect ltrBox = const Rect.fromLTWH(0, 0, 150, 5 * height).inflate(5).translate(10, 10);
     canvas.drawRect(
       ltrBox,
       SurfacePaintData()
@@ -307,7 +307,7 @@ Future<void> testMain() async {
 
     const double height = 95;
 
-    final Rect ltrBox = Rect.fromLTWH(0, 0, 150, 5 * height).inflate(5).translate(10, 10);
+    final Rect ltrBox = const Rect.fromLTWH(0, 0, 150, 5 * height).inflate(5).translate(10, 10);
     canvas.drawRect(
       ltrBox,
       SurfacePaintData()
@@ -383,7 +383,7 @@ Future<void> testMain() async {
     const double height = 95;
 
     // Border for ltr paragraphs.
-    final Rect ltrBox = Rect.fromLTWH(0, 0, 150, 5 * height).inflate(5).translate(10, 10);
+    final Rect ltrBox = const Rect.fromLTWH(0, 0, 150, 5 * height).inflate(5).translate(10, 10);
     canvas.drawRect(
       ltrBox,
       SurfacePaintData()
@@ -422,7 +422,7 @@ Future<void> testMain() async {
     const double height = 95;
 
     // Border for ltr paragraphs.
-    final Rect ltrBox = Rect.fromLTWH(0, 0, 150, 5 * height).inflate(5).translate(10, 10);
+    final Rect ltrBox = const Rect.fromLTWH(0, 0, 150, 5 * height).inflate(5).translate(10, 10);
     canvas.drawRect(
       ltrBox,
       SurfacePaintData()
@@ -502,7 +502,7 @@ Future<void> testMain() async {
     const double height = 95;
 
     // Border for ltr paragraphs.
-    final Rect ltrBox = Rect.fromLTWH(0, 0, 150, 5 * height).inflate(5).translate(10, 10);
+    final Rect ltrBox = const Rect.fromLTWH(0, 0, 150, 5 * height).inflate(5).translate(10, 10);
     canvas.drawRect(
       ltrBox,
       SurfacePaintData()
@@ -541,7 +541,7 @@ Future<void> testMain() async {
     const double height = 95;
 
     // Border for ltr paragraphs.
-    final Rect ltrBox = Rect.fromLTWH(0, 0, 150, 5 * height).inflate(5).translate(10, 10);
+    final Rect ltrBox = const Rect.fromLTWH(0, 0, 150, 5 * height).inflate(5).translate(10, 10);
     canvas.drawRect(
       ltrBox,
       SurfacePaintData()
