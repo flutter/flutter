@@ -602,6 +602,7 @@ class TextSelectionOverlay {
           selectionControls: selectionControls,
           position: position,
           dragStartBehavior: dragStartBehavior,
+          selectionDelegate: selectionDelegate!,
         ),
       );
     }
@@ -695,6 +696,7 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
     required this.onSelectionHandleChanged,
     required this.onSelectionHandleTapped,
     required this.selectionControls,
+    required this.selectionDelegate,
     this.dragStartBehavior = DragStartBehavior.start,
   }) : super(key: key);
 
@@ -707,6 +709,7 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
   final VoidCallback? onSelectionHandleTapped;
   final TextSelectionControls selectionControls;
   final DragStartBehavior dragStartBehavior;
+  final TextSelectionDelegate selectionDelegate;
 
   @override
   _TextSelectionHandleOverlayState createState() => _TextSelectionHandleOverlayState();
@@ -833,32 +836,26 @@ class _TextSelectionHandleOverlayState
     //
     // For the end handle we compute the rectangles that encompass the range
     // of the last full selected grapheme cluster at the end of the selection.
+    //
+    // Only calculate start/end handle rects if the text in the previous frame
+    // is the same as the text in the current frame. This is done because
+    // widget.renderObject contains the renderEditable from the previous frame.
+    // If the text changed between the current and previous frames then
+    // widget.renderObject.getRectForComposingRange might fail.
     final InlineSpan span = widget.renderObject.text!;
-    final String text = span.toPlainText();
+    final String prev_text = span.toPlainText();
+    final String curr_text = widget.selectionDelegate.textEditingValue.text;
     final int firstSelectedGraphemeExtent;
     final int lastSelectedGraphemeExtent;
-    final TextSelection? selection = widget.renderObject.selection;
-
-    if (selection != null && selection.isValid && !selection.isCollapsed) {
-      final String selectedGraphemes = selection.textInside(text);
-      firstSelectedGraphemeExtent = selectedGraphemes.characters.first.length;
-      lastSelectedGraphemeExtent = selectedGraphemes.characters.last.length;
-      assert(firstSelectedGraphemeExtent <= selectedGraphemes.length && lastSelectedGraphemeExtent <= selectedGraphemes.length);
-    } else {
-      // The call to selectedGraphemes.characters.first/last will throw a state
-      // error if the given text is empty, so fall back to first/last character
-      // range in this case.
-      //
-      // The call to widget.selection.textInside(text) will return a RangeError
-      // for a collapsed selection, fall back to this case when that happens.
-      firstSelectedGraphemeExtent = 0;
-      lastSelectedGraphemeExtent = 0;
-    }
-
+    final TextSelection selection = widget.selection;
     final Rect? startHandleRect;
     final Rect? endHandleRect;
 
-    if (selection != null && selection.isValid && !selection.isCollapsed) {
+    if (prev_text == curr_text && selection != null && selection.isValid && !selection.isCollapsed) {
+      final String selectedGraphemes = selection.textInside(curr_text);
+      firstSelectedGraphemeExtent = selectedGraphemes.characters.first.length;
+      lastSelectedGraphemeExtent = selectedGraphemes.characters.last.length;
+      assert(firstSelectedGraphemeExtent <= selectedGraphemes.length && lastSelectedGraphemeExtent <= selectedGraphemes.length);
       startHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: selection.start, end: selection.start + firstSelectedGraphemeExtent));
       endHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: selection.end - lastSelectedGraphemeExtent, end: selection.end));
     } else {
