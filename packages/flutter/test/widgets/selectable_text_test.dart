@@ -1893,7 +1893,7 @@ void main() {
     editableTextWidget = tester.widget(find.byType(EditableText).last);
     c1 = editableTextWidget.controller;
 
-    expect(c1.selection.extentOffset - c1.selection.baseOffset, -6);
+    expect(c1.selection.extentOffset - c1.selection.baseOffset, -10);
   });
 
   testWidgets('Changing focus test', (WidgetTester tester) async {
