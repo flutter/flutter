@@ -174,6 +174,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     testTextInput.reset();
     if (registerTestTextInput)
       _testTextInput.register();
+
+    _surfaceSize = null;
+    handleMetricsChanged();
   }
 
   @override
