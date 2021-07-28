@@ -200,7 +200,7 @@ class KeyEventSimulator {
   }
 
   /// Get a raw key data map given a [LogicalKeyboardKey] and a platform.
-  static Map<String, dynamic> getRawKeyData(
+  static Map<String, dynamic> getKeyData(
     LogicalKeyboardKey key, {
     required String platform,
     bool isDown = true,
@@ -629,12 +629,12 @@ class KeyEventSimulator {
     return result;
   }
 
-  static Future<bool> _simulateKeyEventByRawEvent(ValueGetter<Map<String, dynamic>> getRawKeyData) async {
+  static Future<bool> _simulateKeyEventByRawEvent(ValueGetter<Map<String, dynamic>> getKeyData) async {
     return TestAsyncUtils.guard<bool>(() async {
       final Completer<bool> result = Completer<bool>();
       await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
-        SystemChannels.keyEvent.codec.encodeMessage(getRawKeyData()),
+        SystemChannels.keyEvent.codec.encodeMessage(getKeyData()),
         (ByteData? data) {
           if (data == null) {
             result.complete(false);
@@ -712,7 +712,7 @@ class KeyEventSimulator {
     Future<bool> _simulateByRawEvent() {
       return _simulateKeyEventByRawEvent(() {
         platform ??= _defaultPlatform;
-        return getRawKeyData(key, platform: platform!, isDown: true, physicalKey: physicalKey, character: character);
+        return getKeyData(key, platform: platform!, isDown: true, physicalKey: physicalKey, character: character);
       });
     }
     switch (_transitMode) {
@@ -757,7 +757,7 @@ class KeyEventSimulator {
     Future<bool> _simulateByRawEvent() {
       return _simulateKeyEventByRawEvent(() {
         platform ??= _defaultPlatform;
-        return getRawKeyData(key, platform: platform!, isDown: false, physicalKey: physicalKey);
+        return getKeyData(key, platform: platform!, isDown: false, physicalKey: physicalKey);
       });
     }
     switch (_transitMode) {
@@ -803,7 +803,7 @@ class KeyEventSimulator {
     Future<bool> _simulateByRawEvent() {
       return _simulateKeyEventByRawEvent(() {
         platform ??= _defaultPlatform;
-        return getRawKeyData(key, platform: platform!, isDown: true, physicalKey: physicalKey, character: character);
+        return getKeyData(key, platform: platform!, isDown: true, physicalKey: physicalKey, character: character);
       });
     }
     switch (_transitMode) {
