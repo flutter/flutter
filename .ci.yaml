@@ -499,147 +499,58 @@ targets:
         ["devicelab"]
     scheduler: luci
 
-<<<<<<< HEAD
   - name: Linux_android android_obfuscate_test
     presubmit: false
-||||||| parent of e5f7737fde (mac framework tests)
-  - name: Mac build_tests_1_4
-    builder: Mac build_tests_1_4
-=======
-  # TODO(chillers): Override these with xcode 13
-  - name: Mac build_tests_1_4
-    builder: Mac build_tests_1_4
-    recipe: flutter/flutter_drone
->>>>>>> e5f7737fde (mac framework tests)
     properties:
-      shard: build_tests
-      subshard: 1_4
       tags: >
         ["devicelab"]
     scheduler: luci
 
-<<<<<<< HEAD
   - name: Linux_android android_stack_size_test
     presubmit: false
-||||||| parent of e5f7737fde (mac framework tests)
-  - name: Mac build_tests_2_4
-    builder: Mac build_tests_2_4
-=======
-  - name: Mac build_tests_2_4
-    builder: Mac build_tests_2_4
-    recipe: flutter/flutter_drone
->>>>>>> e5f7737fde (mac framework tests)
     properties:
-      shard: build_tests
-      subshard: 2_4
       tags: >
         ["devicelab"]
     scheduler: luci
 
-<<<<<<< HEAD
   - name: Linux_android android_view_scroll_perf__timeline_summary
     presubmit: false
-||||||| parent of e5f7737fde (mac framework tests)
-  - name: Mac build_tests_3_4
-    builder: Mac build_tests_3_4
-=======
-  - name: Mac build_tests_3_4
-    builder: Mac build_tests_3_4
-    recipe: flutter/flutter_drone
->>>>>>> e5f7737fde (mac framework tests)
     properties:
-      shard: build_tests
-      subshard: 3_4
       tags: >
         ["devicelab"]
     scheduler: luci
 
-<<<<<<< HEAD
   - name: Linux_android animated_image_gc_perf
     presubmit: false
-||||||| parent of e5f7737fde (mac framework tests)
-  - name: Mac build_tests_4_4
-    builder: Mac build_tests_4_4
-=======
-  - name: Mac build_tests_4_4
-    builder: Mac build_tests_4_4
-    recipe: flutter/flutter_drone
->>>>>>> e5f7737fde (mac framework tests)
     properties:
-      shard: build_tests
-      subshard: 4_4
       tags: >
         ["devicelab"]
     scheduler: luci
 
-<<<<<<< HEAD
   - name: Linux_android animated_placeholder_perf__e2e_summary
     presubmit: false
-||||||| parent of e5f7737fde (mac framework tests)
-  - name: Mac customer_testing
-    builder: Mac customer_testing
-=======
-  - name: Mac customer_testing
-    builder: Mac customer_testing
-    recipe: flutter/flutter
->>>>>>> e5f7737fde (mac framework tests)
     properties:
-      validation: customer_testing
-      validation_name: Customer testing
       tags: >
         ["devicelab"]
     scheduler: luci
 
-<<<<<<< HEAD
   - name: Linux_android backdrop_filter_perf__e2e_summary
     presubmit: false
-||||||| parent of e5f7737fde (mac framework tests)
-  - name: Mac framework_tests_libraries
-    builder: Mac framework_tests_libraries
-=======
-  - name: Mac framework_tests_libraries
-    builder: Mac framework_tests_libraries
-    recipe: flutter/flutter_drone
->>>>>>> e5f7737fde (mac framework tests)
     properties:
-      shard: framework_tests
-      subshard: libraries
       tags: >
         ["devicelab"]
     scheduler: luci
 
-<<<<<<< HEAD
   - name: Linux_android basic_material_app_android__compile
     presubmit: false
-||||||| parent of e5f7737fde (mac framework tests)
-  - name: Mac framework_tests_misc
-    builder: Mac framework_tests_misc
-=======
-  - name: Mac framework_tests_misc
-    builder: Mac framework_tests_misc
-    recipe: flutter/flutter_drone
->>>>>>> e5f7737fde (mac framework tests)
     properties:
-      shard: framework_tests
-      subshard: misc
       tags: >
         ["devicelab"]
     scheduler: luci
 
-<<<<<<< HEAD
   - name: Linux_android color_filter_and_fade_perf__e2e_summary
     presubmit: false
-||||||| parent of e5f7737fde (mac framework tests)
-  - name: Mac framework_tests_widgets
-    builder: Mac framework_tests_widgets
-=======
-  - name: Mac framework_tests_widgets
-    builder: Mac framework_tests_widgets
-    recipe: flutter/flutter_drone
->>>>>>> e5f7737fde (mac framework tests)
     properties:
-      shard: framework_tests
-      subshard: widgets
       tags: >
         ["devicelab"]
     scheduler: luci
@@ -721,124 +632,45 @@ targets:
         ["devicelab"]
     scheduler: luci
 
-<<<<<<< HEAD
   - name: Linux_android flutter_gallery__image_cache_memory
     presubmit: false
-||||||| parent of e5f7737fde (mac framework tests)
-  - name: Mac tool_tests_general
-    builder: Mac tool_tests_general
-=======
-  - name: Mac tool_tests_general
-    builder: Mac tool_tests_general
-    recipe: flutter/flutter_drone
->>>>>>> e5f7737fde (mac framework tests)
     properties:
-      shard: tool_tests
-      subshard: general
       tags: >
         ["devicelab"]
     scheduler: luci
 
-<<<<<<< HEAD
   - name: Linux_android flutter_gallery__memory_nav
     presubmit: false
-||||||| parent of e5f7737fde (mac framework tests)
-  - name: Mac tool_integration_tests_1_4
-    builder: Mac tool_integration_tests_1_4
-=======
-  - name: Mac tool_tests_commands
-    builder: Mac tool_tests_commands
-    recipe: flutter/flutter_drone
-    presubmit: false
     properties:
-      shard: tool_tests
-      subshard: commands
-      tags: >
-        ["framework","hostonly","shard"]
-    scheduler: luci
-
-
-  - name: Mac tool_integration_tests_1_4
-    builder: Mac tool_integration_tests_1_4
-    recipe: flutter/flutter_drone
->>>>>>> e5f7737fde (mac framework tests)
-    properties:
-      shard: tool_integration_tests
-      subshard: 1_4
       tags: >
         ["devicelab"]
     scheduler: luci
 
-<<<<<<< HEAD
   - name: Linux_android flutter_gallery__start_up
     presubmit: false
-||||||| parent of e5f7737fde (mac framework tests)
-  - name: Mac tool_integration_tests_2_4
-    builder: Mac tool_integration_tests_2_4
-=======
-  - name: Mac tool_integration_tests_2_4
-    builder: Mac tool_integration_tests_2_4
-    recipe: flutter/flutter_drone
->>>>>>> e5f7737fde (mac framework tests)
     properties:
-      shard: tool_integration_tests
-      subshard: 2_4
       tags: >
         ["devicelab"]
     scheduler: luci
 
-<<<<<<< HEAD
   - name: Linux_android flutter_gallery__transition_perf
     presubmit: false
-||||||| parent of e5f7737fde (mac framework tests)
-  - name: Mac tool_integration_tests_3_4
-    builder: Mac tool_integration_tests_3_4
-=======
-  - name: Mac tool_integration_tests_3_4
-    builder: Mac tool_integration_tests_3_4
-    recipe: flutter/flutter_drone
->>>>>>> e5f7737fde (mac framework tests)
     properties:
-      shard: tool_integration_tests
-      subshard: 3_4
       tags: >
         ["devicelab"]
     scheduler: luci
 
-<<<<<<< HEAD
   - name: Linux_android flutter_gallery__transition_perf_e2e
     bringup: true # Flaky https://github.com/flutter/flutter/issues/83298
     presubmit: false
-||||||| parent of e5f7737fde (mac framework tests)
-  - name: Mac tool_integration_tests_4_4
-    builder: Mac tool_integration_tests_4_4
-=======
-  - name: Mac tool_integration_tests_4_4
-    builder: Mac tool_integration_tests_4_4
-    recipe: flutter/flutter_drone
->>>>>>> e5f7737fde (mac framework tests)
     properties:
-      shard: tool_integration_tests
-      subshard: 4_4
       tags: >
         ["devicelab"]
     scheduler: luci
 
-<<<<<<< HEAD
   - name: Linux_android flutter_gallery__transition_perf_hybrid
     presubmit: false
-||||||| parent of e5f7737fde (mac framework tests)
-  - name: Mac web_tool_tests
-    builder: Mac web_tool_tests
-    postsubmit: false
-=======
-  - name: Mac web_tool_tests
-    builder: Mac web_tool_tests
-    recipe: flutter/flutter_drone
->>>>>>> e5f7737fde (mac framework tests)
     properties:
-      shard: web_tool_tests
-      subshard: web 
       tags: >
         ["devicelab"]
     scheduler: luci
@@ -1720,7 +1552,6 @@ targets:
         ["devicelab"]
     scheduler: luci
 
-<<<<<<< HEAD
   - name: Mac_ios integration_ui_ios_textfield
     presubmit: false
     properties:
@@ -1729,21 +1560,6 @@ targets:
     scheduler: luci
 
   - name: Mac_ios ios_app_with_extensions_test
-||||||| parent of e5f7737fde (mac framework tests)
-  - name: Mac tool_tests_commands
-    builder: Mac tool_tests_commands
-    presubmit: false
-    properties:
-      tags: >
-        ["framework","hostonly","shard"]
-    scheduler: luci
-
-  - name: Mac_ios backdrop_filter_perf_ios__timeline_summary
-    builder: Mac_ios backdrop_filter_perf_ios__timeline_summary
-=======
-  - name: Mac_ios backdrop_filter_perf_ios__timeline_summary
-    builder: Mac_ios backdrop_filter_perf_ios__timeline_summary
->>>>>>> e5f7737fde (mac framework tests)
     presubmit: false
     properties:
       tags: >
