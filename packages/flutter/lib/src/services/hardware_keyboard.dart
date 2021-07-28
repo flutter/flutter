@@ -788,7 +788,14 @@ class KeyEventManager {
         return false;
       case KeyDataTransitMode.keyDataThenRawKeyData:
         // Postpone key event dispatching until the handleRawKeyMessage.
-        _keyEventsSinceLastMessage.add(_eventFromData(data));
+        //
+        // Having 0 as the physical or logical ID indicates an empty key data,
+        // transmitted to ensure that the transit mode is correctly inferred.
+        if (data.physical == 0 || data.logical == 0) {
+          assert(data.physical == 0 && data.logical == 0);
+        } else {
+          _keyEventsSinceLastMessage.add(_eventFromData(data));
+        }
         return false;
     }
   }
