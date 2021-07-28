@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:convert' show jsonDecode;
 
 import 'package:args/command_runner.dart';
@@ -28,11 +26,11 @@ void main() {
     const String candidateBranch = 'flutter-1.2-candidate.3';
     const String releaseChannel = 'stable';
     const String revision = 'abcd1234';
-    Checkouts checkouts;
-    MemoryFileSystem fileSystem;
-    FakePlatform platform;
-    TestStdio stdio;
-    FakeProcessManager processManager;
+    late Checkouts checkouts;
+    late MemoryFileSystem fileSystem;
+    late FakePlatform platform;
+    late TestStdio stdio;
+    late FakeProcessManager processManager;
 
     setUp(() {
       stdio = TestStdio();
@@ -40,9 +38,9 @@ void main() {
     });
 
     CommandRunner<void> createRunner({
-      Map<String, String> environment,
-      String operatingSystem,
-      List<FakeCommand> commands,
+      Map<String, String>? environment,
+      String? operatingSystem,
+      List<FakeCommand>? commands,
     }) {
       operatingSystem ??= const LocalPlatform().operatingSystem;
       final String pathSeparator = operatingSystem == 'windows' ? r'\' : '/';
@@ -73,13 +71,6 @@ void main() {
       );
       return CommandRunner<void>('codesign-test', '')..addCommand(command);
     }
-
-    tearDown(() {
-      // Ensure we don't re-use these between tests.
-      processManager = null;
-      checkouts = null;
-      platform = null;
-    });
 
     test('throws exception if run from Windows', () async {
       final CommandRunner<void> runner = createRunner(
@@ -251,7 +242,7 @@ void main() {
       );
 
       final String stateFilePath = fileSystem.path.join(
-        platform.environment['HOME'],
+        platform.environment['HOME']!,
         kStateFileName,
       );
 

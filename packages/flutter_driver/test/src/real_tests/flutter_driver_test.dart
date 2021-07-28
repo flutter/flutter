@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=20210721"
+@Tags(<String>['no-shuffle'])
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -37,6 +43,7 @@ void main() {
     late FakeVM fakeVM;
     late FakeIsolate fakeIsolate;
     late VMServiceFlutterDriver driver;
+    late File logFile;
     int driverId = -1;
 
     setUp(() {
@@ -45,8 +52,14 @@ void main() {
       fakeClient = FakeVmService(fakeVM);
       fakeClient.responses['waitFor'] = makeFakeResponse(<String, dynamic>{'status':'ok'});
       driverId += 1;
+      logFile = File(path.join(testOutputsDirectory, 'flutter_driver_commands_$driverId.log'));
     });
 
+    tearDown(() {
+      if (logFile.existsSync()) {
+        logFile.deleteSync();
+      }
+    });
 
     group('logCommunicationToFile', () {
       test('logCommunicationToFile = true', () async {
@@ -54,11 +67,10 @@ void main() {
 
         await driver.waitFor(find.byTooltip('foo'), timeout: _kTestTimeout);
 
-        final File file = File(path.join(testOutputsDirectory, 'flutter_driver_commands_$driverId.log'));
-        final bool exists = file.existsSync();
-        expect(exists, true, reason: 'Not found ${file.path}');
+        final bool exists = logFile.existsSync();
+        expect(exists, true, reason: 'Not found ${logFile.path}');
 
-        final String commandLog = await file.readAsString();
+        final String commandLog = await logFile.readAsString();
         const String waitForCommandLog = '>>> {command: waitFor, timeout: $_kSerializedTestTimeout, finderType: ByTooltipMessage, text: foo}';
         const String responseLog = '<<< {isError: false, response: {status: ok}}';
 
@@ -71,9 +83,8 @@ void main() {
 
         await driver.waitFor(find.byTooltip('foo'), timeout: _kTestTimeout);
 
-        final File file = File(path.join(testOutputsDirectory, 'flutter_driver_commands_$driverId.log'));
-        final bool exists = file.existsSync();
-        expect(exists, false, reason: 'because ${file.path} exists');
+        final bool exists = logFile.existsSync();
+        expect(exists, false, reason: 'because ${logFile.path} exists');
       });
     });
   });
@@ -691,6 +702,7 @@ void main() {
   group('WebFlutterDriver with logCommunicationToFile', () {
     late FakeFlutterWebConnection fakeConnection;
     late WebFlutterDriver driver;
+    late File logFile;
     int driverId = -1;
 
     setUp(() {
@@ -698,17 +710,23 @@ void main() {
       fakeConnection.supportsTimelineAction = true;
       fakeConnection.responses['waitFor'] = jsonEncode(makeFakeResponse(<String, dynamic>{'status': 'ok'}));
       driverId += 1;
+      logFile = File(path.join(testOutputsDirectory, 'flutter_driver_commands_$driverId.log'));
+    });
+
+    tearDown(() {
+      if (logFile.existsSync()) {
+        logFile.deleteSync();
+      }
     });
 
     test('logCommunicationToFile = true', () async {
       driver = WebFlutterDriver.connectedTo(fakeConnection);
       await driver.waitFor(find.byTooltip('logCommunicationToFile test'), timeout: _kTestTimeout);
 
-      final File file = File(path.join(testOutputsDirectory, 'flutter_driver_commands_$driverId.log'));
-      final bool exists = file.existsSync();
-      expect(exists, true, reason: 'Not found ${file.path}');
+      final bool exists = logFile.existsSync();
+      expect(exists, true, reason: 'Not found ${logFile.path}');
 
-      final String commandLog = await file.readAsString();
+      final String commandLog = await logFile.readAsString();
       const String waitForCommandLog = '>>> {command: waitFor, timeout: 1234, finderType: ByTooltipMessage, text: logCommunicationToFile test}';
       const String responseLog = '<<< {isError: false, response: {status: ok}, type: Response}';
 
@@ -719,9 +737,8 @@ void main() {
     test('logCommunicationToFile = false', () async {
       driver = WebFlutterDriver.connectedTo(fakeConnection, logCommunicationToFile: false);
       await driver.waitFor(find.byTooltip('logCommunicationToFile test'), timeout: _kTestTimeout);
-      final File file = File(path.join(testOutputsDirectory, 'flutter_driver_commands_$driverId.log'));
-      final bool exists = file.existsSync();
-      expect(exists, false, reason: 'because ${file.path} exists');
+      final bool exists = logFile.existsSync();
+      expect(exists, false, reason: 'because ${logFile.path} exists');
     });
   });
 

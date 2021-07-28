@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:convert' show jsonDecode, jsonEncode;
 
 import 'package:file/file.dart' show File;
@@ -21,7 +19,7 @@ String luciConsoleLink(String channel, String groupName) {
     'channel $channel not recognized',
   );
   assert(
-    <String>['framework', 'engine', 'devicelab'].contains(groupName),
+    <String>['framework', 'engine', 'devicelab', 'packaging'].contains(groupName),
     'group named $groupName not recognized',
   );
   final String consoleName = channel == 'master' ? groupName : '${channel}_$groupName';
@@ -29,9 +27,12 @@ String luciConsoleLink(String channel, String groupName) {
 }
 
 String defaultStateFilePath(Platform platform) {
-  assert(platform.environment['HOME'] != null);
+  final String? home = platform.environment['HOME'];
+  if (home == null) {
+    throw ConductorException(r'Environment variable $HOME must be set!');
+  }
   return <String>[
-    platform.environment['HOME'],
+    home,
     kStateFileName,
   ].join(platform.pathSeparator);
 }
@@ -133,8 +134,9 @@ String phaseInstructions(pb.ConductorState state) {
       ].join('\n');
     case ReleasePhase.CODESIGN_ENGINE_BINARIES:
       return <String>[
-        'You must verify Engine CI builds are successful and then codesign the',
-        'binaries at revision ${state.engine.currentGitHead}.',
+        'You must verify pre-submit CI builds on your engine pull request are successful,',
+        'merge your pull request, validate post-submit CI, and then codesign the binaries ',
+        'on the merge commit.',
       ].join('\n');
     case ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS:
       final List<pb.Cherrypick> outstandingCherrypicks = state.framework.cherrypicks.where(
@@ -150,13 +152,14 @@ String phaseInstructions(pb.ConductorState state) {
       ].join('\n');
     case ReleasePhase.PUBLISH_VERSION:
       return <String>[
-        'You must verify Framework CI builds are successful.',
-        'See $kReleaseDocumentationUrl for more information.',
+        'You must verify pre-submit CI builds on your framework pull request are successful,',
+        'merge your pull request, and validate post-submit CI. See $kReleaseDocumentationUrl,',
+        'for more information.',
       ].join('\n');
     case ReleasePhase.PUBLISH_CHANNEL:
       return 'Issue `conductor next` to publish your release to the release branch.';
     case ReleasePhase.VERIFY_RELEASE:
-      return 'Release archive packages must be verified on cloud storage.';
+      return 'Release archive packages must be verified on cloud storage: ${luciConsoleLink(state.releaseChannel, 'packaging')}';
     case ReleasePhase.RELEASE_COMPLETED:
       return 'This release has been completed.';
   }
@@ -168,12 +171,13 @@ String phaseInstructions(pb.ConductorState state) {
 ///
 /// Will throw a [ConductorException] if [ReleasePhase.RELEASE_COMPLETED] is
 /// passed as an argument, as there is no next phase.
-ReleasePhase getNextPhase(ReleasePhase previousPhase) {
-  assert(previousPhase != null);
-  if (previousPhase == ReleasePhase.RELEASE_COMPLETED) {
+ReleasePhase getNextPhase(ReleasePhase currentPhase) {
+  assert(currentPhase != null);
+  final ReleasePhase? nextPhase = ReleasePhase.valueOf(currentPhase.value + 1);
+  if (nextPhase == null) {
     throw ConductorException('There is no next ReleasePhase!');
   }
-  return ReleasePhase.valueOf(previousPhase.value + 1);
+  return nextPhase;
 }
 
 void writeStateToFile(File file, pb.ConductorState state, List<String> logs) {

@@ -1371,7 +1371,7 @@ Widget createAppWithCenteredButton(Widget child) {
 }
 
 
-class _RestorableDialogTestWidget extends StatelessWidget{
+class _RestorableDialogTestWidget extends StatelessWidget {
   static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
     return CupertinoDialogRoute<void>(
       context: context,

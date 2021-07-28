@@ -835,7 +835,7 @@ class MockVMService extends Fake implements vm_service.VmService {
   }
 }
 
-class FakeDevice extends Fake implements Device {}
+class FakeDevice extends Fake implements Device { }
 
 class FakeFlutterVersion extends Fake implements FlutterVersion {
   @override

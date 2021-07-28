@@ -85,8 +85,8 @@ void main() {
   });
 }
 
-class FakeFlutterProject extends Fake implements FlutterProject {}
-class FakeApplicationPackage extends Fake implements ApplicationPackage {}
+class FakeFlutterProject extends Fake implements FlutterProject { }
+class FakeApplicationPackage extends Fake implements ApplicationPackage { }
 class FakeBundleBuilder extends Fake implements BundleBuilder {
   FakeBundleBuilder(this.fileSystem);
 

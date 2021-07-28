@@ -579,7 +579,7 @@ class FakeIOSApp extends Fake implements IOSApp {
   final String name;
 }
 
-class FakeIOSWorkflow extends Fake implements IOSWorkflow {}
+class FakeIOSWorkflow extends Fake implements IOSWorkflow { }
 
 class FakeXcdevice extends Fake implements XCDevice {
   int getAvailableIOSDevicesCount = 0;

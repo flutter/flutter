@@ -25,7 +25,9 @@ class Remote {
   const Remote({
     required RemoteName name,
     required this.url,
-  }) : _name = name, assert(url != null), assert (url != '');
+  })  : _name = name,
+        assert(url != null),
+        assert(url != '');
 
   final RemoteName _name;
 
@@ -63,9 +65,15 @@ abstract class Repository {
     if (previousCheckoutLocation != null) {
       _checkoutDirectory = fileSystem.directory(previousCheckoutLocation);
       if (!_checkoutDirectory!.existsSync()) {
-        throw ConductorException('Provided previousCheckoutLocation $previousCheckoutLocation does not exist on disk!');
+        throw ConductorException(
+            'Provided previousCheckoutLocation $previousCheckoutLocation does not exist on disk!');
       }
       if (initialRef != null) {
+        git.run(
+          <String>['fetch', upstreamRemote.name],
+          'Fetch ${upstreamRemote.name} to ensure we have latest refs',
+          workingDirectory: _checkoutDirectory!.path,
+        );
         git.run(
           <String>['checkout', '${upstreamRemote.name}/$initialRef'],
           'Checking out initialRef $initialRef',
@@ -255,11 +263,9 @@ abstract class Repository {
   /// List commits in reverse chronological order.
   List<String> revList(List<String> args) {
     return git
-        .getOutput(
-          <String>['rev-list', ...args],
-          'rev-list with args ${args.join(' ')}',
-          workingDirectory: checkoutDirectory.path
-        )
+        .getOutput(<String>['rev-list', ...args],
+            'rev-list with args ${args.join(' ')}',
+            workingDirectory: checkoutDirectory.path)
         .trim()
         .split('\n');
   }
@@ -356,22 +362,33 @@ abstract class Repository {
   }
 
   /// Push [commit] to the release channel [branch].
-  void updateChannel(
-    String commit,
-    String remote,
-    String branch, {
+  void pushRef({
+    required String fromRef,
+    required String remote,
+    required String toRef,
     bool force = false,
+    bool dryRun = false,
   }) {
-    git.run(
-      <String>[
-        'push',
-        if (force) '--force',
-        remote,
-        '$commit:$branch',
-      ],
-      'update the release branch with the commit',
-      workingDirectory: checkoutDirectory.path,
-    );
+    final List<String> args = <String>[
+      'push',
+      if (force) '--force',
+      remote,
+      '$fromRef:$toRef',
+    ];
+    final String command = <String>[
+      'git',
+      ...args,
+    ].join(' ');
+    if (dryRun) {
+      stdio.printStatus('About to execute command: `$command`');
+    } else {
+      git.run(
+        args,
+        'update the release branch with the commit',
+        workingDirectory: checkoutDirectory.path,
+      );
+      stdio.printStatus('Executed command: `$command`');
+    }
   }
 
   String commit(
@@ -566,6 +583,21 @@ class FrameworkRepository extends Repository {
     ) as Map<String, dynamic>;
     return Version.fromString(versionJson['frameworkVersion'] as String);
   }
+
+  void updateEngineRevision(
+    String newEngine, {
+    @visibleForTesting File? engineVersionFile,
+  }) {
+    assert(newEngine.isNotEmpty);
+    engineVersionFile ??= checkoutDirectory
+        .childDirectory('bin')
+        .childDirectory('internal')
+        .childFile('engine.version');
+    assert(engineVersionFile.existsSync());
+    final String oldEngine = engineVersionFile.readAsStringSync();
+    stdio.printStatus('Updating engine revision from $oldEngine to $newEngine');
+    engineVersionFile.writeAsStringSync(newEngine.trim(), flush: true);
+  }
 }
 
 /// A wrapper around the host repository that is executing the conductor.
@@ -578,14 +610,14 @@ class HostFrameworkRepository extends FrameworkRepository {
     String name = 'host-framework',
     required String upstreamPath,
   }) : super(
-    checkouts,
-    name: name,
-    upstreamRemote: Remote(
-      name: RemoteName.upstream,
-      url: 'file://$upstreamPath/',
-    ),
-    localUpstream: false,
-  ) {
+          checkouts,
+          name: name,
+          upstreamRemote: Remote(
+            name: RemoteName.upstream,
+            url: 'file://$upstreamPath/',
+          ),
+          localUpstream: false,
+        ) {
     _checkoutDirectory = checkouts.fileSystem.directory(upstreamPath);
   }
 
@@ -594,17 +626,20 @@ class HostFrameworkRepository extends FrameworkRepository {
 
   @override
   void newBranch(String branchName) {
-    throw ConductorException('newBranch not implemented for the host repository');
+    throw ConductorException(
+        'newBranch not implemented for the host repository');
   }
 
   @override
   void checkout(String ref) {
-    throw ConductorException('checkout not implemented for the host repository');
+    throw ConductorException(
+        'checkout not implemented for the host repository');
   }
 
   @override
   String cherryPick(String commit) {
-    throw ConductorException('cherryPick not implemented for the host repository');
+    throw ConductorException(
+        'cherryPick not implemented for the host repository');
   }
 
   @override
@@ -617,14 +652,15 @@ class HostFrameworkRepository extends FrameworkRepository {
     throw ConductorException('tag not implemented for the host repository');
   }
 
-  @override
   void updateChannel(
     String commit,
     String remote,
     String branch, {
     bool force = false,
+    bool dryRun = false,
   }) {
-    throw ConductorException('updateChannel not implemented for the host repository');
+    throw ConductorException(
+        'updateChannel not implemented for the host repository');
   }
 
   @override
@@ -673,20 +709,20 @@ class EngineRepository extends Repository {
     depsFile ??= checkoutDirectory.childFile('DEPS');
     final String fileContent = depsFile.readAsStringSync();
     final RegExp dartPattern = RegExp("[ ]+'dart_revision': '([a-z0-9]{40})',");
-    final Iterable<RegExpMatch> allMatches = dartPattern.allMatches(fileContent);
+    final Iterable<RegExpMatch> allMatches =
+        dartPattern.allMatches(fileContent);
     if (allMatches.length != 1) {
       throw ConductorException(
-        'Unexpected content in the DEPS file at ${depsFile.path}\n'
-        'Expected to find pattern ${dartPattern.pattern} 1 times, but got '
-        '${allMatches.length}.'
-      );
+          'Unexpected content in the DEPS file at ${depsFile.path}\n'
+          'Expected to find pattern ${dartPattern.pattern} 1 times, but got '
+          '${allMatches.length}.');
     }
     final String updatedFileContent = fileContent.replaceFirst(
       dartPattern,
       "  'dart_revision': '$newRevision',",
     );
 
-    depsFile.writeAsStringSync(updatedFileContent);
+    depsFile.writeAsStringSync(updatedFileContent, flush: true);
   }
 
   @override
@@ -716,7 +752,7 @@ class Checkouts {
     required this.stdio,
     required Directory parentDirectory,
     String directoryName = 'flutter_conductor_checkouts',
-  })  : directory = parentDirectory.childDirectory(directoryName) {
+  }) : directory = parentDirectory.childDirectory(directoryName) {
     if (!directory.existsSync()) {
       directory.createSync(recursive: true);
     }

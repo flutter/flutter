@@ -194,13 +194,13 @@ abstract class ShortcutActivator {
   /// event.
   ///
   /// For example, for `Ctrl-A`, it has to check if the event is a
-  /// [RawKeyDownEvent], if either side of the Ctrl key is pressed, and none of
+  /// [KeyDownEvent], if either side of the Ctrl key is pressed, and none of
   /// the Shift keys, Alt keys, or Meta keys are pressed; it doesn't have to
   /// check if KeyA is pressed, since it's already guaranteed.
   ///
   /// This method must not cause any side effects for the `state`. Typically
-  /// this is only used to query whether [RawKeyboard.keysPressed] contains
-  /// a key.
+  /// this is only used to query whether [HardwareKeyboard.logicalKeysPressed]
+  /// contains a key.
   ///
   /// Since [ShortcutActivator] accepts all event types, subclasses might want
   /// to check the event type in [accepts].
@@ -314,11 +314,13 @@ class LogicalKeySet extends KeySet<LogicalKeyboardKey> with Diagnosticable
 
   @override
   bool accepts(RawKeyEvent event, RawKeyboard state) {
+    if (event is! RawKeyDownEvent)
+      return false;
     final Set<LogicalKeyboardKey> collapsedRequired = LogicalKeyboardKey.collapseSynonyms(keys);
     final Set<LogicalKeyboardKey> collapsedPressed = LogicalKeyboardKey.collapseSynonyms(state.keysPressed);
     final bool keysEqual = collapsedRequired.difference(collapsedPressed).isEmpty
       && collapsedRequired.length == collapsedPressed.length;
-    return event is RawKeyDownEvent && keysEqual;
+    return keysEqual;
   }
 
   static final Set<LogicalKeyboardKey> _modifiers = <LogicalKeyboardKey>{
@@ -425,7 +427,8 @@ class ShortcutMapProperty extends DiagnosticsProperty<Map<ShortcutActivator, Int
 ///  * [CharacterActivator], an activator that represents key combinations
 ///    that result in the specified character, such as question mark.
 class SingleActivator with Diagnosticable implements ShortcutActivator {
-  /// Create an activator of a trigger key and modifiers.
+  /// Triggered when the [trigger] key is pressed or repeated when the
+  /// modifiers are held.
   ///
   /// The `trigger` should be the non-modifier key that is pressed after all the
   /// modifiers, such as [LogicalKeyboardKey.keyC] as in `Ctrl+C`. It must not be
@@ -433,6 +436,9 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
   ///
   /// The `control`, `shift`, `alt`, and `meta` flags represent whether
   /// the respect modifier keys should be held (true) or released (false)
+  ///
+  /// On each [RawKeyDownEvent] of the [trigger] key, this activator checks
+  /// whether the specified modifier conditions are met.
   ///
   /// {@tool dartpad --template=stateful_widget_scaffold_center}
   /// In the following example, the shortcut `Control + C` increases the counter:
@@ -811,17 +817,7 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
   /// must be mapped to an [Action], and the [Action] must be enabled.
   @protected
   KeyEventResult handleKeypress(BuildContext context, RawKeyEvent event) {
-    if (event is! RawKeyDownEvent) {
-      return KeyEventResult.ignored;
-    }
     assert(context != null);
-    assert(
-      RawKeyboard.instance.keysPressed.isNotEmpty,
-      'Received a key down event when no keys are in keysPressed. '
-      "This state can occur if the key event being sent doesn't properly "
-      'set its modifier flags. This was the event: $event and its data: '
-      '${event.data}',
-    );
     final Intent? matchedIntent = _find(event, RawKeyboard.instance);
     if (matchedIntent != null) {
       final BuildContext? primaryContext = primaryFocus?.context;
@@ -1026,6 +1022,8 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
 ///
 /// See also:
 ///
+///  * [CallbackShortcuts], a less complicated (but less flexible) way of
+///    defining key bindings that just invoke callbacks.
 ///  * [Intent], a class for containing a description of a user action to be
 ///    invoked.
 ///  * [Action], a class for defining an invocation of a user action.
@@ -1196,4 +1194,91 @@ class _ShortcutsMarker extends InheritedNotifier<ShortcutManager> {
         super(notifier: manager, child: child);
 
   ShortcutManager get manager => super.notifier!;
+}
+
+/// A widget that provides an uncomplicated mechanism for binding a key
+/// combination to a specific callback.
+///
+/// This is similar to the functionality provided by the [Shortcuts] widget, but
+/// instead of requiring a mapping to an [Intent], and an [Actions] widget
+/// somewhere in the widget tree to bind the [Intent] to, it just takes a set of
+/// bindings that bind the key combination directly to a [VoidCallback].
+///
+/// Because it is a simpler mechanism, it doesn't provide the ability to disable
+/// the callbacks, or to separate the definition of the shortcuts from the
+/// definition of the code that is triggered by them (the role that actions play
+/// in the [Shortcuts]/[Actions] system).
+///
+/// However, for some applications the complexity and flexibility of the
+/// [Shortcuts] and [Actions] mechanism is overkill, and this widget is here for
+/// those apps.
+///
+/// [Shortcuts] and [CallbackShortcuts] can both be used in the same app. As
+/// with any key handling widget, if this widget handles a key event then
+/// widgets above it in the focus chain will not receive the event. This means
+/// that if this widget handles a key, then an ancestor [Shortcuts] widget (or
+/// any other key handling widget) will not receive that key, and similarly, if
+/// a descendant of this widget handles the key, then the key event will not
+/// reach this widget for handling.
+///
+/// See also:
+///  * [Focus], a widget that defines which widgets can receive keyboard focus.
+class CallbackShortcuts extends StatelessWidget {
+  /// Creates a const [CallbackShortcuts] widget.
+  const CallbackShortcuts({
+    Key? key,
+    required this.bindings,
+    required this.child,
+  }) : super(key: key);
+
+  /// A map of key combinations to callbacks used to define the shortcut
+  /// bindings.
+  ///
+  /// If a descendant of this widget has focus, and a key is pressed, the
+  /// activator keys of this map will be asked if they accept the key event. If
+  /// they do, then the corresponding callback is invoked, and the key event
+  /// propagation is halted. If none of the activators accept the key event,
+  /// then the key event continues to be propagated up the focus chain.
+  ///
+  /// If more than one activator accepts the key event, then all of the
+  /// callbacks associated with activators that accept the key event are
+  /// invoked.
+  ///
+  /// Some examples of [ShortcutActivator] subclasses that can be used to define
+  /// the key combinations here are [SingleActivator], [CharacterActivator], and
+  /// [LogicalKeySet].
+  final Map<ShortcutActivator, VoidCallback> bindings;
+
+  /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.ProxyWidget.child}
+  final Widget child;
+
+  // A helper function to make the stack trace more useful if the callback
+  // throws, by providing the activator and event as arguments that will appear
+  // in the stack trace.
+  bool _applyKeyBinding(ShortcutActivator activator, RawKeyEvent event) {
+    if (activator.accepts(event, RawKeyboard.instance)) {
+      bindings[activator]!.call();
+      return true;
+    }
+    return false;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Focus(
+      canRequestFocus: false,
+      skipTraversal: true,
+      onKey: (FocusNode node, RawKeyEvent event) {
+        KeyEventResult result = KeyEventResult.ignored;
+        // Activates all key bindings that match, returns "handled" if any handle it.
+        for (final ShortcutActivator activator in bindings.keys) {
+          result = _applyKeyBinding(activator, event) ? KeyEventResult.handled : result;
+        }
+        return result;
+      },
+      child: child,
+    );
+  }
 }
