@@ -51,7 +51,7 @@ void main() {
     } finally {
       await subscription.cancel();
     }
-  }, skip: true); // Skippping for https://github.com/flutter/flutter/issues/85575.
+  });
 
   testWithoutContext('newly added code executes during hot restart - canvaskit', () async {
     final Completer<void> completer = Completer<void>();
@@ -70,6 +70,5 @@ void main() {
     } finally {
       await subscription.cancel();
     }
-  }, skip: true); // Skipping for https://github.com/flutter/flutter/issues/85575
-                  // and https://github.com/flutter/flutter/issues/85043.
+  }, skip: true); // Skipping for https://github.com/flutter/flutter/issues/85575.
 }

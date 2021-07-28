@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:convert';
 import 'dart:io';
 
@@ -17,14 +15,14 @@ import 'package:http/testing.dart';
 import 'common.dart';
 
 void main() {
-  ProcessResult _processResult;
+  late ProcessResult _processResult;
   ProcessResult runSyncStub(String executable, List<String> args,
-          {Map<String, String> environment,
-          bool includeParentEnvironment,
-          bool runInShell,
-          Encoding stderrEncoding,
-          Encoding stdoutEncoding,
-          String workingDirectory}) =>
+          {Map<String, String>? environment,
+          bool includeParentEnvironment = true,
+          bool runInShell = false,
+          Encoding? stderrEncoding,
+          Encoding? stdoutEncoding,
+          String? workingDirectory}) =>
       _processResult;
 
   // Expected test values.
@@ -33,9 +31,9 @@ void main() {
   const String serviceAccountToken = 'test_token';
 
   group('Cocoon', () {
-    Client mockClient;
-    Cocoon cocoon;
-    FileSystem fs;
+    late Client mockClient;
+    late Cocoon cocoon;
+    late FileSystem fs;
 
     setUp(() {
       fs = MemoryFileSystem();
@@ -180,10 +178,35 @@ void main() {
       expect(() => cocoon.sendResultsPath(resultsPath: resultsPath),
           throwsA(isA<ClientException>()));
     });
+
+    test('does not upload results on non-supported branches', () async {
+      // Any network failure would cause the upoad to fail
+      mockClient = MockClient((Request request) async => Response('', 500));
+
+      cocoon = Cocoon(
+        serviceAccountTokenPath: serviceAccountTokenPath,
+        fs: fs,
+        httpClient: mockClient,
+        requestRetryLimit: 0,
+      );
+
+      const String resultsPath = 'results.json';
+      const String updateTaskJson = '{'
+          '"CommitBranch":"stable",'
+          '"CommitSha":"$commitSha",'
+          '"BuilderName":"builderAbc",'
+          '"NewStatus":"Succeeded",'
+          '"ResultData":{"i":0.0,"j":0.0,"not_a_metric":"something"},'
+          '"BenchmarkScoreKeys":["i","j"]}';
+      fs.file(resultsPath).writeAsStringSync(updateTaskJson);
+
+      // This will fail if it decided to upload results
+      await cocoon.sendResultsPath(resultsPath: resultsPath);
+    });
   });
 
   group('AuthenticatedCocoonClient', () {
-    FileSystem fs;
+    late FileSystem fs;
 
     setUp(() {
       fs = MemoryFileSystem();

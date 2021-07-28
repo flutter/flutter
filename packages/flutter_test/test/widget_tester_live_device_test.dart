@@ -82,31 +82,36 @@ No widgets found at Offset(1.0, 1.0).
       ),
     );
 
+    final Size originalSize = tester.binding.createViewConfiguration().size;
     await tester.binding.setSurfaceSize(const Size(2000, 1800));
-    await tester.pump();
+    try {
+      await tester.pump();
 
-    final Offset widgetCenter = tester.getRect(find.byType(Text)).center;
-    expect(widgetCenter.dx, 1000);
-    expect(widgetCenter.dy, 900);
+      final Offset widgetCenter = tester.getRect(find.byType(Text)).center;
+      expect(widgetCenter.dx, 1000);
+      expect(widgetCenter.dy, 900);
 
-    await binding.collectDebugPrints(printedMessages, () async {
-      await tester.tap(find.byType(Text));
-    });
-    await tester.pump();
-    expect(invocations, 0);
+      await binding.collectDebugPrints(printedMessages, () async {
+        await tester.tap(find.byType(Text));
+      });
+      await tester.pump();
+      expect(invocations, 0);
 
-    _expectStartsWith(printedMessages, '''
+      _expectStartsWith(printedMessages, '''
 Some possible finders for the widgets at Offset(1000.0, 900.0):
   find.text('Test')
 '''.trim().split('\n'));
-    printedMessages.clear();
+      printedMessages.clear();
 
-    await binding.collectDebugPrints(printedMessages, () async {
-      await tester.tapAt(const Offset(1, 1));
-    });
-    expect(printedMessages, equals('''
+      await binding.collectDebugPrints(printedMessages, () async {
+        await tester.tapAt(const Offset(1, 1));
+      });
+      expect(printedMessages, equals('''
 No widgets found at Offset(1.0, 1.0).
 '''.trim().split('\n')));
+    } finally {
+      await tester.binding.setSurfaceSize(originalSize);
+    }
   });
 }
 

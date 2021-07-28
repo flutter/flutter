@@ -70,7 +70,7 @@ Future<void> run(List<String> arguments) async {
   await verifyNoBadImportsInFlutterTools(flutterRoot);
 
   print('$clock Internationalization...');
-  await verifyInternationalizations();
+  await verifyInternationalizations(flutterRoot, dart);
 
   print('$clock Integration test timeouts...');
   await verifyIntegrationTestTimeouts(flutterRoot);
@@ -422,26 +422,26 @@ Future<void> verifyIntegrationTestTimeouts(String workingDirectory) async {
   }
 }
 
-Future<void> verifyInternationalizations() async {
+Future<void> verifyInternationalizations(String workingDirectory, String dartExecutable) async {
   final EvalResult materialGenResult = await _evalCommand(
-    dart,
+    dartExecutable,
     <String>[
       path.join('dev', 'tools', 'localization', 'bin', 'gen_localizations.dart'),
       '--material',
     ],
-    workingDirectory: flutterRoot,
+    workingDirectory: workingDirectory,
   );
   final EvalResult cupertinoGenResult = await _evalCommand(
-    dart,
+    dartExecutable,
     <String>[
       path.join('dev', 'tools', 'localization', 'bin', 'gen_localizations.dart'),
       '--cupertino',
     ],
-    workingDirectory: flutterRoot,
+    workingDirectory: workingDirectory,
   );
 
-  final String materialLocalizationsFile = path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'generated_material_localizations.dart');
-  final String cupertinoLocalizationsFile = path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'generated_cupertino_localizations.dart');
+  final String materialLocalizationsFile = path.join(workingDirectory, 'packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'generated_material_localizations.dart');
+  final String cupertinoLocalizationsFile = path.join(workingDirectory, 'packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'generated_cupertino_localizations.dart');
   final String expectedMaterialResult = await File(materialLocalizationsFile).readAsString();
   final String expectedCupertinoResult = await File(cupertinoLocalizationsFile).readAsString();
 

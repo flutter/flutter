@@ -113,7 +113,7 @@ enum ModifierKey {
 ///    reference to [RawKeyEventData] subclasses.
 ///  * [RawKeyboard], which uses these interfaces to expose key data.
 @immutable
-abstract class RawKeyEventData {
+abstract class RawKeyEventData with Diagnosticable {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const RawKeyEventData();
@@ -291,6 +291,7 @@ abstract class RawKeyEvent with Diagnosticable {
       data = RawKeyEventDataWeb(
         code: message['code'] as String? ?? '',
         key: key ?? '',
+        location: message['location'] as int? ?? 0,
         metaState: message['metaState'] as int? ?? 0,
       );
       if (key != null && key.isNotEmpty) {
@@ -376,6 +377,7 @@ abstract class RawKeyEvent with Diagnosticable {
           data = RawKeyEventDataWeb(
             code: message['code'] as String? ?? '',
             key: key ?? '',
+            location: message['location'] as int? ?? 0,
             metaState: message['metaState'] as int? ?? 0,
           );
           if (key != null && key.isNotEmpty) {
