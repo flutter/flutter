@@ -153,7 +153,7 @@ void main() {
       ),
       textDirection: TextDirection.ltr,
     );
-    // Do layout with width chosen so that this splits as 
+    // Do layout with width chosen so that this splits as
     // First smallsecond |
     // third fourth |
     // fifth|
@@ -490,7 +490,7 @@ void main() {
     );
     // Fake the render boxes that correspond to the WidgetSpans. We use
     // RenderParagraph to reduce the dependencies this test has. The dimensions
-    // of these get used in place of the widths and heights specified in the 
+    // of these get used in place of the widths and heights specified in the
     // SizedBoxes above: each comes out as (w,h) = (14,14).
     final List<RenderBox> renderBoxes = <RenderBox>[
       RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),

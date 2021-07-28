@@ -792,11 +792,11 @@ class RenderParagraph extends RenderBox
   /// [ui.BoxHeightStyle.tight] and [ui.BoxWidthStyle.tight] respectively and
   /// must not be null.
   ///
-  /// A given selection might have more than one rect if the [RenderParagraph] 
+  /// A given selection might have more than one rect if the [RenderParagraph]
   /// contains multiple [InlineSpan]s or bidirectional text, because logically
   /// contiguous text might not be visually contiguous.
   ///
-  /// See [TextPainter.getBoxesForSelection], for which this is essentially a 
+  /// See [TextPainter.getBoxesForSelection], for which this is essentially a
   /// wrapper, for additional details.
   ///
   /// Valid only after [layout].
