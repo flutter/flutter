@@ -845,16 +845,16 @@ class _TextSelectionHandleOverlayState
     // the current frame is different from the previous we fall back to
     // widget.renderObject.preferredLineHeight.
     final InlineSpan span = widget.renderObject.text!;
-    final String prev_text = span.toPlainText();
-    final String curr_text = widget.selectionDelegate.textEditingValue.text;
+    final String prevText = span.toPlainText();
+    final String currText = widget.selectionDelegate.textEditingValue.text;
     final int firstSelectedGraphemeExtent;
     final int lastSelectedGraphemeExtent;
     final TextSelection selection = widget.selection;
     final Rect? startHandleRect;
     final Rect? endHandleRect;
 
-    if (prev_text == curr_text && selection != null && selection.isValid && !selection.isCollapsed) {
-      final String selectedGraphemes = selection.textInside(curr_text);
+    if (prevText == currText && selection != null && selection.isValid && !selection.isCollapsed) {
+      final String selectedGraphemes = selection.textInside(currText);
       firstSelectedGraphemeExtent = selectedGraphemes.characters.first.length;
       lastSelectedGraphemeExtent = selectedGraphemes.characters.last.length;
       assert(firstSelectedGraphemeExtent <= selectedGraphemes.length && lastSelectedGraphemeExtent <= selectedGraphemes.length);
