@@ -55,7 +55,7 @@ enum StepperType {
   horizontal,
 }
 
-/// Defines the [Stepper]'s titles position.
+/// Defines the [Stepper]'s titles position when the [type] is [StepperType.horizontal].
 enum HorizontalTitlePosition {
   /// A horizontal layout of the steps with their titles position.
   inline,
@@ -63,7 +63,7 @@ enum HorizontalTitlePosition {
   bottom,
 }
 
-/// Defines the [Stepper]'s separator position.
+/// Defines the [Stepper]'s separator position when the [type] is [StepperType.horizontal].
 enum HorizontalLinePosition {
   /// A horizontal layout of the steps with their separator position in-between the titles.
   center,
@@ -740,7 +740,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
                 if (widget.type == StepperType.horizontal
                     && widget.horizontalLinePosition == HorizontalLinePosition.top
                     && widget.horizontalTitlePosition == HorizontalTitlePosition.bottom)
-                  const SizedBox(height: 44)
+                  const SizedBox(height: 48)
                 else
                   const SizedBox(height: 0),
               ],
