@@ -266,7 +266,6 @@ class TextEditingValue {
       return _deleteNonEmptySelection();
     }
 
-    final String textAfter = selection.textAfter(text);
     final String textBefore = selection.textBefore(text);
     if (index == selection.extentOffset) {
       return this;
@@ -291,11 +290,16 @@ class TextEditingValue {
       return this;
     }
     final String nextText = text.substring(0, selection.extentOffset) + text.substring(index, text.length);
+    final int charactersDeleted = text.length - nextText.length;
+    final int selectionToComposingStart = composing.start - selection.baseOffset;
+    final int charactersDeletedBeforeComposingStart = selectionToComposingStart.clamp(0, charactersDeleted);
+    final int selectionToComposingEnd = composing.end - selection.baseOffset;
+    final int charactersDeletedBeforeComposingEnd = selectionToComposingEnd.clamp(0, charactersDeleted);
     final TextRange nextComposingRange = !composing.isValid || composing.isCollapsed
       ? TextRange.empty
       : TextRange(
-        start: composing.start - (composing.start - textBefore.length).clamp(0, index),
-        end: composing.end - (composing.end - textBefore.length).clamp(0, index),
+        start: composing.start - charactersDeletedBeforeComposingStart,
+        end: composing.end - charactersDeletedBeforeComposingEnd,
       );
     return TextEditingValue(
       text: nextText,

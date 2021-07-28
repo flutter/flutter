@@ -233,7 +233,7 @@ abstract class TextEditingActionTarget {
       return deleteToStart(cause);
     }
 
-    String textBefore = value.selection.textBefore(value.text);
+    final String textBefore = value.selection.textBefore(value.text);
     final int characterBoundary =
         _getLeftByWord(textBefore.length, includeWhitespace);
     final TextEditingValue nextValue = value.deleteTo(characterBoundary, includeWhitespace);
@@ -368,7 +368,7 @@ abstract class TextEditingActionTarget {
 
 
     // When there is a line break, it shouldn't do anything.
-    String textAfter = value.selection.textAfter(value.text);
+    final String textAfter = value.selection.textAfter(value.text);
     final bool isNextCharacterBreakLine = textAfter.codeUnitAt(0) == 0x0A;
     if (isNextCharacterBreakLine) {
       return;

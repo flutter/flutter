@@ -509,6 +509,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   // Start TextMetrics.
 
+  /// {@macro flutter.services.TextMetrics.getLineAtOffset}
   @override
   TextSelection getLineAtOffset(String text, TextPosition position) {
     assert(
@@ -526,12 +527,13 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     return TextSelection(baseOffset: line.start, extentOffset: line.end);
   }
 
+  /// {@macro flutter.painting.TextPainter.getWordBoundary}
   @override
   TextRange getWordBoundary(TextPosition position) {
     return _textPainter.getWordBoundary(position);
   }
 
-  /// Returns the TextPosition above or below the given offset.
+  /// {@macro flutter.services.TextMetrics.getTextPositionVertical}
   @override
   TextPosition getTextPositionVertical(int textOffset, double verticalOffset) {
     final Offset caretOffset = _textPainter.getOffsetForCaret(TextPosition(offset: textOffset), _caretPrototype);
@@ -539,10 +541,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     return _textPainter.getPositionForOffset(caretOffsetTranslated);
   }
 
-  /// Returns the TextPosition above the given offset into _plainText.
-  ///
-  /// If the offset is already on the first line, the given offset will be
-  /// returned.
+  /// {@macro flutter.services.TextMetrics.getTextPositionAbove}
   @override
   TextPosition getTextPositionAbove(int offset) {
     // The caret offset gives a location in the upper left hand corner of
@@ -553,10 +552,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     return getTextPositionVertical(offset, verticalOffset);
   }
 
-  /// Returns the TextPosition below the given offset into _plainText.
-  ///
-  /// If the offset is already on the last line, the given offset will be
-  /// returned.
+  /// {@macro flutter.services.TextMetrics.getTextPositionBelow}
   @override
   TextPosition getTextPositionBelow(int offset) {
     // The caret offset gives a location in the upper left hand corner of

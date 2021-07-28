@@ -11,8 +11,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/rendering_tester.dart';
 
-class FakeEditableTextState with TextSelectionDelegate, TextEditingActionTarget {
-  FakeEditableTextState({
+class _FakeEditableTextState with TextSelectionDelegate, TextEditingActionTarget {
+  _FakeEditableTextState({
     required this.value,
     // Render editable parameters:
     this.obscureText = false,
@@ -48,6 +48,9 @@ class FakeEditableTextState with TextSelectionDelegate, TextEditingActionTarget 
 
   @override
   TextEditingValue get textEditingValue => value;
+  set textEditingValue(TextEditingValue nextValue) {
+    value = nextValue;
+  }
 
   @override
   void hideToolbar([bool hideHandles = true]) { }
@@ -95,7 +98,7 @@ class FakeEditableTextState with TextSelectionDelegate, TextEditingActionTarget 
 void main() {
   test('moveSelectionLeft/RightByLine stays on the current line', () async {
     const String text = 'one two three\n\nfour five six';
-    final FakeEditableTextState editableTextState = FakeEditableTextState(
+    final _FakeEditableTextState editableTextState = _FakeEditableTextState(
       textSpan: const TextSpan(
         text: text,
         style: TextStyle(
@@ -157,7 +160,7 @@ void main() {
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
   test('arrow keys and delete handle simple text correctly', () async {
-    final FakeEditableTextState editableTextState = FakeEditableTextState(
+    final _FakeEditableTextState editableTextState = _FakeEditableTextState(
       textSpan: const TextSpan(
         text: 'test',
         style: TextStyle(
@@ -191,7 +194,7 @@ void main() {
 
   test('arrow keys and delete handle surrogate pairs correctly', () async {
     const String text = '0123😆6789';
-    final FakeEditableTextState editableTextState = FakeEditableTextState(
+    final _FakeEditableTextState editableTextState = _FakeEditableTextState(
       textSpan: const TextSpan(
         text: text,
         style: TextStyle(
@@ -225,7 +228,7 @@ void main() {
 
   test('arrow keys and delete handle grapheme clusters correctly', () async {
     const String text = '0123👨‍👩‍👦2345';
-    final FakeEditableTextState editableTextState = FakeEditableTextState(
+    final _FakeEditableTextState editableTextState = _FakeEditableTextState(
       textSpan: const TextSpan(
         text: text,
         style: TextStyle(
@@ -259,7 +262,7 @@ void main() {
 
   test('arrow keys and delete handle surrogate pairs correctly case 2', () async {
     const String text = '\u{1F44D}';
-    final FakeEditableTextState editableTextState = FakeEditableTextState(
+    final _FakeEditableTextState editableTextState = _FakeEditableTextState(
       textSpan: const TextSpan(
         text: text,
         style: TextStyle(
@@ -293,7 +296,7 @@ void main() {
 
   test('arrow keys work after detaching the widget and attaching it again', () async {
     const String text = 'W Szczebrzeszynie chrząszcz brzmi w trzcinie';
-    final FakeEditableTextState editableTextState = FakeEditableTextState(
+    final _FakeEditableTextState editableTextState = _FakeEditableTextState(
       textSpan: const TextSpan(
         text: text,
         style: TextStyle(
@@ -333,7 +336,7 @@ void main() {
 
   test('RenderEditable registers and unregisters raw keyboard listener correctly', () async {
     const String text = 'how are you';
-    final FakeEditableTextState editableTextState = FakeEditableTextState(
+    final _FakeEditableTextState editableTextState = _FakeEditableTextState(
       textSpan: const TextSpan(
         text: text,
         style: TextStyle(
@@ -356,7 +359,7 @@ void main() {
 
   test('arrow keys with selection text', () async {
     const String text = '012345';
-    final FakeEditableTextState editableTextState = FakeEditableTextState(
+    final _FakeEditableTextState editableTextState = _FakeEditableTextState(
       textSpan: const TextSpan(
         text: text,
         style: TextStyle(
@@ -404,7 +407,7 @@ void main() {
 
   test('arrow keys with selection text and shift', () async {
     const String text = '012345';
-    final FakeEditableTextState editableTextState = FakeEditableTextState(
+    final _FakeEditableTextState editableTextState = _FakeEditableTextState(
       textSpan: const TextSpan(
         text: text,
         style: TextStyle(
@@ -456,7 +459,7 @@ void main() {
 
   test('respects enableInteractiveSelection', () async {
     const String text = '012345';
-    final FakeEditableTextState editableTextState = FakeEditableTextState(
+    final _FakeEditableTextState editableTextState = _FakeEditableTextState(
       textSpan: const TextSpan(
         text: text,
         style: TextStyle(
@@ -506,7 +509,7 @@ void main() {
   group('delete', () {
     test('when as a non-collapsed selection, it should delete a selection', () async {
       const String text = 'test';
-      final FakeEditableTextState editableTextState = FakeEditableTextState(
+      final _FakeEditableTextState editableTextState = _FakeEditableTextState(
         textSpan: const TextSpan(
           text: text,
           style: TextStyle(
@@ -532,7 +535,7 @@ void main() {
 
     test('when as simple text, it should delete the character to the left', () async {
       const String text = 'test';
-      final FakeEditableTextState editableTextState = FakeEditableTextState(
+      final _FakeEditableTextState editableTextState = _FakeEditableTextState(
         textSpan: const TextSpan(
           text: text,
           style: TextStyle(
@@ -558,7 +561,7 @@ void main() {
 
     test('when has surrogate pairs, it should delete the pair', () async {
       const String text = '\u{1F44D}';
-      final FakeEditableTextState editableTextState = FakeEditableTextState(
+      final _FakeEditableTextState editableTextState = _FakeEditableTextState(
         textSpan: const TextSpan(
           text: text,
           style: TextStyle(
@@ -584,7 +587,7 @@ void main() {
 
     test('when has grapheme clusters, it should delete the grapheme cluster', () async {
       const String text = '0123👨‍👩‍👦2345';
-      final FakeEditableTextState editableTextState = FakeEditableTextState(
+      final _FakeEditableTextState editableTextState = _FakeEditableTextState(
         textSpan: const TextSpan(
           text: text,
           style: TextStyle(
@@ -610,7 +613,7 @@ void main() {
 
     test('when is at the start of the text, it should be a no-op', () async {
       const String text = 'test';
-      final FakeEditableTextState editableTextState = FakeEditableTextState(
+      final _FakeEditableTextState editableTextState = _FakeEditableTextState(
         textSpan: const TextSpan(
           text: text,
           style: TextStyle(
@@ -636,7 +639,7 @@ void main() {
 
     test('when input has obscured text, it should delete the character to the left', () async {
       const String text = 'test';
-      final FakeEditableTextState editableTextState = FakeEditableTextState(
+      final _FakeEditableTextState editableTextState = _FakeEditableTextState(
         obscureText: true,
         textSpan: const TextSpan(
           text: '****',
@@ -665,7 +668,7 @@ void main() {
       const String text = '用多個塊測試';
       // TODO(justinmc): Did I delete too much here in all these offset tests?
       const int offset = 4;
-      final FakeEditableTextState editableTextState = FakeEditableTextState(
+      final _FakeEditableTextState editableTextState = _FakeEditableTextState(
         textSpan: const TextSpan(
           text: text,
           style: TextStyle(
@@ -692,7 +695,7 @@ void main() {
     test('when using rtl', () async {
       const String text = 'برنامج أهلا بالعالم';
       const int offset = text.length;
-      final FakeEditableTextState editableTextState = FakeEditableTextState(
+      final _FakeEditableTextState editableTextState = _FakeEditableTextState(
         textDirection: TextDirection.rtl,
         textSpan: const TextSpan(
           text: text,
@@ -722,7 +725,7 @@ void main() {
     test('when cursor is on the middle of a word, it should delete the left part of the word', () async {
       const String text = 'test with multiple blocks';
       const int offset = 8;
-      final FakeEditableTextState editableTextState = FakeEditableTextState(
+      final _FakeEditableTextState editableTextState = _FakeEditableTextState(
         textSpan: const TextSpan(
           text: text,
           style: TextStyle(
@@ -749,7 +752,7 @@ void main() {
     test('when includeWhiteSpace is true, it should treat a whiteSpace as a single word', () async {
       const String text = 'test with multiple blocks';
       const int offset = 10;
-      final FakeEditableTextState editableTextState = FakeEditableTextState(
+      final _FakeEditableTextState editableTextState = _FakeEditableTextState(
         textSpan: const TextSpan(
           text: text,
           style: TextStyle(
@@ -776,7 +779,7 @@ void main() {
     test('when cursor is after a word, it should delete the whole word', () async {
       const String text = 'test with multiple blocks';
       const int offset = 9;
-      final FakeEditableTextState editableTextState = FakeEditableTextState(
+      final _FakeEditableTextState editableTextState = _FakeEditableTextState(
         textSpan: const TextSpan(
           text: text,
           style: TextStyle(
@@ -803,7 +806,7 @@ void main() {
     test('when cursor is preceeded by white spaces, it should delete the spaces and the next word to the left', () async {
       const String text = 'test with   multiple blocks';
       const int offset = 12;
-      final FakeEditableTextState editableTextState = FakeEditableTextState(
+      final _FakeEditableTextState editableTextState = _FakeEditableTextState(
         textSpan: const TextSpan(
           text: text,
           style: TextStyle(
@@ -830,7 +833,7 @@ void main() {
     test('when cursor is preceeded by tabs spaces', () async {
       const String text = 'test with\t\t\tmultiple blocks';
       const int offset = 12;
-      final FakeEditableTextState editableTextState = FakeEditableTextState(
+      final _FakeEditableTextState editableTextState = _FakeEditableTextState(
         textSpan: const TextSpan(
           text: text,
           style: TextStyle(
@@ -857,7 +860,7 @@ void main() {
     test('when cursor is preceeded by break line, it should delete the breaking line and the word right before it', () async {
       const String text = 'test with\nmultiple blocks';
       const int offset = 10;
-      final FakeEditableTextState editableTextState = FakeEditableTextState(
+      final _FakeEditableTextState editableTextState = _FakeEditableTextState(
         textSpan: const TextSpan(
           text: text,
           style: TextStyle(
@@ -884,7 +887,7 @@ void main() {
     test('when using cjk characters', () async {
         const String text = '用多個塊測試';
         const int offset = 4;
-      final FakeEditableTextState editableTextState = FakeEditableTextState(
+      final _FakeEditableTextState editableTextState = _FakeEditableTextState(
         textSpan: const TextSpan(
           text: text,
           style: TextStyle(
@@ -911,7 +914,7 @@ void main() {
     test('when using rtl', () async {
       const String text = 'برنامج أهلا بالعالم';
       const int offset = text.length;
-      final FakeEditableTextState editableTextState = FakeEditableTextState(
+      final _FakeEditableTextState editableTextState = _FakeEditableTextState(
         textDirection: TextDirection.rtl,
         textSpan: const TextSpan(
           text: text,
@@ -939,7 +942,7 @@ void main() {
     test('when input has obscured text, it should delete everything before the selection', () async {
       const int offset = 21;
       const String text = 'test with multiple\n\n words';
-      final FakeEditableTextState editableTextState = FakeEditableTextState(
+      final _FakeEditableTextState editableTextState = _FakeEditableTextState(
         obscureText: true,
         textSpan: const TextSpan(
           text: '****',
@@ -969,7 +972,7 @@ void main() {
     test('when cursor is on last character of a line, it should delete everything to the left', () async {
       const String text = 'test with multiple blocks';
       const int offset = text.length;
-      final FakeEditableTextState editableTextState = FakeEditableTextState(
+      final _FakeEditableTextState editableTextState = _FakeEditableTextState(
         textSpan: const TextSpan(
           text: text,
           style: TextStyle(
@@ -996,7 +999,7 @@ void main() {
     test('when cursor is on the middle of a word, it should delete delete everything to the left', () async {
       const String text = 'test with multiple blocks';
       const int offset = 8;
-      final FakeEditableTextState editableTextState = FakeEditableTextState(
+      final _FakeEditableTextState editableTextState = _FakeEditableTextState(
         textSpan: const TextSpan(
           text: text,
           style: TextStyle(
@@ -1023,7 +1026,7 @@ void main() {
     test('when previous character is a breakline, it should preserve it', () async {
       const String text = 'test with\nmultiple blocks';
       const int offset = 10;
-      final FakeEditableTextState editableTextState = FakeEditableTextState(
+      final _FakeEditableTextState editableTextState = _FakeEditableTextState(
         textSpan: const TextSpan(
           text: text,
           style: TextStyle(
@@ -1050,7 +1053,7 @@ void main() {
     test('when text is multiline, it should delete until the first line break it finds', () async {
       const String text = 'test with\n\nMore stuff right here.\nmultiple blocks';
       const int offset = 22;
-      final FakeEditableTextState editableTextState = FakeEditableTextState(
+      final _FakeEditableTextState editableTextState = _FakeEditableTextState(
         textSpan: const TextSpan(
           text: text,
           style: TextStyle(
@@ -1077,7 +1080,7 @@ void main() {
     test('when input has obscured text, it should delete everything before the selection', () async {
       const int offset = 21;
       const String text = 'test with multiple\n\n words';
-      final FakeEditableTextState editableTextState = FakeEditableTextState(
+      final _FakeEditableTextState editableTextState = _FakeEditableTextState(
         obscureText: true,
         textSpan: const TextSpan(
           text: '****',
@@ -1106,7 +1109,7 @@ void main() {
   group('deleteForward', () {
     test('when as a non-collapsed selection, it should delete a selection', () async {
       const String text = 'test';
-      final FakeEditableTextState editableTextState = FakeEditableTextState(
+      final _FakeEditableTextState editableTextState = _FakeEditableTextState(
         textSpan: const TextSpan(
           text: text,
           style: TextStyle(
@@ -1133,7 +1136,7 @@ void main() {
     test('when includeWhiteSpace is true, it should treat a whiteSpace as a single word', () async {
       const String text = 'test with multiple blocks';
       const int offset = 9;
-      final FakeEditableTextState editableTextState = FakeEditableTextState(
+      final _FakeEditableTextState editableTextState = _FakeEditableTextState(
         textSpan: const TextSpan(
           text: text,
           style: TextStyle(
@@ -1159,7 +1162,7 @@ void main() {
 
     test('when at the end of a text, it should be a no-op', () async {
       const String text = 'test';
-      final FakeEditableTextState editableTextState = FakeEditableTextState(
+      final _FakeEditableTextState editableTextState = _FakeEditableTextState(
         textSpan: const TextSpan(
           text: text,
           style: TextStyle(
@@ -1185,7 +1188,7 @@ void main() {
 
     test('when the input has obscured text, it should delete the forward character', () async {
       const String text = 'test';
-      final FakeEditableTextState editableTextState = FakeEditableTextState(
+      final _FakeEditableTextState editableTextState = _FakeEditableTextState(
         obscureText: true,
         textSpan: const TextSpan(
           text: '****',
@@ -1213,7 +1216,7 @@ void main() {
     test('when using cjk characters', () async {
       const String text = '用多個塊測試';
       const int offset = 0;
-      final FakeEditableTextState editableTextState = FakeEditableTextState(
+      final _FakeEditableTextState editableTextState = _FakeEditableTextState(
         textSpan: const TextSpan(
           text: text,
           style: TextStyle(
@@ -1240,7 +1243,7 @@ void main() {
     test('when using rtl', () async {
       const String text = 'برنامج أهلا بالعالم';
       const int offset = 0;
-      final FakeEditableTextState editableTextState = FakeEditableTextState(
+      final _FakeEditableTextState editableTextState = _FakeEditableTextState(
         textDirection: TextDirection.rtl,
         textSpan: const TextSpan(
           text: text,
@@ -1270,7 +1273,7 @@ void main() {
     test('when cursor is on the middle of a word, it should delete the next part of the word', () async {
       const String text = 'test with multiple blocks';
       const int offset = 6;
-      final FakeEditableTextState editableTextState = FakeEditableTextState(
+      final _FakeEditableTextState editableTextState = _FakeEditableTextState(
         textSpan: const TextSpan(
           text: text,
           style: TextStyle(
@@ -1297,7 +1300,7 @@ void main() {
     test('when cursor is before a word, it should delete the whole word', () async {
       const String text = 'test with multiple blocks';
       const int offset = 10;
-      final FakeEditableTextState editableTextState = FakeEditableTextState(
+      final _FakeEditableTextState editableTextState = _FakeEditableTextState(
         textSpan: const TextSpan(
           text: text,
           style: TextStyle(
@@ -1324,7 +1327,7 @@ void main() {
     test('when cursor is preceeded by white spaces, it should delete the spaces and the next word', () async {
       const String text = 'test with   multiple blocks';
       const int offset = 9;
-      final FakeEditableTextState editableTextState = FakeEditableTextState(
+      final _FakeEditableTextState editableTextState = _FakeEditableTextState(
         textSpan: const TextSpan(
           text: text,
           style: TextStyle(
@@ -1351,7 +1354,7 @@ void main() {
     test('when cursor is before tabs, it should delete the tabs and the next word', () async {
       const String text = 'test with\t\t\tmultiple blocks';
       const int offset = 9;
-      final FakeEditableTextState editableTextState = FakeEditableTextState(
+      final _FakeEditableTextState editableTextState = _FakeEditableTextState(
         textSpan: const TextSpan(
           text: text,
           style: TextStyle(
@@ -1378,7 +1381,7 @@ void main() {
     test('when cursor is followed by break line, it should delete the next word', () async {
       const String text = 'test with\n\n\nmultiple blocks';
       const int offset = 9;
-      final FakeEditableTextState editableTextState = FakeEditableTextState(
+      final _FakeEditableTextState editableTextState = _FakeEditableTextState(
         textSpan: const TextSpan(
           text: text,
           style: TextStyle(
@@ -1405,7 +1408,7 @@ void main() {
     test('when using cjk characters', () async {
         const String text = '用多個塊測試';
         const int offset = 0;
-      final FakeEditableTextState editableTextState = FakeEditableTextState(
+      final _FakeEditableTextState editableTextState = _FakeEditableTextState(
         textSpan: const TextSpan(
           text: text,
           style: TextStyle(
@@ -1432,7 +1435,7 @@ void main() {
     test('when using rtl', () async {
       const String text = 'برنامج أهلا بالعالم';
       const int offset = 0;
-      final FakeEditableTextState editableTextState = FakeEditableTextState(
+      final _FakeEditableTextState editableTextState = _FakeEditableTextState(
         textDirection: TextDirection.rtl,
         textSpan: const TextSpan(
           text: text,
@@ -1460,7 +1463,7 @@ void main() {
     test('when input has obscured text, it should delete everything after the selection', () async {
       const int offset = 4;
       const String text = 'test';
-      final FakeEditableTextState editableTextState = FakeEditableTextState(
+      final _FakeEditableTextState editableTextState = _FakeEditableTextState(
         obscureText: true,
         textSpan: const TextSpan(
           text: '****',
@@ -1490,7 +1493,7 @@ void main() {
     test('when cursor is on first character of a line, it should delete everything that follows', () async {
       const String text = 'test with multiple blocks';
       const int offset = 4;
-      final FakeEditableTextState editableTextState = FakeEditableTextState(
+      final _FakeEditableTextState editableTextState = _FakeEditableTextState(
         textSpan: const TextSpan(
           text: text,
           style: TextStyle(
@@ -1517,7 +1520,7 @@ void main() {
     test('when cursor is on the middle of a word, it should delete delete everything that follows', () async {
       const String text = 'test with multiple blocks';
       const int offset = 8;
-      final FakeEditableTextState editableTextState = FakeEditableTextState(
+      final _FakeEditableTextState editableTextState = _FakeEditableTextState(
         textSpan: const TextSpan(
           text: text,
           style: TextStyle(
@@ -1544,7 +1547,7 @@ void main() {
     test('when next character is a breakline, it should preserve it', () async {
       const String text = 'test with\n\n\nmultiple blocks';
       const int offset = 9;
-      final FakeEditableTextState editableTextState = FakeEditableTextState(
+      final _FakeEditableTextState editableTextState = _FakeEditableTextState(
         textSpan: const TextSpan(
           text: text,
           style: TextStyle(
@@ -1571,7 +1574,7 @@ void main() {
     test('when text is multiline, it should delete until the first line break it finds', () async {
       const String text = 'test with\n\nMore stuff right here.\nmultiple blocks';
       const int offset = 2;
-      final FakeEditableTextState editableTextState = FakeEditableTextState(
+      final _FakeEditableTextState editableTextState = _FakeEditableTextState(
         textSpan: const TextSpan(
           text: text,
           style: TextStyle(
@@ -1598,7 +1601,7 @@ void main() {
     test('when input has obscured text, it should delete everything after the selection', () async {
       const String text = 'test with multiple\n\n words';
       const int offset = 4;
-      final FakeEditableTextState editableTextState = FakeEditableTextState(
+      final _FakeEditableTextState editableTextState = _FakeEditableTextState(
         obscureText: true,
         textSpan: const TextSpan(
           text: '****',
@@ -1624,12 +1627,32 @@ void main() {
     }, skip: isBrowser);
   });
 
-  // TODO(justinmc): May require some modification of FakeEditableTextState to
-  // allow this kind of inconcistency. Or is this a rendereditable test thing?
-  /*
   group('delete API implementations', () {
-    void verifyDoesNotCrashWithInconsistentTextEditingValue(void Function(SelectionChangedCause) method, EditableTextState editableTextState) {
-      final RenderEditable editable = editableTextState.renderEditable;
+    // Regression test for: https://github.com/flutter/flutter/issues/80226.
+    //
+    // This textSelectionDelegate has different text and selection from the
+    // render editable.
+    late _FakeEditableTextState delegate;
+
+    late RenderEditable editable;
+
+    setUp(() {
+      delegate = _FakeEditableTextState(
+        textSpan: TextSpan(
+          text: 'A ' * 50,
+          style: TextStyle(
+            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          ),
+        ),
+        value: const TextEditingValue(
+          text: 'BBB',
+          selection: TextSelection.collapsed(offset: 0),
+        ),
+      );
+      editable = delegate.renderEditable;
+    });
+
+    void verifyDoesNotCrashWithInconsistentTextEditingValue(void Function(SelectionChangedCause) method) {
       editable = RenderEditable(
         text: TextSpan(
           text: 'A ' * 50,
@@ -1653,22 +1676,12 @@ void main() {
     }
 
     test('delete is not racy and handles composing region correctly', () {
-      const String text = 'ABCDEF';
-      final FakeEditableTextState editableTextState = FakeEditableTextState(
-        obscureText: true,
-        textSpan: const TextSpan(
-          text: text,
-          style: TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
-          ),
-        ),
-        value: const TextEditingValue(
-          text: text,
-          selection: TextSelection.collapsed(offset: 2),
-          composing: TextRange(start: 1, end: 6),
-        ),
+      delegate.textEditingValue = const TextEditingValue(
+        text: 'ABCDEF',
+        selection: TextSelection.collapsed(offset: 2),
+        composing: TextRange(start: 1, end: 6),
       );
-      verifyDoesNotCrashWithInconsistentTextEditingValue(editableTextState.delete);
+      verifyDoesNotCrashWithInconsistentTextEditingValue(delegate.delete);
       final TextEditingValue textEditingValue = editable.textSelectionDelegate.textEditingValue;
       expect(textEditingValue.text, 'ACDEF');
       expect(textEditingValue.selection.isCollapsed, isTrue);
@@ -1691,5 +1704,4 @@ void main() {
       expect(textEditingValue.composing, const TextRange(start: 2, end: 5));
     });
   });
-  */
 }
