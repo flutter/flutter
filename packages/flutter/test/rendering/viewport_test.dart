@@ -1847,7 +1847,6 @@ void main() {
     ScrollController? controller,
     Axis scrollDirection = Axis.vertical,
     ScrollPhysics? physics,
-    bool Function(OverscrollNotification)? callback,
   }) {
     return Directionality(
       textDirection: TextDirection.ltr,
