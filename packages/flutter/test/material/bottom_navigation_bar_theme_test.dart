@@ -177,7 +177,7 @@ void main() {
     const TextStyle themeSelectedTextStyle = TextStyle(fontSize: 22);
     const TextStyle themeUnselectedTextStyle = TextStyle(fontSize: 21);
     const double themeElevation = 9.0;
-    const themeLandscapeLayout = BottomNavigationBarLandscapeLayout.centered;
+    const BottomNavigationBarLandscapeLayout themeLandscapeLayout = BottomNavigationBarLandscapeLayout.centered;
 
     const Color backgroundColor = Color(0xFF000004);
     const Color selectedItemColor = Color(0xFF000005);
@@ -187,7 +187,7 @@ void main() {
     const TextStyle selectedTextStyle = TextStyle(fontSize: 25);
     const TextStyle unselectedTextStyle = TextStyle(fontSize: 26);
     const double elevation = 7.0;
-    const landscapeLayout = BottomNavigationBarLandscapeLayout.spread;
+    const BottomNavigationBarLandscapeLayout landscapeLayout = BottomNavigationBarLandscapeLayout.spread;
 
     await tester.pumpWidget(
       MaterialApp(

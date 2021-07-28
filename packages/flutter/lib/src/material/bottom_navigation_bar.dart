@@ -34,6 +34,8 @@ enum BottomNavigationBarType {
   shifting,
 }
 
+/// Refines the layout of a [BottomNavigationBar] when the enclosing
+/// [MediaQueryData.orientation] is [Orientation.landscape].
 enum BottomNavigationBarLandscapeLayout {
   /// If the enclosing [MediaQueryData.orientation] is
   /// [Orientation.landscape] then the navigation bar's items are
@@ -679,7 +681,7 @@ class _BottomNavigationTile extends StatelessWidget {
 // icon-space-label row, where space is 8 pixels. Otherwise return a
 // icon-label column.
 class _Tile extends StatelessWidget {
-  _Tile({
+ const  _Tile({
     Key? key,
     required this.layout,
     required this.icon,
@@ -699,7 +701,7 @@ class _Tile extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
-          children: <Widget>[icon, SizedBox(width: 8), label],
+          children: <Widget>[icon, const SizedBox(width: 8), label],
         ),
       );
     }
@@ -1156,7 +1158,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
 // Optionally center a Material child for landscape layouts when layout is
 // BottomNavigationBarLandscapeLayout.centered
 class _Bar extends StatelessWidget {
-  _Bar({
+  const _Bar({
     Key? key,
     required this.child,
     required this.layout,
