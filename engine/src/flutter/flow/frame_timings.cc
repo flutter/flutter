@@ -136,6 +136,7 @@ std::unique_ptr<FrameTimingsRecorder> FrameTimingsRecorder::CloneUntil(
   std::scoped_lock state_lock(state_mutex_);
   std::unique_ptr<FrameTimingsRecorder> recorder =
       std::make_unique<FrameTimingsRecorder>(frame_number_);
+  FML_DCHECK(state_ >= state);
   recorder->state_ = state;
 
   if (state >= State::kVsync) {
@@ -147,7 +148,7 @@ std::unique_ptr<FrameTimingsRecorder> FrameTimingsRecorder::CloneUntil(
     recorder->build_start_ = build_start_;
   }
 
-  if (state >= State::kRasterEnd) {
+  if (state >= State::kBuildEnd) {
     recorder->build_end_ = build_end_;
   }
 
@@ -157,6 +158,7 @@ std::unique_ptr<FrameTimingsRecorder> FrameTimingsRecorder::CloneUntil(
 
   if (state >= State::kRasterEnd) {
     recorder->raster_end_ = raster_end_;
+    recorder->raster_end_wall_time_ = raster_end_wall_time_;
   }
 
   return recorder;

@@ -106,11 +106,90 @@ TEST(FrameTimingsRecorderTest, RecordersHaveUniqueFrameNumbers) {
 TEST(FrameTimingsRecorderTest, ClonedHasSameFrameNumber) {
   auto recorder = std::make_unique<FrameTimingsRecorder>();
 
+  auto cloned =
+      recorder->CloneUntil(FrameTimingsRecorder::State::kUninitialized);
+  ASSERT_EQ(recorder->GetFrameNumber(), cloned->GetFrameNumber());
+}
+
+TEST(FrameTimingsRecorderTest, ClonedHasSameVsyncStartAndTarget) {
+  auto recorder = std::make_unique<FrameTimingsRecorder>();
+
   const auto now = fml::TimePoint::Now();
-  recorder->RecordVsync(now, now);
+  recorder->RecordVsync(now, now + fml::TimeDelta::FromMilliseconds(16));
 
   auto cloned = recorder->CloneUntil(FrameTimingsRecorder::State::kVsync);
   ASSERT_EQ(recorder->GetFrameNumber(), cloned->GetFrameNumber());
+  ASSERT_EQ(recorder->GetVsyncStartTime(), cloned->GetVsyncStartTime());
+  ASSERT_EQ(recorder->GetVsyncTargetTime(), cloned->GetVsyncTargetTime());
+}
+
+TEST(FrameTimingsRecorderTest, ClonedHasSameBuildStart) {
+  auto recorder = std::make_unique<FrameTimingsRecorder>();
+
+  const auto now = fml::TimePoint::Now();
+  recorder->RecordVsync(now, now + fml::TimeDelta::FromMilliseconds(16));
+  recorder->RecordBuildStart(fml::TimePoint::Now());
+
+  auto cloned = recorder->CloneUntil(FrameTimingsRecorder::State::kBuildStart);
+  ASSERT_EQ(recorder->GetFrameNumber(), cloned->GetFrameNumber());
+  ASSERT_EQ(recorder->GetVsyncStartTime(), cloned->GetVsyncStartTime());
+  ASSERT_EQ(recorder->GetVsyncTargetTime(), cloned->GetVsyncTargetTime());
+  ASSERT_EQ(recorder->GetBuildStartTime(), cloned->GetBuildStartTime());
+}
+
+TEST(FrameTimingsRecorderTest, ClonedHasSameBuildEnd) {
+  auto recorder = std::make_unique<FrameTimingsRecorder>();
+
+  const auto now = fml::TimePoint::Now();
+  recorder->RecordVsync(now, now + fml::TimeDelta::FromMilliseconds(16));
+  recorder->RecordBuildStart(fml::TimePoint::Now());
+  recorder->RecordBuildEnd(fml::TimePoint::Now());
+
+  auto cloned = recorder->CloneUntil(FrameTimingsRecorder::State::kBuildEnd);
+  ASSERT_EQ(recorder->GetFrameNumber(), cloned->GetFrameNumber());
+  ASSERT_EQ(recorder->GetVsyncStartTime(), cloned->GetVsyncStartTime());
+  ASSERT_EQ(recorder->GetVsyncTargetTime(), cloned->GetVsyncTargetTime());
+  ASSERT_EQ(recorder->GetBuildStartTime(), cloned->GetBuildStartTime());
+  ASSERT_EQ(recorder->GetBuildEndTime(), cloned->GetBuildEndTime());
+}
+
+TEST(FrameTimingsRecorderTest, ClonedHasSameRasterStart) {
+  auto recorder = std::make_unique<FrameTimingsRecorder>();
+
+  const auto now = fml::TimePoint::Now();
+  recorder->RecordVsync(now, now + fml::TimeDelta::FromMilliseconds(16));
+  recorder->RecordBuildStart(fml::TimePoint::Now());
+  recorder->RecordBuildEnd(fml::TimePoint::Now());
+  recorder->RecordRasterStart(fml::TimePoint::Now());
+
+  auto cloned = recorder->CloneUntil(FrameTimingsRecorder::State::kRasterStart);
+  ASSERT_EQ(recorder->GetFrameNumber(), cloned->GetFrameNumber());
+  ASSERT_EQ(recorder->GetVsyncStartTime(), cloned->GetVsyncStartTime());
+  ASSERT_EQ(recorder->GetVsyncTargetTime(), cloned->GetVsyncTargetTime());
+  ASSERT_EQ(recorder->GetBuildStartTime(), cloned->GetBuildStartTime());
+  ASSERT_EQ(recorder->GetBuildEndTime(), cloned->GetBuildEndTime());
+  ASSERT_EQ(recorder->GetRasterStartTime(), cloned->GetRasterStartTime());
+}
+
+TEST(FrameTimingsRecorderTest, ClonedHasSameRasterEnd) {
+  auto recorder = std::make_unique<FrameTimingsRecorder>();
+
+  const auto now = fml::TimePoint::Now();
+  recorder->RecordVsync(now, now + fml::TimeDelta::FromMilliseconds(16));
+  recorder->RecordBuildStart(fml::TimePoint::Now());
+  recorder->RecordBuildEnd(fml::TimePoint::Now());
+  recorder->RecordRasterStart(fml::TimePoint::Now());
+  recorder->RecordRasterEnd();
+
+  auto cloned = recorder->CloneUntil(FrameTimingsRecorder::State::kRasterEnd);
+  ASSERT_EQ(recorder->GetFrameNumber(), cloned->GetFrameNumber());
+  ASSERT_EQ(recorder->GetVsyncStartTime(), cloned->GetVsyncStartTime());
+  ASSERT_EQ(recorder->GetVsyncTargetTime(), cloned->GetVsyncTargetTime());
+  ASSERT_EQ(recorder->GetBuildStartTime(), cloned->GetBuildStartTime());
+  ASSERT_EQ(recorder->GetBuildEndTime(), cloned->GetBuildEndTime());
+  ASSERT_EQ(recorder->GetRasterStartTime(), cloned->GetRasterStartTime());
+  ASSERT_EQ(recorder->GetRasterEndTime(), cloned->GetRasterEndTime());
+  ASSERT_EQ(recorder->GetRasterEndWallTime(), cloned->GetRasterEndWallTime());
 }
 
 TEST(FrameTimingsRecorderTest, FrameNumberTraceArgIsValid) {
