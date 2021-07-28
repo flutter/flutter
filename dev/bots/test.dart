@@ -1145,6 +1145,7 @@ Future<void> _runFlutterPluginsTests() async {
       './script/tool_runner.sh',
       <String>[
         'analyze',
+        '--custom-analysis=script/configs/custom_analysis.yaml',
       ],
       workingDirectory: checkout.path,
       environment: <String, String>{

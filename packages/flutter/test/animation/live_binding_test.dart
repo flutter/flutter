@@ -11,11 +11,12 @@ void main() {
    * because [matchesGoldenFile] does not use Skia Gold in its native package.
    */
 
-  LiveTestWidgetsFlutterBinding();
+  LiveTestWidgetsFlutterBinding().framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.onlyPumps;
 
   testWidgets('Should show event indicator for pointer events', (WidgetTester tester) async {
     final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(200, 200), allLayers: true);
-    final Widget target = Container(
+    int taps = 0;
+    Widget target({bool recording = true}) => Container(
       padding: const EdgeInsets.fromLTRB(20, 10, 25, 20),
       child: animationSheet.record(
         MaterialApp(
@@ -25,37 +26,103 @@ void main() {
               border: Border.all(color: const Color.fromARGB(255, 0, 0, 0)),
             ),
             child: Center(
-              child: GestureDetector(
-                onTap: () {},
-                child: const Text('Test'),
+              child: Container(
+                width: 40,
+                height: 40,
+                color: Colors.black,
+                child: GestureDetector(
+                  onTapDown: (_) {
+                    taps += 1;
+                  },
+                ),
               ),
             ),
           ),
         ),
+        recording: recording,
       ),
     );
 
-    await tester.pumpWidget(target);
+    await tester.pumpWidget(target(recording: false));
 
-    await tester.pumpFrames(target, const Duration(milliseconds: 50));
+    await tester.pumpFrames(target(), const Duration(milliseconds: 50));
 
-    final TestGesture gesture1 = await tester.createGesture();
-    await gesture1.down(tester.getCenter(find.byType(Text)) + const Offset(10, 10));
+    final TestGesture gesture1 = await tester.createGesture(pointer: 1);
+    await gesture1.down(tester.getCenter(find.byType(GestureDetector)) + const Offset(10, 10));
+    expect(taps, 1);
 
-    await tester.pumpFrames(target, const Duration(milliseconds: 100));
+    await tester.pumpFrames(target(), const Duration(milliseconds: 100));
 
-    final TestGesture gesture2 = await tester.createGesture();
-    await gesture2.down(tester.getTopLeft(find.byType(Text)) + const Offset(30, -10));
+    final TestGesture gesture2 = await tester.createGesture(pointer: 2);
+    await gesture2.down(tester.getTopLeft(find.byType(GestureDetector)) + const Offset(30, -10));
     await gesture1.moveBy(const Offset(50, 50));
 
-    await tester.pumpFrames(target, const Duration(milliseconds: 100));
+    await tester.pumpFrames(target(), const Duration(milliseconds: 100));
     await gesture1.up();
     await gesture2.up();
-    await tester.pumpFrames(target, const Duration(milliseconds: 50));
+    await tester.pumpFrames(target(), const Duration(milliseconds: 50));
+    expect(taps, 1);
 
     await expectLater(
       animationSheet.collate(6),
       matchesGoldenFile('LiveBinding.press.animation.png'),
+    );
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42767
+
+  testWidgets('Should show event indicator for pointer events with setSurfaceSize', (WidgetTester tester) async {
+    int taps = 0;
+    final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(200, 200), allLayers: true);
+    Widget target({bool recording = true}) => Container(
+      padding: const EdgeInsets.fromLTRB(20, 10, 25, 20),
+      child: animationSheet.record(
+        MaterialApp(
+          home: Container(
+            decoration: BoxDecoration(
+              color: const Color.fromARGB(255, 128, 128, 128),
+              border: Border.all(color: const Color.fromARGB(255, 0, 0, 0)),
+            ),
+            child: Center(
+              child: Container(
+                width: 40,
+                height: 40,
+                color: Colors.black,
+                child: GestureDetector(
+                  onTapDown: (_) {
+                    taps += 1;
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+        recording: recording,
+      ),
+    );
+
+    await tester.binding.setSurfaceSize(const Size(300, 300));
+    await tester.pumpWidget(target(recording: false));
+
+    await tester.pumpFrames(target(), const Duration(milliseconds: 50));
+
+    final TestGesture gesture1 = await tester.createGesture(pointer: 1);
+    await gesture1.down(tester.getCenter(find.byType(GestureDetector)) + const Offset(10, 10));
+    expect(taps, 1);
+
+    await tester.pumpFrames(target(), const Duration(milliseconds: 100));
+
+    final TestGesture gesture2 = await tester.createGesture(pointer: 2);
+    await gesture2.down(tester.getTopLeft(find.byType(GestureDetector)) + const Offset(30, -10));
+    await gesture1.moveBy(const Offset(50, 50));
+
+    await tester.pumpFrames(target(), const Duration(milliseconds: 100));
+    await gesture1.up();
+    await gesture2.up();
+    await tester.pumpFrames(target(), const Duration(milliseconds: 50));
+    expect(taps, 1);
+
+    await expectLater(
+      animationSheet.collate(6),
+      matchesGoldenFile('LiveBinding.press.animation.2.png'),
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 }
