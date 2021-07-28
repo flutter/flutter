@@ -24,15 +24,15 @@ class CommonFinders {
   const CommonFinders._();
 
   /// Finds [Text], [EditableText], and optionally [RichText] widgets
-  /// containing string equal to the [text] argument.
+  /// containing string equal to the `text` argument.
   ///
-  /// If [skipRichText] is disabled, [RichText] widgets (and therefore also
+  /// If `skipRichText` is disabled, [RichText] widgets (and therefore also
   /// [Text] and [Text.rich] widgets) are matched by comparing the
-  /// [InlineSpan.toPlainText] with the given [text].
-  /// If [skipRichText] is enabled, all standalone [RichText] widgets are
+  /// [InlineSpan.toPlainText] with the given `text`.
+  /// If `skipRichText` is enabled, all standalone [RichText] widgets are
   /// ignored and [Text] matching shortcuts to [Text.data].
   ///
-  /// For [EditableText] widgets, the [text] is always compared to the current
+  /// For [EditableText] widgets, the `text` is always compared to the current
   /// value of the [EditableText.controller].
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
@@ -57,8 +57,13 @@ class CommonFinders {
     String text, {
     bool skipRichText = true,
     bool skipOffstage = true,
-  }) =>
-      _TextFinder(text, skipRichText: skipRichText, skipOffstage: skipOffstage);
+  }) {
+    return _TextFinder(
+      text,
+      skipRichText: skipRichText,
+      skipOffstage: skipOffstage,
+    );
+  }
 
   /// Finds [Text] and [EditableText] widgets which contain the given
   /// `pattern` argument.
@@ -584,14 +589,13 @@ class _TextFinder extends MatchFinder {
   ///
   /// Defaults to `true`.
   ///
-  /// If enabled, only [Text] widgets will be considered. These of course also
-  /// insert a [RichText] widget, however, that is ignored and so are all
-  /// standalone [RichText] widgets.
-  /// If disabled, only [RichText] widgets will be considered. This *implicitly*
-  /// considers [Text] widgets as well since they always insert a [RichText]
+  /// If enabled, only [Text] widgets will be matched. [RichText] widgets
+  /// *without* a [Text] ancestor will be ignored.
+  /// If disabled, only [RichText] widgets will be matched. This *implicitly*
+  /// matches [Text] widgets as well since they always insert a [RichText]
   /// child.
   ///
-  /// In either case, [EditableText] widgets will also be considered.
+  /// In either case, [EditableText] widgets will also be matched.
   final bool skipRichText;
 
   @override
