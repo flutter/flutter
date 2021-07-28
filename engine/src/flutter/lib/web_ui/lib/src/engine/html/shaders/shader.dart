@@ -239,7 +239,7 @@ class GradientLinear extends EngineGradient {
 
     /// When creating an image to apply to a dom element, render
     /// contents at 0,0 and adjust gradient vector for shaderBounds.
-    final bool translateToOrigin = createDataUrl && shaderBounds != null;
+    final bool translateToOrigin = createDataUrl;
 
     if (translateToOrigin) {
       shaderBounds = shaderBounds.translate(-shaderBounds.left, -shaderBounds.top);

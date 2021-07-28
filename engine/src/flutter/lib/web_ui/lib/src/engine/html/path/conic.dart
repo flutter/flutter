@@ -427,11 +427,11 @@ class ConicBounds {
     //       {t^2 (2 - 2 w), t (-2 + 2 w), 1}
     // Calculate coefficients and solve root.
     final QuadRoots roots = QuadRoots();
-    final double P20x = x2 - x1;
-    final double P10x = cpX - x1;
-    final double wP10x = w * P10x;
-    final double ax = w * P20x - P20x;
-    final double bx = P20x - 2 * wP10x;
+    final double p20x = x2 - x1;
+    final double p10x = cpX - x1;
+    final double wP10x = w * p10x;
+    final double ax = w * p20x - p20x;
+    final double bx = p20x - 2 * wP10x;
     final double cx = wP10x;
     int n = roots.findRoots(ax, bx, cx);
     if (n != 0) {
@@ -449,11 +449,11 @@ class ConicBounds {
         maxY = math.max(maxY, extremaY);
       }
     }
-    final double P20y = y2 - y1;
-    final double P10y = cpY - y1;
-    final double wP10y = w * P10y;
-    final double a = w * P20y - P20y;
-    final double b = P20y - 2 * wP10y;
+    final double p20y = y2 - y1;
+    final double p10y = cpY - y1;
+    final double wP10y = w * p10y;
+    final double a = w * p20y - p20y;
+    final double b = p20y - 2 * wP10y;
     final double c = wP10y;
     n = roots.findRoots(a, b, c);
 

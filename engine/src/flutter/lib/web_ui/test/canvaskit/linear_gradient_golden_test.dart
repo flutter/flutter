@@ -41,14 +41,14 @@ void testMain() {
       final CkGradientLinear gradient = CkGradientLinear(
           ui.Offset(region.left + region.width / 4, region.height / 2),
           ui.Offset(region.right - region.width / 8, region.height / 2),
-          <ui.Color>[
+          const <ui.Color>[
             ui.Color(0xFF4285F4),
             ui.Color(0xFF34A853),
             ui.Color(0xFFFBBC05),
             ui.Color(0xFFEA4335),
             ui.Color(0xFF4285F4),
           ],
-          <double>[
+          const <double>[
             0.0,
             0.25,
             0.5,
@@ -75,14 +75,14 @@ void testMain() {
       final CkGradientLinear gradient = CkGradientLinear(
           ui.Offset(region.left + region.width / 4, region.height / 2),
           ui.Offset(region.right - region.width / 8, region.height / 2),
-          <ui.Color>[
+          const <ui.Color>[
             ui.Color(0xFF4285F4),
             ui.Color(0xFF34A853),
             ui.Color(0xFFFBBC05),
             ui.Color(0xFFEA4335),
             ui.Color(0xFF4285F4),
           ],
-          <double>[
+          const <double>[
             0.0,
             0.25,
             0.5,

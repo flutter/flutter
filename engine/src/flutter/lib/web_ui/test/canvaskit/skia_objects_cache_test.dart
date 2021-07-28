@@ -141,8 +141,7 @@ void _tests() {
         expect(
           spy.printLog,
           <String>[
-            'Engine counters:\n'
-                '  TestSkDeletable created: 1\n'
+            'Engine counters:\n  TestSkDeletable created: 1\n'
           ],
         );
 
@@ -168,9 +167,7 @@ void _tests() {
         expect(
           spy.printLog,
           <String>[
-            'Engine counters:\n'
-                '  TestSkDeletable created: 1\n'
-                '  TestSkDeletable deleted: 1\n'
+            'Engine counters:\n  TestSkDeletable created: 1\n  TestSkDeletable deleted: 1\n'
           ],
         );
         Instrumentation.enabled = false;

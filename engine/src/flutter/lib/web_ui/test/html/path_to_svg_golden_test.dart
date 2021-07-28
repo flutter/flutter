@@ -23,7 +23,7 @@ enum PaintMode {
 }
 
 Future<void> testMain() async {
-  final Rect region =
+  const Rect region =
       Rect.fromLTWH(8, 8, 600, 400); // Compensate for old scuba tester padding
 
   Future<void> testPath(Path path, String scubaFileName,

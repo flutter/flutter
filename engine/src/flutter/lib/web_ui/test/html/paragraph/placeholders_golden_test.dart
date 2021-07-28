@@ -129,7 +129,7 @@ Future<void> testMain() async {
     const Rect bounds = Rect.fromLTWH(0, 0, 420, 300);
     final BitmapCanvas canvas = BitmapCanvas(bounds, RenderStrategy());
 
-    Offset offset = Offset(10, 10);
+    Offset offset = const Offset(10, 10);
 
     // First paragraph with a placeholder at the beginning.
     final CanvasParagraph paragraph1 = rich(

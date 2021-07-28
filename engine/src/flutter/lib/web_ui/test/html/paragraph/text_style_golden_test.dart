@@ -177,9 +177,9 @@ Future<void> testMain() async {
           fontFamily: 'Roboto',
           fontSize: 30,
           shadows: <Shadow>[
-            Shadow(
+            const Shadow(
               blurRadius: 0,
-              color: const Color.fromRGBO(255, 0, 255, 1.0),
+              color: Color.fromRGBO(255, 0, 255, 1.0),
               offset: Offset(10, 5),
             ),
           ],
@@ -199,14 +199,14 @@ Future<void> testMain() async {
           fontFamily: 'Roboto',
           fontSize: 30,
           shadows: <Shadow>[
-            Shadow(
+            const Shadow(
               blurRadius: 0,
-              color: const Color.fromRGBO(255, 0, 255, 1.0),
+              color: Color.fromRGBO(255, 0, 255, 1.0),
               offset: Offset(10, 5),
             ),
-            Shadow(
+            const Shadow(
               blurRadius: 0,
-              color: const Color.fromRGBO(0, 255, 255, 1.0),
+              color: Color.fromRGBO(0, 255, 255, 1.0),
               offset: Offset(-10, -5),
             ),
           ],
@@ -241,7 +241,7 @@ Future<void> testMain() async {
     return scuba.diffCanvasScreenshot(
       canvas,
       'text_strut_style_disabled',
-      region: Rect.fromLTRB(0, 0, 100, 100),
+      region: const Rect.fromLTRB(0, 0, 100, 100),
       maxDiffRatePercent: 0.0,
     );
   });

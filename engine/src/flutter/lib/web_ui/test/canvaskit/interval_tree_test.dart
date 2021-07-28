@@ -14,8 +14,8 @@ void testMain() {
   group('$IntervalTree', () {
     test('is balanced', () {
       final Map<String, List<CodeunitRange>> ranges = <String, List<CodeunitRange>>{
-        'A': <CodeunitRange>[CodeunitRange(0, 5), CodeunitRange(6, 10)],
-        'B': <CodeunitRange>[CodeunitRange(4, 6)],
+        'A': const <CodeunitRange>[CodeunitRange(0, 5), CodeunitRange(6, 10)],
+        'B': const <CodeunitRange>[CodeunitRange(4, 6)],
       };
 
       // Should create a balanced 3-node tree with a root with a left and right
@@ -31,7 +31,7 @@ void testMain() {
 
       // Should create a balanced 15-node tree (4 layers deep).
       final Map<String, List<CodeunitRange>> ranges2 = <String, List<CodeunitRange>>{
-        'A': <CodeunitRange>[
+        'A': const <CodeunitRange>[
           CodeunitRange(1, 1),
           CodeunitRange(2, 2),
           CodeunitRange(3, 3),
@@ -67,8 +67,8 @@ void testMain() {
 
     test('finds values whose intervals overlap with a given point', () {
       final Map<String, List<CodeunitRange>> ranges = <String, List<CodeunitRange>>{
-        'A': <CodeunitRange>[CodeunitRange(0, 5), CodeunitRange(7, 10)],
-        'B': <CodeunitRange>[CodeunitRange(4, 6)],
+        'A': const <CodeunitRange>[CodeunitRange(0, 5), CodeunitRange(7, 10)],
+        'B': const <CodeunitRange>[CodeunitRange(4, 6)],
       };
       final IntervalTree<String> tree = IntervalTree<String>.createFromRanges(ranges);
 

@@ -262,7 +262,7 @@ Future<void> runFlutter(
 /// An exception related to an attempt to spawn a sub-process.
 @immutable
 class ProcessException implements Exception {
-  ProcessException({
+  const ProcessException({
     required this.description,
     required this.executable,
     required this.arguments,

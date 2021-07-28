@@ -28,7 +28,7 @@ Future<void> testMain() async {
     test('surfaces error from invalid font buffer', () async {
       await expectLater(
           ui.loadFontFromList(Uint8List(0), fontFamily: 'test-font'),
-          throwsA(TypeMatcher<Exception>()));
+          throwsA(const TypeMatcher<Exception>()));
     },
         // TODO(nurhan): https://github.com/flutter/flutter/issues/56702
         // TODO(nurhan): https://github.com/flutter/flutter/issues/50770
@@ -53,7 +53,7 @@ Future<void> testMain() async {
 
     test('loading font should clear measurement caches', () async {
       final EngineParagraphStyle style = EngineParagraphStyle();
-      final ui.ParagraphConstraints constraints =
+      const ui.ParagraphConstraints constraints =
           ui.ParagraphConstraints(width: 30.0);
 
       final DomParagraphBuilder domBuilder = DomParagraphBuilder(style);

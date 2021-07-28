@@ -586,7 +586,7 @@ class BitmapCanvas extends EngineCanvas {
         }
       }
       _applyFilter(svgElm, paint);
-      _drawElement(svgElm, ui.Offset(0, 0), paint);
+      _drawElement(svgElm, const ui.Offset(0, 0), paint);
     } else {
       setUpPaint(paint, paint.shader != null ? path.getBounds() : null);
       if (paint.style == null && paint.strokeWidth != null) {
@@ -1009,7 +1009,7 @@ class BitmapCanvas extends EngineCanvas {
           : convertVertexPositions(mode, vertices.positions);
       // Draw hairline for vertices if no vertex colors are specified.
       save();
-      final ui.Color color = paint.color ?? ui.Color(0xFF000000);
+      final ui.Color color = paint.color ?? const ui.Color(0xFF000000);
       _canvasPool.contextHandle
         ..fillStyle = null
         ..strokeStyle = colorToCssString(color);

@@ -16,6 +16,6 @@ void main() {
 void testMain() {
   test('screenshot test reports failure', () async {
     html.document.body!.innerHtml = 'Text that does not appear on the screenshot!';
-    await matchGoldenFile('__local__/smoke_test.png', region: Rect.fromLTWH(0, 0, 320, 200));
+    await matchGoldenFile('__local__/smoke_test.png', region: const Rect.fromLTWH(0, 0, 320, 200));
   });
 }

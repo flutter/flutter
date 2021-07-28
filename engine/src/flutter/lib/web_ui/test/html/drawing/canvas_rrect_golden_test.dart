@@ -16,7 +16,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  final Rect region = Rect.fromLTWH(8, 8, 500, 100); // Compensate for old scuba tester padding
+  const Rect region = Rect.fromLTWH(8, 8, 500, 100); // Compensate for old scuba tester padding
 
   late BitmapCanvas canvas;
 
@@ -56,13 +56,13 @@ Future<void> testMain() async {
     canvas.translate(35, 320);
     canvas.drawRRect(
       RRect.fromRectAndRadius(
-          Rect.fromLTRB(-30, -100, 30, -300),
-          Radius.circular(30)),
+          const Rect.fromLTRB(-30, -100, 30, -300),
+          const Radius.circular(30)),
       niceRRectPaint);
     canvas.drawPath(Path()..moveTo(0, 0)..lineTo(20, 0), niceRRectPaint);
     html.document.body!.append(canvas.rootElement);
     await matchGoldenFile('canvas_rrect_flipped.png',
-        region: Rect.fromLTWH(0, 0, 100, 200));
+        region: const Rect.fromLTWH(0, 0, 100, 200));
   });
 
   test('round rect with big radius scale down smaller radius', () async {

@@ -71,7 +71,7 @@ void testMain() {
           ui.window.platformDispatcher as EnginePlatformDispatcher;
       final LayerSceneBuilder sb = LayerSceneBuilder();
       sb.pushOffset(0, 0);
-      sb.pushClipRRect(ui.RRect.fromLTRBR(0, 0, 10, 10, ui.Radius.circular(3)));
+      sb.pushClipRRect(ui.RRect.fromLTRBR(0, 0, 10, 10, const ui.Radius.circular(3)));
       sb.addPlatformView(0, width: 10, height: 10);
       dispatcher.rasterizer!.draw(sb.build().layerTree);
 
@@ -204,8 +204,8 @@ void testMain() {
     test('renders overlays on top of platform views', () async {
       expect(SurfaceFactory.instance.debugCacheSize, 0);
       final CkPicture testPicture =
-          paintPicture(ui.Rect.fromLTRB(0, 0, 10, 10), (CkCanvas canvas) {
-        canvas.drawCircle(ui.Offset(5, 5), 5, CkPaint());
+          paintPicture(const ui.Rect.fromLTRB(0, 0, 10, 10), (CkCanvas canvas) {
+        canvas.drawCircle(const ui.Offset(5, 5), 5, CkPaint());
       });
 
       // Initialize all platform views to be used in the test.
@@ -284,7 +284,7 @@ void testMain() {
       //   Render: deleted platform views.
       //   Expect: error.
       for (final int id in platformViewIds) {
-        final StandardMethodCodec codec = StandardMethodCodec();
+        const StandardMethodCodec codec = StandardMethodCodec();
         final Completer<void> completer = Completer<void>();
         ui.window.sendPlatformMessage(
           'flutter/platform_views',
@@ -427,7 +427,7 @@ void testMain() {
         final LayerSceneBuilder sb = LayerSceneBuilder();
         sb.pushOffset(0, 0);
         sb.pushClipRRect(
-            ui.RRect.fromLTRBR(0, 0, 10, 10, ui.Radius.circular(3)));
+            ui.RRect.fromLTRBR(0, 0, 10, 10, const ui.Radius.circular(3)));
         sb.addPlatformView(0, width: 10, height: 10);
         dispatcher.rasterizer!.draw(sb.build().layerTree);
       }

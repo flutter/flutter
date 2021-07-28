@@ -16,7 +16,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  final Rect region = Rect.fromLTWH(0, 0, 500, 500);
+  const Rect region = Rect.fromLTWH(0, 0, 500, 500);
 
   late BitmapCanvas canvas;
 
@@ -37,18 +37,18 @@ Future<void> testMain() async {
 }
 
 void paintPaths(BitmapCanvas canvas) {
-  canvas.drawRect(Rect.fromLTRB(0, 0, 500, 500),
+  canvas.drawRect(const Rect.fromLTRB(0, 0, 500, 500),
       SurfacePaintData()
-        ..color = Color(0xFFFFFFFF)
+        ..color = const Color(0xFFFFFFFF)
         ..style = PaintingStyle.fill); // white
 
   final SurfacePaint paintFill = SurfacePaint()
     ..style = PaintingStyle.fill
-    ..color = Color(0xFF00B0FF);
+    ..color = const Color(0xFF00B0FF);
   final SurfacePaint paintStroke = SurfacePaint()
     ..style = PaintingStyle.stroke
     ..strokeWidth = 2
-    ..color = Color(0xFFE00000);
+    ..color = const Color(0xFFE00000);
   final Path path1 = Path()
     ..fillType = PathFillType.evenOdd
     ..moveTo(50, 0)
@@ -57,8 +57,8 @@ void paintPaths(BitmapCanvas canvas) {
     ..lineTo(2, 35)
     ..lineTo(79, 90)
     ..close()
-    ..addRect(Rect.fromLTWH(20, 100, 200, 50))
-    ..addRect(Rect.fromLTWH(40, 120, 160, 10));
+    ..addRect(const Rect.fromLTWH(20, 100, 200, 50))
+    ..addRect(const Rect.fromLTWH(40, 120, 160, 10));
   final Path path2 = Path()
     ..fillType = PathFillType.nonZero
     ..moveTo(50, 200)
@@ -67,8 +67,8 @@ void paintPaths(BitmapCanvas canvas) {
     ..lineTo(2, 235)
     ..lineTo(79, 290)
     ..close()
-    ..addRect(Rect.fromLTWH(20, 300, 200, 50))
-    ..addRect(Rect.fromLTWH(40, 320, 160, 10));
+    ..addRect(const Rect.fromLTWH(20, 300, 200, 50))
+    ..addRect(const Rect.fromLTWH(40, 320, 160, 10));
   canvas.drawPath(path1, paintFill.paintData);
   canvas.drawPath(path2, paintFill.paintData);
   canvas.drawPath(path1, paintStroke.paintData);

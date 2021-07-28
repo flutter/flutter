@@ -38,7 +38,7 @@ typedef PlatformViewContentHandler = void Function(html.Element);
 /// some extra cleanup of its internal state, but it can do it automatically. See
 /// [HtmlViewEmbedder.disposeViews]
 class PlatformViewMessageHandler {
-  final MethodCodec _codec = StandardMethodCodec();
+  final MethodCodec _codec = const StandardMethodCodec();
 
   final PlatformViewManager _contentManager;
   final PlatformViewContentHandler? _contentHandler;

@@ -778,7 +778,7 @@ class CkParagraph extends SkiaObject<SkParagraph> implements ui.Paragraph {
         return ui.TextRange(start: metric.startIndex, end: metric.endIndex);
       }
     }
-    return ui.TextRange(start: -1, end: -1);
+    return const ui.TextRange(start: -1, end: -1);
   }
 
   @override

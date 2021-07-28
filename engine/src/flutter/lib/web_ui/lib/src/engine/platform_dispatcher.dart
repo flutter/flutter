@@ -488,7 +488,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
       case 'flutter/accessibility':
         // In widget tests we want to bypass processing of platform messages.
-        final StandardMessageCodec codec = StandardMessageCodec();
+        const StandardMessageCodec codec = StandardMessageCodec();
         accessibilityAnnouncements.handleMessage(codec, data);
         replyToPlatformMessage(callback, codec.encodeMessage(true));
         return;

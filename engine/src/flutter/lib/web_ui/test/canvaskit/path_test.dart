@@ -27,22 +27,22 @@ void testMain() {
       expect(path, isA<CkPath>());
       expect(path.computeMetrics().length, 0);
 
-      path.addRect(ui.Rect.fromLTRB(0, 0, 10, 10));
+      path.addRect(const ui.Rect.fromLTRB(0, 0, 10, 10));
       final ui.PathMetric metric = path.computeMetrics().single;
       expect(metric.contourIndex, 0);
       expect(metric.extractPath(0, 0.5).computeMetrics().length, 1);
 
       final ui.Tangent tangent1 = metric.getTangentForOffset(5)!;
-      expect(tangent1.position, ui.Offset(5, 0));
-      expect(tangent1.vector, ui.Offset(1, 0));
+      expect(tangent1.position, const ui.Offset(5, 0));
+      expect(tangent1.vector, const ui.Offset(1, 0));
 
       final ui.Tangent tangent2 = metric.getTangentForOffset(15)!;
-      expect(tangent2.position, ui.Offset(10, 5));
-      expect(tangent2.vector, ui.Offset(0, 1));
+      expect(tangent2.position, const ui.Offset(10, 5));
+      expect(tangent2.vector, const ui.Offset(0, 1));
 
       expect(metric.isClosed, isTrue);
 
-      path.addOval(ui.Rect.fromLTRB(10, 10, 100, 100));
+      path.addOval(const ui.Rect.fromLTRB(10, 10, 100, 100));
       expect(path.computeMetrics().length, 2);
 
       // Path metrics can be iterated over multiple times.
@@ -99,9 +99,9 @@ void testMain() {
       browserSupportsFinalizationRegistry = false;
       final ui.Path path = ui.Path();
       expect(path, isA<CkPath>());
-      path.addRect(ui.Rect.fromLTRB(0, 0, 10, 10));
-      path.addRect(ui.Rect.fromLTRB(20, 20, 30, 30));
-      path.addRect(ui.Rect.fromLTRB(40, 40, 50, 50));
+      path.addRect(const ui.Rect.fromLTRB(0, 0, 10, 10));
+      path.addRect(const ui.Rect.fromLTRB(20, 20, 30, 30));
+      path.addRect(const ui.Rect.fromLTRB(40, 40, 50, 50));
 
       final ui.PathMetrics metrics = path.computeMetrics();
       final CkContourMeasureIter iterator = metrics.iterator as CkContourMeasureIter;
@@ -125,9 +125,9 @@ void testMain() {
       browserSupportsFinalizationRegistry = false;
       final ui.Path path = ui.Path();
       expect(path, isA<CkPath>());
-      path.addRect(ui.Rect.fromLTRB(0, 0, 10, 10));
-      path.addRect(ui.Rect.fromLTRB(20, 20, 30, 30));
-      path.addRect(ui.Rect.fromLTRB(40, 40, 50, 50));
+      path.addRect(const ui.Rect.fromLTRB(0, 0, 10, 10));
+      path.addRect(const ui.Rect.fromLTRB(20, 20, 30, 30));
+      path.addRect(const ui.Rect.fromLTRB(40, 40, 50, 50));
 
       final ui.PathMetrics metrics = path.computeMetrics();
       final CkContourMeasureIter iterator = metrics.iterator as CkContourMeasureIter;
@@ -135,12 +135,12 @@ void testMain() {
       expect(iterator.moveNext(), isTrue);
       final CkContourMeasure measure0 = iterator.current as CkContourMeasure;
       expect(measure0.contourIndex, 0);
-      expect(measure0.extractPath(0, 15).getBounds(), ui.Rect.fromLTRB(0, 0, 10, 5));
+      expect(measure0.extractPath(0, 15).getBounds(), const ui.Rect.fromLTRB(0, 0, 10, 5));
 
       expect(iterator.moveNext(), isTrue);
       final CkContourMeasure measure1 = iterator.current as CkContourMeasure;
       expect(measure1.contourIndex, 1);
-      expect(measure1.extractPath(0, 15).getBounds(), ui.Rect.fromLTRB(20, 20, 30, 25));
+      expect(measure1.extractPath(0, 15).getBounds(), const ui.Rect.fromLTRB(20, 20, 30, 25));
 
       // Delete iterator and the measure in the middle of iteration
       iterator.delete();
@@ -152,14 +152,14 @@ void testMain() {
 
       // Check that the measure is still value after resurrection.
       expect(measure0.contourIndex, 0);
-      expect(measure0.extractPath(0, 15).getBounds(), ui.Rect.fromLTRB(0, 0, 10, 5));
+      expect(measure0.extractPath(0, 15).getBounds(), const ui.Rect.fromLTRB(0, 0, 10, 5));
       expect(measure1.contourIndex, 1);
-      expect(measure1.extractPath(0, 15).getBounds(), ui.Rect.fromLTRB(20, 20, 30, 25));
+      expect(measure1.extractPath(0, 15).getBounds(), const ui.Rect.fromLTRB(20, 20, 30, 25));
     });
 
     test('Path.from', () {
-      final ui.Rect rect1 = ui.Rect.fromLTRB(0, 0, 10, 10);
-      final ui.Rect rect2 = ui.Rect.fromLTRB(10, 10, 20, 20);
+      const ui.Rect rect1 = ui.Rect.fromLTRB(0, 0, 10, 10);
+      const ui.Rect rect2 = ui.Rect.fromLTRB(10, 10, 20, 20);
 
       final ui.Path original = ui.Path();
       original.addRect(rect1);

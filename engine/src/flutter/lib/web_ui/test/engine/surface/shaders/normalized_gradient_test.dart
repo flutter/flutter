@@ -14,7 +14,7 @@ void main() {
 void testMain() {
   group('Shader Normalized Gradient', () {
     test('3 stop at start', () {
-      final NormalizedGradient gradient = NormalizedGradient(<ui.Color>[
+      final NormalizedGradient gradient = NormalizedGradient(const <ui.Color>[
         ui.Color(0xFF000000), ui.Color(0xFFFF7f3f)
       ], stops: <double>[0.0, 0.5]);
       int res = _computeColorAt(gradient, 0.0);
@@ -30,7 +30,7 @@ void testMain() {
     });
 
     test('3 stop at end', () {
-      final NormalizedGradient gradient = NormalizedGradient(<ui.Color>[
+      final NormalizedGradient gradient = NormalizedGradient(const <ui.Color>[
         ui.Color(0xFF000000), ui.Color(0xFFFF7f3f)
       ], stops: <double>[0.5, 1.0]);
       int res = _computeColorAt(gradient, 0.0);
@@ -46,7 +46,7 @@ void testMain() {
     });
 
     test('4 stop', () {
-      final NormalizedGradient gradient = NormalizedGradient(<ui.Color>[
+      final NormalizedGradient gradient = NormalizedGradient(const <ui.Color>[
         ui.Color(0xFF000000), ui.Color(0xFFFF7f3f)
       ], stops: <double>[0.25, 0.5]);
       int res = _computeColorAt(gradient, 0.0);
@@ -64,7 +64,7 @@ void testMain() {
     });
 
     test('5 stop', () {
-      final NormalizedGradient gradient = NormalizedGradient(<ui.Color>[
+      final NormalizedGradient gradient = NormalizedGradient(const <ui.Color>[
         ui.Color(0x10000000), ui.Color(0x20FF0000),
         ui.Color(0x4000FF00), ui.Color(0x800000FF),
         ui.Color(0xFFFFFFFF)
@@ -90,7 +90,7 @@ void testMain() {
     });
 
     test('2 stops at ends', () {
-      final NormalizedGradient gradient = NormalizedGradient(<ui.Color>[
+      final NormalizedGradient gradient = NormalizedGradient(const <ui.Color>[
         ui.Color(0x00000000), ui.Color(0xFFFFFFFF)
       ]);
       int res = _computeColorAt(gradient, 0.0);

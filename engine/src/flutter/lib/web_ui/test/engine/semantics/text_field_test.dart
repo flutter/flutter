@@ -117,7 +117,7 @@ void testMain() {
         value: 'hello',
         label: 'greeting',
         isFocused: true,
-        rect: ui.Rect.fromLTWH(0, 0, 10, 15),
+        rect: const ui.Rect.fromLTWH(0, 0, 10, 15),
       );
 
       final TextField textField = textFieldSemantics.debugRoleManagerFor(Role.textField)! as TextField;
@@ -134,7 +134,7 @@ void testMain() {
         value: 'bye',
         label: 'farewell',
         isFocused: false,
-        rect: ui.Rect.fromLTWH(0, 0, 12, 17),
+        rect: const ui.Rect.fromLTWH(0, 0, 12, 17),
       );
 
       expect(html.document.activeElement, html.document.body);
@@ -325,7 +325,7 @@ void testMain() {
         width: 13,
         globalTransform: Matrix4.translationValues(14, 15, 0).storage,
       );
-      final ui.Rect semanticsRect = ui.Rect.fromLTRB(0, 0, 100, 50);
+      const ui.Rect semanticsRect = ui.Rect.fromLTRB(0, 0, 100, 50);
 
       testTextEditing.acceptCommand(
         TextInputSetEditableSizeAndTransform(geometry: geometry),
@@ -361,14 +361,14 @@ void testMain() {
             isTextField: true,
             value: 'Hello',
             isFocused: focusFieldId == 1,
-            rect: ui.Rect.fromLTRB(0, 0, 50, 10),
+            rect: const ui.Rect.fromLTRB(0, 0, 50, 10),
           ),
           builder.updateNode(
             id: 2,
             isTextField: true,
             value: 'World',
             isFocused: focusFieldId == 2,
-            rect: ui.Rect.fromLTRB(0, 20, 50, 10),
+            rect: const ui.Rect.fromLTRB(0, 20, 50, 10),
           ),
         ],
       );
