@@ -841,7 +841,9 @@ class _TextSelectionHandleOverlayState
     // is the same as the text in the current frame. This is done because
     // widget.renderObject contains the renderEditable from the previous frame.
     // If the text changed between the current and previous frames then
-    // widget.renderObject.getRectForComposingRange might fail.
+    // widget.renderObject.getRectForComposingRange might fail. In cases where
+    // the current frame is different from the previous we fall back to
+    // widget.renderObject.preferredLineHeight.
     final InlineSpan span = widget.renderObject.text!;
     final String prev_text = span.toPlainText();
     final String curr_text = widget.selectionDelegate.textEditingValue.text;
