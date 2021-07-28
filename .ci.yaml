@@ -22,6 +22,7 @@ targets:
     properties:
       tags: >
         ["devicelab","hostonly"]
+      task_name: build_aar_module_test
     scheduler: luci
     runIf:
       - dev/**
@@ -141,6 +142,76 @@ targets:
       - packages/flutter_tools/lib/src/test/
       - bin/
 
+<<<<<<< HEAD
+||||||| parent of f6759c3e39 (add task_name via generation)
+  - name: Linux firebase_abstract_method_smoke_test
+    builder: Linux firebase_abstract_method_smoke_test
+    recipe: firebaselab
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk"}
+        ]
+      tags: >
+        ["firebaselab"]
+      task_name: abstract_method_smoke_test
+    scheduler: luci
+
+  - name: Linux firebase_android_embedding_v2_smoke_test
+    builder: Linux firebase_android_embedding_v2_smoke_test
+    recipe: firebaselab
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk"}
+        ]
+      tags: >
+        ["firebaselab"]
+      task_name: android_embedding_v2_smoke_test
+    scheduler: luci
+
+  - name: Linux firebase_release_smoke_test
+    builder: Linux firebase_release_smoke_test
+    recipe: firebaselab
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk"}
+        ]
+      tags: >
+        ["firebaselab"]
+      task_name: release_smoke_test
+    scheduler: luci
+
+=======
+  - name: Linux firebase_abstract_method_smoke_test
+    builder: Linux firebase_abstract_method_smoke_test
+    recipe: firebaselab
+    properties:
+      tags: >
+        ["firebaselab"]
+      task_name: abstract_method_smoke_test
+    scheduler: luci
+
+  - name: Linux firebase_android_embedding_v2_smoke_test
+    builder: Linux firebase_android_embedding_v2_smoke_test
+    recipe: firebaselab
+    properties:
+      tags: >
+        ["firebaselab"]
+      task_name: android_embedding_v2_smoke_test
+    scheduler: luci
+
+  - name: Linux firebase_release_smoke_test
+    builder: Linux firebase_release_smoke_test
+    recipe: firebaselab
+    properties:
+      tags: >
+        ["firebaselab"]
+      task_name: release_smoke_test
+    scheduler: luci
+
+>>>>>>> f6759c3e39 (add task_name via generation)
   - name: Linux fuchsia_precache
     properties:
       tags: >
@@ -151,6 +222,7 @@ targets:
     properties:
       tags: >
         ["devicelab","hostonly"]
+      task_name: gradle_desugar_classes_test
     scheduler: luci
     runIf:
       - dev/**
@@ -160,6 +232,7 @@ targets:
     properties:
       tags: >
         ["devicelab","hostonly"]
+      task_name: gradle_java8_compile_test
     scheduler: luci
     runIf:
       - dev/**
@@ -169,6 +242,7 @@ targets:
     properties:
       tags: >
         ["devicelab","hostonly"]
+      task_name: gradle_plugin_bundle_test
     scheduler: luci
     runIf:
       - dev/**
@@ -178,6 +252,7 @@ targets:
     properties:
       tags: >
         ["devicelab","hostonly"]
+      task_name: gradle_plugin_fat_apk_test
     scheduler: luci
     runIf:
       - dev/**
@@ -187,6 +262,7 @@ targets:
     properties:
       tags: >
         ["devicelab","hostonly"]
+      task_name: gradle_plugin_light_apk_test
     scheduler: luci
     runIf:
       - dev/**
@@ -196,6 +272,7 @@ targets:
     properties:
       tags: >
         ["devicelab","hostonly"]
+      task_name: module_host_with_custom_build_test
     scheduler: luci
     runIf:
       - dev/**
@@ -206,6 +283,7 @@ targets:
     properties:
       tags: >
         ["devicelab","hostonly"]
+      task_name: module_custom_host_app_name_test
     scheduler: luci
     runIf:
       - dev/**
@@ -216,6 +294,7 @@ targets:
     properties:
       tags: >
         ["devicelab","hostonly"]
+      task_name: module_test
     scheduler: luci
     runIf:
       - dev/**
@@ -226,6 +305,7 @@ targets:
     properties:
       tags: >
         ["devicelab","hostonly"]
+      task_name: plugin_dependencies_test
     scheduler: luci
     runIf:
       - dev/**
@@ -236,6 +316,7 @@ targets:
     properties:
       tags: >
         ["devicelab","hostonly"]
+      task_name: plugin_test
     scheduler: luci
     runIf:
       - dev/**
@@ -337,6 +418,13 @@ targets:
     scheduler: luci
 
   - name: Linux web_benchmarks_html
+<<<<<<< HEAD
+||||||| parent of f6759c3e39 (add task_name via generation)
+    builder: Linux web_benchmarks_html
+=======
+    builder: Linux web_benchmarks_html
+    recipe: 
+>>>>>>> f6759c3e39 (add task_name via generation)
     properties:
       tags: >
         ["devicelab"]
@@ -489,18 +577,43 @@ targets:
     presubmit: false
     properties:
       tags: >
+<<<<<<< HEAD
         ["devicelab"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab","hostonly"]
+=======
+        ["devicelab","hostonly"]
+      task_name: build_aar_module_test
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
 
   - name: Linux_android android_defines_test
     presubmit: false
     properties:
       tags: >
+<<<<<<< HEAD
         ["devicelab"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab","hostonly"]
+=======
+        ["devicelab","hostonly"]
+      task_name: build_ios_framework_module_test
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
 
+<<<<<<< HEAD
   - name: Linux_android android_obfuscate_test
     presubmit: false
+||||||| parent of f6759c3e39 (add task_name via generation)
+  # TODO(chillers): Override these with xcode 13
+  - name: Mac build_tests_1_4
+    builder: Mac build_tests_1_4
+    recipe: flutter/flutter_drone
+=======
+  - name: Mac build_tests_1_4
+    builder: Mac build_tests_1_4
+    recipe: flutter/flutter_drone
+>>>>>>> f6759c3e39 (add task_name via generation)
     properties:
       tags: >
         ["devicelab"]
@@ -554,82 +667,209 @@ targets:
       tags: >
         ["devicelab"]
     scheduler: luci
+<<<<<<< HEAD
+||||||| parent of f6759c3e39 (add task_name via generation)
+    runIf:
+      - dev/**
+      - packages/flutter/**
+      - packages/flutter_driver/**
+      - packages/integration_test/**
+      - packages/flutter_localizations/**
+      - packages/fuchsia_remote_debug_protocol/**
+      - packages/flutter_test/**
+      - packages/flutter_goldens/**
+      - packages/flutter_tools/lib/src/test/**
+      - bin/**
+  
+  - name: Mac verify_binaries_codesigned
+    builder: Mac verify_binaries_codesigned
+    # Binaries are not signed on master
+    enabled_branches:
+      - dev
+      - beta
+      - stable
+    recipe: flutter/flutter
+    properties:
+      validation: verify_binaries_codesigned
+      validation_name: Verify binaries codesigned
+=======
+    runIf:
+      - dev/**
+      - packages/flutter/**
+      - packages/flutter_driver/**
+      - packages/integration_test/**
+      - packages/flutter_localizations/**
+      - packages/fuchsia_remote_debug_protocol/**
+      - packages/flutter_test/**
+      - packages/flutter_goldens/**
+      - packages/flutter_tools/lib/src/test/**
+      - bin/**
+
+  - name: Mac verify_binaries_codesigned
+    builder: Mac verify_binaries_codesigned
+    # Binaries are not signed on master
+    enabled_branches:
+      - dev
+      - beta
+      - stable
+    recipe: flutter/flutter
+    properties:
+      validation: verify_binaries_codesigned
+      validation_name: Verify binaries codesigned
+>>>>>>> f6759c3e39 (add task_name via generation)
 
   - name: Linux_android complex_layout_android__compile
     presubmit: false
     properties:
       tags: >
+<<<<<<< HEAD
         ["devicelab"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab","hostonly"]
+=======
+        ["devicelab","hostonly"]
+      task_name: gradle_plugin_bundle_test
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
 
   - name: Linux_android complex_layout_android__scroll_smoothness
     presubmit: false
     properties:
       tags: >
+<<<<<<< HEAD
         ["devicelab"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab","hostonly"]
+=======
+        ["devicelab","hostonly"]
+      task_name: gradle_plugin_fat_apk_test
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
 
   - name: Linux_android complex_layout_scroll_perf__devtools_memory
     presubmit: false
     properties:
       tags: >
+<<<<<<< HEAD
         ["devicelab"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab","hostonly"]
+=======
+        ["devicelab","hostonly"]
+      task_name: gradle_plugin_light_apk_test
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
 
   - name: Linux_android complex_layout_semantics_perf
     presubmit: false
     properties:
       tags: >
+<<<<<<< HEAD
         ["devicelab"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab","hostonly"]
+=======
+        ["devicelab","hostonly"]
+      task_name: module_custom_host_app_name_test
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
 
   - name: Linux_android cubic_bezier_perf__e2e_summary
     presubmit: false
     properties:
       tags: >
+<<<<<<< HEAD
         ["devicelab"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab","hostonly"]
+=======
+        ["devicelab","hostonly"]
+      task_name: module_host_with_custom_build_test
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
 
   - name: Linux_android cubic_bezier_perf_sksl_warmup__e2e_summary
     presubmit: false
     properties:
       tags: >
+<<<<<<< HEAD
         ["devicelab"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab","hostonly"]
+=======
+        ["devicelab","hostonly"]
+      task_name: module_test
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
 
   - name: Linux_android cull_opacity_perf__e2e_summary
     presubmit: false
     properties:
       tags: >
+<<<<<<< HEAD
         ["devicelab"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab","hostonly"]
+=======
+        ["devicelab","hostonly"]
+      task_name: module_test_ios
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
 
   - name: Linux_android devtools_profile_start_test
     presubmit: false
     properties:
       tags: >
+<<<<<<< HEAD
         ["devicelab"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab","hostonly"]
+=======
+        ["devicelab","hostonly"]
+      task_name: plugin_lint_mac
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
 
   - name: Linux_android fast_scroll_heavy_gridview__memory
     presubmit: false
     properties:
       tags: >
+<<<<<<< HEAD
         ["devicelab"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab","hostonly"]
+=======
+        ["devicelab","hostonly"]
+      task_name: plugin_dependencies_test
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
 
   - name: Linux_android flutter_engine_group_performance
     presubmit: false
     properties:
       tags: >
+<<<<<<< HEAD
         ["devicelab"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab","hostonly"]
+=======
+        ["devicelab","hostonly"]
+      task_name: plugin_test
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
 
   - name: Linux_android flutter_gallery__back_button_memory
     presubmit: false
     properties:
       tags: >
+<<<<<<< HEAD
         ["devicelab"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab","hostonly"]
+=======
+        ["devicelab","hostonly"]
+      task_name: dart_plugin_registry_test
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
 
   - name: Linux_android flutter_gallery__image_cache_memory
@@ -646,8 +886,19 @@ targets:
         ["devicelab"]
     scheduler: luci
 
+<<<<<<< HEAD
   - name: Linux_android flutter_gallery__start_up
     presubmit: false
+||||||| parent of f6759c3e39 (add task_name via generation)
+
+  - name: Mac tool_integration_tests_1_4
+    builder: Mac tool_integration_tests_1_4
+    recipe: flutter/flutter_drone
+=======
+  - name: Mac tool_integration_tests_1_4
+    builder: Mac tool_integration_tests_1_4
+    recipe: flutter/flutter_drone
+>>>>>>> f6759c3e39 (add task_name via generation)
     properties:
       tags: >
         ["devicelab"]
@@ -678,6 +929,14 @@ targets:
   - name: Linux_android flutter_gallery__transition_perf_with_semantics
     presubmit: false
     properties:
+<<<<<<< HEAD
+||||||| parent of f6759c3e39 (add task_name via generation)
+      shard: web_tool_tests
+      subshard: web 
+=======
+      shard: web_tool_tests
+      subshard: web
+>>>>>>> f6759c3e39 (add task_name via generation)
       tags: >
         ["devicelab"]
     scheduler: luci
@@ -686,7 +945,14 @@ targets:
     presubmit: false
     properties:
       tags: >
+<<<<<<< HEAD
         ["devicelab"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab","hostonly"]
+=======
+        ["devicelab","hostonly"]
+      task_name: build_aar_module_test
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
 
   - name: Linux_android flutter_gallery_sksl_warmup__transition_perf
@@ -743,49 +1009,98 @@ targets:
     presubmit: false
     properties:
       tags: >
+<<<<<<< HEAD
         ["devicelab"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab","hostonly"]
+=======
+        ["devicelab","hostonly"]
+      task_name: gradle_plugin_bundle_test
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
 
   - name: Linux_android image_list_reported_duration
     presubmit: false
     properties:
       tags: >
+<<<<<<< HEAD
         ["devicelab"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab","hostonly"]
+=======
+        ["devicelab","hostonly"]
+      task_name: gradle_plugin_light_apk_test
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
 
   - name: Linux_android large_image_changer_perf_android
     presubmit: false
     properties:
       tags: >
+<<<<<<< HEAD
         ["devicelab"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab","hostonly"]
+=======
+        ["devicelab","hostonly"]
+      task_name: module_custom_host_app_name_test
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
 
   - name: Linux_android linux_chrome_dev_mode
     presubmit: false
     properties:
       tags: >
+<<<<<<< HEAD
         ["devicelab"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab","hostonly"]
+=======
+        ["devicelab","hostonly"]
+      task_name: module_test
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
 
   - name: Linux_android multi_widget_construction_perf__e2e_summary
     presubmit: false
     properties:
       tags: >
+<<<<<<< HEAD
         ["devicelab"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab","hostonly"]
+=======
+        ["devicelab","hostonly"]
+      task_name: module_host_with_custom_build_test
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
 
   - name: Linux_android new_gallery__crane_perf
     presubmit: false
     properties:
       tags: >
+<<<<<<< HEAD
         ["devicelab"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab","hostonly"]
+=======
+        ["devicelab","hostonly"]
+      task_name: plugin_dependencies_test
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
 
   - name: Linux_android picture_cache_perf__e2e_summary
     presubmit: false
     properties:
       tags: >
+<<<<<<< HEAD
         ["devicelab"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab","hostonly"]
+=======
+        ["devicelab","hostonly"]
+      task_name: plugin_test
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
 
   - name: Linux_android platform_channels_benchmarks
@@ -848,35 +1163,132 @@ targets:
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
+<<<<<<< HEAD
+||||||| parent of f6759c3e39 (add task_name via generation)
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
 
-  - name: Mac build_tests_2_4
+  - name: Linux analyzer_benchmark
+    builder: Linux analyzer_benchmark
+    recipe: devicelab/devicelab_drone
+    presubmit: false
     properties:
       tags: >
+        ["devicelab"]
+    scheduler: luci
+=======
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+
+  - name: Linux analyzer_benchmark
+    builder: Linux analyzer_benchmark
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: analyzer_benchmark
+    scheduler: luci
+>>>>>>> f6759c3e39 (add task_name via generation)
+
+<<<<<<< HEAD
+  - name: Mac build_tests_2_4
+||||||| parent of f6759c3e39 (add task_name via generation)
+  - name: Linux android_defines_test
+    builder: Linux android_defines_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    properties:
+      tags: >
+        ["devicelab"]
+    scheduler: luci
+
+  - name: Linux android_obfuscate_test
+    builder: Linux android_obfuscate_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+=======
+  - name: Linux android_defines_test
+    builder: Linux android_defines_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: android_defines_test
+    scheduler: luci
+
+  - name: Linux android_obfuscate_test
+    builder: Linux android_obfuscate_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+>>>>>>> f6759c3e39 (add task_name via generation)
+    properties:
+      tags: >
+<<<<<<< HEAD
         ["framework","hostonly","shard"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab"]
+=======
+        ["devicelab"]
+      task_name: android_obfuscate_test
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
 
   - name: Mac build_tests_3_4
     properties:
       tags: >
+<<<<<<< HEAD
         ["framework","hostonly","shard"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab"]
+=======
+        ["devicelab"]
+      task_name: android_stack_size_test
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
 
   - name: Mac build_tests_4_4
     properties:
       tags: >
+<<<<<<< HEAD
         ["framework","hostonly","shard"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab"]
+=======
+        ["devicelab"]
+      task_name: android_view_scroll_perf__timeline_summary
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
 
   - name: Mac customer_testing
     properties:
       tags: >
+<<<<<<< HEAD
         ["framework","hostonly"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab"]
+=======
+        ["devicelab"]
+      task_name: animated_placeholder_perf__e2e_summary
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
 
   - name: Mac dart_plugin_registry_test
     properties:
       tags: >
+<<<<<<< HEAD
         ["devicelab","hostonly"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab"]
+=======
+        ["devicelab"]
+      task_name: backdrop_filter_perf__e2e_summary
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
     runIf:
       - dev/**
@@ -886,7 +1298,14 @@ targets:
   - name: Mac framework_tests_libraries
     properties:
       tags: >
+<<<<<<< HEAD
         ["framework","hostonly","shard"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab"]
+=======
+        ["devicelab"]
+      task_name: basic_material_app_android__compile
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
     runIf:
       - dev/**
@@ -903,7 +1322,14 @@ targets:
   - name: Mac framework_tests_misc
     properties:
       tags: >
+<<<<<<< HEAD
         ["framework","hostonly","shard"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab"]
+=======
+        ["devicelab"]
+      task_name: color_filter_and_fade_perf__e2e_summary
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
     runIf:
       - dev/**
@@ -920,7 +1346,14 @@ targets:
   - name: Mac framework_tests_widgets
     properties:
       tags: >
+<<<<<<< HEAD
         ["framework","hostonly","shard"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab"]
+=======
+        ["devicelab"]
+      task_name: complex_layout_android__compile
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
     runIf:
       - dev/**
@@ -937,7 +1370,14 @@ targets:
   - name: Mac gradle_plugin_bundle_test
     properties:
       tags: >
+<<<<<<< HEAD
         ["devicelab","hostonly"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab"]
+=======
+        ["devicelab"]
+      task_name: complex_layout_android__scroll_smoothness
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
     runIf:
       - dev/**
@@ -946,7 +1386,14 @@ targets:
   - name: Mac gradle_plugin_fat_apk_test
     properties:
       tags: >
+<<<<<<< HEAD
         ["devicelab","hostonly"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab"]
+=======
+        ["devicelab"]
+      task_name: complex_layout_scroll_perf__devtools_memory
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
     runIf:
       - dev/**
@@ -955,7 +1402,14 @@ targets:
   - name: Mac gradle_plugin_light_apk_test
     properties:
       tags: >
+<<<<<<< HEAD
         ["devicelab","hostonly"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab"]
+=======
+        ["devicelab"]
+      task_name: complex_layout_semantics_perf
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
     runIf:
       - dev/**
@@ -964,7 +1418,14 @@ targets:
   - name: Mac module_custom_host_app_name_test
     properties:
       tags: >
+<<<<<<< HEAD
         ["devicelab","hostonly"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab"]
+=======
+        ["devicelab"]
+      task_name: cubic_bezier_perf__e2e_summary
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
     runIf:
       - dev/**
@@ -974,7 +1435,14 @@ targets:
   - name: Mac module_host_with_custom_build_test
     properties:
       tags: >
+<<<<<<< HEAD
         ["devicelab","hostonly"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab"]
+=======
+        ["devicelab"]
+      task_name: cubic_bezier_perf_sksl_warmup__e2e_summary
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
     runIf:
       - dev/**
@@ -984,7 +1452,14 @@ targets:
   - name: Mac module_test
     properties:
       tags: >
+<<<<<<< HEAD
         ["devicelab","hostonly"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab"]
+=======
+        ["devicelab"]
+      task_name: cull_opacity_perf__e2e_summary
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
     runIf:
       - dev/**
@@ -995,7 +1470,14 @@ targets:
     bringup: true
     properties:
       tags: >
+<<<<<<< HEAD
         ["devicelab","hostonly"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab"]
+=======
+        ["devicelab"]
+      task_name: devtools_profile_start_test
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
     runIf:
       - dev/**
@@ -1013,10 +1495,40 @@ targets:
       - packages/flutter_tools/**
       - bin/**
 
+<<<<<<< HEAD
   - name: Mac plugin_lint_mac
+||||||| parent of f6759c3e39 (add task_name via generation)
+  - name: Linux docs_publish
+    builder: Linux docs_publish
+    recipe: flutter/flutter
+    presubmit: false
+    enabled_branches:
+      - master
+=======
+  - name: Linux docs_publish
+    builder: Linux docs_publish
+    enabled_branches:
+      - master
+    recipe: flutter/flutter
+    presubmit: false
+>>>>>>> f6759c3e39 (add task_name via generation)
     properties:
       tags: >
+<<<<<<< HEAD
         ["devicelab","hostonly"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["framework","hostonly"]
+      validation: docs
+      validation_name: Docs
+      firebase_project: master-docs-flutter-dev
+      release_ref: refs/heads/master 
+=======
+        ["framework","hostonly"]
+      validation: docs
+      validation_name: Docs
+      firebase_project: master-docs-flutter-dev
+      release_ref: refs/heads/master
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
     runIf:
       - dev/**
@@ -1025,7 +1537,14 @@ targets:
   - name: Mac plugin_test
     properties:
       tags: >
+<<<<<<< HEAD
         ["devicelab","hostonly"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab"]
+=======
+        ["devicelab"]
+      task_name: fast_scroll_heavy_gridview__memory
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
     runIf:
       - dev/**
@@ -1035,7 +1554,14 @@ targets:
   - name: Mac tool_integration_tests_1_4
     properties:
       tags: >
+<<<<<<< HEAD
         ["framework","hostonly","shard"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab"]
+=======
+        ["devicelab"]
+      task_name: flutter_engine_group_performance
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
     runIf:
       - dev/**
@@ -1045,7 +1571,14 @@ targets:
   - name: Mac tool_integration_tests_2_4
     properties:
       tags: >
+<<<<<<< HEAD
         ["framework","hostonly","shard"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab"]
+=======
+        ["devicelab"]
+      task_name: flutter_gallery__back_button_memory
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
     runIf:
       - dev/**
@@ -1055,7 +1588,14 @@ targets:
   - name: Mac tool_integration_tests_3_4
     properties:
       tags: >
+<<<<<<< HEAD
         ["framework","hostonly","shard"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab"]
+=======
+        ["devicelab"]
+      task_name: flutter_gallery__image_cache_memory
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
     runIf:
       - dev/**
@@ -1065,7 +1605,14 @@ targets:
   - name: Mac tool_integration_tests_4_4
     properties:
       tags: >
+<<<<<<< HEAD
         ["framework","hostonly","shard"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab"]
+=======
+        ["devicelab"]
+      task_name: flutter_gallery__memory_nav
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
     runIf:
       - dev/**
@@ -1076,10 +1623,30 @@ targets:
     presubmit: false
     properties:
       tags: >
+<<<<<<< HEAD
         ["framework","hostonly","shard"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab"]
+=======
+        ["devicelab"]
+      task_name: flutter_gallery__start_up
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
 
+<<<<<<< HEAD
   - name: Mac tool_tests_general
+||||||| parent of f6759c3e39 (add task_name via generation)
+  - name: Linux flutter_gallery__transition_perf_e2e
+    builder: Linux flutter_gallery__transition_perf_e2e
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/83298
+    presubmit: false
+=======
+  - name: Linux flutter_gallery__transition_perf_e2e
+    builder: Linux flutter_gallery__transition_perf_e2e
+    recipe: 
+    bringup: true
+    presubmit: false
+>>>>>>> f6759c3e39 (add task_name via generation)
     properties:
       tags: >
         ["framework","hostonly","shard"]
@@ -1093,7 +1660,14 @@ targets:
     postsubmit: false
     properties:
       tags: >
+<<<<<<< HEAD
         ["framework","hostonly","shard"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab"]
+=======
+        ["devicelab"]
+      task_name: flutter_gallery__transition_perf_hybrid
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
     runIf:
       - dev/**
@@ -1105,6 +1679,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: flutter_gallery__transition_perf_with_semantics
     scheduler: luci
 
   - name: Mac_android backdrop_filter_perf__timeline_summary
@@ -1112,6 +1687,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: flutter_gallery__transition_perf
     scheduler: luci
 
   - name: Mac_android channels_integration_test
@@ -1119,13 +1695,27 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: flutter_gallery_android__compile
     scheduler: luci
 
+<<<<<<< HEAD
   - name: Mac_android color_filter_and_fade_perf__timeline_summary
+||||||| parent of f6759c3e39 (add task_name via generation)
+  - name: Linux flutter_gallery_sksl_warmup__transition_perf_e2e
+    builder: Linux flutter_gallery_sksl_warmup__transition_perf_e2e
+    recipe: devicelab/devicelab_drone
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/83298
+=======
+  - name: Linux flutter_gallery_sksl_warmup__transition_perf_e2e
+    builder: Linux flutter_gallery_sksl_warmup__transition_perf_e2e
+    recipe: devicelab/devicelab_drone
+    bringup: true
+>>>>>>> f6759c3e39 (add task_name via generation)
     presubmit: false
     properties:
       tags: >
         ["devicelab"]
+      task_name: flutter_gallery_sksl_warmup__transition_perf_e2e
     scheduler: luci
 
   - name: Mac_android complex_layout__start_up
@@ -1133,6 +1723,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: flutter_gallery_sksl_warmup__transition_perf
     scheduler: luci
 
   - name: Mac_android complex_layout_scroll_perf__memory
@@ -1140,6 +1731,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: flutter_gallery_v2_chrome_run_test
     scheduler: luci
 
   - name: Mac_android complex_layout_scroll_perf__timeline_summary
@@ -1147,6 +1739,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: flutter_gallery_v2_web_compile_test
     scheduler: luci
 
   - name: Mac_android cubic_bezier_perf__timeline_summary
@@ -1154,6 +1747,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: flutter_test_performance
     scheduler: luci
 
   - name: Mac_android cubic_bezier_perf_sksl_warmup__timeline_summary
@@ -1161,6 +1755,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: frame_policy_delay_test_android
     scheduler: luci
 
   - name: Mac_android cull_opacity_perf__timeline_summary
@@ -1168,6 +1763,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: hot_mode_dev_cycle_linux__benchmark
     scheduler: luci
 
   - name: Mac_android drive_perf_debug_warning
@@ -1175,6 +1771,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: image_list_jit_reported_duration
     scheduler: luci
 
   - name: Mac_android embedded_android_views_integration_test
@@ -1182,6 +1779,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: image_list_reported_duration
     scheduler: luci
 
   - name: Mac_android external_ui_integration_test
@@ -1189,6 +1787,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: large_image_changer_perf_android
     scheduler: luci
 
   - name: Mac_android fading_child_animation_perf__timeline_summary
@@ -1196,6 +1795,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: animated_image_gc_perf
     scheduler: luci
 
   - name: Mac_android fast_scroll_large_images__memory
@@ -1203,6 +1803,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: linux_chrome_dev_mode
     scheduler: luci
 
   - name: Mac_android flavors_test
@@ -1210,6 +1811,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: multi_widget_construction_perf__e2e_summary
     scheduler: luci
 
   - name: Mac_android flutter_view__start_up
@@ -1217,6 +1819,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: new_gallery__crane_perf
     scheduler: luci
 
   - name: Mac_android fullscreen_textfield_perf__timeline_summary
@@ -1224,6 +1827,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: picture_cache_perf__e2e_summary
     scheduler: luci
 
   - name: Mac_android hello_world__memory
@@ -1231,6 +1835,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: platform_channels_benchmarks
     scheduler: luci
 
   - name: Mac_android hello_world_android__compile
@@ -1238,6 +1843,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: platform_views_scroll_perf__timeline_summary
     scheduler: luci
 
   - name: Mac_android home_scroll_perf__timeline_summary
@@ -1245,20 +1851,58 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: routing_test
     scheduler: luci
 
+<<<<<<< HEAD
   - name: Mac_android hot_mode_dev_cycle__benchmark
+||||||| parent of f6759c3e39 (add task_name via generation)
+  - name: Linux technical_debt__cost
+    builder: Linux technical_debt__cost
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    properties:
+      tags: >
+        ["devicelab","hostonly"]
+    scheduler: luci
+
+  - name: Linux textfield_perf__e2e_summary
+    builder: Linux textfield_perf__e2e_summary
+    recipe: devicelab/devicelab_drone
+=======
+  - name: Linux technical_debt__cost
+    builder: Linux technical_debt__cost
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    properties:
+      tags: >
+        ["devicelab","hostonly"]
+      task_name: technical_debt__cost
+    scheduler: luci
+
+  - name: Linux textfield_perf__e2e_summary
+    builder: Linux textfield_perf__e2e_summary
+    recipe: devicelab/devicelab_drone
+>>>>>>> f6759c3e39 (add task_name via generation)
     presubmit: false
     properties:
       tags: >
         ["devicelab"]
+      task_name: textfield_perf__e2e_summary
     scheduler: luci
 
   - name: Mac_android hybrid_android_views_integration_test
     presubmit: false
     properties:
       tags: >
+<<<<<<< HEAD
         ["devicelab"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab","hostonly"]
+=======
+        ["devicelab","hostonly"]
+      task_name: web_benchmarks_canvaskit
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
 
   - name: Mac_android imagefiltered_transform_animation_perf__timeline_summary
@@ -1266,6 +1910,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: web_size__compile_test
     scheduler: luci
 
   - name: Mac_android integration_test_test
@@ -1273,6 +1918,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: android_semantics_integration_test
     scheduler: luci
 
   - name: Mac_android integration_ui_driver
@@ -1280,6 +1926,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: backdrop_filter_perf__timeline_summary
     scheduler: luci
 
   - name: Mac_android integration_ui_frame_number
@@ -1287,6 +1934,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: channels_integration_test
     scheduler: luci
 
   - name: Mac_android integration_ui_keyboard_resize
@@ -1294,6 +1942,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: color_filter_and_fade_perf__timeline_summary
     scheduler: luci
 
   - name: Mac_android integration_ui_screenshot
@@ -1301,6 +1950,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: complex_layout__start_up
     scheduler: luci
 
   - name: Mac_android integration_ui_textfield
@@ -1308,6 +1958,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: complex_layout_scroll_perf__memory
     scheduler: luci
 
   - name: Mac_android microbenchmarks
@@ -1315,6 +1966,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: complex_layout_scroll_perf__timeline_summary
     scheduler: luci
 
   - name: Mac_android new_gallery__transition_perf
@@ -1322,6 +1974,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: cubic_bezier_perf__timeline_summary
     scheduler: luci
 
   - name: Mac_android picture_cache_perf__timeline_summary
@@ -1329,6 +1982,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: cubic_bezier_perf_sksl_warmup__timeline_summary
     scheduler: luci
 
   - name: Mac_android platform_channel_sample_test
@@ -1336,6 +1990,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: cull_opacity_perf__timeline_summary
     scheduler: luci
 
   - name: Mac_android platform_interaction_test
@@ -1343,6 +1998,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: drive_perf_debug_warning
     scheduler: luci
 
   - name: Mac_android platform_view__start_up
@@ -1350,6 +2006,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: embedded_android_views_integration_test
     scheduler: luci
 
   - name: Mac_android run_release_test
@@ -1357,6 +2014,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: external_ui_integration_test
     scheduler: luci
 
   - name: Mac_android service_extensions_test
@@ -1364,6 +2022,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: fading_child_animation_perf__timeline_summary
     scheduler: luci
 
   - name: Mac_android smoke_catalina_start_up
@@ -1371,6 +2030,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: fast_scroll_large_images__memory
     scheduler: luci
 
   - name: Mac_android textfield_perf__timeline_summary
@@ -1378,6 +2038,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: flavors_test
     scheduler: luci
 
   - name: Mac_android tiles_scroll_perf__timeline_summary
@@ -1385,6 +2046,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: flutter_view__start_up
     scheduler: luci
 
   - name: Mac_ios animation_with_microtasks_perf_ios__timeline_summary
@@ -1396,6 +2058,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: fullscreen_textfield_perf__timeline_summary
     scheduler: luci
 
   - name: Mac_ios backdrop_filter_perf_ios__timeline_summary
@@ -1403,6 +2066,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: hello_world__memory
     scheduler: luci
 
   - name: Mac_ios basic_material_app_ios__compile
@@ -1410,6 +2074,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: hello_world_android__compile
     scheduler: luci
 
   - name: Mac_ios channels_integration_test_ios
@@ -1417,6 +2082,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: home_scroll_perf__timeline_summary
     scheduler: luci
 
   - name: Mac_ios complex_layout_ios__compile
@@ -1424,6 +2090,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: hot_mode_dev_cycle__benchmark
     scheduler: luci
 
   - name: Mac_ios complex_layout_ios__start_up
@@ -1431,6 +2098,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: hybrid_android_views_integration_test
     scheduler: luci
 
   - name: Mac_ios complex_layout_scroll_perf_ios__timeline_summary
@@ -1438,6 +2106,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: imagefiltered_transform_animation_perf__timeline_summary
     scheduler: luci
 
   - name: Mac_ios cubic_bezier_perf_ios_sksl_warmup__timeline_summary
@@ -1445,6 +2114,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: integration_ui_driver
     scheduler: luci
 
   - name: Mac_ios external_ui_integration_test_ios
@@ -1452,6 +2122,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: integration_ui_keyboard_resize
     scheduler: luci
 
   - name: Mac_ios flavors_test_ios
@@ -1459,6 +2130,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: integration_ui_frame_number
     scheduler: luci
 
   - name: Mac_ios flutter_gallery__transition_perf_e2e_ios
@@ -1466,6 +2138,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: integration_ui_screenshot
     scheduler: luci
 
   - name: Mac_ios flutter_gallery_ios__compile
@@ -1473,6 +2146,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: integration_ui_textfield
     scheduler: luci
 
   - name: Mac_ios flutter_gallery_ios__start_up
@@ -1480,6 +2154,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: integration_test_test
     scheduler: luci
 
   - name: Mac_ios flutter_gallery_ios__transition_perf
@@ -1487,6 +2162,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: microbenchmarks
     scheduler: luci
 
   - name: Mac_ios flutter_gallery_ios_sksl_warmup__transition_perf
@@ -1494,6 +2170,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: new_gallery__transition_perf
     scheduler: luci
 
   - name: Mac_ios flutter_view_ios__start_up
@@ -1501,6 +2178,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: picture_cache_perf__timeline_summary
     scheduler: luci
 
   - name: Mac_ios hello_world_ios__compile
@@ -1508,6 +2186,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: platform_channel_sample_test
     scheduler: luci
 
   - name: Mac_ios hot_mode_dev_cycle_macos_target__benchmark
@@ -1515,6 +2194,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: platform_interaction_test
     scheduler: luci
 
   - name: Mac_ios integration_test_test_ios
@@ -1522,6 +2202,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: platform_view__start_up
     scheduler: luci
 
   - name: Mac_ios integration_ui_ios_driver
@@ -1529,6 +2210,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: run_release_test
     scheduler: luci
 
   - name: Mac_ios integration_ui_ios_frame_number
@@ -1536,6 +2218,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: service_extensions_test
     scheduler: luci
 
   - name: Mac_ios integration_ui_ios_keyboard_resize
@@ -1543,6 +2226,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: smoke_catalina_start_up
     scheduler: luci
 
   - name: Mac_ios integration_ui_ios_screenshot
@@ -1550,6 +2234,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: textfield_perf__timeline_summary
     scheduler: luci
 
   - name: Mac_ios integration_ui_ios_textfield
@@ -1557,6 +2242,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: tiles_scroll_perf__timeline_summary
     scheduler: luci
 
   - name: Mac_ios ios_app_with_extensions_test
@@ -1564,6 +2250,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: backdrop_filter_perf_ios__timeline_summary
     scheduler: luci
 
   - name: Mac_ios ios_content_validation_test
@@ -1571,6 +2258,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: basic_material_app_ios__compile
     scheduler: luci
 
   - name: Mac_ios ios_defines_test
@@ -1578,6 +2266,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: channels_integration_test_ios
     scheduler: luci
 
   - name: Mac_ios ios_platform_view_tests
@@ -1585,6 +2274,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: complex_layout_ios__compile
     scheduler: luci
 
   - name: Mac_ios large_image_changer_perf_ios
@@ -1592,6 +2282,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: complex_layout_ios__start_up
     scheduler: luci
 
   - name: Mac_ios macos_chrome_dev_mode
@@ -1599,6 +2290,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: complex_layout_scroll_perf_ios__timeline_summary
     scheduler: luci
 
   - name: Mac_ios microbenchmarks_ios
@@ -1606,6 +2298,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: external_ui_integration_test_ios
     scheduler: luci
 
   - name: Mac_ios new_gallery_ios__transition_perf
@@ -1613,6 +2306,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: flavors_test_ios
     scheduler: luci
 
   - name: Mac_ios platform_channel_sample_test_ios
@@ -1620,6 +2314,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: flutter_gallery__transition_perf_e2e_ios
     scheduler: luci
 
   - name: Mac_ios platform_channel_sample_test_swift
@@ -1627,6 +2322,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: flutter_gallery__transition_perf_e2e_ios32
     scheduler: luci
 
   - name: Mac_ios platform_channels_benchmarks_ios
@@ -1634,6 +2330,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: flutter_gallery_ios__compile
     scheduler: luci
 
   - name: Mac_ios platform_interaction_test_ios
@@ -1641,6 +2338,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: flutter_gallery_ios__start_up
     scheduler: luci
 
   - name: Mac_ios platform_view_ios__start_up
@@ -1648,6 +2346,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: flutter_gallery_ios__transition_perf
     scheduler: luci
 
   - name: Mac_ios platform_views_scroll_perf_ios__timeline_summary
@@ -1655,6 +2354,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: flutter_gallery_ios_sksl_warmup__transition_perf
     scheduler: luci
 
   - name: Mac_ios post_backdrop_filter_perf_ios__timeline_summary
@@ -1662,13 +2362,27 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: cubic_bezier_perf_ios_sksl_warmup__timeline_summary
     scheduler: luci
 
+<<<<<<< HEAD
   - name: Mac_ios simple_animation_perf_ios
     presubmit: false
+||||||| parent of f6759c3e39 (add task_name via generation)
+  - name: Mac_ios flutter_view_ios__start_up
+    builder: Mac_ios flutter_view_ios__start_up
+    presubmit: false
+    recipe: devicelab/devicelab_drone
+=======
+  - name: Mac_ios flutter_view_ios__start_up
+    builder: Mac_ios flutter_view_ios__start_up
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+>>>>>>> f6759c3e39 (add task_name via generation)
     properties:
       tags: >
         ["devicelab"]
+      task_name: flutter_view_ios__start_up
     scheduler: luci
 
   - name: Mac_ios smoke_catalina_hot_mode_dev_cycle_ios__benchmark
@@ -1676,6 +2390,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: hello_world_ios__compile
     scheduler: luci
 
   - name: Mac_ios tiles_scroll_perf_ios__timeline_summary
@@ -1683,6 +2398,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: hot_mode_dev_cycle_macos_target__benchmark
     scheduler: luci
 
   - name: Mac_ios32 flutter_gallery__transition_perf_e2e_ios32
@@ -1691,6 +2407,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: integration_ui_ios_driver
     scheduler: luci
 
   - name: Mac_ios32 native_ui_tests_ios32
@@ -1699,12 +2416,20 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: integration_ui_ios_keyboard_resize
     scheduler: luci
 
   - name: Windows build_aar_module_test
     properties:
       tags: >
+<<<<<<< HEAD
         ["devicelab","hostonly"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab"]
+=======
+        ["devicelab"]
+      task_name: integration_ui_ios_frame_number
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
     runIf:
       - dev/**
@@ -1714,31 +2439,66 @@ targets:
   - name: Windows build_tests_1_3
     properties:
       tags: >
+<<<<<<< HEAD
         ["framework","hostonly","shard"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab"]
+=======
+        ["devicelab"]
+      task_name: integration_ui_ios_screenshot
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
 
   - name: Windows build_tests_2_3
     properties:
       tags: >
+<<<<<<< HEAD
         ["framework","hostonly","shard"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab"]
+=======
+        ["devicelab"]
+      task_name: integration_ui_ios_textfield
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
 
   - name: Windows build_tests_3_3
     properties:
       tags: >
+<<<<<<< HEAD
         ["framework","hostonly","shard"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab"]
+=======
+        ["devicelab"]
+      task_name: integration_test_test_ios
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
 
   - name: Windows customer_testing
     properties:
       tags: >
+<<<<<<< HEAD
         ["framework","hostonly"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab"]
+=======
+        ["devicelab"]
+      task_name: ios_app_with_extensions_test
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
 
   - name: Windows framework_tests_libraries
     properties:
       tags: >
+<<<<<<< HEAD
         ["framework","hostonly","shard"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab"]
+=======
+        ["devicelab"]
+      task_name: ios_content_validation_test
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
     runIf:
       - dev/
@@ -1755,7 +2515,14 @@ targets:
   - name: Windows framework_tests_misc
     properties:
       tags: >
+<<<<<<< HEAD
         ["framework","hostonly","shard"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab"]
+=======
+        ["devicelab"]
+      task_name: ios_defines_test
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
     runIf:
       - dev/
@@ -1772,7 +2539,14 @@ targets:
   - name: Windows framework_tests_widgets
     properties:
       tags: >
+<<<<<<< HEAD
         ["framework","hostonly","shard"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab"]
+=======
+        ["devicelab"]
+      task_name: ios_platform_view_tests
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
     runIf:
       - dev/
@@ -1789,7 +2563,14 @@ targets:
   - name: Windows gradle_plugin_bundle_test
     properties:
       tags: >
+<<<<<<< HEAD
         ["devicelab","hostonly"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab"]
+=======
+        ["devicelab"]
+      task_name: large_image_changer_perf_ios
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
     runIf:
       - dev/**
@@ -1799,13 +2580,27 @@ targets:
     presubmit: false
     properties:
       tags: >
+<<<<<<< HEAD
         ["devicelab","hostonly"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab"]
+=======
+        ["devicelab"]
+      task_name: macos_chrome_dev_mode
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
 
   - name: Windows gradle_plugin_light_apk_test
     properties:
       tags: >
+<<<<<<< HEAD
         ["devicelab","hostonly"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab"]
+=======
+        ["devicelab"]
+      task_name: microbenchmarks_ios
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
     runIf:
       - dev/**
@@ -1816,13 +2611,27 @@ targets:
     presubmit: false
     properties:
       tags: >
+<<<<<<< HEAD
         ["devicelab","hostonly"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab"]
+=======
+        ["devicelab"]
+      task_name: native_ui_tests_ios32
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
 
   - name: Windows module_custom_host_app_name_test
     properties:
       tags: >
+<<<<<<< HEAD
         ["devicelab","hostonly"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab"]
+=======
+        ["devicelab"]
+      task_name: new_gallery_ios__transition_perf
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
     runIf:
       - dev/**
@@ -1832,7 +2641,14 @@ targets:
   - name: Windows module_host_with_custom_build_test
     properties:
       tags: >
+<<<<<<< HEAD
         ["devicelab","hostonly"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab"]
+=======
+        ["devicelab"]
+      task_name: platform_channel_sample_test_ios
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
     runIf:
       - dev/**
@@ -1842,7 +2658,14 @@ targets:
   - name: Windows module_test
     properties:
       tags: >
+<<<<<<< HEAD
         ["devicelab","hostonly"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab"]
+=======
+        ["devicelab"]
+      task_name: platform_channel_sample_test_swift
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
     runIf:
       - dev/**
@@ -1852,7 +2675,14 @@ targets:
   - name: Windows plugin_dependencies_test
     properties:
       tags: >
+<<<<<<< HEAD
         ["devicelab","hostonly"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab"]
+=======
+        ["devicelab"]
+      task_name: platform_channels_benchmarks_ios
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
     runIf:
       - dev/**
@@ -1862,7 +2692,14 @@ targets:
   - name: Windows plugin_test
     properties:
       tags: >
+<<<<<<< HEAD
         ["devicelab","hostonly"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab"]
+=======
+        ["devicelab"]
+      task_name: platform_interaction_test_ios
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
     runIf:
       - dev/**
@@ -1872,7 +2709,14 @@ targets:
   - name: Windows tool_integration_tests_1_5
     properties:
       tags: >
+<<<<<<< HEAD
         ["framework","hostonly","shard"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab"]
+=======
+        ["devicelab"]
+      task_name: platform_view_ios__start_up
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
     runIf:
       - dev/**
@@ -1882,7 +2726,14 @@ targets:
   - name: Windows tool_integration_tests_2_5
     properties:
       tags: >
+<<<<<<< HEAD
         ["framework","hostonly","shard"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab"]
+=======
+        ["devicelab"]
+      task_name: platform_views_scroll_perf_ios__timeline_summary
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
     runIf:
       - dev/**
@@ -1892,7 +2743,14 @@ targets:
   - name: Windows tool_integration_tests_3_5
     properties:
       tags: >
+<<<<<<< HEAD
         ["framework","hostonly","shard"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab"]
+=======
+        ["devicelab"]
+      task_name: post_backdrop_filter_perf_ios__timeline_summary
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
     runIf:
       - dev/**
@@ -1902,7 +2760,14 @@ targets:
   - name: Windows tool_integration_tests_4_5
     properties:
       tags: >
+<<<<<<< HEAD
         ["framework","hostonly","shard"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab"]
+=======
+        ["devicelab"]
+      task_name: simple_animation_perf_ios
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
     runIf:
       - dev/**
@@ -1912,7 +2777,14 @@ targets:
   - name: Windows tool_integration_tests_5_5
     properties:
       tags: >
+<<<<<<< HEAD
         ["framework","hostonly","shard"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab"]
+=======
+        ["devicelab"]
+      task_name: smoke_catalina_hot_mode_dev_cycle_ios__benchmark
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
     runIf:
       - dev/**
@@ -1922,7 +2794,14 @@ targets:
   - name: Windows tool_tests_commands
     properties:
       tags: >
+<<<<<<< HEAD
         ["framework","hostonly","shard"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab"]
+=======
+        ["devicelab"]
+      task_name: tiles_scroll_perf_ios__timeline_summary
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
     runIf:
       - dev/**
@@ -1932,7 +2811,14 @@ targets:
   - name: Windows tool_tests_general
     properties:
       tags: >
+<<<<<<< HEAD
         ["framework","hostonly","shard"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab","hostonly"]
+=======
+        ["devicelab","hostonly"]
+      task_name: gradle_plugin_fat_apk_test
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
     runIf:
       - dev/**
@@ -1942,7 +2828,14 @@ targets:
   - name: Windows web_tool_tests
     properties:
       tags: >
+<<<<<<< HEAD
         ["framework","hostonly","shard"]
+||||||| parent of f6759c3e39 (add task_name via generation)
+        ["devicelab"]
+=======
+        ["devicelab"]
+      task_name: complex_layout_win__compile
+>>>>>>> f6759c3e39 (add task_name via generation)
     scheduler: luci
     runIf:
       - dev/**
@@ -1954,6 +2847,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: basic_material_app_win__compile
     scheduler: luci
 
   - name: Windows_android channels_integration_test_win
@@ -1961,6 +2855,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: flutter_gallery_win__compile
     scheduler: luci
 
   - name: Windows_android complex_layout_win__compile
@@ -1968,6 +2863,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: windows_chrome_dev_mode
     scheduler: luci
 
   - name: Windows_android flavors_test_win
@@ -1975,6 +2871,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: flavors_test_win
     scheduler: luci
 
   - name: Windows_android flutter_gallery_win__compile
@@ -1982,6 +2879,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: channels_integration_test_win
     scheduler: luci
 
   - name: Windows_android hot_mode_dev_cycle_win__benchmark
@@ -1996,4 +2894,6 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: hot_mode_dev_cycle_win__benchmark
     scheduler: luci
+
