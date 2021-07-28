@@ -110,18 +110,16 @@ void runNext({
       }
 
       if (unappliedCherrypicks.isEmpty) {
-        stdio.printStatus(
-          'All engine cherrypicks have been auto-applied by the conductor.\n');
+        stdio.printStatus('All engine cherrypicks have been auto-applied by the conductor.\n');
       } else {
-        stdio.printStatus(
-          'There were ${unappliedCherrypicks.length} cherrypicks that were not auto-applied.');
+        stdio.printStatus('There were ${unappliedCherrypicks.length} cherrypicks that were not auto-applied.');
         stdio.printStatus('These must be applied manually in the directory '
-          '${state.engine.checkoutPath} before proceeding.\n');
+            '${state.engine.checkoutPath} before proceeding.\n');
       }
       if (autoAccept == false) {
         final bool response = prompt(
-            'Are you ready to push your engine branch to the repository '
-            '${state.engine.mirror.url}?',
+          'Are you ready to push your engine branch to the repository '
+          '${state.engine.mirror.url}?',
           stdio,
         );
         if (!response) {
@@ -217,7 +215,9 @@ void runNext({
 
       stdio.printStatus('Rolling new engine hash $engineRevision to framework checkout...');
       framework.updateEngineRevision(engineRevision);
-      framework.commit('Update Engine revision to $engineRevision for ${state.releaseChannel} release ${state.releaseVersion}', addFirst: true);
+      framework.commit(
+          'Update Engine revision to $engineRevision for ${state.releaseChannel} release ${state.releaseVersion}',
+          addFirst: true);
 
       if (state.framework.cherrypicks.isEmpty) {
         stdio.printStatus(

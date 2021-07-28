@@ -85,11 +85,10 @@ String? getValueFromEnvOrArgs(
   String name,
   ArgResults argResults,
   Map<String, String> env, {
-    bool allowNull = false,
-  }
-) {
+  bool allowNull = false,
+}) {
   final String envName = fromArgToEnvName(name);
-  if (env[envName] != null ) {
+  if (env[envName] != null) {
     return env[envName];
   }
   final String? argValue = argResults[name] as String?;
@@ -138,4 +137,14 @@ List<String> getValuesFromEnvOrArgs(
 /// For example, 'state-file' -> 'STATE_FILE'.
 String fromArgToEnvName(String argName) {
   return argName.toUpperCase().replaceAll(r'-', r'_');
+}
+
+/// Return a web link for the user to open a new PR.
+String getNewPrLink({
+  required String userName,
+  required String repoName,
+  required String candidateBranch,
+  required String workingBranch,
+}) {
+  return 'https://github.com/flutter/$repoName/compare/$candidateBranch...$userName:$workingBranch?expand=1';
 }
