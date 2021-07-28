@@ -90,7 +90,7 @@ void testMain() {
     expect(event.client.x, equals(110));
     expect(event.client.y, equals(111));
 
-    events = expectCorrectTypes(context.multiTouchDown(<_TouchDetails>[
+    events = expectCorrectTypes(context.multiTouchDown(const <_TouchDetails>[
       _TouchDetails(pointer: 100, clientX: 120, clientY: 121),
       _TouchDetails(pointer: 101, clientX: 122, clientY: 123),
     ]));
@@ -143,7 +143,7 @@ void testMain() {
     expect(event.client.x, equals(214));
     expect(event.client.y, equals(215));
 
-    events = expectCorrectTypes(context.multiTouchMove(<_TouchDetails>[
+    events = expectCorrectTypes(context.multiTouchMove(const <_TouchDetails>[
       _TouchDetails(pointer: 102, clientX: 220, clientY: 221),
       _TouchDetails(pointer: 103, clientX: 222, clientY: 223),
     ]));
@@ -178,7 +178,7 @@ void testMain() {
     expect(event.client.x, equals(310));
     expect(event.client.y, equals(311));
 
-    events = expectCorrectTypes(context.multiTouchUp(<_TouchDetails>[
+    events = expectCorrectTypes(context.multiTouchUp(const <_TouchDetails>[
       _TouchDetails(pointer: 104, clientX: 320, clientY: 321),
       _TouchDetails(pointer: 105, clientX: 322, clientY: 323),
     ]));
@@ -204,7 +204,7 @@ void testMain() {
     expect(event.client.x, equals(400));
     expect(event.client.y, equals(401));
 
-    events = expectCorrectTypes(context.multiTouchCancel(<_TouchDetails>[
+    events = expectCorrectTypes(context.multiTouchCancel(const <_TouchDetails>[
       _TouchDetails(pointer: 106, clientX: 500, clientY: 501),
       _TouchDetails(pointer: 107, clientX: 502, clientY: 503),
     ]));
@@ -248,7 +248,7 @@ void testMain() {
     expect(event.changedTouches![0].client.x, equals(100));
     expect(event.changedTouches![0].client.y, equals(101));
 
-    events = expectCorrectTypes(context.multiTouchDown(<_TouchDetails>[
+    events = expectCorrectTypes(context.multiTouchDown(const <_TouchDetails>[
       _TouchDetails(pointer: 100, clientX: 120, clientY: 121),
       _TouchDetails(pointer: 101, clientX: 122, clientY: 123),
     ]));
@@ -269,7 +269,7 @@ void testMain() {
     expect(event.changedTouches![0].client.x, equals(200));
     expect(event.changedTouches![0].client.y, equals(201));
 
-    events = expectCorrectTypes(context.multiTouchMove(<_TouchDetails>[
+    events = expectCorrectTypes(context.multiTouchMove(const <_TouchDetails>[
       _TouchDetails(pointer: 102, clientX: 220, clientY: 221),
       _TouchDetails(pointer: 103, clientX: 222, clientY: 223),
     ]));
@@ -290,7 +290,7 @@ void testMain() {
     expect(event.changedTouches![0].client.x, equals(300));
     expect(event.changedTouches![0].client.y, equals(301));
 
-    events = expectCorrectTypes(context.multiTouchUp(<_TouchDetails>[
+    events = expectCorrectTypes(context.multiTouchUp(const <_TouchDetails>[
       _TouchDetails(pointer: 104, clientX: 320, clientY: 321),
       _TouchDetails(pointer: 105, clientX: 322, clientY: 323),
     ]));
@@ -304,7 +304,7 @@ void testMain() {
     expect(events[0].changedTouches![1].client.x, equals(322));
     expect(events[0].changedTouches![1].client.y, equals(323));
 
-    events = expectCorrectTypes(context.multiTouchCancel(<_TouchDetails>[
+    events = expectCorrectTypes(context.multiTouchCancel(const <_TouchDetails>[
       _TouchDetails(pointer: 104, clientX: 320, clientY: 321),
       _TouchDetails(pointer: 105, clientX: 322, clientY: 323),
     ]));
@@ -1826,7 +1826,7 @@ void testMain() {
       };
 
       // Two pointers down
-      context.multiTouchDown(<_TouchDetails>[
+      context.multiTouchDown(const <_TouchDetails>[
         _TouchDetails(pointer: 2, clientX: 100, clientY: 101),
         _TouchDetails(pointer: 3, clientX: 200, clientY: 201),
       ]).forEach(glassPane.dispatchEvent);
@@ -1873,7 +1873,7 @@ void testMain() {
       packets.clear();
 
       // Two pointers move
-      context.multiTouchMove(<_TouchDetails>[
+      context.multiTouchMove(const <_TouchDetails>[
         _TouchDetails(pointer: 3, clientX: 300, clientY: 302),
         _TouchDetails(pointer: 2, clientX: 400, clientY: 402),
       ]).forEach(glassPane.dispatchEvent);
@@ -1908,7 +1908,7 @@ void testMain() {
       packets.clear();
 
       // One pointer up
-      context.multiTouchUp(<_TouchDetails>[
+      context.multiTouchUp(const <_TouchDetails>[
         _TouchDetails(pointer: 3, clientX: 300, clientY: 302),
       ]).forEach(glassPane.dispatchEvent);
       expect(packets, hasLength(1));
@@ -1931,7 +1931,7 @@ void testMain() {
       packets.clear();
 
       // Another pointer up
-      context.multiTouchUp(<_TouchDetails>[
+      context.multiTouchUp(const <_TouchDetails>[
         _TouchDetails(pointer: 2, clientX: 400, clientY: 402),
       ]).forEach(glassPane.dispatchEvent);
       expect(packets, hasLength(1));
@@ -1954,7 +1954,7 @@ void testMain() {
       packets.clear();
 
       // Again two pointers down (reuse pointer ID)
-      context.multiTouchDown(<_TouchDetails>[
+      context.multiTouchDown(const <_TouchDetails>[
         _TouchDetails(pointer: 3, clientX: 500, clientY: 501),
         _TouchDetails(pointer: 2, clientX: 600, clientY: 601),
       ]).forEach(glassPane.dispatchEvent);
@@ -2016,14 +2016,14 @@ void testMain() {
       };
 
       // Two pointers down
-      context.multiTouchDown(<_TouchDetails>[
+      context.multiTouchDown(const <_TouchDetails>[
         _TouchDetails(pointer: 2, clientX: 100, clientY: 101),
         _TouchDetails(pointer: 3, clientX: 200, clientY: 201),
       ]).forEach(glassPane.dispatchEvent);
       packets.clear(); // Down event is tested in other tests.
 
       // One pointer cancel
-      context.multiTouchCancel(<_TouchDetails>[
+      context.multiTouchCancel(const <_TouchDetails>[
         _TouchDetails(pointer: 3, clientX: 300, clientY: 302),
       ]).forEach(glassPane.dispatchEvent);
       expect(packets.length, 1);
@@ -2061,7 +2061,7 @@ void testMain() {
         packets.add(packet);
       };
 
-      context.multiTouchDown(<_TouchDetails>[
+      context.multiTouchDown(const <_TouchDetails>[
         _TouchDetails(pointer: 1, clientX: 100, clientY: 101),
       ]).forEach(glassPane.dispatchEvent);
       expect(packets, hasLength(1));
@@ -2074,7 +2074,7 @@ void testMain() {
       expect(packets[0].data[1].device, equals(1));
       packets.clear();
 
-      context.multiTouchDown(<_TouchDetails>[
+      context.multiTouchDown(const <_TouchDetails>[
         _TouchDetails(pointer: 2, clientX: 200, clientY: 202),
       ]).forEach(glassPane.dispatchEvent);
       // An add will be synthesized.
@@ -2158,7 +2158,7 @@ void testMain() {
         packets.add(packet);
       };
 
-      context.multiTouchDown(<_TouchDetails>[
+      context.multiTouchDown(const <_TouchDetails>[
         _TouchDetails(pointer: 1, clientX: 20, clientY: 20),
       ]).forEach(glassPane.dispatchEvent);
       expect(packets, hasLength(1));
@@ -2180,7 +2180,7 @@ void testMain() {
       expect(packets[0].data[1].physicalDeltaY, equals(0.0));
       packets.clear();
 
-      context.multiTouchMove(<_TouchDetails>[
+      context.multiTouchMove(const <_TouchDetails>[
         _TouchDetails(pointer: 1, clientX: 40, clientY: 30),
       ]).forEach(glassPane.dispatchEvent);
       expect(packets, hasLength(1));
@@ -2194,7 +2194,7 @@ void testMain() {
       expect(packets[0].data[0].physicalDeltaY, equals(10.0 * dpi));
       packets.clear();
 
-      context.multiTouchUp(<_TouchDetails>[
+      context.multiTouchUp(const <_TouchDetails>[
         _TouchDetails(pointer: 1, clientX: 40, clientY: 30),
       ]).forEach(glassPane.dispatchEvent);
       expect(packets, hasLength(1));
@@ -2216,7 +2216,7 @@ void testMain() {
       expect(packets[0].data[1].physicalDeltaY, equals(0.0));
       packets.clear();
 
-      context.multiTouchDown(<_TouchDetails>[
+      context.multiTouchDown(const <_TouchDetails>[
         _TouchDetails(pointer: 2, clientX: 20, clientY: 10),
       ]).forEach(glassPane.dispatchEvent);
       expect(packets, hasLength(1));

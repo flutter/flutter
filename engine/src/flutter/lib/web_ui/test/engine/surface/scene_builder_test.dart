@@ -333,7 +333,7 @@ void testMain() {
     builder.pushOffset(0, 0);
     builder.pushClipRect(const ui.Rect.fromLTRB(0, 0, 1000, 1000)) as PersistedContainerSurface;
     builder.pushTransform((Matrix4.identity()..scale(0.5, 0.5)).toFloat64());
-    builder.addPicture(ui.Offset(1000, 1000), picture);
+    builder.addPicture(const ui.Offset(1000, 1000), picture);
     builder.pop();
     builder.pop();
     builder.pop();
@@ -469,7 +469,7 @@ void testMain() {
       final EnginePictureRecorder recorder = EnginePictureRecorder();
       final RecordingCanvas canvas = recorder.beginRecording(const ui.Rect.fromLTRB(0, 0, 400, 400));
       final DomParagraph paragraph = (DomParagraphBuilder(EngineParagraphStyle())..addText(char)).build() as DomParagraph;
-      paragraph.layout(ui.ParagraphConstraints(width: 1000));
+      paragraph.layout(const ui.ParagraphConstraints(width: 1000));
       canvas.drawParagraph(paragraph, ui.Offset.zero);
       final ui.EngineLayer newLayer = useOffset
           ? builder.pushOffset(0, 0, oldLayer: oldLayer == null ? null : oldLayer as ui.OffsetEngineLayer)
@@ -821,31 +821,31 @@ ui.Picture _drawPicture() {
   final RecordingCanvas canvas =
   recorder.beginRecording(const ui.Rect.fromLTRB(0, 0, 400, 400));
   final ui.Shader gradient = ui.Gradient.radial(
-    ui.Offset(100, 100), 50,
-    <ui.Color>[
-      const ui.Color.fromARGB(255, 0, 0, 0),
-      const ui.Color.fromARGB(255, 0, 0, 255),
+    const ui.Offset(100, 100), 50,
+    const <ui.Color>[
+      ui.Color.fromARGB(255, 0, 0, 0),
+      ui.Color.fromARGB(255, 0, 0, 255),
     ],
   );
   canvas.drawCircle(
-      ui.Offset(offsetX + 10, offsetY + 10), 10,
+      const ui.Offset(offsetX + 10, offsetY + 10), 10,
       SurfacePaint()
         ..style = ui.PaintingStyle.fill
         ..shader = gradient);
   canvas.drawCircle(
-      ui.Offset(offsetX + 60, offsetY + 10),
+      const ui.Offset(offsetX + 60, offsetY + 10),
       10,
       SurfacePaint()
         ..style = ui.PaintingStyle.fill
         ..color = const ui.Color.fromRGBO(255, 0, 0, 1));
   canvas.drawCircle(
-      ui.Offset(offsetX + 10, offsetY + 60),
+      const ui.Offset(offsetX + 10, offsetY + 60),
       10,
       SurfacePaint()
         ..style = ui.PaintingStyle.fill
         ..color = const ui.Color.fromRGBO(0, 255, 0, 1));
   canvas.drawCircle(
-      ui.Offset(offsetX + 60, offsetY + 60),
+      const ui.Offset(offsetX + 60, offsetY + 60),
       10,
       SurfacePaint()
         ..style = ui.PaintingStyle.fill
@@ -866,37 +866,37 @@ EnginePicture _drawPathImagePath() {
   final RecordingCanvas canvas =
   recorder.beginRecording(const ui.Rect.fromLTRB(0, 0, 400, 400));
   final ui.Shader gradient = ui.Gradient.radial(
-    ui.Offset(100, 100), 50,
-    <ui.Color>[
-      const ui.Color.fromARGB(255, 0, 0, 0),
-      const ui.Color.fromARGB(255, 0, 0, 255),
+    const ui.Offset(100, 100), 50,
+    const <ui.Color>[
+      ui.Color.fromARGB(255, 0, 0, 0),
+      ui.Color.fromARGB(255, 0, 0, 255),
     ],
   );
   canvas.drawCircle(
-      ui.Offset(offsetX + 10, offsetY + 10), 10,
+      const ui.Offset(offsetX + 10, offsetY + 10), 10,
       SurfacePaint()
         ..style = ui.PaintingStyle.fill
         ..shader = gradient);
   canvas.drawCircle(
-      ui.Offset(offsetX + 60, offsetY + 10),
+      const ui.Offset(offsetX + 60, offsetY + 10),
       10,
       SurfacePaint()
         ..style = ui.PaintingStyle.fill
         ..color = const ui.Color.fromRGBO(255, 0, 0, 1));
   canvas.drawCircle(
-      ui.Offset(offsetX + 10, offsetY + 60),
+      const ui.Offset(offsetX + 10, offsetY + 60),
       10,
       SurfacePaint()
         ..style = ui.PaintingStyle.fill
         ..color = const ui.Color.fromRGBO(0, 255, 0, 1));
-  canvas.drawImage(createTestImage(), ui.Offset(0, 0), SurfacePaint());
+  canvas.drawImage(createTestImage(), const ui.Offset(0, 0), SurfacePaint());
   canvas.drawCircle(
-      ui.Offset(offsetX + 10, offsetY + 10), 10,
+      const ui.Offset(offsetX + 10, offsetY + 10), 10,
       SurfacePaint()
         ..style = ui.PaintingStyle.fill
         ..shader = gradient);
   canvas.drawCircle(
-      ui.Offset(offsetX + 60, offsetY + 60),
+      const ui.Offset(offsetX + 60, offsetY + 60),
       10,
       SurfacePaint()
         ..style = ui.PaintingStyle.fill

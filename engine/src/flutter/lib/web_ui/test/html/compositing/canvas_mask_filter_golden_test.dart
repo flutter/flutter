@@ -42,7 +42,7 @@ Future<void> testMain() async {
       rc.translate(0, 75);
 
       final SurfacePaint paint = SurfacePaint()
-          ..maskFilter = ui.MaskFilter.blur(ui.BlurStyle.normal, 5);
+          ..maskFilter = const ui.MaskFilter.blur(ui.BlurStyle.normal, 5);
 
       rc.translate(50, 0);
       rc.drawRect(
@@ -51,21 +51,21 @@ Future<void> testMain() async {
       );
 
       rc.translate(100, 0);
-      paint.color = ui.Color(0xFF00FF00);
+      paint.color = const ui.Color(0xFF00FF00);
       rc.drawRRect(
         ui.RRect.fromRectAndRadius(
           ui.Rect.fromCircle(center: ui.Offset.zero, radius: 30),
-          ui.Radius.circular(20),
+          const ui.Radius.circular(20),
         ),
         paint,
       );
 
       rc.translate(100, 0);
-      paint.color = ui.Color(0xFF0000FF);
+      paint.color = const ui.Color(0xFF0000FF);
       rc.drawCircle(ui.Offset.zero, 30, paint);
 
       rc.translate(100, 0);
-      paint.color = ui.Color(0xFF00FFFF);
+      paint.color = const ui.Color(0xFF00FFFF);
       rc.drawPath(
         SurfacePath()
           ..moveTo(-20, 0)
@@ -77,37 +77,37 @@ Future<void> testMain() async {
       );
 
       rc.translate(100, 0);
-      paint.color = ui.Color(0xFFFF00FF);
+      paint.color = const ui.Color(0xFFFF00FF);
       rc.drawOval(
         ui.Rect.fromCenter(center: ui.Offset.zero, width: 40, height: 100),
         paint,
       );
 
       rc.translate(100, 0);
-      paint.color = ui.Color(0xFF888800);
+      paint.color = const ui.Color(0xFF888800);
       paint.strokeWidth = 5;
       rc.drawLine(
-        ui.Offset(-20, -50),
-        ui.Offset(20, 50),
+        const ui.Offset(-20, -50),
+        const ui.Offset(20, 50),
         paint,
       );
 
       rc.translate(100, 0);
-      paint.color = ui.Color(0xFF888888);
+      paint.color = const ui.Color(0xFF888888);
       rc.drawDRRect(
         ui.RRect.fromRectAndRadius(
           ui.Rect.fromCircle(center: ui.Offset.zero, radius: 35),
-          ui.Radius.circular(20),
+          const ui.Radius.circular(20),
         ),
         ui.RRect.fromRectAndRadius(
           ui.Rect.fromCircle(center: ui.Offset.zero, radius: 15),
-          ui.Radius.circular(7),
+          const ui.Radius.circular(7),
         ),
         paint,
       );
 
       rc.translate(100, 0);
-      paint.color = ui.Color(0xFF6500C9);
+      paint.color = const ui.Color(0xFF6500C9);
       rc.drawRawPoints(
         ui.PointMode.points,
         Float32List.fromList(<double>[-10, -10, -10, 10, 10, -10, 10, 10]),
@@ -127,9 +127,9 @@ Future<void> testMain() async {
       rc.translate(150, 150);
 
       final SurfacePaint paint = SurfacePaint()
-          ..maskFilter = ui.MaskFilter.blur(ui.BlurStyle.normal, 5);
+          ..maskFilter = const ui.MaskFilter.blur(ui.BlurStyle.normal, 5);
 
-      final List<ui.Color> colors = <ui.Color>[
+      const List<ui.Color> colors = <ui.Color>[
         ui.Color(0xFF000000),
         ui.Color(0xFF00FF00),
         ui.Color(0xFF0000FF),
@@ -166,7 +166,7 @@ Future<void> testMain() async {
       rc.translate(0, 75);
 
       final SurfacePaint paint = SurfacePaint()
-          ..maskFilter = ui.MaskFilter.blur(ui.BlurStyle.normal, 5);
+          ..maskFilter = const ui.MaskFilter.blur(ui.BlurStyle.normal, 5);
 
       rc.translate(75, 0);
       rc.drawRect(

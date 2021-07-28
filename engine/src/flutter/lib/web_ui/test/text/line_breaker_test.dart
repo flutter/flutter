@@ -170,7 +170,7 @@ void testMain() {
     test('trailing spaces and new lines', () {
       expect(
         findBreaks('foo bar  '),
-        <LineBreakResult>[
+        const <LineBreakResult>[
           LineBreakResult(4, 4, 3, LineBreakType.opportunity),
           LineBreakResult(9, 9, 7, LineBreakType.endOfText),
         ],
@@ -178,7 +178,7 @@ void testMain() {
 
       expect(
         findBreaks('foo  \nbar\nbaz   \n'),
-        <LineBreakResult>[
+        const <LineBreakResult>[
           LineBreakResult(6, 5, 3, LineBreakType.mandatory),
           LineBreakResult(10, 9, 9, LineBreakType.mandatory),
           LineBreakResult(17, 16, 13, LineBreakType.mandatory),
@@ -190,7 +190,7 @@ void testMain() {
     test('leading spaces', () {
       expect(
         findBreaks(' foo'),
-        <LineBreakResult>[
+        const <LineBreakResult>[
           LineBreakResult(1, 1, 0, LineBreakType.opportunity),
           LineBreakResult(4, 4, 4, LineBreakType.endOfText),
         ],
@@ -198,7 +198,7 @@ void testMain() {
 
       expect(
         findBreaks('   foo'),
-        <LineBreakResult>[
+        const <LineBreakResult>[
           LineBreakResult(3, 3, 0, LineBreakType.opportunity),
           LineBreakResult(6, 6, 6, LineBreakType.endOfText),
         ],
@@ -206,7 +206,7 @@ void testMain() {
 
       expect(
         findBreaks('  foo   bar'),
-        <LineBreakResult>[
+        const <LineBreakResult>[
           LineBreakResult(2, 2, 0, LineBreakType.opportunity),
           LineBreakResult(8, 8, 5, LineBreakType.opportunity),
           LineBreakResult(11, 11, 11, LineBreakType.endOfText),
@@ -215,7 +215,7 @@ void testMain() {
 
       expect(
         findBreaks('  \n   foo'),
-        <LineBreakResult>[
+        const <LineBreakResult>[
           LineBreakResult(3, 2, 0, LineBreakType.mandatory),
           LineBreakResult(6, 6, 3, LineBreakType.opportunity),
           LineBreakResult(9, 9, 9, LineBreakType.endOfText),

@@ -58,7 +58,7 @@ void testMain() {
       ..onPreventDefault = onPreventDefault
     );
     expectKeyData(keyDataList.last,
-      timeStamp: Duration(milliseconds: 1),
+      timeStamp: const Duration(milliseconds: 1),
       type: ui.KeyEventType.down,
       physical: kPhysicalKeyA,
       logical: kLogicalKeyA,
@@ -72,7 +72,7 @@ void testMain() {
       ..onPreventDefault = onPreventDefault
     );
     expectKeyData(keyDataList.last,
-      timeStamp: Duration(milliseconds: 1, microseconds: 500),
+      timeStamp: const Duration(milliseconds: 1, microseconds: 500),
       type: ui.KeyEventType.repeat,
       physical: kPhysicalKeyA,
       logical: kLogicalKeyA,
@@ -85,7 +85,7 @@ void testMain() {
       ..onPreventDefault = onPreventDefault
     );
     expectKeyData(keyDataList.last,
-      timeStamp: Duration(seconds: 1, milliseconds: 500),
+      timeStamp: const Duration(seconds: 1, milliseconds: 500),
       type: ui.KeyEventType.repeat,
       physical: kPhysicalKeyA,
       logical: kLogicalKeyA,
@@ -98,7 +98,7 @@ void testMain() {
       ..onPreventDefault = onPreventDefault
     );
     expectKeyData(keyDataList.last,
-      timeStamp: Duration(seconds: 2, microseconds: 500),
+      timeStamp: const Duration(seconds: 2, microseconds: 500),
       type: ui.KeyEventType.up,
       physical: kPhysicalKeyA,
       logical: kLogicalKeyA,
@@ -464,7 +464,7 @@ void testMain() {
     keyDataList.clear();
     preventedDefault = false;
 
-    async.elapse(Duration(microseconds: 1));
+    async.elapse(const Duration(microseconds: 1));
     expect(keyDataList, hasLength(1));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.up,
@@ -490,7 +490,7 @@ void testMain() {
     keyDataList.clear();
     preventedDefault = false;
 
-    async.elapse(Duration(microseconds: 1));
+    async.elapse(const Duration(microseconds: 1));
     expect(keyDataList, hasLength(1));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.up,
@@ -516,7 +516,7 @@ void testMain() {
 
     // Schedules are canceled after disposal
     converter.dispose();
-    async.elapse(Duration(seconds: 10));
+    async.elapse(const Duration(seconds: 10));
     expect(keyDataList, isEmpty);
   });
 
@@ -537,7 +537,7 @@ void testMain() {
     );
     keyDataList.clear();
 
-    async.elapse(Duration(seconds: 10));
+    async.elapse(const Duration(seconds: 10));
     expect(keyDataList, isEmpty);
 
     converter.handleEvent(keyUpEvent('CapsLock', 'CapsLock'));
@@ -550,7 +550,7 @@ void testMain() {
     );
     keyDataList.clear();
 
-    async.elapse(Duration(seconds: 10));
+    async.elapse(const Duration(seconds: 10));
     expect(keyDataList, isEmpty);
 
     converter.handleEvent(keyDownEvent('CapsLock', 'CapsLock'));
@@ -578,7 +578,7 @@ void testMain() {
     });
 
     converter.handleEvent(keyDownEvent('MetaLeft', 'Meta', kMeta, kLocationLeft)..timeStamp = 100);
-    async.elapse(Duration(milliseconds: 100));
+    async.elapse(const Duration(milliseconds: 100));
 
     converter.handleEvent(keyDownEvent('KeyA', 'a', kMeta)..timeStamp = 200);
     expectKeyData(keyDataList.last,
@@ -592,7 +592,7 @@ void testMain() {
 
     // Keyup of KeyA is omitted due to being a shortcut.
 
-    async.elapse(Duration(milliseconds: 2500));
+    async.elapse(const Duration(milliseconds: 2500));
     expectKeyData(keyDataList.last,
       timeStamp: const Duration(milliseconds: 1200),
       type: ui.KeyEventType.up,
@@ -611,7 +611,7 @@ void testMain() {
       logical: kLogicalMetaLeft,
       character: null,
     );
-    async.elapse(Duration(milliseconds: 100));
+    async.elapse(const Duration(milliseconds: 100));
 
     // Key A states are cleared
     converter.handleEvent(keyDownEvent('KeyA', 'a')..timeStamp = 2800);
@@ -622,7 +622,7 @@ void testMain() {
       logical: kLogicalKeyA,
       character: 'a',
     );
-    async.elapse(Duration(milliseconds: 100));
+    async.elapse(const Duration(milliseconds: 100));
 
     converter.handleEvent(keyUpEvent('KeyA', 'a')..timeStamp = 2900);
     expectKeyData(keyDataList.last,
@@ -642,20 +642,20 @@ void testMain() {
     });
 
     converter.handleEvent(keyDownEvent('MetaLeft', 'Meta', kMeta, kLocationLeft)..timeStamp = 100);
-    async.elapse(Duration(milliseconds: 100));
+    async.elapse(const Duration(milliseconds: 100));
 
     converter.handleEvent(keyDownEvent('KeyA', 'a', kMeta)..timeStamp = 200);
-    async.elapse(Duration(milliseconds: 400));
+    async.elapse(const Duration(milliseconds: 400));
 
     converter.handleEvent(keyRepeatedDownEvent('KeyA', 'a', kMeta)..timeStamp = 600);
-    async.elapse(Duration(milliseconds: 50));
+    async.elapse(const Duration(milliseconds: 50));
     converter.handleEvent(keyRepeatedDownEvent('KeyA', 'a', kMeta)..timeStamp = 650);
-    async.elapse(Duration(milliseconds: 50));
+    async.elapse(const Duration(milliseconds: 50));
     converter.handleEvent(keyRepeatedDownEvent('KeyA', 'a', kMeta)..timeStamp = 700);
 
     // Keyup of KeyA is omitted due to being a shortcut.
 
-    async.elapse(Duration(milliseconds: 2500));
+    async.elapse(const Duration(milliseconds: 2500));
     expectKeyData(keyDataList.last,
       timeStamp: const Duration(milliseconds: 1700),
       type: ui.KeyEventType.up,
@@ -674,7 +674,7 @@ void testMain() {
       logical: kLogicalMetaLeft,
       character: null,
     );
-    async.elapse(Duration(milliseconds: 100));
+    async.elapse(const Duration(milliseconds: 100));
 
     // Key A states are cleared
     converter.handleEvent(keyDownEvent('KeyA', 'a')..timeStamp = 3300);
@@ -685,7 +685,7 @@ void testMain() {
       logical: kLogicalKeyA,
       character: 'a',
     );
-    async.elapse(Duration(milliseconds: 100));
+    async.elapse(const Duration(milliseconds: 100));
 
     converter.handleEvent(keyUpEvent('KeyA', 'a')..timeStamp = 3400);
     expectKeyData(keyDataList.last,
@@ -705,7 +705,7 @@ void testMain() {
     });
 
     converter.handleEvent(keyDownEvent('MetaLeft', 'Meta', kMeta, kLocationLeft)..timeStamp = 100);
-    async.elapse(Duration(milliseconds: 100));
+    async.elapse(const Duration(milliseconds: 100));
 
     converter.handleEvent(keyDownEvent('KeyA', 'a', kCtrl)..timeStamp = 200);
     expectKeyData(keyDataList.last,
@@ -716,10 +716,10 @@ void testMain() {
       character: 'a',
     );
     keyDataList.clear();
-    async.elapse(Duration(milliseconds: 500));
+    async.elapse(const Duration(milliseconds: 500));
 
     converter.handleEvent(keyUpEvent('MetaLeft', 'Meta', 0, kLocationLeft)..timeStamp = 700);
-    async.elapse(Duration(milliseconds: 100));
+    async.elapse(const Duration(milliseconds: 100));
 
     converter.handleEvent(keyUpEvent('KeyA', 'a')..timeStamp = 800);
     expectKeyData(keyDataList.last,
@@ -730,7 +730,7 @@ void testMain() {
       character: null,
     );
     keyDataList.clear();
-    async.elapse(Duration(milliseconds: 2000));
+    async.elapse(const Duration(milliseconds: 2000));
     expect(keyDataList, isEmpty);
 
     // Key A states are cleared
@@ -742,7 +742,7 @@ void testMain() {
       logical: kLogicalKeyA,
       character: 'a',
     );
-    async.elapse(Duration(milliseconds: 100));
+    async.elapse(const Duration(milliseconds: 100));
 
     converter.handleEvent(keyUpEvent('KeyA', 'a')..timeStamp = 2900);
     expectKeyData(keyDataList.last,
@@ -771,7 +771,7 @@ void testMain() {
     );
     keyDataList.clear();
 
-    async.elapse(Duration(seconds: 10));
+    async.elapse(const Duration(seconds: 10));
     expect(keyDataList, isEmpty);
 
     converter.handleEvent(keyUpEvent('ScrollLock', 'ScrollLock'));

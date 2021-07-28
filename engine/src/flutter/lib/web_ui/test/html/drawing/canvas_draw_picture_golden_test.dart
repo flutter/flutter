@@ -11,7 +11,7 @@ import 'package:ui/ui.dart';
 
 import '../screenshot.dart';
 
-final Rect region = Rect.fromLTWH(0, 0, 500, 100);
+const Rect region = Rect.fromLTWH(0, 0, 500, 100);
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -94,7 +94,7 @@ Future<void> testMain() async {
       final RecordingCanvas canvas =
       recorder.beginRecording(const Rect.fromLTRB(0, 0, 100, 100));
       canvas.drawPicture(greenRectPicture);
-      builder.addPicture(Offset(10, 10), recorder.endRecording());
+      builder.addPicture(const Offset(10, 10), recorder.endRecording());
 
       await sceneScreenshot(builder, 'canvas_draw_picture_in_picture_rect',
           region: region);
@@ -112,9 +112,9 @@ void _drawTestPicture(SceneBuilder builder, double targetSize, bool clipped) {
   canvas.debugEnforceArbitraryPaint();
   if (clipped) {
     canvas.clipRRect(
-        RRect.fromLTRBR(0, 0, targetSize, targetSize, Radius.circular(4)));
+        RRect.fromLTRBR(0, 0, targetSize, targetSize, const Radius.circular(4)));
   }
-  canvas.drawImageRect(sharedImage!, Rect.fromLTWH(0, 0, 20, 20),
+  canvas.drawImageRect(sharedImage!, const Rect.fromLTWH(0, 0, 20, 20),
       Rect.fromLTWH(0, 0, targetSize, targetSize), makePaint());
   final Picture picture = recorder.endRecording();
   builder.addPicture(
@@ -127,7 +127,7 @@ Picture _drawGreenRectIntoPicture() {
   final EnginePictureRecorder recorder = PictureRecorder() as EnginePictureRecorder;
   final RecordingCanvas canvas =
     recorder.beginRecording(const Rect.fromLTRB(0, 0, 100, 100));
-  canvas.drawRect(Rect.fromLTWH(20, 20, 50, 50),
+  canvas.drawRect(const Rect.fromLTWH(20, 20, 50, 50),
     makePaint()..color = const Color(0xFF00FF00));
   return recorder.endRecording();
 }

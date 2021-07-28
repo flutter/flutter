@@ -39,16 +39,16 @@ void testMain() {
       final CkCanvas canvas = recorder.beginRecording(region);
 
       canvas.drawCircle(
-        ui.Offset(75, 125),
+        const ui.Offset(75, 125),
         50,
-        CkPaint()..color = ui.Color.fromARGB(255, 255, 0, 0),
+        CkPaint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
       );
       final CkPicture redCircle = recorder.endRecording();
 
       builder.addPicture(ui.Offset.zero, redCircle);
 
       // Apply a "greyscale" color filter.
-      builder.pushColorFilter(ui.ColorFilter.matrix(<double>[
+      builder.pushColorFilter(const ui.ColorFilter.matrix(<double>[
         0.2126, 0.7152, 0.0722, 0, 0, //
         0.2126, 0.7152, 0.0722, 0, 0, //
         0.2126, 0.7152, 0.0722, 0, 0, //
@@ -61,9 +61,9 @@ void testMain() {
       final CkCanvas canvas2 = recorder2.beginRecording(region);
 
       canvas2.drawCircle(
-        ui.Offset(425, 125),
+        const ui.Offset(425, 125),
         50,
-        CkPaint()..color = ui.Color.fromARGB(255, 255, 0, 0),
+        CkPaint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
       );
       final CkPicture greyCircle = recorder2.endRecording();
 

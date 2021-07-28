@@ -20,7 +20,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  final Rect region = Rect.fromLTWH(0, 0, 550, 300);
+  const Rect region = Rect.fromLTWH(0, 0, 550, 300);
 
   late SurfaceSceneBuilder builder;
 
@@ -36,7 +36,7 @@ Future<void> testMain() async {
     canvas.drawRect(
       const Rect.fromLTRB(0.0, 0.0, 20.0, 20.0),
       SurfacePaint()
-        ..color = Color.fromARGB(255, 0, 0, 255)
+        ..color = const Color.fromARGB(255, 0, 0, 255)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.0,
     );
@@ -51,7 +51,7 @@ Future<void> testMain() async {
     canvas.drawRect(
       shadowBounds,
       SurfacePaint()
-        ..color = Color.fromARGB(255, 0, 255, 0)
+        ..color = const Color.fromARGB(255, 0, 255, 0)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.0,
     );
@@ -66,7 +66,7 @@ Future<void> testMain() async {
       path: path,
       elevation: elevation,
       shadowColor: _kShadowColor,
-      color: Color.fromARGB(255, 255, 255, 255),
+      color: const Color.fromARGB(255, 255, 255, 255),
     );
     builder.pop(); // physical shape
     _paintShapeOutline();
@@ -121,7 +121,7 @@ Future<void> testMain() async {
       SurfacePaint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1
-        ..color = Color.fromARGB(255, 0, 0, 255),
+        ..color = const Color.fromARGB(255, 0, 0, 255),
     );
     builder.addPicture(Offset.zero, recorder.endRecording());
     _paintShadowBounds(path, elevation);

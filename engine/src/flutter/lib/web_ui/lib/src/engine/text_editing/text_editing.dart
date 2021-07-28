@@ -1379,7 +1379,7 @@ abstract class TextInputCommand {
 
 /// Responds to the 'TextInput.setClient' message.
 class TextInputSetClient extends TextInputCommand {
-  TextInputSetClient({
+  const TextInputSetClient({
     required this.clientId,
     required this.configuration,
   });
@@ -1421,7 +1421,7 @@ DefaultTextEditingStrategy createDefaultTextEditingStrategy(HybridTextEditing te
 
 /// Responds to the 'TextInput.updateConfig' message.
 class TextInputUpdateConfig extends TextInputCommand {
-  TextInputUpdateConfig();
+  const TextInputUpdateConfig();
 
   @override
   void run(HybridTextEditing textEditing) {
@@ -1431,7 +1431,7 @@ class TextInputUpdateConfig extends TextInputCommand {
 
 /// Responds to the 'TextInput.setEditingState' message.
 class TextInputSetEditingState extends TextInputCommand {
-  TextInputSetEditingState({
+  const TextInputSetEditingState({
     required this.state,
   });
 
@@ -1457,7 +1457,7 @@ class TextInputShow extends TextInputCommand {
 
 /// Responds to the 'TextInput.setEditableSizeAndTransform' message.
 class TextInputSetEditableSizeAndTransform extends TextInputCommand {
-  TextInputSetEditableSizeAndTransform({
+  const TextInputSetEditableSizeAndTransform({
     required this.geometry,
   });
 
@@ -1471,7 +1471,7 @@ class TextInputSetEditableSizeAndTransform extends TextInputCommand {
 
 /// Responds to the 'TextInput.setStyle' message.
 class TextInputSetStyle extends TextInputCommand {
-  TextInputSetStyle({
+  const TextInputSetStyle({
     required this.style,
   });
 
@@ -1536,7 +1536,7 @@ class TextInputRequestAutofill extends TextInputCommand {
 }
 
 class TextInputFinishAutofillContext extends TextInputCommand {
-  TextInputFinishAutofillContext({
+  const TextInputFinishAutofillContext({
     required this.saveForm,
   });
 
@@ -1607,7 +1607,7 @@ class TextEditingChannel {
         // field used to flush the command queue. However, delaye applying the
         // configuration because the strategy may not be available yet.
         implementation.configuration = InputConfiguration.fromFrameworkMessage(call.arguments);
-        command = TextInputUpdateConfig();
+        command = const TextInputUpdateConfig();
         break;
 
       case 'TextInput.setEditingState':
@@ -1870,7 +1870,7 @@ class EditableTextStyle {
 /// message from the framework.
 @immutable
 class EditableTextGeometry {
-  EditableTextGeometry({
+  const EditableTextGeometry({
     required this.width,
     required this.height,
     required this.globalTransform,

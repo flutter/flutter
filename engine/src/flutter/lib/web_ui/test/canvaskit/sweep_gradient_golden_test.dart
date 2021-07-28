@@ -39,15 +39,15 @@ void testMain() {
       final CkCanvas canvas = recorder.beginRecording(region);
 
       final CkGradientSweep gradient = CkGradientSweep(
-          ui.Offset(250, 125),
-          <ui.Color>[
+          const ui.Offset(250, 125),
+          const <ui.Color>[
             ui.Color(0xFF4285F4),
             ui.Color(0xFF34A853),
             ui.Color(0xFFFBBC05),
             ui.Color(0xFFEA4335),
             ui.Color(0xFF4285F4),
           ],
-          <double>[
+          const <double>[
             0.0,
             0.25,
             0.5,

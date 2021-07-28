@@ -219,13 +219,13 @@ void _pathOpTests() {
   test('Path.combine test', () {
     final ui.Path path1 = ui.Path();
     expect(path1, isA<CkPath>());
-    path1.addRect(ui.Rect.fromLTRB(0, 0, 10, 10));
-    path1.addOval(ui.Rect.fromLTRB(10, 10, 100, 100));
+    path1.addRect(const ui.Rect.fromLTRB(0, 0, 10, 10));
+    path1.addOval(const ui.Rect.fromLTRB(10, 10, 100, 100));
 
     final ui.Path path2 = ui.Path();
     expect(path2, isA<CkPath>());
-    path2.addRect(ui.Rect.fromLTRB(5, 5, 15, 15));
-    path2.addOval(ui.Rect.fromLTRB(15, 15, 105, 105));
+    path2.addRect(const ui.Rect.fromLTRB(5, 5, 15, 15));
+    path2.addOval(const ui.Rect.fromLTRB(15, 15, 105, 105));
 
     final ui.Path union = ui.Path.combine(ui.PathOperation.union, path1, path2);
     expect(union, isA<CkPath>());
@@ -594,12 +594,12 @@ void _toSkMatrixFromFloat32Tests() {
 
 void _toSkRectTests() {
   test('toSkRect', () {
-    expect(toSkRect(ui.Rect.fromLTRB(1, 2, 3, 4)), <double>[1, 2, 3, 4]);
+    expect(toSkRect(const ui.Rect.fromLTRB(1, 2, 3, 4)), <double>[1, 2, 3, 4]);
   });
 
   test('fromSkRect', () {
     expect(fromSkRect(Float32List.fromList(<double>[1, 2, 3, 4])),
-        ui.Rect.fromLTRB(1, 2, 3, 4));
+        const ui.Rect.fromLTRB(1, 2, 3, 4));
   });
 
   test('toSkRRect', () {
@@ -609,10 +609,10 @@ void _toSkRectTests() {
         2,
         3,
         4,
-        topLeft: ui.Radius.elliptical(5, 6),
-        topRight: ui.Radius.elliptical(7, 8),
-        bottomRight: ui.Radius.elliptical(9, 10),
-        bottomLeft: ui.Radius.elliptical(11, 12),
+        topLeft: const ui.Radius.elliptical(5, 6),
+        topRight: const ui.Radius.elliptical(7, 8),
+        bottomRight: const ui.Radius.elliptical(9, 10),
+        bottomLeft: const ui.Radius.elliptical(11, 12),
       )),
       <double>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
     );
@@ -641,7 +641,7 @@ void _pathTests() {
 
   test('addArc', () {
     path.addArc(
-      toSkRect(ui.Rect.fromLTRB(10, 20, 30, 40)),
+      toSkRect(const ui.Rect.fromLTRB(10, 20, 30, 40)),
       1,
       5,
     );
@@ -649,7 +649,7 @@ void _pathTests() {
 
   test('addOval', () {
     path.addOval(
-      toSkRect(ui.Rect.fromLTRB(10, 20, 30, 40)),
+      toSkRect(const ui.Rect.fromLTRB(10, 20, 30, 40)),
       false,
       1,
     );
@@ -670,8 +670,8 @@ void _pathTests() {
 
   test('addRRect', () {
     final ui.RRect rrect = ui.RRect.fromRectAndRadius(
-      ui.Rect.fromLTRB(10, 10, 20, 20),
-      ui.Radius.circular(3),
+      const ui.Rect.fromLTRB(10, 10, 20, 20),
+      const ui.Radius.circular(3),
     );
     path.addRRect(
       toSkRRect(rrect),
@@ -680,12 +680,12 @@ void _pathTests() {
   });
 
   test('addRect', () {
-    path.addRect(toSkRect(ui.Rect.fromLTRB(1, 2, 3, 4)));
+    path.addRect(toSkRect(const ui.Rect.fromLTRB(1, 2, 3, 4)));
   });
 
   test('arcTo', () {
     path.arcToOval(
-      toSkRect(ui.Rect.fromLTRB(1, 2, 3, 4)),
+      toSkRect(const ui.Rect.fromLTRB(1, 2, 3, 4)),
       5,
       40,
       false,
@@ -800,7 +800,7 @@ void _pathTests() {
     path = _testClosedSkPath();
     path.transform(2, 0, 10, 0, 2, 10, 0, 0, 0);
     final ui.Rect transformedBounds = fromSkRect(path.getBounds());
-    expect(transformedBounds, ui.Rect.fromLTRB(30, 30, 50, 50));
+    expect(transformedBounds, const ui.Rect.fromLTRB(30, 30, 50, 50));
   });
 
   test('SkContourMeasureIter/SkContourMeasure', () {
@@ -835,7 +835,7 @@ void _pathTests() {
     //    |           |
     // 20 +-----------+
     final SkPath segment = measure1.getSegment(5, 15, true);
-    expect(fromSkRect(segment.getBounds()), ui.Rect.fromLTRB(15, 10, 20, 15));
+    expect(fromSkRect(segment.getBounds()), const ui.Rect.fromLTRB(15, 10, 20, 15));
 
     final SkContourMeasure? measure2 = iter.next();
     expect(measure2, isNull);
@@ -881,7 +881,7 @@ void _canvasTests() {
   setUp(() {
     recorder = SkPictureRecorder();
     canvas =
-        recorder.beginRecording(toSkRect(ui.Rect.fromLTRB(0, 0, 100, 100)));
+        recorder.beginRecording(toSkRect(const ui.Rect.fromLTRB(0, 0, 100, 100)));
   });
 
   tearDown(() {
@@ -903,7 +903,7 @@ void _canvasTests() {
   test('saveLayer', () {
     canvas.saveLayer(
       SkPaint(),
-      toSkRect(ui.Rect.fromLTRB(0, 0, 100, 100)),
+      toSkRect(const ui.Rect.fromLTRB(0, 0, 100, 100)),
       null,
       null,
     );
@@ -916,7 +916,7 @@ void _canvasTests() {
   test('saveLayer with filter', () {
     canvas.saveLayer(
       SkPaint(),
-      toSkRect(ui.Rect.fromLTRB(0, 0, 100, 100)),
+      toSkRect(const ui.Rect.fromLTRB(0, 0, 100, 100)),
       canvasKit.ImageFilter.MakeBlur(1, 2, canvasKit.TileMode.Repeat, null),
       0,
     );
@@ -1442,28 +1442,28 @@ void _paragraphTests() {
 
   test('TextHeightBehavior', () {
     expect(
-      toSkTextHeightBehavior(ui.TextHeightBehavior(
+      toSkTextHeightBehavior(const ui.TextHeightBehavior(
         applyHeightToFirstAscent: true,
         applyHeightToLastDescent: true,
       )),
       canvasKit.TextHeightBehavior.All,
     );
     expect(
-      toSkTextHeightBehavior(ui.TextHeightBehavior(
+      toSkTextHeightBehavior(const ui.TextHeightBehavior(
         applyHeightToFirstAscent: false,
         applyHeightToLastDescent: true,
       )),
       canvasKit.TextHeightBehavior.DisableFirstAscent,
     );
     expect(
-      toSkTextHeightBehavior(ui.TextHeightBehavior(
+      toSkTextHeightBehavior(const ui.TextHeightBehavior(
         applyHeightToFirstAscent: true,
         applyHeightToLastDescent: false,
       )),
       canvasKit.TextHeightBehavior.DisableLastDescent,
     );
     expect(
-      toSkTextHeightBehavior(ui.TextHeightBehavior(
+      toSkTextHeightBehavior(const ui.TextHeightBehavior(
         applyHeightToFirstAscent: false,
         applyHeightToLastDescent: false,
       )),

@@ -13,28 +13,13 @@ analyzer:
 
 linter:
   rules:
-    library_names: false
-    library_prefixes: false
-    list_remove_unrelated_type: false
-    no_adjacent_strings_in_list: false
-    no_duplicate_case_values: false
-    non_constant_identifier_names: false
-    overridden_fields: false
     package_api_docs: false
-    package_names: false
-    prefer_adjacent_string_concatenation: false
-    prefer_conditional_assignment: false
-    prefer_const_constructors: false
-    prefer_const_constructors_in_immutables: false
     prefer_foreach: false
     prefer_generic_function_type_aliases: false
     prefer_initializing_formals: false
     prefer_single_quotes: false
     prefer_typing_uninitialized_variables: false
     public_member_api_docs: false
-    recursive_getters: false
-    slash_for_doc_comments: false
-    sort_unnamed_constructors_first: false
     flutter_style_todos: false
 
     # We have some legitimate use-cases for this (preserve tear-off identity)

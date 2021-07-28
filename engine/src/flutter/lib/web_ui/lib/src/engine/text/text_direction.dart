@@ -13,39 +13,39 @@ import 'unicode_range.dart';
 final UnicodePropertyLookup<ui.TextDirection?> _textDirectionLookup = UnicodePropertyLookup<ui.TextDirection?>(
   <UnicodeRange<ui.TextDirection>>[
     // LTR
-    UnicodeRange<ui.TextDirection>(kChar_A, kChar_Z, ui.TextDirection.ltr),
-    UnicodeRange<ui.TextDirection>(kChar_a, kChar_z, ui.TextDirection.ltr),
-    UnicodeRange<ui.TextDirection>(0x00C0, 0x00D6, ui.TextDirection.ltr),
-    UnicodeRange<ui.TextDirection>(0x00D8, 0x00F6, ui.TextDirection.ltr),
-    UnicodeRange<ui.TextDirection>(0x00F8, 0x02B8, ui.TextDirection.ltr),
-    UnicodeRange<ui.TextDirection>(0x0300, 0x0590, ui.TextDirection.ltr),
+    const UnicodeRange<ui.TextDirection>(kChar_A, kChar_Z, ui.TextDirection.ltr),
+    const UnicodeRange<ui.TextDirection>(kChar_a, kChar_z, ui.TextDirection.ltr),
+    const UnicodeRange<ui.TextDirection>(0x00C0, 0x00D6, ui.TextDirection.ltr),
+    const UnicodeRange<ui.TextDirection>(0x00D8, 0x00F6, ui.TextDirection.ltr),
+    const UnicodeRange<ui.TextDirection>(0x00F8, 0x02B8, ui.TextDirection.ltr),
+    const UnicodeRange<ui.TextDirection>(0x0300, 0x0590, ui.TextDirection.ltr),
     // RTL
-    UnicodeRange<ui.TextDirection>(0x0591, 0x06EF, ui.TextDirection.rtl),
-    UnicodeRange<ui.TextDirection>(0x06FA, 0x08FF, ui.TextDirection.rtl),
+    const UnicodeRange<ui.TextDirection>(0x0591, 0x06EF, ui.TextDirection.rtl),
+    const UnicodeRange<ui.TextDirection>(0x06FA, 0x08FF, ui.TextDirection.rtl),
     // LTR
-    UnicodeRange<ui.TextDirection>(0x0900, 0x1FFF, ui.TextDirection.ltr),
-    UnicodeRange<ui.TextDirection>(0x200E, 0x200E, ui.TextDirection.ltr),
+    const UnicodeRange<ui.TextDirection>(0x0900, 0x1FFF, ui.TextDirection.ltr),
+    const UnicodeRange<ui.TextDirection>(0x200E, 0x200E, ui.TextDirection.ltr),
     // RTL
-    UnicodeRange<ui.TextDirection>(0x200F, 0x200F, ui.TextDirection.rtl),
+    const UnicodeRange<ui.TextDirection>(0x200F, 0x200F, ui.TextDirection.rtl),
     // LTR
-    UnicodeRange<ui.TextDirection>(0x2C00, 0xD801, ui.TextDirection.ltr),
+    const UnicodeRange<ui.TextDirection>(0x2C00, 0xD801, ui.TextDirection.ltr),
     // RTL
-    UnicodeRange<ui.TextDirection>(0xD802, 0xD803, ui.TextDirection.rtl),
+    const UnicodeRange<ui.TextDirection>(0xD802, 0xD803, ui.TextDirection.rtl),
     // LTR
-    UnicodeRange<ui.TextDirection>(0xD804, 0xD839, ui.TextDirection.ltr),
+    const UnicodeRange<ui.TextDirection>(0xD804, 0xD839, ui.TextDirection.ltr),
     // RTL
-    UnicodeRange<ui.TextDirection>(0xD83A, 0xD83B, ui.TextDirection.rtl),
+    const UnicodeRange<ui.TextDirection>(0xD83A, 0xD83B, ui.TextDirection.rtl),
     // LTR
-    UnicodeRange<ui.TextDirection>(0xD83C, 0xDBFF, ui.TextDirection.ltr),
-    UnicodeRange<ui.TextDirection>(0xF900, 0xFB1C, ui.TextDirection.ltr),
+    const UnicodeRange<ui.TextDirection>(0xD83C, 0xDBFF, ui.TextDirection.ltr),
+    const UnicodeRange<ui.TextDirection>(0xF900, 0xFB1C, ui.TextDirection.ltr),
     // RTL
-    UnicodeRange<ui.TextDirection>(0xFB1D, 0xFDFF, ui.TextDirection.rtl),
+    const UnicodeRange<ui.TextDirection>(0xFB1D, 0xFDFF, ui.TextDirection.rtl),
     // LTR
-    UnicodeRange<ui.TextDirection>(0xFE00, 0xFE6F, ui.TextDirection.ltr),
+    const UnicodeRange<ui.TextDirection>(0xFE00, 0xFE6F, ui.TextDirection.ltr),
     // RTL
-    UnicodeRange<ui.TextDirection>(0xFE70, 0xFEFC, ui.TextDirection.rtl),
+    const UnicodeRange<ui.TextDirection>(0xFE70, 0xFEFC, ui.TextDirection.rtl),
     // LTR
-    UnicodeRange<ui.TextDirection>(0xFEFD, 0xFFFF, ui.TextDirection.ltr),
+    const UnicodeRange<ui.TextDirection>(0xFEFD, 0xFFFF, ui.TextDirection.ltr),
   ],
   null,
 );

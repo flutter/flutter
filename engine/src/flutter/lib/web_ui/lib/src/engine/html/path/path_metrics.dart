@@ -604,7 +604,7 @@ class SurfacePathMetric implements ui.PathMetric {
 ui.Offset _normalizeSlope(double dx, double dy) {
   final double length = math.sqrt(dx * dx + dy * dy);
   return length < kEpsilon
-      ? ui.Offset(0.0, 0.0)
+      ? const ui.Offset(0.0, 0.0)
       : ui.Offset(dx / length, dy / length);
 }
 

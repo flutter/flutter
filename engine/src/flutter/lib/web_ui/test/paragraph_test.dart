@@ -161,33 +161,33 @@ Future<void> testMain() async {
 
     // At the beginning of the line.
     expect(
-      paragraph.getPositionForOffset(Offset(0, 5)),
-      TextPosition(offset: 0, affinity: TextAffinity.downstream),
+      paragraph.getPositionForOffset(const Offset(0, 5)),
+      const TextPosition(offset: 0, affinity: TextAffinity.downstream),
     );
     // Below the line.
     expect(
-      paragraph.getPositionForOffset(Offset(0, 12)),
-      TextPosition(offset: 8, affinity: TextAffinity.upstream),
+      paragraph.getPositionForOffset(const Offset(0, 12)),
+      const TextPosition(offset: 8, affinity: TextAffinity.upstream),
     );
     // Above the line.
     expect(
-      paragraph.getPositionForOffset(Offset(0, -5)),
-      TextPosition(offset: 0, affinity: TextAffinity.downstream),
+      paragraph.getPositionForOffset(const Offset(0, -5)),
+      const TextPosition(offset: 0, affinity: TextAffinity.downstream),
     );
     // At the end of the line.
     expect(
-      paragraph.getPositionForOffset(Offset(80, 5)),
-      TextPosition(offset: 8, affinity: TextAffinity.upstream),
+      paragraph.getPositionForOffset(const Offset(80, 5)),
+      const TextPosition(offset: 8, affinity: TextAffinity.upstream),
     );
     // On the left side of "b".
     expect(
-      paragraph.getPositionForOffset(Offset(14, 5)),
-      TextPosition(offset: 1, affinity: TextAffinity.downstream),
+      paragraph.getPositionForOffset(const Offset(14, 5)),
+      const TextPosition(offset: 1, affinity: TextAffinity.downstream),
     );
     // On the right side of "b".
     expect(
-      paragraph.getPositionForOffset(Offset(16, 5)),
-      TextPosition(offset: 2, affinity: TextAffinity.upstream),
+      paragraph.getPositionForOffset(const Offset(16, 5)),
+      const TextPosition(offset: 2, affinity: TextAffinity.upstream),
     );
   });
 
@@ -215,79 +215,79 @@ Future<void> testMain() async {
 
     // At the beginning of the first line.
     expect(
-      paragraph.getPositionForOffset(Offset(0, 5)),
-      TextPosition(offset: 0, affinity: TextAffinity.downstream),
+      paragraph.getPositionForOffset(const Offset(0, 5)),
+      const TextPosition(offset: 0, affinity: TextAffinity.downstream),
     );
     // Above the first line.
     expect(
-      paragraph.getPositionForOffset(Offset(0, -15)),
-      TextPosition(offset: 0, affinity: TextAffinity.downstream),
+      paragraph.getPositionForOffset(const Offset(0, -15)),
+      const TextPosition(offset: 0, affinity: TextAffinity.downstream),
     );
     // At the end of the first line.
     expect(
-      paragraph.getPositionForOffset(Offset(50, 5)),
-      TextPosition(offset: 4, affinity: TextAffinity.upstream),
+      paragraph.getPositionForOffset(const Offset(50, 5)),
+      const TextPosition(offset: 4, affinity: TextAffinity.upstream),
     );
     // On the left side of "b" in the first line.
     expect(
-      paragraph.getPositionForOffset(Offset(14, 5)),
-      TextPosition(offset: 1, affinity: TextAffinity.downstream),
+      paragraph.getPositionForOffset(const Offset(14, 5)),
+      const TextPosition(offset: 1, affinity: TextAffinity.downstream),
     );
     // On the right side of "b" in the first line.
     expect(
-      paragraph.getPositionForOffset(Offset(16, 5)),
-      TextPosition(offset: 2, affinity: TextAffinity.upstream),
+      paragraph.getPositionForOffset(const Offset(16, 5)),
+      const TextPosition(offset: 2, affinity: TextAffinity.upstream),
     );
 
     // Second line: "abcdefg\n"
 
     // At the beginning of the second line.
     expect(
-      paragraph.getPositionForOffset(Offset(0, 15)),
-      TextPosition(offset: 5, affinity: TextAffinity.downstream),
+      paragraph.getPositionForOffset(const Offset(0, 15)),
+      const TextPosition(offset: 5, affinity: TextAffinity.downstream),
     );
     // At the end of the second line.
     expect(
-      paragraph.getPositionForOffset(Offset(100, 15)),
-      TextPosition(offset: 12, affinity: TextAffinity.upstream),
+      paragraph.getPositionForOffset(const Offset(100, 15)),
+      const TextPosition(offset: 12, affinity: TextAffinity.upstream),
     );
     // On the left side of "e" in the second line.
     expect(
-      paragraph.getPositionForOffset(Offset(44, 15)),
-      TextPosition(offset: 9, affinity: TextAffinity.downstream),
+      paragraph.getPositionForOffset(const Offset(44, 15)),
+      const TextPosition(offset: 9, affinity: TextAffinity.downstream),
     );
     // On the right side of "e" in the second line.
     expect(
-      paragraph.getPositionForOffset(Offset(46, 15)),
-      TextPosition(offset: 10, affinity: TextAffinity.upstream),
+      paragraph.getPositionForOffset(const Offset(46, 15)),
+      const TextPosition(offset: 10, affinity: TextAffinity.upstream),
     );
 
     // Last (third) line: "ab"
 
     // At the beginning of the last line.
     expect(
-      paragraph.getPositionForOffset(Offset(0, 25)),
-      TextPosition(offset: 13, affinity: TextAffinity.downstream),
+      paragraph.getPositionForOffset(const Offset(0, 25)),
+      const TextPosition(offset: 13, affinity: TextAffinity.downstream),
     );
     // At the end of the last line.
     expect(
-      paragraph.getPositionForOffset(Offset(100, 25)),
-      TextPosition(offset: 15, affinity: TextAffinity.upstream),
+      paragraph.getPositionForOffset(const Offset(100, 25)),
+      const TextPosition(offset: 15, affinity: TextAffinity.upstream),
     );
     // Below the last line.
     expect(
-      paragraph.getPositionForOffset(Offset(0, 32)),
-      TextPosition(offset: 15, affinity: TextAffinity.upstream),
+      paragraph.getPositionForOffset(const Offset(0, 32)),
+      const TextPosition(offset: 15, affinity: TextAffinity.upstream),
     );
     // On the left side of "b" in the last line.
     expect(
-      paragraph.getPositionForOffset(Offset(12, 25)),
-      TextPosition(offset: 14, affinity: TextAffinity.downstream),
+      paragraph.getPositionForOffset(const Offset(12, 25)),
+      const TextPosition(offset: 14, affinity: TextAffinity.downstream),
     );
     // On the right side of "a" in the last line.
     expect(
-      paragraph.getPositionForOffset(Offset(9, 25)),
-      TextPosition(offset: 14, affinity: TextAffinity.upstream),
+      paragraph.getPositionForOffset(const Offset(9, 25)),
+      const TextPosition(offset: 14, affinity: TextAffinity.upstream),
     );
 
     TextMeasurementService.clearCache();
@@ -318,85 +318,85 @@ Future<void> testMain() async {
 
     // At the beginning of the first line.
     expect(
-      paragraph.getPositionForOffset(Offset(0, 5)),
-      TextPosition(offset: 0, affinity: TextAffinity.downstream),
+      paragraph.getPositionForOffset(const Offset(0, 5)),
+      const TextPosition(offset: 0, affinity: TextAffinity.downstream),
     );
     // Above the first line.
     expect(
-      paragraph.getPositionForOffset(Offset(0, -15)),
-      TextPosition(offset: 0, affinity: TextAffinity.downstream),
+      paragraph.getPositionForOffset(const Offset(0, -15)),
+      const TextPosition(offset: 0, affinity: TextAffinity.downstream),
     );
     // At the end of the first line.
     expect(
-      paragraph.getPositionForOffset(Offset(100, 5)),
-      TextPosition(offset: 4, affinity: TextAffinity.upstream),
+      paragraph.getPositionForOffset(const Offset(100, 5)),
+      const TextPosition(offset: 4, affinity: TextAffinity.upstream),
     );
     // On the left side of "b" in the first line.
     expect(
       // The line is centered so it's shifted to the right by "30.0px".
-      paragraph.getPositionForOffset(Offset(30.0 + 14, 5)),
-      TextPosition(offset: 1, affinity: TextAffinity.downstream),
+      paragraph.getPositionForOffset(const Offset(30.0 + 14, 5)),
+      const TextPosition(offset: 1, affinity: TextAffinity.downstream),
     );
     // On the right side of "b" in the first line.
     expect(
       // The line is centered so it's shifted to the right by "30.0px".
-      paragraph.getPositionForOffset(Offset(30.0 + 16, 5)),
-      TextPosition(offset: 2, affinity: TextAffinity.upstream),
+      paragraph.getPositionForOffset(const Offset(30.0 + 16, 5)),
+      const TextPosition(offset: 2, affinity: TextAffinity.upstream),
     );
 
     // Second line: "abcdefg\n"
 
     // At the beginning of the second line.
     expect(
-      paragraph.getPositionForOffset(Offset(0, 15)),
-      TextPosition(offset: 5, affinity: TextAffinity.downstream),
+      paragraph.getPositionForOffset(const Offset(0, 15)),
+      const TextPosition(offset: 5, affinity: TextAffinity.downstream),
     );
     // At the end of the second line.
     expect(
-      paragraph.getPositionForOffset(Offset(100, 15)),
-      TextPosition(offset: 12, affinity: TextAffinity.upstream),
+      paragraph.getPositionForOffset(const Offset(100, 15)),
+      const TextPosition(offset: 12, affinity: TextAffinity.upstream),
     );
     // On the left side of "e" in the second line.
     expect(
       // The line is centered so it's shifted to the right by "15.0px".
-      paragraph.getPositionForOffset(Offset(15.0 + 44, 15)),
-      TextPosition(offset: 9, affinity: TextAffinity.downstream),
+      paragraph.getPositionForOffset(const Offset(15.0 + 44, 15)),
+      const TextPosition(offset: 9, affinity: TextAffinity.downstream),
     );
     // On the right side of "e" in the second line.
     expect(
       // The line is centered so it's shifted to the right by "15.0px".
-      paragraph.getPositionForOffset(Offset(15.0 + 46, 15)),
-      TextPosition(offset: 10, affinity: TextAffinity.upstream),
+      paragraph.getPositionForOffset(const Offset(15.0 + 46, 15)),
+      const TextPosition(offset: 10, affinity: TextAffinity.upstream),
     );
 
     // Last (third) line: "ab"
 
     // At the beginning of the last line.
     expect(
-      paragraph.getPositionForOffset(Offset(0, 25)),
-      TextPosition(offset: 13, affinity: TextAffinity.downstream),
+      paragraph.getPositionForOffset(const Offset(0, 25)),
+      const TextPosition(offset: 13, affinity: TextAffinity.downstream),
     );
     // At the end of the last line.
     expect(
-      paragraph.getPositionForOffset(Offset(100, 25)),
-      TextPosition(offset: 15, affinity: TextAffinity.upstream),
+      paragraph.getPositionForOffset(const Offset(100, 25)),
+      const TextPosition(offset: 15, affinity: TextAffinity.upstream),
     );
     // Below the last line.
     expect(
-      paragraph.getPositionForOffset(Offset(0, 32)),
-      TextPosition(offset: 15, affinity: TextAffinity.upstream),
+      paragraph.getPositionForOffset(const Offset(0, 32)),
+      const TextPosition(offset: 15, affinity: TextAffinity.upstream),
     );
     // On the left side of "b" in the last line.
     expect(
       // The line is centered so it's shifted to the right by "40.0px".
-      paragraph.getPositionForOffset(Offset(40.0 + 12, 25)),
-      TextPosition(offset: 14, affinity: TextAffinity.downstream),
+      paragraph.getPositionForOffset(const Offset(40.0 + 12, 25)),
+      const TextPosition(offset: 14, affinity: TextAffinity.downstream),
     );
     // On the right side of "a" in the last line.
     expect(
       // The line is centered so it's shifted to the right by "40.0px".
-      paragraph.getPositionForOffset(Offset(40.0 + 9, 25)),
-      TextPosition(offset: 14, affinity: TextAffinity.upstream),
+      paragraph.getPositionForOffset(const Offset(40.0 + 9, 25)),
+      const TextPosition(offset: 14, affinity: TextAffinity.upstream),
     );
 
     TextMeasurementService.clearCache();
@@ -410,34 +410,34 @@ Future<void> testMain() async {
     final Paragraph paragraph = builder.build();
 
     const TextRange loremRange = TextRange(start: 0, end: 5);
-    expect(paragraph.getWordBoundary(TextPosition(offset: 0)), loremRange);
-    expect(paragraph.getWordBoundary(TextPosition(offset: 1)), loremRange);
-    expect(paragraph.getWordBoundary(TextPosition(offset: 2)), loremRange);
-    expect(paragraph.getWordBoundary(TextPosition(offset: 3)), loremRange);
-    expect(paragraph.getWordBoundary(TextPosition(offset: 4)), loremRange);
+    expect(paragraph.getWordBoundary(const TextPosition(offset: 0)), loremRange);
+    expect(paragraph.getWordBoundary(const TextPosition(offset: 1)), loremRange);
+    expect(paragraph.getWordBoundary(const TextPosition(offset: 2)), loremRange);
+    expect(paragraph.getWordBoundary(const TextPosition(offset: 3)), loremRange);
+    expect(paragraph.getWordBoundary(const TextPosition(offset: 4)), loremRange);
 
     const TextRange firstSpace = TextRange(start: 5, end: 6);
-    expect(paragraph.getWordBoundary(TextPosition(offset: 5)), firstSpace);
+    expect(paragraph.getWordBoundary(const TextPosition(offset: 5)), firstSpace);
 
     const TextRange ipsumRange = TextRange(start: 6, end: 11);
-    expect(paragraph.getWordBoundary(TextPosition(offset: 6)), ipsumRange);
-    expect(paragraph.getWordBoundary(TextPosition(offset: 7)), ipsumRange);
-    expect(paragraph.getWordBoundary(TextPosition(offset: 8)), ipsumRange);
-    expect(paragraph.getWordBoundary(TextPosition(offset: 9)), ipsumRange);
-    expect(paragraph.getWordBoundary(TextPosition(offset: 10)), ipsumRange);
+    expect(paragraph.getWordBoundary(const TextPosition(offset: 6)), ipsumRange);
+    expect(paragraph.getWordBoundary(const TextPosition(offset: 7)), ipsumRange);
+    expect(paragraph.getWordBoundary(const TextPosition(offset: 8)), ipsumRange);
+    expect(paragraph.getWordBoundary(const TextPosition(offset: 9)), ipsumRange);
+    expect(paragraph.getWordBoundary(const TextPosition(offset: 10)), ipsumRange);
 
     const TextRange secondSpace = TextRange(start: 11, end: 12);
-    expect(paragraph.getWordBoundary(TextPosition(offset: 11)), secondSpace);
+    expect(paragraph.getWordBoundary(const TextPosition(offset: 11)), secondSpace);
 
     const TextRange dolorRange = TextRange(start: 12, end: 17);
-    expect(paragraph.getWordBoundary(TextPosition(offset: 12)), dolorRange);
-    expect(paragraph.getWordBoundary(TextPosition(offset: 13)), dolorRange);
-    expect(paragraph.getWordBoundary(TextPosition(offset: 14)), dolorRange);
-    expect(paragraph.getWordBoundary(TextPosition(offset: 15)), dolorRange);
-    expect(paragraph.getWordBoundary(TextPosition(offset: 16)), dolorRange);
+    expect(paragraph.getWordBoundary(const TextPosition(offset: 12)), dolorRange);
+    expect(paragraph.getWordBoundary(const TextPosition(offset: 13)), dolorRange);
+    expect(paragraph.getWordBoundary(const TextPosition(offset: 14)), dolorRange);
+    expect(paragraph.getWordBoundary(const TextPosition(offset: 15)), dolorRange);
+    expect(paragraph.getWordBoundary(const TextPosition(offset: 16)), dolorRange);
 
     const TextRange endRange = TextRange(start: 17, end: 17);
-    expect(paragraph.getWordBoundary(TextPosition(offset: 17)), endRange);
+    expect(paragraph.getWordBoundary(const TextPosition(offset: 17)), endRange);
   });
 
   testEachMeasurement('getBoxesForRange returns a box', () {
@@ -530,35 +530,35 @@ Future<void> testMain() async {
     // The range "ab" in the first line.
     expect(
       paragraph.getBoxesForRange(0, 2),
-      <TextBox>[
+      const <TextBox>[
         TextBox.fromLTRBD(0.0, 0.0, 20.0, 10.0, TextDirection.ltr),
       ],
     );
     // The range "bc" in the first line.
     expect(
       paragraph.getBoxesForRange(1, 3),
-      <TextBox>[
+      const <TextBox>[
         TextBox.fromLTRBD(10.0, 0.0, 30.0, 10.0, TextDirection.ltr),
       ],
     );
     // The range "d" in the first line.
     expect(
       paragraph.getBoxesForRange(3, 4),
-      <TextBox>[
+      const <TextBox>[
         TextBox.fromLTRBD(30.0, 0.0, 40.0, 10.0, TextDirection.ltr),
       ],
     );
     // The range "\n" in the first line.
     expect(
       paragraph.getBoxesForRange(4, 5),
-      <TextBox>[
+      const <TextBox>[
         TextBox.fromLTRBD(40.0, 0.0, 40.0, 10.0, TextDirection.ltr),
       ],
     );
     // The range "cd\n" in the first line.
     expect(
       paragraph.getBoxesForRange(2, 5),
-      <TextBox>[
+      const <TextBox>[
         TextBox.fromLTRBD(20.0, 0.0, 40.0, 10.0, TextDirection.ltr),
       ],
     );
@@ -578,21 +578,21 @@ Future<void> testMain() async {
     // The range "efg" in the second line.
     expect(
       paragraph.getBoxesForRange(9, 12),
-      <TextBox>[
+      const <TextBox>[
         TextBox.fromLTRBD(40.0, 10.0, 70.0, 20.0, TextDirection.ltr),
       ],
     );
     // The range "bcde" in the second line.
     expect(
       paragraph.getBoxesForRange(6, 10),
-      <TextBox>[
+      const <TextBox>[
         TextBox.fromLTRBD(10.0, 10.0, 50.0, 20.0, TextDirection.ltr),
       ],
     );
     // The range "fg\n" in the second line.
     expect(
       paragraph.getBoxesForRange(10, 13),
-      <TextBox>[
+      const <TextBox>[
         TextBox.fromLTRBD(50.0, 10.0, 70.0, 20.0, TextDirection.ltr),
       ],
     );
@@ -612,14 +612,14 @@ Future<void> testMain() async {
     // The range "a" in the last line.
     expect(
       paragraph.getBoxesForRange(14, 15),
-      <TextBox>[
+      const <TextBox>[
         TextBox.fromLTRBD(10.0, 20.0, 20.0, 30.0, TextDirection.ltr),
       ],
     );
     // The range "ab" in the last line.
     expect(
       paragraph.getBoxesForRange(13, 15),
-      <TextBox>[
+      const <TextBox>[
         TextBox.fromLTRBD(0.0, 20.0, 20.0, 30.0, TextDirection.ltr),
       ],
     );
@@ -630,7 +630,7 @@ Future<void> testMain() async {
     // The range "cd\nabc".
     expect(
       paragraph.getBoxesForRange(2, 8),
-      <TextBox>[
+      const <TextBox>[
         TextBox.fromLTRBD(20.0, 0.0, 40.0, 10.0, TextDirection.ltr),
         TextBox.fromLTRBD(0.0, 10.0, 30.0, 20.0, TextDirection.ltr),
       ],
@@ -639,7 +639,7 @@ Future<void> testMain() async {
     // The range "\nabcd".
     expect(
       paragraph.getBoxesForRange(4, 9),
-      <TextBox>[
+      const <TextBox>[
         TextBox.fromLTRBD(40.0, 0.0, 40.0, 10.0, TextDirection.ltr),
         TextBox.fromLTRBD(0.0, 10.0, 40.0, 20.0, TextDirection.ltr),
       ],
@@ -648,7 +648,7 @@ Future<void> testMain() async {
     // The range "d\nabcdefg\na".
     expect(
       paragraph.getBoxesForRange(3, 14),
-      <TextBox>[
+      const <TextBox>[
         TextBox.fromLTRBD(30.0, 0.0, 40.0, 10.0, TextDirection.ltr),
         TextBox.fromLTRBD(0.0, 10.0, 70.0, 20.0, TextDirection.ltr),
         TextBox.fromLTRBD(0.0, 20.0, 10.0, 30.0, TextDirection.ltr),
@@ -658,7 +658,7 @@ Future<void> testMain() async {
     // The range "abcd\nabcdefg\n".
     expect(
       paragraph.getBoxesForRange(0, 13),
-      <TextBox>[
+      const <TextBox>[
         TextBox.fromLTRBD(0.0, 0.0, 40.0, 10.0, TextDirection.ltr),
         TextBox.fromLTRBD(0.0, 10.0, 70.0, 20.0, TextDirection.ltr),
       ],
@@ -667,7 +667,7 @@ Future<void> testMain() async {
     // The range "abcd\nabcdefg\nab".
     expect(
       paragraph.getBoxesForRange(0, 15),
-      <TextBox>[
+      const <TextBox>[
         TextBox.fromLTRBD(0.0, 0.0, 40.0, 10.0, TextDirection.ltr),
         TextBox.fromLTRBD(0.0, 10.0, 70.0, 20.0, TextDirection.ltr),
         TextBox.fromLTRBD(0.0, 20.0, 20.0, 30.0, TextDirection.ltr),
@@ -710,35 +710,35 @@ Future<void> testMain() async {
     // The range "ab" in the first line.
     expect(
       paragraph.getBoxesForRange(0, 2),
-      <TextBox>[
+      const <TextBox>[
         TextBox.fromLTRBD(0.0, 0.0, 20.0, 10.0, TextDirection.ltr),
       ],
     );
     // The range "bc" in the first line.
     expect(
       paragraph.getBoxesForRange(1, 3),
-      <TextBox>[
+      const <TextBox>[
         TextBox.fromLTRBD(10.0, 0.0, 30.0, 10.0, TextDirection.ltr),
       ],
     );
     // The range "d" in the first line.
     expect(
       paragraph.getBoxesForRange(3, 4),
-      <TextBox>[
+      const <TextBox>[
         TextBox.fromLTRBD(30.0, 0.0, 40.0, 10.0, TextDirection.ltr),
       ],
     );
     // The range "\n" in the first line.
     expect(
       paragraph.getBoxesForRange(4, 5),
-      <TextBox>[
+      const <TextBox>[
         TextBox.fromLTRBD(40.0, 0.0, 40.0, 10.0, TextDirection.ltr),
       ],
     );
     // The range "cd\n" in the first line.
     expect(
       paragraph.getBoxesForRange(2, 5),
-      <TextBox>[
+      const <TextBox>[
         TextBox.fromLTRBD(20.0, 0.0, 40.0, 10.0, TextDirection.ltr),
       ],
     );
@@ -758,21 +758,21 @@ Future<void> testMain() async {
     // The range "efg" in the second line.
     expect(
       paragraph.getBoxesForRange(9, 12),
-      <TextBox>[
+      const <TextBox>[
         TextBox.fromLTRBD(40.0, 10.0, 70.0, 20.0, TextDirection.ltr),
       ],
     );
     // The range "bcde" in the second line.
     expect(
       paragraph.getBoxesForRange(6, 10),
-      <TextBox>[
+      const <TextBox>[
         TextBox.fromLTRBD(10.0, 10.0, 50.0, 20.0, TextDirection.ltr),
       ],
     );
     // The range "fg\n" in the second line.
     expect(
       paragraph.getBoxesForRange(10, 13),
-      <TextBox>[
+      const <TextBox>[
         TextBox.fromLTRBD(50.0, 10.0, 70.0, 20.0, TextDirection.ltr),
       ],
     );
@@ -806,7 +806,7 @@ Future<void> testMain() async {
     // The range "cd\nabc".
     expect(
       paragraph.getBoxesForRange(2, 8),
-      <TextBox>[
+      const <TextBox>[
         TextBox.fromLTRBD(20.0, 0.0, 40.0, 10.0, TextDirection.ltr),
         TextBox.fromLTRBD(0.0, 10.0, 30.0, 20.0, TextDirection.ltr),
       ],
@@ -815,7 +815,7 @@ Future<void> testMain() async {
     // The range "\nabcd".
     expect(
       paragraph.getBoxesForRange(4, 9),
-      <TextBox>[
+      const <TextBox>[
         TextBox.fromLTRBD(40.0, 0.0, 40.0, 10.0, TextDirection.ltr),
         TextBox.fromLTRBD(0.0, 10.0, 40.0, 20.0, TextDirection.ltr),
       ],
@@ -824,7 +824,7 @@ Future<void> testMain() async {
     // The range "d\nabcdefg\na".
     expect(
       paragraph.getBoxesForRange(3, 14),
-      <TextBox>[
+      const <TextBox>[
         TextBox.fromLTRBD(30.0, 0.0, 40.0, 10.0, TextDirection.ltr),
         TextBox.fromLTRBD(0.0, 10.0, 70.0, 20.0, TextDirection.ltr),
       ],
@@ -833,7 +833,7 @@ Future<void> testMain() async {
     // The range "abcd\nabcdefg\n".
     expect(
       paragraph.getBoxesForRange(0, 13),
-      <TextBox>[
+      const <TextBox>[
         TextBox.fromLTRBD(0.0, 0.0, 40.0, 10.0, TextDirection.ltr),
         TextBox.fromLTRBD(0.0, 10.0, 70.0, 20.0, TextDirection.ltr),
       ],
@@ -842,7 +842,7 @@ Future<void> testMain() async {
     // The range "abcd\nabcdefg\nab".
     expect(
       paragraph.getBoxesForRange(0, 15),
-      <TextBox>[
+      const <TextBox>[
         TextBox.fromLTRBD(0.0, 0.0, 40.0, 10.0, TextDirection.ltr),
         TextBox.fromLTRBD(0.0, 10.0, 70.0, 20.0, TextDirection.ltr),
       ],
@@ -862,7 +862,7 @@ Future<void> testMain() async {
     paragraph.layout(const ParagraphConstraints(width: double.infinity));
     expect(
       paragraph.getBoxesForRange(0, text.length),
-      <TextBox>[
+      const <TextBox>[
         TextBox.fromLTRBD(0.0, 0.0, 120.0, 10.0, TextDirection.ltr),
       ],
     );
@@ -881,7 +881,7 @@ Future<void> testMain() async {
     paragraph.layout(const ParagraphConstraints(width: double.infinity));
     expect(
       paragraph.getBoxesForRange(0, text.length),
-      <TextBox>[
+      const <TextBox>[
         TextBox.fromLTRBD(0.0, 0.0, 40.0, 10.0, TextDirection.ltr),
         TextBox.fromLTRBD(0.0, 10.0, 70.0, 20.0, TextDirection.ltr),
         TextBox.fromLTRBD(0.0, 20.0, 30.0, 30.0, TextDirection.ltr),
@@ -926,7 +926,7 @@ Future<void> testMain() async {
     for (int i = 0; i < 15; i++) {
       expect(
         paragraph.getLineBoundary(TextPosition(offset: i)),
-        TextRange(start: 0, end: 15),
+        const TextRange(start: 0, end: 15),
         reason: 'failed at offset $i',
       );
     }
@@ -955,7 +955,7 @@ Future<void> testMain() async {
     for (int i = 0; i < 11; i++) {
       expect(
         paragraph.getLineBoundary(TextPosition(offset: i)),
-        TextRange(start: 0, end: 11),
+        const TextRange(start: 0, end: 11),
         reason: 'failed at offset $i',
       );
     }
@@ -964,7 +964,7 @@ Future<void> testMain() async {
     for (int i = 11; i < 23; i++) {
       expect(
         paragraph.getLineBoundary(TextPosition(offset: i)),
-        TextRange(start: 11, end: 23),
+        const TextRange(start: 11, end: 23),
         reason: 'failed at offset $i',
       );
     }
@@ -973,7 +973,7 @@ Future<void> testMain() async {
     for (int i = 23; i < 33; i++) {
       expect(
         paragraph.getLineBoundary(TextPosition(offset: i)),
-        TextRange(start: 23, end: 33),
+        const TextRange(start: 23, end: 33),
         reason: 'failed at offset $i',
       );
     }

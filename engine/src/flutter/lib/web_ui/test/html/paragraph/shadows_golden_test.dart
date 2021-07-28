@@ -29,8 +29,8 @@ Future<void> testMain() async {
           fontSize: 32.0,
           color: blue,
           shadows: <Shadow>[
-            Shadow(color: red, blurRadius:2.0, offset: Offset(4.0, 2.0)),
-            Shadow(color: green, blurRadius: 3.0),
+            const Shadow(color: red, blurRadius:2.0, offset: Offset(4.0, 2.0)),
+            const Shadow(color: green, blurRadius: 3.0),
           ],
         ));
         builder.addText('Lorem ');
@@ -38,7 +38,7 @@ Future<void> testMain() async {
           color: green,
           background: Paint()..color = yellow,
           shadows: <Shadow>[
-            Shadow(color: black, blurRadius: 10.0),
+            const Shadow(color: black, blurRadius: 10.0),
           ],
         ));
         builder.addText('ipsum');

@@ -101,11 +101,11 @@ Future<void> testMain() async {
     final RecordingCanvas rc = RecordingCanvas(
         const Rect.fromLTRB(0, 0, 400, 400));
     rc.save();
-    rc.drawRect(Rect.fromLTWH(0, 50, 200, 50), makePaint()
+    rc.drawRect(const Rect.fromLTWH(0, 50, 200, 50), makePaint()
       ..color = white);
-    rc.drawImage(createFlutterLogoTestImage(), Offset(0, 50),
+    rc.drawImage(createFlutterLogoTestImage(), const Offset(0, 50),
         makePaint()
-          ..colorFilter = EngineColorFilter.mode(red, BlendMode.srcIn));
+          ..colorFilter = const EngineColorFilter.mode(red, BlendMode.srcIn));
 
     final Paragraph paragraph = createTestParagraph();
     const double textLeft = 80.0;

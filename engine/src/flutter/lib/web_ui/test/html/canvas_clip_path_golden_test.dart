@@ -55,7 +55,7 @@ Future<void> testMain() async {
     const double testWidth = 200;
     const double testHeight = 150;
     final Path path = Path();
-    path.addOval(Rect.fromLTWH(100, 30, testWidth, testHeight));
+    path.addOval(const Rect.fromLTWH(100, 30, testWidth, testHeight));
     rc.clipPath(path);
     final Path paintPath = Path();
     paintPath.moveTo(testWidth / 2, 0);
@@ -65,7 +65,7 @@ Future<void> testMain() async {
     rc.drawPath(
         paintPath,
         engine.SurfacePaint()
-          ..color = Color(0xFF00FF00)
+          ..color = const Color(0xFF00FF00)
           ..style = PaintingStyle.fill);
     rc.restore();
     await canvasScreenshot(rc, 'triangle_clipped_by_oval',
@@ -81,11 +81,11 @@ Future<void> testMain() async {
     const double testHeight = 150;
 
     final Path paintPath = Path();
-    paintPath.addRect(Rect.fromLTWH(-50, 0, testWidth, testHeight));
+    paintPath.addRect(const Rect.fromLTWH(-50, 0, testWidth, testHeight));
     paintPath.close();
     rc.drawPath(paintPath,
         engine.SurfacePaint()
-          ..color = Color(0xFF000000)
+          ..color = const Color(0xFF000000)
           ..style = PaintingStyle.stroke);
 
     final Path path = Path();
@@ -94,8 +94,8 @@ Future<void> testMain() async {
     path.lineTo(-200, 150);
     path.close();
     rc.clipPath(path);
-    rc.drawImageRect(createTestImage(), Rect.fromLTRB(0, 0, testWidth, testHeight),
-        Rect.fromLTWH(-50, 0, testWidth, testHeight), engine.SurfacePaint());
+    rc.drawImageRect(createTestImage(), const Rect.fromLTRB(0, 0, testWidth, testHeight),
+        const Rect.fromLTWH(-50, 0, testWidth, testHeight), engine.SurfacePaint());
     rc.restore();
     await canvasScreenshot(rc, 'image_clipped_by_triangle_off_screen');
   });
@@ -109,18 +109,18 @@ Future<void> testMain() async {
     const double testHeight = 150;
 
     final Path paintPath = Path();
-    paintPath.addRect(Rect.fromLTWH(-50, 0, testWidth, testHeight));
+    paintPath.addRect(const Rect.fromLTWH(-50, 0, testWidth, testHeight));
     paintPath.close();
     rc.drawPath(paintPath,
         engine.SurfacePaint()
-          ..color = Color(0xFF000000)
+          ..color = const Color(0xFF000000)
           ..style = PaintingStyle.stroke);
 
     final Path path = Path();
-    path.addOval(Rect.fromLTRB(-200, 0, 100, 150));
+    path.addOval(const Rect.fromLTRB(-200, 0, 100, 150));
     rc.clipPath(path);
-    rc.drawImageRect(createTestImage(), Rect.fromLTRB(0, 0, testWidth, testHeight),
-        Rect.fromLTWH(-50, 0, testWidth, testHeight), engine.SurfacePaint());
+    rc.drawImageRect(createTestImage(), const Rect.fromLTRB(0, 0, testWidth, testHeight),
+        const Rect.fromLTWH(-50, 0, testWidth, testHeight), engine.SurfacePaint());
     rc.restore();
     await canvasScreenshot(rc, 'image_clipped_by_oval_path');
   });

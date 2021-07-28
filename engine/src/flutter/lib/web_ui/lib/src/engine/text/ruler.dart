@@ -1058,7 +1058,7 @@ class MeasurementResult {
   /// The text direction of the paragraph.
   final ui.TextDirection textDirection;
 
-  MeasurementResult(
+  const MeasurementResult(
     this.constraintWidth, {
     required this.isSingleLine,
     required this.width,

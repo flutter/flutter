@@ -61,7 +61,7 @@ void testMain() {
       });
 
       test('returns false when other view is not a PlatformView', () {
-        final PersistedOpacity anyView = PersistedOpacity(null, 1, Offset(0, 0))..build();
+        final PersistedOpacity anyView = PersistedOpacity(null, 1, const Offset(0, 0))..build();
         expect(view.canUpdateAsMatch(anyView), isFalse);
       });
     });

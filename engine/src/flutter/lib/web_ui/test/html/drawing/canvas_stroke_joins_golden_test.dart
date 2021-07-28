@@ -16,7 +16,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  final Rect region = Rect.fromLTWH(0, 0, 300, 300);
+  const Rect region = Rect.fromLTWH(0, 0, 300, 300);
 
   late BitmapCanvas canvas;
 
@@ -39,19 +39,20 @@ Future<void> testMain() async {
 }
 
 void paintStrokeJoins(BitmapCanvas canvas) {
-  canvas.drawRect(Rect.fromLTRB(0, 0, 300, 300),
+  canvas.drawRect(const Rect.fromLTRB(0, 0, 300, 300),
       SurfacePaintData()
-        ..color = Color(0xFFFFFFFF)
+        ..color = const Color(0xFFFFFFFF)
         ..style = PaintingStyle.fill); // white
 
-  Offset start = Offset(20, 10);
-  Offset mid = Offset(120, 10);
-  Offset end = Offset(120, 20);
+  Offset start = const Offset(20, 10);
+  Offset mid = const Offset(120, 10);
+  Offset end = const Offset(120, 20);
 
   final List<StrokeCap> strokeCaps = <StrokeCap>[StrokeCap.butt, StrokeCap.round, StrokeCap.square];
   for (final StrokeCap cap in strokeCaps) {
     final List<StrokeJoin> joints = <StrokeJoin>[StrokeJoin.miter, StrokeJoin.bevel, StrokeJoin.round];
-    final List<Color> colors = <Color>[Color(0xFFF44336), Color(0xFF4CAF50), Color(0xFF2196F3)]; // red, green, blue
+    const List<Color> colors = <Color>[
+        Color(0xFFF44336), Color(0xFF4CAF50), Color(0xFF2196F3)]; // red, green, blue
     for (int i = 0; i < joints.length; i++) {
       final StrokeJoin join = joints[i];
       final Color color = colors[i % colors.length];

@@ -26,10 +26,10 @@ Future<void> testMain() async {
     final RecordingCanvas canvas = RecordingCanvas(region);
     canvas.drawImage(
         createFlutterLogoTestImage(),
-        Offset(10, 10),
+        const Offset(10, 10),
         makePaint()
           ..colorFilter =
-              EngineColorFilter.mode(Color(0x40000000), BlendMode.dstATop));
+              const EngineColorFilter.mode(Color(0x40000000), BlendMode.dstATop));
     await canvasScreenshot(canvas, 'image_color_fiter_dstatop', region: region);
   });
 
@@ -37,9 +37,9 @@ Future<void> testMain() async {
     final RecordingCanvas canvas = RecordingCanvas(region);
     canvas.drawImage(
         createFlutterLogoTestImage(),
-        Offset(10, 10),
+        const Offset(10, 10),
         makePaint()
-          ..colorFilter = EngineColorFilter.matrix(<double>[
+          ..colorFilter = const EngineColorFilter.matrix(<double>[
             0.2126, 0.7152, 0.0722, 0, 0, //
             0.2126, 0.7152, 0.0722, 0, 0, //
             0.2126, 0.7152, 0.0722, 0, 0, //

@@ -6,6 +6,7 @@
 ///
 /// Prefer keeping the original CanvasKit names so it is easier to locate
 /// the API behind these bindings in the Skia source code.
+// ignore_for_file: non_constant_identifier_names
 @JS()
 library canvaskit_api;
 

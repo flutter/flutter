@@ -18,7 +18,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  final Rect region = Rect.fromLTWH(0, 0, 500, 100);
+  const Rect region = Rect.fromLTWH(0, 0, 500, 100);
 
   late BitmapCanvas canvas;
 
@@ -202,7 +202,7 @@ Future<void> testMain() async {
     final EngineParagraph paragraph = builder.build() as EngineParagraph;
     paragraph.layout(const ParagraphConstraints(width: 100));
 
-    final Rect canvasSize = Offset.zero & Size(500, 500);
+    final Rect canvasSize = Offset.zero & const Size(500, 500);
 
     canvas = BitmapCanvas(canvasSize, RenderStrategy());
     canvas.debugChildOverdraw = true;

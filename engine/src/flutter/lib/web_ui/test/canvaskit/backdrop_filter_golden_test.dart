@@ -26,7 +26,7 @@ void testMain() {
       // Make a checkerboard picture so we can see the blur.
       final CkPictureRecorder recorder = CkPictureRecorder();
       final CkCanvas canvas = recorder.beginRecording(region);
-      canvas.drawColor(ui.Color(0xffffffff), ui.BlendMode.srcOver);
+      canvas.drawColor(const ui.Color(0xffffffff), ui.BlendMode.srcOver);
       final double sideLength = region.width / 20;
       final int rows = (region.height / sideLength).ceil();
 
@@ -40,7 +40,7 @@ void testMain() {
             sideLength,
             sideLength,
           );
-          canvas.drawRect(rect, CkPaint()..color = ui.Color(0xffff0000));
+          canvas.drawRect(rect, CkPaint()..color = const ui.Color(0xffff0000));
         }
       }
       final CkPicture checkerboard = recorder.endRecording();

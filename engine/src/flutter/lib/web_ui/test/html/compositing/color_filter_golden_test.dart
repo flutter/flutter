@@ -12,7 +12,7 @@ import 'package:ui/ui.dart';
 
 import 'package:web_engine_tester/golden_tester.dart';
 
-final Rect region = Rect.fromLTWH(0, 0, 500, 500);
+const Rect region = Rect.fromLTWH(0, 0, 500, 500);
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -36,7 +36,7 @@ Future<void> testMain() async {
     final Picture backgroundPicture = _drawBackground();
     builder.addPicture(Offset.zero, backgroundPicture);
     builder.pushColorFilter(
-        EngineColorFilter.mode(Color(0xF0000080), BlendMode.color));
+        const EngineColorFilter.mode(Color(0xF0000080), BlendMode.color));
     final Picture circles1 = _drawTestPictureWithCircles(30, 30);
     builder.addPicture(Offset.zero, circles1);
     builder.pop();
@@ -74,10 +74,10 @@ Future<void> testMain() async {
     final Picture backgroundPicture = _drawBackground();
     builder.addPicture(Offset.zero, backgroundPicture);
     builder.pushColorFilter(
-      ColorFilter.mode(
-        Color(0xFFFF0000),
-        BlendMode.srcIn,
-      ));
+        const ColorFilter.mode(
+          Color(0xFFFF0000),
+          BlendMode.srcIn,
+        ));
     final Picture circles1 = _drawTestPictureWithCircles(30, 30);
     builder.addPicture(Offset.zero, circles1);
     builder.pop();
@@ -94,19 +94,19 @@ Future<void> testMain() async {
     final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
     final Path path = Path();
     path.addRRect(RRect.fromRectAndRadius(
-        Rect.fromLTRB(0, 0, 400, 400), Radius.circular(2)));
+        const Rect.fromLTRB(0, 0, 400, 400), const Radius.circular(2)));
     final PhysicalShapeEngineLayer oldLayer = builder.pushPhysicalShape(
-        path: path, color: Color(0xFFFFFFFF), elevation: 0);
+        path: path, color: const Color(0xFFFFFFFF), elevation: 0);
     final Picture circles1 = _drawTestPictureWithImage(
-        ColorFilter.mode(Color(0x3C4043), BlendMode.overlay));
-    builder.addPicture(Offset(10, 0), circles1);
+        const ColorFilter.mode(Color(0x3C4043), BlendMode.overlay));
+    builder.addPicture(const Offset(10, 0), circles1);
     builder.pop();
     builder.build();
 
     final SurfaceSceneBuilder builder2 = SurfaceSceneBuilder();
     builder2.pushPhysicalShape(
-        path: path, color: Color(0xFFFFFFFF), elevation: 0, oldLayer: oldLayer);
-    builder2.addPicture(Offset(10, 0), circles1);
+        path: path, color: const Color(0xFFFFFFFF), elevation: 0, oldLayer: oldLayer);
+    builder2.addPicture(const Offset(10, 0), circles1);
     builder2.pop();
 
     html.document.body!.append(builder2.build().webOnlyRootElement!);
@@ -153,8 +153,8 @@ Picture _drawTestPictureWithImage(ColorFilter filter) {
   final Image testImage = createTestImage();
   canvas.drawImageRect(
       testImage,
-      Rect.fromLTWH(0, 0, 200, 150),
-      Rect.fromLTWH(0, 0, 300, 300),
+      const Rect.fromLTWH(0, 0, 200, 150),
+      const Rect.fromLTWH(0, 0, 300, 300),
       (Paint()
         ..style = PaintingStyle.fill
         ..colorFilter = filter
@@ -168,10 +168,10 @@ Picture _drawBackground() {
   final RecordingCanvas canvas =
       recorder.beginRecording(const Rect.fromLTRB(0, 0, 400, 400));
   canvas.drawRect(
-      Rect.fromLTWH(8, 8, 400.0 - 16, 400.0 - 16),
+      const Rect.fromLTWH(8, 8, 400.0 - 16, 400.0 - 16),
       (Paint()
         ..style = PaintingStyle.fill
-        ..color = Color(0xFFE0FFE0)) as SurfacePaint);
+        ..color = const Color(0xFFE0FFE0)) as SurfacePaint);
   return recorder.endRecording();
 }
 

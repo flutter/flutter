@@ -69,7 +69,7 @@ Future<void> testMain() async {
       final ByteData result = await completer.future;
       expect(
         () =>codec.decodeEnvelope(result),
-        throwsA(TypeMatcher<PlatformException>()
+        throwsA(const TypeMatcher<PlatformException>()
           .having((PlatformException e) => e.code, 'code', equals('copy_fail'))));
     });
 

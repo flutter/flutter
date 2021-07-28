@@ -94,7 +94,7 @@ void testMain() {
       path.moveTo(10, 20);
       path.lineTo(200, 20);
       final Rect r = path.toStraightLine()!;
-      expect(r, equals(Rect.fromLTRB(10, 20, 200, 20)));
+      expect(r, equals(const Rect.fromLTRB(10, 20, 200, 20)));
     });
 
     test('Should detect vertical line path', () {
@@ -102,7 +102,7 @@ void testMain() {
       path.moveTo(10, 20);
       path.lineTo(10, 200);
       final Rect r = path.toStraightLine()!;
-      expect(r, equals(Rect.fromLTRB(10, 20, 10, 200)));
+      expect(r, equals(const Rect.fromLTRB(10, 20, 10, 200)));
     });
 
     test('Should detect non rectangular path if empty', () {
@@ -165,64 +165,64 @@ void testMain() {
       expect(emptyPath.getBounds(), Rect.zero);
 
       final SurfacePath path = SurfacePath();
-      path.addRect(Rect.fromLTWH(0, 0, 270, 45));
-      path.addRect(Rect.fromLTWH(134.5, 0, 1, 45));
+      path.addRect(const Rect.fromLTWH(0, 0, 270, 45));
+      path.addRect(const Rect.fromLTWH(134.5, 0, 1, 45));
       expect(path.getBounds(), const Rect.fromLTRB(0, 0, 270, 45));
     });
 
     test('Should compute bounds for addRRect', () {
       SurfacePath path = SurfacePath();
-      final Rect bounds = Rect.fromLTRB(30, 40, 400, 300);
+      const Rect bounds = Rect.fromLTRB(30, 40, 400, 300);
       RRect rrect = RRect.fromRectAndCorners(bounds,
-          topLeft: Radius.elliptical(1, 2),
-          topRight: Radius.elliptical(3, 4),
-          bottomLeft: Radius.elliptical(5, 6),
-          bottomRight: Radius.elliptical(7, 8));
+          topLeft: const Radius.elliptical(1, 2),
+          topRight: const Radius.elliptical(3, 4),
+          bottomLeft: const Radius.elliptical(5, 6),
+          bottomRight: const Radius.elliptical(7, 8));
       path.addRRect(rrect);
       expect(path.getBounds(), bounds);
       expect(path.toRoundedRect(), rrect);
       path = SurfacePath();
       rrect = RRect.fromRectAndCorners(bounds,
-          topLeft: Radius.elliptical(0, 2),
-          topRight: Radius.elliptical(3, 4),
-          bottomLeft: Radius.elliptical(5, 6),
-          bottomRight: Radius.elliptical(7, 8));
+          topLeft: const Radius.elliptical(0, 2),
+          topRight: const Radius.elliptical(3, 4),
+          bottomLeft: const Radius.elliptical(5, 6),
+          bottomRight: const Radius.elliptical(7, 8));
       path.addRRect(rrect);
       expect(path.getBounds(), bounds);
       expect(path.toRoundedRect(), rrect);
       path = SurfacePath();
       rrect = RRect.fromRectAndCorners(bounds,
-          topLeft: Radius.elliptical(0, 0),
-          topRight: Radius.elliptical(3, 4),
-          bottomLeft: Radius.elliptical(5, 6),
-          bottomRight: Radius.elliptical(7, 8));
+          topLeft: const Radius.elliptical(0, 0),
+          topRight: const Radius.elliptical(3, 4),
+          bottomLeft: const Radius.elliptical(5, 6),
+          bottomRight: const Radius.elliptical(7, 8));
       path.addRRect(rrect);
       expect(path.getBounds(), bounds);
       expect(path.toRoundedRect(), rrect);
       path = SurfacePath();
       rrect = RRect.fromRectAndCorners(bounds,
-          topLeft: Radius.elliptical(1, 2),
-          topRight: Radius.elliptical(0, 0),
-          bottomLeft: Radius.elliptical(5, 6),
-          bottomRight: Radius.elliptical(7, 8));
+          topLeft: const Radius.elliptical(1, 2),
+          topRight: const Radius.elliptical(0, 0),
+          bottomLeft: const Radius.elliptical(5, 6),
+          bottomRight: const Radius.elliptical(7, 8));
       path.addRRect(rrect);
       expect(path.getBounds(), bounds);
       expect(path.toRoundedRect(), rrect);
       path = SurfacePath();
       rrect = RRect.fromRectAndCorners(bounds,
-          topLeft: Radius.elliptical(1, 2),
-          topRight: Radius.elliptical(3, 4),
-          bottomLeft: Radius.elliptical(0, 0),
-          bottomRight: Radius.elliptical(7, 8));
+          topLeft: const Radius.elliptical(1, 2),
+          topRight: const Radius.elliptical(3, 4),
+          bottomLeft: const Radius.elliptical(0, 0),
+          bottomRight: const Radius.elliptical(7, 8));
       path.addRRect(rrect);
       expect(path.getBounds(), bounds);
       expect(path.toRoundedRect(), rrect);
       path = SurfacePath();
       rrect = RRect.fromRectAndCorners(bounds,
-          topLeft: Radius.elliptical(1, 2),
-          topRight: Radius.elliptical(3, 4),
-          bottomLeft: Radius.elliptical(5, 6),
-          bottomRight: Radius.elliptical(0, 0));
+          topLeft: const Radius.elliptical(1, 2),
+          topRight: const Radius.elliptical(3, 4),
+          bottomLeft: const Radius.elliptical(5, 6),
+          bottomRight: const Radius.elliptical(0, 0));
       path.addRRect(rrect);
       expect(path.getBounds(), bounds);
       expect(path.toRoundedRect(), rrect);
@@ -242,7 +242,7 @@ void testMain() {
 
     test('Should compute bounds for polygon', () {
       final SurfacePath path = SurfacePath();
-      path.addPolygon(<Offset>[
+      path.addPolygon(const <Offset>[
         Offset(50, 100),
         Offset(250, 100),
         Offset(152, 180),
@@ -375,10 +375,10 @@ void testMain() {
       path.lineTo(110, 190);
       path.lineTo(50, 190);
       path.close();
-      expect(path.contains(Offset(80, 190)), isTrue);
-      expect(path.contains(Offset(110, 80)), isTrue);
-      expect(path.contains(Offset(110, 190)), isTrue);
-      expect(path.contains(Offset(110, 191)), isFalse);
+      expect(path.contains(const Offset(80, 190)), isTrue);
+      expect(path.contains(const Offset(110, 80)), isTrue);
+      expect(path.contains(const Offset(110, 190)), isTrue);
+      expect(path.contains(const Offset(110, 191)), isFalse);
     });
 
     test('Should not contain top-left of beveled border', () {
@@ -392,7 +392,7 @@ void testMain() {
       path.lineTo(15, 40);
       path.lineTo(10, 35);
       path.close();
-      expect(path.contains(Offset(10, 20)), isFalse);
+      expect(path.contains(const Offset(10, 20)), isFalse);
     });
 
     test('Computes contains for cubic curves', () {
@@ -406,8 +406,8 @@ void testMain() {
       path.lineTo(15, 40);
       path.cubicTo(10, 40, 10,  40, 10, 35);
       path.close();
-      expect(path.contains(Offset(10, 20)), isFalse);
-      expect(path.contains(Offset(30, 40)), isFalse);
+      expect(path.contains(const Offset(10, 20)), isFalse);
+      expect(path.contains(const Offset(30, 40)), isFalse);
     });
 
     // Regression test for https://github.com/flutter/flutter/issues/44470
@@ -420,7 +420,7 @@ void testMain() {
         ..lineTo(0, 100)
         ..lineTo(50, 0)
         ..close();
-      expect(path.contains(Offset(50, 50)), isTrue);
+      expect(path.contains(const Offset(50, 50)), isTrue);
       js_util.setProperty(html.window, 'devicePixelRatio', 1.0);
       window.debugOverrideDevicePixelRatio(1.0);
       // TODO: Investigate failure on CI. Locally this passes.
@@ -436,22 +436,22 @@ void testMain() {
     test('Should hit test correctly for malformed rrect', () {
       // Correctly formed rrect.
       final Path path1 = Path()
-        ..addRRect(RRect.fromLTRBR(50, 50, 100, 100, Radius.circular(20)));
-      expect(path1.contains(Offset(75, 75)), isTrue);
-      expect(path1.contains(Offset(52, 75)), isTrue);
-      expect(path1.contains(Offset(50, 50)), isFalse);
-      expect(path1.contains(Offset(100, 50)), isFalse);
-      expect(path1.contains(Offset(100, 100)), isFalse);
-      expect(path1.contains(Offset(50, 100)), isFalse);
+        ..addRRect(RRect.fromLTRBR(50, 50, 100, 100, const Radius.circular(20)));
+      expect(path1.contains(const Offset(75, 75)), isTrue);
+      expect(path1.contains(const Offset(52, 75)), isTrue);
+      expect(path1.contains(const Offset(50, 50)), isFalse);
+      expect(path1.contains(const Offset(100, 50)), isFalse);
+      expect(path1.contains(const Offset(100, 100)), isFalse);
+      expect(path1.contains(const Offset(50, 100)), isFalse);
 
       final Path path2 = Path()
-        ..addRRect(RRect.fromLTRBR(50, 50, 100, 100, Radius.circular(100)));
-      expect(path2.contains(Offset(75, 75)), isTrue);
-      expect(path2.contains(Offset(52, 75)), isTrue);
-      expect(path2.contains(Offset(50, 50)), isFalse);
-      expect(path2.contains(Offset(100, 50)), isFalse);
-      expect(path2.contains(Offset(100, 100)), isFalse);
-      expect(path2.contains(Offset(50, 100)), isFalse);
+        ..addRRect(RRect.fromLTRBR(50, 50, 100, 100, const Radius.circular(100)));
+      expect(path2.contains(const Offset(75, 75)), isTrue);
+      expect(path2.contains(const Offset(52, 75)), isTrue);
+      expect(path2.contains(const Offset(50, 50)), isFalse);
+      expect(path2.contains(const Offset(100, 50)), isFalse);
+      expect(path2.contains(const Offset(100, 100)), isFalse);
+      expect(path2.contains(const Offset(50, 100)), isFalse);
     });
 
     test('Should set segment masks', () {

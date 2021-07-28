@@ -829,7 +829,7 @@ class LineBuilder {
       spanometer,
       maxWidth: maxWidth,
       lineNumber: 0,
-      start: LineBreakResult.sameIndex(0, LineBreakType.prohibited),
+      start: const LineBreakResult.sameIndex(0, LineBreakType.prohibited),
       accumulatedHeight: 0.0,
     );
   }

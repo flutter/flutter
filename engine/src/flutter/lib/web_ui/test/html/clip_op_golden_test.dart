@@ -21,7 +21,7 @@ Future<void> testMain() async {
   test('Clips using difference', () async {
     const Rect region = Rect.fromLTRB(0, 0, 400, 300);
     final RecordingCanvas canvas = RecordingCanvas(region);
-    final Rect titleRect = Rect.fromLTWH(20, 0, 50, 20);
+    const Rect titleRect = Rect.fromLTWH(20, 0, 50, 20);
     final SurfacePaint paint = SurfacePaint()
       ..style = PaintingStyle.stroke
       ..color = const Color(0xff000000)

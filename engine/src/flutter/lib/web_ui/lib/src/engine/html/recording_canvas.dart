@@ -1091,9 +1091,7 @@ class PaintDrawDRRect extends DrawCommand {
 
   @override
   void apply(EngineCanvas canvas) {
-    if (paint.style == null) {
-      paint.style = ui.PaintingStyle.fill;
-    }
+    paint.style ??= ui.PaintingStyle.fill;
     canvas.drawPath(path!, paint);
   }
 

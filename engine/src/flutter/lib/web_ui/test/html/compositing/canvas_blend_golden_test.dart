@@ -30,12 +30,12 @@ Future<void> testMain() async {
         RecordingCanvas(const Rect.fromLTRB(0, 0, 400, 300));
     rc.save();
     rc.drawRect(
-        Rect.fromLTRB(0, 0, 400, 400),
+        const Rect.fromLTRB(0, 0, 400, 400),
         SurfacePaint()
           ..style = PaintingStyle.fill
           ..color = const Color.fromARGB(255, 255, 255, 255));
     rc.drawCircle(
-        Offset(100, 100),
+        const Offset(100, 100),
         80.0,
         SurfacePaint()
           ..style = PaintingStyle.fill
@@ -43,7 +43,7 @@ Future<void> testMain() async {
           ..blendMode = BlendMode.difference);
 
     rc.drawCircle(
-        Offset(170, 100),
+        const Offset(170, 100),
         80.0,
         SurfacePaint()
           ..style = PaintingStyle.fill
@@ -51,7 +51,7 @@ Future<void> testMain() async {
           ..color = const Color.fromARGB(128, 0, 255, 0));
 
     rc.drawCircle(
-        Offset(135, 170),
+        const Offset(135, 170),
         80.0,
         SurfacePaint()
           ..style = PaintingStyle.fill
@@ -69,19 +69,19 @@ Future<void> testMain() async {
         RecordingCanvas(const Rect.fromLTRB(0, 0, 400, 300));
     rc.save();
     rc.drawRect(
-        Rect.fromLTRB(0, 0, 400, 400),
+        const Rect.fromLTRB(0, 0, 400, 400),
         SurfacePaint()
           ..style = PaintingStyle.fill
           ..color = const Color.fromARGB(255, 255, 255, 255));
     rc.drawCircle(
-        Offset(100, 100),
+        const Offset(100, 100),
         80.0,
         SurfacePaint()
           ..style = PaintingStyle.fill
           ..color = const Color.fromARGB(128, 255, 0, 0)
           ..blendMode = BlendMode.difference);
     rc.drawCircle(
-        Offset(170, 100),
+        const Offset(170, 100),
         80.0,
         SurfacePaint()
           ..style = PaintingStyle.fill
@@ -89,12 +89,12 @@ Future<void> testMain() async {
           ..color = const Color.fromARGB(128, 0, 255, 0));
 
     rc.drawCircle(
-        Offset(135, 170),
+        const Offset(135, 170),
         80.0,
         SurfacePaint()
           ..style = PaintingStyle.fill
           ..color = const Color.fromARGB(128, 255, 0, 0));
-    rc.drawImage(createTestImage(), Offset(135.0, 130.0),
+    rc.drawImage(createTestImage(), const Offset(135.0, 130.0),
         SurfacePaint()..blendMode = BlendMode.multiply);
     rc.restore();
     await canvasScreenshot(rc, 'canvas_blend_image_multiply',

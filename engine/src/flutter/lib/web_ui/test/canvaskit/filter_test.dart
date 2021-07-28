@@ -17,10 +17,10 @@ void main() {
 void testMain() {
   List<CkColorFilter> createColorFilters() {
      return <CkColorFilter>[
-       EngineColorFilter.mode(ui.Color(0x12345678), ui.BlendMode.srcOver) as CkColorFilter,
-       EngineColorFilter.mode(ui.Color(0x12345678), ui.BlendMode.dstOver) as CkColorFilter,
-       EngineColorFilter.mode(ui.Color(0x87654321), ui.BlendMode.dstOver) as CkColorFilter,
-       EngineColorFilter.matrix(<double>[
+       const EngineColorFilter.mode(ui.Color(0x12345678), ui.BlendMode.srcOver) as CkColorFilter,
+       const EngineColorFilter.mode(ui.Color(0x12345678), ui.BlendMode.dstOver) as CkColorFilter,
+       const EngineColorFilter.mode(ui.Color(0x87654321), ui.BlendMode.dstOver) as CkColorFilter,
+       const EngineColorFilter.matrix(<double>[
           1, 0, 0, 0, 0,
           0, 1, 0, 0, 0,
           0, 0, 1, 0, 0,
@@ -32,8 +32,8 @@ void testMain() {
           0, 0, 2, 0, 0,
           0, 0, 0, 2, 0,
        ])) as CkColorFilter,
-       EngineColorFilter.linearToSrgbGamma() as CkColorFilter,
-       EngineColorFilter.srgbToLinearGamma() as CkColorFilter,
+       const EngineColorFilter.linearToSrgbGamma() as CkColorFilter,
+       const EngineColorFilter.srgbToLinearGamma() as CkColorFilter,
     ];
   }
 
@@ -97,7 +97,7 @@ void testMain() {
 
     test('with 0 sigma can be set on a Paint', () {
       final ui.Paint paint = ui.Paint();
-      final ui.MaskFilter filter = ui.MaskFilter.blur(ui.BlurStyle.normal, 0);
+      const ui.MaskFilter filter = ui.MaskFilter.blur(ui.BlurStyle.normal, 0);
 
       expect(() => paint.maskFilter = filter, isNot(throwsException));
     });

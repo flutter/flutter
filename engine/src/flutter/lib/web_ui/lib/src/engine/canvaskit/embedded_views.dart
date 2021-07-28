@@ -101,14 +101,14 @@ class HtmlViewEmbedder {
         // Only initialize the picture recorder for the backup surface once.
         final CkPictureRecorder pictureRecorder = CkPictureRecorder();
         pictureRecorder.beginRecording(ui.Offset.zero & _frameSize);
-        pictureRecorder.recordingCanvas!.clear(ui.Color(0x00000000));
+        pictureRecorder.recordingCanvas!.clear(const ui.Color(0x00000000));
         _backupPictureRecorder = pictureRecorder;
       }
       _pictureRecorders[viewId] = _backupPictureRecorder!;
     } else {
       final CkPictureRecorder pictureRecorder = CkPictureRecorder();
       pictureRecorder.beginRecording(ui.Offset.zero & _frameSize);
-      pictureRecorder.recordingCanvas!.clear(ui.Color(0x00000000));
+      pictureRecorder.recordingCanvas!.clear(const ui.Color(0x00000000));
       _pictureRecorders[viewId] = pictureRecorder;
     }
     _compositionOrder.add(viewId);

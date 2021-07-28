@@ -445,7 +445,7 @@ void testMain() {
     });
 
     test('TextInput.requestAutofill', () async {
-      final MethodCall requestAutofill = MethodCall('TextInput.requestAutofill');
+      const MethodCall requestAutofill = MethodCall('TextInput.requestAutofill');
       sendFrameworkMessage(codec.encodeMethodCall(requestAutofill));
 
       //No-op and without crashing.

@@ -40,24 +40,24 @@ void testMain() {
       final CkCanvas canvas = recorder.beginRecording(region);
 
       canvas.drawCircle(
-        ui.Offset(425, 125),
+        const ui.Offset(425, 125),
         50,
-        CkPaint()..color = ui.Color.fromARGB(255, 255, 0, 0),
+        CkPaint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
       );
       final CkPicture redCircle = recorder.endRecording();
 
       builder.addPicture(ui.Offset.zero, redCircle);
 
       final CkGradientSweep shader = CkGradientSweep(
-          ui.Offset(250, 125),
-          <ui.Color>[
+          const ui.Offset(250, 125),
+          const <ui.Color>[
             ui.Color(0xFF4285F4),
             ui.Color(0xFF34A853),
             ui.Color(0xFFFBBC05),
             ui.Color(0xFFEA4335),
             ui.Color(0xFF4285F4),
           ],
-          <double>[
+          const <double>[
             0.0,
             0.25,
             0.5,
@@ -70,11 +70,11 @@ void testMain() {
           null);
 
       final ui.Path clipPath = ui.Path()
-        ..addOval(ui.Rect.fromLTWH(25, 75, 100, 100));
+        ..addOval(const ui.Rect.fromLTWH(25, 75, 100, 100));
       builder.pushClipPath(clipPath);
 
       // Apply a shader mask.
-      builder.pushShaderMask(shader, ui.Rect.fromLTRB(0, 0, 200, 250),
+      builder.pushShaderMask(shader, const ui.Rect.fromLTRB(0, 0, 200, 250),
           ui.BlendMode.color);
 
       // Draw another red circle and apply it to the scene.
@@ -82,8 +82,8 @@ void testMain() {
       final CkPictureRecorder recorder2 = CkPictureRecorder();
       final CkCanvas canvas2 = recorder2.beginRecording(region);
 
-      canvas2.drawRect(ui.Rect.fromLTWH(25, 75, 100, 100),
-        CkPaint()..color = ui.Color.fromARGB(255, 0, 255, 0),
+      canvas2.drawRect(const ui.Rect.fromLTWH(25, 75, 100, 100),
+        CkPaint()..color = const ui.Color.fromARGB(255, 0, 255, 0),
       );
 
       final CkPicture sweepCircle = recorder2.endRecording();
@@ -105,24 +105,24 @@ void testMain() {
       final CkCanvas canvas = recorder.beginRecording(region);
 
       canvas.drawCircle(
-        ui.Offset(425, 125),
+        const ui.Offset(425, 125),
         50,
-        CkPaint()..color = ui.Color.fromARGB(255, 255, 0, 0),
+        CkPaint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
       );
       final CkPicture redCircle = recorder.endRecording();
 
       builder.addPicture(ui.Offset.zero, redCircle);
 
       final CkGradientSweep shader = CkGradientSweep(
-          ui.Offset(250, 125),
-          <ui.Color>[
+          const ui.Offset(250, 125),
+          const <ui.Color>[
             ui.Color(0xFF4285F4),
             ui.Color(0xFF34A853),
             ui.Color(0xFFFBBC05),
             ui.Color(0xFFEA4335),
             ui.Color(0xFF4285F4),
           ],
-          <double>[
+          const <double>[
             0.0,
             0.25,
             0.5,
@@ -135,11 +135,11 @@ void testMain() {
           null);
 
       final ui.Path clipPath = ui.Path()
-        ..addOval(ui.Rect.fromLTWH(25, 75, 100, 100));
+        ..addOval(const ui.Rect.fromLTWH(25, 75, 100, 100));
       builder.pushClipPath(clipPath);
 
       // Apply a shader mask.
-      builder.pushShaderMask(shader, ui.Rect.fromLTRB(50, 50, 200, 250),
+      builder.pushShaderMask(shader, const ui.Rect.fromLTRB(50, 50, 200, 250),
           ui.BlendMode.color);
 
       // Draw another red circle and apply it to the scene.
@@ -147,8 +147,8 @@ void testMain() {
       final CkPictureRecorder recorder2 = CkPictureRecorder();
       final CkCanvas canvas2 = recorder2.beginRecording(region);
 
-      canvas2.drawRect(ui.Rect.fromLTWH(25, 75, 100, 100),
-        CkPaint()..color = ui.Color.fromARGB(255, 0, 255, 0),
+      canvas2.drawRect(const ui.Rect.fromLTWH(25, 75, 100, 100),
+        CkPaint()..color = const ui.Color.fromARGB(255, 0, 255, 0),
       );
 
       final CkPicture sweepCircle = recorder2.endRecording();

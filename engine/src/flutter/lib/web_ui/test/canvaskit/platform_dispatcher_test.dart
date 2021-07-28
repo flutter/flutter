@@ -26,7 +26,7 @@ void testMain() {
       final Completer<ByteData?> completer = Completer<ByteData?>();
       ui.PlatformDispatcher.instance.sendPlatformMessage(
         'flutter/skia',
-        codec.encodeMethodCall(MethodCall(
+        codec.encodeMethodCall(const MethodCall(
           'Skia.setResourceCacheMaxBytes',
           512 * 1000 * 1000,
         )),

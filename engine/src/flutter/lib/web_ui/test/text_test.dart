@@ -326,7 +326,7 @@ Future<void> testMain() async {
     */
 
     final DomParagraph paragraph = builder.build() as DomParagraph;
-    paragraph.layout(ParagraphConstraints(width: 800));
+    paragraph.layout(const ParagraphConstraints(width: 800));
 
     // Reference the offsets with the output of `Display arrangement`.
     const int offset010 = text00.length;
@@ -334,22 +334,22 @@ Future<void> testMain() async {
     const int offset04 = offset030 + text030.length;
     const int offset050 = offset04 + text04.length;
     // Tap text010.
-    expect(paragraph.getPositionForOffset(Offset(700, 10)).offset, offset010);
+    expect(paragraph.getPositionForOffset(const Offset(700, 10)).offset, offset010);
     // Tap text030
-    expect(paragraph.getPositionForOffset(Offset(600, 30)).offset, offset030);
+    expect(paragraph.getPositionForOffset(const Offset(600, 30)).offset, offset030);
     // Tap text050
-    expect(paragraph.getPositionForOffset(Offset(220, 70)).offset, offset050);
+    expect(paragraph.getPositionForOffset(const Offset(220, 70)).offset, offset050);
     // Tap the left neighbor of text050
-    expect(paragraph.getPositionForOffset(Offset(199, 70)).offset, offset04);
+    expect(paragraph.getPositionForOffset(const Offset(199, 70)).offset, offset04);
     // Tap the right neighbor of text050. No matter who the right neighbor of
     // text0505 is, it must not be text050 itself.
-    expect(paragraph.getPositionForOffset(Offset(360, 70)).offset,
+    expect(paragraph.getPositionForOffset(const Offset(360, 70)).offset,
         isNot(offset050));
     // Tap the neighbor above text050
-    expect(paragraph.getPositionForOffset(Offset(220, 59)).offset, offset04);
+    expect(paragraph.getPositionForOffset(const Offset(220, 59)).offset, offset04);
     // Tap the neighbor below text050. No matter who the neighbor above text050,
     // it must not be text050 itself.
-    expect(paragraph.getPositionForOffset(Offset(220, 80)).offset,
+    expect(paragraph.getPositionForOffset(const Offset(220, 80)).offset,
         isNot(offset050));
   });
 

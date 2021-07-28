@@ -31,7 +31,7 @@ Future<void> testMain() async {
   });
 
   test('drawColor should cover entire viewport', () async {
-    final Rect region = Rect.fromLTWH(0, 0, 400, 400);
+    const Rect region = Rect.fromLTWH(0, 0, 400, 400);
 
     final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
     final Picture testPicture = _drawTestPicture(region, useColor: true);
@@ -40,7 +40,7 @@ Future<void> testMain() async {
   }, skip: true); // TODO: matchGolden fails when a div covers viewport.
 
   test('drawPaint should cover entire viewport', () async {
-    final Rect region = Rect.fromLTWH(0, 0, 400, 400);
+    const Rect region = Rect.fromLTWH(0, 0, 400, 400);
 
     final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
     final Picture testPicture = _drawTestPicture(region, useColor: false);
@@ -51,14 +51,14 @@ Future<void> testMain() async {
 
 Picture _drawTestPicture(Rect region, {bool useColor = false}) {
   final EnginePictureRecorder recorder = PictureRecorder() as EnginePictureRecorder;
-  final Rect r = Rect.fromLTWH(0, 0, 200, 200);
+  const Rect r = Rect.fromLTWH(0, 0, 200, 200);
   final RecordingCanvas canvas = recorder.beginRecording(r);
 
   canvas.drawRect(
       region.deflate(8.0),
       Paint() as SurfacePaint
         ..style = PaintingStyle.fill
-        ..color = Color(0xFFE0E0E0)
+        ..color = const Color(0xFFE0E0E0)
   );
 
   canvas.transform(Matrix4.translationValues(50, 50, 0).storage);

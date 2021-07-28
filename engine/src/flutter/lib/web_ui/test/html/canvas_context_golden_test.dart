@@ -57,11 +57,11 @@ Future<void> testMain() async {
     final engine.RecordingCanvas rc =
         engine.RecordingCanvas(const Rect.fromLTRB(0, 0, 400, 300));
     final engine.SurfacePaint paint = Paint() as engine.SurfacePaint
-      ..color = Color(0xFF00FF00)
+      ..color = const Color(0xFF00FF00)
       ..style = PaintingStyle.fill;
     rc.save();
     final Path ovalPath = Path();
-    ovalPath.addOval(Rect.fromLTWH(100, 30, 200, 100));
+    ovalPath.addOval(const Rect.fromLTWH(100, 30, 200, 100));
     rc.clipPath(ovalPath);
     rc.translate(-500, -500);
     rc.save();
@@ -76,7 +76,7 @@ Future<void> testMain() async {
     rc.restore();
     // The rectangle should paint without clipping since we restored
     // context.
-    rc.drawRect(Rect.fromLTWH(0, 0, 4, 200), paint);
+    rc.drawRect(const Rect.fromLTWH(0, 0, 4, 200), paint);
     await _checkScreenshot(rc, 'context_save_restore_transform');
   });
 
@@ -84,24 +84,24 @@ Future<void> testMain() async {
     final engine.RecordingCanvas rc =
         engine.RecordingCanvas(const Rect.fromLTRB(0, 0, 400, 300));
     final Paint goodPaint = Paint()
-      ..color = Color(0x8000FF00)
+      ..color = const Color(0x8000FF00)
       ..style = PaintingStyle.fill;
     final Paint badPaint = Paint()
-      ..color = Color(0xFFFF0000)
+      ..color = const Color(0xFFFF0000)
       ..style = PaintingStyle.fill;
     rc.save();
     final Path ovalPath = Path();
-    ovalPath.addOval(Rect.fromLTWH(100, 30, 200, 100));
+    ovalPath.addOval(const Rect.fromLTWH(100, 30, 200, 100));
     rc.clipPath(ovalPath);
     rc.translate(-500, -500);
     rc.save();
     rc.restore();
     // The rectangle should be clipped against oval.
-    rc.drawRect(Rect.fromLTWH(0, 0, 300, 300), badPaint as engine.SurfacePaint);
+    rc.drawRect(const Rect.fromLTWH(0, 0, 300, 300), badPaint as engine.SurfacePaint);
     rc.restore();
     // The rectangle should paint without clipping since we restored
     // context.
-    rc.drawRect(Rect.fromLTWH(0, 0, 200, 200), goodPaint as engine.SurfacePaint);
+    rc.drawRect(const Rect.fromLTWH(0, 0, 200, 200), goodPaint as engine.SurfacePaint);
     await _checkScreenshot(rc, 'context_save_restore_clip');
   });
 }

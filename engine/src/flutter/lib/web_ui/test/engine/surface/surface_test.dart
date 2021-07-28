@@ -370,9 +370,9 @@ void testMain() {
             () {
       final SceneBuilder builder1 = SceneBuilder();
       final Path path = Path();
-      path.addPolygon(<Offset>[Offset(50, 0), Offset(100, 80), Offset(20, 40)], true);
+      path.addPolygon(const <Offset>[Offset(50, 0), Offset(100, 80), Offset(20, 40)], true);
       final PersistedPhysicalShape shape = builder1.pushPhysicalShape(path: path,
-        color: Color(0xFF00FF00), elevation: 1) as PersistedPhysicalShape;
+        color: const Color(0xFF00FF00), elevation: 1) as PersistedPhysicalShape;
       builder1.build();
       expect(() => shape.apply(), returnsNormally);
     });

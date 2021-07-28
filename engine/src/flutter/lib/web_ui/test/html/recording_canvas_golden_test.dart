@@ -514,7 +514,7 @@ Future<void> testMain() async {
     rc.translate(50.0, 100.0);
     final Path path = Path();
     // Draw a vertical small line (caret).
-    path.addPolygon(<Offset>[Offset(0, 10), Offset(20,5), Offset(50,10)],
+    path.addPolygon(const <Offset>[Offset(0, 10), Offset(20,5), Offset(50,10)],
         false);
     path.lineTo(60, 80);
     path.lineTo(0, 80);
@@ -549,14 +549,14 @@ Future<void> testMain() async {
       },
       (RecordingCanvas canvas, SurfacePaint paint) {
         canvas.drawRRect(
-          RRect.fromLTRBR(0.0, 0.0, 20.0, 20.0, Radius.circular(7.0)),
+          RRect.fromLTRBR(0.0, 0.0, 20.0, 20.0, const Radius.circular(7.0)),
           paint,
         );
       },
       (RecordingCanvas canvas, SurfacePaint paint) {
         canvas.drawDRRect(
-          RRect.fromLTRBR(0.0, 0.0, 20.0, 20.0, Radius.circular(5.0)),
-          RRect.fromLTRBR(4.0, 4.0, 16.0, 16.0, Radius.circular(5.0)),
+          RRect.fromLTRBR(0.0, 0.0, 20.0, 20.0, const Radius.circular(5.0)),
+          RRect.fromLTRBR(4.0, 4.0, 16.0, 16.0, const Radius.circular(5.0)),
           paint,
         );
       },

@@ -53,7 +53,7 @@ void testMain() {
 
     test('basic setup works', () async {
       final TestUrlStrategy strategy = TestUrlStrategy.fromEntry(
-        TestHistoryEntry('initial state', null, '/initial'),
+        const TestHistoryEntry('initial state', null, '/initial'),
       );
       await window.debugInitializeHistory(strategy, useSingle: true);
 
@@ -79,7 +79,7 @@ void testMain() {
 
     test('browser back button pops routes correctly', () async {
       final TestUrlStrategy strategy = TestUrlStrategy.fromEntry(
-        TestHistoryEntry(null, null, '/home'),
+        const TestHistoryEntry(null, null, '/home'),
       );
       await window.debugInitializeHistory(strategy, useSingle: true);
 
@@ -116,7 +116,7 @@ void testMain() {
 
     test('multiple browser back clicks', () async {
       final TestUrlStrategy strategy = TestUrlStrategy.fromEntry(
-        TestHistoryEntry(null, null, '/home'),
+        const TestHistoryEntry(null, null, '/home'),
       );
       await window.debugInitializeHistory(strategy, useSingle: true);
 
@@ -185,7 +185,7 @@ void testMain() {
 
     test('handle user-provided url', () async {
       final TestUrlStrategy strategy = TestUrlStrategy.fromEntry(
-        TestHistoryEntry(null, null, '/home'),
+        const TestHistoryEntry(null, null, '/home'),
       );
       await window.debugInitializeHistory(strategy, useSingle: true);
 
@@ -228,7 +228,7 @@ void testMain() {
 
     test('user types unknown url', () async {
       final TestUrlStrategy strategy = TestUrlStrategy.fromEntry(
-        TestHistoryEntry(null, null, '/home'),
+        const TestHistoryEntry(null, null, '/home'),
       );
       await window.debugInitializeHistory(strategy, useSingle: true);
 
@@ -267,7 +267,7 @@ void testMain() {
 
     test('basic setup works', () async {
       final TestUrlStrategy strategy = TestUrlStrategy.fromEntry(
-        TestHistoryEntry('initial state', null, '/initial'),
+        const TestHistoryEntry('initial state', null, '/initial'),
       );
       await window.debugInitializeHistory(strategy, useSingle: false);
 
@@ -284,7 +284,7 @@ void testMain() {
 
     test('browser back button push route information correctly', () async {
       final TestUrlStrategy strategy = TestUrlStrategy.fromEntry(
-        TestHistoryEntry('initial state', null, '/home'),
+        const TestHistoryEntry('initial state', null, '/home'),
       );
       await window.debugInitializeHistory(strategy, useSingle: false);
 
@@ -325,7 +325,7 @@ void testMain() {
 
     test('multiple browser back clicks', () async {
       final TestUrlStrategy strategy = TestUrlStrategy.fromEntry(
-        TestHistoryEntry('initial state', null, '/home'),
+        const TestHistoryEntry('initial state', null, '/home'),
       );
       await window.debugInitializeHistory(strategy, useSingle: false);
 
@@ -377,7 +377,7 @@ void testMain() {
 
     test('handle user-provided url', () async {
       final TestUrlStrategy strategy = TestUrlStrategy.fromEntry(
-        TestHistoryEntry('initial state', null, '/home'),
+        const TestHistoryEntry('initial state', null, '/home'),
       );
       await window.debugInitializeHistory(strategy, useSingle: false);
 
@@ -422,7 +422,7 @@ void testMain() {
 
     test('forward button works', () async {
       final TestUrlStrategy strategy = TestUrlStrategy.fromEntry(
-        TestHistoryEntry('initial state', null, '/home'),
+        const TestHistoryEntry('initial state', null, '/home'),
       );
       await window.debugInitializeHistory(strategy, useSingle: false);
 
@@ -539,7 +539,7 @@ Future<void> systemNavigatorPop() {
   final Completer<void> completer = Completer<void>();
   window.sendPlatformMessage(
     'flutter/platform',
-    codec.encodeMethodCall(MethodCall('SystemNavigator.pop')),
+    codec.encodeMethodCall(const MethodCall('SystemNavigator.pop')),
     (_) => completer.complete(),
   );
   return completer.future;

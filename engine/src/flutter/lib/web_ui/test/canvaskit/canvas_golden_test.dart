@@ -86,7 +86,7 @@ void testMain() {
       final SkPicture restoredSkPicture = snapshot!.toPicture();
       expect(restoredSkPicture, isNotNull);
       final CkPicture restoredPicture = CkPicture(
-          restoredSkPicture, ui.Rect.fromLTRB(0, 0, 50, 50), snapshot);
+          restoredSkPicture, const ui.Rect.fromLTRB(0, 0, 50, 50), snapshot);
       final ByteData restoredPixels =
         (await (await restoredPicture.toImage(50, 50)).toByteData())!;
 
@@ -118,7 +118,7 @@ void testMain() {
           canvas.save();
           for (int col = 0; col < 10; col += 1) {
             final double elevation = 2 * (col % 5).toDouble();
-            canvas.drawShadow(shape, ui.Color(0xFFFF0000), elevation, true);
+            canvas.drawShadow(shape, const ui.Color(0xFFFF0000), elevation, true);
             canvas.drawPath(shape, shapePaint);
 
             final PhysicalShapeEngineLayer psl = PhysicalShapeEngineLayer(
@@ -284,7 +284,7 @@ void testMain() {
       await testTextStyle('paragraph text height behavior',
           layoutWidth: 50,
           paragraphHeight: 1.5,
-          paragraphTextHeightBehavior: ui.TextHeightBehavior(
+          paragraphTextHeightBehavior: const ui.TextHeightBehavior(
             applyHeightToFirstAscent: false,
             applyHeightToLastDescent: false,
           ));
@@ -408,7 +408,7 @@ void testMain() {
         'half leading inherited from paragraph',
         height: 20,
         fontSize: 10,
-        paragraphTextHeightBehavior: ui.TextHeightBehavior(
+        paragraphTextHeightBehavior: const ui.TextHeightBehavior(
           leadingDistribution: ui.TextLeadingDistribution.even,
         ),
       );
@@ -417,7 +417,7 @@ void testMain() {
         height: 20,
         fontSize: 10,
         leadingDistribution: ui.TextLeadingDistribution.proportional,
-        paragraphTextHeightBehavior: ui.TextHeightBehavior(
+        paragraphTextHeightBehavior: const ui.TextHeightBehavior(
           leadingDistribution: ui.TextLeadingDistribution.even,
         ),
       );
@@ -483,14 +483,14 @@ void testMain() {
 
     test('text styles - shadows', () async {
       await testTextStyle('shadows', shadows: <ui.Shadow>[
-        ui.Shadow(
-          color: const ui.Color(0xFF999900),
-          offset: const ui.Offset(10, 10),
+        const ui.Shadow(
+          color: ui.Color(0xFF999900),
+          offset: ui.Offset(10, 10),
           blurRadius: 5,
         ),
-        ui.Shadow(
-          color: const ui.Color(0xFF009999),
-          offset: const ui.Offset(-10, -10),
+        const ui.Shadow(
+          color: ui.Color(0xFF009999),
+          offset: ui.Offset(-10, -10),
           blurRadius: 10,
         ),
       ]);
@@ -621,24 +621,24 @@ void testMain() {
         }
         builder.addText(text.toString());
         final CkParagraph paragraph = builder.build();
-        paragraph.layout(ui.ParagraphConstraints(width: testWidth));
+        paragraph.layout(const ui.ParagraphConstraints(width: testWidth));
         return paragraph;
       }
 
       final List<ParagraphFactory> variations = <ParagraphFactory>[
         () => createTestParagraph(),
-        () => createTestParagraph(color: ui.Color(0xFF009900)),
+        () => createTestParagraph(color: const ui.Color(0xFF009900)),
         () => createTestParagraph(
-            foreground: CkPaint()..color = ui.Color(0xFF990000)),
+            foreground: CkPaint()..color = const ui.Color(0xFF990000)),
         () => createTestParagraph(
-            background: CkPaint()..color = ui.Color(0xFF7777FF)),
+            background: CkPaint()..color = const ui.Color(0xFF7777FF)),
         () => createTestParagraph(
-              color: ui.Color(0xFFFF00FF),
-              background: CkPaint()..color = ui.Color(0xFF0000FF),
+              color: const ui.Color(0xFFFF00FF),
+              background: CkPaint()..color = const ui.Color(0xFF0000FF),
             ),
         () => createTestParagraph(
-              foreground: CkPaint()..color = ui.Color(0xFF00FFFF),
-              background: CkPaint()..color = ui.Color(0xFF0000FF),
+              foreground: CkPaint()..color = const ui.Color(0xFF00FFFF),
+              background: CkPaint()..color = const ui.Color(0xFF0000FF),
             ),
       ];
 
@@ -655,7 +655,7 @@ void testMain() {
           final ui.Offset leftEnd = ui.Offset(
               fromParagraph.maxIntrinsicWidth + 10, fromParagraph.height / 2);
           final ui.Offset rightEnd = ui.Offset(middle - 10, leftEnd.dy);
-          final ui.Offset tipOffset = ui.Offset(-5, -5);
+          const ui.Offset tipOffset = ui.Offset(-5, -5);
           canvas.drawLine(leftEnd, rightEnd, CkPaint());
           canvas.drawLine(rightEnd, rightEnd + tipOffset, CkPaint());
           canvas.drawLine(
@@ -672,7 +672,7 @@ void testMain() {
       await matchPictureGolden(
         'canvaskit_text_styles_do_not_leak.png',
         picture,
-        region: ui.Rect.fromLTRB(0, 0, testWidth, 850),
+        region: const ui.Rect.fromLTRB(0, 0, testWidth, 850),
       );
     });
 
@@ -806,8 +806,8 @@ void testMain() {
       // First draw a frame with a red rectangle
       final CkPictureRecorder recorder = CkPictureRecorder();
       final CkCanvas canvas = recorder.beginRecording(ui.Rect.largest);
-      canvas.drawRect(ui.Rect.fromLTRB(20, 20, 100, 100),
-          CkPaint()..color = ui.Color(0xffff0000));
+      canvas.drawRect(const ui.Rect.fromLTRB(20, 20, 100, 100),
+          CkPaint()..color = const ui.Color(0xffff0000));
       final CkPicture picture = recorder.endRecording();
       final LayerSceneBuilder builder = LayerSceneBuilder();
       builder.pushOffset(0, 0);
@@ -823,7 +823,7 @@ void testMain() {
       EnginePlatformDispatcher.instance.rasterizer!.draw(emptyLayerTree);
 
       await matchGoldenFile('canvaskit_empty_scene.png',
-          region: ui.Rect.fromLTRB(0, 0, 100, 100));
+          region: const ui.Rect.fromLTRB(0, 0, 100, 100));
     });
     // TODO: https://github.com/flutter/flutter/issues/60040
     // TODO: https://github.com/flutter/flutter/issues/71520
@@ -845,7 +845,7 @@ Future<void> testSampleText(String language, String text,
     ));
     paragraphBuilder.addText(text);
     final CkParagraph paragraph = paragraphBuilder.build();
-    paragraph.layout(ui.ParagraphConstraints(width: testWidth - 20));
+    paragraph.layout(const ui.ParagraphConstraints(width: testWidth - 20));
     canvas.drawParagraph(paragraph, const ui.Offset(10, 10));
     paragraphHeight = paragraph.height;
     return recorder.endRecording();
@@ -863,7 +863,7 @@ Future<void> testSampleText(String language, String text,
 typedef ParagraphFactory = CkParagraph Function();
 
 void drawTestPicture(CkCanvas canvas) {
-  canvas.clear(ui.Color(0xFFFFFFF));
+  canvas.clear(const ui.Color(0xFFFFFFF));
 
   canvas.translate(10, 10);
 
@@ -872,12 +872,12 @@ void drawTestPicture(CkCanvas canvas) {
 
   canvas.save();
   canvas.clipRect(
-    ui.Rect.fromLTRB(0, 0, 45, 45),
+    const ui.Rect.fromLTRB(0, 0, 45, 45),
     ui.ClipOp.intersect,
     true,
   );
   canvas.clipRRect(
-    ui.RRect.fromLTRBR(5, 5, 50, 50, ui.Radius.circular(8)),
+    ui.RRect.fromLTRBR(5, 5, 50, 50, const ui.Radius.circular(8)),
     true,
   );
   canvas.clipPath(
@@ -889,23 +889,23 @@ void drawTestPicture(CkCanvas canvas) {
       ..close(),
     true,
   );
-  canvas.drawColor(ui.Color.fromARGB(255, 100, 100, 0), ui.BlendMode.srcOver);
+  canvas.drawColor(const ui.Color.fromARGB(255, 100, 100, 0), ui.BlendMode.srcOver);
   canvas.restore(); // remove clips
 
   canvas.translate(60, 0);
   canvas.drawCircle(
     const ui.Offset(30, 25),
     15,
-    CkPaint()..color = ui.Color(0xFF0000AA),
+    CkPaint()..color = const ui.Color(0xFF0000AA),
   );
 
   canvas.translate(60, 0);
   canvas.drawArc(
-    ui.Rect.fromLTRB(10, 20, 50, 40),
+    const ui.Rect.fromLTRB(10, 20, 50, 40),
     math.pi / 4,
     3 * math.pi / 2,
     true,
-    CkPaint()..color = ui.Color(0xFF00AA00),
+    CkPaint()..color = const ui.Color(0xFF00AA00),
   );
 
   canvas.translate(60, 0);
@@ -943,24 +943,24 @@ void drawTestPicture(CkCanvas canvas) {
 
   canvas.translate(60, 0);
   canvas.drawDRRect(
-    ui.RRect.fromLTRBR(0, 0, 40, 30, ui.Radius.elliptical(16, 8)),
-    ui.RRect.fromLTRBR(10, 10, 30, 20, ui.Radius.elliptical(4, 8)),
+    ui.RRect.fromLTRBR(0, 0, 40, 30, const ui.Radius.elliptical(16, 8)),
+    ui.RRect.fromLTRBR(10, 10, 30, 20, const ui.Radius.elliptical(4, 8)),
     CkPaint(),
   );
 
   canvas.translate(60, 0);
   canvas.drawImageRect(
     generateTestImage(),
-    ui.Rect.fromLTRB(0, 0, 15, 15),
-    ui.Rect.fromLTRB(10, 10, 40, 40),
+    const ui.Rect.fromLTRB(0, 0, 15, 15),
+    const ui.Rect.fromLTRB(10, 10, 40, 40),
     CkPaint(),
   );
 
   canvas.translate(60, 0);
   canvas.drawImageNine(
     generateTestImage(),
-    ui.Rect.fromLTRB(5, 5, 15, 15),
-    ui.Rect.fromLTRB(10, 10, 50, 40),
+    const ui.Rect.fromLTRB(5, 5, 15, 15),
+    const ui.Rect.fromLTRB(10, 10, 50, 40),
     CkPaint(),
   );
 
@@ -970,29 +970,29 @@ void drawTestPicture(CkCanvas canvas) {
   canvas.translate(0, 60);
   canvas.save();
 
-  canvas.drawLine(ui.Offset(0, 0), ui.Offset(40, 30), CkPaint());
+  canvas.drawLine(const ui.Offset(0, 0), const ui.Offset(40, 30), CkPaint());
 
   canvas.translate(60, 0);
   canvas.drawOval(
-    ui.Rect.fromLTRB(0, 0, 40, 30),
+    const ui.Rect.fromLTRB(0, 0, 40, 30),
     CkPaint(),
   );
 
   canvas.translate(60, 0);
   canvas.save();
-  canvas.clipRect(ui.Rect.fromLTRB(0, 0, 50, 30), ui.ClipOp.intersect, true);
-  canvas.drawPaint(CkPaint()..color = ui.Color(0xFF6688AA));
+  canvas.clipRect(const ui.Rect.fromLTRB(0, 0, 50, 30), ui.ClipOp.intersect, true);
+  canvas.drawPaint(CkPaint()..color = const ui.Color(0xFF6688AA));
   canvas.restore();
 
   canvas.translate(60, 0);
   {
     final CkPictureRecorder otherRecorder = CkPictureRecorder();
     final CkCanvas otherCanvas =
-        otherRecorder.beginRecording(ui.Rect.fromLTRB(0, 0, 40, 20));
+        otherRecorder.beginRecording(const ui.Rect.fromLTRB(0, 0, 40, 20));
     otherCanvas.drawCircle(
-      ui.Offset(30, 15),
+      const ui.Offset(30, 15),
       10,
-      CkPaint()..color = ui.Color(0xFFAABBCC),
+      CkPaint()..color = const ui.Color(0xFFAABBCC),
     );
     canvas.drawPicture(otherRecorder.endRecording());
   }
@@ -1004,11 +1004,11 @@ void drawTestPicture(CkCanvas canvas) {
   //                will ensure it's fixed when we have the fix.
   canvas.drawPoints(
     CkPaint()
-      ..color = ui.Color(0xFF0000FF)
+      ..color = const ui.Color(0xFF0000FF)
       ..strokeWidth = 5
       ..strokeCap = ui.StrokeCap.round,
     ui.PointMode.polygon,
-    offsetListToFloat32List(<ui.Offset>[
+    offsetListToFloat32List(const <ui.Offset>[
       ui.Offset(10, 10),
       ui.Offset(20, 10),
       ui.Offset(30, 20),
@@ -1018,20 +1018,20 @@ void drawTestPicture(CkCanvas canvas) {
 
   canvas.translate(60, 0);
   canvas.drawRRect(
-    ui.RRect.fromLTRBR(0, 0, 40, 30, ui.Radius.circular(10)),
+    ui.RRect.fromLTRBR(0, 0, 40, 30, const ui.Radius.circular(10)),
     CkPaint(),
   );
 
   canvas.translate(60, 0);
   canvas.drawRect(
-    ui.Rect.fromLTRB(0, 0, 40, 30),
+    const ui.Rect.fromLTRB(0, 0, 40, 30),
     CkPaint(),
   );
 
   canvas.translate(60, 0);
   canvas.drawShadow(
-    CkPath()..addRect(ui.Rect.fromLTRB(0, 0, 40, 30)),
-    ui.Color(0xFF00FF00),
+    CkPath()..addRect(const ui.Rect.fromLTRB(0, 0, 40, 30)),
+    const ui.Color(0xFF00FF00),
     4,
     true,
   );
@@ -1045,7 +1045,7 @@ void drawTestPicture(CkCanvas canvas) {
   canvas.drawVertices(
     CkVertices(
       ui.VertexMode.triangleFan,
-      <ui.Offset>[
+      const <ui.Offset>[
         ui.Offset(10, 30),
         ui.Offset(30, 50),
         ui.Offset(10, 60),
@@ -1063,44 +1063,44 @@ void drawTestPicture(CkCanvas canvas) {
     canvas.drawCircle(ui.Offset.zero, 5, CkPaint());
   }
   canvas.restoreToCount(restorePoint);
-  canvas.drawCircle(ui.Offset.zero, 7, CkPaint()..color = ui.Color(0xFFFF0000));
+  canvas.drawCircle(ui.Offset.zero, 7, CkPaint()..color = const ui.Color(0xFFFF0000));
 
   canvas.translate(60, 0);
-  canvas.drawLine(ui.Offset.zero, ui.Offset(30, 30), CkPaint());
+  canvas.drawLine(ui.Offset.zero, const ui.Offset(30, 30), CkPaint());
   canvas.save();
   canvas.rotate(-math.pi / 8);
-  canvas.drawLine(ui.Offset.zero, ui.Offset(30, 30), CkPaint());
+  canvas.drawLine(ui.Offset.zero, const ui.Offset(30, 30), CkPaint());
   canvas.drawCircle(
-      ui.Offset(30, 30), 7, CkPaint()..color = ui.Color(0xFF00AA00));
+      const ui.Offset(30, 30), 7, CkPaint()..color = const ui.Color(0xFF00AA00));
   canvas.restore();
 
   canvas.translate(60, 0);
   final CkPaint thickStroke = CkPaint()
     ..style = ui.PaintingStyle.stroke
     ..strokeWidth = 20;
-  final CkPaint semitransparent = CkPaint()..color = ui.Color(0x66000000);
+  final CkPaint semitransparent = CkPaint()..color = const ui.Color(0x66000000);
 
   canvas.saveLayer(kDefaultRegion, semitransparent);
-  canvas.drawLine(ui.Offset(10, 10), ui.Offset(50, 50), thickStroke);
-  canvas.drawLine(ui.Offset(50, 10), ui.Offset(10, 50), thickStroke);
+  canvas.drawLine(const ui.Offset(10, 10), const ui.Offset(50, 50), thickStroke);
+  canvas.drawLine(const ui.Offset(50, 10), const ui.Offset(10, 50), thickStroke);
   canvas.restore();
 
   canvas.translate(60, 0);
   canvas.saveLayerWithoutBounds(semitransparent);
-  canvas.drawLine(ui.Offset(10, 10), ui.Offset(50, 50), thickStroke);
-  canvas.drawLine(ui.Offset(50, 10), ui.Offset(10, 50), thickStroke);
+  canvas.drawLine(const ui.Offset(10, 10), const ui.Offset(50, 50), thickStroke);
+  canvas.drawLine(const ui.Offset(50, 10), const ui.Offset(10, 50), thickStroke);
   canvas.restore();
 
   // To test saveLayerWithFilter we draw three circles with only the middle one
   // blurred using the layer image filter.
   canvas.translate(60, 0);
   canvas.saveLayer(kDefaultRegion, CkPaint());
-  canvas.drawCircle(ui.Offset(30, 30), 10, CkPaint());
+  canvas.drawCircle(const ui.Offset(30, 30), 10, CkPaint());
   {
     canvas.saveLayerWithFilter(
         kDefaultRegion, ui.ImageFilter.blur(sigmaX: 5, sigmaY: 10));
-    canvas.drawCircle(ui.Offset(10, 10), 10, CkPaint());
-    canvas.drawCircle(ui.Offset(50, 50), 10, CkPaint());
+    canvas.drawCircle(const ui.Offset(10, 10), 10, CkPaint());
+    canvas.drawCircle(const ui.Offset(50, 50), 10, CkPaint());
     canvas.restore();
   }
   canvas.restore();
@@ -1116,7 +1116,7 @@ void drawTestPicture(CkCanvas canvas) {
   canvas.save();
   canvas.translate(30, 30);
   canvas.skew(2, 1.5);
-  canvas.drawRect(ui.Rect.fromLTRB(-10, -10, 10, 10), CkPaint());
+  canvas.drawRect(const ui.Rect.fromLTRB(-10, -10, 10, 10), CkPaint());
   canvas.restore();
 
   canvas.restore();
@@ -1141,15 +1141,15 @@ void drawTestPicture(CkCanvas canvas) {
     fontSize: 18,
   ));
   pb.pushStyle(CkTextStyle(
-    color: ui.Color(0xFF0000AA),
+    color: const ui.Color(0xFF0000AA),
   ));
   pb.addText('Hello');
   pb.pop();
   final CkParagraph p = pb.build();
-  p.layout(ui.ParagraphConstraints(width: 1000));
+  p.layout(const ui.ParagraphConstraints(width: 1000));
   canvas.drawParagraph(
     p,
-    ui.Offset(10, 20),
+    const ui.Offset(10, 20),
   );
 
   canvas.translate(60, 0);
@@ -1159,7 +1159,7 @@ void drawTestPicture(CkCanvas canvas) {
       ..lineTo(50, 50)
       ..lineTo(10, 50)
       ..close(),
-    CkPaint()..color = ui.Color(0xFF0000AA),
+    CkPaint()..color = const ui.Color(0xFF0000AA),
   );
 
   canvas.restore();
@@ -1265,8 +1265,8 @@ Future<void> testTextStyle(
     descriptionBuilder.addText(name);
     final CkParagraph descriptionParagraph = descriptionBuilder.build();
     descriptionParagraph
-        .layout(ui.ParagraphConstraints(width: testWidth / 2 - 70));
-    final ui.Offset descriptionOffset = ui.Offset(testWidth / 2 + 30, 0);
+        .layout(const ui.ParagraphConstraints(width: testWidth / 2 - 70));
+    const ui.Offset descriptionOffset = ui.Offset(testWidth / 2 + 30, 0);
     canvas.drawParagraph(descriptionParagraph, descriptionOffset);
 
     final CkParagraphBuilder pb = CkParagraphBuilder(CkParagraphStyle(

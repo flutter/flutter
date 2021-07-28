@@ -49,12 +49,6 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
   /// Current input configuration supplied by the "flutter/textinput" channel.
   InputConfiguration? inputConfig;
 
-  @override
-  OnChangeCallback? onChange;
-
-  @override
-  OnActionCallback? onAction;
-
   /// The semantics implementation does not operate on DOM nodes, but only
   /// remembers the config and callbacks. This is because the DOM nodes are
   /// supplied in the semantics update and enabled by [activate].
@@ -258,7 +252,6 @@ class TextField extends RoleManager {
       case BrowserEngine.edge:
       case BrowserEngine.ie11:
       case BrowserEngine.firefox:
-      case BrowserEngine.ie11:
       case BrowserEngine.unknown:
         _initializeForBlink();
         break;

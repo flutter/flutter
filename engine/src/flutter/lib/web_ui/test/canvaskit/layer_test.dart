@@ -25,13 +25,13 @@ void testMain() {
           ui.window.platformDispatcher as EnginePlatformDispatcher;
 
       final CkPicture picture =
-          paintPicture(ui.Rect.fromLTRB(0, 0, 60, 60), (CkCanvas canvas) {
-        canvas.drawRect(ui.Rect.fromLTRB(0, 0, 60, 60),
+          paintPicture(const ui.Rect.fromLTRB(0, 0, 60, 60), (CkCanvas canvas) {
+        canvas.drawRect(const ui.Rect.fromLTRB(0, 0, 60, 60),
             CkPaint()..style = ui.PaintingStyle.fill);
       });
 
       final LayerSceneBuilder sb = LayerSceneBuilder();
-      sb.pushClipRect(ui.Rect.fromLTRB(15, 15, 30, 30));
+      sb.pushClipRect(const ui.Rect.fromLTRB(15, 15, 30, 30));
 
       // Intentionally use a perspective transform, which triggered the
       // https://github.com/flutter/flutter/issues/63715 bug.
@@ -44,10 +44,10 @@ void testMain() {
       final LayerTree layerTree = sb.build().layerTree;
       dispatcher.rasterizer!.draw(layerTree);
       final ClipRectEngineLayer clipRect = layerTree.rootLayer.debugLayers.single as ClipRectEngineLayer;
-      expect(clipRect.paintBounds, ui.Rect.fromLTRB(15, 15, 30, 30));
+      expect(clipRect.paintBounds, const ui.Rect.fromLTRB(15, 15, 30, 30));
 
       final TransformEngineLayer transform = clipRect.debugLayers.single as TransformEngineLayer;
-      expect(transform.paintBounds, ui.Rect.fromLTRB(0, 0, 30, 30));
+      expect(transform.paintBounds, const ui.Rect.fromLTRB(0, 0, 30, 30));
     });
 
     test('can push a leaf layer without a container layer', () async {
