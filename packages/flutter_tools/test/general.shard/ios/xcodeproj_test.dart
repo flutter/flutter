@@ -708,6 +708,49 @@ Information about project "Runner":
       expect(buildPhaseScriptContents.contains('EXCLUDED_ARCHS'), isFalse);
     });
 
+    testUsingOsxContext('excludes i386 simulator', () async {
+      const BuildInfo buildInfo = BuildInfo.debug;
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fs.directory('path/to/project'));
+      project.ios.hostAppRoot.childDirectory('Pods').childDirectory('Pods.xcodeproj').childFile('project.pbxproj')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+				ENABLE_BITCODE = NO;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "i386";
+				INFOPLIST_FILE = Runner/Info.plist;
+				UNRELATED_BUILD_SETTING = arm64;
+          ''');
+      await updateGeneratedXcodeProperties(
+        project: project,
+        buildInfo: buildInfo,
+      );
+
+      final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
+      expect(config.readAsStringSync(), contains('EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386\n'));
+
+      final File buildPhaseScript = fs.file('path/to/project/ios/Flutter/flutter_export_environment.sh');
+      expect(buildPhaseScript.readAsStringSync(), isNot(contains('EXCLUDED_ARCHS')));
+    });
+
+    testUsingOsxContext('excludes arm64 simulator when unsupported by plugins', () async {
+      const BuildInfo buildInfo = BuildInfo.debug;
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fs.directory('path/to/project'));
+      project.ios.hostAppRoot.childDirectory('Pods').childDirectory('Pods.xcodeproj').childFile('project.pbxproj')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+				ENABLE_BITCODE = NO;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "i386 arm64";
+				INFOPLIST_FILE = Runner/Info.plist;
+				UNRELATED_BUILD_SETTING = arm64;
+          ''');
+      await updateGeneratedXcodeProperties(
+        project: project,
+        buildInfo: buildInfo,
+      );
+
+      final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
+      expect(config.readAsStringSync(), contains('EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386 arm64\n'));
+    });
+
     testUsingOsxContext('sets TRACK_WIDGET_CREATION=true when trackWidgetCreation is true', () async {
       const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null, trackWidgetCreation: true, treeShakeIcons: false);
       final FlutterProject project = FlutterProject.fromDirectoryTest(fs.directory('path/to/project'));

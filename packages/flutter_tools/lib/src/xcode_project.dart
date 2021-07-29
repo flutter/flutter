@@ -146,6 +146,25 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   /// Xcode workspace shared workspace settings file for the host app.
   File get xcodeWorkspaceSharedSettings => xcodeWorkspaceSharedData.childFile('WorkspaceSettings.xcsettings');
 
+  /// Do all plugins support arm64 simulators to run natively on an ARM Mac?
+  bool get pluginsSupportArmSimulator {
+    final File podProject = hostAppRoot
+        .childDirectory('Pods')
+        .childDirectory('Pods.xcodeproj')
+        .childFile('project.pbxproj');
+    if (!podProject.existsSync()) {
+      // No plugins.
+      return true;
+    }
+    final String podProjectContents = podProject.readAsStringSync();
+    // Quick and dirty way to see if any plugins or their dependencies exclude arm64 simulators
+    // as a valid architecture, usually because a binary is missing that slice.
+    // Example: "EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "arm64 i386";
+    // NOT: "EXCLUDED_ARCHS[sdk=iphoneos*]" = "arm64 i386";
+    // NOT: "EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "i386";
+    return !podProjectContents.contains(RegExp('EXCLUDED_ARCHS.*iphonesimulator.*arm64'));
+  }
+
   @override
   bool existsSync()  {
     return parent.isModule || _editableDirectory.existsSync();
