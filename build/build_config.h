@@ -121,18 +121,6 @@
 #elif defined(__pnacl__)
 #define ARCH_CPU_32_BITS 1
 #define ARCH_CPU_LITTLE_ENDIAN 1
-#elif defined(__MIPSEL__)
-#if defined(__LP64__)
-#define ARCH_CPU_MIPS64_FAMILY 1
-#define ARCH_CPU_MIPS64EL 1
-#define ARCH_CPU_64_BITS 1
-#define ARCH_CPU_LITTLE_ENDIAN 1
-#else
-#define ARCH_CPU_MIPS_FAMILY 1
-#define ARCH_CPU_MIPSEL 1
-#define ARCH_CPU_32_BITS 1
-#define ARCH_CPU_LITTLE_ENDIAN 1
-#endif
 #else
 #error Please add support for your architecture in build/build_config.h
 #endif

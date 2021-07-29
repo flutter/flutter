@@ -125,16 +125,3 @@ gcc_toolchain("x64") {
   toolchain_os = "linux"
   is_clang = false
 }
-
-gcc_toolchain("mipsel") {
-  cc = "mipsel-linux-gnu-gcc"
-  cxx = "mipsel-linux-gnu-g++"
-  ar = "mipsel-linux-gnu-ar"
-  ld = cxx
-  readelf = "mipsel-linux-gnu-readelf"
-  nm = "mipsel-linux-gnu-nm"
-
-  toolchain_cpu = "mipsel"
-  toolchain_os = "linux"
-  is_clang = false
-}

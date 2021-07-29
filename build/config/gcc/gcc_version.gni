@@ -4,8 +4,7 @@
 
 if (is_android) {
   gcc_version = 49
-} else if (current_toolchain == "//build/toolchain/cros:target" ||
-           current_toolchain == "//build/toolchain/linux:mipsel") {
+} else if (current_toolchain == "//build/toolchain/cros:target") {
   gcc_version = exec_script("../../compiler_version.py",
                             [
                               "target",

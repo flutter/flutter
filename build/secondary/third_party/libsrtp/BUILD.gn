@@ -63,10 +63,6 @@ config("libsrtp_config") {
       "CPU_CISC",
     ]
   }
-
-  if (current_cpu == "mipsel") {
-    defines += [ "CPU_RISC" ]
-  }
 }
 
 config("system_libsrtp_config") {

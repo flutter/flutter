@@ -23,15 +23,5 @@
         "Sha1Sum": "e954fb79fcddf64bc39d721c9a5b652b6da549fa",
         "SysrootDir": "debian_sid_i386-sysroot",
         "Tarball": "debian_sid_i386_sysroot.tar.xz"
-    },
-    "sid_mips": {
-        "Sha1Sum": "ca96bbdba7cc36f09790c09694fd61da44e54f06",
-        "SysrootDir": "debian_sid_mips-sysroot",
-        "Tarball": "debian_sid_mips_sysroot.tar.xz"
-    },
-    "sid_mips64el": {
-        "Sha1Sum": "4c1f3e3f4a11f820e152faffc49ccdfa1c435cc0",
-        "SysrootDir": "debian_sid_mips64el-sysroot",
-        "Tarball": "debian_sid_mips64el_sysroot.tar.xz"
     }
 }

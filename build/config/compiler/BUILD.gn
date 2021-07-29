@@ -6,9 +6,6 @@ import("//build/config/android/config.gni")
 if (current_cpu == "arm") {
   import("//build/config/arm.gni")
 }
-if (current_cpu == "mipsel" || current_cpu == "mips64el") {
-  import("//build/config/mips.gni")
-}
 if (is_posix) {
   import("//build/config/gcc/gcc_version.gni")
 }
@@ -244,54 +241,6 @@ config("compiler") {
           # size and performance in gcc 4.9.
           "-fno-caller-saves",
         ]
-      }
-    } else if (current_cpu == "mipsel") {
-      if (mips_arch_variant == "r6") {
-        cflags += [
-          "-mips32r6",
-          "-Wa,-mips32r6",
-        ]
-        if (is_android) {
-          ldflags += [
-            "-mips32r6",
-            "-Wl,-melf32ltsmip",
-          ]
-        }
-      } else if (mips_arch_variant == "r2") {
-        cflags += [
-          "-mips32r2",
-          "-Wa,-mips32r2",
-        ]
-        if (mips_float_abi == "hard" && mips_fpu_mode != "") {
-          cflags += [ "-m$mips_fpu_mode" ]
-        }
-      } else if (mips_arch_variant == "r1") {
-        cflags += [
-          "-mips32",
-          "-Wa,-mips32",
-        ]
-      }
-
-      if (mips_dsp_rev == 1) {
-        cflags += [ "-mdsp" ]
-      } else if (mips_dsp_rev == 2) {
-        cflags += [ "-mdspr2" ]
-      }
-
-      cflags += [ "-m${mips_float_abi}-float" ]
-    } else if (current_cpu == "mips64el") {
-      if (mips_arch_variant == "r6") {
-        cflags += [
-          "-mips64r6",
-          "-Wa,-mips64r6",
-        ]
-        ldflags += [ "-mips64r6" ]
-      } else if (mips_arch_variant == "r2") {
-        cflags += [
-          "-mips64r2",
-          "-Wa,-mips64r2",
-        ]
-        ldflags += [ "-mips64r2" ]
       }
     }
 
@@ -572,11 +521,6 @@ config("runtime_library") {
       ]
     }
 
-    # TODO(jdduke) Re-enable on mips after resolving linking
-    # issues with libc++ (crbug.com/456380).
-    if (current_cpu != "mipsel" && current_cpu != "mips64el") {
-      ldflags += [ "-Wl,--warn-shared-textrel" ]
-    }
     ldflags += [ "-nostdlib" ]
 
     cflags += [
@@ -839,15 +783,6 @@ if (is_win) {
   if (is_android) {
     if (!using_sanitizer && !enable_profiling) {
       common_optimize_on_cflags += [ "-fomit-frame-pointer" ]
-    }
-
-    # TODO(jdduke) Re-enable on mips after resolving linking
-    # issues with libc++ (crbug.com/456380).
-    if (current_cpu != "mipsel" && current_cpu != "mips64el") {
-      common_optimize_on_ldflags += [
-        # Warn in case of text relocations.
-        "-Wl,--warn-shared-textrel",
-      ]
     }
   }
 

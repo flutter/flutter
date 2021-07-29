@@ -27,9 +27,7 @@ if (current_toolchain == default_toolchain && target_sysroot != "") {
   import("//build/config/android/config.gni")
   sysroot = rebase_path("$llvm_android_toolchain_root/sysroot")
 } else if (is_linux && !is_chromeos) {
-  if (current_cpu == "mipsel") {
-    sysroot = rebase_path("//mipsel-sysroot/sysroot")
-  } else if (use_default_linux_sysroot && !is_fuchsia) {
+  if (use_default_linux_sysroot && !is_fuchsia) {
     if (current_cpu == "x64") {
       sysroot = rebase_path("//build/linux/debian_sid_amd64-sysroot")
     } else {
