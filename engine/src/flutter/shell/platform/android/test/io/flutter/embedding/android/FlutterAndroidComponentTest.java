@@ -82,7 +82,7 @@ public class FlutterAndroidComponentTest {
     assertNotNull(binding.getPlatformViewRegistry());
 
     delegate.onRestoreInstanceState(null);
-    delegate.onCreateView(null, null, null, 0, true);
+    delegate.onCreateView(null, null, null, 0);
     delegate.onStart();
     delegate.onResume();
     delegate.onPause();
@@ -156,7 +156,7 @@ public class FlutterAndroidComponentTest {
     // Verify that after Activity creation, the plugin was allowed to restore state.
     verify(mockSaveStateListener, times(1)).onRestoreInstanceState(any(Bundle.class));
 
-    delegate.onCreateView(null, null, null, 0, true);
+    delegate.onCreateView(null, null, null, 0);
     delegate.onStart();
     delegate.onResume();
     delegate.onPause();
@@ -195,7 +195,7 @@ public class FlutterAndroidComponentTest {
     // Push the delegate through all lifecycle methods all the way to destruction.
     delegate.onAttach(RuntimeEnvironment.application);
     delegate.onRestoreInstanceState(null);
-    delegate.onCreateView(null, null, null, 0, true);
+    delegate.onCreateView(null, null, null, 0);
     delegate.onStart();
     delegate.onResume();
     delegate.onPause();
