@@ -178,13 +178,13 @@ void main() {
 
     // 'First ':
     expect(boxes[0], const TextBox.fromLTRBD(0.0, 0.0, 60.0, 10.0, TextDirection.ltr));
-    // 'smallsecond ' in size 8:
+    // 'smallsecond ' in size 5:
     expect(boxes[1], const TextBox.fromLTRBD(60.0, 4.0, 120.0, 9.0, TextDirection.ltr));
     // 'third fourth ':
     expect(boxes[2], const TextBox.fromLTRBD(0.0, 10.0, 130.0, 20.0, TextDirection.ltr));
     // 'fifth':
     expect(boxes[3], const TextBox.fromLTRBD(0.0, 20.0, 50.0, 30.0, TextDirection.ltr));
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61016
+  }, skip: !isLinux); // mac typography values can differ
 
   test('getBoxesForSelection test with boxHeightStyle and boxWidthStyle set to max', () {
     final RenderParagraph paragraph = RenderParagraph(
