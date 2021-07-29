@@ -703,6 +703,70 @@ void main() {
         )),
       );
     });
+
+    testWidgets('Dispatch events to all handlers', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode();
+      final List<int> logs = <int>[];
+
+      await tester.pumpWidget(
+        RawKeyboardListener(
+          autofocus: true,
+          focusNode: focusNode,
+          child: Container(),
+          onKey: (RawKeyEvent event) {
+            logs.add(1);
+          },
+        ),
+      );
+
+      // Only the Service binding handler.
+
+      expect(await simulateKeyDownEvent(LogicalKeyboardKey.keyA),
+        false);
+      expect(logs, <int>[1]);
+      logs.clear();
+
+      // Add a handler.
+
+      void handler2(RawKeyEvent event) {
+        logs.add(2);
+      }
+      RawKeyboard.instance.addListener(handler2);
+
+      expect(await simulateKeyUpEvent(LogicalKeyboardKey.keyA),
+        false);
+      expect(logs, <int>[1, 2]);
+      logs.clear();
+
+      // Add another handler.
+
+      void handler3(RawKeyEvent event) {
+        logs.add(3);
+      }
+      RawKeyboard.instance.addListener(handler3);
+
+      expect(await simulateKeyDownEvent(LogicalKeyboardKey.keyA),
+        false);
+      expect(logs, <int>[1, 2, 3]);
+      logs.clear();
+
+      // Add handler2 again.
+
+      RawKeyboard.instance.addListener(handler2);
+
+      expect(await simulateKeyUpEvent(LogicalKeyboardKey.keyA),
+        false);
+      expect(logs, <int>[1, 2, 3, 2]);
+      logs.clear();
+
+      // Remove handler2 once.
+
+      RawKeyboard.instance.removeListener(handler2);
+      expect(await simulateKeyDownEvent(LogicalKeyboardKey.keyA),
+        false);
+      expect(logs, <int>[1, 3, 2]);
+      logs.clear();
+    }, variant: KeySimulatorTransitModeVariant.all());
   });
 
   group('RawKeyEventDataAndroid', () {
@@ -955,6 +1019,7 @@ void main() {
         },
       );
       expect(message, equals(<String, dynamic>{ 'handled': false }));
+      message = null;
 
       // Set up a widget that will receive focused text events.
       final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');

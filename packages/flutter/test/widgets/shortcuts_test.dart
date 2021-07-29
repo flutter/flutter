@@ -435,7 +435,33 @@ void main() {
       invoked = 0;
 
       expect(RawKeyboard.instance.keysPressed, isEmpty);
-    });
+    }, variant: KeySimulatorTransitModeVariant.all());
+
+    testWidgets('handles repeated events', (WidgetTester tester) async {
+      int invoked = 0;
+      await tester.pumpWidget(activatorTester(
+        const SingleActivator(
+          LogicalKeyboardKey.keyC,
+          control: true,
+        ),
+        (Intent intent) { invoked += 1; },
+      ));
+      await tester.pump();
+
+      // LCtrl -> KeyC: Accept
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      expect(invoked, 0);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyC);
+      expect(invoked, 1);
+      await tester.sendKeyRepeatEvent(LogicalKeyboardKey.keyC);
+      expect(invoked, 2);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyC);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      expect(invoked, 2);
+      invoked = 0;
+
+      expect(RawKeyboard.instance.keysPressed, isEmpty);
+    }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('handles Shift-Ctrl-C', (WidgetTester tester) async {
       int invoked = 0;
@@ -1075,7 +1101,27 @@ void main() {
       await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
       expect(invoked, 1);
       invoked = 0;
-    });
+    }, variant: KeySimulatorTransitModeVariant.all());
+
+    testWidgets('handles repeated events', (WidgetTester tester) async {
+      int invoked = 0;
+      await tester.pumpWidget(activatorTester(
+        const CharacterActivator('?'),
+        (Intent intent) { invoked += 1; },
+      ));
+      await tester.pump();
+
+      // Press KeyC: Accepted by DumbLogicalActivator
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.slash, character: '?');
+      expect(invoked, 1);
+      await tester.sendKeyRepeatEvent(LogicalKeyboardKey.slash, character: '?');
+      expect(invoked, 2);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.slash);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+      expect(invoked, 2);
+      invoked = 0;
+    }, variant: KeySimulatorTransitModeVariant.all());
   });
 
   group('CallbackShortcuts', () {
