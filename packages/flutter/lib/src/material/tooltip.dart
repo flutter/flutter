@@ -113,16 +113,31 @@ class Tooltip extends StatefulWidget {
     this.waitDuration,
     this.showDuration,
     this.child,
-  })  : assert(
-          tooltip != null || message != null,
-          'A non-null message or tooltip must be provided to a Tooltip Widget.',
-        ),
+  })  : assert(tooltip != null || message != null, 'A non-null message or tooltip must be provided to a Tooltip Widget.'),
         super(key: key);
 
-  /// The widget to display in the tooltip.
+  /// The widget to display in the tooltip. [tooltip] is used to provide custom
+  /// tooltip which should be a widget.
+  ///
+  /// When [tooltip] and [message] both are provided, widget provided in the
+  /// tooltip will be shown in the tooltip and message property will be used
+  /// for semantics if [excludeFromSemantics] is true.
+  ///
+  /// For text tooltips, [message] property can be used.
+  ///
+  /// For example,
+  /// tooltip: Text("example tooltip") or message: "example tooltip" are equal.
   final Widget? tooltip;
 
-  /// The text to display in the tooltip.
+  /// The text to display in the tooltip. [message] is used to show a text
+  /// tooltips which is a more common use case.
+  ///
+  /// When [tooltip] and [message] both are provided, widget provided in the
+  /// tooltip will be shown in the tooltip and message property will be used
+  /// for semantics if [excludeFromSemantics] is true.
+  ///
+  /// In some cases, like information button tooltip, [tooltip] can be used
+  /// which accepts widget.
   final String? message;
 
   /// The height of the tooltip's [child].
@@ -193,6 +208,10 @@ class Tooltip extends StatefulWidget {
   /// [Colors.white]. Otherwise, if [ThemeData.brightness] is set to
   /// [Brightness.light], [TextTheme.bodyText2] of [ThemeData.textTheme] will be
   /// used with [Colors.black].
+  ///
+  /// **Note:** When custom tooltip widget is provided in the tooltip, provided
+  /// textStyle will not have any effect over the tooltip content whereas when  
+  /// message is used, it will apply the text styling to the tooltip text;
   final TextStyle? textStyle;
 
   /// The length of time that a pointer must hover over a tooltip's widget
