@@ -171,6 +171,7 @@ class FloatingActionButton extends StatelessWidget {
        _floatingActionButtonType = mini ? _FloatingActionButtonType.small : _FloatingActionButtonType.regular,
        _extendedLabel = null,
        extendedIconLabelSpacing = null,
+       extendedPadding = null,
        super(key: key);
 
   /// Creates a small circular floating action button.
@@ -217,6 +218,7 @@ class FloatingActionButton extends StatelessWidget {
        isExtended = false,
        _extendedLabel = null,
        extendedIconLabelSpacing = null,
+       extendedPadding = null,
        super(key: key);
 
   /// Creates a large circular floating action button.
@@ -263,6 +265,7 @@ class FloatingActionButton extends StatelessWidget {
        isExtended = false,
        _extendedLabel = null,
        extendedIconLabelSpacing = null,
+       extendedPadding = null,
        super(key: key);
 
   /// Creates a wider [StadiumBorder]-shaped floating action button with
@@ -294,6 +297,7 @@ class FloatingActionButton extends StatelessWidget {
     this.focusNode,
     this.autofocus = false,
     this.extendedIconLabelSpacing,
+    this.extendedPadding,
     Widget? icon,
     required Widget label,
     this.enableFeedback,
@@ -518,6 +522,14 @@ class FloatingActionButton extends StatelessWidget {
   /// If that is also null, the default is 8.0.
   final double? extendedIconLabelSpacing;
 
+  /// The padding for an extended [FloatingActionButton]'s content.
+  ///
+  /// If null, [FloatingActionButtonThemeData.extendedPadding] is used. If that
+  /// is also null, the default is
+  /// `EdgeInsetsDirectional.only(start: 16.0, end: 20.0)` if an icon is
+  /// provided, and `EdgeInsetsDirectional.only(start: 20.0, end: 20.0)` if not.
+  final EdgeInsetsGeometry? extendedPadding;
+
   final _FloatingActionButtonType _floatingActionButtonType;
 
   final Widget? _extendedLabel;
@@ -596,16 +608,23 @@ class FloatingActionButton extends StatelessWidget {
       case _FloatingActionButtonType.extended:
         sizeConstraints = floatingActionButtonTheme.extendedSizeConstraints ?? _kExtendedSizeConstraints;
         final double iconLabelSpacing = extendedIconLabelSpacing ?? floatingActionButtonTheme.extendedIconLabelSpacing ?? 8.0;
-        const Widget width20 = SizedBox(width: 20.0);
-        const Widget width16 = SizedBox(width: 16.0);
+        final EdgeInsetsGeometry padding = extendedPadding
+            ?? floatingActionButtonTheme.extendedPadding
+            ?? EdgeInsetsDirectional.only(start: child != null && isExtended ? 16.0 : 20.0, end: 20.0);
         resolvedChild = _ChildOverflowBox(
-          child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: child == null
-                  ? <Widget>[width20, _extendedLabel!, width20]
-                  : isExtended
-                      ? <Widget>[width16, child!, SizedBox(width: iconLabelSpacing), _extendedLabel!, width20]
-                      : <Widget>[width20, child!, width20],
+          child: Padding(
+            padding: padding,
+            child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  if (child != null)
+                    child!,
+                  if (child != null && isExtended)
+                    SizedBox(width: iconLabelSpacing),
+                  if (isExtended)
+                    _extendedLabel!,
+                ],
+            ),
           ),
         );
         break;

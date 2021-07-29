@@ -101,9 +101,10 @@ const ConductorState$json = const {
     const {'1': 'logs', '3': 8, '4': 3, '5': 9, '10': 'logs'},
     const {'1': 'currentPhase', '3': 9, '4': 1, '5': 14, '6': '.conductor_state.ReleasePhase', '10': 'currentPhase'},
     const {'1': 'conductorVersion', '3': 10, '4': 1, '5': 9, '10': 'conductorVersion'},
+    const {'1': 'incrementLevel', '3': 11, '4': 1, '5': 9, '10': 'incrementLevel'},
   ],
 };
 
 /// Descriptor for `ConductorState`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List conductorStateDescriptor = $convert.base64Decode(
-    'Cg5Db25kdWN0b3JTdGF0ZRImCg5yZWxlYXNlQ2hhbm5lbBgBIAEoCVIOcmVsZWFzZUNoYW5uZWwSJgoOcmVsZWFzZVZlcnNpb24YAiABKAlSDnJlbGVhc2VWZXJzaW9uEjMKBmVuZ2luZRgEIAEoCzIbLmNvbmR1Y3Rvcl9zdGF0ZS5SZXBvc2l0b3J5UgZlbmdpbmUSOQoJZnJhbWV3b3JrGAUgASgLMhsuY29uZHVjdG9yX3N0YXRlLlJlcG9zaXRvcnlSCWZyYW1ld29yaxIgCgtjcmVhdGVkRGF0ZRgGIAEoA1ILY3JlYXRlZERhdGUSKAoPbGFzdFVwZGF0ZWREYXRlGAcgASgDUg9sYXN0VXBkYXRlZERhdGUSEgoEbG9ncxgIIAMoCVIEbG9ncxJBCgxjdXJyZW50UGhhc2UYCSABKA4yHS5jb25kdWN0b3Jfc3RhdGUuUmVsZWFzZVBoYXNlUgxjdXJyZW50UGhhc2USKgoQY29uZHVjdG9yVmVyc2lvbhgKIAEoCVIQY29uZHVjdG9yVmVyc2lvbg==');
+    'Cg5Db25kdWN0b3JTdGF0ZRImCg5yZWxlYXNlQ2hhbm5lbBgBIAEoCVIOcmVsZWFzZUNoYW5uZWwSJgoOcmVsZWFzZVZlcnNpb24YAiABKAlSDnJlbGVhc2VWZXJzaW9uEjMKBmVuZ2luZRgEIAEoCzIbLmNvbmR1Y3Rvcl9zdGF0ZS5SZXBvc2l0b3J5UgZlbmdpbmUSOQoJZnJhbWV3b3JrGAUgASgLMhsuY29uZHVjdG9yX3N0YXRlLlJlcG9zaXRvcnlSCWZyYW1ld29yaxIgCgtjcmVhdGVkRGF0ZRgGIAEoA1ILY3JlYXRlZERhdGUSKAoPbGFzdFVwZGF0ZWREYXRlGAcgASgDUg9sYXN0VXBkYXRlZERhdGUSEgoEbG9ncxgIIAMoCVIEbG9ncxJBCgxjdXJyZW50UGhhc2UYCSABKA4yHS5jb25kdWN0b3Jfc3RhdGUuUmVsZWFzZVBoYXNlUgxjdXJyZW50UGhhc2USKgoQY29uZHVjdG9yVmVyc2lvbhgKIAEoCVIQY29uZHVjdG9yVmVyc2lvbhImCg5pbmNyZW1lbnRMZXZlbBgLIAEoCVIOaW5jcmVtZW50TGV2ZWw=');
