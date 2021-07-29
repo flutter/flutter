@@ -11,11 +11,7 @@ import 'package:path/path.dart' as path;
 import 'constants.dart';
 import 'physical_key_data.dart';
 
-bool _isControlCharacter(String label) {
-  if (label.length != 1) {
-    return false;
-  }
-  final int codeUnit = label.codeUnitAt(0);
+bool _isControlCharacter(int codeUnit) {
   return (codeUnit <= 0x1f && codeUnit >= 0x00) || (codeUnit >= 0x7f && codeUnit <= 0x9f);
 }
 
@@ -27,8 +23,11 @@ class _ModifierPair {
   final String right;
 }
 
-List<T> _toNonEmptyArray<T>(dynamic source) {
-  final List<dynamic>? dynamicNullableList = source as List<dynamic>?;
+// Return map[key1][key2] as a non-nullable List<T>, where both map[key1] or
+// map[key1][key2] might be null.
+List<T> _getGrandchildList<T>(Map<String, dynamic> map, String key1, String key2) {
+  final dynamic value = (map[key1] as Map<String, dynamic>?)?[key2];
+  final List<dynamic>? dynamicNullableList = value as List<dynamic>?;
   final List<dynamic> dynamicList = dynamicNullableList ?? <dynamic>[];
   return dynamicList.cast<T>();
 }
@@ -155,20 +154,23 @@ class LogicalKeyData {
       final int value = match.namedGroup('unicode') != null ?
         getHex(match.namedGroup('unicode')!) :
         match.namedGroup('char')!.codeUnitAt(0);
-      final String? keyLabel = match.namedGroup('kind')! == 'UNI' ? String.fromCharCode(value) : null;
+      final String? keyLabel = (match.namedGroup('kind')! == 'UNI' && !_isControlCharacter(value)) ?
+        String.fromCharCode(value) : null;
       // Skip modifier keys from DOM. They will be added with supplemental data.
       if (_chromeModifiers.containsKey(name) && source == 'DOM') {
         continue;
       }
 
-      final bool isPrintable = (keyLabel != null && !_isControlCharacter(keyLabel))
-        || printable.containsKey(name);
+      final bool isPrintable = keyLabel != null;
       data.putIfAbsent(name, () {
-        return LogicalKeyEntry.fromName(
+        final LogicalKeyEntry entry = LogicalKeyEntry.fromName(
           value: toPlane(value, _sourceToPlane(source, isPrintable)),
           name: name,
           keyLabel: keyLabel,
-        )..webNames.add(webName);
+        );
+        if (source == 'DOM' && !isPrintable)
+          entry.webNames.add(webName);
+        return entry;
       });
     }
   }
@@ -418,9 +420,11 @@ class LogicalKeyData {
   })();
 
   static int _sourceToPlane(String source, bool isPrintable) {
+    if (isPrintable)
+      return kUnicodePlane.value;
     switch (source) {
       case 'DOM':
-        return isPrintable ? kUnicodePlane.value : kUnprintablePlane.value;
+        return kUnprintablePlane.value;
       case 'FLUTTER':
         return kFlutterPlane.value;
       default:
@@ -470,20 +474,20 @@ class LogicalKeyEntry {
   LogicalKeyEntry.fromJsonMapEntry(Map<String, dynamic> map)
     : value = map['value'] as int,
       name = map['name'] as String,
-      webNames = _toNonEmptyArray<String>((map['names'] as Map<String, dynamic>)['web']),
-      macOSKeyCodeNames = _toNonEmptyArray<String>((map['names'] as Map<String, dynamic>)['macos']),
-      macOSKeyCodeValues = _toNonEmptyArray<int>((map['values'] as Map<String, dynamic>?)?['macos']),
-      iOSKeyCodeNames = _toNonEmptyArray<String>((map['names'] as Map<String, dynamic>)['ios']),
-      iOSKeyCodeValues = _toNonEmptyArray<int>((map['values'] as Map<String, dynamic>?)?['ios']),
-      gtkNames = _toNonEmptyArray<String>((map['names'] as Map<String, dynamic>)['gtk']),
-      gtkValues = _toNonEmptyArray<int>((map['values'] as Map<String, dynamic>?)?['gtk']),
-      windowsNames = _toNonEmptyArray<String>((map['names'] as Map<String, dynamic>)['windows']),
-      windowsValues = _toNonEmptyArray<int>((map['values'] as Map<String, dynamic>?)?['windows']),
-      androidNames = _toNonEmptyArray<String>((map['names'] as Map<String, dynamic>)['android']),
-      androidValues = _toNonEmptyArray<int>((map['values'] as Map<String, dynamic>?)?['android']),
-      fuchsiaValues = _toNonEmptyArray<int>((map['values'] as Map<String, dynamic>?)?['fuchsia']),
-      glfwNames = _toNonEmptyArray<String>((map['names'] as Map<String, dynamic>)['glfw']),
-      glfwValues = _toNonEmptyArray<int>((map['values'] as Map<String, dynamic>?)?['glfw']),
+      webNames = _getGrandchildList<String>(map, 'names', 'web'),
+      macOSKeyCodeNames = _getGrandchildList<String>(map, 'names', 'macos'),
+      macOSKeyCodeValues = _getGrandchildList<int>(map, 'values', 'macos'),
+      iOSKeyCodeNames = _getGrandchildList<String>(map, 'names', 'ios'),
+      iOSKeyCodeValues = _getGrandchildList<int>(map, 'values', 'ios'),
+      gtkNames = _getGrandchildList<String>(map, 'names', 'gtk'),
+      gtkValues = _getGrandchildList<int>(map, 'values', 'gtk'),
+      windowsNames = _getGrandchildList<String>(map, 'names', 'windows'),
+      windowsValues = _getGrandchildList<int>(map, 'values', 'windows'),
+      androidNames = _getGrandchildList<String>(map, 'names', 'android'),
+      androidValues = _getGrandchildList<int>(map, 'values', 'android'),
+      fuchsiaValues = _getGrandchildList<int>(map, 'values', 'fuchsia'),
+      glfwNames = _getGrandchildList<String>(map, 'names', 'glfw'),
+      glfwValues = _getGrandchildList<int>(map, 'values', 'glfw'),
       keyLabel = map['keyLabel'] as String?;
 
   final int value;

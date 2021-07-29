@@ -2400,6 +2400,7 @@ void main() {
         'keymap': 'web',
         'code': 'KeyA',
         'key': 'a',
+        'location': 0,
         'metaState': 0x0,
       });
       final RawKeyEventDataWeb data = keyAEvent.data as RawKeyEventDataWeb;
@@ -2413,6 +2414,8 @@ void main() {
         'type': 'keydown',
         'keymap': 'web',
         'code': 'Escape',
+        'key': 'Escape',
+        'location': 0,
         'metaState': 0x0,
       });
       final RawKeyEventDataWeb data = escapeKeyEvent.data as RawKeyEventDataWeb;
@@ -2426,6 +2429,8 @@ void main() {
         'type': 'keydown',
         'keymap': 'web',
         'code': 'ShiftLeft',
+        'key': 'Shift',
+        'location': 1,
         'metaState': RawKeyEventDataWeb.modifierShift,
       });
       final RawKeyEventDataWeb data = shiftKeyEvent.data as RawKeyEventDataWeb;
@@ -2439,11 +2444,32 @@ void main() {
         'type': 'keydown',
         'keymap': 'web',
         'code': 'ArrowDown',
+        'key': 'ArrowDown',
+        'location': 0,
         'metaState': 0x0,
       });
       final RawKeyEventDataWeb data = arrowKeyDown.data as RawKeyEventDataWeb;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.arrowDown));
       expect(data.logicalKey, equals(LogicalKeyboardKey.arrowDown));
+      expect(data.keyLabel, isEmpty);
+    });
+
+    test('Unrecognized keys are mapped to Web plane', () {
+      final RawKeyEvent arrowKeyDown = RawKeyEvent.fromMessage(const <String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'web',
+        'code': 'Unrecog1',
+        'key': 'Unrecog2',
+        'location': 0,
+        'metaState': 0x0,
+      });
+      final RawKeyEventDataWeb data = arrowKeyDown.data as RawKeyEventDataWeb;
+      // This might be easily broken on Web if the code fails to acknowledge
+      // that JavaScript doesn't handle 64-bit bit-wise operation.
+      expect(data.physicalKey.usbHidUsage, greaterThan(0x01700000000));
+      expect(data.physicalKey.usbHidUsage, lessThan(0x01800000000));
+      expect(data.logicalKey.keyId, greaterThan(0x01700000000));
+      expect(data.logicalKey.keyId, lessThan(0x01800000000));
       expect(data.keyLabel, isEmpty);
     });
 
