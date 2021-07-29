@@ -1479,6 +1479,10 @@ class ThemeData with Diagnosticable {
     RadioThemeData? radioTheme,
     SwitchThemeData? switchTheme,
     ProgressIndicatorThemeData? progressIndicatorTheme,
+    @Deprecated(
+      'This "fix" is now enabled by default. '
+      'This feature was deprecated after v2.5.0-1.0.pre.',
+    )
     bool? fixTextFieldOutlineLabel,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
