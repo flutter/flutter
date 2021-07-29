@@ -208,7 +208,7 @@ Future<Uri> getRemoteDebuggerUrl(Uri base) async {
 /// [ScreenshotManager] implementation for Chrome.
 ///
 /// This manager can be used for both macOS and Linux.
-// TODO: https://github.com/flutter/flutter/issues/65673
+// TODO(yjbanov): extends tests to Window, https://github.com/flutter/flutter/issues/65673
 class ChromeScreenshotManager extends ScreenshotManager {
   @override
   String get filenameSuffix => '';

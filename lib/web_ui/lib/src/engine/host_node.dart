@@ -106,7 +106,7 @@ class ShadowDomHostNode implements HostNode {
     // The shadowRootStyleElement must be appended to the DOM, or its `sheet` will be null later.
     _shadow.append(shadowRootStyleElement);
 
-    // TODO: Apply only rules for the shadow root
+    // TODO(dit): Apply only rules for the shadow root
     applyGlobalCssRulesToSheet(
       shadowRootStyleElement.sheet! as html.CssStyleSheet,
       browserEngine: browserEngine,

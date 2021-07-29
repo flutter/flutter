@@ -71,7 +71,7 @@ void testMain() {
       ) as CkImageShader;
       expect(imageShader, isA<CkImageShader>());
     });
-  // TODO: https://github.com/flutter/flutter/issues/60040
+  // TODO(hterkelsen): https://github.com/flutter/flutter/issues/60040
   }, skip: isIosSafari);
 }
 

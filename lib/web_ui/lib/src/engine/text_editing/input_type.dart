@@ -11,7 +11,7 @@ import '../browser_detection.dart';
 /// These types are coming from Flutter's [TextInputType]. Currently, we don't
 /// support all the types. We fallback to [EngineInputType.text] when Flutter
 /// sends a type that isn't supported.
-// TODO(flutter_web): Support more types.
+// TODO(mdebbar): Support more types.
 abstract class EngineInputType {
   const EngineInputType();
 

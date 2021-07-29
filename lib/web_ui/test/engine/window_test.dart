@@ -24,9 +24,9 @@ void testMain() {
     final Zone innerZone = Zone.current.fork();
 
     innerZone.runGuarded(() {
-      final ui.VoidCallback callback = () {
+      void callback() {
         expect(Zone.current, innerZone);
-      };
+      }
       window.onTextScaleFactorChanged = callback;
 
       // Test that the getter returns the exact same callback, e.g. it doesn't wrap it.
@@ -40,9 +40,9 @@ void testMain() {
     final Zone innerZone = Zone.current.fork();
 
     innerZone.runGuarded(() {
-      final ui.VoidCallback callback = () {
+      void callback() {
         expect(Zone.current, innerZone);
-      };
+      }
       window.onPlatformBrightnessChanged = callback;
 
       // Test that the getter returns the exact same callback, e.g. it doesn't wrap it.
@@ -56,9 +56,9 @@ void testMain() {
     final Zone innerZone = Zone.current.fork();
 
     innerZone.runGuarded(() {
-      final ui.VoidCallback callback = () {
+      void callback() {
         expect(Zone.current, innerZone);
-      };
+      }
       window.onMetricsChanged = callback;
 
       // Test that the getter returns the exact same callback, e.g. it doesn't wrap it.
@@ -72,9 +72,9 @@ void testMain() {
     final Zone innerZone = Zone.current.fork();
 
     innerZone.runGuarded(() {
-      final ui.VoidCallback callback = () {
+      void callback() {
         expect(Zone.current, innerZone);
-      };
+      }
       window.onLocaleChanged = callback;
 
       // Test that the getter returns the exact same callback, e.g. it doesn't wrap it.
@@ -88,9 +88,9 @@ void testMain() {
     final Zone innerZone = Zone.current.fork();
 
     innerZone.runGuarded(() {
-      final ui.FrameCallback callback = (_) {
+      void callback(Duration _) {
         expect(Zone.current, innerZone);
-      };
+      }
       window.onBeginFrame = callback;
 
       // Test that the getter returns the exact same callback, e.g. it doesn't wrap it.
@@ -104,9 +104,9 @@ void testMain() {
     final Zone innerZone = Zone.current.fork();
 
     innerZone.runGuarded(() {
-      final ui.TimingsCallback callback = (_) {
+      void callback(List<dynamic> _) {
         expect(Zone.current, innerZone);
-      };
+      }
       window.onReportTimings = callback;
 
       // Test that the getter returns the exact same callback, e.g. it doesn't wrap it.
@@ -120,9 +120,9 @@ void testMain() {
     final Zone innerZone = Zone.current.fork();
 
     innerZone.runGuarded(() {
-      final ui.VoidCallback callback = () {
+      void callback() {
         expect(Zone.current, innerZone);
-      };
+      }
       window.onDrawFrame = callback;
 
       // Test that the getter returns the exact same callback, e.g. it doesn't wrap it.
@@ -136,9 +136,9 @@ void testMain() {
     final Zone innerZone = Zone.current.fork();
 
     innerZone.runGuarded(() {
-      final ui.PointerDataPacketCallback callback = (_) {
+      void callback(ui.PointerDataPacket _) {
         expect(Zone.current, innerZone);
-      };
+      }
       window.onPointerDataPacket = callback;
 
       // Test that the getter returns the exact same callback, e.g. it doesn't wrap it.
@@ -168,10 +168,10 @@ void testMain() {
     final Zone innerZone = Zone.current.fork();
 
     innerZone.runGuarded(() {
-      final ui.KeyDataCallback onKeyData = (_) {
+      bool onKeyData(ui.KeyData _) {
         expect(Zone.current, innerZone);
         return false;
-      };
+      }
       window.onKeyData = onKeyData;
 
       // Test that the getter returns the exact same onKeyData, e.g. it doesn't
@@ -198,9 +198,9 @@ void testMain() {
     final Zone innerZone = Zone.current.fork();
 
     innerZone.runGuarded(() {
-      final ui.VoidCallback callback = () {
+      void callback() {
         expect(Zone.current, innerZone);
-      };
+      }
       window.onSemanticsEnabledChanged = callback;
 
       // Test that the getter returns the exact same callback, e.g. it doesn't wrap it.
@@ -214,9 +214,9 @@ void testMain() {
     final Zone innerZone = Zone.current.fork();
 
     innerZone.runGuarded(() {
-      final ui.SemanticsActionCallback callback = (_, __, ___) {
+      void callback(int _, ui.SemanticsAction __, ByteData? ___) {
         expect(Zone.current, innerZone);
-      };
+      }
       window.onSemanticsAction = callback;
 
       // Test that the getter returns the exact same callback, e.g. it doesn't wrap it.
@@ -230,9 +230,9 @@ void testMain() {
     final Zone innerZone = Zone.current.fork();
 
     innerZone.runGuarded(() {
-      final ui.VoidCallback callback = () {
+      void callback() {
         expect(Zone.current, innerZone);
-      };
+      }
       window.onAccessibilityFeaturesChanged = callback;
 
       // Test that the getter returns the exact same callback, e.g. it doesn't wrap it.
@@ -246,9 +246,9 @@ void testMain() {
     final Zone innerZone = Zone.current.fork();
 
     innerZone.runGuarded(() {
-      final ui.PlatformMessageCallback callback = (_, __, ___) {
+      void callback(String _, ByteData? __, void Function(ByteData?)? ___) {
         expect(Zone.current, innerZone);
-      };
+      }
       window.onPlatformMessage = callback;
 
       // Test that the getter returns the exact same callback, e.g. it doesn't wrap it.

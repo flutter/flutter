@@ -118,8 +118,8 @@ void testMain() {
     final DomRenderer renderer = DomRenderer();
     renderer.reset();
   },
-      // TODO(nurhan): https://github.com/flutter/flutter/issues/46638
-      // TODO(nurhan): https://github.com/flutter/flutter/issues/50828
+      // TODO(ferhat): https://github.com/flutter/flutter/issues/46638
+      // TODO(ferhat): https://github.com/flutter/flutter/issues/50828
       skip: browserEngine == BrowserEngine.firefox ||
           browserEngine == BrowserEngine.edge);
 

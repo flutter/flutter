@@ -181,7 +181,7 @@ class IosSafariArgParser extends BrowserArgParser {
 /// Latest Safari version for Catalina, Mojave, High Siera is 13.
 ///
 /// Latest Safari version for Sierra is 12.
-// TODO(nurhan): user latest version to download and install the latest
+// TODO(yjbanov): user latest version to download and install the latest
 // technology preview.
 Future<BrowserInstallation> getOrInstallSafari(
   String requestedVersion, {

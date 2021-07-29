@@ -361,7 +361,7 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
   ///
   /// For now Firefox integration tests only run on Linux and Mac on local.
   ///
-  // TODO: https://github.com/flutter/flutter/issues/63832
+  // TODO(yjbanov): https://github.com/flutter/flutter/issues/63832
   bool get isFirefoxIntegrationTestAvailable =>
       (isFirefox && isLuci && io.Platform.isLinux) ||
       (isFirefox && !isLuci && !io.Platform.isWindows);
@@ -369,7 +369,7 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
   /// Latest versions of Safari Desktop are only available on macOS.
   ///
   /// Integration testing on LUCI is not supported at the moment.
-  // TODO: https://github.com/flutter/flutter/issues/63710
+  // TODO(yjbanov): https://github.com/flutter/flutter/issues/63710
   bool get isSafariIntegrationTestAvailable => isSafariOnMacOS && !isLuci;
 
   /// Due to various factors integration tests might be missing on a given
@@ -776,7 +776,7 @@ class ClearTerminalScreenStep implements PipelineStep {
   Future<void> run() async {
     if (!io.Platform.isWindows) {
       // See: https://en.wikipedia.org/wiki/ANSI_escape_code#CSI_sequences
-      print("\x1B[2J\x1B[1;2H");
+      print('\x1B[2J\x1B[1;2H');
     }
   }
 }

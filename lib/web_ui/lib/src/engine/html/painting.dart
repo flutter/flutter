@@ -153,7 +153,7 @@ class SurfacePaint implements ui.Paint {
     _paintData.colorFilter = value;
   }
 
-  // TODO(flutter_web): see https://github.com/flutter/flutter/issues/33605
+  // TODO(ferhat): see https://github.com/flutter/flutter/issues/33605
   @override
   double get strokeMiterLimit {
     throw UnsupportedError('SurfacePaint.strokeMiterLimit');
@@ -166,13 +166,13 @@ class SurfacePaint implements ui.Paint {
 
   @override
   ui.ImageFilter? get imageFilter {
-    // TODO(flutter/flutter#35156): Implement ImageFilter.
+    // TODO(ferhat): Implement ImageFilter, flutter/flutter#35156.
     return null;
   }
 
   @override
   set imageFilter(ui.ImageFilter? value) {
-    // TODO(flutter/flutter#35156): Implement ImageFilter.
+    // TODO(ferhat): Implement ImageFilter, flutter/flutter#35156
   }
 
   // True if Paint instance has used in RecordingCanvas.

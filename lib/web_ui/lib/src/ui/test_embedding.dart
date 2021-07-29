@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(flutter_web): the Web-only API below need to be cleaned up.
+// TODO(yjbanov): the Web-only API below need to be cleaned up.
 
 part of ui;
 

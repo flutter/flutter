@@ -222,13 +222,13 @@ class DevNull implements StringSink {
   void write(Object? obj) {}
 
   @override
-  void writeAll(Iterable<dynamic> objects, [String separator = ""]) {}
+  void writeAll(Iterable<dynamic> objects, [String separator = '']) {}
 
   @override
   void writeCharCode(int charCode) {}
 
   @override
-  void writeln([Object? obj = ""]) {}
+  void writeln([Object? obj = '']) {}
 }
 
 /// Whether the felt command is running on Cirrus CI.

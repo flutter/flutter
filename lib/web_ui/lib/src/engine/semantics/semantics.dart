@@ -1328,6 +1328,7 @@ class EngineSemanticsOwner {
   /// The top-level DOM element of the semantics DOM element tree.
   html.Element? _rootSemanticsElement;
 
+  // ignore: prefer_function_declarations_over_variables
   TimestampFunction _now = () => DateTime.now();
 
   void debugOverrideTimestampFunction(TimestampFunction value) {

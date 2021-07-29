@@ -102,8 +102,8 @@ void testMain() {
 
       await matchPictureGolden(
           'canvaskit_font_fallback_arabic.png', recorder.endRecording());
-      // TODO: https://github.com/flutter/flutter/issues/60040
-      // TODO: https://github.com/flutter/flutter/issues/71520
+      // TODO(hterkelsen): https://github.com/flutter/flutter/issues/60040
+      // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
     }, skip: isIosSafari || isFirefox);
 
     test('will put the Noto Emoji font before other fallback fonts in the list',
@@ -209,8 +209,8 @@ void testMain() {
 
       await matchPictureGolden(
           'canvaskit_font_fallback_emoji.png', recorder.endRecording());
-      // TODO: https://github.com/flutter/flutter/issues/60040
-      // TODO: https://github.com/flutter/flutter/issues/71520
+      // TODO(hterkelsen): https://github.com/flutter/flutter/issues/60040
+      // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
     }, skip: isIosSafari || isFirefox);
 
     test('will gracefully fail if we cannot parse the Google Fonts CSS',
@@ -364,7 +364,7 @@ void testMain() {
         }
       }
     });
-    // TODO: https://github.com/flutter/flutter/issues/60040
+    // TODO(hterkelsen): https://github.com/flutter/flutter/issues/60040
   }, skip: isIosSafari);
 }
 

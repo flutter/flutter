@@ -204,9 +204,9 @@ abstract class _BaseAdapter {
     html.EventListener handler, {
     bool acceptOutsideGlasspane = false,
   }) {
-    final html.EventListener loggedHandler = (html.Event event) {
+    html.EventListener? loggedHandler(html.Event event) {
       if (!acceptOutsideGlasspane && !glassPaneElement.contains(event.target as html.Node?)) {
-        return;
+        return null;
       }
 
       if (_debugLogPointerEvents) {
@@ -224,7 +224,7 @@ abstract class _BaseAdapter {
       if (EngineSemanticsOwner.instance.receiveGlobalEvent(event)) {
         handler(event);
       }
-    };
+    }
     _listeners[eventName] = loggedHandler;
     // We have to attach the event listener on the window instead of the
     // glasspane element. That's because "up" events that occur outside the

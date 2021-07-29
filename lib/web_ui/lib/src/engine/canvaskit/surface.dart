@@ -117,6 +117,7 @@ class Surface {
     if (surface.context != null) {
       canvasKit.setCurrentContext(surface.context!);
     }
+    // ignore: prefer_function_declarations_over_variables
     final SubmitCallback submitCallback =
         (SurfaceFrame surfaceFrame, CkCanvas canvas) {
       return _presentSurface();

@@ -83,12 +83,9 @@ class EngineLineMetrics implements ui.LineMetrics {
     required this.baseline,
     required this.ascent,
     required this.descent,
-    // Didn't use `this.boxes` because we want it to be non-null in this
-    // constructor.
-    required List<RangeBox> boxes,
+    required this.boxes,
   })  : displayText = null,
-        unscaledAscent = double.infinity,
-        this.boxes = boxes; // ignore: unnecessary_this
+        unscaledAscent = double.infinity;
 
   /// The text to be rendered on the screen representing this line.
   final String? displayText;
@@ -508,7 +505,7 @@ class DomParagraph implements EngineParagraph {
 
     final ParagraphGeometricStyle style = _geometricStyle;
 
-    // TODO(flutter_web): https://github.com/flutter/flutter/issues/33223
+    // TODO(mdebbar): https://github.com/flutter/flutter/issues/33223
     if (style.ellipsis != null &&
         (style.maxLines == null || style.maxLines == 1)) {
       paragraphStyle
@@ -831,7 +828,7 @@ class EngineParagraphStyle implements ui.ParagraphStyle {
     this.ellipsis,
     this.locale,
   })  : _textHeightBehavior = textHeightBehavior,
-        // TODO(b/128317744): add support for strut style.
+        // TODO(mdebbar): add support for strut style., b/128317744
         _strutStyle = strutStyle as EngineStrutStyle?;
 
   final ui.TextAlign? textAlign;
@@ -1240,7 +1237,7 @@ class DomParagraphBuilder implements ui.ParagraphBuilder {
   /// Creates a [DomParagraphBuilder] object, which is used to create a
   /// [DomParagraph].
   DomParagraphBuilder(EngineParagraphStyle style) : _paragraphStyle = style {
-    // TODO(b/128317744): Implement support for strut font families.
+    // TODO(mdebbar): Implement support for strut font families, b/128317744
     List<String?> strutFontFamilies;
     if (style._strutStyle != null) {
       strutFontFamilies = <String?>[];

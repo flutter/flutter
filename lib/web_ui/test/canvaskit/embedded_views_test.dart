@@ -448,7 +448,7 @@ void testMain() {
       renderTestScene();
       expect(skPathDefs.childNodes, hasLength(1));
     });
-    // TODO: https://github.com/flutter/flutter/issues/60040
+    // TODO(dit): https://github.com/flutter/flutter/issues/60040
   }, skip: isIosSafari);
 }
 
