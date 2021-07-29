@@ -1166,9 +1166,12 @@ mixin SchedulerBinding on BindingBase {
 
   /// When a scheduling error occurs, resets the relative state of EventLoop.
   @visibleForTesting
-  void resetEventLoop() {
-    _hasRequestedAnEventLoopCallback = false;
-    _taskQueue.clear();
+  void debugResetEventLoop() {
+    assert(() {
+      _hasRequestedAnEventLoopCallback = false;
+      _taskQueue.clear();
+      return true;
+    }());
   }
 }
 

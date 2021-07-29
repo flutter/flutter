@@ -250,7 +250,7 @@ void main() {
 
   test('The task was successfully executed after the animation', () async {
     scheduler.schedulingStrategy = defaultSchedulingStrategy;
-    scheduler.resetEventLoop();
+    scheduler.debugResetEventLoop();
 
     bool taskExecuted = false;
     final AnimationController controller = AnimationController(
