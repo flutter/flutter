@@ -263,7 +263,6 @@ void main() {
     expect(findFadeTransition, findsNothing);
     expect(_material(tester).elevation, equals(elevation));
     expect(_material(tester).color, equals(backgroundColor));
-    expect(tester.getTopLeft(find.text('Alarm')).dx, 535);
   });
 
   testWidgets('BottomNavigationBarTheme can be used to hide all labels', (WidgetTester tester) async {

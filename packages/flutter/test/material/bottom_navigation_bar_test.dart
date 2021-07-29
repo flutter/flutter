@@ -41,7 +41,6 @@ void main() {
 
     await tester.tap(find.text('Alarm'));
 
-
     expect(mutatedIndex, 1);
   });
 
