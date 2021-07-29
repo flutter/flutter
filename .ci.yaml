@@ -1297,7 +1297,7 @@ targets:
 
   - name: Linux_android flutter_gallery_sksl_warmup__transition_perf_e2e
     builder: Linux_android flutter_gallery_sksl_warmup__transition_perf_e2e
-    bringup: true
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/83298
     presubmit: false
     properties:
       tags: >
@@ -1874,15 +1874,7 @@ targets:
 
   - name: Linux_android flutter_gallery__transition_perf_e2e
     builder: Linux_android flutter_gallery__transition_perf_e2e
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux_android flutter_gallery__transition_perf_e2e
-    builder: Linux_android flutter_gallery__transition_perf_e2e
-    bringup: true
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/83298
     presubmit: false
     properties:
       tags: >
