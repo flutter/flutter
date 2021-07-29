@@ -18,8 +18,7 @@ FLUTTER_ASSERT_ARC
 
 @implementation FlutterAppDelegateTest
 
-// TODO(dnfield): https://github.com/flutter/flutter/issues/74267
-- (void)skip_testLaunchUrl {
+- (void)testLaunchUrl {
   FlutterAppDelegate* appDelegate = [[FlutterAppDelegate alloc] init];
   FlutterViewController* viewController = OCMClassMock([FlutterViewController class]);
   FlutterEngine* engine = OCMClassMock([FlutterEngine class]);
@@ -42,7 +41,7 @@ FLUTTER_ASSERT_ARC
   OCMVerify([navigationChannel invokeMethod:@"pushRoute" arguments:@"/custom/route?query=test"]);
 }
 
-- (void)skip_testLaunchUrlWithQueryParameterAndFragment {
+- (void)testLaunchUrlWithQueryParameterAndFragment {
   FlutterAppDelegate* appDelegate = [[FlutterAppDelegate alloc] init];
   FlutterViewController* viewController = OCMClassMock([FlutterViewController class]);
   FlutterEngine* engine = OCMClassMock([FlutterEngine class]);
@@ -66,7 +65,7 @@ FLUTTER_ASSERT_ARC
                                   arguments:@"/custom/route?query=test#fragment"]);
 }
 
-- (void)skip_testLaunchUrlWithFragmentNoQueryParameter {
+- (void)testLaunchUrlWithFragmentNoQueryParameter {
   FlutterAppDelegate* appDelegate = [[FlutterAppDelegate alloc] init];
   FlutterViewController* viewController = OCMClassMock([FlutterViewController class]);
   FlutterEngine* engine = OCMClassMock([FlutterEngine class]);
