@@ -83,11 +83,13 @@ class RawKeyEventDataWeb extends RawKeyEventData {
 
   @override
   LogicalKeyboardKey get logicalKey {
-    // Look to see if the keyCode is a key based on location. Typically they are
-    // numpad keys (versus main area keys) and left/right modifiers.
-    final LogicalKeyboardKey? maybeLocationKey = kWebLocationMap[key]?[location];
-    if (maybeLocationKey != null)
-      return maybeLocationKey;
+    // Look to see if the keyCode is a printable number pad key, so that a
+    // difference between regular keys (e.g. ".") and the number pad version
+    // (e.g. the "." on the number pad) can be determined.
+    final LogicalKeyboardKey? numPadKey = kWebNumPadMap[code];
+    if (numPadKey != null) {
+      return numPadKey;
+    }
 
     // Look to see if the [code] is one we know about and have a mapping for.
     final LogicalKeyboardKey? newKey = kWebToLogicalKey[code];

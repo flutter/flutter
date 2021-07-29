@@ -328,8 +328,6 @@ void main() {
   });
 
   testWidgets('Cursor animation restarts when it is moved using keys on desktop', (WidgetTester tester) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
-
     const String testText = 'Some text long enough to move the cursor around';
     final TextEditingController controller = TextEditingController(text: testText);
     final Widget widget = MaterialApp(
@@ -402,9 +400,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1));
     expect(renderEditable.cursorColor!.alpha, 0);
     expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
-
-    debugDefaultTargetPlatformOverride = null;
-  }, variant: KeySimulatorTransitModeVariant.all());
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS }));
 
   testWidgets('Cursor does not show when showCursor set to false', (WidgetTester tester) async {
     const Widget widget = MaterialApp(
