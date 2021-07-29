@@ -22,7 +22,7 @@ platform_properties:
       # CIPD flutter_internal/java/openjdk/$platform
       dependencies: >-
         [
-          {"dependency": "openjdk", "version": "1.8.0u202-b08"}
+          {"dependency": "open_jdk", "version": "1.8.0u202-b08"}
         ]
       os: Linux
   mac:
@@ -37,7 +37,7 @@ platform_properties:
       # CIPD flutter_internal/java/openjdk/$platform
       dependencies: >-
         [
-          {"dependency": "openjdk", "version": "1.8.0u202-b08"}
+          {"dependency": "open_jdk", "version": "1.8.0u202-b08"}
         ]
       os: Mac-10.15
       xcode: 12a7209 # xcode 12
@@ -51,7 +51,7 @@ platform_properties:
       # CIPD flutter_internal/java/openjdk/$platform
       dependencies: >-
         [
-          {"dependency": "openjdk", "version": "1.8.0u202-b08"}
+          {"dependency": "open_jdk", "version": "1.8.0u202-b08"}
         ]
       os: Windows-10
 
