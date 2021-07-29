@@ -72,6 +72,7 @@ Future<void> main() async {
     testWidgets('Test traceAction', (WidgetTester tester) async {
       await integrationBinding.enableTimeline(vmService: fakeVM);
       await integrationBinding.traceAction(() async {});
+      print(integrationBinding.reportData);
       expect(integrationBinding.reportData, isNotNull);
       expect(integrationBinding.reportData!.containsKey('timeline'), true);
       expect(
@@ -102,7 +103,7 @@ Future<void> main() async {
   });
 
   tearDownAll(() async {
-    // This part is outside the group so that `request` has been compeleted as
+    // This part is outside the group so that `request` has been completed as
     // part of the `tearDownAll` registered in the group during
     // `IntegrationTestWidgetsFlutterBinding` initialization.
     final Map<String, dynamic> response =

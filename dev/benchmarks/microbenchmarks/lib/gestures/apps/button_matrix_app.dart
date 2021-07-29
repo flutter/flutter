@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 
 class ButtonMatrixApp extends StatefulWidget {
-  const ButtonMatrixApp({Key key}) : super(key: key);
+  const ButtonMatrixApp({Key? key}) : super(key: key);
 
   @override
   ButtonMatrixAppState createState() => ButtonMatrixAppState();

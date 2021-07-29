@@ -127,67 +127,81 @@ class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends 
 /// effects. The [InkWell] class implements this effect and can be used in place
 /// of a [GestureDetector] for handling taps.
 ///
-/// {@animation 200 150 https://flutter.github.io/assets-for-api-docs/assets/widgets/gesture_detector.mp4}
+/// {@tool dartpad --template=stateful_widget_material}
 ///
-/// {@tool snippet}
-///
-/// This example of a [Container] contains a black light bulb wrapped in a [GestureDetector].
-/// It turns the light bulb yellow when the "turn lights on" button is tapped
-/// by setting the `_lights` field. Above animation shows the code in use:
+/// This example contains a black light bulb wrapped in a [GestureDetector]. It
+/// turns the light bulb yellow when the "TURN LIGHT ON" button is tapped by
+/// setting the `_lights` field, and off again when "TURN LIGHT OFF" is tapped.
 ///
 /// ```dart
-/// Container(
-///   alignment: FractionalOffset.center,
-///   color: Colors.white,
-///   child: Column(
-///     mainAxisAlignment: MainAxisAlignment.center,
-///     children: <Widget>[
-///       Padding(
-///         padding: const EdgeInsets.all(8.0),
-///         child: Icon(
-///           Icons.lightbulb_outline,
-///           color: _lights ? Colors.yellow.shade600 : Colors.black,
-///           size: 60,
-///         ),
+/// bool _lightIsOn = false;
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: Container(
+///       alignment: FractionalOffset.center,
+///       child: Column(
+///         mainAxisAlignment: MainAxisAlignment.center,
+///         children: <Widget>[
+///           Padding(
+///             padding: const EdgeInsets.all(8.0),
+///             child: Icon(
+///               Icons.lightbulb_outline,
+///               color: _lightIsOn ? Colors.yellow.shade600 : Colors.black,
+///               size: 60,
+///             ),
+///           ),
+///           GestureDetector(
+///             onTap: () {
+///               setState(() {
+///                 // Toggle light when tapped.
+///                 _lightIsOn = !_lightIsOn;
+///               });
+///             },
+///             child: Container(
+///               color: Colors.yellow.shade600,
+///               padding: const EdgeInsets.all(8),
+///               // Change button text when light changes state.
+///               child: Text(_lightIsOn ? 'TURN LIGHT OFF' : 'TURN LIGHT ON'),
+///             ),
+///           ),
+///         ],
 ///       ),
-///       GestureDetector(
-///         onTap: () {
-///           setState(() {
-///             _lights = true;
-///           });
-///         },
-///         child: Container(
-///           color: Colors.yellow.shade600,
-///           padding: const EdgeInsets.all(8),
-///           child: const Text('TURN LIGHTS ON'),
-///         ),
-///       ),
-///     ],
-///   ),
-/// )
+///     ),
+///   );
+/// }
 /// ```
 /// {@end-tool}
 ///
-/// {@tool snippet}
+/// {@tool dartpad --template=stateful_widget_material}
 ///
-/// This example of a [Container] wraps a [GestureDetector] widget.
-/// Since the [GestureDetector] does not have a child it takes on the size of
-/// its parent making the entire area of the surrounding [Container] clickable.
-/// When tapped the [Container] turns yellow by setting the `_color` field:
+/// This example uses a [Container] that wraps a [GestureDetector] widget which
+/// detects a tap.
+///
+/// Since the [GestureDetector] does not have a child, it takes on the size of its
+/// parent, making the entire area of the surrounding [Container] clickable. When
+/// tapped, the [Container] turns yellow by setting the `_color` field. When
+/// tapped again, it goes back to white.
 ///
 /// ```dart
-/// Container(
-///   color: _color,
-///   height: 200.0,
-///   width: 200.0,
-///   child: GestureDetector(
-///     onTap: () {
-///       setState(() {
-///         _color = Colors.yellow;
-///       });
-///     },
-///   ),
-/// )
+/// Color _color = Colors.white;
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Container(
+///     color: _color,
+///     height: 200.0,
+///     width: 200.0,
+///     child: GestureDetector(
+///       onTap: () {
+///         setState(() {
+///           _color == Colors.yellow ? _color = Colors.white : _color = Colors.yellow;
+///         });
+///       },
+///     ),
+///   );
+/// }
 /// ```
 /// {@end-tool}
 ///

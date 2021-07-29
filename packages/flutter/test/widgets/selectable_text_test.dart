@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 @TestOn('!chrome')
+import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -124,15 +126,15 @@ double getOpacity(WidgetTester tester, Finder finder) {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();
-  SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
+  TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
 
   const String kThreeLines =
       'First line of text is\n'
       'Second line goes until\n'
       'Third line of stuff';
   const String kMoreThanFourLines =
-      kThreeLines +
-          "\nFourth line won't display and ends at";
+      '$kThreeLines\n'
+      "Fourth line won't display and ends at";
 
   // Returns the first RenderEditable.
   RenderEditable findRenderEditable(WidgetTester tester) {
@@ -1303,24 +1305,27 @@ void main() {
   });
 
   testWidgets('minLines cannot be greater than maxLines', (WidgetTester tester) async {
-    try {
-      await tester.pumpWidget(
-        overlay(
-          child: SizedBox(
-            width: 300.0,
-            child: SelectableText(
-              'abcd',
-              minLines: 4,
-              maxLines: 3,
+    expect(
+      () async {
+        await tester.pumpWidget(
+          overlay(
+            child: SizedBox(
+              width: 300.0,
+              child: SelectableText(
+                'abcd',
+                minLines: 4,
+                maxLines: 3,
+              ),
             ),
           ),
-        ),
-      );
-    } on AssertionError catch (e) {
-      expect(e.toString(), contains("minLines can't be greater than maxLines"));
-      return;
-    }
-    fail('An assert should be triggered when minLines is greater than maxLines');
+        );
+      },
+      throwsA(isA<AssertionError>().having(
+        (AssertionError error) => error.toString(),
+        '.toString()',
+        contains("minLines can't be greater than maxLines"),
+      )),
+    );
   });
 
   testWidgets('Selectable height with minLine', (WidgetTester tester) async {
@@ -1415,6 +1420,45 @@ void main() {
     await tester.tap(find.byKey(key2));
     await tester.pump();
     expect(controller.selection, equals(TextRange.empty));
+  });
+
+    testWidgets('Selectable text is skipped during focus traversal',
+      (WidgetTester tester) async {
+    final FocusNode firstFieldFocus = FocusNode();
+    final FocusNode lastFieldFocus = FocusNode();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: Column(
+              children: <Widget>[
+                TextField(
+                  focusNode: firstFieldFocus,
+                  autofocus: true,
+                ),
+                const SelectableText('some text'),
+                TextField(
+                  focusNode: lastFieldFocus,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+
+    expect(firstFieldFocus.hasFocus, isTrue);
+    expect(lastFieldFocus.hasFocus, isFalse);
+
+    firstFieldFocus.nextFocus();
+    await tester.pump();
+
+    // expecting focus to skip straight to the second field
+    expect(firstFieldFocus.hasFocus, isFalse);
+    expect(lastFieldFocus.hasFocus, isTrue);
   });
 
   testWidgets('Selectable text identifies as text field in semantics', (WidgetTester tester) async {
@@ -1626,9 +1670,9 @@ void main() {
     final FocusNode focusNode = FocusNode();
 
     String clipboardContent = '';
-    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.setData')
-        clipboardContent = methodCall.arguments['text'] as String;
+        clipboardContent = (methodCall.arguments as Map<String, dynamic>)['text'] as String;
       else if (methodCall.method == 'Clipboard.getData')
         return <String, dynamic>{'text': clipboardContent};
       return null;
@@ -4604,7 +4648,7 @@ void main() {
       MaterialApp(
         home: SelectableText(
           ' blah blah',
-          onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? cause){
+          onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? cause) {
             selection = newSelection;
           },
         ),
@@ -4650,7 +4694,7 @@ void main() {
           child: Center(
             child: SelectableText(
               ' blah blah',
-              onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? cause){
+              onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? cause) {
                 selection = newSelection;
               },
             ),
@@ -4703,7 +4747,7 @@ void main() {
           child: Center(
             child: SelectableText(
               ' blah blah  \n  blah',
-              onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? cause){
+              onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? cause) {
                 selection = newSelection;
               },
             ),
@@ -4757,4 +4801,108 @@ void main() {
     expect(selection!.baseOffset, 6);
     expect(selection!.extentOffset, 14);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }));
+
+  testWidgets('text selection style 1', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: Column(
+              children: const <Widget>[
+                SelectableText.rich(
+                  TextSpan(
+                    children: <TextSpan>[
+                      TextSpan(
+                        text: 'Atwater Peel ',
+                        style: TextStyle(
+                          fontSize: 30.0,
+                        ),
+                      ),
+                      TextSpan(
+                        text: 'Sherbrooke Bonaventure ',
+                        style: TextStyle(
+                          fontSize: 15.0,
+                        ),
+                      ),
+                      TextSpan(
+                        text: 'hi wassup!',
+                        style: TextStyle(
+                          fontSize: 10.0,
+                        ),
+                      ),
+                    ],
+                  ),
+                  key: Key('field0'),
+                  selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingTop,
+                  selectionWidthStyle: ui.BoxWidthStyle.max,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
+    final TextEditingController controller = editableTextWidget.controller;
+    controller.selection = const TextSelection(baseOffset: 0, extentOffset: 46);
+    await tester.pump();
+
+    await expectLater(
+      find.byType(MaterialApp),
+      matchesGoldenFile('selectable_text_golden.TextSelectionStyle.1.png'),
+    );
+  });
+
+  testWidgets('text selection style 2', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: Column(
+              children: const <Widget>[
+                SelectableText.rich(
+                  TextSpan(
+                    children: <TextSpan>[
+                      TextSpan(
+                        text: 'Atwater Peel ',
+                        style: TextStyle(
+                          fontSize: 30.0,
+                        ),
+                      ),
+                      TextSpan(
+                        text: 'Sherbrooke Bonaventure ',
+                        style: TextStyle(
+                          fontSize: 15.0,
+                        ),
+                      ),
+                      TextSpan(
+                        text: 'hi wassup!',
+                        style: TextStyle(
+                          fontSize: 10.0,
+                        ),
+                      ),
+                    ],
+                  ),
+                  key: Key('field0'),
+                  selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingBottom,
+                  selectionWidthStyle: ui.BoxWidthStyle.tight,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
+    final TextEditingController controller = editableTextWidget.controller;
+    controller.selection = const TextSelection(baseOffset: 0, extentOffset: 46);
+    await tester.pump();
+
+    await expectLater(
+      find.byType(MaterialApp),
+      matchesGoldenFile('selectable_text_golden.TextSelectionStyle.2.png'),
+    );
+  });
 }

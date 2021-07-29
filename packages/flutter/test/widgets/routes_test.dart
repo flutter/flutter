@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=123"
+@Tags(<String>['no-shuffle'])
+
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
@@ -979,7 +985,7 @@ void main() {
       expect(find.byType(ModalBarrier), findsNWidgets(1));
     });
 
-    testWidgets('showGeneralDialog adds non-dismissable barrier when barrierDismissable is false', (WidgetTester tester) async {
+    testWidgets('showGeneralDialog adds non-dismissible barrier when barrierDismissible is false', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         home: Builder(
           builder: (BuildContext context) {
@@ -1701,7 +1707,6 @@ void main() {
       state.addLocalHistory();
       // Waits for modal route to update its internal state;
       await tester.pump();
-
       // Pumps a new widget to dispose WidgetWithLocalHistory. This should cause
       // it to remove the local history entry from modal route during
       // finalizeTree.
@@ -1709,6 +1714,25 @@ void main() {
         home: Text('dummy'),
       ));
       // Waits for modal route to update its internal state;
+      await tester.pump();
+      expect(tester.takeException(), null);
+    });
+
+    testWidgets('child with no local history can be disposed', (WidgetTester tester) async {
+      await tester.pumpWidget(const MaterialApp(
+        home: WidgetWithNoLocalHistory(),
+      ));
+
+      final WidgetWithNoLocalHistoryState state = tester.state(find.byType(WidgetWithNoLocalHistory));
+      state.addLocalHistory();
+      // Waits for modal route to update its internal state;
+      await tester.pump();
+      // Pumps a new widget to dispose WidgetWithNoLocalHistory. This should cause
+      // it to remove the local history entry from modal route during
+      // finalizeTree.
+      await tester.pumpWidget(const MaterialApp(
+        home: Text('dummy'),
+      ));
       await tester.pump();
       expect(tester.takeException(), null);
     });
@@ -1958,6 +1982,33 @@ class WidgetWithLocalHistoryState extends State<WidgetWithLocalHistory> {
     final ModalRoute<dynamic> route = ModalRoute.of(context)!;
     _localHistory = LocalHistoryEntry();
     route.addLocalHistoryEntry(_localHistory);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _localHistory.remove();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const Text('dummy');
+  }
+}
+
+class WidgetWithNoLocalHistory extends StatefulWidget {
+  const WidgetWithNoLocalHistory({Key? key}) : super(key: key);
+
+  @override
+  WidgetWithNoLocalHistoryState createState() => WidgetWithNoLocalHistoryState();
+}
+
+class WidgetWithNoLocalHistoryState extends State<WidgetWithNoLocalHistory> {
+  late LocalHistoryEntry _localHistory;
+
+  void addLocalHistory() {
+    _localHistory = LocalHistoryEntry();
+    // Not calling `route.addLocalHistoryEntry` here.
   }
 
   @override

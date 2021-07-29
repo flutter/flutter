@@ -13,7 +13,7 @@ import '../build_system/build_system.dart';
 import '../build_system/targets/web.dart';
 import '../cache.dart';
 import '../flutter_plugins.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../platform_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';
@@ -26,10 +26,8 @@ Future<void> buildWeb(
   String serviceWorkerStrategy,
   bool sourceMaps,
   bool nativeNullAssertions,
+  String baseHref,
 ) async {
-  if (!flutterProject.web.existsSync()) {
-    throwToolExit('Missing index.html.');
-  }
   final bool hasWebPlugins = (await findPlugins(flutterProject))
     .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
   final Directory outputDirectory = globals.fs.directory(getWebBuildDirectory());
@@ -49,6 +47,7 @@ Future<void> buildWeb(
         kTargetFile: target,
         kHasWebPlugins: hasWebPlugins.toString(),
         kCspMode: csp.toString(),
+        kBaseHref : baseHref,
         kSourceMapsEnabled: sourceMaps.toString(),
         kNativeNullAssertions: nativeNullAssertions.toString(),
         if (serviceWorkerStrategy != null)

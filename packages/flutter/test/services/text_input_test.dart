@@ -154,6 +154,7 @@ void main() {
       expect(TextInputType.visiblePassword.toString(), 'TextInputType(name: TextInputType.visiblePassword, signed: null, decimal: null)');
       expect(TextInputType.name.toString(), 'TextInputType(name: TextInputType.name, signed: null, decimal: null)');
       expect(TextInputType.streetAddress.toString(), 'TextInputType(name: TextInputType.address, signed: null, decimal: null)');
+      expect(TextInputType.none.toString(), 'TextInputType(name: TextInputType.none, signed: null, decimal: null)');
 
       expect(text == number, false);
       expect(number == number2, true);
@@ -181,6 +182,7 @@ void main() {
       expect(TextInputType.visiblePassword.index, 7);
       expect(TextInputType.name.index, 8);
       expect(TextInputType.streetAddress.index, 9);
+      expect(TextInputType.none.index, 10);
 
       expect(TextEditingValue.empty.toString(),
           'TextEditingValue(text: \u2524\u251C, selection: ${const TextSelection.collapsed(offset: -1)}, composing: ${TextRange.empty})');
@@ -465,16 +467,6 @@ class FakeTextChannel implements MethodChannel {
 
   @override
   void setMethodCallHandler(Future<void> Function(MethodCall call)? handler) => incoming = handler;
-
-  @override
-  bool checkMethodCallHandler(Future<void> Function(MethodCall call)? handler) => throw UnimplementedError();
-
-
-  @override
-  void setMockMethodCallHandler(Future<void>? Function(MethodCall call)? handler)  => throw UnimplementedError();
-
-  @override
-  bool checkMockMethodCallHandler(Future<void> Function(MethodCall call)? handler) => throw UnimplementedError();
 
   void validateOutgoingMethodCalls(List<MethodCall> calls) {
     expect(outgoingCalls.length, calls.length);

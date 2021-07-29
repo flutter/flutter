@@ -39,7 +39,6 @@ class WebFlutterDriver extends FlutterDriver {
 
   final FlutterWebConnection _connection;
   DateTime _startTime;
-  bool _accessibilityEnabled = false;
   static int _nextDriverId = 0;
 
   /// The unique ID of this driver instance.
@@ -94,22 +93,6 @@ class WebFlutterDriver extends FlutterDriver {
       printCommunication: printCommunication,
       logCommunicationToFile: logCommunicationToFile,
     );
-  }
-
-  @override
-  Future<void> enableAccessibility() async {
-    if (!_accessibilityEnabled) {
-      // Clicks the button to enable accessibility via Javascript for Desktop Web.
-      //
-      // The tag used in the script is based on
-      // https://github.com/flutter/engine/blob/master/lib/web_ui/lib/src/engine/semantics/semantics_helper.dart#L193
-      //
-      // TODO(angjieli): Support Mobile Web. (https://github.com/flutter/flutter/issues/65192)
-      await webDriver.execute(
-          'document.querySelector(\'flt-semantics-placeholder\').click();',
-          <String>[]);
-      _accessibilityEnabled = true;
-    }
   }
 
   @override
@@ -173,12 +156,12 @@ class WebFlutterDriver extends FlutterDriver {
     final List<Map<String, dynamic>> events = <Map<String, dynamic>>[];
     for (final async_io.LogEntry entry in await _connection.logs.toList()) {
       if (_startTime.isBefore(entry.timestamp)) {
-        final Map<String, dynamic> data = jsonDecode(entry.message!)['message'] as Map<String, dynamic>;
+        final Map<String, dynamic> data = (jsonDecode(entry.message!) as Map<String, dynamic>)['message'] as Map<String, dynamic>;
         if (data['method'] == 'Tracing.dataCollected') {
           // 'ts' data collected from Chrome is in double format, conversion needed
           try {
-            data['params']['ts'] =
-                double.parse(data['params']['ts'].toString()).toInt();
+            final Map<String, dynamic> params = data['params'] as Map<String, dynamic>;
+            params['ts'] = double.parse(params['ts'].toString()).toInt();
           } on FormatException catch (_) {
             // data is corrupted, skip
             continue;

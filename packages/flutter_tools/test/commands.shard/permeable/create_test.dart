@@ -21,13 +21,14 @@ import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/commands/create_base.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:process/process.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
 import 'package:uuid/uuid.dart';
+import 'package:yaml/yaml.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -36,7 +37,7 @@ import '../../src/fakes.dart';
 import '../../src/pubspec_schema.dart';
 import '../../src/test_flutter_command_runner.dart';
 
-const String _kNoPlatformsMessage = 'You\'ve created a plugin project that doesn\'t yet support any platforms.\n';
+const String _kNoPlatformsMessage = "You've created a plugin project that doesn't yet support any platforms.\n";
 const String frameworkRevision = '12345678';
 const String frameworkChannel = 'omega';
 const String _kDisabledPlatformRequestedMessage = 'currently not supported on your local environment.';
@@ -122,6 +123,51 @@ void main() {
         'ios/Runner/AppDelegate.m',
         'ios/Runner/GeneratedPluginRegistrant.h',
         'lib/main.dart',
+      ],
+    );
+    return _runFlutterTest(projectDir);
+  }, overrides: <Type, Generator>{
+    Pub: () => Pub(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+    ),
+  });
+
+  testUsingContext('can create a skeleton (list/detail) app', () async {
+    await _createAndAnalyzeProject(
+      projectDir,
+      <String>['-t', 'skeleton', '-i', 'objc', '-a', 'java', '--implementation-tests'],
+      <String>[
+        'analysis_options.yaml',
+        'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
+        'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
+        'flutter_project.iml',
+        'ios/Flutter/AppFrameworkInfo.plist',
+        'ios/Runner/AppDelegate.m',
+        'ios/Runner/GeneratedPluginRegistrant.h',
+        'lib/main.dart',
+        'l10n.yaml',
+        'assets/images/2.0x/flutter_logo.png',
+        'assets/images/flutter_logo.png',
+        'assets/images/3.0x/flutter_logo.png',
+        'test/unit_test.dart',
+        'test/widget_test.dart',
+        'test/implementation_test.dart',
+        'lib/src/localization/app_en.arb',
+        'lib/src/app.dart',
+        'lib/src/sample_feature/sample_item_details_view.dart',
+        'lib/src/sample_feature/sample_item_list_view.dart',
+        'lib/src/sample_feature/sample_item.dart',
+        'lib/src/settings/settings_controller.dart',
+        'lib/src/settings/settings_view.dart',
+        'lib/src/settings/settings_service.dart',
+        'lib/main.dart',
+        'pubspec.yaml',
+        'README.md',
       ],
     );
     return _runFlutterTest(projectDir);
@@ -482,8 +528,9 @@ void main() {
     // Expect the dependency on flutter_web_plugins exists
     expect(pubspec.dependencies, contains('flutter_web_plugins'));
     // The platform is correctly registered
-    expect(pubspec.flutter['plugin']['platforms']['web']['pluginClass'], 'FlutterProjectWeb');
-    expect(pubspec.flutter['plugin']['platforms']['web']['fileName'], 'flutter_project_web.dart');
+    final YamlMap web = ((pubspec.flutter['plugin'] as YamlMap)['platforms'] as YamlMap)['web'] as YamlMap;
+    expect(web['pluginClass'], 'FlutterProjectWeb');
+    expect(web['fileName'], 'flutter_project_web.dart');
     expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
@@ -660,7 +707,7 @@ void main() {
 
     expectExists('android/gradle.properties');
 
-    final String actualContents = await globals.fs.file(projectDir.path + '/android/gradle.properties').readAsString();
+    final String actualContents = await globals.fs.file('${projectDir.path}/android/gradle.properties').readAsString();
 
     expect(actualContents.contains('useAndroidX'), true);
   });
@@ -694,7 +741,7 @@ void main() {
 
     expectExists('android/gradle.properties');
 
-    final String actualContents = await globals.fs.file(projectDir.path + '/android/gradle.properties').readAsString();
+    final String actualContents = await globals.fs.file('${projectDir.path}/android/gradle.properties').readAsString();
 
     expect(actualContents.contains('useAndroidX'), true);
   });
@@ -708,13 +755,13 @@ void main() {
     await runner.run(<String>['create', '--no-pub', '--platforms', 'android', projectDir.path]);
 
     final String androidManifest = await globals.fs.file(
-      projectDir.path + '/android/app/src/main/AndroidManifest.xml'
+      '${projectDir.path}/android/app/src/main/AndroidManifest.xml'
     ).readAsString();
     expect(androidManifest.contains('android:name="flutterEmbedding"'), true);
     expect(androidManifest.contains('android:value="2"'), true);
 
     final String mainActivity = await globals.fs.file(
-      projectDir.path +  '/android/app/src/main/kotlin/com/example/flutter_project/MainActivity.kt'
+      '${projectDir.path}/android/app/src/main/kotlin/com/example/flutter_project/MainActivity.kt'
     ).readAsString();
     // Import for the new embedding class.
     expect(mainActivity.contains('import io.flutter.embedding.android.FlutterActivity'), true);
@@ -1062,6 +1109,25 @@ void main() {
     Logger: () => logger,
   });
 
+  testUsingContext('app creates maskable icons for web', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>[
+      'create',
+      '--no-pub',
+      '--platforms=web',
+      projectDir.path,
+    ]);
+
+    final Directory iconsDir = projectDir.childDirectory('web').childDirectory('icons');
+
+    expect(iconsDir.childFile('Icon-maskable-192.png'), exists);
+    expect(iconsDir.childFile('Icon-maskable-512.png'), exists);
+  });
+
   testUsingContext('plugin uses new platform schema', () async {
     Cache.flutterRoot = '../..';
 
@@ -1090,7 +1156,7 @@ void main() {
     expectExists('lib/main.dart');
     expectExists('test/widget_test.dart');
 
-    final String actualContents = await globals.fs.file(projectDir.path + '/test/widget_test.dart').readAsString();
+    final String actualContents = await globals.fs.file('${projectDir.path}/test/widget_test.dart').readAsString();
 
     expect(actualContents.contains('flutter_test.dart'), true);
 
@@ -1099,17 +1165,13 @@ void main() {
         final String original = file.readAsStringSync();
 
         final Process process = await Process.start(
-          globals.fs.path.join(
-            globals.artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path,
-            'bin',
-            globals.platform.isWindows ? 'dartfmt.bat' : 'dartfmt',
-          ),
-          <String>[file.path],
+          globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+          <String>['format', '--output=show', file.path],
           workingDirectory: projectDir.path,
         );
         final String formatted = await process.stdout.transform(utf8.decoder).join();
 
-        expect(original, formatted, reason: file.path);
+        expect(formatted, contains(original), reason: file.path);
       }
     }
 
@@ -1205,17 +1267,13 @@ void main() {
         final String original = file.readAsStringSync();
 
         final Process process = await Process.start(
-          globals.fs.path.join(
-            globals.artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path,
-            'bin',
-            globals.platform.isWindows ? 'dartfmt.bat' : 'dartfmt',
-          ),
-          <String>[file.path],
+          globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+          <String>['format', '--output=show', file.path],
           workingDirectory: projectDir.path,
         );
         final String formatted = await process.stdout.transform(utf8.decoder).join();
 
-        expect(original, formatted, reason: file.path);
+        expect(formatted, contains(original), reason: file.path);
       }
     }
 
@@ -1562,19 +1620,6 @@ void main() {
     );
   });
 
-  // Verify that we help the user correct an option ordering issue
-  testUsingContext('produces sensible error message', () async {
-    Cache.flutterRoot = '../..';
-
-    final CreateCommand command = CreateCommand();
-    final CommandRunner<void> runner = createTestCommandRunner(command);
-
-    expect(
-      runner.run(<String>['create', projectDir.path, '--pub']),
-      throwsToolExit(exitCode: 2, message: 'Try moving --pub'),
-    );
-  });
-
   testUsingContext('fails when file exists where output directory should be', () async {
     Cache.flutterRoot = '../..';
     final CreateCommand command = CreateCommand();
@@ -1912,7 +1957,7 @@ void main() {
     Logger: () => logger,
   });
 
-  testUsingContext('plugin doe not support web if feature is not enabled', () async {
+  testUsingContext('plugin does not support web if feature is not enabled', () async {
     Cache.flutterRoot = '../..';
 
     final CreateCommand command = CreateCommand();
@@ -2203,6 +2248,25 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
+  testUsingContext('flutter create . on and existing plugin should show "Your example app code in"', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    final String projectDirPath = globals.fs.path.normalize(projectDir.absolute.path);
+    final String relativePluginPath = globals.fs.path.normalize(globals.fs.path.relative(projectDirPath));
+    final String relativeExamplePath = globals.fs.path.normalize(globals.fs.path.join(relativePluginPath, 'example/lib/main.dart'));
+
+    await runner.run(<String>['create', '--no-pub', '--org=com.example', '--template=plugin', '--platforms=android', projectDir.path]);
+    expect(logger.statusText, contains('Your example app code is in $relativeExamplePath.\n'));
+    await runner.run(<String>['create', '--no-pub', '--org=com.example', '--template=plugin', '--platforms=ios', projectDir.path]);
+    expect(logger.statusText, contains('Your example app code is in $relativeExamplePath.\n'));
+    await runner.run(<String>['create', '--no-pub', projectDir.path]);
+    expect(logger.statusText, contains('Your example app code is in $relativeExamplePath.\n'));
+  }, overrides: <Type, Generator> {
+    Logger: () => logger,
+  });
+
   testUsingContext('flutter create -t plugin in an empty folder should not show pubspec.yaml updating suggestion', () async {
     Cache.flutterRoot = '../..';
 
@@ -2254,7 +2318,7 @@ void main() {
 
     expect(globals.fs.isFileSync('${projectDir.path}/android/app/build.gradle'), true);
 
-    final String buildContent = await globals.fs.file(projectDir.path + '/android/app/build.gradle').readAsString();
+    final String buildContent = await globals.fs.file('${projectDir.path}/android/app/build.gradle').readAsString();
 
     expect(buildContent.contains('compileSdkVersion 30'), true);
     expect(buildContent.contains('targetSdkVersion 30'), true);
@@ -2587,7 +2651,7 @@ Future<void> _ensureFlutterToolsSnapshot() async {
 
   final File snapshotFile = globals.fs.file(flutterToolsSnapshotPath);
   if (snapshotFile.existsSync()) {
-    snapshotFile.renameSync(flutterToolsSnapshotPath + '.bak');
+    snapshotFile.renameSync('$flutterToolsSnapshotPath.bak');
   }
 
   final List<String> snapshotArgs = <String>[
@@ -2615,7 +2679,7 @@ Future<void> _restoreFlutterToolsSnapshot() async {
     'flutter_tools.snapshot',
   ));
 
-  final File snapshotBackup = globals.fs.file(flutterToolsSnapshotPath + '.bak');
+  final File snapshotBackup = globals.fs.file('$flutterToolsSnapshotPath.bak');
   if (!snapshotBackup.existsSync()) {
     // No backup to restore.
     return;
@@ -2661,8 +2725,11 @@ Future<void> _analyzeProject(String workingDir, { List<String> expectedFailures 
     return '$location: $lintName';
   }
   final List<String> errors = const LineSplitter().convert(exec.stdout.toString())
-      .where((String line) => line.trim().isNotEmpty && !line.startsWith('Analyzing'))
-      .map(lineParser).toList();
+      .where((String line) {
+        return line.trim().isNotEmpty &&
+            !line.startsWith('Analyzing') &&
+            !line.contains('flutter pub get');
+      }).map(lineParser).toList();
   expect(errors, unorderedEquals(expectedFailures));
 }
 

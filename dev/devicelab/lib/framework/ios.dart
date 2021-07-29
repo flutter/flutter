@@ -40,17 +40,10 @@ Future<bool> containsBitcode(String pathToBinary) async {
   final List<String> lines = LineSplitter.split(loadCommands).toList();
   lines.asMap().forEach((int index, String line) {
     if (line.contains('segname __LLVM') && lines.length - index - 1 > 3) {
-      final String emptyBitcodeMarker = lines
+      emptyBitcodeMarkerFound |= lines
         .skip(index - 1)
         .take(4)
-        .firstWhere(
-          (String line) => line.contains(' size 0x0000000000000001'),
-          orElse: () => null,
-      );
-      if (emptyBitcodeMarker != null) {
-        emptyBitcodeMarkerFound = true;
-        return;
-      }
+        .any((String line) => line.contains(' size 0x0000000000000001'));
     }
   });
   return !emptyBitcodeMarkerFound;
@@ -77,16 +70,16 @@ Future<void> testWithNewIOSSimulator(
     workingDirectory: flutterDirectory.path,
   );
 
-  String iOSSimRuntime;
+  String? iOSSimRuntime;
 
   final RegExp iOSRuntimePattern = RegExp(r'iOS .*\) - (.*)');
 
   for (final String runtime in LineSplitter.split(availableRuntimes)) {
     // These seem to be in order, so allow matching multiple lines so it grabs
     // the last (hopefully latest) one.
-    final RegExpMatch iOSRuntimeMatch = iOSRuntimePattern.firstMatch(runtime);
+    final RegExpMatch? iOSRuntimeMatch = iOSRuntimePattern.firstMatch(runtime);
     if (iOSRuntimeMatch != null) {
-      iOSSimRuntime = iOSRuntimeMatch.group(1).trim();
+      iOSSimRuntime = iOSRuntimeMatch.group(1)!.trim();
       continue;
     }
   }

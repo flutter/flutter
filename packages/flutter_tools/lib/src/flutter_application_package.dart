@@ -77,6 +77,7 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
           logger: _logger,
           androidSdk: _androidSdk,
           userMessages: _userMessages,
+          processUtils: _processUtils,
         );
       case TargetPlatform.ios:
         return applicationBinary == null

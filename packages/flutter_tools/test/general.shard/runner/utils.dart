@@ -16,6 +16,8 @@ class DummyFlutterCommand extends FlutterCommand {
     this.name = 'dummy',
     this.commandFunction,
     this.packagesPath,
+    this.fileSystemScheme,
+    this.fileSystemRoots,
   });
 
   final bool noUsagePath;
@@ -40,4 +42,10 @@ class DummyFlutterCommand extends FlutterCommand {
 
   @override
   final String packagesPath;
+
+  @override
+  final String fileSystemScheme;
+
+  @override
+  final List<String> fileSystemRoots;
 }

@@ -18,6 +18,6 @@ void main() {
       await driver.close();
     });
 
-    test('empty', () async {}, timeout: const Timeout(Duration(minutes: 1)));
+    test('empty', () async {}, timeout: Timeout.none);
   });
 }

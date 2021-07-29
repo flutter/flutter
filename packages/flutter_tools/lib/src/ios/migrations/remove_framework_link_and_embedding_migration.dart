@@ -2,14 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/logger.dart';
 import '../../base/project_migrator.dart';
-import '../../project.dart';
 import '../../reporting/reporting.dart';
+import '../../xcode_project.dart';
 
 // Xcode 11.4 requires linked and embedded frameworks to contain all targeted architectures before build phases are run.
 // This caused issues switching between a real device and simulator due to architecture mismatch.
@@ -39,7 +37,7 @@ class RemoveFrameworkLinkAndEmbeddingMigration extends ProjectMigrator {
   }
 
   @override
-  String migrateLine(String line) {
+  String? migrateLine(String line) {
     // App.framework Frameworks reference.
     // isa = PBXFrameworksBuildPhase;
     // files = (

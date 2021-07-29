@@ -82,7 +82,7 @@ class VsCode {
   Version? _extensionVersion;
   final List<ValidationMessage> _validationMessages = <ValidationMessage>[];
 
-  String get productName => 'VS Code' + (edition != null ? ', $edition' : '');
+  String get productName => 'VS Code${edition != null ? ', $edition' : ''}';
 
   Iterable<ValidationMessage> get validationMessages => _validationMessages;
 
@@ -326,5 +326,5 @@ class VsCodeInstallLocation {
 
   @override
   // Lowest bit is for isInsiders boolean.
-  int get hashCode => installPath.hashCode ^ extensionsFolder.hashCode ^ edition.hashCode;
+  int get hashCode => Object.hash(installPath, extensionsFolder, edition);
 }

@@ -90,7 +90,7 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
       if (file.existsSync()) {
         throwToolExit(
           'The Flutter tool tried to delete the file or directory ${file.path} but was '
-          'unable to. This may be due to the file and/or project\'s location on a read-only '
+          "unable to. This may be due to the file and/or project's location on a read-only "
           'volume. Consider relocating the project and trying again',
         );
       }

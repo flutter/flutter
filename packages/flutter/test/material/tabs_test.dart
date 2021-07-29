@@ -2778,7 +2778,7 @@ void main() {
   });
 
   group('Tab overlayColor affects ink response', () {
-    testWidgets('Tab\'s ink well changes color on hover with Tab overlayColor', (WidgetTester tester) async {
+    testWidgets("Tab's ink well changes color on hover with Tab overlayColor", (WidgetTester tester) async {
       await tester.pumpWidget(
         boilerplate(
           child: DefaultTabController(
@@ -2810,7 +2810,7 @@ void main() {
     });
 
     testWidgets(
-      'Tab\'s ink response splashColor matches resolved Tab overlayColor for MaterialState.pressed',
+      "Tab's ink response splashColor matches resolved Tab overlayColor for MaterialState.pressed",
       (WidgetTester tester) async {
         const Color splashColor = Color(0xf00fffff);
         await tester.pumpWidget(
@@ -3430,7 +3430,7 @@ void main() {
     // because we tried to send a notification on dispose.
   });
 
-  testWidgets('TabController\'s animation value should be in sync with TabBarView\'s scroll value when user interrupts ballistic scroll', (WidgetTester tester) async {
+  testWidgets("TabController's animation value should be in sync with TabBarView's scroll value when user interrupts ballistic scroll", (WidgetTester tester) async {
     final TabController tabController = TabController(
       vsync: const TestVSync(),
       length: 3,
@@ -3520,7 +3520,7 @@ void main() {
     expect(log, <String>['init: 0', 'init: 3', 'dispose: 0']);
   });
 
-  testWidgets('TabController\'s animation value should be updated when TabController\'s index >= tabs\'s length', (WidgetTester tester) async {
+  testWidgets("TabController's animation value should be updated when TabController's index >= tabs's length", (WidgetTester tester) async {
     // This is a regression test for the issue brought up here
     // https://github.com/flutter/flutter/issues/79226
 
@@ -3747,6 +3747,71 @@ void main() {
     expect(tabTwo.padding, expectedPaddingAdjusted);
     expect(tabThree.padding, expectedPaddingAdjusted);
   });
+
+  testWidgets('Change tab bar height', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: DefaultTabController(
+        length: 4,
+        child: Scaffold(
+          appBar: AppBar(
+            bottom: const TabBar(
+              tabs: <Widget>[
+                Tab(
+                  icon: Icon(Icons.check,size: 40),
+                  child: Text('1 - OK',style: TextStyle(fontSize: 25),),
+                  height: 85,
+                ), // icon and child
+                Tab(
+                  child: Text('2 - OK',style: TextStyle(fontSize: 25),),
+                  height: 85,
+                ), // child
+                Tab(
+                  icon: Icon(Icons.done,size: 40),
+                  height: 85,
+                ), // icon
+                Tab(
+                  text: '4 - OK',
+                  height: 85,
+                ), // text
+              ],
+            ),
+          ),
+        ),
+      ),
+    ));
+    final Tab firstTab = tester.widget(find.widgetWithIcon(Tab, Icons.check));
+    final Tab secTab = tester.widget(find.widgetWithText(Tab, '2 - OK' ));
+    final Tab thirdTab = tester.widget(find.widgetWithIcon(Tab, Icons.done));
+    final Tab fourthTab = tester.widget(find.widgetWithText(Tab, '4 - OK' ));
+    expect(firstTab.preferredSize.height, 85);
+    expect(firstTab.height, 85);
+    expect(secTab.height, 85);
+    expect(thirdTab.height, 85);
+    expect(fourthTab.height, 85);
+  });
+
+  testWidgets('Change tab bar height 2', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: DefaultTabController(
+        length: 1,
+        child: Scaffold(
+          appBar: AppBar(
+            bottom: const TabBar(
+              tabs: <Widget>[
+                Tab(
+                  icon: Icon(Icons.check,size: 40),
+                  text: '1 - OK',
+                  height: 85,
+                ), // icon and text
+              ],
+            ),
+          ),
+        ),
+      ),
+    ));
+    final Tab firstTab = tester.widget(find.widgetWithIcon(Tab, Icons.check));
+    expect(firstTab.height, 85);
+  });
 }
 
 class KeepAliveInk extends StatefulWidget {
@@ -3803,7 +3868,7 @@ class TabBarDemo extends StatelessWidget {
   }
 }
 
-class MockScrollMetrics extends Fake implements ScrollMetrics {}
+class MockScrollMetrics extends Fake implements ScrollMetrics { }
 
 class TabBody extends StatefulWidget {
   const TabBody({ Key? key, required this.index, required this.log }) : super(key: key);

@@ -1901,7 +1901,7 @@ class _TestPostRouteCancelState extends State<_TestPostRouteCancel> {
   }
 }
 
-class _RestorableModalTestWidget extends StatelessWidget{
+class _RestorableModalTestWidget extends StatelessWidget {
   static Route<void> _modalBuilder(BuildContext context, Object? arguments) {
     return CupertinoModalPopupRoute<void>(
       builder: (BuildContext context) {

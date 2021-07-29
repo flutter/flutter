@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:characters/characters.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -110,16 +111,21 @@ class ToolbarItemsParentData extends ContainerBoxParentData<RenderBox> {
 ///
 /// Override text operations such as [handleCut] if needed.
 abstract class TextSelectionControls {
-  /// Builds a selection handle of the given type.
+  /// Builds a selection handle of the given `type`.
   ///
   /// The top left corner of this widget is positioned at the bottom of the
   /// selection position.
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight);
+  ///
+  /// The supplied [onTap] should be invoked when the handle is tapped, if such
+  /// interaction is allowed. As a counterexample, the default selection handle
+  /// on iOS [cupertinoTextSelectionControls] does not call [onTap] at all,
+  /// since its handles are not meant to be tapped.
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap, double? startGlyphHeight, double? endGlyphHeight]);
 
   /// Get the anchor point of the handle relative to itself. The anchor point is
   /// the point that is aligned with a specific point in the text. A handle
   /// often visually "points to" that location.
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight);
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight, [double? startGlyphHeight, double? endGlyphHeight]);
 
   /// Builds a toolbar near a text selection.
   ///
@@ -401,11 +407,19 @@ class TextSelectionOverlay {
   final DragStartBehavior dragStartBehavior;
 
   /// {@template flutter.widgets.TextSelectionOverlay.onSelectionHandleTapped}
-  /// A callback that's invoked when a selection handle is tapped.
+  /// A callback that's optionally invoked when a selection handle is tapped.
   ///
-  /// Both regular taps and long presses invoke this callback, but a drag
-  /// gesture won't.
+  /// The [TextSelectionControls.buildHandle] implementation the text field
+  /// uses decides where the the handle's tap "hotspot" is, or whether the
+  /// selection handle supports tap gestures at all. For instance,
+  /// [MaterialTextSelectionControls] calls [onSelectionHandleTapped] when the
+  /// selection handle's "knob" is tapped, while
+  /// [CupertinoTextSelectionControls] builds a handle that's not sufficiently
+  /// large for tapping (as it's not meant to be tapped) so it does not call
+  /// [onSelectionHandleTapped] even when tapped.
   /// {@endtemplate}
+  // See https://github.com/flutter/flutter/issues/39376#issuecomment-848406415
+  // for provenance.
   final VoidCallback? onSelectionHandleTapped;
 
   /// Maintains the status of the clipboard for determining if its contents can
@@ -568,7 +582,8 @@ class TextSelectionOverlay {
   }
 
   Widget _buildHandle(BuildContext context, _TextSelectionHandlePosition position) {
-    Widget handle;
+    final Widget handle;
+    final TextSelectionControls? selectionControls = this.selectionControls;
     if ((_selection.isCollapsed && position == _TextSelectionHandlePosition.end) ||
          selectionControls == null)
       handle = Container(); // hide the second handle when collapsed
@@ -661,7 +676,7 @@ class TextSelectionOverlay {
         break;
     }
     selectionDelegate!.userUpdateTextEditingValue(
-      _value.copyWith(selection: newSelection, composing: TextRange.empty),
+      _value.copyWith(selection: newSelection),
       SelectionChangedCause.drag,
     );
     selectionDelegate!.bringIntoView(textPosition);
@@ -690,7 +705,7 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
   final RenderEditable renderObject;
   final ValueChanged<TextSelection> onSelectionHandleChanged;
   final VoidCallback? onSelectionHandleTapped;
-  final TextSelectionControls? selectionControls;
+  final TextSelectionControls selectionControls;
   final DragStartBehavior dragStartBehavior;
 
   @override
@@ -747,7 +762,7 @@ class _TextSelectionHandleOverlayState
   }
 
   void _handleDragStart(DragStartDetails details) {
-    final Size handleSize = widget.selectionControls!.getHandleSize(
+    final Size handleSize = widget.selectionControls.getHandleSize(
       widget.renderObject.preferredLineHeight,
     );
     _dragPosition = details.globalPosition + Offset(0.0, -handleSize.height);
@@ -784,10 +799,6 @@ class _TextSelectionHandleOverlayState
     widget.onSelectionHandleChanged(newSelection);
   }
 
-  void _handleTap() {
-    widget.onSelectionHandleTapped?.call();
-  }
-
   @override
   Widget build(BuildContext context) {
     final LayerLink layerLink;
@@ -814,11 +825,49 @@ class _TextSelectionHandleOverlayState
         break;
     }
 
-    final Offset handleAnchor = widget.selectionControls!.getHandleAnchor(
+    // On some platforms we may want to calculate the start and end handles
+    // separately so they scale for the selected content.
+    //
+    // For the start handle we compute the rectangles that encompass the range
+    // of the first full selected grapheme cluster at the beginning of the selection.
+    //
+    // For the end handle we compute the rectangles that encompass the range
+    // of the last full selected grapheme cluster at the end of the selection.
+    final InlineSpan span = widget.renderObject.text!;
+    final String text = span.toPlainText();
+    final int firstSelectedGraphemeExtent;
+    final int lastSelectedGraphemeExtent;
+    final TextSelection? selection = widget.renderObject.selection;
+
+    if (selection != null && selection.isValid && !selection.isCollapsed) {
+      final String selectedGraphemes = selection.textInside(text);
+      firstSelectedGraphemeExtent = selectedGraphemes.characters.first.length;
+      lastSelectedGraphemeExtent = selectedGraphemes.characters.last.length;
+      assert(firstSelectedGraphemeExtent <= selectedGraphemes.length && lastSelectedGraphemeExtent <= selectedGraphemes.length);
+    } else {
+      // The call to selectedGraphemes.characters.first/last will throw a state
+      // error if the given text is empty, so fall back to first/last character
+      // range in this case.
+      //
+      // The call to widget.selection.textInside(text) will return a RangeError
+      // for a collapsed selection, fall back to this case when that happens.
+      firstSelectedGraphemeExtent = 0;
+      lastSelectedGraphemeExtent = 0;
+    }
+
+    final Rect? startHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.selection.start, end: widget.selection.start + firstSelectedGraphemeExtent));
+    final Rect? endHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.selection.end - lastSelectedGraphemeExtent, end: widget.selection.end));
+
+    assert(!(firstSelectedGraphemeExtent > 0 && widget.selection.isValid && !widget.selection.isCollapsed) || startHandleRect != null);
+    assert(!(lastSelectedGraphemeExtent > 0 && widget.selection.isValid && !widget.selection.isCollapsed) || endHandleRect != null);
+
+    final Offset handleAnchor = widget.selectionControls.getHandleAnchor(
       type,
       widget.renderObject.preferredLineHeight,
+      startHandleRect?.height ?? widget.renderObject.preferredLineHeight,
+      endHandleRect?.height ?? widget.renderObject.preferredLineHeight,
     );
-    final Size handleSize = widget.selectionControls!.getHandleSize(
+    final Size handleSize = widget.selectionControls.getHandleSize(
       widget.renderObject.preferredLineHeight,
     );
 
@@ -855,7 +904,6 @@ class _TextSelectionHandleOverlayState
             dragStartBehavior: widget.dragStartBehavior,
             onPanStart: _handleDragStart,
             onPanUpdate: _handleDragUpdate,
-            onTap: _handleTap,
             child: Padding(
               padding: EdgeInsets.only(
                 left: padding.left,
@@ -863,10 +911,13 @@ class _TextSelectionHandleOverlayState
                 right: padding.right,
                 bottom: padding.bottom,
               ),
-              child: widget.selectionControls!.buildHandle(
+              child: widget.selectionControls.buildHandle(
                 context,
                 type,
                 widget.renderObject.preferredLineHeight,
+                widget.onSelectionHandleTapped,
+                startHandleRect?.height ?? widget.renderObject.preferredLineHeight,
+                endHandleRect?.height ?? widget.renderObject.preferredLineHeight,
               ),
             ),
           ),
@@ -1520,12 +1571,9 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   Widget build(BuildContext context) {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
 
-    // Use _TransparentTapGestureRecognizer so that TextSelectionGestureDetector
-    // can receive the same tap events that a selection handle placed visually
-    // on top of it also receives.
-    gestures[_TransparentTapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<_TransparentTapGestureRecognizer>(
-      () => _TransparentTapGestureRecognizer(debugOwner: this),
-      (_TransparentTapGestureRecognizer instance) {
+    gestures[TapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+      () => TapGestureRecognizer(debugOwner: this),
+      (TapGestureRecognizer instance) {
         instance
           ..onSecondaryTap = widget.onSecondaryTap
           ..onSecondaryTapDown = widget.onSecondaryTapDown
@@ -1585,35 +1633,6 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
       behavior: widget.behavior,
       child: widget.child,
     );
-  }
-}
-
-// A TapGestureRecognizer which allows other GestureRecognizers to win in the
-// GestureArena. This means both _TransparentTapGestureRecognizer and other
-// GestureRecognizers can handle the same event.
-//
-// This enables proper handling of events on both the selection handle and the
-// underlying input, since there is significant overlap between the two given
-// the handle's padded hit area.  For example, the selection handle needs to
-// handle single taps on itself, but double taps need to be handled by the
-// underlying input.
-class _TransparentTapGestureRecognizer extends TapGestureRecognizer {
-  _TransparentTapGestureRecognizer({
-    Object? debugOwner,
-  }) : super(debugOwner: debugOwner);
-
-  @override
-  void rejectGesture(int pointer) {
-    // Accept new gestures that another recognizer has already won.
-    // Specifically, this needs to accept taps on the text selection handle on
-    // behalf of the text field in order to handle double tap to select. It must
-    // not accept other gestures like longpresses and drags that end outside of
-    // the text field.
-    if (state == GestureRecognizerState.ready) {
-      acceptGesture(pointer);
-    } else {
-      super.rejectGesture(pointer);
-    }
   }
 }
 

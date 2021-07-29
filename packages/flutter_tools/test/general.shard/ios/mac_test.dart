@@ -149,7 +149,7 @@ void main() {
         xcodeBuildExecution: XcodeBuildExecution(
           buildCommands: buildCommands,
           appDirectory: '/blah/blah',
-          buildForPhysicalDevice: true,
+          environmentType: EnvironmentType.physical,
           buildSettings: buildSettings,
         ),
       );
@@ -160,10 +160,10 @@ void main() {
           'build',
           'ios',
           label: 'xcode-bitcode-failure',
-          parameters: <String, String>{
-            cdKey(CustomDimensions.buildEventCommand): buildCommands.toString(),
-            cdKey(CustomDimensions.buildEventSettings): buildSettings.toString(),
-          },
+          parameters: CustomDimensions(
+            buildEventCommand: buildCommands.toString(),
+            buildEventSettings: buildSettings.toString(),
+          ),
         ),
       ));
     });
@@ -229,7 +229,7 @@ Error launching application on iPhone.''',
         xcodeBuildExecution: XcodeBuildExecution(
           buildCommands: <String>['xcrun', 'xcodebuild', 'blah'],
           appDirectory: '/blah/blah',
-          buildForPhysicalDevice: true,
+          environmentType: EnvironmentType.physical,
           buildSettings: buildSettings,
         ),
       );
@@ -310,7 +310,7 @@ Could not build the precompiled application for the device.''',
         xcodeBuildExecution: XcodeBuildExecution(
           buildCommands: <String>['xcrun', 'xcodebuild', 'blah'],
           appDirectory: '/blah/blah',
-          buildForPhysicalDevice: true,
+          environmentType: EnvironmentType.physical,
           buildSettings: buildSettings,
         ),
       );
@@ -347,7 +347,7 @@ Exited (sigterm)''',
         xcodeBuildExecution: XcodeBuildExecution(
           buildCommands: <String>['xcrun', 'xcodebuild', 'blah'],
           appDirectory: '/blah/blah',
-          buildForPhysicalDevice: true,
+          environmentType: EnvironmentType.physical,
           buildSettings: buildSettings,
         ),
       );
@@ -384,7 +384,7 @@ Exited (sigterm)''',
         xcodeBuildExecution: XcodeBuildExecution(
           buildCommands: <String>['xcrun', 'xcodebuild', 'blah'],
           appDirectory: '/blah/blah',
-          buildForPhysicalDevice: true,
+          environmentType: EnvironmentType.physical,
           buildSettings: buildSettings,
         ),
       );

@@ -11,7 +11,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../project.dart';
 import '../web/chrome.dart';
 import '../web/memory_fs.dart';
@@ -124,6 +124,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
         '--total-shards=$totalShards',
       if (shardIndex != null)
         '--shard-index=$shardIndex',
+      '--chain-stack-traces',
     ];
     if (web) {
       final String tempBuildDir = globals.fs.systemTempDirectory

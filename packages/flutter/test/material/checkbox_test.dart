@@ -267,7 +267,7 @@ void main() {
   testWidgets('has semantic events', (WidgetTester tester) async {
     dynamic semanticEvent;
     bool? checkboxValue = false;
-    SystemChannels.accessibility.setMockMessageHandler((dynamic message) async {
+    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (dynamic message) async {
       semanticEvent = message;
     });
     final SemanticsTester semanticsTester = SemanticsTester(tester);
@@ -300,7 +300,7 @@ void main() {
     });
     expect(object.debugSemantics!.getSemanticsData().hasAction(SemanticsAction.tap), true);
 
-    SystemChannels.accessibility.setMockMessageHandler(null);
+    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
     semanticsTester.dispose();
   });
 
@@ -1192,6 +1192,122 @@ void main() {
     expect(find.byType(Checkbox), findsNothing);
     // Release pointer after widget disappeared.
     await gesture.up();
+  });
+
+  testWidgets('Checkbox BorderSide side only applies when unselected', (WidgetTester tester) async {
+    const Color borderColor = Color(0xfff44336);
+    const Color activeColor = Color(0xff123456);
+    const BorderSide side = BorderSide(
+      width: 4,
+      color: borderColor,
+    );
+
+    Widget buildApp({ bool? value, bool enabled = true }) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: Checkbox(
+              value: value,
+              tristate: value == null,
+              activeColor: activeColor,
+              onChanged: enabled ? (bool? newValue) { } : null,
+              side: side,
+            ),
+          ),
+        ),
+      );
+    }
+
+    RenderBox getCheckboxRenderer() {
+      return tester.renderObject<RenderBox>(find.byType(Checkbox));
+    }
+
+    void expectBorder() {
+      expect(
+        getCheckboxRenderer(),
+        paints
+        ..drrect(
+          color: borderColor,
+          outer: RRect.fromLTRBR(15, 15, 33, 33, const Radius.circular(1)),
+          inner: RRect.fromLTRBR(19, 19, 29, 29, const Radius.circular(-3)),
+        ),
+      );
+    }
+
+    // Checkbox is unselected, so the specified BorderSide appears.
+
+    await tester.pumpWidget(buildApp(value: false));
+    await tester.pumpAndSettle();
+    expectBorder();
+
+    await tester.pumpWidget(buildApp(value: false, enabled: false));
+    await tester.pumpAndSettle();
+    expectBorder();
+
+    // Checkbox is selected/interdeterminate, so the specified BorderSide
+    // does not appear.
+
+    await tester.pumpWidget(buildApp(value: true));
+    await tester.pumpAndSettle();
+    expect(getCheckboxRenderer(), isNot(paints..drrect())); // no border
+    expect(getCheckboxRenderer(), paints..path(color: activeColor)); // checkbox fill
+
+    await tester.pumpWidget(buildApp(value: null));
+    await tester.pumpAndSettle();
+    expect(getCheckboxRenderer(), isNot(paints..drrect())); // no border
+    expect(getCheckboxRenderer(), paints..path(color: activeColor)); // checkbox fill
+  });
+
+  testWidgets('Checkbox MaterialStateBorderSide applies unconditionally', (WidgetTester tester) async {
+    const Color borderColor = Color(0xfff44336);
+    const BorderSide side = BorderSide(
+      width: 4,
+      color: borderColor,
+    );
+
+    Widget buildApp({ bool? value, bool enabled = true }) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: Checkbox(
+              value: value,
+              tristate: value == null,
+              onChanged: enabled ? (bool? newValue) { } : null,
+              side: MaterialStateBorderSide.resolveWith((Set<MaterialState> states) => side),
+            ),
+          ),
+        ),
+      );
+    }
+
+    void expectBorder() {
+      expect(
+        tester.renderObject<RenderBox>(find.byType(Checkbox)),
+        paints
+        ..drrect(
+          color: borderColor,
+          outer: RRect.fromLTRBR(15, 15, 33, 33, const Radius.circular(1)),
+          inner: RRect.fromLTRBR(19, 19, 29, 29, const Radius.circular(-3)),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp(value: false));
+    await tester.pumpAndSettle();
+    expectBorder();
+
+
+    await tester.pumpWidget(buildApp(value: false, enabled: false));
+    await tester.pumpAndSettle();
+    expectBorder();
+
+    await tester.pumpWidget(buildApp(value: true));
+    await tester.pumpAndSettle();
+    expectBorder();
+
+    await tester.pumpWidget(buildApp(value: null));
+    await tester.pumpAndSettle();
+    expectBorder();
   });
 }
 

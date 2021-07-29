@@ -83,6 +83,24 @@ void main() {
       expect(logger.statusText, equals('${testString[0]}\n'));
       expect(logger.errorText, equals('${testString[0]}\n'));
     });
+
+    testWithoutContext('Command output is filtered by mapFunction', () async {
+      processManager.addCommand(const FakeCommand(
+        command: <String>['command'],
+        stdout: 'match\nno match',
+        stderr: 'match\nno match',
+      ));
+
+      await processUtils.stream(<String>['command'], mapFunction: (String line) {
+        if (line == 'match') {
+          return line;
+        }
+        return null;
+      });
+
+      expect(logger.statusText, equals('match\n'));
+      expect(logger.errorText, equals('match\n'));
+    });
   });
 
   group('run', () {

@@ -6,14 +6,15 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter_devicelab/common.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
 TaskFunction dartPluginRegistryTest({
-  String deviceIdOverride,
-  Map<String, String> environment,
+  String? deviceIdOverride,
+  Map<String, String>? environment,
 }) {
   final Directory tempDir = Directory.systemTemp
       .createTempSync('flutter_devicelab_dart_plugin_test.');
@@ -168,7 +169,7 @@ class PluginPlatformInterfaceMacOS {
         section('Wait for registry execution after hot restart');
         await registryExecutedCompleter.future;
 
-        subscription.cancel();
+        unawaited(subscription.cancel());
         run.kill();
       });
       return TaskResult.success(null);

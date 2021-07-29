@@ -698,7 +698,7 @@ Information about project "Runner":
 
       final String contents = config.readAsStringSync();
       expect(contents.contains('ARCHS=armv7'), isTrue);
-      expect(contents.contains('EXCLUDED_ARCHS[sdk=iphonesimulator*]=arm64 i386'), isTrue);
+      expect(contents.contains('EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386'), isTrue);
 
       final File buildPhaseScript = fs.file('path/to/project/ios/Flutter/flutter_export_environment.sh');
       expect(buildPhaseScript.existsSync(), isTrue);
@@ -751,13 +751,7 @@ Information about project "Runner":
     });
 
     group('sim local engine', () {
-      Artifacts localArtifacts;
-
-      setUp(() {
-        localArtifacts = Artifacts.test(localEngine: 'out/ios_debug_sim_unopt');
-      });
-
-      testUsingContext('sets ARCHS=x86_64 when sim local engine is set', () async {
+      testUsingContext('sets ARCHS=x86_64 when x86 sim local engine is set', () async {
         const BuildInfo buildInfo = BuildInfo.debug;
         final FlutterProject project = FlutterProject.fromDirectoryTest(fs.directory('path/to/project'));
         await updateGeneratedXcodeProperties(
@@ -777,7 +771,33 @@ Information about project "Runner":
         final String buildPhaseScriptContents = buildPhaseScript.readAsStringSync();
         expect(buildPhaseScriptContents.contains('ARCHS=x86_64'), isTrue);
       }, overrides: <Type, Generator>{
-        Artifacts: () => localArtifacts,
+        Artifacts: () => Artifacts.test(localEngine: 'out/ios_debug_sim_unopt'),
+        Platform: () => macOS,
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      });
+
+      testUsingContext('sets ARCHS=arm64 when arm64 sim local engine is set', () async {
+        const BuildInfo buildInfo = BuildInfo.debug;
+        final FlutterProject project = FlutterProject.fromDirectoryTest(fs.directory('path/to/project'));
+        await updateGeneratedXcodeProperties(
+          project: project,
+          buildInfo: buildInfo,
+        );
+
+        final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
+        expect(config.existsSync(), isTrue);
+
+        final String contents = config.readAsStringSync();
+        expect(contents.contains('ARCHS=arm64'), isTrue);
+
+        final File buildPhaseScript = fs.file('path/to/project/ios/Flutter/flutter_export_environment.sh');
+        expect(buildPhaseScript.existsSync(), isTrue);
+
+        final String buildPhaseScriptContents = buildPhaseScript.readAsStringSync();
+        expect(buildPhaseScriptContents.contains('ARCHS=arm64'), isTrue);
+      }, overrides: <Type, Generator>{
+        Artifacts: () => Artifacts.test(localEngine: 'out/ios_debug_sim_arm64'),
         Platform: () => macOS,
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),

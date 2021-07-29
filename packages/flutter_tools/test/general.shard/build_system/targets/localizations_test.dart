@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -19,7 +18,7 @@ void main() {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
-      artifacts: null,
+      artifacts: Artifacts.test(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),

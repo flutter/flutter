@@ -43,6 +43,7 @@ class _DropdownMenuPainter extends CustomPainter {
     this.color,
     this.elevation,
     this.selectedIndex,
+    this.borderRadius,
     required this.resize,
     required this.getSelectedItemOffset,
   }) : _painter = BoxDecoration(
@@ -50,7 +51,7 @@ class _DropdownMenuPainter extends CustomPainter {
          // configuration in the paint() function and you must provide some sort
          // of onChanged callback here.
          color: color,
-         borderRadius: BorderRadius.circular(2.0),
+         borderRadius: borderRadius ?? const BorderRadius.all(Radius.circular(2.0)),
          boxShadow: kElevationToShadow[elevation],
        ).createBoxPainter(),
        super(repaint: resize);
@@ -58,6 +59,7 @@ class _DropdownMenuPainter extends CustomPainter {
   final Color? color;
   final int? elevation;
   final int? selectedIndex;
+  final BorderRadius? borderRadius;
   final Animation<double> resize;
   final ValueGetter<double> getSelectedItemOffset;
   final BoxPainter _painter;
@@ -85,6 +87,7 @@ class _DropdownMenuPainter extends CustomPainter {
     return oldPainter.color != color
         || oldPainter.elevation != elevation
         || oldPainter.selectedIndex != selectedIndex
+        || oldPainter.borderRadius != borderRadius
         || oldPainter.resize != resize;
   }
 }
@@ -94,6 +97,7 @@ class _DropdownMenuItemButton<T> extends StatefulWidget {
   const _DropdownMenuItemButton({
     Key? key,
     this.padding,
+    required this.borderRadius,
     required this.route,
     required this.buttonRect,
     required this.constraints,
@@ -107,6 +111,7 @@ class _DropdownMenuItemButton<T> extends StatefulWidget {
   final BoxConstraints constraints;
   final int itemIndex;
   final bool enableFeedback;
+  final BorderRadius borderRadius;
 
   @override
   _DropdownMenuItemButtonState<T> createState() => _DropdownMenuItemButtonState<T>();
@@ -172,6 +177,16 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
       padding: widget.padding,
       child: widget.route.items[widget.itemIndex],
     );
+    final BorderRadius itemBorderRadius;
+    if (widget.route.items.length == 1) {
+      itemBorderRadius = widget.borderRadius;
+    } else if (widget.itemIndex == 0) {
+      itemBorderRadius = BorderRadius.only(topLeft: widget.borderRadius.topLeft, topRight: widget.borderRadius.topRight);
+    } else if (widget.itemIndex == widget.route.items.length - 1) {
+      itemBorderRadius = BorderRadius.only(bottomLeft: widget.borderRadius.bottomLeft, bottomRight: widget.borderRadius.bottomRight);
+    } else {
+      itemBorderRadius = BorderRadius.zero;
+    }
     // An [InkWell] is added to the item only if it is enabled
     if (dropdownMenuItem.enabled) {
       child = InkWell(
@@ -180,6 +195,7 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
         onTap: _handleOnTap,
         onFocusChange: _handleFocusChange,
         child: child,
+        borderRadius: itemBorderRadius,
       );
     }
     child = FadeTransition(opacity: opacity, child: child);
@@ -202,6 +218,7 @@ class _DropdownMenu<T> extends StatefulWidget {
     required this.constraints,
     this.dropdownColor,
     required this.enableFeedback,
+    this.borderRadius,
   }) : super(key: key);
 
   final _DropdownRoute<T> route;
@@ -210,6 +227,7 @@ class _DropdownMenu<T> extends StatefulWidget {
   final BoxConstraints constraints;
   final Color? dropdownColor;
   final bool enableFeedback;
+  final BorderRadius? borderRadius;
 
   @override
   _DropdownMenuState<T> createState() => _DropdownMenuState<T>();
@@ -260,6 +278,7 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
           constraints: widget.constraints,
           itemIndex: itemIndex,
           enableFeedback: widget.enableFeedback,
+          borderRadius: widget.borderRadius ?? BorderRadius.zero,
         ),
       ];
 
@@ -271,6 +290,7 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
           elevation: route.elevation,
           selectedIndex: route.selectedIndex,
           resize: _resize,
+          borderRadius: widget.borderRadius,
           // This offset is passed as a callback, not a value, because it must
           // be retrieved at paint time (after layout), not at build time.
           getSelectedItemOffset: () => route.getItemOffset(route.selectedIndex),
@@ -285,9 +305,10 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
             textStyle: route.style,
             child: ScrollConfiguration(
               // Dropdown menus should never overscroll or display an overscroll indicator.
-              // The default scrollbar platforms will apply.
+              // Scrollbars are built-in below.
               // Platform must use Theme and ScrollPhysics must be Clamping.
               behavior: ScrollConfiguration.of(context).copyWith(
+                scrollbars: false,
                 overscroll: false,
                 physics: const ClampingScrollPhysics(),
                 platform: Theme.of(context).platform,
@@ -419,6 +440,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     this.dropdownColor,
     this.menuMaxHeight,
     required this.enableFeedback,
+    this.borderRadius,
   }) : assert(style != null),
        itemHeights = List<double>.filled(items.length, itemHeight ?? kMinInteractiveDimension);
 
@@ -433,6 +455,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   final Color? dropdownColor;
   final double? menuMaxHeight;
   final bool enableFeedback;
+  final BorderRadius? borderRadius;
 
   final List<double> itemHeights;
   ScrollController? scrollController;
@@ -465,6 +488,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
           style: style,
           dropdownColor: dropdownColor,
           enableFeedback: enableFeedback,
+          borderRadius: borderRadius,
         );
       },
     );
@@ -561,6 +585,7 @@ class _DropdownRoutePage<T> extends StatelessWidget {
     this.style,
     required this.dropdownColor,
     required this.enableFeedback,
+    this.borderRadius,
   }) : super(key: key);
 
   final _DropdownRoute<T> route;
@@ -574,6 +599,7 @@ class _DropdownRoutePage<T> extends StatelessWidget {
   final TextStyle? style;
   final Color? dropdownColor;
   final bool enableFeedback;
+  final BorderRadius? borderRadius;
 
   @override
   Widget build(BuildContext context) {
@@ -584,7 +610,7 @@ class _DropdownRoutePage<T> extends StatelessWidget {
     // DropdownButton.itemHeight is specified or DropdownButton.itemHeight is null
     // and all of the items' intrinsic heights are less than kMinInteractiveDimension.
     // Otherwise the initialScrollOffset is just a rough approximation based on
-    // treating the items as if their heights were all equal to kMinInteractveDimension.
+    // treating the items as if their heights were all equal to kMinInteractiveDimension.
     if (route.scrollController == null) {
       final _MenuLimits menuLimits = route.getMenuLimits(buttonRect, constraints.maxHeight, selectedIndex);
       route.scrollController = ScrollController(initialScrollOffset: menuLimits.scrollOffset);
@@ -598,6 +624,7 @@ class _DropdownRoutePage<T> extends StatelessWidget {
       constraints: constraints,
       dropdownColor: dropdownColor,
       enableFeedback: enableFeedback,
+      borderRadius: borderRadius,
     );
 
     return MediaQuery.removePadding(
@@ -882,6 +909,7 @@ class DropdownButton<T> extends StatefulWidget {
     this.menuMaxHeight,
     this.enableFeedback,
     this.alignment = AlignmentDirectional.centerStart,
+    this.borderRadius,
     // When adding new arguments, consider adding similar arguments to
     // DropdownButtonFormField.
   }) : assert(items == null || items.isEmpty || value == null ||
@@ -1166,6 +1194,14 @@ class DropdownButton<T> extends StatefulWidget {
   ///    relative to text direction.
   final AlignmentGeometry alignment;
 
+  /// Defines the corner radii of the menu's rounded rectangle shape.
+  ///
+  /// The radii of the first menu item's top left and right corners are
+  /// defined by the corresponding properties of the [borderRadius].
+  /// Similarly, the radii of the last menu item's bottom and right corners
+  /// are defined by the corresponding properties of the [borderRadius].
+  final BorderRadius? borderRadius;
+
   @override
   State<DropdownButton<T>> createState() => _DropdownButtonState<T>();
 }
@@ -1319,6 +1355,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       dropdownColor: widget.dropdownColor,
       menuMaxHeight: widget.menuMaxHeight,
       enableFeedback: widget.enableFeedback ?? true,
+      borderRadius: widget.borderRadius,
     );
 
     navigator.push(_dropdownRoute!).then<void>((_DropdownRouteResult<T>? newValue) {
@@ -1621,7 +1658,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
              child: Builder(builder: (BuildContext context) {
                return InputDecorator(
                  decoration: effectiveDecoration.copyWith(errorText: field.errorText),
-                 isEmpty: state.value == null,
+                 isEmpty: items == null || items.where((DropdownMenuItem<T> item) => item.value == state.value).isEmpty,
                  isFocused: Focus.of(context).hasFocus,
                  child: DropdownButtonHideUnderline(
                    child: DropdownButton<T>(

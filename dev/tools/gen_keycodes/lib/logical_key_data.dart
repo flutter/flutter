@@ -50,6 +50,8 @@ class LogicalKeyData {
     String androidNameMap,
     String macosLogicalToPhysical,
     String iosLogicalToPhysical,
+    String glfwHeaderFile,
+    String glfwNameMap,
     PhysicalKeyData physicalKeyData,
   ) {
     final Map<String, LogicalKeyEntry> data = <String, LogicalKeyEntry>{};
@@ -60,6 +62,7 @@ class LogicalKeyData {
     _readMacOsKeyCodes(data, physicalKeyData, parseMapOfListOfString(macosLogicalToPhysical));
     _readIosKeyCodes(data, physicalKeyData, parseMapOfListOfString(iosLogicalToPhysical));
     _readFuchsiaKeyCodes(data, physicalKeyData);
+    _readGlfwKeyCodes(data, glfwHeaderFile, parseMapOfListOfString(glfwNameMap));
     // Sort entries by value
     final List<MapEntry<String, LogicalKeyEntry>> sortedEntries = data.entries.toList()..sort(
       (MapEntry<String, LogicalKeyEntry> a, MapEntry<String, LogicalKeyEntry> b) =>
@@ -120,15 +123,17 @@ class LogicalKeyData {
   ///                Key        Enum       Value
   /// DOM_KEY_MAP("Accel",      ACCEL,    0x0101),
   ///
-  /// Flutter's supplemental_key_data.inc also has a new format
-  /// that uses a character as the 3rd argument.
+  /// Flutter's supplemental_key_data.inc also has some new formats.
+  /// The following format uses a character as the 3rd argument.
   ///                Key        Enum       Character
   /// DOM_KEY_UNI("KeyB",      KEY_B,      'b'),
+  ///
+  /// The following format should be mapped to the Flutter plane.
+  ///                 Key       Enum       Character
+  /// FLUTTER_KEY_MAP("Lang4",  LANG4,     0x00013),
   static void _readKeyEntries(Map<String, LogicalKeyEntry> data, String input) {
-    final Map<String, String> unusedNumpad = Map<String, String>.from(_printableToNumpads);
-
     final RegExp domKeyRegExp = RegExp(
-      r'DOM_KEY_(?<kind>UNI|MAP)\s*\(\s*'
+      r'(?<source>DOM|FLUTTER)_KEY_(?<kind>UNI|MAP)\s*\(\s*'
       r'"(?<name>[^\s]+?)",\s*'
       r'(?<enum>[^\s]+?),\s*'
       r"(?:0[xX](?<unicode>[a-fA-F0-9]+)|'(?<char>.)')\s*"
@@ -140,6 +145,7 @@ class LogicalKeyData {
     final RegExp commentRegExp = RegExp(r'//.*$', multiLine: true);
     input = input.replaceAll(commentRegExp, '');
     for (final RegExpMatch match in domKeyRegExp.allMatches(input)) {
+      final String source = match.namedGroup('source')!;
       final String webName = match.namedGroup('name')!;
       // ".AltGraphLatch"  is consumed internally and not expressed to the Web.
       if (webName.startsWith('.')) {
@@ -150,51 +156,21 @@ class LogicalKeyData {
         getHex(match.namedGroup('unicode')!) :
         match.namedGroup('char')!.codeUnitAt(0);
       final String? keyLabel = match.namedGroup('kind')! == 'UNI' ? String.fromCharCode(value) : null;
-      // If it's a modifier key, add left and right keys instead.
-      // Don't add web names and values; they're solved with locations.
-      if (_chromeModifiers.containsKey(name)) {
-        final _ModifierPair pair = _chromeModifiers[name]!;
-        data[pair.left] = LogicalKeyEntry.fromName(
-          value: value + kLeftModifierPlane,
-          name: pair.left,
-          keyLabel: null, // Modifier keys don't have keyLabels
-        )..webNames.add(pair.left);
-        data[pair.right] = LogicalKeyEntry.fromName(
-          value: value + kRightModifierPlane,
-          name: pair.right,
-          keyLabel: null, // Modifier keys don't have keyLabels
-        )..webNames.add(pair.right);
+      // Skip modifier keys from DOM. They will be added with supplemental data.
+      if (_chromeModifiers.containsKey(name) && source == 'DOM') {
         continue;
       }
 
-      // If it has a numpad counterpart, also add the numpad key.
-      final String? char = value < 256 ? String.fromCharCode(value) : null;
-      if (char != null && _printableToNumpads.containsKey(char)) {
-        final String numpadName = _printableToNumpads[char]!;
-        data[numpadName] = LogicalKeyEntry.fromName(
-          value: char.codeUnitAt(0) + kNumpadPlane,
-          name: numpadName,
-          keyLabel: null, // Don't add keyLabel for numpad counterparts
-        )..webNames.add(numpadName);
-        unusedNumpad.remove(char);
-      }
-
+      final bool isPrintable = (keyLabel != null && !_isControlCharacter(keyLabel))
+        || printable.containsKey(name);
       data.putIfAbsent(name, () {
-        final bool isPrintable = (keyLabel != null && !_isControlCharacter(keyLabel))
-          || printable.containsKey(name)
-          || value == 0; // "None" key
         return LogicalKeyEntry.fromName(
-          value: value + (isPrintable ? kUnicodePlane : kUnprintablePlane),
+          value: toPlane(value, _sourceToPlane(source, isPrintable)),
           name: name,
           keyLabel: keyLabel,
         )..webNames.add(webName);
       });
     }
-
-    // Make sure every Numpad key that we care about has been defined.
-    unusedNumpad.forEach((String key, String value) {
-      print('Undefined numpad key $value');
-    });
   }
 
   static void _readMacOsKeyCodes(
@@ -207,13 +183,13 @@ class LogicalKeyData {
 
     physicalToLogical.forEach((String physicalKeyName, String logicalKeyName) {
       final PhysicalKeyEntry physicalEntry = physicalKeyData.entryByName(physicalKeyName);
-      assert(physicalEntry.macOsScanCode != null,
-        'Physical entry $physicalKeyName does not have a macOsScanCode.');
+      assert(physicalEntry.macOSScanCode != null,
+        'Physical entry $physicalKeyName does not have a macOSScanCode.');
       final LogicalKeyEntry? logicalEntry = data[logicalKeyName];
       assert(logicalEntry != null,
         'Unable to find logical entry by name $logicalKeyName.');
-      logicalEntry!.macOsKeyCodeNames.add(physicalEntry.name);
-      logicalEntry.macOsKeyCodeValues.add(physicalEntry.macOsScanCode!);
+      logicalEntry!.macOSKeyCodeNames.add(physicalEntry.name);
+      logicalEntry.macOSKeyCodeValues.add(physicalEntry.macOSScanCode!);
     });
   }
 
@@ -227,13 +203,13 @@ class LogicalKeyData {
 
     physicalToLogical.forEach((String physicalKeyName, String logicalKeyName) {
       final PhysicalKeyEntry physicalEntry = physicalKeyData.entryByName(physicalKeyName);
-      assert(physicalEntry.iosScanCode != null,
+      assert(physicalEntry.iOSScanCode != null,
         'Physical entry $physicalKeyName does not have an iosScanCode.');
       final LogicalKeyEntry? logicalEntry = data[logicalKeyName];
       assert(logicalEntry != null,
         'Unable to find logical entry by name $logicalKeyName.');
-      logicalEntry!.iosKeyCodeNames.add(physicalEntry.name);
-      logicalEntry.iosKeyCodeValues.add(physicalEntry.iosScanCode!);
+      logicalEntry!.iOSKeyCodeNames.add(physicalEntry.name);
+      logicalEntry.iOSKeyCodeValues.add(physicalEntry.iOSScanCode!);
     });
   }
 
@@ -347,17 +323,65 @@ class LogicalKeyData {
           return 0;
         final String? keyLabel = printable[entry.constantName];
         if (keyLabel != null && !entry.constantName.startsWith('numpad')) {
-          return kUnicodePlane | (keyLabel.codeUnitAt(0) & kValueMask);
+          return toPlane(keyLabel.codeUnitAt(0), kUnicodePlane.value);
         } else {
           final PhysicalKeyEntry? physicalEntry = physicalData.tryEntryByName(entry.name);
           if (physicalEntry != null) {
-            return kHidPlane | (physicalEntry.usbHidCode & kValueMask);
+            return toPlane(physicalEntry.usbHidCode, kFuchsiaPlane.value);
           }
         }
       })();
       if (value != null)
         entry.fuchsiaValues.add(value);
     }
+  }
+
+  /// Parses entries from GLFW's keycodes.h key code data file.
+  ///
+  /// Lines in this file look like this (without the ///):
+  ///  /** Space key. */
+  ///  #define GLFW_KEY_SPACE              32,
+  ///  #define GLFW_KEY_LAST               GLFW_KEY_MENU
+  static void _readGlfwKeyCodes(Map<String, LogicalKeyEntry> data, String headerFile, Map<String, List<String>> nameMap) {
+    final Map<String, String> nameToFlutterName  = reverseMapOfListOfString(nameMap,
+        (String flutterName, String glfwName) { print('Duplicate GLFW logical name $glfwName'); });
+
+    // Only get the KEY definitions, ignore the rest (mouse, joystick, etc).
+    final RegExp definedCodes = RegExp(
+      r'define\s+'
+      r'GLFW_KEY_(?<name>[A-Z0-9_]+)\s+'
+      r'(?<value>[A-Z0-9_]+),?',
+    );
+    final Map<String, dynamic> replaced = <String, dynamic>{};
+    for (final RegExpMatch match in definedCodes.allMatches(headerFile)) {
+      final String name = match.namedGroup('name')!;
+      final String value = match.namedGroup('value')!;
+      replaced[name] = int.tryParse(value) ?? value.replaceAll('GLFW_KEY_', '');
+    }
+    final Map<String, int> glfwNameToKeyCode = <String, int>{};
+    replaced.forEach((String key, dynamic value) {
+      // Some definition values point to other definitions (e.g #define GLFW_KEY_LAST GLFW_KEY_MENU).
+      if (value is String) {
+        glfwNameToKeyCode[key] = replaced[value] as int;
+      } else {
+        glfwNameToKeyCode[key] = value as int;
+      }
+    });
+
+    glfwNameToKeyCode.forEach((String glfwName, int value) {
+      final String? name = nameToFlutterName[glfwName];
+      final LogicalKeyEntry? entry = data[nameToFlutterName[glfwName]];
+      if (entry == null) {
+        print('Invalid logical entry by name $name (from GLFW $glfwName)');
+        return;
+      }
+      addNameValue(
+        entry.glfwNames,
+        entry.glfwValues,
+        glfwName,
+        value,
+      );
+    });
   }
 
   // Map Web key to the pair of key names
@@ -370,26 +394,18 @@ class LogicalKeyData {
   }();
 
   /// Returns the static map of printable representations.
-  static late final Map<String, String> printable = ((){
+  static late final Map<String, String> printable = (() {
     final String printableKeys = File(path.join(dataRoot, 'printable.json',)).readAsStringSync();
     return (json.decode(printableKeys) as Map<String, dynamic>)
       .cast<String, String>();
   })();
-
-  // Map printable to corresponding numpad key name
-  static late final Map<String, String> _printableToNumpads = () {
-    final String rawJson = File(path.join(dataRoot, 'printable_to_numpads.json',)).readAsStringSync();
-    return (json.decode(rawJson) as Map<String, dynamic>).map((String key, dynamic value) {
-      return MapEntry<String, String>(key, value as String);
-    });
-  }();
 
   /// Returns the static map of synonym representations.
   ///
   /// These include synonyms for keys which don't have printable
   /// representations, and appear in more than one place on the keyboard (e.g.
   /// SHIFT, ALT, etc.).
-  static late final Map<String, List<String>> synonyms = ((){
+  static late final Map<String, List<String>> synonyms = (() {
     final String synonymKeys = File(path.join(dataRoot, 'synonyms.json',)).readAsStringSync();
     final Map<String, dynamic> dynamicSynonym = json.decode(synonymKeys) as Map<String, dynamic>;
     return dynamicSynonym.map((String name, dynamic values) {
@@ -400,6 +416,18 @@ class LogicalKeyData {
       return MapEntry<String, List<String>>(name, names);
     });
   })();
+
+  static int _sourceToPlane(String source, bool isPrintable) {
+    switch (source) {
+      case 'DOM':
+        return isPrintable ? kUnicodePlane.value : kUnprintablePlane.value;
+      case 'FLUTTER':
+        return kFlutterPlane.value;
+      default:
+        assert(false, 'Unrecognized logical key source $source');
+        return kFlutterPlane.value;
+    }
+  }
 }
 
 
@@ -414,17 +442,19 @@ class LogicalKeyEntry {
     required this.name,
     this.keyLabel,
   })  : webNames = <String>[],
-        macOsKeyCodeNames = <String>[],
-        macOsKeyCodeValues = <int>[],
-        iosKeyCodeNames = <String>[],
-        iosKeyCodeValues = <int>[],
+        macOSKeyCodeNames = <String>[],
+        macOSKeyCodeValues = <int>[],
+        iOSKeyCodeNames = <String>[],
+        iOSKeyCodeValues = <int>[],
         gtkNames = <String>[],
         gtkValues = <int>[],
         windowsNames = <String>[],
         windowsValues = <int>[],
         androidNames = <String>[],
         androidValues = <int>[],
-        fuchsiaValues = <int>[];
+        fuchsiaValues = <int>[],
+        glfwNames = <String>[],
+        glfwValues = <int>[];
 
   LogicalKeyEntry.fromName({
     required int value,
@@ -440,18 +470,20 @@ class LogicalKeyEntry {
   LogicalKeyEntry.fromJsonMapEntry(Map<String, dynamic> map)
     : value = map['value'] as int,
       name = map['name'] as String,
-      webNames = _toNonEmptyArray<String>(map['names']['web']),
-      macOsKeyCodeNames = _toNonEmptyArray<String>(map['names']['macOs']),
-      macOsKeyCodeValues = _toNonEmptyArray<int>(map['values']?['macOs']),
-      iosKeyCodeNames = _toNonEmptyArray<String>(map['names']['ios']),
-      iosKeyCodeValues = _toNonEmptyArray<int>(map['values']?['ios']),
-      gtkNames = _toNonEmptyArray<String>(map['names']['gtk']),
-      gtkValues = _toNonEmptyArray<int>(map['values']?['gtk']),
-      windowsNames = _toNonEmptyArray<String>(map['names']['windows']),
-      windowsValues = _toNonEmptyArray<int>(map['values']?['windows']),
-      androidNames = _toNonEmptyArray<String>(map['names']['android']),
-      androidValues = _toNonEmptyArray<int>(map['values']?['android']),
-      fuchsiaValues = _toNonEmptyArray<int>(map['values']?['fuchsia']),
+      webNames = _toNonEmptyArray<String>((map['names'] as Map<String, dynamic>)['web']),
+      macOSKeyCodeNames = _toNonEmptyArray<String>((map['names'] as Map<String, dynamic>)['macos']),
+      macOSKeyCodeValues = _toNonEmptyArray<int>((map['values'] as Map<String, dynamic>?)?['macos']),
+      iOSKeyCodeNames = _toNonEmptyArray<String>((map['names'] as Map<String, dynamic>)['ios']),
+      iOSKeyCodeValues = _toNonEmptyArray<int>((map['values'] as Map<String, dynamic>?)?['ios']),
+      gtkNames = _toNonEmptyArray<String>((map['names'] as Map<String, dynamic>)['gtk']),
+      gtkValues = _toNonEmptyArray<int>((map['values'] as Map<String, dynamic>?)?['gtk']),
+      windowsNames = _toNonEmptyArray<String>((map['names'] as Map<String, dynamic>)['windows']),
+      windowsValues = _toNonEmptyArray<int>((map['values'] as Map<String, dynamic>?)?['windows']),
+      androidNames = _toNonEmptyArray<String>((map['names'] as Map<String, dynamic>)['android']),
+      androidValues = _toNonEmptyArray<int>((map['values'] as Map<String, dynamic>?)?['android']),
+      fuchsiaValues = _toNonEmptyArray<int>((map['values'] as Map<String, dynamic>?)?['fuchsia']),
+      glfwNames = _toNonEmptyArray<String>((map['names'] as Map<String, dynamic>)['glfw']),
+      glfwValues = _toNonEmptyArray<int>((map['values'] as Map<String, dynamic>?)?['glfw']),
       keyLabel = map['keyLabel'] as String?;
 
   final int value;
@@ -470,19 +502,19 @@ class LogicalKeyEntry {
 
   /// The names of the key codes that corresponds to this logical key on macOS,
   /// created from the corresponding physical keys.
-  final List<String> macOsKeyCodeNames;
+  final List<String> macOSKeyCodeNames;
 
   /// The key codes that corresponds to this logical key on macOS, created from
   /// the physical key list substituted with the key mapping.
-  final List<int> macOsKeyCodeValues;
+  final List<int> macOSKeyCodeValues;
 
   /// The names of the key codes that corresponds to this logical key on iOS,
   /// created from the corresponding physical keys.
-  final List<String> iosKeyCodeNames;
+  final List<String> iOSKeyCodeNames;
 
   /// The key codes that corresponds to this logical key on iOS, created from the
   /// physical key list substituted with the key mapping.
-  final List<int> iosKeyCodeValues;
+  final List<int> iOSKeyCodeValues;
 
   /// The list of names that GTK gives to this key (symbol names minus the
   /// prefix).
@@ -513,6 +545,15 @@ class LogicalKeyEntry {
 
   final List<int> fuchsiaValues;
 
+  /// The list of names that GLFW gives to this key (symbol names minus the
+  /// prefix).
+  final List<String> glfwNames;
+
+  /// The list of GLFW key codes matching this key, created by looking up the
+  /// GLFW name in the Chromium data, and substituting the GLFW key code
+  /// value.
+  final List<int> glfwValues;
+
   /// A string indicating the letter on the keycap of a letter key.
   ///
   /// This is only used to generate the key label mapping in keyboard_map.dart.
@@ -528,19 +569,21 @@ class LogicalKeyEntry {
       'keyLabel': keyLabel,
       'names': <String, dynamic>{
         'web': webNames,
-        'macOs': macOsKeyCodeNames,
-        'ios': iosKeyCodeNames,
+        'macos': macOSKeyCodeNames,
+        'ios': iOSKeyCodeNames,
         'gtk': gtkNames,
         'windows': windowsNames,
         'android': androidNames,
+        'glfw': glfwNames,
       },
       'values': <String, List<int>>{
-        'macOs': macOsKeyCodeValues,
-        'ios': iosKeyCodeValues,
+        'macos': macOSKeyCodeValues,
+        'ios': iOSKeyCodeValues,
         'gtk': gtkValues,
         'windows': windowsValues,
         'android': androidValues,
         'fuchsia': fuchsiaValues,
+        'glfw': glfwValues,
       },
     });
   }

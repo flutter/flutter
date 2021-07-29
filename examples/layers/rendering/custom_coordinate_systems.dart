@@ -21,5 +21,5 @@ RenderBox buildSectorExample() {
 }
 
 void main() {
-  RenderingFlutterBinding(root: buildSectorExample());
+  RenderingFlutterBinding(root: buildSectorExample()).scheduleFrame();
 }

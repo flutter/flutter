@@ -467,6 +467,19 @@ void main() {
       expect(featureFlags.isWindowsUwpEnabled, true);
     });
 
+    testWithoutContext('Flutter Windows UWP desktop off by default on dev', () {
+      final FeatureFlags featureFlags = createFlags('dev');
+
+      expect(featureFlags.isWindowsUwpEnabled, false);
+    });
+
+    testWithoutContext('Flutter Windows UWP desktop enabled with config on dev', () {
+      final FeatureFlags featureFlags = createFlags('dev');
+      testConfig.setValue('enable-windows-uwp-desktop', true);
+
+      expect(featureFlags.isWindowsUwpEnabled, true);
+    });
+
     testWithoutContext('Flutter Windows UWP desktop off by default on stable', () {
       final FeatureFlags featureFlags = createFlags('stable');
 

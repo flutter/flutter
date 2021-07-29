@@ -118,6 +118,8 @@ class FlutterOptions {
   static const String kNullAssertions = 'null-assertions';
   static const String kAndroidGradleDaemon = 'android-gradle-daemon';
   static const String kDeferredComponents = 'deferred-components';
+  static const String kAndroidProjectArgs = 'android-project-arg';
+  static const String kInitializeFromDill = 'initialize-from-dill';
 }
 
 abstract class FlutterCommand extends Command<void> {
@@ -157,7 +159,6 @@ abstract class FlutterCommand extends Command<void> {
   @override
   ArgParser get argParser => _argParser;
   final ArgParser _argParser = ArgParser(
-    allowTrailingOptions: false,
     usageLineLength: globals.outputPreferences.wrapText ? globals.outputPreferences.wrapColumn : null,
   );
 
@@ -287,6 +288,22 @@ abstract class FlutterCommand extends Command<void> {
   ///
   /// This can be overridden by some of its subclasses.
   String get packagesPath => globalResults['packages'] as String;
+
+  /// The value of the `--filesystem-scheme` argument.
+  ///
+  /// This can be overridden by some of its subclasses.
+  String get fileSystemScheme =>
+    argParser.options.containsKey(FlutterOptions.kFileSystemScheme)
+          ? stringArg(FlutterOptions.kFileSystemScheme)
+          : null;
+
+  /// The values of the `--filesystem-root` argument.
+  ///
+  /// This can be overridden by some of its subclasses.
+  List<String> get fileSystemRoots =>
+    argParser.options.containsKey(FlutterOptions.kFileSystemRoot)
+          ? stringsArg(FlutterOptions.kFileSystemRoot)
+          : null;
 
   void usesPubOption({bool hide = false}) {
     argParser.addFlag('pub',
@@ -545,7 +562,7 @@ abstract class FlutterCommand extends Command<void> {
       allowed: <String>['auto', 'canvaskit', 'html'],
       help: 'The renderer implementation to use when building for the web.',
       allowedHelp: <String, String>{
-        'html': 'Always use the HTML renderer. This renderer uses a combination of HTML, CSS, SVG, 2D Canvas, and WebGL. This is the default.',
+        'html': 'Always use the HTML renderer. This renderer uses a combination of HTML, CSS, SVG, 2D Canvas, and WebGL.',
         'canvaskit': 'Always use the CanvasKit renderer. This renderer uses WebGL and WebAssembly to render graphics.',
         'auto': 'Use the HTML renderer on mobile devices, and CanvasKit on desktop devices.',
       }
@@ -768,6 +785,13 @@ abstract class FlutterCommand extends Command<void> {
       defaultsTo: true,
       hide: hide,
     );
+    argParser.addMultiOption(
+      FlutterOptions.kAndroidProjectArgs,
+      help: 'Additional arguments specified as key=value that are passed directly to the gradle '
+            'project via the -P flag. These can be accessed in build.gradle via the "project.property" API.',
+      splitCommas: false,
+      abbr: 'P',
+    );
   }
 
   void addNativeNullAssertions({ bool hide = false }) {
@@ -780,6 +804,14 @@ abstract class FlutterCommand extends Command<void> {
         'effect in sound mode. To report an issue with a null assertion failure in '
         'dart:html or the other dart web libraries, please file a bug at: '
         'https://github.com/dart-lang/sdk/issues/labels/web-libraries'
+    );
+  }
+
+  void usesInitializeFromDillOption({ @required bool hide }) {
+    argParser.addOption(FlutterOptions.kInitializeFromDill,
+      help: 'Initializes the resident compiler with a specific kernel file instead of '
+        'the default cached location.',
+      hide: hide,
     );
   }
 
@@ -864,7 +896,7 @@ abstract class FlutterCommand extends Command<void> {
             'ABI must be specified at a time with the "--target-platform" flag. When building for iOS, '
             'only the symbols from the arm64 architecture are used to analyze code size.\n'
             'By default, the intermediate output files will be placed in a transient directory in the '
-            'build directory. This can be overriden with the "--${FlutterOptions.kCodeSizeDirectory}" option.\n'
+            'build directory. This can be overridden with the "--${FlutterOptions.kCodeSizeDirectory}" option.\n'
             'This flag cannot be combined with "--${FlutterOptions.kSplitDebugInfoOption}".'
     );
 
@@ -909,7 +941,7 @@ abstract class FlutterCommand extends Command<void> {
 
     if (experiments.isNotEmpty) {
       for (final String expFlag in experiments) {
-        final String flag = '--enable-experiment=' + expFlag;
+        final String flag = '--enable-experiment=$expFlag';
         extraFrontEndOptions.add(flag);
         extraGenSnapshotOptions.add(flag);
       }
@@ -971,6 +1003,10 @@ abstract class FlutterCommand extends Command<void> {
     final bool androidGradleDaemon = !argParser.options.containsKey(FlutterOptions.kAndroidGradleDaemon)
       || boolArg(FlutterOptions.kAndroidGradleDaemon);
 
+    final List<String> androidProjectArgs = argParser.options.containsKey(FlutterOptions.kAndroidProjectArgs)
+      ? stringsArg(FlutterOptions.kAndroidProjectArgs)
+      : <String>[];
+
     if (dartObfuscation && (splitDebugInfoPath == null || splitDebugInfoPath.isEmpty)) {
       throwToolExit(
         '"--${FlutterOptions.kDartObfuscationOption}" can only be used in '
@@ -1020,12 +1056,8 @@ abstract class FlutterCommand extends Command<void> {
       extraGenSnapshotOptions: extraGenSnapshotOptions?.isNotEmpty ?? false
         ? extraGenSnapshotOptions
         : null,
-      fileSystemRoots: argParser.options.containsKey(FlutterOptions.kFileSystemRoot)
-          ? stringsArg(FlutterOptions.kFileSystemRoot)
-          : null,
-      fileSystemScheme: argParser.options.containsKey(FlutterOptions.kFileSystemScheme)
-          ? stringArg(FlutterOptions.kFileSystemScheme)
-          : null,
+      fileSystemRoots: fileSystemRoots,
+      fileSystemScheme: fileSystemScheme,
       buildNumber: buildNumber,
       buildName: argParser.options.containsKey('build-name')
           ? stringArg('build-name')
@@ -1042,6 +1074,10 @@ abstract class FlutterCommand extends Command<void> {
       codeSizeDirectory: codeSizeDirectory,
       androidGradleDaemon: androidGradleDaemon,
       packageConfig: packageConfig,
+      androidProjectArgs: androidProjectArgs,
+      initializeFromDill: argParser.options.containsKey(FlutterOptions.kInitializeFromDill)
+          ? stringArg(FlutterOptions.kInitializeFromDill)
+          : null,
     );
   }
 
@@ -1063,8 +1099,7 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   /// Additional usage values to be sent with the usage ping.
-  Future<Map<CustomDimensions, String>> get usageValues async =>
-      const <CustomDimensions, String>{};
+  Future<CustomDimensions> get usageValues async => const CustomDimensions();
 
   /// Runs this command.
   ///
@@ -1231,12 +1266,9 @@ abstract class FlutterCommand extends Command<void> {
     setupApplicationPackages();
 
     if (commandPath != null) {
-      final Map<CustomDimensions, Object> additionalUsageValues =
-        <CustomDimensions, Object>{
-          ...?await usageValues,
-          CustomDimensions.commandHasTerminal: globals.stdio.hasTerminal,
-        };
-      Usage.command(commandPath, parameters: additionalUsageValues);
+      Usage.command(commandPath, parameters: CustomDimensions(
+        commandHasTerminal: globals.stdio.hasTerminal,
+      ).merge(await usageValues));
     }
 
     return runCommand();

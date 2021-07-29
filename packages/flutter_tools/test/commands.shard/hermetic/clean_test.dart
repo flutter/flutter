@@ -219,7 +219,7 @@ class CleanWorkspaceCall {
     verbose == other.verbose;
 
   @override
-  int get hashCode => workspacePath.hashCode;
+  int get hashCode => Object.hash(workspacePath, scheme, verbose);
 
   @override
   String toString() => '{$workspacePath, $scheme, $verbose}';

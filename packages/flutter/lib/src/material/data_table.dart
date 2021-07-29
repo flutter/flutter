@@ -390,8 +390,9 @@ class DataCell {
 ///         (int index) => DataRow(
 ///           color: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
 ///             // All rows will have the same selected color.
-///             if (states.contains(MaterialState.selected))
+///             if (states.contains(MaterialState.selected)) {
 ///               return Theme.of(context).colorScheme.primary.withOpacity(0.08);
+///             }
 ///             // Even rows will have a grey color.
 ///             if (index.isEven) {
 ///               return Colors.grey.withOpacity(0.3);

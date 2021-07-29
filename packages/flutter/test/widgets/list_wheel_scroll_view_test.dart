@@ -77,7 +77,6 @@ void main() {
       expect(tester.getSize(find.byType(ListWheelScrollView)), const Size(800.0, 600.0));
     });
 
-
     testWidgets('ListWheelScrollView needs positive magnification', (WidgetTester tester) async {
       expect(
         () {
@@ -283,6 +282,38 @@ void main() {
   });
 
   group('layout', () {
+    // Regression test for https://github.com/flutter/flutter/issues/58144
+    testWidgets('ListWheelScrollView childDelegate update test', (WidgetTester tester) async {
+      final FixedExtentScrollController controller = FixedExtentScrollController();
+      Widget buildFrame(int childCount) {
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: ListWheelScrollView.useDelegate(
+            controller: controller,
+            itemExtent: 100.0,
+            onSelectedItemChanged: (_) { },
+            childDelegate: ListWheelChildBuilderDelegate(
+              childCount: childCount,
+              builder: (BuildContext context, int index) {
+                return SizedBox(
+                  width: 400.0,
+                  height: 100.0,
+                  child: Text(index.toString()),
+                );
+              },
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildFrame(1));
+      expect(tester.renderObject(find.text('0')).attached, true);
+
+      await tester.pumpWidget(buildFrame(2));
+      expect(tester.renderObject(find.text('0')).attached, true);
+      expect(tester.renderObject(find.text('1')).attached, true);
+    });
+
     testWidgets("ListWheelScrollView takes parent's size with small children", (WidgetTester tester) async {
       await tester.pumpWidget(
         Directionality(

@@ -46,6 +46,6 @@ void main() {
 
       // Ensure the scroll offset changed appropriately when TextField scrolled back into view.
       expect(scrollOffsetWithKeyboard, greaterThan(scrollOffsetWithoutKeyboard));
-    });
+    }, timeout: Timeout.none);
   });
 }

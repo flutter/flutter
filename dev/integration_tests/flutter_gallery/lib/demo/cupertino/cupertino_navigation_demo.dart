@@ -302,21 +302,15 @@ class Tab1ItemPage extends StatefulWidget {
 }
 
 class Tab1ItemPageState extends State<Tab1ItemPage> {
-  @override
-  void initState() {
-    super.initState();
-    relatedColors = List<Color>.generate(10, (int index) {
-      final math.Random random = math.Random(widget.randomSeed);
-      return Color.fromARGB(
-        255,
-        (widget.color!.red + random.nextInt(100) - 50).clamp(0, 255),
-        (widget.color!.green + random.nextInt(100) - 50).clamp(0, 255),
-        (widget.color!.blue + random.nextInt(100) - 50).clamp(0, 255),
-      );
-    });
-  }
-
-  late List<Color> relatedColors;
+  late final List<Color> relatedColors = List<Color>.generate(10, (int index) {
+    final math.Random random = math.Random(widget.randomSeed);
+    return Color.fromARGB(
+      255,
+      (widget.color!.red + random.nextInt(100) - 50).clamp(0, 255),
+      (widget.color!.green + random.nextInt(100) - 50).clamp(0, 255),
+      (widget.color!.blue + random.nextInt(100) - 50).clamp(0, 255),
+    );
+  });
 
   @override
   Widget build(BuildContext context) {

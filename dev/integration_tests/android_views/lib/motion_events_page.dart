@@ -53,7 +53,7 @@ class MotionEventsBody extends StatefulWidget {
 class MotionEventsBodyState extends State<MotionEventsBody> {
   static const int kEventsBufferSize = 1000;
 
-  late MethodChannel viewChannel;
+  MethodChannel? viewChannel;
 
   /// The list of motion events that were passed to the FlutterView.
   List<Map<String, dynamic>> flutterViewEvents = <Map<String, dynamic>>[];
@@ -137,14 +137,14 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
           .map<Map<String, dynamic>>((Map<dynamic, dynamic> e) =>e.cast<String, dynamic>())
           .toList();
       await channel.invokeMethod<void>('pipeFlutterViewEvents');
-      await viewChannel.invokeMethod<void>('pipeTouchEvents');
+      await viewChannel?.invokeMethod<void>('pipeTouchEvents');
       print('replaying ${recordedEvents.length} motion events');
       for (final Map<String, dynamic> event in recordedEvents.reversed) {
         await channel.invokeMethod<void>('synthesizeEvent', event);
       }
 
       await channel.invokeMethod<void>('stopFlutterViewEvents');
-      await viewChannel.invokeMethod<void>('stopTouchEvents');
+      await viewChannel?.invokeMethod<void>('stopTouchEvents');
 
       if (flutterViewEvents.length != embeddedViewEvents.length)
         return 'Synthesized ${flutterViewEvents.length} events but the embedded view received ${embeddedViewEvents.length} events';
@@ -196,16 +196,16 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
 
   void onPlatformViewCreated(int id) {
     viewChannel = MethodChannel('simple_view/$id');
-    viewChannel.setMethodCallHandler(onViewMethodChannelCall);
+    viewChannel?.setMethodCallHandler(onViewMethodChannelCall);
     driverDataHandler.handlerCompleter.complete(handleDriverMessage);
   }
 
   void listenToFlutterViewEvents() {
     channel.invokeMethod<void>('pipeFlutterViewEvents');
-    viewChannel.invokeMethod<void>('pipeTouchEvents');
+    viewChannel?.invokeMethod<void>('pipeTouchEvents');
     Timer(const Duration(seconds: 3), () {
       channel.invokeMethod<void>('stopFlutterViewEvents');
-      viewChannel.invokeMethod<void>('stopTouchEvents');
+      viewChannel?.invokeMethod<void>('stopTouchEvents');
     });
   }
 

@@ -765,8 +765,8 @@ void main() {
     expect(
       tester.takeException().toString(),
       'No Directionality widget found.\n'
-      'Stack widgets require a Directionality widget ancestor to resolve the \'alignment\' argument.\n'
-      'The default value for \'alignment\' is AlignmentDirectional.topStart, which requires a text direction.\n'
+      "Stack widgets require a Directionality widget ancestor to resolve the 'alignment' argument.\n"
+      "The default value for 'alignment' is AlignmentDirectional.topStart, which requires a text direction.\n"
       'The specific widget that could not find a Directionality ancestor was:\n'
       '  Stack\n'
       'The ownership chain for the affected widget is: "Stack ← [root]"\n'
@@ -775,7 +775,7 @@ void main() {
       'example, to determine how to lay out text, how to interpret "start" and "end" values, and to resolve '
       'EdgeInsetsDirectional, AlignmentDirectional, and other *Directional objects.\n'
       'Instead of providing a Directionality widget, another solution would be passing a non-directional '
-      '\'alignment\', or an explicit \'textDirection\', to the Stack.',
+      "'alignment', or an explicit 'textDirection', to the Stack.",
     );
   });
 }

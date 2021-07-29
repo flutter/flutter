@@ -222,13 +222,7 @@ class _PosixUtils extends OperatingSystemUtils {
   // unzip -o -q zipfile -d dest
   @override
   void unzip(File file, Directory targetDirectory) {
-    try {
-      _processUtils.runSync(
-        <String>['unzip', '-o', '-q', file.path, '-d', targetDirectory.path],
-        throwOnError: true,
-        verboseExceptions: true,
-      );
-    } on ArgumentError {
+    if (!_processManager.canRun('unzip')) {
       // unzip is not available. this error message is modeled after the download
       // error in bin/internal/update_dart_sdk.sh
       String message = 'Please install unzip.';
@@ -241,6 +235,11 @@ class _PosixUtils extends OperatingSystemUtils {
         'Missing "unzip" tool. Unable to extract ${file.path}.\n$message'
       );
     }
+    _processUtils.runSync(
+      <String>['unzip', '-o', '-q', file.path, '-d', targetDirectory.path],
+      throwOnError: true,
+      verboseExceptions: true,
+    );
   }
 
   // tar -xzf tarball -C dest
@@ -351,7 +350,7 @@ class _LinuxUtils extends _PosixUtils {
         final String value =  entryKeyValuePair[1];
         // Remove quotes from either end of the value if they exist
         final String quote = value[0];
-        if (quote == '\'' || quote == '"') {
+        if (quote == "'" || quote == '"') {
           return value.substring(0, value.length - 1).substring(1);
         } else {
           return value;
@@ -428,6 +427,45 @@ class _MacOSUtils extends _PosixUtils {
     }
     return _hostPlatform!;
   }
+
+  // unzip, then rsync
+  @override
+  void unzip(File file, Directory targetDirectory) {
+    if (!_processManager.canRun('unzip')) {
+      // unzip is not available. this error message is modeled after the download
+      // error in bin/internal/update_dart_sdk.sh
+      throwToolExit('Missing "unzip" tool. Unable to extract ${file.path}.\nConsider running "brew install unzip".');
+    }
+    if (_processManager.canRun('rsync')) {
+      final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync('flutter_${file.basename}.');
+      try {
+        // Unzip to a temporary directory.
+        _processUtils.runSync(
+          <String>['unzip', '-o', '-q', file.path, '-d', tempDirectory.path],
+          throwOnError: true,
+          verboseExceptions: true,
+        );
+        for (final FileSystemEntity unzippedFile in tempDirectory.listSync(followLinks: false)) {
+          // rsync --delete the unzipped files so files removed from the archive are also removed from the target.
+          _processUtils.runSync(
+            <String>['rsync', '-av', '--delete', unzippedFile.path, targetDirectory.path],
+            throwOnError: true,
+            verboseExceptions: true,
+          );
+        }
+      } finally {
+        tempDirectory.deleteSync(recursive: true);
+      }
+    } else {
+      // Fall back to just unzipping.
+      _logger.printTrace('Unable to find rsync, falling back to direct unzipping.');
+      _processUtils.runSync(
+        <String>['unzip', '-o', '-q', file.path, '-d', targetDirectory.path],
+        throwOnError: true,
+        verboseExceptions: true,
+      );
+    }
+  }
 }
 
 class _WindowsUtils extends OperatingSystemUtils {
@@ -454,11 +492,7 @@ class _WindowsUtils extends OperatingSystemUtils {
 
   @override
   List<File> _which(String execName, { bool all = false }) {
-    // `where` always returns all matches, not just the first one.
-    ProcessResult result;
-    try {
-      result = _processManager.runSync(<String>['where', execName]);
-    } on ArgumentError {
+    if (!_processManager.canRun('where')) {
       // `where` could be missing if system32 is not on the PATH.
       throwToolExit(
         'Cannot find the executable for `where`. This can happen if the System32 '
@@ -467,6 +501,8 @@ class _WindowsUtils extends OperatingSystemUtils {
         'the terminal and/or IDE.'
       );
     }
+    // `where` always returns all matches, not just the first one.
+    final ProcessResult result = _processManager.runSync(<String>['where', execName]);
     if (result.exitCode != 0) {
       return const <File>[];
     }

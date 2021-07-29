@@ -256,14 +256,6 @@ class SnackBar extends StatefulWidget {
   }) : assert(elevation == null || elevation >= 0.0),
        assert(content != null),
        assert(
-         margin == null || behavior == SnackBarBehavior.floating,
-         'Margin can only be used with floating behavior',
-       ),
-       assert(
-         width == null || behavior == SnackBarBehavior.floating,
-         'Width can only be used with floating behavior',
-       ),
-       assert(
          width == null || margin == null,
          'Width and margin can not be used together',
        ),
@@ -304,10 +296,29 @@ class SnackBar extends StatefulWidget {
   /// The amount of padding to apply to the snack bar's content and optional
   /// action.
   ///
-  /// If this property is null, then the default depends on the [behavior] and
-  /// the presence of an [action]. The start padding is 24 if [behavior] is
-  /// [SnackBarBehavior.fixed] and 16 if it is [SnackBarBehavior.floating]. If
-  /// there is no [action], the same padding is added to the end.
+  /// If this property is null, the default padding values for:
+  ///
+  /// * [content]
+  ///     * Top and bottom paddings are 14.
+  ///     * Left padding is 24 if [behavior] is [SnackBarBehavior.fixed],
+  ///       16 if [behavior] is [SnackBarBehavior.floating]
+  ///     * Right padding is same as start padding if there is no [action], otherwise 0.
+  /// * [action]
+  ///     * Top and bottom paddings are 14
+  ///     * Left and right paddings are half of [content]'s left padding.
+  ///
+  /// If this property is not null, the padding assignment for:
+  ///
+  /// * [content]
+  ///     * Left, top and bottom paddings are assigned normally.
+  ///     * Right padding is assigned normally if there is no [action], otherwise 0.
+  /// * [action]
+  ///     * Left padding is replaced with half value of right padding.
+  ///     * Top and bottom paddings are assigned normally.
+  ///     * Right padding has an additional half value of right padding.
+  ///       ```dart
+  ///       right + (right / 2)
+  ///       ```
   final EdgeInsetsGeometry? padding;
 
   /// The width of the snack bar.
@@ -489,6 +500,26 @@ class _SnackBarState extends State<SnackBar> {
 
     final TextStyle? contentTextStyle = snackBarTheme.contentTextStyle ?? ThemeData(brightness: brightness).textTheme.subtitle1;
     final SnackBarBehavior snackBarBehavior = widget.behavior ?? snackBarTheme.behavior ?? SnackBarBehavior.fixed;
+    assert((){
+      // Whether the behavior is set through the constructor or the theme,
+      // assert that our other properties are configured properly.
+      if (snackBarBehavior != SnackBarBehavior.floating) {
+        String message(String parameter) {
+          final String prefix = '$parameter can only be used with floating behavior.';
+          if (widget.behavior != null) {
+            return '$prefix SnackBarBehavior.fixed was set in the SnackBar constructor.';
+          } else if (snackBarTheme.behavior != null) {
+            return '$prefix SnackBarBehavior.fixed was set by the inherited SnackBarThemeData.';
+          } else {
+            return '$prefix SnackBarBehavior.fixed was set by default.';
+          }
+        }
+        assert(widget.margin == null, message('Margin'));
+        assert(widget.width == null, message('Width'));
+      }
+      return true;
+    }());
+
     final bool isFloatingSnackBar = snackBarBehavior == SnackBarBehavior.floating;
     final double horizontalPadding = isFloatingSnackBar ? 16.0 : 24.0;
     final EdgeInsetsGeometry padding = widget.padding
@@ -511,7 +542,7 @@ class _SnackBarState extends State<SnackBar> {
         children: <Widget>[
           Expanded(
             child: Container(
-              padding: const EdgeInsets.symmetric(vertical: _singleLineVerticalPadding),
+              padding: widget.padding == null ? const EdgeInsets.symmetric(vertical: _singleLineVerticalPadding) : null,
               child: DefaultTextStyle(
                 style: contentTextStyle!,
                 child: widget.content,

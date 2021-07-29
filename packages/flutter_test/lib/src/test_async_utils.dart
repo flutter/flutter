@@ -45,7 +45,7 @@ class _AsyncScope {
 /// });
 /// ```
 class TestAsyncUtils {
-  // This class is not meant to be instatiated or extended; this constructor
+  // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
   TestAsyncUtils._();
   static const String _className = 'TestAsyncUtils';

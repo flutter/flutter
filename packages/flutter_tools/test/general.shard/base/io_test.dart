@@ -68,11 +68,11 @@ void main() {
     expect(io.ProcessSignal.sigint.toString(), ProcessSignal.sigint.toString());
   });
 
-  testWithoutContext('exit throws a StateError if called without being overriden', () {
+  testWithoutContext('exit throws a StateError if called without being overridden', () {
     expect(() => exit(0), throwsAssertionError);
   });
 
-  testWithoutContext('exit does not throw a StateError if overriden', () {
+  testWithoutContext('exit does not throw a StateError if overridden', () {
     try {
       setExitFunctionForTests((int value) {});
 

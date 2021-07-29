@@ -887,4 +887,70 @@ void main() {
     await tester.pumpAndSettle();
     expect(circleFillColor(), dark.background);
   });
+
+  testWidgets('Stepper custom elevation', (WidgetTester tester) async {
+     const double elevation = 4.0;
+
+     await tester.pumpWidget(
+       MaterialApp(
+         home: Material(
+           child: SizedBox(
+             width: 200,
+             height: 75,
+             child: Stepper(
+               type: StepperType.horizontal,
+               elevation: elevation,
+               steps: const <Step>[
+                 Step(
+                   title: Text('Regular title'),
+                   content: Text('Text content'),
+                 ),
+               ],
+             ),
+           ),
+         ),
+       ),
+     );
+
+     final Material material = tester.firstWidget<Material>(
+       find.descendant(
+         of: find.byType(Stepper),
+         matching: find.byType(Material),
+       ),
+     );
+
+     expect(material.elevation, elevation);
+   });
+
+   testWidgets('Stepper with default elevation', (WidgetTester tester) async {
+
+     await tester.pumpWidget(
+       MaterialApp(
+         home: Material(
+           child: SizedBox(
+             width: 200,
+             height: 75,
+             child: Stepper(
+               type: StepperType.horizontal,
+               steps: const <Step>[
+                 Step(
+                   title: Text('Regular title'),
+                   content: Text('Text content')
+                 ),
+               ],
+             ),
+           ),
+         ),
+       ),
+     );
+
+     final Material material = tester.firstWidget<Material>(
+       find.descendant(
+         of: find.byType(Stepper),
+         matching: find.byType(Material),
+       ),
+     );
+
+     expect(material.elevation, 2.0);
+   });
 }

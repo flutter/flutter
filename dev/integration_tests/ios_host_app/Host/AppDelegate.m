@@ -22,7 +22,7 @@ static NSString *_kReloadChannelName = @"reload";
   return _engine;
 }
 
-- (FlutterBasicMessageChannel *)reloadMessabeChannel {
+- (FlutterBasicMessageChannel *)reloadMessageChannel {
   return _reloadMessageChannel;
 }
 

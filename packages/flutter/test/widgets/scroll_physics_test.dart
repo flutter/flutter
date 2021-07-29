@@ -93,7 +93,7 @@ void main() {
     );
   });
 
-  test('ScrollPhysics scrolling subclasses - Creating the simulation doesn\'t alter the velocity for time 0', () {
+  test("ScrollPhysics scrolling subclasses - Creating the simulation doesn't alter the velocity for time 0", () {
     final ScrollMetrics position = FixedScrollMetrics(
       minScrollExtent: 0.0,
       maxScrollExtent: 100.0,

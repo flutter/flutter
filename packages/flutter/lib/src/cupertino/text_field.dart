@@ -251,6 +251,7 @@ class CupertinoTextField extends StatefulWidget {
     this.strutStyle,
     this.textAlign = TextAlign.start,
     this.textAlignVertical,
+    this.textDirection,
     this.readOnly = false,
     ToolbarOptions? toolbarOptions,
     this.showCursor,
@@ -404,6 +405,7 @@ class CupertinoTextField extends StatefulWidget {
     this.strutStyle,
     this.textAlign = TextAlign.start,
     this.textAlignVertical,
+    this.textDirection,
     this.readOnly = false,
     ToolbarOptions? toolbarOptions,
     this.showCursor,
@@ -608,6 +610,9 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.material.InputDecorator.textAlignVertical}
   final TextAlignVertical? textAlignVertical;
 
+  /// {@macro flutter.widgets.editableText.textDirection}
+  final TextDirection? textDirection;
+
   /// {@macro flutter.widgets.editableText.readOnly}
   final bool readOnly;
 
@@ -636,9 +641,13 @@ class CupertinoTextField extends StatefulWidget {
   final bool enableSuggestions;
 
   /// {@macro flutter.widgets.editableText.maxLines}
+  ///  * [expands], which determines whether the field should fill the height of
+  ///    its parent.
   final int? maxLines;
 
   /// {@macro flutter.widgets.editableText.minLines}
+  ///  * [expands], which determines whether the field should fill the height of
+  ///    its parent.
   final int? minLines;
 
   /// {@macro flutter.widgets.editableText.expands}
@@ -815,6 +824,7 @@ class CupertinoTextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics, defaultValue: null));
     properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: TextAlign.start));
     properties.add(DiagnosticsProperty<TextAlignVertical>('textAlignVertical', textAlignVertical, defaultValue: null));
+    properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
   }
 }
 
@@ -1172,6 +1182,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             style: textStyle,
             strutStyle: widget.strutStyle,
             textAlign: widget.textAlign,
+            textDirection: widget.textDirection,
             autofocus: widget.autofocus,
             obscuringCharacter: widget.obscuringCharacter,
             obscureText: widget.obscureText,

@@ -4,6 +4,7 @@
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
@@ -81,16 +82,8 @@ void main() {
   });
 
   group('which on Windows', () {
-    testWithoutContext('throws tool exit if where throws an argument error', () async {
-      fakeProcessManager.addCommand(
-        FakeCommand(
-          command: const <String>[
-            'where',
-            kExecutable,
-          ],
-          exception: ArgumentError('Cannot find executable for where'),
-        ),
-      );
+    testWithoutContext('throws tool exit if where.exe cannot be run', () async {
+      fakeProcessManager.excludedExecutables.add('where');
 
       final OperatingSystemUtils utils = OperatingSystemUtils(
         fileSystem: MemoryFileSystem.test(),
@@ -544,17 +537,83 @@ void main() {
     );
   });
 
-  group('display an install message when unzip throws an ArgumentError', () {
-    testWithoutContext('Linux', () {
+  group('unzip on macOS', () {
+    testWithoutContext('falls back to unzip when rsync cannot run', () {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      fakeProcessManager.addCommand(
+      fakeProcessManager.excludedExecutables.add('rsync');
+
+      final BufferLogger logger = BufferLogger.test();
+      final OperatingSystemUtils macOSUtils = OperatingSystemUtils(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: FakePlatform(operatingSystem: 'macos'),
+        processManager: fakeProcessManager,
+      );
+
+      final Directory targetDirectory = fileSystem.currentDirectory;
+      fakeProcessManager.addCommand(FakeCommand(
+        command: <String>['unzip', '-o', '-q', 'foo.zip', '-d', targetDirectory.path],
+      ));
+
+      macOSUtils.unzip(fileSystem.file('foo.zip'), targetDirectory);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+      expect(logger.traceText, contains('Unable to find rsync'));
+    });
+
+    testWithoutContext('unzip and rsyncs', () {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+
+      final OperatingSystemUtils macOSUtils = OperatingSystemUtils(
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        platform: FakePlatform(operatingSystem: 'macos'),
+        processManager: fakeProcessManager,
+      );
+
+      final Directory targetDirectory = fileSystem.currentDirectory;
+      final Directory tempDirectory = fileSystem.systemTempDirectory.childDirectory('flutter_foo.zip.rand0');
+      fakeProcessManager.addCommands(<FakeCommand>[
         FakeCommand(
           command: <String>[
-            'unzip', '-o', '-q', 'foo.zip', '-d', fileSystem.currentDirectory.path,
+            'unzip',
+            '-o',
+            '-q',
+            'foo.zip',
+            '-d',
+            tempDirectory.path,
           ],
-          exception: ArgumentError(),
+          onRun: () {
+            expect(tempDirectory, exists);
+            tempDirectory.childDirectory('dirA').childFile('fileA').createSync(recursive: true);
+            tempDirectory.childDirectory('dirB').childFile('fileB').createSync(recursive: true);
+          },
         ),
-      );
+        FakeCommand(command: <String>[
+          'rsync',
+          '-av',
+          '--delete',
+          tempDirectory.childDirectory('dirA').path,
+          targetDirectory.path,
+        ]),
+        FakeCommand(command: <String>[
+          'rsync',
+          '-av',
+          '--delete',
+          tempDirectory.childDirectory('dirB').path,
+          targetDirectory.path,
+        ]),
+      ]);
+
+      macOSUtils.unzip(fileSystem.file('foo.zip'), fileSystem.currentDirectory);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+      expect(tempDirectory, isNot(exists));
+    });
+  });
+
+  group('display an install message when unzip cannot be run', () {
+    testWithoutContext('Linux', () {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      fakeProcessManager.excludedExecutables.add('unzip');
 
       final OperatingSystemUtils linuxOsUtils = OperatingSystemUtils(
         fileSystem: fileSystem,
@@ -573,14 +632,7 @@ void main() {
 
     testWithoutContext('macOS', () {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      fakeProcessManager.addCommand(
-        FakeCommand(
-          command: <String>[
-            'unzip', '-o', '-q', 'foo.zip', '-d', fileSystem.currentDirectory.path,
-          ],
-          exception: ArgumentError(),
-        ),
-      );
+      fakeProcessManager.excludedExecutables.add('unzip');
 
       final OperatingSystemUtils macOSUtils = OperatingSystemUtils(
         fileSystem: fileSystem,
@@ -590,7 +642,7 @@ void main() {
       );
 
       expect(
-            () => macOSUtils.unzip(fileSystem.file('foo.zip'), fileSystem.currentDirectory),
+        () => macOSUtils.unzip(fileSystem.file('foo.zip'), fileSystem.currentDirectory),
         throwsToolExit
           (message: 'Missing "unzip" tool. Unable to extract foo.zip.\n'
             'Consider running "brew install unzip".'),
@@ -599,14 +651,7 @@ void main() {
 
     testWithoutContext('unknown OS', () {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      fakeProcessManager.addCommand(
-        FakeCommand(
-          command: <String>[
-            'unzip', '-o', '-q', 'foo.zip', '-d', fileSystem.currentDirectory.path,
-          ],
-          exception: ArgumentError(),
-        ),
-      );
+      fakeProcessManager.excludedExecutables.add('unzip');
 
       final OperatingSystemUtils unknownOsUtils = OperatingSystemUtils(
         fileSystem: fileSystem,

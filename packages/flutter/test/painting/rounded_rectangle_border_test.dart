@@ -20,9 +20,16 @@ void main() {
     expect(const RoundedRectangleBorder().hashCode, const RoundedRectangleBorder().copyWith().hashCode);
     const BorderSide side = BorderSide(width: 10.0, color: Color(0xff123456));
     const BorderRadius radius = BorderRadius.all(Radius.circular(16.0));
+    const BorderRadiusDirectional directionalRadius = BorderRadiusDirectional.all(Radius.circular(16.0));
+
     expect(
       const RoundedRectangleBorder().copyWith(side: side, borderRadius: radius),
       const RoundedRectangleBorder(side: side, borderRadius: radius),
+    );
+
+    expect(
+      const RoundedRectangleBorder().copyWith(side: side, borderRadius: directionalRadius),
+      const RoundedRectangleBorder(side: side, borderRadius: directionalRadius),
     );
   });
 

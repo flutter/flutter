@@ -11,6 +11,6 @@ void main() {
     Ticker((Duration duration) { }).start();
 
     final ByteData? message = const StringCodec().encodeMessage('AppLifecycleState.paused');
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) {});
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) {});
   });
 }
