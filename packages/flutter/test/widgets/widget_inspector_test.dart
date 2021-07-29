@@ -3,6 +3,13 @@
 // found in the LICENSE file.
 
 @TestOn('!chrome')
+
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=456"
+@Tags(<String>['no-shuffle'])
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
@@ -1992,7 +1999,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       _CreationLocation location = knownLocations[id]!;
       expect(location.file, equals(file));
       // ClockText widget.
-      expect(location.line, equals(53));
+      expect(location.line, equals(60));
       expect(location.column, equals(9));
       expect(location.name, equals('ClockText'));
       expect(count, equals(1));
@@ -2002,7 +2009,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       location = knownLocations[id]!;
       expect(location.file, equals(file));
       // Text widget in _ClockTextState build method.
-      expect(location.line, equals(91));
+      expect(location.line, equals(98));
       expect(location.column, equals(12));
       expect(location.name, equals('Text'));
       expect(count, equals(1));
@@ -2029,7 +2036,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       location = knownLocations[id]!;
       expect(location.file, equals(file));
       // ClockText widget.
-      expect(location.line, equals(53));
+      expect(location.line, equals(60));
       expect(location.column, equals(9));
       expect(location.name, equals('ClockText'));
       expect(count, equals(3)); // 3 clock widget instances rebuilt.
@@ -2039,7 +2046,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       location = knownLocations[id]!;
       expect(location.file, equals(file));
       // Text widget in _ClockTextState build method.
-      expect(location.line, equals(91));
+      expect(location.line, equals(98));
       expect(location.column, equals(12));
       expect(location.name, equals('Text'));
       expect(count, equals(3)); // 3 clock widget instances rebuilt.

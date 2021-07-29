@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=3890307731"
+@Tags(<String>['no-shuffle'])
+
 import 'dart:math' as math;
 import 'dart:ui' as ui show window, BoxHeightStyle, BoxWidthStyle, WindowPadding;
 
@@ -922,7 +928,7 @@ void main() {
       ),
     );
     focusNode.requestFocus();
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     await expectLater(
       find.byType(TextField),
@@ -950,7 +956,7 @@ void main() {
       ),
     );
     focusNode.requestFocus();
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     await expectLater(
       find.byType(TextField),
@@ -978,7 +984,7 @@ void main() {
       ),
     );
     focusNode.requestFocus();
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     await expectLater(
       find.byType(TextField),
@@ -6217,10 +6223,13 @@ void main() {
 
     semantics.dispose();
 
-    // On web (just like iOS), we don't check for pasteability because that
-    // triggers a permission dialog in the browser.
+    // On web, we don't check for pasteability because that triggers a
+    // permission dialog in the browser.
     // https://github.com/flutter/flutter/pull/57139#issuecomment-629048058
-  }, skip: isBrowser);
+    // TODO(justinmc): Remove TargetPlatform override when Android and iOS uses
+    //                 `hasStrings` to check for pasteability.
+    //                 https://github.com/flutter/flutter/issues/74139
+  }, skip: isBrowser, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.linux }));
 
   testWidgets('TextField throws when not descended from a Material widget', (WidgetTester tester) async {
     const Widget textField = TextField();
@@ -9582,7 +9591,10 @@ void main() {
       // pasted.
       expect(triedToReadClipboard, true);
     }
-  });
+    // TODO(justinmc): Eventually, all platform should call `hasStrings` instead.
+    //                 This entire test will become irrelevant after the fact.
+    //                 https://github.com/flutter/flutter/issues/74139
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.linux }));
 
   testWidgets('TextField changes mouse cursor when hovered', (WidgetTester tester) async {
     await tester.pumpWidget(

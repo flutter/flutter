@@ -98,7 +98,10 @@ class Cocoon {
       resultsJson['NewStatus'] = testStatus;
     }
     resultsJson['TestFlaky'] = isTestFlaky ?? false;
-    await _sendUpdateTaskRequest(resultsJson);
+    const List<String> supportedBranches = <String>['master'];
+    if(supportedBranches.contains(resultsJson['CommitBranch'])) {
+      await _sendUpdateTaskRequest(resultsJson);
+    }
   }
 
   /// Write the given parameters into an update task request and store the JSON in [resultsPath].
