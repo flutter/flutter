@@ -466,7 +466,7 @@ class TextInputConfiguration {
     this.keyboardAppearance = Brightness.light,
     this.textCapitalization = TextCapitalization.none,
     this.autofillConfiguration,
-    this.requestPrivacy = false,
+    this.enableIMEPersonalizedLearning = false,
   }) : assert(inputType != null),
        assert(obscureText != null),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
@@ -476,7 +476,7 @@ class TextInputConfiguration {
        assert(keyboardAppearance != null),
        assert(inputAction != null),
        assert(textCapitalization != null),
-       assert(requestPrivacy != null);
+       assert(enableIMEPersonalizedLearning != null);
 
   /// The type of information for which to optimize the text input control.
   final TextInputType inputType;
@@ -592,19 +592,19 @@ class TextInputConfiguration {
   /// Defaults to [Brightness.light].
   final Brightness keyboardAppearance;
 
-  /// {@template flutter.services.TextInputConfiguration.requestPrivacy}
-  /// Whether to request that the IME not update personalized data such as
-  /// typing history and user dictionary data.
+  /// {@template flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
+  /// Whether to enable that the IME update personalized data such as typing
+  /// history and user dictionary data.
   ///
   /// This flag only affects Android. On iOS, there is no equivalent flag.
   ///
-  /// Defaults to false. Cannot be null.
+  /// Defaults to true. Cannot be null.
   ///
   /// See also:
   ///
   ///  * <https://developer.android.com/reference/android/view/inputmethod/EditorInfo#IME_FLAG_NO_PERSONALIZED_LEARNING>
   /// {@endtemplate}
-  final bool requestPrivacy;
+  final bool enableIMEPersonalizedLearning;
 
   /// Returns a representation of this object as a JSON object.
   Map<String, dynamic> toJson() {
@@ -620,7 +620,7 @@ class TextInputConfiguration {
       'inputAction': inputAction.toString(),
       'textCapitalization': textCapitalization.toString(),
       'keyboardAppearance': keyboardAppearance.toString(),
-      'requestPrivacy': requestPrivacy,
+      'enableIMEPersonalizedLearning': enableIMEPersonalizedLearning,
       if (autofillConfiguration != null) 'autofill': autofillConfiguration!.toJson(),
     };
   }
