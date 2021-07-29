@@ -210,15 +210,7 @@ public class AccessibilityBridgeTest {
     TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
     testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
 
-    ArgumentCaptor<AccessibilityEvent> eventCaptor =
-        ArgumentCaptor.forClass(AccessibilityEvent.class);
-    verify(mockParent, times(2))
-        .requestSendAccessibilityEvent(eq(mockRootView), eventCaptor.capture());
-    AccessibilityEvent event = eventCaptor.getAllValues().get(0);
-    assertEquals(event.getEventType(), AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
-    List<CharSequence> sentences = event.getText();
-    assertEquals(sentences.size(), 1);
-    assertEquals(sentences.get(0).toString(), "node1");
+    verify(mockRootView, times(1)).setAccessibilityPaneTitle(eq("node1"));
 
     TestSemanticsNode new_root = new TestSemanticsNode();
     new_root.id = 0;
@@ -237,14 +229,7 @@ public class AccessibilityBridgeTest {
     testSemanticsUpdate = new_root.toUpdate();
     testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
 
-    eventCaptor = ArgumentCaptor.forClass(AccessibilityEvent.class);
-    verify(mockParent, times(4))
-        .requestSendAccessibilityEvent(eq(mockRootView), eventCaptor.capture());
-    event = eventCaptor.getAllValues().get(2);
-    assertEquals(event.getEventType(), AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
-    sentences = event.getText();
-    assertEquals(sentences.size(), 1);
-    assertEquals(sentences.get(0).toString(), "new_node2");
+    verify(mockRootView, times(1)).setAccessibilityPaneTitle(eq("new_node2"));
   }
 
   @Test
@@ -517,12 +502,7 @@ public class AccessibilityBridgeTest {
     TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
     testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
 
-    ArgumentCaptor<AccessibilityEvent> eventCaptor =
-        ArgumentCaptor.forClass(AccessibilityEvent.class);
-    verify(mockParent, times(2))
-        .requestSendAccessibilityEvent(eq(mockRootView), eventCaptor.capture());
-    AccessibilityEvent event = eventCaptor.getAllValues().get(0);
-    assertEquals(event.getEventType(), AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
+    verify(mockRootView, times(1)).setAccessibilityPaneTitle(eq(" "));
 
     // Synthesize an accessibility hit test event.
     MotionEvent mockEvent = mock(MotionEvent.class);
@@ -533,10 +513,11 @@ public class AccessibilityBridgeTest {
 
     assertEquals(hit, true);
 
-    eventCaptor = ArgumentCaptor.forClass(AccessibilityEvent.class);
-    verify(mockParent, times(3))
+    ArgumentCaptor<AccessibilityEvent> eventCaptor =
+        ArgumentCaptor.forClass(AccessibilityEvent.class);
+    verify(mockParent, times(2))
         .requestSendAccessibilityEvent(eq(mockRootView), eventCaptor.capture());
-    event = eventCaptor.getAllValues().get(2);
+    AccessibilityEvent event = eventCaptor.getAllValues().get(1);
     assertEquals(event.getEventType(), AccessibilityEvent.TYPE_VIEW_HOVER_ENTER);
     assertEquals(accessibilityBridge.getHoveredObjectId(), 2);
   }
@@ -572,15 +553,7 @@ public class AccessibilityBridgeTest {
     TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
     testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
 
-    ArgumentCaptor<AccessibilityEvent> eventCaptor =
-        ArgumentCaptor.forClass(AccessibilityEvent.class);
-    verify(mockParent, times(2))
-        .requestSendAccessibilityEvent(eq(mockRootView), eventCaptor.capture());
-    AccessibilityEvent event = eventCaptor.getAllValues().get(0);
-    assertEquals(event.getEventType(), AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
-    List<CharSequence> sentences = event.getText();
-    assertEquals(sentences.size(), 1);
-    assertEquals(sentences.get(0).toString(), "node2");
+    verify(mockRootView, times(1)).setAccessibilityPaneTitle(eq("node2"));
 
     TestSemanticsNode new_root = new TestSemanticsNode();
     new_root.id = 0;
@@ -597,14 +570,7 @@ public class AccessibilityBridgeTest {
     testSemanticsUpdate = new_root.toUpdate();
     testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
 
-    eventCaptor = ArgumentCaptor.forClass(AccessibilityEvent.class);
-    verify(mockParent, times(4))
-        .requestSendAccessibilityEvent(eq(mockRootView), eventCaptor.capture());
-    event = eventCaptor.getAllValues().get(2);
-    assertEquals(event.getEventType(), AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
-    sentences = event.getText();
-    assertEquals(sentences.size(), 1);
-    assertEquals(sentences.get(0).toString(), "new_node2");
+    verify(mockRootView, times(1)).setAccessibilityPaneTitle(eq("new_node2"));
   }
 
   @TargetApi(21)
@@ -1087,15 +1053,7 @@ public class AccessibilityBridgeTest {
     TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
     testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
 
-    ArgumentCaptor<AccessibilityEvent> eventCaptor =
-        ArgumentCaptor.forClass(AccessibilityEvent.class);
-    verify(mockParent, times(2))
-        .requestSendAccessibilityEvent(eq(mockRootView), eventCaptor.capture());
-    AccessibilityEvent event = eventCaptor.getAllValues().get(0);
-    assertEquals(event.getEventType(), AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
-    List<CharSequence> sentences = event.getText();
-    assertEquals(sentences.size(), 1);
-    assertEquals(sentences.get(0).toString(), " ");
+    verify(mockRootView, times(1)).setAccessibilityPaneTitle(eq(" "));
   }
 
   @Test

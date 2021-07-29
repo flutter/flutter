@@ -1566,7 +1566,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     if (lastAdded != null
         && (lastAdded.id != previousRouteId || newRoutes.size() != flutterNavigationStack.size())) {
       previousRouteId = lastAdded.id;
-      sendWindowChangeEvent(lastAdded);
+      onWindowNameChange(lastAdded);
     }
     flutterNavigationStack.clear();
     for (SemanticsNode semanticsNode : newRoutes) {
@@ -1778,15 +1778,17 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
   }
 
   /**
-   * Creates a {@link AccessibilityEvent#TYPE_WINDOW_STATE_CHANGED} and sends the event to Android's
-   * accessibility system.
+   * Informs the TalkBack user about window name changes.
+   *
+   * <p>This method sets accessibility panel title if the API level >= 28, otherwise, it creates a
+   * {@link AccessibilityEvent#TYPE_WINDOW_STATE_CHANGED} and sends the event to Android's
+   * accessibility system. In both cases, TalkBack announces the label of the route and re-addjusts
+   * the accessibility focus.
    *
    * <p>The given {@code route} should be a {@link SemanticsNode} that represents a navigation route
    * in the Flutter app.
    */
-  private void sendWindowChangeEvent(@NonNull SemanticsNode route) {
-    AccessibilityEvent event =
-        obtainAccessibilityEvent(route.id, AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
+  private void onWindowNameChange(@NonNull SemanticsNode route) {
     String routeName = route.getRouteName();
     if (routeName == null) {
       // The routeName will be null when there is no semantics node that represnets namesRoute in
@@ -1799,8 +1801,20 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       // next.
       routeName = " ";
     }
-    event.getText().add(routeName);
-    sendAccessibilityEvent(event);
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+      setAccessibilityPaneTitle(routeName);
+    } else {
+      AccessibilityEvent event =
+          obtainAccessibilityEvent(route.id, AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
+      event.getText().add(routeName);
+      sendAccessibilityEvent(event);
+    }
+  }
+
+  @TargetApi(28)
+  @RequiresApi(28)
+  private void setAccessibilityPaneTitle(String title) {
+    rootAccessibilityView.setAccessibilityPaneTitle(title);
   }
 
   /**
