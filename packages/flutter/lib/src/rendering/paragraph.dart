@@ -796,10 +796,12 @@ class RenderParagraph extends RenderBox
   /// contains multiple [InlineSpan]s or bidirectional text, because logically
   /// contiguous text might not be visually contiguous.
   ///
-  /// See [TextPainter.getBoxesForSelection], for which this is essentially a
-  /// wrapper, for additional details.
-  ///
   /// Valid only after [layout].
+  ///
+  /// See also:
+  ///
+  ///  * [TextPainter.getBoxesForSelection], the method in TextPainter to get
+  ///    the equivalent boxes.
   List<ui.TextBox> getBoxesForSelection(
     TextSelection selection, {
     ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,

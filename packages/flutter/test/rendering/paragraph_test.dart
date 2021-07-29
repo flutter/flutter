@@ -141,6 +141,52 @@ void main() {
     expect(boxes.any((ui.TextBox box) => box.right == 100 && box.top == 10), isTrue);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61016
 
+  test('getBoxesForSelection test with multiple TextSpans and lines', () {
+    final RenderParagraph paragraph = RenderParagraph(
+      const TextSpan(
+        text: 'First ',
+        style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+        children: <InlineSpan>[
+          TextSpan(text: 'smallsecond ', style: TextStyle(fontSize: 5.0)),
+          TextSpan(text: 'third fourth fifth'),
+        ],
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    // Do layout with width chosen so that this splits as
+    // First smallsecond |
+    // third fourth |
+    // fifth|
+    // The corresponding line widths come out to be:
+    // 1st line: 120px wide: 6 chars * 10px plus 12 chars * 5px.
+    // 2nd line: 130px wide: 13 chars * 10px.
+    // 3rd line: 50px wide.
+    layout(paragraph, constraints: const BoxConstraints(maxWidth: 140.0));
+
+    final List<ui.TextBox> boxes = paragraph.getBoxesForSelection(
+      const TextSelection(baseOffset: 0, extentOffset: 36),
+    );
+
+    print(boxes);
+    expect(boxes.length, equals(4));
+
+    // The widths of the boxes should match the calculations above.
+    // The heights should all be 10, except for the box for 'smallsecond ',
+    // which should have height 8, and be alphabetic baseline-aligned with
+    // 'First '. The Ahem font specifies alphabetic baselines at 0.2em above the
+    // bottom extent, and 0.8em below the top, so the difference in top
+    // alignment becomes (10px * 0.8 - 5px * 0.8) = 4px.
+
+    // 'First ':
+    expect(boxes[0], const TextBox.fromLTRBD(0.0, 0.0, 60.0, 10.0, TextDirection.ltr));
+    // 'smallsecond ' in size 8:
+    expect(boxes[1], const TextBox.fromLTRBD(60.0, 4.0, 120.0, 9.0, TextDirection.ltr));
+    // 'third fourth ':
+    expect(boxes[2], const TextBox.fromLTRBD(0.0, 10.0, 130.0, 20.0, TextDirection.ltr));
+    // 'fifth':
+    expect(boxes[3], const TextBox.fromLTRBD(0.0, 20.0, 50.0, 30.0, TextDirection.ltr));
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61016
+
   test('getBoxesForSelection test with boxHeightStyle and boxWidthStyle set to max', () {
     final RenderParagraph paragraph = RenderParagraph(
       const TextSpan(
