@@ -889,6 +889,11 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     _parentZone = null;
     buildOwner!.focusManager.dispose();
     buildOwner!.focusManager = FocusManager()..registerGlobalHandlers();
+    // Reset surface size. The renderview configuration is tied with it and
+    // needs to be recreated. Don't use [handleMetricsChanged] because it
+    // introduces unwanted side effects.
+    _surfaceSize = null;
+    renderView.configuration = createViewConfiguration();
     // Disabling the warning because @visibleForTesting doesn't take the testing
     // framework itself into account, but we don't want it visible outside of
     // tests.
