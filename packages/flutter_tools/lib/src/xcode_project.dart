@@ -147,7 +147,7 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   File get xcodeWorkspaceSharedSettings => xcodeWorkspaceSharedData.childFile('WorkspaceSettings.xcsettings');
 
   /// Do all plugins support arm64 simulators to run natively on an ARM Mac?
-  bool get pluginsSupportArmSimulator {
+  bool pluginsSupportArmSimulator() {
     final File podProject = hostAppRoot
         .childDirectory('Pods')
         .childDirectory('Pods.xcodeproj')

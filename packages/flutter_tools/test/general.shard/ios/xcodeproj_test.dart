@@ -716,6 +716,8 @@ Information about project "Runner":
         ..writeAsStringSync('''
 				ENABLE_BITCODE = NO;
 				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "i386";
+				"EXCLUDED_ARCHS[sdk=iphoneos*]" = "arm64 i386";
+				EXCLUDED_ARCHS = "arm64 i386";
 				INFOPLIST_FILE = Runner/Info.plist;
 				UNRELATED_BUILD_SETTING = arm64;
           ''');
