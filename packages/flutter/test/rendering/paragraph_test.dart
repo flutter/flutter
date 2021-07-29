@@ -171,7 +171,7 @@ void main() {
 
     // The widths of the boxes should match the calculations above.
     // The heights should all be 10, except for the box for 'smallsecond ',
-    // which should have height 8, and be alphabetic baseline-aligned with
+    // which should have height 5, and be alphabetic baseline-aligned with
     // 'First '. The Ahem font specifies alphabetic baselines at 0.2em above the
     // bottom extent, and 0.8em below the top, so the difference in top
     // alignment becomes (10px * 0.8 - 5px * 0.8) = 4px.
