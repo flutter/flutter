@@ -5285,7 +5285,7 @@ void main() {
     expect(controller.text, equals(testText), reason: 'on $platform');
 
     // Move back to position 23.
-    controller.selection = TextSelection.collapsed(
+    controller.selection = const TextSelection.collapsed(
       offset: 23,
       affinity: TextAffinity.downstream,
     );
