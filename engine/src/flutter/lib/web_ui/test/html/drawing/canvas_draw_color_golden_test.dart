@@ -37,7 +37,7 @@ Future<void> testMain() async {
     final Picture testPicture = _drawTestPicture(region, useColor: true);
     builder.addPicture(Offset.zero, testPicture);
     await sceneScreenshot(builder, 'canvas_draw_color', region: region);
-  }, skip: true); // TODO: matchGolden fails when a div covers viewport.
+  }, skip: true); // TODO(ferhat): matchGolden fails when a div covers viewport.
 
   test('drawPaint should cover entire viewport', () async {
     const Rect region = Rect.fromLTWH(0, 0, 400, 400);
@@ -46,7 +46,7 @@ Future<void> testMain() async {
     final Picture testPicture = _drawTestPicture(region, useColor: false);
     builder.addPicture(Offset.zero, testPicture);
     await sceneScreenshot(builder, 'canvas_draw_paint', region: region);
-  }, skip: true); // TODO: matchGolden fails when a div covers viewport.);
+  }, skip: true); // TODO(ferhat): matchGolden fails when a div covers viewport.);
 }
 
 Picture _drawTestPicture(Rect region, {bool useColor = false}) {

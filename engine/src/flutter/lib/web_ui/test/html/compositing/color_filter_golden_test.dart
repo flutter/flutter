@@ -42,7 +42,7 @@ Future<void> testMain() async {
     builder.pop();
     html.document.body!.append(builder.build().webOnlyRootElement!);
 
-    // TODO: update golden for this test after canvas sandwich detection is
+    // TODO(ferhat): update golden for this test after canvas sandwich detection is
     // added to RecordingCanvas.
     await matchGoldenFile('color_filter_blendMode_color.png', region: region,
         maxDiffRatePercent: 12.0);

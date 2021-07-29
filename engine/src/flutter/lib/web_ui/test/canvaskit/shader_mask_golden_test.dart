@@ -158,7 +158,7 @@ void testMain() {
       await matchSceneGolden('canvaskit_shadermask_linear_translated.png',
           builder.build());
     });
-    // TODO: https://github.com/flutter/flutter/issues/60040
-    // TODO: https://github.com/flutter/flutter/issues/71520
+    // TODO(hterkelsen): https://github.com/flutter/flutter/issues/60040
+    // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
   }, skip: isIosSafari || isFirefox);
 }

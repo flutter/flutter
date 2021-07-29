@@ -810,7 +810,7 @@ Future<void> testMain()  async {
         expect(result.maxIntrinsicWidth, 40);
         expect(result.height, 10);
         if (instance.isCanvas) {
-          // TODO(flutter_web): https://github.com/flutter/flutter/issues/34346
+          // TODO(mdebbar): https://github.com/flutter/flutter/issues/34346
           // expect(result.lines, <EngineLineMetrics>[
           //   line('.', 0, 4, hardBreak: false, width: 10.0, lineNumber: 0, left: 0.0),
           // ]);

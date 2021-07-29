@@ -35,6 +35,6 @@ void testMain() {
       // The instance is the same.
       expect(firstCanvasKitInstance, windowFlutterCanvasKit);
     });
-    // TODO: https://github.com/flutter/flutter/issues/60040
+    // TODO(hterkelsen): https://github.com/flutter/flutter/issues/60040
   }, skip: isIosSafari);
 }

@@ -188,7 +188,7 @@ void testMain() {
       expect(picture.buildCount, 1);
       expect(picture.updateCount, 0);
       expect(picture.applyPaintCount, 2);
-    }, // TODO(nurhan): https://github.com/flutter/flutter/issues/46638
+    }, // TODO(yjbanov): https://github.com/flutter/flutter/issues/46638
         skip: browserEngine == BrowserEngine.firefox);
   });
 

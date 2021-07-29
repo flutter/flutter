@@ -56,6 +56,7 @@ class FontFallbackData {
       //                resetting the tree would be a matter of reconstructing
       //                the new resolved tree.
       font.reset();
+      // ignore: prefer_foreach
       for (final CodeunitRange range in font.approximateUnicodeRanges) {
         ranges.putIfAbsent(font, () => <CodeunitRange>[]).add(range);
       }
@@ -282,10 +283,7 @@ Future<void> findFontsForMissingCodeunits(List<int> codeUnits) async {
       resolvedFonts.addAll(font.resolvedFont!.tree.intersections(codeUnit));
     }
   }
-
-  for (final _ResolvedNotoSubset resolvedFont in resolvedFonts) {
-    notoDownloadQueue.add(resolvedFont);
-  }
+  resolvedFonts.forEach(notoDownloadQueue.add);
 
   // We looked through the Noto font tree and didn't find any font families
   // covering some code units, or we did find a font family, but when we
@@ -402,6 +400,7 @@ _ResolvedNotoFont? _makeResolvedNotoFontFromCss(String css, String name) {
   final Map<_ResolvedNotoSubset, List<CodeunitRange>> rangesMap =
       <_ResolvedNotoSubset, List<CodeunitRange>>{};
   for (final _ResolvedNotoSubset subset in subsets) {
+    // ignore: prefer_foreach
     for (final CodeunitRange range in subset.ranges) {
       rangesMap.putIfAbsent(subset, () => <CodeunitRange>[]).add(range);
     }

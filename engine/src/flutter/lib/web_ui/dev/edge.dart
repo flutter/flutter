@@ -50,7 +50,7 @@ class Edge extends Browser {
     final String version = EdgeArgParser.instance.version;
 
     return Edge._(() async {
-      // TODO(nurhan): Configure info log for LUCI.
+      // TODO(yjbanov): Configure info log for LUCI.
       final BrowserInstallation installation = await getEdgeInstallation(
         version,
         infoLog: DevNull(),

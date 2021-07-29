@@ -19,7 +19,7 @@ void main() {
 void testMain() {
   group('skia_objects_cache', () {
     _tests();
-    // TODO: https://github.com/flutter/flutter/issues/60040
+    // TODO(hterkelsen): https://github.com/flutter/flutter/issues/60040
   }, skip: isIosSafari);
 }
 

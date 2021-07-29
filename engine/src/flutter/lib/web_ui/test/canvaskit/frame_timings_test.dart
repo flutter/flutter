@@ -19,5 +19,5 @@ void testMain() {
     test('collects frame timings', () async {
       await runFrameTimingsTest();
     });
-  }, skip: isIosSafari); // TODO: https://github.com/flutter/flutter/issues/60040
+  }, skip: isIosSafari); // TODO(hterkelsen): https://github.com/flutter/flutter/issues/60040
 }

@@ -30,8 +30,8 @@ Future<void> testMain() async {
           ui.loadFontFromList(Uint8List(0), fontFamily: 'test-font'),
           throwsA(const TypeMatcher<Exception>()));
     },
-        // TODO(nurhan): https://github.com/flutter/flutter/issues/56702
-        // TODO(nurhan): https://github.com/flutter/flutter/issues/50770
+        // TODO(hterkelsen): https://github.com/flutter/flutter/issues/56702
+        // TODO(hterkelsen): https://github.com/flutter/flutter/issues/50770
         skip: browserEngine == BrowserEngine.edge ||
             browserEngine == BrowserEngine.webkit);
 
@@ -46,8 +46,8 @@ Future<void> testMain() async {
 
       expect(_containsFontFamily('Blehm'), isTrue);
     },
-        // TODO(nurhan): https://github.com/flutter/flutter/issues/56702
-        // TODO(nurhan): https://github.com/flutter/flutter/issues/50770
+        // TODO(hterkelsen): https://github.com/flutter/flutter/issues/56702
+        // TODO(hterkelsen): https://github.com/flutter/flutter/issues/50770
         skip: browserEngine == BrowserEngine.edge ||
             browserEngine == BrowserEngine.webkit);
 
@@ -81,8 +81,8 @@ Future<void> testMain() async {
       expect(TextMeasurementService.rulerManager!.rulers.length, 0);
       expect(Spanometer.rulers.length, 0);
     },
-        // TODO(nurhan): https://github.com/flutter/flutter/issues/56702
-        // TODO(nurhan): https://github.com/flutter/flutter/issues/50770
+        // TODO(hterkelsen): https://github.com/flutter/flutter/issues/56702
+        // TODO(hterkelsen): https://github.com/flutter/flutter/issues/50770
         skip: browserEngine == BrowserEngine.edge ||
             browserEngine == BrowserEngine.webkit);
 
@@ -110,8 +110,8 @@ Future<void> testMain() async {
       expect(actualName, 'flutter/system');
       expect(message, '{"type":"fontsChange"}');
     },
-        // TODO(nurhan): https://github.com/flutter/flutter/issues/56702
-        // TODO(nurhan): https://github.com/flutter/flutter/issues/50770
+        // TODO(hterkelsen): https://github.com/flutter/flutter/issues/56702
+        // TODO(hterkelsen): https://github.com/flutter/flutter/issues/50770
         skip: browserEngine == BrowserEngine.edge ||
             browserEngine == BrowserEngine.webkit);
   });

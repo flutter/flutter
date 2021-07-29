@@ -549,7 +549,6 @@ class RecordingCanvas {
   void drawPicture(ui.Picture picture) {
     assert(!_recordingEnded);
     final EnginePicture enginePicture = picture as EnginePicture;
-    // TODO apply renderStrategy of picture recording to this recording.
     if (enginePicture.recordingCanvas == null) {
       // No contents / nothing to draw.
       return;
@@ -1705,7 +1704,7 @@ class _PaintBounds {
       _currentClipRight = 0.0,
       _currentClipBottom = 0.0;
 
-  _PaintBounds(ui.Rect maxPaintBounds) : maxPaintBounds = maxPaintBounds;
+  _PaintBounds(this.maxPaintBounds);
 
   void translate(double dx, double dy) {
     if (dx != 0.0 || dy != 0.0) {

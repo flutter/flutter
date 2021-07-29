@@ -162,7 +162,7 @@ class SurfacePath implements ui.Path {
   }
 
   void _debugValidate() {
-    // TODO.
+    assert(pathRef.isValid);
   }
 
   /// Return true if path is a single line and returns points in out.
@@ -413,7 +413,7 @@ class SurfacePath implements ui.Path {
     _resetAfterEdit();
     // SkAutoDisableDirectionCheck.
     _firstDirection = finalDirection;
-    // TODO: optimize by setting pathRef bounds if bounds are already computed.
+    // TODO(ferhat): optimize by setting pathRef bounds if bounds are already computed.
   }
 
   /// If the `forceMoveTo` argument is false, adds a straight line
@@ -1320,7 +1320,7 @@ class SurfacePath implements ui.Path {
       points[i] = transformedX;
       points[i + 1] = transformedY;
     }
-    // TODO: optimize for axis aligned or scale/translate type transforms.
+    // TODO(ferhat): optimize for axis aligned or scale/translate type transforms.
     _convexityType = SPathConvexityType.kUnknown;
   }
 

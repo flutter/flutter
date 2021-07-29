@@ -15,7 +15,7 @@ void main() {
 }
 
 /// Whether we are running on iOS Safari.
-// TODO: https://github.com/flutter/flutter/issues/66656
+// TODO(mdebbar): https://github.com/flutter/flutter/issues/66656
 bool get isIosSafari => browserEngine == BrowserEngine.webkit &&
           operatingSystem == OperatingSystem.iOs;
 

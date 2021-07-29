@@ -287,8 +287,7 @@ class _PathContourMeasure {
     double distance = 0.0;
     bool haveSeenMoveTo = false;
 
-    final Function lineToHandler =
-        (double fromX, double fromY, double x, double y) {
+    void lineToHandler(double fromX, double fromY, double x, double y) {
       final double dx = fromX - x;
       final double dy = fromY - y;
       final double prevDistance = distance;
@@ -301,7 +300,8 @@ class _PathContourMeasure {
           _PathSegment(SPath.kLineVerb, distance, <double>[fromX, fromY, x, y]),
         );
       }
-    };
+    }
+
     int verb = 0;
     final Float32List points = Float32List(PathRefIterator.kMaxBufferSize);
     do {

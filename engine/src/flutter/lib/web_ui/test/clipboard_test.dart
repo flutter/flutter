@@ -39,9 +39,9 @@ Future<void> testMain() async {
       clipboardAPICopyStrategy.testResult = true;
       const MethodCodec codec = JSONMethodCodec();
       final Completer<bool> completer = Completer<bool>();
-      final ui.PlatformMessageResponseCallback callback = (ByteData? data) {
+      void callback(ByteData? data) {
         completer.complete(codec.decodeEnvelope(data!));
-      };
+      }
 
       clipboardMessageHandler.setDataMethodCall(
           const MethodCall('Clipboard.setData', <String, dynamic>{
@@ -56,9 +56,9 @@ Future<void> testMain() async {
       clipboardAPICopyStrategy.testResult = false;
       const MethodCodec codec = JSONMethodCodec();
       final Completer<ByteData> completer = Completer<ByteData>();
-      final ui.PlatformMessageResponseCallback callback = (ByteData? data) {
+      void callback(ByteData? data) {
         completer.complete(data!);
-      };
+      }
 
       clipboardMessageHandler.setDataMethodCall(
           const MethodCall('Clipboard.setData', <String, dynamic>{
@@ -77,9 +77,9 @@ Future<void> testMain() async {
       clipboardAPIPasteStrategy.testResult = testText;
       const MethodCodec codec = JSONMethodCodec();
       final Completer<Map<String, dynamic>> completer = Completer<Map<String, dynamic>>();
-      final ui.PlatformMessageResponseCallback callback = (ByteData? data) {
+      void callback(ByteData? data) {
         completer.complete(codec.decodeEnvelope(data!));
-      };
+      }
 
       clipboardMessageHandler.getDataMethodCall(callback);
 

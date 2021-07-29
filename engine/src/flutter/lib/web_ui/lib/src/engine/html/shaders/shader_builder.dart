@@ -293,9 +293,7 @@ class ShaderMethod {
 
   void write(StringBuffer buffer) {
     buffer.writeln('$returnType $name() {');
-    for (final String statement in _statements) {
-      buffer.writeln(statement);
-    }
+    _statements.forEach(buffer.writeln);
     buffer.writeln('}');
   }
 }

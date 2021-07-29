@@ -87,7 +87,7 @@ class PlatformViewMessageHandler {
       return;
     }
 
-    // TODO: How can users add extra `args` from the HtmlElementView widget?
+    // TODO(hterkelsen): How can users add extra `args` from the HtmlElementView widget?
     final html.Element content = _contentManager.renderContent(
       viewType,
       viewId,

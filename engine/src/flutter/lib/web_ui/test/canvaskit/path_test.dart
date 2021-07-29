@@ -177,5 +177,5 @@ void testMain() {
     });
   },
       skip:
-          isIosSafari); // TODO: https://github.com/flutter/flutter/issues/60040
+          isIosSafari); // TODO(hterkelsen): https://github.com/flutter/flutter/issues/60040
 }

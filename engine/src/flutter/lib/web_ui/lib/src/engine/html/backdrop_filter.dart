@@ -112,7 +112,7 @@ class PersistedBackdropFilter extends PersistedContainerSurface
       ..height = '${height}px';
     if (browserEngine == BrowserEngine.firefox) {
       // For FireFox for now render transparent black background.
-      // TODO(flutter_web): Switch code to use filter when
+      // TODO(ferhat): Switch code to use filter when
       // See https://caniuse.com/#feat=css-backdrop-filter.
       filterElementStyle
         ..backgroundColor = '#000'
