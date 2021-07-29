@@ -157,7 +157,6 @@ targets:
 
   - name: Linux gradle_java8_compile_test
     builder: Linux gradle_java8_compile_test
-    bringup: true
     properties:
       tags: >
         ["devicelab","hostonly"]
@@ -232,7 +231,6 @@ targets:
 
   - name: Linux plugin_dependencies_test
     builder: Linux plugin_dependencies_test
-    bringup: true
     properties:
       tags: >
         ["devicelab","hostonly"]
@@ -958,7 +956,6 @@ targets:
 
   - name: Windows plugin_dependencies_test
     builder: Windows plugin_dependencies_test
-    bringup: true
     properties:
       tags: >
         ["devicelab","hostonly"]
@@ -1717,7 +1714,6 @@ targets:
 
   - name: Mac_android microbenchmarks
     builder: Mac_android microbenchmarks
-    bringup: true
     presubmit: false
     properties:
       tags: >
@@ -1919,7 +1915,6 @@ targets:
 
   - name: Mac_ios flutter_gallery_ios_sksl_warmup__transition_perf
     builder: Mac_ios flutter_gallery_ios_sksl_warmup__transition_perf
-    bringup: true
     presubmit: false
     properties:
       tags: >
@@ -1928,7 +1923,6 @@ targets:
 
   - name: Mac_ios cubic_bezier_perf_ios_sksl_warmup__timeline_summary
     builder: Mac_ios cubic_bezier_perf_ios_sksl_warmup__timeline_summary
-    bringup: true
     presubmit: false
     properties:
       tags: >
@@ -1978,7 +1972,6 @@ targets:
   - name: Mac_ios integration_ui_ios_frame_number
     builder: Mac_ios integration_ui_ios_frame_number
     presubmit: false
-    bringup: true
     properties:
       tags: >
         ["devicelab"]
