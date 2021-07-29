@@ -198,16 +198,28 @@ class RouteInformation {
 /// retrieve the new route information from the [routerDelegate]'s
 /// [RouterDelegate.currentConfiguration] method and the
 /// [routeInformationParser]'s [RouteInformationParser.restoreRouteInformation]
-/// method. If the location in the new route information is different from the
-/// current location, the router sends the new route information to the
-/// [routeInformationProvider]'s
-/// [RouteInformationProvider.routerReportsNewRouteInformation] method. That
-/// method as implemented in [PlatformRouteInformationProvider] uses
-/// [SystemNavigator.routeInformationUpdated] to notify the engine, and through
-/// that the browser, of the new URL.
+/// method.
 ///
-/// One can force the [Router] to report new route information to the
-/// [routeInformationProvider] (and thus the browser) even if the
+/// If the location in the new route information is different from the
+/// current location, this is considered to be a navigation event, the router
+/// sends the new route information to the [routeInformationProvider]'s
+/// [RouteInformationProvider.routerReportsNewRouteInformation] method with
+/// `isNavigation` equals to true. That method as implemented in
+/// [PlatformRouteInformationProvider] uses
+/// [SystemNavigator.routeInformationUpdated] to notify the engine, and through
+/// that the browser, to create a history entry with the new url if the
+/// `isNavigation` is true.
+///
+/// If the location is the same as the current location but different state,
+/// the router still sends the new route information to the
+/// [routeInformationProvider]'s
+/// [RouteInformationProvider.routerReportsNewRouteInformation] but with
+/// `isNavigation` equals to false. This causes
+/// [PlatformRouteInformationProvider] replace current history entry instead
+/// of creating a new one.
+///
+/// One can force the [Router] to report new route information as navigation
+/// event to the [routeInformationProvider] (and thus the browser) even if the
 /// [RouteInformation.location] has not changed by calling the [Router.navigate]
 /// method with a callback that performs the state change. This allows one to
 /// support the browser's back and forward buttons without changing the URL. For
@@ -218,10 +230,10 @@ class RouteInformation {
 /// clicks the back button, the app will go back to the previous scroll position
 /// without changing the URL in the location bar.
 ///
-/// One can also force the [Router] to ignore application state changes by
-/// making those changes during a callback passed to [Router.neglect]. The
-/// [Router] will not report any route information even if it detects location
-/// change as a result of running the callback.
+/// One can also force the [Router] to ignore a navigation event by making
+/// those changes during a callback passed to [Router.neglect]. The [Router]
+/// will not report the route information with `isNavigation` equals to false
+/// even if it detects location change as the result of running the callback.
 ///
 /// To opt out of URL updates entirely, pass null for [routeInformationProvider]
 /// and [routeInformationParser]. This is not recommended in general, but may be
@@ -436,8 +448,8 @@ class Router<T> extends StatefulWidget {
   /// route information even if it detects changes as a result of running the
   /// [callback].
   ///
-  /// Note that using this method will still update the current URL and
-  /// browser state.
+  /// Using this method will still update the URL and state in current history
+  /// entry.
   ///
   /// See also:
   ///
@@ -522,14 +534,14 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
         case _IntentionToReportRouteInformation.ignore:
           if (oldRouteInformation.location != currentRouteInformation.location ||
               oldRouteInformation.state != currentRouteInformation.state) {
-            widget.routeInformationProvider!.routerUpdatesRouteInformation(currentRouteInformation);
+            widget.routeInformationProvider!.routerReportsNewRouteInformation(currentRouteInformation, isNavigation: false);
           }
           break;
         case _IntentionToReportRouteInformation.maybe:
           if (oldRouteInformation.location != currentRouteInformation.location) {
             widget.routeInformationProvider!.routerReportsNewRouteInformation(currentRouteInformation);
-          } else if (oldRouteInformation.state != currentRouteInformation.state){
-            widget.routeInformationProvider!.routerUpdatesRouteInformation(currentRouteInformation);
+          } else if (oldRouteInformation.state != currentRouteInformation.state) {
+            widget.routeInformationProvider!.routerReportsNewRouteInformation(currentRouteInformation, isNavigation: false);
           }
           break;
         case _IntentionToReportRouteInformation.must:
@@ -1307,8 +1319,7 @@ abstract class RouterDelegate<T> extends Listenable {
 ///    from the [Router] back to the engine by overriding the
 ///    [routerReportsNewRouteInformation].
 abstract class RouteInformationProvider extends ValueListenable<RouteInformation> {
-  /// A callback called when the [Router] widget detects any navigation event
-  /// due to state changes.
+  /// A callback called when the [Router] widget reports new route information
   ///
   /// The subclasses can override this method to update theirs values or trigger
   /// other side effects. For example, the [PlatformRouteInformationProvider]
@@ -1316,24 +1327,17 @@ abstract class RouteInformationProvider extends ValueListenable<RouteInformation
   ///
   /// The [routeInformation] is the new route information after the navigation
   /// event.
-  void routerReportsNewRouteInformation(RouteInformation routeInformation) {}
-
-  /// A callback called when the [Router] widget detects [RouteInformation]
-  /// is updated by a non-navigation event.
   ///
-  /// One example is [RouteInformation.state] changes without changing the
-  /// location. Another example is the use of [Router.neglect] that forces the
-  /// [Router] to recognize a state change as a result of non-navigation event.
-  /// In the above examples, the [Router] calls this method to notify the
-  /// [RouteInformationProvider].
+  /// The [isNavigation] denotes whether the new route information is generated
+  /// as a result of a navigation event. This information can be useful in a
+  /// web application, for example, the [PlatformRouteInformationProvider] uses
+  /// this flag to decide whether to create a browser history entry that enables
+  /// browser backward and forward buttons.
   ///
-  /// The subclasses can override this method to update theirs values or trigger
-  /// other side effects. For example, the [PlatformRouteInformationProvider]
-  /// overrides this method to report the route information back to the engine.
-  ///
-  /// The [routeInformation] is the updated route information after the
-  /// non-navigation event.
-  void routerUpdatesRouteInformation(RouteInformation routeInformation) {}
+  /// For more information on how [Router] determines a navigation event, see
+  /// the "URL updates for web applications" section in the [Router]
+  /// documentation.
+  void routerReportsNewRouteInformation(RouteInformation routeInformation, {bool isNavigation = true}) {}
 }
 
 /// The route information provider that propagates the platform route information changes.
@@ -1356,22 +1360,12 @@ class PlatformRouteInformationProvider extends RouteInformationProvider with Wid
   }) : _value = initialRouteInformation;
 
   @override
-  void routerReportsNewRouteInformation(RouteInformation routeInformation) {
+  void routerReportsNewRouteInformation(RouteInformation routeInformation, {bool isNavigation = true}) {
     SystemNavigator.selectMultiEntryHistory();
     SystemNavigator.routeInformationUpdated(
       location: routeInformation.location!,
       state: routeInformation.state,
-    );
-    _value = routeInformation;
-  }
-
-  @override
-  void routerUpdatesRouteInformation(RouteInformation routeInformation) {
-    SystemNavigator.selectMultiEntryHistory();
-    SystemNavigator.routeInformationUpdated(
-      location: routeInformation.location!,
-      state: routeInformation.state,
-      replace: true
+      replace: !isNavigation,
     );
     _value = routeInformation;
   }
