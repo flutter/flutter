@@ -326,9 +326,8 @@ public class FlutterFragmentActivity extends FragmentActivity
   private Drawable getSplashScreenFromManifest() {
     try {
       Bundle metaData = getMetaData();
-      Integer splashScreenId =
-          metaData != null ? metaData.getInt(SPLASH_SCREEN_META_DATA_KEY) : null;
-      return splashScreenId != null
+      int splashScreenId = metaData != null ? metaData.getInt(SPLASH_SCREEN_META_DATA_KEY) : 0;
+      return splashScreenId != 0
           ? ResourcesCompat.getDrawable(getResources(), splashScreenId, getTheme())
           : null;
     } catch (Resources.NotFoundException e) {

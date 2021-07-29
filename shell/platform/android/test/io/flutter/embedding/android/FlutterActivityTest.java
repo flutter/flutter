@@ -416,6 +416,26 @@ public class FlutterActivityTest {
     assertNotNull(splashScreen);
   }
 
+  @Test
+  public void itWithMetadataWithoutSplashScreenResourceKeyDoesNotProvideSplashScreen()
+      throws PackageManager.NameNotFoundException {
+    Intent intent = FlutterActivity.createDefaultIntent(RuntimeEnvironment.application);
+    ActivityController<FlutterActivity> activityController =
+        Robolectric.buildActivity(FlutterActivity.class, intent);
+    FlutterActivity flutterActivity = activityController.get();
+
+    // Setup an empty metadata file.
+    PackageManager pm = RuntimeEnvironment.application.getPackageManager();
+    ActivityInfo activityInfo =
+        pm.getActivityInfo(flutterActivity.getComponentName(), PackageManager.GET_META_DATA);
+    activityInfo.metaData = new Bundle();
+    shadowOf(RuntimeEnvironment.application.getPackageManager()).addOrUpdateActivity(activityInfo);
+
+    // It should not load the drawable.
+    SplashScreen splashScreen = flutterActivity.provideSplashScreen();
+    assertNull(splashScreen);
+  }
+
   static class FlutterActivityWithProvidedEngine extends FlutterActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
