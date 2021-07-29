@@ -27,6 +27,7 @@
 /dev/devicelab/bin/tasks/cubic_bezier_perf__e2e_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/cubic_bezier_perf_sksl_warmup__e2e_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/cull_opacity_perf__e2e_summary.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/devtools_profile_start_test.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/fast_scroll_heavy_gridview__memory.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/flutter_engine_group_performance.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/flutter_gallery__back_button_memory.dart @zanderso @flutter/engine
@@ -188,12 +189,19 @@
 /dev/bots/analyze.dart @HansMuller @flutter/framework
 # Linux/Mac/Windows customer_testing
 /dev/customer_testing/run_tests.dart @HansMuller @flutter/framework
+# Linux docs
 # Linux docs_test
+# Linux docs_publish
 /dev/bots/docs.sh @HansMuller @flutter/framework
 # Linux web_e2e_test
-/dev/integration_tests/web_e2e_tests  @ferhatb @flutter/web
+/dev/integration_tests/web_e2e_tests @ferhatb @flutter/web
 # Linux web_smoke_test
 /examples/hello_world/test_driver/smoke_web_engine.dart @ferhatb @flutter/web
+
+## Firebase tests
+/dev/integration_tests/abstract_method_smoke_test @blasten @flutter/android
+/dev/integration_tests/android_embedding_v2_smoke_test @blasten @flutter/android
+/dev/integration_tests/release_smoke_test @blasten @flutter/android
 
 ## Shards tests
 # TODO(keyonghan): add files/paths for below framework host only testss.
