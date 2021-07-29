@@ -1640,9 +1640,9 @@ void main() {
 
     setUp(() {
       delegate = _FakeEditableTextState(
-        textSpan: const TextSpan(
+        textSpan: TextSpan(
           text: 'A ' * 50,
-          style: TextStyle(
+          style: const TextStyle(
             height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
           ),
         ),
