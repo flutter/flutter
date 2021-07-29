@@ -327,7 +327,7 @@ class IOSDevice extends Device {
           app: package as BuildableIOSApp,
           buildInfo: debuggingOptions.buildInfo,
           targetOverride: mainPath,
-          buildForDevice: true,
+          environmentType: EnvironmentType.physical,
           activeArch: cpuArchitecture,
           deviceID: id,
       );
