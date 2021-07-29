@@ -4,7 +4,7 @@
 
 import 'dart:collection';
 import 'dart:math' as math;
-import 'dart:ui' as ui show Gradient, Shader, TextBox, PlaceholderAlignment, TextHeightBehavior;
+import 'dart:ui' as ui show Gradient, Shader, TextBox, PlaceholderAlignment, TextHeightBehavior, BoxHeightStyle, BoxWidthStyle;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -787,15 +787,35 @@ class RenderParagraph extends RenderBox
 
   /// Returns a list of rects that bound the given selection.
   ///
-  /// A given selection might have more than one rect if this text painter
-  /// contains bidirectional text because logically contiguous text might not be
-  /// visually contiguous.
+  /// The [boxHeightStyle] and [boxWidthStyle] arguments may be used to select
+  /// the shape of the [TextBox]es. These properties default to
+  /// [ui.BoxHeightStyle.tight] and [ui.BoxWidthStyle.tight] respectively and
+  /// must not be null.
+  ///
+  /// A given selection might have more than one rect if the [RenderParagraph]
+  /// contains multiple [InlineSpan]s or bidirectional text, because logically
+  /// contiguous text might not be visually contiguous.
   ///
   /// Valid only after [layout].
-  List<ui.TextBox> getBoxesForSelection(TextSelection selection) {
+  ///
+  /// See also:
+  ///
+  ///  * [TextPainter.getBoxesForSelection], the method in TextPainter to get
+  ///    the equivalent boxes.
+  List<ui.TextBox> getBoxesForSelection(
+    TextSelection selection, {
+    ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,
+    ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
+  }) {
     assert(!debugNeedsLayout);
+    assert(boxHeightStyle != null);
+    assert(boxWidthStyle != null);
     _layoutTextWithConstraints(constraints);
-    return _textPainter.getBoxesForSelection(selection);
+    return _textPainter.getBoxesForSelection(
+      selection,
+      boxHeightStyle: boxHeightStyle,
+      boxWidthStyle: boxWidthStyle,
+    );
   }
 
   /// Returns the position within the text for the given pixel offset.

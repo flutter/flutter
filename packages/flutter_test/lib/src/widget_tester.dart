@@ -59,21 +59,6 @@ export 'package:test_api/test_api.dart' hide
 /// Signature for callback to [testWidgets] and [benchmarkWidgets].
 typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 
-// Return the last element that satisifes `test`, or return null if not found.
-E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
-  late E result;
-  bool foundMatching = false;
-  for (final E element in list) {
-    if (test(element)) {
-      result = element;
-      foundMatching = true;
-    }
-  }
-  if (foundMatching)
-    return result;
-  return null;
-}
-
 /// Runs the [callback] inside the Flutter test environment.
 ///
 /// Use this function for testing custom [StatelessWidget]s and
@@ -525,7 +510,7 @@ Future<void> expectLater(
 /// Class that programmatically interacts with widgets and the test environment.
 ///
 /// For convenience, instances of this class (such as the one provided by
-/// `testWidgets`) can be used as the `vsync` for `AnimationController` objects.
+/// `testWidget`) can be used as the `vsync` for `AnimationController` objects.
 class WidgetTester extends WidgetController implements HitTestDispatcher, TickerProvider {
   WidgetTester._(TestWidgetsFlutterBinding binding) : super(binding) {
     if (binding is LiveTestWidgetsFlutterBinding)
@@ -844,12 +829,15 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
         .map((HitTestEntry candidate) => candidate.target)
         .whereType<RenderObject>()
         .first;
-      final Element? innerTargetElement = _lastWhereOrNull(
-        collectAllElementsFrom(binding.renderViewElement!, skipOffstage: true),
-        (Element element) => element.renderObject == innerTarget,
+      final Element? innerTargetElement = collectAllElementsFrom(
+        binding.renderViewElement!,
+        skipOffstage: true,
+      ).cast<Element?>().lastWhere(
+        (Element? element) => element!.renderObject == innerTarget,
+        orElse: () => null,
       );
       if (innerTargetElement == null) {
-        printToConsole('No widgets found at ${event.position}.');
+        printToConsole('No widgets found at ${binding.globalToLocal(event.position)}.');
         return;
       }
       final List<Element> candidates = <Element>[];
@@ -862,7 +850,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       int numberOfWithTexts = 0;
       int numberOfTypes = 0;
       int totalNumber = 0;
-      printToConsole('Some possible finders for the widgets at ${event.position}:');
+      printToConsole('Some possible finders for the widgets at ${binding.globalToLocal(event.position)}:');
       for (final Element element in candidates) {
         if (totalNumber > 13) // an arbitrary number of finders that feels useful without being overwhelming
           break;

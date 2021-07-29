@@ -230,7 +230,6 @@ class TestPointer {
       timeStamp: timeStamp,
       kind: kind,
       device: _device,
-      pointer: pointer,
       position: _location ?? Offset.zero,
     );
   }
@@ -256,7 +255,6 @@ class TestPointer {
       timeStamp: timeStamp,
       kind: kind,
       device: _device,
-      pointer: pointer,
       position: newLocation,
       delta: delta,
     );
