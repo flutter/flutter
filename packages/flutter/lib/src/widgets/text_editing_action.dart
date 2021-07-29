@@ -62,7 +62,7 @@ abstract class TextEditingActionTarget {
   // down in a multiline text field when selecting using the keyboard.
   bool _wasSelectingVerticallyWithKeyboard = false;
 
-  /// {@template flutter.rendering.TextEditingAction.setSelection}
+  /// {@template flutter.widgets.TextEditingActionTarget.setSelection}
   /// Called to update the [TextSelection] in the current [TextEditingValue].
   /// {@endtemplate}
   void setSelection(TextSelection nextSelection, SelectionChangedCause cause) {
@@ -72,7 +72,7 @@ abstract class TextEditingActionTarget {
     );
   }
 
-  /// {@template flutter.rendering.TextEditingAction.setSelection}
+  /// {@template flutter.widgets.TextEditingActionTarget.setTextEditingValue}
   /// Called to update the current [TextEditingValue].
   /// {@endtemplate}
   void setTextEditingValue(TextEditingValue newValue, SelectionChangedCause cause);
@@ -117,8 +117,6 @@ abstract class TextEditingActionTarget {
 
   /// Return the offset at the start of the nearest word to the left of the
   /// given offset.
-  ///
-  /// {@macro flutter.rendering.RenderEditable.stopAtReversal}
   int _getLeftByWord(int offset, [bool includeWhitespace = true]) {
     // If the offset is already all the way left, there is nothing to do.
     if (offset <= 0) {
@@ -139,8 +137,6 @@ abstract class TextEditingActionTarget {
 
   /// Return the offset at the end of the nearest word to the right of the given
   /// offset.
-  ///
-  /// {@macro flutter.rendering.RenderEditable.stopAtReversal}
   int _getRightByWord(int offset, [bool includeWhitespace = true]) {
     // If the selection is already all the way right, there is nothing to do.
     if (offset == value.text.length) {
@@ -173,7 +169,7 @@ abstract class TextEditingActionTarget {
   ///
   /// If [readOnly] is true, does nothing.
   ///
-  /// {@template flutter.rendering.RenderEditable.cause}
+  /// {@template flutter.widgets.TextEditingActionTarget.cause}
   /// The given [SelectionChangedCause] indicates the cause of this change and
   /// will be passed to [onSelectionChanged].
   /// {@endtemplate}
@@ -210,9 +206,9 @@ abstract class TextEditingActionTarget {
   /// If [obscureText] is true, it treats the whole text content as a single
   /// word.
   ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
+  /// {@macro flutter.widgets.TextEditingActionTarget.RenderEditable.cause}
   ///
-  /// {@template flutter.rendering.RenderEditable.whiteSpace}
+  /// {@template flutter.widgets.TextEditingActionTarget.whiteSpace}
   /// By default, includeWhitespace is set to true, meaning that whitespace can
   /// be considered a word in itself.  If set to false, the selection will be
   /// extended past any whitespace and the first word following the whitespace.
@@ -252,7 +248,7 @@ abstract class TextEditingActionTarget {
   ///
   /// If [readOnly] is true, does nothing.
   ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
+  /// {@macro flutter.widgets.TextEditingActionTarget.RenderEditable.cause}
   ///
   /// See also:
   ///
@@ -292,7 +288,7 @@ abstract class TextEditingActionTarget {
   ///
   /// If [readOnly] is true, does nothing.
   ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
+  /// {@macro flutter.widgets.TextEditingActionTarget.RenderEditable.cause}
   ///
   /// See also:
   ///
@@ -314,9 +310,9 @@ abstract class TextEditingActionTarget {
   /// If [obscureText] is true, it treats the whole text content as
   /// a single word.
   ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
+  /// {@macro flutter.widgets.TextEditingActionTarget.RenderEditable.cause}
   ///
-  /// {@macro flutter.rendering.RenderEditable.whiteSpace}
+  /// {@macro flutter.widgets.TextEditingActionTarget.whiteSpace}
   ///
   /// See also:
   ///
@@ -351,7 +347,7 @@ abstract class TextEditingActionTarget {
   /// If [obscureText] is true, it treats the whole text content as
   /// a single word.
   ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
+  /// {@macro flutter.widgets.TextEditingActionTarget.RenderEditable.cause}
   ///
   /// See also:
   ///
@@ -415,7 +411,7 @@ abstract class TextEditingActionTarget {
   /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
   /// to the end.
   ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
+  /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// See also:
   ///
@@ -437,7 +433,7 @@ abstract class TextEditingActionTarget {
   /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
   /// to the start.
   ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
+  /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// See also:
   ///
@@ -452,12 +448,10 @@ abstract class TextEditingActionTarget {
     setSelection(value.expandSelectionTo(0, true), cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingValue.expandSelectionLeftByLine}
-  ///
   /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
   /// left by line.
   ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
+  /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// See also:
   ///
@@ -479,12 +473,10 @@ abstract class TextEditingActionTarget {
     setSelection(value.expandSelectionTo(selectedLine.baseOffset), cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingValue.expandSelectionRightByLine}
-  ///
   /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
   /// right by line.
   ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
+  /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// See also:
   ///
@@ -512,7 +504,7 @@ abstract class TextEditingActionTarget {
   /// If selectionEnabled is false, keeps the selection collapsed and just
   /// moves it down.
   ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
+  /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// See also:
   ///
@@ -545,12 +537,10 @@ abstract class TextEditingActionTarget {
     setSelection(value.extendSelectionTo(index), cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingValue.extendSelectionLeft}
-  ///
   /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
   /// left.
   ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
+  /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// See also:
   ///
@@ -587,7 +577,7 @@ abstract class TextEditingActionTarget {
   /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
   /// left by line.
   ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
+  /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// See also:
   ///
@@ -630,7 +620,7 @@ abstract class TextEditingActionTarget {
   /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
   /// right.
   ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
+  /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// See also:
   ///
@@ -663,7 +653,7 @@ abstract class TextEditingActionTarget {
   /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
   /// right by line.
   ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
+  /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// See also:
   ///
@@ -696,15 +686,13 @@ abstract class TextEditingActionTarget {
     setSelection(nextSelection, cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingValue.extendSelectionLeftByWord}
-  ///
   /// Extend the current [selection] to the previous start of a word.
   ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
+  /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
-  /// {@macro flutter.rendering.RenderEditable.whiteSpace}
+  /// {@macro flutter.widgets.TextEditingActionTarget.whiteSpace}
   ///
-  /// {@template flutter.rendering.RenderEditable.stopAtReversal}
+  /// {@template flutter.widgets.TextEditingActionTarget.stopAtReversal}
   /// The `stopAtReversal` parameter is false by default, meaning that it's
   /// ok for the base and extent to flip their order here. If set to true, then
   /// the selection will collapse when it would otherwise reverse its order. A
@@ -757,15 +745,13 @@ abstract class TextEditingActionTarget {
     setSelection(nextSelection, cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingValue.extendSelectionRightByWord}
-  ///
   /// Extend the current [selection] to the next end of a word.
   ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
+  /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
-  /// {@macro flutter.rendering.RenderEditable.whiteSpace}
+  /// {@macro flutter.widgets.TextEditingActionTarget.whiteSpace}
   ///
-  /// {@macro flutter.rendering.RenderEditable.stopAtReversal}
+  /// {@macro flutter.widgets.TextEditingActionTarget.stopAtReversal}
   ///
   /// See also:
   ///
@@ -817,7 +803,7 @@ abstract class TextEditingActionTarget {
   /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
   /// up.
   ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
+  /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// See also:
   ///
@@ -862,7 +848,7 @@ abstract class TextEditingActionTarget {
 
   /// Move the current [selection] to the leftmost point of the current line.
   ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
+  /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// See also:
   ///
@@ -901,7 +887,7 @@ abstract class TextEditingActionTarget {
   ///
   /// Move the current [selection] to the next line.
   ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
+  /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// See also:
   ///
@@ -941,7 +927,7 @@ abstract class TextEditingActionTarget {
   ///
   /// If it can't be moved left, do nothing.
   ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
+  /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// See also:
   ///
@@ -975,9 +961,9 @@ abstract class TextEditingActionTarget {
   /// A TextSelection that isn't collapsed will be collapsed and moved from the
   /// extentOffset.
   ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
+  /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
-  /// {@macro flutter.rendering.RenderEditable.whiteSpace}
+  /// {@macro flutter.widgets.TextEditingActionTarget.whiteSpace}
   ///
   /// See also:
   ///
@@ -1017,7 +1003,7 @@ abstract class TextEditingActionTarget {
   ///
   /// If it can't be moved right, do nothing.
   ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
+  /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// See also:
   ///
@@ -1049,7 +1035,7 @@ abstract class TextEditingActionTarget {
   ///
   /// Move the current [selection] to the rightmost point of the current line.
   ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
+  /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// See also:
   ///
@@ -1087,9 +1073,9 @@ abstract class TextEditingActionTarget {
   /// A TextSelection that isn't collapsed will be collapsed and moved from the
   /// extentOffset.
   ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
+  /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
-  /// {@macro flutter.rendering.RenderEditable.whiteSpace}
+  /// {@macro flutter.widgets.TextEditingActionTarget.whiteSpace}
   ///
   /// See also:
   ///
@@ -1129,7 +1115,7 @@ abstract class TextEditingActionTarget {
 
   /// Move the current [selection] to the end of the field.
   ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
+  /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// See also:
   ///
@@ -1142,7 +1128,7 @@ abstract class TextEditingActionTarget {
 
   /// Move the current [selection] to the start of the field.
   ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
+  /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// See also:
   ///
@@ -1154,7 +1140,7 @@ abstract class TextEditingActionTarget {
 
   /// Move the current [selection] up by one line.
   ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
+  /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// See also:
   ///
@@ -1173,11 +1159,9 @@ abstract class TextEditingActionTarget {
     setSelection(value.moveSelectionTo(nextIndex), cause);
   }
 
-  /// {@macro flutter.rendering.TextEditingValue.selectAll}
+  /// {@macro flutter.services.TextEditingValue.selectAll}
   ///
-  /// Set the current [selection] to contain the entire text value.
-  ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
+  /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   void selectAll(SelectionChangedCause cause) {
     setSelection(
       value.selectAll(),
@@ -1185,8 +1169,6 @@ abstract class TextEditingActionTarget {
     );
   }
 
-  /// {@macro flutter.rendering.TextEditingValue.copySelection}
-  ///
   /// Copy current [selection] to [Clipboard].
   void copySelection() {
     final TextSelection selection = value.selection;
@@ -1197,10 +1179,9 @@ abstract class TextEditingActionTarget {
     }
   }
 
-  /// {@macro flutter.rendering.TextEditingValue.cutSelection}
   /// Cut current [selection] to Clipboard.
   ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
+  /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   void cutSelection(SelectionChangedCause cause) {
     if (readOnly) {
       return;
@@ -1221,12 +1202,11 @@ abstract class TextEditingActionTarget {
     }
   }
 
-  /// {@macro flutter.rendering.TextEditingValue.pasteText}
   /// Paste text from [Clipboard].
   ///
   /// If there is currently a selection, it will be replaced.
   ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
+  /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   Future<void> pasteText(SelectionChangedCause cause) async {
     if (readOnly) {
       return;

@@ -151,8 +151,6 @@ class TextEditingValue {
   ///
   /// Setting includeWhitespace to false will only return the index of non-space
   /// characters.
-  ///
-  /// {@macro flutter.rendering.RenderEditable.stopAtReversal}
   static int previousCharacter(int index, String string, [bool includeWhitespace = true]) {
     assert(index >= 0 && index <= string.length);
     if (index == 0) {
@@ -176,8 +174,6 @@ class TextEditingValue {
 
   /// Return the offset at the end of the nearest word to the right of the given
   /// offset.
-  ///
-  /// {@macro flutter.rendering.RenderEditable.stopAtReversal}
   static int getRightByWord(String text, TextMetrics textMetrics, int offset, [bool includeWhitespace = true]) {
     // If the selection is already all the way right, there is nothing to do.
     if (offset == text.length) {
@@ -396,11 +392,9 @@ class TextEditingValue {
     );
   }
 
-  /// {@template flutter.rendering.TextEditingValue.selectAll}
+  /// {@template flutter.services.TextEditingValue.selectAll}
   /// Set the current [selection] to contain the entire text value.
   /// {@endtemplate}
-  ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
   TextSelection selectAll() {
     return selection.copyWith(
       baseOffset: 0,

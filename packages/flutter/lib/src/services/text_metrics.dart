@@ -15,7 +15,7 @@ abstract class TextMetrics {
   /// {@macro flutter.painting.TextPainter.getWordBoundary}
   TextRange getWordBoundary(TextPosition position);
 
-  /// {@template flutter.services.TextMetrics.getLineAtOffset}
+  /// {@template flutter.services.TextMetrics.getTextPositionAbove}
   /// Returns the TextPosition above the given offset into _plainText.
   ///
   /// If the offset is already on the first line, the given offset will be
@@ -23,7 +23,7 @@ abstract class TextMetrics {
   /// {@endtemplate}
   TextPosition getTextPositionAbove(int offset);
 
-  /// {@template flutter.services.TextMetrics.getLineAtOffset}
+  /// {@template flutter.services.TextMetrics.getTextPositionBelow}
   /// Returns the TextPosition below the given offset into _plainText.
   ///
   /// If the offset is already on the last line, the given offset will be
@@ -31,7 +31,7 @@ abstract class TextMetrics {
   /// {@endtemplate}
   TextPosition getTextPositionBelow(int offset);
 
-  /// {@template flutter.services.TextMetrics.getLineAtOffset}
+  /// {@template flutter.services.TextMetrics.getTextPositionVertical}
   /// Returns the TextPosition above or below the given offset.
   /// {@endtemplate}
   TextPosition getTextPositionVertical(int textOffset, double verticalOffset);
