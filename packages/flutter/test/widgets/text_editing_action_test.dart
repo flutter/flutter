@@ -48,6 +48,8 @@ class _FakeEditableTextState with TextSelectionDelegate, TextEditingActionTarget
 
   @override
   TextEditingValue get textEditingValue => value;
+
+  @override
   set textEditingValue(TextEditingValue nextValue) {
     value = nextValue;
   }
@@ -1638,7 +1640,7 @@ void main() {
 
     setUp(() {
       delegate = _FakeEditableTextState(
-        textSpan: TextSpan(
+        textSpan: const TextSpan(
           text: 'A ' * 50,
           style: TextStyle(
             height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
@@ -1695,7 +1697,7 @@ void main() {
         selection: TextSelection.collapsed(offset: 2),
         composing: TextRange(start: 2, end: 6),
       );
-      final TextEditingActionTarget target = delegate as TextEditingActionTarget;
+      final TextEditingActionTarget target = delegate;
       verifyDoesNotCrashWithInconsistentTextEditingValue(target.deleteForward);
       final TextEditingValue textEditingValue = editable.textSelectionDelegate.textEditingValue;
       expect(textEditingValue.text, 'ABDEF');
