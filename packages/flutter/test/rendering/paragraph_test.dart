@@ -167,7 +167,6 @@ void main() {
       const TextSelection(baseOffset: 0, extentOffset: 36),
     );
 
-    print(boxes);
     expect(boxes.length, equals(4));
 
     // The widths of the boxes should match the calculations above.
