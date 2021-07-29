@@ -326,8 +326,8 @@ export 'engine/web_experiments.dart';
 
 export 'engine/window.dart';
 
-// The mode the app is running in.
-// Keep these in sync with the same constants on the framework-side under foundation/constants.dart.
+/// The mode the app is running in.
+/// Keep these in sync with the same constants on the framework-side under foundation/constants.dart.
 const bool kReleaseMode =
     bool.fromEnvironment('dart.vm.product', defaultValue: false);
 const bool kProfileMode =
@@ -461,7 +461,7 @@ class NullTreeSanitizer implements html.NodeTreeSanitizer {
 
 /// The shared instance of PlatformViewManager shared across the engine to handle
 /// rendering of PlatformViews into the web app.
-/// TODO(dit): How to make this overridable from tests?
+// TODO(dit): How to make this overridable from tests?
 final PlatformViewManager platformViewManager = PlatformViewManager();
 
 /// Converts a matrix represented using [Float64List] to one represented using

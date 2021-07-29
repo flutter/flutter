@@ -89,7 +89,7 @@ Future<void> testMain() async {
     (EngineCanvas canvas) {
       // [DomCanvas] doesn't support clip commands.
       if (canvas is! DomCanvas) {
-        // TODO(flutter_web): https://github.com/flutter/flutter/issues/35086
+        // TODO(mdebbar): https://github.com/flutter/flutter/issues/35086
         // This produces the wrong result when using [BitmapCanvas] but without
         // the new experimental canvas mode.
         paintTest(canvas, paintTextWithClipStack);

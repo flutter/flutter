@@ -74,7 +74,7 @@ BrowserEngine _detectBrowserEngine() {
 ///    Note: SAMSUNG-SGH-I717
 ///    SPH/SCH are very old Palm models.
 bool _isSamsungBrowser(String agent) {
-  final RegExp exp = RegExp(r"SAMSUNG|SGH-[I|N|T]|GT-[I|N]|SM-[A|N|P|T|Z]|SHV-E|SCH-[I|J|R|S]|SPH-L");
+  final RegExp exp = RegExp(r'SAMSUNG|SGH-[I|N|T]|GT-[I|N]|SM-[A|N|P|T|Z]|SHV-E|SCH-[I|J|R|S]|SPH-L');
   return exp.hasMatch(agent.toUpperCase());
 }
 

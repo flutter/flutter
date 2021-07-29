@@ -467,7 +467,7 @@ Future<void> testMain() async {
     expect(paragraph.maxIntrinsicWidth, 40);
     expect(paragraph.height, 10);
 
-    // TODO(flutter_web): https://github.com/flutter/flutter/issues/34346
+    // TODO(mdebbar): https://github.com/flutter/flutter/issues/34346
     // expectLines(paragraph, <TestLine>[
     //   l('.', 0, 0, hardBreak: false, width: 10.0, left: 0.0),
     // ]);

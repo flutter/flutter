@@ -13,14 +13,4 @@ analyzer:
 
 linter:
   rules:
-    package_api_docs: false
-    prefer_foreach: false
-    prefer_generic_function_type_aliases: false
-    prefer_initializing_formals: false
-    prefer_single_quotes: false
-    prefer_typing_uninitialized_variables: false
     public_member_api_docs: false
-    flutter_style_todos: false
-
-    # We have some legitimate use-cases for this (preserve tear-off identity)
-    prefer_function_declarations_over_variables: false

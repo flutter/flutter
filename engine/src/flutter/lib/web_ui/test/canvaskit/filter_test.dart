@@ -89,7 +89,7 @@ void testMain() {
       expect((paint.imageFilter! as ManagedSkiaObject<Object>).skiaObject, same(skiaFilter));
     });
 
-  // TODO: https://github.com/flutter/flutter/issues/60040
+  // TODO(hterkelsen): https://github.com/flutter/flutter/issues/60040
   }, skip: isIosSafari);
 
   group('MaskFilter', () {
@@ -102,6 +102,6 @@ void testMain() {
       expect(() => paint.maskFilter = filter, isNot(throwsException));
     });
 
-  // TODO: https://github.com/flutter/flutter/issues/60040
+  // TODO(hterkelsen): https://github.com/flutter/flutter/issues/60040
   }, skip: isIosSafari);
 }

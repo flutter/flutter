@@ -307,7 +307,7 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
       buffer.putUint8(_valueNull);
     } else if (value is bool) {
       buffer.putUint8(value ? _valueTrue : _valueFalse);
-      // TODO(flutter_web): upstream double/int if/else swap.
+      // TODO(hterkelsen): upstream double/int if/else swap.
     } else if (value is double) {
       buffer.putUint8(_valueFloat64);
       buffer.putFloat64(value);

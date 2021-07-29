@@ -825,8 +825,8 @@ void testMain() {
       await matchGoldenFile('canvaskit_empty_scene.png',
           region: const ui.Rect.fromLTRB(0, 0, 100, 100));
     });
-    // TODO: https://github.com/flutter/flutter/issues/60040
-    // TODO: https://github.com/flutter/flutter/issues/71520
+    // TODO(hterkelsen): https://github.com/flutter/flutter/issues/60040
+    // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
   }, skip: isIosSafari || isFirefox);
 }
 

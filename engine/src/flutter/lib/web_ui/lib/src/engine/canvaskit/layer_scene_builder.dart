@@ -67,7 +67,7 @@ class LayerSceneBuilder implements ui.SceneBuilder {
     bool freeze = false,
     ui.FilterQuality filterQuality = ui.FilterQuality.low,
   }) {
-    // TODO(b/128315641): implement addTexture.
+    // TODO(hterkelsen): implement addTexture, b/128315641
   }
 
   @override
@@ -214,17 +214,17 @@ class LayerSceneBuilder implements ui.SceneBuilder {
 
   @override
   void setCheckerboardOffscreenLayers(bool checkerboard) {
-    // TODO: implement setCheckerboardOffscreenLayers
+    // TODO(hterkelsen): implement setCheckerboardOffscreenLayers
   }
 
   @override
   void setCheckerboardRasterCacheImages(bool checkerboard) {
-    // TODO: implement setCheckerboardRasterCacheImages
+    // TODO(hterkelsen): implement setCheckerboardRasterCacheImages
   }
 
   @override
   void setRasterizerTracingThreshold(int frameInterval) {
-    // TODO: implement setRasterizerTracingThreshold
+    // TODO(hterkelsen): implement setRasterizerTracingThreshold
   }
 
   T pushLayer<T extends ContainerLayer>(T layer) {

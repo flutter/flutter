@@ -267,7 +267,7 @@ void applyRRectBorderRadius(html.CssStyleDeclaration style, ui.RRect rrect) {
 
 String _borderStrokeToCssUnit(double value) {
   if (value == 0) {
-    // TODO: hairline nees to take into account both dpi and density.
+    // TODO(ferhat): hairline nees to take into account both dpi and density.
     value = 1.0;
   }
   return '${value.toStringAsFixed(3)}px';

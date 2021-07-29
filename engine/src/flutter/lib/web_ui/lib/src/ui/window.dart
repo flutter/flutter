@@ -198,7 +198,7 @@ enum Brightness {
 }
 
 // Unimplemented classes.
-// TODO(flutter_web): see https://github.com/flutter/flutter/issues/33614.
+// TODO(dit): see https://github.com/flutter/flutter/issues/33614.
 class CallbackHandle {
   CallbackHandle.fromRawHandle(this._handle)
     : assert(_handle != null, "'_handle' must not be null."); // ignore: unnecessary_null_comparison
@@ -215,7 +215,7 @@ class CallbackHandle {
   int get hashCode => super.hashCode;
 }
 
-// TODO(flutter_web): see https://github.com/flutter/flutter/issues/33615.
+// TODO(dit): see https://github.com/flutter/flutter/issues/33615.
 class PluginUtilities {
   // This class is only a namespace, and should not be instantiated or
   // extended directly.

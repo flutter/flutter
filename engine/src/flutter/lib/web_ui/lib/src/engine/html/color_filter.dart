@@ -29,6 +29,7 @@ class PersistedColorFilter extends PersistedContainerSurface
   /// introduced by the [rootElement] translation.
   html.Element? _childContainer;
 
+  /// Color filter to apply to this surface.
   final ui.ColorFilter filter;
   html.Element? _filterElement;
   bool containerVisible = true;

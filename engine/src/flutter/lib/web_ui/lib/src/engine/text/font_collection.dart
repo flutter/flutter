@@ -116,11 +116,11 @@ class FontManager {
   // For example font family 'Ahem!' does not fall into this category
   // so the family name will be wrapped in quotes.
   static final RegExp notPunctuation =
-      RegExp(r"[a-z0-9\s]+", caseSensitive: false);
+      RegExp(r'[a-z0-9\s]+', caseSensitive: false);
   // Regular expression to detect tokens starting with a digit.
   // For example font family 'Goudy Bookletter 1911' falls into this
   // category.
-  static final RegExp startWithDigit = RegExp(r"\b\d");
+  static final RegExp startWithDigit = RegExp(r'\b\d');
 
   factory FontManager() {
     if (supportsFontLoadingApi) {

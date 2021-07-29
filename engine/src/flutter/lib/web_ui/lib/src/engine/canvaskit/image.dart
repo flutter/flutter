@@ -33,6 +33,7 @@ class ImageCodecException implements Exception {
 const String _kNetworkImageMessage = 'Failed to load network image.';
 
 typedef HttpRequestFactory = html.HttpRequest Function();
+// ignore: prefer_function_declarations_over_variables
 HttpRequestFactory httpRequestFactory = () => html.HttpRequest();
 void debugRestoreHttpRequestFactory() {
   httpRequestFactory = () => html.HttpRequest();

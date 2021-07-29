@@ -89,7 +89,7 @@ abstract class WordBreaker {
     }
 
     // WB3c: ZWJ	×	\p{Extended_Pictographic}
-    // TODO(flutter_web): What's the right way to implement this?
+    // TODO(mdebbar): What's the right way to implement this?
 
     // Keep horizontal whitespace together.
     // WB3d: WSegSpace × WSegSpace

@@ -25,7 +25,7 @@ Future<void> main() async {
   }
 }
 
-/// TODO: unskip webkit tests once flakiness is resolved. See
+// TODO(ferhat): unskip webkit tests once flakiness is resolved. See
 /// https://github.com/flutter/flutter/issues/76713
 bool get isWebkit => browserEngine == BrowserEngine.webkit;
 

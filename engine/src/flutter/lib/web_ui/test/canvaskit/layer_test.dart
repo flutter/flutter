@@ -56,6 +56,6 @@ void testMain() {
       LayerSceneBuilder().addPicture(ui.Offset.zero, recorder.endRecording());
     });
 
-    // TODO: https://github.com/flutter/flutter/issues/60040
+    // TODO(hterkelsen): https://github.com/flutter/flutter/issues/60040
   }, skip: isIosSafari);
 }

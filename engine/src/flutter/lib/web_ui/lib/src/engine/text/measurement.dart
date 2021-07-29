@@ -226,7 +226,7 @@ abstract class TextMeasurementService {
   /// Gets the appropriate [TextMeasurementService] instance for the given
   /// [paragraph].
   static TextMeasurementService forParagraph(ui.Paragraph paragraph) {
-    // TODO(flutter_web): https://github.com/flutter/flutter/issues/33523
+    // TODO(mdebbar): https://github.com/flutter/flutter/issues/33523
     // When the canvas-based implementation is complete and passes all the
     // tests, get rid of [_experimentalEnableCanvasImplementation].
     // We need to check [window.physicalSize.isEmpty] because some canvas
@@ -606,7 +606,7 @@ class CanvasTextMeasurementService extends TextMeasurementService {
     // string and that would mess things up.
     bool reachedEndOfText = false;
 
-    // TODO(flutter_web): Chrome & Safari return more info from [canvasContext.measureText].
+    // TODO(mdebbar): Chrome & Safari return more info from [canvasContext.measureText].
     int i = 0;
     while (!reachedEndOfText) {
       final LineBreakResult brk = nextLineBreak(text, i);
@@ -671,7 +671,7 @@ class CanvasTextMeasurementService extends TextMeasurementService {
   @override
   ui.TextPosition getTextPositionForOffset(EngineParagraph paragraph,
       ui.ParagraphConstraints? constraints, ui.Offset offset) {
-    // TODO(flutter_web): implement.
+    // TODO(mdebbar): implement.
     return const ui.TextPosition(offset: 0);
   }
 }

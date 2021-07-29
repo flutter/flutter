@@ -518,7 +518,7 @@ class PlaceholderBox extends RangeBox {
 /// Represents a box in a [FlatTextSpan].
 class SpanBox extends RangeBox {
   SpanBox(
-    Spanometer spanometer, {
+    this.spanometer, {
     required LineBreakResult start,
     required LineBreakResult end,
     required double width,
@@ -526,8 +526,7 @@ class SpanBox extends RangeBox {
     required ui.TextDirection boxDirection,
     required this.contentDirection,
     required this.isSpaceOnly,
-  })  : this.spanometer = spanometer, // ignore: unnecessary_this
-        span = spanometer.currentSpan,
+  })  : span = spanometer.currentSpan,
         height = spanometer.height,
         baseline = spanometer.ascent,
         super(start, end, width, paragraphDirection, boxDirection);

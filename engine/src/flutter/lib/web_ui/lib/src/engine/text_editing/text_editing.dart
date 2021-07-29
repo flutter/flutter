@@ -278,7 +278,7 @@ class EngineAutofillForm {
     final List<StreamSubscription<html.Event>> subscriptions =
         <StreamSubscription<html.Event>>[];
 
-    final void Function(String key) addSubscriptionForKey = (String key) {
+    void addSubscriptionForKey(String key) {
         final html.Element element = elements![key]!;
         subscriptions.add(
             element.onInput.listen((html.Event e) {
@@ -291,7 +291,7 @@ class EngineAutofillForm {
               }
             })
         );
-    };
+    }
 
     keys.forEach(addSubscriptionForKey);
     return subscriptions;

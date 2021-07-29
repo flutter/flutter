@@ -54,7 +54,7 @@ void testMain() {
       await matchGoldenFile('canvaskit_backdropfilter_blur_edges.png',
           region: region);
     });
-    // TODO: https://github.com/flutter/flutter/issues/60040
-    // TODO: https://github.com/flutter/flutter/issues/71520
+    // TODO(hterkelsen): https://github.com/flutter/flutter/issues/60040
+    // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
   }, skip: isIosSafari || isFirefox);
 }

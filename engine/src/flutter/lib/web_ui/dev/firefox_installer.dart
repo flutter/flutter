@@ -317,7 +317,7 @@ Future<String> _findSystemFirefoxExecutable() async {
 
 /// Fetches the latest available Firefox build version on Linux.
 Future<String> fetchLatestFirefoxVersionLinux() async {
-  final RegExp forFirefoxVersion = RegExp("firefox-[0-9.]+[0-9]");
+  final RegExp forFirefoxVersion = RegExp('firefox-[0-9.]+[0-9]');
   final io.HttpClientRequest request = await io.HttpClient()
       .getUrl(Uri.parse(PlatformBinding.instance.getFirefoxLatestVersionUrl()));
   request.followRedirects = false;
@@ -332,7 +332,7 @@ Future<String> fetchLatestFirefoxVersionLinux() async {
 
 /// Fetches the latest available Firefox build version on Mac OS.
 Future<String> fetchLatestFirefoxVersionMacOS() async {
-  final RegExp forFirefoxVersion = RegExp("firefox/releases/[0-9.]+[0-9]");
+  final RegExp forFirefoxVersion = RegExp('firefox/releases/[0-9.]+[0-9]');
   final io.HttpClientRequest request = await io.HttpClient()
       .getUrl(Uri.parse(PlatformBinding.instance.getFirefoxLatestVersionUrl()));
   request.followRedirects = false;

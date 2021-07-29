@@ -655,13 +655,13 @@ class PathRef {
         break;
       case SPath.kDoneVerb:
         if (assertionsEnabled) {
-          throw Exception("growForVerb called for kDone");
+          throw Exception('growForVerb called for kDone');
         }
         pCnt = 0;
         break;
       default:
         if (assertionsEnabled) {
-          throw Exception("default is not reached");
+          throw Exception('default is not reached');
         }
         pCnt = 0;
         break;
@@ -722,13 +722,13 @@ class PathRef {
         break;
       case SPath.kDoneVerb:
         if (assertionsEnabled) {
-          throw Exception("growForVerb called for kDone");
+          throw Exception('growForVerb called for kDone');
         }
         pCnt = 0;
         break;
       default:
         if (assertionsEnabled) {
-          throw Exception("default is not reached");
+          throw Exception('default is not reached');
         }
         pCnt = 0;
         break;

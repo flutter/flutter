@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// For documentation see https://github.com/flutter/engine/blob/master/lib/ui/painting.dart
+// ignore_for_file: public_member_api_docs
 part of ui;
 
 // ignore: unused_element, Used in Shader assert.
@@ -399,7 +401,7 @@ class ImageFilter {
     if (engine.useCanvasKit) {
       return engine.CkImageFilter.blur(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
     }
-    // TODO(flutter_web): implement TileMode.
+    // TODO(ferhat): implement TileMode.
     return engine.EngineImageFilter.blur(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
   }
 
@@ -409,11 +411,11 @@ class ImageFilter {
     if (engine.useCanvasKit) {
       return engine.CkImageFilter.matrix(matrix: matrix4, filterQuality: filterQuality);
     }
-    // TODO(flutter_web): implement FilterQuality.
+    // TODO(yjbanov): implement FilterQuality.
     return engine.EngineImageFilter.matrix(matrix: matrix4, filterQuality: filterQuality);
   }
 
-  // TODO(flutter_web): add implementation and remove the "ignore".
+  // TODO(ferhat): add implementation and remove the "ignore".
   // ignore: avoid_unused_constructor_parameters
   ImageFilter.compose({required ImageFilter outer, required ImageFilter inner}) {
     throw UnimplementedError(
@@ -460,7 +462,7 @@ Future<Codec> instantiateImageCodec(
   bool allowUpscaling = true,
 }) async {
   if (engine.useCanvasKit) {
-    // TODO: Implement targetWidth and targetHeight support.
+    // TODO(hterkelsen): Implement targetWidth and targetHeight support.
     return engine.skiaInstantiateImageCodec(list);
   } else {
     final html.Blob blob = html.Blob(<dynamic>[list.buffer]);
@@ -594,12 +596,13 @@ void decodeImageFromPixels(
     return;
   }
 
-  final void Function(Codec) callbacker = (Codec codec) {
+  void executeCallback(Codec codec) {
     codec.getNextFrame().then((FrameInfo frameInfo) {
       callback(frameInfo.image);
     });
-  };
-  _createBmp(pixels, width, height, rowBytes ?? width, format).then(callbacker);
+  }
+  _createBmp(pixels, width, height, rowBytes ?? width, format).then(
+      executeCallback);
 
 }
 

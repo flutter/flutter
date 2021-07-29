@@ -789,7 +789,7 @@ void _testCullRectComputation() {
 
     // ignore: unused_local_variable
     final PersistedPicture picture = enumeratePictures().single;
-    // TODO(https://github.com/flutter/flutter/issues/40395):
+    // TODO(yjbanov): https://github.com/flutter/flutter/issues/40395)
     //   Needs ability to set iframe to 500,100 size. Current screen seems to be 500,500.
     // expect(
     //   picture.optimalLocalCullRect,

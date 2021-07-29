@@ -50,7 +50,7 @@ class EdgeArgParser extends BrowserArgParser {
 /// exclusively with Windows 10 and cannot be downloaded or installed separately.`
 /// See: https://support.microsoft.com/en-us/help/17171/microsoft-edge-get-to-know
 ///
-// TODO(nurhan): Investigate running tests for the tech preview downloads
+// TODO(yjbanov): Investigate running tests for the tech preview downloads
 // from the beta channel.
 Future<BrowserInstallation> getEdgeInstallation(
   String requestedVersion, {

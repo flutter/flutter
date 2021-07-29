@@ -324,7 +324,7 @@ class DomRenderer {
     setElementStyle(bodyElement, 'font', defaultCssFont);
     setElementStyle(bodyElement, 'color', 'red');
 
-    // TODO(flutter_web): Disable spellcheck until changes in the framework and
+    // TODO(mdebbar): Disable spellcheck until changes in the framework and
     // engine are complete.
     bodyElement.spellcheck = false;
 

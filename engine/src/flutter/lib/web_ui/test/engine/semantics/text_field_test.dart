@@ -87,9 +87,9 @@ void testMain() {
     expect(await logger.actionLog.first, ui.SemanticsAction.tap);
 
     semantics().semanticsEnabled = false;
-  },  // TODO(nurhan): https://github.com/flutter/flutter/issues/46638
-      // TODO(nurhan): https://github.com/flutter/flutter/issues/50590
-      // TODO(nurhan): https://github.com/flutter/flutter/issues/50754
+  },  // TODO(yjbanov): https://github.com/flutter/flutter/issues/46638
+      // TODO(yjbanov): https://github.com/flutter/flutter/issues/50590
+      // TODO(yjbanov): https://github.com/flutter/flutter/issues/50754
       skip: browserEngine != BrowserEngine.blink);
 
     test('Syncs editing state from framework', () async {
@@ -405,7 +405,7 @@ void testMain() {
       semantics().semanticsEnabled = false;
     });
   },
-  // TODO(nurhan): https://github.com/flutter/flutter/issues/50769
+  // TODO(mdebbar): https://github.com/flutter/flutter/issues/50769
   skip: browserEngine == BrowserEngine.edge);
 }
 

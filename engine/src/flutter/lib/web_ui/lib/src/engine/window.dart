@@ -332,7 +332,7 @@ typedef _JsSetUrlStrategy = void Function(JsUrlStrategy?);
 // Keep this js name in sync with flutter_web_plugins. Find it at:
 // https://github.com/flutter/flutter/blob/custom_location_strategy/packages/flutter_web_plugins/lib/src/navigation/js_url_strategy.dart
 //
-// TODO: Add integration test https://github.com/flutter/flutter/issues/66852
+// TODO(mdebbar): Add integration test https://github.com/flutter/flutter/issues/66852
 @JS('_flutter_web_set_location_strategy')
 external set jsSetUrlStrategy(_JsSetUrlStrategy? newJsSetUrlStrategy);
 

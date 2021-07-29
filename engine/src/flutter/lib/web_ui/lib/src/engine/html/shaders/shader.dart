@@ -584,7 +584,7 @@ class GradientRadial extends EngineGradient {
   }
 }
 
-/// TODO: Implement focal https://github.com/flutter/flutter/issues/76643.
+// TODO(ferhat): Implement focal https://github.com/flutter/flutter/issues/76643.
 class GradientConical extends GradientRadial {
   GradientConical(
       this.focal,
@@ -697,7 +697,7 @@ class _BlurEngineImageFilter extends EngineImageFilter {
   final double sigmaY;
   final ui.TileMode tileMode;
 
-  // TODO(flutter_web): implement TileMode.
+  // TODO(ferhat): implement TileMode.
   @override
   String get filterAttribute => blurSigmasToCssString(sigmaX, sigmaY);
 
@@ -728,7 +728,7 @@ class _MatrixEngineImageFilter extends EngineImageFilter {
   final Float64List webMatrix;
   final ui.FilterQuality filterQuality;
 
-  // TODO(flutter_web): implement FilterQuality.
+  // TODO(yjbanov): implement FilterQuality.
   @override
   String get transformAttribute => float64ListToCssTransform(webMatrix);
 

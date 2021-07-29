@@ -313,7 +313,7 @@ Future<void> testMain() async {
       const Rect.fromLTRB(textLeft, textTop, textLeft + widthConstraint, 21.0),
     );
     await _checkScreenshot(rc, 'draw_paragraph');
-  },  // TODO: https://github.com/flutter/flutter/issues/65789
+  },  // TODO(mdebbar): https://github.com/flutter/flutter/issues/65789
       skip: browserEngine == BrowserEngine.webkit &&
           operatingSystem == OperatingSystem.iOs);
 
@@ -332,7 +332,7 @@ Future<void> testMain() async {
       const Rect.fromLTRB(textLeft, textTop, textLeft + widthConstraint, 35.0),
     );
     await _checkScreenshot(rc, 'draw_paragraph_multi_line');
-  },  // TODO: https://github.com/flutter/flutter/issues/65789
+  },  // TODO(mdebbar): https://github.com/flutter/flutter/issues/65789
       skip: browserEngine == BrowserEngine.webkit &&
           operatingSystem == OperatingSystem.iOs);
 
