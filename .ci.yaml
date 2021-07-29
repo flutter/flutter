@@ -2057,8 +2057,17 @@ targets:
         ["devicelab"]
     scheduler: luci
 
-  - name: Mac_ios native_ui_tests_ios32
-    builder: Mac_ios native_ui_tests_ios32
+  - name: Mac_ios32 native_ui_tests_ios32
+    builder: Mac_ios32 native_ui_tests_ios32
+    bringup: true
+    presubmit: false
+    properties:
+      tags: >
+        ["devicelab"]
+    scheduler: luci
+
+  - name: Mac_ios32 flutter_gallery__transition_perf_e2e_ios32
+    builder: Mac_ios32 flutter_gallery__transition_perf_e2e_ios32
     bringup: true
     presubmit: false
     properties:
