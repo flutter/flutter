@@ -466,7 +466,7 @@ class TextInputConfiguration {
     this.keyboardAppearance = Brightness.light,
     this.textCapitalization = TextCapitalization.none,
     this.autofillConfiguration,
-    this.enableIMEPersonalizedLearning = false,
+    this.enableIMEPersonalizedLearning = true,
   }) : assert(inputType != null),
        assert(obscureText != null),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
