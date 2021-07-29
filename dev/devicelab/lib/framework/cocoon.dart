@@ -100,7 +100,11 @@ class Cocoon {
     resultsJson['TestFlaky'] = isTestFlaky ?? false;
     const List<String> supportedBranches = <String>['master'];
     if(supportedBranches.contains(resultsJson['CommitBranch'])) {
-      await _sendUpdateTaskRequest(resultsJson);
+      await retry(
+            () => _sendUpdateTaskRequest(resultsJson).timeout(const Duration(seconds: 30)),
+        retryIf: (Exception e) => e is SocketException || e is TimeoutException || e is ClientException,
+        maxAttempts: requestRetryLimit,
+      );
     }
   }
 
@@ -159,6 +163,7 @@ class Cocoon {
   }
 
   Future<void> _sendUpdateTaskRequest(Map<String, dynamic> postBody) async {
+    logger.info('Attempting to send update task request to Cocoon.');
     final Map<String, dynamic> response = await _sendCocoonRequest('update-task-status', postBody);
     if (response['Name'] != null) {
       logger.info('Updated Cocoon with results from this task');
