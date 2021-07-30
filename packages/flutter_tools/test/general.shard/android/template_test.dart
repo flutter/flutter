@@ -15,7 +15,7 @@ void main() {
   testWithoutContext('kotlin reserved keywords', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
-    final Directory rootDir = fileSystem.systemTempDirectory.createTempSync('flutter_template_test.');
+    final Directory rootDir = fileSystem.currentDirectory;
     final Directory templateSource = rootDir.childDirectory('src');
     final Directory imageSourceDir = templateSource;
     final Directory destination = rootDir.childDirectory('dest');
