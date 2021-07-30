@@ -424,6 +424,7 @@ public class TextInputChannel {
           json.optBoolean("obscureText"),
           json.optBoolean("autocorrect", true),
           json.optBoolean("enableSuggestions"),
+          json.optBoolean("enableIMEPersonalizedLearning"),
           TextCapitalization.fromValue(json.getString("textCapitalization")),
           InputType.fromJson(json.getJSONObject("inputType")),
           inputAction,
@@ -573,6 +574,7 @@ public class TextInputChannel {
     public final boolean obscureText;
     public final boolean autocorrect;
     public final boolean enableSuggestions;
+    public final boolean enableIMEPersonalizedLearning;
     @NonNull public final TextCapitalization textCapitalization;
     @NonNull public final InputType inputType;
     @Nullable public final Integer inputAction;
@@ -584,6 +586,7 @@ public class TextInputChannel {
         boolean obscureText,
         boolean autocorrect,
         boolean enableSuggestions,
+        boolean enableIMEPersonalizedLearning,
         @NonNull TextCapitalization textCapitalization,
         @NonNull InputType inputType,
         @Nullable Integer inputAction,
@@ -593,6 +596,7 @@ public class TextInputChannel {
       this.obscureText = obscureText;
       this.autocorrect = autocorrect;
       this.enableSuggestions = enableSuggestions;
+      this.enableIMEPersonalizedLearning = enableIMEPersonalizedLearning;
       this.textCapitalization = textCapitalization;
       this.inputType = inputType;
       this.inputAction = inputAction;
