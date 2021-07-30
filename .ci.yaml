@@ -48,9 +48,8 @@ targets:
         ["framework","hostonly","shard"]
     scheduler: luci
 
-  - name: Linux docs
-    builder: Linux docs
-    postsubmit: false
+  - name: Linux docs_test
+    builder: Linux docs_test
     properties:
       tags: >
         ["framework","hostonly"]
@@ -157,7 +156,6 @@ targets:
 
   - name: Linux gradle_java8_compile_test
     builder: Linux gradle_java8_compile_test
-    bringup: true
     properties:
       tags: >
         ["devicelab","hostonly"]
@@ -232,7 +230,6 @@ targets:
 
   - name: Linux plugin_dependencies_test
     builder: Linux plugin_dependencies_test
-    bringup: true
     properties:
       tags: >
         ["devicelab","hostonly"]
@@ -958,7 +955,6 @@ targets:
 
   - name: Windows plugin_dependencies_test
     builder: Windows plugin_dependencies_test
-    bringup: true
     properties:
       tags: >
         ["devicelab","hostonly"]
@@ -1056,140 +1052,141 @@ targets:
       - packages/flutter_tools/**
       - bin/**
 
-  - name: Linux analyzer_benchmark
-    builder: Linux analyzer_benchmark
+  - name: Linux_android analyzer_benchmark
+    builder: Linux_android analyzer_benchmark
     presubmit: false
     properties:
       tags: >
         ["devicelab"]
     scheduler: luci
 
-  - name: Linux android_defines_test
-    builder: Linux android_defines_test
+  - name: Linux_android android_defines_test
+    builder: Linux_android android_defines_test
     presubmit: false
     properties:
       tags: >
         ["devicelab"]
     scheduler: luci
 
-  - name: Linux android_obfuscate_test
-    builder: Linux android_obfuscate_test
+  - name: Linux_android android_obfuscate_test
+    builder: Linux_android android_obfuscate_test
     presubmit: false
     properties:
       tags: >
         ["devicelab"]
     scheduler: luci
 
-  - name: Linux android_stack_size_test
-    builder: Linux android_stack_size_test
+  - name: Linux_android android_stack_size_test
+    builder: Linux_android android_stack_size_test
     presubmit: false
     properties:
       tags: >
         ["devicelab"]
     scheduler: luci
 
-  - name: Linux android_view_scroll_perf__timeline_summary
-    builder: Linux android_view_scroll_perf__timeline_summary
+  - name: Linux_android android_view_scroll_perf__timeline_summary
+    builder: Linux_android android_view_scroll_perf__timeline_summary
     presubmit: false
     properties:
       tags: >
         ["devicelab"]
     scheduler: luci
 
-  - name: Linux animated_placeholder_perf__e2e_summary
-    builder: Linux animated_placeholder_perf__e2e_summary
+  - name: Linux_android animated_placeholder_perf__e2e_summary
+    builder: Linux_android animated_placeholder_perf__e2e_summary
     presubmit: false
     properties:
       tags: >
         ["devicelab"]
     scheduler: luci
 
-  - name: Linux backdrop_filter_perf__e2e_summary
-    builder: Linux backdrop_filter_perf__e2e_summary
+  - name: Linux_android backdrop_filter_perf__e2e_summary
+    builder: Linux_android backdrop_filter_perf__e2e_summary
     presubmit: false
     properties:
       tags: >
         ["devicelab"]
     scheduler: luci
 
-  - name: Linux basic_material_app_android__compile
-    builder: Linux basic_material_app_android__compile
+  - name: Linux_android basic_material_app_android__compile
+    builder: Linux_android basic_material_app_android__compile
     presubmit: false
     properties:
       tags: >
         ["devicelab"]
     scheduler: luci
 
-  - name: Linux color_filter_and_fade_perf__e2e_summary
-    builder: Linux color_filter_and_fade_perf__e2e_summary
+  - name: Linux_android color_filter_and_fade_perf__e2e_summary
+    builder: Linux_android color_filter_and_fade_perf__e2e_summary
     presubmit: false
     properties:
       tags: >
         ["devicelab"]
     scheduler: luci
 
-  - name: Linux complex_layout_android__compile
-    builder: Linux complex_layout_android__compile
+  - name: Linux_android complex_layout_android__compile
+    builder: Linux_android complex_layout_android__compile
     presubmit: false
     properties:
       tags: >
         ["devicelab"]
     scheduler: luci
 
-  - name: Linux complex_layout_android__scroll_smoothness
-    builder: Linux complex_layout_android__scroll_smoothness
+  - name: Linux_android complex_layout_android__scroll_smoothness
+    builder: Linux_android complex_layout_android__scroll_smoothness
     presubmit: false
     properties:
       tags: >
         ["devicelab"]
     scheduler: luci
 
-  - name: Linux complex_layout_scroll_perf__devtools_memory
-    builder: Linux complex_layout_scroll_perf__devtools_memory
+  - name: Linux_android complex_layout_scroll_perf__devtools_memory
+    builder: Linux_android complex_layout_scroll_perf__devtools_memory
     presubmit: false
     properties:
       tags: >
         ["devicelab"]
     scheduler: luci
 
-  - name: Linux complex_layout_semantics_perf
-    builder: Linux complex_layout_semantics_perf
+  - name: Linux_android complex_layout_semantics_perf
+    builder: Linux_android complex_layout_semantics_perf
     presubmit: false
     properties:
       tags: >
         ["devicelab"]
     scheduler: luci
 
-  - name: Linux cubic_bezier_perf__e2e_summary
-    builder: Linux cubic_bezier_perf__e2e_summary
+  - name: Linux_android cubic_bezier_perf__e2e_summary
+    builder: Linux_android cubic_bezier_perf__e2e_summary
     presubmit: false
     properties:
       tags: >
         ["devicelab"]
     scheduler: luci
 
-  - name: Linux cubic_bezier_perf_sksl_warmup__e2e_summary
-    builder: Linux cubic_bezier_perf_sksl_warmup__e2e_summary
+  - name: Linux_android cubic_bezier_perf_sksl_warmup__e2e_summary
+    builder: Linux_android cubic_bezier_perf_sksl_warmup__e2e_summary
     presubmit: false
     properties:
       tags: >
         ["devicelab"]
     scheduler: luci
 
-  - name: Linux cull_opacity_perf__e2e_summary
-    builder: Linux cull_opacity_perf__e2e_summary
+  - name: Linux_android cull_opacity_perf__e2e_summary
+    builder: Linux_android cull_opacity_perf__e2e_summary
     presubmit: false
     properties:
       tags: >
         ["devicelab"]
     scheduler: luci
 
-  - name: Linux docs_test
-    builder: Linux docs_test
+  - name: Linux_android devtools_profile_start_test
+    builder: Linux_android devtools_profile_start_test
+    bringup: true
     presubmit: false
     properties:
       tags: >
-        ["framework","hostonly"]
+        ["devicelab"]
     scheduler: luci
 
   - name: Linux docs_publish
@@ -1200,56 +1197,56 @@ targets:
         ["framework","hostonly"]
     scheduler: luci
 
-  - name: Linux fast_scroll_heavy_gridview__memory
-    builder: Linux fast_scroll_heavy_gridview__memory
+  - name: Linux_android fast_scroll_heavy_gridview__memory
+    builder: Linux_android fast_scroll_heavy_gridview__memory
     presubmit: false
     properties:
       tags: >
         ["devicelab"]
     scheduler: luci
 
-  - name: Linux flutter_engine_group_performance
-    builder: Linux flutter_engine_group_performance
+  - name: Linux_android flutter_engine_group_performance
+    builder: Linux_android flutter_engine_group_performance
     presubmit: false
     properties:
       tags: >
         ["devicelab"]
     scheduler: luci
 
-  - name: Linux flutter_gallery__back_button_memory
-    builder: Linux flutter_gallery__back_button_memory
+  - name: Linux_android flutter_gallery__back_button_memory
+    builder: Linux_android flutter_gallery__back_button_memory
     presubmit: false
     properties:
       tags: >
         ["devicelab"]
     scheduler: luci
 
-  - name: Linux flutter_gallery__image_cache_memory
-    builder: Linux flutter_gallery__image_cache_memory
+  - name: Linux_android flutter_gallery__image_cache_memory
+    builder: Linux_android flutter_gallery__image_cache_memory
     presubmit: false
     properties:
       tags: >
         ["devicelab"]
     scheduler: luci
 
-  - name: Linux flutter_gallery__memory_nav
-    builder: Linux flutter_gallery__memory_nav
+  - name: Linux_android flutter_gallery__memory_nav
+    builder: Linux_android flutter_gallery__memory_nav
     presubmit: false
     properties:
       tags: >
         ["devicelab"]
     scheduler: luci
 
-  - name: Linux flutter_gallery__start_up
-    builder: Linux flutter_gallery__start_up
+  - name: Linux_android flutter_gallery__start_up
+    builder: Linux_android flutter_gallery__start_up
     presubmit: false
     properties:
       tags: >
         ["devicelab"]
     scheduler: luci
 
-  - name: Linux flutter_gallery__transition_perf_e2e
-    builder: Linux flutter_gallery__transition_perf_e2e
+  - name: Linux_android flutter_gallery__transition_perf_e2e
+    builder: Linux_android flutter_gallery__transition_perf_e2e
     bringup: true # Flaky https://github.com/flutter/flutter/issues/83298
     presubmit: false
     properties:
@@ -1257,40 +1254,40 @@ targets:
         ["devicelab"]
     scheduler: luci
 
-  - name: Linux flutter_gallery__transition_perf_hybrid
-    builder: Linux flutter_gallery__transition_perf_hybrid
+  - name: Linux_android flutter_gallery__transition_perf_hybrid
+    builder: Linux_android flutter_gallery__transition_perf_hybrid
     presubmit: false
     properties:
       tags: >
         ["devicelab"]
     scheduler: luci
 
-  - name: Linux flutter_gallery__transition_perf_with_semantics
-    builder: Linux flutter_gallery__transition_perf_with_semantics
+  - name: Linux_android flutter_gallery__transition_perf_with_semantics
+    builder: Linux_android flutter_gallery__transition_perf_with_semantics
     presubmit: false
     properties:
       tags: >
         ["devicelab"]
     scheduler: luci
 
-  - name: Linux flutter_gallery__transition_perf
-    builder: Linux flutter_gallery__transition_perf
+  - name: Linux_android flutter_gallery__transition_perf
+    builder: Linux_android flutter_gallery__transition_perf
     presubmit: false
     properties:
       tags: >
         ["devicelab"]
     scheduler: luci
 
-  - name: Linux flutter_gallery_android__compile
-    builder: Linux flutter_gallery_android__compile
+  - name: Linux_android flutter_gallery_android__compile
+    builder: Linux_android flutter_gallery_android__compile
     presubmit: false
     properties:
       tags: >
         ["devicelab"]
     scheduler: luci
 
-  - name: Linux flutter_gallery_sksl_warmup__transition_perf_e2e
-    builder: Linux flutter_gallery_sksl_warmup__transition_perf_e2e
+  - name: Linux_android flutter_gallery_sksl_warmup__transition_perf_e2e
+    builder: Linux_android flutter_gallery_sksl_warmup__transition_perf_e2e
     bringup: true # Flaky https://github.com/flutter/flutter/issues/83298
     presubmit: false
     properties:
@@ -1298,136 +1295,136 @@ targets:
         ["devicelab"]
     scheduler: luci
 
-  - name: Linux flutter_gallery_sksl_warmup__transition_perf
-    builder: Linux flutter_gallery_sksl_warmup__transition_perf
+  - name: Linux_android flutter_gallery_sksl_warmup__transition_perf
+    builder: Linux_android flutter_gallery_sksl_warmup__transition_perf
     presubmit: false
     properties:
       tags: >
         ["devicelab"]
     scheduler: luci
 
-  - name: Linux flutter_gallery_v2_chrome_run_test
-    builder: Linux flutter_gallery_v2_chrome_run_test
+  - name: Linux_android flutter_gallery_v2_chrome_run_test
+    builder: Linux_android flutter_gallery_v2_chrome_run_test
     presubmit: false
     properties:
       tags: >
         ["devicelab"]
     scheduler: luci
 
-  - name: Linux flutter_gallery_v2_web_compile_test
-    builder: Linux flutter_gallery_v2_web_compile_test
+  - name: Linux_android flutter_gallery_v2_web_compile_test
+    builder: Linux_android flutter_gallery_v2_web_compile_test
     presubmit: false
     properties:
       tags: >
         ["devicelab"]
     scheduler: luci
 
-  - name: Linux flutter_test_performance
-    builder: Linux flutter_test_performance
+  - name: Linux_android flutter_test_performance
+    builder: Linux_android flutter_test_performance
     presubmit: false
     properties:
       tags: >
         ["devicelab"]
     scheduler: luci
 
-  - name: Linux frame_policy_delay_test_android
-    builder: Linux frame_policy_delay_test_android
+  - name: Linux_android frame_policy_delay_test_android
+    builder: Linux_android frame_policy_delay_test_android
     presubmit: false
     properties:
       tags: >
         ["devicelab"]
     scheduler: luci
 
-  - name: Linux hot_mode_dev_cycle_linux__benchmark
-    builder: Linux hot_mode_dev_cycle_linux__benchmark
+  - name: Linux_android hot_mode_dev_cycle_linux__benchmark
+    builder: Linux_android hot_mode_dev_cycle_linux__benchmark
     presubmit: false
     properties:
       tags: >
         ["devicelab"]
     scheduler: luci
 
-  - name: Linux image_list_jit_reported_duration
-    builder: Linux image_list_jit_reported_duration
+  - name: Linux_android image_list_jit_reported_duration
+    builder: Linux_android image_list_jit_reported_duration
     presubmit: false
     properties:
       tags: >
         ["devicelab"]
     scheduler: luci
 
-  - name: Linux image_list_reported_duration
-    builder: Linux image_list_reported_duration
+  - name: Linux_android image_list_reported_duration
+    builder: Linux_android image_list_reported_duration
     presubmit: false
     properties:
       tags: >
         ["devicelab"]
     scheduler: luci
 
-  - name: Linux large_image_changer_perf_android
-    builder: Linux large_image_changer_perf_android
+  - name: Linux_android large_image_changer_perf_android
+    builder: Linux_android large_image_changer_perf_android
     presubmit: false
     properties:
       tags: >
         ["devicelab"]
     scheduler: luci
 
-  - name: Linux animated_image_gc_perf
-    builder: Linux animated_image_gc_perf
+  - name: Linux_android animated_image_gc_perf
+    builder: Linux_android animated_image_gc_perf
     presubmit: false
     properties:
       tags: >
         ["devicelab"]
     scheduler: luci
 
-  - name: Linux linux_chrome_dev_mode
-    builder: Linux linux_chrome_dev_mode
+  - name: Linux_android linux_chrome_dev_mode
+    builder: Linux_android linux_chrome_dev_mode
     presubmit: false
     properties:
       tags: >
         ["devicelab"]
     scheduler: luci
 
-  - name: Linux multi_widget_construction_perf__e2e_summary
-    builder: Linux multi_widget_construction_perf__e2e_summary
+  - name: Linux_android multi_widget_construction_perf__e2e_summary
+    builder: Linux_android multi_widget_construction_perf__e2e_summary
     presubmit: false
     properties:
       tags: >
         ["devicelab"]
     scheduler: luci
 
-  - name: Linux new_gallery__crane_perf
-    builder: Linux new_gallery__crane_perf
+  - name: Linux_android new_gallery__crane_perf
+    builder: Linux_android new_gallery__crane_perf
     presubmit: false
     properties:
       tags: >
         ["devicelab"]
     scheduler: luci
 
-  - name: Linux picture_cache_perf__e2e_summary
-    builder: Linux picture_cache_perf__e2e_summary
+  - name: Linux_android picture_cache_perf__e2e_summary
+    builder: Linux_android picture_cache_perf__e2e_summary
     presubmit: false
     properties:
       tags: >
         ["devicelab"]
     scheduler: luci
 
-  - name: Linux platform_channels_benchmarks
-    builder: Linux platform_channels_benchmarks
+  - name: Linux_android platform_channels_benchmarks
+    builder: Linux_android platform_channels_benchmarks
     presubmit: false
     properties:
       tags: >
         ["devicelab"]
     scheduler: luci
 
-  - name: Linux platform_views_scroll_perf__timeline_summary
-    builder: Linux platform_views_scroll_perf__timeline_summary
+  - name: Linux_android platform_views_scroll_perf__timeline_summary
+    builder: Linux_android platform_views_scroll_perf__timeline_summary
     presubmit: false
     properties:
       tags: >
         ["devicelab"]
     scheduler: luci
 
-  - name: Linux routing_test
-    builder: Linux routing_test
+  - name: Linux_android routing_test
+    builder: Linux_android routing_test
     presubmit: false
     properties:
       tags: >
@@ -1442,8 +1439,8 @@ targets:
         ["devicelab","hostonly"]
     scheduler: luci
 
-  - name: Linux textfield_perf__e2e_summary
-    builder: Linux textfield_perf__e2e_summary
+  - name: Linux_android textfield_perf__e2e_summary
+    builder: Linux_android textfield_perf__e2e_summary
     presubmit: false
     properties:
       tags: >
@@ -1458,8 +1455,8 @@ targets:
         ["devicelab","hostonly"]
     scheduler: luci
 
-  - name: Linux web_size__compile_test
-    builder: Linux web_size__compile_test
+  - name: Linux_android web_size__compile_test
+    builder: Linux_android web_size__compile_test
     presubmit: false
     properties:
       tags: >
@@ -1677,7 +1674,6 @@ targets:
   - name: Mac_android integration_ui_frame_number
     builder: Mac_android integration_ui_frame_number
     presubmit: false
-    bringup: true
     properties:
       tags: >
         ["devicelab"]
@@ -1709,7 +1705,6 @@ targets:
 
   - name: Mac_android microbenchmarks
     builder: Mac_android microbenchmarks
-    bringup: true
     presubmit: false
     properties:
       tags: >
@@ -1812,6 +1807,18 @@ targets:
         ["devicelab"]
     scheduler: luci
 
+  - name: Mac_ios animation_with_microtasks_perf_ios__timeline_summary
+    builder: Mac_ios animation_with_microtasks_perf_ios__timeline_summary
+    presubmit: false
+    # This test was missed as a part of the migration to new infra tooling.
+    # Added as a part of https://github.com/flutter/flutter/issues/87345,
+    # this isn't flaky and "bringup: true" will be removed after a few runs.
+    bringup: true
+    properties:
+      tags: >
+        ["devicelab"]
+    scheduler: luci
+
   - name: Mac_ios basic_material_app_ios__compile
     builder: Mac_ios basic_material_app_ios__compile
     presubmit: false
@@ -1876,8 +1883,8 @@ targets:
         ["devicelab"]
     scheduler: luci
 
-  - name: Mac_ios flutter_gallery__transition_perf_e2e_ios32
-    builder: Mac_ios flutter_gallery__transition_perf_e2e_ios32
+  - name: Mac_ios32 flutter_gallery__transition_perf_e2e_ios32
+    builder: Mac_ios32 flutter_gallery__transition_perf_e2e_ios32
     bringup: true
     presubmit: false
     properties:
@@ -1911,7 +1918,6 @@ targets:
 
   - name: Mac_ios flutter_gallery_ios_sksl_warmup__transition_perf
     builder: Mac_ios flutter_gallery_ios_sksl_warmup__transition_perf
-    bringup: true
     presubmit: false
     properties:
       tags: >
@@ -1920,7 +1926,6 @@ targets:
 
   - name: Mac_ios cubic_bezier_perf_ios_sksl_warmup__timeline_summary
     builder: Mac_ios cubic_bezier_perf_ios_sksl_warmup__timeline_summary
-    bringup: true
     presubmit: false
     properties:
       tags: >
@@ -1970,7 +1975,6 @@ targets:
   - name: Mac_ios integration_ui_ios_frame_number
     builder: Mac_ios integration_ui_ios_frame_number
     presubmit: false
-    bringup: true
     properties:
       tags: >
         ["devicelab"]
@@ -2056,8 +2060,8 @@ targets:
         ["devicelab"]
     scheduler: luci
 
-  - name: Mac_ios native_ui_tests_ios32
-    builder: Mac_ios native_ui_tests_ios32
+  - name: Mac_ios32 native_ui_tests_ios32
+    builder: Mac_ios32 native_ui_tests_ios32
     bringup: true
     presubmit: false
     properties:
