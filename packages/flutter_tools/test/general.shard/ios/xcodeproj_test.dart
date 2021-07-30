@@ -739,7 +739,6 @@ Build settings for action build and target plugin2:
       }, overrides: <Type, Generator>{
         Artifacts: () => localArtifacts,
         Platform: () => macOS,
-        OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm),
         FileSystem: () => fs,
         ProcessManager: () => fakeProcessManager,
         XcodeProjectInterpreter: () => xcodeProjectInterpreter,
@@ -781,7 +780,6 @@ Build settings for action build and target plugin2:
       }, overrides: <Type, Generator>{
         Artifacts: () => localArtifacts,
         Platform: () => macOS,
-        OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm),
         FileSystem: () => fs,
         ProcessManager: () => fakeProcessManager,
         XcodeProjectInterpreter: () => xcodeProjectInterpreter,
@@ -835,7 +833,6 @@ Build settings for action build and target plugin2:
       }, overrides: <Type, Generator>{
         Artifacts: () => localArtifacts,
         Platform: () => macOS,
-        OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm),
         FileSystem: () => fs,
         ProcessManager: () => fakeProcessManager,
         XcodeProjectInterpreter: () => xcodeProjectInterpreter,
@@ -846,7 +843,6 @@ Build settings for action build and target plugin2:
       testUsingContext(description, testMethod, overrides: <Type, Generator>{
         Artifacts: () => localArtifacts,
         Platform: () => macOS,
-        OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
       });
@@ -875,7 +871,7 @@ Build settings for action build and target plugin2:
       expect(buildPhaseScriptContents.contains('EXCLUDED_ARCHS'), isFalse);
     });
 
-    testUsingOsxContext('excludes i386 simulator', () async {
+    testUsingOsxContext('does not exclude arm64 simulator when there are no plugins', () async {
       const BuildInfo buildInfo = BuildInfo.debug;
       final FlutterProject project = FlutterProject.fromDirectoryTest(fs.directory('path/to/project'));
       await updateGeneratedXcodeProperties(

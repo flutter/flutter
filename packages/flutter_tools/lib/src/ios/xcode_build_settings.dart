@@ -210,7 +210,7 @@ Future<List<String>> _xcodeBuildSettingsLines({
     // If any plugins or their dependencies do not support arm64 simulators
     // (to run natively without Rosetta translation on an ARM Mac),
     // the app will fail to build unless it also excludes arm64 simulators.
-    if (globals.os.hostPlatform == HostPlatform.darwin_arm && !(await project.ios.pluginsSupportArmSimulator())) {
+    if (!(await project.ios.pluginsSupportArmSimulator())) {
       excludedSimulatorArchs += ' arm64';
     }
     xcodeBuildSettings.add('EXCLUDED_ARCHS[sdk=iphonesimulator*]=$excludedSimulatorArchs');
