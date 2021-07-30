@@ -142,6 +142,8 @@ String fromArgToEnvName(String argName) {
 }
 
 /// Return a web link for the user to open a new PR.
+///
+/// Includes PR title and body via query params.
 String getNewPrLink({
   required String userName,
   required String repoName,
