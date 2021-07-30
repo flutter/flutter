@@ -721,7 +721,7 @@ Build settings for action build and target plugin1:
     EXCLUDED_ARCHS = i386;
     INFOPLIST_FILE = Runner/Info.plist;
     UNRELATED_BUILD_SETTING = arm64;
-    
+
 Build settings for action build and target plugin2:
     ENABLE_BITCODE = NO;
     EXCLUDED_ARCHS = i386;
@@ -829,7 +829,7 @@ Build settings for action build and target plugin1:
     EXCLUDED_ARCHS = i386;
     INFOPLIST_FILE = Runner/Info.plist;
     UNRELATED_BUILD_SETTING = arm64;
-    
+
 Build settings for action build and target plugin2:
     ENABLE_BITCODE = NO;
     EXCLUDED_ARCHS = i386 arm64;
