@@ -3,6 +3,7 @@ package io.flutter.embedding.android;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -41,6 +42,7 @@ public class FlutterFragmentTest {
     assertTrue(fragment.shouldDestroyEngineWithHost());
     assertEquals(RenderMode.surface, fragment.getRenderMode());
     assertEquals(TransparencyMode.transparent, fragment.getTransparencyMode());
+    assertFalse(fragment.shouldDelayFirstAndroidViewDraw());
   }
 
   @Test
@@ -68,12 +70,21 @@ public class FlutterFragmentTest {
   }
 
   @Test
-  public void itCreatesCachedEngineFragmentThatDoesNotDestroyTheEngine() {
+  public void itCreatesNewEngineFragmentThatDelaysFirstDrawWhenRequested() {
+    FlutterFragment fragment =
+        FlutterFragment.withNewEngine().shouldDelayFirstAndroidViewDraw(true).build();
+
+    assertNotNull(fragment.shouldDelayFirstAndroidViewDraw());
+  }
+
+  @Test
+  public void itCreatesCachedEngineFragmentWithExpectedDefaults() {
     FlutterFragment fragment = FlutterFragment.withCachedEngine("my_cached_engine").build();
 
     assertTrue(fragment.shouldAttachEngineToActivity());
     assertEquals("my_cached_engine", fragment.getCachedEngineId());
     assertFalse(fragment.shouldDestroyEngineWithHost());
+    assertFalse(fragment.shouldDelayFirstAndroidViewDraw());
   }
 
   @Test
@@ -86,6 +97,16 @@ public class FlutterFragmentTest {
     assertTrue(fragment.shouldAttachEngineToActivity());
     assertEquals("my_cached_engine", fragment.getCachedEngineId());
     assertTrue(fragment.shouldDestroyEngineWithHost());
+  }
+
+  @Test
+  public void itCreatesCachedEngineFragmentThatDelaysFirstDrawWhenRequested() {
+    FlutterFragment fragment =
+        FlutterFragment.withCachedEngine("my_cached_engine")
+            .shouldDelayFirstAndroidViewDraw(true)
+            .build();
+
+    assertNotNull(fragment.shouldDelayFirstAndroidViewDraw());
   }
 
   @Test

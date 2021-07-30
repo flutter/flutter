@@ -2,7 +2,9 @@ package io.flutter.embedding.android;
 
 import static android.content.ComponentCallbacks2.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.notNull;
@@ -15,6 +17,8 @@ import static org.mockito.Mockito.when;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.Lifecycle;
@@ -86,7 +90,7 @@ public class FlutterActivityAndFragmentDelegateTest {
     // We're testing lifecycle behaviors, which require/expect that certain methods have already
     // been executed by the time they run. Therefore, we run those expected methods first.
     delegate.onAttach(RuntimeEnvironment.application);
-    delegate.onCreateView(null, null, null, 0);
+    delegate.onCreateView(null, null, null, 0, true);
 
     // --- Execute the behavior under test ---
     // By the time an Activity/Fragment is started, we don't expect any lifecycle messages
@@ -164,7 +168,7 @@ public class FlutterActivityAndFragmentDelegateTest {
     // --- Execute the behavior under test ---
     // The FlutterEngine is obtained in onAttach().
     delegate.onAttach(RuntimeEnvironment.application);
-    delegate.onCreateView(null, null, null, 0);
+    delegate.onCreateView(null, null, null, 0, true);
     delegate.onStart();
     delegate.onResume();
 
@@ -220,7 +224,7 @@ public class FlutterActivityAndFragmentDelegateTest {
 
     // --- Execute the behavior under test ---
     delegate.onAttach(RuntimeEnvironment.application);
-    delegate.onCreateView(null, null, null, 0);
+    delegate.onCreateView(null, null, null, 0, true);
 
     // Verify that the host was asked to configure a FlutterSurfaceView.
     verify(mockHost, times(1)).onFlutterSurfaceViewCreated(notNull(FlutterSurfaceView.class));
@@ -249,7 +253,7 @@ public class FlutterActivityAndFragmentDelegateTest {
 
     // --- Execute the behavior under test ---
     delegate.onAttach(RuntimeEnvironment.application);
-    delegate.onCreateView(null, null, null, 0);
+    delegate.onCreateView(null, null, null, 0, false);
 
     // Verify that the host was asked to configure a FlutterTextureView.
     verify(customMockHost, times(1)).onFlutterTextureViewCreated(notNull(FlutterTextureView.class));
@@ -282,7 +286,7 @@ public class FlutterActivityAndFragmentDelegateTest {
     // --- Execute the behavior under test ---
     // The initial route is sent in onStart().
     delegate.onAttach(RuntimeEnvironment.application);
-    delegate.onCreateView(null, null, null, 0);
+    delegate.onCreateView(null, null, null, 0, true);
     delegate.onStart();
 
     // Verify that the navigation channel was given our initial route.
@@ -306,7 +310,7 @@ public class FlutterActivityAndFragmentDelegateTest {
     // --- Execute the behavior under test ---
     // Dart is executed in onStart().
     delegate.onAttach(RuntimeEnvironment.application);
-    delegate.onCreateView(null, null, null, 0);
+    delegate.onCreateView(null, null, null, 0, true);
     delegate.onStart();
 
     // Verify that the host's Dart entrypoint was used.
@@ -335,7 +339,7 @@ public class FlutterActivityAndFragmentDelegateTest {
     // --- Execute the behavior under test ---
     // Dart is executed in onStart().
     delegate.onAttach(RuntimeEnvironment.application);
-    delegate.onCreateView(null, null, null, 0);
+    delegate.onCreateView(null, null, null, 0, true);
     delegate.onStart();
 
     // Verify that the host's Dart entrypoint was used.
@@ -390,7 +394,7 @@ public class FlutterActivityAndFragmentDelegateTest {
 
     // Make sure all of the other lifecycle methods can run safely as well
     // without a valid Activity
-    delegate.onCreateView(null, null, null, 0);
+    delegate.onCreateView(null, null, null, 0, true);
     delegate.onStart();
     delegate.onResume();
     delegate.onPause();
@@ -751,7 +755,7 @@ public class FlutterActivityAndFragmentDelegateTest {
     // --- Execute the behavior under test ---
     // Push the delegate through all lifecycle methods all the way to destruction.
     delegate.onAttach(RuntimeEnvironment.application);
-    delegate.onCreateView(null, null, null, 0);
+    delegate.onCreateView(null, null, null, 0, true);
     delegate.onStart();
     delegate.onResume();
     delegate.onPause();
@@ -775,7 +779,7 @@ public class FlutterActivityAndFragmentDelegateTest {
     // --- Execute the behavior under test ---
     // Push the delegate through all lifecycle methods all the way to destruction.
     delegate.onAttach(RuntimeEnvironment.application);
-    delegate.onCreateView(null, null, null, 0);
+    delegate.onCreateView(null, null, null, 0, true);
     delegate.onStart();
     delegate.onResume();
     delegate.onPause();
@@ -806,7 +810,7 @@ public class FlutterActivityAndFragmentDelegateTest {
     // --- Execute the behavior under test ---
     // Push the delegate through all lifecycle methods all the way to destruction.
     delegate.onAttach(RuntimeEnvironment.application);
-    delegate.onCreateView(null, null, null, 0);
+    delegate.onCreateView(null, null, null, 0, true);
     delegate.onStart();
     delegate.onResume();
     delegate.onPause();
@@ -838,7 +842,7 @@ public class FlutterActivityAndFragmentDelegateTest {
     // --- Execute the behavior under test ---
     // Push the delegate through all lifecycle methods all the way to destruction.
     delegate.onAttach(RuntimeEnvironment.application);
-    delegate.onCreateView(null, null, null, 0);
+    delegate.onCreateView(null, null, null, 0, true);
     delegate.onStart();
     delegate.onResume();
     delegate.onPause();
@@ -848,6 +852,77 @@ public class FlutterActivityAndFragmentDelegateTest {
 
     // --- Verify that the cached engine was NOT destroyed ---
     verify(cachedEngine, never()).destroy();
+  }
+
+  @Test
+  public void itDelaysFirstDrawWhenRequested() {
+    // ---- Test setup ----
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+
+    // We're testing lifecycle behaviors, which require/expect that certain methods have already
+    // been executed by the time they run. Therefore, we run those expected methods first.
+    delegate.onAttach(RuntimeEnvironment.application);
+
+    // --- Execute the behavior under test ---
+    boolean shouldDelayFirstAndroidViewDraw = true;
+    delegate.onCreateView(null, null, null, 0, shouldDelayFirstAndroidViewDraw);
+
+    assertNotNull(delegate.activePreDrawListener);
+  }
+
+  @Test
+  public void itDoesNotDelayFirstDrawWhenNotRequested() {
+    // ---- Test setup ----
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+
+    // We're testing lifecycle behaviors, which require/expect that certain methods have already
+    // been executed by the time they run. Therefore, we run those expected methods first.
+    delegate.onAttach(RuntimeEnvironment.application);
+
+    // --- Execute the behavior under test ---
+    boolean shouldDelayFirstAndroidViewDraw = false;
+    delegate.onCreateView(null, null, null, 0, shouldDelayFirstAndroidViewDraw);
+
+    assertNull(delegate.activePreDrawListener);
+  }
+
+  @Test
+  public void itThrowsWhenDelayingTheFirstDrawAndUsingATextureView() {
+    // ---- Test setup ----
+    when(mockHost.getRenderMode()).thenReturn(RenderMode.texture);
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+
+    // We're testing lifecycle behaviors, which require/expect that certain methods have already
+    // been executed by the time they run. Therefore, we run those expected methods first.
+    delegate.onAttach(RuntimeEnvironment.application);
+
+    // --- Execute the behavior under test ---
+    boolean shouldDelayFirstAndroidViewDraw = true;
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          delegate.onCreateView(null, null, null, 0, shouldDelayFirstAndroidViewDraw);
+        });
+  }
+
+  @Test
+  public void itDoesNotDelayTheFirstDrawWhenRequestedAndWithAProvidedSplashScreen() {
+    when(mockHost.provideSplashScreen())
+        .thenReturn(new DrawableSplashScreen(new ColorDrawable(Color.GRAY)));
+
+    // ---- Test setup ----
+    // Create the real object that we're testing.
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+
+    // We're testing lifecycle behaviors, which require/expect that certain methods have already
+    // been executed by the time they run. Therefore, we run those expected methods first.
+    delegate.onAttach(RuntimeEnvironment.application);
+
+    // --- Execute the behavior under test ---
+    boolean shouldDelayFirstAndroidViewDraw = true;
+    delegate.onCreateView(null, null, null, 0, shouldDelayFirstAndroidViewDraw);
+
+    assertNull(delegate.activePreDrawListener);
   }
 
   /**
