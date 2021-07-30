@@ -475,7 +475,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     // If message is empty then no need to create a tooltip overlay to show
     // the empty black container so just return the wrapped child as is
     if (widget.message.isEmpty) {
-      return widget.child!;
+      return widget.child ?? const SizedBox();
     }
     assert(Overlay.of(context, debugRequiredFor: widget) != null);
     final ThemeData theme = Theme.of(context);
