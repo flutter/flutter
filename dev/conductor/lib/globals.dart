@@ -151,23 +151,23 @@ String getNewPrLink({
   assert(state.releaseVersion.isNotEmpty);
   late final String candidateBranch;
   late final String workingBranch;
+  late final String repoLabel;
   switch (repoName) {
     case 'flutter':
-      assert(state.framework.candidateBranch.isNotEmpty);
-      assert(state.framework.workingBranch.isNotEmpty);
       candidateBranch = state.framework.candidateBranch;
       workingBranch = state.framework.workingBranch;
+      repoLabel = 'Framework';
       break;
     case 'engine':
-      assert(state.engine.candidateBranch.isNotEmpty);
-      assert(state.engine.workingBranch.isNotEmpty);
       candidateBranch = state.engine.candidateBranch;
       workingBranch = state.engine.workingBranch;
+      repoLabel = 'Engine';
       break;
     default:
       throw ConductorException('Expected repoName to be one of flutter or engine but got $repoName.');
   }
-  final String repoLabel = repoName == 'engine' ? 'Engine' : 'Framework';
+  assert(candidateBranch.isNotEmpty);
+  assert(workingBranch.isNotEmpty);
   final String title = '[flutter_releases] Flutter ${state.releaseChannel} '
       '${state.releaseVersion} $repoLabel Cherrypicks';
   final StringBuffer body = StringBuffer();
