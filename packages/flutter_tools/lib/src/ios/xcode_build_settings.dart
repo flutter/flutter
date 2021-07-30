@@ -4,7 +4,6 @@
 
 import '../artifacts.dart';
 import '../base/file_system.dart';
-import '../base/os.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../flutter_manifest.dart';
