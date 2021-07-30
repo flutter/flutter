@@ -1256,7 +1256,7 @@ targets:
 
   - name: Linux_android flutter_gallery__transition_perf_e2e
     builder: Linux_android flutter_gallery__transition_perf_e2e
-    bringup: true
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/83298
     presubmit: false
     properties:
       tags: >
@@ -1872,9 +1872,17 @@ targets:
         ["devicelab"]
     scheduler: luci
 
-  - name: Linux_android flutter_gallery__transition_perf_e2e
-    builder: Linux_android flutter_gallery__transition_perf_e2e
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/83298
+  - name: Mac_ios flutter_gallery__transition_perf_e2e_ios
+    builder: Mac_ios flutter_gallery__transition_perf_e2e_ios
+    presubmit: false
+    properties:
+      tags: >
+        ["devicelab"]
+    scheduler: luci
+
+  - name: Mac_ios32 flutter_gallery__transition_perf_e2e_ios32
+    builder: Mac_ios32 flutter_gallery__transition_perf_e2e_ios32
+    bringup: true
     presubmit: false
     properties:
       tags: >
@@ -2058,15 +2066,6 @@ targets:
         ["devicelab"]
     scheduler: luci
 
-  - name: Mac_ios32 flutter_gallery__transition_perf_e2e_ios32
-    builder: Mac_ios32 flutter_gallery__transition_perf_e2e_ios32
-    bringup: true
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
   - name: Mac_ios new_gallery_ios__transition_perf
     builder: Mac_ios new_gallery_ios__transition_perf
     presubmit: false
@@ -2091,8 +2090,8 @@ targets:
         ["devicelab"]
     scheduler: luci
 
-  - name: Linux_android platform_channels_benchmarks
-    builder: Linux_android platform_channels_benchmarks
+  - name: Mac_ios platform_channels_benchmarks_ios
+    builder: Mac_ios platform_channels_benchmarks_ios
     presubmit: false
     properties:
       tags: >
@@ -2218,3 +2217,4 @@ targets:
       tags: >
         ["devicelab"]
     scheduler: luci
+
