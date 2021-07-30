@@ -615,9 +615,7 @@ void main() {
     });
   });
 
-  // TODO(justinmc): Paste should only appears when the clipboard has contents.
-  //                 https://github.com/flutter/flutter/issues/74139
-  testWidgets('Paste always appears regardless of clipboard content on Android', (WidgetTester tester) async {
+  testWidgets('Paste only appears when clipboard has contents', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
@@ -645,10 +643,8 @@ void main() {
     await tester.tapAt(textOffsetToPosition(tester, index));
     await tester.pumpAndSettle();
 
-    // Paste is showing even though clipboard is empty.
-    // TODO(justinmc): Paste should not appears when the clipboard is empty.
-    //                 https://github.com/flutter/flutter/issues/74139
-    expect(find.text('Paste'), findsOneWidget);
+    // No Paste yet, because nothing has been copied.
+    expect(find.text('Paste'), findsNothing);
     expect(find.text('Copy'), findsOneWidget);
     expect(find.text('Cut'), findsOneWidget);
     expect(find.text('Select all'), findsOneWidget);
