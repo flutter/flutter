@@ -11,6 +11,7 @@ import argparse
 import glob
 import os
 import re
+import shutil
 import subprocess
 import sys
 import time
@@ -134,11 +135,32 @@ def RunEngineExecutable(build_dir, executable_name, filter, flags=[],
   else:
     test_command = [ executable ] + flags
 
-  RunCmd(test_command, cwd=cwd, forbidden_output=forbidden_output, expect_failure=expect_failure, env=env)
+  try:
+    RunCmd(test_command, cwd=cwd, forbidden_output=forbidden_output, expect_failure=expect_failure, env=env)
+  except:
+    # The LUCI environment may provide a variable containing a directory path
+    # for additional output files that will be uploaded to cloud storage.
+    # If the command generated a core dump, then run a script to analyze
+    # the dump and output a report that will be uploaded.
+    luci_test_outputs_path = os.environ.get('FLUTTER_TEST_OUTPUTS_DIR')
+    core_path = os.path.join(cwd, 'core')
+    if luci_test_outputs_path and os.path.exists(core_path) and os.path.exists(unstripped_exe):
+      dump_path = os.path.join(luci_test_outputs_path, '%s_%s.txt' % (executable_name, sys.platform))
+      print 'Writing core dump analysis to %s' % dump_path
+      subprocess.call([
+        os.path.join(buildroot_dir, 'flutter', 'testing', 'analyze_core_dump.sh'),
+        buildroot_dir, unstripped_exe, core_path, dump_path,
+      ])
+      os.unlink(core_path)
+    raise
 
 
-def RunCCTests(build_dir, filter, coverage):
+def RunCCTests(build_dir, filter, coverage, capture_core_dump):
   print("Running Engine Unit-tests.")
+
+  if capture_core_dump and IsLinux():
+    import resource
+    resource.setrlimit(resource.RLIMIT_CORE, (resource.RLIM_INFINITY, resource.RLIM_INFINITY))
 
   # Not all of the engine unit tests are designed to be run more than once.
   non_repeatable_shuffle_flags = [
@@ -523,6 +545,8 @@ def main():
       help='Filter parameter for which objc tests to run (example: "IosUnitTestsTests/SemanticsObjectTest/testShouldTriggerAnnouncement")')
   parser.add_argument('--coverage', action='store_true', default=None,
       help='Generate coverage reports for each unit test framework run.')
+  parser.add_argument('--engine-capture-core-dump', dest='engine_capture_core_dump', action='store_true',
+      default=False, help='Capture core dumps from crashes of engine tests.')
 
   args = parser.parse_args()
 
@@ -537,7 +561,7 @@ def main():
 
   engine_filter = args.engine_filter.split(',') if args.engine_filter else None
   if 'engine' in types:
-    RunCCTests(build_dir, engine_filter, args.coverage)
+    RunCCTests(build_dir, engine_filter, args.coverage, args.engine_capture_core_dump)
 
   if 'dart' in types:
     assert not IsWindows(), "Dart tests can't be run on windows. https://github.com/flutter/flutter/issues/36301."
