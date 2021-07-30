@@ -14,6 +14,16 @@
 
 constexpr uint64_t kMicrosecondsPerMillisecond = 1000;
 
+static const FlutterKeyEvent empty_event{
+    .struct_size = sizeof(FlutterKeyEvent),
+    .timestamp = 0,
+    .type = kFlutterKeyEventTypeDown,
+    .physical = 0,
+    .logical = 0,
+    .character = nullptr,
+    .synthesized = false,
+};
+
 // Look up a hash table that maps a uint64_t to a uint64_t.
 //
 // Returns 0 if not found.
@@ -712,6 +722,7 @@ static void fl_key_embedder_responder_handle_event(
       // pressed one, usually indicating multiple keyboards are pressing keys
       // with the same physical key, or the up event was lost during a loss of
       // focus. The down event is ignored.
+      fl_engine_send_key_event(self->engine, &empty_event, nullptr, nullptr);
       callback(true, user_data);
       return;
     } else {
@@ -724,6 +735,7 @@ static void fl_key_embedder_responder_handle_event(
       // The physical key has been released before. It might indicate a missed
       // event due to loss of focus, or multiple keyboards pressed keys with the
       // same physical key. Ignore the up event.
+      fl_engine_send_key_event(self->engine, &empty_event, nullptr, nullptr);
       callback(true, user_data);
       return;
     } else {

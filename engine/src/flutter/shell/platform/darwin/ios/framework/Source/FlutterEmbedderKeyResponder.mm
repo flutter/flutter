@@ -427,6 +427,15 @@ void HandleResponse(bool handled, void* user_data);
                        callback:(nonnull FlutterKeyCallbackGuard*)callback;
 
 /**
+ * Send an empty key event.
+ *
+ * The event is never synthesized, and never expects an event result. An empty
+ * event is sent when no other events should be sent, such as upon back-to-back
+ * keydown events of the same key.
+ */
+- (void)sendEmptyEvent;
+
+/**
  * Send a key event for a modifier key.
  */
 - (void)synthesizeModifierEventOfType:(BOOL)isDownEvent
@@ -619,6 +628,19 @@ void HandleResponse(bool handled, void* user_data);
   _sendEvent(event, HandleResponse, pending);
 }
 
+- (void)sendEmptyEvent {
+  FlutterKeyEvent event = {
+      .struct_size = sizeof(FlutterKeyEvent),
+      .timestamp = 0,
+      .type = kFlutterKeyEventTypeDown,
+      .physical = 0,
+      .logical = 0,
+      .character = nil,
+      .synthesized = false,
+  };
+  _sendEvent(event, nil, nil);
+}
+
 - (void)synthesizeModifierEventOfType:(BOOL)isDownEvent
                             timestamp:(NSTimeInterval)timestamp
                               keyCode:(UInt32)keyCode {
@@ -659,6 +681,7 @@ void HandleResponse(bool handled, void* user_data);
       // However this might happen in add-to-app scenarios if the focus is changed
       // from the native view to the Flutter view amid the key tap.
       [callback resolveTo:TRUE];
+      [self sendEmptyEvent];
       return;
     }
   }
@@ -695,6 +718,7 @@ void HandleResponse(bool handled, void* user_data);
     // However this might happen in add-to-app scenarios if the focus is changed
     // from the native view to the Flutter view amid the key tap.
     [callback resolveTo:TRUE];
+    [self sendEmptyEvent];
     return;
   }
   [self updateKey:physicalKey asPressed:0];

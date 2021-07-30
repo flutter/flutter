@@ -369,9 +369,12 @@ void testMain() {
     converter.handleEvent(keyDownEvent('ShiftLeft', 'Shift', kShift, kLocationLeft)
       ..onPreventDefault = onPreventDefault
     );
-    expect(keyDataList, isEmpty);
-    expect(preventedDefault, isFalse);
+    expect(keyDataList, hasLength(1));
+    expect(keyDataList[0].physical, 0);
+    expect(keyDataList[0].logical, 0);
+    expect(preventedDefault, isTrue);
 
+    keyDataList.clear();
     converter.handleEvent(keyUpEvent('ShiftLeft', 'Shift', 0, kLocationLeft)
       ..onPreventDefault = onPreventDefault
     );
@@ -398,8 +401,10 @@ void testMain() {
     converter.handleEvent(keyUpEvent('ShiftRight', 'Shift', 0, kLocationRight)
       ..onPreventDefault = onPreventDefault
     );
-    expect(keyDataList, isEmpty);
-    expect(preventedDefault, isFalse);
+    expect(keyDataList, hasLength(1));
+    expect(keyDataList[0].physical, 0);
+    expect(keyDataList[0].logical, 0);
+    expect(preventedDefault, isTrue);
   });
 
   test('Conflict from multiple keyboards do not crash', () {

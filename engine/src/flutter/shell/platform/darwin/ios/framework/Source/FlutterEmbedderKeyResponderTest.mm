@@ -301,8 +301,15 @@ typedef void (^ResponseCallback)(bool handled);
                   last_handled = handled;
                 }];
 
-  XCTAssertEqual([events count], 0u);
+  XCTAssertEqual([events count], 1u);
+  event = [events lastObject].data;
+  XCTAssertEqual(event->physical, 0ull);
+  XCTAssertEqual(event->logical, 0ull);
+  XCTAssertEqual(event->synthesized, false);
+  XCTAssertFalse([[events lastObject] hasCallback]);
   XCTAssertEqual(last_handled, TRUE);
+
+  [events removeAllObjects];
 
   last_handled = FALSE;
   [responder handlePress:keyUpEvent(kKeyCodeKeyA, kModifierFlagNone, 123.0f)
@@ -327,6 +334,7 @@ typedef void (^ResponseCallback)(bool handled);
 - (void)testIgnoreAbruptUpEvent API_AVAILABLE(ios(13.4)) {
   __block NSMutableArray<TestKeyEvent*>* events = [[NSMutableArray<TestKeyEvent*> alloc] init];
   __block BOOL last_handled = TRUE;
+  FlutterKeyEvent* event;
 
   FlutterEmbedderKeyResponder* responder = [[FlutterEmbedderKeyResponder alloc]
       initWithSendEvent:^(const FlutterKeyEvent& event, _Nullable FlutterKeyEventCallback callback,
@@ -342,8 +350,15 @@ typedef void (^ResponseCallback)(bool handled);
                   last_handled = handled;
                 }];
 
-  XCTAssertEqual([events count], 0u);
+  XCTAssertEqual([events count], 1u);
+  event = [events lastObject].data;
+  XCTAssertEqual(event->physical, 0ull);
+  XCTAssertEqual(event->logical, 0ull);
+  XCTAssertEqual(event->synthesized, false);
+  XCTAssertFalse([[events lastObject] hasCallback]);
   XCTAssertEqual(last_handled, TRUE);
+
+  [events removeAllObjects];
 }
 
 // Press R-Shift, A, then release R-Shift then A, on a US keyboard.
@@ -433,6 +448,10 @@ typedef void (^ResponseCallback)(bool handled);
 - (void)testSpecialModiferFlags API_AVAILABLE(ios(13.4)) {
   __block NSMutableArray<TestKeyEvent*>* events = [[NSMutableArray<TestKeyEvent*> alloc] init];
   FlutterKeyEvent* event;
+  __block BOOL last_handled = TRUE;
+  id keyEventCallback = ^(BOOL handled) {
+    last_handled = handled;
+  };
 
   FlutterEmbedderKeyResponder* responder = [[FlutterEmbedderKeyResponder alloc]
       initWithSendEvent:^(const FlutterKeyEvent& event, _Nullable FlutterKeyEventCallback callback,
@@ -448,8 +467,7 @@ typedef void (^ResponseCallback)(bool handled);
   // Numpad 1
   // OS provides: char: "1", code: 0x59, modifiers: 0x200000
   [responder handlePress:keyDownEvent(kKeyCodeNumpad1, kModifierFlagNumPadKey, 123.0, "1", "1")
-                callback:^(BOOL handled){
-                }];
+                callback:keyEventCallback];
 
   XCTAssertEqual([events count], 1u);
   event = [events lastObject].data;
@@ -465,8 +483,7 @@ typedef void (^ResponseCallback)(bool handled);
   // Fn Key (sends HID undefined)
   // OS provides: char: nil, keycode: 0x3, modifiers: 0x0
   [responder handlePress:keyDownEvent(kKeyCodeUndefined, kModifierFlagNone, 123.0)
-                callback:^(BOOL handled){
-                }];
+                callback:keyEventCallback];
 
   XCTAssertEqual([events count], 1u);
   event = [events lastObject].data;
@@ -482,8 +499,7 @@ typedef void (^ResponseCallback)(bool handled);
   // F1 Down
   // OS provides: char: UIKeyInputF1, code: 0x3a, modifiers: 0x0
   [responder handlePress:keyDownEvent(kKeyCodeF1, kModifierFlagNone, 123.0f, "\\^P", "\\^P")
-                callback:^(BOOL handled){
-                }];
+                callback:keyEventCallback];
 
   XCTAssertEqual([events count], 1u);
   event = [events lastObject].data;
@@ -499,8 +515,7 @@ typedef void (^ResponseCallback)(bool handled);
   // KeyA Down
   // OS provides: char: "q", code: 0x4, modifiers: 0x0
   [responder handlePress:keyDownEvent(kKeyCodeKeyA, kModifierFlagNone, 123.0f, "a", "a")
-                callback:^(BOOL handled){
-                }];
+                callback:keyEventCallback];
 
   XCTAssertEqual([events count], 1u);
   event = [events lastObject].data;
@@ -516,8 +531,7 @@ typedef void (^ResponseCallback)(bool handled);
   // ShiftLeft Down
   // OS Provides: char: nil, code: 0xe1, modifiers: 0x20000
   [responder handlePress:keyDownEvent(kKeyCodeShiftLeft, kModifierFlagShiftAny, 123.0f)
-                callback:^(BOOL handled){
-                }];
+                callback:keyEventCallback];
 
   XCTAssertEqual([events count], 1u);
   event = [events lastObject].data;
@@ -532,8 +546,7 @@ typedef void (^ResponseCallback)(bool handled);
   // Numpad 1 Up
   // OS provides: char: "1", code: 0x59, modifiers: 0x200000
   [responder handlePress:keyUpEvent(kKeyCodeNumpad1, kModifierFlagNumPadKey, 123.0f)
-                callback:^(BOOL handled){
-                }];
+                callback:keyEventCallback];
 
   XCTAssertEqual([events count], 2u);
 
@@ -559,8 +572,7 @@ typedef void (^ResponseCallback)(bool handled);
   // F1 Up
   // OS provides: char: UIKeyInputF1, code: 0x3a, modifiers: 0x0
   [responder handlePress:keyUpEvent(kKeyCodeF1, kModifierFlagNone, 123.0f)
-                callback:^(BOOL handled){
-                }];
+                callback:keyEventCallback];
 
   XCTAssertEqual([events count], 1u);
   event = [events lastObject].data;
@@ -576,8 +588,7 @@ typedef void (^ResponseCallback)(bool handled);
   // Fn Key (sends HID undefined)
   // OS provides: char: nil, code: 0x3, modifiers: 0x0
   [responder handlePress:keyUpEvent(kKeyCodeUndefined, kModifierFlagNone, 123.0)
-                callback:^(BOOL handled){
-                }];
+                callback:keyEventCallback];
 
   XCTAssertEqual([events count], 1u);
   event = [events lastObject].data;
@@ -592,8 +603,7 @@ typedef void (^ResponseCallback)(bool handled);
   // KeyA Up
   // OS provides: char: "a", code: 0x4, modifiers: 0x0
   [responder handlePress:keyUpEvent(kKeyCodeKeyA, kModifierFlagNone, 123.0f)
-                callback:^(BOOL handled){
-                }];
+                callback:keyEventCallback];
 
   XCTAssertEqual([events count], 1u);
   event = [events lastObject].data;
@@ -609,10 +619,17 @@ typedef void (^ResponseCallback)(bool handled);
   // ShiftLeft Up
   // OS provides: char: nil, code: 0xe1, modifiers: 0x20000
   [responder handlePress:keyUpEvent(kKeyCodeShiftLeft, kModifierFlagShiftAny, 123.0f)
-                callback:^(BOOL handled){
-                }];
+                callback:keyEventCallback];
 
-  XCTAssertEqual([events count], 0u);
+  XCTAssertEqual([events count], 1u);
+  event = [events lastObject].data;
+  XCTAssertEqual(event->physical, 0ull);
+  XCTAssertEqual(event->logical, 0ull);
+  XCTAssertEqual(event->synthesized, false);
+  XCTAssertFalse([[events lastObject] hasCallback]);
+  XCTAssertEqual(last_handled, TRUE);
+
+  [events removeAllObjects];
 }
 
 - (void)testIdentifyLeftAndRightModifiers API_AVAILABLE(ios(13.4)) {

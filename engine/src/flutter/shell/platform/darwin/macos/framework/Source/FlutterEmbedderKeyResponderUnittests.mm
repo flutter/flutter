@@ -302,8 +302,15 @@ TEST(FlutterEmbedderKeyResponderUnittests, IgnoreDuplicateDownEvent) {
                   last_handled = handled;
                 }];
 
-  EXPECT_EQ([events count], 0u);
+  EXPECT_EQ([events count], 1u);
   EXPECT_EQ(last_handled, TRUE);
+  event = [events lastObject].data;
+  EXPECT_EQ(event->physical, 0ull);
+  EXPECT_EQ(event->logical, 0ull);
+  EXPECT_FALSE([[events lastObject] hasCallback]);
+  EXPECT_EQ(last_handled, TRUE);
+
+  [events removeAllObjects];
 
   last_handled = FALSE;
   [responder handleEvent:keyEvent(NSEventTypeKeyUp, 0x100, @"a", @"a", FALSE, kKeyCodeKeyA)
@@ -327,6 +334,7 @@ TEST(FlutterEmbedderKeyResponderUnittests, IgnoreDuplicateDownEvent) {
 
 TEST(FlutterEmbedderKeyResponderUnittests, IgnoreDuplicateUpEvent) {
   __block NSMutableArray<TestKeyEvent*>* events = [[NSMutableArray<TestKeyEvent*> alloc] init];
+  FlutterKeyEvent* event;
   __block BOOL last_handled = TRUE;
 
   FlutterEmbedderKeyResponder* responder = [[FlutterEmbedderKeyResponder alloc]
@@ -343,8 +351,15 @@ TEST(FlutterEmbedderKeyResponderUnittests, IgnoreDuplicateUpEvent) {
                   last_handled = handled;
                 }];
 
-  EXPECT_EQ([events count], 0u);
+  EXPECT_EQ([events count], 1u);
   EXPECT_EQ(last_handled, TRUE);
+  event = [events lastObject].data;
+  EXPECT_EQ(event->physical, 0ull);
+  EXPECT_EQ(event->logical, 0ull);
+  EXPECT_FALSE([[events lastObject] hasCallback]);
+  EXPECT_EQ(last_handled, TRUE);
+
+  [events removeAllObjects];
 }
 
 // Press L shift, A, then release L shift then A, on an US keyboard.
@@ -1042,6 +1057,7 @@ TEST(FlutterEmbedderKeyResponderUnittests, ConvertCapsLockEvents) {
 // Press the CapsLock key when CapsLock state is desynchronized
 TEST(FlutterEmbedderKeyResponderUnittests, SynchronizeCapsLockStateOnCapsLock) {
   __block NSMutableArray<TestKeyEvent*>* events = [[NSMutableArray<TestKeyEvent*> alloc] init];
+  FlutterKeyEvent* event;
   __block BOOL last_handled = TRUE;
   id keyEventCallback = ^(BOOL handled) {
     last_handled = handled;
@@ -1056,13 +1072,20 @@ TEST(FlutterEmbedderKeyResponderUnittests, SynchronizeCapsLockStateOnCapsLock) {
       }];
 
   // In:  CapsLock down
-  // Out:
+  // Out: (empty)
   last_handled = FALSE;
   [responder handleEvent:keyEvent(NSEventTypeFlagsChanged, 0x100, @"", @"", FALSE, kKeyCodeCapsLock)
                 callback:keyEventCallback];
 
-  EXPECT_EQ([events count], 0u);
+  EXPECT_EQ([events count], 1u);
   EXPECT_EQ(last_handled, TRUE);
+  event = [events lastObject].data;
+  EXPECT_EQ(event->physical, 0ull);
+  EXPECT_EQ(event->logical, 0ull);
+  EXPECT_FALSE([[events lastObject] hasCallback]);
+  EXPECT_EQ(last_handled, TRUE);
+
+  [events removeAllObjects];
 }
 
 // Press the CapsLock key when CapsLock state is desynchronized

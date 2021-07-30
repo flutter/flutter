@@ -54,7 +54,9 @@ class PointerDataPacket {};
 - (void)sendKeyEvent:(const FlutterKeyEvent&)event
             callback:(FlutterKeyEventCallback)callback
             userData:(void*)userData API_AVAILABLE(ios(9.0)) {
-  NSAssert(callback != nullptr, @"Invalid callback");
+  if (callback == nil)
+    return;
+  // NSAssert(callback != nullptr, @"Invalid callback");
   // Response is async, so we have to post it to the run loop instead of calling
   // it directly.
   CFRunLoopPerformBlock(CFRunLoopGetCurrent(), kCFRunLoopDefaultMode, ^() {
