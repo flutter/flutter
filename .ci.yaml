@@ -1816,6 +1816,15 @@ targets:
         ["devicelab"]
     scheduler: luci
 
+  - name: Mac_ios animation_with_microtasks_perf_ios__timeline_summary
+    builder: Mac_ios animation_with_microtasks_perf_ios__timeline_summary
+    presubmit: false
+    bringup: true
+    properties:
+      tags: >
+        ["devicelab"]
+    scheduler: luci
+
   - name: Mac_ios basic_material_app_ios__compile
     builder: Mac_ios basic_material_app_ios__compile
     presubmit: false
