@@ -151,6 +151,7 @@ public class TextInputPluginTest {
             false,
             false,
             true,
+            true,
             TextInputChannel.TextCapitalization.NONE,
             null,
             null,
@@ -195,6 +196,7 @@ public class TextInputPluginTest {
         new TextInputChannel.Configuration(
             false,
             false,
+            true,
             true,
             TextInputChannel.TextCapitalization.NONE,
             new TextInputChannel.InputType(TextInputChannel.TextInputType.TEXT, false, false),
@@ -284,6 +286,7 @@ public class TextInputPluginTest {
             false,
             false,
             true,
+            true,
             TextInputChannel.TextCapitalization.NONE,
             null,
             null,
@@ -320,6 +323,7 @@ public class TextInputPluginTest {
         new TextInputChannel.Configuration(
             false,
             false,
+            true,
             true,
             TextInputChannel.TextCapitalization.NONE,
             null,
@@ -366,6 +370,7 @@ public class TextInputPluginTest {
         new TextInputChannel.Configuration(
             false,
             false,
+            true,
             true,
             TextInputChannel.TextCapitalization.NONE,
             new TextInputChannel.InputType(TextInputChannel.TextInputType.TEXT, false, false),
@@ -462,6 +467,7 @@ public class TextInputPluginTest {
             false,
             false,
             true,
+            true,
             TextInputChannel.TextCapitalization.NONE,
             null,
             null,
@@ -503,6 +509,7 @@ public class TextInputPluginTest {
         new TextInputChannel.Configuration(
             false,
             false,
+            true,
             true,
             TextInputChannel.TextCapitalization.NONE,
             new TextInputChannel.InputType(TextInputChannel.TextInputType.TEXT, false, false),
@@ -582,6 +589,7 @@ public class TextInputPluginTest {
             false,
             false,
             true,
+            true,
             TextInputChannel.TextCapitalization.NONE,
             new TextInputChannel.InputType(TextInputChannel.TextInputType.TEXT, false, false),
             null,
@@ -617,6 +625,7 @@ public class TextInputPluginTest {
             false,
             false,
             true,
+            true,
             TextInputChannel.TextCapitalization.NONE,
             new TextInputChannel.InputType(TextInputChannel.TextInputType.NONE, false, false),
             null,
@@ -645,6 +654,7 @@ public class TextInputPluginTest {
         new TextInputChannel.Configuration(
             false,
             false,
+            true,
             true,
             TextInputChannel.TextCapitalization.NONE,
             new TextInputChannel.InputType(TextInputChannel.TextInputType.NONE, false, false),
@@ -682,6 +692,7 @@ public class TextInputPluginTest {
             false,
             false,
             true,
+            true,
             TextInputChannel.TextCapitalization.NONE,
             null,
             null,
@@ -692,6 +703,7 @@ public class TextInputPluginTest {
         new TextInputChannel.Configuration(
             false,
             false,
+            true,
             true,
             TextInputChannel.TextCapitalization.NONE,
             null,
@@ -705,6 +717,7 @@ public class TextInputPluginTest {
         new TextInputChannel.Configuration(
             false,
             false,
+            true,
             true,
             TextInputChannel.TextCapitalization.NONE,
             null,
@@ -753,6 +766,7 @@ public class TextInputPluginTest {
         new TextInputChannel.Configuration(
             false,
             false,
+            true,
             true,
             TextInputChannel.TextCapitalization.NONE,
             null,
@@ -805,6 +819,7 @@ public class TextInputPluginTest {
             false,
             false,
             true,
+            true,
             TextInputChannel.TextCapitalization.NONE,
             null,
             null,
@@ -815,6 +830,7 @@ public class TextInputPluginTest {
         new TextInputChannel.Configuration(
             false,
             false,
+            true,
             true,
             TextInputChannel.TextCapitalization.NONE,
             null,
@@ -829,6 +845,7 @@ public class TextInputPluginTest {
         new TextInputChannel.Configuration(
             false,
             false,
+            true,
             true,
             TextInputChannel.TextCapitalization.NONE,
             null,
@@ -871,6 +888,7 @@ public class TextInputPluginTest {
         new TextInputChannel.Configuration(
             false,
             false,
+            true,
             true,
             TextInputChannel.TextCapitalization.NONE,
             null,
@@ -926,6 +944,7 @@ public class TextInputPluginTest {
             false,
             false,
             true,
+            true,
             TextInputChannel.TextCapitalization.NONE,
             null,
             null,
@@ -936,6 +955,7 @@ public class TextInputPluginTest {
         new TextInputChannel.Configuration(
             false,
             false,
+            true,
             true,
             TextInputChannel.TextCapitalization.NONE,
             null,
@@ -948,6 +968,7 @@ public class TextInputPluginTest {
         new TextInputChannel.Configuration(
             false,
             false,
+            true,
             true,
             TextInputChannel.TextCapitalization.NONE,
             null,
@@ -1011,6 +1032,7 @@ public class TextInputPluginTest {
             false,
             false,
             true,
+            true,
             TextInputChannel.TextCapitalization.NONE,
             null,
             null,
@@ -1021,6 +1043,7 @@ public class TextInputPluginTest {
         new TextInputChannel.Configuration(
             false,
             false,
+            true,
             true,
             TextInputChannel.TextCapitalization.NONE,
             null,
@@ -1033,6 +1056,7 @@ public class TextInputPluginTest {
         new TextInputChannel.Configuration(
             false,
             false,
+            true,
             true,
             TextInputChannel.TextCapitalization.NONE,
             null,
