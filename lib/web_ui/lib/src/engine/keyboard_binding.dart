@@ -76,6 +76,15 @@ const int _kDeadKeyShift = 0x20000000;
 const int _kDeadKeyAlt = 0x40000000;
 const int _kDeadKeyMeta = 0x80000000;
 
+const ui.KeyData _emptyKeyData = ui.KeyData(
+  type: ui.KeyEventType.down,
+  timeStamp: Duration.zero,
+  logical: 0,
+  physical: 0,
+  character: null,
+  synthesized: false,
+);
+
 typedef DispatchKeyData = bool Function(ui.KeyData data);
 
 /// Converts a floating number timestamp (in milliseconds) to a [Duration] by
@@ -401,6 +410,8 @@ class KeyboardConverter {
           // a currently pressed one, usually indicating multiple keyboards are
           // pressing keys with the same physical key, or the up event was lost
           // during a loss of focus. The down event is ignored.
+          dispatchKeyData(_emptyKeyData);
+          event.preventDefault();
           return;
         }
       } else {
@@ -413,6 +424,8 @@ class KeyboardConverter {
       if (lastLogicalRecord == null) {
         // The physical key has been released before. It indicates multiple
         // keyboards pressed keys with the same physical key. Ignore the up event.
+        dispatchKeyData(_emptyKeyData);
+        event.preventDefault();
         return;
       }
 
