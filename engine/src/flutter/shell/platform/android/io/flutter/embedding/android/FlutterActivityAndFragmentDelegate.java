@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver.OnPreDrawListener;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
@@ -67,15 +68,17 @@ import java.util.Arrays;
   private static final String TAG = "FlutterActivityAndFragmentDelegate";
   private static final String FRAMEWORK_RESTORATION_BUNDLE_KEY = "framework";
   private static final String PLUGINS_RESTORATION_BUNDLE_KEY = "plugins";
+  private static final int FLUTTER_SPLASH_VIEW_FALLBACK_ID = 486947586;
 
   // The FlutterActivity or FlutterFragment that is delegating most of its calls
   // to this FlutterActivityAndFragmentDelegate.
   @NonNull private Host host;
   @Nullable private FlutterEngine flutterEngine;
-  @Nullable private FlutterSplashView flutterSplashView;
   @Nullable private FlutterView flutterView;
   @Nullable private PlatformPlugin platformPlugin;
+  @VisibleForTesting @Nullable OnPreDrawListener activePreDrawListener;
   private boolean isFlutterEngineFromHost;
+  private boolean isFlutterUiDisplayed;
 
   @NonNull
   private final FlutterUiDisplayListener flutterUiDisplayListener =
@@ -83,11 +86,13 @@ import java.util.Arrays;
         @Override
         public void onFlutterUiDisplayed() {
           host.onFlutterUiDisplayed();
+          isFlutterUiDisplayed = true;
         }
 
         @Override
         public void onFlutterUiNoLongerDisplayed() {
           host.onFlutterUiNoLongerDisplayed();
+          isFlutterUiDisplayed = false;
         }
       };
 
@@ -254,6 +259,16 @@ import java.util.Arrays;
    *
    * <p>{@code inflater} and {@code container} may be null when invoked from an {@code Activity}.
    *
+   * <p>{@code shouldDelayFirstAndroidViewDraw} determines whether to set up an {@link
+   * android.view.ViewTreeObserver.OnPreDrawListener}, which will defer the current drawing pass
+   * till after the Flutter UI has been displayed. This results in more accurate timings reported
+   * with Android tools, such as "Displayed" timing printed with `am start`.
+   *
+   * <p>Note that it should only be set to true when {@code Host#getRenderMode()} is {@code
+   * RenderMode.surface}. This parameter is also ignored, disabling the delay should the legacy
+   * {@code Host#provideSplashScreen()} be non-null. See <a
+   * href="https://flutter.dev/go/android-splash-migration">Android Splash Migration</a>.
+   *
    * <p>This method:
    *
    * <ol>
@@ -269,7 +284,8 @@ import java.util.Arrays;
       LayoutInflater inflater,
       @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState,
-      int flutterViewId) {
+      int flutterViewId,
+      boolean shouldDelayFirstAndroidViewDraw) {
     Log.v(TAG, "Creating FlutterView.");
     ensureAlive();
 
@@ -298,15 +314,28 @@ import java.util.Arrays;
     // Add listener to be notified when Flutter renders its first frame.
     flutterView.addOnFirstFrameRenderedListener(flutterUiDisplayListener);
 
-    flutterSplashView = new FlutterSplashView(host.getContext());
-    flutterSplashView.setId(ViewUtils.generateViewId(486947586));
-    flutterSplashView.displayFlutterViewWithSplash(flutterView, host.provideSplashScreen());
-
     Log.v(TAG, "Attaching FlutterEngine to FlutterView.");
     flutterView.attachToFlutterEngine(flutterEngine);
     flutterView.setId(flutterViewId);
 
-    return flutterSplashView;
+    SplashScreen splashScreen = host.provideSplashScreen();
+
+    if (splashScreen != null) {
+      Log.w(
+          TAG,
+          "A splash screen was provided to Flutter, but this is deprecated. See"
+              + " flutter.dev/go/android-splash-migration for migration steps.");
+      FlutterSplashView flutterSplashView = new FlutterSplashView(host.getContext());
+      flutterSplashView.setId(ViewUtils.generateViewId(FLUTTER_SPLASH_VIEW_FALLBACK_ID));
+      flutterSplashView.displayFlutterViewWithSplash(flutterView, splashScreen);
+
+      return flutterSplashView;
+    }
+
+    if (shouldDelayFirstAndroidViewDraw) {
+      delayFirstAndroidViewDraw(flutterView);
+    }
+    return flutterView;
   }
 
   void onRestoreInstanceState(@Nullable Bundle bundle) {
@@ -416,6 +445,38 @@ import java.util.Arrays;
   }
 
   /**
+   * Delays the first drawing of the {@code flutterView} until the Flutter first has been displayed.
+   */
+  private void delayFirstAndroidViewDraw(FlutterView flutterView) {
+    if (host.getRenderMode() != RenderMode.surface) {
+      // Using a TextureView will cause a deadlock, where the underlying SurfaceTexture is never
+      // available since it will wait for drawing to be completed first. At the same time, the
+      // preDraw listener keeps returning false since the Flutter Engine waits for the
+      // SurfaceTexture to be available.
+      throw new IllegalArgumentException(
+          "Cannot delay the first Android view draw when the render mode is not set to"
+              + " `RenderMode.surface`.");
+    }
+
+    if (activePreDrawListener != null) {
+      flutterView.getViewTreeObserver().removeOnPreDrawListener(activePreDrawListener);
+    }
+
+    activePreDrawListener =
+        new OnPreDrawListener() {
+          @Override
+          public boolean onPreDraw() {
+            if (isFlutterUiDisplayed && activePreDrawListener != null) {
+              flutterView.getViewTreeObserver().removeOnPreDrawListener(this);
+              activePreDrawListener = null;
+            }
+            return isFlutterUiDisplayed;
+          }
+        };
+    flutterView.getViewTreeObserver().addOnPreDrawListener(activePreDrawListener);
+  }
+
+  /**
    * Invoke this from {@code Activity#onResume()} or {@code Fragment#onResume()}.
    *
    * <p>This method notifies the running Flutter app that it is "resumed" as per the Flutter app
@@ -496,6 +557,10 @@ import java.util.Arrays;
     Log.v(TAG, "onDestroyView()");
     ensureAlive();
 
+    if (activePreDrawListener != null) {
+      flutterView.getViewTreeObserver().removeOnPreDrawListener(activePreDrawListener);
+      activePreDrawListener = null;
+    }
     flutterView.detachFromFlutterEngine();
     flutterView.removeOnFirstFrameRenderedListener(flutterUiDisplayListener);
   }

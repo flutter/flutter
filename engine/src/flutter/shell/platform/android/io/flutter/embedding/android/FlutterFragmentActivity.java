@@ -424,6 +424,7 @@ public class FlutterFragmentActivity extends FragmentActivity
         backgroundMode == BackgroundMode.opaque
             ? TransparencyMode.opaque
             : TransparencyMode.transparent;
+    final boolean shouldDelayFirstAndroidViewDraw = renderMode == RenderMode.surface;
 
     if (getCachedEngineId() != null) {
       Log.v(
@@ -447,6 +448,7 @@ public class FlutterFragmentActivity extends FragmentActivity
           .handleDeeplinking(shouldHandleDeeplinking())
           .shouldAttachEngineToActivity(shouldAttachEngineToActivity())
           .destroyEngineWithFragment(shouldDestroyEngineWithHost())
+          .shouldDelayFirstAndroidViewDraw(shouldDelayFirstAndroidViewDraw)
           .build();
     } else {
       Log.v(
@@ -476,6 +478,7 @@ public class FlutterFragmentActivity extends FragmentActivity
           .renderMode(renderMode)
           .transparencyMode(transparencyMode)
           .shouldAttachEngineToActivity(shouldAttachEngineToActivity())
+          .shouldDelayFirstAndroidViewDraw(shouldDelayFirstAndroidViewDraw)
           .build();
     }
   }
