@@ -243,6 +243,8 @@ compile_platform("strong_platform") {
     "$root_out_dir/flutter_patched_sdk/vm_outline_strong.dill",
   ]
 
+  pool = "//flutter/build/dart:dart_pool"
+
   is_runtime_mode_release =
       flutter_runtime_mode == "release" || flutter_runtime_mode == "jit_release"
   args = [

@@ -4,7 +4,6 @@
 
 import("//flutter/common/config.gni")
 import("//third_party/dart/build/dart/dart_action.gni")
-import("//third_party/dart/utils/compile_platform.gni")
 
 sdk_dill = "$root_out_dir/flutter_web_sdk/kernel/flutter_ddc_sdk.dill"
 sdk_dill_sound =
@@ -51,6 +50,7 @@ prebuilt_dart_action("web_ui_sources") {
   script = "sdk_rewriter.dart"
   output_dir = rebase_path("$root_out_dir/flutter_web_sdk/lib/ui/")
   input_dir = rebase_path("//flutter/lib/web_ui/lib/")
+  pool = "//flutter/build/dart:dart_pool"
 
   outputs = [ "$target_gen_dir/$target_name.stamp" ]
 
@@ -75,6 +75,7 @@ prebuilt_dart_action("web_engine_sources") {
   script = "sdk_rewriter.dart"
   output_dir = rebase_path("$root_out_dir/flutter_web_sdk/lib/_engine/")
   input_dir = rebase_path("//flutter/lib/web_ui/lib/src/")
+  pool = "//flutter/build/dart:dart_pool"
 
   outputs = [ "$target_gen_dir/$target_name.stamp" ]
 
@@ -122,6 +123,8 @@ template("_dartdevc") {
       inputs = invoker.inputs
       outputs = invoker.outputs
 
+      pool = "//flutter/build/dart:dart_pool"
+
       ext = ""
       if (is_win) {
         ext = ".exe"
@@ -149,6 +152,8 @@ template("_dartdevc") {
       ]
 
       script = "//third_party/dart/pkg/dev_compiler/bin/dartdevc.dart"
+
+      pool = "//flutter/build/dart:dart_pool"
     }
   }
 }
@@ -175,6 +180,8 @@ template("_kernel_worker") {
 
       inputs = invoker.inputs
       outputs = invoker.outputs
+
+      pool = "//flutter/build/dart:dart_pool"
 
       ext = ""
       if (is_win) {
@@ -204,6 +211,8 @@ template("_kernel_worker") {
       ]
 
       script = "//third_party/dart/utils/bazel/kernel_worker.dart"
+
+      pool = "//flutter/build/dart:dart_pool"
     }
   }
 }

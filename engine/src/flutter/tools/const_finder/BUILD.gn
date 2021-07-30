@@ -8,6 +8,7 @@ application_snapshot("const_finder") {
   main_dart = "bin/main.dart"
   dot_packages = ".dart_tool/package_config.json"
   dart_snapshot_kind = "kernel"
+  pool = "//flutter/build/dart:dart_pool"
 
   training_args = [ "--help" ]
 
