@@ -68,7 +68,7 @@ def _AddVersionKeys(plist, version=None):
   if version:
     match = re.match('\d+\.\d+\.(\d+\.\d+)$', version)
     if not match:
-      print >>sys.stderr, 'Invalid version string specified: "%s"' % version
+      print('Invalid version string specified: "%s"' % version, file=sys.stderr)
       return False
 
     full_version = match.group(0)
@@ -127,7 +127,7 @@ def _DoSCMKeys(plist, add_keys):
   if scm_revision != None:
     plist['SCMRevision'] = scm_revision
   elif add_keys:
-    print >>sys.stderr, 'Could not determine SCM revision.  This may be OK.'
+    print('Could not determine SCM revision.  This may be OK.', file=sys.stderr)
 
   return True
 
@@ -165,9 +165,9 @@ def _TagSuffixes():
   components_len = len(components)
   combinations = 1 << components_len
   tag_suffixes = []
-  for combination in xrange(0, combinations):
+  for combination in range(0, combinations):
     tag_suffix = ''
-    for component_index in xrange(0, components_len):
+    for component_index in range(0, components_len):
       if combination & (1 << component_index):
         tag_suffix += '-' + components[component_index]
     tag_suffixes.append(tag_suffix)
@@ -221,7 +221,7 @@ def Main(argv):
   (options, args) = parser.parse_args(argv)
 
   if len(args) > 0:
-    print >>sys.stderr, parser.get_usage()
+    print(parser.get_usage(), file=sys.stderr)
     return 1
 
   # Read the plist into its parsed format.
@@ -235,7 +235,7 @@ def Main(argv):
   # Add Breakpad if configured to do so.
   if options.use_breakpad:
     if options.branding is None:
-      print >>sys.stderr, 'Use of Breakpad requires branding.'
+      print('Use of Breakpad requires branding.', file=sys.stderr)
       return 1
     _AddBreakpadKeys(plist, options.branding)
     if options.breakpad_uploads:
@@ -254,7 +254,7 @@ def Main(argv):
   # Only add Keystone in Release builds.
   if options.use_keystone and env['CONFIGURATION'] == 'Release':
     if options.bundle_identifier is None:
-      print >>sys.stderr, 'Use of Keystone requires the bundle id.'
+      print('Use of Keystone requires the bundle id.', file=sys.stderr)
       return 1
     _AddKeystoneKeys(plist, options.bundle_identifier)
   else:

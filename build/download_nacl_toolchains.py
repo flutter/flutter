@@ -21,9 +21,9 @@ def Main(args):
   package_version_dir = os.path.join(nacl_build_dir, 'package_version')
   package_version = os.path.join(package_version_dir, 'package_version.py')
   if not os.path.exists(package_version):
-    print "Can't find '%s'" % package_version
-    print 'Presumably you are intentionally building without NativeClient.'
-    print 'Skipping NativeClient toolchain download.'
+    print("Can't find '%s'" % package_version)
+    print('Presumably you are intentionally building without NativeClient.')
+    print('Skipping NativeClient toolchain download.')
     sys.exit(0)
   sys.path.insert(0, package_version_dir)
   import package_version
@@ -40,7 +40,7 @@ def Main(args):
     if 'pnacl' in buildbot_name and 'sdk' in buildbot_name:
       use_pnacl = True
     if use_pnacl:
-      print '\n*** DOWNLOADING PNACL TOOLCHAIN ***\n'
+      print('\n*** DOWNLOADING PNACL TOOLCHAIN ***\n')
     else:
       args = ['--exclude', 'pnacl_newlib'] + args
 

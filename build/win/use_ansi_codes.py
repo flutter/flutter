@@ -7,4 +7,4 @@
 import os
 
 # Add more terminals here as needed.
-print 'ANSICON' in os.environ
+print('ANSICON' in os.environ)

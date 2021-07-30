@@ -23,4 +23,4 @@ def DoMain(_):
 
 
 if __name__ == '__main__':
-  print DoMain([])
+  print(DoMain([]))

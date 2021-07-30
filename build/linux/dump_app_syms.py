@@ -10,8 +10,8 @@ import subprocess
 import sys
 
 if len(sys.argv) != 5:
-  print "dump_app_syms.py <dump_syms_exe> <strip_binary>"
-  print "                 <binary_with_symbols> <symbols_output>"
+  print("dump_app_syms.py <dump_syms_exe> <strip_binary>")
+  print("                 <binary_with_symbols> <symbols_output>")
   sys.exit(1)
 
 dumpsyms = sys.argv[1]

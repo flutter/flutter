@@ -37,7 +37,7 @@ def main(argv):
 
   build_utils.CheckOptions(options, parser, ['protoc', 'proto_path'])
   if not options.java_out_dir and not options.srcjar:
-    print 'One of --java-out-dir or --srcjar must be specified.'
+    print('One of --java-out-dir or --srcjar must be specified.')
     return 1
 
   with build_utils.TempDir() as temp_dir:

@@ -30,7 +30,7 @@ def print_landmines():
   # dependency problems, fix the dependency problems instead of adding a
   # landmine.
 
-  print 'Lets start a new landmines file.'
+  print("Let's start a new landmines file.")
 
 
 def main():

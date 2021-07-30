@@ -63,7 +63,7 @@ def main(argv):
 
   for line in sys.stdin.readlines():
     line = RewriteLine(line.strip(), opts)
-    print line
+    print(line)
   return 0
 
 

@@ -77,7 +77,7 @@ def main():
     found_exports = set(master_mapping.values()) - set(found_exports)
 
   # Sort the found exports for tidy output.
-  print '\n'.join(sorted(found_exports))
+  print('\n'.join(sorted(found_exports)))
   return 0
 
 

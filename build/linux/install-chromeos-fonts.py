@@ -20,15 +20,15 @@ FONTS_DIR = '/usr/local/share/fonts'
 
 def main(args):
   if not sys.platform.startswith('linux'):
-    print "Error: %s must be run on Linux." % __file__
+    print("Error: %s must be run on Linux." % __file__)
     return 1
 
   if os.getuid() != 0:
-    print "Error: %s must be run as root." % __file__
+    print("Error: %s must be run as root." % __file__)
     return 1
 
   if not os.path.isdir(FONTS_DIR):
-    print "Error: Destination directory does not exist: %s" % FONTS_DIR
+    print("Error: Destination directory does not exist: %s" % FONTS_DIR)
     return 1
 
   dest_dir = os.path.join(FONTS_DIR, 'chromeos')
@@ -37,15 +37,15 @@ def main(args):
   if os.path.exists(stamp):
     with open(stamp) as s:
       if s.read() == URL:
-        print "Chrome OS fonts already up-to-date in %s." % dest_dir
+        print("Chrome OS fonts already up-to-date in %s." % dest_dir)
         return 0
 
   if os.path.isdir(dest_dir):
     shutil.rmtree(dest_dir)
   os.mkdir(dest_dir)
-  os.chmod(dest_dir, 0755)
+  os.chmod(dest_dir, 0o755)
 
-  print "Installing Chrome OS fonts to %s." % dest_dir
+  print("Installing Chrome OS fonts to %s." % dest_dir)
   tarball = os.path.join(dest_dir, os.path.basename(URL))
   subprocess.check_call(['curl', '-L', URL, '-o', tarball])
   subprocess.check_call(['tar', '--no-same-owner', '--no-same-permissions',
@@ -63,9 +63,9 @@ def main(args):
 
   for base, dirs, files in os.walk(dest_dir):
     for dir in dirs:
-      os.chmod(os.path.join(base, dir), 0755)
+      os.chmod(os.path.join(base, dir), 0o755)
     for file in files:
-      os.chmod(os.path.join(base, file), 0644)
+      os.chmod(os.path.join(base, file), 0o644)
 
   return 0
 

@@ -14,9 +14,9 @@ def DoMain(argv):
 
 def main(argv):
   if len(argv) < 2:
-    print "USAGE: inverse_depth.py depth"
+    print("USAGE: inverse_depth.py depth")
     return 1
-  print DoMain(argv[1:])
+  print(DoMain(argv[1:]))
   return 0
 
 

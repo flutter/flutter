@@ -18,7 +18,7 @@ def main():
   for package in packages:
     out.append(package['package_id'])
 
-  print ','.join(out)
+  print(','.join(out))
 
 if __name__ == '__main__':
   sys.exit(main())

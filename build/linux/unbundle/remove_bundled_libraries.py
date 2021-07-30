@@ -21,8 +21,8 @@ def DoMain(argv):
     os.path.join(my_dirname, '..', '..', '..'))
 
   if os.path.join(source_tree_root, 'build', 'linux', 'unbundle') != my_dirname:
-    print ('Sanity check failed: please run this script from ' +
-           'build/linux/unbundle directory.')
+    print(('Sanity check failed: please run this script from ' +
+           'build/linux/unbundle directory.'))
     return 1
 
   parser = optparse.OptionParser()
@@ -80,20 +80,20 @@ def DoMain(argv):
         os.remove(path)
       else:
         # By default just print paths that would be removed.
-        print path
+        print(path)
 
   exit_code = 0
 
   # Fail if exclusion list contains stale entries - this helps keep it
   # up to date.
-  for exclusion, used in exclusion_used.iteritems():
+  for exclusion, used in exclusion_used.items():
     if not used:
-      print '%s does not exist' % exclusion
+      print('%s does not exist' % exclusion)
       exit_code = 1
 
   if not options.do_remove:
-    print ('To actually remove files printed above, please pass ' +
-           '--do-remove flag.')
+    print(('To actually remove files printed above, please pass ' +
+           '--do-remove flag.'))
 
   return exit_code
 

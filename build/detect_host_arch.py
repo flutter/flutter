@@ -37,4 +37,4 @@ def DoMain(_):
   return HostArch()
 
 if __name__ == '__main__':
-  print DoMain([])
+  print(DoMain([]))
