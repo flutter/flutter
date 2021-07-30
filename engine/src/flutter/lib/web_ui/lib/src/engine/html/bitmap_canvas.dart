@@ -160,7 +160,7 @@ class BitmapCanvas extends EngineCanvas {
     _canvasPositionX = _bounds.left.floor() - kPaddingPixels;
     _canvasPositionY = _bounds.top.floor() - kPaddingPixels;
     _updateRootElementTransform();
-    _canvasPool.allocateCanvas(rootElement as html.HtmlElement);
+    _canvasPool.mount(rootElement as html.HtmlElement);
     _setupInitialTransform();
   }
 
@@ -372,7 +372,7 @@ class BitmapCanvas extends EngineCanvas {
       _renderStrategy.isInsideSvgFilterTree ||
       (_preserveImageData == false && _contains3dTransform) ||
       (_childOverdraw &&
-          _canvasPool.canvas == null &&
+          _canvasPool.isEmpty &&
           paint.maskFilter == null &&
           paint.shader == null &&
           paint.style != ui.PaintingStyle.stroke);
@@ -386,7 +386,7 @@ class BitmapCanvas extends EngineCanvas {
       ((_childOverdraw ||
               _renderStrategy.hasImageElements ||
               _renderStrategy.hasParagraphs) &&
-          _canvasPool.canvas == null &&
+          _canvasPool.isEmpty &&
           paint.maskFilter == null &&
           paint.shader == null);
 
