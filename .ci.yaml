@@ -1182,7 +1182,6 @@ targets:
 
   - name: Linux_android devtools_profile_start_test
     builder: Linux_android devtools_profile_start_test
-    bringup: true
     presubmit: false
     properties:
       tags: >
