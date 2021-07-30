@@ -48,9 +48,8 @@ targets:
         ["framework","hostonly","shard"]
     scheduler: luci
 
-  - name: Linux docs
-    builder: Linux docs
-    postsubmit: false
+  - name: Linux docs_test
+    builder: Linux docs_test
     properties:
       tags: >
         ["framework","hostonly"]
@@ -1188,14 +1187,6 @@ targets:
     properties:
       tags: >
         ["devicelab"]
-    scheduler: luci
-
-  - name: Linux docs_test
-    builder: Linux docs_test
-    presubmit: false
-    properties:
-      tags: >
-        ["framework","hostonly"]
     scheduler: luci
 
   - name: Linux docs_publish
