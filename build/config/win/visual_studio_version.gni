@@ -24,7 +24,7 @@ declare_args() {
 
 if (visual_studio_path == "") {
   _toolchain_data =
-      exec_script("../../vs_toolchain.py", [ "get_toolchain_dir" ], "scope")
+      exec_script("//build/vs_toolchain.py", [ "get_toolchain_dir" ], "scope")
   visual_studio_path = _toolchain_data.vs_path
   windows_sdk_path = _toolchain_data.sdk_path
   visual_studio_version = _toolchain_data.vs_version
