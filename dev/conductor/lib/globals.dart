@@ -7,6 +7,8 @@ import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:platform/platform.dart';
 
+import './proto/conductor_state.pb.dart' as pb;
+
 const String kUpstreamRemote = 'https://github.com/flutter/flutter.git';
 
 const String gsutilBinary = 'gsutil.py';
@@ -143,8 +145,51 @@ String fromArgToEnvName(String argName) {
 String getNewPrLink({
   required String userName,
   required String repoName,
-  required String candidateBranch,
-  required String workingBranch,
+  required pb.ConductorState state,
 }) {
-  return 'https://github.com/flutter/$repoName/compare/$candidateBranch...$userName:$workingBranch?expand=1';
+  assert(state.releaseChannel.isNotEmpty);
+  assert(state.releaseVersion.isNotEmpty);
+  late final String candidateBranch;
+  late final String workingBranch;
+  switch (repoName) {
+    case 'flutter':
+      assert(state.framework.candidateBranch.isNotEmpty);
+      assert(state.framework.workingBranch.isNotEmpty);
+      candidateBranch = state.framework.candidateBranch;
+      workingBranch = state.framework.workingBranch;
+      break;
+    case 'engine':
+      assert(state.engine.candidateBranch.isNotEmpty);
+      assert(state.engine.workingBranch.isNotEmpty);
+      candidateBranch = state.engine.candidateBranch;
+      workingBranch = state.engine.workingBranch;
+      break;
+    default:
+      throw ConductorException('Expected repoName to be one of flutter or engine but got $repoName.');
+  }
+  final String repoLabel = repoName == 'engine' ? 'Engine' : 'Framework';
+  final String title = '[flutter_releases] Flutter ${state.releaseChannel} '
+      '${state.releaseVersion} $repoLabel Cherrypicks';
+  final StringBuffer body = StringBuffer();
+  body.write('''
+# Flutter ${state.releaseChannel} ${state.releaseVersion} $repoLabel
+
+## Scheduled Cherrypicks
+
+''');
+  if (repoName == 'engine') {
+    body.writeAll(
+      state.engine.cherrypicks.map<String>((pb.Cherrypick cp) => '- commit: ${cp.trunkRevision}'),
+      '\n',
+    );
+  } else {
+    body.writeAll(
+      state.framework.cherrypicks.map<String>((pb.Cherrypick cp) => '- commit: ${cp.trunkRevision}'),
+      '\n',
+    );
+  }
+  return 'https://github.com/flutter/$repoName/compare/$candidateBranch...$userName:$workingBranch?'
+      'expand=1'
+      '&title=${Uri.encodeQueryComponent(title)}'
+      '&body=${Uri.encodeQueryComponent(body.toString())}';
 }

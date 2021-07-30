@@ -212,6 +212,7 @@ void main() {
             mirror: pb.Remote(name: 'mirror', url: remoteUrl),
           ),
           releaseChannel: releaseChannel,
+          releaseVersion: releaseVersion,
         );
         writeStateToFile(
           fileSystem.file(stateFile),
@@ -383,6 +384,7 @@ void main() {
             candidateBranch: candidateBranch,
             checkoutPath: engineCheckoutPath,
             dartRevision: 'cdef0123',
+            workingBranch: workingBranch,
             upstream: pb.Remote(name: 'upstream', url: engineUpstreamRemoteUrl),
           ),
           currentPhase: ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS,
