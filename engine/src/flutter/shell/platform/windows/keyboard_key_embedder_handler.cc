@@ -26,6 +26,7 @@ constexpr size_t kCharacterCacheSize = 8;
 constexpr SHORT kStateMaskToggled = 0x01;
 constexpr SHORT kStateMaskPressed = 0x80;
 
+const char* empty_character = "";
 }  // namespace
 
 KeyboardKeyEmbedderHandler::KeyboardKeyEmbedderHandler(
@@ -155,6 +156,7 @@ void KeyboardKeyEmbedderHandler::KeyboardHook(
         // as a currently pressed one, usually indicating multiple keyboards are
         // pressing keys with the same physical key, or the up event was lost
         // during a loss of focus. The down event is ignored.
+        sendEvent_(CreateEmptyEvent(), nullptr, nullptr);
         callback(true);
         return;
       }
@@ -171,6 +173,7 @@ void KeyboardKeyEmbedderHandler::KeyboardHook(
       // The physical key has been released before. It might indicate a missed
       // event due to loss of focus, or multiple keyboards pressed keys with the
       // same physical key. Ignore the up event.
+      sendEvent_(CreateEmptyEvent(), nullptr, nullptr);
       callback(true);
       return;
     } else {
@@ -200,6 +203,7 @@ void KeyboardKeyEmbedderHandler::KeyboardHook(
     // presses are considered handled and not sent to Flutter. These events must
     // be filtered by result_logical_key because the key up event of such
     // presses uses the "original" logical key.
+    sendEvent_(CreateEmptyEvent(), nullptr, nullptr);
     callback(true);
     return;
   }
@@ -272,7 +276,6 @@ void KeyboardKeyEmbedderHandler::SynchronizeCritialToggledStates(
         key_info.toggled_on = !key_info.toggled_on;
       }
       if (key_info.toggled_on != should_toggled) {
-        const char* empty_character = "";
         // If the key is pressed, release it first.
         if (pressingRecords_.find(key_info.physical_key) !=
             pressingRecords_.end()) {
@@ -388,6 +391,21 @@ void KeyboardKeyEmbedderHandler::ConvertUtf32ToUtf8_(char* out, char32_t ch) {
   // TODO: Correctly handle UTF-32
   std::wstring text({static_cast<wchar_t>(ch)});
   strcpy_s(out, kCharacterCacheSize, Utf8FromUtf16(text).c_str());
+}
+
+FlutterKeyEvent KeyboardKeyEmbedderHandler::CreateEmptyEvent() {
+  return FlutterKeyEvent{
+      .struct_size = sizeof(FlutterKeyEvent),
+      .timestamp = static_cast<double>(
+          std::chrono::duration_cast<std::chrono::microseconds>(
+              std::chrono::high_resolution_clock::now().time_since_epoch())
+              .count()),
+      .type = kFlutterKeyEventTypeDown,
+      .physical = 0,
+      .logical = 0,
+      .character = empty_character,
+      .synthesized = false,
+  };
 }
 
 FlutterKeyEvent KeyboardKeyEmbedderHandler::SynthesizeSimpleEvent(

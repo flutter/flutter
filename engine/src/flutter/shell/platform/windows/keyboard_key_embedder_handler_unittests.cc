@@ -247,6 +247,15 @@ TEST(KeyboardKeyEmbedderHandlerTest, ImeEventsAreIgnored) {
       [&last_handled](bool handled) { last_handled = handled; });
   EXPECT_EQ(last_handled, true);
 
+  // The A key down should yield an empty event.
+  EXPECT_EQ(results.size(), 1);
+  event = &results[0];
+  EXPECT_EQ(event->physical, 0);
+  EXPECT_EQ(event->logical, 0);
+  EXPECT_EQ(event->callback, nullptr);
+  results.clear();
+
+  // Release A in an IME
   last_handled = false;
   handler->KeyboardHook(
       // The up event for an IME press has a normal virtual key.
@@ -254,8 +263,13 @@ TEST(KeyboardKeyEmbedderHandlerTest, ImeEventsAreIgnored) {
       [&last_handled](bool handled) { last_handled = handled; });
   EXPECT_EQ(last_handled, true);
 
-  // The entire A press does not yield events.
-  EXPECT_EQ(results.size(), 0);
+  // The A key up should yield an empty event.
+  EXPECT_EQ(results.size(), 1);
+  event = &results[0];
+  EXPECT_EQ(event->physical, 0);
+  EXPECT_EQ(event->logical, 0);
+  EXPECT_EQ(event->callback, nullptr);
+  results.clear();
 
   // Press A out of an IME
   key_state.Set(kVirtualKeyA, true);
@@ -469,6 +483,54 @@ TEST(KeyboardKeyEmbedderHandlerTest, ModifierKeysByVirtualKey) {
   results.clear();
 }
 
+TEST(KeyboardKeyEmbedderHandlerTest, RepeatedDownIsIgnored) {
+  TestKeystate key_state;
+  std::vector<TestFlutterKeyEvent> results;
+  TestFlutterKeyEvent* event;
+  bool last_handled = false;
+
+  std::unique_ptr<KeyboardKeyEmbedderHandler> handler =
+      std::make_unique<KeyboardKeyEmbedderHandler>(
+          [&results](const FlutterKeyEvent& event,
+                     FlutterKeyEventCallback callback, void* user_data) {
+            results.emplace_back(event, callback, user_data);
+          },
+          key_state.Getter());
+  last_handled = false;
+
+  // Press A (should yield a normal event)
+  handler->KeyboardHook(
+      kVirtualKeyA, kScanCodeKeyA, WM_KEYDOWN, 'a', false, false,
+      [&last_handled](bool handled) { last_handled = handled; });
+  EXPECT_EQ(last_handled, false);
+  EXPECT_EQ(results.size(), 1);
+  event = &results[0];
+  EXPECT_EQ(event->type, kFlutterKeyEventTypeDown);
+  EXPECT_EQ(event->physical, kPhysicalKeyA);
+  EXPECT_EQ(event->logical, kLogicalKeyA);
+  EXPECT_STREQ(event->character, "a");
+  EXPECT_EQ(event->synthesized, false);
+
+  event->callback(true, event->user_data);
+  EXPECT_EQ(last_handled, true);
+  results.clear();
+
+  // KeyA's key up is missed.
+
+  // Press A again (should yield an empty event)
+  last_handled = false;
+  handler->KeyboardHook(
+      kVirtualKeyA, kScanCodeKeyA, WM_KEYDOWN, 'a', false, false,
+      [&last_handled](bool handled) { last_handled = handled; });
+  EXPECT_EQ(last_handled, true);
+  EXPECT_EQ(results.size(), 1);
+  event = &results[0];
+  EXPECT_EQ(event->physical, 0);
+  EXPECT_EQ(event->logical, 0);
+  EXPECT_EQ(event->callback, nullptr);
+  results.clear();
+}
+
 TEST(KeyboardKeyEmbedderHandlerTest, AbruptRepeatIsConvertedToDown) {
   TestKeystate key_state;
   std::vector<TestFlutterKeyEvent> results;
@@ -520,6 +582,39 @@ TEST(KeyboardKeyEmbedderHandlerTest, AbruptRepeatIsConvertedToDown) {
 
   event->callback(true, event->user_data);
   EXPECT_EQ(last_handled, true);
+  results.clear();
+}
+
+TEST(KeyboardKeyEmbedderHandlerTest, AbruptUpIsIgnored) {
+  TestKeystate key_state;
+  std::vector<TestFlutterKeyEvent> results;
+  TestFlutterKeyEvent* event;
+  bool last_handled = false;
+
+  std::unique_ptr<KeyboardKeyEmbedderHandler> handler =
+      std::make_unique<KeyboardKeyEmbedderHandler>(
+          [&results](const FlutterKeyEvent& event,
+                     FlutterKeyEventCallback callback, void* user_data) {
+            results.emplace_back(event, callback, user_data);
+          },
+          key_state.Getter());
+  last_handled = false;
+
+  // KeyA's key down is missed.
+
+  key_state.Set(kVirtualKeyA, true);
+
+  // Press A again (should yield an empty event)
+  last_handled = false;
+  handler->KeyboardHook(
+      kVirtualKeyA, kScanCodeKeyA, WM_KEYUP, 'a', false, true,
+      [&last_handled](bool handled) { last_handled = handled; });
+  EXPECT_EQ(last_handled, true);
+  EXPECT_EQ(results.size(), 1);
+  event = &results[0];
+  EXPECT_EQ(event->physical, 0);
+  EXPECT_EQ(event->logical, 0);
+  EXPECT_EQ(event->callback, nullptr);
   results.clear();
 }
 
