@@ -96,17 +96,14 @@ def _CopyTool(source_path):
 
 
 def main():
-  if len(sys.argv) != 6:
+  if len(sys.argv) != 5:
     print('Usage setup_toolchain.py '
-          '<visual studio path> <win tool path> <win sdk path> '
+          '<visual studio path> <win sdk path> '
           '<runtime dirs> <target_cpu>')
     sys.exit(2)
-  tool_source = sys.argv[2]
-  win_sdk_path = sys.argv[3]
-  runtime_dirs = sys.argv[4]
-  target_cpu = sys.argv[5]
-
-  _CopyTool(tool_source)
+  win_sdk_path = sys.argv[2]
+  runtime_dirs = sys.argv[3]
+  target_cpu = sys.argv[4]
 
   cpus = ('x86', 'x64', 'arm64')
   assert target_cpu in cpus

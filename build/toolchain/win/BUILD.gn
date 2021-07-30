@@ -27,13 +27,13 @@ assert(is_win)
 # Its arguments are the VS path and the compiler wrapper tool. It will write
 # "environment.x86" and "environment.x64" to the build directory and return a
 # list to us.
-gyp_win_tool_path =
-    rebase_path("//third_party/gyp/pylib/gyp/win_tool.py", root_build_dir)
+
+# This tool will is used as a wrapper for various commands below.
+tool_wrapper_path = rebase_path("tool_wrapper.py", root_build_dir)
 
 toolchain_data = exec_script("setup_toolchain.py",
                              [
                                visual_studio_path,
-                               gyp_win_tool_path,
                                windows_sdk_path,
                                visual_studio_runtime_dirs,
                                current_cpu,
@@ -125,7 +125,8 @@ template("msvc_toolchain") {
     }
 
     tool("rc") {
-      command = "$python_path gyp-win-tool rc-wrapper $env rc.exe {{defines}} {{include_dirs}} /fo{{output}} {{source}}"
+      command = "$python_path $tool_wrapper_path rc-wrapper $env rc.exe /nologo {{defines}} {{include_dirs}} /fo{{output}} {{source}}"
+      depsformat = "msvc"
       outputs = [
         "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.res",
       ]
@@ -146,7 +147,7 @@ template("msvc_toolchain") {
         ml = "ml.exe"
         x64 = ""
       }
-      command = "$python_path gyp-win-tool asm-wrapper $env $ml $x64 {{defines}} {{include_dirs}} {{asmflags}} "
+      command = "$python_path $tool_wrapper_path asm-wrapper $env $ml $x64 {{defines}} {{include_dirs}} {{asmflags}} "
       if (is_msvc_assembler) {
         command += "-c -o{{output}} {{source}}"
       } else {
@@ -159,7 +160,7 @@ template("msvc_toolchain") {
 
     tool("alink") {
       rspfile = "{{output}}.rsp"
-      command = "$python_path gyp-win-tool link-wrapper $env False lib.exe /nologo /ignore:4221 /OUT:{{output}} @$rspfile"
+      command = "$python_path $tool_wrapper_path link-wrapper $env False lib.exe /nologo /ignore:4221 /OUT:{{output}} @$rspfile"
       description = "LIB {{output}}"
       outputs = [
         # Ignore {{output_extension}} and always use .lib, there's no reason to
@@ -179,10 +180,10 @@ template("msvc_toolchain") {
           "{{root_out_dir}}/{{target_output_name}}{{output_extension}}.lib"  # e.g. foo.dll.lib
       rspfile = "${dllname}.rsp"
 
-      link_command = "$python_path gyp-win-tool link-wrapper $env False link.exe /nologo /IMPLIB:$libname /DLL /OUT:$dllname /PDB:${dllname}.pdb @$rspfile"
+      link_command = "$python_path $tool_wrapper_path link-wrapper $env False link.exe /nologo /IMPLIB:$libname /DLL /OUT:$dllname /PDB:${dllname}.pdb @$rspfile"
 
       # TODO(brettw) support manifests
-      #manifest_command = "$python_path gyp-win-tool manifest-wrapper $env mt.exe -nologo -manifest $manifests -out:${dllname}.manifest"
+      #manifest_command = "$python_path $tool_wrapper_path manifest-wrapper $env mt.exe -nologo -manifest $manifests -out:${dllname}.manifest"
       #command = "cmd /c $link_command && $manifest_command"
       command = link_command
 
@@ -208,10 +209,10 @@ template("msvc_toolchain") {
       rspfile = "$binary_output.rsp"
       pdbfile = "$binary_output.pdb"
 
-      link_command = "$python_path gyp-win-tool link-wrapper $env False link.exe /nologo /OUT:$binary_output /PDB:$pdbfile @$rspfile"
+      link_command = "$python_path $tool_wrapper_path link-wrapper $env False link.exe /nologo /OUT:$binary_output /PDB:$pdbfile @$rspfile"
 
       # TODO(brettw) support manifests
-      #manifest_command = "$python_path gyp-win-tool manifest-wrapper $env mt.exe -nologo -manifest $manifests -out:{{output}}.manifest"
+      #manifest_command = "$python_path $tool_wrapper_path manifest-wrapper $env mt.exe -nologo -manifest $manifests -out:{{output}}.manifest"
       #command = "cmd /c $link_command && $manifest_command"
       command = link_command
 
@@ -230,13 +231,13 @@ template("msvc_toolchain") {
     }
 
     tool("stamp") {
-      command = "$python_path gyp-win-tool stamp {{output}}"
+      command = "cmd /c type nul > \"{{output}}\""
       description = "STAMP {{output}}"
     }
 
     tool("copy") {
       command =
-          "$python_path gyp-win-tool recursive-mirror {{source}} {{output}}"
+          "$python_path $tool_wrapper_path recursive-mirror {{source}} {{output}}"
       description = "COPY {{source}} {{output}}"
     }
   }
