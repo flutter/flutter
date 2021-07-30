@@ -262,6 +262,16 @@ targets:
       - packages/flutter_tools/
       - bin/
 
+  - name: Linux test_ownership
+    builder: Linux test_ownership
+    bringup: true
+    properties:
+      tags: >
+        ["framework","hostonly","shard"]
+    scheduler: luci
+    runIf:
+      - .ci.yaml
+
   - name: Linux tool_tests_general
     builder: Linux tool_tests_general
     properties:
