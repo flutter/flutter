@@ -20,7 +20,7 @@ def memoize(default=None):
         ret = func()
         val.append(ret if ret is not None else default)
         if logging.getLogger().isEnabledFor(logging.INFO):
-          print '%s -> %r' % (func.__name__, val[0])
+          print('%s -> %r' % (func.__name__, val[0]))
       return val[0]
     return inner
   return memoizer

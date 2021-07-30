@@ -34,8 +34,8 @@ def _ExtractImportantEnvironment(output_of_set):
   env = {}
   for line in output_of_set.splitlines():
     for envvar in envvars_to_save:
-      if re.match(envvar + '=', line.lower()):
-        var, setting = line.split('=', 1)
+      if re.match(envvar + '=', line.decode().lower()):
+        var, setting = line.decode().split('=', 1)
         if envvar == 'path':
           # Our own rules (for running gyp-win-tool) and other actions in
           # Chromium rely on python being in the path. Add the path to this
@@ -75,7 +75,7 @@ def _FormatAsEnvironmentBlock(envvar_dict):
   CreateProcess documentation for more details."""
   block = ''
   nul = '\0'
-  for key, value in envvar_dict.iteritems():
+  for key, value in envvar_dict.items():
     block += key + '=' + value + nul
   block += nul
   return block
@@ -143,10 +143,10 @@ def main():
       env['INCLUDE'] = additional_includes + env['INCLUDE']
     env_block = _FormatAsEnvironmentBlock(env)
     with open('environment.' + cpu, 'wb') as f:
-      f.write(env_block)
+      f.write(env_block.encode())
 
   assert vc_bin_dir
-  print 'vc_bin_dir = "%s"' % vc_bin_dir
+  print('vc_bin_dir = "%s"' % vc_bin_dir)
 
 
 if __name__ == '__main__':

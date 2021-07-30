@@ -153,7 +153,7 @@ def GetVisualStudioVersion():
 
   # VS installed in depot_tools for Googlers
   if bool(int(os.environ.get('DEPOT_TOOLS_WIN_TOOLCHAIN', '1'))):
-    return supported_versions[0]
+    return list(supported_versions)[0]
 
   # VS installed in system for external developers
   supported_versions_str = ', '.join('{} ({})'.format(v,k)
