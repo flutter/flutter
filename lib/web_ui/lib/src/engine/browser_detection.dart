@@ -33,9 +33,9 @@ enum BrowserEngine {
 
 /// html webgl version qualifier constants.
 abstract class WebGLVersion {
-  // WebGL 1.0 is based on OpenGL ES 2.0 / GLSL 1.00
+  /// WebGL 1.0 is based on OpenGL ES 2.0 / GLSL 1.00
   static const int webgl1 = 1;
-  // WebGL 2.0 is based on OpenGL ES 3.0 / GLSL 3.00
+  /// WebGL 2.0 is based on OpenGL ES 3.0 / GLSL 3.00
   static const int webgl2 = 2;
 }
 
@@ -78,6 +78,9 @@ bool _isSamsungBrowser(String agent) {
   return exp.hasMatch(agent.toUpperCase());
 }
 
+/// Detects browser engine for a given vendor and agent string.
+///
+/// Used for testing this library.
 @visibleForTesting
 BrowserEngine detectBrowserEngineByVendorAgent(String vendor, String agent) {
   if (vendor == 'Google Inc.') {
@@ -149,6 +152,7 @@ OperatingSystem get operatingSystem {
 /// This is intended to be used for testing and debugging only.
 OperatingSystem? debugOperatingSystemOverride;
 
+/// Detects operating system using platform and UA used for unit testing.
 @visibleForTesting
 OperatingSystem detectOperatingSystem({
   String? overridePlatform,

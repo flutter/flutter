@@ -330,9 +330,12 @@ export 'engine/window.dart';
 /// Keep these in sync with the same constants on the framework-side under foundation/constants.dart.
 const bool kReleaseMode =
     bool.fromEnvironment('dart.vm.product', defaultValue: false);
+/// A constant that is true if the application was compiled in profile mode.
 const bool kProfileMode =
     bool.fromEnvironment('dart.vm.profile', defaultValue: false);
+/// A constant that is true if the application was compiled in debug mode.
 const bool kDebugMode = !kReleaseMode && !kProfileMode;
+/// Returns mode of the app is running in as a string.
 String get buildMode => kReleaseMode
     ? 'release'
     : kProfileMode
@@ -454,6 +457,8 @@ void _addUrlStrategyListener() {
   });
 }
 
+/// Sanitizer used to convert const svg filter and clippath snippets to
+/// SvgElement without sanitization.
 class NullTreeSanitizer implements html.NodeTreeSanitizer {
   @override
   void sanitizeTree(html.Node node) {}

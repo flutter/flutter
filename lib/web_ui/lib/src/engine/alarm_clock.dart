@@ -18,6 +18,8 @@ typedef TimestampFunction = DateTime Function();
 ///
 /// https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/setTimeout#Notes
 class AlarmClock {
+
+  /// Initializes Alarmclock with a closure that gets called with a timestamp.
   AlarmClock(TimestampFunction timestampFunction)
       : _timestampFunction = timestampFunction;
 
