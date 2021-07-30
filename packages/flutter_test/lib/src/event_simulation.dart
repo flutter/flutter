@@ -14,6 +14,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'binding.dart';
 import 'test_async_utils.dart';
 
+// A tuple of `key` and `location` from Web's `KeyboardEvent` class.
+//
+// See [RawKeyEventDataWeb]'s `key` and `location` fields for details.
+@immutable
+class _WebKeyLocationPair {
+  const _WebKeyLocationPair(this.key, this.location);
+  final String key;
+  final int location;
+}
+
 // TODO(gspencergoog): Replace this with more robust key simulation code once
 // the new key event code is in.
 // https://github.com/flutter/flutter/issues/33521
@@ -145,8 +155,32 @@ class KeyEventSimulator {
     }
   }
 
-  static String _getWebKeyCode(LogicalKeyboardKey key) {
+  static PhysicalKeyboardKey _inferPhysicalKey(LogicalKeyboardKey key) {
+    PhysicalKeyboardKey? result;
+    for (final PhysicalKeyboardKey physicalKey in PhysicalKeyboardKey.knownPhysicalKeys) {
+      if (physicalKey.debugName == key.debugName) {
+        result = physicalKey;
+        break;
+      }
+    }
+    assert(result != null, 'Unable to infer physical key for $key');
+    return result!;
+  }
+
+  static _WebKeyLocationPair _getWebKeyLocation(LogicalKeyboardKey key, String keyLabel) {
     String? result;
+    for (final MapEntry<String, List<LogicalKeyboardKey?>> entry in kWebLocationMap.entries) {
+      final int foundIndex = entry.value.indexOf(key);
+      // If foundIndex is -1, then the key is not defined in kWebLocationMap.
+      // If foundIndex is 0, then the key is in the standard part of the keyboard,
+      // but we have to check `keyLabel` to see if it's remapped or modified.
+      if (foundIndex != -1 && foundIndex != 0) {
+        return _WebKeyLocationPair(entry.key, foundIndex);
+      }
+    }
+    if (keyLabel.isNotEmpty) {
+      return _WebKeyLocationPair(keyLabel, 0);
+    }
     for (final String code in kWebToLogicalKey.keys) {
       if (key.keyId == kWebToLogicalKey[code]!.keyId) {
         result = code;
@@ -154,6 +188,18 @@ class KeyEventSimulator {
       }
     }
     assert(result != null, 'Key $key not found in web keyCode map');
+    return _WebKeyLocationPair(result!, 0);
+  }
+
+  static String _getWebCode(PhysicalKeyboardKey key) {
+    String? result;
+    for (final MapEntry<String, PhysicalKeyboardKey> entry in kWebToPhysicalKey.entries) {
+      if (entry.value.usbHidUsage == key.usbHidUsage) {
+        result = entry.key;
+        break;
+      }
+    }
+    assert(result != null, 'Key $key not found in web code map');
     return result!;
   }
 
@@ -215,8 +261,6 @@ class KeyEventSimulator {
     physicalKey ??= _findPhysicalKeyByPlatform(key, platform);
 
     assert(key.debugName != null);
-    final int keyCode = _getKeyCode(key, platform);
-    final int scanCode = _getScanCode(physicalKey, platform);
 
     final Map<String, dynamic> result = <String, dynamic>{
       'type': isDown ? 'keydown' : 'keyup',
@@ -225,14 +269,19 @@ class KeyEventSimulator {
 
     final String resultCharacter = character ?? _keyLabel(key) ?? '';
     void assignWeb() {
-      result['code'] = _getWebKeyCode(key);
-      result['key'] = resultCharacter;
+      final _WebKeyLocationPair keyLocation = _getWebKeyLocation(key, resultCharacter);
+      final PhysicalKeyboardKey actualPhysicalKey = physicalKey ?? _inferPhysicalKey(key);
+      result['code'] = _getWebCode(actualPhysicalKey);
+      result['key'] = keyLocation.key;
+      result['location'] = keyLocation.location;
       result['metaState'] = _getWebModifierFlags(key, isDown);
     }
     if (kIsWeb) {
       assignWeb();
       return result;
     }
+    final int keyCode = _getKeyCode(key, platform);
+    final int scanCode = _getScanCode(physicalKey, platform);
 
     switch (platform) {
       case 'android':

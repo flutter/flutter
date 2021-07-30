@@ -174,7 +174,7 @@ void main() {
 
 Future<void> failToEvaluateExpression(FlutterTestDriver flutter) async {
   await expectLater(
-    () => flutter.evaluateInFrame('"test"'),
+    flutter.evaluateInFrame('"test"'),
     throwsA(isA<RPCError>().having(
       (RPCError error) => error.message,
       'message',
