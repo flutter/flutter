@@ -30,6 +30,7 @@ template("compile_flutter_dart_test") {
       "//flutter/flutter_frontend_server:frontend_server",
       "//flutter/lib/snapshot:strong_platform",
     ]
+    pool = "//flutter/build/dart:dart_pool"
     script = "$root_gen_dir/frontend_server.dart.snapshot"
     packages = rebase_path(invoker.packages)  # rebase_path(".packages")
 

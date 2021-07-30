@@ -57,6 +57,7 @@ template("_frontend_server") {
       inputs = invoker.inputs
       outputs = invoker.outputs
       depfile = invoker.depfile
+      pool = "//flutter/build/dart:dart_pool"
 
       ext = ""
       if (is_win) {
@@ -76,6 +77,7 @@ template("_frontend_server") {
       forward_variables_from(invoker, "*")
       deps += [ "//third_party/dart/utils/kernel-service:frontend_server" ]
       script = "$root_out_dir/frontend_server.dart.snapshot"
+      pool = "//flutter/build/dart:dart_pool"
     }
   }
 }
@@ -156,6 +158,8 @@ template("dart_snapshot_aot") {
     testonly = true
 
     tool = "//third_party/dart/runtime/bin:gen_snapshot"
+
+    pool = "//flutter/build/dart:dart_pool"
 
     inputs = [ invoker.dart_kernel ]
 
