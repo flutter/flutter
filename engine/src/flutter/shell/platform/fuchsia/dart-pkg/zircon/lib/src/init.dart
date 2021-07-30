@@ -4,7 +4,8 @@
 
 part of zircon;
 
-final _kLibZirconDartPath = '/pkg/lib/libzircon_ffi.so';
+final _kZirconFFILibName = 'libzircon_ffi.so';
+final _kLibZirconDartPath = '/pkg/lib/$_kZirconFFILibName';
 
 class _Bindings {
   static ZirconFFIBindings? _bindings;
@@ -17,7 +18,7 @@ class _Bindings {
     }
 
     if (_bindings == null) {
-      final _dylib = DynamicLibrary.open(_kLibZirconDartPath);
+      final _dylib = DynamicLibrary.open(_kZirconFFILibName);
       _bindings = ZirconFFIBindings(_dylib);
     }
     return _bindings;
