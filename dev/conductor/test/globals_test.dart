@@ -21,31 +21,36 @@ void main() {
     const String dartRevision = 'fe9708ab688dcda9923f584ba370a66fcbc3811f';
     const String engineCherrypick1 = 'a5a25cd702b062c24b2c67b8d30b5cb33e0ef6f0';
     const String engineCherrypick2 = '94d06a2e1d01a3b0c693b94d70c5e1df9d78d249';
-    const String frameworkCherrypick = 'a5a25cd702b062c24b2c67b8d30b5cb33e0ef6f0';
+    const String frameworkCherrypick =
+        'a5a25cd702b062c24b2c67b8d30b5cb33e0ef6f0';
 
     final RegExp titlePattern = RegExp(r'&title=(.*)&');
     final RegExp bodyPattern = RegExp(r'&body=(.*)$');
 
-    final pb.ConductorState state = pb.ConductorState(
-      engine: pb.Repository(
-        candidateBranch: candidateBranch,
-        cherrypicks: <pb.Cherrypick>[
-          pb.Cherrypick(trunkRevision: engineCherrypick1),
-          pb.Cherrypick(trunkRevision: engineCherrypick2),
-        ],
-        dartRevision: dartRevision,
-        workingBranch: workingBranch,
-      ),
-      framework: pb.Repository(
-        candidateBranch: candidateBranch,
-        cherrypicks: <pb.Cherrypick>[
-          pb.Cherrypick(trunkRevision: frameworkCherrypick),
-        ],
-        workingBranch: workingBranch,
-      ),
-      releaseChannel: releaseChannel,
-      releaseVersion: releaseVersion,
-    );
+    late pb.ConductorState state;
+
+    setUp(() {
+      state = pb.ConductorState(
+        engine: pb.Repository(
+          candidateBranch: candidateBranch,
+          cherrypicks: <pb.Cherrypick>[
+            pb.Cherrypick(trunkRevision: engineCherrypick1),
+            pb.Cherrypick(trunkRevision: engineCherrypick2),
+          ],
+          dartRevision: dartRevision,
+          workingBranch: workingBranch,
+        ),
+        framework: pb.Repository(
+          candidateBranch: candidateBranch,
+          cherrypicks: <pb.Cherrypick>[
+            pb.Cherrypick(trunkRevision: frameworkCherrypick),
+          ],
+          workingBranch: workingBranch,
+        ),
+        releaseChannel: releaseChannel,
+        releaseVersion: releaseVersion,
+      );
+    });
 
     test('throws on an invalid repoName', () {
       expect(
@@ -54,7 +59,9 @@ void main() {
           userName: userName,
           state: state,
         ),
-        throwsExceptionWith('Expected repoName to be one of flutter or engine but got flooter.'),
+        throwsExceptionWith(
+          'Expected repoName to be one of flutter or engine but got flooter.',
+        ),
       );
     });
 
@@ -73,9 +80,9 @@ void main() {
         contains('$candidateBranch...$userName:$workingBranch?expand=1'),
       );
       expect(
-        Uri.decodeQueryComponent(titlePattern.firstMatch(link)?.group(1) ?? ''),
-        '[flutter_releases] Flutter $releaseChannel $releaseVersion Engine Cherrypicks'
-      );
+          Uri.decodeQueryComponent(
+              titlePattern.firstMatch(link)?.group(1) ?? ''),
+          '[flutter_releases] Flutter $releaseChannel $releaseVersion Engine Cherrypicks');
       final String expectedBody = '''
 # Flutter $releaseChannel $releaseVersion Engine
 
@@ -105,9 +112,9 @@ void main() {
         contains('$candidateBranch...$userName:$workingBranch?expand=1'),
       );
       expect(
-        Uri.decodeQueryComponent(titlePattern.firstMatch(link)?.group(1) ?? ''),
-        '[flutter_releases] Flutter $releaseChannel $releaseVersion Framework Cherrypicks'
-      );
+          Uri.decodeQueryComponent(
+              titlePattern.firstMatch(link)?.group(1) ?? ''),
+          '[flutter_releases] Flutter $releaseChannel $releaseVersion Framework Cherrypicks');
       final String expectedBody = '''
 # Flutter $releaseChannel $releaseVersion Framework
 
