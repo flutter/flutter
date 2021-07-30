@@ -1832,19 +1832,19 @@ class _PaintBounds {
     }
 
     if (_clipRectInitialized) {
-      if (transformedPointLeft > _currentClipRight) {
+      if (transformedPointLeft >= _currentClipRight) {
         command.isClippedOut = true;
         return;
       }
-      if (transformedPointRight < _currentClipLeft) {
+      if (transformedPointRight <= _currentClipLeft) {
         command.isClippedOut = true;
         return;
       }
-      if (transformedPointTop > _currentClipBottom) {
+      if (transformedPointTop >= _currentClipBottom) {
         command.isClippedOut = true;
         return;
       }
-      if (transformedPointBottom < _currentClipTop) {
+      if (transformedPointBottom <= _currentClipTop) {
         command.isClippedOut = true;
         return;
       }
