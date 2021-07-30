@@ -304,19 +304,20 @@ class TextEditingValue {
     );
   }
 
-  /// Return [selection] collapsed and moved to the given index.
-  TextSelection moveSelectionTo(int index) {
+  /// Return [selection] collapsed and moved to the given [TextPosition].
+  TextSelection moveSelectionTo(TextPosition position) {
     assert(selection != null);
 
     // If the selection is collapsed at the position already, then nothing
     // happens.
-    if (selection.isCollapsed && selection.extentOffset == index) {
+    if (selection.isCollapsed && selection.extentOffset == position.offset) {
       return selection;
     }
 
     return selection.copyWith(
-      baseOffset: index,
-      extentOffset: index,
+      baseOffset: position.offset,
+      extentOffset: position.offset,
+      affinity: position.affinity,
     );
   }
 
@@ -378,17 +379,18 @@ class TextEditingValue {
 
   /// Keeping [selection]'s [TextSelection.baseOffset] fixed, move the
   /// [TextSelection.extentOffset] to the given [TextPosition].
-  TextSelection extendSelectionTo(int index) {
+  TextSelection extendSelectionTo(TextPosition position) {
     assert(selection != null);
 
     // If the selection's extent is at the position already, then nothing
     // happens.
-    if (selection.extentOffset == index) {
+    if (selection.extent == position) {
       return selection;
     }
 
     return selection.copyWith(
-      extentOffset: index,
+      extentOffset: position.offset,
+      affinity: position.affinity,
     );
   }
 

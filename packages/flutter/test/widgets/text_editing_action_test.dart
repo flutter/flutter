@@ -124,6 +124,7 @@ void main() {
     editableTextState.moveSelectionRightByLine(SelectionChangedCause.keyboard);
     expect(editableTextState.value.selection.isCollapsed, true);
     expect(editableTextState.value.selection.baseOffset, 13);
+    expect(editableTextState.value.selection.affinity, TextAffinity.upstream);
     // RenderEditable relies on its parent that passes onSelectionChanged to set
     // the selection.
 
@@ -132,21 +133,25 @@ void main() {
     editableTextState.moveSelectionRightByLine(SelectionChangedCause.keyboard);
     expect(editableTextState.value.selection.isCollapsed, true);
     expect(editableTextState.value.selection.baseOffset, 13);
+    expect(editableTextState.value.selection.affinity, TextAffinity.upstream);
 
     // Move back to the start of the line.
     editableTextState.moveSelectionLeftByLine(SelectionChangedCause.keyboard);
     expect(editableTextState.value.selection.isCollapsed, true);
     expect(editableTextState.value.selection.baseOffset, 0);
+    expect(editableTextState.value.selection.affinity, TextAffinity.downstream);
 
     // Trying moveSelectionLeftByLine does nothing at the leftmost of the field.
     editableTextState.moveSelectionLeftByLine(SelectionChangedCause.keyboard);
     expect(editableTextState.value.selection.isCollapsed, true);
     expect(editableTextState.value.selection.baseOffset, 0);
+    expect(editableTextState.value.selection.affinity, TextAffinity.downstream);
 
     // Move the selection to the empty line.
     editableTextState.moveSelectionRightByLine(SelectionChangedCause.keyboard);
     expect(editableTextState.value.selection.isCollapsed, true);
     expect(editableTextState.value.selection.baseOffset, 13);
+    expect(editableTextState.value.selection.affinity, TextAffinity.upstream);
     editableTextState.moveSelectionRight(SelectionChangedCause.keyboard);
     expect(editableTextState.value.selection.isCollapsed, true);
     expect(editableTextState.value.selection.baseOffset, 14);
@@ -156,9 +161,11 @@ void main() {
     editableTextState.moveSelectionLeftByLine(SelectionChangedCause.keyboard);
     expect(editableTextState.value.selection.isCollapsed, true);
     expect(editableTextState.value.selection.baseOffset, 14);
+    expect(editableTextState.value.selection.affinity, TextAffinity.downstream);
     editableTextState.moveSelectionRightByLine(SelectionChangedCause.keyboard);
     expect(editableTextState.value.selection.isCollapsed, true);
     expect(editableTextState.value.selection.baseOffset, 14);
+    expect(editableTextState.value.selection.affinity, TextAffinity.downstream);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
   test('arrow keys and delete handle simple text correctly', () async {
@@ -332,7 +339,7 @@ void main() {
     expect(editable.selection?.isCollapsed, true);
     expect(editable.selection?.baseOffset, 3);
 
-     editableTextState.deleteForward(SelectionChangedCause.keyboard);
+    editableTextState.deleteForward(SelectionChangedCause.keyboard);
     expect(editableTextState.textEditingValue.text, 'W Sczebrzeszynie chrząszcz brzmi w trzcinie');
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 

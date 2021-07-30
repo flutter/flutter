@@ -14,6 +14,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:meta/meta.dart';
+
+// The test_api package is not for general use... it's literally for our use.
+// ignore: deprecated_member_use
+import 'package:test_api/test_api.dart' as test_package;
 
 import 'mock_canvas.dart';
 import 'recording_canvas.dart';
@@ -31,6 +36,38 @@ class _FakeEditableTextState with TextSelectionDelegate {
 
   @override
   void bringIntoView(TextPosition position) { }
+}
+
+@isTest
+void testVariants(
+  String description,
+  AsyncValueGetter<void> callback, {
+  bool? skip,
+  test_package.Timeout? timeout,
+  TestVariant<Object?> variant = const DefaultTestVariant(),
+  dynamic tags,
+}) {
+  assert(variant != null);
+  assert(variant.values.isNotEmpty, 'There must be at least one value to test in the testing variant.');
+  for (final dynamic value in variant.values) {
+    final String variationDescription = variant.describeValue(value);
+    final String combinedDescription = variationDescription.isNotEmpty ? '$description ($variationDescription)' : description;
+    test(
+      combinedDescription,
+      () async {
+        Object? memento;
+        try {
+          memento = await variant.setUp(value);
+          await callback();
+        } finally {
+          await variant.tearDown(value, memento);
+        }
+      },
+      skip: skip,
+      timeout: timeout,
+      tags: tags,
+    );
+  }
 }
 
 void main() {

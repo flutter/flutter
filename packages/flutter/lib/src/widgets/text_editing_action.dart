@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' show TextPosition;
+import 'dart:ui' show TextAffinity, TextPosition;
 
 import 'package:flutter/services.dart'
     show Clipboard, ClipboardData, TextMetrics, TextRange;
@@ -112,7 +112,10 @@ abstract class TextEditingActionTarget {
       return moveSelectionToStart(cause);
     }
 
-    setSelection(value.extendSelectionTo(0), cause);
+    setSelection(value.extendSelectionTo(TextPosition(
+      offset: 0,
+      affinity: TextAffinity.upstream,
+    )), cause);
   }
 
   /// Return the offset at the start of the nearest word to the left of the
@@ -534,7 +537,7 @@ abstract class TextEditingActionTarget {
       _cursorResetLocation = index;
     }
 
-    setSelection(value.extendSelectionTo(index), cause);
+    setSelection(value.extendSelectionTo(TextPosition(offset: index)), cause);
   }
 
   /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
@@ -564,7 +567,7 @@ abstract class TextEditingActionTarget {
 
     final int distance = value.selection.extentOffset - previousExtent;
     _cursorResetLocation -= distance;
-    setSelection(value.extendSelectionTo(previousExtent), cause);
+    setSelection(value.extendSelectionTo(TextPosition(offset: previousExtent)), cause);
   }
 
   /// Extend the current [selection] to the start of
@@ -608,7 +611,10 @@ abstract class TextEditingActionTarget {
         extentOffset: value.selection.baseOffset,
       );
     } else {
-      nextSelection = value.extendSelectionTo(selectedLine.baseOffset);
+      nextSelection = value.extendSelectionTo(TextPosition(
+        offset: selectedLine.baseOffset,
+        affinity: TextAffinity.downstream,
+      ));
     }
 
     setSelection(nextSelection, cause);
@@ -640,7 +646,7 @@ abstract class TextEditingActionTarget {
 
     final int distance = nextExtent - value.selection.extentOffset;
     _cursorResetLocation += distance;
-    setSelection(value.extendSelectionTo(nextExtent), cause);
+    setSelection(value.extendSelectionTo(TextPosition(offset: nextExtent)), cause);
   }
 
   /// Extend the current [selection] to the end of [TextSelection.extentOffset]'s
@@ -680,7 +686,10 @@ abstract class TextEditingActionTarget {
         extentOffset: value.selection.baseOffset,
       );
     } else {
-      nextSelection = value.extendSelectionTo(selectedLine.extentOffset);
+      nextSelection = value.extendSelectionTo(TextPosition(
+        offset: selectedLine.extentOffset,
+        affinity: TextAffinity.upstream,
+      ));
     }
 
     setSelection(nextSelection, cause);
@@ -734,9 +743,9 @@ abstract class TextEditingActionTarget {
     if (stopAtReversal &&
         value.selection.extentOffset > value.selection.baseOffset &&
         leftOffset < value.selection.baseOffset) {
-      nextSelection = value.extendSelectionTo(value.selection.baseOffset);
+      nextSelection = value.extendSelectionTo(TextPosition(offset: value.selection.baseOffset));
     } else {
-      nextSelection = value.extendSelectionTo(leftOffset);
+      nextSelection = value.extendSelectionTo(TextPosition(offset: leftOffset));
     }
 
     if (nextSelection == value.selection) {
@@ -785,9 +794,9 @@ abstract class TextEditingActionTarget {
     if (stopAtReversal &&
         value.selection.baseOffset > value.selection.extentOffset &&
         rightOffset > value.selection.baseOffset) {
-      nextSelection = value.moveSelectionTo(value.selection.baseOffset);
+      nextSelection = value.moveSelectionTo(TextPosition(offset: value.selection.baseOffset));
     } else {
-      nextSelection = value.extendSelectionTo(rightOffset);
+      nextSelection = value.extendSelectionTo(TextPosition(offset: rightOffset));
     }
 
     if (nextSelection == value.selection) {
@@ -876,9 +885,10 @@ abstract class TextEditingActionTarget {
       value.text,
       TextPosition(offset: startPoint),
     );
-    final TextSelection nextSelection = TextSelection.collapsed(
+    final TextSelection nextSelection = value.moveSelectionTo(TextPosition(
       offset: selectedLine.baseOffset,
-    );
+      affinity: TextAffinity.downstream,
+    ));
 
     setSelection(nextSelection, cause);
   }
@@ -946,7 +956,7 @@ abstract class TextEditingActionTarget {
       previousExtent = TextEditingValue.previousCharacter(
           value.selection.extentOffset, value.text);
     }
-    final TextSelection nextSelection = value.moveSelectionTo(previousExtent);
+    final TextSelection nextSelection = value.moveSelectionTo(TextPosition(offset: previousExtent));
 
     if (nextSelection == value.selection) {
       return;
@@ -991,7 +1001,7 @@ abstract class TextEditingActionTarget {
 
     final int leftOffset =
         _getLeftByWord(value.selection.extentOffset, includeWhitespace);
-    final TextSelection nextSelection = value.moveSelectionTo(leftOffset);
+    final TextSelection nextSelection = value.moveSelectionTo(TextPosition(offset: leftOffset));
 
     if (nextSelection == value.selection) {
       return;
@@ -1023,7 +1033,7 @@ abstract class TextEditingActionTarget {
       nextExtent = TextEditingValue.nextCharacter(
           value.selection.extentOffset, value.text);
     }
-    final TextSelection nextSelection = value.moveSelectionTo(nextExtent);
+    final TextSelection nextSelection = value.moveSelectionTo(TextPosition(offset: nextExtent));
 
     if (nextSelection == value.selection) {
       return;
@@ -1062,9 +1072,10 @@ abstract class TextEditingActionTarget {
         value.selection.extentOffset, value.text, false);
     final TextSelection selectedLine = textMetrics.getLineAtOffset(
         value.text, TextPosition(offset: startPoint));
-    final TextSelection nextSelection = TextSelection.collapsed(
+    final TextSelection nextSelection = value.moveSelectionTo(TextPosition(
       offset: selectedLine.extentOffset,
-    );
+      affinity: TextAffinity.upstream,
+    ));
     setSelection(nextSelection, cause);
   }
 
@@ -1105,7 +1116,7 @@ abstract class TextEditingActionTarget {
 
     final int rightOffset =
         _getRightByWord(value.selection.extentOffset, includeWhitespace);
-    final TextSelection nextSelection = value.moveSelectionTo(rightOffset);
+    final TextSelection nextSelection = value.moveSelectionTo(TextPosition(offset: rightOffset));
 
     if (nextSelection == value.selection) {
       return;
@@ -1123,7 +1134,7 @@ abstract class TextEditingActionTarget {
   ///   * [moveSelectionToStart], which is the same but in the opposite
   ///     direction.
   void moveSelectionToEnd(SelectionChangedCause cause) {
-    setSelection(value.moveSelectionTo(value.text.length), cause);
+    setSelection(value.moveSelectionTo(TextPosition(offset: value.text.length)), cause);
   }
 
   /// Move the current [selection] to the start of the field.
@@ -1135,7 +1146,7 @@ abstract class TextEditingActionTarget {
   ///   * [TextEditingValue.moveSelectionToStart], which is used by this method.
   ///   * [moveSelectionToEnd], which is the same but in the opposite direction.
   void moveSelectionToStart(SelectionChangedCause cause) {
-    setSelection(value.moveSelectionTo(0), cause);
+    setSelection(value.moveSelectionTo(TextPosition(offset: 0)), cause);
   }
 
   /// Move the current [selection] up by one line.
@@ -1156,7 +1167,7 @@ abstract class TextEditingActionTarget {
     }
     _cursorResetLocation = nextIndex;
 
-    setSelection(value.moveSelectionTo(nextIndex), cause);
+    setSelection(value.moveSelectionTo(TextPosition(offset: nextIndex)), cause);
   }
 
   /// {@macro flutter.services.TextEditingValue.selectAll}
