@@ -5173,6 +5173,7 @@ void main() {
       targetPlatform: defaultTargetPlatform,
     );
 
+    // TODO(justinmc): Maybe do these expects in the switch instead of assigning.
     expect(
       selection,
       equals(
