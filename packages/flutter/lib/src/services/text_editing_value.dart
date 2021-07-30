@@ -395,7 +395,7 @@ class TextEditingValue {
   }
 
   /// {@template flutter.services.TextEditingValue.selectAll}
-  /// Set the current [selection] to contain the entire text value.
+  /// Select the entire text value.
   /// {@endtemplate}
   TextSelection selectAll() {
     return selection.copyWith(

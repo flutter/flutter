@@ -1618,7 +1618,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   bool get selectionEnabled => widget.selectionEnabled;
 
-  /// {@macro flutter.widgets.TextEditingAction.setSelection}
+  /// {@macro flutter.widgets.TextEditingActionTarget.setSelection}
   @override
   void setSelection(TextSelection nextSelection, SelectionChangedCause cause) {
     if (nextSelection.isValid) {

@@ -102,7 +102,7 @@ abstract class TextEditingActionTarget {
   // the start.
   //
   // The given [SelectionChangedCause] indicates the cause of this change and
-  // will be passed to [onSelectionChanged].
+  // will be passed to [setSelection].
   //
   // See also:
   //
@@ -112,7 +112,7 @@ abstract class TextEditingActionTarget {
       return moveSelectionToStart(cause);
     }
 
-    setSelection(value.extendSelectionTo(TextPosition(
+    setSelection(value.extendSelectionTo(const TextPosition(
       offset: 0,
       affinity: TextAffinity.upstream,
     )), cause);
@@ -160,10 +160,7 @@ abstract class TextEditingActionTarget {
     return nextWord.end;
   }
 
-  /// Deletes backwards from the selection in [textSelectionDelegate].
-  ///
-  /// This method operates on the text/selection contained in
-  /// [textSelectionDelegate], and does not depend on [selection].
+  /// Deletes backwards from the current selection.
   ///
   /// If the selection is collapsed, deletes a single character before the
   /// cursor.
@@ -174,7 +171,7 @@ abstract class TextEditingActionTarget {
   ///
   /// {@template flutter.widgets.TextEditingActionTarget.cause}
   /// The given [SelectionChangedCause] indicates the cause of this change and
-  /// will be passed to [onSelectionChanged].
+  /// will be passed to [setSelection].
   /// {@endtemplate}
   ///
   /// See also:
@@ -200,16 +197,16 @@ abstract class TextEditingActionTarget {
   // TODO(justinmc): Update the references on this whiteSpace template.
   /// Deletes a word backwards from the current selection.
   ///
-  /// If the [selection] is collapsed, deletes a word before the cursor.
+  /// If the selection is collapsed, deletes a word before the cursor.
   ///
-  /// If the [selection] is not collapsed, deletes the selection.
+  /// If the selection is not collapsed, deletes the selection.
   ///
   /// If [readOnly] is true, does nothing.
   ///
   /// If [obscureText] is true, it treats the whole text content as a single
   /// word.
   ///
-  /// {@macro flutter.widgets.TextEditingActionTarget.RenderEditable.cause}
+  /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// {@template flutter.widgets.TextEditingActionTarget.whiteSpace}
   /// By default, includeWhitespace is set to true, meaning that whitespace can
@@ -219,7 +216,6 @@ abstract class TextEditingActionTarget {
   ///
   /// See also:
   ///
-  ///   * [TextEditingValue.deleteByWord], which is used by this method.
   ///   * [deleteForwardByWord], which is same but in the opposite direction.
   void deleteByWord(SelectionChangedCause cause,
       [bool includeWhitespace = true]) {
@@ -242,20 +238,19 @@ abstract class TextEditingActionTarget {
 
   /// Deletes a line backwards from the current selection.
   ///
-  /// If the [selection] is collapsed, deletes a line before the cursor.
+  /// If the selection is collapsed, deletes a line before the cursor.
   ///
-  /// If the [selection] is not collapsed, deletes the selection.
+  /// If the selection is not collapsed, deletes the selection.
   ///
   /// If [obscureText] is true, it treats the whole text content as
   /// a single word.
   ///
   /// If [readOnly] is true, does nothing.
   ///
-  /// {@macro flutter.widgets.TextEditingActionTarget.RenderEditable.cause}
+  /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// See also:
   ///
-  ///   * [TextEditingValue.deleteByLine], which is used by this method.
   ///   * [deleteForwardByLine], which is same but in the opposite direction.
   void deleteByLine(SelectionChangedCause cause) {
     if (readOnly) {
@@ -291,7 +286,7 @@ abstract class TextEditingActionTarget {
   ///
   /// If [readOnly] is true, does nothing.
   ///
-  /// {@macro flutter.widgets.TextEditingActionTarget.RenderEditable.cause}
+  /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// See also:
   ///
@@ -304,22 +299,21 @@ abstract class TextEditingActionTarget {
 
   /// Deletes a word in the forward direction from the current selection.
   ///
-  /// If the [selection] is collapsed, deletes a word after the cursor.
+  /// If the selection is collapsed, deletes a word after the cursor.
   ///
-  /// If the [selection] is not collapsed, deletes the selection.
+  /// If the selection is not collapsed, deletes the selection.
   ///
   /// If [readOnly] is true, does nothing.
   ///
   /// If [obscureText] is true, it treats the whole text content as
   /// a single word.
   ///
-  /// {@macro flutter.widgets.TextEditingActionTarget.RenderEditable.cause}
+  /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// {@macro flutter.widgets.TextEditingActionTarget.whiteSpace}
   ///
   /// See also:
   ///
-  ///   * [TextEditingValue.deleteForwardByWord], which is used by this method.
   ///   * [deleteByWord], which is same but in the opposite direction.
   void deleteForwardByWord(SelectionChangedCause cause,
       [bool includeWhitespace = true]) {
@@ -341,16 +335,16 @@ abstract class TextEditingActionTarget {
 
   /// Deletes a line in the forward direction from the current selection.
   ///
-  /// If the [selection] is collapsed, deletes a line after the cursor.
+  /// If the selection is collapsed, deletes a line after the cursor.
   ///
-  /// If the [selection] is not collapsed, deletes the selection.
+  /// If the selection is not collapsed, deletes the selection.
   ///
   /// If [readOnly] is true, does nothing.
   ///
   /// If [obscureText] is true, it treats the whole text content as
   /// a single word.
   ///
-  /// {@macro flutter.widgets.TextEditingActionTarget.RenderEditable.cause}
+  /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// See also:
   ///
@@ -382,7 +376,7 @@ abstract class TextEditingActionTarget {
   /// Deletes the from the current collapsed selection to the end of the field.
   ///
   /// The given SelectionChangedCause indicates the cause of this change and
-  /// will be passed to onSelectionChanged.
+  /// will be passed to setSelection.
   ///
   /// See also:
   ///   * [deleteToStart]
@@ -395,7 +389,7 @@ abstract class TextEditingActionTarget {
   /// Deletes the from the current collapsed selection to the start of the field.
   ///
   /// The given SelectionChangedCause indicates the cause of this change and
-  /// will be passed to onSelectionChanged.
+  /// will be passed to setSelection.
   ///
   /// See also:
   ///   * [deleteToEnd]
@@ -427,7 +421,7 @@ abstract class TextEditingActionTarget {
     setSelection(value.expandSelectionTo(value.text.length, true), cause);
   }
 
-  /// Expand the current [selection] to the start of the field.
+  /// Expand the current selection to the start of the field.
   ///
   /// The selection will never shrink. The [TextSelection.extentOffset] will
   /// always be at the start of the field, regardless of the original order of
@@ -440,7 +434,6 @@ abstract class TextEditingActionTarget {
   ///
   /// See also:
   ///
-  ///   * [TextEditingValue.extendSelectionToStart], which is used by this method.
   ///   * [expandSelectionToEnd], which is the same but in the opposite
   ///     direction.
   void expandSelectionToStart(SelectionChangedCause cause) {
@@ -458,7 +451,6 @@ abstract class TextEditingActionTarget {
   ///
   /// See also:
   ///
-  ///   * [TextEditingValue.extendSelectionLeftByLine], which is used by this method.
   ///   * [expandSelectionRightByLine], which is the same but in the opposite
   ///     direction.
   void expandSelectionLeftByLine(SelectionChangedCause cause) {
@@ -483,7 +475,6 @@ abstract class TextEditingActionTarget {
   ///
   /// See also:
   ///
-  ///   * [TextEditingValue.expandSelectionRightByLine], which is used by this method.
   ///   * [expandSelectionLeftByLine], which is the same but in the opposite
   ///     direction.
   void expandSelectionRightByLine(SelectionChangedCause cause) {
@@ -501,7 +492,7 @@ abstract class TextEditingActionTarget {
     setSelection(value.expandSelectionTo(selectedLine.extentOffset), cause);
   }
 
-  /// Keeping [selection]'s [TextSelection.baseOffset] fixed, move the
+  /// Keeping selection's [TextSelection.baseOffset] fixed, move the
   /// [TextSelection.extentOffset] down by one line.
   ///
   /// If selectionEnabled is false, keeps the selection collapsed and just
@@ -547,7 +538,6 @@ abstract class TextEditingActionTarget {
   ///
   /// See also:
   ///
-  ///   * [TextEditingValue.extendSelectionLeft], which is used by this method.
   ///   * [extendSelectionRight], which is same but in the opposite direction.
   void extendSelectionLeft(SelectionChangedCause cause) {
     // TODO(justinmc): Can I get selectionEnabled from a cleaner place?
@@ -570,7 +560,7 @@ abstract class TextEditingActionTarget {
     setSelection(value.extendSelectionTo(TextPosition(offset: previousExtent)), cause);
   }
 
-  /// Extend the current [selection] to the start of
+  /// Extend the current selection to the start of
   /// [TextSelection.extentOffset]'s line.
   ///
   /// Uses [TextSelection.baseOffset] as a pivot point and doesn't change it.
@@ -584,7 +574,6 @@ abstract class TextEditingActionTarget {
   ///
   /// See also:
   ///
-  ///   * [TextEditingValue.extendSelectionLeftByLine], which is used by this method.
   ///   * [extendSelectionRightByLine], which is same but in the opposite
   ///     direction.
   ///   * [expandSelectionRightByLine], which strictly grows the selection
@@ -620,7 +609,7 @@ abstract class TextEditingActionTarget {
     setSelection(nextSelection, cause);
   }
 
-  /// Keeping [selection]'s [TextSelection.baseOffset] fixed, move the
+  /// Keeping selection's [TextSelection.baseOffset] fixed, move the
   /// [TextSelection.extentOffset] right.
   ///
   /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
@@ -630,7 +619,6 @@ abstract class TextEditingActionTarget {
   ///
   /// See also:
   ///
-  ///   * [TextEditingValue.extendSelectionRight], which is used by this method.
   ///   * [extendSelectionLeft], which is same but in the opposite direction.
   void extendSelectionRight(SelectionChangedCause cause) {
     if (!selectionEnabled) {
@@ -649,7 +637,7 @@ abstract class TextEditingActionTarget {
     setSelection(value.extendSelectionTo(TextPosition(offset: nextExtent)), cause);
   }
 
-  /// Extend the current [selection] to the end of [TextSelection.extentOffset]'s
+  /// Extend the current selection to the end of [TextSelection.extentOffset]'s
   /// line.
   ///
   /// Uses [TextSelection.baseOffset] as a pivot point and doesn't change it. If
@@ -663,7 +651,6 @@ abstract class TextEditingActionTarget {
   ///
   /// See also:
   ///
-  ///   * [TextEditingValue.extendSelectionRightByLine], which is used by this method.
   ///   * [extendSelectionLeftByLine], which is same but in the opposite
   ///     direction.
   ///   * [expandSelectionRightByLine], which strictly grows the selection
@@ -695,7 +682,7 @@ abstract class TextEditingActionTarget {
     setSelection(nextSelection, cause);
   }
 
-  /// Extend the current [selection] to the previous start of a word.
+  /// Extend the current selection to the previous start of a word.
   ///
   /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
@@ -710,7 +697,6 @@ abstract class TextEditingActionTarget {
   ///
   /// See also:
   ///
-  ///   * [TextEditingValue.extendSelectionLeftByWord], which is used by this method.
   ///   * [extendSelectionRightByWord], which is the same but in the opposite
   ///     direction.
   void extendSelectionLeftByWord(SelectionChangedCause cause,
@@ -754,7 +740,7 @@ abstract class TextEditingActionTarget {
     setSelection(nextSelection, cause);
   }
 
-  /// Extend the current [selection] to the next end of a word.
+  /// Extend the current selection to the next end of a word.
   ///
   /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
@@ -764,7 +750,6 @@ abstract class TextEditingActionTarget {
   ///
   /// See also:
   ///
-  ///   * [TextEditingValue.extendSelectionRightByWord], which is used by this method.
   ///   * [extendSelectionLeftByWord], which is the same but in the opposite
   ///     direction.
   void extendSelectionRightByWord(SelectionChangedCause cause,
@@ -805,7 +790,7 @@ abstract class TextEditingActionTarget {
     setSelection(nextSelection, cause);
   }
 
-  /// Keeping [selection]'s [TextSelection.baseOffset] fixed, move the
+  /// Keeping selection's [TextSelection.baseOffset] fixed, move the
   /// [TextSelection.extentOffset] up by one
   /// line.
   ///
@@ -816,7 +801,6 @@ abstract class TextEditingActionTarget {
   ///
   /// See also:
   ///
-  ///   * [TextEditingValue.extendSelectionUp], which is used by this method.
   ///   * [extendSelectionDown], which is the same but in the opposite
   ///     direction.
   void extendSelectionUp(SelectionChangedCause cause) {
@@ -855,14 +839,12 @@ abstract class TextEditingActionTarget {
     setSelection(nextSelection, cause);
   }
 
-  /// Move the current [selection] to the leftmost point of the current line.
+  /// Move the current selection to the leftmost point of the current line.
   ///
   /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// See also:
   ///
-  ///   * [TextEditingValue.moveSelectionLeftByLine], which is used by this
-  ///     method.
   ///   * [moveSelectionRightByLine], which is the same but in the opposite
   ///     direction.
   void moveSelectionLeftByLine(SelectionChangedCause cause) {
@@ -893,15 +875,14 @@ abstract class TextEditingActionTarget {
     setSelection(nextSelection, cause);
   }
 
-  /// Move the current [selection] to the next line.
+  /// Move the current selection to the next line.
   ///
-  /// Move the current [selection] to the next line.
+  /// Move the current selection to the next line.
   ///
   /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// See also:
   ///
-  ///   * [TextEditingValue.moveSelectionDown], which is used by this method.
   ///   * [moveSelectionUp], which is the same but in the opposite direction.
   void moveSelectionDown(SelectionChangedCause cause) {
     // If the selection is collapsed at the end of the field already, then
@@ -933,7 +914,7 @@ abstract class TextEditingActionTarget {
     setSelection(nextSelection, cause);
   }
 
-  /// Move the current [selection] left by one character.
+  /// Move the current selection left by one character.
   ///
   /// If it can't be moved left, do nothing.
   ///
@@ -941,7 +922,6 @@ abstract class TextEditingActionTarget {
   ///
   /// See also:
   ///
-  ///   * [TextEditingValue.moveSelectionLeft], which is used by this method.
   ///   * [moveSelectionRight], which is the same but in the opposite direction.
   void moveSelectionLeft(SelectionChangedCause cause) {
     // If the selection is already all the way left, there is nothing to do.
@@ -966,7 +946,7 @@ abstract class TextEditingActionTarget {
     setSelection(nextSelection, cause);
   }
 
-  /// Move the current [selection] to the previous start of a word.
+  /// Move the current selection to the previous start of a word.
   ///
   /// A TextSelection that isn't collapsed will be collapsed and moved from the
   /// extentOffset.
@@ -977,7 +957,6 @@ abstract class TextEditingActionTarget {
   ///
   /// See also:
   ///
-  ///   * [TextEditingValue.moveSelectionLeftByWord], which is used by this method.
   ///   * [moveSelectionRightByWord], which is the same but in the opposite
   ///     direction.
   void moveSelectionLeftByWord(SelectionChangedCause cause,
@@ -1009,7 +988,7 @@ abstract class TextEditingActionTarget {
     setSelection(nextSelection, cause);
   }
 
-  /// Move the current [selection] to the right by one character.
+  /// Move the current selection to the right by one character.
   ///
   /// If it can't be moved right, do nothing.
   ///
@@ -1017,7 +996,6 @@ abstract class TextEditingActionTarget {
   ///
   /// See also:
   ///
-  ///   * [TextEditingValue.moveSelectionRight], which is used by this method.
   ///   * [moveSelectionLeft], which is the same but in the opposite direction.
   void moveSelectionRight(SelectionChangedCause cause) {
     // If the selection is already all the way right, there is nothing to do.
@@ -1041,15 +1019,14 @@ abstract class TextEditingActionTarget {
     setSelection(nextSelection, cause);
   }
 
-  /// Move the current [selection] to the rightmost point of the current line.
+  /// Move the current selection to the rightmost point of the current line.
   ///
-  /// Move the current [selection] to the rightmost point of the current line.
+  /// Move the current selection to the rightmost point of the current line.
   ///
   /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// See also:
   ///
-  ///   * [TextEditingValue.moveSelectionRightByLine], which is used by this method.
   ///   * [moveSelectionLeftByLine], which is the same but in the opposite
   ///     direction.
   void moveSelectionRightByLine(SelectionChangedCause cause) {
@@ -1079,7 +1056,7 @@ abstract class TextEditingActionTarget {
     setSelection(nextSelection, cause);
   }
 
-  /// Move the current [selection] to the next end of a word.
+  /// Move the current selection to the next end of a word.
   ///
   /// A TextSelection that isn't collapsed will be collapsed and moved from the
   /// extentOffset.
@@ -1090,8 +1067,6 @@ abstract class TextEditingActionTarget {
   ///
   /// See also:
   ///
-  ///   * [TextEditingValue.moveSelectionRightByWord], which is used by this
-  ///     method.
   ///   * [moveSelectionLeftByWord], which is the same but in the opposite
   ///     direction.
   void moveSelectionRightByWord(SelectionChangedCause cause,
@@ -1124,38 +1099,35 @@ abstract class TextEditingActionTarget {
     setSelection(nextSelection, cause);
   }
 
-  /// Move the current [selection] to the end of the field.
+  /// Move the current selection to the end of the field.
   ///
   /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// See also:
   ///
-  ///   * [TextEditingValue.moveSelectionToEnd], which is used by this method.
   ///   * [moveSelectionToStart], which is the same but in the opposite
   ///     direction.
   void moveSelectionToEnd(SelectionChangedCause cause) {
     setSelection(value.moveSelectionTo(TextPosition(offset: value.text.length)), cause);
   }
 
-  /// Move the current [selection] to the start of the field.
+  /// Move the current selection to the start of the field.
   ///
   /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// See also:
   ///
-  ///   * [TextEditingValue.moveSelectionToStart], which is used by this method.
   ///   * [moveSelectionToEnd], which is the same but in the opposite direction.
   void moveSelectionToStart(SelectionChangedCause cause) {
-    setSelection(value.moveSelectionTo(TextPosition(offset: 0)), cause);
+    setSelection(value.moveSelectionTo(const TextPosition(offset: 0)), cause);
   }
 
-  /// Move the current [selection] up by one line.
+  /// Move the current selection up by one line.
   ///
   /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// See also:
   ///
-  ///   * [TextEditingValue.moveSelectionUp], which is used by this method.
   ///   * [moveSelectionDown], which is the same but in the opposite direction.
   void moveSelectionUp(SelectionChangedCause cause) {
     final int nextIndex =
@@ -1180,7 +1152,7 @@ abstract class TextEditingActionTarget {
     );
   }
 
-  /// Copy current [selection] to [Clipboard].
+  /// Copy current selection to [Clipboard].
   void copySelection() {
     final TextSelection selection = value.selection;
     final String text = value.text;
@@ -1190,7 +1162,7 @@ abstract class TextEditingActionTarget {
     }
   }
 
-  /// Cut current [selection] to Clipboard.
+  /// Cut current selection to Clipboard.
   ///
   /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   void cutSelection(SelectionChangedCause cause) {
