@@ -7,7 +7,7 @@ import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:platform/platform.dart';
 
-import './proto/conductor_state.pb.dart' as pb;
+import 'proto/conductor_state.pb.dart' as pb;
 
 const String kUpstreamRemote = 'https://github.com/flutter/flutter.git';
 
