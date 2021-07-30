@@ -27,6 +27,7 @@ void main() {
     expect(themeData.showSelectedLabels, null);
     expect(themeData.showUnselectedLabels, null);
     expect(themeData.type, null);
+    expect(themeData.landscapeLayout, null);
 
     const BottomNavigationBarTheme theme = BottomNavigationBarTheme(data: BottomNavigationBarThemeData(), child: SizedBox());
     expect(theme.data.backgroundColor, null);
@@ -40,6 +41,7 @@ void main() {
     expect(theme.data.showSelectedLabels, null);
     expect(theme.data.showUnselectedLabels, null);
     expect(theme.data.type, null);
+    expect(themeData.landscapeLayout, null);
   });
 
   testWidgets('Default BottomNavigationBarThemeData debugFillProperties', (WidgetTester tester) async {
@@ -175,6 +177,7 @@ void main() {
     const TextStyle themeSelectedTextStyle = TextStyle(fontSize: 22);
     const TextStyle themeUnselectedTextStyle = TextStyle(fontSize: 21);
     const double themeElevation = 9.0;
+    const BottomNavigationBarLandscapeLayout themeLandscapeLayout = BottomNavigationBarLandscapeLayout.centered;
 
     const Color backgroundColor = Color(0xFF000004);
     const Color selectedItemColor = Color(0xFF000005);
@@ -184,6 +187,7 @@ void main() {
     const TextStyle selectedTextStyle = TextStyle(fontSize: 25);
     const TextStyle unselectedTextStyle = TextStyle(fontSize: 26);
     const double elevation = 7.0;
+    const BottomNavigationBarLandscapeLayout landscapeLayout = BottomNavigationBarLandscapeLayout.spread;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -200,6 +204,7 @@ void main() {
             type: BottomNavigationBarType.shifting,
             selectedLabelStyle: themeSelectedTextStyle,
             unselectedLabelStyle: themeUnselectedTextStyle,
+            landscapeLayout: themeLandscapeLayout,
           ),
         ),
         home: Scaffold(
@@ -215,6 +220,7 @@ void main() {
             type: BottomNavigationBarType.fixed,
             selectedLabelStyle: selectedTextStyle,
             unselectedLabelStyle: unselectedTextStyle,
+            landscapeLayout: landscapeLayout,
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.ac_unit),

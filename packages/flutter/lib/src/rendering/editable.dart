@@ -1965,6 +1965,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     final TextSelection selectedLine = _getLineAtOffset(TextPosition(offset: startPoint));
     final TextSelection nextSelection = TextSelection.collapsed(
       offset: selectedLine.baseOffset,
+      affinity: TextAffinity.downstream,
     );
 
     _setSelection(nextSelection, cause);
@@ -2051,6 +2052,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     final TextSelection selectedLine = _getLineAtOffset(TextPosition(offset: startPoint));
     final TextSelection nextSelection = TextSelection.collapsed(
       offset: selectedLine.extentOffset,
+      affinity: TextAffinity.upstream,
     );
 
     _setSelection(nextSelection, cause);

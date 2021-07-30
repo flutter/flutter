@@ -4348,7 +4348,7 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.pump();
     expect(focusNode3.hasPrimaryFocus, isTrue);
-  });
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Scrolling shortcuts are disabled in text fields', (WidgetTester tester) async {
     bool scrollInvoked = false;
@@ -4381,7 +4381,7 @@ void main() {
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     expect(scrollInvoked, isFalse);
-  });
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Cupertino text field semantics', (WidgetTester tester) async {
     await tester.pumpWidget(

@@ -89,6 +89,9 @@ void main() {
         );
         final pb.ConductorState state = pb.ConductorState(
           currentPhase: ReleasePhase.APPLY_ENGINE_CHERRYPICKS,
+          engine: pb.Repository(
+            startingGitHead: revision1,
+          ),
         );
         writeStateToFile(
           fileSystem.file(stateFile),
@@ -116,10 +119,13 @@ void main() {
         expect(processManager, hasNoRemainingExpectations);
         expect(finalState.currentPhase, ReleasePhase.CODESIGN_ENGINE_BINARIES);
         expect(stdio.error, isEmpty);
+        expect(
+          stdio.stdout,
+          contains('You must now codesign the engine binaries for commit $revision1'));
       });
 
       test('confirms to stdout when all engine cherrypicks were auto-applied', () async {
-        const String remoteUrl = 'https://githost.com/org/repo.git';
+        const String remoteUrl = 'https://github.com/org/repo.git';
         stdio.stdin.add('n');
         final FakeProcessManager processManager = FakeProcessManager.empty();
         final FakePlatform platform = FakePlatform(
@@ -170,13 +176,14 @@ void main() {
       });
 
       test('updates lastPhase if user responds yes', () async {
-        const String remoteUrl = 'https://githost.com/org/repo.git';
+        const String remoteUrl = 'https://github.com/org/repo.git';
+        const String releaseChannel = 'dev';
         stdio.stdin.add('y');
         final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
             command: <String>['git', 'fetch', 'upstream'],
           ),
-          const FakeCommand(command: <String>['git', 'checkout', 'upstream/$workingBranch']),
+          const FakeCommand(command: <String>['git', 'checkout', workingBranch]),
           const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
             stdout: revision1,
@@ -191,7 +198,9 @@ void main() {
           pathSeparator: localPathSeparator,
         );
         final pb.ConductorState state = pb.ConductorState(
+          currentPhase: ReleasePhase.APPLY_ENGINE_CHERRYPICKS,
           engine: pb.Repository(
+            candidateBranch: candidateBranch,
             cherrypicks: <pb.Cherrypick>[
               pb.Cherrypick(
                 trunkRevision: 'abc123',
@@ -202,7 +211,7 @@ void main() {
             upstream: pb.Remote(name: 'upstream', url: remoteUrl),
             mirror: pb.Remote(name: 'mirror', url: remoteUrl),
           ),
-          currentPhase: ReleasePhase.APPLY_ENGINE_CHERRYPICKS,
+          releaseChannel: releaseChannel,
         );
         writeStateToFile(
           fileSystem.file(stateFile),
@@ -228,6 +237,9 @@ void main() {
         );
 
         expect(processManager, hasNoRemainingExpectations);
+        expect(
+          stdio.stdout,
+          contains('You must now open a pull request at https://github.com/flutter/engine/compare/flutter-1.2-candidate.3...org:cherrypicks-flutter-1.2-candidate.3?expand=1'));
         expect(stdio.stdout, contains(
                 'Are you ready to push your engine branch to the repository $remoteUrl? (y/n) '));
         expect(finalState.currentPhase, ReleasePhase.CODESIGN_ENGINE_BINARIES);
@@ -332,9 +344,9 @@ void main() {
     });
 
     group('APPLY_FRAMEWORK_CHERRYPICKS to PUBLISH_VERSION', () {
-      const String mirrorRemoteUrl = 'https://githost.com/org/repo.git';
-      const String upstreamRemoteUrl = 'https://githost.com/mirror/repo.git';
-      const String engineUpstreamRemoteUrl = 'https://githost.com/mirror/engine.git';
+      const String mirrorRemoteUrl = 'https://github.com/org/repo.git';
+      const String upstreamRemoteUrl = 'https://github.com/mirror/repo.git';
+      const String engineUpstreamRemoteUrl = 'https://github.com/mirror/engine.git';
       const String frameworkCheckoutPath = '$checkoutsParentDirectory/framework';
       const String engineCheckoutPath = '$checkoutsParentDirectory/engine';
       const String oldEngineVersion = '000000001';
@@ -441,13 +453,14 @@ void main() {
         stdio.stdin.add('n');
         processManager.addCommands(const <FakeCommand>[
           FakeCommand(command: <String>['git', 'fetch', 'upstream']),
+          // we want merged upstream commit, not local working commit
           FakeCommand(command: <String>['git', 'checkout', 'upstream/$candidateBranch']),
           FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
             stdout: revision1,
           ),
           FakeCommand(command: <String>['git', 'fetch', 'upstream']),
-          FakeCommand(command: <String>['git', 'checkout', 'upstream/$workingBranch']),
+          FakeCommand(command: <String>['git', 'checkout', workingBranch]),
           FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
             stdout: revision2,
@@ -509,13 +522,14 @@ void main() {
         stdio.stdin.add('n');
         processManager.addCommands(const <FakeCommand>[
           FakeCommand(command: <String>['git', 'fetch', 'upstream']),
+          // we want merged upstream commit, not local working commit
           FakeCommand(command: <String>['git', 'checkout', 'upstream/$candidateBranch']),
           FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
             stdout: revision1,
           ),
           FakeCommand(command: <String>['git', 'fetch', 'upstream']),
-          FakeCommand(command: <String>['git', 'checkout', 'upstream/$workingBranch']),
+          FakeCommand(command: <String>['git', 'checkout', workingBranch]),
           FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
             stdout: revision2,
@@ -564,6 +578,7 @@ void main() {
         processManager.addCommands(const <FakeCommand>[
           // Engine repo
           FakeCommand(command: <String>['git', 'fetch', 'upstream']),
+          // we want merged upstream commit, not local working commit
           FakeCommand(command: <String>['git', 'checkout', 'upstream/$candidateBranch']),
           FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
@@ -571,7 +586,7 @@ void main() {
           ),
           // Framework repo
           FakeCommand(command: <String>['git', 'fetch', 'upstream']),
-          FakeCommand(command: <String>['git', 'checkout', 'upstream/$workingBranch']),
+          FakeCommand(command: <String>['git', 'checkout', workingBranch]),
           FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
             stdout: revision2,
