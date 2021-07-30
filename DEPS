@@ -97,7 +97,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'd28c48674b65936cf32063da51ef1445af82ac75',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + '300678066c63df763a632943fac3eed0512684b3',
 
    # Fuchsia compatibility
    #
@@ -638,7 +638,7 @@ hooks = [
     'name': 'landmines',
     'pattern': '.',
     'action': [
-        'python',
+        'python3',
         'src/build/landmines.py',
     ],
   },
@@ -647,7 +647,7 @@ hooks = [
     'name': 'win_toolchain',
     'condition': 'download_windows_deps',
     'pattern': '.',
-    'action': ['python', 'src/build/vs_toolchain.py', 'update'],
+    'action': ['python3', 'src/build/vs_toolchain.py', 'update'],
   },
   {
     # Ensure that we don't accidentally reference any .pyc files whose
@@ -655,7 +655,7 @@ hooks = [
     'name': 'remove_stale_pyc_files',
     'pattern': 'src/tools/.*\\.py',
     'action': [
-        'python',
+        'python3',
         'src/tools/remove_stale_pyc_files.py',
         'src/tools',
     ],
@@ -665,7 +665,7 @@ hooks = [
     'pattern': '.',
     'condition': 'download_windows_deps',
     'action': [
-      'python',
+      'python3',
       'src/flutter/tools/dia_dll.py',
     ],
   },
@@ -674,7 +674,7 @@ hooks = [
     'pattern': '.',
     'condition': 'download_linux_deps',
     'action': [
-      'python',
+      'python3',
       'src/build/linux/sysroot_scripts/install-sysroot.py',
       '--arch=x64'],
   },
@@ -683,7 +683,7 @@ hooks = [
     'pattern': '.',
     'condition': 'download_linux_deps',
     'action': [
-      'python',
+      'python3',
       'src/build/linux/sysroot_scripts/install-sysroot.py',
       '--arch=arm64'],
   },
@@ -691,7 +691,7 @@ hooks = [
     'name': 'pub get --offline',
     'pattern': '.',
     'action': [
-      'python',
+      'python3',
       'src/flutter/tools/pub_get_offline.py',
     ]
   },
