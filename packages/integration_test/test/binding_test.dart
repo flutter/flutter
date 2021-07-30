@@ -72,6 +72,7 @@ Future<void> main() async {
     testWidgets('Test traceAction', (WidgetTester tester) async {
       await integrationBinding.enableTimeline(vmService: fakeVM);
       await integrationBinding.traceAction(() async {});
+      print(integrationBinding.reportData);
       expect(integrationBinding.reportData, isNotNull);
       expect(integrationBinding.reportData!.containsKey('timeline'), true);
       expect(

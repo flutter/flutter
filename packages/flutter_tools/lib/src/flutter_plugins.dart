@@ -380,27 +380,47 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
       templateContext['needsShim'] = false;
       // If a plugin is using an embedding version older than 2.0 and the app is using 2.0,
       // then add shim for the old plugins.
+
+      final List<String> pluginsUsingV1 = <String>[];
       for (final Map<String, Object?> plugin in androidPlugins) {
         final bool supportsEmbeddingV1 = (plugin['supportsEmbeddingV1'] as bool?) == true;
         final bool supportsEmbeddingV2 = (plugin['supportsEmbeddingV2'] as bool?) == true;
         if (supportsEmbeddingV1 && !supportsEmbeddingV2) {
           templateContext['needsShim'] = true;
-          if (project.isModule) {
-            globals.printStatus(
-              'The plugin `${plugin['name']}` is built using an older version '
-              "of the Android plugin API which assumes that it's running in a "
-              'full-Flutter environment. It may have undefined behaviors when '
-              'Flutter is integrated into an existing app as a module.\n'
-              'The plugin can be updated to the v2 Android Plugin APIs by '
-              'following https://flutter.dev/go/android-plugin-migration.'
-            );
+          if (plugin['name'] != null) {
+            pluginsUsingV1.add(plugin['name']! as String);
           }
         }
+      }
+      if (pluginsUsingV1.length > 1) {
+        globals.printError(
+          'The plugins `${pluginsUsingV1.join(', ')}` use a deprecated version of the Android embedding.\n'
+          'To avoid unexpected runtime failures, or future build failures, try to see if these plugins '
+          'support the Android V2 embedding. Otherwise, consider removing them since a future release '
+          'of Flutter will remove these deprecated APIs.\n'
+          'If you are plugin author, take a look at the docs for migrating the plugin to the V2 embedding: '
+          'https://flutter.dev/go/android-plugin-migration.'
+        );
+      } else if (pluginsUsingV1.isNotEmpty) {
+        globals.printError(
+          'The plugin `${pluginsUsingV1.first}` uses a deprecated version of the Android embedding.\n'
+          'To avoid unexpected runtime failures, or future build failures, try to see if this plugin '
+          'supports the Android V2 embedding. Otherwise, consider removing it since a future release '
+          'of Flutter will remove these deprecated APIs.\n'
+          'If you are plugin author, take a look at the docs for migrating the plugin to the V2 embedding: '
+          'https://flutter.dev/go/android-plugin-migration.'
+        );
       }
       templateContent = _androidPluginRegistryTemplateNewEmbedding;
       break;
     case AndroidEmbeddingVersion.v1:
     default:
+      globals.printError(
+        'This app is using a deprecated version of the Android embedding.\n'
+        'To avoid unexpected runtime failures, or future build failures, try to migrate this '
+        'app to the V2 embedding.\n'
+        'Take a look at the docs for migrating an app: https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects'
+      );
       for (final Map<String, Object?> plugin in androidPlugins) {
         final bool supportsEmbeddingV1 = (plugin['supportsEmbeddingV1'] as bool?) == true;
         final bool supportsEmbeddingV2 = (plugin['supportsEmbeddingV2'] as bool?) == true;

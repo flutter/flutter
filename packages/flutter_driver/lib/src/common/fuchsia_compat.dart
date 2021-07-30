@@ -83,6 +83,10 @@ Future<PortForwarder> _dummyPortForwardingFunction(
 /// `FUCHSIA_SSH_CONFIG` variables must be set. If run on a Fuchsia device, will
 /// connect locally without need for environment variables.
 class FuchsiaCompat {
+  // This class is not meant to be instantiated or extended; this constructor
+  // prevents instantiation and extension.
+  FuchsiaCompat._();
+
   static void _init() {
     fuchsiaPortForwardingFunction = _dummyPortForwardingFunction;
   }
