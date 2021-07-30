@@ -265,7 +265,7 @@ targets:
 
   - name: Linux test_ownership
     builder: Linux test_ownership
-    postsubmit: false
+    bringup: true
     properties:
       tags: >
         ["framework","hostonly","shard"]
