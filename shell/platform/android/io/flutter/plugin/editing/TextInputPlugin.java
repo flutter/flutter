@@ -230,6 +230,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
       boolean obscureText,
       boolean autocorrect,
       boolean enableSuggestions,
+      boolean enableIMEPersonalizedLearning,
       TextInputChannel.TextCapitalization textCapitalization) {
     if (type.type == TextInputChannel.TextInputType.DATETIME) {
       return InputType.TYPE_CLASS_DATETIME;
@@ -311,8 +312,15 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
             configuration.obscureText,
             configuration.autocorrect,
             configuration.enableSuggestions,
+            configuration.enableIMEPersonalizedLearning,
             configuration.textCapitalization);
     outAttrs.imeOptions = EditorInfo.IME_FLAG_NO_FULLSCREEN;
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+        && !configuration.enableIMEPersonalizedLearning) {
+      outAttrs.imeOptions |= EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING;
+    }
+
     int enterAction;
     if (configuration.inputAction == null) {
       // If an explicit input action isn't set, then default to none for multi-line fields
