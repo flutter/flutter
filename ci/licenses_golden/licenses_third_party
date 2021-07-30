@@ -1,4 +1,4 @@
-Signature: bea3634d82dd4c07913d5db469baff3b
+Signature: e30cd729c47da8d75eb0f0fb6d545dbe
 
 UNUSED LICENSES:
 
@@ -9932,6 +9932,8 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/compiler_timings.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/range.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/relocation_test.cc
 FILE: ../../../third_party/dart/runtime/vm/heap/safepoint_test.cc
+FILE: ../../../third_party/dart/runtime/vm/message_snapshot.cc
+FILE: ../../../third_party/dart/runtime/vm/message_snapshot.h
 FILE: ../../../third_party/dart/runtime/vm/object_graph_copy.cc
 FILE: ../../../third_party/dart/runtime/vm/object_graph_copy.h
 FILE: ../../../third_party/dart/runtime/vm/pending_deopts.cc
@@ -10348,7 +10350,6 @@ FILE: ../../../third_party/dart/runtime/vm/cpu_x64.cc
 FILE: ../../../third_party/dart/runtime/vm/cpuinfo_linux.cc
 FILE: ../../../third_party/dart/runtime/vm/cpuinfo_macos.cc
 FILE: ../../../third_party/dart/runtime/vm/dart_api_impl_test.cc
-FILE: ../../../third_party/dart/runtime/vm/dart_api_message.cc
 FILE: ../../../third_party/dart/runtime/vm/dart_api_message.h
 FILE: ../../../third_party/dart/runtime/vm/dart_api_state.h
 FILE: ../../../third_party/dart/runtime/vm/datastream.h
@@ -10427,13 +10428,11 @@ FILE: ../../../third_party/dart/runtime/vm/proccpuinfo.cc
 FILE: ../../../third_party/dart/runtime/vm/proccpuinfo.h
 FILE: ../../../third_party/dart/runtime/vm/raw_object.cc
 FILE: ../../../third_party/dart/runtime/vm/raw_object.h
-FILE: ../../../third_party/dart/runtime/vm/raw_object_snapshot.cc
 FILE: ../../../third_party/dart/runtime/vm/scopes.cc
 FILE: ../../../third_party/dart/runtime/vm/scopes.h
 FILE: ../../../third_party/dart/runtime/vm/scopes_test.cc
 FILE: ../../../third_party/dart/runtime/vm/snapshot.cc
 FILE: ../../../third_party/dart/runtime/vm/snapshot.h
-FILE: ../../../third_party/dart/runtime/vm/snapshot_ids.h
 FILE: ../../../third_party/dart/runtime/vm/snapshot_test.cc
 FILE: ../../../third_party/dart/runtime/vm/stack_frame.cc
 FILE: ../../../third_party/dart/runtime/vm/stack_frame_test.cc
