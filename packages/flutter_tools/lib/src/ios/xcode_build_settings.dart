@@ -4,6 +4,7 @@
 
 import '../artifacts.dart';
 import '../base/file_system.dart';
+import '../base/os.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../flutter_manifest.dart';
@@ -35,7 +36,7 @@ Future<void> updateGeneratedXcodeProperties({
   bool useMacOSConfig = false,
   String? buildDirOverride,
 }) async {
-  final List<String> xcodeBuildSettings = _xcodeBuildSettingsLines(
+  final List<String> xcodeBuildSettings = await _xcodeBuildSettingsLines(
     project: project,
     buildInfo: buildInfo,
     targetOverride: targetOverride,
@@ -136,13 +137,13 @@ String? parsedBuildNumber({
 }
 
 /// List of lines of build settings. Example: 'FLUTTER_BUILD_DIR=build'
-List<String> _xcodeBuildSettingsLines({
+Future<List<String>> _xcodeBuildSettingsLines({
   required FlutterProject project,
   required BuildInfo buildInfo,
   String? targetOverride,
   bool useMacOSConfig = false,
   String? buildDirOverride,
-}) {
+}) async {
   final List<String> xcodeBuildSettings = <String>[];
 
   final String flutterRoot = globals.fs.path.normalize(Cache.flutterRoot!);
@@ -204,7 +205,15 @@ List<String> _xcodeBuildSettingsLines({
     // ARM not yet supported https://github.com/flutter/flutter/issues/69221
     xcodeBuildSettings.add('EXCLUDED_ARCHS=arm64');
   } else {
-    xcodeBuildSettings.add('EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386');
+    String excludedSimulatorArchs = 'i386';
+
+    // If any plugins or their dependencies do not support arm64 simulators
+    // (to run natively without Rosetta translation on an ARM Mac),
+    // the app will fail to build unless it also excludes arm64 simulators.
+    if (globals.os.hostPlatform == HostPlatform.darwin_arm && !(await project.ios.pluginsSupportArmSimulator())) {
+      excludedSimulatorArchs += ' arm64';
+    }
+    xcodeBuildSettings.add('EXCLUDED_ARCHS[sdk=iphonesimulator*]=$excludedSimulatorArchs');
   }
 
   for (final MapEntry<String, String> config in buildInfo.toEnvironmentConfig().entries) {
