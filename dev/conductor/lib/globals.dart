@@ -178,13 +178,17 @@ String getNewPrLink({
 
 ''');
   if (repoName == 'engine') {
+    if (state.engine.dartRevision.isNotEmpty) {
+      // shorten hashes to make final link manageable
+      body.writeln('- Roll dart revision: dart-lang/sdk@${state.engine.dartRevision.substring(0, 9)}');
+    }
     body.writeAll(
-      state.engine.cherrypicks.map<String>((pb.Cherrypick cp) => '- commit: ${cp.trunkRevision}'),
+      state.engine.cherrypicks.map<String>((pb.Cherrypick cp) => '- commit: ${cp.trunkRevision.substring(0, 9)}'),
       '\n',
     );
   } else {
     body.writeAll(
-      state.framework.cherrypicks.map<String>((pb.Cherrypick cp) => '- commit: ${cp.trunkRevision}'),
+      state.framework.cherrypicks.map<String>((pb.Cherrypick cp) => '- commit: ${cp.trunkRevision.substring(0, 9)}'),
       '\n',
     );
   }
