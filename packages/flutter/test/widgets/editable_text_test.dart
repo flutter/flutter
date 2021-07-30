@@ -199,6 +199,7 @@ void main() {
     expect(editableText.obscureText, isFalse);
     expect(editableText.autocorrect, isTrue);
     expect(editableText.enableSuggestions, isTrue);
+    expect(editableText.enableIMEPersonalizedLearning, isTrue);
     expect(editableText.textAlign, TextAlign.start);
     expect(editableText.cursorWidth, 2.0);
     expect(editableText.cursorHeight, isNull);
@@ -574,6 +575,36 @@ void main() {
     await tester.showKeyboard(find.byType(EditableText));
     await tester.idle();
     expect(tester.testTextInput.setClientArgs!['enableSuggestions'], enableSuggestions);
+  });
+
+  testWidgets('enableIMEPersonalizedLearning flag is sent to the engine properly', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+    const bool enableIMEPersonalizedLearning = false;
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              controller: controller,
+              backgroundCursorColor: Colors.grey,
+              focusNode: focusNode,
+              enableIMEPersonalizedLearning: enableIMEPersonalizedLearning,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    await tester.idle();
+    expect(tester.testTextInput.setClientArgs!['enableIMEPersonalizedLearning'], enableIMEPersonalizedLearning);
   });
 
   group('smartDashesType and smartQuotesType', () {
