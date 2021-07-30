@@ -1816,6 +1816,18 @@ targets:
         ["devicelab"]
     scheduler: luci
 
+  - name: Mac_ios animation_with_microtasks_perf_ios__timeline_summary
+    builder: Mac_ios animation_with_microtasks_perf_ios__timeline_summary
+    presubmit: false
+    # This test was missed as a part of the migration to new infra tooling.
+    # Added as a part of https://github.com/flutter/flutter/issues/87345,
+    # this isn't flaky and "bringup: true" will be removed after a few runs.
+    bringup: true
+    properties:
+      tags: >
+        ["devicelab"]
+    scheduler: luci
+
   - name: Mac_ios basic_material_app_ios__compile
     builder: Mac_ios basic_material_app_ios__compile
     presubmit: false
