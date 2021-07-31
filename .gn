@@ -1,6 +1,10 @@
 # This file is used by the experimental meta-buildsystem in src/tools/gn to
 # find the root of the source tree and to set startup options.
 
+# Use Python 3 for exec_script() calls.
+# See `gn help dotfile` for details.
+script_executable = "python3"
+
 # The location of the build configuration file.
 buildconfig = "//build/config/BUILDCONFIG.gn"
 
