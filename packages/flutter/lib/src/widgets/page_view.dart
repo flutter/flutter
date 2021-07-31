@@ -895,8 +895,15 @@ class PageView extends StatefulWidget {
   State<PageView> createState() => _PageViewState();
 }
 
+
 class _PageViewState extends State<PageView> {
   int _lastReportedPage = 0;
+  
+  Set<PointerDeviceKind> get customDragDevices => {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+        // etc.
+      };
 
   @override
   void initState() {
@@ -945,7 +952,7 @@ class _PageViewState extends State<PageView> {
         controller: widget.controller,
         physics: physics,
         restorationId: widget.restorationId,
-        scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(scrollbars: false),
+        scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(scrollbars: false, dragDevices: customDragDevices),
         viewportBuilder: (BuildContext context, ViewportOffset position) {
           return Viewport(
             // TODO(dnfield): we should provide a way to set cacheExtent
