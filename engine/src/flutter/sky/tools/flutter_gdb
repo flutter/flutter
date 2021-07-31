@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+#
 # Copyright 2013 The Flutter Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -39,7 +40,7 @@ def _find_package_pid(adb_path, package):
     ps_output = subprocess.check_output([adb_path, 'shell', 'ps'])
     ps_match = re.search('^\S+\s+(\d+).*\s%s' % package, ps_output, re.MULTILINE)
     if not ps_match:
-        print 'Unable to find pid for package %s on device' % package
+        print('Unable to find pid for package %s on device' % package)
         return None
     return int(ps_match.group(1))
 
@@ -114,7 +115,7 @@ class GdbClient(object):
 
         dev_null = open(os.devnull, 'w')
         for lib, local_path in sorted(device_libs):
-            print 'Copying %s' % lib
+            print('Copying %s' % lib)
             local_path = os.path.join(GdbClient.SYSTEM_LIBS_PATH, local_path)
             if not os.path.exists(os.path.dirname(local_path)):
                 os.makedirs(os.path.dirname(local_path))
@@ -144,7 +145,7 @@ class GdbClient(object):
 
         debug_out_path = os.path.join(flutter_root, 'out/%s' % local_engine)
         if not os.path.exists(os.path.join(debug_out_path, 'libflutter.so')):
-            print 'Unable to find libflutter.so. Make sure you have completed a %s build' % local_engine
+            print('Unable to find libflutter.so. Make sure you have completed a %s build' % local_engine)
             return 1
 
         eval_commands = []
