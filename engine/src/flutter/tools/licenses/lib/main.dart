@@ -77,7 +77,7 @@ class _RepositorySourceFile extends _RepositoryLicensedFile {
 
   fs.TextFile get ioTextFile => super.io as fs.TextFile;
 
-  static final RegExp _hashBangPattern = RegExp(r'^#! *(?:/bin/sh|/bin/bash|/usr/bin/env +(?:python|bash))\b');
+  static final RegExp _hashBangPattern = RegExp(r'^#! *(?:/bin/sh|/bin/bash|/usr/bin/env +(?:python|python3|bash))\b');
 
   @override
   bool get isShellScript {

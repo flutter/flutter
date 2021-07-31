@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # Copyright 2013 The Flutter Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
@@ -81,7 +81,7 @@ def copy(from_root, to_root, filter_func=None):
         os.makedirs(to_dir)
       shutil.copy(from_path, to_path)
 
-    dirs[:] = filter(wrapped_filter, dirs)
+    dirs[:] = list(filter(wrapped_filter, dirs))
 
 
 def copy_or_link(from_root, to_root, filter_func=None):
@@ -114,7 +114,7 @@ def list_files(from_root, filter_func=None):
     for name in filter(wrapped_filter, files):
       path = os.path.join(root, name)
       file_list.append(path)
-    dirs[:] = filter(wrapped_filter, dirs)
+    dirs[:] = list(filter(wrapped_filter, dirs))
   return file_list
 
 

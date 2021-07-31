@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+#
 # Copyright 2013 The Flutter Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -33,10 +34,10 @@ def patch(dest_dir, relative_patches_dir=os.curdir):
 
   os.chdir(dest_dir)
   for p in utils.find(["*.patch"], patches_dir):
-    print "applying patch %s" % os.path.basename(p)
+    print("applying patch %s" % os.path.basename(p))
     try:
       utils.system(["git", "apply", p])
       utils.commit("applied patch %s" % os.path.basename(p))
     except subprocess.CalledProcessError:
-      print "ERROR: patch %s failed to apply" % os.path.basename(p)
+      print("ERROR: patch %s failed to apply" % os.path.basename(p))
       raise

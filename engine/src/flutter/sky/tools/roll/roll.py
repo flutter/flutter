@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+#
 # Copyright 2013 The Flutter Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -8,7 +9,7 @@ import json
 import os
 import subprocess
 import sys
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 from utils import commit
 from utils import system
 import patch
@@ -96,12 +97,12 @@ def rev(source_dir, dest_dir, dirs_to_rev, name, revision_file=None):
       else:
           d = dir_to_rev
           file_subset = None
-      print "removing directory %s" % d
+      print("removing directory %s" % d)
       try:
           system(["git", "rm", "-r", d], cwd=dest_dir)
       except subprocess.CalledProcessError:
-          print "Could not remove %s" % d
-      print "cloning directory %s" % d
+          print("Could not remove %s" % d)
+      print("cloning directory %s" % d)
 
       if file_subset is None:
           files = system(["git", "ls-files", d], cwd=source_dir).splitlines()
@@ -151,8 +152,8 @@ def main():
       try:
           patch.patch_and_filter(dest_dir, os.path.join('patches', 'chromium'))
       except subprocess.CalledProcessError:
-          print "ERROR: Roll failed due to a patch not applying"
-          print "Fix the patch to apply, commit the result, and re-run this script"
+          print("ERROR: Roll failed due to a patch not applying")
+          print("Fix the patch to apply, commit the result, and re-run this script")
           return 1
 
   return 0

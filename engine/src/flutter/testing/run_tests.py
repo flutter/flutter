@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+#
 # Copyright 2013 The Flutter Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -27,17 +28,17 @@ fml_unittests_filter = '--gtest_filter=-*TimeSensitiveTest*'
 
 
 def PrintDivider(char='='):
-  print '\n'
-  for _ in xrange(4):
-    print(''.join([char for _ in xrange(80)]))
-  print '\n'
+  print('\n')
+  for _ in range(4):
+    print(''.join([char for _ in range(80)]))
+  print('\n')
 
 
 def RunCmd(cmd, forbidden_output=[], expect_failure=False, env=None, **kwargs):
   command_string = ' '.join(cmd)
 
   PrintDivider('>')
-  print 'Running command "%s"' % command_string
+  print('Running command "%s"' % command_string)
 
   start_time = time.time()
   stdout_pipe = sys.stdout if not forbidden_output else subprocess.PIPE
@@ -70,7 +71,7 @@ def RunCmd(cmd, forbidden_output=[], expect_failure=False, env=None, **kwargs):
       raise Exception('command "%s" contained forbidden string %s' % (command_string, forbidden_string))
 
   PrintDivider('<')
-  print 'Command run successfully in %.2f seconds: %s' % (end_time - start_time, command_string)
+  print('Command run successfully in %.2f seconds: %s' % (end_time - start_time, command_string))
 
 
 def IsMac():
@@ -146,7 +147,7 @@ def RunEngineExecutable(build_dir, executable_name, filter, flags=[],
     core_path = os.path.join(cwd, 'core')
     if luci_test_outputs_path and os.path.exists(core_path) and os.path.exists(unstripped_exe):
       dump_path = os.path.join(luci_test_outputs_path, '%s_%s.txt' % (executable_name, sys.platform))
-      print 'Writing core dump analysis to %s' % dump_path
+      print('Writing core dump analysis to %s' % dump_path)
       subprocess.call([
         os.path.join(buildroot_dir, 'flutter', 'testing', 'analyze_core_dump.sh'),
         buildroot_dir, unstripped_exe, core_path, dump_path,
@@ -341,12 +342,12 @@ def RunJavaTests(filter, android_variant='android_debug_unopt'):
   EnsureJavaTestsAreBuilt(android_out_dir)
 
   embedding_deps_dir = os.path.join(buildroot_dir, 'third_party', 'android_embedding_dependencies', 'lib')
-  classpath = map(str, [
+  classpath = list(map(str, [
     os.path.join(buildroot_dir, 'third_party', 'android_tools', 'sdk', 'platforms', 'android-30', 'android.jar'),
     os.path.join(embedding_deps_dir, '*'), # Wildcard for all jars in the directory
     os.path.join(android_out_dir, 'flutter.jar'),
     os.path.join(android_out_dir, 'robolectric_tests.jar')
-  ])
+  ]))
 
   test_class = filter if filter else 'io.flutter.FlutterTestSuite'
   command = [

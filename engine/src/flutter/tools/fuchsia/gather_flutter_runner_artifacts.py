@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # Copyright 2013 The Flutter Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
@@ -58,7 +58,7 @@ def GatherArtifacts(src_root, dst_root, create_meta_package=True):
   else:
     shutil.rmtree(dst_root)
 
-  for src_rel, dst_rel in _ARTIFACT_PATH_TO_DST.iteritems():
+  for src_rel, dst_rel in _ARTIFACT_PATH_TO_DST.items():
     src_full = os.path.join(src_root, src_rel)
     dst_full = os.path.join(dst_root, dst_rel)
     if not os.path.exists(src_full):
