@@ -896,7 +896,6 @@ class PageView extends StatefulWidget {
   State<PageView> createState() => _PageViewState();
 }
 
-
 class _PageViewState extends State<PageView> {
   int _lastReportedPage = 0;
   
