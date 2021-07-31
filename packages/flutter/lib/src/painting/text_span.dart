@@ -383,7 +383,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
     offset.increment(text != null ? text!.length : 0);
   }
 
-  /// In checked mode, throws an exception if the object is not in a valid
+  /// In debug mode, throws an exception if the object is not in a valid
   /// configuration. Otherwise, returns true.
   ///
   /// This is intended to be used as follows:

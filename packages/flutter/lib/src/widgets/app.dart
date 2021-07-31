@@ -242,7 +242,7 @@ typedef InitialRouteListFactory = List<Route<dynamic>> Function(String initialRo
 /// See also:
 ///
 ///  * [CheckedModeBanner], which displays a [Banner] saying "DEBUG" when
-///    running in checked mode.
+///    running in debug mode.
 ///  * [DefaultTextStyle], the text style to apply to descendant [Text] widgets
 ///    without an explicit style.
 ///  * [MediaQuery], which establishes a subtree in which media queries resolve
@@ -960,9 +960,9 @@ class WidgetsApp extends StatefulWidget {
 
   /// Turns on an overlay that enables inspecting the widget tree.
   ///
-  /// The inspector is only available in checked mode as it depends on
+  /// The inspector is only available in debug mode as it depends on
   /// [RenderObject.debugDescribeChildren] which should not be called outside of
-  /// checked mode.
+  /// debug mode.
   final bool debugShowWidgetInspector;
 
   /// Builds the widget the [WidgetInspector] uses to switch between view and
@@ -974,18 +974,18 @@ class WidgetsApp extends StatefulWidget {
   final InspectorSelectButtonBuilder? inspectorSelectButtonBuilder;
 
   /// {@template flutter.widgets.widgetsApp.debugShowCheckedModeBanner}
-  /// Turns on a little "DEBUG" banner in checked mode to indicate
-  /// that the app is in checked mode. This is on by default (in
-  /// checked mode), to turn it off, set the constructor argument to
+  /// Turns on a little "DEBUG" banner in debug mode to indicate
+  /// that the app is in debug mode. This is on by default (in
+  /// debug mode), to turn it off, set the constructor argument to
   /// false. In release mode this has no effect.
   ///
   /// To get this banner in your application if you're not using
   /// WidgetsApp, include a [CheckedModeBanner] widget in your app.
   ///
   /// This banner is intended to deter people from complaining that your
-  /// app is slow when it's in checked mode. In checked mode, Flutter
+  /// app is slow when it's in debug mode. In debug mode, Flutter
   /// enables a large number of expensive diagnostics to aid in
-  /// development, and so performance in checked mode is not
+  /// development, and so performance in debug mode is not
   /// representative of what will happen in release mode.
   /// {@endtemplate}
   final bool debugShowCheckedModeBanner;
