@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # Copyright 2013 The Flutter Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
@@ -13,9 +13,9 @@ Precondition: $CWD/../../flutter is the path to the flutter engine repo.
 usage: copy_info_plist.py <src_path> <dest_path> --bitcode=<enable_bitcode>
 """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
+
+
 import subprocess
 
 import sys
