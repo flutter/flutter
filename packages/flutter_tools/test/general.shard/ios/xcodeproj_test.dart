@@ -9,7 +9,6 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -21,7 +20,6 @@ import 'package:flutter_tools/src/reporting/reporting.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
-import '../../src/fakes.dart';
 
 const String xcodebuild = '/usr/bin/xcodebuild';
 
@@ -739,7 +737,6 @@ Build settings for action build and target plugin2:
       }, overrides: <Type, Generator>{
         Artifacts: () => localArtifacts,
         Platform: () => macOS,
-        OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm),
         FileSystem: () => fs,
         ProcessManager: () => fakeProcessManager,
         XcodeProjectInterpreter: () => xcodeProjectInterpreter,
@@ -781,7 +778,6 @@ Build settings for action build and target plugin2:
       }, overrides: <Type, Generator>{
         Artifacts: () => localArtifacts,
         Platform: () => macOS,
-        OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm),
         FileSystem: () => fs,
         ProcessManager: () => fakeProcessManager,
         XcodeProjectInterpreter: () => xcodeProjectInterpreter,
@@ -835,7 +831,6 @@ Build settings for action build and target plugin2:
       }, overrides: <Type, Generator>{
         Artifacts: () => localArtifacts,
         Platform: () => macOS,
-        OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm),
         FileSystem: () => fs,
         ProcessManager: () => fakeProcessManager,
         XcodeProjectInterpreter: () => xcodeProjectInterpreter,
@@ -846,7 +841,6 @@ Build settings for action build and target plugin2:
       testUsingContext(description, testMethod, overrides: <Type, Generator>{
         Artifacts: () => localArtifacts,
         Platform: () => macOS,
-        OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
       });
@@ -875,7 +869,7 @@ Build settings for action build and target plugin2:
       expect(buildPhaseScriptContents.contains('EXCLUDED_ARCHS'), isFalse);
     });
 
-    testUsingOsxContext('excludes i386 simulator', () async {
+    testUsingOsxContext('does not exclude arm64 simulator when there are no plugins', () async {
       const BuildInfo buildInfo = BuildInfo.debug;
       final FlutterProject project = FlutterProject.fromDirectoryTest(fs.directory('path/to/project'));
       await updateGeneratedXcodeProperties(
