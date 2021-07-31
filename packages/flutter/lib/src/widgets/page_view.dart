@@ -899,7 +899,7 @@ class PageView extends StatefulWidget {
 class _PageViewState extends State<PageView> {
   int _lastReportedPage = 0;
   /// Adds compatability for mouse-based scroll/drag with the line [PointerDeviceKind.mouse] on the PageView for mouse-based platforms.
-  Set<PointerDeviceKind> get customDragDevices => {
+  Set<PointerDeviceKind> get customDragDevices => <PointerDeviceKind>{
         PointerDeviceKind.touch,
         PointerDeviceKind.mouse,
         // etc.
