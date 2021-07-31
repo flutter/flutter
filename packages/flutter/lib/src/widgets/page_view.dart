@@ -899,6 +899,7 @@ class PageView extends StatefulWidget {
 class _PageViewState extends State<PageView> {
   int _lastReportedPage = 0;
   
+  /// Adds compatability for mouse-based scroll/drag with the line [PointerDeviceKind.mouse] on the PageView for mouse-based platforms.
   Set<PointerDeviceKind> get customDragDevices => {
         PointerDeviceKind.touch,
         PointerDeviceKind.mouse,
@@ -952,6 +953,7 @@ class _PageViewState extends State<PageView> {
         controller: widget.controller,
         physics: physics,
         restorationId: widget.restorationId,
+        // Adds compatability for mouse-based scroll/drag on the PageView for mouse-based platforms by implementing the customDragDevices to the dragDevices parameter.
         scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(scrollbars: false, dragDevices: customDragDevices),
         viewportBuilder: (BuildContext context, ViewportOffset position) {
           return Viewport(
