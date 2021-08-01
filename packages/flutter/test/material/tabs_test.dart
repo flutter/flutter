@@ -3871,12 +3871,12 @@ void main() {
             TestSemantics(
               id: 4,
               rect: TestSemantics.fullScreen,
-              children: [
+              children: <TestSemantics>[
                 TestSemantics(
                   id: 6,
                   rect: TestSemantics.fullScreen,
                   actions: <SemanticsAction>[SemanticsAction.scrollLeft],
-                  children: [
+                  children: <TestSemantics>[
                     TestSemantics(
                       id: 5,
                       rect: TestSemantics.fullScreen,
