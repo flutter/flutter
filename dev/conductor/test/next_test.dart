@@ -23,9 +23,9 @@ void main() {
     const String workingBranch = 'cherrypicks-$candidateBranch';
     final String localPathSeparator = const LocalPlatform().pathSeparator;
     final String localOperatingSystem = const LocalPlatform().pathSeparator;
-    const String revision1 = 'abc123';
-    const String revision2 = 'def456';
-    const String revision3 = '789aaa';
+    const String revision1 = 'd3af60d18e01fcb36e0c0fa06c8502e4935ed095';
+    const String revision2 = 'f99555c1e1392bf2a8135056b9446680c2af4ddf';
+    const String revision3 = '98a5ca242b9d270ce000b26309b8a3cdc9c89df5';
     const String releaseVersion = '1.2.0-3.0.pre';
     const String releaseChannel = 'beta';
     late MemoryFileSystem fileSystem;
@@ -203,7 +203,7 @@ void main() {
             candidateBranch: candidateBranch,
             cherrypicks: <pb.Cherrypick>[
               pb.Cherrypick(
-                trunkRevision: 'abc123',
+                trunkRevision: revision2,
                 state: pb.CherrypickState.PENDING,
               ),
             ],
@@ -212,6 +212,7 @@ void main() {
             mirror: pb.Remote(name: 'mirror', url: remoteUrl),
           ),
           releaseChannel: releaseChannel,
+          releaseVersion: releaseVersion,
         );
         writeStateToFile(
           fileSystem.file(stateFile),
@@ -350,6 +351,7 @@ void main() {
       const String frameworkCheckoutPath = '$checkoutsParentDirectory/framework';
       const String engineCheckoutPath = '$checkoutsParentDirectory/engine';
       const String oldEngineVersion = '000000001';
+      const String frameworkCherrypick = '431ae69b4dd2dd48f7ba0153671e0311014c958b';
       late FakeProcessManager processManager;
       late FakePlatform platform;
       late pb.ConductorState state;
@@ -371,7 +373,7 @@ void main() {
             checkoutPath: frameworkCheckoutPath,
             cherrypicks: <pb.Cherrypick>[
               pb.Cherrypick(
-                trunkRevision: 'abc123',
+                trunkRevision: frameworkCherrypick,
                 state: pb.CherrypickState.PENDING,
               ),
             ],
@@ -383,6 +385,7 @@ void main() {
             candidateBranch: candidateBranch,
             checkoutPath: engineCheckoutPath,
             dartRevision: 'cdef0123',
+            workingBranch: workingBranch,
             upstream: pb.Remote(name: 'upstream', url: engineUpstreamRemoteUrl),
           ),
           currentPhase: ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS,
