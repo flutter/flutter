@@ -1688,6 +1688,7 @@ class TabPageSelector extends StatelessWidget {
     final ColorTween selectedColorTween = ColorTween(begin: fixColor, end: fixSelectedColor);
     final ColorTween previousColorTween = ColorTween(begin: fixSelectedColor, end: fixColor);
     final TabController? tabController = controller ?? DefaultTabController.of(context);
+	  final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     assert(() {
       if (tabController == null) {
         throw FlutterError(
@@ -1708,7 +1709,7 @@ class TabPageSelector extends StatelessWidget {
       animation: animation,
       builder: (BuildContext context, Widget? child) {
         return Semantics(
-          label: 'Page ${tabController.index + 1} of ${tabController.length}',
+          label: localizations.tabLabel(tabIndex: tabController.index + 1, tabCount: tabController.length),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: List<Widget>.generate(tabController.length, (int tabIndex) {
