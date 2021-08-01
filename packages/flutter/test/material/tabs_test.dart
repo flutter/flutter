@@ -3847,14 +3847,14 @@ void main() {
       ),
     );
 
-    final TestSemantics expectedSemantics = TestSemantics.root(      
+    final TestSemantics expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
           label: 'Tab 1 of 2',
           id: 1,
           rect: TestSemantics.fullScreen,
           children: <TestSemantics>[
-            TestSemantics(              
+            TestSemantics(
               label: 'TAB1\nTab 1 of 2',
               flags: <SemanticsFlag>[SemanticsFlag.isFocusable, SemanticsFlag.isSelected],
               id: 2,
@@ -3875,17 +3875,17 @@ void main() {
                 TestSemantics(
                   id: 6,
                   rect: TestSemantics.fullScreen,
-                  actions: <SemanticsAction>[SemanticsAction.scrollLeft],  
+                  actions: <SemanticsAction>[SemanticsAction.scrollLeft],
                   children: [
                     TestSemantics(
                       id: 5,
-                      rect: TestSemantics.fullScreen,   
-                      label: 'PAGE1'   
-                    ),               
+                      rect: TestSemantics.fullScreen,
+                      label: 'PAGE1'
+                    ),
                   ]
-                ),              
+                ),
               ],
-            ),                        
+            ),
           ],
         ),
       ],
@@ -3893,8 +3893,8 @@ void main() {
 
     expect(semantics, hasSemantics(expectedSemantics, ignoreRect: true, ignoreTransform: true));
 
-    semantics.dispose();    
-  });  
+    semantics.dispose();
+  });
 }
 
 class KeepAliveInk extends StatefulWidget {
