@@ -772,11 +772,16 @@ class SerialTapUpDetails {
 /// For example, consider a list item that should be _selected_ on the first
 /// tap and _cause an edit dialog to open_ on a double-tap. If you use both
 /// [TapGestureRecognizer] and [DoubleTapGestureRecognizer], there are a few
-/// problems: (1) if the user single-taps the list item, it will not select
-/// the list item until after enough time has passed to rule out a double-tap,
-/// and (2) if the user double-taps the list item, it will not select the list
-/// item at all. The solution is to use [SerialTapGestureRecognizer] and use
-/// the tap count to either select the list item or open the edit dialog.
+/// problems:
+///
+///   1. If the user single-taps the list item, it will not select
+///      the list item until after enough time has passed to rule out a
+///      double-tap.
+///   2. If the user double-taps the list item, it will not select the list
+///      item at all.
+///
+/// The solution is to use [SerialTapGestureRecognizer] and use the tap count
+/// to either select the list item or open the edit dialog.
 ///
 /// ### When competing with `TapGestureRecognizer` and `DoubleTapGestureRecognizer`
 ///
