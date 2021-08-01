@@ -85,6 +85,22 @@ const List<String> kWebTestFileKnownFailures = <String>[
 const String kSmokeTestShardName = 'smoke_tests';
 const List<String> _kAllBuildModes = <String>['debug', 'profile', 'release'];
 
+// The seed used to shuffle tests.  If not passed with
+// --test-randomize-ordering-seed=<seed> on the command line, it will be set the
+// first time it is accessed. Pass zero to turn off shuffling.
+String? _shuffleSeed;
+String get shuffleSeed {
+  if (_shuffleSeed == null) {
+    // Change the seed at 7am, UTC.
+    final DateTime seedTime = DateTime.now().toUtc().subtract(const Duration(hours: 7));
+    // Generates YYYYMMDD as the seed, so that testing continues to fail for a
+    // day after the seed changes, and on other days the seed can be used to
+    // replicate failures.
+    _shuffleSeed = '${seedTime.year * 10000 + seedTime.month * 100 + seedTime.day}';
+  }
+  return _shuffleSeed!;
+}
+
 /// When you call this, you can pass additional arguments to pass custom
 /// arguments to flutter test. For example, you might want to call this
 /// script with the parameter --local-engine=host_debug_unopt to
@@ -99,12 +115,20 @@ Future<void> main(List<String> args) async {
   print('$clock STARTING ANALYSIS');
   try {
     flutterTestArgs.addAll(args);
+    final Set<String> removeArgs = <String>{};
     for (final String arg in args) {
-      if (arg.startsWith('--local-engine='))
+      if (arg.startsWith('--local-engine=')) {
         localEngineEnv['FLUTTER_LOCAL_ENGINE'] = arg.substring('--local-engine='.length);
-      if (arg.startsWith('--local-engine-src-path='))
+      }
+      if (arg.startsWith('--local-engine-src-path=')) {
         localEngineEnv['FLUTTER_LOCAL_ENGINE_SRC_PATH'] = arg.substring('--local-engine-src-path='.length);
+      }
+      if (arg.startsWith('--test-randomize-ordering-seed=')) {
+        _shuffleSeed = arg.substring('--test-randomize-ordering-seed='.length);
+        removeArgs.add(arg);
+      }
     }
+    flutterTestArgs.removeWhere((String arg) => removeArgs.contains(arg));
     if (Platform.environment.containsKey(CIRRUS_TASK_NAME))
       print('Running task: ${Platform.environment[CIRRUS_TASK_NAME]}');
     print('═' * 80);
@@ -116,7 +140,8 @@ Future<void> main(List<String> args) async {
       'framework_coverage': _runFrameworkCoverage,
       'framework_tests': _runFrameworkTests,
       'tool_tests': _runToolTests,
-      'web_tool_tests': _runToolTests,
+      // web_tool_tests is also used by HHH: https://dart.googlesource.com/recipes/+/refs/heads/master/recipes/dart/flutter_engine.py
+      'web_tool_tests': _runWebToolTests,
       'tool_integration_tests': _runIntegrationToolTests,
       // All the unit/widget tests run using `flutter test --platform=chrome`
       'web_tests': _runWebUnitTests,
@@ -331,7 +356,6 @@ Future<void> _runToolTests() async {
   await selectSubshard(<String, ShardRunner>{
     'general': _runGeneralToolTests,
     'commands': _runCommandsToolTests,
-    'web': _runWebToolTests,
   });
 }
 
@@ -728,6 +752,7 @@ Future<void> _runFrameworkTests() async {
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'));
+    await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'gen_keycodes'));
     await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'), options: soundNullSafetyOptions);
     await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'), options: soundNullSafetyOptions);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'benchmarks', 'test_apps', 'stocks'));
@@ -1120,6 +1145,7 @@ Future<void> _runFlutterPluginsTests() async {
       './script/tool_runner.sh',
       <String>[
         'analyze',
+        '--custom-analysis=script/configs/custom_analysis.yaml',
       ],
       workingDirectory: checkout.path,
       environment: <String, String>{
@@ -1436,6 +1462,7 @@ Future<void> _pubRunTest(String workingDirectory, {
   Duration? perTestTimeout,
   bool includeLocalEngineEnv = false,
   bool ensurePrecompiledTool = true,
+  bool shuffleTests = true,
 }) async {
   int? cpus;
   final String? cpuVariable = Platform.environment['CPU']; // CPU is set in cirrus.yml
@@ -1458,6 +1485,7 @@ Future<void> _pubRunTest(String workingDirectory, {
   final List<String> args = <String>[
     'run',
     'test',
+    if (shuffleTests) '--test-randomize-ordering-seed=$shuffleSeed',
     if (useFlutterTestFormatter)
       '-rjson'
     else
@@ -1531,11 +1559,13 @@ Future<void> _runFlutterTest(String workingDirectory, {
   List<String> options = const <String>[],
   Map<String, String>? environment,
   List<String> tests = const <String>[],
+  bool shuffleTests = true,
 }) async {
   assert(!printOutput || outputChecker == null, 'Output either can be printed or checked but not both');
 
   final List<String> args = <String>[
     'test',
+    if (shuffleTests) '--test-randomize-ordering-seed=$shuffleSeed',
     ...options,
     ...flutterTestArgs,
   ];

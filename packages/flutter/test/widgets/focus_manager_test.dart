@@ -165,6 +165,99 @@ void main() {
         'hasPrimaryFocus: false',
       ]);
     });
+
+    testWidgets('onKeyEvent and onKey correctly cooperate', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode(debugLabel: 'Test Node 3');
+      List<List<KeyEventResult>> results = <List<KeyEventResult>>[
+        <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
+        <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
+        <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
+      ];
+      final List<int> logs = <int>[];
+
+      await tester.pumpWidget(
+        Focus(
+          focusNode: FocusNode(debugLabel: 'Test Node 1'),
+          onKeyEvent: (_, KeyEvent event) {
+            logs.add(0);
+            return results[0][0];
+          },
+          onKey: (_, RawKeyEvent event) {
+            logs.add(1);
+            return results[0][1];
+          },
+          child: Focus(
+            focusNode: FocusNode(debugLabel: 'Test Node 2'),
+            onKeyEvent: (_, KeyEvent event) {
+              logs.add(10);
+              return results[1][0];
+            },
+            onKey: (_, RawKeyEvent event) {
+              logs.add(11);
+              return results[1][1];
+            },
+            child: Focus(
+              focusNode: focusNode,
+              onKeyEvent: (_, KeyEvent event) {
+                logs.add(20);
+                return results[2][0];
+              },
+              onKey: (_, RawKeyEvent event) {
+                logs.add(21);
+                return results[2][1];
+              },
+              child: const SizedBox(width: 200, height: 100),
+            ),
+          ),
+        ),
+      );
+      focusNode.requestFocus();
+      await tester.pump();
+
+      // All ignored.
+      results = <List<KeyEventResult>>[
+        <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
+        <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
+        <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
+      ];
+      expect(await simulateKeyDownEvent(LogicalKeyboardKey.digit1),
+          false);
+      expect(logs, <int>[20, 21, 10, 11, 0, 1]);
+      logs.clear();
+
+      // The onKeyEvent should be able to stop propagation.
+      results = <List<KeyEventResult>>[
+        <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
+        <KeyEventResult>[KeyEventResult.handled, KeyEventResult.ignored],
+        <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
+      ];
+      expect(await simulateKeyUpEvent(LogicalKeyboardKey.digit1),
+          true);
+      expect(logs, <int>[20, 21, 10, 11]);
+      logs.clear();
+
+      // The onKey should be able to stop propagation.
+      results = <List<KeyEventResult>>[
+        <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
+        <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.handled],
+        <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
+      ];
+      expect(await simulateKeyDownEvent(LogicalKeyboardKey.digit1),
+          true);
+      expect(logs, <int>[20, 21, 10, 11]);
+      logs.clear();
+
+      // KeyEventResult.skipRemainingHandlers works.
+      results = <List<KeyEventResult>>[
+        <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
+        <KeyEventResult>[KeyEventResult.skipRemainingHandlers, KeyEventResult.ignored],
+        <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
+      ];
+      expect(await simulateKeyUpEvent(LogicalKeyboardKey.digit1),
+          false);
+      expect(logs, <int>[20, 21, 10, 11]);
+      logs.clear();
+    }, variant: KeySimulatorTransitModeVariant.all());
   });
 
   group(FocusScopeNode, () {
@@ -936,7 +1029,7 @@ void main() {
       // Since none of the focused nodes handle this event, nothing should
       // receive it.
       expect(receivedAnEvent, isEmpty);
-    });
+    }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Initial highlight mode guesses correctly.', (WidgetTester tester) async {
       FocusManager.instance.highlightStrategy = FocusHighlightStrategy.automatic;

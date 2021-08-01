@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=3890307731"
+@Tags(<String>['no-shuffle'])
+
 import 'dart:math' as math;
 import 'dart:ui' as ui show window, BoxHeightStyle, BoxWidthStyle, WindowPadding;
 
@@ -833,13 +839,28 @@ void main() {
         ),
       ),
     );
+    final EditableTextState editableTextState = tester.state(find.byType(EditableText));
 
-    final Offset textfieldStart = tester.getTopLeft(find.byKey(const Key('field0')));
-
-    await tester.longPressAt(textfieldStart + const Offset(50.0, 2.0));
+    // Double tap to select the first word.
+    const int index = 4;
+    await tester.tapAt(textOffsetToPosition(tester, index));
     await tester.pump(const Duration(milliseconds: 50));
-    await tester.tapAt(textfieldStart + const Offset(100.0, 107.0));
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.tapAt(textOffsetToPosition(tester, index));
+    await tester.pumpAndSettle();
+    expect(editableTextState.selectionOverlay!.handlesAreVisible, isTrue);
+    expect(controller.selection.baseOffset, 0);
+    expect(controller.selection.extentOffset, 7);
+
+    // Use toolbar to select all text.
+    if (isContextMenuProvidedByPlatform) {
+      controller.selection = TextSelection(baseOffset: 0, extentOffset: controller.text.length);
+      expect(controller.selection.extentOffset, controller.text.length);
+    } else {
+      await tester.tap(find.text('Select all'));
+      await tester.pump();
+      expect(controller.selection.baseOffset, 0);
+      expect(controller.selection.extentOffset, controller.text.length);
+    }
 
     await expectLater(
       find.byType(MaterialApp),
@@ -907,7 +928,7 @@ void main() {
       ),
     );
     focusNode.requestFocus();
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     await expectLater(
       find.byType(TextField),
@@ -935,7 +956,7 @@ void main() {
       ),
     );
     focusNode.requestFocus();
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     await expectLater(
       find.byType(TextField),
@@ -963,7 +984,7 @@ void main() {
       ),
     );
     focusNode.requestFocus();
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     await expectLater(
       find.byType(TextField),
@@ -4710,7 +4731,7 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
       await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
       expect(controller.selection.extentOffset - controller.selection.baseOffset, -1);
-    });
+    }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Shift test 2', (WidgetTester tester) async {
       await setupWidget(tester);
@@ -4728,7 +4749,7 @@ void main() {
       await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowRight);
       await tester.pumpAndSettle();
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 1);
-    });
+    }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Control Shift test', (WidgetTester tester) async {
       await setupWidget(tester);
@@ -4745,7 +4766,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 5);
-    });
+    }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Down and up test', (WidgetTester tester) async {
       await setupWidget(tester);
@@ -4772,7 +4793,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 0);
-    });
+    }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Down and up test 2', (WidgetTester tester) async {
       await setupWidget(tester);
@@ -4828,7 +4849,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, -5);
-    });
+    }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Read only keyboard selection test', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(text: 'readonly');
@@ -4848,7 +4869,7 @@ void main() {
       await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
       await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowLeft);
       expect(controller.selection.extentOffset - controller.selection.baseOffset, -1);
-    });
+    }, variant: KeySimulatorTransitModeVariant.all());
   }, skip: areKeyEventsHandledByPlatform);
 
   testWidgets('Copy paste test', (WidgetTester tester) async {
@@ -4923,7 +4944,7 @@ void main() {
 
     const String expected = 'a biga big house\njumped over a mouse';
     expect(find.text(expected), findsOneWidget, reason: 'Because text contains ${controller.text}');
-  }, skip: areKeyEventsHandledByPlatform);
+  }, skip: areKeyEventsHandledByPlatform, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Copy paste obscured text test', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -4997,7 +5018,7 @@ void main() {
 
     const String expected = 'a biga big house jumped over a mouse';
     expect(find.text(expected), findsOneWidget, reason: 'Because text contains ${controller.text}');
-  }, skip: areKeyEventsHandledByPlatform);
+  }, skip: areKeyEventsHandledByPlatform, variant: KeySimulatorTransitModeVariant.all());
 
   // Regressing test for https://github.com/flutter/flutter/issues/78219
   testWidgets('Paste does not crash when the section is inValid', (WidgetTester tester) async {
@@ -5048,7 +5069,7 @@ void main() {
     // Do nothing.
     expect(find.text(clipboardContent), findsNothing);
     expect(controller.selection, const TextSelection.collapsed(offset: -1));
-  });
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Cut test', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -5124,7 +5145,7 @@ void main() {
 
     const String expected = ' housa bige\njumped over a mouse';
     expect(find.text(expected), findsOneWidget);
-  }, skip: areKeyEventsHandledByPlatform);
+  }, skip: areKeyEventsHandledByPlatform, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Cut obscured text test', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -5199,7 +5220,7 @@ void main() {
 
     const String expected = ' housa bige jumped over a mouse';
     expect(find.text(expected), findsOneWidget);
-  }, skip: areKeyEventsHandledByPlatform);
+  }, skip: areKeyEventsHandledByPlatform, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Select all test', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -5248,7 +5269,7 @@ void main() {
 
     const String expected = '';
     expect(find.text(expected), findsOneWidget);
-  }, skip: areKeyEventsHandledByPlatform);
+  }, skip: areKeyEventsHandledByPlatform, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Delete test', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -5300,7 +5321,7 @@ void main() {
 
     const String expected2 = '';
     expect(find.text(expected2), findsOneWidget);
-  }, skip: areKeyEventsHandledByPlatform);
+  }, skip: areKeyEventsHandledByPlatform, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Changing positions of text fields', (WidgetTester tester) async {
 
@@ -5392,7 +5413,7 @@ void main() {
     await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
 
     expect(c1.selection.extentOffset - c1.selection.baseOffset, -10);
-  }, skip: areKeyEventsHandledByPlatform);
+  }, skip: areKeyEventsHandledByPlatform, variant: KeySimulatorTransitModeVariant.all());
 
 
   testWidgets('Changing focus test', (WidgetTester tester) async {
@@ -5467,7 +5488,7 @@ void main() {
 
     expect(c1.selection.extentOffset - c1.selection.baseOffset, 0);
     expect(c2.selection.extentOffset - c2.selection.baseOffset, -5);
-  }, skip: areKeyEventsHandledByPlatform);
+  }, skip: areKeyEventsHandledByPlatform, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Caret works when maxLines is null', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
@@ -6202,10 +6223,13 @@ void main() {
 
     semantics.dispose();
 
-    // On web (just like iOS), we don't check for pasteability because that
-    // triggers a permission dialog in the browser.
+    // On web, we don't check for pasteability because that triggers a
+    // permission dialog in the browser.
     // https://github.com/flutter/flutter/pull/57139#issuecomment-629048058
-  }, skip: isBrowser);
+    // TODO(justinmc): Remove TargetPlatform override when Android and iOS uses
+    //                 `hasStrings` to check for pasteability.
+    //                 https://github.com/flutter/flutter/issues/74139
+  }, skip: isBrowser, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.linux }));
 
   testWidgets('TextField throws when not descended from a Material widget', (WidgetTester tester) async {
     const Widget textField = TextField();
@@ -9567,7 +9591,10 @@ void main() {
       // pasted.
       expect(triedToReadClipboard, true);
     }
-  });
+    // TODO(justinmc): Eventually, all platform should call `hasStrings` instead.
+    //                 This entire test will become irrelevant after the fact.
+    //                 https://github.com/flutter/flutter/issues/74139
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.linux }));
 
   testWidgets('TextField changes mouse cursor when hovered', (WidgetTester tester) async {
     await tester.pumpWidget(
