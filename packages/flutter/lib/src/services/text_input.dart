@@ -788,7 +788,7 @@ enum SelectionChangedCause {
   /// location of the cursor.
   ///
   /// An example is when the user taps on select all in the tool bar.
-  toolBar,
+  toolbar,
 
   /// The user used the mouse to change the selection by dragging over a piece
   /// of text.
@@ -848,10 +848,10 @@ mixin TextSelectionDelegate {
   /// Whether select all is enabled, must not be null.
   bool get selectAllEnabled => true;
 
-  /// Cut current [selection] to Clipboard.
+  /// Cut current [selection] to [Clipboard].
   ///
-  /// If [cause] is [SelectionChangedCause.toolBar], the position of
-  /// [bringIntoView] to selection will be called and hide toolBar.
+  /// If and only if [cause] is [SelectionChangedCause.toolbar], the toolbar
+  /// will be hidden and the current selection will be scrolled into view.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   void cutSelection(SelectionChangedCause cause) {
@@ -870,7 +870,7 @@ mixin TextSelectionDelegate {
       cause,
     );
 
-    if (cause == SelectionChangedCause.toolBar) {
+    if (cause == SelectionChangedCause.toolbar) {
       bringIntoView(textEditingValue.selection.extent);
       hideToolbar();
     }
@@ -880,12 +880,12 @@ mixin TextSelectionDelegate {
   ///
   /// If there is currently a selection, it will be replaced.
   ///
-  /// If [cause] is [SelectionChangedCause.toolBar], the position of
-  /// [bringIntoView] to selection will be called and hide toolBar.
+  /// If and only if [cause] is [SelectionChangedCause.toolbar], the toolbar
+  /// will be hidden and the current selection will be scrolled into view.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   Future<void> pasteText(SelectionChangedCause cause) async {
-    final TextEditingValue value = textEditingValue; // Snapshot the input before using `await`.
+    final TextEditingValue value = textEditingValue;
     // Snapshot the input before using `await`.
     // See https://github.com/flutter/flutter/issues/11427
     final ClipboardData? data = await Clipboard.getData(Clipboard.kTextPlain);
@@ -902,7 +902,7 @@ mixin TextSelectionDelegate {
         cause,
       );
     }
-    if (cause == SelectionChangedCause.toolBar) {
+    if (cause == SelectionChangedCause.toolbar) {
       bringIntoView(textEditingValue.selection.extent);
       hideToolbar();
     }
@@ -910,8 +910,8 @@ mixin TextSelectionDelegate {
 
   /// Set the current [selection] to contain the entire text value.
   ///
-  /// If [cause] is [SelectionChangedCause.toolBar], the position of
-  /// [bringIntoView] to selection will be called.
+  /// If and only if [cause] is [SelectionChangedCause.toolbar], the selection
+  /// will be scrolled into view.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   void selectAll(SelectionChangedCause cause) {
@@ -925,15 +925,15 @@ mixin TextSelectionDelegate {
       ),
       cause,
     );
-    if (cause == SelectionChangedCause.toolBar) {
+    if (cause == SelectionChangedCause.toolbar) {
       bringIntoView(textEditingValue.selection.extent);
     }
   }
 
   /// Copy current [selection] to [Clipboard].
   ///
-  /// If [cause] is [SelectionChangedCause.toolBar], the position of
-  /// [bringIntoView] to selection will be called and hide toolBar.
+  /// If [cause] is [SelectionChangedCause.toolbar], the position of
+  /// [bringIntoView] to selection will be called and hide toolbar.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   void copySelection(SelectionChangedCause cause) {
@@ -942,20 +942,19 @@ mixin TextSelectionDelegate {
       text: value.selection.textInside(value.text),
     ));
 
-    if (cause == SelectionChangedCause.toolBar) {
+    if (cause == SelectionChangedCause.toolbar) {
       bringIntoView(textEditingValue.selection.extent);
+      hideToolbar(false);
 
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
-        // Hide the toolbar, but keep the selection and keep the handles.
-          hideToolbar(false);
           break;
         case TargetPlatform.macOS:
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
-        // Collapse the selection and hide the toolbar and handles.
+          // Collapse the selection and hide the toolbar and handles.
           userUpdateTextEditingValue(
             TextEditingValue(
               text: value.text,
@@ -963,7 +962,6 @@ mixin TextSelectionDelegate {
             ),
             cause,
           );
-          hideToolbar(false);
           break;
       }
     }

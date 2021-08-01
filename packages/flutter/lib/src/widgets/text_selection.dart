@@ -205,7 +205,7 @@ abstract class TextSelectionControls {
   /// This is called by subclasses when their cut affordance is activated by
   /// the user.
   void handleCut(TextSelectionDelegate delegate) {
-    delegate.cutSelection(SelectionChangedCause.toolBar);
+    delegate.cutSelection(SelectionChangedCause.toolbar);
   }
 
   /// Call [TextSelectionDelegate.copySelection] to copy current [selection].
@@ -213,7 +213,7 @@ abstract class TextSelectionControls {
   /// This is called by subclasses when their copy affordance is activated by
   /// the user.
   void handleCopy(TextSelectionDelegate delegate, ClipboardStatusNotifier? clipboardStatus) {
-    delegate.copySelection(SelectionChangedCause.toolBar);
+    delegate.copySelection(SelectionChangedCause.toolbar);
     clipboardStatus?.update();
   }
 
@@ -227,7 +227,7 @@ abstract class TextSelectionControls {
   /// implemented.
   // TODO(ianh): https://github.com/flutter/flutter/issues/11427
   Future<void> handlePaste(TextSelectionDelegate delegate) async {
-    delegate.pasteText(SelectionChangedCause.toolBar);
+    delegate.pasteText(SelectionChangedCause.toolbar);
   }
 
   /// Call [TextSelectionDelegate.selectAll] to set the current [selection] to
@@ -238,7 +238,7 @@ abstract class TextSelectionControls {
   /// This is called by subclasses when their select-all affordance is activated
   /// by the user.
   void handleSelectAll(TextSelectionDelegate delegate) {
-    delegate.selectAll(SelectionChangedCause.toolBar);
+    delegate.selectAll(SelectionChangedCause.toolbar);
   }
 }
 
