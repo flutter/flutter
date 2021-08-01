@@ -7787,6 +7787,96 @@ void main() {
 
     expect(fadeTransition.toString(), contains('DISPOSED'));
   }, skip: kIsWeb);
+
+  testWidgets('selection will be scrolled into view with SelectionChangedCause', (WidgetTester tester) async {
+    final GlobalKey<EditableTextState> key = GlobalKey<EditableTextState>();
+    final String text = List<int>.generate(64, (int index) => index).join('\n');
+    final TextEditingController controller = TextEditingController(text: text);
+    final ScrollController scrollController = ScrollController();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox(
+              height: 32,
+              child: EditableText(
+                key: key,
+                focusNode: focusNode,
+                style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+                cursorColor: Colors.blue,
+                backgroundCursorColor: Colors.grey,
+                controller: controller,
+                scrollController: scrollController,
+                maxLines: 2,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TextSelectionDelegate textSelectionDelegate = key.currentState!;
+
+    late double maxScrollExtent;
+    Future<void> resetSelectionAndScrollOffset([bool setMaxScrollExtent = true]) async {
+      controller.value = controller.value.copyWith(
+        text: text,
+        selection: controller.selection.copyWith(baseOffset: 0, extentOffset: 1),
+      );
+      await tester.pump();
+      final double targetOffset = setMaxScrollExtent ? scrollController.position.maxScrollExtent : 0.0;
+      scrollController.jumpTo(targetOffset);
+      await tester.pumpAndSettle();
+      maxScrollExtent = scrollController.position.maxScrollExtent;
+      expect(scrollController.offset, targetOffset);
+    }
+
+    // cut
+    await resetSelectionAndScrollOffset();
+    textSelectionDelegate.cutSelection(SelectionChangedCause.keyboard);
+    await tester.pump();
+    expect(scrollController.offset, maxScrollExtent);
+
+    await resetSelectionAndScrollOffset();
+    textSelectionDelegate.cutSelection(SelectionChangedCause.toolbar);
+    await tester.pump();
+    expect(scrollController.offset, 0);
+
+    // paste
+    await resetSelectionAndScrollOffset();
+    textSelectionDelegate.pasteText(SelectionChangedCause.keyboard);
+    await tester.pump();
+    expect(scrollController.offset, maxScrollExtent);
+
+    await resetSelectionAndScrollOffset();
+    textSelectionDelegate.pasteText(SelectionChangedCause.toolbar);
+    await tester.pump();
+    expect(scrollController.offset, 0);
+
+    // select all
+    await resetSelectionAndScrollOffset(false);
+    textSelectionDelegate.selectAll(SelectionChangedCause.keyboard);
+    await tester.pump();
+    expect(scrollController.offset, 0);
+
+    await resetSelectionAndScrollOffset(false);
+    textSelectionDelegate.selectAll(SelectionChangedCause.toolbar);
+    await tester.pump();
+    expect(scrollController.offset, maxScrollExtent);
+
+    // copy
+    await resetSelectionAndScrollOffset();
+    textSelectionDelegate.copySelection(SelectionChangedCause.keyboard);
+    await tester.pump();
+    expect(scrollController.offset, maxScrollExtent);
+
+    await resetSelectionAndScrollOffset();
+    textSelectionDelegate.copySelection(SelectionChangedCause.toolbar);
+    await tester.pump();
+    expect(scrollController.offset, 0);
+
+  });
 }
 
 class UnsettableController extends TextEditingController {
