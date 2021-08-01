@@ -1,9 +1,10 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
+
 import sys
 import time
 import os
 import string
-import StringIO
+import io
 sys.path.insert(0, "python")
 import libxml2
 
@@ -34,8 +35,8 @@ resources = {}
 def resolver(URL, ID, ctxt):
     global resources
 
-    if resources.has_key(URL):
-        return(StringIO.StringIO(resources[URL]))
+    if URL in resources:
+        return(io.StringIO(resources[URL]))
     log.write("Resolver failure: asked %s\n" % (URL))
     log.write("resources: %s\n" % (resources))
     return None
@@ -66,7 +67,7 @@ def handle_valid(node, schema):
     while child != None:
         if child.type != 'text':
 	    instance = instance + child.serialize()
-	child = child.next
+	child = child.__next__
 
 #    mem = libxml2.debugMemory(1);
     try:
@@ -82,7 +83,7 @@ def handle_valid(node, schema):
 	return
 
     if debug:
-        print "instance line %d" % (node.lineNo())
+        print("instance line %d" % (node.lineNo()))
        
     try:
         ctxt = schema.relaxNGNewValidCtxt()
@@ -119,7 +120,7 @@ def handle_invalid(node, schema):
     while child != None:
         if child.type != 'text':
 	    instance = instance + child.serialize()
-	child = child.next
+	child = child.__next__
 
 #    mem = libxml2.debugMemory(1);
 
@@ -135,7 +136,7 @@ def handle_invalid(node, schema):
 	return
 
     if debug:
-        print "instance line %d" % (node.lineNo())
+        print("instance line %d" % (node.lineNo()))
        
     try:
         ctxt = schema.relaxNGNewValidCtxt()
@@ -172,7 +173,7 @@ def handle_correct(node):
     while child != None:
         if child.type != 'text':
 	    schema = schema + child.serialize()
-	child = child.next
+	child = child.__next__
 
     try:
 	rngp = libxml2.relaxNGNewMemParserCtxt(schema, len(schema))
@@ -198,7 +199,7 @@ def handle_incorrect(node):
     while child != None:
         if child.type != 'text':
 	    schema = schema + child.serialize()
-	child = child.next
+	child = child.__next__
 
     try:
 	rngp = libxml2.relaxNGNewMemParserCtxt(schema, len(schema))
@@ -241,7 +242,7 @@ def handle_resource(node, dir):
     while child != None:
         if child.type != 'text':
 	    res = res + child.serialize()
-	child = child.next
+	child = child.__next__
     resources[name] = res
 
 #
@@ -282,7 +283,7 @@ def handle_testCase(node):
               nb_schemas_tests, node.lineNo(), sections))
     resources = {}
     if debug:
-        print "test %d line %d" % (nb_schemas_tests, node.lineNo())
+        print("test %d line %d" % (nb_schemas_tests, node.lineNo()))
 
     dirs = node.xpathEval('dir')
     for dir in dirs:
@@ -294,16 +295,16 @@ def handle_testCase(node):
     tsts = node.xpathEval('incorrect')
     if tsts != []:
         if len(tsts) != 1:
-	    print "warning test line %d has more than one <incorrect> example" %(node.lineNo())
+	    print("warning test line %d has more than one <incorrect> example" %(node.lineNo()))
 	schema = handle_incorrect(tsts[0])
     else:
         tsts = node.xpathEval('correct')
 	if tsts != []:
 	    if len(tsts) != 1:
-		print "warning test line %d has more than one <correct> example"% (node.lineNo())
+		print("warning test line %d has more than one <correct> example"% (node.lineNo()))
 	    schema = handle_correct(tsts[0])
 	else:
-	    print "warning <testCase> line %d has no <correct> nor <incorrect> child" % (node.lineNo())
+	    print("warning <testCase> line %d has no <correct> nor <incorrect> child" % (node.lineNo()))
 
     nb_schemas_tests = nb_schemas_tests + 1;
     
@@ -342,14 +343,14 @@ def handle_testSuite(node, level = 0):
 	    for author in authors:
 	        msg = msg + author.content + " "
 	if quiet == 0:
-	    print msg
+	    print(msg)
     sections = node.xpathEval('section')
     if sections != [] and level <= 0:
         msg = ""
         for section in sections:
 	    msg = msg + section.content + " "
 	if quiet == 0:
-	    print "Tests for section %s" % (msg)
+	    print("Tests for section %s" % (msg))
     for test in node.xpathEval('testCase'):
         handle_testCase(test)
     for test in node.xpathEval('testSuite'):
@@ -360,17 +361,17 @@ def handle_testSuite(node, level = 0):
         msg = ""
         for section in sections:
 	    msg = msg + section.content + " "
-        print "Result of tests for section %s" % (msg)
+        print("Result of tests for section %s" % (msg))
         if nb_schemas_tests != old_schemas_tests:
-	    print "found %d test schemas: %d success %d failures" % (
+	    print("found %d test schemas: %d success %d failures" % (
 		  nb_schemas_tests - old_schemas_tests,
 		  nb_schemas_success - old_schemas_success,
-		  nb_schemas_failed - old_schemas_failed)
+		  nb_schemas_failed - old_schemas_failed))
 	if nb_instances_tests != old_instances_tests:
-	    print "found %d test instances: %d success %d failures" % (
+	    print("found %d test instances: %d success %d failures" % (
 		  nb_instances_tests - old_instances_tests,
 		  nb_instances_success - old_instances_success,
-		  nb_instances_failed - old_instances_failed)
+		  nb_instances_failed - old_instances_failed))
 #
 # Parse the conf file
 #
@@ -389,20 +390,20 @@ libxml2.registerErrorHandler(callback, "")
 libxml2.setEntityLoader(resolver)
 root = testsuite.getRootElement()
 if root.name != 'testSuite':
-    print "%s doesn't start with a testSuite element, aborting" % (CONF)
+    print("%s doesn't start with a testSuite element, aborting" % (CONF))
     sys.exit(1)
 if quiet == 0:
-    print "Running Relax NG testsuite"
+    print("Running Relax NG testsuite")
 handle_testSuite(root)
 
 if quiet == 0:
-    print "\nTOTAL:\n"
+    print("\nTOTAL:\n")
 if quiet == 0 or nb_schemas_failed != 0:
-    print "found %d test schemas: %d success %d failures" % (
-      nb_schemas_tests, nb_schemas_success, nb_schemas_failed)
+    print("found %d test schemas: %d success %d failures" % (
+      nb_schemas_tests, nb_schemas_success, nb_schemas_failed))
 if quiet == 0 or nb_instances_failed != 0:
-    print "found %d test instances: %d success %d failures" % (
-      nb_instances_tests, nb_instances_success, nb_instances_failed)
+    print("found %d test instances: %d success %d failures" % (
+      nb_instances_tests, nb_instances_success, nb_instances_failed))
 
 
 testsuite.freeDoc()
@@ -412,7 +413,7 @@ libxml2.relaxNGCleanupTypes()
 libxml2.cleanupParser()
 if libxml2.debugMemory(1) == 0:
     if quiet == 0:
-	print "OK"
+	print("OK")
 else:
-    print "Memory leak %d bytes" % (libxml2.debugMemory(1))
+    print("Memory leak %d bytes" % (libxml2.debugMemory(1)))
     libxml2.dumpMemory()

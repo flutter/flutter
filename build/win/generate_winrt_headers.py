@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+#
 # Copyright 2014 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -83,7 +84,7 @@ def generate_headers(options_file):
   if process.returncode != 0:
     print('cppwinrt header generation failed. Options file was:')
     infile = open(options_file, 'r')
-    print(infile.read())
+    print((infile.read()))
     infile.close()
   return process.returncode
 

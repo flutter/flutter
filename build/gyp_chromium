@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Copyright (c) 2012 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
@@ -116,7 +116,7 @@ def GetGypVars(supplemental_files):
     with open(supplement, 'r') as f:
       try:
         file_data = eval(f.read(), {'__builtins__': None}, None)
-      except SyntaxError, e:
+      except SyntaxError as e:
         e.filename = os.path.abspath(supplement)
         raise
       variables = file_data.get('variables', [])
@@ -210,13 +210,13 @@ if __name__ == '__main__':
     args.append('-Ganalyzer_output_path=' + args.pop(0))
 
   if int(os.environ.get('GYP_CHROMIUM_NO_ACTION', 0)):
-    print 'Skipping gyp_chromium due to GYP_CHROMIUM_NO_ACTION env var.'
+    print('Skipping gyp_chromium due to GYP_CHROMIUM_NO_ACTION env var.')
     sys.exit(0)
 
   # Use the Psyco JIT if available.
   if psyco:
     psyco.profile()
-    print "Enabled Psyco JIT."
+    print("Enabled Psyco JIT.")
 
   # Fall back on hermetic python if we happen to get run under cygwin.
   # TODO(bradnelson): take this out once this issue is fixed:
@@ -273,14 +273,14 @@ if __name__ == '__main__':
   # We explicitly don't support the make gyp generator (crbug.com/348686). Be
   # nice and fail here, rather than choking in gyp.
   if re.search(r'(^|,|\s)make($|,|\s)', os.environ.get('GYP_GENERATORS', '')):
-    print 'Error: make gyp generator not supported (check GYP_GENERATORS).'
+    print('Error: make gyp generator not supported (check GYP_GENERATORS).')
     sys.exit(1)
 
   # We explicitly don't support the native msvs gyp generator. Be nice and
   # fail here, rather than generating broken projects.
   if re.search(r'(^|,|\s)msvs($|,|\s)', os.environ.get('GYP_GENERATORS', '')):
-    print 'Error: msvs gyp generator not supported (check GYP_GENERATORS).'
-    print 'Did you mean to use the `msvs-ninja` generator?'
+    print('Error: msvs gyp generator not supported (check GYP_GENERATORS).')
+    print('Did you mean to use the `msvs-ninja` generator?')
     sys.exit(1)
 
   # If CHROMIUM_GYP_SYNTAX_CHECK is set to 1, it will invoke gyp with --check
@@ -292,13 +292,13 @@ if __name__ == '__main__':
   # TODO(dmikurube): Remove these checks and messages after a while.
   if ('linux_use_tcmalloc' in gyp_vars_dict or
       'android_use_tcmalloc' in gyp_vars_dict):
-    print '*****************************************************************'
-    print '"linux_use_tcmalloc" and "android_use_tcmalloc" are deprecated!'
-    print '-----------------------------------------------------------------'
-    print 'You specify "linux_use_tcmalloc" or "android_use_tcmalloc" in'
-    print 'your GYP_DEFINES. Please switch them into "use_allocator" now.'
-    print 'See http://crbug.com/345554 for the details.'
-    print '*****************************************************************'
+    print('*****************************************************************')
+    print('"linux_use_tcmalloc" and "android_use_tcmalloc" are deprecated!')
+    print('-----------------------------------------------------------------')
+    print('You specify "linux_use_tcmalloc" or "android_use_tcmalloc" in')
+    print('your GYP_DEFINES. Please switch them into "use_allocator" now.')
+    print('See http://crbug.com/345554 for the details.')
+    print('*****************************************************************')
 
   # Automatically turn on crosscompile support for platforms that need it.
   # (The Chrome OS build sets CC_host / CC_target which implicitly enables
@@ -316,7 +316,7 @@ if __name__ == '__main__':
   args.extend(['-D', 'gyp_output_dir=' + GetOutputDirectory()])
 
   if not use_analyzer:
-    print 'Updating projects from gyp files...'
+    print('Updating projects from gyp files...')
     sys.stdout.flush()
 
   # Off we go...

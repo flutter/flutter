@@ -1,5 +1,6 @@
-#!/usr/bin/python -u
-import glob, os, string, sys, thread, time
+#!/usr/bin/env python3 -u
+
+import glob, os, string, sys, _thread, time
 # import difflib
 import libxml2
 
@@ -74,19 +75,19 @@ def compFiles(res, expected, base1, base2):
     rl = len(res)
     el = len(exp)
     if el != rl:
-        print 'Length of expected is %d, result is %d' % (el, rl)
+        print('Length of expected is %d, result is %d' % (el, rl))
 	ret = -1
     for i in range(min(el, rl)):
         if string.strip(res[i]) != string.strip(exp[i]):
-            print '+:%s-:%s' % (res[i], exp[i])
+            print('+:%s-:%s' % (res[i], exp[i]))
             ret = -1
     if el > rl:
         for i in range(rl, el):
-            print '-:%s' % exp[i]
+            print('-:%s' % exp[i])
             ret = -1
     elif rl > el:
         for i in range (el, rl):
-            print '+:%s' % res[i]
+            print('+:%s' % res[i])
             ret = -1
     return ret
 
@@ -127,7 +128,7 @@ def runOneTest(testDescription, filename, inbase, errbase):
             fname = errbase + filename + ext
             expout = open(fname, 'rt')
         except:
-            print "Can't open result file %s - bypassing test" % fname
+            print("Can't open result file %s - bypassing test" % fname)
             return
 
     noErrors = 0
@@ -169,29 +170,29 @@ def runOneTest(testDescription, filename, inbase, errbase):
     th2Flag = []
     outfile = []	# lists to contain the pipe data
     errfile = []
-    th1 = thread.start_new_thread(readPfile, (pout, outfile, th1Flag))
-    th2 = thread.start_new_thread(readPfile, (perr, errfile, th2Flag))
+    th1 = _thread.start_new_thread(readPfile, (pout, outfile, th1Flag))
+    th2 = _thread.start_new_thread(readPfile, (perr, errfile, th2Flag))
     while (len(th1Flag)==0) or (len(th2Flag)==0):
         time.sleep(0.001)
     if not noResult:
         ret = compFiles(outfile, expout, inbase, 'test/')
         if ret != 0:
-            print 'trouble with %s' % cmd
+            print('trouble with %s' % cmd)
     else:
         if len(outfile) != 0:
             for l in outfile:
-                print l
-            print 'trouble with %s' % cmd
+                print(l)
+            print('trouble with %s' % cmd)
     if experr != None:
         ret = compFiles(errfile, experr, inbase, 'test/')
         if ret != 0:
-            print 'trouble with %s' % cmd
+            print('trouble with %s' % cmd)
     else:
         if not noErrors:
             if len(errfile) != 0:
                 for l in errfile:
-                    print l
-                print 'trouble with %s' % cmd
+                    print(l)
+                print('trouble with %s' % cmd)
 
     if 'stdin' not in testDescription:
         pin.close()
@@ -203,9 +204,9 @@ def runTest(description):
     testDescription = defaultParams.copy()		# set defaults
     testDescription.update(description)			# override with current ent
     if 'testname' in testDescription:
-        print "## %s" % testDescription['testname']
+        print("## %s" % testDescription['testname'])
     if not 'file' in testDescription:
-        print "No file specified - can't run this test!"
+        print("No file specified - can't run this test!")
         return
     # Set up the source and results directory paths from the decoded params
     dir = ''
@@ -222,7 +223,7 @@ def runTest(description):
 
     testFiles = glob.glob(os.path.abspath(dir + testDescription['file']))
     if testFiles == []:
-        print "No files result from '%s'" % testDescription['file']
+        print("No files result from '%s'" % testDescription['file'])
         return
 
     # Some test programs just don't work (yet).  For now we exclude them.
@@ -271,9 +272,9 @@ class testDefaults:
                 self.curText += reader.Value()
 
         elif reader.NodeType() == 15:	# end of element
-            print "Defaults have been set to:"
-            for k in defaultParams.keys():
-                print "   %s : '%s'" % (k, defaultParams[k])
+            print("Defaults have been set to:")
+            for k in list(defaultParams.keys()):
+                print("   %s : '%s'" % (k, defaultParams[k]))
             curClass = rootClass()
         return curClass
 
@@ -316,8 +317,8 @@ class rootClass:
         if reader.Depth() == 0:
             return curClass
         if reader.Depth() != 1:
-            print "Unexpected junk: Level %d, type %d, name %s" % (
-                  reader.Depth(), reader.NodeType(), reader.Name())
+            print("Unexpected junk: Level %d, type %d, name %s" % (
+                  reader.Depth(), reader.NodeType(), reader.Name()))
             return curClass
         if reader.Name() == 'test':
             curClass = testClass()
@@ -330,7 +331,7 @@ def streamFile(filename):
     try:
         reader = libxml2.newTextReaderFilename(filename)
     except:
-        print "unable to open %s" % (filename)
+        print("unable to open %s" % (filename))
         return
 
     curClass = rootClass()
@@ -340,11 +341,11 @@ def streamFile(filename):
         ret = reader.Read()
 
     if ret != 0:
-        print "%s : failed to parse" % (filename)
+        print("%s : failed to parse" % (filename))
 
 # OK, we're finished with all the routines.  Now for the main program:-
 if len(sys.argv) != 2:
-    print "Usage: maketest {filename}"
+    print("Usage: maketest {filename}")
     sys.exit(-1)
 
 streamFile(sys.argv[1])

@@ -1,4 +1,4 @@
-#!/usr/bin/python -u
+#!/usr/bin/env python3 -u
 #
 # Original script modified in November 2003 to take advantage of
 # the character-validation range routines, and updated to the
@@ -43,7 +43,7 @@ BlockNames = {}
 try:
     blocks = open(blockfile, "r")
 except:
-    print "Missing %s, aborting ..." % blockfile
+    print("Missing %s, aborting ..." % blockfile)
     sys.exit(1)
 
 for line in blocks.readlines():
@@ -59,7 +59,7 @@ for line in blocks.readlines():
         name = string.strip(fields[1])
         name = string.replace(name, ' ', '')
     except:
-        print "Failed to process line: %s" % (line)
+        print("Failed to process line: %s" % (line))
         continue
     start = "0x" + start
     end = "0x" + end
@@ -68,19 +68,19 @@ for line in blocks.readlines():
     except:
         BlockNames[name] = [(start, end)]
 blocks.close()
-print "Parsed %d blocks descriptions" % (len(BlockNames.keys()))
+print("Parsed %d blocks descriptions" % (len(list(BlockNames.keys()))))
 
 for block in blockAliases:
     alias = string.split(block,':')
     alist = string.split(alias[1],',')
     for comp in alist:
-        if BlockNames.has_key(comp):
+        if comp in BlockNames:
             if alias[0] not in BlockNames:
                 BlockNames[alias[0]] = []
             for r in BlockNames[comp]:
                 BlockNames[alias[0]].append(r)
         else:
-            print "Alias %s: %s not in Blocks" % (alias[0], comp)
+            print("Alias %s: %s not in Blocks" % (alias[0], comp))
             continue
 
 #
@@ -96,7 +96,7 @@ for block in blockAliases:
 try:
     data = open(catfile, "r")
 except:
-    print "Missing %s, aborting ..." % catfile
+    print("Missing %s, aborting ..." % catfile)
     sys.exit(1)
 
 nbchar = 0;
@@ -122,7 +122,7 @@ for line in data.readlines():
             point = point[1:]
         name = fields[2]
     except:
-        print "Failed to process line: %s" % (line)
+        print("Failed to process line: %s" % (line))
         continue
     
     nbchar = nbchar + 1
@@ -133,7 +133,7 @@ for line in data.readlines():
         try:
             Categories[name] = [value]
         except:
-            print "Failed to process line: %s" % (line)
+            print("Failed to process line: %s" % (line))
     # update "general category" name
     try:
         Categories[name[0]].append(value)
@@ -141,16 +141,16 @@ for line in data.readlines():
         try:
             Categories[name[0]] = [value]
         except:
-            print "Failed to process line: %s" % (line)
+            print("Failed to process line: %s" % (line))
 
 blocks.close()
-print "Parsed %d char generating %d categories" % (nbchar, len(Categories.keys()))
+print("Parsed %d char generating %d categories" % (nbchar, len(list(Categories.keys()))))
 
 #
 # The data is now all read.  Time to process it into a more useful form.
 #
 # reduce the number list into ranges
-for cat in Categories.keys():
+for cat in list(Categories.keys()):
     list = Categories[cat]
     start = -1
     prev = -1
@@ -184,10 +184,10 @@ for cat in Categories.keys():
 # Assure all data is in alphabetic order, since we will be doing binary
 # searches on the tables.
 #
-bkeys = BlockNames.keys()
+bkeys = list(BlockNames.keys())
 bkeys.sort()
 
-ckeys = Categories.keys()
+ckeys = list(Categories.keys())
 ckeys.sort()
 
 #
@@ -196,13 +196,13 @@ ckeys.sort()
 try:
     header = open("include/libxml/xmlunicode.h", "w")
 except:
-    print "Failed to open include/libxml/xmlunicode.h"
+    print("Failed to open include/libxml/xmlunicode.h")
     sys.exit(1)
 
 try:
     output = open("xmlunicode.c", "w")
 except:
-    print "Failed to open xmlunicode.c"
+    print("Failed to open xmlunicode.c")
     sys.exit(1)
 
 date = time.asctime(time.localtime(time.time()))

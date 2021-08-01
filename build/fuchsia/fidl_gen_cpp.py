@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # Copyright 2013 The Flutter Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
@@ -36,7 +36,7 @@ def main():
 
   parser.add_argument('--fidlc-bin', dest='fidlc_bin', action='store', required=True)
   parser.add_argument('--fidlgen-bin', dest='fidlgen_bin', action='store', required=True)
-  
+
   parser.add_argument('--sdk-base', dest='sdk_base', action='store', required=True)
   parser.add_argument('--root', dest='root', action='store', required=True)
   parser.add_argument('--json', dest='json', action='store', required=True)
@@ -63,9 +63,9 @@ def main():
 
   # Create an iterator that works on both python3 and python2
   try:
-    fidl_files_by_name_iter = fidl_files_by_name.items()
+    fidl_files_by_name_iter = list(fidl_files_by_name.items())
   except AttributeError:
-    fidl_files_by_name_iter = fidl_files_by_name.iteritems()
+    fidl_files_by_name_iter = iter(fidl_files_by_name.items())
 
   for _, fidl_files in fidl_files_by_name_iter:
     fidlc_command.append('--files')

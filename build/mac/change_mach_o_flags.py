@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+#
 # Copyright (c) 2011 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -106,8 +107,7 @@ def CheckedSeek(file, offset):
   file.seek(offset, os.SEEK_SET)
   new_offset = file.tell()
   if new_offset != offset:
-    raise MachOError, \
-          'seek: expected offset %d, observed %d' % (offset, new_offset)
+    raise MachOError('seek: expected offset %d, observed %d' % (offset, new_offset))
 
 
 def CheckedRead(file, count):
@@ -116,8 +116,7 @@ def CheckedRead(file, count):
 
   bytes = file.read(count)
   if len(bytes) != count:
-    raise MachOError, \
-          'read: expected length %d, observed %d' % (count, len(bytes))
+    raise MachOError('read: expected length %d, observed %d' % (count, len(bytes)))
 
   return bytes
 
@@ -189,17 +188,15 @@ def HandleMachOFile(file, options, offset=0):
   elif magic == MH_CIGAM or magic == MH_CIGAM_64:
     endian = '>'
   else:
-    raise MachOError, \
-          'Mach-O file at offset %d has illusion of magic' % offset
+    raise MachOError('Mach-O file at offset %d has illusion of magic' % offset)
 
   CheckedSeek(file, offset)
   magic, cputype, cpusubtype, filetype, ncmds, sizeofcmds, flags = \
       ReadMachHeader(file, endian)
   assert magic == MH_MAGIC or magic == MH_MAGIC_64
   if filetype != MH_EXECUTE:
-    raise MachOError, \
-          'Mach-O file at offset %d is type 0x%x, expected MH_EXECUTE' % \
-              (offset, filetype)
+    raise MachOError('Mach-O file at offset %d is type 0x%x, expected MH_EXECUTE' % \
+              (offset, filetype))
 
   original_flags = flags
 
@@ -228,7 +225,7 @@ def HandleFatFile(file, options, fat_offset=0):
 
   nfat_arch = ReadUInt32(file, '>')
 
-  for index in xrange(0, nfat_arch):
+  for index in range(0, nfat_arch):
     cputype, cpusubtype, offset, size, align = ReadFatArch(file)
     assert size >= 28
 
@@ -263,7 +260,7 @@ def main(me, args):
       magic == MH_MAGIC_64 or magic == MH_CIGAM_64:
     HandleMachOFile(executable_file, options)
   else:
-    raise MachOError, '%s is not a Mach-O or fat file' % executable_file
+    raise MachOError('%s is not a Mach-O or fat file' % executable_file)
 
   executable_file.close()
   return 0

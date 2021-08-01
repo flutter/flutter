@@ -1,4 +1,4 @@
-#!/usr/bin/python -u
+#!/usr/bin/env python3 -u
 #
 # generate a tester program for the API
 #
@@ -8,7 +8,7 @@ import string
 try:
     import libxml2
 except:
-    print "libxml2 python bindings not available, skipping testapi.c generation"
+    print("libxml2 python bindings not available, skipping testapi.c generation")
     sys.exit(0)
 
 if len(sys.argv) > 1:
@@ -415,7 +415,7 @@ def is_known_param_type(name, rtype):
 	    crtype = rtype
 
         define = 0
-	if modules_defines.has_key(module):
+	if module in modules_defines:
 	    test.write("#ifdef %s\n" % (modules_defines[module]))
 	    define = 1
         test.write("""
@@ -488,12 +488,12 @@ while line != "":
 input.close()
 
 if line == "":
-    print "Could not find the CUT marker in testapi.c skipping generation"
+    print("Could not find the CUT marker in testapi.c skipping generation")
     test.close()
     sys.exit(0)
 
-print("Scanned testapi.c: found %d parameters types and %d return types\n" % (
-      len(known_param_types), len(known_return_types)))
+print(("Scanned testapi.c: found %d parameters types and %d return types\n" % (
+      len(known_param_types), len(known_return_types))))
 test.write("/* CUT HERE: everything below that line is generated */\n")
 
 
@@ -502,7 +502,7 @@ test.write("/* CUT HERE: everything below that line is generated */\n")
 #
 doc = libxml2.readFile(srcPref + 'doc/libxml2-api.xml', None, 0)
 if doc == None:
-    print "Failed to load doc/libxml2-api.xml"
+    print("Failed to load doc/libxml2-api.xml")
     sys.exit(1)
 ctxt = doc.xpathNewContext()
 
@@ -517,7 +517,7 @@ for arg in args:
     func = arg.xpathEval('string(../@name)')
     if (mod not in skipped_modules) and (func not in skipped_functions):
 	type = arg.xpathEval('string(@type)')
-	if not argtypes.has_key(type):
+	if type not in argtypes:
 	    argtypes[type] = func
 
 # similarly for return types
@@ -528,7 +528,7 @@ for ret in rets:
     func = ret.xpathEval('string(../@name)')
     if (mod not in skipped_modules) and (func not in skipped_functions):
         type = ret.xpathEval('string(@type)')
-	if not rettypes.has_key(type):
+	if type not in rettypes:
 	    rettypes[type] = func
 
 #
@@ -546,7 +546,7 @@ for enum in enums:
         continue;
     define = 0
 
-    if argtypes.has_key(name) and is_known_param_type(name, name) == 0:
+    if name in argtypes and is_known_param_type(name, name) == 0:
 	values = ctxt.xpathEval("/api/symbols/enum[@type='%s']" % name)
 	i = 0
 	vals = []
@@ -559,9 +559,9 @@ for enum in enums:
 		break;
 	    vals.append(vname)
 	if vals == []:
-	    print "Didn't find any value for enum %s" % (name)
+	    print("Didn't find any value for enum %s" % (name))
 	    continue
-	if modules_defines.has_key(module):
+	if module in modules_defines:
 	    test.write("#ifdef %s\n" % (modules_defines[module]))
 	    define = 1
 	test.write("#define gen_nb_%s %d\n" % (name, len(vals)))
@@ -581,7 +581,7 @@ static void des_%s(int no ATTRIBUTE_UNUSED, %s val ATTRIBUTE_UNUSED, int nr ATTR
 	known_param_types.append(name)
 
     if (is_known_return_type(name) == 0) and (name in rettypes):
-	if define == 0 and modules_defines.has_key(module):
+	if define == 0 and module in modules_defines:
 	    test.write("#ifdef %s\n" % (modules_defines[module]))
 	    define = 1
         test.write("""static void desret_%s(%s val ATTRIBUTE_UNUSED) {
@@ -613,7 +613,7 @@ for file in headers:
     #
     desc = file.xpathEval('string(description)')
     if string.find(desc, 'DEPRECATED') != -1:
-        print "Skipping deprecated interface %s" % name
+        print("Skipping deprecated interface %s" % name)
 	continue;
 
     test.write("#include <libxml/%s.h>\n" % name)
@@ -742,7 +742,7 @@ test_%s(void) {
         pass
 
     define = 0
-    if function_defines.has_key(name):
+    if name in function_defines:
         test.write("#ifdef %s\n" % (function_defines[name]))
 	define = 1
     
@@ -783,7 +783,7 @@ test_%s(void) {
 	i = i + 1;
 
     # do the call, and clanup the result
-    if extra_pre_call.has_key(name):
+    if name in extra_pre_call:
 	test.write("        %s\n"% (extra_pre_call[name]))
     if t_ret != None:
 	test.write("\n        ret_val = %s(" % (name))
@@ -798,7 +798,7 @@ test_%s(void) {
 	        test.write("(%s)" % rtype)
 	    test.write("%s" % nam);
 	test.write(");\n")
-	if extra_post_call.has_key(name):
+	if name in extra_post_call:
 	    test.write("        %s\n"% (extra_post_call[name]))
 	test.write("        desret_%s(ret_val);\n" % t_ret[0])
     else:
@@ -814,7 +814,7 @@ test_%s(void) {
 	        test.write("(%s)" % rtype)
 	    test.write("%s" % nam)
 	test.write(");\n")
-	if extra_post_call.has_key(name):
+	if name in extra_post_call:
 	    test.write("        %s\n"% (extra_post_call[name]))
 
     test.write("        call_tests++;\n");
@@ -876,7 +876,7 @@ for module in modules:
     try:
 	functions = ctxt.xpathEval("/api/symbols/function[@file='%s']" % (module))
     except:
-        print "Failed to gather functions from module %s" % (module)
+        print("Failed to gather functions from module %s" % (module))
 	continue;
 
     # iterate over all functions in the module generating the test
@@ -922,12 +922,12 @@ test.write("""    return(0);
 }
 """);
 
-print "Generated test for %d modules and %d functions" %(len(modules), nb_tests)
+print("Generated test for %d modules and %d functions" %(len(modules), nb_tests))
 
 compare_and_save()
 
 missing_list = []
-for missing in missing_types.keys():
+for missing in list(missing_types.keys()):
     if missing == 'va_list' or missing == '...':
         continue;
 
@@ -938,7 +938,7 @@ def compare_missing(a, b):
     return b[0] - a[0]
 
 missing_list.sort(compare_missing)
-print "Missing support for %d functions and %d types see missing.lst" % (missing_functions_nr, len(missing_list))
+print("Missing support for %d functions and %d types see missing.lst" % (missing_functions_nr, len(missing_list)))
 lst = open("missing.lst", "w")
 lst.write("Missing support for %d types" % (len(missing_list)))
 lst.write("\n")
@@ -955,7 +955,7 @@ for miss in missing_list:
 lst.write("\n")
 lst.write("\n")
 lst.write("Missing support per module");
-for module in missing_functions.keys():
+for module in list(missing_functions.keys()):
     lst.write("module %s:\n   %s\n" % (module, missing_functions[module]))
 
 lst.close()

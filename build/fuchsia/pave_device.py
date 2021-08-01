@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # Copyright 2013 The Flutter Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
@@ -29,9 +29,8 @@ def main():
 
   parser.add_argument('--target',
     type=str, dest='target', choices=['chromebook'], default='chromebook')
-   
+
   args = parser.parse_args()
-  
 
   sdk_dir = os.path.join(os.path.dirname(sys.argv[0]),
     "..", "..", "fuchsia", "sdk", SDKSubDirectory())

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Copyright 2019 The Dart project authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -85,15 +85,15 @@ def get_timestamp():
 
 
 def print_status(msg):
-  print(STATUS_LABEL.format(get_timestamp()) + msg)
+  print((STATUS_LABEL.format(get_timestamp()) + msg))
 
 
 def print_warning(msg):
-  print(WARNING_LABEL.format(get_timestamp()) + msg)
+  print((WARNING_LABEL.format(get_timestamp()) + msg))
 
 
 def print_error(msg):
-  print(ERROR_LABEL.format(get_timestamp()) + msg)
+  print((ERROR_LABEL.format(get_timestamp()) + msg))
 
 
 def engine_golden_licenses_path():

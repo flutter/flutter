@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Copyright (c) 2011 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
@@ -74,7 +74,7 @@ def macho_archs(macho):
     archs = []
 
   if len(archs) == 0:
-    print >> sys.stderr, "No architectures in %s" % macho
+    print("No architectures in %s" % macho, file=sys.stderr)
 
   return archs
 
@@ -166,7 +166,7 @@ def macho_uuids(macho):
       uuids[arch] = uuid.upper()
 
   if len(uuids) == 0:
-    print >> sys.stderr, "No UUIDs in %s" % macho
+    print("No UUIDs in %s" % macho, file=sys.stderr)
 
   return uuids
 
@@ -201,7 +201,8 @@ def make_fake_dsym(macho, dsym):
   dwarf_file = os.path.join(dwarf_dir, os.path.basename(macho))
   try:
     os.makedirs(dwarf_dir)
-  except OSError, (err, error_string):
+  except OSError as xxx_todo_changeme:
+    (err, error_string) = xxx_todo_changeme.args
     if err != errno.EEXIST:
       raise
   shutil.copyfile(macho, dwarf_file)
@@ -264,7 +265,8 @@ def strip_and_make_fake_dsym(macho):
   dsym_stat = None
   try:
     dsym_stat = os.stat(dsym)
-  except OSError, (err, error_string):
+  except OSError as xxx_todo_changeme1:
+    (err, error_string) = xxx_todo_changeme1.args
     if err != errno.ENOENT:
       raise
 
@@ -319,11 +321,11 @@ def main(argv=None):
     if macho is None:
       macho = arg
     else:
-      print >> sys.stderr, "Too many things to strip"
+      print("Too many things to strip", file=sys.stderr)
       return 1
 
   if macho is None:
-    print >> sys.stderr, "Nothing to strip"
+    print("Nothing to strip", file=sys.stderr)
     return 1
 
   if not strip_and_make_fake_dsym(macho):

@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+#
 # Copyright (c) 2013 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -18,7 +19,7 @@
 # time chrome's build dependencies are changed but should also be updated
 # periodically to include upstream security fixes from Debian.
 
-from __future__ import print_function
+
 
 import hashlib
 import json
@@ -34,7 +35,7 @@ try:
     from urllib.request import urlopen
 except ImportError:
     # Fall back to Python 2's urllib2
-    from urllib2 import urlopen
+    from urllib.request import urlopen
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 

@@ -1,4 +1,5 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
+
 import sys
 import time
 import os
@@ -49,7 +50,7 @@ def testXInclude(filename, id):
     error_nr = 0
     error_msg = ''
 
-    print "testXInclude(%s, %s)" % (filename, id)
+    print("testXInclude(%s, %s)" % (filename, id))
     return 1
 
 def runTest(test, basedir):
@@ -65,20 +66,20 @@ def runTest(test, basedir):
     id = test.prop('id')
     type = test.prop('type')
     if uri == None:
-        print "Test without ID:", uri
+        print("Test without ID:", uri)
 	return -1
     if id == None:
-        print "Test without URI:", id
+        print("Test without URI:", id)
 	return -1
     if type == None:
-        print "Test without URI:", id
+        print("Test without URI:", id)
 	return -1
     if basedir != None:
 	URI = basedir + "/" + uri
     else:
         URI = uri
     if os.access(URI, os.R_OK) == 0:
-        print "Test %s missing: base %s uri %s" % (URI, basedir, uri)
+        print("Test %s missing: base %s uri %s" % (URI, basedir, uri))
 	return -1
 
     expected = None
@@ -94,7 +95,7 @@ def runTest(test, basedir):
 	    if basedir != None:
 		output = basedir + "/" + output
 	    if os.access(output, os.R_OK) == 0:
-		print "Result for %s missing: %s" % (id, output)
+		print("Result for %s missing: %s" % (id, output))
 		output = None
 	    else:
 		try:
@@ -102,7 +103,7 @@ def runTest(test, basedir):
 		    expected = f.read()
 		    outputfile = output
 		except:
-		    print "Result for %s unreadable: %s" % (id, output)
+		    print("Result for %s unreadable: %s" % (id, output))
 
     try:
         # print "testing %s" % (URI)
@@ -114,13 +115,13 @@ def runTest(test, basedir):
 	if res >= 0 and expected != None:
 	    result = doc.serialize()
 	    if result != expected:
-	        print "Result for %s differs" % (id)
+	        print("Result for %s differs" % (id))
 		open("xinclude.res", "w").write(result)
 		diff = os.popen("diff %s xinclude.res" % outputfile).read()
 
 	doc.freeDoc()
     else:
-        print "Failed to parse %s" % (URI)
+        print("Failed to parse %s" % (URI))
 	res = -1
 
     
@@ -131,24 +132,24 @@ def runTest(test, basedir):
 	    test_succeed = test_succeed + 1
 	elif res == 0:
 	    test_failed = test_failed + 1
-	    print "Test %s: no substitution done ???" % (id)
+	    print("Test %s: no substitution done ???" % (id))
 	elif res < 0:
 	    test_error = test_error + 1
-	    print "Test %s: failed valid XInclude processing" % (id)
+	    print("Test %s: failed valid XInclude processing" % (id))
     elif type == 'error':
 	if res > 0:
 	    test_error = test_error + 1
-	    print "Test %s: failed to detect invalid XInclude processing" % (id)
+	    print("Test %s: failed to detect invalid XInclude processing" % (id))
 	elif res == 0:
 	    test_failed = test_failed + 1
-	    print "Test %s: Invalid but no substitution done" % (id)
+	    print("Test %s: Invalid but no substitution done" % (id))
 	elif res < 0:
 	    test_succeed = test_succeed + 1
     elif type == 'optional':
 	if res > 0:
 	    test_succeed = test_succeed + 1
 	else:
-	    print "Test %s: failed optional test" % (id)
+	    print("Test %s: failed optional test" % (id))
 
     # Log the ontext
     if res != 1:
@@ -172,7 +173,7 @@ def runTest(test, basedir):
 def runTestCases(case):
     creator = case.prop('creator')
     if creator != None:
-	print "=>", creator
+	print("=>", creator)
     base = case.getBase(None)
     basedir = case.prop('basedir')
     if basedir != None:
@@ -183,21 +184,21 @@ def runTestCases(case):
 	    runTest(test, base)
 	if test.name == 'testcases':
 	    runTestCases(test)
-        test = test.next
+        test = test.__next__
         
 conf = libxml2.parseFile(CONF)
 if conf == None:
-    print "Unable to load %s" % CONF
+    print("Unable to load %s" % CONF)
     sys.exit(1)
 
 testsuite = conf.getRootElement()
 if testsuite.name != 'testsuite':
-    print "Expecting TESTSUITE root element: aborting"
+    print("Expecting TESTSUITE root element: aborting")
     sys.exit(1)
 
 profile = testsuite.prop('PROFILE')
 if profile != None:
-    print profile
+    print(profile)
 
 start = time.time()
 
@@ -209,13 +210,13 @@ while case != None:
 	old_test_failed = test_failed
 	old_test_error = test_error
         runTestCases(case)
-	print "   Ran %d tests: %d suceeded, %d failed and %d generated an error" % (
+	print("   Ran %d tests: %d suceeded, %d failed and %d generated an error" % (
 	       test_nr - old_test_nr, test_succeed - old_test_succeed,
-	       test_failed - old_test_failed, test_error - old_test_error)
-    case = case.next
+	       test_failed - old_test_failed, test_error - old_test_error))
+    case = case.__next__
 
 conf.freeDoc()
 log.close()
 
-print "Ran %d tests: %d suceeded, %d failed and %d generated an error in %.2f s." % (
-      test_nr, test_succeed, test_failed, test_error, time.time() - start)
+print("Ran %d tests: %d suceeded, %d failed and %d generated an error in %.2f s." % (
+      test_nr, test_succeed, test_failed, test_error, time.time() - start))

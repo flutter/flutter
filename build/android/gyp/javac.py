@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # Copyright 2013 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
@@ -301,7 +301,7 @@ def main(argv):
     if options.jar_path:
       if options.main_class or options.manifest_entry:
         if options.manifest_entry:
-          entries = map(lambda e: e.split(":"), options.manifest_entry)
+          entries = [e.split(":") for e in options.manifest_entry]
         else:
           entries = []
         manifest_file = os.path.join(temp_dir, 'manifest')

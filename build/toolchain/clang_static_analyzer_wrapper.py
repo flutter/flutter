@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+#
 # Copyright 2017 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -34,7 +35,7 @@ analyzer_option_flags = [
 # e.g. ['-analyzer-foo', '-analyzer-bar'] => ['-Xanalyzer', '-analyzer-foo',
 #                                             '-Xanalyzer', '-analyzer-bar']
 def interleave_args(args, token):
-  return list(sum(zip([token] * len(args), args), ()))
+  return list(sum(list(zip([token] * len(args), args)), ()))
 def main():
   parser = argparse.ArgumentParser()
   parser.add_argument('--mode',
