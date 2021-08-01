@@ -86,7 +86,7 @@ KeyEventResult combineKeyEventResults(Iterable<KeyEventResult> results) {
 /// Returns a [KeyEventResult] that describes how, and whether, the key event
 /// was handled.
 typedef FocusOnKeyEventCallback = KeyEventResult Function(FocusNode node, KeyEvent event);
-  
+
 // Represents a pending autofocus request.
 @immutable
 class _Autofocus {
