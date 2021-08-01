@@ -7875,7 +7875,6 @@ void main() {
     textSelectionDelegate.copySelection(SelectionChangedCause.toolbar);
     await tester.pump();
     expect(scrollController.offset, 0);
-
   });
 }
 
