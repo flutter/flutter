@@ -213,6 +213,7 @@ class StartCommand extends Command<void> {
     state.releaseChannel = releaseChannel;
     state.createdDate = unixDate;
     state.lastUpdatedDate = unixDate;
+    state.incrementLevel = incrementLetter;
 
     final EngineRepository engine = EngineRepository(
       checkouts,
