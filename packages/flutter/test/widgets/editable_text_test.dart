@@ -7788,7 +7788,7 @@ void main() {
     expect(fadeTransition.toString(), contains('DISPOSED'));
   }, skip: kIsWeb);
 
-  testWidgets('selection will be scrolled into view with SelectionChangedCause', (WidgetTester tester) async {
+  testWidgets('Selection will be scrolled into view with SelectionChangedCause', (WidgetTester tester) async {
     final GlobalKey<EditableTextState> key = GlobalKey<EditableTextState>();
     final String text = List<int>.generate(64, (int index) => index).join('\n');
     final TextEditingController controller = TextEditingController(text: text);
