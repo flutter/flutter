@@ -13,6 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../driver_extension.dart';
 import '../extension/wait_conditions.dart';
+import 'action.dart';
 import 'diagnostics_tree.dart';
 import 'error.dart';
 import 'find.dart';
@@ -159,6 +160,7 @@ mixin CommandHandlerFactory {
       case 'get_layer_tree': return _getLayerTree(command);
       case 'get_render_tree': return _getRenderTree(command);
       case 'enter_text': return _enterText(command);
+      case 'receive_action': return _receiveAction(command);
       case 'get_text': return _getText(command, finderFactory);
       case 'request_data': return _requestData(command);
       case 'scroll': return _scroll(command, prober, finderFactory);
@@ -204,6 +206,16 @@ mixin CommandHandlerFactory {
     return Result.empty;
   }
 
+  Future<Result> _receiveAction(Command command) async {
+    if (!_testTextInput.isRegistered) {
+      throw 'Unable to fulfill `FlutterDriver.receiveAction`. Text emulation is '
+            'disabled. You can enable it using `FlutterDriver.setTextEntryEmulation`.';
+    }
+    final ReceiveAction receiveActionCommand = command as ReceiveAction;
+    _testTextInput.receiveAction(receiveActionCommand.textInputAction);
+    return Result.empty;
+  }
+  
   Future<RequestDataResult> _requestData(Command command) async {
     final RequestData requestDataCommand = command as RequestData;
     final DataHandler? dataHandler = getDataHandler();
