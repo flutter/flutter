@@ -1046,6 +1046,7 @@ void main() {
         matching: find.byType(RawMaterialButton),
       ),
     );
+    // The color comes from the default color scheme's onSecondary value.
     expect(rawMaterialButton.textStyle, style.copyWith(color: const Color(0xffffffff)));
   });
 

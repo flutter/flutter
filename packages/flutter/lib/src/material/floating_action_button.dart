@@ -593,11 +593,7 @@ class FloatingActionButton extends StatelessWidget {
       ?? floatingActionButtonTheme.enableFeedback ?? true;
     final TextStyle extendedTextStyle = (this.extendedTextStyle
         ?? floatingActionButtonTheme.extendedTextStyle
-        ?? theme.textTheme.button!.copyWith(
-          letterSpacing: 1.2,
-        )).copyWith(
-      color: foregroundColor,
-    );
+        ?? theme.textTheme.button!.copyWith(letterSpacing: 1.2)).copyWith(color: foregroundColor);
     final ShapeBorder shape = this.shape
       ?? floatingActionButtonTheme.shape
       ?? (isExtended ? _defaultExtendedShape : _defaultShape);
