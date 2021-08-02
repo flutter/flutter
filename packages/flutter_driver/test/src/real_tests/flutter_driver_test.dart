@@ -641,7 +641,7 @@ void main() {
     });
 
     group('runUnsynchronized', () {
-      test('wrap awaitFor with runUnsynchronized', () async {
+      test('wrap waitFor with runUnsynchronized', () async {
         fakeClient.responses['waitFor'] = makeFakeResponse(<String, dynamic>{});
         fakeClient.responses['set_frame_sync'] = makeFakeResponse(<String, dynamic>{});
         
