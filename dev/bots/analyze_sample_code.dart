@@ -115,6 +115,10 @@ void main(List<String> arguments) {
       dartUiLocation: includeDartUi ? dartUiLocation : null,
     );
   } else {
+    stderr.writeln('Current Environment:');
+    for (final String key in Platform.environment.keys) {
+      stderr.writeln('  $key=${Platform.environment[key]}');
+    }
     try {
       exitCode = SampleChecker(
         flutterPackage,
