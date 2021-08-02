@@ -16,6 +16,46 @@ Future<void> main() async {
 
     final Directory tempDir = Directory.systemTemp.createTempSync('flutter_plugin_test.');
     try {
+      section('Lint integration_test');
+
+      await inDirectory(tempDir, () async {
+        // Relative to this script.
+        final String flutterRoot = path.dirname(path.dirname(path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))))));
+        print('Flutter root at $flutterRoot');
+        final String integrationTestPackage = path.join(flutterRoot, 'packages', 'integration_test');
+        final String iosintegrationTestPodspec = path.join(integrationTestPackage, 'ios', 'integration_test.podspec');
+
+        await exec(
+          'pod',
+          <String>[
+            'lib',
+            'lint',
+            iosintegrationTestPodspec,
+            '--configuration=Debug', // Release targets unsupported arm64 simulators. Use Debug to only build against targeted x86_64 simulator devices.
+            '--use-libraries',
+            '--verbose',
+          ],
+          environment: <String, String>{
+            'LANG': 'en_US.UTF-8',
+          },
+        );
+
+        final String macosintegrationTestPodspec = path.join(integrationTestPackage, 'integration_test_macos', 'macos', 'integration_test_macos.podspec');
+        await exec(
+          'pod',
+          <String>[
+            'lib',
+            'lint',
+            macosintegrationTestPodspec,
+            '--configuration=Debug', // Release targets unsupported arm64 Apple Silicon. Use Debug to only build against targeted x86_64 macOS.
+            '--verbose',
+          ],
+          environment: <String, String>{
+            'LANG': 'en_US.UTF-8',
+          },
+        );
+      });
+
       section('Create Objective-C plugin');
 
       const String objcPluginName = 'test_plugin_objc';
@@ -224,7 +264,7 @@ Future<void> main() async {
 
       section('Build Objective-C application with Swift and Objective-C plugins as frameworks');
 
-      objcPodfileContent = 'use_frameworks!\n' + objcPodfileContent;
+      objcPodfileContent = 'use_frameworks!\n$objcPodfileContent';
       objcPodfile.writeAsStringSync(objcPodfileContent, flush: true);
 
       await inDirectory(objcAppPath, () async {

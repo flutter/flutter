@@ -5,7 +5,6 @@
 // @dart = 2.8
 
 import 'package:flutter_tools/src/android/android_device.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
 
@@ -78,7 +77,7 @@ void main() {
       logger: BufferLogger.test(),
     );
 
-    expect(forwarder.forward(123, hostPort: 456), throwsA(isA<ProcessException>()));
+    expect(forwarder.forward(123, hostPort: 456), throwsProcessException());
   });
 
   testWithoutContext('AndroidDevicePortForwarder forwardedPorts returns empty '
@@ -144,7 +143,7 @@ void main() {
     await forwarder.unforward(ForwardedPort(456, 23));
   });
 
-  testWithoutContext('failures to unforward port throw exception if stderr is not recognized', () async {
+  testWithoutContext('failures to unforward port print error but are non-fatal', () async {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>['adb', '-s', '1', 'forward', '--remove', 'tcp:456'],
@@ -152,13 +151,16 @@ void main() {
         exitCode: 1,
       )
     ]);
+    final BufferLogger logger = BufferLogger.test();
     final AndroidDevicePortForwarder forwarder = AndroidDevicePortForwarder(
       adbPath: 'adb',
       deviceId: '1',
       processManager: processManager,
-      logger: BufferLogger.test(),
+      logger: logger,
     );
 
-    expect(() => forwarder.unforward(ForwardedPort(456, 23)), throwsA(isA<ProcessException>()));
+    await forwarder.unforward(ForwardedPort(456, 23));
+
+    expect(logger.errorText, contains('Failed to unforward port: error: everything is broken!'));
   });
 }

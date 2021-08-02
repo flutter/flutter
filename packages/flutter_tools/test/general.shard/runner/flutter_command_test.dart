@@ -212,7 +212,7 @@ void main() {
       );
       await expectLater(
         () => flutterCommand.run(),
-        throwsA(isA<ToolExit>()),
+        throwsToolExit(),
       );
       expect(usage.events, <TestUsageEvent>[
         const TestUsageEvent(
@@ -436,7 +436,7 @@ void main() {
 
       await expectLater(
         () => flutterCommand.run(),
-        throwsA(isA<ToolExit>()),
+        throwsToolExit(),
       );
       expect(usage.timings, contains(
         const TestTimingEvent(
@@ -471,7 +471,7 @@ void main() {
   "generator": "pub",
   "generatorVersion": "2.12.0-76.0.dev"
 }
- ''');
+''');
       final FakeReportingNullSafetyCommand command = FakeReportingNullSafetyCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
@@ -483,12 +483,12 @@ void main() {
           'runtime-mode',
           label: 'NullSafetyMode.sound',
         ),
-        const TestUsageEvent(
+        TestUsageEvent(
           NullSafetyAnalysisEvent.kNullSafetyCategory,
           'stats',
-          parameters: <String, String>{
+          parameters: CustomDimensions.fromMap(<String, String>{
             'cd49': '1', 'cd50': '1',
-          },
+          }),
         ),
         const TestUsageEvent(
           NullSafetyAnalysisEvent.kNullSafetyCategory,
@@ -507,6 +507,26 @@ void main() {
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(packagesPath: 'foo');
       final BuildInfo buildInfo = await flutterCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
       expect(buildInfo.packagesPath, 'foo');
+    });
+
+    testUsingContext('use fileSystemScheme to generate BuildInfo', () async {
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(fileSystemScheme: 'foo');
+      final BuildInfo buildInfo = await flutterCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
+      expect(buildInfo.fileSystemScheme, 'foo');
+    });
+
+    testUsingContext('use fileSystemRoots to generate BuildInfo', () async {
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(fileSystemRoots: <String>['foo', 'bar']);
+      final BuildInfo buildInfo = await flutterCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
+      expect(buildInfo.fileSystemRoots, <String>['foo', 'bar']);
+    });
+
+    testUsingContext('includes initializeFromDill in BuildInfo', () async {
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand()..usesInitializeFromDillOption(hide: false);
+      final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
+      await runner.run(<String>['dummy', '--initialize-from-dill=/foo/bar.dill']);
+      final BuildInfo buildInfo = await flutterCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
+      expect(buildInfo.initializeFromDill, '/foo/bar.dill');
     });
 
     testUsingContext('dds options', () async {
@@ -702,5 +722,6 @@ class FakePub extends Fake implements Pub {
     bool generateSyntheticPackage = false,
     String flutterRootOverride,
     bool checkUpToDate = false,
+    bool shouldSkipThirdPartyGenerator = true,
   }) async { }
 }

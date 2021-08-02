@@ -114,7 +114,7 @@ void main() {
       usage: TestUsage(),
     );
 
-    expect(() async => residentWebRunner.run(), throwsA(isA<Exception>()));
+    expect(() async => residentWebRunner.run(), throwsException);
     expect(await residentWebRunner.waitForAppToFinish(), 1);
   }, overrides: <Type, Generator>{
     BuildSystem: () => TestBuildSystem.error(Exception('foo')),

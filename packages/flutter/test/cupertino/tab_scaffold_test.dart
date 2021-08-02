@@ -58,10 +58,10 @@ void main() {
           tabBar: _buildTabBar(),
           tabBuilder: (BuildContext context, int index) {
             return CustomPaint(
-              child: Text('Page ${index + 1}'),
               painter: TestCallbackPainter(
                 onPaint: () { tabsPainted.add(index); },
               ),
+              child: Text('Page ${index + 1}'),
             );
           },
         ),
@@ -248,10 +248,10 @@ void main() {
           controller: controller,
           tabBuilder: (BuildContext context, int index) {
             return CustomPaint(
-              child: Text('Page ${index + 1}'),
               painter: TestCallbackPainter(
                 onPaint: () { tabsPainted.add(index); },
               ),
+              child: Text('Page ${index + 1}'),
             );
           },
         ),
@@ -284,10 +284,10 @@ void main() {
           tabBar: _buildTabBar(),
           tabBuilder: (BuildContext context, int index) {
             return CustomPaint(
-              child: Text('Page ${index + 1}'),
               painter: TestCallbackPainter(
                 onPaint: () { tabsPainted.add(index); },
               ),
+              child: Text('Page ${index + 1}'),
             );
           },
         ),
@@ -303,10 +303,10 @@ void main() {
           controller: CupertinoTabController(initialIndex: 1), // Programmatically change the tab now.
           tabBuilder: (BuildContext context, int index) {
             return CustomPaint(
-              child: Text('Page ${index + 1}'),
               painter: TestCallbackPainter(
                 onPaint: () { tabsPainted.add(index); },
               ),
+              child: Text('Page ${index + 1}'),
             );
           },
         ),
@@ -630,10 +630,10 @@ void main() {
           controller: controller,
           tabBuilder: (BuildContext context, int index) {
             return CustomPaint(
-              child: Text('Page ${index + 1}'),
               painter: TestCallbackPainter(
                 onPaint: () { tabsPainted.add(index); },
               ),
+              child: Text('Page ${index + 1}'),
             );
           },
         ),
@@ -652,10 +652,10 @@ void main() {
           controller: controller,
           tabBuilder: (BuildContext context, int index) {
             return CustomPaint(
-              child: Text('Page ${index + 1}'),
               painter: TestCallbackPainter(
                 onPaint: () { tabsPainted.add(index); },
               ),
+              child: Text('Page ${index + 1}'),
             );
           },
         ),
@@ -688,10 +688,10 @@ void main() {
             controller: oldController,
             tabBuilder: (BuildContext context, int index) {
               return CustomPaint(
-                child: Text('Page ${index + 1}'),
                 painter: TestCallbackPainter(
                   onPaint: () { tabsPainted.add(index); },
                 ),
+                child: Text('Page ${index + 1}'),
               );
             },
           ),
@@ -710,10 +710,10 @@ void main() {
             tabBuilder:
             (BuildContext context, int index) {
               return CustomPaint(
-                child: Text('Page ${index + 1}'),
                 painter: TestCallbackPainter(
                   onPaint: () { tabsPainted.add(index); },
                 ),
+                child: Text('Page ${index + 1}'),
               );
             },
           ),

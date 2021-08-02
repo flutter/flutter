@@ -164,7 +164,7 @@ class SampleCheckerException implements Exception {
 class SampleChecker {
   /// Creates a [SampleChecker].
   ///
-  /// The positional argument is the path to the the package directory for the
+  /// The positional argument is the path to the package directory for the
   /// flutter package within the Flutter root dir.
   ///
   /// The optional `tempDirectory` argument supplies the location for the
@@ -265,6 +265,7 @@ class SampleChecker {
     return _headers ??= <String>[
       '// generated code',
       '// ignore_for_file: directives_ordering',
+      '// ignore_for_file: unnecessary_import',
       '// ignore_for_file: unused_import',
       '// ignore_for_file: unused_element',
       '// ignore_for_file: unused_local_variable',
@@ -610,13 +611,22 @@ dependencies:
     sdk: flutter
   flutter_test:
     sdk: flutter
+
+dev_dependencies:
+  flutter_lints: ^1.0.3
 ''');
 
 
     // Import the analysis options from the Flutter root.
-    final File rootAnalysisOptions = File(path.join(_flutterRoot,'analysis_options.yaml'));
     final File analysisOptions = File(path.join(directory.path, 'analysis_options.yaml'));
-    analysisOptions.writeAsStringSync('include: ${rootAnalysisOptions.absolute.path}');
+    analysisOptions.writeAsStringSync('''
+include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+    # Samples want to print things pretty often.
+    avoid_print: false
+''');
   }
 
   /// Writes out a sample section to the disk and returns the file.

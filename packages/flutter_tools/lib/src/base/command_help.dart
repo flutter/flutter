@@ -156,16 +156,15 @@ class CommandHelp {
     'debugDumpRenderTree',
   );
 
+  late final CommandHelpOption v = _makeOption(
+    'v',
+    'Open Flutter DevTools.',
+  );
+
   late final CommandHelpOption w = _makeOption(
     'w',
     'Dump widget hierarchy to the console.',
     'debugDumpApp',
-  );
-
-  late final CommandHelpOption z = _makeOption(
-    'z',
-    'Toggle elevation checker.',
-    'debugCheckElevationsEnabled',
   );
 
   // When updating the list above, see the notes above the list regarding order

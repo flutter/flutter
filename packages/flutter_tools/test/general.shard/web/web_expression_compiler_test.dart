@@ -52,7 +52,7 @@ void main() {
       await expressionCompiler.compileExpressionToJs(
         null, null, 1, 1, null, null, null, 'a');
 
-    expectResult(result, true, 'InternalError: frontend server failed to compile \'a\'');
+    expectResult(result, true, "InternalError: frontend server failed to compile 'a'");
   });
 }
 

@@ -35,8 +35,7 @@ void main() {
         exitCode: 1,
       ));
 
-      expect(() async => processUtils.run(<String>['false'], throwOnError: true),
-             throwsA(isA<ProcessException>()));
+      expect(() async => processUtils.run(<String>['false'], throwOnError: true), throwsProcessException());
     });
   });
 
@@ -84,6 +83,24 @@ void main() {
       expect(logger.statusText, equals('${testString[0]}\n'));
       expect(logger.errorText, equals('${testString[0]}\n'));
     });
+
+    testWithoutContext('Command output is filtered by mapFunction', () async {
+      processManager.addCommand(const FakeCommand(
+        command: <String>['command'],
+        stdout: 'match\nno match',
+        stderr: 'match\nno match',
+      ));
+
+      await processUtils.stream(<String>['command'], mapFunction: (String line) {
+        if (line == 'match') {
+          return line;
+        }
+        return null;
+      });
+
+      expect(logger.statusText, equals('match\n'));
+      expect(logger.errorText, equals('match\n'));
+    });
   });
 
   group('run', () {
@@ -124,8 +141,7 @@ void main() {
         ],
         exitCode: 1,
       ));
-      expect(() => processUtils.run(<String>['kaboom'], throwOnError: true),
-             throwsA(isA<ProcessException>()));
+      expect(() => processUtils.run(<String>['kaboom'], throwOnError: true), throwsProcessException());
     });
 
     testWithoutContext(' does not throw on allowed Failures', () async {
@@ -158,7 +174,7 @@ void main() {
           throwOnError: true,
           allowedFailures: (int c) => c == 1,
         ),
-        throwsA(isA<ProcessException>()),
+        throwsProcessException(),
       );
     });
   });
@@ -269,7 +285,8 @@ void main() {
           throwOnError: true,
           allowedFailures: (int c) => c == 1,
         ),
-        throwsA(isA<ProcessException>()));
+        throwsProcessException(),
+      );
     });
 
     testWithoutContext(' prints stdout and stderr to trace on success', () async {
@@ -294,8 +311,7 @@ void main() {
         stdout: 'stdout',
         stderr: 'stderr',
       ));
-      expect(() => processUtils.runSync(<String>['kaboom'], throwOnError: true),
-             throwsA(isA<ProcessException>()));
+      expect(() => processUtils.runSync(<String>['kaboom'], throwOnError: true), throwsProcessException());
       expect(testLogger.statusText, contains('stdout'));
       expect(testLogger.errorText, contains('stderr'));
     });

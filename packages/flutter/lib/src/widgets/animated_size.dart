@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -17,7 +16,7 @@ import 'ticker_provider.dart';
 /// of the [AnimatedSize] widget, here a [FlutterLogo], to animate.
 ///
 /// ```dart
-/// class _MyStatefulWidgetState extends State<MyStatefulWidget> with SingleTickerProviderStateMixin {
+/// class _MyStatefulWidgetState extends State<MyStatefulWidget> {
 ///   double _size = 50.0;
 ///   bool _large = false;
 ///
@@ -123,13 +122,13 @@ class _AnimatedSizeState
   @override
   Widget build(BuildContext context) {
     return _AnimatedSize(
-      child: widget.child,
       alignment: widget.alignment,
       curve: widget.curve,
       duration: widget.duration,
       reverseDuration: widget.reverseDuration,
       vsync: this,
       clipBehavior: widget.clipBehavior,
+      child: widget.child,
     );
   }
 }

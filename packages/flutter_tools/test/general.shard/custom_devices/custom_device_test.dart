@@ -8,13 +8,12 @@ import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-import 'package:file/src/interface/directory.dart';
-import 'package:file/src/interface/file.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/bundle.dart';
+import 'package:flutter_tools/src/bundle_builder.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/custom_devices/custom_device.dart';
 import 'package:flutter_tools/src/custom_devices/custom_device_config.dart';
@@ -100,7 +99,7 @@ void main() {
     id: 'testid',
     label: 'testlabel',
     sdkNameAndVersion: 'testsdknameandversion',
-    disabled: false,
+    enabled: true,
     pingCommand: const <String>['testping'],
     pingSuccessRegex: RegExp('testpingsuccess'),
     postBuildCommand: const <String>['testpostbuild'],
@@ -114,7 +113,7 @@ void main() {
 
   const String testConfigPingSuccessOutput = 'testpingsuccess\n';
   const String testConfigForwardPortSuccessOutput = 'testforwardportsuccess\n';
-  final CustomDeviceConfig disabledTestConfig = testConfig.copyWith(disabled: true);
+  final CustomDeviceConfig disabledTestConfig = testConfig.copyWith(enabled: false);
   final CustomDeviceConfig testConfigNonForwarding = testConfig.copyWith(
     explicitForwardPortCommand: true,
     forwardPortCommand: null,
@@ -248,7 +247,7 @@ void main() {
     expect(pingCommandWasExecuted, true);
   });
 
-  testWithoutContext('CustomDevices.discoverDevices doesn\'t report device when ping command fails', () async {
+  testWithoutContext("CustomDevices.discoverDevices doesn't report device when ping command fails", () async {
     final MemoryFileSystem fs = MemoryFileSystem.test();
     final Directory dir = fs.directory('custom_devices_config_dir');
 
@@ -274,7 +273,7 @@ void main() {
     expect(await discovery.discoverDevices(), hasLength(0));
   });
 
-  testWithoutContext('CustomDevices.discoverDevices doesn\'t report device when ping command output doesn\'t match ping success regex', () async {
+  testWithoutContext("CustomDevices.discoverDevices doesn't report device when ping command output doesn't match ping success regex", () async {
     final MemoryFileSystem fs = MemoryFileSystem.test();
     final Directory dir = fs.directory('custom_devices_config_dir');
 
@@ -577,6 +576,18 @@ void main() {
     );
     expect(screenshotCommandWasExecuted, false);
     expect(screenshotFile.existsSync(), false);
+  });
+
+  testWithoutContext('CustomDevice returns correct target platform', () async {
+    final CustomDevice device = CustomDevice(
+      config: testConfig.copyWith(
+        platform: TargetPlatform.linux_x64
+      ),
+      logger: BufferLogger.test(),
+      processManager: FakeProcessManager.empty()
+    );
+
+    expect(await device.targetPlatform, TargetPlatform.linux_x64);
   });
 }
 

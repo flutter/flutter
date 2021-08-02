@@ -16,7 +16,7 @@ class ExpandingBox extends StatefulWidget {
   State<ExpandingBox> createState() => _ExpandingBoxState();
 }
 
-class _ExpandingBoxState extends State<ExpandingBox> with AutomaticKeepAliveClientMixin<ExpandingBox>{
+class _ExpandingBoxState extends State<ExpandingBox> with AutomaticKeepAliveClientMixin<ExpandingBox> {
   late double _height;
 
   @override
@@ -40,8 +40,8 @@ class _ExpandingBoxState extends State<ExpandingBox> with AutomaticKeepAliveClie
       child: Align(
         alignment: Alignment.bottomCenter,
         child: TextButton(
-          child: const Text('Collapse'),
           onPressed: toggleSize,
+          child: const Text('Collapse'),
         ),
       ),
     );

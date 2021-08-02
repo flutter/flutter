@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 
@@ -30,7 +28,7 @@ class DartPluginRegistrantTarget extends Target {
 
   DartPluginRegistrantTarget._(this._project);
 
-  final FlutterProject _project;
+  final FlutterProject? _project;
 
   @override
   Future<void> build(Environment environment) async {
@@ -66,11 +64,11 @@ class DartPluginRegistrantTarget extends Target {
     if (!environment.generateDartPluginRegistry) {
       return true;
     }
-    final String platformName = environment.defines[kTargetPlatform];
+    final String? platformName = environment.defines[kTargetPlatform];
     if (platformName == null) {
       return true;
     }
-    final TargetPlatform targetPlatform = getTargetPlatformForName(platformName);
+    final TargetPlatform? targetPlatform = getTargetPlatformForName(platformName);
     // TODO(egarciad): Support Android and iOS.
     // https://github.com/flutter/flutter/issues/52267
     return targetPlatform != TargetPlatform.darwin &&

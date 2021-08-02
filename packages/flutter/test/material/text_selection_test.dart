@@ -28,7 +28,7 @@ class MockClipboard {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();
-  SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
+  TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
 
   setUp(() async {
     await Clipboard.setData(const ClipboardData(text: 'clipboard data'));
@@ -153,7 +153,7 @@ void main() {
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
 
-    testWidgets('When menu items don\'t fit, an overflow menu is used.', (WidgetTester tester) async {
+    testWidgets("When menu items don't fit, an overflow menu is used.", (WidgetTester tester) async {
       // Set the screen size to more narrow, so that Select all can't fit.
       tester.binding.window.physicalSizeTestValue = const Size(1000, 800);
       addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
@@ -566,7 +566,7 @@ void main() {
                   padding: const EdgeInsets.symmetric(horizontal: 250),
                   child: FittedBox(
                     child: materialTextSelectionControls.buildHandle(
-                      context, TextSelectionHandleType.right, 10.0,
+                      context, TextSelectionHandleType.right, 10.0, null,
                     ),
                   ),
                 ),
@@ -581,9 +581,43 @@ void main() {
         matchesGoldenFile('transparent_handle.png'),
       );
     });
+
+    testWidgets('works with 3 positional parameters', (WidgetTester tester) async {
+      await tester.pumpWidget(Theme(
+        data: ThemeData(
+          textSelectionTheme: const TextSelectionThemeData(
+            selectionHandleColor: Color(0x550000AA),
+          ),
+        ),
+        child: Builder(
+          builder: (BuildContext context) {
+            return Container(
+              color: Colors.white,
+              height: 800,
+              width: 800,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 250),
+                child: FittedBox(
+                  child: materialTextSelectionControls.buildHandle(
+                    context, TextSelectionHandleType.right, 10.0,
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ));
+
+      // No expect here as this should simply compile / not throw any
+      // exceptions while building. The test will fail if this either does
+      // not compile or if the tester catches an exception, which we do
+      // not take here.
+    });
   });
 
-  testWidgets('Paste only appears when clipboard has contents', (WidgetTester tester) async {
+  // TODO(justinmc): Paste should only appears when the clipboard has contents.
+  //                 https://github.com/flutter/flutter/issues/74139
+  testWidgets('Paste always appears regardless of clipboard content on Android', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
@@ -611,8 +645,10 @@ void main() {
     await tester.tapAt(textOffsetToPosition(tester, index));
     await tester.pumpAndSettle();
 
-    // No Paste yet, because nothing has been copied.
-    expect(find.text('Paste'), findsNothing);
+    // Paste is showing even though clipboard is empty.
+    // TODO(justinmc): Paste should not appears when the clipboard is empty.
+    //                 https://github.com/flutter/flutter/issues/74139
+    expect(find.text('Paste'), findsOneWidget);
     expect(find.text('Copy'), findsOneWidget);
     expect(find.text('Cut'), findsOneWidget);
     expect(find.text('Select all'), findsOneWidget);

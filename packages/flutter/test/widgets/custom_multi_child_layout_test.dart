@@ -48,11 +48,11 @@ class TestMultiChildLayoutDelegate extends MultiChildLayoutDelegate {
 Widget buildFrame(MultiChildLayoutDelegate delegate) {
   return Center(
     child: CustomMultiChildLayout(
+      delegate: delegate,
       children: <Widget>[
         LayoutId(id: 0, child: const SizedBox(width: 150.0, height: 100.0)),
         LayoutId(id: 1, child: const SizedBox(width: 100.0, height: 200.0)),
       ],
-      delegate: delegate,
     ),
   );
 }
@@ -208,20 +208,20 @@ void main() {
     final TestMultiChildLayoutDelegate delegate = TestMultiChildLayoutDelegate();
     await tester.pumpWidget(Center(
       child: CustomMultiChildLayout(
+        delegate: delegate,
         children: <Widget>[
           LayoutId(
             id: 0,
             child: CustomMultiChildLayout(
+              delegate: delegate,
               children: <Widget>[
                 LayoutId(id: 0, child: const SizedBox(width: 150.0, height: 100.0)),
                 LayoutId(id: 1, child: const SizedBox(width: 100.0, height: 200.0)),
               ],
-              delegate: delegate,
             ),
           ),
           LayoutId(id: 1, child: const SizedBox(width: 100.0, height: 200.0)),
         ],
-        delegate: delegate,
       ),
     ));
 
@@ -276,8 +276,8 @@ void main() {
     Widget buildSingleChildFrame(MultiChildLayoutDelegate delegate) {
       return Center(
         child: CustomMultiChildLayout(
-          children: <Widget>[LayoutId(id: 0, child: const SizedBox())],
           delegate: delegate,
+          children: <Widget>[LayoutId(id: 0, child: const SizedBox())],
         ),
       );
     }
@@ -361,8 +361,8 @@ void main() {
       await expectFlutterErrorMessage(
         widget: Center(
           child: CustomMultiChildLayout(
-            children: <Widget>[LayoutWithMissingId(child: Container(width: 100))],
             delegate: PreferredSizeDelegate(preferredSize: const Size(10, 10)),
+            children: <Widget>[LayoutWithMissingId(child: Container(width: 100))],
           ),
         ),
         tester: tester,
@@ -384,12 +384,12 @@ void main() {
       await expectFlutterErrorMessage(
         widget: Center(
           child: CustomMultiChildLayout(
+            delegate: ZeroAndOneIdLayoutDelegate(),
             children: <Widget>[
               LayoutId(id: 0, child: Container(width: 100)),
               LayoutId(id: 1, child: Container(width: 100)),
               LayoutId(id: 2, child: Container(width: 100)),
             ],
-            delegate: ZeroAndOneIdLayoutDelegate(),
           ),
         ),
         tester: tester,
@@ -406,13 +406,13 @@ void main() {
       await expectFlutterErrorMessage(
         widget: Center(
           child: CustomMultiChildLayout(
+            delegate: ZeroAndOneIdLayoutDelegate(),
             children: <Widget>[
               LayoutId(id: 0, child: Container(width: 100)),
               LayoutId(id: 1, child: Container(width: 100)),
               LayoutId(id: 2, child: Container(width: 100)),
               LayoutId(id: 3, child: Container(width: 100)),
             ],
-            delegate: ZeroAndOneIdLayoutDelegate(),
           ),
         ),
         tester: tester,

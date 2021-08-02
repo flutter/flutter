@@ -41,11 +41,11 @@ void main() {
 
     await commandRunner.run(<String>['get']);
 
-    expect(await command.usageValues, <CustomDimensions, Object>{
-      CustomDimensions.commandPackagesNumberPlugins: '0',
-      CustomDimensions.commandPackagesProjectModule: 'false',
-      CustomDimensions.commandPackagesAndroidEmbeddingVersion: 'v1'
-    });
+    expect(await command.usageValues, const CustomDimensions(
+      commandPackagesNumberPlugins: 0,
+      commandPackagesProjectModule: false,
+      commandPackagesAndroidEmbeddingVersion: 'v1',
+    ));
   }, overrides: <Type, Generator>{
     Pub: () => pub,
     ProcessManager: () => FakeProcessManager.any(),
@@ -66,11 +66,11 @@ void main() {
 
     await commandRunner.run(<String>['get']);
 
-    expect(await command.usageValues, <CustomDimensions, Object>{
-      CustomDimensions.commandPackagesNumberPlugins: '0',
-      CustomDimensions.commandPackagesProjectModule: 'false',
-      CustomDimensions.commandPackagesAndroidEmbeddingVersion: 'v1'
-    });
+    expect(await command.usageValues, const CustomDimensions(
+      commandPackagesNumberPlugins: 0,
+      commandPackagesProjectModule: false,
+      commandPackagesAndroidEmbeddingVersion: 'v1',
+    ));
   }, overrides: <Type, Generator>{
     Pub: () => pub,
     ProcessManager: () => FakeProcessManager.any(),
@@ -86,11 +86,11 @@ void main() {
 
     await commandRunner.run(<String>['get']);
 
-    expect(await command.usageValues, <CustomDimensions, Object>{
-      CustomDimensions.commandPackagesNumberPlugins: '0',
-      CustomDimensions.commandPackagesProjectModule: 'false',
-      CustomDimensions.commandPackagesAndroidEmbeddingVersion: 'v1'
-    });
+    expect(await command.usageValues, const CustomDimensions(
+      commandPackagesNumberPlugins: 0,
+      commandPackagesProjectModule: false,
+      commandPackagesAndroidEmbeddingVersion: 'v1',
+    ));
   }, overrides: <Type, Generator>{
     Pub: () => pub,
     ProcessManager: () => FakeProcessManager.any(),
@@ -113,6 +113,7 @@ class FakePub extends Fake implements Pub {
     bool generateSyntheticPackage = false,
     String flutterRootOverride,
     bool checkUpToDate = false,
+    bool shouldSkipThirdPartyGenerator = true,
   }) async {
     fileSystem.currentDirectory
       .childDirectory('.dart_tool')

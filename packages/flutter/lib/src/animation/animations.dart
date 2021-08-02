@@ -408,6 +408,9 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
   /// animation is used to animate.
   AnimationStatus? _curveDirection;
 
+  /// True if this CurvedAnimation has been disposed.
+  bool isDisposed = false;
+
   void _updateCurveDirection(AnimationStatus status) {
     switch (status) {
       case AnimationStatus.dismissed:
@@ -425,6 +428,12 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
 
   bool get _useForwardCurve {
     return reverseCurve == null || (_curveDirection ?? parent.status) != AnimationStatus.reverse;
+  }
+
+  /// Cleans up any listeners added by this CurvedAnimation.
+  void dispose() {
+    isDisposed = true;
+    parent.removeStatusListener(_updateCurveDirection);
   }
 
   @override

@@ -421,14 +421,14 @@ void main() {
     expect(getRawMaterialButtonWidget().shape, const CircleBorder());
 
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
           floatingActionButton: FloatingActionButton.extended(
-            label: const SizedBox(
+            label: SizedBox(
               width: 100.0,
               child: Text('label'),
             ),
-            icon: const Icon(Icons.android),
+            icon: Icon(Icons.android),
             onPressed: null,
           ),
         ),
@@ -475,10 +475,10 @@ void main() {
     }
 
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
           floatingActionButton: FloatingActionButton.extended(
-            label: const SizedBox(
+            label: SizedBox(
               width: 100.0,
               child: Text('label'),
             ),
@@ -965,6 +965,64 @@ void main() {
     expect(find.byKey(labelKey), findsNothing);
   });
 
+  testWidgets('FloatingActionButton.small configures correct size', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          floatingActionButton: FloatingActionButton.small(
+            key: key,
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            onPressed: null,
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byKey(key)), const Size(40.0, 40.0));
+  });
+
+  testWidgets('FloatingActionButton.large configures correct size', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          floatingActionButton: FloatingActionButton.large(
+            key: key,
+            onPressed: null,
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byKey(key)), const Size(96.0, 96.0));
+  });
+
+  testWidgets('FloatingActionButton.extended can customize spacing', (WidgetTester tester) async {
+    const Key iconKey = Key('icon');
+    const Key labelKey = Key('label');
+    const double spacing = 33.0;
+    const EdgeInsetsDirectional padding = EdgeInsetsDirectional.only(start: 5.0, end: 6.0);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          floatingActionButton: FloatingActionButton.extended(
+            label: const Text('', key: labelKey),
+            icon: const Icon(Icons.add, key: iconKey),
+            extendedIconLabelSpacing: spacing,
+            extendedPadding: padding,
+            onPressed: () {},
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getTopLeft(find.byKey(labelKey)).dx - tester.getTopRight(find.byKey(iconKey)).dx, spacing);
+    expect(tester.getTopLeft(find.byKey(iconKey)).dx - tester.getTopLeft(find.byType(FloatingActionButton)).dx, padding.start);
+    expect(tester.getTopRight(find.byType(FloatingActionButton)).dx - tester.getTopRight(find.byKey(labelKey)).dx, padding.end);
+  });
+
   group('feedback', () {
     late FeedbackTester feedback;
 
@@ -1048,7 +1106,7 @@ void main() {
       expect(feedback.hapticCount, 0);
     });
 
-    testWidgets('FloatingActionButton.enableFeedback is overriden by FloatingActionButtonThemeData.enableFeedback', (WidgetTester tester) async {
+    testWidgets('FloatingActionButton.enableFeedback is overridden by FloatingActionButtonThemeData.enableFeedback', (WidgetTester tester) async {
       const bool enableFeedbackTheme = false;
       const bool enableFeedback = true;
       final ThemeData theme = ThemeData(

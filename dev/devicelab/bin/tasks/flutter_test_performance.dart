@@ -65,11 +65,11 @@ Future<int> runTest({bool coverage = false, bool noPub = false}) async {
       // we have a blank line at the start
       step = TestStep.testWritesFirstCarriageReturn;
     } else {
-      final Match match = testOutputPattern.matchAsPrefix(entry);
+      final Match? match = testOutputPattern.matchAsPrefix(entry);
       if (match == null) {
         badLines += 1;
       } else {
-        if (step.index >= TestStep.testWritesFirstCarriageReturn.index && step.index <= TestStep.testLoading.index && match.group(1).startsWith('loading ')) {
+        if (step.index >= TestStep.testWritesFirstCarriageReturn.index && step.index <= TestStep.testLoading.index && match.group(1)!.startsWith('loading ')) {
           // first the test loads
           step = TestStep.testLoading;
         } else if (step.index <= TestStep.testRunning.index && match.group(1) == 'A trivial widget test') {

@@ -4,9 +4,13 @@
 
 // @dart = 2.8
 
+import 'dart:async';
+
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/devtools_launcher.dart';
 import 'package:flutter_tools/src/resident_devtools_handler.dart';
@@ -73,6 +77,12 @@ final FakeVmServiceRequest listViews = FakeVmServiceRequest(
 );
 
 void main() {
+  Cache.flutterRoot = '';
+  final MemoryFileSystem fakefs = MemoryFileSystem.test()
+    ..directory('bin').createSync()
+    ..directory('bin/internal').createSync()
+    ..file('bin/internal/devtools.version').writeAsStringSync('1.0.0');
+
   testWithoutContext('Does not serve devtools if launcher is null', () async {
     final ResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
       null,
@@ -100,6 +110,7 @@ void main() {
   testWithoutContext('Can use devtools with existing devtools URI', () async {
     final DevtoolsServerLauncher launcher = DevtoolsServerLauncher(
       processManager: FakeProcessManager.empty(),
+      fileSystem: fakefs,
       pubExecutable: 'pub',
       logger: BufferLogger.test(),
       platform: FakePlatform(),
@@ -190,6 +201,22 @@ void main() {
     );
   });
 
+  testWithoutContext('serveAndAnnounceDevTools will bail if launching devtools fails', () async {
+    final ResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
+      FakeDevtoolsLauncher()..activeDevToolsServer = null,
+      FakeResidentRunner(),
+      BufferLogger.test(),
+    );
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[], httpAddress: Uri.parse('http://localhost:1234'));
+
+    final FakeFlutterDevice device = FakeFlutterDevice()
+      ..vmService = fakeVmServiceHost.vmService;
+
+    await handler.serveAndAnnounceDevTools(
+      flutterDevices: <FlutterDevice>[device],
+    );
+  });
+
   testWithoutContext('serveAndAnnounceDevTools with web device', () async {
     final ResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
       FakeDevtoolsLauncher()..activeDevToolsServer = DevToolsServerAddress('localhost', 8080),
@@ -203,11 +230,7 @@ void main() {
           'streamId': 'Isolate',
         }
       ),
-      FakeVmServiceRequest(
-        method: 'getVM',
-        jsonResponse: fakeVM.toJson(),
-        args: <String, Object>{},
-      ),
+      listViews,
       FakeVmServiceRequest(
         method: 'getIsolate',
         jsonResponse: isolate.toJson(),
@@ -353,6 +376,73 @@ void main() {
       ],
     );
   });
+
+  testWithoutContext('Does not launch devtools in browser if launcher is null', () async {
+    final FlutterResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
+      null,
+      FakeResidentRunner(),
+      BufferLogger.test(),
+    );
+
+    handler.launchDevToolsInBrowser(flutterDevices: <FlutterDevice>[]);
+    expect(handler.launchedInBrowser, isFalse);
+    expect(handler.activeDevToolsServer, null);
+  });
+
+  testWithoutContext('Does not launch devtools in browser if ResidentRunner does not support the service protocol', () async {
+    final FlutterResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
+      FakeDevtoolsLauncher(),
+      FakeResidentRunner()..supportsServiceProtocol = false,
+      BufferLogger.test(),
+    );
+
+    handler.launchDevToolsInBrowser(flutterDevices: <FlutterDevice>[]);
+    expect(handler.launchedInBrowser, isFalse);
+    expect(handler.activeDevToolsServer, null);
+  });
+
+  testWithoutContext('launchDevToolsInBrowser launches after _devToolsLauncher.ready completes', () async {
+    final Completer<void> completer = Completer<void>();
+    final FlutterResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
+      FakeDevtoolsLauncher()
+        ..devToolsUrl = null
+        // We need to set [activeDevToolsServer] to simulate the state we would
+        // be in after serving devtools completes.
+        ..activeDevToolsServer = DevToolsServerAddress('localhost', 8080)
+        ..readyCompleter = completer,
+      FakeResidentRunner(),
+      BufferLogger.test(),
+    );
+
+    expect(handler.launchDevToolsInBrowser(flutterDevices: <FlutterDevice>[]), isTrue);
+    expect(handler.launchedInBrowser, isFalse);
+
+    completer.complete();
+    // Await a short delay to give DevTools time to launch.
+    await Future<void>.delayed(const Duration(microseconds: 100));
+
+    expect(handler.launchedInBrowser, isTrue);
+  });
+
+  testWithoutContext('launchDevToolsInBrowser launches successfully', () async {
+    final FlutterResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
+      FakeDevtoolsLauncher()
+        ..devToolsUrl = Uri(host: 'localhost', port: 8080)
+        ..activeDevToolsServer = DevToolsServerAddress('localhost', 8080),
+      FakeResidentRunner(),
+      BufferLogger.test(),
+    );
+
+    expect(handler.launchDevToolsInBrowser(flutterDevices: <FlutterDevice>[]), isTrue);
+    expect(handler.launchedInBrowser, isTrue);
+  });
+
+  testWithoutContext('Converts a VmService URI with a query parameter to a pretty display string', () {
+    const String value = 'http://127.0.0.1:9100?uri=http%3A%2F%2F127.0.0.1%3A57922%2F_MXpzytpH20%3D%2F';
+    final Uri uri = Uri.parse(value);
+
+    expect(urlToDisplayString(uri), 'http://127.0.0.1:9100?uri=http://127.0.0.1:57922/_MXpzytpH20=/');
+  });
 }
 
 class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
@@ -360,12 +450,17 @@ class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
   DevToolsServerAddress activeDevToolsServer;
 
   @override
+  Uri devToolsUrl;
+
+  @override
   Future<DevToolsServerAddress> serve() {
     return null;
   }
 
   @override
-  Future<void> get ready => Future<void>.value();
+  Future<void> get ready => readyCompleter.future;
+
+  Completer<void> readyCompleter = Completer<void>()..complete();
 }
 
 class FakeResidentRunner extends Fake implements ResidentRunner {
@@ -387,4 +482,4 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   TargetPlatform targetPlatform = TargetPlatform.android_arm;
 }
 
-class FakeDevice extends Fake implements Device {}
+class FakeDevice extends Fake implements Device { }

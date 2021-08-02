@@ -4,6 +4,12 @@
 
 // @dart = 2.8
 
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=1000"
+@Tags(<String>['no-shuffle'])
+
 import 'package:file/file.dart';
 
 import '../src/common.dart';
@@ -122,7 +128,7 @@ void main() {
 
     final int breakLine = (await flutter.getSourceLocation()).line;
     expect(breakLine, project.lineContaining(project.test, "throw 'platform message callback';"));
-  }, skip: 'TODO(goderbauer): add pragma to _DefaultBinaryMessenger.handlePlatformMessage when async methods are supported (https://github.com/dart-lang/sdk/issues/45673) and enable this test');
+  });
 
   testWithoutContext('breaks when SliverChildBuilderDelegate.builder throws', () async {
     final TestProject project = TestProject(
@@ -388,7 +394,7 @@ void main() {
 
     final int breakLine = (await flutter.getSourceLocation()).line;
     expect(breakLine, project.lineContaining(project.test, "throw 'LayoutBuilder.builder';"));
-  }, skip: 'TODO(goderbauer): Once https://github.com/dart-lang/sdk/issues/45710 is fixed, fix TODO in _LayoutBuilderElement._layout and enable this test');
+  });
 
   testWithoutContext('breaks when _CallbackHookProvider callback throws', () async {
     final TestProject project = TestProject(

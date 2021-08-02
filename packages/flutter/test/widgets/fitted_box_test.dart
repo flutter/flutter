@@ -481,7 +481,7 @@ void main() {
     final RenderFittedBox renderObject = tester.allRenderObjects.whereType<RenderFittedBox>().first;
     expect(renderObject.clipBehavior, equals(Clip.none));
 
-    await tester.pumpWidget(FittedBox(fit: BoxFit.none, child: Container(), clipBehavior: Clip.antiAlias));
+    await tester.pumpWidget(FittedBox(fit: BoxFit.none, clipBehavior: Clip.antiAlias, child: Container()));
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));
   });
 
@@ -588,6 +588,24 @@ void main() {
     await tester.pumpWidget(scaleDownWidget);
 
     expect(outsideBox.size.height, 50.0);
+  });
+
+  testWidgets('FittedBox without child does not throw', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Center(
+        child: SizedBox(
+          width: 200.0,
+          height: 200.0,
+          child: FittedBox(),
+        ),
+      ),
+    );
+
+    expect(find.byType(FittedBox), findsOneWidget);
+
+    // Tapping it also should not throw.
+    await tester.tap(find.byType(FittedBox), warnIfMissed: false);
+    expect(tester.takeException(), isNull);
   });
 }
 

@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=123"
+@Tags(<String>['no-shuffle'])
+
 import 'dart:ui' as ui show Image;
 
 import 'package:flutter/widgets.dart';
@@ -417,7 +423,7 @@ class RecordingPhysics extends ScrollPhysics {
 
   @override
   RecordingPhysics applyTo(ScrollPhysics? ancestor) {
-    return RecordingPhysics(parent: buildParent(ancestor)!);
+    return RecordingPhysics(parent: buildParent(ancestor));
   }
 
   @override
@@ -437,7 +443,7 @@ class ControllablePhysics extends ScrollPhysics {
 
   @override
   ControllablePhysics applyTo(ScrollPhysics? ancestor) {
-    return ControllablePhysics(parent: buildParent(ancestor)!);
+    return ControllablePhysics(parent: buildParent(ancestor));
   }
 
   @override

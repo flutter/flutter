@@ -367,7 +367,7 @@ class FakeEmulator extends Emulator {
   PlatformType get platformType => PlatformType.android;
 
   @override
-  Future<void> launch() {
+  Future<void> launch({bool coldBoot = false}) {
     throw UnimplementedError('Not implemented in Mock');
   }
 }

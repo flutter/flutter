@@ -42,7 +42,7 @@ String toTitleCase(String str) {
 }
 
 /// Return the plural of the given word (`cat(s)`).
-String pluralize(String word, int count) => count == 1 ? word : word + 's';
+String pluralize(String word, int count) => count == 1 ? word : '${word}s';
 
 /// Return the name of an enum item.
 String getEnumName(dynamic enumItem) {
@@ -52,7 +52,8 @@ String getEnumName(dynamic enumItem) {
 }
 
 String toPrettyJson(Object jsonable) {
-  return const JsonEncoder.withIndent('  ').convert(jsonable) + '\n';
+  final String value = const JsonEncoder.withIndent('  ').convert(jsonable);
+  return '$value\n';
 }
 
 final NumberFormat kSecondsFormat = NumberFormat('0.0');
@@ -182,9 +183,6 @@ const int kMinColumnWidth = 10;
 ///   Usage: app main_command <subcommand>
 ///          [arguments]
 /// ```
-///
-/// If [columnWidth] is not specified, then the column width will be the
-/// [outputPreferences.wrapColumn], which is set with the --wrap-column option.
 ///
 /// If [outputPreferences.wrapText] is false, then the text will be returned
 /// unchanged. If [shouldWrap] is specified, then it overrides the
@@ -444,4 +442,20 @@ String interpolateString(String toInterpolate, Map<String, String> replacementVa
 /// ```
 List<String> interpolateStringList(List<String> toInterpolate, Map<String, String> replacementValues) {
   return toInterpolate.map((String s) => interpolateString(s, replacementValues)).toList();
+}
+
+/// Returns the first line-based match for [regExp] in [file].
+///
+/// Assumes UTF8 encoding.
+Match? firstMatchInFile(File file, RegExp regExp) {
+  if (!file.existsSync()) {
+    return null;
+  }
+  for (final String line in file.readAsLinesSync()) {
+    final Match? match = regExp.firstMatch(line);
+    if (match != null) {
+      return match;
+    }
+  }
+  return null;
 }

@@ -165,7 +165,101 @@ void main() {
         'hasPrimaryFocus: false',
       ]);
     });
+
+    testWidgets('onKeyEvent and onKey correctly cooperate', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode(debugLabel: 'Test Node 3');
+      List<List<KeyEventResult>> results = <List<KeyEventResult>>[
+        <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
+        <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
+        <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
+      ];
+      final List<int> logs = <int>[];
+
+      await tester.pumpWidget(
+        Focus(
+          focusNode: FocusNode(debugLabel: 'Test Node 1'),
+          onKeyEvent: (_, KeyEvent event) {
+            logs.add(0);
+            return results[0][0];
+          },
+          onKey: (_, RawKeyEvent event) {
+            logs.add(1);
+            return results[0][1];
+          },
+          child: Focus(
+            focusNode: FocusNode(debugLabel: 'Test Node 2'),
+            onKeyEvent: (_, KeyEvent event) {
+              logs.add(10);
+              return results[1][0];
+            },
+            onKey: (_, RawKeyEvent event) {
+              logs.add(11);
+              return results[1][1];
+            },
+            child: Focus(
+              focusNode: focusNode,
+              onKeyEvent: (_, KeyEvent event) {
+                logs.add(20);
+                return results[2][0];
+              },
+              onKey: (_, RawKeyEvent event) {
+                logs.add(21);
+                return results[2][1];
+              },
+              child: const SizedBox(width: 200, height: 100),
+            ),
+          ),
+        ),
+      );
+      focusNode.requestFocus();
+      await tester.pump();
+
+      // All ignored.
+      results = <List<KeyEventResult>>[
+        <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
+        <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
+        <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
+      ];
+      expect(await simulateKeyDownEvent(LogicalKeyboardKey.digit1),
+          false);
+      expect(logs, <int>[20, 21, 10, 11, 0, 1]);
+      logs.clear();
+
+      // The onKeyEvent should be able to stop propagation.
+      results = <List<KeyEventResult>>[
+        <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
+        <KeyEventResult>[KeyEventResult.handled, KeyEventResult.ignored],
+        <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
+      ];
+      expect(await simulateKeyUpEvent(LogicalKeyboardKey.digit1),
+          true);
+      expect(logs, <int>[20, 21, 10, 11]);
+      logs.clear();
+
+      // The onKey should be able to stop propagation.
+      results = <List<KeyEventResult>>[
+        <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
+        <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.handled],
+        <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
+      ];
+      expect(await simulateKeyDownEvent(LogicalKeyboardKey.digit1),
+          true);
+      expect(logs, <int>[20, 21, 10, 11]);
+      logs.clear();
+
+      // KeyEventResult.skipRemainingHandlers works.
+      results = <List<KeyEventResult>>[
+        <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
+        <KeyEventResult>[KeyEventResult.skipRemainingHandlers, KeyEventResult.ignored],
+        <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
+      ];
+      expect(await simulateKeyUpEvent(LogicalKeyboardKey.digit1),
+          false);
+      expect(logs, <int>[20, 21, 10, 11]);
+      logs.clear();
+    }, variant: KeySimulatorTransitModeVariant.all());
   });
+
   group(FocusScopeNode, () {
 
     testWidgets('Can setFirstFocus on a scope with no manager.', (WidgetTester tester) async {
@@ -935,7 +1029,7 @@ void main() {
       // Since none of the focused nodes handle this event, nothing should
       // receive it.
       expect(receivedAnEvent, isEmpty);
-    });
+    }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Initial highlight mode guesses correctly.', (WidgetTester tester) async {
       FocusManager.instance.highlightStrategy = FocusHighlightStrategy.automatic;
@@ -1350,5 +1444,51 @@ void main() {
     notifyCount = 0;
 
     tester.binding.focusManager.removeListener(handleFocusChange);
+  });
+
+  testWidgets('debugFocusChanges causes logging of focus changes', (WidgetTester tester) async {
+    final bool oldDebugFocusChanges = debugFocusChanges;
+    final DebugPrintCallback oldDebugPrint = debugPrint;
+    final StringBuffer messages = StringBuffer();
+    debugPrint = (String? message, {int? wrapWidth}) {
+      messages.writeln(message ?? '');
+    };
+    debugFocusChanges = true;
+    try {
+      final BuildContext context = await setupWidget(tester);
+      final FocusScopeNode parent1 = FocusScopeNode(debugLabel: 'parent1');
+      final FocusAttachment parent1Attachment = parent1.attach(context);
+      final FocusNode child1 = FocusNode(debugLabel: 'child1');
+      final FocusAttachment child1Attachment = child1.attach(context);
+      parent1Attachment.reparent(parent: tester.binding.focusManager.rootScope);
+      child1Attachment.reparent(parent: parent1);
+
+      int notifyCount = 0;
+      void handleFocusChange() {
+        notifyCount++;
+      }
+      tester.binding.focusManager.addListener(handleFocusChange);
+
+      parent1.requestFocus();
+      expect(notifyCount, equals(0));
+      await tester.pump();
+      expect(notifyCount, equals(1));
+      notifyCount = 0;
+
+      child1.requestFocus();
+      await tester.pump();
+      expect(notifyCount, equals(1));
+      notifyCount = 0;
+
+      tester.binding.focusManager.removeListener(handleFocusChange);
+    } finally {
+      debugFocusChanges = oldDebugFocusChanges;
+      debugPrint = oldDebugPrint;
+    }
+    final String messagesStr = messages.toString();
+    expect(messagesStr.split('\n').length, equals(58));
+    expect(messagesStr, contains(RegExp(r'   └─Child 1: FocusScopeNode#[a-f0-9]{5}\(parent1 \[PRIMARY FOCUS\]\)')));
+    expect(messagesStr, contains('FOCUS: Notifying 2 dirty nodes'));
+    expect(messagesStr, contains(RegExp(r'FOCUS: Scheduling update, current focus is null, next focus will be FocusScopeNode#.*parent1')));
   });
 }

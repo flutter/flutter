@@ -45,7 +45,7 @@ class _AsyncScope {
 /// });
 /// ```
 class TestAsyncUtils {
-  // This class is not meant to be instatiated or extended; this constructor
+  // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
   TestAsyncUtils._();
   static const String _className = 'TestAsyncUtils';
@@ -307,8 +307,9 @@ class TestAsyncUtils {
     do { // skip past frames that are from this class
       index += 1;
       assert(index < stack.length);
-      lineMatch = getClassPattern.matchAsPrefix(stack[index])!;
+      lineMatch = getClassPattern.matchAsPrefix(stack[index]);
       assert(lineMatch != null);
+      lineMatch = lineMatch!;
       assert(lineMatch.groupCount == 1);
     } while (lineMatch.group(1) == _className);
     // try to parse the stack to find the interesting frame

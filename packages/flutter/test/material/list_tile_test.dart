@@ -257,6 +257,20 @@ void main() {
     expect(output, isEmpty);
   });
 
+  testWidgets('ListTile.divideTiles only runs the generator once', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/pull/78879
+    int callCount = 0;
+    Iterable<Widget> generator() sync* {
+      callCount += 1;
+      yield const Text('');
+      yield const Text('');
+    }
+
+    final List<Widget> output = ListTile.divideTiles(tiles: generator(), color: Colors.grey).toList();
+    expect(output, hasLength(2));
+    expect(callCount, 1);
+  });
+
   testWidgets('ListTileTheme', (WidgetTester tester) async {
     final Key titleKey = UniqueKey();
     final Key subtitleKey = UniqueKey();
@@ -1403,7 +1417,7 @@ void main() {
                 child: ListTile(
                   key: tileKey,
                   onTap: enabled ? () {
-                    setState((){
+                    setState(() {
                       tapped = true;
                     });
                   } : null,
@@ -1716,7 +1730,7 @@ void main() {
     expect(find.byType(Material), paints..path(color: defaultColor));
   });
 
-  testWidgets('ListTile respects ListTileTheme\'s tileColor & selectedTileColor', (WidgetTester tester) async {
+  testWidgets("ListTile respects ListTileTheme's tileColor & selectedTileColor", (WidgetTester tester) async {
     late ListTileTheme theme;
     bool isSelected = false;
 
@@ -1754,7 +1768,7 @@ void main() {
     expect(find.byType(Material), paints..path(color: theme.selectedTileColor));
   });
 
-  testWidgets('ListTileTheme\'s tileColor & selectedTileColor are overridden by ListTile properties', (WidgetTester tester) async {
+  testWidgets("ListTileTheme's tileColor & selectedTileColor are overridden by ListTile properties", (WidgetTester tester) async {
     bool isSelected = false;
     final Color tileColor = Colors.green.shade500;
     final Color selectedTileColor = Colors.red.shade500;

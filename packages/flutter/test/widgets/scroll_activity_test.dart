@@ -15,13 +15,13 @@ List<Widget> children(int n) {
 void main() {
   testWidgets('Scrolling with list view changes', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
-    await tester.pumpWidget(MaterialApp(home: ListView(children: children(30), controller: controller)));
+    await tester.pumpWidget(MaterialApp(home: ListView(controller: controller, children: children(30))));
     final double thirty = controller.position.maxScrollExtent;
     controller.jumpTo(thirty);
     await tester.pump();
     controller.jumpTo(thirty + 100.0); // past the end
     await tester.pump();
-    await tester.pumpWidget(MaterialApp(home: ListView(children: children(31), controller: controller)));
+    await tester.pumpWidget(MaterialApp(home: ListView(controller: controller, children: children(31))));
     expect(controller.position.pixels, thirty + 200.0); // same distance past the end
     expect(await tester.pumpAndSettle(), 7); // now it goes ballistic...
     expect(controller.position.pixels, thirty + 100.0); // and ends up at the end

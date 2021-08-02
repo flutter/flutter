@@ -21,9 +21,10 @@ import '../compile.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../fuchsia/fuchsia_device.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../ios/devices.dart';
 import '../ios/simulators.dart';
+import '../macos/macos_ipad_device.dart';
 import '../mdns_discovery.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
@@ -70,6 +71,7 @@ class AttachCommand extends FlutterCommand {
     usesDeviceUserOption();
     addEnableExperimentation(hide: !verboseHelp);
     addNullSafetyModeOptions(hide: !verboseHelp);
+    usesInitializeFromDillOption(hide: !verboseHelp);
     argParser
       ..addOption(
         'debug-port',
@@ -175,6 +177,9 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
   @override
   Future<void> validateCommand() async {
+    // ARM macOS as an iOS target is hidden, except for attach.
+    MacOSDesignedForIPadDevices.allowDiscovery = true;
+
     await super.validateCommand();
     if (await findTargetDevice() == null) {
       throwToolExit(null);
@@ -225,19 +230,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   Future<void> _attachToDevice(Device device) async {
     final FlutterProject flutterProject = FlutterProject.current();
 
-    Future<int> getDevicePort() async {
-      if (debugPort != null) {
-        return debugPort;
-      }
-      // This call takes a non-trivial amount of time, and only iOS devices and
-      // simulators support it.
-      // If/when we do this on Android or other platforms, we can update it here.
-      if (device is IOSDevice || device is IOSSimulator) {
-      }
-      return null;
-    }
-    final int devicePort = await getDevicePort();
-
     final Daemon daemon = boolArg('machine')
       ? Daemon(
           stdinCommandStream,
@@ -255,7 +247,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
     final String hostname = usesIpv6 ? ipv6Loopback : ipv4Loopback;
 
-    if (devicePort == null && debugUri == null) {
+    if (debugPort == null && debugUri == null) {
       if (device is FuchsiaDevice) {
         final String module = stringArg('module');
         if (module == null) {
@@ -274,7 +266,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           }
           rethrow;
         }
-      } else if ((device is IOSDevice) || (device is IOSSimulator)) {
+      } else if ((device is IOSDevice) || (device is IOSSimulator) || (device is MacOSDesignedForIPadDevice)) {
         final Uri uriFromMdns =
           await MDnsObservatoryDiscovery.instance.getObservatoryUri(
             appId,
@@ -310,7 +302,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           buildObservatoryUri(
             device,
             debugUri?.host ?? hostname,
-            devicePort ?? debugUri.port,
+            debugPort ?? debugUri.port,
             hostVmservicePort,
             debugUri?.path,
           )
@@ -419,8 +411,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
-      fileSystemRoots: stringsArg(FlutterOptions.kFileSystemRoot),
-      fileSystemScheme: stringArg(FlutterOptions.kFileSystemScheme),
       target: targetFile,
       targetModel: TargetModel(stringArg('target-model')),
       buildInfo: buildInfo,

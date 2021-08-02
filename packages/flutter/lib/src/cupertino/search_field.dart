@@ -108,7 +108,7 @@ class CupertinoSearchTextField extends StatefulWidget {
   ///
   /// The [itemColor] and [itemSize] properties allow changing the icon color
   /// and icon size of the search icon (prefix) and X-Mark (suffix).
-  /// They default to [CupertinoColors.secondaryLabel] and [20.0].
+  /// They default to [CupertinoColors.secondaryLabel] and `20.0`.
   ///
   /// The [padding], [prefixInsets], and [suffixInsets] let you set the padding
   /// insets for text, the search icon (prefix), and the X-Mark icon (suffix).
@@ -240,7 +240,7 @@ class CupertinoSearchTextField extends StatefulWidget {
   /// Sets the base icon size for the suffix and prefix icons.
   ///
   /// Cannot be null. The size of the icon is scaled using the accessibility
-  /// font scale settings. Defaults to [20.0].
+  /// font scale settings. Defaults to `20.0`.
   final double itemSize;
 
   /// Sets the padding insets for the suffix.
@@ -394,21 +394,24 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
     );
 
     final Widget prefix = Padding(
+      padding: widget.prefixInsets,
       child: IconTheme(
         data: iconThemeData,
         child: widget.prefixIcon,
       ),
-      padding: widget.prefixInsets,
     );
 
     final Widget suffix = Padding(
+      padding: widget.suffixInsets,
       child: CupertinoButton(
-        child: IconTheme(child: widget.suffixIcon, data: iconThemeData),
         onPressed: widget.onSuffixTap ?? _defaultOnSuffixTap,
         minSize: 0,
         padding: EdgeInsets.zero,
+        child: IconTheme(
+          data: iconThemeData,
+          child: widget.suffixIcon,
+        ),
       ),
-      padding: widget.suffixInsets,
     );
 
     return CupertinoTextField(
@@ -427,6 +430,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
       onSubmitted: widget.onSubmitted,
       focusNode: widget.focusNode,
       autocorrect: widget.autocorrect,
+      textInputAction: TextInputAction.search,
     );
   }
 }

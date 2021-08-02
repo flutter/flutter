@@ -11,7 +11,7 @@ void main() {
   test('installDeferredComponent test', () async {
     final List<MethodCall> log = <MethodCall>[];
 
-    SystemChannels.deferredComponent.setMockMethodCallHandler((MethodCall methodCall) async {
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.deferredComponent, (MethodCall methodCall) async {
       log.add(methodCall);
     });
 
@@ -27,7 +27,7 @@ void main() {
   test('uninstallDeferredComponent test', () async {
     final List<MethodCall> log = <MethodCall>[];
 
-    SystemChannels.deferredComponent.setMockMethodCallHandler((MethodCall methodCall) async {
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.deferredComponent, (MethodCall methodCall) async {
       log.add(methodCall);
     });
 

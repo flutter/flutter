@@ -64,6 +64,7 @@ import 'run_hot.dart';
 import 'runner/local_engine.dart';
 import 'version.dart';
 import 'web/workflow.dart';
+import 'windows/uwptool.dart';
 import 'windows/visual_studio.dart';
 import 'windows/visual_studio_validator.dart';
 import 'windows/windows_workflow.dart';
@@ -171,6 +172,11 @@ Future<T> runInContext<T>(
         logger: globals.logger,
         platform: globals.platform,
       ),
+      CustomDevicesConfig: () => CustomDevicesConfig(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        platform: globals.platform
+      ),
       CrashReporter: () => CrashReporter(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -190,7 +196,6 @@ Future<T> runInContext<T>(
         artifacts: globals.artifacts,
         flutterVersion: globals.flutterVersion,
         androidWorkflow: androidWorkflow,
-        config: globals.config,
         fuchsiaWorkflow: fuchsiaWorkflow,
         xcDevice: globals.xcdevice,
         userMessages: globals.userMessages,
@@ -201,14 +206,16 @@ Future<T> runInContext<T>(
         ),
         operatingSystemUtils: globals.os,
         terminal: globals.terminal,
-        customDevicesConfig: CustomDevicesConfig(
-          fileSystem: globals.fs,
+        customDevicesConfig: globals.customDevicesConfig,
+        uwptool: UwpTool(
+          artifacts: globals.artifacts,
           logger: globals.logger,
-          platform: globals.platform
+          processManager: globals.processManager,
         ),
       ),
       DevtoolsLauncher: () => DevtoolsServerLauncher(
         processManager: globals.processManager,
+        fileSystem: globals.fs,
         pubExecutable: globals.artifacts.getHostArtifact(HostArtifact.pubExecutable).path,
         logger: globals.logger,
         platform: globals.platform,

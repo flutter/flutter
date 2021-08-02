@@ -12,8 +12,8 @@ void main() {
   testWidgets('provides a value to the layer tree', (WidgetTester tester) async {
     await tester.pumpWidget(
       const AnnotatedRegion<int>(
-        child: SizedBox(width: 100.0, height: 100.0),
         value: 1,
+        child: SizedBox(width: 100.0, height: 100.0),
       ),
     );
     final List<Layer> layers = tester.layers;
@@ -25,8 +25,8 @@ void main() {
       Transform.translate(
         offset: const Offset(25.0, 25.0),
         child: const AnnotatedRegion<int>(
-          child: SizedBox(width: 100.0, height: 100.0),
           value: 1,
+          child: SizedBox(width: 100.0, height: 100.0),
         ),
       ),
     );

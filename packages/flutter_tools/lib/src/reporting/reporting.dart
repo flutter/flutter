@@ -25,3 +25,4 @@ import 'first_run.dart';
 part 'disabled_usage.dart';
 part 'events.dart';
 part 'usage.dart';
+part 'custom_dimensions.dart';

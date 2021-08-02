@@ -175,7 +175,7 @@ Future<void> main() async {
             ],
           );
         });
-        final String errorMessage = validateSnapshotDependency(project, 'kernel_blob.bin');
+        final String? errorMessage = validateSnapshotDependency(project, 'kernel_blob.bin');
         if (errorMessage != null) {
           throw TaskResult.failure(errorMessage);
         }
@@ -217,7 +217,8 @@ Future<void> main() async {
         });
 
         section('Configure');
-        project.addPlugin('plugin_under_test', value: '$platformLineSep    path: ${pluginDir.path}');
+        project.addPlugin('plugin_under_test',
+            value: '$platformLineSep    path: ${pluginDir.path}');
         await project.addCustomBuildType('local', initWith: 'debug');
         await project.getPackages();
 
@@ -236,7 +237,7 @@ Future<void> main() async {
         await project.addCustomBuildType('local', initWith: 'debug');
         await project.addGlobalBuildType('local', initWith: 'debug');
         section('Add plugin');
-        await project.addPlugin('path_provider');
+        project.addPlugin('path_provider');
         await project.getPackages();
 
         await project.runGradleTask('assembleLocal');

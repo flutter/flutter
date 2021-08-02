@@ -12,8 +12,8 @@ import 'package:flutter_tools/src/flutter_plugins.dart';
 import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/plugins.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:mockito/mockito.dart';
 import 'package:package_config/package_config.dart';
+import 'package:test/fake.dart';
 import 'package:yaml/yaml.dart';
 
 import '../src/common.dart';
@@ -22,23 +22,18 @@ import '../src/context.dart';
 void main() {
   group('Dart plugin registrant', () {
     FileSystem fs;
-    MockFlutterProject flutterProject;
-    MockFlutterManifest flutterManifest;
+    FakeFlutterProject flutterProject;
+    FakeFlutterManifest flutterManifest;
 
     setUp(() async {
       fs = MemoryFileSystem.test();
-
-      flutterProject = MockFlutterProject();
-
-      flutterManifest = MockFlutterManifest();
-      when(flutterManifest.dependencies).thenReturn(<String>{});
-
-      when(flutterProject.manifest).thenReturn(flutterManifest);
-      when(flutterProject.directory).thenReturn(fs.systemTempDirectory.childDirectory('app'));
-
-      when(flutterProject.flutterPluginsFile).thenReturn(flutterProject.directory.childFile('.flutter-plugins'));
-      when(flutterProject.flutterPluginsDependenciesFile).thenReturn(flutterProject.directory.childFile('.flutter-plugins-dependencies'));
-
+      final Directory directory = fs.currentDirectory.childDirectory('app');
+      flutterManifest = FakeFlutterManifest();
+      flutterProject = FakeFlutterProject()
+        ..manifest = flutterManifest
+        ..directory = directory
+        ..flutterPluginsFile = directory.childFile('.flutter-plugins')
+        ..flutterPluginsDependenciesFile = directory.childFile('.flutter-plugins-dependencies');
       flutterProject.directory.childFile('.packages').createSync(recursive: true);
     });
 
@@ -472,7 +467,7 @@ void main() {
         ));
         expect(
           testLogger.errorText,
-          'Plugin `url_launcher_linux_1` doesn\'t implement a plugin interface, '
+          "Plugin `url_launcher_linux_1` doesn't implement a plugin interface, "
           'nor sets a default implementation in pubspec.yaml.\n\n'
           'To set a default implementation, use:\n'
           'flutter:\n'
@@ -531,7 +526,7 @@ void main() {
         ));
         expect(
           testLogger.errorText,
-          'Plugin `url_launcher_linux` doesn\'t implement a plugin interface, '
+          "Plugin `url_launcher_linux` doesn't implement a plugin interface, "
           'nor sets a default implementation in pubspec.yaml.\n\n'
           'To set a default implementation, use:\n'
           'flutter:\n'
@@ -545,7 +540,7 @@ void main() {
           '  plugin:\n'
           '    implements: <plugin-interface>'
           '\n\n'
-          'Plugin `url_launcher_windows` doesn\'t implement a plugin interface, '
+          "Plugin `url_launcher_windows` doesn't implement a plugin interface, "
           'nor sets a default implementation in pubspec.yaml.\n\n'
           'To set a default implementation, use:\n'
           'flutter:\n'
@@ -564,33 +559,8 @@ void main() {
     });
 
     group('generateMainDartWithPluginRegistrant', () {
-
-      void createFakeDartPlugins(
-        FlutterProject flutterProject,
-        FlutterManifest flutterManifest,
-        FileSystem fs,
-        Map<String, String> plugins,
-      ) {
-        final Directory fakePubCache = fs.systemTempDirectory.childDirectory('cache');
-        final File packagesFile = flutterProject.directory
-          .childFile('.packages')
-          ..createSync(recursive: true);
-
-        for (final MapEntry<String, String> entry in plugins.entries) {
-          final String name = fs.path.basename(entry.key);
-          final Directory pluginDirectory = fakePubCache.childDirectory(name);
-          packagesFile.writeAsStringSync(
-              '$name:file://${pluginDirectory.childFile('lib').uri}\n',
-              mode: FileMode.writeOnlyAppend);
-          pluginDirectory.childFile('pubspec.yaml')
-              ..createSync(recursive: true)
-              ..writeAsStringSync(entry.value);
-        }
-        when(flutterManifest.dependencies).thenReturn(<String>{...plugins.keys});
-      }
-
       testUsingContext('Generates new entrypoint', () async {
-        when(flutterProject.isModule).thenReturn(false);
+        flutterProject.isModule = true;
 
         createFakeDartPlugins(
           flutterProject,
@@ -662,25 +632,25 @@ void main() {
           '\n'
           '// @dart = 2.8\n'
           '\n'
-          'import \'package:app/main.dart\' as entrypoint;\n'
-          'import \'dart:io\'; // flutter_ignore: dart_io_import.\n'
-          'import \'package:url_launcher_linux/url_launcher_linux.dart\';\n'
-          'import \'package:awesome_macos/awesome_macos.dart\';\n'
-          'import \'package:url_launcher_macos/url_launcher_macos.dart\';\n'
-          'import \'package:url_launcher_windows/url_launcher_windows.dart\';\n'
+          "import 'package:app/main.dart' as entrypoint;\n"
+          "import 'dart:io'; // flutter_ignore: dart_io_import.\n"
+          "import 'package:url_launcher_linux/url_launcher_linux.dart';\n"
+          "import 'package:awesome_macos/awesome_macos.dart';\n"
+          "import 'package:url_launcher_macos/url_launcher_macos.dart';\n"
+          "import 'package:url_launcher_windows/url_launcher_windows.dart';\n"
           '\n'
-          '@pragma(\'vm:entry-point\')\n'
+          "@pragma('vm:entry-point')\n"
           'class _PluginRegistrant {\n'
           '\n'
-          '  @pragma(\'vm:entry-point\')\n'
+          "  @pragma('vm:entry-point')\n"
           '  static void register() {\n'
           '    if (Platform.isLinux) {\n'
           '      try {\n'
           '        LinuxPlugin.registerWith();\n'
           '      } catch (err) {\n'
           '        print(\n'
-          '          \'`url_launcher_linux` threw an error: \$err. \'\n'
-          '          \'The app may not function as expected until you remove this plugin from pubspec.yaml\'\n'
+          "          '`url_launcher_linux` threw an error: \$err. '\n"
+          "          'The app may not function as expected until you remove this plugin from pubspec.yaml'\n"
           '        );\n'
           '        rethrow;\n'
           '      }\n'
@@ -690,8 +660,8 @@ void main() {
           '        AwesomeMacOS.registerWith();\n'
           '      } catch (err) {\n'
           '        print(\n'
-          '          \'`awesome_macos` threw an error: \$err. \'\n'
-          '          \'The app may not function as expected until you remove this plugin from pubspec.yaml\'\n'
+          "          '`awesome_macos` threw an error: \$err. '\n"
+          "          'The app may not function as expected until you remove this plugin from pubspec.yaml'\n"
           '        );\n'
           '        rethrow;\n'
           '      }\n'
@@ -700,8 +670,8 @@ void main() {
           '        MacOSPlugin.registerWith();\n'
           '      } catch (err) {\n'
           '        print(\n'
-          '          \'`url_launcher_macos` threw an error: \$err. \'\n'
-          '          \'The app may not function as expected until you remove this plugin from pubspec.yaml\'\n'
+          "          '`url_launcher_macos` threw an error: \$err. '\n"
+          "          'The app may not function as expected until you remove this plugin from pubspec.yaml'\n"
           '        );\n'
           '        rethrow;\n'
           '      }\n'
@@ -711,8 +681,8 @@ void main() {
           '        WindowsPlugin.registerWith();\n'
           '      } catch (err) {\n'
           '        print(\n'
-          '          \'`url_launcher_windows` threw an error: \$err. \'\n'
-          '          \'The app may not function as expected until you remove this plugin from pubspec.yaml\'\n'
+          "          '`url_launcher_windows` threw an error: \$err. '\n"
+          "          'The app may not function as expected until you remove this plugin from pubspec.yaml'\n"
           '        );\n'
           '        rethrow;\n'
           '      }\n'
@@ -739,7 +709,7 @@ void main() {
       });
 
       testUsingContext('Plugin without platform support throws tool exit', () async {
-        when(flutterProject.isModule).thenReturn(false);
+        flutterProject.isModule = false;
 
         createFakeDartPlugins(
           flutterProject,
@@ -785,7 +755,7 @@ void main() {
       });
 
       testUsingContext('Plugin with platform support without dart plugin class throws tool exit', () async {
-        when(flutterProject.isModule).thenReturn(false);
+        flutterProject.isModule = false;
 
         createFakeDartPlugins(
           flutterProject,
@@ -858,8 +828,7 @@ void main() {
       });
 
       testUsingContext('Does not create new entrypoint if there are no platform resolutions', () async {
-        when(flutterProject.isModule).thenReturn(false);
-        when(flutterManifest.dependencies).thenReturn(<String>{});
+        flutterProject.isModule = false;
 
         final Directory libDir = flutterProject.directory.childDirectory('lib');
         libDir.createSync(recursive: true);
@@ -886,7 +855,7 @@ void main() {
       });
 
       testUsingContext('Deletes new entrypoint if there are no platform resolutions', () async {
-        when(flutterProject.isModule).thenReturn(false);
+        flutterProject.isModule = false;
 
         createFakeDartPlugins(
           flutterProject,
@@ -943,11 +912,74 @@ void main() {
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
       });
-
     });
-
   });
 }
 
-class MockFlutterManifest extends Mock implements FlutterManifest {}
-class MockFlutterProject extends Mock implements FlutterProject {}
+void createFakeDartPlugins(
+  FakeFlutterProject flutterProject,
+  FakeFlutterManifest flutterManifest,
+  FileSystem fs,
+  Map<String, String> plugins,
+) {
+  final Directory fakePubCache = fs.systemTempDirectory.childDirectory('cache');
+  final File packagesFile = flutterProject.directory
+    .childFile('.packages')
+    ..createSync(recursive: true);
+
+  for (final MapEntry<String, String> entry in plugins.entries) {
+    final String name = fs.path.basename(entry.key);
+    final Directory pluginDirectory = fakePubCache.childDirectory(name);
+    packagesFile.writeAsStringSync(
+      '$name:file://${pluginDirectory.childFile('lib').uri}\n',
+      mode: FileMode.writeOnlyAppend,
+    );
+    pluginDirectory.childFile('pubspec.yaml')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(entry.value);
+  }
+  flutterManifest.dependencies = plugins.keys.toSet();
+}
+
+class FakeFlutterManifest extends Fake implements FlutterManifest {
+  @override
+  Set<String> dependencies = <String>{};
+}
+
+class FakeFlutterProject extends Fake implements FlutterProject {
+  @override
+  bool isModule = false;
+
+  @override
+  FlutterManifest manifest;
+
+  @override
+  Directory directory;
+
+  @override
+  File flutterPluginsFile;
+
+  @override
+  File flutterPluginsDependenciesFile;
+
+  @override
+  IosProject ios;
+
+  @override
+  AndroidProject android;
+
+  @override
+  WebProject web;
+
+  @override
+  MacOSProject macos;
+
+  @override
+  LinuxProject linux;
+
+  @override
+  WindowsProject windows;
+
+  @override
+  WindowsUwpProject windowsUwp;
+}

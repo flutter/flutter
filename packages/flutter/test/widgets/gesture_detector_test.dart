@@ -762,8 +762,8 @@ void main() {
             },
           ),
         },
-        child: Container(),
         semantics: _EmptySemanticsGestureDelegate(),
+        child: Container(),
       ));
       key.currentState!.debugFillProperties(builder);
 
@@ -785,9 +785,9 @@ void main() {
       await tester.pumpWidget(RawGestureDetector(
         key: key,
         gestures: const <Type, GestureRecognizerFactory>{},
-        child: Container(),
         semantics: _EmptySemanticsGestureDelegate(),
         excludeFromSemantics: true,
+        child: Container(),
       ));
       key.currentState!.debugFillProperties(builder);
 

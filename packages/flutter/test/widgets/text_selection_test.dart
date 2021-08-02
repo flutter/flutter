@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind, kSecondaryButton;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -19,15 +20,15 @@ class MockClipboard {
     'text': null,
   };
 
-  Future<dynamic> handleMethodCall(MethodCall methodCall) async {
+  Future<Object?> handleMethodCall(MethodCall methodCall) async {
     switch (methodCall.method) {
       case 'Clipboard.getData':
-        if (getDataThrows) {
+        if (getDataThrows)
           throw Exception();
-        }
         return _clipboardData;
       case 'Clipboard.setData':
         _clipboardData = methodCall.arguments;
+        break;
     }
   }
 }
@@ -758,34 +759,41 @@ void main() {
     group('when Clipboard fails', () {
       setUp(() {
         final MockClipboard mockClipboard = MockClipboard(getDataThrows: true);
-        SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
+        TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
       });
 
       tearDown(() {
-        SystemChannels.platform.setMockMethodCallHandler(null);
+        TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
       });
 
-      test('Clipboard API failure is gracefully recovered from', () async {
+      // TODO(justinmc): See if `testWidgets` can be reverted to `test`.
+      testWidgets('Clipboard API failure is gracefully recovered from', (WidgetTester tester) async {
         final ClipboardStatusNotifier notifier = ClipboardStatusNotifier();
         expect(notifier.value, ClipboardStatus.unknown);
 
         await expectLater(notifier.update(), completes);
         expect(notifier.value, ClipboardStatus.unknown);
-      });
+        // TODO(justinmc): Currently on Android and iOS, ClipboardStatus.pasteable
+        //                 is always returned. Once both platforms properly use
+        //                 `hasStrings` to check whether the clipboard has any
+        //                 content, try to see if this override can be removed.
+        //                 https://github.com/flutter/flutter/issues/74139
+      }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.linux }));
     });
 
     group('when Clipboard succeeds', () {
       final MockClipboard mockClipboard = MockClipboard();
 
       setUp(() {
-        SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
+        TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
       });
 
       tearDown(() {
-        SystemChannels.platform.setMockMethodCallHandler(null);
+        TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
       });
 
-      test('update sets value based on clipboard contents', () async {
+      // TODO(justinmc): See if `testWidgets` can be reverted to `test`.
+      testWidgets('update sets value based on clipboard contents', (WidgetTester tester) async {
         final ClipboardStatusNotifier notifier = ClipboardStatusNotifier();
         expect(notifier.value, ClipboardStatus.unknown);
 
@@ -800,7 +808,12 @@ void main() {
         ));
         await expectLater(notifier.update(), completes);
         expect(notifier.value, ClipboardStatus.pasteable);
-      });
+        // TODO(justinmc): Currently on Android and iOS, ClipboardStatus.pasteable
+        //                 is always returned. Once both platforms properly use
+        //                 `hasStrings` to check whether the clipboard has any
+        //                 content, try to see if this override can be removed.
+        //                 https://github.com/flutter/flutter/issues/74139
+      }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.linux }));
     });
   });
 }

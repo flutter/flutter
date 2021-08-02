@@ -86,7 +86,7 @@ class BouncingScrollSimulation extends Simulation {
   /// model to a spring model which causes [x] to "spring" back to [trailingExtent].
   final double trailingExtent;
 
-  /// The spring used used to return [x] to either [leadingExtent] or [trailingExtent].
+  /// The spring used to return [x] to either [leadingExtent] or [trailingExtent].
   final SpringDescription spring;
 
   late FrictionSimulation _frictionSimulation;

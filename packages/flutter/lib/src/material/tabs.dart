@@ -58,7 +58,7 @@ enum TabBarIndicatorSize {
 ///  * [TabBarView], which displays a widget for the currently selected tab.
 ///  * [TabController], which coordinates tab selection between a [TabBar] and a [TabBarView].
 ///  * <https://material.io/design/components/tabs.html>
-class Tab extends StatelessWidget implements PreferredSizeWidget{
+class Tab extends StatelessWidget implements PreferredSizeWidget {
   /// Creates a material design [TabBar] tab.
   ///
   /// At least one of [text], [icon], and [child] must be non-null. The [text]
@@ -70,6 +70,7 @@ class Tab extends StatelessWidget implements PreferredSizeWidget{
     this.text,
     this.icon,
     this.iconMargin = const EdgeInsets.only(bottom: 10.0),
+    this.height,
     this.child,
   }) : assert(text != null || child != null || icon != null),
        assert(text == null || child == null),
@@ -96,6 +97,13 @@ class Tab extends StatelessWidget implements PreferredSizeWidget{
   /// [text] or [child] is non-null.
   final EdgeInsetsGeometry iconMargin;
 
+  /// The height of the [Tab].
+  ///
+  /// If null, the height will be calculated based on the content of the [Tab].  When `icon` is not
+  /// null along with `child` or `text`, the default height is 72.0 pixels. Without an `icon`, the
+  /// height is 46.0 pixels.
+  final double? height;
+
   Widget _buildLabelText() {
     return child ?? Text(text!, softWrap: false, overflow: TextOverflow.fade);
   }
@@ -104,23 +112,23 @@ class Tab extends StatelessWidget implements PreferredSizeWidget{
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
 
-    final double height;
+    final double calculatedHeight;
     final Widget label;
     if (icon == null) {
-      height = _kTabHeight;
+      calculatedHeight = _kTabHeight;
       label = _buildLabelText();
     } else if (text == null && child == null) {
-      height = _kTabHeight;
+      calculatedHeight = _kTabHeight;
       label = icon!;
     } else {
-      height = _kTextAndIconTabHeight;
+      calculatedHeight = _kTextAndIconTabHeight;
       label = Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           Container(
-            child: icon,
             margin: iconMargin,
+            child: icon,
           ),
           _buildLabelText(),
         ],
@@ -128,10 +136,10 @@ class Tab extends StatelessWidget implements PreferredSizeWidget{
     }
 
     return SizedBox(
-      height: height,
+      height: height ?? calculatedHeight,
       child: Center(
-        child: label,
         widthFactor: 1.0,
+        child: label,
       ),
     );
   }
@@ -145,7 +153,9 @@ class Tab extends StatelessWidget implements PreferredSizeWidget{
 
   @override
   Size get preferredSize {
-    if ((text != null || child != null) && icon != null)
+    if (height != null)
+      return Size.fromHeight(height!);
+    else if ((text != null || child != null) && icon != null)
       return const Size.fromHeight(_kTextAndIconTabHeight);
     else
       return const Size.fromHeight(_kTabHeight);
@@ -606,13 +616,13 @@ class _TabBarScrollController extends ScrollController {
 ///       body: const TabBarView(
 ///         children: <Widget>[
 ///           Center(
-///             child: Text('It\'s cloudy here'),
+///             child: Text("It's cloudy here"),
 ///           ),
 ///           Center(
-///             child: Text('It\'s rainy here'),
+///             child: Text("It's rainy here"),
 ///           ),
 ///           Center(
-///             child: Text('It\'s sunny here'),
+///             child: Text("It's sunny here"),
 ///           ),
 ///         ],
 ///       ),
@@ -623,7 +633,7 @@ class _TabBarScrollController extends ScrollController {
 /// {@end-tool}
 ///
 /// {@tool dartpad --template=stateful_widget_material_ticker}
-/// [TabBar] can also be implmented by using a [TabController] which provides more options
+/// [TabBar] can also be implemented by using a [TabController] which provides more options
 /// to control the behavior of the [TabBar] and [TabBarView]. This can be used instead of
 /// a [DefaultTabController], demonstrated below.
 ///
@@ -661,13 +671,13 @@ class _TabBarScrollController extends ScrollController {
 ///        controller: _tabController,
 ///        children: const <Widget>[
 ///          Center(
-///            child: Text('It\'s cloudy here'),
+///            child: Text("It's cloudy here"),
 ///          ),
 ///          Center(
-///            child: Text('It\'s rainy here'),
+///            child: Text("It's rainy here"),
 ///          ),
 ///          Center(
-///             child: Text('It\'s sunny here'),
+///             child: Text("It's sunny here"),
 ///          ),
 ///        ],
 ///      ),
@@ -700,6 +710,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     required this.tabs,
     this.controller,
     this.isScrollable = false,
+    this.padding,
     this.indicatorColor,
     this.automaticIndicatorColorAdjustment = true,
     this.indicatorWeight = 2.0,
@@ -742,6 +753,13 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// and the entire [TabBar] is scrollable. Otherwise each tab gets an equal
   /// share of the available space.
   final bool isScrollable;
+
+  /// The amount of space by which to inset the tab bar.
+  ///
+  /// When [isScrollable] is false, this will yield the same result as if you had wrapped your
+  /// [TabBar] in a [Padding] widget. When [isScrollable] is true, the scrollable itself is inset,
+  /// allowing the padding to scroll with the tab bar, rather than enclosing it.
+  final EdgeInsetsGeometry? padding;
 
   /// The color of the line that appears below the selected tab.
   ///
@@ -1294,7 +1312,13 @@ class _TabBarState extends State<TabBar> {
         dragStartBehavior: widget.dragStartBehavior,
         scrollDirection: Axis.horizontal,
         controller: _scrollController,
+        padding: widget.padding,
         physics: widget.physics,
+        child: tabBar,
+      );
+    } else if (widget.padding != null) {
+      tabBar = Padding(
+        padding: widget.padding!,
         child: tabBar,
       );
     }

@@ -83,8 +83,8 @@ class PlatformViewPage extends StatelessWidget {
         children: <Widget>[
           const Expanded(
             child: SizedBox(
-              child: UiKitView(viewType: 'platform_view'),
               width: 300,
+              child: UiKitView(viewType: 'platform_view'),
             ),
           ),
           ElevatedButton(

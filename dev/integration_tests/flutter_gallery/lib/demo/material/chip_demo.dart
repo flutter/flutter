@@ -220,7 +220,8 @@ class _ChipDemoState extends State<ChipDemo> {
     if (_selectedAction.isEmpty) {
       return '';
     }
-    return _capitalize(_results[_selectedAction]!) + '!';
+    final String value = _capitalize(_results[_selectedAction]!);
+    return '$value!';
   }
 
   @override

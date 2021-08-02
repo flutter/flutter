@@ -910,7 +910,7 @@ mixin WidgetInspectorService {
   Future<void> forceRebuild() {
     final WidgetsBinding binding = WidgetsBinding.instance!;
     if (binding.renderViewElement != null) {
-      binding.buildOwner!.reassemble(binding.renderViewElement!);
+      binding.buildOwner!.reassemble(binding.renderViewElement!, null);
       return binding.endOfFrame;
     }
     return Future<void>.value();
@@ -1527,10 +1527,10 @@ mixin WidgetInspectorService {
   }
 
   bool _isLocalCreationLocation(_Location? location) {
-    if (location == null || location.file == null) {
+    if (location == null) {
       return false;
     }
-    final String file = Uri.parse(location.file!).path;
+    final String file = Uri.parse(location.file).path;
 
     // By default check whether the creation location was within package:flutter.
     if (_pubRootDirectories == null) {
@@ -2122,21 +2122,43 @@ class _ElementLocationStatsTracker {
       'events': events,
     };
 
+    // Encode the new locations using the older encoding.
     if (newLocations.isNotEmpty) {
       // Add all newly used location ids to the JSON.
       final Map<String, List<int>> locationsJson = <String, List<int>>{};
       for (final _LocationCount entry in newLocations) {
         final _Location location = entry.location;
-        if (location.file != null) {
-          final List<int> jsonForFile = locationsJson.putIfAbsent(
-            location.file!,
-            () => <int>[],
-          );
-          jsonForFile..add(entry.id)..add(location.line)..add(location.column);
-        }
+        final List<int> jsonForFile = locationsJson.putIfAbsent(
+          location.file,
+          () => <int>[],
+        );
+        jsonForFile..add(entry.id)..add(location.line)..add(location.column);
       }
       json['newLocations'] = locationsJson;
     }
+
+    // Encode the new locations using the newer encoding (as of v2.4.0).
+    if (newLocations.isNotEmpty) {
+      final Map<String, Map<String, List<Object?>>> fileLocationsMap = <String, Map<String, List<Object?>>>{};
+      for (final _LocationCount entry in newLocations) {
+        final _Location location = entry.location;
+        final Map<String, List<Object?>> locations = fileLocationsMap.putIfAbsent(
+          location.file, () => <String, List<Object?>>{
+            'ids': <int>[],
+            'lines': <int>[],
+            'columns': <int>[],
+            'names': <String?>[],
+          },
+        );
+
+        locations['ids']!.add(entry.id);
+        locations['lines']!.add(location.line);
+        locations['columns']!.add(location.column);
+        locations['names']!.add(location.name);
+      }
+      json['locations'] = fileLocationsMap;
+    }
+
     resetCounts();
     newLocations.clear();
     return json;
@@ -2455,6 +2477,11 @@ class InspectorSelection {
 
   Element? _currentElement;
   set currentElement(Element? element) {
+    if (element?.debugIsDefunct == true) {
+      _currentElement = null;
+      _current = null;
+      return;
+    }
     if (currentElement != element) {
       _currentElement = element;
       _current = element!.findRenderObject();
@@ -2846,23 +2873,20 @@ class _Location {
     required this.file,
     required this.line,
     required this.column,
-    required this.name,
-    required this.parameterLocations,
+    this.name,
   });
 
   /// File path of the location.
-  final String? file;
+  final String file;
 
   /// 1-based line number.
   final int line;
+
   /// 1-based column number.
   final int column;
 
   /// Optional name of the parameter or function at this location.
   final String? name;
-
-  /// Optional locations of the parameters of the member at this location.
-  final List<_Location>? parameterLocations;
 
   Map<String, Object?> toJsonMap() {
     final Map<String, Object?> json = <String, Object?>{
@@ -2873,11 +2897,6 @@ class _Location {
     if (name != null) {
       json['name'] = name;
     }
-    if (parameterLocations != null) {
-      json['parameterLocations'] = parameterLocations!.map<Map<String, Object?>>(
-        (_Location location) => location.toJsonMap(),
-      ).toList();
-    }
     return json;
   }
 
@@ -2887,9 +2906,7 @@ class _Location {
     if (name != null) {
       parts.add(name!);
     }
-    if (file != null) {
-      parts.add(file!);
-    }
+    parts.add(file);
     parts..add('$line')..add('$column');
     return parts.join(':');
   }

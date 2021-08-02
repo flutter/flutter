@@ -39,7 +39,7 @@ Future<void> main() async {
           ),
         ],
       )),
-      throwsA(isA<AssertionError>().having(
+      throwsA(isAssertionError.having(
         (AssertionError error) => error.toString(),
         '.toString()',
         contains('items.length'),

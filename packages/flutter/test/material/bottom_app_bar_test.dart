@@ -225,9 +225,9 @@ void main() {
         home: Scaffold(
           bottomNavigationBar: ShapeListener(
             BottomAppBar(
-              child: SizedBox(height: 100.0),
               shape: RectangularNotch(),
               notchMargin: 0.0,
+              child: SizedBox(height: 100.0),
             ),
           ),
           floatingActionButton: FloatingActionButton(
@@ -277,9 +277,9 @@ void main() {
         home: Scaffold(
           bottomNavigationBar: ShapeListener(
             BottomAppBar(
-              child: SizedBox(height: 100.0),
               shape: RectangularNotch(),
               notchMargin: 6.0,
+              child: SizedBox(height: 100.0),
             ),
           ),
           floatingActionButton: FloatingActionButton(
@@ -353,9 +353,9 @@ void main() {
         home: Scaffold(
           bottomNavigationBar:
               BottomAppBar(
-                child: SizedBox(height: 100.0),
                 shape: RectangularNotch(),
                 notchMargin: 0.0,
+                child: SizedBox(height: 100.0),
               ),
         ),
       ),
@@ -369,10 +369,10 @@ void main() {
         home: Scaffold(
           bottomNavigationBar:
           BottomAppBar(
-            child: SizedBox(height: 100.0),
             shape: RectangularNotch(),
             notchMargin: 0.0,
             clipBehavior: Clip.antiAliasWithSaveLayer,
+            child: SizedBox(height: 100.0),
           ),
         ),
       ),
@@ -467,8 +467,8 @@ class ShapeListenerState extends State<ShapeListener> {
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
-      child: widget.child,
       painter: cache,
+      child: widget.child,
     );
   }
 

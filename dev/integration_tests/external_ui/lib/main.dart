@@ -157,8 +157,8 @@ Press play to produce texture frames.''';
         ),
         floatingActionButton: _icon == null ? null : FloatingActionButton(
           key: const ValueKey<String>('fab'),
-          child: Icon(_icon),
           onPressed: _nextState,
+          child: Icon(_icon),
         ),
       ),
     );

@@ -22,6 +22,211 @@ void main() {
     Cache.flutterRoot = '';
   });
 
+  testWithoutContext('Throws a tool exit if pub cannot be run', () async {
+    final FakeProcessManager processManager = FakeProcessManager.empty();
+    final BufferLogger logger = BufferLogger.test();
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    processManager.excludedExecutables.add('bin/cache/dart-sdk/bin/pub');
+
+    fileSystem.file('pubspec.yaml').createSync();
+
+    final Pub pub = Pub(
+      fileSystem: fileSystem,
+      logger: logger,
+      processManager: processManager,
+      usage: TestUsage(),
+      platform: FakePlatform(
+        environment: const <String, String>{},
+      ),
+      botDetector: const BotDetectorAlwaysNo(),
+    );
+
+    await expectLater(() => pub.get(
+      context: PubContext.pubGet,
+      checkUpToDate: true,
+    ), throwsToolExit(message: 'Your Flutter SDK download may be corrupt or missing permissions to run'));
+  });
+
+  group('shouldSkipThirdPartyGenerator', () {
+    testWithoutContext('does not skip pub get the parameter is false', () async {
+      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(command: <String>[
+          'bin/cache/dart-sdk/bin/pub',
+          '--verbosity=warning',
+          'get',
+          '--no-precompile',
+        ])
+      ]);
+      final BufferLogger logger = BufferLogger.test();
+      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+
+      fileSystem.file('pubspec.yaml').createSync();
+      fileSystem.file('pubspec.lock').createSync();
+      fileSystem.file('version').writeAsStringSync('b');
+      fileSystem.file('.dart_tool/package_config.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+  {
+    "configVersion": 2,
+    "packages": [],
+    "generated": "2021-07-08T10:02:49.155589Z",
+    "generator": "third-party",
+    "generatorVersion": "2.14.0-276.0.dev"
+  }
+  ''');
+
+      final Pub pub = Pub(
+        fileSystem: fileSystem,
+        logger: logger,
+        processManager: processManager,
+        usage: TestUsage(),
+        platform: FakePlatform(
+          environment: const <String, String>{},
+        ),
+        botDetector: const BotDetectorAlwaysNo(),
+      );
+
+      await pub.get(
+        context: PubContext.pubGet,
+        checkUpToDate: true,
+        shouldSkipThirdPartyGenerator: false,
+      );
+
+      expect(processManager, hasNoRemainingExpectations);
+      expect(fileSystem.file('.dart_tool/version').readAsStringSync(), 'b');
+    });
+
+    testWithoutContext('does not skip pub get if package_config.json has "generator": "pub"', () async {
+      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(command: <String>[
+          'bin/cache/dart-sdk/bin/pub',
+          '--verbosity=warning',
+          'get',
+          '--no-precompile',
+        ])
+      ]);
+      final BufferLogger logger = BufferLogger.test();
+      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+
+      fileSystem.file('pubspec.yaml').createSync();
+      fileSystem.file('pubspec.lock').createSync();
+      fileSystem.file('.dart_tool/package_config.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+  {
+    "configVersion": 2,
+    "packages": [],
+    "generated": "2021-07-08T10:02:49.155589Z",
+    "generator": "pub",
+    "generatorVersion": "2.14.0-276.0.dev"
+  }
+  ''');
+      fileSystem.file('.dart_tool/version').writeAsStringSync('a');
+      fileSystem.file('version').writeAsStringSync('b');
+
+      final Pub pub = Pub(
+        fileSystem: fileSystem,
+        logger: logger,
+        processManager: processManager,
+        usage: TestUsage(),
+        platform: FakePlatform(
+          environment: const <String, String>{},
+        ),
+        botDetector: const BotDetectorAlwaysNo(),
+      );
+
+      await pub.get(
+        context: PubContext.pubGet,
+        checkUpToDate: true,
+      );
+
+      expect(processManager, hasNoRemainingExpectations);
+      expect(fileSystem.file('.dart_tool/version').readAsStringSync(), 'b');
+    });
+
+    testWithoutContext('does not skip pub get if package_config.json has "generator": "pub"', () async {
+      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(command: <String>[
+          'bin/cache/dart-sdk/bin/pub',
+          '--verbosity=warning',
+          'get',
+          '--no-precompile',
+        ])
+      ]);
+      final BufferLogger logger = BufferLogger.test();
+      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+
+      fileSystem.file('pubspec.yaml').createSync();
+      fileSystem.file('pubspec.lock').createSync();
+      fileSystem.file('.dart_tool/package_config.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+  {
+    "configVersion": 2,
+    "packages": [],
+    "generated": "2021-07-08T10:02:49.155589Z",
+    "generator": "pub",
+    "generatorVersion": "2.14.0-276.0.dev"
+  }
+  ''');
+      fileSystem.file('.dart_tool/version').writeAsStringSync('a');
+      fileSystem.file('version').writeAsStringSync('b');
+
+      final Pub pub = Pub(
+        fileSystem: fileSystem,
+        logger: logger,
+        processManager: processManager,
+        usage: TestUsage(),
+        platform: FakePlatform(
+          environment: const <String, String>{},
+        ),
+        botDetector: const BotDetectorAlwaysNo(),
+      );
+
+      await pub.get(
+        context: PubContext.pubGet,
+        checkUpToDate: true,
+      );
+
+      expect(processManager, hasNoRemainingExpectations);
+      expect(fileSystem.file('.dart_tool/version').readAsStringSync(), 'b');
+    });
+
+    testWithoutContext('skips pub get if the package config "generator" is '
+      'different than "pub"', () async {
+      final FakeProcessManager processManager = FakeProcessManager.empty();
+      final BufferLogger logger = BufferLogger.test();
+      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+
+      fileSystem.file('pubspec.yaml').createSync();
+      fileSystem.file('pubspec.lock').createSync();
+      fileSystem.file('.dart_tool/package_config.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{"generator": "third-party"}');
+
+      final Pub pub = Pub(
+        fileSystem: fileSystem,
+        logger: logger,
+        processManager: processManager,
+        usage: TestUsage(),
+        platform: FakePlatform(
+          environment: const <String, String>{},
+        ),
+        botDetector: const BotDetectorAlwaysNo(),
+      );
+
+      await pub.get(
+        context: PubContext.pubGet,
+        checkUpToDate: true,
+      );
+
+      expect(
+        logger.traceText,
+        contains('Skipping pub get: generated by third-party.'),
+      );
+    });
+  });
+
   testWithoutContext('checkUpToDate skips pub get if the package config is newer than the pubspec '
     'and the current framework version is the same as the last version', () async {
     final FakeProcessManager processManager = FakeProcessManager.empty();

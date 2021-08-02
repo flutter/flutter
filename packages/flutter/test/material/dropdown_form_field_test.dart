@@ -70,7 +70,7 @@ Widget buildFormFrame({
               return DropdownMenuItem<String>(
                 key: ValueKey<String>(item),
                 value: item,
-                child: Text(item, key: ValueKey<String>(item + 'Text')),
+                child: Text(item, key: ValueKey<String>('${item}Text')),
               );
             }).toList(),
             alignment: buttonAlignment,
@@ -149,6 +149,60 @@ void verifyPaintedShadow(Finder customPaint, int elevation) {
 }
 
 void main() {
+  // Regression test for https://github.com/flutter/flutter/issues/82910
+  testWidgets('null value test', (WidgetTester tester) async {
+    int? value = 1;
+
+    await tester.pumpWidget(
+      TestApp(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: DropdownButtonFormField<int?>(
+            decoration: const InputDecoration(
+              labelText: 'labelText',
+            ),
+            value: value,
+            onChanged: (int? newValue) {
+              value = newValue;
+            },
+            items: const <DropdownMenuItem<int?>>[
+              DropdownMenuItem<int?>(
+                value: null,
+                child: Text('None'),
+              ),
+              DropdownMenuItem<int?>(
+                value: 1,
+                child: Text('One'),
+              ),
+              DropdownMenuItem<int?>(
+                value: 2,
+                child: Text('Two'),
+              ),
+              DropdownMenuItem<int?>(
+                value: 3,
+                child: Text('Three'),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(value, 1);
+    final Offset nonEmptyLabel = tester.getTopLeft(find.text('labelText'));
+
+    // Switch to `null` value item from value 1.
+    await tester.tap(find.text('One'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('None').last);
+    await tester.pump();
+
+    expect(value, null);
+    final Offset nullValueLabel = tester.getTopLeft(find.text('labelText'));
+    // The position of the label does not change.
+    expect(nonEmptyLabel, nullValueLabel);
+  });
+
   testWidgets('DropdownButtonFormField with autovalidation test', (WidgetTester tester) async {
     String? value = 'one';
     int _validateCalled = 0;
@@ -292,7 +346,7 @@ void main() {
               return DropdownMenuItem<String>(
                 key: ValueKey<String>(item),
                 value: item,
-                child: Text(item, key: ValueKey<String>(item + 'Text')),
+                child: Text(item, key: ValueKey<String>('${item}Text')),
               );
             }).toList(),
           ),
@@ -346,7 +400,7 @@ void main() {
   testWidgets('DropdownButtonFormField - disabledHint displays when the items list is empty, when items is null', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
-    Widget build({ List<String>? items }){
+    Widget build({ List<String>? items }) {
       return buildFormFrame(
         items: items,
         buttonKey: buttonKey,
@@ -372,7 +426,7 @@ void main() {
     (WidgetTester tester) async {
       final Key buttonKey = UniqueKey();
 
-      Widget build({ List<String>? items }){
+      Widget build({ List<String>? items }) {
         return buildFormFrame(
           items: items,
           buttonKey: buttonKey,
@@ -394,7 +448,7 @@ void main() {
   testWidgets('DropdownButtonFormField - disabledHint is null by default', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
-    Widget build({ List<String>? items }){
+    Widget build({ List<String>? items }) {
       return buildFormFrame(
         items: items,
         buttonKey: buttonKey,
@@ -414,7 +468,7 @@ void main() {
   testWidgets('DropdownButtonFormField - disabledHint is null by default', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
-    Widget build({ List<String>? items }){
+    Widget build({ List<String>? items }) {
       return buildFormFrame(
         items: items,
         buttonKey: buttonKey,
@@ -434,7 +488,7 @@ void main() {
   testWidgets('DropdownButtonFormField - disabledHint displays when onChanged is null', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
-    Widget build({ List<String>? items, ValueChanged<String?>? onChanged }){
+    Widget build({ List<String>? items, ValueChanged<String?>? onChanged }) {
       return buildFormFrame(
         items: items,
         buttonKey: buttonKey,
@@ -452,7 +506,7 @@ void main() {
   testWidgets('DropdownButtonFormField - disabled hint should be of same size as enabled hint', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
-    Widget build({ List<String>? items}){
+    Widget build({ List<String>? items}) {
       return buildFormFrame(
         items: items,
         buttonKey: buttonKey,
@@ -588,7 +642,7 @@ void main() {
           ),
         ),
       ),
-      throwsA(isA<AssertionError>().having(
+      throwsA(isAssertionError.having(
         (AssertionError error) => error.toString(),
         '.toString()',
         contains("There should be exactly one item with [DropdownButton]'s value"),
@@ -617,7 +671,7 @@ void main() {
           ),
         ),
       ),
-      throwsA(isA<AssertionError>().having(
+      throwsA(isAssertionError.having(
         (AssertionError error) => error.toString(),
         '.toString()',
         contains("There should be exactly one item with [DropdownButton]'s value"),
@@ -650,8 +704,8 @@ void main() {
                 },
                 items: items.map((String string) {
                   return DropdownMenuItem<String>(
-                    child: Text(string),
                     value: string,
+                    child: Text(string),
                   );
                 }).toList(),
               ),

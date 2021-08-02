@@ -149,9 +149,9 @@ void main() {
         home: Scaffold(
           body: Center(
             child: TextButton(
-              child: const Text('TextButton'),
               onPressed: () { },
               focusNode: focusNode,
+              child: const Text('TextButton'),
             ),
           ),
         ),
@@ -216,9 +216,9 @@ void main() {
               child: Builder(
                 builder: (BuildContext context) {
                   return TextButton(
-                    child: const Text('TextButton'),
                     onPressed: () {},
                     focusNode: focusNode,
+                    child: const Text('TextButton'),
                   );
                 },
               ),
@@ -631,9 +631,9 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: TextButton(
-          child: const Text('button'),
           onPressed: onPressed,
           onLongPress: onLongPress,
+          child: const Text('button'),
         ),
       );
     }
@@ -1115,7 +1115,7 @@ void main() {
     final Key labelKey = UniqueKey();
     final ButtonStyle style = TextButton.styleFrom(
       padding: EdgeInsets.zero,
-      visualDensity: const VisualDensity(), // dx=0, dy=0
+      visualDensity: VisualDensity.standard, // dx=0, dy=0
     );
 
     await tester.pumpWidget(

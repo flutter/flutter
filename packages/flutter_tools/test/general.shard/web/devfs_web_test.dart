@@ -10,9 +10,10 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/targets/web.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:package_config/package_config.dart';
@@ -207,6 +208,19 @@ void main() {
 
     expect(response.statusCode, HttpStatus.ok);
     expect(await response.readAsString(), htmlContent);
+  }));
+
+  test('serves index.html at / if href attribute is $kBaseHrefPlaceholder', () => testbed.run(() async {
+    const String htmlContent = '<html><head><base href ="$kBaseHrefPlaceholder"></head><body id="test"></body></html>';
+    final Directory webDir = globals.fs.currentDirectory.childDirectory('web')
+      ..createSync();
+    webDir.childFile('index.html').writeAsStringSync(htmlContent);
+
+    final Response response = await webAssetServer
+      .handleRequest(Request('GET', Uri.parse('http://foobar/')));
+
+    expect(response.statusCode, HttpStatus.ok);
+    expect(await response.readAsString(), htmlContent.replaceAll(kBaseHrefPlaceholder, '/'));
   }));
 
   test('does not serve outside the base path', () => testbed.run(() async {
@@ -971,7 +985,7 @@ void main() {
     expect(response.statusCode, 404);
   }));
 
-  test('WebAssetServer strips leading base href off off asset requests', () => testbed.run(() async {
+  test('WebAssetServer strips leading base href off of asset requests', () => testbed.run(() async {
     const String htmlContent = '<html><head><base href="/foo/"></head><body id="test"></body></html>';
     globals.fs.currentDirectory
       .childDirectory('web')

@@ -40,7 +40,7 @@ class IOSEmulator extends Emulator {
   PlatformType get platformType => PlatformType.ios;
 
   @override
-  Future<void> launch() async {
+  Future<void> launch({bool coldBoot = false}) async {
     Future<bool> launchSimulator(List<String> additionalArgs) async {
       final List<String> args = <String>[
         'open',

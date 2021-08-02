@@ -68,8 +68,8 @@ class _PlatformChannelState extends State<PlatformChannel> {
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: ElevatedButton(
-                  child: const Text('Refresh'),
                   onPressed: _getBatteryLevel,
+                  child: const Text('Refresh'),
                 ),
               ),
             ],

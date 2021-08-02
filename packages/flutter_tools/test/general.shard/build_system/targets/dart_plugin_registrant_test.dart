@@ -4,6 +4,12 @@
 
 // @dart = 2.8
 
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=20210722"
+@Tags(<String>['no-shuffle'])
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -243,22 +249,22 @@ void main() {
           '\n'
           '// @dart = 2.12\n'
           '\n'
-          'import \'package:path_provider_example/main.dart\' as entrypoint;\n'
-          'import \'dart:io\'; // flutter_ignore: dart_io_import.\n'
-          'import \'package:path_provider_linux/path_provider_linux.dart\';\n'
+          "import 'package:path_provider_example/main.dart' as entrypoint;\n"
+          "import 'dart:io'; // flutter_ignore: dart_io_import.\n"
+          "import 'package:path_provider_linux/path_provider_linux.dart';\n"
           '\n'
-          '@pragma(\'vm:entry-point\')\n'
+          "@pragma('vm:entry-point')\n"
           'class _PluginRegistrant {\n'
           '\n'
-          '  @pragma(\'vm:entry-point\')\n'
+          "  @pragma('vm:entry-point')\n"
           '  static void register() {\n'
           '    if (Platform.isLinux) {\n'
           '      try {\n'
           '        PathProviderLinux.registerWith();\n'
           '      } catch (err) {\n'
           '        print(\n'
-          '          \'`path_provider_linux` threw an error: \$err. \'\n'
-          '          \'The app may not function as expected until you remove this plugin from pubspec.yaml\'\n'
+          "          '`path_provider_linux` threw an error: \$err. '\n"
+          "          'The app may not function as expected until you remove this plugin from pubspec.yaml'\n"
           '        );\n'
           '        rethrow;\n'
           '      }\n'
@@ -380,22 +386,22 @@ void main() {
           '\n'
           '// @dart = 2.12\n'
           '\n'
-          'import \'file:///root/external.dart\' as entrypoint;\n'
-          'import \'dart:io\'; // flutter_ignore: dart_io_import.\n'
-          'import \'package:path_provider_linux/path_provider_linux.dart\';\n'
+          "import 'file:///root/external.dart' as entrypoint;\n"
+          "import 'dart:io'; // flutter_ignore: dart_io_import.\n"
+          "import 'package:path_provider_linux/path_provider_linux.dart';\n"
           '\n'
-          '@pragma(\'vm:entry-point\')\n'
+          "@pragma('vm:entry-point')\n"
           'class _PluginRegistrant {\n'
           '\n'
-          '  @pragma(\'vm:entry-point\')\n'
+          "  @pragma('vm:entry-point')\n"
           '  static void register() {\n'
           '    if (Platform.isLinux) {\n'
           '      try {\n'
           '        PathProviderLinux.registerWith();\n'
           '      } catch (err) {\n'
           '        print(\n'
-          '          \'`path_provider_linux` threw an error: \$err. \'\n'
-          '          \'The app may not function as expected until you remove this plugin from pubspec.yaml\'\n'
+          "          '`path_provider_linux` threw an error: \$err. '\n"
+          "          'The app may not function as expected until you remove this plugin from pubspec.yaml'\n"
           '        );\n'
           '        rethrow;\n'
           '      }\n'

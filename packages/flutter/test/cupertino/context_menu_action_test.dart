@@ -17,11 +17,11 @@ void main() {
     final UniqueKey actionKey = UniqueKey();
     final CupertinoContextMenuAction action = CupertinoContextMenuAction(
       key: actionKey,
-      child: const Text('I am a CupertinoContextMenuAction'),
       onPressed: onPressed,
       trailingIcon: CupertinoIcons.home,
       isDestructiveAction: isDestructiveAction,
       isDefaultAction: isDefaultAction,
+      child: const Text('I am a CupertinoContextMenuAction'),
     );
 
     return CupertinoApp(

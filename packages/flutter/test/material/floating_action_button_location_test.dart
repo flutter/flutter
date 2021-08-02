@@ -652,9 +652,9 @@ void main() {
                       const SnackBar(content: Text('Snacky!')),
                     );
                   },
-                  child: const Text('FAB'),
                   mini: mini,
                   key: key,
+                  child: const Text('FAB'),
                 );
               },
             ),
@@ -1593,8 +1593,8 @@ Widget _singleFabScaffold(
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {},
-          child: const Icon(Icons.beach_access),
           mini: mini,
+          child: const Icon(Icons.beach_access),
         ),
         floatingActionButtonLocation: location,
         floatingActionButtonAnimator: animator,

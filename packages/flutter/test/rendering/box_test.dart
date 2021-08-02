@@ -313,11 +313,11 @@ void main() {
     expect(parentData.offset.dx, isNot(equals(0.0)));
     paddedBox.child = null;
 
-    final RenderConstrainedBox constraintedBox = RenderConstrainedBox(
+    final RenderConstrainedBox constrainedBox = RenderConstrainedBox(
       child: coloredBox,
       additionalConstraints: const BoxConstraints(),
     );
-    layout(constraintedBox);
+    layout(constrainedBox);
     expect(coloredBox.parentData?.runtimeType, ParentData);
   });
 
@@ -379,7 +379,7 @@ void main() {
     expect(unconstrained.getMaxIntrinsicWidth(100.0), equals(200.0));
   });
 
-  group('ConstraintsTransfromBox', () {
+  group('ConstraintsTransformBox', () {
     FlutterErrorDetails? firstErrorDetails;
     void exhaustErrors() {
       FlutterErrorDetails? next;
@@ -648,7 +648,7 @@ void main() {
       child: box200x200,
     );
     layout(defaultBox, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
-    defaultBox.paint(context, Offset.zero);
+    context.paintChild(defaultBox, Offset.zero);
     expect(context.clipBehavior, equals(Clip.none));
 
     for (final Clip clip in Clip.values) {
@@ -659,7 +659,7 @@ void main() {
           clipBehavior: clip,
       );
       layout(box, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
-      box.paint(context, Offset.zero);
+      context.paintChild(box, Offset.zero);
       expect(context.clipBehavior, equals(clip));
     }
   });
@@ -980,7 +980,7 @@ void main() {
             },
           );
         },
-        throwsA(isA<AssertionError>().having(
+        throwsA(isAssertionError.having(
           (AssertionError error) => error.message,
           'message',
           'paintTransform must be invertible.',
@@ -996,7 +996,7 @@ void main() {
             },
           );
         },
-        throwsA(isA<AssertionError>().having(
+        throwsA(isAssertionError.having(
           (AssertionError error) => error.message,
           'message',
           'Exactly one transform or offset argument must be provided.',

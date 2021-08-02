@@ -2,7 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=123"
+@Tags(<String>['no-shuffle'])
+
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 
@@ -386,6 +393,36 @@ void main() {
 
     // Expect the action sheet to take all available height.
     expect(tester.getSize(find.byType(CupertinoActionSheet)).height, screenHeight);
+  });
+
+  testWidgets('CupertinoActionSheet scrollbars controllers should be different', (WidgetTester tester) async {
+    // https://github.com/flutter/flutter/pull/81278
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesActionSheet(
+        CupertinoActionSheet(
+            title: const Text('The title'),
+            message: Text('Very long content' * 200),
+            actions: <Widget>[
+              CupertinoActionSheetAction(
+                child: const Text('One'),
+                onPressed: () { },
+              ),
+            ],
+          )
+        ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pump();
+
+    final List<CupertinoScrollbar> scrollbars =
+      find.descendant(
+        of: find.byType(CupertinoActionSheet),
+        matching: find.byType(CupertinoScrollbar),
+      ).evaluate().map((Element e) => e.widget as CupertinoScrollbar).toList();
+
+    expect(scrollbars.length, 2);
+    expect(scrollbars[0].controller != scrollbars[1].controller, isTrue);
   });
 
   testWidgets('Tap on button calls onPressed', (WidgetTester tester) async {
@@ -993,6 +1030,46 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('Conflicting scrollbars are not applied by ScrollBehavior to CupertinoActionSheet', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/83819
+    final ScrollController actionScrollController = ScrollController();
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesActionSheet(
+        Builder(builder: (BuildContext context) {
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+            child: CupertinoActionSheet(
+              title: const Text('The title'),
+              message: const Text('The message.'),
+              actions: <Widget>[
+                CupertinoActionSheetAction(
+                  child: const Text('One'),
+                  onPressed: () { },
+                ),
+                CupertinoActionSheetAction(
+                  child: const Text('Two'),
+                  onPressed: () { },
+                ),
+              ],
+              actionScrollController: actionScrollController,
+            ),
+          );
+        }),
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pump();
+
+    // The inherited ScrollBehavior should not apply Scrollbars since they are
+    // already built in to the widget.
+    expect(find.byType(Scrollbar), findsNothing);
+    expect(find.byType(RawScrollbar), findsNothing);
+    // Built in CupertinoScrollbars should only number 2: one for the actions,
+    // one for the content.
+    expect(find.byType(CupertinoScrollbar), findsNWidgets(2));
+  }, variant: TargetPlatformVariant.all());
 }
 
 RenderBox findScrollableActionsSectionRenderBox(WidgetTester tester) {
