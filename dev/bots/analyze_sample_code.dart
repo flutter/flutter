@@ -368,6 +368,7 @@ class SampleChecker {
   /// Writes out the given sample to an output file in the [_tempDirectory] and
   /// returns the output file.
   File _writeSample(Sample sample) {
+    print('creating sample for ${sample}')
     // Generate the snippet.
     final String sampleId = _createNameFromSource('sample', sample.start.filename, sample.start.line);
     final String inputName = '$sampleId.input';
@@ -434,6 +435,7 @@ class SampleChecker {
             throw SampleCheckerException('Snippet section unterminated.', file: relativeFilePath, line: lineNumber);
           }
           if (_dartDocSampleEndRegex.hasMatch(trimmedLine)) {
+            print('got sample from $trimmedLine in ${file.path}');
             samples.add(
               Sample(
                 start: startLine,
@@ -654,6 +656,7 @@ linter:
       <String>['--no-wrap', 'analyze', '--no-preamble', '--no-congratulate', '.'],
       workingDirectory: directory.absolute.path,
     );
+
     final List<String> stderr = result.stderr.toString().trim().split('\n');
     final List<String> stdout = result.stdout.toString().trim().split('\n');
     print(stderr);
