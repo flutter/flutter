@@ -89,6 +89,13 @@ class WriteBuffer {
     _buffer.addAll(list.buffer.asUint8List(list.offsetInBytes, 8 * list.length));
   }
 
+  /// Write all the values from a [Float32List] into the buffer.
+  void putFloat32List(Float32List list) {
+    assert(!_isDone);
+    _alignTo(4);
+    _buffer.addAll(list.buffer.asUint8List(list.offsetInBytes, 4 * list.length));
+  }
+
   /// Write all the values from a [Float64List] into the buffer.
   void putFloat64List(Float64List list) {
     assert(!_isDone);
@@ -194,6 +201,14 @@ class ReadBuffer {
     _alignTo(8);
     final Int64List list = data.buffer.asInt64List(data.offsetInBytes + _position, length);
     _position += 8 * length;
+    return list;
+  }
+
+  /// Reads the given number of Float32s from the buffer
+  Float32List getFloat32List(int length) {
+    _alignTo(4);
+    final Float32List list = data.buffer.asFloat32List(data.offsetInBytes + _position, length);
+    _position += 4 * length;
     return list;
   }
 

@@ -67,15 +67,16 @@ task:
       - date
       - which flutter
   matrix:
-    - name: analyze-linux # linux-only
-      only_if: "$CIRRUS_PR != ''"
-      environment:
-        # Empirically, the analyze-linux shard runs surprisingly fast (under 15 minutes) with just 1
-        # CPU.  We noticed OOM failures with 6GB 4/2020, so we increased the memory.
-        CPU: 1
-        MEMORY: 8G
-      script:
-        - dart --enable-asserts ./dev/bots/analyze.dart
+    # TODO(flutter): https://github.com/flutter/flutter/issues/87517 analyze linux is only failing on Cirrus due to an unknown snippets issue
+    # - name: analyze-linux # linux-only
+    #   only_if: "$CIRRUS_PR != ''"
+    #   environment:
+    #     # Empirically, the analyze-linux shard runs surprisingly fast (under 15 minutes) with just 1
+    #     # CPU.  We noticed OOM failures with 6GB 4/2020, so we increased the memory.
+    #     CPU: 1
+    #     MEMORY: 8G
+    #   script:
+    #     - dart --enable-asserts ./dev/bots/analyze.dart
 
     - name: framework_tests-widgets-linux
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/**') && $CIRRUS_PR != ''"
