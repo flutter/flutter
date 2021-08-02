@@ -148,9 +148,10 @@ void testWidgets(
   test_package.Timeout? timeout,
   Duration? initialTimeout,
   bool semanticsEnabled = true,
-  TestVariant<Object?> variant = const DefaultTestVariant(),
+  TestVariant<Object?>? variant,
   dynamic tags,
 }) {
+  variant ??= (defaultPlatformVariant ?? const DefaultTestVariant()) as TestVariant<Object?>;
   assert(variant != null);
   assert(variant.values.isNotEmpty, 'There must be at least one value to test in the testing variant.');
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
@@ -180,10 +181,10 @@ void testWidgets(
             debugResetSemanticsIdCounter();
             Object? memento;
             try {
-              memento = await variant.setUp(value);
+              memento = await variant!.setUp(value);
               await callback(tester);
             } finally {
-              await variant.tearDown(value, memento);
+              await variant!.tearDown(value, memento);
             }
             semanticsHandle?.dispose();
           },
@@ -259,6 +260,9 @@ class DefaultTestVariant extends TestVariant<void> {
   @override
   Future<void> tearDown(void value, void memento) async {}
 }
+
+///
+TargetPlatformVariant? defaultPlatformVariant;
 
 /// A [TestVariant] that runs tests with [debugDefaultTargetPlatformOverride]
 /// set to different values of [TargetPlatform].

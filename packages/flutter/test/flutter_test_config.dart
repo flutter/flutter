@@ -19,6 +19,9 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
   // receive the event.
   WidgetController.hitTestWarningShouldBeFatal = true;
 
+  // Run widget tests across all platforms by default.
+  defaultPlatformVariant = TargetPlatformVariant.all();
+
   // Enable golden file testing using Skia Gold.
   return flutter_goldens.testExecutable(testMain);
 }

@@ -12,6 +12,10 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Future<void> main() async {
+  // TODO(Piinks): Remove this after testWidgets' state leaks/test
+  // dependencies have been fixed.
+  defaultPlatformVariant = null;
+
   final ui.Image image = await createTestImage();
 
   testWidgets('didHaveMemoryPressure clears imageCache', (WidgetTester tester) async {

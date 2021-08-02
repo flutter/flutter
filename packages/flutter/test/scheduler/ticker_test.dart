@@ -14,6 +14,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  // TODO(Piinks): Same as above, remove this the testWidgets' state leaks/test
+  // dependencies have been fixed.
+  defaultPlatformVariant = null;
+
   testWidgets('Ticker mute control test', (WidgetTester tester) async {
     int tickCount = 0;
     void handleTick(Duration duration) {
