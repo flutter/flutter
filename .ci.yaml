@@ -1240,6 +1240,7 @@ targets:
 
   - name: Linux_android flutter_gallery__memory_nav
     builder: Linux_android flutter_gallery__memory_nav
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/87492
     presubmit: false
     properties:
       tags: >
