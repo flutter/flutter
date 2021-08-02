@@ -6,6 +6,7 @@
 
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/logging.h"
+#include "flutter/fml/time/dart_timestamp_provider.h"
 
 #if defined(OS_FUCHSIA)
 #include <zircon/syscalls.h>
@@ -36,8 +37,7 @@ static int64_t NanosSinceEpoch(
 }
 
 TimePoint TimePoint::Now() {
-  const int64_t nanos = NanosSinceEpoch(std::chrono::steady_clock::now());
-  return TimePoint(nanos);
+  return DartTimelineTicksSinceEpoch();
 }
 
 TimePoint TimePoint::CurrentWallTime() {

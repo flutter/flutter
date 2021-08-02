@@ -39,6 +39,7 @@ class TimePoint {
     return TimePoint(ticks.ToNanoseconds());
   }
 
+  // Expects ticks in nanos.
   static constexpr TimePoint FromTicks(int64_t ticks) {
     return TimePoint(ticks);
   }
