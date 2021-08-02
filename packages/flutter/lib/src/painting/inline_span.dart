@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 
-import 'dart:ui' as ui show ParagraphBuilder, StringAttribute;
+import 'dart:ui' as ui show ParagraphBuilder;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -56,7 +56,6 @@ class InlineSpanSemanticsInformation {
     this.text, {
     this.isPlaceholder = false,
     this.semanticsLabel,
-    this.stringAttributes = const <ui.StringAttribute>[],
     this.recognizer,
   }) : assert(text != null),
        assert(isPlaceholder != null),
@@ -85,17 +84,13 @@ class InlineSpanSemanticsInformation {
   /// [isPlaceholder] is true.
   final bool requiresOwnNode;
 
-  /// The string attributes attached to this semantics information
-  final List<ui.StringAttribute> stringAttributes;
-
   @override
   bool operator ==(Object other) {
     return other is InlineSpanSemanticsInformation
         && other.text == text
         && other.semanticsLabel == semanticsLabel
         && other.recognizer == recognizer
-        && other.isPlaceholder == isPlaceholder
-        && listEquals<ui.StringAttribute>(other.stringAttributes, stringAttributes);
+        && other.isPlaceholder == isPlaceholder;
   }
 
   @override
@@ -112,40 +107,31 @@ class InlineSpanSemanticsInformation {
 List<InlineSpanSemanticsInformation> combineSemanticsInfo(List<InlineSpanSemanticsInformation> infoList) {
   final List<InlineSpanSemanticsInformation> combined = <InlineSpanSemanticsInformation>[];
   String workingText = '';
-  String workingLabel = '';
-  List<ui.StringAttribute> workingAttributes = <ui.StringAttribute>[];
+  // TODO(ianh): this algorithm is internally inconsistent. workingText
+  // never becomes null, but we check for it being so below.
+  String? workingLabel;
   for (final InlineSpanSemanticsInformation info in infoList) {
     if (info.requiresOwnNode) {
       combined.add(InlineSpanSemanticsInformation(
         workingText,
-        semanticsLabel: workingLabel,
-        stringAttributes: workingAttributes,
+        semanticsLabel: workingLabel ?? workingText,
       ));
       workingText = '';
-      workingLabel = '';
-      workingAttributes = <ui.StringAttribute>[];
+      workingLabel = null;
       combined.add(info);
     } else {
       workingText += info.text;
-      final String effectiveLabel = info.semanticsLabel ?? info.text;
-      for (final ui.StringAttribute infoAttribute in info.stringAttributes) {
-        workingAttributes.add(
-          infoAttribute.copy(
-            range: TextRange(
-              start: infoAttribute.range.start + workingLabel.length,
-              end: infoAttribute.range.end + workingLabel.length,
-            ),
-          ),
-        );
+      workingLabel ??= '';
+      if (info.semanticsLabel != null) {
+        workingLabel += info.semanticsLabel!;
+      } else {
+        workingLabel += info.text;
       }
-      workingLabel += effectiveLabel;
-
     }
   }
   combined.add(InlineSpanSemanticsInformation(
     workingText,
     semanticsLabel: workingLabel,
-    stringAttributes: workingAttributes,
   ));
   return combined;
 }
