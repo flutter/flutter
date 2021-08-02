@@ -27,6 +27,7 @@ static const double kIdleDelay = 1.0;
 
   CGSize _surfaceSize;
   FlutterIOSurfaceHolder* _ioSurfaces[kFlutterSurfaceManagerBufferCount];
+  BOOL _frameInProgress;
 }
 
 - (instancetype)initWithLayer:(CALayer*)containingLayer contentTransform:(CATransform3D)transform {
@@ -66,23 +67,33 @@ static const double kIdleDelay = 1.0;
             _ioSurfaces[kFlutterSurfaceManagerFrontBuffer]);
   [_delegate onSwapBuffers];
 
-  dispatch_async(dispatch_get_main_queue(), ^{
-    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(onIdle) object:nil];
-    [self performSelector:@selector(onIdle) withObject:nil afterDelay:kIdleDelay];
-  });
+  // performSelector:withObject:afterDelay needs to be performed on RunLoop thread
+  [self performSelectorOnMainThread:@selector(reschedule) withObject:nil waitUntilDone:NO];
+
+  @synchronized(self) {
+    _frameInProgress = NO;
+  }
+}
+
+- (void)reschedule {
+  [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(onIdle) object:nil];
+  [self performSelector:@selector(onIdle) withObject:nil afterDelay:kIdleDelay];
 }
 
 - (void)onIdle {
   @synchronized(self) {
-    // Release the back buffer and notify delegate. The buffer will be restored
-    // on demand in ensureBackBuffer
-    _ioSurfaces[kFlutterSurfaceManagerBackBuffer] = nil;
-    [self.delegate onSurfaceReleased:kFlutterSurfaceManagerBackBuffer];
+    if (!_frameInProgress) {
+      // Release the back buffer and notify delegate. The buffer will be restored
+      // on demand in ensureBackBuffer
+      _ioSurfaces[kFlutterSurfaceManagerBackBuffer] = nil;
+      [self.delegate onSurfaceReleased:kFlutterSurfaceManagerBackBuffer];
+    }
   }
 }
 
 - (void)ensureBackBuffer {
   @synchronized(self) {
+    _frameInProgress = YES;
     if (_ioSurfaces[kFlutterSurfaceManagerBackBuffer] == nil) {
       // Restore previously released backbuffer
       _ioSurfaces[kFlutterSurfaceManagerBackBuffer] = [[FlutterIOSurfaceHolder alloc] init];
