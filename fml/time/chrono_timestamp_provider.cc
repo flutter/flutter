@@ -6,8 +6,6 @@
 
 #include <chrono>
 
-#include "fml/time/time_delta.h"
-
 namespace fml {
 
 ChronoTimestampProvider::ChronoTimestampProvider() = default;
