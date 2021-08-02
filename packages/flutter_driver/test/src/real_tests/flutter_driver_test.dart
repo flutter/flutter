@@ -954,6 +954,23 @@ void main() {
             throwsA(isA<UnsupportedError>()));
       });
     });
+
+    group('runUnsynchronized', () {
+      test('wrap waitFor with runUnsynchronized', () async {
+        fakeConnection.responses['waitFor'] = jsonEncode(makeFakeResponse(<String, dynamic>{'text': 'hello'}));
+        fakeConnection.responses['set_frame_sync'] = jsonEncode(makeFakeResponse(<String, dynamic>{}));
+
+        await driver.runUnsynchronized(() async {
+          await driver.waitFor(find.byTooltip('foo'), timeout: _kTestTimeout);
+        });
+
+        expect(fakeConnection.commandLog, <String>[
+          r'''window.$flutterDriver('{"command":"set_frame_sync","enabled":"false"}') null''',
+          r'''window.$flutterDriver('{"command":"waitFor","timeout":"1234","finderType":"ByTooltipMessage","text":"foo"}') 0:00:01.234000''',
+          r'''window.$flutterDriver('{"command":"set_frame_sync","enabled":"true"}') null''',
+        ]);
+      });
+    });
   });
 
   group('WebFlutterDriver with non-chrome browser', () {
