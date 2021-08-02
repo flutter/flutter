@@ -284,7 +284,7 @@ class SampleChecker {
         '// ${file.path}',
         "import 'package:flutter/${path.basename(file.path)}';",
       ],
-    ].map<Line>((String code) => Line(code)).toList();
+    ].map<Line>((String code) => Line(code, filename: 'headers')).toList();
   }
 
   List<Line>? _headers;
@@ -638,10 +638,10 @@ linter:
     final String sectionId = _createNameFromSource('snippet', section.start.filename, section.start.line);
     final File outputFile = File(path.join(_tempDirectory.path, '$sectionId.dart'))..createSync(recursive: true);
     final List<Line> mainContents = <Line>[
-      if (section.dartVersionOverride != null) Line(section.dartVersionOverride!) else const Line(''),
+      if (section.dartVersionOverride != null) Line(section.dartVersionOverride!) else Line('', filename: section.start.filename, line: 0),
       ...headers,
-      const Line(''),
-      Line('// From: ${section.start.filename}:${section.start.line}'),
+      Line('', filename: section.start.filename, line: 0),
+      Line('// From: ${section.start.filename}:${section.start.line}', filename: section.start.filename, line: 0),
       ...section.code,
     ];
     outputFile.writeAsStringSync(mainContents.map<String>((Line line) => line.code).join('\n'));
@@ -916,7 +916,7 @@ linter:
 
 /// A class to represent a line of input code.
 class Line {
-  const Line(this.code, {this.filename = 'unknown', this.line = -1, this.indent = 0});
+  const Line(this.code, {this.filename = 'missing', this.line = -1, this.indent = 0});
   final String filename;
   final int line;
   final int indent;
@@ -971,9 +971,9 @@ class Section {
       );
     }
     return Section(<Line>[
-      Line(prefix),
+      Line(prefix, filename: firstLine.filename, line: 0),
       ...codeLines,
-      Line(postfix),
+      Line(postfix, filename: firstLine.filename, line: 0),
     ]);
   }
   Line get start => code.firstWhere((Line line) => line.filename != null);
