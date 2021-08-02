@@ -1027,6 +1027,33 @@ void main() {
     expect(tester.getTopRight(find.byType(FloatingActionButton)).dx - tester.getTopRight(find.byKey(labelKey)).dx, padding.end);
   });
 
+  testWidgets('FloatingActionButton.extended can customize text style', (WidgetTester tester) async {
+    const Key labelKey = Key('label');
+    const TextStyle style = TextStyle(letterSpacing: 2.0);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          floatingActionButton: FloatingActionButton.extended(
+            label: const Text('', key: labelKey),
+            icon: const Icon(Icons.add),
+            extendedTextStyle: style,
+            onPressed: () {},
+          ),
+        ),
+      ),
+    );
+
+    final RawMaterialButton rawMaterialButton = tester.widget<RawMaterialButton>(
+      find.descendant(
+        of: find.byType(FloatingActionButton),
+        matching: find.byType(RawMaterialButton),
+      ),
+    );
+    // The color comes from the default color scheme's onSecondary value.
+    expect(rawMaterialButton.textStyle, style.copyWith(color: const Color(0xffffffff)));
+  });
+
   group('feedback', () {
     late FeedbackTester feedback;
 

@@ -932,7 +932,7 @@ void main() {
       ),
     );
     focusNode.requestFocus();
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     await expectLater(
       find.byType(TextField),
@@ -960,7 +960,7 @@ void main() {
       ),
     );
     focusNode.requestFocus();
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     await expectLater(
       find.byType(TextField),
@@ -988,7 +988,7 @@ void main() {
       ),
     );
     focusNode.requestFocus();
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     await expectLater(
       find.byType(TextField),
@@ -6227,13 +6227,10 @@ void main() {
 
     semantics.dispose();
 
-    // On web, we don't check for pasteability because that triggers a
-    // permission dialog in the browser.
+    // On web (just like iOS), we don't check for pasteability because that
+    // triggers a permission dialog in the browser.
     // https://github.com/flutter/flutter/pull/57139#issuecomment-629048058
-    // TODO(justinmc): Remove TargetPlatform override when Android and iOS uses
-    //                 `hasStrings` to check for pasteability.
-    //                 https://github.com/flutter/flutter/issues/74139
-  }, skip: isBrowser, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.linux }));
+  }, skip: isBrowser);
 
   testWidgets('TextField throws when not descended from a Material widget', (WidgetTester tester) async {
     const Widget textField = TextField();
@@ -9595,10 +9592,7 @@ void main() {
       // pasted.
       expect(triedToReadClipboard, true);
     }
-    // TODO(justinmc): Eventually, all platform should call `hasStrings` instead.
-    //                 This entire test will become irrelevant after the fact.
-    //                 https://github.com/flutter/flutter/issues/74139
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.linux }));
+  });
 
   testWidgets('TextField changes mouse cursor when hovered', (WidgetTester tester) async {
     await tester.pumpWidget(

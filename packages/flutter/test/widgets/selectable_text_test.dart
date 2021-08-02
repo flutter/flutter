@@ -2557,7 +2557,7 @@ void main() {
     ));
 
     semanticsOwner.performAction(inputFieldId, SemanticsAction.longPress);
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     expect(semantics, hasSemantics(
       TestSemantics.root(
