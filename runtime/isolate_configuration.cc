@@ -51,7 +51,9 @@ class KernelIsolateConfiguration : public IsolateConfiguration {
     if (DartVM::IsRunningPrecompiledCode()) {
       return false;
     }
-    return isolate.PrepareForRunningFromKernel(std::move(kernel_));
+    return isolate.PrepareForRunningFromKernel(std::move(kernel_),
+                                               /*child_isolate=*/false,
+                                               /*last_piece=*/true);
   }
 
   // |IsolateConfiguration|
@@ -98,7 +100,8 @@ class KernelListIsolateConfiguration final : public IsolateConfiguration {
       }
       const bool last_piece = i + 1 == resolved_kernel_pieces_.size();
       if (!isolate.PrepareForRunningFromKernel(
-              std::move(resolved_kernel_pieces_[i]), last_piece)) {
+              std::move(resolved_kernel_pieces_[i]), /*child_isolate=*/false,
+              last_piece)) {
         return false;
       }
     }
