@@ -639,6 +639,23 @@ void main() {
         expect(() => driver.webDriver, throwsA(isA<UnsupportedError>()));
       });
     });
+
+    group('runUnsynchronized', () {
+      test('wrap awaitFor with runUnsynchronized', () async {
+        fakeClient.responses['waitFor'] = makeFakeResponse(<String, dynamic>{});
+        fakeClient.responses['set_frame_sync'] = makeFakeResponse(<String, dynamic>{});
+        
+        await driver.runUnsynchronized(() async  {
+          await driver.waitFor(find.byTooltip('foo'), timeout: _kTestTimeout);
+        });
+
+        expect(fakeClient.commandLog, <String>[
+          'ext.flutter.driver {command: set_frame_sync, enabled: false}',
+          'ext.flutter.driver {command: waitFor, timeout: $_kSerializedTestTimeout, finderType: ByTooltipMessage, text: foo}',
+          'ext.flutter.driver {command: set_frame_sync, enabled: true}'
+        ]);
+      });
+    });
   });
 
   group('VMServiceFlutterDriver with custom timeout', () {
