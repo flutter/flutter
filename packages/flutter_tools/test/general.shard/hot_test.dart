@@ -295,7 +295,7 @@ void main() {
           fakeFlutterDevice,
         ];
 
-        fakeFlutterDevice.updateDevFSReport = UpdateFSReport(
+        fakeFlutterDevice.updateDevFSReportCallback = () async => UpdateFSReport(
           success: true,
           invalidatedSourcesCount: 2,
           syncedBytes: 4,
@@ -362,7 +362,7 @@ void main() {
           fakeFlutterDevice,
         ];
 
-        fakeFlutterDevice.updateDevFSReport = UpdateFSReport(
+        fakeFlutterDevice.updateDevFSReportCallback = () async => UpdateFSReport(
           success: true,
           invalidatedSourcesCount: 6,
           syncedBytes: 8,
@@ -440,6 +440,74 @@ void main() {
             hotEventReloadVMTimeInMs: 512000,
           )),
         ]);
+        expect(testingConfig.updateDevFSCompleteCalled, true);
+      }, overrides: <Type, Generator>{
+        HotRunnerConfig: () => testingConfig,
+        Artifacts: () => Artifacts.test(),
+        FileSystem: () => fileSystem,
+        Platform: () => FakePlatform(operatingSystem: 'linux'),
+        ProcessManager: () => FakeProcessManager.any(),
+        Usage: () => testUsage,
+      });
+    });
+
+    group('hot restart that failed to sync dev fs', () {
+      TestHotRunnerConfig testingConfig;
+      setUp(() {
+        testingConfig = TestHotRunnerConfig(
+          successfulHotRestartSetup: true,
+        );
+      });
+      testUsingContext('still calls the devfs complete callback', () async {
+        final FakeDevice device = FakeDevice();
+        final FakeFlutterDevice fakeFlutterDevice = FakeFlutterDevice(device);
+        final List<FlutterDevice> devices = <FlutterDevice>[
+          fakeFlutterDevice,
+        ];
+        fakeFlutterDevice.updateDevFSReportCallback = () async => throw 'updateDevFS failed';
+
+        final HotRunner runner = HotRunner(
+          devices,
+          debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+          target: 'main.dart',
+          devtoolsHandler: createNoOpHandler,
+        );
+
+        await expectLater(runner.restart(fullRestart: true), throwsA('updateDevFS failed'));
+        expect(testingConfig.updateDevFSCompleteCalled, true);
+      }, overrides: <Type, Generator>{
+        HotRunnerConfig: () => testingConfig,
+        Artifacts: () => Artifacts.test(),
+        FileSystem: () => fileSystem,
+        Platform: () => FakePlatform(operatingSystem: 'linux'),
+        ProcessManager: () => FakeProcessManager.any(),
+        Usage: () => testUsage,
+      });
+    });
+
+    group('hot reload that failed to sync dev fs', () {
+      TestHotRunnerConfig testingConfig;
+      setUp(() {
+        testingConfig = TestHotRunnerConfig(
+          successfulHotReloadSetup: true,
+        );
+      });
+      testUsingContext('still calls the devfs complete callback', () async {
+        final FakeDevice device = FakeDevice();
+        final FakeFlutterDevice fakeFlutterDevice = FakeFlutterDevice(device);
+        final List<FlutterDevice> devices = <FlutterDevice>[
+          fakeFlutterDevice,
+        ];
+        fakeFlutterDevice.updateDevFSReportCallback = () async => throw 'updateDevFS failed';
+
+        final HotRunner runner = HotRunner(
+          devices,
+          debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+          target: 'main.dart',
+          devtoolsHandler: createNoOpHandler,
+        );
+
+        await expectLater(runner.restart(fullRestart: false), throwsA('updateDevFS failed'));
         expect(testingConfig.updateDevFSCompleteCalled, true);
       }, overrides: <Type, Generator>{
         HotRunnerConfig: () => testingConfig,
@@ -583,7 +651,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   FakeFlutterDevice(this.device);
 
   bool stoppedEchoingDeviceLog = false;
-  UpdateFSReport updateDevFSReport;
+  Future<UpdateFSReport> Function() updateDevFSReportCallback;
 
   @override
   final FakeDevice device;
@@ -616,7 +684,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
     @required String dillOutputPath,
     @required List<Uri> invalidatedFiles,
     @required PackageConfig packageConfig,
-  }) async => updateDevFSReport;
+  }) => updateDevFSReportCallback();
 }
 
 class TestFlutterDevice extends FlutterDevice {
@@ -657,13 +725,13 @@ class TestHotRunnerConfig extends HotRunnerConfig {
 
   @override
   Future<bool> setupHotRestart() async {
-    assert(successfulHotRestartSetup != null, 'setupHotRestart is not expected to be called');
+    assert(successfulHotRestartSetup != null, 'setupHotRestart is not expected to be called in this test.');
     return successfulHotRestartSetup;
   }
 
   @override
   Future<bool> setupHotReload() async {
-    assert(successfulHotReloadSetup != null, 'setupHotReload is not expected to be called');
+    assert(successfulHotReloadSetup != null, 'setupHotReload is not expected to be called in this test.');
     return successfulHotReloadSetup;
   }
 
