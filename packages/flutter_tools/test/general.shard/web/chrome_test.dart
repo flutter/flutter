@@ -525,6 +525,38 @@ void main() {
       throwsToolExit(message: 'Failed to launch browser.'),
     );
   });
+
+  testWithoutContext('Logs an error and exits if connection check fails.', () async {
+    final BufferLogger logger = BufferLogger.test();
+    chromeLauncher = ChromiumLauncher(
+      fileSystem: fileSystem,
+      platform: platform,
+      processManager: processManager,
+      operatingSystemUtils: operatingSystemUtils,
+      browserFinder: findChromeExecutable,
+      logger: logger,
+    );
+    processManager.addCommand(const FakeCommand(
+      command: <String>[
+        'example_chrome',
+        '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
+        '--remote-debugging-port=12345',
+        ...kChromeArgs,
+        'example_url',
+      ],
+      stderr: kDevtoolsStderr,
+    ));
+
+    await expectToolExitLater(
+      chromeLauncher.launch(
+        'example_url',
+        skipCheck: false,
+        headless: false,
+      ),
+      contains('Unable to connect to Chrome debug port:'),
+    );
+    expect(logger.errorText, contains('SocketException'));
+  });
 }
 
 Future<Chromium> _testLaunchChrome(String userDataDir, FakeProcessManager processManager, ChromiumLauncher chromeLauncher) {
