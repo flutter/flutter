@@ -666,12 +666,12 @@ void main() {
     test('VMServiceFlutterDriver does not support webDriver', () async {
       expect(() => driver.webDriver, throwsUnsupportedError);
     });
- 
+
     group('runUnsynchronized', () {
       test('wrap waitFor with runUnsynchronized', () async {
         fakeClient.responses['waitFor'] = makeFakeResponse(<String, dynamic>{});
         fakeClient.responses['set_frame_sync'] = makeFakeResponse(<String, dynamic>{});
-        
+
         await driver.runUnsynchronized(() async  {
           await driver.waitFor(find.byTooltip('foo'), timeout: _kTestTimeout);
         });
