@@ -577,6 +577,7 @@ bool DartIsolate::LoadKernel(std::shared_ptr<const fml::Mapping> mapping,
 
 [[nodiscard]] bool DartIsolate::PrepareForRunningFromKernel(
     std::shared_ptr<const fml::Mapping> mapping,
+    bool child_isolate,
     bool last_piece) {
   TRACE_EVENT0("flutter", "DartIsolate::PrepareForRunningFromKernel");
   if (phase_ != Phase::LibrariesSetup) {
@@ -593,11 +594,13 @@ bool DartIsolate::LoadKernel(std::shared_ptr<const fml::Mapping> mapping,
 
   tonic::DartState::Scope scope(this);
 
-  // Use root library provided by kernel in favor of one provided by snapshot.
-  Dart_SetRootLibrary(Dart_Null());
+  if (!child_isolate || !Dart_IsVMFlagSet("--enable-isolate-groups")) {
+    // Use root library provided by kernel in favor of one provided by snapshot.
+    Dart_SetRootLibrary(Dart_Null());
 
-  if (!LoadKernel(mapping, last_piece)) {
-    return false;
+    if (!LoadKernel(mapping, last_piece)) {
+      return false;
+    }
   }
 
   if (!last_piece) {
@@ -622,7 +625,9 @@ bool DartIsolate::LoadKernel(std::shared_ptr<const fml::Mapping> mapping,
           for (uint64_t i = 0; i < buffers.size(); i++) {
             bool last_piece = i + 1 == buffers.size();
             const std::shared_ptr<const fml::Mapping>& buffer = buffers.at(i);
-            if (!isolate->PrepareForRunningFromKernel(buffer, last_piece)) {
+            if (!isolate->PrepareForRunningFromKernel(buffer,
+                                                      /*child_isolate=*/true,
+                                                      last_piece)) {
               return false;
             }
           }
@@ -650,7 +655,8 @@ bool DartIsolate::LoadKernel(std::shared_ptr<const fml::Mapping> mapping,
 
   for (size_t i = 0; i < count; ++i) {
     bool last = (i == (count - 1));
-    if (!PrepareForRunningFromKernel(kernels[i], last)) {
+    if (!PrepareForRunningFromKernel(kernels[i], /*child_isolate=*/false,
+                                     last)) {
       return false;
     }
   }
