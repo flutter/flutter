@@ -216,15 +216,8 @@ void main(List<String> argList) {
     }
   }
 
-  stderr.writeln('Snippet Command: snippets ${argList.join(' ')}');
-  stderr.writeln('Snippet Environment:');
-  for (final String key in environment.keys) {
-    stderr.writeln('  $key=${environment[key]}');
-  }
-  stderr.writeln('Snippet Input:\n${input.readAsStringSync()}\n--------- END INPUT ------');
-
   final SnippetGenerator generator = SnippetGenerator();
-  final String result = generator.generate(
+  stdout.write(generator.generate(
     input,
     snippetType,
     showDartPad: args[_kShowDartPad] as bool,
@@ -242,9 +235,7 @@ void main(List<String> argList) {
       'library': libraryName,
       'element': elementName,
     },
-  );
-  stderr.writeln('Snippet Output:\n$result\n--------- END OUTPUT ------');
-  stdout.write(result);
+  ));
 
   exit(0);
 }
