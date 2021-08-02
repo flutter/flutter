@@ -77,6 +77,8 @@ source_set("fml") {
     "thread.h",
     "thread_local.cc",
     "thread_local.h",
+    "time/dart_timestamp_provider.cc",
+    "time/dart_timestamp_provider.h",
     "time/time_delta.h",
     "time/time_point.cc",
     "time/time_point.h",
