@@ -556,7 +556,7 @@ void main() {
       contains('Unable to connect to Chrome debug port:'),
     );
     expect(logger.errorText, contains('SocketException'));
-  });
+  }, timeout: const Timeout.factor(2));
 }
 
 Future<Chromium> _testLaunchChrome(String userDataDir, FakeProcessManager processManager, ChromiumLauncher chromeLauncher) {
