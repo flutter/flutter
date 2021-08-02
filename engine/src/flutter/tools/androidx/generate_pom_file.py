@@ -63,16 +63,19 @@ MAVEN_METADATA_CONTENT ='''
 </metadata>
 '''
 
+def utf8(s):
+  return str(s, 'utf-8') if isinstance(s, (bytes, bytearray)) else s
+
 def main():
   with open (os.path.join(THIS_DIR, 'files.json')) as f:
     dependencies = json.load(f)
 
   parser = argparse.ArgumentParser(description='Generate the POM file for the engine artifacts')
-  parser.add_argument('--engine-artifact-id', type=str, required=True,
+  parser.add_argument('--engine-artifact-id', type=utf8, required=True,
                       help='The artifact id. e.g. android_arm_release')
-  parser.add_argument('--engine-version', type=str, required=True,
+  parser.add_argument('--engine-version', type=utf8, required=True,
                       help='The engine commit hash')
-  parser.add_argument('--destination', type=str, required=True,
+  parser.add_argument('--destination', type=utf8, required=True,
                       help='The destination directory absolute path')
   parser.add_argument('--include-embedding-dependencies', type=bool,
                       help='Include the dependencies for the embedding')
