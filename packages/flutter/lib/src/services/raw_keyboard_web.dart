@@ -10,6 +10,13 @@ import 'keyboard_key.dart';
 import 'keyboard_maps.dart';
 import 'raw_keyboard.dart';
 
+String? _unicodeChar(String key) {
+  if (key.length == 1) {
+    return key.substring(0, 1);
+  }
+  return null;
+}
+
 /// Platform-specific key event data for Web.
 ///
 /// See also:
@@ -74,7 +81,7 @@ class RawKeyEventDataWeb extends RawKeyEventData {
   final int metaState;
 
   @override
-  String get keyLabel => key == 'Unidentified' ? '' : key;
+  String get keyLabel => key == 'Unidentified' ? '' : _unicodeChar(key) ?? '';
 
   @override
   PhysicalKeyboardKey get physicalKey {
@@ -95,9 +102,14 @@ class RawKeyEventDataWeb extends RawKeyEventData {
       return newKey;
     }
 
+    final bool isPrintable = key.length == 1;
+    if (isPrintable)
+      return LogicalKeyboardKey(key.codeUnitAt(0));
+
     // This is a non-printable key that we don't know about, so we mint a new
-    // code.
-    return LogicalKeyboardKey(code.hashCode | LogicalKeyboardKey.webPlane);
+    // key from `code`. Don't mint with `key`, because the `key` will always be
+    // "Unidentified" .
+    return LogicalKeyboardKey(code.hashCode + LogicalKeyboardKey.webPlane);
   }
 
   @override
