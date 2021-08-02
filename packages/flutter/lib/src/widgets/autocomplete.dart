@@ -906,8 +906,14 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       widget.textEditingController,
     );
     _updateFocusNode(oldWidget.focusNode, widget.focusNode);
+
+    final bool initialValueChanged = oldWidget.initialValue != widget.initialValue;
     SchedulerBinding.instance!.addPostFrameCallback((Duration _) {
-      _updateOverlay();
+      if (widget.initialValue != null && initialValueChanged) {
+        _textEditingController.value = widget.initialValue!;
+      } else {
+        _updateOverlay();
+      }
     });
   }
 

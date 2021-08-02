@@ -647,6 +647,51 @@ void main() {
     );
   });
 
+  testWidgets('initialValue change rebuilds options', (WidgetTester tester) async {
+    TextEditingValue? initialValue;
+    Iterable<String>? lastOptions;
+
+    Widget builder() {
+      return MaterialApp(
+        home: Scaffold(
+          body: RawAutocomplete<String>(
+            initialValue: initialValue,
+            optionsBuilder: (TextEditingValue textEditingValue) {
+               return kOptions.where((String option) {
+                 return option.contains(textEditingValue.text.toLowerCase());
+               });
+            },
+            optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+              lastOptions = options;
+              return Container();
+            },
+            fieldViewBuilder: (BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
+              return TextField(
+                autofocus: true,
+                focusNode: focusNode,
+                controller: textEditingController,
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(builder());
+
+    initialValue = const TextEditingValue(text: 'go');
+    await tester.pumpWidget(builder());
+    tester.binding.scheduleFrame();
+    await tester.pump();
+    expect(lastOptions, <String>['dingo', 'flamingo', 'goose']);
+
+    initialValue = const TextEditingValue(text: 'goo');
+    await tester.pumpWidget(builder());
+    tester.binding.scheduleFrame();
+    await tester.pump();
+    expect(lastOptions, <String>['goose']);
+  });
+
   testWidgets('can navigate options with the keyboard', (WidgetTester tester) async {
     final GlobalKey fieldKey = GlobalKey();
     final GlobalKey optionsKey = GlobalKey();
