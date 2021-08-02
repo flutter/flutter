@@ -368,7 +368,7 @@ class SampleChecker {
   /// Writes out the given sample to an output file in the [_tempDirectory] and
   /// returns the output file.
   File _writeSample(Sample sample) {
-    print('creating sample for ${sample}')
+    print('creating sample for $sample');
     // Generate the snippet.
     final String sampleId = _createNameFromSource('sample', sample.start.filename, sample.start.line);
     final String inputName = '$sampleId.input';
