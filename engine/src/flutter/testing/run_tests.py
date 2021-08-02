@@ -327,12 +327,11 @@ def AssertExpectedJavaVersion():
 
 
 def AssertExpectedXcodeVersion():
-  """Checks that the user has a recent version of Xcode installed"""
-  EXPECTED_MAJOR_VERSION = ['11', '12']
+  """Checks that the user has a version of Xcode installed"""
   version_output = subprocess.check_output(['xcodebuild', '-version'])
-  match = re.match("Xcode (\d+)", version_output)
+  match = re.match(b"Xcode (\d+)", version_output)
   message = "Xcode must be installed to run the iOS embedding unit tests"
-  assert match.group(1) in EXPECTED_MAJOR_VERSION, message
+  assert match, message
 
 
 def RunJavaTests(filter, android_variant='android_debug_unopt'):
