@@ -7,11 +7,7 @@
 // initialize a binding, which rendering_tester will attempt to re-initialize
 // (or vice versa).
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=123"
-@Tags(<String>['no-shuffle'])
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -785,6 +781,12 @@ void main() {
     }
 
     testWidgets('Reverse List showOnScreen', (WidgetTester tester) async {
+      final ui.Size originalScreenSize = tester.binding.window.physicalSize;
+      final double originalDevicePixelRatio = tester.binding.window.devicePixelRatio;
+      addTearDown(() {
+        tester.binding.window.devicePixelRatioTestValue = originalDevicePixelRatio;
+        tester.binding.window.physicalSizeTestValue = originalScreenSize;
+      });
       const double screenHeight = 400.0;
       const double screenWidth = 400.0;
       const double itemHeight = screenHeight / 10.0;
@@ -1891,17 +1893,17 @@ void main() {
     controller.jumpTo(controller.position.maxScrollExtent);
     await tester.pumpAndSettle();
     expect(controller.offset, maxExtent);
-    expect(tester.getBottomLeft(find.text('Item 19')).dy, 400.0);
+    expect(tester.getBottomLeft(find.text('Item 19')).dy, 600.0);
 
     overscrollGesture = await tester.startGesture(tester.getCenter(find.byType(ListView)));
     await overscrollGesture.moveBy(const Offset(0, -25));
     await tester.pump();
     expect(controller.offset, greaterThan(maxExtent));
-    expect(tester.getBottomLeft(find.text('Item 19')).dy, 375.0);
+    expect(tester.getBottomLeft(find.text('Item 19')).dy, 575.0);
     await overscrollGesture.up();
     await tester.pumpAndSettle();
     expect(controller.offset, maxExtent);
-    expect(tester.getBottomLeft(find.text('Item 19')).dy, 400.0);
+    expect(tester.getBottomLeft(find.text('Item 19')).dy, 600.0);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
   testWidgets('Shrinkwrap allows overscrolling on default platforms - horizontal', (WidgetTester tester) async {
@@ -1930,17 +1932,17 @@ void main() {
     controller.jumpTo(controller.position.maxScrollExtent);
     await tester.pumpAndSettle();
     expect(controller.offset, maxExtent);
-    expect(tester.getTopRight(find.text('Item 19')).dx, 400.0);
+    expect(tester.getTopRight(find.text('Item 19')).dx, 800.0);
 
     overscrollGesture = await tester.startGesture(tester.getCenter(find.byType(ListView)));
     await overscrollGesture.moveBy(const Offset(-25, 0));
     await tester.pump();
     expect(controller.offset, greaterThan(maxExtent));
-    expect(tester.getTopRight(find.text('Item 19')).dx, 375.0);
+    expect(tester.getTopRight(find.text('Item 19')).dx, 775.0);
     await overscrollGesture.up();
     await tester.pumpAndSettle();
     expect(controller.offset, maxExtent);
-    expect(tester.getTopRight(find.text('Item 19')).dx, 400.0);
+    expect(tester.getTopRight(find.text('Item 19')).dx, 800.0);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
   testWidgets('Shrinkwrap allows overscrolling per physics - vertical', (WidgetTester tester) async {
@@ -1969,17 +1971,17 @@ void main() {
     controller.jumpTo(controller.position.maxScrollExtent);
     await tester.pumpAndSettle();
     expect(controller.offset, maxExtent);
-    expect(tester.getBottomLeft(find.text('Item 19')).dy, 400.0);
+    expect(tester.getBottomLeft(find.text('Item 19')).dy, 600.0);
 
     overscrollGesture = await tester.startGesture(tester.getCenter(find.byType(ListView)));
     await overscrollGesture.moveBy(const Offset(0, -25));
     await tester.pump();
     expect(controller.offset, greaterThan(maxExtent));
-    expect(tester.getBottomLeft(find.text('Item 19')).dy, 375.0);
+    expect(tester.getBottomLeft(find.text('Item 19')).dy, 575.0);
     await overscrollGesture.up();
     await tester.pumpAndSettle();
     expect(controller.offset, maxExtent);
-    expect(tester.getBottomLeft(find.text('Item 19')).dy, 400.0);
+    expect(tester.getBottomLeft(find.text('Item 19')).dy, 600.0);
   });
 
   testWidgets('Shrinkwrap allows overscrolling per physics - horizontal', (WidgetTester tester) async {
@@ -2012,17 +2014,17 @@ void main() {
     controller.jumpTo(controller.position.maxScrollExtent);
     await tester.pumpAndSettle();
     expect(controller.offset, maxExtent);
-    expect(tester.getTopRight(find.text('Item 19')).dx, 400.0);
+    expect(tester.getTopRight(find.text('Item 19')).dx, 800.0);
 
     overscrollGesture = await tester.startGesture(tester.getCenter(find.byType(ListView)));
     await overscrollGesture.moveBy(const Offset(-25, 0));
     await tester.pump();
     expect(controller.offset, greaterThan(maxExtent));
-    expect(tester.getTopRight(find.text('Item 19')).dx, 375.0);
+    expect(tester.getTopRight(find.text('Item 19')).dx, 775.0);
     await overscrollGesture.up();
     await tester.pumpAndSettle();
     expect(controller.offset, maxExtent);
-    expect(tester.getTopRight(find.text('Item 19')).dx, 400.0);
+    expect(tester.getTopRight(find.text('Item 19')).dx, 800.0);
   });
 
   testWidgets('Handles infinite constraints when TargetPlatform is iOS or macOS', (WidgetTester tester) async {

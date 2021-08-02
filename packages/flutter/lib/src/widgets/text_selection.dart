@@ -602,6 +602,7 @@ class TextSelectionOverlay {
           selectionControls: selectionControls,
           position: position,
           dragStartBehavior: dragStartBehavior,
+          selectionDelegate: selectionDelegate!,
         ),
       );
     }
@@ -695,6 +696,7 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
     required this.onSelectionHandleChanged,
     required this.onSelectionHandleTapped,
     required this.selectionControls,
+    required this.selectionDelegate,
     this.dragStartBehavior = DragStartBehavior.start,
   }) : super(key: key);
 
@@ -707,6 +709,7 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
   final VoidCallback? onSelectionHandleTapped;
   final TextSelectionControls selectionControls;
   final DragStartBehavior dragStartBehavior;
+  final TextSelectionDelegate selectionDelegate;
 
   @override
   _TextSelectionHandleOverlayState createState() => _TextSelectionHandleOverlayState();
@@ -833,33 +836,31 @@ class _TextSelectionHandleOverlayState
     //
     // For the end handle we compute the rectangles that encompass the range
     // of the last full selected grapheme cluster at the end of the selection.
+    //
+    // Only calculate start/end handle rects if the text in the previous frame
+    // is the same as the text in the current frame. This is done because
+    // widget.renderObject contains the renderEditable from the previous frame.
+    // If the text changed between the current and previous frames then
+    // widget.renderObject.getRectForComposingRange might fail. In cases where
+    // the current frame is different from the previous we fall back to
+    // widget.renderObject.preferredLineHeight.
     final InlineSpan span = widget.renderObject.text!;
-    final String text = span.toPlainText();
+    final String prevText = span.toPlainText();
+    final String currText = widget.selectionDelegate.textEditingValue.text;
     final int firstSelectedGraphemeExtent;
     final int lastSelectedGraphemeExtent;
-    final TextSelection? selection = widget.renderObject.selection;
+    final TextSelection selection = widget.selection;
+    Rect? startHandleRect;
+    Rect? endHandleRect;
 
-    if (selection != null && selection.isValid && !selection.isCollapsed) {
-      final String selectedGraphemes = selection.textInside(text);
+    if (prevText == currText && selection != null && selection.isValid && !selection.isCollapsed) {
+      final String selectedGraphemes = selection.textInside(currText);
       firstSelectedGraphemeExtent = selectedGraphemes.characters.first.length;
       lastSelectedGraphemeExtent = selectedGraphemes.characters.last.length;
       assert(firstSelectedGraphemeExtent <= selectedGraphemes.length && lastSelectedGraphemeExtent <= selectedGraphemes.length);
-    } else {
-      // The call to selectedGraphemes.characters.first/last will throw a state
-      // error if the given text is empty, so fall back to first/last character
-      // range in this case.
-      //
-      // The call to widget.selection.textInside(text) will return a RangeError
-      // for a collapsed selection, fall back to this case when that happens.
-      firstSelectedGraphemeExtent = 0;
-      lastSelectedGraphemeExtent = 0;
+      startHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: selection.start, end: selection.start + firstSelectedGraphemeExtent));
+      endHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: selection.end - lastSelectedGraphemeExtent, end: selection.end));
     }
-
-    final Rect? startHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.selection.start, end: widget.selection.start + firstSelectedGraphemeExtent));
-    final Rect? endHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: widget.selection.end - lastSelectedGraphemeExtent, end: widget.selection.end));
-
-    assert(!(firstSelectedGraphemeExtent > 0 && widget.selection.isValid && !widget.selection.isCollapsed) || startHandleRect != null);
-    assert(!(lastSelectedGraphemeExtent > 0 && widget.selection.isValid && !widget.selection.isCollapsed) || endHandleRect != null);
 
     final Offset handleAnchor = widget.selectionControls.getHandleAnchor(
       type,
@@ -1654,26 +1655,18 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
 
   /// Check the [Clipboard] and update [value] if needed.
   Future<void> update() async {
+    // iOS 14 added a notification that appears when an app accesses the
+    // clipboard. To avoid the notification, don't access the clipboard on iOS,
+    // and instead always show the paste button, even when the clipboard is
+    // empty.
+    // TODO(justinmc): Use the new iOS 14 clipboard API method hasStrings that
+    // won't trigger the notification.
+    // https://github.com/flutter/flutter/issues/60145
     switch (defaultTargetPlatform) {
-      // Android 12 introduces a toast message that appears when an app reads
-      // the content on the clipboard. To avoid unintended access, both the
-      // Flutter engine and the Flutter framework need to be updated to use the
-      // appropriate API to check whether the clipboard is empty.
-      // As a short-term workaround, always show the paste button.
-      // TODO(justinmc): Expose `hasStrings` in `Clipboard` and use that instead
-      // https://github.com/flutter/flutter/issues/74139
-      case TargetPlatform.android:
-        // Intentionally fall through.
-      // iOS 14 added a notification that appears when an app accesses the
-      // clipboard. To avoid the notification, don't access the clipboard on iOS,
-      // and instead always show the paste button, even when the clipboard is
-      // empty.
-      // TODO(justinmc): Use the new iOS 14 clipboard API method hasStrings that
-      // won't trigger the notification.
-      // https://github.com/flutter/flutter/issues/60145
       case TargetPlatform.iOS:
         value = ClipboardStatus.pasteable;
         return;
+      case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.macOS:

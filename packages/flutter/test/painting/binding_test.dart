@@ -42,10 +42,6 @@ Future<void> main() async {
     expect(binding.imageCache.clearCount, 1);
     expect(binding.imageCache.liveClearCount, 1);
   });
-
-  test('ShaderWarmUp is null by default', () {
-    expect(PaintingBinding.shaderWarmUp, null);
-  });
 }
 
 class TestBindingBase implements BindingBase {
