@@ -656,6 +656,8 @@ linter:
     );
     final List<String> stderr = result.stderr.toString().trim().split('\n');
     final List<String> stdout = result.stdout.toString().trim().split('\n');
+    print(stderr);
+    print(stdout);
     // Remove output from building the flutter tool.
     stderr.removeWhere((String line) {
       return line.startsWith('Building flutter tool...');
