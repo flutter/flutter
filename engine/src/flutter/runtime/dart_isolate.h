@@ -301,7 +301,8 @@ class DartIsolate : public UIDartState {
   ///
   [[nodiscard]] bool PrepareForRunningFromKernel(
       std::shared_ptr<const fml::Mapping> kernel,
-      bool last_piece = true);
+      bool child_isolate,
+      bool last_piece);
 
   //----------------------------------------------------------------------------
   /// @brief      Prepare the isolate for running for a a list of kernel files.
