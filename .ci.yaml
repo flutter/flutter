@@ -1,3 +1,4 @@
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/87485
 # Describes the targets run in continuous integration environment.
 #
 # Flutter infra uses this file to generate a checklist of tasks to be performed
