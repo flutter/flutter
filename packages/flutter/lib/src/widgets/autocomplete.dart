@@ -751,16 +751,22 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
 
   // Called when _textEditingController changes.
   void _onChangedField() {
-    final Iterable<T> options = widget.optionsBuilder(
-      _textEditingController.value,
-    );
-    _options = options;
+    _updateOptions();
     _updateHighlight(_highlightedOptionIndex.value);
     if (_selection != null
         && _textEditingController.text != widget.displayStringForOption(_selection!)) {
       _selection = null;
     }
     _updateOverlay();
+  }
+
+  // Called when the field's text changes, or when the widget configuration
+  // changes while the overlay is visible.
+  void _updateOptions() {
+    final Iterable<T> options = widget.optionsBuilder(
+      _textEditingController.value,
+    );
+    _options = options;
   }
 
   // Called when the field's FocusNode changes.
@@ -907,6 +913,9 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     );
     _updateFocusNode(oldWidget.focusNode, widget.focusNode);
     SchedulerBinding.instance!.addPostFrameCallback((Duration _) {
+       if (_shouldShowOptions) {
+         _updateOptions();
+       }
       _updateOverlay();
     });
   }
