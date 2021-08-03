@@ -738,6 +738,16 @@ void main() {
     });
   });
 
+  group('Skip and exclude work', () {
+    testWidgets('skipping a test skips it', (WidgetTester tester) async {
+      expect(true, false); // shouldn't get here
+    }, skip: true); // https://github.com/someissue
+
+    testWidgets('excluding a test skips it', (WidgetTester tester) async {
+      expect(true, false); // shouldn't get here
+    }, exclude: true);
+  });
+
   group('Pending timer', () {
     late TestExceptionReporter currentExceptionReporter;
     setUp(() {

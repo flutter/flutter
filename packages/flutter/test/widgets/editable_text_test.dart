@@ -199,6 +199,7 @@ void main() {
     expect(editableText.obscureText, isFalse);
     expect(editableText.autocorrect, isTrue);
     expect(editableText.enableSuggestions, isTrue);
+    expect(editableText.enableIMEPersonalizedLearning, isTrue);
     expect(editableText.textAlign, TextAlign.start);
     expect(editableText.cursorWidth, 2.0);
     expect(editableText.cursorHeight, isNull);
@@ -574,6 +575,36 @@ void main() {
     await tester.showKeyboard(find.byType(EditableText));
     await tester.idle();
     expect(tester.testTextInput.setClientArgs!['enableSuggestions'], enableSuggestions);
+  });
+
+  testWidgets('enableIMEPersonalizedLearning flag is sent to the engine properly', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+    const bool enableIMEPersonalizedLearning = false;
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              controller: controller,
+              backgroundCursorColor: Colors.grey,
+              focusNode: focusNode,
+              enableIMEPersonalizedLearning: enableIMEPersonalizedLearning,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    await tester.idle();
+    expect(tester.testTextInput.setClientArgs!['enableIMEPersonalizedLearning'], enableIMEPersonalizedLearning);
   });
 
   group('smartDashesType and smartQuotesType', () {
@@ -4868,8 +4899,23 @@ void main() {
     expect(controller.text, isEmpty, reason: 'on $platform');
   }
 
-  testWidgets('keyboard text selection works', (WidgetTester tester) async {
+  testWidgets('keyboard text selection works (RawKeyEvent)', (WidgetTester tester) async {
+    debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.rawKeyData;
+
     await testTextEditing(tester, targetPlatform: defaultTargetPlatform);
+
+    debugKeyEventSimulatorTransitModeOverride = null;
+
+    // On web, using keyboard for selection is handled by the browser.
+  }, skip: kIsWeb, variant: TargetPlatformVariant.all());
+
+  testWidgets('keyboard text selection works (ui.KeyData then RawKeyEvent)', (WidgetTester tester) async {
+    debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.keyDataThenRawKeyData;
+
+    await testTextEditing(tester, targetPlatform: defaultTargetPlatform);
+
+    debugKeyEventSimulatorTransitModeOverride = null;
+
     // On web, using keyboard for selection is handled by the browser.
   }, skip: kIsWeb, variant: TargetPlatformVariant.all());
 
@@ -7679,7 +7725,7 @@ void main() {
       expect(controller.selection.isCollapsed, true);
       expect(controller.selection.baseOffset, 1);
     }
-  });
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('the toolbar is disposed when selection changes and there is no selectionControls', (WidgetTester tester) async {
     late StateSetter setState;
@@ -7801,7 +7847,7 @@ class MockTextSelectionControls extends Fake implements TextSelectionControls {
   }
 
   @override
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]) {
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap, double? startGlyphHeight, double? endGlyphHeight]) {
     return Container();
   }
 
@@ -7811,7 +7857,7 @@ class MockTextSelectionControls extends Fake implements TextSelectionControls {
   }
 
   @override
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight, [double? startGlyphHeight, double? endGlyphHeight]) {
     return Offset.zero;
   }
 

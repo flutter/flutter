@@ -59,6 +59,21 @@ export 'package:test_api/test_api.dart' hide
 /// Signature for callback to [testWidgets] and [benchmarkWidgets].
 typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 
+// Return the last element that satisifes `test`, or return null if not found.
+E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
+  late E result;
+  bool foundMatching = false;
+  for (final E element in list) {
+    if (test(element)) {
+      result = element;
+      foundMatching = true;
+    }
+  }
+  if (foundMatching)
+    return result;
+  return null;
+}
+
 /// Runs the [callback] inside the Flutter test environment.
 ///
 /// Use this function for testing custom [StatelessWidget]s and
@@ -100,6 +115,14 @@ typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 /// each value of the [TestVariant.values]. If [variant] is not set, the test
 /// will be run once using the base test environment.
 ///
+/// If either [exclude] or [skip] is `true`, then the test will be skipped. The
+/// difference is that [skip] is a temporary way to disable a problematic test
+/// while a fix is being developed. It should have a comment after it with a
+/// link to a tracking issue for the work on re-enabling the test.
+///
+/// [exclude] is used to indicate that the test is not designed to run under
+/// the condition given and should always be skipped when it is `true`.
+///
 /// If the [tags] are passed, they declare user-defined tags that are implemented by
 /// the `test` package.
 ///
@@ -117,11 +140,26 @@ typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 ///   expect(find.text('Success'), findsOneWidget);
 /// });
 /// ```
+///
+/// ### Excluded test
+/// ```dart
+/// testWidgets('Some test that will never make sense for the web', (WidgetTester tester) async {
+///   // test code
+/// }, exclude: isBrowser);
+/// ```
+///
+/// ### Skipped test
+/// ```dart
+/// testWidgets('Some flaky test', (WidgetTester tester) async {
+///   // test code
+/// }, skip: true); // https://github.com/flutter/flutter/issues/12345
+/// ```
 @isTest
 void testWidgets(
   String description,
   WidgetTesterCallback callback, {
-  bool? skip,
+  bool skip = false,
+  bool exclude = false,
   test_package.Timeout? timeout,
   Duration? initialTimeout,
   bool semanticsEnabled = true,
@@ -169,7 +207,7 @@ void testWidgets(
           timeout: initialTimeout,
         );
       },
-      skip: skip,
+      skip: (exclude || skip) ? true : null,
       timeout: timeout ?? binding.defaultTestTimeout,
       tags: tags,
     );
@@ -487,7 +525,7 @@ Future<void> expectLater(
 /// Class that programmatically interacts with widgets and the test environment.
 ///
 /// For convenience, instances of this class (such as the one provided by
-/// `testWidget`) can be used as the `vsync` for `AnimationController` objects.
+/// `testWidgets`) can be used as the `vsync` for `AnimationController` objects.
 class WidgetTester extends WidgetController implements HitTestDispatcher, TickerProvider {
   WidgetTester._(TestWidgetsFlutterBinding binding) : super(binding) {
     if (binding is LiveTestWidgetsFlutterBinding)
@@ -806,15 +844,12 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
         .map((HitTestEntry candidate) => candidate.target)
         .whereType<RenderObject>()
         .first;
-      final Element? innerTargetElement = collectAllElementsFrom(
-        binding.renderViewElement!,
-        skipOffstage: true,
-      ).cast<Element?>().lastWhere(
-        (Element? element) => element!.renderObject == innerTarget,
-        orElse: () => null,
+      final Element? innerTargetElement = _lastWhereOrNull(
+        collectAllElementsFrom(binding.renderViewElement!, skipOffstage: true),
+        (Element element) => element.renderObject == innerTarget,
       );
       if (innerTargetElement == null) {
-        printToConsole('No widgets found at ${binding.globalToLocal(event.position)}.');
+        printToConsole('No widgets found at ${event.position}.');
         return;
       }
       final List<Element> candidates = <Element>[];
@@ -827,7 +862,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       int numberOfWithTexts = 0;
       int numberOfTypes = 0;
       int totalNumber = 0;
-      printToConsole('Some possible finders for the widgets at ${binding.globalToLocal(event.position)}:');
+      printToConsole('Some possible finders for the widgets at ${event.position}:');
       for (final Element element in candidates) {
         if (totalNumber > 13) // an arbitrary number of finders that feels useful without being overwhelming
           break;
