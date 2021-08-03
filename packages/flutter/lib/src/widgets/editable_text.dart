@@ -2342,7 +2342,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   void _onCursorColorTick() {
     renderEditable.cursorColor = widget.cursorColor.withOpacity(_cursorBlinkOpacityController.value);
-    _cursorVisibilityNotifier.value = widget.showCursor && _hasFocus && _cursorBlinkOpacityController.value > 0;
+    _cursorVisibilityNotifier.value = widget.showCursor && _cursorBlinkOpacityController.value > 0;
   }
 
   /// Whether the blinking cursor is actually visible at this precise moment
@@ -2683,7 +2683,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                 cursorColor: _cursorColor,
                 backgroundCursorColor: widget.backgroundCursorColor,
                 showCursor: EditableText.debugDeterministicCursor
-                    ? ValueNotifier<bool>(widget.showCursor && _hasFocus)
+                    ? ValueNotifier<bool>(widget.showCursor)
                     : _cursorVisibilityNotifier,
                 forceLine: widget.forceLine,
                 readOnly: widget.readOnly,

@@ -3945,7 +3945,7 @@ void main() {
     ));
 
     assert(focusNode.hasFocus);
-    // Autofocus has an one frame delay.
+    // Autofocus has a one frame delay.
     await tester.pump();
 
     final RenderEditable renderEditable = findRenderEditable(tester);
