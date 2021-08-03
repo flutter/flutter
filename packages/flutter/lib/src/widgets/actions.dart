@@ -136,13 +136,30 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// to allow further overriding, or to allow the [Intent] to propagate to
   /// parent widgets that also support this [Intent].
   ///
-  /// {@tool snippet --template=freeform}
+  /// {@tool sample --template=freeform}
   /// This sample implements a custom text input field that handles the
   /// [DeleteTextIntent] intent, as well as a US telephone number input widget
   /// that consists of multiple text fields for area code, prefix and line
   /// number. When the backspace key is pressed, the phone number input widget
   /// sends the focus to the preceding text field when the currently focused
   /// field becomes empty.
+  ///
+  /// ```dart imports
+  /// import 'package:flutter/material.dart';
+  /// import 'package:flutter/services.dart';
+  /// ```
+  ///
+  /// ```dart main
+  /// void main() {
+  ///   runApp(
+  ///     const MaterialApp(
+  ///       home: Scaffold(
+  ///         body: Center(child: SimpleUSPhoneNumberEntry()),
+  ///       ),
+  ///     ),
+  ///   );
+  /// }
+  /// ```
   ///
   /// ```dart
   /// // This implements a custom phone number input field that handles the
