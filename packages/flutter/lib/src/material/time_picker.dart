@@ -1786,6 +1786,9 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
   }
 }
 
+/// Signature for when the time picker entry mode is changed.
+typedef EntryModeChangeCallback = void Function(TimePickerEntryMode);
+
 /// A material design time picker designed to appear inside a popup dialog.
 ///
 /// Pass this widget to [showDialog]. The value returned by [showDialog] is the
@@ -1807,6 +1810,7 @@ class TimePickerDialog extends StatefulWidget {
     this.minuteLabelText,
     this.restorationId,
     this.initialEntryMode = TimePickerEntryMode.dial,
+    this.onEntryModeChanged,
   }) : assert(initialTime != null),
        super(key: key);
 
@@ -1851,6 +1855,9 @@ class TimePickerDialog extends StatefulWidget {
   ///  * [RestorationManager], which explains how state restoration works in
   ///    Flutter.
   final String? restorationId;
+
+  /// Callback called when the selected entry mode is changed.
+  final EntryModeChangeCallback? onEntryModeChanged;
 
   @override
   State<TimePickerDialog> createState() => _TimePickerDialogState();
@@ -1947,12 +1954,23 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
   final RestorableBoolN _autofocusMinute = RestorableBoolN(null);
   final RestorableBool _announcedInitialTime = RestorableBool(false);
 
+  void Function()? _entryModeListener;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     localizations = MaterialLocalizations.of(context);
     _announceInitialTimeOnce();
     _announceModeOnce();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.onEntryModeChanged != null) {
+      _entryModeListener = () => widget.onEntryModeChanged!(_entryMode.value);
+      _entryMode.addListener(_entryModeListener!);
+    }
   }
 
   @override
@@ -2288,6 +2306,9 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
   void dispose() {
     _vibrateTimer?.cancel();
     _vibrateTimer = null;
+    if (_entryModeListener != null) {
+      _entryMode.removeListener(_entryModeListener!);
+    }
     super.dispose();
   }
 }
@@ -2380,6 +2401,7 @@ Future<TimeOfDay?> showTimePicker({
   String? hourLabelText,
   String? minuteLabelText,
   RouteSettings? routeSettings,
+  EntryModeChangeCallback? onEntryModeChanged,
 }) async {
   assert(context != null);
   assert(initialTime != null);
@@ -2396,6 +2418,7 @@ Future<TimeOfDay?> showTimePicker({
     errorInvalidText: errorInvalidText,
     hourLabelText: hourLabelText,
     minuteLabelText: minuteLabelText,
+    onEntryModeChanged: onEntryModeChanged,
   );
   return showDialog<TimeOfDay>(
     context: context,
