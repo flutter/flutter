@@ -909,7 +909,7 @@ void _testsInput() {
     bool triggeredCallback = false;
 
     await mediaQueryBoilerplate(tester, true, entryMode: TimePickerEntryMode.input, onEntryModeChange: (TimePickerEntryMode mode) {
-      if (mode == TimePickerEntryMode.dial) { 
+      if (mode == TimePickerEntryMode.dial) {
         triggeredCallback = true;
       }
     });
@@ -923,7 +923,7 @@ void _testsInput() {
     bool triggeredCallback = false;
 
     await mediaQueryBoilerplate(tester, true, entryMode: TimePickerEntryMode.dial, onEntryModeChange: (TimePickerEntryMode mode) {
-      if (mode == TimePickerEntryMode.input) { 
+      if (mode == TimePickerEntryMode.input) {
         triggeredCallback = true;
       }
     });
