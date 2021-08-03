@@ -16,14 +16,8 @@ platform_properties:
     properties:
       caches: >-
         [
-          {"name":"android_sdk","path":"android"},
-          {"name":"builder_linux_framework","path":"builder"},
-          {"name":"chrome_and_driver","path":"chrome"},
-          {"name":"flutter_sdk","path":"flutter sdk"},
-          {"name":"pub_cache","path":".pub-cache"},
-          {"name":"openjdk","path":"java"}
+          {"name":"builder_linux_framework","path":"builder"}
         ]
-      # CIPD flutter_internal/java/openjdk/$platform
       dependencies: >-
         [
           {"dependency": "curl"}
@@ -34,16 +28,11 @@ platform_properties:
     properties:
       caches: >-
         [
-          {"name":"android_sdk","path":"android"},
           {"name":"builder_linux_devicelab","path":"builder"},
-          {"name":"flutter_sdk","path":"flutter sdk"},
-          {"name":"pub_cache","path":".pub-cache"},
-          {"name":"openjdk","path":"java"}
         ]
-      # CIPD flutter_internal/java/openjdk/$platform
       dependencies: >-
         [
-          {"dependency": "open_jdk", "version": "version:1.8.0u202-b08"}
+          {"dependency": "curl"}
         ]
       os: Android
       device_os: "N"
@@ -51,119 +40,62 @@ platform_properties:
     properties:
       caches: >-
         [
-          {"name":"android_sdk","path":"android"},
-          {"name":"builder_mac_framework","path":"builder"},
-          {"name":"chrome_and_driver","path":"chrome"},
-          {"name":"flutter_sdk","path":"flutter sdk"},
-          {"name":"pub_cache","path":".pub-cache"},
-          {"name":"openjdk","path":"java"},
-          {"name":"xcode_binary","path":"xcode_binary"},
-          {"name":"osx_sdk","path":"osx_sdk"}
+          {"name":"builder_mac_framework","path":"builder"}
         ]
-      # CIPD flutter_internal/java/openjdk/$platform
-      dependencies: >-
-          [
-  {"dependency": "open_jdk", "version": "version:1.8.0u202-b08"}
-]
       os: Mac-10.15
       device_type: none
       mac_model: Macmini8,1
-      xcode: 12a7209 # xcode 12
+      xcode: 12a7209
   mac_android:
     properties:
       caches: >-
-        [
-          {"name":"android_sdk","path":"android"},
-          {"name":"builder_mac_devicelab","path":"builder"},
-          {"name":"flutter_sdk","path":"flutter sdk"},
-          {"name":"pub_cache","path":".pub-cache"},
-          {"name":"openjdk","path":"java"}
-        ]
-      # CIPD flutter_internal/java/openjdk/$platform
-      dependencies: >-
-        [
-          {"dependency": "open_jdk", "version": "version:1.8.0u202-b08"}
-        ]
+          [
+            {"name":"builder_mac_devicelab","path":"builder"},
+          ]
       os: Mac-10.15
-      device_os: "N"
+      device_os: N
   mac_ios:
     properties:
       caches: >-
-        [
-          {"name":"android_sdk","path":"android"},
-          {"name":"builder_mac_devicelab","path":"builder"},
-          {"name":"flutter_sdk","path":"flutter sdk"},
-          {"name":"pub_cache","path":".pub-cache"},
-          {"name":"openjdk","path":"java"},
-          {"name":"xcode_binary","path":"xcode_binary"},
-          {"name":"osx_sdk","path":"osx_sdk"}
-        ]
-      dependencies: >-
-        [
-          {"dependency": "open_jdk", "version": "version:1.8.0u202-b08"}
-        ]
+          [
+            {"name":"builder_mac_devicelab","path":"builder"}
+          ]
       os: Mac-10.15
       device_os: iOS-14.4.2
       xcode: 12a7209
   mac_ios32:
     properties:
       caches: >-
-        [
-          {"name":"android_sdk","path":"android"},
-          {"name":"builder_mac_devicelab","path":"builder"},
-          {"name":"flutter_sdk","path":"flutter sdk"},
-          {"name":"pub_cache","path":".pub-cache"},
-          {"name":"openjdk","path":"java"},
-          {"name":"xcode_binary","path":"xcode_binary"},
-          {"name":"osx_sdk","path":"osx_sdk"}
-        ]
-      # CIPD flutter_internal/java/openjdk/$platform
-      dependencies: >-
-        [
-          {"dependency": "open_jdk", "version": "version:1.8.0u202-b08"}
-        ]
+          [
+            {"name":"builder_mac_devicelab","path":"builder"}
+          ]
       os: Mac-10.15
       device_os: iOS-9.3.6
-      xcode: 12a7209 # xcode 12
+      xcode: 12a7209
   windows:
     properties:
       caches: >-
-        [
-          {"name":"android_sdk","path":"android"},
-          {"name":"builder_win_framework","path":"builder"},
-          {"name":"chrome_and_driver","path":"chrome"},
-          {"name":"flutter_sdk","path":"flutter sdk"},
-          {"name":"pub_cache","path":".pub-cache"},
-          {"name":"openjdk","path":"java"}
-        ]
+          [
+            {"name":"builder_win_framework","path":"builder"}
+          ]
       dependencies: >-
-        [
-          {"dependency": "android_sdk"},
-          {"dependency": "certs"},
-          {"dependency": "chrome_and_driver"},
-          {"dependency": "goldctl"},
-          {"dependency": "open_jdk"}
-        ]
+          [
+            {"dependency": "certs"},
+          ]
       os: Windows-10
       device_type: none
   windows_android:
     properties:
       caches: >-
-        [
-          {"name":"android_sdk","path":"android"},
-          {"name":"builder_win_devicelab","path":"builder"},
-          {"name":"chrome_and_driver","path":"chrome"},
-          {"name":"flutter_sdk","path":"flutter sdk"},
-          {"name":"pub_cache","path":".pub-cache"},
-          {"name":"openjdk","path":"java"}
-        ]
-      # CIPD flutter_internal/java/openjdk/$platform
+          [
+            {"name":"builder_win_devicelab","path":"builder"}
+          ]
       dependencies: >-
-        [
-          {"dependency": "open_jdk", "version": "version:1.8.0u202-b08"}
-        ]
+          [
+            {"dependency": "certs"},
+          ]
       os: Windows-10
-      device_os: "N"
+      device_os: N
 
 targets:
   - name: Linux analyze
