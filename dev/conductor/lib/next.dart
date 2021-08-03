@@ -102,7 +102,7 @@ void runNext({
         }
       }
 
-      if (state.engine.cherrypicks.isEmpty && state.engine.dartRevision.isEmpty) {
+      if (!requiresEnginePR(state)) {
         stdio.printStatus(
           'This release has no engine cherrypicks. No Engine PR is necessary.\n',
         );
@@ -110,18 +110,16 @@ void runNext({
       }
 
       if (unappliedCherrypicks.isEmpty) {
-        stdio.printStatus('All engine cherrypicks have been auto-applied by '
-            'the conductor.\n');
+        stdio.printStatus('All engine cherrypicks have been auto-applied by the conductor.\n');
       } else {
-        stdio.printStatus(
-          'There were ${unappliedCherrypicks.length} cherrypicks that were not auto-applied.');
+        stdio.printStatus('There were ${unappliedCherrypicks.length} cherrypicks that were not auto-applied.');
         stdio.printStatus('These must be applied manually in the directory '
-          '${state.engine.checkoutPath} before proceeding.\n');
+            '${state.engine.checkoutPath} before proceeding.\n');
       }
       if (autoAccept == false) {
         final bool response = prompt(
-            'Are you ready to push your engine branch to the repository '
-            '${state.engine.mirror.url}?',
+          'Are you ready to push your engine branch to the repository '
+          '${state.engine.mirror.url}?',
           stdio,
         );
         if (!response) {
@@ -189,13 +187,15 @@ void runNext({
           break;
         }
       }
+      final Remote engineUpstreamRemote = Remote(
+        name: RemoteName.upstream,
+        url: state.engine.upstream.url,
+      );
       final EngineRepository engine = EngineRepository(
         checkouts,
-        initialRef: state.engine.candidateBranch,
-        upstreamRemote: Remote(
-          name: RemoteName.upstream,
-          url: state.engine.upstream.url,
-        ),
+        // We explicitly want to check out the merged version from upstream
+        initialRef: '${engineUpstreamRemote.name}/${state.engine.candidateBranch}',
+        upstreamRemote: engineUpstreamRemote,
         previousCheckoutLocation: state.engine.checkoutPath,
       );
 
@@ -215,7 +215,9 @@ void runNext({
 
       stdio.printStatus('Rolling new engine hash $engineRevision to framework checkout...');
       framework.updateEngineRevision(engineRevision);
-      framework.commit('Update Engine revision to $engineRevision for ${state.releaseChannel} release ${state.releaseVersion}', addFirst: true);
+      framework.commit(
+          'Update Engine revision to $engineRevision for ${state.releaseChannel} release ${state.releaseVersion}',
+          addFirst: true);
 
       if (state.framework.cherrypicks.isEmpty) {
         stdio.printStatus(
@@ -262,7 +264,8 @@ void runNext({
       );
       final FrameworkRepository framework = FrameworkRepository(
         checkouts,
-        initialRef: state.framework.candidateBranch,
+        // We explicitly want to check out the merged version from upstream
+        initialRef: '${upstream.name}/${state.framework.candidateBranch}',
         upstreamRemote: upstream,
         previousCheckoutLocation: state.framework.checkoutPath,
       );
@@ -288,7 +291,8 @@ void runNext({
       );
       final FrameworkRepository framework = FrameworkRepository(
         checkouts,
-        initialRef: state.framework.candidateBranch,
+        // We explicitly want to check out the merged version from upstream
+        initialRef: '${upstream.name}/${state.framework.candidateBranch}',
         upstreamRemote: upstream,
         previousCheckoutLocation: state.framework.checkoutPath,
       );

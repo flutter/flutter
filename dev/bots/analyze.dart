@@ -106,7 +106,7 @@ Future<void> run(List<String> arguments) async {
   // Analyze all the sample code in the repo
   print('$clock Sample code...');
   await runCommand(dart,
-    <String>[path.join(flutterRoot, 'dev', 'bots', 'analyze_sample_code.dart')],
+    <String>[path.join(flutterRoot, 'dev', 'bots', 'analyze_sample_code.dart'), '--verbose'],
     workingDirectory: flutterRoot,
   );
 

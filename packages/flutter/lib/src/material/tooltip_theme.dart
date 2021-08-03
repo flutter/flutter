@@ -239,7 +239,7 @@ class TooltipThemeData with Diagnosticable {
 ///       onPressed: () {},
 ///     ),
 ///   ),
-/// ),
+/// )
 /// ```
 /// {@end-tool}
 class TooltipTheme extends InheritedTheme {

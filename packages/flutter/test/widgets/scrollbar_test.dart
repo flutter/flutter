@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/src/physics/utils.dart' show nearEqual;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -1143,6 +1144,12 @@ void main() {
   });
 
   testWidgets('RawScrollbar.isAlwaysShown asserts that a ScrollPosition is attached', (WidgetTester tester) async {
+    final FlutterExceptionHandler? handler = FlutterError.onError;
+    FlutterErrorDetails? error;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      error = details;
+    };
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1163,12 +1170,15 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    final AssertionError exception = tester.takeException() as AssertionError;
-    expect(exception, isAssertionError);
+
+    expect(error, isNotNull);
+    final AssertionError exception = error!.exception as AssertionError;
     expect(
       exception.message,
       contains("The Scrollbar's ScrollController has no ScrollPosition attached."),
     );
+
+    FlutterError.onError = handler;
   });
 
   testWidgets('Interactive scrollbars should have a valid scroll controller', (WidgetTester tester) async {
@@ -1565,4 +1575,76 @@ void main() {
           ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 8.0)));
   });
 
+  testWidgets('The bar can show or hide when the viewport size change', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    Widget buildFrame(double height) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            controller: scrollController,
+            isAlwaysShown: true,
+            child: SingleChildScrollView(
+                controller: scrollController,
+                child: SizedBox(width: double.infinity, height: height)
+            ),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildFrame(600.0));
+    await tester.pumpAndSettle();
+    expect(find.byType(RawScrollbar), isNot(paints..rect())); // Not shown.
+
+    await tester.pumpWidget(buildFrame(600.1));
+    await tester.pumpAndSettle();
+    expect(find.byType(RawScrollbar), paints..rect()..rect()); // Show the bar.
+
+    await tester.pumpWidget(buildFrame(600.0));
+    await tester.pumpAndSettle();
+    expect(find.byType(RawScrollbar), isNot(paints..rect())); // Hide the bar.
+  });
+
+  testWidgets('The bar can show or hide when the window size change', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    Widget buildFrame() {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: PrimaryScrollController(
+            controller: scrollController,
+            child: RawScrollbar(
+              isAlwaysShown: true,
+              controller: scrollController,
+              child: const SingleChildScrollView(
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 600.0,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+    tester.binding.window.physicalSizeTestValue = const Size(800.0, 600.0);
+    tester.binding.window.devicePixelRatioTestValue = 1;
+    addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+    addTearDown(tester.binding.window.clearDevicePixelRatioTestValue);
+
+    await tester.pumpWidget(buildFrame());
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+    expect(find.byType(RawScrollbar), isNot(paints..rect())); // Not shown.
+
+    tester.binding.window.physicalSizeTestValue = const Size(800.0, 599.0);
+    await tester.pumpAndSettle();
+    expect(find.byType(RawScrollbar), paints..rect()..rect()); // Show the bar.
+
+    tester.binding.window.physicalSizeTestValue = const Size(800.0, 600.0);
+    await tester.pumpAndSettle();
+    expect(find.byType(RawScrollbar), isNot(paints..rect())); // Not shown.
+  });
 }

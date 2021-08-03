@@ -140,7 +140,8 @@ Future<void> main(List<String> args) async {
       'framework_coverage': _runFrameworkCoverage,
       'framework_tests': _runFrameworkTests,
       'tool_tests': _runToolTests,
-      'web_tool_tests': _runToolTests,
+      // web_tool_tests is also used by HHH: https://dart.googlesource.com/recipes/+/refs/heads/master/recipes/dart/flutter_engine.py
+      'web_tool_tests': _runWebToolTests,
       'tool_integration_tests': _runIntegrationToolTests,
       // All the unit/widget tests run using `flutter test --platform=chrome`
       'web_tests': _runWebUnitTests,
@@ -355,7 +356,6 @@ Future<void> _runToolTests() async {
   await selectSubshard(<String, ShardRunner>{
     'general': _runGeneralToolTests,
     'commands': _runCommandsToolTests,
-    'web': _runWebToolTests,
   });
 }
 
