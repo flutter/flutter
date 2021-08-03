@@ -299,7 +299,10 @@ void main() {
     expect(controller.text, ' blah2blah1');
     expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 0));
     expect(find.byType(CupertinoButton), findsNothing);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS, TargetPlatform.windows, TargetPlatform.linux }), skip: isContextMenuProvidedByPlatform);
+  },
+    variant: TargetPlatformVariant.desktop(),
+    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
+  );
 
   testWidgets('Activates the text field when receives semantics focus on Mac', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -658,7 +661,7 @@ void main() {
         selection: TextSelection.collapsed(offset: 2),
       ),
     );
-  }, skip: areKeyEventsHandledByPlatform);
+  }, skip: areKeyEventsHandledByPlatform); // [intended] only applies to platforms where we handle key events.
 
   testWidgets('text field selection toolbar renders correctly inside opacity', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -709,7 +712,7 @@ void main() {
       find.byType(Overlay),
       matchesGoldenFile('text_field_opacity_test.0.png'),
     );
-  }, skip: isContextMenuProvidedByPlatform);
+  }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
 
   testWidgets('text field toolbar options correctly changes options',
       (WidgetTester tester) async {
@@ -759,7 +762,7 @@ void main() {
     expect(find.text('Select All'), findsNothing);
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
-    skip: isContextMenuProvidedByPlatform,
+    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
   );
 
   testWidgets('text selection style 1', (WidgetTester tester) async {
@@ -912,7 +915,7 @@ void main() {
       TargetPlatform.linux,
       TargetPlatform.windows,
     }),
-    skip: isContextMenuProvidedByPlatform,
+    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
   );
 
   testWidgets('cursor layout has correct width', (WidgetTester tester) async {
@@ -1296,7 +1299,7 @@ void main() {
     await tester.longPressAt(emptyPos, pointer: 7);
     await tester.pumpAndSettle();
     expect(find.text('Paste'), findsOneWidget);
-  }, skip: isContextMenuProvidedByPlatform);
+  }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
 
   testWidgets('Entering text hides selection handle caret', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
@@ -2022,7 +2025,10 @@ void main() {
     expect(controller.selection.baseOffset, 7);
     expect(controller.value.composing.start, 4);
     expect(controller.value.composing.end, 7);
-  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
+  },
+    skip: kIsWeb, // [intended] text selection is handled by the browser
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS })
+  );
 
   testWidgets('Can use selection toolbar', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
@@ -2090,7 +2096,7 @@ void main() {
     await tester.tap(find.text('Paste'));
     await tester.pump();
     expect(controller.text, 'abc d${testValue}ef ghi');
-  }, skip: isContextMenuProvidedByPlatform);
+  }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
 
   // Show the selection menu at the given index into the text by tapping to
   // place the cursor and then tapping on the handle.
@@ -2169,7 +2175,7 @@ void main() {
       textFieldTopLeft = tester.getTopLeft(find.byType(TextField));
       expect(toolbarTopLeft.dy, lessThan(textFieldTopLeft.dy));
     },
-    skip: isContextMenuProvidedByPlatform,
+    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
   );
 
   testWidgets(
@@ -2240,7 +2246,7 @@ void main() {
       textFieldTopLeft = tester.getTopLeft(find.byType(TextField));
       expect(toolbarTopLeft.dy, lessThan(textFieldTopLeft.dy));
     },
-    skip: isContextMenuProvidedByPlatform,
+    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
   );
 
   testWidgets(
@@ -2296,7 +2302,7 @@ void main() {
       expect(lastLineToolbarTopLeft.dy, lessThan(lastLineTopLeft.dy));
       expect(lastLineToolbarTopLeft.dy, greaterThan(penultimateLineToolbarTopLeft.dy));
     },
-    skip: isContextMenuProvidedByPlatform,
+    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
   );
 
   testWidgets('Selection toolbar fades in', (WidgetTester tester) async {
@@ -2342,7 +2348,7 @@ void main() {
     expect(opacity.opacity.value, lessThan(1.0));
 
     // End the test here to ensure the animation is properly disposed of.
-  }, skip: isContextMenuProvidedByPlatform);
+  }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
 
   testWidgets('An obscured TextField is selectable by default', (WidgetTester tester) async {
     // This is a regression test for
@@ -2455,7 +2461,7 @@ void main() {
     expect(find.text('Select all'), findsOneWidget);
     expect(find.text('Copy'), findsNothing);
     expect(find.text('Cut'), findsNothing);
-  }, skip: isContextMenuProvidedByPlatform);
+  }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
 
   testWidgets('TextField height with minLines unset', (WidgetTester tester) async {
     await tester.pumpWidget(textFieldBuilder());
@@ -3785,7 +3791,7 @@ void main() {
     await tester.pump();
     // Puts 456 before the 2 in 123.
     expect(textController.text, '145623');
-  }, skip: isContextMenuProvidedByPlatform);
+  }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
 
   testWidgets('Pasted values are formatted (deprecated names)', (WidgetTester tester) async {
     final TextEditingController textController = TextEditingController();
@@ -3823,7 +3829,7 @@ void main() {
     await tester.pump();
     // Puts 456 before the 2 in 123.
     expect(textController.text, '145623');
-  }, skip: isContextMenuProvidedByPlatform);
+  }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
 
   testWidgets('Do not add LengthLimiting formatter to the user supplied list', (WidgetTester tester) async {
     final List<TextInputFormatter> formatters = <TextInputFormatter>[];
@@ -4875,7 +4881,7 @@ void main() {
       await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowLeft);
       expect(controller.selection.extentOffset - controller.selection.baseOffset, -1);
     }, variant: KeySimulatorTransitModeVariant.all());
-  }, skip: areKeyEventsHandledByPlatform);
+  }, skip: areKeyEventsHandledByPlatform); // [intended] only applies to platforms where we handle key events.
 
   testWidgets('Copy paste test', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -4949,7 +4955,10 @@ void main() {
 
     const String expected = 'a biga big house\njumped over a mouse';
     expect(find.text(expected), findsOneWidget, reason: 'Because text contains ${controller.text}');
-  }, skip: areKeyEventsHandledByPlatform, variant: KeySimulatorTransitModeVariant.all());
+  },
+    skip: areKeyEventsHandledByPlatform, // [intended] only applies to platforms where we handle key events.
+    variant: KeySimulatorTransitModeVariant.all()
+  );
 
   testWidgets('Copy paste obscured text test', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -5023,7 +5032,10 @@ void main() {
 
     const String expected = 'a biga big house jumped over a mouse';
     expect(find.text(expected), findsOneWidget, reason: 'Because text contains ${controller.text}');
-  }, skip: areKeyEventsHandledByPlatform, variant: KeySimulatorTransitModeVariant.all());
+  },
+    skip: areKeyEventsHandledByPlatform, // [intended] only applies to platforms where we handle key events.
+    variant: KeySimulatorTransitModeVariant.all()
+  );
 
   // Regressing test for https://github.com/flutter/flutter/issues/78219
   testWidgets('Paste does not crash when the section is inValid', (WidgetTester tester) async {
@@ -5150,7 +5162,10 @@ void main() {
 
     const String expected = ' housa bige\njumped over a mouse';
     expect(find.text(expected), findsOneWidget);
-  }, skip: areKeyEventsHandledByPlatform, variant: KeySimulatorTransitModeVariant.all());
+  },
+    skip: areKeyEventsHandledByPlatform, // [intended] only applies to platforms where we handle key events.
+    variant: KeySimulatorTransitModeVariant.all()
+  );
 
   testWidgets('Cut obscured text test', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -5274,7 +5289,10 @@ void main() {
 
     const String expected = '';
     expect(find.text(expected), findsOneWidget);
-  }, skip: areKeyEventsHandledByPlatform, variant: KeySimulatorTransitModeVariant.all());
+  },
+    skip: areKeyEventsHandledByPlatform, // [intended] only applies to platforms where we handle key events.
+    variant: KeySimulatorTransitModeVariant.all()
+  );
 
   testWidgets('Delete test', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -5326,7 +5344,10 @@ void main() {
 
     const String expected2 = '';
     expect(find.text(expected2), findsOneWidget);
-  }, skip: areKeyEventsHandledByPlatform, variant: KeySimulatorTransitModeVariant.all());
+  },
+    skip: areKeyEventsHandledByPlatform, // [intended] only applies to platforms where we handle key events.
+    variant: KeySimulatorTransitModeVariant.all(),
+  );
 
   testWidgets('Changing positions of text fields', (WidgetTester tester) async {
 
@@ -5418,8 +5439,10 @@ void main() {
     await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
 
     expect(c1.selection.extentOffset - c1.selection.baseOffset, -10);
-  }, skip: areKeyEventsHandledByPlatform, variant: KeySimulatorTransitModeVariant.all());
-
+  },
+    skip: areKeyEventsHandledByPlatform, // [intended] only applies to platforms where we handle key events.
+    variant: KeySimulatorTransitModeVariant.all()
+  );
 
   testWidgets('Changing focus test', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -5493,7 +5516,10 @@ void main() {
 
     expect(c1.selection.extentOffset - c1.selection.baseOffset, 0);
     expect(c2.selection.extentOffset - c2.selection.baseOffset, -5);
-  }, skip: areKeyEventsHandledByPlatform, variant: KeySimulatorTransitModeVariant.all());
+  },
+    skip: areKeyEventsHandledByPlatform, // [intended] only applies to platforms where we handle key events.
+    variant: KeySimulatorTransitModeVariant.all()
+  );
 
   testWidgets('Caret works when maxLines is null', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
@@ -6231,7 +6257,7 @@ void main() {
     // On web (just like iOS), we don't check for pasteability because that
     // triggers a permission dialog in the browser.
     // https://github.com/flutter/flutter/pull/57139#issuecomment-629048058
-  }, skip: isBrowser);
+  }, skip: isBrowser); // [intended] see above.
 
   testWidgets('TextField throws when not descended from a Material widget', (WidgetTester tester) async {
     const Widget textField = TextField();
@@ -6349,10 +6375,7 @@ void main() {
     );
 
     expect(topLeft.dx, equals(160.0));
-
-    // TODO(mdebbar): RTL support still has issues on the web.
-    // https://github.com/flutter/flutter/projects/159
-  }, skip: isBrowser);
+  });
 
   testWidgets('TextField semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -7173,7 +7196,7 @@ void main() {
       expect(find.byType(TextButton), findsNWidgets(4));
     },
     variant: TargetPlatformVariant.all(),
-    skip: isContextMenuProvidedByPlatform,
+    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.,
   );
 
   testWidgets(
@@ -7207,7 +7230,7 @@ void main() {
       expect(find.byType(CupertinoButton), findsNWidgets(3));
     },
     variant: TargetPlatformVariant.all(),
-    skip: isContextMenuProvidedByPlatform,
+    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.,
   );
 
   testWidgets('selectionControls is passed to EditableText', (WidgetTester tester) async {
@@ -7310,7 +7333,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Paste'), findsOneWidget);
     },
-    skip: isContextMenuProvidedByPlatform,
+    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.,
   );
 
   testWidgets(
@@ -7341,7 +7364,7 @@ void main() {
       await tester.pump();
       expect(find.text('Paste'), findsOneWidget);
     },
-    skip: isContextMenuProvidedByPlatform,
+    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.,
   );
 
   testWidgets(
@@ -7372,7 +7395,7 @@ void main() {
       await tester.pump();
       expect(find.text('Paste'), findsNothing);
     },
-    skip: isContextMenuProvidedByPlatform,
+    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.,
   );
 
   testWidgets(
@@ -7403,7 +7426,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Paste'), findsOneWidget);
     },
-    skip: isContextMenuProvidedByPlatform,
+    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.,
   );
 
   testWidgets(
@@ -8645,9 +8668,7 @@ void main() {
         const Size(800, 174),
       );
     },
-
-    // TODO(mdebbar): https://github.com/flutter/flutter/issues/32243
-    skip: isBrowser,
+    skip: isBrowser, // TODO(mdebbar): https://github.com/flutter/flutter/issues/32243
   );
 
   testWidgets(
@@ -8676,9 +8697,7 @@ void main() {
         const Size(800, 48),
       );
     },
-
-    // TODO(mdebbar): https://github.com/flutter/flutter/issues/32243
-    skip: isBrowser,
+    skip: isBrowser, // TODO(mdebbar): https://github.com/flutter/flutter/issues/32243
   );
 
   testWidgets(
@@ -8709,9 +8728,7 @@ void main() {
         const Size(800, 78),
       );
     },
-
-    // TODO(mdebbar): https://github.com/flutter/flutter/issues/32243
-    skip: isBrowser,
+    skip: isBrowser, // TODO(mdebbar): https://github.com/flutter/flutter/issues/32243
   );
 
   testWidgets('Caret center position', (WidgetTester tester) async {
@@ -9727,10 +9744,7 @@ void main() {
     inputWidth = editable.size.width;
     expect(inputWidth, wideWidth);
     expect(cursorRight, inputWidth - kCaretGap);
-
-    // TODO(mdebbar): RTL support still has issues on the web.
-    // https://github.com/flutter/flutter/projects/159
-  }, skip: isBrowser);
+  });
 
   // Regressing test for https://github.com/flutter/flutter/issues/70625
   testWidgets('TextFields can inherit [FloatingLabelBehaviour] from InputDecorationTheme.', (WidgetTester tester) async {

@@ -48,6 +48,9 @@ Future<void> run(List<String> arguments) async {
   print('$clock runtimeType in toString...');
   await verifyNoRuntimeTypeInToString(flutterRoot);
 
+  print('$clock debug mode instead of checked mode...');
+  await verifyNoCheckedMode(flutterRoot);
+
   print('$clock Unexpected binaries...');
   await verifyNoBinaries(flutterRoot);
 
@@ -106,7 +109,7 @@ Future<void> run(List<String> arguments) async {
   // Analyze all the sample code in the repo
   print('$clock Sample code...');
   await runCommand(dart,
-    <String>[path.join(flutterRoot, 'dev', 'bots', 'analyze_sample_code.dart')],
+    <String>[path.join(flutterRoot, 'dev', 'bots', 'analyze_sample_code.dart'), '--verbose'],
     workingDirectory: flutterRoot,
   );
 
@@ -470,6 +473,29 @@ Future<void> verifyInternationalizations(String workingDirectory, String dartExe
     ]);
   }
 }
+
+
+/// Verifies that all instances of "checked mode" have been migrated to "debug mode".
+Future<void> verifyNoCheckedMode(String workingDirectory) async {
+  final String flutterPackages = path.join(workingDirectory, 'packages');
+  final List<File> files = await _allFiles(flutterPackages, 'dart', minimumMatches: 400)
+      .where((File file) => path.extension(file.path) == '.dart')
+      .toList();
+  final List<String> problems = <String>[];
+  for (final File file in files) {
+    int lineCount = 0;
+    for (final String line in file.readAsLinesSync()) {
+      if (line.toLowerCase().contains('checked mode')) {
+        problems.add('${file.path}:$lineCount uses deprecated "checked mode" instead of "debug mode".');
+      }
+      lineCount += 1;
+    }
+  }
+  if (problems.isNotEmpty) {
+    exitWithError(problems);
+  }
+}
+
 
 Future<void> verifyNoRuntimeTypeInToString(String workingDirectory) async {
   final String flutterLib = path.join(workingDirectory, 'packages', 'flutter', 'lib');

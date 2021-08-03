@@ -117,7 +117,10 @@ void main() {
     expect(controller.text, ' blah2blah1');
     expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 0));
     expect(find.byType(CupertinoButton), findsNothing);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS, TargetPlatform.windows, TargetPlatform.linux }), skip: kIsWeb);
+  },
+    variant: TargetPlatformVariant.desktop(),
+    skip: kIsWeb, // [intended] we don't supply the cut/copy/paste buttons on the web.
+  );
 
   testWidgets('TextFormField accepts TextField.noMaxLength as value to maxLength parameter', (WidgetTester tester) async {
     bool asserted;
@@ -476,7 +479,7 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 200));
     expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
-  }, skip: isBrowser); // We do not use Flutter-rendered context menu on the Web
+  }, skip: isBrowser); // [intended] We do not use Flutter-rendered context menu on the Web.
 
   testWidgets('onTap is called upon tap', (WidgetTester tester) async {
     int tapCount = 0;

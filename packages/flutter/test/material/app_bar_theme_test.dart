@@ -521,7 +521,7 @@ void main() {
     // to "4", which results in the web evaluating to the value "4" regardless of which
     // one is used. This results in a difference for doubles in debugFillProperties between
     // the web and the rest of Flutter's target platforms.
-  }, skip: kIsWeb);
+  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87364
 }
 
 AppBarTheme _appBarTheme() {

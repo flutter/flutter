@@ -99,7 +99,7 @@ void main() {
     await tester.tap(find.text('Pirate package '));
     await tester.pumpAndSettle(const Duration(milliseconds: 100));
     expect(find.text('Pirate license'), findsOneWidget);
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/54385
+  });
 
   testWidgets('About box logic defaults to executable name for app name', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -160,7 +160,7 @@ void main() {
     await tester.tap(find.text('Another package'));
     await tester.pumpAndSettle(const Duration(milliseconds: 100));
     expect(find.text('Another license'), findsOneWidget);
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/54385
+  });
 
   testWidgets('LicensePage control test with all properties', (WidgetTester tester) async {
     const FlutterLogo logo = FlutterLogo();
@@ -236,7 +236,7 @@ void main() {
     await tester.tap(find.text('Another package'));
     await tester.pumpAndSettle(const Duration(milliseconds: 100));
     expect(find.text('Another license'), findsOneWidget);
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/54385
+  });
 
   testWidgets('_PackageLicensePage title style without AppBarTheme', (WidgetTester tester) async {
     LicenseRegistry.addLicense(() {
@@ -283,7 +283,7 @@ void main() {
     expect(title.style, titleTextStyle);
     final Text subtitle = tester.widget(find.text('1 license.'));
     expect(subtitle.style, subtitleTextStyle);
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/54385
+  });
 
   testWidgets('_PackageLicensePage title style with AppBarTheme', (WidgetTester tester) async {
     LicenseRegistry.addLicense(() {
@@ -341,7 +341,7 @@ void main() {
     expect(title.style, titleTextStyle);
     final Text subtitle = tester.widget(find.text('1 license.'));
     expect(subtitle.style, subtitleTextStyle);
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/54385
+  });
 
   testWidgets('LicensePage respects the notch', (WidgetTester tester) async {
     const double safeareaPadding = 27.0;
@@ -371,7 +371,7 @@ void main() {
       tester.getTopLeft(find.text('Licenses')),
       const Offset(16.0 + safeareaPadding, 18.0 + safeareaPadding),
     );
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/54385
+  });
 
   testWidgets('LicensePage returns early if unmounted', (WidgetTester tester) async {
     final Completer<LicenseEntry> licenseCompleter = Completer<LicenseEntry>();

@@ -786,7 +786,7 @@ void main() {
       await animationSheet.collate(20),
       matchesGoldenFile('material.circular_progress_indicator.indeterminate.png'),
     );
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42767
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
   testWidgets(
     'Adaptive CircularProgressIndicator displays CupertinoActivityIndicator in iOS',

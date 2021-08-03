@@ -115,14 +115,6 @@ E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
 /// each value of the [TestVariant.values]. If [variant] is not set, the test
 /// will be run once using the base test environment.
 ///
-/// If either [exclude] or [skip] is `true`, then the test will be skipped. The
-/// difference is that [skip] is a temporary way to disable a problematic test
-/// while a fix is being developed. It should have a comment after it with a
-/// link to a tracking issue for the work on re-enabling the test.
-///
-/// [exclude] is used to indicate that the test is not designed to run under
-/// the condition given and should always be skipped when it is `true`.
-///
 /// If the [tags] are passed, they declare user-defined tags that are implemented by
 /// the `test` package.
 ///
@@ -140,26 +132,11 @@ E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
 ///   expect(find.text('Success'), findsOneWidget);
 /// });
 /// ```
-///
-/// ### Excluded test
-/// ```dart
-/// testWidgets('Some test that will never make sense for the web', (WidgetTester tester) async {
-///   // test code
-/// }, exclude: isBrowser);
-/// ```
-///
-/// ### Skipped test
-/// ```dart
-/// testWidgets('Some flaky test', (WidgetTester tester) async {
-///   // test code
-/// }, skip: true); // https://github.com/flutter/flutter/issues/12345
-/// ```
 @isTest
 void testWidgets(
   String description,
   WidgetTesterCallback callback, {
-  bool skip = false,
-  bool exclude = false,
+  bool? skip,
   test_package.Timeout? timeout,
   Duration? initialTimeout,
   bool semanticsEnabled = true,
@@ -208,7 +185,7 @@ void testWidgets(
           timeout: initialTimeout,
         );
       },
-      skip: (exclude || skip) ? true : null,
+      skip: skip,
       timeout: timeout ?? binding.defaultTestTimeout,
       tags: tags,
     );
@@ -420,15 +397,15 @@ const String kDebugWarning = '''
 /// passed to the `callback`, and that handle will automatically be disposed
 /// after the callback is finished.
 ///
-/// Benchmarks must not be run in checked mode, because the performance is not
+/// Benchmarks must not be run in debug mode, because the performance is not
 /// representative. To avoid this, this function will print a big message if it
-/// is run in checked mode. Unit tests of this method pass `mayRunWithAsserts`,
+/// is run in debug mode. Unit tests of this method pass `mayRunWithAsserts`,
 /// but it should not be used for actual benchmarking.
 ///
 /// Example:
 ///
 ///     main() async {
-///       assert(false); // fail in checked mode
+///       assert(false); // fail in debug mode
 ///       await benchmarkWidgets((WidgetTester tester) async {
 ///         await tester.pumpWidget(MyWidget());
 ///         final Stopwatch timer = Stopwatch()..start();
