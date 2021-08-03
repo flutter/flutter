@@ -9,10 +9,9 @@ import 'dart:math' as math;
 import 'package:image/image.dart';
 import 'package:path/path.dart' as path;
 import 'package:test_api/src/backend/runtime.dart';
-import 'package:yaml/yaml.dart';
 
 import 'browser.dart';
-import 'common.dart';
+import 'browser_lock.dart';
 import 'environment.dart';
 import 'safari_installation.dart';
 import 'utils.dart';
@@ -30,7 +29,7 @@ class SafariIosEnvironment implements BrowserEnvironment {
 
   @override
   Future<void> prepareEnvironment() async {
-    await IosSafariArgParser.instance.initIosSimulator();
+    await initIosSimulator();
   }
 
   @override
@@ -83,10 +82,10 @@ class SafariIosScreenshotManager extends ScreenshotManager {
   String get filenameSuffix => '.iOS_Safari';
 
   SafariIosScreenshotManager() {
-    final YamlMap browserLock = BrowserLock.instance.configuration;
-    _heightOfHeader = browserLock['ios-safari']['heightOfHeader'] as int;
-    _heightOfFooter = browserLock['ios-safari']['heightOfFooter'] as int;
-    _scaleFactor = browserLock['ios-safari']['scaleFactor'] as double;
+    final SafariIosLock lock = browserLock.safariIosLock;
+    _heightOfHeader = lock.heightOfHeader;
+    _heightOfFooter = lock.heightOfFooter;
+    _scaleFactor = lock.scaleFactor;
 
     /// Create the directory to use for taking screenshots, if it does not
     /// exists.
@@ -160,8 +159,9 @@ class SafariIosScreenshotManager extends ScreenshotManager {
     final String filename = 'screenshot$_fileNameCounter.png';
     _fileNameCounter++;
 
-    await IosSafariArgParser.instance.iosSimulator.takeScreenshot(
-        filename, environment.webUiSimulatorScreenshotsDirectory);
+    await iosSimulator.takeScreenshot(
+      filename, environment.webUiSimulatorScreenshotsDirectory,
+    );
 
     final io.File file = io.File(path.join(
         environment.webUiSimulatorScreenshotsDirectory.path, filename));

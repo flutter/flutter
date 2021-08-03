@@ -3,6 +3,11 @@
 chrome:
   # It seems Chrome can't always release from the same build for all operating
   # systems, so we specify per-OS build number.
+  #
+  # The OS names here must match what recipe Python expression
+  # `self.m.platform.name.capitalize()` evaluates to. See:
+  #
+  # recipe_modules/web_util/api.py
   Linux: 768968 # Major version 84
   Mac: 768985 # Major version 84
   Win: 768975 # Major version 84
@@ -15,12 +20,12 @@ firefox:
 edge:
   launcher_version: '1.2.0.0'
 
-ios-safari:
+safari_ios:
   # Make sure this version is the same version supported by LUCI macOS bots.
   # XCode on these bots will be updated once a year, do not forget to update
   # `heightOfHeader` during this time.
-  majorVersion: 13
-  minorVersion: 0
+  major_version: 13
+  minor_version: 0
   device: 'iPhone 11'
   # `xcrun simctl` command is used to take screenshots. It takes the screenshot
   # of the entire simulator. Therefore we need to crop all the parts other than
@@ -29,10 +34,10 @@ ios-safari:
   # `heightOfHeader` is the number of pixels taken by the phone's header menu
   # and the browsers address bar.
   # TODO: https://github.com/flutter/flutter/issues/65672
-  heightOfHeader: 189
+  height_of_header: 189
   # `heightOfFooter` is the number of pixels taken by the phone's navigation
   # menu.
-  heightOfFooter: 250
+  height_of_footer: 250
   # Most of the time tests use a portion of the screen to compare goldens
   # instead of the entire screen. This area is reprented by a rectangle
   # when taking screenshots. However the rectangle dimensions are in logical
@@ -41,4 +46,4 @@ ios-safari:
   # transformation by a scale_factor (a.k.a. we perform isotropic scaling).
   # This value will be differ depending on the phone.
   # For iOS 13.0 iPhone 11 Pro, this number is 1.15.
-  scaleFactor: 1.00
+  scale_factor: 1.00

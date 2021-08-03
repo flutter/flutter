@@ -64,7 +64,10 @@ void testMain() {
       drawTestPicture(canvas);
       await matchPictureGolden(
           'canvaskit_picture.png', recorder.endRecording());
-    });
+    // Safari does not support weak refs (FinalizationRegistry).
+    // This test should be revisited when Safari ships weak refs.
+    // TODO(yjbanov): skip Firefox due to a crash: https://github.com/flutter/flutter/issues/86632
+    }, skip: isSafari || isFirefox);
 
     test('renders using a recording canvas if weak refs are not supported',
         () async {
