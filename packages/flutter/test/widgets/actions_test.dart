@@ -1377,7 +1377,7 @@ void main() {
       );
 
       Actions.invoke(invokingContext!, LogIntent(log: invocations));
-      // Override 3 is enabled so all 3 actions are enabled.
+      // The final override (action1) is enabled so all 3 actions are enabled.
       expect(invocations, <String>[
         'action1.invokeAsOverride-pre-super',
         'action2.invokeAsOverride-pre-super',
@@ -1589,12 +1589,14 @@ void main() {
         'action2.invokeAsOverride-post-super',
       ]);
     });
-    testWidgets('Override regular Action with a ContextAction', (WidgetTester tester) async {
+
+    testWidgets('Override non-context overridable Actions with a ContextAction', (WidgetTester tester) async {
       await tester.pumpWidget(
         Builder(
           builder: (BuildContext context1) {
             return Actions(
               actions: <Type, Action<Intent>> {
+                // The default Action is a ContextAction subclass.
                 LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationContextAction(actionName: 'action1'), context: context1),
               },
               child: Builder(

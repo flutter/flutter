@@ -91,8 +91,8 @@ typedef ActionListenerCallback = void Function(Action<Intent> action);
 /// [SelectAllTextIntent] should instead select the text within all 3
 /// [TextField]s. The [TextField] widget maps [SelectAllTextIntent] to an
 /// overridable [Action] so the widget has a sensible default handling of that
-/// [Intent], while still allows app develpers to change the handling by
-/// adding an ancestor [Actions] widget that maps [SelectAllTextIntent] to an
+/// [Intent], while still allowing app develpers to change the handling by
+/// adding an ancestor [Actions] widget that maps [SelectAllTextIntent] to a
 /// different [Action].
 ///
 /// See also:
@@ -201,7 +201,6 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// class SimpleUSPhoneNumberEntry extends StatefulWidget {
   ///   State<SimpleUSPhoneNumberEntry> createState() => _SimpleUSPhoneNumberEntryState();
   /// }
-  ///
   ///
   /// class _DeleteDigit extends Action<DeleteTextIntent> {
   ///   _DeleteDigit(this.state);
