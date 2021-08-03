@@ -787,8 +787,15 @@ class KeyEventManager {
         assert(false, 'Should never encounter KeyData when transitMode is rawKeyData.');
         return false;
       case KeyDataTransitMode.keyDataThenRawKeyData:
+        assert((data.physical == 0 && data.logical == 0) ||
+               (data.physical != 0 && data.logical != 0));
         // Postpone key event dispatching until the handleRawKeyMessage.
-        _keyEventsSinceLastMessage.add(_eventFromData(data));
+        //
+        // Having 0 as the physical or logical ID indicates an empty key data,
+        // transmitted to ensure that the transit mode is correctly inferred.
+        if (data.physical != 0 && data.logical != 0) {
+          _keyEventsSinceLastMessage.add(_eventFromData(data));
+        }
         return false;
     }
   }

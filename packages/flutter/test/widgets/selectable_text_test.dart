@@ -1488,6 +1488,72 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('Selectable text rich text with spell out in semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Center(
+            child: SelectableText.rich(TextSpan(text: 'some text', spellOut: true)),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      semantics,
+      includesNodeWith(
+        attributedValue: AttributedString(
+          'some text',
+          attributes: <StringAttribute>[
+            SpellOutStringAttribute(range: const TextRange(start: 0, end:9)),
+          ],
+        ),
+        flags: <SemanticsFlag>[
+          SemanticsFlag.isTextField,
+          SemanticsFlag.isReadOnly,
+          SemanticsFlag.isMultiline,
+        ],
+      ),
+    );
+
+    semantics.dispose();
+  });
+
+  testWidgets('Selectable text rich text with locale in semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Center(
+            child: SelectableText.rich(TextSpan(text: 'some text', locale: Locale('es', 'MX'))),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      semantics,
+      includesNodeWith(
+        attributedValue: AttributedString(
+          'some text',
+          attributes: <StringAttribute>[
+            LocaleStringAttribute(range: const TextRange(start: 0, end:9), locale: const Locale('es', 'MX')),
+          ],
+        ),
+        flags: <SemanticsFlag>[
+          SemanticsFlag.isTextField,
+          SemanticsFlag.isReadOnly,
+          SemanticsFlag.isMultiline,
+        ],
+      ),
+    );
+
+    semantics.dispose();
+  });
+
   testWidgets('Selectable rich text with gesture recognizer has correct semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(

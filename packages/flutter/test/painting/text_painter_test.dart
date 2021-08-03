@@ -746,7 +746,7 @@ void main() {
     expect(painter.inlinePlaceholderBoxes![11], const TextBox.fromLTRBD(250, 30, 300, 60, TextDirection.ltr));
     expect(painter.inlinePlaceholderBoxes![12], const TextBox.fromLTRBD(300, 30, 351, 60, TextDirection.ltr));
     expect(painter.inlinePlaceholderBoxes![13], const TextBox.fromLTRBD(351, 30, 401, 60, TextDirection.ltr));
-  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/42086
+  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/87540
 
   // Null values are valid. See https://github.com/flutter/flutter/pull/48346#issuecomment-584839221
   test('TextPainter set TextHeightBehavior null test', () {
@@ -955,7 +955,7 @@ void main() {
       ).first.toRect();
       expect(glyphBox, newGlyphBox);
     });
-  }, skip: isBrowser && !isCanvasKit);
+  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/87543
 
   test('TextPainter handles invalid UTF-16', () {
     Object? exception;
@@ -973,7 +973,7 @@ void main() {
     // The layout should include one replacement character.
     expect(painter.width, equals(fontSize));
     expect(exception, isNotNull);
-  }, skip: kIsWeb);
+  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87544
 
   test('Diacritic', () {
     final TextPainter painter = TextPainter()
@@ -989,7 +989,7 @@ void main() {
             offset: text.length, affinity: TextAffinity.upstream),
         ui.Rect.zero);
     expect(caretOffset.dx, painter.width);
-  }, skip: kIsWeb && !isCanvasKit);
+  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/87545
 }
 
 class MockCanvas extends Fake implements Canvas {
