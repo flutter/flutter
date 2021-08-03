@@ -1652,16 +1652,15 @@ class DropdownButtonFormField<T> extends FormField<T> {
            );
 
            final bool showSelectedItem = items != null && items.where((DropdownMenuItem<T> item) => item.value == state.value).isNotEmpty;
-           final bool showHintOrDisabledHint = () {
-             if (onChanged == null) {
-               return (hint != null || disabledHint != null) && !showSelectedItem;
-             } else if (items == null || items.isEmpty) {
+           bool isHintOrDisabledHintAvailable() {
+             final bool isDropdownDisabled = onChanged == null || (items == null || items.isEmpty);
+             if (isDropdownDisabled) {
                return hint != null || disabledHint != null;
              } else {
-               return hint != null && !showSelectedItem;
+               return hint != null;
              }
-           }();
-           final bool isEmpty = !showSelectedItem && !showHintOrDisabledHint;
+           }
+           final bool isEmpty = !showSelectedItem && !isHintOrDisabledHintAvailable();
 
            // An unfocusable Focus widget so that this widget can detect if its
            // descendants have focus or not.
