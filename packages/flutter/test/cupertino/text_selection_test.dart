@@ -251,7 +251,7 @@ void main() {
     expect(find.text('Copy'), findsOneWidget);
     expect(find.text('Cut'), findsOneWidget);
   },
-    skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
+    skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
@@ -305,7 +305,7 @@ void main() {
       expect(find.text('◀'), findsNothing);
       expect(find.text('▶'), findsNothing);
     },
-      skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
+      skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
     );
 
@@ -376,7 +376,7 @@ void main() {
       expect(find.text('▶'), findsOneWidget);
       expect(appearsEnabled(tester, '▶'), true);
     },
-      skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
+      skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
     );
 
@@ -478,7 +478,7 @@ void main() {
       expect(find.text('▶'), findsOneWidget);
       expect(appearsEnabled(tester, '▶'), true);
     },
-      skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
+      skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
     );
 
@@ -596,7 +596,7 @@ void main() {
       expect(find.text('▶'), findsOneWidget);
       expect(appearsEnabled(tester, '▶'), true);
     },
-      skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
+      skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
     );
   });
@@ -677,7 +677,7 @@ void main() {
     expect(handles.first.size.height, 60.5);
     expect(handles.last.size.height, 35.5);
   },
-    skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
+    skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
@@ -761,7 +761,7 @@ void main() {
     expect(handles.first.size.height, 110.5);
     expect(handles.last.size.height, 110.5);
   },
-    skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
+    skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
@@ -842,7 +842,7 @@ void main() {
     expect(handles.first.size.height, 60.5);
     expect(handles.last.size.height, 45.5);
   },
-    skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
+    skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
@@ -928,7 +928,7 @@ void main() {
     expect(handles.first.size.height, 50.5);
     expect(handles.last.size.height, 50.5); // This is 60.5 with the previous frame.
   },
-    skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
+    skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 }

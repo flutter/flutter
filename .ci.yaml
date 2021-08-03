@@ -1346,6 +1346,7 @@ targets:
 
   - name: Linux_android hot_mode_dev_cycle_linux__benchmark
     builder: Linux_android hot_mode_dev_cycle_linux__benchmark
+    bringup: true
     presubmit: false
     properties:
       tags: >
