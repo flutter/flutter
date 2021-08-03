@@ -2,18 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=4281596210"
-@Tags(<String>['no-shuffle'])
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  Future<void> controlAppLifeCycleState(AppLifecycleState state) async {
+    final ByteData? message =
+        const StringCodec().encodeMessage(state.toString());
+    await ServicesBinding.instance!.defaultBinaryMessenger
+        .handlePlatformMessage('flutter/lifecycle', message, (_) {});
+  }
+
   testWidgets('Ticker mute control test', (WidgetTester tester) async {
     int tickCount = 0;
     void handleTick(Duration duration) {
@@ -100,7 +101,7 @@ void main() {
     late Ticker ticker;
 
     void testFunction() {
-      ticker = Ticker((Duration _) { });
+      ticker = Ticker((Duration _) {});
     }
 
     testFunction();
@@ -109,7 +110,8 @@ void main() {
     expect(ticker.toString(debugIncludeStack: true), contains('testFunction'));
   });
 
-  testWidgets('Ticker can be sped up with time dilation', (WidgetTester tester) async {
+  testWidgets('Ticker can be sped up with time dilation',
+      (WidgetTester tester) async {
     timeDilation = 0.5; // Move twice as fast.
     late Duration lastDuration;
     void handleTick(Duration duration) {
@@ -125,7 +127,8 @@ void main() {
     ticker.dispose();
   });
 
-  testWidgets('Ticker can be slowed down with time dilation', (WidgetTester tester) async {
+  testWidgets('Ticker can be slowed down with time dilation',
+      (WidgetTester tester) async {
     timeDilation = 2.0; // Move half as fast.
     late Duration lastDuration;
     void handleTick(Duration duration) {
@@ -141,7 +144,8 @@ void main() {
     ticker.dispose();
   });
 
-  testWidgets('Ticker stops ticking when application is paused', (WidgetTester tester) async {
+  testWidgets('Ticker stops ticking when application is paused',
+      (WidgetTester tester) async {
     int tickCount = 0;
     void handleTick(Duration duration) {
       tickCount += 1;
@@ -154,17 +158,19 @@ void main() {
     expect(ticker.isActive, isTrue);
     expect(tickCount, equals(0));
 
-    final ByteData? message = const StringCodec().encodeMessage('AppLifecycleState.paused');
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+    controlAppLifeCycleState(AppLifecycleState.paused);
+
     expect(ticker.isTicking, isFalse);
     expect(ticker.isActive, isTrue);
 
     ticker.stop();
+
+    controlAppLifeCycleState(AppLifecycleState.resumed);
   });
 
-  testWidgets('Ticker can be created before application unpauses', (WidgetTester tester) async {
-    final ByteData? pausedMessage = const StringCodec().encodeMessage('AppLifecycleState.paused');
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', pausedMessage, (_) { });
+  testWidgets('Ticker can be created before application unpauses',
+      (WidgetTester tester) async {
+    controlAppLifeCycleState(AppLifecycleState.paused);
 
     int tickCount = 0;
     void handleTick(Duration duration) {
@@ -182,8 +188,7 @@ void main() {
     expect(tickCount, equals(0));
     expect(ticker.isTicking, isFalse);
 
-    final ByteData? resumedMessage = const StringCodec().encodeMessage('AppLifecycleState.resumed');
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', resumedMessage, (_) { });
+    controlAppLifeCycleState(AppLifecycleState.resumed);
 
     await tester.pump(const Duration(milliseconds: 10));
 
