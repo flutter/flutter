@@ -90,6 +90,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     double? minOverscrollLength,
     ScrollbarOrientation? scrollbarOrientation,
   }) : assert(color != null),
+       assert(radius == null || shape == null),
        assert(thickness != null),
        assert(fadeoutOpacityAnimation != null),
        assert(mainAxisMargin != null),
