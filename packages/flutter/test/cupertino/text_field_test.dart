@@ -290,8 +290,9 @@ void main() {
     expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 0));
     expect(find.byType(CupertinoButton), findsNothing);
   },
-  variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS }),
-  skip: kIsWeb); // [intended] the web handles this on its own.
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS }),
+    skip: kIsWeb, // [intended] the web handles this on its own.
+  );
 
   testWidgets('Activates the text field when receives semantics focus on Mac', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
