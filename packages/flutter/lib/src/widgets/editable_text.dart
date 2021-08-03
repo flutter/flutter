@@ -2454,13 +2454,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
     } else {
       WidgetsBinding.instance!.removeObserver(this);
-      _currentPromptRectRange = null;
+      setState(() { _currentPromptRectRange = null; });
     }
-
-    setState(() {
-       // EditableText shows/hides the selection based on whether the widget
-       // is focused.
-    });
     updateKeepAlive();
   }
 
@@ -2697,7 +2692,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                 minLines: widget.minLines,
                 expands: widget.expands,
                 strutStyle: widget.strutStyle,
-                selectionColor: _hasFocus ? widget.selectionColor : null,
+                selectionColor: widget.selectionColor,
                 textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
                 textAlign: widget.textAlign,
                 textDirection: _textDirection,
