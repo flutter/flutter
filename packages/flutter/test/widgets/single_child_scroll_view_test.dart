@@ -38,6 +38,11 @@ class TestScrollController extends ScrollController {
 }
 
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   testWidgets('SingleChildScrollView overflow and clipRect test', (WidgetTester tester) async {
     // the test widowSize is Size(800.0, 600.0)
     await tester.pumpWidget(

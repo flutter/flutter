@@ -184,6 +184,11 @@ class MyStatefulWidgetState extends State<MyStatefulWidget> {
 }
 
 Future<void> main() async {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   final ui.Image testImage = await createTestImage();
   assert(testImage != null);
 

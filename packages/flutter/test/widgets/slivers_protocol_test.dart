@@ -17,6 +17,11 @@ void verifyPaintPosition(GlobalKey key, Offset ideal) {
 }
 
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   testWidgets('Sliver protocol', (WidgetTester tester) async {
     GlobalKey key1, key2, key3, key4, key5;
     await tester.pumpWidget(

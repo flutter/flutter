@@ -14,6 +14,11 @@ import '../rendering/mock_canvas.dart';
 import 'test_border.dart' show TestBorder;
 
 Future<void> main() async {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   AutomatedTestWidgetsFlutterBinding();
   final ui.Image rawImage = await decodeImageFromList(Uint8List.fromList(kTransparentImage));
   final ImageProvider image = TestImageProvider(0, 0, image: rawImage);

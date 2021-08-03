@@ -50,6 +50,11 @@ RenderParagraph _iconRenderObject(WidgetTester tester, IconData icon) {
 }
 
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   testWidgets('Tab bar defaults - label style and selected/unselected label colors', (WidgetTester tester) async {
     // tests for the default label color and label styles when tabBarTheme and tabBar do not provide any
     await tester.pumpWidget(_withTheme(null));

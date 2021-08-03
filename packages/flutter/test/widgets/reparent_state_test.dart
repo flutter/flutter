@@ -49,6 +49,11 @@ class DeactivateLoggerState extends State<DeactivateLogger> {
 }
 
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   testWidgets('can reparent state', (WidgetTester tester) async {
     final GlobalKey left = GlobalKey();
     final GlobalKey right = GlobalKey();

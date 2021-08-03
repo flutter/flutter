@@ -56,6 +56,11 @@ Finder _findButtonBar() {
 const ShapeBorder _defaultDialogShape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
 
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   testWidgets('Dialog is scrollable', (WidgetTester tester) async {
     bool didPressOk = false;
     final AlertDialog dialog = AlertDialog(

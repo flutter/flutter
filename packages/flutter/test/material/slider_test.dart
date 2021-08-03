@@ -71,6 +71,11 @@ class TallSliderTickMarkShape extends SliderTickMarkShape {
 }
 
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   testWidgets('Slider can move when tapped (LTR)', (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;

@@ -66,6 +66,10 @@ Widget buildListView(Axis scrollDirection, { bool reverse = false, bool shrinkWr
 }
 
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
 
   group('SingleChildScrollView', () {
     testWidgets('SingleChildScrollView ensureVisible Axis.vertical', (WidgetTester tester) async {

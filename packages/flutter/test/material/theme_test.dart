@@ -10,6 +10,11 @@ import 'package:flutter/src/foundation/diagnostics.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   const TextTheme defaultGeometryTheme = Typography.englishLike2014;
 
   test('ThemeDataTween control test', () {

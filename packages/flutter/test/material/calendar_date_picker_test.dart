@@ -10,6 +10,11 @@ import '../rendering/mock_canvas.dart';
 import 'feedback_tester.dart';
 
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   TestWidgetsFlutterBinding.ensureInitialized();
 
   final Finder nextMonthIcon = find.byWidgetPredicate((Widget w) => w is IconButton && (w.tooltip?.startsWith('Next month') ?? false));

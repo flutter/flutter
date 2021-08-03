@@ -65,6 +65,11 @@ class MockClipboard {
 }
 
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   final MockClipboard mockClipboard = MockClipboard();
   (TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding)
     .defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);

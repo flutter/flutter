@@ -16,6 +16,10 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
 
   // The "can be constructed" tests that follow are primarily to ensure that any
   // animations started by the progress indicators are stopped at dispose() time.

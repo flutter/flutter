@@ -19,6 +19,11 @@ Widget boilerplate({required Widget child}) {
 }
 
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   testWidgets('Initial toggle state is reflected', (WidgetTester tester) async {
     TextStyle buttonTextStyle(String text) {
       return tester.widget<DefaultTextStyle>(find.descendant(

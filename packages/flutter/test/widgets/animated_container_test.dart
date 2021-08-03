@@ -7,6 +7,11 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   testWidgets('AnimatedContainer.debugFillProperties', (WidgetTester tester) async {
     final AnimatedContainer container = AnimatedContainer(
       constraints: const BoxConstraints.tightFor(width: 17.0, height: 23.0),

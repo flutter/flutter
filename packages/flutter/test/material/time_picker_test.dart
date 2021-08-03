@@ -127,6 +127,11 @@ Future<void> finishPicker(WidgetTester tester) async {
 }
 
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   group('Time picker - Dial', () {
     _tests();
   });

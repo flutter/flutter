@@ -102,6 +102,11 @@ void resetScrollOffset(WidgetTester tester) {
 }
 
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   testWidgets('Flings on different platforms', (WidgetTester tester) async {
     await pumpTest(tester, TargetPlatform.android);
     await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);

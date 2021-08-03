@@ -28,6 +28,11 @@ Widget buildFrame({ bool reverse = false, required TextDirection textDirection }
 }
 
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   testWidgets('Drag horizontally with scroll anchor at start (LTR)', (WidgetTester tester) async {
     await tester.pumpWidget(buildFrame(textDirection: TextDirection.ltr));
 
