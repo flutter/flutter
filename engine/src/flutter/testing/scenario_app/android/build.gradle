@@ -12,6 +12,9 @@ buildscript {
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
+    configurations.classpath {
+        resolutionStrategy.activateDependencyLocking()
+    }
 }
 
 allprojects {
@@ -27,9 +30,11 @@ rootProject.buildDir = project.hasProperty('out_dir')
 
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
-}
-subprojects {
     project.evaluationDependsOn(':app')
+
+    dependencyLocking {
+        lockAllConfigurations()
+    }
 }
 
 task clean(type: Delete) {
