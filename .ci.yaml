@@ -184,7 +184,6 @@ targets:
       - bin/**
 
   - name: Linux gradle_plugin_light_apk_test
-    postsubmit: false
     properties:
       tags: >
         ["devicelab","hostonly"]
@@ -1812,6 +1811,14 @@ targets:
     runIf:
       - dev/**
       - bin/**
+
+  - name: Windows hot_mode_dev_cycle_win_target__benchmark
+    bringup: true
+    presubmit: false
+    properties:
+      tags: >
+        ["devicelab","hostonly"]
+    scheduler: luci
 
   - name: Windows module_custom_host_app_name_test
     properties:
