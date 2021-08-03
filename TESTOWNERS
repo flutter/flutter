@@ -169,6 +169,7 @@
 /dev/devicelab/bin/tasks/gradle_plugin_bundle_test.dart @stuartmorgan @flutter/plugin
 /dev/devicelab/bin/tasks/gradle_plugin_fat_apk_test.dart @stuartmorgan @flutter/plugin
 /dev/devicelab/bin/tasks/gradle_plugin_light_apk_test.dart @stuartmorgan @flutter/plugin
+/dev/devicelab/bin/tasks/hot_mode_dev_cycle_win_target__benchmark @cbracken @flutter/desktop
 /dev/devicelab/bin/tasks/module_custom_host_app_name_test.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/module_host_with_custom_build_test.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/module_test.dart @zanderso @flutter/tool
