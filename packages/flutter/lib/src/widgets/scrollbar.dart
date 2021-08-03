@@ -234,7 +234,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// shape is a simple rectangle.
   ///
   /// If [shape] is specified, the thumb will take the shape of the passed
-  /// [OutlinedBorder] and fill itself with [thumbColor] (or grey if it
+  /// [OutlinedBorder] and fill itself with [color] (or grey if it
   /// is unspecified).
   ///
   OutlinedBorder? get shape => _shape;
