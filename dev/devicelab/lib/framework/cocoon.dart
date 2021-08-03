@@ -105,7 +105,7 @@ class Cocoon {
     const List<String> supportedBranches = <String>['master'];
     if (supportedBranches.contains(resultsJson['CommitBranch'])) {
       await retry(
-        () => _sendUpdateTaskRequest(resultsJson).timeout(Duration(seconds: requestTimeoutLimit)),
+        () async => _sendUpdateTaskRequest(resultsJson).timeout(Duration(seconds: requestTimeoutLimit)),
         retryIf: (Exception e) => e is SocketException || e is TimeoutException || e is ClientException,
         maxAttempts: requestRetryLimit,
       );
