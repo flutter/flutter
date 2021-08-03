@@ -7,8 +7,9 @@
 #  * https://github.com/flutter/cocoon/blob/master/CI_YAML.md
 enabled_branches:
   - master
-
-platform_properties:
+  - dev
+  - beta
+  - stable
 
 targets:
   - name: Linux analyze
