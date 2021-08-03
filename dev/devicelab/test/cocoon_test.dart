@@ -196,7 +196,7 @@ void main() {
         requestCount++;
         if (requestCount == 1) {
           await Future<void>.delayed(Duration(seconds: timeoutValue + 2));
-          throw Exception("Should not reach this, because timeout should trigger");
+          throw Exception('Should not reach this, because timeout should trigger');
         } else {
           return Response('{}', 200);
         }
