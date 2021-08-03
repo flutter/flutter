@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -190,13 +191,14 @@ void main() {
 
     test('Verify timeout and retry for task result upload', () async {
       int requestCount = 0;
+      int timeoutValue = 2;
       mockClient = MockClient((Request request) async {
         requestCount++;
         if (requestCount == 1) {
-          sleep(Duration(seconds: 5));
-          return Response('{}', 200);
+          await Future<void>.delayed(Duration(seconds: timeoutValue + 2));
+          throw Exception("Should not reach this, because timeout should trigger");
         } else {
-          return Response('{}', 500);
+          return Response('{}', 200);
         }
       });
 
@@ -207,7 +209,42 @@ void main() {
         processRunSync: runSyncStub,
         serviceAccountTokenPath: serviceAccountTokenPath,
         requestRetryLimit: 2,
-        requestTimeoutLimit: 2,
+        requestTimeoutLimit: timeoutValue,
+      );
+
+      const String resultsPath = 'results.json';
+      const String updateTaskJson = '{'
+          '"CommitBranch":"master",'
+          '"CommitSha":"$commitSha",'
+          '"BuilderName":"builderAbc",'
+          '"NewStatus":"Succeeded",'
+          '"ResultData":{"i":0.0,"j":0.0,"not_a_metric":"something"},'
+          '"BenchmarkScoreKeys":["i","j"]}';
+      fs.file(resultsPath).writeAsStringSync(updateTaskJson);
+      await cocoon.sendResultsPath(resultsPath: resultsPath);
+    });
+
+    test('Verify timeout does not trigger for result upload', () async {
+      int requestCount = 0;
+      int timeoutValue = 2;
+      mockClient = MockClient((Request request) async {
+        requestCount++;
+        if (requestCount == 1) {
+          await Future<void>.delayed(Duration(seconds: timeoutValue - 2));
+          return Response('{}', 200);
+        } else {
+          throw Exception('This iteration should not be reached, since timeout should not happen.');
+        }
+      });
+
+      _processResult = ProcessResult(1, 0, commitSha, '');
+      cocoon = Cocoon(
+        fs: fs,
+        httpClient: mockClient,
+        processRunSync: runSyncStub,
+        serviceAccountTokenPath: serviceAccountTokenPath,
+        requestRetryLimit: 2,
+        requestTimeoutLimit: timeoutValue,
       );
 
       const String resultsPath = 'results.json';
