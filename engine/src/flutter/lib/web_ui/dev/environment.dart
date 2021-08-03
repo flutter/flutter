@@ -38,7 +38,7 @@ class Environment {
       webUiRootDir
     ]) {
       if (!expectedDirectory.existsSync()) {
-        throw ToolException('$expectedDirectory does not exist.');
+        throw ToolExit('$expectedDirectory does not exist.');
       }
     }
 

@@ -38,7 +38,7 @@ abstract class PipelineStep {
   /// The name of this step.
   ///
   /// This value appears in logs, so it should be descriptive and human-readable.
-  String get name;
+  String get description;
 
   /// Whether it is safe to interrupt this step while it's running.
   bool get isSafeToInterrupt;
@@ -146,12 +146,12 @@ class Pipeline {
       return;
     }
     if (step.isSafeToInterrupt) {
-      print('Interrupting ${step.name}');
+      print('Interrupting ${step.description}');
       await step.interrupt();
       _status = PipelineStatus.interrupted;
       return;
     }
-    print('${step.name} cannot be interrupted. Waiting for it to complete.');
+    print('${step.description} cannot be interrupted. Waiting for it to complete.');
     await _currentStepFuture;
     _status = PipelineStatus.interrupted;
   }

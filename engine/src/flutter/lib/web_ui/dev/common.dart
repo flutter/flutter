@@ -4,11 +4,15 @@
 
 import 'dart:io' as io;
 
-import 'package:args/args.dart';
 import 'package:path/path.dart' as path;
-import 'package:yaml/yaml.dart';
 
-import 'environment.dart';
+import 'browser.dart';
+import 'browser_lock.dart';
+import 'chrome.dart';
+import 'edge.dart';
+import 'firefox.dart';
+import 'safari_ios.dart';
+import 'safari_macos.dart';
 
 /// The port number for debugging.
 const int kDevtoolsPort = 12345;
@@ -35,7 +39,7 @@ abstract class PlatformBinding {
     throw '${io.Platform.operatingSystem} is not supported';
   }
 
-  int getChromeBuild(YamlMap chromeLock);
+  String getChromeBuild(ChromeLock chromeLock);
   String getChromeDownloadUrl(String version);
   String getFirefoxDownloadUrl(String version);
   String getFirefoxDownloadFilename(String version);
@@ -51,9 +55,8 @@ const String _kBaseDownloadUrl =
 
 class _WindowsBinding implements PlatformBinding {
   @override
-  int getChromeBuild(YamlMap browserLock) {
-    final YamlMap chromeMap = browserLock['chrome'] as YamlMap;
-    return chromeMap['Win'] as int;
+  String getChromeBuild(ChromeLock chromeLock) {
+    return chromeLock.windows;
   }
 
   @override
@@ -90,9 +93,8 @@ class _WindowsBinding implements PlatformBinding {
 
 class _LinuxBinding implements PlatformBinding {
   @override
-  int getChromeBuild(YamlMap browserLock) {
-    final YamlMap chromeMap = browserLock['chrome'] as YamlMap;
-    return chromeMap['Linux'] as int;
+  String getChromeBuild(ChromeLock chromeLock) {
+    return chromeLock.linux;
   }
 
   @override
@@ -131,9 +133,8 @@ class _LinuxBinding implements PlatformBinding {
 
 class _MacBinding implements PlatformBinding {
   @override
-  int getChromeBuild(YamlMap browserLock) {
-    final YamlMap chromeMap = browserLock['chrome'] as YamlMap;
-    return chromeMap['Mac'] as int;
+  String getChromeBuild(ChromeLock chromeLock) {
+    return chromeLock.mac;
   }
 
   @override
@@ -186,36 +187,6 @@ class BrowserInstallation {
   final String executable;
 }
 
-abstract class BrowserArgParser {
-  const BrowserArgParser();
-
-  /// Populate options specific to a browser to the [ArgParser].
-  void populateOptions(ArgParser argParser);
-
-  /// Populate browser with results of the arguments passed.
-  void parseOptions(ArgResults argResults);
-
-  String get version;
-}
-
-/// Provides access to the contents of the `browser_lock.yaml` file.
-class BrowserLock {
-  /// Initializes the [BrowserLock] singleton.
-  static final BrowserLock _singletonInstance = BrowserLock._();
-
-  /// The [Keyboard] singleton.
-  static BrowserLock get instance => _singletonInstance;
-
-  YamlMap _configuration = YamlMap();
-  YamlMap get configuration => _configuration;
-
-  BrowserLock._() {
-    final io.File lockFile = io.File(
-        path.join(environment.webUiRootDir.path, 'dev', 'browser_lock.yaml'));
-    _configuration = loadYaml(lockFile.readAsStringSync()) as YamlMap;
-  }
-}
-
 /// A string sink that swallows all input.
 class DevNull implements StringSink {
   @override
@@ -240,3 +211,31 @@ bool get isLuci => io.Platform.environment['LUCI_CONTEXT'] != null;
 /// Whether the felt command is running on one of the Continuous Integration
 /// environements.
 bool get isCi => isCirrus || isLuci;
+
+const String kChrome = 'chrome';
+const String kEdge = 'edge';
+const String kFirefox = 'firefox';
+const String kSafari = 'safari';
+const String kSafariIos = 'ios-safari';
+
+const List<String> kAllBrowserNames = <String>[
+  kChrome,
+  kEdge,
+  kFirefox,
+  kSafari,
+  kSafariIos,
+];
+
+/// Creates an environment for a browser.
+///
+/// The [browserName] matches the browser name passed as the `--browser` option.
+BrowserEnvironment getBrowserEnvironment(String browserName) {
+  switch (browserName) {
+    case kChrome: return ChromeEnvironment();
+    case kEdge: return EdgeEnvironment();
+    case kFirefox: return FirefoxEnvironment();
+    case kSafari: return SafariMacOsEnvironment();
+    case kSafariIos: return SafariIosEnvironment();
+  }
+  throw UnsupportedError('Browser $browserName is not supported.');
+}

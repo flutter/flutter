@@ -11,10 +11,13 @@ class BrowserInstallerException implements Exception {
   String toString() => message;
 }
 
-class ToolException implements Exception {
-  ToolException(this.message);
+/// Throw this exception in felt command to exit felt with a message and a
+/// non-zero exit code.
+class ToolExit implements Exception {
+  ToolExit(this.message, { this.exitCode = 1 });
 
   final String message;
+  final int exitCode;
 
   @override
   String toString() => message;

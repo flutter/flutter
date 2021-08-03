@@ -13,7 +13,11 @@ import 'package:ui/ui.dart';
 
 import 'package:web_engine_tester/golden_tester.dart';
 
+import '../../common.dart';
 import '../paragraph/text_scuba.dart';
+
+// TODO(yjbanov): unskip Firefox tests when Firefox implements WebGL in headless mode.
+// https://github.com/flutter/flutter/issues/86623
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -131,7 +135,7 @@ Future<void> testMain() async {
 
     canvas.restore();
     await _checkScreenshot(canvas, 'sweep_gradient_rect');
-  });
+  }, skip: isFirefox);
 
   test('Paints sweep gradient ovals', () async {
     final RecordingCanvas canvas =
@@ -210,7 +214,7 @@ Future<void> testMain() async {
 
     canvas.restore();
     await _checkScreenshot(canvas, 'sweep_gradient_oval');
-  });
+  }, skip: isFirefox);
 
   test('Paints sweep gradient paths', () async {
     final RecordingCanvas canvas =
@@ -294,7 +298,7 @@ Future<void> testMain() async {
 
     canvas.restore();
     await _checkScreenshot(canvas, 'sweep_gradient_path');
-  });
+  }, skip: isFirefox);
 
   /// Regression test for https://github.com/flutter/flutter/issues/74137.
   test('Paints rotated and shifted linear gradient', () async {
@@ -342,7 +346,7 @@ Future<void> testMain() async {
 
     canvas.restore();
     await _checkScreenshot(canvas, 'linear_gradient_rect_shifted');
-  });
+  }, skip: isFirefox);
 
   /// Regression test for https://github.com/flutter/flutter/issues/82748.
   test('Paints gradient with gradient stop outside range', () async {

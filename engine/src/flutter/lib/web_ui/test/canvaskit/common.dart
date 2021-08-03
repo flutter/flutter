@@ -7,15 +7,7 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-/// Whether the current browser is Safari.
-bool get isSafari => browserEngine == BrowserEngine.webkit;
-
-/// Whether the current browser is Safari on iOS.
-// TODO(hterkelsen): https://github.com/flutter/flutter/issues/60040
-bool get isIosSafari => isSafari && operatingSystem == OperatingSystem.iOs;
-
-/// Whether the current browser is Firefox.
-bool get isFirefox => browserEngine == BrowserEngine.firefox;
+export '../common.dart';
 
 /// Used in tests instead of [ProductionCollector] to control Skia object
 /// collection explicitly, and to prevent leaks across tests.

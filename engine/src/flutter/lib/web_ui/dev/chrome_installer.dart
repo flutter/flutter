@@ -8,54 +8,13 @@ import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
 import 'package:archive/archive_io.dart';
-import 'package:args/args.dart';
 import 'package:http/http.dart';
 import 'package:path/path.dart' as path;
-import 'package:yaml/yaml.dart';
 
+import 'browser_lock.dart';
 import 'common.dart';
 import 'environment.dart';
 import 'exceptions.dart';
-
-class ChromeArgParser extends BrowserArgParser {
-  static final ChromeArgParser _singletonInstance = ChromeArgParser._();
-
-  /// The [ChromeArgParser] singleton.
-  static ChromeArgParser get instance => _singletonInstance;
-
-  late String _version;
-  late int _pinnedChromeBuildNumber;
-
-  ChromeArgParser._();
-
-  @override
-  void populateOptions(ArgParser argParser) {
-    final YamlMap browserLock = BrowserLock.instance.configuration;
-    _pinnedChromeBuildNumber =
-        PlatformBinding.instance.getChromeBuild(browserLock);
-
-    argParser.addOption(
-        'chrome-version',
-        defaultsTo: pinnedChromeBuildNumber,
-        help: 'The Chrome version to use while running tests. If the requested '
-            'version has not been installed, it will be downloaded and installed '
-            'automatically. A specific Chrome build version number, such as 695653, '
-            'will use that version of Chrome. Value "latest" will use the latest '
-            'available build of Chrome, installing it if necessary. Value "system" '
-            'will use the manually installed version of Chrome on this computer.',
-      );
-  }
-
-  @override
-  void parseOptions(ArgResults argResults) {
-    _version = argResults['chrome-version'] as String;
-  }
-
-  @override
-  String get version => _version;
-
-  String get pinnedChromeBuildNumber => _pinnedChromeBuildNumber.toString();
-}
 
 /// Returns the installation of Chrome, installing it if necessary.
 ///
@@ -287,7 +246,7 @@ Future<String> fetchLatestChromeVersion() async {
 String preinstalledChromeExecutable() {
   // Note that build number and major version is different for Chrome.
   // For example for a build number `753189`, major version is 83.
-  final String buildNumber = ChromeArgParser.instance.pinnedChromeBuildNumber;
+  final String buildNumber = browserLock.chromeLock.versionForCurrentPlatform;
   final ChromeInstaller chromeInstaller = ChromeInstaller(version: buildNumber);
   if (chromeInstaller.isInstalled) {
     final String executable = chromeInstaller.getInstallation()!.executable;

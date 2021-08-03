@@ -14,6 +14,8 @@ import 'package:ui/ui.dart' hide TextStyle, ImageShader;
 
 import 'package:web_engine_tester/golden_tester.dart';
 
+import '../../common.dart';
+
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
@@ -171,7 +173,9 @@ Future<void> testMain() async {
         Paint()
           ..style = PaintingStyle.fill
           ..color = const Color(0xFF00FF00));
-  });
+  },
+  // TODO(yjbanov): https://github.com/flutter/flutter/issues/86623
+  skip: isFirefox);
 
   test('Should draw hairline triangleFan.', () async {
     final Vertices vertices = Vertices.raw(
@@ -245,7 +249,9 @@ Future<void> testMain() async {
 
     await _testVertices('draw_vertices_triangles', vertices, BlendMode.srcOver,
         Paint()..color = const Color.fromARGB(255, 0, 128, 0));
-  });
+  },
+  // TODO(yjbanov): https://github.com/flutter/flutter/issues/86623
+  skip: isFirefox);
 
   test('Should draw triangles with colors and indices.', () async {
     final Int32List colors = Int32List.fromList(
@@ -276,7 +282,9 @@ Future<void> testMain() async {
         vertices as SurfaceVertices, BlendMode.srcOver, SurfacePaint());
 
     await _checkScreenshot(rc, 'draw_vertices_triangles_indexed');
-  });
+  },
+  // TODO(yjbanov): https://github.com/flutter/flutter/issues/86623
+  skip: isFirefox);
 
   test('Should draw triangleFan with colors.', () async {
     final Int32List colors = Int32List.fromList(<int>[
@@ -307,7 +315,9 @@ Future<void> testMain() async {
 
     await _testVertices('draw_vertices_triangle_fan', vertices,
         BlendMode.srcOver, Paint()..color = const Color.fromARGB(255, 0, 128, 0));
-  });
+  },
+  // TODO(yjbanov): https://github.com/flutter/flutter/issues/86623
+  skip: isFirefox);
 
   test('Should draw triangleStrip with colors.', () async {
     final Int32List colors = Int32List.fromList(<int>[
@@ -337,7 +347,9 @@ Future<void> testMain() async {
         colors: colors);
     await _testVertices('draw_vertices_triangle_strip', vertices,
         BlendMode.srcOver, Paint()..color = const Color.fromARGB(255, 0, 128, 0));
-  });
+  },
+  // TODO(yjbanov): https://github.com/flutter/flutter/issues/86623
+  skip: isFirefox);
 
   Future<void> testTexture(TileMode tileMode, String filename) async {
     final Uint16List indices = Uint16List.fromList(<int>[0, 1, 2, 3, 4, 0]);
@@ -377,15 +389,21 @@ Future<void> testMain() async {
 
   test('Should draw triangle with texture and indices', () async {
     await testTexture(TileMode.clamp, 'draw_vertices_texture');
-  });
+  },
+  // TODO(yjbanov): https://github.com/flutter/flutter/issues/86623
+  skip: isFirefox);
 
   test('Should draw triangle with texture and indices', () async {
     await testTexture(TileMode.mirror, 'draw_vertices_texture_mirror');
-  });
+  },
+  // TODO(yjbanov): https://github.com/flutter/flutter/issues/86623
+  skip: isFirefox);
 
   test('Should draw triangle with texture and indices', () async {
     await testTexture(TileMode.repeated, 'draw_vertices_texture_repeated');
-  });
+  },
+  // TODO(yjbanov): https://github.com/flutter/flutter/issues/86623
+  skip: isFirefox);
 }
 
 Future<HtmlImage> createTestImage({int width = 50, int height = 40}) {
