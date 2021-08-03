@@ -27,6 +27,7 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewStructure;
 import android.view.WindowInsets;
 import android.view.WindowManager;
@@ -115,6 +116,7 @@ public class FlutterView extends SurfaceView
     int systemGestureInsetRight = 0;
     int systemGestureInsetBottom = 0;
     int systemGestureInsetLeft = 0;
+    int physicalTouchSlop = -1;
   }
 
   private final DartExecutor dartExecutor;
@@ -178,6 +180,7 @@ public class FlutterView extends SurfaceView
     mIsSoftwareRenderingEnabled = mNativeView.getFlutterJNI().getIsSoftwareRenderingEnabled();
     mMetrics = new ViewportMetrics();
     mMetrics.devicePixelRatio = context.getResources().getDisplayMetrics().density;
+    mMetrics.physicalTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
     setFocusable(true);
     setFocusableInTouchMode(true);
 
@@ -762,7 +765,8 @@ public class FlutterView extends SurfaceView
             mMetrics.systemGestureInsetTop,
             mMetrics.systemGestureInsetRight,
             mMetrics.systemGestureInsetBottom,
-            mMetrics.systemGestureInsetLeft);
+            mMetrics.systemGestureInsetLeft,
+            mMetrics.physicalTouchSlop);
   }
 
   // Called by FlutterNativeView to notify first Flutter frame rendered.

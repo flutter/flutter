@@ -850,7 +850,8 @@ public class PlatformViewsControllerTest {
         int systemGestureInsetTop,
         int systemGestureInsetRight,
         int systemGestureInsetBottom,
-        int systemGestureInsetLeft) {}
+        int systemGestureInsetLeft,
+        int physicalTouchSlop) {}
 
     @Implementation
     public void invokePlatformMessageResponseCallback(
