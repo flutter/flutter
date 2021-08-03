@@ -470,36 +470,9 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       return;
     }
 
-    switch(shape.runtimeType){
-      case RoundedRectangleBorder:
-        final RoundedRectangleBorder roundedRectangleBorder = shape! as RoundedRectangleBorder;
-        final BorderRadius borderRadius = roundedRectangleBorder.borderRadius as BorderRadius;
-        canvas.drawRRect(borderRadius.toRRect(_thumbRect!), _paintThumb);
-        shape!.paint(canvas, _thumbRect!);
-        break;
-      case ContinuousRectangleBorder:
-        final Path path = shape!.getOuterPath(_thumbRect!, textDirection: textDirection);
-        canvas.drawPath(path, _paintThumb);
-        shape!.paint(canvas, _thumbRect!);
-        break;
-      case BeveledRectangleBorder:
-        final Path path = shape!.getOuterPath(_thumbRect!, textDirection: textDirection)
-          ..addPath(shape!.getInnerPath(_thumbRect!, textDirection: textDirection), Offset.zero);
-        canvas.drawPath(path, _paintThumb);
-        shape!.paint(canvas, _thumbRect!);
-        break;
-      case StadiumBorder:
-        final Radius radius = Radius.circular(_thumbRect!.shortestSide / 2.0);
-        canvas.drawRRect(
-          RRect.fromRectAndRadius(_thumbRect!, radius).deflate(shape!.side.width / 2.0),
-          _paintThumb);
-        shape!.paint(canvas, _thumbRect!);
-        break;
-      case CircleBorder:
-        canvas.drawCircle(_thumbRect!.center, (_thumbRect!.shortestSide - shape!.side.width) / 2.0, _paintThumb);
-        shape!.paint(canvas, _thumbRect!);
-        break;
-    }
+    final Path outerPath = shape!.getOuterPath(_thumbRect!);
+    canvas.drawPath(outerPath, _paintThumb);
+    shape!.paint(canvas, _thumbRect!);
   }
 
   double _thumbExtent() {

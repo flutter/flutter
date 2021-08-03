@@ -1566,7 +1566,7 @@ void main() {
             isAlwaysShown: true,
             child: SingleChildScrollView(
               controller: scrollController,
-              child: const SizedBox(height: 1000.0),
+              child: const SizedBox(height: 1000.0, width: 1000),
             ),
           ),
         )));
@@ -1575,7 +1575,15 @@ void main() {
     expect(
       find.byType(RawScrollbar),
       paints
-        ..circle(x: 782.0, y: 180.0, radius: 17.0)
+        ..path(
+          includes: const <Offset>[
+            Offset(782.0, 180.0),
+            Offset(782.0, 180.0 - 18.0),
+            Offset(782.0 + 18.0, 180),
+            Offset(782.0, 180.0 + 18.0),
+            Offset(782.0 - 18.0, 180),
+          ],
+        )
         ..circle(x: 782.0, y: 180.0, radius: 17.0, strokeWidth: 2.0)
     );
   });
@@ -1618,7 +1626,7 @@ void main() {
             isAlwaysShown: true,
             child: SingleChildScrollView(
               controller: scrollController,
-              child: const SizedBox(height: 1000.0),
+              child: const SizedBox(height: 1000.0, width: 1000.0),
             ),
           ),
         )));
@@ -1628,7 +1636,14 @@ void main() {
       find.byType(RawScrollbar),
       paints
         ..rect(rect: const Rect.fromLTRB(780.0, 0.0, 800.0, 600.0))
-        ..rrect(rrect: RRect.fromLTRBAndCorners(780.0, 0.0, 800.0, 360.0, topLeft: const Radius.circular(8.0)))
+        ..path(
+          includes: const <Offset>[
+            Offset(800.0, 0.0),
+          ],
+          excludes: <Offset>[
+            const Offset(780.0, 0.0),
+          ],
+        ),
     );
   });
   testWidgets('minOverscrollLength property of RawScrollbar is respected', (WidgetTester tester) async {
