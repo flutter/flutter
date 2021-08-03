@@ -62,13 +62,12 @@ void main() {
   });
 
   testWithoutContext('can launch chrome and connect to the devtools', () async {
-    expect(
-      () async => _testLaunchChrome(
+    await expectReturnsNormallyLater(
+      _testLaunchChrome(
         '/.tmp_rand0/flutter_tools_chrome_device.rand0',
         processManager,
         chromeLauncher,
-      ),
-      returnsNormally,
+      )
     );
   });
 
@@ -79,13 +78,13 @@ void main() {
       chromeLauncher,
     );
 
-    expect(
-      () async => _testLaunchChrome(
+    await expectToolExitLater(
+      _testLaunchChrome(
         '/.tmp_rand0/flutter_tools_chrome_device.rand1',
         processManager,
         chromeLauncher,
       ),
-      throwsToolExit(message: 'Only one instance of chrome can be started'),
+      contains('Only one instance of chrome can be started'),
     );
   });
 
@@ -97,13 +96,12 @@ void main() {
     );
     await chrome.close();
 
-    expect(
-      () async => _testLaunchChrome(
+    await expectReturnsNormallyLater(
+      _testLaunchChrome(
         '/.tmp_rand0/flutter_tools_chrome_device.rand1',
         processManager,
         chromeLauncher,
-      ),
-      returnsNormally,
+      )
     );
   });
 
@@ -219,12 +217,11 @@ void main() {
       )
     ]);
 
-    expect(
-          () async => chromiumLauncher.launch(
+    await expectReturnsNormallyLater(
+      chromiumLauncher.launch(
         'example_url',
         skipCheck: true,
-      ),
-      returnsNormally,
+      )
     );
   });
 
@@ -259,12 +256,11 @@ void main() {
       )
     ]);
 
-    expect(
-          () async => chromiumLauncher.launch(
+    await expectReturnsNormallyLater(
+      chromiumLauncher.launch(
         'example_url',
         skipCheck: true,
-      ),
-      returnsNormally,
+      )
     );
   });
 
@@ -301,12 +297,11 @@ void main() {
       ),
     ]);
 
-    expect(
-      () async => chromiumLauncher.launch(
+    await expectReturnsNormallyLater(
+      chromiumLauncher.launch(
         'example_url',
         skipCheck: true,
-      ),
-      returnsNormally,
+      )
     );
   });
 
@@ -322,13 +317,12 @@ void main() {
       stderr: kDevtoolsStderr,
     ));
 
-    expect(
-      () async => chromeLauncher.launch(
+    await expectReturnsNormallyLater(
+      chromeLauncher.launch(
         'example_url',
         skipCheck: true,
         debugPort: 10000,
-      ),
-      returnsNormally,
+      )
     );
   });
 
@@ -348,13 +342,12 @@ void main() {
       stderr: kDevtoolsStderr,
     ));
 
-    expect(
-      () async => chromeLauncher.launch(
+    await expectReturnsNormallyLater(
+      chromeLauncher.launch(
         'example_url',
         skipCheck: true,
         headless: true,
-      ),
-      returnsNormally,
+      )
     );
   });
 
@@ -451,13 +444,12 @@ void main() {
       stderr: kDevtoolsStderr,
     ));
 
-    expect(
-      () async => chromeLauncher.launch(
+    await expectReturnsNormallyLater(
+      chromeLauncher.launch(
         'example_url',
         skipCheck: true,
         headless: true,
-      ),
-      returnsNormally,
+      )
     );
   });
 
@@ -488,13 +480,12 @@ void main() {
       stderr: kDevtoolsStderr,
     ));
 
-    expect(
-      () async => chromeLauncher.launch(
+    await expectReturnsNormallyLater(
+      chromeLauncher.launch(
         'example_url',
         skipCheck: true,
         headless: true,
-      ),
-      returnsNormally,
+      )
     );
   });
 
@@ -516,19 +507,19 @@ void main() {
       ));
     }
 
-    expect(
-      () async => chromeLauncher.launch(
+    await expectToolExitLater(
+      chromeLauncher.launch(
         'example_url',
         skipCheck: true,
         headless: true,
       ),
-      throwsToolExit(message: 'Failed to launch browser.'),
+      contains('Failed to launch browser.'),
     );
   });
 
   testWithoutContext('Logs an error and exits if connection check fails.', () async {
     final BufferLogger logger = BufferLogger.test();
-    chromeLauncher = ChromiumLauncher(
+    final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
       fileSystem: fileSystem,
       platform: platform,
       processManager: processManager,
@@ -548,7 +539,7 @@ void main() {
     ));
 
     await expectToolExitLater(
-      chromeLauncher.launch(
+      chromiumLauncher.launch(
         'example_url',
         skipCheck: false,
         headless: false,
