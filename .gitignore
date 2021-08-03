@@ -38,6 +38,7 @@
 /dev/integration_tests/**/xcuserdata
 /dev/integration_tests/**/Pods
 /packages/flutter/coverage/
+/Andre/.flutter
 version
 analysis_benchmark.json
 
