@@ -103,7 +103,7 @@ TEST_F(ShellTest, PlatformConfigurationWindowMetricsUpdate) {
 
     ASSERT_NE(configuration->get_window(0), nullptr);
     configuration->get_window(0)->UpdateWindowMetrics(
-        ViewportMetrics{2.0, 10.0, 20.0});
+        ViewportMetrics{2.0, 10.0, 20.0, 22});
     ASSERT_EQ(
         configuration->get_window(0)->viewport_metrics().device_pixel_ratio,
         2.0);
@@ -111,6 +111,9 @@ TEST_F(ShellTest, PlatformConfigurationWindowMetricsUpdate) {
               10.0);
     ASSERT_EQ(configuration->get_window(0)->viewport_metrics().physical_height,
               20.0);
+    ASSERT_EQ(
+        configuration->get_window(0)->viewport_metrics().physical_touch_slop,
+        22);
 
     message_latch->Signal();
   };

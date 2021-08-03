@@ -12,10 +12,12 @@ ViewportMetrics::ViewportMetrics() = default;
 
 ViewportMetrics::ViewportMetrics(double p_device_pixel_ratio,
                                  double p_physical_width,
-                                 double p_physical_height)
+                                 double p_physical_height,
+                                 double p_physical_touch_slop)
     : device_pixel_ratio(p_device_pixel_ratio),
       physical_width(p_physical_width),
-      physical_height(p_physical_height) {}
+      physical_height(p_physical_height),
+      physical_touch_slop(p_physical_touch_slop) {}
 
 ViewportMetrics::ViewportMetrics(double p_device_pixel_ratio,
                                  double p_physical_width,
@@ -31,7 +33,8 @@ ViewportMetrics::ViewportMetrics(double p_device_pixel_ratio,
                                  double p_physical_system_gesture_inset_top,
                                  double p_physical_system_gesture_inset_right,
                                  double p_physical_system_gesture_inset_bottom,
-                                 double p_physical_system_gesture_inset_left)
+                                 double p_physical_system_gesture_inset_left,
+                                 double p_physical_touch_slop)
     : device_pixel_ratio(p_device_pixel_ratio),
       physical_width(p_physical_width),
       physical_height(p_physical_height),
@@ -48,8 +51,8 @@ ViewportMetrics::ViewportMetrics(double p_device_pixel_ratio,
           p_physical_system_gesture_inset_right),
       physical_system_gesture_inset_bottom(
           p_physical_system_gesture_inset_bottom),
-      physical_system_gesture_inset_left(p_physical_system_gesture_inset_left) {
-}
+      physical_system_gesture_inset_left(p_physical_system_gesture_inset_left),
+      physical_touch_slop(p_physical_touch_slop) {}
 
 bool operator==(const ViewportMetrics& a, const ViewportMetrics& b) {
   return a.device_pixel_ratio == b.device_pixel_ratio &&
@@ -70,7 +73,8 @@ bool operator==(const ViewportMetrics& a, const ViewportMetrics& b) {
          a.physical_system_gesture_inset_bottom ==
              b.physical_system_gesture_inset_bottom &&
          a.physical_system_gesture_inset_left ==
-             b.physical_system_gesture_inset_left;
+             b.physical_system_gesture_inset_left &&
+         a.physical_touch_slop == b.physical_touch_slop;
 }
 
 std::ostream& operator<<(std::ostream& os, const ViewportMetrics& a) {

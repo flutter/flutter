@@ -562,7 +562,8 @@ public class FlutterJNI {
       int systemGestureInsetTop,
       int systemGestureInsetRight,
       int systemGestureInsetBottom,
-      int systemGestureInsetLeft) {
+      int systemGestureInsetLeft,
+      int physicalTouchSlop) {
     ensureRunningOnMainThread();
     ensureAttachedToNative();
     nativeSetViewportMetrics(
@@ -581,7 +582,8 @@ public class FlutterJNI {
         systemGestureInsetTop,
         systemGestureInsetRight,
         systemGestureInsetBottom,
-        systemGestureInsetLeft);
+        systemGestureInsetLeft,
+        physicalTouchSlop);
   }
 
   private native void nativeSetViewportMetrics(
@@ -600,7 +602,8 @@ public class FlutterJNI {
       int systemGestureInsetTop,
       int systemGestureInsetRight,
       int systemGestureInsetBottom,
-      int systemGestureInsetLeft);
+      int systemGestureInsetLeft,
+      int physicalTouchSlop);
   // ----- End Render Surface Support -----
 
   // ------ Start Touch Interaction Support ---

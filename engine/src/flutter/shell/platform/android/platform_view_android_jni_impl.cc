@@ -276,7 +276,8 @@ static void SetViewportMetrics(JNIEnv* env,
                                jint systemGestureInsetTop,
                                jint systemGestureInsetRight,
                                jint systemGestureInsetBottom,
-                               jint systemGestureInsetLeft) {
+                               jint systemGestureInsetLeft,
+                               jint physicalTouchSlop) {
   const flutter::ViewportMetrics metrics{
       static_cast<double>(devicePixelRatio),
       static_cast<double>(physicalWidth),
@@ -293,6 +294,7 @@ static void SetViewportMetrics(JNIEnv* env,
       static_cast<double>(systemGestureInsetRight),
       static_cast<double>(systemGestureInsetBottom),
       static_cast<double>(systemGestureInsetLeft),
+      static_cast<double>(physicalTouchSlop),
   };
 
   ANDROID_SHELL_HOLDER->GetPlatformView()->SetViewportMetrics(metrics);
@@ -682,7 +684,7 @@ bool RegisterApi(JNIEnv* env) {
       },
       {
           .name = "nativeSetViewportMetrics",
-          .signature = "(JFIIIIIIIIIIIIII)V",
+          .signature = "(JFIIIIIIIIIIIIIII)V",
           .fnPtr = reinterpret_cast<void*>(&SetViewportMetrics),
       },
       {

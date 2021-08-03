@@ -20,6 +20,7 @@ import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.view.Surface;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewStructure;
 import android.view.WindowInsets;
@@ -1262,6 +1263,7 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
     }
 
     viewportMetrics.devicePixelRatio = getResources().getDisplayMetrics().density;
+    viewportMetrics.physicalTouchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
     flutterEngine.getRenderer().setViewportMetrics(viewportMetrics);
   }
 
