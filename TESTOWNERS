@@ -221,3 +221,4 @@
 # fuchsia_precache @zanderso @flutter/tool
 # skp_generator @Hixie
 # test_ownership @keyonghan
+# verify_binaries_codesigned @christopherfujino @flutter/releases
