@@ -449,7 +449,11 @@ abstract class TextEditingActionTarget {
       return moveSelectionToStart(cause);
     }
 
-    setSelection(value.expandSelectionTo(TextPosition(offset: 0, affinity: TextAffinity.upstream), true), cause);
+    const TextPosition nextPosition = TextPosition(
+      offset: 0,
+      affinity: TextAffinity.upstream,
+    );
+    setSelection(value.expandSelectionTo(nextPosition, true), cause);
   }
 
   /// If [selectionEnabled] is false, keeps the selection collapsed and moves it

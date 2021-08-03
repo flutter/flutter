@@ -650,7 +650,7 @@ void main() {
       actualNewValue,
       const TextEditingValue(
         text: '12',
-        selection: TextSelection.collapsed(offset: 2),
+        selection: TextSelection.collapsed(offset: 2, affinity: TextAffinity.upstream),
       ),
     );
   }, skip: areKeyEventsHandledByPlatform);
