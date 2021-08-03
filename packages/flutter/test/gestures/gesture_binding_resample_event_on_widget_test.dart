@@ -28,6 +28,11 @@ class TestSamplingClock implements SamplingClock {
 }
 
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   final TestWidgetsFlutterBinding binding = TestResampleEventFlutterBinding();
   testWidgets('PointerEvent resampling on a widget', (WidgetTester tester) async {
     assert(WidgetsBinding.instance == binding);

@@ -47,6 +47,11 @@ class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate
 }
 
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   testWidgets('Scrollable widget scrollDirection update test', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     Widget buildFrame(Axis axis) {

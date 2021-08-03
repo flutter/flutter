@@ -6,6 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   /*
    * Here lies golden tests for packages/flutter_test/lib/src/binding.dart
    * because [matchesGoldenFile] does not use Skia Gold in its native package.

@@ -16,6 +16,11 @@ PopupMenuThemeData _popupMenuTheme() {
 }
 
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   test('PopupMenuThemeData copyWith, ==, hashCode basics', () {
     expect(const PopupMenuThemeData(), const PopupMenuThemeData().copyWith());
     expect(const PopupMenuThemeData().hashCode, const PopupMenuThemeData().copyWith().hashCode);

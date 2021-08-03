@@ -265,6 +265,11 @@ Finder findTooltipContainer(String tooltipText) {
 }
 
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   testWidgets('Chip control test', (WidgetTester tester) async {
     final FeedbackTester feedback = FeedbackTester();
     final List<String> deletedChipLabels = <String>[];

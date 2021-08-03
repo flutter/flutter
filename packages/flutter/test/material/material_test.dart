@@ -64,6 +64,11 @@ class ElevationColor {
 }
 
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   // Regression test for https://github.com/flutter/flutter/issues/81504
   testWidgets('MaterialApp.home nullable and update test', (WidgetTester tester) async {
     // _WidgetsAppState._usesNavigator == true

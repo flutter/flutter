@@ -9,6 +9,11 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   testWidgets('Passes textAlign to underlying CupertinoTextField', (WidgetTester tester) async {
     const TextAlign alignment = TextAlign.center;
 

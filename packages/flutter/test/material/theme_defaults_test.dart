@@ -11,6 +11,11 @@ const BoxConstraints defaultButtonConstraints = BoxConstraints(minWidth: 88.0, m
 const Duration defaultButtonDuration = Duration(milliseconds: 200);
 
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   group('RaisedButton', () {
     testWidgets('theme: ThemeData.light(), enabled: true', (WidgetTester tester) async {
       await tester.pumpWidget(

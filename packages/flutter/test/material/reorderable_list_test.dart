@@ -8,6 +8,11 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   group('$ReorderableListView', () {
     const double itemHeight = 48.0;
     const List<String> originalListItems = <String>['Item 1', 'Item 2', 'Item 3', 'Item 4'];

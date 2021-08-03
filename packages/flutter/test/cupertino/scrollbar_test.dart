@@ -16,6 +16,11 @@ const CupertinoDynamicColor _kScrollbarColor = CupertinoDynamicColor.withBrightn
 );
 
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   const Duration _kScrollbarTimeToFade = Duration(milliseconds: 1200);
   const Duration _kScrollbarFadeDuration = Duration(milliseconds: 250);
   const Duration _kScrollbarResizeDuration = Duration(milliseconds: 100);
