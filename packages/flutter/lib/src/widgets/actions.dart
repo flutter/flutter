@@ -144,7 +144,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// sends the focus to the preceding text field when the currently focused
   /// field becomes empty.
   ///
-  /// ```dart preamble
+  /// ```dart
   /// // This implements a custom phone number input field that handles the
   /// // [DeleteTextIntent] intent.
   /// class DigitInput extends StatefulWidget {
@@ -160,6 +160,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   ///   final TextEditingController controller;
   ///   final TextInputAction textInputAction;
   ///   final FocusNode focusNode;
+  ///
   ///   @override
   ///   DigitInputState createState() => DigitInputState();
   /// }
@@ -195,10 +196,11 @@ abstract class Action<T extends Intent> with Diagnosticable {
   ///     );
   ///   }
   /// }
-  /// ```
   ///
-  /// ``` dart
   /// class SimpleUSPhoneNumberEntry extends StatefulWidget {
+  ///   const SimpleUSPhoneNumberEntry({ Key? key }) : super(key: key);
+  ///
+  ///   @override
   ///   State<SimpleUSPhoneNumberEntry> createState() => _SimpleUSPhoneNumberEntryState();
   /// }
   ///
@@ -225,7 +227,6 @@ abstract class Action<T extends Intent> with Diagnosticable {
   ///   @override
   ///   bool get isActionEnabled => callingAction?.isActionEnabled ?? false;
   /// }
-  /// ```
   ///
   /// class _SimpleUSPhoneNumberEntryState extends State<SimpleUSPhoneNumberEntry> {
   ///   final FocusNode areaCodeFocusNode = FocusNode();
@@ -244,11 +245,11 @@ abstract class Action<T extends Intent> with Diagnosticable {
   ///       child: Row(
   ///         mainAxisAlignment: MainAxisAlignment.spaceBetween,
   ///         children: <Widget>[
-  ///           Expanded(child: Text('(', textAlign: TextAlign.center,), flex: 1),
+  ///           const Expanded(child: Text('(', textAlign: TextAlign.center,), flex: 1),
   ///           Expanded(child: DigitInput(focusNode: areaCodeFocusNode, controller: areaCodeController, maxLength: 3), flex: 3),
-  ///           Expanded(child: Text(')', textAlign: TextAlign.center,), flex: 1),
+  ///           const Expanded(child: Text(')', textAlign: TextAlign.center,), flex: 1),
   ///           Expanded(child: DigitInput(focusNode: prefixFocusNode, controller: prefixController, maxLength: 3), flex: 3),
-  ///           Expanded(child: Text('-', textAlign: TextAlign.center,), flex: 1),
+  ///           const Expanded(child: Text('-', textAlign: TextAlign.center,), flex: 1),
   ///           Expanded(child: DigitInput(focusNode: lineNumberFocusNode, controller: lineNumberController, textInputAction: TextInputAction.done, maxLength: 4), flex: 4),
   ///         ],
   ///       ),
@@ -278,14 +279,15 @@ abstract class Action<T extends Intent> with Diagnosticable {
   ///
   /// The [Action.overridable] constructor creates an overridable [Action] that
   /// allows itself to be overridden by the closest ancestor [Action], and falls
-  /// back to its own `defaultAction` when no overrides can be found. An
-  /// overridable [Action] looks for an override and forwards all incoming
-  /// method calls to the override. The override also has access to the
-  /// `defaultAction` so
+  /// back to its own `defaultAction` when no overrides can be found. When an
+  /// override is present, an overridable [Action] forwards all incoming
+  /// method calls to the override, and allows the override to access the
+  /// `defaultAction` via its [callingAction] property.
   ///
-  /// Before forwarding the call to the override,
-  /// the overridable [Action] is responsible for setting [callingAction] to
-  /// its `defaultAction`.
+  /// Before forwarding the call to the override, the overridable [Action] is
+  /// responsible for setting [callingAction] to its `defaultAction`, which is
+  /// already taken care of by the overridable [Action] created using
+  /// [Action.overridable].
   ///
   /// This property is only non-null when this [Action] is an override of the
   /// [callingAction], and is currently being invoked from [callingAction].
@@ -1960,12 +1962,10 @@ class PrioritizedAction extends Action<PrioritizedIntents> {
 }
 
 mixin _OverridableActionMixin<T extends Intent> on Action<T> {
-  // Asserts when the override calls this action's `invoke` method when the
-  // override is currently being invoked from within the `invoke` method.
+  // When debugAssertMutuallyRecursive is true, this action will throw an
+  // assertion error when the override calls this action's "invoke" method and
+  // the override is already being invoked from within the "invoke" method.
   bool debugAssertMutuallyRecursive = false;
-  // Asserts when the override tries to access this action's `isActionEnabled`
-  // property when this action's `isActionEnabled` property depends on the
-  // override's `isActionEnabled` property.
   bool debugAssertIsActionEnabledMutuallyRecursive = false;
   bool debugAssertIsEnabledMutuallyRecursive = false;
   bool debugAssertConsumeKeyMutuallyRecursive = false;
