@@ -2454,10 +2454,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
     } else {
       WidgetsBinding.instance!.removeObserver(this);
-      setState(() {
-        _currentPromptRectRange = null;
-      });
+      _currentPromptRectRange = null;
     }
+
+    setState(() {
+       // EditableText shows/hides the selection based on whether the widget
+       // is focused.
+    });
     updateKeepAlive();
   }
 
