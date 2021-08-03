@@ -14,6 +14,7 @@ import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
     as wip;
 
 import 'browser.dart';
+import 'browser_lock.dart';
 import 'chrome_installer.dart';
 import 'common.dart';
 import 'environment.dart';
@@ -35,7 +36,12 @@ class ChromeEnvironment implements BrowserEnvironment {
 
   @override
   ScreenshotManager? getScreenshotManager() {
-    return ChromeScreenshotManager();
+    // Always compare screenshots when running tests locally. On CI only compare
+    // on Linux.
+    if (Platform.isLinux || !isLuci) {
+      return ChromeScreenshotManager();
+    }
+    return null;
   }
 
   @override
@@ -59,7 +65,7 @@ class Chrome extends Browser {
   /// Starts a new instance of Chrome open to the given [url], which may be a
   /// [Uri] or a [String].
   factory Chrome(Uri url, {bool debug = false}) {
-    final String version = ChromeArgParser.instance.version;
+    final String version = browserLock.chromeLock.versionForCurrentPlatform;
     final Completer<Uri> remoteDebuggerCompleter = Completer<Uri>.sync();
     return Chrome._(() async {
       final BrowserInstallation installation = await getOrInstallChrome(

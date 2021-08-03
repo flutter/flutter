@@ -8,7 +8,11 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' hide TextStyle;
+import '../../common.dart';
 import '../screenshot.dart';
+
+// TODO(yjbanov): unskip Firefox tests when Firefox implements WebGL in headless mode.
+// https://github.com/flutter/flutter/issues/86623
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -115,7 +119,7 @@ Future<void> testMain() async {
     expect(rc.renderStrategy.hasArbitraryPaint, isTrue);
     await canvasScreenshot(rc, 'linear_gradient_tiled_repeated_rect',
         region: screenRect);
-  });
+  }, skip: isFirefox);
 
   test('Should draw tiled mirrored linear gradient with transform.', () async {
     final RecordingCanvas rc =
@@ -142,5 +146,5 @@ Future<void> testMain() async {
     expect(rc.renderStrategy.hasArbitraryPaint, isTrue);
     await canvasScreenshot(rc, 'linear_gradient_tiled_mirrored_rect',
         region: screenRect);
-  });
+  }, skip: isFirefox);
 }

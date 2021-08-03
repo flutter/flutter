@@ -12,6 +12,8 @@ import 'package:ui/ui.dart';
 
 import 'package:web_engine_tester/golden_tester.dart';
 
+import '../../common.dart';
+
 /// To debug compositing failures on browsers, set this flag to true and run
 /// flutter run -d chrome --web-renderer=html
 ///        test/golden_tests/engine/shader_mask_golden_test.dart --profile
@@ -26,8 +28,9 @@ Future<void> main() async {
 }
 
 // TODO(ferhat): unskip webkit tests once flakiness is resolved. See
-/// https://github.com/flutter/flutter/issues/76713
-bool get isWebkit => browserEngine == BrowserEngine.webkit;
+// https://github.com/flutter/flutter/issues/76713
+// TODO(yjbanov): unskip Firefox tests when Firefox implements WebGL in headless mode.
+// https://github.com/flutter/flutter/issues/86623
 
 Future<void> testMain() async {
   setUp(() async {
@@ -48,58 +51,58 @@ Future<void> testMain() async {
     _renderCirclesScene(BlendMode.dst);
     await matchGoldenFile('shadermask_linear_dst.png',
         region: const Rect.fromLTWH(0, 0, 360, 200));
-  }, skip: isWebkit);
+  }, skip: isSafari || isFirefox);
 
   /// Should render the gradient only where circles have alpha channel.
   test('Renders shader mask with linear gradient BlendMode srcIn', () async {
     _renderCirclesScene(BlendMode.srcIn);
     await matchGoldenFile('shadermask_linear_srcin.png',
         region: const Rect.fromLTWH(0, 0, 360, 200));
-  }, skip: isWebkit);
+  }, skip: isSafari || isFirefox);
 
   test('Renders shader mask with linear gradient BlendMode color', () async {
     _renderCirclesScene(BlendMode.color);
     await matchGoldenFile('shadermask_linear_color.png',
         region: const Rect.fromLTWH(0, 0, 360, 200));
-  }, skip: isWebkit);
+  }, skip: isSafari || isFirefox);
 
   test('Renders shader mask with linear gradient BlendMode xor', () async {
     _renderCirclesScene(BlendMode.xor);
     await matchGoldenFile('shadermask_linear_xor.png',
         region: const Rect.fromLTWH(0, 0, 360, 200));
-  }, skip: isWebkit);
+  }, skip: isSafari || isFirefox);
 
   test('Renders shader mask with linear gradient BlendMode plus', () async {
     _renderCirclesScene(BlendMode.plus);
     await matchGoldenFile('shadermask_linear_plus.png',
         region: const Rect.fromLTWH(0, 0, 360, 200));
-  }, skip: isWebkit);
+  }, skip: isSafari || isFirefox);
 
   test('Renders shader mask with linear gradient BlendMode modulate', () async {
     _renderCirclesScene(BlendMode.modulate);
     await matchGoldenFile('shadermask_linear_modulate.png',
         region: const Rect.fromLTWH(0, 0, 360, 200));
-  }, skip: isWebkit);
+  }, skip: isSafari || isFirefox);
 
   test('Renders shader mask with linear gradient BlendMode overlay', () async {
     _renderCirclesScene(BlendMode.overlay);
     await matchGoldenFile('shadermask_linear_overlay.png',
         region: const Rect.fromLTWH(0, 0, 360, 200));
-  }, skip: isWebkit);
+  }, skip: isSafari || isFirefox);
 
   /// Should render the gradient opaque on top of content.
   test('Renders shader mask with linear gradient BlendMode src', () async {
     _renderCirclesScene(BlendMode.src);
     await matchGoldenFile('shadermask_linear_src.png',
         region: const Rect.fromLTWH(0, 0, 360, 200));
-  }, skip: isWebkit);
+  }, skip: isSafari || isFirefox);
 
   /// Should render text with gradient.
   test('Renders text with linear gradient shader mask', () async {
     _renderTextScene(BlendMode.srcIn);
     await matchGoldenFile('shadermask_linear_text.png',
         region: const Rect.fromLTWH(0, 0, 360, 200), maxDiffRatePercent: 2.0);
-  }, skip: isWebkit);
+  }, skip: isSafari || isFirefox);
 }
 
 Picture _drawTestPictureWithCircles(

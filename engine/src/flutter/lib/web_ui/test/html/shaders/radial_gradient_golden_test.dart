@@ -6,6 +6,7 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' hide TextStyle;
+import '../../common.dart';
 import '../screenshot.dart';
 
 void main() {
@@ -111,7 +112,9 @@ Future<void> testMain() async {
             TileMode.repeated),
         shaderRect: shaderRect,
         region: const Rect.fromLTWH(0, 0, 600, 800));
-  });
+  },
+  // TODO(yjbanov): https://github.com/flutter/flutter/issues/86623
+  skip: isFirefox);
 
   test('Should draw with radial gradient with TileMode.mirrored.', () async {
     const Rect shaderRect = Rect.fromLTRB(50, 50, 100, 100);
@@ -126,5 +129,7 @@ Future<void> testMain() async {
             TileMode.mirror),
         shaderRect: shaderRect,
         region: const Rect.fromLTWH(0, 0, 600, 800));
-  });
+  },
+  // TODO(yjbanov): https://github.com/flutter/flutter/issues/86623
+  skip: isFirefox);
 }

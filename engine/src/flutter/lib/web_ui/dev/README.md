@@ -31,9 +31,16 @@ If you don't want to add `felt` to your path, you can still invoke it using a re
 
 ## Speeding up your builds and tests
 
-If you are a Google employee, you can use an internal instance of Goma to parallelize your builds. Because Goma compiles code on remote servers, this option is effective even on low-powered laptops.
+If you are a Google employee, you can use an internal instance of Goma (go/ma)
+to parallelize your builds. Because Goma compiles code on remote servers, this
+option is particularly effective for building on low-powered laptops.
 
-By default, when compiling Dart code to JavaScript, we use 8 `dart2js` workers.
+Concurrency of various build steps can be configured via environment variables:
+
+- `FELT_DART2JS_CONCURRENCY` specifies the number of concurrent `dart2js`
+  processes used to compile tests. Default value is 8.
+- `FELT_TEST_CONCURRENCY` specifies the number of tests run concurrently.
+  Default value is 10.
 
 ## Running web engine tests
 
