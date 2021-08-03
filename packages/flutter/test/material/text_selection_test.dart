@@ -149,7 +149,7 @@ void main() {
       expect(find.text('Select all'), findsOneWidget);
       expect(find.byType(IconButton), findsNothing);
     },
-      skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
+      skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
 
@@ -223,7 +223,7 @@ void main() {
       expect(find.text('Select all'), findsNothing);
       expect(find.byType(IconButton), findsOneWidget);
     },
-      skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
+      skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
 
@@ -288,7 +288,7 @@ void main() {
       expect(find.text('Select all'), findsNothing);
       expect(find.byType(IconButton), findsOneWidget);
     },
-      skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
+      skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
 
@@ -362,7 +362,7 @@ void main() {
       expect(find.text('Select all'), findsNothing);
       expect(find.byType(IconButton), findsOneWidget);
     },
-      skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
+      skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
 
@@ -468,7 +468,7 @@ void main() {
       final Offset newCutOffset = tester.getTopLeft(find.text('Cut'));
       expect(newCutOffset, equals(cutOffset));
     },
-      skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
+      skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
   });
@@ -542,7 +542,7 @@ void main() {
       final Offset cutOffset = tester.getTopLeft(find.text('Cut'));
       expect(cutOffset.dy, greaterThan(bottomHandlePos.dy));
     },
-      skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
+      skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
   });
@@ -667,7 +667,10 @@ void main() {
     expect(find.text('Cut'), findsOneWidget);
     expect(find.text('Paste'), findsOneWidget);
     expect(find.text('Select all'), findsOneWidget);
-  }, skip: isBrowser, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }));
+  },
+    skip: isBrowser, // [intended] we don't supply the cut/copy/paste buttons on the web.
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android })
+  );
 
   // TODO(justinmc): https://github.com/flutter/flutter/issues/60145
   testWidgets('Paste always appears regardless of clipboard content on iOS', (WidgetTester tester) async {
@@ -719,5 +722,8 @@ void main() {
     expect(find.text('Copy'), findsOneWidget);
     expect(find.text('Cut'), findsOneWidget);
     expect(find.text('Paste'), findsOneWidget);
-  }, skip: isBrowser, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+  },
+    skip: isBrowser, // [intended] we don't supply the cut/copy/paste buttons on the web.
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS })
+  );
 }

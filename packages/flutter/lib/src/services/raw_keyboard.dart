@@ -285,12 +285,10 @@ abstract class RawKeyEvent with Diagnosticable {
   /// Creates a concrete [RawKeyEvent] class from a message in the form received
   /// on the [SystemChannels.keyEvent] channel.
   factory RawKeyEvent.fromMessage(Map<String, dynamic> message) {
-    final RawKeyEventData data;
     String? character;
-
     RawKeyEventData _dataFromWeb() {
       final String? key = message['key'] as String?;
-      if (key != null && key.isNotEmpty) {
+      if (key != null && key.isNotEmpty && key.length == 1) {
         character = key;
       }
       return RawKeyEventDataWeb(
@@ -300,6 +298,8 @@ abstract class RawKeyEvent with Diagnosticable {
         metaState: message['metaState'] as int? ?? 0,
       );
     }
+
+    final RawKeyEventData data;
     if (kIsWeb) {
       data = _dataFromWeb();
     } else {
