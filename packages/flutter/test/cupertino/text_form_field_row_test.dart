@@ -176,6 +176,35 @@ void main() {
     expect(_value, 'Soup');
   });
 
+  testWidgets('`Form.onChanged` should Called when a form field has changed', (WidgetTester tester) async {
+    String? _value;
+    String? checkedValue;
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: Form(
+            onChanged: () => checkedValue = _value,
+            child: CupertinoTextFormFieldRow(
+              onChanged: (String value) {
+                _value = value;
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(_value, null);
+    expect(checkedValue, null);
+
+    await tester.enterText(find.byType(CupertinoTextField), 'I love Flutter!');
+    await tester.pump();
+
+    expect(_value, 'I love Flutter!');
+    expect(checkedValue, 'I love Flutter!');
+  });
+
   testWidgets('autovalidateMode is passed to super', (WidgetTester tester) async {
     int _validateCalled = 0;
 

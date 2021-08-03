@@ -312,6 +312,37 @@ void main() {
     expect(_value, 'Soup');
   });
 
+  testWidgets('`Form.onChanged` should Called when a form field has changed', (WidgetTester tester) async {
+    String? _value;
+    String? checkedValue;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: Form(
+              onChanged: () => checkedValue = _value,
+              child: TextFormField(
+                onChanged: (String value) {
+                  _value = value;
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(_value, null);
+    expect(checkedValue, null);
+
+    await tester.enterText(find.byType(TextField), 'I love Flutter!');
+    await tester.pump();
+
+    expect(_value, 'I love Flutter!');
+    expect(checkedValue, 'I love Flutter!');
+  });
+
   testWidgets('autovalidateMode is passed to super', (WidgetTester tester) async {
     int _validateCalled = 0;
 

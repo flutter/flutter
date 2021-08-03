@@ -218,10 +218,10 @@ class CupertinoTextFormFieldRow extends FormField<String> {
                 field as _CupertinoTextFormFieldRowState;
 
             void onChangedHandler(String value) {
-              field.didChange(value);
               if (onChanged != null) {
                 onChanged(value);
               }
+              field.didChange(value);
             }
 
             return CupertinoFormRow(
