@@ -1088,8 +1088,12 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     FocusOnKeyEventCallback? onKeyEvent,
     FocusOnKeyCallback? onKey,
   }) {
+    assert(
+      onKey != null || this.onKey == null,
+      'Overwriting `focusNode.onKey` to null may not be an intentional design.'
+    );
     _context = context;
-    this.onKey = onKey ?? this.onKey;
+    this.onKey = onKey;
     this.onKeyEvent = onKeyEvent ?? this.onKeyEvent;
     _attachment = FocusAttachment._(this);
     return _attachment!;

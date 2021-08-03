@@ -7,6 +7,29 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets('`FocusNode.onKey` test', (WidgetTester tester) async {
+    final GlobalKey key1 = GlobalKey(debugLabel: '1');
+    bool? keyEventHandled;
+    final FocusNode focusNode = FocusNode(
+        onKey: (FocusNode node, RawKeyEvent event) {
+          keyEventHandled = true;
+          return KeyEventResult.handled;
+        }
+    );
+
+    await tester.pumpWidget(
+      RawKeyboardListener(
+        focusNode: focusNode,
+        child: Container(key: key1),
+      ),
+    );
+
+    Focus.of(key1.currentContext!).requestFocus();
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    expect(keyEventHandled, true);
+  });
+
   testWidgets('Can dispose without keyboard', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     await tester.pumpWidget(RawKeyboardListener(focusNode: focusNode, onKey: null, child: Container()));

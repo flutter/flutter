@@ -1625,7 +1625,79 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.enter);
       expect(keyEventHandled, isTrue);
     });
+
+    // Regression test for https://github.com/flutter/flutter/issues/83023
+    testWidgets('Thrown if overwriting `focusNode.onKey` to null', (WidgetTester tester) async {
+      final GlobalKey key1 = GlobalKey(debugLabel: '1');
+      final FocusNode focusNode = FocusNode(
+          onKey: (FocusNode node, RawKeyEvent event) {
+            return KeyEventResult.handled;
+          }
+      );
+
+      await tester.pumpWidget(
+        Focus(
+          onKey: null,
+          focusNode: focusNode,
+          child: Container(key: key1),
+        ),
+      );
+
+      expect(tester.takeException(), isAssertionError);
+    });
+
+    testWidgets('`Focus.onKey` has a higher priority', (WidgetTester tester) async {
+      final GlobalKey key1 = GlobalKey(debugLabel: '1');
+      bool? keyEventHandled;
+      final FocusNode focusNode = FocusNode(
+          onKey: (FocusNode node, RawKeyEvent event) {
+            keyEventHandled = true;
+            return KeyEventResult.handled;
+          }
+      );
+
+      await tester.pumpWidget(
+        Focus(
+          onKey: (_, __) => KeyEventResult.handled,
+          focusNode: focusNode,
+          child: Container(key: key1),
+        ),
+      );
+
+      Focus.of(key1.currentContext!).requestFocus();
+      await tester.pump();
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      expect(keyEventHandled, null);
+
+      // Update the Focus widget.
+      await tester.pumpWidget(
+        Focus(
+          onKey: (_, __) => KeyEventResult.handled,
+          focusNode: focusNode,
+          child: Container(key: key1),
+        ),
+      );
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      expect(keyEventHandled, null);
+      bool? keyEventHandledByFocus;
+      await tester.pumpWidget(
+        Focus(
+          onKey: (_, __) {
+            keyEventHandledByFocus = true;
+            return KeyEventResult.ignored;
+          },
+          focusNode: focusNode,
+          child: Container(key: key1),
+        ),
+      );
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      expect(keyEventHandled, null);
+      expect(keyEventHandledByFocus, true);
+    });
   });
+
   group('ExcludeFocus', () {
     testWidgets("Descendants of ExcludeFocus aren't focusable.", (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');

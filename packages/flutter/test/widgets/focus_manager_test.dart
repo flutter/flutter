@@ -989,9 +989,9 @@ void main() {
       final FocusScopeNode scope2 = FocusScopeNode(debugLabel: 'Scope 2');
       final FocusAttachment scope2Attachment = scope2.attach(context, onKey: handleEvent);
       final FocusNode parent1 = FocusNode(debugLabel: 'Parent 1', onKey: handleEvent);
-      final FocusAttachment parent1Attachment = parent1.attach(context);
+      final FocusAttachment parent1Attachment = parent1.attach(context, onKey: parent1.onKey);
       final FocusNode parent2 = FocusNode(debugLabel: 'Parent 2', onKey: handleEvent);
-      final FocusAttachment parent2Attachment = parent2.attach(context);
+      final FocusAttachment parent2Attachment = parent2.attach(context, onKey: parent1.onKey);
       final FocusNode child1 = FocusNode(debugLabel: 'Child 1');
       final FocusAttachment child1Attachment = child1.attach(context, onKey: handleEvent);
       final FocusNode child2 = FocusNode(debugLabel: 'Child 2');

@@ -134,6 +134,7 @@ class _RawKeyboardListenerState extends State<RawKeyboardListener> {
   Widget build(BuildContext context) {
     return Focus(
       focusNode: widget.focusNode,
+      onKey: widget.focusNode.onKey,
       autofocus: widget.autofocus,
       includeSemantics: widget.includeSemantics,
       child: widget.child,

@@ -527,4 +527,60 @@ void main() {
     expect(focusNodeA.hasFocus, false);
     expect(focusNodeB.hasFocus, true);
   }, variant: TargetPlatformVariant.desktop());
+
+  testWidgets('`FocusNode.onKey` test', (WidgetTester tester) async {
+    bool? keyEventHandled;
+    final FocusNode focusNode = FocusNode(
+        onKey: (FocusNode node, RawKeyEvent event) {
+          keyEventHandled = true;
+          return KeyEventResult.handled;
+        }
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
+              autofocus: true,
+              focusNode: focusNode,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.testTextInput.isVisible, isTrue);
+    expect(focusNode.hasFocus, isTrue);
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    expect(keyEventHandled, true);
+
+    // Change the focusNode.
+    final FocusNode focusNode1 = FocusNode(
+        onKey: (FocusNode node, RawKeyEvent event) {
+          keyEventHandled = true;
+          return KeyEventResult.handled;
+        }
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
+              autofocus: true,
+              focusNode: focusNode1,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.testTextInput.isVisible, isTrue);
+    focusNode1.requestFocus();
+    await tester.pump();
+    expect(focusNode1.hasFocus, isTrue);
+    keyEventHandled = null;
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    expect(keyEventHandled, true);
+  });
 }

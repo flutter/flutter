@@ -1606,7 +1606,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     super.initState();
     _clipboardStatus?.addListener(_onChangedClipboardStatus);
     widget.controller.addListener(_didChangeTextEditingValue);
-    _focusAttachment = widget.focusNode.attach(context);
+    _focusAttachment = widget.focusNode.attach(context, onKey: widget.focusNode.onKey);
     widget.focusNode.addListener(_handleFocusChanged);
     _scrollController = widget.scrollController ?? ScrollController();
     _scrollController!.addListener(() { _selectionOverlay?.updateForScroll(); });
@@ -1656,7 +1656,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (widget.focusNode != oldWidget.focusNode) {
       oldWidget.focusNode.removeListener(_handleFocusChanged);
       _focusAttachment?.detach();
-      _focusAttachment = widget.focusNode.attach(context);
+      _focusAttachment = widget.focusNode.attach(context, onKey: widget.focusNode.onKey);
       widget.focusNode.addListener(_handleFocusChanged);
       updateKeepAlive();
     }
