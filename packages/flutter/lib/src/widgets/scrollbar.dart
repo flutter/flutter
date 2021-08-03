@@ -1303,7 +1303,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       fadeoutOpacityAnimation: _fadeoutOpacityAnimation,
       scrollbarOrientation: widget.scrollbarOrientation,
       mainAxisMargin: widget.mainAxisMargin,
-      shape: widget.shape
+      shape: widget.shape,
       crossAxisMargin: widget.crossAxisMargin
     );
   }
@@ -1433,7 +1433,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       ..padding = MediaQuery.of(context).padding
       ..scrollbarOrientation = widget.scrollbarOrientation
       ..mainAxisMargin = widget.mainAxisMargin
-      ..shape = widget.shape;
+      ..shape = widget.shape
       ..crossAxisMargin = widget.crossAxisMargin
       ..minLength = widget.minThumbLength
       ..minOverscrollLength = widget.minOverscrollLength ?? widget.minThumbLength;

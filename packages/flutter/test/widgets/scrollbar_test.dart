@@ -1509,7 +1509,7 @@ void main() {
             ),
           ),
         )));
-    await tester.pumpAndSettle();    
+    await tester.pumpAndSettle();
     expect(
       find.byType(RawScrollbar),
       paints
@@ -1692,7 +1692,6 @@ void main() {
     final ScrollController scrollController = ScrollController();
     Widget buildFrame(double height) {
       return Directionality(
-
         textDirection: TextDirection.ltr,
         child: MediaQuery(
           data: const MediaQueryData(),
