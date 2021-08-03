@@ -867,7 +867,7 @@ static void DisposeOps(uint8_t* ptr, uint8_t* end) {
 
       FOR_EACH_DISPLAY_LIST_OP(DL_OP_DISPOSE)
 
-#undef DL_OP_DISPATCH
+#undef DL_OP_DISPOSE
 
       default:
         FML_DCHECK(false);
@@ -905,7 +905,7 @@ static bool CompareOps(uint8_t* ptrA,
 
       FOR_EACH_DISPLAY_LIST_OP(DL_OP_EQUALS)
 
-#undef DL_OP_DISPATCH
+#undef DL_OP_EQUALS
 
       default:
         FML_DCHECK(false);
@@ -1246,7 +1246,7 @@ void DisplayListBuilder::drawPoints(SkCanvas::PointMode mode,
                                     uint32_t count,
                                     const SkPoint pts[]) {
   void* data_ptr;
-  FML_DCHECK(count < MaxDrawPointsCount);
+  FML_DCHECK(count < kMaxDrawPointsCount);
   int bytes = count * sizeof(SkPoint);
   switch (mode) {
     case SkCanvas::PointMode::kPoints_PointMode:

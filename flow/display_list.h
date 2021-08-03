@@ -222,7 +222,7 @@ class DisplayList : public SkRefCnt {
 class Dispatcher {
  public:
   // MaxDrawPointsCount * sizeof(SkPoint) must be less than 1 << 32
-  static constexpr int MaxDrawPointsCount = ((1 << 29) - 1);
+  static constexpr int kMaxDrawPointsCount = ((1 << 29) - 1);
 
   virtual void setAA(bool aa) = 0;
   virtual void setDither(bool dither) = 0;
@@ -334,7 +334,7 @@ class Dispatcher {
 // the DisplayListCanvasRecorder class.
 class DisplayListBuilder final : public virtual Dispatcher, public SkRefCnt {
  public:
-  DisplayListBuilder(const SkRect& cull = SkRect::MakeEmpty());
+  DisplayListBuilder(const SkRect& cull = kMaxCull_);
   ~DisplayListBuilder();
 
   void setAA(bool aa) override;
@@ -451,6 +451,8 @@ class DisplayListBuilder final : public virtual Dispatcher, public SkRefCnt {
   int save_level_ = 0;
 
   SkRect cull_;
+  static constexpr SkRect kMaxCull_ =
+      SkRect::MakeLTRB(-1E9F, -1E9F, 1E9F, 1E9F);
 
   template <typename T, typename... Args>
   void* Push(size_t extra, Args&&... args);

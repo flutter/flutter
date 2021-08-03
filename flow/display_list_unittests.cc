@@ -863,5 +863,130 @@ TEST(DisplayList, DisplayListsWithVaryingOpComparisons) {
   }
 }
 
+TEST(DisplayList, DisplayListSaveLayerBoundsWithAlphaFilter) {
+  SkRect build_bounds = SkRect::MakeLTRB(-100, -100, 200, 200);
+  SkRect save_bounds = SkRect::MakeWH(100, 100);
+  SkRect rect = SkRect::MakeLTRB(30, 30, 70, 70);
+  // clang-format off
+  const float color_matrix[] = {
+    0, 0, 0, 0, 0,
+    0, 1, 0, 0, 0,
+    0, 0, 1, 0, 0,
+    0, 0, 0, 1, 0,
+  };
+  // clang-format on
+  sk_sp<SkColorFilter> base_color_filter = SkColorFilters::Matrix(color_matrix);
+  // clang-format off
+  const float alpha_matrix[] = {
+    0, 0, 0, 0, 0,
+    0, 1, 0, 0, 0,
+    0, 0, 1, 0, 0,
+    0, 0, 0, 0, 1,
+  };
+  // clang-format on
+  sk_sp<SkColorFilter> alpha_color_filter =
+      SkColorFilters::Matrix(alpha_matrix);
+
+  {
+    DisplayListBuilder builder(build_bounds);
+    builder.saveLayer(&save_bounds, true);
+    builder.drawRect(rect);
+    builder.restore();
+    sk_sp<DisplayList> display_list = builder.Build();
+    ASSERT_EQ(display_list->bounds(), rect);
+  }
+
+  {
+    DisplayListBuilder builder(build_bounds);
+    builder.setColorFilter(base_color_filter);
+    builder.saveLayer(&save_bounds, true);
+    builder.setColorFilter(nullptr);
+    builder.drawRect(rect);
+    builder.restore();
+    sk_sp<DisplayList> display_list = builder.Build();
+    ASSERT_EQ(display_list->bounds(), rect);
+  }
+
+  {
+    DisplayListBuilder builder(build_bounds);
+    builder.setColorFilter(alpha_color_filter);
+    builder.saveLayer(&save_bounds, true);
+    builder.setColorFilter(nullptr);
+    builder.drawRect(rect);
+    builder.restore();
+    sk_sp<DisplayList> display_list = builder.Build();
+    ASSERT_EQ(display_list->bounds(), save_bounds);
+  }
+
+  {
+    DisplayListBuilder builder(build_bounds);
+    builder.setColorFilter(alpha_color_filter);
+    builder.saveLayer(nullptr, true);
+    builder.setColorFilter(nullptr);
+    builder.drawRect(rect);
+    builder.restore();
+    sk_sp<DisplayList> display_list = builder.Build();
+    ASSERT_EQ(display_list->bounds(), build_bounds);
+  }
+
+  {
+    DisplayListBuilder builder(build_bounds);
+    builder.setImageFilter(
+        SkImageFilters::ColorFilter(base_color_filter, nullptr));
+    builder.saveLayer(&save_bounds, true);
+    builder.setImageFilter(nullptr);
+    builder.drawRect(rect);
+    builder.restore();
+    sk_sp<DisplayList> display_list = builder.Build();
+    ASSERT_EQ(display_list->bounds(), rect);
+  }
+
+  {
+    DisplayListBuilder builder(build_bounds);
+    builder.setImageFilter(
+        SkImageFilters::ColorFilter(alpha_color_filter, nullptr));
+    builder.saveLayer(&save_bounds, true);
+    builder.setImageFilter(nullptr);
+    builder.drawRect(rect);
+    builder.restore();
+    sk_sp<DisplayList> display_list = builder.Build();
+    ASSERT_EQ(display_list->bounds(), save_bounds);
+  }
+
+  {
+    DisplayListBuilder builder(build_bounds);
+    builder.setImageFilter(
+        SkImageFilters::ColorFilter(alpha_color_filter, nullptr));
+    builder.saveLayer(nullptr, true);
+    builder.setImageFilter(nullptr);
+    builder.drawRect(rect);
+    builder.restore();
+    sk_sp<DisplayList> display_list = builder.Build();
+    ASSERT_EQ(display_list->bounds(), build_bounds);
+  }
+
+  {
+    DisplayListBuilder builder(build_bounds);
+    builder.setBlendMode(SkBlendMode::kClear);
+    builder.saveLayer(&save_bounds, true);
+    builder.setBlendMode(SkBlendMode::kSrcOver);
+    builder.drawRect(rect);
+    builder.restore();
+    sk_sp<DisplayList> display_list = builder.Build();
+    ASSERT_EQ(display_list->bounds(), save_bounds);
+  }
+
+  {
+    DisplayListBuilder builder(build_bounds);
+    builder.setBlendMode(SkBlendMode::kClear);
+    builder.saveLayer(nullptr, true);
+    builder.setBlendMode(SkBlendMode::kSrcOver);
+    builder.drawRect(rect);
+    builder.restore();
+    sk_sp<DisplayList> display_list = builder.Build();
+    ASSERT_EQ(display_list->bounds(), build_bounds);
+  }
+}
+
 }  // namespace testing
 }  // namespace flutter
