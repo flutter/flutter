@@ -632,6 +632,7 @@ void main() {
 
   testWidgets('onChanged callbacks value and FormFieldState.value are sync', (WidgetTester tester) async {
     bool _called = false;
+    late String changeValue;
 
     late FormFieldState<String> state;
 
@@ -642,7 +643,7 @@ void main() {
             child: TextFormField(
               onChanged: (String value) {
                 _called = true;
-                expect(value, state.value);
+                changeValue = value;
               },
             ),
           ),
@@ -655,6 +656,7 @@ void main() {
     await tester.enterText(find.byType(TextField), 'Soup');
 
     expect(_called, true);
+    expect(changeValue, state.value);
   });
 
   testWidgets('autofillHints is passed to super', (WidgetTester tester) async {
