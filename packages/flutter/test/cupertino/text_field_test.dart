@@ -1621,7 +1621,7 @@ void main() {
     expect(find.text('field 1'), findsOneWidget);
     expect(find.text("j'aime la poutine"), findsOneWidget);
     expect(find.text('field 2'), findsNothing);
-  }, exclude: isContextMenuProvidedByPlatform);
+  }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
 
   testWidgets(
     'tap moves cursor to the edge of the word it tapped on',

@@ -251,7 +251,7 @@ void main() {
     expect(find.text('Copy'), findsOneWidget);
     expect(find.text('Cut'), findsOneWidget);
   },
-    exclude: isBrowser, // We do not use Flutter-rendered context menu on the Web
+    skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
