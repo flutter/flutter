@@ -227,6 +227,15 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   }
 
   /// The [shape] of the scrollbar's thumb.
+  ///
+  /// Only one of [radius] and [shape] may be specified. For a rounded rectangle,
+  /// it's simplest to just specify [radius]. By default, the scrollbar thumb's
+  /// shape is a simple rectangle.
+  ///
+  /// If [shape] is specified, the thumb will take the shape of the passed
+  /// [OutlinedBorder] and fill itself with [thumbColor] (or grey if it
+  /// is unspecified).
+  ///
   OutlinedBorder? get shape => _shape;
   OutlinedBorder? _shape;
   set shape(OutlinedBorder? value){
@@ -1064,16 +1073,12 @@ class RawScrollbar extends StatefulWidget {
   /// The [shape] of the scrollbar's thumb.
   ///
   /// Only one of [radius] and [shape] may be specified. For a rounded rectangle,
-  /// it's simplest to just specify [radius]. By default the scrollbar thumb's
+  /// it's simplest to just specify [radius]. By default, the scrollbar thumb's
   /// shape is a simple rectangle.
   ///
-  /// If neither [shape] nor [radius] are specified, the thumb will take the
-  /// shape of a regular rectangle whose width is defined by [thickness], which
-  /// defaults to 6.0. Otherwise, the thumb will take the shape of the
+  /// If [shape] is specified, the thumb will take the shape of the passed
   /// [OutlinedBorder] and fill itself with [thumbColor] (or grey if it
   /// is unspecified).
-  ///
-  /// The [shape] could be any one of the subclasses of [OutlinedBorder].
   ///
   /// Here is an example of using a [StadiumBorder] for drawing the [shape] of the
   /// thumb in a [RawScrollbar]:
