@@ -37,6 +37,7 @@ class Cocoon {
     @visibleForTesting this.fs = const LocalFileSystem(),
     @visibleForTesting this.processRunSync = Process.runSync,
     @visibleForTesting this.requestRetryLimit = 5,
+    @visibleForTesting this.requestTimeoutLimit = 30,
   }) : _httpClient = AuthenticatedCocoonClient(serviceAccountTokenPath, httpClient: httpClient, filesystem: fs);
 
   /// Client to make http requests to Cocoon.
@@ -57,6 +58,9 @@ class Cocoon {
 
   @visibleForTesting
   final int requestRetryLimit;
+
+  @visibleForTesting
+  final int requestTimeoutLimit;
 
   String get commitSha => _commitSha ?? _readCommitSha();
   String? _commitSha;
@@ -99,9 +103,9 @@ class Cocoon {
     }
     resultsJson['TestFlaky'] = isTestFlaky ?? false;
     const List<String> supportedBranches = <String>['master'];
-    if(supportedBranches.contains(resultsJson['CommitBranch'])) {
+    if (supportedBranches.contains(resultsJson['CommitBranch'])) {
       await retry(
-            () => _sendUpdateTaskRequest(resultsJson).timeout(const Duration(seconds: 30)),
+        () => _sendUpdateTaskRequest(resultsJson).timeout(Duration(seconds: requestTimeoutLimit)),
         retryIf: (Exception e) => e is SocketException || e is TimeoutException || e is ClientException,
         maxAttempts: requestRetryLimit,
       );

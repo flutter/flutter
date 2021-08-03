@@ -156,6 +156,104 @@ void main() {
       await cocoon.sendResultsPath(resultsPath: resultsPath);
     });
 
+    test('Verify retries for task result upload', () async {
+      int requestCount = 0;
+      mockClient = MockClient((Request request) async {
+        requestCount++;
+        if (requestCount == 1) {
+          return Response('{}', 500);
+        } else {
+          return Response('{}', 200);
+        }
+      });
+
+      _processResult = ProcessResult(1, 0, commitSha, '');
+      cocoon = Cocoon(
+        fs: fs,
+        httpClient: mockClient,
+        processRunSync: runSyncStub,
+        serviceAccountTokenPath: serviceAccountTokenPath,
+        requestRetryLimit: 3,
+      );
+
+      const String resultsPath = 'results.json';
+      const String updateTaskJson = '{'
+          '"CommitBranch":"master",'
+          '"CommitSha":"$commitSha",'
+          '"BuilderName":"builderAbc",'
+          '"NewStatus":"Succeeded",'
+          '"ResultData":{"i":0.0,"j":0.0,"not_a_metric":"something"},'
+          '"BenchmarkScoreKeys":["i","j"]}';
+      fs.file(resultsPath).writeAsStringSync(updateTaskJson);
+      await cocoon.sendResultsPath(resultsPath: resultsPath);
+    });
+
+    test('Verify timeout and retry for task result upload', () async {
+      int requestCount = 0;
+      mockClient = MockClient((Request request) async {
+        requestCount++;
+        if (requestCount == 1) {
+          sleep(Duration(seconds: 5));
+          return Response('{}', 200);
+        } else {
+          return Response('{}', 500);
+        }
+      });
+
+      _processResult = ProcessResult(1, 0, commitSha, '');
+      cocoon = Cocoon(
+        fs: fs,
+        httpClient: mockClient,
+        processRunSync: runSyncStub,
+        serviceAccountTokenPath: serviceAccountTokenPath,
+        requestRetryLimit: 2,
+        requestTimeoutLimit: 2,
+      );
+
+      const String resultsPath = 'results.json';
+      const String updateTaskJson = '{'
+          '"CommitBranch":"master",'
+          '"CommitSha":"$commitSha",'
+          '"BuilderName":"builderAbc",'
+          '"NewStatus":"Succeeded",'
+          '"ResultData":{"i":0.0,"j":0.0,"not_a_metric":"something"},'
+          '"BenchmarkScoreKeys":["i","j"]}';
+      fs.file(resultsPath).writeAsStringSync(updateTaskJson);
+      await cocoon.sendResultsPath(resultsPath: resultsPath);
+    });
+
+    test('Verify failure without retries for task result upload', () async {
+      int requestCount = 0;
+      mockClient = MockClient((Request request) async {
+        requestCount++;
+        if (requestCount == 1) {
+          return Response('{}', 500);
+        } else {
+          return Response('{}', 200);
+        }
+      });
+
+      _processResult = ProcessResult(1, 0, commitSha, '');
+      cocoon = Cocoon(
+        fs: fs,
+        httpClient: mockClient,
+        processRunSync: runSyncStub,
+        serviceAccountTokenPath: serviceAccountTokenPath,
+        requestRetryLimit: 0,
+      );
+
+      const String resultsPath = 'results.json';
+      const String updateTaskJson = '{'
+          '"CommitBranch":"master",'
+          '"CommitSha":"$commitSha",'
+          '"BuilderName":"builderAbc",'
+          '"NewStatus":"Succeeded",'
+          '"ResultData":{"i":0.0,"j":0.0,"not_a_metric":"something"},'
+          '"BenchmarkScoreKeys":["i","j"]}';
+      fs.file(resultsPath).writeAsStringSync(updateTaskJson);
+      expect(() => cocoon.sendResultsPath(resultsPath: resultsPath), throwsA(isA<ClientException>()));
+    });
+
     test('throws client exception on non-200 responses', () async {
       mockClient = MockClient((Request request) async => Response('', 500));
 
@@ -175,8 +273,7 @@ void main() {
           '"ResultData":{"i":0.0,"j":0.0,"not_a_metric":"something"},'
           '"BenchmarkScoreKeys":["i","j"]}';
       fs.file(resultsPath).writeAsStringSync(updateTaskJson);
-      expect(() => cocoon.sendResultsPath(resultsPath: resultsPath),
-          throwsA(isA<ClientException>()));
+      expect(() => cocoon.sendResultsPath(resultsPath: resultsPath), throwsA(isA<ClientException>()));
     });
 
     test('does not upload results on non-supported branches', () async {
