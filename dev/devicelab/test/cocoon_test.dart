@@ -191,11 +191,11 @@ void main() {
 
     test('Verify timeout and retry for task result upload', () async {
       int requestCount = 0;
-      int timeoutValue = 2;
+      const int timeoutValue = 2;
       mockClient = MockClient((Request request) async {
         requestCount++;
         if (requestCount == 1) {
-          await Future<void>.delayed(Duration(seconds: timeoutValue + 2));
+          await Future<void>.delayed(const Duration(seconds: timeoutValue + 2));
           throw Exception('Should not reach this, because timeout should trigger');
         } else {
           return Response('{}', 200);
@@ -226,11 +226,11 @@ void main() {
 
     test('Verify timeout does not trigger for result upload', () async {
       int requestCount = 0;
-      int timeoutValue = 2;
+      const int timeoutValue = 2;
       mockClient = MockClient((Request request) async {
         requestCount++;
         if (requestCount == 1) {
-          await Future<void>.delayed(Duration(seconds: timeoutValue - 2));
+          await Future<void>.delayed(const Duration(seconds: timeoutValue - 1));
           return Response('{}', 200);
         } else {
           throw Exception('This iteration should not be reached, since timeout should not happen.');
