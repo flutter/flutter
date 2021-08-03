@@ -218,19 +218,18 @@ class TextEditingValue {
 
   // Deletes the current non-empty selection.
   //
-  // Operates on the text/selection contained in textSelectionDelegate, and does
-  // not depend on `RenderEditable.selection`.
-  //
   // If the selection is currently non-empty, this method deletes the selected
-  // text and returns true. Otherwise this method does nothing and returns
-  // false.
+  // text. Otherwise this method does nothing.
   TextEditingValue _deleteNonEmptySelection() {
     assert(selection.isValid);
     assert(!selection.isCollapsed);
 
     final String textBefore = selection.textBefore(text);
     final String textAfter = selection.textAfter(text);
-    final TextSelection newSelection = TextSelection.collapsed(offset: selection.start);
+    final TextSelection newSelection = TextSelection.collapsed(
+      offset: selection.start,
+      affinity: selection.affinity,
+    );
     final TextRange newComposingRange = !composing.isValid || composing.isCollapsed
       ? TextRange.empty
       : TextRange(
@@ -277,7 +276,7 @@ class TextEditingValue {
         );
       return TextEditingValue(
         text: text.substring(0, index) + text.substring(selection.extentOffset, text.length),
-        selection: TextSelection.collapsed(offset: index),
+        selection: TextSelection.collapsed(offset: index, affinity: selection.affinity),
         composing: nextComposingRange,
       );
     }
@@ -336,44 +335,50 @@ class TextEditingValue {
   ///
   ///   * [extendSelectionTo], which is similar but only moves
   ///     [TextSelection.extentOffset].
-  TextSelection expandSelectionTo(int index, [bool extentAtIndex = false]) {
+  TextSelection expandSelectionTo(TextPosition position, [bool extentAtIndex = false]) {
     assert(selection != null);
 
     final int upperOffset = math.min(selection.baseOffset, selection.extentOffset);
     final int lowerOffset = math.max(selection.baseOffset, selection.extentOffset);
-    if (index >= upperOffset && index <= lowerOffset) {
+    if (position.offset >= upperOffset && position.offset <= lowerOffset) {
       return selection;
     }
 
     if (selection.baseOffset <= selection.extentOffset) {
-      if (index <= selection.baseOffset) {
+      if (position.offset <= selection.baseOffset) {
         if (extentAtIndex) {
           return selection.copyWith(
             baseOffset: selection.extentOffset,
-            extentOffset: index,
+            extentOffset: position.offset,
+            affinity: position.affinity,
           );
         }
         return selection.copyWith(
-          baseOffset: index,
+          baseOffset: position.offset,
+          affinity: position.affinity,
         );
       }
       return selection.copyWith(
-        extentOffset: index,
+        extentOffset: position.offset,
+        affinity: position.affinity,
       );
     }
-    if (index <= selection.extentOffset) {
+    if (position.offset <= selection.extentOffset) {
       return selection.copyWith(
-        extentOffset: index,
+        extentOffset: position.offset,
+        affinity: position.affinity,
       );
     }
     if (extentAtIndex) {
       return selection.copyWith(
         baseOffset: selection.extentOffset,
-        extentOffset: index,
+        extentOffset: position.offset,
+        affinity: position.affinity,
       );
     }
     return selection.copyWith(
-      baseOffset: index,
+      baseOffset: position.offset,
+      affinity: position.affinity,
     );
   }
 
