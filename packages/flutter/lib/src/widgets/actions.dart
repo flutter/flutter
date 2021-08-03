@@ -225,6 +225,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   ///   @override
   ///   bool get isActionEnabled => callingAction?.isActionEnabled ?? false;
   /// }
+  /// ```
   ///
   /// class _SimpleUSPhoneNumberEntryState extends State<SimpleUSPhoneNumberEntry> {
   ///   final FocusNode areaCodeFocusNode = FocusNode();
@@ -2124,6 +2125,32 @@ class _OverridableContextAction<T extends Intent> extends ContextAction<T> with 
   final BuildContext lookupContext;
 
   @override
+  Object? _invokeOverride(Action<T> overrideAction, T intent, BuildContext? context) {
+    assert(context != null);
+    assert(!debugAssertMutuallyRecursive);
+    assert(() {
+      debugAssertMutuallyRecursive = true;
+      return true;
+    }());
+
+    // Wrap the default Action together with the calling context in case
+    // overrideAction is not a ContextAction and thus have no access to the
+    // calling BuildContext.
+    final Action<T> wrappedDefault = _ContextActionToActionAdapter<T>(invokeContext: context!, action: defaultAction);
+    overrideAction._callingAction = wrappedDefault;
+    final Object? returnValue = overrideAction is ContextAction<T>
+      ? overrideAction.invoke(intent, context)
+      : overrideAction.invoke(intent);
+    overrideAction._callingAction = null;
+
+    assert(() {
+      debugAssertMutuallyRecursive = false;
+      return true;
+    }());
+    return returnValue;
+  }
+
+  @override
   Object? invokeDefaultAction(T intent, Action<T>? fromAction, BuildContext? context) {
     if (fromAction == null) {
       return defaultAction.invoke(intent, context);
@@ -2137,4 +2164,47 @@ class _OverridableContextAction<T extends Intent> extends ContextAction<T> with 
   ContextAction<T> _makeOverridableAction(BuildContext context) {
     return _OverridableContextAction<T>(defaultAction: defaultAction, lookupContext: context);
   }
+}
+
+class _ContextActionToActionAdapter<T extends Intent> extends Action<T> {
+  _ContextActionToActionAdapter({required this.invokeContext, required this.action});
+
+  final BuildContext invokeContext;
+  final ContextAction<T> action;
+
+  @override
+  set _callingAction(Action<T>? newAction) {
+    action._callingAction = newAction;
+  }
+
+  @override
+  Action<T>? get callingAction => action.callingAction;
+
+  @override
+  bool isEnabled(T intent) => action.isEnabled(intent);
+
+  @override
+  bool get isActionEnabled => action.isActionEnabled;
+
+  @override
+  bool consumesKey(T intent) => action.consumesKey(intent);
+
+  @override
+  void addActionListener(ActionListenerCallback listener) {
+    super.addActionListener(listener);
+    action.addActionListener(listener);
+  }
+
+  @override
+  void removeActionListener(ActionListenerCallback listener) {
+    super.removeActionListener(listener);
+    action.removeActionListener(listener);
+  }
+
+  @override
+  @protected
+  void notifyActionListeners() => action.notifyActionListeners();
+
+  @override
+  Object? invoke(T intent) => action.invoke(intent, invokeContext);
 }
