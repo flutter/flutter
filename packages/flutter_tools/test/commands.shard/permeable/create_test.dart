@@ -1620,19 +1620,6 @@ void main() {
     );
   });
 
-  // Verify that we help the user correct an option ordering issue
-  testUsingContext('produces sensible error message', () async {
-    Cache.flutterRoot = '../..';
-
-    final CreateCommand command = CreateCommand();
-    final CommandRunner<void> runner = createTestCommandRunner(command);
-
-    expect(
-      runner.run(<String>['create', projectDir.path, '--pub']),
-      throwsToolExit(exitCode: 2, message: 'Try moving --pub'),
-    );
-  });
-
   testUsingContext('fails when file exists where output directory should be', () async {
     Cache.flutterRoot = '../..';
     final CreateCommand command = CreateCommand();

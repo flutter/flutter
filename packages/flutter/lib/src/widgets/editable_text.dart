@@ -426,8 +426,8 @@ class EditableText extends StatefulWidget {
   /// [style], [cursorColor], [cursorOpacityAnimates],[backgroundCursorColor],
   /// [enableSuggestions], [paintCursorAboveText], [selectionHeightStyle],
   /// [selectionWidthStyle], [textAlign], [dragStartBehavior], [scrollPadding],
-  /// [dragStartBehavior], [toolbarOptions], [rendererIgnoresPointer], and
-  /// [readOnly] arguments must not be null.
+  /// [dragStartBehavior], [toolbarOptions], [rendererIgnoresPointer],
+  /// [readOnly], and [enableIMEPersonalizedLearning] arguments must not be null.
   EditableText({
     Key? key,
     required this.controller,
@@ -495,6 +495,7 @@ class EditableText extends StatefulWidget {
     this.clipBehavior = Clip.hardEdge,
     this.restorationId,
     this.scrollBehavior,
+    this.enableIMEPersonalizedLearning = true,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
@@ -537,6 +538,7 @@ class EditableText extends StatefulWidget {
          !readOnly || autofillHints == null,
          "Read-only fields can't have autofill hints.",
        ),
+       assert(enableIMEPersonalizedLearning != null),
        _strutStyle = strutStyle,
        keyboardType = keyboardType ?? _inferKeyboardType(autofillHints: autofillHints, maxLines: maxLines),
        inputFormatters = maxLines == 1
@@ -1346,6 +1348,9 @@ class EditableText extends StatefulWidget {
   /// than 1.
   final ScrollBehavior? scrollBehavior;
 
+  /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
+  final bool enableIMEPersonalizedLearning;
+
   // Infer the keyboard type of an `EditableText` if it's not specified.
   static TextInputType _inferKeyboardType({
     required Iterable<String>? autofillHints,
@@ -1513,6 +1518,7 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics, defaultValue: null));
     properties.add(DiagnosticsProperty<Iterable<String>>('autofillHints', autofillHints, defaultValue: null));
     properties.add(DiagnosticsProperty<TextHeightBehavior>('textHeightBehavior', textHeightBehavior, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
   }
 }
 
@@ -1654,12 +1660,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       widget.focusNode.addListener(_handleFocusChanged);
       updateKeepAlive();
     }
+
     if (!_shouldCreateInputConnection) {
       _closeInputConnectionIfNeeded();
-    } else {
-      if (oldWidget.readOnly && _hasFocus) {
-        _openInputConnection();
-      }
+    } else if (oldWidget.readOnly && _hasFocus) {
+      _openInputConnection();
     }
 
     if (kIsWeb && _hasInputConnection) {
@@ -1836,7 +1841,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void updateFloatingCursor(RawFloatingCursorPoint point) {
-    switch(point.state){
+    switch(point.state) {
       case FloatingCursorDragState.Start:
         if (_floatingCursorResetController.isAnimating) {
           _floatingCursorResetController.stop();
@@ -2273,15 +2278,20 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void didChangeMetrics() {
-    if (_lastBottomViewInset < WidgetsBinding.instance!.window.viewInsets.bottom) {
-      _scheduleShowCaretOnScreen();
+    if (_lastBottomViewInset != WidgetsBinding.instance!.window.viewInsets.bottom) {
+      SchedulerBinding.instance!.addPostFrameCallback((Duration _) {
+        _selectionOverlay?.updateForScroll();
+      });
+      if (_lastBottomViewInset < WidgetsBinding.instance!.window.viewInsets.bottom) {
+        _scheduleShowCaretOnScreen();
+      }
     }
     _lastBottomViewInset = WidgetsBinding.instance!.window.viewInsets.bottom;
   }
 
   @pragma('vm:notify-debugger-on-exception')
   void _formatAndSetValue(TextEditingValue value, SelectionChangedCause? cause, {bool userInteraction = false}) {
-    // Only apply input formatters if the text has changed (including uncommited
+    // Only apply input formatters if the text has changed (including uncommitted
     // text in the composing region), or when the user committed the composing
     // text.
     // Gboard is very persistent in restoring the composing region. Applying
@@ -2312,11 +2322,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         (userInteraction &&
         (cause == SelectionChangedCause.longPress ||
          cause == SelectionChangedCause.keyboard))) {
-      _handleSelectionChanged(value.selection, cause);
+      _handleSelectionChanged(_value.selection, cause);
     }
     if (textChanged) {
       try {
-        widget.onChanged?.call(value.text);
+        widget.onChanged?.call(_value.text);
       } catch (exception, stack) {
         FlutterError.reportError(FlutterErrorDetails(
           exception: exception,
@@ -2603,6 +2613,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         autofillHints: widget.autofillHints?.toList(growable: false) ?? <String>[],
         currentEditingValue: currentTextEditingValue,
       ),
+      enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
     );
   }
 

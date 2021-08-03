@@ -1028,7 +1028,7 @@ ResidentRunner setUpResidentRunner(FlutterDevice flutterDevice, {
   );
 }
 
-class FakeWebServerDevice extends FakeDevice implements WebServerDevice {}
+class FakeWebServerDevice extends FakeDevice implements WebServerDevice { }
 
 class FakeDevice extends Fake implements Device {
   @override
@@ -1099,9 +1099,9 @@ class FakeAppConnection extends Fake implements AppConnection {
   }
 }
 
-class FakeChromeDevice extends Fake implements ChromiumDevice {}
+class FakeChromeDevice extends Fake implements ChromiumDevice { }
 
-class FakeWipDebugger extends Fake implements WipDebugger {}
+class FakeWipDebugger extends Fake implements WipDebugger { }
 
 class FakeResidentCompiler extends Fake implements ResidentCompiler {
   @override

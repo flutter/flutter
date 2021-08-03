@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:io';
 
 import 'package:flutter_devicelab/framework/framework.dart';
@@ -147,7 +145,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
     outputPath,
     'Debug',
     'App.xcframework',
-    'ios-x86_64-simulator',
+    'ios-arm64_x86_64-simulator',
     'App.framework',
     'flutter_assets',
     'vm_snapshot_data',
@@ -210,7 +208,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       outputPath,
       mode,
       'App.xcframework',
-      'ios-x86_64-simulator',
+      'ios-arm64_x86_64-simulator',
       'App.framework',
       'App',
     ));
@@ -219,7 +217,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       outputPath,
       mode,
       'App.xcframework',
-      'ios-x86_64-simulator',
+      'ios-arm64_x86_64-simulator',
       'App.framework',
       'Info.plist',
     ));
@@ -312,7 +310,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       outputPath,
       mode,
       'device_info.xcframework',
-      'ios-x86_64-simulator',
+      'ios-arm64_x86_64-simulator',
       'device_info.framework',
       'device_info',
     );
@@ -321,7 +319,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       outputPath,
       mode,
       'device_info.xcframework',
-      'ios-x86_64-simulator',
+      'ios-arm64_x86_64-simulator',
       'device_info.framework',
       'Headers',
       'DeviceInfoPlugin.h',
@@ -368,7 +366,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       outputPath,
       mode,
       'FlutterPluginRegistrant.xcframework',
-      'ios-x86_64-simulator',
+      'ios-arm64_x86_64-simulator',
       'FlutterPluginRegistrant.framework',
       'Headers',
       'GeneratedPluginRegistrant.h',

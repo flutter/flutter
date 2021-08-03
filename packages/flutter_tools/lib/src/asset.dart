@@ -911,11 +911,7 @@ class _Asset {
   }
 
   @override
-  int get hashCode {
-    return baseDir.hashCode
-        ^ relativeUri.hashCode
-        ^ entryUri.hashCode;
-  }
+  int get hashCode => Object.hash(baseDir, relativeUri, entryUri.hashCode);
 }
 
 // Given an assets directory like this:

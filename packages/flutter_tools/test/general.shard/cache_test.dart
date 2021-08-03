@@ -78,16 +78,22 @@ void main() {
     });
 
     testWithoutContext('should not throw when lock is acquired', () async {
+      final String oldRoot = Cache.flutterRoot;
       Cache.flutterRoot = '';
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      final Cache cache = Cache.test(fileSystem: fileSystem, processManager: FakeProcessManager.any());
-      fileSystem.file(fileSystem.path.join('bin', 'cache', 'lockfile'))
-        .createSync(recursive: true);
+      try {
+        final FileSystem fileSystem = MemoryFileSystem.test();
+        final Cache cache = Cache.test(
+            fileSystem: fileSystem, processManager: FakeProcessManager.any());
+        fileSystem.file(fileSystem.path.join('bin', 'cache', 'lockfile'))
+            .createSync(recursive: true);
 
-      await cache.lock();
+        await cache.lock();
 
-      expect(cache.checkLockAcquired, returnsNormally);
-      expect(cache.releaseLock, returnsNormally);
+        expect(cache.checkLockAcquired, returnsNormally);
+        expect(cache.releaseLock, returnsNormally);
+      } finally {
+        Cache.flutterRoot = oldRoot;
+      }
     }, skip: true); // TODO(jonahwilliams): implement support for lock so this can be tested with the memory file system.
 
     testWithoutContext('throws tool exit when lockfile open fails', () async {
@@ -195,9 +201,9 @@ void main() {
     });
 
     testWithoutContext('should not be up to date, if some cached artifact is not', () async {
-      final CachedArtifact artifact1 = FakeSecondayCachedArtifact()
+      final CachedArtifact artifact1 = FakeSecondaryCachedArtifact()
         ..upToDate = true;
-      final CachedArtifact artifact2 = FakeSecondayCachedArtifact()
+      final CachedArtifact artifact2 = FakeSecondaryCachedArtifact()
         ..upToDate = false;
       final FileSystem fileSystem = MemoryFileSystem.test();
 
@@ -211,9 +217,9 @@ void main() {
     });
 
     testWithoutContext('should be up to date, if all cached artifacts are', () async {
-      final FakeSecondayCachedArtifact artifact1 = FakeSecondayCachedArtifact()
+      final FakeSecondaryCachedArtifact artifact1 = FakeSecondaryCachedArtifact()
         ..upToDate = true;
-      final FakeSecondayCachedArtifact artifact2 = FakeSecondayCachedArtifact()
+      final FakeSecondaryCachedArtifact artifact2 = FakeSecondaryCachedArtifact()
         ..upToDate = true;
       final FileSystem fileSystem = MemoryFileSystem.test();
       final Cache cache = Cache.test(
@@ -226,9 +232,9 @@ void main() {
     });
 
     testWithoutContext('should update cached artifacts which are not up to date', () async {
-      final FakeSecondayCachedArtifact artifact1 = FakeSecondayCachedArtifact()
+      final FakeSecondaryCachedArtifact artifact1 = FakeSecondaryCachedArtifact()
         ..upToDate = true;
-      final FakeSecondayCachedArtifact artifact2 = FakeSecondayCachedArtifact()
+      final FakeSecondaryCachedArtifact artifact2 = FakeSecondaryCachedArtifact()
         ..upToDate = false;
       final FileSystem fileSystem = MemoryFileSystem.test();
 
@@ -272,9 +278,9 @@ void main() {
 
     testWithoutContext('failed storage.googleapis.com download shows China warning', () async {
       final InternetAddress address = (await InternetAddress.lookup('storage.googleapis.com')).first;
-      final FakeSecondayCachedArtifact artifact1 = FakeSecondayCachedArtifact()
+      final FakeSecondaryCachedArtifact artifact1 = FakeSecondaryCachedArtifact()
         ..upToDate = false;
-      final FakeSecondayCachedArtifact artifact2 = FakeSecondayCachedArtifact()
+      final FakeSecondaryCachedArtifact artifact2 = FakeSecondaryCachedArtifact()
         ..upToDate = false
         ..updateException = SocketException(
         'Connection reset by peer',
@@ -969,7 +975,7 @@ class FakeDownloadedArtifact extends CachedArtifact {
   Future<void> updateInner(ArtifactUpdater artifactUpdater, FileSystem fileSystem, OperatingSystemUtils operatingSystemUtils) async { }
 }
 
-class FakeSecondayCachedArtifact extends Fake implements CachedArtifact {
+class FakeSecondaryCachedArtifact extends Fake implements CachedArtifact {
   bool upToDate = false;
   bool didUpdate = false;
   Exception updateException;
@@ -1045,7 +1051,17 @@ class FakePub extends Fake implements Pub {
   int calledGet = 0;
 
   @override
-  Future<void> get({PubContext context, String directory, bool skipIfAbsent = false, bool upgrade = false, bool offline = false, bool generateSyntheticPackage = false, String flutterRootOverride, bool checkUpToDate = false}) async {
+  Future<void> get({
+    PubContext context,
+    String directory,
+    bool skipIfAbsent = false,
+    bool upgrade = false,
+    bool offline = false,
+    bool generateSyntheticPackage = false,
+    String flutterRootOverride,
+    bool checkUpToDate = false,
+    bool shouldSkipThirdPartyGenerator = true,
+  }) async {
     calledGet += 1;
   }
 }

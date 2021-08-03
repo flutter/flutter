@@ -174,14 +174,17 @@ class TextInputType {
   /// [TYPE_TEXT_VARIATION_POSTAL_ADDRESS](https://developer.android.com/reference/android/text/InputType#TYPE_TEXT_VARIATION_POSTAL_ADDRESS).
   static const TextInputType streetAddress = TextInputType._(9);
 
+  /// Prevent the OS from showing the on-screen virtual keyboard.
+  static const TextInputType none = TextInputType._(10);
+
   /// All possible enum values.
   static const List<TextInputType> values = <TextInputType>[
-    text, multiline, number, phone, datetime, emailAddress, url, visiblePassword, name, streetAddress,
+    text, multiline, number, phone, datetime, emailAddress, url, visiblePassword, name, streetAddress, none,
   ];
 
   // Corresponding string name for each of the [values].
   static const List<String> _names = <String>[
-    'text', 'multiline', 'number', 'phone', 'datetime', 'emailAddress', 'url', 'visiblePassword', 'name', 'address',
+    'text', 'multiline', 'number', 'phone', 'datetime', 'emailAddress', 'url', 'visiblePassword', 'name', 'address', 'none',
   ];
 
   // Enum value name, this is what enum.toString() would normally return.
@@ -463,6 +466,7 @@ class TextInputConfiguration {
     this.keyboardAppearance = Brightness.light,
     this.textCapitalization = TextCapitalization.none,
     this.autofillConfiguration,
+    this.enableIMEPersonalizedLearning = true,
   }) : assert(inputType != null),
        assert(obscureText != null),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
@@ -471,7 +475,8 @@ class TextInputConfiguration {
        assert(enableSuggestions != null),
        assert(keyboardAppearance != null),
        assert(inputAction != null),
-       assert(textCapitalization != null);
+       assert(textCapitalization != null),
+       assert(enableIMEPersonalizedLearning != null);
 
   /// The type of information for which to optimize the text input control.
   final TextInputType inputType;
@@ -587,6 +592,20 @@ class TextInputConfiguration {
   /// Defaults to [Brightness.light].
   final Brightness keyboardAppearance;
 
+  /// {@template flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
+  /// Whether to enable that the IME update personalized data such as typing
+  /// history and user dictionary data.
+  ///
+  /// This flag only affects Android. On iOS, there is no equivalent flag.
+  ///
+  /// Defaults to true. Cannot be null.
+  ///
+  /// See also:
+  ///
+  ///  * <https://developer.android.com/reference/android/view/inputmethod/EditorInfo#IME_FLAG_NO_PERSONALIZED_LEARNING>
+  /// {@endtemplate}
+  final bool enableIMEPersonalizedLearning;
+
   /// Returns a representation of this object as a JSON object.
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
@@ -601,6 +620,7 @@ class TextInputConfiguration {
       'inputAction': inputAction.toString(),
       'textCapitalization': textCapitalization.toString(),
       'keyboardAppearance': keyboardAppearance.toString(),
+      'enableIMEPersonalizedLearning': enableIMEPersonalizedLearning,
       if (autofillConfiguration != null) 'autofill': autofillConfiguration!.toJson(),
     };
   }

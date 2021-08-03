@@ -84,6 +84,12 @@ message Repository {
 
   // Only for engine repositories.
   string dartRevision = 8;
+
+  // Name of local and remote branch for applying cherrypicks.
+  //
+  // When the pull request is merged, all commits here will be squashed to a
+  // single commit on the [candidateBranch].
+  string workingBranch = 9;
 }
 
 message ConductorState {
@@ -105,4 +111,7 @@ message ConductorState {
 
   // Commit hash of the Conductor tool.
   string conductorVersion = 10;
+
+  // One of x, y, z, m, or n.
+  string incrementLevel = 11;
 }

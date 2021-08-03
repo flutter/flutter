@@ -112,6 +112,8 @@ class Tooltip extends StatefulWidget {
     this.waitDuration,
     this.showDuration,
     this.child,
+    this.triggerMode,
+    this.enableFeedback,
   }) : assert(message != null),
        super(key: key);
 
@@ -201,6 +203,25 @@ class Tooltip extends StatefulWidget {
   /// pointer exits the widget.
   final Duration? showDuration;
 
+  /// The [TooltipTriggerMode] that will show the tooltip.
+  ///
+  /// If this property is null, then [TooltipThemeData.triggerMode] is used.
+  /// If [TooltipThemeData.triggerMode] is also null, the default mode is
+  /// [TooltipTriggerMode.longPress].
+  final TooltipTriggerMode? triggerMode;
+
+  /// Whether the tooltip should provide acoustic and/or haptic feedback.
+  ///
+  /// For example, on Android a tap will produce a clicking sound and a
+  /// long-press will produce a short vibration, when feedback is enabled.
+  ///
+  /// When null, the default value is true.
+  ///
+  /// See also:
+  ///
+  ///  * [Feedback], for providing platform-specific feedback to certain actions.
+  final bool? enableFeedback;
+
   static final Set<_TooltipState> _openedToolTips = <_TooltipState>{};
 
   /// Dismiss all of the tooltips that are currently shown on the screen.
@@ -234,6 +255,8 @@ class Tooltip extends StatefulWidget {
     properties.add(FlagProperty('semantics', value: excludeFromSemantics, ifTrue: 'excluded', showName: true, defaultValue: null));
     properties.add(DiagnosticsProperty<Duration>('wait duration', waitDuration, defaultValue: null));
     properties.add(DiagnosticsProperty<Duration>('show duration', showDuration, defaultValue: null));
+    properties.add(DiagnosticsProperty<TooltipTriggerMode>('triggerMode', triggerMode, defaultValue: null));
+    properties.add(FlagProperty('enableFeedback', value: enableFeedback, ifTrue: 'true', showName: true, defaultValue: null));
   }
 }
 
@@ -247,6 +270,8 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   static const Duration _defaultHoverShowDuration = Duration(milliseconds: 100);
   static const Duration _defaultWaitDuration = Duration.zero;
   static const bool _defaultExcludeFromSemantics = false;
+  static const TooltipTriggerMode _defaultTriggerMode = TooltipTriggerMode.longPress;
+  static const bool _defaultEnableFeedback = true;
 
   late double height;
   late EdgeInsetsGeometry padding;
@@ -264,7 +289,9 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   late Duration hoverShowDuration;
   late Duration waitDuration;
   late bool _mouseIsConnected;
-  bool _longPressActivated = false;
+  bool _pressActivated = false;
+  late TooltipTriggerMode triggerMode;
+  late bool enableFeedback;
 
   @override
   void initState() {
@@ -327,7 +354,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     }
     final bool mouseIsConnected = RendererBinding.instance!.mouseTracker.mouseIsConnected;
     if (mouseIsConnected != _mouseIsConnected) {
-      setState((){
+      setState(() {
         _mouseIsConnected = mouseIsConnected;
       });
     }
@@ -346,12 +373,12 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       _removeEntry();
       return;
     }
-    if (_longPressActivated) {
+    if (_pressActivated) {
       _hideTimer ??= Timer(showDuration, _controller.reverse);
     } else {
       _hideTimer ??= Timer(hoverShowDuration, _controller.reverse);
     }
-    _longPressActivated = false;
+    _pressActivated = false;
   }
 
   void _showTooltip({ bool immediately = false }) {
@@ -463,11 +490,15 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     super.dispose();
   }
 
-  void _handleLongPress() {
-    _longPressActivated = true;
+  void _handlePress() {
+    _pressActivated = true;
     final bool tooltipCreated = ensureTooltipVisible();
-    if (tooltipCreated)
-      Feedback.forLongPress(context);
+    if (tooltipCreated && enableFeedback) {
+      if (triggerMode == TooltipTriggerMode.longPress)
+        Feedback.forLongPress(context);
+      else
+        Feedback.forTap(context);
+    }
   }
 
   @override
@@ -508,10 +539,14 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     waitDuration = widget.waitDuration ?? tooltipTheme.waitDuration ?? _defaultWaitDuration;
     showDuration = widget.showDuration ?? tooltipTheme.showDuration ?? _defaultShowDuration;
     hoverShowDuration = widget.showDuration ?? tooltipTheme.showDuration ?? _defaultHoverShowDuration;
+    triggerMode = widget.triggerMode ?? tooltipTheme.triggerMode ?? _defaultTriggerMode;
+    enableFeedback = widget.enableFeedback ?? tooltipTheme.enableFeedback ?? _defaultEnableFeedback;
 
     Widget result = GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onLongPress: _handleLongPress,
+      onLongPress: (triggerMode == TooltipTriggerMode.longPress) ?
+        _handlePress : null,
+      onTap: (triggerMode == TooltipTriggerMode.tap) ? _handlePress : null,
       excludeFromSemantics: true,
       child: Semantics(
         label: excludeFromSemantics ? null : widget.message,

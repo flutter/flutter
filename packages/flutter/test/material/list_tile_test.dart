@@ -1417,7 +1417,7 @@ void main() {
                 child: ListTile(
                   key: tileKey,
                   onTap: enabled ? () {
-                    setState((){
+                    setState(() {
                       tapped = true;
                     });
                   } : null,

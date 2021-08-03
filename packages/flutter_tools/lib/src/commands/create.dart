@@ -308,7 +308,7 @@ class CreateCommand extends CreateBase {
       _printPluginDirectoryLocationMessage(relativePluginPath, projectName, platformsString);
       if (!creatingNewProject && requestedPlatforms.isNotEmpty) {
         _printPluginUpdatePubspecMessage(relativePluginPath, platformsString);
-      } else if (_getSupportedPlatformsInPlugin(projectDir).isEmpty){
+      } else if (_getSupportedPlatformsInPlugin(projectDir).isEmpty) {
         _printNoPluginMessage();
       }
 

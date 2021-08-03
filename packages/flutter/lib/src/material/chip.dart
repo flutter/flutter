@@ -1835,7 +1835,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
   }
 
   Widget? _wrapWithTooltip(String? tooltip, VoidCallback? callback, Widget? child) {
-    if(!widget.useDeleteButtonTooltip){
+    if(!widget.useDeleteButtonTooltip) {
       return child;
     }
     if (child == null || callback == null || tooltip == null) {

@@ -917,7 +917,7 @@ void main() {
     // We must explicitly cause an "up" gesture to avoid a crash.
     // todo(mattcarroll) remove this call, https://github.com/flutter/flutter/issues/19540
     await gesture.up();
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/52960
+  });
 
   testWidgets('ScaleTransition animation for showCupertinoDialog()', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1371,7 +1371,7 @@ Widget createAppWithCenteredButton(Widget child) {
 }
 
 
-class _RestorableDialogTestWidget extends StatelessWidget{
+class _RestorableDialogTestWidget extends StatelessWidget {
   static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
     return CupertinoDialogRoute<void>(
       context: context,

@@ -13,10 +13,10 @@ typedef ControlCallback = Future<void> Function(WidgetController controller);
 void macroPerfTestE2E(
   String testName,
   String routeName, {
-  Duration pageDelay,
+  Duration? pageDelay,
   Duration duration = const Duration(seconds: 3),
-  ControlCallback body,
-  ControlCallback setup,
+  ControlCallback? body,
+  ControlCallback? setup,
 }) {
   final WidgetsBinding _binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   assert(_binding is IntegrationTestWidgetsFlutterBinding);

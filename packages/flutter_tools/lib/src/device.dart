@@ -266,7 +266,7 @@ abstract class DeviceManager {
             .where((Device device) => device.ephemeral == true)
             .toList();
 
-            if (ephemeralDevices.length == 1){
+            if (ephemeralDevices.length == 1) {
               devices = ephemeralDevices;
             }
       }

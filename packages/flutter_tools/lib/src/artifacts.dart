@@ -576,7 +576,7 @@ class CachedArtifacts implements Artifacts {
         return _fileSystem.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact, platform, mode));
       case Artifact.windowsUwpDesktopPath:
         final String engineArtifactsPath = _cache.getArtifactDirectory('engine').path;
-         return _fileSystem.path.join(engineArtifactsPath, 'windows-uwp-x64-${getNameForBuildMode(mode!)}', _artifactToFileName(artifact, platform, mode));
+        return _fileSystem.path.join(engineArtifactsPath, 'windows-uwp-x64-${getNameForBuildMode(mode!)}', _artifactToFileName(artifact, platform, mode));
       case Artifact.windowsCppClientWrapper:
         final String engineArtifactsPath = _cache.getArtifactDirectory('engine').path;
         return _fileSystem.path.join(engineArtifactsPath, 'windows-x64', _artifactToFileName(artifact, platform, mode));
@@ -672,9 +672,8 @@ String _getIosEngineArtifactPath(String engineDirectory,
     if (!platformDirectory.basename.startsWith('ios-')) {
       continue;
     }
-    // ios-x86_64-simulator, ios-armv7_arm64 (Xcode 11), or ios-arm64_armv7 (Xcode 12).
-    final bool simulatorDirectory =
-        platformDirectory.basename.endsWith('-simulator');
+    // ios-x86_64-simulator, ios-arm64_x86_64-simulator, ios-armv7_arm64 (Xcode 11), or ios-arm64_armv7 (Xcode 12).
+    final bool simulatorDirectory = platformDirectory.basename.endsWith('-simulator');
     if ((environmentType == EnvironmentType.simulator && simulatorDirectory) ||
         (environmentType == EnvironmentType.physical && !simulatorDirectory)) {
       flutterFrameworkSource = platformDirectory;
@@ -904,7 +903,7 @@ class CachedLocalEngineArtifacts implements LocalEngineArtifacts {
   }
 
   String _flutterTesterPath(TargetPlatform platform) {
-     if (_platform.isLinux) {
+    if (_platform.isLinux) {
       return _fileSystem.path.join(engineOutPath, _artifactToFileName(Artifact.flutterTester));
     } else if (_platform.isMacOS) {
       return _fileSystem.path.join(engineOutPath, 'flutter_tester');
