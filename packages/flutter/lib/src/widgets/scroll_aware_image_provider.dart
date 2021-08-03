@@ -96,10 +96,10 @@ class ScrollAwareImageProvider<T extends Object> extends ImageProvider<T> {
     // Try to get to end of the frame callbacks of the next frame, and then
     // check again.
     if (Scrollable.recommendDeferredLoadingForContext(context.context!)) {
-        SchedulerBinding.instance!.scheduleFrameCallback((_) {
-          scheduleMicrotask(() => resolveStreamForKey(configuration, stream, key, handleError));
-        });
-        return;
+      SchedulerBinding.instance!.scheduleFrameCallback((_) {
+        scheduleMicrotask(() => resolveStreamForKey(configuration, stream, key, handleError));
+      });
+      return;
     }
     // We are in the tree, we're not scrolling too fast, the cache doesn't
     // have our image, and no one has otherwise completed the stream.  Go.

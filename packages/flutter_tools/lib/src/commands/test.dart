@@ -167,7 +167,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         defaultsTo: 'tester',
         help: 'Selects the test backend.',
         allowedHelp: <String, String>{
-          'tester': 'Run tests using the default VM-based test environment.',
+          'tester': 'Run tests using the VM-based test environment.',
           'chrome': '(deprecated) Run tests using the Google Chrome web browser. '
                     'This value is intended for testing the Flutter framework '
                     'itself and may be removed at any time.',

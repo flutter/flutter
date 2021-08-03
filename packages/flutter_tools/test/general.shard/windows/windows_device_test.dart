@@ -116,6 +116,22 @@ void main() {
     ).devices, hasLength(2));
   });
 
+  testWithoutContext('WindowsDevices has windows and winuwp well known devices', () async {
+    final FeatureFlags featureFlags = TestFeatureFlags(isWindowsEnabled: true, isWindowsUwpEnabled: true);
+    expect(WindowsDevices(
+      windowsWorkflow: WindowsWorkflow(
+        featureFlags: featureFlags,
+        platform: FakePlatform(operatingSystem: 'windows')
+      ),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
+      logger: BufferLogger.test(),
+      processManager: FakeProcessManager.any(),
+      fileSystem: MemoryFileSystem.test(),
+      featureFlags: featureFlags,
+      uwptool: FakeUwpTool(),
+    ).wellKnownIds, <String>['windows', 'winuwp']);
+  });
+
   testWithoutContext('WindowsDevices ignores the timeout provided to discoverDevices', () async {
     final WindowsDevices windowsDevices = WindowsDevices(
       windowsWorkflow: WindowsWorkflow(

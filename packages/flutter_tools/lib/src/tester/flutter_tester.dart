@@ -11,7 +11,6 @@ import 'package:process/process.dart';
 
 import '../application_package.dart';
 import '../artifacts.dart';
-import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -268,9 +267,6 @@ class FlutterTesterDevices extends PollingDeviceDiscovery {
     @required ProcessManager processManager,
     @required Logger logger,
     @required FlutterVersion flutterVersion,
-    // TODO(jonahwilliams): remove after flutter rolls
-    // ignore: avoid_unused_constructor_parameters
-    Config config,
     @required OperatingSystemUtils operatingSystemUtils,
   }) : _testerDevice = FlutterTesterDevice(
         kTesterDeviceId,
@@ -299,4 +295,7 @@ class FlutterTesterDevices extends PollingDeviceDiscovery {
   Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
     return showFlutterTesterDevice ? <Device>[_testerDevice] : <Device>[];
   }
+
+  @override
+  List<String> get wellKnownIds => const <String>[kTesterDeviceId];
 }

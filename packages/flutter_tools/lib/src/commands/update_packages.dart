@@ -27,7 +27,7 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   // Therefore, we control the version of flutter_gallery_assets so that
   // existing tests do not fail when the package has a new version.
   'flutter_gallery_assets': '^1.0.1',
-  'flutter_template_images': '3.0.1', // Must always exactly match flutter_tools template.
+  'flutter_template_images': '4.0.0', // Must always exactly match flutter_tools template.
   // DART TEAM OWNED NNBD DEPS
   'archive': '">=3.0.0-nullsafety.0"',
   'async': '">=2.5.0-nullsafety.3"',
@@ -1511,7 +1511,6 @@ environment:
     ..writeAsStringSync('''
 name: sky_engine
 version: 0.0.99
-author: Flutter Authors <flutter-dev@googlegroups.com>
 description: Dart SDK extensions for dart:ui
 homepage: http://flutter.io
 # sky_engine requires sdk_ext support in the analyzer which was added in 1.11.x

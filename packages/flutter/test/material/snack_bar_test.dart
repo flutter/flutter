@@ -744,7 +744,6 @@ void main() {
       popupMenuTheme: const PopupMenuThemeData(color: Colors.black),
       bannerTheme: const MaterialBannerThemeData(backgroundColor: Colors.black),
       dividerTheme: const DividerThemeData(color: Colors.black),
-      buttonBarTheme: const ButtonBarThemeData(alignment: MainAxisAlignment.start),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(type: BottomNavigationBarType.fixed),
       timePickerTheme: const TimePickerThemeData(backgroundColor: Colors.black),
       textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(primary: Colors.red)),
@@ -756,7 +755,6 @@ void main() {
       radioTheme: const RadioThemeData(),
       switchTheme: const SwitchThemeData(),
       progressIndicatorTheme: const ProgressIndicatorThemeData(),
-      fixTextFieldOutlineLabel: false,
       useTextSelectionTheme: false,
     );
 
@@ -816,9 +814,9 @@ void main() {
               return GestureDetector(
                 onTap: () {
                   Scaffold.of(context).showSnackBar(
-                    SnackBar(
-                      content: const Text('I am a snack bar.'),
-                      margin: const EdgeInsets.all(padding),
+                    const SnackBar(
+                      content: Text('I am a snack bar.'),
+                      margin: EdgeInsets.all(padding),
                       behavior: SnackBarBehavior.floating,
                     ),
                   );
@@ -979,9 +977,8 @@ void main() {
     final Offset snackBarTopRight = tester.getTopRight(materialFinder);
     expect(textBottomLeft.dx - snackBarBottomLeft.dx, padding);
     expect(snackBarTopRight.dx - textTopRight.dx, padding);
-    // The text is given a vertical padding of 14 already.
-    expect(snackBarBottomLeft.dy - textBottomLeft.dy, padding + 14);
-    expect(textTopRight.dy - snackBarTopRight.dy, padding + 14);
+    expect(snackBarBottomLeft.dy - textBottomLeft.dy, padding);
+    expect(textTopRight.dy - snackBarTopRight.dy, padding);
   });
 
   testWidgets('Snackbar width can be customized', (WidgetTester tester) async {
@@ -994,8 +991,8 @@ void main() {
               return GestureDetector(
                 onTap: () {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: const Text('I am a snack bar.'),
+                    const SnackBar(
+                      content: Text('I am a snack bar.'),
                       width: width,
                       behavior: SnackBarBehavior.floating,
                     ),
@@ -2419,6 +2416,106 @@ void main() {
     expect(find.text(snackBars[0]), findsNothing);
     expect(find.text(snackBars[1]), findsNothing);
     expect(find.text(snackBars[2]), findsNothing);
+  });
+
+  Widget _buildApp({
+    required SnackBarBehavior? behavior,
+    EdgeInsetsGeometry? margin,
+    double? width,
+  }) {
+    return MaterialApp(
+      home: Scaffold(
+        floatingActionButton: FloatingActionButton(
+          child: const Icon(Icons.send),
+          onPressed: () {},
+        ),
+        body: Builder(
+          builder: (BuildContext context) {
+            return GestureDetector(
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  behavior: behavior,
+                  margin: margin,
+                  width: width,
+                  content: const Text('I am a snack bar.'),
+                  duration: const Duration(seconds: 2),
+                  action: SnackBarAction(label: 'ACTION', onPressed: () {}),
+                ));
+              },
+              child: const Text('X'),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  testWidgets('Setting SnackBarBehavior.fixed will still assert for margin', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/84935
+    await tester.pumpWidget(_buildApp(
+      behavior: SnackBarBehavior.fixed,
+      margin: const EdgeInsets.all(8.0),
+    ));
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 750));
+    final AssertionError exception = tester.takeException() as AssertionError;
+    expect(
+      exception.message,
+      'Margin can only be used with floating behavior. SnackBarBehavior.fixed '
+      'was set in the SnackBar constructor.',
+    );
+  });
+
+  testWidgets('Default SnackBarBehavior will still assert for margin', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/84935
+    await tester.pumpWidget(_buildApp(
+      behavior: null,
+      margin: const EdgeInsets.all(8.0),
+    ));
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 750));
+    final AssertionError exception = tester.takeException() as AssertionError;
+    expect(
+      exception.message,
+      'Margin can only be used with floating behavior. SnackBarBehavior.fixed '
+      'was set by default.',
+    );
+  });
+
+  testWidgets('Setting SnackBarBehavior.fixed will still assert for width', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/84935
+    await tester.pumpWidget(_buildApp(
+      behavior: SnackBarBehavior.fixed,
+      width: 5.0,
+    ));
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 750));
+    final AssertionError exception = tester.takeException() as AssertionError;
+    expect(
+      exception.message,
+      'Width can only be used with floating behavior. SnackBarBehavior.fixed '
+      'was set in the SnackBar constructor.',
+    );
+  });
+
+  testWidgets('Default SnackBarBehavior will still assert for width', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/84935
+    await tester.pumpWidget(_buildApp(
+      behavior: null,
+      width: 5.0,
+    ));
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 750));
+    final AssertionError exception = tester.takeException() as AssertionError;
+    expect(
+      exception.message,
+      'Width can only be used with floating behavior. SnackBarBehavior.fixed '
+      'was set by default.',
+    );
   });
 }
 

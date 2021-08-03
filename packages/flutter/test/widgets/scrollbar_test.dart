@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/src/physics/utils.dart' show nearEqual;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -381,13 +382,13 @@ void main() {
       axisDirection: AxisDirection.down,
     );
 
-    final ScrollbarPainter p = _buildPainter(
+    final ScrollbarPainter painter = _buildPainter(
       padding: padding,
       scrollMetrics: metrics,
     );
 
     testWidgets('down', (WidgetTester tester) async {
-      p.update(
+      painter.update(
         metrics.copyWith(
           viewportDimension: size.height,
           pixels: double.negativeInfinity,
@@ -396,13 +397,13 @@ void main() {
       );
 
       // Top overscroll.
-      p.paint(testCanvas, size);
+      painter.paint(testCanvas, size);
       final Rect rect0 = captureRect();
       expect(rect0.top, padding.top);
       expect(size.width - rect0.right, padding.right);
 
       // Bottom overscroll.
-      p.update(
+      painter.update(
         metrics.copyWith(
           viewportDimension: size.height,
           pixels: double.infinity,
@@ -410,14 +411,14 @@ void main() {
         AxisDirection.down,
       );
 
-      p.paint(testCanvas, size);
+      painter.paint(testCanvas, size);
       final Rect rect1 = captureRect();
       expect(size.height - rect1.bottom, padding.bottom);
       expect(size.width - rect1.right, padding.right);
     });
 
     testWidgets('up', (WidgetTester tester) async {
-      p.update(
+      painter.update(
         metrics.copyWith(
           viewportDimension: size.height,
           pixels: double.infinity,
@@ -427,13 +428,13 @@ void main() {
       );
 
       // Top overscroll.
-      p.paint(testCanvas, size);
+      painter.paint(testCanvas, size);
       final Rect rect0 = captureRect();
       expect(rect0.top, padding.top);
       expect(size.width - rect0.right, padding.right);
 
       // Bottom overscroll.
-      p.update(
+      painter.update(
         metrics.copyWith(
           viewportDimension: size.height,
           pixels: double.negativeInfinity,
@@ -442,14 +443,14 @@ void main() {
         AxisDirection.up,
       );
 
-      p.paint(testCanvas, size);
+      painter.paint(testCanvas, size);
       final Rect rect1 = captureRect();
       expect(size.height - rect1.bottom, padding.bottom);
       expect(size.width - rect1.right, padding.right);
     });
 
     testWidgets('left', (WidgetTester tester) async {
-      p.update(
+      painter.update(
         metrics.copyWith(
           viewportDimension: size.width,
           pixels: double.negativeInfinity,
@@ -459,13 +460,13 @@ void main() {
       );
 
       // Right overscroll.
-      p.paint(testCanvas, size);
+      painter.paint(testCanvas, size);
       final Rect rect0 = captureRect();
       expect(size.height - rect0.bottom, padding.bottom);
       expect(size.width - rect0.right, padding.right);
 
       // Left overscroll.
-      p.update(
+      painter.update(
         metrics.copyWith(
           viewportDimension: size.width,
           pixels: double.infinity,
@@ -474,14 +475,14 @@ void main() {
         AxisDirection.left,
       );
 
-      p.paint(testCanvas, size);
+      painter.paint(testCanvas, size);
       final Rect rect1 = captureRect();
       expect(size.height - rect1.bottom, padding.bottom);
       expect(rect1.left, padding.left);
     });
 
     testWidgets('right', (WidgetTester tester) async {
-      p.update(
+      painter.update(
         metrics.copyWith(
           viewportDimension: size.width,
           pixels: double.infinity,
@@ -491,13 +492,13 @@ void main() {
       );
 
       // Right overscroll.
-      p.paint(testCanvas, size);
+      painter.paint(testCanvas, size);
       final Rect rect0 = captureRect();
       expect(size.height - rect0.bottom, padding.bottom);
       expect(size.width - rect0.right, padding.right);
 
       // Left overscroll.
-      p.update(
+      painter.update(
         metrics.copyWith(
           viewportDimension: size.width,
           pixels: double.negativeInfinity,
@@ -506,7 +507,7 @@ void main() {
         AxisDirection.right,
       );
 
-      p.paint(testCanvas, size);
+      painter.paint(testCanvas, size);
       final Rect rect1 = captureRect();
       expect(size.height - rect1.bottom, padding.bottom);
       expect(rect1.left, padding.left);
@@ -525,7 +526,7 @@ void main() {
     );
 
     const double minOverscrollLength = 8.0;
-    final ScrollbarPainter p = _buildPainter(
+    final ScrollbarPainter painter = _buildPainter(
       padding: padding,
       scrollMetrics: metrics,
       minLength: 36.0,
@@ -533,54 +534,54 @@ void main() {
     );
 
     // No overscroll gives a full sized thumb.
-    p.update(
+    painter.update(
       metrics.copyWith(
         pixels: 0.0,
       ),
       AxisDirection.down,
     );
-    p.paint(testCanvas, size);
+    painter.paint(testCanvas, size);
     final double fullThumbExtent = captureRect().height;
     expect(fullThumbExtent, greaterThan(_kMinThumbExtent));
 
     // Scrolling to the middle also gives a full sized thumb.
-    p.update(
+    painter.update(
       metrics.copyWith(
         pixels: scrollExtent / 2,
       ),
       AxisDirection.down,
     );
-    p.paint(testCanvas, size);
+    painter.paint(testCanvas, size);
     expect(captureRect().height, moreOrLessEquals(fullThumbExtent, epsilon: 1e-6));
 
     // Scrolling just to the very end also gives a full sized thumb.
-    p.update(
+    painter.update(
       metrics.copyWith(
         pixels: scrollExtent,
       ),
       AxisDirection.down,
     );
-    p.paint(testCanvas, size);
+    painter.paint(testCanvas, size);
     expect(captureRect().height, moreOrLessEquals(fullThumbExtent, epsilon: 1e-6));
 
     // Scrolling just past the end shrinks the thumb slightly.
-    p.update(
+    painter.update(
       metrics.copyWith(
         pixels: scrollExtent * 1.001,
       ),
       AxisDirection.down,
     );
-    p.paint(testCanvas, size);
+    painter.paint(testCanvas, size);
     expect(captureRect().height, moreOrLessEquals(fullThumbExtent, epsilon: 2.0));
 
     // Scrolling way past the end shrinks the thumb to minimum.
-    p.update(
+    painter.update(
       metrics.copyWith(
         pixels: double.infinity,
       ),
       AxisDirection.down,
     );
-    p.paint(testCanvas, size);
+    painter.paint(testCanvas, size);
     expect(captureRect().height, minOverscrollLength);
   });
 
@@ -1143,6 +1144,12 @@ void main() {
   });
 
   testWidgets('RawScrollbar.isAlwaysShown asserts that a ScrollPosition is attached', (WidgetTester tester) async {
+    final FlutterExceptionHandler? handler = FlutterError.onError;
+    FlutterErrorDetails? error;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      error = details;
+    };
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1163,12 +1170,15 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    final dynamic exception = tester.takeException();
-    expect(exception, isAssertionError);
+
+    expect(error, isNotNull);
+    final AssertionError exception = error!.exception as AssertionError;
     expect(
-      (exception as AssertionError).message,
+      exception.message,
       contains("The Scrollbar's ScrollController has no ScrollPosition attached."),
     );
+
+    FlutterError.onError = handler;
   });
 
   testWidgets('Interactive scrollbars should have a valid scroll controller', (WidgetTester tester) async {
@@ -1198,10 +1208,16 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    final dynamic exception = tester.takeException();
+    AssertionError? exception = tester.takeException() as AssertionError?;
+    // The scrollbar is not visible and cannot be interacted with, so no assertion.
+    expect(exception, isNull);
+    // Scroll to trigger the scrollbar to come into view.
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
+    await gesture.moveBy(const Offset(0.0, -20.0));
+    exception = tester.takeException() as AssertionError;
     expect(exception, isAssertionError);
     expect(
-      (exception as AssertionError).message,
+      exception.message,
       contains("The Scrollbar's ScrollController has no ScrollPosition attached."),
     );
   });
@@ -1445,5 +1461,190 @@ void main() {
     painter.update(scrollMetrics, scrollMetrics.axisDirection);
 
     expect(() => painter.paint(testCanvas, size), throwsA(isA<AssertionError>()));
+  });
+
+  testWidgets('RawScrollbar mainAxisMargin property works properly', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            mainAxisMargin: 10,
+            isAlwaysShown: true,
+            controller: scrollController,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: const SizedBox(width: 1000.0, height: 1000.0),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 580.0))
+        ..rect(rect: const Rect.fromLTRB(794.0, 10.0, 800.0, 358.0))
+    );
+  });
+  testWidgets('minThumbLength property of RawScrollbar is respected', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            controller: scrollController,
+            minThumbLength: 21,
+            minOverscrollLength: 8,
+            isAlwaysShown: true,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: const SizedBox(width: 1000.0, height: 50000.0),
+            ),
+          ),
+        )));
+    await tester.pumpAndSettle();
+    expect(
+        find.byType(RawScrollbar),
+        paints
+          ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0)) // track
+          ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 21.0))); // thumb
+  });
+
+  testWidgets('crossAxisMargin property of RawScrollbar is respected', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            controller: scrollController,
+            crossAxisMargin: 30,
+            isAlwaysShown: true,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: const SizedBox(width: 1000.0, height: 1000.0),
+            ),
+          ),
+        )));
+    await tester.pumpAndSettle();
+    expect(
+        find.byType(RawScrollbar),
+        paints
+          ..rect(rect: const Rect.fromLTRB(734.0, 0.0, 800.0, 600.0))
+          ..rect(rect: const Rect.fromLTRB(764.0, 0.0, 770.0, 360.0)));
+  });
+
+  testWidgets('minOverscrollLength property of RawScrollbar is respected', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            controller: scrollController,
+            isAlwaysShown: true,
+            minOverscrollLength: 8.0,
+            minThumbLength: 36.0,
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              controller: scrollController,
+              child: const SizedBox(height: 10000),
+            )
+          ),
+        )
+      )
+    );
+    await tester.pumpAndSettle();
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(RawScrollbar)));
+    await gesture.moveBy(const Offset(0, 1000));
+    await tester.pump();
+    expect(
+        find.byType(RawScrollbar),
+        paints
+          ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+          ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 8.0)));
+  });
+
+  testWidgets('The bar can show or hide when the viewport size change', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    Widget buildFrame(double height) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            controller: scrollController,
+            isAlwaysShown: true,
+            child: SingleChildScrollView(
+                controller: scrollController,
+                child: SizedBox(width: double.infinity, height: height)
+            ),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildFrame(600.0));
+    await tester.pumpAndSettle();
+    expect(find.byType(RawScrollbar), isNot(paints..rect())); // Not shown.
+
+    await tester.pumpWidget(buildFrame(600.1));
+    await tester.pumpAndSettle();
+    expect(find.byType(RawScrollbar), paints..rect()..rect()); // Show the bar.
+
+    await tester.pumpWidget(buildFrame(600.0));
+    await tester.pumpAndSettle();
+    expect(find.byType(RawScrollbar), isNot(paints..rect())); // Hide the bar.
+  });
+
+  testWidgets('The bar can show or hide when the window size change', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    Widget buildFrame() {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: PrimaryScrollController(
+            controller: scrollController,
+            child: RawScrollbar(
+              isAlwaysShown: true,
+              controller: scrollController,
+              child: const SingleChildScrollView(
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 600.0,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+    tester.binding.window.physicalSizeTestValue = const Size(800.0, 600.0);
+    tester.binding.window.devicePixelRatioTestValue = 1;
+    addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+    addTearDown(tester.binding.window.clearDevicePixelRatioTestValue);
+
+    await tester.pumpWidget(buildFrame());
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+    expect(find.byType(RawScrollbar), isNot(paints..rect())); // Not shown.
+
+    tester.binding.window.physicalSizeTestValue = const Size(800.0, 599.0);
+    await tester.pumpAndSettle();
+    expect(find.byType(RawScrollbar), paints..rect()..rect()); // Show the bar.
+
+    tester.binding.window.physicalSizeTestValue = const Size(800.0, 600.0);
+    await tester.pumpAndSettle();
+    expect(find.byType(RawScrollbar), isNot(paints..rect())); // Not shown.
   });
 }

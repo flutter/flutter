@@ -27,7 +27,7 @@ void main() {
 
     await flutter.run(
       withDebugger: true, startPaused: true, chrome: true,
-      additionalCommandArgs: <String>['--verbose']);
+      additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
     await flutter.addBreakpoint(_project.breakpointUri, _project.breakpointLine);
     await flutter.resume();
     await flutter.waitForPause(); // Now we should be on the breakpoint.
@@ -48,8 +48,7 @@ void main() {
         reason: 'After $i steps, debugger should stop at $expectedLine but stopped at $actualLine'
       );
     }
-  }, skip: true, // Flaky: https://github.com/flutter/flutter/issues/83260
-  );
+  });
 
   tearDown(() async {
     await flutter.stop();

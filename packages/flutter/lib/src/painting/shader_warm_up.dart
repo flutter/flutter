@@ -7,6 +7,8 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 
+import 'debug.dart';
+
 /// Interface for drawing an image to warm up Skia shader compilations.
 ///
 /// When Skia first sees a certain type of draw operation on the GPU, it needs
@@ -85,15 +87,19 @@ abstract class ShaderWarmUp {
     final ui.Canvas canvas = ui.Canvas(recorder);
     await warmUpOnCanvas(canvas);
     final ui.Picture picture = recorder.endRecording();
+    assert(debugCaptureShaderWarmUpPicture(picture));
     if (!kIsWeb) { // Picture.toImage is not yet implemented on the web.
       final TimelineTask shaderWarmUpTask = TimelineTask();
       shaderWarmUpTask.start('Warm-up shader');
       try {
-        await picture.toImage(size.width.ceil(), size.height.ceil());
+        final ui.Image image = await picture.toImage(size.width.ceil(), size.height.ceil());
+        assert(debugCaptureShaderWarmUpImage(image));
+        image.dispose();
       } finally {
         shaderWarmUpTask.finish();
       }
     }
+    picture.dispose();
   }
 }
 

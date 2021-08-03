@@ -5,6 +5,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -360,7 +361,7 @@ void main() {
       }
 
       await tester.pumpWidget(viewWithScroll());
-      final dynamic exception = tester.takeException();
+      final AssertionError exception = tester.takeException() as AssertionError;
       expect(exception, isAssertionError);
     },
   );
@@ -389,9 +390,16 @@ void main() {
         );
       }
 
+      final FlutterExceptionHandler? handler = FlutterError.onError;
+      FlutterErrorDetails? error;
+      FlutterError.onError = (FlutterErrorDetails details) {
+        error = details;
+      };
+
       await tester.pumpWidget(viewWithScroll());
-      final dynamic exception = tester.takeException();
-      expect(exception, isAssertionError);
+      expect(error, isNotNull);
+
+      FlutterError.onError = handler;
     },
   );
 
@@ -961,10 +969,16 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    final dynamic exception = tester.takeException();
+    AssertionError? exception = tester.takeException() as AssertionError?;
+    // The scrollbar is not visible and cannot be interacted with, so no assertion.
+    expect(exception, isNull);
+    // Scroll to trigger the scrollbar to come into view.
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
+    await gesture.moveBy(const Offset(0.0, -20.0));
+    exception = tester.takeException() as AssertionError;
     expect(exception, isAssertionError);
     expect(
-      (exception as AssertionError).message,
+      exception.message,
       contains("The Scrollbar's ScrollController has no ScrollPosition attached."),
     );
   });

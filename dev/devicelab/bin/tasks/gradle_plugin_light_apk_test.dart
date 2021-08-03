@@ -2,11 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:io';
 
-import 'package:flutter_devicelab/common.dart';
 import 'package:flutter_devicelab/framework/apk_utils.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
@@ -178,7 +175,7 @@ Future<void> main() async {
             ],
           );
         });
-        final String errorMessage = validateSnapshotDependency(project, 'kernel_blob.bin');
+        final String? errorMessage = validateSnapshotDependency(project, 'kernel_blob.bin');
         if (errorMessage != null) {
           throw TaskResult.failure(errorMessage);
         }
@@ -220,8 +217,8 @@ Future<void> main() async {
         });
 
         section('Configure');
-        unawaited(project.addPlugin('plugin_under_test',
-            value: '$platformLineSep    path: ${pluginDir.path}'));
+        project.addPlugin('plugin_under_test',
+            value: '$platformLineSep    path: ${pluginDir.path}');
         await project.addCustomBuildType('local', initWith: 'debug');
         await project.getPackages();
 
@@ -240,7 +237,7 @@ Future<void> main() async {
         await project.addCustomBuildType('local', initWith: 'debug');
         await project.addGlobalBuildType('local', initWith: 'debug');
         section('Add plugin');
-        await project.addPlugin('path_provider');
+        project.addPlugin('path_provider');
         await project.getPackages();
 
         await project.runGradleTask('assembleLocal');

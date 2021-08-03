@@ -2,16 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:conductor/globals.dart';
 import 'package:conductor/repository.dart';
 import 'package:conductor/roll_dev.dart';
 import 'package:file/memory.dart';
 import 'package:platform/platform.dart';
 
-import '../../../packages/flutter_tools/test/src/fake_process_manager.dart';
 import './common.dart';
+import '../../../packages/flutter_tools/test/src/fake_process_manager.dart';
 
 void main() {
   group('rollDev()', () {
@@ -20,15 +18,16 @@ void main() {
     const String commit = 'abcde012345';
     const String remote = 'origin';
     const String lastVersion = '1.2.0-0.0.pre';
-    const String nextVersion = '1.2.0-1.0.pre';
+    const String nextVersion = '1.2.0-2.0.pre';
+    const String candidateBranch = 'flutter-1.2-candidate.2';
     const String checkoutsParentDirectory = '/path/to/directory/';
-    FakeArgResults fakeArgResults;
-    MemoryFileSystem fileSystem;
-    TestStdio stdio;
-    FrameworkRepository repo;
-    Checkouts checkouts;
-    FakePlatform platform;
-    FakeProcessManager processManager;
+    late FakeArgResults fakeArgResults;
+    late MemoryFileSystem fileSystem;
+    late TestStdio stdio;
+    late FrameworkRepository repo;
+    late Checkouts checkouts;
+    late FakePlatform platform;
+    late FakeProcessManager processManager;
 
     setUp(() {
       stdio = TestStdio();
@@ -45,37 +44,20 @@ void main() {
       repo = FrameworkRepository(checkouts);
     });
 
-    test('returns false if level not provided', () {
+    test('throws Exception if level not provided', () {
       fakeArgResults = FakeArgResults(
         level: null,
-        commit: commit,
+        candidateBranch: candidateBranch,
         remote: remote,
       );
       expect(
-        rollDev(
+        () => rollDev(
           argResults: fakeArgResults,
           repository: repo,
           stdio: stdio,
           usage: usage,
         ),
-        false,
-      );
-    });
-
-    test('returns false if commit not provided', () {
-      fakeArgResults = FakeArgResults(
-        level: level,
-        commit: null,
-        remote: remote,
-      );
-      expect(
-        rollDev(
-          argResults: fakeArgResults,
-          repository: repo,
-          stdio: stdio,
-          usage: usage,
-        ),
-        false,
+        throwsExceptionWith(usage),
       );
     });
 
@@ -109,24 +91,18 @@ void main() {
       ]);
       fakeArgResults = FakeArgResults(
         level: level,
-        commit: commit,
+        candidateBranch: candidateBranch,
         remote: remote,
       );
-      Exception exception;
-      try {
-        rollDev(
+      expect(
+        () => rollDev(
           argResults: fakeArgResults,
           repository: repo,
           stdio: stdio,
           usage: usage,
-        );
-      } on Exception catch (e) {
-        exception = e;
-      }
-      const String pattern = r'Your git repository is not clean. Try running '
-          '"git clean -fd". Warning, this will delete files! Run with -n to find '
-          'out which ones.';
-      expect(exception?.toString(), contains(pattern));
+        ),
+        throwsExceptionWith('Your git repository is not clean.'),
+      );
     });
 
     test('does not reset or tag if --just-print is specified', () {
@@ -165,13 +141,13 @@ void main() {
         const FakeCommand(command: <String>[
           'git',
           'rev-parse',
-          commit,
+          candidateBranch,
         ], stdout: commit),
         const FakeCommand(command: <String>[
           'git',
           'describe',
           '--match',
-          '*.*.*-*.*.pre',
+          '*.*.*',
           '--exact-match',
           '--tags',
           'refs/remotes/$remote/dev',
@@ -185,7 +161,7 @@ void main() {
 
       fakeArgResults = FakeArgResults(
         level: level,
-        commit: commit,
+        candidateBranch: candidateBranch,
         remote: remote,
         justPrint: true,
       );
@@ -237,13 +213,13 @@ void main() {
         const FakeCommand(command: <String>[
           'git',
           'rev-parse',
-          commit,
+          candidateBranch,
         ], stdout: commit),
         const FakeCommand(command: <String>[
           'git',
           'describe',
           '--match',
-          '*.*.*-*.*.pre',
+          '*.*.*',
           '--exact-match',
           '--tags',
           'refs/remotes/$remote/dev',
@@ -268,7 +244,7 @@ void main() {
 
       fakeArgResults = FakeArgResults(
         level: level,
-        commit: commit,
+        candidateBranch: candidateBranch,
         remote: remote,
         skipTagging: true,
       );
@@ -319,13 +295,13 @@ void main() {
         const FakeCommand(command: <String>[
           'git',
           'rev-parse',
-          commit,
+          candidateBranch,
         ], stdout: commit),
         const FakeCommand(command: <String>[
           'git',
           'describe',
           '--match',
-          '*.*.*-*.*.pre',
+          '*.*.*',
           '--exact-match',
           '--tags',
           'refs/remotes/$remote/dev',
@@ -339,7 +315,7 @@ void main() {
       ]);
       fakeArgResults = FakeArgResults(
         level: level,
-        commit: commit,
+        candidateBranch: candidateBranch,
         remote: remote,
         justPrint: true,
       );
@@ -394,13 +370,13 @@ void main() {
         const FakeCommand(command: <String>[
           'git',
           'rev-parse',
-          commit,
+          candidateBranch,
         ], stdout: commit),
         const FakeCommand(command: <String>[
           'git',
           'describe',
           '--match',
-          '*.*.*-*.*.pre',
+          '*.*.*',
           '--exact-match',
           '--tags',
           'refs/remotes/$remote/dev',
@@ -421,7 +397,7 @@ void main() {
 
       fakeArgResults = FakeArgResults(
         level: level,
-        commit: commit,
+        candidateBranch: candidateBranch,
         remote: remote,
       );
       const String errorMessage = 'The previous dev tag $lastVersion is not a '
@@ -473,13 +449,13 @@ void main() {
         const FakeCommand(command: <String>[
           'git',
           'rev-parse',
-          commit,
+          candidateBranch,
         ], stdout: commit),
         const FakeCommand(command: <String>[
           'git',
           'describe',
           '--match',
-          '*.*.*-*.*.pre',
+          '*.*.*',
           '--exact-match',
           '--tags',
           'refs/remotes/$remote/dev',
@@ -517,7 +493,7 @@ void main() {
       ]);
       fakeArgResults = FakeArgResults(
         level: level,
-        commit: commit,
+        candidateBranch: candidateBranch,
         remote: remote,
         skipTagging: true,
       );
@@ -568,13 +544,13 @@ void main() {
         const FakeCommand(command: <String>[
           'git',
           'rev-parse',
-          commit,
+          candidateBranch,
         ], stdout: commit),
         const FakeCommand(command: <String>[
           'git',
           'describe',
           '--match',
-          '*.*.*-*.*.pre',
+          '*.*.*',
           '--exact-match',
           '--tags',
           'refs/remotes/$remote/dev',
@@ -617,7 +593,7 @@ void main() {
       ]);
       fakeArgResults = FakeArgResults(
         level: level,
-        commit: commit,
+        candidateBranch: candidateBranch,
         remote: remote,
       );
       expect(
@@ -667,13 +643,13 @@ void main() {
         const FakeCommand(command: <String>[
           'git',
           'rev-parse',
-          commit,
+          candidateBranch,
         ], stdout: commit),
         const FakeCommand(command: <String>[
           'git',
           'describe',
           '--match',
-          '*.*.*-*.*.pre',
+          '*.*.*',
           '--exact-match',
           '--tags',
           'refs/remotes/$remote/dev',
@@ -711,7 +687,7 @@ void main() {
 
       fakeArgResults = FakeArgResults(
         level: level,
-        commit: commit,
+        candidateBranch: candidateBranch,
         remote: remote,
         force: true,
       );

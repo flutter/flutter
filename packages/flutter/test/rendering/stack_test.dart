@@ -83,7 +83,7 @@ void main() {
         parentData.left = parentData.right = 0;
       }
       layout(stack, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
-      stack.paint(context, Offset.zero);
+      context.paintChild(stack, Offset.zero);
       expect(context.clipBehavior, equals(clip));
     }
   });

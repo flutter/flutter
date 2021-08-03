@@ -117,30 +117,32 @@ class PaintingContext extends ClipContext {
       );
       return true;
     }());
-    OffsetLayer? childLayer = child._layer as OffsetLayer?;
+    OffsetLayer? childLayer = child._layerHandle.layer as OffsetLayer?;
     if (childLayer == null) {
       assert(debugAlsoPaintedParent);
+      assert(child._layerHandle.layer == null);
       // Not using the `layer` setter because the setter asserts that we not
       // replace the layer for repaint boundaries. That assertion does not
       // apply here because this is exactly the place designed to create a
       // layer for repaint boundaries.
-      child._layer = childLayer = OffsetLayer();
+      final OffsetLayer layer = OffsetLayer();
+      child._layerHandle.layer = childLayer = layer;
     } else {
       assert(debugAlsoPaintedParent || childLayer.attached);
       childLayer.removeAllChildren();
     }
-    assert(identical(childLayer, child._layer));
-    assert(child._layer is OffsetLayer);
+    assert(identical(childLayer, child._layerHandle.layer));
+    assert(child._layerHandle.layer is OffsetLayer);
     assert(() {
-      child._layer!.debugCreator = child.debugCreator ?? child.runtimeType;
+      childLayer!.debugCreator = child.debugCreator ?? child.runtimeType;
       return true;
     }());
-    childContext ??= PaintingContext(child._layer!, child.paintBounds);
+    childContext ??= PaintingContext(childLayer, child.paintBounds);
     child._paintWithContext(childContext, Offset.zero);
 
     // Double-check that the paint method did not replace the layer (the first
     // check is done in the [layer] setter itself).
-    assert(identical(childLayer, child._layer));
+    assert(identical(childLayer, child._layerHandle.layer));
     childContext.stopRecordingIfNeeded();
   }
 
@@ -209,14 +211,14 @@ class PaintingContext extends ClipContext {
           includedParent: true,
           includedChild: false,
         );
-        child._layer!.debugCreator = child.debugCreator ?? child;
+        child._layerHandle.layer!.debugCreator = child.debugCreator ?? child;
         return true;
       }());
     }
-    assert(child._layer is OffsetLayer);
-    final OffsetLayer childOffsetLayer = child._layer! as OffsetLayer;
+    assert(child._layerHandle.layer is OffsetLayer);
+    final OffsetLayer childOffsetLayer = child._layerHandle.layer! as OffsetLayer;
     childOffsetLayer.offset = offset;
-    appendLayer(child._layer!);
+    appendLayer(childOffsetLayer);
   }
 
   /// Adds a layer to the recording requiring that the recording is already
@@ -266,6 +268,7 @@ class PaintingContext extends ClipContext {
   Canvas get canvas {
     if (_canvas == null)
       _startRecording();
+    assert(_currentLayer != null);
     return _canvas!;
   }
 
@@ -391,6 +394,7 @@ class PaintingContext extends ClipContext {
     stopRecordingIfNeeded();
     appendLayer(childLayer);
     final PaintingContext childContext = createChildContext(childLayer, childPaintBounds ?? estimatedBounds);
+
     painter(childContext, offset);
     childContext.stopRecordingIfNeeded();
   }
@@ -969,9 +973,9 @@ class PipelineOwner {
       _nodesNeedingPaint = <RenderObject>[];
       // Sort the dirty nodes in reverse order (deepest first).
       for (final RenderObject node in dirtyNodes..sort((RenderObject a, RenderObject b) => b.depth - a.depth)) {
-        assert(node._layer != null);
+        assert(node._layerHandle.layer != null);
         if (node._needsPaint && node.owner == this) {
-          if (node._layer!.attached) {
+          if (node._layerHandle.layer!.attached) {
             PaintingContext.repaintCompositedChild(node);
           } else {
             node._skippedPaintingOnLayer();
@@ -1274,7 +1278,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   @mustCallSuper
   void dispose() {
     assert(!_debugDisposed);
-    _layer = null;
+    _layerHandle.layer = null;
     assert(() {
       // TODO(dnfield): Enable this assert once clients have had a chance to
       // migrate.
@@ -1478,7 +1482,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       _needsCompositingBitsUpdate = false;
       markNeedsCompositingBitsUpdate();
     }
-    if (_needsPaint && _layer != null) {
+    if (_needsPaint && _layerHandle.layer != null) {
       // Don't enter this block if we've never painted at all;
       // scheduleInitialPaint() will handle it
       _needsPaint = false;
@@ -2050,14 +2054,22 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// never populating this field, or by setting it to null when the value of
   /// [needsCompositing] changes from true to false.
   ///
+  /// If a new layer is created and stored in some other field on the render
+  /// object, the render object must use a [LayerHandle] to store it. A layer
+  /// handle will prevent the layer from being disposed before the render
+  /// object is finished with it, and it will also make sure that the layer
+  /// gets appropriately disposed when the render object creates a replacement
+  /// or nulls it out. The render object must null out the [LayerHandle.layer]
+  /// in its [dispose] method.
+  ///
   /// If this render object is a repaint boundary, the framework automatically
   /// creates an [OffsetLayer] and populates this field prior to calling the
   /// [paint] method. The [paint] method must not replace the value of this
   /// field.
   @protected
   ContainerLayer? get layer {
-    assert(!isRepaintBoundary || (_layer == null || _layer is OffsetLayer));
-    return _layer;
+    assert(!isRepaintBoundary || _layerHandle.layer == null || _layerHandle.layer is OffsetLayer);
+    return _layerHandle.layer;
   }
 
   @protected
@@ -2068,9 +2080,10 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       'The framework creates and assigns an OffsetLayer to a repaint '
       'boundary automatically.',
     );
-    _layer = newLayer;
+    _layerHandle.layer = newLayer;
   }
-  ContainerLayer? _layer;
+
+  final LayerHandle<ContainerLayer> _layerHandle = LayerHandle<ContainerLayer>();
 
   /// In debug mode, the compositing layer that this render object uses to repaint.
   ///
@@ -2082,7 +2095,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ContainerLayer? get debugLayer {
     ContainerLayer? result;
     assert(() {
-      result = _layer;
+      result = _layerHandle.layer;
       return true;
     }());
     return result;
@@ -2218,7 +2231,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       }());
       // If we always have our own layer, then we can just repaint
       // ourselves without involving any other nodes.
-      assert(_layer is OffsetLayer);
+      assert(_layerHandle.layer is OffsetLayer);
       if (owner != null) {
         owner!._nodesNeedingPaint.add(this);
         owner!.requestVisualUpdate();
@@ -2251,14 +2264,14 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     assert(attached);
     assert(isRepaintBoundary);
     assert(_needsPaint);
-    assert(_layer != null);
-    assert(!_layer!.attached);
+    assert(_layerHandle.layer != null);
+    assert(!_layerHandle.layer!.attached);
     AbstractNode? node = parent;
     while (node is RenderObject) {
       if (node.isRepaintBoundary) {
-        if (node._layer == null)
+        if (node._layerHandle.layer == null)
           break; // looks like the subtree here has never been painted. let it handle itself.
-        if (node._layer!.attached)
+        if (node._layerHandle.layer!.attached)
           break; // it's the one that detached us, so it's the one that will decide to repaint us.
         node._needsPaint = true;
       }
@@ -2278,8 +2291,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     assert(parent is! RenderObject);
     assert(!owner!._debugDoingPaint);
     assert(isRepaintBoundary);
-    assert(_layer == null);
-    _layer = rootLayer;
+    assert(_layerHandle.layer == null);
+    _layerHandle.layer = rootLayer;
     assert(_needsPaint);
     owner!._nodesNeedingPaint.add(this);
   }
@@ -2296,9 +2309,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     assert(parent is! RenderObject);
     assert(!owner!._debugDoingPaint);
     assert(isRepaintBoundary);
-    assert(_layer != null); // use scheduleInitialPaint the first time
-    _layer!.detach();
-    _layer = rootLayer;
+    assert(_layerHandle.layer != null); // use scheduleInitialPaint the first time
+    _layerHandle.layer!.detach();
+    _layerHandle.layer = rootLayer;
     markNeedsPaint();
   }
 
@@ -2388,7 +2401,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       _debugDoingThisPaint = true;
       debugLastActivePaint = _debugActivePaint;
       _debugActivePaint = this;
-      assert(!isRepaintBoundary || _layer != null);
+      assert(!isRepaintBoundary || _layerHandle.layer != null);
       return true;
     }());
     _needsPaint = false;
@@ -2983,7 +2996,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     properties.add(DiagnosticsProperty<ParentData>('parentData', parentData, tooltip: _debugCanParentUseSize == true ? 'can use size' : null, missingIfNull: true));
     properties.add(DiagnosticsProperty<Constraints>('constraints', _constraints, missingIfNull: true));
     // don't access it via the "layer" getter since that's only valid when we don't need paint
-    properties.add(DiagnosticsProperty<ContainerLayer>('layer', _layer, defaultValue: null));
+    properties.add(DiagnosticsProperty<ContainerLayer>('layer', _layerHandle.layer, defaultValue: null));
     properties.add(DiagnosticsProperty<SemanticsNode>('semantics node', _semantics, defaultValue: null));
     properties.add(FlagProperty(
       'isBlockingSemanticsOfPreviouslyPaintedNodes',

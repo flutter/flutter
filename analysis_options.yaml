@@ -61,7 +61,7 @@ linter:
     # - avoid_catching_errors # we do this commonly
     - avoid_classes_with_only_static_members
     # - avoid_double_and_int_checks # only useful when targeting JS runtime
-    # - avoid_dynamic_calls # not yet tested
+    - avoid_dynamic_calls
     - avoid_empty_else
     - avoid_equals_and_hash_code_on_mutable_classes
     - avoid_escaping_inner_quotes

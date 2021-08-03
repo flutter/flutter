@@ -7,6 +7,8 @@ import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:platform/platform.dart';
 
+import 'proto/conductor_state.pb.dart' as pb;
+
 const String kUpstreamRemote = 'https://github.com/flutter/flutter.git';
 
 const String gsutilBinary = 'gsutil.py';
@@ -19,6 +21,8 @@ const List<String> kReleaseChannels = <String>[
 ];
 
 const String kReleaseDocumentationUrl = 'https://github.com/flutter/flutter/wiki/Flutter-Cherrypick-Process';
+
+const String kLuciPackagingConsoleLink = 'https://ci.chromium.org/p/flutter/g/packaging/console';
 
 final RegExp releaseCandidateBranchRegex = RegExp(
   r'flutter-(\d+)\.(\d+)-candidate\.(\d+)',
@@ -48,23 +52,7 @@ Directory get localFlutterRoot {
   const FileSystem fileSystem = LocalFileSystem();
   const Platform platform = LocalPlatform();
 
-  // If a test
-  if (platform.script.scheme == 'data') {
-    final RegExp pattern = RegExp(
-      r'(file:\/\/[^"]*[/\\]dev\/conductor[/\\][^"]+\.dart)',
-      multiLine: true,
-    );
-    final Match? match =
-        pattern.firstMatch(Uri.decodeFull(platform.script.path));
-    if (match == null) {
-      throw Exception(
-        'Cannot determine path of script!\n${platform.script.path}',
-      );
-    }
-    filePath = Uri.parse(match.group(1)!).path.replaceAll(r'%20', ' ');
-  } else {
-    filePath = platform.script.toFilePath();
-  }
+  filePath = platform.script.toFilePath();
   final String checkoutsDirname = fileSystem.path.normalize(
     fileSystem.path.join(
       fileSystem.path.dirname(filePath),
@@ -99,11 +87,10 @@ String? getValueFromEnvOrArgs(
   String name,
   ArgResults argResults,
   Map<String, String> env, {
-    bool allowNull = false,
-  }
-) {
+  bool allowNull = false,
+}) {
   final String envName = fromArgToEnvName(name);
-  if (env[envName] != null ) {
+  if (env[envName] != null) {
     return env[envName];
   }
   final String? argValue = argResults[name] as String?;
@@ -152,4 +139,63 @@ List<String> getValuesFromEnvOrArgs(
 /// For example, 'state-file' -> 'STATE_FILE'.
 String fromArgToEnvName(String argName) {
   return argName.toUpperCase().replaceAll(r'-', r'_');
+}
+
+/// Return a web link for the user to open a new PR.
+///
+/// Includes PR title and body via query params.
+String getNewPrLink({
+  required String userName,
+  required String repoName,
+  required pb.ConductorState state,
+}) {
+  assert(state.releaseChannel.isNotEmpty);
+  assert(state.releaseVersion.isNotEmpty);
+  late final String candidateBranch;
+  late final String workingBranch;
+  late final String repoLabel;
+  switch (repoName) {
+    case 'flutter':
+      candidateBranch = state.framework.candidateBranch;
+      workingBranch = state.framework.workingBranch;
+      repoLabel = 'Framework';
+      break;
+    case 'engine':
+      candidateBranch = state.engine.candidateBranch;
+      workingBranch = state.engine.workingBranch;
+      repoLabel = 'Engine';
+      break;
+    default:
+      throw ConductorException('Expected repoName to be one of flutter or engine but got $repoName.');
+  }
+  assert(candidateBranch.isNotEmpty);
+  assert(workingBranch.isNotEmpty);
+  final String title = '[flutter_releases] Flutter ${state.releaseChannel} '
+      '${state.releaseVersion} $repoLabel Cherrypicks';
+  final StringBuffer body = StringBuffer();
+  body.write('''
+# Flutter ${state.releaseChannel} ${state.releaseVersion} $repoLabel
+
+## Scheduled Cherrypicks
+
+''');
+  if (repoName == 'engine') {
+    if (state.engine.dartRevision.isNotEmpty) {
+      // shorten hashes to make final link manageable
+      body.writeln('- Roll dart revision: dart-lang/sdk@${state.engine.dartRevision.substring(0, 9)}');
+    }
+    body.writeAll(
+      state.engine.cherrypicks.map<String>((pb.Cherrypick cp) => '- commit: ${cp.trunkRevision.substring(0, 9)}'),
+      '\n',
+    );
+  } else {
+    body.writeAll(
+      state.framework.cherrypicks.map<String>((pb.Cherrypick cp) => '- commit: ${cp.trunkRevision.substring(0, 9)}'),
+      '\n',
+    );
+  }
+  return 'https://github.com/flutter/$repoName/compare/$candidateBranch...$userName:$workingBranch?'
+      'expand=1'
+      '&title=${Uri.encodeQueryComponent(title)}'
+      '&body=${Uri.encodeQueryComponent(body.toString())}';
 }

@@ -1604,16 +1604,16 @@ class ButtonActivateIntent extends Intent {
 /// activate a control. By default, is bound to [LogicalKeyboardKey.enter],
 /// [LogicalKeyboardKey.gameButtonA], and [LogicalKeyboardKey.space] in the
 /// default keyboard map in [WidgetsApp].
-abstract class ActivateAction extends Action<ActivateIntent> {}
+abstract class ActivateAction extends Action<ActivateIntent> { }
 
 /// An intent that selects the currently focused control.
-class SelectIntent extends Intent {}
+class SelectIntent extends Intent { }
 
 /// An action that selects the currently focused control.
 ///
 /// This is an abstract class that serves as a base class for actions that
 /// select something. It is not bound to any key by default.
-abstract class SelectAction extends Action<SelectIntent> {}
+abstract class SelectAction extends Action<SelectIntent> { }
 
 /// An [Intent] that dismisses the currently focused widget.
 ///
@@ -1631,7 +1631,7 @@ class DismissIntent extends Intent {
 /// An action that dismisses the focused widget.
 ///
 /// This is an abstract class that serves as a base class for dismiss actions.
-abstract class DismissAction extends Action<DismissIntent> {}
+abstract class DismissAction extends Action<DismissIntent> { }
 
 /// An [Intent] that evaluates a series of specified [orderedIntents] for
 /// execution.

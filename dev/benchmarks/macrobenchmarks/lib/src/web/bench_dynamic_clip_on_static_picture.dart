@@ -93,9 +93,9 @@ class BenchDynamicClipOnStaticPicture extends SceneBuilderRecorder {
 
   static const String benchmarkName = 'dynamic_clip_on_static_picture';
 
-  Size screenSize;
-  Size clipSize;
-  Picture picture;
+  late Size screenSize;
+  late Size clipSize;
+  late Picture picture;
   double pictureVerticalOffset = 0.0;
 
   @override

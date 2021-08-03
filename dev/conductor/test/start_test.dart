@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:convert' show jsonDecode;
 
 import 'package:args/command_runner.dart';
@@ -16,8 +14,8 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:platform/platform.dart';
 
-import '../../../packages/flutter_tools/test/src/fake_process_manager.dart';
 import './common.dart';
+import '../../../packages/flutter_tools/test/src/fake_process_manager.dart';
 
 void main() {
   group('start command', () {
@@ -28,11 +26,11 @@ void main() {
     const String candidateBranch = 'flutter-1.2-candidate.3';
     const String releaseChannel = 'stable';
     const String revision = 'abcd1234';
-    Checkouts checkouts;
-    MemoryFileSystem fileSystem;
-    FakePlatform platform;
-    TestStdio stdio;
-    FakeProcessManager processManager;
+    late Checkouts checkouts;
+    late MemoryFileSystem fileSystem;
+    late FakePlatform platform;
+    late TestStdio stdio;
+    late FakeProcessManager processManager;
 
     setUp(() {
       stdio = TestStdio();
@@ -40,9 +38,9 @@ void main() {
     });
 
     CommandRunner<void> createRunner({
-      Map<String, String> environment,
-      String operatingSystem,
-      List<FakeCommand> commands,
+      Map<String, String>? environment,
+      String? operatingSystem,
+      List<FakeCommand>? commands,
     }) {
       operatingSystem ??= const LocalPlatform().operatingSystem;
       final String pathSeparator = operatingSystem == 'windows' ? r'\' : '/';
@@ -73,13 +71,6 @@ void main() {
       );
       return CommandRunner<void>('codesign-test', '')..addCommand(command);
     }
-
-    tearDown(() {
-      // Ensure we don't re-use these between tests.
-      processManager = null;
-      checkouts = null;
-      platform = null;
-    });
 
     test('throws exception if run from Windows', () async {
       final CommandRunner<void> runner = createRunner(
@@ -122,6 +113,9 @@ void main() {
       const String revision3 = '123abc';
       const String previousDartRevision = '171876a4e6cf56ee6da1f97d203926bd7afda7ef';
       const String nextDartRevision = 'f6c91128be6b77aef8351e1e3a9d07c85bc2e46e';
+      const String previousVersion = '1.2.0-1.0.pre';
+      const String nextVersion = '1.2.0-3.0.pre';
+      const String incrementLevel = 'm';
 
       final Directory engine = fileSystem.directory(checkoutsParentDirectory)
           .childDirectory('flutter_conductor_checkouts')
@@ -182,6 +176,7 @@ void main() {
           stdout: revision2,
         ),
       ];
+
       final List<FakeCommand> frameworkCommands = <FakeCommand>[
         FakeCommand(
           command: <String>[
@@ -220,10 +215,22 @@ void main() {
           ],
         ),
         const FakeCommand(
+          command: <String>[
+            'git',
+            'describe',
+            '--match',
+            '*.*.*',
+            '--tags',
+            'refs/remotes/upstream/$candidateBranch',
+          ],
+          stdout: '$previousVersion-42-gabc123',
+        ),
+        const FakeCommand(
           command: <String>['git', 'rev-parse', 'HEAD'],
           stdout: revision3,
         ),
       ];
+
       final CommandRunner<void> runner = createRunner(
         commands: <FakeCommand>[
           const FakeCommand(
@@ -236,7 +243,7 @@ void main() {
       );
 
       final String stateFilePath = fileSystem.path.join(
-        platform.environment['HOME'],
+        platform.environment['HOME']!,
         kStateFileName,
       );
 
@@ -254,6 +261,8 @@ void main() {
         stateFilePath,
         '--$kDartRevisionOption',
         nextDartRevision,
+        '--$kIncrementOption',
+        incrementLevel,
       ]);
 
       final File stateFile = fileSystem.file(stateFilePath);
@@ -265,13 +274,15 @@ void main() {
 
       expect(state.isInitialized(), true);
       expect(state.releaseChannel, releaseChannel);
+      expect(state.releaseVersion, nextVersion);
       expect(state.engine.candidateBranch, candidateBranch);
       expect(state.engine.startingGitHead, revision2);
       expect(state.engine.dartRevision, nextDartRevision);
       expect(state.framework.candidateBranch, candidateBranch);
       expect(state.framework.startingGitHead, revision3);
-      expect(state.lastPhase, ReleasePhase.INITIALIZE);
+      expect(state.currentPhase, ReleasePhase.APPLY_ENGINE_CHERRYPICKS);
       expect(state.conductorVersion, revision);
+      expect(state.incrementLevel, incrementLevel);
     });
   }, onPlatform: <String, dynamic>{
     'windows': const Skip('Flutter Conductor only supported on macos/linux'),

@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 @TestOn('!chrome')
+import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -1486,6 +1488,72 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('Selectable text rich text with spell out in semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Center(
+            child: SelectableText.rich(TextSpan(text: 'some text', spellOut: true)),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      semantics,
+      includesNodeWith(
+        attributedValue: AttributedString(
+          'some text',
+          attributes: <StringAttribute>[
+            SpellOutStringAttribute(range: const TextRange(start: 0, end:9)),
+          ],
+        ),
+        flags: <SemanticsFlag>[
+          SemanticsFlag.isTextField,
+          SemanticsFlag.isReadOnly,
+          SemanticsFlag.isMultiline,
+        ],
+      ),
+    );
+
+    semantics.dispose();
+  });
+
+  testWidgets('Selectable text rich text with locale in semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Center(
+            child: SelectableText.rich(TextSpan(text: 'some text', locale: Locale('es', 'MX'))),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      semantics,
+      includesNodeWith(
+        attributedValue: AttributedString(
+          'some text',
+          attributes: <StringAttribute>[
+            LocaleStringAttribute(range: const TextRange(start: 0, end:9), locale: const Locale('es', 'MX')),
+          ],
+        ),
+        flags: <SemanticsFlag>[
+          SemanticsFlag.isTextField,
+          SemanticsFlag.isReadOnly,
+          SemanticsFlag.isMultiline,
+        ],
+      ),
+    );
+
+    semantics.dispose();
+  });
+
   testWidgets('Selectable rich text with gesture recognizer has correct semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
@@ -1568,7 +1636,7 @@ void main() {
       await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
       await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowLeft);
       expect(controller.selection.extentOffset - controller.selection.baseOffset, -1);
-    });
+    }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Shift test 2', (WidgetTester tester) async {
       await setupWidget(tester, 'abcdefghi');
@@ -1580,7 +1648,7 @@ void main() {
       await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowRight);
       await tester.pumpAndSettle();
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 1);
-    });
+    }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Control Shift test', (WidgetTester tester) async {
       await setupWidget(tester, 'their big house');
@@ -1592,7 +1660,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, -5);
-    });
+    }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Down and up test', (WidgetTester tester) async {
       await setupWidget(tester, 'a big house');
@@ -1610,7 +1678,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 0);
-    });
+    }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Down and up test 2', (WidgetTester tester) async {
       await setupWidget(tester, 'a big house\njumped over a mouse\nOne more line yay');
@@ -1661,7 +1729,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, -5);
-    });
+    }, variant: KeySimulatorTransitModeVariant.all());
   });
 
   testWidgets('Copy test', (WidgetTester tester) async {
@@ -1670,7 +1738,7 @@ void main() {
     String clipboardContent = '';
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.setData')
-        clipboardContent = methodCall.arguments['text'] as String;
+        clipboardContent = (methodCall.arguments as Map<String, dynamic>)['text'] as String;
       else if (methodCall.method == 'Clipboard.getData')
         return <String, dynamic>{'text': clipboardContent};
       return null;
@@ -1720,7 +1788,7 @@ void main() {
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.pumpAndSettle();
-  });
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Select all test', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -1755,7 +1823,7 @@ void main() {
 
     expect(controller.selection.baseOffset, 0);
     expect(controller.selection.extentOffset, 31);
-  });
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('keyboard selection should call onSelectionChanged', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -1802,7 +1870,7 @@ void main() {
       expect(newSelection!.extentOffset, i + 1);
       newSelection = null;
     }
-  });
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Changing positions of selectable text', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -1892,7 +1960,7 @@ void main() {
     c1 = editableTextWidget.controller;
 
     expect(c1.selection.extentOffset - c1.selection.baseOffset, -6);
-  });
+  }, variant: KeySimulatorTransitModeVariant.all());
 
 
   testWidgets('Changing focus test', (WidgetTester tester) async {
@@ -1962,7 +2030,7 @@ void main() {
 
     expect(c1.selection.extentOffset - c1.selection.baseOffset, 0);
     expect(c2.selection.extentOffset - c2.selection.baseOffset, -5);
-  });
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Caret works when maxLines is null', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -4646,7 +4714,7 @@ void main() {
       MaterialApp(
         home: SelectableText(
           ' blah blah',
-          onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? cause){
+          onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? cause) {
             selection = newSelection;
           },
         ),
@@ -4692,7 +4760,7 @@ void main() {
           child: Center(
             child: SelectableText(
               ' blah blah',
-              onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? cause){
+              onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? cause) {
                 selection = newSelection;
               },
             ),
@@ -4745,7 +4813,7 @@ void main() {
           child: Center(
             child: SelectableText(
               ' blah blah  \n  blah',
-              onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? cause){
+              onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? cause) {
                 selection = newSelection;
               },
             ),
@@ -4799,4 +4867,108 @@ void main() {
     expect(selection!.baseOffset, 6);
     expect(selection!.extentOffset, 14);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }));
+
+  testWidgets('text selection style 1', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: Column(
+              children: const <Widget>[
+                SelectableText.rich(
+                  TextSpan(
+                    children: <TextSpan>[
+                      TextSpan(
+                        text: 'Atwater Peel ',
+                        style: TextStyle(
+                          fontSize: 30.0,
+                        ),
+                      ),
+                      TextSpan(
+                        text: 'Sherbrooke Bonaventure ',
+                        style: TextStyle(
+                          fontSize: 15.0,
+                        ),
+                      ),
+                      TextSpan(
+                        text: 'hi wassup!',
+                        style: TextStyle(
+                          fontSize: 10.0,
+                        ),
+                      ),
+                    ],
+                  ),
+                  key: Key('field0'),
+                  selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingTop,
+                  selectionWidthStyle: ui.BoxWidthStyle.max,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
+    final TextEditingController controller = editableTextWidget.controller;
+    controller.selection = const TextSelection(baseOffset: 0, extentOffset: 46);
+    await tester.pump();
+
+    await expectLater(
+      find.byType(MaterialApp),
+      matchesGoldenFile('selectable_text_golden.TextSelectionStyle.1.png'),
+    );
+  });
+
+  testWidgets('text selection style 2', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: Column(
+              children: const <Widget>[
+                SelectableText.rich(
+                  TextSpan(
+                    children: <TextSpan>[
+                      TextSpan(
+                        text: 'Atwater Peel ',
+                        style: TextStyle(
+                          fontSize: 30.0,
+                        ),
+                      ),
+                      TextSpan(
+                        text: 'Sherbrooke Bonaventure ',
+                        style: TextStyle(
+                          fontSize: 15.0,
+                        ),
+                      ),
+                      TextSpan(
+                        text: 'hi wassup!',
+                        style: TextStyle(
+                          fontSize: 10.0,
+                        ),
+                      ),
+                    ],
+                  ),
+                  key: Key('field0'),
+                  selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingBottom,
+                  selectionWidthStyle: ui.BoxWidthStyle.tight,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
+    final TextEditingController controller = editableTextWidget.controller;
+    controller.selection = const TextSelection(baseOffset: 0, extentOffset: 46);
+    await tester.pump();
+
+    await expectLater(
+      find.byType(MaterialApp),
+      matchesGoldenFile('selectable_text_golden.TextSelectionStyle.2.png'),
+    );
+  });
 }

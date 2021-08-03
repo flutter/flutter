@@ -6,10 +6,12 @@
 
 import 'dart:async';
 
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/devtools_launcher.dart';
 import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/persistent_tool_state.dart';
@@ -24,6 +26,13 @@ void main() {
   FakePlatform platform;
   PersistentToolState persistentToolState;
 
+  Cache.flutterRoot = '';
+  const String devtoolsVersion = '1.2.3';
+  final MemoryFileSystem fakefs = MemoryFileSystem.test()
+    ..directory('bin').createSync()
+    ..directory('bin/internal').createSync()
+    ..file('bin/internal/devtools.version').writeAsStringSync(devtoolsVersion);
+
   setUp(() {
     logger = BufferLogger.test();
     platform = FakePlatform(environment: <String, String>{});
@@ -35,9 +44,10 @@ void main() {
     );
   });
 
-   testWithoutContext('DevtoolsLauncher does not launch devtools if unable to reach pub.dev', () async {
+   testWithoutContext('DevtoolsLauncher does not launch devtools if unable to reach pub.dev and there is no activated package', () async {
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
       pubExecutable: 'pub',
+      fileSystem: fakefs,
       logger: logger,
       platform: platform,
       persistentToolState: persistentToolState,
@@ -48,16 +58,69 @@ void main() {
           response: const FakeResponse(statusCode: HttpStatus.internalServerError),
         ),
       ]),
-      processManager: FakeProcessManager.empty(),
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            'pub',
+            'global',
+            'list',
+          ],
+          stdout: 'foobar 0.9.6',
+        ),
+      ]),
     );
 
     final DevToolsServerAddress address = await launcher.serve();
     expect(address, isNull);
   });
 
+  testWithoutContext('DevtoolsLauncher launches devtools if unable to reach pub.dev but there is an activated package', () async {
+    final Completer<void> completer = Completer<void>();
+    final DevtoolsLauncher launcher = DevtoolsServerLauncher(
+      pubExecutable: 'pub',
+      fileSystem: fakefs,
+      logger: logger,
+      platform: platform,
+      persistentToolState: persistentToolState,
+      httpClient: FakeHttpClient.list(<FakeRequest>[
+        FakeRequest(
+          Uri.https('pub.dev', ''),
+          method: HttpMethod.head,
+          response: const FakeResponse(statusCode: HttpStatus.internalServerError),
+        ),
+      ]),
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            'pub',
+            'global',
+            'list',
+          ],
+          stdout: 'devtools 0.9.6',
+        ),
+        FakeCommand(
+          command: const <String>[
+            'pub',
+            'global',
+            'run',
+            'devtools',
+            '--no-launch-browser',
+          ],
+          stdout: 'Serving DevTools at http://127.0.0.1:9100\n',
+          completer: completer,
+        ),
+      ]),
+    );
+
+    final DevToolsServerAddress address = await launcher.serve();
+    expect(address.host, '127.0.0.1');
+    expect(address.port, 9100);
+  });
+
   testWithoutContext('DevtoolsLauncher pings PUB_HOSTED_URL instead of pub.dev for online check', () async {
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
       pubExecutable: 'pub',
+      fileSystem: fakefs,
       logger: logger,
       platform: FakePlatform(environment: <String, String>{
         'PUB_HOSTED_URL': 'https://pub2.dev'
@@ -70,7 +133,16 @@ void main() {
           response: const FakeResponse(statusCode: HttpStatus.internalServerError),
         ),
       ]),
-      processManager: FakeProcessManager.empty(),
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            'pub',
+            'global',
+            'list',
+          ],
+          stdout: 'foobar 0.9.6',
+        ),
+      ]),
     );
 
     final DevToolsServerAddress address = await launcher.serve();
@@ -80,13 +152,23 @@ void main() {
   testWithoutContext('DevtoolsLauncher handles an invalid PUB_HOSTED_URL', () async {
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
       pubExecutable: 'pub',
+      fileSystem: fakefs,
       logger: logger,
       platform: FakePlatform(environment: <String, String>{
         'PUB_HOSTED_URL': r'not_an_http_url'
       }),
       persistentToolState: persistentToolState,
       httpClient: FakeHttpClient.list(<FakeRequest>[]),
-      processManager: FakeProcessManager.empty(),
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            'pub',
+            'global',
+            'list',
+          ],
+          stdout: 'foobar 0.9.6',
+        ),
+      ]),
     );
 
     final DevToolsServerAddress address = await launcher.serve();
@@ -98,6 +180,7 @@ void main() {
     final Completer<void> completer = Completer<void>();
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
       pubExecutable: 'pub',
+      fileSystem: fakefs,
       logger: logger,
       platform: platform,
       persistentToolState: persistentToolState,
@@ -109,7 +192,7 @@ void main() {
             'global',
             'list',
           ],
-          stdout: 'devtools 0.9.6',
+          stdout: 'devtools $devtoolsVersion',
         ),
         const FakeCommand(
           command: <String>[
@@ -117,8 +200,9 @@ void main() {
             'global',
             'activate',
             'devtools',
+            devtoolsVersion,
           ],
-          stdout: 'Activated DevTools 0.9.6',
+          stdout: 'Activated DevTools $devtoolsVersion',
         ),
         FakeCommand(
           command: const <String>[
@@ -143,6 +227,7 @@ void main() {
     final Completer<void> completer = Completer<void>();
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
       pubExecutable: 'pub',
+      fileSystem: fakefs,
       logger: logger,
       platform: platform,
       persistentToolState: persistentToolState,
@@ -162,8 +247,9 @@ void main() {
             'global',
             'activate',
             'devtools',
+            devtoolsVersion,
           ],
-          stdout: 'Activated DevTools 0.9.5',
+          stdout: 'Activated DevTools $devtoolsVersion',
         ),
         const FakeCommand(
           command: <String>[
@@ -171,7 +257,7 @@ void main() {
             'global',
             'list',
           ],
-          stdout: 'devtools 0.9.5',
+          stdout: 'devtools $devtoolsVersion',
         ),
         FakeCommand(
           command: const <String>[
@@ -196,6 +282,7 @@ void main() {
     final Completer<void> completer = Completer<void>();
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
       pubExecutable: 'pub',
+      fileSystem: fakefs,
       logger: logger,
       platform: platform,
       persistentToolState: persistentToolState,
@@ -207,7 +294,7 @@ void main() {
             'global',
             'list',
           ],
-          stdout: 'devtools 0.9.5',
+          stdout: 'devtools $devtoolsVersion',
         ),
         const FakeCommand(
           command: <String>[
@@ -215,8 +302,9 @@ void main() {
             'global',
             'activate',
             'devtools',
+            devtoolsVersion,
           ],
-          stdout: 'Activated DevTools 0.9.5',
+          stdout: 'Activated DevTools $devtoolsVersion',
         ),
         FakeCommand(
           command: const <String>[
@@ -246,6 +334,7 @@ void main() {
     persistentToolState.lastDevToolsActivation = DateTime.now();
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
       pubExecutable: 'pub',
+      fileSystem: fakefs,
       logger: logger,
       platform: platform,
       persistentToolState: persistentToolState,
@@ -257,7 +346,7 @@ void main() {
             'global',
             'list',
           ],
-          stdout: 'devtools 0.9.6',
+          stdout: 'devtools $devtoolsVersion',
         ),
         const FakeCommand(
           command: <String>[
@@ -284,7 +373,7 @@ void main() {
           'global',
           'list',
         ],
-        stdout: 'devtools 0.9.6',
+        stdout: 'devtools $devtoolsVersion',
       ),
       const FakeCommand(
         command: <String>[
@@ -301,6 +390,7 @@ void main() {
     ]);
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
       pubExecutable: 'pub',
+      fileSystem: fakefs,
       logger: logger,
       platform: platform,
       persistentToolState: persistentToolState,
@@ -317,6 +407,7 @@ void main() {
   testWithoutContext('DevtoolsLauncher prints error if exception is thrown during activate', () async {
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
       pubExecutable: 'pub',
+      fileSystem: fakefs,
       logger: logger,
       platform: platform,
       persistentToolState: persistentToolState,
@@ -328,7 +419,7 @@ void main() {
             'global',
             'list',
           ],
-          stdout: 'devtools 0.9.6',
+          stdout: 'devtools $devtoolsVersion',
         ),
         const FakeCommand(
           command: <String>[
@@ -336,6 +427,7 @@ void main() {
             'global',
             'activate',
             'devtools',
+            devtoolsVersion,
           ],
           stderr: 'Error - could not activate devtools',
           exitCode: 1,
@@ -362,6 +454,7 @@ void main() {
   testWithoutContext('DevtoolsLauncher prints error if exception is thrown during launch', () async {
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
       pubExecutable: 'pub',
+      fileSystem: fakefs,
       logger: logger,
       platform: platform,
       persistentToolState: persistentToolState,
@@ -373,7 +466,7 @@ void main() {
             'global',
             'list',
           ],
-          stdout: 'devtools 0.9.5',
+          stdout: 'devtools $devtoolsVersion',
         ),
         const FakeCommand(
           command: <String>[
@@ -381,8 +474,9 @@ void main() {
             'global',
             'activate',
             'devtools',
+            devtoolsVersion,
           ],
-          stdout: 'Activated DevTools 0.9.6',
+          stdout: 'Activated DevTools $devtoolsVersion',
         ),
         const FakeCommand(
           command: <String>[
@@ -406,6 +500,7 @@ void main() {
   testWithoutContext('DevtoolsLauncher prints trace if connecting to pub.dev throws', () async {
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
       pubExecutable: 'pub',
+      fileSystem: fakefs,
       logger: logger,
       platform: platform,
       persistentToolState: persistentToolState,
@@ -416,7 +511,16 @@ void main() {
           responseError: Exception('Connection failed.'),
         ),
       ]),
-      processManager: FakeProcessManager.empty(),
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            'pub',
+            'global',
+            'list',
+          ],
+          stdout: 'foobar 0.9.6',
+        ),
+      ]),
     );
 
     await launcher.launch(Uri.parse('http://127.0.0.1:1234/abcdefg'));
@@ -427,6 +531,7 @@ void main() {
   testWithoutContext('DevtoolsLauncher prints trace if connecting to pub.dev returns non-OK status code', () async {
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
       pubExecutable: 'pub',
+      fileSystem: fakefs,
       logger: logger,
       platform: platform,
       persistentToolState: persistentToolState,
@@ -439,7 +544,16 @@ void main() {
           ),
         ),
       ]),
-      processManager: FakeProcessManager.empty(),
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            'pub',
+            'global',
+            'list',
+          ],
+          stdout: 'foobar 0.9.6',
+        ),
+      ]),
     );
 
     await launcher.launch(Uri.parse('http://127.0.0.1:1234/abcdefg'));

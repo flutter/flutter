@@ -162,7 +162,7 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 ///   }
 /// }
 ///
-/// typedef RemovedItemBuilder = Widget Function(int item, BuildContext context, Animation<double> animation);
+/// typedef RemovedItemBuilder<T> = Widget Function(T item, BuildContext context, Animation<double> animation);
 ///
 /// /// Keeps a Dart [List] in sync with an [AnimatedList].
 /// ///
@@ -181,7 +181,7 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 ///   }) : _items = List<E>.from(initialItems ?? <E>[]);
 ///
 ///   final GlobalKey<AnimatedListState> listKey;
-///   final RemovedItemBuilder removedItemBuilder;
+///   final RemovedItemBuilder<E> removedItemBuilder;
 ///   final List<E> _items;
 ///
 ///   AnimatedListState? get _animatedList => listKey.currentState;
@@ -197,7 +197,7 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 ///       _animatedList!.removeItem(
 ///         index,
 ///         (BuildContext context, Animation<double> animation) {
-///           return removedItemBuilder(index, context, animation);
+///           return removedItemBuilder(removedItem, context, animation);
 ///         },
 ///       );
 ///     }
@@ -402,7 +402,7 @@ class AnimatedList extends StatefulWidget {
   static AnimatedListState of(BuildContext context) {
     assert(context != null);
     final AnimatedListState? result = context.findAncestorStateOfType<AnimatedListState>();
-    assert((){
+    assert(() {
       if (result == null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('AnimatedList.of() called with a context that does not contain an AnimatedList.'),
@@ -822,7 +822,7 @@ class SliverAnimatedList extends StatefulWidget {
   static SliverAnimatedListState of(BuildContext context) {
     assert(context != null);
     final SliverAnimatedListState? result = context.findAncestorStateOfType<SliverAnimatedListState>();
-    assert((){
+    assert(() {
       if (result == null) {
         throw FlutterError(
           'SliverAnimatedList.of() called with a context that does not contain a SliverAnimatedList.\n'

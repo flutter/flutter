@@ -134,7 +134,7 @@ void main() {
       '     _FadeUpwardsPageTransition\n'
       '     AnimatedBuilder\n'
       '     RepaintBoundary\n'
-      '     _FocusTrap\n'
+      '     FocusTrap\n'
       '     _FocusMarker\n'
       '     Semantics\n'
       '     FocusScope\n'
@@ -269,6 +269,7 @@ void main() {
     FlutterError.onError = oldHandler;
 
     expect(exceptions.length, 1);
+    // ignore: avoid_dynamic_calls
     expect(exceptions.single.runtimeType, FlutterError);
     final FlutterError error = exceptions.first as FlutterError;
     expect(error.diagnostics.length, 5);

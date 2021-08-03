@@ -44,8 +44,15 @@ class WebCallbackManager implements CallbackManager {
   ///
   /// See: https://www.w3.org/TR/webdriver/#screen-capture.
   @override
-  Future<void> takeScreenshot(String screenshotName) async {
+  Future<Map<String, dynamic>> takeScreenshot(String screenshotName) async {
     await _sendWebDriverCommand(WebDriverCommand.screenshot(screenshotName));
+    // Flutter Web doesn't provide the bytes.
+    return const <String, dynamic>{'bytes': <int>[]};
+  }
+
+  @override
+  Future<void> convertFlutterSurfaceToImage() async {
+    // Noop on Web.
   }
 
   Future<void> _sendWebDriverCommand(WebDriverCommand command) async {

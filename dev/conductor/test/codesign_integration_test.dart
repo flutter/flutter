@@ -31,9 +31,13 @@ void main() {
       stdio: stdio,
     );
 
+    final Directory flutterRoot = _flutterRootFromDartBinary(
+      fileSystem.file(platform.executable),
+    );
+
     final CommandRunner<void> runner = CommandRunner<void>('codesign-test', '')
       ..addCommand(
-          CodesignCommand(checkouts: checkouts, flutterRoot: localFlutterRoot));
+          CodesignCommand(checkouts: checkouts, flutterRoot: flutterRoot));
 
     try {
       await runner.run(<String>[
@@ -44,7 +48,7 @@ void main() {
       ]);
     } on ConductorException catch (e) {
       print(stdio.error);
-      print(fixItInstructions);
+      print(_fixItInstructions);
       fail(e.message);
     } on Exception {
       print('stdout:\n${stdio.stdout}');
@@ -54,10 +58,17 @@ void main() {
   }, onPlatform: <String, dynamic>{
     'windows': const Skip('codesign command is only supported on macos'),
     'linux': const Skip('codesign command is only supported on macos'),
-  }, skip: 'TODO(christopherfujino): https://github.com/flutter/flutter/issues/83448');
+  });
 }
 
-const String fixItInstructions = '''
+Directory _flutterRootFromDartBinary(File dartBinary) {
+  final Directory flutterDartSdkDir = dartBinary.parent.parent;
+  final Directory flutterCache = flutterDartSdkDir.parent;
+  final Directory flutterSdkDir = flutterCache.parent.parent;
+  return flutterSdkDir;
+}
+
+const String _fixItInstructions = '''
 Codesign integration test failed.
 
 This means that the binary files found in the Flutter cache do not match those

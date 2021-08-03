@@ -400,7 +400,7 @@ void main() {
   testWidgets('DropdownButtonFormField - disabledHint displays when the items list is empty, when items is null', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
-    Widget build({ List<String>? items }){
+    Widget build({ List<String>? items }) {
       return buildFormFrame(
         items: items,
         buttonKey: buttonKey,
@@ -426,7 +426,7 @@ void main() {
     (WidgetTester tester) async {
       final Key buttonKey = UniqueKey();
 
-      Widget build({ List<String>? items }){
+      Widget build({ List<String>? items }) {
         return buildFormFrame(
           items: items,
           buttonKey: buttonKey,
@@ -448,7 +448,7 @@ void main() {
   testWidgets('DropdownButtonFormField - disabledHint is null by default', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
-    Widget build({ List<String>? items }){
+    Widget build({ List<String>? items }) {
       return buildFormFrame(
         items: items,
         buttonKey: buttonKey,
@@ -468,7 +468,7 @@ void main() {
   testWidgets('DropdownButtonFormField - disabledHint is null by default', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
-    Widget build({ List<String>? items }){
+    Widget build({ List<String>? items }) {
       return buildFormFrame(
         items: items,
         buttonKey: buttonKey,
@@ -488,7 +488,7 @@ void main() {
   testWidgets('DropdownButtonFormField - disabledHint displays when onChanged is null', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
-    Widget build({ List<String>? items, ValueChanged<String?>? onChanged }){
+    Widget build({ List<String>? items, ValueChanged<String?>? onChanged }) {
       return buildFormFrame(
         items: items,
         buttonKey: buttonKey,
@@ -506,7 +506,7 @@ void main() {
   testWidgets('DropdownButtonFormField - disabled hint should be of same size as enabled hint', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
-    Widget build({ List<String>? items}){
+    Widget build({ List<String>? items}) {
       return buildFormFrame(
         items: items,
         buttonKey: buttonKey,

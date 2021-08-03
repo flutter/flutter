@@ -24,6 +24,7 @@ import 'package:flutter_tools/src/device_port_forwarder.dart';
 import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
+import 'package:flutter_tools/src/macos/macos_ipad_device.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
@@ -58,6 +59,10 @@ final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
 );
 
 void main() {
+  tearDown(() {
+    MacOSDesignedForIPadDevices.allowDiscovery = false;
+  });
+
   group('attach', () {
     StreamLogger logger;
     FileSystem testFileSystem;
@@ -192,8 +197,8 @@ void main() {
         // output dill, filesystem scheme, and filesystem root.
         final FlutterDevice flutterDevice = hotRunnerFactory.devices.first;
 
-        expect(flutterDevice.fileSystemScheme, filesystemScheme);
-        expect(flutterDevice.fileSystemRoots, const <String>[filesystemRoot]);
+        expect(flutterDevice.buildInfo.fileSystemScheme, filesystemScheme);
+        expect(flutterDevice.buildInfo.fileSystemRoots, const <String>[filesystemRoot]);
       }, overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
         ProcessManager: () => FakeProcessManager.any(),
@@ -410,6 +415,7 @@ void main() {
       expect(testLogger.statusText, containsIgnoringWhitespace('More than one device'));
       expect(testLogger.statusText, contains('xx1'));
       expect(testLogger.statusText, contains('yy2'));
+      expect(MacOSDesignedForIPadDevices.allowDiscovery, isTrue);
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),

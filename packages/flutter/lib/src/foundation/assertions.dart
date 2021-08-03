@@ -1237,7 +1237,7 @@ class _FlutterErrorDetailsNode extends DiagnosticableNode<FlutterErrorDetails> {
   @override
   DiagnosticPropertiesBuilder? get builder {
     final DiagnosticPropertiesBuilder? builder = super.builder;
-    if (builder == null){
+    if (builder == null) {
       return null;
     }
     Iterable<DiagnosticsNode> properties = builder.properties;

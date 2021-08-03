@@ -119,8 +119,9 @@ class TestTextInput {
     log.add(methodCall);
     switch (methodCall.method) {
       case 'TextInput.setClient':
-        _client = methodCall.arguments[0] as int;
-        setClientArgs = methodCall.arguments[1] as Map<String, dynamic>;
+        final List<dynamic> arguments = methodCall.arguments as List<dynamic>;
+        _client = arguments[0] as int;
+        setClientArgs = arguments[1] as Map<String, dynamic>;
         break;
       case 'TextInput.updateConfig':
         setClientArgs = methodCall.arguments as Map<String, dynamic>;

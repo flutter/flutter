@@ -133,6 +133,9 @@ class IOSDevices extends PollingDeviceDiscovery {
 
     return _xcdevice.getDiagnostics();
   }
+
+  @override
+  List<String> get wellKnownIds => const <String>[];
 }
 
 enum IOSDeviceInterface {
@@ -324,7 +327,7 @@ class IOSDevice extends Device {
           app: package as BuildableIOSApp,
           buildInfo: debuggingOptions.buildInfo,
           targetOverride: mainPath,
-          buildForDevice: true,
+          environmentType: EnvironmentType.physical,
           activeArch: cpuArchitecture,
           deviceID: id,
       );
@@ -465,7 +468,7 @@ class IOSDevice extends Device {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
 
   @override
-  Future<String> get sdkNameAndVersion async => 'iOS $_sdkVersion';
+  Future<String> get sdkNameAndVersion async => 'iOS ${_sdkVersion ?? 'unknown version'}';
 
   @override
   DeviceLogReader getLogReader({

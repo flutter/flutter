@@ -59,7 +59,7 @@ Future<void> main() async {
       expect(double.parse(matchFast.group(1)!), closeTo(flutterFrameRate * 2.0, 5.0));
       expect(double.parse(matchFast.group(2)!), closeTo(flutterFrameRate, 10.0));
       expect(int.parse(matchFast.group(3)!), 1);
-    });
+    }, timeout: Timeout.none);
 
     tearDownAll(() async {
       driver.close();

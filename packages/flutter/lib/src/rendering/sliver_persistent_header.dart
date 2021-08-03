@@ -18,7 +18,8 @@ import 'viewport_offset.dart';
 
 // Trims the specified edges of the given `Rect` [original], so that they do not
 // exceed the given values.
-Rect? _trim(Rect? original, {
+Rect? _trim(
+  Rect? original, {
   double top = -double.infinity,
   double right = double.infinity,
   double bottom = double.infinity,
@@ -636,12 +637,12 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
 
     final AnimationController effectiveController =
       _controller ??= AnimationController(vsync: vsync!, duration: duration)
-                        ..addListener(() {
-      if (_effectiveScrollOffset == _animation.value)
-        return;
-      _effectiveScrollOffset = _animation.value;
-      markNeedsLayout();
-    });
+        ..addListener(() {
+            if (_effectiveScrollOffset == _animation.value)
+              return;
+            _effectiveScrollOffset = _animation.value;
+            markNeedsLayout();
+          });
 
     _animation = effectiveController.drive(
       Tween<double>(

@@ -56,7 +56,7 @@ class VisualStudio {
     if (_bestVisualStudioDetails[_catalogKey] == null) {
       return null;
     }
-    return _bestVisualStudioDetails[_catalogKey][_catalogDisplayVersionKey] as String?;
+    return (_bestVisualStudioDetails[_catalogKey] as Map<String, dynamic>)[_catalogDisplayVersionKey] as String?;
   }
 
   /// The directory where Visual Studio is installed.

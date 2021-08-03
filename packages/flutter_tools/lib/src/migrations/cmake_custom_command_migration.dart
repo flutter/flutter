@@ -5,7 +5,7 @@
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/project_migrator.dart';
-import '../project.dart';
+import '../cmake_project.dart';
 
 // CMake's add_custom_command() should use VERBATIM to handle escaping of spaces
 // and special characters correctly.
