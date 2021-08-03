@@ -472,7 +472,7 @@ class FontFeature {
   ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_ae#cv01-cv99>
   factory FontFeature.characterVariant(int value) {
     assert(value >= 1);
-    assert(value <= 20);
+    assert(value <= 99);
     return FontFeature('cv${value.toString().padLeft(2, "0")}');
   }
 

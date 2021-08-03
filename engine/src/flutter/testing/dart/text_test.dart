@@ -198,6 +198,7 @@ void testFontFeatureClass() {
     expect(const FontFeature.caseSensitiveForms(), const FontFeature('case', 1));
     expect(      FontFeature.characterVariant(1), const FontFeature('cv01', 1));
     expect(      FontFeature.characterVariant(18), const FontFeature('cv18', 1));
+    expect(      FontFeature.characterVariant(99), const FontFeature('cv99', 1));
     expect(const FontFeature.denominator(), const FontFeature('dnom', 1));
     expect(const FontFeature.fractions(), const FontFeature('frac', 1));
     expect(const FontFeature.historicalForms(), const FontFeature('hist', 1));
