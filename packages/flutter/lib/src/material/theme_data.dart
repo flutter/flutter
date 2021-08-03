@@ -336,6 +336,10 @@ class ThemeData with Diagnosticable {
     RadioThemeData? radioTheme,
     SwitchThemeData? switchTheme,
     ProgressIndicatorThemeData? progressIndicatorTheme,
+    @Deprecated(
+      'This "fix" is now enabled by default. '
+      'This feature was deprecated after v2.5.0-1.0.pre.',
+    )
     bool? fixTextFieldOutlineLabel,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
@@ -475,7 +479,7 @@ class ThemeData with Diagnosticable {
     switchTheme ??= const SwitchThemeData();
     progressIndicatorTheme ??= const ProgressIndicatorThemeData();
 
-    fixTextFieldOutlineLabel ??= false;
+    fixTextFieldOutlineLabel ??= true;
     useTextSelectionTheme ??= true;
 
     return ThemeData.raw(
@@ -687,6 +691,10 @@ class ThemeData with Diagnosticable {
     required this.radioTheme,
     required this.switchTheme,
     required this.progressIndicatorTheme,
+    @Deprecated(
+      'This "fix" is now enabled by default. '
+      'This feature was deprecated after v2.5.0-1.0.pre.',
+    )
     required this.fixTextFieldOutlineLabel,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
@@ -1326,16 +1334,18 @@ class ThemeData with Diagnosticable {
   /// A theme for customizing the appearance and layout of [ProgressIndicator] widgets.
   final ProgressIndicatorThemeData progressIndicatorTheme;
 
-  /// A temporary flag to allow apps to opt-in to a
+  /// An obsolete flag to allow apps to opt-out of a
   /// [small fix](https://github.com/flutter/flutter/issues/54028) for the Y
   /// coordinate of the floating label in a [TextField] [OutlineInputBorder].
   ///
   /// Setting this flag to true causes the floating label to be more precisely
   /// vertically centered relative to the border's outline.
   ///
-  /// The flag is currently false by default. It will be default true and
-  /// deprecated before the next beta release (1.18), and removed before the next
-  /// stable release (1.19).
+  /// The flag is true by default and its use is deprecated.
+  @Deprecated(
+    'This "fix" is now enabled by default. '
+    'This feature was deprecated after v2.5.0-1.0.pre.',
+  )
   final bool fixTextFieldOutlineLabel;
 
   /// A temporary flag that was used to opt-in to the new [TextSelectionTheme]
@@ -1469,6 +1479,10 @@ class ThemeData with Diagnosticable {
     RadioThemeData? radioTheme,
     SwitchThemeData? switchTheme,
     ProgressIndicatorThemeData? progressIndicatorTheme,
+    @Deprecated(
+      'This "fix" is now enabled by default. '
+      'This feature was deprecated after v2.5.0-1.0.pre.',
+    )
     bool? fixTextFieldOutlineLabel,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
