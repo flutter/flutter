@@ -282,7 +282,7 @@ import 'text_style.dart';
 ///     fontSize: 14,
 ///     forceStrutHeight: true,
 ///   ),
-/// ),
+/// )
 /// ```
 /// {@end-tool}
 ///

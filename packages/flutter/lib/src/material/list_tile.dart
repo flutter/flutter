@@ -429,7 +429,7 @@ enum ListTileControlAffinity {
 ///   ),
 ///   title: const Text('title'),
 ///   dense: false,
-/// ),
+/// )
 /// ```
 /// {@end-tool}
 ///
