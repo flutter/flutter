@@ -27,7 +27,7 @@ def GetRepositoryVersion(repository):
     'HEAD',
   ])
 
-  return version.strip()
+  return str(version.strip(), 'utf-8')
 
 def main():
   parser = argparse.ArgumentParser()
