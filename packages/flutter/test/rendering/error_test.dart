@@ -10,6 +10,10 @@ import '../rendering/mock_canvas.dart';
 
 /// Unit tests error.dart's usage via ErrorWidget.
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
   const String errorMessage = 'Some error message';
 
   testWidgets('test draw error paragraph', (WidgetTester tester) async {
