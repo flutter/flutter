@@ -722,7 +722,7 @@ public class TextInputChannel {
       }
 
       if ((composingStart != -1 || composingEnd != -1)
-          && (composingStart < 0 || composingStart >= composingEnd)) {
+          && (composingStart < 0 || composingStart > composingEnd)) {
         throw new IndexOutOfBoundsException(
             "invalid composing range: ("
                 + String.valueOf(composingStart)
