@@ -5,7 +5,11 @@
 #ifndef FLUTTER_FLOW_DISPLAY_LIST_UTILS_H_
 #define FLUTTER_FLOW_DISPLAY_LIST_UTILS_H_
 
+#include <optional>
+
 #include "flutter/flow/display_list.h"
+#include "flutter/fml/logging.h"
+#include "flutter/fml/macros.h"
 
 #include "third_party/skia/include/core/SkMaskFilter.h"
 
@@ -313,7 +317,10 @@ class DisplayListBoundsCalculator final
                   bool occludes,
                   SkScalar dpr) override;
 
-  SkRect getBounds() { return accumulator_->getBounds(); }
+  SkRect getBounds() {
+    FML_DCHECK(accumulator_ == &root_accumulator_);
+    return root_accumulator_.getBounds();
+  }
 
  private:
   // current accumulator based on saveLayer history
@@ -334,6 +341,9 @@ class DisplayListBoundsCalculator final
 
    protected:
     BoundsAccumulator* saved_accumulator_;
+
+   private:
+    FML_DISALLOW_COPY_AND_ASSIGN(SaveInfo);
   };
 
   class SaveLayerInfo : public SaveInfo {
@@ -347,6 +357,9 @@ class DisplayListBoundsCalculator final
    protected:
     BoundsAccumulator layer_accumulator_;
     const SkMatrix matrix_;
+
+   private:
+    FML_DISALLOW_COPY_AND_ASSIGN(SaveLayerInfo);
   };
 
   class SaveLayerWithPaintInfo : public SaveLayerInfo {
@@ -354,6 +367,7 @@ class DisplayListBoundsCalculator final
     SaveLayerWithPaintInfo(DisplayListBoundsCalculator* calculator,
                            BoundsAccumulator* accumulator,
                            const SkMatrix& save_matrix,
+                           const SkRect* bounds,
                            const SkPaint& save_paint);
     virtual ~SaveLayerWithPaintInfo() = default;
 
@@ -362,10 +376,16 @@ class DisplayListBoundsCalculator final
    protected:
     DisplayListBoundsCalculator* calculator_;
 
+    std::optional<SkRect> bounds_;
     SkPaint paint_;
+
+   private:
+    static constexpr SkRect kMissingBounds = SkRect::MakeWH(-1, -1);
+
+    FML_DISALLOW_COPY_AND_ASSIGN(SaveLayerWithPaintInfo);
   };
 
-  std::vector<SaveInfo> saved_infos_;
+  std::vector<std::unique_ptr<SaveInfo>> saved_infos_;
 
   void accumulateRect(const SkRect& rect, bool force_stroke = false);
 };
