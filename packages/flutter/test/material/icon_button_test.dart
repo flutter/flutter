@@ -75,6 +75,41 @@ void main() {
     expect(iconButton.size, const Size(70.0, 70.0));
   });
 
+  testWidgets('when null, iconSize is overridden IconTheme.of(context).size', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrap(
+        child: IconTheme(
+          data: const IconThemeData(size: 10),
+          child: IconButton(
+            onPressed: mockOnPressedFunction.handler,
+            icon: const Icon(Icons.link),
+          ),
+        )
+      ),
+    );
+
+    final RenderBox icon = tester.renderObject(find.byType(Icon));
+    expect(icon.size, const Size(10.0, 10.0));
+  });
+
+  testWidgets('when non-null, iconSize precedes IconTheme.of(context).size', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrap(
+          child: IconTheme(
+            data: const IconThemeData(size: 24.0),
+            child: IconButton(
+              iconSize: 10.0,
+              onPressed: mockOnPressedFunction.handler,
+              icon: const Icon(Icons.link),
+            ),
+          )
+      ),
+    );
+
+    final RenderBox icon = tester.renderObject(find.byType(Icon));
+    expect(icon.size, const Size(10.0, 10.0));
+  });
+
   testWidgets('Small icons with non-null constraints can be <48dp', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
