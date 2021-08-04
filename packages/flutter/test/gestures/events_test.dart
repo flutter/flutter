@@ -43,11 +43,11 @@ void main() {
     expect(computeHitSlop(PointerDeviceKind.touch, null), kTouchSlop);
     expect(computeHitSlop(PointerDeviceKind.unknown, null), kTouchSlop);
 
-    expect(computePanSlop(PointerDeviceKind.mouse), kPrecisePointerPanSlop);
-    expect(computePanSlop(PointerDeviceKind.stylus), kPanSlop);
-    expect(computePanSlop(PointerDeviceKind.invertedStylus), kPanSlop);
-    expect(computePanSlop(PointerDeviceKind.touch), kPanSlop);
-    expect(computePanSlop(PointerDeviceKind.unknown), kPanSlop);
+    expect(computePanSlop(PointerDeviceKind.mouse, null), kPrecisePointerPanSlop);
+    expect(computePanSlop(PointerDeviceKind.stylus, null), kPanSlop);
+    expect(computePanSlop(PointerDeviceKind.invertedStylus, null), kPanSlop);
+    expect(computePanSlop(PointerDeviceKind.touch, null), kPanSlop);
+    expect(computePanSlop(PointerDeviceKind.unknown, null), kPanSlop);
 
     expect(computeScaleSlop(PointerDeviceKind.mouse), kPrecisePointerScaleSlop);
     expect(computeScaleSlop(PointerDeviceKind.stylus), kScaleSlop);
@@ -62,6 +62,12 @@ void main() {
     expect(computeHitSlop(PointerDeviceKind.invertedStylus, 1), 1);
     expect(computeHitSlop(PointerDeviceKind.touch, 1), 1);
     expect(computeHitSlop(PointerDeviceKind.unknown, 1), 1);
+
+    expect(computePanSlop(PointerDeviceKind.mouse, 1), kPrecisePointerPanSlop);
+    expect(computePanSlop(PointerDeviceKind.stylus, 1), 1);
+    expect(computePanSlop(PointerDeviceKind.invertedStylus, 1), 1);
+    expect(computePanSlop(PointerDeviceKind.touch, 1), 1);
+    expect(computePanSlop(PointerDeviceKind.unknown, 1), 1);
   });
 
   group('fromMouseEvent', () {

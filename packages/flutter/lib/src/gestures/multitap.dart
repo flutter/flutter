@@ -196,6 +196,15 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   ///  * [GestureDetector.onDoubleTapCancel], which exposes this callback.
   GestureTapCancelCallback? onDoubleTapCancel;
 
+  /// A device specific touch slop configuration that should be preferred over the
+  /// framework constants if set.
+  ///
+  /// This is usually retrieved from [MediaQueryData.deviceTouchSlop] and is derived
+  /// from the [GestureSettings] provided by the window.
+  ///
+  /// See also:
+  ///
+  ///  * [GestureSettings], which provides device specific touch configuration.
   double? deviceDoubleTapSlop;
 
   Timer? _doubleTapTimer;
@@ -511,6 +520,15 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
   /// particular location after [longTapDelay].
   GestureMultiTapDownCallback? onLongTapDown;
 
+  /// A device specific touch slop configuration that should be preferred over the
+  /// framework constants if set.
+  ///
+  /// This is usually retrieved from [MediaQueryData.deviceTouchSlop] and is derived
+  /// from the [GestureSettings] provided by the window.
+  ///
+  /// See also:
+  ///
+  ///  * [GestureSettings], which provides device specific touch configuration.
   double? deviceTouchSlop;
 
   final Map<int, _TapGesture> _gestureMap = <int, _TapGesture>{};

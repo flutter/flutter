@@ -313,6 +313,15 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   /// The pointers are no longer in contact with the screen.
   GestureScaleEndCallback? onEnd;
 
+  /// A device specific touch slop configuration that should be preferred over the
+  /// framework constants if set.
+  ///
+  /// This is usually retrieved from [MediaQueryData.deviceTouchSlop] and is derived
+  /// from the [GestureSettings] provided by the window.
+  ///
+  /// See also:
+  ///
+  ///  * [GestureSettings], which provides device specific touch configuration.
   double? deviceTouchSlop;
 
   _ScaleState _state = _ScaleState.ready;

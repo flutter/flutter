@@ -31,6 +31,15 @@ abstract class MultiDragPointerState {
     : assert(initialPosition != null),
       _velocityTracker = VelocityTracker.withKind(kind);
 
+  /// A device specific touch slop configuration that should be preferred over the
+  /// framework constants if set.
+  ///
+  /// This is usually retrieved from [MediaQueryData.deviceTouchSlop] and is derived
+  /// from the [GestureSettings] provided by the window.
+  ///
+  /// See also:
+  ///
+  ///  * [GestureSettings], which provides device specific touch configuration.
   final double? deviceTouchSlop;
 
   /// The global coordinates of the pointer when the pointer contacted the screen.
@@ -223,6 +232,15 @@ abstract class MultiDragGestureRecognizer extends GestureRecognizer {
   /// [Drag] object returned by this callback.
   GestureMultiDragStartCallback? onStart;
 
+  /// A device specific touch slop configuration that should be preferred over the
+  /// framework constants if set.
+  ///
+  /// This is usually retrieved from [MediaQueryData.deviceTouchSlop] and is derived
+  /// from the [GestureSettings] provided by the window.
+  ///
+  /// See also:
+  ///
+  ///  * [GestureSettings], which provides device specific touch configuration.
   double? deviceTouchSlop;
 
   Map<int, MultiDragPointerState>? _pointers = <int, MultiDragPointerState>{};

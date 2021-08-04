@@ -1313,21 +1313,6 @@ void main() {
     await gesture.removePointer();
     await tester.pump();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS, TargetPlatform.android }));
-
-  testWidgets('Scrolls using platform provided touch slop', (WidgetTester tester) async {
-    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
-    final ui.ViewConfiguration oldConfig =  binding.window.viewConfiguration;
-    binding.window.viewConfigurationTestValue = oldConfig.copyWith(
-      devicePixelRatio: 1.0,
-      gestureSettings: const ui.GestureSettings(physicalTouchSlop: 50),
-    );
-
-    try {
-      await pumpTest(tester, debugDefaultTargetPlatformOverride);
-    } finally {
-      binding.window.viewConfigurationTestValue = null;
-    }
-  });
 }
 
 // ignore: must_be_immutable
