@@ -253,7 +253,13 @@ class DefaultTestVariant extends TestVariant<void> {
   Future<void> tearDown(void value, void memento) async {}
 }
 
+/// Sets the default value of [testWidgets]' `variant` with a [TargetPlatformVariant].
 ///
+/// Setting this to null returns the [defaultTargetPlatform] to its original
+/// value.
+///
+/// If the `variant` of [testWidgets] is set by a given test, it will override
+/// this value.
 TargetPlatformVariant? defaultPlatformVariant;
 
 /// A [TestVariant] that runs tests with [debugDefaultTargetPlatformOverride]
