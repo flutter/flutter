@@ -1647,4 +1647,49 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(RawScrollbar), isNot(paints..rect())); // Not shown.
   });
+
+  testWidgets('The bar can show or hide when the window size change', (WidgetTester tester) async {
+    final ScrollController verticalScrollController = ScrollController();
+    final ScrollController horizontalScrollController = ScrollController();
+    Widget buildFrame() {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            isAlwaysShown: true,
+            controller: verticalScrollController,
+            // This scrollbar will receive a notification from both nested
+            // scroll views of opposite axes.
+            notificationPredicate: (ScrollNotification notification) => notification.depth <= 1,
+            child: SingleChildScrollView(
+              controller: verticalScrollController,
+              child: SingleChildScrollView(
+                controller: horizontalScrollController,
+                scrollDirection: Axis.horizontal,
+                child: const SizedBox(
+                  width: 1000.0,
+                  height: 1000.0,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    await tester.pumpAndSettle();
+    expect(verticalScrollController.offset, 0.0);
+    expect(horizontalScrollController.offset, 0.0);
+    horizontalScrollController.jumpTo(10.0);
+    final AssertionError exception = tester.takeException() as AssertionError;
+    expect(
+      exception.message,
+      contains(
+        "The AxisDirection of the Scrollbar's ScrollController does not "
+        'match the AxisDirection of the received ScrollNotification. '
+      )
+    );
+  });
 }

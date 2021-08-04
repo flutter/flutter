@@ -1525,15 +1525,41 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     );
   }
 
+  bool _debugCheckNotificationAxis(Axis notificationAxisDirection) {
+    final ScrollController? scrollController = widget.controller ??
+        PrimaryScrollController.of(context);
+    if (scrollController == null) {
+      // A scrollbar without a scroll controller is a passive indicator relying
+      // on notification metrics alone.
+      return true;
+    }
+    // Ensure we are not flipping axes if the scrollbar is not passive.
+    // It is valid for a scrollbar to change axes based on a notification if it
+    // is passive, but if it has a scroll controller and supports gestures, the
+    // axis of the scroll position and scrollbar should always match.
+    if ((scrollController != null && scrollController.hasClients) || enableGestures) {
+      assert(
+        scrollController.position.axis == notificationAxisDirection,
+        "The AxisDirection of the Scrollbar's ScrollController does not match the "
+        'AxisDirection of the received ScrollNotification. '
+      );
+    }
+    return true;
+  }
+
   bool _handleScrollMetricsNotification(ScrollMetricsNotification notification) {
     if (!widget.notificationPredicate(ScrollUpdateNotification(metrics: notification.metrics, context: notification.context)))
       return false;
+
+    final ScrollMetrics metrics = notification.metrics;
+    assert(_debugCheckNotificationAxis(metrics.axis));
+
     if (showScrollbar) {
       if (_fadeoutAnimationController.status != AnimationStatus.forward
           && _fadeoutAnimationController.status != AnimationStatus.completed)
         _fadeoutAnimationController.forward();
     }
-    scrollbarPainter.update(notification.metrics, notification.metrics.axisDirection);
+    scrollbarPainter.update(metrics, metrics.axisDirection);
     return false;
   }
 
@@ -1542,6 +1568,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       return false;
 
     final ScrollMetrics metrics = notification.metrics;
+    assert(_debugCheckNotificationAxis(metrics.axis));
+
     if (metrics.maxScrollExtent <= metrics.minScrollExtent) {
       // Hide the bar when the Scrollable widget has no space to scroll.
       if (_fadeoutAnimationController.status != AnimationStatus.dismissed
@@ -1559,7 +1587,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
         _fadeoutAnimationController.forward();
 
       _fadeoutTimer?.cancel();
-      scrollbarPainter.update(notification.metrics, notification.metrics.axisDirection);
+      scrollbarPainter.update(metrics, metrics.axisDirection);
     } else if (notification is ScrollEndNotification) {
       if (_dragScrollbarAxisOffset == null)
         _maybeStartFadeoutTimer();
