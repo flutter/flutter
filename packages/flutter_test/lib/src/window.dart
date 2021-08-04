@@ -5,8 +5,6 @@
 import 'dart:typed_data' show ByteData;
 import 'dart:ui' as ui hide window;
 
-import 'package:flutter/rendering.dart';
-
 /// [SingletonFlutterWindow] that wraps another [SingletonFlutterWindow] and
 /// allows faking of some properties for testing purposes.
 ///
