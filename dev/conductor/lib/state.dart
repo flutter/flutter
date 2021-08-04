@@ -139,8 +139,7 @@ String phaseInstructions(pb.ConductorState state) {
       final String newPrLink = getNewPrLink(
         userName: githubAccount(state.engine.mirror.url),
         repoName: 'engine',
-        candidateBranch: state.engine.candidateBranch,
-        workingBranch: state.engine.workingBranch,
+        state: state,
       );
       return <String>[
         'Your working branch ${state.engine.workingBranch} was pushed to your mirror.',
@@ -170,9 +169,8 @@ String phaseInstructions(pb.ConductorState state) {
 
       final String newPrLink = getNewPrLink(
         userName: githubAccount(state.framework.mirror.url),
-        repoName: 'framework',
-        candidateBranch: state.framework.candidateBranch,
-        workingBranch: state.framework.workingBranch,
+        repoName: 'flutter',
+        state: state,
       );
       return <String>[
         'Your working branch ${state.framework.workingBranch} was pushed to your mirror.',

@@ -680,11 +680,15 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// The text to display.
   InlineSpan? get text => _textPainter.text;
   final TextPainter _textPainter;
+  AttributedString? _cachedAttributedValue;
+  List<InlineSpanSemanticsInformation>? _cachedCombinedSemanticsInfos;
   set text(InlineSpan? value) {
     if (_textPainter.text == value)
       return;
     _textPainter.text = value;
     _cachedPlainText = null;
+    _cachedAttributedValue = null;
+    _cachedCombinedSemanticsInfos = null;
     _extractPlaceholderSpans(value);
     markNeedsTextLayout();
     markNeedsSemanticsUpdate();
@@ -1145,10 +1149,31 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
         ..explicitChildNodes = true;
       return;
     }
+    if (_cachedAttributedValue == null) {
+      if (obscureText) {
+        _cachedAttributedValue = AttributedString(obscuringCharacter * _plainText.length);
+      } else {
+        final StringBuffer buffer = StringBuffer();
+        int offset = 0;
+        final List<StringAttribute> attributes = <StringAttribute>[];
+        for (final InlineSpanSemanticsInformation info in _semanticsInfo!) {
+          final String label = info.semanticsLabel ?? info.text;
+          for (final StringAttribute infoAttribute in info.stringAttributes) {
+            final TextRange originalRange = infoAttribute.range;
+            attributes.add(
+              infoAttribute.copy(
+                range: TextRange(start: offset + originalRange.start, end: offset + originalRange.end),
+              ),
+            );
+          }
+          buffer.write(label);
+          offset += label.length;
+        }
+        _cachedAttributedValue = AttributedString(buffer.toString(), attributes: attributes);
+      }
+    }
     config
-      ..value = obscureText
-          ? obscuringCharacter * _plainText.length
-          : _plainText
+      ..attributedValue = _cachedAttributedValue!
       ..isObscured = obscureText
       ..isMultiline = _isMultiline
       ..textDirection = textDirection
@@ -1199,7 +1224,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     int childIndex = 0;
     RenderBox? child = firstChild;
     final Queue<SemanticsNode> newChildCache = Queue<SemanticsNode>();
-    for (final InlineSpanSemanticsInformation info in combineSemanticsInfo(_semanticsInfo!)) {
+    _cachedCombinedSemanticsInfos ??= combineSemanticsInfo(_semanticsInfo!);
+    for (final InlineSpanSemanticsInformation info in _cachedCombinedSemanticsInfos!) {
       final TextSelection selection = TextSelection(
         baseOffset: start,
         extentOffset: start + info.text.length,
@@ -1255,7 +1281,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
         final SemanticsConfiguration configuration = SemanticsConfiguration()
           ..sortKey = OrdinalSortKey(ordinal++)
           ..textDirection = initialDirection
-          ..label = info.semanticsLabel ?? info.text;
+          ..attributedLabel = AttributedString(info.semanticsLabel ?? info.text, attributes: info.stringAttributes);
         final GestureRecognizer? recognizer = info.recognizer;
         if (recognizer != null) {
           if (recognizer is TapGestureRecognizer) {
