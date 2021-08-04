@@ -37,11 +37,11 @@ void main() {
   });
 
   test('computed hit slop values are based on pointer device kind', () {
-    expect(computeHitSlop(PointerDeviceKind.mouse), kPrecisePointerHitSlop);
-    expect(computeHitSlop(PointerDeviceKind.stylus), kTouchSlop);
-    expect(computeHitSlop(PointerDeviceKind.invertedStylus), kTouchSlop);
-    expect(computeHitSlop(PointerDeviceKind.touch), kTouchSlop);
-    expect(computeHitSlop(PointerDeviceKind.unknown), kTouchSlop);
+    expect(computeHitSlop(PointerDeviceKind.mouse, null), kPrecisePointerHitSlop);
+    expect(computeHitSlop(PointerDeviceKind.stylus, null), kTouchSlop);
+    expect(computeHitSlop(PointerDeviceKind.invertedStylus, null), kTouchSlop);
+    expect(computeHitSlop(PointerDeviceKind.touch, null), kTouchSlop);
+    expect(computeHitSlop(PointerDeviceKind.unknown, null), kTouchSlop);
 
     expect(computePanSlop(PointerDeviceKind.mouse), kPrecisePointerPanSlop);
     expect(computePanSlop(PointerDeviceKind.stylus), kPanSlop);
@@ -54,6 +54,14 @@ void main() {
     expect(computeScaleSlop(PointerDeviceKind.invertedStylus), kScaleSlop);
     expect(computeScaleSlop(PointerDeviceKind.touch), kScaleSlop);
     expect(computeScaleSlop(PointerDeviceKind.unknown), kScaleSlop);
+  });
+
+  test('computed hit slop values defer to device value when pointer kind is touch', () {
+    expect(computeHitSlop(PointerDeviceKind.mouse, 1), kPrecisePointerHitSlop);
+    expect(computeHitSlop(PointerDeviceKind.stylus, 1), 1);
+    expect(computeHitSlop(PointerDeviceKind.invertedStylus, 1), 1);
+    expect(computeHitSlop(PointerDeviceKind.touch, 1), 1);
+    expect(computeHitSlop(PointerDeviceKind.unknown, 1), 1);
   });
 
   group('fromMouseEvent', () {

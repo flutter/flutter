@@ -60,6 +60,7 @@ class _TapTracker {
     required PointerDownEvent event,
     required this.entry,
     required Duration doubleTapMinTime,
+    required this.deviceTouchSlop,
   }) : assert(doubleTapMinTime != null),
        assert(event != null),
        assert(event.buttons != null),
@@ -68,6 +69,7 @@ class _TapTracker {
        initialButtons = event.buttons,
        _doubleTapMinTimeCountdown = _CountdownZoned(duration: doubleTapMinTime);
 
+  final double? deviceTouchSlop;
   final int pointer;
   final GestureArenaEntry entry;
   final Offset _initialGlobalPosition;
@@ -194,6 +196,8 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   ///  * [GestureDetector.onDoubleTapCancel], which exposes this callback.
   GestureTapCancelCallback? onDoubleTapCancel;
 
+  double? deviceDoubleTapSlop;
+
   Timer? _doubleTapTimer;
   _TapTracker? _firstTap;
   final Map<int, _TapTracker> _trackers = <int, _TapTracker>{};
@@ -244,6 +248,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
       event: event,
       entry: GestureBinding.instance!.gestureArena.add(event.pointer, this),
       doubleTapMinTime: kDoubleTapMinTime,
+      deviceTouchSlop: deviceDoubleTapSlop,
     );
     _trackers[event.pointer] = tracker;
     tracker.startTrackingPointer(_handleEvent, event.transform);
@@ -380,11 +385,13 @@ class _TapGesture extends _TapTracker {
     required this.gestureRecognizer,
     required PointerEvent event,
     required Duration longTapDelay,
+    required double? deviceTouchSlop,
   }) : _lastPosition = OffsetPair.fromEventPosition(event),
        super(
     event: event as PointerDownEvent,
     entry: GestureBinding.instance!.gestureArena.add(event.pointer, gestureRecognizer),
     doubleTapMinTime: kDoubleTapMinTime,
+    deviceTouchSlop: deviceTouchSlop,
   ) {
     startTrackingPointer(handleEvent, event.transform);
     if (longTapDelay > Duration.zero) {
@@ -406,7 +413,7 @@ class _TapGesture extends _TapTracker {
   void handleEvent(PointerEvent event) {
     assert(event.pointer == pointer);
     if (event is PointerMoveEvent) {
-      if (!isWithinGlobalTolerance(event, computeHitSlop(event.kind)))
+      if (!isWithinGlobalTolerance(event, computeHitSlop(event.kind, deviceTouchSlop)))
         cancel();
       else
         _lastPosition = OffsetPair.fromEventPosition(event);
@@ -504,6 +511,8 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
   /// particular location after [longTapDelay].
   GestureMultiTapDownCallback? onLongTapDown;
 
+  double? deviceTouchSlop;
+
   final Map<int, _TapGesture> _gestureMap = <int, _TapGesture>{};
 
   @override
@@ -513,6 +522,7 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
       gestureRecognizer: this,
       event: event,
       longTapDelay: longTapDelay,
+      deviceTouchSlop: deviceTouchSlop,
     );
     if (onTapDown != null)
       invokeCallback<void>('onTapDown', () {

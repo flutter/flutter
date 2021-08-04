@@ -27,9 +27,11 @@ abstract class MultiDragPointerState {
   /// Creates per-pointer state for a [MultiDragGestureRecognizer].
   ///
   /// The [initialPosition] argument must not be null.
-  MultiDragPointerState(this.initialPosition, this.kind)
+  MultiDragPointerState(this.initialPosition, this.kind, this.deviceTouchSlop)
     : assert(initialPosition != null),
       _velocityTracker = VelocityTracker.withKind(kind);
+
+  final double? deviceTouchSlop;
 
   /// The global coordinates of the pointer when the pointer contacted the screen.
   final Offset initialPosition;
@@ -221,6 +223,8 @@ abstract class MultiDragGestureRecognizer extends GestureRecognizer {
   /// [Drag] object returned by this callback.
   GestureMultiDragStartCallback? onStart;
 
+  double? deviceTouchSlop;
+
   Map<int, MultiDragPointerState>? _pointers = <int, MultiDragPointerState>{};
 
   @override
@@ -326,12 +330,12 @@ abstract class MultiDragGestureRecognizer extends GestureRecognizer {
 }
 
 class _ImmediatePointerState extends MultiDragPointerState {
-  _ImmediatePointerState(Offset initialPosition, PointerDeviceKind kind) : super(initialPosition, kind);
+  _ImmediatePointerState(Offset initialPosition, PointerDeviceKind kind, double? deviceTouchSlop) : super(initialPosition, kind, deviceTouchSlop);
 
   @override
   void checkForResolutionAfterMove() {
     assert(pendingDelta != null);
-    if (pendingDelta!.distance > computeHitSlop(kind))
+    if (pendingDelta!.distance > computeHitSlop(kind, deviceTouchSlop))
       resolve(GestureDisposition.accepted);
   }
 
@@ -377,7 +381,7 @@ class ImmediateMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
 
   @override
   MultiDragPointerState createNewPointerState(PointerDownEvent event) {
-    return _ImmediatePointerState(event.position, event.kind);
+    return _ImmediatePointerState(event.position, event.kind, deviceTouchSlop);
   }
 
   @override
@@ -386,12 +390,12 @@ class ImmediateMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
 
 
 class _HorizontalPointerState extends MultiDragPointerState {
-  _HorizontalPointerState(Offset initialPosition, PointerDeviceKind kind) : super(initialPosition, kind);
+  _HorizontalPointerState(Offset initialPosition, PointerDeviceKind kind, double? deviceTouchSlop) : super(initialPosition, kind, deviceTouchSlop);
 
   @override
   void checkForResolutionAfterMove() {
     assert(pendingDelta != null);
-    if (pendingDelta!.dx.abs() > computeHitSlop(kind))
+    if (pendingDelta!.dx.abs() > computeHitSlop(kind, deviceTouchSlop))
       resolve(GestureDisposition.accepted);
   }
 
@@ -437,7 +441,7 @@ class HorizontalMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
 
   @override
   MultiDragPointerState createNewPointerState(PointerDownEvent event) {
-    return _HorizontalPointerState(event.position, event.kind);
+    return _HorizontalPointerState(event.position, event.kind, deviceTouchSlop);
   }
 
   @override
@@ -446,12 +450,12 @@ class HorizontalMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
 
 
 class _VerticalPointerState extends MultiDragPointerState {
-  _VerticalPointerState(Offset initialPosition, PointerDeviceKind kind) : super(initialPosition, kind);
+  _VerticalPointerState(Offset initialPosition, PointerDeviceKind kind, double? deviceTouchSlop) : super(initialPosition, kind, deviceTouchSlop);
 
   @override
   void checkForResolutionAfterMove() {
     assert(pendingDelta != null);
-    if (pendingDelta!.dy.abs() > computeHitSlop(kind))
+    if (pendingDelta!.dy.abs() > computeHitSlop(kind, deviceTouchSlop))
       resolve(GestureDisposition.accepted);
   }
 
@@ -497,7 +501,7 @@ class VerticalMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
 
   @override
   MultiDragPointerState createNewPointerState(PointerDownEvent event) {
-    return _VerticalPointerState(event.position, event.kind);
+    return _VerticalPointerState(event.position, event.kind, null);
   }
 
   @override
@@ -505,9 +509,9 @@ class VerticalMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
 }
 
 class _DelayedPointerState extends MultiDragPointerState {
-  _DelayedPointerState(Offset initialPosition, Duration delay, PointerDeviceKind kind)
+  _DelayedPointerState(Offset initialPosition, Duration delay, PointerDeviceKind kind, double? deviceTouchSlop)
       : assert(delay != null),
-        super(initialPosition, kind) {
+        super(initialPosition, kind, deviceTouchSlop) {
     _timer = Timer(delay, _delayPassed);
   }
 
@@ -517,7 +521,7 @@ class _DelayedPointerState extends MultiDragPointerState {
   void _delayPassed() {
     assert(_timer != null);
     assert(pendingDelta != null);
-    assert(pendingDelta!.distance <= computeHitSlop(kind));
+    assert(pendingDelta!.distance <= computeHitSlop(kind, deviceTouchSlop));
     _timer = null;
     if (_starter != null) {
       _starter!(initialPosition);
@@ -554,7 +558,7 @@ class _DelayedPointerState extends MultiDragPointerState {
       return;
     }
     assert(pendingDelta != null);
-    if (pendingDelta!.distance > computeHitSlop(kind)) {
+    if (pendingDelta!.distance > computeHitSlop(kind, deviceTouchSlop)) {
       resolve(GestureDisposition.rejected);
       _ensureTimerStopped();
     }
@@ -616,7 +620,7 @@ class DelayedMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
 
   @override
   MultiDragPointerState createNewPointerState(PointerDownEvent event) {
-    return _DelayedPointerState(event.position, delay, event.kind);
+    return _DelayedPointerState(event.position, delay, event.kind, deviceTouchSlop);
   }
 
   @override

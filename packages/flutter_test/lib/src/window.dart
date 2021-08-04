@@ -5,6 +5,8 @@
 import 'dart:typed_data' show ByteData;
 import 'dart:ui' as ui hide window;
 
+import 'package:flutter/rendering.dart';
+
 /// [SingletonFlutterWindow] that wraps another [SingletonFlutterWindow] and
 /// allows faking of some properties for testing purposes.
 ///
@@ -351,6 +353,16 @@ class TestWindow implements ui.SingletonFlutterWindow {
   void clearAccessibilityFeaturesTestValue() {
     _accessibilityFeaturesTestValue = null;
     onAccessibilityFeaturesChanged?.call();
+  }
+
+  @override
+  ui.ViewConfiguration get viewConfiguration => _viewConfiguration ?? _window.viewConfiguration;
+  ui.ViewConfiguration? _viewConfiguration;
+
+  /// Hide the real view configuration and report the provided [value] instead.
+  set viewConfigurationTestValue(ui.ViewConfiguration? value) {
+    _viewConfiguration = value;
+    onMetricsChanged?.call();
   }
 
   @override
