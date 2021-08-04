@@ -436,7 +436,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      depdendencies: >-
+      dependencies: >-
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver"}
@@ -453,7 +453,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      depdendencies: >-
+      dependencies: >-
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver"}
@@ -470,7 +470,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      depdendencies: >-
+      dependencies: >-
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver"}
@@ -487,7 +487,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      depdendencies: >-
+      dependencies: >-
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver"}
@@ -504,7 +504,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      depdendencies: >-
+      dependencies: >-
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver"}
@@ -521,7 +521,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      depdendencies: >-
+      dependencies: >-
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver"}
@@ -539,7 +539,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      depdendencies: >-
+      dependencies: >-
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver"}
@@ -557,7 +557,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      depdendencies: >-
+      dependencies: >-
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver"}
@@ -575,7 +575,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      depdendencies: >-
+      dependencies: >-
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver"}
@@ -593,7 +593,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      depdendencies: >-
+      dependencies: >-
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver"}
@@ -629,7 +629,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
-      depdendencies: >-
+      dependencies: >-
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver"}
@@ -655,7 +655,7 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      depdendencies: >-
+      dependencies: >-
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver"},
@@ -678,7 +678,7 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      depdendencies: >-
+      dependencies: >-
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver"},
@@ -700,7 +700,7 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      depdendencies: >-
+      dependencies: >-
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver"},
@@ -722,7 +722,7 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      depdendencies: >-
+      dependencies: >-
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver"},
@@ -744,7 +744,7 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      depdendencies: >-
+      dependencies: >-
         [
           {"dependency": "android_sdk"},
           {"dependency": "open_jdk"}
@@ -764,7 +764,7 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      depdendencies: >-
+      dependencies: >-
         [
           {"dependency": "android_sdk"},
           {"dependency": "open_jdk"}
@@ -784,7 +784,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
-      depdendencies: >-
+      dependencies: >-
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver"}
@@ -798,7 +798,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      depdendencies: >-
+      dependencies: >-
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver"}
@@ -814,7 +814,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      depdendencies: >-
+      dependencies: >-
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver"},
@@ -834,7 +834,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      depdendencies: >-
+      dependencies: >-
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver"},
@@ -854,7 +854,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      depdendencies: >-
+      dependencies: >-
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver"},
@@ -874,7 +874,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      depdendencies: >-
+      dependencies: >-
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver"},
@@ -894,7 +894,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      depdendencies: >-
+      dependencies: >-
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver"},
@@ -914,7 +914,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      depdendencies: >-
+      dependencies: >-
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver"},
@@ -934,7 +934,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      depdendencies: >-
+      dependencies: >-
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver"},
@@ -954,7 +954,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      depdendencies: >-
+      dependencies: >-
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver"},
@@ -974,7 +974,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      depdendencies: >-
+      dependencies: >-
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver"},
@@ -994,7 +994,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      depdendencies: >-
+      dependencies: >-
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver"},
@@ -1014,7 +1014,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      depdendencies: >-
+      dependencies: >-
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver"},
@@ -1034,7 +1034,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      depdendencies: >-
+      dependencies: >-
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver"},
@@ -1054,7 +1054,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      depdendencies: >-
+      dependencies: >-
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver"},
@@ -1074,7 +1074,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      depdendencies: >-
+      dependencies: >-
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver"},
