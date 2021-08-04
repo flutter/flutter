@@ -205,55 +205,27 @@ void main() {
     await tester.pump();
     FadeTransition transition = tester.firstWidget(find.byType(FadeTransition));
 
-    await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.firstWidget(find.byType(FadeTransition));
-    expect(transition.opacity.value, moreOrLessEquals(0.464, epsilon: 0.001));
-
-    await tester.pump(const Duration(milliseconds: 25));
+    await tester.pump(const Duration(milliseconds: 50));
     transition = tester.firstWidget(find.byType(FadeTransition));
     expect(transition.opacity.value, moreOrLessEquals(0.403, epsilon: 0.001));
 
-    await tester.pump(const Duration(milliseconds: 25));
+    await tester.pump(const Duration(milliseconds: 100));
     transition = tester.firstWidget(find.byType(FadeTransition));
     expect(transition.opacity.value, moreOrLessEquals(0.400, epsilon: 0.001));
 
-    await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.firstWidget(find.byType(FadeTransition));
-    expect(transition.opacity.value, moreOrLessEquals(0.400, epsilon: 0.001));
-
-    await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.firstWidget(find.byType(FadeTransition));
-    expect(transition.opacity.value, moreOrLessEquals(0.4, epsilon: 0.001));
-
-    await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.firstWidget(find.byType(FadeTransition));
-    expect(transition.opacity.value, moreOrLessEquals(0.483, epsilon: 0.001));
-
-    await tester.pump(const Duration(milliseconds: 25));
+    await tester.pump(const Duration(milliseconds: 50));
     transition = tester.firstWidget(find.byType(FadeTransition));
     expect(transition.opacity.value, moreOrLessEquals(0.650, epsilon: 0.001));
 
-    await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.firstWidget(find.byType(FadeTransition));
-    expect(transition.opacity.value, moreOrLessEquals(0.795, epsilon: 0.001));
-
-    await tester.pump(const Duration(milliseconds: 25));
+    await tester.pump(const Duration(milliseconds: 50));
     transition = tester.firstWidget(find.byType(FadeTransition));
     expect(transition.opacity.value, moreOrLessEquals(0.894, epsilon: 0.001));
 
-    await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.firstWidget(find.byType(FadeTransition));
-    expect(transition.opacity.value, moreOrLessEquals(0.955, epsilon: 0.001));
-
-    await tester.pump(const Duration(milliseconds: 25));
+    await tester.pump(const Duration(milliseconds: 50));
     transition = tester.firstWidget(find.byType(FadeTransition));
     expect(transition.opacity.value, moreOrLessEquals(0.988, epsilon: 0.001));
 
-    await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.firstWidget(find.byType(FadeTransition));
-    expect(transition.opacity.value, moreOrLessEquals(0.999, epsilon: 0.001));
-
-    await tester.pump(const Duration(milliseconds: 25));
+    await tester.pump(const Duration(milliseconds: 50));
     transition = tester.firstWidget(find.byType(FadeTransition));
     expect(transition.opacity.value, moreOrLessEquals(1.0, epsilon: 0.001));
   });
