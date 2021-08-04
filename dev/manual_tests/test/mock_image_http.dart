@@ -60,4 +60,4 @@ class FakeHttpClientResponse extends Fake implements HttpClientResponse {
   }
 }
 
-class FakeHttpHeaders extends Fake implements HttpHeaders {}
+class FakeHttpHeaders extends Fake implements HttpHeaders { }

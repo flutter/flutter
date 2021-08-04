@@ -25,10 +25,6 @@ const List<String> kModifiersOfInterest = <String>[
 const List<String> kSpecialPhysicalKeys = <String>['CapsLock'];
 const List<String> kSpecialLogicalKeys = <String>['CapsLock'];
 
-String _toConstantVariableName(String variableName) {
-  return 'k${variableName[0].toUpperCase()}${variableName.substring(1)}';
-}
-
 /// Generates the key mapping for macOS, based on the information in the key
 /// data structure given to it.
 class MacOSCodeGenerator extends PlatformCodeGenerator {
@@ -37,36 +33,36 @@ class MacOSCodeGenerator extends PlatformCodeGenerator {
 
   /// This generates the map of macOS key codes to physical keys.
   String get _scanCodeMap {
-    final StringBuffer scanCodeMap = StringBuffer();
+    final OutputLines<int> lines = OutputLines<int>('macOS scancode map');
     for (final PhysicalKeyEntry entry in keyData.entries) {
       if (entry.macOSScanCode != null) {
-        scanCodeMap.writeln('  @${toHex(entry.macOSScanCode)} : @${toHex(entry.usbHidCode)},  // ${entry.constantName}');
+        lines.add(entry.macOSScanCode!, '  @${toHex(entry.macOSScanCode)} : @${toHex(entry.usbHidCode)},  // ${entry.constantName}');
       }
     }
-    return scanCodeMap.toString().trimRight();
+    return lines.sortedJoin().trimRight();
   }
 
   String get _keyCodeToLogicalMap {
-    final StringBuffer result = StringBuffer();
+    final OutputLines<int> lines = OutputLines<int>('macOS keycode map');
     for (final LogicalKeyEntry entry in logicalData.entries) {
       zipStrict(entry.macOSKeyCodeValues, entry.macOSKeyCodeNames, (int macOSValue, String macOSName) {
-        result.writeln('  @${toHex(macOSValue)} : @${toHex(entry.value, digits: 11)},  // $macOSName');
+        lines.add(macOSValue,
+            '  @${toHex(macOSValue)} : @${toHex(entry.value, digits: 11)},  // $macOSName -> ${entry.constantName}');
       });
     }
-    return result.toString().trimRight();
+    return lines.sortedJoin().trimRight();
   }
 
   /// This generates the mask values for the part of a key code that defines its plane.
   String get _maskConstants {
     final StringBuffer buffer = StringBuffer();
+    const List<MaskConstant> maskConstants = <MaskConstant>[
+      kValueMask,
+      kUnicodePlane,
+      kMacosPlane,
+    ];
     for (final MaskConstant constant in maskConstants) {
-      buffer.writeln('/**');
-      buffer.write(constant.description
-        .map((String line) => wrapString(line, prefix: ' * '))
-        .join(' *\n'));
-      buffer.writeln(' */');
-      buffer.writeln('const uint64_t ${_toConstantVariableName(constant.name)} = ${toHex(constant.value, digits: 11)};');
-      buffer.writeln('');
+      buffer.writeln('const uint64_t k${constant.upperCamelName} = ${toHex(constant.value, digits: 11)};');
     }
     return buffer.toString().trimRight();
   }

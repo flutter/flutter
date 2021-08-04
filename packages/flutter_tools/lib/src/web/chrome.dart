@@ -396,10 +396,11 @@ class ChromiumLauncher {
     if (!skipCheck) {
       try {
         await chrome.chromeConnection.getTabs();
-      } on Exception catch (e) {
+      } on Exception catch (error, stackTrace) {
+        _logger.printError('$error', stackTrace: stackTrace);
         await chrome.close();
         throwToolExit(
-            'Unable to connect to Chrome debug port: ${chrome.debugPort}\n $e');
+            'Unable to connect to Chrome debug port: ${chrome.debugPort}\n $error');
       }
     }
     currentCompleter.complete(chrome);

@@ -20,7 +20,7 @@ import 'text_editing_intents.dart';
 ///   * [DefaultTextEditingShortcuts], which maps keyboard keys to many of the
 ///     [Intent]s that are handled here.
 ///   * [WidgetsApp], which creates a DefaultTextEditingShortcuts.
-class DefaultTextEditingActions extends Actions{
+class DefaultTextEditingActions extends Actions {
   /// Creates an instance of DefaultTextEditingActions.
   DefaultTextEditingActions({
     Key? key,

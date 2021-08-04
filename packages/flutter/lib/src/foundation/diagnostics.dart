@@ -2032,6 +2032,7 @@ class IntProperty extends _NumProperty<int> {
     showName: showName,
     unit: unit,
     defaultValue: defaultValue,
+    style: style,
     level: level,
   );
 

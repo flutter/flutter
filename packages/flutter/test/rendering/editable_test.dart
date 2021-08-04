@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=20210704"
+@Tags(<String>['no-shuffle'])
+
 import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
@@ -10,6 +16,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:meta/meta.dart';
+
+// The test_api package is not for general use... it's literally for our use.
+// ignore: deprecated_member_use
+import 'package:test_api/test_api.dart' as test_package;
 
 import '../rendering/mock_canvas.dart';
 import '../rendering/recording_canvas.dart';
@@ -27,6 +38,38 @@ class FakeEditableTextState with TextSelectionDelegate {
 
   @override
   void bringIntoView(TextPosition position) { }
+}
+
+@isTest
+void testVariants(
+  String description,
+  AsyncValueGetter<void> callback, {
+  bool? skip,
+  test_package.Timeout? timeout,
+  TestVariant<Object?> variant = const DefaultTestVariant(),
+  dynamic tags,
+}) {
+  assert(variant != null);
+  assert(variant.values.isNotEmpty, 'There must be at least one value to test in the testing variant.');
+  for (final dynamic value in variant.values) {
+    final String variationDescription = variant.describeValue(value);
+    final String combinedDescription = variationDescription.isNotEmpty ? '$description ($variationDescription)' : description;
+    test(
+      combinedDescription,
+      () async {
+        Object? memento;
+        try {
+          memento = await variant.setUp(value);
+          await callback();
+        } finally {
+          await variant.tearDown(value, memento);
+        }
+      },
+      skip: skip,
+      timeout: timeout,
+      tags: tags,
+    );
+  }
 }
 
 void main() {
@@ -882,6 +925,7 @@ void main() {
     editable.moveSelectionRightByLine(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 13);
+    expect(currentSelection.affinity, TextAffinity.upstream);
     // RenderEditable relies on its parent that passes onSelectionChanged to set
     // the selection.
 
@@ -890,21 +934,25 @@ void main() {
     editable.moveSelectionRightByLine(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 13);
+    expect(currentSelection.affinity, TextAffinity.upstream);
 
     // Move back to the start of the line.
     editable.moveSelectionLeftByLine(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 0);
+    expect(currentSelection.affinity, TextAffinity.downstream);
 
     // Trying moveSelectionLeftByLine does nothing at the leftmost of the field.
     editable.moveSelectionLeftByLine(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 0);
+    expect(currentSelection.affinity, TextAffinity.downstream);
 
     // Move the selection to the empty line.
     editable.moveSelectionRightByLine(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 13);
+    expect(currentSelection.affinity, TextAffinity.upstream);
     editable.moveSelectionRight(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 14);
@@ -914,9 +962,11 @@ void main() {
     editable.moveSelectionLeftByLine(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 14);
+    expect(currentSelection.affinity, TextAffinity.downstream);
     editable.moveSelectionRightByLine(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 14);
+    expect(currentSelection.affinity, TextAffinity.downstream);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
   test('arrow keys and delete handle simple text correctly', () async {
@@ -1337,7 +1387,7 @@ void main() {
     expect(currentSelection.extentOffset, 1);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/58068
 
-  test('respects enableInteractiveSelection', () async {
+  testVariants('respects enableInteractiveSelection', () async {
     const String text = '012345';
     final TextSelectionDelegate delegate = FakeEditableTextState()
       ..textEditingValue = const TextEditingValue(text: text);
@@ -1397,7 +1447,7 @@ void main() {
 
     await simulateKeyUpEvent(wordModifier);
     await simulateKeyUpEvent(LogicalKeyboardKey.shift);
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/58068
+  }, skip: isBrowser, variant: KeySimulatorTransitModeVariant.all()); // https://github.com/flutter/flutter/issues/58068
 
   group('delete', () {
     test('when as a non-collapsed selection, it should delete a selection', () async {

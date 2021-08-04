@@ -2,11 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
-import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 
 import './proto/conductor_state.pb.dart' as pb;
@@ -20,7 +17,7 @@ const String kStateOption = 'state-file';
 /// Command to print the status of the current Flutter release.
 class StatusCommand extends Command<void> {
   StatusCommand({
-    @required this.checkouts,
+    required this.checkouts,
   })  : platform = checkouts.platform,
         fileSystem = checkouts.fileSystem,
         stdio = checkouts.stdio {
@@ -51,16 +48,16 @@ class StatusCommand extends Command<void> {
 
   @override
   void run() {
-    final File stateFile = checkouts.fileSystem.file(argResults[kStateOption]);
+    final File stateFile = checkouts.fileSystem.file(argResults![kStateOption]);
     if (!stateFile.existsSync()) {
       stdio.printStatus(
-          'No persistent state file found at ${argResults[kStateOption]}.');
+          'No persistent state file found at ${argResults![kStateOption]}.');
       return;
     }
     final pb.ConductorState state = readStateFromFile(stateFile);
 
     stdio.printStatus(presentState(state));
-    if (argResults[kVerboseFlag] as bool) {
+    if (argResults![kVerboseFlag] as bool) {
       stdio.printStatus('\nLogs:');
       state.logs.forEach(stdio.printStatus);
     }

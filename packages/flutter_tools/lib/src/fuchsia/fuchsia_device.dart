@@ -32,6 +32,7 @@ import 'fuchsia_build.dart';
 import 'fuchsia_pm.dart';
 import 'fuchsia_sdk.dart';
 import 'fuchsia_workflow.dart';
+import 'session_control.dart';
 import 'tiles_ctl.dart';
 
 /// The [FuchsiaDeviceTools] instance.
@@ -44,6 +45,9 @@ class FuchsiaDeviceTools {
 
   FuchsiaTilesCtl _tilesCtl;
   FuchsiaTilesCtl get tilesCtl => _tilesCtl ??= FuchsiaTilesCtl();
+
+  FuchsiaSessionControl _sessionControl;
+  FuchsiaSessionControl get sessionControl => _sessionControl ??= FuchsiaSessionControl();
 }
 
 final String _ipv4Loopback = InternetAddress.loopbackIPv4.address;
@@ -266,6 +270,22 @@ class FuchsiaDevice extends Device {
   @override
   bool get supportsStartPaused => false;
 
+  bool _isSession;
+
+  Future<bool> get isSession async => _isSession ??= await _initIsSession();
+
+  /// Determine if the Fuchsia device is running a session based build.
+  ///
+  /// If the device is running a session based build, `session_control` should be
+  /// used to launch apps, otherwise `tiles_ctl` should be used.
+  Future<bool> _initIsSession() async {
+    final RunResult result = await shell('which session_control');
+    if (result.exitCode != 0) {
+      return false;
+    }
+    return true;
+  }
+
   @override
   Future<bool> isAppInstalled(
     ApplicationPackage app, {
@@ -304,6 +324,12 @@ class FuchsiaDevice extends Device {
     bool ipv6 = false,
     String userIdentifier,
   }) async {
+    if (await isSession) {
+      globals.printTrace('Running on a session framework based build.');
+    } else {
+      globals.printTrace('Running on a non session framework based build.');
+    }
+
     if (!prebuiltApplication) {
       await buildFuchsia(fuchsiaProject: FlutterProject.current().fuchsia,
                          targetPlatform: await targetPlatform,
@@ -341,17 +367,26 @@ class FuchsiaDevice extends Device {
     );
     FuchsiaPackageServer fuchsiaPackageServer;
     bool serverRegistered = false;
+    String fuchsiaUrl;
     try {
-      // Ask amber to pre-fetch some things we'll need before setting up our own
-      // package server. This is to avoid relying on amber correctly using
-      // multiple package servers, support for which is in flux.
-      if (!await fuchsiaDeviceTools.amberCtl.getUp(this, 'tiles')) {
-        globals.printError('Failed to get amber to prefetch tiles');
-        return LaunchResult.failed();
-      }
-      if (!await fuchsiaDeviceTools.amberCtl.getUp(this, 'tiles_ctl')) {
-        globals.printError('Failed to get amber to prefetch tiles_ctl');
-        return LaunchResult.failed();
+      if (await isSession) {
+        // Prefetch session_control
+        if (!await fuchsiaDeviceTools.amberCtl.getUp(this, 'session_control')) {
+          globals.printError('Failed to get amber to prefetch session_control');
+          return LaunchResult.failed();
+        }
+      } else {
+        // Ask amber to pre-fetch some things we'll need before setting up our own
+        // package server. This is to avoid relying on amber correctly using
+        // multiple package servers, support for which is in flux.
+        if (!await fuchsiaDeviceTools.amberCtl.getUp(this, 'tiles')) {
+          globals.printError('Failed to get amber to prefetch tiles');
+          return LaunchResult.failed();
+        }
+        if (!await fuchsiaDeviceTools.amberCtl.getUp(this, 'tiles_ctl')) {
+          globals.printError('Failed to get amber to prefetch tiles_ctl');
+          return LaunchResult.failed();
+        }
       }
 
       // Start up a package server.
@@ -417,17 +452,26 @@ class FuchsiaDevice extends Device {
         return LaunchResult.failed();
       }
 
-      // Ensure tiles_ctl is started, and start the app.
-      if (!await FuchsiaTilesCtl.ensureStarted(this)) {
-        globals.printError('Failed to ensure that tiles is started on the device');
-        return LaunchResult.failed();
-      }
+      fuchsiaUrl = 'fuchsia-pkg://$packageServerName/$appName#meta/$appName.cmx';
 
-      // Instruct tiles_ctl to start the app.
-      final String fuchsiaUrl = 'fuchsia-pkg://$packageServerName/$appName#meta/$appName.cmx';
-      if (!await fuchsiaDeviceTools.tilesCtl.add(this, fuchsiaUrl, <String>[])) {
-        globals.printError('Failed to add the app to tiles');
-        return LaunchResult.failed();
+      if (await isSession) {
+        // Instruct session_control to start the app
+        if (!await fuchsiaDeviceTools.sessionControl.add(this, fuchsiaUrl)) {
+          globals.printError('Failed to add the app to session_control');
+          return LaunchResult.failed();
+        }
+      } else {
+        // Ensure tiles_ctl is started, and start the app.
+        if (!await FuchsiaTilesCtl.ensureStarted(this)) {
+          globals.printError('Failed to ensure that tiles is started on the device');
+          return LaunchResult.failed();
+        }
+
+        // Instruct tiles_ctl to start the app.
+        if (!await fuchsiaDeviceTools.tilesCtl.add(this, fuchsiaUrl, <String>[])) {
+          globals.printError('Failed to add the app to tiles');
+          return LaunchResult.failed();
+        }
       }
     } finally {
       // Try to un-teach the package controller about the package server if
@@ -470,6 +514,11 @@ class FuchsiaDevice extends Device {
     covariant FuchsiaApp app, {
     String userIdentifier,
   }) async {
+    if (await isSession) {
+      // Currently there are no way to close a running app programmatically
+      // using the session framework afaik. So this is a no-op.
+      return true;
+    }
     final int appKey = await FuchsiaTilesCtl.findAppKey(this, app.id);
     if (appKey != -1) {
       if (!await fuchsiaDeviceTools.tilesCtl.remove(this, appKey)) {
@@ -522,7 +571,7 @@ class FuchsiaDevice extends Device {
       throw 'Could not take a screenshot on device $name:\n$screencapResult';
     }
     try {
-      final RunResult scpResult =  await scp('/tmp/screenshot.ppm', outputFile.path);
+      final RunResult scpResult = await scp('/tmp/screenshot.ppm', outputFile.path);
       if (scpResult.exitCode != 0) {
         throw 'Failed to copy screenshot from device:\n$scpResult';
       }
