@@ -26,11 +26,11 @@ class CommonFinders {
   /// Finds [Text], [EditableText], and optionally [RichText] widgets
   /// containing string equal to the `text` argument.
   ///
-  /// If `skipRichText` is disabled, [RichText] widgets (and therefore also
+  /// If `findRichText` is disabled, all standalone [RichText] widgets are
+  /// ignored and `text` is matched with [Text.data] or [Text.textSpan].
+  /// If `findRichText` is enabled, [RichText] widgets (and therefore also
   /// [Text] and [Text.rich] widgets) are matched by comparing the
   /// [InlineSpan.toPlainText] with the given `text`.
-  /// If `skipRichText` is enabled, all standalone [RichText] widgets are
-  /// ignored and [Text] matching shortcuts to [Text.data].
   ///
   /// For [EditableText] widgets, the `text` is always compared to the current
   /// value of the [EditableText.controller].
@@ -48,19 +48,19 @@ class CommonFinders {
   /// contain the "Back" string.
   ///
   /// ```dart
-  /// expect(find.text('Close', skipRichText: false), findsOneWidget);
+  /// expect(find.text('Close', findRichText: true), findsOneWidget);
   /// ```
   ///
   /// This will match [Text], [Text.rich], [EditableText], as well as standalone
   /// [RichText] widgets that contain the "Close" string.
   Finder text(
     String text, {
-    bool skipRichText = true,
+    bool findRichText = false,
     bool skipOffstage = true,
   }) {
     return _TextFinder(
       text,
-      skipRichText: skipRichText,
+      findRichText: findRichText,
       skipOffstage: skipOffstage,
     );
   }
@@ -579,24 +579,24 @@ abstract class MatchFinder extends Finder {
 class _TextFinder extends MatchFinder {
   _TextFinder(
     this.text, {
-    this.skipRichText = true,
+    this.findRichText = false,
     bool skipOffstage = true,
   }) : super(skipOffstage: skipOffstage);
 
   final String text;
 
-  /// Whether standalone [RichText] widgets should be skipped or not.
+  /// Whether standalone [RichText] widgets should be found or not.
   ///
-  /// Defaults to `true`.
+  /// Defaults to `false`.
   ///
-  /// If enabled, only [Text] widgets will be matched. [RichText] widgets
+  /// If disabled, only [Text] widgets will be matched. [RichText] widgets
   /// *without* a [Text] ancestor will be ignored.
-  /// If disabled, only [RichText] widgets will be matched. This *implicitly*
+  /// If enabled, only [RichText] widgets will be matched. This *implicitly*
   /// matches [Text] widgets as well since they always insert a [RichText]
   /// child.
   ///
   /// In either case, [EditableText] widgets will also be matched.
-  final bool skipRichText;
+  final bool findRichText;
 
   @override
   String get description => 'text "$text"';
@@ -607,7 +607,7 @@ class _TextFinder extends MatchFinder {
     if (widget is EditableText)
       return _matchesEditableText(widget);
 
-    if (skipRichText)
+    if (!findRichText)
       return _matchesNonRichText(widget);
     // It would be sufficient to always use _matchesRichText if we wanted to
     // match both standalone RichText widgets as well as Text widgets. However,
