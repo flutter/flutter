@@ -50,6 +50,11 @@ void verify(WidgetTester tester, List<Rect> answerKey) {
 }
 
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   testWidgets('Viewport+SliverPadding basic test (VISUAL)', (WidgetTester tester) async {
     const EdgeInsets padding = EdgeInsets.fromLTRB(25.0, 20.0, 15.0, 35.0);
     await test(tester, 0.0, padding, AxisDirection.down, TextDirection.ltr);

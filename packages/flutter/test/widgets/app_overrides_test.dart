@@ -46,6 +46,11 @@ Future<void> pumpApp(WidgetTester tester) async {
 }
 
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   testWidgets('WidgetsApp control test', (WidgetTester tester) async {
     await pumpApp(tester);
     expect(find.byType(WidgetsApp), findsOneWidget);

@@ -24,6 +24,11 @@ class Wrapper extends StatelessWidget {
 }
 
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   testWidgets('Moving a global key from another LayoutBuilder at layout time', (WidgetTester tester) async {
     final GlobalKey victimKey = GlobalKey();
 

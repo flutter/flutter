@@ -17,6 +17,11 @@ const Duration animationDuration = Duration(milliseconds:1000);
 const Duration additionalDelay = Duration(milliseconds:1);
 
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   late MockOnEndFunction mockOnEndFunction;
   const Key switchKey = Key('switchKey');
 

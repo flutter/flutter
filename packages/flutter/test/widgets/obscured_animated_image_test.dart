@@ -14,6 +14,11 @@ import '../painting/fake_codec.dart';
 import '../painting/fake_image_provider.dart';
 
 Future<void> main() async {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   final FakeCodec fakeCodec = await FakeCodec.fromData(Uint8List.fromList(kAnimatedGif));
   final FakeImageProvider fakeImageProvider = FakeImageProvider(fakeCodec);
 

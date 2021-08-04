@@ -120,6 +120,11 @@ Widget activatorTester(
 }
 
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   group(LogicalKeySet, () {
     test('LogicalKeySet passes parameters correctly.', () {
       final LogicalKeySet set1 = LogicalKeySet(LogicalKeyboardKey.keyA);

@@ -13,6 +13,11 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   final GlobalKey widgetKey = GlobalKey();
   Future<BuildContext> setupWidget(WidgetTester tester) async {
     await tester.pumpWidget(Container(key: widgetKey));

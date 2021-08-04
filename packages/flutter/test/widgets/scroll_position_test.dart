@@ -137,6 +137,11 @@ Future<void> performTest(WidgetTester tester, bool maintainState) async {
 }
 
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   testWidgets("ScrollPosition jumpTo() doesn't call notifyListeners twice", (WidgetTester tester) async {
     int count = 0;
     await tester.pumpWidget(MaterialApp(

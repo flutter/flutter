@@ -6,6 +6,11 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   testWidgets('Sliver with keep alive without key - should dispose after reordering', (WidgetTester tester) async {
     List<Widget> childList= <Widget>[
       const WidgetTest0(text: 'child 0', keepAlive: true),

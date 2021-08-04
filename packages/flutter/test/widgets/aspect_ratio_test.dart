@@ -25,6 +25,11 @@ Future<Size> _getSize(WidgetTester tester, BoxConstraints constraints, double as
 }
 
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   testWidgets('Aspect ratio control test', (WidgetTester tester) async {
     expect(await _getSize(tester, BoxConstraints.loose(const Size(500.0, 500.0)), 2.0), equals(const Size(500.0, 250.0)));
     expect(await _getSize(tester, BoxConstraints.loose(const Size(500.0, 500.0)), 0.5), equals(const Size(250.0, 500.0)));

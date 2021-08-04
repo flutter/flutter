@@ -21,6 +21,11 @@ class _MyGlobalObjectKey<T extends State<StatefulWidget>> extends GlobalObjectKe
 }
 
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   testWidgets('UniqueKey control test', (WidgetTester tester) async {
     final Key key = UniqueKey();
     expect(key, hasOneLineDescription);

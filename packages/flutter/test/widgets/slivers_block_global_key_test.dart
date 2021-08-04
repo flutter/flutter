@@ -59,6 +59,11 @@ void verify(WidgetTester tester, List<Offset> answerKey, String text) {
 }
 
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   testWidgets('Viewport+SliverBlock with GlobalKey reparenting', (WidgetTester tester) async {
     await test(tester, 0.0, <int>[1,2,3,4,5,6,7,8,9]);
     verify(tester, <Offset>[

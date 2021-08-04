@@ -41,6 +41,11 @@ Widget buildFrame({ int? count, double? width, double? height, Axis? scrollDirec
 }
 
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   testWidgets('SliverPrototypeExtentList vertical scrolling basics', (WidgetTester tester) async {
     await tester.pumpWidget(buildFrame(count: 20, height: 100.0));
 

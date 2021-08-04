@@ -374,6 +374,11 @@ class _TestState extends State<Test> {
 }
 
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   testWidgets('LinkedScrollController - 1', (WidgetTester tester) async {
     await tester.pumpWidget(const Test());
     expect(find.text('Hello A'), findsOneWidget);

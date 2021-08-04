@@ -21,6 +21,11 @@ Widget buildFrame() {
 }
 
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   testWidgets('Drag vertically', (WidgetTester tester) async {
     await tester.pumpWidget(buildFrame());
 

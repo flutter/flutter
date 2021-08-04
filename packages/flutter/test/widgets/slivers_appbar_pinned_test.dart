@@ -23,6 +23,11 @@ void verifyActualBoxPosition(WidgetTester tester, Finder finder, int index, Rect
 }
 
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   testWidgets('Sliver appbars - pinned', (WidgetTester tester) async {
     const double bigHeight = 550.0;
     GlobalKey key1, key2, key3, key4, key5;

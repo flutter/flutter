@@ -34,6 +34,11 @@ class TestScrollPhysics extends ScrollPhysics {
 
 
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   test('ScrollPhysics applyTo()', () {
     const TestScrollPhysics a = TestScrollPhysics(name: 'a');
     const TestScrollPhysics b = TestScrollPhysics(name: 'b');

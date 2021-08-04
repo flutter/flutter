@@ -6,6 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   testWidgets('SliverList reverse children (with keys)', (WidgetTester tester) async {
     final List<int> items = List<int>.generate(20, (int i) => i);
     const double itemHeight = 300.0;

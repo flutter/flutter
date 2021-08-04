@@ -9,6 +9,11 @@ const double kHeight = 10.0;
 const double kFlingOffset = kHeight * 20.0;
 
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   testWidgets("Flings don't stutter", (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(

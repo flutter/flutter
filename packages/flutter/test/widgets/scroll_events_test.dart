@@ -26,6 +26,11 @@ Widget _buildScroller({ required List<String> log }) {
 }
 
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   Completer<void> animateTo(WidgetTester tester, double newScrollOffset, { required Duration duration }) {
     final Completer<void> completer = Completer<void>();
     final ScrollableState scrollable = tester.state(find.byType(Scrollable));

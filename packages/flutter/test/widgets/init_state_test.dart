@@ -28,6 +28,11 @@ class TestWidgetState extends State<TestWidget> {
 }
 
 void main() {
+  // TODO(Piinks): Remove this after testWidgets'
+  //   - state leaks/test dependencies have been fixed.
+  //   - or tests are refactored for platform specific behaviors
+  defaultPlatformVariant = null;
+
   testWidgets('initState() is called when we are in the tree', (WidgetTester tester) async {
     await tester.pumpWidget(const Parent(child: TestWidget()));
     expect(ancestors, equals(<String>['Parent', 'RenderObjectToWidgetAdapter<RenderBox>']));
