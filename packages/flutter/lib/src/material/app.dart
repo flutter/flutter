@@ -693,8 +693,9 @@ class MaterialApp extends StatefulWidget {
 /// [GlowingOverscrollIndicator] to [Scrollable] descendants when executing on
 /// [TargetPlatform.android] and [TargetPlatform.fuchsia].
 ///
-/// When using the desktop platform, if the [Scrollable] widget scrolls in the
-/// [Axis.vertical], a [Scrollbar] is applied.
+/// When using the desktop platform, a [Scrollbar] is applied. If the [Axis] of
+/// the [ScrollView] is [Axis.horizontal], the [Scrollbar.isAlwaysShown] will
+/// be true. This is because horizontal ScrollViews have lower discoverability.
 ///
 /// See also:
 ///
@@ -714,7 +715,11 @@ class MaterialScrollBehavior extends ScrollBehavior {
     // the base class as well.
     switch (axisDirectionToAxis(details.direction)) {
       case Axis.horizontal:
-        return child;
+        return Scrollbar(
+          isAlwaysShown: true,
+          controller: details.controller,
+          child: child,
+        );
       case Axis.vertical:
         switch (getPlatform(context)) {
           case TargetPlatform.linux:

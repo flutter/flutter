@@ -1557,4 +1557,20 @@ void main() {
         ),
     );
   });
+
+  testWidgets('MaterialScrollBehavior applies AlwaysShown Scrollbar', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(MaterialApp(
+      home: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        controller: controller,
+        child: const SizedBox(
+          width: 4000.0,
+          height: 4000.0,
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+    expect(find.byType(Scrollbar), paints..rect());
+  });
 }
