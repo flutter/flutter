@@ -1213,7 +1213,7 @@ class DecoratedBoxTransition extends AnimatedWidget {
 /// above:
 ///
 /// ```dart
-/// Using `late final` for [lazy initialization](https://dart.dev/null-safety/understanding-null-safety#lazy-initialization).
+/// // Using `late final` for [lazy initialization](https://dart.dev/null-safety/understanding-null-safety#lazy-initialization).
 /// late final AnimationController _controller = AnimationController(
 ///   duration: const Duration(seconds: 2),
 ///   vsync: this,
