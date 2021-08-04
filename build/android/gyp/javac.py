@@ -55,21 +55,9 @@ def ColorJavacOutput(output):
 
   return '\n'.join(map(ApplyColor, output.split('\n')))
 
-
-ERRORPRONE_OPTIONS = [
-  '-Xepdisable:'
-  # Something in chrome_private_java makes this check crash.
-  'com.google.errorprone.bugpatterns.ClassCanBeStatic,'
-  # These crash on lots of targets.
-  'com.google.errorprone.bugpatterns.WrongParameterPackage,'
-  'com.google.errorprone.bugpatterns.GuiceOverridesGuiceInjectableMethod,'
-  'com.google.errorprone.bugpatterns.GuiceOverridesJavaxInjectableMethod,'
-  'com.google.errorprone.bugpatterns.ElementsCountedInLoop'
-]
-
 def DoJavac(
     bootclasspath, classpath, classes_dir, chromium_code,
-    use_errorprone_path, java_files):
+    javac_bin, java_version, java_files):
   """Runs javac.
 
   Builds |java_files| with the provided |classpath| and puts the generated
@@ -95,8 +83,8 @@ def DoJavac(
   if bootclasspath:
     javac_args.extend([
         '-bootclasspath', ':'.join(bootclasspath),
-        '-source', '1.8',
-        '-target', '1.8',
+        '-source', java_version,
+        '-target', java_version,
         ])
 
   if chromium_code:
@@ -108,12 +96,7 @@ def DoJavac(
     # trigger a compile warning or error.
     javac_args.extend(['-XDignore.symbol.file'])
 
-  if use_errorprone_path:
-    javac_cmd = [use_errorprone_path] + ERRORPRONE_OPTIONS
-  else:
-    javac_cmd = ['javac']
-
-  javac_cmd = javac_cmd + javac_args + java_files
+  javac_cmd = [javac_bin] + javac_args + java_files
 
   def Compile():
     build_utils.CheckOutput(
@@ -215,8 +198,19 @@ def main(argv):
       'warnings for chromium code.')
 
   parser.add_option(
-      '--use-errorprone-path',
-      help='Use the Errorprone compiler at this path.')
+      '--javac-bin',
+      default='javac',
+      help='The javac binary. If empty, the javac binary is resolved from PATH.')
+
+  parser.add_option(
+      '--jar-bin',
+      default='jar',
+      help='The jar binary. If empty, the jar binary is resolved from PATH.')
+
+  parser.add_option(
+      '--java-version',
+      default='1.8',
+      help='The source and target versions passed to javac.')
 
   parser.add_option(
       '--classes-dir',
@@ -295,7 +289,8 @@ def main(argv):
           classpath,
           classes_dir,
           options.chromium_code,
-          options.use_errorprone_path,
+          options.javac_bin,
+          options.java_version,
           java_files)
 
     if options.jar_path:
@@ -321,11 +316,12 @@ def main(argv):
       jar.JarDirectory(classes_dir,
                        build_utils.ParseGypList(options.jar_excluded_classes),
                        options.jar_path,
+                       options.jar_bin,
                        manifest_file=manifest_file,
                        additional_jar_files=additional_jar_files)
 
       if options.jar_source_path:
-        jar.Jar(java_files, options.jar_source_base_dir, options.jar_source_path)
+        jar.Jar(java_files, options.jar_source_base_dir, options.jar_source_path, options.jar_bin)
 
     if options.classes_dir:
       # Delete the old classes directory. This ensures that all .class files in

@@ -13,7 +13,7 @@ from util import build_utils
 from util import md5_check
 
 
-def Jar(class_files, classes_dir, jar_path, manifest_file=None, additional_jar_files=None):
+def Jar(class_files, classes_dir, jar_path, jar_bin, manifest_file=None, additional_jar_files=None):
   jar_path = os.path.abspath(jar_path)
 
   # The paths of the files in the jar will be the same as they are passed in to
@@ -21,7 +21,7 @@ def Jar(class_files, classes_dir, jar_path, manifest_file=None, additional_jar_f
   # options.classes_dir so the .class file paths in the jar are correct.
   jar_cwd = classes_dir
   class_files_rel = [os.path.relpath(f, jar_cwd) for f in class_files]
-  jar_cmd = ['jar', 'cf0', jar_path]
+  jar_cmd = [jar_bin, 'cf0', jar_path]
   if manifest_file:
     jar_cmd[1] += 'm'
     jar_cmd.append(os.path.abspath(manifest_file))
@@ -45,12 +45,12 @@ def Jar(class_files, classes_dir, jar_path, manifest_file=None, additional_jar_f
     build_utils.Touch(jar_path, fail_if_missing=True)
 
 
-def JarDirectory(classes_dir, excluded_classes, jar_path, manifest_file=None, additional_jar_files=None):
+def JarDirectory(classes_dir, excluded_classes, jar_path, jar_bin, manifest_file=None, additional_jar_files=None):
   class_files = build_utils.FindInDirectory(classes_dir, '*.class')
   for exclude in excluded_classes:
     class_files = [f for f in class_files if not fnmatch.fnmatch(f, exclude)]
 
-  Jar(class_files, classes_dir, jar_path, manifest_file=manifest_file,
+  Jar(class_files, classes_dir, jar_path, jar_bin, manifest_file=manifest_file,
       additional_jar_files=additional_jar_files)
 
 
@@ -62,6 +62,11 @@ def main():
       help='List of .class file patterns to exclude from the jar.')
   parser.add_option('--stamp', help='Path to touch on success.')
 
+  parser.add_option(
+      '--jar-bin',
+      default='jar',
+      help='The jar binary. If empty, the jar binary is resolved from PATH.')
+
   options, _ = parser.parse_args()
 
   if options.excluded_classes:
@@ -70,7 +75,8 @@ def main():
     excluded_classes = []
   JarDirectory(options.classes_dir,
                excluded_classes,
-               options.jar_path)
+               options.jar_path,
+               options.jar_bin)
 
   if options.stamp:
     build_utils.Touch(options.stamp)
