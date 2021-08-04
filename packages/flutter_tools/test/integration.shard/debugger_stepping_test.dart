@@ -51,5 +51,5 @@ void main() {
     }
 
     await _flutter.stop();
-  }, skip: Platform.isWindows)); // Skipping for https://github.com/flutter/flutter/issues/87481
+  }, skip: Platform.isWindows); // Skipping for https://github.com/flutter/flutter/issues/87481
 }
