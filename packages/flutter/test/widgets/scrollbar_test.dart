@@ -1500,7 +1500,9 @@ void main() {
         child: MediaQuery(
           data: const MediaQueryData(),
           child: RawScrollbar(
-            shape: const BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))),
+            shape: const BeveledRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(8.0))
+            ),
             controller: scrollController,
             isAlwaysShown: true,
             child: SingleChildScrollView(
@@ -1515,13 +1517,13 @@ void main() {
       paints
         ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
         ..path(
-          includes: <Offset>[
-            const Offset(797.0, 0.0),
-            const Offset(797.0, 18.0),
+          includes: const <Offset>[
+            Offset(797.0, 0.0),
+            Offset(797.0, 18.0),
           ],
-          excludes: <Offset>[
-            const Offset(796.0, 0.0),
-            const Offset(798.0, 0.0),
+          excludes: const <Offset>[
+            Offset(796.0, 0.0),
+            Offset(798.0, 0.0),
           ],
         ),
     );
@@ -1631,7 +1633,6 @@ void main() {
           ),
         )));
     await tester.pumpAndSettle();
-
     expect(
       find.byType(RawScrollbar),
       paints
@@ -1640,8 +1641,8 @@ void main() {
           includes: const <Offset>[
             Offset(800.0, 0.0),
           ],
-          excludes: <Offset>[
-            const Offset(780.0, 0.0),
+          excludes: const <Offset>[
+            Offset(780.0, 0.0),
           ],
         ),
     );
