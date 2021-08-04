@@ -18,6 +18,7 @@
 /dev/devicelab/bin/tasks/animated_placeholder_perf__e2e_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/backdrop_filter_perf__e2e_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/basic_material_app_android__compile.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/codegen_integration.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/color_filter_and_fade_perf__e2e_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/complex_layout_android__compile.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/complex_layout_android__scroll_smoothness.dart @zanderso @flutter/engine
@@ -26,6 +27,7 @@
 /dev/devicelab/bin/tasks/cubic_bezier_perf__e2e_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/cubic_bezier_perf_sksl_warmup__e2e_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/cull_opacity_perf__e2e_summary.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/devtools_profile_start_test.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/fast_scroll_heavy_gridview__memory.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/flutter_engine_group_performance.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/flutter_gallery__back_button_memory.dart @zanderso @flutter/engine
@@ -43,6 +45,7 @@
 /dev/devicelab/bin/tasks/flutter_gallery_v2_web_compile_test.dart @ferhatb @flutter/web
 /dev/devicelab/bin/tasks/flutter_test_performance.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/frame_policy_delay_test_android.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/gradle_java8_compile_test.dart @blasten @flutter/tool
 /dev/devicelab/bin/tasks/hot_mode_dev_cycle_linux__benchmark.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/image_list_jit_reported_duration.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/image_list_reported_duration.dart @zanderso @flutter/engine
@@ -53,6 +56,7 @@
 /dev/devicelab/bin/tasks/picture_cache_perf__e2e_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/platform_channels_benchmarks.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/platform_views_scroll_perf__timeline_summary.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/plugin_dependencies_test.dart @jmagman @flutter/tool
 /dev/devicelab/bin/tasks/routing_test.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/textfield_perf__e2e_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/web_size__compile_test.dart @ferhatb @flutter/web
@@ -93,6 +97,7 @@
 /dev/devicelab/bin/tasks/imagefiltered_transform_animation_perf__timeline_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/integration_test_test.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/integration_ui_driver.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/integration_ui_frame_number.dart @iskakaushik @flutter/engine
 /dev/devicelab/bin/tasks/integration_ui_keyboard_resize.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/integration_ui_screenshot.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/integration_ui_textfield.dart @zanderso @flutter/tool
@@ -109,23 +114,28 @@
 /dev/devicelab/bin/tasks/tiles_scroll_perf__timeline_summary.dart @zanderso @flutter/engine
 
 ## Mac iOS DeviceLab tests
+/dev/devicelab/bin/tasks/animation_with_microtasks_perf_ios__timeline_summary.dart @iskakaushik @flutter/engine
 /dev/devicelab/bin/tasks/backdrop_filter_perf_ios__timeline_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/basic_material_app_ios__compile.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/channels_integration_test_ios.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/codegen_integration_mac.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/complex_layout_ios__compile.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/complex_layout_ios__start_up.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/complex_layout_scroll_perf_ios__timeline_summary.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/cubic_bezier_perf_ios_sksl_warmup__timeline_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/external_ui_integration_test_ios.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/flavors_test_ios.dart @jmagman @flutter/tool
 /dev/devicelab/bin/tasks/flutter_gallery__transition_perf_e2e_ios.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/flutter_gallery_ios__compile.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/flutter_gallery_ios__start_up.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/flutter_gallery_ios__transition_perf.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/flutter_gallery_ios_sksl_warmup__transition_perf.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/flutter_view_ios__start_up.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/hello_world_ios__compile.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/hot_mode_dev_cycle_macos_target__benchmark.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/integration_test_test_ios.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/integration_ui_ios_driver.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/integration_ui_ios_frame_number.dart @iskakaushik @flutter/engine
 /dev/devicelab/bin/tasks/integration_ui_ios_keyboard_resize.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/integration_ui_ios_screenshot.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/integration_ui_ios_textfield.dart @zanderso @flutter/tool
@@ -159,6 +169,7 @@
 /dev/devicelab/bin/tasks/gradle_plugin_bundle_test.dart @stuartmorgan @flutter/plugin
 /dev/devicelab/bin/tasks/gradle_plugin_fat_apk_test.dart @stuartmorgan @flutter/plugin
 /dev/devicelab/bin/tasks/gradle_plugin_light_apk_test.dart @stuartmorgan @flutter/plugin
+/dev/devicelab/bin/tasks/hot_mode_dev_cycle_win_target__benchmark.dart @cbracken @flutter/desktop
 /dev/devicelab/bin/tasks/module_custom_host_app_name_test.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/module_host_with_custom_build_test.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/module_test.dart @zanderso @flutter/tool
@@ -180,12 +191,19 @@
 /dev/bots/analyze.dart @HansMuller @flutter/framework
 # Linux/Mac/Windows customer_testing
 /dev/customer_testing/run_tests.dart @HansMuller @flutter/framework
+# Linux docs
 # Linux docs_test
+# Linux docs_publish
 /dev/bots/docs.sh @HansMuller @flutter/framework
 # Linux web_e2e_test
-/dev/integration_tests/web_e2e_tests  @ferhatb @flutter/web
+/dev/integration_tests/web_e2e_tests @ferhatb @flutter/web
 # Linux web_smoke_test
 /examples/hello_world/test_driver/smoke_web_engine.dart @ferhatb @flutter/web
+
+## Firebase tests
+/dev/integration_tests/abstract_method_smoke_test @blasten @flutter/android
+/dev/integration_tests/android_embedding_v2_smoke_test @blasten @flutter/android
+/dev/integration_tests/release_smoke_test @blasten @flutter/android
 
 ## Shards tests
 # TODO(keyonghan): add files/paths for below framework host only testss.
@@ -202,3 +220,5 @@
 # web_tool_tests @zanderso @flutter/tool
 # fuchsia_precache @zanderso @flutter/tool
 # skp_generator @Hixie
+# test_ownership @keyonghan
+# verify_binaries_codesigned @christopherfujino @flutter/releases

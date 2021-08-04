@@ -16,7 +16,7 @@ void main() {
     expect(filtered[0], matches(r'^#0 +main\.<anonymous closure> \(.*stack_trace_test\.dart:[0-9]+:[0-9]+\)$'));
     expect(filtered[1], matches(r'^#1 +Declarer\.test\.<anonymous closure>.<anonymous closure> \(package:test_api/.+:[0-9]+:[0-9]+\)$'));
     expect(filtered[2], equals('<asynchronous suspension>'));
-  }, skip: kIsWeb);
+  });
 
   test('FlutterError.defaultStackFilter (async test body)', () async {
     final List<String> filtered = FlutterError.defaultStackFilter(StackTrace.current.toString().trimRight().split('\n')).toList();

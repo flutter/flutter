@@ -611,7 +611,7 @@ class LayerHandle<T extends Layer> {
 
   /// The [Layer] whose resources this object keeps alive.
   ///
-  /// Setting a new value will or null dispose the previously held layer if
+  /// Setting a new value or null will dispose the previously held layer if
   /// there are no other open handles to that layer.
   T? get layer => _layer;
 
@@ -937,13 +937,6 @@ class ContainerLayer extends Layer {
   // both to render the whole layer tree (e.g. a normal application frame) and
   // to render a subtree (e.g. `OffsetLayer.toImage`).
   ui.Scene buildScene(ui.SceneBuilder builder) {
-    List<PictureLayer>? temporaryLayers;
-    assert(() {
-      if (debugCheckElevationsEnabled) {
-        temporaryLayers = _debugCheckElevations();
-      }
-      return true;
-    }());
     updateSubtreeNeedsAddToScene();
     addToScene(builder);
     // Clearing the flag _after_ calling `addToScene`, not _before_. This is
@@ -951,17 +944,6 @@ class ContainerLayer extends Layer {
     // mark this layer as dirty.
     _needsAddToScene = false;
     final ui.Scene scene = builder.build();
-    assert(() {
-      // We should remove any layers that got added to highlight the incorrect
-      // PhysicalModelLayers. If we don't, we'll end up adding duplicate layers
-      // or continuing to render stale outlines.
-      if (temporaryLayers != null) {
-        for (final PictureLayer temporaryLayer in temporaryLayers!) {
-          temporaryLayer.remove();
-        }
-      }
-      return true;
-    }());
     return scene;
   }
 
@@ -983,102 +965,6 @@ class ContainerLayer extends Layer {
       assert(child.attached == attached);
     }
     return child == equals;
-  }
-
-  PictureLayer _highlightConflictingLayer(PhysicalModelLayer child) {
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final Canvas canvas = Canvas(recorder);
-    canvas.drawPath(
-      child.clipPath!,
-      Paint()
-        ..color = const Color(0xFFAA0000)
-        ..style = PaintingStyle.stroke
-        // The elevation may be 0 or otherwise too small to notice.
-        // Adding 10 to it makes it more visually obvious.
-        ..strokeWidth = child.elevation! + 10.0,
-    );
-    final PictureLayer pictureLayer = PictureLayer(child.clipPath!.getBounds())
-      ..picture = recorder.endRecording()
-      ..debugCreator = child;
-    child.append(pictureLayer);
-    return pictureLayer;
-  }
-
-  List<PictureLayer> _processConflictingPhysicalLayers(PhysicalModelLayer predecessor, PhysicalModelLayer child) {
-    FlutterError.reportError(FlutterErrorDetails(
-      exception: FlutterError(
-        'Painting order is out of order with respect to elevation.\n'
-        'See https://api.flutter.dev/flutter/rendering/debugCheckElevationsEnabled.html '
-        'for more details.',
-      ),
-      library: 'rendering library',
-      context: ErrorDescription('during compositing'),
-      informationCollector: () {
-        return <DiagnosticsNode>[
-          child.toDiagnosticsNode(name: 'Attempted to composite layer', style: DiagnosticsTreeStyle.errorProperty),
-          predecessor.toDiagnosticsNode(name: 'after layer', style: DiagnosticsTreeStyle.errorProperty),
-          ErrorDescription('which occupies the same area at a higher elevation.'),
-        ];
-      },
-    ));
-    return <PictureLayer>[
-      _highlightConflictingLayer(predecessor),
-      _highlightConflictingLayer(child),
-    ];
-  }
-
-  /// Checks that no [PhysicalModelLayer] would paint after another overlapping
-  /// [PhysicalModelLayer] that has a higher elevation.
-  ///
-  /// Returns a list of [PictureLayer] objects it added to the tree to highlight
-  /// bad nodes. These layers should be removed from the tree after building the
-  /// [Scene].
-  List<PictureLayer> _debugCheckElevations() {
-    final List<PhysicalModelLayer> physicalModelLayers = depthFirstIterateChildren().whereType<PhysicalModelLayer>().toList();
-    final List<PictureLayer> addedLayers = <PictureLayer>[];
-
-    for (int i = 0; i < physicalModelLayers.length; i++) {
-      final PhysicalModelLayer physicalModelLayer = physicalModelLayers[i];
-      assert(
-        physicalModelLayer.lastChild?.debugCreator != physicalModelLayer,
-        'debugCheckElevations has either already visited this layer or failed '
-        'to remove the added picture from it.',
-      );
-      double accumulatedElevation = physicalModelLayer.elevation!;
-      Layer? ancestor = physicalModelLayer.parent;
-      while (ancestor != null) {
-        if (ancestor is PhysicalModelLayer) {
-          accumulatedElevation += ancestor.elevation!;
-        }
-        ancestor = ancestor.parent;
-      }
-      for (int j = 0; j <= i; j++) {
-        final PhysicalModelLayer predecessor = physicalModelLayers[j];
-        double predecessorAccumulatedElevation = predecessor.elevation!;
-        ancestor = predecessor.parent;
-        while (ancestor != null) {
-          if (ancestor == predecessor) {
-            continue;
-          }
-          if (ancestor is PhysicalModelLayer) {
-            predecessorAccumulatedElevation += ancestor.elevation!;
-          }
-          ancestor = ancestor.parent;
-        }
-        if (predecessorAccumulatedElevation <= accumulatedElevation) {
-          continue;
-        }
-        final Path intersection = Path.combine(
-          PathOperation.intersect,
-          predecessor._debugTransformedClipPath,
-          physicalModelLayer._debugTransformedClipPath,
-        );
-        if (intersection != null && intersection.computeMetrics().any((ui.PathMetric metric) => metric.length > 0)) {
-          addedLayers.addAll(_processConflictingPhysicalLayers(predecessor, physicalModelLayer));
-        }
-      }
-    }
-    return addedLayers;
   }
 
   @override
@@ -2120,16 +2006,6 @@ class PhysicalModelLayer extends ContainerLayer {
       _clipPath = value;
       markNeedsAddToScene();
     }
-  }
-
-  Path get _debugTransformedClipPath {
-    ContainerLayer? ancestor = parent;
-    final Matrix4 matrix = Matrix4.identity();
-    while (ancestor != null && ancestor.parent != null) {
-      ancestor.applyTransform(this, matrix);
-      ancestor = ancestor.parent;
-    }
-    return clipPath!.transform(matrix.storage);
   }
 
   /// {@macro flutter.material.Material.clipBehavior}
