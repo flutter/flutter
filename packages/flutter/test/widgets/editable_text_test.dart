@@ -1282,6 +1282,56 @@ void main() {
     expect(find.text('Paste'), kIsWeb ? findsNothing : findsOneWidget);
   });
 
+  testWidgets('Paste is shown only when there is something to paste', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: controller,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+        ),
+      ),
+    );
+
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+
+    // Make sure the clipboard has a valid string on it.
+    await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
+
+    // Show the toolbar.
+    state.renderEditable.selectWordsInRange(
+      from: Offset.zero,
+      cause: SelectionChangedCause.tap,
+    );
+    await tester.pump();
+
+    // The Paste button is shown (except on web, which doesn't show the Flutter
+    // toolbar).
+    expect(state.showToolbar(), kIsWeb ? isFalse : isTrue);
+    await tester.pumpAndSettle();
+    expect(find.text('Paste'), kIsWeb ? findsNothing : findsOneWidget);
+
+    // Hide the menu again.
+    state.hideToolbar();
+    await tester.pump();
+    expect(find.text('Paste'), findsNothing);
+
+    // Clear the clipboard
+    await Clipboard.setData(const ClipboardData(text: ''));
+
+    // Show the toolbar again.
+    expect(state.showToolbar(), kIsWeb ? isFalse : isTrue);
+    await tester.pumpAndSettle();
+
+    // Paste is not shown.
+    await tester.pumpAndSettle();
+    expect(find.text('Paste'), findsNothing);
+  });
+
   testWidgets('can show the toolbar after clearing all text', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/35998.
     await tester.pumpWidget(
