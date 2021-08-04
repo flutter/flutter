@@ -921,7 +921,7 @@ void main() {
     // We must explicitly cause an "up" gesture to avoid a crash.
     // todo(mattcarroll) remove this call, https://github.com/flutter/flutter/issues/19540
     await gesture.up();
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/52960
+  });
 
   testWidgets('ScaleTransition animation for showCupertinoDialog()', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1043,53 +1043,54 @@ void main() {
 
     // Enter animation.
     await tester.pump();
-    FadeTransition transition = tester.firstWidget(find.byType(FadeTransition));
+    final Finder fadeTransitionFinder = find.ancestor(of: find.byType(CupertinoAlertDialog), matching: find.byType(FadeTransition));
+    FadeTransition transition = tester.firstWidget(fadeTransitionFinder);
 
-    await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.firstWidget(find.byType(FadeTransition));
-    expect(transition.opacity.value, moreOrLessEquals(0.40, epsilon: 0.001));
+    await tester.pump(const Duration(milliseconds: 50));
+    transition = tester.firstWidget(fadeTransitionFinder);
+    expect(transition.opacity.value, moreOrLessEquals(0.081, epsilon: 0.001));
 
-    await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.firstWidget(find.byType(FadeTransition));
-    expect(transition.opacity.value, moreOrLessEquals(0.437, epsilon: 0.001));
+    await tester.pump(const Duration(milliseconds: 50));
+    transition = tester.firstWidget(fadeTransitionFinder);
+    expect(transition.opacity.value, moreOrLessEquals(0.332, epsilon: 0.001));
 
-    await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.firstWidget(find.byType(FadeTransition));
-    expect(transition.opacity.value, moreOrLessEquals(0.55, epsilon: 0.001));
+    await tester.pump(const Duration(milliseconds: 50));
+    transition = tester.firstWidget(fadeTransitionFinder);
+    expect(transition.opacity.value, moreOrLessEquals(0.667, epsilon: 0.001));
 
-    await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.firstWidget(find.byType(FadeTransition));
-    expect(transition.opacity.value, moreOrLessEquals(0.737, epsilon: 0.001));
+    await tester.pump(const Duration(milliseconds: 50));
+    transition = tester.firstWidget(fadeTransitionFinder);
+    expect(transition.opacity.value, moreOrLessEquals(0.918, epsilon: 0.001));
 
-    await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.firstWidget(find.byType(FadeTransition));
+    await tester.pump(const Duration(milliseconds: 50));
+    transition = tester.firstWidget(fadeTransitionFinder);
     expect(transition.opacity.value, moreOrLessEquals(1.0, epsilon: 0.001));
 
     await tester.tap(find.text('Delete'));
 
     // Exit animation, look at reverse FadeTransition.
-    await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1) as FadeTransition;
-    expect(transition.opacity.value, moreOrLessEquals(0.500, epsilon: 0.001));
+    await tester.pump(const Duration(milliseconds: 50));
+    transition = tester.firstWidget(fadeTransitionFinder);
+    expect(transition.opacity.value, moreOrLessEquals(1.0, epsilon: 0.001));
 
-    await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1) as FadeTransition;
+    await tester.pump(const Duration(milliseconds: 50));
+    transition = tester.firstWidget(fadeTransitionFinder);
+    expect(transition.opacity.value, moreOrLessEquals(0.918, epsilon: 0.001));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    transition = tester.firstWidget(fadeTransitionFinder);
+    expect(transition.opacity.value, moreOrLessEquals(0.667, epsilon: 0.001));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    transition = tester.firstWidget(fadeTransitionFinder);
     expect(transition.opacity.value, moreOrLessEquals(0.332, epsilon: 0.001));
 
-    await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1) as FadeTransition;
-    expect(transition.opacity.value, moreOrLessEquals(0.188, epsilon: 0.001));
-
-    await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1) as FadeTransition;
+    await tester.pump(const Duration(milliseconds: 50));
+    transition = tester.firstWidget(fadeTransitionFinder);
     expect(transition.opacity.value, moreOrLessEquals(0.081, epsilon: 0.001));
 
-    await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1) as FadeTransition;
-    expect(transition.opacity.value, moreOrLessEquals(0.019, epsilon: 0.001));
-
-    await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1) as FadeTransition;
+    await tester.pump(const Duration(milliseconds: 50));
+    transition = tester.firstWidget(fadeTransitionFinder);
     expect(transition.opacity.value, moreOrLessEquals(0.0, epsilon: 0.001));
   });
 

@@ -72,7 +72,8 @@ void main() {
       animationSheet.collate(6),
       matchesGoldenFile('LiveBinding.press.animation.png'),
     );
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42767
+    // Currently skipped due to daily flake: https://github.com/flutter/flutter/issues/87588
+  }, skip: true); // Typically skip: isBrowser https://github.com/flutter/flutter/issues/42767
 
   testWidgets('Should show event indicator for pointer events with setSurfaceSize', (WidgetTester tester) async {
     final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(200, 200), allLayers: true);
