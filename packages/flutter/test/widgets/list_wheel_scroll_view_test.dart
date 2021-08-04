@@ -14,7 +14,7 @@ void main() {
   //   - state leaks/test dependencies have been fixed.
   //   - or tests are refactored for platform specific behaviors
   defaultPlatformVariant = null;
-  
+
   testWidgets('ListWheelScrollView respects clipBehavior', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(

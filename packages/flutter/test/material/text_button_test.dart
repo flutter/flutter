@@ -15,7 +15,7 @@ void main() {
   //   - state leaks/test dependencies have been fixed.
   //   - or tests are refactored for platform specific behaviors
   defaultPlatformVariant = null;
-  
+
   testWidgets('TextButton, TextButton.icon defaults', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
 

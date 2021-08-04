@@ -18,7 +18,7 @@ void main() {
   //   - state leaks/test dependencies have been fixed.
   //   - or tests are refactored for platform specific behaviors
   defaultPlatformVariant = null;
-  
+
   testWidgets('Navigator.push works within a PopupMenuButton', (WidgetTester tester) async {
     final Key targetKey = UniqueKey();
     await tester.pumpWidget(

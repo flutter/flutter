@@ -15,7 +15,7 @@ void main() {
   //   - state leaks/test dependencies have been fixed.
   //   - or tests are refactored for platform specific behaviors
   defaultPlatformVariant = null;
-  
+
     testWidgets('FlatButton defaults', (WidgetTester tester) async {
     final Finder rawButtonMaterial = find.descendant(
       of: find.byType(FlatButton),
