@@ -52,6 +52,18 @@ class HotRunnerConfig {
   Future<bool> setupHotRestart() async {
     return true;
   }
+
+  /// A hook for implementations to perform any necessary initialization prior
+  /// to a hot reload. Should return true if the hot restart should continue.
+  Future<bool> setupHotReload() async {
+    return true;
+  }
+
+  /// A hook for implementations to perform any necessary cleanup after the
+  /// devfs sync is complete. At this point the flutter_tools no longer needs to
+  /// access the source files and assets.
+  void updateDevFSComplete() {}
+
   /// A hook for implementations to perform any necessary operations right
   /// before the runner is about to be shut down.
   Future<void> runPreShutdownOperations() async {
@@ -546,7 +558,12 @@ class HotRunner extends ResidentRunner {
     String reason,
   }) async {
     final Stopwatch restartTimer = Stopwatch()..start();
-    final UpdateFSReport updatedDevFS = await _updateDevFS(fullRestart: true);
+    UpdateFSReport updatedDevFS;
+    try {
+      updatedDevFS = await _updateDevFS(fullRestart: true);
+    } finally {
+      hotRunnerConfig.updateDevFSComplete();
+    }
     if (!updatedDevFS.success) {
       for (final FlutterDevice device in flutterDevices) {
         if (device.generator != null) {
@@ -857,8 +874,16 @@ class HotRunner extends ResidentRunner {
     }
 
     final Stopwatch reloadTimer = _stopwatchFactory.createStopwatch('reloadSources:reload')..start();
+    if (!(await hotRunnerConfig.setupHotReload())) {
+      return OperationResult(1, 'setupHotReload failed');
+    }
     final Stopwatch devFSTimer = Stopwatch()..start();
-    final UpdateFSReport updatedDevFS = await _updateDevFS();
+    UpdateFSReport updatedDevFS;
+    try {
+      updatedDevFS= await _updateDevFS();
+    } finally {
+      hotRunnerConfig.updateDevFSComplete();
+    }
     // Record time it took to synchronize to DevFS.
     bool shouldReportReloadTime = true;
     _addBenchmarkData('hotReloadDevFSSyncMilliseconds', devFSTimer.elapsed.inMilliseconds);
