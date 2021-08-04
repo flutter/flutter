@@ -10,10 +10,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 class MockClipboard {
   MockClipboard({
-    this.getDataThrows = false,
+    this.hasStringsThrows = false,
   });
 
-  final bool getDataThrows;
+  final bool hasStringsThrows;
 
   dynamic _clipboardData = <String, dynamic>{
     'text': null,
@@ -22,9 +22,12 @@ class MockClipboard {
   Future<Object?> handleMethodCall(MethodCall methodCall) async {
     switch (methodCall.method) {
       case 'Clipboard.getData':
-        if (getDataThrows)
-          throw Exception();
         return _clipboardData;
+      case 'Clipboard.hasStrings':
+        if (hasStringsThrows)
+          throw Exception();
+        final String? text = _clipboardData?['text'];
+        return <String, bool>{'value': text != null && text.length > 0};
       case 'Clipboard.setData':
         _clipboardData = methodCall.arguments;
         break;
@@ -757,7 +760,7 @@ void main() {
   group('ClipboardStatusNotifier', () {
     group('when Clipboard fails', () {
       setUp(() {
-        final MockClipboard mockClipboard = MockClipboard(getDataThrows: true);
+        final MockClipboard mockClipboard = MockClipboard(hasStringsThrows: true);
         TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
       });
 

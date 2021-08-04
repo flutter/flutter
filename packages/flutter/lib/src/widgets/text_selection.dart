@@ -1659,10 +1659,10 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
       return;
     }
 
-    late final hasStrings;
+    late final bool hasStrings;
     try {
       hasStrings = await Clipboard.hasStrings();
-    } catch (stacktrace) {
+    } catch (stacktrace, e) {
       // In the case of an error from the Clipboard API, set the value to
       // unknown so that it will try to update again later.
       if (_disposed || value == ClipboardStatus.unknown) {
