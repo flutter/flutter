@@ -17,12 +17,17 @@
     XCUIApplication *app = [[XCUIApplication alloc] init];
     [app launch];
 
+    NSPredicate *hittable = [NSPredicate predicateWithFormat:@"exists == YES AND hittable == YES"];
     XCUIElement *coldButton = app.buttons[@"Full Screen (Cold)"];
-    XCTAssertTrue([coldButton waitForExistenceWithTimeout:60.0]);
+    [self expectationForPredicate:hittable evaluatedWithObject:coldButton handler:nil];
+    [self waitForExpectationsWithTimeout:30.0 handler:nil];
     [coldButton tap];
 
     XCTAssertTrue([app.staticTexts[@"Button tapped 0 times."] waitForExistenceWithTimeout:60.0]);
-    [app.otherElements[@"Increment via Flutter"] tap];
+    XCUIElement *incrementButton = app.otherElements[@"Increment via Flutter"];
+    [self expectationForPredicate:hittable evaluatedWithObject:incrementButton handler:nil];
+    [self waitForExpectationsWithTimeout:30.0 handler:nil];
+    [incrementButton tap];
     XCTAssertTrue([app.staticTexts[@"Button tapped 1 time."] waitForExistenceWithTimeout:60.0]);
 
     // Back navigation.
@@ -34,12 +39,19 @@
     XCUIApplication *app = [[XCUIApplication alloc] init];
     [app launch];
 
+    NSPredicate *hittable = [NSPredicate predicateWithFormat:@"exists == YES AND hittable == YES"];
     XCUIElement *warmButton = app.buttons[@"Full Screen (Warm)"];
-    XCTAssertTrue([warmButton waitForExistenceWithTimeout:60.0]);
+    [self expectationForPredicate:hittable evaluatedWithObject:warmButton handler:nil];
+    [self waitForExpectationsWithTimeout:30.0 handler:nil];
     [warmButton tap];
 
     XCTAssertTrue([app.staticTexts[@"Button tapped 0 times."] waitForExistenceWithTimeout:60.0]);
-    [app.otherElements[@"Increment via Flutter"] tap];
+
+    XCUIElement *incrementButton = app.otherElements[@"Increment via Flutter"];
+    [self expectationForPredicate:hittable evaluatedWithObject:incrementButton handler:nil];
+    [self waitForExpectationsWithTimeout:30.0 handler:nil];
+    [incrementButton tap];
+
     XCTAssertTrue([app.staticTexts[@"Button tapped 1 time."] waitForExistenceWithTimeout:60.0]);
 
     // Back navigation.
@@ -51,12 +63,19 @@
     XCUIApplication *app = [[XCUIApplication alloc] init];
     [app launch];
 
+    NSPredicate *hittable = [NSPredicate predicateWithFormat:@"exists == YES AND hittable == YES"];
     XCUIElement *warmButton = app.buttons[@"Flutter View (Warm)"];
-    XCTAssertTrue([warmButton waitForExistenceWithTimeout:60.0]);
+    [self expectationForPredicate:hittable evaluatedWithObject:warmButton handler:nil];
+    [self waitForExpectationsWithTimeout:30.0 handler:nil];
     [warmButton tap];
 
     XCTAssertTrue([app.staticTexts[@"Button tapped 0 times."] waitForExistenceWithTimeout:60.0]);
-    [app.otherElements[@"Increment via Flutter"] tap];
+
+    XCUIElement *incrementButton = app.otherElements[@"Increment via Flutter"];
+    [self expectationForPredicate:hittable evaluatedWithObject:incrementButton handler:nil];
+    [self waitForExpectationsWithTimeout:30.0 handler:nil];
+    [incrementButton tap];
+
     XCTAssertTrue([app.staticTexts[@"Button tapped 1 time."] waitForExistenceWithTimeout:60.0]);
 
     // Back navigation.
@@ -68,14 +87,20 @@
     XCUIApplication *app = [[XCUIApplication alloc] init];
     [app launch];
 
+    NSPredicate *hittable = [NSPredicate predicateWithFormat:@"exists == YES AND hittable == YES"];
     XCUIElement *warmButton = app.buttons[@"Hybrid View (Warm)"];
-    XCTAssertTrue([warmButton waitForExistenceWithTimeout:60.0]);
+    [self expectationForPredicate:hittable evaluatedWithObject:warmButton handler:nil];
+    [self waitForExpectationsWithTimeout:30.0 handler:nil];
     [warmButton tap];
 
     XCTAssertTrue([app.staticTexts[@"Flutter button tapped 0 times."] waitForExistenceWithTimeout:60.0]);
     XCTAssertTrue(app.staticTexts[@"Platform button tapped 0 times."].exists);
 
-    [app.otherElements[@"Increment via Flutter"] tap];
+    XCUIElement *incrementButton = app.otherElements[@"Increment via Flutter"];
+    [self expectationForPredicate:hittable evaluatedWithObject:incrementButton handler:nil];
+    [self waitForExpectationsWithTimeout:30.0 handler:nil];
+    [incrementButton tap];
+
     XCTAssertTrue([app.staticTexts[@"Flutter button tapped 1 time."] waitForExistenceWithTimeout:60.0]);
     XCTAssertTrue(app.staticTexts[@"Platform button tapped 0 times."].exists);
 
@@ -92,7 +117,11 @@
     XCUIApplication *app = [[XCUIApplication alloc] init];
     [app launch];
 
-    [app.buttons[@"Dual Flutter View (Cold)"] tap];
+    NSPredicate *hittable = [NSPredicate predicateWithFormat:@"exists == YES AND hittable == YES"];
+    XCUIElement *button = app.buttons[@"Dual Flutter View (Cold)"];
+    [self expectationForPredicate:hittable evaluatedWithObject:button handler:nil];
+    [self waitForExpectationsWithTimeout:30.0 handler:nil];
+    [button tap];
 
     // There are two marquees.
     XCUIElementQuery *marqueeQuery = [app.staticTexts matchingIdentifier:@"This is Marquee"];
