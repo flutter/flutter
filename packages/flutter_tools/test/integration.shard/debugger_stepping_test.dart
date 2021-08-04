@@ -4,6 +4,8 @@
 
 // @dart = 2.8
 
+import 'dart:io';
+
 import 'package:file/file.dart';
 
 import '../src/common.dart';
