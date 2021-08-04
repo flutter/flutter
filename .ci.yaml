@@ -799,7 +799,6 @@ targets:
 
   - name: Linux_android android_stack_size_test
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -990,7 +989,6 @@ targets:
 
   - name: Linux_android flutter_gallery__memory_nav
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -1011,7 +1009,6 @@ targets:
 
   - name: Linux_android flutter_gallery__transition_perf
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -1032,7 +1029,6 @@ targets:
 
   - name: Linux_android flutter_gallery__transition_perf_hybrid
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -1063,7 +1059,6 @@ targets:
 
   - name: Linux_android flutter_gallery_sksl_warmup__transition_perf
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
