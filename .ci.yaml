@@ -1582,6 +1582,12 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk"},
+          {"dependency": "open_jdk"},
+          {"dependency": "xcode"}
+        ]
       tags: >
         ["devicelab","hostonly"]
       task_name: build_aar_module_test
@@ -1595,6 +1601,13 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk"},
+          {"dependency": "open_jdk"},
+          {"dependency": "xcode"},
+          {"dependency": "gems"}
+        ]
       tags: >
         ["devicelab","hostonly"]
       task_name: build_ios_framework_module_test
@@ -1609,9 +1622,14 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      caches: >-
+      dependencies: >-
         [
-          {"name":"osx_sdk","path":"new_osx_sdk"}
+          {"dependency": "android_sdk"},
+          {"dependency": "chrome_and_driver"},
+          {"dependency": "open_jdk"},
+          {"dependency": "xcode"},
+          {"dependency": "gems"},
+          {"dependency": "goldctl"}
         ]
       shard: build_tests
       subshard: "1_4"
@@ -1624,9 +1642,14 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      caches: >-
+      dependencies: >-
         [
-          {"name":"osx_sdk","path":"new_osx_sdk"}
+          {"dependency": "android_sdk"},
+          {"dependency": "chrome_and_driver"},
+          {"dependency": "open_jdk"},
+          {"dependency": "xcode"},
+          {"dependency": "gems"},
+          {"dependency": "goldctl"}
         ]
       shard: build_tests
       subshard: "2_4"
@@ -1639,9 +1662,14 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      caches: >-
+      dependencies: >-
         [
-          {"name":"osx_sdk","path":"new_osx_sdk"}
+          {"dependency": "android_sdk"},
+          {"dependency": "chrome_and_driver"},
+          {"dependency": "open_jdk"},
+          {"dependency": "xcode"},
+          {"dependency": "gems"},
+          {"dependency": "goldctl"}
         ]
       shard: build_tests
       subshard: "3_4"
@@ -1654,9 +1682,14 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      caches: >-
+      dependencies: >-
         [
-          {"name":"osx_sdk","path":"new_osx_sdk"}
+          {"dependency": "android_sdk"},
+          {"dependency": "chrome_and_driver"},
+          {"dependency": "open_jdk"},
+          {"dependency": "xcode"},
+          {"dependency": "gems"},
+          {"dependency": "goldctl"}
         ]
       shard: build_tests
       subshard: "4_4"
@@ -1679,6 +1712,11 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "xcode"},
+          {"dependency": "gems"}
+        ]
       tags: >
         ["devicelab","hostonly"]
       task_name: dart_plugin_registry_test
@@ -1692,6 +1730,10 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "goldctl"}
+        ]
       shard: framework_tests
       subshard: libraries
       tags: >
@@ -1713,6 +1755,10 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "goldctl"}
+        ]
       shard: framework_tests
       subshard: misc
       tags: >
@@ -1734,6 +1780,10 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "goldctl"}
+        ]
       shard: framework_tests
       subshard: widgets
       tags: >
@@ -1755,6 +1805,13 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk"},
+          {"dependency": "open_jdk"},
+          {"dependency": "xcode"},
+          {"dependency": "gems"}
+        ]
       tags: >
         ["devicelab","hostonly"]
       task_name: gradle_plugin_bundle_test
@@ -1767,6 +1824,13 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk"},
+          {"dependency": "open_jdk"},
+          {"dependency": "xcode"},
+          {"dependency": "gems"}
+        ]
       tags: >
         ["devicelab","hostonly"]
       task_name: gradle_plugin_fat_apk_test
@@ -1779,6 +1843,13 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk"},
+          {"dependency": "open_jdk"},
+          {"dependency": "xcode"},
+          {"dependency": "gems"}
+        ]
       tags: >
         ["devicelab","hostonly"]
       task_name: gradle_plugin_light_apk_test
@@ -1791,6 +1862,13 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk"},
+          {"dependency": "open_jdk"},
+          {"dependency": "xcode"},
+          {"dependency": "gems"}
+        ]
       tags: >
         ["devicelab","hostonly"]
       task_name: module_custom_host_app_name_test
@@ -1804,6 +1882,13 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk"},
+          {"dependency": "open_jdk"},
+          {"dependency": "xcode"},
+          {"dependency": "gems"}
+        ]
       tags: >
         ["devicelab","hostonly"]
       task_name: module_host_with_custom_build_test
@@ -1817,6 +1902,13 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk"},
+          {"dependency": "open_jdk"},
+          {"dependency": "xcode"},
+          {"dependency": "gems"}
+        ]
       tags: >
         ["devicelab","hostonly"]
       task_name: module_test
@@ -1831,6 +1923,13 @@ targets:
     bringup: true
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk"},
+          {"dependency": "open_jdk"},
+          {"dependency": "xcode"},
+          {"dependency": "gems"}
+        ]
       tags: >
         ["devicelab","hostonly"]
       task_name: module_test_ios
@@ -1844,6 +1943,13 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk"},
+          {"dependency": "open_jdk"},
+          {"dependency": "xcode"},
+          {"dependency": "gems"}
+        ]
       tags: >
         ["devicelab","hostonly"]
       task_name: plugin_dependencies_test
@@ -1857,6 +1963,13 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk"},
+          {"dependency": "open_jdk"},
+          {"dependency": "xcode"},
+          {"dependency": "gems"}
+        ]
       tags: >
         ["devicelab","hostonly"]
       task_name: plugin_lint_mac
@@ -1869,6 +1982,13 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk"},
+          {"dependency": "open_jdk"},
+          {"dependency": "xcode"},
+          {"dependency": "gems"}
+        ]
       tags: >
         ["devicelab","hostonly"]
       task_name: plugin_test
@@ -1883,6 +2003,15 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk"},
+          {"dependency": "chrome_and_driver"},
+          {"dependency": "open_jdk"},
+          {"dependency": "xcode"},
+          {"dependency": "gems"},
+          {"dependency": "goldctl"}
+        ]
       shard: tool_integration_tests
       subshard: "1_4"
       tags: >
@@ -1898,6 +2027,15 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk"},
+          {"dependency": "chrome_and_driver"},
+          {"dependency": "open_jdk"},
+          {"dependency": "xcode"},
+          {"dependency": "gems"},
+          {"dependency": "goldctl"}
+        ]
       shard: tool_integration_tests
       subshard: "2_4"
       tags: >
@@ -1913,6 +2051,15 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk"},
+          {"dependency": "chrome_and_driver"},
+          {"dependency": "open_jdk"},
+          {"dependency": "xcode"},
+          {"dependency": "gems"},
+          {"dependency": "goldctl"}
+        ]
       shard: tool_integration_tests
       subshard: "3_4"
       tags: >
@@ -1928,6 +2075,15 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk"},
+          {"dependency": "chrome_and_driver"},
+          {"dependency": "open_jdk"},
+          {"dependency": "xcode"},
+          {"dependency": "gems"},
+          {"dependency": "goldctl"}
+        ]
       shard: tool_integration_tests
       subshard: "4_4"
       tags: >
@@ -1943,6 +2099,11 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk"},
+          {"dependency": "open_jdk"}
+        ]
       shard: tool_tests
       subshard: commands
       tags: >
@@ -1954,6 +2115,11 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk"},
+          {"dependency": "open_jdk"}
+        ]
       shard: tool_tests
       subshard: general
       tags: >
@@ -1972,6 +2138,10 @@ targets:
     recipe: flutter/flutter
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "xcode"}
+        ]
       tags: >
         ["framework","hostonly","shard"]
       validation: verify_binaries_codesigned
@@ -1981,6 +2151,14 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk"},
+          {"dependency": "chrome_and_driver"},
+          {"dependency": "open_jdk"},
+          {"dependency": "xcode"},
+          {"dependency": "goldctl"}
+        ]
       shard: web_tool_tests
       subshard: web
       tags: >
