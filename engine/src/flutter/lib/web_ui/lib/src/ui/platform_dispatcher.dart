@@ -190,7 +190,7 @@ class ViewConfiguration {
   final WindowPadding viewPadding;
   final WindowPadding systemGestureInsets;
   final WindowPadding padding;
-  final GestureSettings? gestureSettings;
+  final GestureSettings gestureSettings;
 
   @override
   String toString() {
