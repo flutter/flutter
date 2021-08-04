@@ -1,0 +1,102 @@
+[
+    {
+        "archives": [],
+        "drone_dimensions": [],
+        "gn": [
+            "--runtime-mode",
+            "profile",
+            "--android"
+        ],
+        "name": "android_profile",
+        "ninja": {
+            "config": "android_profile",
+            "targets": [
+                "gen_snapshot"
+            ]
+        }
+    },
+    {
+        "archives": [],
+        "drone_dimensions": [],
+        "gn": [
+            "--runtime-mode",
+            "profile",
+            "--android",
+            "--android-cpu=arm64"
+        ],
+        "name": "android_profile_arm64",
+        "ninja": {
+            "config": "android_profile_arm64",
+            "targets": [
+                "gen_snapshot"
+            ]
+        }
+    },
+    {
+        "archives": [],
+        "drone_dimensions": [],
+        "gn": [
+            "--runtime-mode",
+            "profile",
+            "--android",
+            "--android-cpu=x64"
+        ],
+        "name": "android_profile_x64",
+        "ninja": {
+            "config": "android_profile_x64",
+            "targets": [
+                "gen_snapshot"
+            ]
+        }
+    },
+    {
+        "archives": [],
+        "drone_dimensions": [],
+        "gn": [
+            "--runtime-mode",
+            "release",
+            "--android"
+        ],
+        "name": "android_release",
+        "ninja": {
+            "config": "android_release",
+            "targets": [
+                "gen_snapshot"
+            ]
+        }
+    },
+    {
+        "archives": [],
+        "drone_dimensions": [],
+        "gn": [
+            "--runtime-mode",
+            "release",
+            "--android",
+            "--android-cpu=arm64"
+        ],
+        "name": "android_release_arm64",
+        "ninja": {
+            "config": "android_release_arm64",
+            "targets": [
+                "gen_snapshot"
+            ]
+        }
+    },
+    {
+        "archives": [],
+        "drone_dimensions": [],
+        "gn": [
+            "--runtime-mode",
+            "release",
+            "--android",
+            "--android-cpu=x64"
+        ],
+        "name": "android_release_x64",
+        "ninja": {
+            "config": "android_release_x64",
+            "targets": [
+                "gen_snapshot"
+            ]
+        }
+    }
+]
