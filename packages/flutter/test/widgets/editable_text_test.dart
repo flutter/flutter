@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
+import '../widgets/clipboard_utils.dart';
 import 'editable_text_utils.dart';
 import 'semantics_tester.dart';
 
@@ -46,22 +47,6 @@ const Color cursorColor = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
 
 enum HandlePositionInViewport {
   leftEdge, rightEdge, within,
-}
-
-class MockClipboard {
-  Object _clipboardData = <String, dynamic>{
-    'text': null,
-  };
-
-  Future<dynamic> handleMethodCall(MethodCall methodCall) async {
-    switch (methodCall.method) {
-      case 'Clipboard.getData':
-        return _clipboardData;
-      case 'Clipboard.setData':
-        _clipboardData = methodCall.arguments as Object;
-        break;
-    }
-  }
 }
 
 void main() {
