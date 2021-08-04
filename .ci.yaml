@@ -2706,7 +2706,6 @@ targets:
 
   - name: Windows plugin_dependencies_test
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       tags: >
