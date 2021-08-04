@@ -545,6 +545,9 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
   Widget build(BuildContext context, AsyncSnapshot<T> currentSummary) => builder(context, currentSummary);
 }
 
+/// Signature for when [AsyncSnapshot] changes.
+typedef AsyncSnapshotListener<T> = void Function(BuildContext, AsyncSnapshot<T>);
+
 /// Widget that builds itself based on the latest snapshot of interaction with
 /// a [Future].
 ///
@@ -692,6 +695,9 @@ class FutureBuilder<T> extends StatefulWidget {
     Key? key,
     this.future,
     this.initialData,
+    this.listen,
+    this.onPending,
+    this.onError,
     required this.builder,
   }) : assert(builder != null),
        super(key: key);
@@ -737,6 +743,17 @@ class FutureBuilder<T> extends StatefulWidget {
   /// [AsyncSnapshot.hasError] will be true.)
   final T? initialData;
 
+  /// The builder used when the [AsyncSnapshot] is in the [ConnectionState.waiting] state.
+  final WidgetBuilder? onPending;
+
+  /// The builder used when the [AsyncSnapshot] has an error.
+  final WidgetBuilder? onError;
+
+  /// The listener that is called when the passed in [Future] state changes.
+  /// 
+  /// Consider using this for side effects in response to [Future] state changes.
+  final AsyncSnapshotListener<T>? listen;  
+
   /// Whether the latest error received by the asynchronous computation should
   /// be rethrown or swallowed. This property is useful for debugging purposes.
   ///
@@ -779,7 +796,17 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
   }
 
   @override
-  Widget build(BuildContext context) => widget.builder(context, _snapshot);
+  Widget build(BuildContext context) {
+    if (_snapshot.hasError && widget.onError != null) {
+      return widget.onError!(context);
+    }
+    
+    if (_snapshot.connectionState == ConnectionState.waiting && widget.onPending != null) {
+      return widget.onPending!(context);
+    }
+
+    return widget.builder(context, _snapshot);
+  }
 
   @override
   void dispose() {
@@ -796,12 +823,14 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
           setState(() {
             _snapshot = AsyncSnapshot<T>.withData(ConnectionState.done, data);
           });
+          _notifySnapshotListener();
         }
       }, onError: (Object error, StackTrace stackTrace) {
         if (_activeCallbackIdentity == callbackIdentity) {
           setState(() {
             _snapshot = AsyncSnapshot<T>.withError(ConnectionState.done, error, stackTrace);
           });
+          _notifySnapshotListener();
         }
         assert(() {
           if(FutureBuilder.debugRethrowError) {
@@ -812,10 +841,17 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
 
       });
       _snapshot = _snapshot.inState(ConnectionState.waiting);
+      _notifySnapshotListener();
     }
   }
 
   void _unsubscribe() {
     _activeCallbackIdentity = null;
+  }
+
+  void _notifySnapshotListener() {
+    if (widget.listen != null) {
+      widget.listen!(context, _snapshot);
+    }
   }
 }
