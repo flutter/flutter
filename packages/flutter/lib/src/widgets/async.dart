@@ -750,9 +750,9 @@ class FutureBuilder<T> extends StatefulWidget {
   final WidgetBuilder? onError;
 
   /// The listener that is called when the passed in [Future] state changes.
-  /// 
+  ///
   /// Consider using this for side effects in response to [Future] state changes.
-  final AsyncSnapshotListener<T>? listen;  
+  final AsyncSnapshotListener<T>? listen;
 
   /// Whether the latest error received by the asynchronous computation should
   /// be rethrown or swallowed. This property is useful for debugging purposes.
@@ -800,7 +800,7 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
     if (_snapshot.hasError && widget.onError != null) {
       return widget.onError!(context);
     }
-    
+
     if (_snapshot.connectionState == ConnectionState.waiting && widget.onPending != null) {
       return widget.onPending!(context);
     }
