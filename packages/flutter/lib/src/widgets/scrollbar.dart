@@ -1525,7 +1525,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     );
   }
 
-  bool _debugCheckNotificationAxis(Axis notificationAxisDirection) {
+  bool _debugCheckNotificationAxis(Axis notificationAxis) {
     final ScrollController? scrollController = widget.controller ??
         PrimaryScrollController.of(context);
     if (scrollController == null) {
@@ -1539,9 +1539,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     // axis of the scroll position and scrollbar should always match.
     if ((scrollController != null && scrollController.hasClients) || enableGestures) {
       assert(
-        scrollController.position.axis == notificationAxisDirection,
-        "The AxisDirection of the Scrollbar's ScrollController does not match the "
-        'AxisDirection of the received ScrollNotification. '
+        scrollController.position.axis == notificationAxis,
+        "The Axis of the Scrollbar's ScrollController does not match the "
+        'Axis of the received ScrollNotification. '
       );
     }
     return true;

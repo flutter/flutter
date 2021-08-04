@@ -1648,7 +1648,7 @@ void main() {
     expect(find.byType(RawScrollbar), isNot(paints..rect())); // Not shown.
   });
 
-  testWidgets('The bar can show or hide when the window size change', (WidgetTester tester) async {
+  testWidgets('The scrollbar checks for matching axes', (WidgetTester tester) async {
     final ScrollController verticalScrollController = ScrollController();
     final ScrollController horizontalScrollController = ScrollController();
     Widget buildFrame() {
@@ -1679,17 +1679,18 @@ void main() {
     }
 
     await tester.pumpWidget(buildFrame());
-    await tester.pumpAndSettle();
-    expect(verticalScrollController.offset, 0.0);
-    expect(horizontalScrollController.offset, 0.0);
-    horizontalScrollController.jumpTo(10.0);
-    final AssertionError exception = tester.takeException() as AssertionError;
-    expect(
-      exception.message,
-      contains(
-        "The AxisDirection of the Scrollbar's ScrollController does not "
-        'match the AxisDirection of the received ScrollNotification. '
-      )
-    );
+
+    final AssertionError error = tester.takeException() as AssertionError;
+    expect(error.message, contains('Axis'));
+
+    // expect(
+    //   () async => tester.pumpWidget(buildFrame()),
+    //   throwsA(isAssertionError.having(
+    //     (AssertionError e) => e.message,
+    //     'message',
+    //     contains("The AxisDirection of the Scrollbar's ScrollController does not "
+    //       'match the AxisDirection of the received ScrollNotification. '),
+    //   )),
+    // );
   });
 }
