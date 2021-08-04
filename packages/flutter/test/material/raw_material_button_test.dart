@@ -356,7 +356,7 @@ void main() {
         // paints above above material
         expect(
           getMaterialInkController<InkWell>(tester),
-          paintsRipple(center: const Offset(44, 0), color: splashColor),
+          paintsRipple(center: const Offset(44, 5), color: splashColor),
         );
         await gesture.up();
       });

@@ -2848,7 +2848,7 @@ void main() {
       await gesture.up();
     });
 
-    testWidgets('Tab\'s InkRipple color matches resolved Tab overlayColor for MaterialState.pressed', (WidgetTester tester) async {
+    testWidgets("Tab's InkRipple color matches resolved Tab overlayColor for MaterialState.pressed", (WidgetTester tester) async {
       const Color splashColor = Color(0xf00fffff);
       await tester.pumpWidget(
         boilerplate(
