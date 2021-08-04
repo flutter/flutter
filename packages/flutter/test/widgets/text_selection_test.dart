@@ -26,8 +26,9 @@ class MockClipboard {
       case 'Clipboard.hasStrings':
         if (hasStringsThrows)
           throw Exception();
-        final String? text = _clipboardData?['text'];
-        return <String, bool>{'value': text != null && text.length > 0};
+        final Map<String, dynamic>? clipboardDataMap = _clipboardData as Map<String, dynamic>?;
+        final String? text = clipboardDataMap?['text'] as String?;
+        return <String, bool>{'value': text != null && text.isNotEmpty};
       case 'Clipboard.setData':
         _clipboardData = methodCall.arguments;
         break;

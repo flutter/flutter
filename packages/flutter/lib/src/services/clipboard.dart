@@ -66,7 +66,7 @@ class Clipboard {
   /// See also:
   ///   * [The iOS hasStrings method](https://developer.apple.com/documentation/uikit/uipasteboard/1829416-hasstrings?language=objc).
   static Future<bool> hasStrings() async {
-    final Map<String, dynamic> result = await SystemChannels.platform.invokeMethod(
+    final Map<String, dynamic>? result = await SystemChannels.platform.invokeMethod(
       'Clipboard.hasStrings',
       Clipboard.kTextPlain,
     );
