@@ -824,13 +824,14 @@ class SerialTapGestureRecognizer extends GestureRecognizer {
   /// If the user didn't complete the tap, or if another recognizer won the
   /// arena, then [onSerialTapCancel] is called instead.
   ///
-  /// The [SerialTapUpDetails.count] that is passed to this callback
-  /// specifies the series tap count.
+  /// The [SerialTapUpDetails.count] that is passed to this callback specifies
+  /// the series tap count and will match the [SerialTapDownDetails.count] that
+  /// was passed to the [onSerialTapDown] callback.
   GestureSerialTapUpCallback? onSerialTapUp;
 
   Timer? _serialTapTimer;
   final List<_TapTracker> _completedTaps = <_TapTracker>[];
-  final Map<int, bool> _acceptedGestures = <int, bool>{};
+  final Map<int, GestureDisposition> _gestureResolutions = <int, GestureDisposition>{};
   _TapTracker? _pendingTap;
 
   /// Indicates whether this recognizer is currently tracking a pointer that's
@@ -906,12 +907,12 @@ class SerialTapGestureRecognizer extends GestureRecognizer {
   void acceptGesture(int pointer) {
     assert(_pendingTap != null);
     assert(_pendingTap!.pointer == pointer);
-    _acceptedGestures[pointer] = true;
+    _gestureResolutions[pointer] = GestureDisposition.accepted;
   }
 
   @override
   void rejectGesture(int pointer) {
-    _acceptedGestures[pointer] = false;
+    _gestureResolutions[pointer] = GestureDisposition.rejected;
     _reset();
   }
 
@@ -923,7 +924,7 @@ class SerialTapGestureRecognizer extends GestureRecognizer {
     // `reset()`, so we need to check cancel here while we can trust the
     // length of our _completedTaps list.
     _checkCancel(_completedTaps.length + 1);
-    if (_acceptedGestures[tracker.pointer] != false) {
+    if (!_gestureResolutions.containsKey(tracker.pointer)) {
       tracker.entry.resolve(GestureDisposition.rejected);
     }
     _stopTrackingPointer(tracker);
@@ -941,7 +942,7 @@ class SerialTapGestureRecognizer extends GestureRecognizer {
     }
     _pendingTap = null;
     _completedTaps.clear();
-    _acceptedGestures.clear();
+    _gestureResolutions.clear();
     _stopSerialTapTimer();
   }
 
@@ -949,10 +950,11 @@ class SerialTapGestureRecognizer extends GestureRecognizer {
     assert(tracker == _pendingTap);
     assert(tracker.pointer == event.pointer);
     _startSerialTapTimer();
-    if (_acceptedGestures[event.pointer] != true) {
+    assert(_gestureResolutions[event.pointer] != GestureDisposition.rejected);
+    if (!_gestureResolutions.containsKey(event.pointer)) {
       tracker.entry.resolve(GestureDisposition.accepted);
     }
-    assert(_acceptedGestures[event.pointer]!);
+    assert(_gestureResolutions[event.pointer] == GestureDisposition.accepted);
     _stopTrackingPointer(tracker);
     // Note, order is important below in order for the clear -> reject logic to
     // work properly.
