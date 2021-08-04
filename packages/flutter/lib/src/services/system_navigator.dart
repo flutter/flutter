@@ -71,14 +71,14 @@ class SystemNavigator {
   /// multiple-entries history mode. Use the [selectSingleEntryHistory] and
   /// [selectMultiEntryHistory] to toggle between modes.
   ///
-  /// For single-entry mode, this method replaces the current url and state in
+  /// For single-entry mode, this method replaces the current URL and state in
   /// the current history entry. The flag `replace` is ignored.
   ///
   /// For multiple-entries mode, this method creates a new history entry on top
-  /// of the current entry if the `replace` is true, thus the user will
+  /// of the current entry if the `replace` is false, thus the user will
   /// be on a new history entry as if the user has visited a new page, and the
-  /// browser back button brings the user back to the previous entry. If the
-  /// `replace` is false, this method only updates the url and the state in the
+  /// browser back button brings the user back to the previous entry. If
+  /// `replace` is true, this method only updates the URL and the state in the
   /// current history entry without pushing a new one.
   ///
   /// This method is ignored on other platforms.
