@@ -207,6 +207,10 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 }
 
 - (id)accessibilityContainer {
+  if (![_semanticsObject isAccessibilityBridgeAlive]) {
+    return nil;
+  }
+
   if ([_semanticsObject hasChildren] || [_semanticsObject uid] == kRootNodeId) {
     if (_container == nil) {
       _container.reset([[SemanticsObjectContainer alloc]
@@ -682,6 +686,10 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 }
 
 - (id)accessibilityContainer {
+  if (![self isAccessibilityBridgeAlive]) {
+    return nil;
+  }
+
   if ([self hasChildren] || [self uid] == kRootNodeId) {
     if (_container == nil)
       _container.reset([[SemanticsObjectContainer alloc] initWithSemanticsObject:self

@@ -644,4 +644,76 @@ class MockAccessibilityBridge : public AccessibilityBridgeIos {
   XCTAssertEqual(object.accessibilityValue, nativeSwitch.accessibilityValue);
 }
 
+- (void)testFlutterSemanticsObjectReturnsNilContainerWhenBridgeIsNotAlive {
+  FlutterSemanticsObject* parentObject;
+  FlutterSemanticsObject* delegate;
+  FlutterScrollableSemanticsObject* scrollable;
+  SemanticsObject* scrollable_object;
+  FlutterSemanticsObject* object2;
+
+  flutter::SemanticsNode parent;
+  parent.id = 0;
+  parent.rect = SkRect::MakeXYWH(0, 0, 100, 200);
+  parent.label = "label";
+  parent.value = "value";
+  parent.hint = "hint";
+
+  flutter::SemanticsNode node;
+  node.id = 1;
+  node.flags = static_cast<int32_t>(flutter::SemanticsFlags::kHasImplicitScrolling);
+  node.actions = flutter::kHorizontalScrollSemanticsActions;
+  node.rect = SkRect::MakeXYWH(0, 0, 100, 200);
+  node.label = "label";
+  node.value = "value";
+  node.hint = "hint";
+  node.scrollExtentMax = 100.0;
+  node.scrollPosition = 0.0;
+  parent.childrenInTraversalOrder.push_back(1);
+
+  flutter::SemanticsNode node2;
+  node2.id = 2;
+  node2.rect = SkRect::MakeXYWH(0, 0, 100, 200);
+  node2.label = "label";
+  node2.value = "value";
+  node2.hint = "hint";
+  node2.scrollExtentMax = 100.0;
+  node2.scrollPosition = 0.0;
+  parent.childrenInTraversalOrder.push_back(2);
+
+  {
+    flutter::MockAccessibilityBridge* mock = new flutter::MockAccessibilityBridge();
+    mock->isVoiceOverRunningValue = true;
+    fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
+    fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+
+    parentObject = [[FlutterSemanticsObject alloc] initWithBridge:bridge uid:0];
+    [parentObject setSemanticsNode:&parent];
+
+    delegate = [[FlutterSemanticsObject alloc] initWithBridge:bridge uid:1];
+    scrollable = [[FlutterScrollableSemanticsObject alloc] initWithSemanticsObject:delegate];
+    scrollable_object = static_cast<SemanticsObject*>(scrollable);
+    [scrollable_object setSemanticsNode:&node];
+
+    object2 = [[FlutterSemanticsObject alloc] initWithBridge:bridge uid:2];
+    [object2 setSemanticsNode:&node2];
+
+    parentObject.children = @[ scrollable_object, object2 ];
+    [parentObject accessibilityBridgeDidFinishUpdate];
+    [scrollable_object accessibilityBridgeDidFinishUpdate];
+    [object2 accessibilityBridgeDidFinishUpdate];
+
+    // Returns the correct container if the bridge is alive.
+    SemanticsObjectContainer* container =
+        static_cast<SemanticsObjectContainer*>(scrollable_object.accessibilityContainer);
+    XCTAssertEqual(container.semanticsObject, parentObject);
+    SemanticsObjectContainer* container2 =
+        static_cast<SemanticsObjectContainer*>(object2.accessibilityContainer);
+    XCTAssertEqual(container2.semanticsObject, parentObject);
+  }
+  // The bridge pointer went out of scope and was deallocated.
+
+  XCTAssertNil(scrollable_object.accessibilityContainer);
+  XCTAssertNil(object2.accessibilityContainer);
+}
+
 @end
