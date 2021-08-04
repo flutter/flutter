@@ -7,53 +7,174 @@
 #  * https://github.com/flutter/cocoon/blob/master/CI_YAML.md
 enabled_branches:
   - master
+  - dev
+  - beta
+  - stable
+
+platform_properties:
+  linux:
+    properties:
+      caches: >-
+        [
+          {"name":"builder_linux_framework","path":"builder"}
+        ]
+      dependencies: >-
+        [
+          {"dependency": "curl"}
+        ]
+      os: Linux
+      device_type: none
+  linux_android:
+    properties:
+      caches: >-
+        [
+          {"name":"builder_linux_devicelab","path":"builder"},
+        ]
+      dependencies: >-
+        [
+          {"dependency": "curl"}
+        ]
+      os: Android
+      device_os: "N"
+  mac:
+    properties:
+      caches: >-
+        [
+          {"name":"builder_mac_framework","path":"builder"}
+        ]
+      os: Mac-10.15
+      device_type: none
+      mac_model: Macmini8,1
+      xcode: 12a7209
+  mac_android:
+    properties:
+      caches: >-
+          [
+            {"name":"builder_mac_devicelab","path":"builder"},
+          ]
+      os: Mac-10.15
+      device_os: N
+  mac_ios:
+    properties:
+      caches: >-
+          [
+            {"name":"builder_mac_devicelab","path":"builder"}
+          ]
+      os: Mac-10.15
+      device_os: iOS-14.4.2
+      xcode: 12a7209
+  mac_ios32:
+    properties:
+      caches: >-
+          [
+            {"name":"builder_mac_devicelab","path":"builder"}
+          ]
+      os: Mac-10.15
+      device_os: iOS-9.3.6
+      xcode: 12a7209
+  windows:
+    properties:
+      caches: >-
+          [
+            {"name":"builder_win_framework","path":"builder"}
+          ]
+      dependencies: >-
+          [
+            {"dependency": "certs"},
+          ]
+      os: Windows-10
+      device_type: none
+  windows_android:
+    properties:
+      caches: >-
+          [
+            {"name":"builder_win_devicelab","path":"builder"}
+          ]
+      dependencies: >-
+          [
+            {"dependency": "certs"},
+          ]
+      os: Windows-10
+      device_os: N
 
 targets:
   - name: Linux analyze
-    builder: Linux analyze
+    recipe: flutter/flutter
+    timeout: 60
     properties:
       tags: >
         ["framework","hostonly"]
+      validation: analyze
+      validation_name: Analyze
     scheduler: luci
 
   - name: Linux build_aar_module_test
-    builder: Linux build_aar_module_test
+    recipe: devicelab/devicelab_drone
+    timeout: 60
     properties:
+      add_recipes_cq: "true"
       tags: >
         ["devicelab","hostonly"]
+      task_name: build_aar_module_test
     scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
       - bin/**
 
-  - name: Linux customer_testing
-    builder: Linux customer_testing
-    properties:
-      tags: >
-        ["framework","hostonly"]
-    scheduler: luci
-
   - name: Linux build_tests_1_2
-    builder: Linux build_tests_1_2
+    recipe: flutter/flutter_drone
+    timeout: 60
     properties:
+      shard: build_tests
+      subshard: "1_2"
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
 
   - name: Linux build_tests_2_2
-    builder: Linux build_tests_2_2
+    recipe: flutter/flutter_drone
+    timeout: 60
     properties:
+      shard: build_tests
+      subshard: "2_2"
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
 
-  - name: Linux docs
-    builder: Linux docs
-    postsubmit: false
+  - name: Linux customer_testing
+    recipe: flutter/flutter
+    timeout: 60
     properties:
       tags: >
         ["framework","hostonly"]
+      validation: customer_testing
+      validation_name: Customer testing
+    scheduler: luci
+
+  - name: Linux docs_publish
+    enabled_branches:
+      - master
+    recipe: flutter/flutter
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["framework","hostonly"]
+      validation: docs
+      validation_name: Docs
+      firebase_project: master-docs-flutter-dev
+      release_ref: refs/heads/master
+    scheduler: luci
+
+  - name: Linux docs_test
+    recipe: flutter/flutter
+    timeout: 60
+    properties:
+      tags: >
+        ["framework","hostonly"]
+      validation: docs
+      validation_name: Docs
     scheduler: luci
     runIf:
       - dev/
@@ -63,9 +184,49 @@ targets:
       - packages/flutter_localizations/
       - bin/
 
-  - name: Linux framework_tests_libraries
-    builder: Linux framework_tests_libraries
+  - name: Linux firebase_abstract_method_smoke_test
+    recipe: firebaselab
+    timeout: 60
     properties:
+      tags: >
+        ["firebaselab"]
+      task_name: abstract_method_smoke_test
+    scheduler: luci
+
+  - name: Linux firebase_android_embedding_v2_smoke_test
+    recipe: firebaselab
+    timeout: 60
+    properties:
+      tags: >
+        ["firebaselab"]
+      task_name: android_embedding_v2_smoke_test
+    scheduler: luci
+
+  - name: Linux firebase_release_smoke_test
+    recipe: firebaselab
+    timeout: 60
+    properties:
+      tags: >
+        ["firebaselab"]
+      task_name: release_smoke_test
+    scheduler: luci
+
+  - name: Linux flutter_plugins
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      shard: flutter_plugins
+      subshard: analyze
+      tags: >
+        ["framework","hostonly","shard"]
+    scheduler: luci
+
+  - name: Linux framework_tests_libraries
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      shard: framework_tests
+      subshard: libraries
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
@@ -82,8 +243,11 @@ targets:
       - bin/
 
   - name: Linux framework_tests_misc
-    builder: Linux framework_tests_misc
+    recipe: flutter/flutter_drone
+    timeout: 60
     properties:
+      shard: framework_tests
+      subshard: misc
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
@@ -100,8 +264,11 @@ targets:
       - bin/
 
   - name: Linux framework_tests_widgets
-    builder: Linux framework_tests_widgets
+    recipe: flutter/flutter_drone
+    timeout: 60
     properties:
+      shard: framework_tests
+      subshard: widgets
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
@@ -117,101 +284,96 @@ targets:
       - packages/flutter_tools/lib/src/test/
       - bin/
 
-  - name: Linux firebase_abstract_method_smoke_test
-    builder: Linux firebase_abstract_method_smoke_test
-    properties:
-      tags: >
-        ["firebaselab"]
-    scheduler: luci
-
-  - name: Linux firebase_android_embedding_v2_smoke_test
-    builder: Linux firebase_android_embedding_v2_smoke_test
-    properties:
-      tags: >
-        ["firebaselab"]
-    scheduler: luci
-
-  - name: Linux firebase_release_smoke_test
-    builder: Linux firebase_release_smoke_test
-    properties:
-      tags: >
-        ["firebaselab"]
-    scheduler: luci
-
   - name: Linux fuchsia_precache
-    builder: Linux fuchsia_precache
+    recipe: flutter/flutter
+    timeout: 60
     properties:
+      validation: fuchsia_precache
+      validation_name: Fuchsia precache
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
 
   - name: Linux gradle_desugar_classes_test
-    builder: Linux gradle_desugar_classes_test
+    recipe: devicelab/devicelab_drone
+    timeout: 60
     properties:
       tags: >
         ["devicelab","hostonly"]
+      task_name: gradle_desugar_classes_test
     scheduler: luci
     runIf:
       - dev/**
       - bin/**
 
   - name: Linux gradle_java8_compile_test
-    builder: Linux gradle_java8_compile_test
+    recipe: devicelab/devicelab_drone
+    timeout: 60
     properties:
       tags: >
         ["devicelab","hostonly"]
+      task_name: gradle_java8_compile_test
     scheduler: luci
     runIf:
       - dev/**
       - bin/**
 
   - name: Linux gradle_plugin_bundle_test
-    builder: Linux gradle_plugin_bundle_test
+    recipe: devicelab/devicelab_drone
+    timeout: 60
     properties:
       tags: >
         ["devicelab","hostonly"]
+      task_name: gradle_plugin_bundle_test
     scheduler: luci
     runIf:
       - dev/**
       - bin/**
 
   - name: Linux gradle_plugin_fat_apk_test
-    builder: Linux gradle_plugin_fat_apk_test
+    recipe: devicelab/devicelab_drone
+    timeout: 60
     properties:
       tags: >
         ["devicelab","hostonly"]
+      task_name: gradle_plugin_fat_apk_test
     scheduler: luci
     runIf:
       - dev/**
       - bin/**
 
   - name: Linux gradle_plugin_light_apk_test
-    builder: Linux gradle_plugin_light_apk_test
-    postsubmit: false
+    recipe: devicelab/devicelab_drone
+    timeout: 60
     properties:
       tags: >
         ["devicelab","hostonly"]
+      task_name: gradle_plugin_light_apk_test
     scheduler: luci
     runIf:
       - dev/**
       - bin/**
 
-  - name: Linux module_host_with_custom_build_test
-    builder: Linux module_host_with_custom_build_test
+  - name: Linux module_custom_host_app_name_test
+    recipe: devicelab/devicelab_drone
+    timeout: 60
     properties:
       tags: >
         ["devicelab","hostonly"]
+      task_name: module_custom_host_app_name_test
     scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
       - bin/**
 
-  - name: Linux module_custom_host_app_name_test
-    builder: Linux module_custom_host_app_name_test
+  - name: Linux module_host_with_custom_build_test
+    recipe: devicelab/devicelab_drone
+    timeout: 60
     properties:
       tags: >
         ["devicelab","hostonly"]
+      task_name: module_host_with_custom_build_test
     scheduler: luci
     runIf:
       - dev/**
@@ -219,10 +381,12 @@ targets:
       - bin/**
 
   - name: Linux module_test
-    builder: Linux module_test
+    recipe: devicelab/devicelab_drone
+    timeout: 60
     properties:
       tags: >
         ["devicelab","hostonly"]
+      task_name: module_test
     scheduler: luci
     runIf:
       - dev/**
@@ -230,10 +394,12 @@ targets:
       - bin/**
 
   - name: Linux plugin_dependencies_test
-    builder: Linux plugin_dependencies_test
+    recipe: devicelab/devicelab_drone
+    timeout: 60
     properties:
       tags: >
         ["devicelab","hostonly"]
+      task_name: plugin_dependencies_test
     scheduler: luci
     runIf:
       - dev/**
@@ -241,10 +407,12 @@ targets:
       - bin/**
 
   - name: Linux plugin_test
-    builder: Linux plugin_test
+    recipe: devicelab/devicelab_drone
+    timeout: 60
     properties:
       tags: >
         ["devicelab","hostonly"]
+      task_name: plugin_test
     scheduler: luci
     runIf:
       - dev/**
@@ -252,8 +420,13 @@ targets:
       - bin/**
 
   - name: Linux skp_generator
-    builder: Linux skp_generator
+    enabled_branches:
+      - master
+    recipe: flutter/flutter_drone
+    timeout: 60
     properties:
+      shard: skp_generator
+      subshard: "0"
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
@@ -263,33 +436,39 @@ targets:
       - packages/flutter_tools/
       - bin/
 
-  - name: Linux tool_tests_general
-    builder: Linux tool_tests_general
+  - name: Linux technical_debt__cost
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
     properties:
       tags: >
-        ["framework","hostonly","shard"]
+        ["devicelab","hostonly"]
+      task_name: technical_debt__cost
     scheduler: luci
-    runIf:
-      - dev/
-      - packages/flutter_tools/
-      - bin/
 
-  - name: Linux tool_tests_commands
-    builder: Linux tool_tests_commands
+  - name: Linux test_ownership
+    enabled_branches:
+      - master
+    recipe: infra/test_ownership
+    bringup: true
+    timeout: 60
     properties:
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
     runIf:
-      - dev/
-      - packages/flutter_tools/
-      - bin/
+      - .ci.yaml
 
   - name: Linux tool_integration_tests_1_4
-    builder: Linux tool_integration_tests_1_4
+    recipe: flutter/flutter_drone
+    timeout: 60
     properties:
+      add_recipes_cq: "true"
+      shard: tool_integration_tests
+      subshard: "1_4"
       tags: >
         ["framework","hostonly","shard"]
+      test_timeout_secs: "2700"
     scheduler: luci
     runIf:
       - dev/
@@ -297,8 +476,12 @@ targets:
       - bin/
 
   - name: Linux tool_integration_tests_2_4
-    builder: Linux tool_integration_tests_2_4
+    recipe: flutter/flutter_drone
+    timeout: 60
     properties:
+      add_recipes_cq: "true"
+      shard: tool_integration_tests
+      subshard: "2_4"
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
@@ -308,8 +491,12 @@ targets:
       - bin/
 
   - name: Linux tool_integration_tests_3_4
-    builder: Linux tool_integration_tests_3_4
+    recipe: flutter/flutter_drone
+    timeout: 60
     properties:
+      add_recipes_cq: "true"
+      shard: tool_integration_tests
+      subshard: "3_4"
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
@@ -319,8 +506,12 @@ targets:
       - bin/
 
   - name: Linux tool_integration_tests_4_4
-    builder: Linux tool_integration_tests_4_4
+    recipe: flutter/flutter_drone
+    timeout: 60
     properties:
+      add_recipes_cq: "true"
+      shard: tool_integration_tests
+      subshard: "4_4"
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
@@ -329,9 +520,13 @@ targets:
       - packages/flutter_tools/
       - bin/
 
-  - name: Linux web_tool_tests
-    builder: Linux web_tool_tests
+  - name: Linux tool_tests_commands
+    recipe: flutter/flutter_drone
+    timeout: 60
     properties:
+      add_recipes_cq: "true"
+      shard: tool_tests
+      subshard: commands
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
@@ -339,9 +534,35 @@ targets:
       - dev/
       - packages/flutter_tools/
       - bin/
+
+  - name: Linux tool_tests_general
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      shard: tool_tests
+      subshard: general
+      tags: >
+        ["framework","hostonly","shard"]
+    scheduler: luci
+    runIf:
+      - dev/
+      - packages/flutter_tools/
+      - bin/
+
+  - name: Linux web_benchmarks_canvaskit
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","hostonly"]
+      task_name: web_benchmarks_canvaskit
+    scheduler: luci
 
   - name: Linux web_benchmarks_html
-    builder: Linux web_benchmarks_html
+    recipe: devicelab/devicelab_drone
+    timeout: 60
     properties:
       tags: >
         ["devicelab"]
@@ -350,97 +571,12 @@ targets:
       - dev/**
       - bin/**
 
-  - name: Linux web_tests_0
-    builder: Linux web_tests_0
-    properties:
-      tags: >
-        ["framework","hostonly","shard"]
-    scheduler: luci
-    runIf:
-      - dev/
-      - packages/
-      - bin/
-
-  - name: Linux web_tests_1
-    builder: Linux web_tests_1
-    properties:
-      tags: >
-        ["framework","hostonly","shard"]
-    scheduler: luci
-    runIf:
-      - dev/
-      - packages/
-      - bin/
-
-  - name: Linux web_tests_2
-    builder: Linux web_tests_2
-    properties:
-      tags: >
-        ["framework","hostonly","shard"]
-    scheduler: luci
-    runIf:
-      - dev/
-      - packages/
-      - bin/
-
-  - name: Linux web_tests_3
-    builder: Linux web_tests_3
-    properties:
-      tags: >
-        ["framework","hostonly","shard"]
-    scheduler: luci
-    runIf:
-      - dev/
-      - packages/
-      - bin/
-
-  - name: Linux web_tests_4
-    builder: Linux web_tests_4
-    properties:
-      tags: >
-        ["framework","hostonly","shard"]
-    scheduler: luci
-    runIf:
-      - dev/
-      - packages/
-      - bin/
-
-  - name: Linux web_tests_5
-    builder: Linux web_tests_5
-    properties:
-      tags: >
-        ["framework","hostonly","shard"]
-    scheduler: luci
-    runIf:
-      - dev/
-      - packages/
-      - bin/
-
-  - name: Linux web_tests_6
-    builder: Linux web_tests_6
-    properties:
-      tags: >
-        ["framework","hostonly","shard"]
-    scheduler: luci
-    runIf:
-      - dev/
-      - packages/
-      - bin/
-
-  - name: Linux web_tests_7_last
-    builder: Linux web_tests_7_last
-    properties:
-      tags: >
-        ["framework","hostonly","shard"]
-    scheduler: luci
-    runIf:
-      - dev/
-      - packages/
-      - bin/
-
   - name: Linux web_long_running_tests_1_5
-    builder: Linux web_long_running_tests_1_5
+    recipe: flutter/flutter_drone
+    timeout: 60
     properties:
+      shard: web_long_running_tests
+      subshard: "1_5"
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
@@ -450,8 +586,11 @@ targets:
       - bin/
 
   - name: Linux web_long_running_tests_2_5
-    builder: Linux web_long_running_tests_2_5
+    recipe: flutter/flutter_drone
+    timeout: 60
     properties:
+      shard: web_long_running_tests
+      subshard: "2_5"
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
@@ -461,8 +600,11 @@ targets:
       - bin/
 
   - name: Linux web_long_running_tests_3_5
-    builder: Linux web_long_running_tests_3_5
+    recipe: flutter/flutter_drone
+    timeout: 60
     properties:
+      shard: web_long_running_tests
+      subshard: "3_5"
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
@@ -472,8 +614,11 @@ targets:
       - bin/
 
   - name: Linux web_long_running_tests_4_5
-    builder: Linux web_long_running_tests_4_5
+    recipe: flutter/flutter_drone
+    timeout: 60
     properties:
+      shard: web_long_running_tests
+      subshard: "4_5"
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
@@ -483,8 +628,11 @@ targets:
       - bin/
 
   - name: Linux web_long_running_tests_5_5
-    builder: Linux web_long_running_tests_5_5
+    recipe: flutter/flutter_drone
+    timeout: 60
     properties:
+      shard: web_long_running_tests
+      subshard: "5_5"
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
@@ -493,18 +641,626 @@ targets:
       - packages/
       - bin/
 
-  - name: Linux flutter_plugins
-    builder: Linux flutter_plugins
+  - name: Linux web_tests_0
+    recipe: flutter/flutter_drone
+    timeout: 60
     properties:
+      shard: web_tests
+      subshard: "0"
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
+    runIf:
+      - dev/
+      - packages/
+      - bin/
 
-  - name: Mac build_aar_module_test
-    builder: Mac build_aar_module_test
+  - name: Linux web_tests_1
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      shard: web_tests
+      subshard: "1"
+      tags: >
+        ["framework","hostonly","shard"]
+    scheduler: luci
+    runIf:
+      - dev/
+      - packages/
+      - bin/
+
+  - name: Linux web_tests_2
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      shard: web_tests
+      subshard: "2"
+      tags: >
+        ["framework","hostonly","shard"]
+    scheduler: luci
+    runIf:
+      - dev/
+      - packages/
+      - bin/
+
+  - name: Linux web_tests_3
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      shard: web_tests
+      subshard: "3"
+      tags: >
+        ["framework","hostonly","shard"]
+    scheduler: luci
+    runIf:
+      - dev/
+      - packages/
+      - bin/
+
+  - name: Linux web_tests_4
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      shard: web_tests
+      subshard: "4"
+      tags: >
+        ["framework","hostonly","shard"]
+    scheduler: luci
+    runIf:
+      - dev/
+      - packages/
+      - bin/
+
+  - name: Linux web_tests_5
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      shard: web_tests
+      subshard: "5"
+      tags: >
+        ["framework","hostonly","shard"]
+    scheduler: luci
+    runIf:
+      - dev/
+      - packages/
+      - bin/
+
+  - name: Linux web_tests_6
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      shard: web_tests
+      subshard: "6"
+      tags: >
+        ["framework","hostonly","shard"]
+    scheduler: luci
+    runIf:
+      - dev/
+      - packages/
+      - bin/
+
+  - name: Linux web_tests_7_last
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      shard: web_tests
+      subshard: "7_last"
+      tags: >
+        ["framework","hostonly","shard"]
+    scheduler: luci
+    runIf:
+      - dev/
+      - packages/
+      - bin/
+
+  - name: Linux web_tool_tests
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      shard: web_tool_tests
+      subshard: web
+      tags: >
+        ["framework","hostonly","shard"]
+    scheduler: luci
+    runIf:
+      - dev/
+      - packages/flutter_tools/
+      - bin/
+
+  - name: Linux_android analyzer_benchmark
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
     properties:
       tags: >
+        ["devicelab"]
+      task_name: analyzer_benchmark
+    scheduler: luci
+
+  - name: Linux_android android_defines_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: android_defines_test
+    scheduler: luci
+
+  - name: Linux_android android_obfuscate_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: android_obfuscate_test
+    scheduler: luci
+
+  - name: Linux_android android_stack_size_test
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: android_stack_size_test
+    scheduler: luci
+
+  - name: Linux_android android_view_scroll_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: android_view_scroll_perf__timeline_summary
+    scheduler: luci
+
+  - name: Linux_android animated_image_gc_perf
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: animated_image_gc_perf
+    scheduler: luci
+
+  - name: Linux_android animated_placeholder_perf__e2e_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: animated_placeholder_perf__e2e_summary
+    scheduler: luci
+
+  - name: Linux_android backdrop_filter_perf__e2e_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: backdrop_filter_perf__e2e_summary
+    scheduler: luci
+
+  - name: Linux_android basic_material_app_android__compile
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: basic_material_app_android__compile
+    scheduler: luci
+
+  - name: Linux_android color_filter_and_fade_perf__e2e_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: color_filter_and_fade_perf__e2e_summary
+    scheduler: luci
+
+  - name: Linux_android complex_layout_android__compile
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: complex_layout_android__compile
+    scheduler: luci
+
+  - name: Linux_android complex_layout_android__scroll_smoothness
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: complex_layout_android__scroll_smoothness
+    scheduler: luci
+
+  - name: Linux_android complex_layout_scroll_perf__devtools_memory
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: complex_layout_scroll_perf__devtools_memory
+    scheduler: luci
+
+  - name: Linux_android complex_layout_semantics_perf
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: complex_layout_semantics_perf
+    scheduler: luci
+
+  - name: Linux_android cubic_bezier_perf__e2e_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: cubic_bezier_perf__e2e_summary
+    scheduler: luci
+
+  - name: Linux_android cubic_bezier_perf_sksl_warmup__e2e_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: cubic_bezier_perf_sksl_warmup__e2e_summary
+    scheduler: luci
+
+  - name: Linux_android cull_opacity_perf__e2e_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: cull_opacity_perf__e2e_summary
+    scheduler: luci
+
+  - name: Linux_android devtools_profile_start_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: devtools_profile_start_test
+    scheduler: luci
+
+  - name: Linux_android fast_scroll_heavy_gridview__memory
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: fast_scroll_heavy_gridview__memory
+    scheduler: luci
+
+  - name: Linux_android flutter_engine_group_performance
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: flutter_engine_group_performance
+    scheduler: luci
+
+  - name: Linux_android flutter_gallery__back_button_memory
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: flutter_gallery__back_button_memory
+    scheduler: luci
+
+  - name: Linux_android flutter_gallery__image_cache_memory
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: flutter_gallery__image_cache_memory
+    scheduler: luci
+
+  - name: Linux_android flutter_gallery__memory_nav
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: flutter_gallery__memory_nav
+    scheduler: luci
+
+  - name: Linux_android flutter_gallery__start_up
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: flutter_gallery__start_up
+    scheduler: luci
+
+  - name: Linux_android flutter_gallery__transition_perf
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: flutter_gallery__transition_perf
+    scheduler: luci
+
+  - name: Linux_android flutter_gallery__transition_perf_e2e
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+    scheduler: luci
+
+  - name: Linux_android flutter_gallery__transition_perf_hybrid
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: flutter_gallery__transition_perf_hybrid
+    scheduler: luci
+
+  - name: Linux_android flutter_gallery__transition_perf_with_semantics
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: flutter_gallery__transition_perf_with_semantics
+    scheduler: luci
+
+  - name: Linux_android flutter_gallery_android__compile
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: flutter_gallery_android__compile
+    scheduler: luci
+
+  - name: Linux_android flutter_gallery_sksl_warmup__transition_perf
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: flutter_gallery_sksl_warmup__transition_perf
+    scheduler: luci
+
+  - name: Linux_android flutter_gallery_sksl_warmup__transition_perf_e2e
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: flutter_gallery_sksl_warmup__transition_perf_e2e
+    scheduler: luci
+
+  - name: Linux_android flutter_gallery_v2_chrome_run_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: flutter_gallery_v2_chrome_run_test
+    scheduler: luci
+
+  - name: Linux_android flutter_gallery_v2_web_compile_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: flutter_gallery_v2_web_compile_test
+    scheduler: luci
+
+  - name: Linux_android flutter_test_performance
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: flutter_test_performance
+    scheduler: luci
+
+  - name: Linux_android frame_policy_delay_test_android
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: frame_policy_delay_test_android
+    scheduler: luci
+
+  - name: Linux_android hot_mode_dev_cycle_linux__benchmark
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: hot_mode_dev_cycle_linux__benchmark
+    scheduler: luci
+
+  - name: Linux_android image_list_jit_reported_duration
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: image_list_jit_reported_duration
+    scheduler: luci
+
+  - name: Linux_android image_list_reported_duration
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: image_list_reported_duration
+    scheduler: luci
+
+  - name: Linux_android large_image_changer_perf_android
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: large_image_changer_perf_android
+    scheduler: luci
+
+  - name: Linux_android linux_chrome_dev_mode
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: linux_chrome_dev_mode
+    scheduler: luci
+
+  - name: Linux_android multi_widget_construction_perf__e2e_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: multi_widget_construction_perf__e2e_summary
+    scheduler: luci
+
+  - name: Linux_android new_gallery__crane_perf
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: new_gallery__crane_perf
+    scheduler: luci
+
+  - name: Linux_android picture_cache_perf__e2e_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: picture_cache_perf__e2e_summary
+    scheduler: luci
+
+  - name: Linux_android platform_channels_benchmarks
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: platform_channels_benchmarks
+    scheduler: luci
+
+  - name: Linux_android platform_views_scroll_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: platform_views_scroll_perf__timeline_summary
+    scheduler: luci
+
+  - name: Linux_android routing_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: routing_test
+    scheduler: luci
+
+  - name: Linux_android textfield_perf__e2e_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: textfield_perf__e2e_summary
+    scheduler: luci
+
+  - name: Linux_android web_size__compile_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: web_size__compile_test
+    scheduler: luci
+
+  - name: Mac build_aar_module_test
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      tags: >
         ["devicelab","hostonly"]
+      task_name: build_aar_module_test
     scheduler: luci
     runIf:
       - dev/**
@@ -512,10 +1268,12 @@ targets:
       - bin/**
 
   - name: Mac build_ios_framework_module_test
-    builder: Mac build_ios_framework_module_test
+    recipe: devicelab/devicelab_drone
+    timeout: 60
     properties:
       tags: >
         ["devicelab","hostonly"]
+      task_name: build_ios_framework_module_test
     scheduler: luci
     runIf:
       - dev/**
@@ -523,43 +1281,79 @@ targets:
       - bin/**
 
   - name: Mac build_tests_1_4
-    builder: Mac build_tests_1_4
+    recipe: flutter/flutter_drone
+    timeout: 60
     properties:
+      add_recipes_cq: "true"
+      shard: build_tests
+      subshard: "1_4"
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
 
   - name: Mac build_tests_2_4
-    builder: Mac build_tests_2_4
+    recipe: flutter/flutter_drone
+    timeout: 60
     properties:
+      add_recipes_cq: "true"
+      shard: build_tests
+      subshard: "2_4"
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
 
   - name: Mac build_tests_3_4
-    builder: Mac build_tests_3_4
+    recipe: flutter/flutter_drone
+    timeout: 60
     properties:
+      add_recipes_cq: "true"
+      shard: build_tests
+      subshard: "3_4"
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
 
   - name: Mac build_tests_4_4
-    builder: Mac build_tests_4_4
+    recipe: flutter/flutter_drone
+    timeout: 60
     properties:
+      add_recipes_cq: "true"
+      shard: build_tests
+      subshard: "4_4"
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
 
   - name: Mac customer_testing
-    builder: Mac customer_testing
+    recipe: flutter/flutter
+    timeout: 60
     properties:
+      add_recipes_cq: "true"
+      validation: customer_testing
+      validation_name: Customer testing
       tags: >
         ["framework","hostonly"]
     scheduler: luci
 
-  - name: Mac framework_tests_libraries
-    builder: Mac framework_tests_libraries
+  - name: Mac dart_plugin_registry_test
+    recipe: devicelab/devicelab_drone
+    timeout: 60
     properties:
+      tags: >
+        ["devicelab","hostonly"]
+      task_name: dart_plugin_registry_test
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+
+  - name: Mac framework_tests_libraries
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      shard: framework_tests
+      subshard: libraries
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
@@ -576,8 +1370,11 @@ targets:
       - bin/**
 
   - name: Mac framework_tests_misc
-    builder: Mac framework_tests_misc
+    recipe: flutter/flutter_drone
+    timeout: 60
     properties:
+      shard: framework_tests
+      subshard: misc
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
@@ -594,8 +1391,11 @@ targets:
       - bin/**
 
   - name: Mac framework_tests_widgets
-    builder: Mac framework_tests_widgets
+    recipe: flutter/flutter_drone
+    timeout: 60
     properties:
+      shard: framework_tests
+      subshard: widgets
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
@@ -612,40 +1412,48 @@ targets:
       - bin/**
 
   - name: Mac gradle_plugin_bundle_test
-    builder: Mac gradle_plugin_bundle_test
+    recipe: devicelab/devicelab_drone
+    timeout: 60
     properties:
       tags: >
         ["devicelab","hostonly"]
+      task_name: gradle_plugin_bundle_test
     scheduler: luci
     runIf:
       - dev/**
       - bin/**
 
   - name: Mac gradle_plugin_fat_apk_test
-    builder: Mac gradle_plugin_fat_apk_test
+    recipe: devicelab/devicelab_drone
+    timeout: 60
     properties:
       tags: >
         ["devicelab","hostonly"]
+      task_name: gradle_plugin_fat_apk_test
     scheduler: luci
     runIf:
       - dev/**
       - bin/**
 
   - name: Mac gradle_plugin_light_apk_test
-    builder: Mac gradle_plugin_light_apk_test
+    recipe: devicelab/devicelab_drone
+    timeout: 60
     properties:
       tags: >
         ["devicelab","hostonly"]
+      task_name: gradle_plugin_light_apk_test
     scheduler: luci
     runIf:
       - dev/**
       - bin/**
 
   - name: Mac module_custom_host_app_name_test
-    builder: Mac module_custom_host_app_name_test
+    recipe: devicelab/devicelab_drone
+    timeout: 60
     properties:
       tags: >
         ["devicelab","hostonly"]
+      task_name: module_custom_host_app_name_test
     scheduler: luci
     runIf:
       - dev/**
@@ -653,10 +1461,12 @@ targets:
       - bin/**
 
   - name: Mac module_host_with_custom_build_test
-    builder: Mac module_host_with_custom_build_test
+    recipe: devicelab/devicelab_drone
+    timeout: 60
     properties:
       tags: >
         ["devicelab","hostonly"]
+      task_name: module_host_with_custom_build_test
     scheduler: luci
     runIf:
       - dev/**
@@ -664,10 +1474,12 @@ targets:
       - bin/**
 
   - name: Mac module_test
-    builder: Mac module_test
+    recipe: devicelab/devicelab_drone
+    timeout: 60
     properties:
       tags: >
         ["devicelab","hostonly"]
+      task_name: module_test
     scheduler: luci
     runIf:
       - dev/**
@@ -675,11 +1487,26 @@ targets:
       - bin/**
 
   - name: Mac module_test_ios
-    builder: Mac module_test_ios
+    recipe: devicelab/devicelab_drone
     bringup: true
+    timeout: 60
     properties:
       tags: >
         ["devicelab","hostonly"]
+      task_name: module_test_ios
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+
+  - name: Mac plugin_dependencies_test
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","hostonly"]
+      task_name: plugin_dependencies_test
     scheduler: luci
     runIf:
       - dev/**
@@ -687,65 +1514,24 @@ targets:
       - bin/**
 
   - name: Mac plugin_lint_mac
-    builder: Mac plugin_lint_mac
+    recipe: devicelab/devicelab_drone
+    timeout: 60
     properties:
       tags: >
         ["devicelab","hostonly"]
+      task_name: plugin_lint_mac
     scheduler: luci
     runIf:
       - dev/**
-      - bin/**
-
-  - name: Mac plugin_dependencies_test
-    builder: Mac plugin_dependencies_test
-    bringup: true
-    properties:
-      tags: >
-        ["devicelab","hostonly"]
-    scheduler: luci
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
       - bin/**
 
   - name: Mac plugin_test
-    builder: Mac plugin_test
+    recipe: devicelab/devicelab_drone
+    timeout: 60
     properties:
       tags: >
         ["devicelab","hostonly"]
-    scheduler: luci
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-
-  - name: Mac dart_plugin_registry_test
-    builder: Mac dart_plugin_registry_test
-    properties:
-      tags: >
-        ["devicelab","hostonly"]
-    scheduler: luci
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-
-  - name: Mac tool_tests_general
-    builder: Mac tool_tests_general
-    properties:
-      tags: >
-        ["framework","hostonly","shard"]
-    scheduler: luci
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-
-  - name: Windows tool_tests_commands
-    builder: Windows tool_tests_commands
-    properties:
-      tags: >
-        ["framework","hostonly","shard"]
+      task_name: plugin_test
     scheduler: luci
     runIf:
       - dev/**
@@ -753,8 +1539,12 @@ targets:
       - bin/**
 
   - name: Mac tool_integration_tests_1_4
-    builder: Mac tool_integration_tests_1_4
+    recipe: flutter/flutter_drone
+    timeout: 60
     properties:
+      add_recipes_cq: "true"
+      shard: tool_integration_tests
+      subshard: "1_4"
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
@@ -764,8 +1554,12 @@ targets:
       - bin/**
 
   - name: Mac tool_integration_tests_2_4
-    builder: Mac tool_integration_tests_2_4
+    recipe: flutter/flutter_drone
+    timeout: 60
     properties:
+      add_recipes_cq: "true"
+      shard: tool_integration_tests
+      subshard: "2_4"
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
@@ -775,8 +1569,12 @@ targets:
       - bin/**
 
   - name: Mac tool_integration_tests_3_4
-    builder: Mac tool_integration_tests_3_4
+    recipe: flutter/flutter_drone
+    timeout: 60
     properties:
+      add_recipes_cq: "true"
+      shard: tool_integration_tests
+      subshard: "3_4"
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
@@ -786,8 +1584,12 @@ targets:
       - bin/**
 
   - name: Mac tool_integration_tests_4_4
-    builder: Mac tool_integration_tests_4_4
+    recipe: flutter/flutter_drone
+    timeout: 60
     properties:
+      add_recipes_cq: "true"
+      shard: tool_integration_tests
+      subshard: "4_4"
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
@@ -795,11 +1597,52 @@ targets:
       - dev/**
       - packages/flutter_tools/**
       - bin/**
+
+  - name: Mac tool_tests_commands
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      shard: tool_tests
+      subshard: commands
+      tags: >
+        ["framework","hostonly","shard"]
+    scheduler: luci
+
+  - name: Mac tool_tests_general
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      shard: tool_tests
+      subshard: general
+      tags: >
+        ["framework","hostonly","shard"]
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+
+  - name: Mac verify_binaries_codesigned
+    enabled_branches:
+      - dev
+      - beta
+      - stable
+    recipe: flutter/flutter
+    timeout: 60
+    properties:
+      tags: >
+        ["framework","hostonly","shard"]
+      validation: verify_binaries_codesigned
+      validation_name: Verify binaries codesigned
 
   - name: Mac web_tool_tests
-    builder: Mac web_tool_tests
-    postsubmit: false
+    recipe: flutter/flutter_drone
+    timeout: 60
     properties:
+      shard: web_tool_tests
+      subshard: web
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
@@ -808,11 +1651,867 @@ targets:
       - packages/flutter_tools/**
       - bin/**
 
-  - name: Windows build_aar_module_test
-    builder: Windows build_aar_module_test
+  - name: Mac_android android_semantics_integration_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
     properties:
       tags: >
+        ["devicelab"]
+      task_name: android_semantics_integration_test
+    scheduler: luci
+
+  - name: Mac_android backdrop_filter_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: backdrop_filter_perf__timeline_summary
+    scheduler: luci
+
+  - name: Mac_android channels_integration_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: channels_integration_test
+    scheduler: luci
+
+  - name: Mac_android color_filter_and_fade_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: color_filter_and_fade_perf__timeline_summary
+    scheduler: luci
+
+  - name: Mac_android complex_layout__start_up
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: complex_layout__start_up
+    scheduler: luci
+
+  - name: Mac_android complex_layout_scroll_perf__memory
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: complex_layout_scroll_perf__memory
+    scheduler: luci
+
+  - name: Mac_android complex_layout_scroll_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: complex_layout_scroll_perf__timeline_summary
+    scheduler: luci
+
+  - name: Mac_android cubic_bezier_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: cubic_bezier_perf__timeline_summary
+    scheduler: luci
+
+  - name: Mac_android cubic_bezier_perf_sksl_warmup__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: cubic_bezier_perf_sksl_warmup__timeline_summary
+    scheduler: luci
+
+  - name: Mac_android cull_opacity_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: cull_opacity_perf__timeline_summary
+    scheduler: luci
+
+  - name: Mac_android drive_perf_debug_warning
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: drive_perf_debug_warning
+    scheduler: luci
+
+  - name: Mac_android embedded_android_views_integration_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: embedded_android_views_integration_test
+    scheduler: luci
+
+  - name: Mac_android external_ui_integration_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: external_ui_integration_test
+    scheduler: luci
+
+  - name: Mac_android fading_child_animation_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: fading_child_animation_perf__timeline_summary
+    scheduler: luci
+
+  - name: Mac_android fast_scroll_large_images__memory
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: fast_scroll_large_images__memory
+    scheduler: luci
+
+  - name: Mac_android flavors_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: flavors_test
+    scheduler: luci
+
+  - name: Mac_android flutter_view__start_up
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: flutter_view__start_up
+    scheduler: luci
+
+  - name: Mac_android fullscreen_textfield_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: fullscreen_textfield_perf__timeline_summary
+    scheduler: luci
+
+  - name: Mac_android hello_world__memory
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: hello_world__memory
+    scheduler: luci
+
+  - name: Mac_android hello_world_android__compile
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: hello_world_android__compile
+    scheduler: luci
+
+  - name: Mac_android home_scroll_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: home_scroll_perf__timeline_summary
+    scheduler: luci
+
+  - name: Mac_android hot_mode_dev_cycle__benchmark
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: hot_mode_dev_cycle__benchmark
+    scheduler: luci
+
+  - name: Mac_android hybrid_android_views_integration_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: hybrid_android_views_integration_test
+    scheduler: luci
+
+  - name: Mac_android imagefiltered_transform_animation_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: imagefiltered_transform_animation_perf__timeline_summary
+    scheduler: luci
+
+  - name: Mac_android integration_test_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: integration_test_test
+    scheduler: luci
+
+  - name: Mac_android integration_ui_driver
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: integration_ui_driver
+    scheduler: luci
+
+  - name: Mac_android integration_ui_frame_number
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: integration_ui_frame_number
+    scheduler: luci
+
+  - name: Mac_android integration_ui_keyboard_resize
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: integration_ui_keyboard_resize
+    scheduler: luci
+
+  - name: Mac_android integration_ui_screenshot
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: integration_ui_screenshot
+    scheduler: luci
+
+  - name: Mac_android integration_ui_textfield
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: integration_ui_textfield
+    scheduler: luci
+
+  - name: Mac_android microbenchmarks
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: microbenchmarks
+    scheduler: luci
+
+  - name: Mac_android new_gallery__transition_perf
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: new_gallery__transition_perf
+    scheduler: luci
+
+  - name: Mac_android picture_cache_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: picture_cache_perf__timeline_summary
+    scheduler: luci
+
+  - name: Mac_android platform_channel_sample_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: platform_channel_sample_test
+    scheduler: luci
+
+  - name: Mac_android platform_interaction_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: platform_interaction_test
+    scheduler: luci
+
+  - name: Mac_android platform_view__start_up
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: platform_view__start_up
+    scheduler: luci
+
+  - name: Mac_android run_release_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: run_release_test
+    scheduler: luci
+
+  - name: Mac_android service_extensions_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: service_extensions_test
+    scheduler: luci
+
+  - name: Mac_android smoke_catalina_start_up
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: smoke_catalina_start_up
+    scheduler: luci
+
+  - name: Mac_android textfield_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: textfield_perf__timeline_summary
+    scheduler: luci
+
+  - name: Mac_android tiles_scroll_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: tiles_scroll_perf__timeline_summary
+    scheduler: luci
+
+  - name: Mac_ios animation_with_microtasks_perf_ios__timeline_summary
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: animation_with_microtasks_perf_ios__timeline_summary
+    scheduler: luci
+
+  - name: Mac_ios backdrop_filter_perf_ios__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: backdrop_filter_perf_ios__timeline_summary
+    scheduler: luci
+
+  - name: Mac_ios basic_material_app_ios__compile
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: basic_material_app_ios__compile
+    scheduler: luci
+
+  - name: Mac_ios channels_integration_test_ios
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: channels_integration_test_ios
+    scheduler: luci
+
+  - name: Mac_ios complex_layout_ios__compile
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: complex_layout_ios__compile
+    scheduler: luci
+
+  - name: Mac_ios complex_layout_ios__start_up
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: complex_layout_ios__start_up
+    scheduler: luci
+
+  - name: Mac_ios complex_layout_scroll_perf_ios__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: complex_layout_scroll_perf_ios__timeline_summary
+    scheduler: luci
+
+  - name: Mac_ios cubic_bezier_perf_ios_sksl_warmup__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: cubic_bezier_perf_ios_sksl_warmup__timeline_summary
+    scheduler: luci
+
+  - name: Mac_ios external_ui_integration_test_ios
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: external_ui_integration_test_ios
+    scheduler: luci
+
+  - name: Mac_ios flavors_test_ios
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: flavors_test_ios
+    scheduler: luci
+
+  - name: Mac_ios flutter_gallery__transition_perf_e2e_ios
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: flutter_gallery__transition_perf_e2e_ios
+    scheduler: luci
+
+  - name: Mac_ios flutter_gallery_ios__compile
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: flutter_gallery_ios__compile
+    scheduler: luci
+
+  - name: Mac_ios flutter_gallery_ios__start_up
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: flutter_gallery_ios__start_up
+    scheduler: luci
+
+  - name: Mac_ios flutter_gallery_ios__transition_perf
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: flutter_gallery_ios__transition_perf
+    scheduler: luci
+
+  - name: Mac_ios flutter_gallery_ios_sksl_warmup__transition_perf
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: flutter_gallery_ios_sksl_warmup__transition_perf
+    scheduler: luci
+
+  - name: Mac_ios flutter_view_ios__start_up
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: flutter_view_ios__start_up
+    scheduler: luci
+
+  - name: Mac_ios hello_world_ios__compile
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: hello_world_ios__compile
+    scheduler: luci
+
+  - name: Mac_ios hot_mode_dev_cycle_macos_target__benchmark
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: hot_mode_dev_cycle_macos_target__benchmark
+    scheduler: luci
+
+  - name: Mac_ios integration_test_test_ios
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: integration_test_test_ios
+    scheduler: luci
+
+  - name: Mac_ios integration_ui_ios_driver
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: integration_ui_ios_driver
+    scheduler: luci
+
+  - name: Mac_ios integration_ui_ios_frame_number
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: integration_ui_ios_frame_number
+    scheduler: luci
+
+  - name: Mac_ios integration_ui_ios_keyboard_resize
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: integration_ui_ios_keyboard_resize
+    scheduler: luci
+
+  - name: Mac_ios integration_ui_ios_screenshot
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: integration_ui_ios_screenshot
+    scheduler: luci
+
+  - name: Mac_ios integration_ui_ios_textfield
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: integration_ui_ios_textfield
+    scheduler: luci
+
+  - name: Mac_ios ios_app_with_extensions_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: ios_app_with_extensions_test
+    scheduler: luci
+
+  - name: Mac_ios ios_content_validation_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: ios_content_validation_test
+    scheduler: luci
+
+  - name: Mac_ios ios_defines_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: ios_defines_test
+    scheduler: luci
+
+  - name: Mac_ios ios_platform_view_tests
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: ios_platform_view_tests
+    scheduler: luci
+
+  - name: Mac_ios large_image_changer_perf_ios
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: large_image_changer_perf_ios
+    scheduler: luci
+
+  - name: Mac_ios macos_chrome_dev_mode
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: macos_chrome_dev_mode
+    scheduler: luci
+
+  - name: Mac_ios microbenchmarks_ios
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: microbenchmarks_ios
+    scheduler: luci
+
+  - name: Mac_ios new_gallery_ios__transition_perf
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: new_gallery_ios__transition_perf
+    scheduler: luci
+
+  - name: Mac_ios platform_channel_sample_test_ios
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: platform_channel_sample_test_ios
+    scheduler: luci
+
+  - name: Mac_ios platform_channel_sample_test_swift
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: platform_channel_sample_test_swift
+    scheduler: luci
+
+  - name: Mac_ios platform_channels_benchmarks_ios
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: platform_channels_benchmarks_ios
+    scheduler: luci
+
+  - name: Mac_ios platform_interaction_test_ios
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: platform_interaction_test_ios
+    scheduler: luci
+
+  - name: Mac_ios platform_view_ios__start_up
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: platform_view_ios__start_up
+    scheduler: luci
+
+  - name: Mac_ios platform_views_scroll_perf_ios__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: platform_views_scroll_perf_ios__timeline_summary
+    scheduler: luci
+
+  - name: Mac_ios post_backdrop_filter_perf_ios__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: post_backdrop_filter_perf_ios__timeline_summary
+    scheduler: luci
+
+  - name: Mac_ios simple_animation_perf_ios
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: simple_animation_perf_ios
+    scheduler: luci
+
+  - name: Mac_ios smoke_catalina_hot_mode_dev_cycle_ios__benchmark
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: smoke_catalina_hot_mode_dev_cycle_ios__benchmark
+    scheduler: luci
+
+  - name: Mac_ios tiles_scroll_perf_ios__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: tiles_scroll_perf_ios__timeline_summary
+    scheduler: luci
+
+  - name: Mac_ios32 flutter_gallery__transition_perf_e2e_ios32
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 90
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: flutter_gallery__transition_perf_e2e_ios32
+    scheduler: luci
+
+  - name: Mac_ios32 native_ui_tests_ios32
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 90
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: native_ui_tests_ios32
+    scheduler: luci
+
+  - name: Windows build_aar_module_test
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      tags: >
         ["devicelab","hostonly"]
+      task_name: build_aar_module_test
     scheduler: luci
     runIf:
       - dev/**
@@ -820,36 +2519,55 @@ targets:
       - bin/**
 
   - name: Windows build_tests_1_3
-    builder: Windows build_tests_1_3
+    recipe: flutter/flutter_drone
+    timeout: 60
     properties:
+      add_recipes_cq: "true"
+      shard: build_tests
+      subshard: "1_3"
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
 
   - name: Windows build_tests_2_3
-    builder: Windows build_tests_2_3
+    recipe: flutter/flutter_drone
+    timeout: 60
     properties:
+      add_recipes_cq: "true"
+      shard: build_tests
+      subshard: "2_3"
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
 
   - name: Windows build_tests_3_3
-    builder: Windows build_tests_3_3
+    recipe: flutter/flutter_drone
+    timeout: 60
     properties:
+      add_recipes_cq: "true"
+      shard: build_tests
+      subshard: "3_3"
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
 
   - name: Windows customer_testing
-    builder: Windows customer_testing
+    recipe: flutter/flutter
+    timeout: 60
     properties:
+      add_recipes_cq: "true"
+      validation: customer_testing
+      validation_name: Customer testing
       tags: >
         ["framework","hostonly"]
     scheduler: luci
 
   - name: Windows framework_tests_libraries
-    builder: Windows framework_tests_libraries
+    recipe: flutter/flutter_drone
+    timeout: 60
     properties:
+      shard: framework_tests
+      subshard: libraries
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
@@ -866,8 +2584,11 @@ targets:
       - bin/
 
   - name: Windows framework_tests_misc
-    builder: Windows framework_tests_misc
+    recipe: flutter/flutter_drone
+    timeout: 60
     properties:
+      shard: framework_tests
+      subshard: misc
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
@@ -884,8 +2605,11 @@ targets:
       - bin/
 
   - name: Windows framework_tests_widgets
-    builder: Windows framework_tests_widgets
+    recipe: flutter/flutter_drone
+    timeout: 60
     properties:
+      shard: framework_tests
+      subshard: widgets
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
@@ -902,41 +2626,57 @@ targets:
       - bin/
 
   - name: Windows gradle_plugin_bundle_test
-    builder: Windows gradle_plugin_bundle_test
+    recipe: devicelab/devicelab_drone
+    timeout: 60
     properties:
       tags: >
         ["devicelab","hostonly"]
+      task_name: gradle_plugin_bundle_test
     scheduler: luci
     runIf:
       - dev/**
       - bin/**
+
+  - name: Windows gradle_plugin_fat_apk_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","hostonly"]
+      task_name: gradle_plugin_fat_apk_test
+    scheduler: luci
 
   - name: Windows gradle_plugin_light_apk_test
-    builder: Windows gradle_plugin_light_apk_test
+    recipe: devicelab/devicelab_drone
+    timeout: 60
     properties:
       tags: >
         ["devicelab","hostonly"]
+      task_name: gradle_plugin_light_apk_test
     scheduler: luci
     runIf:
       - dev/**
       - bin/**
+
+  - name: Windows hot_mode_dev_cycle_win_target__benchmark
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","hostonly"]
+      task_name: hot_mode_dev_cycle_win_target__benchmark
+    scheduler: luci
 
   - name: Windows module_custom_host_app_name_test
-    builder: Windows module_custom_host_app_name_test
+    recipe: devicelab/devicelab_drone
+    timeout: 60
     properties:
       tags: >
         ["devicelab","hostonly"]
-    scheduler: luci
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-
-  - name: Windows module_test
-    builder: Windows module_test
-    properties:
-      tags: >
-        ["devicelab","hostonly"]
+      task_name: module_custom_host_app_name_test
     scheduler: luci
     runIf:
       - dev/**
@@ -944,10 +2684,25 @@ targets:
       - bin/**
 
   - name: Windows module_host_with_custom_build_test
-    builder: Windows module_host_with_custom_build_test
+    recipe: devicelab/devicelab_drone
+    timeout: 60
     properties:
       tags: >
         ["devicelab","hostonly"]
+      task_name: module_host_with_custom_build_test
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+
+  - name: Windows module_test
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","hostonly"]
+      task_name: module_test
     scheduler: luci
     runIf:
       - dev/**
@@ -955,10 +2710,13 @@ targets:
       - bin/**
 
   - name: Windows plugin_dependencies_test
-    builder: Windows plugin_dependencies_test
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    timeout: 60
     properties:
       tags: >
         ["devicelab","hostonly"]
+      task_name: plugin_dependencies_test
     scheduler: luci
     runIf:
       - dev/**
@@ -966,21 +2724,12 @@ targets:
       - bin/**
 
   - name: Windows plugin_test
-    builder: Windows plugin_test
+    recipe: devicelab/devicelab_drone
+    timeout: 60
     properties:
       tags: >
         ["devicelab","hostonly"]
-    scheduler: luci
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-
-  - name: Windows tool_tests_general
-    builder: Windows tool_tests_general
-    properties:
-      tags: >
-        ["framework","hostonly","shard"]
+      task_name: plugin_test
     scheduler: luci
     runIf:
       - dev/**
@@ -988,8 +2737,12 @@ targets:
       - bin/**
 
   - name: Windows tool_integration_tests_1_5
-    builder: Windows tool_integration_tests_1_5
+    recipe: flutter/flutter_drone
+    timeout: 60
     properties:
+      add_recipes_cq: "true"
+      shard: tool_integration_tests
+      subshard: "1_5"
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
@@ -999,8 +2752,12 @@ targets:
       - bin/**
 
   - name: Windows tool_integration_tests_2_5
-    builder: Windows tool_integration_tests_2_5
+    recipe: flutter/flutter_drone
+    timeout: 60
     properties:
+      add_recipes_cq: "true"
+      shard: tool_integration_tests
+      subshard: "2_5"
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
@@ -1010,8 +2767,12 @@ targets:
       - bin/**
 
   - name: Windows tool_integration_tests_3_5
-    builder: Windows tool_integration_tests_3_5
+    recipe: flutter/flutter_drone
+    timeout: 60
     properties:
+      add_recipes_cq: "true"
+      shard: tool_integration_tests
+      subshard: "3_5"
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
@@ -1021,8 +2782,12 @@ targets:
       - bin/**
 
   - name: Windows tool_integration_tests_4_5
-    builder: Windows tool_integration_tests_4_5
+    recipe: flutter/flutter_drone
+    timeout: 60
     properties:
+      add_recipes_cq: "true"
+      shard: tool_integration_tests
+      subshard: "4_5"
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
@@ -1032,8 +2797,42 @@ targets:
       - bin/**
 
   - name: Windows tool_integration_tests_5_5
-    builder: Windows tool_integration_tests_5_5
+    recipe: flutter/flutter_drone
+    timeout: 60
     properties:
+      add_recipes_cq: "true"
+      shard: tool_integration_tests
+      subshard: "5_5"
+      tags: >
+        ["framework","hostonly","shard"]
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+
+  - name: Windows tool_tests_commands
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      shard: tool_tests
+      subshard: commands
+      tags: >
+        ["framework","hostonly","shard"]
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+
+  - name: Windows tool_tests_general
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      shard: tool_tests
+      subshard: general
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
@@ -1043,8 +2842,11 @@ targets:
       - bin/**
 
   - name: Windows web_tool_tests
-    builder: Windows web_tool_tests
+    recipe: flutter/flutter_drone
+    timeout: 60
     properties:
+      shard: web_tool_tests
+      subshard: web
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
@@ -1053,1167 +2855,72 @@ targets:
       - packages/flutter_tools/**
       - bin/**
 
-  - name: Linux analyzer_benchmark
-    builder: Linux analyzer_benchmark
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux android_defines_test
-    builder: Linux android_defines_test
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux android_obfuscate_test
-    builder: Linux android_obfuscate_test
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux android_stack_size_test
-    builder: Linux android_stack_size_test
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux android_view_scroll_perf__timeline_summary
-    builder: Linux android_view_scroll_perf__timeline_summary
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux animated_placeholder_perf__e2e_summary
-    builder: Linux animated_placeholder_perf__e2e_summary
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux backdrop_filter_perf__e2e_summary
-    builder: Linux backdrop_filter_perf__e2e_summary
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux basic_material_app_android__compile
-    builder: Linux basic_material_app_android__compile
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux color_filter_and_fade_perf__e2e_summary
-    builder: Linux color_filter_and_fade_perf__e2e_summary
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux complex_layout_android__compile
-    builder: Linux complex_layout_android__compile
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux complex_layout_android__scroll_smoothness
-    builder: Linux complex_layout_android__scroll_smoothness
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux complex_layout_scroll_perf__devtools_memory
-    builder: Linux complex_layout_scroll_perf__devtools_memory
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux complex_layout_semantics_perf
-    builder: Linux complex_layout_semantics_perf
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux cubic_bezier_perf__e2e_summary
-    builder: Linux cubic_bezier_perf__e2e_summary
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux cubic_bezier_perf_sksl_warmup__e2e_summary
-    builder: Linux cubic_bezier_perf_sksl_warmup__e2e_summary
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux cull_opacity_perf__e2e_summary
-    builder: Linux cull_opacity_perf__e2e_summary
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux devtools_profile_start_test
-    builder: Linux devtools_profile_start_test
-    bringup: true
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux docs_test
-    builder: Linux docs_test
-    presubmit: false
-    properties:
-      tags: >
-        ["framework","hostonly"]
-    scheduler: luci
-
-  - name: Linux docs_publish
-    builder: Linux docs_publish
-    presubmit: false
-    properties:
-      tags: >
-        ["framework","hostonly"]
-    scheduler: luci
-
-  - name: Linux fast_scroll_heavy_gridview__memory
-    builder: Linux fast_scroll_heavy_gridview__memory
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux flutter_engine_group_performance
-    builder: Linux flutter_engine_group_performance
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux flutter_gallery__back_button_memory
-    builder: Linux flutter_gallery__back_button_memory
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux flutter_gallery__image_cache_memory
-    builder: Linux flutter_gallery__image_cache_memory
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux flutter_gallery__memory_nav
-    builder: Linux flutter_gallery__memory_nav
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux flutter_gallery__start_up
-    builder: Linux flutter_gallery__start_up
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux flutter_gallery__transition_perf_e2e
-    builder: Linux flutter_gallery__transition_perf_e2e
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/83298
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux flutter_gallery__transition_perf_hybrid
-    builder: Linux flutter_gallery__transition_perf_hybrid
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux flutter_gallery__transition_perf_with_semantics
-    builder: Linux flutter_gallery__transition_perf_with_semantics
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux flutter_gallery__transition_perf
-    builder: Linux flutter_gallery__transition_perf
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux flutter_gallery_android__compile
-    builder: Linux flutter_gallery_android__compile
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux flutter_gallery_sksl_warmup__transition_perf_e2e
-    builder: Linux flutter_gallery_sksl_warmup__transition_perf_e2e
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/83298
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux flutter_gallery_sksl_warmup__transition_perf
-    builder: Linux flutter_gallery_sksl_warmup__transition_perf
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux flutter_gallery_v2_chrome_run_test
-    builder: Linux flutter_gallery_v2_chrome_run_test
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux flutter_gallery_v2_web_compile_test
-    builder: Linux flutter_gallery_v2_web_compile_test
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux flutter_test_performance
-    builder: Linux flutter_test_performance
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux frame_policy_delay_test_android
-    builder: Linux frame_policy_delay_test_android
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux hot_mode_dev_cycle_linux__benchmark
-    builder: Linux hot_mode_dev_cycle_linux__benchmark
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux image_list_jit_reported_duration
-    builder: Linux image_list_jit_reported_duration
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux image_list_reported_duration
-    builder: Linux image_list_reported_duration
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux large_image_changer_perf_android
-    builder: Linux large_image_changer_perf_android
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux animated_image_gc_perf
-    builder: Linux animated_image_gc_perf
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux linux_chrome_dev_mode
-    builder: Linux linux_chrome_dev_mode
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux multi_widget_construction_perf__e2e_summary
-    builder: Linux multi_widget_construction_perf__e2e_summary
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux new_gallery__crane_perf
-    builder: Linux new_gallery__crane_perf
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux picture_cache_perf__e2e_summary
-    builder: Linux picture_cache_perf__e2e_summary
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux platform_channels_benchmarks
-    builder: Linux platform_channels_benchmarks
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux platform_views_scroll_perf__timeline_summary
-    builder: Linux platform_views_scroll_perf__timeline_summary
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux routing_test
-    builder: Linux routing_test
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux technical_debt__cost
-    builder: Linux technical_debt__cost
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab","hostonly"]
-    scheduler: luci
-
-  - name: Linux textfield_perf__e2e_summary
-    builder: Linux textfield_perf__e2e_summary
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Linux web_benchmarks_canvaskit
-    builder: Linux web_benchmarks_canvaskit
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab","hostonly"]
-    scheduler: luci
-
-  - name: Linux web_size__compile_test
-    builder: Linux web_size__compile_test
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_android android_semantics_integration_test
-    builder: Mac_android android_semantics_integration_test
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_android backdrop_filter_perf__timeline_summary
-    builder: Mac_android backdrop_filter_perf__timeline_summary
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_android channels_integration_test
-    builder: Mac_android channels_integration_test
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_android color_filter_and_fade_perf__timeline_summary
-    builder: Mac_android color_filter_and_fade_perf__timeline_summary
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_android complex_layout__start_up
-    builder: Mac_android complex_layout__start_up
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_android complex_layout_scroll_perf__memory
-    builder: Mac_android complex_layout_scroll_perf__memory
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_android complex_layout_scroll_perf__timeline_summary
-    builder: Mac_android complex_layout_scroll_perf__timeline_summary
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_android cubic_bezier_perf__timeline_summary
-    builder: Mac_android cubic_bezier_perf__timeline_summary
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_android cubic_bezier_perf_sksl_warmup__timeline_summary
-    builder: Mac_android cubic_bezier_perf_sksl_warmup__timeline_summary
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_android cull_opacity_perf__timeline_summary
-    builder: Mac_android cull_opacity_perf__timeline_summary
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_android drive_perf_debug_warning
-    builder: Mac_android drive_perf_debug_warning
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_android embedded_android_views_integration_test
-    builder: Mac_android embedded_android_views_integration_test
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_android external_ui_integration_test
-    builder: Mac_android external_ui_integration_test
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_android fading_child_animation_perf__timeline_summary
-    builder: Mac_android fading_child_animation_perf__timeline_summary
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_android fast_scroll_large_images__memory
-    builder: Mac_android fast_scroll_large_images__memory
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_android flavors_test
-    builder: Mac_android flavors_test
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_android flutter_view__start_up
-    builder: Mac_android flutter_view__start_up
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_android fullscreen_textfield_perf__timeline_summary
-    builder: Mac_android fullscreen_textfield_perf__timeline_summary
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_android hello_world__memory
-    builder: Mac_android hello_world__memory
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_android hello_world_android__compile
-    builder: Mac_android hello_world_android__compile
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_android home_scroll_perf__timeline_summary
-    builder: Mac_android home_scroll_perf__timeline_summary
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_android hot_mode_dev_cycle__benchmark
-    builder: Mac_android hot_mode_dev_cycle__benchmark
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_android hybrid_android_views_integration_test
-    builder: Mac_android hybrid_android_views_integration_test
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_android imagefiltered_transform_animation_perf__timeline_summary
-    builder: Mac_android imagefiltered_transform_animation_perf__timeline_summary
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_android integration_ui_driver
-    builder: Mac_android integration_ui_driver
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_android integration_ui_keyboard_resize
-    builder: Mac_android integration_ui_keyboard_resize
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_android integration_ui_frame_number
-    builder: Mac_android integration_ui_frame_number
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_android integration_ui_screenshot
-    builder: Mac_android integration_ui_screenshot
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_android integration_ui_textfield
-    builder: Mac_android integration_ui_textfield
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_android integration_test_test
-    builder: Mac_android integration_test_test
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_android microbenchmarks
-    builder: Mac_android microbenchmarks
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_android new_gallery__transition_perf
-    builder: Mac_android new_gallery__transition_perf
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_android picture_cache_perf__timeline_summary
-    builder: Mac_android picture_cache_perf__timeline_summary
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_android platform_channel_sample_test
-    builder: Mac_android platform_channel_sample_test
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_android platform_interaction_test
-    builder: Mac_android platform_interaction_test
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_android platform_view__start_up
-    builder: Mac_android platform_view__start_up
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_android run_release_test
-    builder: Mac_android run_release_test
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_android service_extensions_test
-    builder: Mac_android service_extensions_test
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_android smoke_catalina_start_up
-    builder: Mac_android smoke_catalina_start_up
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_android textfield_perf__timeline_summary
-    builder: Mac_android textfield_perf__timeline_summary
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_android tiles_scroll_perf__timeline_summary
-    builder: Mac_android tiles_scroll_perf__timeline_summary
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac tool_tests_commands
-    builder: Mac tool_tests_commands
-    presubmit: false
-    properties:
-      tags: >
-        ["framework","hostonly","shard"]
-    scheduler: luci
-
-  - name: Mac_ios backdrop_filter_perf_ios__timeline_summary
-    builder: Mac_ios backdrop_filter_perf_ios__timeline_summary
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_ios basic_material_app_ios__compile
-    builder: Mac_ios basic_material_app_ios__compile
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_ios channels_integration_test_ios
-    builder: Mac_ios channels_integration_test_ios
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_ios complex_layout_ios__compile
-    builder: Mac_ios complex_layout_ios__compile
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_ios complex_layout_ios__start_up
-    builder: Mac_ios complex_layout_ios__start_up
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_ios complex_layout_scroll_perf_ios__timeline_summary
-    builder: Mac_ios complex_layout_scroll_perf_ios__timeline_summary
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_ios external_ui_integration_test_ios
-    builder: Mac_ios external_ui_integration_test_ios
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_ios flavors_test_ios
-    builder: Mac_ios flavors_test_ios
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_ios flutter_gallery__transition_perf_e2e_ios
-    builder: Mac_ios flutter_gallery__transition_perf_e2e_ios
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_ios flutter_gallery__transition_perf_e2e_ios32
-    builder: Mac_ios flutter_gallery__transition_perf_e2e_ios32
-    bringup: true
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_ios flutter_gallery_ios__compile
-    builder: Mac_ios flutter_gallery_ios__compile
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_ios flutter_gallery_ios__start_up
-    builder: Mac_ios flutter_gallery_ios__start_up
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_ios flutter_gallery_ios__transition_perf
-    builder: Mac_ios flutter_gallery_ios__transition_perf
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_ios flutter_gallery_ios_sksl_warmup__transition_perf
-    builder: Mac_ios flutter_gallery_ios_sksl_warmup__transition_perf
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_ios cubic_bezier_perf_ios_sksl_warmup__timeline_summary
-    builder: Mac_ios cubic_bezier_perf_ios_sksl_warmup__timeline_summary
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_ios flutter_view_ios__start_up
-    builder: Mac_ios flutter_view_ios__start_up
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_ios hello_world_ios__compile
-    builder: Mac_ios hello_world_ios__compile
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_ios hot_mode_dev_cycle_macos_target__benchmark
-    builder: Mac_ios hot_mode_dev_cycle_macos_target__benchmark
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_ios integration_ui_ios_driver
-    builder: Mac_ios integration_ui_ios_driver
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_ios integration_ui_ios_keyboard_resize
-    builder: Mac_ios integration_ui_ios_keyboard_resize
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_ios integration_ui_ios_frame_number
-    builder: Mac_ios integration_ui_ios_frame_number
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_ios integration_ui_ios_screenshot
-    builder: Mac_ios integration_ui_ios_screenshot
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_ios integration_ui_ios_textfield
-    builder: Mac_ios integration_ui_ios_textfield
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_ios integration_test_test_ios
-    builder: Mac_ios integration_test_test_ios
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_ios ios_app_with_extensions_test
-    builder: Mac_ios ios_app_with_extensions_test
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_ios ios_content_validation_test
-    builder: Mac_ios ios_content_validation_test
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_ios ios_defines_test
-    builder: Mac_ios ios_defines_test
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_ios ios_platform_view_tests
-    builder: Mac_ios ios_platform_view_tests
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_ios large_image_changer_perf_ios
-    builder: Mac_ios large_image_changer_perf_ios
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_ios macos_chrome_dev_mode
-    builder: Mac_ios macos_chrome_dev_mode
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_ios microbenchmarks_ios
-    builder: Mac_ios microbenchmarks_ios
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_ios native_ui_tests_ios32
-    builder: Mac_ios native_ui_tests_ios32
-    bringup: true
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_ios new_gallery_ios__transition_perf
-    builder: Mac_ios new_gallery_ios__transition_perf
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_ios platform_channel_sample_test_ios
-    builder: Mac_ios platform_channel_sample_test_ios
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_ios platform_channel_sample_test_swift
-    builder: Mac_ios platform_channel_sample_test_swift
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_ios platform_channels_benchmarks_ios
-    builder: Mac_ios platform_channels_benchmarks_ios
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_ios platform_interaction_test_ios
-    builder: Mac_ios platform_interaction_test_ios
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_ios platform_view_ios__start_up
-    builder: Mac_ios platform_view_ios__start_up
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_ios platform_views_scroll_perf_ios__timeline_summary
-    builder: Mac_ios platform_views_scroll_perf_ios__timeline_summary
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_ios post_backdrop_filter_perf_ios__timeline_summary
-    builder: Mac_ios post_backdrop_filter_perf_ios__timeline_summary
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_ios simple_animation_perf_ios
-    builder: Mac_ios simple_animation_perf_ios
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_ios smoke_catalina_hot_mode_dev_cycle_ios__benchmark
-    builder: Mac_ios smoke_catalina_hot_mode_dev_cycle_ios__benchmark
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Mac_ios tiles_scroll_perf_ios__timeline_summary
-    builder: Mac_ios tiles_scroll_perf_ios__timeline_summary
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Windows gradle_plugin_fat_apk_test
-    builder: Windows gradle_plugin_fat_apk_test
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab","hostonly"]
-    scheduler: luci
-
-  - name: Windows_android complex_layout_win__compile
-    builder: Windows_android complex_layout_win__compile
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
   - name: Windows_android basic_material_app_win__compile
-    builder: Windows_android basic_material_app_win__compile
+    recipe: devicelab/devicelab_drone
     presubmit: false
+    timeout: 60
     properties:
       tags: >
         ["devicelab"]
-    scheduler: luci
-
-  - name: Windows_android flutter_gallery_win__compile
-    builder: Windows_android flutter_gallery_win__compile
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Windows_android windows_chrome_dev_mode
-    builder: Windows_android windows_chrome_dev_mode
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
-    scheduler: luci
-
-  - name: Windows_android flavors_test_win
-    builder: Windows_android flavors_test_win
-    presubmit: false
-    properties:
-      tags: >
-        ["devicelab"]
+      task_name: basic_material_app_win__compile
     scheduler: luci
 
   - name: Windows_android channels_integration_test_win
-    builder: Windows_android channels_integration_test_win
+    recipe: devicelab/devicelab_drone
     presubmit: false
+    timeout: 60
     properties:
       tags: >
         ["devicelab"]
+      task_name: channels_integration_test_win
+    scheduler: luci
+
+  - name: Windows_android complex_layout_win__compile
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: complex_layout_win__compile
+    scheduler: luci
+
+  - name: Windows_android flavors_test_win
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: flavors_test_win
+    scheduler: luci
+
+  - name: Windows_android flutter_gallery_win__compile
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: flutter_gallery_win__compile
     scheduler: luci
 
   - name: Windows_android hot_mode_dev_cycle_win__benchmark
-    builder: Windows_android hot_mode_dev_cycle_win__benchmark
+    recipe: devicelab/devicelab_drone
     presubmit: false
+    timeout: 60
     properties:
       tags: >
         ["devicelab"]
+      task_name: hot_mode_dev_cycle_win__benchmark
+    scheduler: luci
+
+  - name: Windows_android windows_chrome_dev_mode
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab"]
+      task_name: windows_chrome_dev_mode
     scheduler: luci
