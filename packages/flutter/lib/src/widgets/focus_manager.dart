@@ -309,11 +309,12 @@ enum UnfocusDisposition {
 /// The [FocusManager] receives key events from [RawKeyboard] and
 /// [HardwareKeyboard] and will pass them to the focused nodes. It starts with
 /// the node with the primary focus, and will call the [onKey] or [onKeyEvent]
-/// callback for that node. If the callback returns false, indicating that it did
-/// not handle the event, the [FocusManager] will move to the parent of that node
-/// and call its [onKey] or [onKeyEvent]. If that [onKey] or [onKeyEvent] returns
-/// true, then it will stop propagating the event. If it reaches the root
-/// [FocusScopeNode], [FocusManager.rootScope], the event is discarded.
+/// callback for that node. If the callback returns [KeyEventResult.ignored],
+/// indicating that it did not handle the event, the [FocusManager] will move
+/// to the parent of that node and call its [onKey] or [onKeyEvent]. If that
+/// [onKey] or [onKeyEvent] returns [KeyEventResult.handled], then it will stop
+/// propagating the event. If it reaches the root [FocusScopeNode],
+/// [FocusManager.rootScope], the event is discarded.
 /// {@endtemplate}
 ///
 /// ## Focus Traversal
