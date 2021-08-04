@@ -62,12 +62,13 @@ void main() {
   });
 
   testWithoutContext('can launch chrome and connect to the devtools', () async {
-    await expectReturnsNormallyLater(
-      _testLaunchChrome(
+    expect(
+      () async => _testLaunchChrome(
         '/.tmp_rand0/flutter_tools_chrome_device.rand0',
         processManager,
         chromeLauncher,
-      )
+      ),
+      returnsNormally,
     );
   });
 
@@ -78,13 +79,13 @@ void main() {
       chromeLauncher,
     );
 
-    await expectToolExitLater(
-      _testLaunchChrome(
+    expect(
+      () async => _testLaunchChrome(
         '/.tmp_rand0/flutter_tools_chrome_device.rand1',
         processManager,
         chromeLauncher,
       ),
-      contains('Only one instance of chrome can be started'),
+      throwsToolExit(message: 'Only one instance of chrome can be started'),
     );
   });
 
@@ -96,12 +97,13 @@ void main() {
     );
     await chrome.close();
 
-    await expectReturnsNormallyLater(
-      _testLaunchChrome(
+    expect(
+      () async => _testLaunchChrome(
         '/.tmp_rand0/flutter_tools_chrome_device.rand1',
         processManager,
         chromeLauncher,
-      )
+      ),
+      returnsNormally,
     );
   });
 
@@ -217,11 +219,12 @@ void main() {
       )
     ]);
 
-    await expectReturnsNormallyLater(
-      chromiumLauncher.launch(
+    expect(
+          () async => chromiumLauncher.launch(
         'example_url',
         skipCheck: true,
-      )
+      ),
+      returnsNormally,
     );
   });
 
@@ -256,11 +259,12 @@ void main() {
       )
     ]);
 
-    await expectReturnsNormallyLater(
-      chromiumLauncher.launch(
+    expect(
+          () async => chromiumLauncher.launch(
         'example_url',
         skipCheck: true,
-      )
+      ),
+      returnsNormally,
     );
   });
 
@@ -297,11 +301,12 @@ void main() {
       ),
     ]);
 
-    await expectReturnsNormallyLater(
-      chromiumLauncher.launch(
+    expect(
+      () async => chromiumLauncher.launch(
         'example_url',
         skipCheck: true,
-      )
+      ),
+      returnsNormally,
     );
   });
 
@@ -317,12 +322,13 @@ void main() {
       stderr: kDevtoolsStderr,
     ));
 
-    await expectReturnsNormallyLater(
-      chromeLauncher.launch(
+    expect(
+      () async => chromeLauncher.launch(
         'example_url',
         skipCheck: true,
         debugPort: 10000,
-      )
+      ),
+      returnsNormally,
     );
   });
 
@@ -342,12 +348,13 @@ void main() {
       stderr: kDevtoolsStderr,
     ));
 
-    await expectReturnsNormallyLater(
-      chromeLauncher.launch(
+    expect(
+      () async => chromeLauncher.launch(
         'example_url',
         skipCheck: true,
         headless: true,
-      )
+      ),
+      returnsNormally,
     );
   });
 
@@ -444,12 +451,13 @@ void main() {
       stderr: kDevtoolsStderr,
     ));
 
-    await expectReturnsNormallyLater(
-      chromeLauncher.launch(
+    expect(
+      () async => chromeLauncher.launch(
         'example_url',
         skipCheck: true,
         headless: true,
-      )
+      ),
+      returnsNormally,
     );
   });
 
@@ -480,12 +488,13 @@ void main() {
       stderr: kDevtoolsStderr,
     ));
 
-    await expectReturnsNormallyLater(
-      chromeLauncher.launch(
+    expect(
+      () async => chromeLauncher.launch(
         'example_url',
         skipCheck: true,
         headless: true,
-      )
+      ),
+      returnsNormally,
     );
   });
 
@@ -507,47 +516,15 @@ void main() {
       ));
     }
 
-    await expectToolExitLater(
-      chromeLauncher.launch(
+    expect(
+      () async => chromeLauncher.launch(
         'example_url',
         skipCheck: true,
         headless: true,
       ),
-      contains('Failed to launch browser.'),
+      throwsToolExit(message: 'Failed to launch browser.'),
     );
   });
-
-  testWithoutContext('Logs an error and exits if connection check fails.', () async {
-    final BufferLogger logger = BufferLogger.test();
-    final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
-      fileSystem: fileSystem,
-      platform: platform,
-      processManager: processManager,
-      operatingSystemUtils: operatingSystemUtils,
-      browserFinder: findChromeExecutable,
-      logger: logger,
-    );
-    processManager.addCommand(const FakeCommand(
-      command: <String>[
-        'example_chrome',
-        '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
-        '--remote-debugging-port=12345',
-        ...kChromeArgs,
-        'example_url',
-      ],
-      stderr: kDevtoolsStderr,
-    ));
-
-    await expectToolExitLater(
-      chromiumLauncher.launch(
-        'example_url',
-        skipCheck: false,
-        headless: false,
-      ),
-      contains('Unable to connect to Chrome debug port:'),
-    );
-    expect(logger.errorText, contains('SocketException'));
-  }, timeout: const Timeout.factor(2));
 }
 
 Future<Chromium> _testLaunchChrome(String userDataDir, FakeProcessManager processManager, ChromiumLauncher chromeLauncher) {

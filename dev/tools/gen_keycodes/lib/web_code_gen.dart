@@ -5,7 +5,6 @@
 import 'package:path/path.dart' as path;
 
 import 'base_code_gen.dart';
-import 'constants.dart';
 import 'logical_key_data.dart';
 import 'physical_key_data.dart';
 import 'utils.dart';
@@ -24,11 +23,8 @@ class WebCodeGenerator extends PlatformCodeGenerator {
   String get _webLogicalKeyCodeMap {
     final OutputLines<String> lines = OutputLines<String>('Web logical map');
     for (final LogicalKeyEntry entry in logicalData.entries) {
-      final int plane = getPlane(entry.value);
-      if (plane == kUnprintablePlane.value) {
-        for (final String name in entry.webNames) {
-          lines.add(name, "  '$name': ${toHex(entry.value, digits: 11)},");
-        }
+      for (final String name in entry.webNames) {
+        lines.add(name, "  '$name': ${toHex(entry.value, digits: 11)},");
       }
     }
     return lines.sortedJoin().trimRight();
@@ -36,29 +32,25 @@ class WebCodeGenerator extends PlatformCodeGenerator {
 
   /// This generates the map of Web KeyboardEvent codes to physical key USB HID codes.
   String get _webPhysicalKeyCodeMap {
-    final OutputLines<String> lines = OutputLines<String>('Web physical map');
+    final StringBuffer result = StringBuffer();
     for (final PhysicalKeyEntry entry in keyData.entries) {
       if (entry.name != null) {
-        lines.add(entry.name,
-            "  '${entry.name}': ${toHex(entry.usbHidCode)}, // ${entry.constantName}");
+        result.writeln("  '${entry.name}': ${toHex(entry.usbHidCode)},");
       }
     }
-    return lines.sortedJoin().trimRight();
+    return result.toString().trimRight();
   }
 
   /// This generates the map of Web number pad codes to logical key ids.
   String get _webLogicalLocationMap {
-    final OutputLines<String> lines = OutputLines<String>('Web logical location map');
+    final StringBuffer result = StringBuffer();
     _logicalLocationMap.forEach((String webKey, List<String?> locations) {
       final String valuesString = locations.map((String? value) {
-        return value == null ? 'null' : toHex(logicalData.entryByName(value).value, digits: 11);
+        return value == null ? 'null' : toHex(logicalData.entryByName(value).value, digits: 10);
       }).join(', ');
-      final String namesString = locations.map((String? value) {
-        return value == null ? 'null' : logicalData.entryByName(value).constantName;
-      }).join(', ');
-      lines.add(webKey, "  '$webKey': <int?>[$valuesString], // $namesString");
+      result.writeln("  '$webKey': <int?>[$valuesString],");
     });
-    return lines.sortedJoin().trimRight();
+    return result.toString().trimRight();
   }
   final Map<String, List<String?>> _logicalLocationMap;
 

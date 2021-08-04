@@ -314,21 +314,17 @@ class ResidentWebRunner extends ResidentRunner {
           enableDevTools: enableDevTools,
         );
       });
-    } on WebSocketException catch (error, stackTrace) {
+    } on WebSocketException {
       appFailedToStart();
-      _logger.printError('$error', stackTrace: stackTrace);
       throwToolExit(kExitMessage);
-    } on ChromeDebugException catch (error, stackTrace) {
+    } on ChromeDebugException {
       appFailedToStart();
-      _logger.printError('$error', stackTrace: stackTrace);
       throwToolExit(kExitMessage);
-    } on AppConnectionException catch (error, stackTrace) {
+    } on AppConnectionException {
       appFailedToStart();
-      _logger.printError('$error', stackTrace: stackTrace);
       throwToolExit(kExitMessage);
-    } on SocketException catch (error, stackTrace) {
+    } on SocketException {
       appFailedToStart();
-      _logger.printError('$error', stackTrace: stackTrace);
       throwToolExit(kExitMessage);
     } on Exception {
       appFailedToStart();

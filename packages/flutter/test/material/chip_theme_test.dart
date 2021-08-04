@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show window;
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -88,21 +90,24 @@ void main() {
         locale: const Locale('en', 'us'),
         home: Directionality(
           textDirection: TextDirection.ltr,
-          child: Material(
-            child: Center(
-              child: Theme(
-                data: theme,
-                child: RawChip(
-                  showCheckmark: true,
-                  onDeleted: () { },
-                  tapEnabled: true,
-                  avatar: const Placeholder(),
-                  deleteIcon: const Placeholder(),
-                  isEnabled: true,
-                  selected: false,
-                  label: const Text('Chip'),
-                  onSelected: (bool newValue) { },
-                  onPressed: null,
+          child: MediaQuery(
+            data: MediaQueryData.fromWindow(window),
+            child: Material(
+              child: Center(
+                child: Theme(
+                  data: theme,
+                  child: RawChip(
+                    showCheckmark: true,
+                    onDeleted: () { },
+                    tapEnabled: true,
+                    avatar: const Placeholder(),
+                    deleteIcon: const Placeholder(),
+                    isEnabled: true,
+                    selected: false,
+                    label: const Text('Chip'),
+                    onSelected: (bool newValue) { },
+                    onPressed: null,
+                  ),
                 ),
               ),
             ),
@@ -136,23 +141,26 @@ void main() {
       return MaterialApp(
         home: Directionality(
           textDirection: TextDirection.ltr,
-          child: Material(
-            child: Center(
-              child: Theme(
-                data: theme,
-                child: ChipTheme(
-                  data: customTheme,
-                  child: RawChip(
-                    showCheckmark: true,
-                    onDeleted: () { },
-                    tapEnabled: true,
-                    avatar: const Placeholder(),
-                    deleteIcon: const Placeholder(),
-                    isEnabled: true,
-                    selected: value,
-                    label: const Text('$value'),
-                    onSelected: (bool newValue) { },
-                    onPressed: null,
+          child: MediaQuery(
+            data: MediaQueryData.fromWindow(window),
+            child: Material(
+              child: Center(
+                child: Theme(
+                  data: theme,
+                  child: ChipTheme(
+                    data: customTheme,
+                    child: RawChip(
+                      showCheckmark: true,
+                      onDeleted: () { },
+                      tapEnabled: true,
+                      avatar: const Placeholder(),
+                      deleteIcon: const Placeholder(),
+                      isEnabled: true,
+                      selected: value,
+                      label: const Text('$value'),
+                      onSelected: (bool newValue) { },
+                      onPressed: null,
+                    ),
                   ),
                 ),
               ),

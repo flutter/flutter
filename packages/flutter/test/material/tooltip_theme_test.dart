@@ -48,8 +48,6 @@ void main() {
     expect(theme.textStyle, null);
     expect(theme.waitDuration, null);
     expect(theme.showDuration, null);
-    expect(theme.triggerMode, null);
-    expect(theme.enableFeedback, null);
   });
 
   testWidgets('Default TooltipThemeData debugFillProperties', (WidgetTester tester) async {
@@ -68,8 +66,6 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const Duration wait = Duration(milliseconds: 100);
     const Duration show = Duration(milliseconds: 200);
-    const TooltipTriggerMode triggerMode = TooltipTriggerMode.longPress;
-    const bool enableFeedback = true;
     const TooltipThemeData(
       height: 15.0,
       padding: EdgeInsets.all(20.0),
@@ -80,8 +76,6 @@ void main() {
       textStyle: TextStyle(decoration: TextDecoration.underline),
       waitDuration: wait,
       showDuration: show,
-      triggerMode: triggerMode,
-      enableFeedback: enableFeedback,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -99,8 +93,6 @@ void main() {
       'textStyle: TextStyle(inherit: true, decoration: TextDecoration.underline)',
       'wait duration: ${wait.toString()}',
       'show duration: ${show.toString()}',
-      'triggerMode: $triggerMode',
-      'enableFeedback: true',
     ]);
   });
 
@@ -991,54 +983,6 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1000));
     await tester.pumpAndSettle(); // Tooltip should fade out after
     expect(find.text(tooltipText), findsNothing);
-  });
-
-  testWidgets('Tooltip triggerMode - ThemeData.triggerMode', (WidgetTester tester) async {
-    const TooltipTriggerMode triggerMode = TooltipTriggerMode.tap;
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Theme(
-          data: ThemeData(
-            tooltipTheme: const TooltipThemeData(triggerMode: triggerMode),
-          ),
-          child: const Center(
-            child: Tooltip(
-              message: tooltipText,
-              child: SizedBox(width: 100.0, height: 100.0),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    final Finder tooltip = find.byType(Tooltip);
-    final TestGesture gesture = await tester.startGesture(tester.getCenter(tooltip));
-    await gesture.up();
-    await tester.pump();
-    expect(find.text(tooltipText), findsOneWidget); // Tooltip should show immediately after tap
-  });
-
-  testWidgets('Tooltip triggerMode - TooltipTheme', (WidgetTester tester) async {
-    const TooltipTriggerMode triggerMode = TooltipTriggerMode.tap;
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: TooltipTheme(
-          data: TooltipThemeData(triggerMode: triggerMode),
-          child: Center(
-            child: Tooltip(
-              message: tooltipText,
-              child: SizedBox(width: 100.0, height: 100.0),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    final Finder tooltip = find.byType(Tooltip);
-    final TestGesture gesture = await tester.startGesture(tester.getCenter(tooltip));
-    await gesture.up();
-    await tester.pump();
-    expect(find.text(tooltipText), findsOneWidget); // Tooltip should show immediately after tap
   });
 
   testWidgets('Semantics included by default - ThemeData.tooltipTheme', (WidgetTester tester) async {

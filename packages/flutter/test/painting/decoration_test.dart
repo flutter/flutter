@@ -360,7 +360,7 @@ void main() {
       '   The ImageConfiguration was:\n'
       '     ImageConfiguration(size: Size(100.0, 100.0))\n',
     );
-  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87364
+  }, skip: kIsWeb);
 
   test('DecorationImage - error listener', () async {
     late String exception;
@@ -707,5 +707,5 @@ void main() {
     expect(info.image.debugGetOpenHandleStackTraces()!.length, baselineRefCount);
 
     info.dispose();
-  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87442
+  }, skip: kIsWeb);
 }

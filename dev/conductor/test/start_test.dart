@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:convert' show jsonDecode;
 
 import 'package:args/command_runner.dart';
@@ -26,11 +28,11 @@ void main() {
     const String candidateBranch = 'flutter-1.2-candidate.3';
     const String releaseChannel = 'stable';
     const String revision = 'abcd1234';
-    late Checkouts checkouts;
-    late MemoryFileSystem fileSystem;
-    late FakePlatform platform;
-    late TestStdio stdio;
-    late FakeProcessManager processManager;
+    Checkouts checkouts;
+    MemoryFileSystem fileSystem;
+    FakePlatform platform;
+    TestStdio stdio;
+    FakeProcessManager processManager;
 
     setUp(() {
       stdio = TestStdio();
@@ -38,9 +40,9 @@ void main() {
     });
 
     CommandRunner<void> createRunner({
-      Map<String, String>? environment,
-      String? operatingSystem,
-      List<FakeCommand>? commands,
+      Map<String, String> environment,
+      String operatingSystem,
+      List<FakeCommand> commands,
     }) {
       operatingSystem ??= const LocalPlatform().operatingSystem;
       final String pathSeparator = operatingSystem == 'windows' ? r'\' : '/';
@@ -71,6 +73,13 @@ void main() {
       );
       return CommandRunner<void>('codesign-test', '')..addCommand(command);
     }
+
+    tearDown(() {
+      // Ensure we don't re-use these between tests.
+      processManager = null;
+      checkouts = null;
+      platform = null;
+    });
 
     test('throws exception if run from Windows', () async {
       final CommandRunner<void> runner = createRunner(
@@ -115,7 +124,6 @@ void main() {
       const String nextDartRevision = 'f6c91128be6b77aef8351e1e3a9d07c85bc2e46e';
       const String previousVersion = '1.2.0-1.0.pre';
       const String nextVersion = '1.2.0-3.0.pre';
-      const String incrementLevel = 'm';
 
       final Directory engine = fileSystem.directory(checkoutsParentDirectory)
           .childDirectory('flutter_conductor_checkouts')
@@ -243,7 +251,7 @@ void main() {
       );
 
       final String stateFilePath = fileSystem.path.join(
-        platform.environment['HOME']!,
+        platform.environment['HOME'],
         kStateFileName,
       );
 
@@ -262,7 +270,7 @@ void main() {
         '--$kDartRevisionOption',
         nextDartRevision,
         '--$kIncrementOption',
-        incrementLevel,
+        'm',
       ]);
 
       final File stateFile = fileSystem.file(stateFilePath);
@@ -282,7 +290,6 @@ void main() {
       expect(state.framework.startingGitHead, revision3);
       expect(state.currentPhase, ReleasePhase.APPLY_ENGINE_CHERRYPICKS);
       expect(state.conductorVersion, revision);
-      expect(state.incrementLevel, incrementLevel);
     });
   }, onPlatform: <String, dynamic>{
     'windows': const Skip('Flutter Conductor only supported on macos/linux'),

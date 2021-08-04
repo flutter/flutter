@@ -14,9 +14,6 @@ import 'package:flutter/scheduler.dart';
 
 import 'asset_bundle.dart';
 import 'binary_messenger.dart';
-import 'hardware_keyboard.dart';
-import 'message_codec.dart';
-import 'raw_keyboard.dart';
 import 'restoration.dart';
 import 'system_channels.dart';
 
@@ -33,34 +30,15 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     _instance = this;
     _defaultBinaryMessenger = createBinaryMessenger();
     _restorationManager = createRestorationManager();
-    _initKeyboard();
     initLicenses();
     SystemChannels.system.setMessageHandler((dynamic message) => handleSystemMessage(message as Object));
     SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
-    SystemChannels.platform.setMethodCallHandler(_handlePlatformMessage);
     readInitialLifecycleStateFromNativeWindow();
   }
 
   /// The current [ServicesBinding], if one has been created.
   static ServicesBinding? get instance => _instance;
   static ServicesBinding? _instance;
-
-  /// The global singleton instance of [HardwareKeyboard], which can be used to
-  /// query keyboard states.
-  HardwareKeyboard get keyboard => _keyboard;
-  late final HardwareKeyboard _keyboard;
-
-  /// The global singleton instance of [KeyEventManager], which is used
-  /// internally to dispatch key messages.
-  KeyEventManager get keyEventManager => _keyEventManager;
-  late final KeyEventManager _keyEventManager;
-
-  void _initKeyboard() {
-    _keyboard = HardwareKeyboard();
-    _keyEventManager = KeyEventManager(_keyboard, RawKeyboard.instance);
-    window.onKeyData = _keyEventManager.handleKeyData;
-    SystemChannels.keyEvent.setMessageHandler(_keyEventManager.handleRawKeyMessage);
-  }
 
   /// The default instance of [BinaryMessenger].
   ///
@@ -251,16 +229,6 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     return null;
   }
 
-  Future<void> _handlePlatformMessage(MethodCall methodCall) async {
-    final String method = methodCall.method;
-    // There is only one incoming method call currently possible.
-    assert(method == 'SystemChrome.systemUIChange');
-    final List<dynamic> args = methodCall.arguments as List<dynamic>;
-    if (_systemUiChangeCallback != null) {
-      await _systemUiChangeCallback!(args[0] as bool);
-    }
-  }
-
   static AppLifecycleState? _parseAppLifecycleMessage(String message) {
     switch (message) {
       case 'AppLifecycleState.paused':
@@ -295,31 +263,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   RestorationManager createRestorationManager() {
     return RestorationManager();
   }
-
-  SystemUiChangeCallback? _systemUiChangeCallback;
-
-  /// Sets the callback for the `SystemChrome.systemUIChange` method call
-  /// received on the [SystemChannels.platform] channel.
-  ///
-  /// This is typically not called directly. System UI changes that this method
-  /// responds to are associated with [SystemUiMode]s, which are configured
-  /// using [SystemChrome]. Use [SystemChrome.setSystemUIChangeCallback] to configure
-  /// along with other SystemChrome settings.
-  ///
-  /// See also:
-  ///
-  ///   * [SystemChrome.setEnabledSystemUIMode], which specifies the
-  ///     [SystemUiMode] to have visible when the application is running.
-  void setSystemUiChangeCallback(SystemUiChangeCallback? callback) {
-    _systemUiChangeCallback = callback;
-  }
-
 }
-
-/// Signature for listening to changes in the [SystemUiMode].
-///
-/// Set by [SystemChrome.setSystemUIChangeCallback].
-typedef SystemUiChangeCallback = Future<void> Function(bool systemOverlaysAreVisible);
 
 /// The default implementation of [BinaryMessenger].
 ///

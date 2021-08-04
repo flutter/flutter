@@ -31,7 +31,7 @@ void main() {
   });
 
   testWithoutContext('hot restart works without error', () async {
-    await flutter.run(chrome: true, additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
+    await flutter.run(chrome: true, additionalCommandArgs: <String>['--verbose']);
     await flutter.hotRestart();
   });
 
@@ -43,7 +43,7 @@ void main() {
         completer.complete();
       }
     });
-    await flutter.run(chrome: true, additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
+    await flutter.run(chrome: true, additionalCommandArgs: <String>['--verbose']);
     project.uncommentHotReloadPrint();
     try {
       await flutter.hotRestart();
@@ -51,7 +51,7 @@ void main() {
     } finally {
       await subscription.cancel();
     }
-  });
+  }, skip: true); // Skippping for https://github.com/flutter/flutter/issues/85575.
 
   testWithoutContext('newly added code executes during hot restart - canvaskit', () async {
     final Completer<void> completer = Completer<void>();
@@ -70,5 +70,6 @@ void main() {
     } finally {
       await subscription.cancel();
     }
-  }, skip: true); // Skipping for https://github.com/flutter/flutter/issues/85575.
+  }, skip: true); // Skipping for https://github.com/flutter/flutter/issues/85575
+                  // and https://github.com/flutter/flutter/issues/85043.
 }

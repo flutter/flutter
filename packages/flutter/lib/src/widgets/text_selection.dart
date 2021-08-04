@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:characters/characters.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -120,12 +119,12 @@ abstract class TextSelectionControls {
   /// interaction is allowed. As a counterexample, the default selection handle
   /// on iOS [cupertinoTextSelectionControls] does not call [onTap] at all,
   /// since its handles are not meant to be tapped.
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap, double? startGlyphHeight, double? endGlyphHeight]);
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]);
 
   /// Get the anchor point of the handle relative to itself. The anchor point is
   /// the point that is aligned with a specific point in the text. A handle
   /// often visually "points to" that location.
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight, [double? startGlyphHeight, double? endGlyphHeight]);
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight);
 
   /// Builds a toolbar near a text selection.
   ///
@@ -602,7 +601,6 @@ class TextSelectionOverlay {
           selectionControls: selectionControls,
           position: position,
           dragStartBehavior: dragStartBehavior,
-          selectionDelegate: selectionDelegate!,
         ),
       );
     }
@@ -677,7 +675,7 @@ class TextSelectionOverlay {
         break;
     }
     selectionDelegate!.userUpdateTextEditingValue(
-      _value.copyWith(selection: newSelection),
+      _value.copyWith(selection: newSelection, composing: TextRange.empty),
       SelectionChangedCause.drag,
     );
     selectionDelegate!.bringIntoView(textPosition);
@@ -696,7 +694,6 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
     required this.onSelectionHandleChanged,
     required this.onSelectionHandleTapped,
     required this.selectionControls,
-    required this.selectionDelegate,
     this.dragStartBehavior = DragStartBehavior.start,
   }) : super(key: key);
 
@@ -709,7 +706,6 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
   final VoidCallback? onSelectionHandleTapped;
   final TextSelectionControls selectionControls;
   final DragStartBehavior dragStartBehavior;
-  final TextSelectionDelegate selectionDelegate;
 
   @override
   _TextSelectionHandleOverlayState createState() => _TextSelectionHandleOverlayState();
@@ -828,45 +824,9 @@ class _TextSelectionHandleOverlayState
         break;
     }
 
-    // On some platforms we may want to calculate the start and end handles
-    // separately so they scale for the selected content.
-    //
-    // For the start handle we compute the rectangles that encompass the range
-    // of the first full selected grapheme cluster at the beginning of the selection.
-    //
-    // For the end handle we compute the rectangles that encompass the range
-    // of the last full selected grapheme cluster at the end of the selection.
-    //
-    // Only calculate start/end handle rects if the text in the previous frame
-    // is the same as the text in the current frame. This is done because
-    // widget.renderObject contains the renderEditable from the previous frame.
-    // If the text changed between the current and previous frames then
-    // widget.renderObject.getRectForComposingRange might fail. In cases where
-    // the current frame is different from the previous we fall back to
-    // widget.renderObject.preferredLineHeight.
-    final InlineSpan span = widget.renderObject.text!;
-    final String prevText = span.toPlainText();
-    final String currText = widget.selectionDelegate.textEditingValue.text;
-    final int firstSelectedGraphemeExtent;
-    final int lastSelectedGraphemeExtent;
-    final TextSelection selection = widget.selection;
-    Rect? startHandleRect;
-    Rect? endHandleRect;
-
-    if (prevText == currText && selection != null && selection.isValid && !selection.isCollapsed) {
-      final String selectedGraphemes = selection.textInside(currText);
-      firstSelectedGraphemeExtent = selectedGraphemes.characters.first.length;
-      lastSelectedGraphemeExtent = selectedGraphemes.characters.last.length;
-      assert(firstSelectedGraphemeExtent <= selectedGraphemes.length && lastSelectedGraphemeExtent <= selectedGraphemes.length);
-      startHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: selection.start, end: selection.start + firstSelectedGraphemeExtent));
-      endHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: selection.end - lastSelectedGraphemeExtent, end: selection.end));
-    }
-
     final Offset handleAnchor = widget.selectionControls.getHandleAnchor(
       type,
       widget.renderObject.preferredLineHeight,
-      startHandleRect?.height ?? widget.renderObject.preferredLineHeight,
-      endHandleRect?.height ?? widget.renderObject.preferredLineHeight,
     );
     final Size handleSize = widget.selectionControls.getHandleSize(
       widget.renderObject.preferredLineHeight,
@@ -917,8 +877,6 @@ class _TextSelectionHandleOverlayState
                 type,
                 widget.renderObject.preferredLineHeight,
                 widget.onSelectionHandleTapped,
-                startHandleRect?.height ?? widget.renderObject.preferredLineHeight,
-                endHandleRect?.height ?? widget.renderObject.preferredLineHeight,
               ),
             ),
           ),

@@ -4,7 +4,6 @@
 
 // @dart = 2.8
 
-import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -12,7 +11,6 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
-import 'package:flutter_tools/src/commands/build_fuchsia.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_kernel_compiler.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_pm.dart';
@@ -111,10 +109,9 @@ void main() {
       final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
       pubspecFile.writeAsStringSync('name: $appName');
 
-      final bool supported = BuildFuchsiaCommand(verboseHelp: false).supported;
       expect(
         createTestCommandRunner(command).run(const <String>['build', 'fuchsia']),
-        supported ? throwsToolExit() : throwsA(isA<UsageException>()),
+        throwsToolExit(),
       );
     }, overrides: <Type, Generator>{
       Platform: () => windowsPlatform,

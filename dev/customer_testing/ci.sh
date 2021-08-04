@@ -8,7 +8,7 @@
 # This is called from .cirrus.yml and the LUCI recipes:
 # https://flutter.googlesource.com/recipes/+/refs/heads/master/recipe_modules/adhoc_validation/resources/customer_testing.sh
 
-set -ex
+set -e
 
 # This script does not assume that "flutter update-packages" has been
 # run, to allow CIs to save time by skipping that steps since it's

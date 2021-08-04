@@ -10,6 +10,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 
 import java.util.HashMap;
 
@@ -31,7 +32,9 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
     private MethodChannel.Result permissionResult;
 
     private View getFlutterView() {
-      return findViewById(FLUTTER_VIEW_ID);
+        // TODO(egarciad): Set an unique ID in FlutterView, so it's easier to look it up.
+        ViewGroup root = (ViewGroup)findViewById(android.R.id.content);
+        return ((ViewGroup)root.getChildAt(0)).getChildAt(0);
     }
 
     @Override

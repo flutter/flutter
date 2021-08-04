@@ -61,17 +61,6 @@ class _TestAppState extends State<TestApp> {
     0,
     0x7fffffffffffffff,
   ]);
-  static final Float32List someFloat32s = Float32List.fromList(<double>[
-    double.nan,
-    double.negativeInfinity,
-    -double.maxFinite,
-    -double.minPositive,
-    -0.0,
-    0.0,
-    double.minPositive,
-    double.maxFinite,
-    double.infinity,
-  ]);
   static final Float64List someFloat64s =
       Float64List.fromList(<double>[
     double.nan,
@@ -153,7 +142,6 @@ class _TestAppState extends State<TestApp> {
     () => basicStandardHandshake(someUint8s),
     () => basicStandardHandshake(someInt32s),
     () => basicStandardHandshake(someInt64s),
-    () => basicStandardHandshake(someFloat32s),
     () => basicStandardHandshake(someFloat64s),
     () => basicStandardHandshake(<dynamic>[]),
     () => basicStandardHandshake(aList),

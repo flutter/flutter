@@ -18,10 +18,4 @@ void main() {
     layoutDirection: TextDirection.ltr,
   );
   viewId = textureController.id;
-
-  // Changes made in https://github.com/flutter/flutter/pull/81303
-  await SystemChrome.setEnabledSystemUIOverlays(<SystemUiOverlay>[SystemUiOverlay.top]);
-  await SystemChrome.setEnabledSystemUIOverlays(<SystemUiOverlay>[SystemUiOverlay.bottom]);
-  await SystemChrome.setEnabledSystemUIOverlays(<SystemUiOverlay>[SystemUiOverlay.top, SystemUiOverlay.bottom]);
-  await SystemChrome.setEnabledSystemUIOverlays(<SystemUiOverlay>[]);
 }

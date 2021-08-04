@@ -24,7 +24,7 @@ void main() {
       ..removeWhere((String line) => line.startsWith('Analyzer output:') || line.startsWith('Building flutter tool...'));
     expect(process.exitCode, isNot(equals(0)));
     expect(stderrLines, <String>[
-      'In sample starting at dev/bots/test/analyze-sample-code-test-input/known_broken_documentation.dart:125:      child: Text(title),',
+      'In sample starting at dev/bots/test/analyze-sample-code-test-input/known_broken_documentation.dart:117:      child: Text(title),',
       ">>> error: The final variable 'title' can't be read because it is potentially unassigned at this point (read_potentially_unassigned_final)",
       'dev/bots/test/analyze-sample-code-test-input/known_broken_documentation.dart:30:9: new Opacity(',
       '>>> info: Unnecessary new keyword (unnecessary_new)',
@@ -36,14 +36,12 @@ void main() {
       '>>> info: Prefer const over final for declarations (prefer_const_declarations)',
       'dev/bots/test/analyze-sample-code-test-input/known_broken_documentation.dart:112:25: final int foo = null;',
       ">>> error: A value of type 'Null' can't be assigned to a variable of type 'int' (invalid_assignment)",
-      'dev/bots/test/analyze-sample-code-test-input/known_broken_documentation.dart:120:24: const SizedBox(),',
-      '>>> error: Unexpected comma at end of sample code. (missing_identifier)',
       '',
       'Found 2 sample code errors.',
       ''
     ]);
     expect(stdoutLines, <String>[
-      'Found 9 snippet code blocks, 0 sample code sections, and 2 dartpad sections.',
+      'Found 8 snippet code blocks, 0 sample code sections, and 2 dartpad sections.',
       'Starting analysis of code samples.',
       '',
     ]);
@@ -62,7 +60,7 @@ void main() {
     expect(process.exitCode, isNot(equals(0)));
     expect(stdoutLines, equals(<String>[
       // There is one sample code section in the test's dummy dart:ui code.
-      'Found 9 snippet code blocks, 1 sample code sections, and 2 dartpad sections.',
+      'Found 8 snippet code blocks, 1 sample code sections, and 2 dartpad sections.',
       '',
     ]));
   });

@@ -7,6 +7,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  // TODO(dnfield): remove when https://github.com/flutter/flutter/issues/85066 is resolved.
+  const bool bug85066 = true;
   testWidgets('Tracks picture layers accurately when painting is interleaved with a pushLayer', (WidgetTester tester) async {
     // Creates a RenderObject that will paint into multiple picture layers.
     // Asserts that both layers get a handle, and that all layers get correctly
@@ -32,7 +34,7 @@ void main() {
     await tester.pumpWidget(const SizedBox());
 
     for (final Layer layer in layers) {
-      expect(layer.debugDisposed, true);
+      expect(layer.debugDisposed, true, skip: bug85066);
     }
     expect(renderObject.debugDisposed, true);
   });

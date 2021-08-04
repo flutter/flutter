@@ -345,7 +345,6 @@ class HtmlElementView extends StatelessWidget {
   const HtmlElementView({
     Key? key,
     required this.viewType,
-    this.onPlatformViewCreated,
   }) : assert(viewType != null),
        assert(kIsWeb, 'HtmlElementView is only available on Flutter Web.'),
        super(key: key);
@@ -354,11 +353,6 @@ class HtmlElementView extends StatelessWidget {
   ///
   /// A PlatformViewFactory for this type must have been registered.
   final String viewType;
-
-  /// Callback to invoke after the platform view has been created.
-  ///
-  /// May be null.
-  final PlatformViewCreatedCallback? onPlatformViewCreated;
 
   @override
   Widget build(BuildContext context) {
@@ -378,10 +372,7 @@ class HtmlElementView extends StatelessWidget {
   /// Creates the controller and kicks off its initialization.
   _HtmlElementViewController _createHtmlElementView(PlatformViewCreationParams params) {
     final _HtmlElementViewController controller = _HtmlElementViewController(params.id, viewType);
-    controller._initialize().then((_) {
-      params.onPlatformViewCreated(params.id);
-      onPlatformViewCreated?.call(params.id);
-    });
+    controller._initialize().then((_) { params.onPlatformViewCreated(params.id); });
     return controller;
   }
 }

@@ -1650,18 +1650,6 @@ class DropdownButtonFormField<T> extends FormField<T> {
            final InputDecoration effectiveDecoration = decorationArg.applyDefaults(
              Theme.of(field.context).inputDecorationTheme,
            );
-
-           final bool showSelectedItem = items != null && items.where((DropdownMenuItem<T> item) => item.value == state.value).isNotEmpty;
-           bool isHintOrDisabledHintAvailable() {
-             final bool isDropdownDisabled = onChanged == null || (items == null || items.isEmpty);
-             if (isDropdownDisabled) {
-               return hint != null || disabledHint != null;
-             } else {
-               return hint != null;
-             }
-           }
-           final bool isEmpty = !showSelectedItem && !isHintOrDisabledHintAvailable();
-
            // An unfocusable Focus widget so that this widget can detect if its
            // descendants have focus or not.
            return Focus(
@@ -1670,7 +1658,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
              child: Builder(builder: (BuildContext context) {
                return InputDecorator(
                  decoration: effectiveDecoration.copyWith(errorText: field.errorText),
-                 isEmpty: isEmpty,
+                 isEmpty: items == null || items.where((DropdownMenuItem<T> item) => item.value == state.value).isEmpty,
                  isFocused: Focus.of(context).hasFocus,
                  child: DropdownButtonHideUnderline(
                    child: DropdownButton<T>(

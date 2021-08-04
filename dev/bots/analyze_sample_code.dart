@@ -263,6 +263,7 @@ class SampleChecker {
   /// Computes the headers needed for each sample file.
   List<Line> get headers {
     return _headers ??= <String>[
+      '// generated code',
       '// ignore_for_file: directives_ordering',
       '// ignore_for_file: unnecessary_import',
       '// ignore_for_file: unused_import',
@@ -274,9 +275,12 @@ class SampleChecker {
       "import 'dart:typed_data';",
       "import 'dart:ui' as ui;",
       "import 'package:flutter_test/flutter_test.dart';",
-      for (final File file in _listDartFiles(Directory(_defaultFlutterPackage)))
+      for (final File file in _listDartFiles(Directory(_defaultFlutterPackage))) ...<String>[
+        '',
+        '// ${file.path}',
         "import 'package:flutter/${path.basename(file.path)}';",
-    ].map<Line>((String code) => Line.generated(code: code, filename: 'headers')).toList();
+      ],
+    ].map<Line>((String code) => Line(code)).toList();
   }
 
   List<Line>? _headers;
@@ -491,6 +495,7 @@ class SampleChecker {
           } else if (_codeBlockStartRegex.hasMatch(trimmedLine)) {
             assert(block.isEmpty);
             startLine = Line(
+              '',
               filename: relativeFilePath,
               line: lineNumber + 1,
               indent: line.indexOf(_dartDocPrefixWithSpace) + _dartDocPrefixWithSpace.length,
@@ -502,7 +507,7 @@ class SampleChecker {
           final RegExpMatch? sampleMatch = _dartDocSampleBeginRegex.firstMatch(trimmedLine);
           if (line == '// Examples can assume:') {
             assert(block.isEmpty);
-            startLine = Line.generated(filename: relativeFilePath, line: lineNumber + 1, indent: 3);
+            startLine = Line('', filename: relativeFilePath, line: lineNumber + 1, indent: 3);
             inPreamble = true;
           } else if (sampleMatch != null) {
             inSnippet = sampleMatch != null && (sampleMatch[1] == 'sample' || sampleMatch[1] == 'dartpad');
@@ -514,6 +519,7 @@ class SampleChecker {
                 dartpadCount++;
               }
               startLine = Line(
+                '',
                 filename: relativeFilePath,
                 line: lineNumber + 1,
                 indent: line.indexOf(_dartDocPrefixWithSpace) + _dartDocPrefixWithSpace.length,
@@ -537,9 +543,7 @@ class SampleChecker {
       }
     }
     if (!silent)
-      print('Found ${sections.length} snippet code blocks, '
-          '$sampleCount sample code sections, and '
-          '$dartpadCount dartpad sections.');
+      print('Found ${sections.length} snippet code blocks, $sampleCount sample code sections, and $dartpadCount dartpad sections.');
     for (final Section section in sections) {
       final String path = _writeSection(section).path;
       if (sectionMap != null)
@@ -630,10 +634,10 @@ linter:
     final String sectionId = _createNameFromSource('snippet', section.start.filename, section.start.line);
     final File outputFile = File(path.join(_tempDirectory.path, '$sectionId.dart'))..createSync(recursive: true);
     final List<Line> mainContents = <Line>[
-      Line.generated(code: section.dartVersionOverride ?? '', filename: section.start.filename),
+      if (section.dartVersionOverride != null) Line(section.dartVersionOverride!) else const Line(''),
       ...headers,
-      Line.generated(filename: section.start.filename),
-      Line.generated(code: '// From: ${section.start.filename}:${section.start.line}', filename: section.start.filename),
+      const Line(''),
+      Line('// From: ${section.start.filename}:${section.start.line}'),
       ...section.code,
     ];
     outputFile.writeAsStringSync(mainContents.map<String>((Line line) => line.code).join('\n'));
@@ -657,8 +661,10 @@ linter:
       return line.startsWith('Building flutter tool...');
     });
     // Check out the stderr to see if the analyzer had it's own issues.
-    if (stderr.isNotEmpty && stderr.first.contains(RegExp(r' issues? found\. \(ran in '))) {
+    if (stderr.isNotEmpty && (stderr.first.contains(' issues found. (ran in ') || stderr.first.contains(' issue found. (ran in '))) {
+      // The "23 issues found" message goes onto stderr, which is concatenated first.
       stderr.removeAt(0);
+      // If there's an "issues found" message, we put a blank line on stdout before it.
       if (stderr.isNotEmpty && stderr.last.isEmpty) {
         stderr.removeLast();
       }
@@ -735,6 +741,7 @@ linter:
             message,
             errorCode,
             Line(
+              '',
               filename: file.path,
               line: lineNumber,
             ),
@@ -770,7 +777,7 @@ linter:
               columnNumber,
               message,
               errorCode,
-              Line(filename: file.path, line: lineNumber),
+              Line('', filename: file.path, line: lineNumber),
             ),
           );
           throw SampleCheckerException('Failed to parse error message: $error', file: file.path, line: lineNumber);
@@ -786,43 +793,48 @@ linter:
         }
         final Line actualLine = actualSection.code[lineNumber - 1];
 
-        late int line;
-        late int column;
-        String errorMessage = message;
-        Line source = actualLine;
-        if (actualLine.generated) {
-          // Since generated lines don't appear in the original, we just provide the line
-          // in the generated file.
-          line = lineNumber - 1;
-          column = columnNumber;
+        if (actualLine.filename == null) {
           if (errorCode == 'missing_identifier' && lineNumber > 1) {
-            // For a missing identifier on a generated line, it is very often because of a
-            // trailing comma on the previous line, and so we want to provide a better message
-            // and the previous line as the error location, since that appears in the original
-            // source, and can be more easily located.
-            final Line previousCodeLine = sections[file.path]!.code[lineNumber - 2];
-            if (previousCodeLine.code.contains(RegExp(r',\s*$'))) {
-              line = previousCodeLine.line;
-              column = previousCodeLine.indent + previousCodeLine.code.length - 1;
-              errorMessage = 'Unexpected comma at end of sample code.';
-              source = previousCodeLine;
+            if (fileContents[lineNumber - 2].endsWith(',')) {
+              final Line actualLine = sections[file.path]!.code[lineNumber - 2];
+              addAnalysisError(
+                file,
+                AnalysisError(
+                  type,
+                  actualLine.line,
+                  actualLine.indent + fileContents[lineNumber - 2].length - 1,
+                  'Unexpected comma at end of sample code.',
+                  errorCode,
+                  actualLine,
+                ),
+              );
             }
+          } else {
+            addAnalysisError(
+              file,
+              AnalysisError(
+                type,
+                lineNumber - 1,
+                columnNumber,
+                message,
+                errorCode,
+                actualLine,
+              ),
+            );
           }
         } else {
-          line = actualLine.line;
-          column = actualLine.indent + columnNumber;
+          addAnalysisError(
+            file,
+            AnalysisError(
+              type,
+              actualLine.line,
+              actualLine.indent + columnNumber,
+              message,
+              errorCode,
+              actualLine,
+            ),
+          );
         }
-        addAnalysisError(
-          file,
-          AnalysisError(
-            type,
-            line,
-            column,
-            errorMessage,
-            errorCode,
-            source,
-          ),
-        );
       }
     }
     if (_exitCode == 1 && analysisErrors.isEmpty && !unknownAnalyzerErrors) {
@@ -865,7 +877,7 @@ linter:
         // treated as a separate code block.
         if (block[index] == '' || block[index] == '// ...') {
           if (subline == null)
-            throw SampleCheckerException('${Line(filename: line.filename, line: line.line + index, indent: line.indent)}: '
+            throw SampleCheckerException('${Line('', filename: line.filename, line: line.line + index, indent: line.indent)}: '
                 'Unexpected blank line or "// ..." line near start of subblock in sample code.');
           subblocks += 1;
           subsections.add(_processBlock(subline, buffer));
@@ -877,7 +889,7 @@ linter:
             buffer.add('/${block[index]}'); // so that it doesn't start with "// " and get caught in this again
         } else {
           subline ??= Line(
-            code: block[index],
+            block[index],
             filename: line.filename,
             line: line.line + index,
             indent: line.indent,
@@ -900,17 +912,11 @@ linter:
 
 /// A class to represent a line of input code.
 class Line {
-  const Line({this.code = '', required this.filename, this.line = -1, this.indent = 0})
-      : generated = false;
-  const Line.generated({this.code = '', required this.filename, this.line = -1, this.indent = 0})
-      : generated = true;
-
-  /// The file that this line came from, or the file that the line was generated for, if [generated] is true.
+  const Line(this.code, {this.filename = 'unknown', this.line = -1, this.indent = 0});
   final String filename;
   final int line;
   final int indent;
   final String code;
-  final bool generated;
 
   String toStringWithColumn(int column) {
     if (column != null && indent != null) {
@@ -937,7 +943,7 @@ class Section {
     for (int i = 0; i < code.length; ++i) {
       codeLines.add(
         Line(
-          code: code[i],
+          code[i],
           filename: firstLine.filename,
           line: firstLine.line + i,
           indent: firstLine.indent,
@@ -953,7 +959,7 @@ class Section {
     for (int i = 0; i < code.length; ++i) {
       codeLines.add(
         Line(
-          code: code[i],
+          code[i],
           filename: firstLine.filename,
           line: firstLine.line + i,
           indent: firstLine.indent,
@@ -961,12 +967,12 @@ class Section {
       );
     }
     return Section(<Line>[
-      Line.generated(code: prefix, filename: firstLine.filename, line: 0),
+      Line(prefix),
       ...codeLines,
-      Line.generated(code: postfix, filename: firstLine.filename, line: 0),
+      Line(postfix),
     ]);
   }
-  Line get start => code.firstWhere((Line line) => !line.generated);
+  Line get start => code.firstWhere((Line line) => line.filename != null);
   final List<Line> code;
   final String? dartVersionOverride;
 

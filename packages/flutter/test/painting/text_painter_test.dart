@@ -8,9 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const bool isCanvasKit =
-    bool.fromEnvironment('FLUTTER_WEB_USE_SKIA', defaultValue: false);
-
 void main() {
   test('TextPainter caret test', () {
     final TextPainter painter = TextPainter()
@@ -126,7 +123,7 @@ void main() {
     expect(caretOffset.dx, 98); // <medium skin tone modifier>
     caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 23), ui.Rect.zero);
     expect(caretOffset.dx, 126); // end of string
-  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56308
 
   test('TextPainter caret center space test', () {
     final TextPainter painter = TextPainter()
@@ -148,7 +145,7 @@ void main() {
     expect(caretOffset.dx, 35);
     caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 2), ui.Rect.zero);
     expect(caretOffset.dx, 49);
-  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56308
 
   test('TextPainter error test', () {
     final TextPainter painter = TextPainter(textDirection: TextDirection.ltr);
@@ -746,7 +743,7 @@ void main() {
     expect(painter.inlinePlaceholderBoxes![11], const TextBox.fromLTRBD(250, 30, 300, 60, TextDirection.ltr));
     expect(painter.inlinePlaceholderBoxes![12], const TextBox.fromLTRBD(300, 30, 351, 60, TextDirection.ltr));
     expect(painter.inlinePlaceholderBoxes![13], const TextBox.fromLTRBD(351, 30, 401, 60, TextDirection.ltr));
-  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/87540
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42086
 
   // Null values are valid. See https://github.com/flutter/flutter/pull/48346#issuecomment-584839221
   test('TextPainter set TextHeightBehavior null test', () {
@@ -835,7 +832,7 @@ void main() {
       ui.Rect.zero,
     )!;
     expect(caretHeight, 50.0);
-  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56308
 
   group('TextPainter line-height', () {
     test('half-leading', () {
@@ -955,7 +952,7 @@ void main() {
       ).first.toRect();
       expect(glyphBox, newGlyphBox);
     });
-  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/87543
+  }, skip: isBrowser);
 
   test('TextPainter handles invalid UTF-16', () {
     Object? exception;
@@ -973,23 +970,7 @@ void main() {
     // The layout should include one replacement character.
     expect(painter.width, equals(fontSize));
     expect(exception, isNotNull);
-  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87544
-
-  test('Diacritic', () {
-    final TextPainter painter = TextPainter()
-      ..textDirection = TextDirection.ltr;
-
-    // Two letters followed by a diacritic
-    const String text = 'ฟห้';
-    painter.text = const TextSpan(text: text);
-    painter.layout();
-
-    final ui.Offset caretOffset = painter.getOffsetForCaret(
-        const ui.TextPosition(
-            offset: text.length, affinity: TextAffinity.upstream),
-        ui.Rect.zero);
-    expect(caretOffset.dx, painter.width);
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/87545
+  }, skip: kIsWeb);
 }
 
 class MockCanvas extends Fake implements Canvas {

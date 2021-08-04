@@ -11,8 +11,6 @@ REM work across all platforms!
 REM
 REM --------------------------------------------------------------------------
 
-SETLOCAL ENABLEDELAYEDEXPANSION
-
 FOR %%i IN ("%~dp0..") DO SET FLUTTER_ROOT=%%~fi
 
 REM Include shared scripts in shared.bat

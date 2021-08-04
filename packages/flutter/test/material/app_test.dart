@@ -2,12 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=123"
-@Tags(<String>['no-shuffle'])
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -1068,26 +1062,6 @@ void main() {
     final ScrollBehavior scrollBehavior = ScrollConfiguration.of(capturedContext);
     expect(scrollBehavior.runtimeType, MockScrollBehavior);
     expect(scrollBehavior.getScrollPhysics(capturedContext).runtimeType, NeverScrollableScrollPhysics);
-  });
-
-  testWidgets('When `useInheritedMediaQuery` is true an existing MediaQuery is used if one is available', (WidgetTester tester) async {
-    late BuildContext capturedContext;
-    final UniqueKey uniqueKey = UniqueKey();
-    await tester.pumpWidget(
-      MediaQuery(
-        key: uniqueKey,
-        data: const MediaQueryData(),
-        child: MaterialApp(
-          useInheritedMediaQuery: true,
-          builder: (BuildContext context, Widget? child) {
-            capturedContext = context;
-            return const Placeholder();
-          },
-          color: const Color(0xFF123456),
-        ),
-      ),
-    );
-    expect(capturedContext.dependOnInheritedWidgetOfExactType<MediaQuery>()?.key, uniqueKey);
   });
 }
 

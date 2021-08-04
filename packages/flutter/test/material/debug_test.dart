@@ -134,7 +134,7 @@ void main() {
       '     _FadeUpwardsPageTransition\n'
       '     AnimatedBuilder\n'
       '     RepaintBoundary\n'
-      '     FocusTrap\n'
+      '     _FocusTrap\n'
       '     _FocusMarker\n'
       '     Semantics\n'
       '     FocusScope\n'

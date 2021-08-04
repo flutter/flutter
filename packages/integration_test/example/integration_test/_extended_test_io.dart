@@ -10,7 +10,6 @@
 // tree, read text, and verify that the values of widget properties are correct.
 
 import 'dart:io' show Platform;
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -18,27 +17,17 @@ import 'package:integration_test/integration_test.dart';
 import 'package:integration_test_example/main.dart' as app;
 
 void main() {
-  final IntegrationTestWidgetsFlutterBinding binding =
-      IntegrationTestWidgetsFlutterBinding.ensureInitialized() as IntegrationTestWidgetsFlutterBinding;
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('verify text', (WidgetTester tester) async {
-    // Build our app.
+    // Build our app and trigger a frame.
     app.main();
 
-    // On Android, this is required prior to taking the screenshot.
-    await binding.convertFlutterSurfaceToImage();
-
-    // Pump a frame before taking the screenshot.
+    // Trigger a frame.
     await tester.pumpAndSettle();
-    final List<int> firstPng = await binding.takeScreenshot('first');
-    expect(firstPng.isNotEmpty, isTrue);
 
-    // Pump another frame before taking the screenshot.
-    await tester.pumpAndSettle();
-    final List<int> secondPng = await binding.takeScreenshot('second');
-    expect(secondPng.isNotEmpty, isTrue);
-
-    expect(listEquals(firstPng, secondPng), isTrue);
+    // TODO(nturgut): https://github.com/flutter/flutter/issues/51890
+    // Add screenshot capability for mobile platforms.
 
     // Verify that platform version is retrieved.
     expect(

@@ -78,22 +78,16 @@ void main() {
     });
 
     testWithoutContext('should not throw when lock is acquired', () async {
-      final String oldRoot = Cache.flutterRoot;
       Cache.flutterRoot = '';
-      try {
-        final FileSystem fileSystem = MemoryFileSystem.test();
-        final Cache cache = Cache.test(
-            fileSystem: fileSystem, processManager: FakeProcessManager.any());
-        fileSystem.file(fileSystem.path.join('bin', 'cache', 'lockfile'))
-            .createSync(recursive: true);
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final Cache cache = Cache.test(fileSystem: fileSystem, processManager: FakeProcessManager.any());
+      fileSystem.file(fileSystem.path.join('bin', 'cache', 'lockfile'))
+        .createSync(recursive: true);
 
-        await cache.lock();
+      await cache.lock();
 
-        expect(cache.checkLockAcquired, returnsNormally);
-        expect(cache.releaseLock, returnsNormally);
-      } finally {
-        Cache.flutterRoot = oldRoot;
-      }
+      expect(cache.checkLockAcquired, returnsNormally);
+      expect(cache.releaseLock, returnsNormally);
     }, skip: true); // TODO(jonahwilliams): implement support for lock so this can be tested with the memory file system.
 
     testWithoutContext('throws tool exit when lockfile open fails', () async {
@@ -1051,17 +1045,7 @@ class FakePub extends Fake implements Pub {
   int calledGet = 0;
 
   @override
-  Future<void> get({
-    PubContext context,
-    String directory,
-    bool skipIfAbsent = false,
-    bool upgrade = false,
-    bool offline = false,
-    bool generateSyntheticPackage = false,
-    String flutterRootOverride,
-    bool checkUpToDate = false,
-    bool shouldSkipThirdPartyGenerator = true,
-  }) async {
+  Future<void> get({PubContext context, String directory, bool skipIfAbsent = false, bool upgrade = false, bool offline = false, bool generateSyntheticPackage = false, String flutterRootOverride, bool checkUpToDate = false}) async {
     calledGet += 1;
   }
 }

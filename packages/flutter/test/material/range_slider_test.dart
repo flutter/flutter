@@ -22,15 +22,18 @@ void main() {
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return Material(
-                child: Center(
-                  child: RangeSlider(
-                    values: values,
-                    onChanged: (RangeValues newValues) {
-                      setState(() {
-                        values = newValues;
-                      });
-                    },
+              return MediaQuery(
+                data: MediaQueryData.fromWindow(window),
+                child: Material(
+                  child: Center(
+                    child: RangeSlider(
+                      values: values,
+                      onChanged: (RangeValues newValues) {
+                        setState(() {
+                          values = newValues;
+                        });
+                      },
+                    ),
                   ),
                 ),
               );
@@ -76,15 +79,18 @@ void main() {
           textDirection: TextDirection.rtl,
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return Material(
-                child: Center(
-                  child: RangeSlider(
-                    values: values,
-                    onChanged: (RangeValues newValues) {
-                      setState(() {
-                        values = newValues;
-                      });
-                    },
+              return MediaQuery(
+                data: MediaQueryData.fromWindow(window),
+                child: Material(
+                  child: Center(
+                    child: RangeSlider(
+                      values: values,
+                      onChanged: (RangeValues newValues) {
+                        setState(() {
+                          values = newValues;
+                        });
+                      },
+                    ),
                   ),
                 ),
               );
@@ -130,18 +136,21 @@ void main() {
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return Material(
-                child: Center(
-                  child: RangeSlider(
-                    values: values,
-                    min: 0.0,
-                    max: 100.0,
-                    divisions: 10,
-                    onChanged: (RangeValues newValues) {
-                      setState(() {
-                        values = newValues;
-                      });
-                    },
+              return MediaQuery(
+                data: MediaQueryData.fromWindow(window),
+                child: Material(
+                  child: Center(
+                    child: RangeSlider(
+                      values: values,
+                      min: 0.0,
+                      max: 100.0,
+                      divisions: 10,
+                      onChanged: (RangeValues newValues) {
+                        setState(() {
+                          values = newValues;
+                        });
+                      },
+                    ),
                   ),
                 ),
               );
@@ -189,18 +198,21 @@ void main() {
           textDirection: TextDirection.rtl,
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return Material(
-                child: Center(
-                  child: RangeSlider(
-                    values: values,
-                    min: 0,
-                    max: 100,
-                    divisions: 10,
-                    onChanged: (RangeValues newValues) {
-                      setState(() {
-                        values = newValues;
-                      });
-                    },
+              return MediaQuery(
+                data: MediaQueryData.fromWindow(window),
+                child: Material(
+                  child: Center(
+                    child: RangeSlider(
+                      values: values,
+                      min: 0,
+                      max: 100,
+                      divisions: 10,
+                      onChanged: (RangeValues newValues) {
+                        setState(() {
+                          values = newValues;
+                        });
+                      },
+                    ),
                   ),
                 ),
               );
@@ -248,15 +260,18 @@ void main() {
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return Material(
-                child: Center(
-                  child: RangeSlider(
-                    values: values,
-                    onChanged: (RangeValues newValues) {
-                      setState(() {
-                        values = newValues;
-                      });
-                    },
+              return MediaQuery(
+                data: MediaQueryData.fromWindow(window),
+                child: Material(
+                  child: Center(
+                    child: RangeSlider(
+                      values: values,
+                      onChanged: (RangeValues newValues) {
+                        setState(() {
+                          values = newValues;
+                        });
+                      },
+                    ),
                   ),
                 ),
               );
@@ -292,15 +307,18 @@ void main() {
           textDirection: TextDirection.rtl,
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return Material(
-                child: Center(
-                  child: RangeSlider(
-                    values: values,
-                    onChanged: (RangeValues newValues) {
-                      setState(() {
-                        values = newValues;
-                      });
-                    },
+              return MediaQuery(
+                data: MediaQueryData.fromWindow(window),
+                child: Material(
+                  child: Center(
+                    child: RangeSlider(
+                      values: values,
+                      onChanged: (RangeValues newValues) {
+                        setState(() {
+                          values = newValues;
+                        });
+                      },
+                    ),
                   ),
                 ),
               );
@@ -336,18 +354,21 @@ void main() {
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return Material(
-                child: Center(
-                  child: RangeSlider(
-                    values: values,
-                    min: 0,
-                    max: 100,
-                    divisions: 10,
-                    onChanged: (RangeValues newValues) {
-                      setState(() {
-                        values = newValues;
-                      });
-                    },
+              return MediaQuery(
+                data: MediaQueryData.fromWindow(window),
+                child: Material(
+                  child: Center(
+                    child: RangeSlider(
+                      values: values,
+                      min: 0,
+                      max: 100,
+                      divisions: 10,
+                      onChanged: (RangeValues newValues) {
+                        setState(() {
+                          values = newValues;
+                        });
+                      },
+                    ),
                   ),
                 ),
               );
@@ -383,18 +404,21 @@ void main() {
           textDirection: TextDirection.rtl,
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return Material(
-                child: Center(
-                  child: RangeSlider(
-                    values: values,
-                    min: 0,
-                    max: 100,
-                    divisions: 10,
-                    onChanged: (RangeValues newValues) {
-                      setState(() {
-                        values = newValues;
-                      });
-                    },
+              return MediaQuery(
+                data: MediaQueryData.fromWindow(window),
+                child: Material(
+                  child: Center(
+                    child: RangeSlider(
+                      values: values,
+                      min: 0,
+                      max: 100,
+                      divisions: 10,
+                      onChanged: (RangeValues newValues) {
+                        setState(() {
+                          values = newValues;
+                        });
+                      },
+                    ),
                   ),
                 ),
               );
@@ -430,15 +454,18 @@ void main() {
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return Material(
-                child: Center(
-                  child: RangeSlider(
-                    values: values,
-                    onChanged: (RangeValues newValues) {
-                      setState(() {
-                        values = newValues;
-                      });
-                    },
+              return MediaQuery(
+                data: MediaQueryData.fromWindow(window),
+                child: Material(
+                  child: Center(
+                    child: RangeSlider(
+                      values: values,
+                      onChanged: (RangeValues newValues) {
+                        setState(() {
+                          values = newValues;
+                        });
+                      },
+                    ),
                   ),
                 ),
               );
@@ -480,15 +507,18 @@ void main() {
           textDirection: TextDirection.rtl,
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return Material(
-                child: Center(
-                  child: RangeSlider(
-                    values: values,
-                    onChanged: (RangeValues newValues) {
-                      setState(() {
-                        values = newValues;
-                      });
-                    },
+              return MediaQuery(
+                data: MediaQueryData.fromWindow(window),
+                child: Material(
+                  child: Center(
+                    child: RangeSlider(
+                      values: values,
+                      onChanged: (RangeValues newValues) {
+                        setState(() {
+                          values = newValues;
+                        });
+                      },
+                    ),
                   ),
                 ),
               );
@@ -530,18 +560,21 @@ void main() {
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return Material(
-                child: Center(
-                  child: RangeSlider(
-                    values: values,
-                    min: 0,
-                    max: 100,
-                    divisions: 10,
-                    onChanged: (RangeValues newValues) {
-                      setState(() {
-                        values = newValues;
-                      });
-                    },
+              return MediaQuery(
+                data: MediaQueryData.fromWindow(window),
+                child: Material(
+                  child: Center(
+                    child: RangeSlider(
+                      values: values,
+                      min: 0,
+                      max: 100,
+                      divisions: 10,
+                      onChanged: (RangeValues newValues) {
+                        setState(() {
+                          values = newValues;
+                        });
+                      },
+                    ),
                   ),
                 ),
               );
@@ -583,18 +616,21 @@ void main() {
           textDirection: TextDirection.rtl,
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return Material(
-                child: Center(
-                  child: RangeSlider(
-                    values: values,
-                    min: 0,
-                    max: 100,
-                    divisions: 10,
-                    onChanged: (RangeValues newValues) {
-                      setState(() {
-                        values = newValues;
-                      });
-                    },
+              return MediaQuery(
+                data: MediaQueryData.fromWindow(window),
+                child: Material(
+                  child: Center(
+                    child: RangeSlider(
+                      values: values,
+                      min: 0,
+                      max: 100,
+                      divisions: 10,
+                      onChanged: (RangeValues newValues) {
+                        setState(() {
+                          values = newValues;
+                        });
+                      },
+                    ),
                   ),
                 ),
               );
@@ -636,15 +672,18 @@ void main() {
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return Material(
-                child: Center(
-                  child: RangeSlider(
-                    values: values,
-                    onChanged: (RangeValues newValues) {
-                      setState(() {
-                        values = newValues;
-                      });
-                    },
+              return MediaQuery(
+                data: MediaQueryData.fromWindow(window),
+                child: Material(
+                  child: Center(
+                    child: RangeSlider(
+                      values: values,
+                      onChanged: (RangeValues newValues) {
+                        setState(() {
+                          values = newValues;
+                        });
+                      },
+                    ),
                   ),
                 ),
               );
@@ -686,15 +725,18 @@ void main() {
           textDirection: TextDirection.rtl,
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return Material(
-                child: Center(
-                  child: RangeSlider(
-                    values: values,
-                    onChanged: (RangeValues newValues) {
-                      setState(() {
-                        values = newValues;
-                      });
-                    },
+              return MediaQuery(
+                data: MediaQueryData.fromWindow(window),
+                child: Material(
+                  child: Center(
+                    child: RangeSlider(
+                      values: values,
+                      onChanged: (RangeValues newValues) {
+                        setState(() {
+                          values = newValues;
+                        });
+                      },
+                    ),
                   ),
                 ),
               );
@@ -736,18 +778,21 @@ void main() {
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return Material(
-                child: Center(
-                  child: RangeSlider(
-                    values: values,
-                    min: 0,
-                    max: 100,
-                    divisions: 10,
-                    onChanged: (RangeValues newValues) {
-                      setState(() {
-                        values = newValues;
-                      });
-                    },
+              return MediaQuery(
+                data: MediaQueryData.fromWindow(window),
+                child: Material(
+                  child: Center(
+                    child: RangeSlider(
+                      values: values,
+                      min: 0,
+                      max: 100,
+                      divisions: 10,
+                      onChanged: (RangeValues newValues) {
+                        setState(() {
+                          values = newValues;
+                        });
+                      },
+                    ),
                   ),
                 ),
               );
@@ -789,18 +834,21 @@ void main() {
           textDirection: TextDirection.rtl,
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return Material(
-                child: Center(
-                  child: RangeSlider(
-                    values: values,
-                    min: 0,
-                    max: 100,
-                    divisions: 10,
-                    onChanged: (RangeValues newValues) {
-                      setState(() {
-                        values = newValues;
-                      });
-                    },
+              return MediaQuery(
+                data: MediaQueryData.fromWindow(window),
+                child: Material(
+                  child: Center(
+                    child: RangeSlider(
+                      values: values,
+                      min: 0,
+                      max: 100,
+                      divisions: 10,
+                      onChanged: (RangeValues newValues) {
+                        setState(() {
+                          values = newValues;
+                        });
+                      },
+                    ),
                   ),
                 ),
               );
@@ -844,23 +892,26 @@ void main() {
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return Material(
-                child: Center(
-                  child: RangeSlider(
-                    values: values,
-                    min: 0,
-                    max: 100,
-                    onChanged: (RangeValues newValues) {
-                      setState(() {
-                        values = newValues;
-                      });
-                    },
-                    onChangeStart: (RangeValues newValues) {
-                      startValues = newValues;
-                    },
-                    onChangeEnd: (RangeValues newValues) {
-                      endValues = newValues;
-                    },
+              return MediaQuery(
+                data: MediaQueryData.fromWindow(window),
+                child: Material(
+                  child: Center(
+                    child: RangeSlider(
+                      values: values,
+                      min: 0,
+                      max: 100,
+                      onChanged: (RangeValues newValues) {
+                        setState(() {
+                          values = newValues;
+                        });
+                      },
+                      onChangeStart: (RangeValues newValues) {
+                        startValues = newValues;
+                      },
+                      onChangeEnd: (RangeValues newValues) {
+                        endValues = newValues;
+                      },
+                    ),
                   ),
                 ),
               );
@@ -899,23 +950,26 @@ void main() {
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return Material(
-                child: Center(
-                  child: RangeSlider(
-                    values: values,
-                    min: 0,
-                    max: 100,
-                    onChanged: (RangeValues newValues) {
-                      setState(() {
-                        values = newValues;
-                      });
-                    },
-                    onChangeStart: (RangeValues newValues) {
-                      startValues = newValues;
-                    },
-                    onChangeEnd: (RangeValues newValues) {
-                      endValues = newValues;
-                    },
+              return MediaQuery(
+                data: MediaQueryData.fromWindow(window),
+                child: Material(
+                  child: Center(
+                    child: RangeSlider(
+                      values: values,
+                      min: 0,
+                      max: 100,
+                      onChanged: (RangeValues newValues) {
+                        setState(() {
+                          values = newValues;
+                        });
+                      },
+                      onChangeStart: (RangeValues newValues) {
+                        startValues = newValues;
+                      },
+                      onChangeEnd: (RangeValues newValues) {
+                        endValues = newValues;
+                      },
+                    ),
                   ),
                 ),
               );
@@ -985,17 +1039,20 @@ void main() {
     return MaterialApp(
       home: Directionality(
         textDirection: TextDirection.ltr,
-        child: Material(
-          child: Center(
-            child: Theme(
-              data: theme,
-              child: RangeSlider(
-                values: values,
-                labels: RangeLabels(values.start.toStringAsFixed(2), values.end.toStringAsFixed(2)),
-                divisions: divisions,
-                activeColor: activeColor,
-                inactiveColor: inactiveColor,
-                onChanged: onChanged,
+        child: MediaQuery(
+          data: MediaQueryData.fromWindow(window),
+          child: Material(
+            child: Center(
+              child: Theme(
+                data: theme,
+                child: RangeSlider(
+                  values: values,
+                  labels: RangeLabels(values.start.toStringAsFixed(2), values.end.toStringAsFixed(2)),
+                  divisions: divisions,
+                  activeColor: activeColor,
+                  inactiveColor: inactiveColor,
+                  onChanged: onChanged,
+                ),
               ),
             ),
           ),
@@ -1256,17 +1313,20 @@ void main() {
       return MaterialApp(
         home: Directionality(
           textDirection: TextDirection.ltr,
-          child: Material(
-            child: Center(
-              child: Theme(
-                data: theme,
-                child: RangeSlider(
-                  values: values,
-                  labels: RangeLabels(values.start.toStringAsFixed(2), values.end.toStringAsFixed(2)),
-                  divisions: divisions,
-                  activeColor: activeColor,
-                  inactiveColor: inactiveColor,
-                  onChanged: onChanged,
+          child: MediaQuery(
+            data: MediaQueryData.fromWindow(window),
+            child: Material(
+              child: Center(
+                child: Theme(
+                  data: theme,
+                  child: RangeSlider(
+                    values: values,
+                    labels: RangeLabels(values.start.toStringAsFixed(2), values.end.toStringAsFixed(2)),
+                    divisions: divisions,
+                    activeColor: activeColor,
+                    inactiveColor: inactiveColor,
+                    onChanged: onChanged,
+                  ),
                 ),
               ),
             ),
@@ -1417,17 +1477,20 @@ void main() {
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return Material(
-                child: Center(
-                  child: Theme(
-                    data: theme,
-                    child: RangeSlider(
-                      values: values,
-                      onChanged: (RangeValues newValues) {
-                        setState(() {
-                          values = newValues;
-                        });
-                      },
+              return MediaQuery(
+                data: MediaQueryData.fromWindow(window),
+                child: Material(
+                  child: Center(
+                    child: Theme(
+                      data: theme,
+                      child: RangeSlider(
+                        values: values,
+                        onChanged: (RangeValues newValues) {
+                          setState(() {
+                            values = newValues;
+                          });
+                        },
+                      ),
                     ),
                   ),
                 ),
@@ -1485,18 +1548,21 @@ void main() {
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return Material(
-                child: Center(
-                  child: Theme(
-                    data: theme,
-                    child: RangeSlider(
-                      values: values,
-                      labels: RangeLabels(values.start.toStringAsFixed(2), values.end.toStringAsFixed(2)),
-                      onChanged: (RangeValues newValues) {
-                        setState(() {
-                          values = newValues;
-                        });
-                      },
+              return MediaQuery(
+                data: MediaQueryData.fromWindow(window),
+                child: Material(
+                  child: Center(
+                    child: Theme(
+                      data: theme,
+                      child: RangeSlider(
+                        values: values,
+                        labels: RangeLabels(values.start.toStringAsFixed(2), values.end.toStringAsFixed(2)),
+                        onChanged: (RangeValues newValues) {
+                          setState(() {
+                            values = newValues;
+                          });
+                        },
+                      ),
                     ),
                   ),
                 ),
@@ -1699,12 +1765,15 @@ void main() {
           data: ThemeData.light(),
           child: Directionality(
             textDirection: TextDirection.ltr,
-            child: Material(
-              child: RangeSlider(
-                values: const RangeValues(10.0, 12.0),
-                min: 0.0,
-                max: 100.0,
-                onChanged: (RangeValues v) { },
+            child: MediaQuery(
+              data: MediaQueryData.fromWindow(window),
+              child: Material(
+                child: RangeSlider(
+                  values: const RangeValues(10.0, 12.0),
+                  min: 0.0,
+                  max: 100.0,
+                  onChanged: (RangeValues v) { },
+                ),
               ),
             ),
           ),

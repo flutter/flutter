@@ -627,49 +627,4 @@ void main() {
     expect(outsideBoldTextOverride, false);
     expect(insideBoldTextOverride, true);
   });
-
-  testWidgets('MediaQuery.fromWindow creates a MediaQuery', (WidgetTester tester) async {
-    bool hasMediaQueryAsParentOutside = false;
-    bool hasMediaQueryAsParentInside = false;
-
-    await tester.pumpWidget(
-      Builder(
-        builder: (BuildContext context) {
-          hasMediaQueryAsParentOutside =
-              context.findAncestorWidgetOfExactType<MediaQuery>() != null;
-          return MediaQuery.fromWindow(
-            child: Builder(
-              builder: (BuildContext context) {
-                hasMediaQueryAsParentInside =
-                    context.findAncestorWidgetOfExactType<MediaQuery>() != null;
-                return const SizedBox();
-              },
-            ),
-          );
-        },
-      ),
-    );
-
-    expect(hasMediaQueryAsParentOutside, false);
-    expect(hasMediaQueryAsParentInside, true);
-  });
-
-  testWidgets('MediaQueryData.fromWindow is created using window values', (WidgetTester tester)
-  async {
-    final MediaQueryData windowData = MediaQueryData.fromWindow(WidgetsBinding.instance!.window);
-    late MediaQueryData fromWindowData;
-
-    await tester.pumpWidget(
-      MediaQuery.fromWindow(
-        child: Builder(
-          builder: (BuildContext context) {
-            fromWindowData = MediaQuery.of(context);
-            return const SizedBox();
-          },
-        ),
-      ),
-    );
-
-    expect(windowData, equals(fromWindowData));
-  });
 }

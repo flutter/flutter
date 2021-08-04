@@ -307,14 +307,6 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   }
 
   @override
-  Future<String> pluginsBuildSettingsOutput(
-      Directory podXcodeProject, {
-        Duration timeout = const Duration(minutes: 1),
-      }) async {
-    return null;
-  }
-
-  @override
   Future<void> cleanWorkspace(String workspacePath, String scheme, { bool verbose = false }) {
     return null;
   }

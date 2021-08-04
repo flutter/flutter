@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:convert';
 import 'dart:io';
 
@@ -13,43 +15,43 @@ import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
-late ArgResults args;
+ArgResults args;
 
 List<String> _taskNames = <String>[];
 
 /// The device-id to run test on.
-String? deviceId;
+String deviceId;
 
 /// The git branch being tested on.
-String? gitBranch;
+String gitBranch;
 
 /// The build of the local engine to use.
 ///
 /// Required for A/B test mode.
-String? localEngine;
+String localEngine;
 
 /// The path to the engine "src/" directory.
-String? localEngineSrcPath;
+String localEngineSrcPath;
 
 /// Name of the LUCI builder this test is currently running on.
 ///
 /// This is only passed on CI runs for Cocoon to be able to uniquely identify
 /// this test run.
-String? luciBuilder;
+String luciBuilder;
 
 /// Whether to exit on first test failure.
-bool exitOnFirstTestFailure = false;
+bool exitOnFirstTestFailure;
 
 /// Path to write test results to.
-String? resultsPath;
+String resultsPath;
 
 /// File containing a service account token.
 ///
 /// If passed, the test run results will be uploaded to Flutter infrastructure.
-String? serviceAccountTokenFile;
+String serviceAccountTokenFile;
 
 /// Suppresses standard output, prints only standard error output.
-bool silent = false;
+bool silent;
 
 /// Runs tasks.
 ///
@@ -66,15 +68,15 @@ Future<void> main(List<String> rawArgs) async {
     return;
   }
 
-  deviceId = args['device-id'] as String?;
-  exitOnFirstTestFailure = (args['exit'] as bool?) ?? false;
-  gitBranch = args['git-branch'] as String?;
-  localEngine = args['local-engine'] as String?;
-  localEngineSrcPath = args['local-engine-src-path'] as String?;
-  luciBuilder = args['luci-builder'] as String?;
-  resultsPath = args['results-file'] as String?;
-  serviceAccountTokenFile = args['service-account-token-file'] as String?;
-  silent = (args['silent'] as bool?) ?? false;
+  deviceId = args['device-id'] as String;
+  exitOnFirstTestFailure = args['exit'] as bool;
+  gitBranch = args['git-branch'] as String;
+  localEngine = args['local-engine'] as String;
+  localEngineSrcPath = args['local-engine-src-path'] as String;
+  luciBuilder = args['luci-builder'] as String;
+  resultsPath = args['results-file'] as String;
+  serviceAccountTokenFile = args['service-account-token-file'] as String;
+  silent = args['silent'] as bool;
 
   if (!args.wasParsed('task')) {
     if (args.wasParsed('stage') || args.wasParsed('all')) {
@@ -135,7 +137,7 @@ Future<void> _runABTest() async {
 
   print('$taskName A/B test. Will run $runsPerTest times.');
 
-  final ABTest abTest = ABTest(localEngine!, taskName);
+  final ABTest abTest = ABTest(localEngine, taskName);
   for (int i = 1; i <= runsPerTest; i++) {
     section('Run #$i');
 
@@ -175,17 +177,17 @@ Future<void> _runABTest() async {
 
     abTest.addBResult(localEngineResult);
 
-    if (silent != true && i < runsPerTest) {
+    if (!silent && i < runsPerTest) {
       section('A/B results so far');
       print(abTest.printSummary());
     }
   }
   abTest.finalize();
 
-  final File jsonFile = _uniqueFile(args['ab-result-file'] as String? ?? 'ABresults#.json');
+  final File jsonFile = _uniqueFile(args['ab-result-file'] as String ?? 'ABresults#.json');
   jsonFile.writeAsStringSync(const JsonEncoder.withIndent('  ').convert(abTest.jsonMap));
 
-  if (silent != true) {
+  if (!silent) {
     section('Raw results');
     print(abTest.rawResults());
   }
@@ -212,9 +214,9 @@ File _uniqueFile(String filenameTemplate) {
 }
 
 void addTasks({
-  required List<ManifestTask> tasks,
-  required ArgResults args,
-  required List<String> taskNames,
+  List<ManifestTask> tasks,
+  ArgResults args,
+  List<String> taskNames,
 }) {
   if (args.wasParsed('continue-from')) {
     final int index = tasks.indexWhere((ManifestTask task) => task.name == args['continue-from']);
@@ -284,7 +286,7 @@ final ArgParser _argParser = ArgParser()
           'produces a report containing averages, noise, and the speed-up\n'
           'between the two engines. --local-engine is required when running\n'
           'an A/B test.',
-    callback: (String? value) {
+    callback: (String value) {
       if (value != null && int.tryParse(value) == null) {
         throw ArgParserException('Option --ab must be a number, but was "$value".');
       }

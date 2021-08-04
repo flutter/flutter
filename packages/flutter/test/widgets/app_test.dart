@@ -140,15 +140,10 @@ void main() {
     expect(checked, isTrue);
 
     checked = false;
-    await tester.sendKeyEvent(LogicalKeyboardKey.numpadEnter);
-    await tester.pumpAndSettle();
-    expect(checked, isTrue);
-
-    checked = false;
     await tester.sendKeyEvent(LogicalKeyboardKey.gameButtonA);
     await tester.pumpAndSettle();
     expect(checked, isTrue);
-  }, variant: KeySimulatorTransitModeVariant.all());
+  });
 
   group('error control test', () {
     Future<void> expectFlutterError({
@@ -459,56 +454,6 @@ void main() {
       ),
       const Locale('zh'),
     );
-  });
-
-  testWidgets('WidgetsApp creates a MediaQuery if `useInheritedMediaQuery` is set to false', (WidgetTester tester) async {
-    late BuildContext capturedContext;
-    await tester.pumpWidget(
-      WidgetsApp(
-        useInheritedMediaQuery: false,
-        builder: (BuildContext context, Widget? child) {
-          capturedContext = context;
-          return const Placeholder();
-        },
-        color: const Color(0xFF123456),
-      ),
-    );
-    expect(MediaQuery.of(capturedContext), isNotNull);
-  });
-
-  testWidgets('WidgetsApp does not create MediaQuery if `useInheritedMediaQuery` is set to true and one is available', (WidgetTester tester) async {
-    late BuildContext capturedContext;
-    final UniqueKey uniqueKey = UniqueKey();
-    await tester.pumpWidget(
-      MediaQuery(
-      key: uniqueKey,
-        data: const MediaQueryData(),
-        child: WidgetsApp(
-          useInheritedMediaQuery: true,
-          builder: (BuildContext context, Widget? child) {
-            capturedContext = context;
-            return const Placeholder();
-          },
-          color: const Color(0xFF123456),
-        ),
-      ),
-    );
-    expect(capturedContext.dependOnInheritedWidgetOfExactType<MediaQuery>()?.key, uniqueKey);
-  });
-
-  testWidgets('WidgetsApp does create a MediaQuery if `useInheritedMediaQuery` is set to true and none is available', (WidgetTester tester) async {
-    late BuildContext capturedContext;
-    await tester.pumpWidget(
-      WidgetsApp(
-        useInheritedMediaQuery: true,
-        builder: (BuildContext context, Widget? child) {
-          capturedContext = context;
-          return const Placeholder();
-        },
-        color: const Color(0xFF123456),
-      ),
-    );
-    expect(MediaQuery.of(capturedContext), isNotNull);
   });
 }
 

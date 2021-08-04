@@ -1429,8 +1429,6 @@ void main() {
       excludeFromSemantics: true,
       preferBelow: false,
       verticalOffset: 50.0,
-      triggerMode: TooltipTriggerMode.manual,
-      enableFeedback: true,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -1447,81 +1445,8 @@ void main() {
       'semantics: excluded',
       'wait duration: 0:00:01.000000',
       'show duration: 0:00:02.000000',
-      'triggerMode: TooltipTriggerMode.manual',
-      'enableFeedback: true',
     ]);
   });
-
-  testWidgets('Tooltip triggers on tap when trigger mode is tap', (WidgetTester tester) async {
-    await setWidgetForTooltipMode(tester, TooltipTriggerMode.tap);
-
-    final Finder tooltip = find.byType(Tooltip);
-    expect(find.text(tooltipText), findsNothing);
-
-    await testGestureTap(tester, tooltip);
-    expect(find.text(tooltipText), findsOneWidget);
-  });
-
-  testWidgets('Tooltip triggers on long press when mode is long press', (WidgetTester tester) async {
-    await setWidgetForTooltipMode(tester, TooltipTriggerMode.longPress);
-
-    final Finder tooltip = find.byType(Tooltip);
-    expect(find.text(tooltipText), findsNothing);
-
-    await testGestureTap(tester, tooltip);
-    expect(find.text(tooltipText), findsNothing);
-
-    await testGestureLongPress(tester, tooltip);
-    expect(find.text(tooltipText), findsOneWidget);
-  });
-
-  testWidgets('Tooltip does not trigger on tap when trigger mode is longPress', (WidgetTester tester) async {
-    await setWidgetForTooltipMode(tester, TooltipTriggerMode.longPress);
-
-    final Finder tooltip = find.byType(Tooltip);
-    expect(find.text(tooltipText), findsNothing);
-
-    await testGestureTap(tester, tooltip);
-    expect(find.text(tooltipText), findsNothing);
-  });
-
-  testWidgets('Tooltip does not trigger when trigger mode is manual', (WidgetTester tester) async {
-    await setWidgetForTooltipMode(tester, TooltipTriggerMode.manual);
-
-    final Finder tooltip = find.byType(Tooltip);
-    expect(find.text(tooltipText), findsNothing);
-
-    await testGestureTap(tester, tooltip);
-    expect(find.text(tooltipText), findsNothing);
-
-    await testGestureLongPress(tester, tooltip);
-    expect(find.text(tooltipText), findsNothing);
-  });
-}
-
-Future<void> setWidgetForTooltipMode(WidgetTester tester, TooltipTriggerMode triggerMode) async {
-  await tester.pumpWidget(
-    MaterialApp(
-      home: Tooltip(
-        message: tooltipText,
-        triggerMode: triggerMode,
-        child: const SizedBox(width: 100.0, height: 100.0),
-      ),
-    ),
-  );
-}
-
-Future<void> testGestureLongPress(WidgetTester tester, Finder tooltip) async {
-  final TestGesture gestureLongPress = await tester.startGesture(tester.getCenter(tooltip));
-  await tester.pump();
-  await tester.pump(kLongPressTimeout);
-  await gestureLongPress.up();
-  await tester.pump();
-}
-
-Future<void> testGestureTap(WidgetTester tester, Finder tooltip) async {
-  await tester.tap(tooltip);
-  await tester.pump(const Duration(milliseconds: 10));
 }
 
 SemanticsNode findDebugSemantics(RenderObject object) {

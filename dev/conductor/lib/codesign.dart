@@ -316,15 +316,9 @@ class CodesignCommand extends Command<void> {
           'Test failed because unexpected binaries found in the cache.');
     }
 
-    final String? desiredRevision = argResults![kRevision] as String?;
-    if (desiredRevision == null) {
-      stdio.printStatus(
-          'Verified that binaries are codesigned and have expected entitlements.');
-    } else {
-      stdio.printStatus(
-          'Verified that binaries for commit $desiredRevision are codesigned and have '
-          'expected entitlements.');
-    }
+    stdio.printStatus(
+        'Verified that binaries for commit ${argResults![kRevision] as String} are codesigned and have '
+        'expected entitlements.');
   }
 
   List<String>? _allBinaryPaths;

@@ -17,7 +17,6 @@ import 'package:vm_service/vm_service_io.dart' as vm_io;
 import '_callback_io.dart' if (dart.library.html) '_callback_web.dart' as driver_actions;
 import '_extension_io.dart' if (dart.library.html) '_extension_web.dart';
 import 'common.dart';
-import 'src/channel.dart';
 
 const String _success = 'success';
 
@@ -52,7 +51,7 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
       }
 
       try {
-        await integrationTestChannel.invokeMethod<void>(
+        await _channel.invokeMethod<void>(
           'allTestsFinished',
           <String, dynamic>{
             'results': results.map<String, dynamic>((String name, Object result) {
@@ -145,6 +144,9 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
     return WidgetsBinding.instance!;
   }
 
+  static const MethodChannel _channel =
+      MethodChannel('plugins.flutter.io/integration_test');
+
   /// Test results that will be populated after the tests have completed.
   ///
   /// Keys are the test descriptions, and values are either [_success] or
@@ -165,29 +167,11 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   /// side.
   final CallbackManager callbackManager = driver_actions.callbackManager;
 
-  /// Takes a screenshot.
+  /// Taking a screenshot.
   ///
-  /// On Android, you need to call `convertFlutterSurfaceToImage()`, and
-  /// pump a frame before taking a screenshot.
-  Future<List<int>> takeScreenshot(String screenshotName) async {
-    reportData ??= <String, dynamic>{};
-    reportData!['screenshots'] ??= <dynamic>[];
-    final Map<String, dynamic> data = await callbackManager.takeScreenshot(screenshotName);
-    assert(data.containsKey('bytes'));
-
-    (reportData!['screenshots']! as List<dynamic>).add(data);
-    return data['bytes']! as List<int>;
-  }
-
-  /// Android only. Converts the Flutter surface to an image view.
-  /// Be aware that if you are conducting a perf test, you may not want to call
-  /// this method since the this is an expensive operation that affects the
-  /// rendering of a Flutter app.
-  ///
-  /// Once the screenshot is taken, call `revertFlutterImage()` to restore
-  /// the original Flutter surface.
-  Future<void> convertFlutterSurfaceToImage() async {
-    await callbackManager.convertFlutterSurfaceToImage();
+  /// Called by test methods. Implementation differs for each platform.
+  Future<void> takeScreenshot(String screenshotName) async {
+    await callbackManager.takeScreenshot(screenshotName);
   }
 
   /// The callback function to response the driver side input.

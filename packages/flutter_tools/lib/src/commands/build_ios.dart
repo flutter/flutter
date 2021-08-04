@@ -50,7 +50,7 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
   final XcodeBuildAction xcodeBuildAction = XcodeBuildAction.build;
 
   @override
-  EnvironmentType get environmentType => boolArg('simulator') ? EnvironmentType.simulator : EnvironmentType.physical;
+  bool get forSimulator => boolArg('simulator');
 
   @override
   bool get configOnly => boolArg('config-only');
@@ -91,7 +91,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   final XcodeBuildAction xcodeBuildAction = XcodeBuildAction.archive;
 
   @override
-  final EnvironmentType environmentType = EnvironmentType.physical;
+  final bool forSimulator = false;
 
   @override
   final bool configOnly = false;
@@ -208,7 +208,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   };
 
   XcodeBuildAction get xcodeBuildAction;
-  EnvironmentType get environmentType;
+  bool get forSimulator;
   bool get configOnly;
   bool get shouldCodesign;
 
@@ -225,23 +225,20 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   Directory _outputAppDirectory(String xcodeResultOutput);
 
   @override
-  bool get supported => globals.platform.isMacOS;
-
-  @override
   Future<FlutterCommandResult> runCommand() async {
-    defaultBuildMode = environmentType == EnvironmentType.simulator ? BuildMode.debug : BuildMode.release;
+    defaultBuildMode = forSimulator ? BuildMode.debug : BuildMode.release;
     final BuildInfo buildInfo = await getBuildInfo();
 
-    if (!supported) {
+    if (!globals.platform.isMacOS) {
       throwToolExit('Building for iOS is only supported on macOS.');
     }
-    if (environmentType == EnvironmentType.simulator && !buildInfo.supportsSimulator) {
+    if (forSimulator && !buildInfo.supportsSimulator) {
       throwToolExit('${toTitleCase(buildInfo.friendlyModeName)} mode is not supported for simulators.');
     }
     if (configOnly && buildInfo.codeSizeDirectory != null) {
       throwToolExit('Cannot analyze code size without performing a full build.');
     }
-    if (environmentType == EnvironmentType.physical && !shouldCodesign) {
+    if (!forSimulator && !shouldCodesign) {
       globals.printStatus(
         'Warning: Building for device with codesigning disabled. You will '
         'have to manually codesign before deploying to device.',
@@ -254,7 +251,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       throwToolExit('Application not configured for iOS');
     }
 
-    final String logTarget = environmentType == EnvironmentType.simulator ? 'simulator' : 'device';
+    final String logTarget = forSimulator ? 'simulator' : 'device';
     final String typeName = globals.artifacts.getEngineType(TargetPlatform.ios, buildInfo.mode);
     if (xcodeBuildAction == XcodeBuildAction.build) {
       globals.printStatus('Building $app for $logTarget ($typeName)...');
@@ -265,7 +262,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       app: app,
       buildInfo: buildInfo,
       targetOverride: targetFile,
-      environmentType: environmentType,
+      buildForDevice: !forSimulator,
       codesign: shouldCodesign,
       configOnly: configOnly,
       buildAction: xcodeBuildAction,

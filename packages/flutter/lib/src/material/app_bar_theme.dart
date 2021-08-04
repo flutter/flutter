@@ -28,23 +28,14 @@ import 'theme.dart';
 class AppBarTheme with Diagnosticable {
   /// Creates a theme that can be used for [ThemeData.appBarTheme].
   const AppBarTheme({
-    @Deprecated(
-      'This property is no longer used, please use systemOverlayStyle instead. '
-      'This feature was deprecated after v2.4.0-0.0.pre.',
-    )
     this.brightness,
     Color? color,
     Color? backgroundColor,
     this.foregroundColor,
     this.elevation,
     this.shadowColor,
-    this.shape,
     this.iconTheme,
     this.actionsIconTheme,
-    @Deprecated(
-      'This property is no longer used, please use toolbarTextStyle and titleTextStyle instead. '
-      'This feature was deprecated after v2.4.0-0.0.pre.',
-    )
     this.textTheme,
     this.centerTitle,
     this.titleSpacing,
@@ -52,10 +43,6 @@ class AppBarTheme with Diagnosticable {
     this.toolbarTextStyle,
     this.titleTextStyle,
     this.systemOverlayStyle,
-    @Deprecated(
-      'This property is obsolete and is false by default. '
-      'This feature was deprecated after v2.4.0-0.0.pre.',
-    )
     this.backwardsCompatibility,
   }) : assert(
          color == null || backgroundColor == null,
@@ -63,7 +50,7 @@ class AppBarTheme with Diagnosticable {
        ),
        backgroundColor = backgroundColor ?? color;
 
-  /// This property is deprecated, please use [systemOverlayStyle] instead.
+  /// This property is obsolete, please use [systemOverlayStyle] instead.
   ///
   /// Overrides the default value of the obsolete [AppBar.brightness]
   /// property which implicitly defines [AppBar.systemOverlayStyle] in
@@ -75,14 +62,8 @@ class AppBarTheme with Diagnosticable {
   ///    [AppBar.systemOverlayStyle] in all descendant [AppBar] widgets.
   ///  * [AppBar.backwardsCompatibility], which forces [AppBar] to depend
   ///    on this obsolete property.
-  @Deprecated(
-    'This property is no longer used, please use systemOverlayStyle instead. '
-    'This feature was deprecated after v2.4.0-0.0.pre.',
-  )
   final Brightness? brightness;
 
-  /// This property is deprecated, please use [backgroundColor] instead.
-  ///
   /// Obsolete property that overrides the default value of
   /// [AppBar.backgroundColor] in all descendant [AppBar] widgets.
   ///
@@ -93,10 +74,6 @@ class AppBarTheme with Diagnosticable {
   ///    [AppBar.backgroundColor].
   ///  * [AppBar.backwardsCompatibility], which forces [AppBar] to depend
   ///    on this obsolete property.
-  @Deprecated(
-    'This property is no longer used, please use backgroundColor instead. '
-    'This feature was deprecated after v2.4.0-0.0.pre.',
-  )
   Color? get color => backgroundColor;
 
   /// Overrides the default value of [AppBar.backgroundColor] in all
@@ -125,10 +102,6 @@ class AppBarTheme with Diagnosticable {
   /// descendant widgets.
   final Color? shadowColor;
 
-  /// Overrides the default value for [AppBar.shape] in all
-  /// descendant widgets.
-  final ShapeBorder? shape;
-
   /// Overrides the default value of [AppBar.iconTheme] in all
   /// descendant [AppBar] widgets.
   ///
@@ -151,9 +124,6 @@ class AppBarTheme with Diagnosticable {
   ///    [AppBar.foregroundColor] in all descendant widgets.
   final IconThemeData? actionsIconTheme;
 
-  /// This property is deprecated, please use [toolbarTextStyle] and
-  /// [titleTextStyle] instead.
-  ///
   /// Overrides the default value of the obsolete [AppBar.textTheme]
   /// property in all descendant [AppBar] widgets.
   ///
@@ -163,10 +133,6 @@ class AppBarTheme with Diagnosticable {
   ///    [AppBar.toolbarTextStyle in all descendant [AppBar] widgets.
   ///  * [titleTextStyle], which overrides the default value for
   ///    [AppBar.titleTextStyle in all descendant [AppBar] widgets.
-  @Deprecated(
-    'This property is no longer used, please use toolbarTextStyle and titleTextStyle instead. '
-    'This feature was deprecated after v2.4.0-0.0.pre.',
-  )
   final TextTheme? textTheme;
 
   /// Overrides the default value for [AppBar.centerTitle].
@@ -191,8 +157,7 @@ class AppBarTheme with Diagnosticable {
   /// Overrides the default value for the obsolete [AppBar.toolbarTextStyle]
   /// property in all descendant [AppBar] widgets.
   ///
-  /// If this property is specified, then [backwardsCompatibility]
-  /// should be false (the default).
+  /// If this property is specified, then [backwardsCompatibility] should be true.
   ///
   /// See also:
   ///
@@ -203,8 +168,7 @@ class AppBarTheme with Diagnosticable {
   /// Overrides the default value of [AppBar.titleTextStyle]
   /// property in all descendant [AppBar] widgets.
   ///
-  /// If this property is specified, then [backwardsCompatibility]
-  /// should be false (the default).
+  /// If this property is specified, then [backwardsCompatibility] should be true.
   ///
   /// See also:
   ///
@@ -218,10 +182,6 @@ class AppBarTheme with Diagnosticable {
 
   /// Overrides the default value of [AppBar.backwardsCompatibility]
   /// property in all descendant [AppBar] widgets.
-  @Deprecated(
-    'This property is obsolete and is false by default. '
-    'This feature was deprecated after v2.4.0-0.0.pre.',
-  )
   final bool? backwardsCompatibility;
 
   /// Creates a copy of this object with the given fields replaced with the
@@ -234,7 +194,6 @@ class AppBarTheme with Diagnosticable {
     Color? foregroundColor,
     double? elevation,
     Color? shadowColor,
-    ShapeBorder? shape,
     IconThemeData? iconTheme,
     TextTheme? textTheme,
     bool? centerTitle,
@@ -255,7 +214,6 @@ class AppBarTheme with Diagnosticable {
       foregroundColor: foregroundColor ?? this.foregroundColor,
       elevation: elevation ?? this.elevation,
       shadowColor: shadowColor ?? this.shadowColor,
-      shape: shape ?? this.shape,
       iconTheme: iconTheme ?? this.iconTheme,
       actionsIconTheme: actionsIconTheme ?? this.actionsIconTheme,
       textTheme: textTheme ?? this.textTheme,
@@ -287,7 +245,6 @@ class AppBarTheme with Diagnosticable {
       foregroundColor: Color.lerp(a?.foregroundColor, b?.foregroundColor, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       shadowColor: Color.lerp(a?.shadowColor, b?.shadowColor, t),
-      shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
       iconTheme: IconThemeData.lerp(a?.iconTheme, b?.iconTheme, t),
       actionsIconTheme: IconThemeData.lerp(a?.actionsIconTheme, b?.actionsIconTheme, t),
       textTheme: TextTheme.lerp(a?.textTheme, b?.textTheme, t),
@@ -309,7 +266,6 @@ class AppBarTheme with Diagnosticable {
       foregroundColor,
       elevation,
       shadowColor,
-      shape,
       iconTheme,
       actionsIconTheme,
       textTheme,
@@ -335,7 +291,6 @@ class AppBarTheme with Diagnosticable {
         && other.foregroundColor == foregroundColor
         && other.elevation == elevation
         && other.shadowColor == shadowColor
-        && other.shape == shape
         && other.iconTheme == iconTheme
         && other.actionsIconTheme == actionsIconTheme
         && other.textTheme == textTheme
@@ -356,7 +311,6 @@ class AppBarTheme with Diagnosticable {
     properties.add(ColorProperty('foregroundColor', foregroundColor, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
     properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<IconThemeData>('iconTheme', iconTheme, defaultValue: null));
     properties.add(DiagnosticsProperty<IconThemeData>('actionsIconTheme', actionsIconTheme, defaultValue: null));
     properties.add(DiagnosticsProperty<TextTheme>('textTheme', textTheme, defaultValue: null));

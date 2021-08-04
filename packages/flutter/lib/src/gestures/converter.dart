@@ -19,7 +19,7 @@ int _synthesiseDownButtons(int buttons, PointerDeviceKind kind) {
     case PointerDeviceKind.touch:
     case PointerDeviceKind.stylus:
     case PointerDeviceKind.invertedStylus:
-      return buttons == 0 ? kPrimaryButton : buttons;
+      return buttons | kPrimaryButton;
     case PointerDeviceKind.unknown:
       // We have no information about the device but we know we never want
       // buttons to be 0 when the pointer is down.

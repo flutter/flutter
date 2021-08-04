@@ -250,20 +250,17 @@ abstract class FlutterTestDriver {
 
   // This method isn't racy. If the isolate is already paused,
   // it will immediately return.
-  Future<Isolate> waitForPause() => waitForDebugEvent('Pause');
-  Future<Isolate> waitForResume() => waitForDebugEvent('Resume');
-
-  Future<Isolate> waitForDebugEvent(String kind) async {
+  Future<Isolate> waitForPause() async {
     return _timeoutWithMessages<Isolate>(
       () async {
         final String flutterIsolate = await _getFlutterIsolateId();
         final Completer<Event> pauseEvent = Completer<Event>();
 
-        // Start listening for events containing 'kind'.
+        // Start listening for pause events.
         final StreamSubscription<Event> pauseSubscription = _vmService.onDebugEvent
           .where((Event event) {
             return event.isolate.id == flutterIsolate
-                && event.kind.startsWith(kind);
+                && event.kind.startsWith('Pause');
           })
           .listen((Event event) {
             if (!pauseEvent.isCompleted) {
@@ -271,14 +268,14 @@ abstract class FlutterTestDriver {
             }
           });
 
-        // But also check if the isolate was already at the stae we need (only after we've
-        // set up the subscription) to avoid races. If it was paused, we don't need to wait
+        // But also check if the isolate was already paused (only after we've set
+        // up the subscription) to avoid races. If it was paused, we don't need to wait
         // for the event.
         final Isolate isolate = await _vmService.getIsolate(flutterIsolate);
-        if (isolate.pauseEvent.kind.startsWith(kind)) {
-          _debugPrint('Isolate was already at "$kind" (${isolate.pauseEvent.kind}).');
+        if (isolate.pauseEvent.kind.startsWith('Pause')) {
+          _debugPrint('Isolate was already paused (${isolate.pauseEvent.kind}).');
         } else {
-          _debugPrint('Waiting for "$kind" event to arrive...');
+          _debugPrint('Isolate is not already paused, waiting for event to arrive...');
           await pauseEvent.future;
         }
 
@@ -287,7 +284,7 @@ abstract class FlutterTestDriver {
 
         return getFlutterIsolate();
       },
-      task: 'Waiting for isolate to $kind',
+      task: 'Waiting for isolate to pause',
     );
   }
 
@@ -315,7 +312,6 @@ abstract class FlutterTestDriver {
       () async => _vmService.resume(await _getFlutterIsolateId(), step: step),
       task: 'Resuming isolate (step=$step)',
     );
-    await waitForResume();
     return waitForNextPause ? waitForPause() : null;
   }
 

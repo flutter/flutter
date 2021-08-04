@@ -1965,7 +1965,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     final TextSelection selectedLine = _getLineAtOffset(TextPosition(offset: startPoint));
     final TextSelection nextSelection = TextSelection.collapsed(
       offset: selectedLine.baseOffset,
-      affinity: TextAffinity.downstream,
     );
 
     _setSelection(nextSelection, cause);
@@ -2052,7 +2051,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     final TextSelection selectedLine = _getLineAtOffset(TextPosition(offset: startPoint));
     final TextSelection nextSelection = TextSelection.collapsed(
       offset: selectedLine.extentOffset,
-      affinity: TextAffinity.upstream,
     );
 
     _setSelection(nextSelection, cause);
@@ -2274,15 +2272,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// The text to display.
   InlineSpan? get text => _textPainter.text;
   final TextPainter _textPainter;
-  AttributedString? _cachedAttributedValue;
-  List<InlineSpanSemanticsInformation>? _cachedCombinedSemanticsInfos;
   set text(InlineSpan? value) {
     if (_textPainter.text == value)
       return;
     _textPainter.text = value;
     _cachedPlainText = null;
-    _cachedAttributedValue = null;
-    _cachedCombinedSemanticsInfos = null;
     _extractPlaceholderSpans(value);
     markNeedsTextLayout();
     markNeedsSemanticsUpdate();
@@ -2743,31 +2737,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
         ..explicitChildNodes = true;
       return;
     }
-    if (_cachedAttributedValue == null) {
-      if (obscureText) {
-        _cachedAttributedValue = AttributedString(obscuringCharacter * _plainText.length);
-      } else {
-        final StringBuffer buffer = StringBuffer();
-        int offset = 0;
-        final List<StringAttribute> attributes = <StringAttribute>[];
-        for (final InlineSpanSemanticsInformation info in _semanticsInfo!) {
-          final String label = info.semanticsLabel ?? info.text;
-          for (final StringAttribute infoAttribute in info.stringAttributes) {
-            final TextRange originalRange = infoAttribute.range;
-            attributes.add(
-              infoAttribute.copy(
-                range: TextRange(start: offset + originalRange.start, end: offset + originalRange.end),
-              ),
-            );
-          }
-          buffer.write(label);
-          offset += label.length;
-        }
-        _cachedAttributedValue = AttributedString(buffer.toString(), attributes: attributes);
-      }
-    }
     config
-      ..attributedValue = _cachedAttributedValue!
+      ..value = obscureText
+          ? obscuringCharacter * _plainText.length
+          : _plainText
       ..isObscured = obscureText
       ..isMultiline = _isMultiline
       ..textDirection = textDirection
@@ -2818,8 +2791,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     int childIndex = 0;
     RenderBox? child = firstChild;
     final Queue<SemanticsNode> newChildCache = Queue<SemanticsNode>();
-    _cachedCombinedSemanticsInfos ??= combineSemanticsInfo(_semanticsInfo!);
-    for (final InlineSpanSemanticsInformation info in _cachedCombinedSemanticsInfos!) {
+    for (final InlineSpanSemanticsInformation info in combineSemanticsInfo(_semanticsInfo!)) {
       final TextSelection selection = TextSelection(
         baseOffset: start,
         extentOffset: start + info.text.length,
@@ -2875,7 +2847,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
         final SemanticsConfiguration configuration = SemanticsConfiguration()
           ..sortKey = OrdinalSortKey(ordinal++)
           ..textDirection = initialDirection
-          ..attributedLabel = AttributedString(info.semanticsLabel ?? info.text, attributes: info.stringAttributes);
+          ..label = info.semanticsLabel ?? info.text;
         final GestureRecognizer? recognizer = info.recognizer;
         if (recognizer != null) {
           if (recognizer is TapGestureRecognizer) {
@@ -3116,7 +3088,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     final Offset paintOffset = _paintOffset;
 
     final List<ui.TextBox> boxes = selection.isCollapsed ?
-        <ui.TextBox>[] : _textPainter.getBoxesForSelection(selection, boxHeightStyle: selectionHeightStyle, boxWidthStyle: selectionWidthStyle);
+        <ui.TextBox>[] : _textPainter.getBoxesForSelection(selection);
     if (boxes.isEmpty) {
       // TODO(mpcomplete): This doesn't work well at an RTL/LTR boundary.
       final Offset caretOffset = _textPainter.getOffsetForCaret(selection.extent, _caretPrototype);
@@ -3147,8 +3119,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
     final List<ui.TextBox> boxes = _textPainter.getBoxesForSelection(
       TextSelection(baseOffset: range.start, extentOffset: range.end),
-      boxHeightStyle: selectionHeightStyle,
-      boxWidthStyle: selectionWidthStyle,
     );
 
     return boxes.fold(

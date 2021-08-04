@@ -172,11 +172,6 @@ Future<T> runInContext<T>(
         logger: globals.logger,
         platform: globals.platform,
       ),
-      CustomDevicesConfig: () => CustomDevicesConfig(
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        platform: globals.platform
-      ),
       CrashReporter: () => CrashReporter(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -206,7 +201,11 @@ Future<T> runInContext<T>(
         ),
         operatingSystemUtils: globals.os,
         terminal: globals.terminal,
-        customDevicesConfig: globals.customDevicesConfig,
+        customDevicesConfig: CustomDevicesConfig(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          platform: globals.platform
+        ),
         uwptool: UwpTool(
           artifacts: globals.artifacts,
           logger: globals.logger,
@@ -215,7 +214,6 @@ Future<T> runInContext<T>(
       ),
       DevtoolsLauncher: () => DevtoolsServerLauncher(
         processManager: globals.processManager,
-        fileSystem: globals.fs,
         pubExecutable: globals.artifacts.getHostArtifact(HostArtifact.pubExecutable).path,
         logger: globals.logger,
         platform: globals.platform,

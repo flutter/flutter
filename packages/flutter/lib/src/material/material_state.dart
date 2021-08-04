@@ -437,17 +437,15 @@ class _MaterialStateBorderSide extends MaterialStateBorderSide {
 ///
 /// @override
 /// Widget build(BuildContext context) {
-///   return Material(
-///     child: FilterChip(
-///       label: const Text('Select chip'),
-///       selected: isSelected,
-///       onSelected: (bool value) {
-///         setState(() {
-///           isSelected = value;
-///         });
-///       },
-///       shape: SelectedBorder(),
-///     ),
+///   return FilterChip(
+///     label: const Text('Select chip'),
+///     selected: isSelected,
+///     onSelected: (bool value) {
+///       setState(() {
+///         isSelected = value;
+///       });
+///     },
+///     shape: SelectedBorder(),
 ///   );
 /// }
 /// ```

@@ -33,7 +33,7 @@ typedef ServiceExtensionCallback = Future<Map<String, dynamic>> Function(Map<Str
 /// To use this class in an `on` clause of a mixin, inherit from it and implement
 /// [initInstances()]. The mixin is guaranteed to only be constructed once in
 /// the lifetime of the app (more precisely, it will assert if constructed twice
-/// in debug mode).
+/// in checked mode).
 ///
 /// The top-most layer used to write the application will have a concrete class
 /// that inherits from [BindingBase] and uses all the various [BindingBase]

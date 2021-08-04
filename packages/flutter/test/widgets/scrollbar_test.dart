@@ -4,7 +4,6 @@
 
 import 'dart:ui' as ui;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/src/physics/utils.dart' show nearEqual;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -1144,12 +1143,6 @@ void main() {
   });
 
   testWidgets('RawScrollbar.isAlwaysShown asserts that a ScrollPosition is attached', (WidgetTester tester) async {
-    final FlutterExceptionHandler? handler = FlutterError.onError;
-    FlutterErrorDetails? error;
-    FlutterError.onError = (FlutterErrorDetails details) {
-      error = details;
-    };
-
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1170,15 +1163,12 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-
-    expect(error, isNotNull);
-    final AssertionError exception = error!.exception as AssertionError;
+    final AssertionError exception = tester.takeException() as AssertionError;
+    expect(exception, isAssertionError);
     expect(
       exception.message,
       contains("The Scrollbar's ScrollController has no ScrollPosition attached."),
     );
-
-    FlutterError.onError = handler;
   });
 
   testWidgets('Interactive scrollbars should have a valid scroll controller', (WidgetTester tester) async {
@@ -1491,160 +1481,5 @@ void main() {
         ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 580.0))
         ..rect(rect: const Rect.fromLTRB(794.0, 10.0, 800.0, 358.0))
     );
-  });
-  testWidgets('minThumbLength property of RawScrollbar is respected', (WidgetTester tester) async {
-    final ScrollController scrollController = ScrollController();
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: const MediaQueryData(),
-          child: RawScrollbar(
-            controller: scrollController,
-            minThumbLength: 21,
-            minOverscrollLength: 8,
-            isAlwaysShown: true,
-            child: SingleChildScrollView(
-              controller: scrollController,
-              child: const SizedBox(width: 1000.0, height: 50000.0),
-            ),
-          ),
-        )));
-    await tester.pumpAndSettle();
-    expect(
-        find.byType(RawScrollbar),
-        paints
-          ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0)) // track
-          ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 21.0))); // thumb
-  });
-
-  testWidgets('crossAxisMargin property of RawScrollbar is respected', (WidgetTester tester) async {
-    final ScrollController scrollController = ScrollController();
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: const MediaQueryData(),
-          child: RawScrollbar(
-            controller: scrollController,
-            crossAxisMargin: 30,
-            isAlwaysShown: true,
-            child: SingleChildScrollView(
-              controller: scrollController,
-              child: const SizedBox(width: 1000.0, height: 1000.0),
-            ),
-          ),
-        )));
-    await tester.pumpAndSettle();
-    expect(
-        find.byType(RawScrollbar),
-        paints
-          ..rect(rect: const Rect.fromLTRB(734.0, 0.0, 800.0, 600.0))
-          ..rect(rect: const Rect.fromLTRB(764.0, 0.0, 770.0, 360.0)));
-  });
-
-  testWidgets('minOverscrollLength property of RawScrollbar is respected', (WidgetTester tester) async {
-    final ScrollController scrollController = ScrollController();
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: const MediaQueryData(),
-          child: RawScrollbar(
-            controller: scrollController,
-            isAlwaysShown: true,
-            minOverscrollLength: 8.0,
-            minThumbLength: 36.0,
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              controller: scrollController,
-              child: const SizedBox(height: 10000),
-            )
-          ),
-        )
-      )
-    );
-    await tester.pumpAndSettle();
-    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(RawScrollbar)));
-    await gesture.moveBy(const Offset(0, 1000));
-    await tester.pump();
-    expect(
-        find.byType(RawScrollbar),
-        paints
-          ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
-          ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 8.0)));
-  });
-
-  testWidgets('The bar can show or hide when the viewport size change', (WidgetTester tester) async {
-    final ScrollController scrollController = ScrollController();
-    Widget buildFrame(double height) {
-      return Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: const MediaQueryData(),
-          child: RawScrollbar(
-            controller: scrollController,
-            isAlwaysShown: true,
-            child: SingleChildScrollView(
-                controller: scrollController,
-                child: SizedBox(width: double.infinity, height: height)
-            ),
-          ),
-        ),
-      );
-    }
-    await tester.pumpWidget(buildFrame(600.0));
-    await tester.pumpAndSettle();
-    expect(find.byType(RawScrollbar), isNot(paints..rect())); // Not shown.
-
-    await tester.pumpWidget(buildFrame(600.1));
-    await tester.pumpAndSettle();
-    expect(find.byType(RawScrollbar), paints..rect()..rect()); // Show the bar.
-
-    await tester.pumpWidget(buildFrame(600.0));
-    await tester.pumpAndSettle();
-    expect(find.byType(RawScrollbar), isNot(paints..rect())); // Hide the bar.
-  });
-
-  testWidgets('The bar can show or hide when the window size change', (WidgetTester tester) async {
-    final ScrollController scrollController = ScrollController();
-    Widget buildFrame() {
-      return Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: const MediaQueryData(),
-          child: PrimaryScrollController(
-            controller: scrollController,
-            child: RawScrollbar(
-              isAlwaysShown: true,
-              controller: scrollController,
-              child: const SingleChildScrollView(
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 600.0,
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-    tester.binding.window.physicalSizeTestValue = const Size(800.0, 600.0);
-    tester.binding.window.devicePixelRatioTestValue = 1;
-    addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
-    addTearDown(tester.binding.window.clearDevicePixelRatioTestValue);
-
-    await tester.pumpWidget(buildFrame());
-    await tester.pumpAndSettle();
-    expect(scrollController.offset, 0.0);
-    expect(find.byType(RawScrollbar), isNot(paints..rect())); // Not shown.
-
-    tester.binding.window.physicalSizeTestValue = const Size(800.0, 599.0);
-    await tester.pumpAndSettle();
-    expect(find.byType(RawScrollbar), paints..rect()..rect()); // Show the bar.
-
-    tester.binding.window.physicalSizeTestValue = const Size(800.0, 600.0);
-    await tester.pumpAndSettle();
-    expect(find.byType(RawScrollbar), isNot(paints..rect())); // Not shown.
   });
 }

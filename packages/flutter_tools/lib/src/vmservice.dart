@@ -613,6 +613,10 @@ class FlutterVmService {
     @required String isolateId,
   }) => _flutterToggle('debugPaint', isolateId: isolateId);
 
+  Future<Map<String, dynamic>> flutterToggleDebugCheckElevationsEnabled({
+    @required String isolateId,
+  }) => _flutterToggle('debugCheckElevationsEnabled', isolateId: isolateId);
+
   Future<Map<String, dynamic>> flutterTogglePerformanceOverlayOverride({
     @required String isolateId,
   }) => _flutterToggle('showPerformanceOverlay', isolateId: isolateId);
@@ -951,7 +955,7 @@ class FlutterVmService {
 }
 
 /// Thrown when the VM Service disappears while calls are being made to it.
-class VmServiceDisappearedException implements Exception { }
+class VmServiceDisappearedException implements Exception {}
 
 /// Whether the event attached to an [Isolate.pauseEvent] should be considered
 /// a "pause" event.

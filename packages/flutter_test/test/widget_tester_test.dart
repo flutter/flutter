@@ -697,10 +697,7 @@ void main() {
       if (debugDefaultTargetPlatformOverride == null) {
         expect(tester.testDescription, equals('variant tests have descriptions with details'));
       } else {
-        expect(
-          tester.testDescription,
-          equals('variant tests have descriptions with details (variant: $debugDefaultTargetPlatformOverride)'),
-        );
+        expect(tester.testDescription, equals('variant tests have descriptions with details ($debugDefaultTargetPlatformOverride)'));
       }
     }, variant: TargetPlatformVariant(TargetPlatform.values.toSet()));
   });

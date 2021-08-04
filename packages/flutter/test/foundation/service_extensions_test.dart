@@ -2,12 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=123"
-@Tags(<String>['no-shuffle'])
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:ui' as ui;
@@ -173,7 +167,7 @@ void main() {
     const int disabledExtensions = kIsWeb ? 2 : 0;
     // If you add a service extension... TEST IT! :-)
     // ...then increment this number.
-    expect(binding.extensions.length, 30 + widgetInspectorExtensionCount - disabledExtensions);
+    expect(binding.extensions.length, 31 + widgetInspectorExtensionCount - disabledExtensions);
 
     expect(console, isEmpty);
     debugPrint = debugPrintThrottled;
@@ -201,6 +195,34 @@ void main() {
     result = await binding.testExtension('debugAllowBanner', <String, String>{});
     expect(result, <String, String>{'enabled': 'true'});
     expect(WidgetsApp.debugAllowBannerOverride, true);
+    expect(binding.frameScheduled, isFalse);
+  });
+
+  test('Service extensions - debugCheckElevationsEnabled', () async {
+    expect(binding.frameScheduled, isFalse);
+    expect(debugCheckElevationsEnabled, false);
+
+    bool lastValue = false;
+    Future<void> _updateAndCheck(bool newValue) async {
+      Map<String, dynamic>? result;
+      binding.testExtension(
+        'debugCheckElevationsEnabled',
+        <String, String>{'enabled': '$newValue'},
+      ).then((Map<String, dynamic> answer) => result = answer);
+      await binding.flushMicrotasks();
+      expect(binding.frameScheduled, lastValue != newValue);
+      await binding.doFrame();
+      await binding.flushMicrotasks();
+      expect(result, <String, String>{'enabled': '$newValue'});
+      expect(debugCheckElevationsEnabled, newValue);
+      lastValue = newValue;
+    }
+
+    await _updateAndCheck(false);
+    await _updateAndCheck(true);
+    await _updateAndCheck(true);
+    await _updateAndCheck(false);
+    await _updateAndCheck(false);
     expect(binding.frameScheduled, isFalse);
   });
 

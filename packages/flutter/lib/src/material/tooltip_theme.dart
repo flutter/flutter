@@ -37,8 +37,6 @@ class TooltipThemeData with Diagnosticable {
     this.textStyle,
     this.waitDuration,
     this.showDuration,
-    this.triggerMode,
-    this.enableFeedback,
   });
 
   /// The height of [Tooltip.child].
@@ -86,22 +84,6 @@ class TooltipThemeData with Diagnosticable {
   /// The length of time that the tooltip will be shown once it has appeared.
   final Duration? showDuration;
 
-  /// The [TooltipTriggerMode] that will show the tooltip.
-  final TooltipTriggerMode? triggerMode;
-
-  /// Whether the tooltip should provide acoustic and/or haptic feedback.
-  ///
-  /// For example, on Android a tap will produce a clicking sound and a
-  /// long-press will produce a short vibration, when feedback is enabled.
-  ///
-  /// This value is used if [Tooltip.enableFeedback] is null.
-  /// If this value is null, the default is true.
-  ///
-  /// See also:
-  ///
-  ///   * [Feedback], for providing platform-specific feedback to certain actions.
-  final bool? enableFeedback;
-
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   TooltipThemeData copyWith({
@@ -115,8 +97,6 @@ class TooltipThemeData with Diagnosticable {
     TextStyle? textStyle,
     Duration? waitDuration,
     Duration? showDuration,
-    TooltipTriggerMode? triggerMode,
-    bool? enableFeedback,
   }) {
     return TooltipThemeData(
       height: height ?? this.height,
@@ -129,8 +109,6 @@ class TooltipThemeData with Diagnosticable {
       textStyle: textStyle ?? this.textStyle,
       waitDuration: waitDuration ?? this.waitDuration,
       showDuration: showDuration ?? this.showDuration,
-      triggerMode: triggerMode ?? this.triggerMode,
-      enableFeedback: enableFeedback ?? this.enableFeedback,
     );
   }
 
@@ -168,8 +146,6 @@ class TooltipThemeData with Diagnosticable {
       textStyle,
       waitDuration,
       showDuration,
-      triggerMode,
-      enableFeedback
     );
   }
 
@@ -189,9 +165,7 @@ class TooltipThemeData with Diagnosticable {
         && other.decoration == decoration
         && other.textStyle == textStyle
         && other.waitDuration == waitDuration
-        && other.showDuration == showDuration
-        && other.triggerMode == triggerMode
-        && other.enableFeedback == enableFeedback;
+        && other.showDuration == showDuration;
   }
 
   @override
@@ -207,8 +181,6 @@ class TooltipThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<TextStyle>('textStyle', textStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<Duration>('wait duration', waitDuration, defaultValue: null));
     properties.add(DiagnosticsProperty<Duration>('show duration', showDuration, defaultValue: null));
-    properties.add(DiagnosticsProperty<TooltipTriggerMode>('triggerMode', triggerMode, defaultValue: null));
-    properties.add(FlagProperty('enableFeedback', value: enableFeedback, ifTrue: 'true', showName: true, defaultValue: null));
   }
 }
 
@@ -239,7 +211,7 @@ class TooltipThemeData with Diagnosticable {
 ///       onPressed: () {},
 ///     ),
 ///   ),
-/// )
+/// ),
 /// ```
 /// {@end-tool}
 class TooltipTheme extends InheritedTheme {
@@ -277,27 +249,4 @@ class TooltipTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(TooltipTheme oldWidget) => data != oldWidget.data;
-}
-
-/// The method of interaction that will trigger a tooltip.
-/// Used in [Tooltip.triggerMode] and [TooltipThemeData.triggerMode].
-enum TooltipTriggerMode {
-  /// Tooltip will only be shown by calling `ensureTooltipVisible`.
-  manual,
-
-  /// Tooltip will be shown after a long press.
-  ///
-  /// See also:
-  ///
-  ///   * [GestureDetector.onLongPress], the event that is used for trigger.
-  ///   * [Feedback.forLongPress], the feedback method called when feedback is enabled.
-  longPress,
-
-  /// Tooltip will be shown after a single tap.
-  ///
-  /// See also:
-  ///
-  ///   * [GestureDetector.onTap], the event that is used for trigger.
-  ///   * [Feedback.forTap], the feedback method called when feedback is enabled.
-  tap,
 }

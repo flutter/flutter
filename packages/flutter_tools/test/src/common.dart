@@ -124,15 +124,6 @@ Future<void> expectToolExitLater(Future<dynamic> future, Matcher messageMatcher)
   }
 }
 
-Future<void> expectReturnsNormallyLater(Future<dynamic> future) async {
-  try {
-    await future;
-  // Catch all exceptions to give a better test failure message.
-  } catch (e, trace) { // ignore: avoid_catches_without_on_clauses
-    fail('Expected to run with no exceptions, got $e\n$trace');
-  }
-}
-
 Matcher containsIgnoringWhitespace(String toSearch) {
   return predicate(
     (String source) {

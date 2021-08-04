@@ -24,7 +24,6 @@ import 'src/commands/channel.dart';
 import 'src/commands/clean.dart';
 import 'src/commands/config.dart';
 import 'src/commands/create.dart';
-import 'src/commands/custom_devices.dart';
 import 'src/commands/daemon.dart';
 import 'src/commands/devices.dart';
 import 'src/commands/doctor.dart';
@@ -108,7 +107,6 @@ Future<void> main(List<String> args) async {
       // devtools source code.
       DevtoolsLauncher: () => DevtoolsServerLauncher(
         processManager: globals.processManager,
-        fileSystem: globals.fs,
         pubExecutable: globals.artifacts.getHostArtifact(HostArtifact.pubExecutable).path,
         logger: globals.logger,
         platform: globals.platform,
@@ -151,16 +149,6 @@ List<FlutterCommand> generateCommands({
   ChannelCommand(verboseHelp: verboseHelp),
   CleanCommand(verbose: verbose),
   ConfigCommand(verboseHelp: verboseHelp),
-  CustomDevicesCommand(
-    customDevicesConfig: globals.customDevicesConfig,
-    operatingSystemUtils: globals.os,
-    terminal: globals.terminal,
-    platform: globals.platform,
-    featureFlags: featureFlags,
-    processManager: globals.processManager,
-    fileSystem: globals.fs,
-    logger: globals.logger
-  ),
   CreateCommand(verboseHelp: verboseHelp),
   DaemonCommand(hidden: !verboseHelp),
   DevicesCommand(verboseHelp: verboseHelp),

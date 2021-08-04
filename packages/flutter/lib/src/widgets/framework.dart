@@ -2087,7 +2087,7 @@ abstract class BuildContext {
   /// This getter will only return a valid result if [findRenderObject] actually
   /// returns a [RenderBox]. If [findRenderObject] returns a render object that
   /// is not a subtype of [RenderBox] (e.g., [RenderView]), this getter will
-  /// throw an exception in debug mode and will return null in release mode.
+  /// throw an exception in checked mode and will return null in release mode.
   ///
   /// Calling this getter is theoretically relatively expensive (O(N) in the
   /// depth of the tree), but in practice is usually cheap because the tree

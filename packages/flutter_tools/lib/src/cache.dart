@@ -17,7 +17,6 @@ import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart' show OperatingSystemUtils;
 import 'base/platform.dart';
-import 'base/terminal.dart';
 import 'base/user_messages.dart';
 import 'build_info.dart';
 import 'convert.dart';
@@ -321,13 +320,7 @@ class Cache {
       } on FileSystemException {
         if (!printed) {
           _logger.printTrace('Waiting to be able to obtain lock of Flutter binary artifacts directory: ${_lock!.path}');
-          // This needs to go to stderr to avoid cluttering up stdout if a parent
-          // process is collecting stdout. It's not really an "error" though,
-          // so print it in grey.
-          _logger.printError(
-            'Waiting for another flutter command to release the startup lock...',
-            color: TerminalColor.grey,
-          );
+          _logger.printStatus('Waiting for another flutter command to release the startup lock...');
           printed = true;
         }
         await Future<void>.delayed(const Duration(milliseconds: 50));

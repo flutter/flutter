@@ -1239,6 +1239,7 @@ void main() {
           commandHelp.I,
           commandHelp.o,
           commandHelp.b,
+          commandHelp.z,
           commandHelp.P,
           commandHelp.a,
           commandHelp.M,

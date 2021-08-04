@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:collection/collection.dart' show ListEquality, MapEquality;
 
 import 'package:flutter_devicelab/framework/devices.dart';
@@ -11,11 +13,12 @@ import 'common.dart';
 
 void main() {
   group('device', () {
-    late Device device;
+    Device device;
 
     setUp(() {
       FakeDevice.resetLog();
-      device = FakeDevice(deviceId: 'fakeDeviceId');
+      device = null;
+      device = FakeDevice();
     });
 
     tearDown(() {
@@ -128,9 +131,9 @@ void expectLog(List<CommandArgs> log) {
 }
 
 CommandArgs cmd({
-  required String command,
-  List<String>? arguments,
-  Map<String, String>? environment,
+  String command,
+  List<String> arguments,
+  Map<String, String> environment,
 }) {
   return CommandArgs(
     command: command,
@@ -143,11 +146,11 @@ typedef ExitErrorFactory = dynamic Function();
 
 @immutable
 class CommandArgs {
-  const CommandArgs({ required this.command, this.arguments, this.environment });
+  const CommandArgs({ this.command, this.arguments, this.environment });
 
   final String command;
-  final List<String>? arguments;
-  final Map<String, String>? environment;
+  final List<String> arguments;
+  final Map<String, String> environment;
 
   @override
   String toString() => 'CommandArgs(command: $command, arguments: $arguments, environment: $environment)';
@@ -174,7 +177,7 @@ class CommandArgs {
 }
 
 class FakeDevice extends AndroidDevice {
-  FakeDevice({required String deviceId}) : super(deviceId: deviceId);
+  FakeDevice({String deviceId}) : super(deviceId: deviceId);
 
   static String output = '';
 
@@ -203,7 +206,7 @@ class FakeDevice extends AndroidDevice {
   }
 
   @override
-  Future<String> shellEval(String command, List<String> arguments, { Map<String, String>? environment, bool silent = false }) async {
+  Future<String> shellEval(String command, List<String> arguments, { Map<String, String> environment, bool silent = false }) async {
     commandLog.add(CommandArgs(
       command: command,
       arguments: arguments,
@@ -213,7 +216,7 @@ class FakeDevice extends AndroidDevice {
   }
 
   @override
-  Future<void> shellExec(String command, List<String> arguments, { Map<String, String>? environment, bool silent = false }) async {
+  Future<void> shellExec(String command, List<String> arguments, { Map<String, String> environment, bool silent = false }) async {
     commandLog.add(CommandArgs(
       command: command,
       arguments: arguments,

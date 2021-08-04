@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:shelf/shelf.dart';
 
@@ -36,7 +37,7 @@ Future<void> _setAppVersion(int version) async {
   );
 }
 
-Future<void> _rebuildApp({ required int version }) async {
+Future<void> _rebuildApp({ @required int version }) async {
   await _setAppVersion(version);
   await runCommand(
     _flutter,
@@ -55,7 +56,7 @@ Future<void> _rebuildApp({ required int version }) async {
 
 /// A drop-in replacement for `package:test` expect that can run outside the
 /// test zone.
-void expect(Object? actual, Object? expected) {
+void expect(Object actual, Object expected) {
   final Matcher matcher = wrapMatcher(expected);
   final Map<Object, Object> matchState = <Object, Object>{};
   if (matcher.matches(actual, matchState)) {
@@ -67,7 +68,7 @@ void expect(Object? actual, Object? expected) {
 }
 
 Future<void> runWebServiceWorkerTest({
-  required bool headless,
+  @required bool headless,
 }) async {
   await _rebuildApp(version: 1);
 
@@ -77,25 +78,25 @@ Future<void> runWebServiceWorkerTest({
     requestedPathCounts.clear();
   }
 
-  AppServer? server;
+  AppServer server;
   Future<void> waitForAppToLoad(Map<String, int> waitForCounts) async {
     print('Waiting for app to load $waitForCounts');
-    await Future.any(<Future<Object?>>[
+    await Future.any(<Future<void>>[
       () async {
         while (!waitForCounts.entries.every((MapEntry<String, int> entry) => (requestedPathCounts[entry.key] ?? 0) >= entry.value)) {
           await Future<void>.delayed(const Duration(milliseconds: 100));
         }
       }(),
-      server!.onChromeError.then((String error) {
+      server.onChromeError.then((String error) {
         throw Exception('Chrome error: $error');
       }),
     ]);
   }
 
-  String? reportedVersion;
+  String reportedVersion;
 
   Future<void> startAppServer({
-    required String cacheControl,
+    @required String cacheControl,
   }) async {
     final int serverPort = await findAvailablePort();
     final int browserDebugPort = await findAvailablePort();
@@ -112,7 +113,7 @@ Future<void> runWebServiceWorkerTest({
         (Request request) {
           final String requestedPath = request.url.path;
           requestedPathCounts.putIfAbsent(requestedPath, () => 0);
-          requestedPathCounts[requestedPath] = requestedPathCounts[requestedPath]! + 1;
+          requestedPathCounts[requestedPath] += 1;
           if (requestedPath == 'CLOSE') {
             reportedVersion = request.url.queryParameters['version'];
             return Response.ok('OK');
@@ -157,7 +158,7 @@ Future<void> runWebServiceWorkerTest({
     reportedVersion = null;
 
     print('With cache: test page reload');
-    await server!.chrome.reloadPage();
+    await server.chrome.reloadPage();
     await waitForAppToLoad(<String, int>{
       'CLOSE': 1,
       'flutter_service_worker.js': 1,
@@ -174,7 +175,7 @@ Future<void> runWebServiceWorkerTest({
     await _rebuildApp(version: 2);
 
     // Since we're caching, we need to ignore cache when reloading the page.
-    await server!.chrome.reloadPage(ignoreCache: true);
+    await server.chrome.reloadPage(ignoreCache: true);
     await waitForAppToLoad(<String, int>{
       'CLOSE': 1,
       'flutter_service_worker.js': 2,
@@ -194,7 +195,7 @@ Future<void> runWebServiceWorkerTest({
 
     expect(reportedVersion, '2');
     reportedVersion = null;
-    await server!.stop();
+    await server.stop();
 
 
     //////////////////////////////////////////////////////
@@ -230,7 +231,7 @@ Future<void> runWebServiceWorkerTest({
     reportedVersion = null;
 
     print('No cache: test page reload');
-    await server!.chrome.reloadPage();
+    await server.chrome.reloadPage();
     await waitForAppToLoad(<String, int>{
       'CLOSE': 1,
       'flutter_service_worker.js': 1,
@@ -253,7 +254,7 @@ Future<void> runWebServiceWorkerTest({
     // refresh when running Chrome manually as normal. At the time of writing
     // this test I wasn't able to figure out what's wrong with the way we run
     // Chrome from tests.
-    await server!.chrome.reloadPage(ignoreCache: true);
+    await server.chrome.reloadPage(ignoreCache: true);
     await waitForAppToLoad(<String, int>{
       'CLOSE': 1,
       'flutter_service_worker.js': 1,

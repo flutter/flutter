@@ -111,7 +111,7 @@ bool rollDev({
   required FrameworkRepository repository,
 }) {
   final String remoteName = argResults[kRemoteName] as String;
-  final String? level = argResults[kIncrement] as String?;
+  final String level = argResults[kIncrement] as String;
   final String candidateBranch = argResults[kCandidateBranch] as String;
   final bool justPrint = argResults[kJustPrint] as bool;
   final bool autoApprove = argResults[kYes] as bool;
@@ -191,10 +191,10 @@ bool rollDev({
     repository.tag(commit, version.toString(), remoteName);
   }
 
-  repository.pushRef(
-    fromRef: commit,
-    remote: remoteName,
-    toRef: 'dev',
+  repository.updateChannel(
+    commit,
+    remoteName,
+    'dev',
     force: force,
   );
 

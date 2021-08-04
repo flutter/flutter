@@ -2,14 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:io';
 
+import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 
 import 'utils.dart';
 
 /// Loads manifest data from `manifest.yaml` file or from [yaml], if present.
-Manifest loadTaskManifest([ String? yaml ]) {
+Manifest loadTaskManifest([ String yaml ]) {
   final dynamic manifestYaml = yaml == null
     ? loadYaml(file('manifest.yaml').readAsStringSync())
     : loadYamlNode(yaml);
@@ -29,13 +32,13 @@ class Manifest {
 /// A CI task.
 class ManifestTask {
   ManifestTask._({
-    required this.name,
-    required this.description,
-    required this.stage,
-    required this.requiredAgentCapabilities,
-    required this.isFlaky,
-    required this.timeoutInMinutes,
-    required this.onLuci,
+    @required this.name,
+    @required this.description,
+    @required this.stage,
+    @required this.requiredAgentCapabilities,
+    @required this.isFlaky,
+    @required this.timeoutInMinutes,
+    @required this.onLuci,
   }) {
     final String taskName = 'task "$name"';
     _checkIsNotBlank(name, 'Task name', taskName);
@@ -145,9 +148,9 @@ ManifestTask _validateAndParseTask(String taskName, dynamic taskYaml) {
     // ignore: avoid_dynamic_calls
     stage: taskYaml['stage'] as String,
     requiredAgentCapabilities: capabilities as List<String>,
-    isFlaky: isFlaky as bool,
+    isFlaky: isFlaky as bool ?? false,
     timeoutInMinutes: timeoutInMinutes as int,
-    onLuci: onLuci as bool,
+    onLuci: onLuci as bool ?? false,
   );
 }
 
@@ -158,7 +161,7 @@ List<String> _validateAndParseCapabilities(String taskName, dynamic capabilities
     final dynamic capability = capabilities[i];
     _checkType(capability is String, capability, 'required_agent_capabilities[$i]', 'string');
   }
-  return capabilitiesYaml.cast<String>();
+  return (capabilitiesYaml as List<dynamic>).cast<String>();
 }
 
 void _checkType(bool isValid, dynamic value, String variableName, String typeName) {

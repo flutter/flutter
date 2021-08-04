@@ -5,20 +5,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-/// A callback to use with [integrationDriver].
-///
-/// The callback receives the name of screenshot passed to `binding.takeScreenshot(<name>)` and
-/// a PNG byte buffer.
-///
-/// The callback returns `true` if the test passes or `false` otherwise.
-///
-/// You can use this callback to store the bytes locally in a file or upload them to a service
-/// that compares the image against a gold or baseline version.
-///
-/// Since the function is executed on the host driving the test, you can access any environment
-/// variable from it.
-typedef ScreenshotCallback = Future<bool> Function(String name, List<int> image);
-
 /// Classes shared between `integration_test.dart` and `flutter drive` based
 /// adoptor (ex: `integration_test_driver.dart`).
 
@@ -284,12 +270,8 @@ abstract class CallbackManager {
   Future<Map<String, dynamic>> callback(
       Map<String, String> params, IntegrationTestResults testRunner);
 
-  /// Takes a screenshot of the application.
-  /// Returns the data that is sent back to the host.
-   Future<Map<String, dynamic>> takeScreenshot(String screenshot);
-
-  /// Android only. Converts the Flutter surface to an image view.
-  Future<void> convertFlutterSurfaceToImage();
+  /// Request to take a screenshot of the application.
+  Future<void> takeScreenshot(String screenshot);
 
   /// Cleanup and completers or locks used during the communication.
   void cleanup();

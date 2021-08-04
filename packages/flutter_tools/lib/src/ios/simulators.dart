@@ -529,7 +529,7 @@ class IOSSimulator extends Device {
       app: app,
       buildInfo: buildInfo,
       targetOverride: mainPath,
-      environmentType: EnvironmentType.simulator,
+      buildForDevice: false,
       deviceID: id,
     );
     if (!buildResult.success) {

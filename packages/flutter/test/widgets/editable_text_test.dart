@@ -199,7 +199,6 @@ void main() {
     expect(editableText.obscureText, isFalse);
     expect(editableText.autocorrect, isTrue);
     expect(editableText.enableSuggestions, isTrue);
-    expect(editableText.enableIMEPersonalizedLearning, isTrue);
     expect(editableText.textAlign, TextAlign.start);
     expect(editableText.cursorWidth, 2.0);
     expect(editableText.cursorHeight, isNull);
@@ -575,36 +574,6 @@ void main() {
     await tester.showKeyboard(find.byType(EditableText));
     await tester.idle();
     expect(tester.testTextInput.setClientArgs!['enableSuggestions'], enableSuggestions);
-  });
-
-  testWidgets('enableIMEPersonalizedLearning flag is sent to the engine properly', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController();
-    const bool enableIMEPersonalizedLearning = false;
-    await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: FocusScope(
-            node: focusScopeNode,
-            autofocus: true,
-            child: EditableText(
-              controller: controller,
-              backgroundCursorColor: Colors.grey,
-              focusNode: focusNode,
-              enableIMEPersonalizedLearning: enableIMEPersonalizedLearning,
-              style: textStyle,
-              cursorColor: cursorColor,
-            ),
-          ),
-        ),
-      ),
-    );
-
-    await tester.tap(find.byType(EditableText));
-    await tester.showKeyboard(find.byType(EditableText));
-    await tester.idle();
-    expect(tester.testTextInput.setClientArgs!['enableIMEPersonalizedLearning'], enableIMEPersonalizedLearning);
   });
 
   group('smartDashesType and smartQuotesType', () {
@@ -4895,23 +4864,8 @@ void main() {
     expect(controller.text, isEmpty, reason: 'on $platform');
   }
 
-  testWidgets('keyboard text selection works (RawKeyEvent)', (WidgetTester tester) async {
-    debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.rawKeyData;
-
+  testWidgets('keyboard text selection works', (WidgetTester tester) async {
     await testTextEditing(tester, targetPlatform: defaultTargetPlatform);
-
-    debugKeyEventSimulatorTransitModeOverride = null;
-
-    // On web, using keyboard for selection is handled by the browser.
-  }, skip: kIsWeb, variant: TargetPlatformVariant.all());
-
-  testWidgets('keyboard text selection works (ui.KeyData then RawKeyEvent)', (WidgetTester tester) async {
-    debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.keyDataThenRawKeyData;
-
-    await testTextEditing(tester, targetPlatform: defaultTargetPlatform);
-
-    debugKeyEventSimulatorTransitModeOverride = null;
-
     // On web, using keyboard for selection is handled by the browser.
   }, skip: kIsWeb, variant: TargetPlatformVariant.all());
 
@@ -6257,41 +6211,6 @@ void main() {
       final RenderEditable renderEditable = findRenderEditable(tester);
       final TextSpan textSpan = renderEditable.text! as TextSpan;
       expect(textSpan.style!.color, color);
-    });
-
-    testWidgets('controller listener changes value', (WidgetTester tester) async {
-      const double maxValue = 5.5555;
-      final TextEditingController controller = TextEditingController();
-
-      controller.addListener(() {
-        final double value = double.tryParse(controller.text.trim()) ?? .0;
-        if (value > maxValue) {
-          controller.text = maxValue.toString();
-          controller.selection = TextSelection.fromPosition(
-              TextPosition(offset: maxValue.toString().length));
-        }
-      });
-      await tester.pumpWidget(MaterialApp(
-        home: EditableText(
-          controller: controller,
-          focusNode: focusNode,
-          style: textStyle,
-          cursorColor: Colors.blue,
-          backgroundCursorColor: Colors.grey,
-        ),
-      ));
-
-      final EditableTextState state =
-        tester.state<EditableTextState>(find.byType(EditableText));
-
-      state.updateEditingValue(const TextEditingValue(text: '1', selection: TextSelection.collapsed(offset: 1)));
-      await tester.pump();
-      state.updateEditingValue(const TextEditingValue(text: '12', selection: TextSelection.collapsed(offset: 2)));
-      await tester.pump();
-
-      expect(controller.text, '5.5555');
-      expect(controller.selection.baseOffset, 6);
-      expect(controller.selection.extentOffset, 6);
     });
   });
 
@@ -7721,7 +7640,7 @@ void main() {
       expect(controller.selection.isCollapsed, true);
       expect(controller.selection.baseOffset, 1);
     }
-  }, variant: KeySimulatorTransitModeVariant.all());
+  });
 
   testWidgets('the toolbar is disposed when selection changes and there is no selectionControls', (WidgetTester tester) async {
     late StateSetter setState;
@@ -7843,7 +7762,7 @@ class MockTextSelectionControls extends Fake implements TextSelectionControls {
   }
 
   @override
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap, double? startGlyphHeight, double? endGlyphHeight]) {
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]) {
     return Container();
   }
 
@@ -7853,7 +7772,7 @@ class MockTextSelectionControls extends Fake implements TextSelectionControls {
   }
 
   @override
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight, [double? startGlyphHeight, double? endGlyphHeight]) {
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
     return Offset.zero;
   }
 

@@ -48,9 +48,6 @@ Future<void> run(List<String> arguments) async {
   print('$clock runtimeType in toString...');
   await verifyNoRuntimeTypeInToString(flutterRoot);
 
-  print('$clock debug mode instead of checked mode...');
-  await verifyNoCheckedMode(flutterRoot);
-
   print('$clock Unexpected binaries...');
   await verifyNoBinaries(flutterRoot);
 
@@ -73,7 +70,7 @@ Future<void> run(List<String> arguments) async {
   await verifyNoBadImportsInFlutterTools(flutterRoot);
 
   print('$clock Internationalization...');
-  await verifyInternationalizations(flutterRoot, dart);
+  await verifyInternationalizations();
 
   print('$clock Integration test timeouts...');
   await verifyIntegrationTestTimeouts(flutterRoot);
@@ -170,17 +167,17 @@ Future<void> verifyDeprecations(String workingDirectory, { int minimumMatches = 
     }
     for (int lineNumber in linesWithDeprecations) {
       try {
-        final Match? match1 = _deprecationPattern1.firstMatch(lines[lineNumber]);
+        final Match match1 = _deprecationPattern1.firstMatch(lines[lineNumber]);
         if (match1 == null)
           throw 'Deprecation notice does not match required pattern.';
-        final String indent = match1[1]!;
+        final String indent = match1[1];
         lineNumber += 1;
         if (lineNumber >= lines.length)
           throw 'Incomplete deprecation notice.';
-        Match? match3;
-        String? message;
+        Match match3;
+        String message;
         do {
-          final Match? match2 = _deprecationPattern2.firstMatch(lines[lineNumber]);
+          final Match match2 = _deprecationPattern2.firstMatch(lines[lineNumber]);
           if (match2 == null) {
             String possibleReason = '';
             if (lines[lineNumber].trimLeft().startsWith('"')) {
@@ -191,7 +188,7 @@ Future<void> verifyDeprecations(String workingDirectory, { int minimumMatches = 
           if (!lines[lineNumber].startsWith("$indent  '"))
             throw 'Unexpected deprecation notice indent.';
           if (message == null) {
-            final String firstChar = String.fromCharCode(match2[1]!.runes.first);
+            final String firstChar = String.fromCharCode(match2[1].runes.first);
             if (firstChar.toUpperCase() != firstChar)
               throw 'Deprecation notice should be a grammatically correct sentence and start with a capital letter; see style guide: https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo';
           }
@@ -201,14 +198,14 @@ Future<void> verifyDeprecations(String workingDirectory, { int minimumMatches = 
             throw 'Incomplete deprecation notice.';
           match3 = _deprecationPattern3.firstMatch(lines[lineNumber]);
         } while (match3 == null);
-        final int v1 = int.parse(match3[1]!);
-        final int v2 = int.parse(match3[2]!);
+        final int v1 = int.parse(match3[1]);
+        final int v2 = int.parse(match3[2]);
         final bool hasV4 = match3[4] != null;
         if (v1 > 1 || (v1 == 1 && v2 >= 20)) {
           if (!hasV4)
             throw 'Deprecation notice does not accurately indicate a dev branch version number; please see https://flutter.dev/docs/development/tools/sdk/releases to find the latest dev build version number.';
         }
-        if (!message!.endsWith('.') && !message.endsWith('!') && !message.endsWith('?'))
+        if (!message.endsWith('.') && !message.endsWith('!') && !message.endsWith('?'))
           throw 'Deprecation notice should be a grammatically correct sentence and end with a period.';
         if (!lines[lineNumber].startsWith("$indent  '"))
           throw 'Unexpected deprecation notice indent.';
@@ -241,7 +238,7 @@ String _generateLicense(String prefix) {
 }
 
 Future<void> verifyNoMissingLicense(String workingDirectory, { bool checkMinimums = true }) async {
-  final int? overrideMinimumMatches = checkMinimums ? null : 0;
+  final int overrideMinimumMatches = checkMinimums ? null : 0;
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'dart', overrideMinimumMatches ?? 2000, _generateLicense('// '));
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'java', overrideMinimumMatches ?? 39, _generateLicense('// '));
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'h', overrideMinimumMatches ?? 30, _generateLicense('// '));
@@ -294,7 +291,7 @@ Future<void> verifyNoTestImports(String workingDirectory) async {
   final List<File> dartFiles = await _allFiles(path.join(workingDirectory, 'packages'), 'dart', minimumMatches: 1500).toList();
   for (final File file in dartFiles) {
     for (final String line in file.readAsLinesSync()) {
-      final Match? match = _testImportPattern.firstMatch(line);
+      final Match match = _testImportPattern.firstMatch(line);
       if (match != null && !_exemptTestImports.contains(match.group(2)))
         errors.add(file.path);
     }
@@ -336,11 +333,11 @@ Future<void> verifyNoBadImportsInFlutter(String workingDirectory) async {
   for (final String directory in directories) {
     dependencyMap[directory] = await _findFlutterDependencies(path.join(srcPath, directory), errors, checkForMeta: directory != 'foundation');
   }
-  assert(dependencyMap['material']!.contains('widgets') &&
-         dependencyMap['widgets']!.contains('rendering') &&
-         dependencyMap['rendering']!.contains('painting')); // to make sure we're convinced _findFlutterDependencies is finding some
+  assert(dependencyMap['material'].contains('widgets') &&
+         dependencyMap['widgets'].contains('rendering') &&
+         dependencyMap['rendering'].contains('painting')); // to make sure we're convinced _findFlutterDependencies is finding some
   for (final String package in dependencyMap.keys) {
-    if (dependencyMap[package]!.contains(package)) {
+    if (dependencyMap[package].contains(package)) {
       errors.add(
         'One of the files in the $yellow$package$reset package imports that package recursively.'
       );
@@ -348,7 +345,7 @@ Future<void> verifyNoBadImportsInFlutter(String workingDirectory) async {
   }
 
   for (final String key in dependencyMap.keys) {
-    for (final String dependency in dependencyMap[key]!) {
+    for (final String dependency in dependencyMap[key]) {
       if (dependencyMap[dependency] != null)
         continue;
       // Sanity check before performing _deepSearch, to ensure there's no rogue
@@ -363,7 +360,7 @@ Future<void> verifyNoBadImportsInFlutter(String workingDirectory) async {
   }
 
   for (final String package in dependencyMap.keys) {
-    final List<String>? loop = _deepSearch<String>(dependencyMap, package);
+    final List<String> loop = _deepSearch<String>(dependencyMap, package);
     if (loop != null) {
       errors.add('${yellow}Dependency loop:$reset ${loop.join(' depends on ')}');
     }
@@ -425,26 +422,26 @@ Future<void> verifyIntegrationTestTimeouts(String workingDirectory) async {
   }
 }
 
-Future<void> verifyInternationalizations(String workingDirectory, String dartExecutable) async {
+Future<void> verifyInternationalizations() async {
   final EvalResult materialGenResult = await _evalCommand(
-    dartExecutable,
+    dart,
     <String>[
       path.join('dev', 'tools', 'localization', 'bin', 'gen_localizations.dart'),
       '--material',
     ],
-    workingDirectory: workingDirectory,
+    workingDirectory: flutterRoot,
   );
   final EvalResult cupertinoGenResult = await _evalCommand(
-    dartExecutable,
+    dart,
     <String>[
       path.join('dev', 'tools', 'localization', 'bin', 'gen_localizations.dart'),
       '--cupertino',
     ],
-    workingDirectory: workingDirectory,
+    workingDirectory: flutterRoot,
   );
 
-  final String materialLocalizationsFile = path.join(workingDirectory, 'packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'generated_material_localizations.dart');
-  final String cupertinoLocalizationsFile = path.join(workingDirectory, 'packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'generated_cupertino_localizations.dart');
+  final String materialLocalizationsFile = path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'generated_material_localizations.dart');
+  final String cupertinoLocalizationsFile = path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'generated_cupertino_localizations.dart');
   final String expectedMaterialResult = await File(materialLocalizationsFile).readAsString();
   final String expectedCupertinoResult = await File(cupertinoLocalizationsFile).readAsString();
 
@@ -473,29 +470,6 @@ Future<void> verifyInternationalizations(String workingDirectory, String dartExe
     ]);
   }
 }
-
-
-/// Verifies that all instances of "checked mode" have been migrated to "debug mode".
-Future<void> verifyNoCheckedMode(String workingDirectory) async {
-  final String flutterPackages = path.join(workingDirectory, 'packages');
-  final List<File> files = await _allFiles(flutterPackages, 'dart', minimumMatches: 400)
-      .where((File file) => path.extension(file.path) == '.dart')
-      .toList();
-  final List<String> problems = <String>[];
-  for (final File file in files) {
-    int lineCount = 0;
-    for (final String line in file.readAsLinesSync()) {
-      if (line.toLowerCase().contains('checked mode')) {
-        problems.add('${file.path}:$lineCount uses deprecated "checked mode" instead of "debug mode".');
-      }
-      lineCount += 1;
-    }
-  }
-  if (problems.isNotEmpty) {
-    exitWithError(problems);
-  }
-}
-
 
 Future<void> verifyNoRuntimeTypeInToString(String workingDirectory) async {
   final String flutterLib = path.join(workingDirectory, 'packages', 'flutter', 'lib');
@@ -999,7 +973,7 @@ final Set<Hash256> _legacyBinaries = <Hash256>{
   const Hash256(0x63D2ABD0041C3E3B, 0x4B52AD8D382353B5, 0x3C51C6785E76CE56, 0xED9DACAD2D2E31C4),
 };
 
-Future<void> verifyNoBinaries(String workingDirectory, { Set<Hash256>? legacyBinaries }) async {
+Future<void> verifyNoBinaries(String workingDirectory, { Set<Hash256> legacyBinaries }) async {
   // Please do not add anything to the _legacyBinaries set above.
   // We have a policy of not checking in binaries into this repository.
   // If you are adding/changing template images, use the flutter_template_images
@@ -1077,7 +1051,7 @@ Future<List<File>> _gitFiles(String workingDirectory, {bool runSilently = true})
       .toList();
 }
 
-Stream<File> _allFiles(String workingDirectory, String? extension, { required int minimumMatches }) async* {
+Stream<File> _allFiles(String workingDirectory, String extension, { @required int minimumMatches }) async* {
   final Set<String> gitFileNamesSet = <String>{};
   gitFileNamesSet.addAll((await _gitFiles(workingDirectory)).map((File f) => path.canonicalize(f.absolute.path)));
 
@@ -1127,8 +1101,8 @@ Stream<File> _allFiles(String workingDirectory, String? extension, { required in
 
 class EvalResult {
   EvalResult({
-    required this.stdout,
-    required this.stderr,
+    this.stdout,
+    this.stderr,
     this.exitCode = 0,
   });
 
@@ -1139,13 +1113,18 @@ class EvalResult {
 
 // TODO(ianh): Refactor this to reuse the code in run_command.dart
 Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
-  required String workingDirectory,
-  Map<String, String>? environment,
+  @required String workingDirectory,
+  Map<String, String> environment,
+  bool skip = false,
   bool allowNonZeroExit = false,
   bool runSilently = false,
 }) async {
   final String commandDescription = '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
   final String relativeWorkingDir = path.relative(workingDirectory);
+  if (skip) {
+    printProgress('SKIPPING', relativeWorkingDir, commandDescription);
+    return null;
+  }
 
   if (!runSilently) {
     printProgress('RUNNING', relativeWorkingDir, commandDescription);
@@ -1189,8 +1168,8 @@ Future<void> _checkConsumerDependencies() async {
     '--consumer-only',
   ]);
   if (result.exitCode != 0) {
-    print(result.stdout as Object);
-    print(result.stderr as Object);
+    print(result.stdout);
+    print(result.stderr);
     exit(result.exitCode);
   }
   final Set<String> dependencySet = <String>{};
@@ -1238,7 +1217,7 @@ Future<void> _checkConsumerDependencies() async {
   }
 }
 
-Future<CommandResult> _runFlutterAnalyze(String workingDirectory, {
+Future<void> _runFlutterAnalyze(String workingDirectory, {
   List<String> options = const <String>[],
 }) async {
   return runCommand(
@@ -1256,9 +1235,9 @@ Future<Set<String>> _findFlutterDependencies(String srcPath, List<String> errors
     .map<Set<String>>((File file) {
       final Set<String> result = <String>{};
       for (final String line in file.readAsLinesSync()) {
-        Match? match = _importPattern.firstMatch(line);
+        Match match = _importPattern.firstMatch(line);
         if (match != null)
-          result.add(match.group(2)!);
+          result.add(match.group(2));
         if (checkForMeta) {
           match = _importMetaPattern.firstMatch(line);
           if (match != null) {
@@ -1271,23 +1250,23 @@ Future<Set<String>> _findFlutterDependencies(String srcPath, List<String> errors
       }
       return result;
     })
-    .reduce((Set<String>? value, Set<String> element) {
+    .reduce((Set<String> value, Set<String> element) {
       value ??= <String>{};
       value.addAll(element);
       return value;
     });
 }
 
-List<T>? _deepSearch<T>(Map<T, Set<T>> map, T start, [ Set<T>? seen ]) {
+List<T> _deepSearch<T>(Map<T, Set<T>> map, T start, [ Set<T> seen ]) {
   if (map[start] == null)
     return null; // We catch these separately.
 
-  for (final T key in map[start]!) {
+  for (final T key in map[start]) {
     if (key == start)
       continue; // we catch these separately
     if (seen != null && seen.contains(key))
       return <T>[start, key];
-    final List<T>? result = _deepSearch<T>(
+    final List<T> result = _deepSearch<T>(
       map,
       key,
       <T>{

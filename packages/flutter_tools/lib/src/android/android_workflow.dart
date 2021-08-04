@@ -183,9 +183,6 @@ class AndroidValidator extends DoctorValidator {
       }
       return ValidationResult(ValidationType.missing, messages);
     }
-
-    messages.add(ValidationMessage(_userMessages.androidSdkLocation(androidSdk.directory.path)));
-
     if (!androidSdk.cmdlineToolsAvailable) {
       messages.add(ValidationMessage.error(_userMessages.androidMissingCmdTools));
       return ValidationResult(ValidationType.missing, messages);
@@ -195,6 +192,8 @@ class AndroidValidator extends DoctorValidator {
       messages.add(ValidationMessage.hint(_userMessages.androidSdkLicenseOnly(kAndroidHome)));
       return ValidationResult(ValidationType.partial, messages);
     }
+
+    messages.add(ValidationMessage(_userMessages.androidSdkLocation(androidSdk.directory.path)));
 
     String? sdkVersionText;
     final AndroidSdkVersion? androidSdkLatestVersion = androidSdk.latestVersion;

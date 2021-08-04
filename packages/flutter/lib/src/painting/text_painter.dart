@@ -690,9 +690,6 @@ class TextPainter {
     if (prevCodeUnit == null)
       return null;
 
-    // If the upstream character is a newline, cursor is at start of next line
-    const int NEWLINE_CODE_UNIT = 10;
-
     // Check for multi-code-unit glyphs such as emojis or zero width joiner.
     final bool needsSearch = _isUtf16Surrogate(prevCodeUnit) || _text!.codeUnitAt(offset) == _zwjUtf16 || _isUnicodeDirectionality(prevCodeUnit);
     int graphemeClusterLength = needsSearch ? 2 : 1;
@@ -706,7 +703,7 @@ class TextPainter {
       if (boxes.isEmpty) {
         // When we are at the beginning of the line, a non-surrogate position will
         // return empty boxes. We break and try from downstream instead.
-        if (!needsSearch && prevCodeUnit == NEWLINE_CODE_UNIT) {
+        if (!needsSearch) {
           break; // Only perform one iteration if no search is required.
         }
         if (prevRuneOffset < -flattenedText.length) {
@@ -721,6 +718,8 @@ class TextPainter {
       }
       final TextBox box = boxes.first;
 
+      // If the upstream character is a newline, cursor is at start of next line
+      const int NEWLINE_CODE_UNIT = 10;
       if (prevCodeUnit == NEWLINE_CODE_UNIT) {
         return Rect.fromLTRB(_emptyOffset.dx, box.bottom, _emptyOffset.dx, box.bottom + box.bottom - box.top);
       }

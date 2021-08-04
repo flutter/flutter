@@ -196,7 +196,6 @@ class TextFormField extends FormField<String> {
     AutovalidateMode? autovalidateMode,
     ScrollController? scrollController,
     String? restorationId,
-    bool enableIMEPersonalizedLearning = true,
   }) : assert(initialValue == null || controller == null),
        assert(textAlign != null),
        assert(autofocus != null),
@@ -231,7 +230,6 @@ class TextFormField extends FormField<String> {
        assert(!obscureText || maxLines == 1, 'Obscured fields cannot be multiline.'),
        assert(maxLength == null || maxLength == TextField.noMaxLength || maxLength > 0),
        assert(enableInteractiveSelection != null),
-       assert(enableIMEPersonalizedLearning != null),
        super(
          key: key,
          restorationId: restorationId,
@@ -301,7 +299,6 @@ class TextFormField extends FormField<String> {
                buildCounter: buildCounter,
                autofillHints: autofillHints,
                scrollController: scrollController,
-               enableIMEPersonalizedLearning: enableIMEPersonalizedLearning,
              ),
            );
          },

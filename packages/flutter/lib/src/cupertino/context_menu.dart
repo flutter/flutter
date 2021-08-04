@@ -212,7 +212,7 @@ class CupertinoContextMenu extends StatefulWidget {
   ///       onPressed: () {},
   ///     ),
   ///   ],
-  /// )
+  /// ),
   /// ```
   ///
   /// {@end-tool}

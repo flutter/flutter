@@ -134,7 +134,7 @@ class ContinuousRectangleBorder extends OutlinedBorder {
   }
 
   @override
-  ContinuousRectangleBorder copyWith({ BorderSide? side, BorderRadiusGeometry? borderRadius }) {
+  ContinuousRectangleBorder copyWith({ BorderSide? side, BorderRadius? borderRadius }) {
     return ContinuousRectangleBorder(
       side: side ?? this.side,
       borderRadius: borderRadius ?? this.borderRadius,

@@ -35,28 +35,19 @@ const Map<String, List<String>> _platformAdaptiveIdentifiers = <String, List<Str
   'share': <String>['share', 'ios_share'],
 };
 
-// Rewrite certain Flutter IDs (reserved keywords, numbers) using exact matching.
+// Rewrite certain Flutter IDs (reserved keywords, numbers) using prefix matching.
 const Map<String, String> identifierRewrites = <String, String>{
   '1x': 'one_x',
-  '1x_mobiledata': 'one_x_mobiledata',
   '360': 'threesixty',
   '2d': 'twod',
   '3d': 'threed',
-  '3d_rotation': 'threed_rotation',
   '3p': 'three_p',
   '6_ft': 'six_ft',
-  '6_ft_apart': 'six_ft_apart',
   '3g': 'three_g',
-  '3g_mobiledata': 'three_g_mobiledata',
   '4g': 'four_g',
-  '4g_mobiledata': 'four_g_mobiledata',
-  '4g_plus': 'four_g_plus',
-  '4g_plus_mobiledata': 'four_g_plus_mobiledata',
   '5g': 'five_g',
   '30fps': 'thirty_fps',
-  '30fps_select': 'thirty_fps_select',
   '60fps': 'sixty_fps',
-  '60fps_select': 'sixty_fps_select',
   '1k': 'one_k',
   '2k': 'two_k',
   '3k': 'three_k',
@@ -67,15 +58,6 @@ const Map<String, String> identifierRewrites = <String, String>{
   '8k': 'eight_k',
   '9k': 'nine_k',
   '10k': 'ten_k',
-  '1k_plus': 'one_k_plus',
-  '2k_plus': 'two_k_plus',
-  '3k_plus': 'three_k_plus',
-  '4k_plus': 'four_k_plus',
-  '5k_plus': 'five_k_plus',
-  '6k_plus': 'six_k_plus',
-  '7k_plus': 'seven_k_plus',
-  '8k_plus': 'eight_k_plus',
-  '9k_plus': 'nine_k_plus',
   '1mp': 'one_mp',
   '2mp': 'two_mp',
   '3mp': 'three_mp',
@@ -101,11 +83,7 @@ const Map<String, String> identifierRewrites = <String, String>{
   '23mp': 'twenty_three_mp',
   '24mp': 'twenty_four_mp',
   'class': 'class_',
-  'new': 'new_',
-  'switch': 'switch_',
   'try': 'try_sms_star',
-  'door_back': 'door_back_door',
-  'door_front': 'door_front_door',
 };
 
 const Set<String> _iconsMirroredWhenRTL = <String>{
@@ -368,7 +346,7 @@ class _Icon {
 
     flutterId = id;
     for (final MapEntry<String, String> rewritePair in identifierRewrites.entries) {
-      if (shortId == rewritePair.key) {
+      if (id.startsWith(rewritePair.key)) {
         flutterId = id.replaceFirst(rewritePair.key, identifierRewrites[rewritePair.key]!);
       }
     }
@@ -415,7 +393,7 @@ class _Icon {
     if (shortId == b.shortId) {
       return id.length - b.id.length;
     }
-    return shortId.compareTo(b.shortId);
+    return flutterId.compareTo(b.flutterId);
   }
 
   String _replaceLast(String string, String toReplace) {
