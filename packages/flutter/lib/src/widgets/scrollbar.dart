@@ -1543,9 +1543,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     }
     // Ensure we are not flipping axes if the scrollbar is not passive.
     // It is valid for a scrollbar to change axes based on a notification if it
-    // is passive, but if it has a scroll controller and supports gestures, the
+    // is passive, but if it has a scroll controller, the
     // axis of the scroll position and scrollbar should always match.
-    if ((scrollController != null && scrollController.hasClients) || enableGestures) {
+    if (scrollController != null && scrollController.hasClients) {
       assert(
         scrollController.position.axis == notificationAxis,
         "The Axis of the Scrollbar's ScrollController does not match the "

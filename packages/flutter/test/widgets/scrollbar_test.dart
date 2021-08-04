@@ -1647,7 +1647,6 @@ void main() {
         child: MediaQuery(
           data: const MediaQueryData(),
           child: RawScrollbar(
-            isAlwaysShown: true,
             controller: verticalScrollController,
             // This scrollbar will receive a notification from both nested
             // scroll views of opposite axes.
@@ -1669,18 +1668,16 @@ void main() {
     }
 
     await tester.pumpWidget(buildFrame());
+    await tester.pumpAndSettle();
 
-    final AssertionError error = tester.takeException() as AssertionError;
-    expect(error.message, contains('Axis'));
-
-    // expect(
-    //   () async => tester.pumpWidget(buildFrame()),
-    //   throwsA(isAssertionError.having(
-    //     (AssertionError e) => e.message,
-    //     'message',
-    //     contains("The AxisDirection of the Scrollbar's ScrollController does not "
-    //       'match the AxisDirection of the received ScrollNotification. '),
-    //   )),
-    // );
+    expect(
+      () => horizontalScrollController.jumpTo(10.0),
+      throwsA(isAssertionError.having(
+        (AssertionError e) => e.message,
+        'message',
+        contains("The Axis of the Scrollbar's ScrollController does not "
+          'match the Axis of the received ScrollNotification. '),
+      )),
+    );
   });
 }
