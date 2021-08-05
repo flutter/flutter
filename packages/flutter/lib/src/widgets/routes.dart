@@ -149,6 +149,14 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   Animation<double>? get secondaryAnimation => _secondaryAnimation;
   final ProxyAnimation _secondaryAnimation = ProxyAnimation(kAlwaysDismissedAnimation);
 
+  /// Whether to takeover the [controller] created by [createAnimationController].
+  ///
+  /// If true, this route is responsible for the disposal of the controller.
+  /// If false, the controller should be disposed by whoever owned it.
+  ///
+  /// It defaults to `true`.
+  bool shouldTakeoverAnimationController = true;
+
   /// Called to create the animation controller that will drive the transitions to
   /// this route from the previous one, and back to the previous route from this
   /// one.
@@ -422,7 +430,9 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   void dispose() {
     assert(!_transitionCompleter.isCompleted, 'Cannot dispose a $runtimeType twice.');
     _animation?.removeStatusListener(_handleStatusChanged);
-    _controller?.dispose();
+    if (shouldTakeoverAnimationController) {
+      _controller?.dispose();
+    }
     _transitionCompleter.complete(_result);
     super.dispose();
   }
