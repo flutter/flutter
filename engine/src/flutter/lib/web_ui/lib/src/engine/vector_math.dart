@@ -375,22 +375,6 @@ class Matrix4 {
         det3_201_012 * m[15];
   }
 
-  /// Returns a new vector or matrix by multiplying [this] with [arg].
-  dynamic operator *(dynamic arg) {
-    if (arg is double) {
-      return scaled(arg);
-    }
-    if (arg is Vector3) {
-      final Vector3 copy = arg.clone();
-      transform3(copy.storage);
-      return copy;
-    }
-    if (arg is Matrix4) {
-      return multiplied(arg);
-    }
-    throw ArgumentError(arg);
-  }
-
   /// Transform [arg] of type [Vector3] using the perspective transformation
   /// defined by [this].
   Vector3 perspectiveTransform(Vector3 arg) {

@@ -41,7 +41,7 @@ Future<void> testMain() async {
       final html.HttpRequest response = await html.HttpRequest.request(
           _testFontUrl,
           responseType: 'arraybuffer');
-      await ui.loadFontFromList(Uint8List.view(response.response),
+      await ui.loadFontFromList(Uint8List.view(response.response as ByteBuffer),
           fontFamily: 'Blehm');
 
       expect(_containsFontFamily('Blehm'), isTrue);
@@ -73,7 +73,7 @@ Future<void> testMain() async {
       final html.HttpRequest response = await html.HttpRequest.request(
           _testFontUrl,
           responseType: 'arraybuffer');
-      await ui.loadFontFromList(Uint8List.view(response.response),
+      await ui.loadFontFromList(Uint8List.view(response.response as ByteBuffer),
           fontFamily: 'Blehm');
 
       // Verifies the font is loaded, and the cache is cleaned.
@@ -101,7 +101,7 @@ Future<void> testMain() async {
       final html.HttpRequest response = await html.HttpRequest.request(
           _testFontUrl,
           responseType: 'arraybuffer');
-      await ui.loadFontFromList(Uint8List.view(response.response),
+      await ui.loadFontFromList(Uint8List.view(response.response as ByteBuffer),
           fontFamily: 'Blehm');
       final Completer<void> completer = Completer<void>();
       html.window.requestAnimationFrame( (_) { completer.complete(); } );

@@ -179,7 +179,7 @@ void _startDownloadingCanvasKit(String? canvasKitBase) {
 
     // First check if `exports` and `module` are already defined. If so, then
     // CommonJS is being used, and we shouldn't have any problems.
-    final js.JsFunction objectConstructor = js.context['Object'];
+    final js.JsFunction objectConstructor = js.context['Object'] as js.JsFunction;
     if (js.context['exports'] == null) {
       final js.JsObject exportsAccessor = js.JsObject.jsify(<String, dynamic>{
         'get': js.allowInterop(() {

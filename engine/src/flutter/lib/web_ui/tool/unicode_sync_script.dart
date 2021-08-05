@@ -119,9 +119,9 @@ final String lineBreakCodegen =
 Future<void> main(List<String> arguments) async {
   final ArgResults result = argParser.parse(arguments);
   final PropertiesSyncer syncer = getSyncer(
-    result['words'],
-    result['lines'],
-    result['dry'],
+    result['words'] as String?,
+    result['lines'] as String?,
+    result['dry'] as bool,
   );
 
   syncer.perform();

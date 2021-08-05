@@ -1372,7 +1372,7 @@ class DomParagraphBuilder implements ui.ParagraphBuilder {
     // entirely. Occasionally there will be one [pushStyle], which causes this
     // loop to run once then move on to aggregating text.
     while (i < _ops.length && _ops[i] is EngineTextStyle) {
-      final EngineTextStyle style = _ops[i];
+      final EngineTextStyle style = _ops[i] as EngineTextStyle;
       if (style.color != null) {
         color = style.color!;
       }
@@ -1554,8 +1554,8 @@ class DomParagraphBuilder implements ui.ParagraphBuilder {
 
   /// Builds a [Paragraph] as rich text.
   EngineParagraph _buildRichText() {
-    final List<dynamic> elementStack = <dynamic>[];
-    dynamic currentElement() =>
+    final List<html.Element> elementStack = <html.Element>[];
+    html.Element currentElement() =>
         elementStack.isNotEmpty ? elementStack.last : _paragraphElement;
 
     for (int i = 0; i < _ops.length; i++) {

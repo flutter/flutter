@@ -69,15 +69,16 @@ class OffScreenCanvas {
           0, 0, width, height]);
   }
 
-  /// Converts canvas contents to an image and returns as data url.
+  /// Converts canvas contents to an image and returns as data URL.
   Future<String> toDataUrl() {
     final Completer<String> completer = Completer<String>();
     if (offScreenCanvas != null) {
       offScreenCanvas!.convertToBlob().then((html.Blob value) {
         final html.FileReader fileReader = html.FileReader();
         fileReader.onLoad.listen((html.ProgressEvent event) {
-          completer.complete(js_util.getProperty(
-              js_util.getProperty(event, 'target')!, 'result')!);
+          completer.complete(
+            js_util.getProperty(js_util.getProperty(event, 'target') as Object, 'result') as String,
+          );
         });
         fileReader.readAsDataUrl(value);
       });
