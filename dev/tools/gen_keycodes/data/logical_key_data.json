@@ -1,24 +1,4 @@
 {
-  "None": {
-    "name": "None",
-    "value": 0,
-    "names": {
-      "web": [
-        "None"
-      ],
-      "android": [
-        "UNKNOWN"
-      ]
-    },
-    "values": {
-      "android": [
-        0
-      ],
-      "fuchsia": [
-        0
-      ]
-    }
-  },
   "Space": {
     "name": "Space",
     "value": 32,
@@ -48,7 +28,7 @@
         62
       ],
       "fuchsia": [
-        4295426092
+        77309870124
       ]
     }
   },
@@ -85,7 +65,7 @@
         75
       ],
       "fuchsia": [
-        4295426100
+        77309870132
       ]
     }
   },
@@ -96,6 +76,14 @@
     "names": {
       "web": [
         "NumberSign"
+      ],
+      "android": [
+        "POUND"
+      ]
+    },
+    "values": {
+      "android": [
+        18
       ]
     }
   },
@@ -166,6 +154,14 @@
     "names": {
       "web": [
         "Asterisk"
+      ],
+      "android": [
+        "STAR"
+      ]
+    },
+    "values": {
+      "android": [
+        17
       ]
     }
   },
@@ -176,6 +172,14 @@
     "names": {
       "web": [
         "Add"
+      ],
+      "android": [
+        "PLUS"
+      ]
+    },
+    "values": {
+      "android": [
+        81
       ]
     }
   },
@@ -202,7 +206,7 @@
         55
       ],
       "fuchsia": [
-        4295426102
+        77309870134
       ]
     }
   },
@@ -229,7 +233,7 @@
         69
       ],
       "fuchsia": [
-        4295426093
+        77309870125
       ]
     }
   },
@@ -262,7 +266,7 @@
         56
       ],
       "fuchsia": [
-        4295426103
+        77309870135
       ]
     }
   },
@@ -289,7 +293,7 @@
         76
       ],
       "fuchsia": [
-        4295426104
+        77309870136
       ]
     }
   },
@@ -310,7 +314,7 @@
         7
       ],
       "fuchsia": [
-        4295426087
+        77309870119
       ]
     }
   },
@@ -331,7 +335,7 @@
         8
       ],
       "fuchsia": [
-        4295426078
+        77309870110
       ]
     }
   },
@@ -352,7 +356,7 @@
         9
       ],
       "fuchsia": [
-        4295426079
+        77309870111
       ]
     }
   },
@@ -373,7 +377,7 @@
         10
       ],
       "fuchsia": [
-        4295426080
+        77309870112
       ]
     }
   },
@@ -394,7 +398,7 @@
         11
       ],
       "fuchsia": [
-        4295426081
+        77309870113
       ]
     }
   },
@@ -415,7 +419,7 @@
         12
       ],
       "fuchsia": [
-        4295426082
+        77309870114
       ]
     }
   },
@@ -436,7 +440,7 @@
         13
       ],
       "fuchsia": [
-        4295426083
+        77309870115
       ]
     }
   },
@@ -457,7 +461,7 @@
         14
       ],
       "fuchsia": [
-        4295426084
+        77309870116
       ]
     }
   },
@@ -478,7 +482,7 @@
         15
       ],
       "fuchsia": [
-        4295426085
+        77309870117
       ]
     }
   },
@@ -499,7 +503,7 @@
         16
       ],
       "fuchsia": [
-        4295426086
+        77309870118
       ]
     }
   },
@@ -536,7 +540,7 @@
         74
       ],
       "fuchsia": [
-        4295426099
+        77309870131
       ]
     }
   },
@@ -573,7 +577,7 @@
         70
       ],
       "fuchsia": [
-        4295426094
+        77309870126
       ]
     }
   },
@@ -604,6 +608,14 @@
     "names": {
       "web": [
         "At"
+      ],
+      "android": [
+        "AT"
+      ]
+    },
+    "values": {
+      "android": [
+        77
       ]
     }
   },
@@ -630,7 +642,7 @@
         71
       ],
       "fuchsia": [
-        4295426095
+        77309870127
       ]
     }
   },
@@ -657,7 +669,7 @@
         73
       ],
       "fuchsia": [
-        4295426097
+        77309870129
       ]
     }
   },
@@ -684,7 +696,7 @@
         72
       ],
       "fuchsia": [
-        4295426096
+        77309870128
       ]
     }
   },
@@ -731,7 +743,7 @@
         68
       ],
       "fuchsia": [
-        4295426101
+        77309870133
       ]
     }
   },
@@ -752,7 +764,7 @@
         29
       ],
       "fuchsia": [
-        4295426052
+        77309870084
       ]
     }
   },
@@ -773,7 +785,7 @@
         30
       ],
       "fuchsia": [
-        4295426053
+        77309870085
       ]
     }
   },
@@ -794,7 +806,7 @@
         31
       ],
       "fuchsia": [
-        4295426054
+        77309870086
       ]
     }
   },
@@ -815,7 +827,7 @@
         32
       ],
       "fuchsia": [
-        4295426055
+        77309870087
       ]
     }
   },
@@ -836,7 +848,7 @@
         33
       ],
       "fuchsia": [
-        4295426056
+        77309870088
       ]
     }
   },
@@ -857,7 +869,7 @@
         34
       ],
       "fuchsia": [
-        4295426057
+        77309870089
       ]
     }
   },
@@ -878,7 +890,7 @@
         35
       ],
       "fuchsia": [
-        4295426058
+        77309870090
       ]
     }
   },
@@ -899,7 +911,7 @@
         36
       ],
       "fuchsia": [
-        4295426059
+        77309870091
       ]
     }
   },
@@ -920,7 +932,7 @@
         37
       ],
       "fuchsia": [
-        4295426060
+        77309870092
       ]
     }
   },
@@ -941,7 +953,7 @@
         38
       ],
       "fuchsia": [
-        4295426061
+        77309870093
       ]
     }
   },
@@ -962,7 +974,7 @@
         39
       ],
       "fuchsia": [
-        4295426062
+        77309870094
       ]
     }
   },
@@ -983,7 +995,7 @@
         40
       ],
       "fuchsia": [
-        4295426063
+        77309870095
       ]
     }
   },
@@ -1004,7 +1016,7 @@
         41
       ],
       "fuchsia": [
-        4295426064
+        77309870096
       ]
     }
   },
@@ -1025,7 +1037,7 @@
         42
       ],
       "fuchsia": [
-        4295426065
+        77309870097
       ]
     }
   },
@@ -1046,7 +1058,7 @@
         43
       ],
       "fuchsia": [
-        4295426066
+        77309870098
       ]
     }
   },
@@ -1067,7 +1079,7 @@
         44
       ],
       "fuchsia": [
-        4295426067
+        77309870099
       ]
     }
   },
@@ -1088,7 +1100,7 @@
         45
       ],
       "fuchsia": [
-        4295426068
+        77309870100
       ]
     }
   },
@@ -1109,7 +1121,7 @@
         46
       ],
       "fuchsia": [
-        4295426069
+        77309870101
       ]
     }
   },
@@ -1130,7 +1142,7 @@
         47
       ],
       "fuchsia": [
-        4295426070
+        77309870102
       ]
     }
   },
@@ -1151,7 +1163,7 @@
         48
       ],
       "fuchsia": [
-        4295426071
+        77309870103
       ]
     }
   },
@@ -1172,7 +1184,7 @@
         49
       ],
       "fuchsia": [
-        4295426072
+        77309870104
       ]
     }
   },
@@ -1193,7 +1205,7 @@
         50
       ],
       "fuchsia": [
-        4295426073
+        77309870105
       ]
     }
   },
@@ -1214,7 +1226,7 @@
         51
       ],
       "fuchsia": [
-        4295426074
+        77309870106
       ]
     }
   },
@@ -1235,7 +1247,7 @@
         52
       ],
       "fuchsia": [
-        4295426075
+        77309870107
       ]
     }
   },
@@ -1256,7 +1268,7 @@
         53
       ],
       "fuchsia": [
-        4295426076
+        77309870108
       ]
     }
   },
@@ -1277,7 +1289,7 @@
         54
       ],
       "fuchsia": [
-        4295426077
+        77309870109
       ]
     }
   },
@@ -1323,7 +1335,7 @@
   },
   "Unidentified": {
     "name": "Unidentified",
-    "value": 68719476737,
+    "value": 4294967297,
     "names": {
       "web": [
         "Unidentified"
@@ -1332,7 +1344,7 @@
   },
   "Backspace": {
     "name": "Backspace",
-    "value": 68719476744,
+    "value": 4294967304,
     "keyLabel": "\b",
     "names": {
       "web": [
@@ -1371,13 +1383,13 @@
         67
       ],
       "fuchsia": [
-        4295426090
+        77309870122
       ]
     }
   },
   "Tab": {
     "name": "Tab",
-    "value": 68719476745,
+    "value": 4294967305,
     "keyLabel": "\t",
     "names": {
       "web": [
@@ -1420,13 +1432,13 @@
         61
       ],
       "fuchsia": [
-        4295426091
+        77309870123
       ]
     }
   },
   "Enter": {
     "name": "Enter",
-    "value": 68719476749,
+    "value": 4294967309,
     "keyLabel": "\r",
     "names": {
       "web": [
@@ -1469,13 +1481,13 @@
         66
       ],
       "fuchsia": [
-        4295426088
+        77309870120
       ]
     }
   },
   "Escape": {
     "name": "Escape",
-    "value": 68719476763,
+    "value": 4294967323,
     "keyLabel": "\u001b",
     "names": {
       "web": [
@@ -1514,13 +1526,13 @@
         111
       ],
       "fuchsia": [
-        4295426089
+        77309870121
       ]
     }
   },
   "Delete": {
     "name": "Delete",
-    "value": 68719476863,
+    "value": 4294967423,
     "keyLabel": "",
     "names": {
       "web": [
@@ -1559,13 +1571,13 @@
         112
       ],
       "fuchsia": [
-        4295426124
+        77309870156
       ]
     }
   },
   "Accel": {
     "name": "Accel",
-    "value": 68719476993,
+    "value": 4294967553,
     "names": {
       "web": [
         "Accel"
@@ -1574,7 +1586,7 @@
   },
   "AltGraph": {
     "name": "AltGraph",
-    "value": 68719476995,
+    "value": 4294967555,
     "names": {
       "web": [
         "AltGraph"
@@ -1583,7 +1595,7 @@
   },
   "CapsLock": {
     "name": "CapsLock",
-    "value": 68719476996,
+    "value": 4294967556,
     "names": {
       "web": [
         "CapsLock"
@@ -1621,13 +1633,13 @@
         115
       ],
       "fuchsia": [
-        4295426105
+        77309870137
       ]
     }
   },
   "Fn": {
     "name": "Fn",
-    "value": 68719476998,
+    "value": 4294967558,
     "names": {
       "web": [
         "Fn"
@@ -1647,13 +1659,13 @@
         119
       ],
       "fuchsia": [
-        4294967314
+        77309411346
       ]
     }
   },
   "FnLock": {
     "name": "FnLock",
-    "value": 68719476999,
+    "value": 4294967559,
     "names": {
       "web": [
         "FnLock"
@@ -1661,13 +1673,13 @@
     },
     "values": {
       "fuchsia": [
-        4294967315
+        77309411347
       ]
     }
   },
   "Hyper": {
     "name": "Hyper",
-    "value": 68719477000,
+    "value": 4294967560,
     "names": {
       "web": [
         "Hyper"
@@ -1683,13 +1695,13 @@
         65518
       ],
       "fuchsia": [
-        4294967312
+        77309411344
       ]
     }
   },
   "NumLock": {
     "name": "NumLock",
-    "value": 68719477002,
+    "value": 4294967562,
     "names": {
       "web": [
         "NumLock"
@@ -1727,13 +1739,13 @@
         143
       ],
       "fuchsia": [
-        4295426131
+        77309870163
       ]
     }
   },
   "ScrollLock": {
     "name": "ScrollLock",
-    "value": 68719477004,
+    "value": 4294967564,
     "names": {
       "web": [
         "ScrollLock"
@@ -1759,13 +1771,13 @@
         116
       ],
       "fuchsia": [
-        4295426119
+        77309870151
       ]
     }
   },
   "Super": {
     "name": "Super",
-    "value": 68719477006,
+    "value": 4294967566,
     "names": {
       "web": [
         "Super"
@@ -1781,13 +1793,13 @@
         65516
       ],
       "fuchsia": [
-        4294967313
+        77309411345
       ]
     }
   },
   "Symbol": {
     "name": "Symbol",
-    "value": 68719477007,
+    "value": 4294967567,
     "names": {
       "web": [
         "Symbol"
@@ -1804,7 +1816,7 @@
   },
   "SymbolLock": {
     "name": "SymbolLock",
-    "value": 68719477008,
+    "value": 4294967568,
     "names": {
       "web": [
         "SymbolLock"
@@ -1813,7 +1825,7 @@
   },
   "ShiftLevel5": {
     "name": "ShiftLevel5",
-    "value": 68719477009,
+    "value": 4294967569,
     "names": {
       "web": [
         "ShiftLevel5"
@@ -1822,7 +1834,7 @@
   },
   "ArrowDown": {
     "name": "ArrowDown",
-    "value": 68719477505,
+    "value": 4294968065,
     "names": {
       "web": [
         "ArrowDown"
@@ -1860,13 +1872,13 @@
         20
       ],
       "fuchsia": [
-        4295426129
+        77309870161
       ]
     }
   },
   "ArrowLeft": {
     "name": "ArrowLeft",
-    "value": 68719477506,
+    "value": 4294968066,
     "names": {
       "web": [
         "ArrowLeft"
@@ -1904,13 +1916,13 @@
         21
       ],
       "fuchsia": [
-        4295426128
+        77309870160
       ]
     }
   },
   "ArrowRight": {
     "name": "ArrowRight",
-    "value": 68719477507,
+    "value": 4294968067,
     "names": {
       "web": [
         "ArrowRight"
@@ -1948,13 +1960,13 @@
         22
       ],
       "fuchsia": [
-        4295426127
+        77309870159
       ]
     }
   },
   "ArrowUp": {
     "name": "ArrowUp",
-    "value": 68719477508,
+    "value": 4294968068,
     "names": {
       "web": [
         "ArrowUp"
@@ -1992,13 +2004,13 @@
         19
       ],
       "fuchsia": [
-        4295426130
+        77309870162
       ]
     }
   },
   "End": {
     "name": "End",
-    "value": 68719477509,
+    "value": 4294968069,
     "names": {
       "web": [
         "End"
@@ -2036,13 +2048,13 @@
         123
       ],
       "fuchsia": [
-        4295426125
+        77309870157
       ]
     }
   },
   "Home": {
     "name": "Home",
-    "value": 68719477510,
+    "value": 4294968070,
     "names": {
       "web": [
         "Home"
@@ -2080,13 +2092,13 @@
         122
       ],
       "fuchsia": [
-        4295426122
+        77309870154
       ]
     }
   },
   "PageDown": {
     "name": "PageDown",
-    "value": 68719477511,
+    "value": 4294968071,
     "names": {
       "web": [
         "PageDown"
@@ -2124,13 +2136,13 @@
         93
       ],
       "fuchsia": [
-        4295426126
+        77309870158
       ]
     }
   },
   "PageUp": {
     "name": "PageUp",
-    "value": 68719477512,
+    "value": 4294968072,
     "names": {
       "web": [
         "PageUp"
@@ -2168,13 +2180,13 @@
         92
       ],
       "fuchsia": [
-        4295426123
+        77309870155
       ]
     }
   },
   "Clear": {
     "name": "Clear",
-    "value": 68719477761,
+    "value": 4294968321,
     "names": {
       "web": [
         "Clear"
@@ -2203,7 +2215,7 @@
   },
   "Copy": {
     "name": "Copy",
-    "value": 68719477762,
+    "value": 4294968322,
     "names": {
       "web": [
         "Copy"
@@ -2225,13 +2237,13 @@
         278
       ],
       "fuchsia": [
-        4295426172
+        77309870204
       ]
     }
   },
   "CrSel": {
     "name": "CrSel",
-    "value": 68719477763,
+    "value": 4294968323,
     "names": {
       "web": [
         "CrSel"
@@ -2240,7 +2252,7 @@
   },
   "Cut": {
     "name": "Cut",
-    "value": 68719477764,
+    "value": 4294968324,
     "names": {
       "web": [
         "Cut"
@@ -2260,13 +2272,13 @@
         277
       ],
       "fuchsia": [
-        4295426171
+        77309870203
       ]
     }
   },
   "EraseEof": {
     "name": "EraseEof",
-    "value": 68719477765,
+    "value": 4294968325,
     "names": {
       "web": [
         "EraseEof"
@@ -2283,7 +2295,7 @@
   },
   "ExSel": {
     "name": "ExSel",
-    "value": 68719477766,
+    "value": 4294968326,
     "names": {
       "web": [
         "ExSel"
@@ -2300,7 +2312,7 @@
   },
   "Insert": {
     "name": "Insert",
-    "value": 68719477767,
+    "value": 4294968327,
     "names": {
       "web": [
         "Insert"
@@ -2338,13 +2350,13 @@
         124
       ],
       "fuchsia": [
-        4295426121
+        77309870153
       ]
     }
   },
   "Paste": {
     "name": "Paste",
-    "value": 68719477768,
+    "value": 4294968328,
     "names": {
       "web": [
         "Paste"
@@ -2364,13 +2376,13 @@
         279
       ],
       "fuchsia": [
-        4295426173
+        77309870205
       ]
     }
   },
   "Redo": {
     "name": "Redo",
-    "value": 68719477769,
+    "value": 4294968329,
     "names": {
       "web": [
         "Redo"
@@ -2384,13 +2396,13 @@
         65382
       ],
       "fuchsia": [
-        4295754361
+        77310198393
       ]
     }
   },
   "Undo": {
     "name": "Undo",
-    "value": 68719477770,
+    "value": 4294968330,
     "names": {
       "web": [
         "Undo"
@@ -2404,13 +2416,13 @@
         65381
       ],
       "fuchsia": [
-        4295426170
+        77309870202
       ]
     }
   },
   "Accept": {
     "name": "Accept",
-    "value": 68719478017,
+    "value": 4294968577,
     "names": {
       "web": [
         "Accept"
@@ -2427,7 +2439,7 @@
   },
   "Again": {
     "name": "Again",
-    "value": 68719478018,
+    "value": 4294968578,
     "names": {
       "web": [
         "Again"
@@ -2435,13 +2447,13 @@
     },
     "values": {
       "fuchsia": [
-        4295426169
+        77309870201
       ]
     }
   },
   "Attn": {
     "name": "Attn",
-    "value": 68719478019,
+    "value": 4294968579,
     "names": {
       "web": [
         "Attn"
@@ -2464,7 +2476,7 @@
   },
   "Cancel": {
     "name": "Cancel",
-    "value": 68719478020,
+    "value": 4294968580,
     "names": {
       "web": [
         "Cancel"
@@ -2487,7 +2499,7 @@
   },
   "ContextMenu": {
     "name": "ContextMenu",
-    "value": 68719478021,
+    "value": 4294968581,
     "names": {
       "web": [
         "ContextMenu"
@@ -2525,13 +2537,13 @@
         82
       ],
       "fuchsia": [
-        4295426149
+        77309870181
       ]
     }
   },
   "Execute": {
     "name": "Execute",
-    "value": 68719478022,
+    "value": 4294968582,
     "names": {
       "web": [
         "Execute"
@@ -2554,7 +2566,7 @@
   },
   "Find": {
     "name": "Find",
-    "value": 68719478023,
+    "value": 4294968583,
     "names": {
       "web": [
         "Find"
@@ -2568,13 +2580,13 @@
         65384
       ],
       "fuchsia": [
-        4295426174
+        77309870206
       ]
     }
   },
   "Help": {
     "name": "Help",
-    "value": 68719478024,
+    "value": 4294968584,
     "names": {
       "web": [
         "Help"
@@ -2600,13 +2612,13 @@
         259
       ],
       "fuchsia": [
-        4295426165
+        77309870197
       ]
     }
   },
   "Pause": {
     "name": "Pause",
-    "value": 68719478025,
+    "value": 4294968585,
     "names": {
       "web": [
         "Pause"
@@ -2632,13 +2644,13 @@
         121
       ],
       "fuchsia": [
-        4295426120
+        77309870152
       ]
     }
   },
   "Play": {
     "name": "Play",
-    "value": 68719478026,
+    "value": 4294968586,
     "names": {
       "web": [
         "Play"
@@ -2655,7 +2667,7 @@
   },
   "Props": {
     "name": "Props",
-    "value": 68719478027,
+    "value": 4294968587,
     "names": {
       "web": [
         "Props"
@@ -2663,13 +2675,13 @@
     },
     "values": {
       "fuchsia": [
-        4295426211
+        77309870243
       ]
     }
   },
   "Select": {
     "name": "Select",
-    "value": 68719478028,
+    "value": 4294968588,
     "names": {
       "web": [
         "Select"
@@ -2695,13 +2707,13 @@
         23
       ],
       "fuchsia": [
-        4295426167
+        77309870199
       ]
     }
   },
   "ZoomIn": {
     "name": "ZoomIn",
-    "value": 68719478029,
+    "value": 4294968589,
     "names": {
       "web": [
         "ZoomIn"
@@ -2721,13 +2733,13 @@
         168
       ],
       "fuchsia": [
-        4295754285
+        77310198317
       ]
     }
   },
   "ZoomOut": {
     "name": "ZoomOut",
-    "value": 68719478030,
+    "value": 4294968590,
     "names": {
       "web": [
         "ZoomOut"
@@ -2747,13 +2759,13 @@
         169
       ],
       "fuchsia": [
-        4295754286
+        77310198318
       ]
     }
   },
   "BrightnessDown": {
     "name": "BrightnessDown",
-    "value": 68719478273,
+    "value": 4294968833,
     "names": {
       "web": [
         "BrightnessDown"
@@ -2773,13 +2785,13 @@
         220
       ],
       "fuchsia": [
-        4295753840
+        77310197872
       ]
     }
   },
   "BrightnessUp": {
     "name": "BrightnessUp",
-    "value": 68719478274,
+    "value": 4294968834,
     "names": {
       "web": [
         "BrightnessUp"
@@ -2799,13 +2811,13 @@
         221
       ],
       "fuchsia": [
-        4295753839
+        77310197871
       ]
     }
   },
   "Camera": {
     "name": "Camera",
-    "value": 68719478275,
+    "value": 4294968835,
     "names": {
       "web": [
         "Camera"
@@ -2822,7 +2834,7 @@
   },
   "Eject": {
     "name": "Eject",
-    "value": 68719478276,
+    "value": 4294968836,
     "names": {
       "web": [
         "Eject"
@@ -2842,13 +2854,13 @@
         129
       ],
       "fuchsia": [
-        4295753912
+        77310197944
       ]
     }
   },
   "LogOff": {
     "name": "LogOff",
-    "value": 68719478277,
+    "value": 4294968837,
     "names": {
       "web": [
         "LogOff"
@@ -2862,13 +2874,13 @@
         269025121
       ],
       "fuchsia": [
-        4295754140
+        77310198172
       ]
     }
   },
   "Power": {
     "name": "Power",
-    "value": 68719478278,
+    "value": 4294968838,
     "names": {
       "web": [
         "Power"
@@ -2882,13 +2894,13 @@
         26
       ],
       "fuchsia": [
-        4295426150
+        77309870182
       ]
     }
   },
   "PowerOff": {
     "name": "PowerOff",
-    "value": 68719478279,
+    "value": 4294968839,
     "names": {
       "web": [
         "PowerOff"
@@ -2905,7 +2917,7 @@
   },
   "PrintScreen": {
     "name": "PrintScreen",
-    "value": 68719478280,
+    "value": 4294968840,
     "names": {
       "web": [
         "PrintScreen"
@@ -2925,13 +2937,13 @@
         120
       ],
       "fuchsia": [
-        4295426118
+        77309870150
       ]
     }
   },
   "Hibernate": {
     "name": "Hibernate",
-    "value": 68719478281,
+    "value": 4294968841,
     "names": {
       "web": [
         "Hibernate"
@@ -2940,7 +2952,7 @@
   },
   "Standby": {
     "name": "Standby",
-    "value": 68719478282,
+    "value": 4294968842,
     "names": {
       "web": [
         "Standby"
@@ -2957,7 +2969,7 @@
   },
   "WakeUp": {
     "name": "WakeUp",
-    "value": 68719478283,
+    "value": 4294968843,
     "names": {
       "web": [
         "WakeUp"
@@ -2977,13 +2989,13 @@
         224
       ],
       "fuchsia": [
-        4295032963
+        77309476995
       ]
     }
   },
   "AllCandidates": {
     "name": "AllCandidates",
-    "value": 68719478529,
+    "value": 4294969089,
     "names": {
       "web": [
         "AllCandidates"
@@ -2992,7 +3004,7 @@
   },
   "Alphanumeric": {
     "name": "Alphanumeric",
-    "value": 68719478530,
+    "value": 4294969090,
     "names": {
       "web": [
         "Alphanumeric"
@@ -3001,7 +3013,7 @@
   },
   "CodeInput": {
     "name": "CodeInput",
-    "value": 68719478531,
+    "value": 4294969091,
     "names": {
       "web": [
         "CodeInput"
@@ -3018,7 +3030,7 @@
   },
   "Compose": {
     "name": "Compose",
-    "value": 68719478532,
+    "value": 4294969092,
     "names": {
       "web": [
         "Compose"
@@ -3027,7 +3039,7 @@
   },
   "Convert": {
     "name": "Convert",
-    "value": 68719478533,
+    "value": 4294969093,
     "names": {
       "web": [
         "Convert"
@@ -3047,13 +3059,13 @@
         214
       ],
       "fuchsia": [
-        4295426186
+        77309870218
       ]
     }
   },
   "FinalMode": {
     "name": "FinalMode",
-    "value": 68719478534,
+    "value": 4294969094,
     "names": {
       "web": [
         "FinalMode"
@@ -3070,7 +3082,7 @@
   },
   "GroupFirst": {
     "name": "GroupFirst",
-    "value": 68719478535,
+    "value": 4294969095,
     "names": {
       "web": [
         "GroupFirst"
@@ -3087,7 +3099,7 @@
   },
   "GroupLast": {
     "name": "GroupLast",
-    "value": 68719478536,
+    "value": 4294969096,
     "names": {
       "web": [
         "GroupLast"
@@ -3104,7 +3116,7 @@
   },
   "GroupNext": {
     "name": "GroupNext",
-    "value": 68719478537,
+    "value": 4294969097,
     "names": {
       "web": [
         "GroupNext"
@@ -3127,7 +3139,7 @@
   },
   "GroupPrevious": {
     "name": "GroupPrevious",
-    "value": 68719478538,
+    "value": 4294969098,
     "names": {
       "web": [
         "GroupPrevious"
@@ -3144,7 +3156,7 @@
   },
   "ModeChange": {
     "name": "ModeChange",
-    "value": 68719478539,
+    "value": 4294969099,
     "names": {
       "web": [
         "ModeChange"
@@ -3173,7 +3185,7 @@
   },
   "NextCandidate": {
     "name": "NextCandidate",
-    "value": 68719478540,
+    "value": 4294969100,
     "names": {
       "web": [
         "NextCandidate"
@@ -3182,7 +3194,7 @@
   },
   "NonConvert": {
     "name": "NonConvert",
-    "value": 68719478541,
+    "value": 4294969101,
     "names": {
       "web": [
         "NonConvert"
@@ -3196,13 +3208,13 @@
         213
       ],
       "fuchsia": [
-        4295426187
+        77309870219
       ]
     }
   },
   "PreviousCandidate": {
     "name": "PreviousCandidate",
-    "value": 68719478542,
+    "value": 4294969102,
     "names": {
       "web": [
         "PreviousCandidate"
@@ -3219,7 +3231,7 @@
   },
   "Process": {
     "name": "Process",
-    "value": 68719478543,
+    "value": 4294969103,
     "names": {
       "web": [
         "Process"
@@ -3228,7 +3240,7 @@
   },
   "SingleCandidate": {
     "name": "SingleCandidate",
-    "value": 68719478544,
+    "value": 4294969104,
     "names": {
       "web": [
         "SingleCandidate"
@@ -3245,7 +3257,7 @@
   },
   "HangulMode": {
     "name": "HangulMode",
-    "value": 68719478545,
+    "value": 4294969105,
     "names": {
       "web": [
         "HangulMode"
@@ -3262,30 +3274,24 @@
   },
   "HanjaMode": {
     "name": "HanjaMode",
-    "value": 68719478546,
+    "value": 4294969106,
     "names": {
       "web": [
         "HanjaMode"
       ],
       "gtk": [
         "Hangul_Hanja"
-      ],
-      "windows": [
-        "HANJA"
       ]
     },
     "values": {
       "gtk": [
         65332
-      ],
-      "windows": [
-        25
       ]
     }
   },
   "JunjaMode": {
     "name": "JunjaMode",
-    "value": 68719478547,
+    "value": 4294969107,
     "names": {
       "web": [
         "JunjaMode"
@@ -3302,7 +3308,7 @@
   },
   "Eisu": {
     "name": "Eisu",
-    "value": 68719478548,
+    "value": 4294969108,
     "names": {
       "web": [
         "Eisu"
@@ -3325,7 +3331,7 @@
   },
   "Hankaku": {
     "name": "Hankaku",
-    "value": 68719478549,
+    "value": 4294969109,
     "names": {
       "web": [
         "Hankaku"
@@ -3342,7 +3348,7 @@
   },
   "Hiragana": {
     "name": "Hiragana",
-    "value": 68719478550,
+    "value": 4294969110,
     "names": {
       "web": [
         "Hiragana"
@@ -3359,7 +3365,7 @@
   },
   "HiraganaKatakana": {
     "name": "HiraganaKatakana",
-    "value": 68719478551,
+    "value": 4294969111,
     "names": {
       "web": [
         "HiraganaKatakana"
@@ -3382,7 +3388,7 @@
   },
   "KanaMode": {
     "name": "KanaMode",
-    "value": 68719478552,
+    "value": 4294969112,
     "names": {
       "web": [
         "KanaMode"
@@ -3390,13 +3396,13 @@
     },
     "values": {
       "fuchsia": [
-        4295426184
+        77309870216
       ]
     }
   },
   "KanjiMode": {
     "name": "KanjiMode",
-    "value": 68719478553,
+    "value": 4294969113,
     "names": {
       "web": [
         "KanjiMode"
@@ -3405,7 +3411,7 @@
         "Kanji"
       ],
       "windows": [
-        "KANJI"
+        "HANJA, KANJI"
       ],
       "android": [
         "KANA"
@@ -3425,7 +3431,7 @@
   },
   "Katakana": {
     "name": "Katakana",
-    "value": 68719478554,
+    "value": 4294969114,
     "names": {
       "web": [
         "Katakana"
@@ -3442,7 +3448,7 @@
   },
   "Romaji": {
     "name": "Romaji",
-    "value": 68719478555,
+    "value": 4294969115,
     "names": {
       "web": [
         "Romaji"
@@ -3459,7 +3465,7 @@
   },
   "Zenkaku": {
     "name": "Zenkaku",
-    "value": 68719478556,
+    "value": 4294969116,
     "names": {
       "web": [
         "Zenkaku"
@@ -3476,7 +3482,7 @@
   },
   "ZenkakuHankaku": {
     "name": "ZenkakuHankaku",
-    "value": 68719478557,
+    "value": 4294969117,
     "names": {
       "web": [
         "ZenkakuHankaku"
@@ -3499,7 +3505,7 @@
   },
   "F1": {
     "name": "F1",
-    "value": 68719478785,
+    "value": 4294969345,
     "names": {
       "web": [
         "F1"
@@ -3539,13 +3545,13 @@
         131
       ],
       "fuchsia": [
-        4295426106
+        77309870138
       ]
     }
   },
   "F2": {
     "name": "F2",
-    "value": 68719478786,
+    "value": 4294969346,
     "names": {
       "web": [
         "F2"
@@ -3585,13 +3591,13 @@
         132
       ],
       "fuchsia": [
-        4295426107
+        77309870139
       ]
     }
   },
   "F3": {
     "name": "F3",
-    "value": 68719478787,
+    "value": 4294969347,
     "names": {
       "web": [
         "F3"
@@ -3631,13 +3637,13 @@
         133
       ],
       "fuchsia": [
-        4295426108
+        77309870140
       ]
     }
   },
   "F4": {
     "name": "F4",
-    "value": 68719478788,
+    "value": 4294969348,
     "names": {
       "web": [
         "F4"
@@ -3677,13 +3683,13 @@
         134
       ],
       "fuchsia": [
-        4295426109
+        77309870141
       ]
     }
   },
   "F5": {
     "name": "F5",
-    "value": 68719478789,
+    "value": 4294969349,
     "names": {
       "web": [
         "F5"
@@ -3721,13 +3727,13 @@
         135
       ],
       "fuchsia": [
-        4295426110
+        77309870142
       ]
     }
   },
   "F6": {
     "name": "F6",
-    "value": 68719478790,
+    "value": 4294969350,
     "names": {
       "web": [
         "F6"
@@ -3765,13 +3771,13 @@
         136
       ],
       "fuchsia": [
-        4295426111
+        77309870143
       ]
     }
   },
   "F7": {
     "name": "F7",
-    "value": 68719478791,
+    "value": 4294969351,
     "names": {
       "web": [
         "F7"
@@ -3809,13 +3815,13 @@
         137
       ],
       "fuchsia": [
-        4295426112
+        77309870144
       ]
     }
   },
   "F8": {
     "name": "F8",
-    "value": 68719478792,
+    "value": 4294969352,
     "names": {
       "web": [
         "F8"
@@ -3853,13 +3859,13 @@
         138
       ],
       "fuchsia": [
-        4295426113
+        77309870145
       ]
     }
   },
   "F9": {
     "name": "F9",
-    "value": 68719478793,
+    "value": 4294969353,
     "names": {
       "web": [
         "F9"
@@ -3897,13 +3903,13 @@
         139
       ],
       "fuchsia": [
-        4295426114
+        77309870146
       ]
     }
   },
   "F10": {
     "name": "F10",
-    "value": 68719478794,
+    "value": 4294969354,
     "names": {
       "web": [
         "F10"
@@ -3941,13 +3947,13 @@
         140
       ],
       "fuchsia": [
-        4295426115
+        77309870147
       ]
     }
   },
   "F11": {
     "name": "F11",
-    "value": 68719478795,
+    "value": 4294969355,
     "names": {
       "web": [
         "F11"
@@ -3985,13 +3991,13 @@
         141
       ],
       "fuchsia": [
-        4295426116
+        77309870148
       ]
     }
   },
   "F12": {
     "name": "F12",
-    "value": 68719478796,
+    "value": 4294969356,
     "names": {
       "web": [
         "F12"
@@ -4029,13 +4035,13 @@
         142
       ],
       "fuchsia": [
-        4295426117
+        77309870149
       ]
     }
   },
   "F13": {
     "name": "F13",
-    "value": 68719478797,
+    "value": 4294969357,
     "names": {
       "web": [
         "F13"
@@ -4067,13 +4073,13 @@
         124
       ],
       "fuchsia": [
-        4295426152
+        77309870184
       ]
     }
   },
   "F14": {
     "name": "F14",
-    "value": 68719478798,
+    "value": 4294969358,
     "names": {
       "web": [
         "F14"
@@ -4105,13 +4111,13 @@
         125
       ],
       "fuchsia": [
-        4295426153
+        77309870185
       ]
     }
   },
   "F15": {
     "name": "F15",
-    "value": 68719478799,
+    "value": 4294969359,
     "names": {
       "web": [
         "F15"
@@ -4143,13 +4149,13 @@
         126
       ],
       "fuchsia": [
-        4295426154
+        77309870186
       ]
     }
   },
   "F16": {
     "name": "F16",
-    "value": 68719478800,
+    "value": 4294969360,
     "names": {
       "web": [
         "F16"
@@ -4181,13 +4187,13 @@
         127
       ],
       "fuchsia": [
-        4295426155
+        77309870187
       ]
     }
   },
   "F17": {
     "name": "F17",
-    "value": 68719478801,
+    "value": 4294969361,
     "names": {
       "web": [
         "F17"
@@ -4219,13 +4225,13 @@
         128
       ],
       "fuchsia": [
-        4295426156
+        77309870188
       ]
     }
   },
   "F18": {
     "name": "F18",
-    "value": 68719478802,
+    "value": 4294969362,
     "names": {
       "web": [
         "F18"
@@ -4257,13 +4263,13 @@
         129
       ],
       "fuchsia": [
-        4295426157
+        77309870189
       ]
     }
   },
   "F19": {
     "name": "F19",
-    "value": 68719478803,
+    "value": 4294969363,
     "names": {
       "web": [
         "F19"
@@ -4295,13 +4301,13 @@
         130
       ],
       "fuchsia": [
-        4295426158
+        77309870190
       ]
     }
   },
   "F20": {
     "name": "F20",
-    "value": 68719478804,
+    "value": 4294969364,
     "names": {
       "web": [
         "F20"
@@ -4333,13 +4339,13 @@
         131
       ],
       "fuchsia": [
-        4295426159
+        77309870191
       ]
     }
   },
   "F21": {
     "name": "F21",
-    "value": 68719478805,
+    "value": 4294969365,
     "names": {
       "web": [
         "F21"
@@ -4359,13 +4365,13 @@
         132
       ],
       "fuchsia": [
-        4295426160
+        77309870192
       ]
     }
   },
   "F22": {
     "name": "F22",
-    "value": 68719478806,
+    "value": 4294969366,
     "names": {
       "web": [
         "F22"
@@ -4385,13 +4391,13 @@
         133
       ],
       "fuchsia": [
-        4295426161
+        77309870193
       ]
     }
   },
   "F23": {
     "name": "F23",
-    "value": 68719478807,
+    "value": 4294969367,
     "names": {
       "web": [
         "F23"
@@ -4411,13 +4417,13 @@
         134
       ],
       "fuchsia": [
-        4295426162
+        77309870194
       ]
     }
   },
   "F24": {
     "name": "F24",
-    "value": 68719478808,
+    "value": 4294969368,
     "names": {
       "web": [
         "F24"
@@ -4437,13 +4443,13 @@
         135
       ],
       "fuchsia": [
-        4295426163
+        77309870195
       ]
     }
   },
   "Soft1": {
     "name": "Soft1",
-    "value": 68719479041,
+    "value": 4294969601,
     "names": {
       "web": [
         "Soft1"
@@ -4452,7 +4458,7 @@
   },
   "Soft2": {
     "name": "Soft2",
-    "value": 68719479042,
+    "value": 4294969602,
     "names": {
       "web": [
         "Soft2"
@@ -4461,7 +4467,7 @@
   },
   "Soft3": {
     "name": "Soft3",
-    "value": 68719479043,
+    "value": 4294969603,
     "names": {
       "web": [
         "Soft3"
@@ -4470,7 +4476,7 @@
   },
   "Soft4": {
     "name": "Soft4",
-    "value": 68719479044,
+    "value": 4294969604,
     "names": {
       "web": [
         "Soft4"
@@ -4479,7 +4485,7 @@
   },
   "Soft5": {
     "name": "Soft5",
-    "value": 68719479045,
+    "value": 4294969605,
     "names": {
       "web": [
         "Soft5"
@@ -4488,7 +4494,7 @@
   },
   "Soft6": {
     "name": "Soft6",
-    "value": 68719479046,
+    "value": 4294969606,
     "names": {
       "web": [
         "Soft6"
@@ -4497,7 +4503,7 @@
   },
   "Soft7": {
     "name": "Soft7",
-    "value": 68719479047,
+    "value": 4294969607,
     "names": {
       "web": [
         "Soft7"
@@ -4506,7 +4512,7 @@
   },
   "Soft8": {
     "name": "Soft8",
-    "value": 68719479048,
+    "value": 4294969608,
     "names": {
       "web": [
         "Soft8"
@@ -4515,7 +4521,7 @@
   },
   "Close": {
     "name": "Close",
-    "value": 68719479297,
+    "value": 4294969857,
     "names": {
       "web": [
         "Close"
@@ -4535,13 +4541,13 @@
         128
       ],
       "fuchsia": [
-        4295754243
+        77310198275
       ]
     }
   },
   "MailForward": {
     "name": "MailForward",
-    "value": 68719479298,
+    "value": 4294969858,
     "names": {
       "web": [
         "MailForward"
@@ -4555,13 +4561,13 @@
         269025168
       ],
       "fuchsia": [
-        4295754379
+        77310198411
       ]
     }
   },
   "MailReply": {
     "name": "MailReply",
-    "value": 68719479299,
+    "value": 4294969859,
     "names": {
       "web": [
         "MailReply"
@@ -4575,13 +4581,13 @@
         269025138
       ],
       "fuchsia": [
-        4295754377
+        77310198409
       ]
     }
   },
   "MailSend": {
     "name": "MailSend",
-    "value": 68719479300,
+    "value": 4294969860,
     "names": {
       "web": [
         "MailSend"
@@ -4595,13 +4601,13 @@
         269025147
       ],
       "fuchsia": [
-        4295754380
+        77310198412
       ]
     }
   },
   "MediaPlayPause": {
     "name": "MediaPlayPause",
-    "value": 68719479301,
+    "value": 4294969861,
     "names": {
       "web": [
         "MediaPlayPause"
@@ -4621,13 +4627,13 @@
         85
       ],
       "fuchsia": [
-        4295753933
+        77310197965
       ]
     }
   },
   "MediaStop": {
     "name": "MediaStop",
-    "value": 68719479303,
+    "value": 4294969863,
     "names": {
       "web": [
         "MediaStop"
@@ -4653,13 +4659,13 @@
         86
       ],
       "fuchsia": [
-        4295753911
+        77310197943
       ]
     }
   },
   "MediaTrackNext": {
     "name": "MediaTrackNext",
-    "value": 68719479304,
+    "value": 4294969864,
     "names": {
       "web": [
         "MediaTrackNext"
@@ -4679,13 +4685,13 @@
         87
       ],
       "fuchsia": [
-        4295753909
+        77310197941
       ]
     }
   },
   "MediaTrackPrevious": {
     "name": "MediaTrackPrevious",
-    "value": 68719479305,
+    "value": 4294969865,
     "names": {
       "web": [
         "MediaTrackPrevious"
@@ -4705,13 +4711,13 @@
         88
       ],
       "fuchsia": [
-        4295753910
+        77310197942
       ]
     }
   },
   "New": {
     "name": "New",
-    "value": 68719479306,
+    "value": 4294969866,
     "names": {
       "web": [
         "New"
@@ -4725,13 +4731,13 @@
         269025128
       ],
       "fuchsia": [
-        4295754241
+        77310198273
       ]
     }
   },
   "Open": {
     "name": "Open",
-    "value": 68719479307,
+    "value": 4294969867,
     "names": {
       "web": [
         "Open"
@@ -4745,13 +4751,13 @@
         269025131
       ],
       "fuchsia": [
-        4295426164
+        77309870196
       ]
     }
   },
   "Print": {
     "name": "Print",
-    "value": 68719479308,
+    "value": 4294969868,
     "names": {
       "web": [
         "Print"
@@ -4771,13 +4777,13 @@
         42
       ],
       "fuchsia": [
-        4295754248
+        77310198280
       ]
     }
   },
   "Save": {
     "name": "Save",
-    "value": 68719479309,
+    "value": 4294969869,
     "names": {
       "web": [
         "Save"
@@ -4791,13 +4797,13 @@
         269025143
       ],
       "fuchsia": [
-        4295754247
+        77310198279
       ]
     }
   },
   "SpellCheck": {
     "name": "SpellCheck",
-    "value": 68719479310,
+    "value": 4294969870,
     "names": {
       "web": [
         "SpellCheck"
@@ -4811,13 +4817,13 @@
         269025148
       ],
       "fuchsia": [
-        4295754155
+        77310198187
       ]
     }
   },
   "AudioVolumeDown": {
     "name": "AudioVolumeDown",
-    "value": 68719479311,
+    "value": 4294969871,
     "names": {
       "web": [
         "AudioVolumeDown"
@@ -4855,13 +4861,13 @@
         25
       ],
       "fuchsia": [
-        4295426177
+        77309870209
       ]
     }
   },
   "AudioVolumeUp": {
     "name": "AudioVolumeUp",
-    "value": 68719479312,
+    "value": 4294969872,
     "names": {
       "web": [
         "AudioVolumeUp"
@@ -4899,13 +4905,13 @@
         24
       ],
       "fuchsia": [
-        4295426176
+        77309870208
       ]
     }
   },
   "AudioVolumeMute": {
     "name": "AudioVolumeMute",
-    "value": 68719479313,
+    "value": 4294969873,
     "names": {
       "web": [
         "AudioVolumeMute"
@@ -4943,13 +4949,13 @@
         164
       ],
       "fuchsia": [
-        4295426175
+        77309870207
       ]
     }
   },
   "LaunchApplication2": {
     "name": "LaunchApplication2",
-    "value": 68719479553,
+    "value": 4294970113,
     "names": {
       "web": [
         "LaunchApplication2"
@@ -4958,7 +4964,7 @@
   },
   "LaunchCalendar": {
     "name": "LaunchCalendar",
-    "value": 68719479554,
+    "value": 4294970114,
     "names": {
       "web": [
         "LaunchCalendar"
@@ -4978,13 +4984,13 @@
         208
       ],
       "fuchsia": [
-        4295754126
+        77310198158
       ]
     }
   },
   "LaunchMail": {
     "name": "LaunchMail",
-    "value": 68719479555,
+    "value": 4294970115,
     "names": {
       "web": [
         "LaunchMail"
@@ -5010,13 +5016,13 @@
         65
       ],
       "fuchsia": [
-        4295754122
+        77310198154
       ]
     }
   },
   "LaunchMediaPlayer": {
     "name": "LaunchMediaPlayer",
-    "value": 68719479556,
+    "value": 4294970116,
     "names": {
       "web": [
         "LaunchMediaPlayer"
@@ -5025,7 +5031,7 @@
   },
   "LaunchMusicPlayer": {
     "name": "LaunchMusicPlayer",
-    "value": 68719479557,
+    "value": 4294970117,
     "names": {
       "web": [
         "LaunchMusicPlayer"
@@ -5042,7 +5048,7 @@
   },
   "LaunchApplication1": {
     "name": "LaunchApplication1",
-    "value": 68719479558,
+    "value": 4294970118,
     "names": {
       "web": [
         "LaunchApplication1"
@@ -5051,7 +5057,7 @@
   },
   "LaunchScreenSaver": {
     "name": "LaunchScreenSaver",
-    "value": 68719479559,
+    "value": 4294970119,
     "names": {
       "web": [
         "LaunchScreenSaver"
@@ -5065,13 +5071,13 @@
         269025069
       ],
       "fuchsia": [
-        4295754161
+        77310198193
       ]
     }
   },
   "LaunchSpreadsheet": {
     "name": "LaunchSpreadsheet",
-    "value": 68719479560,
+    "value": 4294970120,
     "names": {
       "web": [
         "LaunchSpreadsheet"
@@ -5079,13 +5085,13 @@
     },
     "values": {
       "fuchsia": [
-        4295754118
+        77310198150
       ]
     }
   },
   "LaunchWebBrowser": {
     "name": "LaunchWebBrowser",
-    "value": 68719479561,
+    "value": 4294970121,
     "names": {
       "web": [
         "LaunchWebBrowser"
@@ -5102,7 +5108,7 @@
   },
   "LaunchWebCam": {
     "name": "LaunchWebCam",
-    "value": 68719479562,
+    "value": 4294970122,
     "names": {
       "web": [
         "LaunchWebCam"
@@ -5111,7 +5117,7 @@
   },
   "LaunchWordProcessor": {
     "name": "LaunchWordProcessor",
-    "value": 68719479563,
+    "value": 4294970123,
     "names": {
       "web": [
         "LaunchWordProcessor"
@@ -5119,13 +5125,13 @@
     },
     "values": {
       "fuchsia": [
-        4295754116
+        77310198148
       ]
     }
   },
   "LaunchContacts": {
     "name": "LaunchContacts",
-    "value": 68719479564,
+    "value": 4294970124,
     "names": {
       "web": [
         "LaunchContacts"
@@ -5139,13 +5145,13 @@
         207
       ],
       "fuchsia": [
-        4295754125
+        77310198157
       ]
     }
   },
   "LaunchPhone": {
     "name": "LaunchPhone",
-    "value": 68719479565,
+    "value": 4294970125,
     "names": {
       "web": [
         "LaunchPhone"
@@ -5159,13 +5165,13 @@
         269025134
       ],
       "fuchsia": [
-        4295753868
+        77310197900
       ]
     }
   },
   "LaunchAssistant": {
     "name": "LaunchAssistant",
-    "value": 68719479566,
+    "value": 4294970126,
     "names": {
       "web": [
         "LaunchAssistant"
@@ -5179,13 +5185,13 @@
         219
       ],
       "fuchsia": [
-        4295754187
+        77310198219
       ]
     }
   },
   "LaunchControlPanel": {
     "name": "LaunchControlPanel",
-    "value": 68719479567,
+    "value": 4294970127,
     "names": {
       "web": [
         "LaunchControlPanel"
@@ -5193,13 +5199,13 @@
     },
     "values": {
       "fuchsia": [
-        4295754143
+        77310198175
       ]
     }
   },
   "BrowserBack": {
     "name": "BrowserBack",
-    "value": 68719479809,
+    "value": 4294970369,
     "names": {
       "web": [
         "BrowserBack"
@@ -5219,13 +5225,13 @@
         166
       ],
       "fuchsia": [
-        4295754276
+        77310198308
       ]
     }
   },
   "BrowserFavorites": {
     "name": "BrowserFavorites",
-    "value": 68719479810,
+    "value": 4294970370,
     "names": {
       "web": [
         "BrowserFavorites"
@@ -5251,13 +5257,13 @@
         174
       ],
       "fuchsia": [
-        4295754282
+        77310198314
       ]
     }
   },
   "BrowserForward": {
     "name": "BrowserForward",
-    "value": 68719479811,
+    "value": 4294970371,
     "names": {
       "web": [
         "BrowserForward"
@@ -5283,13 +5289,13 @@
         125
       ],
       "fuchsia": [
-        4295754277
+        77310198309
       ]
     }
   },
   "BrowserHome": {
     "name": "BrowserHome",
-    "value": 68719479812,
+    "value": 4294970372,
     "names": {
       "web": [
         "BrowserHome"
@@ -5309,13 +5315,13 @@
         172
       ],
       "fuchsia": [
-        4295754275
+        77310198307
       ]
     }
   },
   "BrowserRefresh": {
     "name": "BrowserRefresh",
-    "value": 68719479813,
+    "value": 4294970373,
     "names": {
       "web": [
         "BrowserRefresh"
@@ -5335,13 +5341,13 @@
         168
       ],
       "fuchsia": [
-        4295754279
+        77310198311
       ]
     }
   },
   "BrowserSearch": {
     "name": "BrowserSearch",
-    "value": 68719479814,
+    "value": 4294970374,
     "names": {
       "web": [
         "BrowserSearch"
@@ -5367,13 +5373,13 @@
         84
       ],
       "fuchsia": [
-        4295754273
+        77310198305
       ]
     }
   },
   "BrowserStop": {
     "name": "BrowserStop",
-    "value": 68719479815,
+    "value": 4294970375,
     "names": {
       "web": [
         "BrowserStop"
@@ -5393,13 +5399,13 @@
         169
       ],
       "fuchsia": [
-        4295754278
+        77310198310
       ]
     }
   },
   "AudioBalanceLeft": {
     "name": "AudioBalanceLeft",
-    "value": 68719480065,
+    "value": 4294970625,
     "names": {
       "web": [
         "AudioBalanceLeft"
@@ -5408,7 +5414,7 @@
   },
   "AudioBalanceRight": {
     "name": "AudioBalanceRight",
-    "value": 68719480066,
+    "value": 4294970626,
     "names": {
       "web": [
         "AudioBalanceRight"
@@ -5417,7 +5423,7 @@
   },
   "AudioBassBoostDown": {
     "name": "AudioBassBoostDown",
-    "value": 68719480067,
+    "value": 4294970627,
     "names": {
       "web": [
         "AudioBassBoostDown"
@@ -5426,7 +5432,7 @@
   },
   "AudioBassBoostUp": {
     "name": "AudioBassBoostUp",
-    "value": 68719480068,
+    "value": 4294970628,
     "names": {
       "web": [
         "AudioBassBoostUp"
@@ -5435,7 +5441,7 @@
   },
   "AudioFaderFront": {
     "name": "AudioFaderFront",
-    "value": 68719480069,
+    "value": 4294970629,
     "names": {
       "web": [
         "AudioFaderFront"
@@ -5444,7 +5450,7 @@
   },
   "AudioFaderRear": {
     "name": "AudioFaderRear",
-    "value": 68719480070,
+    "value": 4294970630,
     "names": {
       "web": [
         "AudioFaderRear"
@@ -5453,7 +5459,7 @@
   },
   "AudioSurroundModeNext": {
     "name": "AudioSurroundModeNext",
-    "value": 68719480071,
+    "value": 4294970631,
     "names": {
       "web": [
         "AudioSurroundModeNext"
@@ -5462,7 +5468,7 @@
   },
   "AVRInput": {
     "name": "AVRInput",
-    "value": 68719480072,
+    "value": 4294970632,
     "names": {
       "web": [
         "AVRInput"
@@ -5479,7 +5485,7 @@
   },
   "AVRPower": {
     "name": "AVRPower",
-    "value": 68719480073,
+    "value": 4294970633,
     "names": {
       "web": [
         "AVRPower"
@@ -5496,7 +5502,7 @@
   },
   "ChannelDown": {
     "name": "ChannelDown",
-    "value": 68719480074,
+    "value": 4294970634,
     "names": {
       "web": [
         "ChannelDown"
@@ -5510,13 +5516,13 @@
         167
       ],
       "fuchsia": [
-        4295753885
+        77310197917
       ]
     }
   },
   "ChannelUp": {
     "name": "ChannelUp",
-    "value": 68719480075,
+    "value": 4294970635,
     "names": {
       "web": [
         "ChannelUp"
@@ -5530,13 +5536,13 @@
         166
       ],
       "fuchsia": [
-        4295753884
+        77310197916
       ]
     }
   },
   "ColorF0Red": {
     "name": "ColorF0Red",
-    "value": 68719480076,
+    "value": 4294970636,
     "names": {
       "web": [
         "ColorF0Red"
@@ -5553,7 +5559,7 @@
   },
   "ColorF1Green": {
     "name": "ColorF1Green",
-    "value": 68719480077,
+    "value": 4294970637,
     "names": {
       "web": [
         "ColorF1Green"
@@ -5570,7 +5576,7 @@
   },
   "ColorF2Yellow": {
     "name": "ColorF2Yellow",
-    "value": 68719480078,
+    "value": 4294970638,
     "names": {
       "web": [
         "ColorF2Yellow"
@@ -5587,7 +5593,7 @@
   },
   "ColorF3Blue": {
     "name": "ColorF3Blue",
-    "value": 68719480079,
+    "value": 4294970639,
     "names": {
       "web": [
         "ColorF3Blue"
@@ -5604,7 +5610,7 @@
   },
   "ColorF4Grey": {
     "name": "ColorF4Grey",
-    "value": 68719480080,
+    "value": 4294970640,
     "names": {
       "web": [
         "ColorF4Grey"
@@ -5613,7 +5619,7 @@
   },
   "ColorF5Brown": {
     "name": "ColorF5Brown",
-    "value": 68719480081,
+    "value": 4294970641,
     "names": {
       "web": [
         "ColorF5Brown"
@@ -5622,7 +5628,7 @@
   },
   "ClosedCaptionToggle": {
     "name": "ClosedCaptionToggle",
-    "value": 68719480082,
+    "value": 4294970642,
     "names": {
       "web": [
         "ClosedCaptionToggle"
@@ -5636,13 +5642,13 @@
         175
       ],
       "fuchsia": [
-        4295753825
+        77310197857
       ]
     }
   },
   "Dimmer": {
     "name": "Dimmer",
-    "value": 68719480083,
+    "value": 4294970643,
     "names": {
       "web": [
         "Dimmer"
@@ -5651,7 +5657,7 @@
   },
   "DisplaySwap": {
     "name": "DisplaySwap",
-    "value": 68719480084,
+    "value": 4294970644,
     "names": {
       "web": [
         "DisplaySwap"
@@ -5660,7 +5666,7 @@
   },
   "Exit": {
     "name": "Exit",
-    "value": 68719480085,
+    "value": 4294970645,
     "names": {
       "web": [
         "Exit"
@@ -5668,13 +5674,13 @@
     },
     "values": {
       "fuchsia": [
-        4295753876
+        77310197908
       ]
     }
   },
   "FavoriteClear0": {
     "name": "FavoriteClear0",
-    "value": 68719480086,
+    "value": 4294970646,
     "names": {
       "web": [
         "FavoriteClear0"
@@ -5683,7 +5689,7 @@
   },
   "FavoriteClear1": {
     "name": "FavoriteClear1",
-    "value": 68719480087,
+    "value": 4294970647,
     "names": {
       "web": [
         "FavoriteClear1"
@@ -5692,7 +5698,7 @@
   },
   "FavoriteClear2": {
     "name": "FavoriteClear2",
-    "value": 68719480088,
+    "value": 4294970648,
     "names": {
       "web": [
         "FavoriteClear2"
@@ -5701,7 +5707,7 @@
   },
   "FavoriteClear3": {
     "name": "FavoriteClear3",
-    "value": 68719480089,
+    "value": 4294970649,
     "names": {
       "web": [
         "FavoriteClear3"
@@ -5710,7 +5716,7 @@
   },
   "FavoriteRecall0": {
     "name": "FavoriteRecall0",
-    "value": 68719480090,
+    "value": 4294970650,
     "names": {
       "web": [
         "FavoriteRecall0"
@@ -5719,7 +5725,7 @@
   },
   "FavoriteRecall1": {
     "name": "FavoriteRecall1",
-    "value": 68719480091,
+    "value": 4294970651,
     "names": {
       "web": [
         "FavoriteRecall1"
@@ -5728,7 +5734,7 @@
   },
   "FavoriteRecall2": {
     "name": "FavoriteRecall2",
-    "value": 68719480092,
+    "value": 4294970652,
     "names": {
       "web": [
         "FavoriteRecall2"
@@ -5737,7 +5743,7 @@
   },
   "FavoriteRecall3": {
     "name": "FavoriteRecall3",
-    "value": 68719480093,
+    "value": 4294970653,
     "names": {
       "web": [
         "FavoriteRecall3"
@@ -5746,7 +5752,7 @@
   },
   "FavoriteStore0": {
     "name": "FavoriteStore0",
-    "value": 68719480094,
+    "value": 4294970654,
     "names": {
       "web": [
         "FavoriteStore0"
@@ -5755,7 +5761,7 @@
   },
   "FavoriteStore1": {
     "name": "FavoriteStore1",
-    "value": 68719480095,
+    "value": 4294970655,
     "names": {
       "web": [
         "FavoriteStore1"
@@ -5764,7 +5770,7 @@
   },
   "FavoriteStore2": {
     "name": "FavoriteStore2",
-    "value": 68719480096,
+    "value": 4294970656,
     "names": {
       "web": [
         "FavoriteStore2"
@@ -5773,7 +5779,7 @@
   },
   "FavoriteStore3": {
     "name": "FavoriteStore3",
-    "value": 68719480097,
+    "value": 4294970657,
     "names": {
       "web": [
         "FavoriteStore3"
@@ -5782,7 +5788,7 @@
   },
   "Guide": {
     "name": "Guide",
-    "value": 68719480098,
+    "value": 4294970658,
     "names": {
       "web": [
         "Guide"
@@ -5799,7 +5805,7 @@
   },
   "GuideNextDay": {
     "name": "GuideNextDay",
-    "value": 68719480099,
+    "value": 4294970659,
     "names": {
       "web": [
         "GuideNextDay"
@@ -5808,7 +5814,7 @@
   },
   "GuidePreviousDay": {
     "name": "GuidePreviousDay",
-    "value": 68719480100,
+    "value": 4294970660,
     "names": {
       "web": [
         "GuidePreviousDay"
@@ -5817,7 +5823,7 @@
   },
   "Info": {
     "name": "Info",
-    "value": 68719480101,
+    "value": 4294970661,
     "names": {
       "web": [
         "Info"
@@ -5831,13 +5837,13 @@
         165
       ],
       "fuchsia": [
-        4295753824
+        77310197856
       ]
     }
   },
   "InstantReplay": {
     "name": "InstantReplay",
-    "value": 68719480102,
+    "value": 4294970662,
     "names": {
       "web": [
         "InstantReplay"
@@ -5846,7 +5852,7 @@
   },
   "Link": {
     "name": "Link",
-    "value": 68719480103,
+    "value": 4294970663,
     "names": {
       "web": [
         "Link"
@@ -5855,7 +5861,7 @@
   },
   "ListProgram": {
     "name": "ListProgram",
-    "value": 68719480104,
+    "value": 4294970664,
     "names": {
       "web": [
         "ListProgram"
@@ -5864,7 +5870,7 @@
   },
   "LiveContent": {
     "name": "LiveContent",
-    "value": 68719480105,
+    "value": 4294970665,
     "names": {
       "web": [
         "LiveContent"
@@ -5873,7 +5879,7 @@
   },
   "Lock": {
     "name": "Lock",
-    "value": 68719480106,
+    "value": 4294970666,
     "names": {
       "web": [
         "Lock"
@@ -5882,7 +5888,7 @@
   },
   "MediaApps": {
     "name": "MediaApps",
-    "value": 68719480107,
+    "value": 4294970667,
     "names": {
       "web": [
         "MediaApps"
@@ -5891,7 +5897,7 @@
   },
   "MediaFastForward": {
     "name": "MediaFastForward",
-    "value": 68719480108,
+    "value": 4294970668,
     "names": {
       "web": [
         "MediaFastForward"
@@ -5911,13 +5917,13 @@
         90
       ],
       "fuchsia": [
-        4295753907
+        77310197939
       ]
     }
   },
   "MediaLast": {
     "name": "MediaLast",
-    "value": 68719480109,
+    "value": 4294970669,
     "names": {
       "web": [
         "MediaLast"
@@ -5931,13 +5937,13 @@
         229
       ],
       "fuchsia": [
-        4295753859
+        77310197891
       ]
     }
   },
   "MediaPause": {
     "name": "MediaPause",
-    "value": 68719480110,
+    "value": 4294970670,
     "names": {
       "web": [
         "MediaPause"
@@ -5957,13 +5963,13 @@
         127
       ],
       "fuchsia": [
-        4295753905
+        77310197937
       ]
     }
   },
   "MediaPlay": {
     "name": "MediaPlay",
-    "value": 68719480111,
+    "value": 4294970671,
     "names": {
       "web": [
         "MediaPlay"
@@ -5985,13 +5991,13 @@
         126
       ],
       "fuchsia": [
-        4295753904
+        77310197936
       ]
     }
   },
   "MediaRecord": {
     "name": "MediaRecord",
-    "value": 68719480112,
+    "value": 4294970672,
     "names": {
       "web": [
         "MediaRecord"
@@ -6011,13 +6017,13 @@
         130
       ],
       "fuchsia": [
-        4295753906
+        77310197938
       ]
     }
   },
   "MediaRewind": {
     "name": "MediaRewind",
-    "value": 68719480113,
+    "value": 4294970673,
     "names": {
       "web": [
         "MediaRewind"
@@ -6037,13 +6043,13 @@
         89
       ],
       "fuchsia": [
-        4295753908
+        77310197940
       ]
     }
   },
   "MediaSkip": {
     "name": "MediaSkip",
-    "value": 68719480114,
+    "value": 4294970674,
     "names": {
       "web": [
         "MediaSkip"
@@ -6052,7 +6058,7 @@
   },
   "NextFavoriteChannel": {
     "name": "NextFavoriteChannel",
-    "value": 68719480115,
+    "value": 4294970675,
     "names": {
       "web": [
         "NextFavoriteChannel"
@@ -6061,7 +6067,7 @@
   },
   "NextUserProfile": {
     "name": "NextUserProfile",
-    "value": 68719480116,
+    "value": 4294970676,
     "names": {
       "web": [
         "NextUserProfile"
@@ -6070,7 +6076,7 @@
   },
   "OnDemand": {
     "name": "OnDemand",
-    "value": 68719480117,
+    "value": 4294970677,
     "names": {
       "web": [
         "OnDemand"
@@ -6079,7 +6085,7 @@
   },
   "PInPDown": {
     "name": "PInPDown",
-    "value": 68719480118,
+    "value": 4294970678,
     "names": {
       "web": [
         "PinPDown"
@@ -6088,7 +6094,7 @@
   },
   "PInPMove": {
     "name": "PInPMove",
-    "value": 68719480119,
+    "value": 4294970679,
     "names": {
       "web": [
         "PinPMove"
@@ -6097,7 +6103,7 @@
   },
   "PInPToggle": {
     "name": "PInPToggle",
-    "value": 68719480120,
+    "value": 4294970680,
     "names": {
       "web": [
         "PinPToggle"
@@ -6106,7 +6112,7 @@
   },
   "PInPUp": {
     "name": "PInPUp",
-    "value": 68719480121,
+    "value": 4294970681,
     "names": {
       "web": [
         "PinPUp"
@@ -6115,7 +6121,7 @@
   },
   "PlaySpeedDown": {
     "name": "PlaySpeedDown",
-    "value": 68719480122,
+    "value": 4294970682,
     "names": {
       "web": [
         "PlaySpeedDown"
@@ -6124,7 +6130,7 @@
   },
   "PlaySpeedReset": {
     "name": "PlaySpeedReset",
-    "value": 68719480123,
+    "value": 4294970683,
     "names": {
       "web": [
         "PlaySpeedReset"
@@ -6133,7 +6139,7 @@
   },
   "PlaySpeedUp": {
     "name": "PlaySpeedUp",
-    "value": 68719480124,
+    "value": 4294970684,
     "names": {
       "web": [
         "PlaySpeedUp"
@@ -6142,7 +6148,7 @@
   },
   "RandomToggle": {
     "name": "RandomToggle",
-    "value": 68719480125,
+    "value": 4294970685,
     "names": {
       "web": [
         "RandomToggle"
@@ -6151,7 +6157,7 @@
   },
   "RcLowBattery": {
     "name": "RcLowBattery",
-    "value": 68719480126,
+    "value": 4294970686,
     "names": {
       "web": [
         "RcLowBattery"
@@ -6160,7 +6166,7 @@
   },
   "RecordSpeedNext": {
     "name": "RecordSpeedNext",
-    "value": 68719480127,
+    "value": 4294970687,
     "names": {
       "web": [
         "RecordSpeedNext"
@@ -6169,7 +6175,7 @@
   },
   "RfBypass": {
     "name": "RfBypass",
-    "value": 68719480128,
+    "value": 4294970688,
     "names": {
       "web": [
         "RfBypass"
@@ -6178,7 +6184,7 @@
   },
   "ScanChannelsToggle": {
     "name": "ScanChannelsToggle",
-    "value": 68719480129,
+    "value": 4294970689,
     "names": {
       "web": [
         "ScanChannelsToggle"
@@ -6187,7 +6193,7 @@
   },
   "ScreenModeNext": {
     "name": "ScreenModeNext",
-    "value": 68719480130,
+    "value": 4294970690,
     "names": {
       "web": [
         "ScreenModeNext"
@@ -6196,7 +6202,7 @@
   },
   "Settings": {
     "name": "Settings",
-    "value": 68719480131,
+    "value": 4294970691,
     "names": {
       "web": [
         "Settings"
@@ -6213,7 +6219,7 @@
   },
   "SplitScreenToggle": {
     "name": "SplitScreenToggle",
-    "value": 68719480132,
+    "value": 4294970692,
     "names": {
       "web": [
         "SplitScreenToggle"
@@ -6222,7 +6228,7 @@
   },
   "STBInput": {
     "name": "STBInput",
-    "value": 68719480133,
+    "value": 4294970693,
     "names": {
       "web": [
         "STBInput"
@@ -6239,7 +6245,7 @@
   },
   "STBPower": {
     "name": "STBPower",
-    "value": 68719480134,
+    "value": 4294970694,
     "names": {
       "web": [
         "STBPower"
@@ -6256,7 +6262,7 @@
   },
   "Subtitle": {
     "name": "Subtitle",
-    "value": 68719480135,
+    "value": 4294970695,
     "names": {
       "web": [
         "Subtitle"
@@ -6265,7 +6271,7 @@
   },
   "Teletext": {
     "name": "Teletext",
-    "value": 68719480136,
+    "value": 4294970696,
     "names": {
       "web": [
         "Teletext"
@@ -6282,7 +6288,7 @@
   },
   "TV": {
     "name": "TV",
-    "value": 68719480137,
+    "value": 4294970697,
     "names": {
       "web": [
         "TV"
@@ -6299,7 +6305,7 @@
   },
   "TVInput": {
     "name": "TVInput",
-    "value": 68719480138,
+    "value": 4294970698,
     "names": {
       "web": [
         "TVInput"
@@ -6316,7 +6322,7 @@
   },
   "TVPower": {
     "name": "TVPower",
-    "value": 68719480139,
+    "value": 4294970699,
     "names": {
       "web": [
         "TVPower"
@@ -6333,7 +6339,7 @@
   },
   "VideoModeNext": {
     "name": "VideoModeNext",
-    "value": 68719480140,
+    "value": 4294970700,
     "names": {
       "web": [
         "VideoModeNext"
@@ -6342,7 +6348,7 @@
   },
   "Wink": {
     "name": "Wink",
-    "value": 68719480141,
+    "value": 4294970701,
     "names": {
       "web": [
         "Wink"
@@ -6351,7 +6357,7 @@
   },
   "ZoomToggle": {
     "name": "ZoomToggle",
-    "value": 68719480142,
+    "value": 4294970702,
     "names": {
       "web": [
         "ZoomToggle"
@@ -6365,13 +6371,13 @@
         255
       ],
       "fuchsia": [
-        4295754290
+        77310198322
       ]
     }
   },
   "DVR": {
     "name": "DVR",
-    "value": 68719480143,
+    "value": 4294970703,
     "names": {
       "web": [
         "DVR"
@@ -6388,7 +6394,7 @@
   },
   "MediaAudioTrack": {
     "name": "MediaAudioTrack",
-    "value": 68719480144,
+    "value": 4294970704,
     "names": {
       "web": [
         "MediaAudioTrack"
@@ -6405,7 +6411,7 @@
   },
   "MediaSkipBackward": {
     "name": "MediaSkipBackward",
-    "value": 68719480145,
+    "value": 4294970705,
     "names": {
       "web": [
         "MediaSkipBackward"
@@ -6422,7 +6428,7 @@
   },
   "MediaSkipForward": {
     "name": "MediaSkipForward",
-    "value": 68719480146,
+    "value": 4294970706,
     "names": {
       "web": [
         "MediaSkipForward"
@@ -6439,7 +6445,7 @@
   },
   "MediaStepBackward": {
     "name": "MediaStepBackward",
-    "value": 68719480147,
+    "value": 4294970707,
     "names": {
       "web": [
         "MediaStepBackward"
@@ -6456,7 +6462,7 @@
   },
   "MediaStepForward": {
     "name": "MediaStepForward",
-    "value": 68719480148,
+    "value": 4294970708,
     "names": {
       "web": [
         "MediaStepForward"
@@ -6473,7 +6479,7 @@
   },
   "MediaTopMenu": {
     "name": "MediaTopMenu",
-    "value": 68719480149,
+    "value": 4294970709,
     "names": {
       "web": [
         "MediaTopMenu"
@@ -6490,7 +6496,7 @@
   },
   "NavigateIn": {
     "name": "NavigateIn",
-    "value": 68719480150,
+    "value": 4294970710,
     "names": {
       "web": [
         "NavigateIn"
@@ -6507,7 +6513,7 @@
   },
   "NavigateNext": {
     "name": "NavigateNext",
-    "value": 68719480151,
+    "value": 4294970711,
     "names": {
       "web": [
         "NavigateNext"
@@ -6524,7 +6530,7 @@
   },
   "NavigateOut": {
     "name": "NavigateOut",
-    "value": 68719480152,
+    "value": 4294970712,
     "names": {
       "web": [
         "NavigateOut"
@@ -6541,7 +6547,7 @@
   },
   "NavigatePrevious": {
     "name": "NavigatePrevious",
-    "value": 68719480153,
+    "value": 4294970713,
     "names": {
       "web": [
         "NavigatePrevious"
@@ -6558,7 +6564,7 @@
   },
   "Pairing": {
     "name": "Pairing",
-    "value": 68719480154,
+    "value": 4294970714,
     "names": {
       "web": [
         "Pairing"
@@ -6575,7 +6581,7 @@
   },
   "MediaClose": {
     "name": "MediaClose",
-    "value": 68719480155,
+    "value": 4294970715,
     "names": {
       "web": [
         "MediaClose"
@@ -6584,7 +6590,7 @@
   },
   "AudioBassBoostToggle": {
     "name": "AudioBassBoostToggle",
-    "value": 68719480322,
+    "value": 4294970882,
     "names": {
       "web": [
         "AudioBassBoostToggle"
@@ -6593,7 +6599,7 @@
   },
   "AudioTrebleDown": {
     "name": "AudioTrebleDown",
-    "value": 68719480324,
+    "value": 4294970884,
     "names": {
       "web": [
         "AudioTrebleDown"
@@ -6602,7 +6608,7 @@
   },
   "AudioTrebleUp": {
     "name": "AudioTrebleUp",
-    "value": 68719480325,
+    "value": 4294970885,
     "names": {
       "web": [
         "AudioTrebleUp"
@@ -6611,7 +6617,7 @@
   },
   "MicrophoneToggle": {
     "name": "MicrophoneToggle",
-    "value": 68719480326,
+    "value": 4294970886,
     "names": {
       "web": [
         "MicrophoneToggle"
@@ -6620,7 +6626,7 @@
   },
   "MicrophoneVolumeDown": {
     "name": "MicrophoneVolumeDown",
-    "value": 68719480327,
+    "value": 4294970887,
     "names": {
       "web": [
         "MicrophoneVolumeDown"
@@ -6629,7 +6635,7 @@
   },
   "MicrophoneVolumeUp": {
     "name": "MicrophoneVolumeUp",
-    "value": 68719480328,
+    "value": 4294970888,
     "names": {
       "web": [
         "MicrophoneVolumeUp"
@@ -6638,7 +6644,7 @@
   },
   "MicrophoneVolumeMute": {
     "name": "MicrophoneVolumeMute",
-    "value": 68719480329,
+    "value": 4294970889,
     "names": {
       "web": [
         "MicrophoneVolumeMute"
@@ -6655,7 +6661,7 @@
   },
   "SpeechCorrectionList": {
     "name": "SpeechCorrectionList",
-    "value": 68719480577,
+    "value": 4294971137,
     "names": {
       "web": [
         "SpeechCorrectionList"
@@ -6664,7 +6670,7 @@
   },
   "SpeechInputToggle": {
     "name": "SpeechInputToggle",
-    "value": 68719480578,
+    "value": 4294971138,
     "names": {
       "web": [
         "SpeechInputToggle"
@@ -6672,13 +6678,13 @@
     },
     "values": {
       "fuchsia": [
-        4295753935
+        77310197967
       ]
     }
   },
   "AppSwitch": {
     "name": "AppSwitch",
-    "value": 68719480833,
+    "value": 4294971393,
     "names": {
       "web": [
         "AppSwitch"
@@ -6695,7 +6701,7 @@
   },
   "Call": {
     "name": "Call",
-    "value": 68719480834,
+    "value": 4294971394,
     "names": {
       "web": [
         "Call"
@@ -6712,7 +6718,7 @@
   },
   "CameraFocus": {
     "name": "CameraFocus",
-    "value": 68719480835,
+    "value": 4294971395,
     "names": {
       "web": [
         "CameraFocus"
@@ -6729,7 +6735,7 @@
   },
   "EndCall": {
     "name": "EndCall",
-    "value": 68719480836,
+    "value": 4294971396,
     "names": {
       "web": [
         "EndCall"
@@ -6746,7 +6752,7 @@
   },
   "GoBack": {
     "name": "GoBack",
-    "value": 68719480837,
+    "value": 4294971397,
     "names": {
       "web": [
         "GoBack"
@@ -6763,7 +6769,7 @@
   },
   "GoHome": {
     "name": "GoHome",
-    "value": 68719480838,
+    "value": 4294971398,
     "names": {
       "web": [
         "GoHome"
@@ -6780,7 +6786,7 @@
   },
   "HeadsetHook": {
     "name": "HeadsetHook",
-    "value": 68719480839,
+    "value": 4294971399,
     "names": {
       "web": [
         "HeadsetHook"
@@ -6797,7 +6803,7 @@
   },
   "LastNumberRedial": {
     "name": "LastNumberRedial",
-    "value": 68719480840,
+    "value": 4294971400,
     "names": {
       "web": [
         "LastNumberRedial"
@@ -6806,7 +6812,7 @@
   },
   "Notification": {
     "name": "Notification",
-    "value": 68719480841,
+    "value": 4294971401,
     "names": {
       "web": [
         "Notification"
@@ -6823,7 +6829,7 @@
   },
   "MannerMode": {
     "name": "MannerMode",
-    "value": 68719480842,
+    "value": 4294971402,
     "names": {
       "web": [
         "MannerMode"
@@ -6840,7 +6846,7 @@
   },
   "VoiceDial": {
     "name": "VoiceDial",
-    "value": 68719480843,
+    "value": 4294971403,
     "names": {
       "web": [
         "VoiceDial"
@@ -6849,7 +6855,7 @@
   },
   "TV3DMode": {
     "name": "TV3DMode",
-    "value": 68719481089,
+    "value": 4294971649,
     "names": {
       "web": [
         "TV3DMode"
@@ -6866,7 +6872,7 @@
   },
   "TVAntennaCable": {
     "name": "TVAntennaCable",
-    "value": 68719481090,
+    "value": 4294971650,
     "names": {
       "web": [
         "TVAntennaCable"
@@ -6883,7 +6889,7 @@
   },
   "TVAudioDescription": {
     "name": "TVAudioDescription",
-    "value": 68719481091,
+    "value": 4294971651,
     "names": {
       "web": [
         "TVAudioDescription"
@@ -6900,7 +6906,7 @@
   },
   "TVAudioDescriptionMixDown": {
     "name": "TVAudioDescriptionMixDown",
-    "value": 68719481092,
+    "value": 4294971652,
     "names": {
       "web": [
         "TVAudioDescriptionMixDown"
@@ -6917,7 +6923,7 @@
   },
   "TVAudioDescriptionMixUp": {
     "name": "TVAudioDescriptionMixUp",
-    "value": 68719481093,
+    "value": 4294971653,
     "names": {
       "web": [
         "TVAudioDescriptionMixUp"
@@ -6934,7 +6940,7 @@
   },
   "TVContentsMenu": {
     "name": "TVContentsMenu",
-    "value": 68719481094,
+    "value": 4294971654,
     "names": {
       "web": [
         "TVContentsMenu"
@@ -6951,7 +6957,7 @@
   },
   "TVDataService": {
     "name": "TVDataService",
-    "value": 68719481095,
+    "value": 4294971655,
     "names": {
       "web": [
         "TVDataService"
@@ -6968,7 +6974,7 @@
   },
   "TVInputComponent1": {
     "name": "TVInputComponent1",
-    "value": 68719481096,
+    "value": 4294971656,
     "names": {
       "web": [
         "TVInputComponent1"
@@ -6985,7 +6991,7 @@
   },
   "TVInputComponent2": {
     "name": "TVInputComponent2",
-    "value": 68719481097,
+    "value": 4294971657,
     "names": {
       "web": [
         "TVInputComponent2"
@@ -7002,7 +7008,7 @@
   },
   "TVInputComposite1": {
     "name": "TVInputComposite1",
-    "value": 68719481098,
+    "value": 4294971658,
     "names": {
       "web": [
         "TVInputComposite1"
@@ -7019,7 +7025,7 @@
   },
   "TVInputComposite2": {
     "name": "TVInputComposite2",
-    "value": 68719481099,
+    "value": 4294971659,
     "names": {
       "web": [
         "TVInputComposite2"
@@ -7036,7 +7042,7 @@
   },
   "TVInputHDMI1": {
     "name": "TVInputHDMI1",
-    "value": 68719481100,
+    "value": 4294971660,
     "names": {
       "web": [
         "TVInputHDMI1"
@@ -7053,7 +7059,7 @@
   },
   "TVInputHDMI2": {
     "name": "TVInputHDMI2",
-    "value": 68719481101,
+    "value": 4294971661,
     "names": {
       "web": [
         "TVInputHDMI2"
@@ -7070,7 +7076,7 @@
   },
   "TVInputHDMI3": {
     "name": "TVInputHDMI3",
-    "value": 68719481102,
+    "value": 4294971662,
     "names": {
       "web": [
         "TVInputHDMI3"
@@ -7087,7 +7093,7 @@
   },
   "TVInputHDMI4": {
     "name": "TVInputHDMI4",
-    "value": 68719481103,
+    "value": 4294971663,
     "names": {
       "web": [
         "TVInputHDMI4"
@@ -7104,7 +7110,7 @@
   },
   "TVInputVGA1": {
     "name": "TVInputVGA1",
-    "value": 68719481104,
+    "value": 4294971664,
     "names": {
       "web": [
         "TVInputVGA1"
@@ -7121,7 +7127,7 @@
   },
   "TVMediaContext": {
     "name": "TVMediaContext",
-    "value": 68719481105,
+    "value": 4294971665,
     "names": {
       "web": [
         "TVMediaContext"
@@ -7130,7 +7136,7 @@
   },
   "TVNetwork": {
     "name": "TVNetwork",
-    "value": 68719481106,
+    "value": 4294971666,
     "names": {
       "web": [
         "TVNetwork"
@@ -7147,7 +7153,7 @@
   },
   "TVNumberEntry": {
     "name": "TVNumberEntry",
-    "value": 68719481107,
+    "value": 4294971667,
     "names": {
       "web": [
         "TVNumberEntry"
@@ -7164,7 +7170,7 @@
   },
   "TVRadioService": {
     "name": "TVRadioService",
-    "value": 68719481108,
+    "value": 4294971668,
     "names": {
       "web": [
         "TVRadioService"
@@ -7181,7 +7187,7 @@
   },
   "TVSatellite": {
     "name": "TVSatellite",
-    "value": 68719481109,
+    "value": 4294971669,
     "names": {
       "web": [
         "TVSatellite"
@@ -7198,7 +7204,7 @@
   },
   "TVSatelliteBS": {
     "name": "TVSatelliteBS",
-    "value": 68719481110,
+    "value": 4294971670,
     "names": {
       "web": [
         "TVSatelliteBS"
@@ -7215,7 +7221,7 @@
   },
   "TVSatelliteCS": {
     "name": "TVSatelliteCS",
-    "value": 68719481111,
+    "value": 4294971671,
     "names": {
       "web": [
         "TVSatelliteCS"
@@ -7232,7 +7238,7 @@
   },
   "TVSatelliteToggle": {
     "name": "TVSatelliteToggle",
-    "value": 68719481112,
+    "value": 4294971672,
     "names": {
       "web": [
         "TVSatelliteToggle"
@@ -7249,7 +7255,7 @@
   },
   "TVTerrestrialAnalog": {
     "name": "TVTerrestrialAnalog",
-    "value": 68719481113,
+    "value": 4294971673,
     "names": {
       "web": [
         "TVTerrestrialAnalog"
@@ -7266,7 +7272,7 @@
   },
   "TVTerrestrialDigital": {
     "name": "TVTerrestrialDigital",
-    "value": 68719481114,
+    "value": 4294971674,
     "names": {
       "web": [
         "TVTerrestrialDigital"
@@ -7283,7 +7289,7 @@
   },
   "TVTimer": {
     "name": "TVTimer",
-    "value": 68719481115,
+    "value": 4294971675,
     "names": {
       "web": [
         "TVTimer"
@@ -7300,7 +7306,7 @@
   },
   "Key11": {
     "name": "Key11",
-    "value": 68719481345,
+    "value": 4294971905,
     "names": {
       "web": [
         "Key11"
@@ -7309,690 +7315,16 @@
   },
   "Key12": {
     "name": "Key12",
-    "value": 68719481346,
+    "value": 4294971906,
     "names": {
       "web": [
         "Key12"
       ]
     }
   },
-  "GameButton1": {
-    "name": "GameButton1",
-    "value": 68719869697,
-    "names": {
-      "web": [
-        "GameButton1"
-      ],
-      "android": [
-        "BUTTON_1"
-      ]
-    },
-    "values": {
-      "android": [
-        188
-      ],
-      "fuchsia": [
-        4295360257
-      ]
-    }
-  },
-  "GameButton2": {
-    "name": "GameButton2",
-    "value": 68719869698,
-    "names": {
-      "web": [
-        "GameButton2"
-      ],
-      "android": [
-        "BUTTON_2"
-      ]
-    },
-    "values": {
-      "android": [
-        189
-      ],
-      "fuchsia": [
-        4295360258
-      ]
-    }
-  },
-  "GameButton3": {
-    "name": "GameButton3",
-    "value": 68719869699,
-    "names": {
-      "web": [
-        "GameButton3"
-      ],
-      "android": [
-        "BUTTON_3"
-      ]
-    },
-    "values": {
-      "android": [
-        190
-      ],
-      "fuchsia": [
-        4295360259
-      ]
-    }
-  },
-  "GameButton4": {
-    "name": "GameButton4",
-    "value": 68719869700,
-    "names": {
-      "web": [
-        "GameButton4"
-      ],
-      "android": [
-        "BUTTON_4"
-      ]
-    },
-    "values": {
-      "android": [
-        191
-      ],
-      "fuchsia": [
-        4295360260
-      ]
-    }
-  },
-  "GameButton5": {
-    "name": "GameButton5",
-    "value": 68719869701,
-    "names": {
-      "web": [
-        "GameButton5"
-      ],
-      "android": [
-        "BUTTON_5"
-      ]
-    },
-    "values": {
-      "android": [
-        192
-      ],
-      "fuchsia": [
-        4295360261
-      ]
-    }
-  },
-  "GameButton6": {
-    "name": "GameButton6",
-    "value": 68719869702,
-    "names": {
-      "web": [
-        "GameButton6"
-      ],
-      "android": [
-        "BUTTON_6"
-      ]
-    },
-    "values": {
-      "android": [
-        193
-      ],
-      "fuchsia": [
-        4295360262
-      ]
-    }
-  },
-  "GameButton7": {
-    "name": "GameButton7",
-    "value": 68719869703,
-    "names": {
-      "web": [
-        "GameButton7"
-      ],
-      "android": [
-        "BUTTON_7"
-      ]
-    },
-    "values": {
-      "android": [
-        194
-      ],
-      "fuchsia": [
-        4295360263
-      ]
-    }
-  },
-  "GameButton8": {
-    "name": "GameButton8",
-    "value": 68719869704,
-    "names": {
-      "web": [
-        "GameButton8"
-      ],
-      "windows": [
-        "GAMEPAD_A"
-      ],
-      "android": [
-        "BUTTON_8"
-      ]
-    },
-    "values": {
-      "windows": [
-        195
-      ],
-      "android": [
-        195
-      ],
-      "fuchsia": [
-        4295360264
-      ]
-    }
-  },
-  "GameButton9": {
-    "name": "GameButton9",
-    "value": 68719869705,
-    "names": {
-      "web": [
-        "GameButton9"
-      ],
-      "windows": [
-        "GAMEPAD_B"
-      ],
-      "android": [
-        "BUTTON_9"
-      ]
-    },
-    "values": {
-      "windows": [
-        196
-      ],
-      "android": [
-        196
-      ],
-      "fuchsia": [
-        4295360265
-      ]
-    }
-  },
-  "GameButton10": {
-    "name": "GameButton10",
-    "value": 68719869706,
-    "names": {
-      "web": [
-        "GameButton10"
-      ],
-      "windows": [
-        "GAMEPAD_X"
-      ],
-      "android": [
-        "BUTTON_10"
-      ]
-    },
-    "values": {
-      "windows": [
-        197
-      ],
-      "android": [
-        197
-      ],
-      "fuchsia": [
-        4295360266
-      ]
-    }
-  },
-  "GameButton11": {
-    "name": "GameButton11",
-    "value": 68719869707,
-    "names": {
-      "web": [
-        "GameButton11"
-      ],
-      "windows": [
-        "GAMEPAD_Y"
-      ],
-      "android": [
-        "BUTTON_11"
-      ]
-    },
-    "values": {
-      "windows": [
-        198
-      ],
-      "android": [
-        198
-      ],
-      "fuchsia": [
-        4295360267
-      ]
-    }
-  },
-  "GameButton12": {
-    "name": "GameButton12",
-    "value": 68719869708,
-    "names": {
-      "web": [
-        "GameButton12"
-      ],
-      "windows": [
-        "GAMEPAD_RIGHT_SHOULDER"
-      ],
-      "android": [
-        "BUTTON_12"
-      ]
-    },
-    "values": {
-      "windows": [
-        199
-      ],
-      "android": [
-        199
-      ],
-      "fuchsia": [
-        4295360268
-      ]
-    }
-  },
-  "GameButton13": {
-    "name": "GameButton13",
-    "value": 68719869709,
-    "names": {
-      "web": [
-        "GameButton13"
-      ],
-      "windows": [
-        "GAMEPAD_LEFT_SHOULDER"
-      ],
-      "android": [
-        "BUTTON_13"
-      ]
-    },
-    "values": {
-      "windows": [
-        200
-      ],
-      "android": [
-        200
-      ],
-      "fuchsia": [
-        4295360269
-      ]
-    }
-  },
-  "GameButton14": {
-    "name": "GameButton14",
-    "value": 68719869710,
-    "names": {
-      "web": [
-        "GameButton14"
-      ],
-      "windows": [
-        "GAMEPAD_LEFT_TRIGGER"
-      ],
-      "android": [
-        "BUTTON_14"
-      ]
-    },
-    "values": {
-      "windows": [
-        201
-      ],
-      "android": [
-        201
-      ],
-      "fuchsia": [
-        4295360270
-      ]
-    }
-  },
-  "GameButton15": {
-    "name": "GameButton15",
-    "value": 68719869711,
-    "names": {
-      "web": [
-        "GameButton15"
-      ],
-      "windows": [
-        "GAMEPAD_RIGHT_TRIGGER"
-      ],
-      "android": [
-        "BUTTON_15"
-      ]
-    },
-    "values": {
-      "windows": [
-        202
-      ],
-      "android": [
-        202
-      ],
-      "fuchsia": [
-        4295360271
-      ]
-    }
-  },
-  "GameButton16": {
-    "name": "GameButton16",
-    "value": 68719869712,
-    "names": {
-      "web": [
-        "GameButton16"
-      ],
-      "windows": [
-        "GAMEPAD_DPAD_UP"
-      ],
-      "android": [
-        "BUTTON_16"
-      ]
-    },
-    "values": {
-      "windows": [
-        203
-      ],
-      "android": [
-        203
-      ],
-      "fuchsia": [
-        4295360272
-      ]
-    }
-  },
-  "GameButtonA": {
-    "name": "GameButtonA",
-    "value": 68719869713,
-    "names": {
-      "web": [
-        "GameButtonA"
-      ],
-      "android": [
-        "BUTTON_A"
-      ]
-    },
-    "values": {
-      "android": [
-        96
-      ],
-      "fuchsia": [
-        4295360273
-      ]
-    }
-  },
-  "GameButtonB": {
-    "name": "GameButtonB",
-    "value": 68719869714,
-    "names": {
-      "web": [
-        "GameButtonB"
-      ],
-      "android": [
-        "BUTTON_B"
-      ]
-    },
-    "values": {
-      "android": [
-        97
-      ],
-      "fuchsia": [
-        4295360274
-      ]
-    }
-  },
-  "GameButtonC": {
-    "name": "GameButtonC",
-    "value": 68719869715,
-    "names": {
-      "web": [
-        "GameButtonC"
-      ],
-      "android": [
-        "BUTTON_C"
-      ]
-    },
-    "values": {
-      "android": [
-        98
-      ],
-      "fuchsia": [
-        4295360275
-      ]
-    }
-  },
-  "GameButtonLeft1": {
-    "name": "GameButtonLeft1",
-    "value": 68719869716,
-    "names": {
-      "web": [
-        "GameButtonLeft1"
-      ],
-      "android": [
-        "BUTTON_L1"
-      ]
-    },
-    "values": {
-      "android": [
-        102
-      ],
-      "fuchsia": [
-        4295360276
-      ]
-    }
-  },
-  "GameButtonLeft2": {
-    "name": "GameButtonLeft2",
-    "value": 68719869717,
-    "names": {
-      "web": [
-        "GameButtonLeft2"
-      ],
-      "android": [
-        "BUTTON_L2"
-      ]
-    },
-    "values": {
-      "android": [
-        104
-      ],
-      "fuchsia": [
-        4295360277
-      ]
-    }
-  },
-  "GameButtonMode": {
-    "name": "GameButtonMode",
-    "value": 68719869718,
-    "names": {
-      "web": [
-        "GameButtonMode"
-      ],
-      "android": [
-        "BUTTON_MODE"
-      ]
-    },
-    "values": {
-      "android": [
-        110
-      ],
-      "fuchsia": [
-        4295360278
-      ]
-    }
-  },
-  "GameButtonRight1": {
-    "name": "GameButtonRight1",
-    "value": 68719869719,
-    "names": {
-      "web": [
-        "GameButtonRight1"
-      ],
-      "android": [
-        "BUTTON_R1"
-      ]
-    },
-    "values": {
-      "android": [
-        103
-      ],
-      "fuchsia": [
-        4295360279
-      ]
-    }
-  },
-  "GameButtonRight2": {
-    "name": "GameButtonRight2",
-    "value": 68719869720,
-    "names": {
-      "web": [
-        "GameButtonRight2"
-      ],
-      "android": [
-        "BUTTON_R2"
-      ]
-    },
-    "values": {
-      "android": [
-        105
-      ],
-      "fuchsia": [
-        4295360280
-      ]
-    }
-  },
-  "GameButtonSelect": {
-    "name": "GameButtonSelect",
-    "value": 68719869721,
-    "names": {
-      "web": [
-        "GameButtonSelect"
-      ],
-      "android": [
-        "BUTTON_SELECT"
-      ]
-    },
-    "values": {
-      "android": [
-        109
-      ],
-      "fuchsia": [
-        4295360281
-      ]
-    }
-  },
-  "GameButtonStart": {
-    "name": "GameButtonStart",
-    "value": 68719869722,
-    "names": {
-      "web": [
-        "GameButtonStart"
-      ],
-      "android": [
-        "BUTTON_START"
-      ]
-    },
-    "values": {
-      "android": [
-        108
-      ],
-      "fuchsia": [
-        4295360282
-      ]
-    }
-  },
-  "GameButtonThumbLeft": {
-    "name": "GameButtonThumbLeft",
-    "value": 68719869723,
-    "names": {
-      "web": [
-        "GameButtonThumbLeft"
-      ],
-      "android": [
-        "BUTTON_THUMBL"
-      ]
-    },
-    "values": {
-      "android": [
-        106
-      ],
-      "fuchsia": [
-        4295360283
-      ]
-    }
-  },
-  "GameButtonThumbRight": {
-    "name": "GameButtonThumbRight",
-    "value": 68719869724,
-    "names": {
-      "web": [
-        "GameButtonThumbRight"
-      ],
-      "android": [
-        "BUTTON_THUMBR"
-      ]
-    },
-    "values": {
-      "android": [
-        107
-      ],
-      "fuchsia": [
-        4295360284
-      ]
-    }
-  },
-  "GameButtonX": {
-    "name": "GameButtonX",
-    "value": 68719869725,
-    "names": {
-      "web": [
-        "GameButtonX"
-      ],
-      "android": [
-        "BUTTON_X"
-      ]
-    },
-    "values": {
-      "android": [
-        99
-      ],
-      "fuchsia": [
-        4295360285
-      ]
-    }
-  },
-  "GameButtonY": {
-    "name": "GameButtonY",
-    "value": 68719869726,
-    "names": {
-      "web": [
-        "GameButtonY"
-      ],
-      "android": [
-        "BUTTON_Y"
-      ]
-    },
-    "values": {
-      "android": [
-        100
-      ],
-      "fuchsia": [
-        4295360286
-      ]
-    }
-  },
-  "GameButtonZ": {
-    "name": "GameButtonZ",
-    "value": 68719869727,
-    "names": {
-      "web": [
-        "GameButtonZ"
-      ],
-      "android": [
-        "BUTTON_Z"
-      ]
-    },
-    "values": {
-      "android": [
-        101
-      ],
-      "fuchsia": [
-        4295360287
-      ]
-    }
-  },
   "Suspend": {
     "name": "Suspend",
-    "value": 73014444052,
+    "value": 8589934592,
     "names": {
       "web": [
         "Suspend"
@@ -8006,13 +7338,13 @@
         269025191
       ],
       "fuchsia": [
-        4294967316
+        77309411348
       ]
     }
   },
   "Resume": {
     "name": "Resume",
-    "value": 73014444053,
+    "value": 8589934593,
     "names": {
       "web": [
         "Resume"
@@ -8020,13 +7352,13 @@
     },
     "values": {
       "fuchsia": [
-        4294967317
+        77309411349
       ]
     }
   },
   "Sleep": {
     "name": "Sleep",
-    "value": 73014509698,
+    "value": 8589934594,
     "names": {
       "web": [
         "Sleep"
@@ -8052,13 +7384,145 @@
         223
       ],
       "fuchsia": [
-        4295032962
+        77309476994
+      ]
+    }
+  },
+  "Abort": {
+    "name": "Abort",
+    "value": 8589934595,
+    "names": {
+      "web": [
+        "Abort"
+      ]
+    },
+    "values": {
+      "fuchsia": [
+        77309870235
+      ]
+    }
+  },
+  "Lang1": {
+    "name": "Lang1",
+    "value": 8589934608,
+    "names": {
+      "web": [
+        "Lang1"
+      ],
+      "macos": [
+        "Lang1"
+      ],
+      "ios": [
+        "Lang1"
+      ],
+      "windows": [
+        "KANA, HANGEUL, HANGUL"
+      ]
+    },
+    "values": {
+      "macos": [
+        104
+      ],
+      "ios": [
+        144
+      ],
+      "windows": [
+        21
+      ],
+      "fuchsia": [
+        77309870224
+      ]
+    }
+  },
+  "Lang2": {
+    "name": "Lang2",
+    "value": 8589934609,
+    "names": {
+      "web": [
+        "Lang2"
+      ],
+      "macos": [
+        "Lang2"
+      ],
+      "ios": [
+        "Lang2"
+      ]
+    },
+    "values": {
+      "macos": [
+        102
+      ],
+      "ios": [
+        145
+      ],
+      "fuchsia": [
+        77309870225
+      ]
+    }
+  },
+  "Lang3": {
+    "name": "Lang3",
+    "value": 8589934610,
+    "names": {
+      "web": [
+        "Lang3"
+      ],
+      "ios": [
+        "Lang3"
+      ]
+    },
+    "values": {
+      "ios": [
+        146
+      ],
+      "fuchsia": [
+        77309870226
+      ]
+    }
+  },
+  "Lang4": {
+    "name": "Lang4",
+    "value": 8589934611,
+    "names": {
+      "web": [
+        "Lang4"
+      ],
+      "ios": [
+        "Lang4"
+      ]
+    },
+    "values": {
+      "ios": [
+        147
+      ],
+      "fuchsia": [
+        77309870227
+      ]
+    }
+  },
+  "Lang5": {
+    "name": "Lang5",
+    "value": 8589934612,
+    "names": {
+      "web": [
+        "Lang5"
+      ],
+      "ios": [
+        "Lang5"
+      ]
+    },
+    "values": {
+      "ios": [
+        148
+      ],
+      "fuchsia": [
+        77309870228
       ]
     }
   },
   "IntlBackslash": {
     "name": "IntlBackslash",
-    "value": 73014902884,
+    "value": 8589934624,
     "names": {
       "web": [
         "IntlBackslash"
@@ -8066,13 +7530,13 @@
     },
     "values": {
       "fuchsia": [
-        4295426148
+        77309870180
       ]
     }
   },
   "IntlRo": {
     "name": "IntlRo",
-    "value": 73014902919,
+    "value": 8589934625,
     "names": {
       "web": [
         "IntlRo"
@@ -8098,13 +7562,13 @@
         217
       ],
       "fuchsia": [
-        4295426183
+        77309870215
       ]
     }
   },
   "IntlYen": {
     "name": "IntlYen",
-    "value": 73014902921,
+    "value": 8589934626,
     "names": {
       "web": [
         "IntlYen"
@@ -8136,189 +7600,13 @@
         216
       ],
       "fuchsia": [
-        4295426185
-      ]
-    }
-  },
-  "Lang1": {
-    "name": "Lang1",
-    "value": 73014902928,
-    "names": {
-      "web": [
-        "Lang1"
-      ],
-      "macos": [
-        "Lang1"
-      ],
-      "ios": [
-        "Lang1"
-      ],
-      "windows": [
-        "KANA, HANGEUL, HANGUL"
-      ]
-    },
-    "values": {
-      "macos": [
-        104
-      ],
-      "ios": [
-        144
-      ],
-      "windows": [
-        21
-      ],
-      "fuchsia": [
-        4295426192
-      ]
-    }
-  },
-  "Lang2": {
-    "name": "Lang2",
-    "value": 73014902929,
-    "names": {
-      "web": [
-        "Lang2"
-      ],
-      "macos": [
-        "Lang2"
-      ],
-      "ios": [
-        "Lang2"
-      ]
-    },
-    "values": {
-      "macos": [
-        102
-      ],
-      "ios": [
-        145
-      ],
-      "fuchsia": [
-        4295426193
-      ]
-    }
-  },
-  "Lang3": {
-    "name": "Lang3",
-    "value": 73014902930,
-    "names": {
-      "web": [
-        "Lang3"
-      ],
-      "ios": [
-        "Lang3"
-      ]
-    },
-    "values": {
-      "ios": [
-        146
-      ],
-      "fuchsia": [
-        4295426194
-      ]
-    }
-  },
-  "Lang4": {
-    "name": "Lang4",
-    "value": 73014902931,
-    "names": {
-      "web": [
-        "Lang4"
-      ],
-      "ios": [
-        "Lang4"
-      ]
-    },
-    "values": {
-      "ios": [
-        147
-      ],
-      "fuchsia": [
-        4295426195
-      ]
-    }
-  },
-  "Lang5": {
-    "name": "Lang5",
-    "value": 73014902932,
-    "names": {
-      "web": [
-        "Lang5"
-      ],
-      "ios": [
-        "Lang5"
-      ]
-    },
-    "values": {
-      "ios": [
-        148
-      ],
-      "fuchsia": [
-        4295426196
-      ]
-    }
-  },
-  "Abort": {
-    "name": "Abort",
-    "value": 73014902939,
-    "names": {
-      "web": [
-        "Abort"
-      ]
-    },
-    "values": {
-      "fuchsia": [
-        4295426203
-      ]
-    }
-  },
-  "AltLeft": {
-    "name": "AltLeft",
-    "value": 3298534883586,
-    "names": {
-      "web": [
-        "AltLeft"
-      ],
-      "macos": [
-        "AltLeft"
-      ],
-      "ios": [
-        "AltLeft"
-      ],
-      "gtk": [
-        "Alt_L"
-      ],
-      "windows": [
-        "LMENU"
-      ],
-      "android": [
-        "ALT_LEFT"
-      ]
-    },
-    "values": {
-      "macos": [
-        58
-      ],
-      "ios": [
-        226
-      ],
-      "gtk": [
-        65513
-      ],
-      "windows": [
-        164
-      ],
-      "android": [
-        57
-      ],
-      "fuchsia": [
-        4295426274
+        77309870217
       ]
     }
   },
   "ControlLeft": {
     "name": "ControlLeft",
-    "value": 3298534883589,
+    "value": 8589934848,
     "names": {
       "web": [
         "ControlLeft"
@@ -8358,57 +7646,57 @@
         113
       ],
       "fuchsia": [
-        4295426272
+        77309870304
       ]
     }
   },
-  "MetaLeft": {
-    "name": "MetaLeft",
-    "value": 3298534883593,
+  "ControlRight": {
+    "name": "ControlRight",
+    "value": 8589934849,
     "names": {
       "web": [
-        "MetaLeft"
+        "ControlRight"
       ],
       "macos": [
-        "MetaLeft"
+        "ControlRight"
       ],
       "ios": [
-        "MetaLeft"
+        "ControlRight"
       ],
       "gtk": [
-        "Meta_L"
+        "Control_R"
       ],
       "windows": [
-        "LWIN"
+        "RCONTROL"
       ],
       "android": [
-        "META_LEFT"
+        "CTRL_RIGHT"
       ]
     },
     "values": {
       "macos": [
-        55
+        62
       ],
       "ios": [
-        227
+        228
       ],
       "gtk": [
-        65511
+        65508
       ],
       "windows": [
-        91
+        163
       ],
       "android": [
-        117
+        114
       ],
       "fuchsia": [
-        4295426275
+        77309870308
       ]
     }
   },
   "ShiftLeft": {
     "name": "ShiftLeft",
-    "value": 3298534883597,
+    "value": 8589934850,
     "names": {
       "web": [
         "ShiftLeft"
@@ -8448,13 +7736,101 @@
         59
       ],
       "fuchsia": [
-        4295426273
+        77309870305
+      ]
+    }
+  },
+  "ShiftRight": {
+    "name": "ShiftRight",
+    "value": 8589934851,
+    "names": {
+      "web": [
+        "ShiftRight"
+      ],
+      "macos": [
+        "ShiftRight"
+      ],
+      "ios": [
+        "ShiftRight"
+      ],
+      "gtk": [
+        "Shift_R"
+      ],
+      "windows": [
+        "RSHIFT"
+      ],
+      "android": [
+        "SHIFT_RIGHT"
+      ]
+    },
+    "values": {
+      "macos": [
+        60
+      ],
+      "ios": [
+        229
+      ],
+      "gtk": [
+        65506
+      ],
+      "windows": [
+        161
+      ],
+      "android": [
+        60
+      ],
+      "fuchsia": [
+        77309870309
+      ]
+    }
+  },
+  "AltLeft": {
+    "name": "AltLeft",
+    "value": 8589934852,
+    "names": {
+      "web": [
+        "AltLeft"
+      ],
+      "macos": [
+        "AltLeft"
+      ],
+      "ios": [
+        "AltLeft"
+      ],
+      "gtk": [
+        "Alt_L"
+      ],
+      "windows": [
+        "LMENU"
+      ],
+      "android": [
+        "ALT_LEFT"
+      ]
+    },
+    "values": {
+      "macos": [
+        58
+      ],
+      "ios": [
+        226
+      ],
+      "gtk": [
+        65513
+      ],
+      "windows": [
+        164
+      ],
+      "android": [
+        57
+      ],
+      "fuchsia": [
+        77309870306
       ]
     }
   },
   "AltRight": {
     "name": "AltRight",
-    "value": 4398046511362,
+    "value": 8589934853,
     "names": {
       "web": [
         "AltRight"
@@ -8494,57 +7870,57 @@
         58
       ],
       "fuchsia": [
-        4295426278
+        77309870310
       ]
     }
   },
-  "ControlRight": {
-    "name": "ControlRight",
-    "value": 4398046511365,
+  "MetaLeft": {
+    "name": "MetaLeft",
+    "value": 8589934854,
     "names": {
       "web": [
-        "ControlRight"
+        "MetaLeft"
       ],
       "macos": [
-        "ControlRight"
+        "MetaLeft"
       ],
       "ios": [
-        "ControlRight"
+        "MetaLeft"
       ],
       "gtk": [
-        "Control_R"
+        "Meta_L"
       ],
       "windows": [
-        "RCONTROL"
+        "LWIN"
       ],
       "android": [
-        "CTRL_RIGHT"
+        "META_LEFT"
       ]
     },
     "values": {
       "macos": [
-        62
+        55
       ],
       "ios": [
-        228
+        227
       ],
       "gtk": [
-        65508
+        65511
       ],
       "windows": [
-        163
+        91
       ],
       "android": [
-        114
+        117
       ],
       "fuchsia": [
-        4295426276
+        77309870307
       ]
     }
   },
   "MetaRight": {
     "name": "MetaRight",
-    "value": 4398046511369,
+    "value": 8589934855,
     "names": {
       "web": [
         "MetaRight"
@@ -8582,57 +7958,49 @@
         118
       ],
       "fuchsia": [
-        4295426279
+        77309870311
       ]
     }
   },
-  "ShiftRight": {
-    "name": "ShiftRight",
-    "value": 4398046511373,
+  "Control": {
+    "name": "Control",
+    "value": 8589935088,
     "names": {
       "web": [
-        "ShiftRight"
-      ],
-      "macos": [
-        "ShiftRight"
-      ],
-      "ios": [
-        "ShiftRight"
-      ],
-      "gtk": [
-        "Shift_R"
-      ],
-      "windows": [
-        "RSHIFT"
-      ],
-      "android": [
-        "SHIFT_RIGHT"
+        "Control"
       ]
-    },
-    "values": {
-      "macos": [
-        60
-      ],
-      "ios": [
-        229
-      ],
-      "gtk": [
-        65506
-      ],
-      "windows": [
-        161
-      ],
-      "android": [
-        60
-      ],
-      "fuchsia": [
-        4295426277
+    }
+  },
+  "Shift": {
+    "name": "Shift",
+    "value": 8589935090,
+    "names": {
+      "web": [
+        "Shift"
+      ]
+    }
+  },
+  "Alt": {
+    "name": "Alt",
+    "value": 8589935092,
+    "names": {
+      "web": [
+        "Alt"
+      ]
+    }
+  },
+  "Meta": {
+    "name": "Meta",
+    "value": 8589935094,
+    "names": {
+      "web": [
+        "Meta"
       ]
     }
   },
   "NumpadEnter": {
     "name": "NumpadEnter",
-    "value": 5497558138893,
+    "value": 8589935117,
     "names": {
       "web": [
         "NumpadEnter"
@@ -8664,13 +8032,13 @@
         160
       ],
       "fuchsia": [
-        4295426136
+        77309870168
       ]
     }
   },
   "NumpadParenLeft": {
     "name": "NumpadParenLeft",
-    "value": 5497558138920,
+    "value": 8589935144,
     "names": {
       "web": [
         "NumpadParenLeft"
@@ -8684,13 +8052,13 @@
         162
       ],
       "fuchsia": [
-        4295426230
+        77309870262
       ]
     }
   },
   "NumpadParenRight": {
     "name": "NumpadParenRight",
-    "value": 5497558138921,
+    "value": 8589935145,
     "names": {
       "web": [
         "NumpadParenRight"
@@ -8704,13 +8072,13 @@
         163
       ],
       "fuchsia": [
-        4295426231
+        77309870263
       ]
     }
   },
   "NumpadMultiply": {
     "name": "NumpadMultiply",
-    "value": 5497558138922,
+    "value": 8589935146,
     "names": {
       "web": [
         "NumpadMultiply"
@@ -8748,13 +8116,13 @@
         155
       ],
       "fuchsia": [
-        4295426133
+        77309870165
       ]
     }
   },
   "NumpadAdd": {
     "name": "NumpadAdd",
-    "value": 5497558138923,
+    "value": 8589935147,
     "names": {
       "web": [
         "NumpadAdd"
@@ -8792,13 +8160,13 @@
         157
       ],
       "fuchsia": [
-        4295426135
+        77309870167
       ]
     }
   },
   "NumpadComma": {
     "name": "NumpadComma",
-    "value": 5497558138924,
+    "value": 8589935148,
     "names": {
       "web": [
         "NumpadComma"
@@ -8808,6 +8176,9 @@
       ],
       "ios": [
         "NumpadComma"
+      ],
+      "windows": [
+        "SEPARATOR"
       ],
       "android": [
         "NUMPAD_COMMA"
@@ -8820,17 +8191,20 @@
       "ios": [
         133
       ],
+      "windows": [
+        108
+      ],
       "android": [
         159
       ],
       "fuchsia": [
-        4295426181
+        77309870213
       ]
     }
   },
   "NumpadSubtract": {
     "name": "NumpadSubtract",
-    "value": 5497558138925,
+    "value": 8589935149,
     "names": {
       "web": [
         "NumpadSubtract"
@@ -8868,13 +8242,13 @@
         156
       ],
       "fuchsia": [
-        4295426134
+        77309870166
       ]
     }
   },
   "NumpadDecimal": {
     "name": "NumpadDecimal",
-    "value": 5497558138926,
+    "value": 8589935150,
     "names": {
       "web": [
         "NumpadDecimal"
@@ -8912,13 +8286,13 @@
         158
       ],
       "fuchsia": [
-        4295426147
+        77309870179
       ]
     }
   },
   "NumpadDivide": {
     "name": "NumpadDivide",
-    "value": 5497558138927,
+    "value": 8589935151,
     "names": {
       "web": [
         "NumpadDivide"
@@ -8956,13 +8330,13 @@
         154
       ],
       "fuchsia": [
-        4295426132
+        77309870164
       ]
     }
   },
   "Numpad0": {
     "name": "Numpad0",
-    "value": 5497558138928,
+    "value": 8589935152,
     "names": {
       "web": [
         "Numpad0"
@@ -9002,13 +8376,13 @@
         144
       ],
       "fuchsia": [
-        4295426146
+        77309870178
       ]
     }
   },
   "Numpad1": {
     "name": "Numpad1",
-    "value": 5497558138929,
+    "value": 8589935153,
     "names": {
       "web": [
         "Numpad1"
@@ -9048,13 +8422,13 @@
         145
       ],
       "fuchsia": [
-        4295426137
+        77309870169
       ]
     }
   },
   "Numpad2": {
     "name": "Numpad2",
-    "value": 5497558138930,
+    "value": 8589935154,
     "names": {
       "web": [
         "Numpad2"
@@ -9094,13 +8468,13 @@
         146
       ],
       "fuchsia": [
-        4295426138
+        77309870170
       ]
     }
   },
   "Numpad3": {
     "name": "Numpad3",
-    "value": 5497558138931,
+    "value": 8589935155,
     "names": {
       "web": [
         "Numpad3"
@@ -9140,13 +8514,13 @@
         147
       ],
       "fuchsia": [
-        4295426139
+        77309870171
       ]
     }
   },
   "Numpad4": {
     "name": "Numpad4",
-    "value": 5497558138932,
+    "value": 8589935156,
     "names": {
       "web": [
         "Numpad4"
@@ -9186,13 +8560,13 @@
         148
       ],
       "fuchsia": [
-        4295426140
+        77309870172
       ]
     }
   },
   "Numpad5": {
     "name": "Numpad5",
-    "value": 5497558138933,
+    "value": 8589935157,
     "names": {
       "web": [
         "Numpad5"
@@ -9230,13 +8604,13 @@
         149
       ],
       "fuchsia": [
-        4295426141
+        77309870173
       ]
     }
   },
   "Numpad6": {
     "name": "Numpad6",
-    "value": 5497558138934,
+    "value": 8589935158,
     "names": {
       "web": [
         "Numpad6"
@@ -9276,13 +8650,13 @@
         150
       ],
       "fuchsia": [
-        4295426142
+        77309870174
       ]
     }
   },
   "Numpad7": {
     "name": "Numpad7",
-    "value": 5497558138935,
+    "value": 8589935159,
     "names": {
       "web": [
         "Numpad7"
@@ -9322,13 +8696,13 @@
         151
       ],
       "fuchsia": [
-        4295426143
+        77309870175
       ]
     }
   },
   "Numpad8": {
     "name": "Numpad8",
-    "value": 5497558138936,
+    "value": 8589935160,
     "names": {
       "web": [
         "Numpad8"
@@ -9368,13 +8742,13 @@
         152
       ],
       "fuchsia": [
-        4295426144
+        77309870176
       ]
     }
   },
   "Numpad9": {
     "name": "Numpad9",
-    "value": 5497558138937,
+    "value": 8589935161,
     "names": {
       "web": [
         "Numpad9"
@@ -9414,13 +8788,13 @@
         153
       ],
       "fuchsia": [
-        4295426145
+        77309870177
       ]
     }
   },
   "NumpadEqual": {
     "name": "NumpadEqual",
-    "value": 5497558138941,
+    "value": 8589935165,
     "names": {
       "web": [
         "NumpadEqual"
@@ -9458,7 +8832,681 @@
         161
       ],
       "fuchsia": [
-        4295426151
+        77309870183
+      ]
+    }
+  },
+  "GameButton1": {
+    "name": "GameButton1",
+    "value": 8589935361,
+    "names": {
+      "web": [
+        "GameButton1"
+      ],
+      "android": [
+        "BUTTON_1"
+      ]
+    },
+    "values": {
+      "android": [
+        188
+      ],
+      "fuchsia": [
+        77309804289
+      ]
+    }
+  },
+  "GameButton2": {
+    "name": "GameButton2",
+    "value": 8589935362,
+    "names": {
+      "web": [
+        "GameButton2"
+      ],
+      "android": [
+        "BUTTON_2"
+      ]
+    },
+    "values": {
+      "android": [
+        189
+      ],
+      "fuchsia": [
+        77309804290
+      ]
+    }
+  },
+  "GameButton3": {
+    "name": "GameButton3",
+    "value": 8589935363,
+    "names": {
+      "web": [
+        "GameButton3"
+      ],
+      "android": [
+        "BUTTON_3"
+      ]
+    },
+    "values": {
+      "android": [
+        190
+      ],
+      "fuchsia": [
+        77309804291
+      ]
+    }
+  },
+  "GameButton4": {
+    "name": "GameButton4",
+    "value": 8589935364,
+    "names": {
+      "web": [
+        "GameButton4"
+      ],
+      "android": [
+        "BUTTON_4"
+      ]
+    },
+    "values": {
+      "android": [
+        191
+      ],
+      "fuchsia": [
+        77309804292
+      ]
+    }
+  },
+  "GameButton5": {
+    "name": "GameButton5",
+    "value": 8589935365,
+    "names": {
+      "web": [
+        "GameButton5"
+      ],
+      "android": [
+        "BUTTON_5"
+      ]
+    },
+    "values": {
+      "android": [
+        192
+      ],
+      "fuchsia": [
+        77309804293
+      ]
+    }
+  },
+  "GameButton6": {
+    "name": "GameButton6",
+    "value": 8589935366,
+    "names": {
+      "web": [
+        "GameButton6"
+      ],
+      "android": [
+        "BUTTON_6"
+      ]
+    },
+    "values": {
+      "android": [
+        193
+      ],
+      "fuchsia": [
+        77309804294
+      ]
+    }
+  },
+  "GameButton7": {
+    "name": "GameButton7",
+    "value": 8589935367,
+    "names": {
+      "web": [
+        "GameButton7"
+      ],
+      "android": [
+        "BUTTON_7"
+      ]
+    },
+    "values": {
+      "android": [
+        194
+      ],
+      "fuchsia": [
+        77309804295
+      ]
+    }
+  },
+  "GameButton8": {
+    "name": "GameButton8",
+    "value": 8589935368,
+    "names": {
+      "web": [
+        "GameButton8"
+      ],
+      "windows": [
+        "GAMEPAD_A"
+      ],
+      "android": [
+        "BUTTON_8"
+      ]
+    },
+    "values": {
+      "windows": [
+        195
+      ],
+      "android": [
+        195
+      ],
+      "fuchsia": [
+        77309804296
+      ]
+    }
+  },
+  "GameButton9": {
+    "name": "GameButton9",
+    "value": 8589935369,
+    "names": {
+      "web": [
+        "GameButton9"
+      ],
+      "windows": [
+        "GAMEPAD_B"
+      ],
+      "android": [
+        "BUTTON_9"
+      ]
+    },
+    "values": {
+      "windows": [
+        196
+      ],
+      "android": [
+        196
+      ],
+      "fuchsia": [
+        77309804297
+      ]
+    }
+  },
+  "GameButton10": {
+    "name": "GameButton10",
+    "value": 8589935370,
+    "names": {
+      "web": [
+        "GameButton10"
+      ],
+      "windows": [
+        "GAMEPAD_X"
+      ],
+      "android": [
+        "BUTTON_10"
+      ]
+    },
+    "values": {
+      "windows": [
+        197
+      ],
+      "android": [
+        197
+      ],
+      "fuchsia": [
+        77309804298
+      ]
+    }
+  },
+  "GameButton11": {
+    "name": "GameButton11",
+    "value": 8589935371,
+    "names": {
+      "web": [
+        "GameButton11"
+      ],
+      "windows": [
+        "GAMEPAD_Y"
+      ],
+      "android": [
+        "BUTTON_11"
+      ]
+    },
+    "values": {
+      "windows": [
+        198
+      ],
+      "android": [
+        198
+      ],
+      "fuchsia": [
+        77309804299
+      ]
+    }
+  },
+  "GameButton12": {
+    "name": "GameButton12",
+    "value": 8589935372,
+    "names": {
+      "web": [
+        "GameButton12"
+      ],
+      "windows": [
+        "GAMEPAD_RIGHT_SHOULDER"
+      ],
+      "android": [
+        "BUTTON_12"
+      ]
+    },
+    "values": {
+      "windows": [
+        199
+      ],
+      "android": [
+        199
+      ],
+      "fuchsia": [
+        77309804300
+      ]
+    }
+  },
+  "GameButton13": {
+    "name": "GameButton13",
+    "value": 8589935373,
+    "names": {
+      "web": [
+        "GameButton13"
+      ],
+      "windows": [
+        "GAMEPAD_LEFT_SHOULDER"
+      ],
+      "android": [
+        "BUTTON_13"
+      ]
+    },
+    "values": {
+      "windows": [
+        200
+      ],
+      "android": [
+        200
+      ],
+      "fuchsia": [
+        77309804301
+      ]
+    }
+  },
+  "GameButton14": {
+    "name": "GameButton14",
+    "value": 8589935374,
+    "names": {
+      "web": [
+        "GameButton14"
+      ],
+      "windows": [
+        "GAMEPAD_LEFT_TRIGGER"
+      ],
+      "android": [
+        "BUTTON_14"
+      ]
+    },
+    "values": {
+      "windows": [
+        201
+      ],
+      "android": [
+        201
+      ],
+      "fuchsia": [
+        77309804302
+      ]
+    }
+  },
+  "GameButton15": {
+    "name": "GameButton15",
+    "value": 8589935375,
+    "names": {
+      "web": [
+        "GameButton15"
+      ],
+      "windows": [
+        "GAMEPAD_RIGHT_TRIGGER"
+      ],
+      "android": [
+        "BUTTON_15"
+      ]
+    },
+    "values": {
+      "windows": [
+        202
+      ],
+      "android": [
+        202
+      ],
+      "fuchsia": [
+        77309804303
+      ]
+    }
+  },
+  "GameButton16": {
+    "name": "GameButton16",
+    "value": 8589935376,
+    "names": {
+      "web": [
+        "GameButton16"
+      ],
+      "windows": [
+        "GAMEPAD_DPAD_UP"
+      ],
+      "android": [
+        "BUTTON_16"
+      ]
+    },
+    "values": {
+      "windows": [
+        203
+      ],
+      "android": [
+        203
+      ],
+      "fuchsia": [
+        77309804304
+      ]
+    }
+  },
+  "GameButtonA": {
+    "name": "GameButtonA",
+    "value": 8589935377,
+    "names": {
+      "web": [
+        "GameButtonA"
+      ],
+      "android": [
+        "BUTTON_A"
+      ]
+    },
+    "values": {
+      "android": [
+        96
+      ],
+      "fuchsia": [
+        77309804305
+      ]
+    }
+  },
+  "GameButtonB": {
+    "name": "GameButtonB",
+    "value": 8589935378,
+    "names": {
+      "web": [
+        "GameButtonB"
+      ],
+      "android": [
+        "BUTTON_B"
+      ]
+    },
+    "values": {
+      "android": [
+        97
+      ],
+      "fuchsia": [
+        77309804306
+      ]
+    }
+  },
+  "GameButtonC": {
+    "name": "GameButtonC",
+    "value": 8589935379,
+    "names": {
+      "web": [
+        "GameButtonC"
+      ],
+      "android": [
+        "BUTTON_C"
+      ]
+    },
+    "values": {
+      "android": [
+        98
+      ],
+      "fuchsia": [
+        77309804307
+      ]
+    }
+  },
+  "GameButtonLeft1": {
+    "name": "GameButtonLeft1",
+    "value": 8589935380,
+    "names": {
+      "web": [
+        "GameButtonLeft1"
+      ],
+      "android": [
+        "BUTTON_L1"
+      ]
+    },
+    "values": {
+      "android": [
+        102
+      ],
+      "fuchsia": [
+        77309804308
+      ]
+    }
+  },
+  "GameButtonLeft2": {
+    "name": "GameButtonLeft2",
+    "value": 8589935381,
+    "names": {
+      "web": [
+        "GameButtonLeft2"
+      ],
+      "android": [
+        "BUTTON_L2"
+      ]
+    },
+    "values": {
+      "android": [
+        104
+      ],
+      "fuchsia": [
+        77309804309
+      ]
+    }
+  },
+  "GameButtonMode": {
+    "name": "GameButtonMode",
+    "value": 8589935382,
+    "names": {
+      "web": [
+        "GameButtonMode"
+      ],
+      "android": [
+        "BUTTON_MODE"
+      ]
+    },
+    "values": {
+      "android": [
+        110
+      ],
+      "fuchsia": [
+        77309804310
+      ]
+    }
+  },
+  "GameButtonRight1": {
+    "name": "GameButtonRight1",
+    "value": 8589935383,
+    "names": {
+      "web": [
+        "GameButtonRight1"
+      ],
+      "android": [
+        "BUTTON_R1"
+      ]
+    },
+    "values": {
+      "android": [
+        103
+      ],
+      "fuchsia": [
+        77309804311
+      ]
+    }
+  },
+  "GameButtonRight2": {
+    "name": "GameButtonRight2",
+    "value": 8589935384,
+    "names": {
+      "web": [
+        "GameButtonRight2"
+      ],
+      "android": [
+        "BUTTON_R2"
+      ]
+    },
+    "values": {
+      "android": [
+        105
+      ],
+      "fuchsia": [
+        77309804312
+      ]
+    }
+  },
+  "GameButtonSelect": {
+    "name": "GameButtonSelect",
+    "value": 8589935385,
+    "names": {
+      "web": [
+        "GameButtonSelect"
+      ],
+      "android": [
+        "BUTTON_SELECT"
+      ]
+    },
+    "values": {
+      "android": [
+        109
+      ],
+      "fuchsia": [
+        77309804313
+      ]
+    }
+  },
+  "GameButtonStart": {
+    "name": "GameButtonStart",
+    "value": 8589935386,
+    "names": {
+      "web": [
+        "GameButtonStart"
+      ],
+      "android": [
+        "BUTTON_START"
+      ]
+    },
+    "values": {
+      "android": [
+        108
+      ],
+      "fuchsia": [
+        77309804314
+      ]
+    }
+  },
+  "GameButtonThumbLeft": {
+    "name": "GameButtonThumbLeft",
+    "value": 8589935387,
+    "names": {
+      "web": [
+        "GameButtonThumbLeft"
+      ],
+      "android": [
+        "BUTTON_THUMBL"
+      ]
+    },
+    "values": {
+      "android": [
+        106
+      ],
+      "fuchsia": [
+        77309804315
+      ]
+    }
+  },
+  "GameButtonThumbRight": {
+    "name": "GameButtonThumbRight",
+    "value": 8589935388,
+    "names": {
+      "web": [
+        "GameButtonThumbRight"
+      ],
+      "android": [
+        "BUTTON_THUMBR"
+      ]
+    },
+    "values": {
+      "android": [
+        107
+      ],
+      "fuchsia": [
+        77309804316
+      ]
+    }
+  },
+  "GameButtonX": {
+    "name": "GameButtonX",
+    "value": 8589935389,
+    "names": {
+      "web": [
+        "GameButtonX"
+      ],
+      "android": [
+        "BUTTON_X"
+      ]
+    },
+    "values": {
+      "android": [
+        99
+      ],
+      "fuchsia": [
+        77309804317
+      ]
+    }
+  },
+  "GameButtonY": {
+    "name": "GameButtonY",
+    "value": 8589935390,
+    "names": {
+      "web": [
+        "GameButtonY"
+      ],
+      "android": [
+        "BUTTON_Y"
+      ]
+    },
+    "values": {
+      "android": [
+        100
+      ],
+      "fuchsia": [
+        77309804318
+      ]
+    }
+  },
+  "GameButtonZ": {
+    "name": "GameButtonZ",
+    "value": 8589935391,
+    "names": {
+      "web": [
+        "GameButtonZ"
+      ],
+      "android": [
+        "BUTTON_Z"
+      ]
+    },
+    "values": {
+      "android": [
+        101
+      ],
+      "fuchsia": [
+        77309804319
       ]
     }
   }

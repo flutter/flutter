@@ -113,6 +113,11 @@ class ChannelCommand extends FlutterCommand {
         }
       }
     }
+
+    if (currentChannel == 'unknown') {
+      globals.printStatus('');
+      globals.printStatus('Currently not on an official channel.');
+    }
   }
 
   Future<void> _switchChannel(String branchName) async {

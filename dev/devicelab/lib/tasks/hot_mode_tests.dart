@@ -245,7 +245,7 @@ Future<Map<String, dynamic>> captureReloadData(
 
   await Future.wait<void>(<Future<void>>[stdoutDone.future, stderrDone.future]);
   await process.exitCode;
-  final Map<String, Object> result = json.decode(benchmarkFile.readAsStringSync()) as Map<String, Object>;
+  final Map<String, dynamic> result = json.decode(benchmarkFile.readAsStringSync()) as Map<String, dynamic>;
   benchmarkFile.deleteSync();
   return result;
 }

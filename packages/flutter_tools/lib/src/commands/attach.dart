@@ -411,8 +411,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
-      fileSystemRoots: stringsArg(FlutterOptions.kFileSystemRoot),
-      fileSystemScheme: stringArg(FlutterOptions.kFileSystemScheme),
       target: targetFile,
       targetModel: TargetModel(stringArg('target-model')),
       buildInfo: buildInfo,

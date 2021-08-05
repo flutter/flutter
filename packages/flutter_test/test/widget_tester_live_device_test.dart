@@ -52,9 +52,9 @@ Some possible finders for the widgets at Offset(400.0, 300.0):
   find.byType(FadeTransition)
   find.byType(FractionalTranslation)
   find.byType(SlideTransition)
+  find.widgetWithText(FocusTrap, 'Test')
   find.widgetWithText(PrimaryScrollController, 'Test')
   find.widgetWithText(PageStorage, 'Test')
-  find.widgetWithText(Offstage, 'Test')
 '''.trim().split('\n')));
     printedMessages.clear();
 

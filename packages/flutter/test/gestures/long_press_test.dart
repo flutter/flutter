@@ -59,7 +59,7 @@ const PointerUpEvent up4 = PointerUpEvent(
 );
 
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
+  setUp(ensureGestureBinding);
 
   group('Long press', () {
     late LongPressGestureRecognizer gesture;

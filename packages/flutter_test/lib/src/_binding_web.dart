@@ -6,9 +6,13 @@ import 'package:flutter/widgets.dart';
 
 import 'binding.dart';
 
-/// Ensure the appropriate test binding is initialized.
-TestWidgetsFlutterBinding ensureInitialized([@visibleForTesting Map<String, String>? environment]) {
-  return AutomatedTestWidgetsFlutterBinding.ensureInitialized();
+/// Ensure the [WidgetsBinding] is initialized.
+WidgetsBinding ensureInitialized([@visibleForTesting Map<String, String>? environment]) {
+  if (WidgetsBinding.instance == null) {
+    AutomatedTestWidgetsFlutterBinding();
+  }
+  assert(WidgetsBinding.instance is TestWidgetsFlutterBinding);
+  return WidgetsBinding.instance!;
 }
 
 /// This method is a noop on the web.

@@ -66,7 +66,7 @@ void main() {
             '--no-codesign',
             '--${buildMode.name}',
             '--obfuscate',
-            '--split-debug-info=foo/',
+            '--split-debug-info=foo debug info/',
           ], workingDirectory: projectRoot);
 
           buildPath = fileSystem.directory(fileSystem.path.join(

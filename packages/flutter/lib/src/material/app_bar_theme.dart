@@ -38,6 +38,7 @@ class AppBarTheme with Diagnosticable {
     this.foregroundColor,
     this.elevation,
     this.shadowColor,
+    this.shape,
     this.iconTheme,
     this.actionsIconTheme,
     @Deprecated(
@@ -123,6 +124,10 @@ class AppBarTheme with Diagnosticable {
   /// Overrides the default value for [AppBar.shadowColor] in all
   /// descendant widgets.
   final Color? shadowColor;
+
+  /// Overrides the default value for [AppBar.shape] in all
+  /// descendant widgets.
+  final ShapeBorder? shape;
 
   /// Overrides the default value of [AppBar.iconTheme] in all
   /// descendant [AppBar] widgets.
@@ -229,6 +234,7 @@ class AppBarTheme with Diagnosticable {
     Color? foregroundColor,
     double? elevation,
     Color? shadowColor,
+    ShapeBorder? shape,
     IconThemeData? iconTheme,
     TextTheme? textTheme,
     bool? centerTitle,
@@ -249,6 +255,7 @@ class AppBarTheme with Diagnosticable {
       foregroundColor: foregroundColor ?? this.foregroundColor,
       elevation: elevation ?? this.elevation,
       shadowColor: shadowColor ?? this.shadowColor,
+      shape: shape ?? this.shape,
       iconTheme: iconTheme ?? this.iconTheme,
       actionsIconTheme: actionsIconTheme ?? this.actionsIconTheme,
       textTheme: textTheme ?? this.textTheme,
@@ -280,6 +287,7 @@ class AppBarTheme with Diagnosticable {
       foregroundColor: Color.lerp(a?.foregroundColor, b?.foregroundColor, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       shadowColor: Color.lerp(a?.shadowColor, b?.shadowColor, t),
+      shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
       iconTheme: IconThemeData.lerp(a?.iconTheme, b?.iconTheme, t),
       actionsIconTheme: IconThemeData.lerp(a?.actionsIconTheme, b?.actionsIconTheme, t),
       textTheme: TextTheme.lerp(a?.textTheme, b?.textTheme, t),
@@ -301,6 +309,7 @@ class AppBarTheme with Diagnosticable {
       foregroundColor,
       elevation,
       shadowColor,
+      shape,
       iconTheme,
       actionsIconTheme,
       textTheme,
@@ -326,6 +335,7 @@ class AppBarTheme with Diagnosticable {
         && other.foregroundColor == foregroundColor
         && other.elevation == elevation
         && other.shadowColor == shadowColor
+        && other.shape == shape
         && other.iconTheme == iconTheme
         && other.actionsIconTheme == actionsIconTheme
         && other.textTheme == textTheme
@@ -346,6 +356,7 @@ class AppBarTheme with Diagnosticable {
     properties.add(ColorProperty('foregroundColor', foregroundColor, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
     properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<IconThemeData>('iconTheme', iconTheme, defaultValue: null));
     properties.add(DiagnosticsProperty<IconThemeData>('actionsIconTheme', actionsIconTheme, defaultValue: null));
     properties.add(DiagnosticsProperty<TextTheme>('textTheme', textTheme, defaultValue: null));
