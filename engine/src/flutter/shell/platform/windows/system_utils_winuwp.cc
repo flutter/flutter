@@ -26,9 +26,9 @@ std::vector<LanguageInfo> GetPreferredLanguageInfo() {
 
 std::vector<std::wstring> GetPreferredLanguages() {
   std::vector<std::wstring> languages;
-  auto platform_langueages = winrt::Windows::System::UserProfile::
+  auto platform_languages = winrt::Windows::System::UserProfile::
       GlobalizationPreferences::Languages();
-  for (const auto& platform_language : platform_langueages) {
+  for (const auto& platform_language : platform_languages) {
     languages.push_back(std::wstring{platform_language});
   }
   return languages;
