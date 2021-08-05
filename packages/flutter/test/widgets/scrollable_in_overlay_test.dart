@@ -58,8 +58,6 @@ void main() {
 
     entry2.remove();
     await tester.pump();
-    // final dynamic error = tester.takeException();
-    // print(error);
-    // expect(tester.takeException(), isNull);
+    expect(tester.takeException(), isNull);
   });
 }
