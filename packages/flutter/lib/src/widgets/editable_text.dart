@@ -1641,7 +1641,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// {@macro flutter.widgets.TextEditingActionTarget.setTextEditingValue}
   @override
   void setTextEditingValue(TextEditingValue newValue, SelectionChangedCause cause) {
-    _value = newValue;
+    textEditingValue = newValue;
     userUpdateTextEditingValue(newValue, cause);
   }
 
