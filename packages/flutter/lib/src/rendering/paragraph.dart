@@ -655,7 +655,7 @@ class RenderParagraph extends RenderBox
           break;
         case TextOverflow.clip:
         case TextOverflow.ellipsis:
-          _needsClipping = true;
+          _needsClipping = false;
           _overflowShader = null;
           break;
         case TextOverflow.fade:
