@@ -600,14 +600,17 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   }
 
   void _setTextEditingValue(TextEditingValue newValue, SelectionChangedCause cause) {
+    if (newValue == textSelectionDelegate.textEditingValue) {
+      return;
+    }
     textSelectionDelegate.textEditingValue = newValue;
     textSelectionDelegate.userUpdateTextEditingValue(newValue, cause);
   }
 
-  // TODO(justinmc): I feel like this should check if nextSelection is different
-  // than the existing selection, and if it is, then do nothing. Otherwise I
-  // need to make that check in every TextEditingActionTarget method.
   void _setSelection(TextSelection nextSelection, SelectionChangedCause cause) {
+    if (nextSelection == selection) {
+      return;
+    }
     if (nextSelection.isValid) {
       // The nextSelection is calculated based on _plainText, which can be out
       // of sync with the textSelectionDelegate.textEditingValue by one frame.
