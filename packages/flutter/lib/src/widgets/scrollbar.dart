@@ -1533,15 +1533,36 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     );
   }
 
+  // ScrollController takes precedence over ScrollNotification
+  bool _shouldUpdatePainter(Axis notificationAxis) {
+    final ScrollController? scrollController = widget.controller ??
+        PrimaryScrollController.of(context);
+    // Only update the painter of this scrollbar if the notification
+    // metrics do not conflict with the information we have from the scroll
+    // controller.
+    return
+      // We do not have a scroll controller dictating axis.
+      scrollController == null
+      // The scroll controller is not attached to a position.
+      || !scrollController.hasClients
+      // The notification matches the scroll controller's axis.
+      || scrollController.position.axis == notificationAxis;
+  }
+
   bool _handleScrollMetricsNotification(ScrollMetricsNotification notification) {
     if (!widget.notificationPredicate(ScrollUpdateNotification(metrics: notification.metrics, context: notification.context)))
       return false;
+
     if (showScrollbar) {
       if (_fadeoutAnimationController.status != AnimationStatus.forward
           && _fadeoutAnimationController.status != AnimationStatus.completed)
         _fadeoutAnimationController.forward();
     }
-    scrollbarPainter.update(notification.metrics, notification.metrics.axisDirection);
+
+    final ScrollMetrics metrics = notification.metrics;
+    if (_shouldUpdatePainter(metrics.axis)) {
+      scrollbarPainter.update(metrics, metrics.axisDirection);
+    }
     return false;
   }
 
@@ -1555,7 +1576,10 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       if (_fadeoutAnimationController.status != AnimationStatus.dismissed
           && _fadeoutAnimationController.status != AnimationStatus.reverse)
         _fadeoutAnimationController.reverse();
-      scrollbarPainter.update(metrics, metrics.axisDirection);
+
+      if (_shouldUpdatePainter(metrics.axis)) {
+        scrollbarPainter.update(metrics, metrics.axisDirection);
+      }
       return false;
     }
 
@@ -1567,7 +1591,10 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
         _fadeoutAnimationController.forward();
 
       _fadeoutTimer?.cancel();
-      scrollbarPainter.update(notification.metrics, notification.metrics.axisDirection);
+
+      if (_shouldUpdatePainter(metrics.axis)) {
+        scrollbarPainter.update(metrics, metrics.axisDirection);
+      }
     } else if (notification is ScrollEndNotification) {
       if (_dragScrollbarAxisOffset == null)
         _maybeStartFadeoutTimer();
