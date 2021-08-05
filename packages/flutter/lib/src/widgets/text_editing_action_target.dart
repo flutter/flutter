@@ -67,6 +67,9 @@ abstract class TextEditingActionTarget {
   /// Called to update the [TextSelection] in the current [TextEditingValue].
   /// {@endtemplate}
   void setSelection(TextSelection nextSelection, SelectionChangedCause cause) {
+    if (nextSelection == textEditingValue.selection) {
+      return;
+    }
     setTextEditingValue(
       textEditingValue.copyWith(selection: nextSelection),
       cause,

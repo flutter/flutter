@@ -1277,7 +1277,6 @@ void main() {
     expect(handle.opacity.value, equals(1.0));
   });
 
-
   testWidgets('Long pressing a field with selection 0,0 shows the selection menu', (WidgetTester tester) async {
     await tester.pumpWidget(overlay(
       child: TextField(

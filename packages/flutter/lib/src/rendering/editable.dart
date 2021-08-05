@@ -600,17 +600,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   }
 
   void _setTextEditingValue(TextEditingValue newValue, SelectionChangedCause cause) {
-    if (newValue == textSelectionDelegate.textEditingValue) {
-      return;
-    }
     textSelectionDelegate.textEditingValue = newValue;
     textSelectionDelegate.userUpdateTextEditingValue(newValue, cause);
   }
 
   void _setSelection(TextSelection nextSelection, SelectionChangedCause cause) {
-    if (nextSelection == selection) {
-      return;
-    }
     if (nextSelection.isValid) {
       // The nextSelection is calculated based on _plainText, which can be out
       // of sync with the textSelectionDelegate.textEditingValue by one frame.

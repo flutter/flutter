@@ -1619,6 +1619,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// {@macro flutter.widgets.TextEditingActionTarget.setSelection}
   @override
   void setSelection(TextSelection nextSelection, SelectionChangedCause cause) {
+    if (nextSelection == textEditingValue.selection) {
+      return;
+    }
     if (nextSelection.isValid) {
       // The nextSelection is calculated based on _plainText, which can be out
       // of sync with the textSelectionDelegate.textEditingValue by one frame.
@@ -1641,6 +1644,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// {@macro flutter.widgets.TextEditingActionTarget.setTextEditingValue}
   @override
   void setTextEditingValue(TextEditingValue newValue, SelectionChangedCause cause) {
+    if (newValue == textEditingValue) {
+      return;
+    }
     textEditingValue = newValue;
     userUpdateTextEditingValue(newValue, cause);
   }
