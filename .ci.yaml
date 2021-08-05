@@ -191,6 +191,10 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
+      caches: >-
+        [
+          {"name":"gradle","path":"gradle"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
@@ -436,6 +440,10 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      caches: >-
+        [
+          {"name":"gradle","path":"gradle"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
@@ -453,6 +461,10 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      caches: >-
+        [
+          {"name":"gradle","path":"gradle"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
@@ -470,6 +482,10 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      caches: >-
+        [
+          {"name":"gradle","path":"gradle"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
@@ -487,6 +503,10 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      caches: >-
+        [
+          {"name":"gradle","path":"gradle"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
@@ -504,6 +524,10 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      caches: >-
+        [
+          {"name":"gradle","path":"gradle"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
@@ -521,6 +545,10 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      caches: >-
+        [
+          {"name":"gradle","path":"gradle"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
@@ -539,6 +567,10 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      caches: >-
+        [
+          {"name":"gradle","path":"gradle"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
@@ -557,6 +589,10 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      caches: >-
+        [
+          {"name":"gradle","path":"gradle"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
@@ -575,6 +611,10 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      caches: >-
+        [
+          {"name":"gradle","path":"gradle"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
@@ -593,6 +633,10 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      caches: >-
+        [
+          {"name":"gradle","path":"gradle"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
@@ -629,6 +673,10 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      caches: >-
+        [
+          {"name":"gradle","path":"gradle"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
@@ -784,6 +832,10 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      caches: >-
+        [
+          {"name":"gradle","path":"gradle"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
@@ -798,6 +850,10 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      caches: >-
+        [
+          {"name":"gradle","path":"gradle"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
@@ -1577,6 +1633,10 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
+      caches: >-
+        [
+          {"name":"gradle","path":"gradle"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
@@ -1596,6 +1656,10 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      caches: >-
+        [
+          {"name":"gradle","path":"gradle"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
@@ -1707,6 +1771,10 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      caches: >-
+        [
+          {"name":"gradle","path":"gradle"}
+        ]
       dependencies: >-
         [
           {"dependency": "xcode"},
@@ -1800,6 +1868,10 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      caches: >-
+        [
+          {"name":"gradle","path":"gradle"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
@@ -1819,6 +1891,10 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      caches: >-
+        [
+          {"name":"gradle","path":"gradle"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
@@ -1838,6 +1914,10 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      caches: >-
+        [
+          {"name":"gradle","path":"gradle"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
@@ -1857,6 +1937,10 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      caches: >-
+        [
+          {"name":"gradle","path":"gradle"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
@@ -1877,6 +1961,10 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      caches: >-
+        [
+          {"name":"gradle","path":"gradle"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
@@ -1897,6 +1985,10 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      caches: >-
+        [
+          {"name":"gradle","path":"gradle"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
@@ -1918,6 +2010,10 @@ targets:
     bringup: true
     timeout: 60
     properties:
+      caches: >-
+        [
+          {"name":"gradle","path":"gradle"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
@@ -1938,6 +2034,10 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      caches: >-
+        [
+          {"name":"gradle","path":"gradle"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
@@ -1958,6 +2058,10 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      caches: >-
+        [
+          {"name":"gradle","path":"gradle"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
@@ -1977,6 +2081,10 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      caches: >-
+        [
+          {"name":"gradle","path":"gradle"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
@@ -3022,6 +3130,10 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
+      caches: >-
+        [
+          {"name":"gradle","path":"gradle"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
@@ -3184,6 +3296,10 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      caches: >-
+        [
+          {"name":"gradle","path":"gradle"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
@@ -3203,6 +3319,10 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      caches: >-
+        [
+          {"name":"gradle","path":"gradle"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
@@ -3218,6 +3338,10 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      caches: >-
+        [
+          {"name":"gradle","path":"gradle"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
@@ -3238,6 +3362,10 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      caches: >-
+        [
+          {"name":"gradle","path":"gradle"}
+        ]
       tags: >
         ["devicelab","hostonly"]
       task_name: hot_mode_dev_cycle_win_target__benchmark
@@ -3266,6 +3394,10 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      caches: >-
+        [
+          {"name":"gradle","path":"gradle"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
@@ -3285,6 +3417,10 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      caches: >-
+        [
+          {"name":"gradle","path":"gradle"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
@@ -3304,6 +3440,10 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      caches: >-
+        [
+          {"name":"gradle","path":"gradle"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
@@ -3323,6 +3463,10 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      caches: >-
+        [
+          {"name":"gradle","path":"gradle"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
