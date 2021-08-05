@@ -63,7 +63,7 @@ void testVariants(
           await variant.tearDown(value, memento);
         }
       },
-      skip: skip,
+      skip: skip, // [intended] just part of the API.
       timeout: timeout,
       tags: tags,
     );
@@ -362,11 +362,7 @@ void main() {
     pumpFrame(phase: EnginePhase.compositingBits);
 
     expect(editable, paintsExactlyCountTimes(#drawRRect, 0));
-
-    // TODO(yjbanov): ahem.ttf doesn't have Chinese glyphs, making this test
-    //                sensitive to browser/OS when running in web mode:
-    //                https://github.com/flutter/flutter/issues/83129
-  }, skip: kIsWeb);
+  });
 
   test('text is painted above selection', () {
     final TextSelectionDelegate delegate = _FakeEditableTextState();
@@ -543,7 +539,7 @@ void main() {
     expect(currentSelection.isCollapsed, false);
     expect(currentSelection.baseOffset, 5);
     expect(currentSelection.extentOffset, 9);
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61026
+  });
 
   test('selects readonly renderEditable matches native behavior for android', () {
     // Regression test for https://github.com/flutter/flutter/issues/79166.
@@ -876,7 +872,7 @@ void main() {
 
     editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
     expect(editable.maxScrollExtent, equals(10));
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42772
+  });
 
   test('getEndpointsForSelection handles empty characters', () {
     final TextSelectionDelegate delegate = _FakeEditableTextState();
@@ -1684,7 +1680,7 @@ void main() {
       pumpFrame();
 
       expect(maxIntrinsicWidth, 278);
-    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
+    });
 
     test('hits correct WidgetSpan when not scrolled', () {
       final TextSelectionDelegate delegate = _FakeEditableTextState()

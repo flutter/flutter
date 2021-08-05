@@ -676,7 +676,8 @@ class _FocusState extends State<Focus> {
       focusNode.descendantsAreFocusable = widget.descendantsAreFocusable;
     } else {
       _focusAttachment!.detach();
-      focusNode.removeListener(_handleFocusChanged);
+      oldWidget.focusNode?.removeListener(_handleFocusChanged);
+      _internalNode?.removeListener(_handleAutofocus);
       _initNode();
     }
 

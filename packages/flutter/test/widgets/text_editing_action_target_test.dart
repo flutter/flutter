@@ -416,7 +416,7 @@ void main() {
     editableTextState.moveSelectionLeft(SelectionChangedCause.keyboard);
     expect(editableTextState.value.selection.isCollapsed, true);
     expect(editableTextState.value.selection.baseOffset, 2);
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/58068
+  });
 
   test('arrow keys with selection text and shift', () async {
     const String text = '012345';
@@ -468,7 +468,7 @@ void main() {
     expect(editableTextState.value.selection.isCollapsed, false);
     expect(editableTextState.value.selection.baseOffset, 4);
     expect(editableTextState.value.selection.extentOffset, 1);
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/58068
+  });
 
   test('respects enableInteractiveSelection', () async {
     const String text = '012345';
@@ -517,7 +517,7 @@ void main() {
 
     await simulateKeyUpEvent(wordModifier);
     await simulateKeyUpEvent(LogicalKeyboardKey.shift);
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/58068
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87681
 
   group('delete', () {
     test('when as a non-collapsed selection, it should delete a selection', () async {
@@ -675,7 +675,7 @@ void main() {
       expect(editableTextState.textEditingValue.text, 'tes');
       expect(editableTextState.textEditingValue.selection.isCollapsed, true);
       expect(editableTextState.textEditingValue.selection.baseOffset, 3);
-    }, skip: isBrowser);
+    });
 
     test('when using cjk characters', () async {
       const String text = '用多個塊測試';
@@ -702,7 +702,7 @@ void main() {
       expect(editableTextState.textEditingValue.text, '用多個測試');
       expect(editableTextState.textEditingValue.selection.isCollapsed, true);
       expect(editableTextState.textEditingValue.selection.baseOffset, 3);
-    }, skip: isBrowser);
+    });
 
     test('when using rtl', () async {
       const String text = 'برنامج أهلا بالعالم';
@@ -730,7 +730,7 @@ void main() {
       expect(editableTextState.textEditingValue.text, 'برنامج أهلا بالعال');
       expect(editableTextState.textEditingValue.selection.isCollapsed, true);
       expect(editableTextState.textEditingValue.selection.baseOffset, text.length - 1);
-    }, skip: isBrowser);
+    });
   });
 
   group('deleteByWord', () {
@@ -759,7 +759,7 @@ void main() {
       expect(editableTextState.textEditingValue.text, 'test h multiple blocks');
       expect(editableTextState.textEditingValue.selection.isCollapsed, true);
       expect(editableTextState.textEditingValue.selection.baseOffset, 5);
-    }, skip: isBrowser);
+    });
 
     test('when includeWhiteSpace is true, it should treat a whiteSpace as a single word', () async {
       const String text = 'test with multiple blocks';
@@ -786,7 +786,7 @@ void main() {
       expect(editableTextState.textEditingValue.text, 'test withmultiple blocks');
       expect(editableTextState.textEditingValue.selection.isCollapsed, true);
       expect(editableTextState.textEditingValue.selection.baseOffset, 9);
-    }, skip: isBrowser);
+    });
 
     test('when cursor is after a word, it should delete the whole word', () async {
       const String text = 'test with multiple blocks';
@@ -813,7 +813,7 @@ void main() {
       expect(editableTextState.textEditingValue.text, 'test  multiple blocks');
       expect(editableTextState.textEditingValue.selection.isCollapsed, true);
       expect(editableTextState.textEditingValue.selection.baseOffset, 5);
-    }, skip: isBrowser);
+    });
 
     test('when cursor is preceeded by white spaces, it should delete the spaces and the next word to the left', () async {
       const String text = 'test with   multiple blocks';
@@ -840,7 +840,7 @@ void main() {
       expect(editableTextState.textEditingValue.text, 'test multiple blocks');
       expect(editableTextState.textEditingValue.selection.isCollapsed, true);
       expect(editableTextState.textEditingValue.selection.baseOffset, 5);
-    }, skip: isBrowser);
+    });
 
     test('when cursor is preceeded by tabs spaces', () async {
       const String text = 'test with\t\t\tmultiple blocks';
@@ -867,7 +867,7 @@ void main() {
       expect(editableTextState.textEditingValue.text, 'test multiple blocks');
       expect(editableTextState.textEditingValue.selection.isCollapsed, true);
       expect(editableTextState.textEditingValue.selection.baseOffset, 5);
-    }, skip: isBrowser);
+    });
 
     test('when cursor is preceeded by break line, it should delete the breaking line and the word right before it', () async {
       const String text = 'test with\nmultiple blocks';
@@ -894,7 +894,7 @@ void main() {
       expect(editableTextState.textEditingValue.text, 'test multiple blocks');
       expect(editableTextState.textEditingValue.selection.isCollapsed, true);
       expect(editableTextState.textEditingValue.selection.baseOffset, 5);
-    }, skip: isBrowser);
+    });
 
     test('when using cjk characters', () async {
       const String text = '用多個塊測試';
@@ -921,7 +921,7 @@ void main() {
       expect(editableTextState.textEditingValue.text, '用多個測試');
       expect(editableTextState.textEditingValue.selection.isCollapsed, true);
       expect(editableTextState.textEditingValue.selection.baseOffset, 3);
-    }, skip: isBrowser);
+    });
 
     test('when using rtl', () async {
       const String text = 'برنامج أهلا بالعالم';
@@ -949,7 +949,7 @@ void main() {
       expect(editableTextState.textEditingValue.text, 'برنامج أهلا ');
       expect(editableTextState.textEditingValue.selection.isCollapsed, true);
       expect(editableTextState.textEditingValue.selection.baseOffset, 12);
-    }, skip: isBrowser);
+    });
 
     test('when input has obscured text, it should delete everything before the selection', () async {
       const int offset = 21;
@@ -977,7 +977,7 @@ void main() {
       expect(editableTextState.textEditingValue.text, 'words');
       expect(editableTextState.textEditingValue.selection.isCollapsed, true);
       expect(editableTextState.textEditingValue.selection.baseOffset, 0);
-    }, skip: isBrowser);
+    });
   });
 
   group('deleteByLine', () {
@@ -1006,7 +1006,7 @@ void main() {
       expect(editableTextState.textEditingValue.text, '');
       expect(editableTextState.textEditingValue.selection.isCollapsed, true);
       expect(editableTextState.textEditingValue.selection.baseOffset, 0);
-    }, skip: isBrowser);
+    });
 
     test('when cursor is on the middle of a word, it should delete delete everything to the left', () async {
       const String text = 'test with multiple blocks';
@@ -1033,7 +1033,7 @@ void main() {
       expect(editableTextState.textEditingValue.text, 'h multiple blocks');
       expect(editableTextState.textEditingValue.selection.isCollapsed, true);
       expect(editableTextState.textEditingValue.selection.baseOffset, 0);
-    }, skip: isBrowser);
+    });
 
     test('when previous character is a breakline, it should preserve it', () async {
       const String text = 'test with\nmultiple blocks';
@@ -1060,7 +1060,7 @@ void main() {
       expect(editableTextState.textEditingValue.text, text);
       expect(editableTextState.textEditingValue.selection.isCollapsed, true);
       expect(editableTextState.textEditingValue.selection.baseOffset, offset);
-    }, skip: isBrowser);
+    });
 
     test('when text is multiline, it should delete until the first line break it finds', () async {
       const String text = 'test with\n\nMore stuff right here.\nmultiple blocks';
@@ -1087,7 +1087,7 @@ void main() {
       expect(editableTextState.textEditingValue.text, 'test with\n\nright here.\nmultiple blocks');
       expect(editableTextState.textEditingValue.selection.isCollapsed, true);
       expect(editableTextState.textEditingValue.selection.baseOffset, 11);
-    }, skip: isBrowser);
+    });
 
     test('when input has obscured text, it should delete everything before the selection', () async {
       const int offset = 21;
@@ -1115,7 +1115,7 @@ void main() {
       expect(editableTextState.textEditingValue.text, 'words');
       expect(editableTextState.textEditingValue.selection.isCollapsed, true);
       expect(editableTextState.textEditingValue.selection.baseOffset, 0);
-    }, skip: isBrowser);
+    });
   });
 
   group('deleteForward', () {
@@ -1170,7 +1170,7 @@ void main() {
       expect(editableTextState.textEditingValue.text, 'test withmultiple blocks');
       expect(editableTextState.textEditingValue.selection.isCollapsed, true);
       expect(editableTextState.textEditingValue.selection.baseOffset, 9);
-    }, skip: isBrowser);
+    });
 
     test('when at the end of a text, it should be a no-op', () async {
       const String text = 'test';
@@ -1223,7 +1223,7 @@ void main() {
       expect(editableTextState.textEditingValue.text, 'est');
       expect(editableTextState.textEditingValue.selection.isCollapsed, true);
       expect(editableTextState.textEditingValue.selection.baseOffset, 0);
-    }, skip: isBrowser);
+    });
 
     test('when using cjk characters', () async {
       const String text = '用多個塊測試';
@@ -1250,7 +1250,7 @@ void main() {
       expect(editableTextState.textEditingValue.text, '多個塊測試');
       expect(editableTextState.textEditingValue.selection.isCollapsed, true);
       expect(editableTextState.textEditingValue.selection.baseOffset, 0);
-    }, skip: isBrowser);
+    });
 
     test('when using rtl', () async {
       const String text = 'برنامج أهلا بالعالم';
@@ -1278,7 +1278,7 @@ void main() {
       expect(editableTextState.textEditingValue.text, 'رنامج أهلا بالعالم');
       expect(editableTextState.textEditingValue.selection.isCollapsed, true);
       expect(editableTextState.textEditingValue.selection.baseOffset, 0);
-    }, skip: isBrowser);
+    });
   });
 
   group('deleteForwardByWord', () {
@@ -1307,7 +1307,7 @@ void main() {
       expect(editableTextState.textEditingValue.text, 'test w multiple blocks');
       expect(editableTextState.textEditingValue.selection.isCollapsed, true);
       expect(editableTextState.textEditingValue.selection.baseOffset, offset);
-    }, skip: isBrowser);
+    });
 
     test('when cursor is before a word, it should delete the whole word', () async {
       const String text = 'test with multiple blocks';
@@ -1334,7 +1334,7 @@ void main() {
       expect(editableTextState.textEditingValue.text, 'test with  blocks');
       expect(editableTextState.textEditingValue.selection.isCollapsed, true);
       expect(editableTextState.textEditingValue.selection.baseOffset, offset);
-    }, skip: isBrowser);
+    });
 
     test('when cursor is preceeded by white spaces, it should delete the spaces and the next word', () async {
       const String text = 'test with   multiple blocks';
@@ -1361,7 +1361,7 @@ void main() {
       expect(editableTextState.textEditingValue.text, 'test with blocks');
       expect(editableTextState.textEditingValue.selection.isCollapsed, true);
       expect(editableTextState.textEditingValue.selection.baseOffset, offset);
-    }, skip: isBrowser);
+    });
 
     test('when cursor is before tabs, it should delete the tabs and the next word', () async {
       const String text = 'test with\t\t\tmultiple blocks';
@@ -1388,7 +1388,7 @@ void main() {
       expect(editableTextState.textEditingValue.text, 'test with blocks');
       expect(editableTextState.textEditingValue.selection.isCollapsed, true);
       expect(editableTextState.textEditingValue.selection.baseOffset, offset);
-    }, skip: isBrowser);
+    });
 
     test('when cursor is followed by break line, it should delete the next word', () async {
       const String text = 'test with\n\n\nmultiple blocks';
@@ -1415,7 +1415,7 @@ void main() {
       expect(editableTextState.textEditingValue.text, 'test with blocks');
       expect(editableTextState.textEditingValue.selection.isCollapsed, true);
       expect(editableTextState.textEditingValue.selection.baseOffset, offset);
-    }, skip: isBrowser);
+    });
 
     test('when using cjk characters', () async {
       const String text = '用多個塊測試';
@@ -1442,7 +1442,7 @@ void main() {
       expect(editableTextState.textEditingValue.text, '多個塊測試');
       expect(editableTextState.textEditingValue.selection.isCollapsed, true);
       expect(editableTextState.textEditingValue.selection.baseOffset, offset);
-    }, skip: isBrowser);
+    });
 
     test('when using rtl', () async {
       const String text = 'برنامج أهلا بالعالم';
@@ -1470,7 +1470,7 @@ void main() {
       expect(editableTextState.textEditingValue.text, ' أهلا بالعالم');
       expect(editableTextState.textEditingValue.selection.isCollapsed, true);
       expect(editableTextState.textEditingValue.selection.baseOffset, offset);
-    }, skip: isBrowser);
+    });
 
     test('when input has obscured text, it should delete everything after the selection', () async {
       const int offset = 4;
@@ -1498,7 +1498,7 @@ void main() {
       expect(editableTextState.textEditingValue.text, 'test');
       expect(editableTextState.textEditingValue.selection.isCollapsed, true);
       expect(editableTextState.textEditingValue.selection.baseOffset, offset);
-    }, skip: isBrowser);
+    });
   });
 
   group('deleteForwardByLine', () {
@@ -1527,7 +1527,7 @@ void main() {
       expect(editableTextState.textEditingValue.text, 'test');
       expect(editableTextState.textEditingValue.selection.isCollapsed, true);
       expect(editableTextState.textEditingValue.selection.baseOffset, offset);
-    }, skip: isBrowser);
+    });
 
     test('when cursor is on the middle of a word, it should delete delete everything that follows', () async {
       const String text = 'test with multiple blocks';
@@ -1554,7 +1554,7 @@ void main() {
       expect(editableTextState.textEditingValue.text, 'test wit');
       expect(editableTextState.textEditingValue.selection.isCollapsed, true);
       expect(editableTextState.textEditingValue.selection.baseOffset, offset);
-    }, skip: isBrowser);
+    });
 
     test('when next character is a breakline, it should preserve it', () async {
       const String text = 'test with\n\n\nmultiple blocks';
@@ -1581,7 +1581,7 @@ void main() {
       expect(editableTextState.textEditingValue.text, text);
       expect(editableTextState.textEditingValue.selection.isCollapsed, true);
       expect(editableTextState.textEditingValue.selection.baseOffset, offset);
-    }, skip: isBrowser);
+    });
 
     test('when text is multiline, it should delete until the first line break it finds', () async {
       const String text = 'test with\n\nMore stuff right here.\nmultiple blocks';
@@ -1608,7 +1608,7 @@ void main() {
       expect(editableTextState.textEditingValue.text, 'te\n\nMore stuff right here.\nmultiple blocks');
       expect(editableTextState.textEditingValue.selection.isCollapsed, true);
       expect(editableTextState.textEditingValue.selection.baseOffset, offset);
-    }, skip: isBrowser);
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87685
 
     test('when input has obscured text, it should delete everything after the selection', () async {
       const String text = 'test with multiple\n\n words';
@@ -1636,7 +1636,7 @@ void main() {
       expect(editableTextState.textEditingValue.text, 'test');
       expect(editableTextState.textEditingValue.selection.isCollapsed, true);
       expect(editableTextState.textEditingValue.selection.baseOffset, offset);
-    }, skip: isBrowser);
+    });
   });
 
   group('delete API implementations', () {
