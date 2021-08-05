@@ -196,7 +196,7 @@ class GenerateLocalizationsCommand extends FlutterCommand {
 
   @override
   String get category => FlutterCommandCategories.project;
-  
+
   @override
   Future<FlutterCommandResult> runCommand() async {
     if (_fileSystem.file('l10n.yaml').existsSync()) {
