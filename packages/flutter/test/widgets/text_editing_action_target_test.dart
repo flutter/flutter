@@ -13,7 +13,7 @@ import '../rendering/rendering_tester.dart';
 
 class _FakeEditableTextState with TextSelectionDelegate, TextEditingActionTarget {
   _FakeEditableTextState({
-    required this.value,
+    required this.textEditingValue,
     // Render editable parameters:
     this.obscureText = false,
     required this.textSpan,
@@ -38,7 +38,7 @@ class _FakeEditableTextState with TextSelectionDelegate, TextEditingActionTarget
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
       text: textSpan,
-      selection: value.selection,
+      selection: textEditingValue.selection,
       textAlign: TextAlign.start,
     );
     return _renderEditable!;
@@ -47,12 +47,7 @@ class _FakeEditableTextState with TextSelectionDelegate, TextEditingActionTarget
   // Start TextSelectionDelegate
 
   @override
-  TextEditingValue get textEditingValue => value;
-
-  @override
-  set textEditingValue(TextEditingValue nextValue) {
-    value = nextValue;
-  }
+  TextEditingValue textEditingValue;
 
   @override
   void hideToolbar([bool hideHandles = true]) { }
@@ -65,9 +60,6 @@ class _FakeEditableTextState with TextSelectionDelegate, TextEditingActionTarget
 
   // End TextSelectionDelegate
   // Start TextEditingActionTarget
-
-  @override
-  TextEditingValue value;
 
   @override
   bool get readOnly => false;
@@ -84,14 +76,14 @@ class _FakeEditableTextState with TextSelectionDelegate, TextEditingActionTarget
   @override
   void setSelection(TextSelection selection, SelectionChangedCause cause) {
     renderEditable.selection = selection;
-    value = value.copyWith(
+    textEditingValue = textEditingValue.copyWith(
       selection: selection,
     );
   }
 
   @override
   void setTextEditingValue(TextEditingValue newValue, SelectionChangedCause cause) {
-    value = newValue;
+    textEditingValue = newValue;
   }
 
   @override
@@ -110,7 +102,7 @@ void main() {
           height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
         ),
       ),
-      value: const TextEditingValue(
+      textEditingValue: const TextEditingValue(
         text: text,
         selection: TextSelection.collapsed(offset: 0),
       ),
@@ -125,51 +117,51 @@ void main() {
 
     // Move to the end of the first line.
     editableTextState.moveSelectionRightByLine(SelectionChangedCause.keyboard);
-    expect(editableTextState.value.selection.isCollapsed, true);
-    expect(editableTextState.value.selection.baseOffset, 13);
-    expect(editableTextState.value.selection.affinity, TextAffinity.upstream);
+    expect(editableTextState.textEditingValue.selection.isCollapsed, true);
+    expect(editableTextState.textEditingValue.selection.baseOffset, 13);
+    expect(editableTextState.textEditingValue.selection.affinity, TextAffinity.upstream);
     // RenderEditable relies on its parent that passes onSelectionChanged to set
     // the selection.
 
     // Try moveSelectionRightByLine again and nothing happens because we're
     // already at the end of a line.
     editableTextState.moveSelectionRightByLine(SelectionChangedCause.keyboard);
-    expect(editableTextState.value.selection.isCollapsed, true);
-    expect(editableTextState.value.selection.baseOffset, 13);
-    expect(editableTextState.value.selection.affinity, TextAffinity.upstream);
+    expect(editableTextState.textEditingValue.selection.isCollapsed, true);
+    expect(editableTextState.textEditingValue.selection.baseOffset, 13);
+    expect(editableTextState.textEditingValue.selection.affinity, TextAffinity.upstream);
 
     // Move back to the start of the line.
     editableTextState.moveSelectionLeftByLine(SelectionChangedCause.keyboard);
-    expect(editableTextState.value.selection.isCollapsed, true);
-    expect(editableTextState.value.selection.baseOffset, 0);
-    expect(editableTextState.value.selection.affinity, TextAffinity.downstream);
+    expect(editableTextState.textEditingValue.selection.isCollapsed, true);
+    expect(editableTextState.textEditingValue.selection.baseOffset, 0);
+    expect(editableTextState.textEditingValue.selection.affinity, TextAffinity.downstream);
 
     // Trying moveSelectionLeftByLine does nothing at the leftmost of the field.
     editableTextState.moveSelectionLeftByLine(SelectionChangedCause.keyboard);
-    expect(editableTextState.value.selection.isCollapsed, true);
-    expect(editableTextState.value.selection.baseOffset, 0);
-    expect(editableTextState.value.selection.affinity, TextAffinity.downstream);
+    expect(editableTextState.textEditingValue.selection.isCollapsed, true);
+    expect(editableTextState.textEditingValue.selection.baseOffset, 0);
+    expect(editableTextState.textEditingValue.selection.affinity, TextAffinity.downstream);
 
     // Move the selection to the empty line.
     editableTextState.moveSelectionRightByLine(SelectionChangedCause.keyboard);
-    expect(editableTextState.value.selection.isCollapsed, true);
-    expect(editableTextState.value.selection.baseOffset, 13);
-    expect(editableTextState.value.selection.affinity, TextAffinity.upstream);
+    expect(editableTextState.textEditingValue.selection.isCollapsed, true);
+    expect(editableTextState.textEditingValue.selection.baseOffset, 13);
+    expect(editableTextState.textEditingValue.selection.affinity, TextAffinity.upstream);
     editableTextState.moveSelectionRight(SelectionChangedCause.keyboard);
-    expect(editableTextState.value.selection.isCollapsed, true);
-    expect(editableTextState.value.selection.baseOffset, 14);
-    expect(editableTextState.value.selection.affinity, TextAffinity.upstream);
+    expect(editableTextState.textEditingValue.selection.isCollapsed, true);
+    expect(editableTextState.textEditingValue.selection.baseOffset, 14);
+    expect(editableTextState.textEditingValue.selection.affinity, TextAffinity.upstream);
 
     // Neither moveSelectionLeftByLine nor moveSelectionRightByLine do anything
     // here, because we're at both the beginning and end of the line.
     editableTextState.moveSelectionLeftByLine(SelectionChangedCause.keyboard);
-    expect(editableTextState.value.selection.isCollapsed, true);
-    expect(editableTextState.value.selection.baseOffset, 14);
-    expect(editableTextState.value.selection.affinity, TextAffinity.upstream);
+    expect(editableTextState.textEditingValue.selection.isCollapsed, true);
+    expect(editableTextState.textEditingValue.selection.baseOffset, 14);
+    expect(editableTextState.textEditingValue.selection.affinity, TextAffinity.upstream);
     editableTextState.moveSelectionRightByLine(SelectionChangedCause.keyboard);
-    expect(editableTextState.value.selection.isCollapsed, true);
-    expect(editableTextState.value.selection.baseOffset, 14);
-    expect(editableTextState.value.selection.affinity, TextAffinity.upstream);
+    expect(editableTextState.textEditingValue.selection.isCollapsed, true);
+    expect(editableTextState.textEditingValue.selection.baseOffset, 14);
+    expect(editableTextState.textEditingValue.selection.affinity, TextAffinity.upstream);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
   test('arrow keys and delete handle simple text correctly', () async {
@@ -180,7 +172,7 @@ void main() {
           height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
         ),
       ),
-      value: const TextEditingValue(
+      textEditingValue: const TextEditingValue(
         text: 'test',
         selection: TextSelection.collapsed(offset: 0),
       ),
@@ -194,12 +186,12 @@ void main() {
     pumpFrame();
 
     editableTextState.moveSelectionRight(SelectionChangedCause.keyboard);
-    expect(editableTextState.value.selection.isCollapsed, true);
-    expect(editableTextState.value.selection.baseOffset, 1);
+    expect(editableTextState.textEditingValue.selection.isCollapsed, true);
+    expect(editableTextState.textEditingValue.selection.baseOffset, 1);
 
     editableTextState.moveSelectionLeft(SelectionChangedCause.keyboard);
-    expect(editableTextState.value.selection.isCollapsed, true);
-    expect(editableTextState.value.selection.baseOffset, 0);
+    expect(editableTextState.textEditingValue.selection.isCollapsed, true);
+    expect(editableTextState.textEditingValue.selection.baseOffset, 0);
 
     editableTextState.deleteForward(SelectionChangedCause.keyboard);
     expect(editableTextState.textEditingValue.text, 'est');
@@ -214,7 +206,7 @@ void main() {
           height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
         ),
       ),
-      value: const TextEditingValue(
+      textEditingValue: const TextEditingValue(
         text: text,
         selection: TextSelection.collapsed(offset: 0),
       ),
@@ -228,12 +220,12 @@ void main() {
     pumpFrame();
 
     editableTextState.moveSelectionRight(SelectionChangedCause.keyboard);
-    expect(editableTextState.value.selection.isCollapsed, true);
-    expect(editableTextState.value.selection.baseOffset, 6);
+    expect(editableTextState.textEditingValue.selection.isCollapsed, true);
+    expect(editableTextState.textEditingValue.selection.baseOffset, 6);
 
     editableTextState.moveSelectionLeft(SelectionChangedCause.keyboard);
-    expect(editableTextState.value.selection.isCollapsed, true);
-    expect(editableTextState.value.selection.baseOffset, 4);
+    expect(editableTextState.textEditingValue.selection.isCollapsed, true);
+    expect(editableTextState.textEditingValue.selection.baseOffset, 4);
 
     editableTextState.deleteForward(SelectionChangedCause.keyboard);
     expect(editableTextState.textEditingValue.text, '01236789');
@@ -248,7 +240,7 @@ void main() {
           height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
         ),
       ),
-      value: const TextEditingValue(
+      textEditingValue: const TextEditingValue(
         text: text,
         selection: TextSelection.collapsed(offset: 0),
       ),
@@ -262,12 +254,12 @@ void main() {
     pumpFrame();
 
     editableTextState.moveSelectionRight(SelectionChangedCause.keyboard);
-    expect(editableTextState.value.selection.isCollapsed, true);
-    expect(editableTextState.value.selection.baseOffset, 12);
+    expect(editableTextState.textEditingValue.selection.isCollapsed, true);
+    expect(editableTextState.textEditingValue.selection.baseOffset, 12);
 
     editableTextState.moveSelectionLeft(SelectionChangedCause.keyboard);
-    expect(editableTextState.value.selection.isCollapsed, true);
-    expect(editableTextState.value.selection.baseOffset, 4);
+    expect(editableTextState.textEditingValue.selection.isCollapsed, true);
+    expect(editableTextState.textEditingValue.selection.baseOffset, 4);
 
     editableTextState.deleteForward(SelectionChangedCause.keyboard);
     expect(editableTextState.textEditingValue.text, '01232345');
@@ -282,7 +274,7 @@ void main() {
           height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
         ),
       ),
-      value: const TextEditingValue(
+      textEditingValue: const TextEditingValue(
         text: text,
         selection: TextSelection.collapsed(offset: 0),
       ),
@@ -296,12 +288,12 @@ void main() {
     pumpFrame();
 
     editableTextState.moveSelectionRight(SelectionChangedCause.keyboard);
-    expect(editableTextState.value.selection.isCollapsed, true);
-    expect(editableTextState.value.selection.baseOffset, 2);
+    expect(editableTextState.textEditingValue.selection.isCollapsed, true);
+    expect(editableTextState.textEditingValue.selection.baseOffset, 2);
 
     editableTextState.moveSelectionLeft(SelectionChangedCause.keyboard);
-    expect(editableTextState.value.selection.isCollapsed, true);
-    expect(editableTextState.value.selection.baseOffset, 0);
+    expect(editableTextState.textEditingValue.selection.isCollapsed, true);
+    expect(editableTextState.textEditingValue.selection.baseOffset, 0);
 
     editableTextState.deleteForward(SelectionChangedCause.keyboard);
     expect(editableTextState.textEditingValue.text, '');
@@ -316,7 +308,7 @@ void main() {
           height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
         ),
       ),
-      value: const TextEditingValue(
+      textEditingValue: const TextEditingValue(
         text: text,
         selection: TextSelection.collapsed(offset: 0),
       ),
@@ -356,7 +348,7 @@ void main() {
           height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
         ),
       ),
-      value: const TextEditingValue(
+      textEditingValue: const TextEditingValue(
         text: text,
         selection: TextSelection.collapsed(offset: 0),
       ),
@@ -379,7 +371,7 @@ void main() {
           height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
         ),
       ),
-      value: const TextEditingValue(
+      textEditingValue: const TextEditingValue(
         text: text,
         selection: TextSelection.collapsed(offset: 0),
       ),
@@ -393,29 +385,29 @@ void main() {
     pumpFrame();
 
     editableTextState.moveSelectionRight(SelectionChangedCause.keyboard);
-    expect(editableTextState.value.selection.isCollapsed, true);
-    expect(editableTextState.value.selection.baseOffset, 4);
+    expect(editableTextState.textEditingValue.selection.isCollapsed, true);
+    expect(editableTextState.textEditingValue.selection.baseOffset, 4);
 
     editableTextState.setSelection(const TextSelection(baseOffset: 4, extentOffset: 2), SelectionChangedCause.tap);
     pumpFrame();
 
     editableTextState.moveSelectionRight(SelectionChangedCause.keyboard);
-    expect(editableTextState.value.selection.isCollapsed, true);
-    expect(editableTextState.value.selection.baseOffset, 4);
+    expect(editableTextState.textEditingValue.selection.isCollapsed, true);
+    expect(editableTextState.textEditingValue.selection.baseOffset, 4);
 
     editableTextState.setSelection(const TextSelection(baseOffset: 2, extentOffset: 4), SelectionChangedCause.tap);
     pumpFrame();
 
     editableTextState.moveSelectionLeft(SelectionChangedCause.keyboard);
-    expect(editableTextState.value.selection.isCollapsed, true);
-    expect(editableTextState.value.selection.baseOffset, 2);
+    expect(editableTextState.textEditingValue.selection.isCollapsed, true);
+    expect(editableTextState.textEditingValue.selection.baseOffset, 2);
 
     editableTextState.setSelection(const TextSelection(baseOffset: 4, extentOffset: 2), SelectionChangedCause.tap);
     pumpFrame();
 
     editableTextState.moveSelectionLeft(SelectionChangedCause.keyboard);
-    expect(editableTextState.value.selection.isCollapsed, true);
-    expect(editableTextState.value.selection.baseOffset, 2);
+    expect(editableTextState.textEditingValue.selection.isCollapsed, true);
+    expect(editableTextState.textEditingValue.selection.baseOffset, 2);
   });
 
   test('arrow keys with selection text and shift', () async {
@@ -427,7 +419,7 @@ void main() {
           height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
         ),
       ),
-      value: const TextEditingValue(
+      textEditingValue: const TextEditingValue(
         text: text,
         selection: TextSelection.collapsed(offset: 0),
       ),
@@ -441,33 +433,33 @@ void main() {
     pumpFrame();
 
     editableTextState.extendSelectionRight(SelectionChangedCause.keyboard);
-    expect(editableTextState.value.selection.isCollapsed, false);
-    expect(editableTextState.value.selection.baseOffset, 2);
-    expect(editableTextState.value.selection.extentOffset, 5);
+    expect(editableTextState.textEditingValue.selection.isCollapsed, false);
+    expect(editableTextState.textEditingValue.selection.baseOffset, 2);
+    expect(editableTextState.textEditingValue.selection.extentOffset, 5);
 
     editableTextState.setSelection(const TextSelection(baseOffset: 4, extentOffset: 2), SelectionChangedCause.tap);
     pumpFrame();
 
     editableTextState.extendSelectionRight(SelectionChangedCause.keyboard);
-    expect(editableTextState.value.selection.isCollapsed, false);
-    expect(editableTextState.value.selection.baseOffset, 4);
-    expect(editableTextState.value.selection.extentOffset, 3);
+    expect(editableTextState.textEditingValue.selection.isCollapsed, false);
+    expect(editableTextState.textEditingValue.selection.baseOffset, 4);
+    expect(editableTextState.textEditingValue.selection.extentOffset, 3);
 
     editableTextState.setSelection(const TextSelection(baseOffset: 2, extentOffset: 4), SelectionChangedCause.tap);
     pumpFrame();
 
     editableTextState.extendSelectionLeft(SelectionChangedCause.keyboard);
-    expect(editableTextState.value.selection.isCollapsed, false);
-    expect(editableTextState.value.selection.baseOffset, 2);
-    expect(editableTextState.value.selection.extentOffset, 3);
+    expect(editableTextState.textEditingValue.selection.isCollapsed, false);
+    expect(editableTextState.textEditingValue.selection.baseOffset, 2);
+    expect(editableTextState.textEditingValue.selection.extentOffset, 3);
 
     editableTextState.setSelection(const TextSelection(baseOffset: 4, extentOffset: 2), SelectionChangedCause.tap);
     pumpFrame();
 
     editableTextState.extendSelectionLeft(SelectionChangedCause.keyboard);
-    expect(editableTextState.value.selection.isCollapsed, false);
-    expect(editableTextState.value.selection.baseOffset, 4);
-    expect(editableTextState.value.selection.extentOffset, 1);
+    expect(editableTextState.textEditingValue.selection.isCollapsed, false);
+    expect(editableTextState.textEditingValue.selection.baseOffset, 4);
+    expect(editableTextState.textEditingValue.selection.extentOffset, 1);
   });
 
   test('respects enableInteractiveSelection', () async {
@@ -479,7 +471,7 @@ void main() {
           height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
         ),
       ),
-      value: const TextEditingValue(
+      textEditingValue: const TextEditingValue(
         text: text,
         selection: TextSelection.collapsed(offset: 0),
       ),
@@ -495,12 +487,12 @@ void main() {
     await simulateKeyDownEvent(LogicalKeyboardKey.shift);
 
     editableTextState.moveSelectionRight(SelectionChangedCause.keyboard);
-    expect(editableTextState.value.selection.isCollapsed, true);
-    expect(editableTextState.value.selection.baseOffset, 3);
+    expect(editableTextState.textEditingValue.selection.isCollapsed, true);
+    expect(editableTextState.textEditingValue.selection.baseOffset, 3);
 
     editableTextState.moveSelectionLeft(SelectionChangedCause.keyboard);
-    expect(editableTextState.value.selection.isCollapsed, true);
-    expect(editableTextState.value.selection.baseOffset, 2);
+    expect(editableTextState.textEditingValue.selection.isCollapsed, true);
+    expect(editableTextState.textEditingValue.selection.baseOffset, 2);
 
     final LogicalKeyboardKey wordModifier =
         Platform.isMacOS ? LogicalKeyboardKey.alt : LogicalKeyboardKey.control;
@@ -508,12 +500,12 @@ void main() {
     await simulateKeyDownEvent(wordModifier);
 
     editableTextState.moveSelectionRightByWord(SelectionChangedCause.keyboard);
-    expect(editableTextState.value.selection.isCollapsed, true);
-    expect(editableTextState.value.selection.baseOffset, 6);
+    expect(editableTextState.textEditingValue.selection.isCollapsed, true);
+    expect(editableTextState.textEditingValue.selection.baseOffset, 6);
 
     editableTextState.moveSelectionLeftByWord(SelectionChangedCause.keyboard);
-    expect(editableTextState.value.selection.isCollapsed, true);
-    expect(editableTextState.value.selection.baseOffset, 0);
+    expect(editableTextState.textEditingValue.selection.isCollapsed, true);
+    expect(editableTextState.textEditingValue.selection.baseOffset, 0);
 
     await simulateKeyUpEvent(wordModifier);
     await simulateKeyUpEvent(LogicalKeyboardKey.shift);
@@ -529,7 +521,7 @@ void main() {
             height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
           ),
         ),
-        value: const TextEditingValue(
+        textEditingValue: const TextEditingValue(
           text: text,
           selection: TextSelection(baseOffset: 1, extentOffset: 3),
         ),
@@ -555,7 +547,7 @@ void main() {
             height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
           ),
         ),
-        value: const TextEditingValue(
+        textEditingValue: const TextEditingValue(
           text: text,
           selection: TextSelection.collapsed(offset: 3),
         ),
@@ -581,7 +573,7 @@ void main() {
             height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
           ),
         ),
-        value: const TextEditingValue(
+        textEditingValue: const TextEditingValue(
           text: text,
           selection: TextSelection.collapsed(offset: 2),
         ),
@@ -607,7 +599,7 @@ void main() {
             height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
           ),
         ),
-        value: const TextEditingValue(
+        textEditingValue: const TextEditingValue(
           text: text,
           selection: TextSelection.collapsed(offset: 12),
         ),
@@ -633,7 +625,7 @@ void main() {
             height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
           ),
         ),
-        value: const TextEditingValue(
+        textEditingValue: const TextEditingValue(
           text: text,
           selection: TextSelection.collapsed(offset: 0),
         ),
@@ -660,7 +652,7 @@ void main() {
             height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
           ),
         ),
-        value: const TextEditingValue(
+        textEditingValue: const TextEditingValue(
           text: text,
           selection: TextSelection.collapsed(offset: 4),
         ),
@@ -687,7 +679,7 @@ void main() {
             height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
           ),
         ),
-        value: const TextEditingValue(
+        textEditingValue: const TextEditingValue(
           text: text,
           selection: TextSelection.collapsed(offset: offset),
         ),
@@ -715,7 +707,7 @@ void main() {
             height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
           ),
         ),
-        value: const TextEditingValue(
+        textEditingValue: const TextEditingValue(
           text: text,
           selection: TextSelection.collapsed(offset: offset),
         ),
@@ -744,7 +736,7 @@ void main() {
             height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
           ),
         ),
-        value: const TextEditingValue(
+        textEditingValue: const TextEditingValue(
           text: text,
           selection: TextSelection.collapsed(offset: offset),
         ),
@@ -771,7 +763,7 @@ void main() {
             height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
           ),
         ),
-        value: const TextEditingValue(
+        textEditingValue: const TextEditingValue(
           text: text,
           selection: TextSelection.collapsed(offset: offset),
         ),
@@ -798,7 +790,7 @@ void main() {
             height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
           ),
         ),
-        value: const TextEditingValue(
+        textEditingValue: const TextEditingValue(
           text: text,
           selection: TextSelection.collapsed(offset: offset),
         ),
@@ -825,7 +817,7 @@ void main() {
             height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
           ),
         ),
-        value: const TextEditingValue(
+        textEditingValue: const TextEditingValue(
           text: text,
           selection: TextSelection.collapsed(offset: offset),
         ),
@@ -852,7 +844,7 @@ void main() {
             height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
           ),
         ),
-        value: const TextEditingValue(
+        textEditingValue: const TextEditingValue(
           text: text,
           selection: TextSelection.collapsed(offset: offset),
         ),
@@ -879,7 +871,7 @@ void main() {
             height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
           ),
         ),
-        value: const TextEditingValue(
+        textEditingValue: const TextEditingValue(
           text: text,
           selection: TextSelection.collapsed(offset: offset),
         ),
@@ -906,7 +898,7 @@ void main() {
             height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
           ),
         ),
-        value: const TextEditingValue(
+        textEditingValue: const TextEditingValue(
           text: text,
           selection: TextSelection.collapsed(offset: offset),
         ),
@@ -934,7 +926,7 @@ void main() {
             height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
           ),
         ),
-        value: const TextEditingValue(
+        textEditingValue: const TextEditingValue(
           text: text,
           selection: TextSelection.collapsed(offset: offset),
         ),
@@ -962,7 +954,7 @@ void main() {
             height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
           ),
         ),
-        value: const TextEditingValue(
+        textEditingValue: const TextEditingValue(
           text: text,
           selection: TextSelection.collapsed(offset: offset),
         ),
@@ -991,7 +983,7 @@ void main() {
             height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
           ),
         ),
-        value: const TextEditingValue(
+        textEditingValue: const TextEditingValue(
           text: text,
           selection: TextSelection.collapsed(offset: offset),
         ),
@@ -1018,7 +1010,7 @@ void main() {
             height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
           ),
         ),
-        value: const TextEditingValue(
+        textEditingValue: const TextEditingValue(
           text: text,
           selection: TextSelection.collapsed(offset: offset),
         ),
@@ -1045,7 +1037,7 @@ void main() {
             height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
           ),
         ),
-        value: const TextEditingValue(
+        textEditingValue: const TextEditingValue(
           text: text,
           selection: TextSelection.collapsed(offset: offset),
         ),
@@ -1072,7 +1064,7 @@ void main() {
             height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
           ),
         ),
-        value: const TextEditingValue(
+        textEditingValue: const TextEditingValue(
           text: text,
           selection: TextSelection.collapsed(offset: offset),
         ),
@@ -1100,7 +1092,7 @@ void main() {
             height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
           ),
         ),
-        value: const TextEditingValue(
+        textEditingValue: const TextEditingValue(
           text: text,
           selection: TextSelection.collapsed(offset: offset),
         ),
@@ -1128,7 +1120,7 @@ void main() {
             height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
           ),
         ),
-        value: const TextEditingValue(
+        textEditingValue: const TextEditingValue(
           text: text,
           selection: TextSelection(baseOffset: 1, extentOffset: 3),
         ),
@@ -1155,7 +1147,7 @@ void main() {
             height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
           ),
         ),
-        value: const TextEditingValue(
+        textEditingValue: const TextEditingValue(
           text: text,
           selection: TextSelection.collapsed(offset: offset),
         ),
@@ -1181,7 +1173,7 @@ void main() {
             height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
           ),
         ),
-        value: const TextEditingValue(
+        textEditingValue: const TextEditingValue(
           text: text,
           selection: TextSelection.collapsed(offset: 4),
         ),
@@ -1208,7 +1200,7 @@ void main() {
             height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
           ),
         ),
-        value: const TextEditingValue(
+        textEditingValue: const TextEditingValue(
           text: text,
           selection: TextSelection.collapsed(offset: 0),
         ),
@@ -1235,7 +1227,7 @@ void main() {
             height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
           ),
         ),
-        value: const TextEditingValue(
+        textEditingValue: const TextEditingValue(
           text: text,
           selection: TextSelection.collapsed(offset: offset),
         ),
@@ -1263,7 +1255,7 @@ void main() {
             height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
           ),
         ),
-        value: const TextEditingValue(
+        textEditingValue: const TextEditingValue(
           text: text,
           selection: TextSelection.collapsed(offset: offset),
         ),
@@ -1292,7 +1284,7 @@ void main() {
             height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
           ),
         ),
-        value: const TextEditingValue(
+        textEditingValue: const TextEditingValue(
           text: text,
           selection: TextSelection.collapsed(offset: offset),
         ),
@@ -1319,7 +1311,7 @@ void main() {
             height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
           ),
         ),
-        value: const TextEditingValue(
+        textEditingValue: const TextEditingValue(
           text: text,
           selection: TextSelection.collapsed(offset: offset),
         ),
@@ -1346,7 +1338,7 @@ void main() {
             height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
           ),
         ),
-        value: const TextEditingValue(
+        textEditingValue: const TextEditingValue(
           text: text,
           selection: TextSelection.collapsed(offset: offset),
         ),
@@ -1373,7 +1365,7 @@ void main() {
             height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
           ),
         ),
-        value: const TextEditingValue(
+        textEditingValue: const TextEditingValue(
           text: text,
           selection: TextSelection.collapsed(offset: offset),
         ),
@@ -1400,7 +1392,7 @@ void main() {
             height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
           ),
         ),
-        value: const TextEditingValue(
+        textEditingValue: const TextEditingValue(
           text: text,
           selection: TextSelection.collapsed(offset: offset),
         ),
@@ -1427,7 +1419,7 @@ void main() {
             height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
           ),
         ),
-        value: const TextEditingValue(
+        textEditingValue: const TextEditingValue(
           text: text,
           selection: TextSelection.collapsed(offset: offset),
         ),
@@ -1455,7 +1447,7 @@ void main() {
             height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
           ),
         ),
-        value: const TextEditingValue(
+        textEditingValue: const TextEditingValue(
           text: text,
           selection: TextSelection.collapsed(offset: offset),
         ),
@@ -1483,7 +1475,7 @@ void main() {
             height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
           ),
         ),
-        value: const TextEditingValue(
+        textEditingValue: const TextEditingValue(
           text: text,
           selection: TextSelection.collapsed(offset: offset),
         ),
@@ -1512,7 +1504,7 @@ void main() {
             height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
           ),
         ),
-        value: const TextEditingValue(
+        textEditingValue: const TextEditingValue(
           text: text,
           selection: TextSelection.collapsed(offset: offset),
         ),
@@ -1539,7 +1531,7 @@ void main() {
             height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
           ),
         ),
-        value: const TextEditingValue(
+        textEditingValue: const TextEditingValue(
           text: text,
           selection: TextSelection.collapsed(offset: offset),
         ),
@@ -1566,7 +1558,7 @@ void main() {
             height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
           ),
         ),
-        value: const TextEditingValue(
+        textEditingValue: const TextEditingValue(
           text: text,
           selection: TextSelection.collapsed(offset: offset),
         ),
@@ -1593,7 +1585,7 @@ void main() {
             height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
           ),
         ),
-        value: const TextEditingValue(
+        textEditingValue: const TextEditingValue(
           text: text,
           selection: TextSelection.collapsed(offset: offset),
         ),
@@ -1621,7 +1613,7 @@ void main() {
             height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
           ),
         ),
-        value: const TextEditingValue(
+        textEditingValue: const TextEditingValue(
           text: text,
           selection: TextSelection.collapsed(offset: offset),
         ),
@@ -1656,7 +1648,7 @@ void main() {
             height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
           ),
         ),
-        value: const TextEditingValue(
+        textEditingValue: const TextEditingValue(
           text: 'BBB',
           selection: TextSelection.collapsed(offset: 0),
         ),

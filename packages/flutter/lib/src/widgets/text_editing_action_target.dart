@@ -27,10 +27,10 @@ abstract class TextEditingActionTarget {
 
   /// Whether the field currently in a read-only state.
   ///
-  /// When true, [value]'s text may not be modified, but its selection can be.
+  /// When true, [textEditingValue]'s text may not be modified, but its selection can be.
   bool get readOnly;
 
-  /// Whether the [value]'s selection can be modified.
+  /// Whether the [textEditingValue]'s selection can be modified.
   bool get selectionEnabled;
 
   /// Provides information about the text that is the target of this action.
