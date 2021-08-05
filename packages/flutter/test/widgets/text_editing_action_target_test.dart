@@ -94,6 +94,9 @@ class _FakeEditableTextState with TextSelectionDelegate, TextEditingActionTarget
     value = newValue;
   }
 
+  @override
+  void debugAssertLayoutUpToDate() {}
+
   // End TextEditingActionTarget
 }
 

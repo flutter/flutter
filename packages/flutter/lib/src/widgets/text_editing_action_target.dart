@@ -8,11 +8,7 @@ import 'dart:ui' show TextAffinity, TextPosition;
 import 'package:flutter/services.dart'
     show Clipboard, ClipboardData, TextMetrics, TextRange;
 
-import 'actions.dart';
 import 'editable_text.dart';
-import 'focus_manager.dart';
-import 'framework.dart';
-
 
 /// The recipient of a [TextEditingAction].
 ///
