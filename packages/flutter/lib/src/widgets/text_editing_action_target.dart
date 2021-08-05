@@ -37,7 +37,6 @@ abstract class TextEditingActionTarget {
   /// Whether the [value]'s selection can be modified.
   bool get selectionEnabled;
 
-  // TODO(justinmc): Could this be made private?
   /// Provides information about the text that is the target of this action.
   ///
   /// See also:
@@ -61,6 +60,12 @@ abstract class TextEditingActionTarget {
   // it if they change their minds. Only used for resetting selection up and
   // down in a multiline text field when selecting using the keyboard.
   bool _wasSelectingVerticallyWithKeyboard = false;
+
+  /// Called when assuming that the text layout is in sync with
+  /// [textEditingValue].
+  ///
+  /// Can be overridden to assert that this is a valid assumption.
+  void debugAssertLayoutUpToDate();
 
   /// {@template flutter.widgets.TextEditingActionTarget.setSelection}
   /// Called to update the [TextSelection] in the current [TextEditingValue].
@@ -194,7 +199,6 @@ abstract class TextEditingActionTarget {
     setTextEditingValue(textEditingValue.deleteTo(characterBoundary), cause);
   }
 
-  // TODO(justinmc): Update the references on this whiteSpace template.
   /// Deletes a word backwards from the current selection.
   ///
   /// If the selection is collapsed, deletes a word before the cursor.
@@ -556,7 +560,6 @@ abstract class TextEditingActionTarget {
   ///
   ///   * [extendSelectionRight], which is same but in the opposite direction.
   void extendSelectionLeft(SelectionChangedCause cause) {
-    // TODO(justinmc): Can I get selectionEnabled from a cleaner place?
     if (!selectionEnabled) {
       return moveSelectionLeft(cause);
     }
@@ -722,17 +725,7 @@ abstract class TextEditingActionTarget {
       return _extendSelectionToStart(cause);
     }
 
-    // TODO(justinmc): I think this assert has to happen in RenderEditable. If
-    // we need it here, I could create an overriding method in EditableTextState
-    // that calls some method on RenderEditable that does the assert.
-    // Same for other instances of this assertion.
-    /*
-    assert(
-      _textLayoutLastMaxWidth == constraints.maxWidth &&
-      _textLayoutLastMinWidth == constraints.minWidth,
-      'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).',
-    );
-    */
+    debugAssertLayoutUpToDate();
     // If the selection is already all the way left, there is nothing to do.
     if (textEditingValue.selection.isCollapsed && textEditingValue.selection.extentOffset <= 0) {
       return;
@@ -770,13 +763,7 @@ abstract class TextEditingActionTarget {
   ///     direction.
   void extendSelectionRightByWord(SelectionChangedCause cause,
       [bool includeWhitespace = true, bool stopAtReversal = false]) {
-    /*
-    assert(
-      _textLayoutLastMaxWidth == constraints.maxWidth &&
-      _textLayoutLastMinWidth == constraints.minWidth,
-      'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).',
-    );
-    */
+    debugAssertLayoutUpToDate();
     // When the text is obscured, the whole thing is treated as one big word.
     if (obscureText) {
       return _extendSelectionToEnd(cause);
@@ -984,13 +971,7 @@ abstract class TextEditingActionTarget {
       return moveSelectionToStart(cause);
     }
 
-    /*
-    assert(
-      _textLayoutLastMaxWidth == constraints.maxWidth &&
-      _textLayoutLastMinWidth == constraints.minWidth,
-      'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).',
-    );
-    */
+    debugAssertLayoutUpToDate();
     // If the selection is already all the way left, there is nothing to do.
     if (textEditingValue.selection.isCollapsed && textEditingValue.selection.extentOffset <= 0) {
       return;
@@ -1097,13 +1078,7 @@ abstract class TextEditingActionTarget {
       return moveSelectionToEnd(cause);
     }
 
-    /*
-    assert(
-      _textLayoutLastMaxWidth == constraints.maxWidth &&
-      _textLayoutLastMinWidth == constraints.minWidth,
-      'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).',
-    );
-    */
+    debugAssertLayoutUpToDate();
     // If the selection is already all the way right, there is nothing to do.
     if (textEditingValue.selection.isCollapsed &&
         textEditingValue.selection.extentOffset == textEditingValue.text.length) {
