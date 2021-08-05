@@ -113,8 +113,11 @@ class GlContext {
     }
     js_util.callMethod(glContext, 'shaderSource', <dynamic>[shader, source]);
     js_util.callMethod(glContext, 'compileShader', <dynamic>[shader]);
-    final bool shaderStatus = js_util
-        .callMethod(glContext, 'getShaderParameter', <dynamic>[shader, compileStatus]);
+    final bool shaderStatus = js_util.callMethod(
+      glContext,
+      'getShaderParameter',
+      <dynamic>[shader, compileStatus],
+    ) as bool;
     if (!shaderStatus) {
       throw Exception('Shader compilation failed: ${getShaderInfoLog(shader)}');
     }
@@ -122,7 +125,7 @@ class GlContext {
   }
 
   Object createProgram() =>
-      js_util.callMethod(glContext, 'createProgram', const <dynamic>[])!;
+      js_util.callMethod(glContext, 'createProgram', const <dynamic>[]) as Object;
 
   void attachShader(Object? program, Object shader) {
     js_util.callMethod(glContext, 'attachShader', <dynamic>[program, shader]);
@@ -130,8 +133,12 @@ class GlContext {
 
   void linkProgram(Object program) {
     js_util.callMethod(glContext, 'linkProgram', <dynamic>[program]);
-    if (!js_util
-        .callMethod(glContext, 'getProgramParameter', <dynamic>[program, kLinkStatus])) {
+    final bool programStatus = js_util.callMethod(
+      glContext,
+      'getProgramParameter',
+      <dynamic>[program, kLinkStatus],
+    ) as bool;
+    if (!programStatus) {
       throw Exception(getProgramInfoLog(program));
     }
   }
@@ -219,7 +226,11 @@ class GlContext {
 
   /// Destroys gl context.
   void dispose() {
-    js_util.callMethod(_getExtension('WEBGL_lose_context'), 'loseContext', const <dynamic>[]);
+    js_util.callMethod(
+      _getExtension('WEBGL_lose_context') as Object,
+      'loseContext',
+      const <dynamic>[],
+    );
   }
 
   void deleteProgram(Object program) {
@@ -393,13 +404,13 @@ class GlContext {
   ///  Errors that occurred during failed linking or validation of program
   ///  objects. Typically called after [linkProgram].
   String? getProgramInfoLog(Object glProgram) {
-    return js_util.callMethod(glContext, 'getProgramInfoLog', <dynamic>[glProgram]);
+    return js_util.callMethod(glContext, 'getProgramInfoLog', <dynamic>[glProgram]) as String?;
   }
 
   int? get drawingBufferWidth =>
-      js_util.getProperty(glContext, 'drawingBufferWidth');
+      js_util.getProperty(glContext, 'drawingBufferWidth') as int?;
   int? get drawingBufferHeight =>
-      js_util.getProperty(glContext, 'drawingBufferWidth');
+      js_util.getProperty(glContext, 'drawingBufferWidth') as int?;
 
   /// Reads gl contents as image data.
   ///

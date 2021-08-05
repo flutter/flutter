@@ -191,17 +191,20 @@ class EngineAutofillForm {
     if (fields != null) {
       for (final Map<String, dynamic> field in
           fields.cast<Map<String, dynamic>>()) {
-        final Map<String, dynamic> autofillInfo = field['autofill'];
+        final Map<String, dynamic> autofillInfo = field.readJson('autofill');
         final AutofillInfo autofill = AutofillInfo.fromFrameworkMessage(
-            autofillInfo,
-            textCapitalization: TextCapitalizationConfig.fromInputConfiguration(
-                field['textCapitalization']));
+          autofillInfo,
+          textCapitalization: TextCapitalizationConfig.fromInputConfiguration(
+            field.readString('textCapitalization'),
+          ),
+        );
 
         ids.add(autofill.uniqueIdentifier);
 
         if (autofill.uniqueIdentifier != focusedElement.uniqueIdentifier) {
-          final EngineInputType engineInputType =
-              EngineInputType.fromName(field['inputType']['name']);
+          final EngineInputType engineInputType = EngineInputType.fromName(
+            field.readJson('inputType').readString('name'),
+          );
 
           final html.HtmlElement htmlElement = engineInputType.createDomElement();
           autofill.editingState.applyToDomElement(htmlElement);
@@ -367,15 +370,16 @@ class AutofillInfo {
       {TextCapitalizationConfig textCapitalization =
           const TextCapitalizationConfig.defaultCapitalization()}) {
     assert(autofill != null); // ignore: unnecessary_null_comparison
-    final String uniqueIdentifier = autofill['uniqueIdentifier']!;
-    final List<dynamic> hintsList = autofill['hints'];
+    final String uniqueIdentifier = autofill.readString('uniqueIdentifier');
+    final List<dynamic> hintsList = autofill.readList('hints');
     final EditingState editingState =
-        EditingState.fromFrameworkMessage(autofill['editingValue']);
+        EditingState.fromFrameworkMessage(autofill.readJson('editingValue'));
     return AutofillInfo(
-        uniqueIdentifier: uniqueIdentifier,
-        hint: BrowserAutofillHints.instance.flutterToEngine(hintsList[0]),
-        editingState: editingState,
-        textCapitalization: textCapitalization);
+      uniqueIdentifier: uniqueIdentifier,
+      hint: BrowserAutofillHints.instance.flutterToEngine(hintsList[0] as String),
+      editingState: editingState,
+      textCapitalization: textCapitalization,
+    );
   }
 
   void applyToDomElement(html.HtmlElement domElement,
@@ -429,9 +433,9 @@ class EditingState {
   /// valid selection range for input DOM elements.
   factory EditingState.fromFrameworkMessage(
       Map<String, dynamic> flutterEditingState) {
-    final int selectionBase = flutterEditingState['selectionBase'];
-    final int selectionExtent = flutterEditingState['selectionExtent'];
-    final String? text = flutterEditingState['text'];
+    final int selectionBase = flutterEditingState.readInt('selectionBase');
+    final int selectionExtent = flutterEditingState.readInt('selectionExtent');
+    final String? text = flutterEditingState.tryString('text');
 
     return EditingState(
       text: text,
@@ -576,24 +580,25 @@ class InputConfiguration {
   InputConfiguration.fromFrameworkMessage(
       Map<String, dynamic> flutterInputConfiguration)
       : inputType = EngineInputType.fromName(
-          flutterInputConfiguration['inputType']['name'],
-          isDecimal: flutterInputConfiguration['inputType']['decimal'] ?? false,
+          flutterInputConfiguration.readJson('inputType').readString('name'),
+          isDecimal: flutterInputConfiguration.readJson('inputType').tryBool('decimal') ?? false,
         ),
         inputAction =
-            flutterInputConfiguration['inputAction'] ?? 'TextInputAction.done',
-        obscureText = flutterInputConfiguration['obscureText'] ?? false,
-        readOnly = flutterInputConfiguration['readOnly'] ?? false,
-        autocorrect = flutterInputConfiguration['autocorrect'] ?? true,
+            flutterInputConfiguration.tryString('inputAction') ?? 'TextInputAction.done',
+        obscureText = flutterInputConfiguration.tryBool('obscureText') ?? false,
+        readOnly = flutterInputConfiguration.tryBool('readOnly') ?? false,
+        autocorrect = flutterInputConfiguration.tryBool('autocorrect') ?? true,
         textCapitalization = TextCapitalizationConfig.fromInputConfiguration(
-          flutterInputConfiguration['textCapitalization'],
+          flutterInputConfiguration.readString('textCapitalization'),
         ),
         autofill = flutterInputConfiguration.containsKey('autofill')
             ? AutofillInfo.fromFrameworkMessage(
-                flutterInputConfiguration['autofill'])
+                flutterInputConfiguration.readJson('autofill'))
             : null,
         autofillGroup = EngineAutofillForm.fromFrameworkMessage(
-            flutterInputConfiguration['autofill'],
-            flutterInputConfiguration['fields']);
+          flutterInputConfiguration.tryJson('autofill'),
+          flutterInputConfiguration.tryList('fields'),
+        );
 
   /// The type of information being edited in the input control.
   final EngineInputType inputType;
@@ -1597,8 +1602,8 @@ class TextEditingChannel {
     switch (call.method) {
       case 'TextInput.setClient':
         command = TextInputSetClient(
-          clientId: call.arguments[0],
-          configuration: InputConfiguration.fromFrameworkMessage(call.arguments[1]),
+          clientId: call.arguments[0] as int,
+          configuration: InputConfiguration.fromFrameworkMessage(call.arguments[1] as Map<String, dynamic>),
         );
         break;
 
@@ -1606,13 +1611,17 @@ class TextEditingChannel {
         // Set configuration eagerly because it contains data about the text
         // field used to flush the command queue. However, delaye applying the
         // configuration because the strategy may not be available yet.
-        implementation.configuration = InputConfiguration.fromFrameworkMessage(call.arguments);
+        implementation.configuration = InputConfiguration.fromFrameworkMessage(
+          call.arguments as Map<String, dynamic>
+        );
         command = const TextInputUpdateConfig();
         break;
 
       case 'TextInput.setEditingState':
         command = TextInputSetEditingState(
-          state: EditingState.fromFrameworkMessage(call.arguments),
+          state: EditingState.fromFrameworkMessage(
+            call.arguments as Map<String, dynamic>
+          ),
         );
         break;
 
@@ -1622,13 +1631,17 @@ class TextEditingChannel {
 
       case 'TextInput.setEditableSizeAndTransform':
         command = TextInputSetEditableSizeAndTransform(
-          geometry: EditableTextGeometry.fromFrameworkMessage(call.arguments),
+          geometry: EditableTextGeometry.fromFrameworkMessage(
+            call.arguments as Map<String, dynamic>
+          ),
         );
         break;
 
       case 'TextInput.setStyle':
         command = TextInputSetStyle(
-          style: EditableTextStyle.fromFrameworkMessage(call.arguments),
+          style: EditableTextStyle.fromFrameworkMessage(
+            call.arguments as Map<String, dynamic>,
+          ),
         );
         break;
 
@@ -1823,9 +1836,9 @@ class EditableTextStyle {
     assert(flutterStyle.containsKey('textAlignIndex'));
     assert(flutterStyle.containsKey('textDirectionIndex'));
 
-    final int textAlignIndex = flutterStyle['textAlignIndex'];
-    final int textDirectionIndex = flutterStyle['textDirectionIndex'];
-    final int? fontWeightIndex = flutterStyle['fontWeightIndex'];
+    final int textAlignIndex = flutterStyle['textAlignIndex'] as int;
+    final int textDirectionIndex = flutterStyle['textDirectionIndex'] as int;
+    final int? fontWeightIndex = flutterStyle['fontWeightIndex'] as int?;
 
     // Convert [fontWeightIndex] to its CSS equivalent value.
     final String fontWeight = fontWeightIndex != null
@@ -1836,8 +1849,8 @@ class EditableTextStyle {
     // corresponding enum values in [ui.TextAlign] and [ui.TextDirection]
     // respectively.
     return EditableTextStyle(
-      fontSize: flutterStyle['fontSize'],
-      fontFamily: flutterStyle['fontFamily'],
+      fontSize: flutterStyle.tryDouble('fontSize'),
+      fontFamily: flutterStyle.tryString('fontFamily'),
       textAlign: ui.TextAlign.values[textAlignIndex],
       textDirection: ui.TextDirection.values[textDirectionIndex],
       fontWeight: fontWeight,
@@ -1885,10 +1898,10 @@ class EditableTextGeometry {
     assert(encodedGeometry.containsKey('transform'));
 
     final List<double> transformList =
-        List<double>.from(encodedGeometry['transform']);
+        List<double>.from(encodedGeometry.readList('transform'));
     return EditableTextGeometry(
-      width: encodedGeometry['width'],
-      height: encodedGeometry['height'],
+      width: encodedGeometry.readDouble('width'),
+      height: encodedGeometry.readDouble('height'),
       globalTransform: Float32List.fromList(transformList),
     );
   }

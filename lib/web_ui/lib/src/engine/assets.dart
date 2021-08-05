@@ -61,7 +61,7 @@ class AssetManager {
       final html.HttpRequest request =
           await html.HttpRequest.request(url, responseType: 'arraybuffer');
 
-      final ByteBuffer response = request.response;
+      final ByteBuffer response = request.response as ByteBuffer;
       return response.asByteData();
     } on html.ProgressEvent catch (e) {
       final html.EventTarget? target = e.target;

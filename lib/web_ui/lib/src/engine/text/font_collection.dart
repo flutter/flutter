@@ -46,7 +46,7 @@ class FontCollection {
     }
 
     final List<dynamic>? fontManifest =
-        json.decode(utf8.decode(byteData.buffer.asUint8List()));
+        json.decode(utf8.decode(byteData.buffer.asUint8List())) as List<dynamic>?;
     if (fontManifest == null) {
       throw AssertionError(
           'There was a problem trying to load FontManifest.json');
@@ -60,12 +60,11 @@ class FontCollection {
 
     for (final Map<String, dynamic> fontFamily
         in fontManifest.cast<Map<String, dynamic>>()) {
-      final String? family = fontFamily['family'];
-      final List<dynamic> fontAssets = fontFamily['fonts'];
+      final String? family = fontFamily.tryString('family');
+      final List<Map<String, dynamic>> fontAssets = fontFamily.castList<Map<String, dynamic>>('fonts');
 
-      for (final dynamic fontAssetItem in fontAssets) {
-        final Map<String, dynamic> fontAsset = fontAssetItem;
-        final String asset = fontAsset['asset'];
+      for (final Map<String, dynamic> fontAsset in fontAssets) {
+        final String asset = fontAsset.readString('asset');
         final Map<String, String> descriptors = <String, String>{};
         for (final String descriptor in fontAsset.keys) {
           if (descriptor != 'asset') {

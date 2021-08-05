@@ -117,7 +117,7 @@ class PlatformViewManager {
       if (factoryFunction is ParameterizedPlatformViewFactory) {
         content = factoryFunction(viewId, params: params);
       } else {
-        content = factoryFunction(viewId);
+        content = (factoryFunction as PlatformViewFactory).call(viewId);
       }
 
       _ensureContentCorrectlySized(content, viewType);

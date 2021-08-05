@@ -115,12 +115,12 @@ class DomRenderer {
   /// See for more details:
   /// https://developer.mozilla.org/en-US/docs/Web/API/Document/hasFocus
   bool get windowHasFocus =>
-      js_util.callMethod(html.document, 'hasFocus', <dynamic>[]) ?? false;
+      js_util.callMethod(html.document, 'hasFocus', <dynamic>[]) as bool;
 
   void _setupHotRestart() {
     // This persists across hot restarts to clear stale DOM.
     _staleHotRestartState =
-        js_util.getProperty(html.window, _staleHotRestartStore);
+        js_util.getProperty(html.window, _staleHotRestartStore) as List<html.Element?>?;
     if (_staleHotRestartState == null) {
       _staleHotRestartState = <html.Element?>[];
       js_util.setProperty(
@@ -238,7 +238,10 @@ class DomRenderer {
 
   static void setElementTransform(html.Element element, String transformValue) {
     js_util.setProperty(
-        js_util.getProperty(element, 'style'), 'transform', transformValue);
+      js_util.getProperty(element, 'style') as Object,
+      'transform',
+      transformValue,
+    );
   }
 
   void setText(html.Element element, String text) {
@@ -571,7 +574,7 @@ class DomRenderer {
           return Future<bool>.value(true);
         } else {
           final String? lockType =
-              _deviceOrientationToLockType(orientations.first);
+              _deviceOrientationToLockType(orientations.first as String?);
           if (lockType != null) {
             final Completer<bool> completer = Completer<bool>();
             try {

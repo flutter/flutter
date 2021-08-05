@@ -293,7 +293,7 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
   }
 
   void _addWheelEventListener(html.EventListener handler) {
-    final dynamic eventOptions = js_util.newObject();
+    final Object eventOptions = js_util.newObject() as Object;
     final html.EventListener jsHandler = js.allowInterop((html.Event event) => handler(event));
     _BaseAdapter._nativeListeners['wheel'] = jsHandler;
     js_util.setProperty(eventOptions, 'passive', false);

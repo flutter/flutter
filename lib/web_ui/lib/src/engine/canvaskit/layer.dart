@@ -361,7 +361,7 @@ class TransformEngineLayer extends ContainerLayer
 
   @override
   void preroll(PrerollContext prerollContext, Matrix4 matrix) {
-    final Matrix4 childMatrix = matrix * _transform;
+    final Matrix4 childMatrix = matrix.multiplied(_transform);
     prerollContext.mutatorsStack.pushTransform(_transform);
     final ui.Rect childPaintBounds = prerollChildren(prerollContext, childMatrix);
     paintBounds = transformRect(_transform, childPaintBounds);

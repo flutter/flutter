@@ -136,7 +136,7 @@ class Keyboard {
         if (data == null) {
           return;
         }
-        final Map<String, dynamic> jsonResponse = _messageCodec.decodeMessage(data);
+        final Map<String, dynamic> jsonResponse = _messageCodec.decodeMessage(data) as Map<String, dynamic>;
         if (jsonResponse['handled'] as bool) {
           // If the framework handled it, then don't propagate it any further.
           event.preventDefault();
