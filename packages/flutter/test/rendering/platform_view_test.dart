@@ -99,7 +99,7 @@ void main() {
       expect(fakePlatformViewController.dispatchedPointerEvents, isNotEmpty);
     });
 
-  }, skip: isBrowser); // TODO(yjbanov): fails on Web with obscured stack trace: https://github.com/flutter/flutter/issues/42770
+  });
 
   // Regression test for https://github.com/flutter/flutter/issues/69431
   test('multi-finger touch test', () {
