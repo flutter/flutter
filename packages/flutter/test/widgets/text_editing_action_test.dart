@@ -676,7 +676,6 @@ void main() {
 
     test('when using cjk characters', () async {
       const String text = '用多個塊測試';
-      // TODO(justinmc): Did I delete too much here in all these offset tests?
       const int offset = 4;
       final _FakeEditableTextState editableTextState = _FakeEditableTextState(
         textSpan: const TextSpan(
@@ -895,8 +894,8 @@ void main() {
     }, skip: isBrowser);
 
     test('when using cjk characters', () async {
-        const String text = '用多個塊測試';
-        const int offset = 4;
+      const String text = '用多個塊測試';
+      const int offset = 4;
       final _FakeEditableTextState editableTextState = _FakeEditableTextState(
         textSpan: const TextSpan(
           text: text,
@@ -1416,8 +1415,8 @@ void main() {
     }, skip: isBrowser);
 
     test('when using cjk characters', () async {
-        const String text = '用多個塊測試';
-        const int offset = 0;
+      const String text = '用多個塊測試';
+      const int offset = 0;
       final _FakeEditableTextState editableTextState = _FakeEditableTextState(
         textSpan: const TextSpan(
           text: text,
