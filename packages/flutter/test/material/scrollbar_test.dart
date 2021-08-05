@@ -1558,7 +1558,7 @@ void main() {
     );
   });
 
-  testWidgets('MaterialScrollBehavior applies AlwaysShown Scrollbar', (WidgetTester tester) async {
+  testWidgets('MaterialScrollBehavior applies always shown Scrollbar to horizontal scrollables', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(MaterialApp(
       home: SingleChildScrollView(
