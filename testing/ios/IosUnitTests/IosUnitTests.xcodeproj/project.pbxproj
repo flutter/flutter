@@ -15,6 +15,8 @@
 		0D6AB6C122BB05E200EEE540 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0D6AB6BF22BB05E200EEE540 /* LaunchScreen.storyboard */; };
 		0D6AB6C422BB05E200EEE540 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 0D6AB6C322BB05E200EEE540 /* main.m */; };
 		0D6AB73F22BD8F0200EEE540 /* FlutterEngineConfig.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 0D6AB73E22BD8F0200EEE540 /* FlutterEngineConfig.xcconfig */; };
+		F7521D7826BB68BC005F15C5 /* libios_test_flutter.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = F7521D7226BB671E005F15C5 /* libios_test_flutter.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		F7521D7926BB68BC005F15C5 /* libocmock_shared.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = F7521D7526BB673E005F15C5 /* libocmock_shared.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -34,6 +36,8 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				F7521D7826BB68BC005F15C5 /* libios_test_flutter.dylib in Embed Libraries */,
+				F7521D7926BB68BC005F15C5 /* libocmock_shared.dylib in Embed Libraries */,
 			);
 			name = "Embed Libraries";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -64,6 +68,8 @@
 		0D6AB6C922BB05E200EEE540 /* IosUnitTestsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = IosUnitTestsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		0D6AB6CF22BB05E200EEE540 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0D6AB73E22BD8F0200EEE540 /* FlutterEngineConfig.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = FlutterEngineConfig.xcconfig; sourceTree = "<group>"; };
+		F7521D7226BB671E005F15C5 /* libios_test_flutter.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libios_test_flutter.dylib; path = "../../../../out/$(FLUTTER_ENGINE)/libios_test_flutter.dylib"; sourceTree = "<group>"; };
+		F7521D7526BB673E005F15C5 /* libocmock_shared.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libocmock_shared.dylib; path = "../../../../out/$(FLUTTER_ENGINE)/libocmock_shared.dylib"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -159,6 +165,8 @@
 		0D6AB6FC22BC1BC300EEE540 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				F7521D7226BB671E005F15C5 /* libios_test_flutter.dylib */,
+				F7521D7526BB673E005F15C5 /* libocmock_shared.dylib */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -171,7 +179,6 @@
 			buildConfigurationList = 0D6AB6D222BB05E200EEE540 /* Build configuration list for PBXNativeTarget "IosUnitTests" */;
 			buildPhases = (
 				0D6AB6AD22BB05E100EEE540 /* Sources */,
-				242904382534E32900F90C97 /* ShellScript */,
 				0D6AB6AE22BB05E100EEE540 /* Frameworks */,
 				0D6AB6AF22BB05E100EEE540 /* Resources */,
 				24EBCE9E2534C400008D1687 /* Embed Libraries */,
@@ -260,26 +267,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		242904382534E32900F90C97 /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "set -ex\nxcode_frameworks_dir=\"${TARGET_BUILD_DIR}/${PlugIns/IosUnitTestsTests.xctest/Frameworks/}\"\nmkdir -p \"${xcode_frameworks_dir}\"\nflutter_engine_rel_path=\"../../../../out/${FLUTTER_ENGINE}\"\ncp -f \"${flutter_engine_rel_path}/libios_test_flutter.dylib\" \"${xcode_frameworks_dir}\"\ncp -f \"${flutter_engine_rel_path}/libocmock_shared.dylib\" \"${xcode_frameworks_dir}\"\nif [[ -n \"${EXPANDED_CODE_SIGN_IDENTITY:-}\" ]]; then\n  codesign --force --verbose --sign \"${EXPANDED_CODE_SIGN_IDENTITY}\" -- \"${xcode_frameworks_dir}/libocmock_shared.dylib\"\n  codesign --force --verbose --sign \"${EXPANDED_CODE_SIGN_IDENTITY}\" -- \"${xcode_frameworks_dir}/libios_test_flutter.dylib\"\nfi\n";
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		0D6AB6AD22BB05E100EEE540 /* Sources */ = {
@@ -492,7 +479,6 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CLANG_ENABLE_OBJC_ARC = NO;
 				CODE_SIGN_STYLE = Automatic;
-				FRAMEWORK_SEARCH_PATHS = "";
 				HEADER_SEARCH_PATHS = (
 					../../../..,
 					../../../../flutter/shell/platform/darwin/common/framework/Headers,
@@ -504,7 +490,10 @@
 					../../../../third_party/icu/source/common,
 				);
 				INFOPLIST_FILE = Tests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path",
+				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Tests",
@@ -535,7 +524,6 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CLANG_ENABLE_OBJC_ARC = NO;
 				CODE_SIGN_STYLE = Automatic;
-				FRAMEWORK_SEARCH_PATHS = "";
 				HEADER_SEARCH_PATHS = (
 					../../../..,
 					../../../../flutter/shell/platform/darwin/common/framework/Headers,
@@ -547,7 +535,10 @@
 					../../../../third_party/icu/source/common,
 				);
 				INFOPLIST_FILE = Tests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path",
+				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Tests",
