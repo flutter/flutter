@@ -124,8 +124,9 @@ class KeyboardBinding {
         print(event.type);
       }
       if (EngineSemanticsOwner.instance.receiveGlobalEvent(event)) {
-        return handler(event);
+        return handler(event) as html.EventListener?;
       }
+      return null;
     }
 
     assert(!_listeners.containsKey(eventName));

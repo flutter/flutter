@@ -390,7 +390,7 @@ void testMain() {
     int clientId = 0;
 
     /// Emulates sending of a message by the framework to the engine.
-    void sendFrameworkMessage(dynamic message) {
+    void sendFrameworkMessage(ByteData? message) {
       textEditing!.channel.handleTextInput(message, (ByteData? data) {});
     }
 
@@ -2000,7 +2000,7 @@ KeyboardEvent dispatchKeyboardEvent(
   String type, {
   required int keyCode,
 }) {
-  final Function jsKeyboardEvent = js_util.getProperty(window, 'KeyboardEvent');
+  final Function jsKeyboardEvent = js_util.getProperty(window, 'KeyboardEvent') as Function;
   final List<dynamic> eventArgs = <dynamic>[
     type,
     <String, dynamic>{
@@ -2009,7 +2009,7 @@ KeyboardEvent dispatchKeyboardEvent(
     }
   ];
   final KeyboardEvent event =
-      js_util.callConstructor(jsKeyboardEvent, js_util.jsify(eventArgs));
+      js_util.callConstructor(jsKeyboardEvent, js_util.jsify(eventArgs) as List<Object?>?) as KeyboardEvent;
   target.dispatchEvent(event);
 
   return event;

@@ -303,6 +303,9 @@ String canonicalizeHtml(String htmlContent,
 
     if (mode != HtmlComparisonMode.noAttributes) {
       original.attributes.forEach((dynamic name, String value) {
+        if (name is! String) {
+          throw '"$name" should be String but was ${name.runtimeType}.';
+        }
         if (name == 'style') {
           return;
         }

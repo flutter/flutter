@@ -77,8 +77,9 @@ void _profilerTests() {
     expect(data, isEmpty);
 
     // Not even a callback.
+    jsOnBenchmark('string');
     expect(
-      () => jsOnBenchmark('string'),
+      () => Profiler.instance.benchmark('foo', 123),
       throwsA(isA<TypeError>()),
     );
   });
@@ -159,5 +160,11 @@ class BenchmarkDatapoint {
 }
 
 void jsOnBenchmark(dynamic listener) {
-  js_util.setProperty(html.window, '_flutter_internal_on_benchmark', listener != null ? js.allowInterop(listener) : null);
+  js_util.setProperty(
+    html.window,
+    '_flutter_internal_on_benchmark',
+    listener is Function
+      ? js.allowInterop(listener)
+      : listener,
+  );
 }

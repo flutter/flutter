@@ -12,11 +12,14 @@ import 'package:ui/ui.dart' as ui;
 import 'browser_detection.dart';
 import 'util.dart';
 
-final bool _supportsDecode = js_util.getProperty(
-        js_util.getProperty(
-            js_util.getProperty(html.window, 'Image'), 'prototype'),
-        'decode') !=
-    null;
+Object? get _jsImageDecodeFunction => js_util.getProperty(
+  js_util.getProperty(
+    js_util.getProperty(html.window, 'Image') as Object,
+    'prototype',
+  ) as Object,
+  'decode',
+);
+final bool _supportsDecode = _jsImageDecodeFunction != null;
 
 typedef WebOnlyImageCodecChunkCallback = void Function(
     int cumulativeBytesLoaded, int expectedTotalBytes);

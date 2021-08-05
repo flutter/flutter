@@ -725,7 +725,7 @@ class CkParagraph extends SkiaObject<SkParagraph> implements ui.Paragraph {
     final List<ui.TextBox> result = <ui.TextBox>[];
 
     for (int i = 0; i < skRects.length; i++) {
-      final List<double> rect = skRects[i];
+      final List<double> rect = skRects[i] as List<double>;
       result.add(ui.TextBox.fromLTRBD(
         rect[0],
         rect[1],

@@ -8,6 +8,7 @@ import 'dart:typed_data';
 
 import '../../engine.dart'  show registerHotRestartListener;
 import '../services.dart';
+import '../util.dart';
 
 /// Singleton for accessing accessibility announcements from the platform.
 final AccessibilityAnnouncements accessibilityAnnouncements =
@@ -58,9 +59,9 @@ class AccessibilityAnnouncements {
   /// Decodes the message coming from the 'flutter/accessibility' channel.
   void handleMessage(StandardMessageCodec codec, ByteData? data) {
     final Map<dynamic, dynamic> inputMap =
-        codec.decodeMessage(data);
-    final Map<dynamic, dynamic> dataMap = inputMap['data'];
-    final String? message = dataMap['message'];
+        codec.decodeMessage(data) as Map<dynamic, dynamic>;
+    final Map<dynamic, dynamic> dataMap = inputMap.readDynamicJson('data');
+    final String? message = dataMap.tryString('message');
     if (message != null && message.isNotEmpty) {
       _initLiveRegion(message);
       _removeElementTimer = Timer(durationA11yMessageIsOnDom, () {

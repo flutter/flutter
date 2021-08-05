@@ -969,8 +969,8 @@ class NotoDownloader {
     if (assertionsEnabled) {
       _debugActiveDownloadCount += 1;
     }
-    final Future<ByteBuffer> result = html.window.fetch(url).then(
-        (dynamic fetchResult) => fetchResult
+    final Future<ByteBuffer> result = httpFetch(url).then(
+        (html.Body fetchResult) => fetchResult
             .arrayBuffer()
             .then<ByteBuffer>((dynamic x) => x as ByteBuffer));
     if (assertionsEnabled) {
@@ -988,8 +988,8 @@ class NotoDownloader {
     if (assertionsEnabled) {
       _debugActiveDownloadCount += 1;
     }
-    final Future<String> result = html.window.fetch(url).then(
-        (dynamic response) =>
+    final Future<String> result = httpFetch(url).then(
+        (html.Body response) =>
             response.text().then<String>((dynamic x) => x as String));
     if (assertionsEnabled) {
       result.whenComplete(() {

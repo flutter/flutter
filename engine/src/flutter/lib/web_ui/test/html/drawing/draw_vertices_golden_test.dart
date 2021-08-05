@@ -424,6 +424,6 @@ Future<HtmlImage> createTestImage({int width = 50, int height = 40}) {
   imageElement.onLoad.listen((html.Event event) {
     completer.complete(HtmlImage(imageElement, width, height));
   });
-  imageElement.src = js_util.callMethod(canvas, 'toDataURL', <dynamic>[]);
+  imageElement.src = js_util.callMethod(canvas, 'toDataURL', <dynamic>[]) as String;
   return completer.future;
 }
