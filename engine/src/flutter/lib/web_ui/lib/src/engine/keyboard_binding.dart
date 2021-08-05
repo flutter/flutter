@@ -119,12 +119,12 @@ class KeyboardBinding {
   final Map<String, html.EventListener> _listeners = <String, html.EventListener>{};
 
   void _addEventListener(String eventName, html.EventListener handler) {
-    html.EventListener? loggedHandler(html.Event event) {
+    dynamic loggedHandler(html.Event event) {
       if (_debugLogKeyEvents) {
         print(event.type);
       }
       if (EngineSemanticsOwner.instance.receiveGlobalEvent(event)) {
-        return handler(event) as html.EventListener?;
+        return handler(event);
       }
       return null;
     }
