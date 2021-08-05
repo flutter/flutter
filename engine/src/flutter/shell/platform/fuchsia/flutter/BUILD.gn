@@ -21,6 +21,10 @@ shell_gpu_configuration("fuchsia_gpu_configuration") {
   enable_metal = false
 }
 
+config("runner_base_config") {
+  defines = [ "FML_USED_ON_EMBEDDER" ]
+}
+
 config("runner_debug_config") {
   defines = [ "DEBUG" ]  # Needed due to direct dart dependencies.
 }
@@ -36,7 +40,7 @@ config("runner_product_config") {
 template("runner_sources") {
   assert(defined(invoker.product), "runner_sources must define product")
 
-  runner_configs = []
+  runner_configs = [ ":runner_base_config" ]
   if (is_debug) {
     runner_configs += [ ":runner_debug_config" ]
   }

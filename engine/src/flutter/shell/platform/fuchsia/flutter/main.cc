@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#define FML_USED_ON_EMBEDDER
-
 #include <lib/async-loop/cpp/loop.h>
 #include <lib/sys/inspect/cpp/component.h>
 #include <lib/trace-provider/provider.h>
