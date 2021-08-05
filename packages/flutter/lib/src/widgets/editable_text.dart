@@ -1604,11 +1604,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   TextMetrics get textMetrics => renderEditable;
 
-  // TODO(justinmc): Get rid of _value getter in favor of this getter?
-  // There is also textEditingValue and currentTextEditingValue! All aliases of _value.
-  @override
-  TextEditingValue get value => _value;
-
   @override
   bool get readOnly => widget.readOnly;
 
@@ -1643,7 +1638,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// {@macro flutter.widgets.TextEditingActionTarget.setTextEditingValue}
   @override
   void setTextEditingValue(TextEditingValue newValue, SelectionChangedCause cause) {
-    textEditingValue = newValue;
+    _value = newValue;
     userUpdateTextEditingValue(newValue, cause);
   }
 

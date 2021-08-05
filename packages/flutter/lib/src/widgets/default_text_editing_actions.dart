@@ -132,15 +132,6 @@ class _ExpandSelectionLeftByLineTextAction extends TextEditingAction<ExpandSelec
   @override
   Object? invoke(ExpandSelectionLeftByLineTextIntent intent, [BuildContext? context]) {
     textEditingActionTarget!.expandSelectionLeftByLine(SelectionChangedCause.keyboard);
-    // TODO(justinmc): Rather than putting these methods in TextEditingActionTarget,
-    // I could also just put the logic here. But I think I like the idea of TextEditingActionTarget
-    // as the keeper of bare bones text editing widget logic.
-    /*
-    final TextSelection nextSelection = textEditingActionTarget!.renderEditable.selectionEnabled
-        ? textEditingActionTarget!.textEditingModel.expandSelectionLeftByLine(textEditingActionTarget!.renderEditable)
-        : textEditingActionTarget!.textEditingModel.moveSelectionLeftByLine();
-    textEditingActionTarget!.setSelection(nextSelection, SelectionChangedCause.keyboard);
-    */
   }
 }
 
