@@ -10,7 +10,8 @@ import 'package:integration_test/integration_test.dart';
 import 'package:macrobenchmarks/src/simple_scroll.dart';
 
 void main() {
-  final IntegrationTestWidgetsFlutterBinding binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  final IntegrationTestWidgetsFlutterBinding binding =
+      IntegrationTestWidgetsFlutterBinding.ensureInitialized() as IntegrationTestWidgetsFlutterBinding;
   testWidgets(
     'Frame Counter and Input Delay for benchmarkLive',
     (WidgetTester tester) async {

@@ -120,15 +120,17 @@ class LogicalKeyData {
   ///                Key        Enum       Value
   /// DOM_KEY_MAP("Accel",      ACCEL,    0x0101),
   ///
-  /// Flutter's supplemental_key_data.inc also has a new format
-  /// that uses a character as the 3rd argument.
+  /// Flutter's supplemental_key_data.inc also has some new formats.
+  /// The following format uses a character as the 3rd argument.
   ///                Key        Enum       Character
   /// DOM_KEY_UNI("KeyB",      KEY_B,      'b'),
+  ///
+  /// The following format should be mapped to the Flutter plane.
+  ///                 Key       Enum       Character
+  /// FLUTTER_KEY_MAP("Lang4",  LANG4,     0x00013),
   static void _readKeyEntries(Map<String, LogicalKeyEntry> data, String input) {
-    final Map<String, String> unusedNumpad = Map<String, String>.from(_printableToNumpads);
-
     final RegExp domKeyRegExp = RegExp(
-      r'DOM_KEY_(?<kind>UNI|MAP)\s*\(\s*'
+      r'(?<source>DOM|FLUTTER)_KEY_(?<kind>UNI|MAP)\s*\(\s*'
       r'"(?<name>[^\s]+?)",\s*'
       r'(?<enum>[^\s]+?),\s*'
       r"(?:0[xX](?<unicode>[a-fA-F0-9]+)|'(?<char>.)')\s*"
@@ -140,6 +142,7 @@ class LogicalKeyData {
     final RegExp commentRegExp = RegExp(r'//.*$', multiLine: true);
     input = input.replaceAll(commentRegExp, '');
     for (final RegExpMatch match in domKeyRegExp.allMatches(input)) {
+      final String source = match.namedGroup('source')!;
       final String webName = match.namedGroup('name')!;
       // ".AltGraphLatch"  is consumed internally and not expressed to the Web.
       if (webName.startsWith('.')) {
@@ -150,51 +153,21 @@ class LogicalKeyData {
         getHex(match.namedGroup('unicode')!) :
         match.namedGroup('char')!.codeUnitAt(0);
       final String? keyLabel = match.namedGroup('kind')! == 'UNI' ? String.fromCharCode(value) : null;
-      // If it's a modifier key, add left and right keys instead.
-      // Don't add web names and values; they're solved with locations.
-      if (_chromeModifiers.containsKey(name)) {
-        final _ModifierPair pair = _chromeModifiers[name]!;
-        data[pair.left] = LogicalKeyEntry.fromName(
-          value: value + kLeftModifierPlane,
-          name: pair.left,
-          keyLabel: null, // Modifier keys don't have keyLabels
-        )..webNames.add(pair.left);
-        data[pair.right] = LogicalKeyEntry.fromName(
-          value: value + kRightModifierPlane,
-          name: pair.right,
-          keyLabel: null, // Modifier keys don't have keyLabels
-        )..webNames.add(pair.right);
+      // Skip modifier keys from DOM. They will be added with supplemental data.
+      if (_chromeModifiers.containsKey(name) && source == 'DOM') {
         continue;
       }
 
-      // If it has a numpad counterpart, also add the numpad key.
-      final String? char = value < 256 ? String.fromCharCode(value) : null;
-      if (char != null && _printableToNumpads.containsKey(char)) {
-        final String numpadName = _printableToNumpads[char]!;
-        data[numpadName] = LogicalKeyEntry.fromName(
-          value: char.codeUnitAt(0) + kNumpadPlane,
-          name: numpadName,
-          keyLabel: null, // Don't add keyLabel for numpad counterparts
-        )..webNames.add(numpadName);
-        unusedNumpad.remove(char);
-      }
-
+      final bool isPrintable = (keyLabel != null && !_isControlCharacter(keyLabel))
+        || printable.containsKey(name);
       data.putIfAbsent(name, () {
-        final bool isPrintable = (keyLabel != null && !_isControlCharacter(keyLabel))
-          || printable.containsKey(name)
-          || value == 0; // "None" key
         return LogicalKeyEntry.fromName(
-          value: value + (isPrintable ? kUnicodePlane : kUnprintablePlane),
+          value: toPlane(value, _sourceToPlane(source, isPrintable)),
           name: name,
           keyLabel: keyLabel,
         )..webNames.add(webName);
       });
     }
-
-    // Make sure every Numpad key that we care about has been defined.
-    unusedNumpad.forEach((String key, String value) {
-      print('Undefined numpad key $value');
-    });
   }
 
   static void _readMacOsKeyCodes(
@@ -347,11 +320,11 @@ class LogicalKeyData {
           return 0;
         final String? keyLabel = printable[entry.constantName];
         if (keyLabel != null && !entry.constantName.startsWith('numpad')) {
-          return kUnicodePlane | (keyLabel.codeUnitAt(0) & kValueMask);
+          return toPlane(keyLabel.codeUnitAt(0), kUnicodePlane.value);
         } else {
           final PhysicalKeyEntry? physicalEntry = physicalData.tryEntryByName(entry.name);
           if (physicalEntry != null) {
-            return kHidPlane | (physicalEntry.usbHidCode & kValueMask);
+            return toPlane(physicalEntry.usbHidCode, kFuchsiaPlane.value);
           }
         }
       })();
@@ -376,14 +349,6 @@ class LogicalKeyData {
       .cast<String, String>();
   })();
 
-  // Map printable to corresponding numpad key name
-  static late final Map<String, String> _printableToNumpads = () {
-    final String rawJson = File(path.join(dataRoot, 'printable_to_numpads.json',)).readAsStringSync();
-    return (json.decode(rawJson) as Map<String, dynamic>).map((String key, dynamic value) {
-      return MapEntry<String, String>(key, value as String);
-    });
-  }();
-
   /// Returns the static map of synonym representations.
   ///
   /// These include synonyms for keys which don't have printable
@@ -400,6 +365,18 @@ class LogicalKeyData {
       return MapEntry<String, List<String>>(name, names);
     });
   })();
+
+  static int _sourceToPlane(String source, bool isPrintable) {
+    switch (source) {
+      case 'DOM':
+        return isPrintable ? kUnicodePlane.value : kUnprintablePlane.value;
+      case 'FLUTTER':
+        return kFlutterPlane.value;
+      default:
+        assert(false, 'Unrecognized logical key source $source');
+        return kFlutterPlane.value;
+    }
+  }
 }
 
 

@@ -64,7 +64,7 @@ class TestDataSource extends DataTableSource {
 
 void main() {
   final TestWidgetsFlutterBinding binding =
-      TestWidgetsFlutterBinding.ensureInitialized();
+      TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
 
   testWidgets('PaginatedDataTable paging', (WidgetTester tester) async {
     final TestDataSource source = TestDataSource();

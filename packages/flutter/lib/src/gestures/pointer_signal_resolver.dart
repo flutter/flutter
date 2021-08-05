@@ -30,7 +30,7 @@ bool _isSameEvent(PointerSignalEvent event1, PointerSignalEvent event2) {
 ///
 /// ```dart
 /// void handleSignalEvent(PointerSignalEvent event) {
-///   GestureBinding.instance.pointerSignalResolver.register(event, (PointerSignalEvent event) {
+///   GestureBinding.instance!.pointerSignalResolver.register(event, (PointerSignalEvent event) {
 ///     // handle the event...
 ///   });
 /// }
@@ -96,7 +96,7 @@ bool _isSameEvent(PointerSignalEvent event1, PointerSignalEvent event2) {
 ///       child: Listener(
 ///         onPointerSignal: (PointerSignalEvent event) {
 ///           if (widget.useResolver) {
-///             GestureBinding.instance.pointerSignalResolver.register(event, (PointerSignalEvent event) {
+///             GestureBinding.instance!.pointerSignalResolver.register(event, (PointerSignalEvent event) {
 ///               rotateColor();
 ///             });
 ///           } else {

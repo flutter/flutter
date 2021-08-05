@@ -142,6 +142,7 @@ class PackagesGetCommand extends FlutterCommand {
         context: PubContext.pubGet,
         directory: directory,
         upgrade: upgrade,
+        shouldSkipThirdPartyGenerator: false,
         offline: boolArg('offline'),
         generateSyntheticPackage: flutterProject.manifest.generateSyntheticPackage,
       );
@@ -252,9 +253,8 @@ class PackagesForwardCommand extends FlutterCommand {
 }
 
 class PackagesPassthroughCommand extends FlutterCommand {
-  PackagesPassthroughCommand() {
-    requiresPubspecYaml();
-  }
+  @override
+  ArgParser argParser = ArgParser.allowAnything();
 
   @override
   String get name => 'pub';
