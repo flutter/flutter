@@ -58,7 +58,7 @@ Future<void> main() async {
 
     print('Starting app...');
     runApp(const GalleryApp(testMode: true));
-    final _LiveWidgetController controller = _LiveWidgetController(WidgetsBinding.instance!);
+    final _LiveWidgetController controller = _LiveWidgetController(WidgetsBinding.instance);
     for (final GalleryDemoCategory category in kAllGalleryDemoCategories) {
       print('Tapping "${category.name}" section...');
       await controller.tap(find.text(category.name));
@@ -111,7 +111,7 @@ class _LiveWidgetController extends LiveWidgetController {
   Future<void> _waitUntilFrame(bool Function() condition, [Completer<void>? completer]) {
     completer ??= Completer<void>();
     if (!condition()) {
-      SchedulerBinding.instance!.addPostFrameCallback((Duration timestamp) {
+      SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
         _waitUntilFrame(condition, completer);
       });
     } else {

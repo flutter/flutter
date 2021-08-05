@@ -542,7 +542,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     this.testCompilation = false,
     this.trackWidgetCreation = true,
     this.packagesPath,
-    List<String> fileSystemRoots = const <String>[],
+    this.fileSystemRoots = const <String>[],
     this.fileSystemScheme,
     this.initializeFromDill,
     this.targetModel = TargetModel.flutter,
@@ -560,9 +560,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
        _platform = platform,
        dartDefines = dartDefines ?? const <String>[],
        // This is a URI, not a file path, so the forward slash is correct even on Windows.
-       sdkRoot = sdkRoot.endsWith('/') ? sdkRoot : '$sdkRoot/',
-       // Make a copy, we might need to modify it later.
-       fileSystemRoots = List<String>.from(fileSystemRoots);
+       sdkRoot = sdkRoot.endsWith('/') ? sdkRoot : '$sdkRoot/';
 
   final Logger _logger;
   final ProcessManager _processManager;

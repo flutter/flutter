@@ -37,7 +37,6 @@ void main() {
     expect(widget.color, Colors.blue);
     expect(widget.elevation, 4.0);
     expect(widget.shadowColor, Colors.black);
-    expect(widget.shape, null);
     expect(iconTheme.data, const IconThemeData(color: Colors.white));
     expect(actionsIconTheme.data, const IconThemeData(color: Colors.white));
     expect(actionIconText.text.style!.color, Colors.white);
@@ -73,7 +72,6 @@ void main() {
     expect(widget.color, appBarTheme.backgroundColor);
     expect(widget.elevation, appBarTheme.elevation);
     expect(widget.shadowColor, appBarTheme.shadowColor);
-    expect(widget.shape, const StadiumBorder());
     expect(iconTheme.data, appBarTheme.iconTheme);
     expect(actionsIconTheme.data, appBarTheme.actionsIconTheme);
     expect(actionIconText.text.style!.color, appBarTheme.actionsIconTheme!.color);
@@ -133,7 +131,6 @@ void main() {
     const Color color = Colors.orange;
     const double elevation = 3.0;
     const Color shadowColor = Colors.red;
-    const ShapeBorder shape = RoundedRectangleBorder();
     const IconThemeData iconThemeData = IconThemeData(color: Colors.green);
     const IconThemeData actionsIconThemeData = IconThemeData(color: Colors.lightBlue);
     const TextStyle toolbarTextStyle = TextStyle(color: Colors.pink);
@@ -141,9 +138,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.from(colorScheme: const ColorScheme.light()).copyWith(
-          appBarTheme: _appBarTheme(),
-        ),
+        theme: ThemeData.from(colorScheme: const ColorScheme.light()),
         home: Scaffold(
           appBar: AppBar(
             backgroundColor: color,
@@ -151,7 +146,6 @@ void main() {
             systemOverlayStyle: systemOverlayStyle,
             elevation: elevation,
             shadowColor: shadowColor,
-            shape: shape,
             iconTheme: iconThemeData,
             actionsIconTheme: actionsIconThemeData,
             toolbarTextStyle: toolbarTextStyle,
@@ -174,7 +168,6 @@ void main() {
     expect(widget.color, color);
     expect(widget.elevation, elevation);
     expect(widget.shadowColor, shadowColor);
-    expect(widget.shape, shape);
     expect(iconTheme.data, iconThemeData);
     expect(actionsIconTheme.data, actionsIconThemeData);
     expect(actionIconText.text.style!.color, actionsIconThemeData.color);
@@ -532,7 +525,6 @@ AppBarTheme _appBarTheme() {
     backgroundColor: backgroundColor,
     elevation: elevation,
     shadowColor: shadowColor,
-    shape: StadiumBorder(),
     iconTheme: iconThemeData,
     toolbarHeight: 96,
     toolbarTextStyle: TextStyle(color: Colors.yellow),

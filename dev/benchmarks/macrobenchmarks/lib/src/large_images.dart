@@ -11,7 +11,7 @@ class LargeImagesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ImageCache imageCache = PaintingBinding.instance!.imageCache!;
+    final ImageCache imageCache = PaintingBinding.instance.imageCache;
     imageCache.maximumSize = 30;
     imageCache.maximumSizeBytes = 50 << 20;
     return GridView.builder(

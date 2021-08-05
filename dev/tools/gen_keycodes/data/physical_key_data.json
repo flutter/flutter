@@ -1,4 +1,12 @@
 {
+  "None": {
+    "names": {
+      "name": "None"
+    },
+    "scanCodes": {
+      "usb": 0
+    }
+  },
   "Hyper": {
     "names": {
       "name": "Hyper",

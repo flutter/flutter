@@ -955,7 +955,7 @@ void main() {
 
     testWidgets('Mouse events change initial focus highlight mode on mobile.', (WidgetTester tester) async {
       expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.touch));
-      RendererBinding.instance!.initMouseTracker(); // Clear out the mouse state.
+      RendererBinding.instance.initMouseTracker(); // Clear out the mouse state.
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 0);
       addTearDown(gesture.removePointer);
       await gesture.moveTo(Offset.zero);
@@ -964,7 +964,7 @@ void main() {
 
     testWidgets('Mouse events change initial focus highlight mode on desktop.', (WidgetTester tester) async {
       expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.traditional));
-      RendererBinding.instance!.initMouseTracker(); // Clear out the mouse state.
+      RendererBinding.instance.initMouseTracker(); // Clear out the mouse state.
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 0);
       addTearDown(gesture.removePointer);
       await gesture.moveTo(Offset.zero);

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:io';
 
 import 'package:flutter_devicelab/framework/apk_utils.dart';
@@ -44,7 +46,7 @@ Future<void> main() async {
         final Directory appBundle = applications
             .listSync()
             .whereType<Directory>()
-            .singleWhere((Directory directory) => path.extension(directory.path) == '.app');
+            .singleWhere((Directory directory) => path.extension(directory.path) == '.app', orElse: () => null);
 
         final String flutterFramework = path.join(
           appBundle.path,

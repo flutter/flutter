@@ -56,7 +56,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
   @override
   Future<void> forceRebuild() async {
     rebuildCount++;
-    final WidgetsBinding binding = WidgetsBinding.instance!;
+    final WidgetsBinding binding = WidgetsBinding.instance;
 
     if (binding.renderViewElement != null) {
       binding.buildOwner!.reassemble(binding.renderViewElement!, null);

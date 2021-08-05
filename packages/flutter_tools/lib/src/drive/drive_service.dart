@@ -46,7 +46,6 @@ class FlutterDriverFactory {
   DriverService createDriverService(bool web) {
     if (web) {
       return WebDriverService(
-        logger: _logger,
         processUtils: _processUtils,
         dartSdkPath: _dartSdkPath,
       );

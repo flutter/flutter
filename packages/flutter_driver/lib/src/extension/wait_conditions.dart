@@ -49,12 +49,12 @@ class _InternalNoTransientCallbacksCondition implements WaitCondition {
   }
 
   @override
-  bool get condition => SchedulerBinding.instance!.transientCallbackCount == 0;
+  bool get condition => SchedulerBinding.instance.transientCallbackCount == 0;
 
   @override
   Future<void> wait() async {
     while (!condition) {
-      await SchedulerBinding.instance!.endOfFrame;
+      await SchedulerBinding.instance.endOfFrame;
     }
     assert(condition);
   }
@@ -77,12 +77,12 @@ class _InternalNoPendingFrameCondition implements WaitCondition {
   }
 
   @override
-  bool get condition => !SchedulerBinding.instance!.hasScheduledFrame;
+  bool get condition => !SchedulerBinding.instance.hasScheduledFrame;
 
   @override
   Future<void> wait() async {
     while (!condition) {
-      await SchedulerBinding.instance!.endOfFrame;
+      await SchedulerBinding.instance.endOfFrame;
     }
     assert(condition);
   }
@@ -105,11 +105,11 @@ class _InternalFirstFrameRasterizedCondition implements WaitCondition {
   }
 
   @override
-  bool get condition => WidgetsBinding.instance!.firstFrameRasterized;
+  bool get condition => WidgetsBinding.instance.firstFrameRasterized;
 
   @override
   Future<void> wait() async {
-    await WidgetsBinding.instance!.waitUntilFirstFrameRasterized;
+    await WidgetsBinding.instance.waitUntilFirstFrameRasterized;
     assert(condition);
   }
 }
@@ -132,13 +132,13 @@ class _InternalNoPendingPlatformMessagesCondition implements WaitCondition {
 
   @override
   bool get condition {
-    final TestDefaultBinaryMessenger binaryMessenger = ServicesBinding.instance!.defaultBinaryMessenger as TestDefaultBinaryMessenger;
+    final TestDefaultBinaryMessenger binaryMessenger = ServicesBinding.instance.defaultBinaryMessenger as TestDefaultBinaryMessenger;
     return binaryMessenger.pendingMessageCount == 0;
   }
 
   @override
   Future<void> wait() async {
-    final TestDefaultBinaryMessenger binaryMessenger = ServicesBinding.instance!.defaultBinaryMessenger as TestDefaultBinaryMessenger;
+    final TestDefaultBinaryMessenger binaryMessenger = ServicesBinding.instance.defaultBinaryMessenger as TestDefaultBinaryMessenger;
     while (!condition) {
       await binaryMessenger.platformMessagesFinished;
     }

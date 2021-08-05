@@ -1,5 +1,4 @@
 {
-  "Add": ["PLUS"],
   "Again": ["AGAIN"],
   "AltLeft": ["ALT_LEFT"],
   "AltRight": ["ALT_RIGHT"],
@@ -8,8 +7,6 @@
   "ArrowLeft": ["DPAD_LEFT"],
   "ArrowRight": ["DPAD_RIGHT"],
   "ArrowUp": ["DPAD_UP"],
-  "Asterisk": ["STAR"],
-  "At": ["AT"],
   "AudioVolumeDown": ["VOLUME_DOWN"],
   "AudioVolumeMute": ["VOLUME_MUTE"],
   "AudioVolumeUp": ["VOLUME_UP"],
@@ -204,7 +201,6 @@
   "None": ["UNKNOWN"],
   "Notification": ["NOTIFICATION"],
   "NumLock": ["NUM_LOCK"],
-  "NumberSign": ["POUND"],
   "Numpad0": ["NUMPAD_0"],
   "Numpad1": ["NUMPAD_1"],
   "Numpad2": ["NUMPAD_2"],

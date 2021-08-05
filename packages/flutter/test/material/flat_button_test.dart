@@ -36,10 +36,10 @@ void main() {
     expect(material.elevation, 0.0);
     expect(material.shadowColor, null);
     expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)));
-    expect(material.textStyle!.color, const Color(0xdd000000));
-    expect(material.textStyle!.fontFamily, 'Roboto');
-    expect(material.textStyle!.fontSize, 14);
-    expect(material.textStyle!.fontWeight, FontWeight.w500);
+    expect(material.textStyle?.color, const Color(0xdd000000));
+    expect(material.textStyle?.fontFamily, 'Roboto');
+    expect(material.textStyle?.fontSize, 14);
+    expect(material.textStyle?.fontWeight, FontWeight.w500);
     expect(material.type, MaterialType.transparency);
 
     final Offset center = tester.getCenter(find.byType(FlatButton));
@@ -56,10 +56,10 @@ void main() {
     expect(material.elevation, 0.0);
     expect(material.shadowColor, null);
     expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)));
-    expect(material.textStyle!.color, const Color(0xdd000000));
-    expect(material.textStyle!.fontFamily, 'Roboto');
-    expect(material.textStyle!.fontSize, 14);
-    expect(material.textStyle!.fontWeight, FontWeight.w500);
+    expect(material.textStyle?.color, const Color(0xdd000000));
+    expect(material.textStyle?.fontFamily, 'Roboto');
+    expect(material.textStyle?.fontSize, 14);
+    expect(material.textStyle?.fontWeight, FontWeight.w500);
     expect(material.type, MaterialType.transparency);
 
     // Disabled FlatButton
@@ -81,10 +81,10 @@ void main() {
     expect(material.elevation, 0.0);
     expect(material.shadowColor, null);
     expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)));
-    expect(material.textStyle!.color, const Color(0x61000000));
-    expect(material.textStyle!.fontFamily, 'Roboto');
-    expect(material.textStyle!.fontSize, 14);
-    expect(material.textStyle!.fontWeight, FontWeight.w500);
+    expect(material.textStyle?.color, const Color(0x61000000));
+    expect(material.textStyle?.fontFamily, 'Roboto');
+    expect(material.textStyle?.fontSize, 14);
+    expect(material.textStyle?.fontWeight, FontWeight.w500);
     expect(material.type, MaterialType.transparency);
   });
 
@@ -458,7 +458,7 @@ void main() {
     addTearDown(gesture.removePointer);
 
     await tester.pump();
-    expect(RendererBinding.instance?.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     await tester.pumpWidget(
       Directionality(
@@ -474,7 +474,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance?.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     // Test default cursor
     await tester.pumpWidget(
@@ -490,7 +490,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance?.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
 
     // Test default cursor when disabled
     await tester.pumpWidget(
@@ -506,7 +506,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance?.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
   testWidgets('Does FlatButton work with focus', (WidgetTester tester) async {
@@ -525,7 +525,7 @@ void main() {
       ),
     );
 
-    WidgetsBinding.instance?.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    WidgetsBinding.instance.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     focusNode.requestFocus();
     await tester.pumpAndSettle();
 

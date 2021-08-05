@@ -23,7 +23,6 @@ class TableBorder {
     this.left = BorderSide.none,
     this.horizontalInside = BorderSide.none,
     this.verticalInside = BorderSide.none,
-    this.borderRadius = BorderRadius.zero,
   });
 
   /// A uniform border with all sides the same color and width.
@@ -33,10 +32,9 @@ class TableBorder {
     Color color = const Color(0xFF000000),
     double width = 1.0,
     BorderStyle style = BorderStyle.solid,
-    BorderRadius borderRadius = BorderRadius.zero,
   }) {
     final BorderSide side = BorderSide(color: color, width: width, style: style);
-    return TableBorder(top: side, right: side, bottom: side, left: side, horizontalInside: side, verticalInside: side, borderRadius: borderRadius);
+    return TableBorder(top: side, right: side, bottom: side, left: side, horizontalInside: side, verticalInside: side);
   }
 
   /// Creates a border for a table where all the interior sides use the same
@@ -72,9 +70,6 @@ class TableBorder {
 
   /// The vertical interior sides of this border.
   final BorderSide verticalInside;
-
-  /// The [BorderRadius] to use when painting the corners of this border.
-  final BorderRadius borderRadius;
 
   /// The widths of the sides of this border represented as an [EdgeInsets].
   ///
@@ -261,14 +256,7 @@ class TableBorder {
         }
       }
     }
-    if(!isUniform || borderRadius == BorderRadius.zero)
-      paintBorder(canvas, rect, top: top, right: right, bottom: bottom, left: left);
-    else {
-      final RRect outer = borderRadius.toRRect(rect);
-      final RRect inner = outer.deflate(top.width);
-      final Paint paint = Paint()..color = top.color;
-      canvas.drawDRRect(outer, inner, paint);
-    }
+    paintBorder(canvas, rect, top: top, right: right, bottom: bottom, left: left);
   }
 
   @override
@@ -283,13 +271,12 @@ class TableBorder {
         && other.bottom == bottom
         && other.left == left
         && other.horizontalInside == horizontalInside
-        && other.verticalInside == verticalInside
-        && other.borderRadius == borderRadius;
+        && other.verticalInside == verticalInside;
   }
 
   @override
-  int get hashCode => hashValues(top, right, bottom, left, horizontalInside, verticalInside, borderRadius);
+  int get hashCode => hashValues(top, right, bottom, left, horizontalInside, verticalInside);
 
   @override
-  String toString() => 'TableBorder($top, $right, $bottom, $left, $horizontalInside, $verticalInside, $borderRadius)';
+  String toString() => 'TableBorder($top, $right, $bottom, $left, $horizontalInside, $verticalInside)';
 }
