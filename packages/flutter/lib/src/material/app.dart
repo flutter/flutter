@@ -693,9 +693,13 @@ class MaterialApp extends StatefulWidget {
 /// [GlowingOverscrollIndicator] to [Scrollable] descendants when executing on
 /// [TargetPlatform.android] and [TargetPlatform.fuchsia].
 ///
-/// When using the desktop platform, a [Scrollbar] is applied. If the [Axis] of
-/// the [ScrollView] is [Axis.horizontal], the [Scrollbar.isAlwaysShown] will
-/// be true. This is because horizontal ScrollViews have lower discoverability.
+/// The [buildScrollbar] function is called by the [Scrollable] to wrap with a
+/// [Scrollbar] when appropriate. On all platforms, when the Scrollable [Axis] is
+/// [Axis.horizontal], an always visible Scrollbar will be applied. This is
+/// because horizontal [ScrollView]s have lower discoverability as scrollable
+/// content. When the Axis is [Axis.vertical] a Scrollbar is applied on
+/// desktop platforms. In this vertical case, [Scrollbar.isAlwaysShown] is not
+/// set and will defer to the inherited [ScrollbarTheme].
 ///
 /// See also:
 ///
