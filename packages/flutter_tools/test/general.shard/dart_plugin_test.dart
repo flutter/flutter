@@ -126,6 +126,45 @@ void main() {
         );
       });
 
+      testWithoutContext('selects inline implementation', () async {
+        final Set<String> directDependencies = <String>{};
+
+        final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(<Plugin>[
+          Plugin.fromYaml(
+            'url_launcher',
+            '',
+            YamlMap.wrap(<String, dynamic>{
+              'platforms': <String, dynamic>{
+                'android': <String, dynamic>{
+                  'dartPluginClass': 'UrlLauncherAndroid',
+                },
+                'ios': <String, dynamic>{
+                  'dartPluginClass': 'UrlLauncherIos',
+                },
+              },
+            }),
+            <String>[],
+            fileSystem: fs,
+            appDependencies: directDependencies,
+          ),
+        ]);
+        expect(resolutions.length, equals(2));
+        expect(resolutions[0].toMap(), equals(
+          <String, String>{
+            'pluginName': 'url_launcher',
+            'dartClass': 'UrlLauncherAndroid',
+            'platform': 'android',
+          })
+        );
+        expect(resolutions[1].toMap(), equals(
+          <String, String>{
+            'pluginName': 'url_launcher',
+            'dartClass': 'UrlLauncherIos',
+            'platform': 'ios',
+          })
+        );
+      });
+
       testWithoutContext('selects default implementation', () async {
         final Set<String> directDependencies = <String>{};
 
@@ -439,123 +478,6 @@ void main() {
           message: 'Please resolve the errors',
         ));
       });
-
-      testUsingContext('provides error when plugin pubspec.yaml doesn\'t have "implementation" nor "default_implementation"', () async {
-        final Set<String> directDependencies = <String>{
-          'url_launcher_linux_1',
-        };
-        expect(() {
-          resolvePlatformImplementation(<Plugin>[
-            Plugin.fromYaml(
-              'url_launcher_linux_1',
-              '',
-              YamlMap.wrap(<String, dynamic>{
-                'platforms': <String, dynamic>{
-                  'linux': <String, dynamic>{
-                    'dartPluginClass': 'UrlLauncherPluginLinux',
-                  },
-                },
-              }),
-              <String>[],
-              fileSystem: fs,
-              appDependencies: directDependencies,
-            ),
-          ]);
-        },
-        throwsToolExit(
-          message: 'Please resolve the errors'
-        ));
-        expect(
-          testLogger.errorText,
-          "Plugin `url_launcher_linux_1` doesn't implement a plugin interface, "
-          'nor sets a default implementation in pubspec.yaml.\n\n'
-          'To set a default implementation, use:\n'
-          'flutter:\n'
-          '  plugin:\n'
-          '    platforms:\n'
-          '      linux:\n'
-          '        default_package: <plugin-implementation>\n'
-          '\n'
-          'To implement an interface, use:\n'
-          'flutter:\n'
-          '  plugin:\n'
-          '    implements: <plugin-interface>'
-          '\n\n'
-        );
-      });
-
-      testUsingContext('provides all errors when plugin pubspec.yaml doesn\'t have "implementation" nor "default_implementation"', () async {
-        final Set<String> directDependencies = <String>{
-          'url_launcher_linux',
-          'url_launcher_windows',
-        };
-        expect(() {
-          resolvePlatformImplementation(<Plugin>[
-            Plugin.fromYaml(
-              'url_launcher_linux',
-              '',
-              YamlMap.wrap(<String, dynamic>{
-                'platforms': <String, dynamic>{
-                  'linux': <String, dynamic>{
-                    'dartPluginClass': 'UrlLauncherPluginLinux',
-                  },
-                },
-              }),
-              <String>[],
-              fileSystem: fs,
-              appDependencies: directDependencies,
-            ),
-            Plugin.fromYaml(
-              'url_launcher_windows',
-              '',
-              YamlMap.wrap(<String, dynamic>{
-                'platforms': <String, dynamic>{
-                  'windows': <String, dynamic>{
-                    'dartPluginClass': 'UrlLauncherPluginWindows',
-                  },
-                },
-              }),
-              <String>[],
-              fileSystem: fs,
-              appDependencies: directDependencies,
-            ),
-          ]);
-        },
-        throwsToolExit(
-          message: 'Please resolve the errors'
-        ));
-        expect(
-          testLogger.errorText,
-          "Plugin `url_launcher_linux` doesn't implement a plugin interface, "
-          'nor sets a default implementation in pubspec.yaml.\n\n'
-          'To set a default implementation, use:\n'
-          'flutter:\n'
-          '  plugin:\n'
-          '    platforms:\n'
-          '      linux:\n'
-          '        default_package: <plugin-implementation>\n'
-          '\n'
-          'To implement an interface, use:\n'
-          'flutter:\n'
-          '  plugin:\n'
-          '    implements: <plugin-interface>'
-          '\n\n'
-          "Plugin `url_launcher_windows` doesn't implement a plugin interface, "
-          'nor sets a default implementation in pubspec.yaml.\n\n'
-          'To set a default implementation, use:\n'
-          'flutter:\n'
-          '  plugin:\n'
-          '    platforms:\n'
-          '      windows:\n'
-          '        default_package: <plugin-implementation>\n'
-          '\n'
-          'To implement an interface, use:\n'
-          'flutter:\n'
-          '  plugin:\n'
-          '    implements: <plugin-interface>'
-          '\n\n'
-        );
-      });
     });
 
     group('generateMainDartWithPluginRegistrant', () {
@@ -567,6 +489,22 @@ void main() {
           flutterManifest,
           fs,
           <String, String>{
+          'url_launcher_android': '''
+  flutter:
+    plugin:
+      implements: url_launcher
+      platforms:
+        android:
+          dartPluginClass: AndroidPlugin
+''',
+          'url_launcher_ios': '''
+  flutter:
+    plugin:
+      implements: url_launcher
+      platforms:
+        ios:
+          dartPluginClass: IosPlugin
+''',
           'url_launcher_macos': '''
   flutter:
     plugin:
@@ -634,6 +572,8 @@ void main() {
           '\n'
           "import 'package:app/main.dart' as entrypoint;\n"
           "import 'dart:io'; // flutter_ignore: dart_io_import.\n"
+          "import 'package:url_launcher_android/url_launcher_android.dart';\n"
+          "import 'package:url_launcher_ios/url_launcher_ios.dart';\n"
           "import 'package:url_launcher_linux/url_launcher_linux.dart';\n"
           "import 'package:awesome_macos/awesome_macos.dart';\n"
           "import 'package:url_launcher_macos/url_launcher_macos.dart';\n"
@@ -644,7 +584,29 @@ void main() {
           '\n'
           "  @pragma('vm:entry-point')\n"
           '  static void register() {\n'
-          '    if (Platform.isLinux) {\n'
+          '    if (Platform.isAndroid) {\n'
+          '      try {\n'
+          '        AndroidPlugin.registerWith();\n'
+          '      } catch (err) {\n'
+          '        print(\n'
+          "          '`url_launcher_android` threw an error: \$err. '\n"
+          "          'The app may not function as expected until you remove this plugin from pubspec.yaml'\n"
+          '        );\n'
+          '        rethrow;\n'
+          '      }\n'
+          '\n'
+          '    } else if (Platform.isIOS) {\n'
+          '      try {\n'
+          '        IosPlugin.registerWith();\n'
+          '      } catch (err) {\n'
+          '        print(\n'
+          "          '`url_launcher_ios` threw an error: \$err. '\n"
+          "          'The app may not function as expected until you remove this plugin from pubspec.yaml'\n"
+          '        );\n'
+          '        rethrow;\n'
+          '      }\n'
+          '\n'
+          '    } else if (Platform.isLinux) {\n'
           '      try {\n'
           '        LinuxPlugin.registerWith();\n'
           '      } catch (err) {\n'
