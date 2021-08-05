@@ -57,5 +57,5 @@ void main() {
       throwsA(isA<String>().having((String message) => message, 'message', 'Object has been disposed.')),
     );
     expect(capturedImage.debugDisposed, true);
-  }, skip: kIsWeb); // Browser doesn't support approximateBytesUsed and doesn't rasterize the picture at this time.
+  }, skip: kIsWeb); // [intended] Browser doesn't support approximateBytesUsed and doesn't rasterize the picture at this time.
 }

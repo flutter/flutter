@@ -204,5 +204,5 @@ void main() {
     expect(find.text('Copy'), findsNothing);
     expect(find.text('Paste'), findsNothing);
     expect(find.text('Select all'), findsNothing);
-  }, skip: kIsWeb);
+  }, skip: kIsWeb); // [intended] We don't show the toolbar on the web.
 }
