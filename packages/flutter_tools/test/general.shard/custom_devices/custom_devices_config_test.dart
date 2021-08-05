@@ -17,201 +17,138 @@ Map<String, dynamic> copyJsonObjectWith(
 ) => Map<String, dynamic>.of(object)..addAll(overrides);
 
 void main() {
-  testWithoutContext("CustomDevicesConfig logs no error when 'custom-devices' key is missing in config", () {
-    final BufferLogger logger = BufferLogger.test();
-    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-    final Directory directory = fileSystem.directory('custom_devices_config');
+  late BufferLogger logger;
+  late MemoryFileSystem fileSystem;
+  late Directory directory;
+  late CustomDevicesConfig config;
 
-    writeCustomDevicesConfigFile(
-      directory
-    );
-
-    final CustomDevicesConfig customDevicesConfig = CustomDevicesConfig.test(
+  void loadConfig() {
+    config = CustomDevicesConfig.test(
       fileSystem: fileSystem,
       directory: directory,
-      logger: logger
+      logger: logger,
     );
+  }
 
-    expect(customDevicesConfig.devices, hasLength(0));
-    expect(logger.errorText, hasLength(0));
-  });
-
-  testWithoutContext("CustomDevicesConfig logs error when 'custom-devices' key is not a JSON array", () {
-    final BufferLogger logger = BufferLogger.test();
-    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-    final Directory directory = fileSystem.directory('custom_devices_config');
-
-    writeCustomDevicesConfigFile(
+  void writeConfig(dynamic json) {
+    return writeCustomDevicesConfigFile(
       directory,
-      json: <String, dynamic>{
+      json: json
+    );
+  }
+
+  group('custom devices config', () {
+    setUp(() {
+      logger = BufferLogger.test();
+      fileSystem = MemoryFileSystem.test();
+      directory = fileSystem.directory('custom_devices_config');
+    });
+
+    testWithoutContext("CustomDevicesConfig logs no error when 'custom-devices' key is missing in config", () {
+      writeConfig(null);
+      loadConfig();
+
+      expect(config.devices, hasLength(0));
+      expect(logger.errorText, hasLength(0));
+    });
+
+    testWithoutContext("CustomDevicesConfig logs error when 'custom-devices' key is not a JSON array", () {
+
+      writeConfig(<String, dynamic>{
         'test': 'testvalue'
-      }
-    );
+      });
+      loadConfig();
 
-    final CustomDevicesConfig customDevicesConfig = CustomDevicesConfig.test(
-      fileSystem: fileSystem,
-      directory: directory,
-      logger: logger
-    );
+      const String msg = "Could not load custom devices config. config['custom-devices'] is not a JSON array.";
+      expect(() => config.devices, throwsA(const CustomDeviceRevivalException(msg)));
+      expect(logger.errorText, contains(msg));
+    });
 
-    const String msg = "Could not load custom devices config. config['custom-devices'] is not a JSON array.";
-    expect(() => customDevicesConfig.devices, throwsA(const CustomDeviceRevivalException(msg)));
-    expect(logger.errorText, contains(msg));
-  });
+    testWithoutContext('CustomDeviceRevivalException serialization', () {
+      expect(
+        const CustomDeviceRevivalException('testmessage').toString(),
+        equals('testmessage')
+      );
+      expect(
+        const CustomDeviceRevivalException.fromDescriptions('testfielddescription', 'testexpectedvaluedescription').toString(),
+        equals('Expected testfielddescription to be testexpectedvaluedescription.')
+      );
+    });
 
-  testWithoutContext('CustomDeviceRevivalException serialization', () {
-    expect(
-      const CustomDeviceRevivalException('testmessage').toString(),
-      equals('testmessage')
-    );
-    expect(
-      const CustomDeviceRevivalException.fromDescriptions('testfielddescription', 'testexpectedvaluedescription').toString(),
-      equals('Expected testfielddescription to be testexpectedvaluedescription.')
-    );
-  });
+    testWithoutContext('CustomDevicesConfig can load test config and logs no errors', () {
+      writeConfig(<dynamic>[testConfigJson]);
+      loadConfig();
 
-  testWithoutContext('CustomDevicesConfig can load test config and logs no errors', () {
-    final BufferLogger logger = BufferLogger.test();
-    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-    final Directory directory = fileSystem.directory('custom_devices_config');
+      final List<CustomDeviceConfig> devices = config.devices;
+      expect(logger.errorText, hasLength(0));
+      expect(devices, hasLength(1));
+      expect(devices.first, equals(testConfig));
+    });
 
-    writeCustomDevicesConfigFile(
-      directory,
-      json: <dynamic>[
-        testConfigJson
-      ],
-    );
-
-    final CustomDevicesConfig customDevicesConfig = CustomDevicesConfig.test(
-      fileSystem: fileSystem,
-      directory: directory,
-      logger: logger
-    );
-
-    final List<CustomDeviceConfig> devices = customDevicesConfig.devices;
-    expect(logger.errorText, hasLength(0));
-    expect(devices, hasLength(1));
-    expect(devices.first, equals(testConfig));
-  });
-
-  testWithoutContext('CustomDevicesConfig logs error when id is null', () {
-    final BufferLogger logger = BufferLogger.test();
-    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-    final Directory directory = fileSystem.directory('custom_devices_config');
-
-    writeCustomDevicesConfigFile(
-      directory,
-      json: <dynamic>[
+    testWithoutContext('CustomDevicesConfig logs error when id is null', () {
+      writeConfig(<dynamic>[
         copyJsonObjectWith(
           testConfigJson,
           <String, dynamic>{
             'id': null
           },
         ),
-      ],
-    );
+      ]);
 
-    final CustomDevicesConfig customDevicesConfig = CustomDevicesConfig.test(
-      fileSystem: fileSystem,
-      directory: directory,
-      logger: logger
-    );
+      loadConfig();
 
-    const String msg = 'Could not load custom device from config index 0: Expected id to be a string.';
-    expect(() => customDevicesConfig.devices, throwsA(const CustomDeviceRevivalException(msg)));
-    expect(logger.errorText, contains(msg));
-  });
+      const String msg = 'Could not load custom device from config index 0: Expected id to be a string.';
+      expect(() => config.devices, throwsA(const CustomDeviceRevivalException(msg)));
+      expect(logger.errorText, contains(msg));
+    });
 
-  testWithoutContext('CustomDevicesConfig logs error when id is not a string', () {
-    final BufferLogger logger = BufferLogger.test();
-    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-    final Directory directory = fileSystem.directory('custom_devices_config');
-
-    writeCustomDevicesConfigFile(
-      directory,
-      json: <dynamic>[
+    testWithoutContext('CustomDevicesConfig logs error when id is not a string', () {
+      writeConfig(<dynamic>[
         copyJsonObjectWith(
           testConfigJson,
           <String, dynamic>{
             'id': 1
           },
         ),
-      ],
-    );
+      ]);
+      loadConfig();
 
-    final CustomDevicesConfig customDevicesConfig = CustomDevicesConfig.test(
-      fileSystem: fileSystem,
-      directory: directory,
-      logger: logger
-    );
+      const String msg = 'Could not load custom device from config index 0: Expected id to be a string.';
+      expect(() => config.devices, throwsA(const CustomDeviceRevivalException(msg)));
+      expect(logger.errorText, contains(msg));
+    });
 
-    const String msg = 'Could not load custom device from config index 0: Expected id to be a string.';
-    expect(() => customDevicesConfig.devices, throwsA(const CustomDeviceRevivalException(msg)));
-    expect(logger.errorText, contains(msg));
-  });
-
-  testWithoutContext('CustomDevicesConfig logs error when label is not a string', () {
-    final BufferLogger logger = BufferLogger.test();
-    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-    final Directory directory = fileSystem.directory('custom_devices_config');
-
-    writeCustomDevicesConfigFile(
-      directory,
-      json: <dynamic>[
+    testWithoutContext('CustomDevicesConfig logs error when label is not a string', () {
+      writeConfig(<dynamic>[
         copyJsonObjectWith(
           testConfigJson,
           <String, dynamic>{
             'label': 1
           },
         ),
-      ],
-    );
+      ]);
+      loadConfig();
 
-    final CustomDevicesConfig customDevicesConfig = CustomDevicesConfig.test(
-      fileSystem: fileSystem,
-      directory: directory,
-      logger: logger
-    );
+      const String msg = 'Could not load custom device from config index 0: Expected label to be a string.';
+      expect(() => config.devices, throwsA(const CustomDeviceRevivalException(msg)));
+      expect(logger.errorText, contains(msg));
+    });
 
-    const String msg = 'Could not load custom device from config index 0: Expected label to be a string.';
-    expect(() => customDevicesConfig.devices, throwsA(const CustomDeviceRevivalException(msg)));
-    expect(logger.errorText, contains(msg));
-  });
-
-  testWithoutContext('CustomDevicesConfig loads config when postBuild is null', () {
-    final BufferLogger logger = BufferLogger.test();
-    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-    final Directory directory = fileSystem.directory('custom_devices_config');
-
-    writeCustomDevicesConfigFile(
-      directory,
-      json: <dynamic>[
+    testWithoutContext('CustomDevicesConfig loads config when postBuild is null', () {
+      writeConfig(<dynamic>[
         copyJsonObjectWith(
           testConfigJson,
           <String, dynamic>{
             'postBuild': null
           },
         ),
-      ],
-    );
+      ]);
+      loadConfig();
+      expect(config.devices, hasLength(1));
+    });
 
-    final CustomDevicesConfig customDevicesConfig = CustomDevicesConfig.test(
-      fileSystem: fileSystem,
-      directory: directory,
-      logger: logger,
-    );
-
-    expect(customDevicesConfig.devices, hasLength(1));
-  });
-
-  testWithoutContext('CustomDevicesConfig loads config without port forwarding', () {
-    final BufferLogger logger = BufferLogger.test();
-    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-    final Directory directory = fileSystem.directory('custom_devices_config');
-
-    writeCustomDevicesConfigFile(
-      directory,
-      json: <dynamic>[
+    testWithoutContext('CustomDevicesConfig loads config without port forwarding', () {
+      writeConfig(<dynamic>[
         copyJsonObjectWith(
           testConfigJson,
           <String, dynamic>{
@@ -219,46 +156,96 @@ void main() {
             'forwardPortSuccessRegex': null
           },
         ),
-      ],
-    );
+      ]);
+      loadConfig();
 
-    final CustomDevicesConfig customDevicesConfig = CustomDevicesConfig.test(
-      fileSystem: fileSystem,
-      directory: directory,
-      logger: logger,
-    );
+      final List<CustomDeviceConfig> devices = config.devices;
+      expect(devices, hasLength(1));
+      expect(devices.first.usesPortForwarding, false);
+    });
 
-    final List<CustomDeviceConfig> devices = customDevicesConfig.devices;
-
-    expect(devices, hasLength(1));
-    expect(devices.first.usesPortForwarding, false);
-  });
-
-  testWithoutContext('CustomDevicesConfig logs error when port forward command is given but not regex', () {
-    final BufferLogger logger = BufferLogger.test();
-    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-    final Directory directory = fileSystem.directory('custom_devices_config');
-
-    writeCustomDevicesConfigFile(
-      directory,
-      json: <dynamic>[
+    testWithoutContext('CustomDevicesConfig logs error when port forward command is given but not regex', () {
+      writeConfig(<dynamic>[
         copyJsonObjectWith(
           testConfigJson,
           <String, dynamic>{
             'forwardPortSuccessRegex': null
           },
         ),
-      ],
-    );
+      ]);
+      loadConfig();
 
-    final CustomDevicesConfig customDevicesConfig = CustomDevicesConfig.test(
-      fileSystem: fileSystem,
-      directory: directory,
-      logger: logger,
-    );
+      const String msg = 'Could not load custom device from config index 0: When forwardPort is given, forwardPortSuccessRegex must be specified too.';
+      expect(() => config.devices, throwsA(const CustomDeviceRevivalException(msg)));
+      expect(logger.errorText, contains(msg));
+    });
 
-    const String msg = 'Could not load custom device from config index 0: When forwardPort is given, forwardPortSuccessRegex must be specified too.';
-    expect(() => customDevicesConfig.devices, throwsA(const CustomDeviceRevivalException(msg)));
-    expect(logger.errorText, contains(msg));
+    testWithoutContext('CustomDevicesConfig logs error when embedder name is neither null or a string', () {
+      writeConfig(<dynamic>[
+        copyJsonObjectWith(
+          testConfigJson,
+          <String, dynamic>{
+            'embedder': 123
+          },
+        ),
+      ]);
+      loadConfig();
+
+      const String msg = 'Could not load custom device from config index 0: Expected embedder to be string or null.';
+      expect(() => config.devices, throwsA(const CustomDeviceRevivalException(msg)));
+      expect(logger.errorText, contains(msg));
+    });
+
+    testWithoutContext('CustomDevicesConfig.supportsPlugins works', () {
+      writeConfig(<dynamic>[
+        copyJsonObjectWith(testConfigJson, const <String, dynamic>{
+          'embedder': 'testembedder',
+          'configureNativeProject': <String>['testconfigurenativeproject'],
+          'buildNativeProject': <String>['testbuildnativeproject'],
+        }),
+      ]);
+      loadConfig();
+
+      expect(config.devices.single.supportsPlugins, isTrue);
+    });
+
+    testWithoutContext('CustomDevicesConfig.supportsPlugins works', () {
+      writeConfig(<dynamic>[
+        copyJsonObjectWith(testConfigJson, const <String, dynamic>{
+          'embedder': null,
+          'configureNativeProject': <String>['testconfigurenativeproject'],
+          'buildNativeProject': <String>['testbuildnativeproject'],
+        }),
+      ]);
+      loadConfig();
+
+      expect(config.devices.single.supportsPlugins, isFalse);
+    });
+
+    testWithoutContext('CustomDevicesConfig.supportsPlugins works', () {
+      writeConfig(<dynamic>[
+        copyJsonObjectWith(testConfigJson, <String, dynamic>{
+          'embedder': 'testembeddername',
+          'configureNativeProject': null,
+          'buildNativeProject': null,
+        }),
+      ]);
+      loadConfig();
+
+      expect(config.devices.single.supportsPlugins, isFalse);
+    });
+
+    testWithoutContext('CustomDevicesConfig.supportsPlugins works', () {
+      writeConfig(<dynamic>[
+        copyJsonObjectWith(testConfigJson, const <String, dynamic>{
+          'embedder': 'testembeddername',
+          'configureNativeProject': <String>['testconfigurenativeproject'],
+          'buildNativeProject': null,
+        }),
+      ]);
+      loadConfig();
+
+      expect(config.devices.single.supportsPlugins, isTrue);
+    });
   });
 }

@@ -81,6 +81,7 @@ void main() {
     FakeWebProject webProject;
     FakeWindowsProject windowsProject;
     FakeLinuxProject linuxProject;
+    FakeCustomEmbedderProject customEmbedderProject;
     FakeSystemClock systemClock;
     FlutterVersion flutterVersion;
     // A Windows-style filesystem. This is not populated by default, so tests
@@ -154,6 +155,18 @@ void main() {
         ..cmakeFile = linuxManagedDirectory.parent.childFile('CMakeLists.txt')
         ..generatedPluginCmakeFile = linuxManagedDirectory.childFile('generated_plugins.mk')
         ..exists = false;
+
+      customEmbedderProject = FakeCustomEmbedderProject();
+      flutterProject.customEmbedderProjects = <CustomEmbedderProject>[customEmbedderProject];
+      final Directory customEmbedderBaseDir = flutterProject.directory.childDirectory('x-test');
+      final Directory customEmbedderEphemeralDir = customEmbedderBaseDir.childDirectory('ephemeral');
+      customEmbedderProject
+        ..embedderName = 'test'
+        ..pluginConfigKey = 'x-test'
+        ..baseDirectory = customEmbedderBaseDir
+        ..ephemeralDirectory = customEmbedderEphemeralDir
+        ..pluginSymlinkDirectory = customEmbedderEphemeralDir.childDirectory('.plugin_symlinks')
+        ..exists = false;
     }
 
     setUp(() async {
@@ -194,6 +207,7 @@ void main() {
         android:
           pluginClass: PLUGIN_CLASS
           package: AndroidPackage
+        x-test: {}
   ''';
 
       final List<Directory> directories = <Directory>[];
@@ -554,6 +568,7 @@ dependencies:
         expect(plugins['windows'], <dynamic>[]);
         expect(plugins['linux'], <dynamic>[]);
         expect(plugins['web'], <dynamic>[]);
+        expect(plugins['x-test'], <dynamic>[]);
 
         final List<dynamic> expectedDependencyGraph = <dynamic>[
           <String, dynamic> {
@@ -1418,7 +1433,7 @@ flutter:
       FeatureFlags featureFlags;
 
       setUp(() {
-        featureFlags = TestFeatureFlags(isLinuxEnabled: true, isWindowsEnabled: true);
+        featureFlags = TestFeatureFlags(isLinuxEnabled: true, isWindowsEnabled: true, areCustomDevicesEnabled: true);
       });
 
       testUsingContext('Symlinks are created for Linux plugins', () async {
@@ -1447,13 +1462,41 @@ flutter:
         FeatureFlags: () => featureFlags,
       });
 
+      testUsingContext('Symlinks are created for custom devices plugins', () async {
+        customEmbedderProject.exists = true;
+        createFakePlugin(fs);
+        // refreshPluginsList should call createPluginSymlinks.
+        await refreshPluginsList(flutterProject);
+
+        expect(customEmbedderProject.pluginSymlinkDirectory.childLink('some_plugin').existsSync(), true);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => featureFlags,
+      });
+
+      testUsingContext('Symlinks are not created for custom devices plugins when feature is disabled', () async {
+        customEmbedderProject.exists = true;
+        createFakePlugin(fs);
+        // refreshPluginsList should call createPluginSymlinks.
+        await refreshPluginsList(flutterProject, featureFlagsOverride: TestFeatureFlags());
+
+        expect(customEmbedderProject.pluginSymlinkDirectory.childLink('some_plugin').existsSync(), false);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => featureFlags,
+      });
+
       testUsingContext('Existing symlinks are removed when no longer in use with force', () {
         linuxProject.exists = true;
         windowsProject.exists = true;
+        customEmbedderProject.exists = true;
 
         final List<File> dummyFiles = <File>[
           flutterProject.linux.pluginSymlinkDirectory.childFile('dummy'),
           flutterProject.windows.pluginSymlinkDirectory.childFile('dummy'),
+          flutterProject.customEmbedderProjects.single.pluginSymlinkDirectory.childFile('dummy'),
         ];
         for (final File file in dummyFiles) {
           file.createSync(recursive: true);
@@ -1473,10 +1516,12 @@ flutter:
       testUsingContext('Existing symlinks are removed automatically on refresh when no longer in use', () async {
         linuxProject.exists = true;
         windowsProject.exists = true;
+        customEmbedderProject.exists = true;
 
         final List<File> dummyFiles = <File>[
           flutterProject.linux.pluginSymlinkDirectory.childFile('dummy'),
           flutterProject.windows.pluginSymlinkDirectory.childFile('dummy'),
+          flutterProject.customEmbedderProjects.single.pluginSymlinkDirectory.childFile('dummy'),
         ];
         for (final File file in dummyFiles) {
           file.createSync(recursive: true);
@@ -1498,10 +1543,12 @@ flutter:
       testUsingContext('createPluginSymlinks is a no-op without force when up to date', () {
         linuxProject.exists = true;
         windowsProject.exists = true;
+        customEmbedderProject.exists = true;
 
         final List<File> dummyFiles = <File>[
           flutterProject.linux.pluginSymlinkDirectory.childFile('dummy'),
           flutterProject.windows.pluginSymlinkDirectory.childFile('dummy'),
+          flutterProject.customEmbedderProjects.single.pluginSymlinkDirectory.childFile('dummy'),
         ];
         for (final File file in dummyFiles) {
           file.createSync(recursive: true);
@@ -1522,12 +1569,14 @@ flutter:
       testUsingContext('createPluginSymlinks repairs missing links', () async {
         linuxProject.exists = true;
         windowsProject.exists = true;
+        customEmbedderProject.exists = true;
         createFakePlugin(fs);
         await refreshPluginsList(flutterProject);
 
         final List<Link> links = <Link>[
           linuxProject.pluginSymlinkDirectory.childLink('some_plugin'),
           windowsProject.pluginSymlinkDirectory.childLink('some_plugin'),
+          customEmbedderProject.pluginSymlinkDirectory.childLink('some_plugin'),
         ];
         for (final Link link in links) {
           link.deleteSync();
@@ -1580,15 +1629,23 @@ flutter:
         android:
           pluginClass: SomePlugin
           package: AndroidPackage
+        x-test: {}
   ''';
         _createPubspecFile(pluginYaml);
-        validatePubspecForPlugin(projectDir: projectDir.absolute.path, pluginClass: 'SomePlugin', expectedPlatforms: <String>[
-          'ios', 'macos', 'windows', 'linux', 'android', 'web'
-        ], androidIdentifier: 'AndroidPackage', webFileName: 'lib/SomeFile.dart');
+        validatePubspecForPlugin(
+          projectDir: projectDir.absolute.path,
+          pluginClass: 'SomePlugin',
+          expectedPlatforms: <String>[
+            'ios', 'macos', 'windows', 'linux', 'android', 'web',
+          ],
+          expectedEmptyPlatforms: <String>['x-test'],
+          androidIdentifier: 'AndroidPackage',
+          webFileName: 'lib/SomeFile.dart'
+        );
       });
 
       testUsingContext('createPlatformsYamlMap should create the correct map', () async {
-        final YamlMap map = Plugin.createPlatformsYamlMap(<String>['ios', 'android', 'linux'], 'PluginClass', 'some.android.package');
+        final YamlMap map = Plugin.createPlatformsYamlMap(<String>['ios', 'android', 'linux'], 'PluginClass', 'some.android.package', <String>['x-test']);
         expect(map['ios'], <String, String> {
           'pluginClass' : 'PluginClass'
         });
@@ -1599,6 +1656,7 @@ flutter:
         expect(map['linux'], <String, String> {
           'pluginClass' : 'PluginClass'
         });
+        expect(map['x-test'], <String, String>{});
       });
 
       testUsingContext('createPlatformsYamlMap should create empty map', () async {
@@ -1685,6 +1743,9 @@ class FakeFlutterProject extends Fake implements FlutterProject {
 
   @override
   WindowsUwpProject windowsUwp;
+
+  @override
+  List<CustomEmbedderProject> customEmbedderProjects;
 }
 
 class FakeMacOSProject extends Fake implements MacOSProject {
@@ -1825,6 +1886,32 @@ class FakeLinuxProject extends Fake implements LinuxProject {
   @override
   bool existsSync() => exists;
 
+}
+
+class FakeCustomEmbedderProject extends Fake implements CustomEmbedderProject {
+  @override
+  String embedderName;
+
+  @override
+  Directory baseDirectory;
+
+  @override
+  Directory ephemeralDirectory;
+
+  @override
+  Directory pluginSymlinkDirectory;
+
+  bool exists;
+
+  @override
+  bool existsSync() => exists;
+
+  @override
+  String pluginConfigKey;
+
+  //Future<void> writePluginFiles() async {}
+
+  //Future<void> ensureReadyForPlatformSpecificTooling() async {}
 }
 
 class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {

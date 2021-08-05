@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
+import 'package:flutter_tools/src/custom_devices/custom_devices_config.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -23,6 +24,7 @@ import 'package:test/fake.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/custom_devices_common.dart';
 import '../src/fakes.dart';
 
 void main() {
@@ -41,9 +43,8 @@ void main() {
 
       testWithoutContext('invalid utf8 throws a tool exit', () {
         final FileSystem fileSystem = MemoryFileSystem.test();
-        final FlutterProjectFactory projectFactory = FlutterProjectFactory(
+        final FlutterProjectFactory projectFactory = makeProjectFactory(
           fileSystem: fileSystem,
-          logger: BufferLogger.test(),
         );
         fileSystem.file('pubspec.yaml').writeAsBytesSync(<int>[0xFFFE]);
 
@@ -256,7 +257,7 @@ void main() {
         FileSystem: () => MemoryFileSystem.test(),
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
-        FlutterProjectFactory: () => FlutterProjectFactory(
+        FlutterProjectFactory: () => makeProjectFactory(
           logger: logger,
           fileSystem: globals.fs,
         ),
@@ -270,7 +271,7 @@ void main() {
         FileSystem: () => MemoryFileSystem.test(),
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
-        FlutterProjectFactory: () => FlutterProjectFactory(
+        FlutterProjectFactory: () => makeProjectFactory(
           logger: logger,
           fileSystem: globals.fs,
         ),
@@ -285,7 +286,7 @@ void main() {
         FileSystem: () => MemoryFileSystem.test(),
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-        FlutterProjectFactory: () => FlutterProjectFactory(
+        FlutterProjectFactory: () => makeProjectFactory(
           logger: logger,
           fileSystem: globals.fs,
         ),
@@ -300,7 +301,7 @@ void main() {
         FileSystem: () => MemoryFileSystem.test(),
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
-        FlutterProjectFactory: () => FlutterProjectFactory(
+        FlutterProjectFactory: () => makeProjectFactory(
           logger: logger,
           fileSystem: globals.fs,
         ),
@@ -385,7 +386,7 @@ void main() {
       setUp(() {
         fs = MemoryFileSystem.test();
         xcodeProjectInterpreter = XcodeProjectInterpreter.test(processManager: FakeProcessManager.any());
-        flutterProjectFactory = FlutterProjectFactory(
+        flutterProjectFactory = makeProjectFactory(
           logger: logger,
           fileSystem: fs,
         );
@@ -424,7 +425,7 @@ apply plugin: 'kotlin-android'
         fs = MemoryFileSystem.test();
         testPlistUtils = FakePlistParser();
         mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
-        flutterProjectFactory = FlutterProjectFactory(
+        flutterProjectFactory = makeProjectFactory(
           fileSystem: fs,
           logger: logger,
         );
@@ -661,6 +662,62 @@ apply plugin: 'kotlin-android'
         );
       });
     });
+
+    group('project factory with custom devices', () {
+      MemoryFileSystem fs;
+      BufferLogger logger;
+      CustomDevicesConfig config;
+
+      setUp(() {
+        fs = MemoryFileSystem.test();
+        logger = BufferLogger.test();
+        config = CustomDevicesConfig.test(
+          fileSystem: fs,
+          directory: fs.directory('custom_devices'),
+          logger: logger
+        );
+      });
+
+      void writeAndLoadConfig(dynamic json) {
+        writeCustomDevicesConfigFile(fs.directory('custom_devices'), json: json);
+        config = CustomDevicesConfig.test(
+          fileSystem: fs,
+          directory: fs.directory('custom_devices'),
+          logger: logger
+        );
+      }
+
+      testWithoutContext('project factory works with custom devices disabled', () {
+        writeAndLoadConfig(<dynamic>[testConfigPluginsJson]);
+
+        final FlutterProjectFactory factory = FlutterProjectFactory(
+          logger: logger,
+          fileSystem: fs,
+          featureFlags: TestFeatureFlags(),
+          customDevicesConfig: config
+        );
+
+        final FlutterProject project = factory.fromDirectory(fs.currentDirectory);
+
+        expect(project.customEmbedderProjects, hasLength(0));
+      });
+
+      testWithoutContext('project factory works with custom devices disabled', () {
+        writeAndLoadConfig(<dynamic>[testConfigPluginsJson]);
+
+        final FlutterProjectFactory factory = FlutterProjectFactory(
+          logger: logger,
+          fileSystem: fs,
+          featureFlags: TestFeatureFlags(areCustomDevicesEnabled: true),
+          customDevicesConfig: config
+        );
+
+        final FlutterProject project = factory.fromDirectory(fs.currentDirectory);
+
+        expect(project.customEmbedderProjects, hasLength(1));
+        expect(project.customEmbedderProjects.single.embedderName, equals('testembedder'));
+      });
+    });
   });
   group('watch companion', () {
     MemoryFileSystem fs;
@@ -671,7 +728,7 @@ apply plugin: 'kotlin-android'
       fs = MemoryFileSystem.test();
       testPlistParser = FakePlistParser();
       mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
-      flutterProjectFactory = FlutterProjectFactory(
+      flutterProjectFactory = makeProjectFactory(
         fileSystem: fs,
         logger: logger,
       );
@@ -906,9 +963,9 @@ void _testInMemory(String description, Future<void> Function() testMethod) {
         platform: globals.platform,
         artifacts: <ArtifactSet>[],
       ),
-      FlutterProjectFactory: () => FlutterProjectFactory(
+      FlutterProjectFactory: () => makeProjectFactory(
         fileSystem: testFileSystem,
-        logger: globals.logger ?? BufferLogger.test(),
+        logger: globals.logger,
       ),
     },
   );

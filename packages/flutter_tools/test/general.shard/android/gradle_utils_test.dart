@@ -177,8 +177,7 @@ void main() {
       androidDirectory.childFile('gradlew.bat').createSync();
       androidDirectory.childFile('gradle.properties').createSync();
 
-      final FlutterProject flutterProject = FlutterProjectFactory(
-        logger: BufferLogger.test(),
+      final FlutterProject flutterProject = makeProjectFactory(
         fileSystem: fileSystem,
       ).fromDirectory(fileSystem.currentDirectory);
 

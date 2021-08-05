@@ -9,12 +9,18 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/custom_devices/custom_devices_config.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/project.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 import 'package:test_api/test_api.dart' as test_package show test; // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' hide test; // ignore: deprecated_member_use
+
+import 'fakes.dart';
 
 export 'package:test_api/test_api.dart' hide test, isInstanceOf; // ignore: deprecated_member_use
 
@@ -292,4 +298,30 @@ class FileExceptionHandler {
     }
     throw exception;
   }
+}
+
+/// Creates a FlutterProjectFactory with some reasonable defaults.
+///
+/// If [logger] is `null`, creates one using [BufferLogger.test].
+/// If [fileSystem] is `null`, creates one using [MemoryFileSystem.test].
+/// If [featureFlags] is `null`, creates one using [TestFeatureFlags].
+/// If [customDevicesConfig] is `null`, creates one using [CustomDevicesConfig.test],
+/// with [fileSystem] and [logger] as the arguments.
+FlutterProjectFactory makeProjectFactory({
+  Logger? logger,
+  FileSystem? fileSystem,
+  FeatureFlags? featureFlags,
+  CustomDevicesConfig? customDevicesConfig
+}) {
+  logger ??= BufferLogger.test();
+  fileSystem ??= MemoryFileSystem.test();
+  return FlutterProjectFactory(
+    logger: logger,
+    fileSystem: fileSystem,
+    featureFlags: featureFlags ?? TestFeatureFlags(),
+    customDevicesConfig: customDevicesConfig ?? CustomDevicesConfig.test(
+      fileSystem: fileSystem,
+      logger: logger
+    ),
+  );
 }

@@ -29,6 +29,7 @@ import 'cache.dart';
 import 'custom_devices/custom_devices_config.dart';
 import 'device.dart';
 import 'doctor.dart';
+import 'features.dart';
 import 'fuchsia/fuchsia_sdk.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/plist_parser.dart';
@@ -269,6 +270,8 @@ FlutterProjectFactory get projectFactory {
   return context.get<FlutterProjectFactory>() ?? FlutterProjectFactory(
     logger: logger,
     fileSystem: fs,
+    featureFlags: featureFlags,
+    customDevicesConfig: customDevicesConfig
   );
 }
 

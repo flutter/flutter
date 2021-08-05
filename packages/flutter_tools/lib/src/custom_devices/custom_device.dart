@@ -21,6 +21,8 @@ import '../convert.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../features.dart';
+import '../flutter_plugins.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../protocol_discovery.dart';
 import 'custom_device_config.dart';
@@ -676,6 +678,76 @@ class CustomDevice extends Device {
     }
   }
 
+  Future<bool> tryConfigureNativeProject({
+    required String buildType,
+    required List<String> plugins,
+    required Directory assetBundleDir,
+    Duration? timeout,
+    Map<String, String> additionalReplacementValues = const <String, String>{}
+  }) async {
+    final List<String> interpolated = interpolateCommand(
+      _config.configureNativeProject!,
+      <String, String>{
+        'buildType': buildType,
+        'pluginList': plugins.join(';'),
+        'assetBundleDirectory': assetBundleDir.absolute.path,
+      },
+      additionalReplacementValues: additionalReplacementValues
+    );
+
+    try {
+      await _processUtils.run(
+        interpolated,
+        throwOnError: true,
+        timeout: timeout,
+        workingDirectory: FlutterProject.current()
+          .customEmbedderProjects
+          .singleWhere((CustomEmbedderProject p) => p.embedderName == _config.embedderName)
+          .baseDirectory
+          .path
+      );
+      return true;
+    } on ProcessException catch (e) {
+      _logger.printError('Error configuring plugins for custom device $id: $e');
+      return false;
+    }
+  }
+
+  Future<bool> tryBuildNativeProject({
+    required String buildType,
+    required List<String> plugins,
+    required Directory assetBundleDir,
+    Duration? timeout,
+    Map<String, String> additionalReplacementValues = const <String, String>{}
+  }) async {
+    final List<String> interpolated = interpolateCommand(
+      _config.buildNativeProject!,
+      <String, String>{
+        'buildType': buildType,
+        'pluginList': plugins.join(';'),
+        'assetBundleDirectory': assetBundleDir.absolute.path
+      },
+      additionalReplacementValues: additionalReplacementValues
+    );
+
+    try {
+      await _processUtils.run(
+        interpolated,
+        throwOnError: true,
+        timeout: timeout,
+        workingDirectory: FlutterProject.current()
+          .customEmbedderProjects
+          .singleWhere((CustomEmbedderProject p) => p.embedderName == _config.embedderName)
+          .baseDirectory
+          .path
+      );
+      return true;
+    } on ProcessException catch (e) {
+      _logger.printError('Error building plugins for custom device $id: $e');
+      return false;
+    }
+  }
+
   @override
   void clearLogs() {}
 
@@ -794,22 +866,67 @@ class CustomDevice extends Device {
         assetDirPath: assetBundleDir,
       );
 
+      if (_config.supportsPlugins) {
+        final CustomEmbedderProject project = FlutterProject.current().customEmbedderProjects.singleWhere((CustomEmbedderProject p) => p.embedderName == _config.embedderName);
+
+        if (!project.baseDirectory.existsSync()) {
+          throwToolExit('No ${_config.embedderName} project configured. See (https://github.com/flutter/flutter/wiki/Using-custom-embedders-with-the-Flutter-CLI) to learn about adding custom embedder support to a project.');
+        }
+
+        await refreshPluginsList(project.project);
+
+        final List<Map<String, Object?>> plugins = await findNativeCustomEmbedderPlugins('x-${_config.embedderName}');
+        final List<String> pluginNames = plugins
+          .map<String>((Map<String, Object?> pluginInfo) => pluginInfo['name']! as String)
+          .toList();
+
+        if (_config.configureNativeProject != null) {
+          final bool ok = await tryConfigureNativeProject(
+            buildType: debuggingOptions.buildInfo.isDebug ? 'debug' :
+              debuggingOptions.buildInfo.isProfile ? 'profile' :
+              'release',
+            assetBundleDir: globals.fs.directory(assetBundleDir),
+            plugins: pluginNames
+          );
+          if (!ok) {
+            return LaunchResult.failed();
+          }
+        }
+        if (_config.buildNativeProject != null) {
+          final bool ok = await tryBuildNativeProject(
+            buildType: debuggingOptions.buildInfo.isDebug ? 'debug' :
+              debuggingOptions.buildInfo.isProfile ? 'profile' :
+              'release',
+            assetBundleDir: globals.fs.directory(assetBundleDir),
+            plugins: pluginNames
+          );
+          if (!ok) {
+            return LaunchResult.failed();
+          }
+        }
+      }
+
       // if we have a post build step (needed for some embedders), execute it
       if (_config.postBuildCommand != null) {
         final String? packageName = package.name;
         if (packageName == null) {
           throw ToolExit('Could not start app, name for $package is unknown.');
         }
-        await _tryPostBuild(
+        final bool ok = await _tryPostBuild(
           appName: packageName,
           localPath: assetBundleDir,
         );
+        if (!ok) {
+          return LaunchResult.failed();
+        }
       }
     }
 
     // install the app on the device
     // (will invoke the uninstall and then the install command internally)
-    await installApp(package, userIdentifier: userIdentifier);
+    if (!await installApp(package, userIdentifier: userIdentifier)) {
+      return LaunchResult.failed();
+    }
 
     // finally launch the app
     return _getOrCreateAppSession(package).start(

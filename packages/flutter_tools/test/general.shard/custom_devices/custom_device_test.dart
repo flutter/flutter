@@ -9,10 +9,10 @@ import 'dart:async';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
-import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/bundle_builder.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/custom_devices/custom_device.dart';
@@ -27,6 +27,7 @@ import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/custom_devices_common.dart';
 import '../../src/fakes.dart';
 
 
@@ -42,11 +43,7 @@ void _writeCustomDevicesConfigFile(Directory dir, List<CustomDeviceConfig> confi
 }
 
 FlutterProject _setUpFlutterProject(Directory directory) {
-  final FlutterProjectFactory flutterProjectFactory = FlutterProjectFactory(
-    fileSystem: directory.fileSystem,
-    logger: BufferLogger.test(),
-  );
-  return flutterProjectFactory.fromDirectory(directory);
+  return makeProjectFactory(fileSystem: directory.fileSystem).fromDirectory(directory);
 }
 
 void main() {
@@ -638,6 +635,10 @@ class MyFakeStreamSubscription<T> extends Fake implements StreamSubscription<T> 
 }
 
 class FakeBundleBuilder extends Fake implements BundleBuilder {
+  FakeBundleBuilder([this.impl]);
+
+  final BundleBuildFunction impl;
+
   @override
   Future<void> build({
     TargetPlatform platform,
@@ -649,5 +650,21 @@ class FakeBundleBuilder extends Fake implements BundleBuilder {
     String depfilePath,
     String assetDirPath,
     @visibleForTesting BuildSystem buildSystem
-  }) async {}
+  }) async {
+    if (impl != null) {
+      return impl(
+        platform: platform,
+        buildInfo: buildInfo,
+        project: project,
+        mainPath: mainPath,
+        manifestPath: manifestPath,
+        applicationKernelFilePath: applicationKernelFilePath,
+        depfilePath: depfilePath,
+        assetDirPath: assetDirPath,
+        buildSystem: buildSystem
+      );
+    } else {
+      return;
+    }
+  }
 }

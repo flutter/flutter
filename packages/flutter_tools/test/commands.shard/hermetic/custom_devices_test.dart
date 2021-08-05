@@ -954,7 +954,7 @@ void main() {
           logger: BufferLogger.test(),
         );
 
-        config.add(CustomDeviceConfig.exampleUnix.copyWith(id: 'testid'));
+        config.add(CustomDeviceConfig.exampleLinux.copyWith(id: 'testid'));
 
         final CommandRunner<void> runner = createCustomDevicesCommandRunner(
           config: (_, __) => config,
@@ -986,7 +986,7 @@ void main() {
           directory: fs.directory('/'),
           logger: BufferLogger.test(),
         );
-        config.add(CustomDeviceConfig.exampleUnix.copyWith(id: 'testid2'));
+        config.add(CustomDeviceConfig.exampleLinux.copyWith(id: 'testid2'));
         final Uint8List contentsBefore = fs.file('.flutter_custom_devices.json').readAsBytesSync();
 
         final CommandRunner<void> runner = createCustomDevicesCommandRunner(
@@ -1073,9 +1073,9 @@ void main() {
           directory: fs.directory('/'),
           logger: logger,
         )..add(
-          CustomDeviceConfig.exampleUnix.copyWith(id: 'testid', label: 'testlabel', enabled: true)
+          CustomDeviceConfig.exampleLinux.copyWith(id: 'testid', label: 'testlabel', enabled: true)
         )..add(
-          CustomDeviceConfig.exampleUnix.copyWith(id: 'testid2', label: 'testlabel2', enabled: false)
+          CustomDeviceConfig.exampleLinux.copyWith(id: 'testid2', label: 'testlabel2', enabled: false)
         );
 
         final CommandRunner<void> runner = createCustomDevicesCommandRunner(
@@ -1114,9 +1114,9 @@ void main() {
           directory: fs.directory('/'),
           logger: logger,
         )..add(
-          CustomDeviceConfig.exampleUnix.copyWith(id: 'testid', label: 'testlabel', enabled: true)
+          CustomDeviceConfig.exampleLinux.copyWith(id: 'testid', label: 'testlabel', enabled: true)
         )..add(
-          CustomDeviceConfig.exampleUnix.copyWith(id: 'testid2', label: 'testlabel2', enabled: false)
+          CustomDeviceConfig.exampleLinux.copyWith(id: 'testid2', label: 'testlabel2', enabled: false)
         );
 
         final Uint8List contentsBefore = fs.file('.flutter_custom_devices.json').readAsBytesSync();

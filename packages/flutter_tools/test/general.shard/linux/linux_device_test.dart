@@ -163,9 +163,8 @@ void main() {
 }
 
 FlutterProject setUpFlutterProject(Directory directory) {
-  final FlutterProjectFactory flutterProjectFactory = FlutterProjectFactory(
+  final FlutterProjectFactory flutterProjectFactory = makeProjectFactory(
     fileSystem: directory.fileSystem,
-    logger: BufferLogger.test(),
   );
   return flutterProjectFactory.fromDirectory(directory);
 }

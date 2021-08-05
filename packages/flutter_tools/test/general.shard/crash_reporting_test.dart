@@ -81,7 +81,10 @@ void main() {
     final CrashReporter crashReporter = CrashReporter(
       fileSystem: fs,
       logger: logger,
-      flutterProjectFactory: FlutterProjectFactory(fileSystem: fs, logger: logger),
+      flutterProjectFactory: makeProjectFactory(
+        fileSystem: fs,
+        logger: logger,
+      ),
     );
 
     final File file = fs.file('flutter_00.log');

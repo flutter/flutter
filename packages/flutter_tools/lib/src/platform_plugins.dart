@@ -532,6 +532,65 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
   }
 }
 
+class CustomEmbedderPlugin extends PluginPlatform implements NativeOrDartPlugin {
+  const CustomEmbedderPlugin({
+    required this.embedderName,
+    required this.name,
+    required this.pluginPath,
+    required FileSystem fileSystem,
+    this.dartPluginClass,
+    this.defaultPackage,
+  }) : configKey = 'x-$embedderName',
+       _fileSystem = fileSystem;
+
+  factory CustomEmbedderPlugin.fromYaml({
+    required String embedderName,
+    required String name,
+    required YamlMap yaml,
+    required String pluginPath,
+    required FileSystem fileSystem
+  }) {
+    assert(validate(yaml));
+    return CustomEmbedderPlugin(
+      embedderName: embedderName,
+      name: name,
+      pluginPath: pluginPath,
+      fileSystem: fileSystem,
+      dartPluginClass: yaml[kDartPluginClass] as String?,
+      defaultPackage: yaml[kDefaultPackage] as String?
+    );
+  }
+
+  static bool validate(YamlMap yaml) {
+    if (yaml == null) {
+      return false;
+    }
+
+    return (yaml[kDartPluginClass] is String?) &&
+      (yaml[kDefaultPackage] is String?);
+  }
+
+  final String configKey;
+  final String embedderName;
+  final String name;
+  final String pluginPath;
+  final FileSystem _fileSystem;
+  final String? dartPluginClass;
+  final String? defaultPackage;
+
+  @override
+  bool isNative() => _fileSystem.directory(pluginPath).childDirectory('x-$embedderName').existsSync();
+
+  @override
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'name': name,
+      if (dartPluginClass != null) kDartPluginClass: dartPluginClass!,
+      if (defaultPackage != null) kDefaultPackage: defaultPackage!,
+    };
+  }
+}
+
 /// Contains the parameters to template a web plugin.
 ///
 /// The required fields include: [name] of the plugin, the [pluginClass] that will

@@ -55,7 +55,8 @@ void main() {
       '  pluginClass: WebSamplePlugin\n'
       '  fileName: web_plugin.dart\n'
       ' windows:\n'
-      '  pluginClass: WinSamplePlugin\n';
+      '  pluginClass: WinSamplePlugin\n'
+      ' x-testembedder: {}\n';
 
     final YamlMap pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
     final Plugin plugin = Plugin.fromYaml(
@@ -73,6 +74,7 @@ void main() {
     final MacOSPlugin macOSPlugin = plugin.platforms[MacOSPlugin.kConfigKey]! as MacOSPlugin;
     final WebPlugin webPlugin = plugin.platforms[WebPlugin.kConfigKey]! as WebPlugin;
     final WindowsPlugin windowsPlugin = plugin.platforms[WindowsPlugin.kConfigKey]! as WindowsPlugin;
+    final CustomEmbedderPlugin customEmbedderPlugin = plugin.platforms['x-testembedder']! as CustomEmbedderPlugin;
 
     expect(iosPlugin.pluginClass, 'ISamplePlugin');
     expect(iosPlugin.classPrefix, '');
@@ -83,6 +85,12 @@ void main() {
     expect(webPlugin.pluginClass, 'WebSamplePlugin');
     expect(webPlugin.fileName, 'web_plugin.dart');
     expect(windowsPlugin.pluginClass, 'WinSamplePlugin');
+    expect(customEmbedderPlugin.configKey, 'x-testembedder');
+    expect(customEmbedderPlugin.embedderName, 'testembedder');
+    expect(customEmbedderPlugin.name, _kTestPluginName);
+    expect(customEmbedderPlugin.pluginPath, _kTestPluginPath);
+    expect(customEmbedderPlugin.dartPluginClass, isNull);
+    expect(customEmbedderPlugin.defaultPackage, isNull);
   });
 
   testWithoutContext('Plugin parsing of unknown fields are allowed (allows some future compatibility)', () {
@@ -103,7 +111,9 @@ void main() {
       '  pluginClass: WebSamplePlugin\n'
       '  fileName: web_plugin.dart\n'
       ' windows:\n'
-        '  pluginClass: WinSamplePlugin\n';
+      '  pluginClass: WinSamplePlugin\n'
+      ' x-testembedder:\n'
+      '  anUnknownField: ASamplePlugin\n';
 
     final YamlMap pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
     final Plugin plugin = Plugin.fromYaml(
@@ -121,6 +131,7 @@ void main() {
     final MacOSPlugin macOSPlugin = plugin.platforms[MacOSPlugin.kConfigKey]! as MacOSPlugin;
     final WebPlugin webPlugin = plugin.platforms[WebPlugin.kConfigKey]! as WebPlugin;
     final WindowsPlugin windowsPlugin = plugin.platforms[WindowsPlugin.kConfigKey]! as WindowsPlugin;
+    final CustomEmbedderPlugin customEmbedderPlugin = plugin.platforms['x-testembedder']! as CustomEmbedderPlugin;
 
     expect(iosPlugin.pluginClass, 'ISamplePlugin');
     expect(iosPlugin.classPrefix, '');
@@ -131,6 +142,7 @@ void main() {
     expect(webPlugin.pluginClass, 'WebSamplePlugin');
     expect(webPlugin.fileName, 'web_plugin.dart');
     expect(windowsPlugin.pluginClass, 'WinSamplePlugin');
+    expect(customEmbedderPlugin.name, _kTestPluginName);
   });
 
   testWithoutContext('Plugin parsing allows for Dart-only plugins without a pluginClass', () {
@@ -146,7 +158,9 @@ void main() {
       ' macos:\n'
       '  dartPluginClass: MSamplePlugin\n'
       ' windows:\n'
-      '  dartPluginClass: WinSamplePlugin\n';
+      '  dartPluginClass: WinSamplePlugin\n'
+      ' x-testembedder:\n'
+      '  dartPluginClass: TestEmbedderSamplePlugin\n';
 
     final YamlMap pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
     final Plugin plugin = Plugin.fromYaml(
@@ -163,6 +177,7 @@ void main() {
     final LinuxPlugin linuxPlugin = plugin.platforms[LinuxPlugin.kConfigKey]! as LinuxPlugin;
     final MacOSPlugin macOSPlugin = plugin.platforms[MacOSPlugin.kConfigKey]! as MacOSPlugin;
     final WindowsPlugin windowsPlugin = plugin.platforms[WindowsPlugin.kConfigKey]! as WindowsPlugin;
+    final CustomEmbedderPlugin customEmbedderPlugin = plugin.platforms['x-testembedder']! as CustomEmbedderPlugin;
 
     expect(androidPlugin.pluginClass, isNull);
     expect(iOSPlugin.pluginClass, isNull);
@@ -174,6 +189,7 @@ void main() {
     expect(linuxPlugin.dartPluginClass, 'LSamplePlugin');
     expect(macOSPlugin.dartPluginClass, 'MSamplePlugin');
     expect(windowsPlugin.dartPluginClass, 'WinSamplePlugin');
+    expect(customEmbedderPlugin.dartPluginClass, 'TestEmbedderSamplePlugin');
   });
 
   testWithoutContext('Plugin parsing of legacy format and multi-platform format together is not allowed '

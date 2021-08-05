@@ -15,6 +15,8 @@ import 'base/logger.dart';
 import 'base/utils.dart';
 import 'bundle.dart' as bundle;
 import 'cmake_project.dart';
+import 'custom_devices/custom_device_config.dart';
+import 'custom_devices/custom_devices_config.dart';
 import 'features.dart';
 import 'flutter_manifest.dart';
 import 'flutter_plugins.dart';
@@ -44,11 +46,17 @@ class FlutterProjectFactory {
   FlutterProjectFactory({
     required Logger logger,
     required FileSystem fileSystem,
+    required FeatureFlags featureFlags,
+    required CustomDevicesConfig customDevicesConfig
   }) : _logger = logger,
-       _fileSystem = fileSystem;
+       _fileSystem = fileSystem,
+       _featureFlags = featureFlags,
+       _customDevicesConfig = customDevicesConfig;
 
   final Logger _logger;
   final FileSystem _fileSystem;
+  final FeatureFlags _featureFlags;
+  final CustomDevicesConfig _customDevicesConfig;
 
   @visibleForTesting
   final Map<String, FlutterProject> projects =
@@ -66,11 +74,20 @@ class FlutterProjectFactory {
       );
       final FlutterManifest exampleManifest = FlutterProject._readManifest(
         FlutterProject._exampleDirectory(directory)
-            .childFile(bundle.defaultManifestPath)
-            .path,
+          .childFile(bundle.defaultManifestPath)
+          .path,
         logger: _logger,
         fileSystem: _fileSystem,
       );
+
+      if (_featureFlags.areCustomDevicesEnabled) {
+        return FlutterProject(
+          directory,
+          manifest,
+          exampleManifest,
+          _customDevicesConfig.devices.where((CustomDeviceConfig c) => c.enabled).toList()
+        );
+      }
       return FlutterProject(directory, manifest, exampleManifest);
     });
   }
@@ -87,10 +104,14 @@ class FlutterProjectFactory {
 /// cached.
 class FlutterProject {
   @visibleForTesting
-  FlutterProject(this.directory, this.manifest, this._exampleManifest)
-    : assert(directory != null),
-      assert(manifest != null),
-      assert(_exampleManifest != null);
+  FlutterProject(
+    this.directory,
+    this.manifest,
+    this._exampleManifest, [
+    this._customDeviceConfigs = const <CustomDeviceConfig>[]
+  ]) : assert(directory != null),
+       assert(manifest != null),
+       assert(_exampleManifest != null);
 
   /// Returns a [FlutterProject] view of the given directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
@@ -128,6 +149,8 @@ class FlutterProject {
 
   /// The manifest of the example sub-project of this project.
   final FlutterManifest _exampleManifest;
+
+  final List<CustomDeviceConfig> _customDeviceConfigs;
 
   /// The set of organization names found in this project as
   /// part of iOS product bundle identifier, Android application ID, or
@@ -199,6 +222,20 @@ class FlutterProject {
 
   /// The Fuchsia sub project of this project.
   late final FuchsiaProject fuchsia = FuchsiaProject._(this);
+
+  List<CustomEmbedderProject>? _customEmbedderProjects;
+  List<CustomEmbedderProject> get customEmbedderProjects {
+    if (_customEmbedderProjects == null) {
+      final List<CustomEmbedderProject> projects = <CustomEmbedderProject>[];
+      for (final CustomDeviceConfig config in _customDeviceConfigs) {
+        if (config.supportsPlugins) {
+          projects.add(CustomEmbedderProject._(this, config));
+        }
+      }
+      _customEmbedderProjects = projects;
+    }
+    return _customEmbedderProjects!;
+  }
 
   /// The `pubspec.yaml` file of this project.
   File get pubspecFile => directory.childFile('pubspec.yaml');
@@ -351,6 +388,7 @@ class FlutterProject {
     bool windowsPlatform = false,
     bool webPlatform = false,
     bool winUwpPlatform = false,
+    bool customEmbedders = false,
     DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
   }) async {
     if (!directory.existsSync() || isPlugin) {
@@ -378,6 +416,11 @@ class FlutterProject {
     if (winUwpPlatform) {
       await windowsUwp.ensureReadyForPlatformSpecificTooling();
     }
+    if (customEmbedders) {
+      for (final CustomEmbedderProject project in customEmbedderProjects) {
+        await project.ensureReadyForPlatformSpecificTooling();
+      }
+    }
     await injectPlugins(
       this,
       androidPlatform: androidPlatform,
@@ -387,6 +430,7 @@ class FlutterProject {
       windowsPlatform: windowsPlatform,
       webPlatform: webPlatform,
       winUwpPlatform: winUwpPlatform,
+      customEmbedders: customEmbedders
     );
   }
 
@@ -766,4 +810,33 @@ class FuchsiaProject {
   Directory? _meta;
   Directory get meta =>
       _meta ??= editableHostAppDirectory.childDirectory('meta');
+}
+
+/// A subproject for a custom embedder like flutter-pi or the sony-embedder.
+class CustomEmbedderProject extends FlutterProjectPlatform {
+  CustomEmbedderProject._(this.project, this._config);
+
+  final FlutterProject project;
+  final CustomDeviceConfig _config;
+
+  String get embedderName => _config.embedderName!;
+
+  Directory get baseDirectory => project.directory.childDirectory('x-$embedderName');
+
+  /// The subdirectory of [editableDirectory] that contains files that are
+  /// generated on the fly. All generated files that are not intended to be
+  /// checked in should live here.
+  Directory get ephemeralDirectory => baseDirectory.childDirectory('ephemeral');
+
+  Directory get pluginSymlinkDirectory => ephemeralDirectory.childDirectory('.plugin_symlinks');
+
+  @override
+  bool existsSync() => baseDirectory.existsSync();
+
+  @override
+  String get pluginConfigKey => 'x-$embedderName';
+
+  Future<void> writePluginFiles() async {}
+
+  Future<void> ensureReadyForPlatformSpecificTooling() async {}
 }

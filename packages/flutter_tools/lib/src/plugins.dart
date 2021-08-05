@@ -111,6 +111,15 @@ class Plugin {
     assert (_validateMultiPlatformYaml(platformsYaml).isEmpty,
             'Invalid multi-platform plugin specification $name.');
 
+    // We assume any platform name starting with a `x-` is a custom embedder.
+    final List<String> customEmbedderPlatformKeys = platformsYaml.keys
+      .whereType<String>()
+      .where((String s) => s.startsWith('x-'))
+      .toList();
+
+    final List<String> customEmbedderNames =
+      customEmbedderPlatformKeys.map((String s) => s.substring(2)).toList();
+
     final Map<String, PluginPlatform> platforms = <String, PluginPlatform>{};
 
     if (_providesImplementationForPlatform(platformsYaml, AndroidPlugin.kConfigKey)) {
@@ -147,6 +156,19 @@ class Plugin {
           WindowsPlugin.fromYaml(name, platformsYaml[WindowsPlugin.kConfigKey] as YamlMap);
     }
 
+    for (final String embedderName in customEmbedderNames) {
+      final String platformKey = 'x-$embedderName';
+      if (_providesImplementationForPlatform(platformsYaml, platformKey)) {
+        platforms[platformKey] = CustomEmbedderPlugin.fromYaml(
+          embedderName: embedderName,
+          name: name,
+          yaml: platformsYaml[platformKey] as YamlMap,
+          pluginPath: path,
+          fileSystem: fileSystem,
+        );
+      }
+    }
+
     // TODO(stuartmorgan): Consider merging web into this common handling; the
     // fact that its implementation of Dart-only plugins and default packages
     // are separate is legacy.
@@ -156,6 +178,7 @@ class Plugin {
       LinuxPlugin.kConfigKey,
       MacOSPlugin.kConfigKey,
       WindowsPlugin.kConfigKey,
+      ...customEmbedderPlatformKeys
     ];
     final Map<String, String> defaultPackages = <String, String>{};
     final Map<String, String> dartPluginClasses = <String, String>{};
@@ -235,13 +258,21 @@ class Plugin {
   ///       pluginClass: SamplePlugin
   ///     ios:
   ///       pluginClass: SamplePlugin
-  static YamlMap createPlatformsYamlMap(List<String> platforms, String pluginClass, String androidPackage) {
+  static YamlMap createPlatformsYamlMap(
+    List<String> platforms,
+    String pluginClass,
+    String androidPackage, [
+    List<String> emptyPlatforms = const <String>[],
+  ]) {
     final Map<String, dynamic> map = <String, dynamic>{};
     for (final String platform in platforms) {
       map[platform] = <String, String>{
         'pluginClass': pluginClass,
         ...platform == 'android' ? <String, String>{'package': androidPackage} : <String, String>{},
       };
+    }
+    for (final String platform in emptyPlatforms) {
+      map[platform] = <String, String>{};
     }
     return YamlMap.wrap(map);
   }
@@ -320,6 +351,11 @@ class Plugin {
     if (isInvalid(WindowsPlugin.kConfigKey, WindowsPlugin.validate)) {
       errors.add('Invalid "windows" plugin specification.');
     }
+    yaml.forEach((dynamic key, dynamic value) {
+      if (key is String && key.startsWith('x-')) {
+        isInvalid(key, CustomEmbedderPlugin.validate);
+      }
+    });
     return errors;
   }
 
@@ -409,20 +445,25 @@ class Plugin {
 class PluginInterfaceResolution {
   PluginInterfaceResolution({
     required this.plugin,
-    required this.platform,
-  }) : assert(plugin != null),
-       assert(platform != null);
+    required this.platformKey,
+  })  : assert(plugin != null),
+        assert(platformKey != null);
 
   /// The plugin.
   final Plugin plugin;
-  // The name of the platform that this plugin implements.
-  final String platform;
+
+  /// The platform config key for the platform that this plugin implements.
+  /// For example, `linux` or `x-custom-embedder`.
+  final String platformKey;
+
+  /// The platform that this plugin implements.
+  PluginPlatform get platform => plugin.platforms[platformKey]!;
 
   Map<String, String> toMap() {
     return <String, String> {
       'pluginName': plugin.name,
-      'platform': platform,
-      'dartClass': plugin.pluginDartClassPlatforms[platform] ?? '',
+      'platform': platformKey,
+      'dartClass': plugin.pluginDartClassPlatforms[platformKey] ?? '',
     };
   }
 }

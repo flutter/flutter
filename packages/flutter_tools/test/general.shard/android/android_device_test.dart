@@ -190,9 +190,8 @@ flutter:
   module: {}
 ''');
     fileSystem.file('.packages').createSync();
-    final FlutterProject flutterProject = FlutterProjectFactory(
+    final FlutterProject flutterProject = makeProjectFactory(
       fileSystem: fileSystem,
-      logger: BufferLogger.test(),
     ).fromDirectory(fileSystem.currentDirectory);
     final AndroidDevice device = setUpAndroidDevice(fileSystem: fileSystem);
 
@@ -204,9 +203,8 @@ flutter:
     fileSystem.file('pubspec.yaml').createSync();
     fileSystem.file('.packages').createSync();
     fileSystem.directory('android').createSync();
-    final FlutterProject flutterProject = FlutterProjectFactory(
+    final FlutterProject flutterProject = makeProjectFactory(
       fileSystem: fileSystem,
-      logger: BufferLogger.test(),
     ).fromDirectory(fileSystem.currentDirectory);
 
     final AndroidDevice device = setUpAndroidDevice(fileSystem: fileSystem);
@@ -218,9 +216,8 @@ flutter:
     final FileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.file('pubspec.yaml').createSync();
     fileSystem.file('.packages').createSync();
-    final FlutterProject flutterProject = FlutterProjectFactory(
+    final FlutterProject flutterProject = makeProjectFactory(
       fileSystem: fileSystem,
-      logger: BufferLogger.test(),
     ).fromDirectory(fileSystem.currentDirectory);
 
     final AndroidDevice device = setUpAndroidDevice(fileSystem: fileSystem);

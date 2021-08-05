@@ -6,7 +6,11 @@
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/custom_devices/custom_device_config.dart';
+import 'package:flutter_tools/src/custom_devices/custom_devices_config.dart';
 import 'package:flutter_tools/src/dart/package_map.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/flutter_plugins.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -19,6 +23,8 @@ import 'package:yaml/yaml.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/custom_devices_common.dart';
+import '../src/fakes.dart';
 
 void main() {
   group('Dart plugin registrant', () {
@@ -617,6 +623,11 @@ void main() {
       testUsingContext('Generates new entrypoint', () async {
         flutterProject.isModule = true;
 
+        writeCustomDevicesConfigFile(
+          fs.directory('custom_devices'),
+          configs: <CustomDeviceConfig>[testConfigPlugins],
+        );
+
         createFakeDartPlugins(
           flutterProject,
           flutterManifest,
@@ -669,7 +680,15 @@ void main() {
       platforms:
         macos:
           dartPluginClass: AwesomeMacOS
-'''
+''',
+            'url_launcher_testembedder': '''
+  flutter:
+    plugin:
+      implements: url_launcher
+      platforms:
+        x-testembedder:
+          dartPluginClass: TestEmbedderPlugin
+''',
           });
 
         final Directory libDir = flutterProject.directory.childDirectory('lib');
@@ -702,11 +721,12 @@ void main() {
           '// @dart = 2.8\n'
           '\n'
           "import 'dart:io'; // flutter_ignore: dart_io_import.\n"
+          "import 'package:awesome_macos/awesome_macos.dart';\n"
           "import 'package:url_launcher_android/url_launcher_android.dart';\n"
           "import 'package:url_launcher_ios/url_launcher_ios.dart';\n"
           "import 'package:url_launcher_linux/url_launcher_linux.dart';\n"
-          "import 'package:awesome_macos/awesome_macos.dart';\n"
           "import 'package:url_launcher_macos/url_launcher_macos.dart';\n"
+          "import 'package:url_launcher_testembedder/url_launcher_testembedder.dart';\n"
           "import 'package:url_launcher_windows/url_launcher_windows.dart';\n"
           '\n'
           "@pragma('vm:entry-point')\n"
@@ -714,7 +734,18 @@ void main() {
           '\n'
           "  @pragma('vm:entry-point')\n"
           '  static void register() {\n'
-          '    if (Platform.isAndroid) {\n'
+          "    if (String.fromEnvironment('flutter.customPlatform', defaultValue: Platform.environment['FLUTTER_CUSTOM_PLATFORM']) == r'testembedder') {\n"
+          '      try {\n'
+          '        TestEmbedderPlugin.registerWith();\n'
+          '      } catch (err) {\n'
+          '        print(\n'
+          "          '`url_launcher_testembedder` threw an error: \$err. '\n"
+          "          'The app may not function as expected until you remove this plugin from pubspec.yaml'\n"
+          '        );\n'
+          '        rethrow;\n'
+          '      }\n'
+          '\n'
+          '    } else if (Platform.isAndroid) {\n'
           '      try {\n'
           '        AndroidPlugin.registerWith();\n'
           '      } catch (err) {\n'
@@ -781,11 +812,16 @@ void main() {
           '\n'
           '    }\n'
           '  }\n'
-          '}\n'
+          '}\n',
         );
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
+        CustomDevicesConfig: () => CustomDevicesConfig.test(
+            fileSystem: fs,
+            directory: fs.directory('custom_devices'),
+            logger: BufferLogger.test()),
+        FeatureFlags: () => TestFeatureFlags(areCustomDevicesEnabled: true)
       });
 
       testUsingContext('Plugin without platform support throws tool exit', () async {
@@ -1057,4 +1093,7 @@ class FakeFlutterProject extends Fake implements FlutterProject {
 
   @override
   WindowsUwpProject windowsUwp;
+
+  @override
+  List<CustomEmbedderProject> customEmbedderProjects;
 }

@@ -181,20 +181,21 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
     return ErrorHandlingFileSystem.deleteIfExists(pluginsFile);
   }
 
-  final String iosKey = project.ios.pluginConfigKey;
-  final String androidKey = project.android.pluginConfigKey;
-  final String macosKey = project.macos.pluginConfigKey;
-  final String linuxKey = project.linux.pluginConfigKey;
-  final String windowsKey = project.windows.pluginConfigKey;
-  final String webKey = project.web.pluginConfigKey;
+  final List<String> keys = <String>[
+    project.ios.pluginConfigKey,
+    project.android.pluginConfigKey,
+    project.macos.pluginConfigKey,
+    project.linux.pluginConfigKey,
+    project.windows.pluginConfigKey,
+    project.web.pluginConfigKey,
+    for (CustomEmbedderProject p in project.customEmbedderProjects)
+      p.pluginConfigKey
+  ];
 
-  final Map<String, Object> pluginsMap = <String, Object>{};
-  pluginsMap[iosKey] = _filterPluginsByPlatform(plugins, iosKey);
-  pluginsMap[androidKey] = _filterPluginsByPlatform(plugins, androidKey);
-  pluginsMap[macosKey] = _filterPluginsByPlatform(plugins, macosKey);
-  pluginsMap[linuxKey] = _filterPluginsByPlatform(plugins, linuxKey);
-  pluginsMap[windowsKey] = _filterPluginsByPlatform(plugins, windowsKey);
-  pluginsMap[webKey] = _filterPluginsByPlatform(plugins, webKey);
+  final Map<String, Object> pluginsMap = <String, Object>{
+    for (final String key in keys)
+      key: _filterPluginsByPlatform(plugins, key)
+  };
 
   final Map<String, Object> result = <String, Object> {};
 
@@ -708,28 +709,20 @@ const String _dartPluginRegistryForNonWebTemplate = '''
 // @dart = {{dartLanguageVersion}}
 
 import 'dart:io'; // flutter_ignore: dart_io_import.
-{{#android}}
+{{#plugins}}
 import 'package:{{pluginName}}/{{pluginName}}.dart';
-{{/android}}
-{{#ios}}
-import 'package:{{pluginName}}/{{pluginName}}.dart';
-{{/ios}}
-{{#linux}}
-import 'package:{{pluginName}}/{{pluginName}}.dart';
-{{/linux}}
-{{#macos}}
-import 'package:{{pluginName}}/{{pluginName}}.dart';
-{{/macos}}
-{{#windows}}
-import 'package:{{pluginName}}/{{pluginName}}.dart';
-{{/windows}}
+{{/plugins}}
 
 @pragma('vm:entry-point')
 class _PluginRegistrant {
 
   @pragma('vm:entry-point')
   static void register() {
-    if (Platform.isAndroid) {
+    {{#custom-embedders}}if (String.fromEnvironment('flutter.customPlatform', defaultValue: Platform.environment['FLUTTER_CUSTOM_PLATFORM']) == r'{{embedderName}}') {
+      {{#plugins}}
+$_dartPluginRegisterWith
+      {{/plugins}}
+    } else {{/custom-embedders}}if (Platform.isAndroid) {
       {{#android}}
 $_dartPluginRegisterWith
       {{/android}}
@@ -1013,6 +1006,17 @@ void createPluginSymlinks(FlutterProject project, {bool force = false, @visibleF
       force: force,
     );
   }
+  if (localFeatureFlags.areCustomDevicesEnabled) {
+    for (final CustomEmbedderProject p in project.customEmbedderProjects) {
+      if (p.existsSync()) {
+        _createPlatformPluginSymlinks(
+          p.pluginSymlinkDirectory,
+          platformPlugins[p.pluginConfigKey] as List<Object?>?,
+          force: force
+        );
+      }
+    }
+  }
 }
 
 /// Handler for symlink failures which provides specific instructions for known
@@ -1074,6 +1078,7 @@ Future<void> refreshPluginsList(
   FlutterProject project, {
   bool iosPlatform = false,
   bool macOSPlatform = false,
+  @visibleForTesting FeatureFlags? featureFlagsOverride
 }) async {
   final List<Plugin> plugins = await findPlugins(project);
   // Sort the plugins by name to keep ordering stable in generated files.
@@ -1084,7 +1089,7 @@ Future<void> refreshPluginsList(
 
   final bool changed = _writeFlutterPluginsList(project, plugins);
   if (changed || legacyChanged) {
-    createPluginSymlinks(project, force: true);
+    createPluginSymlinks(project, force: true, featureFlagsOverride: featureFlagsOverride);
     if (iosPlatform) {
       globals.cocoaPods?.invalidatePodInstallOutput(project.ios);
     }
@@ -1106,6 +1111,7 @@ Future<void> injectPlugins(
   bool windowsPlatform = false,
   bool winUwpPlatform = false,
   bool webPlatform = false,
+  bool customEmbedders = false,
 }) async {
   final List<Plugin> plugins = await findPlugins(project);
   // Sort the plugins by name to keep ordering stable in generated files.
@@ -1147,6 +1153,11 @@ Future<void> injectPlugins(
   if (webPlatform) {
     await _writeWebPluginRegistrant(project, plugins);
   }
+  if (customEmbedders) {
+    for (final CustomEmbedderProject project in project.customEmbedderProjects) {
+      await project.writePluginFiles();
+    }
+  }
 }
 
 /// Returns whether the specified Flutter [project] has any plugin dependencies.
@@ -1173,6 +1184,7 @@ bool hasPlugins(FlutterProject project) {
 List<PluginInterfaceResolution> resolvePlatformImplementation(
   List<Plugin> plugins, {
   bool throwOnPluginPubspecError = true,
+  List<String> customEmbedderConfigKeys = const <String>[]
 }) {
   final List<String> platforms = <String>[
     AndroidPlugin.kConfigKey,
@@ -1180,6 +1192,7 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
     LinuxPlugin.kConfigKey,
     MacOSPlugin.kConfigKey,
     WindowsPlugin.kConfigKey,
+    ...customEmbedderConfigKeys
   ];
   final Map<String, PluginInterfaceResolution> directDependencyResolutions
       = <String, PluginInterfaceResolution>{};
@@ -1277,7 +1290,7 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
       }
       directDependencyResolutions[resolutionKey] = PluginInterfaceResolution(
         plugin: plugin,
-        platform: platform,
+        platformKey: platform,
       );
     }
   }
@@ -1297,6 +1310,7 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
   }
   return finalResolution;
 }
+
 
 /// Generates the Dart plugin registrant, which allows to bind a platform
 /// implementation of a Dart only plugin to its interface.
@@ -1320,24 +1334,25 @@ Future<void> generateMainDartWithPluginRegistrant(
   bool throwOnPluginPubspecError = false,
 }) async {
   final List<Plugin> plugins = await findPlugins(rootProject);
+
+  final Set<String> customEmbedderConfigKeys = <String>{
+    for (final Plugin plugin in plugins)
+      for (final PluginPlatform platform in plugin.platforms.values)
+        if (platform is CustomEmbedderPlugin)
+          platform.configKey
+  };
+
   final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
     plugins,
     throwOnPluginPubspecError: throwOnPluginPubspecError,
+    customEmbedderConfigKeys: customEmbedderConfigKeys.toList()
   );
+
   final LanguageVersion entrypointVersion = determineLanguageVersion(
     mainFile,
     packageConfig.packageOf(mainFile.absolute.uri),
     Cache.flutterRoot!,
   );
-  final Map<String, Object> templateContext = <String, Object>{
-    'mainEntrypoint': currentMainUri,
-    'dartLanguageVersion': entrypointVersion.toString(),
-    AndroidPlugin.kConfigKey: <Object?>[],
-    IOSPlugin.kConfigKey: <Object?>[],
-    LinuxPlugin.kConfigKey: <Object?>[],
-    MacOSPlugin.kConfigKey: <Object?>[],
-    WindowsPlugin.kConfigKey: <Object?>[],
-  };
   final File newMainDart = rootProject.dartPluginRegistrant;
   if (resolutions.isEmpty) {
     try {
@@ -1353,10 +1368,51 @@ Future<void> generateMainDartWithPluginRegistrant(
     }
     return;
   }
+
+  final List<Object> allResolutions = <Object>[];
+  final List<Object> androidResolutions = <Object>[];
+  final List<Object> iosResolutions = <Object>[];
+  final List<Object> linuxResolutions = <Object>[];
+  final List<Object> macosResolutions = <Object>[];
+  final List<Object> windowsResolutions = <Object>[];
+  final Map<String, List<Object>> customEmbeddersWithResolutions = <String, List<Object>>{};
+
   for (final PluginInterfaceResolution resolution in resolutions) {
-    assert(templateContext.containsKey(resolution.platform));
-    (templateContext[resolution.platform] as List<Object?>?)?.add(resolution.toMap());
+    final Map<String, String> mapped = resolution.toMap();
+    allResolutions.add(mapped);
+    if (resolution.platformKey == AndroidPlugin.kConfigKey) {
+      androidResolutions.add(mapped);
+    } else if (resolution.platformKey == IOSPlugin.kConfigKey) {
+      iosResolutions.add(mapped);
+    } else if (resolution.platformKey == LinuxPlugin.kConfigKey) {
+      linuxResolutions.add(mapped);
+    } else if (resolution.platformKey == MacOSPlugin.kConfigKey) {
+      macosResolutions.add(mapped);
+    } else if (resolution.platformKey == WindowsPlugin.kConfigKey) {
+      windowsResolutions.add(mapped);
+    } else if (customEmbedderConfigKeys.contains(resolution.platformKey)) {
+      final CustomEmbedderPlugin plugin = resolution.platform as CustomEmbedderPlugin;
+      customEmbeddersWithResolutions.putIfAbsent(plugin.embedderName, () => <Map<String, String>>[]);
+      customEmbeddersWithResolutions[plugin.embedderName]!.add(mapped);
+    }
   }
+
+  final Map<String, Object> templateContext = <String, Object>{
+    'mainEntrypoint': currentMainUri,
+    'dartLanguageVersion': entrypointVersion.toString(),
+    'plugins': allResolutions,
+    AndroidPlugin.kConfigKey: androidResolutions,
+    IOSPlugin.kConfigKey: iosResolutions,
+    LinuxPlugin.kConfigKey: linuxResolutions,
+    MacOSPlugin.kConfigKey: macosResolutions,
+    WindowsPlugin.kConfigKey: windowsResolutions,
+    'custom-embedders': customEmbeddersWithResolutions.entries.map((MapEntry<String, Object> entry) => <String, Object>{
+      'embedderName': entry.key,
+      'embedderPlatformKey': 'x-${entry.key}',
+      'plugins': entry.value
+    }).toList()
+  };
+
   try {
     _renderTemplateToFile(
       _dartPluginRegistryForNonWebTemplate,
@@ -1368,4 +1424,13 @@ Future<void> generateMainDartWithPluginRegistrant(
     globals.printError('Unable to write ${newMainDart.path}, received error: $error');
     rethrow;
   }
+}
+
+Future<List<Map<String, Object?>>> findNativeCustomEmbedderPlugins(
+  String platformKey, {
+  FlutterProject? project
+}) async {
+  final List<Plugin> plugins = await findPlugins(project ?? FlutterProject.current());
+  plugins.sort((Plugin left, Plugin right) => left.name.compareTo(right.name));
+  return _extractPlatformMaps(_filterNativePlugins(plugins, platformKey), platformKey);
 }

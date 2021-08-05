@@ -94,7 +94,10 @@ class CustomDeviceConfig {
     required this.runDebugCommand,
     this.forwardPortCommand,
     this.forwardPortSuccessRegex,
-    this.screenshotCommand
+    this.screenshotCommand,
+    this.embedderName,
+    this.configureNativeProject,
+    this.buildNativeProject,
   }) : assert(forwardPortCommand == null || forwardPortSuccessRegex != null),
        assert(
          platform == null
@@ -111,26 +114,26 @@ class CustomDeviceConfig {
     final Map<String, dynamic> typedMap = _castJsonObject(
       json,
       'device configuration',
-      'a JSON object'
+      'a JSON object',
     );
 
     final List<String>? forwardPortCommand = _castStringListOrNull(
       typedMap[_kForwardPortCommand],
       _kForwardPortCommand,
       'null or array of strings with at least one element',
-      minLength: 1
+      minLength: 1,
     );
 
     final RegExp? forwardPortSuccessRegex = _convertToRegexOrNull(
       typedMap[_kForwardPortSuccessRegex],
       _kForwardPortSuccessRegex,
-      'null or string-ified regex'
+      'null or string-ified regex',
     );
 
     final String? archString = _castStringOrNull(
       typedMap[_kPlatform],
       _kPlatform,
-      'null or one of linux-arm64, linux-x64'
+      'null or one of linux-arm64, linux-x64',
     );
 
     late TargetPlatform? platform;
@@ -141,7 +144,7 @@ class CustomDeviceConfig {
     } on FallThroughError {
       throw const CustomDeviceRevivalException.fromDescriptions(
         _kPlatform,
-        'null or one of linux-arm64, linux-x64'
+        'null or one of linux-arm64, linux-x64',
       );
     }
 
@@ -151,7 +154,7 @@ class CustomDeviceConfig {
     ) {
       throw const CustomDeviceRevivalException.fromDescriptions(
         _kPlatform,
-        'null or one of linux-arm64, linux-x64'
+        'null or one of linux-arm64, linux-x64',
       );
     }
 
@@ -169,7 +172,7 @@ class CustomDeviceConfig {
         typedMap[_kPingCommand],
         _kPingCommand,
         'array of strings with at least one element',
-        minLength: 1
+        minLength: 1,
       ),
       pingSuccessRegex: _convertToRegexOrNull(typedMap[_kPingSuccessRegex], _kPingSuccessRegex, 'null or string-ified regex'),
       postBuildCommand: _castStringListOrNull(
@@ -182,19 +185,19 @@ class CustomDeviceConfig {
         typedMap[_kInstallCommand],
         _kInstallCommand,
         'array of strings with at least one element',
-        minLength: 1
+        minLength: 1,
       ),
       uninstallCommand: _castStringList(
         typedMap[_kUninstallCommand],
         _kUninstallCommand,
         'array of strings with at least one element',
-        minLength: 1
+        minLength: 1,
       ),
       runDebugCommand: _castStringList(
         typedMap[_kRunDebugCommand],
         _kRunDebugCommand,
         'array of strings with at least one element',
-        minLength: 1
+        minLength: 1,
       ),
       forwardPortCommand: forwardPortCommand,
       forwardPortSuccessRegex: forwardPortSuccessRegex,
@@ -202,7 +205,24 @@ class CustomDeviceConfig {
         typedMap[_kScreenshotCommand],
         _kScreenshotCommand,
         'array of strings with at least one element',
-        minLength: 1
+        minLength: 1,
+      ),
+      embedderName: _castStringOrNull(
+        typedMap[_kEmbedderName],
+        _kEmbedderName,
+        'string or null',
+      ),
+      configureNativeProject: _castStringListOrNull(
+        typedMap[_kConfigureNativeProject],
+        _kConfigureNativeProject,
+        'array of strings with at least one element or null',
+        minLength: 1,
+      ),
+      buildNativeProject: _castStringListOrNull(
+        typedMap[_kBuildNativeProject],
+        _kBuildNativeProject,
+        'array of strings with at least one element or null',
+        minLength: 1,
       )
     );
   }
@@ -221,6 +241,9 @@ class CustomDeviceConfig {
   static const String _kForwardPortCommand = 'forwardPort';
   static const String _kForwardPortSuccessRegex = 'forwardPortSuccessRegex';
   static const String _kScreenshotCommand = 'screenshot';
+  static const String _kEmbedderName = 'embedder';
+  static const String _kConfigureNativeProject = 'configureNativeProject';
+  static const String _kBuildNativeProject = 'buildNativeProject';
 
   /// An example device config used for creating the default config file.
   /// Uses windows-specific ping and pingSuccessRegex. For the linux and macOs
@@ -233,7 +256,7 @@ class CustomDeviceConfig {
     enabled: false,
     pingCommand: const <String>[
       'ping',
-      '-w', '500',
+      '-w', '3000',
       '-n', '1',
       'raspberrypi',
     ],
@@ -273,19 +296,85 @@ class CustomDeviceConfig {
       'pi@raspberrypi',
       r"fbgrab /tmp/screenshot.png && cat /tmp/screenshot.png | base64 | tr -d ' \n\t'",
     ],
+    embedderName: 'sony-embedder',
+    configureNativeProject: const <String>[
+      'rmdir',
+      '/Q',
+      '/S',
+      'build',
+      '&&',
+      'mkdir',
+      'build',
+      '&&',
+      'cd',
+      'build',
+      '&&',
+      'cmake',
+      '-DCMAKE_SYSTEM_NAME=Linux',
+      '-DCMAKE_SYSTEM_PROCESSOR=arm',
+      '-DCMAKE_C_COMPILER=clang',
+      '-DCMAKE_C_COMPILER_TARGET=arm-linux-gnueabihf',
+      '-DCMAKE_C_FLAGS=-fuse-ld=lld',
+      '-DCMAKE_CXX_COMPILER=clang',
+      '-DCMAKE_CXX_COMPILER_TARGET=arm-linux-gnueabihf',
+      '-DCMAKE_CXX_FLAGS=-fuse-ld=lld',
+      '-DCMAKE_SYSROOT=C:/Users/hannes/devel/debian_sid_arm-sysroot',
+      r'-DCMAKE_BUILD_MODE=${buildType}',
+      r'-DPLUGINS=${pluginList}',
+      r'-DCMAKE_INSTALL_PREFIX=${assetBundleDirectory}',
+      '-GNinja',
+      '..'
+    ],
+    buildNativeProject: const <String>['ninja', '-C', 'build', 'install'],
   );
 
   /// An example device config used for creating the default config file.
   /// Uses ping and pingSuccessRegex values that only work on linux or macOs.
   /// For the Windows example config, see [exampleWindows].
-  static final CustomDeviceConfig exampleUnix = exampleWindows.copyWith(
-    pingCommand: const <String>[
-      'ping',
-      '-w', '1',
-      '-c', '1',
-      'raspberrypi'
+  static final CustomDeviceConfig exampleLinux = exampleWindows.copyWith(
+    pingCommand: const <String>['ping', '-w', '3', '-c', '1', 'raspberrypi'],
+    explicitPingSuccessRegex: true, // overwrite pingSuccessRegex with null
+    runDebugCommand: const <String>[
+      'ssh',
+      '-o', 'BatchMode=yes',
+      '-tt',
+      'pi@raspberrypi',
+      r'flutter-pi "/tmp/${appName}"',
     ],
-    explicitPingSuccessRegex: true
+    configureNativeProject: const <String>[
+      'rm',
+      '-rf',
+      'build',
+      '&&',
+      'mkdir',
+      'build',
+      '&&',
+      'cd',
+      'build',
+      '&&',
+      'cmake',
+      '-DCMAKE_SYSTEM_NAME=Linux',
+      '-DCMAKE_SYSTEM_PROCESSOR=arm',
+      '-DCMAKE_C_COMPILER=clang',
+      '-DCMAKE_C_COMPILER_TARGET=arm-linux-gnueabihf',
+      '-DCMAKE_CXX_COMPILER=clang',
+      '-DCMAKE_CXX_COMPILER_TARGET=arm-linux-gnueabihf',
+      '-DCMAKE_SYSROOT=/home/hannes/devel/debian_sid_arm-sysroot',
+      r'-DCMAKE_BUILD_MODE=${buildType}',
+      r'-DPLUGINS=${pluginList}',
+      r'-DCMAKE_INSTALL_PREFIX=${assetBundleDirectory}',
+      '-GNinja',
+      '..',
+    ],
+    buildNativeProject: const <String>['ninja', '-C', 'build', 'install'],
+  );
+
+  /// An example device config used for creating the default config file.
+  /// Uses ping and pingSuccessRegex values that only work on linux or macOs.
+  /// For the Windows example config, see [exampleWindows].
+  static final CustomDeviceConfig exampleMacos = exampleLinux.copyWith(
+    pingCommand: const <String>['ping', '-c', '1', 'raspberrypi'],
+    explicitPingSuccessRegex: true, // overwrite pingSuccessRegex with null
   );
 
   /// Returns an example custom device config that works on the given host platform.
@@ -296,9 +385,10 @@ class CustomDeviceConfig {
   static CustomDeviceConfig getExampleForPlatform(Platform platform) {
     if (platform.isWindows) {
       return exampleWindows;
-    }
-    if (platform.isLinux || platform.isMacOS) {
-      return exampleUnix;
+    } else if (platform.isLinux) {
+      return exampleLinux;
+    } else if (platform.isMacOS) {
+      return exampleMacos;
     }
     throw FallThroughError();
   }
@@ -317,6 +407,9 @@ class CustomDeviceConfig {
   final List<String>? forwardPortCommand;
   final RegExp? forwardPortSuccessRegex;
   final List<String>? screenshotCommand;
+  final String? embedderName;
+  final List<String>? configureNativeProject;
+  final List<String>? buildNativeProject;
 
   /// Returns true when this custom device config uses port forwarding,
   /// which is the case when [forwardPortCommand] is not null.
@@ -325,6 +418,13 @@ class CustomDeviceConfig {
   /// Returns true when this custom device config supports screenshotting,
   /// which is the case when the [screenshotCommand] is not null.
   bool get supportsScreenshotting => screenshotCommand != null;
+
+  /// Returns true when this custom device config supports plugins,
+  /// which is the case when it has an [embedderName] and either the
+  /// [configureNativeProject] or [buildNativeProject] is not null.
+  bool get supportsPlugins =>
+    embedderName != null &&
+    (configureNativeProject != null || buildNativeProject != null);
 
   /// Invokes and returns the result of [closure].
   ///
@@ -480,6 +580,9 @@ class CustomDeviceConfig {
       _kForwardPortCommand: forwardPortCommand,
       _kForwardPortSuccessRegex: forwardPortSuccessRegex?.pattern,
       _kScreenshotCommand: screenshotCommand,
+      _kEmbedderName: embedderName,
+      _kConfigureNativeProject: configureNativeProject,
+      _kBuildNativeProject: buildNativeProject,
     };
   }
 
@@ -503,7 +606,13 @@ class CustomDeviceConfig {
     bool explicitForwardPortSuccessRegex = false,
     RegExp? forwardPortSuccessRegex,
     bool explicitScreenshotCommand = false,
-    List<String>? screenshotCommand
+    List<String>? screenshotCommand,
+    bool explicitEmbedderName = false,
+    String? embedderName,
+    bool explicitConfigureNativeProject = false,
+    List<String>? configureNativeProject,
+    bool explicitBuildNativeProject = false,
+    List<String>? buildNativeProject,
   }) {
     return CustomDeviceConfig(
       id: id ?? this.id,
@@ -520,6 +629,9 @@ class CustomDeviceConfig {
       forwardPortCommand: explicitForwardPortCommand ? forwardPortCommand : (forwardPortCommand ?? this.forwardPortCommand),
       forwardPortSuccessRegex: explicitForwardPortSuccessRegex ? forwardPortSuccessRegex : (forwardPortSuccessRegex ?? this.forwardPortSuccessRegex),
       screenshotCommand: explicitScreenshotCommand ? screenshotCommand : (screenshotCommand ?? this.screenshotCommand),
+      embedderName: explicitEmbedderName ? embedderName : (embedderName ?? this.embedderName),
+      configureNativeProject: explicitConfigureNativeProject ? configureNativeProject : (configureNativeProject ?? this.configureNativeProject),
+      buildNativeProject: explicitBuildNativeProject ? buildNativeProject : (buildNativeProject ?? this.buildNativeProject),
     );
   }
 
@@ -539,7 +651,10 @@ class CustomDeviceConfig {
       && _listsEqual(other.runDebugCommand, runDebugCommand)
       && _listsEqual(other.forwardPortCommand, forwardPortCommand)
       && _regexesEqual(other.forwardPortSuccessRegex, forwardPortSuccessRegex)
-      && _listsEqual(other.screenshotCommand, screenshotCommand);
+      && _listsEqual(other.screenshotCommand, screenshotCommand)
+      && other.embedderName == embedderName
+      && _listsEqual(other.configureNativeProject, configureNativeProject)
+      && _listsEqual(other.buildNativeProject, buildNativeProject);
   }
 
   @override
@@ -557,7 +672,10 @@ class CustomDeviceConfig {
       ^ runDebugCommand.hashCode
       ^ forwardPortCommand.hashCode
       ^ (forwardPortSuccessRegex?.pattern).hashCode
-      ^ screenshotCommand.hashCode;
+      ^ screenshotCommand.hashCode
+      ^ embedderName.hashCode
+      ^ configureNativeProject.hashCode
+      ^ buildNativeProject.hashCode;
   }
 
   @override
@@ -576,6 +694,9 @@ class CustomDeviceConfig {
       'runDebugCommand: $runDebugCommand, '
       'forwardPortCommand: $forwardPortCommand, '
       'forwardPortSuccessRegex: $forwardPortSuccessRegex, '
-      'screenshotCommand: $screenshotCommand)';
+      'screenshotCommand: $screenshotCommand'
+      'embedderName: $embedderName, '
+      'configurePluginsCommand: $configureNativeProject, '
+      'buildPluginsCommand: $buildNativeProject)';
   }
 }

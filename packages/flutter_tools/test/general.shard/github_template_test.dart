@@ -9,7 +9,6 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/devfs.dart';
-import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/github_template.dart';
 
 import '../src/common.dart';
@@ -158,7 +157,7 @@ void main() {
         final GitHubTemplateCreator creator = GitHubTemplateCreator(
           fileSystem: fs,
           logger: logger,
-          flutterProjectFactory: FlutterProjectFactory(
+          flutterProjectFactory: makeProjectFactory(
             fileSystem: fs,
             logger: logger,
           ),
@@ -182,7 +181,7 @@ void main() {
         final GitHubTemplateCreator creator = GitHubTemplateCreator(
           fileSystem: fs,
           logger: logger,
-          flutterProjectFactory: FlutterProjectFactory(
+          flutterProjectFactory: makeProjectFactory(
             fileSystem: fs,
             logger: logger,
           ),

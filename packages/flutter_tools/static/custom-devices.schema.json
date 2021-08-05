@@ -131,6 +131,53 @@
               "ssh", "pi@raspberrypi", "fbgrab /tmp/screenshot.png && cat /tmp/screenshot.png | base64 | tr -d ' \\n\\t'"
             ],
             "required": false
+          },
+          "embedder": {
+            "description": "Name of the embedder.\nUsed to determine the directory name for platform-specific code, and will be compared against the value of the 'FLUTTER_CUSTOM_PLATFORM' environment variable to activate the correct variant of any plugin. (If the value of the 'FLUTTER_CUSTOM_PLATFORM' variable is 'flutter-pi', the flutter-pi variant of any plugin will be activated.)",
+            "type": ["string", "null"],
+            "default": "sony-embedder",
+            "required": false
+          },
+          "configureNativeProject": {
+            "description": "Command to be run to configure the compilation of the runner & any native plugins.\nWill be called by the SDK when: \n  - something about the plugin list changed (plugin added / removed)\n  - when the project should be built and 'configureNativeProject' hasn't been called yet.  - When the project should be built for a different runtime mode than the last time 'configureNativeProject' was called",
+            "type": ["array", "null"],
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "required": false,
+            "default": [
+              "rmdir", "/Q", "/S", "build", "&&",
+              "mkdir", "build", "&&",
+              "cd", "build", "&&",
+              "cmake",
+                "-DCMAKE_SYSTEM_NAME=Linux",
+                "-DCMAKE_SYSTEM_PROCESSOR=arm",
+                "-DCMAKE_C_COMPILER=clang",
+                "-DCMAKE_C_COMPILER_TARGET=arm-linux-gnueabihf",
+                "-DCMAKE_C_FLAGS=-fuse-ld=lld",
+                "-DCMAKE_CXX_COMPILER=clang",
+                "-DCMAKE_CXX_COMPILER_TARGET=arm-linux-gnueabihf",
+                "-DCMAKE_CXX_FLAGS=-fuse-ld=lld",
+                "-DCMAKE_SYSROOT=C:/Users/hannes/devel/debian_sid_arm-sysroot",
+                "-DCMAKE_BUILD_MODE=${buildType}",
+                "-DPLUGINS=${pluginList}",
+                "-DCMAKE_INSTALL_PREFIX=${assetBuildDirectory}",
+                "-GNinja",
+                ".."
+            ]
+          },
+          "buildNativeProject": {
+            "description": "Command to be run to build the runner & any native plugins.\nWill be called by the SDK any time the project should be built.",
+            "type": ["array", "null"],
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "required": false,
+            "default": [
+              "ninja", "-C", "build", "install"
+            ]
           }
         }
       }

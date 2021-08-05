@@ -5,6 +5,7 @@
 import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 
@@ -44,6 +45,8 @@ class FakeFlutterProjectFactory extends FlutterProjectFactory {
     super(
       fileSystem: globals.fs,
       logger: globals.logger,
+      featureFlags: featureFlags,
+      customDevicesConfig: globals.customDevicesConfig
     );
 
   final Directory directoryOverride;
