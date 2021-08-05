@@ -4,8 +4,8 @@
 
 import 'text_editing.dart';
 
-// TODO(justinmc): Document.
-/// A read-only interface for accessing information about some editable text.
+/// A read-only interface for accessing visual information about the
+/// implementing text.
 abstract class TextMetrics {
   /// {@template flutter.services.TextMetrics.getLineAtOffset}
   /// Return a [TextSelection] containing the line of the given [TextPosition].
