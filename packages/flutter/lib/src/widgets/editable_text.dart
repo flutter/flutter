@@ -28,7 +28,7 @@ import 'scroll_controller.dart';
 import 'scroll_physics.dart';
 import 'scrollable.dart';
 import 'text.dart';
-import 'text_editing_action.dart';
+import 'text_editing_action_target.dart';
 import 'text_selection.dart';
 import 'ticker_provider.dart';
 import 'widget_span.dart';
