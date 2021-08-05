@@ -18,15 +18,16 @@ FLUTTER_ASSERT_ARC
 
 @implementation FlutterAppDelegateTest
 
-// TODO(dnfield): https://github.com/flutter/flutter/issues/74267
-- (void)skip_testLaunchUrl {
+- (void)testLaunchUrl {
   FlutterAppDelegate* appDelegate = [[FlutterAppDelegate alloc] init];
   FlutterViewController* viewController = OCMClassMock([FlutterViewController class]);
   FlutterEngine* engine = OCMClassMock([FlutterEngine class]);
   FlutterMethodChannel* navigationChannel = OCMClassMock([FlutterMethodChannel class]);
   OCMStub([engine navigationChannel]).andReturn(navigationChannel);
   OCMStub([viewController engine]).andReturn(engine);
-  OCMStub([engine waitForFirstFrame:3.0 callback:([OCMArg invokeBlockWithArgs:@(NO), nil])]);
+  // Set blockNoInvoker to a strong local to retain to end of scope.
+  id blockNoInvoker = [OCMArg invokeBlockWithArgs:@NO, nil];
+  OCMStub([engine waitForFirstFrame:3.0 callback:blockNoInvoker]);
   appDelegate.rootFlutterViewControllerGetter = ^{
     return viewController;
   };
@@ -42,14 +43,16 @@ FLUTTER_ASSERT_ARC
   OCMVerify([navigationChannel invokeMethod:@"pushRoute" arguments:@"/custom/route?query=test"]);
 }
 
-- (void)skip_testLaunchUrlWithQueryParameterAndFragment {
+- (void)testLaunchUrlWithQueryParameterAndFragment {
   FlutterAppDelegate* appDelegate = [[FlutterAppDelegate alloc] init];
   FlutterViewController* viewController = OCMClassMock([FlutterViewController class]);
   FlutterEngine* engine = OCMClassMock([FlutterEngine class]);
   FlutterMethodChannel* navigationChannel = OCMClassMock([FlutterMethodChannel class]);
   OCMStub([engine navigationChannel]).andReturn(navigationChannel);
   OCMStub([viewController engine]).andReturn(engine);
-  OCMStub([engine waitForFirstFrame:3.0 callback:([OCMArg invokeBlockWithArgs:@(NO), nil])]);
+  // Set blockNoInvoker to a strong local to retain to end of scope.
+  id blockNoInvoker = [OCMArg invokeBlockWithArgs:@NO, nil];
+  OCMStub([engine waitForFirstFrame:3.0 callback:blockNoInvoker]);
   appDelegate.rootFlutterViewControllerGetter = ^{
     return viewController;
   };
@@ -66,14 +69,16 @@ FLUTTER_ASSERT_ARC
                                   arguments:@"/custom/route?query=test#fragment"]);
 }
 
-- (void)skip_testLaunchUrlWithFragmentNoQueryParameter {
+- (void)testLaunchUrlWithFragmentNoQueryParameter {
   FlutterAppDelegate* appDelegate = [[FlutterAppDelegate alloc] init];
   FlutterViewController* viewController = OCMClassMock([FlutterViewController class]);
   FlutterEngine* engine = OCMClassMock([FlutterEngine class]);
   FlutterMethodChannel* navigationChannel = OCMClassMock([FlutterMethodChannel class]);
   OCMStub([engine navigationChannel]).andReturn(navigationChannel);
   OCMStub([viewController engine]).andReturn(engine);
-  OCMStub([engine waitForFirstFrame:3.0 callback:([OCMArg invokeBlockWithArgs:@(NO), nil])]);
+  // Set blockNoInvoker to a strong local to retain to end of scope.
+  id blockNoInvoker = [OCMArg invokeBlockWithArgs:@NO, nil];
+  OCMStub([engine waitForFirstFrame:3.0 callback:blockNoInvoker]);
   appDelegate.rootFlutterViewControllerGetter = ^{
     return viewController;
   };
