@@ -52,7 +52,11 @@ public class SurfaceTextureWrapper {
   // Called by native.
   @SuppressWarnings("unused")
   public void attachToGLContext(int texName) {
-    surfaceTexture.attachToGLContext(texName);
+    synchronized (this) {
+      if (!released) {
+        surfaceTexture.attachToGLContext(texName);
+      }
+    }
   }
 
   // Called by native.
