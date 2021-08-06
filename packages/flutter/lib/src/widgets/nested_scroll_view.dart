@@ -976,8 +976,9 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
       if ((velocity > 0.0) && (innerPosition.pixels > innerPosition.minScrollExtent)) {
         // This handles going forward (fling up) and inner list is scrolled past
         // zero. We want to grab the extra pixels immediately to shrink.
-        extra = _outerPosition!.maxScrollExtent - _outerPosition!.pixels;
-        assert(extra >= 0.0);
+        final double rawExtra = _outerPosition!.maxScrollExtent - _outerPosition!.pixels;
+        assert(rawExtra > -precisionErrorTolerance);
+        extra = math.max(0.0, rawExtra);
         minRange = pixels;
         maxRange = pixels + extra;
         assert(minRange <= maxRange);
@@ -985,8 +986,9 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
       } else if ((velocity < 0.0) && (innerPosition.pixels < innerPosition.minScrollExtent)) {
         // This handles going backward (fling down) and inner list is
         // underscrolled. We want to grab the extra pixels immediately to grow.
-        extra = _outerPosition!.pixels - _outerPosition!.minScrollExtent;
-        assert(extra >= 0.0);
+        final double rawExtra = _outerPosition!.pixels - _outerPosition!.minScrollExtent;
+        assert(rawExtra > -precisionErrorTolerance);
+        extra = math.max(0.0, rawExtra);
         minRange = pixels - extra;
         maxRange = pixels;
         assert(minRange <= maxRange);
@@ -996,14 +998,16 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
         // underscrolled, OR, going backward (fling down) and inner list is
         // scrolled past zero. We want to skip the pixels we don't need to grow
         // or shrink over.
+        double rawExtra = 0.0;
         if (velocity > 0.0) {
           // shrinking
-          extra = _outerPosition!.minScrollExtent - _outerPosition!.pixels;
+          rawExtra = _outerPosition!.minScrollExtent - _outerPosition!.pixels;
         } else if (velocity < 0.0) {
           // growing
-          extra = _outerPosition!.pixels - (_outerPosition!.maxScrollExtent - _outerPosition!.minScrollExtent);
+          rawExtra = _outerPosition!.pixels - (_outerPosition!.maxScrollExtent - _outerPosition!.minScrollExtent);
         }
-        assert(extra <= 0.0);
+        assert(rawExtra <= precisionErrorTolerance);
+        extra = math.min(0.0, rawExtra);
         minRange = _outerPosition!.minScrollExtent;
         maxRange = _outerPosition!.maxScrollExtent + extra;
         assert(minRange <= maxRange);
