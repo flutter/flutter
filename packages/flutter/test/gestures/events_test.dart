@@ -64,10 +64,11 @@ void main() {
     expect(computeHitSlop(PointerDeviceKind.unknown, 1), 1);
 
     expect(computePanSlop(PointerDeviceKind.mouse, 1), kPrecisePointerPanSlop);
-    expect(computePanSlop(PointerDeviceKind.stylus, 1), 1);
-    expect(computePanSlop(PointerDeviceKind.invertedStylus, 1), 1);
-    expect(computePanSlop(PointerDeviceKind.touch, 1), 2); // Pan slop is 2x touch slop
-    expect(computePanSlop(PointerDeviceKind.unknown, 1), 1);
+    // Pan slop is 2x touch slop
+    expect(computePanSlop(PointerDeviceKind.stylus, 1), 2);
+    expect(computePanSlop(PointerDeviceKind.invertedStylus, 1), 2);
+    expect(computePanSlop(PointerDeviceKind.touch, 1), 2);
+    expect(computePanSlop(PointerDeviceKind.unknown, 1), 2);
   });
 
   group('fromMouseEvent', () {
