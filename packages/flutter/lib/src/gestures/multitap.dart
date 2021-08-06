@@ -509,17 +509,6 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
   /// particular location after [longTapDelay].
   GestureMultiTapDownCallback? onLongTapDown;
 
-  /// A device specific touch slop configuration that should be preferred over the
-  /// framework constants if set.
-  ///
-  /// This is usually retrieved from [MediaQueryData.deviceTouchSlop] and is derived
-  /// from the [GestureSettings] provided by the window.
-  ///
-  /// See also:
-  ///
-  ///  * [GestureSettings], which provides device specific touch configuration.
-  double? deviceTouchSlop;
-
   final Map<int, _TapGesture> _gestureMap = <int, _TapGesture>{};
 
   @override
@@ -529,7 +518,7 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
       gestureRecognizer: this,
       event: event,
       longTapDelay: longTapDelay,
-      touchSlop: deviceTouchSlop,
+      touchSlop: gestureSettings?.touchSlop,
     );
     if (onTapDown != null)
       invokeCallback<void>('onTapDown', () {
