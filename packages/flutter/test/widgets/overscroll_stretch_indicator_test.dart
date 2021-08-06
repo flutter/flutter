@@ -178,4 +178,46 @@ void main() {
       matchesGoldenFile('overscroll_stretch.horizontal.right.png'),
     );
   });
+
+  testWidgets('Disallow stretching overscroll', (WidgetTester tester) async {
+    final Key box1Key = UniqueKey();
+    final Key box2Key = UniqueKey();
+    final Key box3Key = UniqueKey();
+    final ScrollController controller = ScrollController();
+    double indicatorNotification =0;
+    await tester.pumpWidget(
+      NotificationListener<OverscrollIndicatorNotification>(
+        onNotification: (OverscrollIndicatorNotification notification) {
+          notification.disallowIndicator();
+          indicatorNotification += 1;
+          return false;
+        },
+        child: buildTest(box1Key, box2Key, box3Key, controller),
+      )
+    );
+
+    expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
+    expect(find.byType(GlowingOverscrollIndicator), findsNothing);
+    final RenderBox box1 = tester.renderObject(find.byKey(box1Key));
+    final RenderBox box2 = tester.renderObject(find.byKey(box2Key));
+    final RenderBox box3 = tester.renderObject(find.byKey(box3Key));
+
+    expect(indicatorNotification, 0.0);
+    expect(controller.offset, 0.0);
+    expect(box1.localToGlobal(Offset.zero), Offset.zero);
+    expect(box2.localToGlobal(Offset.zero), const Offset(0.0, 250.0));
+    expect(box3.localToGlobal(Offset.zero), const Offset(0.0, 500.0));
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(CustomScrollView)));
+    // Overscroll the start, should not stretch
+    await gesture.moveBy(const Offset(0.0, 200.0));
+    await tester.pumpAndSettle();
+    expect(indicatorNotification, 1.0);
+    expect(box1.localToGlobal(Offset.zero), Offset.zero);
+    expect(box2.localToGlobal(Offset.zero), const Offset(0.0, 250.0));
+    expect(box3.localToGlobal(Offset.zero), const Offset(0.0, 500.0));
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+  });
 }
