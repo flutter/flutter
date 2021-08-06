@@ -82,6 +82,33 @@ import 'tooltip_theme.dart';
 /// }
 /// ```
 /// {@end-tool}
+/// 
+/// {@tool dartpad --template=stateless_widget_scaffold_center}
+///
+/// This example show a basic [Tooltip.custom] which has a [Container] 
+/// containing [Text] as child.
+/// [tooltip] contains your widget to be shown by the tooltip when
+/// the child that Tooltip wraps is hovered over on web or desktop. On mobile,
+/// the tooltip is shown when the widget is long pressed. Also, [decoration],
+/// [height] and other options can be specified like above example.
+/// ```dart
+/// Widget build(BuildContext context) {
+///     return Tooltip.custom(
+///       tooltip: TextSpan(
+///         text: " Custom",
+///         style: TextStyle(color: Colors.red),
+///         children: [
+///           TextSpan(
+///             text: "Test Tooltip",
+///             style: TextStyle(color: Colors.white70),
+///           ),
+///         ],
+///       ),
+///       child: Text('Hover over the text to show a custom tooltip.'),
+///    );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -100,7 +127,7 @@ class Tooltip extends StatefulWidget {
   /// override the default values _and_ the values in [TooltipTheme.of].
   const Tooltip({
     Key? key,
-    required this.message,
+    required String this.message,
     this.height,
     this.padding,
     this.margin,
@@ -114,11 +141,100 @@ class Tooltip extends StatefulWidget {
     this.child,
     this.triggerMode,
     this.enableFeedback,
-  }) : assert(message != null),
+  }) : assert(
+         message != null,
+         'A non-null String must be provided in message to a Tooltip widget.',
+       ),
+       tooltip = null,
+       semanticsLabel = null,
        super(key: key);
 
-  /// The text to display in the tooltip.
-  final String message;
+  /// Creates a tooltip using a widget provided to the [tooltip].
+  /// 
+  /// **NOTE :** Using [Tooltip] and [Tooltip.custom], like examples given 
+  /// below, will result in same results unless the [textStyle] or 
+  /// [TooltipTheme] is not customised for the first example.Therefore, it is 
+  /// recommended to use the [Tooltip] instead of [Tooltip.custom] in general 
+  /// scenarios where just simple text tooltips needed like following examples.
+  /// ```dart
+  /// Tooltip(
+  ///   message:"my tooltip",
+  /// ) 
+  /// 
+  /// Tooltip.custom(
+  ///   tooltip: Text("my tooltip"),
+  /// )
+  /// ``` 
+  ///
+  /// **NOTE :** 
+  /// By default, tooltips should adhere to the
+  /// [Material specification](https://material.io/design/components/tooltips.html#spec).
+  /// But, in the case of [Tooltip.custom], this will ignore the [TooltipTheme.of] as widget 
+  /// provided in the [tooltip] will use themes like as it would be using in the
+  /// normal application.
+  ///
+  /// All parameters that are defined in the constructor will
+  /// override the default values _and_ the values in [TooltipTheme.of].
+  const Tooltip.custom({
+    Key? key,
+    required Widget this.tooltip,
+    this.height,
+    this.padding,
+    this.margin,
+    this.verticalOffset,
+    this.preferBelow,
+    this.semanticsLabel,
+    this.decoration,
+    this.waitDuration,
+    this.showDuration,
+    this.child,
+    this.triggerMode,
+    this.enableFeedback,
+  }) : assert(
+         tooltip != null,
+         'A non-null Widget must be provided in tooltip to a Tooltip.custom widget.',
+       ),
+       message = null,
+       textStyle = null,
+       excludeFromSemantics = true,
+       super(key: key);
+
+  /// The text to display in the tooltip. [message] is used to show a text
+  /// tooltips which is general use cases.
+  ///
+  /// When [tooltip] and [message] both are provided, widget provided in the
+  /// tooltip will be shown in the tooltip and message property will be used
+  /// for semantics if [excludeFromSemantics] is true.
+  ///
+  /// In some cases, like information button tooltip, [Tooltip.custom] 
+  /// can be used which accepts widget. In case of [Tooltip.custom], 
+  /// [TooltipTheme.of] will be ignored.  
+  final String? message;
+
+  /// The widget to display in the tooltip. This can be any widget like 
+  /// the [child].
+  /// 
+  /// General use case will be a information button tooltips where custom 
+  /// tooltip content can be defined using [tooltip] widget.
+  /// 
+  /// For example,
+  /// 
+  /// ```dart
+  /// Tooltip.custom(
+  ///   child: Text("Custom tooltip"),
+  ///   tooltip: TextSpan(
+  ///              text: "Custom ",
+  ///              style: TextStyle(color: Colors.red),
+  ///              children: [
+  ///                TextSpan(
+  ///                  text: "Tooltip",
+  ///                  style: TextStyle(color: Colors.green),
+  ///                ),
+  ///             ],
+  ///          ),
+  ///       ),
+  /// ```
+  final Widget? tooltip;
 
   /// The height of the tooltip's [child].
   ///
@@ -166,6 +282,22 @@ class Tooltip extends StatefulWidget {
   /// [Tooltip.message]. Set this property to true if the app is going to
   /// provide its own custom semantics label.
   final bool? excludeFromSemantics;
+
+  /// A semantics label for the [Tooltip.custom].
+  ///
+  /// If present, the semantics of [Tooltip.custom] widget will be defined using
+  /// [semanticsLabel].
+  ///
+  /// Example,
+  /// ```dart
+  /// Tooltip(
+  ///   tooltip: Container(
+  ///     child: Text("tooltip")
+  ///   ), 
+  ///   semanticsLabel: 'semantics for tooltip'
+  /// )
+  /// ```
+  final String? semanticsLabel;
 
   /// The widget below this widget in the tree.
   ///
@@ -257,6 +389,9 @@ class Tooltip extends StatefulWidget {
     properties.add(DiagnosticsProperty<Duration>('show duration', showDuration, defaultValue: null));
     properties.add(DiagnosticsProperty<TooltipTriggerMode>('triggerMode', triggerMode, defaultValue: null));
     properties.add(FlagProperty('enableFeedback', value: enableFeedback, ifTrue: 'true', showName: true, defaultValue: null));
+    if (semanticsLabel != null) {
+      properties.add(StringProperty('semanticsLabel', semanticsLabel));
+    }
   }
 }
 
@@ -428,14 +563,13 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     final Widget overlay = Directionality(
       textDirection: Directionality.of(context),
       child: _TooltipOverlay(
-        message: widget.message,
+        tooltip: widget.tooltip ?? Text(widget.message!, style: textStyle),
         height: height,
         padding: padding,
         margin: margin,
         onEnter: _mouseIsConnected ? (PointerEnterEvent event) => _showTooltip() : null,
         onExit: _mouseIsConnected ? (PointerExitEvent event) => _hideTooltip() : null,
         decoration: decoration,
-        textStyle: textStyle,
         animation: CurvedAnimation(
           parent: _controller,
           curve: Curves.fastOutSlowIn,
@@ -447,7 +581,9 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     );
     _entry = OverlayEntry(builder: (BuildContext context) => overlay);
     overlayState.insert(_entry!);
-    SemanticsService.tooltip(widget.message);
+    if(widget.semanticsLabel != null || widget.message != null){
+      SemanticsService.tooltip(widget.semanticsLabel ?? widget.message!);
+    }
     Tooltip._openedToolTips.add(this);
   }
 
@@ -549,7 +685,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       onTap: (triggerMode == TooltipTriggerMode.tap) ? _handlePress : null,
       excludeFromSemantics: true,
       child: Semantics(
-        label: excludeFromSemantics ? null : widget.message,
+        label: widget.semanticsLabel ?? (excludeFromSemantics ? null : widget.message),
         child: widget.child,
       ),
     );
@@ -620,12 +756,11 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
 class _TooltipOverlay extends StatelessWidget {
   const _TooltipOverlay({
     Key? key,
-    required this.message,
+    required this.tooltip,
     required this.height,
     this.padding,
     this.margin,
     this.decoration,
-    this.textStyle,
     required this.animation,
     required this.target,
     required this.verticalOffset,
@@ -634,12 +769,11 @@ class _TooltipOverlay extends StatelessWidget {
     this.onExit,
   }) : super(key: key);
 
-  final String message;
+  final Widget tooltip;
   final double height;
   final EdgeInsetsGeometry? padding;
   final EdgeInsetsGeometry? margin;
   final Decoration? decoration;
-  final TextStyle? textStyle;
   final Animation<double> animation;
   final Offset target;
   final double verticalOffset;
@@ -663,10 +797,7 @@ class _TooltipOverlay extends StatelessWidget {
               child: Center(
                 widthFactor: 1.0,
                 heightFactor: 1.0,
-                child: Text(
-                  message,
-                  style: textStyle,
-                ),
+                child: tooltip,
               ),
             ),
           ),
