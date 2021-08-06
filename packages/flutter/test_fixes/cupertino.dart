@@ -182,7 +182,7 @@ void main() {
   listWheelViewport = ListWheelViewport(clipToSize: false);
   listWheelViewport.clipToSize;
 
-  // Changes made in [TBD]
+  // Changes made in https://github.com/flutter/flutter/pull/87839
   final OverscrollIndicatorNotification notification = OverscrollIndicatorNotification(leading: true);
   notification.disallowGlow();
 }

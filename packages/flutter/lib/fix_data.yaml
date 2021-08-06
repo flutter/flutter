@@ -15,7 +15,7 @@
 version: 1
 transforms:
 
-  # Changes made in [TBD]
+  # Changes made in https://github.com/flutter/flutter/pull/87839
   - title: "Migrate to 'disallowIndicator'"
     date: 2021-08-06
     element:
