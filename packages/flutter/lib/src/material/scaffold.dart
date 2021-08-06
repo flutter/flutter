@@ -2690,6 +2690,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     ShapeBorder? shape,
     Clip? clipBehavior,
     BoxConstraints? constraints,
+    bool willDisposeAnimationController = true,
   }) {
     assert(() {
       if (widget.bottomSheet != null && isPersistent && _currentBottomSheet != null) {
@@ -2755,6 +2756,11 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
           setState(() {
             _dismissedBottomSheets.remove(bottomSheet);
           });
+        }
+      },
+      onDispose: () {
+        if (willDisposeAnimationController) {
+          animationController.dispose();
         }
       },
       builder: builder,
@@ -2890,6 +2896,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
         shape: shape,
         clipBehavior: clipBehavior,
         constraints: constraints,
+        willDisposeAnimationController: transitionAnimationController == null,
       );
     });
     return _currentBottomSheet! as PersistentBottomSheetController<T>;
@@ -3065,12 +3072,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     _snackBarTimer = null;
 
     _geometryNotifier.dispose();
-    for (final _StandardBottomSheet bottomSheet in _dismissedBottomSheets) {
-      bottomSheet.animationController.dispose();
-    }
-    if (_currentBottomSheet != null) {
-      _currentBottomSheet!._widget.animationController.dispose();
-    }
     _floatingActionButtonMoveController.dispose();
     _floatingActionButtonVisibilityController.dispose();
     _scaffoldMessenger?._unregister(this);
@@ -3583,12 +3584,14 @@ class _StandardBottomSheet extends StatefulWidget {
     this.shape,
     this.clipBehavior,
     this.constraints,
+    this.onDispose,
   }) : super(key: key);
 
   final AnimationController animationController; // we control it, but it must be disposed by whoever created it.
   final bool enableDrag;
   final VoidCallback? onClosing;
   final VoidCallback? onDismissed;
+  final VoidCallback? onDispose;
   final WidgetBuilder builder;
   final bool isPersistent;
   final Color? backgroundColor;
@@ -3613,6 +3616,12 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
         || widget.animationController.status == AnimationStatus.completed,
     );
     widget.animationController.addStatusListener(_handleStatusChange);
+  }
+
+  @override
+  void dispose() {
+    widget.onDispose?.call();
+    super.dispose();
   }
 
   @override
