@@ -303,7 +303,7 @@ targets:
       - bin/
 
   - name: Linux firebase_abstract_method_smoke_test
-    recipe: firebaselab
+    recipe: firebaselab/firebaselab
     timeout: 60
     properties:
       dependencies: >-
@@ -316,7 +316,7 @@ targets:
     scheduler: luci
 
   - name: Linux firebase_android_embedding_v2_smoke_test
-    recipe: firebaselab
+    recipe: firebaselab/firebaselab
     timeout: 60
     properties:
       dependencies: >-
@@ -329,7 +329,7 @@ targets:
     scheduler: luci
 
   - name: Linux firebase_release_smoke_test
-    recipe: firebaselab
+    recipe: firebaselab/firebaselab
     timeout: 60
     properties:
       dependencies: >-
