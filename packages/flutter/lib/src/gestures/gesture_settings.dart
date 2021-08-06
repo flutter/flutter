@@ -3,8 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui;
-import 'package:meta/meta.dart';
-
+import 'package:flutter/foundation.dart';
 
 /// The device specific gesture settings scaled into logical pixels.
 ///
