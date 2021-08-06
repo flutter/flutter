@@ -334,16 +334,29 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   Rect? _trackRect;
   late double _thumbOffset;
 
-  /// Update with new [ScrollMetrics]. The scrollbar will show and redraw itself
-  /// based on these new metrics.
+  /// Update with new [ScrollMetrics]. If the metrics change, the scrollbar will
+  /// show and redraw itself based on these new metrics.
   ///
   /// The scrollbar will remain on screen.
   void update(
     ScrollMetrics metrics,
     AxisDirection axisDirection,
   ) {
+    if (_lastMetrics != null &&
+        _lastMetrics!.extentBefore == metrics.extentBefore &&
+        _lastMetrics!.extentInside == metrics.extentInside &&
+        _lastMetrics!.extentAfter == metrics.extentAfter &&
+        _lastAxisDirection == axisDirection)
+      return;
+
+    final ScrollMetrics? oldMetrics = _lastMetrics;
     _lastMetrics = metrics;
     _lastAxisDirection = axisDirection;
+
+    bool _needPaint(ScrollMetrics? metrics) => metrics != null && metrics.maxScrollExtent > metrics.minScrollExtent;
+    if (!_needPaint(oldMetrics) && !_needPaint(metrics))
+      return;
+
     notifyListeners();
   }
 
@@ -526,7 +539,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   void paint(Canvas canvas, Size size) {
     if (_lastAxisDirection == null
         || _lastMetrics == null
-        || fadeoutOpacityAnimation.value == 0.0)
+        || fadeoutOpacityAnimation.value == 0.0
+        || _lastMetrics!.maxScrollExtent <= _lastMetrics!.minScrollExtent)
       return;
 
     // Skip painting if there's not enough space.
@@ -1519,22 +1533,68 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     );
   }
 
+  // ScrollController takes precedence over ScrollNotification
+  bool _shouldUpdatePainter(Axis notificationAxis) {
+    final ScrollController? scrollController = widget.controller ??
+        PrimaryScrollController.of(context);
+    // Only update the painter of this scrollbar if the notification
+    // metrics do not conflict with the information we have from the scroll
+    // controller.
+    return
+      // We do not have a scroll controller dictating axis.
+      scrollController == null
+      // The scroll controller is not attached to a position.
+      || !scrollController.hasClients
+      // The notification matches the scroll controller's axis.
+      || scrollController.position.axis == notificationAxis;
+  }
+
+  bool _handleScrollMetricsNotification(ScrollMetricsNotification notification) {
+    if (!widget.notificationPredicate(ScrollUpdateNotification(metrics: notification.metrics, context: notification.context)))
+      return false;
+
+    if (showScrollbar) {
+      if (_fadeoutAnimationController.status != AnimationStatus.forward
+          && _fadeoutAnimationController.status != AnimationStatus.completed)
+        _fadeoutAnimationController.forward();
+    }
+
+    final ScrollMetrics metrics = notification.metrics;
+    if (_shouldUpdatePainter(metrics.axis)) {
+      scrollbarPainter.update(metrics, metrics.axisDirection);
+    }
+    return false;
+  }
+
   bool _handleScrollNotification(ScrollNotification notification) {
     if (!widget.notificationPredicate(notification))
       return false;
 
     final ScrollMetrics metrics = notification.metrics;
-    if (metrics.maxScrollExtent <= metrics.minScrollExtent)
+    if (metrics.maxScrollExtent <= metrics.minScrollExtent) {
+      // Hide the bar when the Scrollable widget has no space to scroll.
+      if (_fadeoutAnimationController.status != AnimationStatus.dismissed
+          && _fadeoutAnimationController.status != AnimationStatus.reverse)
+        _fadeoutAnimationController.reverse();
+
+      if (_shouldUpdatePainter(metrics.axis)) {
+        scrollbarPainter.update(metrics, metrics.axisDirection);
+      }
       return false;
+    }
 
     if (notification is ScrollUpdateNotification ||
       notification is OverscrollNotification) {
       // Any movements always makes the scrollbar start showing up.
-      if (_fadeoutAnimationController.status != AnimationStatus.forward)
+      if (_fadeoutAnimationController.status != AnimationStatus.forward
+          && _fadeoutAnimationController.status != AnimationStatus.completed)
         _fadeoutAnimationController.forward();
 
       _fadeoutTimer?.cancel();
-      scrollbarPainter.update(notification.metrics, notification.metrics.axisDirection);
+
+      if (_shouldUpdatePainter(metrics.axis)) {
+        scrollbarPainter.update(metrics, metrics.axisDirection);
+      }
     } else if (notification is ScrollEndNotification) {
       if (_dragScrollbarAxisOffset == null)
         _maybeStartFadeoutTimer();
@@ -1658,47 +1718,49 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
     updateScrollbarPainter();
 
-    return NotificationListener<ScrollNotification>(
-      onNotification: _handleScrollNotification,
-      child: RepaintBoundary(
-        child: RawGestureDetector(
-          gestures: _gestures,
-          child: MouseRegion(
-            onExit: (PointerExitEvent event) {
-              switch(event.kind) {
-                case PointerDeviceKind.mouse:
-                  if (enableGestures)
-                    handleHoverExit(event);
-                  break;
-                case PointerDeviceKind.stylus:
-                case PointerDeviceKind.invertedStylus:
-                case PointerDeviceKind.unknown:
-                case PointerDeviceKind.touch:
-                  break;
-              }
-            },
-            onHover: (PointerHoverEvent event) {
-              switch(event.kind) {
-                case PointerDeviceKind.mouse:
-                  if (enableGestures)
-                    handleHover(event);
-                  break;
-                case PointerDeviceKind.stylus:
-                case PointerDeviceKind.invertedStylus:
-                case PointerDeviceKind.unknown:
-                case PointerDeviceKind.touch:
-                  break;
-              }
-            },
-            child: CustomPaint(
-              key: _scrollbarPainterKey,
-              foregroundPainter: scrollbarPainter,
-              child: RepaintBoundary(child: widget.child),
+    return NotificationListener<ScrollMetricsNotification>(
+      onNotification: _handleScrollMetricsNotification,
+      child: NotificationListener<ScrollNotification>(
+        onNotification: _handleScrollNotification,
+        child: RepaintBoundary(
+          child: RawGestureDetector(
+            gestures: _gestures,
+            child: MouseRegion(
+              onExit: (PointerExitEvent event) {
+                switch(event.kind) {
+                  case PointerDeviceKind.mouse:
+                    if (enableGestures)
+                      handleHoverExit(event);
+                    break;
+                  case PointerDeviceKind.stylus:
+                  case PointerDeviceKind.invertedStylus:
+                  case PointerDeviceKind.unknown:
+                  case PointerDeviceKind.touch:
+                    break;
+                }
+              },
+              onHover: (PointerHoverEvent event) {
+                switch(event.kind) {
+                  case PointerDeviceKind.mouse:
+                    if (enableGestures)
+                      handleHover(event);
+                    break;
+                  case PointerDeviceKind.stylus:
+                  case PointerDeviceKind.invertedStylus:
+                  case PointerDeviceKind.unknown:
+                  case PointerDeviceKind.touch:
+                    break;
+                }
+              },
+              child: CustomPaint(
+                key: _scrollbarPainterKey,
+                foregroundPainter: scrollbarPainter,
+                child: RepaintBoundary(child: widget.child),
+              ),
             ),
           ),
         ),

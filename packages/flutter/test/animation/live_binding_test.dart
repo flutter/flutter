@@ -15,7 +15,7 @@ void main() {
 
   testWidgets('Should show event indicator for pointer events', (WidgetTester tester) async {
     final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(200, 200), allLayers: true);
-    int taps = 0;
+    final List<Offset> taps = <Offset>[];
     Widget target({bool recording = true}) => Container(
       padding: const EdgeInsets.fromLTRB(20, 10, 25, 20),
       child: animationSheet.record(
@@ -31,8 +31,8 @@ void main() {
                 height: 40,
                 color: Colors.black,
                 child: GestureDetector(
-                  onTapDown: (_) {
-                    taps += 1;
+                  onTapDown: (TapDownDetails details) {
+                    taps.add(details.globalPosition);
                   },
                 ),
               ),
@@ -49,7 +49,8 @@ void main() {
 
     final TestGesture gesture1 = await tester.createGesture(pointer: 1);
     await gesture1.down(tester.getCenter(find.byType(GestureDetector)) + const Offset(10, 10));
-    expect(taps, 1);
+    expect(taps, equals(const <Offset>[Offset(130, 120)]));
+    taps.clear();
 
     await tester.pumpFrames(target(), const Duration(milliseconds: 100));
 
@@ -61,17 +62,18 @@ void main() {
     await gesture1.up();
     await gesture2.up();
     await tester.pumpFrames(target(), const Duration(milliseconds: 50));
-    expect(taps, 1);
+    expect(taps, isEmpty);
 
     await expectLater(
       animationSheet.collate(6),
       matchesGoldenFile('LiveBinding.press.animation.png'),
     );
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42767
+    // Currently skipped due to daily flake: https://github.com/flutter/flutter/issues/87588
+  }, skip: true); // Typically skip: isBrowser https://github.com/flutter/flutter/issues/42767
 
   testWidgets('Should show event indicator for pointer events with setSurfaceSize', (WidgetTester tester) async {
-    int taps = 0;
     final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(200, 200), allLayers: true);
+    final List<Offset> taps = <Offset>[];
     Widget target({bool recording = true}) => Container(
       padding: const EdgeInsets.fromLTRB(20, 10, 25, 20),
       child: animationSheet.record(
@@ -87,8 +89,8 @@ void main() {
                 height: 40,
                 color: Colors.black,
                 child: GestureDetector(
-                  onTapDown: (_) {
-                    taps += 1;
+                  onTapDown: (TapDownDetails details) {
+                    taps.add(details.globalPosition);
                   },
                 ),
               ),
@@ -106,7 +108,8 @@ void main() {
 
     final TestGesture gesture1 = await tester.createGesture(pointer: 1);
     await gesture1.down(tester.getCenter(find.byType(GestureDetector)) + const Offset(10, 10));
-    expect(taps, 1);
+    expect(taps, equals(const <Offset>[Offset(130, 120)]));
+    taps.clear();
 
     await tester.pumpFrames(target(), const Duration(milliseconds: 100));
 
@@ -118,7 +121,7 @@ void main() {
     await gesture1.up();
     await gesture2.up();
     await tester.pumpFrames(target(), const Duration(milliseconds: 50));
-    expect(taps, 1);
+    expect(taps, isEmpty);
 
     await expectLater(
       animationSheet.collate(6),
