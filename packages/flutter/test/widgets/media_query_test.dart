@@ -111,7 +111,7 @@ void main() {
     expect(data.boldText, false);
     expect(data.highContrast, false);
     expect(data.platformBrightness, Brightness.light);
-    expect(data.gestureSettings.touchSlop, 16.0);
+    expect(data.gestureSettings.touchSlop, null);
   });
 
   testWidgets('MediaQueryData.copyWith defaults to source', (WidgetTester tester) async {

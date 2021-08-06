@@ -13,6 +13,7 @@ import 'constants.dart';
 import 'drag.dart';
 import 'drag_details.dart';
 import 'events.dart';
+import 'gesture_settings.dart';
 import 'recognizer.dart';
 import 'velocity_tracker.dart';
 
@@ -27,20 +28,15 @@ abstract class MultiDragPointerState {
   /// Creates per-pointer state for a [MultiDragGestureRecognizer].
   ///
   /// The [initialPosition] argument must not be null.
-  MultiDragPointerState(this.initialPosition, this.kind, this.deviceTouchSlop)
+  MultiDragPointerState(this.initialPosition, this.kind, this.gestureSettings)
     : assert(initialPosition != null),
       _velocityTracker = VelocityTracker.withKind(kind);
 
-  /// A device specific touch slop configuration that should be preferred over the
-  /// framework constants if set.
+  /// Device specific gesture configuration that should be preferred over
+  /// framework constants.
   ///
-  /// This is usually retrieved from [MediaQueryData.deviceTouchSlop] and is derived
-  /// from the [GestureSettings] provided by the window.
-  ///
-  /// See also:
-  ///
-  ///  * [GestureSettings], which provides device specific touch configuration.
-  final double? deviceTouchSlop;
+  /// These settings are commonly retrieved from a [MediaQuery].
+  final DeviceGestureSettings? gestureSettings;
 
   /// The global coordinates of the pointer when the pointer contacted the screen.
   final Offset initialPosition;
@@ -348,12 +344,12 @@ abstract class MultiDragGestureRecognizer extends GestureRecognizer {
 }
 
 class _ImmediatePointerState extends MultiDragPointerState {
-  _ImmediatePointerState(Offset initialPosition, PointerDeviceKind kind, double? deviceTouchSlop) : super(initialPosition, kind, deviceTouchSlop);
+  _ImmediatePointerState(Offset initialPosition, PointerDeviceKind kind, DeviceGestureSettings? deviceGestureSettings) : super(initialPosition, kind, deviceGestureSettings);
 
   @override
   void checkForResolutionAfterMove() {
     assert(pendingDelta != null);
-    if (pendingDelta!.distance > computeHitSlop(kind, deviceTouchSlop))
+    if (pendingDelta!.distance > computeHitSlop(kind, gestureSettings?.touchSlop))
       resolve(GestureDisposition.accepted);
   }
 
@@ -399,7 +395,7 @@ class ImmediateMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
 
   @override
   MultiDragPointerState createNewPointerState(PointerDownEvent event) {
-    return _ImmediatePointerState(event.position, event.kind, deviceTouchSlop);
+    return _ImmediatePointerState(event.position, event.kind, gestureSettings);
   }
 
   @override
@@ -408,12 +404,12 @@ class ImmediateMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
 
 
 class _HorizontalPointerState extends MultiDragPointerState {
-  _HorizontalPointerState(Offset initialPosition, PointerDeviceKind kind, double? deviceTouchSlop) : super(initialPosition, kind, deviceTouchSlop);
+  _HorizontalPointerState(Offset initialPosition, PointerDeviceKind kind, DeviceGestureSettings? deviceGestureSettings): super(initialPosition, kind, deviceGestureSettings);
 
   @override
   void checkForResolutionAfterMove() {
     assert(pendingDelta != null);
-    if (pendingDelta!.dx.abs() > computeHitSlop(kind, deviceTouchSlop))
+    if (pendingDelta!.dx.abs() > computeHitSlop(kind, gestureSettings?.touchSlop))
       resolve(GestureDisposition.accepted);
   }
 
@@ -459,7 +455,7 @@ class HorizontalMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
 
   @override
   MultiDragPointerState createNewPointerState(PointerDownEvent event) {
-    return _HorizontalPointerState(event.position, event.kind, deviceTouchSlop);
+    return _HorizontalPointerState(event.position, event.kind, gestureSettings);
   }
 
   @override
@@ -468,12 +464,12 @@ class HorizontalMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
 
 
 class _VerticalPointerState extends MultiDragPointerState {
-  _VerticalPointerState(Offset initialPosition, PointerDeviceKind kind, double? deviceTouchSlop) : super(initialPosition, kind, deviceTouchSlop);
+  _VerticalPointerState(Offset initialPosition, PointerDeviceKind kind, DeviceGestureSettings? deviceGestureSettings): super(initialPosition, kind, deviceGestureSettings);
 
   @override
   void checkForResolutionAfterMove() {
     assert(pendingDelta != null);
-    if (pendingDelta!.dy.abs() > computeHitSlop(kind, deviceTouchSlop))
+    if (pendingDelta!.dy.abs() > computeHitSlop(kind, gestureSettings?.touchSlop))
       resolve(GestureDisposition.accepted);
   }
 
@@ -527,9 +523,9 @@ class VerticalMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
 }
 
 class _DelayedPointerState extends MultiDragPointerState {
-  _DelayedPointerState(Offset initialPosition, Duration delay, PointerDeviceKind kind, double? deviceTouchSlop)
+  _DelayedPointerState(Offset initialPosition, Duration delay, PointerDeviceKind kind, DeviceGestureSettings? deviceGestureSettings)
       : assert(delay != null),
-        super(initialPosition, kind, deviceTouchSlop) {
+        super(initialPosition, kind, deviceGestureSettings) {
     _timer = Timer(delay, _delayPassed);
   }
 
@@ -539,7 +535,7 @@ class _DelayedPointerState extends MultiDragPointerState {
   void _delayPassed() {
     assert(_timer != null);
     assert(pendingDelta != null);
-    assert(pendingDelta!.distance <= computeHitSlop(kind, deviceTouchSlop));
+    assert(pendingDelta!.distance <= computeHitSlop(kind, gestureSettings?.touchSlop));
     _timer = null;
     if (_starter != null) {
       _starter!(initialPosition);
@@ -576,7 +572,7 @@ class _DelayedPointerState extends MultiDragPointerState {
       return;
     }
     assert(pendingDelta != null);
-    if (pendingDelta!.distance > computeHitSlop(kind, deviceTouchSlop)) {
+    if (pendingDelta!.distance > computeHitSlop(kind, gestureSettings?.touchSlop)) {
       resolve(GestureDisposition.rejected);
       _ensureTimerStopped();
     }
@@ -638,7 +634,7 @@ class DelayedMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
 
   @override
   MultiDragPointerState createNewPointerState(PointerDownEvent event) {
-    return _DelayedPointerState(event.position, delay, event.kind, deviceTouchSlop);
+    return _DelayedPointerState(event.position, delay, event.kind, gestureSettings);
   }
 
   @override

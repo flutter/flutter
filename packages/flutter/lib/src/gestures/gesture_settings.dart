@@ -42,4 +42,7 @@ class DeviceGestureSettings {
     return other is DeviceGestureSettings
       && other.touchSlop == touchSlop;
   }
+
+  @override
+  String toString() => 'DeviceGestureSettings(touchSlop: $touchSlop)';
 }
