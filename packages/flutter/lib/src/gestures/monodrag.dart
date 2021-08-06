@@ -209,17 +209,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///    match the native behavior on that platform.
   GestureVelocityTrackerBuilder velocityTrackerBuilder;
 
-  /// A device specific touch slop configuration that should be preferred over the
-  /// framework constants if set.
-  ///
-  /// This is usually retrieved from [MediaQueryData.deviceTouchSlop] and is derived
-  /// from the [GestureSettings] provided by the window.
-  ///
-  /// See also:
-  ///
-  ///  * [GestureSettings], which provides device specific touch configuration.
-  double? deviceTouchSlop;
-
   _DragState _state = _DragState.ready;
   late OffsetPair _initialPosition;
   late OffsetPair _pendingDragOffset;
@@ -324,7 +313,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
           untransformedDelta: movedLocally,
           untransformedEndPosition: event.localPosition,
         ).distance * (_getPrimaryValueFromOffset(movedLocally) ?? 1).sign;
-        if (_hasSufficientGlobalDistanceToAccept(event.kind, deviceTouchSlop))
+        if (_hasSufficientGlobalDistanceToAccept(event.kind, gestureSettings?.touchSlop))
           resolve(GestureDisposition.accepted);
       }
     }
@@ -546,7 +535,7 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
   @override
   bool isFlingGesture(VelocityEstimate estimate, PointerDeviceKind kind) {
     final double minVelocity = minFlingVelocity ?? kMinFlingVelocity;
-    final double minDistance = minFlingDistance ?? computeHitSlop(kind, deviceTouchSlop);
+    final double minDistance = minFlingDistance ?? computeHitSlop(kind, gestureSettings?.touchSlop);
     return estimate.pixelsPerSecond.dy.abs() > minVelocity && estimate.offset.dy.abs() > minDistance;
   }
 
@@ -596,7 +585,7 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
   @override
   bool isFlingGesture(VelocityEstimate estimate, PointerDeviceKind kind) {
     final double minVelocity = minFlingVelocity ?? kMinFlingVelocity;
-    final double minDistance = minFlingDistance ?? computeHitSlop(kind, deviceTouchSlop);
+    final double minDistance = minFlingDistance ?? computeHitSlop(kind, gestureSettings?.touchSlop);
     return estimate.pixelsPerSecond.dx.abs() > minVelocity && estimate.offset.dx.abs() > minDistance;
   }
 
@@ -631,7 +620,7 @@ class PanGestureRecognizer extends DragGestureRecognizer {
   @override
   bool isFlingGesture(VelocityEstimate estimate, PointerDeviceKind kind) {
     final double minVelocity = minFlingVelocity ?? kMinFlingVelocity;
-    final double minDistance = minFlingDistance ?? computeHitSlop(kind, deviceTouchSlop);
+    final double minDistance = minFlingDistance ?? computeHitSlop(kind, gestureSettings?.touchSlop);
     return estimate.pixelsPerSecond.distanceSquared > minVelocity * minVelocity
         && estimate.offset.distanceSquared > minDistance * minDistance;
   }

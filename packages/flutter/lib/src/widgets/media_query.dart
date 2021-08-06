@@ -104,7 +104,7 @@ class MediaQueryData {
     this.disableAnimations = false,
     this.boldText = false,
     this.navigationMode = NavigationMode.traditional,
-    this.gestureSettings = const GestureSettings()
+    this.gestureSettings = const DeviceGestureSettings(touchSlop: 16.0)
   }) : assert(size != null),
        assert(devicePixelRatio != null),
        assert(textScaleFactor != null),
@@ -145,7 +145,7 @@ class MediaQueryData {
       highContrast = window.accessibilityFeatures.highContrast,
       alwaysUse24HourFormat = window.alwaysUse24HourFormat,
       navigationMode = NavigationMode.traditional,
-      gestureSettings = window.viewConfiguration.gestureSettings;
+      gestureSettings = DeviceGestureSettings.fromWindow(window);
 
   /// The size of the media in logical pixels (e.g, the size of the screen).
   ///
@@ -373,17 +373,7 @@ class MediaQueryData {
   /// This contains platform specific configuration for gesture behavior,
   /// such as touch slop. These settings should be favored for configuring
   /// gesture behavior over the framework constants.
-  final GestureSettings gestureSettings;
-
-  /// Return the touch slop value from the [gestureSettings] in logical pixels, or
-  /// `null` if it was not set.
-  double? get deviceTouchSlop {
-    final double? physicalTouchSlop = gestureSettings.physicalTouchSlop;
-    if (physicalTouchSlop == null) {
-      return null;
-    }
-    return physicalTouchSlop / devicePixelRatio;
-  }
+  final DeviceGestureSettings gestureSettings;
 
   /// The orientation of the media (e.g., whether the device is in landscape or
   /// portrait mode).
@@ -409,7 +399,7 @@ class MediaQueryData {
     bool? accessibleNavigation,
     bool? boldText,
     NavigationMode? navigationMode,
-    GestureSettings? gestureSettings,
+    DeviceGestureSettings? gestureSettings,
   }) {
     return MediaQueryData(
       size: size ?? this.size,
@@ -1068,5 +1058,42 @@ class _MediaQueryFromWindowState extends State<_MediaQueryFromWindow> with Widge
   void dispose() {
     WidgetsBinding.instance!.removeObserver(this);
     super.dispose();
+  }
+}
+
+/// The device specific gesture settings scaled into logical pixels.
+///
+/// See also:
+///
+///  * [GestureSettings], the configuration that this is derived from.
+@immutable
+class DeviceGestureSettings {
+  /// Create a new [DeviceGestureSettings] with configured settings in logical
+  /// pixels.
+  const DeviceGestureSettings({
+    this.touchSlop,
+  });
+
+  /// Create a new [DeviceGestureSettings] from the current window.
+  factory DeviceGestureSettings.fromWindow(ui.SingletonFlutterWindow window) {
+    final double? physicalTouchSlop = window.viewConfiguration.gestureSettings.physicalTouchSlop;
+    return DeviceGestureSettings(
+      touchSlop: physicalTouchSlop == null ? null : physicalTouchSlop / window.devicePixelRatio
+    );
+  }
+
+  /// The touch slop value from the [gestureSettings] in logical pixels, or
+  /// `null` if it was not set.
+  final double? touchSlop;
+
+  @override
+  int get hashCode => ui.hashValues(touchSlop, 23);
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is DeviceGestureSettings
+      && other.touchSlop == touchSlop;
   }
 }

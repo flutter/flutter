@@ -7,6 +7,7 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/src/widgets/media_query.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'arena.dart';
@@ -80,6 +81,10 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// This is used in the [toString] serialization to report the object for which
   /// this gesture recognizer was created, to aid in debugging.
   final Object? debugOwner;
+
+  /// Optional device specific configuration for device gestures that will
+  /// take precedence over framework defaults.
+  DeviceGestureSettings? gestureSettings;
 
   /// The kind of devices that are allowed to be recognized as provided by
   /// `supportedDevices` in the constructor, or the currently deprecated `kind`.

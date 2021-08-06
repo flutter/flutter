@@ -313,17 +313,6 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   /// The pointers are no longer in contact with the screen.
   GestureScaleEndCallback? onEnd;
 
-  /// A device specific touch slop configuration that should be preferred over the
-  /// framework constants if set.
-  ///
-  /// This is usually retrieved from [MediaQueryData.deviceTouchSlop] and is derived
-  /// from the [GestureSettings] provided by the window.
-  ///
-  /// See also:
-  ///
-  ///  * [GestureSettings], which provides device specific touch configuration.
-  double? deviceTouchSlop;
-
   _ScaleState _state = _ScaleState.ready;
 
   Matrix4? _lastTransform;
@@ -506,7 +495,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     if (_state == _ScaleState.possible) {
       final double spanDelta = (_currentSpan - _initialSpan).abs();
       final double focalPointDelta = (_currentFocalPoint - _initialFocalPoint).distance;
-      if (spanDelta > computeScaleSlop(pointerDeviceKind) || focalPointDelta > computePanSlop(pointerDeviceKind, deviceTouchSlop))
+      if (spanDelta > computeScaleSlop(pointerDeviceKind) || focalPointDelta > computePanSlop(pointerDeviceKind, gestureSettings?.touchSlop))
         resolve(GestureDisposition.accepted);
     } else if (_state.index >= _ScaleState.accepted.index) {
       resolve(GestureDisposition.accepted);
