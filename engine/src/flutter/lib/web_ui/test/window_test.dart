@@ -237,6 +237,48 @@ void testMain() {
     expect(window.browserHistory.urlStrategy!.getPath(), '/foo');
   });
 
+  test('should not throw when state is complex json object',
+      () async {
+    // Regression test https://github.com/flutter/flutter/issues/87823.
+    await window.debugInitializeHistory(TestUrlStrategy.fromEntry(
+      const TestHistoryEntry('initial state', null, '/initial'),
+    ), useSingle: false);
+    expect(window.browserHistory, isA<MultiEntriesBrowserHistory>());
+
+    // routeInformationUpdated does not
+    final Completer<void> callback = Completer<void>();
+    window.sendPlatformMessage(
+      'flutter/navigation',
+      const JSONMethodCodec().encodeMethodCall(const MethodCall(
+        'routeInformationUpdated',
+        // ignore: prefer_const_literals_to_create_immutables
+        <String, dynamic>{
+          'location': '/baz',
+          'state': <String, dynamic>{
+            'state1': true,
+            'state2': 1,
+            'state3': 'string',
+            'state4': <String, dynamic> {
+              'substate1': 1.0,
+              'substate2': 'string2',
+            }
+          },
+        },
+      )),
+      (_) { callback.complete(); },
+    );
+    await callback.future;
+    expect(window.browserHistory, isA<MultiEntriesBrowserHistory>());
+    expect(window.browserHistory.urlStrategy!.getPath(), '/baz');
+    final dynamic wrappedState = window.browserHistory.urlStrategy!.getState()!;
+    final dynamic actualState = wrappedState['state'];
+    expect(actualState['state1'], true);
+    expect(actualState['state2'], 1);
+    expect(actualState['state3'], 'string');
+    expect(actualState['state4']['substate1'], 1.0);
+    expect(actualState['state4']['substate2'], 'string2');
+  });
+
   test('can replace in MultiEntriesBrowserHistory',
       () async {
     await window.debugInitializeHistory(TestUrlStrategy.fromEntry(
