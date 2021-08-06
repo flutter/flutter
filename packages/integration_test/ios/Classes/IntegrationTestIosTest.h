@@ -2,47 +2,40 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#import <Foundation/Foundation.h>
+@import Foundation;
+
+@class UIImage;
 
 NS_ASSUME_NONNULL_BEGIN
 
-@protocol FLTIntegrationTestScreenshotDelegate;
+typedef void (^FLTIntegrationTestResults)(NSString *testName, BOOL success, NSString *_Nullable failureMessage);
 
 @interface IntegrationTestIosTest : NSObject
 
-- (instancetype)initWithScreenshotDelegate:(nullable id<FLTIntegrationTestScreenshotDelegate>)delegate NS_DESIGNATED_INITIALIZER;
-
 /**
- * Initate dart tests and wait for results.  @c testResult will be set to a string describing the results.
- *
- * @return @c YES if all tests succeeded.
+ * Any screenshots captured by the plugin.
  */
-- (BOOL)testIntegrationTest:(NSString *_Nullable *_Nullable)testResult;
+@property (copy, readonly) NSDictionary<NSString *, UIImage *> *capturedScreenshotsByName;
+
+/*!
+ Start dart tests and wait for results.
+
+ @param testResult Will be called once per every completed dart test.
+ */
+- (void)testIntegrationTestWithResults:(FLTIntegrationTestResults)testResult;
 
 @end
 
-#define INTEGRATION_TEST_IOS_RUNNER(__test_class)                                           \
-  @interface __test_class : XCTestCase<FLTIntegrationTestScreenshotDelegate>                \
-  @end                                                                                      \
-                                                                                            \
-  @implementation __test_class                                                              \
-                                                                                            \
-  - (void)testIntegrationTest {                                                             \
-    NSString *testResult;                                                                   \
-    IntegrationTestIosTest *integrationTestIosTest = integrationTestIosTest = [[IntegrationTestIosTest alloc] initWithScreenshotDelegate:self]; \
-    BOOL testPass = [integrationTestIosTest testIntegrationTest:&testResult];               \
-    XCTAssertTrue(testPass, @"%@", testResult);                                             \
-  }                                                                                         \
-                                                                                            \
-  - (void)didTakeScreenshot:(UIImage *)screenshot attachmentName:(NSString *)name {         \
-    XCTAttachment *attachment = [XCTAttachment attachmentWithImage:screenshot];             \
-    attachment.lifetime = XCTAttachmentLifetimeKeepAlways;                                  \
-    if (name != nil) {                                                                      \
-      attachment.name = name;                                                               \
-    }                                                                                       \
-    [self addAttachment:attachment];                                                        \
-  }                                                                                         \
-                                                                                            \
-  @end
+@interface IntegrationTestIosTest (Deprecated)
+
+/*!
+ Initate dart tests and wait for results.
+
+ @param testResult Will be set to a string describing the results.
+ @returns @c YES if all tests succeeded.
+ */
+- (BOOL)testIntegrationTest:(NSString *_Nullable *_Nullable)testResult DEPRECATED_MSG_ATTRIBUTE("Use testIntegrationTestWithResults: instead.");
+
+@end
 
 NS_ASSUME_NONNULL_END
