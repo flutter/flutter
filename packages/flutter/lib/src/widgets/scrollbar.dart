@@ -1224,25 +1224,16 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _maybeTriggerScrollbar();
+    assert(_debugScheduleCheckHasValidScrollPosition());
   }
 
-  // Waits one frame and cause an empty scroll event (zero delta pixels).
-  //
-  // This allows the thumb to show immediately when isAlwaysShown is true.
-  // A scroll event is required in order to paint the thumb.
-  void _maybeTriggerScrollbar() {
+  bool _debugScheduleCheckHasValidScrollPosition() {
+    if (!showScrollbar)
+      return true;
     WidgetsBinding.instance!.addPostFrameCallback((Duration duration) {
-      final ScrollController? scrollController = widget.controller ?? PrimaryScrollController.of(context);
-      if (showScrollbar) {
-        _fadeoutTimer?.cancel();
-        // Wait one frame and cause an empty scroll event.  This allows the
-        // thumb to show immediately when isAlwaysShown is true. A scroll
-        // event is required in order to paint the thumb.
-        assert(_debugCheckHasValidScrollPosition());
-        scrollController!.position.didUpdateScrollPositionBy(0);
-      }
+      assert(_debugCheckHasValidScrollPosition());
     });
+    return true;
   }
 
   void _validateInteractions(AnimationStatus status) {
@@ -1365,7 +1356,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     super.didUpdateWidget(oldWidget);
     if (widget.isAlwaysShown != oldWidget.isAlwaysShown) {
       if (widget.isAlwaysShown == true) {
-        _maybeTriggerScrollbar();
+        assert(_debugScheduleCheckHasValidScrollPosition());
+        _fadeoutTimer?.cancel();
         _fadeoutAnimationController.animateTo(1.0);
       } else {
         _fadeoutAnimationController.reverse();

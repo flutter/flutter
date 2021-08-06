@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/src/physics/utils.dart' show nearEqual;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -1143,6 +1144,12 @@ void main() {
   });
 
   testWidgets('RawScrollbar.isAlwaysShown asserts that a ScrollPosition is attached', (WidgetTester tester) async {
+    final FlutterExceptionHandler? handler = FlutterError.onError;
+    FlutterErrorDetails? error;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      error = details;
+    };
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1163,12 +1170,15 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    final AssertionError exception = tester.takeException() as AssertionError;
-    expect(exception, isAssertionError);
+
+    expect(error, isNotNull);
+    final AssertionError exception = error!.exception as AssertionError;
     expect(
       exception.message,
       contains("The Scrollbar's ScrollController has no ScrollPosition attached."),
     );
+
+    FlutterError.onError = handler;
   });
 
   testWidgets('Interactive scrollbars should have a valid scroll controller', (WidgetTester tester) async {
