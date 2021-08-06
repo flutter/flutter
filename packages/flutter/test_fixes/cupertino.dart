@@ -181,4 +181,8 @@ void main() {
   listWheelViewport = ListWheelViewport(clipToSize: true);
   listWheelViewport = ListWheelViewport(clipToSize: false);
   listWheelViewport.clipToSize;
+
+  // Changes made in [TBD]
+  final OverscrollIndicatorNotification notification = OverscrollIndicatorNotification(leading: true);
+  notification.disallowGlow();
 }

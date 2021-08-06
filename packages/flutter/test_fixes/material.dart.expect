@@ -366,4 +366,8 @@ void main() {
   themeData = ThemeData.raw();
   themeData = themeData.copyWith();
   themeData.fixTextFieldOutlineLabel; // Removing field reference not supported.
+
+  // Changes made in [TBD]
+  final OverscrollIndicatorNotification notification = OverscrollIndicatorNotification(leading: true);
+  notification.disallowIndicator();
 }
