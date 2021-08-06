@@ -14,15 +14,15 @@
 #include "third_party/skia/include/core/SkMatrix.h"
 
 #if OS_ANDROID
-#include "flutter/fml/platform/android/jni_weak_ref.h"
+#include "flutter/fml/platform/android/scoped_java_ref.h"
 #endif
 
 namespace flutter {
 
 #if OS_ANDROID
-using JavaWeakGlobalRef = fml::jni::JavaObjectWeakGlobalRef;
+using JavaLocalRef = fml::jni::ScopedJavaLocalRef<jobject>;
 #else
-using JavaWeakGlobalRef = std::nullptr_t;
+using JavaLocalRef = std::nullptr_t;
 #endif
 
 //------------------------------------------------------------------------------
@@ -86,31 +86,28 @@ class PlatformViewAndroidJNI {
   /// @brief      Attach the SurfaceTexture to the OpenGL ES context that is
   ///             current on the calling thread.
   ///
-  virtual void SurfaceTextureAttachToGLContext(
-      JavaWeakGlobalRef surface_texture,
-      int textureId) = 0;
+  virtual void SurfaceTextureAttachToGLContext(JavaLocalRef surface_texture,
+                                               int textureId) = 0;
 
   //----------------------------------------------------------------------------
   /// @brief      Updates the texture image to the most recent frame from the
   ///             image stream.
   ///
-  virtual void SurfaceTextureUpdateTexImage(
-      JavaWeakGlobalRef surface_texture) = 0;
+  virtual void SurfaceTextureUpdateTexImage(JavaLocalRef surface_texture) = 0;
 
   //----------------------------------------------------------------------------
   /// @brief      Gets the transform matrix from the SurfaceTexture.
   ///             Then, it updates the `transform` matrix, so it fill the canvas
   ///             and preserve the aspect ratio.
   ///
-  virtual void SurfaceTextureGetTransformMatrix(
-      JavaWeakGlobalRef surface_texture,
-      SkMatrix& transform) = 0;
+  virtual void SurfaceTextureGetTransformMatrix(JavaLocalRef surface_texture,
+                                                SkMatrix& transform) = 0;
 
   //----------------------------------------------------------------------------
   /// @brief      Detaches a SurfaceTexture from the OpenGL ES context.
   ///
   virtual void SurfaceTextureDetachFromGLContext(
-      JavaWeakGlobalRef surface_texture) = 0;
+      JavaLocalRef surface_texture) = 0;
 
   //----------------------------------------------------------------------------
   /// @brief      Positions and sizes a platform view if using hybrid
