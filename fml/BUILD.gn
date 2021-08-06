@@ -57,6 +57,8 @@ source_set("fml") {
     "posix_wrappers.h",
     "raster_thread_merger.cc",
     "raster_thread_merger.h",
+    "shared_thread_merger.cc",
+    "shared_thread_merger.h",
     "size.h",
     "synchronization/atomic_object.h",
     "synchronization/count_down_latch.cc",
