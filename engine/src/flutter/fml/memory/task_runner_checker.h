@@ -22,7 +22,7 @@ class TaskRunnerChecker final {
 
  private:
   TaskQueueId initialized_queue_id_;
-  TaskQueueId subsumed_queue_id_;
+  std::set<TaskQueueId> subsumed_queue_ids_;
 
   TaskQueueId InitTaskQueueId();
 };

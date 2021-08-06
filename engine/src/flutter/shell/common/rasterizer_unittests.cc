@@ -28,6 +28,8 @@ class MockDelegate : public Rasterizer::Delegate {
   MOCK_METHOD0(GetFrameBudget, fml::Milliseconds());
   MOCK_CONST_METHOD0(GetLatestFrameTargetTime, fml::TimePoint());
   MOCK_CONST_METHOD0(GetTaskRunners, const TaskRunners&());
+  MOCK_CONST_METHOD0(GetParentRasterThreadMerger,
+                     const fml::RefPtr<fml::RasterThreadMerger>());
   MOCK_CONST_METHOD0(GetIsGpuDisabledSyncSwitch,
                      std::shared_ptr<const fml::SyncSwitch>());
   MOCK_METHOD0(CreateSnapshotSurface, std::unique_ptr<Surface>());

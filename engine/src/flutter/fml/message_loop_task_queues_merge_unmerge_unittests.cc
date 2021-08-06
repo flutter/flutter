@@ -100,13 +100,64 @@ TEST(MessageLoopTaskQueueMergeUnmerge, MergeUnmergeTasksPreserved) {
   ASSERT_EQ(2u, task_queue->GetNumPendingTasks(queue_id_1));
   ASSERT_EQ(0u, task_queue->GetNumPendingTasks(queue_id_2));
 
-  task_queue->Unmerge(queue_id_1);
+  task_queue->Unmerge(queue_id_1, queue_id_2);
 
   ASSERT_EQ(1u, task_queue->GetNumPendingTasks(queue_id_1));
   ASSERT_EQ(1u, task_queue->GetNumPendingTasks(queue_id_2));
 }
 
-TEST(MessageLoopTaskQueueMergeUnmerge, MergeFailIfAlreadyMergedOrSubsumed) {
+/// Multiple standalone engines scene
+TEST(MessageLoopTaskQueueMergeUnmerge,
+     OneCanOwnMultipleQueuesAndUnmergeIndependently) {
+  auto task_queue = fml::MessageLoopTaskQueues::GetInstance();
+  auto queue_id_1 = task_queue->CreateTaskQueue();
+  auto queue_id_2 = task_queue->CreateTaskQueue();
+  auto queue_id_3 = task_queue->CreateTaskQueue();
+
+  // merge
+  ASSERT_TRUE(task_queue->Merge(queue_id_1, queue_id_2));
+  ASSERT_TRUE(task_queue->Owns(queue_id_1, queue_id_2));
+  ASSERT_FALSE(task_queue->Owns(queue_id_1, queue_id_3));
+
+  ASSERT_TRUE(task_queue->Merge(queue_id_1, queue_id_3));
+  ASSERT_TRUE(task_queue->Owns(queue_id_1, queue_id_2));
+  ASSERT_TRUE(task_queue->Owns(queue_id_1, queue_id_3));
+
+  // unmerge
+  ASSERT_TRUE(task_queue->Unmerge(queue_id_1, queue_id_2));
+  ASSERT_FALSE(task_queue->Owns(queue_id_1, queue_id_2));
+  ASSERT_TRUE(task_queue->Owns(queue_id_1, queue_id_3));
+
+  ASSERT_TRUE(task_queue->Unmerge(queue_id_1, queue_id_3));
+  ASSERT_FALSE(task_queue->Owns(queue_id_1, queue_id_2));
+  ASSERT_FALSE(task_queue->Owns(queue_id_1, queue_id_3));
+}
+
+TEST(MessageLoopTaskQueueMergeUnmerge,
+     CannotMergeSameQueueToTwoDifferentOwners) {
+  auto task_queue = fml::MessageLoopTaskQueues::GetInstance();
+  auto queue = task_queue->CreateTaskQueue();
+  auto owner_1 = task_queue->CreateTaskQueue();
+  auto owner_2 = task_queue->CreateTaskQueue();
+
+  ASSERT_TRUE(task_queue->Merge(owner_1, queue));
+  ASSERT_FALSE(task_queue->Merge(owner_2, queue));
+}
+
+TEST(MessageLoopTaskQueueMergeUnmerge, MergeFailIfAlreadySubsumed) {
+  auto task_queue = fml::MessageLoopTaskQueues::GetInstance();
+
+  auto queue_id_1 = task_queue->CreateTaskQueue();
+  auto queue_id_2 = task_queue->CreateTaskQueue();
+  auto queue_id_3 = task_queue->CreateTaskQueue();
+
+  ASSERT_TRUE(task_queue->Merge(queue_id_1, queue_id_2));
+  ASSERT_FALSE(task_queue->Merge(queue_id_2, queue_id_3));
+  ASSERT_FALSE(task_queue->Merge(queue_id_2, queue_id_1));
+}
+
+TEST(MessageLoopTaskQueueMergeUnmerge,
+     MergeFailIfAlreadyOwnsButTryToBeSubsumed) {
   auto task_queue = fml::MessageLoopTaskQueues::GetInstance();
 
   auto queue_id_1 = task_queue->CreateTaskQueue();
@@ -114,20 +165,22 @@ TEST(MessageLoopTaskQueueMergeUnmerge, MergeFailIfAlreadyMergedOrSubsumed) {
   auto queue_id_3 = task_queue->CreateTaskQueue();
 
   task_queue->Merge(queue_id_1, queue_id_2);
-
-  ASSERT_FALSE(task_queue->Merge(queue_id_1, queue_id_3));
-  ASSERT_FALSE(task_queue->Merge(queue_id_2, queue_id_3));
+  // A recursively linked merging will fail
+  ASSERT_FALSE(task_queue->Merge(queue_id_3, queue_id_1));
 }
 
-TEST(MessageLoopTaskQueueMergeUnmerge, UnmergeFailsOnSubsumed) {
+TEST(MessageLoopTaskQueueMergeUnmerge, UnmergeFailsOnSubsumedOrNeverMerged) {
   auto task_queue = fml::MessageLoopTaskQueues::GetInstance();
 
   auto queue_id_1 = task_queue->CreateTaskQueue();
   auto queue_id_2 = task_queue->CreateTaskQueue();
+  auto queue_id_3 = task_queue->CreateTaskQueue();
 
   task_queue->Merge(queue_id_1, queue_id_2);
-
-  ASSERT_FALSE(task_queue->Unmerge(queue_id_2));
+  ASSERT_FALSE(task_queue->Unmerge(queue_id_2, queue_id_3));
+  ASSERT_FALSE(task_queue->Unmerge(queue_id_1, queue_id_3));
+  ASSERT_FALSE(task_queue->Unmerge(queue_id_3, queue_id_1));
+  ASSERT_FALSE(task_queue->Unmerge(queue_id_2, queue_id_1));
 }
 
 TEST(MessageLoopTaskQueueMergeUnmerge, MergeInvokesBothWakeables) {
@@ -177,7 +230,7 @@ TEST(MessageLoopTaskQueueMergeUnmerge,
       queue_id_2, []() {}, ChronoTicksSinceEpoch());
 
   task_queue->Merge(queue_id_1, queue_id_2);
-  task_queue->Unmerge(queue_id_1);
+  task_queue->Unmerge(queue_id_1, queue_id_2);
 
   CountRemainingTasks(task_queue, queue_id_1);
 

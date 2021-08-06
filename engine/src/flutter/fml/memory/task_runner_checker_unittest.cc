@@ -94,14 +94,14 @@ TEST(TaskRunnerCheckerTests, MergedTaskRunnersRunsOnTheSameThread) {
   fml::TaskQueueId qid2 = loop2->GetTaskRunner()->GetTaskQueueId();
   const auto raster_thread_merger_ =
       fml::MakeRefCounted<fml::RasterThreadMerger>(qid1, qid2);
-  const int kNumFramesMerged = 5;
+  const size_t kNumFramesMerged = 5;
 
   raster_thread_merger_->MergeWithLease(kNumFramesMerged);
 
   // merged, running on the same thread
   EXPECT_EQ(TaskRunnerChecker::RunsOnTheSameThread(qid1, qid2), true);
 
-  for (int i = 0; i < kNumFramesMerged; i++) {
+  for (size_t i = 0; i < kNumFramesMerged; i++) {
     ASSERT_TRUE(raster_thread_merger_->IsMerged());
     raster_thread_merger_->DecrementLease();
   }
@@ -154,7 +154,7 @@ TEST(TaskRunnerCheckerTests,
   });
   latch3.Wait();
 
-  fml::MessageLoopTaskQueues::GetInstance()->Unmerge(qid1);
+  fml::MessageLoopTaskQueues::GetInstance()->Unmerge(qid1, qid2);
 
   fml::AutoResetWaitableEvent latch4;
   loop2->GetTaskRunner()->PostTask([&]() {

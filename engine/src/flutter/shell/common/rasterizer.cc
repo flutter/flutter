@@ -68,8 +68,8 @@ void Rasterizer::Setup(std::unique_ptr<Surface> surface) {
         delegate_.GetTaskRunners().GetPlatformTaskRunner()->GetTaskQueueId();
     const auto gpu_id =
         delegate_.GetTaskRunners().GetRasterTaskRunner()->GetTaskQueueId();
-    raster_thread_merger_ =
-        fml::MakeRefCounted<fml::RasterThreadMerger>(platform_id, gpu_id);
+    raster_thread_merger_ = fml::RasterThreadMerger::CreateOrShareThreadMerger(
+        delegate_.GetParentRasterThreadMerger(), platform_id, gpu_id);
   }
   if (raster_thread_merger_) {
     raster_thread_merger_->SetMergeUnmergeCallback([=]() {
@@ -94,7 +94,7 @@ void Rasterizer::Teardown() {
   if (raster_thread_merger_.get() != nullptr &&
       raster_thread_merger_.get()->IsMerged()) {
     FML_DCHECK(raster_thread_merger_->IsEnabled());
-    raster_thread_merger_->UnMergeNow();
+    raster_thread_merger_->UnMergeNowIfLastOne();
     raster_thread_merger_->SetMergeUnmergeCallback(nullptr);
   }
 }
@@ -503,23 +503,11 @@ RasterStatus Rasterizer::DrawToSurface(
       frame->supports_readback(),     // surface supports pixel reads
       raster_thread_merger_           // thread merger
   );
-
   if (compositor_frame) {
     RasterStatus raster_status = compositor_frame->Raster(layer_tree, false);
     if (raster_status == RasterStatus::kFailed ||
         raster_status == RasterStatus::kSkipAndRetry) {
       return raster_status;
-    }
-    if (shared_engine_block_thread_merging_ && raster_thread_merger_ &&
-        raster_thread_merger_->IsMerged()) {
-      // TODO(73620): Remove when platform views are accounted for.
-      FML_LOG(ERROR)
-          << "Error: Thread merging not implemented for engines with shared "
-             "components.\n\n"
-             "This is likely a result of using platform views with enigne "
-             "groups.  See "
-             "https://github.com/flutter/flutter/issues/73620.";
-      fml::KillProcess();
     }
     if (external_view_embedder_ &&
         (!raster_thread_merger_ || raster_thread_merger_->IsMerged())) {
@@ -716,6 +704,10 @@ void Rasterizer::SetExternalViewEmbedder(
 void Rasterizer::SetSnapshotSurfaceProducer(
     std::unique_ptr<SnapshotSurfaceProducer> producer) {
   snapshot_surface_producer_ = std::move(producer);
+}
+
+fml::RefPtr<fml::RasterThreadMerger> Rasterizer::GetRasterThreadMerger() {
+  return raster_thread_merger_;
 }
 
 void Rasterizer::FireNextFrameCallbackIfPresent() {
