@@ -2795,8 +2795,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   /// that closes the bottom sheet.
   ///
   /// The [transitionAnimationController] controls the bottom sheet's entrance and
-  /// exit animations if provided. It's up to the owner of the controller to call
-  /// `dispose` on it after finish using it.
+  /// exit animations. It's up to the owner of the controller to call
+  /// [AnimationController.dispose] when the controller is no longer needed.
   ///
   /// To create a persistent bottom sheet that is not a [LocalHistoryEntry] and
   /// does not add a back button to the enclosing Scaffold's app bar, use the

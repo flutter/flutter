@@ -771,7 +771,8 @@ void main() {
     expect(find.text('BottomSheet'), findsNothing);
   });
 
-  testWidgets('the framework do not takeover the transitionAnimationController provided by user.', (WidgetTester tester) async {
+  // Regression test for https://github.com/flutter/flutter/issues/87592
+  testWidgets('the framework do not dispose the transitionAnimationController provided by user.', (WidgetTester tester) async {
     const Key tapTarget = Key('tap-target');
     final AnimationController controller = AnimationController(
       vsync: const TestVSync(),

@@ -499,7 +499,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     assert(_animationController == null);
     if (transitionAnimationController != null) {
       _animationController = transitionAnimationController;
-      shouldTakeoverAnimationController = false;
+      willDisposeAnimationController = false;
     } else {
       _animationController = BottomSheet.createAnimationController(navigator!.overlay!);
     }
@@ -631,8 +631,8 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 /// for more details).
 ///
 /// The [transitionAnimationController] controls the bottom sheet's entrance and
-/// exit animations if provided. It's up to the owner of the controller to call
-/// `dispose` on it after finish using it.
+/// exit animations. It's up to the owner of the controller to call
+/// [AnimationController.dispose] when the controller is no longer needed.
 ///
 /// The optional `routeSettings` parameter sets the [RouteSettings] of the modal bottom sheet
 /// sheet. This is particularly useful in the case that a user wants to observe
