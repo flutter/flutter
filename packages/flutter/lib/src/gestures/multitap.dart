@@ -907,6 +907,7 @@ class SerialTapGestureRecognizer extends GestureRecognizer {
       invokeCallback<void>('onSerialTapDown', () => onSerialTapDown!(details));
     }
     final _TapTracker tracker = _TapTracker(
+      deviceTouchSlop: null,
       event: event,
       entry: GestureBinding.instance!.gestureArena.add(event.pointer, this),
       doubleTapMinTime: kDoubleTapMinTime,
