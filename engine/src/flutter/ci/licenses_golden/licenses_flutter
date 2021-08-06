@@ -259,6 +259,8 @@ FILE: ../../../flutter/fml/posix_wrappers.h
 FILE: ../../../flutter/fml/raster_thread_merger.cc
 FILE: ../../../flutter/fml/raster_thread_merger.h
 FILE: ../../../flutter/fml/raster_thread_merger_unittests.cc
+FILE: ../../../flutter/fml/shared_thread_merger.cc
+FILE: ../../../flutter/fml/shared_thread_merger.h
 FILE: ../../../flutter/fml/size.h
 FILE: ../../../flutter/fml/status.h
 FILE: ../../../flutter/fml/synchronization/atomic_object.h

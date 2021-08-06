@@ -816,7 +816,7 @@ TEST_F(ShellTest,
        OnPlatformViewDestroyAfterMergingThreads
 #endif
 ) {
-  const size_t ThreadMergingLease = 10;
+  const int ThreadMergingLease = 10;
   auto settings = CreateSettingsForFixture();
   fml::AutoResetWaitableEvent end_frame_latch;
   std::shared_ptr<ShellTestExternalViewEmbedder> external_view_embedder;
@@ -896,7 +896,7 @@ TEST_F(ShellTest,
        OnPlatformViewDestroyWhenThreadsAreMerging
 #endif
 ) {
-  const size_t kThreadMergingLease = 10;
+  const int kThreadMergingLease = 10;
   auto settings = CreateSettingsForFixture();
   fml::AutoResetWaitableEvent end_frame_latch;
   auto end_frame_callback =

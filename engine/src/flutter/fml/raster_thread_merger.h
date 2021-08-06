@@ -11,6 +11,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/ref_counted.h"
 #include "flutter/fml/message_loop_task_queues.h"
+#include "flutter/fml/shared_thread_merger.h"
 
 namespace fml {
 
@@ -22,6 +23,11 @@ enum class RasterThreadStatus {
   kUnmergedNow
 };
 
+/// This class is a client and proxy between the rasterizer and
+/// |SharedThreadMerger|. The multiple |RasterThreadMerger| instances with same
+/// owner_queue_id and same subsumed_queue_id share the same
+/// |SharedThreadMerger| instance. Whether they share the same inner instance is
+/// determined by |RasterThreadMerger::CreateOrShareThreadMerger| method.
 class RasterThreadMerger
     : public fml::RefCountedThreadSafe<RasterThreadMerger> {
  public:
@@ -36,14 +42,28 @@ class RasterThreadMerger
   // When task queues are statically merged this method becomes no-op.
   void MergeWithLease(size_t lease_term);
 
-  // Un-merges the threads now, and resets the lease term to 0.
+  // Gets the shared merger from current merger object
+  const fml::RefPtr<SharedThreadMerger>& GetSharedRasterThreadMerger() const;
+
+  /// Creates a new merger from parent, share the inside shared_merger member
+  /// when the platform_queue_id and raster_queue_id are same, otherwise create
+  /// a new shared_merger instance
+  static fml::RefPtr<fml::RasterThreadMerger> CreateOrShareThreadMerger(
+      const fml::RefPtr<fml::RasterThreadMerger>& parent_merger,
+      TaskQueueId platform_id,
+      TaskQueueId raster_id);
+
+  // Un-merges the threads now if current caller is the last merge caller,
+  // and it resets the lease term to 0, otherwise it will remove the caller
+  // record and return. The multiple caller records were recorded after
+  // |MergeWithLease| or |ExtendLeaseTo| method.
   //
   // Must be executed on the raster task runner.
   //
   // If the task queues are the same, we consider them statically merged.
   // When task queues are statically merged, we never unmerge them and
   // this method becomes no-op.
-  void UnMergeNow();
+  void UnMergeNowIfLastOne();
 
   // If the task queues are the same, we consider them statically merged.
   // When task queues are statically merged this method becomes no-op.
@@ -56,15 +76,15 @@ class RasterThreadMerger
   // When task queues are statically merged this method becomes no-op.
   RasterThreadStatus DecrementLease();
 
+  // The method is locked by current instance, and asks the shared instance of
+  // SharedThreadMerger and the merging state is determined by the
+  // lease_term_ counter.
   bool IsMerged();
 
   // Waits until the threads are merged.
   //
   // Must run on the platform task runner.
   void WaitUntilMerged();
-
-  RasterThreadMerger(fml::TaskQueueId platform_queue_id,
-                     fml::TaskQueueId gpu_queue_id);
 
   // Returns true if the current thread owns rasterizing.
   // When the threads are merged, platform thread owns rasterizing.
@@ -78,12 +98,12 @@ class RasterThreadMerger
   void Enable();
 
   // Disables the thread merger. Once disabled, any call to
-  // |MergeWithLease| or |UnMergeNow| results in a noop.
+  // |MergeWithLease| or |UnMergeNowIfLastOne| results in a noop.
   void Disable();
 
   // Whether the thread merger is enabled. By default, the thread merger is
-  // enabled. If false, calls to |MergeWithLease| or |UnMergeNow| results in a
-  // noop.
+  // enabled. If false, calls to |MergeWithLease| or |UnMergeNowIfLastOne|
+  // or |ExtendLeaseTo| or |DecrementLease| results in a noop.
   bool IsEnabled();
 
   // Registers a callback that can be used to clean up global state right after
@@ -94,13 +114,18 @@ class RasterThreadMerger
   void SetMergeUnmergeCallback(const fml::closure& callback);
 
  private:
-  static const int kLeaseNotSet;
   fml::TaskQueueId platform_queue_id_;
   fml::TaskQueueId gpu_queue_id_;
-  fml::RefPtr<fml::MessageLoopTaskQueues> task_queues_;
-  std::atomic_int lease_term_;
+
+  RasterThreadMerger(fml::TaskQueueId platform_queue_id,
+                     fml::TaskQueueId gpu_queue_id);
+  RasterThreadMerger(fml::RefPtr<fml::SharedThreadMerger> shared_merger,
+                     fml::TaskQueueId platform_queue_id,
+                     fml::TaskQueueId gpu_queue_id);
+
+  const fml::RefPtr<fml::SharedThreadMerger> shared_merger_;
   std::condition_variable merged_condition_;
-  std::mutex lease_term_mutex_;
+  std::mutex mutex_;
   fml::closure merge_unmerge_callback_;
   bool enabled_;
 

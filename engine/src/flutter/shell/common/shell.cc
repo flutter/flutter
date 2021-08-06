@@ -149,6 +149,7 @@ std::unique_ptr<Shell> Shell::Create(
   }
   return CreateWithSnapshot(std::move(platform_data),            //
                             std::move(task_runners),             //
+                            /*parent_merger=*/nullptr,           //
                             std::move(settings),                 //
                             std::move(vm),                       //
                             std::move(isolate_snapshot),         //
@@ -159,6 +160,7 @@ std::unique_ptr<Shell> Shell::Create(
 
 std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
     DartVMRef vm,
+    fml::RefPtr<fml::RasterThreadMerger> parent_merger,
     TaskRunners task_runners,
     const PlatformData& platform_data,
     Settings settings,
@@ -173,7 +175,7 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
   }
 
   auto shell = std::unique_ptr<Shell>(
-      new Shell(std::move(vm), task_runners, settings,
+      new Shell(std::move(vm), task_runners, parent_merger, settings,
                 std::make_shared<VolatilePathTracker>(
                     task_runners.GetUITaskRunner(),
                     !settings.skia_deterministic_rendering_on_cpu),
@@ -301,6 +303,7 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
 std::unique_ptr<Shell> Shell::CreateWithSnapshot(
     const PlatformData& platform_data,
     TaskRunners task_runners,
+    fml::RefPtr<fml::RasterThreadMerger> parent_thread_merger,
     Settings settings,
     DartVMRef vm,
     fml::RefPtr<const DartSnapshot> isolate_snapshot,
@@ -326,6 +329,7 @@ std::unique_ptr<Shell> Shell::CreateWithSnapshot(
       fml::MakeCopyable(
           [&latch,                                                        //
            &shell,                                                        //
+           parent_thread_merger,                                          //
            task_runners = std::move(task_runners),                        //
            platform_data = std::move(platform_data),                      //
            settings = std::move(settings),                                //
@@ -337,6 +341,7 @@ std::unique_ptr<Shell> Shell::CreateWithSnapshot(
            is_gpu_disabled]() mutable {
             shell = CreateShellOnPlatformThread(
                 std::move(vm),                       //
+                parent_thread_merger,                //
                 std::move(task_runners),             //
                 std::move(platform_data),            //
                 std::move(settings),                 //
@@ -352,10 +357,12 @@ std::unique_ptr<Shell> Shell::CreateWithSnapshot(
 
 Shell::Shell(DartVMRef vm,
              TaskRunners task_runners,
+             fml::RefPtr<fml::RasterThreadMerger> parent_merger,
              Settings settings,
              std::shared_ptr<VolatilePathTracker> volatile_path_tracker,
              bool is_gpu_disabled)
     : task_runners_(std::move(task_runners)),
+      parent_raster_thread_merger_(parent_merger),
       settings_(std::move(settings)),
       vm_(std::move(vm)),
       is_gpu_disabled_sync_switch_(new fml::SyncSwitch(is_gpu_disabled)),
@@ -477,9 +484,9 @@ std::unique_ptr<Shell> Shell::Spawn(
   FML_DCHECK(task_runners_.IsValid());
   auto shell_maker = [&](bool is_gpu_disabled) {
     std::unique_ptr<Shell> result(CreateWithSnapshot(
-        PlatformData{}, task_runners_, GetSettings(), vm_,
-        vm_->GetVMData()->GetIsolateSnapshot(), on_create_platform_view,
-        on_create_rasterizer,
+        PlatformData{}, task_runners_, rasterizer_->GetRasterThreadMerger(),
+        GetSettings(), vm_, vm_->GetVMData()->GetIsolateSnapshot(),
+        on_create_platform_view, on_create_rasterizer,
         [engine = this->engine_.get()](
             Engine::Delegate& delegate,
             const PointerDataDispatcherMaker& dispatcher_maker, DartVM& vm,
@@ -505,18 +512,6 @@ std::unique_ptr<Shell> Shell::Spawn(
           .SetIfTrue([&] { result = shell_maker(true); }));
   result->shared_resource_context_ = io_manager_->GetSharedResourceContext();
   result->RunEngine(std::move(run_configuration));
-
-  task_runners_.GetRasterTaskRunner()->PostTask(
-      [rasterizer = rasterizer_->GetWeakPtr(),
-       spawn_rasterizer = result->rasterizer_->GetWeakPtr()]() {
-        if (rasterizer) {
-          rasterizer->BlockThreadMerging();
-        }
-        if (spawn_rasterizer) {
-          spawn_rasterizer->BlockThreadMerging();
-        }
-      });
-
   return result;
 }
 
@@ -672,6 +667,11 @@ const Settings& Shell::GetSettings() const {
 
 const TaskRunners& Shell::GetTaskRunners() const {
   return task_runners_;
+}
+
+const fml::RefPtr<fml::RasterThreadMerger> Shell::GetParentRasterThreadMerger()
+    const {
+  return parent_raster_thread_merger_;
 }
 
 fml::TaskRunnerAffineWeakPtr<Rasterizer> Shell::GetRasterizer() const {
