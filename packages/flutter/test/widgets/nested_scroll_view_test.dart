@@ -2445,7 +2445,7 @@ void main() {
     expect(position.pixels, 0.0);
   });
 
-  testWidgets('NestedScrollView respects precisionErrorTolerance error while growing outer position', (WidgetTester tester) async {
+  testWidgets('NestedScrollView respects precisionErrorTolerance while growing outer position', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/63825
 
     await tester.pumpWidget(MaterialApp(
