@@ -46,7 +46,14 @@ const Set<PointerDeviceKind> _kTouchLikeDeviceTypes = <PointerDeviceKind>{
 @immutable
 class ScrollBehavior {
   /// Creates a description of how [Scrollable] widgets should behave.
-  const ScrollBehavior();
+  const ScrollBehavior({ this.updatedAndroidOverscrollIndicator = false});
+
+  /// Indicates which overscroll indicator to use when building the overscroll
+  /// indicator for [TargetPlatform.Android].
+  ///
+  /// Defaults to false, resulting in the [GlowingOverscrollIndicator]. Set to
+  /// true to use the [StretchingOverscrollIndicator]. Cannot be null.
+  final bool updatedAndroidOverscrollIndicator;
 
   /// Creates a copy of this ScrollBehavior, making it possible to
   /// easily toggle `scrollbar` and `overscrollIndicator` effects.
@@ -62,6 +69,7 @@ class ScrollBehavior {
     Set<PointerDeviceKind>? dragDevices,
     ScrollPhysics? physics,
     TargetPlatform? platform,
+    bool? updatedAndroidOverscrollIndicator,
   }) {
     return _WrappedScrollBehavior(
       delegate: this,
@@ -70,6 +78,7 @@ class ScrollBehavior {
       physics: physics,
       platform: platform,
       dragDevices: dragDevices,
+      updatedAndroidOverscrollIndicator: updatedAndroidOverscrollIndicator,
     );
   }
 
@@ -106,6 +115,14 @@ class ScrollBehavior {
       case TargetPlatform.windows:
         return child;
       case TargetPlatform.android:
+        if (updatedAndroidOverscrollIndicator) {
+          return StretchingOverscrollIndicator(
+            axisDirection: axisDirection,
+            child: child,
+          );
+        }
+        continue glow;
+      glow:
       case TargetPlatform.fuchsia:
       return GlowingOverscrollIndicator(
         axisDirection: axisDirection,
@@ -218,7 +235,9 @@ class _WrappedScrollBehavior implements ScrollBehavior {
     this.physics,
     this.platform,
     Set<PointerDeviceKind>? dragDevices,
-  }) : _dragDevices = dragDevices;
+    bool? updatedAndroidOverscrollIndicator,
+  }) : _dragDevices = dragDevices,
+       _updatedAndroidOverscrollIndicator = updatedAndroidOverscrollIndicator;
 
   final ScrollBehavior delegate;
   final bool scrollbar;
@@ -226,9 +245,13 @@ class _WrappedScrollBehavior implements ScrollBehavior {
   final ScrollPhysics? physics;
   final TargetPlatform? platform;
   final Set<PointerDeviceKind>? _dragDevices;
+  final bool? _updatedAndroidOverscrollIndicator;
 
   @override
   Set<PointerDeviceKind> get dragDevices => _dragDevices ?? delegate.dragDevices;
+
+  @override
+  bool get updatedAndroidOverscrollIndicator => _updatedAndroidOverscrollIndicator ?? delegate.updatedAndroidOverscrollIndicator;
 
   @override
   Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
@@ -256,6 +279,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
     ScrollPhysics? physics,
     TargetPlatform? platform,
     Set<PointerDeviceKind>? dragDevices,
+    bool? updatedAndroidOverscrollIndicator
   }) {
     return delegate.copyWith(
       scrollbars: scrollbars,
@@ -263,6 +287,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
       physics: physics,
       platform: platform,
       dragDevices: dragDevices,
+      updatedAndroidOverscrollIndicator: updatedAndroidOverscrollIndicator,
     );
   }
 

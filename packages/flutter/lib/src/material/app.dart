@@ -743,6 +743,14 @@ class MaterialScrollBehavior extends ScrollBehavior {
       case TargetPlatform.windows:
         return child;
       case TargetPlatform.android:
+        if (updatedAndroidOverscrollIndicator) {
+          return StretchingOverscrollIndicator(
+            axisDirection: details.direction,
+            child: child,
+          );
+        }
+        continue glow;
+      glow:
       case TargetPlatform.fuchsia:
         return GlowingOverscrollIndicator(
           axisDirection: details.direction,
