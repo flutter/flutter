@@ -46,22 +46,22 @@ class JNIMock final : public PlatformViewAndroidJNI {
 
   MOCK_METHOD(void,
               SurfaceTextureAttachToGLContext,
-              (JavaWeakGlobalRef surface_texture, int textureId),
+              (JavaLocalRef surface_texture, int textureId),
               (override));
 
   MOCK_METHOD(void,
               SurfaceTextureUpdateTexImage,
-              (JavaWeakGlobalRef surface_texture),
+              (JavaLocalRef surface_texture),
               (override));
 
   MOCK_METHOD(void,
               SurfaceTextureGetTransformMatrix,
-              (JavaWeakGlobalRef surface_texture, SkMatrix& transform),
+              (JavaLocalRef surface_texture, SkMatrix& transform),
               (override));
 
   MOCK_METHOD(void,
               SurfaceTextureDetachFromGLContext,
-              (JavaWeakGlobalRef surface_texture),
+              (JavaLocalRef surface_texture),
               (override));
 
   MOCK_METHOD(void,

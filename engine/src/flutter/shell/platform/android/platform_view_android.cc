@@ -291,7 +291,7 @@ void PlatformViewAndroid::UpdateSemantics(
 
 void PlatformViewAndroid::RegisterExternalTexture(
     int64_t texture_id,
-    const fml::jni::JavaObjectWeakGlobalRef& surface_texture) {
+    const fml::jni::ScopedJavaGlobalRef<jobject>& surface_texture) {
   RegisterTexture(std::make_shared<AndroidExternalTextureGL>(
       texture_id, surface_texture, std::move(jni_facade_)));
 }

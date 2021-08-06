@@ -34,6 +34,7 @@ import io.flutter.util.Preconditions;
 import io.flutter.view.AccessibilityBridge;
 import io.flutter.view.FlutterCallbackInformation;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -756,11 +757,14 @@ public class FlutterJNI {
   public void registerTexture(long textureId, @NonNull SurfaceTextureWrapper textureWrapper) {
     ensureRunningOnMainThread();
     ensureAttachedToNative();
-    nativeRegisterTexture(nativeShellHolderId, textureId, textureWrapper);
+    nativeRegisterTexture(
+        nativeShellHolderId, textureId, new WeakReference<SurfaceTextureWrapper>(textureWrapper));
   }
 
   private native void nativeRegisterTexture(
-      long nativeShellHolderId, long textureId, @NonNull SurfaceTextureWrapper textureWrapper);
+      long nativeShellHolderId,
+      long textureId,
+      @NonNull WeakReference<SurfaceTextureWrapper> textureWrapper);
 
   /**
    * Call this method to inform Flutter that a texture previously registered with {@link

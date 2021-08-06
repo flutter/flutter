@@ -11,7 +11,6 @@
 #include <vector>
 
 #include "flutter/fml/memory/weak_ptr.h"
-#include "flutter/fml/platform/android/jni_weak_ref.h"
 #include "flutter/fml/platform/android/scoped_java_ref.h"
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/shell/common/platform_view.h"
@@ -97,7 +96,7 @@ class PlatformViewAndroid final : public PlatformView {
 
   void RegisterExternalTexture(
       int64_t texture_id,
-      const fml::jni::JavaObjectWeakGlobalRef& surface_texture);
+      const fml::jni::ScopedJavaGlobalRef<jobject>& surface_texture);
 
   // |PlatformView|
   void LoadDartDeferredLibrary(
