@@ -5,7 +5,6 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -390,16 +389,9 @@ void main() {
         );
       }
 
-      final FlutterExceptionHandler? handler = FlutterError.onError;
-      FlutterErrorDetails? error;
-      FlutterError.onError = (FlutterErrorDetails details) {
-        error = details;
-      };
-
       await tester.pumpWidget(viewWithScroll());
-      expect(error, isNotNull);
-
-      FlutterError.onError = handler;
+      final AssertionError exception = tester.takeException() as AssertionError;
+      expect(exception, isAssertionError);
     },
   );
 
