@@ -64,7 +64,8 @@ static NSString *const kMethodRevertImage = @"revertFlutterImage";
     // Also pass back along the channel for the driver to handle.
     NSData *pngData = UIImagePNGRepresentation(screenshot);
     result([FlutterStandardTypedData typedDataWithBytes:pngData]);
-  } else if ([call.method isEqualToString:kMethodConvertSurfaceToImage] || [call.method isEqualToString:kMethodRevertImage]) {
+  } else if ([call.method isEqualToString:kMethodConvertSurfaceToImage]
+             || [call.method isEqualToString:kMethodRevertImage]) {
     // Android only, no-op on iOS.
     result(nil);
   } else {
@@ -73,7 +74,8 @@ static NSString *const kMethodRevertImage = @"revertFlutterImage";
 }
 
 - (UIImage *)capturePngScreenshot {
-  UIWindow *window = [UIApplication.sharedApplication.windows filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"keyWindow = YES"]].firstObject;
+  UIWindow *window = [UIApplication.sharedApplication.windows
+                      filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"keyWindow = YES"]].firstObject;
   CGRect screenshotBounds = window.bounds;
   UIImage *image;
 
