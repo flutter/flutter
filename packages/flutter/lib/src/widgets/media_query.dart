@@ -4,9 +4,10 @@
 
 import 'dart:math' as math;
 import 'dart:ui' as ui;
-import 'dart:ui' show Brightness, GestureSettings;
+import 'dart:ui' show Brightness;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 
 import 'basic.dart';
 import 'binding.dart';
@@ -1058,42 +1059,5 @@ class _MediaQueryFromWindowState extends State<_MediaQueryFromWindow> with Widge
   void dispose() {
     WidgetsBinding.instance!.removeObserver(this);
     super.dispose();
-  }
-}
-
-/// The device specific gesture settings scaled into logical pixels.
-///
-/// See also:
-///
-///  * [GestureSettings], the configuration that this is derived from.
-@immutable
-class DeviceGestureSettings {
-  /// Create a new [DeviceGestureSettings] with configured settings in logical
-  /// pixels.
-  const DeviceGestureSettings({
-    this.touchSlop,
-  });
-
-  /// Create a new [DeviceGestureSettings] from the current window.
-  factory DeviceGestureSettings.fromWindow(ui.SingletonFlutterWindow window) {
-    final double? physicalTouchSlop = window.viewConfiguration.gestureSettings.physicalTouchSlop;
-    return DeviceGestureSettings(
-      touchSlop: physicalTouchSlop == null ? null : physicalTouchSlop / window.devicePixelRatio
-    );
-  }
-
-  /// The touch slop value from the [gestureSettings] in logical pixels, or
-  /// `null` if it was not set.
-  final double? touchSlop;
-
-  @override
-  int get hashCode => ui.hashValues(touchSlop, 23);
-
-  @override
-  bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
-      return false;
-    return other is DeviceGestureSettings
-      && other.touchSlop == touchSlop;
   }
 }

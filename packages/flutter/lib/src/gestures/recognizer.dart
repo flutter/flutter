@@ -7,7 +7,6 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/src/widgets/media_query.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'arena.dart';
@@ -15,6 +14,7 @@ import 'binding.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'events.dart';
+import 'gesture_settings.dart';
 import 'pointer_router.dart';
 import 'team.dart';
 
