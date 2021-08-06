@@ -60,7 +60,7 @@ class _TapTracker {
     required PointerDownEvent event,
     required this.entry,
     required Duration doubleTapMinTime,
-    required this.deviceTouchSlop,
+    required this.touchSlop,
   }) : assert(doubleTapMinTime != null),
        assert(event != null),
        assert(event.buttons != null),
@@ -69,7 +69,7 @@ class _TapTracker {
        initialButtons = event.buttons,
        _doubleTapMinTimeCountdown = _CountdownZoned(duration: doubleTapMinTime);
 
-  final double? deviceTouchSlop;
+  final double? touchSlop;
   final int pointer;
   final GestureArenaEntry entry;
   final Offset _initialGlobalPosition;
@@ -196,17 +196,6 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   ///  * [GestureDetector.onDoubleTapCancel], which exposes this callback.
   GestureTapCancelCallback? onDoubleTapCancel;
 
-  /// A device specific touch slop configuration that should be preferred over the
-  /// framework constants if set.
-  ///
-  /// This is usually retrieved from [MediaQueryData.deviceTouchSlop] and is derived
-  /// from the [GestureSettings] provided by the window.
-  ///
-  /// See also:
-  ///
-  ///  * [GestureSettings], which provides device specific touch configuration.
-  double? deviceDoubleTapSlop;
-
   Timer? _doubleTapTimer;
   _TapTracker? _firstTap;
   final Map<int, _TapTracker> _trackers = <int, _TapTracker>{};
@@ -257,7 +246,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
       event: event,
       entry: GestureBinding.instance!.gestureArena.add(event.pointer, this),
       doubleTapMinTime: kDoubleTapMinTime,
-      deviceTouchSlop: deviceDoubleTapSlop,
+      touchSlop: null,
     );
     _trackers[event.pointer] = tracker;
     tracker.startTrackingPointer(_handleEvent, event.transform);
@@ -394,13 +383,13 @@ class _TapGesture extends _TapTracker {
     required this.gestureRecognizer,
     required PointerEvent event,
     required Duration longTapDelay,
-    required double? deviceTouchSlop,
+    required double? touchSlop,
   }) : _lastPosition = OffsetPair.fromEventPosition(event),
        super(
     event: event as PointerDownEvent,
     entry: GestureBinding.instance!.gestureArena.add(event.pointer, gestureRecognizer),
     doubleTapMinTime: kDoubleTapMinTime,
-    deviceTouchSlop: deviceTouchSlop,
+    touchSlop: touchSlop,
   ) {
     startTrackingPointer(handleEvent, event.transform);
     if (longTapDelay > Duration.zero) {
@@ -422,7 +411,7 @@ class _TapGesture extends _TapTracker {
   void handleEvent(PointerEvent event) {
     assert(event.pointer == pointer);
     if (event is PointerMoveEvent) {
-      if (!isWithinGlobalTolerance(event, computeHitSlop(event.kind, deviceTouchSlop)))
+      if (!isWithinGlobalTolerance(event, computeHitSlop(event.kind, touchSlop)))
         cancel();
       else
         _lastPosition = OffsetPair.fromEventPosition(event);
@@ -540,7 +529,7 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
       gestureRecognizer: this,
       event: event,
       longTapDelay: longTapDelay,
-      deviceTouchSlop: deviceTouchSlop,
+      touchSlop: deviceTouchSlop,
     );
     if (onTapDown != null)
       invokeCallback<void>('onTapDown', () {
@@ -907,7 +896,7 @@ class SerialTapGestureRecognizer extends GestureRecognizer {
       invokeCallback<void>('onSerialTapDown', () => onSerialTapDown!(details));
     }
     final _TapTracker tracker = _TapTracker(
-      deviceTouchSlop: null,
+      touchSlop: null,
       event: event,
       entry: GestureBinding.instance!.gestureArena.add(event.pointer, this),
       doubleTapMinTime: kDoubleTapMinTime,
