@@ -24,7 +24,8 @@ abstract class MacOSApp extends ApplicationPackage {
 
   /// Creates a new [MacOSApp] from a macOS project directory.
   factory MacOSApp.fromMacOSProject(MacOSProject project) {
-    return BuildableMacOSApp(project);
+    // projectBundleId is unused for macOS apps. Use a placeholder bundle ID.
+    return BuildableMacOSApp(project, 'com.example.placeholder');
   }
 
   /// Creates a new [MacOSApp] from an existing app bundle.
@@ -139,7 +140,7 @@ class PrebuiltMacOSApp extends MacOSApp {
 }
 
 class BuildableMacOSApp extends MacOSApp {
-  BuildableMacOSApp(this.project);
+  BuildableMacOSApp(this.project, String projectBundleId): super(projectBundleId: projectBundleId);
 
   final MacOSProject project;
 

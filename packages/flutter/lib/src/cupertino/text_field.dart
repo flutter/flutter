@@ -884,6 +884,11 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
       _controller!.dispose();
       _controller = null;
     }
+
+    if (widget.focusNode != oldWidget.focusNode) {
+      (oldWidget.focusNode ?? _focusNode)?.removeListener(_handleFocusChanged);
+      (widget.focusNode ?? _focusNode)?.addListener(_handleFocusChanged);
+    }
     _effectiveFocusNode.canRequestFocus = widget.enabled ?? true;
   }
 
@@ -915,6 +920,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
 
   @override
   void dispose() {
+    _effectiveFocusNode.removeListener(_handleFocusChanged);
     _focusNode?.dispose();
     _controller?.dispose();
     super.dispose();
@@ -924,6 +930,13 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
 
   void _requestKeyboard() {
     _editableText.requestKeyboard();
+  }
+
+  void _handleFocusChanged() {
+    setState(() {
+      // Rebuild the widget on focus change to show/hide the text selection
+      // highlight.
+    });
   }
 
   bool _shouldShowSelectionHandles(SelectionChangedCause? cause) {
@@ -1202,7 +1215,8 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             maxLines: widget.maxLines,
             minLines: widget.minLines,
             expands: widget.expands,
-            selectionColor: selectionColor,
+            // Only show the selection highlight when the text field is focused.
+            selectionColor: _effectiveFocusNode.hasFocus ? selectionColor : null,
             selectionControls: widget.selectionEnabled
               ? textSelectionControls : null,
             onChanged: widget.onChanged,
