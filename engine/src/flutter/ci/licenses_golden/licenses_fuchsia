@@ -1,4 +1,4 @@
-Signature: 2a28320cbb801cf24dbe799b1c087d6f
+Signature: 8b6a89e63e3c9775ee6a7df8f7a78eff
 
 UNUSED LICENSES:
 
@@ -559,6 +559,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-default/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-loop-cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-loop-default/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/async-loop-testing/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-loop/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-testing/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async/meta.json
@@ -1286,6 +1287,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-default/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-loop-cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-loop-default/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/async-loop-testing/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-loop/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-testing/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async/meta.json
@@ -1910,6 +1912,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-default/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-loop-cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-loop-default/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/async-loop-testing/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-loop/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-testing/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async/meta.json
@@ -2430,8 +2433,11 @@ FILE: ../../../fuchsia/sdk/linux/pkg/svc/include/lib/svc/dir.h
 FILE: ../../../fuchsia/sdk/linux/pkg/sync/include/lib/sync/condition.h
 FILE: ../../../fuchsia/sdk/linux/pkg/sync/include/lib/sync/internal/condition-template.h
 FILE: ../../../fuchsia/sdk/linux/pkg/sync/include/lib/sync/mutex.h
+FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp_testing/enclosing_environment.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp_testing/fake_component.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp_testing/fake_launcher.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp_testing/launcher_impl.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp_testing/test_with_environment.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/include/lib/syslog/global.h
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/include/lib/syslog/logger.h
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/include/lib/syslog/wire_format.h
@@ -2740,6 +2746,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/wait.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/async-default/include/lib/async/default.h
 FILE: ../../../fuchsia/sdk/linux/pkg/async-loop-cpp/include/lib/async-loop/cpp/loop.h
 FILE: ../../../fuchsia/sdk/linux/pkg/async-loop-cpp/loop_wrapper.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/async-loop-testing/real_loop.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/async-loop/include/lib/async-loop/loop.h
 FILE: ../../../fuchsia/sdk/linux/pkg/async-loop/loop.c
 FILE: ../../../fuchsia/sdk/linux/pkg/async-testing/dispatcher_stub.cc
