@@ -118,7 +118,13 @@ float FlutterWindowWinUWP::GetDpiScale() {
 }
 
 bool FlutterWindowWinUWP::IsVisible() {
-  return window_.Visible();
+  // This is called from raster thread as an optimization to not wait for vsync
+  // if window is invisible. However CoreWindow is not agile so we can't call
+  // Visible() from raster thread. For now assume window is always visible.
+  // Possible solution would be to register a VisibilityChanged handler and
+  // store the visiblity state in a variable. TODO(knopp)
+  // https://github.com/flutter/flutter/issues/87870
+  return true;
 }
 
 void FlutterWindowWinUWP::OnDpiChanged(
