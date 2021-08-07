@@ -150,7 +150,7 @@ class FontWeight {
 ///               style: TextStyle(
 ///                   fontFamily: 'Cardo',
 ///                   fontSize: 24,
-///                   fontFeatures: const <FontFeature>[FontFeature.oldstyleFigures()])),
+///                   fontFeatures: <FontFeature>[FontFeature.oldstyleFigures()])),
 ///           const Spacer(),
 ///           const Divider(),
 ///           const Spacer(),
@@ -761,7 +761,7 @@ class FontFeature {
   ///   // The Noto family of fonts can be downloaded from Google Fonts (https://www.google.com/fonts).
   ///   return const Text(
   ///     '次 化 刃 直 入 令',
-  ///     locale: const Locale('zh', 'CN'), // or Locale('ja'), Locale('ko'), Locale('zh', 'TW'), etc
+  ///     locale: Locale('zh', 'CN'), // or Locale('ja'), Locale('ko'), Locale('zh', 'TW'), etc
   ///     style: TextStyle(
   ///       fontFamily: 'Noto Sans',
   ///     ),
