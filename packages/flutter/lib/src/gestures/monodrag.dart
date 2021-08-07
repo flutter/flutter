@@ -535,13 +535,13 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
   @override
   bool isFlingGesture(VelocityEstimate estimate, PointerDeviceKind kind) {
     final double minVelocity = minFlingVelocity ?? kMinFlingVelocity;
-    final double minDistance = minFlingDistance ?? computeHitSlop(kind, gestureSettings?.touchSlop);
+    final double minDistance = minFlingDistance ?? computeHitSlop(kind, gestureSettings);
     return estimate.pixelsPerSecond.dy.abs() > minVelocity && estimate.offset.dy.abs() > minDistance;
   }
 
   @override
   bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind, double? deviceTouchSlop) {
-    return _globalDistanceMoved.abs() > computeHitSlop(pointerDeviceKind, deviceTouchSlop);
+    return _globalDistanceMoved.abs() > computeHitSlop(pointerDeviceKind, gestureSettings);
   }
 
   @override
@@ -585,13 +585,13 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
   @override
   bool isFlingGesture(VelocityEstimate estimate, PointerDeviceKind kind) {
     final double minVelocity = minFlingVelocity ?? kMinFlingVelocity;
-    final double minDistance = minFlingDistance ?? computeHitSlop(kind, gestureSettings?.touchSlop);
+    final double minDistance = minFlingDistance ?? computeHitSlop(kind, gestureSettings);
     return estimate.pixelsPerSecond.dx.abs() > minVelocity && estimate.offset.dx.abs() > minDistance;
   }
 
   @override
   bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind, double? deviceTouchSlop) {
-    return _globalDistanceMoved.abs() > computeHitSlop(pointerDeviceKind, deviceTouchSlop);
+    return _globalDistanceMoved.abs() > computeHitSlop(pointerDeviceKind, gestureSettings);
   }
 
   @override
@@ -620,14 +620,14 @@ class PanGestureRecognizer extends DragGestureRecognizer {
   @override
   bool isFlingGesture(VelocityEstimate estimate, PointerDeviceKind kind) {
     final double minVelocity = minFlingVelocity ?? kMinFlingVelocity;
-    final double minDistance = minFlingDistance ?? computeHitSlop(kind, gestureSettings?.touchSlop);
+    final double minDistance = minFlingDistance ?? computeHitSlop(kind, gestureSettings);
     return estimate.pixelsPerSecond.distanceSquared > minVelocity * minVelocity
         && estimate.offset.distanceSquared > minDistance * minDistance;
   }
 
   @override
   bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind, double? deviceTouchSlop) {
-    return _globalDistanceMoved.abs() > computePanSlop(pointerDeviceKind, deviceTouchSlop);
+    return _globalDistanceMoved.abs() > computePanSlop(pointerDeviceKind, gestureSettings);
   }
 
   @override

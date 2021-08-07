@@ -57,18 +57,20 @@ void main() {
   });
 
   test('computed hit slop values defer to device value when pointer kind is touch', () {
-    expect(computeHitSlop(PointerDeviceKind.mouse, 1), kPrecisePointerHitSlop);
-    expect(computeHitSlop(PointerDeviceKind.stylus, 1), 1);
-    expect(computeHitSlop(PointerDeviceKind.invertedStylus, 1), 1);
-    expect(computeHitSlop(PointerDeviceKind.touch, 1), 1);
-    expect(computeHitSlop(PointerDeviceKind.unknown, 1), 1);
+    const DeviceGestureSettings settings = DeviceGestureSettings(touchSlop: 1);
 
-    expect(computePanSlop(PointerDeviceKind.mouse, 1), kPrecisePointerPanSlop);
+    expect(computeHitSlop(PointerDeviceKind.mouse, settings), kPrecisePointerHitSlop);
+    expect(computeHitSlop(PointerDeviceKind.stylus, settings), 1);
+    expect(computeHitSlop(PointerDeviceKind.invertedStylus, settings), 1);
+    expect(computeHitSlop(PointerDeviceKind.touch, settings), 1);
+    expect(computeHitSlop(PointerDeviceKind.unknown, settings), 1);
+
+    expect(computePanSlop(PointerDeviceKind.mouse, settings), kPrecisePointerPanSlop);
     // Pan slop is 2x touch slop
-    expect(computePanSlop(PointerDeviceKind.stylus, 1), 2);
-    expect(computePanSlop(PointerDeviceKind.invertedStylus, 1), 2);
-    expect(computePanSlop(PointerDeviceKind.touch, 1), 2);
-    expect(computePanSlop(PointerDeviceKind.unknown, 1), 2);
+    expect(computePanSlop(PointerDeviceKind.stylus, settings), 2);
+    expect(computePanSlop(PointerDeviceKind.invertedStylus, settings), 2);
+    expect(computePanSlop(PointerDeviceKind.touch, settings), 2);
+    expect(computePanSlop(PointerDeviceKind.unknown, settings), 2);
   });
 
   group('fromMouseEvent', () {

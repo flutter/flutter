@@ -338,7 +338,7 @@ class _ImmediatePointerState extends MultiDragPointerState {
   @override
   void checkForResolutionAfterMove() {
     assert(pendingDelta != null);
-    if (pendingDelta!.distance > computeHitSlop(kind, gestureSettings?.touchSlop))
+    if (pendingDelta!.distance > computeHitSlop(kind, gestureSettings))
       resolve(GestureDisposition.accepted);
   }
 
@@ -398,7 +398,7 @@ class _HorizontalPointerState extends MultiDragPointerState {
   @override
   void checkForResolutionAfterMove() {
     assert(pendingDelta != null);
-    if (pendingDelta!.dx.abs() > computeHitSlop(kind, gestureSettings?.touchSlop))
+    if (pendingDelta!.dx.abs() > computeHitSlop(kind, gestureSettings))
       resolve(GestureDisposition.accepted);
   }
 
@@ -458,7 +458,7 @@ class _VerticalPointerState extends MultiDragPointerState {
   @override
   void checkForResolutionAfterMove() {
     assert(pendingDelta != null);
-    if (pendingDelta!.dy.abs() > computeHitSlop(kind, gestureSettings?.touchSlop))
+    if (pendingDelta!.dy.abs() > computeHitSlop(kind, gestureSettings))
       resolve(GestureDisposition.accepted);
   }
 
@@ -504,7 +504,7 @@ class VerticalMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
 
   @override
   MultiDragPointerState createNewPointerState(PointerDownEvent event) {
-    return _VerticalPointerState(event.position, event.kind, null);
+    return _VerticalPointerState(event.position, event.kind, gestureSettings);
   }
 
   @override
@@ -524,7 +524,7 @@ class _DelayedPointerState extends MultiDragPointerState {
   void _delayPassed() {
     assert(_timer != null);
     assert(pendingDelta != null);
-    assert(pendingDelta!.distance <= computeHitSlop(kind, gestureSettings?.touchSlop));
+    assert(pendingDelta!.distance <= computeHitSlop(kind, gestureSettings));
     _timer = null;
     if (_starter != null) {
       _starter!(initialPosition);
@@ -561,7 +561,7 @@ class _DelayedPointerState extends MultiDragPointerState {
       return;
     }
     assert(pendingDelta != null);
-    if (pendingDelta!.distance > computeHitSlop(kind, gestureSettings?.touchSlop)) {
+    if (pendingDelta!.distance > computeHitSlop(kind, gestureSettings)) {
       resolve(GestureDisposition.rejected);
       _ensureTimerStopped();
     }

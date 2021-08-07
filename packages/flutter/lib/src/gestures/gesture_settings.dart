@@ -32,6 +32,10 @@ class DeviceGestureSettings {
   /// The touch slop value in logical pixels, or `null` if it was not set.
   final double? touchSlop;
 
+  /// The touch slop value for pan gestures, in logical pixels, or `null` if it
+  /// was not set.
+  double? get panSlop => touchSlop != null ? (touchSlop! * 2) : null;
+
   @override
   int get hashCode => ui.hashValues(touchSlop, 23);
 
