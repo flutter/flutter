@@ -7832,7 +7832,7 @@ void main() {
       expect(scrollController.offset, targetOffset);
     }
 
-    // cut
+    // Cut
     await resetSelectionAndScrollOffset();
     textSelectionDelegate.cutSelection(SelectionChangedCause.keyboard);
     await tester.pump();
