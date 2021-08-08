@@ -63,10 +63,7 @@ platform_properties:
           {"name":"xcode_binary","path":"xcode_binary"}
         ]
       dependencies: >-
-        [
-          {"dependency": "gems"},
-          {"dependency": "xcode"}
-        ]
+        []
       os: Mac-10.15
       device_type: none
       mac_model: Macmini8,1
@@ -707,6 +704,7 @@ targets:
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver"},
+          {"dependency": "clang"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"}
         ]
@@ -730,6 +728,7 @@ targets:
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver"},
+          {"dependency": "clang"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"}
         ]
@@ -737,6 +736,7 @@ targets:
       subshard: "2_4"
       tags: >
         ["framework","hostonly","shard"]
+      test_timeout_secs: "2700"
     scheduler: luci
     runIf:
       - dev/
@@ -752,6 +752,7 @@ targets:
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver"},
+          {"dependency": "clang"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"}
         ]
@@ -759,6 +760,7 @@ targets:
       subshard: "3_4"
       tags: >
         ["framework","hostonly","shard"]
+      test_timeout_secs: "2700"
     scheduler: luci
     runIf:
       - dev/
@@ -774,6 +776,7 @@ targets:
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver"},
+          {"dependency": "clang"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"}
         ]
@@ -781,6 +784,7 @@ targets:
       subshard: "4_4"
       tags: >
         ["framework","hostonly","shard"]
+      test_timeout_secs: "2700"
     scheduler: luci
     runIf:
       - dev/
@@ -1406,6 +1410,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: flutter_gallery__transition_perf_e2e
     scheduler: luci
 
   - name: Linux_android flutter_gallery__transition_perf_hybrid
@@ -1641,6 +1646,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk"},
+          {"dependency": "gems"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"}
         ]
