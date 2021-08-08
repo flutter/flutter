@@ -7157,7 +7157,7 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
 ///         height: 100.0,
 ///         child: ElevatedButton(
 ///           onPressed: () {},
-///           child: null,
+///           child: Container(),
 ///         ),
 ///       ),
 ///       SizedBox(
@@ -7170,7 +7170,7 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
 ///               primary: Colors.blue.shade200,
 ///             ),
 ///             onPressed: () {},
-///             child: null,
+///             child: Container(),
 ///           ),
 ///         ),
 ///       ),
