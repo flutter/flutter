@@ -1579,26 +1579,18 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
 
   /// Check the [Clipboard] and update [value] if needed.
   Future<void> update() async {
+    // iOS 14 added a notification that appears when an app accesses the
+    // clipboard. To avoid the notification, don't access the clipboard on iOS,
+    // and instead always show the paste button, even when the clipboard is
+    // empty.
+    // TODO(justinmc): Use the new iOS 14 clipboard API method hasStrings that
+    // won't trigger the notification.
+    // https://github.com/flutter/flutter/issues/60145
     switch (defaultTargetPlatform) {
-      // Android 12 introduces a toast message that appears when an app reads
-      // the content on the clipboard. To avoid unintended access, both the
-      // Flutter engine and the Flutter framework need to be updated to use the
-      // appropriate API to check whether the clipboard is empty.
-      // As a short-term workaround, always show the paste button.
-      // TODO(justinmc): Expose `hasStrings` in `Clipboard` and use that instead
-      // https://github.com/flutter/flutter/issues/74139
-      case TargetPlatform.android:
-        // Intentionally fall through.
-      // iOS 14 added a notification that appears when an app accesses the
-      // clipboard. To avoid the notification, don't access the clipboard on iOS,
-      // and instead always show the paste button, even when the clipboard is
-      // empty.
-      // TODO(justinmc): Use the new iOS 14 clipboard API method hasStrings that
-      // won't trigger the notification.
-      // https://github.com/flutter/flutter/issues/60145
       case TargetPlatform.iOS:
         value = ClipboardStatus.pasteable;
         return;
+      case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
