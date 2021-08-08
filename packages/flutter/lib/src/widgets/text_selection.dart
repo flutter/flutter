@@ -200,7 +200,7 @@ abstract class TextSelectionControls {
     return delegate.selectAllEnabled && delegate.textEditingValue.text.isNotEmpty && delegate.textEditingValue.selection.isCollapsed;
   }
 
-  /// Call [TextSelectionDelegate.cutSelection] to cut current [selection].
+  /// Call [TextSelectionDelegate.cutSelection] to cut current selection.
   ///
   /// This is called by subclasses when their cut affordance is activated by
   /// the user.
@@ -208,7 +208,7 @@ abstract class TextSelectionControls {
     delegate.cutSelection(SelectionChangedCause.toolbar);
   }
 
-  /// Call [TextSelectionDelegate.copySelection] to copy current [selection].
+  /// Call [TextSelectionDelegate.copySelection] to copy current selection.
   ///
   /// This is called by subclasses when their copy affordance is activated by
   /// the user.
@@ -230,7 +230,7 @@ abstract class TextSelectionControls {
     delegate.pasteText(SelectionChangedCause.toolbar);
   }
 
-  /// Call [TextSelectionDelegate.selectAll] to set the current [selection] to
+  /// Call [TextSelectionDelegate.selectAll] to set the current selection to
   /// contain the entire text value.
   ///
   /// Does not hide the toolbar.

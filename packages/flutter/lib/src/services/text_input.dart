@@ -865,7 +865,7 @@ mixin TextSelectionDelegate {
   /// Whether select all is enabled, must not be null.
   bool get selectAllEnabled => true;
 
-  /// Cut current [selection] to [Clipboard].
+  /// Cut current selection to [Clipboard].
   ///
   /// If and only if [cause] is [SelectionChangedCause.toolbar], the toolbar
   /// will be hidden and the current selection will be scrolled into view.
@@ -925,7 +925,7 @@ mixin TextSelectionDelegate {
     }
   }
 
-  /// Set the current [selection] to contain the entire text value.
+  /// Set the current selection to contain the entire text value.
   ///
   /// If and only if [cause] is [SelectionChangedCause.toolbar], the selection
   /// will be scrolled into view.
@@ -947,7 +947,7 @@ mixin TextSelectionDelegate {
     }
   }
 
-  /// Copy current [selection] to [Clipboard].
+  /// Copy current selection to [Clipboard].
   ///
   /// If [cause] is [SelectionChangedCause.toolbar], the position of
   /// [bringIntoView] to selection will be called and hide toolbar.
