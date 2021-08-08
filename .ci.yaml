@@ -62,6 +62,8 @@ platform_properties:
           {"name":"pub_cache","path":".pub-cache"},
           {"name":"xcode_binary","path":"xcode_binary"}
         ]
+      dependencies: >-
+        []
       os: Mac-10.15
       device_type: none
       mac_model: Macmini8,1
@@ -734,6 +736,7 @@ targets:
       subshard: "2_4"
       tags: >
         ["framework","hostonly","shard"]
+      test_timeout_secs: "2700"
     scheduler: luci
     runIf:
       - dev/
@@ -757,6 +760,7 @@ targets:
       subshard: "3_4"
       tags: >
         ["framework","hostonly","shard"]
+      test_timeout_secs: "2700"
     scheduler: luci
     runIf:
       - dev/
@@ -780,6 +784,7 @@ targets:
       subshard: "4_4"
       tags: >
         ["framework","hostonly","shard"]
+      test_timeout_secs: "2700"
     scheduler: luci
     runIf:
       - dev/
