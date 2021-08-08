@@ -7883,7 +7883,7 @@ void main() {
 
     await resetSelectionAndScrollOffset();
     textSelectionDelegate.cutSelection(SelectionChangedCause.toolbar);
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(scrollController.offset, 0);
 
     // paste
@@ -7894,7 +7894,7 @@ void main() {
 
     await resetSelectionAndScrollOffset();
     textSelectionDelegate.pasteText(SelectionChangedCause.toolbar);
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(scrollController.offset, 0);
 
     // select all
@@ -7905,7 +7905,7 @@ void main() {
 
     await resetSelectionAndScrollOffset(false);
     textSelectionDelegate.selectAll(SelectionChangedCause.toolbar);
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(scrollController.offset, maxScrollExtent);
 
     // copy
@@ -7916,7 +7916,7 @@ void main() {
 
     await resetSelectionAndScrollOffset();
     textSelectionDelegate.copySelection(SelectionChangedCause.toolbar);
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(scrollController.offset, 0);
   });
 }
