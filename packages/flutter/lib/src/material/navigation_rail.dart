@@ -328,12 +328,12 @@ class NavigationRail extends StatefulWidget {
   final double? minExtendedWidth;
 
   /// The curve for animations of the [NavigationRail].
-  /// 
+  ///
   /// The default animation is fastOutSlowIn
   final Curve curve;
 
   /// The duration for animations of the [NavigationRail].
-  /// 
+  ///
   /// The default duration is 250 milliseconds
   final Duration duration;
 
