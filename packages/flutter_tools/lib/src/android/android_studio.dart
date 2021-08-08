@@ -270,7 +270,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
             final String plistFile = globals.fs.path.join(studioPath, 'Info.plist');
             final Map<String, dynamic> plistValues = globals.plistParser.parseFile(plistFile);
             final String? cfBundleExecutable = plistValues['CFBundleExecutable'] as String?;
-            if (cfBundleExecutable == 'studio') {
+            if (cfBundleExecutable != null && cfBundleExecutable == 'studio') {
               candidatePaths.add(directory);
             }
           } else if (!directory.path.endsWith('.app')) {
