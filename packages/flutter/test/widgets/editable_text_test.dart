@@ -7886,7 +7886,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(scrollController.offset, 0);
 
-    // paste
+    // Paste
     await resetSelectionAndScrollOffset();
     textSelectionDelegate.pasteText(SelectionChangedCause.keyboard);
     await tester.pump();
@@ -7897,7 +7897,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(scrollController.offset, 0);
 
-    // select all
+    // Select all
     await resetSelectionAndScrollOffset(false);
     textSelectionDelegate.selectAll(SelectionChangedCause.keyboard);
     await tester.pump();
@@ -7908,7 +7908,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(scrollController.offset, maxScrollExtent);
 
-    // copy
+    // Copy
     await resetSelectionAndScrollOffset();
     textSelectionDelegate.copySelection(SelectionChangedCause.keyboard);
     await tester.pump();
