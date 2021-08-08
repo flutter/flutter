@@ -37,7 +37,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     this.studioAppName = 'AndroidStudio',
     this.presetPluginsPath,
   }) : version = version ?? Version.unknown {
-    _init();
+    _init(version: version);
   }
 
   factory AndroidStudio.fromMacOSBundle(String bundlePath) {
@@ -436,7 +436,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     return keyMatcher.stringMatch(plistValue)?.split('=').last.trim().replaceAll('"', '');
   }
 
-  void _init() {
+  void _init({Version? version}) {
     _isValid = false;
     _validationMessages.clear();
 
@@ -450,6 +450,8 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     }
 
     final String javaPath = globals.platform.isMacOS ?
+        version != null && version.major >= 2020 ?
+        globals.fs.path.join(directory, 'jre', 'Contents', 'Home') :
         globals.fs.path.join(directory, 'jre', 'jdk', 'Contents', 'Home') :
         globals.fs.path.join(directory, 'jre');
     final String javaExecutable = globals.fs.path.join(javaPath, 'bin', 'java');

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert' show jsonDecode, jsonEncode;
+import 'dart:convert' show JsonEncoder, jsonDecode;
 
 import 'package:file/file.dart' show File;
 import 'package:platform/platform.dart';
@@ -43,10 +43,8 @@ String presentState(pb.ConductorState state) {
   buffer.writeln('Release channel: ${state.releaseChannel}');
   buffer.writeln('Release version: ${state.releaseVersion}');
   buffer.writeln('');
-  buffer.writeln(
-      'Release started at: ${DateTime.fromMillisecondsSinceEpoch(state.createdDate.toInt())}');
-  buffer.writeln(
-      'Last updated at: ${DateTime.fromMillisecondsSinceEpoch(state.lastUpdatedDate.toInt())}');
+  buffer.writeln('Release started at: ${DateTime.fromMillisecondsSinceEpoch(state.createdDate.toInt())}');
+  buffer.writeln('Last updated at: ${DateTime.fromMillisecondsSinceEpoch(state.lastUpdatedDate.toInt())}');
   buffer.writeln('');
   buffer.writeln('Engine Repo');
   buffer.writeln('\tCandidate branch: ${state.engine.candidateBranch}');
@@ -128,15 +126,26 @@ String phaseInstructions(pb.ConductorState state) {
       return <String>[
         'You must now manually apply the following engine cherrypicks to the checkout',
         'at ${state.engine.checkoutPath} in order:',
-        for (final pb.Cherrypick cherrypick in state.engine.cherrypicks)
-          '\t${cherrypick.trunkRevision}',
+        for (final pb.Cherrypick cherrypick in state.engine.cherrypicks) '\t${cherrypick.trunkRevision}',
         'See $kReleaseDocumentationUrl for more information.',
       ].join('\n');
     case ReleasePhase.CODESIGN_ENGINE_BINARIES:
+      if (!requiresEnginePR(state)) {
+        return 'You must now codesign the engine binaries for commit '
+            '${state.engine.startingGitHead}.';
+      }
+      // User's working branch was pushed to their mirror, but a PR needs to be
+      // opened on GitHub.
+      final String newPrLink = getNewPrLink(
+        userName: githubAccount(state.engine.mirror.url),
+        repoName: 'engine',
+        state: state,
+      );
       return <String>[
-        'You must verify pre-submit CI builds on your engine pull request are successful,',
-        'merge your pull request, validate post-submit CI, and then codesign the binaries ',
-        'on the merge commit.',
+        'Your working branch ${state.engine.workingBranch} was pushed to your mirror.',
+        'You must now open a pull request at $newPrLink, verify pre-submit CI',
+        'builds on your engine pull request are successful, merge your pull request,',
+        'validate post-submit CI, and then codesign the binaries on the merge commit.',
       ].join('\n');
     case ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS:
       final List<pb.Cherrypick> outstandingCherrypicks = state.framework.cherrypicks.where(
@@ -144,17 +153,30 @@ String phaseInstructions(pb.ConductorState state) {
           return cp.state == pb.CherrypickState.PENDING || cp.state == pb.CherrypickState.PENDING_WITH_CONFLICT;
         },
       ).toList();
-      return <String>[
-        'You must now manually apply the following framework cherrypicks to the checkout',
-        'at ${state.framework.checkoutPath} in order:',
-        for (final pb.Cherrypick cherrypick in outstandingCherrypicks)
-          '\t${cherrypick.trunkRevision}',
-      ].join('\n');
+      if (outstandingCherrypicks.isNotEmpty) {
+        return <String>[
+          'You must now manually apply the following framework cherrypicks to the checkout',
+          'at ${state.framework.checkoutPath} in order:',
+          for (final pb.Cherrypick cherrypick in outstandingCherrypicks) '\t${cherrypick.trunkRevision}',
+        ].join('\n');
+      }
+      return <String>['Either all cherrypicks have been auto-applied or there were none.'].join('\n');
     case ReleasePhase.PUBLISH_VERSION:
+      if (!requiresFrameworkPR(state)) {
+        return 'Since there are no code changes in this release, no Framework '
+            'PR is necessary.';
+      }
+
+      final String newPrLink = getNewPrLink(
+        userName: githubAccount(state.framework.mirror.url),
+        repoName: 'flutter',
+        state: state,
+      );
       return <String>[
-        'You must verify pre-submit CI builds on your framework pull request are successful,',
-        'merge your pull request, and validate post-submit CI. See $kReleaseDocumentationUrl,',
-        'for more information.',
+        'Your working branch ${state.framework.workingBranch} was pushed to your mirror.',
+        'You must now open a pull request at $newPrLink',
+        'verify pre-submit CI builds on your pull request are successful, merge your ',
+        'pull request, validate post-submit CI.',
       ].join('\n');
     case ReleasePhase.PUBLISH_CHANNEL:
       return 'Issue `conductor next` to publish your release to the release branch.';
@@ -163,8 +185,36 @@ String phaseInstructions(pb.ConductorState state) {
     case ReleasePhase.RELEASE_COMPLETED:
       return 'This release has been completed.';
   }
-  assert(false);
-  return ''; // For analyzer
+  // For analyzer
+  throw ConductorException('Unimplemented phase ${state.currentPhase}');
+}
+
+/// Regex pattern for git remote host URLs.
+///
+/// First group = git host (currently must be github.com)
+/// Second group = account name
+/// Third group = repo name
+final RegExp githubRemotePattern =
+    RegExp(r'^(git@github\.com:|https?:\/\/github\.com\/)([a-zA-Z0-9_-]+)\/([a-zA-Z0-9_-]+)(\.git)?$');
+
+/// Parses a Git remote URL and returns the account name.
+///
+/// Uses [githubRemotePattern].
+String githubAccount(String remoteUrl) {
+  final String engineUrl = remoteUrl;
+  final RegExpMatch? match = githubRemotePattern.firstMatch(engineUrl);
+  if (match == null) {
+    throw ConductorException(
+      'Cannot determine the GitHub account from $engineUrl',
+    );
+  }
+  final String? accountName = match.group(2);
+  if (accountName == null || accountName.isEmpty) {
+    throw ConductorException(
+      'Cannot determine the GitHub account from $match',
+    );
+  }
+  return accountName;
 }
 
 /// Returns the next phase in the ReleasePhase enum.
@@ -180,10 +230,13 @@ ReleasePhase getNextPhase(ReleasePhase currentPhase) {
   return nextPhase;
 }
 
+// Indent two spaces.
+const JsonEncoder _encoder = JsonEncoder.withIndent('  ');
+
 void writeStateToFile(File file, pb.ConductorState state, List<String> logs) {
   state.logs.addAll(logs);
   file.writeAsStringSync(
-    jsonEncode(state.toProto3Json()),
+    _encoder.convert(state.toProto3Json()),
     flush: true,
   );
 }
@@ -195,4 +248,39 @@ pb.ConductorState readStateFromFile(File file) {
     jsonDecode(stateAsString),
   );
   return state;
+}
+
+/// This release will require a new Engine PR.
+///
+/// The logic is if there are engine cherrypicks that have not been abandoned OR
+/// there is a new Dart revision, then return true, else false.
+bool requiresEnginePR(pb.ConductorState state) {
+  final bool hasRequiredCherrypicks = state.engine.cherrypicks.any(
+    (pb.Cherrypick cp) => cp.state != pb.CherrypickState.ABANDONED,
+  );
+  if (hasRequiredCherrypicks) {
+    return true;
+  }
+  return state.engine.dartRevision.isNotEmpty;
+}
+
+/// This release will require a new Framework PR.
+///
+/// The logic is if there was an Engine PR OR there are framework cherrypicks
+/// that have not been abandoned OR the increment level is 'm', then return
+/// true, else false.
+bool requiresFrameworkPR(pb.ConductorState state) {
+  if (requiresEnginePR(state)) {
+    return true;
+  }
+  final bool hasRequiredCherrypicks =
+      state.framework.cherrypicks.any((pb.Cherrypick cp) => cp.state != pb.CherrypickState.ABANDONED);
+  if (hasRequiredCherrypicks) {
+    return true;
+  }
+  if (state.incrementLevel == 'm') {
+    // requires an update to .ci.yaml
+    return true;
+  }
+  return false;
 }

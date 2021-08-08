@@ -2090,7 +2090,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   // hint would.
   bool get _hasInlineLabel {
     return !widget._labelShouldWithdraw
-        && decoration!.labelText != null
+        && (decoration!.labelText != null || decoration!.label != null)
         && decoration!.floatingLabelBehavior != FloatingLabelBehavior.always;
   }
 
@@ -2205,7 +2205,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final TextStyle inlineLabelStyle = themeData.fixTextFieldOutlineLabel
       ? inlineStyle.merge(decoration!.labelStyle).copyWith(height: 1)
       : inlineStyle.merge(decoration!.labelStyle);
-    final Widget? label = decoration!.labelText == null ? null : _Shaker(
+    final Widget? label = decoration!.labelText == null && decoration!.label == null ? null : _Shaker(
       animation: _shakingLabelController.view,
       child: AnimatedOpacity(
         duration: _kTransitionDuration,
@@ -2217,7 +2217,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
           style: widget._labelShouldWithdraw
             ? _getFloatingLabelStyle(themeData)
             : inlineLabelStyle,
-          child: Text(
+          child: decoration!.label ?? Text(
             decoration!.labelText!,
             overflow: TextOverflow.ellipsis,
             textAlign: textAlign,
@@ -2521,6 +2521,7 @@ class InputDecoration {
   /// Similarly, only one of [suffix] and [suffixText] can be specified.
   const InputDecoration({
     this.icon,
+    this.label,
     this.labelText,
     this.labelStyle,
     this.floatingLabelStyle,
@@ -2566,6 +2567,7 @@ class InputDecoration {
     this.alignLabelWithHint,
     this.constraints,
   }) : assert(enabled != null),
+       assert(!(label != null && labelText != null), 'Declaring both label and labelText is not supported.'),
        assert(!(prefix != null && prefixText != null), 'Declaring both prefix and prefixText is not supported.'),
        assert(!(suffix != null && suffixText != null), 'Declaring both suffix and suffixText is not supported.');
 
@@ -2587,6 +2589,7 @@ class InputDecoration {
     this.enabled = true,
   }) : assert(enabled != null),
        icon = null,
+       label = null,
        labelText = null,
        labelStyle = null,
        floatingLabelStyle = null,
@@ -2639,13 +2642,62 @@ class InputDecoration {
   /// See [Icon], [ImageIcon].
   final Widget? icon;
 
-  /// Text that describes the input field.
+  /// Optional widget that describes the input field.
   ///
+  /// {@template flutter.material.inputDecoration.label}
   /// When the input field is empty and unfocused, the label is displayed on
   /// top of the input field (i.e., at the same location on the screen where
   /// text may be entered in the input field). When the input field receives
   /// focus (or if the field is non-empty), the label moves above (i.e.,
   /// vertically adjacent to) the input field.
+  /// {@endtemplate}
+  ///
+  /// This can be used, for example, to add multiple [TextStyle]'s to a label that would
+  /// otherwise be specified using [labelText], which only takes one [TextStyle].
+  ///
+  /// {@tool dartpad --template=stateless_widget_scaffold}
+  ///
+  /// This example shows a `TextField` with a [Text.rich] widget as the [label].
+  /// The widget contains multiple [Text] widgets with different [TextStyle]'s.
+  ///
+  /// ```dart
+  /// Widget build(BuildContext context) {
+  ///   return const Center(
+  ///     child: TextField(
+  ///       decoration: InputDecoration(
+  ///         label: Text.rich(
+  ///           TextSpan(
+  ///             children: <InlineSpan>[
+  ///               WidgetSpan(
+  ///                 child: Text(
+  ///                   'Username',
+  ///                 ),
+  ///               ),
+  ///               WidgetSpan(
+  ///                 child: Text(
+  ///                   '*',
+  ///                   style: TextStyle(color: Colors.red),
+  ///                 ),
+  ///               ),
+  ///             ],
+  ///           ),
+  ///         ),
+  ///       ),
+  ///     ),
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
+  ///
+  /// Only one of [label] and [labelText] can be specified.
+  final Widget? label;
+
+  /// Optional text that describes the input field.
+  ///
+  /// {@macro flutter.material.inputDecoration.label}
+  ///
+  /// If a more elaborate label is required, consider using [label] instead.
+  /// Only one of [label] and [labelText] can be specified.
   final String? labelText;
 
   /// The style to use for the [labelText] when the label is on top of the
@@ -3324,6 +3376,7 @@ class InputDecoration {
   /// by the new values.
   InputDecoration copyWith({
     Widget? icon,
+    Widget? label,
     String? labelText,
     TextStyle? labelStyle,
     TextStyle? floatingLabelStyle,
@@ -3371,6 +3424,7 @@ class InputDecoration {
   }) {
     return InputDecoration(
       icon: icon ?? this.icon,
+      label: label ?? this.label,
       labelText: labelText ?? this.labelText,
       labelStyle: labelStyle ?? this.labelStyle,
       floatingLabelStyle: floatingLabelStyle ?? this.floatingLabelStyle,
@@ -3462,6 +3516,7 @@ class InputDecoration {
       return false;
     return other is InputDecoration
         && other.icon == icon
+        && other.label == label
         && other.labelText == labelText
         && other.labelStyle == labelStyle
         && other.floatingLabelStyle == floatingLabelStyle
@@ -3512,6 +3567,7 @@ class InputDecoration {
   int get hashCode {
     final List<Object?> values = <Object?>[
       icon,
+      label,
       labelText,
       floatingLabelStyle,
       labelStyle,
@@ -3566,6 +3622,7 @@ class InputDecoration {
   String toString() {
     final List<String> description = <String>[
       if (icon != null) 'icon: $icon',
+      if (label != null) 'label: $label',
       if (labelText != null) 'labelText: "$labelText"',
       if (floatingLabelStyle != null) 'floatingLabelStyle: "$floatingLabelStyle"',
       if (helperText != null) 'helperText: "$helperText"',

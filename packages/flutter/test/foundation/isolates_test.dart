@@ -46,5 +46,5 @@ void main() {
     final String scriptPath = fs.path.join(packageRoot, 'test', 'foundation', '_compute_caller.dart');
     final ProcessResult result = await Process.run(dartPath, <String>[scriptPath]);
     expect(result.exitCode, 0);
-  }, skip: kIsWeb);
+  }, skip: kIsWeb); // [intended] isn't supported on the web.
 }
