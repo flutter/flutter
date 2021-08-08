@@ -7883,8 +7883,8 @@ void main() {
 
     await resetSelectionAndScrollOffset();
     textSelectionDelegate.cutSelection(SelectionChangedCause.toolbar);
-    await tester.pumpAndSettle();
-    expect(scrollController.offset, 0);
+    await tester.pump();
+    expect(scrollController.offset.roundToDouble(), 0.0);
 
     // Paste
     await resetSelectionAndScrollOffset();
@@ -7894,19 +7894,19 @@ void main() {
 
     await resetSelectionAndScrollOffset();
     textSelectionDelegate.pasteText(SelectionChangedCause.toolbar);
-    await tester.pumpAndSettle();
-    expect(scrollController.offset, 0);
+    await tester.pump();
+    expect(scrollController.offset.roundToDouble(), 0.0);
 
     // Select all
     await resetSelectionAndScrollOffset(false);
     textSelectionDelegate.selectAll(SelectionChangedCause.keyboard);
     await tester.pump();
-    expect(scrollController.offset, 0);
+    expect(scrollController.offset, 0.0);
 
     await resetSelectionAndScrollOffset(false);
     textSelectionDelegate.selectAll(SelectionChangedCause.toolbar);
-    await tester.pumpAndSettle();
-    expect(scrollController.offset, maxScrollExtent);
+    await tester.pump();
+    expect(scrollController.offset.roundToDouble(), maxScrollExtent);
 
     // Copy
     await resetSelectionAndScrollOffset();
@@ -7916,8 +7916,8 @@ void main() {
 
     await resetSelectionAndScrollOffset();
     textSelectionDelegate.copySelection(SelectionChangedCause.toolbar);
-    await tester.pumpAndSettle();
-    expect(scrollController.offset, 0);
+    await tester.pump();
+    expect(scrollController.offset.roundToDouble(), 0.0);
   });
 }
 
