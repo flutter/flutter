@@ -20,7 +20,7 @@ You may also reach out to the team via our public [Discord](https://github.com/f
 sure to e-mail `security@flutter.dev` when reporting an issue, and avoid revealing information about
 vulnerabilities in public if that could put users at risk.
 
-## Process
+## Process 
 
 This section describes the process used by the Flutter team when handling vulnerability reports.
 
