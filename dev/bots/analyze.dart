@@ -48,6 +48,9 @@ Future<void> run(List<String> arguments) async {
   print('$clock runtimeType in toString...');
   await verifyNoRuntimeTypeInToString(flutterRoot);
 
+  print('$clock debug mode instead of checked mode...');
+  await verifyNoCheckedMode(flutterRoot);
+
   print('$clock Unexpected binaries...');
   await verifyNoBinaries(flutterRoot);
 
@@ -70,7 +73,7 @@ Future<void> run(List<String> arguments) async {
   await verifyNoBadImportsInFlutterTools(flutterRoot);
 
   print('$clock Internationalization...');
-  await verifyInternationalizations();
+  await verifyInternationalizations(flutterRoot, dart);
 
   print('$clock Integration test timeouts...');
   await verifyIntegrationTestTimeouts(flutterRoot);
@@ -422,26 +425,26 @@ Future<void> verifyIntegrationTestTimeouts(String workingDirectory) async {
   }
 }
 
-Future<void> verifyInternationalizations() async {
+Future<void> verifyInternationalizations(String workingDirectory, String dartExecutable) async {
   final EvalResult materialGenResult = await _evalCommand(
-    dart,
+    dartExecutable,
     <String>[
       path.join('dev', 'tools', 'localization', 'bin', 'gen_localizations.dart'),
       '--material',
     ],
-    workingDirectory: flutterRoot,
+    workingDirectory: workingDirectory,
   );
   final EvalResult cupertinoGenResult = await _evalCommand(
-    dart,
+    dartExecutable,
     <String>[
       path.join('dev', 'tools', 'localization', 'bin', 'gen_localizations.dart'),
       '--cupertino',
     ],
-    workingDirectory: flutterRoot,
+    workingDirectory: workingDirectory,
   );
 
-  final String materialLocalizationsFile = path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'generated_material_localizations.dart');
-  final String cupertinoLocalizationsFile = path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'generated_cupertino_localizations.dart');
+  final String materialLocalizationsFile = path.join(workingDirectory, 'packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'generated_material_localizations.dart');
+  final String cupertinoLocalizationsFile = path.join(workingDirectory, 'packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'generated_cupertino_localizations.dart');
   final String expectedMaterialResult = await File(materialLocalizationsFile).readAsString();
   final String expectedCupertinoResult = await File(cupertinoLocalizationsFile).readAsString();
 
@@ -470,6 +473,29 @@ Future<void> verifyInternationalizations() async {
     ]);
   }
 }
+
+
+/// Verifies that all instances of "checked mode" have been migrated to "debug mode".
+Future<void> verifyNoCheckedMode(String workingDirectory) async {
+  final String flutterPackages = path.join(workingDirectory, 'packages');
+  final List<File> files = await _allFiles(flutterPackages, 'dart', minimumMatches: 400)
+      .where((File file) => path.extension(file.path) == '.dart')
+      .toList();
+  final List<String> problems = <String>[];
+  for (final File file in files) {
+    int lineCount = 0;
+    for (final String line in file.readAsLinesSync()) {
+      if (line.toLowerCase().contains('checked mode')) {
+        problems.add('${file.path}:$lineCount uses deprecated "checked mode" instead of "debug mode".');
+      }
+      lineCount += 1;
+    }
+  }
+  if (problems.isNotEmpty) {
+    exitWithError(problems);
+  }
+}
+
 
 Future<void> verifyNoRuntimeTypeInToString(String workingDirectory) async {
   final String flutterLib = path.join(workingDirectory, 'packages', 'flutter', 'lib');

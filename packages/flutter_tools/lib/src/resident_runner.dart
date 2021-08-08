@@ -738,22 +738,6 @@ abstract class ResidentHandlers {
     return true;
   }
 
-  /// Toggle the "elevation check" debugging feature.
-  Future<bool> debugToggleDebugCheckElevationsEnabled() async {
-    if (!supportsServiceProtocol) {
-      return false;
-    }
-    for (final FlutterDevice device in flutterDevices) {
-      final List<FlutterView> views = await device.vmService.getFlutterViews();
-      for (final FlutterView view in views) {
-        await device.vmService.flutterToggleDebugCheckElevationsEnabled(
-          isolateId: view.uiIsolate.id,
-        );
-      }
-    }
-    return true;
-  }
-
   /// Toggle the performance overlay.
   ///
   /// This is not supported in web mode.
@@ -1426,7 +1410,6 @@ abstract class ResidentRunner extends ResidentHandlers {
         commandHelp.I.print();
         commandHelp.o.print();
         commandHelp.b.print();
-        commandHelp.z.print();
       } else {
         commandHelp.S.print();
         commandHelp.U.print();
@@ -1659,9 +1642,6 @@ class TerminalHandler {
       case 'w':
       case 'W':
         return residentRunner.debugDumpApp();
-      case 'z':
-      case 'Z':
-        return residentRunner.debugToggleDebugCheckElevationsEnabled();
     }
     return false;
   }

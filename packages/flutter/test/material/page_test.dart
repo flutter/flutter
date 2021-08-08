@@ -66,7 +66,10 @@ void main() {
 
     expect(find.text('Page 1'), isOnstage);
     expect(find.text('Page 2'), findsNothing);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb);
+  },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+    skip: kIsWeb, // [intended] no default transitions on the web.
+  );
 
   testWidgets('test page transition', (WidgetTester tester) async {
     final Key page2Key = UniqueKey();
@@ -147,7 +150,10 @@ void main() {
 
     // Page 1 is back where it started.
     expect(widget1InitialTopLeft == widget1TransientTopLeft, true);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS), skip: kIsWeb);
+  },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    skip: kIsWeb, // [intended] no default transitions on the web.
+  );
 
   testWidgets('test fullscreen dialog transition', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -207,7 +213,10 @@ void main() {
 
     // Page 1 is back where it started.
     expect(widget1InitialTopLeft == widget1TransientTopLeft, true);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS), skip: kIsWeb);
+  },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    skip: kIsWeb, // [intended] no default transitions on the web.
+  );
 
   testWidgets('test no back gesture on Android', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -237,7 +246,10 @@ void main() {
 
     // Page 2 didn't move
     expect(tester.getTopLeft(find.text('Page 2')), Offset.zero);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb);
+  },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+    skip: kIsWeb, // [intended] no default transitions on the web.
+  );
 
   testWidgets('test back gesture', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -278,7 +290,10 @@ void main() {
     await tester.pump();
 
     expect(tester.getTopLeft(find.text('Page 2')), const Offset(100.0, 0.0));
-  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS), skip: kIsWeb);
+  },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    skip: kIsWeb, // [intended] no default transitions on the web.
+  );
 
   testWidgets('back gesture while OS changes', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
@@ -369,7 +384,7 @@ void main() {
     final Offset helloPosition6 = tester.getCenter(find.text('HELLO'));
     expect(helloPosition5, helloPosition6);
     expect(Theme.of(tester.element(find.text('HELLO'))).platform, TargetPlatform.macOS);
-  }, skip: kIsWeb);
+  }, skip: kIsWeb); // [intended] doesn't apply to the web.
 
   testWidgets('test no back gesture on fullscreen dialogs', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -480,7 +495,10 @@ void main() {
 
     // Page 1 is back where it started.
     expect(widget1InitialTopLeft == widget1TransientTopLeft, true);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS), skip: kIsWeb);
+  },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    skip: kIsWeb, // [intended] no default transitions on the web.
+  );
 
   testWidgets('test edge swipe then drop back at starting point works', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -548,7 +566,10 @@ void main() {
 
     expect(find.text('Page 1'), isOnstage);
     expect(find.text('Page 2'), findsNothing);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS), skip: kIsWeb);
+  },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    skip: kIsWeb, // [intended] no default transitions on the web.
+  );
 
   testWidgets('Back swipe dismiss interrupted by route push', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/28728
@@ -643,7 +664,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('route'), findsOneWidget);
     expect(find.text('push'), findsNothing);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS), skip: kIsWeb);
+  },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    skip: kIsWeb, // [intended] no default transitions on the web.
+  );
 
   testWidgets('During back swipe the route ignores input', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/39989
@@ -713,7 +737,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.getTopLeft(find.byKey(pageScaffoldKey)), const Offset(400, 0));
     expect(tester.getTopLeft(find.byKey(homeScaffoldKey)).dx, lessThan(0));
-  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS), skip: kIsWeb);
+  },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    skip: kIsWeb, // [intended] no default transitions on the web.
+  );
 
   testWidgets('After a pop caused by a back-swipe, input reaches the exposed route', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/41024
@@ -784,7 +811,10 @@ void main() {
     await tester.tap(find.byKey(homeScaffoldKey));
     expect(homeTapCount, 2);
     expect(pageTapCount, 1);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS), skip: kIsWeb);
+  },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    skip: kIsWeb, // [intended] no default transitions on the web.
+  );
 
   testWidgets('A MaterialPageRoute should slide out with CupertinoPageTransition when a compatible PageRoute is pushed on top of it', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/44864.
@@ -812,7 +842,10 @@ void main() {
     // Title of the first route slides to the left.
     expect(titleInitialTopLeft.dy, equals(titleTransientTopLeft.dy));
     expect(titleInitialTopLeft.dx, greaterThan(titleTransientTopLeft.dx));
-  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS), skip: kIsWeb);
+  },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    skip: kIsWeb, // [intended] no default transitions on the web.
+  );
 
   testWidgets('MaterialPage works', (WidgetTester tester) async {
     final LocalKey pageKey = UniqueKey();

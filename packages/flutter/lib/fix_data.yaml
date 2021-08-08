@@ -15,6 +15,39 @@
 version: 1
 transforms:
 
+  # Changes made in https://github.com/flutter/flutter/pull/87281
+  - title: "Remove 'fixTextFieldOutlineLabel'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'fixTextFieldOutlineLabel'
+
+  # Changes made in https://github.com/flutter/flutter/pull/87281
+  - title: "Remove 'fixTextFieldOutlineLabel'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'fixTextFieldOutlineLabel'
+
+  # Changes made in https://github.com/flutter/flutter/pull/87281
+  - title: "Remove 'fixTextFieldOutlineLabel'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'fixTextFieldOutlineLabel'
+
   # Changes made in https://github.com/flutter/flutter/pull/81336
   - title: "Remove 'buttonColor'"
     date: 2021-04-30

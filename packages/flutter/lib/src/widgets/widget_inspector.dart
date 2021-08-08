@@ -2122,6 +2122,7 @@ class _ElementLocationStatsTracker {
       'events': events,
     };
 
+    // Encode the new locations using the older encoding.
     if (newLocations.isNotEmpty) {
       // Add all newly used location ids to the JSON.
       final Map<String, List<int>> locationsJson = <String, List<int>>{};
@@ -2136,21 +2137,26 @@ class _ElementLocationStatsTracker {
       json['newLocations'] = locationsJson;
     }
 
-    // Add in a data structure for the location names.
+    // Encode the new locations using the newer encoding (as of v2.4.0).
     if (newLocations.isNotEmpty) {
-      final Map<String, Map<int, String>> namesJson = <String, Map<int, String>>{};
+      final Map<String, Map<String, List<Object?>>> fileLocationsMap = <String, Map<String, List<Object?>>>{};
       for (final _LocationCount entry in newLocations) {
         final _Location location = entry.location;
-        final Map<int, String> jsonForFile = namesJson.putIfAbsent(
-          location.file,
-              () => <int, String>{},
+        final Map<String, List<Object?>> locations = fileLocationsMap.putIfAbsent(
+          location.file, () => <String, List<Object?>>{
+            'ids': <int>[],
+            'lines': <int>[],
+            'columns': <int>[],
+            'names': <String?>[],
+          },
         );
-        final String? name = location.name;
-        if (name != null) {
-          jsonForFile[entry.id] = name;
-        }
+
+        locations['ids']!.add(entry.id);
+        locations['lines']!.add(location.line);
+        locations['columns']!.add(location.column);
+        locations['names']!.add(location.name);
       }
-      json['newLocationsNames'] = namesJson;
+      json['locations'] = fileLocationsMap;
     }
 
     resetCounts();

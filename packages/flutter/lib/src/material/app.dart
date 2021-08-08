@@ -200,6 +200,7 @@ class MaterialApp extends StatefulWidget {
     this.actions,
     this.restorationScopeId,
     this.scrollBehavior,
+    this.useInheritedMediaQuery = false,
   }) : assert(routes != null),
        assert(navigatorObservers != null),
        assert(title != null),
@@ -247,6 +248,7 @@ class MaterialApp extends StatefulWidget {
     this.actions,
     this.restorationScopeId,
     this.scrollBehavior,
+    this.useInheritedMediaQuery = false,
   }) : assert(routeInformationParser != null),
        assert(routerDelegate != null),
        assert(title != null),
@@ -658,12 +660,15 @@ class MaterialApp extends StatefulWidget {
   /// Turns on a [GridPaper] overlay that paints a baseline grid
   /// Material apps.
   ///
-  /// Only available in checked mode.
+  /// Only available in debug mode.
   ///
   /// See also:
   ///
   ///  * <https://material.io/design/layout/spacing-methods.html>
   final bool debugShowMaterialGrid;
+
+  /// {@macro flutter.widgets.widgetsApp.useInheritedMediaQuery}
+  final bool useInheritedMediaQuery;
 
   @override
   State<MaterialApp> createState() => _MaterialAppState();
@@ -858,6 +863,7 @@ class _MaterialAppState extends State<MaterialApp> {
         shortcuts: widget.shortcuts,
         actions: widget.actions,
         restorationScopeId: widget.restorationScopeId,
+        useInheritedMediaQuery: widget.useInheritedMediaQuery,
       );
     }
 
@@ -893,6 +899,7 @@ class _MaterialAppState extends State<MaterialApp> {
       shortcuts: widget.shortcuts,
       actions: widget.actions,
       restorationScopeId: widget.restorationScopeId,
+      useInheritedMediaQuery: widget.useInheritedMediaQuery,
     );
   }
 

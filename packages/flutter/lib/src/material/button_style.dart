@@ -35,7 +35,7 @@ import 'theme_data.dart';
 /// ```dart
 /// ElevatedButton(
 ///   style: ButtonStyle(
-///     backgroundColor: MaterialStateProperty.resolveWith<Color>(
+///     backgroundColor: MaterialStateProperty.resolveWith<Color?>(
 ///       (Set<MaterialState> states) {
 ///         if (states.contains(MaterialState.pressed))
 ///           return Theme.of(context).colorScheme.primary.withOpacity(0.5);

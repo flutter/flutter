@@ -142,7 +142,7 @@ import 'text_style.dart';
 ///     fontSize: 30,
 ///     height: 1.5,
 ///   ),
-/// ),
+/// )
 /// ```
 /// {@end-tool}
 ///
@@ -183,7 +183,7 @@ import 'text_style.dart';
 ///     fontFamily: 'Roboto',
 ///     height: 1.5,
 ///   ),
-/// ),
+/// )
 /// ```
 /// {@end-tool}
 ///
@@ -226,7 +226,7 @@ import 'text_style.dart';
 ///     height: 1,
 ///     forceStrutHeight: true,
 ///   ),
-/// ),
+/// )
 /// ```
 /// {@end-tool}
 ///
@@ -282,7 +282,7 @@ import 'text_style.dart';
 ///     fontSize: 14,
 ///     forceStrutHeight: true,
 ///   ),
-/// ),
+/// )
 /// ```
 /// {@end-tool}
 ///
