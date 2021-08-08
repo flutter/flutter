@@ -266,7 +266,13 @@ class AndroidStudio implements Comparable<AndroidStudio> {
           final String name = directory.basename;
           // An exact match, or something like 'Android Studio 3.0 Preview.app'.
           if (name.startsWith('Android Studio') && name.endsWith('.app')) {
-            candidatePaths.add(directory);
+            final String studioPath = globals.fs.path.join(directory.path, 'Contents');
+            final String plistFile = globals.fs.path.join(studioPath, 'Info.plist');
+            final Map<String, dynamic> plistValues = globals.plistParser.parseFile(plistFile);
+            final String? cfBundleExecutable = plistValues['CFBundleExecutable'] as String?;
+            if (cfBundleExecutable == 'studio') {
+              candidatePaths.add(directory);
+            }
           } else if (!directory.path.endsWith('.app')) {
             _checkForStudio(directory.path);
           }
@@ -319,7 +325,6 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     return candidatePaths
         .map<AndroidStudio>((FileSystemEntity e) => AndroidStudio.fromMacOSBundle(e.path))
         .whereType<AndroidStudio>()
-        .toSet()
         .toList();
   }
 
@@ -478,14 +483,4 @@ class AndroidStudio implements Comparable<AndroidStudio> {
 
   @override
   String toString() => 'Android Studio ($version)';
-
-  @override
-  // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => directory.hashCode;
-
-  @override
-  // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  bool operator ==(Object other) {
-    return other is Object && hashCode == other.hashCode;
-  }
 }
