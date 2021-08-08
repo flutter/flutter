@@ -896,12 +896,31 @@ void _testsInput() {
     expect(find.text(errorInvalidText), findsOneWidget);
   });
 
-  testWidgets('Can toggle to dial entry mode', (WidgetTester tester) async {
+  testWidgets('Can switch from input to dial entry mode', (WidgetTester tester) async {
     await mediaQueryBoilerplate(tester, true, entryMode: TimePickerEntryMode.input);
     await tester.tap(find.byIcon(Icons.access_time));
     await tester.pumpAndSettle();
     expect(find.byType(TextField), findsNothing);
   });
+
+  testWidgets('Can switch from dial to input entry mode', (WidgetTester tester) async {
+    await mediaQueryBoilerplate(tester, true, entryMode: TimePickerEntryMode.dial);
+    await tester.tap(find.byIcon(Icons.keyboard));
+    await tester.pumpAndSettle();
+    expect(find.byType(TextField), findsOneWidget);
+  });
+
+  testWidgets('Can not switch out of inputOnly mode', (WidgetTester tester) async {
+    await mediaQueryBoilerplate(tester, true, entryMode: TimePickerEntryMode.inputOnly);
+    expect(find.byType(TextField), findsOneWidget);
+    expect(find.byIcon(Icons.access_time), findsNothing);
+  });  
+
+  testWidgets('Can not switch out of dialOnly mode', (WidgetTester tester) async {
+    await mediaQueryBoilerplate(tester, true, entryMode: TimePickerEntryMode.dialOnly);
+    expect(find.byType(TextField), findsNothing);
+    expect(find.byIcon(Icons.keyboard), findsNothing);
+  });   
 
   testWidgets('Can double tap hours (when selected) to enter input mode', (WidgetTester tester) async {
     await mediaQueryBoilerplate(tester, false, entryMode: TimePickerEntryMode.dial);
