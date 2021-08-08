@@ -244,7 +244,7 @@ void main() {
                 onPressed: () {
                   pressed = true;
                 },
-                child: null,
+                child: Container(),
               ),
               const Material(
                 type: MaterialType.transparency,

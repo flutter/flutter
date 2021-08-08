@@ -287,7 +287,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final GlobalKey topButtonKey = GlobalKey();
 
       Widget selectButtonBuilder(BuildContext context, VoidCallback onPressed) {
-        return Material(child: ElevatedButton(onPressed: onPressed, key: selectButtonKey, child: null));
+        return Material(child: ElevatedButton(onPressed: onPressed, key: selectButtonKey, child: Container()));
       }
       // State type is private, hence using dynamic.
       dynamic getInspectorState() => inspectorKey.currentState;
@@ -390,7 +390,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final GlobalKey inspectorKey = GlobalKey();
 
       Widget selectButtonBuilder(BuildContext context, VoidCallback onPressed) {
-        return Material(child: ElevatedButton(onPressed: onPressed, key: selectButtonKey, child: null));
+        return Material(child: ElevatedButton(onPressed: onPressed, key: selectButtonKey, child: Container()));
       }
       // State type is private, hence using dynamic.
       dynamic getInspectorState() => inspectorKey.currentState;
@@ -590,7 +590,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
       InspectorSelectButtonBuilder selectButtonBuilder(Key key) {
         return (BuildContext context, VoidCallback onPressed) {
-          return Material(child: ElevatedButton(onPressed: onPressed, key: key, child: null));
+          return Material(child: ElevatedButton(onPressed: onPressed, key: key, child: Container()));
         };
       }
 
