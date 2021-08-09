@@ -1637,4 +1637,65 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(RawScrollbar), isNot(paints..rect())); // Not shown.
   });
+
+  testWidgets('Scrollbar will not flip axes based on notification is there is a scroll controller', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/87697
+    final ScrollController verticalScrollController = ScrollController();
+    final ScrollController horizontalScrollController = ScrollController();
+    Widget buildFrame() {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            isAlwaysShown: true,
+            controller: verticalScrollController,
+            // This scrollbar will receive scroll notifications from both nested
+            // scroll views of opposite axes, but should stay on the vertical
+            // axis that its scroll controller is associated with.
+            notificationPredicate: (ScrollNotification notification) => notification.depth <= 1,
+            child: SingleChildScrollView(
+              controller: verticalScrollController,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                controller: horizontalScrollController,
+                child: const SizedBox(
+                  width: 1000.0,
+                  height: 1000.0,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    await tester.pumpAndSettle();
+    expect(verticalScrollController.offset, 0.0);
+    expect(horizontalScrollController.offset, 0.0);
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 360.0),
+          color: const Color(0x66BCBCBC),
+        ),
+    );
+
+    // Move the horizontal scroll view. The vertical scrollbar should not flip.
+    horizontalScrollController.jumpTo(10.0);
+    expect(verticalScrollController.offset, 0.0);
+    expect(horizontalScrollController.offset, 10.0);
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 360.0),
+          color: const Color(0x66BCBCBC),
+        ),
+    );
+  });
 }

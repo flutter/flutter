@@ -1868,6 +1868,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
       _primaryFocus = _markedForFocus;
       _markedForFocus = null;
     }
+    assert(_markedForFocus == null);
     if (previousFocus != _primaryFocus) {
       assert(_focusDebug('Updating focus from $previousFocus to $_primaryFocus'));
       if (previousFocus != null) {
