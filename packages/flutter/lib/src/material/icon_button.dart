@@ -280,7 +280,9 @@ class IconButton extends StatelessWidget {
 
   /// {@macro flutter.material.RawMaterialButton.mouseCursor}
   ///
-  /// Defaults to [SystemMouseCursors.click].
+  /// If set to null, will default to
+  /// - [SystemMouseCursors.forbidden], if [onPressed] is null
+  /// - [SystemMouseCursors.click], otherwise
   final MouseCursor? mouseCursor;
 
   /// {@macro flutter.widgets.Focus.focusNode}
