@@ -1807,6 +1807,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       return;
     }
 
+    TextDelta? delta = value.delta;
+    if (delta != null) {
+      print('Delta type: ' + delta.deltaType.toString());
+      print('Delta old text: ' + delta.oldText);
+      print('Delta new text: ' + delta.newText);
+      print('Delta beginning of modified range: ' + delta.modifiedRange.start.toString());
+      print('Delta end of modified range: ' + delta.modifiedRange.end.toString());
+      print('Delta beginning of new range: ' + delta.newRange.start.toString());
+      print('Delta end of new range: ' + delta.newRange.end.toString());
+    }
+
     if (widget.readOnly) {
       // In the read-only case, we only care about selection changes, and reject
       // everything else.

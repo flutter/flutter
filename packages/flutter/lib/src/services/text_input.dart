@@ -703,6 +703,26 @@ class RawFloatingCursorPoint {
   final FloatingCursorDragState state;
 }
 
+enum TextDeltaType { insertion, deletion, replacement, equality, none }
+
+/// A model representing the changes made to a [TextEditingValue] from time T1
+/// to T2.
+class TextDelta {
+  const TextDelta({
+    required this.oldText,
+    required this.newText,
+    required this.deltaType,
+    required this.modifiedRange,
+    required this.newRange
+  });
+
+  final String oldText;
+  final String newText;
+  final TextDeltaType deltaType;
+  final TextRange modifiedRange;
+  final TextRange newRange;
+}
+
 /// The current text, selection, and composing state for editing a run of text.
 @immutable
 class TextEditingValue {
@@ -716,12 +736,32 @@ class TextEditingValue {
     this.text = '',
     this.selection = const TextSelection.collapsed(offset: -1),
     this.composing = TextRange.empty,
+    this.delta,
   }) : assert(text != null),
-       assert(selection != null),
-       assert(composing != null);
+        assert(selection != null),
+        assert(composing != null);
 
   /// Creates an instance of this class from a JSON object.
   factory TextEditingValue.fromJSON(Map<String, dynamic> encoded) {
+    TextDeltaType deltaType;
+
+    switch (encoded['delta'] as String) {
+      case 'INSERTION':
+        deltaType = TextDeltaType.insertion;
+        break;
+      case 'DELETION':
+        deltaType = TextDeltaType.deletion;
+        break;
+      case 'REPLACEMENT':
+        deltaType = TextDeltaType.replacement;
+        break;
+      case 'EQUALITY':
+        deltaType = TextDeltaType.equality;
+        break;
+      default:
+        deltaType = TextDeltaType.none;
+    }
+
     return TextEditingValue(
       text: encoded['text'] as String,
       selection: TextSelection(
@@ -733,6 +773,19 @@ class TextEditingValue {
       composing: TextRange(
         start: encoded['composingBase'] as int? ?? -1,
         end: encoded['composingExtent'] as int? ?? -1,
+      ),
+      delta: TextDelta(
+        oldText: encoded['oldText'] as String,
+        newText: encoded['newText'] as String,
+        deltaType: deltaType,
+        modifiedRange: TextRange(
+          start: encoded['modifiedBase'] as int? ?? -1,
+          end: encoded['modifiedExtent'] as int? ?? -1,
+        ),
+        newRange: TextRange(
+          start: encoded['newBase'] as int? ?? -1,
+          end: encoded['newExtent'] as int? ?? -1,
+        ),
       ),
     );
   }
@@ -749,16 +802,21 @@ class TextEditingValue {
   /// A value that corresponds to the empty string with no selection and no composing range.
   static const TextEditingValue empty = TextEditingValue();
 
+  /// The changes that resulted in the current [TextEditingValue].
+  final TextDelta? delta;
+
   /// Creates a copy of this value but with the given fields replaced with the new values.
   TextEditingValue copyWith({
     String? text,
     TextSelection? selection,
     TextRange? composing,
+    TextDelta? delta,
   }) {
     return TextEditingValue(
       text: text ?? this.text,
       selection: selection ?? this.selection,
       composing: composing ?? this.composing,
+      delta: delta ?? this.delta,
     );
   }
 
