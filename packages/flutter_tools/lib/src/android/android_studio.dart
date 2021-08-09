@@ -483,5 +483,4 @@ class AndroidStudio implements Comparable<AndroidStudio> {
 
   @override
   String toString() => 'Android Studio ($version)';
-
 }
