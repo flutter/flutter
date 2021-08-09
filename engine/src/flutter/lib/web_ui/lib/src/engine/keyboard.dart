@@ -128,6 +128,7 @@ class Keyboard {
       'keymap': 'web',
       'code': keyboardEvent.code,
       'key': keyboardEvent.key,
+      'location': keyboardEvent.location,
       'metaState': _lastMetaState,
     };
 
@@ -151,6 +152,7 @@ class Keyboard {
       'keymap': 'web',
       'code': event.code,
       'key': event.key,
+      'location': event.location,
       'metaState': _lastMetaState,
     };
 
