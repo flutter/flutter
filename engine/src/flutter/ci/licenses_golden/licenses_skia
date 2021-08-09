@@ -1,4 +1,4 @@
-Signature: 4b7bf0522e0487447fc2a26c49e5c134
+Signature: d29739fa9d3c3a29c6629f10ac43012f
 
 UNUSED LICENSES:
 
@@ -672,8 +672,17 @@ FILE: ../../../third_party/skia/experimental/skottiekit/postamble.js
 FILE: ../../../third_party/skia/experimental/skottiekit/preamble.js
 FILE: ../../../third_party/skia/experimental/skottiekit/release.js
 FILE: ../../../third_party/skia/experimental/skottiekit/skottiekit/package.json
+FILE: ../../../third_party/skia/experimental/sktext/editor/Cursor.cpp
+FILE: ../../../third_party/skia/experimental/sktext/editor/Cursor.h
+FILE: ../../../third_party/skia/experimental/sktext/editor/Defaults.h
 FILE: ../../../third_party/skia/experimental/sktext/editor/Editor.cpp
 FILE: ../../../third_party/skia/experimental/sktext/editor/Editor.h
+FILE: ../../../third_party/skia/experimental/sktext/editor/Mouse.cpp
+FILE: ../../../third_party/skia/experimental/sktext/editor/Mouse.h
+FILE: ../../../third_party/skia/experimental/sktext/editor/Selection.cpp
+FILE: ../../../third_party/skia/experimental/sktext/editor/Selection.h
+FILE: ../../../third_party/skia/experimental/sktext/editor/Texts.cpp
+FILE: ../../../third_party/skia/experimental/sktext/editor/Texts.h
 FILE: ../../../third_party/skia/experimental/sktext/include/Text.h
 FILE: ../../../third_party/skia/experimental/sktext/include/Types.h
 FILE: ../../../third_party/skia/experimental/sktext/samples/Text.cpp
