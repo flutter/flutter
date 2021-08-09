@@ -8,6 +8,10 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  tearDown(() {
+    debugDisableShadows = true;
+  });
+
   test('BorderSide control test', () {
     const BorderSide side1 = BorderSide();
     final BorderSide side2 = side1.copyWith(
@@ -148,6 +152,7 @@ void main() {
 
   testWidgets('BoxShadow BoxStyle.solid', (WidgetTester tester) async {
     final Key key = UniqueKey();
+    debugDisableShadows = false;
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -174,10 +179,12 @@ void main() {
       find.byKey(key),
       matchesGoldenFile('boxShadow.boxStyle.solid.0.0.png'),
     );
+    debugDisableShadows = true;
   });
 
   testWidgets('BoxShadow BoxStyle.outer', (WidgetTester tester) async {
     final Key key = UniqueKey();
+    debugDisableShadows = false;
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -204,10 +211,12 @@ void main() {
       find.byKey(key),
       matchesGoldenFile('boxShadow.boxStyle.outer.0.0.png'),
     );
+    debugDisableShadows = true;
   });
 
   testWidgets('BoxShadow BoxStyle.inner', (WidgetTester tester) async {
     final Key key = UniqueKey();
+    debugDisableShadows = false;
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -234,10 +243,12 @@ void main() {
       find.byKey(key),
       matchesGoldenFile('boxShadow.boxStyle.inner.0.0.png'),
     );
+    debugDisableShadows = true;
   });
 
   testWidgets('BoxShadow BoxStyle.normal', (WidgetTester tester) async {
     final Key key = UniqueKey();
+    debugDisableShadows = false;
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -264,10 +275,12 @@ void main() {
       find.byKey(key),
       matchesGoldenFile('boxShadow.boxStyle.normal.0.0.png'),
     );
+    debugDisableShadows = true;
   });
 
   testWidgets('BoxShadow BoxStyle.normal.wide_radius', (WidgetTester tester) async {
     final Key key = UniqueKey();
+    debugDisableShadows = false;
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -295,10 +308,12 @@ void main() {
       find.byKey(key),
       matchesGoldenFile('boxShadow.boxStyle.normal.wide_radius.0.0.png'),
     );
+    debugDisableShadows = true;
   });
 
   testWidgets('BoxShadow BoxStyle.outer.wide_radius', (WidgetTester tester) async {
     final Key key = UniqueKey();
+    debugDisableShadows = false;
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -326,10 +341,12 @@ void main() {
       find.byKey(key),
       matchesGoldenFile('boxShadow.boxStyle.outer.wide_radius.0.0.png'),
     );
+    debugDisableShadows = true;
   });
 
   testWidgets('BoxShadow BoxStyle.solid.wide_radius', (WidgetTester tester) async {
     final Key key = UniqueKey();
+    debugDisableShadows = false;
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -352,15 +369,16 @@ void main() {
         ),
       ),
     );
-
     await expectLater(
       find.byKey(key),
       matchesGoldenFile('boxShadow.boxStyle.solid.wide_radius.0.0.png'),
     );
+    debugDisableShadows = true;
   });
 
   testWidgets('BoxShadow BoxStyle.inner.wide_radius', (WidgetTester tester) async {
     final Key key = UniqueKey();
+    debugDisableShadows = false;
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -383,10 +401,10 @@ void main() {
         ),
       ),
     );
-
     await expectLater(
       find.byKey(key),
       matchesGoldenFile('boxShadow.boxStyle.inner.wide_radius.0.0.png'),
     );
+    debugDisableShadows = true;
   });
 }
