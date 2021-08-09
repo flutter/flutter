@@ -105,7 +105,7 @@ class MediaQueryData {
     this.disableAnimations = false,
     this.boldText = false,
     this.navigationMode = NavigationMode.traditional,
-    this.gestureSettings = const DeviceGestureSettings(touchSlop: 16.0)
+    this.gestureSettings = const DeviceGestureSettings(touchSlop: kTouchSlop)
   }) : assert(size != null),
        assert(devicePixelRatio != null),
        assert(textScaleFactor != null),
