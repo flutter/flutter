@@ -657,7 +657,7 @@ class _GlowingOverscrollIndicatorPainter extends CustomPainter {
 ///
 /// Created by [ScrollBehavior.buildOverscrollIndicator] on platforms
 /// (e.g., Android) that commonly use this type of overscroll indication when
-/// [ScrollBehavior.updatedAndroidOverscrollIndicator] is true. Otherwise, the
+/// [ScrollBehavior.androidOverscrollIndicator] is true. Otherwise, the
 /// default [GlowingOverscrollIndicator] is applied.
 ///
 /// See also:
@@ -701,7 +701,7 @@ class StretchingOverscrollIndicator extends StatefulWidget {
   ///
   /// Typically a [StretchingOverscrollIndicator] is created by a
   /// [ScrollBehavior.buildOverscrollIndicator] method when opted-in using the
-  /// [ScrollBehavior.updatedAndroidOverscrollIndicator] flag. In this case
+  /// [ScrollBehavior.androidOverscrollIndicator] flag. In this case
   /// the child is usually the one provided as an argument to that method.
   final Widget? child;
 
