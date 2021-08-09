@@ -59,7 +59,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   private View flutterView;
 
   // The texture registry maintaining the textures into which the embedded views will be rendered.
-  private TextureRegistry textureRegistry;
+  @Nullable private TextureRegistry textureRegistry;
 
   @Nullable private TextInputPlugin textInputPlugin;
 
@@ -79,7 +79,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   // Since each virtual display has it's unique context this allows associating any view with the
   // platform view that
   // it is associated with(e.g if a platform view creates other views in the same virtual display.
-  private final HashMap<Context, View> contextToPlatformView;
+  @VisibleForTesting /* package */ final HashMap<Context, View> contextToPlatformView;
 
   // The views returned by `PlatformView#getView()`.
   //
@@ -710,6 +710,10 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
     while (platformViews.size() > 0) {
       channelHandler.disposeAndroidViewForPlatformView(platformViews.keyAt(0));
+    }
+
+    if (contextToPlatformView.size() > 0) {
+      contextToPlatformView.clear();
     }
   }
 
