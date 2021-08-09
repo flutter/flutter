@@ -132,22 +132,11 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
   }
 }
 
-static BOOL IsDeepLinkingEnabled(NSDictionary* infoDictionary) {
-  NSNumber* isEnabled = [infoDictionary objectForKey:@"FlutterDeepLinkingEnabled"];
-  if (isEnabled) {
-    return [isEnabled boolValue];
-  } else {
-    return NO;
-  }
-}
-
-- (BOOL)application:(UIApplication*)application
-            openURL:(NSURL*)url
-            options:(NSDictionary<UIApplicationOpenURLOptionsKey, id>*)options
-    infoPlistGetter:(NSDictionary* (^)())infoPlistGetter {
-  if ([_lifeCycleDelegate application:application openURL:url options:options]) {
-    return YES;
-  } else if (!IsDeepLinkingEnabled(infoPlistGetter())) {
+- (BOOL)openURL:(NSURL*)url {
+  NSNumber* isDeepLinkingEnabled =
+      [[NSBundle mainBundle] objectForInfoDictionaryKey:@"FlutterDeepLinkingEnabled"];
+  if (!isDeepLinkingEnabled.boolValue) {
+    // Not set or NO.
     return NO;
   } else {
     FlutterViewController* flutterViewController = [self rootFlutterViewController];
@@ -181,12 +170,10 @@ static BOOL IsDeepLinkingEnabled(NSDictionary* infoDictionary) {
 - (BOOL)application:(UIApplication*)application
             openURL:(NSURL*)url
             options:(NSDictionary<UIApplicationOpenURLOptionsKey, id>*)options {
-  return [self application:application
-                   openURL:url
-                   options:options
-           infoPlistGetter:^NSDictionary*() {
-             return [[NSBundle mainBundle] infoDictionary];
-           }];
+  if ([_lifeCycleDelegate application:application openURL:url options:options]) {
+    return YES;
+  }
+  return [self openURL:url];
 }
 
 - (BOOL)application:(UIApplication*)application handleOpenURL:(NSURL*)url {
@@ -229,9 +216,12 @@ static BOOL IsDeepLinkingEnabled(NSDictionary* infoDictionary) {
     continueUserActivity:(NSUserActivity*)userActivity
       restorationHandler:(void (^)(NSArray* __nullable restorableObjects))restorationHandler {
 #endif
-  return [_lifeCycleDelegate application:application
-                    continueUserActivity:userActivity
-                      restorationHandler:restorationHandler];
+  if ([_lifeCycleDelegate application:application
+                 continueUserActivity:userActivity
+                   restorationHandler:restorationHandler]) {
+    return YES;
+  }
+  return [self openURL:userActivity.webpageURL];
 }
 
 #pragma mark - FlutterPluginRegistry methods. All delegating to the rootViewController
