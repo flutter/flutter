@@ -1070,6 +1070,46 @@ void main() {
     expect(scrollBehavior.getScrollPhysics(capturedContext).runtimeType, NeverScrollableScrollPhysics);
   });
 
+  testWidgets('ScrollBehavior default android overscroll indicator', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: ScrollConfiguration(
+          behavior: const MaterialScrollBehavior(),
+          child: ListView(
+              children: const <Widget>[
+                SizedBox(
+                  height: 1000.0,
+                  width: 1000.0,
+                  child: Text('Test'),
+                )
+              ]
+          )
+      ),
+    ));
+
+    expect(find.byType(StretchingOverscrollIndicator), findsNothing);
+    expect(find.byType(GlowingOverscrollIndicator), findsOneWidget);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+  testWidgets('ScrollBehavior stretch android overscroll indicator', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+        home: ScrollConfiguration(
+          behavior: const MaterialScrollBehavior(androidOverscrollIndicator: AndroidOverscrollIndicator.stretch),
+          child: ListView(
+              children: const <Widget>[
+                SizedBox(
+                  height: 1000.0,
+                  width: 1000.0,
+                  child: Text('Test'),
+                )
+              ]
+          )
+      ),
+    ));
+
+    expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
+    expect(find.byType(GlowingOverscrollIndicator), findsNothing);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
   testWidgets('When `useInheritedMediaQuery` is true an existing MediaQuery is used if one is available', (WidgetTester tester) async {
     late BuildContext capturedContext;
     final UniqueKey uniqueKey = UniqueKey();

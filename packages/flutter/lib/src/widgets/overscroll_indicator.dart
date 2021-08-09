@@ -186,7 +186,7 @@ class GlowingOverscrollIndicator extends StatefulWidget {
   /// handled by this widget.
   ///
   /// By default, checks whether `notification.depth == 0`. Set it to something
-  /// else for more complicated layouts, such as nested [ScrollViews].
+  /// else for more complicated layouts, such as nested [ScrollView]s.
   /// {@endtemplate}
   final ScrollNotificationPredicate notificationPredicate;
 
@@ -653,7 +653,7 @@ class _GlowingOverscrollIndicatorPainter extends CustomPainter {
 /// When triggered, the [StretchingOverscrollIndicator] generates an
 /// [OverscrollIndicatorNotification] before showing an overscroll indication.
 /// To prevent the indicator from showing the indication, call
-/// [OverscrollIndicatorNotification.disallowStretch] on the notification.
+/// [OverscrollIndicatorNotification.disallowIndicator] on the notification.
 ///
 /// Created by [ScrollBehavior.buildOverscrollIndicator] on platforms
 /// (e.g., Android) that commonly use this type of overscroll indication when
@@ -716,16 +716,10 @@ class StretchingOverscrollIndicator extends StatefulWidget {
 }
 
 class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndicator> with TickerProviderStateMixin {
-  _StretchController? _stretchController;
+  late final _StretchController _stretchController = _StretchController(vsync: this);
   ScrollNotification? _lastNotification;
   OverscrollNotification? _lastOverscrollNotification;
   bool _accepted = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _stretchController = _StretchController(vsync: this);
-  }
 
   bool _handleScrollNotification(ScrollNotification notification) {
     if (!widget.notificationPredicate(notification))
@@ -743,17 +737,17 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
       if (_accepted) {
         if (notification.velocity != 0.0) {
           assert(notification.dragDetails == null);
-          _stretchController!.absorbImpact(notification.velocity.abs());
+          _stretchController.absorbImpact(notification.velocity.abs());
         } else {
           assert(notification.overscroll != 0.0);
           if (notification.dragDetails != null) {
-            _stretchController!.pull(notification.overscroll.abs() / notification.metrics.viewportDimension);
+            _stretchController.pull(notification.overscroll.abs() / notification.metrics.viewportDimension);
           }
         }
       }
     } else if (notification is ScrollEndNotification && notification.dragDetails != null
         || notification is ScrollUpdateNotification && notification.dragDetails != null) {
-      _stretchController!.scrollEnd();
+      _stretchController.scrollEnd();
     }
     _lastNotification = notification;
     return false;
@@ -761,7 +755,7 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
 
   @override
   void dispose() {
-    _stretchController!.dispose();
+    _stretchController.dispose();
     super.dispose();
   }
 
@@ -770,23 +764,23 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
     return NotificationListener<ScrollNotification>(
       onNotification: _handleScrollNotification,
       child: AnimatedBuilder(
-        animation: _stretchController!,
+        animation: _stretchController,
         builder: (BuildContext context, Widget? child) {
-          final double stretch = _stretchController?.value ?? 0;
+          final double stretch = _stretchController.value;
           double x = 1.0;
           double y = 1.0;
-          late AlignmentDirectional alignment;
+          final AlignmentDirectional alignment;
 
-          switch(widget.axis) {
+          switch (widget.axis) {
             case Axis.horizontal:
               x += stretch;
-              alignment = (_lastOverscrollNotification?.overscroll  ?? 0) > 0
+              alignment = (_lastOverscrollNotification?.overscroll ?? 0) > 0
                   ? AlignmentDirectional.centerEnd
                   : AlignmentDirectional.centerStart;
               break;
             case Axis.vertical:
               y += stretch;
-              alignment = (_lastOverscrollNotification?.overscroll  ?? 0) > 0
+              alignment = (_lastOverscrollNotification?.overscroll ?? 0) > 0
                   ? AlignmentDirectional.bottomCenter
                   : AlignmentDirectional.topCenter;
               break;

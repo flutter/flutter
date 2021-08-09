@@ -703,7 +703,9 @@ class MaterialScrollBehavior extends ScrollBehavior {
   /// Creates a MaterialScrollBehavior that decorates [Scrollable]s with
   /// [GlowingOverscrollIndicator]s and [Scrollbar]s based on the current
   /// platform and provided [ScrollableDetails].
-  const MaterialScrollBehavior();
+  const MaterialScrollBehavior({
+    AndroidOverscrollIndicator? androidOverscrollIndicator,
+  }) : super(androidOverscrollIndicator: androidOverscrollIndicator);
 
   @override
   TargetPlatform getPlatform(BuildContext context) => Theme.of(context).platform;
@@ -743,7 +745,7 @@ class MaterialScrollBehavior extends ScrollBehavior {
       case TargetPlatform.windows:
         return child;
       case TargetPlatform.android:
-        if (updatedAndroidOverscrollIndicator) {
+        if (androidOverscrollIndicator == AndroidOverscrollIndicator.stretch) {
           return StretchingOverscrollIndicator(
             axisDirection: details.direction,
             child: child,
