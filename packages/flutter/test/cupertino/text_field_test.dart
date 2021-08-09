@@ -2381,6 +2381,7 @@ void main() {
     await gesture.moveBy(const Offset(600, 0));
     // To the edge of the screen basically.
     await tester.pump();
+    await tester.pumpAndSettle();
     expect(
       controller.selection,
       const TextSelection.collapsed(offset: 54, affinity: TextAffinity.upstream),
@@ -2388,12 +2389,14 @@ void main() {
     // Keep moving out.
     await gesture.moveBy(const Offset(1, 0));
     await tester.pump();
+    await tester.pumpAndSettle();
     expect(
       controller.selection,
       const TextSelection.collapsed(offset: 61, affinity: TextAffinity.upstream),
     );
     await gesture.moveBy(const Offset(1, 0));
     await tester.pump();
+    await tester.pumpAndSettle();
     expect(
       controller.selection,
       const TextSelection.collapsed(offset: 66, affinity: TextAffinity.upstream),
