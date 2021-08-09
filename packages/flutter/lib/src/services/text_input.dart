@@ -703,6 +703,15 @@ class RawFloatingCursorPoint {
   final FloatingCursorDragState state;
 }
 
+/// A [TextDeltaType.insertion] singifies there has been a single/sequence
+/// character insertion.
+/// A [TextDeltaType.replacement] signifies that a replacement has occured.
+/// A replacement can occur in cases such as auto-correct, suggestions, and
+/// when a selection is replaced by a single character.
+/// A [TextDeltaType.deletion] signifies there has been a single/sequence
+/// character deletion.
+/// A [TextDeltaType.equality] signifies no text has changed from the last
+/// [TextEditingValue].
 enum TextDeltaType { insertion, deletion, replacement, equality, none }
 
 /// A model representing the changes made to a [TextEditingValue] from time T1
@@ -716,10 +725,20 @@ class TextDelta {
     required this.newRange
   });
 
+  /// The old text state before the delta has occured.
   final String oldText;
+
+  /// The raw delta value.
   final String newText;
+
+  /// The type of delta that has occured.
+  /// See [TextDeltaType] for more information.
   final TextDeltaType deltaType;
+
+  /// The [TextRange] that is being modified.
   final TextRange modifiedRange;
+
+  /// The new [TextRange] as a result of the delta.
   final TextRange newRange;
 }
 
