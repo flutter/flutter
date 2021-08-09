@@ -96,7 +96,7 @@ bool ApplicationStore::Install(
 bool ApplicationStore::Uninstall(const std::wstring_view package_family) {
   bool success = true;
   for (const Application& app : GetApps(package_family)) {
-    if (Uninstall(app.GetPackageFullName())) {
+    if (UninstallPackage(app.GetPackageFullName())) {
       std::wcerr << L"Uninstalled application " << app.GetPackageFullName()
                  << std::endl;
     } else {
