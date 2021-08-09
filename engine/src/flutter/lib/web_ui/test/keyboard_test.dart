@@ -61,6 +61,7 @@ void testMain() {
         'type': 'keyup',
         'keymap': 'web',
         'code': 'SomeCode',
+        'location': 0,
         'key': 'SomeKey',
         'metaState': 0x0,
       });
@@ -92,6 +93,7 @@ void testMain() {
         'keymap': 'web',
         'code': 'SomeCode',
         'key': 'SomeKey',
+        'location': 0,
         'metaState': 0x0,
       });
       expect(event.defaultPrevented, isFalse);
@@ -124,6 +126,7 @@ void testMain() {
         'keymap': 'web',
         'code': 'SomeCode',
         'key': 'SomeKey',
+        'location': 0,
         //          ctrl
         'metaState': 0x4,
       });
@@ -142,6 +145,7 @@ void testMain() {
         'keymap': 'web',
         'code': 'SomeCode',
         'key': 'SomeKey',
+        'location': 0,
         //          shift  alt   meta
         'metaState': 0x1 | 0x2 | 0x8,
       });
@@ -191,6 +195,7 @@ void testMain() {
         'keymap': 'web',
         'code': 'SomeCode',
         'key': 'SomeKey',
+        'location': 0,
         'metaState': 0,
       };
       expect(messages, <Map<String, dynamic>>[
@@ -346,12 +351,14 @@ void testMain() {
           'keydown',
           key: 'Meta',
           code: 'MetaLeft',
+          location: 1,
           isMetaPressed: true,
         );
         dispatchKeyboardEvent(
           'keydown',
           key: 'Alt',
           code: 'AltLeft',
+          location: 1,
           isMetaPressed: true,
           isAltPressed: true,
         );
@@ -367,9 +374,15 @@ void testMain() {
           'keyup',
           key: 'Meta',
           code: 'MetaLeft',
+          location: 1,
           isAltPressed: true,
         );
-        dispatchKeyboardEvent('keyup', key: 'Alt', code: 'AltLeft');
+        dispatchKeyboardEvent(
+          'keyup',
+          key: 'Alt',
+          code: 'AltLeft',
+          location: 1,
+        );
         // Notice no `keyup` for "i".
 
         expect(messages, <Map<String, dynamic>>[
@@ -378,6 +391,7 @@ void testMain() {
             'keymap': 'web',
             'key': 'Meta',
             'code': 'MetaLeft',
+            'location': 1,
             //           meta
             'metaState': 0x8,
           },
@@ -386,6 +400,7 @@ void testMain() {
             'keymap': 'web',
             'key': 'Alt',
             'code': 'AltLeft',
+            'location': 1,
             //           alt   meta
             'metaState': 0x2 | 0x8,
           },
@@ -394,6 +409,7 @@ void testMain() {
             'keymap': 'web',
             'key': 'i',
             'code': 'KeyI',
+            'location': 0,
             //           alt   meta
             'metaState': 0x2 | 0x8,
           },
@@ -402,6 +418,7 @@ void testMain() {
             'keymap': 'web',
             'key': 'Meta',
             'code': 'MetaLeft',
+            'location': 1,
             //           alt
             'metaState': 0x2,
           },
@@ -410,6 +427,7 @@ void testMain() {
             'keymap': 'web',
             'key': 'Alt',
             'code': 'AltLeft',
+            'location': 1,
             'metaState': 0x0,
           },
         ]);
@@ -426,6 +444,7 @@ void testMain() {
             'keymap': 'web',
             'key': 'i',
             'code': 'KeyI',
+            'location': 0,
             'metaState': 0x0,
           }
         ]);
@@ -449,12 +468,14 @@ void testMain() {
           'keydown',
           key: 'Meta',
           code: 'MetaLeft',
+          location: 1,
           isMetaPressed: true,
         );
         dispatchKeyboardEvent(
           'keydown',
           key: 'Alt',
           code: 'AltLeft',
+          location: 1,
           isMetaPressed: true,
           isAltPressed: true,
         );
@@ -470,9 +491,15 @@ void testMain() {
           'keyup',
           key: 'Meta',
           code: 'MetaLeft',
+          location: 1,
           isAltPressed: true,
         );
-        dispatchKeyboardEvent('keyup', key: 'Alt', code: 'AltLeft');
+        dispatchKeyboardEvent(
+          'keyup',
+          key: 'Alt',
+          code: 'AltLeft',
+          location: 1,
+        );
         // Notice no `keyup` for "i".
 
         messages.clear();
@@ -497,6 +524,7 @@ void testMain() {
             'keymap': 'web',
             'key': 'i',
             'code': 'KeyI',
+            'location': 0,
             'metaState': 0x0,
           });
         }
@@ -551,12 +579,14 @@ void testMain() {
         'keydown',
         key: 'Meta',
         code: 'MetaLeft',
+        location: 1,
         isMetaPressed: true,
       );
       dispatchKeyboardEvent(
         'keydown',
         key: 'Alt',
         code: 'AltLeft',
+        location: 1,
         isMetaPressed: true,
         isAltPressed: true,
       );
@@ -572,6 +602,7 @@ void testMain() {
         'keyup',
         key: 'Meta',
         code: 'MetaLeft',
+        location: 1,
         isAltPressed: true,
       );
       // Notice no `keyup` for "AltLeft" and "i".
@@ -587,6 +618,7 @@ void testMain() {
           'keymap': 'web',
           'key': 'i',
           'code': 'KeyI',
+          'location': 0,
           //           alt
           'metaState': 0x2,
         }
@@ -616,6 +648,7 @@ html.KeyboardEvent dispatchKeyboardEvent(
   html.EventTarget? target,
   String? key,
   String? code,
+  int location = 0,
   bool repeat = false,
   bool isShiftPressed = false,
   bool isAltPressed = false,
@@ -631,6 +664,7 @@ html.KeyboardEvent dispatchKeyboardEvent(
     <String, dynamic>{
       'key': key,
       'code': code,
+      'location': location,
       'repeat': repeat,
       'shiftKey': isShiftPressed,
       'altKey': isAltPressed,
