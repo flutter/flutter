@@ -76,6 +76,14 @@ static void CheckEncodeDecodeWithEncodePrefix(
   EXPECT_EQ(value, *decoded);
 }
 
+TEST(StandardMessageCodec, GetInstanceCachesInstance) {
+  const StandardMessageCodec& codec_a =
+      StandardMessageCodec::GetInstance(nullptr);
+  const StandardMessageCodec& codec_b =
+      StandardMessageCodec::GetInstance(nullptr);
+  EXPECT_EQ(&codec_a, &codec_b);
+}
+
 TEST(StandardMessageCodec, CanEncodeAndDecodeNull) {
   std::vector<uint8_t> bytes = {0x00};
   CheckEncodeDecode(EncodableValue(), bytes);

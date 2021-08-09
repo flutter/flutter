@@ -32,6 +32,14 @@ bool MethodCallsAreEqual(const MethodCall<>& a, const MethodCall<>& b) {
 
 }  // namespace
 
+TEST(StandardMethodCodec, GetInstanceCachesInstance) {
+  const StandardMethodCodec& codec_a =
+      StandardMethodCodec::GetInstance(nullptr);
+  const StandardMethodCodec& codec_b =
+      StandardMethodCodec::GetInstance(nullptr);
+  EXPECT_EQ(&codec_a, &codec_b);
+}
+
 TEST(StandardMethodCodec, HandlesMethodCallsWithNullArguments) {
   const StandardMethodCodec& codec = StandardMethodCodec::GetInstance();
   MethodCall<> call("hello", nullptr);

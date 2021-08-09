@@ -295,8 +295,8 @@ const StandardMessageCodec& StandardMessageCodec::GetInstance(
   if (!serializer) {
     serializer = &StandardCodecSerializer::GetInstance();
   }
-  auto* sInstances = new std::map<const StandardCodecSerializer*,
-                                  std::unique_ptr<StandardMessageCodec>>;
+  static auto* sInstances = new std::map<const StandardCodecSerializer*,
+                                         std::unique_ptr<StandardMessageCodec>>;
   auto it = sInstances->find(serializer);
   if (it == sInstances->end()) {
     // Uses new due to private constructor (to prevent API clients from
@@ -342,8 +342,8 @@ const StandardMethodCodec& StandardMethodCodec::GetInstance(
   if (!serializer) {
     serializer = &StandardCodecSerializer::GetInstance();
   }
-  auto* sInstances = new std::map<const StandardCodecSerializer*,
-                                  std::unique_ptr<StandardMethodCodec>>;
+  static auto* sInstances = new std::map<const StandardCodecSerializer*,
+                                         std::unique_ptr<StandardMethodCodec>>;
   auto it = sInstances->find(serializer);
   if (it == sInstances->end()) {
     // Uses new due to private constructor (to prevent API clients from
