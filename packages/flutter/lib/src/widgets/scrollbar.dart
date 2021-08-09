@@ -1532,11 +1532,19 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     // Only update the painter of this scrollbar if the notification
     // metrics do not conflict with the information we have from the scroll
     // controller.
+
+    // We do not have a scroll controller dictating axis.
+    if (scrollController == null) {
+      return true;
+    }
+    // Has more than one attached positions.
+    if (scrollController.positions.length > 1) {
+      return false;
+    }
+
     return
-      // We do not have a scroll controller dictating axis.
-      scrollController == null
       // The scroll controller is not attached to a position.
-      || !scrollController.hasClients
+      !scrollController.hasClients
       // The notification matches the scroll controller's axis.
       || scrollController.position.axis == notificationAxis;
   }
