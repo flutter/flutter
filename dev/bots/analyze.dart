@@ -60,6 +60,9 @@ Future<void> run(List<String> arguments) async {
   print('$clock Deprecations...');
   await verifyDeprecations(flutterRoot);
 
+  print('$clock Skip test comments...');
+  await verifySkipTestComments(flutterRoot);
+
   print('$clock Licenses...');
   await verifyNoMissingLicense(flutterRoot);
 
@@ -276,6 +279,39 @@ Future<void> _verifyNoMissingLicenseForExtension(String workingDirectory, String
       'The expected license header is:',
       license,
       if (trailingBlank) '...followed by a blank line.',
+    ]);
+  }
+}
+
+final RegExp _skipTestCommentPattern = RegExp(r'skip:.*?//(.*)');
+const Pattern _skipTestIntentionalPattern = '[intended]';
+final Pattern _skipTestTrackingBugPattern = RegExp(r'https+?://github.com/.*/issues/[0-9]+');
+
+Future<void> verifySkipTestComments(String workingDirectory) async {
+  final List<String> errors = <String>[];
+  assert("// foo\n}, skip: isBrowser); // this is some text\n'".contains(_skipTestCommentPattern));
+  final List<File> testFiles = await _allFiles(workingDirectory, 'dart', minimumMatches: 1500)
+      .where((File f) => f.path.endsWith('_test.dart')).toList();
+
+  for (final File file in testFiles) {
+    final List<String> lines = file.readAsLinesSync();
+    for (int index = 0; index < lines.length; index++) {
+      final Match? match = _skipTestCommentPattern.firstMatch(lines[index]);
+      final String? skipComment = match?.group(1);
+      if (skipComment != null
+          && !skipComment.contains(_skipTestIntentionalPattern)
+          && !skipComment.contains(_skipTestTrackingBugPattern)) {
+        final int sourceLine = index + 1;
+        errors.add('${file.path}:$sourceLine}: skip test without a justification comment.');
+      }
+    }
+  }
+
+  // Fail if any errors
+  if (errors.isNotEmpty) {
+    exitWithError(<String>[
+      ...errors,
+      '\n${bold}See: https://github.com/flutter/flutter/wiki/Tree-hygiene#skipped-tests$reset',
     ]);
   }
 }
