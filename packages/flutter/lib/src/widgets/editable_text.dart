@@ -1191,6 +1191,8 @@ class EditableText extends StatefulWidget {
   /// When this is false, the text selection cannot be adjusted by
   /// the user, text cannot be copied, and the user cannot paste into
   /// the text field from the clipboard.
+  ///
+  /// Defaults to true.
   /// {@endtemplate}
   final bool enableInteractiveSelection;
 
