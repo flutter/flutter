@@ -21,10 +21,14 @@ import 'package:path/path.dart' as p;
 /// Takes the path to the out directory as the first argument, and the path to
 /// the buildtools directory as the second argument.
 ///
-/// If the second argument is not specified, it is assumed that it is the parent
-/// of the out directory (for backwards compatibility).
+/// If the second argument is not specified, for backwards compatibility, it is
+/// assumed that it is ../buildtools relative to the first parameter (the out
+/// directory).
 void main(List<String> arguments) {
-  assert(arguments.length == 2 || arguments.length == 1);
+  if (arguments.isEmpty || arguments.length > 2) {
+    print('usage: dart verify_exported.dart OUT_DIR [BUILDTOOLS]');
+    exit(1);
+  }
   final String outPath = arguments.first;
   final String buildToolsPath = arguments.length == 1
       ? p.join(p.dirname(outPath), 'buildtools')
@@ -39,7 +43,10 @@ void main(List<String> arguments) {
     throw UnimplementedError('Script only support running on Linux or MacOS.');
   }
   final String nmPath = p.join(buildToolsPath, platform, 'clang', 'bin', 'llvm-nm');
-  assert(Directory(outPath).existsSync());
+  if (!Directory(outPath).existsSync()) {
+    print('error: build out directory not found: $outPath');
+    exit(1);
+  }
 
   final Iterable<String> releaseBuilds = Directory(outPath).listSync()
       .whereType<Directory>()
