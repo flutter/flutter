@@ -1,4 +1,4 @@
-Signature: d29739fa9d3c3a29c6629f10ac43012f
+Signature: 220af64e2b1faa2466d2645cad6fb49c
 
 UNUSED LICENSES:
 
@@ -1842,8 +1842,6 @@ FILE: ../../../third_party/skia/src/effects/imagefilters/SkShaderImageFilter.cpp
 FILE: ../../../third_party/skia/src/gpu/GrAppliedClip.h
 FILE: ../../../third_party/skia/src/gpu/GrAuditTrail.cpp
 FILE: ../../../third_party/skia/src/gpu/GrAuditTrail.h
-FILE: ../../../third_party/skia/src/gpu/GrClipStackClip.cpp
-FILE: ../../../third_party/skia/src/gpu/GrClipStackClip.h
 FILE: ../../../third_party/skia/src/gpu/GrColorSpaceXform.cpp
 FILE: ../../../third_party/skia/src/gpu/GrColorSpaceXform.h
 FILE: ../../../third_party/skia/src/gpu/GrDirectContextPriv.h
@@ -1851,8 +1849,6 @@ FILE: ../../../third_party/skia/src/gpu/GrFixedClip.h
 FILE: ../../../third_party/skia/src/gpu/GrOpsRenderPass.cpp
 FILE: ../../../third_party/skia/src/gpu/GrOpsRenderPass.h
 FILE: ../../../third_party/skia/src/gpu/GrProgramDesc.cpp
-FILE: ../../../third_party/skia/src/gpu/GrReducedClip.cpp
-FILE: ../../../third_party/skia/src/gpu/GrReducedClip.h
 FILE: ../../../third_party/skia/src/gpu/GrRenderTargetProxy.cpp
 FILE: ../../../third_party/skia/src/gpu/GrRenderTargetProxy.h
 FILE: ../../../third_party/skia/src/gpu/GrResourceHandle.h
