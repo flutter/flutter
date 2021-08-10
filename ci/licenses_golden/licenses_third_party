@@ -1,4 +1,4 @@
-Signature: e2fd126030d914f33c35d4840c3f9b17
+Signature: a12a857e6d8f1d80c4b26b281b013116
 
 UNUSED LICENSES:
 
@@ -9906,6 +9906,8 @@ ORIGIN: ../../../third_party/dart/benchmarks/DartCLIStartup/dart/DartCLIStartup.
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/dart/benchmarks/DartCLIStartup/dart/DartCLIStartup.dart
 FILE: ../../../third_party/dart/benchmarks/DartCLIStartup/dart2/DartCLIStartup.dart
+FILE: ../../../third_party/dart/benchmarks/IsolateFibonacci/dart/IsolateFibonacci.dart
+FILE: ../../../third_party/dart/benchmarks/IsolateFibonacci/dart2/IsolateFibonacci.dart
 FILE: ../../../third_party/dart/benchmarks/MapLookup/dart/MapLookup.dart
 FILE: ../../../third_party/dart/benchmarks/MapLookup/dart/maps.dart
 FILE: ../../../third_party/dart/benchmarks/MapLookup/dart2/MapLookup.dart
