@@ -622,5 +622,5 @@ void main() {
       '',
       'Application finished.',
     ]);
-  });
+  }, skip: Platform.isWindows); // TODO(jonahwilliams): Re-enable when this test is reliable on device lab, https://github.com/flutter/flutter/issues/81556
 }
