@@ -88,7 +88,6 @@ class ScrollController extends ChangeNotifier {
   ///
   /// This should not be mutated directly. [ScrollPosition] objects can be added
   /// and removed using [attach] and [detach].
-  @protected
   Iterable<ScrollPosition> get positions => _positions;
   final List<ScrollPosition> _positions = <ScrollPosition>[];
 
