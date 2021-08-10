@@ -326,10 +326,11 @@ class CreateCommand extends CreateBase {
       final List<String> requestedPlatforms = _getUserRequestedPlatforms();
 
       // Let them know a summary of the state of their tooling.
+      
+      final String dirChangeCmd = relativeAppPath == '.' ? '' : '\n  \$ cd $relativeAppPath';
       globals.printStatus('''
 In order to run your $application, type:
-
-  \$ cd $relativeAppPath
+  $dirChangeCmd
   \$ flutter run
 
 Your $application code is in $relativeAppMain.
