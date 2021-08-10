@@ -174,7 +174,8 @@ class DesktopSemanticsEnabler extends SemanticsEnabler {
 
   @override
   html.Element prepareAccessibilityPlaceholder() {
-    final html.Element placeholder = _semanticsPlaceholder = html.Element.tag('flt-semantics-placeholder');
+    final html.Element placeholder =
+        _semanticsPlaceholder = html.Element.tag('flt-semantics-placeholder');
 
     // Only listen to "click" because other kinds of events are reported via
     // PointerBinding.
@@ -189,7 +190,7 @@ class DesktopSemanticsEnabler extends SemanticsEnabler {
     // to the assistive technology user.
     placeholder
       ..setAttribute('role', 'button')
-      ..setAttribute('aria-live', 'true')
+      ..setAttribute('aria-live', 'polite')
       ..setAttribute('tabindex', '0')
       ..setAttribute('aria-label', placeholderMessage);
 
@@ -372,7 +373,8 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
 
   @override
   html.Element prepareAccessibilityPlaceholder() {
-    final html.Element placeholder = _semanticsPlaceholder = html.Element.tag('flt-semantics-placeholder');
+    final html.Element placeholder =
+        _semanticsPlaceholder = html.Element.tag('flt-semantics-placeholder');
 
     // Only listen to "click" because other kinds of events are reported via
     // PointerBinding.
