@@ -1197,9 +1197,12 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
         if (defaultImplementation != null) {
           defaultImplementations['$platform/${plugin.name}'] = defaultImplementation;
           continue;
-        } else {
+        } else if (platform != 'linux' && platform != 'macos' && platform != 'windows') {
           // An interface package (i.e., one with no 'implements') with an
           // inline implementation is its own default implementation.
+          // TODO(stuartmorgan): This should be true on desktop as well, but
+          // enabling that would be a breaking change for most existing
+          // Dart-only plugins. See https://github.com/flutter/flutter/issues/87862
           implementsPackage = plugin.name;
           defaultImplementations['$platform/${plugin.name}'] = plugin.name;
         }

@@ -126,7 +126,7 @@ void main() {
         );
       });
 
-      testWithoutContext('selects inline implementation', () async {
+      testWithoutContext('selects inline implementation on mobile', () async {
         final Set<String> directDependencies = <String>{};
 
         final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(<Plugin>[
@@ -163,6 +163,36 @@ void main() {
             'platform': 'ios',
           })
         );
+      });
+
+      // See https://github.com/flutter/flutter/issues/87862 for why this is
+      // currently asserted even though it's not the desired behavior long term.
+      testWithoutContext('doesn not select inline implementation on desktop', () async {
+        final Set<String> directDependencies = <String>{};
+
+        final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(<Plugin>[
+          Plugin.fromYaml(
+            'url_launcher',
+            '',
+            YamlMap.wrap(<String, dynamic>{
+              'platforms': <String, dynamic>{
+                'linux': <String, dynamic>{
+                  'dartPluginClass': 'UrlLauncherLinux',
+                },
+                'macos': <String, dynamic>{
+                  'dartPluginClass': 'UrlLauncherMacOS',
+                },
+                'windows': <String, dynamic>{
+                  'dartPluginClass': 'UrlLauncherWindows',
+                },
+              },
+            }),
+            <String>[],
+            fileSystem: fs,
+            appDependencies: directDependencies,
+          ),
+        ]);
+        expect(resolutions.length, equals(0));
       });
 
       testWithoutContext('selects default implementation', () async {

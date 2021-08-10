@@ -65,7 +65,15 @@ class DartPluginRegistrantTarget extends Target {
     if (!environment.generateDartPluginRegistry) {
       return true;
     }
-    return false;
+    final String? platformName = environment.defines[kTargetPlatform];
+    final TargetPlatform? targetPlatform = platformName == null ? null
+      : getTargetPlatformForName(platformName);
+    // TODO(stuartmorgan): Investigate removing this check entirely; ideally the
+    // source generation step shouldn't be platform dependent, and the generated
+    // code should just do the right thing on every platform.
+    return targetPlatform == TargetPlatform.fuchsia_arm64 ||
+           targetPlatform == TargetPlatform.fuchsia_x64 ||
+           targetPlatform == TargetPlatform.web_javascript;
   }
 
   @override
