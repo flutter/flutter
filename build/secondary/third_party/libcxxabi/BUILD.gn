@@ -3,7 +3,10 @@
 # found in the LICENSE file.
 
 config("libcxxabi_config") {
-  common_cc_flags = [ "-nostdinc++" ]
+  common_cc_flags = [
+    "-nostdinc++",
+    "-fvisibility=hidden",
+  ]
 
   cflags_cc = common_cc_flags
   cflags_objcc = common_cc_flags
@@ -20,6 +23,7 @@ source_set("libcxxabi") {
     "_LIBCXXABI_NO_EXCEPTIONS",
     "_LIBCXXABI_BUILDING_LIBRARY",
     "LIBCXXABI_SILENT_TERMINATE",
+    "_LIBCXXABI_DISABLE_VISIBILITY_ANNOTATIONS",
   ]
 
   sources = []
