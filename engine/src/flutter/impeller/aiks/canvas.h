@@ -4,10 +4,13 @@
 
 #pragma once
 
+#include <memory>
+#include <optional>
 #include <stack>
 
 #include "flutter/fml/macros.h"
 #include "impeller/aiks/paint.h"
+#include "impeller/aiks/picture.h"
 #include "impeller/geometry/matrix.h"
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/vector.h"
@@ -21,6 +24,8 @@ class Canvas {
   ~Canvas();
 
   void Save();
+
+  void SaveLayer(const Paint& paint, std::optional<Rect> bounds = std::nullopt);
 
   bool Restore();
 
@@ -37,6 +42,12 @@ class Canvas {
   void Rotate(Radians radians);
 
   void DrawPath(Path path, Paint paint);
+
+  void ClipPath(Path path);
+
+  void DrawShadow(Path path, Color color, Scalar elevation);
+
+  void DrawPicture(std::shared_ptr<Picture> picture);
 
  private:
   std::stack<Matrix> xformation_stack_;
