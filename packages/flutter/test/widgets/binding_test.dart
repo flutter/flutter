@@ -270,7 +270,7 @@ void main() {
     expect(errorDetails.exception, isAssertionError);
     const String toMatch = '...     Normal element mounting (';
     expect(toMatch.allMatches(errorDetails.toString()).length, 1);
-  }, skip: kIsWeb);
+  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87875
 }
 
 class TestStatefulWidget extends StatefulWidget {

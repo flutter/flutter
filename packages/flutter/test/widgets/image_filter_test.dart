@@ -65,7 +65,7 @@ void main() {
       find.byType(ImageFiltered),
       matchesGoldenFile('image_filter_matrix.png'),
     );
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/45213
+  });
 
   testWidgets('Image filter - reuses its layer', (WidgetTester tester) async {
     Future<void> pumpWithSigma(double sigma) async {

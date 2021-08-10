@@ -593,7 +593,7 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 ///
 /// A closely related widget is a persistent bottom sheet, which shows
 /// information that supplements the primary content of the app without
-/// preventing the use from interacting with the app. Persistent bottom sheets
+/// preventing the user from interacting with the app. Persistent bottom sheets
 /// can be created and displayed with the [showBottomSheet] function or the
 /// [ScaffoldState.showBottomSheet] method.
 ///

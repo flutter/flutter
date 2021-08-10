@@ -391,7 +391,7 @@ void main() {
         await expectLater(find.byType(RepaintBoundary).first, matchesReferenceImage(imageWithCompositing));
       }
     },
-    skip: isBrowser, // due to https://github.com/flutter/flutter/issues/42767
+    skip: isBrowser, // due to https://github.com/flutter/flutter/issues/49857
   );
 
   testWidgets('Transform.translate with FilterQuality produces filter layer', (WidgetTester tester) async {
