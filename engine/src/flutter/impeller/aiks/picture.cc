@@ -2,24 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
-
-#include "flutter/fml/macros.h"
-
-#include "impeller/geometry/color.h"
+#include "impeller/aiks/picture.h"
 
 namespace impeller {
 
-class Paint {
- public:
-  Paint();
+Picture::Picture() = default;
 
-  ~Paint();
-
-  void SetColor(Color color);
-
- private:
-  Color color_;
-};
+Picture::~Picture() = default;
 
 }  // namespace impeller

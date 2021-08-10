@@ -12,6 +12,8 @@ impeller_component("aiks") {
     "image.h",
     "paint.cc",
     "paint.h",
+    "picture.cc",
+    "picture.h",
   ]
 
   public_deps = [

@@ -7,7 +7,7 @@ config("impeller_public_config") {
 }
 
 group("impeller") {
-  deps = [
+  public_deps = [
     "aiks",
     "base",
     "compiler",
