@@ -3969,8 +3969,8 @@ void main() {
         error.toStringDeep(),
         equalsIgnoringHashCodes(
           'FlutterError\n'
-          '   invalid text selection: TextSelection(baseOffset: 10,\n'
-          '   extentOffset: 10, affinity: TextAffinity.downstream,\n'
+          '   invalid text selection: TextSelection.collapsed(offset: 10,\n'
+          '   affinity: TextAffinity.downstream,\n'
           '   isDirectional: false)\n',
         ),
       );
