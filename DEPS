@@ -97,7 +97,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'bab43eb08cff63e71de5e7fe816ccf2aea3576a4',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'c37164f39300c6e42560a5853e16a919688f7b86',
 
    # Fuchsia compatibility
    #
@@ -631,17 +631,6 @@ deps = {
 }
 
 hooks = [
-  {
-    # This clobbers when necessary (based on get_landmines.py). It must be the
-    # first hook so that other things that get/generate into the output
-    # directory will not subsequently be clobbered.
-    'name': 'landmines',
-    'pattern': '.',
-    'action': [
-        'python3',
-        'src/build/landmines.py',
-    ],
-  },
   {
     # Update the Windows toolchain if necessary.
     'name': 'win_toolchain',
