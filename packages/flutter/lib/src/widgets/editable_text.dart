@@ -1705,8 +1705,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _floatingCursorResetController.dispose();
     _closeInputConnectionIfNeeded();
     assert(!_hasInputConnection);
-    _stopCursorTimer();
-    assert(_cursorTimer == null);
+    _cursorTimer?.cancel();
+    _cursorTimer = null;
     _cursorBlinkOpacityController.dispose();
     _selectionOverlay?.dispose();
     _selectionOverlay = null;

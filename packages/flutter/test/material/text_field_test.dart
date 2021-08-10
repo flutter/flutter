@@ -3970,8 +3970,7 @@ void main() {
         equalsIgnoringHashCodes(
           'FlutterError\n'
           '   invalid text selection: TextSelection.collapsed(offset: 10,\n'
-          '   affinity: TextAffinity.downstream,\n'
-          '   isDirectional: false)\n',
+          '   affinity: TextAffinity.downstream, isDirectional: false)\n',
         ),
       );
     }
