@@ -63,14 +63,11 @@ platform_properties:
           {"name":"xcode_binary","path":"xcode_binary"}
         ]
       dependencies: >-
-        [
-          {"dependency": "gems"},
-          {"dependency": "xcode"}
-        ]
+        []
       os: Mac-10.15
       device_type: none
       mac_model: Macmini8,1
-      xcode: 12a7209
+      xcode: 12c33
   mac_android:
     properties:
       caches: >-
@@ -112,7 +109,7 @@ platform_properties:
         ]
       os: Mac-10.15
       device_os: iOS-14.4.2
-      xcode: 12a7209
+      xcode: 12c33
   mac_ios32:
     properties:
       caches: >-
@@ -134,7 +131,7 @@ platform_properties:
         ]
       os: Mac-10.15
       device_os: iOS-9.3.6
-      xcode: 12a7209
+      xcode: 12c33
   windows:
     properties:
       caches: >-
@@ -303,7 +300,7 @@ targets:
       - bin/
 
   - name: Linux firebase_abstract_method_smoke_test
-    recipe: firebaselab
+    recipe: firebaselab/firebaselab
     timeout: 60
     properties:
       dependencies: >-
@@ -316,7 +313,7 @@ targets:
     scheduler: luci
 
   - name: Linux firebase_android_embedding_v2_smoke_test
-    recipe: firebaselab
+    recipe: firebaselab/firebaselab
     timeout: 60
     properties:
       dependencies: >-
@@ -329,7 +326,7 @@ targets:
     scheduler: luci
 
   - name: Linux firebase_release_smoke_test
-    recipe: firebaselab
+    recipe: firebaselab/firebaselab
     timeout: 60
     properties:
       dependencies: >-
@@ -707,6 +704,7 @@ targets:
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver"},
+          {"dependency": "clang"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"}
         ]
@@ -730,6 +728,7 @@ targets:
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver"},
+          {"dependency": "clang"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"}
         ]
@@ -737,6 +736,7 @@ targets:
       subshard: "2_4"
       tags: >
         ["framework","hostonly","shard"]
+      test_timeout_secs: "2700"
     scheduler: luci
     runIf:
       - dev/
@@ -752,6 +752,7 @@ targets:
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver"},
+          {"dependency": "clang"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"}
         ]
@@ -759,6 +760,7 @@ targets:
       subshard: "3_4"
       tags: >
         ["framework","hostonly","shard"]
+      test_timeout_secs: "2700"
     scheduler: luci
     runIf:
       - dev/
@@ -774,6 +776,7 @@ targets:
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver"},
+          {"dependency": "clang"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"}
         ]
@@ -781,6 +784,7 @@ targets:
       subshard: "4_4"
       tags: >
         ["framework","hostonly","shard"]
+      test_timeout_secs: "2700"
     scheduler: luci
     runIf:
       - dev/
@@ -861,6 +865,7 @@ targets:
         ]
       tags: >
         ["devicelab"]
+      task_name: web_benchmarks_html
     scheduler: luci
     runIf:
       - dev/**
@@ -1405,6 +1410,7 @@ targets:
     properties:
       tags: >
         ["devicelab"]
+      task_name: flutter_gallery__transition_perf_e2e
     scheduler: luci
 
   - name: Linux_android flutter_gallery__transition_perf_hybrid
@@ -1640,6 +1646,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk"},
+          {"dependency": "gems"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"}
         ]
