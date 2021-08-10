@@ -283,13 +283,12 @@ Future<void> _verifyNoMissingLicenseForExtension(String workingDirectory, String
   }
 }
 
-final RegExp _skipTestCommentPattern = RegExp(r'skip:.*?//(.*)');
+final RegExp _skipTestCommentPattern = RegExp(r'\bskip:.*?//(.*)');
 const Pattern _skipTestIntentionalPattern = '[intended]';
 final Pattern _skipTestTrackingBugPattern = RegExp(r'https+?://github.com/.*/issues/[0-9]+');
 
 Future<void> verifySkipTestComments(String workingDirectory) async {
   final List<String> errors = <String>[];
-  assert("// foo\n}, skip: isBrowser); // this is some text\n'".contains(_skipTestCommentPattern));
   final List<File> testFiles = await _allFiles(workingDirectory, 'dart', minimumMatches: 1500)
       .where((File f) => f.path.endsWith('_test.dart')).toList();
 
