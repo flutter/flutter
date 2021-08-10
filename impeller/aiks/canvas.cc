@@ -52,6 +52,24 @@ size_t Canvas::GetSaveCount() const {
   return xformation_stack_.size();
 }
 
-void Canvas::DrawPath(Path path, Paint paint) {}
+void Canvas::DrawPath(Path path, Paint paint) {
+  FML_LOG(ERROR) << "WIP";
+}
+
+void Canvas::SaveLayer(const Paint& paint, std::optional<Rect> bounds) {
+  FML_LOG(ERROR) << "WIP";
+}
+
+void Canvas::ClipPath(Path path) {
+  FML_LOG(ERROR) << "WIP";
+}
+
+void Canvas::DrawShadow(Path path, Color color, Scalar elevation) {
+  FML_LOG(ERROR) << "WIP";
+}
+
+void Canvas::DrawPicture(std::shared_ptr<Picture> picture) {
+  FML_LOG(ERROR) << "WIP";
+}
 
 }  // namespace impeller

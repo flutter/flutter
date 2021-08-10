@@ -33,6 +33,13 @@ struct TRect {
   constexpr TRect(Type x, Type y, Type width, Type height)
       : origin(x, y), size(width, height) {}
 
+  constexpr static TRect MakeLTRB(Type left,
+                                  Type top,
+                                  Type right,
+                                  Type bottom) {
+    return TRect(left, top, right - left, bottom - top);
+  }
+
   template <class U>
   constexpr explicit TRect(const TRect<U>& other)
       : origin(static_cast<TPoint<Type>>(other.origin)),

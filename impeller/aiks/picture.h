@@ -6,20 +6,16 @@
 
 #include "flutter/fml/macros.h"
 
-#include "impeller/geometry/color.h"
-
 namespace impeller {
 
-class Paint {
+class Picture {
  public:
-  Paint();
+  Picture();
 
-  ~Paint();
-
-  void SetColor(Color color);
+  ~Picture();
 
  private:
-  Color color_;
+  FML_DISALLOW_COPY_AND_ASSIGN(Picture);
 };
 
 }  // namespace impeller
