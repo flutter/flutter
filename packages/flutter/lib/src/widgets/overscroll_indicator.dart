@@ -820,8 +820,11 @@ class _StretchController extends ChangeNotifier {
   final Tween<double> _stretchSizeTween = Tween<double>(begin: 0.0, end: 0.0);
   _StretchState _state = _StretchState.idle;
   double _pullDistance = 0.0;
-  final double _scalar = math.e / 0.33;
 
+  // Constants from Android.
+  static const double _exponentialScalar = math.e / 0.33;
+  static const double _stretchIntensity = 0.016;
+  static const double _flingFriction = 1.01;
   static const Duration _stretchDuration = Duration(milliseconds: 400);
 
   double get value => _stretchSize.value;
@@ -833,7 +836,7 @@ class _StretchController extends ChangeNotifier {
     assert(velocity >= 0.0);
     velocity = velocity.clamp(1, 10000);
     _stretchSizeTween.begin = _stretchSize.value;
-    _stretchSizeTween.end = math.min(0.016 + (1.01 / velocity), 1.0);
+    _stretchSizeTween.end = math.min(_stretchIntensity + (_flingFriction / velocity), 1.0);
     _stretchController.duration = Duration(milliseconds: (velocity * 0.02).round());
     _stretchController.forward(from: 0.0);
     _state = _StretchState.absorb;
@@ -848,8 +851,8 @@ class _StretchController extends ChangeNotifier {
     assert(normalizedOverscroll >= 0.0);
     _pullDistance = normalizedOverscroll + _pullDistance;
     _stretchSizeTween.begin = _stretchSize.value;
-    final double linearIntensity = 0.016 * _pullDistance;
-    final double exponentialIntensity = 0.016 * (1 - math.exp(-_pullDistance * _scalar));
+    final double linearIntensity =_stretchIntensity * _pullDistance;
+    final double exponentialIntensity = _stretchIntensity * (1 - math.exp(-_pullDistance * _exponentialScalar));
     _stretchSizeTween.end = linearIntensity + exponentialIntensity;
     _stretchController.duration = _stretchDuration;
     if (_state != _StretchState.pull) {
