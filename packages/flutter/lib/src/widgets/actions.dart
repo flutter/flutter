@@ -74,26 +74,28 @@ typedef ActionListenerCallback = void Function(Action<Intent> action);
 ///
 /// ### Action Overriding
 ///
+/// When using a leaf widget to build a more specialized widget, it's sometimes
+/// desirable to change the default handling of an [Intent] defined in the leaf
+/// widget. For instance, [TextField]'s [SelectAllTextIntent] by default selects
+/// the text it currently contains, but in a US phone number widget that
+/// consists of 3 different [TextField]s (area code, prefix and line number),
+/// [SelectAllTextIntent] should instead select the text within all 3
+/// [TextField]s.
+///
 /// An overridable [Action] is a special kind of [Action] created using the
-/// [Action.overridable] constructor. It has access to a default [Action],
-/// and a nullable override [Action]. It the same behavior as its override
-/// if that exists, and mirrors the behavior of its `defaultAction` otherwise.
+/// [Action.overridable] constructor. It has access to a default [Action], and a
+/// nullable override [Action]. It has the same behavior as its override if that
+/// exists, and mirrors the behavior of its `defaultAction` otherwise.
 ///
 /// The [Action.overridable] constructor creates overridable [Action]s that use
 /// a [BuildContext] to find a suitable override in its ancestor [Actions]
 /// widget. This can be used to provide a default implementation when creating a
 /// general purpose leaf widget, and later override it when building a more
-/// specialized widget using that widget.
-///
-/// For instance, [TextField]'s [SelectAllTextIntent] by default selects the
-/// text it currently contains, but in a US phone number widget that consists of
-/// 3 different [TextField]s (area code, prefix and line number),
-/// [SelectAllTextIntent] should instead select the text within all 3
-/// [TextField]s. The [TextField] widget maps [SelectAllTextIntent] to an
-/// overridable [Action] so the widget has a sensible default handling of that
-/// [Intent], while still allowing app develpers to change the handling by
-/// adding an ancestor [Actions] widget that maps [SelectAllTextIntent] to a
-/// different [Action].
+/// specialized widget using that leaf widget. Using the [TextField] example
+/// above, the [TextField] widget uses an overridable [Action] to provide a
+/// sensible default for [SelectAllTextIntent], while still allowing app
+/// developers to change that if they add an ancestor [Actions] widget that maps
+/// [SelectAllTextIntent] to a different [Action].
 ///
 /// See also:
 ///
@@ -103,6 +105,8 @@ typedef ActionListenerCallback = void Function(Action<Intent> action);
 ///    and allows redefining of actions for its descendants.
 ///  * [ActionDispatcher], a class that takes an [Action] and invokes it, passing
 ///    a given [Intent].
+///  * [Action.overridable] for an example on how to make an [Action]
+///    overridable.
 abstract class Action<T extends Intent> with Diagnosticable {
   /// Creates an [Action].
   Action();
