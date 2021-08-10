@@ -1434,7 +1434,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 ///       child: Padding(
 ///         padding: const EdgeInsets.all(8),
 ///         child: OverflowBar(
-///           alignment: MainAxisAlignment.spaceEvenly,
+///           overflowAlignment: OverflowBarAlignment.center,
 ///           children: <Widget>[
 ///             Row(
 ///               mainAxisSize: MainAxisSize.min,

@@ -7,6 +7,7 @@ import 'dart:ui' as ui;
 import 'dart:ui' show Brightness;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 
 import 'basic.dart';
 import 'binding.dart';
@@ -104,6 +105,7 @@ class MediaQueryData {
     this.disableAnimations = false,
     this.boldText = false,
     this.navigationMode = NavigationMode.traditional,
+    this.gestureSettings = const DeviceGestureSettings(touchSlop: kTouchSlop)
   }) : assert(size != null),
        assert(devicePixelRatio != null),
        assert(textScaleFactor != null),
@@ -118,7 +120,8 @@ class MediaQueryData {
        assert(highContrast != null),
        assert(disableAnimations != null),
        assert(boldText != null),
-       assert(navigationMode != null);
+       assert(navigationMode != null),
+       assert(gestureSettings != null);
 
   /// Creates data for a media query based on the given window.
   ///
@@ -142,7 +145,8 @@ class MediaQueryData {
       boldText = window.accessibilityFeatures.boldText,
       highContrast = window.accessibilityFeatures.highContrast,
       alwaysUse24HourFormat = window.alwaysUse24HourFormat,
-      navigationMode = NavigationMode.traditional;
+      navigationMode = NavigationMode.traditional,
+      gestureSettings = DeviceGestureSettings.fromWindow(window);
 
   /// The size of the media in logical pixels (e.g, the size of the screen).
   ///
@@ -365,6 +369,13 @@ class MediaQueryData {
   /// a widget subtree for those widgets sensitive to it.
   final NavigationMode navigationMode;
 
+  /// The gesture settings for the view this media query is derived from.
+  ///
+  /// This contains platform specific configuration for gesture behavior,
+  /// such as touch slop. These settings should be favored for configuring
+  /// gesture behavior over the framework constants.
+  final DeviceGestureSettings gestureSettings;
+
   /// The orientation of the media (e.g., whether the device is in landscape or
   /// portrait mode).
   Orientation get orientation {
@@ -389,6 +400,7 @@ class MediaQueryData {
     bool? accessibleNavigation,
     bool? boldText,
     NavigationMode? navigationMode,
+    DeviceGestureSettings? gestureSettings,
   }) {
     return MediaQueryData(
       size: size ?? this.size,
@@ -406,6 +418,7 @@ class MediaQueryData {
       accessibleNavigation: accessibleNavigation ?? this.accessibleNavigation,
       boldText: boldText ?? this.boldText,
       navigationMode: navigationMode ?? this.navigationMode,
+      gestureSettings: gestureSettings ?? this.gestureSettings,
     );
   }
 
@@ -456,6 +469,7 @@ class MediaQueryData {
       invertColors: invertColors,
       accessibleNavigation: accessibleNavigation,
       boldText: boldText,
+      gestureSettings: gestureSettings,
     );
   }
 
@@ -504,6 +518,7 @@ class MediaQueryData {
       invertColors: invertColors,
       accessibleNavigation: accessibleNavigation,
       boldText: boldText,
+      gestureSettings: gestureSettings,
     );
   }
 
@@ -552,6 +567,7 @@ class MediaQueryData {
       invertColors: invertColors,
       accessibleNavigation: accessibleNavigation,
       boldText: boldText,
+      gestureSettings: gestureSettings,
     );
   }
 
@@ -573,7 +589,8 @@ class MediaQueryData {
         && other.invertColors == invertColors
         && other.accessibleNavigation == accessibleNavigation
         && other.boldText == boldText
-        && other.navigationMode == navigationMode;
+        && other.navigationMode == navigationMode
+        && other.gestureSettings == gestureSettings;
   }
 
   @override
@@ -593,6 +610,7 @@ class MediaQueryData {
       accessibleNavigation,
       boldText,
       navigationMode,
+      gestureSettings,
     );
   }
 
@@ -613,6 +631,7 @@ class MediaQueryData {
       'invertColors: $invertColors',
       'boldText: $boldText',
       'navigationMode: ${describeEnum(navigationMode)}',
+      'gestureSettings: $gestureSettings',
     ];
     return '${objectRuntimeType(this, 'MediaQueryData')}(${properties.join(', ')})';
   }

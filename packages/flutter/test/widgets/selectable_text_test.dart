@@ -185,7 +185,7 @@ void main() {
     );
   }
 
-  testWidgets('can use the desktop cut/copy/paste buttons on Mac', (WidgetTester tester) async {
+  testWidgets('can use the desktop cut/copy/paste buttons on desktop', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'blah1 blah2',
     );
@@ -257,7 +257,7 @@ void main() {
     expect(controller.text, ' blah2blah1');
     expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 0));
     expect(find.byType(CupertinoButton), findsNothing);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS, TargetPlatform.windows, TargetPlatform.linux }), skip: kIsWeb);
+  }, variant: TargetPlatformVariant.desktop(), skip: kIsWeb); // [intended] toolbar is handled by the browser.
 
   testWidgets('has expected defaults', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1388,42 +1388,7 @@ void main() {
     expect(topLeft.dx, equals(399.0));
   });
 
-  testWidgets('Selectable text drops selection when losing focus', (WidgetTester tester) async {
-    final Key key1 = UniqueKey();
-    final Key key2 = UniqueKey();
-
-    await tester.pumpWidget(
-      overlay(
-        child: Column(
-          children: <Widget>[
-            SelectableText(
-              'text 1',
-              key: key1,
-            ),
-            SelectableText(
-                'text 2',
-                key: key2,
-            ),
-          ],
-        ),
-      ),
-    );
-
-    await tester.tap(find.byKey(key1));
-    await tester.pump();
-    final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
-    final TextEditingController controller = editableTextWidget.controller;
-    controller.selection = const TextSelection(baseOffset: 0, extentOffset: 3);
-    await tester.pump();
-    expect(controller.selection, isNot(equals(TextRange.empty)));
-
-    await tester.tap(find.byKey(key2));
-    await tester.pump();
-    expect(controller.selection, equals(TextRange.empty));
-  });
-
-    testWidgets('Selectable text is skipped during focus traversal',
-      (WidgetTester tester) async {
+  testWidgets('Selectable text is skipped during focus traversal', (WidgetTester tester) async {
     final FocusNode firstFieldFocus = FocusNode();
     final FocusNode lastFieldFocus = FocusNode();
 
@@ -2028,7 +1993,7 @@ void main() {
     await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
     await tester.pumpAndSettle();
 
-    expect(c1.selection.extentOffset - c1.selection.baseOffset, 0);
+    expect(c1.selection.extentOffset - c1.selection.baseOffset, -5);
     expect(c2.selection.extentOffset - c2.selection.baseOffset, -5);
   }, variant: KeySimulatorTransitModeVariant.all());
 

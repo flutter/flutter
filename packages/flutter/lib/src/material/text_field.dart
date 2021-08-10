@@ -985,6 +985,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       _createLocalController();
     }
     _effectiveFocusNode.canRequestFocus = _isEnabled;
+    _effectiveFocusNode.addListener(_handleFocusChanged);
   }
 
   bool get _canRequestFocus {
@@ -1013,7 +1014,14 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       _controller!.dispose();
       _controller = null;
     }
+
+    if (widget.focusNode != oldWidget.focusNode) {
+      (oldWidget.focusNode ?? _focusNode)?.removeListener(_handleFocusChanged);
+      (widget.focusNode ?? _focusNode)?.addListener(_handleFocusChanged);
+    }
+
     _effectiveFocusNode.canRequestFocus = _canRequestFocus;
+
     if (_effectiveFocusNode.hasFocus && widget.readOnly != oldWidget.readOnly && _isEnabled) {
       if(_effectiveController.selection.isCollapsed) {
         _showSelectionHandles = !widget.readOnly;
@@ -1048,6 +1056,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
   @override
   void dispose() {
+    _effectiveFocusNode.removeListener(_handleFocusChanged);
     _focusNode?.dispose();
     _controller?.dispose();
     super.dispose();
@@ -1081,6 +1090,13 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       return true;
 
     return false;
+  }
+
+  void _handleFocusChanged() {
+    setState(() {
+      // Rebuild the widget on focus change to show/hide the text selection
+      // highlight.
+    });
   }
 
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
@@ -1239,7 +1255,8 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           maxLines: widget.maxLines,
           minLines: widget.minLines,
           expands: widget.expands,
-          selectionColor: selectionColor,
+          // Only show the selection highlight when the text field is focused.
+          selectionColor: focusNode.hasFocus ? selectionColor : null,
           selectionControls: widget.selectionEnabled ? textSelectionControls : null,
           onChanged: widget.onChanged,
           onSelectionChanged: _handleSelectionChanged,
