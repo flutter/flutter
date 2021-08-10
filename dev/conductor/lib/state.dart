@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert' show jsonDecode, jsonEncode;
+import 'dart:convert' show JsonEncoder, jsonDecode;
 
 import 'package:file/file.dart' show File;
 import 'package:platform/platform.dart';
@@ -230,10 +230,13 @@ ReleasePhase getNextPhase(ReleasePhase currentPhase) {
   return nextPhase;
 }
 
+// Indent two spaces.
+const JsonEncoder _encoder = JsonEncoder.withIndent('  ');
+
 void writeStateToFile(File file, pb.ConductorState state, List<String> logs) {
   state.logs.addAll(logs);
   file.writeAsStringSync(
-    jsonEncode(state.toProto3Json()),
+    _encoder.convert(state.toProto3Json()),
     flush: true,
   );
 }
