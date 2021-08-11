@@ -1,4 +1,4 @@
-Signature: 2471f12bcf5f0a039fa3d5dd27457a2b
+Signature: c29014c94c0e35229c037e1c6ac097a1
 
 UNUSED LICENSES:
 
@@ -3426,6 +3426,8 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/dai_connect.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.goldfish/goldfish_sync.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/port.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input.virtualkeyboard/virtual_keyboard.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.intl/calendar.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.intl/time_zones.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/inotify.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.power.profile/profile.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.composition/allocator.fidl
@@ -3434,6 +3436,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.composition/screenshot.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/flatland_tokens.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.common/wlan_common.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.ieee80211/constants.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.ieee80211/rsn.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.policy/types.fidl
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/inotify.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/transformer.h
