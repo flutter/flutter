@@ -188,7 +188,7 @@ void main() {
             command: <String>['git', 'rev-parse', 'HEAD'],
             stdout: revision1,
           ),
-          const FakeCommand(command: <String>['git', 'push', 'mirror', '$revision1:$workingBranch']),
+          const FakeCommand(command: <String>['git', 'push', 'mirror', '$revision1:refs/heads/$workingBranch']),
         ]);
         final FakePlatform platform = FakePlatform(
           environment: <String, String>{
@@ -605,7 +605,7 @@ void main() {
             stdout: revision3,
           ),
           FakeCommand(
-            command: <String>['git', 'push', 'mirror', '$revision2:$workingBranch'],
+            command: <String>['git', 'push', 'mirror', '$revision2:refs/heads/$workingBranch'],
           ),
         ]);
         writeStateToFile(
@@ -646,7 +646,7 @@ void main() {
         );
         expect(
           stdio.stdout,
-          contains('Executed command: `git push mirror $revision2:$workingBranch`'),
+          contains('Executed command: `git push mirror $revision2:refs/heads/$workingBranch`'),
         );
         expect(stdio.error, isEmpty);
       });

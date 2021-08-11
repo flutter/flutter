@@ -142,7 +142,8 @@ void runNext({
 
       engine.pushRef(
         fromRef: headRevision,
-        toRef: state.engine.workingBranch,
+        // Explicitly create new branch
+        toRef: 'refs/heads/${state.engine.workingBranch}',
         remote: state.engine.mirror.name,
       );
 
@@ -251,7 +252,8 @@ void runNext({
 
       framework.pushRef(
         fromRef: headRevision,
-        toRef: state.framework.workingBranch,
+        // Explicitly create new branch
+        toRef: 'refs/heads/${state.framework.workingBranch}',
         remote: state.framework.mirror.name,
       );
       break;
