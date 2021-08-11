@@ -358,9 +358,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
       initialExtent: widget.initialChildSize,
       listener: _setExtent,
     );
-    _scrollController = _DraggableScrollableSheetScrollController(
-      extent: _extent,
-    );
+    _scrollController = _DraggableScrollableSheetScrollController(extent: _extent);
   }
 
   List<double> _impliedSnapSizes() {
