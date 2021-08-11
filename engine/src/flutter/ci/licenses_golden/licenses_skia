@@ -1,4 +1,4 @@
-Signature: 564a5fe17d1e8c2e4f308a926a5ef348
+Signature: 056eaecdb0a5e817f0eddfd3bad4fe8a
 
 UNUSED LICENSES:
 
@@ -1574,10 +1574,8 @@ FILE: ../../../third_party/skia/src/gpu/gl/glx/GrGLMakeGLXInterface.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/iOS/GrGLMakeNativeInterface_iOS.cpp
 FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLFragmentShaderBuilder.cpp
 FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLFragmentShaderBuilder.h
-FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLGeometryProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLShaderBuilder.cpp
 FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLShaderBuilder.h
-FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLXferProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrDashOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrDashOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrSmallPathRenderer.h
@@ -2485,14 +2483,12 @@ FILE: ../../../third_party/skia/src/gpu/gl/GrGLUniformHandler.h
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLVaryingHandler.h
 FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLBlend.cpp
 FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLBlend.h
-FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLFragmentProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLProgramBuilder.cpp
 FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLProgramBuilder.h
 FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLProgramDataManager.h
 FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLUniformHandler.h
 FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLVarying.cpp
 FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLVarying.h
-FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLXferProcessor.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrAAConvexTessellator.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrAAConvexTessellator.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrAALinearizingConvexPathRenderer.cpp
@@ -2771,8 +2767,6 @@ FILE: ../../../third_party/skia/src/gpu/gl/GrGLContext.h
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLExtensions.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLVertexArray.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLVertexArray.h
-FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLFragmentProcessor.h
-FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLGeometryProcessor.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrOvalOpFactory.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrOvalOpFactory.h
 FILE: ../../../third_party/skia/src/lazy/SkDiscardableMemoryPool.cpp
