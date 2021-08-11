@@ -43,6 +43,35 @@ void main() {
 }
 
 void testMain() {
+  test('KeyData.toString', () {
+    expect(const ui.KeyData(
+      type: ui.KeyEventType.down,
+      physical: 0x700e5,
+      logical: 0x61,
+      character: 'A',
+      timeStamp: Duration.zero,
+      synthesized: false,
+    ).toString(), 'KeyData(type: down, physical: 0x700e5, logical: 0x61 (Unicode), character: "A" (0x41))');
+
+    expect(const ui.KeyData(
+      type: ui.KeyEventType.up,
+      physical: 0x700e6,
+      logical: 0x100000061,
+      character: '\n',
+      timeStamp: Duration.zero,
+      synthesized: true,
+    ).toString(), r'KeyData(type: up, physical: 0x700e6, logical: 0x100000061 (Unprintable), character: "\n" (0x0a), synthesized)');
+
+    expect(const ui.KeyData(
+      type: ui.KeyEventType.repeat,
+      physical: 0x700e7,
+      logical: 0x9900000071,
+      character: null,
+      timeStamp: Duration.zero,
+      synthesized: false,
+    ).toString(), 'KeyData(type: repeat, physical: 0x700e7, logical: 0x9900000071, character: <none>)');
+  });
+
   test('Single key press, repeat, and release', () {
     final List<ui.KeyData> keyDataList = <ui.KeyData>[];
     final KeyboardConverter converter = KeyboardConverter((ui.KeyData key) {
