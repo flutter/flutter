@@ -11,10 +11,15 @@ Invokes gradlew for building the scenario_app from GN/Ninja.
 import os
 import sys
 import subprocess
+import platform
 
 SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
-ANDROID_HOME = os.path.join(SCRIPT_PATH, '..', '..', '..', 'third_party',
-    'android_tools', 'sdk')
+ANDROID_HOME = os.path.join(SCRIPT_PATH, '..', '..', '..', 'third_party', 'android_tools', 'sdk')
+
+if platform.system() == 'Darwin':
+  JAVA_HOME = os.path.join(SCRIPT_PATH, '..', '..', '..', 'third_party', 'java', 'openjdk', 'Contents', 'Home')
+else:
+  JAVA_HOME = os.path.join(SCRIPT_PATH, '..', '..', '..', 'third_party', 'java', 'openjdk')
 
 def main():
   if not os.path.isdir(ANDROID_HOME):
@@ -26,7 +31,7 @@ def main():
   result = subprocess.check_output(
     args=[gradle_bin] + sys.argv[2:],
     cwd=android_dir,
-    env=dict(os.environ, ANDROID_HOME=ANDROID_HOME),
+    env=dict(os.environ, ANDROID_HOME=ANDROID_HOME, JAVA_HOME=JAVA_HOME),
   )
   return 0
 

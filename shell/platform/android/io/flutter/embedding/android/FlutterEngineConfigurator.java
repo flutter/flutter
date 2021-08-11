@@ -28,12 +28,16 @@ public interface FlutterEngineConfigurator {
    * {@link io.flutter.embedding.engine.plugins.activity.ActivityControlSurface}. In that case, any
    * configuration, e.g., plugins, must not expect or depend upon an available {@code Activity} at
    * the time that this method is invoked.
+   *
+   * @param flutterEngine The Flutter engine.
    */
   void configureFlutterEngine(@NonNull FlutterEngine flutterEngine);
 
   /**
    * Cleans up references that were established in {@link #configureFlutterEngine(FlutterEngine)}
    * before the host is destroyed or detached.
+   *
+   * @param flutterEngine The Flutter engine.
    */
   void cleanUpFlutterEngine(@NonNull FlutterEngine flutterEngine);
 }

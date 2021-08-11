@@ -59,18 +59,11 @@ android {
     // Use https://github.com/robolectric/robolectric/blob/master/robolectric/src/main/java/org/robolectric/plugins/LegacyDependencyResolver.java#L24
     // and specify them as runtime dependencies.
     embeddingTesting "org.robolectric:android-all:9-robolectric-4913185-2"
-    // Get robolectric shadows for SDK=16 used by PlatformPluginTest.
     embeddingTesting_v16 "org.robolectric:android-all:4.1.2_r1-robolectric-r1"
-    embeddingTesting "androidx.fragment:fragment-testing:1.1.0"
-    embeddingTesting "org.mockito:mockito-all:1.10.19"
-    embeddingTesting ("org.robolectric:robolectric:4.3") {
-      // org.hamcrest is added by org.mockito:mockito-all
-      exclude group: "org.hamcrest", module:"hamcrest-core"
-    }
-    embeddingTesting ("junit:junit:4.13") {
-      // org.hamcrest is added by org.mockito:mockito-all
-      exclude group: "org.hamcrest", module:"hamcrest-core"
-    }
+    embeddingTesting "org.robolectric:robolectric:4.4"
+    embeddingTesting "junit:junit:4.13"
+    embeddingTesting "androidx.test:core:1.0.0"
+    embeddingTesting "org.mockito:mockito-core:3.11.2"
   }
 }
 

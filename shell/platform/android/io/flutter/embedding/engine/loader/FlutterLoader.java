@@ -58,6 +58,7 @@ public class FlutterLoader {
    * is used instead of static methods to facilitate testing without actually running native library
    * linking.
    *
+   * @return The Flutter loader.
    * @deprecated Use the {@link io.flutter.FlutterInjector} instead.
    */
   @Deprecated

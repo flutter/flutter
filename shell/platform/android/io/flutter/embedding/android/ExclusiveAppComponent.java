@@ -29,7 +29,11 @@ public interface ExclusiveAppComponent<T> {
    */
   void detachFromFlutterEngine();
 
-  /** Retrieve the App Component behind this exclusive App Component. */
+  /**
+   * Retrieve the App Component behind this exclusive App Component.
+   *
+   * @return The app component.
+   */
   @NonNull
   T getAppComponent();
 }

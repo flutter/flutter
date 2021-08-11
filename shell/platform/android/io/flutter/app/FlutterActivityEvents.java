@@ -21,10 +21,18 @@ import io.flutter.plugin.common.PluginRegistry.RequestPermissionsResultListener;
  */
 public interface FlutterActivityEvents
     extends ComponentCallbacks2, ActivityResultListener, RequestPermissionsResultListener {
-  /** @see android.app.Activity#onCreate(android.os.Bundle) */
+  /**
+   * @param savedInstanceState If the activity is being re-initialized after previously being shut
+   *     down then this Bundle contains the data it most recently supplied in {@code
+   *     onSaveInstanceState(Bundle)}.
+   * @see android.app.Activity#onCreate(android.os.Bundle)
+   */
   void onCreate(Bundle savedInstanceState);
 
-  /** @see android.app.Activity#onNewIntent(Intent) */
+  /**
+   * @param intent The new intent that was started for the activity.
+   * @see android.app.Activity#onNewIntent(Intent)
+   */
   void onNewIntent(Intent intent);
 
   /** @see android.app.Activity#onPause() */
