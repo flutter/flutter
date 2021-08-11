@@ -358,7 +358,7 @@ void main() {
     } finally {
       tryToDelete(fileSystem.directory(tempDirectory));
     }
-  }, skip: platform.isWindows);
+  }, skip: platform.isWindows); // https://github.com/flutter/flutter/issues/87924
 
   testWithoutContext('flutter run handle SIGUSR1/2', () async {
     final String tempDirectory = fileSystem.systemTempDirectory.createTempSync('flutter_overall_experience_test.').resolveSymbolicLinksSync();
@@ -415,7 +415,7 @@ void main() {
     } finally {
       tryToDelete(fileSystem.directory(tempDirectory));
     }
-  }, skip: Platform.isWindows); // Windows doesn't support sending signals.
+  }, skip: Platform.isWindows); // [intended] Windows doesn't support sending signals.
 
   testWithoutContext('flutter run can hot reload and hot restart, handle "p" key', () async {
     final String tempDirectory = fileSystem.systemTempDirectory.createTempSync('flutter_overall_experience_test.').resolveSymbolicLinksSync();
