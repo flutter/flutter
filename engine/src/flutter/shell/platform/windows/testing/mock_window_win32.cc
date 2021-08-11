@@ -15,9 +15,23 @@ UINT MockWin32Window::GetDpi() {
   return GetCurrentDPI();
 }
 
+LRESULT MockWin32Window::Win32DefWindowProc(HWND hWnd,
+                                            UINT Msg,
+                                            WPARAM wParam,
+                                            LPARAM lParam) {
+  return kWmResultDefault;
+}
+
 LRESULT MockWin32Window::InjectWindowMessage(UINT const message,
                                              WPARAM const wparam,
                                              LPARAM const lparam) {
+  return HandleMessage(message, wparam, lparam);
+}
+
+LRESULT MockWin32Window::Win32SendMessage(HWND hWnd,
+                                          UINT const message,
+                                          WPARAM const wparam,
+                                          LPARAM const lparam) {
   return HandleMessage(message, wparam, lparam);
 }
 

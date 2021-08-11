@@ -62,7 +62,7 @@ static bool IsKeyDownAltRight(int action, int virtual_key, bool extended) {
 #ifdef WINUWP
   return false;
 #else
-  return virtual_key == VK_LMENU && extended && action == WM_KEYDOWN;
+  return virtual_key == VK_RMENU && extended && action == WM_KEYDOWN;
 #endif
 }
 
@@ -73,7 +73,7 @@ static bool IsKeyUpAltRight(int action, int virtual_key, bool extended) {
 #ifdef WINUWP
   return false;
 #else
-  return virtual_key == VK_LMENU && extended && action == WM_KEYUP;
+  return virtual_key == VK_RMENU && extended && action == WM_KEYUP;
 #endif
 }
 
