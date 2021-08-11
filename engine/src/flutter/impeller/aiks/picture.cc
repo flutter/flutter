@@ -4,9 +4,12 @@
 
 #include "impeller/aiks/picture.h"
 
+#include "impeller/aiks/picture_operation.h"
+
 namespace impeller {
 
-Picture::Picture() = default;
+Picture::Picture(std::vector<std::unique_ptr<PictureOperation>> operations)
+    : ops_(std::move(operations)) {}
 
 Picture::~Picture() = default;
 

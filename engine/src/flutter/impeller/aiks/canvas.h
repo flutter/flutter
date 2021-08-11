@@ -7,6 +7,7 @@
 #include <memory>
 #include <optional>
 #include <stack>
+#include <vector>
 
 #include "flutter/fml/macros.h"
 #include "impeller/aiks/paint.h"
@@ -16,6 +17,8 @@
 #include "impeller/geometry/vector.h"
 
 namespace impeller {
+
+class PictureOperation;
 
 class Canvas {
  public:
@@ -49,8 +52,11 @@ class Canvas {
 
   void DrawPicture(std::shared_ptr<Picture> picture);
 
+  std::shared_ptr<Picture> EndRecordingAsPicture();
+
  private:
   std::stack<Matrix> xformation_stack_;
+  std::vector<std::unique_ptr<PictureOperation>> ops_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Canvas);
 };
