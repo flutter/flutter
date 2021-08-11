@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--Begin Deferred Components strings.-->
+    <string name="component1Name">component1</string>
+    <string name="component2Name">component2</string>
+    <!--End Deferred Components strings.-->
+</resources>
+
