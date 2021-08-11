@@ -289,10 +289,10 @@ final Pattern _skipTestTrackingBugPattern = RegExp(r'https+?://github.com/.*/iss
 
 Future<void> verifySkipTestComments(String workingDirectory) async {
   final List<String> errors = <String>[];
-  final List<File> testFiles = await _allFiles(workingDirectory, 'dart', minimumMatches: 1500)
-      .where((File f) => f.path.endsWith('_test.dart')).toList();
+  final Stream<File> testFiles = _allFiles(workingDirectory, 'dart', minimumMatches: 1500)
+    .where((File f) => f.path.endsWith('_test.dart'));
 
-  for (final File file in testFiles) {
+  await for (final File file in testFiles) {
     final List<String> lines = file.readAsLinesSync();
     for (int index = 0; index < lines.length; index++) {
       final Match? match = _skipTestCommentPattern.firstMatch(lines[index]);
