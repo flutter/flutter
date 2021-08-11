@@ -127,13 +127,15 @@ class ScrollBehavior {
       case TargetPlatform.windows:
         return child;
       case TargetPlatform.android:
-        if (_androidOverscrollIndicator == AndroidOverscrollIndicator.stretch) {
-          return StretchingOverscrollIndicator(
-            axisDirection: axisDirection,
-            child: child,
-          );
+        switch (androidOverscrollIndicator) {
+          case AndroidOverscrollIndicator.stretch:
+            return StretchingOverscrollIndicator(
+              axisDirection: axisDirection,
+              child: child,
+            );
+          case AndroidOverscrollIndicator.glow:
+            continue glow;
         }
-        continue glow;
       glow:
       case TargetPlatform.fuchsia:
       return GlowingOverscrollIndicator(

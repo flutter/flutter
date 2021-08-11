@@ -1072,18 +1072,16 @@ void main() {
 
   testWidgets('ScrollBehavior default android overscroll indicator', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
-      home: ScrollConfiguration(
-          behavior: const MaterialScrollBehavior(),
-          child: ListView(
-              children: const <Widget>[
-                SizedBox(
-                  height: 1000.0,
-                  width: 1000.0,
-                  child: Text('Test'),
-                )
-              ]
+      scrollBehavior: const MaterialScrollBehavior(),
+      home: ListView(
+        children: const <Widget>[
+          SizedBox(
+            height: 1000.0,
+            width: 1000.0,
+            child: Text('Test'),
           )
-      ),
+        ]
+      )
     ));
 
     expect(find.byType(StretchingOverscrollIndicator), findsNothing);
@@ -1092,18 +1090,16 @@ void main() {
 
   testWidgets('ScrollBehavior stretch android overscroll indicator', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
-        home: ScrollConfiguration(
-          behavior: const MaterialScrollBehavior(androidOverscrollIndicator: AndroidOverscrollIndicator.stretch),
-          child: ListView(
-              children: const <Widget>[
-                SizedBox(
-                  height: 1000.0,
-                  width: 1000.0,
-                  child: Text('Test'),
-                )
-              ]
+      scrollBehavior: const MaterialScrollBehavior(androidOverscrollIndicator: AndroidOverscrollIndicator.stretch),
+      home: ListView(
+        children: const <Widget>[
+          SizedBox(
+            height: 1000.0,
+            width: 1000.0,
+            child: Text('Test'),
           )
-      ),
+        ]
+      )
     ));
 
     expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);

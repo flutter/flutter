@@ -5,6 +5,7 @@
 import 'dart:async' show Timer;
 import 'dart:math' as math;
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart' show nearEqual, Tolerance;
 import 'package:flutter/rendering.dart';
@@ -117,9 +118,10 @@ import 'transitions.dart';
 /// See also:
 ///
 ///  * [OverscrollIndicatorNotification], which can be used to manipulate the
-///    glow position or prevent the glow from being painted at all
+///    glow position or prevent the glow from being painted at all.
 ///  * [NotificationListener], to listen for the
-///    [OverscrollIndicatorNotification]
+///    [OverscrollIndicatorNotification].
+///  * [StretchingOverscrollIndicator], a Material Design overscroll indicator.
 class GlowingOverscrollIndicator extends StatefulWidget {
   /// Creates a visual indication that a scroll view has overscrolled.
   ///
@@ -278,7 +280,7 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
         assert(false);
       }
       final bool isLeading = controller == _leadingController;
-      if (_lastNotificationType != OverscrollNotification) {
+      if (_lastNotificationType is! OverscrollNotification) {
         final OverscrollIndicatorNotification confirmationNotification = OverscrollIndicatorNotification(leading: isLeading);
         confirmationNotification.dispatch(context);
         _accepted[isLeading] = confirmationNotification._accepted;
@@ -657,15 +659,18 @@ class _GlowingOverscrollIndicatorPainter extends CustomPainter {
 ///
 /// Created by [ScrollBehavior.buildOverscrollIndicator] on platforms
 /// (e.g., Android) that commonly use this type of overscroll indication when
-/// [ScrollBehavior.androidOverscrollIndicator] is true. Otherwise, the
-/// default [GlowingOverscrollIndicator] is applied.
+/// [ScrollBehavior.androidOverscrollIndicator] is
+/// [AndroidOverscrollIndicator.stretch]. Otherwise, the default
+/// [GlowingOverscrollIndicator] is applied.
 ///
 /// See also:
 ///
 ///  * [OverscrollIndicatorNotification], which can be used to prevent the stretch
 ///    effect from being applied at all.
 ///  * [NotificationListener], to listen for the
-///    [OverscrollIndicatorNotification]
+///    [OverscrollIndicatorNotification].
+///  * [GlowingOverscrollIndicator], the default overscroll indicator for
+///    [TargetPlatform.android] and [TargetPlatform.fuchsia].
 class StretchingOverscrollIndicator extends StatefulWidget {
   /// Creates a visual indication that a scroll view has overscrolled by
   /// applying a stretch transformation to the content.
@@ -681,8 +686,8 @@ class StretchingOverscrollIndicator extends StatefulWidget {
     this.notificationPredicate = defaultScrollNotificationPredicate,
     this.child,
   }) : assert(axisDirection != null),
-        assert(notificationPredicate != null),
-        super(key: key);
+       assert(notificationPredicate != null),
+       super(key: key);
 
   /// {@macro flutter.overscroll.axisDirection}
   final AxisDirection axisDirection;
@@ -727,7 +732,7 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
 
     if (notification is OverscrollNotification) {
       _lastOverscrollNotification = notification;
-      if (_lastNotification.runtimeType != OverscrollNotification) {
+      if (_lastNotification.runtimeType is! OverscrollNotification) {
         final OverscrollIndicatorNotification confirmationNotification = OverscrollIndicatorNotification(leading: notification.overscroll < 0.0);
         confirmationNotification.dispatch(context);
         _accepted = confirmationNotification._accepted;
