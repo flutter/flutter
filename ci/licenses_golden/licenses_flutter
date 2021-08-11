@@ -1658,6 +1658,7 @@ FILE: ../../../flutter/shell/platform/windows/keyboard_key_embedder_handler_unit
 FILE: ../../../flutter/shell/platform/windows/keyboard_key_handler.cc
 FILE: ../../../flutter/shell/platform/windows/keyboard_key_handler.h
 FILE: ../../../flutter/shell/platform/windows/keyboard_key_handler_unittests.cc
+FILE: ../../../flutter/shell/platform/windows/keyboard_unittests.cc
 FILE: ../../../flutter/shell/platform/windows/platform_handler.cc
 FILE: ../../../flutter/shell/platform/windows/platform_handler.h
 FILE: ../../../flutter/shell/platform/windows/platform_handler_unittests.cc

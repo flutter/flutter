@@ -470,7 +470,7 @@ TEST(KeyboardKeyHandlerTest, AltGr) {
   EXPECT_EQ(handler.KeyboardHook(nullptr, VK_LCONTROL, kScanCodeControlLeft,
                                  WM_KEYDOWN, 0, false, false),
             true);
-  EXPECT_EQ(handler.KeyboardHook(nullptr, VK_LMENU, kScanCodeAltLeft,
+  EXPECT_EQ(handler.KeyboardHook(nullptr, VK_RMENU, kScanCodeAltLeft,
                                  WM_KEYDOWN, 0, true, false),
             true);
   EXPECT_EQ(redispatch_scancode, 0);
@@ -489,7 +489,7 @@ TEST(KeyboardKeyHandlerTest, AltGr) {
   EXPECT_EQ(handler.KeyboardHook(nullptr, VK_LCONTROL, kScanCodeControlLeft,
                                  WM_KEYDOWN, 0, false, false),
             false);
-  EXPECT_EQ(handler.KeyboardHook(nullptr, VK_LMENU, kScanCodeAltLeft,
+  EXPECT_EQ(handler.KeyboardHook(nullptr, VK_RMENU, kScanCodeAltLeft,
                                  WM_KEYDOWN, 0, true, false),
             false);
 
@@ -498,7 +498,7 @@ TEST(KeyboardKeyHandlerTest, AltGr) {
   hook_history.clear();
 
   // The key up event only causes a AltRight (extended AltLeft) up.
-  EXPECT_EQ(handler.KeyboardHook(nullptr, VK_LMENU, kScanCodeAltLeft, WM_KEYUP,
+  EXPECT_EQ(handler.KeyboardHook(nullptr, VK_RMENU, kScanCodeAltLeft, WM_KEYUP,
                                  0, true, true),
             true);
   EXPECT_EQ(hook_history.size(), 1);
@@ -523,7 +523,7 @@ TEST(KeyboardKeyHandlerTest, AltGr) {
   EXPECT_EQ(handler.KeyboardHook(nullptr, VK_LCONTROL, kScanCodeControlLeft,
                                  WM_KEYUP, 0, false, true),
             false);
-  EXPECT_EQ(handler.KeyboardHook(nullptr, VK_LMENU, kScanCodeAltLeft, WM_KEYUP,
+  EXPECT_EQ(handler.KeyboardHook(nullptr, VK_RMENU, kScanCodeAltLeft, WM_KEYUP,
                                  0, true, true),
             false);
 
@@ -556,7 +556,7 @@ TEST(KeyboardKeyHandlerTest, AltGr) {
             false);
 
   // Key down AltRight.
-  EXPECT_EQ(handler.KeyboardHook(nullptr, VK_LMENU, kScanCodeAltLeft,
+  EXPECT_EQ(handler.KeyboardHook(nullptr, VK_RMENU, kScanCodeAltLeft,
                                  WM_KEYDOWN, 0, true, false),
             true);
   EXPECT_EQ(redispatch_scancode, 0);
@@ -569,14 +569,14 @@ TEST(KeyboardKeyHandlerTest, AltGr) {
   hook_history.clear();
 
   // Resolve redispatches.
-  EXPECT_EQ(handler.KeyboardHook(nullptr, VK_LMENU, kScanCodeAltLeft,
+  EXPECT_EQ(handler.KeyboardHook(nullptr, VK_RMENU, kScanCodeAltLeft,
                                  WM_KEYDOWN, 0, true, false),
             false);
 
   redispatch_scancode = 0;
 
   // Key up AltRight.
-  EXPECT_EQ(handler.KeyboardHook(nullptr, VK_LMENU, kScanCodeAltLeft, WM_KEYUP,
+  EXPECT_EQ(handler.KeyboardHook(nullptr, VK_RMENU, kScanCodeAltLeft, WM_KEYUP,
                                  0, true, true),
             true);
   EXPECT_EQ(hook_history.size(), 1);
@@ -601,7 +601,7 @@ TEST(KeyboardKeyHandlerTest, AltGr) {
   EXPECT_EQ(handler.KeyboardHook(nullptr, VK_LCONTROL, kScanCodeControlLeft,
                                  WM_KEYUP, 0, false, true),
             false);
-  EXPECT_EQ(handler.KeyboardHook(nullptr, VK_LMENU, kScanCodeAltLeft, WM_KEYUP,
+  EXPECT_EQ(handler.KeyboardHook(nullptr, VK_RMENU, kScanCodeAltLeft, WM_KEYUP,
                                  0, true, true),
             false);
 
@@ -635,7 +635,7 @@ TEST(KeyboardKeyHandlerTest, AltGr) {
   EXPECT_EQ(handler.KeyboardHook(nullptr, VK_LCONTROL, kScanCodeControlLeft,
                                  WM_KEYDOWN, 0, false, false),
             true);
-  EXPECT_EQ(handler.KeyboardHook(nullptr, VK_LMENU, kScanCodeAltLeft,
+  EXPECT_EQ(handler.KeyboardHook(nullptr, VK_RMENU, kScanCodeAltLeft,
                                  WM_KEYDOWN, 0, true, false),
             true);
   EXPECT_EQ(redispatch_scancode, 0);
@@ -654,7 +654,7 @@ TEST(KeyboardKeyHandlerTest, AltGr) {
   EXPECT_EQ(handler.KeyboardHook(nullptr, VK_LCONTROL, kScanCodeControlLeft,
                                  WM_KEYDOWN, 0, false, false),
             false);
-  EXPECT_EQ(handler.KeyboardHook(nullptr, VK_LMENU, kScanCodeAltLeft,
+  EXPECT_EQ(handler.KeyboardHook(nullptr, VK_RMENU, kScanCodeAltLeft,
                                  WM_KEYDOWN, 0, true, false),
             false);
 
@@ -666,7 +666,7 @@ TEST(KeyboardKeyHandlerTest, AltGr) {
   EXPECT_EQ(handler.KeyboardHook(nullptr, VK_LCONTROL, kScanCodeControlLeft,
                                  WM_KEYDOWN, 0, false, true),
             true);
-  EXPECT_EQ(handler.KeyboardHook(nullptr, VK_LMENU, kScanCodeAltLeft,
+  EXPECT_EQ(handler.KeyboardHook(nullptr, VK_RMENU, kScanCodeAltLeft,
                                  WM_KEYDOWN, 0, true, true),
             true);
   EXPECT_EQ(redispatch_scancode, 0);
@@ -685,7 +685,7 @@ TEST(KeyboardKeyHandlerTest, AltGr) {
   EXPECT_EQ(handler.KeyboardHook(nullptr, VK_LCONTROL, kScanCodeControlLeft,
                                  WM_KEYDOWN, 0, false, false),
             false);
-  EXPECT_EQ(handler.KeyboardHook(nullptr, VK_LMENU, kScanCodeAltLeft,
+  EXPECT_EQ(handler.KeyboardHook(nullptr, VK_RMENU, kScanCodeAltLeft,
                                  WM_KEYDOWN, 0, true, false),
             false);
 
@@ -694,7 +694,7 @@ TEST(KeyboardKeyHandlerTest, AltGr) {
   hook_history.clear();
 
   // Key up AltRight.
-  EXPECT_EQ(handler.KeyboardHook(nullptr, VK_LMENU, kScanCodeAltLeft, WM_KEYUP,
+  EXPECT_EQ(handler.KeyboardHook(nullptr, VK_RMENU, kScanCodeAltLeft, WM_KEYUP,
                                  0, true, true),
             true);
   EXPECT_EQ(hook_history.size(), 1);
@@ -719,7 +719,7 @@ TEST(KeyboardKeyHandlerTest, AltGr) {
   EXPECT_EQ(handler.KeyboardHook(nullptr, VK_LCONTROL, kScanCodeControlLeft,
                                  WM_KEYUP, 0, false, true),
             false);
-  EXPECT_EQ(handler.KeyboardHook(nullptr, VK_LMENU, kScanCodeAltLeft, WM_KEYUP,
+  EXPECT_EQ(handler.KeyboardHook(nullptr, VK_RMENU, kScanCodeAltLeft, WM_KEYUP,
                                  0, true, true),
             false);
 
