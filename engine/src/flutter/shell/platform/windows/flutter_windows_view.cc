@@ -55,7 +55,17 @@ void FlutterWindowsView::SetEngine(
 
   // Set up the system channel handlers.
   auto internal_plugin_messenger = internal_plugin_registrar_->messenger();
-  RegisterKeyboardHandlers(internal_plugin_messenger);
+#ifdef WINUWP
+  flutter::KeyboardKeyHandler::EventDispatcher dispatch_event = nullptr;
+  flutter::KeyboardKeyEmbedderHandler::GetKeyStateHandler get_key_state =
+      nullptr;
+#else
+  flutter::KeyboardKeyHandler::EventDispatcher dispatch_event = SendInput;
+  flutter::KeyboardKeyEmbedderHandler::GetKeyStateHandler get_key_state =
+      GetKeyState;
+#endif
+  RegisterKeyboardHandlers(internal_plugin_messenger, dispatch_event,
+                           get_key_state);
   platform_handler_ = PlatformHandler::Create(internal_plugin_messenger, this);
   cursor_handler_ = std::make_unique<flutter::CursorHandler>(
       internal_plugin_messenger, binding_handler_.get());
@@ -67,7 +77,9 @@ void FlutterWindowsView::SetEngine(
 }
 
 void FlutterWindowsView::RegisterKeyboardHandlers(
-    flutter::BinaryMessenger* messenger) {
+    flutter::BinaryMessenger* messenger,
+    flutter::KeyboardKeyHandler::EventDispatcher dispatch_event,
+    flutter::KeyboardKeyEmbedderHandler::GetKeyStateHandler get_key_state) {
   // There must be only one handler that receives |SendInput|, i.e. only one
   // handler that might redispatch events. (See the documentation of
   // |KeyboardKeyHandler| to learn about redispatching.)
@@ -76,17 +88,8 @@ void FlutterWindowsView::RegisterKeyboardHandlers(
   // of the event. In order to allow the same real event in the future, the
   // handler is "toggled" when events pass through, therefore the redispatching
   // algorithm does not allow more than 1 handler that takes |SendInput|.
-#ifdef WINUWP
-  flutter::KeyboardKeyHandler::EventDispatcher redispatch_event = nullptr;
-  flutter::KeyboardKeyEmbedderHandler::GetKeyStateHandler get_key_state =
-      nullptr;
-#else
-  flutter::KeyboardKeyHandler::EventDispatcher redispatch_event = SendInput;
-  flutter::KeyboardKeyEmbedderHandler::GetKeyStateHandler get_key_state =
-      GetKeyState;
-#endif
   auto key_handler =
-      std::make_unique<flutter::KeyboardKeyHandler>(redispatch_event);
+      std::make_unique<flutter::KeyboardKeyHandler>(dispatch_event);
   key_handler->AddDelegate(std::make_unique<KeyboardKeyEmbedderHandler>(
       [this](const FlutterKeyEvent& event, FlutterKeyEventCallback callback,
              void* user_data) {

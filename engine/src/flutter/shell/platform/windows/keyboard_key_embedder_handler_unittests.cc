@@ -83,6 +83,32 @@ constexpr uint64_t kVirtualKeyA = 0x41;
 using namespace ::flutter::testing::keycodes;
 }  // namespace
 
+TEST(KeyboardKeyEmbedderHandlerTest, ConvertChar32ToUtf8) {
+  std::string result;
+
+  result = ConvertChar32ToUtf8(0x0024);
+  EXPECT_EQ(result.length(), 1);
+  EXPECT_EQ(result[0], '\x24');
+
+  result = ConvertChar32ToUtf8(0x00A2);
+  EXPECT_EQ(result.length(), 2);
+  EXPECT_EQ(result[0], '\xC2');
+  EXPECT_EQ(result[1], '\xA2');
+
+  result = ConvertChar32ToUtf8(0x0939);
+  EXPECT_EQ(result.length(), 3);
+  EXPECT_EQ(result[0], '\xE0');
+  EXPECT_EQ(result[1], '\xA4');
+  EXPECT_EQ(result[2], '\xB9');
+
+  result = ConvertChar32ToUtf8(0x10348);
+  EXPECT_EQ(result.length(), 4);
+  EXPECT_EQ(result[0], '\xF0');
+  EXPECT_EQ(result[1], '\x90');
+  EXPECT_EQ(result[2], '\x8D');
+  EXPECT_EQ(result[3], '\x88');
+}
+
 // Test the most basic key events.
 //
 // Press, hold, and release key A on an US keyboard.

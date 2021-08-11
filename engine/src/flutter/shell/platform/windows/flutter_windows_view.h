@@ -19,6 +19,8 @@
 #include "flutter/shell/platform/windows/cursor_handler.h"
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
 #include "flutter/shell/platform/windows/keyboard_handler_base.h"
+#include "flutter/shell/platform/windows/keyboard_key_embedder_handler.h"
+#include "flutter/shell/platform/windows/keyboard_key_handler.h"
 #include "flutter/shell/platform/windows/platform_handler.h"
 #include "flutter/shell/platform/windows/public/flutter_windows.h"
 #include "flutter/shell/platform/windows/text_input_plugin_delegate.h"
@@ -144,7 +146,15 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
 
  protected:
   // Called to create the keyboard hook handlers.
-  virtual void RegisterKeyboardHandlers(flutter::BinaryMessenger* messenger);
+  //
+  // The provided |dispatch_event| is where to inject events into the system,
+  // while |get_key_state| is where to acquire keyboard states. They will be
+  // the system APIs in production classes, but might be replaced with mock
+  // functions in unit tests.
+  virtual void RegisterKeyboardHandlers(
+      flutter::BinaryMessenger* messenger,
+      flutter::KeyboardKeyHandler::EventDispatcher dispatch_event,
+      flutter::KeyboardKeyEmbedderHandler::GetKeyStateHandler get_key_state);
 
   // Used by RegisterKeyboardHandlers to add a new keyboard hook handler.
   void AddKeyboardHandler(

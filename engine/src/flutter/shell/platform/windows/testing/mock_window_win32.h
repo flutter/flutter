@@ -7,6 +7,7 @@
 
 #include <windowsx.h>
 
+#include "flutter/shell/platform/windows/testing/test_keyboard.h"
 #include "flutter/shell/platform/windows/window_win32.h"
 #include "gmock/gmock.h"
 
@@ -14,7 +15,7 @@ namespace flutter {
 namespace testing {
 
 /// Mock for the |WindowWin32| base class.
-class MockWin32Window : public WindowWin32 {
+class MockWin32Window : public WindowWin32, public MockMessageQueue {
  public:
   MockWin32Window();
   virtual ~MockWin32Window();
@@ -45,7 +46,14 @@ class MockWin32Window : public WindowWin32 {
   MOCK_METHOD0(OnComposeCommit, void());
   MOCK_METHOD0(OnComposeEnd, void());
   MOCK_METHOD2(OnComposeChange, void(const std::u16string&, int));
-  MOCK_METHOD4(DefaultWindowProc, LRESULT(HWND, UINT, WPARAM, LPARAM));
+
+ protected:
+  LRESULT Win32DefWindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
+
+  LRESULT Win32SendMessage(HWND hWnd,
+                           UINT const message,
+                           WPARAM const wparam,
+                           LPARAM const lparam) override;
 };
 
 }  // namespace testing

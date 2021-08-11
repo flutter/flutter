@@ -12,6 +12,7 @@
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
 #include "flutter/shell/platform/windows/testing/engine_modifier.h"
 #include "flutter/shell/platform/windows/testing/mock_window_binding_handler.h"
+#include "flutter/shell/platform/windows/testing/test_keyboard.h"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -59,82 +60,16 @@ std::unique_ptr<FlutterWindowsEngine> GetTestEngine() {
   auto engine = std::make_unique<FlutterWindowsEngine>(project);
 
   EngineModifier modifier(engine.get());
-
-  // This mock handles channel messages.  This mock handles key events sent
-  // through the message channel is recorded in `key_event_logs`.
-  modifier.embedder_api().SendPlatformMessage =
-      [](FLUTTER_API_SYMBOL(FlutterEngine) engine,
-         const FlutterPlatformMessage* message) {
-        if (std::string(message->channel) == std::string("flutter/settings")) {
-          return kSuccess;
-        }
-        if (std::string(message->channel) == std::string("flutter/keyevent")) {
-          key_event_logs.push_back(kKeyEventFromChannel);
-          auto response = keyHandlingResponse(true);
-          const TestResponseHandle* response_handle =
-              reinterpret_cast<const TestResponseHandle*>(
-                  message->response_handle);
-          if (response_handle->callback != nullptr) {
-            response_handle->callback(response->data(), response->size(),
-                                      response_handle->user_data);
-          }
-          return kSuccess;
-        }
-        return kSuccess;
-      };
-
-  // This mock handles key events sent through the embedder API,
-  // and records it in `key_event_logs`.
-  modifier.embedder_api().SendKeyEvent =
-      [](FLUTTER_API_SYMBOL(FlutterEngine) engine, const FlutterKeyEvent* event,
-         FlutterKeyEventCallback callback, void* user_data) {
+  MockEmbedderApiForKeyboard(
+      modifier,
+      [] {
+        key_event_logs.push_back(kKeyEventFromChannel);
+        return test_response;
+      },
+      [](const FlutterKeyEvent* event) {
         key_event_logs.push_back(kKeyEventFromEmbedder);
-        if (callback != nullptr) {
-          callback(test_response, user_data);
-        }
-        return kSuccess;
-      };
-
-  // The following mocks enable channel mocking.
-  modifier.embedder_api().PlatformMessageCreateResponseHandle =
-      [](auto engine, auto data_callback, auto user_data, auto response_out) {
-        TestResponseHandle* response_handle = new TestResponseHandle();
-        response_handle->user_data = user_data;
-        response_handle->callback = data_callback;
-        *response_out = reinterpret_cast<FlutterPlatformMessageResponseHandle*>(
-            response_handle);
-        return kSuccess;
-      };
-
-  modifier.embedder_api().PlatformMessageReleaseResponseHandle =
-      [](FLUTTER_API_SYMBOL(FlutterEngine) engine,
-         FlutterPlatformMessageResponseHandle* response) {
-        const TestResponseHandle* response_handle =
-            reinterpret_cast<const TestResponseHandle*>(response);
-        delete response_handle;
-        return kSuccess;
-      };
-
-  // The following mocks allows RunWithEntrypoint to be run, which creates a
-  // non-empty FlutterEngine and enables SendKeyEvent.
-
-  modifier.embedder_api().Run =
-      [](size_t version, const FlutterRendererConfig* config,
-         const FlutterProjectArgs* args, void* user_data,
-         FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
-        *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(1);
-
-        return kSuccess;
-      };
-  modifier.embedder_api().UpdateLocales =
-      [](auto engine, const FlutterLocale** locales, size_t locales_count) {
-        return kSuccess;
-      };
-  modifier.embedder_api().SendWindowMetricsEvent =
-      [](auto engine, const FlutterWindowMetricsEvent* event) {
-        return kSuccess;
-      };
-  modifier.embedder_api().Shutdown = [](auto engine) { return kSuccess; };
+        return test_response;
+      });
 
   engine->RunWithEntrypoint(nullptr);
   return engine;

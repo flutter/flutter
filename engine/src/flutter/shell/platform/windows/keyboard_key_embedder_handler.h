@@ -15,7 +15,7 @@
 
 namespace flutter {
 
-namespace {}  // namespace
+std::string ConvertChar32ToUtf8(char32_t ch);
 
 // A delegate of |KeyboardKeyHandler| that handles events by sending
 // converted |FlutterKeyEvent|s through the embedder API.

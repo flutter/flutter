@@ -29,6 +29,35 @@ constexpr SHORT kStateMaskPressed = 0x80;
 const char* empty_character = "";
 }  // namespace
 
+// Get some bits of the char, from the start'th bit from the right (excluded)
+// to the end'th bit from the right (included).
+//
+// For example, _GetBit(0x1234, 8, 4) => 0x3.
+char _GetBit(char32_t ch, size_t start, size_t end) {
+  return (ch >> end) & ((1 << (start - end)) - 1);
+}
+
+std::string ConvertChar32ToUtf8(char32_t ch) {
+  std::string result;
+  assert(0 <= ch && ch <= 0x10FFFF);
+  if (ch <= 0x007F) {
+    result.push_back(ch);
+  } else if (ch <= 0x07FF) {
+    result.push_back(0b11000000 + _GetBit(ch, 11, 6));
+    result.push_back(0b10000000 + _GetBit(ch, 6, 0));
+  } else if (ch <= 0xFFFF) {
+    result.push_back(0b11100000 + _GetBit(ch, 16, 12));
+    result.push_back(0b10000000 + _GetBit(ch, 12, 6));
+    result.push_back(0b10000000 + _GetBit(ch, 6, 0));
+  } else {
+    result.push_back(0b11110000 + _GetBit(ch, 21, 18));
+    result.push_back(0b10000000 + _GetBit(ch, 18, 12));
+    result.push_back(0b10000000 + _GetBit(ch, 12, 6));
+    result.push_back(0b10000000 + _GetBit(ch, 6, 0));
+  }
+  return result;
+}
+
 KeyboardKeyEmbedderHandler::KeyboardKeyEmbedderHandler(
     SendEvent send_event,
     GetKeyStateHandler get_key_state)
@@ -267,10 +296,10 @@ void KeyboardKeyEmbedderHandler::SynchronizeCritialToggledStates(
       continue;
     }
     assert(key_info.logical_key != 0);
-    SHORT state = get_key_state_(virtual_key);
 
     // Check toggling state first, because it might alter pressing state.
     if (key_info.check_toggled) {
+      SHORT state = get_key_state_(virtual_key);
       bool should_toggled = state & kStateMaskToggled;
       if (virtual_key == toggle_virtual_key) {
         key_info.toggled_on = !key_info.toggled_on;
@@ -312,8 +341,8 @@ void KeyboardKeyEmbedderHandler::SynchronizeCritialPressedStates() {
       continue;
     }
     assert(key_info.logical_key != 0);
-    SHORT state = get_key_state_(virtual_key);
     if (key_info.check_pressed) {
+      SHORT state = get_key_state_(virtual_key);
       auto recorded_pressed_iter = pressingRecords_.find(key_info.physical_key);
       bool recorded_pressed = recorded_pressed_iter != pressingRecords_.end();
       bool should_pressed = state & kStateMaskPressed;
@@ -388,9 +417,8 @@ void KeyboardKeyEmbedderHandler::ConvertUtf32ToUtf8_(char* out, char32_t ch) {
     out[0] = '\0';
     return;
   }
-  // TODO: Correctly handle UTF-32
-  std::wstring text({static_cast<wchar_t>(ch)});
-  strcpy_s(out, kCharacterCacheSize, Utf8FromUtf16(text).c_str());
+  std::string result = ConvertChar32ToUtf8(ch);
+  strcpy_s(out, kCharacterCacheSize, result.c_str());
 }
 
 FlutterKeyEvent KeyboardKeyEmbedderHandler::CreateEmptyEvent() {
