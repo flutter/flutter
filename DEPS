@@ -528,7 +528,18 @@ deps = {
      'packages': [
        {
         'package': 'flutter/android/embedding_bundle',
-        'version': 'last_updated:2020-09-11T17:57:41-0700'
+        'version': 'last_updated:2021-08-10T22:12:57-0700'
+       }
+     ],
+     'condition': 'download_android_deps',
+     'dep_type': 'cipd',
+   },
+
+  'src/third_party/java/openjdk': {
+     'packages': [
+       {
+        'package': 'flutter/java/openjdk/${{platform}}',
+        'version': 'version:11'
        }
      ],
      'condition': 'download_android_deps',

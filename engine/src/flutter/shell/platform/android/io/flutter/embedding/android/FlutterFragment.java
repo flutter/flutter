@@ -65,8 +65,6 @@ import io.flutter.util.ViewUtils;
  * io.flutter.embedding.engine.FlutterEngine}. The two exceptions to using a cached {@link
  * FlutterEngine} are:
  *
- * <p>
- *
  * <ul>
  *   <li>When {@code FlutterFragment} is in the first {@code Activity} displayed by the app, because
  *       pre-warming a {@link io.flutter.embedding.engine.FlutterEngine} would have no impact in
@@ -707,7 +705,7 @@ public class FlutterFragment extends Fragment
   // Delegate that runs all lifecycle and OS hook logic that is common between
   // FlutterActivity and FlutterFragment. See the FlutterActivityAndFragmentDelegate
   // implementation for details about why it exists.
-  @VisibleForTesting /* package */ FlutterActivityAndFragmentDelegate delegate;
+  @VisibleForTesting @Nullable /* package */ FlutterActivityAndFragmentDelegate delegate;
 
   private final OnBackPressedCallback onBackPressedCallback =
       new OnBackPressedCallback(true) {

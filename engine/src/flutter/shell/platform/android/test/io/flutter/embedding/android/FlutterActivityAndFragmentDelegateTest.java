@@ -7,6 +7,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isNull;
 import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -684,7 +685,7 @@ public class FlutterActivityAndFragmentDelegateTest {
 
     // Verify that the call was forwarded to the engine.
     verify(mockFlutterEngine.getActivityControlSurface(), times(1))
-        .onActivityResult(any(Integer.class), any(Integer.class), any(Intent.class));
+        .onActivityResult(any(Integer.class), any(Integer.class), /*intent=*/ isNull());
   }
 
   @Test

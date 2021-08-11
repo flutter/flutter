@@ -8,7 +8,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -53,8 +55,8 @@ public class ApplicationInfoLoaderTest {
     Resources resources = mock(Resources.class);
     when(context.getPackageManager()).thenReturn(packageManager);
     when(context.getResources()).thenReturn(resources);
-    when(packageManager.getApplicationInfo(any(String.class), any(int.class)))
-        .thenReturn(applicationInfo);
+    when(context.getPackageName()).thenReturn("");
+    when(packageManager.getApplicationInfo(anyString(), anyInt())).thenReturn(applicationInfo);
     if (networkPolicyXml != null) {
       metadata.putInt(ApplicationInfoLoader.NETWORK_POLICY_METADATA_KEY, 5);
       doAnswer(invocationOnMock -> createMockResourceParser(networkPolicyXml))
@@ -156,10 +158,9 @@ public class ApplicationInfoLoaderTest {
     when(resourceParser.getAttributeCount()).thenAnswer(invokeMethodOnRealParser);
     when(resourceParser.getAttributeName(anyInt())).thenAnswer(invokeMethodOnRealParser);
     when(resourceParser.getAttributeValue(anyInt())).thenAnswer(invokeMethodOnRealParser);
-    when(resourceParser.getAttributeValue(any(String.class), any(String.class)))
+    when(resourceParser.getAttributeValue(anyString(), anyString()))
         .thenAnswer(invokeMethodOnRealParser);
-    when(resourceParser.getAttributeBooleanValue(
-            any(String.class), any(String.class), any(Boolean.class)))
+    when(resourceParser.getAttributeBooleanValue(any(), anyString(), anyBoolean()))
         .thenAnswer(
             invocation -> {
               Object[] args = invocation.getArguments();
