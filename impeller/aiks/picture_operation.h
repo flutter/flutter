@@ -4,25 +4,18 @@
 
 #pragma once
 
-#include <memory>
-#include <vector>
-
 #include "flutter/fml/macros.h"
 
 namespace impeller {
 
-class PictureOperation;
-
-class Picture {
+class PictureOperation {
  public:
-  Picture(std::vector<std::unique_ptr<PictureOperation>> operations);
+  PictureOperation();
 
-  ~Picture();
+  ~PictureOperation();
 
  private:
-  std::vector<std::unique_ptr<PictureOperation>> ops_;
-
-  FML_DISALLOW_COPY_AND_ASSIGN(Picture);
+  FML_DISALLOW_COPY_AND_ASSIGN(PictureOperation);
 };
 
 }  // namespace impeller
