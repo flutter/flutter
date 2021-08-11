@@ -274,6 +274,43 @@ vars = {
       final EngineRepository repo = EngineRepository(checkouts);
       repo.commit(message);
     });
+
+    test('updateEngineRevision() returns false if newCommit is the same as version file', () {
+      const String commit1 = 'abc123';
+      const String commit2 = 'def456';
+      final TestStdio stdio = TestStdio();
+      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+      final File engineVersionFile = fileSystem.file('/engine.version')..writeAsStringSync(commit2);
+      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(command: <String>[
+          'git',
+          'clone',
+          '--origin',
+          'upstream',
+          '--',
+          FrameworkRepository.defaultUpstream,
+          fileSystem.path
+              .join(rootDir, 'flutter_conductor_checkouts', 'framework'),
+        ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'rev-parse',
+          'HEAD',
+        ], stdout: commit1),
+      ]);
+
+      final Checkouts checkouts = Checkouts(
+        fileSystem: fileSystem,
+        parentDirectory: fileSystem.directory(rootDir),
+        platform: platform,
+        processManager: processManager,
+        stdio: stdio,
+      );
+
+      final FrameworkRepository repo = FrameworkRepository(checkouts);
+      final bool didUpdate = repo.updateEngineRevision(commit2, engineVersionFile: engineVersionFile);
+      expect(didUpdate, false);
+    });
   });
 }
 

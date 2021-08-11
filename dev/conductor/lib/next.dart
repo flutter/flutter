@@ -215,10 +215,13 @@ void runNext({
       final String headRevision = framework.reverseParse('HEAD');
 
       stdio.printStatus('Rolling new engine hash $engineRevision to framework checkout...');
-      framework.updateEngineRevision(engineRevision);
-      framework.commit(
+      final bool needsCommit = framework.updateEngineRevision(engineRevision);
+      if (needsCommit) {
+        framework.commit(
           'Update Engine revision to $engineRevision for ${state.releaseChannel} release ${state.releaseVersion}',
-          addFirst: true);
+          addFirst: true,
+        );
+      }
 
       if (state.framework.cherrypicks.isEmpty) {
         stdio.printStatus(

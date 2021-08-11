@@ -586,7 +586,10 @@ class FrameworkRepository extends Repository {
     return Version.fromString(versionJson['frameworkVersion'] as String);
   }
 
-  void updateEngineRevision(
+  /// Update this framework's engine version file.
+  ///
+  /// Returns [true] if the version file was updated and a commit is needed.
+  bool updateEngineRevision(
     String newEngine, {
     @visibleForTesting File? engineVersionFile,
   }) {
@@ -597,8 +600,19 @@ class FrameworkRepository extends Repository {
         .childFile('engine.version');
     assert(engineVersionFile.existsSync());
     final String oldEngine = engineVersionFile.readAsStringSync();
+    if (oldEngine.trim() == newEngine.trim()) {
+      stdio.printTrace(
+        'Tried to update the engine revision but version file is alread up to date at: $newEngine',
+      );
+      return false;
+    }
     stdio.printStatus('Updating engine revision from $oldEngine to $newEngine');
-    engineVersionFile.writeAsStringSync(newEngine.trim(), flush: true);
+    engineVersionFile.writeAsStringSync(
+      // Version files have trailing newlines
+      '${newEngine.trim()}\n',
+      flush: true,
+    );
+    return true;
   }
 }
 
