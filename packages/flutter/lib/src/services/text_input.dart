@@ -869,8 +869,6 @@ mixin TextSelectionDelegate {
   ///
   /// If and only if [cause] is [SelectionChangedCause.toolbar], the toolbar
   /// will be hidden and the current selection will be scrolled into view.
-  ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
   void cutSelection(SelectionChangedCause cause) {
     final TextSelection selection = textEditingValue.selection;
     final String text = textEditingValue.text;
@@ -899,8 +897,6 @@ mixin TextSelectionDelegate {
   ///
   /// If and only if [cause] is [SelectionChangedCause.toolbar], the toolbar
   /// will be hidden and the current selection will be scrolled into view.
-  ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
   Future<void> pasteText(SelectionChangedCause cause) async {
     final TextEditingValue value = textEditingValue;
     // Snapshot the input before using `await`.
@@ -929,8 +925,6 @@ mixin TextSelectionDelegate {
   ///
   /// If and only if [cause] is [SelectionChangedCause.toolbar], the selection
   /// will be scrolled into view.
-  ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
   void selectAll(SelectionChangedCause cause) {
     userUpdateTextEditingValue(
       TextEditingValue(
@@ -951,8 +945,6 @@ mixin TextSelectionDelegate {
   ///
   /// If [cause] is [SelectionChangedCause.toolbar], the position of
   /// [bringIntoView] to selection will be called and hide toolbar.
-  ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
   void copySelection(SelectionChangedCause cause) {
     final TextEditingValue value = textEditingValue;
     Clipboard.setData(ClipboardData(
