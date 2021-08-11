@@ -1,8 +1,10 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:async';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_driver/driver_extension.dart';
 
@@ -22,25 +24,22 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: MyHomePage(title: 'Deferred Component'),
+      home: const MyHomePage(),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key, this.title}) : super(key: key);
-
-  String? title;
+  const MyHomePage({Key? key}) : super(key: key);
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  MyHomePageState createState() => MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  Future<void>? _libraryFuture;
-  Future<void>? _autoLoadFuture;
+class MyHomePageState extends State<MyHomePage> {
+  Future<void>? libraryFuture;
 
-  Widget postLoadDisplayWidget = Text(
+  Widget postLoadDisplayWidget = const Text(
       'placeholder',
       key: Key('PlaceholderText'),
     );
@@ -48,19 +47,19 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     // Automatically trigger load for release test without driver.
-    _autoLoadFuture = Future.delayed(Duration(milliseconds: 3000), () {
+    Future<void>.delayed(const Duration(milliseconds: 3000), () {
       _pressHandler();
     });
     super.initState();
   }
 
   void _pressHandler() {
-    if (_libraryFuture == null) {
+    if (libraryFuture == null) {
       setState(() {
-        _libraryFuture = component1.loadLibrary().then((_) {
+        libraryFuture = component1.loadLibrary().then((dynamic _) {
           // Delay to give debug runs more than one frame to capture
           // the placeholder text.
-          Future.delayed(Duration(milliseconds: 1000), () {
+          Future<void>.delayed(const Duration(milliseconds: 750), () {
             setState(() {
               postLoadDisplayWidget = component1.LogoScreen();
             });
@@ -72,34 +71,31 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final Widget testWidget = libraryFuture == null ? const Text('preload', key: Key('PreloadText')) :
+      FutureBuilder<void>(
+        future: libraryFuture,
+        builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            if (snapshot.hasError) {
+              return Text('Error: ${snapshot.error}');
+            }
+            return postLoadDisplayWidget;
+          }
+          return postLoadDisplayWidget;
+        },
+      );
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title!),
+        title: const Text('Deferred components test'),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            _libraryFuture == null ? Text('preload', key: Key('PreloadText')) : FutureBuilder<void>(
-              future: _libraryFuture,
-              builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
-                if (snapshot.connectionState == ConnectionState.done) {
-                  if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}');
-                  }
-                  return postLoadDisplayWidget;
-                }
-                return postLoadDisplayWidget;
-              },
-            ),
-          ],
-        ),
+        child: testWidget,
       ),
       floatingActionButton: FloatingActionButton(
-        key: Key('FloatingActionButton'),
+        key: const Key('FloatingActionButton'),
         onPressed: _pressHandler,
         tooltip: 'Load',
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
     );
   }
