@@ -112,21 +112,36 @@ class KeyData {
   }
 
   String _logicalToString() {
-    String result = '0x${logical.toRadixString(16)}';
-    final int nonValueBits = _nonValueBits(logical);
-    if (nonValueBits & 0x0FF == 0x000) {
-      result += '(Unicode)';
-    }
-    if (nonValueBits & 0x0FF == 0x001) {
-      result += '(HID)';
-    }
-    if (nonValueBits & 0x100 != 0x000) {
-      result += '(auto)';
-    }
-    if (nonValueBits & 0x200 != 0x000) {
-      result += '(synonym)';
-    }
-    return result;
+    final String result = '0x${logical.toRadixString(16)}';
+    final int planeNum = _nonValueBits(logical) & 0x0FF;
+    final String planeDescription = (() {
+      switch (planeNum) {
+        case 0x000:
+          return ' (Unicode)';
+        case 0x001:
+          return ' (Unprintable)';
+        case 0x002:
+          return ' (Flutter)';
+        case 0x011:
+          return ' (Android)';
+        case 0x012:
+          return ' (Fuchsia)';
+        case 0x013:
+          return ' (iOS)';
+        case 0x014:
+          return ' (macOS)';
+        case 0x015:
+          return ' (GTK)';
+        case 0x016:
+          return ' (Windows)';
+        case 0x017:
+          return ' (Web)';
+        case 0x018:
+          return ' (GLFW)';
+      }
+      return '';
+    })();
+    return '$result$planeDescription';
   }
 
   String? _escapeCharacter() {
@@ -149,9 +164,17 @@ class KeyData {
     }
   }
 
+  String? _quotedCharCode() {
+    if (character == null)
+      return '';
+    final Iterable<String> hexChars = character!.codeUnits
+        .map((int code) => code.toRadixString(16).padLeft(2, '0'));
+    return ' (0x${hexChars.join(' ')})';
+  }
+
   @override
   String toString() => 'KeyData(key ${_typeToString(type)}, physical: 0x${physical.toRadixString(16)}, '
-    'logical: ${_logicalToString()}, character: ${_escapeCharacter()})';
+    'logical: ${_logicalToString()}, character: ${_escapeCharacter()}${_quotedCharCode()}${synthesized ? ', synthesized' : ''})';
 
   /// Returns a complete textual description of the information in this object.
   String toStringFull() {
