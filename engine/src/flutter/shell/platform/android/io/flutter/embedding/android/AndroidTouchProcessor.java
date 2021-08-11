@@ -77,6 +77,9 @@ public class AndroidTouchProcessor {
   /**
    * Constructs an {@code AndroidTouchProcessor} that will send touch event data to the Flutter
    * execution context represented by the given {@link FlutterRenderer}.
+   *
+   * @param renderer The object that manages textures for rendering.
+   * @param trackMotionEvents This is used to query motion events when platform views are rendered.
    */
   // TODO(mattcarroll): consider moving packet behavior to a FlutterInteractionSurface instead of
   // FlutterRenderer
@@ -90,7 +93,14 @@ public class AndroidTouchProcessor {
     return onTouchEvent(event, IDENTITY_TRANSFORM);
   }
 
-  /** Sends the given {@link MotionEvent} data to Flutter in a format that Flutter understands. */
+  /**
+   * Sends the given {@link MotionEvent} data to Flutter in a format that Flutter understands.
+   *
+   * @param event The motion event from the view.
+   * @param transformMatrix Applies to the view that originated the event. It's used to transform
+   *     the gesture pointers into screen coordinates.
+   * @return True if the event was handled.
+   */
   public boolean onTouchEvent(@NonNull MotionEvent event, Matrix transformMatrix) {
     int pointerCount = event.getPointerCount();
 
@@ -150,6 +160,9 @@ public class AndroidTouchProcessor {
    *
    * <p>Generic motion events include joystick movement, mouse hover, track pad touches, scroll
    * wheel movements, etc.
+   *
+   * @param event The generic motion event being processed.
+   * @return True if the event was handled.
    */
   public boolean onGenericMotionEvent(@NonNull MotionEvent event) {
     // Method isFromSource is only available in API 18+ (Jelly Bean MR2)

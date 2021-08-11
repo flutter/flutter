@@ -1,5 +1,6 @@
 package io.flutter.embedding.android;
 
+import static android.os.Looper.getMainLooper;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.HANDLE_DEEPLINKING_META_DATA_KEY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -100,6 +101,7 @@ public class FlutterFragmentActivityTest {
     // commit it to the fragment manager. This attaches the fragment to the FlutterFragmentActivity
     // creating and configuring the engine.
     activity.onCreate(null);
+    shadowOf(getMainLooper()).idle();
 
     List<FlutterEngine> registeredEngines = GeneratedPluginRegistrant.getRegisteredEngines();
     assertEquals(1, registeredEngines.size());
@@ -111,6 +113,8 @@ public class FlutterFragmentActivityTest {
     FlutterFragmentActivity activity =
         Robolectric.buildActivity(FlutterFragmentActivityWithProvidedEngine.class).get();
     activity.onCreate(null);
+    shadowOf(getMainLooper()).idle();
+
     activity.configureFlutterEngine(activity.getFlutterEngine());
 
     List<FlutterEngine> registeredEngines = GeneratedPluginRegistrant.getRegisteredEngines();
@@ -186,6 +190,8 @@ public class FlutterFragmentActivityTest {
     // Creating the FlutterFragmentActivity will create and attach the FlutterFragment, causing
     // a FlutterEngine to be created.
     activity.onCreate(null);
+    shadowOf(getMainLooper()).idle();
+
     assertNotNull(activity.getFlutterEngine());
     assertEquals(1, activity.numberOfEnginesCreated);
   }

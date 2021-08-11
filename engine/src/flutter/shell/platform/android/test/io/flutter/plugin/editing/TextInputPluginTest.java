@@ -124,11 +124,7 @@ public class TextInputPluginTest {
     ArgumentCaptor<String> channelCaptor = ArgumentCaptor.forClass(String.class);
     ArgumentCaptor<ByteBuffer> bufferCaptor = ArgumentCaptor.forClass(ByteBuffer.class);
 
-    verify(dartExecutor, times(1))
-        .send(
-            channelCaptor.capture(),
-            bufferCaptor.capture(),
-            any(BinaryMessenger.BinaryReply.class));
+    verify(dartExecutor, times(1)).send(channelCaptor.capture(), bufferCaptor.capture(), isNull());
     assertEquals("flutter/textinput", channelCaptor.getValue());
     verifyMethodCall(bufferCaptor.getValue(), "TextInputClient.requestExistingInputState", null);
   }
@@ -528,11 +524,7 @@ public class TextInputPluginTest {
 
     ArgumentCaptor<String> channelCaptor = ArgumentCaptor.forClass(String.class);
     ArgumentCaptor<ByteBuffer> bufferCaptor = ArgumentCaptor.forClass(ByteBuffer.class);
-    verify(dartExecutor, times(1))
-        .send(
-            channelCaptor.capture(),
-            bufferCaptor.capture(),
-            any(BinaryMessenger.BinaryReply.class));
+    verify(dartExecutor, times(1)).send(channelCaptor.capture(), bufferCaptor.capture(), isNull());
     assertEquals("flutter/textinput", channelCaptor.getValue());
     verifyMethodCall(bufferCaptor.getValue(), "TextInputClient.requestExistingInputState", null);
     InputConnectionAdaptor connection =
@@ -541,11 +533,7 @@ public class TextInputPluginTest {
                 testView, mock(KeyboardManager.class), new EditorInfo());
 
     connection.handleKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER));
-    verify(dartExecutor, times(2))
-        .send(
-            channelCaptor.capture(),
-            bufferCaptor.capture(),
-            any(BinaryMessenger.BinaryReply.class));
+    verify(dartExecutor, times(2)).send(channelCaptor.capture(), bufferCaptor.capture(), isNull());
     assertEquals("flutter/textinput", channelCaptor.getValue());
     verifyMethodCall(
         bufferCaptor.getValue(),
@@ -554,11 +542,7 @@ public class TextInputPluginTest {
     connection.handleKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER));
 
     connection.handleKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_NUMPAD_ENTER));
-    verify(dartExecutor, times(3))
-        .send(
-            channelCaptor.capture(),
-            bufferCaptor.capture(),
-            any(BinaryMessenger.BinaryReply.class));
+    verify(dartExecutor, times(3)).send(channelCaptor.capture(), bufferCaptor.capture(), isNull());
     assertEquals("flutter/textinput", channelCaptor.getValue());
     verifyMethodCall(
         bufferCaptor.getValue(),
@@ -735,7 +719,7 @@ public class TextInputPluginTest {
     final ViewStructure[] children = {mock(ViewStructure.class), mock(ViewStructure.class)};
 
     when(viewStructure.newChild(anyInt()))
-        .thenAnswer(invocation -> children[invocation.getArgumentAt(0, int.class)]);
+        .thenAnswer(invocation -> children[(int) invocation.getArgument(0)]);
 
     textInputPlugin.onProvideAutofillVirtualStructure(viewStructure, 0);
 
@@ -784,7 +768,7 @@ public class TextInputPluginTest {
     final ViewStructure[] children = {mock(ViewStructure.class)};
 
     when(viewStructure.newChild(anyInt()))
-        .thenAnswer(invocation -> children[invocation.getArgumentAt(0, int.class)]);
+        .thenAnswer(invocation -> children[(int) invocation.getArgument(0)]);
 
     textInputPlugin.onProvideAutofillVirtualStructure(viewStructure, 0);
 

@@ -13,6 +13,8 @@ public interface SplashScreenProvider {
   /**
    * Provides a {@link SplashScreen} to display while Flutter initializes and renders its first
    * frame.
+   *
+   * @return The splash screen.
    */
   @Nullable
   SplashScreen provideSplashScreen();

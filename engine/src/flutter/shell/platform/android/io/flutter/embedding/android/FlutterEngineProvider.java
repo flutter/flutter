@@ -27,6 +27,9 @@ public interface FlutterEngineProvider {
    * <p>This method may return a new {@link io.flutter.embedding.engine.FlutterEngine}, an existing,
    * cached {@link FlutterEngine}, or null to express that the {@code FlutterEngineProvider} would
    * like the {@code FlutterFragment} to provide its own {@code FlutterEngine} instance.
+   *
+   * @param context The current context. e.g. An activity.
+   * @return The Flutter engine.
    */
   @Nullable
   FlutterEngine provideFlutterEngine(@NonNull Context context);

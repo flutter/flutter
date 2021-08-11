@@ -320,7 +320,14 @@ public interface PluginRegistry {
    * Activity}.
    */
   interface RequestPermissionsResultListener {
-    /** @return true if the result has been handled. */
+    /**
+     * @param requestCode The request code passed in {@code
+     *     ActivityCompat.requestPermissions(android.app.Activity, String[], int)}.
+     * @param permissions The requested permissions.
+     * @param grantResults The grant results for the corresponding permissions which is either
+     *     {@code PackageManager.PERMISSION_GRANTED} or {@code PackageManager.PERMISSION_DENIED}.
+     * @return true if the result has been handled.
+     */
     boolean onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults);
   }
 
@@ -329,7 +336,15 @@ public interface PluginRegistry {
    * android.app.Activity}.
    */
   interface ActivityResultListener {
-    /** @return true if the result has been handled. */
+    /**
+     * @param requestCode The integer request code originally supplied to {@code
+     *     startActivityForResult()}, allowing you to identify who this result came from.
+     * @param resultCode The integer result code returned by the child activity through its {@code
+     *     setResult()}.
+     * @param data An Intent, which can return result data to the caller (various data can be
+     *     attached to Intent "extras").
+     * @return true if the result has been handled.
+     */
     boolean onActivityResult(int requestCode, int resultCode, Intent data);
   }
 
@@ -337,7 +352,10 @@ public interface PluginRegistry {
    * Delegate interface for handling new intents on behalf of the main {@link android.app.Activity}.
    */
   interface NewIntentListener {
-    /** @return true if the new intent has been handled. */
+    /**
+     * @param intent The new intent that was started for the activity.
+     * @return true if the new intent has been handled.
+     */
     boolean onNewIntent(Intent intent);
   }
 

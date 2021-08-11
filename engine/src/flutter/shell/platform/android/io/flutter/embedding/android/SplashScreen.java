@@ -17,6 +17,11 @@ import androidx.annotation.Nullable;
  * <p>Implementations provide a visual representation of a splash screen in {@link
  * #createSplashView(Context, Bundle)}, and implement a transition from the splash UI to Flutter's
  * UI in {@link #transitionToFlutter(Runnable)}.
+ *
+ * <p>Please use the new Splash screen API available on Android S. On lower versions of Android,
+ * it's no longer necessary to display a splash screen to wait for the Flutter first frame.
+ *
+ * @deprecated
  */
 public interface SplashScreen {
   /**
@@ -27,6 +32,12 @@ public interface SplashScreen {
    * configuration changes that require recreation of a view hierarchy. Implementers that provide a
    * stateful splash view, such as one with animations, should take care to migrate that animation
    * state from the previously returned splash view to the newly created splash view.
+   *
+   * @param context The current context. e.g. The activity.
+   * @param savedInstanceState If the activity is being re-initialized after previously being shut
+   *     down then this Bundle contains the data it most recently supplied in {@code
+   *     onSaveInstanceState(Bundle)}.
+   * @return The splash screen view.
    */
   @Nullable
   View createSplashView(@NonNull Context context, @Nullable Bundle savedInstanceState);
@@ -38,6 +49,8 @@ public interface SplashScreen {
    * <p>The provided {@code onTransitionComplete} callback must be invoked when the splash {@code
    * View} has finished transitioning itself away. The splash {@code View} will be removed and
    * destroyed when the callback is invoked.
+   *
+   * @param onTransitionComplete The callback after the transition has completed.
    */
   void transitionToFlutter(@NonNull Runnable onTransitionComplete);
 
@@ -69,6 +82,9 @@ public interface SplashScreen {
    * callback if it has already completed its transition. By meeting these requirements, and
    * returning {@code true} from this method, the splash screen experience will be completely
    * seamless, including configuration changes.
+   *
+   * @return True if the given splash {@code View} should be displayed in the {@code View}
+   *     hierarchy.
    */
   // We suppress NewApi because the CI linter thinks that "default" methods are unsupported.
   @SuppressLint("NewApi")
@@ -79,6 +95,8 @@ public interface SplashScreen {
   /**
    * Returns whatever state is necessary to restore a splash {@code View} after destruction and
    * recreation, e.g., orientation change.
+   *
+   * @return Bundle used to restore a splash screen state.
    */
   // We suppress NewApi because the CI linter thinks that "default" methods are unsupported.
   @SuppressLint("NewApi")

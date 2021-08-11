@@ -12,7 +12,6 @@ import argparse
 import glob
 import os
 import re
-import shutil
 import subprocess
 import sys
 import time
@@ -316,17 +315,6 @@ def EnsureIosTestsAreBuilt(ios_out_dir):
   assert os.path.exists(tmp_out_dir), final_message
 
 
-def AssertExpectedJavaVersion():
-  """Checks that the user has Java 8 which is the supported Java version for Android"""
-  EXPECTED_VERSION = '1.8'
-  # `java -version` is output to stderr. https://bugs.java.com/bugdatabase/view_bug.do?bug_id=4380614
-  version_output = subprocess.check_output(['java', '-version'], stderr=subprocess.STDOUT)
-  version_output = version_output.decode('utf-8')
-  match = bool(re.compile('version "%s' % EXPECTED_VERSION).search(version_output))
-  message = "JUnit tests need to be run with Java %s. Check the `java -version` on your PATH." % EXPECTED_VERSION
-  assert match, message
-
-
 def AssertExpectedXcodeVersion():
   """Checks that the user has a version of Xcode installed"""
   version_output = subprocess.check_output(['xcodebuild', '-version'])
@@ -335,9 +323,18 @@ def AssertExpectedXcodeVersion():
   assert match, message
 
 
+def JavaBin():
+  script_path = os.path.dirname(os.path.realpath(__file__))
+  if IsMac():
+    return os.path.join(script_path, '..', '..', 'third_party', 'java', 'openjdk', 'Contents', 'Home', 'bin', 'java')
+  elif IsWindows():
+    return os.path.join(script_path, '..', '..', 'third_party', 'java', 'openjdk', 'bin', 'java.exe')
+  else :
+    return os.path.join(script_path, '..', '..', 'third_party', 'java', 'openjdk', 'bin', 'java')
+
+
 def RunJavaTests(filter, android_variant='android_debug_unopt'):
   """Runs the Java JUnit unit tests for the Android embedding"""
-  AssertExpectedJavaVersion()
   android_out_dir = os.path.join(out_dir, android_variant)
   EnsureJavaTestsAreBuilt(android_out_dir)
 
@@ -351,7 +348,7 @@ def RunJavaTests(filter, android_variant='android_debug_unopt'):
 
   test_class = filter if filter else 'io.flutter.FlutterTestSuite'
   command = [
-    'java',
+    JavaBin(),
     '-Drobolectric.offline=true',
     '-Drobolectric.dependency.dir=' + embedding_deps_dir,
     '-classpath', ':'.join(classpath),

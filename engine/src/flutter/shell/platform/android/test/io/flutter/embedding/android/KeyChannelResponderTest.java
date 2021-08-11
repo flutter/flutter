@@ -40,7 +40,7 @@ public class KeyChannelResponderTest {
 
     doAnswer(
             invocation -> {
-              invocation.getArgumentAt(2, EventResponseHandler.class).onFrameworkResponse(true);
+              ((EventResponseHandler) invocation.getArgument(2)).onFrameworkResponse(true);
               return null;
             })
         .when(keyEventChannel)

@@ -2,6 +2,7 @@ package io.flutter.embedding.android;
 
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
@@ -154,7 +155,7 @@ public class FlutterAndroidComponentTest {
     delegate.onRestoreInstanceState(null);
 
     // Verify that after Activity creation, the plugin was allowed to restore state.
-    verify(mockSaveStateListener, times(1)).onRestoreInstanceState(any(Bundle.class));
+    verify(mockSaveStateListener, times(1)).onRestoreInstanceState(isNull());
 
     delegate.onCreateView(null, null, null, 0, true);
     delegate.onStart();
