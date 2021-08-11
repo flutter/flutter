@@ -185,7 +185,7 @@ class NotificationListener<T extends Notification> extends StatelessWidget {
   /// Called when a notification of the appropriate type arrives at this
   /// location in the tree.
   ///
-  /// Return true to cancel the notification bubbling. Return false (or null) to
+  /// Return true to cancel the notification bubbling. Return false to
   /// allow the notification to continue to be dispatched to further ancestors.
   ///
   /// The notification's [Notification.visitAncestor] method is called for each
