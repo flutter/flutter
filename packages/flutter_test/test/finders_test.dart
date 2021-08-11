@@ -28,8 +28,8 @@ void main() {
       expect(find.text('test'), findsOneWidget);
     });
 
-    group('skipRichText', () {
-      testWidgets('finds RichText widgets when disabled',
+    group('findRichText', () {
+      testWidgets('finds RichText widgets when enabled',
           (WidgetTester tester) async {
         await tester.pumpWidget(_boilerplate(RichText(
           text: const TextSpan(
@@ -40,17 +40,17 @@ void main() {
           ),
         )));
 
-        expect(find.text('test', skipRichText: false), findsOneWidget);
+        expect(find.text('test', findRichText: true), findsOneWidget);
       });
 
-      testWidgets('finds Text widgets once when disabled',
+      testWidgets('finds Text widgets once when enabled',
           (WidgetTester tester) async {
         await tester.pumpWidget(_boilerplate(const Text('test2')));
 
-        expect(find.text('test2', skipRichText: false), findsOneWidget);
+        expect(find.text('test2', findRichText: true), findsOneWidget);
       });
 
-      testWidgets('does not find RichText widgets when enabled',
+      testWidgets('does not find RichText widgets when disabled',
           (WidgetTester tester) async {
         await tester.pumpWidget(_boilerplate(RichText(
           text: const TextSpan(
@@ -61,7 +61,7 @@ void main() {
           ),
         )));
 
-        expect(find.text('test', skipRichText: true), findsNothing);
+        expect(find.text('test', findRichText: false), findsNothing);
       });
 
       testWidgets(
@@ -73,21 +73,6 @@ void main() {
         ));
 
         expect(find.text('test'), findsOneWidget);
-      });
-
-      testWidgets('finds Text.rich widgets when disabled',
-          (WidgetTester tester) async {
-        await tester.pumpWidget(_boilerplate(const Text.rich(
-          TextSpan(
-            text: 't',
-            children: <TextSpan>[
-              TextSpan(text: 'est'),
-              TextSpan(text: '3'),
-            ],
-          ),
-        )));
-
-        expect(find.text('test3', skipRichText: false), findsOneWidget);
       });
 
       testWidgets('finds Text.rich widgets when enabled',
@@ -102,7 +87,22 @@ void main() {
           ),
         )));
 
-        expect(find.text('test3', skipRichText: true), findsOneWidget);
+        expect(find.text('test3', findRichText: true), findsOneWidget);
+      });
+
+      testWidgets('finds Text.rich widgets when disabled',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(_boilerplate(const Text.rich(
+          TextSpan(
+            text: 't',
+            children: <TextSpan>[
+              TextSpan(text: 'est'),
+              TextSpan(text: '3'),
+            ],
+          ),
+        )));
+
+        expect(find.text('test3', findRichText: false), findsOneWidget);
       });
     });
   });
