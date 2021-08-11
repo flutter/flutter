@@ -1410,7 +1410,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 ///           child: SizedBox(
 ///             height: 20,
 ///             child: Center(
-///               child: const Text('Scroll to see the SliverAppBar in effect.'),
+///               child: Text('Scroll to see the SliverAppBar in effect.'),
 ///             ),
 ///           ),
 ///         ),
