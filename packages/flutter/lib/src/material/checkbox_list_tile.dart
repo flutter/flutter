@@ -109,7 +109,7 @@ import 'theme_data.dart';
 ///   final String label;
 ///   final EdgeInsets padding;
 ///   final bool value;
-///   final Function onChanged;
+///   final ValueChanged<bool> onChanged;
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
@@ -135,7 +135,7 @@ import 'theme_data.dart';
 ///           Checkbox(
 ///             value: value,
 ///             onChanged: (bool? newValue) {
-///               onChanged(newValue);
+///               onChanged(newValue!);
 ///             },
 ///           ),
 ///         ],
@@ -190,7 +190,7 @@ import 'theme_data.dart';
 ///   final String label;
 ///   final EdgeInsets padding;
 ///   final bool value;
-///   final Function onChanged;
+///   final ValueChanged<bool> onChanged;
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
@@ -206,7 +206,7 @@ import 'theme_data.dart';
 ///             Checkbox(
 ///               value: value,
 ///               onChanged: (bool? newValue) {
-///                 onChanged(newValue);
+///                 onChanged(newValue!);
 ///               },
 ///             ),
 ///           ],
