@@ -201,39 +201,36 @@ class RouteInformation {
 /// method.
 ///
 /// If the location in the new route information is different from the
-/// current location, this is considered to be a navigation event, the router
-/// sends the new route information to the [routeInformationProvider]'s
-/// [RouteInformationProvider.routerReportsNewRouteInformation] method with
-/// `isNavigation` equals to true. That method as implemented in
-/// [PlatformRouteInformationProvider] uses
-/// [SystemNavigator.routeInformationUpdated] to notify the engine, and through
-/// that the browser, to create a history entry with the new url if the
-/// `isNavigation` is true.
-///
-/// If the location is the same as the current location but different state,
-/// the router still sends the new route information to the
-/// [routeInformationProvider]'s
-/// [RouteInformationProvider.routerReportsNewRouteInformation] but with
-/// `isNavigation` equals to false. This causes
-/// [PlatformRouteInformationProvider] replace current history entry instead
-/// of creating a new one.
+/// current location, this is considered to be a navigation event, the
+/// [PlatformRouteInformationProvider.routerReportsNewRouteInformation] method
+/// calls [SystemNavigator.routeInformationUpdated] with `replace = false` to
+/// notify the engine, and through that the browser, to create a history entry
+/// with the new url. Otherwise,
+/// [PlatformRouteInformationProvider.routerReportsNewRouteInformation] calls
+/// [SystemNavigator.routeInformationUpdated] with `replace = true` to update
+/// the current history entry with the latest [RouterInformation].
 ///
 /// One can force the [Router] to report new route information as navigation
 /// event to the [routeInformationProvider] (and thus the browser) even if the
 /// [RouteInformation.location] has not changed by calling the [Router.navigate]
-/// method with a callback that performs the state change. This allows one to
-/// support the browser's back and forward buttons without changing the URL. For
-/// example, the scroll position of a scroll view may be saved in the
-/// [RouteInformation.state]. Using [Router.navigate] to update the scroll
-/// position causes the browser to create a new history entry with the
+/// method with a callback that performs the state change. This causes [Router]
+/// to call the [RouteInformationProvider.routerReportsNewRouteInformation] with
+/// [RouteInformationReportingType.navigation], and thus causes
+/// [PlatformRouteInformationProvider] to push a new history entry regardlessly.
+/// This allows one to support the browser's back and forward buttons without
+/// changing the URL. For example, the scroll position of a scroll view may be
+/// saved in the [RouteInformation.state]. Using [Router.navigate] to update the
+/// scroll position causes the browser to create a new history entry with the
 /// [RouteInformation.state] that stores this new scroll position. When the user
 /// clicks the back button, the app will go back to the previous scroll position
 /// without changing the URL in the location bar.
 ///
 /// One can also force the [Router] to ignore a navigation event by making
 /// those changes during a callback passed to [Router.neglect]. The [Router]
-/// will not report the route information with `isNavigation` equals to false
-/// even if it detects location change as the result of running the callback.
+/// calls the [RouteInformationProvider.routerReportsNewRouteInformation] with
+/// [RouteInformationReportingType.neglecting], and thus causes
+/// [PlatformRouteInformationProvider] to replace the current history entry
+/// regardlessly even if it detects location change.
 ///
 /// To opt out of URL updates entirely, pass null for [routeInformationProvider]
 /// and [routeInformationParser]. This is not recommended in general, but may be
@@ -432,7 +429,7 @@ class Router<T> extends StatefulWidget {
     final _RouterScope scope = context
       .getElementForInheritedWidgetOfExactType<_RouterScope>()!
       .widget as _RouterScope;
-    scope.routerState._setStateWithExplicitReportStatus(RouteInformationReportingType.navigating, callback);
+    scope.routerState._setStateWithExplicitReportStatus(RouteInformationReportingType.navigation, callback);
   }
 
   /// Forces the [Router] to run the [callback] without creating a new history
@@ -471,14 +468,20 @@ class Router<T> extends StatefulWidget {
 typedef _AsyncPassthrough<Q> = Future<Q> Function(Q);
 typedef _DelegateRouteSetter<T> = Future<void> Function(T);
 
-// Whether to report the route information in this build cycle.
+/// The [Router]'s intention when it reports a new [RouteInformation] to the
+/// [RouteInformationProvider].
+///
+/// See also:
+///
+///  * [RouteInformationProvider.routerReportsNewRouteInformation]: which is
+///    called by the router when it has a new route information to report.
 enum RouteInformationReportingType {
-  // We haven't receive any signal on whether to report.
+  /// The router does not have a specific intention.
   implicit,
-  // Report if route information changes.
+  /// The [RouteInformation] is generated during the [Router.neglect].
   neglecting,
-  // Report regardless of route information changes.
-  navigating,
+  /// The [RouteInformation] is generated during the [Router.navigate].
+  navigation,
 }
 
 class _RouterState<T> extends State<Router<T>> with RestorationMixin {
@@ -1302,14 +1305,16 @@ abstract class RouteInformationProvider extends ValueListenable<RouteInformation
   /// other side effects. For example, the [PlatformRouteInformationProvider]
   /// overrides this method to report the route information back to the engine.
   ///
-  /// The [routeInformation] is the new route information after the navigation
-  /// event.
+  /// The `routeInformation` is the new route information generated by the
+  /// Router rebuild, the it can be the same or different from the
+  /// [value].
   ///
-  /// The [isNavigation] denotes whether the new route information is generated
-  /// as a result of a navigation event. This information can be useful in a
-  /// web application, for example, the [PlatformRouteInformationProvider] uses
-  /// this flag to decide whether to create a browser history entry that enables
-  /// browser backward and forward buttons.
+  /// The `type` denotes the [Router]'s intention when it reports this
+  /// `routeInformation`. It is useful when deciding how to update the internal
+  /// state of [RouteInformationProvider] subclass with the `routeInformation`.
+  /// For example, [PlatformRouteInformationProvider] uses this property to
+  /// decide whether to push or replace the browser history entry with the new
+  /// `routeInformation`.
   ///
   /// For more information on how [Router] determines a navigation event, see
   /// the "URL updates for web applications" section in the [Router]

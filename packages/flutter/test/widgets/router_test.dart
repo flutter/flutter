@@ -621,7 +621,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     // report a route information because isNavigating = true.
     await tester.tap(find.byType(ElevatedButton));
     await tester.pump();
-    expect(reportedType, RouteInformationReportingType.navigating);
+    expect(reportedType, RouteInformationReportingType.navigation);
     expect(reportedRouteInformation!.location, 'update');
     reportedType = null;
     reportedRouteInformation = null;
@@ -823,7 +823,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     ]);
 
     log.clear();
-    provider.routerReportsNewRouteInformation(const RouteInformation(location: 'b', state: false), type: RouteInformationReportingType.navigating);
+    provider.routerReportsNewRouteInformation(const RouteInformation(location: 'b', state: false), type: RouteInformationReportingType.navigation);
     expect(log, <Object>[
       isMethodCall('selectMultiEntryHistory', arguments: null),
       isMethodCall('routeInformationUpdated', arguments: <String, dynamic>{ 'location': 'b', 'state': false, 'replace': false }),
