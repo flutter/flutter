@@ -23,6 +23,7 @@ import androidx.annotation.Nullable;
  *
  * @deprecated
  */
+@Deprecated
 public interface SplashScreen {
   /**
    * Creates a {@code View} to be displayed as a splash screen before Flutter renders its first

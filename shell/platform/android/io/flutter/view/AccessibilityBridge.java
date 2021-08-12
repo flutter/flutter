@@ -2692,7 +2692,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
           switch (attribute.type) {
             case SPELLOUT:
               {
-                final TtsSpan ttsSpan = new TtsSpan.Builder(TtsSpan.TYPE_VERBATIM).build();
+                final TtsSpan ttsSpan = new TtsSpan.Builder<>(TtsSpan.TYPE_VERBATIM).build();
                 spannableString.setSpan(ttsSpan, attribute.start, attribute.end, 0);
                 break;
               }
