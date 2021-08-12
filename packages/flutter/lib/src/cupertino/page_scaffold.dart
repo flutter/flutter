@@ -32,7 +32,7 @@ import 'theme.dart';
 ///     // Uncomment to change the background color
 ///     // backgroundColor: CupertinoColors.systemPink,
 ///     navigationBar: const CupertinoNavigationBar(
-///       middle: const Text('Sample Code'),
+///       middle: Text('Sample Code'),
 ///     ),
 ///     child: ListView(
 ///       children: <Widget>[

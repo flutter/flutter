@@ -901,7 +901,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///               return const SizedBox(
   ///                 width: 200,
   ///                 child: Padding(
-  ///                   padding: const EdgeInsets.all(8.0),
+  ///                   padding: EdgeInsets.all(8.0),
   ///                   child: TextField(
   ///                     decoration: InputDecoration(border: OutlineInputBorder()),
   ///                   ),

@@ -1731,7 +1731,7 @@ void main() {
       await _testRotatedImage(tester, true);
       await _testRotatedImage(tester, false);
     },
-    skip: kIsWeb, // https://github.com/flutter/flutter/issues/54292.
+    skip: kIsWeb, // https://github.com/flutter/flutter/issues/87933.
   );
 
   testWidgets(
@@ -1782,7 +1782,7 @@ void main() {
         matchesGoldenFile('transparent_image.png'),
       );
     },
-    skip: kIsWeb, // https://github.com/flutter/flutter/issues/54292.
+    skip: kIsWeb, // https://github.com/flutter/flutter/issues/87933.
   );
 
   testWidgets('Reports image size when painted', (WidgetTester tester) async {
@@ -1865,7 +1865,7 @@ void main() {
     // Image cache listener go away and Image stream listeners go away.
     // Image is now at zero.
     expect(image.debugGetOpenHandleStackTraces()!.length, 0);
-  }, skip: kIsWeb); // Web does not care about image handle/disposal.
+  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87442
 
   testWidgets('Keeps stream alive when ticker mode is disabled',  (WidgetTester tester) async {
     imageCache!.maximumSize = 0;

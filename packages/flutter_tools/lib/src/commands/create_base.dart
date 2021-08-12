@@ -151,6 +151,7 @@ abstract class CreateBase extends FlutterCommand {
   void addPlatformsOptions({String customHelp}) {
     argParser.addMultiOption('platforms',
       help: customHelp ?? _kDefaultPlatformArgumentHelp,
+      aliases: <String>[ 'platform' ],
       defaultsTo: <String>[
         ..._kAvailablePlatforms,
         if (featureFlags.isWindowsUwpEnabled)
