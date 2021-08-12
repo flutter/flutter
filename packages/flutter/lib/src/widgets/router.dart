@@ -208,7 +208,7 @@ class RouteInformation {
 /// with the new url. Otherwise,
 /// [PlatformRouteInformationProvider.routerReportsNewRouteInformation] calls
 /// [SystemNavigator.routeInformationUpdated] with `replace = true` to update
-/// the current history entry with the latest [RouterInformation].
+/// the current history entry with the latest [RouteInformation].
 ///
 /// One can force the [Router] to report new route information as navigation
 /// event to the [routeInformationProvider] (and thus the browser) even if the
