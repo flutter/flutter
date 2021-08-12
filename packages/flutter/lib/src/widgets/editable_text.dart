@@ -1544,7 +1544,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   ScrollController? _scrollController;
 
-  late final AnimationController _cursorBlinkOpacityController = AnimationController(vsync: this, duration: _fadeDuration);
+  late final AnimationController _cursorBlinkOpacityController = AnimationController(
+    vsync: this,
+    duration: _fadeDuration,
+  )..addListener(_onCursorColorTick);
 
   final LayerLink _toolbarLayerLink = LayerLink();
   final LayerLink _startHandleLayerLink = LayerLink();
@@ -1619,7 +1622,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     widget.focusNode.addListener(_handleFocusChanged);
     _scrollController = widget.scrollController ?? ScrollController();
     _scrollController!.addListener(() { _selectionOverlay?.updateForScroll(); });
-    _cursorBlinkOpacityController.addListener(_onCursorColorTick);
     _floatingCursorResetController = AnimationController(vsync: this);
     _floatingCursorResetController.addListener(_onFloatingCursorResetTick);
     _cursorVisibilityNotifier.value = widget.showCursor;
