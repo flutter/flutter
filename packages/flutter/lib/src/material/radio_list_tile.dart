@@ -120,7 +120,7 @@ import 'theme_data.dart';
 ///   final EdgeInsets padding;
 ///   final bool groupValue;
 ///   final bool value;
-///   final Function onChanged;
+///   final ValueChanged<bool> onChanged;
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
@@ -132,7 +132,7 @@ import 'theme_data.dart';
 ///             groupValue: groupValue,
 ///             value: value,
 ///             onChanged: (bool? newValue) {
-///               onChanged(newValue);
+///               onChanged(newValue!);
 ///             }
 ///           ),
 ///           RichText(
@@ -221,7 +221,7 @@ import 'theme_data.dart';
 ///   final EdgeInsets padding;
 ///   final bool groupValue;
 ///   final bool value;
-///   final Function onChanged;
+///   final ValueChanged<bool> onChanged;
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
@@ -239,7 +239,7 @@ import 'theme_data.dart';
 ///               groupValue: groupValue,
 ///               value: value,
 ///               onChanged: (bool? newValue) {
-///                 onChanged(newValue);
+///                 onChanged(newValue!);
 ///               },
 ///             ),
 ///             Text(label),

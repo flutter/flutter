@@ -382,7 +382,7 @@ class DataCell {
 ///     child: DataTable(
 ///       columns: const <DataColumn>[
 ///         DataColumn(
-///           label: const Text('Number'),
+///           label: Text('Number'),
 ///         ),
 ///       ],
 ///       rows: List<DataRow>.generate(
