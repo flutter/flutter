@@ -13,7 +13,7 @@ function script_location() {
     script_location="$(readlink "$script_location")"
     [[ "$script_location" != /* ]] && script_location="$DIR/$script_location"
   done
-  echo "$(cd -P "$(dirname "$script_location")" >/dev/null && pwd)"
+  cd -P "$(dirname "$script_location")" >/dev/null && pwd
 }
 
 function generate_docs() {
@@ -21,6 +21,18 @@ function generate_docs() {
     # NOTE: When updating to a new dartdoc version, please also update
     # `dartdoc_options.yaml` to include newly introduced error and warning types.
     "$PUB" global activate dartdoc 1.0.2
+
+    # Install and activate the snippets tool, which resides in the
+    # assets-for-api-docs repo:
+    # https://github.com/flutter/assets-for-api-docs/tree/master/packages/snippets
+    # >>> If you update this version, also update it in dev/bots/analyze_sample_code.dart <<<
+    "$PUB" global activate snippets 0.2.2
+
+    # Install and activate the snippets tool, which resides in the
+    # assets-for-api-docs repo:
+    # https://github.com/flutter/assets-for-api-docs/tree/master/packages/snippets
+    # >>> If you update this version, also update it in dev/bots/analyze_sample_code.dart <<<
+    "$PUB" global activate snippets 0.2.1
 
     # This script generates a unified doc set, and creates
     # a custom index.html, placing everything into dev/docs/doc.
@@ -96,9 +108,9 @@ function move_offline_into_place() {
   mv flutter.docs.zip doc/offline/flutter.docs.zip
   du -sh doc/offline/flutter.docs.zip
   if [[ "$LUCI_BRANCH" == "stable" ]]; then
-    echo -e "<entry>\n  <version>${FLUTTER_VERSION}</version>\n  <url>https://api.flutter.dev/offline/flutter.docset.tar.gz</url>\n</entry>" > doc/offline/flutter.xml
+    echo -e "<entry>\n  <version>${FLUTTER_VERSION_STRING}</version>\n  <url>https://api.flutter.dev/offline/flutter.docset.tar.gz</url>\n</entry>" > doc/offline/flutter.xml
   else
-    echo -e "<entry>\n  <version>${FLUTTER_VERSION}</version>\n  <url>https://master-api.flutter.dev/offline/flutter.docset.tar.gz</url>\n</entry>" > doc/offline/flutter.xml
+    echo -e "<entry>\n  <version>${FLUTTER_VERSION_STRING}</version>\n  <url>https://master-api.flutter.dev/offline/flutter.docset.tar.gz</url>\n</entry>" > doc/offline/flutter.xml
   fi
   mv flutter.docset.tar.gz doc/offline/flutter.docset.tar.gz
   du -sh doc/offline/flutter.docset.tar.gz
@@ -125,9 +137,11 @@ DART="$DART_BIN/dart"
 PUB="$DART_BIN/pub"
 export PATH="$FLUTTER_BIN:$DART_BIN:$PATH"
 
-# Make sure dart is installed by invoking flutter to download it.
-"$FLUTTER" --version
-FLUTTER_VERSION=$(cat "$FLUTTER_ROOT/version")
+# Make sure dart is installed by invoking Flutter to download it.
+# This also creates the 'version' file.
+FLUTTER_VERSION=$("$FLUTTER" --version --machine)
+export FLUTTER_VERSION
+FLUTTER_VERSION_STRING=$(cat "$FLUTTER_ROOT/version")
 
 # If the pub cache directory exists in the root, then use that.
 FLUTTER_PUB_CACHE="$FLUTTER_ROOT/.pub-cache"

@@ -246,6 +246,17 @@ targets:
         ["framework","hostonly","shard"]
     scheduler: luci
 
+  - name: Linux ci_yaml flutter roller
+    recipe: infra/ci_yaml
+    bringup: true
+    timeout: 30
+    properties:
+      tags: >
+        ["framework","hostonly","shard"]
+    scheduler: luci
+    runIf:
+      - .ci.yaml
+
   - name: Linux customer_testing
     recipe: flutter/flutter
     timeout: 60
