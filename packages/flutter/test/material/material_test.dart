@@ -244,7 +244,7 @@ void main() {
                 onPressed: () {
                   pressed = true;
                 },
-                child: const Text('Button'),
+                child: null,
               ),
               const Material(
                 type: MaterialType.transparency,

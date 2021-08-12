@@ -96,7 +96,7 @@ class ElevatedButton extends ButtonStyleButton {
     FocusNode? focusNode,
     bool autofocus = false,
     Clip clipBehavior = Clip.none,
-    required Widget child,
+    required Widget? child,
   }) : super(
     key: key,
     onPressed: onPressed,
