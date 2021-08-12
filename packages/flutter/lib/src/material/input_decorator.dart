@@ -2426,7 +2426,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 ///       hintText: 'Hint Text',
 ///       helperText: 'Helper Text',
 ///       counterText: '0 characters',
-///       border: const OutlineInputBorder(),
+///       border: OutlineInputBorder(),
 ///     ),
 ///   );
 /// }
