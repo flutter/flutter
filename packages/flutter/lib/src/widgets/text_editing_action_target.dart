@@ -234,7 +234,7 @@ abstract class TextEditingActionTarget {
     final String textBefore = textEditingValue.selection.textBefore(textEditingValue.text);
     final int characterBoundary =
         _getLeftByWord(textBefore.length, includeWhitespace);
-    final TextEditingValue nextValue = textEditingValue.deleteTo(characterBoundary, includeWhitespace);
+    final TextEditingValue nextValue = textEditingValue.deleteTo(characterBoundary);
 
     setTextEditingValue(nextValue, cause);
   }
@@ -335,7 +335,7 @@ abstract class TextEditingActionTarget {
 
     final String textBefore = textEditingValue.selection.textBefore(textEditingValue.text);
     final int characterBoundary = _getRightByWord(textBefore.length, includeWhitespace);
-    final TextEditingValue nextValue = textEditingValue.deleteTo(characterBoundary, includeWhitespace);
+    final TextEditingValue nextValue = textEditingValue.deleteTo(characterBoundary);
 
     setTextEditingValue(nextValue, cause);
   }

@@ -250,7 +250,7 @@ class TextEditingValue {
   ///
   /// If the selection is not collapsed, deletes the selection regardless of the
   /// given index.
-  TextEditingValue deleteTo(int index, [bool includeWhitespace = true]) {
+  TextEditingValue deleteTo(int index) {
     assert(selection != null);
 
     if (!selection.isValid) {
