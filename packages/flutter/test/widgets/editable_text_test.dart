@@ -5208,6 +5208,7 @@ void main() {
 
     late final int afterHomeOffset;
     late final int afterEndOffset;
+    late final TextAffinity afterEndAffinity;
     switch (defaultTargetPlatform) {
       // These platforms don't handle home/end at all.
       case TargetPlatform.android:
@@ -5216,6 +5217,7 @@ void main() {
       case TargetPlatform.macOS:
         afterHomeOffset = 23;
         afterEndOffset = 23;
+        afterEndAffinity = TextAffinity.downstream;
         break;
 
       // These platforms go to the line start/end.
@@ -5223,6 +5225,7 @@ void main() {
       case TargetPlatform.windows:
         afterHomeOffset = 20;
         afterEndOffset = 35;
+        afterEndAffinity = TextAffinity.upstream;
         break;
     }
 
@@ -5246,13 +5249,12 @@ void main() {
       targetPlatform: defaultTargetPlatform,
     );
 
-    // TODO(justinmc): Maybe do these expects in the switch instead of assigning.
     expect(
       selection,
       equals(
         TextSelection.collapsed(
           offset: afterEndOffset,
-          affinity: TextAffinity.downstream,
+          affinity: afterEndAffinity,
         ),
       ),
       reason: 'on $platform',
