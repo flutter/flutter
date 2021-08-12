@@ -1009,6 +1009,7 @@ class ContainerLayer extends Layer {
   @override
   void detach() {
     super.detach();
+    assert(parent == null || attached == parent!.attached);
     Layer? child = firstChild;
     while (child != null) {
       child.detach();

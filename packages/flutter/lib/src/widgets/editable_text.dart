@@ -2462,13 +2462,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _updateSizeAndTransform() {
-    if (_hasInputConnection) {
-      final Size size = renderEditable.size;
-      final Matrix4 transform = renderEditable.getTransformTo(null);
-      _textInputConnection!.setEditableSizeAndTransform(size, transform);
-      SchedulerBinding.instance!
-          .addPostFrameCallback((Duration _) => _updateSizeAndTransform());
+    if (!_hasInputConnection || !renderEditable.attached) {
+      return;
     }
+    final Size size = renderEditable.size;
+    final Matrix4 transform = renderEditable.getTransformTo(null);
+    _textInputConnection!.setEditableSizeAndTransform(size, transform);
+    SchedulerBinding.instance!
+        .addPostFrameCallback((Duration _) => _updateSizeAndTransform());
   }
 
   // Sends the current composing rect to the iOS text input plugin via the text
@@ -2477,34 +2478,36 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   // plugin needs to estimate the composing rect based on the latest caret rect,
   // when the composing rect info didn't arrive in time.
   void _updateComposingRectIfNeeded() {
-    final TextRange composingRange = _value.composing;
-    if (_hasInputConnection) {
-      assert(mounted);
-      Rect? composingRect = renderEditable.getRectForComposingRange(composingRange);
-      // Send the caret location instead if there's no marked text yet.
-      if (composingRect == null) {
-        assert(!composingRange.isValid || composingRange.isCollapsed);
-        final int offset = composingRange.isValid ? composingRange.start : 0;
-        composingRect = renderEditable.getLocalRectForCaret(TextPosition(offset: offset));
-      }
-      assert(composingRect != null);
-      _textInputConnection!.setComposingRect(composingRect);
-      SchedulerBinding.instance!
-          .addPostFrameCallback((Duration _) => _updateComposingRectIfNeeded());
+    if (!_hasInputConnection || !renderEditable.attached) {
+      return;
     }
+    final TextRange composingRange = _value.composing;
+    assert(mounted);
+    Rect? composingRect = renderEditable.getRectForComposingRange(composingRange);
+    // Send the caret location instead if there's no marked text yet.
+    if (composingRect == null) {
+      assert(!composingRange.isValid || composingRange.isCollapsed);
+      final int offset = composingRange.isValid ? composingRange.start : 0;
+      composingRect = renderEditable.getLocalRectForCaret(TextPosition(offset: offset));
+    }
+    assert(composingRect != null);
+    _textInputConnection!.setComposingRect(composingRect);
+    SchedulerBinding.instance!
+        .addPostFrameCallback((Duration _) => _updateComposingRectIfNeeded());
   }
 
   void _updateCaretRectIfNeeded() {
-    if (_hasInputConnection) {
-      if (renderEditable.selection != null && renderEditable.selection!.isValid &&
-          renderEditable.selection!.isCollapsed) {
-        final TextPosition currentTextPosition = TextPosition(offset: renderEditable.selection!.baseOffset);
-        final Rect caretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
-        _textInputConnection!.setCaretRect(caretRect);
-      }
-      SchedulerBinding.instance!
-          .addPostFrameCallback((Duration _) => _updateCaretRectIfNeeded());
+    if (!_hasInputConnection || !renderEditable.attached) {
+      return;
     }
+    if (renderEditable.selection != null && renderEditable.selection!.isValid &&
+        renderEditable.selection!.isCollapsed) {
+      final TextPosition currentTextPosition = TextPosition(offset: renderEditable.selection!.baseOffset);
+      final Rect caretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
+      _textInputConnection!.setCaretRect(caretRect);
+    }
+    SchedulerBinding.instance!
+        .addPostFrameCallback((Duration _) => _updateCaretRectIfNeeded());
   }
 
   TextDirection get _textDirection {

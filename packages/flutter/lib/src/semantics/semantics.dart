@@ -1808,6 +1808,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     owner!._nodes.remove(id);
     owner!._detachedNodes.add(this);
     super.detach();
+    assert(parent == null || attached == parent!.attached);
     assert(owner == null);
     if (_children != null) {
       for (final SemanticsNode child in _children!) {

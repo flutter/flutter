@@ -346,6 +346,13 @@ class Hero extends StatefulWidget {
         final StatefulElement hero = element as StatefulElement;
         final Object tag = widget.tag;
         assert(tag != null);
+        // If the hero's render object is currently not populated or detached,
+        // we can't read its layout information. Keep searching in case there're
+        // descendant elements with attached render objects.
+        if (!(hero.findRenderObject()?.attached ?? false)) {
+          element.visitChildren(visitor);
+          return;
+        }
         if (Navigator.of(hero) == navigator) {
           inviteHero(hero, tag);
         } else {
@@ -897,43 +904,44 @@ class HeroController extends NavigatorObserver {
     HeroFlightDirection flightType,
     bool isUserGestureTransition,
   ) {
-    if (toRoute != fromRoute && toRoute is PageRoute<dynamic> && fromRoute is PageRoute<dynamic>) {
-      final PageRoute<dynamic> from = fromRoute;
-      final PageRoute<dynamic> to = toRoute;
-      final Animation<double> animation = (flightType == HeroFlightDirection.push) ? to.animation! : from.animation!;
+    if (toRoute == fromRoute || toRoute is! PageRoute<dynamic> || fromRoute is! PageRoute<dynamic>) {
+      return;
+    }
+    final PageRoute<dynamic> from = fromRoute;
+    final PageRoute<dynamic> to = toRoute;
+    final Animation<double> animation = (flightType == HeroFlightDirection.push) ? to.animation! : from.animation!;
 
-      // A user gesture may have already completed the pop, or we might be the initial route
-      switch (flightType) {
-        case HeroFlightDirection.pop:
-          if (animation.value == 0.0) {
-            return;
-          }
-          break;
-        case HeroFlightDirection.push:
-          if (animation.value == 1.0) {
-            return;
-          }
-          break;
-      }
+    // A user gesture may have already completed the pop, or we might be the initial route
+    switch (flightType) {
+      case HeroFlightDirection.pop:
+        if (animation.value == 0.0) {
+          return;
+        }
+        break;
+      case HeroFlightDirection.push:
+        if (animation.value == 1.0) {
+          return;
+        }
+        break;
+    }
 
-      // For pop transitions driven by a user gesture: if the "to" page has
-      // maintainState = true, then the hero's final dimensions can be measured
-      // immediately because their page's layout is still valid.
-      if (isUserGestureTransition && flightType == HeroFlightDirection.pop && to.maintainState) {
+    // For pop transitions driven by a user gesture: if the "to" page has
+    // maintainState = true, then the hero's final dimensions can be measured
+    // immediately because their page's layout is still valid.
+    if (isUserGestureTransition && flightType == HeroFlightDirection.pop && to.maintainState) {
+      _startHeroTransition(from, to, animation, flightType, isUserGestureTransition);
+    } else {
+      // Otherwise, delay measuring until the end of the next frame to allow
+      // the 'to' route to build and layout.
+
+      // Putting a route offstage changes its animation value to 1.0. Once this
+      // frame completes, we'll know where the heroes in the `to` route are
+      // going to end up, and the `to` route will go back onstage.
+      to.offstage = to.animation!.value == 0.0;
+
+      WidgetsBinding.instance!.addPostFrameCallback((Duration value) {
         _startHeroTransition(from, to, animation, flightType, isUserGestureTransition);
-      } else {
-        // Otherwise, delay measuring until the end of the next frame to allow
-        // the 'to' route to build and layout.
-
-        // Putting a route offstage changes its animation value to 1.0. Once this
-        // frame completes, we'll know where the heroes in the `to` route are
-        // going to end up, and the `to` route will go back onstage.
-        to.offstage = to.animation!.value == 0.0;
-
-        WidgetsBinding.instance!.addPostFrameCallback((Duration value) {
-          _startHeroTransition(from, to, animation, flightType, isUserGestureTransition);
-        });
-      }
+      });
     }
   }
 

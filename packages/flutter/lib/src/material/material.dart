@@ -632,6 +632,9 @@ abstract class InkFeature {
   }
 
   void _paint(Canvas canvas) {
+    if (!referenceBox.attached) {
+      return;
+    }
     assert(referenceBox.attached);
     assert(!_debugDisposed);
     // find the chain of renderers from us to the feature's referenceBox
