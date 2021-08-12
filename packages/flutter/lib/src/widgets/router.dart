@@ -432,7 +432,7 @@ class Router<T> extends StatefulWidget {
     final _RouterScope scope = context
       .getElementForInheritedWidgetOfExactType<_RouterScope>()!
       .widget as _RouterScope;
-    scope.routerState._setStateWithExplicitReportStatus(_IntentionToReportRouteInformation.must, callback);
+    scope.routerState._setStateWithExplicitReportStatus(RouteInformationReportingType.navigating, callback);
   }
 
   /// Forces the [Router] to run the [callback] without creating a new history
@@ -461,7 +461,7 @@ class Router<T> extends StatefulWidget {
     final _RouterScope scope = context
       .getElementForInheritedWidgetOfExactType<_RouterScope>()!
       .widget as _RouterScope;
-    scope.routerState._setStateWithExplicitReportStatus(_IntentionToReportRouteInformation.ignore, callback);
+    scope.routerState._setStateWithExplicitReportStatus(RouteInformationReportingType.neglecting, callback);
   }
 
   @override
@@ -472,21 +472,19 @@ typedef _AsyncPassthrough<Q> = Future<Q> Function(Q);
 typedef _DelegateRouteSetter<T> = Future<void> Function(T);
 
 // Whether to report the route information in this build cycle.
-enum _IntentionToReportRouteInformation {
+enum RouteInformationReportingType {
   // We haven't receive any signal on whether to report.
-  none,
+  implicit,
   // Report if route information changes.
-  maybe,
+  neglecting,
   // Report regardless of route information changes.
-  must,
-  // Don't report regardless of route information changes.
-  ignore,
+  navigating,
 }
 
 class _RouterState<T> extends State<Router<T>> with RestorationMixin {
   Object? _currentRouteInformationParserTransaction;
   Object? _currentRouterDelegateTransaction;
-  _IntentionToReportRouteInformation _currentIntentionToReport = _IntentionToReportRouteInformation.none;
+  RouteInformationReportingType? _currentIntentionToReport;
   final _RestorableRouteInformation _routeInformation = _RestorableRouteInformation();
 
   @override
@@ -515,7 +513,7 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
   void _scheduleRouteInformationReportingTask() {
     if (_routeInformationReportingTaskScheduled || widget.routeInformationProvider == null)
       return;
-    assert(_currentIntentionToReport != _IntentionToReportRouteInformation.none);
+    assert(_currentIntentionToReport != null);
     _routeInformationReportingTaskScheduled = true;
     SchedulerBinding.instance!.addPostFrameCallback(_reportRouteInformation);
   }
@@ -525,31 +523,11 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
     _routeInformationReportingTaskScheduled = false;
 
     if (_routeInformation.value != null) {
-      final RouteInformation oldRouteInformation = widget.routeInformationProvider!.value;
       final RouteInformation currentRouteInformation = _routeInformation.value!;
-      switch (_currentIntentionToReport) {
-        case _IntentionToReportRouteInformation.none:
-          assert(false, '_reportRouteInformation must not be called with _IntentionToReportRouteInformation.none');
-          return;
-        case _IntentionToReportRouteInformation.ignore:
-          if (oldRouteInformation.location != currentRouteInformation.location ||
-              oldRouteInformation.state != currentRouteInformation.state) {
-            widget.routeInformationProvider!.routerReportsNewRouteInformation(currentRouteInformation, isNavigation: false);
-          }
-          break;
-        case _IntentionToReportRouteInformation.maybe:
-          if (oldRouteInformation.location != currentRouteInformation.location) {
-            widget.routeInformationProvider!.routerReportsNewRouteInformation(currentRouteInformation);
-          } else if (oldRouteInformation.state != currentRouteInformation.state) {
-            widget.routeInformationProvider!.routerReportsNewRouteInformation(currentRouteInformation, isNavigation: false);
-          }
-          break;
-        case _IntentionToReportRouteInformation.must:
-          widget.routeInformationProvider!.routerReportsNewRouteInformation(currentRouteInformation);
-          break;
-      }
+      assert(_currentIntentionToReport != null);
+      widget.routeInformationProvider!.routerReportsNewRouteInformation(currentRouteInformation, type: _currentIntentionToReport!);
     }
-    _currentIntentionToReport = _IntentionToReportRouteInformation.none;
+    _currentIntentionToReport = RouteInformationReportingType.implicit;
   }
 
   RouteInformation? _retrieveNewRouteInformation() {
@@ -560,13 +538,14 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
   }
 
   void _setStateWithExplicitReportStatus(
-    _IntentionToReportRouteInformation status,
+    RouteInformationReportingType status,
     VoidCallback fn,
   ) {
     assert(status != null);
-    assert(status.index >= _IntentionToReportRouteInformation.must.index);
+    assert(status.index >= RouteInformationReportingType.neglecting.index);
     assert(() {
-      if (_currentIntentionToReport.index >= _IntentionToReportRouteInformation.must.index &&
+      if (_currentIntentionToReport != null &&
+          _currentIntentionToReport != RouteInformationReportingType.implicit &&
           _currentIntentionToReport != status) {
         FlutterError.reportError(
           const FlutterErrorDetails(
@@ -587,9 +566,7 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
 
   void _maybeNeedToReportRouteInformation() {
     _routeInformation.value = _retrieveNewRouteInformation();
-    _currentIntentionToReport = _currentIntentionToReport != _IntentionToReportRouteInformation.none
-      ? _currentIntentionToReport
-      : _IntentionToReportRouteInformation.maybe;
+    _currentIntentionToReport ??= RouteInformationReportingType.implicit;
     _scheduleRouteInformationReportingTask();
   }
 
@@ -1337,7 +1314,7 @@ abstract class RouteInformationProvider extends ValueListenable<RouteInformation
   /// For more information on how [Router] determines a navigation event, see
   /// the "URL updates for web applications" section in the [Router]
   /// documentation.
-  void routerReportsNewRouteInformation(RouteInformation routeInformation, {bool isNavigation = true}) {}
+  void routerReportsNewRouteInformation(RouteInformation routeInformation, {required RouteInformationReportingType type}) {}
 }
 
 /// The route information provider that propagates the platform route information changes.
@@ -1360,24 +1337,32 @@ class PlatformRouteInformationProvider extends RouteInformationProvider with Wid
   }) : _value = initialRouteInformation;
 
   @override
-  void routerReportsNewRouteInformation(RouteInformation routeInformation, {bool isNavigation = true}) {
+  void routerReportsNewRouteInformation(RouteInformation routeInformation, {required RouteInformationReportingType type}) {
+    final bool replace =
+      type == RouteInformationReportingType.neglecting ||
+      (type == RouteInformationReportingType.implicit &&
+       _valueInEngine.location == routeInformation.location);
     SystemNavigator.selectMultiEntryHistory();
     SystemNavigator.routeInformationUpdated(
       location: routeInformation.location!,
       state: routeInformation.state,
-      replace: !isNavigation,
+      replace: replace,
     );
     _value = routeInformation;
+    _valueInEngine = routeInformation;
   }
 
   @override
   RouteInformation get value => _value;
   RouteInformation _value;
 
+  RouteInformation _valueInEngine = RouteInformation(location: WidgetsBinding.instance!.window.defaultRouteName);
+
   void _platformReportsNewRouteInformation(RouteInformation routeInformation) {
     if (_value == routeInformation)
       return;
     _value = routeInformation;
+    _valueInEngine = routeInformation;
     notifyListeners();
   }
 
