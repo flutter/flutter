@@ -12,10 +12,12 @@ import 'component1.dart' deferred as component1;
 
 void main() {
   enableFlutterDriverExtension();
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -61,6 +63,8 @@ class MyHomePageState extends State<MyHomePage> {
           // the placeholder text.
           Future<void>.delayed(const Duration(milliseconds: 750), () {
             setState(() {
+              // See https://github.com/dart-lang/sdk/issues/46894
+              // ignore: prefer_const_constructors
               postLoadDisplayWidget = component1.LogoScreen();
             });
           });

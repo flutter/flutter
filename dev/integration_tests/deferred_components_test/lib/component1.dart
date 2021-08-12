@@ -8,14 +8,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 class LogoScreen extends StatelessWidget {
-  const LogoScreen();
+  const LogoScreen({Key? key}) : super(key: key);
 
-   @override
-   Widget build(BuildContext context) {
-      print('Running deferred code');
-      return Container(
-        child: Column(
-          children: <Widget>[
+  @override
+  Widget build(BuildContext context) {
+    print('Running deferred code');
+    return Container(
+      child: Column(
+        children: <Widget>[
             const Text('DeferredWidget', key: Key('DeferredWidget')),
             Image.asset('customassets/flutter_logo.png', key: const Key('DeferredImage')),
           ]
