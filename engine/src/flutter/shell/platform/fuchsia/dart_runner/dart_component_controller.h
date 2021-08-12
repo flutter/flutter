@@ -7,7 +7,6 @@
 
 #include <memory>
 
-#include <fuchsia/component/runner/cpp/fidl.h>
 #include <fuchsia/sys/cpp/fidl.h>
 #include <lib/async-loop/cpp/loop.h>
 #include <lib/async/cpp/wait.h>
@@ -22,41 +21,34 @@
 
 namespace dart_runner {
 
-/// The base class for Dart components.
-class DartComponentController {
+class DartComponentController : public fuchsia::sys::ComponentController {
  public:
-  // Called before the application is run.
-  bool Setup();
+  DartComponentController(
+      fuchsia::sys::Package package,
+      fuchsia::sys::StartupInfo startup_info,
+      std::shared_ptr<sys::ServiceDirectory> runner_incoming_services,
+      fidl::InterfaceRequest<fuchsia::sys::ComponentController> controller);
+  ~DartComponentController() override;
 
-  // Calling this method will run the given application
+  bool Setup();
   void Run();
+  bool Main();
+  void SendReturnCode();
 
  private:
-  bool Main();
-
-  // Override this method to send the return code to the caller.
-  virtual void SendReturnCode() = 0;
-
-  // Called when the application is starting up. Subclasses should
-  // populate the namespace and return the pointer.
-  virtual fdio_ns_t* PrepareNamespace() = 0;
-
-  // Initializes the builtin libraries given the namespace.
-  virtual bool PrepareBuiltinLibraries() = 0;
-
-  // Returns the file descriptors for stdout/stderr
-  virtual int GetStdoutFileDescriptor() = 0;
-  virtual int GetStderrFileDescriptor() = 0;
-
-  // Called by the main method to pass incoming arguments to the dart
-  // application.
-  virtual std::vector<std::string> GetArguments() = 0;
+  bool SetupNamespace();
 
   bool SetupFromKernel();
   bool SetupFromAppSnapshot();
 
   bool CreateIsolate(const uint8_t* isolate_snapshot_data,
                      const uint8_t* isolate_snapshot_instructions);
+
+  int SetupFileDescriptor(fuchsia::sys::FileDescriptorPtr fd);
+
+  // |ComponentController|
+  void Kill() override;
+  void Detach() override;
 
   // Idle notification.
   void MessageEpilogue(Dart_Handle result);
@@ -65,14 +57,28 @@ class DartComponentController {
                    zx_status_t status,
                    const zx_packet_signal* signal);
 
+  // The loop must be the first declared member so that it gets destroyed after
+  // binding_ which expects the existence of a loop.
+  std::unique_ptr<async::Loop> loop_;
+  std::string label_;
+  std::string url_;
+  fuchsia::sys::Package package_;
+  fuchsia::sys::StartupInfo startup_info_;
   std::shared_ptr<sys::ServiceDirectory> runner_incoming_services_;
+  std::string data_path_;
+  fidl::Binding<fuchsia::sys::ComponentController> binding_;
+  std::unique_ptr<sys::ComponentContext> context_;
 
+  fdio_ns_t* namespace_ = nullptr;
+  int stdoutfd_ = -1;
+  int stderrfd_ = -1;
   dart_utils::ElfSnapshot elf_snapshot_;                      // AOT snapshot
   dart_utils::MappedResource isolate_snapshot_data_;          // JIT snapshot
   dart_utils::MappedResource isolate_snapshot_instructions_;  // JIT snapshot
   std::vector<dart_utils::MappedResource> kernel_peices_;
 
   Dart_Isolate isolate_;
+  int32_t return_code_ = 0;
 
   zx::time idle_start_{0};
   zx::timer idle_timer_;
@@ -83,99 +89,6 @@ class DartComponentController {
   // Disallow copy and assignment.
   DartComponentController(const DartComponentController&) = delete;
   DartComponentController& operator=(const DartComponentController&) = delete;
-
- protected:
-  DartComponentController(
-      std::string resolved_url,
-      std::shared_ptr<sys::ServiceDirectory> runner_incoming_services);
-  ~DartComponentController();
-
-  void Shutdown();
-
-  std::unique_ptr<async::Loop> loop_;
-  std::string label_;
-  std::string data_path_;
-  std::string url_;
-
-  int32_t return_code_ = 0;
-
-  fdio_ns_t* namespace_ = nullptr;
-  int stdoutfd_ = -1;
-  int stderrfd_ = -1;
-};
-
-class DartComponentController_v1 : public DartComponentController,
-                                   public fuchsia::sys::ComponentController {
- public:
-  DartComponentController_v1(
-      fuchsia::sys::Package package,
-      fuchsia::sys::StartupInfo startup_info,
-      std::shared_ptr<sys::ServiceDirectory> runner_incoming_services,
-      fidl::InterfaceRequest<fuchsia::sys::ComponentController> controller);
-  ~DartComponentController_v1() override;
-
- private:
-  // |ComponentController|
-  void Kill() override;
-  void Detach() override;
-
-  void SendReturnCode() override;
-  fdio_ns_t* PrepareNamespace() override;
-
-  int GetStdoutFileDescriptor() override;
-  int GetStderrFileDescriptor() override;
-
-  bool PrepareBuiltinLibraries() override;
-
-  std::vector<std::string> GetArguments() override;
-
-  int SetupFileDescriptor(fuchsia::sys::FileDescriptorPtr fd);
-
-  fuchsia::sys::Package package_;
-  fuchsia::sys::StartupInfo startup_info_;
-
-  fidl::Binding<fuchsia::sys::ComponentController> binding_;
-
-  // Disallow copy and assignment.
-  DartComponentController_v1(const DartComponentController_v1&) = delete;
-  DartComponentController_v1& operator=(const DartComponentController_v1&) =
-      delete;
-};
-
-class DartComponentController_v2
-    : public DartComponentController,
-      public fuchsia::component::runner::ComponentController {
- public:
-  DartComponentController_v2(
-      fuchsia::component::runner::ComponentStartInfo start_info,
-      std::shared_ptr<sys::ServiceDirectory> runner_incoming_services,
-      fidl::InterfaceRequest<fuchsia::component::runner::ComponentController>
-          controller);
-  ~DartComponentController_v2() override;
-
- private:
-  // |fuchsia::component::runner::ComponentController|
-  void Kill() override;
-  void Stop() override;
-
-  void SendReturnCode() override;
-  fdio_ns_t* PrepareNamespace() override;
-
-  int GetStdoutFileDescriptor() override;
-  int GetStderrFileDescriptor() override;
-
-  bool PrepareBuiltinLibraries() override;
-
-  std::vector<std::string> GetArguments() override;
-
-  fuchsia::component::runner::ComponentStartInfo start_info_;
-
-  fidl::Binding<fuchsia::component::runner::ComponentController> binding_;
-
-  // Disallow copy and assignment.
-  DartComponentController_v2(const DartComponentController_v2&) = delete;
-  DartComponentController_v2& operator=(const DartComponentController_v2&) =
-      delete;
 };
 
 }  // namespace dart_runner
