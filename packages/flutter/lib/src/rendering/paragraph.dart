@@ -118,6 +118,8 @@ class RenderParagraph extends RenderBox
   }
 
   final TextPainter _textPainter;
+  AttributedString? _cachedAttributedLabel;
+  List<InlineSpanSemanticsInformation>? _cachedCombinedSemanticsInfos;
 
   /// The text to display.
   InlineSpan get text => _textPainter.text!;
@@ -129,6 +131,8 @@ class RenderParagraph extends RenderBox
         return;
       case RenderComparison.paint:
         _textPainter.text = value;
+        _cachedAttributedLabel = null;
+        _cachedCombinedSemanticsInfos = null;
         _extractPlaceholderSpans(value);
         markNeedsPaint();
         markNeedsSemanticsUpdate();
@@ -136,6 +140,8 @@ class RenderParagraph extends RenderBox
       case RenderComparison.layout:
         _textPainter.text = value;
         _overflowShader = null;
+        _cachedAttributedLabel = null;
+        _cachedCombinedSemanticsInfos = null;
         _extractPlaceholderSpans(value);
         markNeedsLayout();
         break;
@@ -869,11 +875,27 @@ class RenderParagraph extends RenderBox
       config.explicitChildNodes = true;
       config.isSemanticBoundary = true;
     } else {
-      final StringBuffer buffer = StringBuffer();
-      for (final InlineSpanSemanticsInformation info in _semanticsInfo!) {
-        buffer.write(info.semanticsLabel ?? info.text);
+      if (_cachedAttributedLabel == null) {
+        final StringBuffer buffer = StringBuffer();
+        int offset = 0;
+        final List<StringAttribute> attributes = <StringAttribute>[];
+        for (final InlineSpanSemanticsInformation info in _semanticsInfo!) {
+          final String label = info.semanticsLabel ?? info.text;
+          for (final StringAttribute infoAttribute in info.stringAttributes) {
+            final TextRange originalRange = infoAttribute.range;
+            attributes.add(
+              infoAttribute.copy(
+                  range: TextRange(start: offset + originalRange.start,
+                      end: offset + originalRange.end)
+              ),
+            );
+          }
+          buffer.write(label);
+          offset += label.length;
+        }
+        _cachedAttributedLabel = AttributedString(buffer.toString(), attributes: attributes);
       }
-      config.label = buffer.toString();
+      config.attributedLabel = _cachedAttributedLabel!;
       config.textDirection = textDirection;
     }
   }
@@ -896,7 +918,8 @@ class RenderParagraph extends RenderBox
     int childIndex = 0;
     RenderBox? child = firstChild;
     final Queue<SemanticsNode> newChildCache = Queue<SemanticsNode>();
-    for (final InlineSpanSemanticsInformation info in combineSemanticsInfo(_semanticsInfo!)) {
+    _cachedCombinedSemanticsInfos ??= combineSemanticsInfo(_semanticsInfo!);
+    for (final InlineSpanSemanticsInformation info in _cachedCombinedSemanticsInfos!) {
       final TextSelection selection = TextSelection(
         baseOffset: start,
         extentOffset: start + info.text.length,
@@ -952,7 +975,7 @@ class RenderParagraph extends RenderBox
         final SemanticsConfiguration configuration = SemanticsConfiguration()
           ..sortKey = OrdinalSortKey(ordinal++)
           ..textDirection = initialDirection
-          ..label = info.semanticsLabel ?? info.text;
+          ..attributedLabel = AttributedString(info.semanticsLabel ?? info.text, attributes: info.stringAttributes);
         final GestureRecognizer? recognizer = info.recognizer;
         if (recognizer != null) {
           if (recognizer is TapGestureRecognizer) {

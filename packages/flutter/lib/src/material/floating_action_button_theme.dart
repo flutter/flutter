@@ -49,6 +49,7 @@ class FloatingActionButtonThemeData with Diagnosticable {
     this.extendedSizeConstraints,
     this.extendedIconLabelSpacing,
     this.extendedPadding,
+    this.extendedTextStyle,
   });
 
   /// Color to be used for the unselected, enabled [FloatingActionButton]'s
@@ -121,6 +122,9 @@ class FloatingActionButtonThemeData with Diagnosticable {
   /// The padding for an extended [FloatingActionButton]'s content.
   final EdgeInsetsGeometry? extendedPadding;
 
+  /// The text style for an extended [FloatingActionButton]'s label.
+  final TextStyle? extendedTextStyle;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   FloatingActionButtonThemeData copyWith({
@@ -142,6 +146,7 @@ class FloatingActionButtonThemeData with Diagnosticable {
     BoxConstraints? extendedSizeConstraints,
     double? extendedIconLabelSpacing,
     EdgeInsetsGeometry? extendedPadding,
+    TextStyle? extendedTextStyle,
   }) {
     return FloatingActionButtonThemeData(
       foregroundColor: foregroundColor ?? this.foregroundColor,
@@ -162,6 +167,7 @@ class FloatingActionButtonThemeData with Diagnosticable {
       extendedSizeConstraints: extendedSizeConstraints ?? this.extendedSizeConstraints,
       extendedIconLabelSpacing: extendedIconLabelSpacing ?? this.extendedIconLabelSpacing,
       extendedPadding: extendedPadding ?? this.extendedPadding,
+      extendedTextStyle: extendedTextStyle ?? this.extendedTextStyle,
     );
   }
 
@@ -193,6 +199,7 @@ class FloatingActionButtonThemeData with Diagnosticable {
       extendedSizeConstraints: BoxConstraints.lerp(a?.extendedSizeConstraints, b?.extendedSizeConstraints, t),
       extendedIconLabelSpacing: lerpDouble(a?.extendedIconLabelSpacing, b?.extendedIconLabelSpacing, t),
       extendedPadding: EdgeInsetsGeometry.lerp(a?.extendedPadding, b?.extendedPadding, t),
+      extendedTextStyle: TextStyle.lerp(a?.extendedTextStyle, b?.extendedTextStyle, t),
     );
   }
 
@@ -217,6 +224,7 @@ class FloatingActionButtonThemeData with Diagnosticable {
       extendedSizeConstraints,
       extendedIconLabelSpacing,
       extendedPadding,
+      extendedTextStyle,
     );
   }
 
@@ -244,7 +252,8 @@ class FloatingActionButtonThemeData with Diagnosticable {
         && other.largeSizeConstraints == largeSizeConstraints
         && other.extendedSizeConstraints == extendedSizeConstraints
         && other.extendedIconLabelSpacing == extendedIconLabelSpacing
-        && other.extendedPadding == extendedPadding;
+        && other.extendedPadding == extendedPadding
+        && other.extendedTextStyle == extendedTextStyle;
   }
 
   @override
@@ -269,5 +278,6 @@ class FloatingActionButtonThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<BoxConstraints>('extendedSizeConstraints', extendedSizeConstraints, defaultValue: null));
     properties.add(DoubleProperty('extendedIconLabelSpacing', extendedIconLabelSpacing, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('extendedPadding', extendedPadding, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextStyle>('extendedTextStyle', extendedTextStyle, defaultValue: null));
   }
 }

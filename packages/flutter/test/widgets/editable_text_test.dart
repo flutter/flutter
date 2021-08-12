@@ -199,6 +199,7 @@ void main() {
     expect(editableText.obscureText, isFalse);
     expect(editableText.autocorrect, isTrue);
     expect(editableText.enableSuggestions, isTrue);
+    expect(editableText.enableIMEPersonalizedLearning, isTrue);
     expect(editableText.textAlign, TextAlign.start);
     expect(editableText.cursorWidth, 2.0);
     expect(editableText.cursorHeight, isNull);
@@ -515,6 +516,45 @@ void main() {
     expect(tester.testTextInput.setClientArgs!['inputAction'], equals('TextInputAction.newline'));
   });
 
+  testWidgets('selection persists when unfocused', (WidgetTester tester) async {
+    const TextEditingValue value = TextEditingValue(
+      text: 'test test',
+      selection: TextSelection(affinity: TextAffinity.upstream, baseOffset: 5, extentOffset: 7),
+    );
+    controller.value = value;
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: EditableText(
+            controller: controller,
+            backgroundCursorColor: Colors.grey,
+            focusNode: focusNode,
+            keyboardType: TextInputType.multiline,
+            style: textStyle,
+            cursorColor: cursorColor,
+          ),
+        ),
+      ),
+    );
+
+    expect(controller.value, value);
+    expect(focusNode.hasFocus, isFalse);
+
+    focusNode.requestFocus();
+    await tester.pump();
+
+    expect(controller.value, value);
+    expect(focusNode.hasFocus, isTrue);
+
+    focusNode.unfocus();
+    await tester.pump();
+
+    expect(controller.value, value);
+    expect(focusNode.hasFocus, isFalse);
+  });
+
   testWidgets('visiblePassword keyboard is requested when set explicitly', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
@@ -574,6 +614,36 @@ void main() {
     await tester.showKeyboard(find.byType(EditableText));
     await tester.idle();
     expect(tester.testTextInput.setClientArgs!['enableSuggestions'], enableSuggestions);
+  });
+
+  testWidgets('enableIMEPersonalizedLearning flag is sent to the engine properly', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+    const bool enableIMEPersonalizedLearning = false;
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              controller: controller,
+              backgroundCursorColor: Colors.grey,
+              focusNode: focusNode,
+              enableIMEPersonalizedLearning: enableIMEPersonalizedLearning,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    await tester.idle();
+    expect(tester.testTextInput.setClientArgs!['enableIMEPersonalizedLearning'], enableIMEPersonalizedLearning);
   });
 
   group('smartDashesType and smartQuotesType', () {
@@ -1645,7 +1715,7 @@ void main() {
 
     // On web, we don't show the Flutter toolbar and instead rely on the browser
     // toolbar. Until we change that, this test should remain skipped.
-  }, skip: kIsWeb);
+  }, skip: kIsWeb); // [intended]
 
   // The variants to test in the focus handling test.
   final ValueVariant<TextInputAction> focusVariants = ValueVariant<
@@ -3677,7 +3747,6 @@ void main() {
           ),
         ));
       },
-      skip: isBrowser, // Related to https://github.com/flutter/flutter/issues/66089
     );
 
     testWidgets(
@@ -3771,7 +3840,6 @@ void main() {
           ),
         ));
       },
-      skip: isBrowser, // Related to https://github.com/flutter/flutter/issues/66089
     );
 
     testWidgets(
@@ -3875,6 +3943,8 @@ void main() {
     ));
 
     assert(focusNode.hasFocus);
+    // Autofocus has a one frame delay.
+    await tester.pump();
 
     final RenderEditable renderEditable = findRenderEditable(tester);
     // The actual text span is split into 3 parts with the middle part underlined.
@@ -3884,6 +3954,8 @@ void main() {
     expect(textSpan.style!.decoration, TextDecoration.underline);
 
     focusNode.unfocus();
+    // Drain microtasks.
+    await tester.idle();
     await tester.pump();
 
     expect((renderEditable.text! as TextSpan).children, isNull);
@@ -4059,7 +4131,7 @@ void main() {
 
     // On web, we don't show the Flutter toolbar and instead rely on the browser
     // toolbar. Until we change that, this test should remain skipped.
-  }, skip: kIsWeb);
+  }, skip: kIsWeb); // [intended]
 
   testWidgets('text selection handle visibility RTL', (WidgetTester tester) async {
     // Text with two separate words to select.
@@ -4121,7 +4193,7 @@ void main() {
 
     // On web, we don't show the Flutter toolbar and instead rely on the browser
     // toolbar. Until we change that, this test should remain skipped.
-  }, skip: kIsWeb);
+  }, skip: kIsWeb); // [intended]
 
   const String testText = 'Now is the time for\n'
       'all good people\n'
@@ -4872,7 +4944,7 @@ void main() {
     debugKeyEventSimulatorTransitModeOverride = null;
 
     // On web, using keyboard for selection is handled by the browser.
-  }, skip: kIsWeb, variant: TargetPlatformVariant.all());
+  }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
 
   testWidgets('keyboard text selection works (ui.KeyData then RawKeyEvent)', (WidgetTester tester) async {
     debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.keyDataThenRawKeyData;
@@ -4882,7 +4954,7 @@ void main() {
     debugKeyEventSimulatorTransitModeOverride = null;
 
     // On web, using keyboard for selection is handled by the browser.
-  }, skip: kIsWeb, variant: TargetPlatformVariant.all());
+  }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
 
   testWidgets(
     'keyboard shortcuts respect read-only',
@@ -5058,7 +5130,8 @@ void main() {
       );
       expect(controller.text, equals(testText), reason: 'on $platform');
     },
-    skip: kIsWeb,
+    // On web, using keyboard for selection is handled by the browser.
+    skip: kIsWeb, // [intended]
     variant: TargetPlatformVariant.all(),
   );
 
@@ -5496,9 +5569,12 @@ void main() {
     scrollable.controller!.jumpTo(0);
     await verifyVisibility(HandlePositionInViewport.rightEdge, false, HandlePositionInViewport.rightEdge, false);
 
-    // On web, we don't show the Flutter toolbar and instead rely on the browser
-    // toolbar. Until we change that, this test should remain skipped.
-  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  },
+      // On web, we don't show the Flutter toolbar and instead rely on the browser
+      // toolbar. Until we change that, this test should remain skipped.
+      skip: kIsWeb, // [intended]
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS })
+  );
 
   testWidgets("scrolling doesn't bounce", (WidgetTester tester) async {
     // 3 lines of text, where the last line overflows and requires scrolling.
@@ -7598,7 +7674,7 @@ void main() {
     }
 
     // On web, using keyboard for selection is handled by the browser.
-  }, skip: kIsWeb);
+  }, skip: kIsWeb); // [intended]
 
   testWidgets('navigating by word', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: 'word word word');
@@ -7736,7 +7812,7 @@ void main() {
     expect(controller.selection.extentOffset, 9);
 
     // On web, using keyboard for selection is handled by the browser.
-  }, skip: kIsWeb, variant: TargetPlatformVariant.all());
+  }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
 
   testWidgets('expanding selection to start/end', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: 'word word word');
@@ -7819,8 +7895,11 @@ void main() {
       reason: 'on $platform',
     );
 
-    // On web, using keyboard for selection is handled by the browser.
-  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS }));
+  },
+      // On web, using keyboard for selection is handled by the browser.
+      skip: kIsWeb, // [intended]
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS })
+  );
 
   testWidgets('can change behavior by overriding text editing actions', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: testText);
@@ -7903,7 +7982,7 @@ void main() {
     }
 
     // On web, using keyboard for selection is handled by the browser.
-  }, skip: kIsWeb);
+  }, skip: kIsWeb); // [intended]
 
   testWidgets('ignore key event from web platform', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
@@ -8026,7 +8105,9 @@ void main() {
     await tester.pump();
 
     expect(fadeTransition.toString(), contains('DISPOSED'));
-  }, skip: kIsWeb);
+
+    // On web, using keyboard for selection is handled by the browser.
+  }, skip: kIsWeb); // [intended]
 }
 
 class UnsettableController extends TextEditingController {

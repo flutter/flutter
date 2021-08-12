@@ -163,12 +163,21 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   }
   TestRestorationManager? _restorationManager;
 
+  // The configuration at the beginning of a widget test to be restored after
+  // the test.
+  //
+  // Normally this value should always be non-null during [postTest], except in
+  // rare cases [postTest] is called explicitly without [testWidgets] (so that
+  // [reset] is not called).
+  ViewConfiguration? _preTestViewConfiguration;
   /// Called by the test framework at the beginning of a widget test to
   /// prepare the binding for the next test.
   ///
   /// If [registerTestTextInput] returns true when this method is called,
   /// the [testTextInput] is configured to simulate the keyboard.
   void reset() {
+    assert(_surfaceSize == null);
+    _preTestViewConfiguration = renderView.configuration;
     _restorationManager = null;
     resetGestureBinding();
     testTextInput.reset();
@@ -942,6 +951,16 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         'active mouse gesture to remove the mouse pointer.');
     // ignore: invalid_use_of_visible_for_testing_member
     RendererBinding.instance!.initMouseTracker();
+    // Reset _surfaceSize and renderView.configuration.
+    //
+    // The _surfaceSize and renderView.configuration might be set within a
+    // test, but such changes should not be carried over. The
+    // renderView.configuration might also be set outside of a test, which
+    // *should* be kept between tests. Don't use [handleMetricsChanged] because
+    // it contains unwanted side effects.
+    _surfaceSize = null;
+    if (_preTestViewConfiguration != null && _preTestViewConfiguration != renderView.configuration)
+      renderView.configuration = _preTestViewConfiguration!;
   }
 }
 
@@ -951,8 +970,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 /// This binding controls time, allowing tests to verify long
 /// animation sequences without having to execute them in real time.
 ///
-/// This class assumes it is always run in checked mode (since tests are always
-/// run in checked mode).
+/// This class assumes it is always run in debug mode (since tests are always
+/// run in debug mode).
 class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   void initInstances() {

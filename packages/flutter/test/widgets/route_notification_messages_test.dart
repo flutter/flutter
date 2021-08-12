@@ -69,6 +69,7 @@ void main() {
         arguments: <String, dynamic>{
           'location': '/',
           'state': null,
+          'replace': false,
         },
       ),
     ]);
@@ -86,6 +87,7 @@ void main() {
         arguments: <String, dynamic>{
           'location': '/A',
           'state': null,
+          'replace': false,
         },
       ),
     );
@@ -103,6 +105,7 @@ void main() {
         arguments: <String, dynamic>{
           'location': '/',
           'state': null,
+          'replace': false,
         },
       ),
     );
@@ -174,6 +177,7 @@ void main() {
         arguments: <String, dynamic>{
           'location': '/',
           'state': null,
+          'replace': false,
         },
       ),
     ]);
@@ -191,6 +195,7 @@ void main() {
         arguments: <String, dynamic>{
           'location': '/A',
           'state': null,
+          'replace': false,
         },
       ),
     );
@@ -208,6 +213,7 @@ void main() {
         arguments: <String, dynamic>{
           'location': '/B',
           'state': null,
+          'replace': false,
         },
       ),
     );
@@ -243,6 +249,7 @@ void main() {
         arguments: <String, dynamic>{
           'location': '/home',
           'state': null,
+          'replace': false,
         },
       ),
     ]);
@@ -294,6 +301,7 @@ void main() {
       isMethodCall('routeInformationUpdated', arguments: <String, dynamic>{
         'location': 'update',
         'state': 'state',
+        'replace': false,
       }),
     ]);
   });
