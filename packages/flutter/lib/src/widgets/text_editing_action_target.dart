@@ -122,6 +122,8 @@ abstract class TextEditingActionTarget {
     )), cause);
   }
 
+  // TODO(justinmc): Add missing RTL support.
+  // https://github.com/flutter/flutter/issues/88126
   /// Return the offset at the start of the nearest word to the left of the
   /// given offset.
   int _getLeftByWord(int offset, [bool includeWhitespace = true]) {
@@ -142,6 +144,8 @@ abstract class TextEditingActionTarget {
     return word.start;
   }
 
+  // TODO(justinmc): Add missing RTL support.
+  // https://github.com/flutter/flutter/issues/88126
   /// Return the offset at the end of the nearest word to the right of the given
   /// offset.
   int _getRightByWord(int offset, [bool includeWhitespace = true]) {

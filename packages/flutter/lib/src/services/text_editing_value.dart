@@ -172,26 +172,6 @@ class TextEditingValue {
     return 0;
   }
 
-  /// Return the offset at the end of the nearest word to the right of the given
-  /// offset.
-  static int getRightByWord(String text, TextMetrics textMetrics, int offset, [bool includeWhitespace = true]) {
-    // If the selection is already all the way right, there is nothing to do.
-    if (offset == text.length) {
-      return offset;
-    }
-
-    // If we can just return the end of the text without checking for a word.
-    if (offset == text.length - 1 || offset == text.length) {
-      return text.length;
-    }
-
-    final int startPoint = includeWhitespace || !isWhitespace(text.codeUnitAt(offset))
-        ? offset
-        : nextCharacter(offset, text, includeWhitespace);
-    final TextRange nextWord = textMetrics.getWordBoundary(TextPosition(offset: startPoint));
-    return nextWord.end;
-  }
-
   /// Creates a copy of this value but with the given fields replaced with the new values.
   TextEditingValue copyWith({
     String? text,
