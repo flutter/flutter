@@ -23,6 +23,7 @@ import androidx.annotation.Nullable;
  *
  * @deprecated
  */
+@Deprecated
 public final class DrawableSplashScreen implements SplashScreen {
   private final Drawable drawable;
   private final ImageView.ScaleType scaleType;
