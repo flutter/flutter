@@ -7,6 +7,9 @@
 #
 # Usage:
 # $ build.py --commit [Engine commit hash] --builder [builder name]
+#
+# NOTE: This script requires python3.7 or later.
+#
 
 import argparse
 import os
