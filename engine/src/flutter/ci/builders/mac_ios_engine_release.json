@@ -49,7 +49,7 @@
             "mac_model=Macmini8,1",
             "os=Mac"
         ],
-        "generators": [],
+        "generators": {},
         "gn": [
             "--ios",
             "--runtime-mode",

@@ -47,12 +47,14 @@
             "mac_model=Macmini8,1",
             "os=Mac"
         ],
-        "generators": [
-            {
-                "name": "BuildObjcDoc",
-                "script": "flutter/tools/gen_objcdoc.sh"
-            }
-        ],
+        "generators": {
+		"tasks": [
+			{
+				"name": "BuildObjcDoc",
+				"scripts": ["flutter/tools/gen_objcdoc.sh"]
+			}
+		]
+	},
         "gn": [
             "--bitcode",
             "--ios",
