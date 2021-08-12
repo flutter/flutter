@@ -67,7 +67,7 @@
         "gclient_custom_vars": {
           "download_android_deps": false
         },
-        "generators": [],
+        "generators": {},
         "gn": [
             "--runtime-mode",
             "release",
