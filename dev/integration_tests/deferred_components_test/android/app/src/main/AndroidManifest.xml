@@ -12,7 +12,6 @@ found in the LICENSE file. -->
     <application
         android:name="io.flutter.app.FlutterPlayStoreSplitApplication"
         android:label="deferred_components_test"
-        android:icon="@mipmap/ic_launcher"
         android:extractNativeLibs="false">
         <activity
             android:name=".MainActivity"
