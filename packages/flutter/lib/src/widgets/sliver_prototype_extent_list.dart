@@ -72,10 +72,9 @@ class _SliverPrototypeExtentListElement extends SliverMultiBoxAdaptorElement {
   static final Object _prototypeSlot = Object();
 
   @override
-  void insertRenderObjectChild(covariant RenderObject child, covariant Object slot) {
+  void insertRenderObjectChild(RenderBox child, covariant Object slot) {
     if (slot == _prototypeSlot) {
-      assert(child is RenderBox);
-      renderObject.child = child as RenderBox;
+      renderObject.child = child;
     } else {
       super.insertRenderObjectChild(child, slot as int);
     }

@@ -1408,11 +1408,11 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   }
 
   @override
-  void insertRenderObjectChild(covariant RenderObject child, int slot) {
+  void insertRenderObjectChild(RenderBox child, int slot) {
     assert(slot != null);
     assert(_currentlyUpdatingChildIndex == slot);
     assert(renderObject.debugValidateChild(child));
-    renderObject.insert(child as RenderBox, after: _currentBeforeChild);
+    renderObject.insert(child, after: _currentBeforeChild);
     assert(() {
       final SliverMultiBoxAdaptorParentData childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
       assert(slot == childParentData.index);
@@ -1421,16 +1421,16 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   }
 
   @override
-  void moveRenderObjectChild(covariant RenderObject child, int oldSlot, int newSlot) {
+  void moveRenderObjectChild(RenderBox child, int oldSlot, int newSlot) {
     assert(newSlot != null);
     assert(_currentlyUpdatingChildIndex == newSlot);
-    renderObject.move(child as RenderBox, after: _currentBeforeChild);
+    renderObject.move(child, after: _currentBeforeChild);
   }
 
   @override
-  void removeRenderObjectChild(covariant RenderObject child, int slot) {
+  void removeRenderObjectChild(RenderBox child, int slot) {
     assert(_currentlyUpdatingChildIndex != null);
-    renderObject.remove(child as RenderBox);
+    renderObject.remove(child);
   }
 
   @override

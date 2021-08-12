@@ -188,12 +188,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   RenderSliverMultiBoxAdaptor({
     required RenderSliverBoxChildManager childManager,
   }) : assert(childManager != null),
-       _childManager = childManager {
-    assert(() {
-      _debugDanglingKeepAlives = <RenderBox>[];
-      return true;
-    }());
-  }
+       _childManager = childManager;
 
   @override
   void setupParentData(RenderObject child) {
@@ -214,7 +209,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   /// The nodes being kept alive despite not being visible.
   final Map<int, RenderBox> _keepAliveBucket = <int, RenderBox>{};
 
-  late List<RenderBox> _debugDanglingKeepAlives;
+  late final List<RenderBox> _debugDanglingKeepAlives = <RenderBox>[];
 
   /// Indicates whether integrity check is enabled.
   ///
@@ -358,27 +353,22 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
       remove(child);
       _keepAliveBucket[childParentData.index!] = child;
       child.parentData = childParentData;
+      // Set up the render subtree rooted at child so it has the correct tree
+      // hierarchy, but every node in the subtree including child will be
+      // detached from the owner.
+      // This ensures none of the render objects in the subtree can submit dirty
+      // nodes to the pipeline owner for relayout and repaint, while still
+      // allowing these nodes to access their parent nodes, for calling
+      // showOnScreen or marking the parent node as needing layout, etc.
       super.adoptChild(child);
+      child.detach();
+
       childParentData._keptAlive = true;
     } else {
       assert(child.parent == this);
       _childManager.removeChild(child);
       assert(child.parent == null);
     }
-  }
-
-  @override
-  void attach(PipelineOwner owner) {
-    super.attach(owner);
-    for (final RenderBox child in _keepAliveBucket.values)
-      child.attach(owner);
-  }
-
-  @override
-  void detach() {
-    super.detach();
-    for (final RenderBox child in _keepAliveBucket.values)
-      child.detach();
   }
 
   @override
@@ -584,6 +574,10 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
       // zero transform to prevent it from painting.
       transform.setZero();
     } else if (_keepAliveBucket.containsKey(childParentData.index)) {
+      assert(
+        false,
+        'Attempted to access the transform of a keep-alive RenderObject: $child',
+      );
       // It is possible that widgets under kept alive children want to paint
       // themselves. For example, the Material widget tries to paint all
       // InkFeatures under its subtree as long as they are not disposed. In

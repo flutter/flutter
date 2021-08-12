@@ -1612,6 +1612,14 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     assert(_relayoutBoundary != null);
     if (_relayoutBoundary != this) {
       markParentNeedsLayout();
+    } else if (!attached && parent != null) {
+      // This is a former relayout boundary that wasn't laid out because an
+      // ancestor render object chose not to perform layout on this subtree (for
+      // instance, the render subtree is kept-alive). The render object is still
+      // allowed to crawl its way back since the ancestor render object detached
+      // its owner instead of dropping the subtree entirely (this render object
+      // is still holding a reference to its parent).
+      markParentNeedsLayout();
     } else {
       _needsLayout = true;
       if (owner != null) {
@@ -3013,7 +3021,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// on screen.
   ///
   /// If `descendant` is provided, that [RenderObject] is made visible. If
-  /// `descendant` is omitted, this [RenderObject] is made visible.
+  /// `descendant` is omitted, or has not been laid out, this [RenderObject] is
+  /// made visible.
   ///
   /// The optional `rect` parameter describes which area of that [RenderObject]
   /// should be shown on screen. If `rect` is null, the entire
@@ -3037,8 +3046,11 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   }) {
     if (parent is RenderObject) {
       final RenderObject renderParent = parent! as RenderObject;
+      final RenderObject effectiveDescendant = descendant != null && descendant.attached
+        ? descendant
+        : this;
       renderParent.showOnScreen(
-        descendant: descendant ?? this,
+        descendant: effectiveDescendant,
         rect: rect,
         duration: duration,
         curve: curve,
