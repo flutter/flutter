@@ -131,10 +131,6 @@ template("_fuchsia_archive") {
            ]
     sources = copy_outputs
 
-    if (defined(invoker.cml_file)) {
-      sources += [ invoker.cml_file ]
-    }
-
     inputs = []
     if (defined(invoker.inputs)) {
       inputs += invoker.inputs

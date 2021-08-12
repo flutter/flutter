@@ -69,7 +69,6 @@ template("runner") {
              "//flutter/fml",
              "//flutter/shell/platform/fuchsia/dart-pkg/fuchsia",
              "//flutter/shell/platform/fuchsia/dart-pkg/zircon",
-             "$fuchsia_sdk_root/fidl:fuchsia.component.runner",
              "$fuchsia_sdk_root/pkg:async",
              "$fuchsia_sdk_root/pkg:async-cpp",
              "$fuchsia_sdk_root/pkg:async-default",
@@ -221,7 +220,6 @@ template("jit_runner_package") {
     binary = "dart_jit${product_suffix}_runner"
 
     cmx_file = rebase_path("meta/dart_jit${product_suffix}_runner.cmx")
-    cml_file = rebase_path("meta/dart_jit${product_suffix}_runner.cml")
 
     libraries = _common_runner_libs
 
