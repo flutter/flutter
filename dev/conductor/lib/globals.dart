@@ -182,19 +182,25 @@ String getNewPrLink({
   if (repoName == 'engine') {
     if (state.engine.dartRevision.isNotEmpty) {
       // shorten hashes to make final link manageable
+      // prefix with github org/repo so GitHub will auto-generate a hyperlink
       body.writeln('- Roll dart revision: dart-lang/sdk@${state.engine.dartRevision.substring(0, 9)}');
     }
     body.writeAll(
-      state.engine.cherrypicks.map<String>((pb.Cherrypick cp) => '- commit: ${cp.trunkRevision.substring(0, 9)}'),
+      // prefix with github org/repo so GitHub will auto-generate a hyperlink
+      state.engine.cherrypicks.map<String>((pb.Cherrypick cp) => '- commit: flutter/engine@${cp.trunkRevision.substring(0, 9)}'),
       '\n',
     );
+    body.write('\n');
   } else {
-    body.writeAll(
-      state.framework.cherrypicks.map<String>((pb.Cherrypick cp) => '- commit: ${cp.trunkRevision.substring(0, 9)}'),
-      '\n',
-    );
+    for (final pb.Cherrypick cp in state.framework.cherrypicks) {
+      // Only list commits that map to a commit that exists upstream.
+      if (cp.trunkRevision.isNotEmpty) {
+        body.writeln('- commit: ${cp.trunkRevision.substring(0, 9)}');
+      }
+    }
   }
-  return 'https://github.com/flutter/$repoName/compare/$candidateBranch...$userName:$workingBranch?'
+  return 'https://github.com/flutter/$repoName/compare/'
+      '$candidateBranch...$userName:$workingBranch?'
       'expand=1'
       '&title=${Uri.encodeQueryComponent(title)}'
       '&body=${Uri.encodeQueryComponent(body.toString())}';

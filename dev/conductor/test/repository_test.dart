@@ -225,6 +225,65 @@ vars = {
       );
     });
 
+    test('commit() throws if there are no local changes to commit', () {
+      const String commit1 = 'abc123';
+      const String commit2 = 'def456';
+      const String message = 'This is a commit message.';
+      final TestStdio stdio = TestStdio();
+      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(command: <String>[
+          'git',
+          'clone',
+          '--origin',
+          'upstream',
+          '--',
+          EngineRepository.defaultUpstream,
+          fileSystem.path
+              .join(rootDir, 'flutter_conductor_checkouts', 'engine'),
+        ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'checkout',
+          'upstream/master',
+        ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'rev-parse',
+          'HEAD',
+        ], stdout: commit1),
+        const FakeCommand(command: <String>[
+          'git',
+          'status',
+          '--porcelain',
+        ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'commit',
+          "--message='$message'",
+        ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'rev-parse',
+          'HEAD',
+        ], stdout: commit2),
+      ]);
+
+      final Checkouts checkouts = Checkouts(
+        fileSystem: fileSystem,
+        parentDirectory: fileSystem.directory(rootDir),
+        platform: platform,
+        processManager: processManager,
+        stdio: stdio,
+      );
+
+      final EngineRepository repo = EngineRepository(checkouts);
+      expect(
+        () => repo.commit(message),
+        throwsExceptionWith('Tried to commit with message $message but no changes were present'),
+      );
+    });
+
     test('commit() passes correct commit message', () {
       const String commit1 = 'abc123';
       const String commit2 = 'def456';
@@ -252,6 +311,10 @@ vars = {
           'rev-parse',
           'HEAD',
         ], stdout: commit1),
+        const FakeCommand(
+          command: <String>['git', 'status', '--porcelain'],
+          stdout: 'MM path/to/file.txt',
+        ),
         const FakeCommand(command: <String>[
           'git',
           'commit',
@@ -313,7 +376,17 @@ vars = {
       expect(didUpdate, false);
     });
 
-    test('enableBranch() will prepend the given branch to the yaml list of enabled_branches', () {
+    test('CiYaml(file) will throw if file does not exist', () {
+      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+      final File file = fileSystem.file('/non/existent/file.txt');
+
+      expect(
+        () => CiYaml(file),
+        throwsExceptionWith('Could not find the .ci.yaml file at /non/existent/file.txt'),
+      );
+    });
+
+    test('ciYaml.enableBranch() will prepend the given branch to the yaml list of enabled_branches', () {
       const String commit1 = 'abc123';
       final TestStdio stdio = TestStdio();
       final MemoryFileSystem fileSystem = MemoryFileSystem.test();
@@ -379,7 +452,7 @@ enabled_branches:
       );
     });
 
-    test('enableBranch() will throw if the input branch is already present in the yaml file', () {
+    test('ciYaml.enableBranch() will throw if the input branch is already present in the yaml file', () {
       const String commit1 = 'abc123';
       final TestStdio stdio = TestStdio();
       final MemoryFileSystem fileSystem = MemoryFileSystem.test();

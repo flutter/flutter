@@ -26,6 +26,7 @@ void main() {
     const String revision1 = 'd3af60d18e01fcb36e0c0fa06c8502e4935ed095';
     const String revision2 = 'f99555c1e1392bf2a8135056b9446680c2af4ddf';
     const String revision3 = '98a5ca242b9d270ce000b26309b8a3cdc9c89df5';
+    const String revision4 = '280e23318a0d8341415c66aa32581352a421d974';
     const String releaseVersion = '1.2.0-3.0.pre';
     const String releaseChannel = 'beta';
     late MemoryFileSystem fileSystem;
@@ -454,29 +455,54 @@ void main() {
 
       test('with no engine cherrypicks but a dart revision update, updates engine revision', () async {
         stdio.stdin.add('n');
-        processManager.addCommands(const <FakeCommand>[
-          FakeCommand(command: <String>['git', 'fetch', 'upstream']),
+        processManager.addCommands(<FakeCommand>[
+          const FakeCommand(command: <String>['git', 'fetch', 'upstream']),
           // we want merged upstream commit, not local working commit
-          FakeCommand(command: <String>['git', 'checkout', 'upstream/$candidateBranch']),
-          FakeCommand(
+          const FakeCommand(command: <String>['git', 'checkout', 'upstream/$candidateBranch']),
+          const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
             stdout: revision1,
           ),
-          FakeCommand(command: <String>['git', 'fetch', 'upstream']),
-          FakeCommand(command: <String>['git', 'checkout', workingBranch]),
+          const FakeCommand(command: <String>['git', 'fetch', 'upstream']),
           FakeCommand(
+            command: const <String>['git', 'checkout', workingBranch],
+            onRun: () {
+              final File file = fileSystem.file('$checkoutsParentDirectory/framework/.ci.yaml')
+                  ..createSync();
+              _initializeCiYamlFile(file);
+            },
+          ),
+          const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
             stdout: revision2,
           ),
-          FakeCommand(command: <String>['git', 'add', '--all']),
-          FakeCommand(command: <String>[
+          const FakeCommand(
+            command: <String>['git', 'status', '--porcelain'],
+            stdout: 'MM /path/to/.ci.yaml',
+          ),
+          const FakeCommand(command: <String>['git', 'add', '--all']),
+          const FakeCommand(command: <String>[
+            'git',
+            'commit',
+            "--message='add branch $candidateBranch to enabled_branches in .ci.yaml'",
+          ]),
+          const FakeCommand(
+            command: <String>['git', 'rev-parse', 'HEAD'],
+            stdout: revision3,
+          ),
+          const FakeCommand(
+            command: <String>['git', 'status', '--porcelain'],
+            stdout: 'MM /path/to/engine.version',
+          ),
+          const FakeCommand(command: <String>['git', 'add', '--all']),
+          const FakeCommand(command: <String>[
             'git',
             'commit',
             "--message='Update Engine revision to $revision1 for $releaseChannel release $releaseVersion'",
           ]),
-          FakeCommand(
+          const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
-            stdout: revision3,
+            stdout: revision4,
           ),
         ]);
         final pb.ConductorState state = pb.ConductorState(
@@ -518,34 +544,59 @@ void main() {
 
         expect(processManager, hasNoRemainingExpectations);
         expect(stdio.stdout, contains('Updating engine revision from $oldEngineVersion to $revision1'));
-        expect(stdio.stdout, contains('a framework PR is still\nrequired to roll engine cherrypicks.'));
+        expect(stdio.stdout, contains('Are you ready to push your framework branch'));
       });
 
       test('does not update state.currentPhase if user responds no', () async {
         stdio.stdin.add('n');
-        processManager.addCommands(const <FakeCommand>[
-          FakeCommand(command: <String>['git', 'fetch', 'upstream']),
+        processManager.addCommands(<FakeCommand>[
+          const FakeCommand(command: <String>['git', 'fetch', 'upstream']),
           // we want merged upstream commit, not local working commit
-          FakeCommand(command: <String>['git', 'checkout', 'upstream/$candidateBranch']),
           FakeCommand(
+            command: const <String>['git', 'checkout', 'upstream/$candidateBranch'],
+            onRun: () {
+              final File file = fileSystem.file('$checkoutsParentDirectory/framework/.ci.yaml')
+                  ..createSync();
+              _initializeCiYamlFile(file);
+            },
+          ),
+          const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
             stdout: revision1,
           ),
-          FakeCommand(command: <String>['git', 'fetch', 'upstream']),
-          FakeCommand(command: <String>['git', 'checkout', workingBranch]),
-          FakeCommand(
+          const FakeCommand(command: <String>['git', 'fetch', 'upstream']),
+          const FakeCommand(command: <String>['git', 'checkout', workingBranch]),
+          const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
             stdout: revision2,
           ),
-          FakeCommand(command: <String>['git', 'add', '--all']),
-          FakeCommand(command: <String>[
+          const FakeCommand(
+            command: <String>['git', 'status', '--porcelain'],
+            stdout: 'MM path/to/.ci.yaml',
+          ),
+          const FakeCommand(command: <String>['git', 'add', '--all']),
+          const FakeCommand(command: <String>[
+            'git',
+            'commit',
+            "--message='add branch $candidateBranch to enabled_branches in .ci.yaml'",
+          ]),
+          const FakeCommand(
+            command: <String>['git', 'rev-parse', 'HEAD'],
+            stdout: revision3,
+          ),
+          const FakeCommand(
+            command: <String>['git', 'status', '--porcelain'],
+            stdout: 'MM path/to/engine.version',
+          ),
+          const FakeCommand(command: <String>['git', 'add', '--all']),
+          const FakeCommand(command: <String>[
             'git',
             'commit',
             "--message='Update Engine revision to $revision1 for $releaseChannel release $releaseVersion'",
           ]),
-          FakeCommand(
+          const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
-            stdout: revision3,
+            stdout: revision4,
           ),
         ]);
         writeStateToFile(
@@ -578,33 +629,58 @@ void main() {
 
       test('updates state.currentPhase if user responds yes', () async {
         stdio.stdin.add('y');
-        processManager.addCommands(const <FakeCommand>[
+        processManager.addCommands(<FakeCommand>[
           // Engine repo
-          FakeCommand(command: <String>['git', 'fetch', 'upstream']),
+          const FakeCommand(command: <String>['git', 'fetch', 'upstream']),
           // we want merged upstream commit, not local working commit
-          FakeCommand(command: <String>['git', 'checkout', 'upstream/$candidateBranch']),
-          FakeCommand(
+          const FakeCommand(command: <String>['git', 'checkout', 'upstream/$candidateBranch']),
+          const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
             stdout: revision1,
           ),
           // Framework repo
-          FakeCommand(command: <String>['git', 'fetch', 'upstream']),
-          FakeCommand(command: <String>['git', 'checkout', workingBranch]),
+          const FakeCommand(command: <String>['git', 'fetch', 'upstream']),
           FakeCommand(
+            command: const <String>['git', 'checkout', workingBranch],
+            onRun: () {
+              final File file = fileSystem.file('$checkoutsParentDirectory/framework/.ci.yaml')
+                  ..createSync();
+              _initializeCiYamlFile(file);
+            },
+          ),
+          const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
             stdout: revision2,
           ),
-          FakeCommand(command: <String>['git', 'add', '--all']),
-          FakeCommand(command: <String>[
+          const FakeCommand(
+            command: <String>['git', 'status', '--porcelain'],
+            stdout: 'MM path/to/.ci.yaml',
+          ),
+          const FakeCommand(command: <String>['git', 'add', '--all']),
+          const FakeCommand(command: <String>[
+            'git',
+            'commit',
+            "--message='add branch $candidateBranch to enabled_branches in .ci.yaml'",
+          ]),
+          const FakeCommand(
+            command: <String>['git', 'rev-parse', 'HEAD'],
+            stdout: revision3,
+          ),
+          const FakeCommand(
+            command: <String>['git', 'status', '--porcelain'],
+            stdout: 'MM path/to/engine.version',
+          ),
+          const FakeCommand(command: <String>['git', 'add', '--all']),
+          const FakeCommand(command: <String>[
             'git',
             'commit',
             "--message='Update Engine revision to $revision1 for $releaseChannel release $releaseVersion'",
           ]),
-          FakeCommand(
+          const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
-            stdout: revision3,
+            stdout: revision4,
           ),
-          FakeCommand(
+          const FakeCommand(
             command: <String>['git', 'push', 'mirror', '$revision2:refs/heads/$workingBranch'],
           ),
         ]);
@@ -940,4 +1016,17 @@ void main() {
   }, onPlatform: <String, dynamic>{
     'windows': const Skip('Flutter Conductor only supported on macos/linux'),
   });
+}
+
+void _initializeCiYamlFile(
+  File file, {
+  List<String>? enabledBranches,
+}) {
+  enabledBranches ??= <String>['master', 'dev', 'beta', 'stable'];
+  file.createSync(recursive: true);
+  final StringBuffer buffer = StringBuffer('enabled_branches:\n');
+  for (final String branch in enabledBranches) {
+    buffer.writeln('  - $branch');
+  }
+  file.writeAsStringSync(buffer.toString());
 }

@@ -167,13 +167,6 @@ void runNext({
       }
       break;
     case pb.ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS:
-      final List<pb.Cherrypick> unappliedCherrypicks = <pb.Cherrypick>[];
-      for (final pb.Cherrypick cherrypick in state.framework.cherrypicks) {
-        if (!finishedStates.contains(cherrypick.state)) {
-          unappliedCherrypicks.add(cherrypick);
-        }
-      }
-
       if (state.engine.cherrypicks.isEmpty && state.engine.dartRevision.isEmpty) {
         stdio.printStatus(
           'This release has no engine cherrypicks, and thus the engine.version file\n'
@@ -214,13 +207,40 @@ void runNext({
       );
       final String headRevision = framework.reverseParse('HEAD');
 
+      // Check if the current candidate branch is enabled
+      if (!framework.ciYaml.enabledBranches.contains(state.framework.candidateBranch)) {
+        framework.ciYaml.enableBranch(state.framework.candidateBranch);
+        // commit
+        final String revision = framework.commit(
+          'add branch ${state.framework.candidateBranch} to enabled_branches in .ci.yaml',
+          addFirst: true,
+        );
+        // append to list of cherrypicks so we know a PR is required
+        state.framework.cherrypicks.add(pb.Cherrypick(
+          appliedRevision: revision,
+          state: pb.CherrypickState.COMPLETED,
+        ));
+      }
+
       stdio.printStatus('Rolling new engine hash $engineRevision to framework checkout...');
       final bool needsCommit = framework.updateEngineRevision(engineRevision);
       if (needsCommit) {
-        framework.commit(
+        final String revision = framework.commit(
           'Update Engine revision to $engineRevision for ${state.releaseChannel} release ${state.releaseVersion}',
           addFirst: true,
         );
+        // append to list of cherrypicks so we know a PR is required
+        state.framework.cherrypicks.add(pb.Cherrypick(
+          appliedRevision: revision,
+          state: pb.CherrypickState.COMPLETED,
+        ));
+      }
+
+      final List<pb.Cherrypick> unappliedCherrypicks = <pb.Cherrypick>[];
+      for (final pb.Cherrypick cherrypick in state.framework.cherrypicks) {
+        if (!finishedStates.contains(cherrypick.state)) {
+          unappliedCherrypicks.add(cherrypick);
+        }
       }
 
       if (state.framework.cherrypicks.isEmpty) {

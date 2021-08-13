@@ -399,6 +399,14 @@ abstract class Repository {
     bool addFirst = false,
   }) {
     assert(!message.contains("'"));
+    final bool hasChanges = git.getOutput(
+      <String>['status', '--porcelain'],
+      'check for uncommitted changes',
+      workingDirectory: checkoutDirectory.path,
+    ).trim().isNotEmpty;
+    if (!hasChanges) {
+      throw ConductorException('Tried to commit with message $message but no changes were present');
+    }
     if (addFirst) {
       git.run(
         <String>['add', '--all'],
@@ -784,8 +792,13 @@ class Checkouts {
 }
 
 class CiYaml {
-  CiYaml(this.file) : assert(file.existsSync());
+  CiYaml(this.file) {
+    if (!file.existsSync()) {
+      throw ConductorException('Could not find the .ci.yaml file at ${file.path}');
+    }
+  }
 
+  /// Underlying [File] that this object wraps.
   final File file;
 
   /// Returns the raw string contents of this file.
@@ -808,6 +821,12 @@ class CiYaml {
   }
 
   static final RegExp _enabledBranchPattern = RegExp(r'^enabled_branches:');
+
+  /// Update this .ci.yaml file with the given branch name.
+  ///
+  /// The underlying [File] is written to, but not committed to git. This method
+  /// will throw a [ConductorException] if the [branchName] is already present
+  /// in the file or if the file does not have an "enabled_branches:" field.
   void enableBranch(String branchName) {
     final List<String> newStrings = <String>[];
     if (enabledBranches.contains(branchName)) {
