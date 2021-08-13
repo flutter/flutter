@@ -182,17 +182,17 @@ void main(List<String> args) {
   }
 
   final String newCodepointsString = newCodepointsFile.readAsStringSync();
-  final TokenPairMap newTokenPairMap = stringToTokenPairMap(newCodepointsString);
+  final TokenPairMap newTokenPairMap = _stringToTokenPairMap(newCodepointsString);
 
   final String oldCodepointsString = oldCodepointsFile.readAsStringSync();
-  final TokenPairMap oldTokenPairMap = stringToTokenPairMap(oldCodepointsString);
+  final TokenPairMap oldTokenPairMap = _stringToTokenPairMap(oldCodepointsString);
 
   _testIsMapSuperset(newTokenPairMap, oldTokenPairMap);
 
   final String iconClassFileData = iconClassFile.readAsStringSync();
 
   stderr.writeln('Generating icons file...');
-  final String newIconData = regenerateIconsFile(iconClassFileData, newTokenPairMap);
+  final String newIconData = _regenerateIconsFile(iconClassFileData, newTokenPairMap);
 
   if (argResults[_dryRunOption] as bool) {
     stdout.write(newIconData);
@@ -224,7 +224,7 @@ ArgResults _handleArguments(List<String> args) {
   return argParser.parse(args);
 }
 
-TokenPairMap stringToTokenPairMap(String codepointData) {
+TokenPairMap _stringToTokenPairMap(String codepointData) {
   final Iterable<String> cleanData = LineSplitter.split(codepointData)
       .map((String line) => line.trim())
       .where((String line) => line.isNotEmpty);
@@ -242,7 +242,7 @@ TokenPairMap stringToTokenPairMap(String codepointData) {
   return pairs;
 }
 
-String regenerateIconsFile(String iconData, TokenPairMap tokenPairMap) {
+String _regenerateIconsFile(String iconData, TokenPairMap tokenPairMap) {
   final List<_Icon> newIcons = tokenPairMap.entries
       .map((MapEntry<String, String> entry) => _Icon(entry))
       .toList();
@@ -262,7 +262,7 @@ String regenerateIconsFile(String iconData, TokenPairMap tokenPairMap) {
       final List<String> platformAdaptiveDeclarations = <String>[];
       _platformAdaptiveIdentifiers.forEach((String flutterId, List<String> ids) {
         // Automatically finds and generates styled icon declarations.
-        for (final String style in _Icon.styleSuffixes) {
+        for (final String style in <String>['', '_outlined', '_rounded', '_sharp']) {
           try {
             final _Icon agnosticIcon = newIcons.firstWhere(
                     (_Icon icon) => icon.id == '${ids[0]}$style',
@@ -337,64 +337,45 @@ class _Icon {
     id = tokenPair.key;
     hexCodepoint = tokenPair.value;
 
-    // Handle special families.
+    // Handle special families first.
     if (id.endsWith('_gm_outlined')) {
-      shortId = _replaceLast(id, '_gm_outlined');
       family = 'GM';
       htmlSuffix = '-outlined';
     } else if (id.endsWith('_gm_filled')) {
-      shortId = _replaceLast(id, '_gm_filled');
       family = 'GM';
       htmlSuffix = '-filled';
     } else if (id.endsWith('_monoline_outlined')) {
-      shortId = _replaceLast(id, '_monoline_outlined');
       family = 'Monoline';
       htmlSuffix = '-outlined';
     } else if (id.endsWith('_monoline_filled')) {
-      shortId = _replaceLast(id, '_monoline_filled');
       family = 'Monoline';
       htmlSuffix = '-filled';
     } else {
       family = 'material';
-      // Determine and remove style suffix.
       if (id.endsWith('_outlined') && id != 'insert_chart_outlined') {
-        shortId = _replaceLast(id, '_outlined');
         htmlSuffix = '-outlined';
       } else if (id.endsWith('_rounded')) {
-        shortId = _replaceLast(id, '_rounded');
         htmlSuffix = '-round';
       } else if (id.endsWith('_sharp')) {
-        shortId = _replaceLast(id, '_sharp');
         htmlSuffix = '-sharp';
       } else {
-        shortId = id;
         htmlSuffix = '';
       }
     }
 
-    flutterId = id;
-
-    // Exact identifier rewrites.
-    for (final MapEntry<String, String> rewritePair
-    in identifierExactRewrites.entries) {
-      if (shortId == rewritePair.key) {
-        flutterId = id.replaceFirst(rewritePair.key, identifierExactRewrites[rewritePair.key]!);
-      }
-    }
-    // Prefix identifer rewrites.
-    for (final MapEntry<String, String> rewritePair
-    in identifierPrefixRewrites.entries) {
-      if (id.startsWith(rewritePair.key)) {
-        flutterId = id.replaceFirst(rewritePair.key, identifierPrefixRewrites[rewritePair.key]!);
-      }
-      // TODO(guidezpl): With the next icon update, this won't be necessary, remove it.
-      if (id.startsWith(rewritePair.key.replaceFirst('_', ''))) {
-        flutterId = id.replaceFirst(rewritePair.key.replaceFirst('_', ''), identifierPrefixRewrites[rewritePair.key]!);
-      }
-    }
+    shortId = _generateShortId(id);
+    flutterId = generateFlutterId(id);
   }
 
-  static const List<String> styleSuffixes = <String>['', '_outlined', '_rounded', '_sharp'];
+  static const List<String> allStyleSuffixes = <String>[
+    '_gm_outlined',
+    '_gm_filled',
+    '_monoline_outlined',
+    '_monoline_filled',
+    '_outlined',
+    '_rounded',
+    '_sharp'
+  ];
 
   late String id; // e.g. 5g, 5g_outlined, 5g_rounded, 5g_sharp
   late String shortId; // e.g. 5g
@@ -441,7 +422,46 @@ class _Icon {
     return shortId.compareTo(b.shortId);
   }
 
-  String _replaceLast(String string, String toReplace) {
+  static String _replaceLast(String string, String toReplace) {
     return string.replaceAll(RegExp('$toReplace\$'), '');
+  }
+
+  static String _generateShortId(String id) {
+    String shortId = id;
+    for (final String styleSuffix in allStyleSuffixes) {
+      if (styleSuffix == '_outlined' && id == 'insert_chart_outlined')
+        continue;
+      shortId = _replaceLast(shortId, styleSuffix);
+      if (shortId != id) {
+        break;
+      }
+    }
+    return shortId;
+  }
+
+  /// Given some icon's raw id, returns a valid Dart icon identifier
+  static String generateFlutterId(String id) {
+    String flutterId = id;
+    // Exact identifier rewrites.
+    for (final MapEntry<String, String> rewritePair
+    in identifierExactRewrites.entries) {
+      final String shortId = _Icon._generateShortId(id);
+
+      if (shortId == rewritePair.key) {
+        flutterId = id.replaceFirst(rewritePair.key, identifierExactRewrites[rewritePair.key]!);
+      }
+    }
+    // Prefix identifer rewrites.
+    for (final MapEntry<String, String> rewritePair
+    in identifierPrefixRewrites.entries) {
+      if (id.startsWith(rewritePair.key)) {
+        flutterId = id.replaceFirst(rewritePair.key, identifierPrefixRewrites[rewritePair.key]!);
+      }
+      // TODO(guidezpl): With the next icon update, this won't be necessary, remove it.
+      if (id.startsWith(rewritePair.key.replaceFirst('_', ''))) {
+        flutterId = id.replaceFirst(rewritePair.key.replaceFirst('_', ''), identifierPrefixRewrites[rewritePair.key]!);
+      }
+    }
+    return flutterId;
   }
 }
