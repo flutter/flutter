@@ -39,6 +39,50 @@ void main() {
 }
 
 void testMain() {
+  test('createHistoryForExistingState', () {
+    TestUrlStrategy strategy;
+    BrowserHistory history;
+
+    // No url strategy.
+    history = createHistoryForExistingState(null);
+    expect(history, isA<MultiEntriesBrowserHistory>());
+    expect(history.urlStrategy, isNull);
+
+    // Random history state.
+    strategy = TestUrlStrategy.fromEntry(
+      const TestHistoryEntry(<dynamic, dynamic>{'foo': 123}, null, '/'),
+    );
+    history = createHistoryForExistingState(strategy);
+    expect(history, isA<MultiEntriesBrowserHistory>());
+    expect(history.urlStrategy, strategy);
+
+    // Multi-entry history state.
+    final Map<dynamic, dynamic> state = <dynamic, dynamic>{
+      'serialCount': 1,
+      'state': <dynamic, dynamic>{'foo': 123},
+    };
+    strategy = TestUrlStrategy.fromEntry(TestHistoryEntry(state, null, '/'));
+    history = createHistoryForExistingState(strategy);
+    expect(history, isA<MultiEntriesBrowserHistory>());
+    expect(history.urlStrategy, strategy);
+
+    // Single-entry history "origin" state.
+    strategy = TestUrlStrategy.fromEntry(
+      const TestHistoryEntry(<dynamic, dynamic>{'origin': true}, null, '/'),
+    );
+    history = createHistoryForExistingState(strategy);
+    expect(history, isA<SingleEntryBrowserHistory>());
+    expect(history.urlStrategy, strategy);
+
+    // Single-entry history "flutter" state.
+    strategy = TestUrlStrategy.fromEntry(
+      const TestHistoryEntry(<dynamic, dynamic>{'flutter': true}, null, '/'),
+    );
+    history = createHistoryForExistingState(strategy);
+    expect(history, isA<SingleEntryBrowserHistory>());
+    expect(history.urlStrategy, strategy);
+  });
+
   group('$SingleEntryBrowserHistory', () {
     final PlatformMessagesSpy spy = PlatformMessagesSpy();
 

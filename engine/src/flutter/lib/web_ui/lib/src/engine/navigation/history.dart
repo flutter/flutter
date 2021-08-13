@@ -11,6 +11,20 @@ import '../services/message_codec.dart';
 import '../services/message_codecs.dart';
 import 'url_strategy.dart';
 
+/// Infers the history mode from the existing browser history state, then
+/// creates the appropriate instance of [BrowserHistory] for it.
+///
+/// If it can't infer, it creates a [MultiEntriesBrowserHistory] by default.
+BrowserHistory createHistoryForExistingState(UrlStrategy? urlStrategy) {
+  if (urlStrategy != null) {
+    final Object? state = urlStrategy.getState();
+    if (SingleEntryBrowserHistory._isOriginEntry(state) || SingleEntryBrowserHistory._isFlutterEntry(state)) {
+      return SingleEntryBrowserHistory(urlStrategy: urlStrategy);
+    }
+  }
+  return MultiEntriesBrowserHistory(urlStrategy: urlStrategy);
+}
+
 /// An abstract class that provides the API for [EngineWindow] to delegate its
 /// navigating events.
 ///
@@ -263,14 +277,14 @@ class SingleEntryBrowserHistory extends BrowserHistory {
 
   /// The origin entry is the history entry that the Flutter app landed on. It's
   /// created by the browser when the user navigates to the url of the app.
-  bool _isOriginEntry(Object? state) {
+  static bool _isOriginEntry(Object? state) {
     return state is Map && state[_kOriginTag] == true;
   }
 
   /// The flutter entry is a history entry that we maintain on top of the origin
   /// entry. It allows us to catch popstate events when the user hits the back
   /// button.
-  bool _isFlutterEntry(Object? state) {
+  static bool _isFlutterEntry(Object? state) {
     return state is Map && state[_kFlutterTag] == true;
   }
 
