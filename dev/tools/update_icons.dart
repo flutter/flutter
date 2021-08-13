@@ -401,9 +401,7 @@ class _Icon {
   late String flutterId; // e.g. five_g, five_g_outlined, five_g_rounded, five_g_sharp
   late String family; // e.g. material
   late String hexCodepoint; // e.g. e547
-
-  // The suffix for the 'material-icons' HTML class.
-  late String htmlSuffix;
+  late String htmlSuffix; // The suffix for the 'material-icons' HTML class.
 
   String get name => shortId.replaceAll('_', ' ').trim();
 
