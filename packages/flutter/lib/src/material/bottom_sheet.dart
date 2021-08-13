@@ -497,7 +497,12 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   @override
   AnimationController createAnimationController() {
     assert(_animationController == null);
-    _animationController = transitionAnimationController ?? BottomSheet.createAnimationController(navigator!.overlay!);
+    if (transitionAnimationController != null) {
+      _animationController = transitionAnimationController;
+      willDisposeAnimationController = false;
+    } else {
+      _animationController = BottomSheet.createAnimationController(navigator!.overlay!);
+    }
     return _animationController!;
   }
 
@@ -593,7 +598,7 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 ///
 /// A closely related widget is a persistent bottom sheet, which shows
 /// information that supplements the primary content of the app without
-/// preventing the use from interacting with the app. Persistent bottom sheets
+/// preventing the user from interacting with the app. Persistent bottom sheets
 /// can be created and displayed with the [showBottomSheet] function or the
 /// [ScaffoldState.showBottomSheet] method.
 ///
@@ -626,7 +631,8 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 /// for more details).
 ///
 /// The [transitionAnimationController] controls the bottom sheet's entrance and
-/// exit animations if provided.
+/// exit animations. It's up to the owner of the controller to call
+/// [AnimationController.dispose] when the controller is no longer needed.
 ///
 /// The optional `routeSettings` parameter sets the [RouteSettings] of the modal bottom sheet
 /// sheet. This is particularly useful in the case that a user wants to observe

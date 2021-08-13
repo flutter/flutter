@@ -5,7 +5,6 @@
 @TestOn('!chrome')
 import 'dart:typed_data';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -78,5 +77,5 @@ void main() {
       ];
       checkEncodeDecode<dynamic>(standard, message);
     });
-  }, skip: kIsWeb);
+  }, skip: isBrowser); // [intended] Javascript can't handle the big integer literals used here.
 }

@@ -3870,7 +3870,7 @@ void main() {
       editableTextState.textEditingValue.copyWith(
         selection: TextSelection.collapsed(offset: longText.length),
       ),
-      null,
+      SelectionChangedCause.tap,
     );
 
     await tester.pump(); // TODO(ianh): Figure out why this extra pump is needed.
@@ -3907,7 +3907,7 @@ void main() {
       editableTextState.textEditingValue.copyWith(
         selection: const TextSelection.collapsed(offset: tallText.length),
       ),
-      null,
+      SelectionChangedCause.tap,
     );
     await tester.pump();
     await skipPastScrollingAnimation(tester);
@@ -3945,37 +3945,6 @@ void main() {
     expect(feedback.hapticCount, 1);
 
     feedback.dispose();
-  });
-
-  testWidgets('Text field drops selection when losing focus', (WidgetTester tester) async {
-    final Key key1 = UniqueKey();
-    final TextEditingController controller1 = TextEditingController();
-    final Key key2 = UniqueKey();
-
-    await tester.pumpWidget(
-      overlay(
-        child: Column(
-          children: <Widget>[
-            TextField(
-              key: key1,
-              controller: controller1,
-            ),
-            TextField(key: key2),
-          ],
-        ),
-      ),
-    );
-
-    await tester.tap(find.byKey(key1));
-    await tester.enterText(find.byKey(key1), 'abcd');
-    await tester.pump();
-    controller1.selection = const TextSelection(baseOffset: 0, extentOffset: 3);
-    await tester.pump();
-    expect(controller1.selection, isNot(equals(TextRange.empty)));
-
-    await tester.tap(find.byKey(key2));
-    await tester.pump();
-    expect(controller1.selection, equals(TextRange.empty));
   });
 
   testWidgets('Selection is consistent with text length', (WidgetTester tester) async {
@@ -5508,7 +5477,7 @@ void main() {
     }
     await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
 
-    expect(c1.selection.extentOffset - c1.selection.baseOffset, 0);
+    expect(c1.selection.extentOffset - c1.selection.baseOffset, -5);
     expect(c2.selection.extentOffset - c2.selection.baseOffset, -5);
   },
     skip: areKeyEventsHandledByPlatform, // [intended] only applies to platforms where we handle key events.
@@ -7739,6 +7708,7 @@ void main() {
     await gesture.moveBy(const Offset(600, 0));
     // To the edge of the screen basically.
     await tester.pump();
+    await tester.pumpAndSettle();
     expect(
       controller.selection,
       const TextSelection.collapsed(offset: 56, affinity: TextAffinity.downstream),
@@ -7746,12 +7716,14 @@ void main() {
     // Keep moving out.
     await gesture.moveBy(const Offset(1, 0));
     await tester.pump();
+    await tester.pumpAndSettle();
     expect(
       controller.selection,
       const TextSelection.collapsed(offset: 62, affinity: TextAffinity.downstream),
     );
     await gesture.moveBy(const Offset(1, 0));
     await tester.pump();
+    await tester.pumpAndSettle();
     expect(
       controller.selection,
       const TextSelection.collapsed(offset: 66, affinity: TextAffinity.upstream),
