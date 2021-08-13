@@ -6,6 +6,7 @@ import 'package:flutter/rendering.dart';
 
 import 'animated_size.dart';
 import 'basic.dart';
+import 'focus_scope.dart';
 import 'focus_traversal.dart';
 import 'framework.dart';
 import 'ticker_provider.dart';
