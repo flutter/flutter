@@ -314,15 +314,15 @@ class DesktopLogReader extends DeviceLogReader {
     final StreamSubscription<List<int>> stderrSub = process.stderr.listen(
       _inputController.add,
     );
+    final Future<void> stdioFuture = Future.wait<void>(<Future<void>>[
+      stdoutSub.asFuture<void>(),
+      stderrSub.asFuture<void>(),
+    ]);
     process.exitCode.whenComplete(() async {
       // Wait for output to be fully processed.
-      await Future.wait<void>(<Future<void>>[
-        stdoutSub.asFuture<void>(),
-        stderrSub.asFuture<void>(),
-      ]);
-      // The streams as futures have already completed, so waiting for the
-      // potentially async stream cancellation to complete likely has no
-      // benefit.
+      await stdioFuture;
+      // The streams have already completed, so waiting for the stream
+      // cancellation to complete is not needed.
       unawaited(stdoutSub.cancel());
       unawaited(stderrSub.cancel());
       await _inputController.close();
