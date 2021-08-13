@@ -133,13 +133,14 @@ class TextSelection extends TextRange {
     );
   }
 
-  /// Return [selection] expanded to the given [TextPosition].
+  /// Return the selection expanded to the given [TextPosition].
   ///
-  /// If the given [TextPosition] is inside of [selection], then [selection] is
-  /// returned without change.
+  /// If the given [TextPosition] is inside of the selection, then returns
+  /// `this` without change.
   ///
-  /// The returned selection will always be a strict superset of [selection].
-  /// In other words, the selection grows to include the given [TextPosition].
+  /// The returned selection will always be a strict superset of the current
+  /// selection. In other words, the selection grows to include the given
+  /// [TextPosition].
   ///
   /// If extentAtIndex is true, then the [TextSelection.extentOffset] will be
   /// placed at the given index regardless of the original order of it and
@@ -195,7 +196,7 @@ class TextSelection extends TextRange {
     );
   }
 
-  /// Keeping [selection]'s [TextSelection.baseOffset] fixed, pivot the
+  /// Keeping the selection's [TextSelection.baseOffset] fixed, pivot the
   /// [TextSelection.extentOffset] to the given [TextPosition].
   ///
   /// In some cases, the [TextSelection.baseOffset] and
@@ -219,7 +220,7 @@ class TextSelection extends TextRange {
     );
   }
 
-  /// Return [selection] collapsed and moved to the given [TextPosition].
+  /// Return the selection collapsed and moved to the given [TextPosition].
   TextSelection moveTo(TextPosition position) {
     // If the selection is collapsed at the position already, then nothing
     // happens.
