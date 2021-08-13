@@ -99,9 +99,12 @@ def main():
       help='Path to read-elf executable.')
 
   args = parser.parse_args()
-  assert os.path.exists(args.exec_path)
-  assert os.path.exists(args.dest)
-  assert os.path.exists(args.read_elf)
+  assert os.path.exists(args.exec_path), (
+    'exec_path "%s" does not exist' % args.exec_path)
+  assert os.path.exists(args.dest), (
+    'dest "%s" does not exist' % args.dest)
+  assert os.path.exists(args.read_elf), (
+    'read_elf "%s" does not exist' % args.read_elf)
 
   parts = GetBuildIdParts(args.exec_path, args.read_elf)
   dbg_prefix_base = os.path.join(args.dest, parts['prefix_dir'])
