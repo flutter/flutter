@@ -650,7 +650,7 @@ void main() {
         // false.
         state.userUpdateTextEditingValue(
           state.textEditingValue.copyWith(selection: const TextSelection.collapsed(offset: 90)),
-          SelectionChangedCause.tap,
+          null,
         );
         await tester.pumpAndSettle();
         expect(isCaretOnScreen(tester), isTrue);
@@ -674,7 +674,7 @@ void main() {
 
         state.userUpdateTextEditingValue(
           state.textEditingValue.copyWith(selection: const TextSelection.collapsed(offset: 100)),
-          SelectionChangedCause.tap,
+          null,
         );
         await tester.pumpAndSettle();
         expect(isCaretOnScreen(tester), isTrue);
