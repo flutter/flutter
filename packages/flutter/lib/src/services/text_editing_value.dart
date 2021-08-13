@@ -224,7 +224,7 @@ class TextEditingValue {
     );
   }
 
-  /// Deletes to the given index.
+  /// Deletes to the given index, inclusively.
   ///
   /// Returns a new TextEditingValue representing the state after the deletion.
   ///
