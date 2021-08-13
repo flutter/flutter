@@ -37,6 +37,16 @@ char _GetBit(char32_t ch, size_t start, size_t end) {
   return (ch >> end) & ((1 << (start - end)) - 1);
 }
 
+// Revert the "character" for a dead key to its normal value.
+//
+// When a dead key is pressed, the WM_KEYDOWN's lParam is mapped to a special
+// value: the "normal character" | 0x80000000.  For example, when pressing
+// "dead key caret" (one that makes the following e into ê), its mapped
+// character is 0x8000005E. "Reverting" it gives 0x5E, which is character '^'.
+uint32_t _UndeadChar(uint32_t ch) {
+  return ch & ~0x80000000;
+}
+
 std::string ConvertChar32ToUtf8(char32_t ch) {
   std::string result;
   assert(0 <= ch && ch <= 0x10FFFF);
@@ -170,6 +180,8 @@ void KeyboardKeyEmbedderHandler::KeyboardHook(
   uint64_t next_logical_record;
   bool next_has_record = true;
   char character_bytes[kCharacterCacheSize];
+
+  character = _UndeadChar(character);
 
   if (is_physical_down) {
     if (had_record) {
