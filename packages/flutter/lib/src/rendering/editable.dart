@@ -593,7 +593,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   bool _wasSelectingVerticallyWithKeyboard = false;
 
   void _setTextEditingValue(TextEditingValue newValue, SelectionChangedCause cause) {
-    textSelectionDelegate.textEditingValue = newValue;
     textSelectionDelegate.userUpdateTextEditingValue(newValue, cause);
   }
 
@@ -613,11 +612,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
         extentOffset: math.min(nextSelection.extentOffset, textLength),
       );
     }
-    _handleSelectionChange(nextSelection, cause);
     _setTextEditingValue(
       textSelectionDelegate.textEditingValue.copyWith(selection: nextSelection),
       cause,
     );
+    _handleSelectionChange(nextSelection, cause);
   }
 
   void _handleSelectionChange(

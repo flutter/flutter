@@ -444,7 +444,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///           ),
 ///           ElevatedButton(
 ///             onPressed: () {
-///               FocusScope.of(context).requestFocus(new FocusNode());
+///               FocusScope.of(context).unfocus();
 ///               if (!_formKey.currentState!.validate()) {
 ///                 return;
 ///               }
