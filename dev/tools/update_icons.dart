@@ -12,8 +12,6 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:path/path.dart' as path;
 
-typedef TokenPairMap = Map<String, String>;
-
 const String _newCodepointsPathOption = 'new-codepoints';
 const String _oldCodepointsPathOption = 'old-codepoints';
 const String _iconsClassPathOption = 'icons';
@@ -182,10 +180,10 @@ void main(List<String> args) {
   }
 
   final String newCodepointsString = newCodepointsFile.readAsStringSync();
-  final TokenPairMap newTokenPairMap = _stringToTokenPairMap(newCodepointsString);
+  final Map<String, String> newTokenPairMap = _stringToTokenPairMap(newCodepointsString);
 
   final String oldCodepointsString = oldCodepointsFile.readAsStringSync();
-  final TokenPairMap oldTokenPairMap = _stringToTokenPairMap(oldCodepointsString);
+  final Map<String, String> oldTokenPairMap = _stringToTokenPairMap(oldCodepointsString);
 
   _testIsMapSuperset(newTokenPairMap, oldTokenPairMap);
 
@@ -224,12 +222,12 @@ ArgResults _handleArguments(List<String> args) {
   return argParser.parse(args);
 }
 
-TokenPairMap _stringToTokenPairMap(String codepointData) {
+Map<String, String> _stringToTokenPairMap(String codepointData) {
   final Iterable<String> cleanData = LineSplitter.split(codepointData)
       .map((String line) => line.trim())
       .where((String line) => line.isNotEmpty);
 
-  final TokenPairMap pairs = <String,String>{};
+  final Map<String, String> pairs = <String,String>{};
 
   for (final String line in cleanData) {
     final List<String> tokens = line.split(' ');
@@ -242,7 +240,7 @@ TokenPairMap _stringToTokenPairMap(String codepointData) {
   return pairs;
 }
 
-String _regenerateIconsFile(String iconData, TokenPairMap tokenPairMap) {
+String _regenerateIconsFile(String iconData, Map<String, String> tokenPairMap) {
   final List<_Icon> newIcons = tokenPairMap.entries
       .map((MapEntry<String, String> entry) => _Icon(entry))
       .toList();
@@ -301,7 +299,7 @@ String _regenerateIconsFile(String iconData, TokenPairMap tokenPairMap) {
   return buf.toString();
 }
 
-void _testIsMapSuperset(TokenPairMap newCodepoints, TokenPairMap oldCodepoints) {
+void _testIsMapSuperset(Map<String, String> newCodepoints, Map<String, String> oldCodepoints) {
   final Set<String> newCodepointsSet = newCodepoints.keys.toSet();
   final Set<String> oldCodepointsSet = oldCodepoints.keys.toSet();
 
@@ -321,7 +319,7 @@ Error: New codepoints file does not contain all ${oldCodepointsSet.length} exist
   }
 }
 
-void _regenerateCodepointsFile(File oldCodepointsFile, TokenPairMap newTokenPairMap) {
+void _regenerateCodepointsFile(File oldCodepointsFile, Map<String, String> newTokenPairMap) {
   stderr.writeln('Regenerating old codepoints file ${oldCodepointsFile.path}.\n');
 
   final StringBuffer buf = StringBuffer();
