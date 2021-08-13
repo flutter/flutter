@@ -9,6 +9,7 @@ import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
+import 'package:yaml/yaml.dart';
 
 import './git.dart';
 import './globals.dart';
@@ -490,6 +491,7 @@ class FrameworkRepository extends Repository {
   }
 
   final Checkouts checkouts;
+  late final CiYaml ciYaml = CiYaml(checkoutDirectory.childFile('.ci.yaml'));
   static const String defaultUpstream =
       'https://github.com/flutter/flutter.git';
 
@@ -779,4 +781,28 @@ class Checkouts {
   final Platform platform;
   final ProcessManager processManager;
   final Stdio stdio;
+}
+
+class CiYaml {
+  CiYaml(this.file) : assert(file.existsSync());
+
+  final File file;
+
+  late final String stringContents = file.readAsStringSync();
+  late final YamlMap contents = loadYaml(stringContents) as YamlMap;
+
+  List<String> get enabledBranches {
+    final YamlList yamlList = contents['enabled_branches'] as YamlList;
+    return yamlList.map<String>((dynamic element) {
+      return element as String;
+    }).toList();
+  }
+
+  static final RegExp _enabledBranchPattern = RegExp(r'enabled_branches:');
+  void enableBranch(String branchName) {
+    final List<String> newStrings = <String>[];
+    assert(!enabledBranches.contains(branchName));
+    final List<String> lines = stringContents.split('\n');
+    lines.forEach();
+  }
 }

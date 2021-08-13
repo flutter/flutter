@@ -6,6 +6,7 @@ import 'package:conductor/repository.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:platform/platform.dart';
+import 'package:yaml/yaml.dart';
 
 import './common.dart';
 import '../../../packages/flutter_tools/test/src/fake_process_manager.dart';
@@ -310,6 +311,55 @@ vars = {
       final FrameworkRepository repo = FrameworkRepository(checkouts);
       final bool didUpdate = repo.updateEngineRevision(commit2, engineVersionFile: engineVersionFile);
       expect(didUpdate, false);
+    });
+
+    test('yolo', () {
+      const String commit1 = 'abc123';
+      final TestStdio stdio = TestStdio();
+      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+      final File ciYaml = fileSystem.file('/flutter_conductor_checkouts/framework/.ci.yaml');
+      final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+            command: <String>[
+          'git',
+          'clone',
+          '--origin',
+          'upstream',
+          '--',
+          FrameworkRepository.defaultUpstream,
+          fileSystem.path
+              .join(rootDir, 'flutter_conductor_checkouts', 'framework'),
+        ],
+        onRun: () {
+          ciYaml.createSync(recursive: true);
+          ciYaml.writeAsStringSync('''
+enabled_branches:
+  - master
+  - dev
+  - beta
+  - stable
+''');
+        }),
+        const FakeCommand(command: <String>[
+          'git',
+          'rev-parse',
+          'HEAD',
+        ], stdout: commit1),
+      ]);
+      final Checkouts checkouts = Checkouts(
+        fileSystem: fileSystem,
+        parentDirectory: fileSystem.directory(rootDir),
+        platform: platform,
+        processManager: processManager,
+        stdio: stdio,
+      );
+
+      final FrameworkRepository framework = FrameworkRepository(checkouts);
+      //final YamlMap contents = framework.ciYaml.contents;
+      expect(
+        framework.ciYaml.enabledBranches,
+        <String>['master', 'dev', 'beta', 'stable'],
+      );
     });
   });
 }
