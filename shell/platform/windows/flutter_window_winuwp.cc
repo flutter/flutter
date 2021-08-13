@@ -9,6 +9,11 @@ namespace flutter {
 // Multipler used to map controller velocity to an appropriate scroll input.
 static constexpr double kControllerScrollMultiplier = 3;
 
+// TODO(clarkezone): Determine pointer ID in
+// OnPointerPressed/OnPointerReleased/OnPointerMoved in order to support multi
+// touch. See https://github.com/flutter/flutter/issues/70201
+static constexpr int32_t kDefaultPointerDeviceId = 0;
+
 FlutterWindowWinUWP::FlutterWindowWinUWP(
     ABI::Windows::ApplicationModel::Core::CoreApplicationView*
         applicationview) {
@@ -146,7 +151,7 @@ void FlutterWindowWinUWP::OnPointerPressed(
   FlutterPointerDeviceKind device_kind = GetPointerDeviceKind(args);
 
   binding_handler_delegate_->OnPointerDown(
-      x, y, device_kind,
+      x, y, device_kind, kDefaultPointerDeviceId,
       FlutterPointerMouseButtons::kFlutterPointerButtonMousePrimary);
 }
 
@@ -158,7 +163,7 @@ void FlutterWindowWinUWP::OnPointerReleased(
   FlutterPointerDeviceKind device_kind = GetPointerDeviceKind(args);
 
   binding_handler_delegate_->OnPointerUp(
-      x, y, device_kind,
+      x, y, device_kind, kDefaultPointerDeviceId,
       FlutterPointerMouseButtons::kFlutterPointerButtonMousePrimary);
 }
 
@@ -169,7 +174,8 @@ void FlutterWindowWinUWP::OnPointerMoved(
   double y = GetPosY(args);
   FlutterPointerDeviceKind device_kind = GetPointerDeviceKind(args);
 
-  binding_handler_delegate_->OnPointerMove(x, y, device_kind);
+  binding_handler_delegate_->OnPointerMove(x, y, device_kind,
+                                           kDefaultPointerDeviceId);
 }
 
 void FlutterWindowWinUWP::OnPointerWheelChanged(
@@ -177,8 +183,10 @@ void FlutterWindowWinUWP::OnPointerWheelChanged(
     winrt::Windows::UI::Core::PointerEventArgs const& args) {
   double x = GetPosX(args);
   double y = GetPosY(args);
+  FlutterPointerDeviceKind device_kind = GetPointerDeviceKind(args);
   int delta = args.CurrentPoint().Properties().MouseWheelDelta();
-  binding_handler_delegate_->OnScroll(x, y, 0, -delta, 1);
+  binding_handler_delegate_->OnScroll(x, y, 0, -delta, 1, device_kind,
+                                      kDefaultPointerDeviceId);
 }
 
 double FlutterWindowWinUWP::GetPosX(
