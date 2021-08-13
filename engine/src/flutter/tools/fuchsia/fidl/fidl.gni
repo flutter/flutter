@@ -1,0 +1,46 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/fuchsia/sdk.gni")
+import("//flutter/tools/fuchsia/dart/toolchain.gni")
+import("//flutter/tools/fuchsia/fidl/toolchain.gni")
+
+# Declares a FIDL library.
+#
+# Depending on the toolchain in which this targets is expanded, it will yield
+# different results:
+#   - in the FIDL toolchain, it will compile its source files into an
+#     intermediate representation consumable by language bindings generators;
+#   - in the target or shared toolchain, this will produce a source_set
+#     containing language-specific bindings.
+template("fidl") {
+  # Allow generated targets visibility to their dependant generated targets
+  if (defined(invoker.visibility)) {
+    invoker.visibility += [ ":*" ]
+  }
+
+  assert(!defined(invoker.deps),
+         "All FIDL dependencies are inherently " +
+             "public, use 'public_deps' instead of 'deps'.")
+
+  deps = []
+
+  if (current_toolchain == dart_toolchain) {
+    import("//flutter/tools/fuchsia/dart/fidl_dart.gni")
+
+    fidl_dart(target_name) {
+      forward_variables_from(invoker, "*")
+    }
+  } else {
+    if (current_toolchain == fidl_toolchain) {
+      import("//flutter/tools/fuchsia/fidl/fidl_library.gni")
+
+      fidl_library(target_name) {
+        forward_variables_from(invoker, "*")
+      }
+    } else {
+      not_needed("*")
+    }
+  }
+}

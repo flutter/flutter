@@ -1,0 +1,24 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//flutter/tools/fuchsia/dart/dart_build_config.gni")
+
+declare_args() {
+  # Forces all Dart apps to build in product mode which is a
+  # stripped down version of the VM running in AOT mode.
+  dart_force_product = false
+
+  # TODO(fxbug.dev/64153) renable aot builds
+  #  if (dart_force_product) {
+  # Product AOT
+  #    dart_default_build_cfg = dart_release_build_cfg
+  #  } else if (is_debug) {
+  # Non-product JIT
+  dart_default_build_cfg = dart_debug_build_cfg
+
+  #  } else {
+  # Non-product AOT
+  #    dart_default_build_cfg = dart_profile_build_cfg
+  #  }
+}

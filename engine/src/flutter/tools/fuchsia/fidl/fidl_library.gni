@@ -1,0 +1,143 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//flutter/tools/executable_action.gni")
+import("//flutter/tools/fuchsia/fidl/fidl.gni")
+import("//flutter/tools/fuchsia/fidl/toolchain.gni")
+
+# Generates some representation of a FIDL library that's consumable by Language
+# bindings generators.
+#
+# The parameters for this template are defined in //flutter/tools/fuchsia/fidl/fidl.gni. The
+# relevant parameters in this template are:
+#   - name;
+#   - sources.
+
+template("fidl_library") {
+  assert(
+      current_toolchain == fidl_toolchain,
+      "This template can only be used in the FIDL toolchain $fidl_toolchain.")
+
+  assert(defined(invoker.sources), "A FIDL library requires some sources.")
+
+  library_name = target_name
+  if (defined(invoker.name)) {
+    library_name = invoker.name
+  }
+
+  response_file = "$target_gen_dir/$target_name.args"
+  fidl_stem = "$target_gen_dir/$target_name.fidl"
+  json_representation = "$fidl_stem.json"
+
+  coding_tables = "$fidl_stem.tables.c"
+
+  main_target_name = target_name
+  response_file_target_name = "${target_name}_response_file"
+  compilation_target_name = "${target_name}_compile"
+
+  # Only artifacts that have various associated FIDL generated targets.
+  fidl_deps = []
+
+  # Artifacts other than FIDL, that are also dependencies.
+  non_fidl_deps = []
+
+  if (defined(invoker.non_fidl_deps)) {
+    non_fidl_deps += invoker.non_fidl_deps
+  }
+
+  if (defined(invoker.deps)) {
+    fidl_deps += invoker.deps - non_fidl_deps
+  }
+  if (defined(invoker.public_deps)) {
+    fidl_deps += invoker.public_deps
+  }
+
+  action(response_file_target_name) {
+    visibility = [ ":*" ]
+
+    script = "//flutter/tools/fuchsia/fidl/gen_response_file.py"
+
+    forward_variables_from(invoker,
+                           [
+                             "deps",
+                             "public_deps",
+                             "sources",
+                             "testonly",
+                           ])
+
+    libraries = "$target_gen_dir/$main_target_name.libraries"
+
+    outputs = [
+      response_file,
+      libraries,
+    ]
+
+    args = [
+             "--out-response-file",
+             rebase_path(response_file, root_build_dir),
+             "--out-libraries",
+             rebase_path(libraries, root_build_dir),
+             "--json",
+             rebase_path(json_representation, root_build_dir),
+             "--tables",
+             rebase_path(coding_tables, root_build_dir),
+             "--name",
+             library_name,
+             "--sources",
+           ] + rebase_path(sources, root_build_dir)
+
+    if (fidl_deps != []) {
+      dep_libraries = []
+
+      foreach(dep, fidl_deps) {
+        gen_dir = get_label_info(dep, "target_gen_dir")
+        name = get_label_info(dep, "name")
+        dep_libraries += [ "$gen_dir/$name.libraries" ]
+      }
+
+      inputs = dep_libraries
+
+      args += [ "--dep-libraries" ] + rebase_path(dep_libraries, root_build_dir)
+    }
+  }
+
+  executable_action(compilation_target_name) {
+    forward_variables_from(invoker, [ "testonly" ])
+
+    visibility = [ ":*" ]
+
+    tool = "${fuchsia_sdk_path}/tools/fidlc"
+
+    inputs = [ response_file ]
+
+    outputs = [
+      coding_tables,
+      json_representation,
+    ]
+
+    args = [ "@" + rebase_path(response_file, root_build_dir) ]
+
+    deps = [ ":$response_file_target_name" ] + non_fidl_deps
+  }
+
+  group(main_target_name) {
+    forward_variables_from(invoker,
+                           [
+                             "testonly",
+                             "visibility",
+                             "response_file",
+                           ])
+
+    # Metadata to allow us to query all FIDL IR files.
+    metadata = {
+      fidl_json = [ rebase_path(json_representation, root_build_dir) ]
+      generated_sources = fidl_json
+    }
+
+    public_deps = [
+      ":$compilation_target_name",
+      ":$response_file_target_name",
+    ]
+  }
+}
