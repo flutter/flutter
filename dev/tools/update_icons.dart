@@ -199,7 +199,7 @@ void main(List<String> args) {
   } else {
     stderr.writeln('\nWriting to ${iconClassFile.path}.');
     iconClassFile.writeAsStringSync(newIconData);
-    _overwriteOldCodepoints(oldCodepointsFile, newTokenPairMap);
+    _regenerateCodepointsFile(oldCodepointsFile, newTokenPairMap);
   }
 }
 
@@ -322,7 +322,7 @@ Error: New codepoints file does not contain all ${oldCodepointsSet.length} exist
   }
 }
 
-void _overwriteOldCodepoints(File oldCodepointsFile, TokenPairMap newTokenPairMap) {
+void _regenerateCodepointsFile(File oldCodepointsFile, TokenPairMap newTokenPairMap) {
   stderr.writeln('Regenerating old codepoints file ${oldCodepointsFile.path}.\n');
 
   final StringBuffer buf = StringBuffer();
