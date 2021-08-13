@@ -545,6 +545,8 @@ def main():
       help='Generate coverage reports for each unit test framework run.')
   parser.add_argument('--engine-capture-core-dump', dest='engine_capture_core_dump', action='store_true',
       default=False, help='Capture core dumps from crashes of engine tests.')
+  parser.add_argument('--asan-options', dest='asan_options', action='store', type=str, default='',
+      help='Runtime AddressSanitizer flags to use if built wth asan (example: "verbosity=1:detect_leaks=0')
 
   args = parser.parse_args()
 
@@ -556,6 +558,9 @@ def main():
   build_dir = os.path.join(out_dir, args.variant)
   if args.type != 'java':
     assert os.path.exists(build_dir), 'Build variant directory %s does not exist!' % build_dir
+
+  if args.asan_options:
+    os.environ['ASAN_OPTIONS'] = args.asan_options
 
   engine_filter = args.engine_filter.split(',') if args.engine_filter else None
   if 'engine' in types:
