@@ -1747,6 +1747,16 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       return moveSelectionLeftByLine(cause);
     }
 
+    // If the lowest edge of the selection is at the start of a line, don't do
+    // anything.
+    final int lowestOffset = math.min(selection!.baseOffset, selection!.extentOffset);
+    final TextSelection currentLine = _getLineAtOffset(TextPosition(
+      offset: lowestOffset,
+    ));
+    if (currentLine.baseOffset == lowestOffset) {
+      return;
+    }
+
     final int firstOffset = math.min(selection!.baseOffset, selection!.extentOffset);
     final int startPoint = previousCharacter(firstOffset, _plainText, false);
     final TextSelection selectedLine = _getLineAtOffset(TextPosition(offset: startPoint));
@@ -1867,18 +1877,28 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       return moveSelectionRightByLine(cause);
     }
 
-    final int lastOffset = math.max(selection!.baseOffset, selection!.extentOffset);
-    final int startPoint = nextCharacter(lastOffset, _plainText, false);
+    // If greatest edge is already at the end of a line, don't do anything.
+    final TextPosition greatestPosition = selection!.baseOffset <= selection!.extentOffset
+      ? selection!.extent
+      : selection!.base;
+    final TextSelection currentLine = _getLineAtOffset(greatestPosition);
+    if (currentLine.extentOffset == greatestPosition.offset) {
+      return;
+    }
+
+    final int startPoint = nextCharacter(greatestPosition.offset, _plainText, false);
     final TextSelection selectedLine = _getLineAtOffset(TextPosition(offset: startPoint));
 
     late final TextSelection nextSelection;
-    if (selection!.extentOffset >= selection!.baseOffset) {
+    if (selection!.baseOffset <= selection!.extentOffset) {
       nextSelection = selection!.copyWith(
         extentOffset: selectedLine.extentOffset,
+        affinity: TextAffinity.upstream,
       );
     } else {
       nextSelection = selection!.copyWith(
         baseOffset: selectedLine.extentOffset,
+        affinity: TextAffinity.upstream,
       );
     }
 
@@ -1950,10 +1970,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   void moveSelectionLeftByLine(SelectionChangedCause cause) {
     assert(selection != null);
 
-    // If the previous character is the edge of a line, don't do anything.
-    final int previousPoint = previousCharacter(selection!.extentOffset, _plainText, true);
-    final TextSelection line = _getLineAtOffset(TextPosition(offset: previousPoint));
-    if (line.extentOffset == previousPoint) {
+    // If already at the left edge of the line, do nothing.
+    final TextSelection currentLine = _getLineAtOffset(selection!.extent);
+    if (currentLine.baseOffset == selection!.extentOffset) {
       return;
     }
 
@@ -2037,9 +2056,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     assert(selection != null);
 
     // If already at the right edge of the line, do nothing.
-    final TextSelection currentLine = _getLineAtOffset(TextPosition(
-      offset: selection!.extentOffset,
-    ));
+    final TextSelection currentLine = _getLineAtOffset(selection!.extent);
     if (currentLine.extentOffset == selection!.extentOffset) {
       return;
     }
@@ -2049,7 +2066,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     // for the line bounds, since _getLineAtOffset finds the line
     // boundaries without including whitespace (like the newline).
     final int startPoint = nextCharacter(selection!.extentOffset, _plainText, false);
-    final TextSelection selectedLine = _getLineAtOffset(TextPosition(offset: startPoint));
+    final TextSelection selectedLine = _getLineAtOffset(TextPosition(
+      offset: startPoint,
+      affinity: TextAffinity.upstream,
+    ));
     final TextSelection nextSelection = TextSelection.collapsed(
       offset: selectedLine.extentOffset,
       affinity: TextAffinity.upstream,
@@ -3555,8 +3575,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).',
     );
     final TextRange line = _textPainter.getLineBoundary(position);
-    if (position.offset >= line.end)
-      return TextSelection.fromPosition(position);
     // If text is obscured, the entire string should be treated as one line.
     if (obscureText) {
       return TextSelection(baseOffset: 0, extentOffset: _plainText.length);
