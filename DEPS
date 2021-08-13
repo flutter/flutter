@@ -29,6 +29,10 @@ vars = {
   'ocmock_git': 'https://github.com/erikdoe/ocmock.git',
   'skia_revision': '73339ada9d13ed284179989029b94fa878015bb7',
 
+  # WARNING: DO NOT EDIT canvaskit_cipd_instance MANUALLY
+  # See `lib/web_ui/README.md` for how to roll CanvasKit to a new version.
+  'canvaskit_cipd_instance': 'srPdrAoUIWOde-KMPE5S8koi64mejhae7NzvfR_7m3gC',
+
   # When updating the Dart revision, ensure that all entries that are
   # dependencies of Dart are also updated to match the entries in the
   # Dart SDK's DEPS file for that revision of Dart. The DEPS file for
@@ -532,6 +536,16 @@ deps = {
        }
      ],
      'condition': 'download_android_deps',
+     'dep_type': 'cipd',
+   },
+
+  'src/third_party/web_dependencies': {
+     'packages': [
+       {
+         'package': 'flutter/web/canvaskit_bundle',
+         'version': Var('canvaskit_cipd_instance')
+       }
+     ],
      'dep_type': 'cipd',
    },
 

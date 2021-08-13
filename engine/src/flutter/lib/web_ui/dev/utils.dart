@@ -56,6 +56,27 @@ Future<int> runProcess(
   return manager.wait();
 }
 
+/// Runs the process and returns its standard output as a string.
+///
+/// Standard error output is ignored (use [ProcessManager.evalStderr] for that).
+///
+/// Throws an exception if the process exited with a non-zero exit code.
+Future<String> evalProcess(
+  String executable,
+  List<String> arguments, {
+  String? workingDirectory,
+  Map<String, String> environment = const <String, String>{},
+}) async {
+  final ProcessManager manager = await startProcess(
+    executable,
+    arguments,
+    workingDirectory: workingDirectory,
+    environment: environment,
+    evalOutput: true,
+  );
+  return manager.evalStdout();
+}
+
 /// Starts a process using the [executable], passing it [arguments].
 ///
 /// Returns a process manager that decorates the process with extra
