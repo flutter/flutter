@@ -19,9 +19,9 @@ import 'package:test_core/src/runner/reporter.dart' as hack;
 import '../browser.dart';
 import '../environment.dart';
 import '../exceptions.dart';
+import '../pipeline.dart';
 import '../test_platform.dart';
 import '../utils.dart';
-import '../watcher.dart';
 
 // Maximum number of tests that run concurrently.
 const int _testConcurrency = int.fromEnvironment('FELT_TEST_CONCURRENCY', defaultValue: 10);

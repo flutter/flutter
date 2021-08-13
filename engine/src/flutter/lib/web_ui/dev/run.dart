@@ -8,10 +8,10 @@ import 'dart:io' as io;
 import 'package:args/command_runner.dart';
 
 import 'common.dart';
+import 'pipeline.dart';
 import 'steps/compile_tests_step.dart';
 import 'steps/run_tests_step.dart';
 import 'utils.dart';
-import 'watcher.dart';
 
 /// Runs build and test steps.
 ///

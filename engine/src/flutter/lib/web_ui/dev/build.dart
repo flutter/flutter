@@ -10,8 +10,8 @@ import 'package:path/path.dart' as path;
 import 'package:watcher/src/watch_event.dart';
 
 import 'environment.dart';
+import 'pipeline.dart';
 import 'utils.dart';
-import 'watcher.dart';
 
 class BuildCommand extends Command<bool> with ArgUtils<bool> {
   BuildCommand() {

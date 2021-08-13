@@ -87,13 +87,16 @@ abstract class ProcessStep implements PipelineStep {
   }
 }
 
-/// Represents a sequence of asynchronous tasks to be executed.
+/// Executes a sequence of asynchronous tasks, typically as part of a build/test
+/// process.
 ///
 /// The pipeline can be executed by calling [start] and stopped by calling
 /// [stop].
 ///
 /// When a pipeline is stopped, it switches to the [PipelineStatus.stopping]
-/// state and waits until the current task finishes.
+/// state. If [PipelineStep.isSafeToInterrupt] is true, interrupts the currently
+/// running step and skips the rest. Otherwise, waits until the current task
+/// finishes and skips the rest.
 class Pipeline {
   Pipeline({required this.steps});
 
