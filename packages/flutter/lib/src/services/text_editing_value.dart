@@ -11,7 +11,6 @@ import 'package:characters/characters.dart';
 import 'package:flutter/foundation.dart';
 
 import 'text_editing.dart';
-import 'text_metrics.dart';
 
 TextAffinity? _toTextAffinity(String? affinity) {
   switch (affinity) {
