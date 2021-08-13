@@ -270,7 +270,6 @@ String _regenerateIconsFile(String iconData, TokenPairMap tokenPairMap) {
             final _Icon iOSIcon = newIcons.firstWhere(
                     (_Icon icon) => icon.id == '${ids[1]}$style',
                 orElse: () => throw ids[1]);
-
             platformAdaptiveDeclarations.add(_Icon.platformAdaptiveDeclaration('$flutterId$style', agnosticIcon, iOSIcon));
           } catch (e) {
             if (style == '') {
@@ -446,7 +445,6 @@ class _Icon {
     for (final MapEntry<String, String> rewritePair
     in identifierExactRewrites.entries) {
       final String shortId = _Icon._generateShortId(id);
-
       if (shortId == rewritePair.key) {
         flutterId = id.replaceFirst(rewritePair.key, identifierExactRewrites[rewritePair.key]!);
       }
