@@ -378,16 +378,18 @@ class _Icon {
     for (final MapEntry<String, String> rewritePair
     in identifierExactRewrites.entries) {
       if (shortId == rewritePair.key) {
-        flutterId = id.replaceFirst(
-            rewritePair.key, identifierExactRewrites[rewritePair.key]!);
+        flutterId = id.replaceFirst(rewritePair.key, identifierExactRewrites[rewritePair.key]!);
       }
     }
     // Prefix identifer rewrites.
     for (final MapEntry<String, String> rewritePair
     in identifierPrefixRewrites.entries) {
       if (id.startsWith(rewritePair.key)) {
-        flutterId = id.replaceFirst(
-            rewritePair.key, identifierPrefixRewrites[rewritePair.key]!);
+        flutterId = id.replaceFirst(rewritePair.key, identifierPrefixRewrites[rewritePair.key]!);
+      }
+      // TODO(guidezpl): With the next icon update, this won't be necessary, remove it.
+      if (id.startsWith(rewritePair.key.replaceFirst('_', ''))) {
+        flutterId = id.replaceFirst(rewritePair.key.replaceFirst('_', ''), identifierPrefixRewrites[rewritePair.key]!);
       }
     }
   }
@@ -408,7 +410,7 @@ class _Icon {
   String get style => htmlSuffix == '' ? '' : ' (${htmlSuffix.replaceFirst('-', '')})';
 
   String get dartDoc =>
-      '<i class="material-icons$htmlSuffix md-36">$shortId</i> &#x2014; $family icon named $name$style';
+      '<i class="material-icons$htmlSuffix md-36">$shortId</i> &#x2014; $family icon named "$name"$style';
 
   String get mirroredInRTL => _iconsMirroredWhenRTL.contains(shortId)
       ? ', matchTextDirection: true'
