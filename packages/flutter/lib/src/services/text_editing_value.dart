@@ -306,15 +306,17 @@ class TextEditingValue {
   /// returned without change.
   ///
   /// The returned selection will always be a strict superset of [selection].
+  /// In other words, the selection grows to include the given [TextPosition].
   ///
   /// If extentAtIndex is true, then the [TextSelection.extentOffset] will be
   /// placed at the given index regardless of the original order of it and
   /// [TextSelection.baseOffset]. Otherwise, their order will be preserved.
   ///
-  /// See also:
-  ///
-  ///   * [extendSelectionTo], which is similar but only moves
-  ///     [TextSelection.extentOffset].
+  /// ## Difference with [extendSelectionTo]
+  /// In contrast with this method, [extendSelectionTo] is a pivot; it holds
+  /// [TextSelection.baseOffset] fixed while moving [TextSelection.extentOffset]
+  /// to the given [TextPosition].  It doesn't strictly grow the selection and
+  /// may collapse it or flip its order.
   TextSelection expandSelectionTo(TextPosition position, [bool extentAtIndex = false]) {
     assert(selection != null);
 
@@ -362,8 +364,17 @@ class TextEditingValue {
     );
   }
 
-  /// Keeping [selection]'s [TextSelection.baseOffset] fixed, move the
+  /// Keeping [selection]'s [TextSelection.baseOffset] fixed, pivot the
   /// [TextSelection.extentOffset] to the given [TextPosition].
+  ///
+  /// In some cases, the [TextSelection.baseOffset] and
+  /// [TextSelection.extentOffset] may flip during this operation, or the size
+  /// of the selection may shrink.
+  ///
+  /// ## Difference with [expandSelectionTo]
+  /// In contrast with this method, [expandSelectionTo] is strictly growth; the
+  /// selection is grown to include the given [TextPosition] and will never
+  /// shrink.
   TextSelection extendSelectionTo(TextPosition position) {
     assert(selection != null);
 
