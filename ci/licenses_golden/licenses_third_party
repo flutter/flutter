@@ -1,4 +1,4 @@
-Signature: 4d56a6883ff0009c30217daf7b4cd651
+Signature: bf7b8049e7878899f66343357195e4fe
 
 UNUSED LICENSES:
 
@@ -9928,6 +9928,10 @@ FILE: ../../../third_party/dart/benchmarks/StringPool/dart2/StringPool.dart
 FILE: ../../../third_party/dart/benchmarks/StringPool/dart2/StringPool100.dart
 FILE: ../../../third_party/dart/runtime/bin/abstract_socket_test.cc
 FILE: ../../../third_party/dart/runtime/bin/utils.cc
+FILE: ../../../third_party/dart/runtime/bin/virtual_memory.h
+FILE: ../../../third_party/dart/runtime/bin/virtual_memory_fuchsia.cc
+FILE: ../../../third_party/dart/runtime/bin/virtual_memory_posix.cc
+FILE: ../../../third_party/dart/runtime/bin/virtual_memory_win.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/asm_intrinsifier_test.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/compiler_timings.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/compiler_timings.h
