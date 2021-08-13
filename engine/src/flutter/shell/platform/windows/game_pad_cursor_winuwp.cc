@@ -7,6 +7,8 @@
 
 namespace flutter {
 
+static constexpr int32_t kDefaultPointerDeviceId = 0;
+
 GamepadCursorWinUWP::GamepadCursorWinUWP(
     WindowBindingHandlerDelegate* view,
     DisplayHelperWinUWP* displayhelper,
@@ -162,16 +164,18 @@ void GamepadCursorWinUWP::OnGamepadLeftStickMoved(double x, double y) {
     // TODO(dnfield): Support for gamepad as a distinct device type?
     // https://github.com/flutter/flutter/issues/80472
     binding_handler_delegate_->OnPointerMove(scaled.x, scaled.y,
-                                             kFlutterPointerDeviceKindMouse);
+                                             kFlutterPointerDeviceKindMouse,
+                                             kDefaultPointerDeviceId);
   }
 }
 
 void GamepadCursorWinUWP::OnGamepadRightStickMoved(double x, double y) {
   winrt::Windows::Foundation::Numerics::float3 scaled =
       GetScaledInput(cursor_visual_.Offset());
-  binding_handler_delegate_->OnScroll(scaled.x, scaled.y,
-                                      x * kControllerScrollMultiplier,
-                                      y * kControllerScrollMultiplier, 1);
+  binding_handler_delegate_->OnScroll(
+      scaled.x, scaled.y, x * kControllerScrollMultiplier,
+      y * kControllerScrollMultiplier, 1, kFlutterPointerDeviceKindMouse,
+      kDefaultPointerDeviceId);
 }
 
 void GamepadCursorWinUWP::OnGamepadButtonPressed(
@@ -190,6 +194,7 @@ void GamepadCursorWinUWP::OnGamepadButtonPressed(
     // https://github.com/flutter/flutter/issues/80472
     binding_handler_delegate_->OnPointerDown(
         scaled.x, scaled.y, kFlutterPointerDeviceKindMouse,
+        kDefaultPointerDeviceId,
         FlutterPointerMouseButtons::kFlutterPointerButtonMousePrimary);
   } else if ((buttons &
               winrt::Windows::Gaming::Input::GamepadButtons::DPadLeft) ==
@@ -234,6 +239,7 @@ void GamepadCursorWinUWP::OnGamepadButtonReleased(
     // https://github.com/flutter/flutter/issues/80472
     binding_handler_delegate_->OnPointerUp(
         scaled.x, scaled.y, kFlutterPointerDeviceKindMouse,
+        kDefaultPointerDeviceId,
         FlutterPointerMouseButtons::kFlutterPointerButtonMousePrimary);
   } else if ((buttons &
               winrt::Windows::Gaming::Input::GamepadButtons::DPadLeft) ==

@@ -11,7 +11,10 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <vector>
 
+#include "flutter/shell/platform/embedder/embedder.h"
+#include "flutter/shell/platform/windows/sequential_id_generator.h"
 #include "flutter/shell/platform/windows/text_input_manager_win32.h"
 
 namespace flutter {
@@ -54,17 +57,18 @@ class WindowWin32 {
   // Processes and route salient window messages for mouse handling,
   // size change and DPI.  Delegates handling of these to member overloads that
   // inheriting classes can handle.
-  LRESULT
-  HandleMessage(UINT const message,
-                WPARAM const wparam,
-                LPARAM const lparam) noexcept;
+  LRESULT HandleMessage(UINT const message,
+                        WPARAM const wparam,
+                        LPARAM const lparam) noexcept;
 
   // When WM_DPICHANGE process it using |hWnd|, |wParam|.  If
   // |top_level| is set, extract the suggested new size from |lParam| and resize
   // the window to the new suggested size.  If |top_level| is not set, the
   // |lParam| will not contain a suggested size hence ignore it.
-  LRESULT
-  HandleDpiChange(HWND hWnd, WPARAM wParam, LPARAM lParam, bool top_level);
+  LRESULT HandleDpiChange(HWND hWnd,
+                          WPARAM wParam,
+                          LPARAM lParam,
+                          bool top_level);
 
   // Called when the DPI changes either when a
   // user drags the window between monitors of differing DPI or when the user
@@ -76,17 +80,29 @@ class WindowWin32 {
 
   // Called when the pointer moves within the
   // window bounds.
-  virtual void OnPointerMove(double x, double y) = 0;
+  virtual void OnPointerMove(double x,
+                             double y,
+                             FlutterPointerDeviceKind device_kind,
+                             int32_t device_id) = 0;
 
   // Called when the a mouse button, determined by |button|, goes down.
-  virtual void OnPointerDown(double x, double y, UINT button) = 0;
+  virtual void OnPointerDown(double x,
+                             double y,
+                             FlutterPointerDeviceKind device_kind,
+                             int32_t device_id,
+                             UINT button) = 0;
 
   // Called when the a mouse button, determined by |button|, goes from
   // down to up
-  virtual void OnPointerUp(double x, double y, UINT button) = 0;
+  virtual void OnPointerUp(double x,
+                           double y,
+                           FlutterPointerDeviceKind device_kind,
+                           int32_t device_id,
+                           UINT button) = 0;
 
   // Called when the mouse leaves the window.
-  virtual void OnPointerLeave() = 0;
+  virtual void OnPointerLeave(FlutterPointerDeviceKind device_kind,
+                              int32_t device_id) = 0;
 
   // Called when the cursor should be set for the client area.
   virtual void OnSetCursor() = 0;
@@ -151,7 +167,10 @@ class WindowWin32 {
   virtual void UpdateCursorRect(const Rect& rect);
 
   // Called when mouse scrollwheel input occurs.
-  virtual void OnScroll(double delta_x, double delta_y) = 0;
+  virtual void OnScroll(double delta_x,
+                        double delta_y,
+                        FlutterPointerDeviceKind device_kind,
+                        int32_t device_id) = 0;
 
   UINT GetCurrentDPI();
 
@@ -226,6 +245,12 @@ class WindowWin32 {
 
   // Manages IME state.
   TextInputManagerWin32 text_input_manager_;
+
+  // Used for temporarily storing the WM_TOUCH-provided touch points.
+  std::vector<TOUCHINPUT> touch_points_;
+
+  // Generates touch point IDs for touch events.
+  SequentialIdGenerator touch_id_generator_;
 };
 
 }  // namespace flutter

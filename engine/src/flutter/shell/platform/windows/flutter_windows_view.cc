@@ -172,19 +172,21 @@ void FlutterWindowsView::OnWindowSizeChanged(size_t width, size_t height) {
 
 void FlutterWindowsView::OnPointerMove(double x,
                                        double y,
-                                       FlutterPointerDeviceKind device_kind) {
-  SendPointerMove(x, y, device_kind);
+                                       FlutterPointerDeviceKind device_kind,
+                                       int32_t device_id) {
+  SendPointerMove(x, y, GetOrCreatePointerState(device_kind, device_id));
 }
 
 void FlutterWindowsView::OnPointerDown(
     double x,
     double y,
     FlutterPointerDeviceKind device_kind,
+    int32_t device_id,
     FlutterPointerMouseButtons flutter_button) {
   if (flutter_button != 0) {
-    uint64_t mouse_buttons = mouse_state_.buttons | flutter_button;
-    SetMouseButtons(mouse_buttons);
-    SendPointerDown(x, y, device_kind);
+    auto state = GetOrCreatePointerState(device_kind, device_id);
+    state->buttons |= flutter_button;
+    SendPointerDown(x, y, state);
   }
 }
 
@@ -192,16 +194,18 @@ void FlutterWindowsView::OnPointerUp(
     double x,
     double y,
     FlutterPointerDeviceKind device_kind,
+    int32_t device_id,
     FlutterPointerMouseButtons flutter_button) {
   if (flutter_button != 0) {
-    uint64_t mouse_buttons = mouse_state_.buttons & ~flutter_button;
-    SetMouseButtons(mouse_buttons);
-    SendPointerUp(x, y, device_kind);
+    auto state = GetOrCreatePointerState(device_kind, device_id);
+    state->buttons &= ~flutter_button;
+    SendPointerUp(x, y, state);
   }
 }
 
-void FlutterWindowsView::OnPointerLeave(FlutterPointerDeviceKind device_kind) {
-  SendPointerLeave(device_kind);
+void FlutterWindowsView::OnPointerLeave(FlutterPointerDeviceKind device_kind,
+                                        int32_t device_id) {
+  SendPointerLeave(GetOrCreatePointerState(device_kind, device_id));
 }
 
 void FlutterWindowsView::OnText(const std::u16string& text) {
@@ -238,8 +242,11 @@ void FlutterWindowsView::OnScroll(double x,
                                   double y,
                                   double delta_x,
                                   double delta_y,
-                                  int scroll_offset_multiplier) {
-  SendScroll(x, y, delta_x, delta_y, scroll_offset_multiplier);
+                                  int scroll_offset_multiplier,
+                                  FlutterPointerDeviceKind device_kind,
+                                  int32_t device_id) {
+  SendScroll(x, y, delta_x, delta_y, scroll_offset_multiplier, device_kind,
+             device_id);
 }
 
 void FlutterWindowsView::OnCursorRectUpdated(const Rect& rect) {
@@ -265,18 +272,38 @@ void FlutterWindowsView::SendInitialBounds() {
                     binding_handler_->GetDpiScale());
 }
 
+FlutterWindowsView::PointerState* FlutterWindowsView::GetOrCreatePointerState(
+    FlutterPointerDeviceKind device_kind,
+    int32_t device_id) {
+  // Create a virtual pointer ID that is unique across all device types
+  // to prevent pointers from clashing in the engine's converter
+  // (lib/ui/window/pointer_data_packet_converter.cc)
+  int32_t pointer_id = (static_cast<int32_t>(device_kind) << 28) | device_id;
+
+  auto [it, added] = pointer_states_.try_emplace(pointer_id, nullptr);
+  if (added) {
+    auto state = std::make_unique<PointerState>();
+    state->device_kind = device_kind;
+    state->pointer_id = pointer_id;
+    it->second = std::move(state);
+  }
+
+  return it->second.get();
+}
+
 // Set's |event_data|'s phase to either kMove or kHover depending on the current
 // primary mouse button state.
 void FlutterWindowsView::SetEventPhaseFromCursorButtonState(
-    FlutterPointerEvent* event_data) const {
+    FlutterPointerEvent* event_data,
+    const PointerState* state) const {
   // For details about this logic, see FlutterPointerPhase in the embedder.h
   // file.
-  if (mouse_state_.buttons == 0) {
-    event_data->phase = mouse_state_.flutter_state_is_down
+  if (state->buttons == 0) {
+    event_data->phase = state->flutter_state_is_down
                             ? FlutterPointerPhase::kUp
                             : FlutterPointerPhase::kHover;
   } else {
-    event_data->phase = mouse_state_.flutter_state_is_down
+    event_data->phase = state->flutter_state_is_down
                             ? FlutterPointerPhase::kMove
                             : FlutterPointerPhase::kDown;
   }
@@ -284,47 +311,46 @@ void FlutterWindowsView::SetEventPhaseFromCursorButtonState(
 
 void FlutterWindowsView::SendPointerMove(double x,
                                          double y,
-                                         FlutterPointerDeviceKind device_kind) {
+                                         PointerState* state) {
   FlutterPointerEvent event = {};
   event.x = x;
   event.y = y;
-  event.device_kind = device_kind;
-  SetEventPhaseFromCursorButtonState(&event);
-  SendPointerEventWithData(event);
+
+  SetEventPhaseFromCursorButtonState(&event, state);
+  SendPointerEventWithData(event, state);
 }
 
 void FlutterWindowsView::SendPointerDown(double x,
                                          double y,
-                                         FlutterPointerDeviceKind device_kind) {
+                                         PointerState* state) {
   FlutterPointerEvent event = {};
-  SetEventPhaseFromCursorButtonState(&event);
   event.x = x;
   event.y = y;
-  event.device_kind = device_kind;
-  SendPointerEventWithData(event);
-  SetMouseFlutterStateDown(true);
+
+  SetEventPhaseFromCursorButtonState(&event, state);
+  SendPointerEventWithData(event, state);
+
+  state->flutter_state_is_down = true;
 }
 
 void FlutterWindowsView::SendPointerUp(double x,
                                        double y,
-                                       FlutterPointerDeviceKind device_kind) {
+                                       PointerState* state) {
   FlutterPointerEvent event = {};
-  SetEventPhaseFromCursorButtonState(&event);
   event.x = x;
   event.y = y;
-  event.device_kind = device_kind;
-  SendPointerEventWithData(event);
+
+  SetEventPhaseFromCursorButtonState(&event, state);
+  SendPointerEventWithData(event, state);
   if (event.phase == FlutterPointerPhase::kUp) {
-    SetMouseFlutterStateDown(false);
+    state->flutter_state_is_down = false;
   }
 }
 
-void FlutterWindowsView::SendPointerLeave(
-    FlutterPointerDeviceKind device_kind) {
+void FlutterWindowsView::SendPointerLeave(PointerState* state) {
   FlutterPointerEvent event = {};
-  event.device_kind = device_kind;
   event.phase = FlutterPointerPhase::kRemove;
-  SendPointerEventWithData(event);
+  SendPointerEventWithData(event, state);
 }
 
 void FlutterWindowsView::SendText(const std::u16string& text) {
@@ -378,39 +404,47 @@ void FlutterWindowsView::SendScroll(double x,
                                     double y,
                                     double delta_x,
                                     double delta_y,
-                                    int scroll_offset_multiplier) {
+                                    int scroll_offset_multiplier,
+                                    FlutterPointerDeviceKind device_kind,
+                                    int32_t device_id) {
+  auto state = GetOrCreatePointerState(device_kind, device_id);
+
   FlutterPointerEvent event = {};
-  SetEventPhaseFromCursorButtonState(&event);
-  event.signal_kind = FlutterPointerSignalKind::kFlutterPointerSignalKindScroll;
   event.x = x;
   event.y = y;
+  event.signal_kind = FlutterPointerSignalKind::kFlutterPointerSignalKindScroll;
   event.scroll_delta_x = delta_x * scroll_offset_multiplier;
   event.scroll_delta_y = delta_y * scroll_offset_multiplier;
-  SendPointerEventWithData(event);
+  SetEventPhaseFromCursorButtonState(&event, state);
+  SendPointerEventWithData(event, state);
 }
 
 void FlutterWindowsView::SendPointerEventWithData(
-    const FlutterPointerEvent& event_data) {
+    const FlutterPointerEvent& event_data,
+    PointerState* state) {
   // If sending anything other than an add, and the pointer isn't already added,
   // synthesize an add to satisfy Flutter's expectations about events.
-  if (!mouse_state_.flutter_state_is_added &&
+  if (!state->flutter_state_is_added &&
       event_data.phase != FlutterPointerPhase::kAdd) {
     FlutterPointerEvent event = {};
     event.phase = FlutterPointerPhase::kAdd;
     event.x = event_data.x;
     event.y = event_data.y;
     event.buttons = 0;
-    SendPointerEventWithData(event);
+    SendPointerEventWithData(event, state);
   }
+
   // Don't double-add (e.g., if events are delivered out of order, so an add has
   // already been synthesized).
-  if (mouse_state_.flutter_state_is_added &&
+  if (state->flutter_state_is_added &&
       event_data.phase == FlutterPointerPhase::kAdd) {
     return;
   }
 
   FlutterPointerEvent event = event_data;
-  event.buttons = mouse_state_.buttons;
+  event.device_kind = state->device_kind;
+  event.device = state->pointer_id;
+  event.buttons = state->buttons;
 
   // Set metadata that's always the same regardless of the event.
   event.struct_size = sizeof(event);
@@ -422,10 +456,12 @@ void FlutterWindowsView::SendPointerEventWithData(
   engine_->SendPointerEvent(event);
 
   if (event_data.phase == FlutterPointerPhase::kAdd) {
-    SetMouseFlutterStateAdded(true);
+    state->flutter_state_is_added = true;
   } else if (event_data.phase == FlutterPointerPhase::kRemove) {
-    SetMouseFlutterStateAdded(false);
-    ResetMouseState();
+    auto it = pointer_states_.find(state->pointer_id);
+    if (it != pointer_states_.end()) {
+      pointer_states_.erase(it);
+    }
   }
 }
 

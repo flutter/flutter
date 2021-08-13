@@ -37,16 +37,28 @@ class FlutterWindowWin32 : public WindowWin32, public WindowBindingHandler {
   void OnResize(unsigned int width, unsigned int height) override;
 
   // |WindowWin32|
-  void OnPointerMove(double x, double y) override;
+  void OnPointerMove(double x,
+                     double y,
+                     FlutterPointerDeviceKind device_kind,
+                     int32_t device_id) override;
 
   // |WindowWin32|
-  void OnPointerDown(double x, double y, UINT button) override;
+  void OnPointerDown(double x,
+                     double y,
+                     FlutterPointerDeviceKind device_kind,
+                     int32_t device_id,
+                     UINT button) override;
 
   // |WindowWin32|
-  void OnPointerUp(double x, double y, UINT button) override;
+  void OnPointerUp(double x,
+                   double y,
+                   FlutterPointerDeviceKind device_kind,
+                   int32_t device_id,
+                   UINT button) override;
 
   // |WindowWin32|
-  void OnPointerLeave() override;
+  void OnPointerLeave(FlutterPointerDeviceKind device_kind,
+                      int32_t device_id) override;
 
   // |WindowWin32|
   void OnSetCursor() override;
@@ -78,7 +90,10 @@ class FlutterWindowWin32 : public WindowWin32, public WindowBindingHandler {
   void OnCursorRectUpdated(const Rect& rect) override;
 
   // |WindowWin32|
-  void OnScroll(double delta_x, double delta_y) override;
+  void OnScroll(double delta_x,
+                double delta_y,
+                FlutterPointerDeviceKind device_kind,
+                int32_t device_id) override;
 
   // |FlutterWindowBindingHandler|
   void SetView(WindowBindingHandlerDelegate* view) override;
