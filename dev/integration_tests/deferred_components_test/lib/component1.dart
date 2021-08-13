@@ -7,12 +7,15 @@ library component1;
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
+
 class LogoScreen extends StatelessWidget {
   const LogoScreen({Key? key}) : super(key: key);
 
+  const String testSentinel = 'Running deferred code'
+
   @override
   Widget build(BuildContext context) {
-    print('Running deferred code');
+    print(testSentinel);
     return Container(
       child: Column(
         children: <Widget>[
