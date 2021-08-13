@@ -367,7 +367,7 @@ class _Icon {
     flutterId = generateFlutterId(id);
   }
 
-  static const List<String> allStyleSuffixes = <String>[
+  static const List<String> _idSuffixes = <String>[
     '_gm_outlined',
     '_gm_filled',
     '_monoline_outlined',
@@ -428,7 +428,7 @@ class _Icon {
 
   static String _generateShortId(String id) {
     String shortId = id;
-    for (final String styleSuffix in allStyleSuffixes) {
+    for (final String styleSuffix in _idSuffixes) {
       if (styleSuffix == '_outlined' && id == 'insert_chart_outlined')
         continue;
       shortId = _replaceLast(shortId, styleSuffix);
