@@ -281,7 +281,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 ///         children: <Widget>[
 ///           const Text(
 ///             'Linear progress indicator with a fixed color',
-///             style: const TextStyle(fontSize: 20),
+///             style: TextStyle(fontSize: 20),
 ///           ),
 ///           LinearProgressIndicator(
 ///             value: controller.value,

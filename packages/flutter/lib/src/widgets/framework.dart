@@ -4442,7 +4442,7 @@ typedef ErrorWidgetBuilder = Widget Function(FlutterErrorDetails details);
 ///       alignment: Alignment.center,
 ///       child: const Text(
 ///         'Error!',
-///         style: const TextStyle(color: Colors.yellow),
+///         style: TextStyle(color: Colors.yellow),
 ///         textDirection: TextDirection.ltr,
 ///       ),
 ///     );
