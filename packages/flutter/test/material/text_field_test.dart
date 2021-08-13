@@ -3871,7 +3871,7 @@ void main() {
       editableTextState.textEditingValue.copyWith(
         selection: TextSelection.collapsed(offset: longText.length),
       ),
-      null,
+      SelectionChangedCause.tap,
     );
 
     await tester.pump(); // TODO(ianh): Figure out why this extra pump is needed.
@@ -3908,7 +3908,7 @@ void main() {
       editableTextState.textEditingValue.copyWith(
         selection: const TextSelection.collapsed(offset: tallText.length),
       ),
-      null,
+      SelectionChangedCause.tap,
     );
     await tester.pump();
     await skipPastScrollingAnimation(tester);
@@ -7708,6 +7708,7 @@ void main() {
     await gesture.moveBy(const Offset(600, 0));
     // To the edge of the screen basically.
     await tester.pump();
+    await tester.pumpAndSettle();
     expect(
       controller.selection,
       const TextSelection.collapsed(offset: 56, affinity: TextAffinity.downstream),
@@ -7715,12 +7716,14 @@ void main() {
     // Keep moving out.
     await gesture.moveBy(const Offset(1, 0));
     await tester.pump();
+    await tester.pumpAndSettle();
     expect(
       controller.selection,
       const TextSelection.collapsed(offset: 62, affinity: TextAffinity.downstream),
     );
     await gesture.moveBy(const Offset(1, 0));
     await tester.pump();
+    await tester.pumpAndSettle();
     expect(
       controller.selection,
       const TextSelection.collapsed(offset: 66, affinity: TextAffinity.upstream),

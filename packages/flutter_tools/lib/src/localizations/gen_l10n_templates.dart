@@ -126,6 +126,11 @@ const String dateFormatTemplate = '''
     final String @(placeholder)String = @(placeholder)DateFormat.format(@(placeholder));
 ''';
 
+const String dateFormatCustomTemplate = '''
+    final intl.DateFormat @(placeholder)DateFormat = intl.DateFormat(@(format), localeName);
+    final String @(placeholder)String = @(placeholder)DateFormat.format(@(placeholder));
+''';
+
 const String getterTemplate = '''
   @override
   String get @(name) => @(message);''';
