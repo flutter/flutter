@@ -116,7 +116,7 @@ abstract class TextEditingActionTarget {
       return moveSelectionToStart(cause);
     }
 
-    setSelection(textEditingValue.extendSelectionTo(const TextPosition(
+    setSelection(textEditingValue.selection.extendTo(const TextPosition(
       offset: 0,
       affinity: TextAffinity.upstream,
     )), cause);
@@ -429,7 +429,7 @@ abstract class TextEditingActionTarget {
       offset: textEditingValue.text.length,
       affinity: TextAffinity.downstream,
     );
-    setSelection(textEditingValue.expandSelectionTo(nextPosition, true), cause);
+    setSelection(textEditingValue.selection.expandTo(nextPosition, true), cause);
   }
 
   /// Expand the current selection to the start of the field.
@@ -456,7 +456,7 @@ abstract class TextEditingActionTarget {
       offset: 0,
       affinity: TextAffinity.upstream,
     );
-    setSelection(textEditingValue.expandSelectionTo(nextPosition, true), cause);
+    setSelection(textEditingValue.selection.expandTo(nextPosition, true), cause);
   }
 
   /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
@@ -480,7 +480,7 @@ abstract class TextEditingActionTarget {
     final TextSelection selectedLine = textMetrics.getLineAtOffset(
         textEditingValue.text, TextPosition(offset: startPoint));
 
-    setSelection(textEditingValue.expandSelectionTo(TextPosition(offset: selectedLine.baseOffset, affinity: textEditingValue.selection.affinity)), cause);
+    setSelection(textEditingValue.selection.expandTo(TextPosition(offset: selectedLine.baseOffset, affinity: textEditingValue.selection.affinity)), cause);
   }
 
   /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
@@ -504,7 +504,7 @@ abstract class TextEditingActionTarget {
     final TextSelection selectedLine = textMetrics.getLineAtOffset(
         textEditingValue.text, TextPosition(offset: startPoint));
 
-    setSelection(textEditingValue.expandSelectionTo(TextPosition(offset: selectedLine.extentOffset, affinity: textEditingValue.selection.affinity)), cause);
+    setSelection(textEditingValue.selection.expandTo(TextPosition(offset: selectedLine.extentOffset, affinity: textEditingValue.selection.affinity)), cause);
   }
 
   /// Keeping selection's [TextSelection.baseOffset] fixed, move the
@@ -547,7 +547,7 @@ abstract class TextEditingActionTarget {
       offset: index,
       affinity: textEditingValue.selection.affinity,
     );
-    setSelection(textEditingValue.extendSelectionTo(nextPosition), cause);
+    setSelection(textEditingValue.selection.extendTo(nextPosition), cause);
   }
 
   /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
@@ -575,7 +575,7 @@ abstract class TextEditingActionTarget {
 
     final int distance = textEditingValue.selection.extentOffset - previousExtent;
     _cursorResetLocation -= distance;
-    setSelection(textEditingValue.extendSelectionTo(TextPosition(offset: previousExtent, affinity: textEditingValue.selection.affinity)), cause);
+    setSelection(textEditingValue.selection.extendTo(TextPosition(offset: previousExtent, affinity: textEditingValue.selection.affinity)), cause);
   }
 
   /// Extend the current selection to the start of
@@ -618,7 +618,7 @@ abstract class TextEditingActionTarget {
         extentOffset: textEditingValue.selection.baseOffset,
       );
     } else {
-      nextSelection = textEditingValue.extendSelectionTo(TextPosition(
+      nextSelection = textEditingValue.selection.extendTo(TextPosition(
         offset: selectedLine.baseOffset,
         affinity: TextAffinity.downstream,
       ));
@@ -652,7 +652,7 @@ abstract class TextEditingActionTarget {
 
     final int distance = nextExtent - textEditingValue.selection.extentOffset;
     _cursorResetLocation += distance;
-    setSelection(textEditingValue.extendSelectionTo(TextPosition(offset: nextExtent, affinity: textEditingValue.selection.affinity)), cause);
+    setSelection(textEditingValue.selection.extendTo(TextPosition(offset: nextExtent, affinity: textEditingValue.selection.affinity)), cause);
   }
 
   /// Extend the current selection to the end of [TextSelection.extentOffset]'s
@@ -691,7 +691,7 @@ abstract class TextEditingActionTarget {
         extentOffset: textEditingValue.selection.baseOffset,
       );
     } else {
-      nextSelection = textEditingValue.extendSelectionTo(TextPosition(
+      nextSelection = textEditingValue.selection.extendTo(TextPosition(
         offset: selectedLine.extentOffset,
         affinity: TextAffinity.upstream,
       ));
@@ -737,9 +737,9 @@ abstract class TextEditingActionTarget {
     if (stopAtReversal &&
         textEditingValue.selection.extentOffset > textEditingValue.selection.baseOffset &&
         leftOffset < textEditingValue.selection.baseOffset) {
-      nextSelection = textEditingValue.extendSelectionTo(TextPosition(offset: textEditingValue.selection.baseOffset));
+      nextSelection = textEditingValue.selection.extendTo(TextPosition(offset: textEditingValue.selection.baseOffset));
     } else {
-      nextSelection = textEditingValue.extendSelectionTo(TextPosition(offset: leftOffset, affinity: textEditingValue.selection.affinity));
+      nextSelection = textEditingValue.selection.extendTo(TextPosition(offset: leftOffset, affinity: textEditingValue.selection.affinity));
     }
 
     if (nextSelection == textEditingValue.selection) {
@@ -781,9 +781,9 @@ abstract class TextEditingActionTarget {
     if (stopAtReversal &&
         textEditingValue.selection.baseOffset > textEditingValue.selection.extentOffset &&
         rightOffset > textEditingValue.selection.baseOffset) {
-      nextSelection = textEditingValue.moveSelectionTo(TextPosition(offset: textEditingValue.selection.baseOffset));
+      nextSelection = textEditingValue.selection.moveTo(TextPosition(offset: textEditingValue.selection.baseOffset));
     } else {
-      nextSelection = textEditingValue.extendSelectionTo(TextPosition(offset: rightOffset, affinity: textEditingValue.selection.affinity));
+      nextSelection = textEditingValue.selection.extendTo(TextPosition(offset: rightOffset, affinity: textEditingValue.selection.affinity));
     }
 
     if (nextSelection == textEditingValue.selection) {
@@ -871,7 +871,7 @@ abstract class TextEditingActionTarget {
       textEditingValue.text,
       TextPosition(offset: startPoint),
     );
-    final TextSelection nextSelection = textEditingValue.moveSelectionTo(TextPosition(
+    final TextSelection nextSelection = textEditingValue.selection.moveTo(TextPosition(
       offset: selectedLine.baseOffset,
       affinity: TextAffinity.downstream,
     ));
@@ -940,7 +940,7 @@ abstract class TextEditingActionTarget {
       previousExtent = TextEditingValue.previousCharacter(
           textEditingValue.selection.extentOffset, textEditingValue.text);
     }
-    final TextSelection nextSelection = textEditingValue.moveSelectionTo(TextPosition(offset: previousExtent, affinity: textEditingValue.selection.affinity));
+    final TextSelection nextSelection = textEditingValue.selection.moveTo(TextPosition(offset: previousExtent, affinity: textEditingValue.selection.affinity));
 
     if (nextSelection == textEditingValue.selection) {
       return;
@@ -978,7 +978,7 @@ abstract class TextEditingActionTarget {
 
     final int leftOffset =
         _getLeftByWord(textEditingValue.selection.extentOffset, includeWhitespace);
-    final TextSelection nextSelection = textEditingValue.moveSelectionTo(TextPosition(offset: leftOffset, affinity: textEditingValue.selection.affinity));
+    final TextSelection nextSelection = textEditingValue.selection.moveTo(TextPosition(offset: leftOffset, affinity: textEditingValue.selection.affinity));
 
     if (nextSelection == textEditingValue.selection) {
       return;
@@ -1009,7 +1009,7 @@ abstract class TextEditingActionTarget {
       nextExtent = TextEditingValue.nextCharacter(
           textEditingValue.selection.extentOffset, textEditingValue.text);
     }
-    final TextSelection nextSelection = textEditingValue.moveSelectionTo(TextPosition(
+    final TextSelection nextSelection = textEditingValue.selection.moveTo(TextPosition(
       offset: nextExtent,
       affinity: textEditingValue.selection.affinity,
     ));
@@ -1050,7 +1050,7 @@ abstract class TextEditingActionTarget {
         textEditingValue.selection.extentOffset, textEditingValue.text, false);
     final TextSelection selectedLine = textMetrics.getLineAtOffset(
         textEditingValue.text, TextPosition(offset: startPoint));
-    final TextSelection nextSelection = textEditingValue.moveSelectionTo(TextPosition(
+    final TextSelection nextSelection = textEditingValue.selection.moveTo(TextPosition(
       offset: selectedLine.extentOffset,
       affinity: TextAffinity.upstream,
     ));
@@ -1086,7 +1086,7 @@ abstract class TextEditingActionTarget {
 
     final int rightOffset =
         _getRightByWord(textEditingValue.selection.extentOffset, includeWhitespace);
-    final TextSelection nextSelection = textEditingValue.moveSelectionTo(TextPosition(offset: rightOffset, affinity: textEditingValue.selection.affinity));
+    final TextSelection nextSelection = textEditingValue.selection.moveTo(TextPosition(offset: rightOffset, affinity: textEditingValue.selection.affinity));
 
     if (nextSelection == textEditingValue.selection) {
       return;
@@ -1107,7 +1107,7 @@ abstract class TextEditingActionTarget {
       offset: textEditingValue.text.length,
       affinity: TextAffinity.downstream,
     );
-    setSelection(textEditingValue.moveSelectionTo(nextPosition), cause);
+    setSelection(textEditingValue.selection.moveTo(nextPosition), cause);
   }
 
   /// Move the current selection to the start of the field.
@@ -1122,7 +1122,7 @@ abstract class TextEditingActionTarget {
       offset: 0,
       affinity: TextAffinity.upstream,
     );
-    setSelection(textEditingValue.moveSelectionTo(nextPosition), cause);
+    setSelection(textEditingValue.selection.moveTo(nextPosition), cause);
   }
 
   /// Move the current selection up by one line.
@@ -1142,7 +1142,7 @@ abstract class TextEditingActionTarget {
     }
     _cursorResetLocation = nextIndex;
 
-    setSelection(textEditingValue.moveSelectionTo(TextPosition(offset: nextIndex, affinity: textEditingValue.selection.affinity)), cause);
+    setSelection(textEditingValue.selection.moveTo(TextPosition(offset: nextIndex, affinity: textEditingValue.selection.affinity)), cause);
   }
 
   /// {@macro flutter.services.TextEditingValue.selectAll}

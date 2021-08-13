@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
 import 'dart:ui' show hashValues, TextAffinity, TextPosition, TextRange;
 
 import 'package:flutter/foundation.dart';
@@ -129,6 +130,107 @@ class TextSelection extends TextRange {
       extentOffset: extentOffset ?? this.extentOffset,
       affinity: affinity ?? this.affinity,
       isDirectional: isDirectional ?? this.isDirectional,
+    );
+  }
+
+  /// Return [selection] expanded to the given [TextPosition].
+  ///
+  /// If the given [TextPosition] is inside of [selection], then [selection] is
+  /// returned without change.
+  ///
+  /// The returned selection will always be a strict superset of [selection].
+  /// In other words, the selection grows to include the given [TextPosition].
+  ///
+  /// If extentAtIndex is true, then the [TextSelection.extentOffset] will be
+  /// placed at the given index regardless of the original order of it and
+  /// [TextSelection.baseOffset]. Otherwise, their order will be preserved.
+  ///
+  /// ## Difference with [extendTo]
+  /// In contrast with this method, [extendTo] is a pivot; it holds
+  /// [TextSelection.baseOffset] fixed while moving [TextSelection.extentOffset]
+  /// to the given [TextPosition].  It doesn't strictly grow the selection and
+  /// may collapse it or flip its order.
+  TextSelection expandTo(TextPosition position, [bool extentAtIndex = false]) {
+    final int upperOffset = math.min(baseOffset, extentOffset);
+    final int lowerOffset = math.max(baseOffset, extentOffset);
+    if (position.offset >= upperOffset && position.offset <= lowerOffset) {
+      return this;
+    }
+
+    if (baseOffset <= extentOffset) {
+      if (position.offset <= baseOffset) {
+        if (extentAtIndex) {
+          return copyWith(
+            baseOffset: extentOffset,
+            extentOffset: position.offset,
+            affinity: position.affinity,
+          );
+        }
+        return copyWith(
+          baseOffset: position.offset,
+          affinity: position.affinity,
+        );
+      }
+      return copyWith(
+        extentOffset: position.offset,
+        affinity: position.affinity,
+      );
+    }
+    if (position.offset <= extentOffset) {
+      return copyWith(
+        extentOffset: position.offset,
+        affinity: position.affinity,
+      );
+    }
+    if (extentAtIndex) {
+      return copyWith(
+        baseOffset: extentOffset,
+        extentOffset: position.offset,
+        affinity: position.affinity,
+      );
+    }
+    return copyWith(
+      baseOffset: position.offset,
+      affinity: position.affinity,
+    );
+  }
+
+  /// Keeping [selection]'s [TextSelection.baseOffset] fixed, pivot the
+  /// [TextSelection.extentOffset] to the given [TextPosition].
+  ///
+  /// In some cases, the [TextSelection.baseOffset] and
+  /// [TextSelection.extentOffset] may flip during this operation, or the size
+  /// of the selection may shrink.
+  ///
+  /// ## Difference with [expandTo]
+  /// In contrast with this method, [expandTo] is strictly growth; the
+  /// selection is grown to include the given [TextPosition] and will never
+  /// shrink.
+  TextSelection extendTo(TextPosition position) {
+    // If the selection's extent is at the position already, then nothing
+    // happens.
+    if (extent == position) {
+      return this;
+    }
+
+    return copyWith(
+      extentOffset: position.offset,
+      affinity: position.affinity,
+    );
+  }
+
+  /// Return [selection] collapsed and moved to the given [TextPosition].
+  TextSelection moveTo(TextPosition position) {
+    // If the selection is collapsed at the position already, then nothing
+    // happens.
+    if (isCollapsed && extentOffset == position.offset) {
+      return this;
+    }
+
+    return copyWith(
+      baseOffset: position.offset,
+      extentOffset: position.offset,
+      affinity: position.affinity,
     );
   }
 }
