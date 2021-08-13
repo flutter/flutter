@@ -788,8 +788,17 @@ class CiYaml {
 
   final File file;
 
-  late final String stringContents = file.readAsStringSync();
-  late final YamlMap contents = loadYaml(stringContents) as YamlMap;
+  /// Returns the raw string contents of this file.
+  ///
+  /// This is not cached as the contents can be written to while the conductor
+  /// is running.
+  String get stringContents => file.readAsStringSync();
+
+  /// Returns the parsed contents of the file as a [YamlMap].
+  ///
+  /// This is not cached as the contents can be written to while the conductor
+  /// is running.
+  YamlMap get contents => loadYaml(stringContents) as YamlMap;
 
   List<String> get enabledBranches {
     final YamlList yamlList = contents['enabled_branches'] as YamlList;
@@ -798,11 +807,32 @@ class CiYaml {
     }).toList();
   }
 
-  static final RegExp _enabledBranchPattern = RegExp(r'enabled_branches:');
+  static final RegExp _enabledBranchPattern = RegExp(r'^enabled_branches:');
   void enableBranch(String branchName) {
     final List<String> newStrings = <String>[];
-    assert(!enabledBranches.contains(branchName));
+    if (enabledBranches.contains(branchName)) {
+      throw ConductorException('${file.path} already contains the branch $branchName');
+    }
+    if (!_enabledBranchPattern.hasMatch(stringContents)) {
+      throw ConductorException(
+        'Did not find the expected string "enabled_branches:" in the file ${file.path}',
+      );
+    }
     final List<String> lines = stringContents.split('\n');
-    lines.forEach();
+    bool insertedCurrentBranch = false;
+    for (final String line in lines) {
+      // Every existing line should be copied to the new Yaml
+      newStrings.add(line);
+      if (insertedCurrentBranch) {
+        continue;
+      }
+      if (_enabledBranchPattern.hasMatch(line)) {
+        insertedCurrentBranch = true;
+        // Indent two spaces
+        final String indent = ' ' * 2;
+        newStrings.add('$indent- ${branchName.trim()}');
+      }
+    }
+    file.writeAsStringSync(newStrings.join('\n'), flush: true);
   }
 }
