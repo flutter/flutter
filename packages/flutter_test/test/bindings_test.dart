@@ -33,6 +33,26 @@ void main() {
     });
   });
 
+  group('testWidgets resets the surface size', () {
+    // A setSurfaceSize in one test should not bleed into another test.
+
+    // The next two tests must run in order.
+    int order = 0;
+
+    testWidgets('prepare: one test called setSurfaceSize', (WidgetTester tester) async {
+      assert(order == 0);
+      // This test case is only for preparation. It doesn't need `expect`.
+      binding.setSurfaceSize(const Size(100, 100));
+      order += 1;
+    });
+
+    testWidgets('other tests should still have the default surface size', (WidgetTester tester) async {
+      assert(order == 1);
+      expect(binding.renderView.configuration.size, const Size(800, 600));
+      order += 1;
+    });
+  });
+
   // The next three tests must run in order -- first using `test`, then `testWidgets`, then `test` again.
 
   int order = 0;

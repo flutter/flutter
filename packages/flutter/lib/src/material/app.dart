@@ -660,7 +660,7 @@ class MaterialApp extends StatefulWidget {
   /// Turns on a [GridPaper] overlay that paints a baseline grid
   /// Material apps.
   ///
-  /// Only available in checked mode.
+  /// Only available in debug mode.
   ///
   /// See also:
   ///
@@ -703,7 +703,9 @@ class MaterialScrollBehavior extends ScrollBehavior {
   /// Creates a MaterialScrollBehavior that decorates [Scrollable]s with
   /// [GlowingOverscrollIndicator]s and [Scrollbar]s based on the current
   /// platform and provided [ScrollableDetails].
-  const MaterialScrollBehavior();
+  const MaterialScrollBehavior({
+    AndroidOverscrollIndicator? androidOverscrollIndicator,
+  }) : super(androidOverscrollIndicator: androidOverscrollIndicator);
 
   @override
   TargetPlatform getPlatform(BuildContext context) => Theme.of(context).platform;
@@ -743,6 +745,16 @@ class MaterialScrollBehavior extends ScrollBehavior {
       case TargetPlatform.windows:
         return child;
       case TargetPlatform.android:
+        switch (androidOverscrollIndicator) {
+          case AndroidOverscrollIndicator.stretch:
+            return StretchingOverscrollIndicator(
+              axisDirection: details.direction,
+              child: child,
+            );
+          case AndroidOverscrollIndicator.glow:
+            continue glow;
+        }
+      glow:
       case TargetPlatform.fuchsia:
         return GlowingOverscrollIndicator(
           axisDirection: details.direction,
