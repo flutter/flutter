@@ -111,7 +111,7 @@ class AbstractNode {
   void detach() {
     assert(_owner != null);
     _owner = null;
-    //assert(parent == null || attached == parent!.attached);
+    assert(parent == null || attached == parent!.attached);
   }
 
   /// The parent of this node in the tree.
@@ -147,9 +147,9 @@ class AbstractNode {
   void dropChild(covariant AbstractNode child) {
     assert(child != null);
     assert(child._parent == this);
-    //assert(child.attached == attached);
+    assert(child.attached == attached);
     child._parent = null;
-    if (attached && child.attached)
+    if (attached)
       child.detach();
   }
 }

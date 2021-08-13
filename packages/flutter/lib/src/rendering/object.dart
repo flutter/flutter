@@ -1093,6 +1093,51 @@ class PipelineOwner {
   }
 }
 
+abstract class OffscreenPipelineOwner extends PipelineOwner {
+  PipelineOwner get owner;
+
+  @override
+  VoidCallback? get onNeedVisualUpdate => owner.onNeedVisualUpdate;
+
+  @override
+  VoidCallback? get onSemanticsOwnerCreated => owner.onSemanticsOwnerCreated;
+
+  @override
+  VoidCallback? get onSemanticsOwnerDisposed => owner.onSemanticsOwnerDisposed;
+
+  @override
+  void requestVisualUpdate() {
+    // The render objects attached to this PipelineOwner by definition should
+    // not request visual updates by themselves.
+  }
+
+  @override
+  AbstractNode? get rootNode => owner.rootNode;
+
+  @override
+  void flushLayout() {
+    _nodesNeedingLayout.clear();
+  }
+
+  @override
+  void flushCompositingBits() {
+    _nodesNeedingCompositingBitsUpdate.clear();
+  }
+
+  @override
+  void flushPaint() {
+    _nodesNeedingPaint.clear();
+  }
+
+  @override
+  SemanticsOwner? get semanticsOwner => owner.semanticsOwner;
+
+  @override
+  void flushSemantics() {
+    _nodesNeedingSemantics.clear();
+  }
+}
+
 /// An object in the render tree.
 ///
 /// The [RenderObject] class hierarchy is the core of the rendering

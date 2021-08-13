@@ -125,6 +125,8 @@ mixin KeepAliveParentDataMixin implements ParentData {
   /// Whether the widget is currently being kept alive, i.e. has [keepAlive] set
   /// to true and is offscreen.
   bool get keptAlive;
+
+  RenderSliverBoxChildManager? get childManager;
 }
 
 /// This class exists to dissociate [KeepAlive] from [RenderSliverMultiBoxAdaptor].
@@ -148,6 +150,10 @@ class SliverMultiBoxAdaptorParentData extends SliverLogicalParentData with Conta
   @override
   bool get keptAlive => _keptAlive;
   bool _keptAlive = false;
+
+  @override
+  RenderSliverBoxChildManager? get childManager => _childManager;
+  RenderSliverBoxChildManager? _childManager;
 
   @override
   String toString() => 'index=$index; ${keepAlive == true ? "keepAlive; " : ""}${super.toString()}';
