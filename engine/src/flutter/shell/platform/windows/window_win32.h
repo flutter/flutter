@@ -197,6 +197,11 @@ class WindowWin32 {
                                 UINT wMsgFilterMax,
                                 UINT wRemoveMsg);
 
+  // Win32's MapVirtualKey(*, MAPVK_VK_TO_CHAR).
+  //
+  // Used to process key messages. Exposed for dependency injection.
+  virtual uint32_t Win32MapVkToChar(uint32_t virtual_key);
+
  private:
   // Release OS resources associated with window.
   void Destroy();
