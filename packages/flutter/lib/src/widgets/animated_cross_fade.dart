@@ -344,8 +344,7 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
       enabled: _isTransitioning,
       child: ExcludeSemantics(
         excluding: true, // Always exclude the semantics of the widget that's fading out.
-        child: FocusTraversalGroup(
-          descendantsAreFocusable: false,
+        child: ExcludeFocus(
           child: FadeTransition(
             opacity: bottomAnimation,
             child: bottomChild,
@@ -358,8 +357,8 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
       enabled: true, // Top widget always has its animations enabled.
       child: ExcludeSemantics(
         excluding: false, // Always publish semantics for the widget that's fading in.
-        child: FocusTraversalGroup(
-          descendantsAreFocusable: true,
+        child: ExcludeFocus(
+          excluding: false,
           child: FadeTransition(
             opacity: topAnimation,
             child: topChild,
