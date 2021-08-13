@@ -454,7 +454,7 @@ WindowWin32::HandleMessage(UINT const message,
         // https://docs.microsoft.com/en-us/windows/win32/learnwin32/accelerator-tables
         const char32_t event_character =
             (message == WM_DEADCHAR || message == WM_SYSDEADCHAR)
-                ? MapVirtualKey(keycode_for_char_message_, MAPVK_VK_TO_CHAR)
+                ? Win32MapVkToChar(keycode_for_char_message_)
             : IsPrintable(code_point) ? code_point
                                       : 0;
         bool handled = OnKey(keycode_for_char_message_, scancode, WM_KEYDOWN,
@@ -510,7 +510,7 @@ WindowWin32::HandleMessage(UINT const message,
       // character messages. This allows key combinations such as "CTRL + Digit"
       // to properly produce key down events even though `MapVirtualKey` returns
       // a valid character. See https://github.com/flutter/flutter/issues/85587.
-      unsigned int character = MapVirtualKey(wparam, MAPVK_VK_TO_CHAR);
+      unsigned int character = Win32MapVkToChar(wparam);
       UINT next_key_message = PeekNextMessageType(WM_KEYFIRST, WM_KEYLAST);
       bool has_wm_char =
           (next_key_message == WM_DEADCHAR ||
@@ -595,6 +595,10 @@ BOOL WindowWin32::Win32PeekMessage(LPMSG lpMsg,
                                    UINT wMsgFilterMax,
                                    UINT wRemoveMsg) {
   return PeekMessage(lpMsg, hWnd, wMsgFilterMin, wMsgFilterMax, wRemoveMsg);
+}
+
+uint32_t WindowWin32::Win32MapVkToChar(uint32_t virtual_key) {
+  return MapVirtualKey(virtual_key, MAPVK_VK_TO_CHAR);
 }
 
 }  // namespace flutter

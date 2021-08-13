@@ -43,13 +43,30 @@ static LPARAM CreateKeyEventLparam(USHORT scancode,
           (LPARAM(scancode) << 16) | LPARAM(repeat_count));
 }
 
+typedef uint32_t (*MapVkToCharHandler)(uint32_t virtual_key);
+
+uint32_t LayoutDefault(uint32_t virtual_key) {
+  return MapVirtualKey(virtual_key, MAPVK_VK_TO_CHAR);
+}
+
+uint32_t LayoutFrench(uint32_t virtual_key) {
+  switch (virtual_key) {
+    case 0xDD:
+      return 0x8000005E;
+    default:
+      return MapVirtualKey(virtual_key, MAPVK_VK_TO_CHAR);
+  }
+}
+
 class MockFlutterWindowWin32 : public FlutterWindowWin32,
                                public MockMessageQueue {
  public:
   typedef std::function<void(const std::u16string& text)> U16StringHandler;
 
   MockFlutterWindowWin32(U16StringHandler on_text)
-      : FlutterWindowWin32(800, 600), on_text_(std::move(on_text)) {
+      : FlutterWindowWin32(800, 600),
+        on_text_(std::move(on_text)),
+        map_vk_to_char_(LayoutDefault) {
     ON_CALL(*this, GetDpiScale())
         .WillByDefault(Return(this->FlutterWindowWin32::GetDpiScale()));
   }
@@ -90,6 +107,12 @@ class MockFlutterWindowWin32 : public FlutterWindowWin32,
   MOCK_METHOD0(IsVisible, bool());
   MOCK_METHOD1(UpdateCursorRect, void(const Rect&));
 
+  void SetLayout(MapVkToCharHandler map_vk_to_char) {
+    map_vk_to_char_ =
+        map_vk_to_char == nullptr ? LayoutDefault : map_vk_to_char;
+  }
+
+ protected:
   virtual BOOL Win32PeekMessage(LPMSG lpMsg,
                                 HWND hWnd,
                                 UINT wMsgFilterMin,
@@ -99,8 +122,14 @@ class MockFlutterWindowWin32 : public FlutterWindowWin32,
                                               wMsgFilterMax, wRemoveMsg);
   }
 
+  virtual uint32_t Win32MapVkToChar(uint32_t virtual_key) override {
+    return map_vk_to_char_(virtual_key);
+  }
+
  private:
   U16StringHandler on_text_;
+
+  MapVkToCharHandler map_vk_to_char_;
 
   LRESULT Win32SendMessage(HWND hWnd,
                            UINT const message,
@@ -247,6 +276,8 @@ class KeyboardTester {
   }
 
   void Responding(bool response) { test_response = response; }
+
+  void SetLayout(MapVkToCharHandler layout) { window_->SetLayout(layout); }
 
   void InjectMessages(int count, Win32Message message1, ...) {
     Win32Message messages[count];
@@ -636,7 +667,7 @@ TEST(KeyboardTest, Digit1OnFrenchLayout) {
   KeyboardTester tester;
   tester.Responding(false);
 
-  // French Keyboard layout
+  tester.SetLayout(LayoutFrench);
 
   // Press 1
   tester.InjectMessages(
@@ -755,7 +786,7 @@ TEST(KeyboardTest, DeadKeyThatCombines) {
   KeyboardTester tester;
   tester.Responding(false);
 
-  // French Keyboard layout
+  tester.SetLayout(LayoutFrench);
 
   // Press ^¨ (US: Left bracket)
   tester.InjectMessages(
@@ -767,7 +798,7 @@ TEST(KeyboardTest, DeadKeyThatCombines) {
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown,
-                       kPhysicalBracketLeft, kLogicalBracketRight, "]",
+                       kPhysicalBracketLeft, kLogicalBracketRight, "^",
                        kNotSynthesized);
   clear_key_calls();
 
@@ -829,7 +860,7 @@ TEST(KeyboardTest, DeadKeyThatDoesNotCombine) {
   KeyboardTester tester;
   tester.Responding(false);
 
-  // French Keyboard layout
+  tester.SetLayout(LayoutFrench);
 
   // Press ^¨ (US: Left bracket)
   tester.InjectMessages(
@@ -841,7 +872,7 @@ TEST(KeyboardTest, DeadKeyThatDoesNotCombine) {
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown,
-                       kPhysicalBracketLeft, kLogicalBracketRight, "]",
+                       kPhysicalBracketLeft, kLogicalBracketRight, "^",
                        kNotSynthesized);
   clear_key_calls();
 
