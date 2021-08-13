@@ -229,7 +229,7 @@ TokenPairMap stringToTokenPairMap(String codepointData) {
       .map((String line) => line.trim())
       .where((String line) => line.isNotEmpty);
 
-  final TokenPairMap pairs = {};
+  final TokenPairMap pairs = <String,String>{};
 
   for (final String line in cleanData) {
     final List<String> tokens = line.split(' ');
