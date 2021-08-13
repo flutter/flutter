@@ -10,8 +10,8 @@ import 'package:web_test_utils/goldens.dart';
 
 import '../environment.dart';
 import '../exceptions.dart';
+import '../pipeline.dart';
 import '../utils.dart';
-import '../watcher.dart';
 
 /// Compiles web tests and their dependencies.
 ///

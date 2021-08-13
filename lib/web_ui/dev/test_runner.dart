@@ -12,10 +12,10 @@ import 'package:watcher/src/watch_event.dart';
 
 import 'browser.dart';
 import 'common.dart';
+import 'pipeline.dart';
 import 'steps/compile_tests_step.dart';
 import 'steps/run_tests_step.dart';
 import 'utils.dart';
-import 'watcher.dart';
 
 /// Runs tests.
 class TestCommand extends Command<bool> with ArgUtils<bool> {
