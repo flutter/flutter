@@ -1,4 +1,4 @@
-Signature: 634d86fbaeea2087bfc55f02f5ef8f26
+Signature: 57498a609288308406d096868e008292
 
 UNUSED LICENSES:
 
@@ -2337,7 +2337,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fidl/epitaph.c
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl/handle_closing.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl/include/lib/fidl/epitaph.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/walker.h
-FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/walker.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp/include/lib/fidl/cpp/binding.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp/include/lib/fidl/cpp/binding_set.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp/include/lib/fidl/cpp/interface_ptr.h
