@@ -336,7 +336,7 @@ class _Icon {
     id = tokenPair.key;
     hexCodepoint = tokenPair.value;
 
-    // Handle special families first.
+    // Determine family and htmlSuffix.
     if (id.endsWith('_gm_outlined')) {
       family = 'GM';
       htmlSuffix = '-outlined';
