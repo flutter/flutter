@@ -25,7 +25,9 @@ TEST(MockWin32Window, VerticalScroll) {
   const int scroll_amount = 10;
   // Vertical scroll should be passed along, adjusted for scroll tick size
   // and direction.
-  EXPECT_CALL(window, OnScroll(0, -scroll_amount / 120.0)).Times(1);
+  EXPECT_CALL(window, OnScroll(0, -scroll_amount / 120.0,
+                               kFlutterPointerDeviceKindMouse, 0))
+      .Times(1);
 
   window.InjectWindowMessage(WM_MOUSEWHEEL, MAKEWPARAM(0, scroll_amount), 0);
 }
@@ -34,7 +36,9 @@ TEST(MockWin32Window, HorizontalScroll) {
   MockWin32Window window;
   const int scroll_amount = 10;
   // Vertical scroll should be passed along, adjusted for scroll tick size.
-  EXPECT_CALL(window, OnScroll(scroll_amount / 120.0, 0)).Times(1);
+  EXPECT_CALL(window, OnScroll(scroll_amount / 120.0, 0,
+                               kFlutterPointerDeviceKindMouse, 0))
+      .Times(1);
 
   window.InjectWindowMessage(WM_MOUSEHWHEEL, MAKEWPARAM(0, scroll_amount), 0);
 }

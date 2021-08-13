@@ -13,13 +13,39 @@
 namespace flutter {
 
 namespace {
+
+static constexpr int32_t kDefaultPointerDeviceId = 0;
+
+// This method is only valid during a window message related to mouse/touch
+// input.
+// See
+// https://docs.microsoft.com/en-us/windows/win32/tablet/system-events-and-mouse-messages?redirectedfrom=MSDN#distinguishing-pen-input-from-mouse-and-touch.
+static FlutterPointerDeviceKind GetFlutterPointerDeviceKind() {
+  constexpr LPARAM kTouchOrPenSignature = 0xFF515700;
+  constexpr LPARAM kTouchSignature = kTouchOrPenSignature | 0x80;
+  constexpr LPARAM kSignatureMask = 0xFFFFFF00;
+  LPARAM info = GetMessageExtraInfo();
+  if ((info & kSignatureMask) == kTouchOrPenSignature) {
+    if ((info & kTouchSignature) == kTouchSignature) {
+      return kFlutterPointerDeviceKindTouch;
+    }
+    return kFlutterPointerDeviceKindStylus;
+  }
+  return kFlutterPointerDeviceKindMouse;
+}
+
 char32_t CodePointFromSurrogatePair(wchar_t high, wchar_t low) {
   return 0x10000 + ((static_cast<char32_t>(high) & 0x000003FF) << 10) +
          (low & 0x3FF);
 }
+
+static const int kMinTouchDeviceId = 0;
+static const int kMaxTouchDeviceId = 128;
+
 }  // namespace
 
-WindowWin32::WindowWin32() {
+WindowWin32::WindowWin32()
+    : touch_id_generator_(kMinTouchDeviceId, kMaxTouchDeviceId) {
   // Get the DPI of the primary monitor as the initial DPI. If Per-Monitor V2 is
   // supported, |current_dpi_| should be updated in the
   // kWmDpiChangedBeforeParent message.
@@ -94,6 +120,7 @@ LRESULT CALLBACK WindowWin32::WndProc(HWND const window,
     auto that = static_cast<WindowWin32*>(cs->lpCreateParams);
     that->window_handle_ = window;
     that->text_input_manager_.SetWindowHandle(window);
+    RegisterTouchWindow(window, 0);
   } else if (WindowWin32* that = GetThisFromHandle(window)) {
     return that->HandleMessage(message, wparam, lparam);
   }
@@ -204,6 +231,7 @@ WindowWin32::HandleMessage(UINT const message,
   int xPos = 0, yPos = 0;
   UINT width = 0, height = 0;
   UINT button_pressed = 0;
+  FlutterPointerDeviceKind device_kind;
 
   switch (message) {
     case kWmDpiChangedBeforeParent:
@@ -218,15 +246,56 @@ WindowWin32::HandleMessage(UINT const message,
       current_height_ = height;
       HandleResize(width, height);
       break;
-    case WM_MOUSEMOVE:
-      TrackMouseLeaveEvent(window_handle_);
+    case WM_TOUCH: {
+      UINT num_points = LOWORD(wparam);
+      touch_points_.resize(num_points);
+      auto touch_input_handle = reinterpret_cast<HTOUCHINPUT>(lparam);
+      if (GetTouchInputInfo(touch_input_handle, num_points,
+                            touch_points_.data(), sizeof(TOUCHINPUT))) {
+        for (const auto& touch : touch_points_) {
+          // Generate a mapped ID for the Windows-provided touch ID
+          auto touch_id = touch_id_generator_.GetGeneratedId(touch.dwID);
 
-      xPos = GET_X_LPARAM(lparam);
-      yPos = GET_Y_LPARAM(lparam);
-      OnPointerMove(static_cast<double>(xPos), static_cast<double>(yPos));
+          POINT pt = {TOUCH_COORD_TO_PIXEL(touch.x),
+                      TOUCH_COORD_TO_PIXEL(touch.y)};
+          ScreenToClient(window_handle_, &pt);
+          auto x = static_cast<double>(pt.x);
+          auto y = static_cast<double>(pt.y);
+
+          if (touch.dwFlags & TOUCHEVENTF_DOWN) {
+            OnPointerDown(x, y, kFlutterPointerDeviceKindTouch, touch_id,
+                          WM_LBUTTONDOWN);
+          } else if (touch.dwFlags & TOUCHEVENTF_MOVE) {
+            OnPointerMove(x, y, kFlutterPointerDeviceKindTouch, touch_id);
+          } else if (touch.dwFlags & TOUCHEVENTF_UP) {
+            OnPointerUp(x, y, kFlutterPointerDeviceKindTouch, touch_id,
+                        WM_LBUTTONDOWN);
+            OnPointerLeave(kFlutterPointerDeviceKindTouch, touch_id);
+            touch_id_generator_.ReleaseNumber(touch.dwID);
+          }
+        }
+        CloseTouchInputHandle(touch_input_handle);
+      }
+      return 0;
+    }
+    case WM_MOUSEMOVE:
+      device_kind = GetFlutterPointerDeviceKind();
+      if (device_kind == kFlutterPointerDeviceKindMouse) {
+        TrackMouseLeaveEvent(window_handle_);
+
+        xPos = GET_X_LPARAM(lparam);
+        yPos = GET_Y_LPARAM(lparam);
+
+        OnPointerMove(static_cast<double>(xPos), static_cast<double>(yPos),
+                      device_kind, kDefaultPointerDeviceId);
+      }
       break;
-    case WM_MOUSELEAVE:;
-      OnPointerLeave();
+    case WM_MOUSELEAVE:
+      device_kind = GetFlutterPointerDeviceKind();
+      if (device_kind == kFlutterPointerDeviceKindMouse) {
+        OnPointerLeave(device_kind, kDefaultPointerDeviceId);
+      }
+
       // Once the tracked event is received, the TrackMouseEvent function
       // resets. Set to false to make sure it's called once mouse movement is
       // detected again.
@@ -250,6 +319,11 @@ WindowWin32::HandleMessage(UINT const message,
     case WM_RBUTTONDOWN:
     case WM_MBUTTONDOWN:
     case WM_XBUTTONDOWN:
+      device_kind = GetFlutterPointerDeviceKind();
+      if (device_kind != kFlutterPointerDeviceKindMouse) {
+        break;
+      }
+
       if (message == WM_LBUTTONDOWN) {
         // Capture the pointer in case the user drags outside the client area.
         // In this case, the "mouse leave" event is delayed until the user
@@ -265,12 +339,17 @@ WindowWin32::HandleMessage(UINT const message,
       xPos = GET_X_LPARAM(lparam);
       yPos = GET_Y_LPARAM(lparam);
       OnPointerDown(static_cast<double>(xPos), static_cast<double>(yPos),
-                    button_pressed);
+                    device_kind, kDefaultPointerDeviceId, button_pressed);
       break;
     case WM_LBUTTONUP:
     case WM_RBUTTONUP:
     case WM_MBUTTONUP:
     case WM_XBUTTONUP:
+      device_kind = GetFlutterPointerDeviceKind();
+      if (device_kind != kFlutterPointerDeviceKindMouse) {
+        break;
+      }
+
       if (message == WM_LBUTTONUP) {
         ReleaseCapture();
       }
@@ -281,16 +360,18 @@ WindowWin32::HandleMessage(UINT const message,
       xPos = GET_X_LPARAM(lparam);
       yPos = GET_Y_LPARAM(lparam);
       OnPointerUp(static_cast<double>(xPos), static_cast<double>(yPos),
-                  button_pressed);
+                  device_kind, kDefaultPointerDeviceId, button_pressed);
       break;
     case WM_MOUSEWHEEL:
-      OnScroll(0.0, -(static_cast<short>(HIWORD(wparam)) /
-                      static_cast<double>(WHEEL_DELTA)));
+      OnScroll(0.0,
+               -(static_cast<short>(HIWORD(wparam)) /
+                 static_cast<double>(WHEEL_DELTA)),
+               kFlutterPointerDeviceKindMouse, kDefaultPointerDeviceId);
       break;
     case WM_MOUSEHWHEEL:
       OnScroll((static_cast<short>(HIWORD(wparam)) /
                 static_cast<double>(WHEEL_DELTA)),
-               0.0);
+               0.0, kFlutterPointerDeviceKindMouse, kDefaultPointerDeviceId);
       break;
     case WM_INPUTLANGCHANGE:
       // TODO(cbracken): pass this to TextInputManager to aid with

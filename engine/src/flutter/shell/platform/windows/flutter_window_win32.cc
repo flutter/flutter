@@ -128,24 +128,6 @@ static uint64_t ConvertWinButtonToFlutterButton(UINT button) {
   return 0;
 }
 
-// This method is only valid during a window message related to mouse/touch
-// input.
-// See
-// https://docs.microsoft.com/en-us/windows/win32/tablet/system-events-and-mouse-messages?redirectedfrom=MSDN#distinguishing-pen-input-from-mouse-and-touch.
-static FlutterPointerDeviceKind GetFlutterPointerDeviceKind() {
-  constexpr LPARAM kTouchOrPenSignature = 0xFF515700;
-  constexpr LPARAM kTouchSignature = kTouchOrPenSignature | 0x80;
-  constexpr LPARAM kSignatureMask = 0xFFFFFF00;
-  LPARAM info = GetMessageExtraInfo();
-  if ((info & kSignatureMask) == kTouchOrPenSignature) {
-    if ((info & kTouchSignature) == kTouchSignature) {
-      return kFlutterPointerDeviceKindTouch;
-    }
-    return kFlutterPointerDeviceKindStylus;
-  }
-  return kFlutterPointerDeviceKindMouse;
-}
-
 void FlutterWindowWin32::OnDpiScale(unsigned int dpi){};
 
 // When DesktopWindow notifies that a WM_Size message has come in
@@ -156,30 +138,42 @@ void FlutterWindowWin32::OnResize(unsigned int width, unsigned int height) {
   }
 }
 
-void FlutterWindowWin32::OnPointerMove(double x, double y) {
-  binding_handler_delegate_->OnPointerMove(x, y, GetFlutterPointerDeviceKind());
+void FlutterWindowWin32::OnPointerMove(double x,
+                                       double y,
+                                       FlutterPointerDeviceKind device_kind,
+                                       int32_t device_id) {
+  binding_handler_delegate_->OnPointerMove(x, y, device_kind, device_id);
 }
 
-void FlutterWindowWin32::OnPointerDown(double x, double y, UINT button) {
+void FlutterWindowWin32::OnPointerDown(double x,
+                                       double y,
+                                       FlutterPointerDeviceKind device_kind,
+                                       int32_t device_id,
+                                       UINT button) {
   uint64_t flutter_button = ConvertWinButtonToFlutterButton(button);
   if (flutter_button != 0) {
     binding_handler_delegate_->OnPointerDown(
-        x, y, GetFlutterPointerDeviceKind(),
+        x, y, device_kind, device_id,
         static_cast<FlutterPointerMouseButtons>(flutter_button));
   }
 }
 
-void FlutterWindowWin32::OnPointerUp(double x, double y, UINT button) {
+void FlutterWindowWin32::OnPointerUp(double x,
+                                     double y,
+                                     FlutterPointerDeviceKind device_kind,
+                                     int32_t device_id,
+                                     UINT button) {
   uint64_t flutter_button = ConvertWinButtonToFlutterButton(button);
   if (flutter_button != 0) {
     binding_handler_delegate_->OnPointerUp(
-        x, y, GetFlutterPointerDeviceKind(),
+        x, y, device_kind, device_id,
         static_cast<FlutterPointerMouseButtons>(flutter_button));
   }
 }
 
-void FlutterWindowWin32::OnPointerLeave() {
-  binding_handler_delegate_->OnPointerLeave(GetFlutterPointerDeviceKind());
+void FlutterWindowWin32::OnPointerLeave(FlutterPointerDeviceKind device_kind,
+                                        int32_t device_id) {
+  binding_handler_delegate_->OnPointerLeave(device_kind, device_id);
 }
 
 void FlutterWindowWin32::OnSetCursor() {
@@ -217,13 +211,17 @@ void FlutterWindowWin32::OnComposeChange(const std::u16string& text,
   binding_handler_delegate_->OnComposeChange(text, cursor_pos);
 }
 
-void FlutterWindowWin32::OnScroll(double delta_x, double delta_y) {
+void FlutterWindowWin32::OnScroll(double delta_x,
+                                  double delta_y,
+                                  FlutterPointerDeviceKind device_kind,
+                                  int32_t device_id) {
   POINT point;
   GetCursorPos(&point);
 
   ScreenToClient(GetWindowHandle(), &point);
   binding_handler_delegate_->OnScroll(point.x, point.y, delta_x, delta_y,
-                                      kScrollOffsetMultiplier);
+                                      kScrollOffsetMultiplier, device_kind,
+                                      device_id);
 }
 
 void FlutterWindowWin32::OnCursorRectUpdated(const Rect& rect) {
