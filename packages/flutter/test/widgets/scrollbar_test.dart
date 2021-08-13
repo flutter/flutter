@@ -1708,4 +1708,37 @@ void main() {
         ),
     );
   });
+
+  testWidgets('notificationPredicate depth test.', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    final List<int> depths = <int>[];
+    Widget buildFrame() {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            notificationPredicate: (ScrollNotification notification) {
+              depths.add(notification.depth);
+              return notification.depth == 0;
+            },
+            controller: scrollController,
+            isAlwaysShown: true,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: const SingleChildScrollView(),
+            ),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildFrame());
+    await tester.pumpAndSettle();
+
+    // `notificationPredicate` should be called twice with different `depth`
+    // because there are two scrollable widgets.
+    expect(depths.length, 2);
+    expect(depths[0], 1);
+    expect(depths[1], 0);
+  });
 }
