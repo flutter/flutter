@@ -21,7 +21,7 @@ abstract class TextMetrics {
   /// If the offset is already on the first line, the given offset will be
   /// returned.
   /// {@endtemplate}
-  TextPosition getTextPositionAbove(int offset);
+  TextPosition getTextPositionAbove(TextPosition position);
 
   /// {@template flutter.services.TextMetrics.getTextPositionBelow}
   /// Returns the TextPosition below the given offset into _plainText.
@@ -29,10 +29,10 @@ abstract class TextMetrics {
   /// If the offset is already on the last line, the given offset will be
   /// returned.
   /// {@endtemplate}
-  TextPosition getTextPositionBelow(int offset);
+  TextPosition getTextPositionBelow(TextPosition position);
 
   /// {@template flutter.services.TextMetrics.getTextPositionVertical}
   /// Returns the TextPosition above or below the given offset.
   /// {@endtemplate}
-  TextPosition getTextPositionVertical(int textOffset, double verticalOffset);
+  TextPosition getTextPositionVertical(TextPosition position, double verticalOffset);
 }

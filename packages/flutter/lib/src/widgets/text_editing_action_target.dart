@@ -535,7 +535,7 @@ abstract class TextEditingActionTarget {
     }
 
     int index =
-        textMetrics.getTextPositionBelow(textEditingValue.selection.extentOffset).offset;
+        textMetrics.getTextPositionBelow(textEditingValue.selection.extent).offset;
 
     if (index == textEditingValue.selection.extentOffset) {
       index = textEditingValue.text.length;
@@ -821,7 +821,7 @@ abstract class TextEditingActionTarget {
     }
 
     final TextPosition positionAbove =
-        textMetrics.getTextPositionAbove(textEditingValue.selection.extentOffset);
+        textMetrics.getTextPositionAbove(textEditingValue.selection.extent);
     late final TextSelection nextSelection;
     if (positionAbove.offset == textEditingValue.selection.extentOffset) {
       nextSelection = textEditingValue.selection.copyWith(
@@ -901,7 +901,7 @@ abstract class TextEditingActionTarget {
     }
 
     final TextPosition positionBelow =
-        textMetrics.getTextPositionBelow(textEditingValue.selection.extentOffset);
+        textMetrics.getTextPositionBelow(textEditingValue.selection.extent);
 
     late final TextSelection nextSelection;
     if (positionBelow.offset == textEditingValue.selection.extentOffset) {
@@ -1138,7 +1138,7 @@ abstract class TextEditingActionTarget {
   ///   * [moveSelectionDown], which is the same but in the opposite direction.
   void moveSelectionUp(SelectionChangedCause cause) {
     final int nextIndex =
-        textMetrics.getTextPositionAbove(textEditingValue.selection.extentOffset).offset;
+        textMetrics.getTextPositionAbove(textEditingValue.selection.extent).offset;
 
     if (nextIndex == textEditingValue.selection.extentOffset) {
       _wasSelectingVerticallyWithKeyboard = false;

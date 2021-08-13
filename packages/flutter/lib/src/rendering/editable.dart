@@ -540,32 +540,32 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   /// {@macro flutter.services.TextMetrics.getTextPositionVertical}
   @override
-  TextPosition getTextPositionVertical(int textOffset, double verticalOffset) {
-    final Offset caretOffset = _textPainter.getOffsetForCaret(TextPosition(offset: textOffset), _caretPrototype);
+  TextPosition getTextPositionVertical(TextPosition position, double verticalOffset) {
+    final Offset caretOffset = _textPainter.getOffsetForCaret(position, _caretPrototype);
     final Offset caretOffsetTranslated = caretOffset.translate(0.0, verticalOffset);
     return _textPainter.getPositionForOffset(caretOffsetTranslated);
   }
 
   /// {@macro flutter.services.TextMetrics.getTextPositionAbove}
   @override
-  TextPosition getTextPositionAbove(int offset) {
+  TextPosition getTextPositionAbove(TextPosition position) {
     // The caret offset gives a location in the upper left hand corner of
     // the caret so the middle of the line above is a half line above that
     // point and the line below is 1.5 lines below that point.
     final double preferredLineHeight = _textPainter.preferredLineHeight;
     final double verticalOffset = -0.5 * preferredLineHeight;
-    return getTextPositionVertical(offset, verticalOffset);
+    return getTextPositionVertical(position, verticalOffset);
   }
 
   /// {@macro flutter.services.TextMetrics.getTextPositionBelow}
   @override
-  TextPosition getTextPositionBelow(int offset) {
+  TextPosition getTextPositionBelow(TextPosition position) {
     // The caret offset gives a location in the upper left hand corner of
     // the caret so the middle of the line above is a half line above that
     // point and the line below is 1.5 lines below that point.
     final double preferredLineHeight = _textPainter.preferredLineHeight;
     final double verticalOffset = 1.5 * preferredLineHeight;
-    return getTextPositionVertical(offset, verticalOffset);
+    return getTextPositionVertical(position, verticalOffset);
   }
 
   // End TextMetrics.
