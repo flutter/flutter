@@ -21,6 +21,7 @@ void main() {
     const String checkoutsParentDirectory = '$flutterRoot/dev/conductor';
     const String candidateBranch = 'flutter-1.2-candidate.3';
     const String workingBranch = 'cherrypicks-$candidateBranch';
+    const String remoteUrl = 'https://github.com/org/repo.git';
     final String localPathSeparator = const LocalPlatform().pathSeparator;
     final String localOperatingSystem = const LocalPlatform().pathSeparator;
     const String revision1 = 'd3af60d18e01fcb36e0c0fa06c8502e4935ed095';
@@ -78,9 +79,16 @@ void main() {
 
     group('APPLY_ENGINE_CHERRYPICKS to CODESIGN_ENGINE_BINARIES', () {
       test('does not prompt user and updates currentPhase if there are no engine cherrypicks', () async {
-        final FakeProcessManager processManager = FakeProcessManager.list(
-          <FakeCommand>[],
-        );
+        final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(command: <String>['git', 'fetch', 'upstream']),
+          const FakeCommand(
+            command: <String>['git', 'checkout', workingBranch],
+          ),
+          const FakeCommand(
+            command: <String>['git', 'rev-parse', 'HEAD'],
+            stdout: revision1,
+          ),
+        ]);
         final FakePlatform platform = FakePlatform(
           environment: <String, String>{
             'HOME': <String>['path', 'to', 'home'].join(localPathSeparator),
@@ -88,10 +96,18 @@ void main() {
           operatingSystem: localOperatingSystem,
           pathSeparator: localPathSeparator,
         );
+        final File ciYaml = fileSystem.file('$checkoutsParentDirectory/engine/.ci.yaml')
+            ..createSync(recursive: true);
+        // this branch already present in ciYaml
+        _initializeCiYamlFile(ciYaml, enabledBranches: <String>[candidateBranch]);
         final pb.ConductorState state = pb.ConductorState(
           currentPhase: ReleasePhase.APPLY_ENGINE_CHERRYPICKS,
           engine: pb.Repository(
+            candidateBranch: candidateBranch,
+            checkoutPath: fileSystem.path.join(checkoutsParentDirectory, 'engine'),
+            workingBranch: workingBranch,
             startingGitHead: revision1,
+            upstream: pb.Remote(name: 'upstream', url: remoteUrl),
           ),
         );
         writeStateToFile(
@@ -126,9 +142,39 @@ void main() {
       });
 
       test('confirms to stdout when all engine cherrypicks were auto-applied', () async {
-        const String remoteUrl = 'https://github.com/org/repo.git';
         stdio.stdin.add('n');
-        final FakeProcessManager processManager = FakeProcessManager.empty();
+        final File ciYaml = fileSystem.file('$checkoutsParentDirectory/engine/.ci.yaml')
+            ..createSync(recursive: true);
+        _initializeCiYamlFile(ciYaml);
+        final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(command: <String>['git', 'fetch', 'upstream']),
+          const FakeCommand(
+            command: <String>['git', 'checkout', workingBranch],
+            //onRun: () {
+            //  final File file = fileSystem.file('$checkoutsParentDirectory/engine/.ci.yaml')
+            //      ..createSync();
+            //  _initializeCiYamlFile(file);
+            //},
+          ),
+          const FakeCommand(
+            command: <String>['git', 'rev-parse', 'HEAD'],
+            stdout: revision1,
+          ),
+          const FakeCommand(
+            command: <String>['git', 'status', '--porcelain'],
+            stdout: 'MM blah',
+          ),
+          const FakeCommand(command: <String>['git', 'add', '--all']),
+          const FakeCommand(command: <String>[
+            'git',
+            'commit',
+            "--message='add branch $candidateBranch to enabled_branches in .ci.yaml'",
+          ]),
+          const FakeCommand(
+            command: <String>['git', 'rev-parse', 'HEAD'],
+            stdout: revision2,
+          ),
+        ]);
         final FakePlatform platform = FakePlatform(
           environment: <String, String>{
             'HOME': <String>['path', 'to', 'home'].join(localPathSeparator),
@@ -138,12 +184,14 @@ void main() {
         );
         final pb.ConductorState state = pb.ConductorState(
           engine: pb.Repository(
+            candidateBranch: candidateBranch,
             cherrypicks: <pb.Cherrypick>[
               pb.Cherrypick(
                 trunkRevision: 'abc123',
                 state: pb.CherrypickState.COMPLETED,
               ),
             ],
+            checkoutPath: fileSystem.path.join(checkoutsParentDirectory, 'engine'),
             workingBranch: workingBranch,
             upstream: pb.Remote(name: 'upstream', url: remoteUrl),
             mirror: pb.Remote(name: 'mirror', url: remoteUrl),
@@ -184,10 +232,27 @@ void main() {
           const FakeCommand(
             command: <String>['git', 'fetch', 'upstream'],
           ),
-          const FakeCommand(command: <String>['git', 'checkout', workingBranch]),
+          FakeCommand(
+            command: const <String>['git', 'checkout', workingBranch],
+            onRun: () {
+              final File file = fileSystem.file('$checkoutsParentDirectory/engine/.ci.yaml')
+                  ..createSync(recursive: true);
+              _initializeCiYamlFile(file);
+            },
+          ),
           const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
             stdout: revision1,
+          ),
+          const FakeCommand(
+            command: <String>['git', 'status', '--porcelain'],
+            stdout: 'MM .ci.yaml',
+          ),
+          const FakeCommand(command: <String>['git', 'add', '--all']),
+          const FakeCommand(command: <String>['git', 'commit', "--message='add branch $candidateBranch to enabled_branches in .ci.yaml'"]),
+          const FakeCommand(
+            command: <String>['git', 'rev-parse', 'HEAD'],
+            stdout: revision2,
           ),
           const FakeCommand(command: <String>['git', 'push', 'mirror', '$revision1:refs/heads/$workingBranch']),
         ]);
@@ -202,6 +267,7 @@ void main() {
           currentPhase: ReleasePhase.APPLY_ENGINE_CHERRYPICKS,
           engine: pb.Repository(
             candidateBranch: candidateBranch,
+            checkoutPath: fileSystem.path.join(checkoutsParentDirectory, 'engine'),
             cherrypicks: <pb.Cherrypick>[
               pb.Cherrypick(
                 trunkRevision: revision2,
@@ -220,9 +286,11 @@ void main() {
           state,
           <String>[],
         );
+        // engine dir is expected to already exist
+        fileSystem.directory(checkoutsParentDirectory).childDirectory('engine').createSync(recursive: true);
         final Checkouts checkouts = Checkouts(
           fileSystem: fileSystem,
-          parentDirectory: fileSystem.directory(checkoutsParentDirectory)..createSync(recursive: true),
+          parentDirectory: fileSystem.directory(checkoutsParentDirectory),
           platform: platform,
           processManager: processManager,
           stdio: stdio,

@@ -95,11 +95,31 @@ void runNext({
 
   switch (state.currentPhase) {
     case pb.ReleasePhase.APPLY_ENGINE_CHERRYPICKS:
-      final List<pb.Cherrypick> unappliedCherrypicks = <pb.Cherrypick>[];
-      for (final pb.Cherrypick cherrypick in state.engine.cherrypicks) {
-        if (!finishedStates.contains(cherrypick.state)) {
-          unappliedCherrypicks.add(cherrypick);
-        }
+      final Remote upstream = Remote(
+        name: RemoteName.upstream,
+        url: state.engine.upstream.url,
+      );
+      final EngineRepository engine = EngineRepository(
+        checkouts,
+        initialRef: state.engine.workingBranch,
+        upstreamRemote: upstream,
+        previousCheckoutLocation: state.engine.checkoutPath,
+      );
+      final String headRevision = engine.reverseParse('HEAD');
+
+      // check if the candidate branch is enabled in .ci.yaml
+      if (!engine.ciYaml.enabledBranches.contains(state.engine.candidateBranch)) {
+        engine.ciYaml.enableBranch(state.engine.candidateBranch);
+        // commit
+        final String revision = engine.commit(
+          'add branch ${state.engine.candidateBranch} to enabled_branches in .ci.yaml',
+          addFirst: true,
+        );
+        // append to list of cherrypicks so we know a PR is required
+        state.engine.cherrypicks.add(pb.Cherrypick(
+          appliedRevision: revision,
+          state: pb.CherrypickState.COMPLETED,
+        ));
       }
 
       if (!requiresEnginePR(state)) {
@@ -107,6 +127,13 @@ void runNext({
           'This release has no engine cherrypicks. No Engine PR is necessary.\n',
         );
         break;
+      }
+
+      final List<pb.Cherrypick> unappliedCherrypicks = <pb.Cherrypick>[];
+      for (final pb.Cherrypick cherrypick in state.engine.cherrypicks) {
+        if (!finishedStates.contains(cherrypick.state)) {
+          unappliedCherrypicks.add(cherrypick);
+        }
       }
 
       if (unappliedCherrypicks.isEmpty) {
@@ -128,17 +155,6 @@ void runNext({
           return;
         }
       }
-      final Remote upstream = Remote(
-        name: RemoteName.upstream,
-        url: state.engine.upstream.url,
-      );
-      final EngineRepository engine = EngineRepository(
-        checkouts,
-        initialRef: state.engine.workingBranch,
-        upstreamRemote: upstream,
-        previousCheckoutLocation: state.engine.checkoutPath,
-      );
-      final String headRevision = engine.reverseParse('HEAD');
 
       engine.pushRef(
         fromRef: headRevision,

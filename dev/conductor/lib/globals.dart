@@ -185,12 +185,12 @@ String getNewPrLink({
       // prefix with github org/repo so GitHub will auto-generate a hyperlink
       body.writeln('- Roll dart revision: dart-lang/sdk@${state.engine.dartRevision.substring(0, 9)}');
     }
-    body.writeAll(
-      // prefix with github org/repo so GitHub will auto-generate a hyperlink
-      state.engine.cherrypicks.map<String>((pb.Cherrypick cp) => '- commit: flutter/engine@${cp.trunkRevision.substring(0, 9)}'),
-      '\n',
-    );
-    body.write('\n');
+    for (final pb.Cherrypick cp in state.engine.cherrypicks) {
+      // Only list commits that map to a commit that exists upstream.
+      if (cp.trunkRevision.isNotEmpty) {
+        body.writeln('- commit: flutter/engine@${cp.trunkRevision.substring(0, 9)}');
+      }
+    }
   } else {
     for (final pb.Cherrypick cp in state.framework.cherrypicks) {
       // Only list commits that map to a commit that exists upstream.

@@ -70,6 +70,7 @@ abstract class Repository {
             'Provided previousCheckoutLocation $previousCheckoutLocation does not exist on disk!');
       }
       if (initialRef != null) {
+        assert(initialRef != '');
         git.run(
           <String>['fetch', upstreamRemote.name],
           'Fetch ${upstreamRemote.name} to ensure we have latest refs',
@@ -722,6 +723,8 @@ class EngineRepository extends Repository {
         );
 
   final Checkouts checkouts;
+
+  late final CiYaml ciYaml = CiYaml(checkoutDirectory.childFile('.ci.yaml'));
 
   static const String defaultUpstream = 'https://github.com/flutter/engine.git';
   static const String defaultBranch = 'master';
