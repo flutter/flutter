@@ -7,6 +7,8 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
+import '../html/paragraph/helper.dart';
+
 const ui.Color white = ui.Color(0xFFFFFFFF);
 const ui.Color black = ui.Color(0xFF000000);
 const ui.Color red = ui.Color(0xFFFF0000);
@@ -20,15 +22,6 @@ final EngineParagraphStyle ahemStyle = EngineParagraphStyle(
 
 ui.ParagraphConstraints constrain(double width) {
   return ui.ParagraphConstraints(width: width);
-}
-
-CanvasParagraph rich(
-  EngineParagraphStyle style,
-  void Function(CanvasParagraphBuilder) callback,
-) {
-  final CanvasParagraphBuilder builder = CanvasParagraphBuilder(style);
-  callback(builder);
-  return builder.build();
 }
 
 void main() {
@@ -685,6 +678,54 @@ Future<void> testMain() async {
         );
       }
     });
+  });
+
+  test('$CanvasParagraph.getWordBoundary', () {
+    final ui.Paragraph paragraph = plain(ahemStyle, 'Lorem ipsum dolor');
+
+    const ui.TextRange loremRange = ui.TextRange(start: 0, end: 5);
+    expect(paragraph.getWordBoundary(const ui.TextPosition(offset: 0)), loremRange);
+    expect(paragraph.getWordBoundary(const ui.TextPosition(offset: 1)), loremRange);
+    expect(paragraph.getWordBoundary(const ui.TextPosition(offset: 2)), loremRange);
+    expect(paragraph.getWordBoundary(const ui.TextPosition(offset: 3)), loremRange);
+    expect(paragraph.getWordBoundary(const ui.TextPosition(offset: 4)), loremRange);
+
+    const ui.TextRange firstSpace = ui.TextRange(start: 5, end: 6);
+    expect(paragraph.getWordBoundary(const ui.TextPosition(offset: 5)), firstSpace);
+
+    const ui.TextRange ipsumRange = ui.TextRange(start: 6, end: 11);
+    expect(paragraph.getWordBoundary(const ui.TextPosition(offset: 6)), ipsumRange);
+    expect(paragraph.getWordBoundary(const ui.TextPosition(offset: 7)), ipsumRange);
+    expect(paragraph.getWordBoundary(const ui.TextPosition(offset: 8)), ipsumRange);
+    expect(paragraph.getWordBoundary(const ui.TextPosition(offset: 9)), ipsumRange);
+    expect(paragraph.getWordBoundary(const ui.TextPosition(offset: 10)), ipsumRange);
+
+    const ui.TextRange secondSpace = ui.TextRange(start: 11, end: 12);
+    expect(paragraph.getWordBoundary(const ui.TextPosition(offset: 11)), secondSpace);
+
+    const ui.TextRange dolorRange = ui.TextRange(start: 12, end: 17);
+    expect(paragraph.getWordBoundary(const ui.TextPosition(offset: 12)), dolorRange);
+    expect(paragraph.getWordBoundary(const ui.TextPosition(offset: 13)), dolorRange);
+    expect(paragraph.getWordBoundary(const ui.TextPosition(offset: 14)), dolorRange);
+    expect(paragraph.getWordBoundary(const ui.TextPosition(offset: 15)), dolorRange);
+    expect(paragraph.getWordBoundary(const ui.TextPosition(offset: 16)), dolorRange);
+
+    const ui.TextRange endRange = ui.TextRange(start: 17, end: 17);
+    expect(paragraph.getWordBoundary(const ui.TextPosition(offset: 17)), endRange);
+  });
+
+  test('$CanvasParagraph.longestLine', () {
+    final ui.Paragraph paragraph = plain(ahemStyle, 'abcd\nabcde abc');
+    paragraph.layout(const ui.ParagraphConstraints(width: 80.0));
+    expect(paragraph.longestLine, 50.0);
+  });
+
+  test('$CanvasParagraph.width should be a whole integer', () {
+    final ui.Paragraph paragraph = plain(ahemStyle, 'abc');
+    paragraph.layout(const ui.ParagraphConstraints(width: 30.8));
+
+    expect(paragraph.width, 30);
+    expect(paragraph.height, 10);
   });
 }
 

@@ -818,10 +818,12 @@ void _testCullRectComputation() {
     'renders clipped text with high quality',
     () async {
       // To reproduce blurriness we need real clipping.
-      final DomParagraph paragraph =
-          (DomParagraphBuilder(EngineParagraphStyle(fontFamily: 'Roboto'))
+      final CanvasParagraph paragraph =
+          (ui.ParagraphBuilder(ui.ParagraphStyle(fontFamily: 'Roboto'))
+                // Use a decoration to force rendering in DOM mode.
+                ..pushStyle(ui.TextStyle(decoration: ui.TextDecoration.lineThrough, decorationColor: const ui.Color(0x00000000)))
                 ..addText('Am I blurry?'))
-              .build() as DomParagraph;
+              .build() as CanvasParagraph;
       paragraph.layout(const ui.ParagraphConstraints(width: 1000));
 
       final ui.Rect canvasSize = ui.Rect.fromLTRB(
@@ -843,7 +845,7 @@ void _testCullRectComputation() {
         final RecordingCanvas canvas = recorder.beginRecording(outerClip);
         canvas.drawParagraph(paragraph, const ui.Offset(8.5, 8.5));
         final ui.Picture picture = recorder.endRecording();
-        expect(canvas.renderStrategy.hasArbitraryPaint, isFalse);
+        expect(paragraph.drawOnCanvas, isFalse);
 
         builder.addPicture(
           ui.Offset.zero,
@@ -857,7 +859,7 @@ void _testCullRectComputation() {
         final RecordingCanvas canvas = recorder.beginRecording(innerClip);
         canvas.drawParagraph(paragraph, ui.Offset(8.5, 8.5 + innerClip.top));
         final ui.Picture picture = recorder.endRecording();
-        expect(canvas.renderStrategy.hasArbitraryPaint, isFalse);
+        expect(paragraph.drawOnCanvas, isFalse);
 
         builder.addPicture(
           ui.Offset.zero,

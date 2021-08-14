@@ -71,7 +71,7 @@ class EngineScubaTester {
       sceneElement.append(canvas.rootElement);
       html.document.body!.append(sceneElement);
       String screenshotName = '${fileName}_${canvas.runtimeType}';
-      if (WebExperiments.instance!.useCanvasText) {
+      if (canvas is BitmapCanvas) {
         screenshotName += '+canvas_measurement';
       }
       await diffScreenshot(
@@ -94,41 +94,11 @@ typedef CanvasTest = FutureOr<void> Function(EngineCanvas canvas);
 void testEachCanvas(String description, CanvasTest body,
     {double? maxDiffRate}) {
   const ui.Rect bounds = ui.Rect.fromLTWH(0, 0, 600, 800);
-  test('$description (bitmap)', () {
-    try {
-      TextMeasurementService.initialize(rulerCacheCapacity: 2);
-      WebExperiments.instance!.useCanvasText = false;
-      WebExperiments.instance!.useCanvasRichText = false;
-      return body(BitmapCanvas(bounds, RenderStrategy()));
-    } finally {
-      WebExperiments.instance!.useCanvasText = null;
-      WebExperiments.instance!.useCanvasRichText = null;
-      TextMeasurementService.clearCache();
-    }
-  });
   test('$description (bitmap + canvas measurement)', () async {
-    try {
-      TextMeasurementService.initialize(rulerCacheCapacity: 2);
-      WebExperiments.instance!.useCanvasText = true;
-      WebExperiments.instance!.useCanvasRichText = false;
-      await body(BitmapCanvas(bounds, RenderStrategy()));
-    } finally {
-      WebExperiments.instance!.useCanvasText = null;
-      WebExperiments.instance!.useCanvasRichText = null;
-      TextMeasurementService.clearCache();
-    }
+    return body(BitmapCanvas(bounds, RenderStrategy()));
   });
   test('$description (dom)', () {
-    try {
-      TextMeasurementService.initialize(rulerCacheCapacity: 2);
-      WebExperiments.instance!.useCanvasText = false;
-      WebExperiments.instance!.useCanvasRichText = false;
-      return body(DomCanvas(domRenderer.createElement('flt-picture')));
-    } finally {
-      WebExperiments.instance!.useCanvasText = null;
-      WebExperiments.instance!.useCanvasRichText = null;
-      TextMeasurementService.clearCache();
-    }
+    return body(DomCanvas(domRenderer.createElement('flt-picture')));
   });
 }
 
