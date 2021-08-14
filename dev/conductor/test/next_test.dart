@@ -1089,5 +1089,23 @@ void _initializeCiYamlFile(
   for (final String branch in enabledBranches) {
     buffer.writeln('  - $branch');
   }
+  buffer.writeln('''
+
+platform_properties:
+  linux:
+    properties:
+    caches: ["name":"openjdk","path":"java"]
+
+targets:
+  - name: Linux analyze
+    recipe: flutter/flutter
+    timeout: 60
+    properties:
+      tags: >
+        ["framework","hostonly"]
+      validation: analyze
+      validation_name: Analyze
+    scheduler: luci
+''');
   file.writeAsStringSync(buffer.toString());
 }
