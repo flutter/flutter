@@ -3384,6 +3384,10 @@ targets:
         [
           {"name":"gradle","path":"gradle"}
         ]
+      dependencies: >-
+        [
+          {"dependency": "vs_build"}
+        ]
       tags: >
         ["devicelab","hostonly"]
       task_name: hot_mode_dev_cycle_win_target__benchmark
