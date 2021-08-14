@@ -148,14 +148,7 @@ void main() {
         _initializeCiYamlFile(ciYaml);
         final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(command: <String>['git', 'fetch', 'upstream']),
-          const FakeCommand(
-            command: <String>['git', 'checkout', workingBranch],
-            //onRun: () {
-            //  final File file = fileSystem.file('$checkoutsParentDirectory/engine/.ci.yaml')
-            //      ..createSync();
-            //  _initializeCiYamlFile(file);
-            //},
-          ),
+          const FakeCommand(command: <String>['git', 'checkout', workingBranch]),
           const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
             stdout: revision1,
