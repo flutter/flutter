@@ -56,12 +56,6 @@ Future<void> testMain() async {
       const ui.ParagraphConstraints constraints =
           ui.ParagraphConstraints(width: 30.0);
 
-      final DomParagraphBuilder domBuilder = DomParagraphBuilder(style);
-      domBuilder.addText('test');
-      // Triggers the measuring and verifies the result has been cached.
-      domBuilder.build().layout(constraints);
-      expect(TextMeasurementService.rulerManager!.rulers.length, 1);
-
       final CanvasParagraphBuilder canvasBuilder = CanvasParagraphBuilder(style);
       canvasBuilder.addText('test');
       // Triggers the measuring and verifies the ruler cache has been populated.
@@ -78,7 +72,6 @@ Future<void> testMain() async {
 
       // Verifies the font is loaded, and the cache is cleaned.
       expect(_containsFontFamily('Blehm'), isTrue);
-      expect(TextMeasurementService.rulerManager!.rulers.length, 0);
       expect(Spanometer.rulers.length, 0);
     },
         // TODO(hterkelsen): https://github.com/flutter/flutter/issues/56702

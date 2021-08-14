@@ -12,7 +12,6 @@ import '../assets.dart';
 import '../browser_detection.dart';
 import '../util.dart';
 import 'layout_service.dart';
-import 'measurement.dart';
 
 const String ahemFontFamily = 'Ahem';
 const String ahemFontUrl = 'packages/ui/assets/ahem.ttf';
@@ -215,7 +214,6 @@ class FontManager {
       // There might be paragraph measurements for this new font before it is
       // loaded. They were measured using fallback font, so we should clear the
       // cache.
-      TextMeasurementService.clearCache();
       Spanometer.clearRulersCache();
     }, onError: (dynamic exception) {
       // Failures here will throw an html.DomException which confusingly
