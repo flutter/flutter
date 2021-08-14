@@ -109,7 +109,7 @@ This feature is currently supported on Android, iOS, and Web.
 ```dart
 void main() {
   final IntegrationTestWidgetsFlutterBinding binding =
-      IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+      IntegrationTestWidgetsFlutterBinding();
 
   testWidgets('screenshot', (WidgetTester tester) async {
     // Build the app.
@@ -154,7 +154,7 @@ Future<void> main() async {
 ```dart
 void main() {
   final IntegrationTestWidgetsFlutterBinding binding =
-      IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+      IntegrationTestWidgetsFlutterBinding();
 
   testWidgets('screenshot', (WidgetTester tester) async {
     // Build the app.
