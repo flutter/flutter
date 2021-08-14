@@ -5,7 +5,6 @@
 package io.flutter.view;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.eq;
@@ -47,7 +46,6 @@ import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.invocation.InvocationOnMock;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
@@ -798,122 +796,6 @@ public class AccessibilityBridgeTest {
     AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(1);
     assertEquals(nodeInfo.getTextSelectionStart(), expectedStart);
     assertEquals(nodeInfo.getTextSelectionEnd(), expectedEnd);
-  }
-
-  @Test
-  public void itSetsFocusedNodeBeforeSendingEvent() {
-    AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
-    AccessibilityViewEmbedder mockViewEmbedder = mock(AccessibilityViewEmbedder.class);
-    AccessibilityManager mockManager = mock(AccessibilityManager.class);
-    View mockRootView = mock(View.class);
-    Context context = mock(Context.class);
-    when(mockRootView.getContext()).thenReturn(context);
-    when(context.getPackageName()).thenReturn("test");
-    AccessibilityBridge accessibilityBridge =
-        setUpBridge(
-            /*rootAccessibilityView=*/ mockRootView,
-            /*accessibilityChannel=*/ mockChannel,
-            /*accessibilityManager=*/ mockManager,
-            /*contentResolver=*/ null,
-            /*accessibilityViewEmbedder=*/ mockViewEmbedder,
-            /*platformViewsAccessibilityDelegate=*/ null);
-
-    ViewParent mockParent = mock(ViewParent.class);
-    when(mockRootView.getParent()).thenReturn(mockParent);
-    when(mockManager.isEnabled()).thenReturn(true);
-
-    TestSemanticsNode root = new TestSemanticsNode();
-    root.id = 0;
-    root.label = "root";
-
-    TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
-    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
-
-    class Verifier {
-      public Verifier(AccessibilityBridge accessibilityBridge) {
-        this.accessibilityBridge = accessibilityBridge;
-      }
-
-      public AccessibilityBridge accessibilityBridge;
-      public boolean verified = false;
-
-      public boolean verify(InvocationOnMock invocation) {
-        AccessibilityEvent event = (AccessibilityEvent) invocation.getArguments()[1];
-        assertEquals(event.getEventType(), AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED);
-        // The accessibility focus must be set before sending out
-        // the TYPE_VIEW_ACCESSIBILITY_FOCUSED event.
-        AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
-        assertTrue(nodeInfo.isAccessibilityFocused());
-        verified = true;
-        return true;
-      }
-    };
-    Verifier verifier = new Verifier(accessibilityBridge);
-    when(mockParent.requestSendAccessibilityEvent(eq(mockRootView), any(AccessibilityEvent.class)))
-        .thenAnswer(invocation -> verifier.verify(invocation));
-    accessibilityBridge.performAction(0, AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS, null);
-    assertTrue(verifier.verified);
-  }
-
-  @Test
-  public void itClearsFocusedNodeBeforeSendingEvent() {
-    AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
-    AccessibilityViewEmbedder mockViewEmbedder = mock(AccessibilityViewEmbedder.class);
-    AccessibilityManager mockManager = mock(AccessibilityManager.class);
-    View mockRootView = mock(View.class);
-    Context context = mock(Context.class);
-    when(mockRootView.getContext()).thenReturn(context);
-    when(context.getPackageName()).thenReturn("test");
-    AccessibilityBridge accessibilityBridge =
-        setUpBridge(
-            /*rootAccessibilityView=*/ mockRootView,
-            /*accessibilityChannel=*/ mockChannel,
-            /*accessibilityManager=*/ mockManager,
-            /*contentResolver=*/ null,
-            /*accessibilityViewEmbedder=*/ mockViewEmbedder,
-            /*platformViewsAccessibilityDelegate=*/ null);
-
-    ViewParent mockParent = mock(ViewParent.class);
-    when(mockRootView.getParent()).thenReturn(mockParent);
-    when(mockManager.isEnabled()).thenReturn(true);
-
-    TestSemanticsNode root = new TestSemanticsNode();
-    root.id = 0;
-    root.label = "root";
-
-    TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
-    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
-    // Set the focus on root.
-    accessibilityBridge.performAction(0, AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS, null);
-    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
-    assertTrue(nodeInfo.isAccessibilityFocused());
-
-    class Verifier {
-      public Verifier(AccessibilityBridge accessibilityBridge) {
-        this.accessibilityBridge = accessibilityBridge;
-      }
-
-      public AccessibilityBridge accessibilityBridge;
-      public boolean verified = false;
-
-      public boolean verify(InvocationOnMock invocation) {
-        AccessibilityEvent event = (AccessibilityEvent) invocation.getArguments()[1];
-        assertEquals(
-            event.getEventType(), AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED);
-        // The accessibility focus must be cleared before sending out
-        // the TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED event.
-        AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
-        assertFalse(nodeInfo.isAccessibilityFocused());
-        verified = true;
-        return true;
-      }
-    };
-    Verifier verifier = new Verifier(accessibilityBridge);
-    when(mockParent.requestSendAccessibilityEvent(eq(mockRootView), any(AccessibilityEvent.class)))
-        .thenAnswer(invocation -> verifier.verify(invocation));
-    accessibilityBridge.performAction(
-        0, AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS, null);
-    assertTrue(verifier.verified);
   }
 
   @Test
