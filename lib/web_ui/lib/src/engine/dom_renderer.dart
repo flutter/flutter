@@ -16,7 +16,6 @@ import 'keyboard_binding.dart';
 import 'platform_dispatcher.dart';
 import 'pointer_binding.dart';
 import 'semantics.dart';
-import 'text/measurement.dart';
 import 'text_editing/text_editing.dart';
 import 'util.dart';
 import 'window.dart';
@@ -28,11 +27,6 @@ class DomRenderer {
     }
 
     reset();
-
-    TextMeasurementService.initialize(
-      rulerCacheCapacity: 10,
-      root: _glassPaneShadow!.node,
-    );
 
     assert(() {
       _setupHotRestart();

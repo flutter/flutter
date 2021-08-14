@@ -468,7 +468,10 @@ void testMain() {
       final bool useOffset = int.tryParse(char) == null;
       final EnginePictureRecorder recorder = EnginePictureRecorder();
       final RecordingCanvas canvas = recorder.beginRecording(const ui.Rect.fromLTRB(0, 0, 400, 400));
-      final DomParagraph paragraph = (DomParagraphBuilder(EngineParagraphStyle())..addText(char)).build() as DomParagraph;
+      final ui.Paragraph paragraph = (ui.ParagraphBuilder(ui.ParagraphStyle())
+            ..pushStyle(ui.TextStyle(decoration: ui.TextDecoration.lineThrough))
+            ..addText(char))
+          .build();
       paragraph.layout(const ui.ParagraphConstraints(width: 1000));
       canvas.drawParagraph(paragraph, ui.Offset.zero);
       final ui.EngineLayer newLayer = useOffset
