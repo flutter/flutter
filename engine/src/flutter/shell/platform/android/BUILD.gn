@@ -499,6 +499,7 @@ action("robolectric_tests") {
     "test/io/flutter/embedding/android/FlutterAndroidComponentTest.java",
     "test/io/flutter/embedding/android/FlutterFragmentActivityTest.java",
     "test/io/flutter/embedding/android/FlutterFragmentTest.java",
+    "test/io/flutter/embedding/android/FlutterTextureViewTest.java",
     "test/io/flutter/embedding/android/FlutterViewTest.java",
     "test/io/flutter/embedding/android/KeyChannelResponderTest.java",
     "test/io/flutter/embedding/android/KeyboardManagerTest.java",
