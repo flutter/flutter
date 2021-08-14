@@ -1,10 +1,10 @@
 ---
 name: The CI infrastructure used by Flutter has a problem
-about: As a contributor, you want to file an issue about the build/test/release
-  infra, e.g. dashboards (http://flutter-dashboard.appspot.com), devicelab,
-  LUCI (https://ci.chromium.org/p/flutter) etc.
+about: As a contributor, you want to file an issue about the build/test/release infra,
+  e.g. dashboards (http://flutter-dashboard.appspot.com), devicelab, LUCI (https://ci.chromium.org/p/flutter)
+  etc.
 title: ''
-labels: 'team: infra'
+labels: ''
 assignees: ''
 
 ---
