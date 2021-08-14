@@ -11,11 +11,11 @@ import 'package:flutter/widgets.dart';
 class LogoScreen extends StatelessWidget {
   const LogoScreen({Key? key}) : super(key: key);
 
-  const String testSentinel = 'Running deferred code'
+  static const String _testSentinel = 'Running deferred code';
 
   @override
   Widget build(BuildContext context) {
-    print(testSentinel);
+    print(_testSentinel);
     return Container(
       child: Column(
         children: <Widget>[
