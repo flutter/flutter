@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/recording_canvas.dart';
 
@@ -28,7 +28,7 @@ class TestOrientedBox extends SingleChildRenderObjectWidget {
   const TestOrientedBox({ Key? key, Widget? child }) : super(key: key, child: child);
 
   Decoration _getDecoration(BuildContext context) {
-    final Orientation orientation = MediaQuery.of(context)!.orientation;
+    final Orientation orientation = MediaQuery.of(context).orientation;
     switch (orientation) {
       case Orientation.landscape:
         return const BoxDecoration(color: Color(0xFF00FF00));
@@ -54,6 +54,11 @@ class TestNonVisitingWidget extends SingleChildRenderObjectWidget {
 }
 
 class TestNonVisitingRenderObject extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return child!.getDryLayout(constraints);
+  }
+
   @override
   void performLayout() {
     child!.layout(constraints, parentUsesSize: true);
@@ -123,7 +128,7 @@ void main() {
     await tester.pumpWidget(DecoratedBox(
       decoration: kBoxDecorationA,
       child: DecoratedBox(
-        decoration: kBoxDecorationB
+        decoration: kBoxDecorationB,
       ),
     ));
 
@@ -133,7 +138,7 @@ void main() {
       decoration: kBoxDecorationA,
       child: TestWidget(
         child: DecoratedBox(
-          decoration: kBoxDecorationB
+          decoration: kBoxDecorationB,
         ),
       ),
     ));
@@ -143,14 +148,14 @@ void main() {
     await tester.pumpWidget(DecoratedBox(
       decoration: kBoxDecorationA,
       child: DecoratedBox(
-        decoration: kBoxDecorationB
+        decoration: kBoxDecorationB,
       ),
     ));
 
     checkFullTree();
 
     await tester.pumpWidget(DecoratedBox(
-      decoration: kBoxDecorationA
+      decoration: kBoxDecorationA,
     ));
 
     childBareTree();
@@ -160,7 +165,7 @@ void main() {
       child: TestWidget(
         child: TestWidget(
           child: DecoratedBox(
-            decoration: kBoxDecorationB
+            decoration: kBoxDecorationB,
           ),
         ),
       ),
@@ -169,7 +174,7 @@ void main() {
     checkFullTree();
 
     await tester.pumpWidget(DecoratedBox(
-      decoration: kBoxDecorationA
+      decoration: kBoxDecorationA,
     ));
 
     childBareTree();
@@ -182,7 +187,7 @@ void main() {
       child: DecoratedBox(
         decoration: kBoxDecorationB,
         child: DecoratedBox(
-          decoration: kBoxDecorationC
+          decoration: kBoxDecorationC,
         ),
       ),
     ));
@@ -200,7 +205,7 @@ void main() {
     expect(grandChild.child, isNull);
 
     await tester.pumpWidget(DecoratedBox(
-      decoration: kBoxDecorationA
+      decoration: kBoxDecorationA,
     ));
 
     element =

@@ -8,7 +8,6 @@ import 'dart:ui' as ui show Image;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
-// ignore: must_be_immutable
 class TestImageInfo implements ImageInfo {
   const TestImageInfo(this.value, { required this.image, this.scale = 1.0, this.debugLabel });
 
@@ -24,7 +23,7 @@ class TestImageInfo implements ImageInfo {
   final int value;
 
   @override
-  String toString() => '$runtimeType($value)';
+  String toString() => '${objectRuntimeType(this, 'TestImageInfo')}($value)';
 
   @override
   TestImageInfo clone() {
@@ -76,12 +75,12 @@ class TestImageProvider extends ImageProvider<int> {
   @override
   ImageStreamCompleter load(int key, DecoderCallback decode) {
     return OneFrameImageStreamCompleter(
-      SynchronousFuture<ImageInfo>(TestImageInfo(imageValue, image: image.clone()))
+      SynchronousFuture<ImageInfo>(TestImageInfo(imageValue, image: image.clone())),
     );
   }
 
   @override
-  String toString() => '$runtimeType($key, $imageValue)';
+  String toString() => '${objectRuntimeType(this, 'TestImageProvider')}($key, $imageValue)';
 }
 
 class FailingTestImageProvider extends TestImageProvider {

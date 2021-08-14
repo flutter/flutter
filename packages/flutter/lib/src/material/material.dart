@@ -54,11 +54,11 @@ enum MaterialType {
 ///
 ///  * [MaterialType]
 ///  * [Material]
-final Map<MaterialType, BorderRadius?> kMaterialEdges = <MaterialType, BorderRadius?>{
+const Map<MaterialType, BorderRadius?> kMaterialEdges = <MaterialType, BorderRadius?>{
   MaterialType.canvas: null,
-  MaterialType.card: BorderRadius.circular(2.0),
+  MaterialType.card: BorderRadius.all(Radius.circular(2.0)),
   MaterialType.circle: null,
-  MaterialType.button: BorderRadius.circular(2.0),
+  MaterialType.button: BorderRadius.all(Radius.circular(2.0)),
   MaterialType.transparency: null,
 };
 
@@ -198,7 +198,7 @@ class Material extends StatefulWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   /// The kind of material to show (e.g., card or canvas). This
@@ -275,7 +275,7 @@ class Material extends StatefulWidget {
   /// If false, the border will be painted behind the [child].
   final bool borderOnForeground;
 
-  /// {@template flutter.widgets.Clip}
+  /// {@template flutter.material.Material.clipBehavior}
   /// The content will be clipped (or not) according to this option.
   ///
   /// See the enum [Clip] for details of all possible options and their common
@@ -310,12 +310,14 @@ class Material extends StatefulWidget {
   /// ```dart
   /// MaterialInkController inkController = Material.of(context);
   /// ```
+  ///
+  /// This method can be expensive (it walks the element tree).
   static MaterialInkController? of(BuildContext context) {
     return context.findAncestorRenderObjectOfType<_RenderInkFeatures>();
   }
 
   @override
-  _MaterialState createState() => _MaterialState();
+  State<Material> createState() => _MaterialState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -338,7 +340,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
   final GlobalKey _inkFeatureRenderer = GlobalKey(debugLabel: 'ink renderer');
 
   Color? _getBackgroundColor(BuildContext context) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     Color? color = widget.color;
     if (color == null) {
       switch (widget.type) {
@@ -363,12 +365,12 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       'If Material type is not MaterialType.transparency, a color must '
       'either be passed in through the `color` property, or be defined '
       'in the theme (ex. canvasColor != null if type is set to '
-      'MaterialType.canvas)'
+      'MaterialType.canvas)',
     );
     Widget? contents = widget.child;
     if (contents != null) {
       contents = AnimatedDefaultTextStyle(
-        style: widget.textStyle ?? Theme.of(context)!.textTheme.bodyText2!,
+        style: widget.textStyle ?? Theme.of(context).textTheme.bodyText2!,
         duration: widget.animationDuration,
         child: contents,
       );
@@ -383,8 +385,8 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
         key: _inkFeatureRenderer,
         absorbHitTest: widget.type != MaterialType.transparency,
         color: backgroundColor,
-        child: contents,
         vsync: this,
+        child: contents,
       ),
     );
 
@@ -406,7 +408,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
         borderRadius: BorderRadius.zero,
         elevation: widget.elevation,
         color: ElevationOverlay.applyOverlay(context, backgroundColor!, widget.elevation),
-        shadowColor: widget.shadowColor ?? Theme.of(context)!.shadowColor,
+        shadowColor: widget.shadowColor ?? Theme.of(context).shadowColor,
         animateColor: false,
         child: contents,
       );
@@ -431,7 +433,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       clipBehavior: widget.clipBehavior,
       elevation: widget.elevation,
       color: backgroundColor!,
-      shadowColor: widget.shadowColor ?? Theme.of(context)!.shadowColor,
+      shadowColor: widget.shadowColor ?? Theme.of(context).shadowColor,
       child: contents,
     );
   }
@@ -443,19 +445,19 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     required Widget contents,
   }) {
     final _ShapeBorderPaint child = _ShapeBorderPaint(
-      child: contents,
       shape: shape,
+      child: contents,
     );
     if (clipBehavior == Clip.none) {
       return child;
     }
     return ClipPath(
-      child: child,
       clipper: ShapeBorderClipper(
         shape: shape,
-        textDirection: Directionality.of(context),
+        textDirection: Directionality.maybeOf(context),
       ),
       clipBehavior: clipBehavior,
+      child: child,
     );
   }
 
@@ -626,8 +628,7 @@ abstract class InkFeature {
       return true;
     }());
     _controller._removeFeature(this);
-    if (onRemoved != null)
-      onRemoved!();
+    onRemoved?.call();
   }
 
   void _paint(Canvas canvas) {
@@ -706,7 +707,7 @@ class _MaterialInterior extends ImplicitlyAnimatedWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// The border of the widget.
@@ -721,7 +722,7 @@ class _MaterialInterior extends ImplicitlyAnimatedWidget {
   /// If false, the border will be painted behind the child.
   final bool borderOnForeground;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.none], and must not be null.
   final Clip clipBehavior;
@@ -777,22 +778,22 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
 
   @override
   Widget build(BuildContext context) {
-    final ShapeBorder shape = _border!.evaluate(animation!)!;
-    final double elevation = _elevation!.evaluate(animation!);
+    final ShapeBorder shape = _border!.evaluate(animation)!;
+    final double elevation = _elevation!.evaluate(animation);
     return PhysicalShape(
-      child: _ShapeBorderPaint(
-        child: widget.child,
-        shape: shape,
-        borderOnForeground: widget.borderOnForeground,
-      ),
       clipper: ShapeBorderClipper(
         shape: shape,
-        textDirection: Directionality.of(context),
+        textDirection: Directionality.maybeOf(context),
       ),
       clipBehavior: widget.clipBehavior,
       elevation: elevation,
       color: ElevationOverlay.applyOverlay(context, widget.color, elevation),
-      shadowColor: _shadowColor!.evaluate(animation!)!,
+      shadowColor: _shadowColor!.evaluate(animation)!,
+      child: _ShapeBorderPaint(
+        shape: shape,
+        borderOnForeground: widget.borderOnForeground,
+        child: widget.child,
+      ),
     );
   }
 }
@@ -811,9 +812,9 @@ class _ShapeBorderPaint extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
+      painter: borderOnForeground ? null : _ShapeBorderPainter(shape, Directionality.maybeOf(context)),
+      foregroundPainter: borderOnForeground ? _ShapeBorderPainter(shape, Directionality.maybeOf(context)) : null,
       child: child,
-      painter: borderOnForeground ? null : _ShapeBorderPainter(shape, Directionality.of(context)),
-      foregroundPainter: borderOnForeground ? _ShapeBorderPainter(shape, Directionality.of(context)) : null,
     );
   }
 }

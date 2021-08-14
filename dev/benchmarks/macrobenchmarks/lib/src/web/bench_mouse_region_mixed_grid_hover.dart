@@ -7,14 +7,14 @@ import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'recorder.dart';
 
 class _NestedMouseRegion extends StatelessWidget {
-  const _NestedMouseRegion({this.nests, this.child});
+  const _NestedMouseRegion({required this.nests, required this.child});
 
   final int nests;
   final Widget child;
@@ -33,7 +33,7 @@ class _NestedMouseRegion extends StatelessWidget {
 }
 
 class _NestedListener extends StatelessWidget {
-  const _NestedListener({this.nests, this.child});
+  const _NestedListener({required this.nests, required this.child});
 
   final int nests;
   final Widget child;
@@ -56,15 +56,15 @@ class _NestedListener extends StatelessWidget {
 /// Measures our ability to hit test mouse regions.
 class BenchMouseRegionMixedGridHover extends WidgetRecorder {
   BenchMouseRegionMixedGridHover() : super(name: benchmarkName) {
-    tester = _Tester(onDataPoint: handleDataPoint);
+    _tester = _Tester(onDataPoint: handleDataPoint);
   }
 
   static const String benchmarkName = 'bench_mouse_region_mixed_grid_hover';
 
-  _Tester tester;
+  late _Tester _tester;
 
   void handleDataPoint(Duration duration) {
-    profile.addDataPoint('hitTestDuration', duration, reported: true);
+    profile!.addDataPoint('hitTestDuration', duration, reported: true);
   }
 
   // Use a non-trivial border to force Web to switch painter
@@ -85,9 +85,9 @@ class BenchMouseRegionMixedGridHover extends WidgetRecorder {
   void frameDidDraw() {
     if (!started) {
       started = true;
-      SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) async {
-        tester.start();
-        registerDidStop(tester.stop);
+      SchedulerBinding.instance!.addPostFrameCallback((Duration timeStamp) async {
+        _tester.start();
+        registerDidStop(_tester.stop);
       });
     }
     super.frameDidDraw();
@@ -141,22 +141,22 @@ class BenchMouseRegionMixedGridHover extends WidgetRecorder {
 class _UntilNextFrame {
   _UntilNextFrame._();
 
-  static Completer<void> _completer;
+  static Completer<void>? _completer;
 
   static Future<void> wait() {
     if (_UntilNextFrame._completer == null) {
       _UntilNextFrame._completer = Completer<void>();
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        _UntilNextFrame._completer.complete(null);
+      SchedulerBinding.instance!.addPostFrameCallback((_) {
+        _UntilNextFrame._completer!.complete(null);
         _UntilNextFrame._completer = null;
       });
     }
-    return _UntilNextFrame._completer.future;
+    return _UntilNextFrame._completer!.future;
   }
 }
 
 class _Tester {
-  _Tester({this.onDataPoint});
+  _Tester({required this.onDataPoint});
 
   final ValueSetter<Duration> onDataPoint;
 
@@ -167,12 +167,12 @@ class _Tester {
   TestGesture get gesture {
     return _gesture ??= TestGesture(
       dispatcher: (PointerEvent event) async {
-        RendererBinding.instance.handlePointerEvent(event);
+        RendererBinding.instance!.handlePointerEvent(event);
       },
       kind: PointerDeviceKind.mouse,
     );
   }
-  TestGesture _gesture;
+  TestGesture? _gesture;
 
   Duration currentTime = Duration.zero;
 

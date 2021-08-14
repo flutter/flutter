@@ -5,7 +5,7 @@
 import 'context.dart';
 import 'platform.dart';
 
-UserMessages get userMessages => context.get<UserMessages>();
+UserMessages get userMessages => context.get<UserMessages>()!;
 
 /// Class containing message strings that can be produced by Flutter tools.
 class UserMessages {
@@ -14,12 +14,14 @@ class UserMessages {
       'Please report a bug at https://github.com/flutter/flutter/issues.';
 
   // Messages used in FlutterValidator
-  String flutterStatusInfo(String channel, String version, String os, String locale) =>
+  String flutterStatusInfo(String? channel, String? version, String os, String locale) =>
       'Channel ${channel ?? 'unknown'}, ${version ?? 'Unknown'}, on $os, locale $locale';
   String flutterVersion(String version, String flutterRoot) =>
       'Flutter version $version at $flutterRoot';
   String flutterRevision(String revision, String age, String date) =>
       'Framework revision $revision ($age), $date';
+  String flutterUpstreamRepositoryUrl(String url) => 'Upstream repository $url';
+  String flutterGitUrl(String url) => 'FLUTTER_GIT_URL = $url';
   String engineRevision(String revision) => 'Engine revision $revision';
   String dartRevision(String revision) => 'Dart version $revision';
   String pubMirrorURL(String url) => 'Pub download mirror $url';
@@ -34,7 +36,11 @@ class UserMessages {
 
   // Messages used in NoIdeValidator
   String get noIdeStatusInfo => 'No supported IDEs installed';
-  String get noIdeInstallationInfo => 'IntelliJ - https://www.jetbrains.com/idea/';
+  List<String> get noIdeInstallationInfo => <String>[
+    'IntelliJ - https://www.jetbrains.com/idea/',
+    'Android Studio - https://developer.android.com/studio/',
+    'VS Code - https://code.visualstudio.com/',
+  ];
 
   // Messages used in IntellijValidator
   String intellijStatusInfo(String version) => 'version $version';
@@ -114,6 +120,9 @@ class UserMessages {
   String androidSdkBuildToolsOutdated(String managerPath, int sdkMinVersion, String buildToolsMinVersion, Platform platform) =>
       'Flutter requires Android SDK $sdkMinVersion and the Android BuildTools $buildToolsMinVersion\n'
       'To update the Android SDK visit ${_androidSdkInstallUrl(platform)} for detailed instructions.';
+  String get androidMissingCmdTools => 'cmdline-tools component is missing\n'
+      'Run `path/to/sdkmanager --install "cmdline-tools;latest"`\n'
+      'See https://developer.android.com/studio/command-line for more details.';
 
   // Messages used in AndroidStudioValidator
   String androidStudioVersion(String version) => 'version $version';
@@ -135,9 +144,15 @@ class UserMessages {
 
   // Messages used in XcodeValidator
   String xcodeLocation(String location) => 'Xcode at $location';
-  String xcodeOutdated(int versionMajor, int versionMinor, int versionPatch) =>
-      'Flutter requires a minimum Xcode version of $versionMajor.$versionMinor.$versionPatch.\n'
+
+  String xcodeOutdated(String requiredVersion) =>
+      'Flutter requires a minimum Xcode version of $requiredVersion.\n'
       'Download the latest version or update via the Mac App Store.';
+
+  String xcodeRecommended(String recommendedVersion) =>
+      'Flutter recommends a minimum Xcode version of $recommendedVersion.\n'
+      'Download the latest version or update via the Mac App Store.';
+
   String get xcodeEula => "Xcode end user license agreement not signed; open Xcode or run the command 'sudo xcodebuild -license'.";
   String get xcodeMissingSimct =>
       'Xcode requires additional components to be installed in order to run.\n'
@@ -156,12 +171,6 @@ class UserMessages {
 
   // Messages used in CocoaPodsValidator
   String cocoaPodsVersion(String version) => 'CocoaPods version $version';
-  String cocoaPodsUninitialized(String consequence) =>
-      'CocoaPods installed but not initialized.\n'
-      '$consequence\n'
-      'To initialize CocoaPods, run:\n'
-      '  pod setup\n'
-      "once to finalize CocoaPods' installation.";
   String cocoaPodsMissing(String consequence, String installInstructions) =>
       'CocoaPods not installed.\n'
       '$consequence\n'
@@ -225,14 +234,12 @@ class UserMessages {
       'can be downloaded from https://github.com/ninja-build/ninja/releases';
   String ninjaTooOld(String minimumVersion) => 'ninja $minimumVersion or later is required.';
   String pkgConfigVersion(String version) => 'pkg-config version $version';
-  String get pkgConfigMissing => 'pgk-config is required for Linux development.\n'
+  String get pkgConfigMissing => 'pkg-config is required for Linux development.\n'
       'It is likely available from your distribution (e.g.: apt install pkg-config), or '
       'can be downloaded from https://www.freedesktop.org/wiki/Software/pkg-config/';
   String pkgConfigTooOld(String minimumVersion) => 'pkg-config $minimumVersion or later is required.';
   String get gtkLibrariesMissing => 'GTK 3.0 development libraries are required for Linux development.\n'
       'They are likely available from your distribution (e.g.: apt install libgtk-3-dev)';
-  String get blkidLibraryMissing => 'The blkid development library is required for Linux development.\n'
-      'It is likely available from your distribution (e.g.: apt install libblkid-dev)';
 
   // Messages used in FlutterCommand
   String flutterElapsedTime(String name, String elapsedTime) => '"flutter $name" took $elapsedTime.';

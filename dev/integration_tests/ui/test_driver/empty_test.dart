@@ -8,7 +8,7 @@ import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 // Connect and disconnect from the empty app.
 void main() {
   group('FlutterDriver', () {
-    FlutterDriver driver;
+    late FlutterDriver driver;
 
     setUpAll(() async {
       driver = await FlutterDriver.connect();
@@ -18,6 +18,6 @@ void main() {
       await driver.close();
     });
 
-    test('empty', () async {}, timeout: const Timeout(Duration(minutes: 1)));
+    test('empty', () async {}, timeout: Timeout.none);
   });
 }

@@ -38,13 +38,14 @@ void main() {
   run(ui.window.defaultRouteName);
 }
 
-Future<String> run(String name) async {
+Future<String> run(String? name) async {
   // The platform-specific component will call [setInitialRoute] on the Flutter
   // view (or view controller for iOS) to set [ui.window.defaultRouteName].
   // We then dispatch based on the route names to show different Flutter
   // widgets.
   // Since we don't really care about Flutter-side navigation in this app, we're
   // not using a regular routes map.
+  name ??= '';
   switch (name) {
     case greenMarqueeRouteName:
       runApp(Marquee(color: Colors.green[400]));
@@ -62,7 +63,7 @@ Future<String> run(String name) async {
 }
 
 class FlutterView extends StatelessWidget {
-  const FlutterView({@required this.initialRoute});
+  const FlutterView({required this.initialRoute});
 
   @override
   Widget build(BuildContext context) {
@@ -76,7 +77,7 @@ class FlutterView extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({this.initialRoute});
+  const MyHomePage({required this.initialRoute});
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -131,7 +132,7 @@ class _MyHomePageState extends State<MyHomePage> {
   /// Callback for messages sent by the platform-specific component.
   ///
   /// Increments our internal counter.
-  Future<String> _handlePlatformIncrement(String message) async {
+  Future<String> _handlePlatformIncrement(String? message) async {
     // Normally we'd dispatch based on the value of [message], but in this
     // sample, there is only one message that is sent to us.
     _incrementCounter();

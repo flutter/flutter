@@ -59,7 +59,7 @@ import 'image_provider.dart';
 /// ```
 /// {@end-tool}
 ///
-/// {@template flutter.painting.boxDecoration.clip}
+/// {@template flutter.painting.BoxDecoration.clip}
 /// The [shape] or the [borderRadius] won't clip the children of the
 /// decorated [Container]. If the clip is required, insert a clip widget
 /// (e.g., [ClipRect], [ClipRRect], [ClipPath]) as the child of the [Container].
@@ -99,7 +99,7 @@ class BoxDecoration extends Decoration {
        assert(
          backgroundBlendMode == null || color != null || gradient != null,
          "backgroundBlendMode applies to BoxDecoration's background color or "
-         'gradient, but no color or gradient was provided.'
+         'gradient, but no color or gradient was provided.',
        );
 
   /// Creates a copy of this object but with the given fields replaced with the
@@ -128,8 +128,7 @@ class BoxDecoration extends Decoration {
 
   @override
   bool debugAssertIsValid() {
-    assert(shape != BoxShape.circle ||
-          borderRadius == null); // Can't have a border radius if you're a circle.
+    assert(shape != BoxShape.circle || borderRadius == null); // Can't have a border radius if you're a circle.
     return super.debugAssertIsValid();
   }
 
@@ -167,7 +166,7 @@ class BoxDecoration extends Decoration {
   /// Applies only to boxes with rectangular shapes; ignored if [shape] is not
   /// [BoxShape.rectangle].
   ///
-  /// {@macro flutter.painting.boxDecoration.clip}
+  /// {@macro flutter.painting.BoxDecoration.clip}
   final BorderRadiusGeometry? borderRadius;
 
   /// A list of shadows cast by this box behind the box.
@@ -208,7 +207,7 @@ class BoxDecoration extends Decoration {
   /// [BoxShape.circle] and [RoundedRectangleBorder] instead of
   /// [BoxShape.rectangle].
   ///
-  /// {@macro flutter.painting.boxDecoration.clip}
+  /// {@macro flutter.painting.BoxDecoration.clip}
   final BoxShape shape;
 
   @override
@@ -374,7 +373,7 @@ class BoxDecoration extends Decoration {
   }
 
   @override
-  _BoxDecorationPainter createBoxPainter([ VoidCallback? onChanged ]) {
+  BoxPainter createBoxPainter([ VoidCallback? onChanged ]) {
     assert(onChanged != null || image == null);
     return _BoxDecorationPainter(this, onChanged);
   }

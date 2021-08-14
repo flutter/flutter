@@ -17,9 +17,9 @@ void main() {
     expect(-a, const FractionalOffset(-0.5, -0.25));
     expect(a - b, const FractionalOffset(-0.75, -0.5));
     expect(a + b, const FractionalOffset(1.75, 1.0));
-    expect(a * 2.0, const FractionalOffset(1.0, 0.5));
+    expect(a * 2.0, FractionalOffset.centerRight);
     expect(a / 2.0, const FractionalOffset(0.25, 0.125));
-    expect(a ~/ 2.0, const FractionalOffset(0.0, 0.0));
+    expect(a ~/ 2.0, FractionalOffset.topLeft);
     expect(a % 5.0, const FractionalOffset(0.5, 0.25));
   });
 

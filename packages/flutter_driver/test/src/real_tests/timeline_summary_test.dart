@@ -2,15 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:convert' show json;
 
 import 'package:file/file.dart';
 import 'package:flutter_driver/flutter_driver.dart';
-import 'package:flutter_driver/src/driver/common.dart';
 import 'package:flutter_driver/src/driver/profiling_summarizer.dart';
 import 'package:flutter_driver/src/driver/scene_display_lag_summarizer.dart';
+import 'package:flutter_driver/src/driver/vsync_frame_lag_summarizer.dart';
 import 'package:path/path.dart' as path;
 
 import '../../common.dart';
@@ -84,6 +82,50 @@ void main() {
         'dirty_memory_usage': dirty.toString(),
       }
     };
+
+    Map<String, dynamic> platformVsync(int timeStamp) => <String, dynamic>{
+      'name': 'VSYNC',
+      'ph': 'B',
+      'ts': timeStamp,
+    };
+
+    Map<String, dynamic> vsyncCallback(int timeStamp) => <String, dynamic>{
+      'name': 'VsyncProcessCallback',
+      'ph': 'B',
+      'ts': timeStamp,
+    };
+
+    List<Map<String, dynamic>> newGenGC(int count) => List<Map<String, dynamic>>.filled(
+      count,
+      <String, dynamic>{
+        'name': 'CollectNewGeneration',
+        'cat': 'GC',
+        'tid': 19695,
+        'pid': 19650,
+        'ts': 358849612473,
+        'tts': 476761,
+        'ph': 'B',
+        'args': <String, dynamic>{
+          'isolateGroupId': 'isolateGroups/10824099774666259225',
+        },
+      },
+    );
+
+    List<Map<String, dynamic>> oldGenGC(int count) => List<Map<String, dynamic>>.filled(
+      count,
+      <String, dynamic>{
+        'name': 'CollectOldGeneration',
+        'cat': 'GC',
+        'tid': 19695,
+        'pid': 19650,
+        'ts': 358849612473,
+        'tts': 476761,
+        'ph': 'B',
+        'args': <String, dynamic>{
+          'isolateGroupId': 'isolateGroups/10824099774666259225',
+        },
+      },
+    );
 
     List<Map<String, dynamic>> rasterizeTimeSequenceInMillis(List<int> sequence) {
       final List<Map<String, dynamic>> result = <Map<String, dynamic>>[];
@@ -378,6 +420,8 @@ void main() {
             begin(1000), end(19000),
             begin(19000), end(29000),
             begin(29000), end(49000),
+            ...newGenGC(4),
+            ...oldGenGC(5),
             frameBegin(1000), frameEnd(18000),
             frameBegin(19000), frameEnd(28000),
             frameBegin(29000), frameEnd(48000),
@@ -395,13 +439,18 @@ void main() {
             'missed_frame_rasterizer_budget_count': 2,
             'frame_count': 3,
             'frame_rasterizer_count': 3,
+            'new_gen_gc_count': 4,
+            'old_gen_gc_count': 5,
             'frame_build_times': <int>[17000, 9000, 19000],
             'frame_rasterizer_times': <int>[18000, 10000, 20000],
             'frame_begin_times': <int>[0, 18000, 28000],
             'frame_rasterizer_begin_times': <int>[0, 18000, 28000],
             'average_vsync_transitions_missed': 0.0,
             '90th_percentile_vsync_transitions_missed': 0.0,
-            '99th_percentile_vsync_transitions_missed': 0.0
+            '99th_percentile_vsync_transitions_missed': 0.0,
+            'average_vsync_frame_lag': 0.0,
+            '90th_percentile_vsync_frame_lag': 0.0,
+            '99th_percentile_vsync_frame_lag': 0.0,
           },
         );
       });
@@ -409,7 +458,7 @@ void main() {
 
     group('writeTimelineToFile', () {
 
-      Directory tempDir;
+      late Directory tempDir;
 
       setUp(() {
         useMemoryFileSystemForTesting();
@@ -421,12 +470,34 @@ void main() {
         restoreFileSystem();
       });
 
-      test('writes timeline to JSON file', () async {
+      test('writes timeline to JSON file without summary', () async {
         await summarize(<Map<String, String>>[<String, String>{'foo': 'bar'}])
-          .writeTimelineToFile('test', destinationDirectory: tempDir.path);
+          .writeTimelineToFile('test', destinationDirectory: tempDir.path, includeSummary: false);
         final String written =
             await fs.file(path.join(tempDir.path, 'test.timeline.json')).readAsString();
         expect(written, '{"traceEvents":[{"foo":"bar"}]}');
+      });
+
+      test('writes timeline to JSON file with summary', () async {
+        await summarize(<Map<String, dynamic>>[
+          <String, String>{'foo': 'bar'},
+          begin(1000), end(19000),
+          frameBegin(1000), frameEnd(18000),
+        ]).writeTimelineToFile(
+          'test',
+          destinationDirectory: tempDir.path,
+          includeSummary: true,
+        );
+        final String written =
+            await fs.file(path.join(tempDir.path, 'test.timeline.json')).readAsString();
+        expect(
+          written,
+          '{"traceEvents":[{"foo":"bar"},'
+          '{"name":"GPURasterizer::Draw","ph":"B","ts":1000},'
+          '{"name":"GPURasterizer::Draw","ph":"E","ts":19000},'
+          '{"name":"Frame","ph":"B","ts":1000},'
+          '{"name":"Frame","ph":"E","ts":18000}]}',
+        );
       });
 
       test('writes summary to JSON file', () async {
@@ -440,9 +511,12 @@ void main() {
           lagBegin(1000, 4), lagEnd(2000, 4),
           lagBegin(1200, 12), lagEnd(2400, 12),
           lagBegin(4200, 8), lagEnd(9400, 8),
+          ...newGenGC(4),
+          ...oldGenGC(5),
           cpuUsage(5000, 20), cpuUsage(5010, 60),
           memoryUsage(6000, 20, 40), memoryUsage(6100, 30, 45),
-        ]).writeSummaryToFile('test', destinationDirectory: tempDir.path);
+          platformVsync(7000), vsyncCallback(7500),
+        ]).writeTimelineToFile('test', destinationDirectory: tempDir.path);
         final String written =
             await fs.file(path.join(tempDir.path, 'test.timeline_summary.json')).readAsString();
         expect(json.decode(written), <String, dynamic>{
@@ -458,6 +532,8 @@ void main() {
           'missed_frame_rasterizer_budget_count': 2,
           'frame_count': 3,
           'frame_rasterizer_count': 3,
+          'new_gen_gc_count': 4,
+          'old_gen_gc_count': 5,
           'frame_build_times': <int>[17000, 9000, 19000],
           'frame_rasterizer_times': <int>[18000, 10000, 20000],
           'frame_begin_times': <int>[0, 18000, 28000],
@@ -465,6 +541,9 @@ void main() {
           'average_vsync_transitions_missed': 8.0,
           '90th_percentile_vsync_transitions_missed': 12.0,
           '99th_percentile_vsync_transitions_missed': 12.0,
+          'average_vsync_frame_lag': 500.0,
+          '90th_percentile_vsync_frame_lag': 500.0,
+          '99th_percentile_vsync_frame_lag': 500.0,
           'average_cpu_usage': 40.0,
           '90th_percentile_cpu_usage': 60.0,
           '99th_percentile_cpu_usage': 60.0,
@@ -480,7 +559,7 @@ void main() {
           final Timeline timeline = Timeline.fromJson(<String, dynamic>{
           'traceEvents': traceEvents,
           });
-          return SceneDisplayLagSummarizer(timeline.events);
+          return SceneDisplayLagSummarizer(timeline.events!);
       }
 
       test('average_vsyncs_missed', () async {
@@ -531,7 +610,7 @@ void main() {
           final Timeline timeline = Timeline.fromJson(<String, dynamic>{
             'traceEvents': traceEvents,
           });
-          return ProfilingSummarizer.fromEvents(timeline.events);
+          return ProfilingSummarizer.fromEvents(timeline.events!);
       }
 
       test('has_both_cpu_and_memory_usage', () async {
@@ -562,6 +641,65 @@ void main() {
           cpuUsage(4, 85), cpuUsage(4, 100),
         ]);
         expect(summarizer.computePercentile(ProfileType.CPU, 90), 85.0);
+      });
+    });
+
+    group('VsyncFrameLagSummarizer tests', () {
+      VsyncFrameLagSummarizer summarize(List<Map<String, dynamic>> traceEvents) {
+        final Timeline timeline = Timeline.fromJson(<String, dynamic>{
+          'traceEvents': traceEvents,
+        });
+        return VsyncFrameLagSummarizer(timeline.events!);
+      }
+
+      test('average_vsync_frame_lag', () async {
+        final VsyncFrameLagSummarizer summarizer = summarize(<Map<String, dynamic>>[
+          platformVsync(10),
+          vsyncCallback(12),
+          platformVsync(16),
+          vsyncCallback(29),
+        ]);
+        expect(summarizer.computeAverageVsyncFrameLag(), 7.5);
+      });
+
+      test('malformed_event_ordering', () async {
+        final VsyncFrameLagSummarizer summarizer = summarize(<Map<String, dynamic>>[
+          vsyncCallback(10),
+          platformVsync(10),
+        ]);
+        expect(summarizer.computeAverageVsyncFrameLag(), 0);
+        expect(summarizer.computePercentileVsyncFrameLag(80), 0);
+      });
+
+      test('penalize_consecutive_vsyncs', () async {
+        final VsyncFrameLagSummarizer summarizer = summarize(<Map<String, dynamic>>[
+          platformVsync(10),
+          platformVsync(12),
+        ]);
+        expect(summarizer.computeAverageVsyncFrameLag(), 2);
+      });
+
+      test('pick_nearest_platform_vsync', () async {
+        final VsyncFrameLagSummarizer summarizer = summarize(<Map<String, dynamic>>[
+          platformVsync(10),
+          platformVsync(12),
+          vsyncCallback(18),
+        ]);
+        expect(summarizer.computeAverageVsyncFrameLag(), 4);
+      });
+
+      test('percentile_vsync_frame_lag', () async {
+        final List<Map<String, dynamic>> events = <Map<String, dynamic>>[];
+        int ts = 100;
+        for (int i = 0; i < 100; i++) {
+          events.add(platformVsync(ts));
+          ts = ts + 10 * (i + 1);
+          events.add(vsyncCallback(ts));
+        }
+
+        final VsyncFrameLagSummarizer summarizer = summarize(events);
+        expect(summarizer.computePercentileVsyncFrameLag(90), 890);
+        expect(summarizer.computePercentileVsyncFrameLag(99), 990);
       });
     });
   });

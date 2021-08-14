@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Can hit test flex children of stacks', (WidgetTester tester) async {
@@ -65,16 +65,16 @@ void main() {
     // both of these cases have failed in the past due to floating point issues
     await tester.pumpWidget(
       Center(
-        child: Container(
+        child: SizedBox(
           height: 400.0,
           child: Column(
-            children: <Widget>[
-              Expanded(child: Container()),
-              Expanded(child: Container()),
-              Expanded(child: Container()),
-              Expanded(child: Container()),
-              Expanded(child: Container()),
-              Expanded(child: Container()),
+            children: const <Widget>[
+              Expanded(child: SizedBox()),
+              Expanded(child: SizedBox()),
+              Expanded(child: SizedBox()),
+              Expanded(child: SizedBox()),
+              Expanded(child: SizedBox()),
+              Expanded(child: SizedBox()),
             ],
           ),
         ),
@@ -82,16 +82,16 @@ void main() {
     );
     await tester.pumpWidget(
       Center(
-        child: Container(
+        child: SizedBox(
           height: 199.0,
           child: Column(
-            children: <Widget>[
-              Expanded(child: Container()),
-              Expanded(child: Container()),
-              Expanded(child: Container()),
-              Expanded(child: Container()),
-              Expanded(child: Container()),
-              Expanded(child: Container()),
+            children: const <Widget>[
+              Expanded(child: SizedBox()),
+              Expanded(child: SizedBox()),
+              Expanded(child: SizedBox()),
+              Expanded(child: SizedBox()),
+              Expanded(child: SizedBox()),
+              Expanded(child: SizedBox()),
             ],
           ),
         ),
@@ -112,6 +112,9 @@ void main() {
       Duration.zero,
       EnginePhase.layout,
     );
+
+    // Turn off intrinsics checking, which also fails with the same exception.
+    debugCheckIntrinsicSizes = false;
     await tester.pumpWidget(
       Column(
         children: <Widget>[
@@ -125,6 +128,7 @@ void main() {
       Duration.zero,
       EnginePhase.layout,
     );
+    debugCheckIntrinsicSizes = true;
     final String message = tester.takeException().toString();
     expect(message, contains('\nSee also:'));
   });

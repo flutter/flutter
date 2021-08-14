@@ -9,7 +9,9 @@ import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
 import 'framework.dart';
+import 'localizations.dart';
 import 'media_query.dart';
+import 'overlay.dart';
 import 'table.dart';
 
 // Any changes to this file should be reflected in the debugAssertAllWidgetVarsUnset()
@@ -141,7 +143,7 @@ bool debugChildrenHaveDuplicateKeys(Widget parent, Iterable<Widget> children) {
       throw FlutterError(
         'Duplicate keys found.\n'
         'If multiple keyed nodes exist as children of another node, they must have unique keys.\n'
-        '$parent has multiple children with key $nonUniqueKey.'
+        '$parent has multiple children with key $nonUniqueKey.',
       );
     }
     return true;
@@ -182,6 +184,8 @@ bool debugItemsHaveDuplicateKeys(Iterable<Widget> items) {
 /// assert(debugCheckHasTable(context));
 /// ```
 ///
+/// This method can be expensive (it walks the element tree).
+///
 /// Does nothing if asserts are disabled. Always returns true.
 bool debugCheckHasTable(BuildContext context) {
   assert(() {
@@ -213,15 +217,18 @@ bool debugCheckHasTable(BuildContext context) {
 /// Does nothing if asserts are disabled. Always returns true.
 bool debugCheckHasMediaQuery(BuildContext context) {
   assert(() {
-    if (context.widget is! MediaQuery && context.findAncestorWidgetOfExactType<MediaQuery>() == null) {
+    if (context.widget is! MediaQuery && context.getElementForInheritedWidgetOfExactType<MediaQuery>() == null) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary('No MediaQuery widget found.'),
+        ErrorSummary('No MediaQuery widget ancestor found.'),
         ErrorDescription('${context.widget.runtimeType} widgets require a MediaQuery widget ancestor.'),
         context.describeWidget('The specific widget that could not find a MediaQuery ancestor was'),
         context.describeOwnershipChain('The ownership chain for the affected widget is'),
         ErrorHint(
-          'Typically, the MediaQuery widget is introduced by the MaterialApp or '
-          'WidgetsApp widget at the top of your application widget tree.'
+          'No MediaQuery ancestor could be found starting from the context '
+          'that was passed to MediaQuery.of(). This can happen because you '
+          'have not added a WidgetsApp, CupertinoApp, or MaterialApp widget '
+          '(those widgets introduce a MediaQuery), or it can happen if the '
+          'context you use comes from a widget above those widgets.',
         ),
       ]);
     }
@@ -248,7 +255,7 @@ bool debugCheckHasMediaQuery(BuildContext context) {
 ///  * why: explain why the direction is needed, for example "to resolve
 ///    the 'alignment' argument". Should be an adverb phrase describing why.
 ///  * hint: explain why this might be happening, for example "The default
-///    value of the 'aligment' argument of the $runtimeType widget is an
+///    value of the 'alignment' argument of the $runtimeType widget is an
 ///    AlignmentDirectional value.". Should be a fully punctuated sentence.
 ///  * alternative: provide additional advice specific to the situation,
 ///    especially an alternative to providing a Directionality ancestor.
@@ -262,7 +269,7 @@ bool debugCheckHasMediaQuery(BuildContext context) {
 /// Does nothing if asserts are disabled. Always returns true.
 bool debugCheckHasDirectionality(BuildContext context, { String? why, String? hint, String? alternative }) {
   assert(() {
-    if (context.widget is! Directionality && context.findAncestorWidgetOfExactType<Directionality>() == null) {
+    if (context.widget is! Directionality && context.getElementForInheritedWidgetOfExactType<Directionality>() == null) {
       why = why == null ? '' : ' $why';
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('No Directionality widget found.'),
@@ -277,7 +284,7 @@ bool debugCheckHasDirectionality(BuildContext context, { String? why, String? hi
           'determines the ambient reading direction and is used, for example, to '
           'determine how to lay out text, how to interpret "start" and "end" '
           'values, and to resolve EdgeInsetsDirectional, '
-          'AlignmentDirectional, and other *Directional objects.'
+          'AlignmentDirectional, and other *Directional objects.',
         ),
         if (alternative != null)
           ErrorHint(alternative),
@@ -303,7 +310,7 @@ void debugWidgetBuilderValue(Widget widget, Widget? built) {
         ErrorDescription('Build functions must never return null.'),
         ErrorHint(
           'To return an empty space that causes the building widget to fill available room, return "Container()". '
-          'To return an empty space that takes as little room as possible, return "Container(width: 0.0, height: 0.0)".'
+          'To return an empty space that takes as little room as possible, return "Container(width: 0.0, height: 0.0)".',
         ),
       ]);
     }
@@ -313,12 +320,85 @@ void debugWidgetBuilderValue(Widget widget, Widget? built) {
         DiagnosticsProperty<Widget>('The offending widget is', widget, style: DiagnosticsTreeStyle.errorProperty),
         ErrorDescription(
           'Build functions must never return their BuildContext parameter\'s widget or a child that contains "context.widget". '
-          'Doing so introduces a loop in the widget tree that can cause the app to crash.'
+          'Doing so introduces a loop in the widget tree that can cause the app to crash.',
         ),
       ]);
     }
     return true;
   }());
+}
+
+/// Asserts that the given context has a [Localizations] ancestor that contains
+/// a [WidgetsLocalizations] delegate.
+///
+/// To call this function, use the following pattern, typically in the
+/// relevant Widget's build method:
+///
+/// ```dart
+/// assert(debugCheckHasWidgetsLocalizations(context));
+/// ```
+///
+/// Does nothing if asserts are disabled. Always returns true.
+bool debugCheckHasWidgetsLocalizations(BuildContext context) {
+  assert(() {
+    if (Localizations.of<WidgetsLocalizations>(context, WidgetsLocalizations) == null) {
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('No WidgetsLocalizations found.'),
+        ErrorDescription(
+          '${context.widget.runtimeType} widgets require WidgetsLocalizations '
+          'to be provided by a Localizations widget ancestor.',
+        ),
+        ErrorDescription(
+          'The widgets library uses Localizations to generate messages, '
+          'labels, and abbreviations.',
+        ),
+        ErrorHint(
+          'To introduce a WidgetsLocalizations, either use a '
+          'WidgetsApp at the root of your application to include them '
+          'automatically, or add a Localization widget with a '
+          'WidgetsLocalizations delegate.',
+        ),
+        ...context.describeMissingAncestor(expectedAncestorType: WidgetsLocalizations),
+      ]);
+    }
+    return true;
+  }());
+  return true;
+}
+
+/// Asserts that the given context has an [Overlay] ancestor.
+///
+/// To call this function, use the following pattern, typically in the
+/// relevant Widget's build method:
+///
+/// ```dart
+/// assert(debugCheckHasOverlay(context));
+/// ```
+///
+/// This method can be expensive (it walks the element tree).
+///
+/// Does nothing if asserts are disabled. Always returns true.
+bool debugCheckHasOverlay(BuildContext context) {
+  assert(() {
+    if (context.widget is! Overlay && context.findAncestorWidgetOfExactType<Overlay>() == null) {
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('No Overlay widget found.'),
+        ErrorDescription(
+          '${context.widget.runtimeType} widgets require an Overlay '
+          'widget ancestor.\n'
+          'An overlay lets widgets float on top of other widget children.',
+        ),
+        ErrorHint(
+          'To introduce an Overlay widget, you can either directly '
+          'include one, or use a widget that contains an Overlay itself, '
+          'such as a Navigator, WidgetApp, MaterialApp, or CupertinoApp.',
+        ),
+        ...context.describeMissingAncestor(expectedAncestorType: Overlay),
+      ]);
+    }
+    return true;
+  }());
+  return true;
 }
 
 /// Returns true if none of the widget library debug variables have been changed.

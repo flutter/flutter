@@ -2,19 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Locale;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
-import 'binding.dart';
 import 'container.dart';
+import 'debug.dart';
 import 'framework.dart';
 
 // Examples can assume:
-// class Intl { static String message(String s, { String name, String locale }) => ''; }
-// Future<void> initializeMessages(String locale) => null;
+// class Intl { static String message(String s, { String? name, String? locale }) => ''; }
+// Future<void> initializeMessages(String locale) => Future<void>.value();
 
 // Used by loadAll() to record LocalizationsDelegate.load() futures we're
 // waiting for.
@@ -155,7 +153,7 @@ abstract class WidgetsLocalizations {
   /// that encloses the given context.
   ///
   /// This method is just a convenient shorthand for:
-  /// `Localizations.of<WidgetsLocalizations>(context, WidgetsLocalizations)`.
+  /// `Localizations.of<WidgetsLocalizations>(context, WidgetsLocalizations)!`.
   ///
   /// References to the localized resources defined by this class are typically
   /// written in terms of this method. For example:
@@ -163,8 +161,9 @@ abstract class WidgetsLocalizations {
   /// ```dart
   /// textDirection: WidgetsLocalizations.of(context).textDirection,
   /// ```
-  static WidgetsLocalizations? of(BuildContext context) {
-    return Localizations.of<WidgetsLocalizations>(context, WidgetsLocalizations);
+  static WidgetsLocalizations of(BuildContext context) {
+    assert(debugCheckHasWidgetsLocalizations(context));
+    return Localizations.of<WidgetsLocalizations>(context, WidgetsLocalizations)!;
   }
 }
 
@@ -321,7 +320,7 @@ class _LocalizationsScope extends InheritedWidget {
 ///   }
 ///
 ///   static MyLocalizations of(BuildContext context) {
-///     return Localizations.of<MyLocalizations>(context, MyLocalizations);
+///     return Localizations.of<MyLocalizations>(context, MyLocalizations)!;
 ///   }
 ///
 ///   String title() => Intl.message('<title>', name: 'title', locale: locale.toString());
@@ -388,7 +387,7 @@ class Localizations extends StatefulWidget {
       mergedDelegates.insertAll(0, delegates);
     return Localizations(
       key: key,
-      locale: locale ?? Localizations.localeOf(context)!,
+      locale: locale ?? Localizations.localeOf(context),
       delegates: mergedDelegates,
       child: child,
     );
@@ -403,23 +402,44 @@ class Localizations extends StatefulWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   /// The locale of the Localizations widget for the widget tree that
   /// corresponds to [BuildContext] `context`.
   ///
   /// If no [Localizations] widget is in scope then the [Localizations.localeOf]
-  /// method will throw an exception, unless the `nullOk` argument is set to
-  /// true, in which case it returns null.
-  static Locale? localeOf(BuildContext context, { bool nullOk = false }) {
+  /// method will throw an exception.
+  static Locale localeOf(BuildContext context) {
     assert(context != null);
-    assert(nullOk != null);
     final _LocalizationsScope? scope = context.dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
-    if (nullOk && scope == null)
-      return null;
-    assert(scope != null, 'a Localizations ancestor was not found');
-    return scope!.localizationsState.locale;
+    assert(() {
+      if (scope == null) {
+        throw FlutterError(
+          'Requested the Locale of a context that does not include a Localizations ancestor.\n'
+          'To request the Locale, the context used to retrieve the Localizations widget must '
+          'be that of a widget that is a descendant of a Localizations widget.',
+        );
+      }
+      if (scope.localizationsState.locale == null) {
+        throw FlutterError(
+          'Localizations.localeOf found a Localizations widget that had a unexpected null locale.\n',
+        );
+      }
+      return true;
+    }());
+    return scope!.localizationsState.locale!;
+  }
+
+  /// The locale of the Localizations widget for the widget tree that
+  /// corresponds to [BuildContext] `context`.
+  ///
+  /// If no [Localizations] widget is in scope then this function will return
+  /// null.
+  static Locale? maybeLocaleOf(BuildContext context) {
+    assert(context != null);
+    final _LocalizationsScope? scope = context.dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
+    return scope?.localizationsState.locale;
   }
 
   // There doesn't appear to be a need to make this public. See the
@@ -454,7 +474,7 @@ class Localizations extends StatefulWidget {
   }
 
   @override
-  _LocalizationsState createState() => _LocalizationsState();
+  State<Localizations> createState() => _LocalizationsState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

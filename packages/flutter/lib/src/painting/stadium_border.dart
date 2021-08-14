@@ -395,7 +395,7 @@ class _StadiumToRoundedRectangleBorder extends OutlinedBorder {
     return _StadiumToRoundedRectangleBorder(
       side: side ?? this.side,
       borderRadius: borderRadius ?? this.borderRadius,
-      rectness: rectness ?? this.rectness
+      rectness: rectness ?? this.rectness,
     );
   }
 

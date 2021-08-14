@@ -5,9 +5,9 @@
 import 'dart:typed_data';
 import 'dart:ui';
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Image filter - blur', (WidgetTester tester) async {
@@ -60,7 +60,7 @@ void main() {
       find.byType(ImageFiltered),
       matchesGoldenFile('image_filter_matrix.png'),
     );
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/45213
+  });
 
   testWidgets('Image filter - reuses its layer', (WidgetTester tester) async {
     Future<void> pumpWithSigma(double sigma) async {

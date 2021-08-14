@@ -11,10 +11,12 @@ import 'package:flutter_driver/driver_extension.dart';
 void main() {
   enableFlutterDriverExtension();
   debugPrint('Application starting...');
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatefulWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   State createState() => MyAppState();
 }
@@ -25,17 +27,17 @@ enum FrameState { initial, slow, afterSlow, fast, afterFast }
 
 class MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
   int _widgetBuilds = 0;
-  FrameState _state;
+  FrameState _state = FrameState.initial;
   String _summary = '';
-  IconData _icon;
-  double _flutterFrameRate;
+  IconData? _icon;
+  double _flutterFrameRate = 0;
 
   Future<void> _summarizeStats() async {
-    final double framesProduced = await channel.invokeMethod('getProducedFrameRate');
-    final double framesConsumed = await channel.invokeMethod('getConsumedFrameRate');
+    final double? framesProduced = await channel.invokeMethod('getProducedFrameRate');
+    final double? framesConsumed = await channel.invokeMethod('getConsumedFrameRate');
     _summary = '''
-Produced: ${framesProduced.toStringAsFixed(1)}fps
-Consumed: ${framesConsumed.toStringAsFixed(1)}fps
+Produced: ${framesProduced?.toStringAsFixed(1)}fps
+Consumed: ${framesConsumed?.toStringAsFixed(1)}fps
 Widget builds: $_widgetBuilds''';
   }
 
@@ -94,15 +96,15 @@ Widget builds: $_widgetBuilds''';
     debugPrint('Awaiting calm (3 second pause)...');
     await Future<void>.delayed(const Duration(milliseconds: 3000));
     debugPrint('Calibrating...');
-    DateTime startTime;
+    late DateTime startTime;
     int tickCount = 0;
-    Ticker ticker;
+    Ticker? ticker;
     ticker = createTicker((Duration time) {
       tickCount += 1;
       if (tickCount == calibrationTickCount) { // about 10 seconds
         final Duration elapsed = DateTime.now().difference(startTime);
-        ticker.stop();
-        ticker.dispose();
+        ticker?.stop();
+        ticker?.dispose();
         setState(() {
           _flutterFrameRate = tickCount * 1000 / elapsed.inMilliseconds;
           debugPrint('Calibrated: frame rate ${_flutterFrameRate.toStringAsFixed(1)}fps.');
@@ -134,10 +136,10 @@ Press play to produce texture frames.''';
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Container(
+              const SizedBox(
                 width: 300.0,
                 height: 200.0,
-                child: const Texture(textureId: 0),
+                child: Texture(textureId: 0),
               ),
               Container(
                 width: 300.0,
@@ -155,8 +157,8 @@ Press play to produce texture frames.''';
         ),
         floatingActionButton: _icon == null ? null : FloatingActionButton(
           key: const ValueKey<String>('fab'),
-          child: Icon(_icon),
           onPressed: _nextState,
+          child: Icon(_icon),
         ),
       ),
     );

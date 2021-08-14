@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'localizations.dart';
@@ -25,19 +24,19 @@ bool debugCheckHasCupertinoLocalizations(BuildContext context) {
         ErrorSummary('No CupertinoLocalizations found.'),
         ErrorDescription(
           '${context.widget.runtimeType} widgets require CupertinoLocalizations '
-          'to be provided by a Localizations widget ancestor.'
+          'to be provided by a Localizations widget ancestor.',
         ),
         ErrorDescription(
           'The cupertino library uses Localizations to generate messages, '
-          'labels, and abbreviations.'
+          'labels, and abbreviations.',
         ),
         ErrorHint(
           'To introduce a CupertinoLocalizations, either use a '
           'CupertinoApp at the root of your application to include them '
           'automatically, or add a Localization widget with a '
-          'CupertinoLocalizations delegate.'
+          'CupertinoLocalizations delegate.',
         ),
-        ...context.describeMissingAncestor(expectedAncestorType: CupertinoLocalizations)
+        ...context.describeMissingAncestor(expectedAncestorType: CupertinoLocalizations),
       ]);
     }
     return true;

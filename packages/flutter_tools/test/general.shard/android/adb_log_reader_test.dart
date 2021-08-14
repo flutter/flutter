@@ -2,13 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:flutter_tools/src/android/android_device.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 
 const int kLollipopVersionCode = 21;
 const String kLastLogcatTimestamp = '11-27 15:39:04.506';
@@ -32,16 +34,16 @@ void main() {
           '-v',
           'time',
           '-T',
-          '\'$kLastLogcatTimestamp\'',
+          "'$kLastLogcatTimestamp'",
         ],
       )
     ]);
     await AdbLogReader.createLogReader(
-      createMockDevice(kLollipopVersionCode),
+      createFakeDevice(kLollipopVersionCode),
       processManager,
     );
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('AdbLogReader calls adb logcat with expected flags apiVersion < 21', () async {
@@ -60,11 +62,11 @@ void main() {
       )
     ]);
     await AdbLogReader.createLogReader(
-      createMockDevice(kLollipopVersionCode - 1),
+      createFakeDevice(kLollipopVersionCode - 1),
       processManager,
     );
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('AdbLogReader calls adb logcat with expected flags null apiVersion', () async {
@@ -83,11 +85,11 @@ void main() {
       )
     ]);
     await AdbLogReader.createLogReader(
-      createMockDevice(null),
+      createFakeDevice(null),
       processManager,
     );
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('AdbLogReader calls adb logcat with expected flags when requesting past logs', () async {
@@ -108,12 +110,12 @@ void main() {
       )
     ]);
     await AdbLogReader.createLogReader(
-      createMockDevice(null),
+      createFakeDevice(null),
       processManager,
       includePastLogs: true,
     );
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('AdbLogReader handles process early exit', () async {
@@ -134,7 +136,7 @@ void main() {
       )
     ]);
     final AdbLogReader logReader = await AdbLogReader.createLogReader(
-      createMockDevice(null),
+      createFakeDevice(null),
       processManager,
     );
     final Completer<void> onDone = Completer<void>.sync();
@@ -158,9 +160,9 @@ void main() {
           'time',
         ],
         completer: Completer<void>.sync(),
-        // Example stack trace from an incorrectly named application:name in the AndroidManfiest.xml
+        // Example stack trace from an incorrectly named application:name in the AndroidManifest.xml
         stdout:
-          kDummyLine +
+          '$kDummyLine'
           '05-11 12:54:46.665 E/AndroidRuntime(11787): FATAL EXCEPTION: main\n'
           '05-11 12:54:46.665 E/AndroidRuntime(11787): Process: com.example.foobar, PID: 11787\n'
           '05-11 12:54:46.665 java.lang.RuntimeException: Unable to instantiate application '
@@ -168,7 +170,7 @@ void main() {
       )
     ]);
     final AdbLogReader logReader = await AdbLogReader.createLogReader(
-      createMockDevice(null),
+      createFakeDevice(null),
       processManager,
     );
     await expectLater(logReader.logLines, emitsInOrder(<String>[
@@ -181,16 +183,32 @@ void main() {
   });
 }
 
-MockAndroidDevice createMockDevice(int sdkLevel) {
-  final MockAndroidDevice mockAndroidDevice = MockAndroidDevice();
-  when(mockAndroidDevice.apiVersion)
-    .thenAnswer((Invocation invocation) async => sdkLevel.toString());
-  when(mockAndroidDevice.lastLogcatTimestamp()).thenAnswer((Invocation _) async => kLastLogcatTimestamp);
-  when(mockAndroidDevice.adbCommandForDevice(any))
-    .thenAnswer((Invocation invocation) => <String>[
-      'adb', '-s', '1234', ...invocation.positionalArguments.first as List<String>
-    ]);
-  return mockAndroidDevice;
+AndroidDevice createFakeDevice(int sdkLevel) {
+  return FakeAndroidDevice(
+    sdkLevel.toString(),
+    kLastLogcatTimestamp,
+  );
 }
 
-class MockAndroidDevice extends Mock implements AndroidDevice {}
+class FakeAndroidDevice extends Fake implements AndroidDevice {
+  FakeAndroidDevice(this._apiVersion, this._lastLogcatTimestamp);
+
+  final String _lastLogcatTimestamp;
+  final String _apiVersion;
+
+  @override
+  String get name => 'test-device';
+
+  @override
+  Future<String> get apiVersion => Future<String>.value(_apiVersion);
+
+  @override
+  Future<String> lastLogcatTimestamp() async => _lastLogcatTimestamp;
+
+  @override
+  List<String> adbCommandForDevice(List<String> command) {
+    return <String>[
+      'adb', '-s', '1234', ...command,
+    ];
+  }
+}

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart' show Brightness;
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';

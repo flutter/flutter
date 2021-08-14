@@ -32,6 +32,9 @@ assignees: ''
 
 ## Logs
 
+<details>
+<summary>Logs</summary>
+
 <!--
       Include the full logs of the commands you are running between the lines
       with the backticks below. If you are running any "flutter" commands,
@@ -46,3 +49,5 @@ assignees: ''
 
 ```
 ```
+
+</details>

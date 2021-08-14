@@ -5,15 +5,15 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:process_runner/process_runner.dart';
 import 'package:path/path.dart' as path;
+import 'package:process_runner/process_runner.dart';
 
 // This program enables testing of private interfaces in the flutter package.
 //
 // See README.md for more information.
 
 final Directory flutterRoot =
-    Directory(path.fromUri(Platform.script)).absolute.parent.parent.parent.parent.parent;
+  Directory(path.fromUri(Platform.script)).absolute.parent.parent.parent.parent.parent;
 final Directory flutterPackageDir = Directory(path.join(flutterRoot.path, 'packages', 'flutter'));
 final Directory testPrivateDir = Directory(path.join(flutterPackageDir.path, 'test_private'));
 final Directory privateTestsDir = Directory(path.join(testPrivateDir.path, 'test'));
@@ -175,7 +175,7 @@ class TestCase {
         return false;
       }
     }
-    // Copy the test files into the the tmpdir's lib directory.
+    // Copy the test files into the tmpdir's lib directory.
     for (final File file in tests) {
       String destination = tmpdir.path;
       try {
@@ -207,7 +207,7 @@ class TestCase {
       printOutputDefault: true,
     );
     final ProcessRunnerResult result = await runner.runProcess(
-      <String>[flutter, 'analyze', '--current-package', '--enable-experiment=non-nullable', '--pub', '--congratulate', '.'],
+      <String>[flutter, 'analyze', '--current-package', '--pub', '--congratulate', '.'],
       failOk: true,
     );
     if (result.exitCode != 0) {

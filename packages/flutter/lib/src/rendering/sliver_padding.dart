@@ -4,8 +4,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'debug.dart';
@@ -18,7 +16,7 @@ import 'sliver.dart';
 /// of its child. Any incoming [SliverConstraints.overlap] is ignored and not
 /// passed on to the child.
 ///
-/// {@template flutter.rendering.sliverPadding.limitation}
+/// {@template flutter.rendering.RenderSliverEdgeInsetsPadding}
 /// Applying padding in the main extent of the viewport to slivers that have scroll effects is likely to have
 /// undesired effects. For example, For example, wrapping a [SliverPersistentHeader] with
 /// `pinned:true` will cause only the appbar to stay pinned while the padding will scroll away.
@@ -307,7 +305,7 @@ abstract class RenderSliverEdgeInsetsPadding extends RenderSliver with RenderObj
 /// its child. Any incoming [SliverConstraints.overlap] is ignored and not
 /// passed on to the child.
 ///
-/// {@macro flutter.rendering.sliverPadding.limitation}
+/// {@macro flutter.rendering.RenderSliverEdgeInsetsPadding}
 class RenderSliverPadding extends RenderSliverEdgeInsetsPadding {
   /// Creates a render object that insets its child in a viewport.
   ///

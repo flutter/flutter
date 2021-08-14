@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 @TestOn('chrome') // Uses web-only Flutter SDK
 
 import 'dart:ui' as ui;
@@ -56,10 +54,10 @@ void main() {
       const StandardMessageCodec codec = StandardMessageCodec();
 
       final List<String> loggedMessages = <String>[];
-      ServicesBinding.instance.defaultBinaryMessenger
-          .setMessageHandler('test_send', (ByteData data) {
-        loggedMessages.add(codec.decodeMessage(data) as String);
-        return null;
+      ServicesBinding.instance!.defaultBinaryMessenger
+          .setMessageHandler('test_send', (ByteData? data) {
+        loggedMessages.add(codec.decodeMessage(data)! as String);
+        return Future<ByteData?>.value(null);
       });
 
       await pluginBinaryMessenger.send(
@@ -70,15 +68,8 @@ void main() {
           'test_send', codec.encodeMessage('world'));
       expect(loggedMessages, equals(<String>['hello', 'world']));
 
-      ServicesBinding.instance.defaultBinaryMessenger
+      ServicesBinding.instance!.defaultBinaryMessenger
           .setMessageHandler('test_send', null);
-    });
-
-    test('throws when trying to set a mock handler', () {
-      expect(
-          () => pluginBinaryMessenger.setMockMessageHandler(
-              'test', (ByteData data) async => ByteData(0)),
-          throwsFlutterError);
     });
   });
 }

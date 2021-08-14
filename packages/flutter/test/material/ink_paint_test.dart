@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -46,7 +45,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Material(
           child: Center(
-            child: Container(
+            child: SizedBox(
               width: 200.0,
               height: 60.0,
               child: InkWell(
@@ -95,7 +94,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Material(
           child: Center(
-            child: Container(
+            child: SizedBox(
               width: 100.0,
               height: 100.0,
               child: InkWell(
@@ -259,16 +258,16 @@ void main() {
 
     final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
     Future<void> buildTest(Intent intent) async {
-      return await tester.pumpWidget(
+      return tester.pumpWidget(
         Shortcuts(
-          shortcuts: <LogicalKeySet, Intent>{
-            LogicalKeySet(LogicalKeyboardKey.space): intent,
+          shortcuts: <ShortcutActivator, Intent>{
+            const SingleActivator(LogicalKeyboardKey.space): intent,
           },
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Material(
               child: Center(
-                child: Container(
+                child: SizedBox(
                   width: 100.0,
                   height: 100.0,
                   child: InkWell(
@@ -359,7 +358,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Material(
           child: Center(
-            child: Container(
+            child: SizedBox(
               width: 100.0,
               height: 100.0,
               child: InkWell(
@@ -380,7 +379,7 @@ void main() {
 
     final TestGesture gesture = await tester.startGesture(tapDownOffset);
     await tester.pump(); // start gesture
-    await gesture.moveTo(const Offset(0.0, 0.0));
+    await gesture.moveTo(Offset.zero);
     await gesture.up(); // generates a tap cancel
     await tester.pumpAndSettle();
   });
@@ -395,7 +394,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Material(
           child: Center(
-            child: Container(
+            child: SizedBox(
               width: 100.0,
               height: 100.0,
               child: InkWell(
@@ -419,7 +418,7 @@ void main() {
     // Generate a tap cancel; Will cancel the ink splash before it started
     final TestGesture gesture = await tester.startGesture(tapDownOffset);
     await tester.pump(); // start gesture
-    await gesture.moveTo(const Offset(0.0, 0.0));
+    await gesture.moveTo(Offset.zero);
     await gesture.up(); // generates a tap cancel
 
     final RenderBox box = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;

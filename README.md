@@ -1,7 +1,7 @@
 # [![Flutter logo][]][flutter.dev]
 
 [![Build Status - Cirrus][]][Build status]
-[![Gitter Channel][]][Gitter badge]
+[![Discord badge][]][Discord instructions]
 [![Twitter handle][]][Twitter badge]
 
 Flutter is Google's SDK for crafting beautiful, fast user experiences for
@@ -18,7 +18,8 @@ and open source.
 
 For announcements about new releases and breaking changes, follow the
 [flutter-announce@googlegroups.com](https://groups.google.com/forum/#!forum/flutter-announce)
-mailing list.
+mailing list or see the
+[breaking changes](https://flutter.dev/docs/release/breaking-changes) page.
 
 ## About Flutter
 
@@ -64,15 +65,15 @@ regardless of your target platform. And accessing other native code is easy,
 with support for both [FFI] and [platform-specific APIs][platform channels].
 
 Flutter is a fully open-source project, and we welcome contributions.
-Information on how to get started can be found at our
+Information on how to get started can be found in our
 [contributor guide](CONTRIBUTING.md).
 
-[Flutter logo]: https://raw.githubusercontent.com/flutter/website/master/src/_assets/image/flutter-lockup.png
+[Flutter logo]: https://raw.githubusercontent.com/flutter/website/master/src/_assets/image/flutter-lockup-bg.jpg
 [flutter.dev]: https://flutter.dev
 [Build Status - Cirrus]: https://api.cirrus-ci.com/github/flutter/flutter.svg
 [Build status]: https://cirrus-ci.com/github/flutter/flutter/master
-[Gitter Channel]: https://badges.gitter.im/flutter/flutter.svg
-[Gitter badge]: https://gitter.im/flutter/flutter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+[Discord instructions]: https://github.com/flutter/flutter/wiki/Chat
+[Discord badge]: https://img.shields.io/discord/608014603317936148
 [Twitter handle]: https://img.shields.io/twitter/follow/flutterdev.svg?style=social&label=Follow
 [Twitter badge]: https://twitter.com/intent/follow?screen_name=flutterdev
 [layered architecture]: https://flutter.dev/docs/resources/inside-flutter

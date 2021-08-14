@@ -65,7 +65,7 @@ void main() {
       equalsIgnoringHashCodes(
         '══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞══════════════════════\n'
         'The following assertion was thrown during performLayout():\n'
-        'TestThrowingRenderObject does not support performLayout.\n'
+        'TestThrowingRenderObject does not support performLayout.\n',
       ),
     );
 
@@ -78,7 +78,7 @@ void main() {
         '  parentData: MISSING\n'
         '  constraints: BoxConstraints(unconstrained)\n'
         'This RenderObject has no descendants.\n'
-        '═════════════════════════════════════════════════════════════════\n'
+        '═════════════════════════════════════════════════════════════════\n',
       ),
     );
   });
@@ -98,6 +98,15 @@ void main() {
     final TestParentData data3 = TestParentData()
       ..nextSibling = RenderOpacity();
     expect(() => data3.detach(), throwsAssertionError);
+  });
+
+  test('RenderObject.getTransformTo asserts is argument is not descendant', () {
+    final PipelineOwner owner = PipelineOwner();
+    final TestRenderObject renderObject1 = TestRenderObject();
+    renderObject1.attach(owner);
+    final TestRenderObject renderObject2 = TestRenderObject();
+    renderObject2.attach(owner);
+    expect(() => renderObject1.getTransformTo(renderObject2), throwsAssertionError);
   });
 
   test('PaintingContext.pushClipRect reuses the layer', () {
@@ -134,6 +143,38 @@ void main() {
     _testPaintingContextLayerReuse<OpacityLayer>((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer? oldLayer) {
       return context.pushOpacity(offset, 100, painter, oldLayer: oldLayer as OpacityLayer?);
     });
+  });
+
+  test('RenderObject.dispose sets debugDisposed to true', () {
+    final TestRenderObject renderObject = TestRenderObject();
+    expect(renderObject.debugDisposed, false);
+    renderObject.dispose();
+    expect(renderObject.debugDisposed, true);
+    expect(renderObject.toStringShort(), contains('DISPOSED'));
+  });
+
+  test('RenderObject.dispose null the layer on repaint boundaries', () {
+    final TestRenderObject renderObject = TestRenderObject(allowPaintBounds: true);
+    // Force a layer to get set.
+    renderObject.isRepaintBoundary = true;
+    PaintingContext.repaintCompositedChild(renderObject, debugAlsoPaintedParent: true);
+    expect(renderObject.debugLayer, isA<OffsetLayer>());
+
+    // Dispose with repaint boundary still being true.
+    renderObject.dispose();
+    expect(renderObject.debugLayer, null);
+  });
+
+  test('RenderObject.dispose nulls the layer on non-repaint boundaries', () {
+    final TestRenderObject renderObject = TestRenderObject(allowPaintBounds: true);
+    // Force a layer to get set.
+    renderObject.isRepaintBoundary = true;
+    PaintingContext.repaintCompositedChild(renderObject, debugAlsoPaintedParent: true);
+
+    // Dispose with repaint boundary being false.
+    renderObject.isRepaintBoundary = false;
+    renderObject.dispose();
+    expect(renderObject.debugLayer, null);
   });
 }
 
@@ -179,12 +220,19 @@ class _TestCustomLayerBox extends RenderBox {
 class TestParentData extends ParentData with ContainerParentDataMixin<RenderBox> { }
 
 class TestRenderObject extends RenderObject {
+  TestRenderObject({this.allowPaintBounds = false});
+
+  final bool allowPaintBounds;
+
+  @override
+  bool isRepaintBoundary = false;
+
   @override
   void debugAssertDoesMeetConstraints() { }
 
   @override
   Rect get paintBounds {
-    assert(false); // The test shouldn't call this.
+    assert(allowPaintBounds); // For some tests, this should not get called.
     return Rect.zero;
   }
 

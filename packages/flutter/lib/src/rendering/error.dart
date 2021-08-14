@@ -56,8 +56,7 @@ class RenderErrorBox extends RenderBox {
   /// The message to attempt to display at paint time.
   final String message;
 
-  // TODO(ianh): should be final
-  ui.Paragraph? _paragraph;
+  late final ui.Paragraph? _paragraph;
 
   @override
   double computeMaxIntrinsicWidth(double height) {
@@ -76,8 +75,8 @@ class RenderErrorBox extends RenderBox {
   bool hitTestSelf(Offset position) => true;
 
   @override
-  void performResize() {
-    size = constraints.constrain(const Size(_kMaxWidth, _kMaxHeight));
+  Size computeDryLayout(BoxConstraints constraints) {
+    return constraints.constrain(const Size(_kMaxWidth, _kMaxHeight));
   }
 
   /// The distance to place around the text.

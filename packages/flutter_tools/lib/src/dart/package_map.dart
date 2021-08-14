@@ -4,40 +4,26 @@
 
 import 'dart:typed_data';
 
-import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 
-const String kPackagesFileName = '.packages';
-
-// No touching!
-String get globalPackagesPath => _globalPackagesPath ?? kPackagesFileName;
-
-set globalPackagesPath(String value) {
-  _globalPackagesPath = value;
-}
-
-bool get isUsingCustomPackagesPath => _globalPackagesPath != null;
-
-String _globalPackagesPath;
-
 /// Load the package configuration from [file] or throws a [ToolExit]
 /// if the operation would fail.
 ///
-/// If [nonFatal] is true, in the event of an error an empty package
+/// If [throwOnError] is false, in the event of an error an empty package
 /// config is returned.
 Future<PackageConfig> loadPackageConfigWithLogging(File file, {
-  @required Logger logger,
+  required Logger logger,
   bool throwOnError = true,
 }) async {
   final FileSystem fileSystem = file.fileSystem;
   bool didError = false;
   final PackageConfig result = await loadPackageConfigUri(
     file.absolute.uri,
-    loader: (Uri uri) {
+    loader: (Uri uri) async {
       final File configFile = fileSystem.file(uri);
       if (!configFile.existsSync()) {
         return null;
@@ -61,7 +47,7 @@ Future<PackageConfig> loadPackageConfigWithLogging(File file, {
     }
   );
   if (didError) {
-    throwToolExit(null);
+    throwToolExit('');
   }
   return result;
 }

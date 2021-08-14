@@ -6,7 +6,6 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/platform_plugins.dart';
 
-
 import '../src/common.dart';
 
 void main() {

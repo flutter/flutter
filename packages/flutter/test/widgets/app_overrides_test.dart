@@ -2,8 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=123"
+@Tags(<String>['no-shuffle'])
+
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 class TestRoute<T> extends PageRoute<T> {
   TestRoute({ required this.child, RouteSettings? settings }) : super(settings: settings);

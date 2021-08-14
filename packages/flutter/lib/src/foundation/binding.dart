@@ -5,7 +5,7 @@
 import 'dart:convert' show json;
 import 'dart:developer' as developer;
 import 'dart:io' show exit;
-import 'dart:ui' as ui show  Window, window, Brightness;
+import 'dart:ui' as ui show SingletonFlutterWindow, Brightness, PlatformDispatcher, window;
 // Before adding any more dart:ui imports, please read the README.
 
 import 'package:meta/meta.dart';
@@ -33,7 +33,7 @@ typedef ServiceExtensionCallback = Future<Map<String, dynamic>> Function(Map<Str
 /// To use this class in an `on` clause of a mixin, inherit from it and implement
 /// [initInstances()]. The mixin is guaranteed to only be constructed once in
 /// the lifetime of the app (more precisely, it will assert if constructed twice
-/// in checked mode).
+/// in debug mode).
 ///
 /// The top-most layer used to write the application will have a concrete class
 /// that inherits from [BindingBase] and uses all the various [BindingBase]
@@ -68,23 +68,64 @@ abstract class BindingBase {
   static bool _debugInitialized = false;
   static bool _debugServiceExtensionsRegistered = false;
 
-  /// The window to which this binding is bound.
+  /// Additional configuration used by the framework during hot reload.
   ///
-  /// A number of additional bindings are defined as extensions of [BindingBase],
-  /// e.g., [ServicesBinding], [RendererBinding], and [WidgetsBinding]. Each of
-  /// these bindings define behaviors that interact with a [ui.Window], e.g.,
-  /// [ServicesBinding] registers a [ui.Window.onPlatformMessage] handler, and
-  /// [RendererBinding] registers [ui.Window.onMetricsChanged],
-  /// [ui.Window.onTextScaleFactorChanged], [ui.Window.onSemanticsEnabledChanged],
-  /// and [ui.Window.onSemanticsAction] handlers.
+  /// See also:
   ///
-  /// Each of these other bindings could individually access a [Window] statically,
-  /// but that would preclude the ability to test these behaviors with a fake
-  /// window for verification purposes.  Therefore, [BindingBase] exposes this
-  /// [Window] for use by other bindings.  A subclass of [BindingBase], such as
+  ///  * [DebugReassembleConfig], which describes the configuration.
+  static DebugReassembleConfig? debugReassembleConfig;
+
+  /// The main window to which this binding is bound.
+  ///
+  /// A number of additional bindings are defined as extensions of
+  /// [BindingBase], e.g., [ServicesBinding], [RendererBinding], and
+  /// [WidgetsBinding]. Each of these bindings define behaviors that interact
+  /// with a [ui.SingletonFlutterWindow].
+  ///
+  /// Each of these other bindings could individually access a
+  /// [ui.SingletonFlutterWindow] statically, but that would preclude the
+  /// ability to test its behaviors with a fake window for verification
+  /// purposes.  Therefore, [BindingBase] exposes this
+  /// [ui.SingletonFlutterWindow] for use by other bindings.  A subclass of
+  /// [BindingBase], such as [TestWidgetsFlutterBinding], can override this
+  /// accessor to return a different [ui.SingletonFlutterWindow] implementation,
+  /// such as a [TestWindow].
+  ///
+  /// The `window` is a singleton meant for use by applications that only have a
+  /// single main window. In addition to the properties of [ui.FlutterWindow],
+  /// `window` provides access to platform-specific properties and callbacks
+  /// available on the [platformDispatcher].
+  ///
+  /// For applications designed for more than one main window, prefer using the
+  /// [platformDispatcher] to access available views via
+  /// [ui.PlatformDispatcher.views].
+  ///
+  /// However, multiple window support is not yet implemented, so currently this
+  /// provides access to the one and only window.
+  // TODO(gspencergoog): remove the preceding note once multi-window support is
+  // active.
+  ui.SingletonFlutterWindow get window => ui.window;
+
+  /// The [ui.PlatformDispatcher] to which this binding is bound.
+  ///
+  /// A number of additional bindings are defined as extensions of
+  /// [BindingBase], e.g., [ServicesBinding], [RendererBinding], and
+  /// [WidgetsBinding]. Each of these bindings define behaviors that interact
+  /// with a [ui.PlatformDispatcher], e.g., [ServicesBinding] registers
+  /// listeners with the [ChannelBuffers], and [RendererBinding]
+  /// registers [ui.PlatformDispatcher.onMetricsChanged],
+  /// [ui.PlatformDispatcher.onTextScaleFactorChanged],
+  /// [ui.PlatformDispatcher.onSemanticsEnabledChanged], and
+  /// [ui.PlatformDispatcher.onSemanticsAction] handlers.
+  ///
+  /// Each of these other bindings could individually access a
+  /// [ui.PlatformDispatcher] statically, but that would preclude the ability to
+  /// test these behaviors with a fake platform dispatcher for verification
+  /// purposes. Therefore, [BindingBase] exposes this [ui.PlatformDispatcher]
+  /// for use by other bindings. A subclass of [BindingBase], such as
   /// [TestWidgetsFlutterBinding], can override this accessor to return a
-  /// different [Window] implementation, such as a [TestWindow].
-  ui.Window get window => ui.window;
+  /// different [ui.PlatformDispatcher] implementation.
+  ui.PlatformDispatcher get platformDispatcher => ui.PlatformDispatcher.instance;
 
   /// The initialization method. Subclasses override this method to hook into
   /// the platform and otherwise configure their services. Subclasses must call
@@ -117,7 +158,7 @@ abstract class BindingBase {
   /// Implementations of this method must call their superclass
   /// implementation.
   ///
-  /// {@macro flutter.foundation.bindingBase.registerServiceExtension}
+  /// {@macro flutter.foundation.BindingBase.registerServiceExtension}
   ///
   /// See also:
   ///
@@ -135,10 +176,27 @@ abstract class BindingBase {
       return true;
     }());
 
-    if (!kReleaseMode && !kIsWeb) {
-      registerSignalServiceExtension(
-        name: 'exit',
-        callback: _exitApplication,
+    if (!kReleaseMode) {
+      if (!kIsWeb) {
+        registerSignalServiceExtension(
+          name: 'exit',
+          callback: _exitApplication,
+        );
+      }
+      // These service extensions are used in profile mode applications.
+      registerStringServiceExtension(
+        name: 'connectedVmServiceUri',
+        getter: () async => connectedVmServiceUri ?? '',
+        setter: (String uri) async {
+          connectedVmServiceUri = uri;
+        },
+      );
+      registerStringServiceExtension(
+        name: 'activeDevToolsServerAddress',
+        getter: () async => activeDevToolsServerAddress ?? '',
+        setter: (String serverAddress) async {
+          activeDevToolsServerAddress = serverAddress;
+        },
       );
     }
 
@@ -239,7 +297,7 @@ abstract class BindingBase {
   ///
   /// The [Future] returned by the `callback` argument is returned by [lockEvents].
   @protected
-  Future<void> lockEvents(Future<void> callback()) {
+  Future<void> lockEvents(Future<void> Function() callback) {
     developer.Timeline.startSync('Lock events');
 
     assert(callback != null);
@@ -310,7 +368,7 @@ abstract class BindingBase {
   ///
   /// Calls the `callback` callback when the service extension is called.
   ///
-  /// {@macro flutter.foundation.bindingBase.registerServiceExtension}
+  /// {@macro flutter.foundation.BindingBase.registerServiceExtension}
   @protected
   void registerSignalServiceExtension({
     required String name,
@@ -340,7 +398,7 @@ abstract class BindingBase {
   /// Calls the `setter` callback with the new value when the
   /// service extension method is called with a new value.
   ///
-  /// {@macro flutter.foundation.bindingBase.registerServiceExtension}
+  /// {@macro flutter.foundation.BindingBase.registerServiceExtension}
   @protected
   void registerBoolServiceExtension({
     required String name,
@@ -374,7 +432,7 @@ abstract class BindingBase {
   /// Calls the `setter` callback with the new value when the
   /// service extension method is called with a new value.
   ///
-  /// {@macro flutter.foundation.bindingBase.registerServiceExtension}
+  /// {@macro flutter.foundation.BindingBase.registerServiceExtension}
   @protected
   void registerNumericServiceExtension({
     required String name,
@@ -436,7 +494,7 @@ abstract class BindingBase {
   /// Calls the `setter` callback with the new value when the
   /// service extension method is called with a new value.
   ///
-  /// {@macro flutter.foundation.bindingBase.registerServiceExtension}
+  /// {@macro flutter.foundation.BindingBase.registerServiceExtension}
   @protected
   void registerStringServiceExtension({
     required String name,
@@ -470,7 +528,7 @@ abstract class BindingBase {
   ///
   /// The returned map will be mutated.
   ///
-  /// {@template flutter.foundation.bindingBase.registerServiceExtension}
+  /// {@template flutter.foundation.BindingBase.registerServiceExtension}
   /// A registered service extension can only be activated if the vm-service
   /// is included in the build, which only happens in debug and profile mode.
   /// Although a service extension cannot be used in release mode its code may
@@ -577,4 +635,24 @@ abstract class BindingBase {
 /// Terminate the Flutter application.
 Future<void> _exitApplication() async {
   exit(0);
+}
+
+/// Additional configuration used for hot reload reassemble optimizations.
+///
+/// Do not extend, implement, or mixin this class. This may only be instantiated
+/// in debug mode.
+class DebugReassembleConfig {
+  /// Create a new [DebugReassembleConfig].
+  ///
+  /// Throws a [FlutterError] if this is called in profile or release mode.
+  DebugReassembleConfig({
+    this.widgetName,
+  }) {
+    if (!kDebugMode) {
+      throw FlutterError('Cannot instaniate DebugReassembleConfig in profile or release mode.');
+    }
+  }
+
+  /// The name of the widget that was modified, or `null` if the change was elsewhere.
+  final String? widgetName;
 }

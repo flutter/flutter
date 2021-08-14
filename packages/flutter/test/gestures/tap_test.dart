@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=1000"
+@Tags(<String>['no-shuffle'])
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -1022,7 +1028,7 @@ void main() {
 
     final TestPointer pointer1 = TestPointer(1);
 
-    final PointerDownEvent down = pointer1.down(const Offset(0.0, 0.0));
+    final PointerDownEvent down = pointer1.down(Offset.zero);
     drag.addPointer(down);
     tap.addPointer(down);
 

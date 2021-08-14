@@ -4,14 +4,19 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
+import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
+import 'focus_manager.dart';
+import 'focus_scope.dart';
 import 'framework.dart';
+import 'notification_listener.dart';
 import 'primary_scroll_controller.dart';
 import 'scroll_controller.dart';
+import 'scroll_notification.dart';
 import 'scroll_physics.dart';
+import 'scroll_view.dart';
 import 'scrollable.dart';
 
 /// A box in which a single widget can be scrolled.
@@ -91,7 +96,7 @@ import 'scrollable.dart';
 /// ```dart
 ///  Widget build(BuildContext context) {
 ///    return DefaultTextStyle(
-///      style: Theme.of(context).textTheme.bodyText2,
+///      style: Theme.of(context).textTheme.bodyText2!,
 ///      child: LayoutBuilder(
 ///        builder: (BuildContext context, BoxConstraints viewportConstraints) {
 ///          return SingleChildScrollView(
@@ -161,7 +166,7 @@ import 'scrollable.dart';
 /// ```dart
 ///  Widget build(BuildContext context) {
 ///    return DefaultTextStyle(
-///      style: Theme.of(context).textTheme.bodyText2,
+///      style: Theme.of(context).textTheme.bodyText2!,
 ///      child: LayoutBuilder(
 ///        builder: (BuildContext context, BoxConstraints viewportConstraints) {
 ///          return SingleChildScrollView(
@@ -221,12 +226,13 @@ class SingleChildScrollView extends StatelessWidget {
     this.dragStartBehavior = DragStartBehavior.start,
     this.clipBehavior = Clip.hardEdge,
     this.restorationId,
+    this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
   }) : assert(scrollDirection != null),
        assert(dragStartBehavior != null),
        assert(clipBehavior != null),
        assert(!(controller != null && primary == true),
           'Primary ScrollViews obtain their ScrollController via inheritance from a PrimaryScrollController widget. '
-          'You cannot both set primary to true and pass an explicit controller.'
+          'You cannot both set primary to true and pass an explicit controller.',
        ),
        primary = primary ?? controller == null && identical(scrollDirection, Axis.vertical),
        super(key: key);
@@ -270,6 +276,11 @@ class SingleChildScrollView extends StatelessWidget {
   /// Whether this is the primary scroll view associated with the parent
   /// [PrimaryScrollController].
   ///
+  /// When true, the scroll view is used for default [ScrollAction]s. If a
+  /// ScrollAction is not handled by an otherwise focused part of the application,
+  /// the ScrollAction will be evaluated using this scroll view, for example,
+  /// when executing [Shortcuts] key events like page up and down.
+  ///
   /// On iOS, this identifies the scroll view that will scroll to top in
   /// response to a tap in the status bar.
   ///
@@ -287,19 +298,22 @@ class SingleChildScrollView extends StatelessWidget {
 
   /// The widget that scrolls.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
   /// {@macro flutter.widgets.scrollable.restorationId}
   final String? restorationId;
+
+  /// {@macro flutter.widgets.scroll_view.keyboardDismissBehavior}
+  final ScrollViewKeyboardDismissBehavior keyboardDismissBehavior;
 
   AxisDirection _getDirection(BuildContext context) {
     return getAxisDirectionFromAxisReverseAndDirectionality(context, scrollDirection, reverse);
@@ -314,7 +328,7 @@ class SingleChildScrollView extends StatelessWidget {
     final ScrollController? scrollController = primary
         ? PrimaryScrollController.of(context)
         : controller;
-    final Scrollable scrollable = Scrollable(
+    Widget scrollable = Scrollable(
       dragStartBehavior: dragStartBehavior,
       axisDirection: axisDirection,
       controller: scrollController,
@@ -324,11 +338,25 @@ class SingleChildScrollView extends StatelessWidget {
         return _SingleChildViewport(
           axisDirection: axisDirection,
           offset: offset,
-          child: contents,
           clipBehavior: clipBehavior,
+          child: contents,
         );
       },
     );
+
+    if (keyboardDismissBehavior == ScrollViewKeyboardDismissBehavior.onDrag) {
+      scrollable = NotificationListener<ScrollUpdateNotification>(
+        child: scrollable,
+        onNotification: (ScrollUpdateNotification notification) {
+          final FocusScopeNode focusNode = FocusScope.of(context);
+          if (notification.dragDetails != null && focusNode.hasFocus) {
+            focusNode.unfocus();
+          }
+          return false;
+        },
+      );
+    }
+
     return primary && scrollController != null
       ? PrimaryScrollController.none(child: scrollable)
       : scrollable;
@@ -413,7 +441,7 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
     markNeedsLayout();
   }
 
-  /// {@macro flutter.rendering.viewport.cacheExtent}
+  /// {@macro flutter.rendering.RenderViewportBase.cacheExtent}
   double get cacheExtent => _cacheExtent;
   double _cacheExtent;
   set cacheExtent(double value) {
@@ -424,7 +452,7 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
     markNeedsLayout();
   }
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.none], and must not be null.
   Clip get clipBehavior => _clipBehavior;
@@ -536,6 +564,15 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
   // which makes no sense.
 
   @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    if (child == null) {
+      return constraints.smallest;
+    }
+    final Size childSize = child!.getDryLayout(_getInnerConstraints(constraints));
+    return constraints.constrain(childSize);
+  }
+
+  @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
     if (child == null) {
@@ -583,16 +620,28 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
       }
 
       if (_shouldClipAtPaintOffset(paintOffset) && clipBehavior != Clip.none) {
-        _clipRectLayer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, paintContents,
-            clipBehavior: clipBehavior, oldLayer: _clipRectLayer);
+        _clipRectLayer.layer = context.pushClipRect(
+          needsCompositing,
+          offset,
+          Offset.zero & size,
+          paintContents,
+          clipBehavior: clipBehavior,
+          oldLayer: _clipRectLayer.layer,
+        );
       } else {
-        _clipRectLayer = null;
+        _clipRectLayer.layer = null;
         paintContents(context, offset);
       }
     }
   }
 
-  ClipRectLayer? _clipRectLayer;
+  final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();
+
+  @override
+  void dispose() {
+    _clipRectLayer.layer = null;
+    super.dispose();
+  }
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {

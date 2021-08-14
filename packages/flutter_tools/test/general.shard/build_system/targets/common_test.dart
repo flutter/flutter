@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -32,7 +34,7 @@ void main() {
   Logger logger;
 
   setUp(() {
-    processManager = FakeProcessManager.list(<FakeCommand>[]);
+    processManager = FakeProcessManager.empty();
     logger = BufferLogger.test();
     artifacts = Artifacts.test();
     fileSystem = MemoryFileSystem.test(style: FileSystemStyle.posix);
@@ -76,21 +78,21 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
     final String build = androidEnvironment.buildDir.path;
+    final String flutterPatchedSdkPath = artifacts.getArtifactPath(
+      Artifact.flutterPatchedSdkPath,
+      platform: TargetPlatform.android_arm,
+      mode: BuildMode.profile,
+    );
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
-        artifacts.getArtifactPath(Artifact.engineDartBinary),
+        artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
-        artifacts.getArtifactPath(
-          Artifact.flutterPatchedSdkPath,
-          platform: TargetPlatform.android_arm,
-          mode: BuildMode.profile,
-        ) + '/',
+        '$flutterPatchedSdkPath/',
         '--target=flutter',
         '--no-print-incremental-dependencies',
-        '-Ddart.developer.causal_async_stacks=false',
-        ...buildModeOptions(BuildMode.profile),
+        ...buildModeOptions(BuildMode.profile, <String>[]),
         '--aot',
         '--tfa',
         '--packages',
@@ -103,9 +105,8 @@ void main() {
       ], exitCode: 1),
     ]);
 
-    await expectLater(() => const KernelSnapshot().build(androidEnvironment),
-      throwsA(isA<Exception>()));
-    expect(processManager.hasRemainingExpectations, false);
+    await expectLater(() => const KernelSnapshot().build(androidEnvironment), throwsException);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('KernelSnapshot does not use track widget creation on profile builds', () async {
@@ -113,21 +114,21 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
     final String build = androidEnvironment.buildDir.path;
+    final String flutterPatchedSdkPath = artifacts.getArtifactPath(
+      Artifact.flutterPatchedSdkPath,
+      platform: TargetPlatform.android_arm,
+      mode: BuildMode.profile,
+    );
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
-        artifacts.getArtifactPath(Artifact.engineDartBinary),
+        artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
-        artifacts.getArtifactPath(
-          Artifact.flutterPatchedSdkPath,
-          platform: TargetPlatform.android_arm,
-          mode: BuildMode.profile,
-        ) + '/',
+        '$flutterPatchedSdkPath/',
         '--target=flutter',
         '--no-print-incremental-dependencies',
-        '-Ddart.developer.causal_async_stacks=false',
-        ...buildModeOptions(BuildMode.profile),
+        ...buildModeOptions(BuildMode.profile, <String>[]),
         '--aot',
         '--tfa',
         '--packages',
@@ -142,7 +143,7 @@ void main() {
 
     await const KernelSnapshot().build(androidEnvironment);
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('KernelSnapshot correctly handles an empty string in ExtraFrontEndOptions', () async {
@@ -150,21 +151,21 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
     final String build = androidEnvironment.buildDir.path;
+    final String flutterPatchedSdkPath = artifacts.getArtifactPath(
+      Artifact.flutterPatchedSdkPath,
+      platform: TargetPlatform.android_arm,
+      mode: BuildMode.profile,
+    );
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
-        artifacts.getArtifactPath(Artifact.engineDartBinary),
+        artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
-        artifacts.getArtifactPath(
-          Artifact.flutterPatchedSdkPath,
-          platform: TargetPlatform.android_arm,
-          mode: BuildMode.profile,
-        ) + '/',
+        '$flutterPatchedSdkPath/',
         '--target=flutter',
         '--no-print-incremental-dependencies',
-        '-Ddart.developer.causal_async_stacks=false',
-        ...buildModeOptions(BuildMode.profile),
+        ...buildModeOptions(BuildMode.profile, <String>[]),
         '--aot',
         '--tfa',
         '--packages',
@@ -180,7 +181,7 @@ void main() {
     await const KernelSnapshot()
       .build(androidEnvironment..defines[kExtraFrontEndOptions] = '');
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('KernelSnapshot correctly forwards ExtraFrontEndOptions', () async {
@@ -188,21 +189,21 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
     final String build = androidEnvironment.buildDir.path;
+    final String flutterPatchedSdkPath = artifacts.getArtifactPath(
+      Artifact.flutterPatchedSdkPath,
+      platform: TargetPlatform.android_arm,
+      mode: BuildMode.profile,
+    );
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
-        artifacts.getArtifactPath(Artifact.engineDartBinary),
+        artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
-        artifacts.getArtifactPath(
-          Artifact.flutterPatchedSdkPath,
-          platform: TargetPlatform.android_arm,
-          mode: BuildMode.profile,
-        ) + '/',
+        '$flutterPatchedSdkPath/',
         '--target=flutter',
         '--no-print-incremental-dependencies',
-        '-Ddart.developer.causal_async_stacks=false',
-        ...buildModeOptions(BuildMode.profile),
+        ...buildModeOptions(BuildMode.profile, <String>[]),
         '--aot',
         '--tfa',
         '--packages',
@@ -220,7 +221,7 @@ void main() {
     await const KernelSnapshot()
       .build(androidEnvironment..defines[kExtraFrontEndOptions] = 'foo,bar');
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('KernelSnapshot can disable track-widget-creation on debug builds', () async {
@@ -228,21 +229,21 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
     final String build = androidEnvironment.buildDir.path;
+    final String flutterPatchedSdkPath = artifacts.getArtifactPath(
+      Artifact.flutterPatchedSdkPath,
+      platform: TargetPlatform.android_arm,
+      mode: BuildMode.debug,
+    );
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
-        artifacts.getArtifactPath(Artifact.engineDartBinary),
+        artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
-        artifacts.getArtifactPath(
-          Artifact.flutterPatchedSdkPath,
-          platform: TargetPlatform.android_arm,
-          mode: BuildMode.debug,
-        ) + '/',
+        '$flutterPatchedSdkPath/',
         '--target=flutter',
         '--no-print-incremental-dependencies',
-        '-Ddart.developer.causal_async_stacks=true',
-        ...buildModeOptions(BuildMode.debug),
+        ...buildModeOptions(BuildMode.debug, <String>[]),
         '--no-link-platform',
         '--packages',
         '/.dart_tool/package_config.json',
@@ -258,7 +259,7 @@ void main() {
       ..defines[kBuildMode] = getNameForBuildMode(BuildMode.debug)
       ..defines[kTrackWidgetCreation] = 'false');
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('KernelSnapshot forces platform linking on debug for darwin target platforms', () async {
@@ -266,21 +267,21 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
     final String build = androidEnvironment.buildDir.path;
+    final String flutterPatchedSdkPath = artifacts.getArtifactPath(
+      Artifact.flutterPatchedSdkPath,
+      platform: TargetPlatform.darwin,
+      mode: BuildMode.debug,
+    );
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
-        artifacts.getArtifactPath(Artifact.engineDartBinary),
+        artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
-        artifacts.getArtifactPath(
-          Artifact.flutterPatchedSdkPath,
-          platform: TargetPlatform.darwin_x64,
-          mode: BuildMode.debug,
-        ) + '/',
+        '$flutterPatchedSdkPath/',
         '--target=flutter',
         '--no-print-incremental-dependencies',
-        '-Ddart.developer.causal_async_stacks=true',
-        ...buildModeOptions(BuildMode.debug),
+        ...buildModeOptions(BuildMode.debug, <String>[]),
         '--packages',
         '/.dart_tool/package_config.json',
         '--output-dill',
@@ -292,12 +293,12 @@ void main() {
     ]);
 
     await const KernelSnapshot().build(androidEnvironment
-      ..defines[kTargetPlatform]  = getNameForTargetPlatform(TargetPlatform.darwin_x64)
+      ..defines[kTargetPlatform]  = getNameForTargetPlatform(TargetPlatform.darwin)
       ..defines[kBuildMode] = getNameForBuildMode(BuildMode.debug)
       ..defines[kTrackWidgetCreation] = 'false'
     );
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('KernelSnapshot does use track widget creation on debug builds', () async {
@@ -316,21 +317,21 @@ void main() {
       logger: logger,
     );
     final String build = testEnvironment.buildDir.path;
+    final String flutterPatchedSdkPath = artifacts.getArtifactPath(
+      Artifact.flutterPatchedSdkPath,
+      platform: TargetPlatform.android_arm,
+      mode: BuildMode.debug,
+    );
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
-        artifacts.getArtifactPath(Artifact.engineDartBinary),
+        artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
-        artifacts.getArtifactPath(
-          Artifact.flutterPatchedSdkPath,
-          platform: TargetPlatform.android_arm,
-          mode: BuildMode.debug,
-        ) + '/',
+        '$flutterPatchedSdkPath/',
         '--target=flutter',
         '--no-print-incremental-dependencies',
-        '-Ddart.developer.causal_async_stacks=true',
-        ...buildModeOptions(BuildMode.debug),
+        ...buildModeOptions(BuildMode.debug, <String>[]),
         '--track-widget-creation',
         '--no-link-platform',
         '--packages',
@@ -345,7 +346,7 @@ void main() {
 
     await const KernelSnapshot().build(testEnvironment);
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testUsingContext('AotElfProfile Produces correct output directory', () async {
@@ -363,8 +364,6 @@ void main() {
         '--strip',
         '--no-sim-use-hardfp',
         '--no-use-integer-division',
-        '--no-causal-async-stacks',
-        '--lazy-async-stacks',
         '$build/app.dill',
       ])
     ]);
@@ -372,7 +371,7 @@ void main() {
 
     await const AotElfProfile(TargetPlatform.android_arm).build(androidEnvironment);
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testUsingContext('AotElfRelease configures gen_snapshot with code size directory', () async {
@@ -393,8 +392,6 @@ void main() {
         '--strip',
         '--no-sim-use-hardfp',
         '--no-use-integer-division',
-        '--no-causal-async-stacks',
-        '--lazy-async-stacks',
         '$build/app.dill',
       ])
     ]);
@@ -402,7 +399,7 @@ void main() {
 
     await const AotElfRelease(TargetPlatform.android_arm).build(androidEnvironment);
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testUsingContext('AotElfProfile throws error if missing build mode', () async {
@@ -443,8 +440,7 @@ void main() {
   });
 
   testUsingContext('AotAssemblyProfile throws error if built for non-iOS platform', () async {
-    expect(const AotAssemblyProfile().build(androidEnvironment),
-      throwsA(isA<Exception>()));
+    expect(const AotAssemblyProfile().build(androidEnvironment), throwsException);
   }, overrides: <Type, Generator>{
     Platform: () => macPlatform,
     FileSystem: () => fileSystem,
@@ -463,8 +459,6 @@ void main() {
         '--strip',
         '--no-sim-use-hardfp',
         '--no-use-integer-division',
-        '--no-causal-async-stacks',
-        '--lazy-async-stacks',
         '$build/app.dill',
       ]),
       FakeCommand(command: <String>[
@@ -474,36 +468,16 @@ void main() {
         kAssemblyAot,
         '--assembly=$build/arm64/snapshot_assembly.S',
         '--strip',
-        '--no-causal-async-stacks',
-        '--lazy-async-stacks',
         '$build/app.dill',
-      ]),
-      const FakeCommand(
-        command: <String>[
-          'sysctl',
-          'hw.optional.arm64',
-        ],
-        exitCode: 1,
-      ),
-      const FakeCommand(command: <String>[
-        'xcrun',
-        '--sdk',
-        'iphoneos',
-        '--show-sdk-path',
-      ]),
-      const FakeCommand(command: <String>[
-        'xcrun',
-        '--sdk',
-        'iphoneos',
-        '--show-sdk-path',
       ]),
       FakeCommand(command: <String>[
         'xcrun',
         'cc',
         '-arch',
         'armv7',
+        '-miphoneos-version-min=9.0',
         '-isysroot',
-        '',
+        'path/to/iPhoneOS.sdk',
         '-c',
         '$build/armv7/snapshot_assembly.S',
         '-o',
@@ -514,8 +488,9 @@ void main() {
         'cc',
         '-arch',
         'arm64',
+        '-miphoneos-version-min=9.0',
         '-isysroot',
-        '',
+        'path/to/iPhoneOS.sdk',
         '-c',
         '$build/arm64/snapshot_assembly.S',
         '-o',
@@ -526,7 +501,9 @@ void main() {
         'clang',
         '-arch',
         'armv7',
-        '-miphoneos-version-min=8.0',
+        '-miphoneos-version-min=9.0',
+        '-isysroot',
+        'path/to/iPhoneOS.sdk',
         '-dynamiclib',
         '-Xlinker',
         '-rpath',
@@ -538,8 +515,6 @@ void main() {
         '@loader_path/Frameworks',
         '-install_name',
         '@rpath/App.framework/App',
-        '-isysroot',
-        '',
         '-o',
         '$build/armv7/App.framework/App',
         '$build/armv7/snapshot_assembly.o',
@@ -549,7 +524,9 @@ void main() {
         'clang',
         '-arch',
         'arm64',
-        '-miphoneos-version-min=8.0',
+        '-miphoneos-version-min=9.0',
+        '-isysroot',
+        'path/to/iPhoneOS.sdk',
         '-dynamiclib',
         '-Xlinker',
         '-rpath',
@@ -561,8 +538,6 @@ void main() {
         '@loader_path/Frameworks',
         '-install_name',
         '@rpath/App.framework/App',
-        '-isysroot',
-        '',
         '-o',
         '$build/arm64/App.framework/App',
         '$build/arm64/snapshot_assembly.o',
@@ -577,10 +552,11 @@ void main() {
       ]),
     ]);
     iosEnvironment.defines[kIosArchs] ='armv7 arm64';
+    iosEnvironment.defines[kSdkRoot] = 'path/to/iPhoneOS.sdk';
 
     await const AotAssemblyProfile().build(iosEnvironment);
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     Platform: () => macPlatform,
     FileSystem: () => fileSystem,
@@ -590,6 +566,7 @@ void main() {
   testUsingContext('AotAssemblyProfile with bitcode sends correct argument to snapshotter (one arch)', () async {
     iosEnvironment.defines[kIosArchs] = 'arm64';
     iosEnvironment.defines[kBitcodeFlag] = 'true';
+    iosEnvironment.defines[kSdkRoot] = 'path/to/iPhoneOS.sdk';
     final String build = iosEnvironment.buildDir.path;
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
@@ -599,30 +576,16 @@ void main() {
         kAssemblyAot,
         '--assembly=$build/arm64/snapshot_assembly.S',
         '--strip',
-        '--no-causal-async-stacks',
-        '--lazy-async-stacks',
         '$build/app.dill',
-      ]),
-      const FakeCommand(
-        command: <String>[
-          'sysctl',
-          'hw.optional.arm64',
-        ],
-        exitCode: 1,
-      ),
-      const FakeCommand(command: <String>[
-        'xcrun',
-        '--sdk',
-        'iphoneos',
-        '--show-sdk-path',
       ]),
       FakeCommand(command: <String>[
         'xcrun',
         'cc',
         '-arch',
         'arm64',
+        '-miphoneos-version-min=9.0',
         '-isysroot',
-        '',
+        'path/to/iPhoneOS.sdk',
         // Contains bitcode flag.
         '-fembed-bitcode',
         '-c',
@@ -635,7 +598,9 @@ void main() {
         'clang',
         '-arch',
         'arm64',
-        '-miphoneos-version-min=8.0',
+        '-miphoneos-version-min=9.0',
+        '-isysroot',
+        'path/to/iPhoneOS.sdk',
         '-dynamiclib',
         '-Xlinker',
         '-rpath',
@@ -649,8 +614,6 @@ void main() {
         '@rpath/App.framework/App',
         // Contains bitcode flag.
         '-fembed-bitcode',
-        '-isysroot',
-        '',
         '-o',
         '$build/arm64/App.framework/App',
         '$build/arm64/snapshot_assembly.o',
@@ -666,7 +629,7 @@ void main() {
 
     await const AotAssemblyProfile().build(iosEnvironment);
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     Platform: () => macPlatform,
     FileSystem: () => fileSystem,
@@ -676,6 +639,7 @@ void main() {
   testUsingContext('AotAssemblyRelease configures gen_snapshot with code size directory', () async {
     iosEnvironment.defines[kCodeSizeDirectory] = 'code_size_1';
     iosEnvironment.defines[kIosArchs] = 'arm64';
+    iosEnvironment.defines[kSdkRoot] = 'path/to/iPhoneOS.sdk';
     iosEnvironment.defines[kBitcodeFlag] = 'true';
     final String build = iosEnvironment.buildDir.path;
     processManager.addCommands(<FakeCommand>[
@@ -688,30 +652,16 @@ void main() {
         kAssemblyAot,
         '--assembly=$build/arm64/snapshot_assembly.S',
         '--strip',
-        '--no-causal-async-stacks',
-        '--lazy-async-stacks',
         '$build/app.dill',
-      ]),
-      const FakeCommand(
-        command: <String>[
-          'sysctl',
-          'hw.optional.arm64',
-        ],
-        exitCode: 1,
-      ),
-      const FakeCommand(command: <String>[
-        'xcrun',
-        '--sdk',
-        'iphoneos',
-        '--show-sdk-path',
       ]),
       FakeCommand(command: <String>[
         'xcrun',
         'cc',
         '-arch',
         'arm64',
+        '-miphoneos-version-min=9.0',
         '-isysroot',
-        '',
+        'path/to/iPhoneOS.sdk',
         // Contains bitcode flag.
         '-fembed-bitcode',
         '-c',
@@ -724,7 +674,9 @@ void main() {
         'clang',
         '-arch',
         'arm64',
-        '-miphoneos-version-min=8.0',
+        '-miphoneos-version-min=9.0',
+        '-isysroot',
+        'path/to/iPhoneOS.sdk',
         '-dynamiclib',
         '-Xlinker',
         '-rpath',
@@ -738,8 +690,6 @@ void main() {
         '@rpath/App.framework/App',
         // Contains bitcode flag.
         '-fembed-bitcode',
-        '-isysroot',
-        '',
         '-o',
         '$build/arm64/App.framework/App',
         '$build/arm64/snapshot_assembly.o',
@@ -755,7 +705,7 @@ void main() {
 
     await const AotAssemblyProfile().build(iosEnvironment);
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     Platform: () => macPlatform,
     FileSystem: () => fileSystem,
@@ -783,14 +733,12 @@ void main() {
         '--strip',
         '--no-sim-use-hardfp',
         '--no-use-integer-division',
-        '--no-causal-async-stacks',
-        '--lazy-async-stacks',
         '$build/app.dill',
       ]),
     ]);
 
     await const AotElfRelease(TargetPlatform.android_arm).build(androidEnvironment);
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 }

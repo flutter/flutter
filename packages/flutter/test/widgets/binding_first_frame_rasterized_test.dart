@@ -4,9 +4,9 @@
 
 import 'dart:ui';
 
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fake_async/fake_async.dart';
 
 void main() {
   test('Deferred frames will trigger the first frame callback', () {

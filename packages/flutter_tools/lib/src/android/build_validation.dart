@@ -25,7 +25,7 @@ void validateBuild(AndroidBuildInfo androidBuildInfo) {
     );
   }
   if (buildInfo.buildNumber != null) {
-    final int result = int.tryParse(buildInfo.buildNumber);
+    final int? result = int.tryParse(buildInfo.buildNumber!);
     if (result == null) {
       throwToolExit(
         'buildNumber: ${buildInfo.buildNumber} was not a valid integer value.\n'

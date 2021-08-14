@@ -48,7 +48,7 @@ class ContinuousRectangleBorder extends OutlinedBorder {
   /// [getOuterPath].
   final BorderRadiusGeometry borderRadius;
 
-   @override
+  @override
   EdgeInsetsGeometry get dimensions => EdgeInsets.all(side.width);
 
   @override
@@ -93,7 +93,7 @@ class ContinuousRectangleBorder extends OutlinedBorder {
     final double top = rrect.top;
     final double bottom = rrect.bottom;
     //  Radii will be clamped to the value of the shortest side
-    /// of [rrect] to avoid strange tie-fighter shapes.
+    // of rrect to avoid strange tie-fighter shapes.
     final double tlRadiusX =
       math.max(0.0, _clampToShortest(rrect, rrect.tlRadiusX));
     final double tlRadiusY =
@@ -134,7 +134,7 @@ class ContinuousRectangleBorder extends OutlinedBorder {
   }
 
   @override
-  ContinuousRectangleBorder copyWith({ BorderSide? side, BorderRadius? borderRadius }) {
+  ContinuousRectangleBorder copyWith({ BorderSide? side, BorderRadiusGeometry? borderRadius }) {
     return ContinuousRectangleBorder(
       side: side ?? this.side,
       borderRadius: borderRadius ?? this.borderRadius,

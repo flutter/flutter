@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'app_bar.dart';
+import 'app_bar_theme.dart';
+import 'color_scheme.dart';
 import 'colors.dart';
 import 'debug.dart';
 import 'input_border.dart';
@@ -34,6 +35,12 @@ import 'theme.dart';
 /// call. Call [SearchDelegate.close] before re-using the same delegate instance
 /// for another [showSearch] call.
 ///
+/// The `useRootNavigator` argument is used to determine whether to push the
+/// search page to the [Navigator] furthest from or nearest to the given
+/// `context`. By default, `useRootNavigator` is `false` and the search page
+/// route created by this method is pushed to the nearest navigator to the
+/// given `context`. It can not be `null`.
+///
 /// The transition to the search page triggered by this method looks best if the
 /// screen triggering the transition contains an [AppBar] at the top and the
 /// transition is called from an [IconButton] that's part of [AppBar.actions].
@@ -44,7 +51,7 @@ import 'theme.dart';
 /// used to exit the search page.
 ///
 /// ## Handling emojis and other complex characters
-/// {@macro flutter.widgets.editableText.complexCharacters}
+/// {@macro flutter.widgets.EditableText.onChanged}
 ///
 /// See also:
 ///
@@ -53,12 +60,14 @@ Future<T?> showSearch<T>({
   required BuildContext context,
   required SearchDelegate<T> delegate,
   String? query = '',
+  bool useRootNavigator = false,
 }) {
   assert(delegate != null);
   assert(context != null);
+  assert(useRootNavigator != null);
   delegate.query = query ?? delegate.query;
   delegate._currentBody = _SearchBody.suggestions;
-  return Navigator.of(context)!.push(_SearchPageRoute<T>(
+  return Navigator.of(context, rootNavigator: useRootNavigator).push(_SearchPageRoute<T>(
     delegate: delegate,
   ));
 }
@@ -67,8 +76,9 @@ Future<T?> showSearch<T>({
 ///
 /// The search page always shows an [AppBar] at the top where users can
 /// enter their search queries. The buttons shown before and after the search
-/// query text field can be customized via [SearchDelegate.buildLeading] and
-/// [SearchDelegate.buildActions].
+/// query text field can be customized via [SearchDelegate.buildLeading]
+/// and [SearchDelegate.buildActions]. Additionally, a widget can be placed
+/// across the bottom of the [AppBar] via [SearchDelegate.buildBottom].
 ///
 /// The body below the [AppBar] can either show suggested queries (returned by
 /// [SearchDelegate.buildSuggestions]) or - once the user submits a search  - the
@@ -90,17 +100,18 @@ Future<T?> showSearch<T>({
 /// for another [showSearch] call.
 ///
 /// ## Handling emojis and other complex characters
-/// {@macro flutter.widgets.editableText.complexCharacters}
+/// {@macro flutter.widgets.EditableText.onChanged}
 abstract class SearchDelegate<T> {
-
-  /// Constructor to be called by subclasses which may specify [searchFieldLabel], [keyboardType] and/or
-  /// [textInputAction].
+  /// Constructor to be called by subclasses which may specify
+  /// [searchFieldLabel], either [searchFieldStyle] or [searchFieldDecorationTheme],
+  /// [keyboardType] and/or [textInputAction]. Only one of [searchFieldLabel]
+  /// and [searchFieldDecorationTheme] may be non-null.
   ///
   /// {@tool snippet}
   /// ```dart
-  /// class CustomSearchHintDelegate extends SearchDelegate {
+  /// class CustomSearchHintDelegate extends SearchDelegate<String> {
   ///   CustomSearchHintDelegate({
-  ///     String hintText,
+  ///     required String hintText,
   ///   }) : super(
   ///     searchFieldLabel: hintText,
   ///     keyboardType: TextInputType.text,
@@ -108,25 +119,33 @@ abstract class SearchDelegate<T> {
   ///   );
   ///
   ///   @override
-  ///   Widget buildLeading(BuildContext context) => Text("leading");
+  ///   Widget buildLeading(BuildContext context) => const Text('leading');
   ///
   ///   @override
-  ///   Widget buildSuggestions(BuildContext context) => Text("suggestions");
+  ///   PreferredSizeWidget buildBottom(BuildContext context) {
+  ///     return const PreferredSize(
+  ///        preferredSize: Size.fromHeight(56.0),
+  ///        child: Text('bottom'));
+  ///   }
   ///
   ///   @override
-  ///   Widget buildResults(BuildContext context) => Text('results');
+  ///   Widget buildSuggestions(BuildContext context) => const Text('suggestions');
   ///
   ///   @override
-  ///   List<Widget> buildActions(BuildContext context) => [];
+  ///   Widget buildResults(BuildContext context) => const Text('results');
+  ///
+  ///   @override
+  ///   List<Widget> buildActions(BuildContext context) => <Widget>[];
   /// }
   /// ```
   /// {@end-tool}
   SearchDelegate({
     this.searchFieldLabel,
     this.searchFieldStyle,
+    this.searchFieldDecorationTheme,
     this.keyboardType,
     this.textInputAction = TextInputAction.search,
-  });
+  }) : assert(searchFieldStyle == null || searchFieldDecorationTheme == null);
 
   /// Suggestions shown in the body of the search page while the user types a
   /// query into the search field.
@@ -169,7 +188,7 @@ abstract class SearchDelegate<T> {
   /// See also:
   ///
   ///  * [AppBar.leading], the intended use for the return value of this method.
-  Widget buildLeading(BuildContext context);
+  Widget? buildLeading(BuildContext context);
 
   /// Widgets to display after the search query in the [AppBar].
   ///
@@ -182,27 +201,51 @@ abstract class SearchDelegate<T> {
   /// See also:
   ///
   ///  * [AppBar.actions], the intended use for the return value of this method.
-  List<Widget> buildActions(BuildContext context);
+  List<Widget>? buildActions(BuildContext context);
 
-  /// The theme used to style the [AppBar].
+  /// Widget to display across the bottom of the [AppBar].
   ///
-  /// By default, a white theme is used.
+  /// Returns null by default, i.e. a bottom widget is not included.
   ///
   /// See also:
   ///
-  ///  * [AppBar.backgroundColor], which is set to [ThemeData.primaryColor].
-  ///  * [AppBar.iconTheme], which is set to [ThemeData.primaryIconTheme].
-  ///  * [AppBar.textTheme], which is set to [ThemeData.primaryTextTheme].
-  ///  * [AppBar.brightness], which is set to [ThemeData.primaryColorBrightness].
+  ///  * [AppBar.bottom], the intended use for the return value of this method.
+  ///
+  PreferredSizeWidget? buildBottom(BuildContext context) => null;
+
+  /// The theme used to configure the search page.
+  ///
+  /// The returned [ThemeData] will be used to wrap the entire search page,
+  /// so it can be used to configure any of its components with the appropriate
+  /// theme properties.
+  ///
+  /// Unless overridden, the default theme will configure the AppBar containing
+  /// the search input text field with a white background and black text on light
+  /// themes. For dark themes the default is a dark grey background with light
+  /// color text.
+  ///
+  /// See also:
+  ///
+  ///  * [AppBarTheme], which configures the AppBar's appearance.
+  ///  * [InputDecorationTheme], which configures the appearance of the search
+  ///    text field.
   ThemeData appBarTheme(BuildContext context) {
     assert(context != null);
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
     assert(theme != null);
     return theme.copyWith(
-      primaryColor: Colors.white,
-      primaryIconTheme: theme.primaryIconTheme.copyWith(color: Colors.grey),
-      primaryColorBrightness: Brightness.light,
-      primaryTextTheme: theme.textTheme,
+      appBarTheme: AppBarTheme(
+        brightness: colorScheme.brightness,
+        backgroundColor: colorScheme.brightness == Brightness.dark ? Colors.grey[900] : Colors.white,
+        iconTheme: theme.primaryIconTheme.copyWith(color: Colors.grey),
+        textTheme: theme.textTheme,
+      ),
+      inputDecorationTheme: searchFieldDecorationTheme ??
+          InputDecorationTheme(
+            hintStyle: searchFieldStyle ?? theme.inputDecorationTheme.hintStyle,
+            border: InputBorder.none,
+          ),
     );
   }
 
@@ -213,9 +256,14 @@ abstract class SearchDelegate<T> {
   /// If the user taps on a suggestion provided by [buildSuggestions] this
   /// string should be updated to that suggestion via the setter.
   String get query => _queryTextController.text;
+
+  /// Changes the current query string.
+  ///
+  /// Setting the query string programmatically moves the cursor to the end of the text field.
   set query(String value) {
     assert(query != null);
     _queryTextController.text = value;
+    _queryTextController.selection = TextSelection.fromPosition(TextPosition(offset: _queryTextController.text.length));
   }
 
   /// Transition from the suggestions returned by [buildSuggestions] to the
@@ -259,7 +307,7 @@ abstract class SearchDelegate<T> {
   void close(BuildContext context, T result) {
     _currentBody = null;
     _focusNode?.unfocus();
-    Navigator.of(context)!
+    Navigator.of(context)
       ..popUntil((Route<dynamic> route) => route == _route)
       ..pop(result);
   }
@@ -274,7 +322,16 @@ abstract class SearchDelegate<T> {
   ///
   /// If this value is set to null, the value of the ambient [Theme]'s
   /// [InputDecorationTheme.hintStyle] will be used instead.
+  ///
+  /// Only one of [searchFieldStyle] or [searchFieldDecorationTheme] can
+  /// be non-null.
   final TextStyle? searchFieldStyle;
+
+  /// The [InputDecorationTheme] used to configure the search field's visuals.
+  ///
+  /// Only one of [searchFieldStyle] or [searchFieldDecorationTheme] can
+  /// be non-null.
+  final InputDecorationTheme? searchFieldDecorationTheme;
 
   /// The type of action button to use for the keyboard.
   ///
@@ -480,8 +537,6 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
     final ThemeData theme = widget.delegate.appBarTheme(context);
     final String searchFieldLabel = widget.delegate.searchFieldLabel
       ?? MaterialLocalizations.of(context).searchFieldLabel;
-    final TextStyle? searchFieldStyle = widget.delegate.searchFieldStyle
-      ?? theme.inputDecorationTheme.hintStyle;
     Widget? body;
     switch(widget.delegate._currentBody) {
       case _SearchBody.suggestions:
@@ -499,7 +554,8 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
       case null:
         break;
     }
-    final String routeName;
+
+    late final String routeName;
     switch (theme.platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
@@ -517,33 +573,29 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
       scopesRoute: true,
       namesRoute: true,
       label: routeName,
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: theme.primaryColor,
-          iconTheme: theme.primaryIconTheme,
-          textTheme: theme.primaryTextTheme,
-          brightness: theme.primaryColorBrightness,
-          leading: widget.delegate.buildLeading(context),
-          title: TextField(
-            controller: widget.delegate._queryTextController,
-            focusNode: focusNode,
-            style: theme.textTheme.headline6,
-            textInputAction: widget.delegate.textInputAction,
-            keyboardType: widget.delegate.keyboardType,
-            onSubmitted: (String _) {
-              widget.delegate.showResults(context);
-            },
-            decoration: InputDecoration(
-              border: InputBorder.none,
-              hintText: searchFieldLabel,
-              hintStyle: searchFieldStyle,
+      child: Theme(
+        data: theme,
+        child: Scaffold(
+          appBar: AppBar(
+            leading: widget.delegate.buildLeading(context),
+            title: TextField(
+              controller: widget.delegate._queryTextController,
+              focusNode: focusNode,
+              style: theme.textTheme.headline6,
+              textInputAction: widget.delegate.textInputAction,
+              keyboardType: widget.delegate.keyboardType,
+              onSubmitted: (String _) {
+                widget.delegate.showResults(context);
+              },
+              decoration: InputDecoration(hintText: searchFieldLabel),
             ),
+            actions: widget.delegate.buildActions(context),
+            bottom: widget.delegate.buildBottom(context),
           ),
-          actions: widget.delegate.buildActions(context),
-        ),
-        body: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 300),
-          child: body,
+          body: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            child: body,
+          ),
         ),
       ),
     );

@@ -9,11 +9,12 @@ import 'transformations_demo_edit_board_point.dart';
 import 'transformations_demo_gesture_transformable.dart';
 
 class TransformationsDemo extends StatefulWidget {
-  const TransformationsDemo({ Key key }) : super(key: key);
+  const TransformationsDemo({ Key? key }) : super(key: key);
 
   static const String routeName = '/transformations';
 
-  @override _TransformationsDemoState createState() => _TransformationsDemoState();
+  @override
+  State<TransformationsDemo> createState() => _TransformationsDemoState();
 }
 class _TransformationsDemoState extends State<TransformationsDemo> {
   // The radius of a hexagon tile in pixels.
@@ -67,9 +68,6 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
                 _reset = false;
               });
             },
-            child: CustomPaint(
-              painter: painter,
-            ),
             boundaryRect: Rect.fromLTWH(
               -visibleSize.width / 2,
               -visibleSize.height / 2,
@@ -82,6 +80,9 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
             initialTranslation: Offset(size.width / 2, size.height / 2),
             onTapUp: _onTapUp,
             size: size,
+            child: CustomPaint(
+              painter: painter,
+            ),
           );
         },
       ),
@@ -139,10 +140,10 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
             height: 150,
             padding: const EdgeInsets.all(12.0),
             child: EditBoardPoint(
-              boardPoint: _board.selected,
+              boardPoint: _board.selected!,
               onColorSelection: (Color color) {
                 setState(() {
-                  _board = _board.copyWithBoardPointColor(_board.selected, color);
+                  _board = _board.copyWithBoardPointColor(_board.selected!, color);
                   Navigator.pop(context);
                 });
               },
@@ -157,7 +158,7 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
 
   void _onTapUp(TapUpDetails details) {
     final Offset scenePoint = details.globalPosition;
-    final BoardPoint boardPoint = _board.pointToBoardPoint(scenePoint);
+    final BoardPoint? boardPoint = _board.pointToBoardPoint(scenePoint);
     setState(() {
       _board = _board.copyWithSelected(boardPoint);
     });
@@ -171,19 +172,19 @@ class BoardPainter extends CustomPainter {
     this.board,
   });
 
-  final Board board;
+  final Board? board;
 
   @override
   void paint(Canvas canvas, Size size) {
-    void drawBoardPoint(BoardPoint boardPoint) {
-      final Color color = boardPoint.color.withOpacity(
-        board.selected == boardPoint ? 0.2 : 1.0,
+    void drawBoardPoint(BoardPoint? boardPoint) {
+      final Color color = boardPoint!.color.withOpacity(
+        board!.selected == boardPoint ? 0.2 : 1.0,
       );
-      final Vertices vertices = board.getVerticesForBoardPoint(boardPoint, color);
+      final Vertices vertices = board!.getVerticesForBoardPoint(boardPoint, color);
       canvas.drawVertices(vertices, BlendMode.color, Paint());
     }
 
-    board.forEach(drawBoardPoint);
+    board!.forEach(drawBoardPoint);
   }
 
   // We should repaint whenever the board changes, such as board.selected.

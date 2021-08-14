@@ -2,23 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:package_config/package_config.dart';
 
 import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../compile.dart';
-import '../dart/package_map.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../project.dart';
 
 /// A request to the [TestCompiler] for recompilation.
-class _CompilationRequest {
-  _CompilationRequest(this.mainUri, this.result);
+class CompilationRequest {
+  CompilationRequest(this.mainUri, this.result);
 
   Uri mainUri;
   Completer<String> result;
@@ -36,20 +36,23 @@ class TestCompiler {
   /// extension.
   ///
   /// [flutterProject] is the project for which we are running tests.
+  ///
+  /// If [precompiledDillPath] is passed, it will be used to initialize the
+  /// compiler.
   TestCompiler(
     this.buildInfo,
     this.flutterProject,
-    this.extraFrontEndOptions,
-  ) : testFilePath = globals.fs.path.join(
+    { String precompiledDillPath }
+  ) : testFilePath = precompiledDillPath ?? globals.fs.path.join(
         flutterProject.directory.path,
         getBuildDirectory(),
         'test_cache',
         getDefaultCachedKernelPath(
           trackWidgetCreation: buildInfo.trackWidgetCreation,
-          nullSafetyMode: buildInfo.nullSafetyMode,
           dartDefines: buildInfo.dartDefines,
           extraFrontEndOptions: buildInfo.extraFrontEndOptions,
-        )) {
+        )),
+       shouldCopyDillFile = precompiledDillPath == null {
     // Compiler maintains and updates single incremental dill file.
     // Incremental compilation requests done for each test copy that file away
     // for independent execution.
@@ -63,12 +66,12 @@ class TestCompiler {
     });
   }
 
-  final StreamController<_CompilationRequest> compilerController = StreamController<_CompilationRequest>();
-  final List<_CompilationRequest> compilationQueue = <_CompilationRequest>[];
+  final StreamController<CompilationRequest> compilerController = StreamController<CompilationRequest>();
+  final List<CompilationRequest> compilationQueue = <CompilationRequest>[];
   final FlutterProject flutterProject;
   final BuildInfo buildInfo;
   final String testFilePath;
-  final List<String> extraFrontEndOptions;
+  final bool shouldCopyDillFile;
 
 
   ResidentCompiler compiler;
@@ -79,7 +82,7 @@ class TestCompiler {
     if (compilerController.isClosed) {
       return null;
     }
-    compilerController.add(_CompilationRequest(mainDart, completer));
+    compilerController.add(CompilationRequest(mainDart, completer));
     return completer.future;
   }
 
@@ -110,18 +113,19 @@ class TestCompiler {
       initializeFromDill: testFilePath,
       unsafePackageSerialization: false,
       dartDefines: buildInfo.dartDefines,
-      packagesPath: globalPackagesPath,
-      extraFrontEndOptions: extraFrontEndOptions,
+      packagesPath: buildInfo.packagesPath,
+      extraFrontEndOptions: buildInfo.extraFrontEndOptions,
       platform: globals.platform,
       testCompilation: true,
+      fileSystem: globals.fs,
+      fileSystemRoots: buildInfo.fileSystemRoots,
+      fileSystemScheme: buildInfo.fileSystemScheme,
     );
     return residentCompiler;
   }
 
-  PackageConfig _packageConfig;
-
   // Handle a compilation request.
-  Future<void> _onCompilationRequest(_CompilationRequest request) async {
+  Future<void> _onCompilationRequest(CompilationRequest request) async {
     final bool isEmpty = compilationQueue.isEmpty;
     compilationQueue.add(request);
     // Only trigger processing if queue was empty - i.e. no other requests
@@ -130,30 +134,8 @@ class TestCompiler {
     if (!isEmpty) {
       return;
     }
-    if (_packageConfig == null) {
-      _packageConfig ??= await loadPackageConfigWithLogging(
-        globals.fs.file(globalPackagesPath),
-        logger: globals.logger,
-      );
-      // Compilation will fail if there is no flutter_test dependency, since
-      // this library is imported by the generated entrypoint script.
-      if (_packageConfig['flutter_test'] == null) {
-        globals.printError(
-          '\n'
-          'Error: cannot run without a dependency on "package:flutter_test". '
-          'Ensure the following lines are present in your pubspec.yaml:'
-          '\n\n'
-          'dev_dependencies:\n'
-          '  flutter_test:\n'
-          '    sdk: flutter\n',
-        );
-        request.result.complete(null);
-        await compilerController.close();
-        return;
-      }
-    }
     while (compilationQueue.isNotEmpty) {
-      final _CompilationRequest request = compilationQueue.first;
+      final CompilationRequest request = compilationQueue.first;
       globals.printTrace('Compiling ${request.mainUri}');
       final Stopwatch compilerTime = Stopwatch()..start();
       bool firstCompile = false;
@@ -165,7 +147,9 @@ class TestCompiler {
         request.mainUri,
         <Uri>[request.mainUri],
         outputPath: outputDill.path,
-        packageConfig: _packageConfig,
+        packageConfig: buildInfo.packageConfig,
+        projectRootPath: flutterProject?.directory?.absolute?.path,
+        fs: globals.fs,
       );
       final String outputPath = compilerOutput?.outputFilename;
 
@@ -173,28 +157,32 @@ class TestCompiler {
       // errors, pass [null] upwards to the consumer and shutdown the
       // compiler to avoid reusing compiler that might have gotten into
       // a weird state.
-      final String path = request.mainUri.toFilePath(windows: globals.platform.isWindows);
       if (outputPath == null || compilerOutput.errorCount > 0) {
         request.result.complete(null);
         await _shutdown();
       } else {
-        final File outputFile = globals.fs.file(outputPath);
-        final File kernelReadyToRun = await outputFile.copy('$path.dill');
-        final File testCache = globals.fs.file(testFilePath);
-        if (firstCompile || !testCache.existsSync() || (testCache.lengthSync() < outputFile.lengthSync())) {
-          // The idea is to keep the cache file up-to-date and include as
-          // much as possible in an effort to re-use as many packages as
-          // possible.
-          if (!testCache.parent.existsSync()) {
-            testCache.parent.createSync(recursive: true);
+        if (shouldCopyDillFile) {
+          final String path = request.mainUri.toFilePath(windows: globals.platform.isWindows);
+          final File outputFile = globals.fs.file(outputPath);
+          final File kernelReadyToRun = await outputFile.copy('$path.dill');
+          final File testCache = globals.fs.file(testFilePath);
+          if (firstCompile || !testCache.existsSync() || (testCache.lengthSync() < outputFile.lengthSync())) {
+            // The idea is to keep the cache file up-to-date and include as
+            // much as possible in an effort to re-use as many packages as
+            // possible.
+            if (!testCache.parent.existsSync()) {
+              testCache.parent.createSync(recursive: true);
+            }
+            await outputFile.copy(testFilePath);
           }
-          await outputFile.copy(testFilePath);
+          request.result.complete(kernelReadyToRun.path);
+        } else {
+          request.result.complete(outputPath);
         }
-        request.result.complete(kernelReadyToRun.path);
         compiler.accept();
         compiler.reset();
       }
-      globals.printTrace('Compiling $path took ${compilerTime.elapsedMilliseconds}ms');
+      globals.printTrace('Compiling ${request.mainUri} took ${compilerTime.elapsedMilliseconds}ms');
       // Only remove now when we finished processing the element
       compilationQueue.removeAt(0);
     }

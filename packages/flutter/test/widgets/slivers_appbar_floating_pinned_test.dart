@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/material.dart';
 
 import 'semantics_tester.dart';
 
@@ -151,7 +151,7 @@ void main() {
     );
     expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true));
 
-    await tester.fling(find.text('Tile 2'), const Offset(0, -600), 2000);
+    await tester.fling(find.text('Tile 2'), const Offset(0, -600), 1950);
     await tester.pumpAndSettle();
 
     expectedSemantics = TestSemantics.root(
@@ -320,9 +320,9 @@ void main() {
                 ),
                 SliverList(
                   delegate: SliverChildListDelegate(List<Widget>.generate(20, (int i) {
-                    return Container(
-                      child: Text('Tile $i'),
+                    return SizedBox(
                       height: 100.0,
+                      child: Text('Tile $i'),
                     );
                   })),
                 ),

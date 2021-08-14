@@ -9,11 +9,13 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   const MethodChannel channel = MethodChannel('com.example.abstract_method_smoke_test');
   await channel.invokeMethod<void>('show_keyboard');
-  runApp(MyApp());
-  print('Test suceeded');
+  runApp(const MyApp());
+  print('Test succeeded');
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -21,14 +23,16 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: HomePage(),
+      home: const HomePage(),
     );
   }
 }
 
 class HomePage extends StatefulWidget {
+  const HomePage({Key? key}) : super(key: key);
+
   @override
-  _HomePage createState() => _HomePage();
+  State<HomePage> createState() => _HomePage();
 }
 
 class _HomePage extends State<HomePage> {
@@ -38,9 +42,9 @@ class _HomePage extends State<HomePage> {
 
     // Trigger the second route.
     // https://github.com/flutter/flutter/issues/40126
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
+    WidgetsBinding.instance?.addPostFrameCallback((_) async {
       Navigator.of(context).push(
-          MaterialPageRoute<void>(builder: (_) => SecondPage()));
+          MaterialPageRoute<void>(builder: (_) => const SecondPage()));
     });
   }
 
@@ -51,6 +55,8 @@ class _HomePage extends State<HomePage> {
 }
 
 class SecondPage extends StatelessWidget {
+  const SecondPage({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

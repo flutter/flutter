@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/material.dart';
 
 void main() {
   group('SliverAppBar - Stretch', () {
@@ -24,12 +23,12 @@ void main() {
                 child: Container(
                   key: anchor,
                   height: 800,
-                )
+                ),
               ),
               SliverToBoxAdapter(
                 child: Container(
                   height: 800,
-                )
+                ),
               ),
             ],
           ),
@@ -37,7 +36,7 @@ void main() {
       );
 
       final RenderSliverScrollingPersistentHeader header = tester.renderObject(
-        find.byType(SliverAppBar)
+        find.byType(SliverAppBar),
       );
       expect(header.child!.size.height, equals(100.0));
       await slowDrag(tester, anchor, const Offset(0.0, 100));
@@ -59,12 +58,12 @@ void main() {
                 child: Container(
                   key: anchor,
                   height: 800,
-                )
+                ),
               ),
               SliverToBoxAdapter(
                 child: Container(
                   height: 800,
-                )
+                ),
               ),
             ],
           ),
@@ -72,7 +71,7 @@ void main() {
       );
 
       final RenderSliverScrollingPersistentHeader header = tester.renderObject(
-        find.byType(SliverAppBar)
+        find.byType(SliverAppBar),
       );
       expect(header.child!.size.height, equals(100.0));
       await slowDrag(tester, anchor, const Offset(0.0, 100.0));
@@ -98,12 +97,12 @@ void main() {
                 child: Container(
                   key: anchor,
                   height: 800,
-                )
+                ),
               ),
               SliverToBoxAdapter(
                 child: Container(
                   height: 800,
-                )
+                ),
               ),
             ],
           ),
@@ -137,12 +136,12 @@ void main() {
                 child: Container(
                   key: anchor,
                   height: 800,
-                )
+                ),
               ),
               SliverToBoxAdapter(
                 child: Container(
                   height: 800,
-                )
+                ),
               ),
             ],
           ),
@@ -176,12 +175,12 @@ void main() {
                 child: Container(
                   key: anchor,
                   height: 800,
-                )
+                ),
               ),
               SliverToBoxAdapter(
                 child: Container(
                   height: 800,
-                )
+                ),
               ),
             ],
           ),
@@ -210,12 +209,12 @@ void main() {
                 SliverToBoxAdapter(
                   child: Container(
                     height: 800,
-                  )
+                  ),
                 ),
                 SliverToBoxAdapter(
                   child: Container(
                     height: 800,
-                  )
+                  ),
                 ),
               ],
             ),
@@ -243,19 +242,19 @@ void main() {
                 child: Container(
                   key: anchor,
                   height: 800,
-                )
+                ),
               ),
               SliverToBoxAdapter(
                 child: Container(
                   height: 800,
-                )
+                ),
               ),
             ],
           ),
         ),
       );
       final RenderSliverPinnedPersistentHeader header = tester.renderObject(
-        find.byType(SliverAppBar)
+        find.byType(SliverAppBar),
       );
       expect(header.child!.size.height, equals(100.0));
       await slowDrag(tester, anchor, const Offset(0.0, 100));
@@ -278,19 +277,19 @@ void main() {
                 child: Container(
                   key: anchor,
                   height: 800,
-                )
+                ),
               ),
               SliverToBoxAdapter(
                 child: Container(
                   height: 800,
-                )
+                ),
               ),
             ],
           ),
         ),
       );
       final RenderSliverPinnedPersistentHeader header = tester.renderObject(
-        find.byType(SliverAppBar)
+        find.byType(SliverAppBar),
       );
       expect(header.child!.size.height, equals(100.0));
       await slowDrag(tester, anchor, const Offset(0.0, 100));
@@ -315,19 +314,19 @@ void main() {
                 child: Container(
                   key: anchor,
                   height: 800,
-                )
+                ),
               ),
               SliverToBoxAdapter(
                 child: Container(
                   height: 800,
-                )
+                ),
               ),
             ],
           ),
         ),
       );
       final RenderSliverFloatingPersistentHeader header = tester.renderObject(
-        find.byType(SliverAppBar)
+        find.byType(SliverAppBar),
       );
       expect(header.child!.size.height, equals(100.0));
       await slowDrag(tester, anchor, const Offset(0.0, 100));
@@ -350,19 +349,19 @@ void main() {
                 child: Container(
                   key: anchor,
                   height: 800,
-                )
+                ),
               ),
               SliverToBoxAdapter(
                 child: Container(
                   height: 800,
-                )
+                ),
               ),
             ],
           ),
         ),
       );
       final RenderSliverFloatingPersistentHeader header = tester.renderObject(
-        find.byType(SliverAppBar)
+        find.byType(SliverAppBar),
       );
       expect(header.child!.size.height, equals(100.0));
       await slowDrag(tester, anchor, const Offset(0.0, 100));
@@ -388,19 +387,19 @@ void main() {
                 child: Container(
                   key: anchor,
                   height: 800,
-                )
+                ),
               ),
               SliverToBoxAdapter(
                 child: Container(
                   height: 800,
-                )
+                ),
               ),
             ],
           ),
         ),
       );
       final RenderSliverFloatingPinnedPersistentHeader header = tester.renderObject(
-        find.byType(SliverAppBar)
+        find.byType(SliverAppBar),
       );
       expect(header.child!.size.height, equals(100.0));
       await slowDrag(tester, anchor, const Offset(0.0, 100));
@@ -424,19 +423,19 @@ void main() {
                 child: Container(
                   key: anchor,
                   height: 800,
-                )
+                ),
               ),
               SliverToBoxAdapter(
                 child: Container(
                   height: 800,
-                )
+                ),
               ),
             ],
           ),
         ),
       );
       final RenderSliverFloatingPinnedPersistentHeader header = tester.renderObject(
-        find.byType(SliverAppBar)
+        find.byType(SliverAppBar),
       );
       expect(header.child!.size.height, equals(100.0));
       await slowDrag(tester, anchor, const Offset(0.0, 100));

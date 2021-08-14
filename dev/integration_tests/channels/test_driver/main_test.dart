@@ -7,7 +7,7 @@ import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {
   group('channel suite', () {
-    FlutterDriver driver;
+    late FlutterDriver driver;
 
     setUpAll(() async {
       driver = await FlutterDriver.connect();
@@ -25,10 +25,10 @@ void main() {
       if (status != 'complete') {
         fail('Failed at step $step with status $status');
       }
-    }, timeout: const Timeout(Duration(minutes: 1)));
+    }, timeout: Timeout.none);
 
     tearDownAll(() async {
-      driver?.close();
+      driver.close();
     });
   });
 }

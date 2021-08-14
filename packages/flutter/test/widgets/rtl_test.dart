@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Padding RTL', (WidgetTester tester) async {
@@ -20,7 +20,7 @@ void main() {
       textDirection: TextDirection.rtl,
       child: child,
     ));
-    expect(tester.getTopLeft(find.byType(Placeholder)), const Offset(0.0, 0.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)), Offset.zero);
 
     await tester.pumpWidget(
       const Padding(
@@ -84,7 +84,7 @@ void main() {
   });
 
   testWidgets('EdgeInsetsDirectional without Directionality', (WidgetTester tester) async {
-    await tester.pumpWidget(const Padding(padding: EdgeInsetsDirectional.only()));
+    await tester.pumpWidget(const Padding(padding: EdgeInsetsDirectional.zero));
     expect(tester.takeException(), isAssertionError);
   });
 }

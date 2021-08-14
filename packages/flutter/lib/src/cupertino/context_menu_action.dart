@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'colors.dart';
 
@@ -46,7 +45,7 @@ class CupertinoContextMenuAction extends StatefulWidget {
   final IconData? trailingIcon;
 
   @override
-  _CupertinoContextMenuActionState createState() => _CupertinoContextMenuActionState();
+  State<CupertinoContextMenuAction> createState() => _CupertinoContextMenuActionState();
 }
 
 class _CupertinoContextMenuActionState extends State<CupertinoContextMenuAction> {

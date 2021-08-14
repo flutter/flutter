@@ -7,14 +7,13 @@ import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {
   group('scrolling performance test', () {
-    FlutterDriver driver;
+    late FlutterDriver driver;
 
     setUpAll(() async {
       driver = await FlutterDriver.connect();
     });
 
     tearDownAll(() async {
-      if (driver != null)
         driver.close();
     });
 
@@ -36,6 +35,6 @@ void main() {
         await driver.scroll(demoList, 0.0, 300.0, const Duration(milliseconds: 300));
         await Future<void>.delayed(const Duration(milliseconds: 500));
       }
-    });
+    }, timeout: Timeout.none);
   });
 }

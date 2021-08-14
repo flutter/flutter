@@ -14,7 +14,7 @@ Future<void> main() async {
 
     final String targetPlatform = await driver.requestData('getTargetPlatform');
 
-    Timeline timeline;
+    Timeline? timeline;
     switch (targetPlatform) {
       case 'TargetPlatform.iOS':
         {
@@ -36,10 +36,9 @@ Future<void> main() async {
 
     if (timeline != null) {
       final TimelineSummary summary = TimelineSummary.summarize(timeline);
-      await summary.writeSummaryToFile(fileName, pretty: true);
       await summary.writeTimelineToFile(fileName, pretty: true);
     }
 
     await driver.close();
-  });
+  }, timeout: Timeout.none);
 }

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/rendering.dart';
-
 import 'basic.dart';
 import 'framework.dart';
 
@@ -21,7 +19,7 @@ import 'framework.dart';
 ///
 /// ```dart
 /// Row(
-///   children: <Widget>[
+///   children: const <Widget>[
 ///     Text('Begin'),
 ///     Spacer(), // Defaults to a flex of one.
 ///     Text('Middle'),

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:meta/meta.dart';
@@ -19,12 +21,14 @@ import '../base/process.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
+import '../device_port_forwarder.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
 
 import 'android.dart';
 import 'android_console.dart';
 import 'android_sdk.dart';
+import 'application_package.dart';
 
 /// Whether the [AndroidDevice] is believed to be a physical device or an emulator.
 enum HardwareType { emulator, physical }
@@ -575,7 +579,8 @@ class AndroidDevice extends Device {
       );
       // Package has been built, so we can get the updated application ID and
       // activity name from the .apk.
-      package = await AndroidApk.fromAndroidProject(project.android);
+      package = await ApplicationPackageFactory.instance
+        .getPackageForPlatform(devicePlatform, buildInfo: debuggingOptions.buildInfo) as AndroidApk;
     }
     // There was a failure parsing the android project information.
     if (package == null) {
@@ -590,13 +595,17 @@ class AndroidDevice extends Device {
     }
 
     final bool traceStartup = platformArgs['trace-startup'] as bool ?? false;
-    _logger.printTrace('$this startApp');
-
     ProtocolDiscovery observatoryDiscovery;
 
     if (debuggingOptions.debuggingEnabled) {
       observatoryDiscovery = ProtocolDiscovery.observatory(
-        await getLogReader(),
+        // Avoid using getLogReader, which returns a singleton instance, because the
+        // observatory discovery will dipose at the end. creating a new logger here allows
+        // logs to be surfaced normally during `flutter drive`.
+        await AdbLogReader.createLogReader(
+          this,
+          _processManager,
+        ),
         portForwarder: portForwarder,
         hostPort: debuggingOptions.hostVmServicePort,
         devicePort: debuggingOptions.deviceVmServicePort,
@@ -623,7 +632,9 @@ class AndroidDevice extends Device {
       if (debuggingOptions.traceSkia)
         ...<String>['--ez', 'trace-skia', 'true'],
       if (debuggingOptions.traceAllowlist != null)
-        ...<String>['--ez', 'trace-allowlist', debuggingOptions.traceAllowlist],
+        ...<String>['--es', 'trace-allowlist', debuggingOptions.traceAllowlist],
+      if (debuggingOptions.traceSkiaAllowlist != null)
+        ...<String>['--es', 'trace-skia-allowlist', debuggingOptions.traceSkiaAllowlist],
       if (debuggingOptions.traceSystrace)
         ...<String>['--ez', 'trace-systrace', 'true'],
       if (debuggingOptions.endlessTraceBuffer)
@@ -669,8 +680,6 @@ class AndroidDevice extends Device {
     // Wait for the service protocol port here. This will complete once the
     // device has printed "Observatory is listening on...".
     _logger.printTrace('Waiting for observatory port to be available...');
-
-    // TODO(danrubel): Waiting for observatory services can be made common across all devices.
     try {
       Uri observatoryUri;
       if (debuggingOptions.buildInfo.isDebug || debuggingOptions.buildInfo.isProfile) {
@@ -1024,7 +1033,7 @@ class AdbLogReader extends DeviceLogReader {
       final String lastLogcatTimestamp = await device.lastLogcatTimestamp();
       args.addAll(<String>[
         '-T',
-        if (lastLogcatTimestamp != null) '\'$lastLogcatTimestamp\'' else '0',
+        if (lastLogcatTimestamp != null) "'$lastLogcatTimestamp'" else '0',
       ]);
     }
     final Process process = await processManager.start(device.adbCommandForDevice(args));
@@ -1306,13 +1315,10 @@ class AndroidDevicePortForwarder extends DevicePortForwarder {
       ],
       throwOnError: false,
     );
-    // The port may have already been unforwarded, for example if there
-    // are multiple attach process already connected.
-    if (runResult.exitCode == 0 || runResult
-      .stderr.contains("listener '$tcpLine' not found")) {
+    if (runResult.exitCode == 0) {
       return;
     }
-    runResult.throwException('Process exited abnormally:\n$runResult');
+    _logger.printError('Failed to unforward port: $runResult');
   }
 
   @override

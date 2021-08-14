@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
@@ -249,7 +248,7 @@ class AnimatedSwitcher extends StatefulWidget {
   final AnimatedSwitcherLayoutBuilder layoutBuilder;
 
   @override
-  _AnimatedSwitcherState createState() => _AnimatedSwitcherState();
+  State<AnimatedSwitcher> createState() => _AnimatedSwitcherState();
 
   /// The transition builder used as the default value of [transitionBuilder].
   ///
@@ -274,11 +273,11 @@ class AnimatedSwitcher extends StatefulWidget {
   /// This is an [AnimatedSwitcherLayoutBuilder] function.
   static Widget defaultLayoutBuilder(Widget? currentChild, List<Widget> previousChildren) {
     return Stack(
+      alignment: Alignment.center,
       children: <Widget>[
         ...previousChildren,
         if (currentChild != null) currentChild,
       ],
-      alignment: Alignment.center,
     );
   }
 

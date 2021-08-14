@@ -5,7 +5,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-import 'basic.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
@@ -22,10 +21,16 @@ export 'package:flutter/services.dart' show RawKeyEvent;
 /// For text entry, consider using a [EditableText], which integrates with
 /// on-screen keyboards and input method editors (IMEs).
 ///
+/// The [RawKeyboardListener] is different from [KeyboardListener] in that
+/// [RawKeyboardListener] uses the legacy [RawKeyboard] API. Use
+/// [KeyboardListener] if possible.
+///
 /// See also:
 ///
 ///  * [EditableText], which should be used instead of this widget for text
 ///    entry.
+///  * [KeyboardListener], a similar widget based on the newer
+///    [HardwareKeyboard] API.
 class RawKeyboardListener extends StatefulWidget {
   /// Creates a widget that receives raw keyboard events.
   ///
@@ -62,11 +67,11 @@ class RawKeyboardListener extends StatefulWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   @override
-  _RawKeyboardListenerState createState() => _RawKeyboardListenerState();
+  State<RawKeyboardListener> createState() => _RawKeyboardListenerState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -122,8 +127,7 @@ class _RawKeyboardListenerState extends State<RawKeyboardListener> {
   }
 
   void _handleRawKeyEvent(RawKeyEvent event) {
-    if (widget.onKey != null)
-      widget.onKey!(event);
+    widget.onKey?.call(event);
   }
 
   @override

@@ -70,7 +70,7 @@ abstract class FlowDelegate {
   /// respecting the constraints.
   ///
   /// If this function depends on information other than the given constraints,
-  /// override [shouldRelayout] to indicate when when the container should
+  /// override [shouldRelayout] to indicate when the container should
   /// relayout.
   Size getSize(BoxConstraints constraints) => constraints.biggest;
 
@@ -85,7 +85,7 @@ abstract class FlowDelegate {
   /// let them be larger or smaller than 100.0 by 100.0.
   ///
   /// If this function depends on information other than the given constraints,
-  /// override [shouldRelayout] to indicate when when the container should
+  /// override [shouldRelayout] to indicate when the container should
   /// relayout.
   BoxConstraints getConstraintsForChild(int i, BoxConstraints constraints) => constraints;
 
@@ -103,7 +103,7 @@ abstract class FlowDelegate {
   /// matrices for the children.
   ///
   /// If this function depends on information other than the given context,
-  /// override [shouldRepaint] to indicate when when the container should
+  /// override [shouldRepaint] to indicate when the container should
   /// relayout.
   void paintChildren(FlowPaintingContext context);
 
@@ -225,7 +225,7 @@ class RenderFlow extends RenderBox
     }
   }
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.hardEdge], and must not be null.
   Clip get clipBehavior => _clipBehavior;
@@ -296,6 +296,11 @@ class RenderFlow extends RenderBox
   }
 
   @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return _getSize(constraints);
+  }
+
+  @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
     size = _getSize(constraints);
@@ -340,7 +345,7 @@ class RenderFlow extends RenderBox
         throw FlutterError(
           'Cannot call paintChild twice for the same child.\n'
           'The flow delegate of type ${_delegate.runtimeType} attempted to '
-          'paint child $i multiple times, which is not permitted.'
+          'paint child $i multiple times, which is not permitted.',
         );
       }
       return true;
@@ -384,15 +389,27 @@ class RenderFlow extends RenderBox
   @override
   void paint(PaintingContext context, Offset offset) {
     if (clipBehavior == Clip.none) {
-      _clipRectLayer = null;
+      _clipRectLayer.layer = null;
       _paintWithDelegate(context, offset);
     } else {
-      _clipRectLayer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintWithDelegate,
-          clipBehavior: clipBehavior, oldLayer: _clipRectLayer);
+      _clipRectLayer.layer = context.pushClipRect(
+        needsCompositing,
+        offset,
+        Offset.zero & size,
+        _paintWithDelegate,
+        clipBehavior: clipBehavior,
+        oldLayer: _clipRectLayer.layer,
+      );
     }
   }
 
-  ClipRectLayer? _clipRectLayer;
+  final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();
+
+  @override
+  void dispose() {
+    _clipRectLayer.layer = null;
+    super.dispose();
+  }
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {

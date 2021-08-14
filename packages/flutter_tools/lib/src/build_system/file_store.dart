@@ -2,33 +2,30 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:collection';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
-import 'package:meta/meta.dart';
-import 'package:pool/pool.dart';
 
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/utils.dart';
 import '../convert.dart';
-import 'build_system.dart';
-
-/// The default threshold for file chunking is 250 KB, or about the size of `framework.dart`.
-const int kDefaultFileChunkThresholdBytes = 250000;
+import 'hash.dart';
 
 /// An encoded representation of all file hashes.
 class FileStorage {
   FileStorage(this.version, this.files);
 
   factory FileStorage.fromBuffer(Uint8List buffer) {
-    final Map<String, dynamic> json = castStringKeyedMap(jsonDecode(utf8.decode(buffer)));
+    final Map<String, dynamic>? json = castStringKeyedMap(jsonDecode(utf8.decode(buffer)));
+    if (json == null) {
+      throw Exception('File storage format invalid');
+    }
     final int version = json['version'] as int;
-    final List<Map<String, Object>> rawCachedFiles = (json['files'] as List<dynamic>).cast<Map<String, Object>>();
+    final List<Map<String, dynamic>> rawCachedFiles = (json['files'] as List<dynamic>).cast<Map<String, dynamic>>();
     final List<FileHash> cachedFiles = <FileHash>[
-      for (final Map<String, Object> rawFile in rawCachedFiles) FileHash.fromJson(rawFile),
+      for (final Map<String, dynamic> rawFile in rawCachedFiles) FileHash._fromJson(rawFile),
     ];
     return FileStorage(version, cachedFiles);
   }
@@ -51,8 +48,11 @@ class FileStorage {
 class FileHash {
   FileHash(this.path, this.hash);
 
-  factory FileHash.fromJson(Map<String, Object> json) {
-    return FileHash(json['path'] as String, json['hash'] as String);
+  factory FileHash._fromJson(Map<String, dynamic> json) {
+    if (!json.containsKey('path') || !json.containsKey('hash')) {
+      throw Exception('File storage format invalid');
+    }
+    return FileHash(json['path']! as String, json['hash']! as String);
   }
 
   final String path;
@@ -91,19 +91,16 @@ enum FileStoreStrategy {
 /// The format of the file store is subject to change and not part of its API.
 class FileStore {
   FileStore({
-    @required File cacheFile,
-    @required Logger logger,
+    required File cacheFile,
+    required Logger logger,
     FileStoreStrategy strategy = FileStoreStrategy.hash,
-    int fileChunkThreshold = kDefaultFileChunkThresholdBytes,
   }) : _logger = logger,
        _strategy = strategy,
-       _cacheFile = cacheFile,
-       _fileChunkThreshold = fileChunkThreshold;
+       _cacheFile = cacheFile;
 
   final File _cacheFile;
   final Logger _logger;
   final FileStoreStrategy _strategy;
-  final int _fileChunkThreshold;
 
   final HashMap<String, String> previousAssetKeys = HashMap<String, String>();
   final HashMap<String, String> currentAssetKeys = HashMap<String, String>();
@@ -187,14 +184,13 @@ class FileStore {
 
   /// Computes a diff of the provided files and returns a list of files
   /// that were dirty.
-  Future<List<File>> diffFileList(List<File> files) async {
+  List<File> diffFileList(List<File> files) {
     final List<File> dirty = <File>[];
     switch (_strategy) {
       case FileStoreStrategy.hash:
-        final Pool openFiles = Pool(kMaxOpenFiles);
-        await Future.wait(<Future<void>>[
-          for (final File file in files) _hashFile(file, dirty, openFiles)
-        ]);
+        for (final File file in files) {
+          _hashFile(file, dirty);
+        }
         break;
       case FileStoreStrategy.timestamp:
         for (final File file in files) {
@@ -207,7 +203,7 @@ class FileStore {
 
   void _checkModification(File file, List<File> dirty) {
     final String absolutePath = file.path;
-    final String previousTime = previousAssetKeys[absolutePath];
+    final String? previousTime = previousAssetKeys[absolutePath];
 
     // If the file is missing it is assumed to be dirty.
     if (!file.existsSync()) {
@@ -223,37 +219,38 @@ class FileStore {
     currentAssetKeys[absolutePath] = modifiedTime;
   }
 
-  Future<void> _hashFile(File file, List<File> dirty, Pool pool) async {
-    final PoolResource resource = await pool.request();
-    try {
-      final String absolutePath = file.path;
-      final String previousHash = previousAssetKeys[absolutePath];
-      // If the file is missing it is assumed to be dirty.
-      if (!file.existsSync()) {
-        currentAssetKeys.remove(absolutePath);
-        previousAssetKeys.remove(absolutePath);
-        dirty.add(file);
-        return;
-      }
-      Digest digest;
-      final int fileBytes = file.lengthSync();
-      // For files larger than a given threshold, chunk the conversion.
-      if (fileBytes > _fileChunkThreshold) {
-        final StreamController<Digest> digests = StreamController<Digest>();
-        final ByteConversionSink inputSink = md5.startChunkedConversion(digests);
-        await file.openRead().forEach(inputSink.add);
-        inputSink.close();
-        digest = await digests.stream.last;
-      } else {
-        digest = md5.convert(await file.readAsBytes());
-      }
-      final String currentHash = digest.toString();
-      if (currentHash != previousHash) {
-        dirty.add(file);
-      }
-      currentAssetKeys[absolutePath] = currentHash;
-    } finally {
-      resource.release();
+  // 64k is the same sized buffer used by dart:io for `File.openRead`.
+  static final Uint8List _readBuffer = Uint8List(64 * 1024);
+
+  void _hashFile(File file, List<File> dirty) {
+    final String absolutePath = file.path;
+    final String? previousHash = previousAssetKeys[absolutePath];
+    // If the file is missing it is assumed to be dirty.
+    if (!file.existsSync()) {
+      currentAssetKeys.remove(absolutePath);
+      previousAssetKeys.remove(absolutePath);
+      dirty.add(file);
+      return;
     }
+    final int fileBytes = file.lengthSync();
+    final Md5Hash hash = Md5Hash();
+    RandomAccessFile? openFile;
+    try {
+      openFile = file.openSync(mode: FileMode.read);
+      int bytes = 0;
+      while (bytes < fileBytes) {
+        final int bytesRead = openFile.readIntoSync(_readBuffer);
+        hash.addChunk(_readBuffer, bytesRead);
+        bytes += bytesRead;
+      }
+    } finally {
+      openFile?.closeSync();
+    }
+    final Digest digest = Digest(hash.finalize().buffer.asUint8List());
+    final String currentHash = digest.toString();
+    if (currentHash != previousHash) {
+      dirty.add(file);
+    }
+    currentAssetKeys[absolutePath] = currentHash;
   }
 }

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -27,6 +29,7 @@ class MacOSDevice extends DesktopDevice {
     @required OperatingSystemUtils operatingSystemUtils,
   }) : _processManager = processManager,
        _logger = logger,
+       _operatingSystemUtils = operatingSystemUtils,
        super(
         'macos',
         platformType: PlatformType.macos,
@@ -39,6 +42,7 @@ class MacOSDevice extends DesktopDevice {
 
   final ProcessManager _processManager;
   final Logger _logger;
+  final OperatingSystemUtils _operatingSystemUtils;
 
   @override
   bool isSupported() => true;
@@ -47,7 +51,16 @@ class MacOSDevice extends DesktopDevice {
   String get name => 'macOS';
 
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.darwin_x64;
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.darwin;
+
+  @override
+  Future<String> get targetPlatformDisplayName async {
+    if (_operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm) {
+      return 'darwin-arm64';
+    } else {
+      return 'darwin-x64';
+    }
+  }
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {
@@ -135,4 +148,7 @@ class MacOSDevices extends PollingDeviceDiscovery {
 
   @override
   Future<List<String>> getDiagnostics() async => const <String>[];
+
+  @override
+  List<String> get wellKnownIds => const <String>['macos'];
 }

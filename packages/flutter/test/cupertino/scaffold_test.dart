@@ -25,7 +25,7 @@ void main() {
       ),
     );
 
-    expect(tester.getTopLeft(find.byType(Center)), const Offset(0.0, 0.0));
+    expect(tester.getTopLeft(find.byType(Center)), Offset.zero);
   });
 
   testWidgets('Opaque bar pushes contents down', (WidgetTester tester) async {
@@ -49,7 +49,7 @@ void main() {
       ),
     ));
 
-    expect(MediaQuery.of(childContext)!.padding.top, 0);
+    expect(MediaQuery.of(childContext).padding.top, 0);
     // The top of the [Container] is 44 px from the top of the screen because
     // it's pushed down by the opaque navigation bar whose height is 44 px,
     // and the 20 px [MediaQuery] top padding is fully absorbed by the navigation bar.
@@ -94,12 +94,12 @@ void main() {
     }
     await tester.pumpWidget(scaffoldWithBrightness(Brightness.light));
 
-    expect(MediaQuery.of(childContext)!.padding.top, 0);
+    expect(MediaQuery.of(childContext).padding.top, 0);
     expect(find.byType(CupertinoPageScaffold), paints..rect(color: backgroundColor.color));
 
     await tester.pumpWidget(scaffoldWithBrightness(Brightness.dark));
 
-    expect(MediaQuery.of(childContext)!.padding.top, greaterThan(0));
+    expect(MediaQuery.of(childContext).padding.top, greaterThan(0));
     expect(find.byType(CupertinoPageScaffold), paints..rect(color: backgroundColor.darkColor));
   });
 
@@ -142,7 +142,7 @@ void main() {
     expect(tester.getSize(find.byType(Container)).height, 600.0 - 100.0);
     // The shouldn't see a media query view inset because it was consumed by
     // the scaffold.
-    expect(MediaQuery.of(childContext)!.viewInsets.bottom, 0);
+    expect(MediaQuery.of(childContext).viewInsets.bottom, 0);
 
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -211,11 +211,11 @@ void main() {
             items: <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-                title: const Text('Tab 1'),
+                label: 'Tab 1',
               ),
               BottomNavigationBarItem(
                 icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-                title: const Text('Tab 2'),
+                label: 'Tab 2',
               ),
             ],
           ),
@@ -251,11 +251,11 @@ void main() {
               items: <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
                   icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-                  title: const Text('Tab 1'),
+                  label: 'Tab 1',
                 ),
                 BottomNavigationBarItem(
                   icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-                  title: const Text('Tab 2'),
+                  label: 'Tab 2',
                 ),
               ],
             ),
@@ -282,7 +282,7 @@ void main() {
     expect(tester.getTopLeft(find.byWidget(content)).dy, 20.0 + 44.0);
 
     // Overscroll to the bottom.
-    await tester.drag(find.byWidget(content), const Offset(0.0, -400.0));
+    await tester.drag(find.byWidget(content), const Offset(0.0, -400.0), warnIfMissed: false); // can't be hit (it's empty) but we're aiming for the list really so it doesn't matter
     // Let it bounce back.
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
@@ -301,11 +301,11 @@ void main() {
             items: <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-                title: const Text('Tab 1'),
+                label: 'Tab 1',
               ),
               BottomNavigationBarItem(
                 icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-                title: const Text('Tab 2'),
+                label: 'Tab 2',
               ),
             ],
           ),
@@ -322,7 +322,7 @@ void main() {
                     child: CupertinoButton(
                       child: const Text('Next'),
                       onPressed: () {
-                        Navigator.of(context)!.push(
+                        Navigator.of(context).push(
                           CupertinoPageRoute<void>(
                             builder: (BuildContext context) {
                               return CupertinoPageScaffold(
@@ -333,7 +333,7 @@ void main() {
                                   child: CupertinoButton(
                                     child: const Text('Back'),
                                     onPressed: () {
-                                      Navigator.of(context)!.pop();
+                                      Navigator.of(context).pop();
                                     },
                                   ),
                                 ),
@@ -420,8 +420,8 @@ void main() {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoPageScaffold(
-          child: Center(),
           backgroundColor: Color(0xFF010203),
+          child: Center(),
         ),
       ),
     );
@@ -439,7 +439,7 @@ void main() {
         builder: (BuildContext context, Widget? child) {
           // Acts as a 20px status bar at the root of the app.
           return MediaQuery(
-            data: MediaQuery.of(context)!.copyWith(padding: const EdgeInsets.only(top: 20)),
+            data: MediaQuery.of(context).copyWith(padding: const EdgeInsets.only(top: 20)),
             child: child!,
           );
         },
@@ -537,7 +537,7 @@ void main() {
       CupertinoApp(
         home: Builder(builder: (BuildContext context) {
           return MediaQuery(
-            data: MediaQuery.of(context)!.copyWith(textScaleFactor: 99),
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 99),
             child: const CupertinoPageScaffold(
               navigationBar: CupertinoNavigationBar(
                 middle: Text('middle'),

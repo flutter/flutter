@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 bool willPopValue = false;
 
@@ -116,7 +116,8 @@ void main() {
 
     // Use didPopRoute() to simulate the system back button. Check that
     // didPopRoute() indicates that the notification was handled.
-    final dynamic widgetsAppState = tester.state(find.byType(WidgetsApp)); // ignore: unnecessary_nullable_for_final_variable_declarations
+    final dynamic widgetsAppState = tester.state(find.byType(WidgetsApp));
+    // ignore: avoid_dynamic_calls
     expect(await widgetsAppState.didPopRoute(), isTrue);
     expect(find.text('Sample Page'), findsOneWidget);
 
@@ -139,7 +140,7 @@ void main() {
                 child: TextButton(
                   child: const Text('X'),
                   onPressed: () {
-                    Navigator.of(context)!.push(MaterialPageRoute<void>(
+                    Navigator.of(context).push(MaterialPageRoute<void>(
                       builder: (BuildContext context) {
                         return SampleForm(
                           callback: () => Future<bool>.value(willPopValue),
@@ -178,7 +179,7 @@ void main() {
                 child: TextButton(
                   child: const Text('X'),
                   onPressed: () {
-                    Navigator.of(context)!.push(MaterialPageRoute<void>(
+                    Navigator.of(context).push(MaterialPageRoute<void>(
                       builder: (BuildContext context) {
                         return SampleForm(
                           callback: () => Future<bool>.value(willPopValue),
@@ -230,11 +231,11 @@ void main() {
             actions: <Widget> [
               TextButton(
                 child: const Text('YES'),
-                onPressed: () { Navigator.of(context)!.pop(true); },
+                onPressed: () { Navigator.of(context).pop(true); },
               ),
               TextButton(
                 child: const Text('NO'),
-                onPressed: () { Navigator.of(context)!.pop(false); },
+                onPressed: () { Navigator.of(context).pop(false); },
               ),
             ],
           );
@@ -252,12 +253,12 @@ void main() {
                 child: TextButton(
                   child: const Text('X'),
                   onPressed: () {
-                    Navigator.of(context)!.push(MaterialPageRoute<void>(
+                    Navigator.of(context).push(MaterialPageRoute<void>(
                       builder: (BuildContext context) {
                         return SampleForm(
                           callback: () => showYesNoAlert(context),
                         );
-                      }
+                      },
                     ));
                   },
                 ),
@@ -323,7 +324,7 @@ void main() {
           builder: (BuildContext context, StateSetter setState) {
             contentsSetState = setState;
             return contentsEmpty ? Container() : SampleForm(key: UniqueKey(), callback: () async => false);
-          }
+          },
         );
       },
     );
@@ -338,7 +339,7 @@ void main() {
                 child: TextButton(
                   child: const Text('X'),
                   onPressed: () {
-                    Navigator.of(context)!.push(route);
+                    Navigator.of(context).push(route);
                   },
                 ),
               );

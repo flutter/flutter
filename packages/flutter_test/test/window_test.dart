@@ -2,15 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=123"
+@Tags(<String>['no-shuffle'])
+
 import 'dart:ui' as ui show window;
 import 'dart:ui' show Size, Locale, WindowPadding, AccessibilityFeatures, Brightness;
 
-import 'package:flutter/widgets.dart' show WidgetsBinding;
+import 'package:flutter/widgets.dart' show WidgetsBinding, WidgetsBindingObserver;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('TestWindow can handle new methods without breaking', () {
-    final dynamic testWindow = TestWindow(window: ui.window); // ignore: unnecessary_nullable_for_final_variable_declarations
+    final dynamic testWindow = TestWindow(window: ui.window);
+    // ignore: avoid_dynamic_calls
     expect(testWindow.someNewProperty, null);
   });
 
@@ -184,6 +191,14 @@ void main() {
     expect(WidgetsBinding.instance!.window.devicePixelRatio, originalDevicePixelRatio);
     expect(WidgetsBinding.instance!.window.textScaleFactor, originalTextScaleFactor);
   });
+
+  testWidgets('TestWindow sends fake locales when WidgetsBindingObserver notifiers are called', (WidgetTester tester) async {
+    final TestObserver observer = TestObserver();
+    retrieveTestBinding(tester).addObserver(observer);
+    final List<Locale> expectedValue = <Locale>[const Locale('fake_language_code')];
+    retrieveTestBinding(tester).window.localesTestValue = expectedValue;
+    expect(observer.locales, equals(expectedValue));
+  });
 }
 
 void verifyThatTestWindowCanFakeProperty<WindowPropertyType>({
@@ -271,5 +286,15 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
   @override
   dynamic noSuchMethod(Invocation invocation) {
     return null;
+  }
+}
+
+class TestObserver with WidgetsBindingObserver {
+  List<Locale>? locales;
+  Locale? locale;
+
+  @override
+  void didChangeLocales(List<Locale>? locales) {
+    this.locales = locales;
   }
 }

@@ -4,8 +4,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/gestures.dart';
-import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';
@@ -75,6 +73,15 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
   Matrix4? _paintTransform;
 
   @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    if (child == null) {
+      return constraints.smallest;
+    }
+    final Size childSize = child!.getDryLayout(_isVertical ? constraints.flipped : constraints);
+    return _isVertical ? Size(childSize.height, childSize.width) : childSize;
+  }
+
+  @override
   void performLayout() {
     _paintTransform = null;
     if (child != null) {
@@ -85,7 +92,7 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
         ..rotateZ(_kQuarterTurnsInRadians * (quarterTurns % 4))
         ..translate(-child!.size.width / 2.0, -child!.size.height / 2.0);
     } else {
-      performResize();
+      size = constraints.smallest;
     }
   }
 
@@ -110,14 +117,25 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
-      _transformLayer = context.pushTransform(needsCompositing, offset, _paintTransform!, _paintChild,
-          oldLayer: _transformLayer);
+      _transformLayer.layer = context.pushTransform(
+        needsCompositing,
+        offset,
+        _paintTransform!,
+        _paintChild,
+        oldLayer: _transformLayer.layer,
+      );
     } else {
-      _transformLayer = null;
+      _transformLayer.layer = null;
     }
   }
 
-  TransformLayer? _transformLayer;
+  final LayerHandle<TransformLayer> _transformLayer = LayerHandle<TransformLayer>();
+
+  @override
+  void dispose() {
+    _transformLayer.layer = null;
+    super.dispose();
+  }
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {

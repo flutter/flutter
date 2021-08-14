@@ -82,7 +82,7 @@ class DialogTheme with Diagnosticable {
 
   /// The data from the closest [DialogTheme] instance given the build context.
   static DialogTheme of(BuildContext context) {
-    return Theme.of(context)!.dialogTheme;
+    return Theme.of(context).dialogTheme;
   }
 
   /// Linearly interpolate between two dialog themes.

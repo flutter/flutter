@@ -38,6 +38,10 @@ void main() {
     return s.fontFamily == '.SF UI Text';
   }, 'Uses SF Text font');
 
+  final Matcher isMacOSSanFranciscoMetaFont = predicate((TextStyle s) {
+    return s.fontFamily == '.AppleSystemUIFont';
+  }, 'Uses macOS system meta-font');
+
   test('Typography on iOS defaults to the correct SF font family based on size', () {
     final Typography typography = Typography.material2018(platform: TargetPlatform.iOS);
     for (final TextTheme textTheme in <TextTheme>[typography.black, typography.white]) {
@@ -57,22 +61,22 @@ void main() {
     }
   });
 
-  test('Typography on macOS defaults to the correct SF font family based on size', () {
+  test('Typography on macOS defaults to the system UI meta-font', () {
     final Typography typography = Typography.material2018(platform: TargetPlatform.macOS);
     for (final TextTheme textTheme in <TextTheme>[typography.black, typography.white]) {
-      expect(textTheme.headline1, isSanFranciscoDisplayFont);
-      expect(textTheme.headline2, isSanFranciscoDisplayFont);
-      expect(textTheme.headline3, isSanFranciscoDisplayFont);
-      expect(textTheme.headline4, isSanFranciscoDisplayFont);
-      expect(textTheme.headline5, isSanFranciscoDisplayFont);
-      expect(textTheme.headline6, isSanFranciscoDisplayFont);
-      expect(textTheme.subtitle1, isSanFranciscoTextFont);
-      expect(textTheme.bodyText1, isSanFranciscoTextFont);
-      expect(textTheme.bodyText2, isSanFranciscoTextFont);
-      expect(textTheme.caption, isSanFranciscoTextFont);
-      expect(textTheme.button, isSanFranciscoTextFont);
-      expect(textTheme.subtitle2, isSanFranciscoTextFont);
-      expect(textTheme.overline, isSanFranciscoTextFont);
+      expect(textTheme.headline1, isMacOSSanFranciscoMetaFont);
+      expect(textTheme.headline2, isMacOSSanFranciscoMetaFont);
+      expect(textTheme.headline3, isMacOSSanFranciscoMetaFont);
+      expect(textTheme.headline4, isMacOSSanFranciscoMetaFont);
+      expect(textTheme.headline5, isMacOSSanFranciscoMetaFont);
+      expect(textTheme.headline6, isMacOSSanFranciscoMetaFont);
+      expect(textTheme.subtitle1, isMacOSSanFranciscoMetaFont);
+      expect(textTheme.bodyText1, isMacOSSanFranciscoMetaFont);
+      expect(textTheme.bodyText2, isMacOSSanFranciscoMetaFont);
+      expect(textTheme.caption, isMacOSSanFranciscoMetaFont);
+      expect(textTheme.button, isMacOSSanFranciscoMetaFont);
+      expect(textTheme.subtitle2, isMacOSSanFranciscoMetaFont);
+      expect(textTheme.overline, isMacOSSanFranciscoMetaFont);
     }
   });
 

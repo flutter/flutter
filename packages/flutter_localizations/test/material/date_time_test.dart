@@ -158,12 +158,29 @@ void main() {
         expect(formatted[DateType.full], 'Mittwoch, 1. August 2018');
         expect(formatted[DateType.monthYear], 'August 2018');
       });
+
+      testWidgets('formats dates in Serbian', (WidgetTester tester) async {
+        final Map<DateType, String> formatted = await formatDate(tester, const Locale('sr'), DateTime(2018, 8, 1));
+        expect(formatted[DateType.year], '2018.');
+        expect(formatted[DateType.medium], 'сре 1. авг');
+        expect(formatted[DateType.full], 'среда, 1. август 2018.');
+        expect(formatted[DateType.monthYear], 'август 2018.');
+      });
+
+      testWidgets('formats dates in Serbian (Latin)', (WidgetTester tester) async {
+        final Map<DateType, String> formatted = await formatDate(tester,
+          const Locale.fromSubtags(languageCode:'sr', scriptCode: 'Latn'), DateTime(2018, 8, 1));
+        expect(formatted[DateType.year], '2018.');
+        expect(formatted[DateType.medium], 'sre 1. avg');
+        expect(formatted[DateType.full], 'sreda, 1. avgust 2018.');
+        expect(formatted[DateType.monthYear], 'avgust 2018.');
+      });
     });
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/67644.
   testWidgets('en_US is initialized correctly by Flutter when DateFormat is used', (WidgetTester tester) async {
-    DateFormat dateFormat;
+    late DateFormat dateFormat;
 
     await tester.pumpWidget(MaterialApp(
       supportedLocales: const <Locale>[
@@ -180,7 +197,7 @@ void main() {
       }),
     ));
 
-    expect(dateFormat?.locale, 'en_US');
+    expect(dateFormat.locale, 'en_US');
   });
 }
 

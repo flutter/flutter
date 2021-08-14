@@ -200,7 +200,7 @@ void main() {
       find.descendant(
         of: find.byType(CupertinoTabScaffold),
         matching: find.byType(DecoratedBox),
-      )
+      ),
     ).decoration as BoxDecoration;
 
     expect(tabDecoration.color!.value, backgroundColor.color.value);
@@ -223,7 +223,7 @@ void main() {
       find.descendant(
         of: find.byType(CupertinoTabScaffold),
         matching: find.byType(DecoratedBox),
-      )
+      ),
     ).decoration as BoxDecoration;
 
     expect(tabDecoration.color!.value, backgroundColor.darkColor.value);
@@ -235,7 +235,7 @@ void main() {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(
-          viewInsets:  EdgeInsets.only(bottom: 0),
+          viewInsets:  EdgeInsets.zero,
         ),
         child: MaterialApp(
           home: Material(
@@ -282,12 +282,12 @@ void main() {
       MaterialApp(
         home: Builder(builder: (BuildContext context) {
           return MediaQuery(
-            data: MediaQuery.of(context)!.copyWith(textScaleFactor: 99),
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 99),
             child: CupertinoTabScaffold(
               tabBar: CupertinoTabBar(
                 items: List<BottomNavigationBarItem>.generate(
                   10,
-                  (int i) => BottomNavigationBarItem(icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))), title: Text('$i')),
+                  (int i) => BottomNavigationBarItem(icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))), label: '$i'),
                 ),
               ),
               tabBuilder: (BuildContext context, int index) => const Text('content'),
@@ -325,11 +325,11 @@ CupertinoTabBar _buildTabBar({ int selectedTab = 0 }) {
     items: <BottomNavigationBarItem>[
       BottomNavigationBarItem(
         icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-        title: const Text('Tab 1'),
+        label: 'Tab 1',
       ),
       BottomNavigationBarItem(
         icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-        title: const Text('Tab 2'),
+        label: 'Tab 2',
       ),
     ],
     currentIndex: selectedTab,

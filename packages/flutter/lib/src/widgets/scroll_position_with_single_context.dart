@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'framework.dart';
-import 'gesture_detector.dart';
 import 'scroll_activity.dart';
 import 'scroll_context.dart';
 import 'scroll_notification.dart';
@@ -202,7 +203,29 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     goBallistic(0.0);
   }
 
-  @Deprecated('This will lead to bugs.') // ignore: flutter_deprecation_syntax, https://github.com/flutter/flutter/issues/44609
+  @override
+  void pointerScroll(double delta) {
+    assert(delta != 0.0);
+
+    final double targetPixels =
+        math.min(math.max(pixels + delta, minScrollExtent), maxScrollExtent);
+    if (targetPixels != pixels) {
+      goIdle();
+      updateUserScrollDirection(
+          -delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse,
+      );
+      final double oldPixels = pixels;
+      forcePixels(targetPixels);
+      isScrollingNotifier.value = true;
+      didStartScroll();
+      didUpdateScrollPositionBy(pixels - oldPixels);
+      didEndScroll();
+      goBallistic(0.0);
+    }
+  }
+
+
+  @Deprecated('This will lead to bugs.') // flutter_ignore: deprecation_syntax, https://github.com/flutter/flutter/issues/44609
   @override
   void jumpToWithoutSettling(double value) {
     goIdle();

@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import '../../gallery/demo.dart';
 
 class ElevationDemo extends StatefulWidget {
+  const ElevationDemo({Key? key}) : super(key: key);
+
   static const String routeName = '/material/elevation';
 
   @override

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:html';
 
 @TestOn('chrome') // Uses web-only Flutter SDK
@@ -13,14 +11,16 @@ import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
 void main() {
   group('$HashUrlStrategy', () {
-    TestPlatformLocation location;
+    late TestPlatformLocation location;
 
     setUp(() {
       location = TestPlatformLocation();
     });
 
-    tearDown(() {
-      location = null;
+    test('allows null state', () {
+      final HashUrlStrategy strategy = HashUrlStrategy(location);
+      expect(() => strategy.pushState(null, '', '/'), returnsNormally);
+      expect(() => strategy.replaceState(null, '', '/'), returnsNormally);
     });
 
     test('leading slash is optional', () {
@@ -48,14 +48,17 @@ void main() {
   });
 
   group('$PathUrlStrategy', () {
-    TestPlatformLocation location;
+    late TestPlatformLocation location;
 
     setUp(() {
       location = TestPlatformLocation();
     });
 
-    tearDown(() {
-      location = null;
+    test('allows null state', () {
+      location.baseHref = '/';
+      final PathUrlStrategy strategy = PathUrlStrategy(location);
+      expect(() => strategy.pushState(null, '', '/'), returnsNormally);
+      expect(() => strategy.replaceState(null, '', '/'), returnsNormally);
     });
 
     test('validates base href', () {
@@ -153,7 +156,7 @@ class TestPlatformLocation extends PlatformLocation {
   String hash = '';
 
   @override
-  dynamic state;
+  Object? get state => null;
 
   /// Mocks the base href of the document.
   String baseHref = '';
@@ -169,14 +172,10 @@ class TestPlatformLocation extends PlatformLocation {
   }
 
   @override
-  void pushState(dynamic state, String title, String url) {
-    throw UnimplementedError();
-  }
+  void pushState(Object? state, String title, String url) {}
 
   @override
-  void replaceState(dynamic state, String title, String url) {
-    throw UnimplementedError();
-  }
+  void replaceState(Object? state, String title, String url) {}
 
   @override
   void go(int count) {

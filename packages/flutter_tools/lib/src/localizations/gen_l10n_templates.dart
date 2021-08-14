@@ -12,8 +12,7 @@ const String fileTemplate = '''
 @(header)
 import 'dart:async';
 
-// ignore: unused_import
-import 'package:flutter/foundation.dart';
+@(requiresFoundationImport)
 import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
@@ -23,8 +22,8 @@ import 'package:intl/intl.dart' as intl;
 /// Callers can lookup localized strings with an instance of @(class) returned
 /// by `@(class).of(context)`.
 ///
-/// Applications need to include `@(class).delegate()` in their app\'s
-/// localizationDelegates list, and the locales they support in the app\'s
+/// Applications need to include `@(class).delegate()` in their app's
+/// localizationDelegates list, and the locales they support in the app's
 /// supportedLocales list. For example:
 ///
 /// ```
@@ -47,7 +46,7 @@ import 'package:intl/intl.dart' as intl;
 ///   # Internationalization support.
 ///   flutter_localizations:
 ///     sdk: flutter
-///   intl: 0.16.1
+///   intl: any # Use the pinned version from flutter_localizations
 ///
 ///   # rest of dependencies
 /// ```
@@ -72,13 +71,12 @@ import 'package:intl/intl.dart' as intl;
 /// be consistent with the languages listed in the @(class).supportedLocales
 /// property.
 abstract class @(class) {
-  @(class)(String locale) : assert(locale != null), localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  @(class)(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
-  // ignore: unused_field
   final String localeName;
 
-  static @(class) of(BuildContext context) {
-    return Localizations.of<@(class)>(context, @(class));
+  static @(class)@(canBeNullable) of(BuildContext context) {
+    return Localizations.of<@(class)>(context, @(class))@(needsNullCheck);
   }
 
   static const LocalizationsDelegate<@(class)> delegate = _@(class)Delegate();
@@ -110,7 +108,12 @@ abstract class @(class) {
 @(delegateClass)
 ''';
 
-const String numberFormatTemplate = '''
+const String numberFormatPositionalTemplate = '''
+    final intl.NumberFormat @(placeholder)NumberFormat = intl.NumberFormat.@(format)(localeName);
+    final String @(placeholder)String = @(placeholder)NumberFormat.format(@(placeholder));
+''';
+
+const String numberFormatNamedTemplate = '''
     final intl.NumberFormat @(placeholder)NumberFormat = intl.NumberFormat.@(format)(
       locale: localeName,
       @(parameters)
@@ -120,6 +123,11 @@ const String numberFormatTemplate = '''
 
 const String dateFormatTemplate = '''
     final intl.DateFormat @(placeholder)DateFormat = intl.DateFormat.@(format)(localeName);
+    final String @(placeholder)String = @(placeholder)DateFormat.format(@(placeholder));
+''';
+
+const String dateFormatCustomTemplate = '''
+    final intl.DateFormat @(placeholder)DateFormat = intl.DateFormat(@(format), localeName);
     final String @(placeholder)String = @(placeholder)DateFormat.format(@(placeholder));
 ''';
 
@@ -153,13 +161,51 @@ const String pluralMethodTemplate = '''
     );
   }''';
 
+const String pluralMethodTemplateInString = '''
+  @override
+  String @(name)(@(parameters)) {
+@(dateFormatting)
+@(numberFormatting)
+    final String @(variable) = intl.Intl.pluralLogic(
+      @(count),
+      locale: localeName,
+@(pluralLogicArgs),
+    );
+
+    return @(string);
+  }''';
+
+const String selectMethodTemplate = '''
+  @override
+  String @(name)(@(parameters)) {
+    return intl.Intl.select(
+      @(choice),
+      {
+        @(cases)
+      },
+      desc: '@(description)'
+    );
+  }''';
+
+const String selectMethodTemplateInString = '''
+  @override
+  String @(name)(@(parameters)) {
+    final String @(variable) = intl.Intl.select(
+      @(choice),
+      {
+        @(cases)
+      },
+      desc: '@(description)'
+    );
+
+    return @(string);
+  }''';
+
 const String classFileTemplate = '''
 @(header)
-// ignore: unused_import
-import 'package:intl/intl.dart' as intl;
-import '@(fileName)';
 
-// ignore_for_file: unnecessary_brace_in_string_interps
+@(requiresIntlImport)
+import '@(fileName)';
 
 /// The translations for @(language) (`@(localeName)`).
 class @(class) extends @(baseClass) {
@@ -180,12 +226,16 @@ class @(class) extends @(baseLanguageClassName) {
 ''';
 
 const String baseClassGetterTemplate = '''
-  // @(comment)
+  /// @(comment)
+  ///
+@(templateLocaleTranslationComment)
   String get @(name);
 ''';
 
 const String baseClassMethodTemplate = '''
-  // @(comment)
+  /// @(comment)
+  ///
+@(templateLocaleTranslationComment)
   String @(name)(@(parameters));
 ''';
 
@@ -215,18 +265,28 @@ const String loadBodyDeferredLoadingTemplate = '''return @(lookupName)(locale);'
 
 // DELEGATE LOOKUP TEMPLATES
 
-const String lookupFunctionTemplate = '''
+const String lookupFunctionTemplate = r'''
 @(class) @(lookupName)(Locale locale) {
   @(lookupBody)
-  assert(false, '@(class).delegate failed to load unsupported locale "\$locale"');
-  return null;
+
+  throw FlutterError(
+    '@(class).delegate failed to load unsupported locale "$locale". This is likely '
+    'an issue with the localizations generation tool. Please file an issue '
+    'on GitHub with a reproducible sample app and the gen-l10n configuration '
+    'that was used.'
+  );
 }''';
 
-const String lookupFunctionDeferredLoadingTemplate = '''
+const String lookupFunctionDeferredLoadingTemplate = r'''
 Future<@(class)> @(lookupName)(Locale locale) {
   @(lookupBody)
-  assert(false, '@(class).delegate failed to load unsupported locale "\$locale"');
-  return null;
+
+  throw FlutterError(
+    '@(class).delegate failed to load unsupported locale "$locale". This is likely '
+    'an issue with the localizations generation tool. Please file an issue '
+    'on GitHub with a reproducible sample app and the gen-l10n configuration '
+    'that was used.'
+  );
 }''';
 
 const String lookupBodyTemplate = '''
@@ -248,15 +308,15 @@ case '@(languageCode)': {
 }''';
 
 const String languageCodeSwitchTemplate = '''
-@(comment)
-switch (locale.languageCode) {
-  @(switchClauses)
-}
+  @(comment)
+  switch (locale.languageCode) {
+    @(switchClauses)
+  }
 ''';
 
 const String allCodesLookupTemplate = '''
-// Lookup logic when language+script+country codes are specified.
-switch (locale.toString()) {
-  @(allCodesSwitchClauses)
-}
+  // Lookup logic when language+script+country codes are specified.
+  switch (locale.toString()) {
+    @(allCodesSwitchClauses)
+  }
 ''';

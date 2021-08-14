@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:file/file.dart';
@@ -188,6 +190,6 @@ bool _isHotReloadCompletionEvent(Map<String, dynamic> event) {
   return event != null &&
       event['event'] == 'app.progress' &&
       event['params'] != null &&
-      event['params']['progressId'] == 'hot.reload' &&
-      event['params']['finished'] == true;
+      (event['params'] as Map<String, dynamic>)['progressId'] == 'hot.reload' &&
+      (event['params'] as Map<String, dynamic>)['finished'] == true;
 }

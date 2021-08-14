@@ -5,7 +5,6 @@
 import 'dart:collection';
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -128,30 +127,30 @@ class CupertinoSegmentedControl<T extends Object> extends StatefulWidget {
   ///
   /// ```dart
   /// class SegmentedControlExample extends StatefulWidget {
+  ///   const SegmentedControlExample({Key? key}) : super(key: key);
+  ///
   ///   @override
   ///   State createState() => SegmentedControlExampleState();
   /// }
   ///
   /// class SegmentedControlExampleState extends State<SegmentedControlExample> {
-  ///   final Map<int, Widget> children = const {
+  ///   final Map<int, Widget> children = const <int, Widget>{
   ///     0: Text('Child 1'),
   ///     1: Text('Child 2'),
   ///   };
   ///
-  ///   int currentValue;
+  ///   late int currentValue;
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
-  ///     return Container(
-  ///       child: CupertinoSegmentedControl<int>(
-  ///         children: children,
-  ///         onValueChanged: (int newValue) {
-  ///           setState(() {
-  ///             currentValue = newValue;
-  ///           });
-  ///         },
-  ///         groupValue: currentValue,
-  ///       ),
+  ///     return CupertinoSegmentedControl<int>(
+  ///       children: children,
+  ///       onValueChanged: (int newValue) {
+  ///         setState(() {
+  ///           currentValue = newValue;
+  ///         });
+  ///       },
+  ///       groupValue: currentValue,
   ///     );
   ///   }
   /// }
@@ -188,7 +187,7 @@ class CupertinoSegmentedControl<T extends Object> extends StatefulWidget {
   final EdgeInsetsGeometry? padding;
 
   @override
-  _SegmentedControlState<T> createState() => _SegmentedControlState<T>();
+  State<CupertinoSegmentedControl<T>> createState() => _SegmentedControlState<T>();
 }
 
 class _SegmentedControlState<T extends Object> extends State<CupertinoSegmentedControl<T>>
@@ -410,11 +409,11 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSegmentedC
     }
 
     final Widget box = _SegmentedControlRenderWidget<T>(
-      children: _gestureChildren,
       selectedIndex: selectedIndex,
       pressedIndex: pressedIndex,
       backgroundColors: _backgroundColors,
       borderColor: _borderColor!,
+      children: _gestureChildren,
     );
 
     return Padding(
@@ -448,7 +447,7 @@ class _SegmentedControlRenderWidget<T> extends MultiChildRenderObjectWidget {
   @override
   RenderObject createRenderObject(BuildContext context) {
     return _RenderSegmentedControl<T>(
-      textDirection: Directionality.of(context)!,
+      textDirection: Directionality.of(context),
       selectedIndex: selectedIndex,
       pressedIndex: pressedIndex,
       backgroundColors: backgroundColors,
@@ -459,7 +458,7 @@ class _SegmentedControlRenderWidget<T> extends MultiChildRenderObjectWidget {
   @override
   void updateRenderObject(BuildContext context, _RenderSegmentedControl<T> renderObject) {
     renderObject
-      ..textDirection = Directionality.of(context)!
+      ..textDirection = Directionality.of(context)
       ..selectedIndex = selectedIndex
       ..pressedIndex = pressedIndex
       ..backgroundColors = backgroundColors
@@ -613,11 +612,17 @@ class _RenderSegmentedControl<T> extends RenderBox
       final Rect childRect = Rect.fromLTWH(start, 0.0, child.size.width, child.size.height);
       final RRect rChildRect;
       if (child == leftChild) {
-        rChildRect = RRect.fromRectAndCorners(childRect, topLeft: const Radius.circular(3.0),
-            bottomLeft: const Radius.circular(3.0));
+        rChildRect = RRect.fromRectAndCorners(
+          childRect,
+          topLeft: const Radius.circular(3.0),
+          bottomLeft: const Radius.circular(3.0),
+        );
       } else if (child == rightChild) {
-        rChildRect = RRect.fromRectAndCorners(childRect, topRight: const Radius.circular(3.0),
-            bottomRight: const Radius.circular(3.0));
+        rChildRect = RRect.fromRectAndCorners(
+          childRect,
+          topRight: const Radius.circular(3.0),
+          bottomRight: const Radius.circular(3.0),
+        );
       } else {
         rChildRect = RRect.fromRectAndCorners(childRect);
       }
@@ -627,32 +632,45 @@ class _RenderSegmentedControl<T> extends RenderBox
     }
   }
 
-  @override
-  void performLayout() {
-    final BoxConstraints constraints = this.constraints;
+  Size _calculateChildSize(BoxConstraints constraints) {
     double maxHeight = _kMinSegmentedControlHeight;
-
     double childWidth = constraints.minWidth / childCount;
-    for (final RenderBox child in getChildrenAsList()) {
+    RenderBox? child = firstChild;
+    while (child != null) {
       childWidth = math.max(childWidth, child.getMaxIntrinsicWidth(double.infinity));
+      child = childAfter(child);
     }
     childWidth = math.min(childWidth, constraints.maxWidth / childCount);
-
-    RenderBox? child = firstChild;
+    child = firstChild;
     while (child != null) {
       final double boxHeight = child.getMaxIntrinsicHeight(childWidth);
       maxHeight = math.max(maxHeight, boxHeight);
       child = childAfter(child);
     }
+    return Size(childWidth, maxHeight);
+  }
 
-    constraints.constrainHeight(maxHeight);
+  Size _computeOverallSizeFromChildSize(Size childSize) {
+    return constraints.constrain(Size(childSize.width * childCount, childSize.height));
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    final Size childSize = _calculateChildSize(constraints);
+    return _computeOverallSizeFromChildSize(childSize);
+  }
+
+  @override
+  void performLayout() {
+    final BoxConstraints constraints = this.constraints;
+    final Size childSize = _calculateChildSize(constraints);
 
     final BoxConstraints childConstraints = BoxConstraints.tightFor(
-      width: childWidth,
-      height: maxHeight,
+      width: childSize.width,
+      height: childSize.height,
     );
 
-    child = firstChild;
+    RenderBox? child = firstChild;
     while (child != null) {
       child.layout(childConstraints, parentUsesSize: true);
       child = childAfter(child);
@@ -675,7 +693,7 @@ class _RenderSegmentedControl<T> extends RenderBox
         break;
     }
 
-    size = constraints.constrain(Size(childWidth * childCount, maxHeight));
+    size = _computeOverallSizeFromChildSize(childSize);
   }
 
   @override

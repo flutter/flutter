@@ -3,9 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:ui' show Brightness;
-import 'package:flutter/foundation.dart';
-import 'package:flutter_test/flutter_test.dart';
+
+import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('MediaQuery does not have a default', (WidgetTester tester) async {
@@ -24,31 +25,54 @@ void main() {
     expect(exception, isNotNull);
     expect(exception ,isFlutterError);
     final FlutterError error = exception as FlutterError;
-    expect(error.diagnostics.length, 3);
-    expect(error.diagnostics.last, isA<DiagnosticsProperty<Element>>());
+    expect(error.diagnostics.length, 5);
+    expect(error.diagnostics.last, isA<ErrorHint>());
     expect(
       error.toStringDeep(),
       equalsIgnoringHashCodes(
         'FlutterError\n'
-        '   MediaQuery.of() called with a context that does not contain a\n'
-        '   MediaQuery.\n'
+        '   No MediaQuery widget ancestor found.\n'
+        '   Builder widgets require a MediaQuery widget ancestor.\n'
+        '   The specific widget that could not find a MediaQuery ancestor\n'
+        '   was:\n'
+        '     Builder\n'
+        '   The ownership chain for the affected widget is: "Builder ←\n'
+        '     [root]"\n'
         '   No MediaQuery ancestor could be found starting from the context\n'
         '   that was passed to MediaQuery.of(). This can happen because you\n'
-        '   do not have a WidgetsApp or MaterialApp widget (those widgets\n'
-        '   introduce a MediaQuery), or it can happen if the context you use\n'
-        '   comes from a widget above those widgets.\n'
-        '   The context used was:\n'
-        '     Builder\n',
+        '   have not added a WidgetsApp, CupertinoApp, or MaterialApp widget\n'
+        '   (those widgets introduce a MediaQuery), or it can happen if the\n'
+        '   context you use comes from a widget above those widgets.\n',
       ),
     );
   });
 
-  testWidgets('MediaQuery defaults to null', (WidgetTester tester) async {
+  testWidgets('MediaQuery.of finds a MediaQueryData when there is one', (WidgetTester tester) async {
+    bool tested = false;
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Builder(
+          builder: (BuildContext context) {
+            final MediaQueryData data = MediaQuery.of(context);
+            expect(data, isNotNull);
+            tested = true;
+            return Container();
+          },
+        ),
+      ),
+    );
+    final dynamic exception = tester.takeException();
+    expect(exception, isNull);
+    expect(tested, isTrue);
+  });
+
+  testWidgets('MediaQuery.maybeOf defaults to null', (WidgetTester tester) async {
     bool tested = false;
     await tester.pumpWidget(
       Builder(
         builder: (BuildContext context) {
-          final MediaQueryData? data = MediaQuery.of(context, nullOk: true);
+          final MediaQueryData? data = MediaQuery.maybeOf(context);
           expect(data, isNull);
           tested = true;
           return Container();
@@ -58,7 +82,25 @@ void main() {
     expect(tested, isTrue);
   });
 
-  testWidgets('MediaQueryData is sane', (WidgetTester tester) async {
+  testWidgets('MediaQuery.maybeOf finds a MediaQueryData when there is one', (WidgetTester tester) async {
+    bool tested = false;
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Builder(
+          builder: (BuildContext context) {
+            final MediaQueryData? data = MediaQuery.maybeOf(context);
+            expect(data, isNotNull);
+            tested = true;
+            return Container();
+          },
+        ),
+      ),
+    );
+    expect(tested, isTrue);
+  });
+
+  testWidgets('MediaQueryData.fromWindow is sane', (WidgetTester tester) async {
     final MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance!.window);
     expect(data, hasOneLineDescription);
     expect(data.hashCode, equals(data.copyWith().hashCode));
@@ -69,6 +111,7 @@ void main() {
     expect(data.boldText, false);
     expect(data.highContrast, false);
     expect(data.platformBrightness, Brightness.light);
+    expect(data.gestureSettings.touchSlop, null);
   });
 
   testWidgets('MediaQueryData.copyWith defaults to source', (WidgetTester tester) async {
@@ -88,6 +131,7 @@ void main() {
     expect(copied.boldText, data.boldText);
     expect(copied.highContrast, data.highContrast);
     expect(copied.platformBrightness, data.platformBrightness);
+    expect(copied.gestureSettings, data.gestureSettings);
   });
 
   testWidgets('MediaQuery.copyWith copies specified values', (WidgetTester tester) async {
@@ -100,6 +144,7 @@ void main() {
     const EdgeInsets customViewPadding = EdgeInsets.all(11.24031);
     const EdgeInsets customViewInsets = EdgeInsets.all(1.67262);
     const EdgeInsets customSystemGestureInsets = EdgeInsets.all(1.5556);
+    const DeviceGestureSettings gestureSettings = DeviceGestureSettings(touchSlop: 8.0);
 
     final MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance!.window);
     final MediaQueryData copied = data.copyWith(
@@ -117,6 +162,7 @@ void main() {
       boldText: true,
       highContrast: true,
       platformBrightness: Brightness.dark,
+      gestureSettings: gestureSettings,
     );
     expect(copied.size, customSize);
     expect(copied.devicePixelRatio, customDevicePixelRatio);
@@ -132,6 +178,7 @@ void main() {
     expect(copied.boldText, true);
     expect(copied.highContrast, true);
     expect(copied.platformBrightness, Brightness.dark);
+    expect(copied.gestureSettings, gestureSettings);
   });
 
   testWidgets('MediaQuery.removePadding removes specified padding', (WidgetTester tester) async {
@@ -169,7 +216,7 @@ void main() {
               removeBottom: true,
               child: Builder(
                 builder: (BuildContext context) {
-                  unpadded = MediaQuery.of(context)!;
+                  unpadded = MediaQuery.of(context);
                   return Container();
                 },
               ),
@@ -225,7 +272,7 @@ void main() {
               context: context,
               child: Builder(
                 builder: (BuildContext context) {
-                  unpadded = MediaQuery.of(context)!;
+                  unpadded = MediaQuery.of(context);
                   return Container();
                 },
               ),
@@ -284,7 +331,7 @@ void main() {
               removeBottom: true,
               child: Builder(
                 builder: (BuildContext context) {
-                  unpadded = MediaQuery.of(context)!;
+                  unpadded = MediaQuery.of(context);
                   return Container();
                 },
               ),
@@ -340,7 +387,7 @@ void main() {
               removeBottom: true,
               child: Builder(
                 builder: (BuildContext context) {
-                  unpadded = MediaQuery.of(context)!;
+                  unpadded = MediaQuery.of(context);
                   return Container();
                 },
               ),
@@ -399,7 +446,7 @@ void main() {
               removeBottom: true,
               child: Builder(
                 builder: (BuildContext context) {
-                  unpadded = MediaQuery.of(context)!;
+                  unpadded = MediaQuery.of(context);
                   return Container();
                 },
               ),
@@ -455,7 +502,7 @@ void main() {
               removeLeft: true,
               child: Builder(
                 builder: (BuildContext context) {
-                  unpadded = MediaQuery.of(context)!;
+                  unpadded = MediaQuery.of(context);
                   return Container();
                 },
               ),
@@ -585,5 +632,67 @@ void main() {
 
     expect(outsideBoldTextOverride, false);
     expect(insideBoldTextOverride, true);
+  });
+
+  testWidgets('MediaQuery.fromWindow creates a MediaQuery', (WidgetTester tester) async {
+    bool hasMediaQueryAsParentOutside = false;
+    bool hasMediaQueryAsParentInside = false;
+
+    await tester.pumpWidget(
+      Builder(
+        builder: (BuildContext context) {
+          hasMediaQueryAsParentOutside =
+              context.findAncestorWidgetOfExactType<MediaQuery>() != null;
+          return MediaQuery.fromWindow(
+            child: Builder(
+              builder: (BuildContext context) {
+                hasMediaQueryAsParentInside =
+                    context.findAncestorWidgetOfExactType<MediaQuery>() != null;
+                return const SizedBox();
+              },
+            ),
+          );
+        },
+      ),
+    );
+
+    expect(hasMediaQueryAsParentOutside, false);
+    expect(hasMediaQueryAsParentInside, true);
+  });
+
+  testWidgets('MediaQueryData.fromWindow is created using window values', (WidgetTester tester) async {
+    final MediaQueryData windowData = MediaQueryData.fromWindow(WidgetsBinding.instance!.window);
+    late MediaQueryData fromWindowData;
+
+    await tester.pumpWidget(
+      MediaQuery.fromWindow(
+        child: Builder(
+          builder: (BuildContext context) {
+            fromWindowData = MediaQuery.of(context);
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    expect(windowData, equals(fromWindowData));
+  });
+
+  test('DeviceGestureSettings has reasonable hashCode', () {
+    final DeviceGestureSettings settingsA = DeviceGestureSettings(touchSlop: nonconst(16));
+    final DeviceGestureSettings settingsB = DeviceGestureSettings(touchSlop: nonconst(8));
+    final DeviceGestureSettings settingsC = DeviceGestureSettings(touchSlop: nonconst(16));
+
+    expect(settingsA.hashCode, settingsC.hashCode);
+    expect(settingsA.hashCode, isNot(settingsB.hashCode));
+  });
+
+  test('DeviceGestureSettings has reasonable equality', () {
+    final DeviceGestureSettings settingsA = DeviceGestureSettings(touchSlop: nonconst(16));
+    final DeviceGestureSettings settingsB = DeviceGestureSettings(touchSlop: nonconst(8));
+    final DeviceGestureSettings settingsC = DeviceGestureSettings(touchSlop: nonconst(16));
+
+    expect(settingsA, equals(settingsC));
+    expect(settingsA, isNot(settingsB));
   });
 }

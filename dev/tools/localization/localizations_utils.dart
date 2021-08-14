@@ -21,11 +21,11 @@ int sortFilesByPath (FileSystemEntity a, FileSystemEntity b) {
 @immutable
 class LocaleInfo implements Comparable<LocaleInfo> {
   const LocaleInfo({
-    this.languageCode,
+    required this.languageCode,
     this.scriptCode,
     this.countryCode,
-    this.length,
-    this.originalString,
+    required this.length,
+    required this.originalString,
   });
 
   /// Simple parser. Expects the locale string to be in the form of 'language_script_COUNTRY'
@@ -40,8 +40,8 @@ class LocaleInfo implements Comparable<LocaleInfo> {
     final List<String> codes = locale.split('_'); // [language, script, country]
     assert(codes.isNotEmpty && codes.length < 4);
     final String languageCode = codes[0];
-    String scriptCode;
-    String countryCode;
+    String? scriptCode;
+    String? countryCode;
     int length = codes.length;
     String originalString = locale;
     if (codes.length == 2) {
@@ -94,9 +94,9 @@ class LocaleInfo implements Comparable<LocaleInfo> {
       // Update the base string to reflect assumed scriptCodes.
       originalString = languageCode;
       if (scriptCode != null)
-        originalString += '_' + scriptCode;
+        originalString += '_$scriptCode';
       if (countryCode != null)
-        originalString += '_' + countryCode;
+        originalString += '_$countryCode';
     }
 
     return LocaleInfo(
@@ -109,8 +109,8 @@ class LocaleInfo implements Comparable<LocaleInfo> {
   }
 
   final String languageCode;
-  final String scriptCode;
-  final String countryCode;
+  final String? scriptCode;
+  final String? countryCode;
   final int length;             // The number of fields. Ranges from 1-3.
   final String originalString;  // Original un-parsed locale string.
 
@@ -128,9 +128,7 @@ class LocaleInfo implements Comparable<LocaleInfo> {
   }
 
   @override
-  int get hashCode {
-    return originalString.hashCode;
-  }
+  int get hashCode => originalString.hashCode;
 
   @override
   String toString() {
@@ -146,10 +144,10 @@ class LocaleInfo implements Comparable<LocaleInfo> {
 /// Parse the data for a locale from a file, and store it in the [attributes]
 /// and [resources] keys.
 void loadMatchingArbsIntoBundleMaps({
-  @required Directory directory,
-  @required RegExp filenamePattern,
-  @required Map<LocaleInfo, Map<String, String>> localeToResources,
-  @required Map<LocaleInfo, Map<String, dynamic>> localeToResourceAttributes,
+  required Directory directory,
+  required RegExp filenamePattern,
+  required Map<LocaleInfo, Map<String, String>> localeToResources,
+  required Map<LocaleInfo, Map<String, dynamic>> localeToResourceAttributes,
 }) {
   assert(directory != null);
   assert(filenamePattern != null);
@@ -167,13 +165,13 @@ void loadMatchingArbsIntoBundleMaps({
   for (final FileSystemEntity entity in directory.listSync().toList()..sort(sortFilesByPath)) {
     final String entityPath = entity.path;
     if (FileSystemEntity.isFileSync(entityPath) && filenamePattern.hasMatch(entityPath)) {
-      final String localeString = filenamePattern.firstMatch(entityPath)[1];
+      final String localeString = filenamePattern.firstMatch(entityPath)![1]!;
       final File arbFile = File(entityPath);
 
       // Helper method to fill the maps with the correct data from file.
       void populateResources(LocaleInfo locale, File file) {
-        final Map<String, String> resources = localeToResources[locale];
-        final Map<String, dynamic> attributes = localeToResourceAttributes[locale];
+        final Map<String, String> resources = localeToResources[locale]!;
+        final Map<String, dynamic> attributes = localeToResourceAttributes[locale]!;
         final Map<String, dynamic> bundle = json.decode(file.readAsStringSync()) as Map<String, dynamic>;
         for (final String key in bundle.keys) {
           // The ARB file resource "attributes" for foo are called @foo.
@@ -200,7 +198,7 @@ void loadMatchingArbsIntoBundleMaps({
       // Add an assumed locale to default to when there is no info on scriptOnly locales.
       locale = LocaleInfo.fromString(localeString, deriveScriptCode: true);
       if (locale.scriptCode != null) {
-        final LocaleInfo scriptLocale = LocaleInfo.fromString(locale.languageCode + '_' + locale.scriptCode);
+        final LocaleInfo scriptLocale = LocaleInfo.fromString('${locale.languageCode}_${locale.scriptCode}');
         if (!localeToResources.containsKey(scriptLocale)) {
           assumedLocales.add(scriptLocale);
           localeToResources[scriptLocale] ??= <String, String>{};
@@ -256,9 +254,9 @@ GeneratorOptions parseArgs(List<String> rawArgs) {
 
 class GeneratorOptions {
   GeneratorOptions({
-    @required this.writeToFile,
-    @required this.materialOnly,
-    @required this.cupertinoOnly,
+    required this.writeToFile,
+    required this.materialOnly,
+    required this.cupertinoOnly,
   });
 
   final bool writeToFile;
@@ -269,7 +267,7 @@ class GeneratorOptions {
 // See also //master/tools/gen_locale.dart in the engine repo.
 Map<String, List<String>> _parseSection(String section) {
   final Map<String, List<String>> result = <String, List<String>>{};
-  List<String> lastHeading;
+  late List<String> lastHeading;
   for (final String line in section.split('\n')) {
     if (line == '')
       continue;
@@ -283,7 +281,7 @@ Map<String, List<String>> _parseSection(String section) {
     final String name = line.substring(0, colon);
     final String value = line.substring(colon + 2);
     lastHeading = result.putIfAbsent(name, () => <String>[]);
-    result[name].add(value);
+    result[name]!.add(value);
   }
   return result;
 }
@@ -302,11 +300,11 @@ void precacheLanguageAndRegionTags() {
       languageSubtagRegistry.split('%%').skip(1).map<Map<String, List<String>>>(_parseSection).toList();
   for (final Map<String, List<String>> section in sections) {
     assert(section.containsKey('Type'), section.toString());
-    final String type = section['Type'].single;
+    final String type = section['Type']!.single;
     if (type == 'language' || type == 'region' || type == 'script') {
       assert(section.containsKey('Subtag') && section.containsKey('Description'), section.toString());
-      final String subtag = section['Subtag'].single;
-      String description = section['Description'].join(' ');
+      final String subtag = section['Subtag']!.single;
+      String description = section['Description']!.join(' ');
       if (description.startsWith('United '))
         description = 'the $description';
       if (description.contains(kParentheticalPrefix))
@@ -334,10 +332,10 @@ String describeLocale(String tag) {
   final List<String> subtags = tag.split('_');
   assert(subtags.isNotEmpty);
   assert(_languages.containsKey(subtags[0]));
-  final String language = _languages[subtags[0]];
+  final String language = _languages[subtags[0]]!;
   String output = language;
-  String region;
-  String script;
+  String? region;
+  String? script;
   if (subtags.length == 2) {
     region = _regions[subtags[1]];
     script = _scripts[subtags[1]];
@@ -378,9 +376,9 @@ class $classNamePrefix$camelCaseName extends $superClass {''';
 ///
 /// This function is used by tools that take in a JSON-formatted file to
 /// generate Dart code. For this reason, characters with special meaning
-/// in JSON files. For example, the backspace character (\b) have to be
-/// properly escaped by this function so that the generated Dart code
-/// correctly represents this character:
+/// in JSON files are escaped. For example, the backspace character (\b)
+/// has to be properly escaped by this function so that the generated
+/// Dart code correctly represents this character:
 /// ```
 /// foo\bar => 'foo\\bar'
 /// foo\nbar => 'foo\\nbar'
@@ -390,6 +388,19 @@ class $classNamePrefix$camelCaseName extends $superClass {''';
 /// foo$bar = 'foo\$bar'
 /// ```
 String generateString(String value) {
+  if (<String>['\n', '\f', '\t', '\r', '\b'].every((String pattern) => !value.contains(pattern))) {
+    final bool hasDollar = value.contains(r'$');
+    final bool hasBackslash = value.contains(r'\');
+    final bool hasQuote = value.contains("'");
+    final bool hasDoubleQuote = value.contains('"');
+    if (!hasQuote) {
+      return hasBackslash || hasDollar ? "r'$value'" : "'$value'";
+    }
+    if (!hasDoubleQuote) {
+      return hasBackslash || hasDollar ? 'r"$value"' : '"$value"';
+    }
+  }
+
   const String backslash = '__BACKSLASH__';
   assert(
     !value.contains(backslash),
@@ -401,17 +412,17 @@ String generateString(String value) {
   value = value
     // Replace backslashes with a placeholder for now to properly parse
     // other special characters.
-    .replaceAll('\\', backslash)
-    .replaceAll('\$', '\\\$')
-    .replaceAll("'", "\\'")
-    .replaceAll('"', '\\"')
-    .replaceAll('\n', '\\n')
-    .replaceAll('\f', '\\f')
-    .replaceAll('\t', '\\t')
-    .replaceAll('\r', '\\r')
-    .replaceAll('\b', '\\b')
+    .replaceAll(r'\', backslash)
+    .replaceAll(r'$', r'\$')
+    .replaceAll("'", r"\'")
+    .replaceAll('"', r'\"')
+    .replaceAll('\n', r'\n')
+    .replaceAll('\f', r'\f')
+    .replaceAll('\t', r'\t')
+    .replaceAll('\r', r'\r')
+    .replaceAll('\b', r'\b')
     // Reintroduce escaped backslashes into generated Dart string.
-    .replaceAll(backslash, '\\\\');
+    .replaceAll(backslash, r'\\');
 
   return "'$value'";
 }

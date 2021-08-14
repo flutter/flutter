@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(yjbanov): enable Web when https://github.com/flutter/engine/pull/12747 rolls into the framework.
-@TestOn('!chrome')
-
 import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -33,9 +30,9 @@ void main() {
     final TestChannelBuffersFlutterBinding binding = TestChannelBuffersFlutterBinding();
     expect(binding.defaultBinaryMessenger, isNotNull);
     bool didCallCallback = false;
-    final ui.PlatformMessageResponseCallback callback = (ByteData? responseData) {
+    void callback(ByteData? responseData) {
       didCallCallback = true;
-    };
+    }
     const String payload = 'bar';
     final ByteData data = _makeByteData(payload);
     ui.channelBuffers.push(channel, data, callback);

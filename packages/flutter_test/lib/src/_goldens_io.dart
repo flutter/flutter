@@ -91,16 +91,9 @@ class LocalFileComparator extends GoldenFileComparator with LocalComparisonOutpu
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
-    final File goldenFile = _getGoldenFile(golden);
-    if (!goldenFile.existsSync()) {
-      throw test_package.TestFailure(
-        'Could not be compared against non-existent file: "$golden"'
-      );
-    }
-    final List<int> goldenBytes = await goldenFile.readAsBytes();
     final ComparisonResult result = await GoldenFileComparator.compareLists(
       imageBytes,
-      goldenBytes,
+      await getGoldenBytes(golden),
     );
 
     if (!result.passed) {
@@ -117,14 +110,27 @@ class LocalFileComparator extends GoldenFileComparator with LocalComparisonOutpu
     await goldenFile.writeAsBytes(imageBytes, flush: true);
   }
 
-  File _getGoldenFile(Uri golden) {
-    return File(_path.join(_path.fromUri(basedir), _path.fromUri(golden.path)));
+  /// Returns the bytes of the given [golden] file.
+  ///
+  /// If the file cannot be found, an error will be thrown.
+  @protected
+  Future<List<int>> getGoldenBytes(Uri golden) async {
+    final File goldenFile = _getGoldenFile(golden);
+    if (!goldenFile.existsSync()) {
+      throw test_package.TestFailure(
+        'Could not be compared against non-existent file: "$golden"'
+      );
+    }
+    final List<int> goldenBytes = await goldenFile.readAsBytes();
+    return goldenBytes;
   }
+
+  File _getGoldenFile(Uri golden) => File(_path.join(_path.fromUri(basedir), _path.fromUri(golden.path)));
 }
 
-/// A class for use in golden file comparators that run locally and provide
+/// A mixin for use in golden file comparators that run locally and provide
 /// output.
-class LocalComparisonOutput {
+mixin LocalComparisonOutput {
   /// Writes out diffs from the [ComparisonResult] of a golden file test.
   ///
   /// Will throw an error if a null result is provided.
@@ -140,7 +146,7 @@ class LocalComparisonOutput {
       final Map<String, Image> diffs = result.diffs!.cast<String, Image>();
       for (final MapEntry<String, Image> entry in diffs.entries) {
         final File output = getFailureFile(
-          key.isEmpty ? entry.key : entry.key + '_' + key,
+          key.isEmpty ? entry.key : '${entry.key}_$key',
           golden,
           basedir,
         );
@@ -155,10 +161,7 @@ class LocalComparisonOutput {
   /// Returns the appropriate file for a given diff from a [ComparisonResult].
   File getFailureFile(String failure, Uri golden, Uri basedir) {
     final String fileName = golden.pathSegments.last;
-    final String testName = fileName.split(path.extension(fileName))[0]
-      + '_'
-      + failure
-      + '.png';
+    final String testName = '${fileName.split(path.extension(fileName))[0]}_$failure.png';
     return File(path.join(
       path.fromUri(basedir),
       path.fromUri(Uri.parse('failures/$testName')),
@@ -170,11 +173,15 @@ class LocalComparisonOutput {
 /// [test] and [master] image bytes provided.
 Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async {
   if (identical(test, master))
-    return ComparisonResult(passed: true);
+    return ComparisonResult(
+      passed: true,
+      diffPercent: 0.0,
+    );
 
   if (test == null || master == null || test.isEmpty || master.isEmpty) {
     return ComparisonResult(
       passed: false,
+      diffPercent: 1.0,
       error: 'Pixel test failed, null image provided.',
     );
   }
@@ -195,6 +202,7 @@ Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async 
   if (width != masterImage.width || height != masterImage.height) {
     return ComparisonResult(
       passed: false,
+      diffPercent: 1.0,
       error: 'Pixel test failed, image sizes do not match.\n'
         'Master Image: ${masterImage.width} X ${masterImage.height}\n'
         'Test Image: ${testImage.width} X ${testImage.height}',
@@ -240,10 +248,12 @@ Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async 
   }
 
   if (pixelDiffCount > 0) {
+    final double diffPercent = pixelDiffCount / totalPixels;
     return ComparisonResult(
       passed: false,
+      diffPercent: diffPercent,
       error: 'Pixel test failed, '
-        '${((pixelDiffCount/totalPixels) * 100).toStringAsFixed(2)}% '
+        '${(diffPercent * 100).toStringAsFixed(2)}% '
         'diff detected.',
       diffs:  <String, Image>{
         'masterImage' : masterImage,
@@ -253,7 +263,7 @@ Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async 
       },
     );
   }
-  return ComparisonResult(passed: true);
+  return ComparisonResult(passed: true, diffPercent: 0.0);
 }
 
 /// Inverts [imageBytes], returning a new [ByteData] object.

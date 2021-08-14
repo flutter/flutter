@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=123"
+@Tags(<String>['no-shuffle'])
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -15,7 +21,7 @@ void main() {
     ];
     final Widget widget = Flex(
       direction: Axis.vertical,
-      children: children
+      children: children,
     );
     late FlutterError error;
     try {
@@ -32,8 +38,8 @@ void main() {
           '   If multiple keyed nodes exist as children of another node, they\n'
           '   must have unique keys.\n'
           '   Flex(direction: vertical, mainAxisAlignment: start,\n'
-          '   crossAxisAlignment: center, textBaseline: alphabetic) has\n'
-          "   multiple children with key [<'key'>].\n",
+          '   crossAxisAlignment: center) has multiple children with key\n'
+          "   [<'key'>].\n",
         ),
       );
     }
@@ -56,7 +62,7 @@ void main() {
         error.toStringDeep(),
         equalsIgnoringHashCodes(
           'FlutterError\n'
-          "   Duplicate key found: [<'key'>].\n"
+          "   Duplicate key found: [<'key'>].\n",
         ),
       );
     }
@@ -84,12 +90,12 @@ void main() {
                 '   The specific widget that could not find a Table ancestor was:\n'
                 '     Builder\n'
                 '   The ownership chain for the affected widget is: "Builder ←\n'
-                '     [root]"\n'
+                '     [root]"\n',
               ),
             );
           }
           return Container();
-        }
+        },
       ),
     );
   });
@@ -111,28 +117,34 @@ void main() {
             expect(
               error.diagnostics.last.toStringDeep(),
               equalsIgnoringHashCodes(
-                'Typically, the MediaQuery widget is introduced by the MaterialApp\n'
-                'or WidgetsApp widget at the top of your application widget tree.\n'
+                'No MediaQuery ancestor could be found starting from the context\n'
+                'that was passed to MediaQuery.of(). This can happen because you\n'
+                'have not added a WidgetsApp, CupertinoApp, or MaterialApp widget\n'
+                '(those widgets introduce a MediaQuery), or it can happen if the\n'
+                'context you use comes from a widget above those widgets.\n',
               ),
             );
             expect(
               error.toStringDeep(),
               equalsIgnoringHashCodes(
                 'FlutterError\n'
-                '   No MediaQuery widget found.\n'
+                '   No MediaQuery widget ancestor found.\n'
                 '   Builder widgets require a MediaQuery widget ancestor.\n'
                 '   The specific widget that could not find a MediaQuery ancestor\n'
                 '   was:\n'
                 '     Builder\n'
                 '   The ownership chain for the affected widget is: "Builder ←\n'
                 '     [root]"\n'
-                '   Typically, the MediaQuery widget is introduced by the MaterialApp\n'
-                '   or WidgetsApp widget at the top of your application widget tree.\n'
+                '   No MediaQuery ancestor could be found starting from the context\n'
+                '   that was passed to MediaQuery.of(). This can happen because you\n'
+                '   have not added a WidgetsApp, CupertinoApp, or MaterialApp widget\n'
+                '   (those widgets introduce a MediaQuery), or it can happen if the\n'
+                '   context you use comes from a widget above those widgets.\n',
               ),
             );
           }
           return Container();
-        }
+        },
       ),
     );
   });
@@ -153,8 +165,8 @@ void main() {
         error.diagnostics[1].toStringDeep(),
         equalsIgnoringHashCodes(
           'The offending widget is:\n'
-          '  Container\n'
-        )
+          '  Container\n',
+        ),
       );
       expect(error.diagnostics[2].level, DiagnosticLevel.info);
       expect(error.diagnostics[3].level, DiagnosticLevel.hint);
@@ -165,7 +177,7 @@ void main() {
           'available room, return "Container()". To return an empty space\n'
           'that takes as little room as possible, return "Container(width:\n'
           '0.0, height: 0.0)".\n',
-        )
+        ),
       );
       expect(
         error.toStringDeep(),
@@ -178,7 +190,7 @@ void main() {
           '   To return an empty space that causes the building widget to fill\n'
           '   available room, return "Container()". To return an empty space\n'
           '   that takes as little room as possible, return "Container(width:\n'
-          '   0.0, height: 0.0)".\n'
+          '   0.0, height: 0.0)".\n',
         ),
       );
       error = null;
@@ -196,8 +208,8 @@ void main() {
         error.diagnostics[1].toStringDeep(),
         equalsIgnoringHashCodes(
           'The offending widget is:\n'
-          '  Container\n'
-        )
+          '  Container\n',
+        ),
       );
       expect(
         error.toStringDeep(),
@@ -209,10 +221,40 @@ void main() {
           "   Build functions must never return their BuildContext parameter's\n"
           '   widget or a child that contains "context.widget". Doing so\n'
           '   introduces a loop in the widget tree that can cause the app to\n'
-          '   crash.\n'
+          '   crash.\n',
         ),
       );
     }
+  });
+
+  testWidgets('debugCheckHasWidgetsLocalizations throws', (WidgetTester tester) async {
+    final GlobalKey noLocalizationsAvailable = GlobalKey();
+    final GlobalKey localizationsAvailable = GlobalKey();
+
+    await tester.pumpWidget(
+      Container(
+        key: noLocalizationsAvailable,
+        child: WidgetsApp(
+          builder: (BuildContext context, Widget? child) {
+            return Container(
+              key: localizationsAvailable,
+            );
+          },
+          color: const Color(0xFF4CAF50),
+        ),
+      ),
+    );
+
+    expect(
+      () => debugCheckHasWidgetsLocalizations(noLocalizationsAvailable.currentContext!),
+      throwsA(isAssertionError.having(
+        (AssertionError e) => e.message,
+        'message',
+        contains('No WidgetsLocalizations found'),
+      )),
+    );
+
+    expect(debugCheckHasWidgetsLocalizations(localizationsAvailable.currentContext!), isTrue);
   });
 
   test('debugAssertAllWidgetVarsUnset', () {

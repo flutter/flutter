@@ -59,7 +59,7 @@ void main() {
     );
 
     expect(value, equals(0.0));
-    await tester.tap(find.byKey(sliderKey));
+    await tester.tap(find.byKey(sliderKey), warnIfMissed: false);
     expect(value, equals(0.0));
     await tester.pump(); // No animation should start.
     // Check the transientCallbackCount before tearing down the widget to ensure
@@ -95,7 +95,7 @@ void main() {
     );
 
     expect(value, equals(0.0));
-    await tester.tap(find.byKey(sliderKey));
+    await tester.tap(find.byKey(sliderKey), warnIfMissed: false);
     expect(value, equals(0.0));
     await tester.pump(); // No animation should start.
     // Check the transientCallbackCount before tearing down the widget to ensure
@@ -347,7 +347,7 @@ void main() {
           TestSemantics(
             id: 1,
             flags: <SemanticsFlag>[SemanticsFlag.isSlider],
-          )
+          ),
         ],
       ),
       ignoreRect: true,
@@ -587,7 +587,7 @@ void main() {
       ..rrect()
       ..rrect()
       ..rrect()
-      ..rrect(color: CupertinoColors.systemPurple.color)
+      ..rrect(color: CupertinoColors.systemPurple.color),
     );
 
     await tester.pumpWidget(
@@ -610,7 +610,7 @@ void main() {
           ..rrect()
           ..rrect()
           ..rrect()
-          ..rrect(color: CupertinoColors.activeOrange.color)
+          ..rrect(color: CupertinoColors.activeOrange.color),
     );
   });
 }

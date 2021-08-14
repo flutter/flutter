@@ -4,9 +4,9 @@
 
 import 'dart:async';
 
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_tools/src/base/async_guard.dart';
 import 'package:flutter_tools/src/base/common.dart';
-import 'package:fake_async/fake_async.dart';
 
 import '../../src/common.dart';
 
@@ -30,7 +30,7 @@ Future<void> syncAndAsyncError() {
 Future<void> delayedThrow(FakeAsync time) {
   final Future<void> result =
     Future<void>.delayed(const Duration(milliseconds: 10))
-      .then((_) {
+      .then((_) async {
         throw 'Delayed Doom';
       });
   time.elapse(const Duration(seconds: 1));
@@ -39,10 +39,10 @@ Future<void> delayedThrow(FakeAsync time) {
 }
 
 void main() {
-  Completer<void> caughtInZone;
+  late Completer<void> caughtInZone;
   bool caughtByZone = false;
   bool caughtByHandler = false;
-  Zone zone;
+  late Zone zone;
 
   setUp(() {
     caughtInZone = Completer<void>();
@@ -152,7 +152,7 @@ void main() {
 
     final Completer<void> completer = Completer<void>();
     await FakeAsync().run((FakeAsync time) {
-      unawaited(runZoned(() async {
+      unawaited(runZonedGuarded(() async {
         final Future<void> f = asyncGuard<void>(() => delayedThrow(time))
           .catchError((Object e, StackTrace s) {
             caughtByCatchError = true;
@@ -165,7 +165,7 @@ void main() {
         if (!completer.isCompleted) {
           completer.complete(null);
         }
-      }, onError: (Object e, StackTrace s) {
+      }, (Object e, StackTrace s) {
         caughtByZone = true;
         if (!completer.isCompleted) {
           completer.complete(null);
@@ -188,7 +188,7 @@ void main() {
 
     final Completer<void> completer = Completer<void>();
     await FakeAsync().run((FakeAsync time) {
-      unawaited(runZoned(() async {
+      unawaited(runZonedGuarded(() async {
         final Future<void> f = asyncGuard<void>(
           () => delayedThrow(time),
           onError: (Object e, StackTrace s) {
@@ -203,7 +203,7 @@ void main() {
         if (!completer.isCompleted) {
           completer.complete(null);
         }
-      }, onError: (Object e, StackTrace s) {
+      }, (Object e, StackTrace s) {
         caughtByZone = true;
         if (!completer.isCompleted) {
           completer.complete(null);
@@ -226,7 +226,7 @@ void main() {
 
     final Completer<void> completer = Completer<void>();
     await FakeAsync().run((FakeAsync time) {
-      unawaited(runZoned(() async {
+      unawaited(runZonedGuarded(() async {
         final Future<void> f = asyncGuard<void>(
           () => delayedThrow(time),
           onError: (Object e) {
@@ -241,7 +241,7 @@ void main() {
         if (!completer.isCompleted) {
           completer.complete(null);
         }
-      }, onError: (Object e, StackTrace s) {
+      }, (Object e, StackTrace s) {
         caughtByZone = true;
         if (!completer.isCompleted) {
           completer.complete(null);
@@ -265,10 +265,10 @@ void main() {
 
     final Completer<void> completer = Completer<void>();
     await FakeAsync().run((FakeAsync time) {
-      unawaited(runZoned(() async {
+      unawaited(runZonedGuarded(() async {
         final Future<void> f = asyncGuard<void>(
           () => delayedThrow(time),
-          onError: (Object e, [StackTrace s]) {
+          onError: (Object e, [StackTrace? s]) {
             caughtByOnError = true;
             nonNullStackTrace = s != null;
           },
@@ -281,7 +281,7 @@ void main() {
         if (!completer.isCompleted) {
           completer.complete(null);
         }
-      }, onError: (Object e, StackTrace s) {
+      }, (Object e, StackTrace s) {
         caughtByZone = true;
         if (!completer.isCompleted) {
           completer.complete(null);

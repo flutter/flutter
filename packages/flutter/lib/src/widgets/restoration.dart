@@ -14,7 +14,7 @@ export 'package:flutter/services.dart' show RestorationBucket;
 /// Creates a new scope for restoration IDs used by descendant widgets to claim
 /// [RestorationBucket]s.
 ///
-/// {@template flutter.widgets.restoration.scope}
+/// {@template flutter.widgets.RestorationScope}
 /// A restoration scope inserts a [RestorationBucket] into the widget tree,
 /// which descendant widgets can access via [RestorationScope.of]. It is
 /// uncommon for descendants to directly store data in this bucket. Instead,
@@ -80,7 +80,7 @@ class RestorationScope extends StatefulWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// The restoration ID used by this widget to obtain a child bucket from the
@@ -119,7 +119,7 @@ class _RestorationScopeState extends State<RestorationScope> with RestorationMix
 /// Inserts a provided [RestorationBucket] into the widget tree and makes it
 /// available to descendants via [RestorationScope.of].
 ///
-/// {@macro flutter.widgets.restoration.scope}
+/// {@macro flutter.widgets.RestorationScope}
 ///
 /// If [bucket] is null, no restoration bucket is made available to descendant
 /// widgets ([RestorationScope.of] invoked from a descendant will return null).
@@ -230,7 +230,7 @@ class RootRestorationScope extends StatefulWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// The restoration ID used to identify the child bucket that this widget
@@ -301,7 +301,9 @@ class _RootRestorationScopeState extends State<RootRestorationScope> {
 
   @override
   void dispose() {
-    ServicesBinding.instance!.restorationManager.removeListener(_replaceRootBucket);
+    if (_rootBucketValid) {
+      ServicesBinding.instance!.restorationManager.removeListener(_replaceRootBucket);
+    }
     super.dispose();
   }
 
@@ -520,7 +522,7 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
       if (_disposed) {
         throw FlutterError(
           'A $runtimeType was used after being disposed.\n'
-          'Once you have called dispose() on a $runtimeType, it can no longer be used.'
+          'Once you have called dispose() on a $runtimeType, it can no longer be used.',
         );
       }
       return true;
@@ -605,14 +607,16 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
 /// ```
 ///
 /// ```dart main
-/// void main() => runApp(RestorationExampleApp());
+/// void main() => runApp(const RestorationExampleApp());
 /// ```
 ///
 /// ```dart preamble
 /// class RestorationExampleApp extends StatelessWidget {
+///   const RestorationExampleApp({Key? key}) : super(key: key);
+///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return MaterialApp(
+///     return const MaterialApp(
 ///       restorationScopeId: 'app',
 ///       title: 'Restorable Counter',
 ///       home: RestorableCounter(restorationId: 'counter'),
@@ -623,12 +627,12 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
 ///
 /// ```dart
 /// class RestorableCounter extends StatefulWidget {
-///   RestorableCounter({Key key, this.restorationId}) : super(key: key);
+///   const RestorableCounter({Key? key, this.restorationId}) : super(key: key);
 ///
-///   final String restorationId;
+///   final String? restorationId;
 ///
 ///   @override
-///   _RestorableCounterState createState() => _RestorableCounterState();
+///   State<RestorableCounter> createState() => _RestorableCounterState();
 /// }
 ///
 /// // The [State] object uses the [RestorationMixin] to make the current value
@@ -638,15 +642,15 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
 ///   // During state restoration it is automatically restored to its old value.
 ///   // If no restoration data is available to restore the counter from, it is
 ///   // initialized to the specified default value of zero.
-///   RestorableInt _counter = RestorableInt(0);
+///   final RestorableInt _counter = RestorableInt(0);
 ///
 ///   // In this example, the restoration ID for the mixin is passed in through
 ///   // the [StatefulWidget]'s constructor.
 ///   @override
-///   String get restorationId => widget.restorationId;
+///   String? get restorationId => widget.restorationId;
 ///
 ///   @override
-///   void restoreState(RestorationBucket oldBucket, bool initialRestore) {
+///   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
 ///     // All restorable properties must be registered with the mixin. After
 ///     // registration, the counter either has its old value restored or is
 ///     // initialized to its default value.
@@ -671,13 +675,13 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
 ///   Widget build(BuildContext context) {
 ///     return Scaffold(
 ///       appBar: AppBar(
-///         title: Text('Restorable Counter'),
+///         title: const Text('Restorable Counter'),
 ///       ),
 ///       body: Center(
 ///         child: Column(
 ///           mainAxisAlignment: MainAxisAlignment.center,
 ///           children: <Widget>[
-///             Text(
+///             const Text(
 ///               'You have pushed the button this many times:',
 ///             ),
 ///             Text(
@@ -690,7 +694,7 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
 ///       floatingActionButton: FloatingActionButton(
 ///         onPressed: _incrementCounter,
 ///         tooltip: 'Increment',
-///         child: Icon(Icons.add),
+///         child: const Icon(Icons.add),
 ///       ),
 ///     );
 ///   }
@@ -838,7 +842,7 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
            'Property is already registered under ${property._restorationId}.',
     );
     assert(_debugDoingRestore || !_properties.keys.map((RestorableProperty<Object?> r) => r._restorationId).contains(restorationId),
-           '"$restorationId" is already registered to another property.'
+           '"$restorationId" is already registered to another property.',
     );
     final bool hasSerializedValue = bucket?.contains(restorationId) == true;
     final Object? initialValue = hasSerializedValue
@@ -847,11 +851,11 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
 
     if (!property.isRegistered) {
       property._register(restorationId, this);
-      final VoidCallback listener = () {
+      void listener() {
         if (bucket == null)
           return;
         _updateProperty(property);
-      };
+      }
       property.addListener(listener);
       _properties[property] = listener;
     }
@@ -859,7 +863,7 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
     assert(
       property._restorationId == restorationId &&
       property._owner == this &&
-      _properties.containsKey(property)
+      _properties.containsKey(property),
     );
 
     property.initWithValue(initialValue);

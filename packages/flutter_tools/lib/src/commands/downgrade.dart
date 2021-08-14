@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:process/process.dart';
 
 import '../base/common.dart';
@@ -10,9 +12,8 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
-import '../base/time.dart';
 import '../cache.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../persistent_tool_state.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
@@ -29,11 +30,12 @@ import '../version.dart';
 /// the command would fail since there was no previously recorded stable version.
 class DowngradeCommand extends FlutterCommand {
   DowngradeCommand({
+    bool verboseHelp = false,
     PersistentToolState persistentToolState,
     Logger logger,
     ProcessManager processManager,
     FlutterVersion flutterVersion,
-    AnsiTerminal terminal,
+    Terminal terminal,
     Stdio stdio,
     FileSystem fileSystem,
   }) : _terminal = terminal,
@@ -45,18 +47,21 @@ class DowngradeCommand extends FlutterCommand {
        _fileSystem = fileSystem {
     argParser.addOption(
       'working-directory',
-      hide: true,
-      help: 'Override the downgrade working directory for integration testing.'
+      hide: !verboseHelp,
+      help: 'Override the downgrade working directory. '
+            'This is only intended to enable integration testing of the tool itself.'
     );
     argParser.addFlag(
       'prompt',
       defaultsTo: true,
-      hide: true,
-      help: 'Disable the downgrade prompt for integration testing.'
+      hide: !verboseHelp,
+      help: 'Show the downgrade prompt. '
+            'The ability to disable this using "--no-prompt" is only provided for '
+            'integration testing of the tool itself.'
     );
   }
 
-  AnsiTerminal _terminal;
+  Terminal _terminal;
   FlutterVersion _flutterVersion;
   PersistentToolState _persistentToolState;
   ProcessUtils _processUtils;
@@ -73,7 +78,7 @@ class DowngradeCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    // Note: commands do not necessarily have access to the correct zone injected
+    // Commands do not necessarily have access to the correct zone injected
     // values when being created. Fields must be lazily instantiated in runCommand,
     // at least until the zone injection is refactored.
     _terminal ??= globals.terminal;
@@ -87,7 +92,7 @@ class DowngradeCommand extends FlutterCommand {
     String workingDirectory = Cache.flutterRoot;
     if (argResults.wasParsed('working-directory')) {
       workingDirectory = stringArg('working-directory');
-      _flutterVersion = FlutterVersion(const SystemClock(), workingDirectory);
+      _flutterVersion = FlutterVersion(workingDirectory: workingDirectory);
     }
 
     final String currentChannel = _flutterVersion.channel;

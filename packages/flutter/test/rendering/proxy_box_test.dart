@@ -9,7 +9,7 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
-import '../flutter_test_alternative.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
@@ -196,18 +196,22 @@ void main() {
     boundary = RenderRepaintBoundary();
     final RenderStack stack = RenderStack()..alignment = Alignment.topLeft;
     final RenderDecoratedBox blackBox = RenderDecoratedBox(
-        decoration: const BoxDecoration(color: Color(0xff000000)),
-        child: RenderConstrainedBox(
-          additionalConstraints: BoxConstraints.tight(const Size.square(20.0)),
-        ));
-    stack.add(RenderOpacity()
-      ..opacity = 0.5
-      ..child = blackBox);
+      decoration: const BoxDecoration(color: Color(0xff000000)),
+      child: RenderConstrainedBox(
+        additionalConstraints: BoxConstraints.tight(const Size.square(20.0)),
+      ),
+    );
+    stack.add(
+      RenderOpacity()
+        ..opacity = 0.5
+        ..child = blackBox,
+    );
     final RenderDecoratedBox whiteBox = RenderDecoratedBox(
-        decoration: const BoxDecoration(color: Color(0xffffffff)),
-        child: RenderConstrainedBox(
-          additionalConstraints: BoxConstraints.tight(const Size.square(10.0)),
-        ));
+      decoration: const BoxDecoration(color: Color(0xffffffff)),
+      child: RenderConstrainedBox(
+        additionalConstraints: BoxConstraints.tight(const Size.square(10.0)),
+      ),
+    );
     final RenderPositionedBox positioned = RenderPositionedBox(
       widthFactor: 2.0,
       heightFactor: 2.0,
@@ -258,7 +262,7 @@ void main() {
     expect(getPixel(20, 20), equals(0x00000080));
     expect(getPixel(image.width - 1, 0), equals(0x00000000));
     expect(getPixel(image.width - 1, 20), equals(0xffffffff));
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42767
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/49857
 
   test('RenderOpacity does not composite if it is transparent', () {
     final RenderOpacity renderOpacity = RenderOpacity(
@@ -517,7 +521,7 @@ void main() {
     );
     layout(follower, constraints: BoxConstraints.tight(const Size(200.0, 200.0)));
     final BoxHitTestResult hitTestResult = BoxHitTestResult();
-    expect(follower.hitTest(hitTestResult, position: const Offset(0.0, 0.0)), isTrue);
+    expect(follower.hitTest(hitTestResult, position: Offset.zero), isTrue);
   });
 
   test('RenderFollowerLayer hit test without a leader layer and the showWhenUnlinked is false', () {
@@ -528,7 +532,7 @@ void main() {
     );
     layout(follower, constraints: BoxConstraints.tight(const Size(200.0, 200.0)));
     final BoxHitTestResult hitTestResult = BoxHitTestResult();
-    expect(follower.hitTest(hitTestResult, position: const Offset(0.0, 0.0)), isFalse);
+    expect(follower.hitTest(hitTestResult, position: Offset.zero), isFalse);
   });
 
   test('RenderFollowerLayer hit test with a leader layer and the showWhenUnlinked is true', () {
@@ -544,7 +548,7 @@ void main() {
     );
     layout(follower, constraints: BoxConstraints.tight(const Size(200.0, 200.0)));
     final BoxHitTestResult hitTestResult = BoxHitTestResult();
-    expect(follower.hitTest(hitTestResult, position: const Offset(0.0, 0.0)), isTrue);
+    expect(follower.hitTest(hitTestResult, position: Offset.zero), isTrue);
   });
 
   test('RenderFollowerLayer hit test with a leader layer and the showWhenUnlinked is false', () {
@@ -561,7 +565,7 @@ void main() {
     layout(follower, constraints: BoxConstraints.tight(const Size(200.0, 200.0)));
     final BoxHitTestResult hitTestResult = BoxHitTestResult();
     // The follower is still hit testable because there is a leader layer.
-    expect(follower.hitTest(hitTestResult, position: const Offset(0.0, 0.0)), isTrue);
+    expect(follower.hitTest(hitTestResult, position: Offset.zero), isTrue);
   });
 }
 

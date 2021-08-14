@@ -5,60 +5,76 @@
 import 'package:path/path.dart' as path;
 
 import 'base_code_gen.dart';
-import 'key_data.dart';
+import 'constants.dart';
+import 'logical_key_data.dart';
+import 'physical_key_data.dart';
 import 'utils.dart';
 
-
-/// Generates the key mapping of Web, based on the information in the key
+/// Generates the key mapping for Web, based on the information in the key
 /// data structure given to it.
 class WebCodeGenerator extends PlatformCodeGenerator {
-  WebCodeGenerator(KeyData keyData) : super(keyData);
+  WebCodeGenerator(
+    PhysicalKeyData keyData,
+    LogicalKeyData logicalData,
+    String logicalLocationMap,
+  ) : _logicalLocationMap = parseMapOfListOfNullableString(logicalLocationMap),
+      super(keyData, logicalData);
 
   /// This generates the map of Web KeyboardEvent codes to logical key ids.
   String get _webLogicalKeyCodeMap {
-    final StringBuffer result = StringBuffer();
-    for (final Key entry in keyData.data) {
-      if (entry.name != null) {
-        result.writeln("  '${entry.name}': ${toHex(entry.flutterId, digits: 10)},");
+    final OutputLines<String> lines = OutputLines<String>('Web logical map');
+    for (final LogicalKeyEntry entry in logicalData.entries) {
+      final int plane = getPlane(entry.value);
+      if (plane == kUnprintablePlane.value) {
+        for (final String name in entry.webNames) {
+          lines.add(name, "  '$name': ${toHex(entry.value, digits: 11)},");
+        }
       }
     }
-    return result.toString().trimRight();
+    return lines.sortedJoin().trimRight();
   }
 
   /// This generates the map of Web KeyboardEvent codes to physical key USB HID codes.
   String get _webPhysicalKeyCodeMap {
-    final StringBuffer result = StringBuffer();
-    for (final Key entry in keyData.data) {
+    final OutputLines<String> lines = OutputLines<String>('Web physical map');
+    for (final PhysicalKeyEntry entry in keyData.entries) {
       if (entry.name != null) {
-        result.writeln("  '${entry.name}': ${toHex(entry.usbHidCode)},");
+        lines.add(entry.name,
+            "  '${entry.name}': ${toHex(entry.usbHidCode)}, // ${entry.constantName}");
       }
     }
-    return result.toString().trimRight();
+    return lines.sortedJoin().trimRight();
   }
 
   /// This generates the map of Web number pad codes to logical key ids.
-  String get _webNumpadCodeMap {
-    final StringBuffer result = StringBuffer();
-    for (final Key entry in numpadKeyData) {
-      if (entry.name != null) {
-        result.writeln("  '${entry.name}': ${toHex(entry.flutterId, digits: 10)},");
-      }
-    }
-    return result.toString().trimRight();
+  String get _webLogicalLocationMap {
+    final OutputLines<String> lines = OutputLines<String>('Web logical location map');
+    _logicalLocationMap.forEach((String webKey, List<String?> locations) {
+      final String valuesString = locations.map((String? value) {
+        return value == null ? 'null' : toHex(logicalData.entryByName(value).value, digits: 11);
+      }).join(', ');
+      final String namesString = locations.map((String? value) {
+        return value == null ? 'null' : logicalData.entryByName(value).constantName;
+      }).join(', ');
+      lines.add(webKey, "  '$webKey': <int?>[$valuesString], // $namesString");
+    });
+    return lines.sortedJoin().trimRight();
   }
+  final Map<String, List<String?>> _logicalLocationMap;
 
   @override
-  String get templatePath => path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'keyboard_map_web.tmpl');
+  String get templatePath => path.join(dataRoot, 'web_key_map_dart.tmpl');
 
   @override
-  String outputPath(String platform) => path.join(flutterRoot.path, '..', 'engine', 'src', 'flutter', path.join('lib', 'web_ui', 'lib', 'src', 'engine', 'keycodes', 'keyboard_map_web.dart'));
+  String outputPath(String platform) => path.join(PlatformCodeGenerator.engineRoot,
+      'lib', 'web_ui', 'lib', 'src', 'engine', 'key_map.dart');
 
   @override
   Map<String, String> mappings() {
     return <String, String>{
       'WEB_LOGICAL_KEY_CODE_MAP': _webLogicalKeyCodeMap,
       'WEB_PHYSICAL_KEY_CODE_MAP': _webPhysicalKeyCodeMap,
-      'WEB_NUMPAD_CODE_MAP': _webNumpadCodeMap,
+      'WEB_LOGICAL_LOCATION_MAP': _webLogicalLocationMap,
     };
   }
 }

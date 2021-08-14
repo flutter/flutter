@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:meta/meta.dart';
@@ -17,6 +19,7 @@ import 'build_info.dart';
 import 'convert.dart';
 import 'devfs.dart';
 import 'device.dart';
+import 'device_port_forwarder.dart';
 import 'protocol_discovery.dart';
 
 /// A partial implementation of Device for desktop-class devices to inherit
@@ -139,6 +142,7 @@ abstract class DesktopDevice extends Device {
     final Process process = await _processManager.start(
       <String>[
         executable,
+        ...?debuggingOptions?.dartEntrypointArgs,
       ],
       environment: _computeEnvironment(debuggingOptions, traceStartup, route),
     );
@@ -247,6 +251,9 @@ abstract class DesktopDevice extends Device {
     if (debuggingOptions.traceAllowlist != null) {
       addFlag('trace-allowlist=${debuggingOptions.traceAllowlist}');
     }
+    if (debuggingOptions.traceSkiaAllowlist != null) {
+      addFlag('trace-skia-allowlist=${debuggingOptions.traceSkiaAllowlist}');
+    }
     if (debuggingOptions.traceSystrace) {
       addFlag('trace-systrace=true');
     }
@@ -301,9 +308,25 @@ class DesktopLogReader extends DeviceLogReader {
 
   /// Begin listening to the stdout and stderr streams of the provided [process].
   void initializeProcess(Process process) {
-    process.stdout.listen(_inputController.add);
-    process.stderr.listen(_inputController.add);
-    process.exitCode.whenComplete(_inputController.close);
+    final StreamSubscription<List<int>> stdoutSub = process.stdout.listen(
+      _inputController.add,
+    );
+    final StreamSubscription<List<int>> stderrSub = process.stderr.listen(
+      _inputController.add,
+    );
+    final Future<void> stdioFuture = Future.wait<void>(<Future<void>>[
+      stdoutSub.asFuture<void>(),
+      stderrSub.asFuture<void>(),
+    ]);
+    process.exitCode.whenComplete(() async {
+      // Wait for output to be fully processed.
+      await stdioFuture;
+      // The streams have already completed, so waiting for the stream
+      // cancellation to complete is not needed.
+      unawaited(stdoutSub.cancel());
+      unawaited(stderrSub.cancel());
+      await _inputController.close();
+    });
   }
 
   @override

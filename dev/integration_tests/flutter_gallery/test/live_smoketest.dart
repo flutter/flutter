@@ -11,15 +11,13 @@
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart' show kPrimaryButton;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter/gestures.dart' show kPrimaryButton;
-import 'package:flutter_test/flutter_test.dart';
-
-import 'package:flutter_gallery/gallery/demos.dart';
 import 'package:flutter_gallery/gallery/app.dart' show GalleryApp;
+import 'package:flutter_gallery/gallery/demos.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 // Reports success or failure to the native code.
 const MethodChannel _kTestChannel = MethodChannel('io.flutter.demo.gallery/TestLifecycleListener');
@@ -60,11 +58,11 @@ Future<void> main() async {
 
     print('Starting app...');
     runApp(const GalleryApp(testMode: true));
-    final _LiveWidgetController controller = _LiveWidgetController(WidgetsBinding.instance);
+    final _LiveWidgetController controller = _LiveWidgetController(WidgetsBinding.instance!);
     for (final GalleryDemoCategory category in kAllGalleryDemoCategories) {
       print('Tapping "${category.name}" section...');
       await controller.tap(find.text(category.name));
-      for (final GalleryDemo demo in kGalleryCategoryToDemos[category]) {
+      for (final GalleryDemo demo in kGalleryCategoryToDemos[category]!) {
         final Finder demoItem = find.text(demo.title);
         print('Scrolling to "${demo.title}"...');
         await controller.scrollIntoView(demoItem, alignment: 0.5);
@@ -110,10 +108,10 @@ class _LiveWidgetController extends LiveWidgetController {
   bool frameSync = true;
 
   /// Waits until at the end of a frame the provided [condition] is [true].
-  Future<void> _waitUntilFrame(bool condition(), [Completer<void> completer]) {
+  Future<void> _waitUntilFrame(bool Function() condition, [Completer<void>? completer]) {
     completer ??= Completer<void>();
     if (!condition()) {
-      SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
+      SchedulerBinding.instance!.addPostFrameCallback((Duration timestamp) {
         _waitUntilFrame(condition, completer);
       });
     } else {
@@ -133,11 +131,11 @@ class _LiveWidgetController extends LiveWidgetController {
   }
 
   @override
-  Future<void> tap(Finder finder, { int pointer, int buttons = kPrimaryButton }) async {
-    await super.tap(await _waitForElement(finder), pointer: pointer, buttons: buttons);
+  Future<void> tap(Finder finder, { int? pointer, int buttons = kPrimaryButton, bool warnIfMissed = true }) async {
+    await super.tap(await _waitForElement(finder), pointer: pointer, buttons: buttons, warnIfMissed: warnIfMissed);
   }
 
-  Future<void> scrollIntoView(Finder finder, {double alignment}) async {
+  Future<void> scrollIntoView(Finder finder, {required double alignment}) async {
     final Finder target = await _waitForElement(finder);
     await Scrollable.ensureVisible(target.evaluate().single, duration: const Duration(milliseconds: 100), alignment: alignment);
   }

@@ -20,7 +20,7 @@ Future<void> main() async {
 
     section('Find Java');
 
-    final String javaHome = await findJavaHome();
+    final String? javaHome = await findJavaHome();
     if (javaHome == null) {
       return TaskResult.failure('Could not find Java');
     }
@@ -77,7 +77,7 @@ Future<void> main() async {
         Directory(path.join(hostAppDir.path, 'gradle', 'wrapper')),
       );
 
-      final Function clean = () async {
+      Future<void> clean() async {
         section('Clean');
         await inDirectory(hostAppDir, () async {
           await exec(gradlewExecutable,
@@ -87,7 +87,7 @@ Future<void> main() async {
             },
           );
         });
-      };
+      }
 
       if (!Platform.isWindows) {
         section('Make $gradlewExecutable executable');

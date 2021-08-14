@@ -52,12 +52,13 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 /// ```
 ///
 /// ```dart
+/// @override
 /// Widget build(BuildContext context) {
 ///   return Column(
 ///     mainAxisSize: MainAxisSize.min,
 ///     children: <Widget>[
 ///       IconButton(
-///         icon: Icon(Icons.volume_up),
+///         icon: const Icon(Icons.volume_up),
 ///         tooltip: 'Increase volume by 10',
 ///         onPressed: () {
 ///           setState(() {
@@ -94,6 +95,7 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/icon_button_background.png)
 ///
 /// ```dart
+/// @override
 /// Widget build(BuildContext context) {
 ///   return Material(
 ///     color: Colors.white,
@@ -104,7 +106,7 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 ///           shape: CircleBorder(),
 ///         ),
 ///         child: IconButton(
-///           icon: Icon(Icons.android),
+///           icon: const Icon(Icons.android),
 ///           color: Colors.white,
 ///           onPressed: () {},
 ///         ),
@@ -144,7 +146,6 @@ class IconButton extends StatelessWidget {
     this.padding = const EdgeInsets.all(8.0),
     this.alignment = Alignment.center,
     this.splashRadius,
-    required this.icon,
     this.color,
     this.focusColor,
     this.hoverColor,
@@ -152,12 +153,13 @@ class IconButton extends StatelessWidget {
     this.splashColor,
     this.disabledColor,
     required this.onPressed,
-    this.mouseCursor = SystemMouseCursors.click,
+    this.mouseCursor,
     this.focusNode,
     this.autofocus = false,
     this.tooltip,
     this.enableFeedback = true,
     this.constraints,
+    required this.icon,
   }) : assert(iconSize != null),
        assert(padding != null),
        assert(alignment != null),
@@ -276,10 +278,12 @@ class IconButton extends StatelessWidget {
   /// If this is set to null, the button will be disabled.
   final VoidCallback? onPressed;
 
-  /// {@macro flutter.material.button.mouseCursor}
+  /// {@macro flutter.material.RawMaterialButton.mouseCursor}
   ///
-  /// Defaults to [SystemMouseCursors.click].
-  final MouseCursor mouseCursor;
+  /// If set to null, will default to
+  /// - [SystemMouseCursors.forbidden], if [onPressed] is null
+  /// - [SystemMouseCursors.click], otherwise
+  final MouseCursor? mouseCursor;
 
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
@@ -326,7 +330,7 @@ class IconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     Color? currentColor;
     if (onPressed != null)
       currentColor = color;
@@ -377,9 +381,8 @@ class IconButton extends StatelessWidget {
         autofocus: autofocus,
         canRequestFocus: onPressed != null,
         onTap: onPressed,
-        mouseCursor: mouseCursor,
+        mouseCursor: mouseCursor ?? (onPressed == null ? SystemMouseCursors.forbidden : SystemMouseCursors.click),
         enableFeedback: enableFeedback,
-        child: result,
         focusColor: focusColor ?? theme.focusColor,
         hoverColor: hoverColor ?? theme.hoverColor,
         highlightColor: highlightColor ?? theme.highlightColor,
@@ -389,6 +392,7 @@ class IconButton extends StatelessWidget {
           (iconSize + math.min(padding.horizontal, padding.vertical)) * 0.7,
           // x 0.5 for diameter -> radius and + 40% overflow derived from other Material apps.
         ),
+        child: result,
       ),
     );
   }

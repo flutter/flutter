@@ -31,7 +31,7 @@ import 'package:flutter/rendering.dart';
 ///
 ///  * [FixedScrollMetrics], which is an immutable object that implements this
 ///    interface.
-abstract class ScrollMetrics {
+mixin ScrollMetrics {
   /// Creates a [ScrollMetrics] that has the same properties as this object.
   ///
   /// This is useful if this object is mutable, but you want to get a snapshot
@@ -129,7 +129,7 @@ abstract class ScrollMetrics {
 /// An immutable snapshot of values associated with a [Scrollable] viewport.
 ///
 /// For details, see [ScrollMetrics], which defines this object's interfaces.
-class FixedScrollMetrics extends ScrollMetrics {
+class FixedScrollMetrics with ScrollMetrics {
   /// Creates an immutable snapshot of values associated with a [Scrollable] viewport.
   FixedScrollMetrics({
     required double? minScrollExtent,

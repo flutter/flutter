@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#import <EarlGrey/EarlGrey.h>
+#import <EarlGreyTest/EarlGrey.h>
 #import <XCTest/XCTest.h>
 
 #import "AppDelegate.h"
@@ -13,33 +13,27 @@
 
 @implementation FlutterTests
 
-- (void)expectSemanticsNotification:(UIViewController*)viewController
-                             engine:(FlutterEngine*)engine {
-   // Flutter app will only send semantics update if test passes in main.dart.
-  [self expectationForNotification:FlutterSemanticsUpdateNotification object:viewController handler:nil];
-  [self waitForExpectationsWithTimeout:30.0 handler:nil];
-}
-
-- (void)checkAppConnection {
-  FlutterEngine *engine = [((AppDelegate *)[[UIApplication sharedApplication] delegate]) engine];
-  UINavigationController *navController =
-       (UINavigationController *)((AppDelegate *)
-            [[UIApplication sharedApplication]
-                 delegate])
-       .window.rootViewController;
-  __weak UIViewController *weakViewController = navController.visibleViewController;
-  [self expectSemanticsNotification:weakViewController
-                             engine:engine];
-  GREYAssertNotNil(weakViewController,
-                   @"Expected non-nil FullScreenViewController.");
+- (void)setUp {
+  self.continueAfterFailure = NO;
+  XCUIApplication *app = [[XCUIApplication alloc] init];
+  [app launch];
 }
 
 - (void)testFullScreenCanPop {
+  XCTestExpectation *notificationReceived = [self expectationWithDescription:@"Remote semantics notification"];
+  NSNotificationCenter *notificationCenter = [[GREYHostApplicationDistantObject sharedInstance] notificationCenter];
+  id observer = [notificationCenter addObserverForName:FlutterSemanticsUpdateNotification object:nil queue:nil usingBlock:^(NSNotification *notification) {
+    XCTAssertTrue([notification.object isKindOfClass:GREY_REMOTE_CLASS_IN_APP(FullScreenViewController)]);
+    [notificationReceived fulfill];
+  }];
+
   [[EarlGrey selectElementWithMatcher:grey_keyWindow()]
       assertWithMatcher:grey_sufficientlyVisible()];
   [[EarlGrey selectElementWithMatcher:grey_buttonTitle(@"Full Screen (Cold)")]
       performAction:grey_tap()];
-  [self checkAppConnection];
+
+  [self waitForExpectationsWithTimeout:30.0 handler:nil];
+  [notificationCenter removeObserver:observer];
 }
 
 @end

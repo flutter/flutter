@@ -2,20 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class _TimePickerLauncher extends StatelessWidget {
   const _TimePickerLauncher({
-    Key key,
+    Key? key,
     this.onChanged,
-    this.locale,
+    required this.locale,
     this.entryMode = TimePickerEntryMode.dial,
   }) : super(key: key);
 
-  final ValueChanged<TimeOfDay> onChanged;
+  final ValueChanged<TimeOfDay?>? onChanged;
   final Locale locale;
   final TimePickerEntryMode entryMode;
 
@@ -32,7 +31,7 @@ class _TimePickerLauncher extends StatelessWidget {
               return ElevatedButton(
                 child: const Text('X'),
                 onPressed: () async {
-                  onChanged(await showTimePicker(
+                  onChanged?.call(await showTimePicker(
                     context: context,
                     initialEntryMode: entryMode,
                     initialTime: const TimeOfDay(hour: 7, minute: 0),
@@ -49,7 +48,7 @@ class _TimePickerLauncher extends StatelessWidget {
 
 Future<Offset> startPicker(
   WidgetTester tester,
-  ValueChanged<TimeOfDay> onChanged, {
+  ValueChanged<TimeOfDay?> onChanged, {
     Locale locale = const Locale('en', 'US'),
 }) async {
   await tester.pumpWidget(_TimePickerLauncher(onChanged: onChanged, locale: locale,));
@@ -89,7 +88,7 @@ void main() {
     ];
 
     for (final Locale locale in locales) {
-      final Offset center = await startPicker(tester, (TimeOfDay time) { }, locale: locale);
+      final Offset center = await startPicker(tester, (TimeOfDay? time) { }, locale: locale);
       final Text stringFragmentText = tester.widget(stringFragmentTextFinder);
       final double hourLeftOffset = tester.getTopLeft(hourControlFinder).dx;
       final double minuteLeftOffset = tester.getTopLeft(minuteControlFinder).dx;
@@ -133,8 +132,8 @@ void main() {
       await finishPicker(tester);
     }
 
-    tester.binding.window.physicalSizeTestValue = null;
-    tester.binding.window.devicePixelRatioTestValue = null;
+    tester.binding.window.clearPhysicalSizeTestValue();
+    tester.binding.window.clearDevicePixelRatioTestValue();
   });
 
   testWidgets('can localize the header in all known formats - landscape', (WidgetTester tester) async {
@@ -161,7 +160,7 @@ void main() {
     ];
 
     for (final Locale locale in locales) {
-      final Offset center = await startPicker(tester, (TimeOfDay time) { }, locale: locale);
+      final Offset center = await startPicker(tester, (TimeOfDay? time) { }, locale: locale);
       final Text stringFragmentText = tester.widget(stringFragmentTextFinder);
       final double hourLeftOffset = tester.getTopLeft(hourControlFinder).dx;
       final double hourTopOffset = tester.getTopLeft(hourControlFinder).dy;
@@ -210,8 +209,8 @@ void main() {
       await finishPicker(tester);
     }
 
-    tester.binding.window.physicalSizeTestValue = null;
-    tester.binding.window.devicePixelRatioTestValue = null;
+    tester.binding.window.clearPhysicalSizeTestValue();
+    tester.binding.window.clearDevicePixelRatioTestValue();
   });
 
   testWidgets('can localize input mode in all known formats', (WidgetTester tester) async {
@@ -234,7 +233,7 @@ void main() {
     ];
 
     for (final Locale locale in locales) {
-      await tester.pumpWidget(_TimePickerLauncher(onChanged: (TimeOfDay time) { }, locale: locale, entryMode: TimePickerEntryMode.input));
+      await tester.pumpWidget(_TimePickerLauncher(onChanged: (TimeOfDay? time) { }, locale: locale, entryMode: TimePickerEntryMode.input));
       await tester.tap(find.text('X'));
       await tester.pumpAndSettle(const Duration(seconds: 1));
 
@@ -292,8 +291,8 @@ void main() {
       // 12:00 AM position. Because there's only one ring, no matter where you
       // tap the time will be the same.
       for (int i = 1; i < 10; i++) {
-        TimeOfDay result;
-        final Offset center = await startPicker(tester, (TimeOfDay time) { result = time; }, locale: locale);
+        TimeOfDay? result;
+        final Offset center = await startPicker(tester, (TimeOfDay? time) { result = time; }, locale: locale);
         final Size size = tester.getSize(find.byKey(const Key('time-picker-dial')));
         final double dy = (size.height / 2.0 / 10) * i;
         await tester.tapAt(Offset(center.dx, center.dy - dy));
@@ -346,15 +345,19 @@ void main() {
 
     final CustomPaint dialPaint = tester.widget(find.byKey(const ValueKey<String>('time-picker-dial')));
     final dynamic dialPainter = dialPaint.painter;
+    // ignore: avoid_dynamic_calls
     final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
     expect(
-      primaryLabels.map<String>((dynamic tp) => ((tp.painter as TextPainter).text as TextSpan).text),
+      // ignore: avoid_dynamic_calls
+      primaryLabels.map<String>((dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text!),
       labels12To11,
     );
 
+    // ignore: avoid_dynamic_calls
     final List<dynamic> secondaryLabels = dialPainter.secondaryLabels as List<dynamic>;
     expect(
-      secondaryLabels.map<String>((dynamic tp) => ((tp.painter as TextPainter).text as TextSpan).text),
+      // ignore: avoid_dynamic_calls
+      secondaryLabels.map<String>((dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text!),
       labels12To11,
     );
   });
@@ -364,15 +367,19 @@ void main() {
 
     final CustomPaint dialPaint = tester.widget(find.byKey(const ValueKey<String>('time-picker-dial')));
     final dynamic dialPainter = dialPaint.painter;
+    // ignore: avoid_dynamic_calls
     final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
     expect(
-      primaryLabels.map<String>((dynamic tp) => ((tp.painter as TextPainter).text as TextSpan).text),
+      // ignore: avoid_dynamic_calls
+      primaryLabels.map<String>((dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text!),
       labels00To22TwoDigit,
     );
 
+    // ignore: avoid_dynamic_calls
     final List<dynamic> secondaryLabels = dialPainter.secondaryLabels as List<dynamic>;
     expect(
-      secondaryLabels.map<String>((dynamic tp) => ((tp.painter as TextPainter).text as TextSpan).text),
+      // ignore: avoid_dynamic_calls
+      secondaryLabels.map<String>((dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text!),
       labels00To22TwoDigit,
     );
   });

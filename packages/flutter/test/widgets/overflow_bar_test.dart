@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('OverflowBar documented defaults', (WidgetTester tester) async {
     final OverflowBar bar = OverflowBar();
     expect(bar.spacing, 0);
+    expect(bar.alignment, null);
     expect(bar.overflowSpacing, 0);
     expect(bar.overflowDirection, VerticalDirection.down);
     expect(bar.textDirection, null);
@@ -233,5 +234,111 @@ void main() {
 
     await tester.pumpWidget(buildFrame(maxWidth: 150));
     expect(tester.getSize(find.byType(OverflowBar)).height, 166); // 166 = 50 + 8 + 25 + 8 + 75
+  });
+
+
+  testWidgets('OverflowBar is wider that its intrinsic width', (WidgetTester tester) async {
+    final Key key0 = UniqueKey();
+    final Key key1 = UniqueKey();
+    final Key key2 = UniqueKey();
+
+    Widget buildFrame(TextDirection textDirection) {
+      return Directionality(
+        textDirection: textDirection,
+        child: SizedBox(
+          width: 800,
+          // intrinsic width = 50 + 10 + 60 + 10 + 70 = 200
+          child: OverflowBar(
+            spacing: 10,
+            children: <Widget>[
+              SizedBox(key: key0, width: 50, height: 50),
+              SizedBox(key: key1, width: 60, height: 50),
+              SizedBox(key: key2, width: 70, height: 50),
+            ],
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(TextDirection.ltr));
+    expect(tester.getSize(find.byType(OverflowBar)), const Size(800.0, 600.0));
+    expect(tester.getTopLeft(find.byKey(key0)).dx, 0);
+    expect(tester.getTopLeft(find.byKey(key1)).dx, 60);
+    expect(tester.getTopLeft(find.byKey(key2)).dx, 130);
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl));
+    expect(tester.getSize(find.byType(OverflowBar)), const Size(800.0, 600.0));
+    expect(tester.getTopLeft(find.byKey(key0)).dx, 750);
+    expect(tester.getTopLeft(find.byKey(key1)).dx, 680);
+    expect(tester.getTopLeft(find.byKey(key2)).dx, 600);
+  });
+
+  testWidgets('OverflowBar with alignment should match Row with mainAxisAlignment', (WidgetTester tester) async {
+    final Key key0 = UniqueKey();
+    final Key key1 = UniqueKey();
+    final Key key2 = UniqueKey();
+
+    // This list of children appears in a Row and an OverflowBar, so each
+    // find.byKey() for key0, key1, key2 returns two widgets.
+    final List<Widget> children = <Widget>[
+      SizedBox(key: key0, width: 50, height: 50),
+      SizedBox(key: key1, width: 70, height: 50),
+      SizedBox(key: key2, width: 80, height: 50),
+    ];
+
+    const List<MainAxisAlignment> allAlignments = <MainAxisAlignment>[
+      MainAxisAlignment.start,
+      MainAxisAlignment.center,
+      MainAxisAlignment.end,
+      MainAxisAlignment.spaceBetween,
+      MainAxisAlignment.spaceAround,
+      MainAxisAlignment.spaceEvenly,
+    ];
+
+    const List<TextDirection> allTextDirections = <TextDirection>[
+      TextDirection.ltr,
+      TextDirection.rtl,
+    ];
+
+    Widget buildFrame(MainAxisAlignment alignment, TextDirection textDirection) {
+      return Directionality(
+        textDirection: textDirection,
+        child: Column(
+          children: <Widget>[
+            OverflowBar(
+              alignment: alignment,
+              children: children,
+            ),
+            Row(
+              mainAxisAlignment: alignment,
+              children: children,
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Each key from key0, key1, key2 maps to one child in the OverflowBar
+    // and a matching child in the Row. We expect the children to be the
+    // same size and for their left and right edges to align.
+    void testLayout() {
+      expect(tester.getSize(find.byType(OverflowBar)), const Size(800, 50));
+      for (final Key key in <Key>[key0, key1, key2]) {
+        final Finder matchingChildren = find.byKey(key);
+        expect(matchingChildren.evaluate().length, 2);
+        final Rect rect0 = tester.getRect(matchingChildren.first);
+        final Rect rect1 = tester.getRect(matchingChildren.last);
+        expect(rect0.size, rect1.size);
+        expect(rect0.left, rect1.left);
+        expect(rect0.right, rect1.right);
+      }
+    }
+
+    for (final MainAxisAlignment alignment in allAlignments) {
+      for (final TextDirection textDirection in allTextDirections) {
+        await tester.pumpWidget(buildFrame(alignment, textDirection));
+        testLayout();
+      }
+    }
   });
 }

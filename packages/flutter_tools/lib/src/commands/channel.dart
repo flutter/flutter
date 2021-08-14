@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import '../base/common.dart';
 import '../cache.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../runner/flutter_command.dart';
 import '../version.dart';
 
@@ -94,7 +96,7 @@ class ChannelCommand extends FlutterCommand {
       // only print non-missing channels
       if (availableChannels[i]) {
         String currentIndicator = ' ';
-        if (officialChannels[i] == currentChannel){
+        if (officialChannels[i] == currentChannel) {
           currentIndicator = '*';
         }
         globals.printStatus('$currentIndicator ${officialChannels[i]}');
@@ -111,28 +113,21 @@ class ChannelCommand extends FlutterCommand {
         }
       }
     }
+
+    if (currentChannel == 'unknown') {
+      globals.printStatus('');
+      globals.printStatus('Currently not on an official channel.');
+    }
   }
 
   Future<void> _switchChannel(String branchName) async {
     globals.printStatus("Switching to flutter channel '$branchName'...");
-    if (kObsoleteBranches.containsKey(branchName)) {
-      final String alternative = kObsoleteBranches[branchName];
-      globals.printStatus("This channel is obsolete. Consider switching to the '$alternative' channel instead.");
-    } else if (!kOfficialChannels.contains(branchName)) {
+    if (!kOfficialChannels.contains(branchName)) {
       globals.printStatus('This is not an official channel. For a list of available channels, try "flutter channel".');
     }
     await _checkout(branchName);
     globals.printStatus("Successfully switched to flutter channel '$branchName'.");
     globals.printStatus("To ensure that you're on the latest build from this channel, run 'flutter upgrade'");
-  }
-
-  static Future<void> upgradeChannel() async {
-    final String channel = globals.flutterVersion.channel;
-    if (kObsoleteBranches.containsKey(channel)) {
-      final String alternative = kObsoleteBranches[channel];
-      globals.printStatus("Transitioning from '$channel' to '$alternative'...");
-      return _checkout(alternative);
-    }
   }
 
   static Future<void> _checkout(String branchName) async {

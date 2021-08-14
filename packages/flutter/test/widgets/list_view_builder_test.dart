@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'test_widgets.dart';
 
@@ -22,7 +22,7 @@ void main() {
             itemExtent: 100.0,
             itemBuilder: (BuildContext context, int index) {
               callbackTracker.add(index);
-              return Container(
+              return SizedBox(
                 key: ValueKey<int>(index),
                 height: 100.0,
                 child: Text('$index'),
@@ -68,15 +68,15 @@ void main() {
     // so if our widget is 200 pixels tall, it should fit exactly 3 times.
     // but if we are offset by 300 pixels, there will be 4, numbered 1-4.
 
-    final IndexedWidgetBuilder itemBuilder = (BuildContext context, int index) {
+    Widget itemBuilder(BuildContext context, int index) {
       callbackTracker.add(index);
-      return Container(
+      return SizedBox(
         key: ValueKey<int>(index),
         width: 500.0, // this should be ignored
         height: 400.0, // should be overridden by itemExtent
         child: Text('$index', textDirection: TextDirection.ltr),
       );
-    };
+    }
 
     Widget buildWidget() {
       return Directionality(
@@ -141,15 +141,15 @@ void main() {
     // so if our widget is 200 pixels wide, it should fit exactly 4 times.
     // but if we are offset by 300 pixels, there will be 5, numbered 1-5.
 
-    final IndexedWidgetBuilder itemBuilder = (BuildContext context, int index) {
+    Widget itemBuilder(BuildContext context, int index) {
       callbackTracker.add(index);
-      return Container(
+      return SizedBox(
         key: ValueKey<int>(index),
         width: 400.0, // this should be overridden by itemExtent
         height: 500.0, // this should be ignored
         child: Text('$index'),
       );
-    };
+    }
 
     Widget buildWidget() {
       return Directionality(
@@ -215,10 +215,10 @@ void main() {
     // items are 300 tall. Scrolling should cause two or three items
     // to be built.
 
-    final IndexedWidgetBuilder itemBuilder = (BuildContext context, int index) {
+    Widget itemBuilder(BuildContext context, int index) {
       callbackTracker.add(index);
       return Text('$index', key: ValueKey<int>(index), textDirection: TextDirection.ltr);
-    };
+    }
 
     final Widget testWidget = Directionality(
       textDirection: TextDirection.ltr,
@@ -258,6 +258,54 @@ void main() {
 
     expect(callbackTracker, equals(<int>[5]));
     check(visible: <int>[2, 3, 4], hidden: <int>[0, 1, 5]);
+    callbackTracker.clear();
+  });
+
+  testWidgets('ListView.builder 30 items with big jump, using prototypeItem', (WidgetTester tester) async {
+    final List<int> callbackTracker = <int>[];
+
+    // The root view is 800x600 in the test environment and our list
+    // items are 300 tall. Scrolling should cause two or three items
+    // to be built.
+
+    Widget itemBuilder(BuildContext context, int index) {
+      callbackTracker.add(index);
+      return Text('$index', key: ValueKey<int>(index), textDirection: TextDirection.ltr);
+    }
+
+    final Widget testWidget = Directionality(
+      textDirection: TextDirection.ltr,
+      child: ListView.builder(
+        itemBuilder: itemBuilder,
+        prototypeItem: const SizedBox(
+          width: 800,
+          height: 300,
+        ),
+        itemCount: 30,
+      ),
+    );
+
+    void jumpTo(double newScrollOffset) {
+      final ScrollableState scrollable = tester.state(find.byType(Scrollable));
+      scrollable.position.jumpTo(newScrollOffset);
+    }
+
+    await tester.pumpWidget(testWidget);
+
+    // 2 is in the cache area, but not visible.
+    expect(callbackTracker, equals(<int>[0, 1, 2]));
+    final List<int> initialExpectedHidden = List<int>.generate(28, (int i) => i + 2);
+    check(visible: <int>[0, 1], hidden: initialExpectedHidden);
+    callbackTracker.clear();
+
+    // Jump to the end of the ListView.
+    jumpTo(8400);
+    await tester.pump();
+
+    // 27 is in the cache area, but not visible.
+    expect(callbackTracker, equals(<int>[27, 28, 29]));
+    final List<int> finalExpectedHidden = List<int>.generate(28, (int i) => i);
+    check(visible: <int>[28, 29], hidden: finalExpectedHidden);
     callbackTracker.clear();
   });
 
@@ -351,6 +399,29 @@ void main() {
 
     await tester.pumpWidget(buildFrame(itemCount: 4));
     expect(scrollable().semanticChildCount, 4);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/72292
+  testWidgets('ListView.builder and SingleChildScrollView can work well together', (WidgetTester tester) async {
+    Widget builder(int itemCount) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: SingleChildScrollView(
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemExtent: 35,
+            itemCount: itemCount,
+            itemBuilder: (BuildContext context, int index) {
+              return const Text('I love Flutter.');
+            },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(builder(1));
+    // Trigger relayout and garbage collect.
+    await tester.pumpWidget(builder(2));
   });
 }
 

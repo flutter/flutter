@@ -2,15 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Whether the tool started from the daemon, as opposed to the command line.
-// TODO(jonahwilliams): remove once IDE updates have rolled.
-bool isRunningFromDaemon = false;
-
 /// Throw a specialized exception for expected situations
 /// where the tool should exit with a clear message to the user
 /// and no stack trace unless the --verbose option is specified.
 /// For example: network errors.
-void throwToolExit(String message, { int exitCode }) {
+Never throwToolExit(String message, { int? exitCode }) {
   throw ToolExit(message, exitCode: exitCode);
 }
 
@@ -21,14 +17,14 @@ void throwToolExit(String message, { int exitCode }) {
 class ToolExit implements Exception {
   ToolExit(this.message, { this.exitCode });
 
-  final String message;
-  final int exitCode;
+  final String? message;
+  final int? exitCode;
 
   @override
-  String toString() => 'Exception: $message';
+  String toString() => 'Exception: $message'; // TODO(ianh): Really this should say "Error".
 }
 
-/// Indicates to the linter that the given future is intentionally not `await`-ed.
+/// Indicates to the linter that the given future is intentionally not awaited.
 ///
 /// Has the same functionality as `unawaited` from `package:pedantic`.
 ///
@@ -37,4 +33,4 @@ class ToolExit implements Exception {
 /// the flutter_tools package. However, there are times where one or more
 /// futures are intentionally not awaited. This function may be used to ignore a
 /// particular future. It silences the unawaited_futures lint.
-void unawaited(Future<void> future) { }
+void unawaited(Future<void>? future) { }

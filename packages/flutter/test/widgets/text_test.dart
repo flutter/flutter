@@ -4,11 +4,11 @@
 
 import 'dart:ui' as ui;
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 import 'semantics_tester.dart';
@@ -37,7 +37,7 @@ void main() {
 
   testWidgets('Text respects textScaleFactor with default font size', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const Center(child: Text('Hello', textDirection: TextDirection.ltr))
+      const Center(child: Text('Hello', textDirection: TextDirection.ltr)),
     );
 
     RichText text = tester.firstWidget(find.byType(RichText));
@@ -65,8 +65,11 @@ void main() {
 
   testWidgets('Text respects textScaleFactor with explicit font size', (WidgetTester tester) async {
     await tester.pumpWidget(const Center(
-      child: Text('Hello',
-        style: TextStyle(fontSize: 20.0), textDirection: TextDirection.ltr),
+      child: Text(
+        'Hello',
+        style: TextStyle(fontSize: 20.0),
+        textDirection: TextDirection.ltr,
+      ),
     ));
 
     RichText text = tester.firstWidget(find.byType(RichText));
@@ -77,10 +80,12 @@ void main() {
     expect(baseSize.height, equals(20.0));
 
     await tester.pumpWidget(const Center(
-      child: Text('Hello',
+      child: Text(
+        'Hello',
         style: TextStyle(fontSize: 20.0),
         textScaleFactor: 1.3,
-        textDirection: TextDirection.ltr),
+        textDirection: TextDirection.ltr,
+      ),
     ));
 
     text = tester.firstWidget(find.byType(RichText));
@@ -159,7 +164,7 @@ void main() {
       ),
     );
     expect(tester.takeException(), null);
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42086
+  });
 
   testWidgets('inline widgets hitTest works with ellipsis', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/68559
@@ -195,7 +200,7 @@ void main() {
     await tester.tap(find.byType(Text));
 
     expect(tester.takeException(), null);
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42086
+  });
 
   testWidgets('inline widgets works with textScaleFactor', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/59316
@@ -257,7 +262,7 @@ void main() {
     renderText = tester.renderObject(find.byKey(key));
     // The RichText in the widget span should wrap into three lines.
     expect(renderText.size.height, singleLineHeight * textScaleFactor * 3);
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42086
+  });
 
   testWidgets('semanticsLabel can override text label', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -266,7 +271,7 @@ void main() {
         r'$$',
         semanticsLabel: 'Double dollars',
         textDirection: TextDirection.ltr,
-      )
+      ),
     );
     final TestSemantics expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
@@ -289,7 +294,8 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: Text(r'$$', semanticsLabel: 'Double dollars')),
+        child: Text(r'$$', semanticsLabel: 'Double dollars'),
+      ),
     );
 
     expect(
@@ -310,16 +316,17 @@ void main() {
       textDirection: TextDirection.ltr,
       child: RichText(
         text: TextSpan(
-        children: <InlineSpan>[
-          const TextSpan(
-            text: 'Some Text',
-            semanticsLabel: '',
-          ),
-          TextSpan(
-            text: 'Clickable',
-            recognizer: TapGestureRecognizer()..onTap = () { },
-          ),
-        ]),
+          children: <InlineSpan>[
+            const TextSpan(
+              text: 'Some Text',
+              semanticsLabel: '',
+            ),
+            TextSpan(
+              text: 'Clickable',
+              recognizer: TapGestureRecognizer()..onTap = () { },
+            ),
+          ],
+        ),
       ),
     ));
     final TestSemantics expectedSemantics = TestSemantics.root(
@@ -620,7 +627,7 @@ void main() {
               label: 'click me',
               textDirection: TextDirection.ltr,
               actions: <SemanticsAction>[SemanticsAction.tap],
-              flags: <SemanticsFlag>[SemanticsFlag.isLink]
+              flags: <SemanticsFlag>[SemanticsFlag.isLink],
             ),
           ],
         ),
@@ -707,7 +714,7 @@ void main() {
       ),
     );
     semantics.dispose();
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42086
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/62945
 
   testWidgets('inline widgets semantic nodes scale', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -787,7 +794,7 @@ void main() {
       ),
     );
     semantics.dispose();
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42086
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/62945
 
   testWidgets('Overflow is clipping correctly - short text with overflow: clip', (WidgetTester tester) async {
     await _pumpTextWidget(
@@ -810,7 +817,7 @@ void main() {
       find.byType(Text),
       paints..clipRect(rect: const Rect.fromLTWH(0, 0, 50, 50)),
     );
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33523
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87878
 
   testWidgets('Overflow is clipping correctly - short text with overflow: ellipsis', (WidgetTester tester) async {
     await _pumpTextWidget(
@@ -871,14 +878,12 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: Center(
-              child: Container(
-                // Each word takes up more than a half of a line. Together they
-                // wrap onto two lines, but leave a lot of extra space.
-                child: Text(
-                  'twowordsthateachtakeupmorethanhalfof alineoftextsothattheywrapwithlotsofextraspace',
-                  textDirection: TextDirection.ltr,
-                  textWidthBasis: textWidthBasis,
-                ),
+              // Each word takes up more than a half of a line. Together they
+              // wrap onto two lines, but leave a lot of extra space.
+              child: Text(
+                'twowordsthateachtakeupmorethanhalfof alineoftextsothattheywrapwithlotsofextraspace',
+                textDirection: TextDirection.ltr,
+                textWidthBasis: textWidthBasis,
               ),
             ),
           ),
@@ -983,7 +988,9 @@ void main() {
           throw 'paragraph.width (${paragraph.width}) >= 400';
         return true;
       }));
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44020
+    },
+    skip: isBrowser, // https://github.com/flutter/flutter/issues/44020
+  );
 
   testWidgets('Paragraph.getBoxesForRange returns nothing when selection range is zero length', (WidgetTester tester) async {
     final ui.ParagraphBuilder builder = ui.ParagraphBuilder(ui.ParagraphStyle());
@@ -1006,7 +1013,7 @@ void main() {
             text: 'HELLO',
             style: const TextStyle(color: Colors.black),
             recognizer: TapGestureRecognizer()..onTap = () {},
-          )
+          ),
         ]),
       ),
     );
@@ -1038,7 +1045,233 @@ void main() {
         ),
       ],
     )));
-  }, semanticsEnabled: true, skip: isBrowser); // Browser semantics have different sizes.
+  }, semanticsEnabled: true, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
+
+  // Regression test for https://github.com/flutter/flutter/issues/69787
+  testWidgets('WidgetSpans with no semantic information are elided from semantics - case 2', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: RichText(
+          text: TextSpan(children: <InlineSpan>[
+            const WidgetSpan(child: SizedBox.shrink()),
+            const WidgetSpan(child: Text('included')),
+            TextSpan(
+              text: 'HELLO',
+              style: const TextStyle(color: Colors.black),
+              recognizer: TapGestureRecognizer()..onTap = () {},
+            ),
+            const WidgetSpan(child: Text('included2')),
+          ]),
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics(
+          children: <TestSemantics>[
+            TestSemantics(label: 'included'),
+            TestSemantics(
+              label: 'HELLO',
+              actions: <SemanticsAction>[
+                SemanticsAction.tap,
+              ],
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isLink,
+              ],
+            ),
+            TestSemantics(label: 'included2'),
+          ],
+        ),
+      ],
+    ),
+    ignoreId: true,
+    ignoreRect: true,
+    ignoreTransform: true,
+    ));
+  }, semanticsEnabled: true, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
+
+  // Regression test for https://github.com/flutter/flutter/issues/69787
+  testWidgets('WidgetSpans with no semantic information are elided from semantics - case 3', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: RichText(
+          text: TextSpan(children: <InlineSpan>[
+            const WidgetSpan(child: SizedBox.shrink()),
+            WidgetSpan(
+              child: Row(
+                children: <Widget>[
+                  Semantics(
+                    container: true,
+                    child: const Text('foo'),
+                  ),
+                  Semantics(
+                    container: true,
+                    child: const Text('bar'),
+                  ),
+                ],
+              ),
+            ),
+            TextSpan(
+              text: 'HELLO',
+              style: const TextStyle(color: Colors.black),
+              recognizer: TapGestureRecognizer()..onTap = () {},
+            ),
+          ]),
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics(
+          children: <TestSemantics>[
+            TestSemantics(label: 'foo'),
+            TestSemantics(label: 'bar'),
+            TestSemantics(
+              label: 'HELLO',
+              actions: <SemanticsAction>[
+                SemanticsAction.tap,
+              ],
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isLink,
+              ],
+            ),
+          ],
+        ),
+      ],
+    ),
+    ignoreId: true,
+    ignoreRect: true,
+    ignoreTransform: true,
+    ));
+  }, semanticsEnabled: true, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
+
+  // Regression test for https://github.com/flutter/flutter/issues/69787
+  testWidgets('WidgetSpans with no semantic information are elided from semantics - case 4', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: ClipRect(
+            child: Container(
+              color: Colors.green,
+              height: 100,
+              width: 100,
+              child: OverflowBox(
+                alignment: Alignment.topLeft,
+                maxWidth: double.infinity,
+                child: RichText(
+                  text: TextSpan(
+                    children: <InlineSpan>[
+                      const WidgetSpan(
+                        child: Icon(
+                          Icons.edit,
+                          size: 16,
+                          semanticLabel: 'not clipped',
+                        ),
+                      ),
+                      TextSpan(
+                        text: 'next WS is clipped',
+                        recognizer: TapGestureRecognizer()..onTap = () { },
+                      ),
+                      const WidgetSpan(
+                        child: Icon(
+                          Icons.edit,
+                          size: 16,
+                          semanticLabel: 'clipped',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics(
+          children: <TestSemantics>[
+            TestSemantics(label: 'not clipped'),
+            TestSemantics(
+              label: 'next WS is clipped',
+              flags: <SemanticsFlag>[SemanticsFlag.isLink],
+              actions: <SemanticsAction>[SemanticsAction.tap],
+            ),
+          ],
+        ),
+      ],
+    ),
+    ignoreId: true,
+    ignoreRect: true,
+    ignoreTransform: true,
+    ));
+  }, semanticsEnabled: true, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
+
+  testWidgets('RenderParagraph intrinsic width', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            height: 100,
+            child: IntrinsicWidth(
+              child: RichText(
+                text: TextSpan(
+                  style: const TextStyle(fontSize: 16, height: 1),
+                  children: <InlineSpan>[
+                    const TextSpan(text: 'S '),
+                    WidgetSpan(
+                      alignment: PlaceholderAlignment.top,
+                      child: Wrap(
+                        direction: Axis.vertical,
+                        children: const <Widget>[
+                          SizedBox(width: 200, height: 100),
+                          SizedBox(width: 200, height: 30),
+                        ],
+                      ),
+                    ),
+                    const TextSpan(text: ' E'),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byType(RichText)).width, 200 + 4 * 16.0);
+    final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.byType(RichText));
+    // The inline spans are rendered on one (horizontal) line, the sum of the widths is the max intrinsic width.
+    expect(paragraph.getMaxIntrinsicWidth(0.0), 200 + 4 * 16.0);
+    // The inline spans are rendered in one vertical run, the widest one determines the min intrinsic width.
+    expect(paragraph.getMinIntrinsicWidth(0.0), 200);
+  });
+
+  testWidgets('Text uses TextStyle.overflow', (WidgetTester tester) async {
+    const TextOverflow overflow = TextOverflow.fade;
+
+    await tester.pumpWidget( const Text(
+      'Hello World',
+      textDirection: TextDirection.ltr,
+      style: TextStyle(overflow: overflow),
+    ));
+
+    final RichText richText = tester.firstWidget(find.byType(RichText));
+
+    expect(richText.overflow, overflow);
+    expect(richText.text.style!.overflow, overflow);
+  });
 }
 
 Future<void> _pumpTextWidget({
@@ -1050,7 +1283,7 @@ Future<void> _pumpTextWidget({
     Directionality(
       textDirection: TextDirection.ltr,
       child: Center(
-        child: Container(
+        child: SizedBox(
           width: 50.0,
           height: 50.0,
           child: Text(

@@ -4,10 +4,8 @@
 
 import 'dart:ui' as ui;
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/animation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../scheduler/scheduler_tester.dart';
 
@@ -245,19 +243,18 @@ void main() {
       error = e;
     }
     expect(error, isNotNull);
-    expect(error!.toStringDeep(), matches(
+    expect(
+      error!.toStringDeep(),
       // RegExp matcher is required here due to flutter web and flutter mobile generating
       // slightly different floating point numbers
       // in Flutter web 0.0 sometimes just appears as 0. or 0
-      RegExp(r'''
+      matches(RegExp(r'''
 FlutterError
    Invalid curve endpoint at \d+(\.\d*)?\.
    Curves must map 0\.0 to near zero and 1\.0 to near one but
    BogusCurve mapped \d+(\.\d*)? to \d+(\.\d*)?, which is near \d+(\.\d*)?\.
-''',
-        multiLine: true
-      ),
-    ));
+''', multiLine: true)),
+    );
   });
 
   test('CurvedAnimation running with different forward and reverse durations.', () {
@@ -269,7 +266,7 @@ FlutterError
     final CurvedAnimation curved = CurvedAnimation(parent: controller, curve: Curves.linear, reverseCurve: Curves.linear);
 
     controller.forward();
-    tick(const Duration(milliseconds: 0));
+    tick(Duration.zero);
     tick(const Duration(milliseconds: 10));
     expect(curved.value, moreOrLessEquals(0.1));
     tick(const Duration(milliseconds: 20));
@@ -305,6 +302,44 @@ FlutterError
     expect(curved.value, moreOrLessEquals(0.0));
   });
 
+  test('CurvedAnimation stops listening to parent when disposed.', () async {
+    const Interval forwardCurve = Interval(0.0, 0.5);
+    const Interval reverseCurve = Interval(0.5, 1.0);
+
+    final AnimationController controller = AnimationController(
+      duration: const Duration(milliseconds: 100),
+      reverseDuration: const Duration(milliseconds: 100),
+      vsync: const TestVSync(),
+    );
+    final CurvedAnimation curved = CurvedAnimation(
+        parent: controller, curve: forwardCurve, reverseCurve: reverseCurve);
+
+    expect(forwardCurve.transform(0.5), 1.0);
+    expect(reverseCurve.transform(0.5), 0.0);
+
+    controller.forward(from: 0.5);
+    expect(controller.status, equals(AnimationStatus.forward));
+    expect(curved.value, equals(1.0));
+
+    controller.value = 1.0;
+    expect(controller.status, equals(AnimationStatus.completed));
+
+    controller.reverse(from: 0.5);
+    expect(controller.status, equals(AnimationStatus.reverse));
+    expect(curved.value, equals(0.0));
+
+    expect(curved.isDisposed, isFalse);
+    curved.dispose();
+    expect(curved.isDisposed, isTrue);
+
+    controller.value = 0.0;
+    expect(controller.status, equals(AnimationStatus.dismissed));
+
+    controller.forward(from: 0.5);
+    expect(controller.status, equals(AnimationStatus.forward));
+    expect(curved.value, equals(0.0));
+  });
+
   test('ReverseAnimation running with different forward and reverse durations.', () {
     final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
@@ -320,7 +355,7 @@ FlutterError
     );
 
     controller.forward();
-    tick(const Duration(milliseconds: 0));
+    tick(Duration.zero);
     tick(const Duration(milliseconds: 10));
     expect(reversed.value, moreOrLessEquals(0.9));
     tick(const Duration(milliseconds: 20));

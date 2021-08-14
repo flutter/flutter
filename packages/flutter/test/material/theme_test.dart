@@ -44,7 +44,7 @@ void main() {
     await tester.tap(find.byKey(popupMenuButtonKey));
     await tester.pump(const Duration(seconds: 1));
 
-    expect(Theme.of(tester.element(find.text('menuItem')))!.brightness, equals(Brightness.dark));
+    expect(Theme.of(tester.element(find.text('menuItem'))).brightness, equals(Brightness.dark));
   });
 
   testWidgets('Fallback theme', (WidgetTester tester) async {
@@ -54,12 +54,11 @@ void main() {
         builder: (BuildContext context) {
           capturedContext = context;
           return Container();
-        }
-      )
+        },
+      ),
     );
 
     expect(Theme.of(capturedContext), equals(ThemeData.localize(ThemeData.fallback(), defaultGeometryTheme)));
-    expect(Theme.of(capturedContext, shadowThemeOnly: true), isNull);
   });
 
   testWidgets('ThemeData.localize memoizes the result', (WidgetTester tester) async {
@@ -114,7 +113,7 @@ void main() {
     await tester.tap(find.byKey(popupMenuButtonKey));
     await tester.pump(const Duration(seconds: 1));
 
-    expect(Theme.of(tester.element(find.text('menuItem')))!.brightness, equals(Brightness.light));
+    expect(Theme.of(tester.element(find.text('menuItem'))).brightness, equals(Brightness.light));
   });
 
   testWidgets('DropdownMenu inherits shadowed app theme', (WidgetTester tester) async {
@@ -149,7 +148,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     for (final Element item in tester.elementList(find.text('menuItem')))
-      expect(Theme.of(item)!.brightness, equals(Brightness.light));
+      expect(Theme.of(item).brightness, equals(Brightness.light));
   });
 
   testWidgets('ModalBottomSheet inherits shadowed app theme', (WidgetTester tester) async {
@@ -171,7 +170,7 @@ void main() {
                     },
                     child: const Text('SHOW'),
                   );
-                }
+                },
               ),
             ),
           ),
@@ -180,11 +179,9 @@ void main() {
     );
 
     await tester.tap(find.text('SHOW'));
-    await tester.pump(const Duration(seconds: 1));
-    expect(Theme.of(tester.element(find.text('bottomSheet')))!.brightness, equals(Brightness.light));
-
-    await tester.tap(find.text('bottomSheet')); // dismiss the bottom sheet
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(seconds: 1)); // end animation
+    expect(Theme.of(tester.element(find.text('bottomSheet'))).brightness, equals(Brightness.light));
   });
 
   testWidgets('Dialog inherits shadowed app theme', (WidgetTester tester) async {
@@ -208,7 +205,7 @@ void main() {
                     },
                     child: const Text('SHOW'),
                   );
-                }
+                },
               ),
             ),
           ),
@@ -218,7 +215,7 @@ void main() {
 
     await tester.tap(find.text('SHOW'));
     await tester.pump(const Duration(seconds: 1));
-    expect(Theme.of(tester.element(find.text('dialog')))!.brightness, equals(Brightness.light));
+    expect(Theme.of(tester.element(find.text('dialog'))).brightness, equals(Brightness.light));
   });
 
   testWidgets("Scaffold inherits theme's scaffoldBackgroundColor", (WidgetTester tester) async {
@@ -349,7 +346,7 @@ void main() {
       child: Theme(
         data: customTheme,
         child: Builder(builder: (BuildContext context) {
-          final ThemeData theme = Theme.of(context)!;
+          final ThemeData theme = Theme.of(context);
           actualFontSize = theme.primaryTextTheme.bodyText2!.fontSize!;
           return Text(
             'A',
@@ -368,7 +365,7 @@ void main() {
       textDirection: TextDirection.ltr,
       child: Builder(
         builder: (BuildContext context) {
-          theme = Theme.of(context)!;
+          theme = Theme.of(context);
           return const Text('A');
         },
       ),
@@ -531,7 +528,8 @@ void main() {
       expect(theme.primaryColor, Colors.orange);
     });
 
-    testWidgets("CupertinoThemeData does not override material theme's icon theme",
+    testWidgets(
+      "CupertinoThemeData does not override material theme's icon theme",
       (WidgetTester tester) async {
         const Color materialIconColor = Colors.blue;
         const Color cupertinoIconColor = Colors.black;
@@ -543,7 +541,8 @@ void main() {
 
         expect(buildCount, 1);
         expect(actualIconTheme!.color, materialIconColor);
-    });
+      },
+    );
 
     testWidgets(
       'Changing cupertino theme override triggers rebuilds',
@@ -677,7 +676,7 @@ class Test extends StatefulWidget {
   const Test({ Key? key }) : super(key: key);
 
   @override
-  _TestState createState() => _TestState();
+  State<Test> createState() => _TestState();
 }
 
 class _TestState extends State<Test> {
@@ -686,7 +685,7 @@ class _TestState extends State<Test> {
     testBuildCalled += 1;
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context)!.primaryColor,
+        color: Theme.of(context).primaryColor,
       ),
     );
   }
@@ -728,6 +727,8 @@ class _TextStyleProxy implements TextStyle {
   @override
   double? get height => _delegate.height;
   @override
+  TextLeadingDistribution? get leadingDistribution => _delegate.leadingDistribution;
+  @override
   Locale? get locale => _delegate.locale;
   @override
   ui.Paint? get foreground => _delegate.foreground;
@@ -745,6 +746,8 @@ class _TextStyleProxy implements TextStyle {
   List<Shadow>? get shadows => _delegate.shadows;
   @override
   List<ui.FontFeature>? get fontFeatures => _delegate.fontFeatures;
+  @override
+  TextOverflow? get overflow => _delegate.overflow;
 
   @override
   String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) =>
@@ -781,10 +784,12 @@ class _TextStyleProxy implements TextStyle {
     double wordSpacingDelta = 0.0,
     double heightFactor = 1.0,
     double heightDelta = 0.0,
+    TextLeadingDistribution? leadingDistribution,
     TextBaseline? textBaseline,
     Locale? locale,
     List<ui.Shadow>? shadows,
     List<ui.FontFeature>? fontFeatures,
+    TextOverflow? overflow,
   }) {
     throw UnimplementedError();
   }
@@ -808,6 +813,7 @@ class _TextStyleProxy implements TextStyle {
     double? wordSpacing,
     TextBaseline? textBaseline,
     double? height,
+    TextLeadingDistribution? leadingDistribution,
     Locale? locale,
     ui.Paint? foreground,
     ui.Paint? background,
@@ -818,6 +824,7 @@ class _TextStyleProxy implements TextStyle {
     TextDecorationStyle? decorationStyle,
     double? decorationThickness,
     String? debugLabel,
+    TextOverflow? overflow,
   }) {
     throw UnimplementedError();
   }

@@ -7,10 +7,9 @@ import 'dart:convert' show JsonEncoder, json;
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:flutter_driver/flutter_driver.dart';
+import 'package:flutter_gallery/demo_lists.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
-
-import 'package:flutter_gallery/demo_lists.dart';
 
 const FileSystem _fs = LocalFileSystem();
 
@@ -26,8 +25,8 @@ List<String> _allDemos = <String>[];
 /// it into a histogram, and saves to a JSON file.
 Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String outputPath) async {
   final Map<String, List<int>> durations = <String, List<int>>{};
-  Map<String, dynamic> startEvent;
-  int frameStart;
+  Map<String, dynamic>? startEvent;
+  int? frameStart;
 
   // Save the duration of the first frame after each 'Start Transition' event.
   for (final Map<String, dynamic> event in events) {
@@ -43,9 +42,9 @@ Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
         frameStart = timestamp;
       } else {
         assert(phase == 'E');
-        final String routeName = startEvent['args']['to'] as String;
+        final String routeName = (startEvent['args'] as Map<String, dynamic>)['to'] as String;
         durations[routeName] ??= <int>[];
-        durations[routeName].add(timestamp - frameStart);
+        durations[routeName]!.add(timestamp - frameStart!);
         startEvent = null;
         frameStart = null;
       }
@@ -80,7 +79,7 @@ Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
         continue;
 
       final String routeName = eventName == 'Start Transition'
-        ? eventIter.current['args']['to'] as String
+        ? (eventIter.current['args'] as Map<String, dynamic>)['to'] as String
         : '';
 
       if (eventName == lastEventName && routeName == lastRouteName) {
@@ -104,7 +103,7 @@ Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
 /// home screen twice.
 Future<void> runDemos(List<String> demos, FlutterDriver driver) async {
   final SerializableFinder demoList = find.byValueKey('GalleryDemoList');
-  String currentDemoCategory;
+  String? currentDemoCategory;
 
   for (final String demo in demos) {
     if (kSkippedDemos.contains(demo))
@@ -114,11 +113,14 @@ Future<void> runDemos(List<String> demos, FlutterDriver driver) async {
     final String demoCategory = demo.substring(demo.indexOf('@') + 1);
     print('> $demo');
 
+    final SerializableFinder demoCategoryItem = find.text(demoCategory);
     if (currentDemoCategory == null) {
-      await driver.tap(find.text(demoCategory));
+      await driver.scrollIntoView(demoCategoryItem);
+      await driver.tap(demoCategoryItem);
     } else if (currentDemoCategory != demoCategory) {
       await driver.tap(find.byTooltip('Back'));
-      await driver.tap(find.text(demoCategory));
+      await driver.scrollIntoView(demoCategoryItem);
+      await driver.tap(demoCategoryItem);
       // Scroll back to the top
       await driver.scroll(demoList, 0.0, 10000.0, const Duration(milliseconds: 100));
     }
@@ -128,7 +130,6 @@ Future<void> runDemos(List<String> demos, FlutterDriver driver) async {
     await driver.scrollUntilVisible(demoList, demoItem,
       dyScroll: -48.0,
       alignment: 0.5,
-      timeout: const Duration(seconds: 30),
     );
 
     for (int i = 0; i < 2; i += 1) {
@@ -154,14 +155,14 @@ void main([List<String> args = const <String>[]]) {
   final bool withSemantics = args.contains('--with_semantics');
   final bool hybrid = args.contains('--hybrid');
   group('flutter gallery transitions', () {
-    FlutterDriver driver;
+    late FlutterDriver driver;
     setUpAll(() async {
       driver = await FlutterDriver.connect();
 
       // Wait for the first frame to be rasterized.
       await driver.waitUntilFirstFrameRasterized();
       if (withSemantics) {
-        print('Enabeling semantics...');
+        print('Enabling semantics...');
         await driver.setSemantics(true);
       }
 
@@ -172,7 +173,6 @@ void main([List<String> args = const <String>[]]) {
     });
 
     tearDownAll(() async {
-      if (driver != null)
         await driver.close();
     });
 
@@ -180,7 +180,7 @@ void main([List<String> args = const <String>[]]) {
       // Assert that we can use semantics related finders in profile mode.
       final int id = await driver.getSemanticsId(find.bySemanticsLabel('Material'));
       expect(id, greaterThan(-1));
-    }, skip: !withSemantics);
+    }, skip: !withSemantics, timeout: Timeout.none);
 
     test('all demos', () async {
       // Collect timeline data for just a limited set of demos to avoid OOMs.
@@ -195,6 +195,7 @@ void main([List<String> args = const <String>[]]) {
         streams: const <TimelineStream>[
           TimelineStream.dart,
           TimelineStream.embedder,
+          TimelineStream.gc,
         ],
       );
 
@@ -202,7 +203,6 @@ void main([List<String> args = const <String>[]]) {
       // that follows a 'Start Transition' event. The Gallery app adds a
       // 'Start Transition' event when a demo is launched (see GalleryItem).
       final TimelineSummary summary = TimelineSummary.summarize(timeline);
-      await summary.writeSummaryToFile('transitions', pretty: true);
       await summary.writeTimelineToFile('transitions', pretty: true);
       final String histogramPath = path.join(testOutputsDirectory, 'transition_durations.timeline.json');
       await saveDurationsHistogram(
@@ -217,6 +217,6 @@ void main([List<String> args = const <String>[]]) {
         await runDemos(unprofiledDemos.toList(), driver);
       }
 
-    }, timeout: const Timeout(Duration(minutes: 5)));
+    }, timeout: Timeout.none);
   });
 }
