@@ -1226,7 +1226,7 @@ class TextSelectionGestureDetectorBuilder {
   @protected
   void onDoubleTapDown(TapDownDetails details) {
     if (delegate.selectionEnabled) {
-      renderEditable.selectWord(cause: SelectionChangedCause.doubleTap);
+      renderEditable.selectWord(cause: SelectionChangedCause.tap);
       if (shouldShowSelectionToolbar)
         editableText.showToolbar();
     }

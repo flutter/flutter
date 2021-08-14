@@ -1079,9 +1079,6 @@ class EditableText extends StatefulWidget {
   /// {@template flutter.widgets.editableText.onSelectionChanged}
   /// Called when the user changes the selection of text (including the cursor
   /// location).
-  ///
-  /// This callback is only called when the selected text is changed, or the
-  /// same range of text is selected via a different [SelectionChangedCause].
   /// {@endtemplate}
   final SelectionChangedCallback? onSelectionChanged;
 
@@ -1766,22 +1763,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
     _lastKnownRemoteTextEditingValue = value;
 
-    final bool shouldShowCaret = widget.readOnly
-      ? _value.selection != value.selection
-      : _value != value;
-    if (shouldShowCaret) {
-      _scheduleShowCaretOnScreen();
+    if (value == _value) {
+      // This is possible, for example, when the numeric keyboard is input,
+      // the engine will notify twice for the same value.
+      // Track at https://github.com/flutter/flutter/issues/65811
+      return;
     }
 
-    // Wherever the value is changed by the user, schedule a showCaretOnScreen
-    // to make sure the user can see the changes they just made. Programmatical
-    // changes to `textEditingValue` do not trigger the behavior even if the
-    // text field is focused.
-    _scheduleShowCaretOnScreen();
-    // Apply the input formatters.
-    value = _formatUserInput(value);
-
-    if (value.text != _value.text || value.composing != _value.composing) {
+    if (value.text == _value.text && value.composing == _value.composing) {
+      // `selection` is the only change.
+      _handleSelectionChanged(value.selection, SelectionChangedCause.keyboard);
+    } else {
       hideToolbar();
       _currentPromptRectRange = null;
 
@@ -1791,9 +1783,21 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           _obscureLatestCharIndex = _value.selection.baseOffset;
         }
       }
+
+      _formatAndSetValue(value, SelectionChangedCause.keyboard);
     }
 
-    _updateEditingValueForUserInteraction(value, SelectionChangedCause.keyboard);
+    // Wherever the value is changed by the user, schedule a showCaretOnScreen
+    // to make sure the user can see the changes they just made. Programmatical
+    // changes to `textEditingValue` do not trigger the behavior even if the
+    // text field is focused.
+    _scheduleShowCaretOnScreen();
+    if (_hasInputConnection) {
+      // To keep the cursor from blinking while typing, we want to restart the
+      // cursor timer every time a new character is typed.
+      _stopCursorTimer(resetCharTicks: false);
+      _startCursorTimer();
+    }
   }
 
   @override
@@ -1891,13 +1895,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final Offset finalPosition = renderEditable.getLocalRectForCaret(_lastTextPosition!).centerLeft - _floatingCursorOffset;
     if (_floatingCursorResetController.isCompleted) {
       renderEditable.setFloatingCursor(FloatingCursorDragState.End, finalPosition, _lastTextPosition!);
-      if (_lastTextPosition!.offset != renderEditable.selection!.baseOffset) {
+      if (_lastTextPosition!.offset != renderEditable.selection!.baseOffset)
         // The cause is technically the force cursor, but the cause is listed as tap as the desired functionality is the same.
-        final TextEditingValue newValue = _value.copyWith(
-          selection: TextSelection.fromPosition(_lastTextPosition!),
-        );
-        _updateEditingValueForUserInteraction(newValue, SelectionChangedCause.forcePress);
-      }
+        _handleSelectionChanged(TextSelection.collapsed(offset: _lastTextPosition!.offset), SelectionChangedCause.forcePress);
       _startCaretRect = null;
       _lastTextPosition = null;
       _pointOffsetOrigin = null;
@@ -2169,30 +2169,63 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _selectionOverlay?.updateForScroll();
   }
 
-  void _updateSelectionOverlayForNewEditingValue(TextEditingValue newEditingValue) {
+  @pragma('vm:notify-debugger-on-exception')
+  void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
+    // We return early if the selection is not valid. This can happen when the
+    // text of [EditableText] is updated at the same time as the selection is
+    // changed by a gesture event.
+    if (!widget.controller.isSelectionWithinTextBounds(selection))
+      return;
+
+    widget.controller.selection = selection;
+
+    // This will show the keyboard for all selection changes on the
+    // EditableWidget, not just changes triggered by user gestures.
+    requestKeyboard();
     if (widget.selectionControls == null) {
       _selectionOverlay?.dispose();
       _selectionOverlay = null;
-      return;
+    } else {
+      if (_selectionOverlay == null) {
+        _selectionOverlay = TextSelectionOverlay(
+          clipboardStatus: _clipboardStatus,
+          context: context,
+          value: _value,
+          debugRequiredFor: widget,
+          toolbarLayerLink: _toolbarLayerLink,
+          startHandleLayerLink: _startHandleLayerLink,
+          endHandleLayerLink: _endHandleLayerLink,
+          renderObject: renderEditable,
+          selectionControls: widget.selectionControls,
+          selectionDelegate: this,
+          dragStartBehavior: widget.dragStartBehavior,
+          onSelectionHandleTapped: widget.onSelectionHandleTapped,
+        );
+      } else {
+        _selectionOverlay!.update(_value);
+      }
+      _selectionOverlay!.handlesVisible = widget.showSelectionHandles;
+      _selectionOverlay!.showHandles();
+    }
+    // TODO(chunhtai): we should make sure selection actually changed before
+    // we call the onSelectionChanged.
+    // https://github.com/flutter/flutter/issues/76349.
+    try {
+      widget.onSelectionChanged?.call(selection, cause);
+    } catch (exception, stack) {
+      FlutterError.reportError(FlutterErrorDetails(
+        exception: exception,
+        stack: stack,
+        library: 'widgets',
+        context: ErrorDescription('while calling onSelectionChanged for $cause'),
+      ));
     }
 
-    _selectionOverlay?.update(newEditingValue);
-    _selectionOverlay ??= TextSelectionOverlay(
-      clipboardStatus: _clipboardStatus,
-      context: context,
-      value: newEditingValue,
-      debugRequiredFor: widget,
-      toolbarLayerLink: _toolbarLayerLink,
-      startHandleLayerLink: _startHandleLayerLink,
-      endHandleLayerLink: _endHandleLayerLink,
-      renderObject: renderEditable,
-      selectionControls: widget.selectionControls,
-      selectionDelegate: this,
-      dragStartBehavior: widget.dragStartBehavior,
-      onSelectionHandleTapped: widget.onSelectionHandleTapped,
-    );
-    _selectionOverlay?.handlesVisible = widget.showSelectionHandles;
-    _selectionOverlay?.showHandles();
+    // To keep the cursor from blinking while it moves, restart the timer here.
+    if (_cursorTimer != null) {
+      _stopCursorTimer(resetCharTicks: false);
+      _startCursorTimer();
+    }
   }
 
   Rect? _currentCaretRect;
@@ -2276,7 +2309,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   @pragma('vm:notify-debugger-on-exception')
-  TextEditingValue _formatUserInput(TextEditingValue newValue) {
+  void _formatAndSetValue(TextEditingValue value, SelectionChangedCause? cause, {bool userInteraction = false}) {
     // Only apply input formatters if the text has changed (including uncommitted
     // text in the composing region), or when the user committed the composing
     // text.
@@ -2285,41 +2318,32 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // current composing region) is very infinite-loop-prone: the formatters
     // will keep trying to modify the composing region while Gboard will keep
     // trying to restore the original composing region.
-    final bool needsFormatting = _value.text != newValue.text
-                              || (!_value.composing.isCollapsed && newValue.composing.isCollapsed);
+    final bool textChanged = _value.text != value.text
+                          || (!_value.composing.isCollapsed && value.composing.isCollapsed);
+    final bool selectionChanged = _value.selection != value.selection;
 
-    return needsFormatting
-      ? widget.inputFormatters?.fold<TextEditingValue>(
-          newValue,
-          (TextEditingValue newValue, TextInputFormatter formatter) => formatter.formatEditUpdate(_value, newValue),
-        ) ?? newValue
-      : newValue;
-  }
-
-  // Update the TextEditingValue in the controller in response to user
-  // interactions (via hardware/software keyboards and gesture events).
-  //
-  // This method should not be called for programmatical changes made by
-  // directly modifying the TextEditingValue in the controller.
-  //
-  // Do not call request keyboard in this method: this method can be called
-  // when the text field does not have focus and should not request focus (for
-  // instance, during autofill).
-  @pragma('vm:notify-debugger-on-exception')
-  void _updateEditingValueForUserInteraction(TextEditingValue value, SelectionChangedCause? cause) {
-    final TextEditingValue previousValue = _value;
+    if (textChanged) {
+      value = widget.inputFormatters?.fold<TextEditingValue>(
+        value,
+        (TextEditingValue newValue, TextInputFormatter formatter) => formatter.formatEditUpdate(_value, newValue),
+      ) ?? value;
+    }
 
     // Put all optional user callback invocations in a batch edit to prevent
     // sending multiple `TextInput.updateEditingValue` messages.
     beginBatchEdit();
-
-    // Set the value before we invoke the onChanged callbacks.
-    // This is going to notify the listeners, which may potentially further
-    // modify the text editing value.
     _value = value;
-
-    // Call the onChanged callback first in case it changes the selection.
-    if (_value.text != previousValue.text) {
+    // Changes made by the keyboard can sometimes be "out of band" for listening
+    // components, so always send those events, even if we didn't think it
+    // changed. Also, the user long pressing should always send a selection change
+    // as well.
+    if (selectionChanged ||
+        (userInteraction &&
+        (cause == SelectionChangedCause.longPress ||
+         cause == SelectionChangedCause.keyboard))) {
+      _handleSelectionChanged(_value.selection, cause);
+    }
+    if (textChanged) {
       try {
         widget.onChanged?.call(_value.text);
       } catch (exception, stack) {
@@ -2332,30 +2356,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
     }
 
-    final bool selectionChanged = _value.selection != previousValue.selection;
-
-    if (selectionChanged || cause != _selectionChangedCause) {
-      try {
-        widget.onSelectionChanged?.call(_value.selection, cause);
-        _selectionChangedCause = cause;
-      } catch (exception, stack) {
-        FlutterError.reportError(FlutterErrorDetails(
-          exception: exception,
-          stack: stack,
-          library: 'widgets',
-          context: ErrorDescription('while calling onSelectionChanged for $cause'),
-        ));
-      }
-
-      // TODO(LongCatIsLoong): find a better place to populate the selection
-      // overlay. See: https://github.com/flutter/flutter/issues/87963.
-      _updateSelectionOverlayForNewEditingValue(_value);
-      // To keep the cursor from blinking while it moves, restart the timer here.
-      if (_cursorTimer != null) {
-        _stopCursorTimer(resetCharTicks: false);
-        _startCursorTimer();
-      }
-    }
     endBatchEdit();
   }
 
@@ -2469,10 +2469,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
       if (!_value.selection.isValid) {
         // Place cursor at the end if the selection is invalid when we receive focus.
-        final TextEditingValue valueWithValidSelection = _value.copyWith(
-          selection: TextSelection.collapsed(offset: _value.text.length),
-        );
-        _updateEditingValueForUserInteraction(valueWithValidSelection, null);
+        _handleSelectionChanged(TextSelection.collapsed(offset: _value.text.length), null);
       }
     } else {
       WidgetsBinding.instance!.removeObserver(this);
@@ -2503,6 +2500,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       Rect? composingRect = renderEditable.getRectForComposingRange(composingRange);
       // Send the caret location instead if there's no marked text yet.
       if (composingRect == null) {
+        assert(!composingRange.isValid || composingRange.isCollapsed);
         final int offset = composingRange.isValid ? composingRange.start : 0;
         composingRect = renderEditable.getLocalRectForCaret(TextPosition(offset: offset));
       }
@@ -2544,11 +2542,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   double get _devicePixelRatio => MediaQuery.of(context).devicePixelRatio;
 
-  // This method is similar to updateEditingValue, but is used to handle user
-  // input caused by hardware keyboard events and gesture events, while
-  // updateEditingValue handles IME/software keyboard input.
   @override
-  void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause cause) {
+  void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause? cause) {
     // Compare the current TextEditingValue with the pre-format new
     // TextEditingValue value, in case the formatter would reject the change.
     final bool shouldShowCaret = widget.readOnly
@@ -2557,24 +2552,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (shouldShowCaret) {
       _scheduleShowCaretOnScreen();
     }
-
-    final TextEditingValue formattedValue = _formatUserInput(value);
-    if (value.selection != _value.selection) {
-      requestKeyboard();
-    }
-
-    if (value.text != _value.text || value.composing != _value.composing) {
-      hideToolbar();
-      _currentPromptRectRange = null;
-
-      if (_hasInputConnection) {
-        if (widget.obscureText && value.text.length == _value.text.length + 1) {
-          _obscureShowCharTicksPending = _kObscureShowLatestCharCursorTicks;
-          _obscureLatestCharIndex = _value.selection.baseOffset;
-        }
-      }
-    }
-    _updateEditingValueForUserInteraction(formattedValue, cause);
+    _formatAndSetValue(value, cause, userInteraction: true);
   }
 
   @override

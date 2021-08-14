@@ -4938,19 +4938,21 @@ void main() {
 
   testWidgets('keyboard text selection works (RawKeyEvent)', (WidgetTester tester) async {
     debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.rawKeyData;
-    addTearDown(() { debugKeyEventSimulatorTransitModeOverride = null; });
 
     await testTextEditing(tester, targetPlatform: defaultTargetPlatform);
+
     debugKeyEventSimulatorTransitModeOverride = null;
+
     // On web, using keyboard for selection is handled by the browser.
   }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
 
   testWidgets('keyboard text selection works (ui.KeyData then RawKeyEvent)', (WidgetTester tester) async {
     debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.keyDataThenRawKeyData;
-    addTearDown(() { debugKeyEventSimulatorTransitModeOverride = null; });
 
     await testTextEditing(tester, targetPlatform: defaultTargetPlatform);
+
     debugKeyEventSimulatorTransitModeOverride = null;
+
     // On web, using keyboard for selection is handled by the browser.
   }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
 
@@ -6120,6 +6122,7 @@ void main() {
       'TextInput.setStyle',
       'TextInput.setEditingState',
       'TextInput.setEditingState',
+      'TextInput.show',
       'TextInput.setCaretRect',
     ];
     expect(
@@ -6163,14 +6166,16 @@ void main() {
       'TextInput.setStyle',
       'TextInput.setEditingState',
       'TextInput.setEditingState',
+      'TextInput.show',
       'TextInput.setCaretRect',
+      'TextInput.show',
     ];
-
-    expect(
-      tester.testTextInput.log.map((MethodCall methodCall) => methodCall.method),
-      logOrder,
-    );
-
+    expect(tester.testTextInput.log.length, logOrder.length);
+    int index = 0;
+    for (final MethodCall m in tester.testTextInput.log) {
+      expect(m.method, logOrder[index]);
+      index++;
+    }
     expect(tester.testTextInput.editingState!['text'], 'flutter is the best!');
   });
 
@@ -6211,6 +6216,7 @@ void main() {
       'TextInput.setStyle',
       'TextInput.setEditingState',
       'TextInput.setEditingState',
+      'TextInput.show',
       'TextInput.setCaretRect',
       'TextInput.setEditingState',
     ];
@@ -6284,7 +6290,7 @@ void main() {
       selection: controller.selection,
     ));
 
-    expect(log, isEmpty);
+    expect(log.length, 0);
 
     // setEditingState is called when remote value modified by the formatter.
     state.updateEditingValue(TextEditingValue(
@@ -7526,115 +7532,6 @@ void main() {
 
       state.updateEditingValue(const TextEditingValue(text: 'abDEFc', composing: TextRange(start: 4, end: 5)));
       expect(state.currentTextEditingValue.composing, TextRange.empty);
-    });
-  });
-
-  group('onChanged callbacks are edge-triggered', () {
-    SelectionChangedCallback? onSelectionChanged;
-    ValueChanged<String>? onChanged;
-
-    final TextEditingController controller = TextEditingController();
-    final Widget editableText = EditableText(
-      showSelectionHandles: false,
-      controller: controller,
-      focusNode: FocusNode(),
-      cursorColor: Colors.red,
-      backgroundCursorColor: Colors.blue,
-      style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!.copyWith(fontFamily: 'Roboto'),
-      keyboardType: TextInputType.text,
-      selectionControls: materialTextSelectionControls,
-      onSelectionChanged: (TextSelection selection, SelectionChangedCause? cause) => onSelectionChanged?.call(selection, cause),
-      onChanged: (String value) => onChanged?.call(value),
-    );
-
-    tearDown(() {
-      onSelectionChanged = null;
-      onChanged = null;
-    });
-
-    testWidgets('onSelectionChanged', (WidgetTester tester) async {
-      TextSelection? selection;
-      SelectionChangedCause? cause;
-
-      onSelectionChanged = (TextSelection newSelection, SelectionChangedCause? newCause) {
-        selection = newSelection;
-        cause = newCause;
-      };
-
-      controller.value = const TextEditingValue(text: 'text', selection: TextSelection(baseOffset: 1, extentOffset: 2));
-
-      await tester.pumpWidget(MaterialApp(
-        home: editableText,
-      ));
-      final EditableTextState state = tester.state(find.byWidget(editableText));
-
-      await tester.showKeyboard(find.byWidget(editableText));
-      await tester.pump();
-
-      // No user input.
-      expect(selection, isNull);
-      expect(cause, isNull);
-
-      // Selection didn't change but the cause did (keyboard).
-      state.updateEditingValue(
-        const TextEditingValue(text: 'test text', selection: TextSelection(baseOffset: 1, extentOffset: 2)),
-      );
-      expect(selection, const TextSelection(baseOffset: 1, extentOffset: 2));
-      expect(cause, SelectionChangedCause.keyboard);
-
-      // Selection and cause both changed
-      await tester.enterText(find.byWidget(editableText), 'test text');
-      expect(selection, const TextSelection.collapsed(offset: 9));
-      expect(cause, SelectionChangedCause.keyboard);
-
-      selection = null;
-      cause = null;
-      // Nothing changes.
-      state.userUpdateTextEditingValue(
-        const TextEditingValue(text: 'test text', selection: TextSelection.collapsed(offset: 9)),
-        SelectionChangedCause.keyboard
-      );
-      expect(selection, isNull);
-      expect(cause, isNull);
-
-      // The cause changes.
-      state.userUpdateTextEditingValue(
-        const TextEditingValue(text: 'test text', selection: TextSelection.collapsed(offset: 9)),
-        SelectionChangedCause.toolBar,
-      );
-      expect(selection, const TextSelection.collapsed(offset: 9));
-      expect(cause, SelectionChangedCause.toolBar);
-    });
-
-    testWidgets('onChanged', (WidgetTester tester) async {
-      String? newText;
-
-      onChanged = (String text) => newText = text;
-      controller.value = const TextEditingValue(text: 'text', selection: TextSelection(baseOffset: 1, extentOffset: 2));
-
-      await tester.pumpWidget(MaterialApp(
-        home: editableText,
-      ));
-      final EditableTextState state = tester.state(find.byWidget(editableText));
-
-      await tester.showKeyboard(find.byWidget(editableText));
-      await tester.pump();
-
-      // No user input.
-      expect(newText, isNull);
-
-      state.updateEditingValue(
-        const TextEditingValue(text: 'text', selection: TextSelection(baseOffset: 1, extentOffset: 3)),
-      );
-      // Selection & cause changed but the text didn't;
-      expect(newText, isNull);
-
-      state.updateEditingValue(
-        const TextEditingValue(text: 'test text', selection: TextSelection(baseOffset: 1, extentOffset: 3)),
-      );
-
-      // Now the text is changed.
-      expect(newText, 'test text');
     });
   });
 
