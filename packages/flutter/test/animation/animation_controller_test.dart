@@ -256,6 +256,7 @@ void main() {
     expect(largeRangeController.value, -30.0);
     largeRangeController.stop();
     controller.dispose();
+    largeRangeController.dispose();
   });
 
   test('Custom springDescription can be applied', () {
@@ -280,6 +281,7 @@ void main() {
 
     expect(customSpringController.value < controller.value, true);
     controller.dispose();
+    customSpringController.dispose();
   });
 
   test('lastElapsedDuration control test', () {
@@ -814,6 +816,7 @@ void main() {
       final AnimationController repeating = AnimationController.unbounded(vsync: const TestVSync());
       expect(repeating.animationBehavior, AnimationBehavior.preserve);
       controller.dispose();
+      repeating.dispose();
     });
 
     test('AnimationBehavior.preserve runs at normal speed when animatingTo', () {
@@ -886,6 +889,7 @@ void main() {
       expect(controller.value < fastController.value, true);
       debugSemanticsDisableAnimations = null;
       controller.dispose();
+      fastController.dispose();
     });
   });
 
