@@ -23,6 +23,7 @@ void main() {
       final XcodeValidator validator = XcodeValidator(xcode: xcode, userMessages: UserMessages());
       final ValidationResult result = await validator.validate();
       expect(result.type, ValidationType.missing);
+      expect(result.statusInfo, isNull);
       expect(result.messages.last.type, ValidationMessageType.error);
       expect(result.messages.last.message, contains('Xcode not installed'));
     });
@@ -66,7 +67,9 @@ void main() {
       );
       final XcodeValidator validator = XcodeValidator(xcode: xcode, userMessages: UserMessages());
       final ValidationResult result = await validator.validate();
-      expect('${validator.title} (version ${result.versionInfo})', 'Xcode - develop for iOS and macOS (version 12.0.1)');
+      expect(result.type, ValidationType.installed);
+      expect(result.messages.last.type, ValidationMessageType.information);
+      expect(result.statusInfo, '12.0.1');
     });
 
     testWithoutContext('Emits partial status when Xcode below recommended version', () async {
@@ -193,6 +196,7 @@ void main() {
       final XcodeValidator validator = XcodeValidator(xcode: xcode, userMessages: UserMessages());
       final ValidationResult result = await validator.validate();
       expect(result.type, ValidationType.installed);
+      expect(result.statusInfo, '1000.0.0');
     });
   });
 }

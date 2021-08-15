@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import '../base/user_messages.dart';
-import '../base/version.dart';
 import '../doctor_validator.dart';
 import 'xcode.dart';
 
@@ -33,12 +32,11 @@ class XcodeValidator extends DoctorValidator {
       }
       final String? versionText = _xcode.versionText;
       if (versionText != null) {
-        xcodeVersionInfo = _xcode.currentVersion == Version.unknown
-        ? null
-        : userMessages.xcodeVersion(_xcode.currentVersion.toString());
-        messages.add(ValidationMessage(versionText));
+        xcodeVersionInfo = versionText;
+        if (xcodeVersionInfo.contains(',')) {
+          xcodeVersionInfo = xcodeVersionInfo.substring(0, xcodeVersionInfo.indexOf(','));
+        }
       }
-
       if (!_xcode.isInstalledAndMeetsVersionCheck) {
         xcodeStatus = ValidationType.partial;
         messages.add(ValidationMessage.error(_userMessages.xcodeOutdated(xcodeRequiredVersion.toString())));
