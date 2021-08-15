@@ -92,7 +92,7 @@ presented.
    format code in the framework.
 
 8. [Flutter design doc template](https://flutter.dev/go/template),
-   which should be used when proposing a new technical design.  This is a good
+   which should be used when proposing a new technical design. This is a good
    practice to do before coding more intricate changes.
 
 In addition to the above, there are many pages on [our
