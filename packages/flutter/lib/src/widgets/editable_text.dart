@@ -1535,14 +1535,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   TextInputConnection? _textInputConnection;
   TextSelectionOverlay? _selectionOverlay;
 
-  ScrollController? _internalScorllController;
-  ScrollController get _scrollController => widget.scrollController ?? (_internalScorllController ??= ScrollController());
-
-  // The source of the most recent selection change.
-  //
-  // Changing the selection programmatically does not update
-  // _selectionChangedCause.
-  SelectionChangedCause? _selectionChangedCause;
+  ScrollController? _internalScrollController;
+  ScrollController get _scrollController => widget.scrollController ?? (_internalScrollController ??= ScrollController());
 
   late final AnimationController _cursorBlinkOpacityController = AnimationController(
     vsync: this,
@@ -1671,7 +1665,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
 
     if (widget.scrollController != oldWidget.scrollController) {
-      (oldWidget.scrollController ?? _internalScorllController)?.removeListener(_updateSelectionOverlayForScroll);
+      (oldWidget.scrollController ?? _internalScrollController)?.removeListener(_updateSelectionOverlayForScroll);
       _scrollController.addListener(_updateSelectionOverlayForScroll);
     }
 
@@ -1708,7 +1702,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void dispose() {
-    _internalScorllController?.dispose();
+    _internalScrollController?.dispose();
     _currentAutofillScope?.unregister(autofillId);
     widget.controller.removeListener(_didChangeTextEditingValue);
     _floatingCursorResetController.dispose();
