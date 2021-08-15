@@ -292,16 +292,16 @@ class _ZoomEnterTransition extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     double opacity = 0;
-    // The transition's scrim opacity only increases on the forward transition. In the reverse
-    // transition, the opacity should always be 0.0.
+    // The transition's scrim opacity only increases on the forward transition.
+    // In the reverse transition, the opacity should always be 0.0.
     //
-    // Therefore, we need to only apply the scrim opacity animation when the transition
-    // is running forwards.
+    // Therefore, we need to only apply the scrim opacity animation when
+    // the transition is running forwards.
     //
-    // The reason that we check that the animation's status is not `completed` instead
-    // of checking that it is `forward` is that this allows the interrupted reversal of the
-    // forward transition to smoothly fade the scrim away. This prevents a disjointed
-    // removal of the scrim.
+    // The reason that we check that the animation's status is not `completed`
+    // instead of checking that it is `forward` is that this allows
+    // the interrupted reversal of the forward transition to smoothly fade
+    // the scrim away. This prevents a disjointed removal of the scrim.
     if (!reverse && animation.status != AnimationStatus.completed) {
       opacity = _scrimOpacityTween.evaluate(animation)!;
     }
@@ -325,10 +325,7 @@ class _ZoomEnterTransition extends StatelessWidget {
       },
       child: FadeTransition(
         opacity: fadeTransition,
-        child: ScaleTransition(
-          scale: scaleTransition,
-          child: child,
-        ),
+        child: ScaleTransition(scale: scaleTransition, child: child),
       ),
     );
   }
@@ -375,10 +372,7 @@ class _ZoomExitTransition extends StatelessWidget {
 
     return FadeTransition(
       opacity: fadeTransition,
-      child: ScaleTransition(
-        scale: scaleTransition,
-        child: child,
-      ),
+      child: ScaleTransition(scale: scaleTransition, child: child),
     );
   }
 }
@@ -489,9 +483,6 @@ class OpenUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
 /// transition animation that looks like the default page transition used on
 /// Android Q.
 ///
-/// If a builder with a matching platform is not found, then the
-/// [ZoomPageTransitionsBuilder] is used.
-///
 /// See also:
 ///
 ///  * [FadeUpwardsPageTransitionsBuilder], which defines a page transition
@@ -599,8 +590,7 @@ class PageTransitionsTheme with Diagnosticable {
   Map<TargetPlatform, PageTransitionsBuilder> get builders => _builders;
   final Map<TargetPlatform, PageTransitionsBuilder> _builders;
 
-  /// Delegates to the builder for the current [ThemeData.platform]
-  /// or [ZoomPageTransitionsBuilder].
+  /// Delegates to the builder for the current [ThemeData.platform].
   ///
   /// [MaterialPageRoute.buildTransitions] delegates to this method.
   Widget buildTransitions<T>(
