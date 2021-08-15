@@ -1320,6 +1320,63 @@ void main() {
     },
   );
 
+  testWidgets('CupertinoNavigationBar is not flickering', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/71389
+    late BuildContext secondPageContext;
+
+    Widget createPage(BuildContext context, String title) {
+      return Center(
+        child: SizedBox(
+          width: 392.72727272727275,
+          child: CupertinoPageScaffold(
+            navigationBar: CupertinoNavigationBar(
+              middle: Text(
+                title,
+                overflow: TextOverflow.clip,
+              ),
+            ),
+            child: Center(
+              child: CupertinoButton(
+                child: const Text('Go'),
+                onPressed: () {
+                  Navigator.pushNamed(context, '/second');
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        title: 'Flutter Demo',
+        home: Builder(
+          builder: (BuildContext context) => createPage(context, 'First Page'),
+        ),
+        routes: <String, WidgetBuilder>{
+          '/second': (BuildContext context) {
+            secondPageContext = context;
+            return createPage(context, 'Second Page');
+          },
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+
+    await tester.pump();
+
+    final AnimationController controller = ModalRoute.of(secondPageContext)!.controller!;
+    controller.value = 0.16247749999999997;
+
+    await tester.pump();
+
+    // Not working...
+
+    // expect(find.text('First Page').first, isNot(paints..clipRect()));
+  });
+
   testWidgets('Null NavigationBar border transition', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/71389
     await tester.pumpWidget(

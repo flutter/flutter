@@ -497,9 +497,11 @@ class RenderParagraph extends RenderBox
     final bool widthMatters = softWrap || overflow == TextOverflow.ellipsis;
     _textPainter.layout(
       minWidth: minWidth,
-      maxWidth: widthMatters ?
-        maxWidth :
-        double.infinity,
+      maxWidth: widthMatters
+        // Add tolerance to allow small overflow for cases when constraints
+        // are slightly smaller than it is needed to layout the text without overflow
+        ? maxWidth + precisionErrorTolerance
+        : double.infinity,
     );
   }
 
