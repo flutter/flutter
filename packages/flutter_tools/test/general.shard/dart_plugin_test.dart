@@ -167,7 +167,7 @@ void main() {
 
       // See https://github.com/flutter/flutter/issues/87862 for why this is
       // currently asserted even though it's not the desired behavior long term.
-      testWithoutContext('doesn not select inline implementation on desktop', () async {
+      testWithoutContext('does not select inline implementation on desktop', () async {
         final Set<String> directDependencies = <String>{};
 
         final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(<Plugin>[
@@ -519,7 +519,7 @@ void main() {
           flutterManifest,
           fs,
           <String, String>{
-          'url_launcher_android': '''
+            'url_launcher_android': '''
   flutter:
     plugin:
       implements: url_launcher
@@ -567,7 +567,7 @@ void main() {
         macos:
           dartPluginClass: AwesomeMacOS
 '''
-        });
+          });
 
         final Directory libDir = flutterProject.directory.childDirectory('lib');
         libDir.createSync(recursive: true);
@@ -708,7 +708,7 @@ void main() {
           flutterManifest,
           fs,
           <String, String>{
-          'url_launcher_macos': '''
+            'url_launcher_macos': '''
   flutter:
     plugin:
       implements: url_launcher
@@ -716,7 +716,7 @@ void main() {
         macos:
           invalid:
 '''
-        });
+          });
 
         final Directory libDir = flutterProject.directory.childDirectory('lib');
         libDir.createSync(recursive: true);
@@ -754,12 +754,12 @@ void main() {
           flutterManifest,
           fs,
           <String, String>{
-          'url_launcher_macos': '''
+            'url_launcher_macos': '''
   flutter:
     plugin:
       implements: url_launcher
 '''
-        });
+          });
 
         final Directory libDir = flutterProject.directory.childDirectory('lib');
         libDir.createSync(recursive: true);
@@ -854,7 +854,7 @@ void main() {
           flutterManifest,
           fs,
           <String, String>{
-          'url_launcher_macos': '''
+            'url_launcher_macos': '''
   flutter:
     plugin:
       implements: url_launcher
@@ -862,7 +862,7 @@ void main() {
         macos:
           dartPluginClass: MacOSPlugin
 '''
-        });
+          });
 
         final Directory libDir = flutterProject.directory.childDirectory('lib');
         libDir.createSync(recursive: true);
