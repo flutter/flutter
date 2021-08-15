@@ -146,9 +146,14 @@ class UserMessages {
   String xcodeVersion(String version) => 'version $version';
   String xcodeLocation(String location) => 'Xcode at $location';
 
-  String xcodeOutdated(String currentVersion, String recommendedVersion) =>
-      'Xcode $currentVersion out of date ($recommendedVersion is recommended).\n'
+  String xcodeOutdated(String requiredVersion) =>
+      'Flutter requires a minimum Xcode version of $requiredVersion.\n'
       'Download the latest version or update via the Mac App Store.';
+
+  String xcodeRecommended(String recommendedVersion) =>
+      'Flutter recommends a minimum Xcode version of $recommendedVersion.\n'
+      'Download the latest version or update via the Mac App Store.';
+
   String get xcodeEula => "Xcode end user license agreement not signed; open Xcode or run the command 'sudo xcodebuild -license'.";
   String get xcodeMissingSimct =>
       'Xcode requires additional components to be installed in order to run.\n'

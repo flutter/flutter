@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=20210721"
+@Tags(<String>['no-shuffle'])
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -660,6 +666,23 @@ void main() {
     test('VMServiceFlutterDriver does not support webDriver', () async {
       expect(() => driver.webDriver, throwsUnsupportedError);
     });
+
+    group('runUnsynchronized', () {
+      test('wrap waitFor with runUnsynchronized', () async {
+        fakeClient.responses['waitFor'] = makeFakeResponse(<String, dynamic>{});
+        fakeClient.responses['set_frame_sync'] = makeFakeResponse(<String, dynamic>{});
+
+        await driver.runUnsynchronized(() async  {
+          await driver.waitFor(find.byTooltip('foo'), timeout: _kTestTimeout);
+        });
+
+        expect(fakeClient.commandLog, <String>[
+          'ext.flutter.driver {command: set_frame_sync, enabled: false}',
+          'ext.flutter.driver {command: waitFor, timeout: $_kSerializedTestTimeout, finderType: ByTooltipMessage, text: foo}',
+          'ext.flutter.driver {command: set_frame_sync, enabled: true}'
+        ]);
+      });
+    });
   });
 
   group('VMServiceFlutterDriver with custom timeout', () {
@@ -957,6 +980,23 @@ void main() {
 
       test('serviceClient', () async {
         expect(() => driver.serviceClient.getVM(), throwsUnsupportedError);
+      });
+    });
+
+    group('runUnsynchronized', () {
+      test('wrap waitFor with runUnsynchronized', () async {
+        fakeConnection.responses['waitFor'] = jsonEncode(makeFakeResponse(<String, dynamic>{'text': 'hello'}));
+        fakeConnection.responses['set_frame_sync'] = jsonEncode(makeFakeResponse(<String, dynamic>{}));
+
+        await driver.runUnsynchronized(() async {
+          await driver.waitFor(find.byTooltip('foo'), timeout: _kTestTimeout);
+        });
+
+        expect(fakeConnection.commandLog, <String>[
+          r'''window.$flutterDriver('{"command":"set_frame_sync","enabled":"false"}') null''',
+          r'''window.$flutterDriver('{"command":"waitFor","timeout":"1234","finderType":"ByTooltipMessage","text":"foo"}') 0:00:01.234000''',
+          r'''window.$flutterDriver('{"command":"set_frame_sync","enabled":"true"}') null''',
+        ]);
       });
     });
   });

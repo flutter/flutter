@@ -9,7 +9,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
 import 'actions.dart';
@@ -150,9 +149,21 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   Animation<double>? get secondaryAnimation => _secondaryAnimation;
   final ProxyAnimation _secondaryAnimation = ProxyAnimation(kAlwaysDismissedAnimation);
 
+  /// Whether to takeover the [controller] created by [createAnimationController].
+  ///
+  /// If true, this route will call [AnimationController.dispose] when the
+  /// controller is no longer needed.
+  /// If false, the controller should be disposed by whoever owned it.
+  ///
+  /// It defaults to `true`.
+  bool willDisposeAnimationController = true;
+
   /// Called to create the animation controller that will drive the transitions to
   /// this route from the previous one, and back to the previous route from this
   /// one.
+  ///
+  /// The returned controller will be disposed by [AnimationController.dispose]
+  /// if the [willDisposeAnimationController] is `true`.
   AnimationController createAnimationController() {
     assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
     final Duration duration = transitionDuration;
@@ -423,7 +434,9 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   void dispose() {
     assert(!_transitionCompleter.isCompleted, 'Cannot dispose a $runtimeType twice.');
     _animation?.removeStatusListener(_handleStatusChanged);
-    _controller?.dispose();
+    if (willDisposeAnimationController) {
+      _controller?.dispose();
+    }
     _transitionCompleter.complete(_result);
     super.dispose();
   }

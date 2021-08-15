@@ -46,10 +46,10 @@ class VerboseStdio extends Stdio {
   });
 
   factory VerboseStdio.local() => VerboseStdio(
-    stdout: io.stdout,
-    stderr: io.stderr,
-    stdin: io.stdin,
-  );
+        stdout: io.stdout,
+        stderr: io.stderr,
+        stdin: io.stdin,
+      );
 
   final io.Stdout stdout;
   final io.Stdout stderr;

@@ -258,7 +258,7 @@ void main() {
       FakeCommand(
         command: const <String>['debug', 'arg1', 'arg2'],
         stdout: 'Observatory listening on http://127.0.0.1/0\n',
-        completer: completer
+        completer: completer,
       ),
     ]);
     final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
@@ -268,11 +268,43 @@ void main() {
       prebuiltApplication: true,
       debuggingOptions: DebuggingOptions.enabled(
         BuildInfo.debug,
-        dartEntrypointArgs: <String>['arg1', 'arg2']
+        dartEntrypointArgs: <String>['arg1', 'arg2'],
       ),
     );
 
     expect(result.started, true);
+  });
+
+  testWithoutContext('Device logger captues all output', () async {
+    final Completer<void> exitCompleter = Completer<void>();
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: const <String>['debug', 'arg1', 'arg2'],
+        exitCode: -1,
+        stderr: 'Oops\n',
+        completer: exitCompleter,
+        outputFollowsExit: true,
+      ),
+    ]);
+    final FakeDesktopDevice device = setUpDesktopDevice(
+      processManager: processManager,
+    );
+    unawaited(Future<void>(() {
+      exitCompleter.complete();
+    }));
+
+    // Start looking for 'Oops' in the stream before starting the app.
+    expect(device.getLogReader().logLines, emits('Oops'));
+
+    final FakeApplicationPackage package = FakeApplicationPackage();
+    await device.startApp(
+      package,
+      prebuiltApplication: true,
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.debug,
+        dartEntrypointArgs: <String>['arg1', 'arg2'],
+      ),
+    );
   });
 }
 

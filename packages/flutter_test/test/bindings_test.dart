@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=20210721"
+@Tags(<String>['no-shuffle'])
+
 import 'dart:io';
 
 import 'package:flutter/widgets.dart';
@@ -24,6 +30,26 @@ void main() {
     test('allows setting defaultTestTimeout to 5 minutes', () {
       binding.defaultTestTimeout = const test_package.Timeout(Duration(minutes: 5));
       expect(binding.defaultTestTimeout.duration, const Duration(minutes: 5));
+    });
+  });
+
+  group('testWidgets resets the surface size', () {
+    // A setSurfaceSize in one test should not bleed into another test.
+
+    // The next two tests must run in order.
+    int order = 0;
+
+    testWidgets('prepare: one test called setSurfaceSize', (WidgetTester tester) async {
+      assert(order == 0);
+      // This test case is only for preparation. It doesn't need `expect`.
+      binding.setSurfaceSize(const Size(100, 100));
+      order += 1;
+    });
+
+    testWidgets('other tests should still have the default surface size', (WidgetTester tester) async {
+      assert(order == 1);
+      expect(binding.renderView.configuration.size, const Size(800, 600));
+      order += 1;
     });
   });
 
