@@ -18,10 +18,9 @@ import '_isolates_io.dart'
 typedef ComputeCallback<Q, R> = FutureOr<R> Function(Q message);
 
 /// The signature of [compute].
-typedef ComputeImpl = Future<R> Function<Q, R>(ComputeCallback<Q, R> callback, Q message, { String? debugLabel });
-
-/// Spawn an isolate, run `callback` on that isolate, passing it `message`, and
-/// (eventually) return the value returned by `callback`.
+///
+/// [compute] spawns an isolate, runs `callback` on that isolate, passes it
+/// `message`, and (eventually) returns the value returned by `callback`.
 ///
 /// This is useful for operations that take longer than a few milliseconds, and
 /// which would therefore risk skipping frames. For tasks that will only take a
@@ -44,4 +43,7 @@ typedef ComputeImpl = Future<R> Function<Q, R>(ComputeCallback<Q, R> callback, Q
 ///
 /// The `debugLabel` argument can be specified to provide a name to add to the
 /// [Timeline]. This is useful when profiling an application.
+typedef ComputeImpl = Future<R> Function<Q, R>(ComputeCallback<Q, R> callback, Q message, { String? debugLabel });
+
+/// See [ComputeImpl].
 const ComputeImpl compute = _isolates.compute;
