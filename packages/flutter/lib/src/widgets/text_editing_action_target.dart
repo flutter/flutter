@@ -1011,7 +1011,6 @@ abstract class TextEditingActionTarget {
     }
     final TextSelection nextSelection = textEditingValue.selection.moveTo(TextPosition(
       offset: nextExtent,
-      affinity: textEditingValue.selection.affinity,
     ));
 
     if (nextSelection == textEditingValue.selection) {

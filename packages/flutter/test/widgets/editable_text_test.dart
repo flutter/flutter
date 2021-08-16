@@ -4455,7 +4455,7 @@ void main() {
         const TextSelection(
           baseOffset: 20,
           extentOffset: 20,
-          affinity: TextAffinity.upstream,
+          affinity: TextAffinity.downstream,
         ),
       ),
       reason: 'on $platform',
@@ -4477,7 +4477,7 @@ void main() {
         const TextSelection(
           baseOffset: 20,
           extentOffset: 39,
-          affinity: TextAffinity.upstream,
+          affinity: TextAffinity.downstream,
         ),
       ),
       reason: 'on $platform',
@@ -4502,7 +4502,7 @@ void main() {
         const TextSelection(
           baseOffset: 20,
           extentOffset: testText.length,
-          affinity: TextAffinity.upstream,
+          affinity: TextAffinity.downstream,
         ),
       ),
       reason: 'on $platform',
@@ -4524,7 +4524,7 @@ void main() {
         const TextSelection(
           baseOffset: 20,
           extentOffset: 57,
-          affinity: TextAffinity.upstream,
+          affinity: TextAffinity.downstream,
         ),
       ),
       reason: 'on $platform',
@@ -4547,7 +4547,7 @@ void main() {
         const TextSelection(
           baseOffset: 20,
           extentOffset: 72,
-          affinity: TextAffinity.upstream,
+          affinity: TextAffinity.downstream,
         ),
       ),
       reason: 'on $platform',
@@ -4570,7 +4570,7 @@ void main() {
         const TextSelection(
           baseOffset: 0,
           extentOffset: 72,
-          affinity: TextAffinity.upstream,
+          affinity: TextAffinity.downstream,
         ),
       ),
       reason: 'on $platform',
@@ -4592,7 +4592,7 @@ void main() {
         const TextSelection(
           baseOffset: 0,
           extentOffset: testText.length,
-          affinity: TextAffinity.upstream,
+          affinity: TextAffinity.downstream,
         ),
       ),
       reason: 'on $platform',
@@ -4613,7 +4613,7 @@ void main() {
         const TextSelection(
           baseOffset: 0,
           extentOffset: 0,
-          affinity: TextAffinity.upstream,
+          affinity: TextAffinity.downstream,
         ),
       ),
       reason: 'on $platform',
@@ -4683,7 +4683,7 @@ void main() {
       equals(
         const TextSelection.collapsed(
           offset: 3,
-          affinity: TextAffinity.upstream,
+          affinity: TextAffinity.downstream,
         ),
       ),
       reason: 'on $platform',
@@ -5335,43 +5335,8 @@ void main() {
       targetPlatform: defaultTargetPlatform,
     );
 
-    late final int afterHomeOffset;
-    late final int afterEndOffset;
-    switch (defaultTargetPlatform) {
-      // These platforms don't handle shift + home/end at all.
-      case TargetPlatform.android:
-      case TargetPlatform.iOS:
-      case TargetPlatform.fuchsia:
-        afterHomeOffset = 23;
-        afterEndOffset = 23;
-        break;
-
-      // These platforms go to the line start/end.
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        afterHomeOffset = 20;
-        afterEndOffset = 35;
-        break;
-
-      // Mac goes to the start/end of the document.
-      case TargetPlatform.macOS:
-        afterHomeOffset = 0;
-        afterEndOffset = 72;
-        break;
-    }
-
-    expect(
-      selection,
-      equals(
-        TextSelection(
-          baseOffset: 23,
-          extentOffset: afterHomeOffset,
-          affinity: TextAffinity.downstream,
-        ),
-      ),
-      reason: 'on $platform',
-    );
     expect(controller.text, equals(testText), reason: 'on $platform');
+    final TextSelection selectionAfterHome = selection;
 
     // Move back to position 23.
     controller.selection = const TextSelection.collapsed(
@@ -5389,18 +5354,116 @@ void main() {
       targetPlatform: defaultTargetPlatform,
     );
 
-    expect(
-      selection,
-      equals(
-        TextSelection(
-          baseOffset: 23,
-          extentOffset: afterEndOffset,
-          affinity: TextAffinity.downstream,
-        ),
-      ),
-      reason: 'on $platform',
-    );
     expect(controller.text, equals(testText), reason: 'on $platform');
+    final TextSelection selectionAfterEnd = selection;
+
+    switch (defaultTargetPlatform) {
+      // These platforms don't handle shift + home/end at all.
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+        expect(
+          selectionAfterHome,
+          equals(
+            TextSelection(
+              baseOffset: 23,
+              extentOffset: 23,
+              affinity: TextAffinity.downstream,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+        expect(
+          selectionAfterEnd,
+          equals(
+            TextSelection(
+              baseOffset: 23,
+              extentOffset: 23,
+              affinity: TextAffinity.downstream,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+        break;
+
+      // Linux extends to the line start/end.
+      case TargetPlatform.linux:
+        expect(
+          selectionAfterHome,
+          equals(
+            TextSelection(
+              baseOffset: 23,
+              extentOffset: 20,
+              affinity: TextAffinity.downstream,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+        expect(
+          selectionAfterEnd,
+          equals(
+            TextSelection(
+              baseOffset: 23,
+              extentOffset: 35,
+              affinity: TextAffinity.upstream,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+        break;
+
+      // Windows expands to the line start/end.
+      case TargetPlatform.windows:
+        expect(
+          selectionAfterHome,
+          equals(
+            TextSelection(
+              baseOffset: 20,
+              extentOffset: 23,
+              affinity: TextAffinity.downstream,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+        expect(
+          selectionAfterEnd,
+          equals(
+            TextSelection(
+              baseOffset: 23,
+              extentOffset: 35,
+              affinity: TextAffinity.downstream,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+        break;
+
+      // Mac goes to the start/end of the document.
+      case TargetPlatform.macOS:
+        expect(
+          selectionAfterHome,
+          equals(
+            TextSelection(
+              baseOffset: 23,
+              extentOffset: 0,
+              affinity: TextAffinity.upstream,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+        expect(
+          selectionAfterEnd,
+          equals(
+            TextSelection(
+              baseOffset: 23,
+              extentOffset: 72,
+              affinity: TextAffinity.downstream,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+        break;
+    }
   },
     skip: kIsWeb,
     variant: TargetPlatformVariant.all(),

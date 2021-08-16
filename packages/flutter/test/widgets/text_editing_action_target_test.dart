@@ -150,18 +150,18 @@ void main() {
     editableTextState.moveSelectionRight(SelectionChangedCause.keyboard);
     expect(editableTextState.textEditingValue.selection.isCollapsed, true);
     expect(editableTextState.textEditingValue.selection.baseOffset, 14);
-    expect(editableTextState.textEditingValue.selection.affinity, TextAffinity.upstream);
+    expect(editableTextState.textEditingValue.selection.affinity, TextAffinity.downstream);
 
     // Neither moveSelectionLeftByLine nor moveSelectionRightByLine do anything
     // here, because we're at both the beginning and end of the line.
     editableTextState.moveSelectionLeftByLine(SelectionChangedCause.keyboard);
     expect(editableTextState.textEditingValue.selection.isCollapsed, true);
     expect(editableTextState.textEditingValue.selection.baseOffset, 14);
-    expect(editableTextState.textEditingValue.selection.affinity, TextAffinity.upstream);
+    expect(editableTextState.textEditingValue.selection.affinity, TextAffinity.downstream);
     editableTextState.moveSelectionRightByLine(SelectionChangedCause.keyboard);
     expect(editableTextState.textEditingValue.selection.isCollapsed, true);
     expect(editableTextState.textEditingValue.selection.baseOffset, 14);
-    expect(editableTextState.textEditingValue.selection.affinity, TextAffinity.upstream);
+    expect(editableTextState.textEditingValue.selection.affinity, TextAffinity.downstream);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
   test('arrow keys and delete handle simple text correctly', () async {
