@@ -248,7 +248,6 @@ targets:
 
   - name: Linux ci_yaml flutter roller
     recipe: infra/ci_yaml
-    bringup: true
     timeout: 30
     properties:
       tags: >
