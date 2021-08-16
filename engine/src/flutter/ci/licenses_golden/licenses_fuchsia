@@ -1,4 +1,4 @@
-Signature: 1ea2cf7ef895115f4f8c301fed10621c
+Signature: cecc87b37902c94be1b0c2a602296d00
 
 UNUSED LICENSES:
 
@@ -3448,6 +3448,8 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fit/scheduler.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fit/scope.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fit/sequencer.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fit/single_threaded_executor.h
+FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/view_identity.h
+FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/view_identity.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/algorithm.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/cstddef.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/functional.h
