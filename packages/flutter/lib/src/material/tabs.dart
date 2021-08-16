@@ -1308,16 +1308,13 @@ class _TabBarState extends State<TabBar> {
 
     if (widget.isScrollable) {
       _scrollController ??= _TabBarScrollController(this);
-      tabBar = ScrollConfiguration(
-        behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-        child: SingleChildScrollView(
-          dragStartBehavior: widget.dragStartBehavior,
-          scrollDirection: Axis.horizontal,
-          controller: _scrollController,
-          padding: widget.padding,
-          physics: widget.physics,
-          child: tabBar,
-        ),
+      tabBar = SingleChildScrollView(
+        dragStartBehavior: widget.dragStartBehavior,
+        scrollDirection: Axis.horizontal,
+        controller: _scrollController,
+        padding: widget.padding,
+        physics: widget.physics,
+        child: tabBar,
       );
     } else if (widget.padding != null) {
       tabBar = Padding(

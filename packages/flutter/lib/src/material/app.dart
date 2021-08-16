@@ -693,13 +693,13 @@ class MaterialApp extends StatefulWidget {
 /// [GlowingOverscrollIndicator] to [Scrollable] descendants when executing on
 /// [TargetPlatform.android] and [TargetPlatform.fuchsia].
 ///
-/// The [buildScrollbar] function is called by the [Scrollable] to wrap with a
-/// [Scrollbar] when appropriate. On all platforms, when the Scrollable [Axis] is
-/// [Axis.horizontal], an always visible Scrollbar will be applied. This is
-/// because horizontal [ScrollView]s have lower discoverability as scrollable
-/// content. When the Axis is [Axis.vertical] a Scrollbar is applied on
-/// desktop platforms. In this vertical case, [Scrollbar.isAlwaysShown] is not
-/// set and will defer to the inherited [ScrollbarTheme].
+/// When using the desktop platform, if the [Scrollable] widget scrolls in the
+/// [Axis.vertical], a [Scrollbar] is applied.
+///
+/// [MaterialScrollBehavior.androidOverscrollIndicator] specifies the
+/// overscroll indicator that is used on [TargetPlatform.android]. When null,
+/// [ThemeData.androidOverscrollIndicator] is used. If also null, the default
+/// overscroll indicator is the [GlowingOverscrollIndicator].
 ///
 /// See also:
 ///
@@ -708,9 +708,17 @@ class MaterialScrollBehavior extends ScrollBehavior {
   /// Creates a MaterialScrollBehavior that decorates [Scrollable]s with
   /// [GlowingOverscrollIndicator]s and [Scrollbar]s based on the current
   /// platform and provided [ScrollableDetails].
+  ///
+  /// [MaterialScrollBehavior.androidOverscrollIndicator] specifies the
+  /// overscroll indicator that is used on [TargetPlatform.android]. When null,
+  /// [ThemeData.androidOverscrollIndicator] is used. If also null, the default
+  /// overscroll indicator is the [GlowingOverscrollIndicator].
   const MaterialScrollBehavior({
     AndroidOverscrollIndicator? androidOverscrollIndicator,
-  }) : super(androidOverscrollIndicator: androidOverscrollIndicator);
+  }) : _androidOverscrollIndicator = androidOverscrollIndicator,
+       super(androidOverscrollIndicator: androidOverscrollIndicator);
+
+  final AndroidOverscrollIndicator? _androidOverscrollIndicator;
 
   @override
   TargetPlatform getPlatform(BuildContext context) => Theme.of(context).platform;
@@ -721,11 +729,7 @@ class MaterialScrollBehavior extends ScrollBehavior {
     // the base class as well.
     switch (axisDirectionToAxis(details.direction)) {
       case Axis.horizontal:
-        return Scrollbar(
-          isAlwaysShown: true,
-          controller: details.controller,
-          child: child,
-        );
+        return child;
       case Axis.vertical:
         switch (getPlatform(context)) {
           case TargetPlatform.linux:
@@ -747,6 +751,9 @@ class MaterialScrollBehavior extends ScrollBehavior {
   Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
     // When modifying this function, consider modifying the implementation in
     // the base class as well.
+    final AndroidOverscrollIndicator indicator = _androidOverscrollIndicator
+        ?? Theme.of(context).androidOverscrollIndicator
+        ?? androidOverscrollIndicator;
     switch (getPlatform(context)) {
       case TargetPlatform.iOS:
       case TargetPlatform.linux:
@@ -754,7 +761,7 @@ class MaterialScrollBehavior extends ScrollBehavior {
       case TargetPlatform.windows:
         return child;
       case TargetPlatform.android:
-        switch (androidOverscrollIndicator) {
+        switch (indicator) {
           case AndroidOverscrollIndicator.stretch:
             return StretchingOverscrollIndicator(
               axisDirection: details.direction,

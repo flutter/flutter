@@ -19,7 +19,7 @@ import 'package:path/path.dart' as path;
 import 'package:watcher/watcher.dart';
 
 // If you update this version, also update it in dev/bots/docs.sh
-const String _snippetsActivateVersion = '0.2.2';
+const String _snippetsActivateVersion = '0.2.3';
 
 final String _flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
 final String _defaultFlutterPackage = path.join(_flutterRoot, 'packages', 'flutter', 'lib');

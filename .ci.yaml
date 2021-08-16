@@ -248,7 +248,6 @@ targets:
 
   - name: Linux ci_yaml flutter roller
     recipe: infra/ci_yaml
-    bringup: true
     timeout: 30
     properties:
       tags: >
@@ -1169,7 +1168,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: analyzer_benchmark
     scheduler: luci
 
@@ -1179,7 +1178,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: android_defines_test
     scheduler: luci
 
@@ -1189,7 +1188,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: android_obfuscate_test
     scheduler: luci
 
@@ -1199,7 +1198,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: android_stack_size_test
     scheduler: luci
 
@@ -1209,7 +1208,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: android_view_scroll_perf__timeline_summary
     scheduler: luci
 
@@ -1219,7 +1218,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: animated_image_gc_perf
     scheduler: luci
 
@@ -1229,7 +1228,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: animated_placeholder_perf__e2e_summary
     scheduler: luci
 
@@ -1239,7 +1238,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: backdrop_filter_perf__e2e_summary
     scheduler: luci
 
@@ -1249,7 +1248,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: basic_material_app_android__compile
     scheduler: luci
 
@@ -1259,7 +1258,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: color_filter_and_fade_perf__e2e_summary
     scheduler: luci
 
@@ -1270,7 +1269,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: complex_layout_android__compile
       dependencies: >-
         [
@@ -1289,7 +1288,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: complex_layout_android__scroll_smoothness
       dependencies: >-
         [
@@ -1308,7 +1307,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: complex_layout_scroll_perf__devtools_memory
       dependencies: >-
         [
@@ -1327,7 +1326,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: complex_layout_semantics_perf
       dependencies: >-
         [
@@ -1345,7 +1344,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: cubic_bezier_perf__e2e_summary
     scheduler: luci
 
@@ -1355,7 +1354,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: cubic_bezier_perf_sksl_warmup__e2e_summary
     scheduler: luci
 
@@ -1365,7 +1364,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: cull_opacity_perf__e2e_summary
     scheduler: luci
 
@@ -1375,7 +1374,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: devtools_profile_start_test
     scheduler: luci
 
@@ -1385,7 +1384,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: fast_scroll_heavy_gridview__memory
     scheduler: luci
 
@@ -1395,7 +1394,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: flutter_engine_group_performance
     scheduler: luci
 
@@ -1405,7 +1404,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: flutter_gallery__back_button_memory
     scheduler: luci
 
@@ -1415,7 +1414,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: flutter_gallery__image_cache_memory
     scheduler: luci
 
@@ -1425,7 +1424,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: flutter_gallery__memory_nav
     scheduler: luci
 
@@ -1435,7 +1434,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: flutter_gallery__start_up
     scheduler: luci
 
@@ -1445,7 +1444,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: flutter_gallery__transition_perf
     scheduler: luci
 
@@ -1456,7 +1455,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: flutter_gallery__transition_perf_e2e
     scheduler: luci
 
@@ -1466,7 +1465,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: flutter_gallery__transition_perf_hybrid
     scheduler: luci
 
@@ -1476,7 +1475,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: flutter_gallery__transition_perf_with_semantics
     scheduler: luci
 
@@ -1486,7 +1485,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: flutter_gallery_android__compile
     scheduler: luci
 
@@ -1496,7 +1495,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: flutter_gallery_sksl_warmup__transition_perf
     scheduler: luci
 
@@ -1507,7 +1506,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: flutter_gallery_sksl_warmup__transition_perf_e2e
     scheduler: luci
 
@@ -1517,7 +1516,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: flutter_gallery_v2_chrome_run_test
     scheduler: luci
 
@@ -1527,7 +1526,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: flutter_gallery_v2_web_compile_test
     scheduler: luci
 
@@ -1537,7 +1536,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: flutter_test_performance
     scheduler: luci
 
@@ -1547,7 +1546,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: frame_policy_delay_test_android
     scheduler: luci
 
@@ -1557,7 +1556,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: hot_mode_dev_cycle_linux__benchmark
     scheduler: luci
 
@@ -1567,7 +1566,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: image_list_jit_reported_duration
     scheduler: luci
 
@@ -1577,7 +1576,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: image_list_reported_duration
     scheduler: luci
 
@@ -1587,7 +1586,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: large_image_changer_perf_android
     scheduler: luci
 
@@ -1597,7 +1596,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: linux_chrome_dev_mode
     scheduler: luci
 
@@ -1607,7 +1606,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: multi_widget_construction_perf__e2e_summary
     scheduler: luci
 
@@ -1617,7 +1616,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: new_gallery__crane_perf
     scheduler: luci
 
@@ -1627,7 +1626,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: picture_cache_perf__e2e_summary
     scheduler: luci
 
@@ -1637,7 +1636,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: platform_channels_benchmarks
     scheduler: luci
 
@@ -1647,7 +1646,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: platform_views_scroll_perf__timeline_summary
     scheduler: luci
 
@@ -1657,7 +1656,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: routing_test
     scheduler: luci
 
@@ -1667,7 +1666,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: textfield_perf__e2e_summary
     scheduler: luci
 
@@ -1677,7 +1676,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","linux"]
       task_name: web_size__compile_test
     scheduler: luci
 
@@ -2332,7 +2331,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","mac"]
       task_name: android_semantics_integration_test
     scheduler: luci
 
@@ -2342,7 +2341,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","mac"]
       task_name: backdrop_filter_perf__timeline_summary
     scheduler: luci
 
@@ -2352,7 +2351,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","mac"]
       task_name: channels_integration_test
     scheduler: luci
 
@@ -2362,7 +2361,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","mac"]
       task_name: color_filter_and_fade_perf__timeline_summary
     scheduler: luci
 
@@ -2372,7 +2371,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","mac"]
       task_name: complex_layout__start_up
     scheduler: luci
 
@@ -2382,7 +2381,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","mac"]
       task_name: complex_layout_scroll_perf__memory
     scheduler: luci
 
@@ -2392,7 +2391,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","mac"]
       task_name: complex_layout_scroll_perf__timeline_summary
     scheduler: luci
 
@@ -2402,7 +2401,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","mac"]
       task_name: cubic_bezier_perf__timeline_summary
     scheduler: luci
 
@@ -2412,7 +2411,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","mac"]
       task_name: cubic_bezier_perf_sksl_warmup__timeline_summary
     scheduler: luci
 
@@ -2422,7 +2421,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","mac"]
       task_name: cull_opacity_perf__timeline_summary
     scheduler: luci
 
@@ -2432,7 +2431,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","mac"]
       task_name: drive_perf_debug_warning
     scheduler: luci
 
@@ -2442,7 +2441,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","mac"]
       task_name: embedded_android_views_integration_test
     scheduler: luci
 
@@ -2452,7 +2451,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","mac"]
       task_name: external_ui_integration_test
     scheduler: luci
 
@@ -2462,7 +2461,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","mac"]
       task_name: fading_child_animation_perf__timeline_summary
     scheduler: luci
 
@@ -2472,7 +2471,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","mac"]
       task_name: fast_scroll_large_images__memory
     scheduler: luci
 
@@ -2482,7 +2481,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","mac"]
       task_name: flavors_test
     scheduler: luci
 
@@ -2492,7 +2491,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","mac"]
       task_name: flutter_view__start_up
     scheduler: luci
 
@@ -2502,7 +2501,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","mac"]
       task_name: fullscreen_textfield_perf__timeline_summary
     scheduler: luci
 
@@ -2512,7 +2511,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","mac"]
       task_name: hello_world__memory
     scheduler: luci
 
@@ -2522,7 +2521,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","mac"]
       task_name: hello_world_android__compile
     scheduler: luci
 
@@ -2532,7 +2531,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","mac"]
       task_name: home_scroll_perf__timeline_summary
     scheduler: luci
 
@@ -2542,7 +2541,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","mac"]
       task_name: hot_mode_dev_cycle__benchmark
     scheduler: luci
 
@@ -2552,7 +2551,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","mac"]
       task_name: hybrid_android_views_integration_test
     scheduler: luci
 
@@ -2562,7 +2561,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","mac"]
       task_name: imagefiltered_transform_animation_perf__timeline_summary
     scheduler: luci
 
@@ -2572,7 +2571,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","mac"]
       task_name: integration_test_test
     scheduler: luci
 
@@ -2582,7 +2581,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","mac"]
       task_name: integration_ui_driver
     scheduler: luci
 
@@ -2592,7 +2591,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","mac"]
       task_name: integration_ui_frame_number
     scheduler: luci
 
@@ -2602,7 +2601,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","mac"]
       task_name: integration_ui_keyboard_resize
     scheduler: luci
 
@@ -2612,7 +2611,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","mac"]
       task_name: integration_ui_screenshot
     scheduler: luci
 
@@ -2622,7 +2621,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","mac"]
       task_name: integration_ui_textfield
     scheduler: luci
 
@@ -2632,7 +2631,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","mac"]
       task_name: microbenchmarks
     scheduler: luci
 
@@ -2642,7 +2641,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","mac"]
       task_name: new_gallery__transition_perf
     scheduler: luci
 
@@ -2652,7 +2651,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","mac"]
       task_name: picture_cache_perf__timeline_summary
     scheduler: luci
 
@@ -2662,7 +2661,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","mac"]
       task_name: platform_channel_sample_test
     scheduler: luci
 
@@ -2672,7 +2671,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","mac"]
       task_name: platform_interaction_test
     scheduler: luci
 
@@ -2682,7 +2681,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","mac"]
       task_name: platform_view__start_up
     scheduler: luci
 
@@ -2692,7 +2691,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","mac"]
       task_name: run_release_test
     scheduler: luci
 
@@ -2702,7 +2701,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","mac"]
       task_name: service_extensions_test
     scheduler: luci
 
@@ -2712,7 +2711,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","mac"]
       task_name: smoke_catalina_start_up
     scheduler: luci
 
@@ -2722,7 +2721,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","mac"]
       task_name: textfield_perf__timeline_summary
     scheduler: luci
 
@@ -2732,18 +2731,17 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","mac"]
       task_name: tiles_scroll_perf__timeline_summary
     scheduler: luci
 
   - name: Mac_ios animation_with_microtasks_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","ios","mac"]
       task_name: animation_with_microtasks_perf_ios__timeline_summary
     scheduler: luci
 
@@ -2753,7 +2751,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","ios","mac"]
       task_name: backdrop_filter_perf_ios__timeline_summary
     scheduler: luci
 
@@ -2763,7 +2761,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","ios","mac"]
       task_name: basic_material_app_ios__compile
     scheduler: luci
 
@@ -2773,7 +2771,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","ios","mac"]
       task_name: channels_integration_test_ios
     scheduler: luci
 
@@ -2783,7 +2781,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","ios","mac"]
       task_name: complex_layout_ios__compile
     scheduler: luci
 
@@ -2793,7 +2791,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","ios","mac"]
       task_name: complex_layout_ios__start_up
     scheduler: luci
 
@@ -2803,7 +2801,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","ios","mac"]
       task_name: complex_layout_scroll_perf_ios__timeline_summary
     scheduler: luci
 
@@ -2813,7 +2811,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","ios","mac"]
       task_name: cubic_bezier_perf_ios_sksl_warmup__timeline_summary
     scheduler: luci
 
@@ -2823,7 +2821,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","ios","mac"]
       task_name: external_ui_integration_test_ios
     scheduler: luci
 
@@ -2833,7 +2831,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","ios","mac"]
       task_name: flavors_test_ios
     scheduler: luci
 
@@ -2843,7 +2841,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","ios","mac"]
       task_name: flutter_gallery__transition_perf_e2e_ios
     scheduler: luci
 
@@ -2853,7 +2851,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","ios","mac"]
       task_name: flutter_gallery_ios__compile
     scheduler: luci
 
@@ -2863,7 +2861,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","ios","mac"]
       task_name: flutter_gallery_ios__start_up
     scheduler: luci
 
@@ -2873,7 +2871,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","ios","mac"]
       task_name: flutter_gallery_ios__transition_perf
     scheduler: luci
 
@@ -2883,7 +2881,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","ios","mac"]
       task_name: flutter_gallery_ios_sksl_warmup__transition_perf
     scheduler: luci
 
@@ -2893,7 +2891,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","ios","mac"]
       task_name: flutter_view_ios__start_up
     scheduler: luci
 
@@ -2903,7 +2901,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","ios","mac"]
       task_name: hello_world_ios__compile
     scheduler: luci
 
@@ -2913,7 +2911,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","ios","mac"]
       task_name: hot_mode_dev_cycle_macos_target__benchmark
     scheduler: luci
 
@@ -2923,7 +2921,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","ios","mac"]
       task_name: integration_test_test_ios
     scheduler: luci
 
@@ -2933,7 +2931,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","ios","mac"]
       task_name: integration_ui_ios_driver
     scheduler: luci
 
@@ -2943,7 +2941,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","ios","mac"]
       task_name: integration_ui_ios_frame_number
     scheduler: luci
 
@@ -2953,7 +2951,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","ios","mac"]
       task_name: integration_ui_ios_keyboard_resize
     scheduler: luci
 
@@ -2963,7 +2961,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","ios","mac"]
       task_name: integration_ui_ios_screenshot
     scheduler: luci
 
@@ -2973,7 +2971,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","ios","mac"]
       task_name: integration_ui_ios_textfield
     scheduler: luci
 
@@ -2983,7 +2981,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","ios","mac"]
       task_name: ios_app_with_extensions_test
     scheduler: luci
 
@@ -2993,7 +2991,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","ios","mac"]
       task_name: ios_content_validation_test
     scheduler: luci
 
@@ -3003,7 +3001,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","ios","mac"]
       task_name: ios_defines_test
     scheduler: luci
 
@@ -3013,7 +3011,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","ios","mac"]
       task_name: ios_platform_view_tests
     scheduler: luci
 
@@ -3023,7 +3021,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","ios","mac"]
       task_name: large_image_changer_perf_ios
     scheduler: luci
 
@@ -3033,7 +3031,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","ios","mac"]
       task_name: macos_chrome_dev_mode
     scheduler: luci
 
@@ -3043,7 +3041,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","ios","mac"]
       task_name: microbenchmarks_ios
     scheduler: luci
 
@@ -3053,7 +3051,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","ios","mac"]
       task_name: new_gallery_ios__transition_perf
     scheduler: luci
 
@@ -3063,7 +3061,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","ios","mac"]
       task_name: platform_channel_sample_test_ios
     scheduler: luci
 
@@ -3073,7 +3071,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","ios","mac"]
       task_name: platform_channel_sample_test_swift
     scheduler: luci
 
@@ -3083,7 +3081,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","ios","mac"]
       task_name: platform_channels_benchmarks_ios
     scheduler: luci
 
@@ -3093,7 +3091,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","ios","mac"]
       task_name: platform_interaction_test_ios
     scheduler: luci
 
@@ -3103,7 +3101,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","ios","mac"]
       task_name: platform_view_ios__start_up
     scheduler: luci
 
@@ -3113,7 +3111,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","ios","mac"]
       task_name: platform_views_scroll_perf_ios__timeline_summary
     scheduler: luci
 
@@ -3123,7 +3121,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","ios","mac"]
       task_name: post_backdrop_filter_perf_ios__timeline_summary
     scheduler: luci
 
@@ -3133,7 +3131,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","ios","mac"]
       task_name: simple_animation_perf_ios
     scheduler: luci
 
@@ -3143,7 +3141,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","ios","mac"]
       task_name: smoke_catalina_hot_mode_dev_cycle_ios__benchmark
     scheduler: luci
 
@@ -3153,7 +3151,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","ios","mac"]
       task_name: tiles_scroll_perf_ios__timeline_summary
     scheduler: luci
 
@@ -3164,7 +3162,7 @@ targets:
     timeout: 90
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","ios32","mac"]
       task_name: flutter_gallery__transition_perf_e2e_ios32
     scheduler: luci
 
@@ -3175,7 +3173,7 @@ targets:
     timeout: 90
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","ios32","mac"]
       task_name: native_ui_tests_ios32
     scheduler: luci
 
@@ -3419,6 +3417,10 @@ targets:
       caches: >-
         [
           {"name":"gradle","path":"gradle"}
+        ]
+      dependencies: >-
+        [
+          {"dependency": "vs_build"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -3718,7 +3720,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","windows"]
       task_name: basic_material_app_win__compile
     scheduler: luci
 
@@ -3728,7 +3730,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","windows"]
       task_name: channels_integration_test_win
     scheduler: luci
 
@@ -3738,7 +3740,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","windows"]
       task_name: complex_layout_win__compile
     scheduler: luci
 
@@ -3748,7 +3750,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","windows"]
       task_name: flavors_test_win
     scheduler: luci
 
@@ -3758,7 +3760,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","windows"]
       task_name: flutter_gallery_win__compile
     scheduler: luci
 
@@ -3768,7 +3770,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","windows"]
       task_name: hot_mode_dev_cycle_win__benchmark
     scheduler: luci
 
@@ -3778,6 +3780,6 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab"]
+        ["devicelab","android","windows"]
       task_name: windows_chrome_dev_mode
     scheduler: luci
