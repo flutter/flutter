@@ -31,3 +31,19 @@
 
 // Test deprecated macro. Do not use.
 INTEGRATION_TEST_IOS_RUNNER(RunnerObjCMacroTests)
+
+@interface DeprecatedIntegrationTestIosTests : XCTestCase
+@end
+
+@implementation DeprecatedIntegrationTestIosTests
+
+- (void)testIntegrationTest {
+  NSString *testResult;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+  BOOL testPass = [[IntegrationTestIosTest new] testIntegrationTest:&testResult];
+#pragma clang diagnostic pop
+  XCTAssertTrue(testPass, @"%@", testResult);
+}
+
+@end
