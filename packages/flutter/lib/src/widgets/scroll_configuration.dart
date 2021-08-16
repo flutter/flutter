@@ -65,7 +65,14 @@ class ScrollBehavior {
     AndroidOverscrollIndicator? androidOverscrollIndicator,
   }): _androidOverscrollIndicator = androidOverscrollIndicator;
 
-  /// Specifies which overscroll indicatpr to use on [TargetPlatform.android].
+  /// Specifies which overscroll indicator to use on [TargetPlatform.android].
+  ///
+  /// Cannot be null. Defaults to [AndroidOverscrollIndicator.glow].
+  ///
+  /// See also:
+  ///
+  ///   * [MaterialScrollBehavior], which supports setting this property
+  ///     using [ThemeData].
   AndroidOverscrollIndicator get androidOverscrollIndicator => _androidOverscrollIndicator ?? _kDefaultAndroidOverscrollIndicator;
   final AndroidOverscrollIndicator? _androidOverscrollIndicator;
 
