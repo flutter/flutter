@@ -8,6 +8,7 @@
 #include <unistd.h>
 
 #include "flutter/fml/eintr_wrapper.h"
+#include "flutter/fml/logging.h"
 
 #if FML_TIMERFD_AVAILABLE == 0
 
@@ -48,6 +49,9 @@ bool TimerRearm(int fd, fml::TimePoint time_point) {
   spec.it_interval = spec.it_value;  // single expiry.
 
   int result = ::timerfd_settime(fd, TFD_TIMER_ABSTIME, &spec, nullptr);
+  if (result != 0) {
+    FML_DLOG(ERROR) << "timerfd_settime err:" << strerror(errno);
+  }
   return result == 0;
 }
 
