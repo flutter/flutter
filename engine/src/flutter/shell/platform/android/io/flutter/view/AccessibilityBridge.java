@@ -1020,27 +1020,38 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         }
       case AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS:
         {
+          // Focused semantics node must be reset before sending the
+          // TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED event. Otherwise,
+          // TalkBack may think the node is still focused.
+          if (accessibilityFocusedSemanticsNode != null
+              && accessibilityFocusedSemanticsNode.id == virtualViewId) {
+            accessibilityFocusedSemanticsNode = null;
+          }
+          if (embeddedAccessibilityFocusedNodeId != null
+              && embeddedAccessibilityFocusedNodeId == virtualViewId) {
+            embeddedAccessibilityFocusedNodeId = null;
+          }
           accessibilityChannel.dispatchSemanticsAction(
               virtualViewId, Action.DID_LOSE_ACCESSIBILITY_FOCUS);
           sendAccessibilityEvent(
               virtualViewId, AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED);
-          accessibilityFocusedSemanticsNode = null;
-          embeddedAccessibilityFocusedNodeId = null;
           return true;
         }
       case AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS:
         {
-          accessibilityChannel.dispatchSemanticsAction(
-              virtualViewId, Action.DID_GAIN_ACCESSIBILITY_FOCUS);
-          sendAccessibilityEvent(virtualViewId, AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED);
-
           if (accessibilityFocusedSemanticsNode == null) {
             // When Android focuses a node, it doesn't invalidate the view.
             // (It does when it sends ACTION_CLEAR_ACCESSIBILITY_FOCUS, so
             // we only have to worry about this when the focused node is null.)
             rootAccessibilityView.invalidate();
           }
+          // Focused semantics node must be set before sending the TYPE_VIEW_ACCESSIBILITY_FOCUSED
+          // event. Otherwise, TalkBack may think the node is not focused yet.
           accessibilityFocusedSemanticsNode = semanticsNode;
+
+          accessibilityChannel.dispatchSemanticsAction(
+              virtualViewId, Action.DID_GAIN_ACCESSIBILITY_FOCUS);
+          sendAccessibilityEvent(virtualViewId, AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED);
 
           if (semanticsNode.hasAction(Action.INCREASE)
               || semanticsNode.hasAction(Action.DECREASE)) {
