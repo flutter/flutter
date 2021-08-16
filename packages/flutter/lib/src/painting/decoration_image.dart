@@ -495,6 +495,8 @@ void paintImage({
       // Some ImageProvider implementations may not have given this.
       source: debugImageLabel ?? '<Unknown Image(${image.width}×${image.height})>',
       imageSize: Size(image.width.toDouble(), image.height.toDouble()),
+      // It's ok to use this instead of a MediaQuery because if this changes,
+      // whatever is aware of the MediaQuery will be repainting the image anyway.
       displaySize: outputSize * PaintingBinding.instance!.window.devicePixelRatio,
     );
     assert(() {
