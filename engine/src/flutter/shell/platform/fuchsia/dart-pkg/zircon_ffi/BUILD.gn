@@ -13,12 +13,22 @@ shared_library("zircon_ffi") {
   public_configs = [ ":zircon_ffi_config" ]
 
   sources = [
+    "basic_types.cc",
+    "basic_types.h",
+    "channel.cc",
+    "channel.h",
     "clock.cc",
     "clock.h",
+    "dart_dl.cc",
+    "dart_dl.h",
+    "handle.cc",
+    "handle.h",
+    "macros.h",
   ]
 
   deps = [
     "$fuchsia_sdk_root/pkg:zx",
+    "//flutter/fml",
     "//third_party/dart/runtime:dart_api",
   ]
 }

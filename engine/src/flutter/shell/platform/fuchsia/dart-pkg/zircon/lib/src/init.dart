@@ -21,6 +21,12 @@ class _Bindings {
       final _dylib = DynamicLibrary.open(_kZirconFFILibName);
       _bindings = ZirconFFIBindings(_dylib);
     }
+
+    final initializer = _bindings!.zircon_dart_dl_initialize;
+    if (initializer(NativeApi.initializeApiDLData) != 1) {
+      throw UnsupportedError('Unable to initialize dart:zircon_ffi.');
+    }
+
     return _bindings;
   }
 }
