@@ -1,0 +1,4 @@
+wheel: <
+  name: "infra/python/wheels/pyyaml/${vpython_platform}"
+  version: "version:3.12"
+>
