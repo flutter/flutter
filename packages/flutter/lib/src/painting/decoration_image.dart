@@ -11,6 +11,7 @@ import 'package:flutter/scheduler.dart';
 
 import 'alignment.dart';
 import 'basic_types.dart';
+import 'binding.dart';
 import 'borders.dart';
 import 'box_fit.dart';
 import 'debug.dart';
@@ -494,14 +495,14 @@ void paintImage({
       // Some ImageProvider implementations may not have given this.
       source: debugImageLabel ?? '<Unknown Image(${image.width}×${image.height})>',
       imageSize: Size(image.width.toDouble(), image.height.toDouble()),
-      displaySize: outputSize,
+      displaySize: outputSize * PaintingBinding.instance!.window.devicePixelRatio,
     );
     assert(() {
       if (debugInvertOversizedImages &&
           sizeInfo.decodedSizeInBytes > sizeInfo.displaySizeInBytes + debugImageOverheadAllowance) {
         final int overheadInKilobytes = (sizeInfo.decodedSizeInBytes - sizeInfo.displaySizeInBytes) ~/ 1024;
-        final int outputWidth = outputSize.width.toInt();
-        final int outputHeight = outputSize.height.toInt();
+        final int outputWidth = sizeInfo.displaySize.width.toInt();
+        final int outputHeight = sizeInfo.displaySize.height.toInt();
         FlutterError.reportError(FlutterErrorDetails(
           exception: 'Image $debugImageLabel has a display size of '
             '$outputWidth×$outputHeight but a decode size of '
