@@ -21,7 +21,6 @@ const String kFirstRecompileTime  = 'FirstRecompileTime';
 const String kSecondStartupTime = 'SecondStartupTime';
 const String kSecondRestartTime = 'SecondRestartTime';
 
-
 abstract class WebDevice {
   static const String chrome = 'chrome';
   static const String webServer = 'web-server';
