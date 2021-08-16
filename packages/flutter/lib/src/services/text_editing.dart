@@ -94,27 +94,40 @@ class TextSelection extends TextRange {
 
   @override
   String toString() {
-    return '${objectRuntimeType(this, 'TextSelection')}(baseOffset: $baseOffset, extentOffset: $extentOffset, affinity: $affinity, isDirectional: $isDirectional)';
+    final String typeName = objectRuntimeType(this, 'TextSelection');
+    if (!isValid) {
+      return '$typeName.invalid';
+    }
+    return isCollapsed
+      ? '$typeName.collapsed(offset: $baseOffset, affinity: $affinity, isDirectional: $isDirectional)'
+      : '$typeName(baseOffset: $baseOffset, extentOffset: $extentOffset, isDirectional: $isDirectional)';
   }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other))
       return true;
-    return other is TextSelection
-        && other.baseOffset == baseOffset
+    if (other is! TextSelection)
+      return false;
+    if (!isValid) {
+      return !other.isValid;
+    }
+    return other.baseOffset == baseOffset
         && other.extentOffset == extentOffset
-        && other.affinity == affinity
+        && (!isCollapsed || other.affinity == affinity)
         && other.isDirectional == isDirectional;
   }
 
   @override
-  int get hashCode => hashValues(
-    baseOffset.hashCode,
-    extentOffset.hashCode,
-    affinity.hashCode,
-    isDirectional.hashCode,
-  );
+  int get hashCode {
+    if (!isValid) {
+      return hashValues(-1.hashCode, -1.hashCode, TextAffinity.downstream.hashCode);
+    }
+
+    final int affinityHash = isCollapsed ? affinity.hashCode : TextAffinity.downstream.hashCode;
+    return hashValues(baseOffset.hashCode, extentOffset.hashCode, affinityHash, isDirectional.hashCode);
+  }
+
 
   /// Creates a new [TextSelection] based on the current selection, with the
   /// provided parameters overridden.

@@ -5717,6 +5717,81 @@ void main() {
     expect(scrollController.offset, 0);
   });
 
+  testWidgets('can change scroll controller', (WidgetTester tester) async {
+    final _TestScrollController scrollController1 = _TestScrollController();
+    final _TestScrollController scrollController2 = _TestScrollController();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          controller: TextEditingController(text: 'A' * 1000),
+          maxLines: 1,
+          focusNode: FocusNode(),
+          style: textStyle,
+          cursorColor: Colors.blue,
+          backgroundCursorColor: Colors.grey,
+          scrollController: scrollController1,
+        ),
+      ),
+    );
+
+    expect(scrollController1.attached, isTrue);
+    expect(scrollController2.attached, isFalse);
+
+    // Change scrollController to controller 2.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          controller: TextEditingController(text: 'A' * 1000),
+          maxLines: 1,
+          focusNode: FocusNode(),
+          style: textStyle,
+          cursorColor: Colors.blue,
+          backgroundCursorColor: Colors.grey,
+          scrollController: scrollController2,
+        ),
+      ),
+    );
+
+    expect(scrollController1.attached, isFalse);
+    expect(scrollController2.attached, isTrue);
+
+    // Changing scrollController to null.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          controller: TextEditingController(text: 'A' * 1000),
+          maxLines: 1,
+          focusNode: FocusNode(),
+          style: textStyle,
+          cursorColor: Colors.blue,
+          backgroundCursorColor: Colors.grey,
+        ),
+      ),
+    );
+
+    expect(scrollController1.attached, isFalse);
+    expect(scrollController2.attached, isFalse);
+
+    // Change scrollController to back controller 2.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          controller: TextEditingController(text: 'A' * 1000),
+          maxLines: 1,
+          focusNode: FocusNode(),
+          style: textStyle,
+          cursorColor: Colors.blue,
+          backgroundCursorColor: Colors.grey,
+          scrollController: scrollController2,
+        ),
+      ),
+    );
+
+    expect(scrollController1.attached, isFalse);
+    expect(scrollController2.attached, isTrue);
+  });
+
   testWidgets('getLocalRectForCaret does not throw when it sees an infinite point', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -8107,9 +8182,134 @@ void main() {
     await tester.pump();
 
     expect(fadeTransition.toString(), contains('DISPOSED'));
-
     // On web, using keyboard for selection is handled by the browser.
   }, skip: kIsWeb); // [intended]
+
+  testWidgets('EditableText does not leak animation controllers', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          autofocus: true,
+          controller: TextEditingController(text: 'A'),
+          maxLines: 1,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: Colors.blue,
+          backgroundCursorColor: Colors.grey,
+          cursorOpacityAnimates: true,
+        ),
+      ),
+    );
+
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    final EditableTextState state = tester.state(find.byType(EditableText));
+
+    state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start, offset: Offset.zero));
+
+    // Start the cursor blink opacity animation controller.
+    // _kCursorBlinkWaitForStart
+    await tester.pump(const Duration(milliseconds: 150));
+    // _kCursorBlinkHalfPeriod
+    await tester.pump(const Duration(milliseconds: 500));
+
+    // Start the floating cursor reset animation controller.
+    state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End, offset: Offset.zero));
+
+    expect(tester.binding.transientCallbackCount, 2);
+
+    await tester.pumpWidget(const SizedBox());
+    expect(tester.hasRunningAnimations, isFalse);
+  });
+
+  testWidgets('Selection will be scrolled into view with SelectionChangedCause', (WidgetTester tester) async {
+    final GlobalKey<EditableTextState> key = GlobalKey<EditableTextState>();
+    final String text = List<int>.generate(64, (int index) => index).join('\n');
+    final TextEditingController controller = TextEditingController(text: text);
+    final ScrollController scrollController = ScrollController();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox(
+              height: 32,
+              child: EditableText(
+                key: key,
+                focusNode: focusNode,
+                style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+                cursorColor: Colors.blue,
+                backgroundCursorColor: Colors.grey,
+                controller: controller,
+                scrollController: scrollController,
+                maxLines: 2,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TextSelectionDelegate textSelectionDelegate = key.currentState!;
+
+    late double maxScrollExtent;
+    Future<void> resetSelectionAndScrollOffset([bool setMaxScrollExtent = true]) async {
+      controller.value = controller.value.copyWith(
+        text: text,
+        selection: controller.selection.copyWith(baseOffset: 0, extentOffset: 1),
+      );
+      await tester.pump();
+      final double targetOffset = setMaxScrollExtent ? scrollController.position.maxScrollExtent : 0.0;
+      scrollController.jumpTo(targetOffset);
+      await tester.pumpAndSettle();
+      maxScrollExtent = scrollController.position.maxScrollExtent;
+      expect(scrollController.offset, targetOffset);
+    }
+
+    // Cut
+    await resetSelectionAndScrollOffset();
+    textSelectionDelegate.cutSelection(SelectionChangedCause.keyboard);
+    await tester.pump();
+    expect(scrollController.offset, maxScrollExtent);
+
+    await resetSelectionAndScrollOffset();
+    textSelectionDelegate.cutSelection(SelectionChangedCause.toolbar);
+    await tester.pump();
+    expect(scrollController.offset.roundToDouble(), 0.0);
+
+    // Paste
+    await resetSelectionAndScrollOffset();
+    textSelectionDelegate.pasteText(SelectionChangedCause.keyboard);
+    await tester.pump();
+    expect(scrollController.offset, maxScrollExtent);
+
+    await resetSelectionAndScrollOffset();
+    textSelectionDelegate.pasteText(SelectionChangedCause.toolbar);
+    await tester.pump();
+    expect(scrollController.offset.roundToDouble(), 0.0);
+
+    // Select all
+    await resetSelectionAndScrollOffset(false);
+    textSelectionDelegate.selectAll(SelectionChangedCause.keyboard);
+    await tester.pump();
+    expect(scrollController.offset, 0.0);
+
+    await resetSelectionAndScrollOffset(false);
+    textSelectionDelegate.selectAll(SelectionChangedCause.toolbar);
+    await tester.pump();
+    expect(scrollController.offset.roundToDouble(), maxScrollExtent);
+
+    // Copy
+    await resetSelectionAndScrollOffset();
+    textSelectionDelegate.copySelection(SelectionChangedCause.keyboard);
+    await tester.pump();
+    expect(scrollController.offset, maxScrollExtent);
+
+    await resetSelectionAndScrollOffset();
+    textSelectionDelegate.copySelection(SelectionChangedCause.toolbar);
+    await tester.pump();
+    expect(scrollController.offset.roundToDouble(), 0.0);
+  });
 }
 
 class UnsettableController extends TextEditingController {
@@ -8350,4 +8550,8 @@ class _MyMoveSelectionRightTextAction extends TextEditingAction<Intent> {
     textEditingActionTarget!.renderEditable.moveSelectionRight(SelectionChangedCause.keyboard);
     onInvoke();
   }
+}
+
+class _TestScrollController extends ScrollController {
+  bool get attached => hasListeners;
 }
