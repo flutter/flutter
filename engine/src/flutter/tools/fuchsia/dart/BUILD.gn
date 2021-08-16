@@ -3,13 +3,8 @@
 # found in the LICENSE file.
 
 import("//flutter/tools/fuchsia/dart/toolchain.gni")
-import("//flutter/tools/fuchsia/python/python_binary.gni")
 import("//flutter/tools/fuchsia/sdk/sdk_targets.gni")
 import("//flutter/tools/fuchsia/toolchain/basic_toolchain.gni")
-
-python_binary("gen_dart_package_config") {
-  main_source = "gen_dart_package_config.py"
-}
 
 if (current_toolchain == default_toolchain) {
   # A toolchain dedicated to processing and analyzing Dart packages.
