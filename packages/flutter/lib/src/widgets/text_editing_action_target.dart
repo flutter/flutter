@@ -1149,22 +1149,32 @@ abstract class TextEditingActionTarget {
   /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   void selectAll(SelectionChangedCause cause) {
     setSelection(
-      textEditingValue.selectAll(),
+      textEditingValue.selection.copyWith(
+        baseOffset: 0,
+        extentOffset: textEditingValue.text.length,
+      ),
       cause,
     );
   }
 
+  /// {@template flutter.widgets.TextEditingActionTarget.copySelection}
   /// Copy current selection to [Clipboard].
-  void copySelection() {
+  /// {@endtemplate}
+  ///
+  /// {@macro flutter.widgets.TextEditingActionTarget.cause}
+  void copySelection(SelectionChangedCause cause) {
     final TextSelection selection = textEditingValue.selection;
     final String text = textEditingValue.text;
     assert(selection != null);
-    if (!selection.isCollapsed) {
-      Clipboard.setData(ClipboardData(text: selection.textInside(text)));
+    if (selection.isCollapsed) {
+      return;
     }
+    Clipboard.setData(ClipboardData(text: selection.textInside(text)));
   }
 
+  /// {@template flutter.widgets.TextEditingActionTarget.copySelection}
   /// Cut current selection to Clipboard.
+  /// {@endtemplate}
   ///
   /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   void cutSelection(SelectionChangedCause cause) {
@@ -1174,22 +1184,25 @@ abstract class TextEditingActionTarget {
     final TextSelection selection = textEditingValue.selection;
     final String text = textEditingValue.text;
     assert(selection != null);
-    if (!selection.isCollapsed) {
-      Clipboard.setData(ClipboardData(text: selection.textInside(text)));
-      setTextEditingValue(
-        TextEditingValue(
-          text: selection.textBefore(text) + selection.textAfter(text),
-          selection: TextSelection.collapsed(
-            offset: math.min(selection.start, selection.end),
-            affinity: selection.affinity,
-          ),
-        ),
-        cause,
-      );
+    if (selection.isCollapsed) {
+      return;
     }
+    Clipboard.setData(ClipboardData(text: selection.textInside(text)));
+    setTextEditingValue(
+      TextEditingValue(
+        text: selection.textBefore(text) + selection.textAfter(text),
+        selection: TextSelection.collapsed(
+          offset: math.min(selection.start, selection.end),
+          affinity: selection.affinity,
+        ),
+      ),
+      cause,
+    );
   }
 
+  /// {@template flutter.widgets.TextEditingActionTarget.pasteText}
   /// Paste text from [Clipboard].
+  /// {@endtemplate}
   ///
   /// If there is currently a selection, it will be replaced.
   ///
@@ -1201,23 +1214,27 @@ abstract class TextEditingActionTarget {
     final TextSelection selection = textEditingValue.selection;
     final String text = textEditingValue.text;
     assert(selection != null);
+    if (!selection.isValid) {
+      return;
+    }
     // Snapshot the input before using `await`.
     // See https://github.com/flutter/flutter/issues/11427
     final ClipboardData? data = await Clipboard.getData(Clipboard.kTextPlain);
-    if (data != null && selection.isValid) {
-      setTextEditingValue(
-        TextEditingValue(
-          text: selection.textBefore(text) +
-              data.text! +
-              selection.textAfter(text),
-          selection: TextSelection.collapsed(
-            offset:
-                math.min(selection.start, selection.end) + data.text!.length,
-            affinity: selection.affinity,
-          ),
-        ),
-        cause,
-      );
+    if (data == null) {
+      return;
     }
+    setTextEditingValue(
+      TextEditingValue(
+        text: selection.textBefore(text) +
+            data.text! +
+            selection.textAfter(text),
+        selection: TextSelection.collapsed(
+          offset:
+              math.min(selection.start, selection.end) + data.text!.length,
+          affinity: selection.affinity,
+        ),
+      ),
+      cause,
+    );
   }
 }

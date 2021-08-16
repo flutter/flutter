@@ -16,6 +16,7 @@ import 'dart:ui' show
 import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
+import '../../services.dart' show Clipboard, ClipboardData;
 import 'autofill.dart';
 import 'message_codec.dart';
 import 'platform_channel.dart';
@@ -690,15 +691,15 @@ enum SelectionChangedCause {
   /// location of the cursor.
   ///
   /// An example is when the user taps on select all in the tool bar.
-  toolBar,
+  toolbar,
 
   /// The user used the mouse to change the selection by dragging over a piece
   /// of text.
   drag,
 }
 
-/// A mixin for manipulating the selection, to be used by the implementer
-/// of the toolbar widget.
+/// A mixin for manipulating the selection, provided for toolbar or shortcut
+/// keys.
 mixin TextSelectionDelegate {
   /// Gets the current text input.
   TextEditingValue get textEditingValue;
@@ -749,6 +750,32 @@ mixin TextSelectionDelegate {
 
   /// Whether select all is enabled, must not be null.
   bool get selectAllEnabled => true;
+
+  /// Cut current selection to [Clipboard].
+  ///
+  /// If and only if [cause] is [SelectionChangedCause.toolbar], the toolbar
+  /// will be hidden and the current selection will be scrolled into view.
+  void cutSelection(SelectionChangedCause cause);
+
+  /// Paste text from [Clipboard].
+  ///
+  /// If there is currently a selection, it will be replaced.
+  ///
+  /// If and only if [cause] is [SelectionChangedCause.toolbar], the toolbar
+  /// will be hidden and the current selection will be scrolled into view.
+  Future<void> pasteText(SelectionChangedCause cause);
+
+  /// Set the current selection to contain the entire text value.
+  ///
+  /// If and only if [cause] is [SelectionChangedCause.toolbar], the selection
+  /// will be scrolled into view.
+  void selectAll(SelectionChangedCause cause);
+
+  /// Copy current selection to [Clipboard].
+  ///
+  /// If [cause] is [SelectionChangedCause.toolbar], the position of
+  /// [bringIntoView] to selection will be called and hide toolbar.
+  void copySelection(SelectionChangedCause cause);
 }
 
 /// An interface to receive information from [TextInput].

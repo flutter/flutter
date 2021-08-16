@@ -289,17 +289,13 @@ void main() {
     final FakeDesktopDevice device = setUpDesktopDevice(
       processManager: processManager,
     );
-    final Completer<void> testCompleter = Completer<void>();
-    final List<String> logOutput = <String>[];
-    device.getLogReader().logLines.listen((String line) {
-      logOutput.add(line);
-    }, onDone: () {
-      expect(logOutput, contains('Oops'));
-      testCompleter.complete();
-    });
     unawaited(Future<void>(() {
       exitCompleter.complete();
     }));
+
+    // Start looking for 'Oops' in the stream before starting the app.
+    expect(device.getLogReader().logLines, emits('Oops'));
+
     final FakeApplicationPackage package = FakeApplicationPackage();
     await device.startApp(
       package,
@@ -309,7 +305,6 @@ void main() {
         dartEntrypointArgs: <String>['arg1', 'arg2'],
       ),
     );
-    await testCompleter.future;
   });
 }
 

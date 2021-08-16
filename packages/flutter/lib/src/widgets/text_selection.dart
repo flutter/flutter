@@ -200,74 +200,24 @@ abstract class TextSelectionControls {
     return delegate.selectAllEnabled && delegate.textEditingValue.text.isNotEmpty && delegate.textEditingValue.selection.isCollapsed;
   }
 
-  // TODO(justinmc): This and other methods should be ported to Actions and
-  // removed, along with their keyboard shortcut equivalents.
-  // https://github.com/flutter/flutter/issues/75004
-  /// Copy the current selection of the text field managed by the given
-  /// `delegate` to the [Clipboard]. Then, remove the selected text from the
-  /// text field and hide the toolbar.
+  /// Call [TextSelectionDelegate.cutSelection] to cut current selection.
   ///
   /// This is called by subclasses when their cut affordance is activated by
   /// the user.
   void handleCut(TextSelectionDelegate delegate) {
-    final TextEditingValue value = delegate.textEditingValue;
-    Clipboard.setData(ClipboardData(
-      text: value.selection.textInside(value.text),
-    ));
-    delegate.userUpdateTextEditingValue(
-      TextEditingValue(
-        text: value.selection.textBefore(value.text)
-            + value.selection.textAfter(value.text),
-        selection: TextSelection.collapsed(
-          offset: value.selection.start,
-        ),
-      ),
-      SelectionChangedCause.toolBar,
-    );
-    delegate.bringIntoView(delegate.textEditingValue.selection.extent);
-    delegate.hideToolbar();
+    delegate.cutSelection(SelectionChangedCause.toolbar);
   }
 
-  /// Copy the current selection of the text field managed by the given
-  /// `delegate` to the [Clipboard]. Then, move the cursor to the end of the
-  /// text (collapsing the selection in the process), and hide the toolbar.
+  /// Call [TextSelectionDelegate.copySelection] to copy current selection.
   ///
   /// This is called by subclasses when their copy affordance is activated by
   /// the user.
   void handleCopy(TextSelectionDelegate delegate, ClipboardStatusNotifier? clipboardStatus) {
-    final TextEditingValue value = delegate.textEditingValue;
-    Clipboard.setData(ClipboardData(
-      text: value.selection.textInside(value.text),
-    ));
+    delegate.copySelection(SelectionChangedCause.toolbar);
     clipboardStatus?.update();
-    delegate.bringIntoView(delegate.textEditingValue.selection.extent);
-
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-        // Hide the toolbar, but keep the selection and keep the handles.
-        delegate.hideToolbar(false);
-        return;
-      case TargetPlatform.macOS:
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        // Collapse the selection and hide the toolbar and handles.
-        delegate.userUpdateTextEditingValue(
-          TextEditingValue(
-            text: value.text,
-            selection: TextSelection.collapsed(offset: value.selection.end),
-          ),
-          SelectionChangedCause.toolBar,
-        );
-        delegate.hideToolbar();
-        return;
-    }
   }
 
-  /// Paste the current clipboard selection (obtained from [Clipboard]) into
-  /// the text field managed by the given `delegate`, replacing its current
-  /// selection, if any. Then, hide the toolbar.
+  /// Call [TextSelectionDelegate.pasteText] to paste text.
   ///
   /// This is called by subclasses when their paste affordance is activated by
   /// the user.
@@ -277,43 +227,18 @@ abstract class TextSelectionControls {
   /// implemented.
   // TODO(ianh): https://github.com/flutter/flutter/issues/11427
   Future<void> handlePaste(TextSelectionDelegate delegate) async {
-    final TextEditingValue value = delegate.textEditingValue; // Snapshot the input before using `await`.
-    final ClipboardData? data = await Clipboard.getData(Clipboard.kTextPlain);
-    if (data != null) {
-      delegate.userUpdateTextEditingValue(
-        TextEditingValue(
-          text: value.selection.textBefore(value.text)
-              + data.text!
-              + value.selection.textAfter(value.text),
-          selection: TextSelection.collapsed(
-              offset: value.selection.start + data.text!.length,
-          ),
-        ),
-        SelectionChangedCause.toolBar,
-      );
-    }
-    delegate.bringIntoView(delegate.textEditingValue.selection.extent);
-    delegate.hideToolbar();
+    delegate.pasteText(SelectionChangedCause.toolbar);
   }
 
-  /// Adjust the selection of the text field managed by the given `delegate` so
-  /// that everything is selected.
+  /// Call [TextSelectionDelegate.selectAll] to set the current selection to
+  /// contain the entire text value.
   ///
   /// Does not hide the toolbar.
   ///
   /// This is called by subclasses when their select-all affordance is activated
   /// by the user.
   void handleSelectAll(TextSelectionDelegate delegate) {
-    delegate.userUpdateTextEditingValue(
-      TextEditingValue(
-        text: delegate.textEditingValue.text,
-        selection: TextSelection(
-          baseOffset: 0,
-          extentOffset: delegate.textEditingValue.text.length,
-        ),
-      ),
-      SelectionChangedCause.toolBar,
-    );
+    delegate.selectAll(SelectionChangedCause.toolbar);
     delegate.bringIntoView(delegate.textEditingValue.selection.extent);
   }
 }
@@ -1226,7 +1151,7 @@ class TextSelectionGestureDetectorBuilder {
   @protected
   void onDoubleTapDown(TapDownDetails details) {
     if (delegate.selectionEnabled) {
-      renderEditable.selectWord(cause: SelectionChangedCause.doubleTap);
+      renderEditable.selectWord(cause: SelectionChangedCause.tap);
       if (shouldShowSelectionToolbar)
         editableText.showToolbar();
     }

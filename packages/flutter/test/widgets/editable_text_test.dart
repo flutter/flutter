@@ -4938,19 +4938,21 @@ void main() {
 
   testWidgets('keyboard text selection works (RawKeyEvent)', (WidgetTester tester) async {
     debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.rawKeyData;
-    addTearDown(() { debugKeyEventSimulatorTransitModeOverride = null; });
 
     await testTextEditing(tester, targetPlatform: defaultTargetPlatform);
+
     debugKeyEventSimulatorTransitModeOverride = null;
+
     // On web, using keyboard for selection is handled by the browser.
   }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
 
   testWidgets('keyboard text selection works (ui.KeyData then RawKeyEvent)', (WidgetTester tester) async {
     debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.keyDataThenRawKeyData;
-    addTearDown(() { debugKeyEventSimulatorTransitModeOverride = null; });
 
     await testTextEditing(tester, targetPlatform: defaultTargetPlatform);
+
     debugKeyEventSimulatorTransitModeOverride = null;
+
     // On web, using keyboard for selection is handled by the browser.
   }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
 
@@ -6108,6 +6110,7 @@ void main() {
       'TextInput.setStyle',
       'TextInput.setEditingState',
       'TextInput.setEditingState',
+      'TextInput.show',
       'TextInput.setCaretRect',
     ];
     expect(
@@ -6151,14 +6154,16 @@ void main() {
       'TextInput.setStyle',
       'TextInput.setEditingState',
       'TextInput.setEditingState',
+      'TextInput.show',
       'TextInput.setCaretRect',
+      'TextInput.show',
     ];
-
-    expect(
-      tester.testTextInput.log.map((MethodCall methodCall) => methodCall.method),
-      logOrder,
-    );
-
+    expect(tester.testTextInput.log.length, logOrder.length);
+    int index = 0;
+    for (final MethodCall m in tester.testTextInput.log) {
+      expect(m.method, logOrder[index]);
+      index++;
+    }
     expect(tester.testTextInput.editingState!['text'], 'flutter is the best!');
   });
 
@@ -6199,6 +6204,7 @@ void main() {
       'TextInput.setStyle',
       'TextInput.setEditingState',
       'TextInput.setEditingState',
+      'TextInput.show',
       'TextInput.setCaretRect',
       'TextInput.setEditingState',
     ];
@@ -6272,7 +6278,7 @@ void main() {
       selection: controller.selection,
     ));
 
-    expect(log, isEmpty);
+    expect(log.length, 0);
 
     // setEditingState is called when remote value modified by the formatter.
     state.updateEditingValue(TextEditingValue(
@@ -7517,115 +7523,6 @@ void main() {
     });
   });
 
-  group('onChanged callbacks are edge-triggered', () {
-    SelectionChangedCallback? onSelectionChanged;
-    ValueChanged<String>? onChanged;
-
-    final TextEditingController controller = TextEditingController();
-    final Widget editableText = EditableText(
-      showSelectionHandles: false,
-      controller: controller,
-      focusNode: FocusNode(),
-      cursorColor: Colors.red,
-      backgroundCursorColor: Colors.blue,
-      style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!.copyWith(fontFamily: 'Roboto'),
-      keyboardType: TextInputType.text,
-      selectionControls: materialTextSelectionControls,
-      onSelectionChanged: (TextSelection selection, SelectionChangedCause? cause) => onSelectionChanged?.call(selection, cause),
-      onChanged: (String value) => onChanged?.call(value),
-    );
-
-    tearDown(() {
-      onSelectionChanged = null;
-      onChanged = null;
-    });
-
-    testWidgets('onSelectionChanged', (WidgetTester tester) async {
-      TextSelection? selection;
-      SelectionChangedCause? cause;
-
-      onSelectionChanged = (TextSelection newSelection, SelectionChangedCause? newCause) {
-        selection = newSelection;
-        cause = newCause;
-      };
-
-      controller.value = const TextEditingValue(text: 'text', selection: TextSelection(baseOffset: 1, extentOffset: 2));
-
-      await tester.pumpWidget(MaterialApp(
-        home: editableText,
-      ));
-      final EditableTextState state = tester.state(find.byWidget(editableText));
-
-      await tester.showKeyboard(find.byWidget(editableText));
-      await tester.pump();
-
-      // No user input.
-      expect(selection, isNull);
-      expect(cause, isNull);
-
-      // Selection didn't change but the cause did (keyboard).
-      state.updateEditingValue(
-        const TextEditingValue(text: 'test text', selection: TextSelection(baseOffset: 1, extentOffset: 2)),
-      );
-      expect(selection, const TextSelection(baseOffset: 1, extentOffset: 2));
-      expect(cause, SelectionChangedCause.keyboard);
-
-      // Selection and cause both changed
-      await tester.enterText(find.byWidget(editableText), 'test text');
-      expect(selection, const TextSelection.collapsed(offset: 9));
-      expect(cause, SelectionChangedCause.keyboard);
-
-      selection = null;
-      cause = null;
-      // Nothing changes.
-      state.userUpdateTextEditingValue(
-        const TextEditingValue(text: 'test text', selection: TextSelection.collapsed(offset: 9)),
-        SelectionChangedCause.keyboard
-      );
-      expect(selection, isNull);
-      expect(cause, isNull);
-
-      // The cause changes.
-      state.userUpdateTextEditingValue(
-        const TextEditingValue(text: 'test text', selection: TextSelection.collapsed(offset: 9)),
-        SelectionChangedCause.toolBar,
-      );
-      expect(selection, const TextSelection.collapsed(offset: 9));
-      expect(cause, SelectionChangedCause.toolBar);
-    });
-
-    testWidgets('onChanged', (WidgetTester tester) async {
-      String? newText;
-
-      onChanged = (String text) => newText = text;
-      controller.value = const TextEditingValue(text: 'text', selection: TextSelection(baseOffset: 1, extentOffset: 2));
-
-      await tester.pumpWidget(MaterialApp(
-        home: editableText,
-      ));
-      final EditableTextState state = tester.state(find.byWidget(editableText));
-
-      await tester.showKeyboard(find.byWidget(editableText));
-      await tester.pump();
-
-      // No user input.
-      expect(newText, isNull);
-
-      state.updateEditingValue(
-        const TextEditingValue(text: 'text', selection: TextSelection(baseOffset: 1, extentOffset: 3)),
-      );
-      // Selection & cause changed but the text didn't;
-      expect(newText, isNull);
-
-      state.updateEditingValue(
-        const TextEditingValue(text: 'test text', selection: TextSelection(baseOffset: 1, extentOffset: 3)),
-      );
-
-      // Now the text is changed.
-      expect(newText, 'test text');
-    });
-  });
-
   group('callback errors', () {
     const String errorText = 'Test EditableText callback error';
 
@@ -8273,9 +8170,97 @@ void main() {
     await tester.pump();
 
     expect(fadeTransition.toString(), contains('DISPOSED'));
-
     // On web, using keyboard for selection is handled by the browser.
   }, skip: kIsWeb); // [intended]
+
+  testWidgets('Selection will be scrolled into view with SelectionChangedCause', (WidgetTester tester) async {
+    final GlobalKey<EditableTextState> key = GlobalKey<EditableTextState>();
+    final String text = List<int>.generate(64, (int index) => index).join('\n');
+    final TextEditingController controller = TextEditingController(text: text);
+    final ScrollController scrollController = ScrollController();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox(
+              height: 32,
+              child: EditableText(
+                key: key,
+                focusNode: focusNode,
+                style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+                cursorColor: Colors.blue,
+                backgroundCursorColor: Colors.grey,
+                controller: controller,
+                scrollController: scrollController,
+                maxLines: 2,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TextSelectionDelegate textSelectionDelegate = key.currentState!;
+
+    late double maxScrollExtent;
+    Future<void> resetSelectionAndScrollOffset([bool setMaxScrollExtent = true]) async {
+      controller.value = controller.value.copyWith(
+        text: text,
+        selection: controller.selection.copyWith(baseOffset: 0, extentOffset: 1),
+      );
+      await tester.pump();
+      final double targetOffset = setMaxScrollExtent ? scrollController.position.maxScrollExtent : 0.0;
+      scrollController.jumpTo(targetOffset);
+      await tester.pumpAndSettle();
+      maxScrollExtent = scrollController.position.maxScrollExtent;
+      expect(scrollController.offset, targetOffset);
+    }
+
+    // Cut
+    await resetSelectionAndScrollOffset();
+    textSelectionDelegate.cutSelection(SelectionChangedCause.keyboard);
+    await tester.pump();
+    expect(scrollController.offset, maxScrollExtent);
+
+    await resetSelectionAndScrollOffset();
+    textSelectionDelegate.cutSelection(SelectionChangedCause.toolbar);
+    await tester.pump();
+    expect(scrollController.offset.roundToDouble(), 0.0);
+
+    // Paste
+    await resetSelectionAndScrollOffset();
+    textSelectionDelegate.pasteText(SelectionChangedCause.keyboard);
+    await tester.pump();
+    expect(scrollController.offset, maxScrollExtent);
+
+    await resetSelectionAndScrollOffset();
+    textSelectionDelegate.pasteText(SelectionChangedCause.toolbar);
+    await tester.pump();
+    expect(scrollController.offset.roundToDouble(), 0.0);
+
+    // Select all
+    await resetSelectionAndScrollOffset(false);
+    textSelectionDelegate.selectAll(SelectionChangedCause.keyboard);
+    await tester.pump();
+    expect(scrollController.offset, 0.0);
+
+    await resetSelectionAndScrollOffset(false);
+    textSelectionDelegate.selectAll(SelectionChangedCause.toolbar);
+    await tester.pump();
+    expect(scrollController.offset.roundToDouble(), maxScrollExtent);
+
+    // Copy
+    await resetSelectionAndScrollOffset();
+    textSelectionDelegate.copySelection(SelectionChangedCause.keyboard);
+    await tester.pump();
+    expect(scrollController.offset, maxScrollExtent);
+
+    await resetSelectionAndScrollOffset();
+    textSelectionDelegate.copySelection(SelectionChangedCause.toolbar);
+    await tester.pump();
+    expect(scrollController.offset.roundToDouble(), 0.0);
+  });
 }
 
 class UnsettableController extends TextEditingController {
