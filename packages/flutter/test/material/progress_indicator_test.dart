@@ -890,7 +890,7 @@ class _RefreshProgressIndicatorGoldenState extends State<_RefreshProgressIndicat
     ..addListener(() {
         setState(() {});
       })
-    ..addStatusListener((status) {
+    ..addStatusListener((AnimationStatus status) {
         if (status == AnimationStatus.completed) {
           indeterminate = true;
         }
@@ -899,7 +899,7 @@ class _RefreshProgressIndicatorGoldenState extends State<_RefreshProgressIndicat
   bool indeterminate = false;
 
   @override
-  void dispose() { 
+  void dispose() {
     controller.dispose();
     super.dispose();
   }
