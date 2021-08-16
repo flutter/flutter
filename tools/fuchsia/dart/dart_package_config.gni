@@ -97,10 +97,7 @@ template("dart_package_config") {
     if (!defined(deps)) {
       deps = []
     }
-    deps += [
-      ":$generate_target",
-      "//flutter/tools/fuchsia/dart:gen_dart_package_config",
-    ]
+    deps += [ ":$generate_target" ]
 
     metadata = {
       # Add a barrier here to avoid double of inclusion of elements listed in
