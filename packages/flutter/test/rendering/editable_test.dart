@@ -36,6 +36,20 @@ class _FakeEditableTextState with TextSelectionDelegate {
 
   @override
   void bringIntoView(TextPosition position) { }
+
+  @override
+  void cutSelection(SelectionChangedCause cause) { }
+
+  @override
+  Future<void> pasteText(SelectionChangedCause cause) {
+    return Future<void>.value(null);
+  }
+
+  @override
+  void selectAll(SelectionChangedCause cause) { }
+
+  @override
+  void copySelection(SelectionChangedCause cause) { }
 }
 
 @isTest

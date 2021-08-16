@@ -5367,7 +5367,7 @@ void main() {
         expect(
           selectionAfterHome,
           equals(
-            TextSelection(
+            const TextSelection(
               baseOffset: 23,
               extentOffset: 23,
               affinity: TextAffinity.downstream,
@@ -5378,7 +5378,7 @@ void main() {
         expect(
           selectionAfterEnd,
           equals(
-            TextSelection(
+            const TextSelection(
               baseOffset: 23,
               extentOffset: 23,
               affinity: TextAffinity.downstream,
@@ -5393,7 +5393,7 @@ void main() {
         expect(
           selectionAfterHome,
           equals(
-            TextSelection(
+            const TextSelection(
               baseOffset: 23,
               extentOffset: 20,
               affinity: TextAffinity.downstream,
@@ -5404,7 +5404,7 @@ void main() {
         expect(
           selectionAfterEnd,
           equals(
-            TextSelection(
+            const TextSelection(
               baseOffset: 23,
               extentOffset: 35,
               affinity: TextAffinity.upstream,
@@ -5419,7 +5419,7 @@ void main() {
         expect(
           selectionAfterHome,
           equals(
-            TextSelection(
+            const TextSelection(
               baseOffset: 20,
               extentOffset: 23,
               affinity: TextAffinity.downstream,
@@ -5430,7 +5430,7 @@ void main() {
         expect(
           selectionAfterEnd,
           equals(
-            TextSelection(
+            const TextSelection(
               baseOffset: 23,
               extentOffset: 35,
               affinity: TextAffinity.downstream,
@@ -5445,7 +5445,7 @@ void main() {
         expect(
           selectionAfterHome,
           equals(
-            TextSelection(
+            const TextSelection(
               baseOffset: 23,
               extentOffset: 0,
               affinity: TextAffinity.upstream,
@@ -5456,7 +5456,7 @@ void main() {
         expect(
           selectionAfterEnd,
           equals(
-            TextSelection(
+            const TextSelection(
               baseOffset: 23,
               extentOffset: 72,
               affinity: TextAffinity.downstream,

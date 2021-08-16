@@ -16,7 +16,7 @@ import 'dart:ui' show
 import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
-import '../../services.dart' show Clipboard, ClipboardData;
+import '../../services.dart' show Clipboard;
 import 'autofill.dart';
 import 'message_codec.dart';
 import 'platform_channel.dart';

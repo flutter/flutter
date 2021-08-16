@@ -1172,7 +1172,7 @@ abstract class TextEditingActionTarget {
     Clipboard.setData(ClipboardData(text: selection.textInside(text)));
   }
 
-  /// {@template flutter.widgets.TextEditingActionTarget.copySelection}
+  /// {@template flutter.widgets.TextEditingActionTarget.cutSelection}
   /// Cut current selection to Clipboard.
   /// {@endtemplate}
   ///
