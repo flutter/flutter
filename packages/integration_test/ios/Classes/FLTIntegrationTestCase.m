@@ -7,7 +7,7 @@
 
 #import "FLTIntegrationTestCase.h"
 
-#import "IntegrationTestIosTest.h"
+#import "FLTIntegrationTestRunner.h"
 #import "IntegrationTestPlugin.h"
 
 @import ObjectiveC.runtime;
@@ -20,9 +20,9 @@
     // Do not add any tests for this base class.
     return @[];
   }
-  IntegrationTestIosTest *integrationTestIosTest = [IntegrationTestIosTest new];
+  FLTIntegrationTestRunner *integrationTestRunner = [FLTIntegrationTestRunner new];
   NSMutableArray<NSInvocation *> *testInvocations = [NSMutableArray new];
-  [integrationTestIosTest testIntegrationTestWithResults:^(NSString *testName, BOOL success, NSString *_Nullable failureMessage) {
+  [integrationTestRunner testIntegrationTestWithResults:^(NSString *testName, BOOL success, NSString *failureMessage) {
     // For every Flutter dart test, dynamically generate an Objective-C method mirroring the test results
     // so it is reported as a native XCTest run result.
     IMP assertImplementation = imp_implementationWithBlock(^(id _self) {
@@ -44,10 +44,9 @@
     [testInvocations addObject:invocation];
   }];
 
-  NSDictionary<NSString *, UIImage *> *capturedScreenshotsByName = integrationTestIosTest.capturedScreenshotsByName;
+  NSDictionary<NSString *, UIImage *> *capturedScreenshotsByName = integrationTestRunner.capturedScreenshotsByName;
   if (capturedScreenshotsByName.count > 0) {
     // If the Flutter dart tests have captured screenshots, add them to the XCTest bundle.
-
     IMP screenshotImplementation = imp_implementationWithBlock(^(id _self) {
       [capturedScreenshotsByName enumerateKeysAndObjectsUsingBlock:^(NSString *name, UIImage *screenshot, BOOL *stop) {
         XCTAttachment *attachment = [XCTAttachment attachmentWithImage:screenshot];

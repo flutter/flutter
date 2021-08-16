@@ -2,19 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#import "IntegrationTestIosTest.h"
+#import "FLTIntegrationTestRunner.h"
 
 #import "IntegrationTestPlugin.h"
 
 @import UIKit;
 
-@interface IntegrationTestIosTest ()
+@interface FLTIntegrationTestRunner ()
 
 @property IntegrationTestPlugin *integrationTestPlugin;
 
 @end
 
-@implementation IntegrationTestIosTest
+@implementation FLTIntegrationTestRunner
 
 - (instancetype)init {
   self = [super init];
@@ -23,7 +23,7 @@
   return self;
 }
 
-- (void)testIntegrationTestWithResults:(FLTIntegrationTestResults)testResult {
+- (void)testIntegrationTestWithResults:(NS_NOESCAPE FLTIntegrationTestResults)testResult {
   IntegrationTestPlugin *integrationTestPlugin = self.integrationTestPlugin;
   UIViewController *rootViewController = UIApplication.sharedApplication.delegate.window.rootViewController;
   if (![rootViewController isKindOfClass:[FlutterViewController class]]) {
@@ -50,15 +50,20 @@
   return self.integrationTestPlugin.capturedScreenshotsByName;
 }
 
+@end
+
 #pragma mark - Deprecated
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-implementations"
+
+@implementation IntegrationTestIosTest
+
 - (BOOL)testIntegrationTest:(NSString **)testResult {
   NSLog(@"==================== Test Results =====================");
   NSMutableArray<NSString *> *failedTests = [NSMutableArray array];
   NSMutableArray<NSString *> *testNames = [NSMutableArray array];
-  [self testIntegrationTestWithResults:^(NSString *testName, BOOL success, NSString *message) {
+  [[FLTIntegrationTestRunner new] testIntegrationTestWithResults:^(NSString *testName, BOOL success, NSString *message) {
     [testNames addObject:testName];
     if (success) {
       NSLog(@"%@ passed.", testName);
@@ -76,6 +81,6 @@
   }
   return testPass;
 }
-#pragma clang diagnostic pop
 
 @end
+#pragma clang diagnostic pop
