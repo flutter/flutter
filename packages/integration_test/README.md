@@ -296,8 +296,8 @@ replace the file:
 ```
 or in Swift:
 ````swift
+import integration_test
 import XCTest
-@testable import integration_test
 
 class RunnerSwiftTests: FLTIntegrationTestCase {
 }
