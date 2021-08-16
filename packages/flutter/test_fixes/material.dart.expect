@@ -420,4 +420,8 @@ void main() {
   themeData = ThemeData.raw();
   themeData = themeData.copyWith();
   themeData.fixTextFieldOutlineLabel; // Removing field reference not supported.
+
+  // Changes made in https://github.com/flutter/flutter/pull/87839
+  final OverscrollIndicatorNotification notification = OverscrollIndicatorNotification(leading: true);
+  notification.disallowIndicator();
 }

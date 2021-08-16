@@ -120,7 +120,7 @@ class Multiple extends Transition {
 
   @override
   String toString() {
-    if (_originalPatterns.length == patterns.length) {
+    if (patterns.isEmpty) {
       return '${_originalPatterns.map(describe).join(', ')} (all matched)';
     }
     return '${_originalPatterns.map(describe).join(', ')} (matched ${_originalPatterns.length - patterns.length} so far)';

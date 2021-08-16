@@ -62,8 +62,8 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: const <String>['release/executable'],
-          stdout: 'Hello World',
-          stderr: 'Goodnight, Moon',
+          stdout: 'Hello World\n',
+          stderr: 'Goodnight, Moon\n',
           completer: completer,
         )
       ]),
@@ -82,7 +82,7 @@ void main() {
 
     final DeviceLogReader logReader = device.getLogReader(app: package);
 
-    expect(logReader.logLines, emits('Hello WorldGoodnight, Moon'));
+    expect(logReader.logLines, emitsInAnyOrder(<String>['Hello World', 'Goodnight, Moon']));
     completer.complete();
   });
 
