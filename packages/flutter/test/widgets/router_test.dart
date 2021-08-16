@@ -515,7 +515,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     ));
     expect(find.text('initial'), findsOneWidget);
     expect(reportedRouteInformation!.location, 'initial');
-    expect(reportedType, RouteInformationReportingType.implicit);
+    expect(reportedType, RouteInformationReportingType.none);
     reportedRouteInformation = null;
     reportedType = null;
     delegate.routeInformation = const RouteInformation(
@@ -525,7 +525,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     expect(find.text('initial'), findsNothing);
     expect(find.text('update'), findsOneWidget);
     expect(reportedRouteInformation!.location, 'update');
-    expect(reportedType, RouteInformationReportingType.implicit);
+    expect(reportedType, RouteInformationReportingType.none);
 
     // The router should report as non navigation event if only state changes.
     reportedRouteInformation = null;
@@ -538,7 +538,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     expect(find.text('update'), findsOneWidget);
     expect(reportedRouteInformation!.location, 'update');
     expect(reportedRouteInformation!.state, 'another state');
-    expect(reportedType, RouteInformationReportingType.implicit);
+    expect(reportedType, RouteInformationReportingType.none);
 
     reportedRouteInformation = null;
     reportedType = null;
@@ -548,7 +548,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     await tester.pump();
     expect(find.text('popped'), findsOneWidget);
     expect(reportedRouteInformation!.location, 'popped');
-    expect(reportedType, RouteInformationReportingType.implicit);
+    expect(reportedType, RouteInformationReportingType.none);
   });
 
   testWidgets('router can be forced to recognize or ignore navigating events', (WidgetTester tester) async {
@@ -599,7 +599,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     ));
     expect(find.text('initial'), findsOneWidget);
     expect(reportedRouteInformation!.location, 'initial');
-    expect(reportedType, RouteInformationReportingType.implicit);
+    expect(reportedType, RouteInformationReportingType.none);
     reportedType = null;
     reportedRouteInformation = null;
 
@@ -610,7 +610,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     await tester.pump();
     expect(find.text('initial'), findsNothing);
     expect(find.text('update'), findsOneWidget);
-    expect(reportedType, RouteInformationReportingType.neglecting);
+    expect(reportedType, RouteInformationReportingType.neglect);
     expect(reportedRouteInformation!.location, 'update');
     reportedType = null;
     reportedRouteInformation = null;
@@ -621,7 +621,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     // report a route information because isNavigating = true.
     await tester.tap(find.byType(ElevatedButton));
     await tester.pump();
-    expect(reportedType, RouteInformationReportingType.navigation);
+    expect(reportedType, RouteInformationReportingType.navigate);
     expect(reportedRouteInformation!.location, 'update');
     reportedType = null;
     reportedRouteInformation = null;
@@ -666,7 +666,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     ));
     expect(find.text('initial'), findsOneWidget);
     expect(updatedRouteInformation!.location, 'initial');
-    expect(reportingType, RouteInformationReportingType.implicit);
+    expect(reportingType, RouteInformationReportingType.none);
     updatedRouteInformation = null;
     reportingType = null;
 
@@ -678,7 +678,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     expect(find.text('initial'), findsNothing);
     expect(find.text('update'), findsOneWidget);
     expect(updatedRouteInformation!.location, 'update');
-    expect(reportingType, RouteInformationReportingType.neglecting);
+    expect(reportingType, RouteInformationReportingType.neglect);
   });
 
   testWidgets('state change without location changes updates RouteInformationProvider', (WidgetTester tester) async {
@@ -719,7 +719,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     ));
     expect(find.text('initial'), findsOneWidget);
     expect(updatedRouteInformation!.location, 'initial');
-    expect(reportingType, RouteInformationReportingType.implicit);
+    expect(reportingType, RouteInformationReportingType.none);
     updatedRouteInformation = null;
     reportingType = null;
 
@@ -731,7 +731,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     await tester.pump();
     expect(updatedRouteInformation!.location, 'initial');
     expect(updatedRouteInformation!.state, 'state2');
-    expect(reportingType, RouteInformationReportingType.implicit);
+    expect(reportingType, RouteInformationReportingType.none);
   });
 
   testWidgets('PlatformRouteInformationProvider works', (WidgetTester tester) async {
@@ -801,14 +801,14 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     );
 
     log.clear();
-    provider.routerReportsNewRouteInformation(const RouteInformation(location: 'a', state: true), type: RouteInformationReportingType.implicit);
+    provider.routerReportsNewRouteInformation(const RouteInformation(location: 'a', state: true), type: RouteInformationReportingType.none);
     // Implicit reporting pushes new history entry if the location changes.
     expect(log, <Object>[
       isMethodCall('selectMultiEntryHistory', arguments: null),
       isMethodCall('routeInformationUpdated', arguments: <String, dynamic>{ 'location': 'a', 'state': true, 'replace': false }),
     ]);
     log.clear();
-    provider.routerReportsNewRouteInformation(const RouteInformation(location: 'a', state: false), type: RouteInformationReportingType.implicit);
+    provider.routerReportsNewRouteInformation(const RouteInformation(location: 'a', state: false), type: RouteInformationReportingType.none);
     // Since the location is the same, the provider sends replaces message.
     expect(log, <Object>[
       isMethodCall('selectMultiEntryHistory', arguments: null),
@@ -816,14 +816,14 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     ]);
 
     log.clear();
-    provider.routerReportsNewRouteInformation(const RouteInformation(location: 'b', state: false), type: RouteInformationReportingType.neglecting);
+    provider.routerReportsNewRouteInformation(const RouteInformation(location: 'b', state: false), type: RouteInformationReportingType.neglect);
     expect(log, <Object>[
       isMethodCall('selectMultiEntryHistory', arguments: null),
       isMethodCall('routeInformationUpdated', arguments: <String, dynamic>{ 'location': 'b', 'state': false, 'replace': true }),
     ]);
 
     log.clear();
-    provider.routerReportsNewRouteInformation(const RouteInformation(location: 'b', state: false), type: RouteInformationReportingType.navigation);
+    provider.routerReportsNewRouteInformation(const RouteInformation(location: 'b', state: false), type: RouteInformationReportingType.navigate);
     expect(log, <Object>[
       isMethodCall('selectMultiEntryHistory', arguments: null),
       isMethodCall('routeInformationUpdated', arguments: <String, dynamic>{ 'location': 'b', 'state': false, 'replace': false }),
