@@ -900,6 +900,7 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
     super.didUpdateWidget(oldWidget);
   }
 
+  @override
   Widget _buildAnimation() {
     return AnimatedBuilder(
       animation: _controller,
