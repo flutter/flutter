@@ -155,7 +155,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       testWrapper.registerPlatformPlugin(
         <Runtime>[Runtime.chrome],
         () {
-          // TODO(jonahwilliams): refactor this into a factory that handles
+          // TODO(flutter): refactor this into a factory that handles
           // providing dependencies.
           return FlutterWebPlatform.start(
             flutterProject.directory.path,

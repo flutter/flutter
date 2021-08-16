@@ -373,7 +373,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       collector = CoverageCollector(
         verbose: !machine,
         libraryPredicate: (String libraryName) => libraryName.contains(projectName),
-        // TODO(jonahwilliams): file bug for incorrect URI handling on windows
+        // TODO(flutter): incorrect URI handling in package coverage on windows,
+        // https://github.com/dart-lang/coverage/issues/318
         packagesPath: globals.fs.file(buildInfo.packagesPath)
           .parent.parent.childFile('.packages').path
       );

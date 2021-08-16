@@ -450,7 +450,7 @@ abstract class ResidentCompiler {
     String librariesSpec,
   }) = DefaultResidentCompiler;
 
-  // TODO(jonahwilliams): find a better way to configure additional file system
+  // TODO(flutter): find a better way to configure additional file system
   // roots from the runner.
   // See: https://github.com/flutter/flutter/issues/50494
   void addFileSystemRoot(String root);
@@ -708,11 +708,11 @@ class DefaultResidentCompiler implements ResidentCompiler {
       if (testCompilation)
         '--no-print-incremental-dependencies',
       '--target=$targetModel',
-      // TODO(jonahwilliams): remove once this becomes the default behavior
+      // TODO(flutter): remove once this becomes the default behavior
       // in the frontend_server.
       // https://github.com/flutter/flutter/issues/52693
       '--debugger-module-names',
-      // TODO(annagrin): remove once this becomes the default behavior
+      // TODO(flutter): remove once this becomes the default behavior
       // in the frontend_server.
       // https://github.com/flutter/flutter/issues/59902
       '--experimental-emit-debug-metadata',

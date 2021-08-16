@@ -57,8 +57,6 @@ abstract class ChromiumDevice extends Device {
   /// The active chrome instance.
   Chromium _chrome;
 
-  // TODO(jonahwilliams): this is technically false, but requires some refactoring
-  // to allow hot mode restart only devices.
   @override
   bool get supportsHotReload => true;
 

@@ -36,7 +36,7 @@ class BuildInfo {
     List<String>? dartExperiments,
     required this.treeShakeIcons,
     this.performanceMeasurementFile,
-    this.packagesPath = '.packages', // TODO(jonahwilliams): make this required and remove the default.
+    this.packagesPath = '.packages',
     this.nullSafetyMode = NullSafetyMode.sound,
     this.codeSizeDirectory,
     this.androidGradleDaemon = true,
@@ -534,7 +534,6 @@ enum DarwinArch {
   x86_64,
 }
 
-// TODO(jonahwilliams): replace all android TargetPlatform usage with AndroidArch.
 enum AndroidArch {
   armeabi_v7a,
   arm64_v8a,

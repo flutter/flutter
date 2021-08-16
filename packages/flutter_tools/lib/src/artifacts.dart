@@ -565,7 +565,7 @@ class CachedArtifacts implements Artifacts {
       case Artifact.windowsDesktopPath:
       case Artifact.flutterMacOSPodspec:
       case Artifact.linuxHeaders:
-        // TODO(jonahwilliams): remove once debug desktop artifacts are uploaded
+        // TODO(flutter): remove once debug desktop artifacts are uploaded
         // under a separate directory from the host artifacts.
         // https://github.com/flutter/flutter/issues/38935
         String platformDirName = _enginePlatformDirectoryName(platform);
@@ -610,7 +610,7 @@ class CachedArtifacts implements Artifacts {
       case TargetPlatform.linux_arm64:
       case TargetPlatform.darwin:
       case TargetPlatform.windows_x64:
-        // TODO(jonahwilliams): remove once debug desktop artifacts are uploaded
+        // TODO(flutter): remove once debug desktop artifacts are uploaded
         // under a separate directory from the host artifacts.
         // https://github.com/flutter/flutter/issues/38935
         if (mode == BuildMode.debug || mode == null) {
