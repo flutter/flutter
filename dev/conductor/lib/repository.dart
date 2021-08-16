@@ -613,7 +613,7 @@ class FrameworkRepository extends Repository {
     final String oldEngine = engineVersionFile.readAsStringSync();
     if (oldEngine.trim() == newEngine.trim()) {
       stdio.printTrace(
-        'Tried to update the engine revision but version file is alread up to date at: $newEngine',
+        'Tried to update the engine revision but version file is already up to date at: $newEngine',
       );
       return false;
     }
