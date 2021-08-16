@@ -1736,6 +1736,7 @@ class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
   /// Whether this observer is managing changes for the specified route.
   ///
   /// If asserts are disabled, this method will throw an exception.
+  @visibleForTesting
   bool debugObservingRoute(R route) {
     late bool contained;
     assert(() {
