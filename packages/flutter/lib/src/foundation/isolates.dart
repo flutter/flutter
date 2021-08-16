@@ -17,9 +17,6 @@ import '_isolates_io.dart'
 /// {@macro flutter.foundation.compute.limitations}
 typedef ComputeCallback<Q, R> = FutureOr<R> Function(Q message);
 
-// The signature of [compute].
-typedef _ComputeImpl = Future<R> Function<Q, R>(ComputeCallback<Q, R> callback, Q message, { String? debugLabel });
-
 /// Spawn an isolate, run `callback` on that isolate, passing it `message`, and
 /// (eventually) return the value returned by `callback`.
 ///
@@ -46,4 +43,6 @@ typedef _ComputeImpl = Future<R> Function<Q, R>(ComputeCallback<Q, R> callback, 
 /// [Timeline]. This is useful when profiling an application.
 // Remove when https://github.com/dart-lang/sdk/issues/37149 is fixed.
 // ignore: prefer_const_declarations
-final _ComputeImpl compute = _isolates.compute;
+final Future<R> Function<Q, R>(
+    ComputeCallback<Q, R> callback, Q message, { String? debugLabel })
+  compute = _isolates.compute;
