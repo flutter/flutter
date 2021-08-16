@@ -470,10 +470,10 @@ void main() {
       ),
     );
 
-    //By default the value of strokeWidth is 2.0
+    // Check for the default value
     expect(
       tester.widget<RefreshIndicator>(find.byType(RefreshIndicator)).strokeWidth,
-      2.0,
+      RefreshProgressIndicator.defaultStrokeWidth,
     );
 
     await tester.pumpWidget(
