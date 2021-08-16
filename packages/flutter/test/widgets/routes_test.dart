@@ -525,6 +525,33 @@ void main() {
       expect(pageRouteAware.didPushCount, 2);
       expect(pageRouteAware.didPopCount, 0);
     });
+
+    test('releases reference to route when unsubscribed', () {
+      final RouteObserver<PageRoute<dynamic>> observer = RouteObserver<PageRoute<dynamic>>();
+      final MockRouteAware pageRouteAware = MockRouteAware();
+      final MockRouteAware page2RouteAware = MockRouteAware();
+      final MockPageRoute pageRoute = MockPageRoute();
+      final MockPageRoute nextPageRoute = MockPageRoute();
+      observer.subscribe(pageRouteAware, pageRoute);
+      observer.subscribe(pageRouteAware, nextPageRoute);
+      observer.subscribe(page2RouteAware, pageRoute);
+      observer.subscribe(page2RouteAware, nextPageRoute);
+      expect(pageRouteAware.didPushCount, 2);
+      expect(page2RouteAware.didPushCount, 2);
+
+      expect(observer.debugObservingRoute(pageRoute), true);
+      expect(observer.debugObservingRoute(nextPageRoute), true);
+
+      observer.unsubscribe(pageRouteAware);
+
+      expect(observer.debugObservingRoute(pageRoute), true);
+      expect(observer.debugObservingRoute(nextPageRoute), true);
+
+      observer.unsubscribe(page2RouteAware);
+
+      expect(observer.debugObservingRoute(pageRoute), false);
+      expect(observer.debugObservingRoute(nextPageRoute), false);
+    });
   });
 
   testWidgets('Can autofocus a TextField nested in a Focus in a route.', (WidgetTester tester) async {
