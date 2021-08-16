@@ -14,6 +14,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
+import '../rendering/rendering_tester.dart';
 
 void main() {
 
@@ -530,6 +531,19 @@ void main() {
     expect(tester.hasRunningAnimations, isTrue);
   });
 
+  testWidgets('RefreshProgressIndicator uses expected animation', (WidgetTester tester) async {
+    final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(50, 50));
+
+    await tester.pumpFrames(animationSheet.record(
+      const _RefreshProgressIndicatorGolden(),
+    ), const Duration(seconds: 3));
+
+    await expectLater(
+      await animationSheet.collate(20),
+      matchesGoldenFile('material.refresh_progress_indicator.png'),
+    );
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
+
   testWidgets('Determinate CircularProgressIndicator stops the animator', (WidgetTester tester) async {
     double? progressValue;
     late StateSetter setState;
@@ -858,4 +872,47 @@ void main() {
     expect(wrappedTheme, isInstanceOf<ProgressIndicatorTheme>());
     expect((wrappedTheme as ProgressIndicatorTheme).data, themeData);
   });
+}
+
+class _RefreshProgressIndicatorGolden extends StatefulWidget {
+  const _RefreshProgressIndicatorGolden({Key? key}) : super(key: key);
+
+  @override
+  _RefreshProgressIndicatorGoldenState createState() => _RefreshProgressIndicatorGoldenState();
+}
+
+class _RefreshProgressIndicatorGoldenState extends State<_RefreshProgressIndicatorGolden> with SingleTickerProviderStateMixin {
+  late final AnimationController controller = AnimationController(
+    vsync: this,
+    duration: const Duration(seconds: 1),
+  )
+    ..forward()
+    ..addListener(() {
+        setState(() {});
+      })
+    ..addStatusListener((status) {
+        if (status == AnimationStatus.completed) {
+          indeterminate = true;
+        }
+      });
+
+  bool indeterminate = false;
+
+  @override
+  void dispose() { 
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: RefreshProgressIndicator(
+          value: indeterminate ? null : controller.value,
+        ),
+      ),
+    );
+  }
 }
