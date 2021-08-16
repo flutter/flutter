@@ -70,7 +70,7 @@ dependency_overrides:
   crypto:
     path: ../../third_party/dart/third_party/pkg/crypto
   dart2js_info:
-    path: ../../third_party/dart/third_party/pkg/dart2js_info
+    path: ../../third_party/dart/pkg/dart2js_info
   dev_compiler:
     path: ../../third_party/dart/pkg/dev_compiler
   expect:
