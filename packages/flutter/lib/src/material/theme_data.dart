@@ -1361,7 +1361,18 @@ class ThemeData with Diagnosticable {
   )
   final bool useTextSelectionTheme;
 
-  /// Doc
+  /// Specifies which overscroll indicator to use on [TargetPlatform.android].
+  ///
+  /// When null, the default value of
+  /// [MaterialScrollBehavior.androidOverscrollIndicator] is
+  /// [AndroidOverscrollIndicator.glow].
+  ///
+  /// See also:
+  ///
+  ///   * [StretchingOverscrollIndicator], a material design edge effect
+  ///     that transforms the contents of a scrollable when overscrolled.
+  ///   * [GlowingOverscrollIndicator], an edge effect that paints a glow
+  ///     over the contents of a scrollable when overscrolled.
   final AndroidOverscrollIndicator? androidOverscrollIndicator;
 
   /// Creates a copy of this theme but with the given fields replaced with the new values.

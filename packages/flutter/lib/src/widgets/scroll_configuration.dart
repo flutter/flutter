@@ -71,7 +71,7 @@ class ScrollBehavior {
   ///
   /// See also:
   ///
-  ///   * [MaterialScrollBehavior], which enables setting this property
+  ///   * [MaterialScrollBehavior], which supports setting this property
   ///     using [ThemeData].
   AndroidOverscrollIndicator get androidOverscrollIndicator => _androidOverscrollIndicator ?? _kDefaultAndroidOverscrollIndicator;
   final AndroidOverscrollIndicator? _androidOverscrollIndicator;
