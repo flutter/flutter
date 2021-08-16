@@ -16,7 +16,11 @@ ffigen:
   output: 'lib/zircon_ffi.dart'
   headers:
     entry-points:
+      - 'basic_types.h'
+      - 'channel.h'
       - 'clock.h'
+      - 'dart_dl.h'
+      - 'handle.h'
   functions:
     include:
       - 'zircon_dart_.*'
@@ -34,7 +38,7 @@ ffigen:
       - nothing
   structs:
     include:
-      - nothing
+      - 'zircon_dart_.*'
     dependency-only: opaque
   compiler-opts:
-    - '-I../../../../../../../third_party/dart/runtime'
+    - '-I../../../../../../third_party/dart/runtime'

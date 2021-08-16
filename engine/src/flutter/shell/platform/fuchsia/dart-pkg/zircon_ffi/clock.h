@@ -5,9 +5,9 @@
 #ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_DART_PKG_ZIRCON_SDK_FFI_CLOCK_H_
 #define FLUTTER_SHELL_PLATFORM_FUCHSIA_DART_PKG_ZIRCON_SDK_FFI_CLOCK_H_
 
-#include <stdint.h>
+#include "macros.h"
 
-#define ZIRCON_FFI_EXPORT __attribute__((visibility("default")))
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {

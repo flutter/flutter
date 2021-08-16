@@ -2,5 +2,19 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+name: zircon
+
 environment:
-  sdk: '>=2.11.0 <3.0.0'
+  sdk: '>=2.12.0 <3.0.0'
+
+
+# Uncomment block for local testing
+
+# dependencies:
+#   zircon_ffi:
+#     path: ../zircon_ffi
+
+# dev_dependencies:
+#   test: ^1.17.10
+
+# block end

@@ -1335,6 +1335,8 @@ FILE: ../../../flutter/shell/platform/fuchsia/dart-pkg/zircon/lib/src/handle_dis
 FILE: ../../../flutter/shell/platform/fuchsia/dart-pkg/zircon/lib/src/handle_waiter.dart
 FILE: ../../../flutter/shell/platform/fuchsia/dart-pkg/zircon/lib/src/init.dart
 FILE: ../../../flutter/shell/platform/fuchsia/dart-pkg/zircon/lib/src/system.dart
+FILE: ../../../flutter/shell/platform/fuchsia/dart-pkg/zircon/lib/src/zd_channel.dart
+FILE: ../../../flutter/shell/platform/fuchsia/dart-pkg/zircon/lib/src/zd_handle.dart
 FILE: ../../../flutter/shell/platform/fuchsia/dart-pkg/zircon/lib/zircon.dart
 FILE: ../../../flutter/shell/platform/fuchsia/dart-pkg/zircon/sdk_ext/handle.cc
 FILE: ../../../flutter/shell/platform/fuchsia/dart-pkg/zircon/sdk_ext/handle.h
@@ -1346,9 +1348,18 @@ FILE: ../../../flutter/shell/platform/fuchsia/dart-pkg/zircon/sdk_ext/natives.cc
 FILE: ../../../flutter/shell/platform/fuchsia/dart-pkg/zircon/sdk_ext/natives.h
 FILE: ../../../flutter/shell/platform/fuchsia/dart-pkg/zircon/sdk_ext/system.cc
 FILE: ../../../flutter/shell/platform/fuchsia/dart-pkg/zircon/sdk_ext/system.h
+FILE: ../../../flutter/shell/platform/fuchsia/dart-pkg/zircon_ffi/basic_types.cc
+FILE: ../../../flutter/shell/platform/fuchsia/dart-pkg/zircon_ffi/basic_types.h
+FILE: ../../../flutter/shell/platform/fuchsia/dart-pkg/zircon_ffi/channel.cc
+FILE: ../../../flutter/shell/platform/fuchsia/dart-pkg/zircon_ffi/channel.h
 FILE: ../../../flutter/shell/platform/fuchsia/dart-pkg/zircon_ffi/clock.cc
 FILE: ../../../flutter/shell/platform/fuchsia/dart-pkg/zircon_ffi/clock.h
+FILE: ../../../flutter/shell/platform/fuchsia/dart-pkg/zircon_ffi/dart_dl.cc
+FILE: ../../../flutter/shell/platform/fuchsia/dart-pkg/zircon_ffi/dart_dl.h
+FILE: ../../../flutter/shell/platform/fuchsia/dart-pkg/zircon_ffi/handle.cc
+FILE: ../../../flutter/shell/platform/fuchsia/dart-pkg/zircon_ffi/handle.h
 FILE: ../../../flutter/shell/platform/fuchsia/dart-pkg/zircon_ffi/lib/zircon_ffi.dart
+FILE: ../../../flutter/shell/platform/fuchsia/dart-pkg/zircon_ffi/macros.h
 FILE: ../../../flutter/shell/platform/fuchsia/dart/compiler.dart
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/builtin_libraries.cc
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/builtin_libraries.h

@@ -23,6 +23,14 @@ void main() {
     expect(pair.second.isValid, isTrue);
   });
 
+  test('[ffi] create channel', () {
+    final ZDChannel? channel = ZDChannel.create();
+    expect(channel, isNotNull);
+    final ZDHandlePair pair = channel!.handlePair;
+    expect(pair.left.isValid(), isTrue);
+    expect(pair.right.isValid(), isTrue);
+  });
+
   test('close channel', () {
     final HandlePairResult pair = System.channelCreate();
     expect(pair.first.close(), equals(0));
@@ -31,6 +39,18 @@ void main() {
     expect(System.channelWrite(pair.first, ByteData(1), <Handle>[]),
         equals(ZX.ERR_BAD_HANDLE));
     expect(System.channelWrite(pair.second, ByteData(1), <Handle>[]),
+        equals(ZX.ERR_PEER_CLOSED));
+  });
+
+  test('[ffi] close channel', () {
+    final ZDChannel? channel = ZDChannel.create();
+    final ZDHandlePair pair = channel!.handlePair;
+    expect(pair.left.close(), isTrue);
+    expect(pair.left.isValid, isFalse);
+    expect(pair.right.isValid, isTrue);
+    expect(channel.writeLeft(ByteData(1), <ZDHandle>[]),
+        equals(ZX.ERR_BAD_HANDLE));
+    expect(channel.writeRight(ByteData(1), <ZDHandle>[]),
         equals(ZX.ERR_PEER_CLOSED));
   });
 
