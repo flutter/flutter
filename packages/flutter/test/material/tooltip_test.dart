@@ -2261,7 +2261,7 @@ void main() {
       await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
       final RenderParagraph tooltipRenderParagraph = tester.renderObject<RenderParagraph>(find.text(tooltipText));
- 
+
       // Why 14.0 and not 10.0? because it is default size for the Text Widget,
       // Tooltip.custom does not apply default tooltip style to its decendant
       // Text Widget
