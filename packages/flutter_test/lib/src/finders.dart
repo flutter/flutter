@@ -26,9 +26,9 @@ class CommonFinders {
   /// Finds [Text], [EditableText], and optionally [RichText] widgets
   /// containing string equal to the `text` argument.
   ///
-  /// If `findRichText` is disabled, all standalone [RichText] widgets are
+  /// If `findRichText` is false, all standalone [RichText] widgets are
   /// ignored and `text` is matched with [Text.data] or [Text.textSpan].
-  /// If `findRichText` is enabled, [RichText] widgets (and therefore also
+  /// If `findRichText` is true, [RichText] widgets (and therefore also
   /// [Text] and [Text.rich] widgets) are matched by comparing the
   /// [InlineSpan.toPlainText] with the given `text`.
   ///
