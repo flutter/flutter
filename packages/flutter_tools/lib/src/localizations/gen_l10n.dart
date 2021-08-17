@@ -1184,10 +1184,15 @@ class LocalizationsGenerator {
     );
 
     final List<LocaleInfo> allLocales = _allBundles.locales.toList()..sort();
-    final String fileName = outputFileName.split('.')[0];
+    final List<String> fileParts = outputFileName.split('.');
+    if (fileParts.last != 'dart') {
+      fileParts.add('dart');
+    }
+    final String fileName = fileParts.first;
+    final String fileExtension = fileParts.skip(1).join('.');
     for (final LocaleInfo locale in allLocales) {
       if (isBaseClassLocale(locale, locale.languageCode)) {
-        final File languageMessageFile = outputDirectory.childFile('${fileName}_$locale.dart');
+        final File languageMessageFile = outputDirectory.childFile('${fileName}_$locale.$fileExtension');
 
         // Generate the template for the base class file. Further string
         // interpolation will be done to determine if there are
@@ -1224,9 +1229,9 @@ class LocalizationsGenerator {
       .map((LocaleInfo locale) {
         final String library = '${fileName}_${locale.toString()}';
         if (useDeferredLoading) {
-          return "import '$library.dart' deferred as $library;";
+          return "import '$library.$fileExtension' deferred as $library;";
         } else {
-          return "import '$library.dart';";
+          return "import '$library.$fileExtension';";
         }
       })
       .toList()

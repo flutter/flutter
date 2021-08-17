@@ -1324,6 +1324,38 @@ import 'output-localization-file_zh.dart';
 '''));
     });
 
+    testWithoutContext('full output file suffix is retained', () {
+      fs.currentDirectory.childDirectory('lib').childDirectory('l10n')..createSync(recursive: true)
+        ..childFile(defaultTemplateArbFileName).writeAsStringSync(singleMessageArbFileString);
+
+      LocalizationsGenerator(
+        fileSystem: fs,
+        inputPathString: defaultL10nPathString,
+        outputPathString: defaultL10nPathString,
+        templateArbFileName: defaultTemplateArbFileName,
+        outputFileString: 'output-localization-file.g.dart',
+        classNameString: defaultClassNameString,
+      )
+        ..loadResources()
+        ..writeOutputFiles(BufferLogger.test());
+
+      final String baseLocalizationsFile = fs.file(
+        fs.path.join(syntheticL10nPackagePath, 'output-localization-file.g.dart'),
+      ).readAsStringSync();
+      expect(baseLocalizationsFile, contains(
+'''
+import 'output-localization-file_en.g.dart';
+'''));
+
+      final String englishLocalizationsFile = fs.file(
+        fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.g.dart'),
+      ).readAsStringSync();
+      expect(englishLocalizationsFile, contains(
+'''
+import 'output-localization-file.g.dart';
+'''));
+    });
+
     testWithoutContext('imports are deferred and loaded when useDeferredImports are set', () {
       fs.currentDirectory.childDirectory('lib').childDirectory('l10n')..createSync(recursive: true)
         ..childFile(defaultTemplateArbFileName).writeAsStringSync(singleMessageArbFileString);
