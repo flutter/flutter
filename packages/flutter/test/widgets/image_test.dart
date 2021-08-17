@@ -1819,7 +1819,7 @@ void main() {
       const ImageSizeInfo(
         source: 'test.png',
         imageSize: Size(100, 100),
-        displaySize: Size(50, 50),
+        displaySize: Size(150, 150),
       ),
     );
 
