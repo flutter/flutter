@@ -1,4 +1,4 @@
-Signature: fac378e302ae7778b7fb2dbc8afaef61
+Signature: ca24aa044cd1092fd7fdc3154b86149e
 
 UNUSED LICENSES:
 
@@ -9787,9 +9787,6 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/stub_code_compiler_arm.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/stub_code_compiler_arm64.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/stub_code_compiler_ia32.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/stub_code_compiler_x64.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/type_testing_stubs_arm.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/type_testing_stubs_arm64.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/type_testing_stubs_x64.cc
 FILE: ../../../third_party/dart/runtime/vm/constants_arm.cc
 FILE: ../../../third_party/dart/runtime/vm/constants_arm64.cc
 FILE: ../../../third_party/dart/runtime/vm/constants_ia32.cc
@@ -9944,6 +9941,7 @@ FILE: ../../../third_party/dart/runtime/vm/object_graph_copy.cc
 FILE: ../../../third_party/dart/runtime/vm/object_graph_copy.h
 FILE: ../../../third_party/dart/runtime/vm/pending_deopts.cc
 FILE: ../../../third_party/dart/runtime/vm/pending_deopts.h
+FILE: ../../../third_party/dart/runtime/vm/thread_interrupter_android_arm.S
 FILE: ../../../third_party/dart/runtime/vm/virtual_memory_compressed.cc
 FILE: ../../../third_party/dart/runtime/vm/virtual_memory_compressed.h
 FILE: ../../../third_party/dart/samples/ffi/resource_management/utf8_helpers.dart
