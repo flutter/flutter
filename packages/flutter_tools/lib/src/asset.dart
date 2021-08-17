@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 
@@ -48,12 +46,12 @@ const List<Map<String, Object>> kMaterialFonts = <Map<String, Object>>[
 /// Injected factory class for spawning [AssetBundle] instances.
 abstract class AssetBundleFactory {
   /// The singleton instance, pulled from the [AppContext].
-  static AssetBundleFactory get instance => context.get<AssetBundleFactory>();
+  static AssetBundleFactory get instance => context.get<AssetBundleFactory>()!;
 
   static AssetBundleFactory defaultInstance({
-    @required Logger logger,
-    @required FileSystem fileSystem,
-    @required Platform platform,
+    required Logger logger,
+    required FileSystem fileSystem,
+    required Platform platform,
     bool splitDeferredAssets = false,
   }) => _ManifestAssetBundleFactory(logger: logger, fileSystem: fileSystem, platform: platform, splitDeferredAssets: splitDeferredAssets);
 
@@ -82,18 +80,18 @@ abstract class AssetBundle {
   /// Returns 0 for success; non-zero for failure.
   Future<int> build({
     String manifestPath = defaultManifestPath,
-    String assetDirPath,
-    @required String packagesPath,
+    String? assetDirPath,
+    required String packagesPath,
     bool deferredComponentsEnabled = false,
-    TargetPlatform targetPlatform,
+    TargetPlatform? targetPlatform,
   });
 }
 
 class _ManifestAssetBundleFactory implements AssetBundleFactory {
   _ManifestAssetBundleFactory({
-    @required Logger logger,
-    @required FileSystem fileSystem,
-    @required Platform platform,
+    required Logger logger,
+    required FileSystem fileSystem,
+    required Platform platform,
     bool splitDeferredAssets = false,
   }) : _logger = logger,
        _fileSystem = fileSystem,
@@ -114,9 +112,9 @@ class ManifestAssetBundle implements AssetBundle {
   /// Constructs an [ManifestAssetBundle] that gathers the set of assets from the
   /// pubspec.yaml manifest.
   ManifestAssetBundle({
-    @required Logger logger,
-    @required FileSystem fileSystem,
-    @required Platform platform,
+    required Logger logger,
+    required FileSystem fileSystem,
+    required Platform platform,
     bool splitDeferredAssets = false,
   }) : _logger = logger,
        _fileSystem = fileSystem,
@@ -144,7 +142,7 @@ class ManifestAssetBundle implements AssetBundle {
   // the current project.
   final Map<Uri, Directory> _wildcardDirectories = <Uri, Directory>{};
 
-  DateTime _lastBuildTimestamp;
+  DateTime? _lastBuildTimestamp;
 
   static const String _kAssetManifestJson = 'AssetManifest.json';
   static const String _kNoticeFile = 'NOTICES';
@@ -179,22 +177,22 @@ class ManifestAssetBundle implements AssetBundle {
         if (dateTime == null) {
           continue;
         }
-        if (dateTime.isAfter(_lastBuildTimestamp)) {
+        if (dateTime.isAfter(_lastBuildTimestamp!)) {
           return true;
         }
       }
     }
 
-    return stat.modified.isAfter(_lastBuildTimestamp);
+    return stat.modified.isAfter(_lastBuildTimestamp!);
   }
 
   @override
   Future<int> build({
     String manifestPath = defaultManifestPath,
-    String assetDirPath,
-    @required String packagesPath,
+    String? assetDirPath,
+    required String packagesPath,
     bool deferredComponentsEnabled = false,
-    TargetPlatform targetPlatform,
+    TargetPlatform? targetPlatform,
   }) async {
     assetDirPath ??= getAssetBuildDirectory();
     FlutterProject flutterProject;
@@ -268,7 +266,7 @@ class ManifestAssetBundle implements AssetBundle {
       // Include the assets in the regular set of assets if not using deferred
       // components.
       for (final String componentName in deferredComponentsAssetVariants.keys) {
-        assetVariants.addAll(deferredComponentsAssetVariants[componentName]);
+        assetVariants.addAll(deferredComponentsAssetVariants[componentName]!);
       }
       deferredComponentsAssetVariants.clear();
       deferredComponentsEntries.clear();
@@ -288,7 +286,7 @@ class ManifestAssetBundle implements AssetBundle {
       if (packageUri != null && packageUri.scheme == 'file') {
         final String packageManifestPath = _fileSystem.path.fromUri(packageUri.resolve('../pubspec.yaml'));
         inputFiles.add(_fileSystem.file(packageManifestPath));
-        final FlutterManifest packageFlutterManifest = FlutterManifest.createFromPath(
+        final FlutterManifest? packageFlutterManifest = FlutterManifest.createFromPath(
           packageManifestPath,
           logger: _logger,
           fileSystem: _fileSystem,
@@ -345,7 +343,7 @@ class ManifestAssetBundle implements AssetBundle {
     // asset in entries.
     for (final _Asset asset in assetVariants.keys) {
       final File assetFile = asset.lookupAssetFile(_fileSystem);
-      if (!assetFile.existsSync() && assetVariants[asset].isEmpty) {
+      if (!assetFile.existsSync() && assetVariants[asset]!.isEmpty) {
         _logger.printStatus('Error detected in pubspec.yaml:', emphasis: true);
         _logger.printError('No file or variants found for $asset.\n');
         if (asset.package != null) {
@@ -360,10 +358,10 @@ class ManifestAssetBundle implements AssetBundle {
       // "1x" resolution variant and if both exist then the explicit 1x
       // variant is preferred.
       if (assetFile.existsSync()) {
-        assert(!assetVariants[asset].contains(asset));
-        assetVariants[asset].insert(0, asset);
+        assert(!assetVariants[asset]!.contains(asset));
+        assetVariants[asset]!.insert(0, asset);
       }
-      for (final _Asset variant in assetVariants[asset]) {
+      for (final _Asset variant in assetVariants[asset]!) {
         final File variantFile = variant.lookupAssetFile(_fileSystem);
         inputFiles.add(variantFile);
         assert(variantFile.existsSync());
@@ -375,9 +373,9 @@ class ManifestAssetBundle implements AssetBundle {
     if (deferredComponentsAssetVariants != null) {
       for (final String componentName in deferredComponentsAssetVariants.keys) {
         deferredComponentsEntries[componentName] = <String, DevFSContent>{};
-        for (final _Asset asset in deferredComponentsAssetVariants[componentName].keys) {
+        for (final _Asset asset in deferredComponentsAssetVariants[componentName]!.keys) {
           final File assetFile = asset.lookupAssetFile(_fileSystem);
-          if (!assetFile.existsSync() && deferredComponentsAssetVariants[componentName][asset].isEmpty) {
+          if (!assetFile.existsSync() && deferredComponentsAssetVariants[componentName]![asset]!.isEmpty) {
             _logger.printStatus('Error detected in pubspec.yaml:', emphasis: true);
             _logger.printError('No file or variants found for $asset.\n');
             if (asset.package != null) {
@@ -392,13 +390,13 @@ class ManifestAssetBundle implements AssetBundle {
           // "1x" resolution variant and if both exist then the explicit 1x
           // variant is preferred.
           if (assetFile.existsSync()) {
-            assert(!deferredComponentsAssetVariants[componentName][asset].contains(asset));
-            deferredComponentsAssetVariants[componentName][asset].insert(0, asset);
+            assert(!deferredComponentsAssetVariants[componentName]![asset]!.contains(asset));
+            deferredComponentsAssetVariants[componentName]![asset]!.insert(0, asset);
           }
-          for (final _Asset variant in deferredComponentsAssetVariants[componentName][asset]) {
+          for (final _Asset variant in deferredComponentsAssetVariants[componentName]![asset]!) {
             final File variantFile = variant.lookupAssetFile(_fileSystem);
             assert(variantFile.existsSync());
-            deferredComponentsEntries[componentName][variant.entryUri.path] ??= DevFSFileContent(variantFile);
+            deferredComponentsEntries[componentName]![variant.entryUri.path] ??= DevFSFileContent(variantFile);
           }
         }
       }

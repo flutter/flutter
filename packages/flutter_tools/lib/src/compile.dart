@@ -467,7 +467,7 @@ abstract class ResidentCompiler {
     List<Uri>? invalidatedFiles, {
     required String outputPath,
     required PackageConfig packageConfig,
-    required String projectRootPath,
+    String? projectRootPath,
     required FileSystem fs,
     bool suppressErrors = false,
   });

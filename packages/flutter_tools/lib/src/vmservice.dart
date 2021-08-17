@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:meta/meta.dart' show required, visibleForTesting;
+import 'package:meta/meta.dart' show visibleForTesting;
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'base/common.dart';
@@ -496,7 +496,7 @@ class FlutterVmService {
   ///
   /// This method is currently used only for benchmarking.
   Future<void> flushUIThreadTasks({
-    @required String uiIsolateId,
+    required String uiIsolateId,
   }) async {
     await callMethodWrapper(
       kFlushUIThreadTasksMethod,
@@ -512,9 +512,9 @@ class FlutterVmService {
   /// This method is used by the tool to hot restart an already running Flutter
   /// engine.
   Future<void> runInView({
-    @required String viewId,
-    @required Uri main,
-    @required Uri assetsDirectory,
+    required String viewId,
+    required Uri main,
+    required Uri assetsDirectory,
   }) async {
     try {
       await service.streamListen(vm_service.EventStreams.kIsolate);
@@ -536,60 +536,75 @@ class FlutterVmService {
   }
 
   Future<String> flutterDebugDumpApp({
-    @required String isolateId,
+    required String isolateId,
   }) async {
-    final Map<String, Object> response = await invokeFlutterExtensionRpcRaw(
+    final Map<String, dynamic>? response = await invokeFlutterExtensionRpcRaw(
       'ext.flutter.debugDumpApp',
       isolateId: isolateId,
     );
-    return response != null ? response['data']?.toString() : '';
+    if (response != null) {
+      return response['data']?.toString() ?? '';
+    }
+    return '';
   }
 
   Future<String> flutterDebugDumpRenderTree({
-    @required String isolateId,
+    required String isolateId,
   }) async {
-    final Map<String, Object> response = await invokeFlutterExtensionRpcRaw(
+    final Map<String, dynamic>? response = await invokeFlutterExtensionRpcRaw(
       'ext.flutter.debugDumpRenderTree',
       isolateId: isolateId,
       args: <String, Object>{}
     );
-    return response != null ? response['data']?.toString() : '';
+    if (response != null) {
+      return response['data']?.toString() ?? '';
+    }
+    return '';
   }
 
   Future<String> flutterDebugDumpLayerTree({
-    @required String isolateId,
+    required String isolateId,
   }) async {
-    final Map<String, Object> response = await invokeFlutterExtensionRpcRaw(
+    final Map<String, dynamic>? response = await invokeFlutterExtensionRpcRaw(
       'ext.flutter.debugDumpLayerTree',
       isolateId: isolateId,
     );
-    return response != null ? response['data']?.toString() : '';
+    if (response != null) {
+      return response['data']?.toString() ?? '';
+    }
+    return '';
   }
 
   Future<String> flutterDebugDumpSemanticsTreeInTraversalOrder({
-    @required String isolateId,
+    required String isolateId,
   }) async {
-    final Map<String, Object> response = await invokeFlutterExtensionRpcRaw(
+    final Map<String, dynamic>? response = await invokeFlutterExtensionRpcRaw(
       'ext.flutter.debugDumpSemanticsTreeInTraversalOrder',
       isolateId: isolateId,
     );
-    return response != null ? response['data']?.toString() : '';
+    if (response != null) {
+      return response['data']?.toString() ?? '';
+    }
+    return '';
   }
 
   Future<String> flutterDebugDumpSemanticsTreeInInverseHitTestOrder({
-    @required String isolateId,
+    required String isolateId,
   }) async {
-    final Map<String, Object> response = await invokeFlutterExtensionRpcRaw(
+    final Map<String, dynamic>? response = await invokeFlutterExtensionRpcRaw(
       'ext.flutter.debugDumpSemanticsTreeInInverseHitTestOrder',
       isolateId: isolateId,
     );
-    return response != null ? response['data']?.toString() : '';
+    if (response != null) {
+      return response['data']?.toString() ?? '';
+    }
+    return '';
   }
 
-  Future<Map<String, dynamic>> _flutterToggle(String name, {
-    @required String isolateId,
+  Future<Map<String, dynamic>?> _flutterToggle(String name, {
+    required String isolateId,
   }) async {
-    Map<String, dynamic> state = await invokeFlutterExtensionRpcRaw(
+    Map<String, dynamic>? state = await invokeFlutterExtensionRpcRaw(
       'ext.flutter.$name',
       isolateId: isolateId,
     );
@@ -606,28 +621,28 @@ class FlutterVmService {
     return state;
   }
 
-  Future<Map<String, dynamic>> flutterToggleDebugPaintSizeEnabled({
-    @required String isolateId,
+  Future<Map<String, dynamic>?> flutterToggleDebugPaintSizeEnabled({
+    required String isolateId,
   }) => _flutterToggle('debugPaint', isolateId: isolateId);
 
-  Future<Map<String, dynamic>> flutterTogglePerformanceOverlayOverride({
-    @required String isolateId,
+  Future<Map<String, dynamic>?> flutterTogglePerformanceOverlayOverride({
+    required String isolateId,
   }) => _flutterToggle('showPerformanceOverlay', isolateId: isolateId);
 
-  Future<Map<String, dynamic>> flutterToggleWidgetInspector({
-    @required String isolateId,
+  Future<Map<String, dynamic>?> flutterToggleWidgetInspector({
+    required String isolateId,
   }) => _flutterToggle('inspector.show', isolateId: isolateId);
 
-  Future<Map<String,dynamic>> flutterToggleInvertOversizedImages({
-    @required String isolateId,
+  Future<Map<String,dynamic>?> flutterToggleInvertOversizedImages({
+    required String isolateId,
   }) => _flutterToggle('invertOversizedImages', isolateId: isolateId);
 
-  Future<Map<String, dynamic>> flutterToggleProfileWidgetBuilds({
-    @required String isolateId,
+  Future<Map<String, dynamic>?> flutterToggleProfileWidgetBuilds({
+    required String isolateId,
   }) => _flutterToggle('profileWidgetBuilds', isolateId: isolateId);
 
-  Future<Map<String, dynamic>> flutterDebugAllowBanner(bool show, {
-    @required String isolateId,
+  Future<Map<String, dynamic>?> flutterDebugAllowBanner(bool show, {
+    required String isolateId,
   }) {
     return invokeFlutterExtensionRpcRaw(
       'ext.flutter.debugAllowBanner',
@@ -636,8 +651,8 @@ class FlutterVmService {
     );
   }
 
-  Future<Map<String, dynamic>> flutterReassemble({
-    @required String isolateId,
+  Future<Map<String, dynamic>?> flutterReassemble({
+    required String isolateId,
   }) {
     return invokeFlutterExtensionRpcRaw(
       'ext.flutter.reassemble',
@@ -645,9 +660,9 @@ class FlutterVmService {
     );
   }
 
-  Future<Map<String, dynamic>> flutterFastReassemble({
-   @required String isolateId,
-   @required String className,
+  Future<Map<String, dynamic>?> flutterFastReassemble({
+   required String isolateId,
+   required String className,
   }) {
     return invokeFlutterExtensionRpcRaw(
       'ext.flutter.fastReassemble',
@@ -659,9 +674,9 @@ class FlutterVmService {
   }
 
   Future<bool> flutterAlreadyPaintedFirstUsefulFrame({
-    @required String isolateId,
+    required String isolateId,
   }) async {
-    final Map<String, dynamic> result = await invokeFlutterExtensionRpcRaw(
+    final Map<String, dynamic>? result = await invokeFlutterExtensionRpcRaw(
       'ext.flutter.didSendFirstFrameRasterizedEvent',
       isolateId: isolateId,
     );
@@ -669,8 +684,8 @@ class FlutterVmService {
     return result != null && result['enabled'] == 'true';
   }
 
-  Future<Map<String, dynamic>> uiWindowScheduleFrame({
-    @required String isolateId,
+  Future<Map<String, dynamic>?> uiWindowScheduleFrame({
+    required String isolateId,
   }) {
     return invokeFlutterExtensionRpcRaw(
       'ext.ui.window.scheduleFrame',
@@ -678,8 +693,8 @@ class FlutterVmService {
     );
   }
 
-  Future<Map<String, dynamic>> flutterEvictAsset(String assetPath, {
-   @required String isolateId,
+  Future<Map<String, dynamic>?> flutterEvictAsset(String assetPath, {
+   required String isolateId,
   }) {
     return invokeFlutterExtensionRpcRaw(
       'ext.flutter.evict',
@@ -695,10 +710,10 @@ class FlutterVmService {
   /// This method is only supported by certain embedders. This is
   /// described by [Device.supportsFlutterExit].
   Future<bool> flutterExit({
-    @required String isolateId,
+    required String isolateId,
   }) async {
     try {
-      final Map<String, Object> result = await invokeFlutterExtensionRpcRaw(
+      final Map<String, dynamic>? result = await invokeFlutterExtensionRpcRaw(
         'ext.flutter.exit',
         isolateId: isolateId,
       );
@@ -722,10 +737,10 @@ class FlutterVmService {
   /// If a non-null value is provided for [platform], the platform override
   /// is updated with this value.
   Future<String> flutterPlatformOverride({
-    String platform,
-    @required String isolateId,
+    String? platform,
+    required String isolateId,
   }) async {
-    final Map<String, dynamic> result = await invokeFlutterExtensionRpcRaw(
+    final Map<String, dynamic>? result = await invokeFlutterExtensionRpcRaw(
       'ext.flutter.platformOverride',
       isolateId: isolateId,
       args: platform != null
@@ -743,11 +758,11 @@ class FlutterVmService {
   ///
   /// If a non-null value is provided for [brightness], the brightness override
   /// is updated with this value.
-  Future<Brightness> flutterBrightnessOverride({
-    Brightness brightness,
-    @required String isolateId,
+  Future<Brightness?> flutterBrightnessOverride({
+    Brightness? brightness,
+    required String isolateId,
   }) async {
-    final Map<String, dynamic> result = await invokeFlutterExtensionRpcRaw(
+    final Map<String, dynamic>? result = await invokeFlutterExtensionRpcRaw(
       'ext.flutter.brightnessOverride',
       isolateId: isolateId,
       args: brightness != null
@@ -762,9 +777,9 @@ class FlutterVmService {
     return null;
   }
 
-  Future<vm_service.Response> _checkedCallServiceExtension(
+  Future<vm_service.Response?> _checkedCallServiceExtension(
     String method, {
-    Map<String, dynamic> args,
+    Map<String, dynamic>? args,
   }) async {
     try {
       return await service.callServiceExtension(method, args: args);
@@ -781,14 +796,14 @@ class FlutterVmService {
 
   /// Invoke a flutter extension method, if the flutter extension is not
   /// available, returns null.
-  Future<Map<String, dynamic>> invokeFlutterExtensionRpcRaw(
+  Future<Map<String, dynamic>?> invokeFlutterExtensionRpcRaw(
     String method, {
-    @required String isolateId,
-    Map<String, dynamic> args,
+    required String isolateId,
+    Map<String, dynamic>? args,
   }) async {
-    final vm_service.Response response = await _checkedCallServiceExtension(
+    final vm_service.Response? response = await _checkedCallServiceExtension(
       method,
-      args: <String, Object>{
+      args: <String, dynamic>{
         'isolateId': isolateId,
         ...?args,
       },
@@ -807,7 +822,7 @@ class FlutterVmService {
     Duration delay = const Duration(milliseconds: 50),
   }) async {
     while (true) {
-      final vm_service.Response response = await callMethodWrapper(
+      final vm_service.Response? response = await callMethodWrapper(
         kListViewsMethod,
       );
       if (response == null) {
@@ -816,7 +831,7 @@ class FlutterVmService {
         // with cleaning up.
         return <FlutterView>[];
       }
-      final List<Object> rawViews = response.json['views'] as List<Object>;
+      final List<Object> rawViews = response.json!['views'] as List<Object>;
       final List<FlutterView> views = <FlutterView>[
         for (final Object rawView in rawViews)
           FlutterView.parse(rawView as Map<String, Object>)
@@ -846,7 +861,7 @@ class FlutterVmService {
     }
 
     final Completer<vm_service.IsolateRef> extensionAdded = Completer<vm_service.IsolateRef>();
-    StreamSubscription<vm_service.Event> isolateEvents;
+    late final StreamSubscription<vm_service.Event> isolateEvents;
     isolateEvents = service.onIsolateEvent.listen((vm_service.Event event) {
       if (event.kind == vm_service.EventKind.kServiceExtensionAdded
           && event.extensionRPC == extensionName) {
@@ -858,8 +873,8 @@ class FlutterVmService {
     try {
       final List<vm_service.IsolateRef> refs = await _getIsolateRefs();
       for (final vm_service.IsolateRef ref in refs) {
-        final vm_service.Isolate isolate = await getIsolateOrNull(ref.id);
-        if (isolate != null && isolate.extensionRPCs.contains(extensionName)) {
+        final vm_service.Isolate? isolate = await getIsolateOrNull(ref.id!);
+        if (isolate != null && isolate.extensionRPCs!.contains(extensionName)) {
           return ref;
         }
       }
@@ -882,8 +897,9 @@ class FlutterVmService {
 
     final List<vm_service.IsolateRef> refs = <vm_service.IsolateRef>[];
     for (final FlutterView flutterView in flutterViews) {
-      if (flutterView.uiIsolate != null) {
-        refs.add(flutterView.uiIsolate);
+      final vm_service.IsolateRef? uiIsolate = flutterView.uiIsolate;
+      if (uiIsolate != null) {
+        refs.add(uiIsolate);
       }
     }
     return refs;
@@ -891,8 +907,10 @@ class FlutterVmService {
 
   /// Attempt to retrieve the isolate with id [isolateId], or `null` if it has
   /// been collected.
-  Future<vm_service.Isolate> getIsolateOrNull(String isolateId) {
+  Future<vm_service.Isolate?> getIsolateOrNull(String isolateId) async {
     return service.getIsolate(isolateId)
+      // The .then() call is required to cast from Future<Isolate> to Future<Isolate?>
+      .then<vm_service.Isolate?>((vm_service.Isolate isolate) => isolate)
       .catchError((dynamic error, StackTrace stackTrace) {
         return null;
       }, test: (dynamic error) {
@@ -919,11 +937,11 @@ class FlutterVmService {
     );
   }
 
-  Future<vm_service.Response> screenshot() {
+  Future<vm_service.Response?> screenshot() {
     return _checkedCallServiceExtension(kScreenshotMethod);
   }
 
-  Future<vm_service.Response> screenshotSkp() {
+  Future<vm_service.Response?> screenshotSkp() {
     return _checkedCallServiceExtension(kScreenshotSkpMethod);
   }
 
@@ -938,7 +956,7 @@ class FlutterVmService {
     );
   }
 
-  Future<vm_service.Response> getTimeline() {
+  Future<vm_service.Response?> getTimeline() {
     return _checkedCallServiceExtension('getVMTimeline');
   }
 
@@ -980,7 +998,7 @@ enum Brightness {
 
 /// Process a VM service log event into a string message.
 String processVmServiceMessage(vm_service.Event event) {
-  final String message = utf8.decode(base64.decode(event.bytes));
+  final String message = utf8.decode(base64.decode(event.bytes!));
   // Remove extra trailing newlines appended by the vm service.
   if (message.endsWith('\n')) {
     return message.substring(0, message.length - 1);
