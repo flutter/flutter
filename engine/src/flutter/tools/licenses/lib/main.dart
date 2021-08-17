@@ -1497,6 +1497,16 @@ class _RepositoryIcuDirectory extends _RepositoryDirectory {
   }
 }
 
+class _RepositoryBundletoolDirectory extends _RepositoryDirectory {
+  _RepositoryBundletoolDirectory(_RepositoryDirectory parent, fs.Directory io) : super(parent, io);
+
+  @override
+  bool shouldRecurse(fs.IoNode entry) {
+    return entry.name != 'bundletool.jar' // redundant with LICENSE file
+        && super.shouldRecurse(entry);
+  }
+}
+
 class _RepositoryHarfbuzzDirectory extends _RepositoryDirectory {
   _RepositoryHarfbuzzDirectory(_RepositoryDirectory parent, fs.Directory io) : super(parent, io);
 
@@ -1858,6 +1868,8 @@ class _RepositoryRootThirdPartyDirectory extends _RepositoryGenericThirdPartyDir
       return _RepositoryHarfbuzzDirectory(this, entry);
     if (entry.name == 'icu')
       return _RepositoryIcuDirectory(this, entry);
+    if (entry.name == 'bundletool')
+      return _RepositoryBundletoolDirectory(this, entry);
     if (entry.name == 'jsr-305')
       return _RepositoryJSR305Directory(this, entry);
     if (entry.name == 'libcxx')

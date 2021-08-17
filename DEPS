@@ -1,21 +1,7 @@
-# This file is automatically processed to create .DEPS.git which is the file
-# that gclient uses under git.
+# This file contains the dependencies used by the Engine repo.
 #
-# See http://code.google.com/p/chromium/wiki/UsingGit
-#
-# To test manually, run:
-#   python tools/deps2git/deps2git.py -o .DEPS.git -w <gclientdir>
-# where <gcliendir> is the absolute path to the directory containing the
-# .gclient file (the parent of 'src').
-#
-# Then commit .DEPS.git locally (gclient doesn't like dirty trees) and run
-#   gclient sync..
-# Verify the thing happened you wanted. Then revert your .DEPS.git change
-# DO NOT CHECK IN CHANGES TO .DEPS.git upstream. It will be automatically
-# updated by a bot when you modify this one.
-#
-# When adding a new dependency, please update the top-level .gitignore file
-# to list the dependency's destination directory.
+# Use the `gclient sync` command to download and sync local checkouts
+# with the versions listed in this file.
 
 vars = {
   'chromium_git': 'https://chromium.googlesource.com',
@@ -444,6 +430,16 @@ deps = {
 
   'src/third_party/pkg/when':
   Var('dart_git') + '/when.git' + '@' + '0.2.0',
+
+  'src/third_party/bundletool': {
+     'packages': [
+       {
+        'package': 'flutter/android/bundletool',
+        'version': 'version:1.7.1.1'
+       }
+     ],
+     'dep_type': 'cipd',
+   },
 
   'src/third_party/android_tools/ndk': {
      'packages': [
