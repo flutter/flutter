@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import integration_test
-import XCTest
+@import XCTest;
+@import integration_test;
 
-class RunnerSwiftTests: FLTIntegrationTestCase {
-}
+INTEGRATION_TEST_IOS_RUNNER(RunnerTests)
