@@ -182,6 +182,7 @@ void main() {
       );
       final XcodeValidator validator = XcodeValidator(xcode: xcode, userMessages: UserMessages());
       final ValidationResult result = await validator.validate();
+      expect(result.messages.length, 1);
       final ValidationMessage firstMessage = result.messages.first;
       expect(firstMessage.type, ValidationMessageType.information);
       expect(firstMessage.message, 'Xcode at /Library/Developer/CommandLineTools');
