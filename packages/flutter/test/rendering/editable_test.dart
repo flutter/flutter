@@ -16,6 +16,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:meta/meta.dart';
+
+// The test_api package is not for general use... it's literally for our use.
+// ignore: deprecated_member_use
+import 'package:test_api/test_api.dart' as test_package;
 
 import '../rendering/mock_canvas.dart';
 import '../rendering/recording_canvas.dart';
@@ -33,6 +38,38 @@ class FakeEditableTextState with TextSelectionDelegate {
 
   @override
   void bringIntoView(TextPosition position) { }
+}
+
+@isTest
+void testVariants(
+  String description,
+  AsyncValueGetter<void> callback, {
+  bool? skip,
+  test_package.Timeout? timeout,
+  TestVariant<Object?> variant = const DefaultTestVariant(),
+  dynamic tags,
+}) {
+  assert(variant != null);
+  assert(variant.values.isNotEmpty, 'There must be at least one value to test in the testing variant.');
+  for (final dynamic value in variant.values) {
+    final String variationDescription = variant.describeValue(value);
+    final String combinedDescription = variationDescription.isNotEmpty ? '$description ($variationDescription)' : description;
+    test(
+      combinedDescription,
+      () async {
+        Object? memento;
+        try {
+          memento = await variant.setUp(value);
+          await callback();
+        } finally {
+          await variant.tearDown(value, memento);
+        }
+      },
+      skip: skip, // [intended] just part of the API.
+      timeout: timeout,
+      tags: tags,
+    );
+  }
 }
 
 void main() {
@@ -327,11 +364,7 @@ void main() {
     pumpFrame(phase: EnginePhase.compositingBits);
 
     expect(editable, paintsExactlyCountTimes(#drawRRect, 0));
-
-    // TODO(yjbanov): ahem.ttf doesn't have Chinese glyphs, making this test
-    //                sensitive to browser/OS when running in web mode:
-    //                https://github.com/flutter/flutter/issues/83129
-  }, skip: kIsWeb);
+  });
 
   test('text is painted above selection', () {
     final TextSelectionDelegate delegate = FakeEditableTextState();
@@ -508,7 +541,7 @@ void main() {
     expect(currentSelection.isCollapsed, false);
     expect(currentSelection.baseOffset, 5);
     expect(currentSelection.extentOffset, 9);
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61026
+  });
 
   test('selects readonly renderEditable matches native behavior for android', () {
     // Regression test for https://github.com/flutter/flutter/issues/79166.
@@ -841,7 +874,7 @@ void main() {
 
     editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
     expect(editable.maxScrollExtent, equals(10));
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42772
+  });
 
   test('moveSelectionLeft/RightByLine stays on the current line', () async {
     const String text = 'one two three\n\nfour five six';
@@ -888,6 +921,7 @@ void main() {
     editable.moveSelectionRightByLine(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 13);
+    expect(currentSelection.affinity, TextAffinity.upstream);
     // RenderEditable relies on its parent that passes onSelectionChanged to set
     // the selection.
 
@@ -896,21 +930,25 @@ void main() {
     editable.moveSelectionRightByLine(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 13);
+    expect(currentSelection.affinity, TextAffinity.upstream);
 
     // Move back to the start of the line.
     editable.moveSelectionLeftByLine(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 0);
+    expect(currentSelection.affinity, TextAffinity.downstream);
 
     // Trying moveSelectionLeftByLine does nothing at the leftmost of the field.
     editable.moveSelectionLeftByLine(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 0);
+    expect(currentSelection.affinity, TextAffinity.downstream);
 
     // Move the selection to the empty line.
     editable.moveSelectionRightByLine(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 13);
+    expect(currentSelection.affinity, TextAffinity.upstream);
     editable.moveSelectionRight(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 14);
@@ -920,9 +958,11 @@ void main() {
     editable.moveSelectionLeftByLine(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 14);
+    expect(currentSelection.affinity, TextAffinity.downstream);
     editable.moveSelectionRightByLine(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 14);
+    expect(currentSelection.affinity, TextAffinity.downstream);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
   test('arrow keys and delete handle simple text correctly', () async {
@@ -1277,7 +1317,7 @@ void main() {
     editable.moveSelectionLeft(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 2);
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/58068
+  });
 
   test('arrow keys with selection text and shift', () async {
     const String text = '012345';
@@ -1341,9 +1381,9 @@ void main() {
     expect(currentSelection.isCollapsed, false);
     expect(currentSelection.baseOffset, 4);
     expect(currentSelection.extentOffset, 1);
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/58068
+  });
 
-  test('respects enableInteractiveSelection', () async {
+  testVariants('respects enableInteractiveSelection', () async {
     const String text = '012345';
     final TextSelectionDelegate delegate = FakeEditableTextState()
       ..textEditingValue = const TextEditingValue(text: text);
@@ -1403,7 +1443,7 @@ void main() {
 
     await simulateKeyUpEvent(wordModifier);
     await simulateKeyUpEvent(LogicalKeyboardKey.shift);
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/58068
+  }, skip: isBrowser, variant: KeySimulatorTransitModeVariant.all()); // https://github.com/flutter/flutter/issues/87681
 
   group('delete', () {
     test('when as a non-collapsed selection, it should delete a selection', () async {
@@ -1622,7 +1662,7 @@ void main() {
       expect(delegate.textEditingValue.text, 'tes');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 3);
-    }, skip: isBrowser);
+    });
 
     test('when using cjk characters', () async {
         const String text = '用多個塊測試';
@@ -1660,7 +1700,7 @@ void main() {
         expect(delegate.textEditingValue.text, '用多個測試');
         expect(delegate.textEditingValue.selection.isCollapsed, true);
         expect(delegate.textEditingValue.selection.baseOffset, 3);
-      }, skip: isBrowser);
+      });
 
     test('when using rtl', () async {
       const String text = 'برنامج أهلا بالعالم';
@@ -1698,7 +1738,7 @@ void main() {
       expect(delegate.textEditingValue.text, 'برنامج أهلا بالعال');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, text.length - 1);
-    }, skip: isBrowser);
+    });
   });
 
   group('deleteByWord', () {
@@ -1738,7 +1778,7 @@ void main() {
       expect(delegate.textEditingValue.text, 'test h multiple blocks');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 5);
-    }, skip: isBrowser);
+    });
 
     test('when includeWhiteSpace is true, it should treat a whiteSpace as a single word', () async {
       const String text = 'test with multiple blocks';
@@ -1776,7 +1816,7 @@ void main() {
       expect(delegate.textEditingValue.text, 'test withmultiple blocks');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 9);
-    }, skip: isBrowser);
+    });
 
     test('when cursor is after a word, it should delete the whole word', () async {
       const String text = 'test with multiple blocks';
@@ -1814,9 +1854,9 @@ void main() {
       expect(delegate.textEditingValue.text, 'test  multiple blocks');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 5);
-    }, skip: isBrowser);
+    });
 
-    test('when cursor is preceeded by white spaces, it should delete the spaces and the next word to the left', () async {
+    test('when cursor is preceded by white spaces, it should delete the spaces and the next word to the left', () async {
       const String text = 'test with   multiple blocks';
       const int offset = 12;
       final TextSelectionDelegate delegate = FakeEditableTextState()
@@ -1852,9 +1892,9 @@ void main() {
       expect(delegate.textEditingValue.text, 'test multiple blocks');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 5);
-    }, skip: isBrowser);
+    });
 
-    test('when cursor is preceeded by tabs spaces', () async {
+    test('when cursor is preceded by tabs spaces', () async {
       const String text = 'test with\t\t\tmultiple blocks';
       const int offset = 12;
       final TextSelectionDelegate delegate = FakeEditableTextState()
@@ -1890,9 +1930,9 @@ void main() {
       expect(delegate.textEditingValue.text, 'test multiple blocks');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 5);
-    }, skip: isBrowser);
+    });
 
-    test('when cursor is preceeded by break line, it should delete the breaking line and the word right before it', () async {
+    test('when cursor is preceded by break line, it should delete the breaking line and the word right before it', () async {
       const String text = 'test with\nmultiple blocks';
       const int offset = 10;
       final TextSelectionDelegate delegate = FakeEditableTextState()
@@ -1928,7 +1968,7 @@ void main() {
       expect(delegate.textEditingValue.text, 'test multiple blocks');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 5);
-    }, skip: isBrowser);
+    });
 
     test('when using cjk characters', () async {
         const String text = '用多個塊測試';
@@ -1966,7 +2006,7 @@ void main() {
         expect(delegate.textEditingValue.text, '用多個測試');
         expect(delegate.textEditingValue.selection.isCollapsed, true);
         expect(delegate.textEditingValue.selection.baseOffset, 3);
-      }, skip: isBrowser);
+      });
 
     test('when using rtl', () async {
       const String text = 'برنامج أهلا بالعالم';
@@ -2004,7 +2044,7 @@ void main() {
       expect(delegate.textEditingValue.text, 'برنامج أهلا ');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 12);
-    }, skip: isBrowser);
+    });
 
     test('when input has obscured text, it should delete everything before the selection', () async {
       const int offset = 21;
@@ -2043,7 +2083,7 @@ void main() {
       expect(delegate.textEditingValue.text, 'words');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 0);
-    }, skip: isBrowser);
+    });
   });
 
   group('deleteByLine', () {
@@ -2083,7 +2123,7 @@ void main() {
       expect(delegate.textEditingValue.text, '');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 0);
-    }, skip: isBrowser);
+    });
 
     test('when cursor is on the middle of a word, it should delete delete everything to the left', () async {
       const String text = 'test with multiple blocks';
@@ -2121,7 +2161,7 @@ void main() {
       expect(delegate.textEditingValue.text, 'h multiple blocks');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 0);
-    }, skip: isBrowser);
+    });
 
     test('when previous character is a breakline, it should preserve it', () async {
       const String text = 'test with\nmultiple blocks';
@@ -2159,7 +2199,7 @@ void main() {
       expect(delegate.textEditingValue.text, text);
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, offset);
-    }, skip: isBrowser);
+    });
 
     test('when text is multiline, it should delete until the first line break it finds', () async {
       const String text = 'test with\n\nMore stuff right here.\nmultiple blocks';
@@ -2197,7 +2237,7 @@ void main() {
       expect(delegate.textEditingValue.text, 'test with\n\nright here.\nmultiple blocks');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 11);
-    }, skip: isBrowser);
+    });
 
     test('when input has obscured text, it should delete everything before the selection', () async {
       const int offset = 21;
@@ -2236,7 +2276,7 @@ void main() {
       expect(delegate.textEditingValue.text, 'words');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 0);
-    }, skip: isBrowser);
+    });
   });
 
   group('deleteForward', () {
@@ -2312,7 +2352,7 @@ void main() {
       expect(delegate.textEditingValue.text, 'test withmultiple blocks');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 9);
-    }, skip: isBrowser);
+    });
 
     test('when at the end of a text, it should be a no-op', () async {
       final TextSelectionDelegate delegate = FakeEditableTextState()
@@ -2386,7 +2426,7 @@ void main() {
       expect(delegate.textEditingValue.text, 'est');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 0);
-    }, skip: isBrowser);
+    });
 
     test('when using cjk characters', () async {
         const String text = '用多個塊測試';
@@ -2424,7 +2464,7 @@ void main() {
         expect(delegate.textEditingValue.text, '多個塊測試');
         expect(delegate.textEditingValue.selection.isCollapsed, true);
         expect(delegate.textEditingValue.selection.baseOffset, 0);
-      }, skip: isBrowser);
+      });
 
     test('when using rtl', () async {
       const String text = 'برنامج أهلا بالعالم';
@@ -2462,7 +2502,7 @@ void main() {
       expect(delegate.textEditingValue.text, 'رنامج أهلا بالعالم');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, 0);
-    }, skip: isBrowser);
+    });
 
   });
 
@@ -2503,7 +2543,7 @@ void main() {
       expect(delegate.textEditingValue.text, 'test w multiple blocks');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, offset);
-    }, skip: isBrowser);
+    });
 
     test('when cursor is before a word, it should delete the whole word', () async {
       const String text = 'test with multiple blocks';
@@ -2541,9 +2581,9 @@ void main() {
       expect(delegate.textEditingValue.text, 'test with  blocks');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, offset);
-    }, skip: isBrowser);
+    });
 
-    test('when cursor is preceeded by white spaces, it should delete the spaces and the next word', () async {
+    test('when cursor is preceded by white spaces, it should delete the spaces and the next word', () async {
       const String text = 'test with   multiple blocks';
       const int offset = 9;
       final TextSelectionDelegate delegate = FakeEditableTextState()
@@ -2579,7 +2619,7 @@ void main() {
       expect(delegate.textEditingValue.text, 'test with blocks');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, offset);
-    }, skip: isBrowser);
+    });
 
     test('when cursor is before tabs, it should delete the tabs and the next word', () async {
       const String text = 'test with\t\t\tmultiple blocks';
@@ -2617,7 +2657,7 @@ void main() {
       expect(delegate.textEditingValue.text, 'test with blocks');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, offset);
-    }, skip: isBrowser);
+    });
 
     test('when cursor is followed by break line, it should delete the next word', () async {
       const String text = 'test with\n\n\nmultiple blocks';
@@ -2655,7 +2695,7 @@ void main() {
       expect(delegate.textEditingValue.text, 'test with blocks');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, offset);
-    }, skip: isBrowser);
+    });
 
     test('when using cjk characters', () async {
         const String text = '用多個塊測試';
@@ -2693,7 +2733,7 @@ void main() {
         expect(delegate.textEditingValue.text, '多個塊測試');
         expect(delegate.textEditingValue.selection.isCollapsed, true);
         expect(delegate.textEditingValue.selection.baseOffset, offset);
-      }, skip: isBrowser);
+      });
 
     test('when using rtl', () async {
       const String text = 'برنامج أهلا بالعالم';
@@ -2731,7 +2771,7 @@ void main() {
       expect(delegate.textEditingValue.text, ' أهلا بالعالم');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, offset);
-    }, skip: isBrowser);
+    });
 
     test('when input has obscured text, it should delete everything after the selection', () async {
       const int offset = 4;
@@ -2770,7 +2810,7 @@ void main() {
       expect(delegate.textEditingValue.text, 'test');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, offset);
-    }, skip: isBrowser);
+    });
   });
 
   group('deleteForwardByLine', () {
@@ -2810,7 +2850,7 @@ void main() {
       expect(delegate.textEditingValue.text, 'test');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, offset);
-    }, skip: isBrowser);
+    });
 
     test('when cursor is on the middle of a word, it should delete delete everything that follows', () async {
       const String text = 'test with multiple blocks';
@@ -2848,7 +2888,7 @@ void main() {
       expect(delegate.textEditingValue.text, 'test wit');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, offset);
-    }, skip: isBrowser);
+    });
 
     test('when next character is a breakline, it should preserve it', () async {
       const String text = 'test with\n\n\nmultiple blocks';
@@ -2886,7 +2926,7 @@ void main() {
       expect(delegate.textEditingValue.text, text);
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, offset);
-    }, skip: isBrowser);
+    });
 
     test('when text is multiline, it should delete until the first line break it finds', () async {
       const String text = 'test with\n\nMore stuff right here.\nmultiple blocks';
@@ -2924,7 +2964,7 @@ void main() {
       expect(delegate.textEditingValue.text, 'te\n\nMore stuff right here.\nmultiple blocks');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, offset);
-    }, skip: isBrowser);
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87685
 
     test('when input has obscured text, it should delete everything after the selection', () async {
       const int offset = 4;
@@ -2963,7 +3003,7 @@ void main() {
       expect(delegate.textEditingValue.text, 'test');
       expect(delegate.textEditingValue.selection.isCollapsed, true);
       expect(delegate.textEditingValue.selection.baseOffset, offset);
-    }, skip: isBrowser);
+    });
   });
 
   test('getEndpointsForSelection handles empty characters', () {
@@ -3084,7 +3124,7 @@ void main() {
       // Since the range covers an entire line, the Rect should also be almost
       // as wide as the entire paragraph (give or take 1 character).
       expect(composingRect.width, greaterThan(200 - 10));
-    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/66089
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87696
   });
 
   group('previousCharacter', () {
@@ -3852,7 +3892,7 @@ void main() {
       pumpFrame();
 
       expect(maxIntrinsicWidth, 278);
-    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
+    });
 
     test('hits correct WidgetSpan when not scrolled', () {
       final TextSelectionDelegate delegate = FakeEditableTextState()

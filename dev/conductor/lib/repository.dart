@@ -9,6 +9,7 @@ import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
+import 'package:yaml/yaml.dart';
 
 import './git.dart';
 import './globals.dart';
@@ -69,13 +70,16 @@ abstract class Repository {
             'Provided previousCheckoutLocation $previousCheckoutLocation does not exist on disk!');
       }
       if (initialRef != null) {
+        assert(initialRef != '');
         git.run(
           <String>['fetch', upstreamRemote.name],
           'Fetch ${upstreamRemote.name} to ensure we have latest refs',
           workingDirectory: _checkoutDirectory!.path,
         );
+        // Note: if [initialRef] is a remote ref the checkout will be left in a
+        // detached HEAD state.
         git.run(
-          <String>['checkout', '${upstreamRemote.name}/$initialRef'],
+          <String>['checkout', initialRef!],
           'Checking out initialRef $initialRef',
           workingDirectory: _checkoutDirectory!.path,
         );
@@ -396,6 +400,14 @@ abstract class Repository {
     bool addFirst = false,
   }) {
     assert(!message.contains("'"));
+    final bool hasChanges = git.getOutput(
+      <String>['status', '--porcelain'],
+      'check for uncommitted changes',
+      workingDirectory: checkoutDirectory.path,
+    ).trim().isNotEmpty;
+    if (!hasChanges) {
+      throw ConductorException('Tried to commit with message $message but no changes were present');
+    }
     if (addFirst) {
       git.run(
         <String>['add', '--all'],
@@ -488,6 +500,7 @@ class FrameworkRepository extends Repository {
   }
 
   final Checkouts checkouts;
+  late final CiYaml ciYaml = CiYaml(checkoutDirectory.childFile('.ci.yaml'));
   static const String defaultUpstream =
       'https://github.com/flutter/flutter.git';
 
@@ -584,7 +597,10 @@ class FrameworkRepository extends Repository {
     return Version.fromString(versionJson['frameworkVersion'] as String);
   }
 
-  void updateEngineRevision(
+  /// Update this framework's engine version file.
+  ///
+  /// Returns [true] if the version file was updated and a commit is needed.
+  bool updateEngineRevision(
     String newEngine, {
     @visibleForTesting File? engineVersionFile,
   }) {
@@ -595,8 +611,19 @@ class FrameworkRepository extends Repository {
         .childFile('engine.version');
     assert(engineVersionFile.existsSync());
     final String oldEngine = engineVersionFile.readAsStringSync();
+    if (oldEngine.trim() == newEngine.trim()) {
+      stdio.printTrace(
+        'Tried to update the engine revision but version file is already up to date at: $newEngine',
+      );
+      return false;
+    }
     stdio.printStatus('Updating engine revision from $oldEngine to $newEngine');
-    engineVersionFile.writeAsStringSync(newEngine.trim(), flush: true);
+    engineVersionFile.writeAsStringSync(
+      // Version files have trailing newlines
+      '${newEngine.trim()}\n',
+      flush: true,
+    );
+    return true;
   }
 }
 
@@ -697,6 +724,8 @@ class EngineRepository extends Repository {
 
   final Checkouts checkouts;
 
+  late final CiYaml ciYaml = CiYaml(checkoutDirectory.childFile('.ci.yaml'));
+
   static const String defaultUpstream = 'https://github.com/flutter/engine.git';
   static const String defaultBranch = 'master';
 
@@ -763,4 +792,69 @@ class Checkouts {
   final Platform platform;
   final ProcessManager processManager;
   final Stdio stdio;
+}
+
+class CiYaml {
+  CiYaml(this.file) {
+    if (!file.existsSync()) {
+      throw ConductorException('Could not find the .ci.yaml file at ${file.path}');
+    }
+  }
+
+  /// Underlying [File] that this object wraps.
+  final File file;
+
+  /// Returns the raw string contents of this file.
+  ///
+  /// This is not cached as the contents can be written to while the conductor
+  /// is running.
+  String get stringContents => file.readAsStringSync();
+
+  /// Returns the parsed contents of the file as a [YamlMap].
+  ///
+  /// This is not cached as the contents can be written to while the conductor
+  /// is running.
+  YamlMap get contents => loadYaml(stringContents) as YamlMap;
+
+  List<String> get enabledBranches {
+    final YamlList yamlList = contents['enabled_branches'] as YamlList;
+    return yamlList.map<String>((dynamic element) {
+      return element as String;
+    }).toList();
+  }
+
+  static final RegExp _enabledBranchPattern = RegExp(r'^enabled_branches:');
+
+  /// Update this .ci.yaml file with the given branch name.
+  ///
+  /// The underlying [File] is written to, but not committed to git. This method
+  /// will throw a [ConductorException] if the [branchName] is already present
+  /// in the file or if the file does not have an "enabled_branches:" field.
+  void enableBranch(String branchName) {
+    final List<String> newStrings = <String>[];
+    if (enabledBranches.contains(branchName)) {
+      throw ConductorException('${file.path} already contains the branch $branchName');
+    }
+    if (!_enabledBranchPattern.hasMatch(stringContents)) {
+      throw ConductorException(
+        'Did not find the expected string "enabled_branches:" in the file ${file.path}',
+      );
+    }
+    final List<String> lines = stringContents.split('\n');
+    bool insertedCurrentBranch = false;
+    for (final String line in lines) {
+      // Every existing line should be copied to the new Yaml
+      newStrings.add(line);
+      if (insertedCurrentBranch) {
+        continue;
+      }
+      if (_enabledBranchPattern.hasMatch(line)) {
+        insertedCurrentBranch = true;
+        // Indent two spaces
+        final String indent = ' ' * 2;
+        newStrings.add('$indent- ${branchName.trim()}');
+      }
+    }
+    file.writeAsStringSync(newStrings.join('\n'), flush: true);
+  }
 }

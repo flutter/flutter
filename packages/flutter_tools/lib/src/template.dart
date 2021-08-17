@@ -13,6 +13,12 @@ import 'base/template.dart';
 import 'cache.dart';
 import 'dart/package_map.dart';
 
+/// The Kotlin keywords which are not Java keywords.
+/// They are escaped in Kotlin files.
+///
+/// https://kotlinlang.org/docs/keyword-reference.html
+const List<String> kReservedKotlinKeywords = <String>['when', 'in'];
+
 /// Expands templates in a directory to a destination. All files that must
 /// undergo template expansion should end with the '.tmpl' extension. All files
 /// that should be replaced with the corresponding image from
@@ -322,6 +328,11 @@ class Template {
 
       if (sourceFile.path.endsWith(templateExtension)) {
         final String templateContents = sourceFile.readAsStringSync();
+        final String? androidIdentifier = context['androidIdentifier'] as String?;
+        if (finalDestinationFile.path.endsWith('.kt') && androidIdentifier != null) {
+          context['androidIdentifier'] = _escapeKotlinKeywords(androidIdentifier);
+        }
+
         final String renderedContents = _templateRenderer.renderString(templateContents, context);
 
         finalDestinationFile.writeAsStringSync(renderedContents);
@@ -359,4 +370,12 @@ Future<Directory> _templateImageDirectory(String name, FileSystem fileSystem, Lo
       .parent
       .childDirectory('templates')
       .childDirectory(name);
+}
+
+String _escapeKotlinKeywords(String androidIdentifier) {
+  final List<String> segments = androidIdentifier.split('.');
+  final List<String> correctedSegments = segments.map(
+    (String segment) => kReservedKotlinKeywords.contains(segment) ? '`$segment`' : segment
+  ).toList();
+  return correctedSegments.join('.');
 }

@@ -25,7 +25,7 @@ import '../project.dart';
 import '../reporting/reporting.dart';
 import 'application_package.dart';
 import 'code_signing.dart';
-import 'devices.dart';
+import 'iproxy.dart';
 import 'migrations/deployment_target_migration.dart';
 import 'migrations/project_base_configuration_migration.dart';
 import 'migrations/project_build_location_migration.dart';
@@ -73,7 +73,7 @@ class IMobileDevice {
   Future<void> takeScreenshot(
     File outputFile,
     String deviceID,
-    IOSDeviceInterface interfaceType,
+    IOSDeviceConnectionInterface interfaceType,
   ) {
     return _processUtils.run(
       <String>[
@@ -81,7 +81,7 @@ class IMobileDevice {
         outputFile.path,
         '--udid',
         deviceID,
-        if (interfaceType == IOSDeviceInterface.network)
+        if (interfaceType == IOSDeviceConnectionInterface.network)
           '--network',
       ],
       throwOnError: true,

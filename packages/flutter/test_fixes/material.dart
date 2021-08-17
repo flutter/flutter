@@ -387,4 +387,15 @@ void main() {
   listWheelViewport = ListWheelViewport(clipToSize: true);
   listWheelViewport = ListWheelViewport(clipToSize: false);
   listWheelViewport.clipToSize;
+
+  // Changes made in https://github.com/flutter/flutter/pull/87281
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData(fixTextFieldOutlineLabel: true);
+  themeData = ThemeData.raw(fixTextFieldOutlineLabel: true);
+  themeData = themeData.copyWith(fixTextFieldOutlineLabel: true);
+  themeData.fixTextFieldOutlineLabel; // Removing field reference not supported.
+
+  // Changes made in https://github.com/flutter/flutter/pull/87839
+  final OverscrollIndicatorNotification notification = OverscrollIndicatorNotification(leading: true);
+  notification.disallowGlow();
 }

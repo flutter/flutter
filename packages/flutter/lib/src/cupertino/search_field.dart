@@ -151,6 +151,7 @@ class CupertinoSearchTextField extends StatefulWidget {
     this.onSuffixTap,
     this.restorationId,
     this.focusNode,
+    this.autofocus = false,
     this.onTap,
     this.autocorrect = true,
     this.enabled,
@@ -286,6 +287,9 @@ class CupertinoSearchTextField extends StatefulWidget {
 
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
+
+  /// {@macro flutter.widgets.editableText.autofocus}
+  final bool autofocus;
 
   /// {@macro flutter.material.textfield.onTap}
   final VoidCallback? onTap;
@@ -429,6 +433,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
       onChanged: widget.onChanged,
       onSubmitted: widget.onSubmitted,
       focusNode: widget.focusNode,
+      autofocus: widget.autofocus,
       autocorrect: widget.autocorrect,
       textInputAction: TextInputAction.search,
     );

@@ -23,7 +23,6 @@ Widget buildInputDecorator({
   TextStyle? baseStyle,
   TextAlignVertical? textAlignVertical,
   VisualDensity? visualDensity,
-  bool fixTextFieldOutlineLabel = false,
   Widget child = const Text(
     'text',
     style: TextStyle(fontFamily: 'Ahem', fontSize: 16.0),
@@ -37,7 +36,6 @@ Widget buildInputDecorator({
             data: (theme ?? Theme.of(context)).copyWith(
               inputDecorationTheme: inputDecorationTheme,
               visualDensity: visualDensity,
-              fixTextFieldOutlineLabel: fixTextFieldOutlineLabel,
             ),
             child: Align(
               alignment: Alignment.topLeft,
@@ -3963,17 +3961,17 @@ void main() {
 
     await pumpDecorator(focused: false, empty: false);
     await tester.pumpAndSettle();
-    expect(getLabelRect(tester).topLeft, equals(const Offset(12, -4)));
+    expect(getLabelRect(tester).topLeft, equals(const Offset(12, -5.5)));
     expect(getLabelRect(tester).size, equals(const Size(80, 16)));
 
     await pumpDecorator(focused: true, empty: true);
     await tester.pumpAndSettle();
-    expect(getLabelRect(tester).topLeft, equals(const Offset(12, -4)));
+    expect(getLabelRect(tester).topLeft, equals(const Offset(12, -5.5)));
     expect(getLabelRect(tester).size, equals(const Size(80, 16)));
 
     await pumpDecorator(focused: true, empty: false);
     await tester.pumpAndSettle();
-    expect(getLabelRect(tester).topLeft, equals(const Offset(12, -4)));
+    expect(getLabelRect(tester).topLeft, equals(const Offset(12, -5.5)));
     expect(getLabelRect(tester).size, equals(const Size(80, 16)));
 
     await pumpDecorator(focused: false, empty: true, enabled: false);
@@ -3983,7 +3981,7 @@ void main() {
 
     await pumpDecorator(focused: false, empty: false, enabled: false);
     await tester.pumpAndSettle();
-    expect(getLabelRect(tester).topLeft, equals(const Offset(12, -4)));
+    expect(getLabelRect(tester).topLeft, equals(const Offset(12, -5.5)));
     expect(getLabelRect(tester).size, equals(const Size(80, 16)));
 
     // Focused and disabled happens with NavigationMode.directional.
@@ -3994,7 +3992,7 @@ void main() {
 
     await pumpDecorator(focused: true, empty: false, enabled: false);
     await tester.pumpAndSettle();
-    expect(getLabelRect(tester).topLeft, equals(const Offset(12, -4)));
+    expect(getLabelRect(tester).topLeft, equals(const Offset(12, -5.5)));
     expect(getLabelRect(tester).size, equals(const Size(80, 16)));
   });
 
@@ -4589,10 +4587,6 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/54028
     await tester.pumpWidget(
       buildInputDecorator(
-        // Temporary opt-in fix for https://github.com/flutter/flutter/issues/54028
-        // Ensures that the floating label is vertically centered relative to
-        // center of the top edge of the InputDecorator's outline border.
-        fixTextFieldOutlineLabel: true,
         isEmpty: true,
         decoration: const InputDecoration(
           labelText: 'label',
