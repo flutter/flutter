@@ -122,6 +122,7 @@ class RefreshIndicator extends StatefulWidget {
     this.semanticsValue,
     this.strokeWidth = 2.0,
     this.triggerMode = RefreshIndicatorTriggerMode.onEdge,
+    this.isRefreshing
   }) : assert(child != null),
        assert(onRefresh != null),
        assert(notificationPredicate != null),
@@ -210,6 +211,10 @@ class RefreshIndicator extends StatefulWidget {
   ///
   /// Defaults to [RefreshIndicatorTriggerMode.onEdge].
   final RefreshIndicatorTriggerMode triggerMode;
+
+  /// Defines if the progress indicator's should be running
+  /// not running.  By default
+  final bool? isRefreshing;
 
   @override
   RefreshIndicatorState createState() => RefreshIndicatorState();
@@ -515,7 +520,9 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     }());
 
     final bool showIndeterminateIndicator =
-      _mode == _RefreshIndicatorMode.refresh || _mode == _RefreshIndicatorMode.done;
+        _checkIsRefreshing(widget.isRefreshing)  ||
+        _mode == _RefreshIndicatorMode.refresh   ||
+        _mode == _RefreshIndicatorMode.done;
 
     return Stack(
       children: <Widget>[
@@ -557,4 +564,39 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
       ],
     );
   }
+
+  bool _checkIsRefreshing(bool? isRefreshing) {
+
+    if (isRefreshing != null) {
+
+      if (isRefreshing) {
+        _showProgressIndicator();
+      } else {
+        _hideProgressIndicator();
+      }
+
+      return isRefreshing;
+    } else {
+      return false;
+    }
+
+  }
+
+  void _hideProgressIndicator() {
+    if (mounted && _mode == _RefreshIndicatorMode.refresh) {
+      _dismiss(_RefreshIndicatorMode.done);
+    }
+  }
+
+  void _showProgressIndicator() {
+    if (_mode == null || _isIndicatorAtTop == null || _dragOffset == null) {
+      _isIndicatorAtTop = true;
+      _dragOffset = 0.0;
+      _scaleController.value = 0.0;
+      _positionController.animateTo(1.0 / _kDragSizeFactorLimit,
+          duration: _kIndicatorSnapDuration);
+      _mode = _RefreshIndicatorMode.refresh;
+    }
+  }
+
 }

@@ -868,4 +868,60 @@ void main() {
     await tester.pump();
     expect(tester.widget<RefreshProgressIndicator>(find.byType(RefreshProgressIndicator)).valueColor!.value, red.withOpacity(1.0));
   });
+
+  testWidgets('RefreshIndicator.isRefreshing set to true',
+          (WidgetTester tester) async {
+        const bool isRefreshing = true;
+
+        refreshCalled = false;
+        await tester.pumpWidget(
+          MaterialApp(
+            home: RefreshIndicator(
+              isRefreshing: isRefreshing,
+              onRefresh: refresh,
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: const <Widget>[
+                  SizedBox(
+                    height: 200.0,
+                    child: Text('X'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+
+        await tester.pump();
+        expect(refreshCalled, false);
+        expect(find.byType(RefreshProgressIndicator), findsOneWidget);
+      });
+
+  testWidgets('RefreshIndicator.isRefreshing set to false',
+          (WidgetTester tester) async {
+        const bool isRefreshing = false;
+
+        refreshCalled = false;
+        await tester.pumpWidget(
+          MaterialApp(
+            home: RefreshIndicator(
+              isRefreshing: isRefreshing,
+              onRefresh: refresh,
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: const <Widget>[
+                  SizedBox(
+                    height: 200.0,
+                    child: Text('X'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+
+        await tester.pump();
+        expect(refreshCalled, false);
+        expect(find.byType(RefreshProgressIndicator), findsNothing);
+      });
 }
