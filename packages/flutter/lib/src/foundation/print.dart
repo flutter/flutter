@@ -27,7 +27,7 @@ typedef DebugPrintCallback = void Function(String? message, { int? wrapWidth });
 /// Prints a message to the console, which you can access using the "flutter"
 /// tool's "logs" command ("flutter logs").
 ///
-/// See [DebugPrintCallback].
+/// See [DebugPrintCallback] for usage details.
 DebugPrintCallback debugPrint = debugPrintThrottled;
 
 /// Alternative implementation of [debugPrint] that does not throttle.
