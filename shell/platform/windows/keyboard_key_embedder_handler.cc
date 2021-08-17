@@ -27,17 +27,9 @@ constexpr SHORT kStateMaskToggled = 0x01;
 constexpr SHORT kStateMaskPressed = 0x80;
 
 const char* empty_character = "";
-}  // namespace
 
-// Get some bits of the char, from the start'th bit from the right (excluded)
-// to the end'th bit from the right (included).
-//
-// For example, _GetBit(0x1234, 8, 4) => 0x3.
-char _GetBit(char32_t ch, size_t start, size_t end) {
-  return (ch >> end) & ((1 << (start - end)) - 1);
-}
-
-// Revert the "character" for a dead key to its normal value.
+// Revert the "character" for a dead key to its normal value, or the argument
+// unchanged otherwise.
 //
 // When a dead key is pressed, the WM_KEYDOWN's lParam is mapped to a special
 // value: the "normal character" | 0x80000000.  For example, when pressing
@@ -46,6 +38,15 @@ char _GetBit(char32_t ch, size_t start, size_t end) {
 uint32_t _UndeadChar(uint32_t ch) {
   return ch & ~0x80000000;
 }
+
+// Get some bits of the char, from the start'th bit from the right (excluded)
+// to the end'th bit from the right (included).
+//
+// For example, _GetBit(0x1234, 8, 4) => 0x3.
+char _GetBit(char32_t ch, size_t start, size_t end) {
+  return (ch >> end) & ((1 << (start - end)) - 1);
+}
+}  // namespace
 
 std::string ConvertChar32ToUtf8(char32_t ch) {
   std::string result;
