@@ -1,4 +1,4 @@
-Signature: cecc87b37902c94be1b0c2a602296d00
+Signature: 76cb8a563889046ac155dc7a578512c6
 
 UNUSED LICENSES:
 
@@ -598,7 +598,9 @@ FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/trace-provider-so/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/trace/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/vulkan/client.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/vulkan/vulkan.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_compact_image.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_image_pipe_swapchain.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_khronos_validation.json
@@ -1326,7 +1328,9 @@ FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/trace-provider-so/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/trace/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/vulkan/client.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/vulkan/vulkan.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_compact_image.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_image_pipe_swapchain.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_khronos_validation.json
@@ -1951,7 +1955,9 @@ FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/trace-provider-so/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/trace/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/vulkan/client.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/vulkan/vulkan.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_compact_image.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_image_pipe_swapchain.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_khronos_validation.json
