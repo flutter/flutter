@@ -1,4 +1,4 @@
-Signature: ca24aa044cd1092fd7fdc3154b86149e
+Signature: f427af9f485f92a836bc41e41797e50b
 
 UNUSED LICENSES:
 
@@ -9903,6 +9903,9 @@ ORIGIN: ../../../third_party/dart/benchmarks/DartCLIStartup/dart/DartCLIStartup.
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/dart/benchmarks/DartCLIStartup/dart/DartCLIStartup.dart
 FILE: ../../../third_party/dart/benchmarks/DartCLIStartup/dart2/DartCLIStartup.dart
+FILE: ../../../third_party/dart/benchmarks/EventLoopLatencyRegexp/dart/EventLoopLatencyRegexp.dart
+FILE: ../../../third_party/dart/benchmarks/EventLoopLatencyRegexp/dart/regexp_benchmark.dart
+FILE: ../../../third_party/dart/benchmarks/EventLoopLatencyRegexp/dart2/regexp_benchmark.dart
 FILE: ../../../third_party/dart/benchmarks/IsolateFibonacci/dart/IsolateFibonacci.dart
 FILE: ../../../third_party/dart/benchmarks/IsolateFibonacci/dart2/IsolateFibonacci.dart
 FILE: ../../../third_party/dart/benchmarks/MapLookup/dart/MapLookup.dart
@@ -10000,6 +10003,7 @@ FILE: ../../../third_party/dart/benchmarks/EventLoopLatencyJson350KB/dart/latenc
 FILE: ../../../third_party/dart/benchmarks/EventLoopLatencyJson350KB/dart2/EventLoopLatencyJson350KB.dart
 FILE: ../../../third_party/dart/benchmarks/EventLoopLatencyJson350KB/dart2/json_benchmark.dart
 FILE: ../../../third_party/dart/benchmarks/EventLoopLatencyJson350KB/dart2/latency.dart
+FILE: ../../../third_party/dart/benchmarks/EventLoopLatencyRegexp/dart2/EventLoopLatencyRegexp.dart
 FILE: ../../../third_party/dart/benchmarks/ListCopy/dart/ListCopy.dart
 FILE: ../../../third_party/dart/benchmarks/ListCopy/dart2/ListCopy.dart
 FILE: ../../../third_party/dart/benchmarks/MD5/dart/md5.dart
