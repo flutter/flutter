@@ -82,10 +82,10 @@ import 'tooltip_theme.dart';
 /// }
 /// ```
 /// {@end-tool}
-/// 
+///
 /// {@tool dartpad --template=stateless_widget_scaffold_center}
 ///
-/// This example show a basic [Tooltip.custom] which has a [Container] 
+/// This example show a basic [Tooltip.custom] which has a [Container]
 /// containing [Text] as child.
 /// [tooltip] contains your widget to be shown by the tooltip when
 /// the child that Tooltip wraps is hovered over on web or desktop. On mobile,
@@ -150,26 +150,26 @@ class Tooltip extends StatefulWidget {
        super(key: key);
 
   /// Creates a tooltip using a widget provided to the [tooltip].
-  /// 
-  /// **NOTE :** Using [Tooltip] and [Tooltip.custom], like examples given 
-  /// below, will result in same results unless the [textStyle] or 
-  /// [TooltipTheme] is not customised for the first example.Therefore, it is 
-  /// recommended to use the [Tooltip] instead of [Tooltip.custom] in general 
+  ///
+  /// **NOTE :** Using [Tooltip] and [Tooltip.custom], like examples given
+  /// below, will result in same results unless the [textStyle] or
+  /// [TooltipTheme] is not customised for the first example.Therefore, it is
+  /// recommended to use the [Tooltip] instead of [Tooltip.custom] in general
   /// scenarios where just simple text tooltips needed like following examples.
   /// ```dart
   /// Tooltip(
   ///   message:"my tooltip",
-  /// ) 
-  /// 
+  /// )
+  ///
   /// Tooltip.custom(
   ///   tooltip: Text("my tooltip"),
   /// )
-  /// ``` 
+  /// ```
   ///
-  /// **NOTE :** 
+  /// **NOTE :**
   /// By default, tooltips should adhere to the
   /// [Material specification](https://material.io/design/components/tooltips.html#spec).
-  /// But, in the case of [Tooltip.custom], this will ignore the [TooltipTheme.of] as widget 
+  /// But, in the case of [Tooltip.custom], this will ignore the [TooltipTheme.of] as widget
   /// provided in the [tooltip] will use themes like as it would be using in the
   /// normal application.
   ///
@@ -206,19 +206,19 @@ class Tooltip extends StatefulWidget {
   /// tooltip will be shown in the tooltip and message property will be used
   /// for semantics if [excludeFromSemantics] is true.
   ///
-  /// In some cases, like information button tooltip, [Tooltip.custom] 
-  /// can be used which accepts widget. In case of [Tooltip.custom], 
-  /// [TooltipTheme.of] will be ignored.  
+  /// In some cases, like information button tooltip, [Tooltip.custom]
+  /// can be used which accepts widget. In case of [Tooltip.custom],
+  /// [TooltipTheme.of] will be ignored.
   final String? message;
 
-  /// The widget to display in the tooltip. This can be any widget like 
+  /// The widget to display in the tooltip. This can be any widget like
   /// the [child].
-  /// 
-  /// General use case will be a information button tooltips where custom 
+  ///
+  /// General use case will be a information button tooltips where custom
   /// tooltip content can be defined using [tooltip] widget.
-  /// 
+  ///
   /// For example,
-  /// 
+  ///
   /// ```dart
   /// Tooltip.custom(
   ///   child: Text("Custom tooltip"),
@@ -293,7 +293,7 @@ class Tooltip extends StatefulWidget {
   /// Tooltip(
   ///   tooltip: Container(
   ///     child: Text("tooltip")
-  ///   ), 
+  ///   ),
   ///   semanticsLabel: 'semantics for tooltip'
   /// )
   /// ```

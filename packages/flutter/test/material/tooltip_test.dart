@@ -1543,7 +1543,6 @@ void main() {
           matching: find.byKey(containerKey),
         )
       );
-      
       expect(tipContainer.size.height, 50.0);
       expect(tipContainer.size.width, 80.0);
       expect(tipContainer, paints..rect(
@@ -1554,7 +1553,6 @@ void main() {
   });
 
   group('Tooltip.custom tests', () {
-   
     testWidgets('Does tooltip end up in the right place - center', (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
       await tester.pumpWidget(
@@ -2263,11 +2261,11 @@ void main() {
       await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
       final RenderParagraph tooltipRenderParagraph = tester.renderObject<RenderParagraph>(find.text(tooltipText));
-      
+ 
       // Why 14.0 and not 10.0? because it is default size for the Text Widget,
       // Tooltip.custom does not apply default tooltip style to its decendant
       // Text Widget
-      expect(tooltipRenderParagraph.textSize.height, equals(14.0)); 
+      expect(tooltipRenderParagraph.textSize.height, equals(14.0));
 
       final RenderBox tip = tester.renderObject(
         _findTooltipContainer(tooltipText),
@@ -3013,7 +3011,7 @@ void main() {
         'show duration: 0:00:02.000000',
         'triggerMode: TooltipTriggerMode.manual',
         'enableFeedback: true',
-        'semanticsLabel: "message"', 
+        'semanticsLabel: "message"',
       ]);
     });
 
@@ -3116,7 +3114,7 @@ Future<void> setCustomTooltip(WidgetTester tester, GlobalKey key, Widget widget)
         key: key,
         tooltip: widget
       ),
-    ),  
+    ),
   );
   _ensureTooltipVisible(key);
   await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
