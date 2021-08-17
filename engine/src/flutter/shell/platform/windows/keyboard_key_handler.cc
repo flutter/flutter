@@ -18,6 +18,11 @@ namespace {
 // emitting a warning on the console about unhandled events.
 static constexpr int kMaxPendingEvents = 1000;
 
+// Returns if a character sent by Win32 is a dead key.
+bool _IsDeadKey(uint32_t ch) {
+  return (ch & 0x80000000) != 0;
+}
+
 // Returns true if this key is a key down event of ShiftRight.
 //
 // This is a temporary solution to
@@ -261,7 +266,14 @@ void KeyboardKeyHandler::ResolvePendingEvent(uint64_t sequence_id,
       if (event.unreplied == 0) {
         std::unique_ptr<PendingEvent> event_ptr = std::move(*iter);
         pending_responds_.erase(iter);
-        if (!event_ptr->any_handled) {
+        // Don't dispatch handled events or dead key events.
+        //
+        // Redispatching dead keys events makes Win32 ignore the dead key state
+        // and redispatches a normal character without combining it with the
+        // next letter key.
+        const bool should_redispatch =
+            !event_ptr->any_handled && !_IsDeadKey(event_ptr->character);
+        if (should_redispatch) {
           RedispatchEvent(std::move(event_ptr));
         }
       }

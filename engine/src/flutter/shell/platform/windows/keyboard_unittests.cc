@@ -175,9 +175,10 @@ class TestFlutterWindowsView : public FlutterWindowsView {
 
   uint32_t redispatch_char;
 
-  void InjectPendingEvents(MockFlutterWindowWin32* win32window,
-                           uint32_t redispatch_char) {
+  int InjectPendingEvents(MockFlutterWindowWin32* win32window,
+                          uint32_t redispatch_char) {
     std::vector<Win32Message> messages;
+    int num_pending_responds = pending_responds_.size();
     for (const SendInputInfo& input : pending_responds_) {
       const KEYBDINPUT kbdinput = input.kbdinput;
       const UINT message =
@@ -200,6 +201,7 @@ class TestFlutterWindowsView : public FlutterWindowsView {
 
     win32window->InjectMessageList(messages.size(), messages.data());
     pending_responds_.clear();
+    return num_pending_responds;
   }
 
   void SetKeyState(uint32_t key, bool pressed, bool toggled_on) {
@@ -294,10 +296,12 @@ class KeyboardTester {
   // Inject all events called with |SendInput| to the event queue,
   // then process the event queue.
   //
+  // Returns the number of events injected.
+  //
   // If |redispatch_char| is not 0, then WM_KEYDOWN events will
   // also redispatch a WM_CHAR event with that value as lparam.
-  void InjectPendingEvents(uint32_t redispatch_char = 0) {
-    view_->InjectPendingEvents(window_.get(), redispatch_char);
+  int InjectPendingEvents(uint32_t redispatch_char = 0) {
+    return view_->InjectPendingEvents(window_.get(), redispatch_char);
   }
 
   static bool test_response;
@@ -802,7 +806,7 @@ TEST(KeyboardTest, DeadKeyThatCombines) {
                        kNotSynthesized);
   clear_key_calls();
 
-  tester.InjectPendingEvents(0);  // No WM_DEADCHAR messages sent here.
+  EXPECT_EQ(tester.InjectPendingEvents(), 0);
   EXPECT_EQ(key_calls.size(), 0);
   clear_key_calls();
 

@@ -16,6 +16,7 @@ namespace testing {
 
 namespace {
 static constexpr char kScanCodeKey[] = "scanCode";
+static constexpr char kCharacterCodePointKey[] = "characterCodePoint";
 static constexpr int kHandledScanCode = 0x14;
 static constexpr int kUnhandledScanCode = 0x15;
 static constexpr int kUnhandledScanCodeExtended = 0xe015;
@@ -106,6 +107,32 @@ TEST(KeyboardKeyChannelHandlerTest, ExtendedKeysAreSentToRedispatch) {
       [&last_handled](bool handled) { last_handled = handled; });
   EXPECT_EQ(last_handled, false);
   EXPECT_EQ(received_scancode, kUnhandledScanCode);
+}
+
+TEST(KeyboardKeyChannelHandlerTest, DeadKeysDoNotCrash) {
+  auto handled_message = CreateResponse(true);
+  auto unhandled_message = CreateResponse(false);
+  int received_scancode = 0;
+
+  TestBinaryMessenger messenger(
+      [&received_scancode, &handled_message, &unhandled_message](
+          const std::string& channel, const uint8_t* message,
+          size_t message_size, BinaryReply reply) {
+        if (channel == "flutter/keyevent") {
+          auto message_doc = JsonMessageCodec::GetInstance().DecodeMessage(
+              message, message_size);
+          uint32_t character = (*message_doc)[kCharacterCodePointKey].GetUint();
+          EXPECT_EQ(character, (uint32_t)'^');
+        }
+        return true;
+      });
+
+  KeyboardKeyChannelHandler handler(&messenger);
+  // Extended key flag is passed to redispatched events if set.
+  handler.KeyboardHook(0xDD, 0x1a, WM_KEYDOWN, 0x8000005E, false, false,
+                       [](bool handled) {});
+
+  // EXPECT is done during the callback above.
 }
 
 }  // namespace testing
