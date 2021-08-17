@@ -19,7 +19,14 @@ LICENSE
   s.public_header_files = 'Classes/**/*.h'
   s.dependency 'Flutter'
   s.ios.framework  = 'UIKit'
+  # Weakly link for parts of API that need to be run in XCTest targets.
+  s.ios.weak_framework = 'XCTest'
 
   s.platform = :ios, '8.0'
-  s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386' }
+  s.pod_target_xcconfig = {
+    'DEFINES_MODULE' => 'YES',
+    'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386',
+    # Find XCTest framework.
+    'FRAMEWORK_SEARCH_PATHS' => '$(PLATFORM_DIR)/Developer/Library/Frameworks',
+  }
 end
