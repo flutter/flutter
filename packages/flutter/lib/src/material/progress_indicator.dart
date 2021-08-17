@@ -870,9 +870,9 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
   /// Interval for arrow head to fully grow.
   static const double _strokeHeadInterval = 0.33;
 
-  static final Animatable<double> _convertTween = CurveTween(curve:
-    const Interval(0.1, _strokeHeadInterval
-  ));
+  static final Animatable<double> _convertTween = CurveTween(
+    curve: const Interval(0.1, _strokeHeadInterval),
+  );
 
   // Last value received from the widget before null.
   double? _lastValue;
