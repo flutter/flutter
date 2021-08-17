@@ -17,10 +17,9 @@ import '_isolates_io.dart'
 /// {@macro flutter.foundation.compute.limitations}
 typedef ComputeCallback<Q, R> = FutureOr<R> Function(Q message);
 
-/// The signature of [compute].
-///
-/// [compute] spawns an isolate, runs `callback` on that isolate, passes it
-/// `message`, and (eventually) returns the value returned by `callback`.
+/// The signature of [compute], which spawns an isolate, runs `callback` on
+/// that isolate, passes it `message`, and (eventually) returns the value
+/// returned by `callback`.
 ///
 /// This is useful for operations that take longer than a few milliseconds, and
 /// which would therefore risk skipping frames. For tasks that will only take a
@@ -45,5 +44,7 @@ typedef ComputeCallback<Q, R> = FutureOr<R> Function(Q message);
 /// [Timeline]. This is useful when profiling an application.
 typedef ComputeImpl = Future<R> Function<Q, R>(ComputeCallback<Q, R> callback, Q message, { String? debugLabel });
 
+/// A function that spawns an isolate and runs a callback on that isolate.
+///
 /// See [ComputeImpl].
 const ComputeImpl compute = _isolates.compute;
