@@ -222,6 +222,8 @@ void main() {
 
     expect(plugin.platforms, <String, PluginPlatform>{});
     expect(plugin.defaultPackagePlatforms, <String, String>{
+      'android': 'sample_package_android',
+      'ios': 'sample_package_ios',
       'linux': 'sample_package_linux',
       'macos': 'sample_package_macos',
       'windows': 'sample_package_windows',
