@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:meta/meta.dart' show required, visibleForTesting;
@@ -31,7 +29,7 @@ const int kIsolateReloadBarred = 1005;
 
 /// Override `WebSocketConnector` in [context] to use a different constructor
 /// for [WebSocket]s (used by tests).
-typedef WebSocketConnector = Future<io.WebSocket> Function(String url, {io.CompressionOptions compression, @required Logger logger});
+typedef WebSocketConnector = Future<io.WebSocket> Function(String url, {io.CompressionOptions compression, Logger? logger});
 
 typedef PrintStructuredErrorLogMethod = void Function(vm_service.Event);
 
@@ -41,7 +39,7 @@ WebSocketConnector _openChannel = _defaultOpenChannel;
 ///
 /// Provide a `null` value to restore the original connector.
 @visibleForTesting
-set openChannelForTesting(WebSocketConnector connector) {
+set openChannelForTesting(WebSocketConnector? connector) {
   _openChannel = connector ?? _defaultOpenChannel;
 }
 
@@ -104,14 +102,14 @@ typedef GetSkSLMethod = Future<String> Function();
 
 Future<io.WebSocket> _defaultOpenChannel(String url, {
   io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
-  @required Logger logger,
+  Logger? logger,
 }) async {
   Duration delay = const Duration(milliseconds: 100);
   int attempts = 0;
-  io.WebSocket socket;
+  io.WebSocket? socket;
 
   Future<void> handleError(dynamic e) async {
-    void Function(String) printVisibleTrace = logger.printTrace;
+    void Function(String) printVisibleTrace = logger!.printTrace;
     if (attempts == 10) {
       logger.printStatus('Connecting to the VM Service is taking longer than expected...');
     } else if (attempts == 20) {
@@ -142,7 +140,7 @@ Future<io.WebSocket> _defaultOpenChannel(String url, {
 
   final WebSocketConnector constructor = context.get<WebSocketConnector>() ?? (String url, {
     io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
-    @required Logger logger,
+    Logger? logger,
   }) => io.WebSocket.connect(url, compression: compression);
 
   while (socket == null) {
@@ -161,14 +159,14 @@ Future<io.WebSocket> _defaultOpenChannel(String url, {
 /// Override `VMServiceConnector` in [context] to return a different VMService
 /// from [VMService.connect] (used by tests).
 typedef VMServiceConnector = Future<FlutterVmService> Function(Uri httpUri, {
-  ReloadSources reloadSources,
-  Restart restart,
-  CompileExpression compileExpression,
-  GetSkSLMethod getSkSLMethod,
-  PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
+  ReloadSources? reloadSources,
+  Restart? restart,
+  CompileExpression? compileExpression,
+  GetSkSLMethod? getSkSLMethod,
+  PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
   io.CompressionOptions compression,
-  Device device,
-  @required Logger logger,
+  Device? device,
+  required Logger logger,
 });
 
 /// Set up the VM Service client by attaching services for each of the provided
@@ -176,12 +174,12 @@ typedef VMServiceConnector = Future<FlutterVmService> Function(Uri httpUri, {
 ///
 /// All parameters besides [vmService] may be null.
 Future<vm_service.VmService> setUpVmService(
-  ReloadSources reloadSources,
-  Restart restart,
-  CompileExpression compileExpression,
-  Device device,
-  GetSkSLMethod skSLMethod,
-  PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
+  ReloadSources? reloadSources,
+  Restart? restart,
+  CompileExpression? compileExpression,
+  Device? device,
+  GetSkSLMethod? skSLMethod,
+  PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
   vm_service.VmService vmService
 ) async {
   // Each service registration requires a request to the attached VM service. Since the
@@ -304,14 +302,14 @@ Future<vm_service.VmService> setUpVmService(
 /// See: https://github.com/dart-lang/sdk/commit/df8bf384eb815cf38450cb50a0f4b62230fba217
 Future<FlutterVmService> connectToVmService(
   Uri httpUri, {
-    ReloadSources reloadSources,
-    Restart restart,
-    CompileExpression compileExpression,
-    GetSkSLMethod getSkSLMethod,
-    PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
+    ReloadSources? reloadSources,
+    Restart? restart,
+    CompileExpression? compileExpression,
+    GetSkSLMethod? getSkSLMethod,
+    PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
-    Device device,
-    @required Logger logger,
+    Device? device,
+    required Logger logger,
   }) async {
   final VMServiceConnector connector = context.get<VMServiceConnector>() ?? _connect;
   return connector(httpUri,
@@ -329,7 +327,7 @@ Future<FlutterVmService> connectToVmService(
 Future<vm_service.VmService> createVmServiceDelegate(
   Uri wsUri, {
   io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
-  @required Logger logger,
+  required Logger logger,
 }) async {
   final io.WebSocket channel = await _openChannel(wsUri.toString(), compression: compression, logger: logger);
   return vm_service.VmService(
@@ -344,14 +342,14 @@ Future<vm_service.VmService> createVmServiceDelegate(
 
 Future<FlutterVmService> _connect(
   Uri httpUri, {
-  ReloadSources reloadSources,
-  Restart restart,
-  CompileExpression compileExpression,
-  GetSkSLMethod getSkSLMethod,
-  PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
+  ReloadSources? reloadSources,
+  Restart? restart,
+  CompileExpression? compileExpression,
+  GetSkSLMethod? getSkSLMethod,
+  PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
   io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
-  Device device,
-  @required Logger logger,
+  Device? device,
+  required Logger logger,
 }) async {
   final Uri wsUri = httpUri.replace(scheme: 'ws', path: urlContext.join(httpUri.path, 'ws'));
   final vm_service.VmService delegateService = await createVmServiceDelegate(
@@ -376,14 +374,14 @@ Future<FlutterVmService> _connect(
 
 String _validateRpcStringParam(String methodName, Map<String, dynamic> params, String paramName) {
   final dynamic value = params[paramName];
-  if (value is! String || (value as String).isEmpty) {
+  if (value is! String || value.isEmpty) {
     throw vm_service.RPCError(
       methodName,
       RPCErrorCodes.kInvalidParams,
       "Invalid '$paramName': $value",
     );
   }
-  return value as String;
+  return value;
 }
 
 bool _validateRpcBoolParam(String methodName, Map<String, dynamic> params, String paramName) {
@@ -395,30 +393,30 @@ bool _validateRpcBoolParam(String methodName, Map<String, dynamic> params, Strin
       "Invalid '$paramName': $value",
     );
   }
-  return (value as bool) ?? false;
+  return value as bool;
 }
 
 /// Peered to an Android/iOS FlutterView widget on a device.
 class FlutterView {
   FlutterView({
-    @required this.id,
-    @required this.uiIsolate,
+    required this.id,
+    required this.uiIsolate,
   });
 
   factory FlutterView.parse(Map<String, Object> json) {
-    final Map<String, Object> rawIsolate = json['isolate'] as Map<String, Object>;
-    vm_service.IsolateRef isolate;
+    final Map<String, Object?>? rawIsolate = json['isolate'] as Map<String, Object?>?;
+    vm_service.IsolateRef? isolate;
     if (rawIsolate != null) {
       rawIsolate['number'] = rawIsolate['number']?.toString();
       isolate = vm_service.IsolateRef.parse(rawIsolate);
     }
     return FlutterView(
-      id: json['id'] as String,
+      id: json['id']! as String,
       uiIsolate: isolate,
     );
   }
 
-  final vm_service.IsolateRef uiIsolate;
+  final vm_service.IsolateRef? uiIsolate;
   final String id;
 
   bool get hasIsolate => uiIsolate != null;
@@ -426,8 +424,8 @@ class FlutterView {
   @override
   String toString() => id;
 
-  Map<String, Object> toJson() {
-    return <String, Object>{
+  Map<String, Object?> toJson() {
+    return <String, Object?>{
       'id': id,
       'isolate': uiIsolate?.toJson(),
     };
@@ -439,13 +437,13 @@ class FlutterVmService {
   FlutterVmService(this.service, {this.wsAddress, this.httpAddress});
 
   final vm_service.VmService service;
-  final Uri wsAddress;
-  final Uri httpAddress;
+  final Uri? wsAddress;
+  final Uri? httpAddress;
 
-  Future<vm_service.Response> callMethodWrapper(
+  Future<vm_service.Response?> callMethodWrapper(
     String method, {
-    String isolateId,
-    Map<String, dynamic> args
+    String? isolateId,
+    Map<String, dynamic>? args
   }) async {
     try {
       return await service.callMethod(method, isolateId: isolateId, args: args);
@@ -463,11 +461,10 @@ class FlutterVmService {
 
   /// Set the asset directory for the an attached Flutter view.
   Future<void> setAssetDirectory({
-    @required Uri assetsDirectory,
-    @required String viewId,
-    @required String uiIsolateId,
+    required Uri assetsDirectory,
+    required String? viewId,
+    required String? uiIsolateId,
   }) async {
-    assert(assetsDirectory != null);
     await callMethodWrapper(kSetAssetBundlePathMethod,
       isolateId: uiIsolateId,
       args: <String, dynamic>{
@@ -480,10 +477,10 @@ class FlutterVmService {
   ///
   /// This method will only return data if `--cache-sksl` was provided as a
   /// flutter run argument, and only then on physical devices.
-  Future<Map<String, Object>> getSkSLs({
-    @required String viewId,
+  Future<Map<String, Object>?> getSkSLs({
+    required String viewId,
   }) async {
-    final vm_service.Response response = await callMethodWrapper(
+    final vm_service.Response? response = await callMethodWrapper(
       kGetSkSLsMethod,
       args: <String, String>{
         'viewId': viewId,
@@ -492,7 +489,7 @@ class FlutterVmService {
     if (response == null) {
       return null;
     }
-    return response.json['SkSLs'] as Map<String, Object>;
+    return response.json!['SkSLs'] as Map<String, Object>;
   }
 
   /// Flush all tasks on the UI thread for an attached Flutter view.
