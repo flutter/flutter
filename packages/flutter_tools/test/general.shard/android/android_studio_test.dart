@@ -223,7 +223,7 @@ void main() {
       PlistParser: () => plistUtils,
     });
 
-    testUsingContext('Does not discover Android Studio with JetBrainsToolboxApp', () {
+    testUsingContext('Does not discover Android Studio from JetBrainsToolboxApp', () {
       final String applicationPlistFolder = globals.fs.path.join(
         '/',
         'Applications',
