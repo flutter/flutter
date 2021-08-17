@@ -1796,6 +1796,19 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   TextEditingValue get currentTextEditingValue => _value;
 
   @override
+  void updateEditingValueWithDelta(TextEditingDelta delta) {
+    if (!_shouldCreateInputConnection) {
+      return;
+    }
+
+    print('Delta type: ' + delta.deltaType.toString());
+    print('Delta old text: ' + delta.oldText);
+    print('Delta new text: ' + delta.deltaText);
+    print('Delta beginning of new range: ' + delta.deltaRange.start.toString());
+    print('Delta end of new range: ' + delta.deltaRange.end.toString());
+  }
+
+  @override
   void updateEditingValue(TextEditingValue value) {
     // This method handles text editing state updates from the platform text
     // input plugin. The [EditableText] may not have the focus or an open input
@@ -1805,17 +1818,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // to disable text updating.
     if (!_shouldCreateInputConnection) {
       return;
-    }
-
-    TextDelta? delta = value.delta;
-    if (delta != null) {
-      print('Delta type: ' + delta.deltaType.toString());
-      print('Delta old text: ' + delta.oldText);
-      print('Delta new text: ' + delta.newText);
-      print('Delta beginning of modified range: ' + delta.modifiedRange.start.toString());
-      print('Delta end of modified range: ' + delta.modifiedRange.end.toString());
-      print('Delta beginning of new range: ' + delta.newRange.start.toString());
-      print('Delta end of new range: ' + delta.newRange.end.toString());
     }
 
     if (widget.readOnly) {

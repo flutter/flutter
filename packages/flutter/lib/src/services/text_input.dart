@@ -703,43 +703,69 @@ class RawFloatingCursorPoint {
   final FloatingCursorDragState state;
 }
 
-/// A [TextDeltaType.insertion] singifies there has been a single/sequence
+/// A [TextEditingDeltaType.insertion] singifies there has been a single/sequence
 /// character insertion.
-/// A [TextDeltaType.replacement] signifies that a replacement has occured.
+/// A [TextEditingDeltaType.replacement] signifies that a replacement has occured.
 /// A replacement can occur in cases such as auto-correct, suggestions, and
 /// when a selection is replaced by a single character.
-/// A [TextDeltaType.deletion] signifies there has been a single/sequence
+/// A [TextEditingDeltaType.deletion] signifies there has been a single/sequence
 /// character deletion.
-/// A [TextDeltaType.equality] signifies no text has changed from the last
+/// A [TextEditingDeltaType.equality] signifies no text has changed from the last
 /// [TextEditingValue].
-enum TextDeltaType { insertion, deletion, replacement, equality, none }
+enum TextEditingDeltaType { insertion, deletion, replacement, equality }
 
 /// A model representing the changes made to a [TextEditingValue] from time T1
 /// to T2.
-class TextDelta {
-  const TextDelta({
+class TextEditingDelta {
+  const TextEditingDelta({
     required this.oldText,
-    required this.newText,
+    required this.deltaText,
     required this.deltaType,
-    required this.modifiedRange,
-    required this.newRange
+    required this.deltaRange
   });
 
   /// The old text state before the delta has occured.
   final String oldText;
 
   /// The raw delta value.
-  final String newText;
+  final String deltaText;
 
   /// The type of delta that has occured.
-  /// See [TextDeltaType] for more information.
-  final TextDeltaType deltaType;
-
-  /// The [TextRange] that is being modified.
-  final TextRange modifiedRange;
+  /// See [TextEditingDeltaType] for more information.
+  final TextEditingDeltaType deltaType;
 
   /// The new [TextRange] as a result of the delta.
-  final TextRange newRange;
+  final TextRange deltaRange;
+
+  /// Creates an instance of this class from a JSON object.
+  factory TextEditingDelta.fromJSON(Map<String, dynamic> encoded) {
+    TextEditingDeltaType? deltaType = null;
+
+    switch (encoded['delta'] as String) {
+      case 'INSERTION':
+        deltaType = TextEditingDeltaType.insertion;
+        break;
+      case 'DELETION':
+        deltaType = TextEditingDeltaType.deletion;
+        break;
+      case 'REPLACEMENT':
+        deltaType = TextEditingDeltaType.replacement;
+        break;
+      case 'EQUALITY':
+        deltaType = TextEditingDeltaType.equality;
+        break;
+    }
+
+    return TextEditingDelta(
+      oldText: encoded['oldText'] as String,
+      deltaText: encoded['deltaText'] as String,
+      deltaType: deltaType!,
+      deltaRange: TextRange(
+        start: encoded['deltaStart'] as int? ?? -1,
+        end: encoded['deltaEnd'] as int? ?? -1,
+      ),
+    );
+  }
 }
 
 /// The current text, selection, and composing state for editing a run of text.
@@ -755,32 +781,12 @@ class TextEditingValue {
     this.text = '',
     this.selection = const TextSelection.collapsed(offset: -1),
     this.composing = TextRange.empty,
-    this.delta,
   }) : assert(text != null),
         assert(selection != null),
         assert(composing != null);
 
   /// Creates an instance of this class from a JSON object.
   factory TextEditingValue.fromJSON(Map<String, dynamic> encoded) {
-    TextDeltaType deltaType;
-
-    switch (encoded['delta'] as String) {
-      case 'INSERTION':
-        deltaType = TextDeltaType.insertion;
-        break;
-      case 'DELETION':
-        deltaType = TextDeltaType.deletion;
-        break;
-      case 'REPLACEMENT':
-        deltaType = TextDeltaType.replacement;
-        break;
-      case 'EQUALITY':
-        deltaType = TextDeltaType.equality;
-        break;
-      default:
-        deltaType = TextDeltaType.none;
-    }
-
     return TextEditingValue(
       text: encoded['text'] as String,
       selection: TextSelection(
@@ -792,19 +798,6 @@ class TextEditingValue {
       composing: TextRange(
         start: encoded['composingBase'] as int? ?? -1,
         end: encoded['composingExtent'] as int? ?? -1,
-      ),
-      delta: TextDelta(
-        oldText: encoded['oldText'] as String,
-        newText: encoded['newText'] as String,
-        deltaType: deltaType,
-        modifiedRange: TextRange(
-          start: encoded['modifiedBase'] as int? ?? -1,
-          end: encoded['modifiedExtent'] as int? ?? -1,
-        ),
-        newRange: TextRange(
-          start: encoded['newBase'] as int? ?? -1,
-          end: encoded['newExtent'] as int? ?? -1,
-        ),
       ),
     );
   }
@@ -821,21 +814,16 @@ class TextEditingValue {
   /// A value that corresponds to the empty string with no selection and no composing range.
   static const TextEditingValue empty = TextEditingValue();
 
-  /// The changes that resulted in the current [TextEditingValue].
-  final TextDelta? delta;
-
   /// Creates a copy of this value but with the given fields replaced with the new values.
   TextEditingValue copyWith({
     String? text,
     TextSelection? selection,
     TextRange? composing,
-    TextDelta? delta,
   }) {
     return TextEditingValue(
       text: text ?? this.text,
       selection: selection ?? this.selection,
       composing: composing ?? this.composing,
-      delta: delta ?? this.delta,
     );
   }
 
@@ -1032,6 +1020,13 @@ abstract class TextInputClient {
   /// The new [value] is treated as user input and thus may subject to input
   /// formatting.
   void updateEditingValue(TextEditingValue value);
+
+  /// Requests that this client update its editing state by applying the delta
+  /// received from the engine.
+  ///
+  /// The [delta] is treated as a change that will be applied to the client's
+  /// value.
+  void updateEditingValueWithDelta(TextEditingDelta delta);
 
   /// Requests that this client perform the given action.
   void performAction(TextInputAction action);
@@ -1523,6 +1518,9 @@ class TextInput {
     switch (method) {
       case 'TextInputClient.updateEditingState':
         _currentConnection!._client.updateEditingValue(TextEditingValue.fromJSON(args[1] as Map<String, dynamic>));
+        break;
+      case 'TextInputClient.updateEditingStateWithDelta':
+        _currentConnection!._client.updateEditingValueWithDelta(TextEditingDelta.fromJSON(args[1] as Map<String, dynamic>));
         break;
       case 'TextInputClient.performAction':
         _currentConnection!._client.performAction(_toTextInputAction(args[1] as String));
