@@ -870,6 +870,10 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
   /// Interval for arrow head to fully grow.
   static const double _strokeHeadInterval = 0.33;
 
+  static final Animatable<double> _convertTween = CurveTween(curve:
+    const Interval(0.1, _strokeHeadInterval
+  ));
+
   // Last value received from the widget before null.
   double? _lastValue;
 
@@ -881,23 +885,13 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
   // When value is null the arrow animation starting from wherever we left it.
   @override
   Widget build(BuildContext context) {
-    return _buildAnimation();
-  }
-
-  @override
-  void didUpdateWidget(RefreshProgressIndicator oldWidget) {
     final double? value = widget.value;
-    if (value == null && !_controller.isAnimating)
-      _controller.repeat();
-    else if (value != null && _controller.isAnimating)
-      _controller.stop();
-
     if (value != null) {
       _lastValue = value;
-      _controller.value = CurveTween(curve: const Interval(0.1, _strokeHeadInterval)).transform(value)
+      _controller.value = _convertTween.transform(value)
         * (1333 / 2 / _kIndeterminateCircularDuration);
     }
-    super.didUpdateWidget(oldWidget);
+    return _buildAnimation();
   }
 
   @override
