@@ -916,21 +916,23 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
   Widget _buildMaterialIndicator(BuildContext context, double headValue, double tailValue, double offsetValue, double rotationValue) {
     final double? value = widget.value;
     final double arrowheadScale = value == null ? 0.0 : const Interval(0.1, _strokeHeadInterval).transform(value);
-
-    // Makes arrow to expand a little bit earlier, to match the Android look.
-    final double expandRotation;
-    final double endRotation;
+    final double rotation;
 
     if (value == null && _lastValue == null) {
-      expandRotation = 0.0;
-      endRotation = 0.0;
+      rotation = 0.0;
     } else {
-      expandRotation = math.pi * Tween<double>(begin: 0.0, end: -0.1).chain(CurveTween(
-        curve: const Interval(0.0, _strokeHeadInterval)
-      )).transform(value ?? _lastValue!);
-      endRotation = math.pi * Tween<double>(begin: -0.1, end: 1.45).chain(CurveTween(
-        curve: const Interval(_strokeHeadInterval, 1.0)
-      )).transform(value ?? _lastValue!);
+      rotation = math.pi * TweenSequence<double>([
+        // Makes arrow to expand a little bit earlier, to match the Android look.
+        TweenSequenceItem<double>(
+          tween: Tween<double>(begin: -0.1, end: -0.2),
+          weight: _strokeHeadInterval,
+        ),
+        // Additional rotation after the arrow expanded
+        TweenSequenceItem<double>(
+          tween: Tween<double>(begin: -0.2, end: 1.35),
+          weight: 1 - _strokeHeadInterval,
+        ),
+      ]).transform(value ?? _lastValue!);
     }
 
     Color valueColor = widget._getValueColor(context);
@@ -957,20 +959,17 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
             child: Opacity(
               opacity: opacity,
               child: Transform.rotate(
-                angle: expandRotation,
-                child: Transform.rotate(
-                  angle: endRotation,
-                  child: CustomPaint(
-                    painter: _RefreshProgressIndicatorPainter(
-                      valueColor: valueColor,
-                      value: null, // Draw the indeterminate progress indicator.
-                      headValue: headValue,
-                      tailValue: tailValue,
-                      offsetValue: offsetValue,
-                      rotationValue: rotationValue,
-                      strokeWidth: widget.strokeWidth,
-                      arrowheadScale: arrowheadScale,
-                    ),
+                angle: rotation,
+                child: CustomPaint(
+                  painter: _RefreshProgressIndicatorPainter(
+                    valueColor: valueColor,
+                    value: null, // Draw the indeterminate progress indicator.
+                    headValue: headValue,
+                    tailValue: tailValue,
+                    offsetValue: offsetValue,
+                    rotationValue: rotationValue,
+                    strokeWidth: widget.strokeWidth,
+                    arrowheadScale: arrowheadScale,
                   ),
                 ),
               ),
