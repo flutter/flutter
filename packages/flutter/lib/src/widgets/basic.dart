@@ -2192,7 +2192,7 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
   /// Creates a custom multi-child layout.
   ///
   /// The [delegate] argument must not be null.
-  CustomMultiChildLayout({
+  const CustomMultiChildLayout({
     Key? key,
     required this.delegate,
     List<Widget> children = const <Widget>[],
@@ -3682,7 +3682,7 @@ class ListBody extends MultiChildRenderObjectWidget {
   /// given axis.
   ///
   /// By default, the [mainAxis] is [Axis.vertical].
-  ListBody({
+  const ListBody({
     Key? key,
     this.mainAxis = Axis.vertical,
     this.reverse = false,
@@ -3842,7 +3842,7 @@ class Stack extends MultiChildRenderObjectWidget {
   ///
   /// By default, the non-positioned children of the stack are aligned by their
   /// top left corners.
-  Stack({
+  const Stack({
     Key? key,
     this.alignment = AlignmentDirectional.topStart,
     this.textDirection,
@@ -3975,7 +3975,7 @@ class IndexedStack extends Stack {
   /// Creates a [Stack] widget that paints a single child.
   ///
   /// The [index] argument must not be null.
-  IndexedStack({
+  const IndexedStack({
     Key? key,
     AlignmentGeometry alignment = AlignmentDirectional.topStart,
     TextDirection? textDirection,
@@ -4473,7 +4473,7 @@ class Flex extends MultiChildRenderObjectWidget {
   /// to be necessary to decide which direction to lay the children in or to
   /// disambiguate `start` or `end` values for the main or cross axis
   /// directions, the [textDirection] must not be null.
-  Flex({
+  const Flex({
     Key? key,
     required this.direction,
     this.mainAxisAlignment = MainAxisAlignment.start,
@@ -4850,7 +4850,7 @@ class Row extends Flex {
   /// unless the row has no children or only one child) or to disambiguate
   /// `start` or `end` values for the [mainAxisAlignment], the [textDirection]
   /// must not be null.
-  Row({
+  const Row({
     Key? key,
     MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
     MainAxisSize mainAxisSize = MainAxisSize.max,
@@ -5050,7 +5050,7 @@ class Column extends Flex {
   /// any. If there is no ambient directionality, and a text direction is going
   /// to be necessary to disambiguate `start` or `end` values for the
   /// [crossAxisAlignment], the [textDirection] must not be null.
-  Column({
+  const Column({
     Key? key,
     MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
     MainAxisSize mainAxisSize = MainAxisSize.max,
@@ -5327,7 +5327,7 @@ class Wrap extends MultiChildRenderObjectWidget {
   /// to be necessary to decide which direction to lay the children in or to
   /// disambiguate `start` or `end` values for the main or cross axis
   /// directions, the [textDirection] must not be null.
-  Wrap({
+  const Wrap({
     Key? key,
     this.direction = Axis.horizontal,
     this.alignment = WrapAlignment.start,
@@ -5703,7 +5703,7 @@ class Flow extends MultiChildRenderObjectWidget {
   /// a repaint boundary.
   ///
   /// The [delegate] argument must not be null.
-  Flow.unwrapped({
+  const Flow.unwrapped({
     Key? key,
     required this.delegate,
     List<Widget> children = const <Widget>[],

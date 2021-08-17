@@ -228,7 +228,7 @@ void main() {
                   ),
                   child: page1Center,
                 )
-                : Stack();
+                : const Stack();
           },
         ),
       ),
@@ -271,7 +271,7 @@ void main() {
                       ],
                     ),
                   )
-                  : Stack();
+                  : const Stack();
             },
           ),
         ),

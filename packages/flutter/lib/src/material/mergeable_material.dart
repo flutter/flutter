@@ -645,7 +645,7 @@ class _MergeableMaterialSliceKey extends GlobalKey {
 }
 
 class _MergeableMaterialListBody extends ListBody {
-  _MergeableMaterialListBody({
+  const _MergeableMaterialListBody({
     required List<Widget> children,
     Axis mainAxis = Axis.vertical,
     required this.items,
