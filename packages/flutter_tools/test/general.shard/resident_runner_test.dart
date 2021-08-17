@@ -1808,7 +1808,7 @@ void main() {
       ..dds = DartDevelopmentService();
     ddsLauncherCallback = (Uri uri, {bool enableAuthCodes, bool ipv6, Uri serviceUri}) {
       expect(uri, Uri(scheme: 'foo', host: 'bar'));
-      expect(enableAuthCodes, isFalse);
+      expect(enableAuthCodes, isTrue);
       expect(ipv6, isFalse);
       expect(serviceUri, Uri(scheme: 'http', host: '127.0.0.1', port: 0));
       throw FakeDartDevelopmentServiceException(message:
@@ -1855,7 +1855,7 @@ void main() {
     final Completer<void>done = Completer<void>();
     ddsLauncherCallback = (Uri uri, {bool enableAuthCodes, bool ipv6, Uri serviceUri}) async {
       expect(uri, Uri(scheme: 'foo', host: 'bar'));
-      expect(enableAuthCodes, isTrue);
+      expect(enableAuthCodes, isFalse);
       expect(ipv6, isTrue);
       expect(serviceUri, Uri(scheme: 'http', host: '::1', port: 0));
       done.complete();
@@ -1886,7 +1886,7 @@ void main() {
       ..dds = DartDevelopmentService();
     ddsLauncherCallback = (Uri uri, {bool enableAuthCodes, bool ipv6, Uri serviceUri}) {
       expect(uri, Uri(scheme: 'foo', host: 'bar'));
-      expect(enableAuthCodes, isFalse);
+      expect(enableAuthCodes, isTrue);
       expect(ipv6, isFalse);
       expect(serviceUri, Uri(scheme: 'http', host: '127.0.0.1', port: 0));
       throw FakeDartDevelopmentServiceException(message: 'No URI');

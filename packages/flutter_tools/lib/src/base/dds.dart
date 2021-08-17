@@ -50,7 +50,7 @@ class DartDevelopmentService {
       _ddsInstance = await ddsLauncherCallback(
           observatoryUri,
           serviceUri: ddsUri,
-          enableAuthCodes: disableServiceAuthCodes == true,
+          enableAuthCodes: disableServiceAuthCodes != true,
           ipv6: ipv6 == true,
         );
       unawaited(_ddsInstance?.done.whenComplete(() {
