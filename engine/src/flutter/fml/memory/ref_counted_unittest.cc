@@ -472,13 +472,15 @@ TEST(RefCountedTest, SelfAssignment) {
 
 TEST(RefCountedTest, Swap) {
   MyClass* created1 = nullptr;
-  bool was_destroyed1 = false;
+  static bool was_destroyed1;
+  was_destroyed1 = false;
   RefPtr<MyClass> r1(MakeRefCounted<MyClass>(&created1, &was_destroyed1));
   EXPECT_TRUE(created1);
   EXPECT_EQ(created1, r1.get());
 
   MyClass* created2 = nullptr;
-  bool was_destroyed2 = false;
+  static bool was_destroyed2;
+  was_destroyed2 = false;
   RefPtr<MyClass> r2(MakeRefCounted<MyClass>(&created2, &was_destroyed2));
   EXPECT_TRUE(created2);
   EXPECT_EQ(created2, r2.get());
