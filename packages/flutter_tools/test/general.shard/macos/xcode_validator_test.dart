@@ -182,6 +182,7 @@ void main() {
       );
       final XcodeValidator validator = XcodeValidator(xcode: xcode, userMessages: UserMessages());
       final ValidationResult result = await validator.validate();
+      expect(result.type, ValidationType.installed);
       expect(result.messages.length, 1);
       final ValidationMessage firstMessage = result.messages.first;
       expect(firstMessage.type, ValidationMessageType.information);
