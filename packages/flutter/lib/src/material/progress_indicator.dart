@@ -870,8 +870,23 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
   /// Interval for arrow head to fully grow.
   static const double _strokeHeadInterval = 0.33;
 
-  static final Animatable<double> _convertTween = CurveTween(
+  late final Animatable<double> _convertTween = CurveTween(
     curve: const Interval(0.1, _strokeHeadInterval),
+  );
+
+  late final Animatable<double> _additionalRotationTween = TweenSequence<double>(
+    <TweenSequenceItem<double>>[
+      // Makes arrow to expand a little bit earlier, to match the Android look.
+      TweenSequenceItem<double>(
+        tween: Tween<double>(begin: -0.1, end: -0.2),
+        weight: _strokeHeadInterval,
+      ),
+      // Additional rotation after the arrow expanded
+      TweenSequenceItem<double>(
+        tween: Tween<double>(begin: -0.2, end: 1.35),
+        weight: 1 - _strokeHeadInterval,
+      ),
+    ],
   );
 
   // Last value received from the widget before null.
@@ -911,7 +926,6 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
     );
   }
 
-
   @override
   Widget _buildMaterialIndicator(BuildContext context, double headValue, double tailValue, double offsetValue, double rotationValue) {
     final double? value = widget.value;
@@ -921,18 +935,7 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
     if (value == null && _lastValue == null) {
       rotation = 0.0;
     } else {
-      rotation = math.pi * TweenSequence<double>([
-        // Makes arrow to expand a little bit earlier, to match the Android look.
-        TweenSequenceItem<double>(
-          tween: Tween<double>(begin: -0.1, end: -0.2),
-          weight: _strokeHeadInterval,
-        ),
-        // Additional rotation after the arrow expanded
-        TweenSequenceItem<double>(
-          tween: Tween<double>(begin: -0.2, end: 1.35),
-          weight: 1 - _strokeHeadInterval,
-        ),
-      ]).transform(value ?? _lastValue!);
+      rotation = math.pi * _additionalRotationTween.transform(value ?? _lastValue!);
     }
 
     Color valueColor = widget._getValueColor(context);
