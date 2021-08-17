@@ -2489,11 +2489,10 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(RightAlignParagraph)) {
   ASSERT_TRUE(paragraph->records_[0].style().equals(text_style));
   ASSERT_DOUBLE_EQ(paragraph->records_[0].offset().y(), expected_y);
   expected_y += 30;
-  ASSERT_NEAR(
-      paragraph->records_[0].offset().x(),
-      paragraph->width_ -
-          paragraph->breaker_.getWidths()[paragraph->records_[0].line()],
-      2.0);
+  ASSERT_NEAR(paragraph->records_[0].offset().x(),
+              paragraph->width_ -
+                  paragraph->line_widths_[paragraph->records_[0].line()],
+              2.0);
 
   // width_ takes the full available space, while longest_line_ wraps the glyphs
   // as tightly as possible. Even though this text is more than one line long,
@@ -2506,37 +2505,33 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(RightAlignParagraph)) {
   ASSERT_TRUE(paragraph->records_[2].style().equals(text_style));
   ASSERT_DOUBLE_EQ(paragraph->records_[2].offset().y(), expected_y);
   expected_y += 30;
-  ASSERT_NEAR(
-      paragraph->records_[2].offset().x(),
-      paragraph->width_ -
-          paragraph->breaker_.getWidths()[paragraph->records_[2].line()],
-      2.0);
+  ASSERT_NEAR(paragraph->records_[2].offset().x(),
+              paragraph->width_ -
+                  paragraph->line_widths_[paragraph->records_[2].line()],
+              2.0);
 
   ASSERT_TRUE(paragraph->records_[4].style().equals(text_style));
   ASSERT_DOUBLE_EQ(paragraph->records_[4].offset().y(), expected_y);
   expected_y += 30;
-  ASSERT_NEAR(
-      paragraph->records_[4].offset().x(),
-      paragraph->width_ -
-          paragraph->breaker_.getWidths()[paragraph->records_[4].line()],
-      2.0);
+  ASSERT_NEAR(paragraph->records_[4].offset().x(),
+              paragraph->width_ -
+                  paragraph->line_widths_[paragraph->records_[4].line()],
+              2.0);
 
   ASSERT_TRUE(paragraph->records_[6].style().equals(text_style));
   ASSERT_DOUBLE_EQ(paragraph->records_[6].offset().y(), expected_y);
   expected_y += 30 * 10;
-  ASSERT_NEAR(
-      paragraph->records_[6].offset().x(),
-      paragraph->width_ -
-          paragraph->breaker_.getWidths()[paragraph->records_[6].line()],
-      2.0);
+  ASSERT_NEAR(paragraph->records_[6].offset().x(),
+              paragraph->width_ -
+                  paragraph->line_widths_[paragraph->records_[6].line()],
+              2.0);
 
   ASSERT_TRUE(paragraph->records_[26].style().equals(text_style));
   ASSERT_DOUBLE_EQ(paragraph->records_[26].offset().y(), expected_y);
-  ASSERT_NEAR(
-      paragraph->records_[26].offset().x(),
-      paragraph->width_ -
-          paragraph->breaker_.getWidths()[paragraph->records_[26].line()],
-      2.0);
+  ASSERT_NEAR(paragraph->records_[26].offset().x(),
+              paragraph->width_ -
+                  paragraph->line_widths_[paragraph->records_[26].line()],
+              2.0);
 
   ASSERT_EQ(paragraph_style.text_align,
             paragraph->GetParagraphStyle().text_align);
@@ -2609,7 +2604,7 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(CenterAlignParagraph)) {
   expected_y += 30;
   ASSERT_NEAR(paragraph->records_[0].offset().x(),
               (paragraph->width_ -
-               paragraph->breaker_.getWidths()[paragraph->records_[0].line()]) /
+               paragraph->line_widths_[paragraph->records_[0].line()]) /
                   2,
               2.0);
 
@@ -2618,7 +2613,7 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(CenterAlignParagraph)) {
   expected_y += 30;
   ASSERT_NEAR(paragraph->records_[2].offset().x(),
               (paragraph->width_ -
-               paragraph->breaker_.getWidths()[paragraph->records_[2].line()]) /
+               paragraph->line_widths_[paragraph->records_[2].line()]) /
                   2,
               2.0);
 
@@ -2627,7 +2622,7 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(CenterAlignParagraph)) {
   expected_y += 30;
   ASSERT_NEAR(paragraph->records_[4].offset().x(),
               (paragraph->width_ -
-               paragraph->breaker_.getWidths()[paragraph->records_[4].line()]) /
+               paragraph->line_widths_[paragraph->records_[4].line()]) /
                   2,
               2.0);
 
@@ -2636,18 +2631,17 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(CenterAlignParagraph)) {
   expected_y += 30 * 10;
   ASSERT_NEAR(paragraph->records_[6].offset().x(),
               (paragraph->width_ -
-               paragraph->breaker_.getWidths()[paragraph->records_[6].line()]) /
+               paragraph->line_widths_[paragraph->records_[6].line()]) /
                   2,
               2.0);
 
   ASSERT_TRUE(paragraph->records_[26].style().equals(text_style));
   ASSERT_DOUBLE_EQ(paragraph->records_[26].offset().y(), expected_y);
-  ASSERT_NEAR(
-      paragraph->records_[26].offset().x(),
-      (paragraph->width_ -
-       paragraph->breaker_.getWidths()[paragraph->records_[26].line()]) /
-          2,
-      2.0);
+  ASSERT_NEAR(paragraph->records_[26].offset().x(),
+              (paragraph->width_ -
+               paragraph->line_widths_[paragraph->records_[26].line()]) /
+                  2,
+              2.0);
 
   ASSERT_EQ(paragraph_style.text_align,
             paragraph->GetParagraphStyle().text_align);

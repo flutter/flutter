@@ -54,6 +54,8 @@ bool TextStyle::equals(const TextStyle& other) const {
     return false;
   if (foreground != other.foreground)
     return false;
+  if (font_families.size() != other.font_families.size())
+    return false;
   if (text_shadows.size() != other.text_shadows.size())
     return false;
   for (size_t font_index = 0; font_index < font_families.size(); ++font_index) {
