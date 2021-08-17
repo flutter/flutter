@@ -545,8 +545,8 @@ def main():
       help='Generate coverage reports for each unit test framework run.')
   parser.add_argument('--engine-capture-core-dump', dest='engine_capture_core_dump', action='store_true',
       default=False, help='Capture core dumps from crashes of engine tests.')
-  parser.add_argument('--asan-options', dest='asan_options', action='store', type=str, default='',
-      help='Runtime AddressSanitizer flags to use if built wth asan (example: "verbosity=1:detect_leaks=0')
+  parser.add_argument('--use-sanitizer-suppressions', dest='sanitizer_suppressions', action='store_true',
+      default=False, help='Provide the sanitizer suppressions lists to the via environment to the tests.')
 
   args = parser.parse_args()
 
@@ -559,8 +559,17 @@ def main():
   if args.type != 'java':
     assert os.path.exists(build_dir), 'Build variant directory %s does not exist!' % build_dir
 
-  if args.asan_options:
-    os.environ['ASAN_OPTIONS'] = args.asan_options
+  if args.sanitizer_suppressions:
+    file_dir = os.path.dirname(os.path.abspath(__file__))
+    command = [
+      "env", "-i", "bash",
+      "-c", "source {}/sanitizer_suppressions.sh >/dev/null && env".format(file_dir)
+    ]
+    process = subprocess.Popen(command, stdout=subprocess.PIPE)
+    for line in process.stdout:
+      key, _, value = str(line).partition("=")
+      os.environ[key] = value
+    process.communicate() # Avoid pipe deadlock while waiting for termination.
 
   engine_filter = args.engine_filter.split(',') if args.engine_filter else None
   if 'engine' in types:
