@@ -740,9 +740,6 @@ class FuchsiaDevice extends Device {
   /// provided set of `ports`.
   ///
   /// Returns null if no isolate port can be found.
-  ///
-  // TODO(jonahwilliams): replacing this with the hub will require an update
-  // to the flutter_runner.
   Future<int> findIsolatePort(String isolateName, List<int> ports) async {
     for (final int port in ports) {
       try {
