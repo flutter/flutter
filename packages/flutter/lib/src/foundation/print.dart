@@ -6,13 +6,9 @@ import 'dart:async';
 import 'dart:collection';
 
 /// Signature for [debugPrint] implementations.
-typedef DebugPrintCallback = void Function(String? message, { int? wrapWidth });
-
-/// Prints a message to the console, which you can access using the "flutter"
-/// tool's "logs" command ("flutter logs").
 ///
-/// If a wrapWidth is provided, each line of the message is word-wrapped to that
-/// width. (Lines may be separated by newline characters, as in '\n'.)
+/// If a [wrapWidth] is provided, each line of the [message] is word-wrapped to
+/// that width. (Lines may be separated by newline characters, as in '\n'.)
 ///
 /// By default, this function very crudely attempts to throttle the rate at
 /// which messages are sent to avoid data loss on Android. This means that
@@ -26,6 +22,12 @@ typedef DebugPrintCallback = void Function(String? message, { int? wrapWidth });
 ///
 /// The default value is [debugPrintThrottled]. For a version that acts
 /// identically but does not throttle, use [debugPrintSynchronously].
+typedef DebugPrintCallback = void Function(String? message, { int? wrapWidth });
+
+/// Prints a message to the console, which you can access using the "flutter"
+/// tool's "logs" command ("flutter logs").
+///
+/// See [DebugPrintCallback].
 DebugPrintCallback debugPrint = debugPrintThrottled;
 
 /// Alternative implementation of [debugPrint] that does not throttle.
