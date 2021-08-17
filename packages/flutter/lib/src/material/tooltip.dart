@@ -94,17 +94,19 @@ import 'tooltip_theme.dart';
 /// ```dart
 /// Widget build(BuildContext context) {
 ///     return Tooltip.custom(
-///       tooltip: TextSpan(
-///         text: " Custom",
-///         style: TextStyle(color: Colors.red),
-///         children: [
-///           TextSpan(
-///             text: "Test Tooltip",
-///             style: TextStyle(color: Colors.white70),
-///           ),
-///         ],
+///       tooltip: RichText(
+///         text: const TextSpan(
+///           text: " Custom",
+///           style: TextStyle(color: Colors.red),
+///           children: [
+///             TextSpan(
+///               text: "Test Tooltip",
+///               style: TextStyle(color: Colors.white70),
+///             ),
+///           ],
+///         ),
 ///       ),
-///       child: Text('Hover over the text to show a custom tooltip.'),
+///       child: const Text('Hover over the text to show a custom tooltip.'),
 ///    );
 /// }
 /// ```
