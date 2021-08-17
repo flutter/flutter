@@ -727,7 +727,7 @@ void main() {
     final SemanticsNode truncatedChild = SemanticsNode();
     truncatedChild.tags = <SemanticsTag>{const PlaceholderSpanIndexSemanticsTag(0)};
     paragraph.assembleSemanticsNode(result, SemanticsConfiguration(), <SemanticsNode>[truncatedChild]);
-    // It should only contain the semantics node of the TextSpan
+    // It should only contain the semantics node of the TextSpan.
     expect(result.childrenCount, 1);
     result.visitChildren((SemanticsNode node) {
       expect(node != truncatedChild, isTrue);
