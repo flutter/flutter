@@ -2018,7 +2018,8 @@ TEST_F(EmbedderTest,
 
   constexpr size_t frames_expected = 10;
   fml::CountDownLatch frame_latch(frames_expected);
-  size_t frames_seen = 0;
+  static size_t frames_seen;
+  frames_seen = 0;
   context.AddNativeCallback("SignalNativeTest",
                             CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
                               frames_seen++;
@@ -2056,7 +2057,8 @@ TEST_F(EmbedderTest,
 
   constexpr size_t frames_expected = 10;
   fml::CountDownLatch frame_latch(frames_expected);
-  size_t frames_seen = 0;
+  static size_t frames_seen;
+  frames_seen = 0;
   context.AddNativeCallback("SignalNativeTest",
                             CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
                               frames_seen++;
