@@ -44,8 +44,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     final String studioPath = globals.fs.path.join(bundlePath, 'Contents');
     final String plistFile = globals.fs.path.join(studioPath, 'Info.plist');
     final Map<String, dynamic> plistValues = globals.plistParser.parseFile(plistFile);
-    // As AndroidStudio managed by JetBrainsToolbox could have a wrapper pointing to the real Android Studio.
-    // Check if we've found a JetBrainsToolbox wrapper and deal with it properly.
+    // If we've found a JetBrainsToolbox wrapper, ignore it.
     if (plistValues.containsKey('JetBrainsToolboxApp')) {
       return null;
     }

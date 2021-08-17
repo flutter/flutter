@@ -223,7 +223,7 @@ void main() {
       PlistParser: () => plistUtils,
     });
 
-    testUsingContext('Does not discover Android Studio from JetBrainsToolboxApp', () {
+    testUsingContext('Does not discover Android Studio with JetBrainsToolboxApp wrapper', () {
       final String applicationPlistFolder = globals.fs.path.join(
         '/',
         'Applications',
@@ -234,7 +234,7 @@ void main() {
 
       final String applicationsPlistFilePath = globals.fs.path.join(applicationPlistFolder, 'Info.plist');
       const Map<String, dynamic> jetbrainsInfoPlist = <String, dynamic>{
-        'JetBrainsToolboxApp': '$homeMac/Library/Application Support/JetBrains/Toolbox/apps/AndroidStudio/ch-0/203.7583922/Android Studio.app',
+        'JetBrainsToolboxApp': 'ignored',
       };
       plistUtils.fileContents[applicationsPlistFilePath] = jetbrainsInfoPlist;
 
