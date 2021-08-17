@@ -4,7 +4,6 @@
 
 import 'package:meta/meta.dart';
 
-import './base/version.dart';
 import 'base/async_guard.dart';
 import 'base/terminal.dart';
 import 'globals_null_migrated.dart' as globals;
@@ -142,7 +141,7 @@ class GroupedValidator extends DoctorValidator {
 class ValidationResult {
   /// [ValidationResult.type] should only equal [ValidationResult.installed]
   /// if no [messages] are hints or errors.
-  const ValidationResult(this.type, this.messages, { this.statusInfo, this.versionInfo });
+  const ValidationResult(this.type, this.messages, { this.statusInfo });
 
   factory ValidationResult.crash(Object error, [StackTrace? stackTrace]) {
     return ValidationResult(ValidationType.crash, <ValidationMessage>[
@@ -161,7 +160,6 @@ class ValidationResult {
   // A short message about the status.
   final String? statusInfo;
   final List<ValidationMessage> messages;
-  final Version? versionInfo;
 
   String get leadingBox {
     assert(type != null);

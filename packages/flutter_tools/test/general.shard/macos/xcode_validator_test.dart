@@ -59,19 +59,6 @@ void main() {
       expect(result.messages.last.message, contains('Flutter requires a minimum Xcode version of 12.0.1'));
     });
 
-    testWithoutContext('Check for Xcode version in non-verbose flutter doctor', () async {
-      final ProcessManager processManager = FakeProcessManager.any();
-      final Xcode xcode = Xcode.test(
-        processManager: processManager,
-        xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager, version: Version(12, 0, 1)),
-      );
-      final XcodeValidator validator = XcodeValidator(xcode: xcode, userMessages: UserMessages());
-      final ValidationResult result = await validator.validate();
-      expect(result.type, ValidationType.installed);
-      expect(result.messages.last.type, ValidationMessageType.information);
-      expect(result.statusInfo, '12.0.1');
-    });
-
     testWithoutContext('Emits partial status when Xcode below recommended version', () async {
       final ProcessManager processManager = FakeProcessManager.any();
       final Xcode xcode = Xcode.test(
@@ -195,7 +182,9 @@ void main() {
       );
       final XcodeValidator validator = XcodeValidator(xcode: xcode, userMessages: UserMessages());
       final ValidationResult result = await validator.validate();
-      expect(result.type, ValidationType.installed);
+      final ValidationMessage firstMessage = result.messages.first;
+      expect(firstMessage.type, ValidationMessageType.information);
+      expect(firstMessage.message, 'Xcode at /Library/Developer/CommandLineTools');
       expect(result.statusInfo, '1000.0.0');
     });
   });

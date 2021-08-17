@@ -63,6 +63,6 @@ class XcodeValidator extends DoctorValidator {
       }
     }
 
-    return ValidationResult(xcodeStatus, messages, statusInfo: xcodeVersionInfo, versionInfo: _xcode.currentVersion);
+    return ValidationResult(xcodeStatus, messages, statusInfo: xcodeVersionInfo);
   }
 }
