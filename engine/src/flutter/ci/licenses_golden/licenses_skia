@@ -1,4 +1,4 @@
-Signature: 84d0a762b7ddb7d5817405df71c998dc
+Signature: 29d7ebca3e5cdc5e122f260a9ade4964
 
 UNUSED LICENSES:
 
@@ -3346,8 +3346,6 @@ FILE: ../../../third_party/skia/bench/ClipMaskBench.cpp
 FILE: ../../../third_party/skia/bench/ClipStrategyBench.cpp
 FILE: ../../../third_party/skia/bench/PathTextBench.cpp
 FILE: ../../../third_party/skia/bench/ShadowBench.cpp
-FILE: ../../../third_party/skia/bin/gerrit-number
-FILE: ../../../third_party/skia/bin/sysopen
 FILE: ../../../third_party/skia/dm/DMGpuTestProcs.cpp
 FILE: ../../../third_party/skia/example/HelloWorld.cpp
 FILE: ../../../third_party/skia/example/HelloWorld.h
