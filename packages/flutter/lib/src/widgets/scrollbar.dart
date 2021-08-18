@@ -220,6 +220,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   Radius? get radius => _radius;
   Radius? _radius;
   set radius(Radius? value) {
+    assert(shape == null || value == null);
     if (radius == value)
       return;
 
@@ -240,6 +241,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   OutlinedBorder? get shape => _shape;
   OutlinedBorder? _shape;
   set shape(OutlinedBorder? value){
+    assert(radius == null || value == null);
     if(shape == value)
       return;
 
@@ -1084,6 +1086,7 @@ class RawScrollbar extends StatefulWidget {
   /// Here is an example of using a [StadiumBorder] for drawing the [shape] of the
   /// thumb in a [RawScrollbar]:
   ///
+  /// {@tool dartpad --template=stateless_widget_material}
   /// ```dart
   /// Widget build(BuildContext context) {
   ///   return Scaffold(
@@ -1100,6 +1103,7 @@ class RawScrollbar extends StatefulWidget {
   ///   );
   /// }
   /// ```
+  /// {@end-tool}
   final OutlinedBorder? shape;
 
   /// The [Radius] of the scrollbar thumb's rounded rectangle corners.
