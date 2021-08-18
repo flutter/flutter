@@ -11,6 +11,9 @@ EntityRendererImpl::EntityRendererImpl(std::shared_ptr<Context> context)
   if (!context_ || !context_->IsValid()) {
     return;
   }
+
+  solid_fill_pipeline_ = std::make_unique<SolidFillPipeline>(*context);
+
   is_valid_ = true;
 }
 

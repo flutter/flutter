@@ -4,13 +4,20 @@
 
 #pragma once
 
-#include "flutter/fml/macros.h"
-
 #include <Metal/Metal.h>
+
+#include <future>
+
+#include "flutter/fml/macros.h"
+#include "impeller/compositor/context.h"
+#include "impeller/compositor/pipeline_builder.h"
 
 namespace impeller {
 
 class PipelineLibrary;
+class Pipeline;
+
+using PipelineFuture = std::future<std::shared_ptr<Pipeline>>;
 
 class Pipeline {
  public:
@@ -39,6 +46,29 @@ class Pipeline {
            id<MTLDepthStencilState> depth_stencil_state);
 
   FML_DISALLOW_COPY_AND_ASSIGN(Pipeline);
+};
+
+PipelineFuture CreatePipelineFuture(const Context& context,
+                                    std::optional<PipelineDescriptor> desc);
+
+template <class VertexShader_, class FragmentShader_>
+class PipelineT {
+ public:
+  using VertexShader = VertexShader_;
+  using FragmentShader = FragmentShader_;
+  using Builder = PipelineBuilder<VertexShader, FragmentShader>;
+
+  explicit PipelineT(const Context& context)
+      : pipeline_future_(CreatePipelineFuture(
+            context,
+            Builder::MakeDefaultPipelineDescriptor(context))) {}
+
+  const Pipeline* WaitAndGet() { return pipeline_future_.get().get(); }
+
+ private:
+  PipelineFuture pipeline_future_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(PipelineT);
 };
 
 }  // namespace impeller
