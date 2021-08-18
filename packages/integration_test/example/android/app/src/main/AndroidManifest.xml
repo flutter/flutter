@@ -14,12 +14,6 @@ found in the LICENSE file. -->
         android:name="io.flutter.app.FlutterApplication"
         android:label="integration_test_example"
         android:icon="@mipmap/ic_launcher">
-        <activity android:name=".EmbedderV1Activity"
-                  android:theme="@android:style/Theme.Black.NoTitleBar"
-                  android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection"
-                  android:hardwareAccelerated="true"
-                  android:windowSoftInputMode="adjustResize">
-        </activity>
         <activity
             android:name="io.flutter.embedding.android.FlutterActivity"
             android:theme="@style/LaunchTheme"

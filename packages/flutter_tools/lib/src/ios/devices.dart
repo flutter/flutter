@@ -133,12 +133,9 @@ class IOSDevices extends PollingDeviceDiscovery {
 
     return _xcdevice.getDiagnostics();
   }
-}
 
-enum IOSDeviceInterface {
-  none,
-  usb,
-  network,
+  @override
+  List<String> get wellKnownIds => const <String>[];
 }
 
 class IOSDevice extends Device {
@@ -188,13 +185,13 @@ class IOSDevice extends Device {
   }
 
   @override
-  bool get supportsHotReload => interfaceType == IOSDeviceInterface.usb;
+  bool get supportsHotReload => interfaceType == IOSDeviceConnectionInterface.usb;
 
   @override
-  bool get supportsHotRestart => interfaceType == IOSDeviceInterface.usb;
+  bool get supportsHotRestart => interfaceType == IOSDeviceConnectionInterface.usb;
 
   @override
-  bool get supportsFlutterExit => interfaceType == IOSDeviceInterface.usb;
+  bool get supportsFlutterExit => interfaceType == IOSDeviceConnectionInterface.usb;
 
   @override
   final String name;
@@ -204,7 +201,7 @@ class IOSDevice extends Device {
 
   final DarwinArch cpuArchitecture;
 
-  final IOSDeviceInterface interfaceType;
+  final IOSDeviceConnectionInterface interfaceType;
 
   Map<IOSApp, DeviceLogReader> _logReaders;
 
@@ -324,7 +321,7 @@ class IOSDevice extends Device {
           app: package as BuildableIOSApp,
           buildInfo: debuggingOptions.buildInfo,
           targetOverride: mainPath,
-          buildForDevice: true,
+          environmentType: EnvironmentType.physical,
           activeArch: cpuArchitecture,
           deviceID: id,
       );
@@ -465,7 +462,7 @@ class IOSDevice extends Device {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
 
   @override
-  Future<String> get sdkNameAndVersion async => 'iOS $_sdkVersion';
+  Future<String> get sdkNameAndVersion async => 'iOS ${_sdkVersion ?? 'unknown version'}';
 
   @override
   DeviceLogReader getLogReader({

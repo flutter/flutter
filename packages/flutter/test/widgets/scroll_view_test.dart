@@ -278,7 +278,7 @@ void main() {
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:2),
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         itemCount: focusNodes.length,
-        itemBuilder: (BuildContext context, int index){
+        itemBuilder: (BuildContext context, int index) {
           return Container(
             height: 50,
             color: Colors.green,
@@ -590,7 +590,7 @@ void main() {
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:2),
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
         itemCount: focusNodes.length,
-        itemBuilder: (BuildContext context, int index){
+        itemBuilder: (BuildContext context, int index) {
           return Container(
             height: 50,
             color: Colors.green,

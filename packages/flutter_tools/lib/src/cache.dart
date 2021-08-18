@@ -17,6 +17,7 @@ import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart' show OperatingSystemUtils;
 import 'base/platform.dart';
+import 'base/terminal.dart';
 import 'base/user_messages.dart';
 import 'build_info.dart';
 import 'convert.dart';
@@ -320,7 +321,13 @@ class Cache {
       } on FileSystemException {
         if (!printed) {
           _logger.printTrace('Waiting to be able to obtain lock of Flutter binary artifacts directory: ${_lock!.path}');
-          _logger.printStatus('Waiting for another flutter command to release the startup lock...');
+          // This needs to go to stderr to avoid cluttering up stdout if a parent
+          // process is collecting stdout. It's not really an "error" though,
+          // so print it in grey.
+          _logger.printError(
+            'Waiting for another flutter command to release the startup lock...',
+            color: TerminalColor.grey,
+          );
           printed = true;
         }
         await Future<void>.delayed(const Duration(milliseconds: 50));
@@ -478,7 +485,7 @@ class Cache {
     return versionFile.existsSync() ? versionFile.readAsStringSync().trim() : null;
   }
 
-    /// Delete all stamp files maintained by the cache.
+  /// Delete all stamp files maintained by the cache.
   void clearStampFiles() {
     try {
       getStampFileFor('flutter_tools').deleteSync();
@@ -1072,7 +1079,7 @@ class ArtifactUpdater {
     }
   }
 
-    /// Clear any zip/gzip files downloaded.
+  /// Clear any zip/gzip files downloaded.
   void removeDownloadedFiles() {
     for (final File file in downloadedFiles) {
       if (!file.existsSync()) {
@@ -1106,7 +1113,7 @@ class ArtifactUpdater {
 }
 
 @visibleForTesting
-String flattenNameSubdirs(Uri url, FileSystem fileSystem){
+String flattenNameSubdirs(Uri url, FileSystem fileSystem) {
   final List<String> pieces = <String>[url.host, ...url.pathSegments];
   final Iterable<String> convertedPieces = pieces.map<String>(_flattenNameNoSubdirs);
   return fileSystem.path.joinAll(convertedPieces);

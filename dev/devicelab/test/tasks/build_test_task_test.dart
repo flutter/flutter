@@ -22,7 +22,7 @@ void main() {
       deviceId: 'FAKE_SUCCESS',
       isolateParams: isolateParams,
     );
-    expect(result.data['benchmark'], 'data');
+    expect(result.data!['benchmark'], 'data');
   });
 
   test('runs build only when build arg is given', () async {
@@ -42,7 +42,7 @@ void main() {
       deviceId: 'FAKE_SUCCESS',
       isolateParams: isolateParams,
     );
-    expect(result.data['benchmark'], 'data');
+    expect(result.data!['benchmark'], 'data');
   });
 
   test('sets environment', () async {

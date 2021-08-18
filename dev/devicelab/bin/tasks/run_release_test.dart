@@ -7,7 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_devicelab/common.dart';
-import 'package:flutter_devicelab/framework/adb.dart';
+import 'package:flutter_devicelab/framework/devices.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
@@ -50,7 +50,7 @@ void main() {
         <String>['--suppress-analytics', 'run', '--release', '-d', device.deviceId, 'lib/main.dart'],
         isBot: false, // we just want to test the output, not have any debugging info
       );
-      int runExitCode;
+      int? runExitCode;
       run.stdout
         .transform<String>(utf8.decoder)
         .transform<String>(const LineSplitter())

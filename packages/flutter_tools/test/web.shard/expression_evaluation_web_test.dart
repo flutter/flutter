@@ -36,7 +36,7 @@ void main() {
       await flutter.run(
         withDebugger: true, chrome: true,
         expressionEvaluation: expressionEvaluation,
-        additionalCommandArgs: <String>['--verbose']);
+        additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
     }
 
     Future<void> breakInBuildMethod(FlutterTestDriver flutter) async {
@@ -106,7 +106,6 @@ void main() {
     });
   });
 
-
   group('Flutter test for web', () {
     final TestsProject project = TestsProject();
     Directory tempDir;
@@ -128,8 +127,7 @@ void main() {
         project.breakpointAppUri,
         project.breakpointLine,
       );
-      await flutter.resume();
-      return flutter.waitForPause();
+      return flutter.resume(waitForNextPause: true);
     }
 
     Future<void> startPaused({bool expressionEvaluation}) {
@@ -140,7 +138,7 @@ void main() {
         withDebugger: true, chrome: true,
         expressionEvaluation: expressionEvaluation,
         startPaused: true, script: project.testFilePath,
-        additionalCommandArgs: <String>['--verbose']);
+        additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
     }
 
     testWithoutContext('cannot evaluate expressions if feature is disabled', () async {
@@ -175,7 +173,7 @@ void main() {
 
 Future<void> failToEvaluateExpression(FlutterTestDriver flutter) async {
   await expectLater(
-    () => flutter.evaluateInFrame('"test"'),
+    flutter.evaluateInFrame('"test"'),
     throwsA(isA<RPCError>().having(
       (RPCError error) => error.message,
       'message',

@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=382757700"
+@Tags(<String>['no-shuffle'])
+
 import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart';
@@ -128,7 +134,7 @@ void main() {
       of: find.byType(Scrollbar),
       matching: find.byType(CustomPaint),
     ).first);
-    final dynamic scrollPainter = custom.foregroundPainter;
+    final ScrollbarPainter? scrollPainter = custom.foregroundPainter as ScrollbarPainter?;
     // Dragging makes the scrollbar first appear.
     await tester.drag(find.text('0'), const Offset(0.0, -10.0));
     await tester.pump(const Duration(milliseconds: 200));
@@ -141,9 +147,11 @@ void main() {
       viewportDimension: 100.0,
       axisDirection: AxisDirection.down,
     );
-    scrollPainter.update(metrics, AxisDirection.down);
+    // ignore: avoid_dynamic_calls
+    scrollPainter!.update(metrics, AxisDirection.down);
 
     final TestCanvas canvas = TestCanvas();
+    // ignore: avoid_dynamic_calls
     scrollPainter.paint(canvas, const Size(10.0, 100.0));
 
     // Scrollbar is not supposed to draw anything if there isn't enough content.
@@ -171,7 +179,7 @@ void main() {
       }
 
       await tester.pumpWidget(viewWithScroll());
-      final dynamic exception = tester.takeException();
+      final AssertionError exception = tester.takeException() as AssertionError;
       expect(exception, isAssertionError);
     },
   );
@@ -199,7 +207,7 @@ void main() {
       }
 
       await tester.pumpWidget(viewWithScroll());
-      final dynamic exception = tester.takeException();
+      final AssertionError exception = tester.takeException() as AssertionError;
       expect(exception, isAssertionError);
     },
   );
@@ -1051,8 +1059,9 @@ void main() {
           ),
           child: Scrollbar(
             controller: controller,
-            child: const SingleChildScrollView(
-              child: SizedBox(width: 4000.0, height: 4000.0),
+            child: SingleChildScrollView(
+              controller: controller,
+              child: const SizedBox(width: 4000.0, height: 4000.0),
             ),
           ),
         ),
@@ -1447,8 +1456,12 @@ void main() {
       );
     }
 
-    Widget _buildApp({ ScrollController? scrollController }) {
+    Widget _buildApp({
+      required String id,
+      ScrollController? scrollController,
+    }) {
       return MaterialApp(
+        key: ValueKey<String>(id),
         home: DefaultTabController(
           length: 2,
           child: Scaffold(
@@ -1464,33 +1477,37 @@ void main() {
     }
 
     // Asserts when using the PrimaryScrollController.
-    await tester.pumpWidget(_buildApp());
+    await tester.pumpWidget(_buildApp(id: 'PrimaryScrollController'));
 
     // Swipe to the second tab, resulting in two attached ScrollPositions during
     // the transition.
-    try {
-      await tester.drag(find.text('Test').first, const Offset(10.0, 0.0));
-    } on FlutterError catch (error) {
-      expect(
-        error.message,
-        contains('The Scrollbar attempted to paint using the position attached to the PrimaryScrollController.'),
-      );
-    }
+    await tester.drag(find.text('Test').first, const Offset(-100.0, 0.0));
+    await tester.pump();
+
+    FlutterError error = tester.takeException() as FlutterError;
+    expect(
+      error.message,
+      contains('The PrimaryScrollController is currently attached to more than one ScrollPosition.'),
+    );
 
     // Asserts when using the ScrollController provided by the user.
     final ScrollController scrollController = ScrollController();
-    await tester.pumpWidget(_buildApp(scrollController: scrollController));
+    await tester.pumpWidget(
+      _buildApp(
+        id: 'Provided ScrollController',
+        scrollController: scrollController,
+      ),
+    );
 
     // Swipe to the second tab, resulting in two attached ScrollPositions during
     // the transition.
-    try {
-      await tester.drag(find.text('Test').first, const Offset(10.0, 0.0));
-    } on AssertionError catch (error) {
-      expect(
-        error.message,
-        contains('The Scrollbar attempted to paint using the position attached to the provided ScrollController.'),
-      );
-    }
+    await tester.drag(find.text('Test').first, const Offset(-100.0, 0.0));
+    await tester.pump();
+    error = tester.takeException() as FlutterError;
+    expect(
+      error.message,
+      contains('The provided ScrollController is currently attached to more than one ScrollPosition.'),
+    );
   });
 
   testWidgets('Scrollbar scrollOrientation works correctly', (WidgetTester tester) async {

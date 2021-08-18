@@ -316,8 +316,11 @@ void main() {
     expect(call.positionalArguments[1], const Rect.fromLTRB(10.0, 20.0, 40.0, 60.0));
     expect(call.positionalArguments[2], const Rect.fromLTRB(0.0, 0.0, 100.0, 100.0));
     expect(call.positionalArguments[3], isA<Paint>());
+    // ignore: avoid_dynamic_calls
     expect(call.positionalArguments[3].isAntiAlias, false);
+    // ignore: avoid_dynamic_calls
     expect(call.positionalArguments[3].colorFilter, colorFilter);
+    // ignore: avoid_dynamic_calls
     expect(call.positionalArguments[3].filterQuality, FilterQuality.low);
   });
 
@@ -357,7 +360,7 @@ void main() {
       '   The ImageConfiguration was:\n'
       '     ImageConfiguration(size: Size(100.0, 100.0))\n',
     );
-  }, skip: kIsWeb);
+  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87364
 
   test('DecorationImage - error listener', () async {
     late String exception;
@@ -654,6 +657,7 @@ void main() {
       expect(call.positionalArguments, hasLength(4));
 
       // Image should be positioned in the center of the container
+      // ignore: avoid_dynamic_calls
       expect(call.positionalArguments[2].center, outputRect.center);
     }
   });
@@ -674,6 +678,7 @@ void main() {
     final Invocation call = canvas.invocations.firstWhere((Invocation call) => call.memberName == #drawImageRect);
     // The image should scale down to Size(25.0, 25.0) from Size(100.0, 100.0)
     // considering DecorationImage scale to be 4.0 and Image scale to be 1.0.
+    // ignore: avoid_dynamic_calls
     expect(call.positionalArguments[2].size, const Size(25.0, 25.0));
     expect(call.positionalArguments[2], const Rect.fromLTRB(0.0, 0.0, 25.0, 25.0));
   });
@@ -702,5 +707,5 @@ void main() {
     expect(info.image.debugGetOpenHandleStackTraces()!.length, baselineRefCount);
 
     info.dispose();
-  }, skip: kIsWeb);
+  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87442
 }

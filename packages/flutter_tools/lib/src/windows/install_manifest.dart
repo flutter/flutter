@@ -12,7 +12,7 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
-import '../project.dart';
+import '../cmake_project.dart';
 
 /// Generate an install manifest that is required for CMAKE on UWP projects.
 Future<void> createManifest({

@@ -61,9 +61,12 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('page b'), findsOneWidget);
     expect(find.byType(CupertinoPageTransition), findsOneWidget);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS), skip: kIsWeb);
+  },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    skip: kIsWeb, // [intended] no default transitions on the web.
+  );
 
-  testWidgets('Default PageTransitionsTheme builds a _FadeUpwardsPageTransition for android', (WidgetTester tester) async {
+  testWidgets('Default PageTransitionsTheme builds a _ZoomPageTransition for android', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => Material(
         child: TextButton(
@@ -80,21 +83,24 @@ void main() {
       ),
     );
 
-    Finder findFadeUpwardsPageTransition() {
+    Finder findZoomPageTransition() {
       return find.descendant(
         of: find.byType(MaterialApp),
-        matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_FadeUpwardsPageTransition'),
+        matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_ZoomPageTransition'),
       );
     }
 
     expect(Theme.of(tester.element(find.text('push'))).platform, debugDefaultTargetPlatformOverride);
-    expect(findFadeUpwardsPageTransition(), findsOneWidget);
+    expect(findZoomPageTransition(), findsOneWidget);
 
     await tester.tap(find.text('push'));
     await tester.pumpAndSettle();
     expect(find.text('page b'), findsOneWidget);
-    expect(findFadeUpwardsPageTransition(), findsOneWidget);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb);
+    expect(findZoomPageTransition(), findsOneWidget);
+  },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+    skip: kIsWeb, // [intended] no default transitions on the web.
+  );
 
   testWidgets('PageTransitionsTheme override builds a _OpenUpwardsPageTransition', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
@@ -134,9 +140,12 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('page b'), findsOneWidget);
     expect(findOpenUpwardsPageTransition(), findsOneWidget);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb);
+  },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+    skip: kIsWeb, // [intended] no default transitions on the web.
+  );
 
-  testWidgets('PageTransitionsTheme override builds a _ZoomPageTransition', (WidgetTester tester) async {
+  testWidgets('PageTransitionsTheme override builds a _FadeUpwardsTransition', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => Material(
         child: TextButton(
@@ -152,7 +161,7 @@ void main() {
         theme: ThemeData(
           pageTransitionsTheme: const PageTransitionsTheme(
             builders: <TargetPlatform, PageTransitionsBuilder>{
-              TargetPlatform.android: ZoomPageTransitionsBuilder(), // creates a _ZoomPageTransition
+              TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(), // creates a _FadeUpwardsTransition
             },
           ),
         ),
@@ -160,21 +169,24 @@ void main() {
       ),
     );
 
-    Finder findZoomPageTransition() {
+    Finder findFadeUpwardsPageTransition() {
       return find.descendant(
         of: find.byType(MaterialApp),
-        matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_ZoomPageTransition'),
+        matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_FadeUpwardsPageTransition'),
       );
     }
 
     expect(Theme.of(tester.element(find.text('push'))).platform, debugDefaultTargetPlatformOverride);
-    expect(findZoomPageTransition(), findsOneWidget);
+    expect(findFadeUpwardsPageTransition(), findsOneWidget);
 
     await tester.tap(find.text('push'));
     await tester.pumpAndSettle();
     expect(find.text('page b'), findsOneWidget);
-    expect(findZoomPageTransition(), findsOneWidget);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb);
+    expect(findFadeUpwardsPageTransition(), findsOneWidget);
+  },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+    skip: kIsWeb, // [intended] no default transitions on the web.
+  );
 
   testWidgets('_ZoomPageTransition only cause child widget built once', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/58345
@@ -220,5 +232,8 @@ void main() {
     await tester.tap(find.text('pop'));
     await tester.pumpAndSettle();
     expect(builtCount, 1);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb);
+  },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+    skip: kIsWeb, // [intended] no default transitions on the web.
+  );
 }

@@ -35,7 +35,7 @@ import 'theme.dart';
 /// final List<int> _items = List<int>.generate(50, (int index) => index);
 ///
 /// @override
-/// Widget build(BuildContext context){
+/// Widget build(BuildContext context) {
 ///   final ColorScheme colorScheme = Theme.of(context).colorScheme;
 ///   final Color oddItemColor = colorScheme.primary.withOpacity(0.05);
 ///   final Color evenItemColor = colorScheme.primary.withOpacity(0.15);
@@ -238,7 +238,7 @@ class ReorderableListView extends StatefulWidget {
   /// final List<int> _items = List<int>.generate(50, (int index) => index);
   ///
   /// @override
-  /// Widget build(BuildContext context){
+  /// Widget build(BuildContext context) {
   ///   final ColorScheme colorScheme = Theme.of(context).colorScheme;
   ///   final Color oddItemColor = colorScheme.primary.withOpacity(0.05);
   ///   final Color evenItemColor = colorScheme.primary.withOpacity(0.15);
@@ -421,7 +421,6 @@ class _ReorderableListViewState extends State<ReorderableListView> {
 
     if (widget.buildDefaultDragHandles) {
       switch (Theme.of(context).platform) {
-        case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
         case TargetPlatform.macOS:
@@ -470,6 +469,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
 
         case TargetPlatform.iOS:
         case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
           return ReorderableDelayedDragStartListener(
             key: itemGlobalKey,
             index: index,

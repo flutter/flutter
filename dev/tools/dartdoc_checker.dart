@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
@@ -82,7 +80,7 @@ void checkForUnresolvedDirectives(String htmlOutputPath) {
 int _scanFile(File file) {
   assert(path.extension(file.path) == '.html');
   final Iterable<String> matches = _pattern.allMatches(file.readAsStringSync())
-      .map((RegExpMatch m ) => m.group(0));
+      .map((RegExpMatch m ) => m.group(0)!);
 
   if (matches.isNotEmpty) {
     stderr.writeln('Found unresolved dartdoc directives in ${file.path}:');

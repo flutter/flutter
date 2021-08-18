@@ -278,6 +278,9 @@ class CupertinoAlertDialog extends StatelessWidget {
   ///    section when there are many actions.
   final ScrollController? scrollController;
 
+  ScrollController get _effectiveScrollController =>
+    scrollController ?? ScrollController();
+
   /// A scroll controller that can be used to control the scrolling of the
   /// actions in the dialog.
   ///
@@ -288,6 +291,9 @@ class CupertinoAlertDialog extends StatelessWidget {
   ///  * [scrollController], which can be used for controlling the [content]
   ///    section when it is long.
   final ScrollController? actionScrollController;
+
+  ScrollController get _effectiveActionScrollController =>
+    actionScrollController ?? ScrollController();
 
   /// {@macro flutter.material.dialog.insetAnimationDuration}
   final Duration insetAnimationDuration;
@@ -305,7 +311,7 @@ class CupertinoAlertDialog extends StatelessWidget {
           child: _CupertinoAlertContentSection(
             title: title,
             message: content,
-            scrollController: scrollController,
+            scrollController: _effectiveScrollController,
             titlePadding: EdgeInsets.only(
               left: _kDialogEdgePadding,
               right: _kDialogEdgePadding,
@@ -344,7 +350,7 @@ class CupertinoAlertDialog extends StatelessWidget {
     );
     if (actions.isNotEmpty) {
       actionSection = _CupertinoAlertActionSection(
-        scrollController: actionScrollController,
+        scrollController: _effectiveActionScrollController,
         isActionSheet: false,
         children: actions,
       );
@@ -365,44 +371,48 @@ class CupertinoAlertDialog extends StatelessWidget {
           // iOS does not shrink dialog content below a 1.0 scale factor
           textScaleFactor: math.max(textScaleFactor, 1.0),
         ),
-        child: LayoutBuilder(
-          builder: (BuildContext context, BoxConstraints constraints) {
-            return AnimatedPadding(
-              padding: MediaQuery.of(context).viewInsets +
-                  const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
-              duration: insetAnimationDuration,
-              curve: insetAnimationCurve,
-              child: MediaQuery.removeViewInsets(
-                removeLeft: true,
-                removeTop: true,
-                removeRight: true,
-                removeBottom: true,
-                context: context,
-                child: Center(
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(vertical: _kDialogEdgePadding),
-                    width: isInAccessibilityMode
-                        ? _kAccessibilityCupertinoDialogWidth
-                        : _kCupertinoDialogWidth,
-                    child: CupertinoPopupSurface(
-                      isSurfacePainted: false,
-                      child: Semantics(
-                        namesRoute: true,
-                        scopesRoute: true,
-                        explicitChildNodes: true,
-                        label: localizations.alertDialogLabel,
-                        child: _CupertinoDialogRenderWidget(
-                          contentSection: _buildContent(context),
-                          actionsSection: _buildActions(),
-                          dividerColor: CupertinoColors.separator,
+        child: ScrollConfiguration(
+          // A CupertinoScrollbar is built-in below.
+          behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+          child: LayoutBuilder(
+            builder: (BuildContext context, BoxConstraints constraints) {
+              return AnimatedPadding(
+                padding: MediaQuery.of(context).viewInsets +
+                    const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
+                duration: insetAnimationDuration,
+                curve: insetAnimationCurve,
+                child: MediaQuery.removeViewInsets(
+                  removeLeft: true,
+                  removeTop: true,
+                  removeRight: true,
+                  removeBottom: true,
+                  context: context,
+                  child: Center(
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(vertical: _kDialogEdgePadding),
+                      width: isInAccessibilityMode
+                          ? _kAccessibilityCupertinoDialogWidth
+                          : _kCupertinoDialogWidth,
+                      child: CupertinoPopupSurface(
+                        isSurfacePainted: false,
+                        child: Semantics(
+                          namesRoute: true,
+                          scopesRoute: true,
+                          explicitChildNodes: true,
+                          label: localizations.alertDialogLabel,
+                          child: _CupertinoDialogRenderWidget(
+                            contentSection: _buildContent(context),
+                            actionsSection: _buildActions(),
+                            dividerColor: CupertinoColors.separator,
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
     );
@@ -587,11 +597,17 @@ class CupertinoActionSheet extends StatelessWidget {
   /// short.
   final ScrollController? messageScrollController;
 
+  ScrollController get _effectiveMessageScrollController =>
+    messageScrollController ?? ScrollController();
+
   /// A scroll controller that can be used to control the scrolling of the
   /// [actions] in the action sheet.
   ///
   /// This attribute is typically not needed.
   final ScrollController? actionScrollController;
+
+  ScrollController get _effectiveActionScrollController =>
+    actionScrollController ?? ScrollController();
 
   /// The optional cancel button that is grouped separately from the other
   /// actions.
@@ -605,7 +621,7 @@ class CupertinoActionSheet extends StatelessWidget {
       final Widget titleSection = _CupertinoAlertContentSection(
         title: title,
         message: message,
-        scrollController: messageScrollController,
+        scrollController: _effectiveMessageScrollController,
         titlePadding: const EdgeInsets.only(
           left: _kActionSheetContentHorizontalPadding,
           right: _kActionSheetContentHorizontalPadding,
@@ -646,7 +662,7 @@ class CupertinoActionSheet extends StatelessWidget {
       );
     }
     return _CupertinoAlertActionSection(
-      scrollController: actionScrollController,
+      scrollController: _effectiveActionScrollController,
       hasCancelButton: cancelButton != null,
       isActionSheet: true,
       children: actions!,
@@ -694,23 +710,27 @@ class CupertinoActionSheet extends StatelessWidget {
     }
 
     return SafeArea(
-      child: Semantics(
-        namesRoute: true,
-        scopesRoute: true,
-        explicitChildNodes: true,
-        label: 'Alert',
-        child: CupertinoUserInterfaceLevel(
-          data: CupertinoUserInterfaceLevelData.elevated,
-          child: Container(
-            width: actionSheetWidth,
-            margin: const EdgeInsets.symmetric(
-              horizontal: _kActionSheetEdgeHorizontalPadding,
-              vertical: _kActionSheetEdgeVerticalPadding,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: children,
+      child: ScrollConfiguration(
+        // A CupertinoScrollbar is built-in below
+        behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+        child: Semantics(
+          namesRoute: true,
+          scopesRoute: true,
+          explicitChildNodes: true,
+          label: 'Alert',
+          child: CupertinoUserInterfaceLevel(
+            data: CupertinoUserInterfaceLevelData.elevated,
+            child: Container(
+              width: actionSheetWidth,
+              margin: const EdgeInsets.symmetric(
+                horizontal: _kActionSheetEdgeHorizontalPadding,
+                vertical: _kActionSheetEdgeVerticalPadding,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: children,
+              ),
             ),
           ),
         ),
@@ -1493,6 +1513,7 @@ class _CupertinoAlertContentSection extends StatelessWidget {
     }
 
     return CupertinoScrollbar(
+      controller: scrollController,
       child: SingleChildScrollView(
         controller: scrollController,
         child: Column(
@@ -1557,6 +1578,7 @@ class _CupertinoAlertActionSectionState
     }
 
     return CupertinoScrollbar(
+      controller: widget.scrollController,
       child: SingleChildScrollView(
         controller: widget.scrollController,
         child: _CupertinoDialogActionsRenderWidget(

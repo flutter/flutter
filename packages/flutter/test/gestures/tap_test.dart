@@ -832,11 +832,11 @@ void main() {
     });
 
     tearDown(() {
-      recognized.clear();
       primary.dispose();
       primary2.dispose();
       secondary.dispose();
       tertiary.dispose();
+      recognized.clear();
     });
 
     testGesture('A primary tap recognizer does not form competition with a secondary tap recognizer', (GestureTester tester) {

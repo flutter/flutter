@@ -169,9 +169,9 @@ class PointerEventResampler {
   }
 
   void _dequeueAndSampleNonHoverOrMovePointerEventsUntil(
-      Duration sampleTime,
-      Duration nextSampleTime,
-      HandleEventCallback callback,
+    Duration sampleTime,
+    Duration nextSampleTime,
+    HandleEventCallback callback,
   ) {
     Duration endTime = sampleTime;
     // Scan queued events to determine end time.
@@ -260,8 +260,8 @@ class PointerEventResampler {
   }
 
   void _samplePointerPosition(
-      Duration sampleTime,
-      HandleEventCallback callback,
+    Duration sampleTime,
+    HandleEventCallback callback,
   ) {
     // Position at `sampleTime`.
     final Offset position = _positionAt(sampleTime);

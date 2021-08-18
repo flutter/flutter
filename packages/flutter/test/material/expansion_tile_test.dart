@@ -371,24 +371,23 @@ void main() {
   });
 
   testWidgets('CrossAxisAlignment.baseline is not allowed', (WidgetTester tester) async {
-    try {
-      MaterialApp(
-        home: Material(
-          child: ExpansionTile(
-            initiallyExpanded: true,
-            title: const Text('title'),
-            expandedCrossAxisAlignment: CrossAxisAlignment.baseline,
+    expect(
+      () {
+        MaterialApp(
+          home: Material(
+            child: ExpansionTile(
+              initiallyExpanded: true,
+              title: const Text('title'),
+              expandedCrossAxisAlignment: CrossAxisAlignment.baseline,
+            ),
           ),
-        ),
-      );
-    } on AssertionError catch (error) {
-      expect(error.toString(), contains(
+        );
+      },
+      throwsA(isA<AssertionError>().having((AssertionError error) => error.toString(), '.toString()', contains(
         'CrossAxisAlignment.baseline is not supported since the expanded'
         ' children are aligned in a column, not a row. Try to use another constant.',
-      ));
-      return;
-    }
-    fail('AssertionError was not thrown when expandedCrossAxisAlignment is CrossAxisAlignment.baseline.');
+      ))),
+    );
   });
 
   testWidgets('expandedCrossAxisAlignment and expandedAlignment default values', (WidgetTester tester) async {
@@ -560,5 +559,65 @@ void main() {
 
     expect(getIconColor(), iconColor);
     expect(getTextColor(), textColor);
+  });
+
+  testWidgets('ExpansionTile platform controlAffinity test', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: ExpansionTile(
+          title: Text('Title'),
+        ),
+      ),
+    ));
+
+    final ListTile listTile = tester.widget(find.byType(ListTile));
+    expect(listTile.leading, isNull);
+    expect(listTile.trailing.runtimeType, RotationTransition);
+  });
+
+  testWidgets('ExpansionTile trailing controlAffinity test', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: ExpansionTile(
+          title: Text('Title'),
+          controlAffinity: ListTileControlAffinity.trailing,
+        ),
+      ),
+    ));
+
+    final ListTile listTile = tester.widget(find.byType(ListTile));
+    expect(listTile.leading, isNull);
+    expect(listTile.trailing.runtimeType, RotationTransition);
+  });
+
+  testWidgets('ExpansionTile leading controlAffinity test', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: ExpansionTile(
+          title: Text('Title'),
+          controlAffinity: ListTileControlAffinity.leading,
+        ),
+      ),
+    ));
+
+    final ListTile listTile = tester.widget(find.byType(ListTile));
+    expect(listTile.leading.runtimeType, RotationTransition);
+    expect(listTile.trailing, isNull);
+  });
+
+  testWidgets('ExpansionTile override rotating icon test', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: ExpansionTile(
+          title: Text('Title'),
+          leading: Icon(Icons.info),
+          controlAffinity: ListTileControlAffinity.leading,
+        ),
+      ),
+    ));
+
+    final ListTile listTile = tester.widget(find.byType(ListTile));
+    expect(listTile.leading.runtimeType, Icon);
+    expect(listTile.trailing, isNull);
   });
 }

@@ -310,7 +310,7 @@ void main() {
      expect(log, equals(<String>['left']));
      await gesture.up();
      expect(log, equals(<String>['left']));
-   }, skip: true); // https://github.com/flutter/flutter/issues/4771
+   });
 
   testWidgets('popAndPushNamed', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
@@ -780,7 +780,7 @@ void main() {
       ),
       '/A/B': (BuildContext context) => OnTapPage(
         id: 'B',
-        onTap: (){
+        onTap: () {
           Navigator.of(context).popUntil((Route<dynamic> route) => route.isFirst);
           Navigator.of(context).pushReplacementNamed('/C');
         },
@@ -847,7 +847,7 @@ void main() {
       ),
       '/A/B': (BuildContext context) => OnTapPage(
         id: 'B',
-        onTap: (){
+        onTap: () {
           // Pops all routes with bad predicate.
           Navigator.of(context).popUntil((Route<dynamic> route) => false);
         },
@@ -1582,6 +1582,7 @@ void main() {
 
     final dynamic exception = tester.takeException();
     expect(exception, isA<String>());
+    // ignore: avoid_dynamic_calls
     expect(exception.startsWith('Could not navigate to initial route.'), isTrue);
 
     // Only the root route should've been pushed.
@@ -2542,7 +2543,7 @@ void main() {
     );
   });
 
-  group('Page api', (){
+  group('Page api', () {
     Widget buildNavigator({
       required List<Page<dynamic>> pages,
       required PopPageCallback onPopPage,
@@ -2649,7 +2650,7 @@ void main() {
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/' : (BuildContext context) => OnTapPage(
           id: action,
-          onTap: (){
+          onTap: () {
             if (action == 'push') {
               Navigator.of(context).push(myPage.createRoute(context));
             } else if (action == 'pushReplacement') {
@@ -3597,7 +3598,7 @@ void main() {
 
 typedef AnnouncementCallBack = void Function(Route<dynamic>?);
 
-class NotAnnounced extends Route<void> {/* A place holder for not announced route*/}
+class NotAnnounced extends Route<void> { /* A place holder for not announced route*/ }
 
 class RouteAnnouncementSpy extends Route<void> {
   RouteAnnouncementSpy({

@@ -31,7 +31,6 @@ class GradleHandledError {
     required String line,
     required FlutterProject project,
     required bool usesAndroidX,
-    required bool shouldBuildPluginAsAar,
   }) handler;
 
   /// The [BuildEvent] label is named gradle-[eventLabel].
@@ -46,12 +45,10 @@ enum GradleBuildStatus {
   exit,
   /// The tool can retry the exact same build.
   retry,
-  /// The tool can build the plugins as AAR and retry the build.
-  retryWithAarPlugins,
 }
 
-/// Returns a simple test function that evaluates to [true] if
-/// [errorMessage] is contained in the error message.
+/// Returns a simple test function that evaluates to `true` if at least one of
+/// `errorMessages` is contained in the error message.
 GradleErrorTest _lineMatcher(List<String> errorMessages) {
   return (String line) {
     return errorMessages.any((String errorMessage) => line.contains(errorMessage));
@@ -74,7 +71,6 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   minSdkVersion,
   transformInputIssue,
   lockFileDepMissing,
-  androidXFailureHandler, // Keep last since the pattern is broader.
 ];
 
 // Permission defined error message.
@@ -87,7 +83,6 @@ final GradleHandledError permissionDeniedErrorHandler = GradleHandledError(
     required String line,
     required FlutterProject project,
     required bool usesAndroidX,
-    required bool shouldBuildPluginAsAar,
   }) async {
     globals.printStatus('${globals.logger.terminal.warningMark} Gradle does not have execution permission.', emphasis: true);
     globals.printStatus(
@@ -118,13 +113,12 @@ final GradleHandledError networkErrorHandler = GradleHandledError(
     'javax.net.ssl.SSLHandshakeException: Remote host closed connection during handshake',
     'java.net.SocketException: Connection reset',
     'java.io.FileNotFoundException',
-    'Gateway Time-out'
+    "> Could not get resource 'http",
   ]),
   handler: ({
     required String line,
     required FlutterProject project,
     required bool usesAndroidX,
-    required bool shouldBuildPluginAsAar,
   }) async {
     globals.printError(
       '${globals.logger.terminal.warningMark} Gradle threw an error while downloading artifacts from the network. '
@@ -154,7 +148,6 @@ final GradleHandledError r8FailureHandler = GradleHandledError(
     required String line,
     required FlutterProject project,
     required bool usesAndroidX,
-    required bool shouldBuildPluginAsAar,
   }) async {
     globals.printStatus('${globals.logger.terminal.warningMark} The shrinker may have failed to optimize the Java bytecode.', emphasis: true);
     globals.printStatus('To disable the shrinker, pass the `--no-shrink` flag to this command.', indent: 4);
@@ -162,91 +155,6 @@ final GradleHandledError r8FailureHandler = GradleHandledError(
     return GradleBuildStatus.exit;
   },
   eventLabel: 'r8',
-);
-
-// AndroidX failure.
-//
-// This regex is intentionally broad. AndroidX errors can manifest in multiple
-// different ways and each one depends on the specific code config and
-// filesystem paths of the project. Throwing the broadest net possible here to
-// catch all known and likely cases.
-//
-// Example stack traces:
-// https://github.com/flutter/flutter/issues/27226 "AAPT: error: resource android:attr/fontVariationSettings not found."
-// https://github.com/flutter/flutter/issues/27106 "Android resource linking failed|Daemon: AAPT2|error: failed linking references"
-// https://github.com/flutter/flutter/issues/27493 "error: cannot find symbol import androidx.annotation.NonNull;"
-// https://github.com/flutter/flutter/issues/23995 "error: package android.support.annotation does not exist import android.support.annotation.NonNull;"
-final RegExp _androidXFailureRegex = RegExp(r'(AAPT|androidx|android\.support)');
-
-final RegExp androidXPluginWarningRegex = RegExp(r'\*{57}'
-  r"|WARNING: This version of (\w+) will break your Android build if it or its dependencies aren't compatible with AndroidX."
-  r'|See https://goo.gl/CP92wY for more information on the problem and how to fix it.'
-  r'|This warning prints for all Android build failures. The real root cause of the error may be unrelated.');
-
-@visibleForTesting
-final GradleHandledError androidXFailureHandler = GradleHandledError(
-  test: (String line) {
-    return !androidXPluginWarningRegex.hasMatch(line) &&
-           _androidXFailureRegex.hasMatch(line);
-  },
-  handler: ({
-    required String line,
-    required FlutterProject project,
-    required bool usesAndroidX,
-    required bool shouldBuildPluginAsAar,
-  }) async {
-    final bool hasPlugins = project.flutterPluginsFile.existsSync();
-    if (!hasPlugins) {
-      // If the app doesn't use any plugin, then it's unclear where
-      // the incompatibility is coming from.
-      BuildEvent(
-        'gradle-android-x-failure',
-        type: 'gradle',
-        eventError: 'app-not-using-plugins',
-        flutterUsage: globals.flutterUsage,
-      ).send();
-    }
-    if (hasPlugins && !usesAndroidX) {
-      // If the app isn't using AndroidX, then the app is likely using
-      // a plugin already migrated to AndroidX.
-      globals.printStatus(
-        'AndroidX incompatibilities may have caused this build to fail. '
-        'Please migrate your app to AndroidX. See https://goo.gl/CP92wY .'
-      );
-      BuildEvent(
-        'gradle-android-x-failure',
-        type: 'gradle',
-        eventError: 'app-not-using-androidx',
-        flutterUsage: globals.flutterUsage,
-      ).send();
-    }
-    if (hasPlugins && usesAndroidX && shouldBuildPluginAsAar) {
-      // This is a dependency conflict instead of an AndroidX failure since
-      // by this point the app is using AndroidX, the plugins are built as
-      // AARs, Jetifier translated Support libraries for AndroidX equivalents.
-      BuildEvent(
-        'gradle-android-x-failure',
-        type: 'gradle',
-        eventError: 'using-jetifier',
-        flutterUsage: globals.flutterUsage,
-      ).send();
-    }
-    if (hasPlugins && usesAndroidX && !shouldBuildPluginAsAar) {
-      globals.printStatus(
-        'The build failed likely due to AndroidX incompatibilities in a plugin. '
-        'The tool is about to try using Jetifier to solve the incompatibility.'
-      );
-      BuildEvent(
-        'gradle-android-x-failure',
-        type: 'gradle',
-        eventError: 'not-using-jetifier',
-        flutterUsage: globals.flutterUsage,
-      ).send();
-      return GradleBuildStatus.retryWithAarPlugins;
-    }
-    return GradleBuildStatus.exit;
-  },
-  eventLabel: 'android-x',
 );
 
 /// Handle Gradle error thrown when Gradle needs to download additional
@@ -261,7 +169,6 @@ final GradleHandledError licenseNotAcceptedHandler = GradleHandledError(
     required String line,
     required FlutterProject project,
     required bool usesAndroidX,
-    required bool shouldBuildPluginAsAar,
   }) async {
     const String licenseNotAcceptedMatcher =
       r'You have not accepted the license agreements of the following SDK components:\s*\[(.+)\]';
@@ -295,7 +202,6 @@ final GradleHandledError flavorUndefinedHandler = GradleHandledError(
     required String line,
     required FlutterProject project,
     required bool usesAndroidX,
-    required bool shouldBuildPluginAsAar,
   }) async {
     final RunResult tasksRunResult = await globals.processUtils.run(
       <String>[
@@ -368,7 +274,6 @@ final GradleHandledError minSdkVersion = GradleHandledError(
     required String line,
     required FlutterProject project,
     required bool usesAndroidX,
-    required bool shouldBuildPluginAsAar,
   }) async {
     final File gradleFile = project.directory
         .childDirectory('android')
@@ -409,7 +314,6 @@ final GradleHandledError transformInputIssue = GradleHandledError(
     required String line,
     required FlutterProject project,
     required bool usesAndroidX,
-    required bool shouldBuildPluginAsAar,
   }) async {
     final File gradleFile = project.directory
         .childDirectory('android')
@@ -443,7 +347,6 @@ final GradleHandledError lockFileDepMissing = GradleHandledError(
     required String line,
     required FlutterProject project,
     required bool usesAndroidX,
-    required bool shouldBuildPluginAsAar,
   }) async {
     final File gradleFile = project.directory
         .childDirectory('android')

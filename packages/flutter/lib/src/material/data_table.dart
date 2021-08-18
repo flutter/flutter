@@ -167,7 +167,7 @@ class DataRow {
   ///
   /// ```dart
   /// DataRow(
-  ///   color: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+  ///   color: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
   ///     if (states.contains(MaterialState.selected))
   ///       return Theme.of(context).colorScheme.primary.withOpacity(0.08);
   ///     return null;  // Use the default value.
@@ -382,7 +382,7 @@ class DataCell {
 ///     child: DataTable(
 ///       columns: const <DataColumn>[
 ///         DataColumn(
-///           label: const Text('Number'),
+///           label: Text('Number'),
 ///         ),
 ///       ],
 ///       rows: List<DataRow>.generate(
@@ -390,8 +390,9 @@ class DataCell {
 ///         (int index) => DataRow(
 ///           color: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
 ///             // All rows will have the same selected color.
-///             if (states.contains(MaterialState.selected))
+///             if (states.contains(MaterialState.selected)) {
 ///               return Theme.of(context).colorScheme.primary.withOpacity(0.08);
+///             }
 ///             // Even rows will have a grey color.
 ///             if (index.isEven) {
 ///               return Colors.grey.withOpacity(0.3);
@@ -548,7 +549,7 @@ class DataTable extends StatelessWidget {
   /// {@template flutter.material.DataTable.dataRowColor}
   /// ```dart
   /// DataTable(
-  ///   dataRowColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+  ///   dataRowColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
   ///     if (states.contains(MaterialState.selected))
   ///       return Theme.of(context).colorScheme.primary.withOpacity(0.08);
   ///     return null;  // Use the default value.
@@ -596,7 +597,7 @@ class DataTable extends StatelessWidget {
   /// {@template flutter.material.DataTable.headingRowColor}
   /// ```dart
   /// DataTable(
-  ///   headingRowColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+  ///   headingRowColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
   ///     if (states.contains(MaterialState.hovered))
   ///       return Theme.of(context).colorScheme.primary.withOpacity(0.08);
   ///     return null;  // Use the default value.

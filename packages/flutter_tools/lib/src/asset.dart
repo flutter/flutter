@@ -28,12 +28,12 @@ const String kFontManifestJson = 'FontManifest.json';
 /// The effect of adding `uses-material-design: true` to the pubspec is to insert
 /// the following snippet into the asset manifest:
 ///
-///```yaml
+/// ```yaml
 /// material:
 ///   - family: MaterialIcons
 ///     fonts:
 ///       - asset: fonts/MaterialIcons-Regular.otf
-///```
+/// ```
 const List<Map<String, Object>> kMaterialFonts = <Map<String, Object>>[
   <String, Object>{
     'family': 'MaterialIcons',
@@ -413,7 +413,7 @@ class ManifestAssetBundle implements AssetBundle {
       entries[asset.entryUri.path] ??= DevFSFileContent(assetFile);
     }
 
-    // Update wildcard directories we we can detect changes in them.
+    // Update wildcard directories we can detect changes in them.
     for (final Uri uri in wildcardDirectories) {
       _wildcardDirectories[uri] ??= _fileSystem.directory(uri);
     }
@@ -911,11 +911,7 @@ class _Asset {
   }
 
   @override
-  int get hashCode {
-    return baseDir.hashCode
-        ^ relativeUri.hashCode
-        ^ entryUri.hashCode;
-  }
+  int get hashCode => Object.hash(baseDir, relativeUri, entryUri.hashCode);
 }
 
 // Given an assets directory like this:

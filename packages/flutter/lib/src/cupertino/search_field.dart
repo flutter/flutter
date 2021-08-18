@@ -108,7 +108,7 @@ class CupertinoSearchTextField extends StatefulWidget {
   ///
   /// The [itemColor] and [itemSize] properties allow changing the icon color
   /// and icon size of the search icon (prefix) and X-Mark (suffix).
-  /// They default to [CupertinoColors.secondaryLabel] and [20.0].
+  /// They default to [CupertinoColors.secondaryLabel] and `20.0`.
   ///
   /// The [padding], [prefixInsets], and [suffixInsets] let you set the padding
   /// insets for text, the search icon (prefix), and the X-Mark icon (suffix).
@@ -151,6 +151,7 @@ class CupertinoSearchTextField extends StatefulWidget {
     this.onSuffixTap,
     this.restorationId,
     this.focusNode,
+    this.autofocus = false,
     this.onTap,
     this.autocorrect = true,
     this.enabled,
@@ -240,7 +241,7 @@ class CupertinoSearchTextField extends StatefulWidget {
   /// Sets the base icon size for the suffix and prefix icons.
   ///
   /// Cannot be null. The size of the icon is scaled using the accessibility
-  /// font scale settings. Defaults to [20.0].
+  /// font scale settings. Defaults to `20.0`.
   final double itemSize;
 
   /// Sets the padding insets for the suffix.
@@ -286,6 +287,9 @@ class CupertinoSearchTextField extends StatefulWidget {
 
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
+
+  /// {@macro flutter.widgets.editableText.autofocus}
+  final bool autofocus;
 
   /// {@macro flutter.material.textfield.onTap}
   final VoidCallback? onTap;
@@ -429,6 +433,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
       onChanged: widget.onChanged,
       onSubmitted: widget.onSubmitted,
       focusNode: widget.focusNode,
+      autofocus: widget.autofocus,
       autocorrect: widget.autocorrect,
       textInputAction: TextInputAction.search,
     );

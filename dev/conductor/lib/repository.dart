@@ -9,6 +9,7 @@ import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
+import 'package:yaml/yaml.dart';
 
 import './git.dart';
 import './globals.dart';
@@ -25,7 +26,9 @@ class Remote {
   const Remote({
     required RemoteName name,
     required this.url,
-  }) : _name = name;
+  })  : _name = name,
+        assert(url != null),
+        assert(url != '');
 
   final RemoteName _name;
 
@@ -47,7 +50,7 @@ class Remote {
 abstract class Repository {
   Repository({
     required this.name,
-    required this.fetchRemote,
+    required this.upstreamRemote,
     required this.processManager,
     required this.stdio,
     required this.platform,
@@ -55,20 +58,43 @@ abstract class Repository {
     required this.parentDirectory,
     this.initialRef,
     this.localUpstream = false,
-    this.useExistingCheckout = false,
-    this.pushRemote,
+    String? previousCheckoutLocation,
+    this.mirrorRemote,
   })  : git = Git(processManager),
         assert(localUpstream != null),
-        assert(useExistingCheckout != null);
+        assert(upstreamRemote.url.isNotEmpty) {
+    if (previousCheckoutLocation != null) {
+      _checkoutDirectory = fileSystem.directory(previousCheckoutLocation);
+      if (!_checkoutDirectory!.existsSync()) {
+        throw ConductorException(
+            'Provided previousCheckoutLocation $previousCheckoutLocation does not exist on disk!');
+      }
+      if (initialRef != null) {
+        assert(initialRef != '');
+        git.run(
+          <String>['fetch', upstreamRemote.name],
+          'Fetch ${upstreamRemote.name} to ensure we have latest refs',
+          workingDirectory: _checkoutDirectory!.path,
+        );
+        // Note: if [initialRef] is a remote ref the checkout will be left in a
+        // detached HEAD state.
+        git.run(
+          <String>['checkout', initialRef!],
+          'Checking out initialRef $initialRef',
+          workingDirectory: _checkoutDirectory!.path,
+        );
+      }
+    }
+  }
 
   final String name;
-  final Remote fetchRemote;
+  final Remote upstreamRemote;
 
-  /// Remote to publish tags and commits to.
+  /// Remote for user's mirror.
   ///
-  /// This value can be null, in which case attempting to publish will lead to
+  /// This value can be null, in which case attempting to access it will lead to
   /// a [ConductorException].
-  final Remote? pushRemote;
+  final Remote? mirrorRemote;
 
   /// The initial ref (branch or commit name) to check out.
   final String? initialRef;
@@ -78,7 +104,6 @@ abstract class Repository {
   final Platform platform;
   final FileSystem fileSystem;
   final Directory parentDirectory;
-  final bool useExistingCheckout;
 
   /// If the repository will be used as an upstream for a test repo.
   final bool localUpstream;
@@ -100,55 +125,53 @@ abstract class Repository {
 
   /// Ensure the repository is cloned to disk and initialized with proper state.
   void lazilyInitialize(Directory checkoutDirectory) {
-    if (!useExistingCheckout && checkoutDirectory.existsSync()) {
+    if (checkoutDirectory.existsSync()) {
       stdio.printTrace('Deleting $name from ${checkoutDirectory.path}...');
       checkoutDirectory.deleteSync(recursive: true);
     }
 
-    if (!checkoutDirectory.existsSync()) {
-      stdio.printTrace(
-        'Cloning $name from ${fetchRemote.url} to ${checkoutDirectory.path}...',
+    stdio.printTrace(
+      'Cloning $name from ${upstreamRemote.url} to ${checkoutDirectory.path}...',
+    );
+    git.run(
+      <String>[
+        'clone',
+        '--origin',
+        upstreamRemote.name,
+        '--',
+        upstreamRemote.url,
+        checkoutDirectory.path
+      ],
+      'Cloning $name repo',
+      workingDirectory: parentDirectory.path,
+    );
+    if (mirrorRemote != null) {
+      git.run(
+        <String>['remote', 'add', mirrorRemote!.name, mirrorRemote!.url],
+        'Adding remote ${mirrorRemote!.url} as ${mirrorRemote!.name}',
+        workingDirectory: checkoutDirectory.path,
       );
       git.run(
-        <String>[
-          'clone',
-          '--origin',
-          fetchRemote.name,
-          '--',
-          fetchRemote.url,
-          checkoutDirectory.path
-        ],
-        'Cloning $name repo',
-        workingDirectory: parentDirectory.path,
+        <String>['fetch', mirrorRemote!.name],
+        'Fetching git remote ${mirrorRemote!.name}',
+        workingDirectory: checkoutDirectory.path,
       );
-      if (pushRemote != null) {
+    }
+    if (localUpstream) {
+      // These branches must exist locally for the repo that depends on it
+      // to fetch and push to.
+      for (final String channel in kReleaseChannels) {
         git.run(
-          <String>['remote', 'add', pushRemote!.name, pushRemote!.url],
-          'Adding remote ${pushRemote!.url} as ${pushRemote!.name}',
+          <String>['checkout', channel, '--'],
+          'check out branch $channel locally',
           workingDirectory: checkoutDirectory.path,
         );
-        git.run(
-          <String>['fetch', pushRemote!.name],
-          'Fetching git remote ${pushRemote!.name}',
-          workingDirectory: checkoutDirectory.path,
-        );
-      }
-      if (localUpstream) {
-        // These branches must exist locally for the repo that depends on it
-        // to fetch and push to.
-        for (final String channel in kReleaseChannels) {
-          git.run(
-            <String>['checkout', channel, '--'],
-            'check out branch $channel locally',
-            workingDirectory: checkoutDirectory.path,
-          );
-        }
       }
     }
 
     if (initialRef != null) {
       git.run(
-        <String>['checkout', '${fetchRemote.name}/$initialRef'],
+        <String>['checkout', '${upstreamRemote.name}/$initialRef'],
         'Checking out initialRef $initialRef',
         workingDirectory: checkoutDirectory.path,
       );
@@ -217,13 +240,25 @@ abstract class Repository {
     );
   }
 
-  /// Obtain the version tag of the previous dev release.
-  String getFullTag(String remoteName) {
-    const String glob = '*.*.*-*.*.pre';
+  /// Obtain the version tag at the tip of a release branch.
+  String getFullTag(
+    String remoteName,
+    String branchName, {
+    bool exact = true,
+  }) {
+    // includes both stable (e.g. 1.2.3) and dev tags (e.g. 1.2.3-4.5.pre)
+    const String glob = '*.*.*';
     // describe the latest dev release
-    final String ref = 'refs/remotes/$remoteName/dev';
+    final String ref = 'refs/remotes/$remoteName/$branchName';
     return git.getOutput(
-      <String>['describe', '--match', glob, '--exact-match', '--tags', ref],
+      <String>[
+        'describe',
+        '--match',
+        glob,
+        if (exact) '--exact-match',
+        '--tags',
+        ref,
+      ],
       'obtain last released version number',
       workingDirectory: checkoutDirectory.path,
     );
@@ -232,11 +267,9 @@ abstract class Repository {
   /// List commits in reverse chronological order.
   List<String> revList(List<String> args) {
     return git
-        .getOutput(
-          <String>['rev-list', ...args],
-          'rev-list with args ${args.join(' ')}',
-          workingDirectory: checkoutDirectory.path,
-        )
+        .getOutput(<String>['rev-list', ...args],
+            'rev-list with args ${args.join(' ')}',
+            workingDirectory: checkoutDirectory.path)
         .trim()
         .split('\n');
   }
@@ -332,37 +365,34 @@ abstract class Repository {
     );
   }
 
-  /// Tag [commit] and push the tag to the remote.
-  void tag(String commit, String tagName, String remote) {
-    git.run(
-      <String>['tag', tagName, commit],
-      'tag the commit with the version label',
-      workingDirectory: checkoutDirectory.path,
-    );
-    git.run(
-      <String>['push', remote, tagName],
-      'publish the tag to the repo',
-      workingDirectory: checkoutDirectory.path,
-    );
-  }
-
   /// Push [commit] to the release channel [branch].
-  void updateChannel(
-    String commit,
-    String remote,
-    String branch, {
+  void pushRef({
+    required String fromRef,
+    required String remote,
+    required String toRef,
     bool force = false,
+    bool dryRun = false,
   }) {
-    git.run(
-      <String>[
-        'push',
-        if (force) '--force',
-        remote,
-        '$commit:$branch',
-      ],
-      'update the release branch with the commit',
-      workingDirectory: checkoutDirectory.path,
-    );
+    final List<String> args = <String>[
+      'push',
+      if (force) '--force',
+      remote,
+      '$fromRef:$toRef',
+    ];
+    final String command = <String>[
+      'git',
+      ...args,
+    ].join(' ');
+    if (dryRun) {
+      stdio.printStatus('About to execute command: `$command`');
+    } else {
+      git.run(
+        args,
+        'update the release branch with the commit',
+        workingDirectory: checkoutDirectory.path,
+      );
+      stdio.printStatus('Executed command: `$command`');
+    }
   }
 
   String commit(
@@ -370,6 +400,14 @@ abstract class Repository {
     bool addFirst = false,
   }) {
     assert(!message.contains("'"));
+    final bool hasChanges = git.getOutput(
+      <String>['status', '--porcelain'],
+      'check for uncommitted changes',
+      workingDirectory: checkoutDirectory.path,
+    ).trim().isNotEmpty;
+    if (!hasChanges) {
+      throw ConductorException('Tried to commit with message $message but no changes were present');
+    }
     if (addFirst) {
       git.run(
         <String>['add', '--all'],
@@ -419,16 +457,16 @@ class FrameworkRepository extends Repository {
   FrameworkRepository(
     this.checkouts, {
     String name = 'framework',
-    Remote fetchRemote = const Remote(
+    Remote upstreamRemote = const Remote(
         name: RemoteName.upstream, url: FrameworkRepository.defaultUpstream),
     bool localUpstream = false,
-    bool useExistingCheckout = false,
+    String? previousCheckoutLocation,
     String? initialRef,
-    Remote? pushRemote,
+    Remote? mirrorRemote,
   }) : super(
           name: name,
-          fetchRemote: fetchRemote,
-          pushRemote: pushRemote,
+          upstreamRemote: upstreamRemote,
+          mirrorRemote: mirrorRemote,
           initialRef: initialRef,
           fileSystem: checkouts.fileSystem,
           localUpstream: localUpstream,
@@ -436,7 +474,7 @@ class FrameworkRepository extends Repository {
           platform: checkouts.platform,
           processManager: checkouts.processManager,
           stdio: checkouts.stdio,
-          useExistingCheckout: useExistingCheckout,
+          previousCheckoutLocation: previousCheckoutLocation,
         );
 
   /// A [FrameworkRepository] with the host conductor's repo set as upstream.
@@ -446,22 +484,23 @@ class FrameworkRepository extends Repository {
   factory FrameworkRepository.localRepoAsUpstream(
     Checkouts checkouts, {
     String name = 'framework',
-    bool useExistingCheckout = false,
+    String? previousCheckoutLocation,
     required String upstreamPath,
   }) {
     return FrameworkRepository(
       checkouts,
       name: name,
-      fetchRemote: Remote(
+      upstreamRemote: Remote(
         name: RemoteName.upstream,
         url: 'file://$upstreamPath/',
       ),
       localUpstream: false,
-      useExistingCheckout: useExistingCheckout,
+      previousCheckoutLocation: previousCheckoutLocation,
     );
   }
 
   final Checkouts checkouts;
+  late final CiYaml ciYaml = CiYaml(checkoutDirectory.childFile('.ci.yaml'));
   static const String defaultUpstream =
       'https://github.com/flutter/flutter.git';
 
@@ -473,6 +512,27 @@ class FrameworkRepository extends Repository {
         'cache',
       );
 
+  /// Tag [commit] and push the tag to the remote.
+  void tag(String commit, String tagName, String remote) {
+    assert(commit.isNotEmpty);
+    assert(tagName.isNotEmpty);
+    assert(remote.isNotEmpty);
+    stdio.printStatus('About to tag commit $commit as $tagName...');
+    git.run(
+      <String>['tag', tagName, commit],
+      'tag the commit with the version label',
+      workingDirectory: checkoutDirectory.path,
+    );
+    stdio.printStatus('Tagging successful.');
+    stdio.printStatus('About to push $tagName to remote $remote...');
+    git.run(
+      <String>['push', remote, tagName],
+      'publish the tag to the repo',
+      workingDirectory: checkoutDirectory.path,
+    );
+    stdio.printStatus('Tag push successful.');
+  }
+
   @override
   Repository cloneRepository(String? cloneName) {
     assert(localUpstream);
@@ -480,9 +540,8 @@ class FrameworkRepository extends Repository {
     return FrameworkRepository(
       checkouts,
       name: cloneName,
-      fetchRemote: Remote(
+      upstreamRemote: Remote(
           name: RemoteName.upstream, url: 'file://${checkoutDirectory.path}/'),
-      useExistingCheckout: useExistingCheckout,
     );
   }
 
@@ -537,6 +596,35 @@ class FrameworkRepository extends Repository {
     ) as Map<String, dynamic>;
     return Version.fromString(versionJson['frameworkVersion'] as String);
   }
+
+  /// Update this framework's engine version file.
+  ///
+  /// Returns [true] if the version file was updated and a commit is needed.
+  bool updateEngineRevision(
+    String newEngine, {
+    @visibleForTesting File? engineVersionFile,
+  }) {
+    assert(newEngine.isNotEmpty);
+    engineVersionFile ??= checkoutDirectory
+        .childDirectory('bin')
+        .childDirectory('internal')
+        .childFile('engine.version');
+    assert(engineVersionFile.existsSync());
+    final String oldEngine = engineVersionFile.readAsStringSync();
+    if (oldEngine.trim() == newEngine.trim()) {
+      stdio.printTrace(
+        'Tried to update the engine revision but version file is already up to date at: $newEngine',
+      );
+      return false;
+    }
+    stdio.printStatus('Updating engine revision from $oldEngine to $newEngine');
+    engineVersionFile.writeAsStringSync(
+      // Version files have trailing newlines
+      '${newEngine.trim()}\n',
+      flush: true,
+    );
+    return true;
+  }
 }
 
 /// A wrapper around the host repository that is executing the conductor.
@@ -547,18 +635,16 @@ class HostFrameworkRepository extends FrameworkRepository {
   HostFrameworkRepository({
     required Checkouts checkouts,
     String name = 'host-framework',
-    bool useExistingCheckout = false,
     required String upstreamPath,
   }) : super(
-    checkouts,
-    name: name,
-    fetchRemote: Remote(
-      name: RemoteName.upstream,
-      url: 'file://$upstreamPath/',
-    ),
-    localUpstream: false,
-    useExistingCheckout: useExistingCheckout,
-  ) {
+          checkouts,
+          name: name,
+          upstreamRemote: Remote(
+            name: RemoteName.upstream,
+            url: 'file://$upstreamPath/',
+          ),
+          localUpstream: false,
+        ) {
     _checkoutDirectory = checkouts.fileSystem.directory(upstreamPath);
   }
 
@@ -567,17 +653,20 @@ class HostFrameworkRepository extends FrameworkRepository {
 
   @override
   void newBranch(String branchName) {
-    throw ConductorException('newBranch not implemented for the host repository');
+    throw ConductorException(
+        'newBranch not implemented for the host repository');
   }
 
   @override
   void checkout(String ref) {
-    throw ConductorException('checkout not implemented for the host repository');
+    throw ConductorException(
+        'checkout not implemented for the host repository');
   }
 
   @override
   String cherryPick(String commit) {
-    throw ConductorException('cherryPick not implemented for the host repository');
+    throw ConductorException(
+        'cherryPick not implemented for the host repository');
   }
 
   @override
@@ -590,14 +679,15 @@ class HostFrameworkRepository extends FrameworkRepository {
     throw ConductorException('tag not implemented for the host repository');
   }
 
-  @override
   void updateChannel(
     String commit,
     String remote,
     String branch, {
     bool force = false,
+    bool dryRun = false,
   }) {
-    throw ConductorException('updateChannel not implemented for the host repository');
+    throw ConductorException(
+        'updateChannel not implemented for the host repository');
   }
 
   @override
@@ -613,15 +703,15 @@ class EngineRepository extends Repository {
     this.checkouts, {
     String name = 'engine',
     String initialRef = EngineRepository.defaultBranch,
-    Remote fetchRemote = const Remote(
+    Remote upstreamRemote = const Remote(
         name: RemoteName.upstream, url: EngineRepository.defaultUpstream),
     bool localUpstream = false,
-    bool useExistingCheckout = false,
-    Remote? pushRemote,
+    String? previousCheckoutLocation,
+    Remote? mirrorRemote,
   }) : super(
           name: name,
-          fetchRemote: fetchRemote,
-          pushRemote: pushRemote,
+          upstreamRemote: upstreamRemote,
+          mirrorRemote: mirrorRemote,
           initialRef: initialRef,
           fileSystem: checkouts.fileSystem,
           localUpstream: localUpstream,
@@ -629,10 +719,12 @@ class EngineRepository extends Repository {
           platform: checkouts.platform,
           processManager: checkouts.processManager,
           stdio: checkouts.stdio,
-          useExistingCheckout: useExistingCheckout,
+          previousCheckoutLocation: previousCheckoutLocation,
         );
 
   final Checkouts checkouts;
+
+  late final CiYaml ciYaml = CiYaml(checkoutDirectory.childFile('.ci.yaml'));
 
   static const String defaultUpstream = 'https://github.com/flutter/engine.git';
   static const String defaultBranch = 'master';
@@ -646,20 +738,20 @@ class EngineRepository extends Repository {
     depsFile ??= checkoutDirectory.childFile('DEPS');
     final String fileContent = depsFile.readAsStringSync();
     final RegExp dartPattern = RegExp("[ ]+'dart_revision': '([a-z0-9]{40})',");
-    final Iterable<RegExpMatch> allMatches = dartPattern.allMatches(fileContent);
+    final Iterable<RegExpMatch> allMatches =
+        dartPattern.allMatches(fileContent);
     if (allMatches.length != 1) {
       throw ConductorException(
-        'Unexpected content in the DEPS file at ${depsFile.path}\n'
-        'Expected to find pattern ${dartPattern.pattern} 1 times, but got '
-        '${allMatches.length}.'
-      );
+          'Unexpected content in the DEPS file at ${depsFile.path}\n'
+          'Expected to find pattern ${dartPattern.pattern} 1 times, but got '
+          '${allMatches.length}.');
     }
     final String updatedFileContent = fileContent.replaceFirst(
       dartPattern,
       "  'dart_revision': '$newRevision',",
     );
 
-    depsFile.writeAsStringSync(updatedFileContent);
+    depsFile.writeAsStringSync(updatedFileContent, flush: true);
   }
 
   @override
@@ -669,9 +761,8 @@ class EngineRepository extends Repository {
     return EngineRepository(
       checkouts,
       name: cloneName,
-      fetchRemote: Remote(
+      upstreamRemote: Remote(
           name: RemoteName.upstream, url: 'file://${checkoutDirectory.path}/'),
-      useExistingCheckout: useExistingCheckout,
     );
   }
 }
@@ -690,7 +781,7 @@ class Checkouts {
     required this.stdio,
     required Directory parentDirectory,
     String directoryName = 'flutter_conductor_checkouts',
-  })  : directory = parentDirectory.childDirectory(directoryName) {
+  }) : directory = parentDirectory.childDirectory(directoryName) {
     if (!directory.existsSync()) {
       directory.createSync(recursive: true);
     }
@@ -701,4 +792,69 @@ class Checkouts {
   final Platform platform;
   final ProcessManager processManager;
   final Stdio stdio;
+}
+
+class CiYaml {
+  CiYaml(this.file) {
+    if (!file.existsSync()) {
+      throw ConductorException('Could not find the .ci.yaml file at ${file.path}');
+    }
+  }
+
+  /// Underlying [File] that this object wraps.
+  final File file;
+
+  /// Returns the raw string contents of this file.
+  ///
+  /// This is not cached as the contents can be written to while the conductor
+  /// is running.
+  String get stringContents => file.readAsStringSync();
+
+  /// Returns the parsed contents of the file as a [YamlMap].
+  ///
+  /// This is not cached as the contents can be written to while the conductor
+  /// is running.
+  YamlMap get contents => loadYaml(stringContents) as YamlMap;
+
+  List<String> get enabledBranches {
+    final YamlList yamlList = contents['enabled_branches'] as YamlList;
+    return yamlList.map<String>((dynamic element) {
+      return element as String;
+    }).toList();
+  }
+
+  static final RegExp _enabledBranchPattern = RegExp(r'^enabled_branches:');
+
+  /// Update this .ci.yaml file with the given branch name.
+  ///
+  /// The underlying [File] is written to, but not committed to git. This method
+  /// will throw a [ConductorException] if the [branchName] is already present
+  /// in the file or if the file does not have an "enabled_branches:" field.
+  void enableBranch(String branchName) {
+    final List<String> newStrings = <String>[];
+    if (enabledBranches.contains(branchName)) {
+      throw ConductorException('${file.path} already contains the branch $branchName');
+    }
+    if (!_enabledBranchPattern.hasMatch(stringContents)) {
+      throw ConductorException(
+        'Did not find the expected string "enabled_branches:" in the file ${file.path}',
+      );
+    }
+    final List<String> lines = stringContents.split('\n');
+    bool insertedCurrentBranch = false;
+    for (final String line in lines) {
+      // Every existing line should be copied to the new Yaml
+      newStrings.add(line);
+      if (insertedCurrentBranch) {
+        continue;
+      }
+      if (_enabledBranchPattern.hasMatch(line)) {
+        insertedCurrentBranch = true;
+        // Indent two spaces
+        final String indent = ' ' * 2;
+        newStrings.add('$indent- ${branchName.trim()}');
+      }
+    }
+    file.writeAsStringSync(newStrings.join('\n'), flush: true);
+  }
 }

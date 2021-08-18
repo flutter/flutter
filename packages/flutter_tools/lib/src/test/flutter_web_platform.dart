@@ -737,21 +737,24 @@ class BrowserManager {
 
   /// The callback for handling messages received from the host page.
   void _onMessage(dynamic message) {
-    switch (message['command'] as String) {
-      case 'ping':
-        break;
-      case 'restart':
-        _onRestartController.add(null);
-        break;
-      case 'resume':
-        if (_pauseCompleter != null) {
-          _pauseCompleter.complete();
-        }
-        break;
-      default:
+    assert(message is Map<String, dynamic>);
+    if (message is Map<String, dynamic>) {
+      switch (message['command'] as String) {
+        case 'ping':
+          break;
+        case 'restart':
+          _onRestartController.add(null);
+          break;
+        case 'resume':
+          if (_pauseCompleter != null) {
+            _pauseCompleter.complete();
+          }
+          break;
+        default:
         // Unreachable.
-        assert(false);
-        break;
+          assert(false);
+          break;
+      }
     }
   }
 

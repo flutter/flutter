@@ -12,6 +12,24 @@ import '../rendering/mock_canvas.dart';
 
 void main() {
   testWidgets('test page transition', (WidgetTester tester) async {
+    Iterable<T> _findWidgets<T extends Widget>(Finder of) {
+      return tester.widgetList<T>(
+        find.ancestor(of: of, matching: find.byType(T)),
+      );
+    }
+
+    FadeTransition _findForwardFadeTransition(Finder of) {
+      return _findWidgets<FadeTransition>(of).where(
+        (FadeTransition t) => t.opacity.status == AnimationStatus.forward,
+      ).first;
+    }
+
+    ScaleTransition _findForwardScaleTransition(Finder of) {
+      return _findWidgets<ScaleTransition>(of).where(
+        (ScaleTransition t) => t.scale.status == AnimationStatus.forward,
+      ).first;
+    }
+
     await tester.pumpWidget(
       MaterialApp(
         home: const Material(child: Text('Page 1')),
@@ -23,27 +41,23 @@ void main() {
       ),
     );
 
-    final Offset widget1TopLeft = tester.getTopLeft(find.text('Page 1'));
-
     tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    ScaleTransition widget1Scale = _findForwardScaleTransition(find.text('Page 1'));
+    ScaleTransition widget2Scale = _findForwardScaleTransition(find.text('Page 2'));
+    FadeTransition widget2Opacity = _findForwardFadeTransition(find.text('Page 2'));
+
+    // Page 1 is enlarging, starts from 1.0.
+    expect(widget1Scale.scale.value, greaterThan(1.0));
+    // Page 2 is enlarging from the value less than 1.0.
+    expect(widget2Scale.scale.value, lessThan(1.0));
+    // Page 2 is becoming none transparent.
+    expect(widget2Opacity.opacity.value, lessThan(1.0));
+
+    await tester.pump(const Duration(milliseconds: 250));
     await tester.pump(const Duration(milliseconds: 1));
-
-    FadeTransition widget2Opacity =
-        tester.element(find.text('Page 2')).findAncestorWidgetOfExactType<FadeTransition>()!;
-    Offset widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
-    final Size widget2Size = tester.getSize(find.text('Page 2'));
-
-    // Android transition is vertical only.
-    expect(widget1TopLeft.dx == widget2TopLeft.dx, true);
-    // Page 1 is above page 2 mid-transition.
-    expect(widget1TopLeft.dy < widget2TopLeft.dy, true);
-    // Animation begins 3/4 of the way up the page.
-    expect(widget2TopLeft.dy < widget2Size.height / 4.0, true);
-    // Animation starts with page 2 being near transparent.
-    expect(widget2Opacity.opacity.value < 0.01, true);
-
-    await tester.pump(const Duration(milliseconds: 300));
 
     // Page 2 covers page 1.
     expect(find.text('Page 1'), findsNothing);
@@ -51,22 +65,28 @@ void main() {
 
     tester.state<NavigatorState>(find.byType(Navigator)).pop();
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    widget1Scale = _findForwardScaleTransition(find.text('Page 1'));
+    widget2Scale = _findForwardScaleTransition(find.text('Page 2'));
+    widget2Opacity = _findForwardFadeTransition(find.text('Page 2'));
+
+    // Page 1 is narrowing down, but still larger than 1.0.
+    expect(widget1Scale.scale.value, greaterThan(1.0));
+    // Page 2 is smaller than 1.0.
+    expect(widget2Scale.scale.value, lessThan(1.0));
+    // Page 2 is becoming transparent.
+    expect(widget2Opacity.opacity.value, lessThan(1.0));
+
+    await tester.pump(const Duration(milliseconds: 200));
     await tester.pump(const Duration(milliseconds: 1));
-
-    widget2Opacity =
-        tester.element(find.text('Page 2')).findAncestorWidgetOfExactType<FadeTransition>()!;
-    widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
-
-    // Page 2 starts to move down.
-    expect(widget1TopLeft.dy < widget2TopLeft.dy, true);
-    // Page 2 starts to lose opacity.
-    expect(widget2Opacity.opacity.value < 1.0, true);
-
-    await tester.pump(const Duration(milliseconds: 300));
 
     expect(find.text('Page 1'), isOnstage);
     expect(find.text('Page 2'), findsNothing);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb);
+  },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+    skip: kIsWeb, // [intended] no default transitions on the web.
+  );
 
   testWidgets('test page transition', (WidgetTester tester) async {
     final Key page2Key = UniqueKey();
@@ -147,7 +167,74 @@ void main() {
 
     // Page 1 is back where it started.
     expect(widget1InitialTopLeft == widget1TransientTopLeft, true);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS), skip: kIsWeb);
+  },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    skip: kIsWeb, // [intended] no default transitions on the web.
+  );
+
+  testWidgets('test page transition with FadeUpwardsPageTransitionBuilder', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          pageTransitionsTheme: const PageTransitionsTheme(
+            builders: <TargetPlatform, PageTransitionsBuilder>{
+              TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+            },
+          ),
+        ),
+        home: const Material(child: Text('Page 1')),
+        routes: <String, WidgetBuilder>{
+          '/next': (BuildContext context) {
+            return const Material(child: Text('Page 2'));
+          },
+        },
+      ),
+    );
+
+    final Offset widget1TopLeft = tester.getTopLeft(find.text('Page 1'));
+
+    tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1));
+
+    FadeTransition widget2Opacity =
+    tester.element(find.text('Page 2')).findAncestorWidgetOfExactType<FadeTransition>()!;
+    Offset widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
+    final Size widget2Size = tester.getSize(find.text('Page 2'));
+
+    // Android transition is vertical only.
+    expect(widget1TopLeft.dx == widget2TopLeft.dx, true);
+    // Page 1 is above page 2 mid-transition.
+    expect(widget1TopLeft.dy < widget2TopLeft.dy, true);
+    // Animation begins 3/4 of the way up the page.
+    expect(widget2TopLeft.dy < widget2Size.height / 4.0, true);
+    // Animation starts with page 2 being near transparent.
+    expect(widget2Opacity.opacity.value < 0.01, true);
+
+    await tester.pump(const Duration(milliseconds: 300));
+
+    // Page 2 covers page 1.
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 2'), isOnstage);
+
+    tester.state<NavigatorState>(find.byType(Navigator)).pop();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1));
+
+    widget2Opacity =
+    tester.element(find.text('Page 2')).findAncestorWidgetOfExactType<FadeTransition>()!;
+    widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
+
+    // Page 2 starts to move down.
+    expect(widget1TopLeft.dy < widget2TopLeft.dy, true);
+    // Page 2 starts to lose opacity.
+    expect(widget2Opacity.opacity.value < 1.0, true);
+
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('Page 1'), isOnstage);
+    expect(find.text('Page 2'), findsNothing);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
   testWidgets('test fullscreen dialog transition', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -207,7 +294,10 @@ void main() {
 
     // Page 1 is back where it started.
     expect(widget1InitialTopLeft == widget1TransientTopLeft, true);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS), skip: kIsWeb);
+  },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    skip: kIsWeb, // [intended] no default transitions on the web.
+  );
 
   testWidgets('test no back gesture on Android', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -237,7 +327,10 @@ void main() {
 
     // Page 2 didn't move
     expect(tester.getTopLeft(find.text('Page 2')), Offset.zero);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb);
+  },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+    skip: kIsWeb, // [intended] no default transitions on the web.
+  );
 
   testWidgets('test back gesture', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -278,7 +371,10 @@ void main() {
     await tester.pump();
 
     expect(tester.getTopLeft(find.text('Page 2')), const Offset(100.0, 0.0));
-  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS), skip: kIsWeb);
+  },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    skip: kIsWeb, // [intended] no default transitions on the web.
+  );
 
   testWidgets('back gesture while OS changes', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
@@ -369,7 +465,7 @@ void main() {
     final Offset helloPosition6 = tester.getCenter(find.text('HELLO'));
     expect(helloPosition5, helloPosition6);
     expect(Theme.of(tester.element(find.text('HELLO'))).platform, TargetPlatform.macOS);
-  }, skip: kIsWeb);
+  }, skip: kIsWeb); // [intended] doesn't apply to the web.
 
   testWidgets('test no back gesture on fullscreen dialogs', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -480,7 +576,10 @@ void main() {
 
     // Page 1 is back where it started.
     expect(widget1InitialTopLeft == widget1TransientTopLeft, true);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS), skip: kIsWeb);
+  },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    skip: kIsWeb, // [intended] no default transitions on the web.
+  );
 
   testWidgets('test edge swipe then drop back at starting point works', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -548,7 +647,10 @@ void main() {
 
     expect(find.text('Page 1'), isOnstage);
     expect(find.text('Page 2'), findsNothing);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS), skip: kIsWeb);
+  },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    skip: kIsWeb, // [intended] no default transitions on the web.
+  );
 
   testWidgets('Back swipe dismiss interrupted by route push', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/28728
@@ -643,7 +745,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('route'), findsOneWidget);
     expect(find.text('push'), findsNothing);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS), skip: kIsWeb);
+  },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    skip: kIsWeb, // [intended] no default transitions on the web.
+  );
 
   testWidgets('During back swipe the route ignores input', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/39989
@@ -713,7 +818,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.getTopLeft(find.byKey(pageScaffoldKey)), const Offset(400, 0));
     expect(tester.getTopLeft(find.byKey(homeScaffoldKey)).dx, lessThan(0));
-  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS), skip: kIsWeb);
+  },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    skip: kIsWeb, // [intended] no default transitions on the web.
+  );
 
   testWidgets('After a pop caused by a back-swipe, input reaches the exposed route', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/41024
@@ -784,7 +892,10 @@ void main() {
     await tester.tap(find.byKey(homeScaffoldKey));
     expect(homeTapCount, 2);
     expect(pageTapCount, 1);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS), skip: kIsWeb);
+  },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    skip: kIsWeb, // [intended] no default transitions on the web.
+  );
 
   testWidgets('A MaterialPageRoute should slide out with CupertinoPageTransition when a compatible PageRoute is pushed on top of it', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/44864.
@@ -812,7 +923,10 @@ void main() {
     // Title of the first route slides to the left.
     expect(titleInitialTopLeft.dy, equals(titleTransientTopLeft.dy));
     expect(titleInitialTopLeft.dx, greaterThan(titleTransientTopLeft.dx));
-  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS), skip: kIsWeb);
+  },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    skip: kIsWeb, // [intended] no default transitions on the web.
+  );
 
   testWidgets('MaterialPage works', (WidgetTester tester) async {
     final LocalKey pageKey = UniqueKey();

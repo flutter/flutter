@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'base/file_system.dart';
-import 'project.dart';
+import 'cmake_project.dart';
 
 /// Extracts the `BINARY_NAME` from a project's CMake file.
 ///

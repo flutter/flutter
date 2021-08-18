@@ -26,19 +26,26 @@ import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'build_system/build_system.dart';
 import 'cache.dart';
+import 'custom_devices/custom_devices_config.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/plist_parser.dart';
 import 'ios/xcodeproj.dart';
 import 'macos/cocoapods.dart';
+import 'macos/cocoapods_validator.dart';
 import 'macos/xcode.dart';
 import 'persistent_tool_state.dart';
 import 'project.dart';
 import 'reporting/reporting.dart';
+import 'runner/local_engine.dart';
 import 'version.dart';
+
+/// The flutter GitHub repository.
+String get flutterGit => platform.environment['FLUTTER_GIT_URL'] ?? 'https://github.com/flutter/flutter.git';
 
 Artifacts? get artifacts => context.get<Artifacts>();
 BuildSystem? get buildSystem => context.get<BuildSystem>();
 Cache get cache => context.get<Cache>()!;
+CocoaPodsValidator? get cocoapodsValidator => context.get<CocoaPodsValidator>();
 Config get config => context.get<Config>()!;
 HttpClientFactory? get httpClientFactory => context.get<HttpClientFactory>();
 Logger get logger => context.get<Logger>()!;
@@ -51,6 +58,7 @@ Usage get flutterUsage => context.get<Usage>()!;
 XcodeProjectInterpreter? get xcodeProjectInterpreter => context.get<XcodeProjectInterpreter>();
 Xcode? get xcode => context.get<Xcode>();
 IOSWorkflow? get iosWorkflow => context.get<IOSWorkflow>();
+LocalEngineLocator? get localEngineLocator => context.get<LocalEngineLocator>();
 
 PersistentToolState? get persistentToolState => PersistentToolState.instance;
 
@@ -211,3 +219,5 @@ FlutterProjectFactory get projectFactory {
     fileSystem: fs,
   );
 }
+
+CustomDevicesConfig get customDevicesConfig => context.get<CustomDevicesConfig>()!;
