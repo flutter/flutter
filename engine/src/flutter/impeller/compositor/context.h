@@ -10,13 +10,13 @@
 #include <string>
 
 #include "flutter/fml/macros.h"
-#include "impeller/compositor/pipeline_library.h"
 
 namespace impeller {
 
 class ShaderLibrary;
 class SamplerLibrary;
 class CommandBuffer;
+class PipelineLibrary;
 class Allocator;
 
 class Context {
