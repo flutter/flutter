@@ -15,6 +15,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.robolectric.Shadows.shadowOf;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
@@ -438,6 +439,7 @@ public class FlutterActivityTest {
 
   static class FlutterActivityWithProvidedEngine extends FlutterActivity {
     @Override
+    @SuppressLint("MissingSuperCall")
     protected void onCreate(@Nullable Bundle savedInstanceState) {
       super.delegate = new FlutterActivityAndFragmentDelegate(this);
       super.delegate.setupFlutterEngine();
