@@ -31,10 +31,18 @@ class VertexBufferBuilder {
 
   void SetLabel(std::string label) { label_ = std::move(label); }
 
+  void Reserve(size_t count) { return vertices_.reserve(count); }
+
+  VertexBufferBuilder& AppendVertex(VertexType_ vertex) {
+    vertices_.emplace_back(std::move(vertex));
+    return *this;
+  }
+
   VertexBufferBuilder& AddVertices(
       std::initializer_list<VertexType_> vertices) {
-    for (const auto& vertex : vertices) {
-      vertices_.push_back(vertex);
+    vertices_.reserve(vertices.size());
+    for (auto& vertex : vertices) {
+      vertices_.emplace_back(std::move(vertex));
     }
     return *this;
   }
