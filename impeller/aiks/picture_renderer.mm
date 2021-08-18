@@ -23,7 +23,7 @@ bool PictureRenderer::IsValid() const {
 }
 
 bool PictureRenderer::Render(const Surface& surface,
-                             const RenderPass& onscreen_pass,
+                             RenderPass& onscreen_pass,
                              const Picture& picture) {
   if (!IsValid()) {
     return false;
