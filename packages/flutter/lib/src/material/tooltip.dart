@@ -85,12 +85,13 @@ import 'tooltip_theme.dart';
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold_center}
 ///
-/// This example show a basic [Tooltip.custom] which has a [Container]
-/// containing [Text] as child.
-/// [tooltip] contains your widget to be shown by the tooltip when
-/// the child that Tooltip wraps is hovered over on web or desktop. On mobile,
-/// the tooltip is shown when the widget is long pressed. Also, [decoration],
-/// [height] and other options can be specified like above example.
+/// This example show a basic [Tooltip.custom] example which has a [RichText]
+/// containing a [TextSpan] as child where it shows red text and another
+/// [TextSpan] in the children which shows white text. [tooltip] contains your
+/// widget to be shown by the tooltip when the child that Tooltip wraps is
+/// hovered over on web or desktop. On mobile, the tooltip is shown when the
+/// widget is long pressed. Also, [decoration], [height] and other options can
+/// be specified like above example.
 /// ```dart
 /// Widget build(BuildContext context) {
 ///     return Tooltip.custom(
@@ -154,8 +155,8 @@ class Tooltip extends StatefulWidget {
   /// Creates a tooltip using a widget provided to the [tooltip].
   ///
   /// **NOTE :** Using [Tooltip] and [Tooltip.custom], like examples given
-  /// below, will result in same results unless the [textStyle] or
-  /// [TooltipTheme] is not customised for the first example.Therefore, it is
+  /// below, will show the same results unless the custom [textStyle] or
+  /// [TooltipTheme] is not procvided for the [Tooltip]. Therefore, it is
   /// recommended to use the [Tooltip] instead of [Tooltip.custom] in general
   /// scenarios where just simple text tooltips needed like following examples.
   /// ```dart
