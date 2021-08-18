@@ -9,6 +9,7 @@
 #include "flutter/fml/paths.h"
 #include "impeller/compositor/allocator.h"
 #include "impeller/compositor/command_buffer.h"
+#include "impeller/compositor/pipeline_library.h"
 #include "impeller/compositor/sampler_descriptor.h"
 #include "impeller/compositor/shader_library.h"
 

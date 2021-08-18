@@ -6,7 +6,6 @@
 
 #include <Metal/Metal.h>
 
-#include <future>
 #include <memory>
 #include <unordered_map>
 
@@ -22,11 +21,10 @@ class PipelineLibrary : public std::enable_shared_from_this<PipelineLibrary> {
  public:
   ~PipelineLibrary();
 
-  std::future<std::shared_ptr<Pipeline>> GetRenderPipeline(
+  PipelineFuture GetRenderPipeline(
       std::optional<PipelineDescriptor> descriptor);
 
-  std::future<std::shared_ptr<Pipeline>> GetRenderPipeline(
-      PipelineDescriptor descriptor);
+  PipelineFuture GetRenderPipeline(PipelineDescriptor descriptor);
 
  private:
   friend Context;

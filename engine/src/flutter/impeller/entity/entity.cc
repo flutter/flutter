@@ -69,6 +69,10 @@ bool Entity::HasRenderableContents() const {
     return false;
   }
 
+  if (IsClip()) {
+    return true;
+  }
+
   if (HasStroke()) {
     return true;
   }

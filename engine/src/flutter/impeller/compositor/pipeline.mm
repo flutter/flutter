@@ -4,6 +4,9 @@
 
 #include "impeller/compositor/pipeline.h"
 
+#include "impeller/compositor/context.h"
+#include "impeller/compositor/pipeline_library.h"
+
 namespace impeller {
 
 Pipeline::Pipeline(id<MTLRenderPipelineState> state,
@@ -28,6 +31,18 @@ id<MTLRenderPipelineState> Pipeline::GetMTLRenderPipelineState() const {
 
 id<MTLDepthStencilState> Pipeline::GetMTLDepthStencilState() const {
   return depth_stencil_state_;
+}
+
+PipelineFuture CreatePipelineFuture(const Context& context,
+                                    std::optional<PipelineDescriptor> desc) {
+  if (!context.IsValid()) {
+    std::promise<std::shared_ptr<Pipeline>> promise;
+    auto future = promise.get_future();
+    promise.set_value(nullptr);
+    return future;
+  }
+
+  return context.GetPipelineLibrary()->GetRenderPipeline(std::move(desc));
 }
 
 }  // namespace impeller
