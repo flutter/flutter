@@ -58,6 +58,7 @@ class XcodeProjectInterpreter {
           processManager: processManager,
         ),
         _version = version,
+        _versionText = version?.toString(),
         _usage = usage;
 
   /// Create an [XcodeProjectInterpreter] for testing.

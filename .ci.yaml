@@ -2092,6 +2092,8 @@ targets:
     scheduler: luci
     runIf:
       - dev/**
+      - packages/flutter_tools/**
+      - packages/integration_test/**
       - bin/**
 
   - name: Mac plugin_test

@@ -605,11 +605,11 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
 
   @override
   Future<void> startDartDevelopmentService(
-    Uri observatoryUri,
+    Uri observatoryUri, {
+    @required Logger logger,
     int hostPort,
     bool ipv6,
-    bool disableServiceAuthCodes, {
-    @required Logger logger,
+    bool disableServiceAuthCodes,
   }) async {
     started = true;
   }
