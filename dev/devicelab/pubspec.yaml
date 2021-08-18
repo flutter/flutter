@@ -11,6 +11,7 @@ dependencies:
   file: 6.1.2
   http: 0.13.3
   meta: 1.7.0
+  metrics_center: 1.0.0
   path: 1.8.0
   platform: 3.0.2
   process: 4.2.3

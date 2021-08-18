@@ -5,6 +5,7 @@
 import 'package:args/command_runner.dart';
 
 import '../framework/cocoon.dart';
+import '../framework/metrics_center.dart';
 
 class UploadResultsCommand extends Command<void> {
   UploadResultsCommand() {
@@ -37,6 +38,15 @@ class UploadResultsCommand extends Command<void> {
     final String? gitBranch = argResults!['git-branch'] as String?;
     final String? builderName = argResults!['luci-builder'] as String?;
     final String? testStatus = argResults!['test-status'] as String?;
+
+    // Upload metrics to metrics_center from test runner.
+    // The upload step will be skipped from cocoon once this is validated.
+    try {
+      await uploadToMetricsCenter(resultsPath);
+      print('Successfully uploaded metrics to metrics center');
+    } on Exception catch (e, stacktrace) {
+      print('Uploading metrics failure: $e\n\n$stacktrace');
+    }
 
     final Cocoon cocoon = Cocoon(serviceAccountTokenPath: serviceAccountTokenFile);
     return cocoon.sendResultsPath(
