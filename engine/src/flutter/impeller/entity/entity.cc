@@ -62,6 +62,10 @@ bool Entity::HasStroke() const {
   return stroke_size_ > 0.0 && !stroke_color_.IsTransparent();
 }
 
+bool Entity::HasContents() const {
+  return !background_color_.IsTransparent();
+}
+
 bool Entity::HasRenderableContents() const {
   const bool has_empty_path = path_.GetBoundingBox().IsZero();
 
@@ -77,7 +81,7 @@ bool Entity::HasRenderableContents() const {
     return true;
   }
 
-  if (!background_color_.IsTransparent()) {
+  if (HasContents()) {
     return true;
   }
 

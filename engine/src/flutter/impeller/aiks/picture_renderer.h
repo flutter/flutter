@@ -23,7 +23,7 @@ class PictureRenderer {
   bool IsValid() const;
 
   [[nodiscard]] bool Render(const Surface& surface,
-                            const RenderPass& onscreen_pass,
+                            RenderPass& onscreen_pass,
                             const Picture& picture);
 
  private:

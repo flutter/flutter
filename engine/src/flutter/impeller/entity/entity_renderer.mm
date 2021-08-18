@@ -24,7 +24,7 @@ bool EntityRenderer::IsValid() const {
 }
 
 bool EntityRenderer::RenderEntities(const Surface& surface,
-                                    const RenderPass& onscreen_pass,
+                                    RenderPass& onscreen_pass,
                                     const std::vector<Entity>& entities) const {
   if (!IsValid()) {
     return false;

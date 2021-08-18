@@ -63,7 +63,7 @@ class PipelineT {
             context,
             Builder::MakeDefaultPipelineDescriptor(context))) {}
 
-  const Pipeline* WaitAndGet() { return pipeline_future_.get().get(); }
+  std::shared_ptr<Pipeline> WaitAndGet() { return pipeline_future_.get(); }
 
  private:
   PipelineFuture pipeline_future_;
