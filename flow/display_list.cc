@@ -951,17 +951,19 @@ bool DisplayList::Equals(const DisplayList& other) const {
   if (used_ != other.used_ || op_count_ != other.op_count_) {
     return false;
   }
-  if (ptr_ == other.ptr_) {
+  uint8_t* ptr = storage_.get();
+  uint8_t* o_ptr = other.storage_.get();
+  if (ptr == o_ptr) {
     return true;
   }
-  return CompareOps(ptr_, ptr_ + used_, other.ptr_, other.ptr_ + other.used_);
+  return CompareOps(ptr, ptr + used_, o_ptr, o_ptr + other.used_);
 }
 
 DisplayList::DisplayList(uint8_t* ptr,
                          size_t used,
                          int op_count,
                          const SkRect& cull)
-    : ptr_(ptr),
+    : storage_(ptr),
       used_(used),
       op_count_(op_count),
       bounds_({0, 0, -1, -1}),
@@ -973,7 +975,8 @@ DisplayList::DisplayList(uint8_t* ptr,
 }
 
 DisplayList::~DisplayList() {
-  DisposeOps(ptr_, ptr_ + used_);
+  uint8_t* ptr = storage_.get();
+  DisposeOps(ptr, ptr + used_);
 }
 
 #define DL_BUILDER_PAGE 4096

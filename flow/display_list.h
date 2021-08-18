@@ -168,8 +168,7 @@ class DisplayList : public SkRefCnt {
   static const SkSamplingOptions CubicSampling;
 
   DisplayList()
-      : ptr_(nullptr),
-        used_(0),
+      : used_(0),
         op_count_(0),
         unique_id_(0),
         bounds_({0, 0, 0, 0}),
@@ -177,7 +176,10 @@ class DisplayList : public SkRefCnt {
 
   ~DisplayList();
 
-  void Dispatch(Dispatcher& ctx) const { Dispatch(ctx, ptr_, ptr_ + used_); }
+  void Dispatch(Dispatcher& ctx) const {
+    uint8_t* ptr = storage_.get();
+    Dispatch(ctx, ptr, ptr + used_);
+  }
 
   void RenderTo(SkCanvas* canvas) const;
 
@@ -199,7 +201,7 @@ class DisplayList : public SkRefCnt {
  private:
   DisplayList(uint8_t* ptr, size_t used, int op_count, const SkRect& cull_rect);
 
-  uint8_t* ptr_;
+  std::unique_ptr<uint8_t, SkFunctionWrapper<void(void*), sk_free>> storage_;
   size_t used_;
   int op_count_;
 
