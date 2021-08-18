@@ -10,6 +10,7 @@
 #include <lib/zx/vmo.h>
 
 #include <array>
+#include <cstdint>
 #include <memory>
 
 #include "flutter/flow/raster_cache_key.h"
@@ -21,6 +22,8 @@
 #include "third_party/skia/include/core/SkSurface.h"
 
 namespace flutter_runner {
+
+using ReleaseImageCallback = std::function<void()>;
 
 class SurfaceProducerSurface {
  public:
@@ -37,9 +40,21 @@ class SurfaceProducerSurface {
   virtual void SignalWritesFinished(
       const std::function<void(void)>& on_writes_committed) = 0;
 
+  virtual void SetImageId(uint32_t image_id) = 0;
+
   virtual uint32_t GetImageId() = 0;
 
   virtual sk_sp<SkSurface> GetSkiaSurface() const = 0;
+
+  virtual fuchsia::ui::composition::BufferCollectionImportToken
+  GetBufferCollectionImportToken() = 0;
+
+  virtual zx::event GetAcquireFence() = 0;
+
+  virtual zx::event GetReleaseFence() = 0;
+
+  virtual void SetReleaseImageCallback(
+      ReleaseImageCallback release_image_callback) = 0;
 };
 
 class SurfaceProducer {
@@ -71,6 +86,7 @@ class VulkanSurface final : public SurfaceProducerSurface {
  public:
   VulkanSurface(vulkan::VulkanProvider& vulkan_provider,
                 fuchsia::sysmem::AllocatorSyncPtr& sysmem_allocator,
+                fuchsia::ui::composition::AllocatorPtr& flatland_allocator,
                 sk_sp<GrDirectContext> context,
                 scenic::Session* session,
                 const SkISize& size,
@@ -96,10 +112,27 @@ class VulkanSurface final : public SurfaceProducerSurface {
       const std::function<void(void)>& on_writes_committed) override;
 
   // |SurfaceProducerSurface|
+  void SetImageId(uint32_t image_id) override;
+
+  // |SurfaceProducerSurface|
   uint32_t GetImageId() override;
 
   // |SurfaceProducerSurface|
   sk_sp<SkSurface> GetSkiaSurface() const override;
+
+  // |SurfaceProducerSurface|
+  fuchsia::ui::composition::BufferCollectionImportToken
+  GetBufferCollectionImportToken() override;
+
+  // |SurfaceProducerSurface|
+  zx::event GetAcquireFence() override;
+
+  // |SurfaceProducerSurface|
+  zx::event GetReleaseFence() override;
+
+  // |SurfaceProducerSurface|
+  void SetReleaseImageCallback(
+      ReleaseImageCallback release_image_callback) override;
 
   const vulkan::VulkanHandle<VkImage>& GetVkImage() {
     return vulkan_image_.vk_image;
@@ -144,10 +177,12 @@ class VulkanSurface final : public SurfaceProducerSurface {
                      zx_status_t status,
                      const zx_packet_signal_t* signal);
 
-  bool AllocateDeviceMemory(fuchsia::sysmem::AllocatorSyncPtr& sysmem_allocator,
-                            sk_sp<GrDirectContext> context,
-                            const SkISize& size,
-                            uint32_t buffer_id);
+  bool AllocateDeviceMemory(
+      fuchsia::sysmem::AllocatorSyncPtr& sysmem_allocator,
+      fuchsia::ui::composition::AllocatorPtr& flatland_allocator,
+      sk_sp<GrDirectContext> context,
+      const SkISize& size,
+      uint32_t buffer_id);
 
   bool CreateVulkanImage(vulkan::VulkanProvider& vulkan_provider,
                          const SkISize& size,
@@ -176,6 +211,7 @@ class VulkanSurface final : public SurfaceProducerSurface {
   vulkan::VulkanHandle<VkFence> command_buffer_fence_;
   sk_sp<SkSurface> sk_surface_;
   uint32_t buffer_id_ = 0;
+  fuchsia::ui::composition::BufferCollectionImportToken import_token_;
   uint32_t image_id_ = 0;
   vulkan::VulkanHandle<VkBufferCollectionFUCHSIA> collection_;
   zx::event acquire_event_;
@@ -188,6 +224,7 @@ class VulkanSurface final : public SurfaceProducerSurface {
   int size_history_index_ = 0;
   size_t age_ = 0;
   bool valid_ = false;
+  ReleaseImageCallback release_image_callback_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(VulkanSurface);
 };
