@@ -1,4 +1,4 @@
-Signature: 98db5194a0f103aa503050fec4dc20fa
+Signature: a71c772f405aebc04192d81a402f30b7
 
 UNUSED LICENSES:
 
@@ -1338,10 +1338,10 @@ FILE: ../../../third_party/skia/src/gpu/gl/mac/GrGLMakeNativeInterface_mac.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/win/GrGLMakeNativeInterface_win.cpp
 FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSL.cpp
 FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSL.h
-FILE: ../../../third_party/skia/src/gpu/ops/GrAAHairLinePathRenderer.cpp
-FILE: ../../../third_party/skia/src/gpu/ops/GrAAHairLinePathRenderer.h
-FILE: ../../../third_party/skia/src/gpu/ops/GrDefaultPathRenderer.cpp
-FILE: ../../../third_party/skia/src/gpu/ops/GrDefaultPathRenderer.h
+FILE: ../../../third_party/skia/src/gpu/ops/AAHairLinePathRenderer.cpp
+FILE: ../../../third_party/skia/src/gpu/ops/AAHairLinePathRenderer.h
+FILE: ../../../third_party/skia/src/gpu/ops/DefaultPathRenderer.cpp
+FILE: ../../../third_party/skia/src/gpu/ops/DefaultPathRenderer.h
 FILE: ../../../third_party/skia/src/gpu/v1/Device.cpp
 FILE: ../../../third_party/skia/src/pdf/SkPDFDevice.cpp
 FILE: ../../../third_party/skia/src/pdf/SkPDFDevice.h
@@ -2127,8 +2127,8 @@ FILE: ../../../third_party/skia/src/gpu/gl/GrGLCaps.h
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLProgramDataManager.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLProgramDataManager.h
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLUtil.h
-FILE: ../../../third_party/skia/src/gpu/ops/GrAAConvexPathRenderer.cpp
-FILE: ../../../third_party/skia/src/gpu/ops/GrAAConvexPathRenderer.h
+FILE: ../../../third_party/skia/src/gpu/ops/AAConvexPathRenderer.cpp
+FILE: ../../../third_party/skia/src/gpu/ops/AAConvexPathRenderer.h
 FILE: ../../../third_party/skia/src/gpu/ops/SoftwarePathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/SoftwarePathRenderer.h
 FILE: ../../../third_party/skia/src/image/SkImage.cpp
@@ -2490,13 +2490,13 @@ FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLProgramDataManager.h
 FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLUniformHandler.h
 FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLVarying.cpp
 FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLVarying.h
-FILE: ../../../third_party/skia/src/gpu/ops/GrAALinearizingConvexPathRenderer.cpp
-FILE: ../../../third_party/skia/src/gpu/ops/GrAALinearizingConvexPathRenderer.h
+FILE: ../../../third_party/skia/src/gpu/ops/AALinearizingConvexPathRenderer.cpp
+FILE: ../../../third_party/skia/src/gpu/ops/AALinearizingConvexPathRenderer.h
+FILE: ../../../third_party/skia/src/gpu/ops/DashLinePathRenderer.cpp
+FILE: ../../../third_party/skia/src/gpu/ops/DashLinePathRenderer.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrAtlasTextOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrAtlasTextOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrClearOp.h
-FILE: ../../../third_party/skia/src/gpu/ops/GrDashLinePathRenderer.cpp
-FILE: ../../../third_party/skia/src/gpu/ops/GrDashLinePathRenderer.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrDrawAtlasOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrDrawAtlasOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrDrawOp.h
