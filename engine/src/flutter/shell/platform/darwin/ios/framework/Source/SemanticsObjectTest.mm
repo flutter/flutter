@@ -56,6 +56,36 @@ class MockAccessibilityBridge : public AccessibilityBridgeIos {
   UIView* view_;
   UIWindow* window_;
 };
+
+class MockAccessibilityBridgeNoWindow : public AccessibilityBridgeIos {
+ public:
+  MockAccessibilityBridgeNoWindow() : observations({}) {
+    view_ = [[UIView alloc] initWithFrame:kScreenSize];
+  }
+  bool isVoiceOverRunning() const override { return isVoiceOverRunningValue; }
+  UIView* view() const override { return view_; }
+  UIView<UITextInput>* textInputView() override { return nil; }
+  void DispatchSemanticsAction(int32_t id, SemanticsAction action) override {
+    SemanticsActionObservation observation(id, action);
+    observations.push_back(observation);
+  }
+  void DispatchSemanticsAction(int32_t id,
+                               SemanticsAction action,
+                               fml::MallocMapping args) override {
+    SemanticsActionObservation observation(id, action);
+    observations.push_back(observation);
+  }
+  void AccessibilityObjectDidBecomeFocused(int32_t id) override {}
+  void AccessibilityObjectDidLoseFocus(int32_t id) override {}
+  std::shared_ptr<FlutterPlatformViewsController> GetPlatformViewsController() const override {
+    return nil;
+  }
+  std::vector<SemanticsActionObservation> observations;
+  bool isVoiceOverRunningValue;
+
+ private:
+  UIView* view_;
+};
 }  // namespace
 }  // namespace flutter
 
@@ -176,6 +206,46 @@ class MockAccessibilityBridge : public AccessibilityBridgeIos {
 
   float transformScale = 0.5f;
   float screenScale = [[bridge->view() window] screen].scale;
+  float effectivelyScale = transformScale / screenScale;
+  float x = 10;
+  float y = 10;
+  float w = 100;
+  float h = 200;
+  float scrollExtentMax = 500.0;
+  float scrollPosition = 150.0;
+
+  flutter::SemanticsNode node;
+  node.flags = static_cast<int32_t>(flutter::SemanticsFlags::kHasImplicitScrolling);
+  node.actions = flutter::kVerticalScrollSemanticsActions;
+  node.rect = SkRect::MakeXYWH(x, y, w, h);
+  node.scrollExtentMax = scrollExtentMax;
+  node.scrollPosition = scrollPosition;
+  node.transform = {
+      transformScale, 0, 0, 0, 0, transformScale, 0, 0, 0, 0, transformScale, 0, 0, 0, 0, 1.0};
+  FlutterSemanticsObject* delegate = [[FlutterSemanticsObject alloc] initWithBridge:bridge uid:0];
+  FlutterScrollableSemanticsObject* scrollable =
+      [[FlutterScrollableSemanticsObject alloc] initWithSemanticsObject:delegate];
+  SemanticsObject* scrollable_object = static_cast<SemanticsObject*>(scrollable);
+  [scrollable_object setSemanticsNode:&node];
+  [scrollable_object accessibilityBridgeDidFinishUpdate];
+  XCTAssertTrue(
+      CGRectEqualToRect(scrollable.frame, CGRectMake(x * effectivelyScale, y * effectivelyScale,
+                                                     w * effectivelyScale, h * effectivelyScale)));
+  XCTAssertTrue(CGSizeEqualToSize(
+      scrollable.contentSize,
+      CGSizeMake(w * effectivelyScale, (h + scrollExtentMax) * effectivelyScale)));
+  XCTAssertTrue(CGPointEqualToPoint(scrollable.contentOffset,
+                                    CGPointMake(0, scrollPosition * effectivelyScale)));
+}
+
+- (void)testVerticalFlutterScrollableSemanticsObjectNoWindow {
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
+      new flutter::MockAccessibilityBridgeNoWindow());
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+
+  float transformScale = 0.5f;
+  float screenScale =
+      [UIScreen mainScreen].scale;  // Flutter view without window uses [UIScreen mainScreen];
   float effectivelyScale = transformScale / screenScale;
   float x = 10;
   float y = 10;
