@@ -31,8 +31,7 @@ bool EntityRendererImpl::RenderEntity(const Surface& surface,
   }
 
   if (entity.HasContents()) {
-    using CurrentPipeline = decltype(solid_fill_pipeline_)::element_type;
-    using VS = CurrentPipeline::VertexShader;
+    using VS = SolidFillPipeline::VertexShader;
 
     Command cmd;
     cmd.pipeline = solid_fill_pipeline_->WaitAndGet();

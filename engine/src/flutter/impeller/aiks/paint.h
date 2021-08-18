@@ -12,6 +12,7 @@ namespace impeller {
 
 struct Paint {
   Color color;
+  Scalar stroke_width = 0.0;
 };
 
 }  // namespace impeller

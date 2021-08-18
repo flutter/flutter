@@ -63,10 +63,21 @@ class PipelineT {
             context,
             Builder::MakeDefaultPipelineDescriptor(context))) {}
 
-  std::shared_ptr<Pipeline> WaitAndGet() { return pipeline_future_.get(); }
+  std::shared_ptr<Pipeline> WaitAndGet() {
+    if (did_wait_) {
+      return pipeline_;
+    }
+    did_wait_ = true;
+    if (pipeline_future_.valid()) {
+      pipeline_ = pipeline_future_.get();
+    }
+    return pipeline_;
+  }
 
  private:
   PipelineFuture pipeline_future_;
+  std::shared_ptr<Pipeline> pipeline_;
+  bool did_wait_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(PipelineT);
 };
