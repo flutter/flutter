@@ -12,9 +12,10 @@ namespace impeller {
 
 constexpr size_t kMaxFramesInFlight = 3u;
 
-Renderer::Renderer(std::string shaders_directory)
+Renderer::Renderer(std::string shaders_directory, std::string main_library_file)
     : frames_in_flight_sema_(::dispatch_semaphore_create(kMaxFramesInFlight)),
-      context_(std::make_shared<Context>(std::move(shaders_directory))) {
+      context_(std::make_shared<Context>(std::move(shaders_directory),
+                                         std::move(main_library_file))) {
   if (!context_->IsValid()) {
     return;
   }

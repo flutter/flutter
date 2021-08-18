@@ -16,7 +16,7 @@ std::shared_ptr<Canvas> PictureRecorder::GetCanvas() const {
   return canvas_;
 }
 
-std::shared_ptr<Picture> PictureRecorder::EndRecordingAsPicture() {
+Picture PictureRecorder::EndRecordingAsPicture() {
   return canvas_->EndRecordingAsPicture();
 }
 

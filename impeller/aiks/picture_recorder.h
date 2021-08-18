@@ -18,7 +18,7 @@ class PictureRecorder {
 
   std::shared_ptr<Canvas> GetCanvas() const;
 
-  std::shared_ptr<Picture> EndRecordingAsPicture();
+  Picture EndRecordingAsPicture();
 
  private:
   std::shared_ptr<Canvas> canvas_;
