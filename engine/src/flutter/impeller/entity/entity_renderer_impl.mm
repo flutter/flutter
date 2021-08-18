@@ -12,7 +12,7 @@ EntityRendererImpl::EntityRendererImpl(std::shared_ptr<Context> context)
     return;
   }
 
-  solid_fill_pipeline_ = std::make_unique<SolidFillPipeline>(*context);
+  solid_fill_pipeline_ = std::make_unique<SolidFillPipeline>(*context_);
 
   is_valid_ = true;
 }
@@ -24,10 +24,27 @@ bool EntityRendererImpl::IsValid() const {
 }
 
 bool EntityRendererImpl::RenderEntity(const Surface& surface,
-                                      const RenderPass& onscreen_pass,
+                                      RenderPass& pass,
                                       const Entity& entity) {
   if (!entity.HasRenderableContents()) {
     return true;
+  }
+
+  if (entity.HasContents()) {
+    using CurrentPipeline = decltype(solid_fill_pipeline_)::element_type;
+    using VS = CurrentPipeline::VertexShader;
+
+    Command cmd;
+    cmd.pipeline = solid_fill_pipeline_->WaitAndGet();
+    if (cmd.pipeline == nullptr) {
+      return false;
+    }
+
+    VS::FrameInfo frame_info;
+    frame_info.mvp = Matrix::MakeOrthographic(surface.GetSize()) *
+                     entity.GetTransformation();
+    VS::BindFrameInfo(cmd,
+                      pass.GetTransientsBuffer().EmplaceUniform(frame_info));
   }
 
   return true;

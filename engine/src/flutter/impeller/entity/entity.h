@@ -44,6 +44,8 @@ class Entity {
 
   bool HasStroke() const;
 
+  bool HasContents() const;
+
   bool HasRenderableContents() const;
 
  private:

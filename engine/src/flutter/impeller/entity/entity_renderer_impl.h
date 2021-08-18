@@ -30,7 +30,7 @@ class EntityRendererImpl {
   bool IsValid() const;
 
   [[nodiscard]] bool RenderEntity(const Surface& surface,
-                                  const RenderPass& onscreen_pass,
+                                  RenderPass& onscreen_pass,
                                   const Entity& entities);
 
  private:
