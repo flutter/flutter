@@ -55,6 +55,7 @@ class SemanticsUpdateBuilder
                   std::vector<NativeStringAttribute*> decreasedValueAttributes,
                   std::string hint,
                   std::vector<NativeStringAttribute*> hintAttributes,
+                  std::string tooltip,
                   int textDirection,
                   const tonic::Float64List& transform,
                   const tonic::Int32List& childrenInTraversalOrder,
