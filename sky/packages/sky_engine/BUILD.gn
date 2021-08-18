@@ -137,6 +137,11 @@ copy("math") {
       [ "$root_gen_dir/dart-pkg/sky_engine/lib/math/{{source_file_part}}" ]
 }
 
+copy("spirv") {
+  sources = [ "//flutter/lib/spirv/lib" ]
+  outputs = [ "$root_gen_dir/dart-pkg/sky_engine/lib/spirv" ]
+}
+
 copy("typed_data") {
   lib_path = rebase_path("typed_data", "", dart_sdk_lib_path)
   sources = rebase_path(typed_data_sdk_sources, "", lib_path)
@@ -177,6 +182,7 @@ group("copy_dart_sdk") {
     ":js",
     ":js_util",
     ":math",
+    ":spirv",
     ":typed_data",
   ]
 }
@@ -209,6 +215,7 @@ generated_file("_embedder_yaml") {
     "  # public API, e.g. List being Iterable by virtue of implementing",
     "  # EfficientLengthIterable. Not including this library yields analysis errors.",
     "  \"dart:_internal\": \"internal/internal.dart\"",
+    "  \"dart:_spirv\": \"spirv/spirv.dart\"",
     "  \"dart:nativewrappers\": \"_empty.dart\"",
   ]
 }
