@@ -4,6 +4,7 @@
 
 package io.flutter.embedding.android;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -99,6 +100,7 @@ public class FlutterImageView extends View implements RenderSurface {
   }
 
   @TargetApi(19)
+  @SuppressLint("WrongConstant") // RGBA_8888 is a valid constant.
   @NonNull
   private static ImageReader createImageReader(int width, int height) {
     if (width <= 0) {
