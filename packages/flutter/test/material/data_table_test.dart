@@ -459,7 +459,7 @@ void main() {
       home: Material(child: buildTable(sortAscending: true)),
     ));
     // The `tester.widget` ensures that there is exactly one upward arrow.
-    Transform transformOfArrow = tester.firstWidget<Transform>(find.widgetWithIcon(Transform, Icons.arrow_upward));
+    Transform transformOfArrow = tester.widget<Transform>(find.widgetWithIcon(Transform, Icons.arrow_upward));
     expect(
       transformOfArrow.transform.getRotation(),
       equals(Matrix3.identity()),
@@ -471,7 +471,7 @@ void main() {
     ));
     await tester.pumpAndSettle();
     // The `tester.widget` ensures that there is exactly one upward arrow.
-    transformOfArrow = tester.firstWidget<Transform>(find.widgetWithIcon(Transform, Icons.arrow_upward));
+    transformOfArrow = tester.widget<Transform>(find.widgetWithIcon(Transform, Icons.arrow_upward));
     expect(
       transformOfArrow.transform.getRotation(),
       equals(Matrix3.rotationZ(math.pi)),
