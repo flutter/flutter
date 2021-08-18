@@ -281,27 +281,14 @@ To build `integration_test/foo_test.dart` from the command line, run:
 flutter build ios --config-only integration_test/foo_test.dart
 ```
 
-In Xcode, add a test file called `RunnerTests.m` or `RunnerTests.swift` (or any name of your choice) to the new target and
+In Xcode, add a test file called `RunnerTests.m` (or any name of your choice) to the new target and
 replace the file:
 
 ```objective-c
 @import XCTest;
 @import integration_test;
 
-@interface RunnerTests : FLTIntegrationTestCase
-@end
-
-@implementation RunnerTests
-@end
-```
-or in Swift:
-````swift
-import integration_test
-import XCTest
-
-class RunnerSwiftTests: FLTIntegrationTestCase {
-}
-
+INTEGRATION_TEST_IOS_RUNNER(RunnerTests)
 ```
 
 Run `Product > Test` to run the integration tests on your selected device.
