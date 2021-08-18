@@ -263,9 +263,9 @@ class FlutterDevice {
         try {
           await device.dds.startDartDevelopmentService(
             observatoryUri,
-            ddsPort,
-            ipv6,
-            disableServiceAuthCodes,
+            hostPort: ddsPort,
+            ipv6: ipv6,
+            disableServiceAuthCodes: disableServiceAuthCodes,
             logger: globals.logger,
           );
         } on dds.DartDevelopmentServiceException catch (e, st) {
