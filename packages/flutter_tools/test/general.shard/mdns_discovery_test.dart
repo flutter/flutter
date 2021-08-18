@@ -261,7 +261,7 @@ class FakeMDnsClient extends Fake implements MDnsClient {
     InternetAddress mDnsAddress,
   }) async {
     if (osErrorOnStart) {
-      throw const OSError('Operation not suppoted on socket', 102);
+      throw const OSError('Operation not supported on socket', 102);
     }
   }
 

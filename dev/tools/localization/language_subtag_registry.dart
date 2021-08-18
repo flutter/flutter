@@ -46629,7 +46629,7 @@ Prefix: de
 Type: variant
 Subtag: abl1943
 Description: Orthographic formulation of 1943 - Official in Brazil
-  (Formulário Ortográfico de 1943 - Oficial no Brasil)
+  (Formulário Ortográfico de 1943 - Official no Brasil)
 Added: 2015-05-06
 Prefix: pt-BR
 Comments: Denotes conventions established by the Academia Brasileira de

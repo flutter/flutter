@@ -676,7 +676,7 @@ class _BottomNavigationTile extends StatelessWidget {
 }
 
 
-// If the orientaion is landscape and layout is
+// If the orientation is landscape and layout is
 // BottomNavigationBarLandscapeLayout.linear then return a
 // icon-space-label row, where space is 8 pixels. Otherwise return a
 // icon-label column.
