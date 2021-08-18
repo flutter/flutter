@@ -69,12 +69,24 @@ class _Transpiler {
   /// Function ID mapped to source-code definition.
   final Map<int, StringBuffer> functionDefs = <int, StringBuffer>{};
 
+  /// Function ID mapped to referenced functions.
+  /// This is used to ensure they are written in the right order.
+  final Map<int, List<int>> functionDeps = <int, List<int>>{};
+
   /// ID mapped to location decorator.
   /// See [opDecorate] for more information.
   final Map<int, int> locations = <int, int>{};
 
   /// ID mapped to ID. Used by [OpLoad].
   final Map<int, int> alias = <int, int>{};
+
+  /// The ID for a constant true value.
+  /// See [opConstantTrue].
+  int constantTrue = 0;
+
+  /// The ID for a constant false value.
+  /// See [opConstantFalse].
+  int constantFalse = 0;
 
   /// The current word-index in the SPIR-V buffer.
   int position = 0;
@@ -92,6 +104,10 @@ class _Transpiler {
   /// The ID of the shader's entry point.
   /// See [opEntryPoint].
   int entryPoint = 0;
+
+  /// The ID of a 32-bit int type.
+  /// See [opTypeInt].
+  int intType = 0;
 
   /// The ID of a 32-bit float type.
   /// See [opTypeFloat].
@@ -115,7 +131,7 @@ class _Transpiler {
   /// Set by [opDecorate].
   int fragCoord = 0;
 
-  /// The number of floats used by uniforms.
+  /// The number of floats used by uniform
   int uniformFloatCount = 0;
 
   /// Current indentation to prepend to new lines.
@@ -139,13 +155,24 @@ class _Transpiler {
     }
 
     src.writeln();
-    for (final StringBuffer def in functionDefs.values) {
-      src.write(def.toString());
-    }
+    // TODO(antrob): Investigate if `List<bool>.filled(maxFunctionId, false)` can be used here instead.
+    final Set<int> visited = <int>{};
+    writeFunctionAndDeps(visited, entryPoint);
   }
 
   TranspileException failure(String why) =>
       TranspileException._(currentOp, why);
+
+  void writeFunctionAndDeps(Set<int> visited, int function) {
+    if (visited.contains(function)) {
+      return;
+    }
+    visited.add(function);
+    for (final int dep in functionDeps[function]!) {
+      writeFunctionAndDeps(visited, dep);
+    }
+    src.write(functionDefs[function]!.toString());
+  }
 
   void writeHeader() {
     switch (target) {
@@ -167,7 +194,11 @@ class _Transpiler {
     if (alias.containsKey(id)) {
       return resolveName(alias[id]!);
     }
-    if (id == colorOutput) {
+    if (constantTrue > 0 && id == constantTrue) {
+      return 'true';
+    } else if (constantFalse > 0 && id == constantFalse) {
+      return 'false';
+    } if (id == colorOutput) {
       if (target == TargetLanguage.glslES) {
         return _glslESColorName;
       } else {
@@ -222,6 +253,13 @@ class _Transpiler {
     throw failure('No null-terminating character found for string literal');
   }
 
+  void typeCast() {
+    final String type = resolveType(readWord());
+    final String name = resolveName(readWord());
+    final String value = resolveName(readWord());
+    out.writeln('$indent$type $name = $type($value);');
+  }
+
   /// Read an instruction word, and handle the operation.
   ///
   /// SPIR-V instructions contain an op-code as well as a
@@ -251,11 +289,17 @@ class _Transpiler {
       case _opCapability:
         opCapability();
         break;
+      case _opConvertSToF:
+        typeCast();
+        break;
       case _opTypeVoid:
         opTypeVoid();
         break;
       case _opTypeBool:
         opTypeBool();
+        break;
+      case _opTypeInt:
+        opTypeInt();
         break;
       case _opTypeFloat:
         opTypeFloat();
@@ -272,11 +316,20 @@ class _Transpiler {
       case _opTypeFunction:
         opTypeFunction();
         break;
+      case _opConstantTrue:
+        opConstantTrue();
+        break;
+      case _opConstantFalse:
+        opConstantFalse();
+        break;
       case _opConstant:
         opConstant();
         break;
       case _opConstantComposite:
         opConstantComposite();
+        break;
+      case _opConvertFToS:
+        typeCast();
         break;
       case _opFunction:
         opFunction();
@@ -295,6 +348,9 @@ class _Transpiler {
         break;
       case _opLoad:
         opLoad();
+        break;
+      case _opSelect:
+        opSelect();
         break;
       case _opStore:
         opStore();
@@ -332,6 +388,9 @@ class _Transpiler {
       case _opFMod:
         parseBuiltinFunction('mod');
         break;
+      case _opFUnordNotEqual:
+        parseOperatorInst('!=');
+        break;
       case _opVectorTimesScalar:
       case _opMatrixTimesScalar:
       case _opVectorTimesMatrix:
@@ -350,6 +409,14 @@ class _Transpiler {
         break;
       case _opReturnValue:
         opReturnValue();
+        break;
+      // Unsupported ops with no semantic meaning.
+      case _opSource:
+      case _opSourceExtension:
+      case _opName:
+      case _opMemberName:
+      case _opString:
+      case _opLine:
         break;
       default:
         throw failure('Not a supported op.');
@@ -418,6 +485,16 @@ class _Transpiler {
 
   void opTypeBool() {
     types[readWord()] = _Type._bool;
+  }
+
+  void opTypeInt() {
+    final int id = readWord();
+    types[id] = _Type._int;
+    intType = id;
+    final int width = readWord();
+    if (width != 32) {
+      throw failure('int width must be 32');
+    }
   }
 
   void opTypeFloat() {
@@ -503,6 +580,18 @@ class _Transpiler {
     functionTypes[id] = _FunctionType(returnType, params);
   }
 
+  void opConstantTrue() {
+    // Skip type operand.
+    position++;
+    constantTrue = readWord();
+  }
+
+  void opConstantFalse() {
+    // Skip type operand.
+    position++;
+    constantFalse = readWord();
+  }
+
   void opConstant() {
     final int type = readWord();
     final String id = resolveName(readWord());
@@ -548,12 +637,10 @@ class _Transpiler {
     final String opening = '$returnType $name(';
     final StringBuffer def = StringBuffer();
     def.write(opening);
-    src.write(opening);
 
     if (target == TargetLanguage.sksl && id == entryPoint) {
       const String fragParam = 'float2 $_fragParamName';
       def.write(fragParam);
-      src.write(fragParam);
     }
 
     final int typeIndex = readWord();
@@ -564,7 +651,6 @@ class _Transpiler {
 
     if (functionType.params.isEmpty) {
       def.write(') ');
-      src.writeln(');');
     }
 
     currentFunction = id;
@@ -572,6 +658,7 @@ class _Transpiler {
     declaredParams = 0;
     out = def;
     functionDefs[id] = def;
+    functionDeps[id] = <int>[];
   }
 
   void opFunctionParameter() {
@@ -609,7 +696,12 @@ class _Transpiler {
   void opFunctionCall() {
     final String type = resolveType(readWord());
     final String name = resolveName(readWord());
-    final String functionName = resolveName(readWord());
+    final int functionId = readWord();
+    final String functionName = resolveName(functionId);
+
+    // Make the current function depend on this function.
+    functionDeps[currentFunction]!.add(functionId);
+
     final List<String> args =
         List<String>.generate(nextPosition - position, (int i) {
       return resolveName(readWord());
@@ -665,6 +757,15 @@ class _Transpiler {
     final int id = readWord();
     final int pointer = readWord();
     alias[id] = pointer;
+  }
+
+  void opSelect() {
+    final String type = resolveType(readWord());
+    final String name = resolveName(readWord());
+    final String condition = resolveName(readWord());
+    final String a = resolveName(readWord());
+    final String b = resolveName(readWord());
+    out.writeln('$indent$type $name = mix($b, $a, $type($condition));');
   }
 
   void opStore() {
@@ -815,7 +916,10 @@ class _Transpiler {
   }
 
   void parseGLSLInst(int id, int type) {
-    final int inst = readWord();
+    int inst = readWord();
+    if (inst == _glslStd450Atan2 && target == TargetLanguage.sksl) {
+      inst = _glslStd450Atan;
+    }
     final String? opName = _glslStd450OpNames[inst];
     if (opName == null) {
       throw failure('$id is not a supported GLSL instruction.');

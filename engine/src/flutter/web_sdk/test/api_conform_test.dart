@@ -54,7 +54,7 @@ void main() {
   print('Checking ${uiClasses.length} public classes.');
   for (final String className in uiClasses.keys) {
     final ClassDeclaration uiClass = uiClasses[className]!;
-    final ClassDeclaration webClass = webClasses[className]!;
+    final ClassDeclaration? webClass = webClasses[className];
     // If the web class is missing there isn't much left to do here. Print a
     // warning and move along.
     if (webClass == null) {
