@@ -98,7 +98,7 @@ class ImageInfo {
   /// the image.
   final ui.Image image;
 
-  /// The size of raw image pixels in bytes
+  /// The size of raw image pixels in bytes.
   int get sizeBytes => image.height * image.width * 4;
 
   /// The linear scale factor for drawing this image at its intended size.
