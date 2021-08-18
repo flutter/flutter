@@ -27,7 +27,6 @@ const LocalProcessManager processManager = LocalProcessManager();
 /// Java 1.8.
 Future<void> main(List<String> args) async {
   final ArgParser argParser = setupOptions();
-  await checkJava1_8();
   final int exitCode = await runLint(argParser, argParser.parse(args));
   exit(exitCode);
 }
@@ -74,7 +73,7 @@ Future<int> runLint(ArgParser argParser, ArgResults argResults) async {
 <!-- WILL AUTOMATICALLY FIND ALL .java FILES AND INCLUDE THEM HERE       -->
 <project>
   <sdk dir="${androidSdkDir.path}" />
-  <module name="FlutterEngine" android="true" library="true" compile-sdk-version="android-P">
+  <module name="FlutterEngine" android="true" library="true" compile-sdk-version="android-S">
   <manifest file="${path.join(androidDir.path, 'AndroidManifest.xml')}" />
 ''');
   for (final FileSystemEntity entity in androidDir.listSync(recursive: true)) {
@@ -89,12 +88,11 @@ Future<int> runLint(ArgParser argParser, ArgResults argResults) async {
 </project>
 ''');
   await projectXml.close();
-
   print('Wrote project.xml, starting lint...');
   final List<String> lintArgs = <String>[
-    path.join(androidSdkDir.path, 'tools', 'bin', 'lint'),
-    '--project',
-    projectXmlPath,
+    path.join(androidSdkDir.path, 'cmdline-tools', 'bin', 'lint'),
+    '--project', projectXmlPath,
+    '--compile-sdk-version', '31',
     '--showall',
     '--exitcode', // Set non-zero exit code on errors
     '-Wall',
@@ -106,14 +104,13 @@ Future<int> runLint(ArgParser argParser, ArgResults argResults) async {
   if (html) {
     lintArgs.addAll(<String>['--html', argResults['out'] as String]);
   }
-  final String? javaHome = await getJavaHome();
+  final String javahome = getJavaHome(inArgument);
+  print('Using JAVA_HOME=$javahome');
   final Process lintProcess = await processManager.start(
     lintArgs,
-    environment: javaHome != null
-        ? <String, String>{
-            'JAVA_HOME': javaHome,
-          }
-        : null,
+    environment: <String, String>{
+      'JAVA_HOME': javahome,
+    },
   );
   lintProcess.stdout.pipe(stdout);
   lintProcess.stderr.pipe(stderr);
@@ -166,50 +163,11 @@ ArgParser setupOptions() {
   return argParser;
 }
 
-/// On macOS, we can try to find Java 1.8.
-///
-/// Otherwise, default to whatever JAVA_HOME is already.
-Future<String?> getJavaHome() async {
+String getJavaHome(String src) {
   if (Platform.isMacOS) {
-    final ProcessResult result = await processManager.run(
-      <String>['/usr/libexec/java_home', '-v', '1.8', '-F'],
-    );
-    if (result.exitCode == 0) {
-      return (result.stdout as String).trim();
-    }
+    return path.normalize('$src/third_party/java/openjdk/Contents/Home/');
   }
-  return Platform.environment['JAVA_HOME'];
-}
-
-/// Checks that `java` points to Java 1.8.
-///
-/// The SDK lint tool may not work with Java > 1.8.
-Future<void> checkJava1_8() async {
-  print('Checking Java version...');
-
-  if (Platform.isMacOS) {
-    final ProcessResult result = await processManager.run(
-      <String>['/usr/libexec/java_home', '-v', '1.8', '-F'],
-    );
-    if (result.exitCode != 0) {
-      print('Java 1.8 not available - the linter may not work properly.');
-    }
-    return;
-  }
-  final ProcessResult javaResult = await processManager.run(
-    <String>['java', '-version'],
-  );
-  if (javaResult.exitCode != 0) {
-    print('Could not run "java -version". '
-        'Ensure Java is installed and available on your path.');
-    print(javaResult.stderr);
-  }
-  // `java -version` writes to stderr.
-  final String javaVersionStdout = javaResult.stderr as String;
-  if (!javaVersionStdout.contains('"1.8')) {
-    print('The Android SDK tools may not work properly with your Java version. '
-        'If this process fails, please retry using Java 1.8.');
-  }
+  return path.normalize('$src/third_party/java/openjdk/');
 }
 
 /// The root directory of this project.
