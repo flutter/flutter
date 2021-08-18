@@ -56,14 +56,9 @@ using OnShaderWarmup = std::function<void(const std::vector<std::string>&,
 // in HandlePlatformMessage.  This communication is bidirectional.  Platform
 // messages are notably responsible for communication related to input and
 // external views / windowing.
-//
-// The PlatformView implements SessionListener and gets Session events but it
-// does *not* actually own the Session itself; that is owned by the
-// FuchsiaExternalViewEmbedder on the raster thread.
-class PlatformView final : public flutter::PlatformView,
-                           private fuchsia::ui::scenic::SessionListener,
-                           private fuchsia::ui::input3::KeyboardListener,
-                           private fuchsia::ui::input::InputMethodEditorClient {
+class PlatformView : public flutter::PlatformView,
+                     private fuchsia::ui::input3::KeyboardListener,
+                     private fuchsia::ui::input::InputMethodEditorClient {
  public:
   PlatformView(flutter::PlatformView::Delegate& delegate,
                std::string debug_label,
@@ -72,13 +67,10 @@ class PlatformView final : public flutter::PlatformView,
                std::shared_ptr<sys::ServiceDirectory> runner_services,
                fidl::InterfaceHandle<fuchsia::sys::ServiceProvider>
                    parent_environment_service_provider,
-               fidl::InterfaceRequest<fuchsia::ui::scenic::SessionListener>
-                   session_listener_request,
                fidl::InterfaceHandle<fuchsia::ui::views::ViewRefFocused> vrf,
                fidl::InterfaceHandle<fuchsia::ui::views::Focuser> focuser,
                fidl::InterfaceRequest<fuchsia::ui::input3::KeyboardListener>
                    keyboard_listener,
-               fit::closure on_session_listener_error_callback,
                OnEnableWireframe wireframe_enabled_callback,
                OnCreateView on_create_view_callback,
                OnUpdateView on_update_view_callback,
@@ -92,7 +84,7 @@ class PlatformView final : public flutter::PlatformView,
                AwaitVsyncForSecondaryCallbackCallback
                    await_vsync_for_secondary_callback_callback);
 
-  ~PlatformView();
+  virtual ~PlatformView();
 
   // |flutter::PlatformView|
   void SetSemanticsEnabled(bool enabled) override;
@@ -101,7 +93,7 @@ class PlatformView final : public flutter::PlatformView,
   std::shared_ptr<flutter::ExternalViewEmbedder> CreateExternalViewEmbedder()
       override;
 
- private:
+ protected:
   void RegisterPlatformMessageHandlers();
 
   // |fuchsia.ui.input3.KeyboardListener|
@@ -117,10 +109,6 @@ class PlatformView final : public flutter::PlatformView,
 
   // |fuchsia::ui::input::InputMethodEditorClient|
   void OnAction(fuchsia::ui::input::InputMethodAction action) override;
-
-  // |fuchsia::ui::scenic::SessionListener|
-  void OnScenicError(std::string error) override;
-  void OnScenicEvent(std::vector<fuchsia::ui::scenic::Event> events) override;
 
   // ViewHolder event handlers.  These return false if the ViewHolder
   // corresponding to `view_holder_id` could not be found and the evnt was
@@ -202,8 +190,6 @@ class PlatformView final : public flutter::PlatformView,
   std::optional<std::array<float, 2>> view_logical_origin_;
   std::optional<float> view_pixel_ratio_;
 
-  fidl::Binding<fuchsia::ui::scenic::SessionListener> session_listener_binding_;
-  fit::closure session_listener_error_callback_;
   OnEnableWireframe wireframe_enabled_callback_;
   OnCreateView on_create_view_callback_;
   OnUpdateView on_update_view_callback_;
