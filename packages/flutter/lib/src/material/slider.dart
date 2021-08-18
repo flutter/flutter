@@ -712,10 +712,9 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       if (_hovering) MaterialState.hovered,
       if (_focused) MaterialState.focused,
     };
-    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
-      widget.mouseCursor ?? sliderTheme.mouseCursor?.resolve(states) ?? MaterialStateMouseCursor.clickable,
-      states,
-    );
+    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
+      ?? sliderTheme.mouseCursor?.resolve(states)
+      ?? MaterialStateProperty.resolveAs<MouseCursor>(MaterialStateMouseCursor.clickable, states);
 
     // This size is used as the max bounds for the painting of the value
     // indicators It must be kept in sync with the function with the same name
