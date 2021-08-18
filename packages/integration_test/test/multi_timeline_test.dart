@@ -10,7 +10,8 @@ import 'package:integration_test/integration_test_driver.dart';
 void main() {
   useMemoryFileSystemForTesting();
 
-  test('Writes multiple files for each timeline', ()  async {
+  test('Writes multiple files for each timeline', () async {
+    print('------------------ HERE');
     await writeResponseData(<String, dynamic>{
       'timeline_a': <String, dynamic>{},
       'timeline_b': <String, dynamic>{},
@@ -18,6 +19,8 @@ void main() {
     });
     final Directory buildDir = fs.directory('build');
     expect(buildDir.existsSync(), true);
+    print(buildDir.listSync(recursive: true));
+    print(buildDir.childFile('integration_response_data_timeline_a.json'));
     expect(buildDir.childFile('integration_response_data_timeline_a.json').existsSync(), true);
     expect(buildDir.childFile('integration_response_data_timeline_b.json').existsSync(), true);
     expect(buildDir.childFile('integration_response_data_screenshots.json').existsSync(), false);

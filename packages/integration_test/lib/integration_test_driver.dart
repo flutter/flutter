@@ -33,17 +33,20 @@ Future<void> writeResponseData(
   String testOutputFilename = 'integration_response_data',
   String? destinationDirectory,
 }) async {
+  print('---------------- A $data');
   if (data == null) {
     return;
   }
   assert(testOutputFilename != null);
   destinationDirectory ??= testOutputsDirectory;
   await fs.directory(destinationDirectory).create(recursive: true);
+  print(destinationDirectory);
   for (final String key in data.keys.where((String key) => key != 'screenshots')) {
     final File file = fs.file(path.join(
       destinationDirectory,
       '${testOutputFilename}_$key.json',
     ));
+    print(file);
     final String resultString = _encodeJson(data[key], true);
     await file.writeAsString(resultString);
   }
