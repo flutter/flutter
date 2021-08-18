@@ -7,6 +7,7 @@
 #include <Metal/Metal.h>
 
 #include <memory>
+#include <string>
 
 #include "flutter/fml/macros.h"
 #include "impeller/compositor/pipeline_library.h"
@@ -20,7 +21,7 @@ class Allocator;
 
 class Context {
  public:
-  Context(std::string shaders_directory);
+  Context(std::string shaders_directory, std::string main_library_file_name);
 
   ~Context();
 

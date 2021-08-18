@@ -10,16 +10,8 @@
 
 namespace impeller {
 
-class Paint {
- public:
-  Paint();
-
-  ~Paint();
-
-  void SetColor(Color color);
-
- private:
-  Color color_;
+struct Paint {
+  Color color;
 };
 
 }  // namespace impeller

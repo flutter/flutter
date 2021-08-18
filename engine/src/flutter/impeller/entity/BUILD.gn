@@ -4,11 +4,26 @@
 
 import("//flutter/impeller/tools/impeller.gni")
 
+impeller_shaders("entity_shaders") {
+  name = "entity"
+
+  shaders = [
+    "path.vert",
+    "solid_fill.frag",
+  ]
+}
+
 impeller_component("entity") {
   sources = [
     "entity.cc",
     "entity.h",
+    "entity_renderer.h",
+    "entity_renderer.mm",
+    "entity_renderer_impl.h",
+    "entity_renderer_impl.mm",
   ]
+
+  deps = [ ":entity_shaders" ]
 
   public_deps = [
     "../compositor",

@@ -38,6 +38,14 @@ class Entity {
 
   void SetPath(Path path);
 
+  void SetIsClip(bool is_clip);
+
+  bool IsClip() const;
+
+  bool HasStroke() const;
+
+  bool HasRenderableContents() const;
+
  private:
   Matrix transformation_;
   Color background_color_;
@@ -45,8 +53,7 @@ class Entity {
   Path path_;
   Color stroke_color_;
   double stroke_size_ = 1.0;
-
-  FML_DISALLOW_COPY_AND_ASSIGN(Entity);
+  bool is_clip_ = false;
 };
 
 }  // namespace impeller

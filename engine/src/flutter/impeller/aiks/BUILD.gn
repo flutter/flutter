@@ -14,10 +14,10 @@ impeller_component("aiks") {
     "paint.h",
     "picture.cc",
     "picture.h",
-    "picture_operation.cc",
-    "picture_operation.h",
     "picture_recorder.cc",
     "picture_recorder.h",
+    "picture_renderer.h",
+    "picture_renderer.mm",
   ]
 
   public_deps = [
