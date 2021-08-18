@@ -6,32 +6,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:metrics_center/metrics_center.dart';
-import 'package:path/path.dart' as p;
-
-Future<ProcessResult> runGit(
-  List<String> args, {
-  String? processWorkingDir,
-}) async {
-  return Process.run(
-    'git',
-    args,
-    workingDirectory: processWorkingDir,
-    runInShell: true,
-  );
-}
-
-/// Returns commit time in committer date in UNIX timestamp.
-Future<String> getCommitDate() async {
-  final String gitRoot = p.absolute('.');
-  final ProcessResult logResult = await runGit(
-    <String>['log', '--pretty=format:%ct', '-n', '1'],
-    processWorkingDir: gitRoot,
-  );
-  if (logResult.exitCode != 0) {
-    throw 'Unexpected exit code ${logResult.exitCode}';
-  }
-  return logResult.stdout.toString().trim();
-}
 
 /// Authenticate and connect to gcloud storage.
 ///
@@ -95,20 +69,24 @@ List<MetricPoint> parse(Map<String, dynamic> resultsJson) {
 }
 
 /// Upload test metrics to metrics center.
-Future<void> uploadToMetricsCenter(String? resultsPath) async {
+Future<void> uploadToMetricsCenter(String? resultsPath, int? commitTime) async {
   if (resultsPath == null) {
     return;
+  }
+  if (commitTime != null) {
+    commitTime *= 1000;
+  } else {
+    commitTime ??= DateTime.now().millisecondsSinceEpoch;
   }
   final File resultFile = File(resultsPath);
   Map<String, dynamic> resultsJson = <String, dynamic>{};
   resultsJson = json.decode(await resultFile.readAsString()) as Map<String, dynamic>;
   final List<MetricPoint> metricPoints = parse(resultsJson);
   final FlutterDestination metricsDestination = await connectFlutterDestination();
-  final String gitCommitDate = await getCommitDate();
   await metricsDestination.update(
     metricPoints,
     DateTime.fromMillisecondsSinceEpoch(
-      int.parse(gitCommitDate) * 1000,
+      commitTime,
       isUtc: true,
     ),
   );

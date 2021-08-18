@@ -22,6 +22,7 @@ class UploadResultsCommand extends Command<void> {
     );
     argParser.addOption('luci-builder', help: '[Flutter infrastructure] Name of the LUCI builder being run on.');
     argParser.addOption('test-status', help: 'Test status: Succeeded|Failed');
+    argParser.addOption('commit-time', help: 'Commit time in UNIX timestamp');
   }
 
   @override
@@ -38,11 +39,12 @@ class UploadResultsCommand extends Command<void> {
     final String? gitBranch = argResults!['git-branch'] as String?;
     final String? builderName = argResults!['luci-builder'] as String?;
     final String? testStatus = argResults!['test-status'] as String?;
+    final int? commitTime = argResults!['commit-time'] as int?;
 
     // Upload metrics to metrics_center from test runner.
     // The upload step will be skipped from cocoon once this is validated.
     try {
-      await uploadToMetricsCenter(resultsPath);
+      await uploadToMetricsCenter(resultsPath, commitTime);
       print('Successfully uploaded metrics to metrics center');
     } on Exception catch (e, stacktrace) {
       print('Uploading metrics failure: $e\n\n$stacktrace');
