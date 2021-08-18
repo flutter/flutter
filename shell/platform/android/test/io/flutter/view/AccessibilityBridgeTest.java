@@ -719,6 +719,43 @@ public class AccessibilityBridgeTest {
     assertEquals(actual.getSpanEnd(spellOutSpan), 9);
   }
 
+  @TargetApi(28)
+  @Test
+  public void itSetsTooltipCorrectly() {
+    AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
+    AccessibilityViewEmbedder mockViewEmbedder = mock(AccessibilityViewEmbedder.class);
+    AccessibilityManager mockManager = mock(AccessibilityManager.class);
+    View mockRootView = mock(View.class);
+    Context context = mock(Context.class);
+    when(mockRootView.getContext()).thenReturn(context);
+    when(context.getPackageName()).thenReturn("test");
+    AccessibilityBridge accessibilityBridge =
+        setUpBridge(
+            /*rootAccessibilityView=*/ mockRootView,
+            /*accessibilityChannel=*/ mockChannel,
+            /*accessibilityManager=*/ mockManager,
+            /*contentResolver=*/ null,
+            /*accessibilityViewEmbedder=*/ mockViewEmbedder,
+            /*platformViewsAccessibilityDelegate=*/ null);
+
+    ViewParent mockParent = mock(ViewParent.class);
+    when(mockRootView.getParent()).thenReturn(mockParent);
+    when(mockManager.isEnabled()).thenReturn(true);
+    // Create a node with tooltip.
+    TestSemanticsNode root = new TestSemanticsNode();
+    root.id = 0;
+    root.tooltip = "tooltip";
+
+    TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+
+    // Test the generated AccessibilityNodeInfo for the node we created
+    // and verify it has correct tooltip text.
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    CharSequence actual = nodeInfo.getTooltipText();
+    assertEquals(actual.toString(), root.tooltip);
+  }
+
   @TargetApi(21)
   @Test
   public void itCanCreateAccessibilityNodeInfoWithSetText() {
@@ -1552,6 +1589,7 @@ public class AccessibilityBridgeTest {
     List<TestStringAttribute> decreasedValueAttributes;
     String hint = null;
     List<TestStringAttribute> hintAttributes;
+    String tooltip = null;
     int textDirection = 0;
     float left = 0.0f;
     float top = 0.0f;
@@ -1603,6 +1641,12 @@ public class AccessibilityBridgeTest {
       updateString(increasedValue, increasedValueAttributes, bytes, strings, stringAttributeArgs);
       updateString(decreasedValue, decreasedValueAttributes, bytes, strings, stringAttributeArgs);
       updateString(hint, hintAttributes, bytes, strings, stringAttributeArgs);
+      if (tooltip == null) {
+        bytes.putInt(-1);
+      } else {
+        strings.add(tooltip);
+        bytes.putInt(strings.size() - 1);
+      }
       bytes.putInt(textDirection);
       bytes.putFloat(left);
       bytes.putFloat(top);
