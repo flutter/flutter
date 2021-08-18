@@ -14,7 +14,8 @@
 
 namespace impeller {
 
-Context::Context(std::string shaders_directory)
+Context::Context(std::string shaders_directory,
+                 std::string main_library_file_name)
     : device_(::MTLCreateSystemDefaultDevice()) {
   // Setup device.
   if (!device_) {
@@ -36,7 +37,7 @@ Context::Context(std::string shaders_directory)
   {
     NSError* shader_library_error = nil;
     auto shader_library_path =
-        fml::paths::JoinPaths({shaders_directory, "impeller.metallib"});
+        fml::paths::JoinPaths({shaders_directory, main_library_file_name});
 
     auto library_exists = fml::IsFile(shader_library_path);
 

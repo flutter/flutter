@@ -4,8 +4,9 @@
 
 #include "impeller/aiks/canvas.h"
 
+#include <algorithm>
+
 #include "flutter/fml/logging.h"
-#include "impeller/aiks/picture_operation.h"
 
 namespace impeller {
 
@@ -53,18 +54,35 @@ size_t Canvas::GetSaveCount() const {
   return xformation_stack_.size();
 }
 
-void Canvas::DrawPath(Path path, Paint paint) {}
+void Canvas::DrawPath(Path path, Paint paint) {
+  Entity entity;
+  entity.SetTransformation(GetCurrentTransformation());
+  entity.SetPath(std::move(path));
+  entity.SetBackgroundColor(paint.color);
+  ops_.emplace_back(std::move(entity));
+}
 
 void Canvas::SaveLayer(const Paint& paint, std::optional<Rect> bounds) {}
 
-void Canvas::ClipPath(Path path) {}
+void Canvas::ClipPath(Path path) {
+  Entity entity;
+  entity.SetTransformation(GetCurrentTransformation());
+  entity.SetPath(std::move(path));
+  entity.SetIsClip(true);
+  ops_.emplace_back(std::move(entity));
+}
 
 void Canvas::DrawShadow(Path path, Color color, Scalar elevation) {}
 
-void Canvas::DrawPicture(std::shared_ptr<Picture> picture) {}
+void Canvas::DrawPicture(const Picture& picture) {
+  std::copy(std::begin(picture.entities), std::end(picture.entities),
+            std::back_inserter(ops_));
+}
 
-std::shared_ptr<Picture> Canvas::EndRecordingAsPicture() {
-  return std::make_shared<Picture>(std::move(ops_));
+Picture Canvas::EndRecordingAsPicture() {
+  Picture picture;
+  picture.entities = std::move(ops_);
+  return picture;
 }
 
 }  // namespace impeller

@@ -50,4 +50,34 @@ void Entity::SetPath(Path path) {
   path_ = std::move(path);
 }
 
+void Entity::SetIsClip(bool is_clip) {
+  is_clip_ = is_clip;
+}
+
+bool Entity::IsClip() const {
+  return is_clip_;
+}
+
+bool Entity::HasStroke() const {
+  return stroke_size_ > 0.0 && !stroke_color_.IsTransparent();
+}
+
+bool Entity::HasRenderableContents() const {
+  const bool has_empty_path = path_.GetBoundingBox().IsZero();
+
+  if (has_empty_path) {
+    return false;
+  }
+
+  if (HasStroke()) {
+    return true;
+  }
+
+  if (!background_color_.IsTransparent()) {
+    return true;
+  }
+
+  return false;
+}
+
 }  // namespace impeller

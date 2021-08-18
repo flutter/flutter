@@ -23,7 +23,7 @@ class Renderer {
   using RenderCallback =
       std::function<bool(const Surface& surface, RenderPass& pass)>;
 
-  Renderer(std::string shaders_directory);
+  Renderer(std::string shaders_directory, std::string main_library_file);
 
   ~Renderer();
 

@@ -4,13 +4,10 @@
 
 #include "impeller/aiks/picture.h"
 
-#include "impeller/aiks/picture_operation.h"
+#include "impeller/entity/entity.h"
 
 namespace impeller {
 
-Picture::Picture(std::vector<std::unique_ptr<PictureOperation>> operations)
-    : ops_(std::move(operations)) {}
-
-Picture::~Picture() = default;
+//
 
 }  // namespace impeller

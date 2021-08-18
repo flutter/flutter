@@ -18,7 +18,7 @@
 
 namespace impeller {
 
-class PictureOperation;
+class Entity;
 
 class Canvas {
  public:
@@ -50,13 +50,13 @@ class Canvas {
 
   void DrawShadow(Path path, Color color, Scalar elevation);
 
-  void DrawPicture(std::shared_ptr<Picture> picture);
+  void DrawPicture(const Picture& picture);
 
-  std::shared_ptr<Picture> EndRecordingAsPicture();
+  Picture EndRecordingAsPicture();
 
  private:
   std::stack<Matrix> xformation_stack_;
-  std::vector<std::unique_ptr<PictureOperation>> ops_;
+  std::vector<Entity> ops_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Canvas);
 };

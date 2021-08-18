@@ -8,21 +8,12 @@
 #include <vector>
 
 #include "flutter/fml/macros.h"
+#include "impeller/entity/entity.h"
 
 namespace impeller {
 
-class PictureOperation;
-
-class Picture {
- public:
-  Picture(std::vector<std::unique_ptr<PictureOperation>> operations);
-
-  ~Picture();
-
- private:
-  std::vector<std::unique_ptr<PictureOperation>> ops_;
-
-  FML_DISALLOW_COPY_AND_ASSIGN(Picture);
+struct Picture {
+  std::vector<Entity> entities;
 };
 
 }  // namespace impeller

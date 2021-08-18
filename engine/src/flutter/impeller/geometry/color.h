@@ -638,6 +638,8 @@ struct Color {
         1.0                                                //
     };
   }
+
+  constexpr bool IsTransparent() const { return alpha == 0.0; }
 };
 
 /**
