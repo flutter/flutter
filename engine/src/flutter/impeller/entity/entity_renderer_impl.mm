@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "impeller/entity/entity_renderer_impl.h"
+#include "impeller/compositor/vertex_buffer_builder.h"
 
 namespace impeller {
 
@@ -38,6 +39,8 @@ bool EntityRendererImpl::RenderEntity(const Surface& surface,
     if (cmd.pipeline == nullptr) {
       return false;
     }
+
+    VertexBufferBuilder<VS::PerVertexData> builder;
 
     VS::FrameInfo frame_info;
     frame_info.mvp = Matrix::MakeOrthographic(surface.GetSize()) *
