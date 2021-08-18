@@ -1,6 +1,7 @@
 # Copyright 2013 The Flutter Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
+
 import("//flutter/testing/testing.gni")
 
 if (enable_unittests) {
@@ -13,5 +14,13 @@ if (enable_unittests) {
       "//third_party/swiftshader_flutter:spvtools",
       "//third_party/swiftshader_flutter:spvtools_val",
     ]
+  }
+
+  executable("glsl_to_spirv") {
+    sources = [ "glsl_to_spirv.cc" ]
+
+    configs += [ "//third_party/shaderc_flutter:shaderc_util_config" ]
+
+    deps = [ "//third_party/shaderc_flutter" ]
   }
 }
