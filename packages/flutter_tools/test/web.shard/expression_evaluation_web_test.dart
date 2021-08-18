@@ -127,8 +127,7 @@ void main() {
         project.breakpointAppUri,
         project.breakpointLine,
       );
-      await flutter.resume();
-      return flutter.waitForPause();
+      return flutter.resume(waitForNextPause: true);
     }
 
     Future<void> startPaused({bool expressionEvaluation}) {
