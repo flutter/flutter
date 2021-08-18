@@ -8,7 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  Future<void> controlAppLifeCycleState(AppLifecycleState state) async {
+  Future<void> setAppLifeCycleState(AppLifecycleState state) async {
     final ByteData? message =
         const StringCodec().encodeMessage(state.toString());
     await ServicesBinding.instance!.defaultBinaryMessenger
@@ -101,7 +101,7 @@ void main() {
     late Ticker ticker;
 
     void testFunction() {
-      ticker = Ticker((Duration _) {});
+      ticker = Ticker((Duration _) { });
     }
 
     testFunction();
@@ -110,8 +110,7 @@ void main() {
     expect(ticker.toString(debugIncludeStack: true), contains('testFunction'));
   });
 
-  testWidgets('Ticker can be sped up with time dilation',
-      (WidgetTester tester) async {
+  testWidgets('Ticker can be sped up with time dilation', (WidgetTester tester) async {
     timeDilation = 0.5; // Move twice as fast.
     late Duration lastDuration;
     void handleTick(Duration duration) {
@@ -127,8 +126,7 @@ void main() {
     ticker.dispose();
   });
 
-  testWidgets('Ticker can be slowed down with time dilation',
-      (WidgetTester tester) async {
+  testWidgets('Ticker can be slowed down with time dilation', (WidgetTester tester) async {
     timeDilation = 2.0; // Move half as fast.
     late Duration lastDuration;
     void handleTick(Duration duration) {
@@ -144,8 +142,7 @@ void main() {
     ticker.dispose();
   });
 
-  testWidgets('Ticker stops ticking when application is paused',
-      (WidgetTester tester) async {
+  testWidgets('Ticker stops ticking when application is paused', (WidgetTester tester) async {
     int tickCount = 0;
     void handleTick(Duration duration) {
       tickCount += 1;
@@ -158,19 +155,18 @@ void main() {
     expect(ticker.isActive, isTrue);
     expect(tickCount, equals(0));
 
-    controlAppLifeCycleState(AppLifecycleState.paused);
+    setAppLifeCycleState(AppLifecycleState.paused);
 
     expect(ticker.isTicking, isFalse);
     expect(ticker.isActive, isTrue);
 
     ticker.stop();
 
-    controlAppLifeCycleState(AppLifecycleState.resumed);
+    setAppLifeCycleState(AppLifecycleState.resumed);
   });
 
-  testWidgets('Ticker can be created before application unpauses',
-      (WidgetTester tester) async {
-    controlAppLifeCycleState(AppLifecycleState.paused);
+  testWidgets('Ticker can be created before application unpauses', (WidgetTester tester) async {
+    setAppLifeCycleState(AppLifecycleState.paused);
 
     int tickCount = 0;
     void handleTick(Duration duration) {
@@ -188,7 +184,7 @@ void main() {
     expect(tickCount, equals(0));
     expect(ticker.isTicking, isFalse);
 
-    controlAppLifeCycleState(AppLifecycleState.resumed);
+    setAppLifeCycleState(AppLifecycleState.resumed);
 
     await tester.pump(const Duration(milliseconds: 10));
 
