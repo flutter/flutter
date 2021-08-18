@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/src/physics/utils.dart' show nearEqual;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -1143,6 +1144,12 @@ void main() {
   });
 
   testWidgets('RawScrollbar.isAlwaysShown asserts that a ScrollPosition is attached', (WidgetTester tester) async {
+    final FlutterExceptionHandler? handler = FlutterError.onError;
+    FlutterErrorDetails? error;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      error = details;
+    };
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1163,12 +1170,15 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    final AssertionError exception = tester.takeException() as AssertionError;
-    expect(exception, isAssertionError);
+
+    expect(error, isNotNull);
+    final AssertionError exception = error!.exception as AssertionError;
     expect(
       exception.message,
       contains("The Scrollbar's ScrollController has no ScrollPosition attached."),
     );
+
+    FlutterError.onError = handler;
   });
 
   testWidgets('Interactive scrollbars should have a valid scroll controller', (WidgetTester tester) async {
@@ -1697,5 +1707,38 @@ void main() {
           color: const Color(0x66BCBCBC),
         ),
     );
+  });
+
+  testWidgets('notificationPredicate depth test.', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    final List<int> depths = <int>[];
+    Widget buildFrame() {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            notificationPredicate: (ScrollNotification notification) {
+              depths.add(notification.depth);
+              return notification.depth == 0;
+            },
+            controller: scrollController,
+            isAlwaysShown: true,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: const SingleChildScrollView(),
+            ),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildFrame());
+    await tester.pumpAndSettle();
+
+    // `notificationPredicate` should be called twice with different `depth`
+    // because there are two scrollable widgets.
+    expect(depths.length, 2);
+    expect(depths[0], 1);
+    expect(depths[1], 0);
   });
 }

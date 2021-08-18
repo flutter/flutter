@@ -1410,7 +1410,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 ///           child: SizedBox(
 ///             height: 20,
 ///             child: Center(
-///               child: const Text('Scroll to see the SliverAppBar in effect.'),
+///               child: Text('Scroll to see the SliverAppBar in effect.'),
 ///             ),
 ///           ),
 ///         ),
@@ -1434,7 +1434,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 ///       child: Padding(
 ///         padding: const EdgeInsets.all(8),
 ///         child: OverflowBar(
-///           alignment: MainAxisAlignment.spaceEvenly,
+///           overflowAlignment: OverflowBarAlignment.center,
 ///           children: <Widget>[
 ///             Row(
 ///               mainAxisSize: MainAxisSize.min,

@@ -346,6 +346,7 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v1.23.0-4.0.pre.',
     )
     bool? useTextSelectionTheme,
+    AndroidOverscrollIndicator? androidOverscrollIndicator,
   }) {
     assert(colorScheme?.brightness == null || brightness == null || colorScheme!.brightness == brightness);
     final Brightness _brightness = brightness ?? colorScheme?.brightness ?? Brightness.light;
@@ -561,6 +562,7 @@ class ThemeData with Diagnosticable {
       progressIndicatorTheme: progressIndicatorTheme,
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel,
       useTextSelectionTheme: useTextSelectionTheme,
+      androidOverscrollIndicator: androidOverscrollIndicator,
     );
   }
 
@@ -701,6 +703,7 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v1.23.0-4.0.pre.',
     )
     required this.useTextSelectionTheme,
+    required this.androidOverscrollIndicator,
   }) : assert(visualDensity != null),
        assert(primaryColor != null),
        assert(primaryColorBrightness != null),
@@ -1358,6 +1361,20 @@ class ThemeData with Diagnosticable {
   )
   final bool useTextSelectionTheme;
 
+  /// Specifies which overscroll indicator to use on [TargetPlatform.android].
+  ///
+  /// When null, the default value of
+  /// [MaterialScrollBehavior.androidOverscrollIndicator] is
+  /// [AndroidOverscrollIndicator.glow].
+  ///
+  /// See also:
+  ///
+  ///   * [StretchingOverscrollIndicator], a material design edge effect
+  ///     that transforms the contents of a scrollable when overscrolled.
+  ///   * [GlowingOverscrollIndicator], an edge effect that paints a glow
+  ///     over the contents of a scrollable when overscrolled.
+  final AndroidOverscrollIndicator? androidOverscrollIndicator;
+
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ///
   /// The [brightness] value is applied to the [colorScheme].
@@ -1489,6 +1506,7 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v1.23.0-4.0.pre.',
     )
     bool? useTextSelectionTheme,
+    AndroidOverscrollIndicator? androidOverscrollIndicator,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     return ThemeData.raw(
@@ -1570,6 +1588,7 @@ class ThemeData with Diagnosticable {
       progressIndicatorTheme: progressIndicatorTheme ?? this.progressIndicatorTheme,
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel ?? this.fixTextFieldOutlineLabel,
       useTextSelectionTheme: useTextSelectionTheme ?? this.useTextSelectionTheme,
+      androidOverscrollIndicator: androidOverscrollIndicator ?? this.androidOverscrollIndicator,
     );
   }
 
@@ -1729,6 +1748,7 @@ class ThemeData with Diagnosticable {
       progressIndicatorTheme: ProgressIndicatorThemeData.lerp(a.progressIndicatorTheme, b.progressIndicatorTheme, t)!,
       fixTextFieldOutlineLabel: t < 0.5 ? a.fixTextFieldOutlineLabel : b.fixTextFieldOutlineLabel,
       useTextSelectionTheme: t < 0.5 ? a.useTextSelectionTheme : b.useTextSelectionTheme,
+      androidOverscrollIndicator: t < 0.5 ? a.androidOverscrollIndicator : b.androidOverscrollIndicator,
     );
   }
 
@@ -1815,7 +1835,8 @@ class ThemeData with Diagnosticable {
         && other.switchTheme == switchTheme
         && other.progressIndicatorTheme == progressIndicatorTheme
         && other.fixTextFieldOutlineLabel == fixTextFieldOutlineLabel
-        && other.useTextSelectionTheme == useTextSelectionTheme;
+        && other.useTextSelectionTheme == useTextSelectionTheme
+        && other.androidOverscrollIndicator == androidOverscrollIndicator;
   }
 
   @override
@@ -1902,6 +1923,7 @@ class ThemeData with Diagnosticable {
       progressIndicatorTheme,
       fixTextFieldOutlineLabel,
       useTextSelectionTheme,
+      androidOverscrollIndicator,
     ];
     return hashList(values);
   }
@@ -1984,6 +2006,7 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<RadioThemeData>('radioTheme', radioTheme, defaultValue: defaultData.radioTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<SwitchThemeData>('switchTheme', switchTheme, defaultValue: defaultData.switchTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ProgressIndicatorThemeData>('progressIndicatorTheme', progressIndicatorTheme, defaultValue: defaultData.progressIndicatorTheme, level: DiagnosticLevel.debug));
+    properties.add(EnumProperty<AndroidOverscrollIndicator>('androidOverscrollIndicator', androidOverscrollIndicator, defaultValue: null, level: DiagnosticLevel.debug));
   }
 }
 

@@ -308,9 +308,25 @@ class DesktopLogReader extends DeviceLogReader {
 
   /// Begin listening to the stdout and stderr streams of the provided [process].
   void initializeProcess(Process process) {
-    process.stdout.listen(_inputController.add);
-    process.stderr.listen(_inputController.add);
-    process.exitCode.whenComplete(_inputController.close);
+    final StreamSubscription<List<int>> stdoutSub = process.stdout.listen(
+      _inputController.add,
+    );
+    final StreamSubscription<List<int>> stderrSub = process.stderr.listen(
+      _inputController.add,
+    );
+    final Future<void> stdioFuture = Future.wait<void>(<Future<void>>[
+      stdoutSub.asFuture<void>(),
+      stderrSub.asFuture<void>(),
+    ]);
+    process.exitCode.whenComplete(() async {
+      // Wait for output to be fully processed.
+      await stdioFuture;
+      // The streams have already completed, so waiting for the stream
+      // cancellation to complete is not needed.
+      unawaited(stdoutSub.cancel());
+      unawaited(stderrSub.cancel());
+      await _inputController.close();
+    });
   }
 
   @override
