@@ -349,6 +349,7 @@ Future<void> _runIntegrationToolTests() async {
     toolsPath,
     forceSingleCore: true,
     testPaths: _selectIndexOfTotalSubshard<String>(allTests),
+    shuffleTests: true,
   );
 }
 
