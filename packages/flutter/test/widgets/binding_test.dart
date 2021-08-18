@@ -2,12 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=382757700"
-@Tags(<String>['no-shuffle'])
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -238,6 +232,7 @@ void main() {
       '   argument.\n',
     );
   });
+  
   testWidgets('defaultStackFilter elides framework Element mounting stacks', (WidgetTester tester) async {
     final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     late FlutterErrorDetails errorDetails;
