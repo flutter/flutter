@@ -630,5 +630,8 @@ class RenderSliverMultiBoxAdaptorAlt extends RenderSliver with
   }
 
   @override
+  RenderObject? get renderParent => null;
+
+  @override
   void performLayout() { }
 }

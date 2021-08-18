@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/src/semantics/semantics.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';
@@ -125,6 +126,8 @@ mixin KeepAliveParentDataMixin implements ParentData {
   /// Whether the widget is currently being kept alive, i.e. has [keepAlive] set
   /// to true and is offscreen.
   bool get keptAlive;
+
+  RenderSliverBoxChildManager? get childManager;
 }
 
 /// This class exists to dissociate [KeepAlive] from [RenderSliverMultiBoxAdaptor].
@@ -150,7 +153,67 @@ class SliverMultiBoxAdaptorParentData extends SliverLogicalParentData with Conta
   bool _keptAlive = false;
 
   @override
+  RenderSliverBoxChildManager? get childManager => _childManager;
+  RenderSliverBoxChildManager? _childManager;
+
+  @override
   String toString() => 'index=$index; ${keepAlive == true ? "keepAlive; " : ""}${super.toString()}';
+}
+
+class _KeepAlivePipeline extends PipelineOwner {
+  _KeepAlivePipeline(this.parent, this.renderSliver) : super.construct();
+
+  final PipelineOwner parent;
+  final RenderSliverMultiBoxAdaptor renderSliver;
+
+  @override
+  void flushLayout() {
+    renderSliver.markNeedsLayout();
+  }
+
+  @override
+  void flushCompositingBits() { }
+
+  @override
+  void flushPaint() { }
+
+  @override
+  void flushSemantics() { }
+
+  @override
+  AbstractNode? get rootNode => parent.rootNode;
+  @override
+  set rootNode(AbstractNode? value) => parent.rootNode = value;
+
+  @override
+  int get debugOutstandingSemanticsHandles => parent.debugOutstandingSemanticsHandles;
+
+  @override
+  SemanticsHandle ensureSemantics({VoidCallback? listener}) => parent.ensureSemantics(listener: listener);
+
+  @override
+  void requestVisualUpdate() {
+    // Offscreen render objects can't directly request visual update. It must be
+    // done via its onscreen ancestors.
+  }
+
+  @override
+  void scheduleCompositingBitsUpdateForRenderObject(RenderObject renderObject) { }
+
+  @override
+  void scheduleLayoutForRenderObject(RenderObject renderObject) { }
+
+  @override
+  void schedulePaintForRenderObject(RenderObject renderObject) { }
+
+
+  @override
+  SemanticsOwner? get semanticsOwner => parent.semanticsOwner;
+
+  @override
+  void scheduleSemanticsUpdateForRenderObject(RenderObject renderObject) { }
+  @override
+  void unscheduleSemanticsUpdateForRenderObject(RenderObject renderObject) { }
 }
 
 /// A sliver with multiple box children.
@@ -210,6 +273,8 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   final Map<int, RenderBox> _keepAliveBucket = <int, RenderBox>{};
 
   late final List<RenderBox> _debugDanglingKeepAlives = <RenderBox>[];
+
+  late final PipelineOwner keepAlivePipelineOwner = PipelineOwner();
 
   /// Indicates whether integrity check is enabled.
   ///

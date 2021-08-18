@@ -94,6 +94,94 @@ void main() {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
   });
 
+  testWidgets('Nested ListView both with KeepAlives', (WidgetTester tester) async {
+    final ScrollController outerScrollController = ScrollController();
+    final ScrollController innerScrollController = ScrollController();
+    final List<Widget> filler = List<Widget>.generate(500, (int i) => const SizedBox(height: 12.3));
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView(
+          controller: outerScrollController,
+          cacheExtent: 0.0,
+          addAutomaticKeepAlives: false,
+          addRepaintBoundaries: false,
+          addSemanticIndexes: false,
+          children: <Widget>[
+            Leaf(
+              key: const GlobalObjectKey<_LeafState>('outer'),
+              child: SizedBox(
+                height: 800,
+                child: ListView(
+                  controller: innerScrollController,
+                  cacheExtent: 0.0,
+                  addAutomaticKeepAlives: false,
+                  addRepaintBoundaries: false,
+                  addSemanticIndexes: false,
+                  itemExtent: 12.3, // about 50 widgets visible
+                  children: <Widget>[
+                    const Leaf(key: GlobalObjectKey<_LeafState>('inner'), child: SizedBox()),
+                    ...filler,
+                  ],
+                ),
+              ),
+            ),
+            ...filler,
+          ],
+        ),
+      ),
+    );
+
+    Future<void> setKeepAlive({ bool? innerKeepAlive, bool? outerKeepAlive }) async {
+      outerScrollController.jumpTo(0);
+      await tester.pump();
+      innerScrollController.jumpTo(0);
+      await tester.pump();
+      if (innerKeepAlive != null)
+        const GlobalObjectKey<_LeafState>('inner').currentState!.setKeepAlive(innerKeepAlive);
+      if (outerKeepAlive != null)
+        const GlobalObjectKey<_LeafState>('outer').currentState!.setKeepAlive(outerKeepAlive);
+
+      innerScrollController.jumpTo(3000);
+      outerScrollController.jumpTo(3000);
+      await tester.pump();
+    }
+
+    // Both have keepAlive = false.
+    await setKeepAlive(innerKeepAlive: false, outerKeepAlive: false);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>('outer'), skipOffstage: false), findsNothing);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>('inner'), skipOffstage: false), findsNothing);
+
+    await setKeepAlive(innerKeepAlive: true, outerKeepAlive: false);
+    // Neither widget was kept alive since the outer widget wasn't
+    expect(find.byKey(const GlobalObjectKey<_LeafState>('outer'), skipOffstage: false), findsNothing);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>('inner'), skipOffstage: false), findsNothing);
+
+    await setKeepAlive(innerKeepAlive: false, outerKeepAlive: true);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>('outer'), skipOffstage: false), findsOneWidget);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>('inner'), skipOffstage: false), findsNothing);
+
+    await setKeepAlive(innerKeepAlive: true, outerKeepAlive: true);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>('outer'), skipOffstage: false), findsOneWidget);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>('inner'), skipOffstage: false), findsOneWidget);
+
+    // Turn KeepAlive off when a widget is currently kept alive.
+    // Inner:
+    await setKeepAlive(innerKeepAlive: true, outerKeepAlive: true);
+    const GlobalObjectKey<_LeafState>('inner').currentState!.setKeepAlive(false);
+    await tester.pump();
+    expect(find.byKey(const GlobalObjectKey<_LeafState>('outer'), skipOffstage: false), findsOneWidget);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>('inner'), skipOffstage: false), findsNothing);
+
+    // Outer:
+    await setKeepAlive(innerKeepAlive: true, outerKeepAlive: true);
+    const GlobalObjectKey<_LeafState>('outer').currentState!.setKeepAlive(false);
+    await tester.pump();
+    expect(find.byKey(const GlobalObjectKey<_LeafState>('outer'), skipOffstage: false), findsNothing);
+    expect(find.byKey(const GlobalObjectKey<_LeafState>('inner'), skipOffstage: false), findsNothing);
+  });
+
+
   testWidgets('KeepAlive with ListView without itemExtent', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(

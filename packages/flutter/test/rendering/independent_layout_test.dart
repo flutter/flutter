@@ -47,7 +47,7 @@ void main() {
     // Attach the offscreen to a custom render view and owner
     final RenderView renderView = RenderView(configuration: testConfiguration, window: ui.window);
     final PipelineOwner pipelineOwner = PipelineOwner();
-    renderView.attach(pipelineOwner);
+    pipelineOwner.rootNode = renderView;
     renderView.child = offscreen.root;
     renderView.prepareInitialFrame();
     pipelineOwner.requestVisualUpdate();
@@ -77,7 +77,7 @@ void main() {
     // Attach the offscreen to a custom render view and owner
     final RenderView renderView = RenderView(configuration: testConfiguration, window: ui.window);
     final PipelineOwner pipelineOwner = PipelineOwner();
-    renderView.attach(pipelineOwner);
+    pipelineOwner.rootNode = renderView;
     renderView.child = offscreen.root;
     renderView.prepareInitialFrame();
     pipelineOwner.requestVisualUpdate();
