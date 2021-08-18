@@ -24,6 +24,8 @@
             "fuchsia.sysmem.Allocator",
             "fuchsia.timezone.Timezone",
             "fuchsia.tracing.provider.Registry",
+            "fuchsia.ui.composition.Allocator",
+            "fuchsia.ui.composition.Flatland",
             "fuchsia.vulkan.loader.Loader"
         ]
     }

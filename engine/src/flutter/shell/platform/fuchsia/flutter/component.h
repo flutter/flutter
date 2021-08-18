@@ -128,6 +128,9 @@ class Application final : public Engine::Delegate,
                              fuchsia::ui::views::ViewRefControl control_ref,
                              fuchsia::ui::views::ViewRef view_ref) override;
 
+  // |fuchsia::ui::app::ViewProvider|
+  void CreateView2(fuchsia::ui::app::CreateView2Args view_args) override;
+
   // |flutter::Engine::Delegate|
   void OnEngineTerminate(const Engine* holder) override;
 

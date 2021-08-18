@@ -22,7 +22,7 @@
 #include "flutter/lib/ui/window/pointer_data.h"
 #include "flutter/lib/ui/window/viewport_metrics.h"
 #include "flutter/shell/common/context_options.h"
-#include "flutter/shell/platform/fuchsia/flutter/platform_view.h"
+#include "flutter/shell/platform/fuchsia/flutter/gfx_platform_view.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "surface.h"
@@ -258,10 +258,10 @@ class PlatformViewBuilder {
   }
 
   // Once Build is called, the instance is no longer usable.
-  PlatformView Build() {
+  GfxPlatformView Build() {
     EXPECT_FALSE(std::exchange(built_, true))
         << "Build() was already called, this buider is good for one use only.";
-    return PlatformView(
+    return GfxPlatformView(
         delegate_, debug_label_, std::move(view_ref_), task_runners_,
         runner_services_, std::move(parent_environment_service_provider_),
         std::move(session_listener_request_), std::move(vrf_),
@@ -376,7 +376,7 @@ TEST_F(PlatformViewTests, InvalidPlatformMessageRequest) {
   fidl::BindingSet<fuchsia::ui::views::ViewRefFocused> vrf_bindings;
   auto vrf_handle = vrf_bindings.AddBinding(&vrf);
 
-  flutter_runner::PlatformView platform_view =
+  flutter_runner::GfxPlatformView platform_view =
       PlatformViewBuilder(delegate, std::move(task_runners),
                           services_provider.service_directory())
           .SetViewRefFocused(std::move(vrf_handle))
@@ -455,7 +455,7 @@ TEST_F(PlatformViewTests, CreateSurfaceTest) {
         "PlatformViewTest", view_embedder, gr_context.get());
   };
 
-  flutter_runner::PlatformView platform_view =
+  flutter_runner::GfxPlatformView platform_view =
       PlatformViewBuilder(delegate, std::move(task_runners),
                           services_provider.service_directory())
           .SetCreateSurfaceCallback(CreateSurfaceCallback)
@@ -487,7 +487,7 @@ TEST_F(PlatformViewTests, SetViewportMetrics) {
   sys::testing::ServiceDirectoryProvider services_provider(dispatcher());
   flutter::TaskRunners task_runners("test_runners", nullptr, nullptr, nullptr,
                                     nullptr);
-  flutter_runner::PlatformView platform_view =
+  flutter_runner::GfxPlatformView platform_view =
       PlatformViewBuilder(delegate, std::move(task_runners),
                           services_provider.service_directory())
           .SetSessionListenerRequest(session_listener.NewRequest())
@@ -606,7 +606,7 @@ TEST_F(PlatformViewTests, ChangesAccessibilitySettings) {
   EXPECT_FALSE(delegate.semantics_enabled());
   EXPECT_EQ(delegate.semantics_features(), 0);
 
-  flutter_runner::PlatformView platform_view =
+  flutter_runner::GfxPlatformView platform_view =
       PlatformViewBuilder(
           delegate,                              // delegate
           std::move(task_runners),               // task_runners
@@ -645,7 +645,7 @@ TEST_F(PlatformViewTests, EnableWireframeTest) {
     wireframe_enabled = should_enable;
   };
 
-  flutter_runner::PlatformView platform_view =
+  flutter_runner::GfxPlatformView platform_view =
       PlatformViewBuilder(delegate, std::move(task_runners),
                           services_provider.service_directory())
           .SetEnableWireframeCallback(EnableWireframeCallback)
@@ -704,7 +704,7 @@ TEST_F(PlatformViewTests, CreateViewTest) {
     on_view_bound(0);
   };
 
-  flutter_runner::PlatformView platform_view =
+  flutter_runner::GfxPlatformView platform_view =
       PlatformViewBuilder(delegate, std::move(task_runners),
                           services_provider.service_directory())
           .SetCreateViewCallback(CreateViewCallback)
@@ -757,7 +757,7 @@ TEST_F(PlatformViewTests, UpdateViewTest) {
     focusable_for_test = focusable;
   };
 
-  flutter_runner::PlatformView platform_view =
+  flutter_runner::GfxPlatformView platform_view =
       PlatformViewBuilder(delegate, std::move(task_runners),
                           services_provider.service_directory())
           .SetUpdateViewCallback(UpdateViewCallback)
@@ -880,7 +880,7 @@ TEST_F(PlatformViewTests, DestroyViewTest) {
         on_view_unbound(0);
       };
 
-  flutter_runner::PlatformView platform_view =
+  flutter_runner::GfxPlatformView platform_view =
       PlatformViewBuilder(delegate, std::move(task_runners),
                           services_provider.service_directory())
           .SetDestroyViewCallback(DestroyViewCallback)
@@ -942,7 +942,7 @@ TEST_F(PlatformViewTests, ViewEventsTest) {
     on_view_bound(kViewHolderId);
   };
 
-  flutter_runner::PlatformView platform_view =
+  flutter_runner::GfxPlatformView platform_view =
       PlatformViewBuilder(delegate, std::move(task_runners),
                           services_provider.service_directory())
           .SetSessionListenerRequest(session_listener.NewRequest())
@@ -1062,7 +1062,7 @@ TEST_F(PlatformViewTests, GetFocusStatesTest) {
   fidl::BindingSet<fuchsia::ui::views::ViewRefFocused> vrf_bindings;
   auto vrf_handle = vrf_bindings.AddBinding(&vrf);
 
-  flutter_runner::PlatformView platform_view =
+  flutter_runner::GfxPlatformView platform_view =
       PlatformViewBuilder(delegate, std::move(task_runners),
                           services_provider.service_directory())
           .SetViewRefFocused(std::move(vrf_handle))
@@ -1124,7 +1124,7 @@ TEST_F(PlatformViewTests, RequestFocusTest) {
   fidl::BindingSet<fuchsia::ui::views::Focuser> focuser_bindings;
   auto focuser_handle = focuser_bindings.AddBinding(&focuser);
 
-  flutter_runner::PlatformView platform_view =
+  flutter_runner::GfxPlatformView platform_view =
       PlatformViewBuilder(delegate, std::move(task_runners),
                           services_provider.service_directory())
           .SetFocuser(std::move(focuser_handle))
@@ -1170,7 +1170,7 @@ TEST_F(PlatformViewTests, RequestFocusFailTest) {
   fidl::BindingSet<fuchsia::ui::views::Focuser> focuser_bindings;
   auto focuser_handle = focuser_bindings.AddBinding(&focuser);
 
-  flutter_runner::PlatformView platform_view =
+  flutter_runner::GfxPlatformView platform_view =
       PlatformViewBuilder(delegate, std::move(task_runners),
                           services_provider.service_directory())
           .SetFocuser(std::move(focuser_handle))
@@ -1223,7 +1223,7 @@ TEST_F(PlatformViewTests, OnKeyEvent) {
 
   fidl::InterfacePtr<fuchsia::ui::input3::KeyboardListener> keyboard_listener;
 
-  flutter_runner::PlatformView platform_view =
+  flutter_runner::GfxPlatformView platform_view =
       PlatformViewBuilder(delegate, std::move(task_runners),
                           services_provider.service_directory())
           .SetKeyboardListener(keyboard_listener.NewRequest(dispatcher()))
@@ -1317,7 +1317,7 @@ TEST_F(PlatformViewTests, OnShaderWarmup) {
         completion_callback(shaders_in.size());
       };
 
-  flutter_runner::PlatformView platform_view =
+  flutter_runner::GfxPlatformView platform_view =
       PlatformViewBuilder(delegate, std::move(task_runners),
                           services_provider.service_directory())
           .SetShaderWarmupCallback(on_shader_warmup)
@@ -1394,7 +1394,7 @@ TEST_F(PlatformViewTests, DownPointerNumericNudge) {
   MockPlatformViewDelegate delegate;
   flutter::TaskRunners task_runners("test_runners", nullptr, nullptr, nullptr,
                                     nullptr);
-  flutter_runner::PlatformView platform_view =
+  flutter_runner::GfxPlatformView platform_view =
       PlatformViewBuilder(delegate, std::move(task_runners),
                           services_provider.service_directory())
           .SetSessionListenerRequest(session_listener.NewRequest())

@@ -1399,6 +1399,12 @@ FILE: ../../../flutter/shell/platform/fuchsia/flutter/component.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/component_unittest.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/engine.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/engine.h
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/flatland_connection.cc
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/flatland_connection.h
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/flatland_external_view_embedder.cc
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/flatland_external_view_embedder.h
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/flatland_platform_view.cc
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/flatland_platform_view.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/flutter_runner_fakes.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/flutter_runner_product_configuration.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/flutter_runner_product_configuration.h
@@ -1410,6 +1416,8 @@ FILE: ../../../flutter/shell/platform/fuchsia/flutter/fuchsia_external_view_embe
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/fuchsia_intl.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/fuchsia_intl.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/fuchsia_intl_unittest.cc
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/gfx_platform_view.cc
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/gfx_platform_view.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/gfx_session_connection.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/gfx_session_connection.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/isolate_configurator.cc

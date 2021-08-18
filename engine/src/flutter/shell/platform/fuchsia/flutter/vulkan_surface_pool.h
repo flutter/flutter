@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <fuchsia/ui/composition/cpp/fidl.h>
+
 #include <unordered_map>
 #include <vector>
 
@@ -42,6 +44,7 @@ class VulkanSurfacePool final {
   sk_sp<GrDirectContext> context_;
   scenic::Session* scenic_session_;
   fuchsia::sysmem::AllocatorSyncPtr sysmem_allocator_;
+  fuchsia::ui::composition::AllocatorPtr flatland_allocator_;
   std::vector<std::unique_ptr<VulkanSurface>> available_surfaces_;
   std::unordered_map<uintptr_t, std::unique_ptr<VulkanSurface>>
       pending_surfaces_;

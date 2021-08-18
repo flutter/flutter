@@ -639,6 +639,29 @@ void Application::CreateViewWithViewRef(
       ));
 }
 
+void Application::CreateView2(fuchsia::ui::app::CreateView2Args view_args) {
+  if (!svc_) {
+    FML_DLOG(ERROR)
+        << "Component incoming services was invalid when attempting to "
+           "create a shell for a view provider request.";
+    return;
+  }
+
+  shell_holders_.emplace(std::make_unique<Engine>(
+      *this,                      // delegate
+      debug_label_,               // thread label
+      svc_,                       // Component incoming services
+      runner_incoming_services_,  // Runner incoming services
+      settings_,                  // settings
+      std::move(
+          *view_args.mutable_view_creation_token()),  // view creation token
+      scenic::ViewRefPair::New(),                     // view ref pair
+      std::move(fdio_ns_),                            // FDIO namespace
+      std::move(directory_request_),                  // outgoing request
+      product_config_                                 // product configuration
+      ));
+}
+
 #if !defined(DART_PRODUCT)
 void Application::WriteProfileToTrace() const {
   for (const auto& engine : shell_holders_) {
