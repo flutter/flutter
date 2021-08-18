@@ -348,7 +348,6 @@ class TextField extends StatefulWidget {
     this.autofillHints = const <String>[],
     this.restorationId,
     this.enableIMEPersonalizedLearning = true,
-    this.deltaManager,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -407,8 +406,6 @@ class TextField extends StatefulWidget {
   ///
   /// If null, this widget will create its own [TextEditingController].
   final TextEditingController? controller;
-
-  final TextEditingDeltaNotifier? deltaManager;
 
   /// Defines the keyboard focus for this widget.
   ///
@@ -793,7 +790,6 @@ class TextField extends StatefulWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<TextEditingController>('controller', controller, defaultValue: null));
-    properties.add(DiagnosticsProperty<TextEditingDeltaNotifier>('deltaManager', deltaManager, defaultValue: null));
     properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('enabled', enabled, defaultValue: null));
     properties.add(DiagnosticsProperty<InputDecoration>('decoration', decoration, defaultValue: const InputDecoration()));
@@ -945,7 +941,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     if (widget.controller == null) {
       _createLocalController();
     }
-
     _effectiveFocusNode.canRequestFocus = _isEnabled;
     _effectiveFocusNode.addListener(_handleFocusChanged);
   }
@@ -1222,7 +1217,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           showCursor: widget.showCursor,
           showSelectionHandles: _showSelectionHandles,
           controller: controller,
-          deltaManager: widget.deltaManager,
           focusNode: focusNode,
           keyboardType: widget.keyboardType,
           textInputAction: widget.textInputAction,
