@@ -58,7 +58,6 @@ class MDnsObservatoryDiscovery {
   /// If it is null and there is only one available instance of Observatory,
   /// it will return that instance's information regardless of what application
   /// the Observatory instance is for.
-  // TODO(jonahwilliams): use `deviceVmservicePort` to filter mdns results.
   @visibleForTesting
   Future<MDnsObservatoryDiscoveryResult> query({String applicationId, int deviceVmservicePort}) async {
     _logger.printTrace('Checking for advertised Dart observatories...');

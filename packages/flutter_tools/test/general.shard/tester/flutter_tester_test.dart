@@ -96,7 +96,6 @@ void main() {
         fileSystem: fileSystem,
         processManager: fakeProcessManager,
         artifacts: Artifacts.test(),
-        buildDirectory: 'build',
         logger: BufferLogger.test(),
         flutterVersion: FakeFlutterVersion(),
         operatingSystemUtils: FakeOperatingSystemUtils(),
