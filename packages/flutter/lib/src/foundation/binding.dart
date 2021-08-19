@@ -298,7 +298,7 @@ abstract class BindingBase {
   /// The [Future] returned by the `callback` argument is returned by [lockEvents].
   @protected
   Future<void> lockEvents(Future<void> Function() callback) {
-    developer.Timeline.startSync('Lock events');
+    final developer.TimelineTask timelineTask = developer.TimelineTask()..start('Lock events');
 
     assert(callback != null);
     _lockCount += 1;
@@ -307,7 +307,7 @@ abstract class BindingBase {
     future.whenComplete(() {
       _lockCount -= 1;
       if (!locked) {
-        developer.Timeline.finishSync();
+        timelineTask.finish();
         unlocked();
       }
     });

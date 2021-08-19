@@ -293,7 +293,7 @@ class TimelineSummary {
     // Timeline does not guarantee that the first event is the "begin" event.
     TimelineEvent? begin;
     for (final TimelineEvent event in events) {
-      if (event.phase == 'B') {
+      if (event.phase == 'B' || event.phase == 'b') {
         begin = event;
       } else {
         if (begin != null) {
