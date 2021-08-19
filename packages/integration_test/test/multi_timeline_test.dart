@@ -22,6 +22,6 @@ void main() {
     );
     expect(fs.file(path.join(outDir, 'integration_response_data_timeline_a.json')).existsSync(), true);
     expect(fs.file(path.join(outDir, 'integration_response_data_timeline_b.json')).existsSync(), true);
-    expect(fs.file(path.join(outDir, 'integration_response_data_screenshots.json')).existsSync(), true);
+    expect(fs.file(path.join(outDir, 'integration_response_data_screenshots.json')).existsSync(), false);
   });
 }
