@@ -2409,10 +2409,19 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
+    bringup: true
     properties:
       tags: >
         ["devicelab","android","mac"]
       task_name: complex_layout_scroll_perf__timeline_summary
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
     scheduler: luci
 
   - name: Mac_android cubic_bezier_perf__timeline_summary
@@ -2808,30 +2817,57 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
+    bringup: true
     properties:
       tags: >
         ["devicelab","ios","mac"]
       task_name: complex_layout_ios__compile
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
     scheduler: luci
 
   - name: Mac_ios complex_layout_ios__start_up
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
+    bringup: true
     properties:
       tags: >
         ["devicelab","ios","mac"]
       task_name: complex_layout_ios__start_up
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
     scheduler: luci
 
   - name: Mac_ios complex_layout_scroll_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
+    bringup: true
     properties:
       tags: >
         ["devicelab","ios","mac"]
       task_name: complex_layout_scroll_perf_ios__timeline_summary
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
     scheduler: luci
 
   - name: Mac_ios cubic_bezier_perf_ios_sksl_warmup__timeline_summary
