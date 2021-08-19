@@ -384,9 +384,9 @@ TEST(FlValueTest, Int64ListToString) {
 
 TEST(FlValueTest, FloatList) {
   double data[] = {0.0, -1.0, M_PI};
-  g_autoptr(FlValue) value = fl_value_new_float_list(data, 4);
+  g_autoptr(FlValue) value = fl_value_new_float_list(data, 3);
   ASSERT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_FLOAT_LIST);
-  ASSERT_EQ(fl_value_get_length(value), static_cast<size_t>(4));
+  ASSERT_EQ(fl_value_get_length(value), static_cast<size_t>(3));
   EXPECT_EQ(fl_value_get_float_list(value)[0], 0);
   EXPECT_EQ(fl_value_get_float_list(value)[1], -1.0);
   EXPECT_EQ(fl_value_get_float_list(value)[2], M_PI);
