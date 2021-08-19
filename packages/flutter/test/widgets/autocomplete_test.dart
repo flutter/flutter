@@ -652,16 +652,17 @@ void main() {
     final GlobalKey optionsKey = GlobalKey();
     late FocusNode focusNode;
     late TextEditingController textEditingController;
-    late Iterable<String> lastOptions;
+    Iterable<String>? lastOptions;
+    const delay = Duration(milliseconds: 500);
 
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: RawAutocomplete<String>(
             optionsBuilder: (TextEditingValue textEditingValue) async {
-              return kOptions.where((String option) {
+              return Future.delayed(delay, () => kOptions.where((String option) {
                 return option.contains(textEditingValue.text.toLowerCase());
-              });
+              }));
             },
             fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
               focusNode = fieldFocusNode;
@@ -681,16 +682,19 @@ void main() {
       )
     );
 
-    // Enter text to show the options.
+    // Enter text to build the options.
     focusNode.requestFocus();
     await tester.enterText(find.byKey(fieldKey), 'go');
-    expect(find.byKey(fieldKey), findsOneWidget);
-    expect(find.byKey(optionsKey), findsOneWidget);
-    expect(lastOptions, kOptions);
-
-    // Asynchronous options builder was awaited.
     await tester.pumpAndSettle();
-    expect(lastOptions,  <String>['dingo', 'flamingo', 'goose']);
+
+    // The options have not yet been built.
+    expect(find.byKey(optionsKey), findsNothing);
+    expect(lastOptions, isNull);
+
+    // Await asynchronous options builder.
+    await tester.pumpAndSettle(delay);
+    expect(find.byKey(optionsKey), findsOneWidget);
+    expect(lastOptions, <String>['dingo', 'flamingo', 'goose']);
   });
 
   testWidgets('can navigate options with the keyboard', (WidgetTester tester) async {
