@@ -7,9 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  // Allowable error to still consider floats equal.
-  const double epsilon = 1e-6;
-
   Widget _boilerplate(VoidCallback? onButtonPressed, {
     int itemCount = 100,
     double initialChildSize = .5,
@@ -346,7 +343,10 @@ void main() {
       final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
 
       // The sheet should not have snapped.
-      expect(tester.getSize(find.byKey(containerKey)).height / screenHeight, closeTo(.7, epsilon));
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(.7, precisionErrorTolerance,
+      ));
     }, variant: TargetPlatformVariant.all());
 
     testWidgets('Does not snap away from initial child on reset', (WidgetTester tester) async {
@@ -362,13 +362,19 @@ void main() {
 
       await tester.drag(find.text('Item 1'), Offset(0, -.4 * screenHeight));
       await tester.pumpAndSettle();
-      expect(tester.getSize(find.byKey(containerKey)).height / screenHeight, closeTo(1.0, epsilon));
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(1.0, precisionErrorTolerance),
+      );
 
       DraggableScrollableActuator.reset(tester.element(find.byKey(containerKey)));
       await tester.pumpAndSettle();
 
       // The sheet should have reset without snapping away from initial child.
-      expect(tester.getSize(find.byKey(containerKey)).height / screenHeight, closeTo(.5, epsilon));
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(.5, precisionErrorTolerance),
+      );
     }, variant: TargetPlatformVariant.all());
 
     testWidgets('Zero velocity drag snaps to nearest snap target', (WidgetTester tester) async {
@@ -386,27 +392,42 @@ void main() {
       // We are dragging up, but we'll snap down because we're closer to .75 than 1.
       await tester.drag(find.text('Item 1'), Offset(0, -.35 * screenHeight));
       await tester.pumpAndSettle();
-      expect(tester.getSize(find.byKey(containerKey)).height / screenHeight, closeTo(.75, epsilon));
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(.75, precisionErrorTolerance),
+      );
 
       // Drag up and snap up.
       await tester.drag(find.text('Item 1'), Offset(0, -.2 * screenHeight));
       await tester.pumpAndSettle();
-      expect(tester.getSize(find.byKey(containerKey)).height / screenHeight, closeTo(1.0, epsilon));
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(1.0, precisionErrorTolerance),
+      );
 
       // Drag down and snap up.
       await tester.drag(find.text('Item 1'), Offset(0, .1 * screenHeight));
       await tester.pumpAndSettle();
-      expect(tester.getSize(find.byKey(containerKey)).height / screenHeight, closeTo(1.0, epsilon));
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(1.0, precisionErrorTolerance),
+      );
 
       // Drag down and snap down.
       await tester.drag(find.text('Item 1'), Offset(0, .45 * screenHeight));
       await tester.pumpAndSettle();
-      expect(tester.getSize(find.byKey(containerKey)).height / screenHeight, closeTo(.5, epsilon));
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(.5, precisionErrorTolerance),
+      );
 
       // Fling up with negligible velocity and snap down.
       await tester.fling(find.text('Item 1'), Offset(0, .1 * screenHeight), 1);
       await tester.pumpAndSettle();
-      expect(tester.getSize(find.byKey(containerKey)).height / screenHeight, closeTo(.5, epsilon));
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(.5, precisionErrorTolerance),
+      );
     }, variant: TargetPlatformVariant.all());
 
     for (final List<double>? snapSizes in <List<double>?>[null, <double>[]]) {
@@ -424,11 +445,17 @@ void main() {
 
           await tester.drag(find.text('Item 1'), Offset(0, -.4 * screenHeight));
           await tester.pumpAndSettle();
-          expect(tester.getSize(find.byKey(containerKey)).height / screenHeight, closeTo(1.0, epsilon));
+          expect(
+            tester.getSize(find.byKey(containerKey)).height / screenHeight,
+            closeTo(1.0, precisionErrorTolerance,
+          ));
 
           await tester.drag(find.text('Item 1'), Offset(0, .7 * screenHeight));
           await tester.pumpAndSettle();
-          expect(tester.getSize(find.byKey(containerKey)).height / screenHeight, closeTo(.25, epsilon));
+          expect(
+            tester.getSize(find.byKey(containerKey)).height / screenHeight,
+            closeTo(.25, precisionErrorTolerance),
+          );
       }, variant: TargetPlatformVariant.all());
     }
 
@@ -446,11 +473,17 @@ void main() {
 
       await tester.drag(find.text('Item 1'), Offset(0, -.4 * screenHeight));
       await tester.pumpAndSettle();
-      expect(tester.getSize(find.byKey(containerKey)).height / screenHeight, closeTo(1.0, epsilon));
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(1.0, precisionErrorTolerance),
+      );
 
       await tester.drag(find.text('Item 1'), Offset(0, .7 * screenHeight));
       await tester.pumpAndSettle();
-      expect(tester.getSize(find.byKey(containerKey)).height / screenHeight, closeTo(.25, epsilon));
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(.25, precisionErrorTolerance),
+      );
     }, variant: TargetPlatformVariant.all());
 
     testWidgets('Fling snaps in direction of momentum', (WidgetTester tester) async {
@@ -467,11 +500,17 @@ void main() {
 
       await tester.fling(find.text('Item 1'), Offset(0, -.1 * screenHeight), 1000);
       await tester.pumpAndSettle();
-      expect(tester.getSize(find.byKey(containerKey)).height / screenHeight, closeTo(.75, epsilon));
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(.75, precisionErrorTolerance),
+      );
 
       await tester.fling(find.text('Item 1'), Offset(0, .3 * screenHeight), 1000);
       await tester.pumpAndSettle();
-      expect(tester.getSize(find.byKey(containerKey)).height / screenHeight, closeTo(.25, epsilon));
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(.25, precisionErrorTolerance),
+      );
 
     }, variant: TargetPlatformVariant.all());
 

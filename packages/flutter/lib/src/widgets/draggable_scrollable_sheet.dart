@@ -362,11 +362,14 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
   }
 
   List<double> _impliedSnapSizes() {
-    widget.snapSizes?.asMap().forEach((int index, double snapSize) {
+    for (int index = 0; index < (widget.snapSizes?.length ?? 0); index += 1) {
+      final double snapSize = widget.snapSizes![index];
       assert(snapSize >= widget.minChildSize && snapSize <= widget.maxChildSize,
         'Snap sizes must be between `minChildSize` and `maxChildSize`. Invalid size: $snapSize');
       assert(index == 0 || snapSize > widget.snapSizes![index - 1],
         'Snap sizes must be in ascending order. Invalid size: $snapSize');
+    }
+    widget.snapSizes?.asMap().forEach((int index, double snapSize) {
     });
     // Ensure the snap sizes start and end with the min and max child sizes.
     if (widget.snapSizes == null || widget.snapSizes!.isEmpty) {
@@ -545,13 +548,13 @@ class _DraggableScrollableSheetScrollPosition
     }
   }
 
-  bool get _isAtSnapSize =>
-      extent.snapSizes.any(
-              (double snapSize) {
-            return (extent.currentExtent - snapSize).abs() <=
-                extent.pixelsToExtent(physics.tolerance.distance);
-          });
-
+  bool get _isAtSnapSize {
+    return extent.snapSizes.any(
+      (double snapSize) {
+        return (extent.currentExtent - snapSize).abs() <= extent.pixelsToExtent(physics.tolerance.distance);
+      },
+    );
+  }
   bool get _shouldSnap => extent.snap && extent.hasChanged && !_isAtSnapSize;
 
   @override
