@@ -33,7 +33,8 @@ static std::string ShaderLibraryDirectory() {
   return fml::paths::JoinPaths({path_result.second, "shaders"});
 }
 
-Playground::Playground() : renderer_(ShaderLibraryDirectory()) {}
+Playground::Playground()
+    : renderer_(ShaderLibraryDirectory(), "impeller.metallib") {}
 
 Playground::~Playground() = default;
 

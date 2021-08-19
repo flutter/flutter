@@ -12,10 +12,10 @@
 namespace impeller {
 
 struct SmoothingApproximation {
-  const Scalar scale;
-  const Scalar angle_tolerance;
-  const Scalar cusp_limit;
-  const Scalar distance_tolerance_square;
+  Scalar scale;
+  Scalar angle_tolerance;
+  Scalar cusp_limit;
+  Scalar distance_tolerance_square;
 
   SmoothingApproximation(/* default */)
       : SmoothingApproximation(1.0 /* scale */,

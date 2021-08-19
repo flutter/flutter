@@ -7,10 +7,13 @@
 #include "impeller/compositor/command.h"
 #include "impeller/compositor/command_buffer.h"
 #include "impeller/compositor/pipeline_builder.h"
+#include "impeller/compositor/pipeline_library.h"
 #include "impeller/compositor/renderer.h"
 #include "impeller/compositor/sampler_descriptor.h"
 #include "impeller/compositor/surface.h"
+#include "impeller/compositor/tessellator.h"
 #include "impeller/compositor/vertex_buffer_builder.h"
+#include "impeller/geometry/path_builder.h"
 #include "impeller/image/compressed_image.h"
 #include "impeller/image/decompressed_image.h"
 #include "impeller/playground/playground.h"
@@ -246,6 +249,75 @@ TEST_F(PrimitivesTest, CanRenderToTexture) {
       cmd, r2t_pass->GetTransientsBuffer().EmplaceUniform(uniforms));
   ASSERT_TRUE(r2t_pass->RecordCommand(std::move(cmd)));
   ASSERT_TRUE(r2t_pass->Commit(*context->GetTransientsAllocator()));
+}
+
+TEST_F(PrimitivesTest, CanRenderPath) {
+  auto path = PathBuilder{}.AddRect({10, 10, 100, 100}).CreatePath();
+  ASSERT_FALSE(path.GetBoundingBox().IsZero());
+
+  using BoxPipeline = PipelineT<BoxFadeVertexShader, BoxFadeFragmentShader>;
+  using VS = BoxFadeVertexShader;
+  using FS = BoxFadeFragmentShader;
+
+  BoxPipeline box_pipeline(*GetContext());
+
+  // Vertex buffer.
+  VertexBufferBuilder<VS::PerVertexData> vertex_builder;
+  vertex_builder.SetLabel("Box");
+
+  Tessellator tessellator;
+  ASSERT_TRUE(tessellator.Tessellate(
+      path.SubdivideAdaptively({}), [&vertex_builder](Point point) {
+        VS::PerVertexData vtx;
+        vtx.vertex_position = {point.x, point.y, 0.0};
+        vtx.texture_coordinates = {0.5, 0.5};
+        vertex_builder.AppendVertex(vtx);
+      }));
+
+  auto context = GetContext();
+
+  auto vertex_buffer =
+      vertex_builder.CreateVertexBuffer(*context->GetPermanentsAllocator());
+  ASSERT_TRUE(vertex_buffer);
+
+  auto bridge = CreateTextureForFixture("bay_bridge.jpg");
+  auto boston = CreateTextureForFixture("boston.jpg");
+  ASSERT_TRUE(bridge && boston);
+  auto sampler = context->GetSamplerLibrary()->GetSampler({});
+  ASSERT_TRUE(sampler);
+
+  Renderer::RenderCallback callback = [&](const Surface& surface,
+                                          RenderPass& pass) {
+    Command cmd;
+    cmd.label = "Box";
+    cmd.pipeline = box_pipeline.WaitAndGet();
+
+    cmd.BindVertices(vertex_buffer);
+
+    FS::FrameInfo frame_info;
+    frame_info.current_time = fml::TimePoint::Now().ToEpochDelta().ToSecondsF();
+    frame_info.cursor_position = GetCursorPosition();
+    frame_info.window_size.x = GetWindowSize().width;
+    frame_info.window_size.y = GetWindowSize().height;
+
+    FS::BindFrameInfo(cmd,
+                      pass.GetTransientsBuffer().EmplaceUniform(frame_info));
+    FS::BindContents1(cmd, boston, sampler);
+    FS::BindContents2(cmd, bridge, sampler);
+
+    cmd.primitive_type = PrimitiveType::kTriangle;
+
+    VS::UniformBuffer uniforms;
+    uniforms.mvp = Matrix::MakeOrthographic(surface.GetSize());
+    VS::BindUniformBuffer(cmd,
+                          pass.GetTransientsBuffer().EmplaceUniform(uniforms));
+    if (!pass.RecordCommand(cmd)) {
+      return false;
+    }
+
+    return true;
+  };
+  OpenPlaygroundHere(callback);
 }
 
 }  // namespace testing
