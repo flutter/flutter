@@ -1,4 +1,4 @@
-Signature: bf5bb76af1a5c5d2c1aa27072757e8d7
+Signature: 83df021712095d063ee78e0a35866604
 
 UNUSED LICENSES:
 
@@ -2508,8 +2508,8 @@ FILE: ../../../third_party/skia/src/gpu/ops/GrMeshDrawOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrMeshDrawOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrOp.h
-FILE: ../../../third_party/skia/src/gpu/ops/GrTriangulatingPathRenderer.cpp
-FILE: ../../../third_party/skia/src/gpu/ops/GrTriangulatingPathRenderer.h
+FILE: ../../../third_party/skia/src/gpu/ops/TriangulatingPathRenderer.cpp
+FILE: ../../../third_party/skia/src/gpu/ops/TriangulatingPathRenderer.h
 FILE: ../../../third_party/skia/src/gpu/text/GrDistanceFieldAdjustTable.cpp
 FILE: ../../../third_party/skia/src/gpu/text/GrDistanceFieldAdjustTable.h
 FILE: ../../../third_party/skia/src/gpu/text/GrStrikeCache.cpp
@@ -2989,6 +2989,7 @@ FILE: ../../../third_party/skia/src/gpu/SurfaceFillContext.h
 FILE: ../../../third_party/skia/src/gpu/geometry/GrInnerFanTriangulator.h
 FILE: ../../../third_party/skia/src/gpu/gl/egl/GrGLMakeNativeInterface_egl.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/glx/GrGLMakeNativeInterface_glx.cpp
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrTessTypes.h
 FILE: ../../../third_party/skia/src/gpu/v2/Device.cpp
 FILE: ../../../third_party/skia/src/gpu/v2/Device_v2.h
 FILE: ../../../third_party/skia/src/gpu/v2/SurfaceDrawContext.cpp
@@ -5234,8 +5235,8 @@ FILE: ../../../third_party/skia/src/core/SkMalloc.cpp
 FILE: ../../../third_party/skia/src/core/SkPixelRefPriv.h
 FILE: ../../../third_party/skia/src/core/SkTextBlobTrace.cpp
 FILE: ../../../third_party/skia/src/core/SkTextBlobTrace.h
-FILE: ../../../third_party/skia/src/gpu/ops/GrAtlasPathRenderer.cpp
-FILE: ../../../third_party/skia/src/gpu/ops/GrAtlasPathRenderer.h
+FILE: ../../../third_party/skia/src/gpu/ops/AtlasPathRenderer.cpp
+FILE: ../../../third_party/skia/src/gpu/ops/AtlasPathRenderer.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathInnerTriangulateOp.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathInnerTriangulateOp.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrTessellationPathRenderer.cpp
