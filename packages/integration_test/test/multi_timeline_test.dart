@@ -11,14 +11,17 @@ void main() {
   useMemoryFileSystemForTesting();
 
   test('Writes multiple files for each timeline', () async {
-    await writeResponseData(<String, dynamic>{
-      'timeline_a': <String, dynamic>{},
-      'timeline_b': <String, dynamic>{},
-      'screenshots': <String, dynamic>{},
-    });
-    expect(fs.directory('build').existsSync(), true);
-    expect(fs.file(path.join('build', 'integration_response_data_timeline_a.json')).existsSync(), true);
-    expect(fs.file(path.join('build', 'integration_response_data_timeline_b.json')).existsSync(), true);
-    expect(fs.file(path.join('build', 'integration_response_data_screenshots.json')).existsSync(), true);
+    final String outDir = fs.systemTempDirectory.path;
+    await writeResponseData(
+      <String, dynamic>{
+        'timeline_a': <String, dynamic>{},
+        'timeline_b': <String, dynamic>{},
+        'screenshots': <String, dynamic>{},
+      },
+      destinationDirectory: outDir,
+    );
+    expect(fs.file(path.join(outDir, 'integration_response_data_timeline_a.json')).existsSync(), true);
+    expect(fs.file(path.join(outDir, 'integration_response_data_timeline_b.json')).existsSync(), true);
+    expect(fs.file(path.join(outDir, 'integration_response_data_screenshots.json')).existsSync(), true);
   });
 }
