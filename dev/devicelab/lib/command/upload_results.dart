@@ -43,6 +43,7 @@ class UploadResultsCommand extends Command<void> {
 
     // Upload metrics to metrics_center from test runner.
     // The upload step will be skipped from cocoon once this is validated.
+    // TODO(keyong): remove try block to block test when this is validated to work https://github.com/flutter/flutter/issues/88484
     try {
       await uploadToMetricsCenter(resultsPath, commitTime);
       print('Successfully uploaded metrics to metrics center');
