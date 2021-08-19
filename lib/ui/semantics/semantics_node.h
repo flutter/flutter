@@ -131,7 +131,6 @@ struct SemanticsNode {
   StringAttributes increasedValueAttributes;
   std::string decreasedValue;
   StringAttributes decreasedValueAttributes;
-  std::string tooltip;
   int32_t textDirection = 0;  // 0=unknown, 1=rtl, 2=ltr
 
   SkRect rect = SkRect::MakeEmpty();  // Local space, relative to parent.

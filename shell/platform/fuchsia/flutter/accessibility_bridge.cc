@@ -331,15 +331,6 @@ AccessibilityBridge::GetNodeAttributes(const flutter::SemanticsNode& node,
     *added_size += node.label.size();
   }
 
-  if (node.tooltip.size() > fuchsia::accessibility::semantics::MAX_LABEL_SIZE) {
-    attributes.set_secondary_label(node.tooltip.substr(
-        0, fuchsia::accessibility::semantics::MAX_LABEL_SIZE));
-    *added_size += fuchsia::accessibility::semantics::MAX_LABEL_SIZE;
-  } else {
-    attributes.set_secondary_label(node.tooltip);
-    *added_size += node.tooltip.size();
-  }
-
   if (node.HasFlag(flutter::SemanticsFlags::kIsKeyboardKey)) {
     attributes.set_is_keyboard_key(true);
   }
