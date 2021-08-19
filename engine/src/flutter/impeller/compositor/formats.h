@@ -100,6 +100,11 @@ enum class TextureUsage : TextureUsageMask {
   kRenderTarget,
 };
 
+enum class WindingOrder {
+  kClockwise,
+  kCounterClockwise,
+};
+
 enum class PrimitiveType {
   kTriangle,
   kTriangleStrip,
