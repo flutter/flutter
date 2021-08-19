@@ -404,7 +404,6 @@ class Slider extends StatefulWidget {
   ///  * [MaterialState.disabled].
   /// {@endtemplate}
   ///
-  ///
   /// If null, then the value of [SliderThemeData.mouseCursor] is used. If that
   /// is also null, then [MaterialStateMouseCursor.clickable] is used.
   final MouseCursor? mouseCursor;
@@ -714,7 +713,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     };
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
       ?? sliderTheme.mouseCursor?.resolve(states)
-      ?? MaterialStateProperty.resolveAs<MouseCursor>(MaterialStateMouseCursor.clickable, states);
+      ?? MaterialStateMouseCursor.clickable.resolve(states);
 
     // This size is used as the max bounds for the painting of the value
     // indicators It must be kept in sync with the function with the same name
