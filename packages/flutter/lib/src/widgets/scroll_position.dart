@@ -509,7 +509,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
 
   bool _pendingDimensions = false;
   ScrollMetrics? _lastMetrics;
-  // True indicates that there is an ScrollMetrics update notificaton pending.
+  // True indicates that there is a ScrollMetrics update notification pending.
   bool _haveScheduledUpdateNotification = false;
   Axis? _lastAxis;
 
