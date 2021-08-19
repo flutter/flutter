@@ -13,6 +13,7 @@
     <src file="../../../flutter/shell/platform/android/test/io/flutter/FlutterTestSuite.java" />
     <src file="../../../flutter/shell/platform/android/test/io/flutter/embedding/android/FlutterActivityTest.java" />
     <src file="../../../flutter/shell/platform/android/test/io/flutter/embedding/android/KeyChannelResponderTest.java" />
+    <src file="../../../flutter/shell/platform/android/test/io/flutter/embedding/android/FlutterTextureViewTest.java" />
     <src file="../../../flutter/shell/platform/android/test/io/flutter/embedding/android/FlutterViewTest.java" />
     <src file="../../../flutter/shell/platform/android/test/io/flutter/embedding/android/SplashShadowResources.java" />
     <src file="../../../flutter/shell/platform/android/test/io/flutter/embedding/android/RobolectricFlutterActivity.java" />

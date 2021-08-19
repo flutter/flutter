@@ -37,7 +37,7 @@ configurations {
 }
 
 android {
-  compileSdkVersion 30
+  compileSdkVersion 31
 
   dependencies {
     embedding "androidx.annotation:annotation:1.1.0"
