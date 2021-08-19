@@ -30,7 +30,6 @@ function follow_links() (
 SCRIPT_DIR=$(follow_links "$(dirname -- "${BASH_SOURCE[0]}")")
 SRC_DIR="$(cd "$SCRIPT_DIR/../.."; pwd -P)"
 FLUTTER_DIR="$SRC_DIR/flutter"
-SKY_ENGINE_DIR="$SRC_DIR/out/host_debug_unopt/gen/dart-pkg/sky_engine"
 DART_BIN="$SRC_DIR/out/host_debug_unopt/dart-sdk/bin"
 DART="$DART_BIN/dart"
 
@@ -47,8 +46,7 @@ echo "Using dart from $DART_BIN"
 "$DART" --version
 echo ""
 
-(cd $SKY_ENGINE_DIR && "$DART" pub get --offline)
-"$DART" analyze "$SKY_ENGINE_DIR/lib/ui/ui.dart"
+"$DART" analyze "$FLUTTER_DIR/lib/ui"
 
 "$DART" analyze "$FLUTTER_DIR/lib/spirv"
 

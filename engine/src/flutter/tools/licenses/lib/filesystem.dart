@@ -177,9 +177,6 @@ FileType identifyFile(String name, Reader reader) {
     // Machine code
     case '.so': return FileType.binary; // ELF shared object
     case '.xpt': return FileType.binary; // XPCOM Type Library
-    // Graphics code
-    case '.glsl': return FileType.text;
-    case '.spvasm': return FileType.text;
     // Documentation
     case '.md': return FileType.text;
     case '.txt': return FileType.text;
