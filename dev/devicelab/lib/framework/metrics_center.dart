@@ -69,14 +69,15 @@ List<MetricPoint> parse(Map<String, dynamic> resultsJson) {
 }
 
 /// Upload test metrics to metrics center.
-Future<void> uploadToMetricsCenter(String? resultsPath, int? commitTime) async {
+Future<void> uploadToMetricsCenter(String? resultsPath, String? commitTime) async {
+  int commitTimeSinceEpoch;
   if (resultsPath == null) {
     return;
   }
   if (commitTime != null) {
-    commitTime *= 1000;
+    commitTimeSinceEpoch = 1000 * int.parse(commitTime);
   } else {
-    commitTime ??= DateTime.now().millisecondsSinceEpoch;
+    commitTimeSinceEpoch = DateTime.now().millisecondsSinceEpoch;
   }
   final File resultFile = File(resultsPath);
   Map<String, dynamic> resultsJson = <String, dynamic>{};
@@ -86,7 +87,7 @@ Future<void> uploadToMetricsCenter(String? resultsPath, int? commitTime) async {
   await metricsDestination.update(
     metricPoints,
     DateTime.fromMillisecondsSinceEpoch(
-      commitTime,
+      commitTimeSinceEpoch,
       isUtc: true,
     ),
   );

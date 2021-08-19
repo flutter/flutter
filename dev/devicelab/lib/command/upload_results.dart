@@ -39,7 +39,7 @@ class UploadResultsCommand extends Command<void> {
     final String? gitBranch = argResults!['git-branch'] as String?;
     final String? builderName = argResults!['luci-builder'] as String?;
     final String? testStatus = argResults!['test-status'] as String?;
-    final int? commitTime = argResults!['commit-time'] as int?;
+    final String? commitTime = argResults!['commit-time'] as String?;
 
     // Upload metrics to metrics_center from test runner.
     // The upload step will be skipped from cocoon once this is validated.
