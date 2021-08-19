@@ -5,6 +5,7 @@
 import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -94,91 +95,139 @@ void main() {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
   });
 
-  testWidgets('Nested ListView both with KeepAlives', (WidgetTester tester) async {
+  group('Nested ListViews with KeepAlives', () {
     final ScrollController outerScrollController = ScrollController();
     final ScrollController innerScrollController = ScrollController();
     final List<Widget> filler = List<Widget>.generate(500, (int i) => const SizedBox(height: 12.3));
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: ListView(
-          controller: outerScrollController,
-          cacheExtent: 0.0,
-          addAutomaticKeepAlives: false,
-          addRepaintBoundaries: false,
-          addSemanticIndexes: false,
-          children: <Widget>[
-            Leaf(
-              key: const GlobalObjectKey<_LeafState>('outer'),
-              child: SizedBox(
-                height: 800,
-                child: ListView(
-                  controller: innerScrollController,
-                  cacheExtent: 0.0,
-                  addAutomaticKeepAlives: false,
-                  addRepaintBoundaries: false,
-                  addSemanticIndexes: false,
-                  itemExtent: 12.3, // about 50 widgets visible
-                  children: <Widget>[
-                    const Leaf(key: GlobalObjectKey<_LeafState>('inner'), child: SizedBox()),
-                    ...filler,
-                  ],
-                ),
+    final Widget nestedListViews = Directionality(
+      textDirection: TextDirection.ltr,
+      child: ListView(
+        controller: outerScrollController,
+        cacheExtent: 0.0,
+        addAutomaticKeepAlives: false,
+        addRepaintBoundaries: false,
+        addSemanticIndexes: false,
+        children: <Widget>[
+          Leaf(
+            key: const GlobalObjectKey<_LeafState>('outer'),
+            child: SizedBox(
+              height: 800,
+              child: ListView(
+                controller: innerScrollController,
+                cacheExtent: 0.0,
+                addAutomaticKeepAlives: false,
+                addRepaintBoundaries: false,
+                addSemanticIndexes: false,
+                itemExtent: 12.3, // about 50 widgets visible
+                children: <Widget>[
+                  const Leaf(key: GlobalObjectKey<_LeafState>('inner'), child: SizedBox()),
+                  ...filler,
+                ],
               ),
             ),
-            ...filler,
-          ],
-        ),
+          ),
+          ...filler,
+        ],
       ),
     );
 
-    Future<void> setKeepAlive({ bool? innerKeepAlive, bool? outerKeepAlive }) async {
-      outerScrollController.jumpTo(0);
+    testWidgets('Scroll out of viewport simultaneously', (WidgetTester tester) async {
+      await tester.pumpWidget(nestedListViews);
+
+      Future<void> setKeepAlive({ bool? innerKeepAlive, bool? outerKeepAlive }) async {
+        outerScrollController.jumpTo(0);
+        // Pump once to allow the inner controller to attach.
+        await tester.pump();
+        innerScrollController.jumpTo(0);
+        await tester.pump();
+
+        if (innerKeepAlive != null)
+          const GlobalObjectKey<_LeafState>('inner').currentState!.setKeepAlive(innerKeepAlive);
+        if (outerKeepAlive != null)
+          const GlobalObjectKey<_LeafState>('outer').currentState!.setKeepAlive(outerKeepAlive);
+
+        innerScrollController.jumpTo(3000);
+        outerScrollController.jumpTo(3000);
+        await tester.pump();
+      }
+
+      // Both have keepAlive = false.
+      await setKeepAlive(innerKeepAlive: false, outerKeepAlive: false);
+      expect(find.byKey(const GlobalObjectKey<_LeafState>('outer'), skipOffstage: false), findsNothing);
+      expect(find.byKey(const GlobalObjectKey<_LeafState>('inner'), skipOffstage: false), findsNothing);
+
+      await setKeepAlive(innerKeepAlive: true, outerKeepAlive: false);
+      // Neither widget is kept alive since the outer widget isn't.
+      expect(find.byKey(const GlobalObjectKey<_LeafState>('outer'), skipOffstage: false), findsNothing);
+      expect(find.byKey(const GlobalObjectKey<_LeafState>('inner'), skipOffstage: false), findsNothing);
+
+      // Edge case: Since the outer list jumped to 3000, the inner list was
+      // never laid out and thus its effective scroll offset is still 0.
+      await setKeepAlive(innerKeepAlive: false, outerKeepAlive: true);
+      expect(find.byKey(const GlobalObjectKey<_LeafState>('outer'), skipOffstage: false), findsOneWidget);
+      expect(find.byKey(const GlobalObjectKey<_LeafState>('inner'), skipOffstage: false), findsOneWidget);
+
+      await setKeepAlive(innerKeepAlive: true, outerKeepAlive: true);
+      expect(find.byKey(const GlobalObjectKey<_LeafState>('outer'), skipOffstage: false), findsOneWidget);
+      expect(find.byKey(const GlobalObjectKey<_LeafState>('inner'), skipOffstage: false), findsOneWidget);
+    });
+
+    testWidgets('Inner scrolls out of viewport, and then outer', (WidgetTester tester) async {
+      await tester.pumpWidget(nestedListViews);
+
+      Future<void> setKeepAlive({ bool? innerKeepAlive, bool? outerKeepAlive }) async {
+        outerScrollController.jumpTo(0);
+        // Pump once to allow the inner controller to attach.
+        await tester.pump();
+        innerScrollController.jumpTo(0);
+        await tester.pump();
+
+        if (innerKeepAlive != null)
+          const GlobalObjectKey<_LeafState>('inner').currentState!.setKeepAlive(innerKeepAlive);
+        if (outerKeepAlive != null)
+          const GlobalObjectKey<_LeafState>('outer').currentState!.setKeepAlive(outerKeepAlive);
+
+        // Scroll the inner keep alive out of the cache extent, then the outer.
+        innerScrollController.jumpTo(3000);
+        await tester.pump();
+        outerScrollController.jumpTo(3000);
+        await tester.pump();
+      }
+
+      // Both have keepAlive = false.
+      await setKeepAlive(innerKeepAlive: false, outerKeepAlive: false);
+      expect(find.byKey(const GlobalObjectKey<_LeafState>('outer'), skipOffstage: false), findsNothing);
+      expect(find.byKey(const GlobalObjectKey<_LeafState>('inner'), skipOffstage: false), findsNothing);
+
+      await setKeepAlive(innerKeepAlive: true, outerKeepAlive: false);
+      // Neither widget is kept alive since the outer widget isn't.
+      expect(find.byKey(const GlobalObjectKey<_LeafState>('outer'), skipOffstage: false), findsNothing);
+      expect(find.byKey(const GlobalObjectKey<_LeafState>('inner'), skipOffstage: false), findsNothing);
+
+      await setKeepAlive(innerKeepAlive: false, outerKeepAlive: true);
+      expect(find.byKey(const GlobalObjectKey<_LeafState>('outer'), skipOffstage: false), findsOneWidget);
+      expect(find.byKey(const GlobalObjectKey<_LeafState>('inner'), skipOffstage: false), findsNothing);
+
+      await setKeepAlive(innerKeepAlive: true, outerKeepAlive: true);
+      expect(find.byKey(const GlobalObjectKey<_LeafState>('outer'), skipOffstage: false), findsOneWidget);
+      expect(find.byKey(const GlobalObjectKey<_LeafState>('inner'), skipOffstage: false), findsOneWidget);
+
+      // Turn KeepAlive off when a widget is currently kept alive.
+      // Inner:
+      await setKeepAlive(innerKeepAlive: true, outerKeepAlive: true);
+      // The inner widget is kept alive. Turning keep alive should unmount it.
+      const GlobalObjectKey<_LeafState>('inner').currentState!.setKeepAlive(false);
       await tester.pump();
-      innerScrollController.jumpTo(0);
+      expect(find.byKey(const GlobalObjectKey<_LeafState>('outer'), skipOffstage: false), findsOneWidget);
+      expect(find.byKey(const GlobalObjectKey<_LeafState>('inner'), skipOffstage: false), findsNothing);
+
+      // Outer:
+      await setKeepAlive(innerKeepAlive: true, outerKeepAlive: true);
+      const GlobalObjectKey<_LeafState>('outer').currentState!.setKeepAlive(false);
       await tester.pump();
-      if (innerKeepAlive != null)
-        const GlobalObjectKey<_LeafState>('inner').currentState!.setKeepAlive(innerKeepAlive);
-      if (outerKeepAlive != null)
-        const GlobalObjectKey<_LeafState>('outer').currentState!.setKeepAlive(outerKeepAlive);
-
-      innerScrollController.jumpTo(3000);
-      outerScrollController.jumpTo(3000);
-      await tester.pump();
-    }
-
-    // Both have keepAlive = false.
-    await setKeepAlive(innerKeepAlive: false, outerKeepAlive: false);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>('outer'), skipOffstage: false), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>('inner'), skipOffstage: false), findsNothing);
-
-    await setKeepAlive(innerKeepAlive: true, outerKeepAlive: false);
-    // Neither widget was kept alive since the outer widget wasn't
-    expect(find.byKey(const GlobalObjectKey<_LeafState>('outer'), skipOffstage: false), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>('inner'), skipOffstage: false), findsNothing);
-
-    await setKeepAlive(innerKeepAlive: false, outerKeepAlive: true);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>('outer'), skipOffstage: false), findsOneWidget);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>('inner'), skipOffstage: false), findsNothing);
-
-    await setKeepAlive(innerKeepAlive: true, outerKeepAlive: true);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>('outer'), skipOffstage: false), findsOneWidget);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>('inner'), skipOffstage: false), findsOneWidget);
-
-    // Turn KeepAlive off when a widget is currently kept alive.
-    // Inner:
-    await setKeepAlive(innerKeepAlive: true, outerKeepAlive: true);
-    const GlobalObjectKey<_LeafState>('inner').currentState!.setKeepAlive(false);
-    await tester.pump();
-    expect(find.byKey(const GlobalObjectKey<_LeafState>('outer'), skipOffstage: false), findsOneWidget);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>('inner'), skipOffstage: false), findsNothing);
-
-    // Outer:
-    await setKeepAlive(innerKeepAlive: true, outerKeepAlive: true);
-    const GlobalObjectKey<_LeafState>('outer').currentState!.setKeepAlive(false);
-    await tester.pump();
-    expect(find.byKey(const GlobalObjectKey<_LeafState>('outer'), skipOffstage: false), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>('inner'), skipOffstage: false), findsNothing);
+      expect(find.byKey(const GlobalObjectKey<_LeafState>('outer'), skipOffstage: false), findsNothing);
+      expect(find.byKey(const GlobalObjectKey<_LeafState>('inner'), skipOffstage: false), findsNothing);
+    });
   });
 
 
@@ -596,26 +645,26 @@ void main() {
       '                       ╎     constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                       ╎     size: Size(800.0, 400.0)\n'
       '                       ╎\n'
-      '                       ╎╌child with index 0 (kept alive but not laid out): RenderLimitedBox#00000 DETACHED\n'               // <----- this one is index 0 and is marked as being kept alive but not laid out
+      '                       ╎╌child with index 0 (kept alive but not laid out): RenderLimitedBox#00000\n'               // <----- this one is index 0 and is marked as being kept alive but not laid out
       '                       ╎ │ parentData: index=0; keepAlive; layoutOffset=0.0\n'
       '                       ╎ │ constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                       ╎ │ size: Size(800.0, 400.0)\n'
       '                       ╎ │ maxWidth: 400.0\n'
       '                       ╎ │ maxHeight: 400.0\n'
       '                       ╎ │\n'
-      '                       ╎ └─child: RenderCustomPaint#00000 DETACHED\n'
+      '                       ╎ └─child: RenderCustomPaint#00000\n'
       '                       ╎     parentData: <none> (can use size)\n'
       '                       ╎     constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                       ╎     size: Size(800.0, 400.0)\n'
       '                       ╎\n'                                                                                // <----- dashed line ends here
-      '                       └╌child with index 3 (kept alive but not laid out): RenderLimitedBox#00000 DETACHED\n'
+      '                       └╌child with index 3 (kept alive but not laid out): RenderLimitedBox#00000\n'
       '                         │ parentData: index=3; keepAlive; layoutOffset=1200.0\n'
       '                         │ constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                         │ size: Size(800.0, 400.0)\n'
       '                         │ maxWidth: 400.0\n'
       '                         │ maxHeight: 400.0\n'
       '                         │\n'
-      '                         └─child: RenderCustomPaint#00000 DETACHED\n'
+      '                         └─child: RenderCustomPaint#00000\n'
       '                             parentData: <none> (can use size)\n'
       '                             constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                             size: Size(800.0, 400.0)\n',

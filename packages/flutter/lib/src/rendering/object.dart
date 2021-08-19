@@ -767,6 +767,58 @@ class SemanticsHandle {
   }
 }
 
+abstract class RenderPipeline {
+  void scheduleLayoutForRenderObject(RenderObject renderObject);
+
+  /// Update the layout information for all dirty render objects.
+  ///
+  /// This function is one of the core stages of the rendering pipeline. Layout
+  /// information is cleaned prior to painting so that render objects will
+  /// appear on screen in their up-to-date locations.
+  ///
+  /// See [RendererBinding] for an example of how this function is used.
+  void flushLayout();
+
+  void scheduleCompositingBitsUpdateForRenderObject(RenderObject renderObject);
+
+  /// Updates the [RenderObject.needsCompositing] bits.
+  ///
+  /// Called as part of the rendering pipeline after [flushLayout] and before
+  /// [flushPaint].
+  void flushCompositingBits();
+
+  void schedulePaintForRenderObject(RenderObject renderObject);
+
+  /// Update the display lists for all render objects.
+  ///
+  /// This function is one of the core stages of the rendering pipeline.
+  /// Painting occurs after layout and before the scene is recomposited so that
+  /// scene is composited with up-to-date display lists for every render object.
+  ///
+  /// See [RendererBinding] for an example of how this function is used.
+  void flushPaint();
+
+  void scheduleSemanticsUpdateForRenderObject(RenderObject renderObject);
+  void unscheduleSemanticsUpdateForRenderObject(RenderObject renderObject);
+
+  /// Update the semantics for render objects marked as needing a semantics
+  /// update.
+  ///
+  /// Initially, only the root node, as scheduled by
+  /// [RenderObject.scheduleInitialSemantics], needs a semantics update.
+  ///
+  /// This function is one of the core stages of the rendering pipeline. The
+  /// semantics are compiled after painting and only after
+  /// [RenderObject.scheduleInitialSemantics] has been called.
+  ///
+  /// See [RendererBinding] for an example of how this function is used.
+  void flushSemantics();
+
+  /// Whether the implementation of the [flushLayout] method makes the dirty
+  /// render objects' layout up-to-date.
+  bool get layoutEnabled => true;
+}
+
 /// The pipeline owner manages the rendering pipeline.
 ///
 /// The pipeline owner provides an interface for driving the rendering pipeline
@@ -806,29 +858,56 @@ abstract class PipelineOwner {
     VoidCallback? onNeedVisualUpdate,
     VoidCallback? onSemanticsOwnerCreated,
     VoidCallback? onSemanticsOwnerDisposed,
-  }) {
-    return _RootPipelineOwner(
-      onNeedVisualUpdate: onNeedVisualUpdate,
-      onSemanticsOwnerCreated: onSemanticsOwnerCreated,
-      onSemanticsOwnerDisposed: onSemanticsOwnerDisposed,
-    )._measuredPipeline;
-  }
+  }) = _RootPipelineOwner;
 
-  PipelineOwner.construct();
+  PipelineOwner.construct(
+    this.onNeedVisualUpdate,
+    this.onSemanticsOwnerCreated,
+    this.onSemanticsOwnerDisposed,
+  );
 
-  late final MeasuredPipeline _measuredPipeline = MeasuredPipeline._(this);
+  RenderPipeline get renderPipeline;
+
+  /// Called when a render object associated with this pipeline owner wishes to
+  /// update its visual appearance.
+  ///
+  /// Typical implementations of this function will schedule a task to flush the
+  /// various stages of the pipeline. This function might be called multiple
+  /// times in quick succession. Implementations should take care to discard
+  /// duplicate calls quickly.
+  final VoidCallback? onNeedVisualUpdate;
+
+  /// Called whenever this pipeline owner creates a semantics object.
+  ///
+  /// Typical implementations will schedule the creation of the initial
+  /// semantics tree.
+  final VoidCallback? onSemanticsOwnerCreated;
+
+  /// Called whenever this pipeline owner disposes its semantics owner.
+  ///
+  /// Typical implementations will tear down the semantics tree.
+  final VoidCallback? onSemanticsOwnerDisposed;
 
   /// Calls [onNeedVisualUpdate] if [onNeedVisualUpdate] is not null.
   ///
   /// Used to notify the pipeline owner that an associated render object wishes
   /// to update its visual appearance.
-  void requestVisualUpdate();
+  void requestVisualUpdate() => onNeedVisualUpdate?.call();
 
   /// The unique object managed by this pipeline that has no parent.
   ///
   /// This object does not have to be a [RenderObject].
-  AbstractNode? get rootNode;
-  set rootNode(AbstractNode? value);
+  AbstractNode? get rootNode => _rootNode;
+  AbstractNode? _rootNode;
+  set rootNode(AbstractNode? value) {
+    if (value == _rootNode)
+      return;
+    _rootNode?.detach();
+    _rootNode = value;
+    _rootNode?.attach(this);
+  }
+
+  void scheduleLayoutForRenderObject(RenderObject renderObject) => renderPipeline.scheduleLayoutForRenderObject(renderObject);
 
   /// Whether this pipeline is currently in the layout phase.
   ///
@@ -836,9 +915,8 @@ abstract class PipelineOwner {
   ///
   /// Only valid when asserts are enabled; in release builds, this
   /// always returns false.
-  bool get debugDoingLayout => _measuredPipeline.debugDoingLayout;
-
-  void scheduleLayoutForRenderObject(RenderObject renderObject);
+  bool get debugDoingLayout => _debugDoingLayout;
+  bool _debugDoingLayout = false;
 
   /// Update the layout information for all dirty render objects.
   ///
@@ -847,7 +925,26 @@ abstract class PipelineOwner {
   /// appear on screen in their up-to-date locations.
   ///
   /// See [RendererBinding] for an example of how this function is used.
-  void flushLayout();
+  void flushLayout() {
+    if (!kReleaseMode) {
+      Timeline.startSync('Layout', arguments: timelineArgumentsIndicatingLandmarkEvent);
+    }
+    assert(() {
+      _debugDoingLayout = true;
+      return true;
+    }());
+    try {
+      renderPipeline.flushLayout();
+    } finally {
+      assert(() {
+        _debugDoingLayout = false;
+        return true;
+      }());
+      if (!kReleaseMode) {
+        Timeline.finishSync();
+      }
+    }
+  }
 
   // This flag is used to allow the kinds of mutations performed by GlobalKey
   // reparenting while a LayoutBuilder is being rebuilt and in so doing tries to
@@ -875,13 +972,23 @@ abstract class PipelineOwner {
     }
   }
 
-  void scheduleCompositingBitsUpdateForRenderObject(RenderObject renderObject);
+  void scheduleCompositingBitsUpdateForRenderObject(RenderObject renderObject) {
+    renderPipeline.scheduleCompositingBitsUpdateForRenderObject(renderObject);
+  }
 
   /// Updates the [RenderObject.needsCompositing] bits.
   ///
   /// Called as part of the rendering pipeline after [flushLayout] and before
   /// [flushPaint].
-  void flushCompositingBits();
+  void flushCompositingBits() {
+    if (!kReleaseMode) {
+      Timeline.startSync('Compositing bits');
+    }
+    renderPipeline.flushCompositingBits();
+    if (!kReleaseMode) {
+      Timeline.finishSync();
+    }
+  }
 
   /// Whether this pipeline is currently in the paint phase.
   ///
@@ -889,9 +996,12 @@ abstract class PipelineOwner {
   ///
   /// Only valid when asserts are enabled. In release builds,
   /// this always returns false.
-  bool get debugDoingPaint => _measuredPipeline.debugDoingPaint;
+  bool get debugDoingPaint => _debugDoingPaint;
+  bool _debugDoingPaint = false;
 
-  void schedulePaintForRenderObject(RenderObject renderObject);
+  void schedulePaintForRenderObject(RenderObject renderObject) {
+    renderPipeline.schedulePaintForRenderObject(renderObject);
+  }
 
   /// Update the display lists for all render objects.
   ///
@@ -900,7 +1010,69 @@ abstract class PipelineOwner {
   /// scene is composited with up-to-date display lists for every render object.
   ///
   /// See [RendererBinding] for an example of how this function is used.
-  void flushPaint();
+  void flushPaint() {
+    if (!kReleaseMode) {
+      Timeline.startSync('Paint', arguments: timelineArgumentsIndicatingLandmarkEvent);
+    }
+    assert(() {
+      _debugDoingPaint = true;
+      return true;
+    }());
+    try {
+      renderPipeline.flushPaint();
+    } finally {
+      assert(() {
+        _debugDoingPaint = false;
+        return true;
+      }());
+      if (!kReleaseMode) {
+        Timeline.finishSync();
+      }
+    }
+  }
+
+  void scheduleSemanticsUpdateForRenderObject(RenderObject renderObject) {
+    renderPipeline.scheduleSemanticsUpdateForRenderObject(renderObject);
+  }
+  void unscheduleSemanticsUpdateForRenderObject(RenderObject renderObject) {
+    renderPipeline.unscheduleSemanticsUpdateForRenderObject(renderObject);
+  }
+
+  bool _debugDoingSemantics = false;
+  /// Update the semantics for render objects marked as needing a semantics
+  /// update.
+  ///
+  /// Initially, only the root node, as scheduled by
+  /// [RenderObject.scheduleInitialSemantics], needs a semantics update.
+  ///
+  /// This function is one of the core stages of the rendering pipeline. The
+  /// semantics are compiled after painting and only after
+  /// [RenderObject.scheduleInitialSemantics] has been called.
+  ///
+  /// See [RendererBinding] for an example of how this function is used.
+  void flushSemantics() {
+    if (semanticsOwner == null)
+      return;
+    if (!kReleaseMode) {
+      Timeline.startSync('Semantics');
+    }
+    assert(semanticsOwner != null);
+    assert(() {
+      _debugDoingSemantics = true;
+      return true;
+    }());
+    try {
+      renderPipeline.flushSemantics();
+    } finally {
+      assert(() {
+        _debugDoingSemantics = false;
+        return true;
+      }());
+      if (!kReleaseMode) {
+        Timeline.finishSync();
+      }
+    }
+  }
 
   /// The object that is managing semantics for this pipeline owner, if any.
   ///
@@ -912,13 +1084,15 @@ abstract class PipelineOwner {
   ///
   /// When [semanticsOwner] is null, the [PipelineOwner] skips all steps
   /// relating to semantics.
-  SemanticsOwner? get semanticsOwner;
+  SemanticsOwner? get semanticsOwner => _semanticsOwner;
+  SemanticsOwner? _semanticsOwner;
 
   /// The number of clients registered to listen for semantics.
   ///
   /// The number is increased whenever [ensureSemantics] is called and decreased
   /// when [SemanticsHandle.dispose] is called.
-  int get debugOutstandingSemanticsHandles;
+  int get debugOutstandingSemanticsHandles => _outstandingSemanticsHandles;
+  int _outstandingSemanticsHandles = 0;
 
   /// Opens a [SemanticsHandle] and calls [listener] whenever the semantics tree
   /// updates.
@@ -932,73 +1106,45 @@ abstract class PipelineOwner {
   /// [SemanticsHandle.dispose]. Once all the outstanding [SemanticsHandle]
   /// objects for a given [PipelineOwner] are closed, the [PipelineOwner] stops
   /// maintaining the semantics tree.
-  SemanticsHandle ensureSemantics({ VoidCallback? listener });
-
-  void _didDisposeSemanticsHandle();
-
-  void scheduleSemanticsUpdateForRenderObject(RenderObject renderObject);
-  void unscheduleSemanticsUpdateForRenderObject(RenderObject renderObject);
-
-  /// Update the semantics for render objects marked as needing a semantics
-  /// update.
-  ///
-  /// Initially, only the root node, as scheduled by
-  /// [RenderObject.scheduleInitialSemantics], needs a semantics update.
-  ///
-  /// This function is one of the core stages of the rendering pipeline. The
-  /// semantics are compiled after painting and only after
-  /// [RenderObject.scheduleInitialSemantics] has been called.
-  ///
-  /// See [RendererBinding] for an example of how this function is used.
-  void flushSemantics();
-}
-
-class _RootPipelineOwner extends PipelineOwner {
-  _RootPipelineOwner({
-    this.onNeedVisualUpdate,
-    this.onSemanticsOwnerCreated,
-    this.onSemanticsOwnerDisposed,
-  }) : super.construct();
-
-  /// Called when a render object associated with this pipeline owner wishes to
-  /// update its visual appearance.
-  ///
-  /// Typical implementations of this function will schedule a task to flush the
-  /// various stages of the pipeline. This function might be called multiple
-  /// times in quick succession. Implementations should take care to discard
-  /// duplicate calls quickly.
-  final VoidCallback? onNeedVisualUpdate;
-
-  /// Called whenever this pipeline owner creates a semantics object.
-  ///
-  /// Typical implementations will schedule the creation of the initial
-  /// semantics tree.
-  final VoidCallback? onSemanticsOwnerCreated;
-
-  /// Called whenever this pipeline owner disposes its semantics owner.
-  ///
-  /// Typical implementations will tear down the semantics tree.
-  final VoidCallback? onSemanticsOwnerDisposed;
-
-  @override
-  AbstractNode? get rootNode => _rootNode;
-  AbstractNode? _rootNode;
-  @override
-  set rootNode(AbstractNode? value) {
-    if (value == _rootNode)
-      return;
-    _rootNode?.detach();
-    _rootNode = value;
-    _rootNode?.attach(this);
+  SemanticsHandle ensureSemantics({ VoidCallback? listener }) {
+    _outstandingSemanticsHandles += 1;
+    if (_outstandingSemanticsHandles == 1) {
+      assert(semanticsOwner == null);
+      _semanticsOwner = SemanticsOwner();
+      onSemanticsOwnerCreated?.call();
+    }
+    return SemanticsHandle._(this, listener);
   }
 
-  @override
-  void requestVisualUpdate() => onNeedVisualUpdate?.call();
+  void _didDisposeSemanticsHandle() {
+    assert(semanticsOwner != null);
+    _outstandingSemanticsHandles -= 1;
+    if (_outstandingSemanticsHandles == 0) {
+      semanticsOwner!.dispose();
+      _semanticsOwner = null;
+      onSemanticsOwnerDisposed?.call();
+    }
+  }
+}
+
+class _RootPipeline implements RenderPipeline {
+  _RootPipeline(this.owner);
+
+  final PipelineOwner owner;
 
   List<RenderObject> _nodesNeedingLayout = <RenderObject>[];
 
   @override
-  void scheduleLayoutForRenderObject(RenderObject renderObject) => _nodesNeedingLayout.add(renderObject);
+  void scheduleLayoutForRenderObject(RenderObject renderObject) {
+    assert(renderObject.owner == owner);
+    if (renderObject._relayoutBoundary == renderObject) {
+      _nodesNeedingLayout.add(renderObject);
+      return;
+    }
+
+    assert(renderObject.parent!.owner == owner);
+    renderObject.markParentNeedsLayout();
+  }
 
   @override
   void flushLayout() {
@@ -1007,7 +1153,7 @@ class _RootPipelineOwner extends PipelineOwner {
       final List<RenderObject> dirtyNodes = _nodesNeedingLayout;
       _nodesNeedingLayout = <RenderObject>[];
       for (final RenderObject node in dirtyNodes..sort((RenderObject a, RenderObject b) => a.depth - b.depth)) {
-        if (node._needsLayout && node.owner == this)
+        if (node._needsLayout && node.owner == owner)
           node._layoutWithoutResize();
       }
     }
@@ -1022,7 +1168,7 @@ class _RootPipelineOwner extends PipelineOwner {
   void flushCompositingBits() {
     _nodesNeedingCompositingBitsUpdate.sort((RenderObject a, RenderObject b) => a.depth - b.depth);
     for (final RenderObject node in _nodesNeedingCompositingBitsUpdate) {
-      if (node._needsCompositingBitsUpdate && node.owner == this)
+      if (node._needsCompositingBitsUpdate && node.owner == owner)
         node._updateCompositingBits();
     }
     _nodesNeedingCompositingBitsUpdate.clear();
@@ -1040,7 +1186,7 @@ class _RootPipelineOwner extends PipelineOwner {
     // Sort the dirty nodes in reverse order (deepest first).
     for (final RenderObject node in dirtyNodes..sort((RenderObject a, RenderObject b) => b.depth - a.depth)) {
       assert(node._layerHandle.layer != null);
-      if (node._needsPaint && node.owner == this) {
+      if (node._needsPaint && node.owner == owner) {
         if (node._layerHandle.layer!.attached) {
           PaintingContext.repaintCompositedChild(node);
         } else {
@@ -1049,35 +1195,6 @@ class _RootPipelineOwner extends PipelineOwner {
       }
     }
     assert(_nodesNeedingPaint.isEmpty);
-  }
-
-  @override
-  SemanticsOwner? semanticsOwner;
-
-  @override
-  int get debugOutstandingSemanticsHandles => _outstandingSemanticsHandles;
-  int _outstandingSemanticsHandles = 0;
-
-  @override
-  SemanticsHandle ensureSemantics({ VoidCallback? listener }) {
-    _outstandingSemanticsHandles += 1;
-    if (_outstandingSemanticsHandles == 1) {
-      assert(semanticsOwner == null);
-      semanticsOwner = SemanticsOwner();
-      onSemanticsOwnerCreated?.call();
-    }
-    return SemanticsHandle._(this, listener);
-  }
-
-  @override
-  void _didDisposeSemanticsHandle() {
-    assert(semanticsOwner != null);
-    _outstandingSemanticsHandles -= 1;
-    if (_outstandingSemanticsHandles == 0) {
-      semanticsOwner!.dispose();
-      semanticsOwner = null;
-      onSemanticsOwnerDisposed?.call();
-    }
   }
 
   final Set<RenderObject> _nodesNeedingSemantics = <RenderObject>{};
@@ -1094,152 +1211,35 @@ class _RootPipelineOwner extends PipelineOwner {
         ..sort((RenderObject a, RenderObject b) => a.depth - b.depth);
       _nodesNeedingSemantics.clear();
       for (final RenderObject node in nodesToProcess) {
-        if (node._needsSemanticsUpdate && node.owner == this)
+        if (node._needsSemanticsUpdate && node.owner == owner)
           node._updateSemantics();
       }
-      semanticsOwner!.sendSemanticsUpdate();
+      owner.semanticsOwner!.sendSemanticsUpdate();
     } finally {
       assert(_nodesNeedingSemantics.isEmpty);
     }
   }
+
+  @override
+  bool get layoutEnabled => true;
 }
 
-class MeasuredPipeline extends PipelineOwner {
-  factory MeasuredPipeline(PipelineOwner _delegate) => _delegate._measuredPipeline;
-
-  MeasuredPipeline._(this._delegate)
-    : assert(_delegate is! MeasuredPipeline),
-      super.construct();
-
-  final PipelineOwner _delegate;
-
-  @override
-  MeasuredPipeline get _measuredPipeline => this;
-
-  @override
-  void requestVisualUpdate() => _delegate.requestVisualUpdate();
+class _RootPipelineOwner extends PipelineOwner {
+  _RootPipelineOwner({
+    VoidCallback? onNeedVisualUpdate,
+    VoidCallback? onSemanticsOwnerCreated,
+    VoidCallback? onSemanticsOwnerDisposed,
+  }) : super.construct(
+      onNeedVisualUpdate,
+      onSemanticsOwnerCreated,
+      onSemanticsOwnerDisposed,
+    );
 
   @override
-  AbstractNode? get rootNode => _delegate.rootNode;
-  @override
-  set rootNode(AbstractNode? value) => _delegate.rootNode = value;
-
-  @override
-  void scheduleLayoutForRenderObject(RenderObject renderObject) => _delegate.scheduleLayoutForRenderObject(renderObject);
-
-  @override
-  bool debugDoingLayout = false;
-
-  @override
-  void flushLayout() {
-    if (!kReleaseMode) {
-      Timeline.startSync('Layout', arguments: timelineArgumentsIndicatingLandmarkEvent);
-    }
-    assert(() {
-      debugDoingLayout = true;
-      return true;
-    }());
-    try {
-      _delegate.flushLayout();
-    } finally {
-      assert(() {
-        debugDoingLayout = false;
-        return true;
-      }());
-      if (!kReleaseMode) {
-        Timeline.finishSync();
-      }
-    }
-  }
-
-  @override
-  void scheduleCompositingBitsUpdateForRenderObject(RenderObject renderObject) => _delegate.scheduleCompositingBitsUpdateForRenderObject(renderObject);
-
-  @override
-  void flushCompositingBits() {
-    if (!kReleaseMode) {
-      Timeline.startSync('Compositing bits');
-    }
-    _delegate.flushCompositingBits();
-    if (!kReleaseMode) {
-      Timeline.finishSync();
-    }
-  }
-
-  @override
-  void schedulePaintForRenderObject(RenderObject renderObject) => _delegate.schedulePaintForRenderObject(renderObject);
-
-  @override
-  bool debugDoingPaint = false;
-
-  @override
-  void flushPaint() {
-    if (!kReleaseMode) {
-      Timeline.startSync('Paint', arguments: timelineArgumentsIndicatingLandmarkEvent);
-    }
-    assert(() {
-      debugDoingPaint = true;
-      return true;
-    }());
-    try {
-      _delegate.flushPaint();
-    } finally {
-      assert(() {
-        debugDoingPaint = false;
-        return true;
-      }());
-      if (!kReleaseMode) {
-        Timeline.finishSync();
-      }
-    }
-  }
-
-  @override
-  SemanticsOwner? get semanticsOwner => _delegate.semanticsOwner;
-
-  @override
-  int get debugOutstandingSemanticsHandles => _delegate.debugOutstandingSemanticsHandles;
-
-  @override
-  SemanticsHandle ensureSemantics({ VoidCallback? listener }) => _delegate.ensureSemantics(listener: listener);
-
-  @override
-  void _didDisposeSemanticsHandle() => _delegate._didDisposeSemanticsHandle();
-
-  @override
-  void scheduleSemanticsUpdateForRenderObject(RenderObject renderObject) => _delegate.scheduleSemanticsUpdateForRenderObject(renderObject);
-  @override
-  void unscheduleSemanticsUpdateForRenderObject(RenderObject renderObject) => _delegate.unscheduleSemanticsUpdateForRenderObject(renderObject);
-
-  bool _debugDoingSemantics = false;
-
-  @override
-  void flushSemantics() {
-    if (semanticsOwner == null)
-      return;
-    if (!kReleaseMode) {
-      Timeline.startSync('Semantics');
-    }
-    assert(semanticsOwner != null);
-    assert(() {
-      _debugDoingSemantics = true;
-      return true;
-    }());
-    try {
-      _delegate.flushSemantics();
-    } finally {
-      assert(() {
-        _debugDoingSemantics = false;
-        return true;
-      }());
-      if (!kReleaseMode) {
-        Timeline.finishSync();
-      }
-    }
-  }
+  late final RenderPipeline renderPipeline = _RootPipeline(this);
 }
 
-/// AN object in the render tree.
+/// An object in the render tree.
 ///
 /// The [RenderObject] class hierarchy is the core of the rendering
 /// library's reason for being.
@@ -1666,6 +1666,16 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   bool get debugDoingThisLayoutWithCallback => _doingThisLayoutWithCallback;
   bool _doingThisLayoutWithCallback = false;
 
+  /// Whether this render object's layout information is up-to-date, after the
+  /// last layout phase.
+  ///
+  /// If a parent render object decides to not perform layout on a child
+  /// render object (for example, as an optimization to avoid handling offscreen
+  /// render objects), but still chooses to keep that child in the tree,
+  /// [hasDimensions] must return false for that render object and its
+  /// descendants.
+  bool get hasDimensions => owner?.renderPipeline.layoutEnabled ?? false;
+
   /// The layout constraints most recently supplied by the parent.
   ///
   /// If layout has not yet happened, accessing this getter will
@@ -1755,29 +1765,28 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       assert(_debugSubtreeRelayoutRootAlreadyMarkedNeedsLayout());
       return;
     }
-    assert(_relayoutBoundary != null);
-    if (_relayoutBoundary != this) {
-      markParentNeedsLayout();
-    } else if (!attached && parent != null) {
-      // This is a former relayout boundary that wasn't laid out because an
-      // ancestor render object chose not to perform layout on this subtree (for
-      // instance, the render subtree is kept-alive). The render object is still
-      // allowed to crawl its way back since the ancestor render object detached
-      // its owner instead of dropping the subtree entirely (this render object
-      // is still holding a reference to its parent).
-      markParentNeedsLayout();
-    } else {
-      _needsLayout = true;
-      if (owner != null) {
-        assert(() {
-          if (debugPrintMarkNeedsLayoutStacks)
-            debugPrintStack(label: 'markNeedsLayout() called for $this');
-          return true;
-        }());
-        owner!.scheduleLayoutForRenderObject(this);
-        owner!.requestVisualUpdate();
-      }
+
+    _needsLayout = true;
+    final PipelineOwner? owner = this.owner;
+    if (owner == null) {
+      assert(() {
+        if (debugPrintMarkNeedsLayoutStacks) {
+          debugPrintStack(
+            label: 'markNeedsLayout() called for detached render object $this',
+          );
+        }
+        return true;
+      }());
+      return;
     }
+    assert(() {
+      if (debugPrintMarkNeedsLayoutStacks)
+        debugPrintStack(label: 'markNeedsLayout() called for $this');
+      return true;
+    }());
+
+    owner.scheduleLayoutForRenderObject(this);
+    owner.requestVisualUpdate();
   }
 
   /// Mark this render object's layout information as dirty, and then defer to
@@ -2694,7 +2703,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     assert(!_debugDisposed);
     assert(attached);
     assert(parent is! RenderObject);
-    assert(!owner!._measuredPipeline._debugDoingSemantics);
+    assert(!owner!._debugDoingSemantics);
     assert(_semantics == null);
     assert(_needsSemanticsUpdate);
     assert(owner!.semanticsOwner != null);
@@ -2815,7 +2824,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// any way to update the semantics tree.
   void markNeedsSemanticsUpdate() {
     assert(!_debugDisposed);
-    assert(!attached || !owner!._measuredPipeline._debugDoingSemantics);
+    assert(!attached || !owner!._debugDoingSemantics);
     if (!attached || owner!.semanticsOwner == null) {
       _cachedSemanticsConfiguration = null;
       return;

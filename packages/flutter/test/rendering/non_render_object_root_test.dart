@@ -49,7 +49,8 @@ void main() {
         child: RenderSizedBox(const Size(100.0, 100.0)),
       ),
     );
-    root.attach(PipelineOwner());
+
+    PipelineOwner().rootNode = root;
 
     child.scheduleInitialLayout();
     root.layout();

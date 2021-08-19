@@ -147,9 +147,9 @@ class AbstractNode {
   void dropChild(covariant AbstractNode child) {
     assert(child != null);
     assert(child._parent == this);
-    //assert(child.attached == attached);
+    assert(child.attached == attached);
     child._parent = null;
-    if (attached && child.attached)
+    if (attached)
       child.detach();
   }
 }

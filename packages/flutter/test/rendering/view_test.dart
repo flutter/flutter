@@ -36,7 +36,7 @@ void main() {
         window: window,
       );
       final PipelineOwner owner = PipelineOwner();
-      view.attach(owner);
+      owner.rootNode = view;
       view.prepareInitialFrame();
       final ContainerLayer firstLayer = view.debugLayer!;
       view.configuration = createViewConfiguration();

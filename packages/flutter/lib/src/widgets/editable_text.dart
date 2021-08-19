@@ -2472,7 +2472,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _updateSizeAndTransform() {
-    if (!_hasInputConnection || !renderEditable.attached) {
+    if (!_hasInputConnection || !renderEditable.hasDimensions) {
       return;
     }
     final Size size = renderEditable.size;
@@ -2488,7 +2488,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   // plugin needs to estimate the composing rect based on the latest caret rect,
   // when the composing rect info didn't arrive in time.
   void _updateComposingRectIfNeeded() {
-    if (!_hasInputConnection || !renderEditable.attached) {
+    if (!_hasInputConnection || !renderEditable.hasDimensions) {
       return;
     }
     final TextRange composingRange = _value.composing;
@@ -2507,7 +2507,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _updateCaretRectIfNeeded() {
-    if (!_hasInputConnection || !renderEditable.attached) {
+    if (!_hasInputConnection || !renderEditable.hasDimensions) {
       return;
     }
     if (renderEditable.selection != null && renderEditable.selection!.isValid &&

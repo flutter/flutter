@@ -160,60 +160,71 @@ class SliverMultiBoxAdaptorParentData extends SliverLogicalParentData with Conta
   String toString() => 'index=$index; ${keepAlive == true ? "keepAlive; " : ""}${super.toString()}';
 }
 
-class _KeepAlivePipeline extends PipelineOwner {
-  _KeepAlivePipeline(this.parent, this.renderSliver) : super.construct();
-
-  final PipelineOwner parent;
-  final RenderSliverMultiBoxAdaptor renderSliver;
+class _KeepAlivePipelineOwner extends PipelineOwner {
+  _KeepAlivePipelineOwner(RenderSliverMultiBoxAdaptor renderSliver)
+    : renderPipeline = _KeepAlivePipeline(renderSliver),
+      super.construct(null, null, null);
 
   @override
-  void flushLayout() {
-    renderSliver.markNeedsLayout();
+  final RenderPipeline renderPipeline;
+}
+
+class _KeepAlivePipeline implements RenderPipeline {
+  _KeepAlivePipeline(this.renderSliver);
+
+  final RenderSliverMultiBoxAdaptor renderSliver;
+
+  List<RenderSliverMultiBoxAdaptor> _dirtyNodes = <RenderSliverMultiBoxAdaptor>[];
+  @override
+  void scheduleLayoutForRenderObject(RenderObject renderObject) {
+    if (renderObject is RenderSliverMultiBoxAdaptor) {
+      renderSliver.markNeedsLayout();
+      _dirtyNodes.add(renderObject);
+    }
   }
 
   @override
-  void flushCompositingBits() { }
-
-  @override
-  void flushPaint() { }
-
-  @override
-  void flushSemantics() { }
-
-  @override
-  AbstractNode? get rootNode => parent.rootNode;
-  @override
-  set rootNode(AbstractNode? value) => parent.rootNode = value;
-
-  @override
-  int get debugOutstandingSemanticsHandles => parent.debugOutstandingSemanticsHandles;
-
-  @override
-  SemanticsHandle ensureSemantics({VoidCallback? listener}) => parent.ensureSemantics(listener: listener);
-
-  @override
-  void requestVisualUpdate() {
-    // Offscreen render objects can't directly request visual update. It must be
-    // done via its onscreen ancestors.
+  void flushLayout() {
+    // Sweeps all kept-alive render objects in the render subtree rooted at
+    // `renderSliver`. The subtree may contain other _KeepAlivePipelines that
+    // are no longer have render objects attached to, but still have unswept
+    // keep alive buckets.
+    renderSliver._sweepKeepAliveBucket();
+    final List<RenderSliverMultiBoxAdaptor> dirtyNodes = _dirtyNodes..sort((RenderObject a, RenderObject b) => a.depth - b.depth);
+    _dirtyNodes = <RenderSliverMultiBoxAdaptor>[];
+    for (final RenderSliverMultiBoxAdaptor dirtyNode in dirtyNodes) {
+      //if (dirtyNode.owner != this)
+      //  continue;
+      assert(dirtyNode.depth > renderSliver.depth);
+      dirtyNode._keepAlivePipelineOwner.flushLayout();
+      //dirtyNode._sweepKeepAliveBucket();
+    }
+    // Sweeping the descendant nodes should not redirty any other descendants:
+    // we're only removing render objects no longer kept alive.
+    assert(_dirtyNodes.isEmpty);
   }
 
   @override
   void scheduleCompositingBitsUpdateForRenderObject(RenderObject renderObject) { }
-
   @override
-  void scheduleLayoutForRenderObject(RenderObject renderObject) { }
+  void flushCompositingBits() { }
 
   @override
   void schedulePaintForRenderObject(RenderObject renderObject) { }
-
-
   @override
-  SemanticsOwner? get semanticsOwner => parent.semanticsOwner;
+  void flushPaint() { }
 
   @override
   void scheduleSemanticsUpdateForRenderObject(RenderObject renderObject) { }
   @override
   void unscheduleSemanticsUpdateForRenderObject(RenderObject renderObject) { }
+
+
+  @override
+  void flushSemantics() { }
+
+  @override
+  bool get layoutEnabled => false;
 }
 
 /// A sliver with multiple box children.
@@ -274,7 +285,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
 
   late final List<RenderBox> _debugDanglingKeepAlives = <RenderBox>[];
 
-  late final PipelineOwner keepAlivePipelineOwner = PipelineOwner();
+  late final _KeepAlivePipelineOwner _keepAlivePipelineOwner = _KeepAlivePipelineOwner(this);
 
   /// Indicates whether integrity check is enabled.
   ///
@@ -429,11 +440,28 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
       child.detach();
 
       childParentData._keptAlive = true;
+      child.attach(_keepAlivePipelineOwner);
     } else {
       assert(child.parent == this);
       _childManager.removeChild(child);
       assert(child.parent == null);
     }
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    markNeedsLayout();
+    for (final RenderBox child in _keepAliveBucket.values) {
+      child.attach(owner);
+    }
+  }
+
+  @override
+  void detach() {
+    super.detach();
+    for (final RenderBox child in _keepAliveBucket.values)
+      child.detach();
   }
 
   @override
@@ -568,18 +596,27 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
         _destroyOrCacheChild(lastChild!);
         trailingGarbage -= 1;
       }
-      // Ask the child manager to remove the children that are no longer being
-      // kept alive. (This should cause _keepAliveBucket to change, so we have
-      // to prepare our list ahead of time.)
-      _keepAliveBucket.values.where((RenderBox child) {
-        final SliverMultiBoxAdaptorParentData childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
-        return !childParentData.keepAlive;
-      }).toList().forEach(_childManager.removeChild);
-      assert(_keepAliveBucket.values.where((RenderBox child) {
-        final SliverMultiBoxAdaptorParentData childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
-        return !childParentData.keepAlive;
-      }).isEmpty);
+
+      // This calls _sweepKeepAliveBucket on dirty RenderSliverMultiBoxAdaptor
+      // descendants and this render object.
+      _keepAlivePipelineOwner.flushLayout();
     });
+  }
+
+  // Ask the child manager to remove the children that are no longer being
+  // kept alive. (This should cause _keepAliveBucket to change, so we have
+  // to prepare our list ahead of time.)
+  void _sweepKeepAliveBucket() {
+    final List<RenderBox> nodesToRemove = _keepAliveBucket.values.where((RenderBox child) {
+      final SliverMultiBoxAdaptorParentData childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
+      return !childParentData.keepAlive;
+    }).toList(growable: false);
+    nodesToRemove.forEach(_childManager.removeChild);
+    // print('swept keep alive bucket $this. nodes to remove: $nodesToRemove');
+    assert(_keepAliveBucket.values.where((RenderBox child) {
+      final SliverMultiBoxAdaptorParentData childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
+      return !childParentData.keepAlive;
+    }).isEmpty);
   }
 
   /// Returns the index of the given child, as given by the
@@ -638,17 +675,11 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
       // SliverPrototypeExtentList, then it is not visible, so we give it a
       // zero transform to prevent it from painting.
       transform.setZero();
-    } else if (_keepAliveBucket.containsKey(childParentData.index)) {
+    } else {
       assert(
-        false,
+        !_keepAliveBucket.containsKey(childParentData.index),
         'Attempted to access the transform of a keep-alive RenderObject: $child',
       );
-      // It is possible that widgets under kept alive children want to paint
-      // themselves. For example, the Material widget tries to paint all
-      // InkFeatures under its subtree as long as they are not disposed. In
-      // such case, we give it a zero transform to prevent them from painting.
-      transform.setZero();
-    } else {
       applyPaintTransformForBoxChild(child, transform);
     }
   }
