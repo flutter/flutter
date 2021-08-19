@@ -50,8 +50,6 @@ class PathBuilder {
 
   PathBuilder& AddCircle(const Point& center, Scalar radius);
 
-  PathBuilder& AddEllipse(const Point& center, const Size& size);
-
   struct RoundingRadii {
     Scalar topLeft = 0.0;
     Scalar bottomLeft = 0.0;

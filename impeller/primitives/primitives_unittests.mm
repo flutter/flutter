@@ -252,7 +252,7 @@ TEST_F(PrimitivesTest, CanRenderToTexture) {
 }
 
 TEST_F(PrimitivesTest, CanRenderPath) {
-  auto path = PathBuilder{}.AddCircle({550, 550}, 500).CreatePath();
+  auto path = PathBuilder{}.AddRoundedRect({10, 10, 200, 200}, 50).CreatePath();
   ASSERT_FALSE(path.GetBoundingBox().IsZero());
 
   using BoxPipeline = PipelineT<BoxFadeVertexShader, BoxFadeFragmentShader>;
