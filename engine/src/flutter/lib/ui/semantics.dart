@@ -800,9 +800,6 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass1 {
   /// and `decreasedValue` respectively. Their contents must not be changed during
   /// the semantics update.
   ///
-  /// The `tooltip` is a string that describe additional information when user
-  /// hover or long press on the backing widget of this semantics node.
-  ///
   /// The fields `textSelectionBase` and `textSelectionExtent` describe the
   /// currently selected text within `value`. A value of -1 indicates no
   /// current text selection base or extent.
@@ -860,16 +857,15 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass1 {
     required double thickness,
     required Rect rect,
     required String label,
-    required List<StringAttribute> labelAttributes,
+    List<StringAttribute>? labelAttributes,
     required String value,
-    required List<StringAttribute> valueAttributes,
+    List<StringAttribute>? valueAttributes,
     required String increasedValue,
-    required List<StringAttribute> increasedValueAttributes,
+    List<StringAttribute>? increasedValueAttributes,
     required String decreasedValue,
-    required List<StringAttribute> decreasedValueAttributes,
+    List<StringAttribute>? decreasedValueAttributes,
     required String hint,
-    required List<StringAttribute> hintAttributes,
-    String? tooltip,
+    List<StringAttribute>? hintAttributes,
     TextDirection? textDirection,
     required Float64List transform,
     required Int32List childrenInTraversalOrder,
@@ -911,7 +907,6 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass1 {
       decreasedValueAttributes,
       hint,
       hintAttributes,
-      tooltip,
       textDirection != null ? textDirection.index + 1 : 0,
       transform,
       childrenInTraversalOrder,
@@ -940,16 +935,15 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass1 {
     double elevation,
     double thickness,
     String label,
-    List<StringAttribute> labelAttributes,
+    List<StringAttribute>? labelAttributes,
     String value,
-    List<StringAttribute> valueAttributes,
+    List<StringAttribute>? valueAttributes,
     String increasedValue,
-    List<StringAttribute> increasedValueAttributes,
+    List<StringAttribute>? increasedValueAttributes,
     String decreasedValue,
-    List<StringAttribute> decreasedValueAttributes,
+    List<StringAttribute>? decreasedValueAttributes,
     String hint,
-    List<StringAttribute> hintAttributes,
-    String? tooltip,
+    List<StringAttribute>? hintAttributes,
     int textDirection,
     Float64List transform,
     Int32List childrenInTraversalOrder,
