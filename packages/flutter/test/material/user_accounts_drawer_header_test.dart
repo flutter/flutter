@@ -70,12 +70,6 @@ Future<void> pumpTestWidget(
 }
 
 void main() {
-  // Find the exact transform which is the descendant of [UserAccountsDrawerHeader].
-  final Finder findTransform = find.descendant(
-    of: find.byType(UserAccountsDrawerHeader),
-    matching: find.byType(Transform),
-  );
-
   testWidgets('UserAccountsDrawerHeader test', (WidgetTester tester) async {
     await pumpTestWidget(tester);
 
@@ -133,7 +127,7 @@ void main() {
 
   testWidgets('UserAccountsDrawerHeader icon rotation test', (WidgetTester tester) async {
     await pumpTestWidget(tester);
-    Transform transformWidget = tester.firstWidget(findTransform);
+    Transform transformWidget = tester.firstWidget(find.byType(Transform));
 
     // Icon is right side up.
     expect(transformWidget.transform.getRotation()[0], 1.0);
@@ -146,7 +140,7 @@ void main() {
 
     await tester.pumpAndSettle();
     await tester.pump();
-    transformWidget = tester.firstWidget(findTransform);
+    transformWidget = tester.firstWidget(find.byType(Transform));
 
     // Icon has rotated 180 degrees.
     expect(transformWidget.transform.getRotation()[0], -1.0);
@@ -159,7 +153,7 @@ void main() {
 
     await tester.pumpAndSettle();
     await tester.pump();
-    transformWidget = tester.firstWidget(findTransform);
+    transformWidget = tester.firstWidget(find.byType(Transform));
 
     // Icon has rotated 180 degrees back to the original position.
     expect(transformWidget.transform.getRotation()[0], 1.0);
@@ -184,7 +178,7 @@ void main() {
       ),
     ));
 
-    Transform transformWidget = tester.firstWidget(findTransform);
+    Transform transformWidget = tester.firstWidget(find.byType(Transform));
 
     // Icon is right side up.
     expect(transformWidget.transform.getRotation()[0], 1.0);
@@ -195,7 +189,7 @@ void main() {
     expect(tester.hasRunningAnimations, isFalse);
 
     expect(await tester.pumpAndSettle(), 1);
-    transformWidget = tester.firstWidget(findTransform);
+    transformWidget = tester.firstWidget(find.byType(Transform));
 
     // Icon has not rotated.
     expect(transformWidget.transform.getRotation()[0], 1.0);
@@ -204,7 +198,7 @@ void main() {
 
   testWidgets('UserAccountsDrawerHeader icon rotation test speeeeeedy', (WidgetTester tester) async {
     await pumpTestWidget(tester);
-    Transform transformWidget = tester.firstWidget(findTransform);
+    Transform transformWidget = tester.firstWidget(find.byType(Transform));
 
     // Icon is right side up.
     expect(transformWidget.transform.getRotation()[0], 1.0);
@@ -236,7 +230,7 @@ void main() {
 
     await tester.pumpAndSettle();
     await tester.pump();
-    transformWidget = tester.firstWidget(findTransform);
+    transformWidget = tester.firstWidget(find.byType(Transform));
 
     // Icon has rotated 180 degrees back to the original position.
     expect(transformWidget.transform.getRotation()[0], 1.0);
