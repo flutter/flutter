@@ -845,7 +845,7 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
    * @param accessibilityId The view accessibility id.
    * @return The view matching the accessibility id if any.
    */
-  @SuppressLint("PrivateApi")
+  @SuppressLint("SoonBlockedPrivateApi")
   public View findViewByAccessibilityIdTraversal(int accessibilityId) {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
       return findViewByAccessibilityIdRootedAtCurrentView(accessibilityId, this);
