@@ -58,6 +58,8 @@ impeller_component("compositor") {
     "shader_types.h",
     "surface.h",
     "surface.mm",
+    "tessellator.cc",
+    "tessellator.h",
     "texture.h",
     "texture.mm",
     "texture_descriptor.h",
@@ -91,5 +93,6 @@ source_set("compositor_unittests") {
     ":compositor",
     "../playground",
     "//flutter/testing:testing_lib",
+    "//third_party/libtess2",
   ]
 }
