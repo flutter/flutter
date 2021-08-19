@@ -78,16 +78,15 @@ class SemanticsNodeUpdate {
     required this.scrollExtentMin,
     required this.rect,
     required this.label,
-    required this.labelAttributes,
+    this.labelAttributes,
     required this.hint,
-    required this.hintAttributes,
+    this.hintAttributes,
     required this.value,
-    required this.valueAttributes,
+    this.valueAttributes,
     required this.increasedValue,
-    required this.increasedValueAttributes,
+    this.increasedValueAttributes,
     required this.decreasedValue,
-    required this.decreasedValueAttributes,
-    this.tooltip,
+    this.decreasedValueAttributes,
     this.textDirection,
     required this.transform,
     required this.elevation,
@@ -143,34 +142,31 @@ class SemanticsNodeUpdate {
   final String label;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
-  final List<ui.StringAttribute> labelAttributes;
+  final List<ui.StringAttribute>? labelAttributes;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final String hint;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
-  final List<ui.StringAttribute> hintAttributes;
+  final List<ui.StringAttribute>? hintAttributes;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final String value;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
-  final List<ui.StringAttribute> valueAttributes;
+  final List<ui.StringAttribute>? valueAttributes;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final String increasedValue;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
-  final List<ui.StringAttribute> increasedValueAttributes;
+  final List<ui.StringAttribute>? increasedValueAttributes;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final String decreasedValue;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
-  final List<ui.StringAttribute> decreasedValueAttributes;
-
-  /// See [ui.SemanticsUpdateBuilder.updateNode].
-  final String? tooltip;
+  final List<ui.StringAttribute>? decreasedValueAttributes;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final ui.TextDirection? textDirection;

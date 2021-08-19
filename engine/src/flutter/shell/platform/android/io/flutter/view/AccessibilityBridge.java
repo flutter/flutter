@@ -266,15 +266,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         /** The user has opened a tooltip. */
         @Override
         public void onTooltip(@NonNull String message) {
-          // Native Android tooltip is no longer announced when it pops up after API 28 and is
-          // handled by
-          // AccessibilityNodeInfo.setTooltipText instead.
-          //
-          // To reproduce native behavior, see
-          // https://developer.android.com/guide/topics/ui/tooltips.
-          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            return;
-          }
           AccessibilityEvent e =
               obtainAccessibilityEvent(ROOT_NODE_ID, AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
           e.getText().add(message);
@@ -829,28 +820,12 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       result.setLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
     }
 
-    // Scopes routes are not focusable, only need to set the content
-    // for non-scopes-routes semantics nodes.
     if (semanticsNode.hasFlag(Flag.IS_TEXT_FIELD)) {
       result.setText(semanticsNode.getValueLabelHint());
     } else if (!semanticsNode.hasFlag(Flag.SCOPES_ROUTE)) {
       CharSequence content = semanticsNode.getValueLabelHint();
-      if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
-        if (semanticsNode.tooltip != null) {
-          // For backward compatibility with Flutter SDK before Android API
-          // level 28, the tooltip is appended at the end of content description.
-          content = content != null ? content : "";
-          content = content + "\n" + semanticsNode.tooltip;
-        }
-      }
       if (content != null) {
         result.setContentDescription(content);
-      }
-    }
-
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-      if (semanticsNode.tooltip != null) {
-        result.setTooltipText(semanticsNode.tooltip);
       }
     }
 
@@ -2213,12 +2188,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     private String hint;
     private List<StringAttribute> hintAttributes;
 
-    // The textual description of the backing widget's tooltip.
-    //
-    // The tooltip is attached through AccessibilityNodInfo.setTooltipText if
-    // API level >= 28; otherwise, this is attached to the end of content description.
-    @Nullable private String tooltip;
-
     // The id of the sibling node that is before this node in traversal
     // order.
     //
@@ -2420,9 +2389,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       hint = stringIndex == -1 ? null : strings[stringIndex];
 
       hintAttributes = getStringAttributesFromBuffer(buffer, stringAttributeArgs);
-
-      stringIndex = buffer.getInt();
-      tooltip = stringIndex == -1 ? null : strings[stringIndex];
 
       textDirection = TextDirection.fromInt(buffer.getInt());
 
