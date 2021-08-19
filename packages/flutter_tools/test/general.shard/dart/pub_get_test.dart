@@ -26,7 +26,7 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.empty();
     final BufferLogger logger = BufferLogger.test();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-    processManager.excludedExecutables.add('bin/cache/dart-sdk/bin/pub');
+    processManager.excludedExecutables.add('bin/cache/dart-sdk/bin/dart');
 
     fileSystem.file('pubspec.yaml').createSync();
 
