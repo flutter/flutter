@@ -357,7 +357,9 @@ bool RenderPass::EncodeCommands(Allocator& allocator,
         command.pipeline->GetMTLRenderPipelineState());
     pass_bindings.SetDepthStencilState(
         command.pipeline->GetMTLDepthStencilState());
-    [pass setFrontFacingWinding:MTLWindingClockwise];
+    [pass setFrontFacingWinding:command.winding == WindingOrder::kClockwise
+                                    ? MTLWindingClockwise
+                                    : MTLWindingCounterClockwise];
     [pass setCullMode:MTLCullModeBack];
     if (!bind_stage_resources(command.vertex_bindings, ShaderStage::kVertex)) {
       return false;

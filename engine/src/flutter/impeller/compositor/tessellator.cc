@@ -88,6 +88,7 @@ bool Tessellator::Tessellate(const std::vector<Point>& contours,
     return false;
   }
 
+  // TODO(csg): This copy can be elided entirely for the current use case.
   std::vector<Point> points;
   std::vector<uint32_t> indices;
 
@@ -109,6 +110,10 @@ bool Tessellator::Tessellate(const std::vector<Point>& contours,
   }
 
   return true;
+}
+
+WindingOrder Tessellator::GetFrontFaceWinding() const {
+  return WindingOrder::kClockwise;
 }
 
 }  // namespace impeller

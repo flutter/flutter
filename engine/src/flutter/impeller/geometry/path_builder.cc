@@ -145,50 +145,59 @@ PathBuilder& PathBuilder::SmoothCubicCurveTo(Point point,
 PathBuilder& PathBuilder::AddRect(Rect rect) {
   current_ = rect.origin;
 
-  auto topLeft = rect.origin;
-  auto bottomLeft = rect.origin + Point{0.0, rect.size.height};
-  auto bottomRight = rect.origin + Point{rect.size.width, rect.size.height};
-  auto topRight = rect.origin + Point{rect.size.width, 0.0};
+  auto tl = rect.origin;
+  auto bl = rect.origin + Point{0.0, rect.size.height};
+  auto br = rect.origin + Point{rect.size.width, rect.size.height};
+  auto tr = rect.origin + Point{rect.size.width, 0.0};
 
-  prototype_.AddLinearComponent(topLeft, bottomLeft)
-      .AddLinearComponent(bottomLeft, bottomRight)
-      .AddLinearComponent(bottomRight, topRight)
-      .AddLinearComponent(topRight, topLeft);
+  prototype_.AddLinearComponent(tl, tr)
+      .AddLinearComponent(tr, br)
+      .AddLinearComponent(br, bl)
+      .AddLinearComponent(bl, tl);
 
   return *this;
 }
 
-PathBuilder& PathBuilder::AddCircle(const Point& center, Scalar radius) {
-  current_ = center + Point{0.0, radius};
+PathBuilder& PathBuilder::AddCircle(const Point& c, Scalar r) {
+  current_ = c + Point{0.0, r};
 
-  const Scalar diameter = radius * 2.0;
-  const Scalar magic = kArcApproximationMagic * radius;
+  // m for magic
+  const auto m = kArcApproximationMagic * r;
 
-  prototype_.AddCubicComponent(
-      {center.x + radius, center.y},                     //
-      {center.x + radius + magic, center.y},             //
-      {center.x + diameter, center.y + radius - magic},  //
-      {center.x + diameter, center.y + radius}           //
+  //----------------------------------------------------------------------------
+  /// Top right arc.
+  ///
+  prototype_.AddCubicComponent({c.x, c.y - r},      // p1
+                               {c.x + m, c.y - r},  // cp1
+                               {c.x + r, c.y - m},  // cp2
+                               {c.x + r, c.y}       // p2
   );
 
-  prototype_.AddCubicComponent(
-      {center.x + diameter, center.y + radius},          //
-      {center.x + diameter, center.y + radius + magic},  //
-      {center.x + radius + magic, center.y + diameter},  //
-      {center.x + radius, center.y + diameter}           //
+  //----------------------------------------------------------------------------
+  /// Bottom right arc.
+  ///
+  prototype_.AddCubicComponent({c.x + r, c.y},      // p1
+                               {c.x + r, c.y + m},  // cp1
+                               {c.x + m, c.y + r},  // cp2
+                               {c.x, c.y + r}       // p2
   );
 
-  prototype_.AddCubicComponent(
-      {center.x + radius, center.y + diameter},          //
-      {center.x + radius - magic, center.y + diameter},  //
-      {center.x, center.y + radius + magic},             //
-      {center.x, center.y + radius}                      //
+  //----------------------------------------------------------------------------
+  /// Bottom left arc.
+  ///
+  prototype_.AddCubicComponent({c.x, c.y + r},      // p1
+                               {c.x - m, c.y + r},  // cp1
+                               {c.x - r, c.y + m},  // cp2
+                               {c.x - r, c.y}       // p2
   );
 
-  prototype_.AddCubicComponent({center.x, center.y + radius},          //
-                               {center.x, center.y + radius - magic},  //
-                               {center.x + radius - magic, center.y},  //
-                               {center.x + radius, center.y}           //
+  //----------------------------------------------------------------------------
+  /// Top left arc.
+  ///
+  prototype_.AddCubicComponent({c.x - r, c.y},      // p1
+                               {c.x - r, c.y - m},  // cp1
+                               {c.x - m, c.y - r},  // cp2
+                               {c.x, c.y - r}       // p2
   );
 
   return *this;

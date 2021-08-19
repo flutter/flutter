@@ -252,7 +252,7 @@ TEST_F(PrimitivesTest, CanRenderToTexture) {
 }
 
 TEST_F(PrimitivesTest, CanRenderPath) {
-  auto path = PathBuilder{}.AddRect({10, 10, 100, 100}).CreatePath();
+  auto path = PathBuilder{}.AddCircle({550, 550}, 500).CreatePath();
   ASSERT_FALSE(path.GetBoundingBox().IsZero());
 
   using BoxPipeline = PipelineT<BoxFadeVertexShader, BoxFadeFragmentShader>;
@@ -306,6 +306,7 @@ TEST_F(PrimitivesTest, CanRenderPath) {
     FS::BindContents2(cmd, bridge, sampler);
 
     cmd.primitive_type = PrimitiveType::kTriangle;
+    cmd.winding = tessellator.GetFrontFaceWinding();
 
     VS::UniformBuffer uniforms;
     uniforms.mvp = Matrix::MakeOrthographic(surface.GetSize());

@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "flutter/fml/macros.h"
+#include "impeller/compositor/formats.h"
 #include "impeller/geometry/point.h"
 
 namespace impeller {
@@ -29,6 +30,8 @@ class Tessellator {
   void SetFillType(FillType winding);
 
   FillType GetFillType() const;
+
+  WindingOrder GetFrontFaceWinding() const;
 
   using VertexCallback = std::function<void(Point)>;
   [[nodiscard]] bool Tessellate(const std::vector<Point>& vertices,
