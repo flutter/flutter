@@ -34,6 +34,7 @@ struct Command {
   size_t index_count = 0u;
   std::string label;
   PrimitiveType primitive_type = PrimitiveType::kTriangle;
+  WindingOrder winding = WindingOrder::kClockwise;
 
   bool BindVertices(const VertexBuffer& buffer);
 
