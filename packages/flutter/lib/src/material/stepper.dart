@@ -292,17 +292,17 @@ class Stepper extends StatefulWidget {
   /// ```dart
   /// Widget build(BuildContext context) {
   ///   return Stepper(
-  ///     detailedControlsBuilder:
+  ///     controlsBuilder:
   ///       (BuildContext context, { required ControlsDetails details }) {
   ///          return Row(
   ///            children: <Widget>[
   ///              TextButton(
-  ///                onPressed: details.onStepContinue
-  ///                child: const Text('Continue to Step ${details.stepIndex + 1}'),
+  ///                onPressed: details.onStepContinue,
+  ///                child: Text('Continue to Step ${details.stepIndex + 1}'),
   ///              ),
   ///              TextButton(
   ///                onPressed: details.onStepCancel,
-  ///                child: const Text('Back to Step {details.stepIndex - 1}'),
+  ///                child: Text('Back to Step ${details.stepIndex - 1}'),
   ///              ),
   ///            ],
   ///          );
