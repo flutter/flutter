@@ -42,7 +42,7 @@ void main() {
       expect(renderObject.isAntiAlias, false);
 
       final ui.Image image2 = (await tester.runAsync<ui.Image>(() => createTestImage(width: 2, height: 2)))!;
-      const String debugImageLabel = 'debugImageLabel1';
+      const String debugImageLabel = 'debugImageLabel';
       const double width = 1;
       const double height = 1;
       const double scale = 2.0;
@@ -55,7 +55,7 @@ void main() {
       const Rect centerSlice = Rect.fromLTWH(0, 0, width, height);
       const bool matchTextDirection = true;
       const bool invertColors = true;
-      const FilterQuality filterQuality = FilterQuality.low;
+      const FilterQuality filterQuality = FilterQuality.high;
       const bool isAntiAlias = true;
 
       await tester.pumpWidget(
@@ -73,7 +73,7 @@ void main() {
             fit: fit,
             alignment: alignment,
             repeat: repeat,
-            centerSlice:centerSlice,
+            centerSlice: centerSlice,
             matchTextDirection: matchTextDirection,
             invertColors: invertColors,
             filterQuality: filterQuality,
