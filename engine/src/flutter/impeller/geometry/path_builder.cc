@@ -211,122 +211,85 @@ PathBuilder& PathBuilder::AddRoundedRect(Rect rect, Scalar radius) {
 PathBuilder& PathBuilder::AddRoundedRect(Rect rect, RoundingRadii radii) {
   current_ = rect.origin + Point{radii.topLeft, 0.0};
 
-  const Scalar magicTopRight = kArcApproximationMagic * radii.topRight;
-  const Scalar magicBottomRight = kArcApproximationMagic * radii.bottomRight;
-  const Scalar magicBottomLeft = kArcApproximationMagic * radii.bottomLeft;
-  const Scalar magicTopLeft = kArcApproximationMagic * radii.topLeft;
+  const Scalar magic_top_right = kArcApproximationMagic * radii.topRight;
+  const Scalar magic_bottom_right = kArcApproximationMagic * radii.bottomRight;
+  const Scalar magic_bottom_left = kArcApproximationMagic * radii.bottomLeft;
+  const Scalar magic_top_left = kArcApproximationMagic * radii.topLeft;
 
-  /*
-   *  Top line.
-   */
+  //----------------------------------------------------------------------------
+  /// Top line.
+  ///
   prototype_.AddLinearComponent(
       {rect.origin.x + radii.topLeft, rect.origin.y},
       {rect.origin.x + rect.size.width - radii.topRight, rect.origin.y});
 
-  /*
-   *  Top right arc.
-   */
+  //----------------------------------------------------------------------------
+  /// Top right arc.
+  ///
   prototype_.AddCubicComponent(
       {rect.origin.x + rect.size.width - radii.topRight, rect.origin.y},
-      {rect.origin.x + rect.size.width - radii.topRight + magicTopRight,
+      {rect.origin.x + rect.size.width - radii.topRight + magic_top_right,
        rect.origin.y},
       {rect.origin.x + rect.size.width,
-       rect.origin.y + radii.topRight - magicTopRight},
+       rect.origin.y + radii.topRight - magic_top_right},
       {rect.origin.x + rect.size.width, rect.origin.y + radii.topRight});
 
-  /*
-   *  Right line.
-   */
+  //----------------------------------------------------------------------------
+  /// Right line.
+  ///
   prototype_.AddLinearComponent(
       {rect.origin.x + rect.size.width, rect.origin.y + radii.topRight},
       {rect.origin.x + rect.size.width,
        rect.origin.y + rect.size.height - radii.bottomRight});
 
-  /*
-   *  Bottom right arc.
-   */
+  //----------------------------------------------------------------------------
+  /// Bottom right arc.
+  ///
   prototype_.AddCubicComponent(
       {rect.origin.x + rect.size.width,
        rect.origin.y + rect.size.height - radii.bottomRight},
-      {rect.origin.x + rect.size.width,
-       rect.origin.y + rect.size.height - radii.bottomRight + magicBottomRight},
-      {rect.origin.x + rect.size.width - radii.bottomRight + magicBottomRight,
+      {rect.origin.x + rect.size.width, rect.origin.y + rect.size.height -
+                                            radii.bottomRight +
+                                            magic_bottom_right},
+      {rect.origin.x + rect.size.width - radii.bottomRight + magic_bottom_right,
        rect.origin.y + rect.size.height},
       {rect.origin.x + rect.size.width - radii.bottomRight,
        rect.origin.y + rect.size.height});
 
-  /*
-   *  Bottom line.
-   */
+  //----------------------------------------------------------------------------
+  /// Bottom line.
+  ///
   prototype_.AddLinearComponent(
       {rect.origin.x + rect.size.width - radii.bottomRight,
        rect.origin.y + rect.size.height},
       {rect.origin.x + radii.bottomLeft, rect.origin.y + rect.size.height});
 
-  /*
-   *  Bottom left arc.
-   */
+  //----------------------------------------------------------------------------
+  /// Bottom left arc.
+  ///
   prototype_.AddCubicComponent(
       {rect.origin.x + radii.bottomLeft, rect.origin.y + rect.size.height},
-      {rect.origin.x + radii.bottomLeft - magicBottomLeft,
+      {rect.origin.x + radii.bottomLeft - magic_bottom_left,
        rect.origin.y + rect.size.height},
       {rect.origin.x,
-       rect.origin.y + rect.size.height - radii.bottomLeft + magicBottomLeft},
+       rect.origin.y + rect.size.height - radii.bottomLeft + magic_bottom_left},
       {rect.origin.x, rect.origin.y + rect.size.height - radii.bottomLeft});
 
-  /*
-   *  Left line.
-   */
+  //----------------------------------------------------------------------------
+  /// Left line.
+  ///
   prototype_.AddLinearComponent(
       {rect.origin.x, rect.origin.y + rect.size.height - radii.bottomLeft},
       {rect.origin.x, rect.origin.y + radii.topLeft});
 
-  /*
-   *  Top left arc.
-   */
+  //----------------------------------------------------------------------------
+  /// Top left arc.
+  ///
   prototype_.AddCubicComponent(
       {rect.origin.x, rect.origin.y + radii.topLeft},
-      {rect.origin.x, rect.origin.y + radii.topLeft - magicTopLeft},
-      {rect.origin.x + radii.topLeft - magicTopLeft, rect.origin.y},
+      {rect.origin.x, rect.origin.y + radii.topLeft - magic_top_left},
+      {rect.origin.x + radii.topLeft - magic_top_left, rect.origin.y},
       {rect.origin.x + radii.topLeft, rect.origin.y});
-
-  return *this;
-}
-
-PathBuilder& PathBuilder::AddEllipse(const Point& center, const Size& radius) {
-  current_ = center + Point{0.0, radius.height};
-
-  const Size diameter = {radius.width * 2.0f, radius.height * 2.0f};
-  const Size magic = {kArcApproximationMagic * radius.width,
-                      kArcApproximationMagic * radius.height};
-
-  prototype_.AddCubicComponent(
-      {center.x + radius.width, center.y},                                   //
-      {center.x + radius.width + magic.width, center.y},                     //
-      {center.x + diameter.width, center.y + radius.height - magic.height},  //
-      {center.x + diameter.width, center.y + radius.height}                  //
-  );
-
-  prototype_.AddCubicComponent(
-      {center.x + diameter.width, center.y + radius.height},                 //
-      {center.x + diameter.width, center.y + radius.height + magic.height},  //
-      {center.x + radius.width + magic.width, center.y + diameter.height},   //
-      {center.x + radius.width, center.y + diameter.height}                  //
-  );
-
-  prototype_.AddCubicComponent(
-      {center.x + radius.width, center.y + diameter.height},                //
-      {center.x + radius.width - magic.width, center.y + diameter.height},  //
-      {center.x, center.y + radius.height + magic.height},                  //
-      {center.x, center.y + radius.height}                                  //
-  );
-
-  prototype_.AddCubicComponent(
-      {center.x, center.y + radius.height},                 //
-      {center.x, center.y + radius.height - magic.height},  //
-      {center.x + radius.width - magic.width, center.y},    //
-      {center.x + radius.width, center.y}                   //
-  );
 
   return *this;
 }
