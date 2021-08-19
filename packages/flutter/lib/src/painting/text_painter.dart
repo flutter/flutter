@@ -161,7 +161,7 @@ class TextPainter {
   TextPainter({
     InlineSpan? text,
     TextAlign textAlign = TextAlign.start,
-    TextDirection? textDirection,
+    TextDirection textDirection = TextDirection.ltr,
     double textScaleFactor = 1.0,
     int? maxLines,
     String? ellipsis,
