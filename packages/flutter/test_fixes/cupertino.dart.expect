@@ -181,4 +181,8 @@ void main() {
   listWheelViewport = ListWheelViewport(clipBehavior: Clip.hardEdge);
   listWheelViewport = ListWheelViewport(clipBehavior: Clip.none);
   listWheelViewport.clipBehavior;
+
+  // Changes made in https://github.com/flutter/flutter/pull/87839
+  final OverscrollIndicatorNotification notification = OverscrollIndicatorNotification(leading: true);
+  notification.disallowIndicator();
 }

@@ -219,7 +219,8 @@ class CupertinoTextField extends StatefulWidget {
   /// The [autocorrect], [autofocus], [clearButtonMode], [dragStartBehavior],
   /// [expands], [maxLengthEnforced], [obscureText], [prefixMode], [readOnly],
   /// [scrollPadding], [suffixMode], [textAlign], [selectionHeightStyle],
-  /// [selectionWidthStyle], and [enableSuggestions] properties must not be null.
+  /// [selectionWidthStyle], [enableSuggestions], and [enableIMEPersonalizedLearning]
+  /// properties must not be null.
   ///
   /// See also:
   ///
@@ -251,6 +252,7 @@ class CupertinoTextField extends StatefulWidget {
     this.strutStyle,
     this.textAlign = TextAlign.start,
     this.textAlignVertical,
+    this.textDirection,
     this.readOnly = false,
     ToolbarOptions? toolbarOptions,
     this.showCursor,
@@ -293,6 +295,7 @@ class CupertinoTextField extends StatefulWidget {
     this.scrollPhysics,
     this.autofillHints,
     this.restorationId,
+    this.enableIMEPersonalizedLearning = true,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -334,6 +337,7 @@ class CupertinoTextField extends StatefulWidget {
          !identical(keyboardType, TextInputType.text),
          'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.',
        ),
+       assert(enableIMEPersonalizedLearning != null),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        toolbarOptions = toolbarOptions ?? (obscureText ?
          const ToolbarOptions(
@@ -404,6 +408,7 @@ class CupertinoTextField extends StatefulWidget {
     this.strutStyle,
     this.textAlign = TextAlign.start,
     this.textAlignVertical,
+    this.textDirection,
     this.readOnly = false,
     ToolbarOptions? toolbarOptions,
     this.showCursor,
@@ -446,6 +451,7 @@ class CupertinoTextField extends StatefulWidget {
     this.scrollPhysics,
     this.autofillHints,
     this.restorationId,
+    this.enableIMEPersonalizedLearning = true,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -487,6 +493,7 @@ class CupertinoTextField extends StatefulWidget {
          !identical(keyboardType, TextInputType.text),
          'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.',
        ),
+       assert(enableIMEPersonalizedLearning != null),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        toolbarOptions = toolbarOptions ?? (obscureText ?
          const ToolbarOptions(
@@ -607,6 +614,9 @@ class CupertinoTextField extends StatefulWidget {
 
   /// {@macro flutter.material.InputDecorator.textAlignVertical}
   final TextAlignVertical? textAlignVertical;
+
+  /// {@macro flutter.widgets.editableText.textDirection}
+  final TextDirection? textDirection;
 
   /// {@macro flutter.widgets.editableText.readOnly}
   final bool readOnly;
@@ -779,6 +789,9 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.material.textfield.restorationId}
   final String? restorationId;
 
+  /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
+  final bool enableIMEPersonalizedLearning;
+
   @override
   State<CupertinoTextField> createState() => _CupertinoTextFieldState();
 
@@ -819,6 +832,8 @@ class CupertinoTextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics, defaultValue: null));
     properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: TextAlign.start));
     properties.add(DiagnosticsProperty<TextAlignVertical>('textAlignVertical', textAlignVertical, defaultValue: null));
+    properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
   }
 }
 
@@ -869,6 +884,11 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
       _controller!.dispose();
       _controller = null;
     }
+
+    if (widget.focusNode != oldWidget.focusNode) {
+      (oldWidget.focusNode ?? _focusNode)?.removeListener(_handleFocusChanged);
+      (widget.focusNode ?? _focusNode)?.addListener(_handleFocusChanged);
+    }
     _effectiveFocusNode.canRequestFocus = widget.enabled ?? true;
   }
 
@@ -900,6 +920,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
 
   @override
   void dispose() {
+    _effectiveFocusNode.removeListener(_handleFocusChanged);
     _focusNode?.dispose();
     _controller?.dispose();
     super.dispose();
@@ -909,6 +930,13 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
 
   void _requestKeyboard() {
     _editableText.requestKeyboard();
+  }
+
+  void _handleFocusChanged() {
+    setState(() {
+      // Rebuild the widget on focus change to show/hide the text selection
+      // highlight.
+    });
   }
 
   bool _shouldShowSelectionHandles(SelectionChangedCause? cause) {
@@ -1176,6 +1204,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             style: textStyle,
             strutStyle: widget.strutStyle,
             textAlign: widget.textAlign,
+            textDirection: widget.textDirection,
             autofocus: widget.autofocus,
             obscuringCharacter: widget.obscuringCharacter,
             obscureText: widget.obscureText,
@@ -1186,7 +1215,8 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             maxLines: widget.maxLines,
             minLines: widget.minLines,
             expands: widget.expands,
-            selectionColor: selectionColor,
+            // Only show the selection highlight when the text field is focused.
+            selectionColor: _effectiveFocusNode.hasFocus ? selectionColor : null,
             selectionControls: widget.selectionEnabled
               ? textSelectionControls : null,
             onChanged: widget.onChanged,
@@ -1214,6 +1244,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             enableInteractiveSelection: widget.enableInteractiveSelection,
             autofillHints: widget.autofillHints,
             restorationId: 'editable',
+            enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
           ),
         ),
       ),

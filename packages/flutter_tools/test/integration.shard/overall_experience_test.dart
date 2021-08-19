@@ -25,6 +25,12 @@
 // @dart = 2.8
 // This file is ready to transition, just uncomment /*?*/, /*!*/, and /*late*/.
 
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=1000"
+@Tags(<String>['no-shuffle'])
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -114,7 +120,7 @@ class Multiple extends Transition {
 
   @override
   String toString() {
-    if (_originalPatterns.length == patterns.length) {
+    if (patterns.isEmpty) {
       return '${_originalPatterns.map(describe).join(', ')} (all matched)';
     }
     return '${_originalPatterns.map(describe).join(', ')} (matched ${_originalPatterns.length - patterns.length} so far)';
@@ -352,7 +358,7 @@ void main() {
     } finally {
       tryToDelete(fileSystem.directory(tempDirectory));
     }
-  }, skip: platform.isWindows);
+  }, skip: platform.isWindows); // https://github.com/flutter/flutter/issues/87924
 
   testWithoutContext('flutter run handle SIGUSR1/2', () async {
     final String tempDirectory = fileSystem.systemTempDirectory.createTempSync('flutter_overall_experience_test.').resolveSymbolicLinksSync();
@@ -409,7 +415,7 @@ void main() {
     } finally {
       tryToDelete(fileSystem.directory(tempDirectory));
     }
-  }, skip: Platform.isWindows); // Windows doesn't support sending signals.
+  }, skip: Platform.isWindows); // [intended] Windows doesn't support sending signals.
 
   testWithoutContext('flutter run can hot reload and hot restart, handle "p" key', () async {
     final String tempDirectory = fileSystem.systemTempDirectory.createTempSync('flutter_overall_experience_test.').resolveSymbolicLinksSync();
@@ -600,7 +606,6 @@ void main() {
       'I Toggle oversized image inversion.                                     (debugInvertOversizedImages)',
       'o Simulate different operating systems.                                      (defaultTargetPlatform)',
       'b Toggle platform brightness (dark and light mode).                        (debugBrightnessOverride)',
-      'z Toggle elevation checker.                                            (debugCheckElevationsEnabled)',
       'P Toggle performance overlay.                                    (WidgetsApp.showPerformanceOverlay)',
       'a Toggle timeline events for all widget build methods.                    (debugProfileWidgetBuilds)',
       'M Write SkSL shaders to a unique file in the project directory.',

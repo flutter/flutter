@@ -5,6 +5,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
 import 'constants.dart';
@@ -12,7 +13,12 @@ import 'constants.dart';
 /// The location of the Flutter root directory, based on the known location of
 /// this script.
 final Directory flutterRoot = Directory(path.dirname(Platform.script.toFilePath())).parent.parent.parent.parent;
-final String dataRoot = path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data');
+String get dataRoot => testDataRoot ?? _dataRoot;
+String _dataRoot = path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data');
+
+/// Allows overriding of the [dataRoot] for testing purposes.
+@visibleForTesting
+String? testDataRoot;
 
 /// Converts `FOO_BAR` to `FooBar`.
 String shoutingToUpperCamel(String shouting) {

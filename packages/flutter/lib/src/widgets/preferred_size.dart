@@ -94,7 +94,7 @@ abstract class PreferredSizeWidget implements Widget {
 ///   }
 /// }
 /// ```
-///```dart
+/// ```dart
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
 ///     appBar: PreferredSize(
