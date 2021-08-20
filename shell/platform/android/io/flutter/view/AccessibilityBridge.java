@@ -85,6 +85,25 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
   private static final float SCROLL_EXTENT_FOR_INFINITY = 100000.0f;
   private static final float SCROLL_POSITION_CAP_FOR_INFINITY = 70000.0f;
   private static final int ROOT_NODE_ID = 0;
+  private static final int SCROLLABLE_ACTIONS =
+      Action.SCROLL_RIGHT.value
+          | Action.SCROLL_LEFT.value
+          | Action.SCROLL_UP.value
+          | Action.SCROLL_DOWN.value;
+  // Flags that make a node accessibilty focusable.
+  private static final int FOCUSABLE_FLAGS =
+      Flag.HAS_CHECKED_STATE.value
+          | Flag.IS_CHECKED.value
+          | Flag.IS_SELECTED.value
+          | Flag.IS_TEXT_FIELD.value
+          | Flag.IS_FOCUSED.value
+          | Flag.HAS_ENABLED_STATE.value
+          | Flag.IS_ENABLED.value
+          | Flag.IS_IN_MUTUALLY_EXCLUSIVE_GROUP.value
+          | Flag.HAS_TOGGLED_STATE.value
+          | Flag.IS_TOGGLED.value
+          | Flag.IS_FOCUSABLE.value
+          | Flag.IS_SLIDER.value;
 
   // The minimal ID for an engine generated AccessibilityNodeInfo.
   //
@@ -2578,13 +2597,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       // If not explicitly set as focusable, then use our legacy
       // algorithm. Once all focusable widgets have a Focus widget, then
       // this won't be needed.
-      int scrollableActions =
-          Action.SCROLL_RIGHT.value
-              | Action.SCROLL_LEFT.value
-              | Action.SCROLL_UP.value
-              | Action.SCROLL_DOWN.value;
-      return (actions & ~scrollableActions) != 0
-          || flags != 0
+      return (actions & ~SCROLLABLE_ACTIONS) != 0
+          || (flags & FOCUSABLE_FLAGS) != 0
           || (label != null && !label.isEmpty())
           || (value != null && !value.isEmpty())
           || (hint != null && !hint.isEmpty());
