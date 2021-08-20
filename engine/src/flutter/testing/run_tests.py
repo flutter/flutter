@@ -564,6 +564,7 @@ def main():
     assert os.path.exists(build_dir), 'Build variant directory %s does not exist!' % build_dir
 
   if args.sanitizer_suppressions:
+    assert IsLinux() or IsMac(), "The sanitizer suppressions flag is only supported on Linux and Mac."
     file_dir = os.path.dirname(os.path.abspath(__file__))
     command = [
       "env", "-i", "bash",
