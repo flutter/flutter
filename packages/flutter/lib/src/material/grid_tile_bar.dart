@@ -67,13 +67,13 @@ class GridTileBar extends StatelessWidget {
       end: trailing != null ? 8.0 : 16.0,
     );
 
-    final ThemeData darkTheme = ThemeData.dark();
+    final ThemeData theme = Theme.of(context);
     return Container(
       padding: padding,
       decoration: decoration,
       height: (title != null && subtitle != null) ? 68.0 : 48.0,
       child: Theme(
-        data: darkTheme,
+        data: theme,
         child: IconTheme.merge(
           data: const IconThemeData(color: Colors.white),
           child: Row(
@@ -88,13 +88,13 @@ class GridTileBar extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       DefaultTextStyle(
-                        style: darkTheme.textTheme.subtitle1!,
+                        style: theme.textTheme.subtitle1!,
                         softWrap: false,
                         overflow: TextOverflow.ellipsis,
                         child: title!,
                       ),
                       DefaultTextStyle(
-                        style: darkTheme.textTheme.caption!,
+                        style: theme.textTheme.caption!,
                         softWrap: false,
                         overflow: TextOverflow.ellipsis,
                         child: subtitle!,
@@ -105,7 +105,7 @@ class GridTileBar extends StatelessWidget {
               else if (title != null || subtitle != null)
                 Expanded(
                   child: DefaultTextStyle(
-                    style: darkTheme.textTheme.subtitle1!,
+                    style: theme.textTheme.subtitle1!,
                     softWrap: false,
                     overflow: TextOverflow.ellipsis,
                     child: title ?? subtitle!,

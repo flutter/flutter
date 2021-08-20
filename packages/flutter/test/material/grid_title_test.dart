@@ -49,4 +49,87 @@ void main() {
 
     expect(find.text('Simple'), findsOneWidget);
   });
+
+  testWidgets('GridTile consistent theme', (WidgetTester tester) async {
+    final GridTile gridTile = GridTile(
+      footer: GridTileBar(
+        backgroundColor: Colors.blue,
+        trailing: PopupMenuButton<String>(
+          itemBuilder: (BuildContext context) {
+            return [
+              const PopupMenuItem<String>(
+                value: 'Flutter',
+                child: Text('Working a lot harder'),
+              ),
+              const PopupMenuItem<String>(
+                value: 'Dart',
+                child: Text('Being a lot smarter'),
+              ),
+              const PopupMenuItem<String>(
+                value: 'iOS',
+                child: Text('Being a self-starter'),
+              ),
+            ];
+          },
+          icon: const Icon(
+            Icons.more_vert,
+            size: 28,
+          ),
+        ),
+      ),
+      child: const FlutterLogo(
+        style: FlutterLogoStyle.horizontal,
+      ),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: gridTile,
+        ),
+      ),
+    );
+
+    Theme theme = tester.firstWidget(find.byType(Theme));
+    expect(theme.data, ThemeData.light());
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.light(),
+        home: Scaffold(
+          body: gridTile,
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    theme = tester.firstWidget(find.byType(Theme));
+    expect(theme.data, ThemeData.light());
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.dark(),
+        home: Scaffold(
+          body: gridTile,
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    theme = tester.firstWidget(find.byType(Theme));
+    expect(theme.data, ThemeData.dark());
+
+    await tester.pumpWidget(
+      MaterialApp(
+        themeMode: ThemeMode.light,
+        home: Scaffold(
+          body: gridTile,
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    theme = tester.firstWidget(find.byType(Theme));
+    expect(theme.data, ThemeData.light());
+  });
 }
