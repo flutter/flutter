@@ -1445,6 +1445,8 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   void debugVisitOnstageChildren(ElementVisitor visitor) {
     _childElements.values.cast<Element>().where((Element child) {
       final SliverMultiBoxAdaptorParentData parentData = child.renderObject!.parentData! as SliverMultiBoxAdaptorParentData;
+      if (parentData.keptAlive)
+        return false;
       final double itemExtent;
       switch (renderObject.constraints.axis) {
         case Axis.horizontal:

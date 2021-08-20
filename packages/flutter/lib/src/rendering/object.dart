@@ -774,6 +774,7 @@ class SemanticsHandle {
 /// in each stage of the pipeline. To flush the pipeline, call the following
 /// functions in order:
 ///
+/// {@template flutter.rendering.RenderPipeline}
 /// 1. [flushLayout] updates any render objects that need to compute their
 ///    layout. During this phase, the size and position of each render
 ///    object is calculated. Render objects might dirty their painting or
@@ -791,10 +792,16 @@ class SemanticsHandle {
 /// 4. Finally, if semantics are enabled, [flushSemantics] will compile the
 ///    semantics for the render objects. This semantic information is used by
 ///    assistive technology to improve the accessibility of the render tree.
+/// {@endtemplate}
 abstract class RenderPipeline {
+  /// Informs the [RenderPipeline] that the given [renderObject]'s layout
+  /// information is dirty and needs updating.
+  ///
+  /// Typically called by [RenderObject.markNeedsLayout].
   void scheduleLayoutForRenderObject(RenderObject renderObject);
 
-  /// Update the layout information for all dirty render objects.
+  /// Update the layout information for all dirty render objects reported via
+  /// [scheduleLayoutForRenderObject].
   ///
   /// This function is one of the core stages of the rendering pipeline. Layout
   /// information is cleaned prior to painting so that render objects will
@@ -803,6 +810,10 @@ abstract class RenderPipeline {
   /// See [RendererBinding] for an example of how this function is used.
   void flushLayout();
 
+  /// Informs the [RenderPipeline] that the given [renderObject]'s combositing
+  /// bits needs updating.
+  ///
+  /// Typically called by [RenderObject.markNeedsCompositingBitsUpdate].
   void scheduleCompositingBitsUpdateForRenderObject(RenderObject renderObject);
 
   /// Updates the [RenderObject.needsCompositing] bits.
@@ -811,6 +822,10 @@ abstract class RenderPipeline {
   /// [flushPaint].
   void flushCompositingBits();
 
+  /// Informs the [RenderPipeline] that the given [renderObject]'s visual
+  /// appearance needs updating.
+  ///
+  /// Typically called by [RenderObject.markNeedsPaint].
   void schedulePaintForRenderObject(RenderObject renderObject);
 
   /// Update the display lists for all render objects.
@@ -822,7 +837,16 @@ abstract class RenderPipeline {
   /// See [RendererBinding] for an example of how this function is used.
   void flushPaint();
 
+  /// Informs the [RenderPipeline] that the given [renderObject]'s semantics
+  /// description needs updating.
+  ///
+  /// Typically called by [RenderObject.markNeedsSemanticsUpdate].
   void scheduleSemanticsUpdateForRenderObject(RenderObject renderObject);
+
+  /// Informs the [RenderPipeline] that the given [renderObject]'s semantics
+  /// description update needs to be cancelled.
+  ///
+  /// Typically called by [RenderObject.markNeedsSemanticsUpdate].
   void unscheduleSemanticsUpdateForRenderObject(RenderObject renderObject);
 
   /// Update the semantics for render objects marked as needing a semantics
@@ -843,30 +867,12 @@ abstract class RenderPipeline {
   bool get layoutEnabled => true;
 }
 
-/// The pipeline owner manages the rendering pipeline.
+/// The pipeline owner that manages a [RenderPipeline].
 ///
-/// The pipeline owner provides an interface for driving the rendering pipeline
-/// and stores the state about which render objects have requested to be visited
-/// in each stage of the pipeline. To flush the pipeline, call the following
-/// functions in order:
-///
-/// 1. [flushLayout] updates any render objects that need to compute their
-///    layout. During this phase, the size and position of each render
-///    object is calculated. Render objects might dirty their painting or
-///    compositing state during this phase.
-/// 2. [flushCompositingBits] updates any render objects that have dirty
-///    compositing bits. During this phase, each render object learns whether
-///    any of its children require compositing. This information is used during
-///    the painting phase when selecting how to implement visual effects such as
-///    clipping. If a render object has a composited child, its needs to use a
-///    [Layer] to create the clip in order for the clip to apply to the
-///    composited child (which will be painted into its own [Layer]).
-/// 3. [flushPaint] visits any render objects that need to paint. During this
-///    phase, render objects get a chance to record painting commands into
-///    [PictureLayer]s and construct other composited [Layer]s.
-/// 4. Finally, if semantics are enabled, [flushSemantics] will compile the
-///    semantics for the render objects. This semantic information is used by
-///    assistive technology to improve the accessibility of the render tree.
+/// This class is a wrapper around a [RenderPipeline] [renderPipeline]:
+/// it implements the [RenderPipeline] interface, providing additional
+/// [Timeline] traces and debug asserts, and eventually invokes
+/// [renderPipeline]'s implementation.
 ///
 /// The [RendererBinding] holds the pipeline owner for the render objects that
 /// are visible on screen. You can create other pipeline owners to manage
@@ -884,12 +890,15 @@ abstract class PipelineOwner implements RenderPipeline {
     VoidCallback? onSemanticsOwnerDisposed,
   }) = _RootPipelineOwner;
 
+  /// Creates a pipeline owner.
   PipelineOwner.construct(
     this.onNeedVisualUpdate,
     this.onSemanticsOwnerCreated,
     this.onSemanticsOwnerDisposed,
   );
 
+  /// The [RenderPipeline] that provides the implementation of the
+  /// [RenderPipline] methods.
   RenderPipeline get renderPipeline;
 
   /// Called when a render object associated with this pipeline owner wishes to

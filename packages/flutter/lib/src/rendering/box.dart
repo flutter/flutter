@@ -1913,7 +1913,7 @@ abstract class RenderBox extends RenderObject {
   }
 
   /// Whether this render object has undergone layout and has a [size].
-  bool get hasSize => _size != null && hasDimensions;
+  bool get hasSize => _size != null;
 
   /// The size of this render box computed during layout.
   ///
