@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -27,6 +28,7 @@ void main() {
     expect(popupMenuTheme.shape, null);
     expect(popupMenuTheme.elevation, null);
     expect(popupMenuTheme.textStyle, null);
+    expect(popupMenuTheme.mouseCursor, null);
   });
 
   testWidgets('Default PopupMenuThemeData debugFillProperties', (WidgetTester tester) async {
@@ -48,6 +50,7 @@ void main() {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)),
       elevation: 2.0,
       textStyle: const TextStyle(color: Color(0xffffffff)),
+      mouseCursor: MaterialStateMouseCursor.clickable,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -60,6 +63,7 @@ void main() {
       'shape: RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.circular(2.0))',
       'elevation: 2.0',
       'text style: TextStyle(inherit: true, color: Color(0xffffffff))',
+      'mouseCursor: MaterialStateMouseCursor(clickable)',
     ]);
   });
 
@@ -264,6 +268,7 @@ void main() {
                 shape: BeveledRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 elevation: 6.0,
                 textStyle: const TextStyle(color: Color(0xfffff000), textBaseline: TextBaseline.alphabetic),
+                mouseCursor: MaterialStateProperty.all(SystemMouseCursors.contextMenu),
               ),
               child: PopupMenuButton<void>(
                 key: popupButtonKey,
@@ -310,5 +315,13 @@ void main() {
       ).last,
     );
     expect(text.style.color, const Color(0xfffff000));
+
+    /// The default clickable mouse cursor should be overridden by the theme.
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(tester.getCenter(find.byKey(popupItemKey).last));
+    await tester.pumpAndSettle();
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.contextMenu);
   });
 }

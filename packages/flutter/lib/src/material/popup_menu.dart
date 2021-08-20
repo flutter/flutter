@@ -264,6 +264,7 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   /// of [ThemeData.textTheme] is used.
   final TextStyle? textStyle;
 
+  /// {@template flutter.material.popupmenu.mouseCursor}
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
@@ -271,8 +272,10 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   /// [MaterialStateProperty.resolve] is used for the following [MaterialState]:
   ///
   ///  * [MaterialState.disabled].
+  /// {@endtemplate}
   ///
-  /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
+  /// If null, then the value of [PopupMenuThemeData.mouseCursor] is used. If
+  /// that is also null, then [MaterialStateMouseCursor.clickable] is used.
   final MouseCursor? mouseCursor;
 
   /// The widget below this widget in the tree.
@@ -355,12 +358,12 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
         child: item,
       );
     }
-    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
-      widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
-      <MaterialState>{
-        if (!widget.enabled) MaterialState.disabled,
-      },
-    );
+    final Set<MaterialState> states = <MaterialState>{
+      if (!widget.enabled) MaterialState.disabled,
+    };
+    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
+      ?? popupMenuTheme.mouseCursor?.resolve(states)
+      ?? MaterialStateMouseCursor.clickable.resolve(states);
 
     return MergeSemantics(
       child: Semantics(
