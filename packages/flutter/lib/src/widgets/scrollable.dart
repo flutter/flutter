@@ -400,7 +400,6 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   late ScrollBehavior _configuration;
   ScrollPhysics? _physics;
   ScrollController? _fallbackScrollController;
-  MediaQueryData? _mediaQueryData;
 
   ScrollController get _effectiveScrollController => widget.controller ?? _fallbackScrollController!;
 
@@ -454,7 +453,6 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
   @override
   void didChangeDependencies() {
-    _mediaQueryData = MediaQuery.maybeOf(context);
     _updatePosition();
     super.didChangeDependencies();
   }
