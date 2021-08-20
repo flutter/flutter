@@ -610,10 +610,15 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 - (NSString*)accessibilityLabel {
   if (![self isAccessibilityBridgeAlive])
     return nil;
-
-  if ([self node].label.empty())
-    return nil;
-  return @([self node].label.data());
+  NSString* label = nil;
+  if (![self node].label.empty()) {
+    label = @([self node].label.data());
+  }
+  if (![self node].tooltip.empty()) {
+    label = label ? [NSString stringWithFormat:@"%@\n%@", label, @([self node].tooltip.data())]
+                  : @([self node].tooltip.data());
+  }
+  return label;
 }
 
 - (NSAttributedString*)accessibilityAttributedLabel {
