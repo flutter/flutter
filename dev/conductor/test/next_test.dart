@@ -84,10 +84,6 @@ void main() {
           const FakeCommand(
             command: <String>['git', 'checkout', workingBranch],
           ),
-          const FakeCommand(
-            command: <String>['git', 'rev-parse', 'HEAD'],
-            stdout: revision1,
-          ),
         ]);
         final FakePlatform platform = FakePlatform(
           environment: <String, String>{
@@ -149,10 +145,6 @@ void main() {
         final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(command: <String>['git', 'fetch', 'upstream']),
           const FakeCommand(command: <String>['git', 'checkout', workingBranch]),
-          const FakeCommand(
-            command: <String>['git', 'rev-parse', 'HEAD'],
-            stdout: revision1,
-          ),
           const FakeCommand(
             command: <String>['git', 'status', '--porcelain'],
             stdout: 'MM blah',
@@ -234,10 +226,6 @@ void main() {
             },
           ),
           const FakeCommand(
-            command: <String>['git', 'rev-parse', 'HEAD'],
-            stdout: revision1,
-          ),
-          const FakeCommand(
             command: <String>['git', 'status', '--porcelain'],
             stdout: 'MM .ci.yaml',
           ),
@@ -247,7 +235,7 @@ void main() {
             command: <String>['git', 'rev-parse', 'HEAD'],
             stdout: revision2,
           ),
-          const FakeCommand(command: <String>['git', 'push', 'mirror', '$revision1:refs/heads/$workingBranch']),
+          const FakeCommand(command: <String>['git', 'push', 'mirror', 'HEAD:refs/heads/$workingBranch']),
         ]);
         final FakePlatform platform = FakePlatform(
           environment: <String, String>{
@@ -730,11 +718,7 @@ void main() {
             stdout: revision4,
           ),
           const FakeCommand(
-            command: <String>['git', 'rev-parse', 'HEAD'],
-            stdout: revision2,
-          ),
-          const FakeCommand(
-            command: <String>['git', 'push', 'mirror', '$revision2:refs/heads/$workingBranch'],
+            command: <String>['git', 'push', 'mirror', 'HEAD:refs/heads/$workingBranch'],
           ),
         ]);
         writeStateToFile(
@@ -775,7 +759,7 @@ void main() {
         );
         expect(
           stdio.stdout,
-          contains('Executed command: `git push mirror $revision2:refs/heads/$workingBranch`'),
+          contains('Executed command: `git push mirror HEAD:refs/heads/$workingBranch`'),
         );
         expect(stdio.error, isEmpty);
       });
