@@ -1265,7 +1265,6 @@ targets:
   - name: Linux_android complex_layout_android__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -1284,7 +1283,6 @@ targets:
   - name: Linux_android complex_layout_android__scroll_smoothness
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -1303,7 +1301,6 @@ targets:
   - name: Linux_android complex_layout_scroll_perf__devtools_memory
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -1322,7 +1319,6 @@ targets:
   - name: Linux_android complex_layout_semantics_perf
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -2370,7 +2366,6 @@ targets:
   - name: Mac_android complex_layout__start_up
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -2389,7 +2384,6 @@ targets:
   - name: Mac_android complex_layout_scroll_perf__memory
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -2409,7 +2403,6 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
-    bringup: true
     properties:
       tags: >
         ["devicelab","android","mac"]
@@ -2817,7 +2810,6 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
-    bringup: true
     properties:
       tags: >
         ["devicelab","ios","mac"]
@@ -2836,7 +2828,6 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
-    bringup: true
     properties:
       tags: >
         ["devicelab","ios","mac"]
@@ -2855,7 +2846,6 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
-    bringup: true
     properties:
       tags: >
         ["devicelab","ios","mac"]
@@ -3802,7 +3792,6 @@ targets:
   - name: Windows_android complex_layout_win__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
