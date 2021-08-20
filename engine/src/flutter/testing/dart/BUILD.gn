@@ -13,6 +13,7 @@ tests = [
   "compositing_test.dart",
   "dart_test.dart",
   "encoding_test.dart",
+  "fragment_shader_test.dart",
   "geometry_test.dart",
   "gesture_settings_test.dart",
   "gradient_test.dart",

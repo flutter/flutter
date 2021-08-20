@@ -33,13 +33,40 @@ Support for textures, control flow, and structured types is planned, but not cur
 
 ## Testing
 
-## Exception Tests
+### Exception Tests
 
 These tests rely on the `.spvasm` (SPIR-V Assembly)  and `.glsl` files contained under `test/exception_shaders` in this directory. They are compiled to binary SPIR-V using `spirv-asm`, from the SwiftShader dependency. They are tested by testing/dart/spirv_exception_test.dart as part of the normal suite of dart tests. The purpose of these tests is to exercise every explicit failure path for shader transpilation. Each `glsl` or `spvasm` file should include a comment describing the failure that it is testing. The given files should be valid apart from the single failure case they are testing.
 
-## Pixel Tests
+To test the exception tests directly: `./testing/run_tests.py --type dart --dart-filter spirv_exception_test.dart`
 
-Pixel test are not yet checked in, and should run as part of unit-testing for each implementation of `dart:ui`. These tests aim to validate the correctness of transpilation to each target language. Each shader should render the color green #00FF00 for a correct transpilation, and any other color for failure. They will be a combination of `.spvasm` files and more-readable GLSL files that are compiled to SPIR-V via `glslang`, provided by the SwiftShader dependency. Information for pixel tests will be expanded in a follow-up PR.
+### Pixel Tests
 
-These tests will be able to be run alone by executing `./ui_unittests` in the build-output directory.
+Pixel tests should run as part of unit-testing for each implementation of `dart:ui`. Currently, FragmentShader is only supported in C++. These tests aim to validate the correctness of transpilation to each target language. Each shader should render the color green for a correct transpilation, and any other color for failure. They will be a GLSL files that are compiled to SPIR-V via `shaderc`. Therefor, the `fragColor` should resolve to `vec4(0.0, 1.0, 0.0, 1.0)`
+for all tests.
 
+In each test, the uniform `a` is initialized with the value of 1.0.
+This is important so that expressions are not simplified during GLSL to SPIR-V compilation, which may result in the removal of the op being tested.
+
+To test the pixel tests directly: `./testing/run_tests.py --type dart --dart-filter fragment_shader_test.dart`
+
+#### A Note on Test Isolation
+
+Even the simplest GLSL program tests several instructions, so no test us completely isolated
+to a single op. Also, some of the GLSL 450 op tests will use addition in subtraction, along with the
+actual op being tested. However, the GLSL program for each test file is kept as simple as possible,
+to satisfy these conditions: pass if the op works, and fail if the op does not work. In some tests,
+it is sufficient to only call the GLSL op once, while other may need more calls to more completelty
+test the op. Many ops support scalars, vectors, or a combination as parameters. Most tests default
+to using scalars as params, but vec2, vec3, and vec4 parameters are also tested.
+
+- vec2 is tested as a paramter in glsl_op_normalize.glsl
+- vec3 is tested as a parameter in glsl_op_cross.glsl
+- vec4 is tested as a parameter in glsl_op_length.glsl
+
+### Adding New Tests
+
+To add a new test, add a glsl (fragment shader tests) or spvasm (spirv exception tests) src file to a `lib/spirv/test/` subfolder, and add the file as a source to the corresponding `BUILD.gn`.
+
+- New files in `exception_shaders` are automatically tested in `testing/dart/spirv_exception_test`.
+- New files in `supported_op_shaders` and `supported_glsl_op_shaders` are automatically tested in `testing/dart/fragment_shader_test`.
+- New files in `general_shaders` are not automatically tested and must add a new manual test case in `testing/dart/fragment_shader_test`.
