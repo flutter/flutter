@@ -65,9 +65,9 @@ Future<void> _kDefaultDartDevelopmentServiceStarter(
 ) async {
   await device.dds.startDartDevelopmentService(
     observatoryUri,
-    0,
-    true,
-    disableServiceAuthCodes,
+    hostPort: 0,
+    ipv6: true,
+    disableServiceAuthCodes: disableServiceAuthCodes,
     logger: globals.logger,
   );
 }
