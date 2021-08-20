@@ -381,7 +381,7 @@ deps = {
    Var('fuchsia_git') + '/third_party/libjpeg-turbo' + '@' + '0fb821f3b2e570b2783a94ccd9a2fb1f4916ae9f',
 
   'src/third_party/libpng':
-   Var('flutter_git') + '/third_party/libpng' + '@' + 'afda123a503bdc41df13f86316cf5f83bc204761',
+   Var('flutter_git') + '/third_party/libpng' + '@' + '45c760458b4a83d567cc42d21bd79a3b3fe21815',
 
   'src/third_party/libwebp':
    Var('chromium_git') + '/webm/libwebp.git' + '@' + '1.2.0',
