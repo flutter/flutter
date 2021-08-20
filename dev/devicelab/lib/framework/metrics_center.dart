@@ -78,12 +78,15 @@ List<MetricPoint> parse(Map<String, dynamic> resultsJson) {
 
 /// Upload test metrics to metrics center.
 Future<void> uploadToMetricsCenter(String? resultsPath, String? commitTime) async {
+  print ('commit time: $commitTime');
   int commitTimeSinceEpoch;
   if (resultsPath == null) {
     return;
   }
   if (commitTime != null) {
+    print ('before parse commitTime: $commitTime');
     commitTimeSinceEpoch = 1000 * int.parse(commitTime);
+    print ('after parse commitTime: $commitTime');
   } else {
     commitTimeSinceEpoch = DateTime.now().millisecondsSinceEpoch;
   }

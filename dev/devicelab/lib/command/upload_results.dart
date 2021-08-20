@@ -33,6 +33,7 @@ class UploadResultsCommand extends Command<void> {
 
   @override
   Future<void> run() async {
+    print ('-------beginning of metric upload.--------')
     final String? resultsPath = argResults!['results-file'] as String?;
     final String? serviceAccountTokenFile = argResults!['service-account-token-file'] as String?;
     final String? testFlakyStatus = argResults!['test-flaky'] as String?;
@@ -41,12 +42,14 @@ class UploadResultsCommand extends Command<void> {
     final String? testStatus = argResults!['test-status'] as String?;
     final String? commitTime = argResults!['commit-time'] as String?;
 
+    print ('-------args loaded.--------')
     // Upload metrics to metrics_center from test runner when `commitTime` is specified. This
     // is mainly for testing purpose.
     // The upload step will be skipped from cocoon once this is validated.
     // TODO(keyong): remove try block to block test when this is validated to work https://github.com/flutter/flutter/issues/88484
     try {
       if (commitTime != null) {
+        print ('-------before calling upload.--------')
         await uploadToMetricsCenter(resultsPath, commitTime);
         print('Successfully uploaded metrics to metrics center');
       }
