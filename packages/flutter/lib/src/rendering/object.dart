@@ -767,6 +767,30 @@ class SemanticsHandle {
   }
 }
 
+/// An interface for controlling a rendering pipeline.
+///
+/// This class provides an interface for driving the rendering pipeline and
+/// stores the state about which render objects have requested to be visited
+/// in each stage of the pipeline. To flush the pipeline, call the following
+/// functions in order:
+///
+/// 1. [flushLayout] updates any render objects that need to compute their
+///    layout. During this phase, the size and position of each render
+///    object is calculated. Render objects might dirty their painting or
+///    compositing state during this phase.
+/// 2. [flushCompositingBits] updates any render objects that have dirty
+///    compositing bits. During this phase, each render object learns whether
+///    any of its children require compositing. This information is used during
+///    the painting phase when selecting how to implement visual effects such as
+///    clipping. If a render object has a composited child, its needs to use a
+///    [Layer] to create the clip in order for the clip to apply to the
+///    composited child (which will be painted into its own [Layer]).
+/// 3. [flushPaint] visits any render objects that need to paint. During this
+///    phase, render objects get a chance to record painting commands into
+///    [PictureLayer]s and construct other composited [Layer]s.
+/// 4. Finally, if semantics are enabled, [flushSemantics] will compile the
+///    semantics for the render objects. This semantic information is used by
+///    assistive technology to improve the accessibility of the render tree.
 abstract class RenderPipeline {
   void scheduleLayoutForRenderObject(RenderObject renderObject);
 
@@ -848,7 +872,7 @@ abstract class RenderPipeline {
 /// are visible on screen. You can create other pipeline owners to manage
 /// off-screen objects, which can flush their pipelines independently of the
 /// on-screen render objects.
-abstract class PipelineOwner {
+abstract class PipelineOwner implements RenderPipeline {
   /// Creates a pipeline owner.
   ///
   /// Typically created by the binding (e.g., [RendererBinding]), but can be
@@ -907,6 +931,10 @@ abstract class PipelineOwner {
     _rootNode?.attach(this);
   }
 
+  @override
+  bool get layoutEnabled => renderPipeline.layoutEnabled;
+
+  @override
   void scheduleLayoutForRenderObject(RenderObject renderObject) => renderPipeline.scheduleLayoutForRenderObject(renderObject);
 
   /// Whether this pipeline is currently in the layout phase.
@@ -925,6 +953,7 @@ abstract class PipelineOwner {
   /// appear on screen in their up-to-date locations.
   ///
   /// See [RendererBinding] for an example of how this function is used.
+  @override
   void flushLayout() {
     if (!kReleaseMode) {
       Timeline.startSync('Layout', arguments: timelineArgumentsIndicatingLandmarkEvent);
@@ -972,6 +1001,7 @@ abstract class PipelineOwner {
     }
   }
 
+  @override
   void scheduleCompositingBitsUpdateForRenderObject(RenderObject renderObject) {
     renderPipeline.scheduleCompositingBitsUpdateForRenderObject(renderObject);
   }
@@ -980,6 +1010,7 @@ abstract class PipelineOwner {
   ///
   /// Called as part of the rendering pipeline after [flushLayout] and before
   /// [flushPaint].
+  @override
   void flushCompositingBits() {
     if (!kReleaseMode) {
       Timeline.startSync('Compositing bits');
@@ -999,6 +1030,7 @@ abstract class PipelineOwner {
   bool get debugDoingPaint => _debugDoingPaint;
   bool _debugDoingPaint = false;
 
+  @override
   void schedulePaintForRenderObject(RenderObject renderObject) {
     renderPipeline.schedulePaintForRenderObject(renderObject);
   }
@@ -1010,6 +1042,7 @@ abstract class PipelineOwner {
   /// scene is composited with up-to-date display lists for every render object.
   ///
   /// See [RendererBinding] for an example of how this function is used.
+  @override
   void flushPaint() {
     if (!kReleaseMode) {
       Timeline.startSync('Paint', arguments: timelineArgumentsIndicatingLandmarkEvent);
@@ -1031,9 +1064,11 @@ abstract class PipelineOwner {
     }
   }
 
+  @override
   void scheduleSemanticsUpdateForRenderObject(RenderObject renderObject) {
     renderPipeline.scheduleSemanticsUpdateForRenderObject(renderObject);
   }
+  @override
   void unscheduleSemanticsUpdateForRenderObject(RenderObject renderObject) {
     renderPipeline.unscheduleSemanticsUpdateForRenderObject(renderObject);
   }
@@ -1050,6 +1085,7 @@ abstract class PipelineOwner {
   /// [RenderObject.scheduleInitialSemantics] has been called.
   ///
   /// See [RendererBinding] for an example of how this function is used.
+  @override
   void flushSemantics() {
     if (semanticsOwner == null)
       return;
