@@ -14,12 +14,15 @@ import subprocess
 import platform
 
 SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
-ANDROID_HOME = os.path.join(SCRIPT_PATH, '..', '..', '..', 'third_party', 'android_tools', 'sdk')
+ANDROID_HOME = os.path.normpath(os.path.join(SCRIPT_PATH, '..', '..', '..',
+    'third_party', 'android_tools', 'sdk'))
 
 if platform.system() == 'Darwin':
-  JAVA_HOME = os.path.join(SCRIPT_PATH, '..', '..', '..', 'third_party', 'java', 'openjdk', 'Contents', 'Home')
+  JAVA_HOME = os.path.normpath(os.path.join(SCRIPT_PATH, '..', '..', '..',
+      'third_party', 'java', 'openjdk', 'Contents', 'Home'))
 else:
-  JAVA_HOME = os.path.join(SCRIPT_PATH, '..', '..', '..', 'third_party', 'java', 'openjdk')
+  JAVA_HOME = os.path.normpath(os.path.join(SCRIPT_PATH, '..', '..', '..',
+      'third_party', 'java', 'openjdk'))
 
 def main():
   if not os.path.isdir(ANDROID_HOME):
