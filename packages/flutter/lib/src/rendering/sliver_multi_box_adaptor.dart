@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/src/semantics/semantics.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';
@@ -126,8 +125,6 @@ mixin KeepAliveParentDataMixin implements ParentData {
   /// Whether the widget is currently being kept alive, i.e. has [keepAlive] set
   /// to true and is offscreen.
   bool get keptAlive;
-
-  RenderSliverBoxChildManager? get childManager;
 }
 
 /// This class exists to dissociate [KeepAlive] from [RenderSliverMultiBoxAdaptor].
@@ -151,10 +148,6 @@ class SliverMultiBoxAdaptorParentData extends SliverLogicalParentData with Conta
   @override
   bool get keptAlive => _keptAlive;
   bool _keptAlive = false;
-
-  @override
-  RenderSliverBoxChildManager? get childManager => _childManager;
-  RenderSliverBoxChildManager? _childManager;
 
   @override
   String toString() => 'index=$index; ${keepAlive == true ? "keepAlive; " : ""}${super.toString()}';
@@ -193,11 +186,17 @@ class _KeepAlivePipeline implements RenderPipeline {
     final List<RenderSliverMultiBoxAdaptor> dirtyNodes = _dirtyNodes..sort((RenderObject a, RenderObject b) => a.depth - b.depth);
     _dirtyNodes = <RenderSliverMultiBoxAdaptor>[];
     for (final RenderSliverMultiBoxAdaptor dirtyNode in dirtyNodes) {
-      //if (dirtyNode.owner != this)
-      //  continue;
       assert(dirtyNode.depth > renderSliver.depth);
+
+      // Skip a node if it requested relayout but got subsequently detached from
+      // this pipeline owner.
+      // If a node is newly attached to this pipeline owner it always requests
+      // relayout.
+      if (dirtyNode.owner != renderSliver._keepAlivePipelineOwner) {
+        continue;
+      }
       dirtyNode._keepAlivePipelineOwner.flushLayout();
-      //dirtyNode._sweepKeepAliveBucket();
+      dirtyNode._sweepKeepAliveBucket();
     }
     // Sweeping the descendant nodes should not redirty any other descendants:
     // we're only removing render objects no longer kept alive.
@@ -224,7 +223,7 @@ class _KeepAlivePipeline implements RenderPipeline {
   void flushSemantics() { }
 
   @override
-  bool get layoutEnabled => false;
+  bool get doesLayout => false;
 }
 
 /// A sliver with multiple box children.
@@ -439,6 +438,9 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
       super.adoptChild(child);
       child.detach();
 
+      // _KeepAlivePipelineOwner's flushLayout method should only sweep
+      // _keepAliveBucket and removeChild. It should not call this method.
+      assert(owner is! _KeepAlivePipelineOwner);
       childParentData._keptAlive = true;
       child.attach(_keepAlivePipelineOwner);
     } else {
@@ -451,7 +453,10 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    markNeedsLayout();
+    // Calling markNeedsLayout does not guarantee this node will be added to the
+    // pipeline's dirty list, as markNeedsLayout skips the operation if
+    // _needsLayout is true, which is specific to _RootPipeline.
+    owner.scheduleLayoutForRenderObject(this);
     for (final RenderBox child in _keepAliveBucket.values) {
       child.attach(owner);
     }

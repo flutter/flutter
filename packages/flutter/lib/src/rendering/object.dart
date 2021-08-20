@@ -20,6 +20,9 @@ export 'package:flutter/foundation.dart' show FlutterError, InformationCollector
 export 'package:flutter/gestures.dart' show HitTestEntry, HitTestResult;
 export 'package:flutter/painting.dart';
 
+// Examples can assume:
+// class MyRenderPipeline extends RenderPipeline {  }
+
 /// Base class for data associated with a [RenderObject] by its parent.
 ///
 /// Some render objects wish to store data on their children, such as the
@@ -862,22 +865,75 @@ abstract class RenderPipeline {
   /// See [RendererBinding] for an example of how this function is used.
   void flushSemantics();
 
-  /// Whether the implementation of the [flushLayout] method makes the dirty
-  /// render objects' layout up-to-date.
-  bool get layoutEnabled => true;
+  /// Whether calling the [flushLayout] method brings the dirty render objects'
+  /// layout up-to-date.
+  ///
+  /// The property should always return the same value.
+  ///
+  /// See also:
+  ///  * [RenderObject.hasStaleLayout], which is a shorthand for this property.
+  bool get doesLayout => true;
 }
 
 /// The pipeline owner that manages a [RenderPipeline].
 ///
+/// {@macro flutter.rendering.RenderPipeline}
+///
 /// This class is a wrapper around a [RenderPipeline] [renderPipeline]:
 /// it implements the [RenderPipeline] interface, providing additional
-/// [Timeline] traces and debug asserts, and eventually invokes
+/// [Timeline] traces and debug asserts, and ultimately invokes
 /// [renderPipeline]'s implementation.
 ///
 /// The [RendererBinding] holds the pipeline owner for the render objects that
 /// are visible on screen. You can create other pipeline owners to manage
 /// off-screen objects, which can flush their pipelines independently of the
 /// on-screen render objects.
+///
+/// ### Creating a [PipelineOwner] Subclass
+///
+/// The behavior of a [PipelineOwner] as a [RenderPipeline] is controlled by its
+/// [renderPipeline] property, so a [PipelineOwner] subclass typically only
+/// have to override [renderPipeline] to return a different workhorse
+/// [RenerPipeline]:
+///
+/// ```dart
+/// class MyPipelineOwner extends PipelineOwner {
+///   MyPipelineOwner({
+///     VoidCallback? onNeedVisualUpdate,
+///     VoidCallback? onSemanticsOwnerCreated,
+///     VoidCallback? onSemanticsOwnerDisposed,
+///   }) : super.construct(
+///       onNeedVisualUpdate,
+///       onSemanticsOwnerCreated,
+///       onSemanticsOwnerDisposed,
+///     );
+///
+///   @override
+///   final RenderPipeline renderPipeline = BogusPipeline();
+/// }
+///
+/// class BogusPipeline extends RenderPipeline {
+///   final List<RenderObject> renderObjectsNeedingLayout = <RenderObject>[];
+///   @override
+///   void scheduleLayoutForRenderObject(RenderObject renderObject) {
+///     print('$renderObject marked as needing layout.');
+///     renderObjectsNeedingLayout.add(renderObject);
+///   }
+///
+///   @override
+///   void flushLayout() {
+///     print('laying out $renderObjectsNeedingLayout.');
+///     renderObjectsNeedingLayout.clear();
+///   }
+///
+///   // Return false since the flushLayout implementation does not actually
+///   // layout dirty nodes.
+///   @override
+///   bool get doesLayout => false;
+///
+///   ...
+/// }
+/// ```
 abstract class PipelineOwner implements RenderPipeline {
   /// Creates a pipeline owner.
   ///
@@ -941,7 +997,7 @@ abstract class PipelineOwner implements RenderPipeline {
   }
 
   @override
-  bool get layoutEnabled => renderPipeline.layoutEnabled;
+  bool get doesLayout => renderPipeline.doesLayout;
 
   @override
   void scheduleLayoutForRenderObject(RenderObject renderObject) => renderPipeline.scheduleLayoutForRenderObject(renderObject);
@@ -1266,7 +1322,7 @@ class _RootPipeline implements RenderPipeline {
   }
 
   @override
-  bool get layoutEnabled => true;
+  bool get doesLayout => true;
 }
 
 class _RootPipelineOwner extends PipelineOwner {
@@ -1711,15 +1767,34 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   bool get debugDoingThisLayoutWithCallback => _doingThisLayoutWithCallback;
   bool _doingThisLayoutWithCallback = false;
 
-  /// Whether this render object's layout information is up-to-date, after the
-  /// last layout phase.
+  /// Indicates this render object may have outdated layout information even
+  /// after the layout phase, due to its [owner] ignoring relayout requests or
+  /// skipping laying out dirty nodes.
   ///
-  /// If a parent render object decides to not perform layout on a child
-  /// render object (for example, as an optimization to avoid handling offscreen
-  /// render objects), but still chooses to keep that child in the tree,
-  /// [hasDimensions] must return false for that render object and its
-  /// descendants.
-  bool get hasDimensions => owner?.renderPipeline.layoutEnabled ?? false;
+  /// The layout process of the render tree this render object belongs to is
+  /// typically driven by its [owner]. Some render parents, such as lazy list
+  /// views and stacks, may choose to not layout dirty offscreen children, as a
+  /// performance optimization. It is typically done by attaching these children
+  /// to a special [PipelineOwner] that does not perform layout, or detaching
+  /// these children completely.
+  ///
+  /// It is recommended to verify [hasStaleLayout] is false before attempting
+  /// to access the layout information or paint transform of a render object.
+  ///
+  /// See also:
+  ///
+  ///  * [owner], the [PipelineOwner] that drives the layout process of a render
+  ///    object tree.
+  ///  * [State.mounted], which is a similar check typically performed before
+  ///    accessing a [State]'s properties in a user interaction handler, to
+  ///    ensure the [State] is still in a tree.
+  ///  * [RenderBox.hasSize], which indicates a [RenderBox] has undergone layout
+  ///    but does not guarantee the current layout information is up-to-date.
+  ///  * [debugNeedsLayout], a debug-only flag that indicates a render object's
+  ///    layout information is dirty. A render object may still need layout even
+  ///    if [debugNeedsLayout] is false, as the incoming constraints may have
+  ///    changed.
+  bool get hasStaleLayout => !(owner?.renderPipeline.doesLayout ?? false);
 
   /// The layout constraints most recently supplied by the parent.
   ///

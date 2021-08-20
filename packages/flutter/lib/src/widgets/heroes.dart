@@ -350,7 +350,7 @@ class Hero extends StatefulWidget {
         // is outdated, we can't read its layout information. Keep searching in
         // case there're descendant elements with render objects with up-to-date
         // layout info.
-        if (!(hero.findRenderObject()?.hasDimensions ?? false)) {
+        if (hero.findRenderObject()?.hasStaleLayout ?? true) {
           element.visitChildren(visitor);
           return;
         }
@@ -668,7 +668,7 @@ class _HeroFlight {
       ? manifest.toHero.context.findRenderObject() as RenderBox?
       : null;
     // Try to find the new origin of the toHero, if the flight isn't aborted.
-    final Offset? toHeroOrigin = toHeroBox != null && toHeroBox.hasDimensions && toHeroBox.hasSize
+    final Offset? toHeroOrigin = toHeroBox != null && !toHeroBox.hasStaleLayout && toHeroBox.hasSize
       ? toHeroBox.localToGlobal(Offset.zero, ancestor: manifest.toRoute.subtreeContext?.findRenderObject() as RenderBox?)
       : null;
 

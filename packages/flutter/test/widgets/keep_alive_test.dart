@@ -230,7 +230,6 @@ void main() {
     });
   });
 
-
   testWidgets('KeepAlive with ListView without itemExtent', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(

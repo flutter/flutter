@@ -632,7 +632,7 @@ abstract class InkFeature {
   }
 
   void _paint(Canvas canvas) {
-    if (!referenceBox.hasDimensions) {
+    if (referenceBox.hasStaleLayout) {
       return;
     }
     assert(referenceBox.attached);
