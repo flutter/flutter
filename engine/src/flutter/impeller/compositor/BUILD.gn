@@ -78,6 +78,8 @@ impeller_component("compositor") {
     "../image",
   ]
 
+  deps = [ "//third_party/libtess2" ]
+
   frameworks = [ "Metal.framework" ]
 }
 
@@ -93,6 +95,5 @@ source_set("compositor_unittests") {
     ":compositor",
     "../playground",
     "//flutter/testing:testing_lib",
-    "//third_party/libtess2",
   ]
 }

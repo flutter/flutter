@@ -344,6 +344,7 @@ bool RenderPass::EncodeCommands(Allocator& allocator,
   fml::closure pop_debug_marker = [pass]() { [pass popDebugGroup]; };
   for (const auto& command : commands_) {
     if (command.index_count == 0u) {
+      FML_DLOG(ERROR) << "Zero index count in render pass command.";
       continue;
     }
 
@@ -360,7 +361,7 @@ bool RenderPass::EncodeCommands(Allocator& allocator,
     [pass setFrontFacingWinding:command.winding == WindingOrder::kClockwise
                                     ? MTLWindingClockwise
                                     : MTLWindingCounterClockwise];
-    [pass setCullMode:MTLCullModeBack];
+    [pass setCullMode:MTLCullModeNone];
     if (!bind_stage_resources(command.vertex_bindings, ShaderStage::kVertex)) {
       return false;
     }

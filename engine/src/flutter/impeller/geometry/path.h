@@ -54,7 +54,7 @@ class Path {
   bool UpdateCubicComponentAtIndex(size_t index, CubicPathComponent& cubic);
 
   std::vector<Point> SubdivideAdaptively(
-      const SmoothingApproximation& approximation) const;
+      const SmoothingApproximation& approximation = {}) const;
 
   Rect GetBoundingBox() const;
 

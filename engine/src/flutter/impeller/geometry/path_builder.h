@@ -19,6 +19,8 @@ class PathBuilder {
 
   Path CreatePath() const;
 
+  const Path& GetCurrentPath() const;
+
   PathBuilder& MoveTo(Point point, bool relative = false);
 
   PathBuilder& Close();
@@ -49,6 +51,8 @@ class PathBuilder {
   PathBuilder& AddRoundedRect(Rect rect, Scalar radius);
 
   PathBuilder& AddCircle(const Point& center, Scalar radius);
+
+  PathBuilder& AddOval(const Rect& rect);
 
   struct RoundingRadii {
     Scalar topLeft = 0.0;
