@@ -47,36 +47,9 @@ import 'theme_data.dart';
 /// button will be disabled.
 ///
 /// {@tool dartpad --template=stateful_widget_scaffold}
-///
 /// This sample produces an enabled and a disabled ElevatedButton.
 ///
-/// ```dart
-/// @override
-/// Widget build(BuildContext context) {
-///   final ButtonStyle style =
-///     ElevatedButton.styleFrom(textStyle: const TextStyle(fontSize: 20));
-///
-///   return Center(
-///     child: Column(
-///       mainAxisSize: MainAxisSize.min,
-///       children: <Widget>[
-///         ElevatedButton(
-///            style: style,
-///            onPressed: null,
-///            child: const Text('Disabled'),
-///         ),
-///         const SizedBox(height: 30),
-///         ElevatedButton(
-///           style: style,
-///           onPressed: () {},
-///           child: const Text('Enabled'),
-///         ),
-///       ],
-///     ),
-///   );
-/// }
-///
-/// ```
+/// ** See code in examples/api/lib/material/elevated_button/elevated_button.0.dart **
 /// {@end-tool}
 ///
 /// See also:

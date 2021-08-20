@@ -48,70 +48,21 @@ import 'transitions.dart';
 /// notification, or use a [NestedScrollView].
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
-///
 /// This example demonstrates how to use a [NotificationListener] to manipulate
 /// the placement of a [GlowingOverscrollIndicator] when building a
 /// [CustomScrollView]. Drag the scrollable to see the bounds of the overscroll
 /// indicator.
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   final double leadingPaintOffset = MediaQuery.of(context).padding.top + AppBar().preferredSize.height;
-///   return NotificationListener<OverscrollIndicatorNotification>(
-///     onNotification: (OverscrollIndicatorNotification notification) {
-///       if (notification.leading) {
-///         notification.paintOffset = leadingPaintOffset;
-///       }
-///       return false;
-///     },
-///     child: CustomScrollView(
-///       slivers: <Widget>[
-///         const SliverAppBar(title: Text('Custom PaintOffset')),
-///         SliverToBoxAdapter(
-///           child: Container(
-///             color: Colors.amberAccent,
-///             height: 100,
-///             child: const Center(child: Text('Glow all day!')),
-///           ),
-///         ),
-///         const SliverFillRemaining(child: FlutterLogo()),
-///       ],
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/overscroll_indicator/glowing_overscroll_indicator.0.dart **
 /// {@end-tool}
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
-///
 /// This example demonstrates how to use a [NestedScrollView] to manipulate the
 /// placement of a [GlowingOverscrollIndicator] when building a
 /// [CustomScrollView]. Drag the scrollable to see the bounds of the overscroll
 /// indicator.
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return NestedScrollView(
-///     headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-///       return const <Widget>[
-///         SliverAppBar(title: Text('Custom NestedScrollViews')),
-///       ];
-///     },
-///     body: CustomScrollView(
-///       slivers: <Widget>[
-///         SliverToBoxAdapter(
-///           child: Container(
-///             color: Colors.amberAccent,
-///             height: 100,
-///             child: const Center(child: Text('Glow all day!')),
-///           ),
-///         ),
-///         const SliverFillRemaining(child: FlutterLogo()),
-///       ],
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/overscroll_indicator/glowing_overscroll_indicator.1.dart **
 /// {@end-tool}
 ///
 /// See also:

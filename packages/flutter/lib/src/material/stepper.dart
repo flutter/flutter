@@ -124,43 +124,8 @@ class Step {
 ///
 /// {@tool sample --template=stateful_widget_scaffold_center}
 ///
-/// ```dart
-/// int _index = 0;
 ///
-/// @override
-/// Widget build(BuildContext context) {
-///   return Stepper(
-///     currentStep: _index,
-///     onStepCancel: () {
-///       if (_index > 0) {
-///         setState(() { _index -= 1; });
-///       }
-///     },
-///     onStepContinue: () {
-///       if (_index <= 0) {
-///         setState(() { _index += 1; });
-///       }
-///     },
-///     onStepTapped: (int index) {
-///       setState(() { _index = index; });
-///     },
-///     steps: <Step>[
-///       Step(
-///         title: const Text('Step 1 title'),
-///         content: Container(
-///           alignment: Alignment.centerLeft,
-///           child: const Text('Content for Step 1')
-///         ),
-///       ),
-///       const Step(
-///         title: Text('Step 2 title'),
-///         content: Text('Content for Step 2'),
-///       ),
-///     ],
-///   );
-/// }
-/// ```
-///
+/// ** See code in examples/api/lib/material/stepper/stepper.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -241,43 +206,7 @@ class Stepper extends StatefulWidget {
   /// {@tool dartpad --template=stateless_widget_scaffold}
   /// Creates a stepper control with custom buttons.
   ///
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   return Stepper(
-  ///     controlsBuilder:
-  ///       (BuildContext context, { VoidCallback? onStepContinue, VoidCallback? onStepCancel }) {
-  ///          return Row(
-  ///            children: <Widget>[
-  ///              TextButton(
-  ///                onPressed: onStepContinue,
-  ///                child: const Text('NEXT'),
-  ///              ),
-  ///              TextButton(
-  ///                onPressed: onStepCancel,
-  ///                child: const Text('CANCEL'),
-  ///              ),
-  ///            ],
-  ///          );
-  ///       },
-  ///     steps: const <Step>[
-  ///       Step(
-  ///         title: Text('A'),
-  ///         content: SizedBox(
-  ///           width: 100.0,
-  ///           height: 100.0,
-  ///         ),
-  ///       ),
-  ///       Step(
-  ///         title: Text('B'),
-  ///         content: SizedBox(
-  ///           width: 100.0,
-  ///           height: 100.0,
-  ///         ),
-  ///       ),
-  ///     ],
-  ///   );
-  /// }
-  /// ```
+  /// ** See code in examples/api/lib/material/stepper/stepper.controls_builder.0.dart **
   /// {@end-tool}
   final ControlsWidgetBuilder? controlsBuilder;
 

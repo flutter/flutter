@@ -759,45 +759,7 @@ abstract class RouteTransitionRecord {
 /// removes or adds routes without animated transitions and puts the removed
 /// routes at the top of the list.
 ///
-/// ```dart imports
-/// import 'package:flutter/widgets.dart';
-/// ```
-///
-/// ```dart
-/// class NoAnimationTransitionDelegate extends TransitionDelegate<void> {
-///   @override
-///   Iterable<RouteTransitionRecord> resolve({
-///     required List<RouteTransitionRecord> newPageRouteHistory,
-///     required Map<RouteTransitionRecord?, RouteTransitionRecord> locationToExitingPageRoute,
-///     required Map<RouteTransitionRecord?, List<RouteTransitionRecord>> pageRouteToPagelessRoutes,
-///   }) {
-///     final List<RouteTransitionRecord> results = <RouteTransitionRecord>[];
-///
-///     for (final RouteTransitionRecord pageRoute in newPageRouteHistory) {
-///       if (pageRoute.isWaitingForEnteringDecision) {
-///         pageRoute.markForAdd();
-///       }
-///       results.add(pageRoute);
-///
-///     }
-///     for (final RouteTransitionRecord exitingPageRoute in locationToExitingPageRoute.values) {
-///       if (exitingPageRoute.isWaitingForExitingDecision) {
-///        exitingPageRoute.markForRemove();
-///        final List<RouteTransitionRecord>? pagelessRoutes = pageRouteToPagelessRoutes[exitingPageRoute];
-///        if (pagelessRoutes != null) {
-///          for (final RouteTransitionRecord pagelessRoute in pagelessRoutes) {
-///             pagelessRoute.markForRemove();
-///           }
-///        }
-///       }
-///       results.add(exitingPageRoute);
-///
-///     }
-///     return results;
-///   }
-/// }
-///
-/// ```
+/// ** See code in examples/api/lib/widgets/navigator/transition_delegate.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -1297,136 +1259,7 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
 /// Run this example with `flutter run --route=/signup` to start it with
 /// the signup flow instead of on the home page.
 ///
-/// ```dart imports
-/// import 'package:flutter/material.dart';
-/// ```
-///
-/// ```dart main
-/// void main() => runApp(const MyApp());
-/// ```
-///
-/// ```dart
-/// class MyApp extends StatelessWidget {
-///   const MyApp({Key? key}) : super(key: key);
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return MaterialApp(
-///       title: 'Flutter Code Sample for Navigator',
-///       // MaterialApp contains our top-level Navigator
-///       initialRoute: '/',
-///       routes: <String, WidgetBuilder>{
-///         '/': (BuildContext context) => const HomePage(),
-///         '/signup': (BuildContext context) => const SignUpPage(),
-///       },
-///     );
-///   }
-/// }
-///
-/// class HomePage extends StatelessWidget {
-///   const HomePage({Key? key}) : super(key: key);
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return DefaultTextStyle(
-///       style: Theme.of(context).textTheme.headline4!,
-///       child: Container(
-///         color: Colors.white,
-///         alignment: Alignment.center,
-///         child: const Text('Home Page'),
-///       ),
-///     );
-///   }
-/// }
-///
-/// class CollectPersonalInfoPage extends StatelessWidget {
-///   const CollectPersonalInfoPage({Key? key}) : super(key: key);
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return DefaultTextStyle(
-///       style: Theme.of(context).textTheme.headline4!,
-///       child: GestureDetector(
-///         onTap: () {
-///           // This moves from the personal info page to the credentials page,
-///           // replacing this page with that one.
-///           Navigator.of(context)
-///             .pushReplacementNamed('signup/choose_credentials');
-///         },
-///         child: Container(
-///           color: Colors.lightBlue,
-///           alignment: Alignment.center,
-///           child: const Text('Collect Personal Info Page'),
-///         ),
-///       ),
-///     );
-///   }
-/// }
-///
-/// class ChooseCredentialsPage extends StatelessWidget {
-///   const ChooseCredentialsPage({
-///     Key? key,
-///     required this.onSignupComplete,
-///   }) : super(key: key);
-///
-///   final VoidCallback onSignupComplete;
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return GestureDetector(
-///       onTap: onSignupComplete,
-///       child: DefaultTextStyle(
-///         style: Theme.of(context).textTheme.headline4!,
-///         child: Container(
-///           color: Colors.pinkAccent,
-///           alignment: Alignment.center,
-///           child: const Text('Choose Credentials Page'),
-///         ),
-///       ),
-///     );
-///   }
-/// }
-///
-/// class SignUpPage extends StatelessWidget {
-///   const SignUpPage({Key? key}) : super(key: key);
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     // SignUpPage builds its own Navigator which ends up being a nested
-///     // Navigator in our app.
-///     return Navigator(
-///       initialRoute: 'signup/personal_info',
-///       onGenerateRoute: (RouteSettings settings) {
-///         WidgetBuilder builder;
-///         switch (settings.name) {
-///           case 'signup/personal_info':
-///           // Assume CollectPersonalInfoPage collects personal info and then
-///           // navigates to 'signup/choose_credentials'.
-///             builder = (BuildContext context) => const CollectPersonalInfoPage();
-///             break;
-///           case 'signup/choose_credentials':
-///           // Assume ChooseCredentialsPage collects new credentials and then
-///           // invokes 'onSignupComplete()'.
-///             builder = (BuildContext _) => ChooseCredentialsPage(
-///               onSignupComplete: () {
-///                 // Referencing Navigator.of(context) from here refers to the
-///                 // top level Navigator because SignUpPage is above the
-///                 // nested Navigator that it created. Therefore, this pop()
-///                 // will pop the entire "sign up" journey and return to the
-///                 // "/" route, AKA HomePage.
-///                 Navigator.of(context).pop();
-///               },
-///             );
-///             break;
-///           default:
-///             throw Exception('Invalid route: ${settings.name}');
-///         }
-///         return MaterialPageRoute<void>(builder: builder, settings: settings);
-///       },
-///     );
-///   }
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/navigator/navigator.0.dart **
 /// {@end-tool}
 ///
 /// [Navigator.of] operates on the nearest ancestor [Navigator] from the given
@@ -2162,30 +1995,9 @@ class Navigator extends StatefulWidget {
   /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
   /// {@tool dartpad --template=stateful_widget_material}
-  ///
   /// Typical usage is as follows:
   ///
-  /// ```dart
-  /// static Route<void> _myRouteBuilder(BuildContext context, Object? arguments) {
-  ///   return MaterialPageRoute<void>(
-  ///     builder: (BuildContext context) => const MyStatefulWidget(),
-  ///   );
-  /// }
-  ///
-  /// @override
-  /// Widget build(BuildContext context) {
-  ///   return Scaffold(
-  ///     appBar: AppBar(
-  ///       title: const Text('Sample Code'),
-  ///     ),
-  ///     floatingActionButton: FloatingActionButton(
-  ///       onPressed: () => Navigator.restorablePush(context, _myRouteBuilder),
-  ///       tooltip: 'Increment Counter',
-  ///       child: const Icon(Icons.add),
-  ///     ),
-  ///   );
-  /// }
-  /// ```
+  /// ** See code in examples/api/lib/widgets/navigator/navigator.restorable_push.0.dart **
   /// {@end-tool}
   @optionalTypeArgs
   static String restorablePush<T extends Object?>(BuildContext context, RestorableRouteBuilder<T> routeBuilder, {Object? arguments}) {
@@ -2262,30 +2074,9 @@ class Navigator extends StatefulWidget {
   /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
   /// {@tool dartpad --template=stateful_widget_material}
-  ///
   /// Typical usage is as follows:
   ///
-  /// ```dart
-  /// static Route<void> _myRouteBuilder(BuildContext context, Object? arguments) {
-  ///   return MaterialPageRoute<void>(
-  ///     builder: (BuildContext context) => const MyStatefulWidget(),
-  ///   );
-  /// }
-  ///
-  /// @override
-  /// Widget build(BuildContext context) {
-  ///   return Scaffold(
-  ///     appBar: AppBar(
-  ///       title: const Text('Sample Code'),
-  ///     ),
-  ///     floatingActionButton: FloatingActionButton(
-  ///       onPressed: () => Navigator.restorablePushReplacement(context, _myRouteBuilder),
-  ///       tooltip: 'Increment Counter',
-  ///       child: const Icon(Icons.add),
-  ///     ),
-  ///   );
-  /// }
-  /// ```
+  /// ** See code in examples/api/lib/widgets/navigator/navigator.restorable_push_replacement.0.dart **
   /// {@end-tool}
   @optionalTypeArgs
   static String restorablePushReplacement<T extends Object?, TO extends Object?>(BuildContext context, RestorableRouteBuilder<T> routeBuilder, { TO? result, Object? arguments }) {
@@ -2368,34 +2159,9 @@ class Navigator extends StatefulWidget {
   /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
   /// {@tool dartpad --template=stateful_widget_material}
-  ///
   /// Typical usage is as follows:
   ///
-  /// ```dart
-  /// static Route<void> _myRouteBuilder(BuildContext context, Object? arguments) {
-  ///   return MaterialPageRoute<void>(
-  ///     builder: (BuildContext context) => const MyStatefulWidget(),
-  ///   );
-  /// }
-  ///
-  /// @override
-  /// Widget build(BuildContext context) {
-  ///   return Scaffold(
-  ///     appBar: AppBar(
-  ///       title: const Text('Sample Code'),
-  ///     ),
-  ///     floatingActionButton: FloatingActionButton(
-  ///       onPressed: () => Navigator.restorablePushAndRemoveUntil(
-  ///         context,
-  ///         _myRouteBuilder,
-  ///         ModalRoute.withName('/'),
-  ///       ),
-  ///       tooltip: 'Increment Counter',
-  ///       child: const Icon(Icons.add),
-  ///     ),
-  ///   );
-  /// }
-  /// ```
+  /// ** See code in examples/api/lib/widgets/navigator/navigator.restorable_push_and_remove_until.0.dart **
   /// {@end-tool}
   @optionalTypeArgs
   static String restorablePushAndRemoveUntil<T extends Object?>(BuildContext context, RestorableRouteBuilder<T> newRouteBuilder, RoutePredicate predicate, {Object? arguments}) {
@@ -4552,30 +4318,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
   /// {@tool dartpad --template=stateful_widget_material}
-  ///
   /// Typical usage is as follows:
   ///
-  /// ```dart
-  /// static Route<void> _myRouteBuilder(BuildContext context, Object? arguments) {
-  ///   return MaterialPageRoute<void>(
-  ///     builder: (BuildContext context) => const MyStatefulWidget(),
-  ///   );
-  /// }
-  ///
-  /// @override
-  /// Widget build(BuildContext context) {
-  ///   return Scaffold(
-  ///     appBar: AppBar(
-  ///       title: const Text('Sample Code'),
-  ///     ),
-  ///     floatingActionButton: FloatingActionButton(
-  ///       onPressed: () => Navigator.of(context).restorablePush(_myRouteBuilder),
-  ///       tooltip: 'Increment Counter',
-  ///       child: const Icon(Icons.add),
-  ///     ),
-  ///   );
-  /// }
-  /// ```
+  /// ** See code in examples/api/lib/widgets/navigator/navigator_state.restorable_push.0.dart **
   /// {@end-tool}
   @optionalTypeArgs
   String restorablePush<T extends Object?>(RestorableRouteBuilder<T> routeBuilder, {Object? arguments}) {
@@ -4695,32 +4440,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
   /// {@tool dartpad --template=stateful_widget_material}
-  ///
   /// Typical usage is as follows:
   ///
-  /// ```dart
-  /// static Route<void> _myRouteBuilder(BuildContext context, Object? arguments) {
-  ///   return MaterialPageRoute<void>(
-  ///     builder: (BuildContext context) => const MyStatefulWidget(),
-  ///   );
-  /// }
-  ///
-  /// @override
-  /// Widget build(BuildContext context) {
-  ///   return Scaffold(
-  ///     appBar: AppBar(
-  ///       title: const Text('Sample Code'),
-  ///     ),
-  ///     floatingActionButton: FloatingActionButton(
-  ///       onPressed: () => Navigator.of(context).restorablePushReplacement(
-  ///         _myRouteBuilder,
-  ///       ),
-  ///       tooltip: 'Increment Counter',
-  ///       child: const Icon(Icons.add),
-  ///     ),
-  ///   );
-  /// }
-  /// ```
+  /// ** See code in examples/api/lib/widgets/navigator/navigator_state.restorable_push_replacement.0.dart **
   /// {@end-tool}
   @optionalTypeArgs
   String restorablePushReplacement<T extends Object?, TO extends Object?>(RestorableRouteBuilder<T> routeBuilder, { TO? result, Object? arguments }) {
@@ -4803,33 +4525,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
   /// {@tool dartpad --template=stateful_widget_material}
-  ///
   /// Typical usage is as follows:
   ///
-  /// ```dart
-  /// static Route<void> _myRouteBuilder(BuildContext context, Object? arguments) {
-  ///   return MaterialPageRoute<void>(
-  ///     builder: (BuildContext context) => const MyStatefulWidget(),
-  ///   );
-  /// }
-  ///
-  /// @override
-  /// Widget build(BuildContext context) {
-  ///   return Scaffold(
-  ///     appBar: AppBar(
-  ///       title: const Text('Sample Code'),
-  ///     ),
-  ///     floatingActionButton: FloatingActionButton(
-  ///       onPressed: () => Navigator.of(context).restorablePushAndRemoveUntil(
-  ///         _myRouteBuilder,
-  ///         ModalRoute.withName('/'),
-  ///       ),
-  ///       tooltip: 'Increment Counter',
-  ///       child: const Icon(Icons.add),
-  ///     ),
-  ///   );
-  /// }
-  /// ```
+  /// ** See code in examples/api/lib/widgets/navigator/navigator_state.restorable_push_and_remove_until.0.dart **
   /// {@end-tool}
   @optionalTypeArgs
   String restorablePushAndRemoveUntil<T extends Object?>(RestorableRouteBuilder<T> newRouteBuilder, RoutePredicate predicate, {Object? arguments}) {
@@ -5727,166 +5425,7 @@ typedef RouteCompletionCallback<T> = void Function(T result);
 /// This example uses a [RestorableRouteFuture] in the `_MyHomeState` to push a
 /// new `MyCounter` route and to retrieve its return value.
 ///
-/// ```dart imports
-/// import 'package:flutter/material.dart';
-/// ```
-///
-/// ```dart main
-/// void main() => runApp(const MyApp());
-/// ```
-///
-/// ```dart preamble
-/// class MyApp extends StatelessWidget {
-///   const MyApp({Key? key}) : super(key: key);
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return MaterialApp(
-///       restorationScopeId: 'app',
-///       home: Scaffold(
-///         appBar: AppBar(title: const Text('RestorableRouteFuture Example')),
-///         body: const MyHome(),
-///       ),
-///     );
-///   }
-/// }
-/// ```
-///
-/// ```dart
-/// class MyHome extends StatefulWidget {
-///   const MyHome({Key? key}) : super(key: key);
-///
-///   @override
-///   State<MyHome> createState() => _MyHomeState();
-/// }
-///
-/// class _MyHomeState extends State<MyHome> with RestorationMixin {
-///   final RestorableInt _lastCount = RestorableInt(0);
-///   late RestorableRouteFuture<int> _counterRoute;
-///
-///   @override
-///   String get restorationId => 'home';
-///
-///   @override
-///   void initState() {
-///     super.initState();
-///     _counterRoute = RestorableRouteFuture<int>(
-///       onPresent: (NavigatorState navigator, Object? arguments) {
-///         // Defines what route should be shown (and how it should be added
-///         // to the navigator) when `RestorableRouteFuture.present` is called.
-///         return navigator.restorablePush(
-///           _counterRouteBuilder,
-///           arguments: arguments,
-///         );
-///       },
-///       onComplete: (int count) {
-///         // Defines what should happen with the return value when the route
-///         // completes.
-///         setState(() {
-///           _lastCount.value = count;
-///         });
-///       }
-///     );
-///   }
-///
-///   @override
-///   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
-///     // Register the `RestorableRouteFuture` with the state restoration framework.
-///     registerForRestoration(_counterRoute, 'route');
-///     registerForRestoration(_lastCount, 'count');
-///   }
-///
-///   @override
-///   void dispose() {
-///     super.dispose();
-///     _lastCount.dispose();
-///     _counterRoute.dispose();
-///   }
-///
-///   // A static `RestorableRouteBuilder` that can re-create the route during
-///   // state restoration.
-///   static Route<int> _counterRouteBuilder(BuildContext context, Object? arguments) {
-///     return MaterialPageRoute<int>(
-///       builder: (BuildContext context) => MyCounter(
-///         title: arguments!.toString(),
-///       ),
-///     );
-///   }
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return Center(
-///       child: Column(
-///         mainAxisSize: MainAxisSize.min,
-///         children: <Widget>[
-///           Text('Last count: ${_lastCount.value}'),
-///           ElevatedButton(
-///             onPressed: () {
-///               // Show the route defined by the `RestorableRouteFuture`.
-///               _counterRoute.present('Awesome Counter');
-///             },
-///             child: const Text('Open Counter'),
-///           ),
-///         ],
-///       ),
-///     );
-///   }
-/// }
-///
-/// // Widget for the route pushed by the `RestorableRouteFuture`.
-/// class MyCounter extends StatefulWidget {
-///   const MyCounter({Key? key, required this.title}) : super(key: key);
-///
-///   final String title;
-///
-///   @override
-///   State<MyCounter> createState() => _MyCounterState();
-/// }
-///
-/// class _MyCounterState extends State<MyCounter> with RestorationMixin {
-///   final RestorableInt _count = RestorableInt(0);
-///
-///   @override
-///   String get restorationId => 'counter';
-///
-///   @override
-///   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
-///     registerForRestoration(_count, 'count');
-///   }
-///
-///   @override
-///   void dispose() {
-///     super.dispose();
-///     _count.dispose();
-///   }
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return Scaffold(
-///       appBar: AppBar(
-///         title: Text(widget.title),
-///         leading: BackButton(
-///           onPressed: () {
-///             // Return the current count of the counter from this route.
-///             Navigator.of(context).pop(_count.value);
-///           },
-///         ),
-///       ),
-///       body: Center(
-///         child: Text('Count: ${_count.value}'),
-///       ),
-///       floatingActionButton: FloatingActionButton(
-///         child: const Icon(Icons.add),
-///         onPressed: () {
-///           setState(() {
-///             _count.value++;
-///           });
-///         },
-///       ),
-///     );
-///   }
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/navigator/restorable_route_future.0.dart **
 /// {@end-tool}
 class RestorableRouteFuture<T> extends RestorableProperty<String?> {
   /// Creates a [RestorableRouteFuture].
