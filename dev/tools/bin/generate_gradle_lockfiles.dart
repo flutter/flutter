@@ -54,6 +54,11 @@ void main(List<String> arguments) {
       continue;
     }
 
+    if (androidDirectory.parent.childFile('pubspec.yaml').readAsStringSync().contains('deferred-components')) {
+      print('${rootBuildGradle.path} uses deferred components - skipping');
+      continue;
+    }
+
     if (!androidDirectory.parent
         .childDirectory('lib')
         .childFile('main.dart')

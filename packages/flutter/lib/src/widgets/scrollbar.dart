@@ -1550,7 +1550,11 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   }
 
   bool _handleScrollMetricsNotification(ScrollMetricsNotification notification) {
-    if (!widget.notificationPredicate(ScrollUpdateNotification(metrics: notification.metrics, context: notification.context)))
+    if (!widget.notificationPredicate(ScrollUpdateNotification(
+          metrics: notification.metrics,
+          context: notification.context,
+          depth: notification.depth,
+        )))
       return false;
 
     if (showScrollbar) {

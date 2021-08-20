@@ -4,8 +4,6 @@
 
 // @dart = 2.8
 
-import 'dart:io';
-
 import 'package:file/file.dart';
 
 import '../src/common.dart';
@@ -32,8 +30,7 @@ void main() {
 
     await _flutter.run(withDebugger: true, startPaused: true);
     await _flutter.addBreakpoint(_project.breakpointUri, _project.breakpointLine);
-    await _flutter.resume();
-    await _flutter.waitForPause(); // Now we should be on the breakpoint.
+    await _flutter.resume(waitForNextPause: true); // Now we should be on the breakpoint.
 
     expect((await _flutter.getSourceLocation()).line, equals(_project.breakpointLine));
 
@@ -53,5 +50,5 @@ void main() {
     }
 
     await _flutter.stop();
-  }, skip: Platform.isWindows); // Skipping for https://github.com/flutter/flutter/issues/87481
+  });
 }

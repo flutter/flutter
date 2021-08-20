@@ -24,7 +24,8 @@ String testOutputsDirectory =
 typedef ResponseDataCallback = FutureOr<void> Function(Map<String, dynamic>?);
 
 /// Writes a json-serializable data to
-/// [testOutputsDirectory]/`testOutputFilename.json`.
+/// [testOutputsDirectory]/`testOutputFilename_<key>.json`, where key is the
+/// name provided as the report key for the response data.
 ///
 /// This is the default `responseDataCallback` in [integrationDriver].
 Future<void> writeResponseData(
@@ -32,15 +33,20 @@ Future<void> writeResponseData(
   String testOutputFilename = 'integration_response_data',
   String? destinationDirectory,
 }) async {
+  if (data == null) {
+    return;
+  }
   assert(testOutputFilename != null);
   destinationDirectory ??= testOutputsDirectory;
   await fs.directory(destinationDirectory).create(recursive: true);
-  final File file = fs.file(path.join(
-    destinationDirectory,
-    '$testOutputFilename.json',
-  ));
-  final String resultString = _encodeJson(data, true);
-  await file.writeAsString(resultString);
+  for (final String key in data.keys.where((String key) => key != 'screenshots')) {
+    final File file = fs.file(path.join(
+      destinationDirectory,
+      '${testOutputFilename}_$key.json',
+    ));
+    final String resultString = _encodeJson(data[key], true);
+    await file.writeAsString(resultString);
+  }
 }
 
 /// Adaptor to run an integration test using `flutter drive`.
@@ -95,6 +101,6 @@ Future<void> integrationDriver({
 
 const JsonEncoder _prettyEncoder = JsonEncoder.withIndent('  ');
 
-String _encodeJson(Map<String, dynamic>? jsonObject, bool pretty) {
+String _encodeJson(Object? jsonObject, bool pretty) {
   return pretty ? _prettyEncoder.convert(jsonObject) : json.encode(jsonObject);
 }

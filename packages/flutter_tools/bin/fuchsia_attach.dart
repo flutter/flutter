@@ -55,7 +55,7 @@ Future<void> main(List<String> args) async {
   final String packages = '$buildDirectory/dartlang/gen/$path/${name}_dart_library.packages';
   final String outputDill = '$buildDirectory/${name}_tmp.dill';
 
-  // TODO(jonahwilliams): running from fuchsia root hangs hot reload for some reason.
+  // Running from fuchsia root hangs hot reload for some reason.
   // switch to the project root directory and run from there.
   originalWorkingDirectory = globals.fs.currentDirectory.path;
   globals.fs.currentDirectory = path;
@@ -92,7 +92,7 @@ Future<void> main(List<String> args) async {
     '--target',
     targetFile,
     '--target-model',
-    'flutter', // TODO(jonahwilliams): change to flutter_runner when dart SDK rolls
+    'flutter_runner',
     '--output-dill',
     outputDill,
     '--packages',

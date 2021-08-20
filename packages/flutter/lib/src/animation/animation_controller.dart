@@ -572,7 +572,9 @@ class AnimationController extends Animation<double>
         case AnimationBehavior.normal:
           // Since the framework cannot handle zero duration animations, we run it at 5% of the normal
           // duration to limit most animations to a single frame.
-          // TODO(jonahwilliams): determine a better process for setting duration.
+          // Ideally, the framework would be able to handle zero duration animations, however, the common
+          // pattern of an eternally repeating animation might cause an endless loop if it weren't delayed
+          // for at least one frame.
           scale = 0.05;
           break;
         case AnimationBehavior.preserve:
