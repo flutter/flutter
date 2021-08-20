@@ -161,9 +161,9 @@ class Tooltip extends StatefulWidget {
   ///
   /// Only one of [message] and [richMessage] may be non-null.
   final InlineSpan? richMessage;
-  
+
   /// The plain text message for this tooltip.
-  /// 
+  ///
   /// This value will either come from [message] or [richMessage].
   String get tooltipMessage => message ?? richMessage!.toPlainText();
 
