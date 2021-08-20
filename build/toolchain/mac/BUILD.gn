@@ -26,12 +26,6 @@ if (use_goma) {
   goma_prefix = ""
 }
 
-# This will copy the gyp-mac-tool to the build directory. We pass in the source
-# file of the win tool.
-gyp_mac_tool_source =
-    rebase_path("//third_party/gyp/pylib/gyp/mac_tool.py", root_build_dir)
-exec_script("setup_toolchain.py", [ gyp_mac_tool_source ])
-
 # Shared toolchain definition. Invocations should set toolchain_os to set the
 # build args in this definition.
 template("mac_toolchain") {
