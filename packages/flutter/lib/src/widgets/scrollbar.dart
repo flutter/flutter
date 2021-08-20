@@ -228,7 +228,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     notifyListeners();
   }
 
-  /// The [shape] of the scrollbar's thumb.
+  /// The [OutlinedBorder] of the scrollbar's thumb.
   ///
   /// Only one of [radius] and [shape] may be specified. For a rounded rectangle,
   /// it's simplest to just specify [radius]. By default, the scrollbar thumb's
@@ -1073,7 +1073,7 @@ class RawScrollbar extends StatefulWidget {
   /// {@endtemplate}
   final bool? isAlwaysShown;
 
-  /// The [shape] of the scrollbar's thumb.
+  /// The [OutlinedBorder] of the scrollbar's thumb.
   ///
   /// Only one of [radius] and [shape] may be specified. For a rounded rectangle,
   /// it's simplest to just specify [radius]. By default, the scrollbar thumb's

@@ -1445,6 +1445,7 @@ void main() {
         ),
     );
   });
+
   testWidgets('ScrollbarPainter asserts if scrollbarOrientation is used with wrong axisDirection', (WidgetTester tester) async {
     final ScrollbarPainter painter = ScrollbarPainter(
       color: _kScrollbarColor,
@@ -1492,6 +1493,7 @@ void main() {
         ..rect(rect: const Rect.fromLTRB(794.0, 10.0, 800.0, 358.0))
     );
   });
+
   testWidgets('shape property of RawScrollbar can draw a BeveledRectangleBorder', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
@@ -1554,6 +1556,7 @@ void main() {
           ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0)) // track
           ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 21.0))); // thumb
   });
+
   testWidgets('shape property of RawScrollbar can draw a CircleBorder', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
@@ -1614,6 +1617,7 @@ void main() {
           ..rect(rect: const Rect.fromLTRB(734.0, 0.0, 800.0, 600.0))
           ..rect(rect: const Rect.fromLTRB(764.0, 0.0, 770.0, 360.0)));
   });
+
   testWidgets('shape property of RawScrollbar can draw a RoundedRectangleBorder', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
@@ -1647,6 +1651,7 @@ void main() {
         ),
     );
   });
+
   testWidgets('minOverscrollLength property of RawScrollbar is respected', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
@@ -1704,6 +1709,7 @@ void main() {
         ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 360.0))
     );
   });
+
   testWidgets('The bar can show or hide when the viewport size change', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     Widget buildFrame(double height) {
