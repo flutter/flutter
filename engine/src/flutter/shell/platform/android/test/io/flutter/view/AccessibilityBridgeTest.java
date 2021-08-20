@@ -40,6 +40,7 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import io.flutter.embedding.engine.systemchannels.AccessibilityChannel;
 import io.flutter.plugin.platform.PlatformViewsAccessibilityDelegate;
+import io.flutter.view.AccessibilityBridge.Flag;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -883,6 +884,52 @@ public class AccessibilityBridgeTest {
         0, AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS, null);
     nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
     assertFalse(nodeInfo.isAccessibilityFocused());
+  }
+
+  @Test
+  public void itSetsFocusabilityBasedOnFlagsCorrectly() {
+    AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
+    AccessibilityViewEmbedder mockViewEmbedder = mock(AccessibilityViewEmbedder.class);
+    AccessibilityManager mockManager = mock(AccessibilityManager.class);
+    View mockRootView = mock(View.class);
+    Context context = mock(Context.class);
+    when(mockRootView.getContext()).thenReturn(context);
+    when(context.getPackageName()).thenReturn("test");
+    AccessibilityBridge accessibilityBridge =
+        setUpBridge(
+            /*rootAccessibilityView=*/ mockRootView,
+            /*accessibilityChannel=*/ mockChannel,
+            /*accessibilityManager=*/ mockManager,
+            /*contentResolver=*/ null,
+            /*accessibilityViewEmbedder=*/ mockViewEmbedder,
+            /*platformViewsAccessibilityDelegate=*/ null);
+
+    ViewParent mockParent = mock(ViewParent.class);
+    when(mockRootView.getParent()).thenReturn(mockParent);
+    when(mockManager.isEnabled()).thenReturn(true);
+
+    TestSemanticsNode root = new TestSemanticsNode();
+    root.id = 0;
+    root.addFlag(Flag.HAS_IMPLICIT_SCROLLING);
+    TestSemanticsNode node1 = new TestSemanticsNode();
+    node1.id = 1;
+    node1.addFlag(Flag.IS_READ_ONLY);
+    root.children.add(node1);
+    TestSemanticsNode node2 = new TestSemanticsNode();
+    node2.id = 2;
+    node2.addFlag(Flag.HAS_CHECKED_STATE);
+    root.children.add(node2);
+    TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+
+    // Only node 2 is focusable because it has a flag that is not in
+    // AccessibilityBridge.TRIVIAL_FLAGS.
+    AccessibilityNodeInfo rootInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertFalse(rootInfo.isFocusable());
+    AccessibilityNodeInfo node1Info = accessibilityBridge.createAccessibilityNodeInfo(1);
+    assertFalse(node1Info.isFocusable());
+    AccessibilityNodeInfo node2Info = accessibilityBridge.createAccessibilityNodeInfo(2);
+    assertTrue(node2Info.isFocusable());
   }
 
   @Test
