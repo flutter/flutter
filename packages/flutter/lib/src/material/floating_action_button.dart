@@ -665,7 +665,7 @@ class FloatingActionButton extends StatelessWidget {
 
     if (tooltip != null) {
       result = Tooltip(
-        message: tooltip!,
+        message: tooltip,
         child: result,
       );
     }
