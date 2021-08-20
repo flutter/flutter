@@ -161,7 +161,7 @@ class TextPainter {
   TextPainter({
     InlineSpan? text,
     TextAlign textAlign = TextAlign.start,
-    TextDirection textDirection = TextDirection.ltr,
+    TextDirection? textDirection,
     double textScaleFactor = 1.0,
     int? maxLines,
     String? ellipsis,
@@ -171,6 +171,7 @@ class TextPainter {
     ui.TextHeightBehavior? textHeightBehavior,
   }) : assert(text == null || text.debugAssertIsValid()),
        assert(textAlign != null),
+       assert(textDirection != null),
        assert(textScaleFactor != null),
        assert(maxLines == null || maxLines > 0),
        assert(textWidthBasis != null),
