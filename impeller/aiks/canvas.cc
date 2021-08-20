@@ -54,7 +54,12 @@ size_t Canvas::GetSaveCount() const {
   return xformation_stack_.size();
 }
 
+void AssertionBreak() {}
+
 void Canvas::DrawPath(Path path, Paint paint) {
+  if (path.GetBoundingBox().IsZero()) {
+    AssertionBreak();
+  }
   Entity entity;
   entity.SetTransformation(GetCurrentTransformation());
   entity.SetPath(std::move(path));
@@ -75,8 +80,12 @@ void Canvas::ClipPath(Path path) {
 void Canvas::DrawShadow(Path path, Color color, Scalar elevation) {}
 
 void Canvas::DrawPicture(const Picture& picture) {
-  std::copy(std::begin(picture.entities), std::end(picture.entities),
-            std::back_inserter(ops_));
+  for (const auto& entity : picture.entities) {
+    auto new_entity = entity;
+    new_entity.SetTransformation(GetCurrentTransformation() *
+                                 new_entity.GetTransformation());
+    ops_.emplace_back(std::move(new_entity));
+  }
 }
 
 Picture Canvas::EndRecordingAsPicture() {

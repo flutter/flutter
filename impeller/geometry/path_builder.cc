@@ -159,48 +159,7 @@ PathBuilder& PathBuilder::AddRect(Rect rect) {
 }
 
 PathBuilder& PathBuilder::AddCircle(const Point& c, Scalar r) {
-  current_ = c + Point{0.0, r};
-
-  // m for magic
-  const auto m = kArcApproximationMagic * r;
-
-  //----------------------------------------------------------------------------
-  /// Top right arc.
-  ///
-  prototype_.AddCubicComponent({c.x, c.y - r},      // p1
-                               {c.x + m, c.y - r},  // cp1
-                               {c.x + r, c.y - m},  // cp2
-                               {c.x + r, c.y}       // p2
-  );
-
-  //----------------------------------------------------------------------------
-  /// Bottom right arc.
-  ///
-  prototype_.AddCubicComponent({c.x + r, c.y},      // p1
-                               {c.x + r, c.y + m},  // cp1
-                               {c.x + m, c.y + r},  // cp2
-                               {c.x, c.y + r}       // p2
-  );
-
-  //----------------------------------------------------------------------------
-  /// Bottom left arc.
-  ///
-  prototype_.AddCubicComponent({c.x, c.y + r},      // p1
-                               {c.x - m, c.y + r},  // cp1
-                               {c.x - r, c.y + m},  // cp2
-                               {c.x - r, c.y}       // p2
-  );
-
-  //----------------------------------------------------------------------------
-  /// Top left arc.
-  ///
-  prototype_.AddCubicComponent({c.x - r, c.y},      // p1
-                               {c.x - r, c.y - m},  // cp1
-                               {c.x - m, c.y - r},  // cp2
-                               {c.x, c.y - r}       // p2
-  );
-
-  return *this;
+  return AddOval(Rect{c.x - r, c.y - r, 2.0f * r, 2.0f * r});
 }
 
 PathBuilder& PathBuilder::AddRoundedRect(Rect rect, Scalar radius) {
@@ -292,6 +251,55 @@ PathBuilder& PathBuilder::AddRoundedRect(Rect rect, RoundingRadii radii) {
       {rect.origin.x + radii.topLeft, rect.origin.y});
 
   return *this;
+}
+
+PathBuilder& PathBuilder::AddOval(const Rect& container) {
+  const Point r = {container.size.width * 0.5f, container.size.height * 0.5f};
+  const Point c = {container.origin.x + (container.size.width * 0.5f),
+                   container.origin.y + (container.size.height * 0.5f)};
+  const Point m = {kArcApproximationMagic * r.x, kArcApproximationMagic * r.y};
+
+  //----------------------------------------------------------------------------
+  /// Top right arc.
+  ///
+  prototype_.AddCubicComponent({c.x, c.y - r.y},        // p1
+                               {c.x + m.x, c.y - r.y},  // cp1
+                               {c.x + r.x, c.y - m.y},  // cp2
+                               {c.x + r.x, c.y}         // p2
+  );
+
+  //----------------------------------------------------------------------------
+  /// Bottom right arc.
+  ///
+  prototype_.AddCubicComponent({c.x + r.x, c.y},        // p1
+                               {c.x + r.x, c.y + m.y},  // cp1
+                               {c.x + m.x, c.y + r.y},  // cp2
+                               {c.x, c.y + r.y}         // p2
+  );
+
+  //----------------------------------------------------------------------------
+  /// Bottom left arc.
+  ///
+  prototype_.AddCubicComponent({c.x, c.y + r.y},        // p1
+                               {c.x - m.x, c.y + r.y},  // cp1
+                               {c.x - r.x, c.y + m.y},  // cp2
+                               {c.x - r.x, c.y}         // p2
+  );
+
+  //----------------------------------------------------------------------------
+  /// Top left arc.
+  ///
+  prototype_.AddCubicComponent({c.x - r.x, c.y},        // p1
+                               {c.x - r.x, c.y - m.y},  // cp1
+                               {c.x - m.x, c.y - r.y},  // cp2
+                               {c.x, c.y - r.y}         // p2
+  );
+
+  return *this;
+}
+
+const Path& PathBuilder::GetCurrentPath() const {
+  return prototype_;
 }
 
 }  // namespace impeller

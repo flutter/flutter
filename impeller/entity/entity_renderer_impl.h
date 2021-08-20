@@ -29,9 +29,15 @@ class EntityRendererImpl {
 
   bool IsValid() const;
 
-  [[nodiscard]] bool RenderEntity(const Surface& surface,
-                                  RenderPass& onscreen_pass,
-                                  const Entity& entities);
+  enum class RenderResult {
+    kSkipped,
+    kSuccess,
+    kFailure,
+  };
+
+  [[nodiscard]] RenderResult RenderEntity(const Surface& surface,
+                                          RenderPass& onscreen_pass,
+                                          const Entity& entities);
 
  private:
   using SolidFillPipeline =
