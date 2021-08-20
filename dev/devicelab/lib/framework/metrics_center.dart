@@ -16,21 +16,24 @@ Future<FlutterDestination> connectFlutterDestination() async {
   final Map<String, String> env = Platform.environment;
   // final bool isTesting = env['IS_TESTING'] == 'true';
   const bool isTesting = true;
-  if (env.containsKey(kTokenPath) && env.containsKey(kGcpProject)) {
+  print(env[kTokenPath]);
+  print(env[kGcpProject]);
+  print(File(env[kTokenPath]!).readAsStringSync().trim());
+  // if (env.containsKey(kTokenPath) && env.containsKey(kGcpProject)) {
     return FlutterDestination.makeFromAccessToken(
-      File(env[kTokenPath]!).readAsStringSync(),
-      env[kGcpProject]!,
-      // 'flutter-infra',
+      File(env[kTokenPath]!).readAsStringSync().trim(),
+      // env[kGcpProject]!,
+      'flutter-infra',
       isTesting: isTesting,
     );
-  }
-  const String credential = '';
-  final Map<String, dynamic> map = jsonDecode(credential) as Map<String, dynamic>;
-  return FlutterDestination.makeFromCredentialsJson(
-    // jsonDecode(env['BENCHMARK_GCP_CREDENTIALS']!) as Map<String, dynamic>,
-    map,
-    isTesting: isTesting,
-  );
+  // }
+  // const String credential = '';
+  // // final Map<String, dynamic> map = jsonDecode(credential) as Map<String, dynamic>;
+  // return FlutterDestination.makeFromCredentialsJson(
+  //   jsonDecode(env['BENCHMARK_GCP_CREDENTIALS']!) as Map<String, dynamic>,
+  //   // map,
+  //   isTesting: isTesting,
+  // );
 }
 
 /// Parse results into Metric Points.
