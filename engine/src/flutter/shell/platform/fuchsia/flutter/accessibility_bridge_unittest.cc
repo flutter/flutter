@@ -585,6 +585,52 @@ TEST_F(AccessibilityBridgeTest, TruncatesLargeLabel) {
   EXPECT_FALSE(semantics_manager_.UpdateOverflowed());
 }
 
+TEST_F(AccessibilityBridgeTest, TruncatesLargeToolTip) {
+  // Test that tooltips which are too long are truncated.
+  flutter::SemanticsNode node0;
+  node0.id = 0;
+
+  flutter::SemanticsNode node1;
+  node1.id = 1;
+
+  flutter::SemanticsNode bad_node;
+  bad_node.id = 2;
+  bad_node.tooltip =
+      std::string(fuchsia::accessibility::semantics::MAX_LABEL_SIZE + 1, '2');
+
+  node0.childrenInTraversalOrder = {1, 2};
+  node0.childrenInHitTestOrder = {1, 2};
+
+  accessibility_bridge_->AddSemanticsNodeUpdate(
+      {
+          {0, node0},
+          {1, node1},
+          {2, bad_node},
+      },
+      1.f);
+  RunLoopUntilIdle();
+
+  // Nothing to delete, but we should have broken
+  EXPECT_EQ(0, semantics_manager_.DeleteCount());
+  EXPECT_EQ(1, semantics_manager_.UpdateCount());
+  EXPECT_EQ(1, semantics_manager_.CommitCount());
+  EXPECT_EQ(3U, semantics_manager_.LastUpdatedNodes().size());
+  auto trimmed_node =
+      std::find_if(semantics_manager_.LastUpdatedNodes().begin(),
+                   semantics_manager_.LastUpdatedNodes().end(),
+                   [id = static_cast<uint32_t>(bad_node.id)](
+                       fuchsia::accessibility::semantics::Node const& node) {
+                     return node.node_id() == id;
+                   });
+  ASSERT_NE(trimmed_node, semantics_manager_.LastUpdatedNodes().end());
+  ASSERT_TRUE(trimmed_node->has_attributes());
+  EXPECT_EQ(
+      trimmed_node->attributes().secondary_label(),
+      std::string(fuchsia::accessibility::semantics::MAX_LABEL_SIZE, '2'));
+  EXPECT_FALSE(semantics_manager_.DeleteOverflowed());
+  EXPECT_FALSE(semantics_manager_.UpdateOverflowed());
+}
+
 TEST_F(AccessibilityBridgeTest, TruncatesLargeValue) {
   // Test that values which are too long are truncated.
   flutter::SemanticsNode node0;

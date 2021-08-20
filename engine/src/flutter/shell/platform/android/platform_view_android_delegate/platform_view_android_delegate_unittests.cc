@@ -19,9 +19,10 @@ TEST(PlatformViewShell, UpdateSemanticsDoesFlutterViewUpdateSemantics) {
   flutter::SemanticsNode node0;
   node0.id = 0;
   node0.label = "label";
+  node0.tooltip = "tooltip";
   update.insert(std::make_pair(0, std::move(node0)));
 
-  std::vector<uint8_t> expected_buffer(184);
+  std::vector<uint8_t> expected_buffer(188);
   std::vector<std::vector<uint8_t>> expected_string_attribute_args(0);
   size_t position = 0;
   int32_t* buffer_int32 = reinterpret_cast<int32_t*>(&expected_buffer[0]);
@@ -51,6 +52,8 @@ TEST(PlatformViewShell, UpdateSemanticsDoesFlutterViewUpdateSemantics) {
   buffer_int32[position++] = -1;  // node0.decreasedValueAttributes
   buffer_int32[position++] = -1;  // node0.hint
   buffer_int32[position++] = -1;  // node0.hintAttributes
+  buffer_int32[position++] = expected_strings.size();  // node0.tooltip
+  expected_strings.push_back(node0.tooltip);
   buffer_int32[position++] = node0.textDirection;
   buffer_float32[position++] = node0.rect.left();
   buffer_float32[position++] = node0.rect.top();
@@ -93,7 +96,7 @@ TEST(PlatformViewShell,
   node0.hintAttributes.push_back(locale_attribute);
   update.insert(std::make_pair(0, std::move(node0)));
 
-  std::vector<uint8_t> expected_buffer(216);
+  std::vector<uint8_t> expected_buffer(220);
   std::vector<std::vector<uint8_t>> expected_string_attribute_args;
   size_t position = 0;
   int32_t* buffer_int32 = reinterpret_cast<int32_t*>(&expected_buffer[0]);
@@ -132,9 +135,10 @@ TEST(PlatformViewShell,
   buffer_int32[position++] = 3;  // node0.hintAttributes[0].end
   buffer_int32[position++] = 1;  // node0.hintAttributes[0].type
   buffer_int32[position++] =
-      expected_string_attribute_args.size();  // node0.labelAttributes[0].args
+      expected_string_attribute_args.size();  // node0.hintAttributes[0].args
   expected_string_attribute_args.push_back(
       {locale_attribute->locale.begin(), locale_attribute->locale.end()});
+  buffer_int32[position++] = -1;  // node0.tooltip
   buffer_int32[position++] = node0.textDirection;
   buffer_float32[position++] = node0.rect.left();
   buffer_float32[position++] = node0.rect.top();

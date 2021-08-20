@@ -468,6 +468,35 @@ class MockAccessibilityBridgeNoWindow : public AccessibilityBridgeIos {
   XCTAssertTrue([scrollable_object.accessibilityHint isEqualToString:@"hint"]);
 }
 
+- (void)testFlutterSemanticsObjectMergeTooltipToLabel {
+  flutter::MockAccessibilityBridge* mock = new flutter::MockAccessibilityBridge();
+  mock->isVoiceOverRunningValue = true;
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+
+  flutter::SemanticsNode node;
+  node.rect = SkRect::MakeXYWH(0, 0, 100, 200);
+  node.label = "label";
+  node.tooltip = "tooltip";
+  FlutterSemanticsObject* object = [[FlutterSemanticsObject alloc] initWithBridge:bridge uid:0];
+  [object setSemanticsNode:&node];
+  XCTAssertTrue(object.isAccessibilityElement);
+  XCTAssertTrue([object.accessibilityLabel isEqualToString:@"label\ntooltip"]);
+}
+
+- (void)testFlutterSemanticsObjectAttributedStringsDoNotCrashWhenEmpty {
+  flutter::MockAccessibilityBridge* mock = new flutter::MockAccessibilityBridge();
+  mock->isVoiceOverRunningValue = true;
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+
+  flutter::SemanticsNode node;
+  node.rect = SkRect::MakeXYWH(0, 0, 100, 200);
+  FlutterSemanticsObject* object = [[FlutterSemanticsObject alloc] initWithBridge:bridge uid:0];
+  [object setSemanticsNode:&node];
+  XCTAssertTrue(object.accessibilityAttributedLabel == nil);
+}
+
 - (void)testFlutterScrollableSemanticsObjectReturnsParentContainerIfNoChildren {
   flutter::MockAccessibilityBridge* mock = new flutter::MockAccessibilityBridge();
   mock->isVoiceOverRunningValue = true;

@@ -76,6 +76,7 @@ void SemanticsUpdateBuilder::updateNode(
     std::vector<NativeStringAttribute*> decreasedValueAttributes,
     std::string hint,
     std::vector<NativeStringAttribute*> hintAttributes,
+    std::string tooltip,
     int textDirection,
     const tonic::Float64List& transform,
     const tonic::Int32List& childrenInTraversalOrder,
@@ -114,6 +115,7 @@ void SemanticsUpdateBuilder::updateNode(
   pushStringAttributes(node.decreasedValueAttributes, decreasedValueAttributes);
   node.hint = hint;
   pushStringAttributes(node.hintAttributes, hintAttributes);
+  node.tooltip = tooltip;
   node.textDirection = textDirection;
   SkScalar scalarTransform[16];
   for (int i = 0; i < 16; ++i) {
