@@ -3555,4 +3555,45 @@ void main() {
 
     expect(menuItem.borderRadius, borderRadius);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/88574
+  testWidgets("specifying itemHeight affects popup menu items' height", (WidgetTester tester) async {
+    const String value = 'One';
+    const double itemHeight = 80;
+    final List<DropdownMenuItem<String>> menuItems = <String>[
+      value,
+      'Two',
+      'Free',
+      'Four'
+    ].map<DropdownMenuItem<String>>((String value) {
+      return DropdownMenuItem<String>(
+        value: value,
+        child: Text(value),
+      );
+    }).toList();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: DropdownButton<String>(
+              value: value,
+              itemHeight: itemHeight,
+              onChanged: (_) {},
+              items: menuItems,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text(value));
+    await tester.pumpAndSettle();
+
+    for (final DropdownMenuItem<String> item in menuItems) {
+      final Iterable<Element> elements = tester.elementList(find.byWidget(item));
+      for (final Element element in elements){
+        expect(element.size!.height, itemHeight);
+      }
+    }
+  });
 }
