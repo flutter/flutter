@@ -105,8 +105,6 @@ void runNext({
         upstreamRemote: upstream,
         previousCheckoutLocation: state.engine.checkoutPath,
       );
-      final String headRevision = engine.reverseParse('HEAD');
-
       // check if the candidate branch is enabled in .ci.yaml
       if (!engine.ciYaml.enabledBranches.contains(state.engine.candidateBranch)) {
         engine.ciYaml.enableBranch(state.engine.candidateBranch);
@@ -157,7 +155,7 @@ void runNext({
       }
 
       engine.pushRef(
-        fromRef: headRevision,
+        fromRef: 'HEAD',
         // Explicitly create new branch
         toRef: 'refs/heads/${state.engine.workingBranch}',
         remote: state.engine.mirror.name,
@@ -221,7 +219,6 @@ void runNext({
         upstreamRemote: upstream,
         previousCheckoutLocation: state.framework.checkoutPath,
       );
-      final String headRevision = framework.reverseParse('HEAD');
 
       // Check if the current candidate branch is enabled
       if (!framework.ciYaml.enabledBranches.contains(state.framework.candidateBranch)) {
@@ -290,7 +287,7 @@ void runNext({
       }
 
       framework.pushRef(
-        fromRef: headRevision,
+        fromRef: 'HEAD',
         // Explicitly create new branch
         toRef: 'refs/heads/${state.framework.workingBranch}',
         remote: state.framework.mirror.name,
