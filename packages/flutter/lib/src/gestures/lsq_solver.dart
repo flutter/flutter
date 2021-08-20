@@ -181,7 +181,7 @@ class LeastSquaresSolver {
       sumSquaredTotal += w[h] * w[h] * v * v;
     }
 
-    result.confidence = sumSquaredTotal < precisionErrorTolerance ? 1.0 :
+    result.confidence = sumSquaredTotal <= precisionErrorTolerance ? 1.0 :
                           1.0 - (sumSquaredError / sumSquaredTotal);
 
     return result;
