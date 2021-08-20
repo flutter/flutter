@@ -162,15 +162,41 @@ public class PlatformPluginTest {
     when(fakeActivity.getWindow()).thenReturn(fakeWindow);
     PlatformChannel fakePlatformChannel = mock(PlatformChannel.class);
     PlatformPlugin platformPlugin = new PlatformPlugin(fakeActivity, fakePlatformChannel);
+    // Default style test
     SystemChromeStyle style =
-        new SystemChromeStyle(0XFF000000, null, true, 0XFFC70039, null, 0XFF006DB3, true);
+        new SystemChromeStyle(
+            0XFF000000, // statusBarColor
+            null, // statusBarIconBrightness
+            true, // systemStatusBarContrastEnforced
+            0XFFC70039, // systemNavigationBarColor
+            null, // systemNavigationBarIconBrightness
+            0XFF006DB3, // systemNavigationBarDividerColor
+            true); // systemNavigationBarContrastEnforced
 
     if (Build.VERSION.SDK_INT >= 28) {
       platformPlugin.mPlatformMessageHandler.setSystemUiOverlayStyle(style);
 
+      assertEquals(0XFF000000, fakeActivity.getWindow().getStatusBarColor());
+      assertEquals(0XFFC70039, fakeActivity.getWindow().getNavigationBarColor());
       assertEquals(0XFF006DB3, fakeActivity.getWindow().getNavigationBarDividerColor());
+
+      // Regression test for https://github.com/flutter/flutter/issues/88431
+      // A null brightness should not affect changing color settings.
+      style =
+          new SystemChromeStyle(
+              0XFF006DB3, // statusBarColor
+              null, // statusBarIconBrightness
+              true, // systemStatusBarContrastEnforced
+              0XFF000000, // systemNavigationBarColor
+              null, // systemNavigationBarIconBrightness
+              0XFF006DB3, // systemNavigationBarDividerColor
+              true); // systemNavigationBarContrastEnforced
+
+      platformPlugin.mPlatformMessageHandler.setSystemUiOverlayStyle(style);
+
       assertEquals(0XFFC70039, fakeActivity.getWindow().getStatusBarColor());
       assertEquals(0XFF000000, fakeActivity.getWindow().getNavigationBarColor());
+      assertEquals(0XFF006DB3, fakeActivity.getWindow().getNavigationBarDividerColor());
     }
   }
 

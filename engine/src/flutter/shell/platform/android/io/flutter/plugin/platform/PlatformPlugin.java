@@ -374,15 +374,17 @@ public class PlatformPlugin {
     // If transparent, SDK 29 and higher may apply a translucent scrim behind the bar to ensure
     // proper contrast. This can be overridden with
     // SystemChromeStyle.systemStatusBarContrastEnforced.
-    if (systemChromeStyle.statusBarIconBrightness != null && Build.VERSION.SDK_INT >= 23) {
-      switch (systemChromeStyle.statusBarIconBrightness) {
-        case DARK:
-          // View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-          flags |= 0x2000;
-          break;
-        case LIGHT:
-          flags &= ~0x2000;
-          break;
+    if (Build.VERSION.SDK_INT >= 23) {
+      if (systemChromeStyle.statusBarIconBrightness != null) {
+        switch (systemChromeStyle.statusBarIconBrightness) {
+          case DARK:
+            // View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+            flags |= 0x2000;
+            break;
+          case LIGHT:
+            flags &= ~0x2000;
+            break;
+        }
       }
 
       if (systemChromeStyle.statusBarColor != null) {
@@ -403,16 +405,17 @@ public class PlatformPlugin {
     // If transparent, SDK 29 and higher may apply a translucent scrim behind 2/3 button navigation
     // bars to ensure proper contrast. This can be overridden with
     // SystemChromeStyle.systemNavigationBarContrastEnforced.
-    if (systemChromeStyle.systemNavigationBarIconBrightness != null
-        && Build.VERSION.SDK_INT >= 26) {
-      switch (systemChromeStyle.systemNavigationBarIconBrightness) {
-        case DARK:
-          // View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
-          flags |= 0x10;
-          break;
-        case LIGHT:
-          flags &= ~0x10;
-          break;
+    if (Build.VERSION.SDK_INT >= 26) {
+      if (systemChromeStyle.systemNavigationBarIconBrightness != null) {
+        switch (systemChromeStyle.systemNavigationBarIconBrightness) {
+          case DARK:
+            // View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+            flags |= 0x10;
+            break;
+          case LIGHT:
+            flags &= ~0x10;
+            break;
+        }
       }
 
       if (systemChromeStyle.systemNavigationBarColor != null) {
