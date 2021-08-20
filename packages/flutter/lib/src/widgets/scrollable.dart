@@ -15,7 +15,6 @@ import 'basic.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
-import 'media_query.dart';
 import 'notification_listener.dart';
 import 'primary_scroll_controller.dart';
 import 'restoration.dart';
