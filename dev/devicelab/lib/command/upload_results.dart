@@ -41,12 +41,15 @@ class UploadResultsCommand extends Command<void> {
     final String? testStatus = argResults!['test-status'] as String?;
     final String? commitTime = argResults!['commit-time'] as String?;
 
-    // Upload metrics to metrics_center from test runner.
+    // Upload metrics to metrics_center from test runner when `commitTime` is specified. This
+    // is mainly for testing purpose.
     // The upload step will be skipped from cocoon once this is validated.
     // TODO(keyong): remove try block to block test when this is validated to work https://github.com/flutter/flutter/issues/88484
     try {
-      await uploadToMetricsCenter(resultsPath, commitTime);
-      print('Successfully uploaded metrics to metrics center');
+      if (commitTime != null) {
+        await uploadToMetricsCenter(resultsPath, commitTime);
+        print('Successfully uploaded metrics to metrics center');
+      }
     } on Exception catch (e, stacktrace) {
       print('Uploading metrics failure: $e\n\n$stacktrace');
     }
