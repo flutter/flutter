@@ -534,10 +534,6 @@ void main() {
             },
           ),
           const FakeCommand(
-            command: <String>['git', 'rev-parse', 'HEAD'],
-            stdout: revision2,
-          ),
-          const FakeCommand(
             command: <String>['git', 'status', '--porcelain'],
             stdout: 'MM /path/to/.ci.yaml',
           ),
@@ -628,10 +624,6 @@ void main() {
           const FakeCommand(command: <String>['git', 'fetch', 'upstream']),
           const FakeCommand(command: <String>['git', 'checkout', workingBranch]),
           const FakeCommand(
-            command: <String>['git', 'rev-parse', 'HEAD'],
-            stdout: revision2,
-          ),
-          const FakeCommand(
             command: <String>['git', 'status', '--porcelain'],
             stdout: 'MM path/to/.ci.yaml',
           ),
@@ -710,10 +702,6 @@ void main() {
             },
           ),
           const FakeCommand(
-            command: <String>['git', 'rev-parse', 'HEAD'],
-            stdout: revision2,
-          ),
-          const FakeCommand(
             command: <String>['git', 'status', '--porcelain'],
             stdout: 'MM path/to/.ci.yaml',
           ),
@@ -740,6 +728,10 @@ void main() {
           const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
             stdout: revision4,
+          ),
+          const FakeCommand(
+            command: <String>['git', 'rev-parse', 'HEAD'],
+            stdout: revision2,
           ),
           const FakeCommand(
             command: <String>['git', 'push', 'mirror', '$revision2:refs/heads/$workingBranch'],

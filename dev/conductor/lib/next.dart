@@ -221,7 +221,6 @@ void runNext({
         upstreamRemote: upstream,
         previousCheckoutLocation: state.framework.checkoutPath,
       );
-      final String headRevision = framework.reverseParse('HEAD');
 
       // Check if the current candidate branch is enabled
       if (!framework.ciYaml.enabledBranches.contains(state.framework.candidateBranch)) {
@@ -288,6 +287,8 @@ void runNext({
           return;
         }
       }
+
+      final String headRevision = framework.reverseParse('HEAD');
 
       framework.pushRef(
         fromRef: headRevision,
