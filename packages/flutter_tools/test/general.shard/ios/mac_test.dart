@@ -12,7 +12,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/ios/devices.dart';
+import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
@@ -77,7 +77,7 @@ void main() {
         expect(() async => iMobileDevice.takeScreenshot(
           outputFile,
           '1234',
-          IOSDeviceInterface.usb,
+          IOSDeviceConnectionInterface.usb,
         ), throwsA(anything));
         expect(fakeProcessManager.hasRemainingExpectations, isFalse);
       });
@@ -100,7 +100,7 @@ void main() {
         await iMobileDevice.takeScreenshot(
           outputFile,
           '1234',
-          IOSDeviceInterface.usb,
+          IOSDeviceConnectionInterface.usb,
         );
         expect(fakeProcessManager.hasRemainingExpectations, isFalse);
       });
@@ -123,7 +123,7 @@ void main() {
         await iMobileDevice.takeScreenshot(
           outputFile,
           '1234',
-          IOSDeviceInterface.network,
+          IOSDeviceConnectionInterface.network,
         );
         expect(fakeProcessManager.hasRemainingExpectations, isFalse);
       });
@@ -149,7 +149,7 @@ void main() {
         xcodeBuildExecution: XcodeBuildExecution(
           buildCommands: buildCommands,
           appDirectory: '/blah/blah',
-          buildForPhysicalDevice: true,
+          environmentType: EnvironmentType.physical,
           buildSettings: buildSettings,
         ),
       );
@@ -229,7 +229,7 @@ Error launching application on iPhone.''',
         xcodeBuildExecution: XcodeBuildExecution(
           buildCommands: <String>['xcrun', 'xcodebuild', 'blah'],
           appDirectory: '/blah/blah',
-          buildForPhysicalDevice: true,
+          environmentType: EnvironmentType.physical,
           buildSettings: buildSettings,
         ),
       );
@@ -310,7 +310,7 @@ Could not build the precompiled application for the device.''',
         xcodeBuildExecution: XcodeBuildExecution(
           buildCommands: <String>['xcrun', 'xcodebuild', 'blah'],
           appDirectory: '/blah/blah',
-          buildForPhysicalDevice: true,
+          environmentType: EnvironmentType.physical,
           buildSettings: buildSettings,
         ),
       );
@@ -347,7 +347,7 @@ Exited (sigterm)''',
         xcodeBuildExecution: XcodeBuildExecution(
           buildCommands: <String>['xcrun', 'xcodebuild', 'blah'],
           appDirectory: '/blah/blah',
-          buildForPhysicalDevice: true,
+          environmentType: EnvironmentType.physical,
           buildSettings: buildSettings,
         ),
       );
@@ -384,7 +384,7 @@ Exited (sigterm)''',
         xcodeBuildExecution: XcodeBuildExecution(
           buildCommands: <String>['xcrun', 'xcodebuild', 'blah'],
           appDirectory: '/blah/blah',
-          buildForPhysicalDevice: true,
+          environmentType: EnvironmentType.physical,
           buildSettings: buildSettings,
         ),
       );

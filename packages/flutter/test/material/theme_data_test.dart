@@ -346,6 +346,7 @@ void main() {
       progressIndicatorTheme: const ProgressIndicatorThemeData(),
       fixTextFieldOutlineLabel: false,
       useTextSelectionTheme: false,
+      androidOverscrollIndicator: null,
     );
 
     final SliderThemeData otherSliderTheme = SliderThemeData.fromPrimaryColors(
@@ -440,6 +441,7 @@ void main() {
       progressIndicatorTheme: const ProgressIndicatorThemeData(),
       fixTextFieldOutlineLabel: true,
       useTextSelectionTheme: true,
+      androidOverscrollIndicator: AndroidOverscrollIndicator.stretch,
     );
 
     final ThemeData themeDataCopy = theme.copyWith(

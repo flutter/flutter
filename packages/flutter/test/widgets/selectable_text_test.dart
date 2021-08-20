@@ -185,7 +185,7 @@ void main() {
     );
   }
 
-  testWidgets('can use the desktop cut/copy/paste buttons on Mac', (WidgetTester tester) async {
+  testWidgets('can use the desktop cut/copy/paste buttons on desktop', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'blah1 blah2',
     );
@@ -257,7 +257,7 @@ void main() {
     expect(controller.text, ' blah2blah1');
     expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 0));
     expect(find.byType(CupertinoButton), findsNothing);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS, TargetPlatform.windows, TargetPlatform.linux }), skip: kIsWeb);
+  }, variant: TargetPlatformVariant.desktop(), skip: kIsWeb); // [intended] toolbar is handled by the browser.
 
   testWidgets('has expected defaults', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1388,42 +1388,7 @@ void main() {
     expect(topLeft.dx, equals(399.0));
   });
 
-  testWidgets('Selectable text drops selection when losing focus', (WidgetTester tester) async {
-    final Key key1 = UniqueKey();
-    final Key key2 = UniqueKey();
-
-    await tester.pumpWidget(
-      overlay(
-        child: Column(
-          children: <Widget>[
-            SelectableText(
-              'text 1',
-              key: key1,
-            ),
-            SelectableText(
-                'text 2',
-                key: key2,
-            ),
-          ],
-        ),
-      ),
-    );
-
-    await tester.tap(find.byKey(key1));
-    await tester.pump();
-    final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
-    final TextEditingController controller = editableTextWidget.controller;
-    controller.selection = const TextSelection(baseOffset: 0, extentOffset: 3);
-    await tester.pump();
-    expect(controller.selection, isNot(equals(TextRange.empty)));
-
-    await tester.tap(find.byKey(key2));
-    await tester.pump();
-    expect(controller.selection, equals(TextRange.empty));
-  });
-
-    testWidgets('Selectable text is skipped during focus traversal',
-      (WidgetTester tester) async {
+  testWidgets('Selectable text is skipped during focus traversal', (WidgetTester tester) async {
     final FocusNode firstFieldFocus = FocusNode();
     final FocusNode lastFieldFocus = FocusNode();
 
@@ -1477,6 +1442,72 @@ void main() {
     expect(
       semantics,
       includesNodeWith(
+        flags: <SemanticsFlag>[
+          SemanticsFlag.isTextField,
+          SemanticsFlag.isReadOnly,
+          SemanticsFlag.isMultiline,
+        ],
+      ),
+    );
+
+    semantics.dispose();
+  });
+
+  testWidgets('Selectable text rich text with spell out in semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Center(
+            child: SelectableText.rich(TextSpan(text: 'some text', spellOut: true)),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      semantics,
+      includesNodeWith(
+        attributedValue: AttributedString(
+          'some text',
+          attributes: <StringAttribute>[
+            SpellOutStringAttribute(range: const TextRange(start: 0, end:9)),
+          ],
+        ),
+        flags: <SemanticsFlag>[
+          SemanticsFlag.isTextField,
+          SemanticsFlag.isReadOnly,
+          SemanticsFlag.isMultiline,
+        ],
+      ),
+    );
+
+    semantics.dispose();
+  });
+
+  testWidgets('Selectable text rich text with locale in semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Center(
+            child: SelectableText.rich(TextSpan(text: 'some text', locale: Locale('es', 'MX'))),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      semantics,
+      includesNodeWith(
+        attributedValue: AttributedString(
+          'some text',
+          attributes: <StringAttribute>[
+            LocaleStringAttribute(range: const TextRange(start: 0, end:9), locale: const Locale('es', 'MX')),
+          ],
+        ),
         flags: <SemanticsFlag>[
           SemanticsFlag.isTextField,
           SemanticsFlag.isReadOnly,
@@ -1570,7 +1601,7 @@ void main() {
       await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
       await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowLeft);
       expect(controller.selection.extentOffset - controller.selection.baseOffset, -1);
-    });
+    }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Shift test 2', (WidgetTester tester) async {
       await setupWidget(tester, 'abcdefghi');
@@ -1582,7 +1613,7 @@ void main() {
       await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowRight);
       await tester.pumpAndSettle();
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 1);
-    });
+    }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Control Shift test', (WidgetTester tester) async {
       await setupWidget(tester, 'their big house');
@@ -1594,7 +1625,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, -5);
-    });
+    }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Down and up test', (WidgetTester tester) async {
       await setupWidget(tester, 'a big house');
@@ -1612,7 +1643,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 0);
-    });
+    }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Down and up test 2', (WidgetTester tester) async {
       await setupWidget(tester, 'a big house\njumped over a mouse\nOne more line yay');
@@ -1663,7 +1694,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, -5);
-    });
+    }, variant: KeySimulatorTransitModeVariant.all());
   });
 
   testWidgets('Copy test', (WidgetTester tester) async {
@@ -1722,7 +1753,7 @@ void main() {
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.pumpAndSettle();
-  });
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Select all test', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -1757,7 +1788,7 @@ void main() {
 
     expect(controller.selection.baseOffset, 0);
     expect(controller.selection.extentOffset, 31);
-  });
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('keyboard selection should call onSelectionChanged', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -1804,7 +1835,7 @@ void main() {
       expect(newSelection!.extentOffset, i + 1);
       newSelection = null;
     }
-  });
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Changing positions of selectable text', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -1894,7 +1925,7 @@ void main() {
     c1 = editableTextWidget.controller;
 
     expect(c1.selection.extentOffset - c1.selection.baseOffset, -6);
-  });
+  }, variant: KeySimulatorTransitModeVariant.all());
 
 
   testWidgets('Changing focus test', (WidgetTester tester) async {
@@ -1962,9 +1993,9 @@ void main() {
     await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
     await tester.pumpAndSettle();
 
-    expect(c1.selection.extentOffset - c1.selection.baseOffset, 0);
+    expect(c1.selection.extentOffset - c1.selection.baseOffset, -5);
     expect(c2.selection.extentOffset - c2.selection.baseOffset, -5);
-  });
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Caret works when maxLines is null', (WidgetTester tester) async {
     await tester.pumpWidget(

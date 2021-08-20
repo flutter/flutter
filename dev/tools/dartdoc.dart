@@ -7,7 +7,9 @@ import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:intl/intl.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
+import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
 import 'dartdoc_checker.dart';
@@ -116,14 +118,25 @@ Future<void> main(List<String> arguments) async {
     'dartdoc',
   ];
 
-  // Verify which version of dartdoc we're using.
-  final ProcessResult result = Process.runSync(
+  // Verify which version of snippets and dartdoc we're using.
+  final ProcessResult snippetsResult = Process.runSync(
     pubExecutable,
-    <String>[...dartdocBaseArgs, '--version'],
+    <String>[
+      'global',
+      'list',
+    ],
     workingDirectory: kDocsRoot,
     environment: pubEnvironment,
+    stdoutEncoding: utf8,
   );
-  print('\n${result.stdout}flutter version: $version\n');
+  print('');
+  final Iterable<RegExpMatch> versionMatches = RegExp(r'^(?<name>snippets|dartdoc) (?<version>[^\s]+)', multiLine: true)
+      .allMatches(snippetsResult.stdout as String);
+  for (final RegExpMatch match in versionMatches) {
+    print('${match.namedGroup('name')} version: ${match.namedGroup('version')}');
+  }
+
+  print('flutter version: $version\n');
 
   // Dartdoc warnings and errors in these packages are considered fatal.
   // All packages owned by flutter should be in the list.
@@ -252,8 +265,21 @@ ArgParser _createArgsParser() {
 
 final RegExp gitBranchRegexp = RegExp(r'^## (.*)');
 
-String getBranchName() {
-  final ProcessResult gitResult = Process.runSync('git', <String>['status', '-b', '--porcelain']);
+/// Get the name of the release branch.
+///
+/// On LUCI builds, the git HEAD is detached, so first check for the env
+/// variable "LUCI_BRANCH"; if it is not set, fall back to calling git.
+String getBranchName({
+  @visibleForTesting
+  Platform platform = const LocalPlatform(),
+  @visibleForTesting
+  ProcessManager processManager = const LocalProcessManager(),
+}) {
+  final String? luciBranch = platform.environment['LUCI_BRANCH'];
+  if (luciBranch != null && luciBranch.trim().isNotEmpty) {
+    return luciBranch.trim();
+  }
+  final ProcessResult gitResult = processManager.runSync(<String>['git', 'status', '-b', '--porcelain']);
   if (gitResult.exitCode != 0)
     throw 'git status exit with non-zero exit code: ${gitResult.exitCode}';
   final RegExpMatch? gitBranchMatch = gitBranchRegexp.firstMatch(

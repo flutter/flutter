@@ -78,17 +78,24 @@ void main() {
     });
 
     testWithoutContext('should not throw when lock is acquired', () async {
+      final String oldRoot = Cache.flutterRoot;
       Cache.flutterRoot = '';
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      final Cache cache = Cache.test(fileSystem: fileSystem, processManager: FakeProcessManager.any());
-      fileSystem.file(fileSystem.path.join('bin', 'cache', 'lockfile'))
-        .createSync(recursive: true);
+      try {
+        final FileSystem fileSystem = MemoryFileSystem.test();
+        final Cache cache = Cache.test(
+            fileSystem: fileSystem, processManager: FakeProcessManager.any());
+        fileSystem.file(fileSystem.path.join('bin', 'cache', 'lockfile'))
+            .createSync(recursive: true);
 
-      await cache.lock();
+        await cache.lock();
 
-      expect(cache.checkLockAcquired, returnsNormally);
-      expect(cache.releaseLock, returnsNormally);
-    }, skip: true); // TODO(jonahwilliams): implement support for lock so this can be tested with the memory file system.
+        expect(cache.checkLockAcquired, returnsNormally);
+        expect(cache.releaseLock, returnsNormally);
+      } finally {
+        Cache.flutterRoot = oldRoot;
+      }
+      // TODO(jonahwilliams): implement support for lock so this can be tested with the memory file system.
+    }, skip: true); // https://github.com/flutter/flutter/issues/87923
 
     testWithoutContext('throws tool exit when lockfile open fails', () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
@@ -97,7 +104,8 @@ void main() {
         .createSync(recursive: true);
 
       expect(() async => cache.lock(), throwsToolExit());
-    }, skip: true); // TODO(jonahwilliams): implement support for lock so this can be tested with the memory file system.
+      // TODO(jonahwilliams): implement support for lock so this can be tested with the memory file system.
+    }, skip: true); // https://github.com/flutter/flutter/issues/87923
 
     testWithoutContext('should not throw when FLUTTER_ALREADY_LOCKED is set', () {
      final Cache cache = Cache.test(
@@ -1045,7 +1053,17 @@ class FakePub extends Fake implements Pub {
   int calledGet = 0;
 
   @override
-  Future<void> get({PubContext context, String directory, bool skipIfAbsent = false, bool upgrade = false, bool offline = false, bool generateSyntheticPackage = false, String flutterRootOverride, bool checkUpToDate = false}) async {
+  Future<void> get({
+    PubContext context,
+    String directory,
+    bool skipIfAbsent = false,
+    bool upgrade = false,
+    bool offline = false,
+    bool generateSyntheticPackage = false,
+    String flutterRootOverride,
+    bool checkUpToDate = false,
+    bool shouldSkipThirdPartyGenerator = true,
+  }) async {
     calledGet += 1;
   }
 }

@@ -95,41 +95,6 @@ void runNext({
 
   switch (state.currentPhase) {
     case pb.ReleasePhase.APPLY_ENGINE_CHERRYPICKS:
-      final List<pb.Cherrypick> unappliedCherrypicks = <pb.Cherrypick>[];
-      for (final pb.Cherrypick cherrypick in state.engine.cherrypicks) {
-        if (!finishedStates.contains(cherrypick.state)) {
-          unappliedCherrypicks.add(cherrypick);
-        }
-      }
-
-      if (state.engine.cherrypicks.isEmpty && state.engine.dartRevision.isEmpty) {
-        stdio.printStatus(
-          'This release has no engine cherrypicks. No Engine PR is necessary.\n',
-        );
-        break;
-      }
-
-      if (unappliedCherrypicks.isEmpty) {
-        stdio.printStatus('All engine cherrypicks have been auto-applied by '
-            'the conductor.\n');
-      } else {
-        stdio.printStatus(
-          'There were ${unappliedCherrypicks.length} cherrypicks that were not auto-applied.');
-        stdio.printStatus('These must be applied manually in the directory '
-          '${state.engine.checkoutPath} before proceeding.\n');
-      }
-      if (autoAccept == false) {
-        final bool response = prompt(
-            'Are you ready to push your engine branch to the repository '
-            '${state.engine.mirror.url}?',
-          stdio,
-        );
-        if (!response) {
-          stdio.printError('Aborting command.');
-          writeStateToFile(stateFile, state, stdio.logs);
-          return;
-        }
-      }
       final Remote upstream = Remote(
         name: RemoteName.upstream,
         url: state.engine.upstream.url,
@@ -142,9 +107,59 @@ void runNext({
       );
       final String headRevision = engine.reverseParse('HEAD');
 
+      // check if the candidate branch is enabled in .ci.yaml
+      if (!engine.ciYaml.enabledBranches.contains(state.engine.candidateBranch)) {
+        engine.ciYaml.enableBranch(state.engine.candidateBranch);
+        // commit
+        final String revision = engine.commit(
+          'add branch ${state.engine.candidateBranch} to enabled_branches in .ci.yaml',
+          addFirst: true,
+        );
+        // append to list of cherrypicks so we know a PR is required
+        state.engine.cherrypicks.add(pb.Cherrypick(
+          appliedRevision: revision,
+          state: pb.CherrypickState.COMPLETED,
+        ));
+      }
+
+      if (!requiresEnginePR(state)) {
+        stdio.printStatus(
+          'This release has no engine cherrypicks. No Engine PR is necessary.\n',
+        );
+        break;
+      }
+
+      final List<pb.Cherrypick> unappliedCherrypicks = <pb.Cherrypick>[];
+      for (final pb.Cherrypick cherrypick in state.engine.cherrypicks) {
+        if (!finishedStates.contains(cherrypick.state)) {
+          unappliedCherrypicks.add(cherrypick);
+        }
+      }
+
+      if (unappliedCherrypicks.isEmpty) {
+        stdio.printStatus('All engine cherrypicks have been auto-applied by the conductor.\n');
+      } else {
+        stdio.printStatus('There were ${unappliedCherrypicks.length} cherrypicks that were not auto-applied.');
+        stdio.printStatus('These must be applied manually in the directory '
+            '${state.engine.checkoutPath} before proceeding.\n');
+      }
+      if (autoAccept == false) {
+        final bool response = prompt(
+          'Are you ready to push your engine branch to the repository '
+          '${state.engine.mirror.url}?',
+          stdio,
+        );
+        if (!response) {
+          stdio.printError('Aborting command.');
+          writeStateToFile(stateFile, state, stdio.logs);
+          return;
+        }
+      }
+
       engine.pushRef(
         fromRef: headRevision,
-        toRef: state.engine.workingBranch,
+        // Explicitly create new branch
+        toRef: 'refs/heads/${state.engine.workingBranch}',
         remote: state.engine.mirror.name,
       );
 
@@ -168,13 +183,6 @@ void runNext({
       }
       break;
     case pb.ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS:
-      final List<pb.Cherrypick> unappliedCherrypicks = <pb.Cherrypick>[];
-      for (final pb.Cherrypick cherrypick in state.framework.cherrypicks) {
-        if (!finishedStates.contains(cherrypick.state)) {
-          unappliedCherrypicks.add(cherrypick);
-        }
-      }
-
       if (state.engine.cherrypicks.isEmpty && state.engine.dartRevision.isEmpty) {
         stdio.printStatus(
           'This release has no engine cherrypicks, and thus the engine.version file\n'
@@ -189,13 +197,15 @@ void runNext({
           break;
         }
       }
+      final Remote engineUpstreamRemote = Remote(
+        name: RemoteName.upstream,
+        url: state.engine.upstream.url,
+      );
       final EngineRepository engine = EngineRepository(
         checkouts,
-        initialRef: state.engine.candidateBranch,
-        upstreamRemote: Remote(
-          name: RemoteName.upstream,
-          url: state.engine.upstream.url,
-        ),
+        // We explicitly want to check out the merged version from upstream
+        initialRef: '${engineUpstreamRemote.name}/${state.engine.candidateBranch}',
+        upstreamRemote: engineUpstreamRemote,
         previousCheckoutLocation: state.engine.checkoutPath,
       );
 
@@ -213,9 +223,41 @@ void runNext({
       );
       final String headRevision = framework.reverseParse('HEAD');
 
+      // Check if the current candidate branch is enabled
+      if (!framework.ciYaml.enabledBranches.contains(state.framework.candidateBranch)) {
+        framework.ciYaml.enableBranch(state.framework.candidateBranch);
+        // commit
+        final String revision = framework.commit(
+          'add branch ${state.framework.candidateBranch} to enabled_branches in .ci.yaml',
+          addFirst: true,
+        );
+        // append to list of cherrypicks so we know a PR is required
+        state.framework.cherrypicks.add(pb.Cherrypick(
+          appliedRevision: revision,
+          state: pb.CherrypickState.COMPLETED,
+        ));
+      }
+
       stdio.printStatus('Rolling new engine hash $engineRevision to framework checkout...');
-      framework.updateEngineRevision(engineRevision);
-      framework.commit('Update Engine revision to $engineRevision for ${state.releaseChannel} release ${state.releaseVersion}', addFirst: true);
+      final bool needsCommit = framework.updateEngineRevision(engineRevision);
+      if (needsCommit) {
+        final String revision = framework.commit(
+          'Update Engine revision to $engineRevision for ${state.releaseChannel} release ${state.releaseVersion}',
+          addFirst: true,
+        );
+        // append to list of cherrypicks so we know a PR is required
+        state.framework.cherrypicks.add(pb.Cherrypick(
+          appliedRevision: revision,
+          state: pb.CherrypickState.COMPLETED,
+        ));
+      }
+
+      final List<pb.Cherrypick> unappliedCherrypicks = <pb.Cherrypick>[];
+      for (final pb.Cherrypick cherrypick in state.framework.cherrypicks) {
+        if (!finishedStates.contains(cherrypick.state)) {
+          unappliedCherrypicks.add(cherrypick);
+        }
+      }
 
       if (state.framework.cherrypicks.isEmpty) {
         stdio.printStatus(
@@ -249,7 +291,8 @@ void runNext({
 
       framework.pushRef(
         fromRef: headRevision,
-        toRef: state.framework.workingBranch,
+        // Explicitly create new branch
+        toRef: 'refs/heads/${state.framework.workingBranch}',
         remote: state.framework.mirror.name,
       );
       break;
@@ -262,7 +305,8 @@ void runNext({
       );
       final FrameworkRepository framework = FrameworkRepository(
         checkouts,
-        initialRef: state.framework.candidateBranch,
+        // We explicitly want to check out the merged version from upstream
+        initialRef: '${upstream.name}/${state.framework.candidateBranch}',
         upstreamRemote: upstream,
         previousCheckoutLocation: state.framework.checkoutPath,
       );
@@ -288,7 +332,8 @@ void runNext({
       );
       final FrameworkRepository framework = FrameworkRepository(
         checkouts,
-        initialRef: state.framework.candidateBranch,
+        // We explicitly want to check out the merged version from upstream
+        initialRef: '${upstream.name}/${state.framework.candidateBranch}',
         upstreamRemote: upstream,
         previousCheckoutLocation: state.framework.checkoutPath,
       );

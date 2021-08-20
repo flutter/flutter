@@ -197,7 +197,7 @@ class Directionality extends InheritedWidget {
 ///
 /// Animating an [Opacity] widget directly causes the widget (and possibly its
 /// subtree) to rebuild each frame, which is not very efficient. Consider using
-/// an [AnimatedOpacity] instead.
+/// an [AnimatedOpacity] or a [FadeTransition] instead.
 ///
 /// ## Transparent image
 ///
@@ -6139,8 +6139,8 @@ class RawImage extends LeafRenderObjectWidget {
       matchTextDirection: matchTextDirection,
       textDirection: matchTextDirection || alignment is! Alignment ? Directionality.of(context) : null,
       invertColors: invertColors,
-      filterQuality: filterQuality,
       isAntiAlias: isAntiAlias,
+      filterQuality: filterQuality,
     );
   }
 
@@ -6158,14 +6158,16 @@ class RawImage extends LeafRenderObjectWidget {
       ..height = height
       ..scale = scale
       ..color = color
+      ..opacity = opacity
       ..colorBlendMode = colorBlendMode
-      ..alignment = alignment
       ..fit = fit
+      ..alignment = alignment
       ..repeat = repeat
       ..centerSlice = centerSlice
       ..matchTextDirection = matchTextDirection
       ..textDirection = matchTextDirection || alignment is! Alignment ? Directionality.of(context) : null
       ..invertColors = invertColors
+      ..isAntiAlias = isAntiAlias
       ..filterQuality = filterQuality;
   }
 

@@ -2651,21 +2651,21 @@ class RenderFittedBox extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (size.isEmpty || child!.size.isEmpty)
+    if (child == null || size.isEmpty || child!.size.isEmpty)
       return;
     _updatePaintData();
-    if (child != null) {
-      if (_hasVisualOverflow! && clipBehavior != Clip.none)
-        layer = context.pushClipRect(
-          needsCompositing,
-          offset,
-          Offset.zero & size,
-          _paintChildWithTransform,
-          oldLayer: layer is ClipRectLayer ? layer! as ClipRectLayer : null,
-          clipBehavior: clipBehavior,
-        );
-      else
-        layer = _paintChildWithTransform(context, offset);
+    assert(child != null);
+    if (_hasVisualOverflow! && clipBehavior != Clip.none) {
+      layer = context.pushClipRect(
+        needsCompositing,
+        offset,
+        Offset.zero & size,
+        _paintChildWithTransform,
+        oldLayer: layer is ClipRectLayer ? layer! as ClipRectLayer : null,
+        clipBehavior: clipBehavior,
+      );
+    } else {
+      layer = _paintChildWithTransform(context, offset);
     }
   }
 
@@ -3075,7 +3075,7 @@ class RenderMouseRegion extends RenderProxyBox implements MouseTrackerAnnotation
 /// application and the rest of the application would not repaint.
 ///
 /// To tell if a particular RenderRepaintBoundary is useful, run your
-/// application in checked mode, interacting with it in typical ways, and then
+/// application in debug mode, interacting with it in typical ways, and then
 /// call [debugDumpRenderTree]. Each RenderRepaintBoundary will include the
 /// ratio of cases where the repaint boundary was useful vs the cases where it
 /// was not. These counts can also be inspected programmatically using
@@ -3237,7 +3237,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
       return true;
     }());
     if (inReleaseMode)
-      properties.add(DiagnosticsNode.message('(run in checked mode to collect repaint boundary statistics)'));
+      properties.add(DiagnosticsNode.message('(run in debug mode to collect repaint boundary statistics)'));
   }
 }
 

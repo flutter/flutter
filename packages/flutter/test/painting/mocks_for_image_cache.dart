@@ -44,6 +44,9 @@ class TestImageInfo implements ImageInfo {
   }
 
   @override
+  int get sizeBytes => image.height * image.width * 4;
+
+  @override
   int get hashCode => hashValues(value, image, scale, debugLabel);
 
   @override
