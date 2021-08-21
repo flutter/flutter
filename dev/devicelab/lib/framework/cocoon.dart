@@ -120,7 +120,7 @@ class Cocoon {
     required String resultsPath,
   }) async {
     final Map<String, dynamic> updateRequest = _constructUpdateRequest(
-      gitBranch: gitBranch,
+      gitBranch: gitBranch ?? 'master',
       builderName: builderName,
       result: result,
     );
