@@ -1008,7 +1008,13 @@ class FakeFuchsiaSdk extends Fake implements FuchsiaSdk {
 
 class FakeDartDevelopmentService extends Fake implements DartDevelopmentService {
   @override
-  Future<void> startDartDevelopmentService(Uri observatoryUri, int hostPort, bool ipv6, bool disableServiceAuthCodes, {Logger logger}) async { }
+  Future<void> startDartDevelopmentService(
+    Uri observatoryUri, {
+    @required Logger logger,
+    int hostPort,
+    bool ipv6,
+    bool disableServiceAuthCodes,
+  }) async {}
 
   @override
   Uri get uri => Uri.parse('example');
