@@ -1676,6 +1676,17 @@ targets:
       task_name: web_size__compile_test
     scheduler: luci
 
+  - name: Linux Android Views
+    recipe: flutter/android_views
+    properties:
+      dependencies: >-
+        [
+          # {"dependency": "android_sdk"},
+          # {"dependency": "android_avd"},
+        ]
+    timeout: 60
+    scheduler: luci
+
   - name: Mac build_aar_module_test
     recipe: devicelab/devicelab_drone
     timeout: 60
