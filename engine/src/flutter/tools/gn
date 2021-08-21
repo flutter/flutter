@@ -85,6 +85,14 @@ def cpu_for_target_arch(arch):
   if arch in ['x64', 'arm64', 'simarm64', 'simdbc64', 'armsimdbc64']:
     return 'x64'
 
+def is_host_build(args):
+    # If target_os == None, then this is a host build.
+    # However, for linux arm64 builds, we cross compile from x64 hosts, so the
+    # target_os='linux' and linux-cpu='arm64'
+    # TODO(fujino): make host platform explicit
+    #   https://github.com/flutter/flutter/issues/79403
+    return args.target_os is None or args.target_os == 'linux'
+
 # Determines whether a prebuilt Dart SDK can be used instead of building one.
 # We can use a prebuilt Dart SDK when:
 # 1. It is a host build, or a build targeting desktop
@@ -328,13 +336,17 @@ def to_gn_args(args):
     # use it instead of building a new one.
     if args.prebuilt_dart_sdk:
       if can_use_prebuilt_dart(args):
+        print('Using prebuilt Dart SDK binary. If you are editing Dart sources '
+              'and wish to compile the Dart SDK, set `--no-prebuilt-dart-sdk`.')
         gn_args['flutter_prebuilt_dart_sdk'] = True
         gn_args['dart_sdk_output'] = 'built-dart-sdk'
-      else:
-        print('--prebuilt-dart-sdk was specified, but an appropriate prebuilt '
-              'could not be found! Try running '
-              'flutter/tools/download_dart_sdk.py manually.')
-    elif args.target_os is None or args.target_os == 'linux':
+      elif is_host_build(args):
+        print('Tried to download prebuilt Dart SDK but an appropriate version '
+                'could not be found!')
+        print('Either retry by running '
+              'flutter/tools/download_dart_sdk.py manually or compile from '
+              'source by setting `--no-prebuilt-dart-sdk` flag to tools/gn')
+    elif is_host_build(args):
       # dart_platform_sdk is only defined for host builds, linux arm host builds
       # specify target_os=linux.
       # dart_platform_sdk=True means exclude web-related files, e.g. dart2js,
@@ -478,8 +490,10 @@ def parse_args(args):
                       help='Strip debug symbols from the output. This defaults to true and has no effect on iOS.')
   parser.add_argument('--no-stripped', dest='stripped', action='store_false')
 
-  parser.add_argument('--prebuilt-dart-sdk', default=False, action='store_true',
-                      help='Whether to use a prebuilt Dart SDK instead of building one.')
+  parser.add_argument('--prebuilt-dart-sdk', default=True, action='store_true',
+                      help='Whether to use a prebuilt Dart SDK instead of building one. This defaults to ' +
+                      'true and is enabled on CI.')
+  parser.add_argument('--no-prebuilt-dart-sdk', dest='prebuilt_dart_sdk', action='store_false')
 
   # Sanitizers.
   parser.add_argument('--asan', default=False, action='store_true')
