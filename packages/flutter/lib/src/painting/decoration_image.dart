@@ -153,7 +153,8 @@ class DecorationImage {
   /// change the opacity of an image.
   final double opacity;
 
-  /// Used to set the filterQuality of the image
+  /// Used to set the filterQuality of the image.
+  ///
   /// Use the "low" quality setting to scale the image, which corresponds to
   /// bilinear interpolation, rather than the default "none" which corresponds
   /// to nearest-neighbor.
@@ -161,7 +162,7 @@ class DecorationImage {
 
   /// Whether the colors of the image are inverted when drawn.
   ///
-  /// inverting the colors of an image applies a new color filter to the paint.
+  /// Inverting the colors of an image applies a new color filter to the paint.
   /// If there is another specified color filter, the invert will be applied
   /// after it. This is primarily used for implementing smart invert on iOS.
   ///
