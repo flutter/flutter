@@ -212,7 +212,7 @@ def Main():
   fail_loudly = 1 if args.fail_loudly else 0
   verbose = args.verbose
 
-  prebuilt_enabled = os.environ.get(FLUTTER_PREBUILTS_ENV_VAR, 'false')
+  prebuilt_enabled = os.environ.get(FLUTTER_PREBUILTS_ENV_VAR, 'true')
   if prebuilt_enabled == '0' or prebuilt_enabled.lower() == 'false':
     if verbose:
       print('Skipping prebuild Dart SDK download.')
