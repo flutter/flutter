@@ -53,7 +53,7 @@ class AbstractNode {
   /// Only call this method from overrides of [redepthChildren].
   @protected
   void redepthChild(AbstractNode child) {
-    assert(child.owner == owner);
+    //assert(child.owner == owner);
     if (child._depth <= _depth) {
       child._depth = _depth + 1;
       child.redepthChildren();
@@ -109,7 +109,7 @@ class AbstractNode {
   /// method, as in `super.detach()`.
   @mustCallSuper
   void detach() {
-    assert(_owner != null);
+    assert(_owner != null, 'Can not detach $this: already detached');
     _owner = null;
     //assert(parent == null || attached == parent!.attached);
   }

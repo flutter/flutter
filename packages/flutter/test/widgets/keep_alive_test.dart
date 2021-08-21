@@ -46,6 +46,17 @@ List<Widget> generateList(Widget child) {
   );
 }
 
+class _CustomPainter extends CustomPainter {
+  int paintCount = 0;
+  @override
+  void paint(Canvas canvas, Size size) {
+    paintCount += 1;
+  }
+
+  @override
+  bool shouldRepaint(_CustomPainter oldDelegate) => true;
+}
+
 void main() {
   testWidgets('KeepAlive with ListView with itemExtent', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -227,6 +238,84 @@ void main() {
       await tester.pump();
       expect(find.byKey(const GlobalObjectKey<_LeafState>('outer'), skipOffstage: false), findsNothing);
       expect(find.byKey(const GlobalObjectKey<_LeafState>('inner'), skipOffstage: false), findsNothing);
+    });
+  });
+
+  group('Global Key Reparenting', () {
+    final ScrollController outerScrollController = ScrollController();
+    final ScrollController innerScrollController = ScrollController();
+    final List<Widget> filler = List<Widget>.generate(50, (int i) => const SizedBox(height: 123));
+    final GlobalKey key = GlobalKey(debugLabel: 'Directionality');
+    const GlobalObjectKey<_LeafState> innerKey = GlobalObjectKey<_LeafState>('inner');
+    const GlobalObjectKey<_LeafState> outerKey = GlobalObjectKey<_LeafState>('outer');
+
+    Widget buildNestedListViews({ Widget child = const SizedBox() }) {
+      return Directionality(
+        key: key,
+        textDirection: TextDirection.ltr,
+        child: ListView(
+          controller: outerScrollController,
+          cacheExtent: 0.0,
+          addAutomaticKeepAlives: false,
+          addRepaintBoundaries: false,
+          addSemanticIndexes: false,
+          children: <Widget>[
+            Leaf(
+              key: outerKey,
+              child: SizedBox(
+                height: 800,
+                child: ListView(
+                  controller: innerScrollController,
+                  cacheExtent: 0.0,
+                  addAutomaticKeepAlives: false,
+                  addRepaintBoundaries: false,
+                  addSemanticIndexes: false,
+                  itemExtent: 123,
+                  children: <Widget>[
+                    Leaf(key: innerKey, child: child),
+                    ...filler,
+                  ],
+                ),
+              ),
+            ),
+            ...filler,
+          ],
+        ),
+      );
+    }
+
+    testWidgets('basic tests', (WidgetTester tester) async {
+      await tester.pumpWidget(buildNestedListViews());
+
+      // Keep both Leaf widgets alive.
+      innerKey.currentState!.setKeepAlive(true);
+      outerKey.currentState!.setKeepAlive(true);
+      await tester.pump();
+
+      innerScrollController.jumpTo(3000);
+      await tester.pump();
+      outerScrollController.jumpTo(3000);
+      await tester.pump();
+
+      // Reparent both
+      final _CustomPainter painter = _CustomPainter();
+
+      await tester.pumpWidget(
+        SizedBox(
+          child: buildNestedListViews(
+            child: RepaintBoundary(
+              child: CustomPaint(painter: painter),
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.renderObject(find.byKey(innerKey, skipOffstage: false)).hasStaleLayout, isTrue);
+      expect(tester.renderObject(find.byKey(outerKey, skipOffstage: false)).hasStaleLayout, isTrue);
+      expect(painter.paintCount, 0);
+    });
+
+    testWidgets('reparenting keptalive', (WidgetTester tester) async {
     });
   });
 

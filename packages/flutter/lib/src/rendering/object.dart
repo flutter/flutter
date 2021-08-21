@@ -801,7 +801,7 @@ abstract class RenderPipeline {
   /// information is dirty and needs updating.
   ///
   /// Typically called by [RenderObject.markNeedsLayout].
-  void scheduleLayoutForRenderObject(RenderObject renderObject);
+  void scheduleLayoutForRenderObject(RenderObject renderObject, { bool isInitialLayout = false });
 
   /// Update the layout information for all dirty render objects reported via
   /// [scheduleLayoutForRenderObject].
@@ -1000,7 +1000,7 @@ abstract class PipelineOwner implements RenderPipeline {
   bool get doesLayout => renderPipeline.doesLayout;
 
   @override
-  void scheduleLayoutForRenderObject(RenderObject renderObject) => renderPipeline.scheduleLayoutForRenderObject(renderObject);
+  void scheduleLayoutForRenderObject(RenderObject renderObject, { bool isInitialLayout = false }) => renderPipeline.scheduleLayoutForRenderObject(renderObject, isInitialLayout: isInitialLayout);
 
   /// Whether this pipeline is currently in the layout phase.
   ///
@@ -1236,10 +1236,30 @@ class _RootPipeline implements RenderPipeline {
   List<RenderObject> _nodesNeedingLayout = <RenderObject>[];
 
   @override
-  void scheduleLayoutForRenderObject(RenderObject renderObject) {
-    assert(renderObject.owner == owner);
-    if (renderObject._relayoutBoundary == renderObject) {
+  void scheduleLayoutForRenderObject(RenderObject renderObject, { bool isInitialLayout = false }) {
+    if (isInitialLayout) {
+      renderObject._needsLayout = true;
       _nodesNeedingLayout.add(renderObject);
+      return;
+    }
+
+    if (renderObject._needsLayout) {
+      assert(renderObject._debugSubtreeRelayoutRootAlreadyMarkedNeedsLayout());
+      return;
+    }
+
+    assert(renderObject.owner == owner);
+    assert(renderObject._relayoutBoundary != null);
+    if (renderObject._relayoutBoundary == renderObject) {
+      assert(() {
+        if (debugPrintMarkNeedsLayoutStacks)
+          debugPrintStack(label: 'markNeedsLayout() called for $renderObject');
+        return true;
+      }());
+
+      renderObject._needsLayout = true;
+      _nodesNeedingLayout.add(renderObject);
+      owner.requestVisualUpdate();
       return;
     }
 
@@ -1881,32 +1901,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// [markNeedsLayoutForSizedByParentChange] instead of [markNeedsLayout].
   void markNeedsLayout() {
     assert(_debugCanPerformMutations);
-    if (_needsLayout) {
-      assert(_debugSubtreeRelayoutRootAlreadyMarkedNeedsLayout());
-      return;
-    }
-
+    owner?.scheduleLayoutForRenderObject(this);
+    assert(_needsLayout || hasStaleLayout);
     _needsLayout = true;
-    final PipelineOwner? owner = this.owner;
-    if (owner == null) {
-      assert(() {
-        if (debugPrintMarkNeedsLayoutStacks) {
-          debugPrintStack(
-            label: 'markNeedsLayout() called for detached render object $this',
-          );
-        }
-        return true;
-      }());
-      return;
-    }
-    assert(() {
-      if (debugPrintMarkNeedsLayoutStacks)
-        debugPrintStack(label: 'markNeedsLayout() called for $this');
-      return true;
-    }());
-
-    owner.scheduleLayoutForRenderObject(this);
-    owner.requestVisualUpdate();
   }
 
   /// Mark this render object's layout information as dirty, and then defer to
@@ -1973,7 +1970,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       _debugCanParentUseSize = false;
       return true;
     }());
-    owner!.scheduleLayoutForRenderObject(this);
+    owner!.scheduleLayoutForRenderObject(this, isInitialLayout: true);
   }
 
   @pragma('vm:notify-debugger-on-exception')
