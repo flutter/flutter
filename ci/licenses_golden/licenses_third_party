@@ -1,4 +1,4 @@
-Signature: d5acd8c1cd845c39caa3211a35eea370
+Signature: d050875e8a1be4d1c6660001d488883e
 
 UNUSED LICENSES:
 
@@ -1231,10 +1231,11 @@ FILE: ../../../third_party/wuffs/example/cbor-to-json/cbor-to-json.cc
 FILE: ../../../third_party/wuffs/example/convert-to-nia/convert-to-nia.c
 FILE: ../../../third_party/wuffs/example/crc32/crc32.cc
 FILE: ../../../third_party/wuffs/example/gifplayer/gifplayer.c
-FILE: ../../../third_party/wuffs/example/imageviewer/imageviewer.c
+FILE: ../../../third_party/wuffs/example/imageviewer/imageviewer.cc
 FILE: ../../../third_party/wuffs/example/json-to-cbor/json-to-cbor.cc
 FILE: ../../../third_party/wuffs/example/jsonfindptrs/jsonfindptrs.cc
 FILE: ../../../third_party/wuffs/example/jsonptr/jsonptr.cc
+FILE: ../../../third_party/wuffs/example/sdl-imageviewer/sdl-imageviewer.cc
 FILE: ../../../third_party/wuffs/example/toy-genlib/toy-genlib.c
 FILE: ../../../third_party/wuffs/example/zcat/zcat.c
 FILE: ../../../third_party/wuffs/fuzz/c/fuzzlib/fuzzlib.c
@@ -1243,6 +1244,7 @@ FILE: ../../../third_party/wuffs/fuzz/c/std/bmp_fuzzer.c
 FILE: ../../../third_party/wuffs/fuzz/c/std/cbor_fuzzer.c
 FILE: ../../../third_party/wuffs/fuzz/c/std/gif_fuzzer.c
 FILE: ../../../third_party/wuffs/fuzz/c/std/json_fuzzer.c
+FILE: ../../../third_party/wuffs/fuzz/c/std/pixel_swizzler_fuzzer.c
 FILE: ../../../third_party/wuffs/fuzz/c/std/png_fuzzer.c
 FILE: ../../../third_party/wuffs/fuzz/c/std/zlib_fuzzer.c
 FILE: ../../../third_party/wuffs/hello-wuffs-c/main.c
@@ -1252,6 +1254,8 @@ FILE: ../../../third_party/wuffs/internal/cgen/auxiliary/base.cc
 FILE: ../../../third_party/wuffs/internal/cgen/auxiliary/base.hh
 FILE: ../../../third_party/wuffs/internal/cgen/auxiliary/cbor.cc
 FILE: ../../../third_party/wuffs/internal/cgen/auxiliary/cbor.hh
+FILE: ../../../third_party/wuffs/internal/cgen/auxiliary/image.cc
+FILE: ../../../third_party/wuffs/internal/cgen/auxiliary/image.hh
 FILE: ../../../third_party/wuffs/internal/cgen/auxiliary/json.cc
 FILE: ../../../third_party/wuffs/internal/cgen/auxiliary/json.hh
 FILE: ../../../third_party/wuffs/internal/cgen/base/all-impl.c
@@ -1264,6 +1268,7 @@ FILE: ../../../third_party/wuffs/internal/cgen/base/image-public.h
 FILE: ../../../third_party/wuffs/internal/cgen/base/intconv-submodule.c
 FILE: ../../../third_party/wuffs/internal/cgen/base/io-private.h
 FILE: ../../../third_party/wuffs/internal/cgen/base/io-public.h
+FILE: ../../../third_party/wuffs/internal/cgen/base/magic-submodule.c
 FILE: ../../../third_party/wuffs/internal/cgen/base/memory-private.h
 FILE: ../../../third_party/wuffs/internal/cgen/base/memory-public.h
 FILE: ../../../third_party/wuffs/internal/cgen/base/pixconv-submodule.c
@@ -1291,6 +1296,8 @@ FILE: ../../../third_party/wuffs/lang/ast/sort.go
 FILE: ../../../third_party/wuffs/lang/ast/string.go
 FILE: ../../../third_party/wuffs/lang/ast/string_test.go
 FILE: ../../../third_party/wuffs/lang/builtin/builtin.go
+FILE: ../../../third_party/wuffs/lang/builtin/data.go
+FILE: ../../../third_party/wuffs/lang/builtin/gen.go
 FILE: ../../../third_party/wuffs/lang/check/assert.go
 FILE: ../../../third_party/wuffs/lang/check/bounds.go
 FILE: ../../../third_party/wuffs/lang/check/check.go
@@ -1306,6 +1313,11 @@ FILE: ../../../third_party/wuffs/lang/render/render.go
 FILE: ../../../third_party/wuffs/lang/token/list.go
 FILE: ../../../third_party/wuffs/lang/token/token.go
 FILE: ../../../third_party/wuffs/lang/wuffsroot/wuffsroot.go
+FILE: ../../../third_party/wuffs/lib/armneonintrinsics/ani.go
+FILE: ../../../third_party/wuffs/lib/armneonintrinsics/data.go
+FILE: ../../../third_party/wuffs/lib/armneonintrinsics/example_test.go
+FILE: ../../../third_party/wuffs/lib/armneonintrinsics/gen.go
+FILE: ../../../third_party/wuffs/lib/armneonintrinsics/type.go
 FILE: ../../../third_party/wuffs/lib/base38/base38.go
 FILE: ../../../third_party/wuffs/lib/base38/base38_test.go
 FILE: ../../../third_party/wuffs/lib/cgolz4/cgolz4.go
@@ -1356,9 +1368,12 @@ FILE: ../../../third_party/wuffs/script/base38-encode.go
 FILE: ../../../third_party/wuffs/script/bench-c-deflate-fragmentation.c
 FILE: ../../../third_party/wuffs/script/bench-go-deflate/main.go
 FILE: ../../../third_party/wuffs/script/bench-go-gif/main.go
+FILE: ../../../third_party/wuffs/script/bench-go-png/main.go
 FILE: ../../../third_party/wuffs/script/bench-rust-deflate/src/main.rs
 FILE: ../../../third_party/wuffs/script/bench-rust-gif-dot-rs/src/main.rs
 FILE: ../../../third_party/wuffs/script/bench-rust-gif/src/main.rs
+FILE: ../../../third_party/wuffs/script/bench-rust-png/src/main.rs
+FILE: ../../../third_party/wuffs/script/benchstat-ratio.go
 FILE: ../../../third_party/wuffs/script/checksum.go
 FILE: ../../../third_party/wuffs/script/compress-giflzw.go
 FILE: ../../../third_party/wuffs/script/convert-png-to-wbmp.go
@@ -1377,6 +1392,7 @@ FILE: ../../../third_party/wuffs/script/print-bits.go
 FILE: ../../../third_party/wuffs/script/print-byte-frequencies.go
 FILE: ../../../third_party/wuffs/script/print-crc32-example.go
 FILE: ../../../third_party/wuffs/script/print-crc32-magic-numbers.go
+FILE: ../../../third_party/wuffs/script/print-crc32-x86-sse42-magic-numbers.go
 FILE: ../../../third_party/wuffs/script/print-deflate-huff-table-size.go
 FILE: ../../../third_party/wuffs/script/print-deflate-magic-numbers.go
 FILE: ../../../third_party/wuffs/script/print-file-sizes-json.go
@@ -1389,14 +1405,22 @@ FILE: ../../../third_party/wuffs/script/print-mpb-powers-of-10.go
 FILE: ../../../third_party/wuffs/script/print-render-number-f64-tests.go
 FILE: ../../../third_party/wuffs/script/process-json-numbers.c
 FILE: ../../../third_party/wuffs/script/rac-random-seek-test.go
+FILE: ../../../third_party/wuffs/script/strip-png-ancillary-chunks.go
 FILE: ../../../third_party/wuffs/script/wuffs-deflate-decoder-decode-huffman.c
 FILE: ../../../third_party/wuffs/std/adler32/common_adler32.wuffs
+FILE: ../../../third_party/wuffs/std/adler32/common_up_arm_neon.wuffs
+FILE: ../../../third_party/wuffs/std/adler32/common_up_x86_sse42.wuffs
 FILE: ../../../third_party/wuffs/std/bmp/decode_bmp.wuffs
 FILE: ../../../third_party/wuffs/std/cbor/decode_cbor.wuffs
 FILE: ../../../third_party/wuffs/std/crc32/common_crc32.wuffs
+FILE: ../../../third_party/wuffs/std/crc32/common_up_arm_crc32.wuffs
+FILE: ../../../third_party/wuffs/std/crc32/common_up_x86_avx2.wuffs
+FILE: ../../../third_party/wuffs/std/crc32/common_up_x86_sse42.wuffs
 FILE: ../../../third_party/wuffs/std/deflate/common_consts.wuffs
 FILE: ../../../third_party/wuffs/std/deflate/decode_deflate.wuffs
-FILE: ../../../third_party/wuffs/std/deflate/decode_huffman_fast.wuffs
+FILE: ../../../third_party/wuffs/std/deflate/decode_huffman_bmi2.wuffs
+FILE: ../../../third_party/wuffs/std/deflate/decode_huffman_fast32.wuffs
+FILE: ../../../third_party/wuffs/std/deflate/decode_huffman_fast64.wuffs
 FILE: ../../../third_party/wuffs/std/deflate/decode_huffman_slow.wuffs
 FILE: ../../../third_party/wuffs/std/gif/common_consts.wuffs
 FILE: ../../../third_party/wuffs/std/gif/decode_gif.wuffs
@@ -1407,8 +1431,12 @@ FILE: ../../../third_party/wuffs/std/json/decode_json.wuffs
 FILE: ../../../third_party/wuffs/std/json/decode_quirks.wuffs
 FILE: ../../../third_party/wuffs/std/lzw/decode_lzw.wuffs
 FILE: ../../../third_party/wuffs/std/nie/decode_nie.wuffs
+FILE: ../../../third_party/wuffs/std/png/decode_filter_arm_neon.wuffs
 FILE: ../../../third_party/wuffs/std/png/decode_filter_fallback.wuffs
+FILE: ../../../third_party/wuffs/std/png/decode_filter_x86_sse42.wuffs
 FILE: ../../../third_party/wuffs/std/png/decode_png.wuffs
+FILE: ../../../third_party/wuffs/std/png/decode_swizzle_fallback.wuffs
+FILE: ../../../third_party/wuffs/std/png/decode_swizzle_tricky.wuffs
 FILE: ../../../third_party/wuffs/std/wbmp/decode_wbmp.wuffs
 FILE: ../../../third_party/wuffs/std/zlib/decode_zlib.wuffs
 ----------------------------------------------------------------------------------------------------
@@ -23894,6 +23922,7 @@ FILE: ../../../third_party/wuffs/go.sum
 FILE: ../../../third_party/wuffs/script/bench-rust-deflate/Cargo.toml
 FILE: ../../../third_party/wuffs/script/bench-rust-gif-dot-rs/Cargo.toml
 FILE: ../../../third_party/wuffs/script/bench-rust-gif/Cargo.toml
+FILE: ../../../third_party/wuffs/script/bench-rust-png/Cargo.toml
 ----------------------------------------------------------------------------------------------------
 Apache License
 Version 2.0, January 2004
