@@ -167,21 +167,28 @@ class _KeepAlivePipeline implements RenderPipeline {
 
   final RenderSliverMultiBoxAdaptor renderSliver;
 
+  bool markNeedsSweep = false;
   List<RenderSliverMultiBoxAdaptor> _dirtyNodes = <RenderSliverMultiBoxAdaptor>[];
+
+  bool _pipelineFlushScheduled = false;
+
   @override
-  void scheduleLayoutForRenderObject(RenderObject renderObject, { bool isInitialLayout = false }) {
-    assert(!isInitialLayout);
-    assert(renderObject.depth > renderSliver.depth);
-    if (renderObject is! RenderSliverMultiBoxAdaptor) {
+  void scheduleLayoutForRenderObject(RenderObject renderObject) {
+    if (renderObject is! RenderSliverMultiBoxAdaptor)
+      return;
+    assert(!identical(renderObject, renderSliver));
+    if (renderObject._needsKeepAliveBucketSweep) {
       return;
     }
-    if (renderSliver._keepAliveBucketSweepScheduled) {
-      return;
-    }
-    renderSliver._keepAliveBucketSweepScheduled = true;
-    renderSliver.markNeedsLayout();
-    assert(!renderObject.debugDoingThisLayout, '$renderObject');
+    renderObject._needsKeepAliveBucketSweep = true;
     _dirtyNodes.add(renderObject);
+
+    // Tell the parent pipeline owner that our RenderSliverMultiBoxAdaptor needs
+    // layout.
+    if (!_pipelineFlushScheduled) {
+      _pipelineFlushScheduled = true;
+      renderSliver.markNeedsLayout();
+    }
   }
 
   @override
@@ -191,24 +198,23 @@ class _KeepAlivePipeline implements RenderPipeline {
     // are no longer have render objects attached to, but still have unswept
     // keep alive buckets.
     renderSliver._sweepKeepAliveBucket();
+
     final List<RenderSliverMultiBoxAdaptor> dirtyNodes = _dirtyNodes..sort((RenderObject a, RenderObject b) => a.depth - b.depth);
     _dirtyNodes = <RenderSliverMultiBoxAdaptor>[];
     for (final RenderSliverMultiBoxAdaptor dirtyNode in dirtyNodes) {
-      assert(dirtyNode.depth > renderSliver.depth);
+      //assert(dirtyNode.depth > renderSliver.depth);
 
       // Skip a node if it requested relayout but got subsequently detached from
       // this pipeline owner.
       // If a node is newly attached to this pipeline owner it always requests
       // relayout.
-      if (dirtyNode.owner != renderSliver._keepAlivePipelineOwner) {
-        continue;
+      if (dirtyNode.owner == renderSliver._keepAlivePipelineOwner) {
+        dirtyNode._keepAlivePipelineOwner.flushLayout();
       }
-      dirtyNode._keepAlivePipelineOwner.flushLayout();
-      //dirtyNode._sweepKeepAliveBucket();
     }
     // Sweeping the descendant nodes should not redirty any other descendants:
-    // we're only removing render objects no longer kept alive.
-    //assert(_dirtyNodes.isEmpty, '$_dirtyNodes');
+    // we're only removing offscreen render objects no longer kept alive.
+    _dirtyNodes.clear();
   }
 
   @override
@@ -462,9 +468,15 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   void attach(PipelineOwner owner) {
     super.attach(owner);
     assert(_keepAlivePipelineOwner.renderPipeline._dirtyNodes.isEmpty);
+
     for(final RenderBox child in _keepAliveBucket.values)
       child.attach(_keepAlivePipelineOwner);
-    markNeedsLayout();
+    // After all nodes are attached, report to the owner.
+    if (!_keepAlivePipelineOwner.renderPipeline._pipelineFlushScheduled && _needsKeepAliveBucketSweep) {
+      _needsKeepAliveBucketSweep = false;
+      markNeedsLayout();
+      assert(_needsKeepAliveBucketSweep || debugNeedsLayout);
+    }
   }
 
   @override
@@ -473,6 +485,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
     for (final RenderBox child in _keepAliveBucket.values)
       child.detach();
     _keepAlivePipelineOwner.renderPipeline._dirtyNodes.clear();
+    _keepAlivePipelineOwner.renderPipeline._pipelineFlushScheduled = false;
   }
 
   @override
@@ -608,28 +621,33 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
         trailingGarbage -= 1;
       }
 
+      _needsKeepAliveBucketSweep = true;
       // This calls _sweepKeepAliveBucket on dirty RenderSliverMultiBoxAdaptor
       // descendants and this render object.
       _keepAlivePipelineOwner.flushLayout();
     });
   }
 
-  bool _keepAliveBucketSweepScheduled = false;
-  // Ask the child manager to remove the children that are no longer being
-  // kept alive. (This should cause _keepAliveBucket to change, so we have
-  // to prepare our list ahead of time.)
+  bool _needsKeepAliveBucketSweep = true;
+
   void _sweepKeepAliveBucket() {
+    if (!_needsKeepAliveBucketSweep)
+      return;
     final List<RenderBox> nodesToRemove = _keepAliveBucket.values.where((RenderBox child) {
       final SliverMultiBoxAdaptorParentData childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
       return !childParentData.keepAlive;
     }).toList(growable: false);
+
+    // Ask the child manager to remove the children that are no longer being
+    // kept alive. (This should cause _keepAliveBucket to change, so we have
+    // to prepare our list ahead of time.)
     nodesToRemove.forEach(_childManager.removeChild);
-    // print('swept keep alive bucket $this. nodes to remove: $nodesToRemove');
     assert(_keepAliveBucket.values.where((RenderBox child) {
       final SliverMultiBoxAdaptorParentData childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
       return !childParentData.keepAlive;
     }).isEmpty);
-    _keepAliveBucketSweepScheduled = false;
+    _needsKeepAliveBucketSweep = false;
+    _keepAlivePipelineOwner.renderPipeline._pipelineFlushScheduled = false;
   }
 
   /// Returns the index of the given child, as given by the

@@ -297,7 +297,7 @@ void main() {
       outerScrollController.jumpTo(3000);
       await tester.pump();
 
-      // Reparent both
+      // Reparent both keep alive widgets.
       final _CustomPainter painter = _CustomPainter();
 
       await tester.pumpWidget(
@@ -315,7 +315,189 @@ void main() {
       expect(painter.paintCount, 0);
     });
 
-    testWidgets('reparenting keptalive', (WidgetTester tester) async {
+    testWidgets('reparent to a keptalive widget', (WidgetTester tester) async {
+      final ScrollController targetController = ScrollController();
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Column(
+            children: <Widget>[
+              Expanded(
+                child: ListView(
+                  controller: targetController,
+                  cacheExtent: 0.0,
+                  addAutomaticKeepAlives: false,
+                  addRepaintBoundaries: false,
+                  addSemanticIndexes: false,
+                  children: <Widget>[
+                    // Target KeepAlive to reparent to.
+                    const KeepAlive(
+                      keepAlive: true,
+                      child: SizedBox(
+                        height: 600,
+                      ),
+                    ),
+                    ...filler,
+                  ],
+                ),
+                flex: 1,
+              ),
+              Expanded(child: buildNestedListViews(), flex: 1),
+            ],
+          ),
+        ),
+      );
+
+      // Keep the reparent destination alive.
+      targetController.jumpTo(3000);
+      await tester.pump();
+
+      // Keep both Leaf widgets alive.
+      innerKey.currentState!.setKeepAlive(true);
+      outerKey.currentState!.setKeepAlive(true);
+      await tester.pump();
+
+      innerScrollController.jumpTo(3000);
+      await tester.pump();
+      outerScrollController.jumpTo(3000);
+      await tester.pump();
+
+      // Reparent both keep alive widgets.
+      final _CustomPainter painter = _CustomPainter();
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Column(
+            children: <Widget>[
+              Expanded(
+                child: ListView(
+                  controller: targetController,
+                  cacheExtent: 0.0,
+                  addAutomaticKeepAlives: false,
+                  addRepaintBoundaries: false,
+                  addSemanticIndexes: false,
+                  children: <Widget>[
+                    KeepAlive(
+                      keepAlive: true,
+                      child: SizedBox(
+                        height: 600,
+                        child: buildNestedListViews(
+                          child: RepaintBoundary(
+                            child: CustomPaint(painter: painter),
+                          ),
+                        ),
+                      ),
+                    ),
+                    ...filler,
+                  ],
+                ),
+                flex: 1,
+              ),
+              const Expanded(child: SizedBox(), flex: 1),
+            ],
+          ),
+        ),
+      );
+
+      expect(tester.renderObject(find.byKey(outerKey, skipOffstage: false)).hasStaleLayout, isTrue);
+      expect(tester.renderObject(find.byKey(innerKey, skipOffstage: false)).hasStaleLayout, isTrue);
+      expect(painter.paintCount, 0);
+    });
+
+    testWidgets('reparent to a keptalive widget while turning keepalive off', (WidgetTester tester) async {
+      final ScrollController targetController = ScrollController();
+      final _CustomPainter painter = _CustomPainter();
+      final Widget nestedListViews = buildNestedListViews(
+                          child: RepaintBoundary(
+                            child: CustomPaint(painter: painter),
+                          ),
+                        );
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Column(
+            children: <Widget>[
+              Expanded(
+                child: ListView(
+                  controller: targetController,
+                  cacheExtent: 0.0,
+                  addAutomaticKeepAlives: false,
+                  addRepaintBoundaries: false,
+                  addSemanticIndexes: false,
+                  children: <Widget>[
+                    // Target KeepAlive to reparent to.
+                    const KeepAlive(
+                      keepAlive: true,
+                      child: SizedBox(
+                        height: 600,
+                      ),
+                    ),
+                    ...filler,
+                  ],
+                ),
+                flex: 1,
+              ),
+              Expanded(child: nestedListViews, flex: 1),
+            ],
+          ),
+        ),
+      );
+
+      // Keep the reparent destination alive.
+      targetController.jumpTo(3000);
+      await tester.pump();
+
+      // Keep both Leaf widgets alive.
+      innerKey.currentState!.setKeepAlive(true);
+      outerKey.currentState!.setKeepAlive(true);
+      await tester.pump();
+
+      innerScrollController.jumpTo(3000);
+      await tester.pump();
+      outerScrollController.jumpTo(3000);
+      await tester.pump();
+
+      painter.paintCount = 0;
+      // Reparent both keep alive widgets while turning keep alive off for the
+      // inner subtree.
+      innerKey.currentState!.setKeepAlive(false);
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Column(
+            children: <Widget>[
+              Expanded(
+                child: ListView(
+                  controller: targetController,
+                  cacheExtent: 0.0,
+                  addAutomaticKeepAlives: false,
+                  addRepaintBoundaries: false,
+                  addSemanticIndexes: false,
+                  children: <Widget>[
+                    KeepAlive(
+                      keepAlive: true,
+                      child: SizedBox(
+                        height: 600,
+                        child: nestedListViews,
+                      ),
+                    ),
+                    ...filler,
+                  ],
+                ),
+                flex: 1,
+              ),
+              const Expanded(child: SizedBox(), flex: 1),
+            ],
+          ),
+        ),
+      );
+
+      expect(tester.renderObject(find.byKey(outerKey, skipOffstage: false)).hasStaleLayout, isTrue);
+      expect(find.byKey(innerKey, skipOffstage: false), findsNothing);
+      expect(painter.paintCount, 0);
     });
   });
 

@@ -1429,7 +1429,6 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 
   @override
   void removeRenderObjectChild(RenderBox child, int slot) {
-    assert(_currentlyUpdatingChildIndex != null);
     renderObject.remove(child);
   }
 
