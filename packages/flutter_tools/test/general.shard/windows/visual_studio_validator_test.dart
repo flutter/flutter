@@ -27,6 +27,10 @@ void main() {
       fakeVisualStudio.fullVersion = '16.2';
       fakeVisualStudio.displayName = 'Visual Studio Community 2019';
       fakeVisualStudio.windows10SDKVersion = '10.0.18362.0';
+      fakeVisualStudio.cmakePath = r'''
+      C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe
+      ''';
+      fakeVisualStudio.cmakeVersion = '3.15';
     }
 
     // Assigns default values for a complete VS installation that is too old.
@@ -37,6 +41,10 @@ void main() {
       fakeVisualStudio.fullVersion = '15.1';
       fakeVisualStudio.displayName = 'Visual Studio Community 2017';
       fakeVisualStudio.windows10SDKVersion = '10.0.17763.0';
+      fakeVisualStudio.cmakePath = r'''
+      C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe
+      ''';
+      fakeVisualStudio.cmakeVersion = '3.14';
     }
 
     // Assigns default values for a missing VS installation.
@@ -49,6 +57,8 @@ void main() {
       fakeVisualStudio.isRebootRequired = false;
       fakeVisualStudio.hasNecessaryComponents = false;
       fakeVisualStudio.windows10SDKVersion = null;
+      fakeVisualStudio.cmakePath = null;
+      fakeVisualStudio.cmakeVersion = null;
     }
 
     testWithoutContext('Emits a message when Visual Studio is a pre-release version', () async {
@@ -123,6 +133,22 @@ void main() {
           fakeVisualStudio.minimumVersionDescription,
           fakeVisualStudio.workloadDescription,
         ),
+      );
+
+      expect(result.messages.contains(expectedMessage), true);
+      expect(result.type, ValidationType.partial);
+    });
+
+    testWithoutContext('Emits partial status when Cmake is installed but too old', () async {
+      final VisualStudioValidator validator = VisualStudioValidator(
+        userMessages: userMessages,
+        visualStudio: fakeVisualStudio,
+      );
+      _configureMockVisualStudioAsTooOld();
+
+      final ValidationResult result = await validator.validate();
+      final ValidationMessage expectedMessage = ValidationMessage.error(
+        userMessages.cmakeTooOld('3.15'),
       );
 
       expect(result.messages.contains(expectedMessage), true);
@@ -229,6 +255,14 @@ class FakeVisualStudio extends Fake implements VisualStudio {
   String? displayName;
 
   String? windows10SDKVersion;
+
+  @override
+  String? cmakePath;
+
+  String? cmakeVersion;
+
+  @override
+  String? getCmakeVersion() => cmakeVersion;
 
   @override
   String? getWindows10SDKVersion() => windows10SDKVersion;
