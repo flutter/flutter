@@ -55,6 +55,49 @@ const Duration _kCursorBlinkWaitForStart = Duration(milliseconds: 150);
 // is shown in an obscured text field.
 const int _kObscureShowLatestCharCursorTicks = 3;
 
+class DeltaTextEditingController extends TextEditingController {
+  TextEditingValue applyDeltas(List<TextEditingDelta> deltas) {
+    String newText = value.text;
+    TextSelection newSelection = value.selection;
+    TextRange newComposingRegion = value.composing;
+
+    for (final TextEditingDelta delta in deltas) {
+      print('Delta type: ' + delta.deltaType.toString());
+      print('Delta old text: ' + delta.oldText);
+      print('Delta new text: ' + delta.deltaText);
+      print('Delta beginning of new range: ' + delta.deltaRange.start.toString());
+      print('Delta end of new range: ' + delta.deltaRange.end.toString());
+
+      switch(delta.deltaType) {
+        case TextEditingDeltaType.equality:
+          break;
+        case TextEditingDeltaType.insertion:
+          newText = replace(newText, delta.deltaText, delta.deltaRange.start, delta.deltaRange.end);
+          break;
+        case TextEditingDeltaType.deletion:
+          int deletionLength = delta.deltaText.length;
+          newText = replace(newText, "", delta.deltaRange.start - deletionLength, delta.deltaRange.end);
+          break;
+        case TextEditingDeltaType.replacement:
+          newText = replace(newText, delta.deltaText, delta.deltaRange.start, delta.deltaRange.end);
+          break;
+      }
+
+      newSelection = delta.selection;
+      newComposingRegion = delta.composing;
+    }
+
+    return value.copyWith(text: newText, selection: newSelection, composing: newComposingRegion);
+  }
+
+  String replace(String orig, String delta, int start, int end) {
+    String textStart = orig.substring(0, start);
+    String textEnd = orig.substring(end, orig.length);
+    String newText = textStart + delta + textEnd;
+    return newText;
+  }
+}
+
 /// A controller for an editable text field.
 ///
 /// Whenever the user modifies a text field with an associated
@@ -1796,16 +1839,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   TextEditingValue get currentTextEditingValue => _value;
 
   @override
-  void updateEditingValueWithDelta(TextEditingDelta delta) {
-    if (!_shouldCreateInputConnection) {
-      return;
-    }
-
-    print('Delta type: ' + delta.deltaType.toString());
-    print('Delta old text: ' + delta.oldText);
-    print('Delta new text: ' + delta.deltaText);
-    print('Delta beginning of new range: ' + delta.deltaRange.start.toString());
-    print('Delta end of new range: ' + delta.deltaRange.end.toString());
+  void updateEditingValueWithDeltas(List<TextEditingDelta> deltas) {
+    TextEditingValue value = (widget.controller as DeltaTextEditingController).applyDeltas(deltas);
+    updateEditingValue(value);
   }
 
   @override
@@ -2700,6 +2736,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       keyboardAppearance: widget.keyboardAppearance,
       autofillConfiguration: autofillConfiguration,
       enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
+      enableDeltaModel: true, //Proof of concept.
     );
   }
 

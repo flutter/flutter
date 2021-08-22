@@ -467,6 +467,7 @@ class TextInputConfiguration {
     this.textCapitalization = TextCapitalization.none,
     this.autofillConfiguration = AutofillConfiguration.disabled,
     this.enableIMEPersonalizedLearning = true,
+    this.enableDeltaModel = false,
   }) : assert(inputType != null),
        assert(obscureText != null),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
@@ -476,7 +477,8 @@ class TextInputConfiguration {
        assert(keyboardAppearance != null),
        assert(inputAction != null),
        assert(textCapitalization != null),
-       assert(enableIMEPersonalizedLearning != null);
+       assert(enableIMEPersonalizedLearning != null),
+       assert(enableDeltaModel != null);
 
   /// The type of information for which to optimize the text input control.
   final TextInputType inputType;
@@ -622,6 +624,7 @@ class TextInputConfiguration {
     TextCapitalization? textCapitalization,
     bool? enableIMEPersonalizedLearning,
     AutofillConfiguration? autofillConfiguration,
+    bool? enableDeltaModel,
   }) {
     return TextInputConfiguration(
       inputType: inputType ?? this.inputType,
@@ -636,8 +639,14 @@ class TextInputConfiguration {
       keyboardAppearance: keyboardAppearance ?? this.keyboardAppearance,
       enableIMEPersonalizedLearning: enableIMEPersonalizedLearning?? this.enableIMEPersonalizedLearning,
       autofillConfiguration: autofillConfiguration ?? this.autofillConfiguration,
+      enableDeltaModel: enableDeltaModel ?? this.enableDeltaModel,
     );
   }
+
+  /// Whether to enable that the engine sends text input updates to the
+  /// framework as [TextEditingDelta]'s or as one [TextEditingValue].
+  final bool enableDeltaModel;
+
   /// Returns a representation of this object as a JSON object.
   Map<String, dynamic> toJson() {
     final Map<String, dynamic>? autofill = autofillConfiguration.toJson();
@@ -655,6 +664,7 @@ class TextInputConfiguration {
       'keyboardAppearance': keyboardAppearance.toString(),
       'enableIMEPersonalizedLearning': enableIMEPersonalizedLearning,
       if (autofill != null) 'autofill': autofill,
+      'enableDeltaModel' : enableDeltaModel,
     };
   }
 }
@@ -721,7 +731,9 @@ class TextEditingDelta {
     required this.oldText,
     required this.deltaText,
     required this.deltaType,
-    required this.deltaRange
+    required this.deltaRange,
+    required this.selection,
+    required this.composing,
   });
 
   /// The old text state before the delta has occured.
@@ -736,6 +748,10 @@ class TextEditingDelta {
 
   /// The new [TextRange] as a result of the delta.
   final TextRange deltaRange;
+
+  final TextSelection selection;
+
+  final TextRange composing;
 
   /// Creates an instance of this class from a JSON object.
   factory TextEditingDelta.fromJSON(Map<String, dynamic> encoded) {
@@ -763,6 +779,16 @@ class TextEditingDelta {
       deltaRange: TextRange(
         start: encoded['deltaStart'] as int? ?? -1,
         end: encoded['deltaEnd'] as int? ?? -1,
+      ),
+      selection: TextSelection(
+        baseOffset: encoded['selectionBase'] as int? ?? -1,
+        extentOffset: encoded['selectionExtent'] as int? ?? -1,
+        affinity: _toTextAffinity(encoded['selectionAffinity'] as String?) ?? TextAffinity.downstream,
+        isDirectional: encoded['selectionIsDirectional'] as bool? ?? false,
+      ),
+      composing: TextRange(
+        start: encoded['composingBase'] as int? ?? -1,
+        end: encoded['composingExtent'] as int? ?? -1,
       ),
     );
   }
@@ -1024,9 +1050,9 @@ abstract class TextInputClient {
   /// Requests that this client update its editing state by applying the delta
   /// received from the engine.
   ///
-  /// The [delta] is treated as a change that will be applied to the client's
+  /// The [TextEditingDelta] is treated as a change that will be applied to the client's
   /// value.
-  void updateEditingValueWithDelta(TextEditingDelta delta);
+  void updateEditingValueWithDeltas(List<TextEditingDelta> deltas);
 
   /// Requests that this client perform the given action.
   void performAction(TextInputAction action);
@@ -1519,8 +1545,17 @@ class TextInput {
       case 'TextInputClient.updateEditingState':
         _currentConnection!._client.updateEditingValue(TextEditingValue.fromJSON(args[1] as Map<String, dynamic>));
         break;
-      case 'TextInputClient.updateEditingStateWithDelta':
-        _currentConnection!._client.updateEditingValueWithDelta(TextEditingDelta.fromJSON(args[1] as Map<String, dynamic>));
+      case 'TextInputClient.updateEditingStateWithDeltas':
+        List<TextEditingDelta> batchDeltas = [];
+
+        Map<String, dynamic> encoded = args[1] as Map<String, dynamic>;
+
+        for (final dynamic encodedDelta in encoded['batchDeltas']) {
+          final TextEditingDelta delta = TextEditingDelta.fromJSON(encodedDelta);
+          batchDeltas.add(delta);
+        }
+
+        _currentConnection!._client.updateEditingValueWithDeltas(batchDeltas);
         break;
       case 'TextInputClient.performAction':
         _currentConnection!._client.performAction(_toTextInputAction(args[1] as String));
