@@ -794,7 +794,7 @@ void main() {
       );
     }
 
-    // false for _handleDragEnd - when dragged to the end and released 
+    // false for _handleDragEnd - when dragged to the end and released
 
     await tester.pumpWidget(buildFrame());
 
@@ -806,7 +806,7 @@ void main() {
     completer.complete(false);
     await tester.pump();
 
-    // true for _handleDragEnd - when dragged to the end and released 
+    // true for _handleDragEnd - when dragged to the end and released
 
     await tester.pumpWidget(buildFrame());
 
@@ -892,7 +892,7 @@ void main() {
     expect(tester.getTopLeft(find.text('0')), position);
   });
 
-  testWidgets('null resizeDuration calls onDismissed immediately', (WidgetTester tester) async {
+  testWidgets('Dismissible with null resizeDuration calls onDismissed immediately', (WidgetTester tester) async {
     scrollDirection = Axis.vertical;
     dismissDirection = DismissDirection.horizontal;
 
