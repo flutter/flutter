@@ -181,13 +181,13 @@ struct PipelineColorAttachment {
   /// final_color = final_color & write_mask;
   /// ```
 
-  BlendFactor src_color_blend_factor = BlendFactor::kOne;
+  BlendFactor src_color_blend_factor = BlendFactor::kSourceAlpha;
   BlendOperation color_blend_op = BlendOperation::kAdd;
-  BlendFactor dst_color_blend_factor = BlendFactor::kZero;
+  BlendFactor dst_color_blend_factor = BlendFactor::kOneMinusSourceAlpha;
 
-  BlendFactor src_alpha_blend_factor = BlendFactor::kOne;
+  BlendFactor src_alpha_blend_factor = BlendFactor::kSourceAlpha;
   BlendOperation alpha_blend_op = BlendOperation::kAdd;
-  BlendFactor dst_alpha_blend_factor = BlendFactor::kZero;
+  BlendFactor dst_alpha_blend_factor = BlendFactor::kOneMinusSourceAlpha;
 
   std::underlying_type_t<ColorWriteMask> write_mask =
       static_cast<uint64_t>(ColorWriteMask::kAll);
