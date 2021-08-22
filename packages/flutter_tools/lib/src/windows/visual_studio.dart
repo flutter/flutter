@@ -14,7 +14,7 @@ import '../base/version.dart';
 import '../convert.dart';
 import '../globals_null_migrated.dart' as globals;
 
-// Beginning of Visual Studio Cmake doc directory. 
+// Beginning of Visual Studio Cmake doc directory.
 const String _cmakeDocDirTitle = 'cmake-';
 
 /// Encapsulates information about the installed copy of Visual Studio, if any.
