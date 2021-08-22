@@ -12,6 +12,10 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/version.dart';
 import '../convert.dart';
+import '../globals_null_migrated.dart' as globals;
+
+// Beginning of Visual Studio Cmake doc directory. 
+const String _cmakeDocDirTitle = 'cmake-';
 
 /// Encapsulates information about the installed copy of Visual Studio, if any.
 class VisualStudio {
@@ -165,6 +169,29 @@ class VisualStudio {
       'bin',
       'cmake.exe',
     ]);
+  }
+
+  String? getCmakeVersion() {
+    final String _cmakeDocPath = _fileSystem.path.joinAll(<String>[
+      _usableVisualStudioDetails[_installationPathKey] as String,
+      'Common7',
+      'IDE',
+      'CommonExtensions',
+      'Microsoft',
+      'CMake',
+      'CMake',
+      'doc',
+    ]);
+    final Directory _cmakeDocDir = globals.fs.directory(_cmakeDocPath);
+      if (!_cmakeDocDir.existsSync()) {
+        return null;
+    }
+    for (final Directory dir in _cmakeDocDir.listSync().whereType<Directory>()) {
+      final String result  = globals.fs.path.basename(dir.path);
+      return result.substring(_cmakeDocDirTitle.length);
+    }
+
+    return null;
   }
 
   /// The major version of the Visual Studio install, as an integer.

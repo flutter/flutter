@@ -197,6 +197,7 @@ class UserMessages {
   String visualStudioVersion(String name, String version) => '$name version $version';
   String visualStudioLocation(String location) => 'Visual Studio at $location';
   String windows10SdkVersion(String version) => 'Windows 10 SDK version $version';
+  String visualStudioCmakeVersion(String version) => 'Cmake version $version';
   String visualStudioMissingComponents(String workload, List<String> components) =>
       'Visual Studio is missing necessary components. Please re-run the '
       'Visual Studio installer for the "$workload" workload, and include these components:\n'

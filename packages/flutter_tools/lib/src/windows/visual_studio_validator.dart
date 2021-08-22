@@ -47,6 +47,16 @@ class VisualStudioValidator extends DoctorValidator {
         messages.add(ValidationMessage(_userMessages.windows10SdkVersion(windows10SdkVersion)));
       }
 
+      final String? cmakeVersion = _visualStudio.getCmakeVersion();
+      if (cmakeVersion != null) {
+        if (double.parse(cmakeVersion) >= 3.15) {
+          messages.add(ValidationMessage(_userMessages.visualStudioCmakeVersion(cmakeVersion)));
+        } else {
+          status = ValidationType.partial;
+          messages.add(ValidationMessage.hint(_userMessages.cmakeTooOld('3.15')));
+        }
+      }
+
       // Messages for faulty installations.
       if (!_visualStudio.isAtLeastMinimumVersion) {
         status = ValidationType.partial;
