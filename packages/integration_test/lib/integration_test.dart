@@ -297,19 +297,12 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   ///
   /// The `streams` and `retainPriorEvents` parameters are passed as-is to
   /// [traceTimeline].
-  ///
-  /// The `reportKey` must not be `'screenshots'`, which is reserved for
-  /// screenshots created by
-  /// [IntegrationTestWidgetsFlutterBinding.takeScreenshot].
   Future<void> traceAction(
     Future<dynamic> Function() action, {
     List<String> streams = const <String>['all'],
     bool retainPriorEvents = false,
     String reportKey = 'timeline',
   }) async {
-    if (reportKey == 'screenshots') {
-      throw ArgumentError('The "screenshots" reportKey is reserved.');
-    }
     final vm.Timeline timeline = await traceTimeline(
       action,
       streams: streams,
