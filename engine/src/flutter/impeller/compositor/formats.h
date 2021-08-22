@@ -159,27 +159,31 @@ constexpr size_t BytesPerPixelForPixelFormat(PixelFormat format) {
   return 0u;
 }
 
+//------------------------------------------------------------------------------
+/// @brief      Describe the color attachment that will be used with this
+///             pipeline.
+///
+/// Blending at specific color attachments follows the pseudocode:
+/// ```
+/// if (blending_enabled) {
+///   final_color.rgb = (src_color_blend_factor * new_color.rgb)
+///                             <color_blend_op>
+///                     (dst_color_blend_factor * old_color.rgb);
+///   final_color.a = (src_alpha_blend_factor * new_color.a)
+///                             <alpha_blend_op>
+///                     (dst_alpha_blend_factor * old_color.a);
+/// } else {
+///   final_color = new_color;
+/// }
+/// // IMPORTANT: The write mask is applied irrespective of whether
+/// //            blending_enabled is set.
+/// final_color = final_color & write_mask;
+/// ```
+///
+/// The default blend mode is 1 - source alpha.
 struct PipelineColorAttachment {
   PixelFormat format = PixelFormat::kUnknown;
   bool blending_enabled = false;
-
-  //----------------------------------------------------------------------------
-  /// Blending at specific color attachments follows the pseudocode:
-  /// ```
-  /// if (blending_enabled) {
-  ///   final_color.rgb = (src_color_blend_factor * new_color.rgb)
-  ///                             <color_blend_op>
-  ///                     (dst_color_blend_factor * old_color.rgb);
-  ///   final_color.a = (src_alpha_blend_factor * new_color.a)
-  ///                             <alpha_blend_op>
-  ///                     (dst_alpha_blend_factor * old_color.a);
-  /// } else {
-  ///   final_color = new_color;
-  /// }
-  /// // IMPORTANT: The write mask is applied irrespective of whether
-  /// //            blending_enabled is set.
-  /// final_color = final_color & write_mask;
-  /// ```
 
   BlendFactor src_color_blend_factor = BlendFactor::kSourceAlpha;
   BlendOperation color_blend_op = BlendOperation::kAdd;
