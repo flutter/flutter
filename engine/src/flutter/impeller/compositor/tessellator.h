@@ -16,8 +16,8 @@ namespace impeller {
 class Tessellator {
  public:
   enum class FillType {
-    kOdd,  // The default winding order.
-    kNonZero,
+    kNonZero,  // The default winding order.
+    kOdd,
     kPositive,
     kNegative,
     kAbsGeqTwo,
@@ -38,7 +38,7 @@ class Tessellator {
                                 VertexCallback callback) const;
 
  private:
-  FillType fill_type_ = FillType::kOdd;
+  FillType fill_type_ = FillType::kNonZero;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Tessellator);
 };
