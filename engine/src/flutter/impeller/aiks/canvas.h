@@ -34,6 +34,8 @@ class Canvas {
 
   size_t GetSaveCount() const;
 
+  void RestoreToCount(size_t count);
+
   const Matrix& GetCurrentTransformation() const;
 
   void Concat(const Matrix& xformation);
@@ -56,6 +58,7 @@ class Canvas {
 
  private:
   std::stack<Matrix> xformation_stack_;
+  std::stack<Paint> paint_stack_;
   std::vector<Entity> ops_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Canvas);

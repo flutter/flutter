@@ -11,7 +11,11 @@
 namespace impeller {
 
 Canvas::Canvas() {
-  xformation_stack_.push(Matrix{});
+  xformation_stack_.push({});
+
+  Paint default_paint;
+  default_paint.color = Color::White();
+  paint_stack_.push(default_paint);
 }
 
 Canvas::~Canvas() = default;
@@ -19,6 +23,7 @@ Canvas::~Canvas() = default;
 void Canvas::Save() {
   FML_DCHECK(xformation_stack_.size() > 0);
   xformation_stack_.push(xformation_stack_.top());
+  paint_stack_.push(paint_stack_.top());
 }
 
 bool Canvas::Restore() {
@@ -27,11 +32,12 @@ bool Canvas::Restore() {
     return false;
   }
   xformation_stack_.pop();
+  paint_stack_.pop();
   return true;
 }
 
 void Canvas::Concat(const Matrix& xformation) {
-  xformation_stack_.top() = xformation_stack_.top() * xformation;
+  xformation_stack_.top() = xformation * xformation_stack_.top();
 }
 
 const Matrix& Canvas::GetCurrentTransformation() const {
@@ -54,20 +60,28 @@ size_t Canvas::GetSaveCount() const {
   return xformation_stack_.size();
 }
 
-void AssertionBreak() {}
+void Canvas::RestoreToCount(size_t count) {
+  while (GetSaveCount() > count) {
+    if (!Restore()) {
+      return;
+    }
+  }
+}
 
 void Canvas::DrawPath(Path path, Paint paint) {
-  if (path.GetBoundingBox().IsZero()) {
-    AssertionBreak();
-  }
+  Color color = paint.color;
+  color.alpha *= paint_stack_.top().color.alpha;
   Entity entity;
   entity.SetTransformation(GetCurrentTransformation());
   entity.SetPath(std::move(path));
-  entity.SetBackgroundColor(paint.color);
+  entity.SetBackgroundColor(color);
   ops_.emplace_back(std::move(entity));
 }
 
-void Canvas::SaveLayer(const Paint& paint, std::optional<Rect> bounds) {}
+void Canvas::SaveLayer(const Paint& paint, std::optional<Rect> bounds) {
+  Save();
+  paint_stack_.top() = paint;
+}
 
 void Canvas::ClipPath(Path path) {
   Entity entity;
