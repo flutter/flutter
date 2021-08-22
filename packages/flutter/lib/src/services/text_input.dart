@@ -1524,6 +1524,21 @@ class TextInput {
       return;
     }
 
+    if (method == 'TextInputClient.updateEditingStateWithDeltasWithTag') {
+      assert(_currentConnection!._client != null);
+      final TextInputClient client = _currentConnection!._client;
+      final AutofillScope? scope = client.currentAutofillScope;
+      final Map<String, dynamic> editingDelta = args[1] as Map<String, dynamic>;
+      for (final String tag in editingDelta.keys) {
+        final TextEditingDelta textEditingDelta = TextEditingDelta.fromJSON(
+          editingDelta[tag],
+        );
+        scope?.getAutofillClient(tag)?.updateEditingValueWithDeltas([textEditingDelta]);
+      }
+
+      return;
+    }
+
     final int client = args[0] as int;
     if (client != _currentConnection!._id) {
       // If the client IDs don't match, the incoming message was for a different
