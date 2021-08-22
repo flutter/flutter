@@ -981,7 +981,9 @@ abstract class PipelineOwner implements RenderPipeline {
   ///
   /// Used to notify the pipeline owner that an associated render object wishes
   /// to update its visual appearance.
-  void requestVisualUpdate() => onNeedVisualUpdate?.call();
+  void requestVisualUpdate() {
+    onNeedVisualUpdate?.call();
+  }
 
   /// The unique object managed by this pipeline that has no parent.
   ///
@@ -1231,7 +1233,7 @@ abstract class PipelineOwner implements RenderPipeline {
 class _RootPipeline implements RenderPipeline {
   _RootPipeline(this.owner);
 
-  final PipelineOwner owner;
+  final _RootPipelineOwner owner;
 
   List<RenderObject> _nodesNeedingLayout = <RenderObject>[];
 
@@ -1349,7 +1351,7 @@ class _RootPipelineOwner extends PipelineOwner {
     );
 
   @override
-  late final RenderPipeline renderPipeline = _RootPipeline(this);
+  late final _RootPipeline renderPipeline = _RootPipeline(this);
 }
 
 /// An object in the render tree.
@@ -1893,8 +1895,11 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// [markNeedsLayoutForSizedByParentChange] instead of [markNeedsLayout].
   void markNeedsLayout() {
     assert(_debugCanPerformMutations);
+    final bool neededLayout = _needsLayout;
     owner?.scheduleLayoutForRenderObject(this);
-    owner?.requestVisualUpdate();
+    if (!neededLayout) {
+      owner?.requestVisualUpdate();
+    }
     assert(_needsLayout || hasStaleLayout);
     _needsLayout = true;
   }
