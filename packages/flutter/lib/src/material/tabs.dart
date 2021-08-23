@@ -1434,6 +1434,8 @@ class _TabBarViewState extends State<TabBarView> {
     super.didChangeDependencies();
     _updateTabController();
     _currentIndex = _controller?.index;
+    // if keepPages is true, [ScrollPosition.restoreScrollOffset] will execute,
+    // then initialPage maybe is ignore.
     _pageController = PageController(initialPage: _currentIndex ?? 0, keepPage: false);
   }
 

@@ -372,11 +372,7 @@ class DefaultTabController extends StatefulWidget {
   /// The [length] argument is typically greater than one. The [length] must
   /// match [TabBar.tabs]'s and [TabBarView.children]'s length.
   ///
-  /// The [initialIndex] argument must not be null.
-  ///
-  /// See also:
-  ///
-  ///  * [PageStorageKey] are used to remember the index.
+  /// The [initialIndex] argument must not be null
   const DefaultTabController({
     Key? key,
     required this.length,
@@ -395,7 +391,14 @@ class DefaultTabController extends StatefulWidget {
 
   /// The initial index of the selected tab.
   ///
+  /// if [key] is [PageStorageKey], and if an index is found in [PageStorage],
+  /// then this field is ignored.
+  ///
   /// Defaults to zero.
+  ///
+  /// See also:
+  ///
+  ///  * [PageStorageKey] are used to remember the index.
   final int initialIndex;
 
   /// The widget below this widget in the tree.
