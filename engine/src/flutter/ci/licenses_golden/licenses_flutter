@@ -778,8 +778,6 @@ FILE: ../../../flutter/shell/platform/android/android_surface_gl.cc
 FILE: ../../../flutter/shell/platform/android/android_surface_gl.h
 FILE: ../../../flutter/shell/platform/android/android_surface_software.cc
 FILE: ../../../flutter/shell/platform/android/android_surface_software.h
-FILE: ../../../flutter/shell/platform/android/android_surface_vulkan.cc
-FILE: ../../../flutter/shell/platform/android/android_surface_vulkan.h
 FILE: ../../../flutter/shell/platform/android/apk_asset_provider.cc
 FILE: ../../../flutter/shell/platform/android/apk_asset_provider.h
 FILE: ../../../flutter/shell/platform/android/context/android_context.cc

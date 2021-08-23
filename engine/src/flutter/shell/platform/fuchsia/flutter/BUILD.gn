@@ -17,6 +17,8 @@ import("//flutter/vulkan/config.gni")
 shell_gpu_configuration("fuchsia_gpu_configuration") {
   enable_software = false
   enable_gl = false
+
+  # TODO(dworsham): Enable once Fuchsia supports Vulkan through the embedder.
   enable_vulkan = false
   enable_metal = false
 }

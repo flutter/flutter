@@ -6,7 +6,7 @@ declare_args() {
   shell_enable_gl = !is_fuchsia
   shell_enable_metal = false
 
-  # TODO(gw280): Enable once Fuchsia supports Vulkan through the embedder
+  # TODO(dworsham): Enable once Fuchsia supports Vulkan through the embedder.
   shell_enable_vulkan = false
   shell_enable_software = true
 }
