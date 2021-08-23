@@ -1682,6 +1682,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk"},
+          {"dependency": "android_avd", "version": "31"},
         ]
     timeout: 60
     scheduler: luci
