@@ -47,10 +47,10 @@ class VertexBufferBuilder {
     return *this;
   }
 
-  VertexBuffer CreateVertexBuffer(HostBuffer& host) const {
+  VertexBuffer CreateVertexBuffer(HostBuffer& host_buffer) const {
     VertexBuffer buffer;
-    buffer.vertex_buffer = CreateVertexBufferView(host);
-    buffer.index_buffer = CreateIndexBufferView(host);
+    buffer.vertex_buffer = CreateVertexBufferView(host_buffer);
+    buffer.index_buffer = CreateIndexBufferView(host_buffer);
     buffer.index_count = GetIndexCount();
     return buffer;
   };

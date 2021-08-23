@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "impeller/entity/contents.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/matrix.h"
 #include "impeller/geometry/path.h"
@@ -48,9 +49,14 @@ class Entity {
 
   bool HasRenderableContents() const;
 
+  void SetContents(std::shared_ptr<Contents> contents);
+
+  const std::shared_ptr<Contents>& GetContents() const;
+
  private:
   Matrix transformation_;
   Color background_color_;
+  std::shared_ptr<Contents> contents_;
 
   Path path_;
   Color stroke_color_;

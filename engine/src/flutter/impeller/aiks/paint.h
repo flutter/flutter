@@ -6,6 +6,7 @@
 
 #include "flutter/fml/macros.h"
 
+#include "impeller/entity/contents.h"
 #include "impeller/geometry/color.h"
 
 namespace impeller {
@@ -13,6 +14,7 @@ namespace impeller {
 struct Paint {
   Color color;
   Scalar stroke_width = 0.0;
+  std::shared_ptr<Contents> contents;
 };
 
 }  // namespace impeller

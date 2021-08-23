@@ -16,6 +16,11 @@ EntityRendererImpl::EntityRendererImpl(std::shared_ptr<Context> context)
     return;
   }
 
+  content_renderer_ = std::make_unique<ContentRenderer>(context_);
+  if (!content_renderer_->IsValid()) {
+    return;
+  }
+
   solid_fill_pipeline_ = std::make_unique<SolidFillPipeline>(*context_);
 
   is_valid_ = true;
@@ -32,13 +37,10 @@ EntityRendererImpl::RenderResult EntityRendererImpl::RenderEntity(
     RenderPass& pass,
     const Entity& entity) {
   if (!entity.HasRenderableContents()) {
-    if (entity.GetPath().GetBoundingBox().IsZero()) {
-      FML_LOG(ERROR) << "Skipped because bounds box zero.";
-    }
     return RenderResult::kSkipped;
   }
 
-  if (entity.HasContents() && !entity.IsClip()) {
+  if (entity.HasContents() && !entity.IsClip() && !entity.GetContents()) {
     using VS = SolidFillPipeline::VertexShader;
 
     Command cmd;
@@ -50,7 +52,6 @@ EntityRendererImpl::RenderResult EntityRendererImpl::RenderEntity(
 
     VertexBufferBuilder<VS::PerVertexData> vtx_builder;
     {
-      TRACE_EVENT0("flutter", "Tesselate");
       auto tesselation_result = Tessellator{}.Tessellate(
           entity.GetPath().SubdivideAdaptively(), [&vtx_builder](auto point) {
             VS::PerVertexData vtx;
@@ -75,6 +76,12 @@ EntityRendererImpl::RenderResult EntityRendererImpl::RenderEntity(
     cmd.primitive_type = PrimitiveType::kTriangle;
 
     if (!pass.RecordCommand(std::move(cmd))) {
+      return RenderResult::kFailure;
+    }
+  } else if (entity.GetContents()) {
+    auto result =
+        entity.GetContents()->Render(*content_renderer_, entity, surface, pass);
+    if (!result) {
       return RenderResult::kFailure;
     }
   }
