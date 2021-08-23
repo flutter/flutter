@@ -630,7 +630,7 @@ class MediaQueryData {
         && other.boldText == boldText
         && other.navigationMode == navigationMode
         && other.gestureSettings == gestureSettings
-        && other.displayFeatures == displayFeatures;
+        && listEquals(other.displayFeatures, displayFeatures);
   }
 
   @override
