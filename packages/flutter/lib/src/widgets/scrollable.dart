@@ -525,7 +525,6 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
       _gestureDetectorKey.currentState!.replaceSemanticsActions(actions);
   }
 
-
   // GESTURE RECOGNITION AND POINTER IGNORING
 
   final GlobalKey<RawGestureDetectorState> _gestureDetectorKey = GlobalKey<RawGestureDetectorState>();
@@ -719,6 +718,15 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     }
   }
 
+  bool _handleScrollMetricsNotification(ScrollMetricsNotification notification) {
+    if (notification.depth == 0) {
+      final RenderObject? scrollSemanticsRenderObject = _scrollSemanticsKey.currentContext?.findRenderObject();
+      if (scrollSemanticsRenderObject != null)
+        scrollSemanticsRenderObject.markNeedsSemanticsUpdate();
+    }
+    return false;
+  }
+
   // DESCRIPTION
 
   @override
@@ -757,12 +765,15 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     );
 
     if (!widget.excludeFromSemantics) {
-      result = _ScrollSemantics(
-        key: _scrollSemanticsKey,
-        position: position,
-        allowImplicitScrolling: _physics!.allowImplicitScrolling,
-        semanticChildCount: widget.semanticChildCount,
-        child: result,
+      result = NotificationListener<ScrollMetricsNotification>(
+        onNotification: _handleScrollMetricsNotification,
+        child: _ScrollSemantics(
+          key: _scrollSemanticsKey,
+          position: position,
+          allowImplicitScrolling: _physics!.allowImplicitScrolling,
+          semanticChildCount: widget.semanticChildCount,
+          child: result,
+        )
       );
     }
 
