@@ -2350,6 +2350,7 @@ class _EngineSrcDirectory extends _RepositoryDirectory {
     return entry.name != 'build' // only used by build
         && entry.name != 'buildtools' // only used by build
         && entry.name != 'build_overrides' // only used by build
+        && entry.name != 'gradle' // only used by build
         && entry.name != 'ios_tools' // only used by build
         && entry.name != 'tools' // not distributed in binary
         && entry.name != 'out' // output of build
