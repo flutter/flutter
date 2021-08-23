@@ -14,7 +14,8 @@ SharedThreadMerger::SharedThreadMerger(fml::TaskQueueId owner,
                                        fml::TaskQueueId subsumed)
     : owner_(owner),
       subsumed_(subsumed),
-      task_queues_(fml::MessageLoopTaskQueues::GetInstance()) {}
+      task_queues_(fml::MessageLoopTaskQueues::GetInstance()),
+      enabled_(true) {}
 
 bool SharedThreadMerger::MergeWithLease(RasterThreadMergerId caller,
                                         size_t lease_term) {
@@ -83,6 +84,14 @@ void SharedThreadMerger::ExtendLeaseTo(RasterThreadMergerId caller,
 
 bool SharedThreadMerger::IsMergedUnSafe() const {
   return !IsAllLeaseTermsZeroUnSafe();
+}
+
+bool SharedThreadMerger::IsEnabledUnSafe() const {
+  return enabled_;
+}
+
+void SharedThreadMerger::SetEnabledUnSafe(bool enabled) {
+  enabled_ = enabled;
 }
 
 bool SharedThreadMerger::IsAllLeaseTermsZeroUnSafe() const {
