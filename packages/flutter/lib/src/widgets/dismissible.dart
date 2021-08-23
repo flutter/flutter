@@ -30,6 +30,11 @@ typedef DismissDirectionCallback = void Function(DismissDirection direction);
 /// Used by [Dismissible.confirmDismiss].
 typedef ConfirmDismissCallback = Future<bool?> Function(DismissDirection direction);
 
+/// Signature used by [Dismissible] to indicate whether the dismiss threshold has
+/// been reached
+/// Used by [Dismissible.onDismissThresholdReached].
+typedef DismissThresholdReachedCallback = void Function(DismissDirection direction, bool reached);
+
 /// The direction in which a [Dismissible] can be dismissed.
 enum DismissDirection {
   /// The [Dismissible] can be dismissed by dragging either up or down.
@@ -106,6 +111,7 @@ class Dismissible extends StatefulWidget {
     this.crossAxisEndOffset = 0.0,
     this.dragStartBehavior = DragStartBehavior.start,
     this.behavior = HitTestBehavior.opaque,
+    this.onDismissThresholdReached,
   }) : assert(key != null),
        assert(secondaryBackground == null || background != null),
        assert(dragStartBehavior != null),
@@ -205,6 +211,12 @@ class Dismissible extends StatefulWidget {
   /// This defaults to [HitTestBehavior.opaque].
   final HitTestBehavior behavior;
 
+  /// Called when the dismiss threshold has been reached while dragging the widget.
+  /// When the dismiss thresold is reached, this function is called with the value
+  /// true. Once the dismiss thresold is not reached anymore, this function is called with
+  /// the value false.
+  final DismissThresholdReachedCallback? onDismissThresholdReached;
+
   @override
   State<Dismissible> createState() => _DismissibleState();
 }
@@ -268,6 +280,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
   bool _confirming = false;
   bool _dragUnderway = false;
   Size? _sizePriorToCollapse;
+  bool _dismissThresholdReached = false;
 
   @override
   bool get wantKeepAlive => _moveController?.isAnimating == true || _resizeController?.isAnimating == true;
@@ -386,6 +399,15 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
     if (!_moveController!.isAnimating) {
       _moveController!.value = _dragExtent.abs() / _overallDragAxisExtent;
     }
+
+    if(widget.onDismissThresholdReached != null) {
+      bool oldDismissThresholdReached = _dismissThresholdReached;
+      _dismissThresholdReached = _moveController!.value > (widget.dismissThresholds[_dismissDirection] ?? _kDismissThreshold);
+
+      if (_dismissThresholdReached != oldDismissThresholdReached) {
+        widget.onDismissThresholdReached!(_dismissDirection, _dismissThresholdReached);
+      }
+    }
   }
 
   void _updateMoveAnimation() {
@@ -489,6 +511,10 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
         _startResizeAnimation();
       else
         _moveController!.reverse();
+        if(widget.onDismissThresholdReached != null) {
+          _dismissThresholdReached = false;
+          widget.onDismissThresholdReached!(_dismissDirection, _dismissThresholdReached);
+        }
     }
   }
 
