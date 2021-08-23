@@ -20,12 +20,12 @@ Future<FlutterDestination> connectFlutterDestination() async {
   print(env[kGcpProject]);
   print(File(env[kTokenPath]!).readAsStringSync().trim());
   // if (env.containsKey(kTokenPath) && env.containsKey(kGcpProject)) {
-    return FlutterDestination.makeFromAccessToken(
-      File(env[kTokenPath]!).readAsStringSync().trim(),
-      // env[kGcpProject]!,
-      'flutter-infra',
-      isTesting: isTesting,
-    );
+  return FlutterDestination.makeFromAccessToken(
+    File(env[kTokenPath]!).readAsStringSync().trim(),
+    // env[kGcpProject]!,
+    'flutter-infra',
+    isTesting: isTesting,
+  );
   // }
   // const String credential = '';
   // // final Map<String, dynamic> map = jsonDecode(credential) as Map<String, dynamic>;
@@ -53,8 +53,10 @@ Future<FlutterDestination> connectFlutterDestination() async {
 ///     ]
 ///   }
 List<MetricPoint> parse(Map<String, dynamic> resultsJson) {
-  final List<String> scoreKeys = (resultsJson['BenchmarkScoreKeys'] as List<dynamic>).cast<String>();
-  final Map<String, dynamic> resultData = resultsJson['ResultData'] as Map<String, dynamic>;
+  final List<String> scoreKeys =
+      (resultsJson['BenchmarkScoreKeys'] as List<dynamic>?)?.cast<String>() ?? const <String>[];
+  final Map<String, dynamic> resultData =
+      resultsJson['ResultData'] as Map<String, dynamic>? ?? const <String, dynamic>{};
   final String gitBranch = (resultsJson['CommitBranch'] as String).trim();
   final String gitSha = (resultsJson['CommitSha'] as String).trim();
   final String builderName = resultsJson['BuilderName'] as String;
@@ -78,23 +80,23 @@ List<MetricPoint> parse(Map<String, dynamic> resultsJson) {
 
 /// Upload test metrics to metrics center.
 Future<void> uploadToMetricsCenter(String? resultsPath, String? commitTime) async {
-  print ('commit time: $commitTime');
+  print('commit time: $commitTime');
   int commitTimeSinceEpoch;
   if (resultsPath == null) {
     return;
   }
   if (commitTime != null) {
-    print ('before parse commitTime: $commitTime');
+    print('before parse commitTime: $commitTime');
     commitTimeSinceEpoch = 1000 * int.parse(commitTime);
-    print ('after parse commitTime: $commitTime');
+    print('after parse commitTime: $commitTime');
   } else {
     commitTimeSinceEpoch = DateTime.now().millisecondsSinceEpoch;
   }
   final File resultFile = File(resultsPath);
   Map<String, dynamic> resultsJson = <String, dynamic>{};
-  print ('before reading result file: $resultFile');
+  print('before reading result file: $resultFile');
   resultsJson = json.decode(await resultFile.readAsString()) as Map<String, dynamic>;
-  print ('after reading result file: $resultsJson');
+  print('after reading result file: $resultsJson');
   final List<MetricPoint> metricPoints = parse(resultsJson);
   final FlutterDestination metricsDestination = await connectFlutterDestination();
   await metricsDestination.update(
