@@ -71,10 +71,13 @@ void Canvas::RestoreToCount(size_t count) {
 void Canvas::DrawPath(Path path, Paint paint) {
   Color color = paint.color;
   color.alpha *= paint_stack_.top().color.alpha;
+
   Entity entity;
   entity.SetTransformation(GetCurrentTransformation());
   entity.SetPath(std::move(path));
   entity.SetBackgroundColor(color);
+  entity.SetContents(std::move(paint.contents));
+
   ops_.emplace_back(std::move(entity));
 }
 

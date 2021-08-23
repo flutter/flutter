@@ -12,9 +12,10 @@
 #include "impeller/compositor/pipeline_builder.h"
 #include "impeller/compositor/render_pass.h"
 #include "impeller/compositor/surface.h"
+#include "impeller/entity/content_renderer.h"
 #include "impeller/entity/entity.h"
-#include "impeller/entity/path.vert.h"
 #include "impeller/entity/solid_fill.frag.h"
+#include "impeller/entity/solid_fill.vert.h"
 
 namespace impeller {
 
@@ -41,10 +42,11 @@ class EntityRendererImpl {
 
  private:
   using SolidFillPipeline =
-      PipelineT<PathVertexShader, SolidFillFragmentShader>;
+      PipelineT<SolidFillVertexShader, SolidFillFragmentShader>;
 
   std::shared_ptr<Context> context_;
   std::unique_ptr<SolidFillPipeline> solid_fill_pipeline_;
+  std::unique_ptr<ContentRenderer> content_renderer_;
 
   bool is_valid_ = false;
 
