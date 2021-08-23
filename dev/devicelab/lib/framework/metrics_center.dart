@@ -59,7 +59,7 @@ List<MetricPoint> parse(Map<String, dynamic> resultsJson) {
       resultsJson['ResultData'] as Map<String, dynamic>? ?? const <String, dynamic>{};
   final String gitBranch = (resultsJson['CommitBranch'] as String).trim();
   final String gitSha = (resultsJson['CommitSha'] as String).trim();
-  final String builderName = resultsJson['BuilderName'] as String;
+  final String builderName = (resultsJson['BuilderName'] as String).trim();
   final List<MetricPoint> metricPoints = <MetricPoint>[];
   for (final String scoreKey in scoreKeys) {
     metricPoints.add(
