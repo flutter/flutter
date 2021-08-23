@@ -197,7 +197,7 @@ class UserMessages {
   String visualStudioVersion(String name, String version) => '$name version $version';
   String visualStudioLocation(String location) => 'Visual Studio at $location';
   String windows10SdkVersion(String version) => 'Windows 10 SDK version $version';
-  String visualStudioCmakeVersion(String version) => 'Cmake version $version';
+  String visualStudioCmakeVersion(String version) => 'CMake version $version';
   String visualStudioMissingComponents(String workload, List<String> components) =>
       'Visual Studio is missing necessary components. Please re-run the '
       'Visual Studio installer for the "$workload" workload, and include these components:\n'
@@ -228,7 +228,7 @@ class UserMessages {
   String get cmakeMissing => 'CMake is required for Linux development.\n'
       'It is likely available from your distribution (e.g.: apt install cmake), or '
       'can be downloaded from https://cmake.org/download/';
-  String cmakeTooOld(String minimumVersion) => 'cmake $minimumVersion or later is required.';
+  String cmakeTooOld(String minimumVersion) => 'CMake $minimumVersion or later is required.';
   String ninjaVersion(String version) => 'ninja version $version';
   String get ninjaMissing => 'ninja is required for Linux development.\n'
       'It is likely available from your distribution (e.g.: apt install ninja-build), or '
