@@ -42,6 +42,14 @@ class SharedThreadMerger
   // See the doc of |RasterThreadMerger::IsMergedUnSafe|.
   bool IsMergedUnSafe() const;
 
+  // It's called by |RasterThreadMerger::IsEnabledUnSafe|.
+  // See the doc of |RasterThreadMerger::IsEnabledUnSafe|.
+  bool IsEnabledUnSafe() const;
+
+  // It's called by |RasterThreadMerger::Enable| or
+  // |RasterThreadMerger::Disable|.
+  void SetEnabledUnSafe(bool enabled);
+
   // It's called by |RasterThreadMerger::DecrementLease|.
   // See the doc of |RasterThreadMerger::DecrementLease|.
   bool DecrementLease(RasterThreadMergerId caller);
@@ -51,6 +59,7 @@ class SharedThreadMerger
   fml::TaskQueueId subsumed_;
   fml::RefPtr<fml::MessageLoopTaskQueues> task_queues_;
   std::mutex mutex_;
+  bool enabled_;
 
   /// The |MergeWithLease| or |ExtendLeaseTo| method will record the caller
   /// into this lease_term_by_caller_ map, |UnMergeNowIfLastOne|

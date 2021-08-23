@@ -709,9 +709,9 @@ void Shell::OnPlatformViewCreated(std::unique_ptr<Surface> surface) {
   //
   // This prevents false positives such as this method starts assuming that the
   // raster and platform queues have a given thread configuration, but then the
-  // configuration is changed by a task, and the asumption is not longer true.
+  // configuration is changed by a task, and the assumption is no longer true.
   //
-  // This incorrect assumption can lead to dead lock.
+  // This incorrect assumption can lead to deadlock.
   // See `should_post_raster_task` for more.
   rasterizer_->DisableThreadMergerIfNeeded();
 
@@ -719,7 +719,7 @@ void Shell::OnPlatformViewCreated(std::unique_ptr<Surface> surface) {
   // starting the sequence and waiting on the latch. Later the UI thread posts
   // raster_task to the raster thread which signals the latch. If the raster and
   // the platform threads are the same this results in a deadlock as the
-  // raster_task will never be posted to the plaform/raster thread that is
+  // raster_task will never be posted to the platform/raster thread that is
   // blocked on a latch. To avoid the described deadlock, if the raster and the
   // platform threads are the same, should_post_raster_task will be false, and
   // then instead of posting a task to the raster thread, the ui thread just
@@ -818,9 +818,9 @@ void Shell::OnPlatformViewDestroyed() {
   //
   // This prevents false positives such as this method starts assuming that the
   // raster and platform queues have a given thread configuration, but then the
-  // configuration is changed by a task, and the asumption is not longer true.
+  // configuration is changed by a task, and the assumption is no longer true.
   //
-  // This incorrect assumption can lead to dead lock.
+  // This incorrect assumption can lead to deadlock.
   // See `should_post_raster_task` for more.
   rasterizer_->DisableThreadMergerIfNeeded();
 
@@ -828,8 +828,8 @@ void Shell::OnPlatformViewDestroyed() {
   // starting the sequence and waiting on the latch. Later the UI thread posts
   // raster_task to the raster thread triggers signaling the latch(on the IO
   // thread). If the raster and the platform threads are the same this results
-  // in a deadlock as the raster_task will never be posted to the plaform/raster
-  // thread that is blocked on a latch.  To avoid the described deadlock, if the
+  // in a deadlock as the raster_task will never be posted to platform/raster
+  // thread that is blocked on a latch. To avoid the described deadlock, if the
   // raster and the platform threads are the same, should_post_raster_task will
   // be false, and then instead of posting a task to the raster thread, the ui
   // thread just signals the latch and the platform/raster thread follows with

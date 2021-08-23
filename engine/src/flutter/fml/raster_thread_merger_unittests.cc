@@ -361,6 +361,27 @@ TEST(RasterThreadMerger, IsEnabled) {
   ASSERT_TRUE(raster_thread_merger->IsEnabled());
 }
 
+TEST(RasterThreadMerger, TwoMergersWithSameThreadPairShareEnabledState) {
+  TaskQueueWrapper queue1;
+  TaskQueueWrapper queue2;
+  fml::TaskQueueId qid1 = queue1.GetTaskQueueId();
+  fml::TaskQueueId qid2 = queue2.GetTaskQueueId();
+  const auto merger1 =
+      RasterThreadMerger::CreateOrShareThreadMerger(nullptr, qid1, qid2);
+  const auto merger2 =
+      RasterThreadMerger::CreateOrShareThreadMerger(merger1, qid1, qid2);
+  ASSERT_TRUE(merger1->IsEnabled());
+  ASSERT_TRUE(merger2->IsEnabled());
+
+  merger1->Disable();
+  ASSERT_FALSE(merger1->IsEnabled());
+  ASSERT_FALSE(merger2->IsEnabled());
+
+  merger2->Enable();
+  ASSERT_TRUE(merger1->IsEnabled());
+  ASSERT_TRUE(merger2->IsEnabled());
+}
+
 TEST(RasterThreadMerger, RunExpiredTasksWhileFirstTaskMergesThreads) {
   fml::MessageLoop* loop_platform = nullptr;
   fml::AutoResetWaitableEvent latch1;

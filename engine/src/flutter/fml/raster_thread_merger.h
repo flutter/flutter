@@ -127,7 +127,6 @@ class RasterThreadMerger
   std::condition_variable merged_condition_;
   std::mutex mutex_;
   fml::closure merge_unmerge_callback_;
-  bool enabled_;
 
   bool IsMergedUnSafe() const;
 
