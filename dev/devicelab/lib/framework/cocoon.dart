@@ -92,6 +92,7 @@ class Cocoon {
     String? testStatus,
   }) async {
     Map<String, dynamic> resultsJson = <String, dynamic>{};
+    print('cocoon api resultsJson before: $resultsJson');
     if (resultsPath != null) {
       final File resultFile = fs.file(resultsPath);
       resultsJson = json.decode(await resultFile.readAsString()) as Map<String, dynamic>;
@@ -102,6 +103,7 @@ class Cocoon {
       resultsJson['NewStatus'] = testStatus;
     }
     resultsJson['TestFlaky'] = isTestFlaky ?? false;
+    print('cocoon api resultsJson after: $resultsJson');
     const List<String> supportedBranches = <String>['master'];
     if (supportedBranches.contains(resultsJson['CommitBranch'])) {
       await retry(
@@ -168,7 +170,9 @@ class Cocoon {
 
   Future<void> _sendUpdateTaskRequest(Map<String, dynamic> postBody) async {
     logger.info('Attempting to send update task request to Cocoon.');
+    print('Attempting to send update task request to Cocoon.');
     final Map<String, dynamic> response = await _sendCocoonRequest('update-task-status', postBody);
+    print('after calling update-task-status');
     if (response['Name'] != null) {
       logger.info('Updated Cocoon with results from this task');
     } else {
@@ -180,6 +184,7 @@ class Cocoon {
   /// Make an API request to Cocoon.
   Future<Map<String, dynamic>> _sendCocoonRequest(String apiPath, [dynamic jsonData]) async {
     final Uri url = Uri.parse('$baseCocoonApiUrl/$apiPath');
+    print ('uri: $url');
 
     /// Retry requests to Cocoon as sometimes there are issues with the servers, such
     /// as version changes to the backend, datastore issues, or latency issues.
@@ -188,6 +193,7 @@ class Cocoon {
       retryIf: (Exception e) => e is SocketException || e is TimeoutException || e is ClientException,
       maxAttempts: requestRetryLimit,
     );
+    print ('response: $response');
     return json.decode(response.body) as Map<String, dynamic>;
   }
 }
