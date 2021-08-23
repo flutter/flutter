@@ -43,6 +43,9 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
   }) : super(childManager: childManager);
 
   @override
+  bool get ignoreLayoutRequestsFromKeptAliveDescendants => true;
+
+  @override
   void performLayout() {
     final SliverConstraints constraints = this.constraints;
     childManager.didStartLayout();

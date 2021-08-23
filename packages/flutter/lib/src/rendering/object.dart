@@ -813,8 +813,8 @@ abstract class RenderPipeline {
   /// See [RendererBinding] for an example of how this function is used.
   void flushLayout();
 
-  /// Informs the [RenderPipeline] that the given [renderObject]'s combositing
-  /// bits needs updating.
+  /// Informs the [RenderPipeline] that the given [renderObject]'s compositing
+  /// bits need updating.
   ///
   /// Typically called by [RenderObject.markNeedsCompositingBitsUpdate].
   void scheduleCompositingBitsUpdateForRenderObject(RenderObject renderObject);
@@ -867,6 +867,13 @@ abstract class RenderPipeline {
 
   /// Whether calling the [flushLayout] method brings the dirty render objects'
   /// layout up-to-date.
+  ///
+  /// Some [RenderPipeline]s do not actually update the layout information of
+  /// dirty render objects (for instance, the ones used to manage offscreen
+  /// render objects). The [doesLayout] property should only return true if the
+  /// [flushLayout] implementation guarantees that every dirty render object
+  /// (reported via [scheduleLayoutForRenderObject]) that is currently attached
+  /// to this pipeline will be properly laid out.
   ///
   /// The property should always return the same value.
   ///
@@ -991,7 +998,7 @@ abstract class PipelineOwner implements RenderPipeline {
   AbstractNode? get rootNode => _rootNode;
   AbstractNode? _rootNode;
   set rootNode(AbstractNode? value) {
-    if (value == _rootNode)
+    if (_rootNode == value)
       return;
     _rootNode?.detach();
     _rootNode = value;
@@ -1786,14 +1793,17 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// skipping laying out dirty nodes.
   ///
   /// The layout process of the render tree this render object belongs to is
-  /// typically driven by its [owner]. Some render parents, such as lazy list
-  /// views and stacks, may choose to not layout dirty offscreen children, as a
+  /// typically driven by its [owner]. Some render objects, such as lazy list
+  /// views and stacks, may choose to not layout dirty offscreen children as a
   /// performance optimization. It is typically done by attaching these children
   /// to a special [PipelineOwner] that does not perform layout, or detaching
-  /// these children completely.
+  /// these children completely, and in boths case [hasStaleLayout] will return
+  /// true for these offscreen children.
   ///
-  /// It is recommended to verify [hasStaleLayout] is false before attempting
-  /// to access the layout information or paint transform of a render object.
+  /// It is recommended to verify [hasStaleLayout] is false before accessing
+  /// the render object's layout information (for instance, its paint transform).
+  /// Render objects that have stale layout information are typically offscreen,
+  /// so their layout information is rarely useful.
   ///
   /// See also:
   ///
@@ -3272,8 +3282,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// on screen.
   ///
   /// If `descendant` is provided, that [RenderObject] is made visible. If
-  /// `descendant` is omitted, or has not been laid out, this [RenderObject] is
-  /// made visible.
+  /// `descendant` is omitted, this [RenderObject] is made visible.
   ///
   /// The optional `rect` parameter describes which area of that [RenderObject]
   /// should be shown on screen. If `rect` is null, the entire
@@ -3297,11 +3306,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   }) {
     if (parent is RenderObject) {
       final RenderObject renderParent = parent! as RenderObject;
-      final RenderObject effectiveDescendant = descendant != null && descendant.attached
-        ? descendant
-        : this;
       renderParent.showOnScreen(
-        descendant: effectiveDescendant,
+        descendant: descendant ?? this,
         rect: rect,
         duration: duration,
         curve: curve,

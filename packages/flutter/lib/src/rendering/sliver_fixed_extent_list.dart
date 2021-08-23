@@ -171,6 +171,9 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
   }
 
   @override
+  bool get ignoreLayoutRequestsFromKeptAliveDescendants => true;
+
+  @override
   void performLayout() {
     final SliverConstraints constraints = this.constraints;
     childManager.didStartLayout();

@@ -165,17 +165,29 @@ class _KeepAlivePipelineOwner extends PipelineOwner {
 class _KeepAlivePipeline implements RenderPipeline {
   _KeepAlivePipeline(this.renderSliver);
 
+  // The RenderSliverMultiBoxAdaptor that owns this pipeline and uses this
+  // pipeline to manage its kept-alive descendants.
   final RenderSliverMultiBoxAdaptor renderSliver;
 
+  // Whether renderSliver's own _keepAliveBucket needs sweeping.
   bool markNeedsSweep = false;
+  // RenderSliverMultiBoxAdaptor descendants whose _keepAliveBucket needs
+  // sweeping.
   List<RenderSliverMultiBoxAdaptor> _dirtyNodes = <RenderSliverMultiBoxAdaptor>[];
 
   bool _pipelineFlushScheduled = false;
 
   @override
   void scheduleLayoutForRenderObject(RenderObject renderObject) {
-    if (renderObject is! RenderSliverMultiBoxAdaptor)
+    if (renderObject is! RenderSliverMultiBoxAdaptor) {
+      // We can usually ignore layout requests from kept-alive descendants
+      // unless kept-alive descendants' sizes affect
+      // RenderSliverMultiBoxAdaptor's layout algorithm.
+      if (!renderSliver.ignoreLayoutRequestsFromKeptAliveDescendants) {
+        renderSliver.markNeedsLayout();
+      }
       return;
+    }
     assert(!identical(renderObject, renderSliver));
     if (renderObject._needsKeepAliveBucketSweep) {
       return;
@@ -191,23 +203,17 @@ class _KeepAlivePipeline implements RenderPipeline {
     }
   }
 
+  // Sweeps all kept-alive render objects in the render subtree rooted at
+  // `renderSliver`. The subtree may contain other _KeepAlivePipelines.
   @override
   void flushLayout() {
-    // Sweeps all kept-alive render objects in the render subtree rooted at
-    // `renderSliver`. The subtree may contain other _KeepAlivePipelines that
-    // are no longer have render objects attached to, but still have unswept
-    // keep alive buckets.
     renderSliver._sweepKeepAliveBucket();
 
     final List<RenderSliverMultiBoxAdaptor> dirtyNodes = _dirtyNodes..sort((RenderObject a, RenderObject b) => a.depth - b.depth);
     _dirtyNodes = <RenderSliverMultiBoxAdaptor>[];
     for (final RenderSliverMultiBoxAdaptor dirtyNode in dirtyNodes) {
-      //assert(dirtyNode.depth > renderSliver.depth);
-
       // Skip a node if it requested relayout but got subsequently detached from
-      // this pipeline owner.
-      // If a node is newly attached to this pipeline owner it always requests
-      // relayout.
+      // this pipeline owner. The node will be handled by its new owner.
       if (dirtyNode.owner == renderSliver._keepAlivePipelineOwner) {
         dirtyNode._keepAlivePipelineOwner.flushLayout();
       }
@@ -215,6 +221,7 @@ class _KeepAlivePipeline implements RenderPipeline {
     // Sweeping the descendant nodes should not redirty any other descendants:
     // we're only removing offscreen render objects no longer kept alive.
     _dirtyNodes.clear();
+    _pipelineFlushScheduled = false;
   }
 
   @override
@@ -231,8 +238,6 @@ class _KeepAlivePipeline implements RenderPipeline {
   void scheduleSemanticsUpdateForRenderObject(RenderObject renderObject) { }
   @override
   void unscheduleSemanticsUpdateForRenderObject(RenderObject renderObject) { }
-
-
   @override
   void flushSemantics() { }
 
@@ -298,6 +303,9 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
 
   late final List<RenderBox> _debugDanglingKeepAlives = <RenderBox>[];
 
+  // This pipeline is typically driven by the [performLayout] method of this
+  // render object. All of its flush methods are no-ops except for `flushLayout`,
+  // which removes kept-alive descendants that should no longer be kept alive.
   late final _KeepAlivePipelineOwner _keepAlivePipelineOwner = _KeepAlivePipelineOwner(this);
 
   /// Indicates whether integrity check is enabled.
@@ -442,20 +450,17 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
       remove(child);
       _keepAliveBucket[childParentData.index!] = child;
       child.parentData = childParentData;
-      // Set up the render subtree rooted at child so it has the correct tree
-      // hierarchy, but every node in the subtree including child will be
-      // detached from the owner.
-      // This ensures none of the render objects in the subtree can submit dirty
-      // nodes to the pipeline owner for relayout and repaint, while still
-      // allowing these nodes to access their parent nodes, for calling
-      // showOnScreen or marking the parent node as needing layout, etc.
       super.adoptChild(child);
       child.detach();
 
       // _KeepAlivePipelineOwner's flushLayout method should only sweep
-      // _keepAliveBucket and removeChild. It should not call this method.
+      // _keepAliveBucket and call removeChild. It should not call this method.
       assert(owner is! _KeepAlivePipelineOwner);
       childParentData._keptAlive = true;
+      // This ensures none of the render objects in the subtree can submit dirty
+      // nodes to the pipeline owner for relayout and repaint, while still
+      // allowing these nodes to access their parent nodes, for calling
+      // showOnScreen or marking the parent node as needing layout, etc.
       child.attach(_keepAlivePipelineOwner);
     } else {
       assert(child.parent == this);
@@ -463,6 +468,23 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
       assert(child.parent == null);
     }
   }
+
+  /// Whether this render object should adjust its layout when an offscreen
+  /// kept-alive descendant requests relayout.
+  ///
+  /// The return value should match the render object's [performLayout]
+  /// implementation. For example, a [RenderSliverList] places its box children
+  /// in a linear array along the main axis in a non-overlapping fashion,
+  /// starting from a child that's currently considered visible (within the
+  /// viewport's `cacheExtent`). Thus an offscreen child will never to able to
+  /// get back on screen by just resizing itself, so its layout requests can be
+  /// safely ignored.
+  ///
+  /// Returning false is always correct, but returning true can be more
+  /// efficient since laying out a [RenderSliverMultiBoxAdaptor] can be
+  /// relatively expensive.
+  @protected
+  bool get ignoreLayoutRequestsFromKeptAliveDescendants => false;
 
   @override
   void attach(PipelineOwner owner) {
@@ -473,6 +495,8 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
       child.attach(_keepAlivePipelineOwner);
     // After all nodes are attached, report to the owner.
     if (!_keepAlivePipelineOwner.renderPipeline._pipelineFlushScheduled && _needsKeepAliveBucketSweep) {
+      // We have to temporarily set _needsKeepAliveBucketSweep to false in order
+      // to add this dirty node to the new pipeline.
       _needsKeepAliveBucketSweep = false;
       markNeedsLayout();
       assert(_needsKeepAliveBucketSweep || debugNeedsLayout);
@@ -622,14 +646,13 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
       }
 
       _needsKeepAliveBucketSweep = true;
-      // This calls _sweepKeepAliveBucket on dirty RenderSliverMultiBoxAdaptor
-      // descendants and this render object.
       _keepAlivePipelineOwner.flushLayout();
     });
   }
 
   bool _needsKeepAliveBucketSweep = true;
-
+  // Sweeps the current _keepAliveBucket and removes children that are no longer
+  // kept alive.
   void _sweepKeepAliveBucket() {
     if (!_needsKeepAliveBucketSweep)
       return;
@@ -647,7 +670,6 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
       return !childParentData.keepAlive;
     }).isEmpty);
     _needsKeepAliveBucketSweep = false;
-    _keepAlivePipelineOwner.renderPipeline._pipelineFlushScheduled = false;
   }
 
   /// Returns the index of the given child, as given by the
@@ -709,7 +731,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
     } else {
       assert(
         !_keepAliveBucket.containsKey(childParentData.index),
-        'Attempted to access the transform of a keep-alive RenderObject: $child',
+        'Attempted to access the transform of a kept-alive RenderObject: $child',
       );
       applyPaintTransformForBoxChild(child, transform);
     }

@@ -2060,7 +2060,7 @@ abstract class BuildContext {
   /// call if [State.mounted] returns false.
   ///
   /// Before accessing the layout (or paint) information on the returned
-  /// [RenderObject], such as its [size], check the [RenderObject.attached]
+  /// [RenderObject], such as its [size], check the [RenderObject.hasStaleLayout]
   /// property to ensure these information are up-to-date. An ancestor
   /// [RenderObject] may choose not to perform layout on a child, for instance,
   /// when the child is guaranteed to be off-screen and will not affect the
@@ -2083,12 +2083,10 @@ abstract class BuildContext {
 
   /// The size of the [RenderBox] returned by [findRenderObject].
   ///
-  /// This getter will only return a valid result after the corresponding
-  /// [RenderBox] is laid out. It is therefore not valid to call this from a
-  /// build method. It should only be called from paint callbacks or interaction
-  /// event handlers (e.g. gesture callbacks). Additionally the parent of the
-  /// [RenderBox] may choose to not perform layout on it as an optimization,
-  /// when the [RenderBox] is off-screen.
+  /// This getter will only return a valid result after the layout phase is
+  /// complete. It is therefore not valid to call this from a build method.
+  /// It should only be called from paint callbacks or interaction event
+  /// handlers (e.g. gesture callbacks).
   ///
   /// For details on the different phases of a frame, see the discussion at
   /// [WidgetsBinding.drawFrame].
@@ -4026,9 +4024,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       }
       return true;
     }());
-    if (renderObject is! RenderBox)
-      return null;
-    return renderObject.attached ? renderObject.size : null;
+    if (renderObject is RenderBox)
+      return renderObject.size;
+    return null;
   }
 
   Map<Type, InheritedElement>? _inheritedWidgets;
