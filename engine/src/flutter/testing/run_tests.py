@@ -166,12 +166,9 @@ def RunCCTests(build_dir, filter, coverage, capture_core_dump):
     import resource
     resource.setrlimit(resource.RLIMIT_CORE, (resource.RLIM_INFINITY, resource.RLIM_INFINITY))
 
-  # Not all of the engine unit tests are designed to be run more than once.
-  non_repeatable_shuffle_flags = [
-    "--gtest_shuffle",
-  ]
-  shuffle_flags = non_repeatable_shuffle_flags + [
+  shuffle_flags = [
     "--gtest_repeat=2",
+    "--gtest_shuffle",
   ]
 
   RunEngineExecutable(build_dir, 'client_wrapper_glfw_unittests', filter, shuffle_flags, coverage=coverage)
@@ -187,7 +184,7 @@ def RunCCTests(build_dir, filter, coverage, capture_core_dump):
     RunEngineExecutable(build_dir, 'embedder_unittests', filter, shuffle_flags, coverage=coverage)
     RunEngineExecutable(build_dir, 'embedder_proctable_unittests', filter, shuffle_flags, coverage=coverage)
   else:
-    RunEngineExecutable(build_dir, 'flutter_windows_unittests', filter, non_repeatable_shuffle_flags, coverage=coverage)
+    RunEngineExecutable(build_dir, 'flutter_windows_unittests', filter, shuffle_flags, coverage=coverage)
 
     RunEngineExecutable(build_dir, 'client_wrapper_windows_unittests', filter, shuffle_flags, coverage=coverage)
 
@@ -225,7 +222,7 @@ def RunCCTests(build_dir, filter, coverage, capture_core_dump):
   # These unit-tests are Objective-C and can only run on Darwin.
   if IsMac():
     RunEngineExecutable(build_dir, 'flutter_channels_unittests', filter, shuffle_flags, coverage=coverage)
-    RunEngineExecutable(build_dir, 'flutter_desktop_darwin_unittests', filter, non_repeatable_shuffle_flags, coverage=coverage)
+    RunEngineExecutable(build_dir, 'flutter_desktop_darwin_unittests', filter, shuffle_flags, coverage=coverage)
 
   # https://github.com/flutter/flutter/issues/36296
   if IsLinux():
@@ -233,8 +230,8 @@ def RunCCTests(build_dir, filter, coverage, capture_core_dump):
     RunEngineExecutable(build_dir, 'txt_unittests', filter, icu_flags + shuffle_flags, coverage=coverage)
 
   if IsLinux():
-    RunEngineExecutable(build_dir, 'flutter_linux_unittests', filter, non_repeatable_shuffle_flags, coverage=coverage)
-    RunEngineExecutable(build_dir, 'flutter_glfw_unittests', filter, non_repeatable_shuffle_flags, coverage=coverage)
+    RunEngineExecutable(build_dir, 'flutter_linux_unittests', filter, shuffle_flags, coverage=coverage)
+    RunEngineExecutable(build_dir, 'flutter_glfw_unittests', filter, shuffle_flags, coverage=coverage)
 
 
 def RunEngineBenchmarks(build_dir, filter):
