@@ -569,7 +569,7 @@ def main():
     ]
     process = subprocess.Popen(command, stdout=subprocess.PIPE)
     for line in process.stdout:
-      key, _, value = str(line).partition("=")
+      key, _, value = line.decode('ascii').strip().partition("=")
       os.environ[key] = value
     process.communicate() # Avoid pipe deadlock while waiting for termination.
 
