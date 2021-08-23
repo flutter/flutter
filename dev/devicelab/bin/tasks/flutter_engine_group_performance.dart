@@ -2,11 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:io';
 
-import 'package:flutter_devicelab/common.dart';
 import 'package:flutter_devicelab/framework/devices.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
@@ -74,7 +71,7 @@ Future<TaskResult> _doTest() async {
     final String apkPath = path.join(multipleFluttersPath, 'android', 'app',
         'build', 'outputs', 'apk', 'release', 'app-release.apk');
 
-    TaskResult result;
+    TaskResult? result;
     await _withApkInstall(apkPath, _bundleName, (AndroidDevice device) async {
       final List<int> totalMemorySamples = <int>[];
       for (int i = 0; i < _numberOfIterations; ++i) {
@@ -109,5 +106,5 @@ Future<TaskResult> _doTest() async {
 }
 
 Future<void> main() async {
-  unawaited(task(_doTest));
+  await task(_doTest);
 }

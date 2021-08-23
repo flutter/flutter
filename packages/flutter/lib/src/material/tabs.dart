@@ -58,7 +58,7 @@ enum TabBarIndicatorSize {
 ///  * [TabBarView], which displays a widget for the currently selected tab.
 ///  * [TabController], which coordinates tab selection between a [TabBar] and a [TabBarView].
 ///  * <https://material.io/design/components/tabs.html>
-class Tab extends StatelessWidget implements PreferredSizeWidget{
+class Tab extends StatelessWidget implements PreferredSizeWidget {
   /// Creates a material design [TabBar] tab.
   ///
   /// At least one of [text], [icon], and [child] must be non-null. The [text]

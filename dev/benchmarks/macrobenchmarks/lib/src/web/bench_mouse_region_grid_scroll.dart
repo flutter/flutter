@@ -41,7 +41,7 @@ class BenchMouseRegionGridScroll extends WidgetRecorder {
   void frameDidDraw() {
     if (!started) {
       started = true;
-      SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) async {
+      SchedulerBinding.instance!.addPostFrameCallback((Duration timeStamp) async {
         _tester.start();
         registerDidStop(_tester.stop);
       });
@@ -91,17 +91,17 @@ class BenchMouseRegionGridScroll extends WidgetRecorder {
 class _UntilNextFrame {
   _UntilNextFrame._();
 
-  static Completer<void> _completer;
+  static Completer<void>? _completer;
 
   static Future<void> wait() {
     if (_UntilNextFrame._completer == null) {
       _UntilNextFrame._completer = Completer<void>();
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        _UntilNextFrame._completer.complete(null);
+      SchedulerBinding.instance!.addPostFrameCallback((_) {
+        _UntilNextFrame._completer!.complete(null);
         _UntilNextFrame._completer = null;
       });
     }
-    return _UntilNextFrame._completer.future;
+    return _UntilNextFrame._completer!.future;
   }
 }
 
@@ -117,12 +117,12 @@ class _Tester {
   TestGesture get gesture {
     return _gesture ??= TestGesture(
       dispatcher: (PointerEvent event) async {
-        RendererBinding.instance.handlePointerEvent(event);
+        RendererBinding.instance!.handlePointerEvent(event);
       },
       kind: PointerDeviceKind.mouse,
     );
   }
-  TestGesture _gesture;
+  TestGesture? _gesture;
 
   Duration currentTime = Duration.zero;
 

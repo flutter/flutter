@@ -100,17 +100,6 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
           return Future<void>.value();
         },
       );
-      registerBoolServiceExtension(
-        name: 'debugCheckElevationsEnabled',
-        getter: () async => debugCheckElevationsEnabled,
-        setter: (bool value) {
-          if (debugCheckElevationsEnabled == value) {
-            return Future<void>.value();
-          }
-          debugCheckElevationsEnabled = value;
-          return _forceRepaint();
-        },
-      );
       registerServiceExtension(
         name: 'debugDumpLayerTree',
         callback: (Map<String, String> parameters) async {
@@ -474,11 +463,13 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   @override
   Future<void> performReassemble() async {
     await super.performReassemble();
-    Timeline.startSync('Dirty Render Tree', arguments: timelineArgumentsIndicatingLandmarkEvent);
-    try {
-      renderView.reassemble();
-    } finally {
-      Timeline.finishSync();
+    if (BindingBase.debugReassembleConfig?.widgetName == null) {
+      Timeline.startSync('Dirty Render Tree', arguments: timelineArgumentsIndicatingLandmarkEvent);
+      try {
+        renderView.reassemble();
+      } finally {
+        Timeline.finishSync();
+      }
     }
     scheduleWarmUpFrame();
     await endOfFrame;

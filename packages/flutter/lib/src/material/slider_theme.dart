@@ -1667,7 +1667,7 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
       isDiscrete: isDiscrete,
     );
     final Radius trackRadius = Radius.circular(trackRect.height / 2);
-    final Radius activeTrackRadius = Radius.circular(trackRect.height / 2 + 1);
+    final Radius activeTrackRadius = Radius.circular((trackRect.height + additionalActiveTrackHeight) / 2);
 
     context.canvas.drawRRect(
       RRect.fromLTRBAndCorners(

@@ -78,17 +78,24 @@ void main() {
     });
 
     testWithoutContext('should not throw when lock is acquired', () async {
+      final String oldRoot = Cache.flutterRoot;
       Cache.flutterRoot = '';
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      final Cache cache = Cache.test(fileSystem: fileSystem, processManager: FakeProcessManager.any());
-      fileSystem.file(fileSystem.path.join('bin', 'cache', 'lockfile'))
-        .createSync(recursive: true);
+      try {
+        final FileSystem fileSystem = MemoryFileSystem.test();
+        final Cache cache = Cache.test(
+            fileSystem: fileSystem, processManager: FakeProcessManager.any());
+        fileSystem.file(fileSystem.path.join('bin', 'cache', 'lockfile'))
+            .createSync(recursive: true);
 
-      await cache.lock();
+        await cache.lock();
 
-      expect(cache.checkLockAcquired, returnsNormally);
-      expect(cache.releaseLock, returnsNormally);
-    }, skip: true); // TODO(jonahwilliams): implement support for lock so this can be tested with the memory file system.
+        expect(cache.checkLockAcquired, returnsNormally);
+        expect(cache.releaseLock, returnsNormally);
+      } finally {
+        Cache.flutterRoot = oldRoot;
+      }
+      // TODO(zanderso): implement support for lock so this can be tested with the memory file system.
+    }, skip: true); // https://github.com/flutter/flutter/issues/87923
 
     testWithoutContext('throws tool exit when lockfile open fails', () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
@@ -97,7 +104,8 @@ void main() {
         .createSync(recursive: true);
 
       expect(() async => cache.lock(), throwsToolExit());
-    }, skip: true); // TODO(jonahwilliams): implement support for lock so this can be tested with the memory file system.
+      // TODO(zanderso): implement support for lock so this can be tested with the memory file system.
+    }, skip: true); // https://github.com/flutter/flutter/issues/87923
 
     testWithoutContext('should not throw when FLUTTER_ALREADY_LOCKED is set', () {
      final Cache cache = Cache.test(
@@ -159,7 +167,11 @@ void main() {
 
     testWithoutContext('Gradle wrapper will delete .properties/NOTICES if they exist', () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      final Cache cache = Cache.test(fileSystem: fileSystem, processManager: FakeProcessManager.any());
+      final Directory artifactDir = fileSystem.systemTempDirectory.createTempSync('flutter_cache_test_artifact.');
+      final FakeSecondaryCache cache = FakeSecondaryCache()
+        ..artifactDirectory = artifactDir
+        ..version = '123456';
+
       final OperatingSystemUtils operatingSystemUtils = OperatingSystemUtils(
         processManager: FakeProcessManager.any(),
         platform: FakePlatform(),
@@ -167,10 +179,9 @@ void main() {
         fileSystem: fileSystem,
       );
       final GradleWrapper gradleWrapper = GradleWrapper(cache);
-      final Directory directory = cache.getCacheDir(fileSystem.path.join('artifacts', 'gradle_wrapper'));
-      final File propertiesFile = fileSystem.file(fileSystem.path.join(directory.path, 'gradle', 'wrapper', 'gradle-wrapper.properties'))
+      final File propertiesFile = fileSystem.file(fileSystem.path.join(artifactDir.path, 'gradle', 'wrapper', 'gradle-wrapper.properties'))
         ..createSync(recursive: true);
-      final File noticeFile = fileSystem.file(fileSystem.path.join(directory.path, 'NOTICE'))
+      final File noticeFile = fileSystem.file(fileSystem.path.join(artifactDir.path, 'NOTICE'))
         ..createSync(recursive: true);
 
       await gradleWrapper.updateInner(FakeArtifactUpdater(), fileSystem, operatingSystemUtils);
@@ -192,9 +203,9 @@ void main() {
     });
 
     testWithoutContext('should not be up to date, if some cached artifact is not', () async {
-      final CachedArtifact artifact1 = FakeSecondayCachedArtifact()
+      final CachedArtifact artifact1 = FakeSecondaryCachedArtifact()
         ..upToDate = true;
-      final CachedArtifact artifact2 = FakeSecondayCachedArtifact()
+      final CachedArtifact artifact2 = FakeSecondaryCachedArtifact()
         ..upToDate = false;
       final FileSystem fileSystem = MemoryFileSystem.test();
 
@@ -208,9 +219,9 @@ void main() {
     });
 
     testWithoutContext('should be up to date, if all cached artifacts are', () async {
-      final FakeSecondayCachedArtifact artifact1 = FakeSecondayCachedArtifact()
+      final FakeSecondaryCachedArtifact artifact1 = FakeSecondaryCachedArtifact()
         ..upToDate = true;
-      final FakeSecondayCachedArtifact artifact2 = FakeSecondayCachedArtifact()
+      final FakeSecondaryCachedArtifact artifact2 = FakeSecondaryCachedArtifact()
         ..upToDate = true;
       final FileSystem fileSystem = MemoryFileSystem.test();
       final Cache cache = Cache.test(
@@ -223,9 +234,9 @@ void main() {
     });
 
     testWithoutContext('should update cached artifacts which are not up to date', () async {
-      final FakeSecondayCachedArtifact artifact1 = FakeSecondayCachedArtifact()
+      final FakeSecondaryCachedArtifact artifact1 = FakeSecondaryCachedArtifact()
         ..upToDate = true;
-      final FakeSecondayCachedArtifact artifact2 = FakeSecondayCachedArtifact()
+      final FakeSecondaryCachedArtifact artifact2 = FakeSecondaryCachedArtifact()
         ..upToDate = false;
       final FileSystem fileSystem = MemoryFileSystem.test();
 
@@ -269,9 +280,9 @@ void main() {
 
     testWithoutContext('failed storage.googleapis.com download shows China warning', () async {
       final InternetAddress address = (await InternetAddress.lookup('storage.googleapis.com')).first;
-      final FakeSecondayCachedArtifact artifact1 = FakeSecondayCachedArtifact()
+      final FakeSecondaryCachedArtifact artifact1 = FakeSecondaryCachedArtifact()
         ..upToDate = false;
-      final FakeSecondayCachedArtifact artifact2 = FakeSecondayCachedArtifact()
+      final FakeSecondaryCachedArtifact artifact2 = FakeSecondaryCachedArtifact()
         ..upToDate = false
         ..updateException = SocketException(
         'Connection reset by peer',
@@ -429,10 +440,9 @@ void main() {
 
   testWithoutContext('FlutterRunnerDebugSymbols downloads Flutter runner debug symbols', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final Cache cache = Cache.test(
-      fileSystem: fileSystem,
-      processManager: FakeProcessManager.any(),
-    );
+    final Cache cache = FakeSecondaryCache()
+      ..version = '123456';
+
     final FakeVersionedPackageResolver packageResolver = FakeVersionedPackageResolver();
     final FlutterRunnerDebugSymbols flutterRunnerDebugSymbols = FlutterRunnerDebugSymbols(
       cache,
@@ -443,8 +453,8 @@ void main() {
     await flutterRunnerDebugSymbols.updateInner(FakeArtifactUpdater(), fileSystem, FakeOperatingSystemUtils());
 
     expect(packageResolver.resolved, <List<String>>[
-      <String>['fuchsia-debug-symbols-x64', null],
-      <String>['fuchsia-debug-symbols-arm64', null],
+      <String>['fuchsia-debug-symbols-x64', '123456'],
+      <String>['fuchsia-debug-symbols-arm64', '123456'],
     ]);
   });
 
@@ -967,7 +977,7 @@ class FakeDownloadedArtifact extends CachedArtifact {
   Future<void> updateInner(ArtifactUpdater artifactUpdater, FileSystem fileSystem, OperatingSystemUtils operatingSystemUtils) async { }
 }
 
-class FakeSecondayCachedArtifact extends Fake implements CachedArtifact {
+class FakeSecondaryCachedArtifact extends Fake implements CachedArtifact {
   bool upToDate = false;
   bool didUpdate = false;
   Exception updateException;
@@ -1043,7 +1053,17 @@ class FakePub extends Fake implements Pub {
   int calledGet = 0;
 
   @override
-  Future<void> get({PubContext context, String directory, bool skipIfAbsent = false, bool upgrade = false, bool offline = false, bool generateSyntheticPackage = false, String flutterRootOverride, bool checkUpToDate = false}) async {
+  Future<void> get({
+    PubContext context,
+    String directory,
+    bool skipIfAbsent = false,
+    bool upgrade = false,
+    bool offline = false,
+    bool generateSyntheticPackage = false,
+    String flutterRootOverride,
+    bool checkUpToDate = false,
+    bool shouldSkipThirdPartyGenerator = true,
+  }) async {
     calledGet += 1;
   }
 }

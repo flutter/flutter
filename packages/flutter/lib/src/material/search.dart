@@ -35,6 +35,12 @@ import 'theme.dart';
 /// call. Call [SearchDelegate.close] before re-using the same delegate instance
 /// for another [showSearch] call.
 ///
+/// The `useRootNavigator` argument is used to determine whether to push the
+/// search page to the [Navigator] furthest from or nearest to the given
+/// `context`. By default, `useRootNavigator` is `false` and the search page
+/// route created by this method is pushed to the nearest navigator to the
+/// given `context`. It can not be `null`.
+///
 /// The transition to the search page triggered by this method looks best if the
 /// screen triggering the transition contains an [AppBar] at the top and the
 /// transition is called from an [IconButton] that's part of [AppBar.actions].
@@ -54,12 +60,14 @@ Future<T?> showSearch<T>({
   required BuildContext context,
   required SearchDelegate<T> delegate,
   String? query = '',
+  bool useRootNavigator = false,
 }) {
   assert(delegate != null);
   assert(context != null);
+  assert(useRootNavigator != null);
   delegate.query = query ?? delegate.query;
   delegate._currentBody = _SearchBody.suggestions;
-  return Navigator.of(context).push(_SearchPageRoute<T>(
+  return Navigator.of(context, rootNavigator: useRootNavigator).push(_SearchPageRoute<T>(
     delegate: delegate,
   ));
 }

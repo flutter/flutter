@@ -486,18 +486,6 @@ class VMServiceFlutterDriver extends FlutterDriver {
   }
 
   @override
-  Future<T> runUnsynchronized<T>(Future<T> Function() action, { Duration? timeout }) async {
-    await sendCommand(SetFrameSync(false, timeout: timeout));
-    T result;
-    try {
-      result = await action();
-    } finally {
-      await sendCommand(SetFrameSync(true, timeout: timeout));
-    }
-    return result;
-  }
-
-  @override
   Future<void> forceGC() async {
     try {
       await _serviceClient.callMethod(_collectAllGarbageMethodName, isolateId: _appIsolate.id);

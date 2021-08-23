@@ -520,7 +520,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)));
-  });
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Vertical scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
@@ -571,7 +571,7 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.pageUp);
     await tester.pumpAndSettle();
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)));
-  });
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Horizontal scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
@@ -617,7 +617,7 @@ void main() {
       await tester.sendKeyUpEvent(modifierKey);
     await tester.pumpAndSettle();
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 0.0, 50.0, 600.0)));
-  });
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Horizontal scrollables are scrolled the correct direction in RTL locales.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
@@ -666,7 +666,7 @@ void main() {
       await tester.sendKeyUpEvent(modifierKey);
     await tester.pumpAndSettle();
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(750.0, 0.0, 800.0, 600.0)));
-  });
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Reversed vertical scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
@@ -720,7 +720,7 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.pageDown);
     await tester.pumpAndSettle();
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 550.0, 800.0, 600.0)));
-  });
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Reversed horizontal scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
@@ -768,7 +768,7 @@ void main() {
     if (!kIsWeb)
       await tester.sendKeyUpEvent(modifierKey);
     await tester.pumpAndSettle();
-  });
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Custom scrollables with a center sliver are scrolled when activated via keyboard.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
@@ -828,7 +828,7 @@ void main() {
     // Goes up two past "center" where it started, so negative.
     expect(controller.position.pixels, equals(-100.0));
     expect(tester.getRect(find.byKey(const ValueKey<String>('Item 10'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 100.0, 800.0, 200.0)));
-  });
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Can recommendDeferredLoadingForContext - animation', (WidgetTester tester) async {
     final List<String> widgetTracker = <String>[];

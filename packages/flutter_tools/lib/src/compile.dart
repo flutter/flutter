@@ -450,7 +450,7 @@ abstract class ResidentCompiler {
     String librariesSpec,
   }) = DefaultResidentCompiler;
 
-  // TODO(jonahwilliams): find a better way to configure additional file system
+  // TODO(zanderso): find a better way to configure additional file system
   // roots from the runner.
   // See: https://github.com/flutter/flutter/issues/50494
   void addFileSystemRoot(String root);
@@ -542,7 +542,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     this.testCompilation = false,
     this.trackWidgetCreation = true,
     this.packagesPath,
-    this.fileSystemRoots = const <String>[],
+    List<String> fileSystemRoots = const <String>[],
     this.fileSystemScheme,
     this.initializeFromDill,
     this.targetModel = TargetModel.flutter,
@@ -560,7 +560,9 @@ class DefaultResidentCompiler implements ResidentCompiler {
        _platform = platform,
        dartDefines = dartDefines ?? const <String>[],
        // This is a URI, not a file path, so the forward slash is correct even on Windows.
-       sdkRoot = sdkRoot.endsWith('/') ? sdkRoot : '$sdkRoot/';
+       sdkRoot = sdkRoot.endsWith('/') ? sdkRoot : '$sdkRoot/',
+       // Make a copy, we might need to modify it later.
+       fileSystemRoots = List<String>.from(fileSystemRoots);
 
   final Logger _logger;
   final ProcessManager _processManager;
@@ -706,7 +708,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
       if (testCompilation)
         '--no-print-incremental-dependencies',
       '--target=$targetModel',
-      // TODO(jonahwilliams): remove once this becomes the default behavior
+      // TODO(zanderso): remove once this becomes the default behavior
       // in the frontend_server.
       // https://github.com/flutter/flutter/issues/52693
       '--debugger-module-names',

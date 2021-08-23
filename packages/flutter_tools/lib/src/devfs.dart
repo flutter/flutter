@@ -480,6 +480,9 @@ class DevFS {
   final Directory rootDirectory;
   final Set<String> assetPathsToEvict = <String>{};
 
+  // A flag to indicate whether we have called `setAssetDirectory` on the target device.
+  bool hasSetAssetDirectory = false;
+
   List<Uri> sources = <Uri>[];
   DateTime lastCompiled;
   DateTime _previousCompiled;

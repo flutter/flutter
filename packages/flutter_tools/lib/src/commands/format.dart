@@ -47,8 +47,8 @@ class FormatCommand extends FlutterCommand {
     } else {
       command.addAll(<String>[
         for (String arg in argResults.rest)
-          if (arg == '--dry-run')
-            '--output=show'
+          if (arg == '--dry-run' || arg == '-n')
+            '--output=none'
           else
             arg
       ]);

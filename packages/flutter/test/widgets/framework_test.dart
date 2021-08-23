@@ -1084,7 +1084,7 @@ void main() {
     expect(tabController.index, 0);
 
     // switch tabs 0 -> 1
-    setState((){
+    setState(() {
       tabController.index = 1;
     });
 
@@ -1093,7 +1093,7 @@ void main() {
     expect(tabController.index, 1);
 
     // rebuild TabBarView that only have the 1st page with GlobalKey 'key1'
-    setState((){
+    setState(() {
       tabBarViewCnt = 1;
       tabController = TabController(length: tabBarViewCnt, vsync: const TestVSync());
     });
@@ -1523,6 +1523,7 @@ void main() {
     await tester.pumpWidget(Container());
     final dynamic exception = tester.takeException();
     expect(
+      // ignore: avoid_dynamic_calls
       exception.message,
       equalsIgnoringHashCodes(
         'Tried to build dirty widget in the wrong build scope.\n'
@@ -1584,7 +1585,7 @@ void main() {
     // occur.
     expect(() => element.state, throwsA(isA<TypeError>()));
     expect(() => element.widget, throwsA(isA<TypeError>()));
-  }, skip: kIsWeb);
+  });
 
   testWidgets('Deactivate and activate are called correctly', (WidgetTester tester) async {
     final List<String> states = <String>[];

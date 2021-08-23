@@ -214,7 +214,7 @@ void main() {
       Platform: () => macPlatform,
       XcodeProjectInterpreter: () => fakeXcodeProjectInterpreter,
       Xcode: () => xcode,
-    }, skip: true); // TODO(jonahwilliams): clean up with https://github.com/flutter/flutter/issues/60675
+    }, skip: true); // TODO(zanderso): clean up with https://github.com/flutter/flutter/issues/60675
   });
 }
 
@@ -265,7 +265,7 @@ IOSDevice setUpIOSDevice({
       cache: cache,
     ),
     cpuArchitecture: DarwinArch.arm64,
-    interfaceType: IOSDeviceInterface.usb,
+    interfaceType: IOSDeviceConnectionInterface.usb,
   );
 }
 

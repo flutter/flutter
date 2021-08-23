@@ -648,7 +648,7 @@ void main() {
       child: box200x200,
     );
     layout(defaultBox, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
-    defaultBox.paint(context, Offset.zero);
+    context.paintChild(defaultBox, Offset.zero);
     expect(context.clipBehavior, equals(Clip.none));
 
     for (final Clip clip in Clip.values) {
@@ -659,7 +659,7 @@ void main() {
           clipBehavior: clip,
       );
       layout(box, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
-      box.paint(context, Offset.zero);
+      context.paintChild(box, Offset.zero);
       expect(context.clipBehavior, equals(clip));
     }
   });

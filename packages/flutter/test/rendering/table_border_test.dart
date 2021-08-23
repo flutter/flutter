@@ -124,6 +124,13 @@ void main() {
 
   test('TableBorder Object API', () {
     final String none = BorderSide.none.toString();
-    expect(const TableBorder().toString(), 'TableBorder($none, $none, $none, $none, $none, $none)');
+    final String zeroRadius = BorderRadius.zero.toString();
+    expect(const TableBorder().toString(), 'TableBorder($none, $none, $none, $none, $none, $none, $zeroRadius)');
   });
+
+  test('TableBorder.all with a borderRadius', () {
+    final TableBorder tableA = TableBorder.all(borderRadius: BorderRadius.circular(8.0));
+    expect(tableA.borderRadius, BorderRadius.circular(8.0));
+  });
+
 }

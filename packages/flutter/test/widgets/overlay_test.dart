@@ -1036,6 +1036,7 @@ void main() {
 
     // By default, clipBehavior should be Clip.hardEdge
     final dynamic renderObject = tester.renderObject(find.byType(Overlay));
+    // ignore: avoid_dynamic_calls
     expect(renderObject.clipBehavior, equals(Clip.hardEdge));
 
     for (final Clip clip in Clip.values) {
@@ -1052,6 +1053,7 @@ void main() {
           ),
         ),
       );
+      // ignore: avoid_dynamic_calls
       expect(renderObject.clipBehavior, clip);
     }
   });

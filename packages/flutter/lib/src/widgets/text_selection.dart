@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:characters/characters.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -119,12 +120,12 @@ abstract class TextSelectionControls {
   /// interaction is allowed. As a counterexample, the default selection handle
   /// on iOS [cupertinoTextSelectionControls] does not call [onTap] at all,
   /// since its handles are not meant to be tapped.
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]);
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap, double? startGlyphHeight, double? endGlyphHeight]);
 
   /// Get the anchor point of the handle relative to itself. The anchor point is
   /// the point that is aligned with a specific point in the text. A handle
   /// often visually "points to" that location.
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight);
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight, [double? startGlyphHeight, double? endGlyphHeight]);
 
   /// Builds a toolbar near a text selection.
   ///
@@ -199,74 +200,24 @@ abstract class TextSelectionControls {
     return delegate.selectAllEnabled && delegate.textEditingValue.text.isNotEmpty && delegate.textEditingValue.selection.isCollapsed;
   }
 
-  // TODO(justinmc): This and other methods should be ported to Actions and
-  // removed, along with their keyboard shortcut equivalents.
-  // https://github.com/flutter/flutter/issues/75004
-  /// Copy the current selection of the text field managed by the given
-  /// `delegate` to the [Clipboard]. Then, remove the selected text from the
-  /// text field and hide the toolbar.
+  /// Call [TextSelectionDelegate.cutSelection] to cut current selection.
   ///
   /// This is called by subclasses when their cut affordance is activated by
   /// the user.
   void handleCut(TextSelectionDelegate delegate) {
-    final TextEditingValue value = delegate.textEditingValue;
-    Clipboard.setData(ClipboardData(
-      text: value.selection.textInside(value.text),
-    ));
-    delegate.userUpdateTextEditingValue(
-      TextEditingValue(
-        text: value.selection.textBefore(value.text)
-            + value.selection.textAfter(value.text),
-        selection: TextSelection.collapsed(
-          offset: value.selection.start,
-        ),
-      ),
-      SelectionChangedCause.toolBar,
-    );
-    delegate.bringIntoView(delegate.textEditingValue.selection.extent);
-    delegate.hideToolbar();
+    delegate.cutSelection(SelectionChangedCause.toolbar);
   }
 
-  /// Copy the current selection of the text field managed by the given
-  /// `delegate` to the [Clipboard]. Then, move the cursor to the end of the
-  /// text (collapsing the selection in the process), and hide the toolbar.
+  /// Call [TextSelectionDelegate.copySelection] to copy current selection.
   ///
   /// This is called by subclasses when their copy affordance is activated by
   /// the user.
   void handleCopy(TextSelectionDelegate delegate, ClipboardStatusNotifier? clipboardStatus) {
-    final TextEditingValue value = delegate.textEditingValue;
-    Clipboard.setData(ClipboardData(
-      text: value.selection.textInside(value.text),
-    ));
+    delegate.copySelection(SelectionChangedCause.toolbar);
     clipboardStatus?.update();
-    delegate.bringIntoView(delegate.textEditingValue.selection.extent);
-
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-        // Hide the toolbar, but keep the selection and keep the handles.
-        delegate.hideToolbar(false);
-        return;
-      case TargetPlatform.macOS:
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        // Collapse the selection and hide the toolbar and handles.
-        delegate.userUpdateTextEditingValue(
-          TextEditingValue(
-            text: value.text,
-            selection: TextSelection.collapsed(offset: value.selection.end),
-          ),
-          SelectionChangedCause.toolBar,
-        );
-        delegate.hideToolbar();
-        return;
-    }
   }
 
-  /// Paste the current clipboard selection (obtained from [Clipboard]) into
-  /// the text field managed by the given `delegate`, replacing its current
-  /// selection, if any. Then, hide the toolbar.
+  /// Call [TextSelectionDelegate.pasteText] to paste text.
   ///
   /// This is called by subclasses when their paste affordance is activated by
   /// the user.
@@ -276,44 +227,18 @@ abstract class TextSelectionControls {
   /// implemented.
   // TODO(ianh): https://github.com/flutter/flutter/issues/11427
   Future<void> handlePaste(TextSelectionDelegate delegate) async {
-    final TextEditingValue value = delegate.textEditingValue; // Snapshot the input before using `await`.
-    final ClipboardData? data = await Clipboard.getData(Clipboard.kTextPlain);
-    if (data != null) {
-      delegate.userUpdateTextEditingValue(
-        TextEditingValue(
-          text: value.selection.textBefore(value.text)
-              + data.text!
-              + value.selection.textAfter(value.text),
-          selection: TextSelection.collapsed(
-              offset: value.selection.start + data.text!.length,
-          ),
-        ),
-        SelectionChangedCause.toolBar,
-      );
-    }
-    delegate.bringIntoView(delegate.textEditingValue.selection.extent);
-    delegate.hideToolbar();
+    delegate.pasteText(SelectionChangedCause.toolbar);
   }
 
-  /// Adjust the selection of the text field managed by the given `delegate` so
-  /// that everything is selected.
+  /// Call [TextSelectionDelegate.selectAll] to set the current selection to
+  /// contain the entire text value.
   ///
   /// Does not hide the toolbar.
   ///
   /// This is called by subclasses when their select-all affordance is activated
   /// by the user.
   void handleSelectAll(TextSelectionDelegate delegate) {
-    delegate.userUpdateTextEditingValue(
-      TextEditingValue(
-        text: delegate.textEditingValue.text,
-        selection: TextSelection(
-          baseOffset: 0,
-          extentOffset: delegate.textEditingValue.text.length,
-        ),
-      ),
-      SelectionChangedCause.toolBar,
-    );
-    delegate.bringIntoView(delegate.textEditingValue.selection.extent);
+    delegate.selectAll(SelectionChangedCause.toolbar);
   }
 }
 
@@ -601,6 +526,7 @@ class TextSelectionOverlay {
           selectionControls: selectionControls,
           position: position,
           dragStartBehavior: dragStartBehavior,
+          selectionDelegate: selectionDelegate!,
         ),
       );
     }
@@ -675,7 +601,7 @@ class TextSelectionOverlay {
         break;
     }
     selectionDelegate!.userUpdateTextEditingValue(
-      _value.copyWith(selection: newSelection, composing: TextRange.empty),
+      _value.copyWith(selection: newSelection),
       SelectionChangedCause.drag,
     );
     selectionDelegate!.bringIntoView(textPosition);
@@ -694,6 +620,7 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
     required this.onSelectionHandleChanged,
     required this.onSelectionHandleTapped,
     required this.selectionControls,
+    required this.selectionDelegate,
     this.dragStartBehavior = DragStartBehavior.start,
   }) : super(key: key);
 
@@ -706,6 +633,7 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
   final VoidCallback? onSelectionHandleTapped;
   final TextSelectionControls selectionControls;
   final DragStartBehavior dragStartBehavior;
+  final TextSelectionDelegate selectionDelegate;
 
   @override
   _TextSelectionHandleOverlayState createState() => _TextSelectionHandleOverlayState();
@@ -824,9 +752,45 @@ class _TextSelectionHandleOverlayState
         break;
     }
 
+    // On some platforms we may want to calculate the start and end handles
+    // separately so they scale for the selected content.
+    //
+    // For the start handle we compute the rectangles that encompass the range
+    // of the first full selected grapheme cluster at the beginning of the selection.
+    //
+    // For the end handle we compute the rectangles that encompass the range
+    // of the last full selected grapheme cluster at the end of the selection.
+    //
+    // Only calculate start/end handle rects if the text in the previous frame
+    // is the same as the text in the current frame. This is done because
+    // widget.renderObject contains the renderEditable from the previous frame.
+    // If the text changed between the current and previous frames then
+    // widget.renderObject.getRectForComposingRange might fail. In cases where
+    // the current frame is different from the previous we fall back to
+    // widget.renderObject.preferredLineHeight.
+    final InlineSpan span = widget.renderObject.text!;
+    final String prevText = span.toPlainText();
+    final String currText = widget.selectionDelegate.textEditingValue.text;
+    final int firstSelectedGraphemeExtent;
+    final int lastSelectedGraphemeExtent;
+    final TextSelection selection = widget.selection;
+    Rect? startHandleRect;
+    Rect? endHandleRect;
+
+    if (prevText == currText && selection != null && selection.isValid && !selection.isCollapsed) {
+      final String selectedGraphemes = selection.textInside(currText);
+      firstSelectedGraphemeExtent = selectedGraphemes.characters.first.length;
+      lastSelectedGraphemeExtent = selectedGraphemes.characters.last.length;
+      assert(firstSelectedGraphemeExtent <= selectedGraphemes.length && lastSelectedGraphemeExtent <= selectedGraphemes.length);
+      startHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: selection.start, end: selection.start + firstSelectedGraphemeExtent));
+      endHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: selection.end - lastSelectedGraphemeExtent, end: selection.end));
+    }
+
     final Offset handleAnchor = widget.selectionControls.getHandleAnchor(
       type,
       widget.renderObject.preferredLineHeight,
+      startHandleRect?.height ?? widget.renderObject.preferredLineHeight,
+      endHandleRect?.height ?? widget.renderObject.preferredLineHeight,
     );
     final Size handleSize = widget.selectionControls.getHandleSize(
       widget.renderObject.preferredLineHeight,
@@ -877,6 +841,8 @@ class _TextSelectionHandleOverlayState
                 type,
                 widget.renderObject.preferredLineHeight,
                 widget.onSelectionHandleTapped,
+                startHandleRect?.height ?? widget.renderObject.preferredLineHeight,
+                endHandleRect?.height ?? widget.renderObject.preferredLineHeight,
               ),
             ),
           ),

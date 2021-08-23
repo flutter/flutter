@@ -7,6 +7,9 @@ import 'package:flutter/material.dart';
 void main() {
   // Generic reference variables.
   BuildContext context;
+  RenderObjectWidget renderObjectWidget;
+  RenderObject renderObject;
+  Object object;
 
   // Changes made in https://github.com/flutter/flutter/pull/26259
   const Scaffold scaffold = Scaffold(resizeToAvoidBottomPadding: true);
@@ -301,4 +304,151 @@ void main() {
   longPressDraggable = LongPressDraggable(dragAnchor: DragAnchor.child);
   longPressDraggable = LongPressDraggable(dragAnchor: DragAnchor.pointer);
   longPressDraggable.dragAnchor;
+
+  // Changes made in https://github.com/flutter/flutter/pull/64254
+  final LeafRenderObjectElement leafElement = LeafRenderObjectElement();
+  leafElement.insertChildRenderObject(renderObject, object);
+  leafElement.moveChildRenderObject(renderObject, object);
+  leafElement.removeChildRenderObject(renderObject);
+  final ListWheelElement listWheelElement = ListWheelElement();
+  listWheelElement.insertChildRenderObject(renderObject, object);
+  listWheelElement.moveChildRenderObject(renderObject, object);
+  listWheelElement.removeChildRenderObject(renderObject);
+  final MultiChildRenderObjectElement multiChildRenderObjectElement = MultiChildRenderObjectElement();
+  multiChildRenderObjectElement.insertChildRenderObject(renderObject, object);
+  multiChildRenderObjectElement.moveChildRenderObject(renderObject, object);
+  multiChildRenderObjectElement.removeChildRenderObject(renderObject);
+  final SingleChildRenderObjectElement singleChildRenderObjectElement = SingleChildRenderObjectElement();
+  singleChildRenderObjectElement.insertChildRenderObject(renderObject, object);
+  singleChildRenderObjectElement.moveChildRenderObject(renderObject, object);
+  singleChildRenderObjectElement.removeChildRenderObject(renderObject);
+  final SliverMultiBoxAdaptorElement sliverMultiBoxAdaptorElement = SliverMultiBoxAdaptorElement();
+  sliverMultiBoxAdaptorElement.insertChildRenderObject(renderObject, object);
+  sliverMultiBoxAdaptorElement.moveChildRenderObject(renderObject, object);
+  sliverMultiBoxAdaptorElement.removeChildRenderObject(renderObject);
+  final RenderObjectToWidgetElement renderObjectToWidgetElement = RenderObjectToWidgetElement(widget);
+  renderObjectToWidgetElement.insertChildRenderObject(renderObject, object);
+  renderObjectToWidgetElement.moveChildRenderObject(renderObject, object);
+  renderObjectToWidgetElement.removeChildRenderObject(renderObject);
+
+  // Changes made in https://github.com/flutter/flutter/pull/81336
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData(accentColor: Colors.red);
+  themeData = ThemeData(accentColor: Colors.red, primarySwatch: Colors.blue);
+  themeData = ThemeData(accentColor: Colors.red, colorScheme: ColorScheme.light());
+  themeData = ThemeData(accentColor: Colors.red, colorScheme: ColorScheme.light(), primarySwatch: Colors.blue);
+  themeData = ThemeData.raw(accentColor: Colors.red);
+  themeData = ThemeData.raw(accentColor: Colors.red, primarySwatch: Colors.blue);
+  themeData = ThemeData.raw(accentColor: Colors.red, colorScheme: ColorScheme.light());
+  themeData = ThemeData.raw(accentColor: Colors.red, colorScheme: ColorScheme.light(), primarySwatch: Colors.blue);
+  themeData = themeData.copyWith(accentColor: Colors.red);
+  themeData = themeData.copyWith(accentColor: Colors.red, primarySwatch: Colors.blue);
+  themeData = themeData.copyWith(accentColor: Colors.red, colorScheme: ColorScheme.light());
+  themeData = themeData.copyWith(accentColor: Colors.red, colorScheme: ColorScheme.light(), primarySwatch: Colors.blue);
+  themeData.accentColor;
+
+  // Changes made in https://github.com/flutter/flutter/pull/81336
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData(accentColorBrightness: Brightness.dark);
+  themeData = ThemeData.raw(accentColorBrightness: Brightness.dark);
+  themeData = themeData.copyWith(accentColorBrightness: Brightness.dark);
+  themeData.accentColorBrightness; // Removing field reference not supported.
+
+  // Changes made in https://github.com/flutter/flutter/pull/81336
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData(accentTextTheme: TextTheme());
+  themeData = ThemeData.raw(accentTextTheme: TextTheme());
+  themeData = themeData.copyWith(accentTextTheme: TextTheme());
+  themeData.accentTextTheme; // Removing field reference not supported.
+
+  // Changes made in https://github.com/flutter/flutter/pull/81336
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData(accentIconTheme: IconThemeData());
+  themeData = ThemeData.raw(accentIconTheme: IconThemeData());
+  themeData = themeData.copyWith(accentIconTheme: IconThemeData());
+  themeData.accentIconTheme; // Removing field reference not supported.
+
+  // Changes made in https://github.com/flutter/flutter/pull/81336
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData(buttonColor: Colors.red);
+  themeData = ThemeData.raw(buttonColor: Colors.red);
+  themeData = themeData.copyWith(buttonColor: Colors.red);
+  themeData.buttonColor; // Removing field reference not supported.
+
+  // Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  ListWheelScrollView listWheelScrollView = ListWheelScrollView();
+  listWheelScrollView = ListWheelScrollView(clipToSize: true);
+  listWheelScrollView = ListWheelScrollView(clipToSize: false);
+  listWheelScrollView = ListWheelScrollView.useDelegate();
+  listWheelScrollView = ListWheelScrollView.useDelegate(clipToSize: true);
+  listWheelScrollView = ListWheelScrollView.useDelegate(clipToSize: false);
+  listWheelScrollView.clipToSize;
+  ListWheelViewport listWheelViewport = ListWheelViewport();
+  listWheelViewport = ListWheelViewport(clipToSize: true);
+  listWheelViewport = ListWheelViewport(clipToSize: false);
+  listWheelViewport.clipToSize;
+
+  // Changes made in https://github.com/flutter/flutter/pull/87281
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData(fixTextFieldOutlineLabel: true);
+  themeData = ThemeData.raw(fixTextFieldOutlineLabel: true);
+  themeData = themeData.copyWith(fixTextFieldOutlineLabel: true);
+  themeData.fixTextFieldOutlineLabel; // Removing field reference not supported.
+
+  // Changes made in https://github.com/flutter/flutter/pull/87839
+  final OverscrollIndicatorNotification notification = OverscrollIndicatorNotification(leading: true);
+  notification.disallowGlow();
+
+  // Changes made in https://github.com/flutter/flutter/pull/86198
+  AppBar appBar = AppBar();
+  appBar = AppBar(brightness: Brightness.light);
+  appBar = AppBar(brightness: Brightness.dark);
+  appBar.brightness;
+
+  SliverAppBar sliverAppBar = SliverAppBar();
+  sliverAppBar = SliverAppBar(brightness: Brightness.light);
+  sliverAppBar = SliverAppBar(brightness: Brightness.dark);
+  sliverAppBar.brightness;
+
+  AppBarTheme appBarTheme = AppBarTheme();
+  appBarTheme = AppBarTheme(brightness: Brightness.light);
+  appBarTheme = AppBarTheme(brightness: Brightness.dark);
+  appBarTheme = appBarTheme.copyWith(brightness: Brightness.light);
+  appBarTheme = appBarTheme.copyWith(brightness: Brightness.dark);
+  appBarTheme.brightness;
+
+  TextTheme myTextTheme = TextTheme();
+  AppBar appBar = AppBar();
+  appBar = AppBar(textTheme: myTextTheme);
+  appBar = AppBar(textTheme: myTextTheme);
+
+  SliverAppBar sliverAppBar = SliverAppBar();
+  sliverAppBar = SliverAppBar(textTheme: myTextTheme);
+  sliverAppBar = SliverAppBar(textTheme: myTextTheme);
+
+  AppBarTheme appBarTheme = AppBarTheme();
+  appBarTheme = AppBarTheme(textTheme: myTextTheme);
+  appBarTheme = AppBarTheme(textTheme: myTextTheme);
+  appBarTheme = appBarTheme.copyWith(textTheme: myTextTheme);
+  appBarTheme = appBarTheme.copyWith(textTheme: myTextTheme);
+
+  AppBar appBar = AppBar();
+  appBar = AppBar(backwardsCompatibility: true);
+  appBar = AppBar(backwardsCompatibility: false));
+  appBar.backwardsCompatibility; // Removing field reference not supported.
+
+  SliverAppBar sliverAppBar = SliverAppBar();
+  sliverAppBar = SliverAppBar(backwardsCompatibility: true);
+  sliverAppBar = SliverAppBar(backwardsCompatibility: false);
+  sliverAppBar.backwardsCompatibility; // Removing field reference not supported.
+
+  AppBarTheme appBarTheme = AppBarTheme();
+  appBarTheme = AppBarTheme(backwardsCompatibility: true);
+  appBarTheme = AppBarTheme(backwardsCompatibility: false);
+  appBarTheme = appBarTheme.copyWith(backwardsCompatibility: true);
+  appBarTheme = appBarTheme.copyWith(backwardsCompatibility: false);
+  appBarTheme.backwardsCompatibility; // Removing field reference not supported.
+
+  AppBarTheme appBarTheme = AppBarTheme();
+  appBarTheme.color;
 }

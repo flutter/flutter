@@ -52,6 +52,18 @@ class HotRunnerConfig {
   Future<bool> setupHotRestart() async {
     return true;
   }
+
+  /// A hook for implementations to perform any necessary initialization prior
+  /// to a hot reload. Should return true if the hot restart should continue.
+  Future<bool> setupHotReload() async {
+    return true;
+  }
+
+  /// A hook for implementations to perform any necessary cleanup after the
+  /// devfs sync is complete. At this point the flutter_tools no longer needs to
+  /// access the source files and assets.
+  void updateDevFSComplete() {}
+
   /// A hook for implementations to perform any necessary operations right
   /// before the runner is about to be shut down.
   Future<void> runPreShutdownOperations() async {
@@ -279,14 +291,6 @@ class HotRunner extends ResidentRunner {
         device.generator.accept();
       }
       final List<FlutterView> views = await device.vmService.getFlutterViews();
-      final Uri deviceAssetsDirectoryUri = device.devFS.baseUri.resolveUri(globals.fs.path.toUri(getAssetBuildDirectory()));
-      await Future.wait<void>(views.map<Future<void>>(
-        (FlutterView view) => device.vmService.setAssetDirectory(
-          assetsDirectory: deviceAssetsDirectoryUri,
-          uiIsolateId: view.uiIsolate.id,
-          viewId: view.id,
-        )
-      ));
       for (final FlutterView view in views) {
         globals.printTrace('Connected to $view.');
       }
@@ -554,7 +558,12 @@ class HotRunner extends ResidentRunner {
     String reason,
   }) async {
     final Stopwatch restartTimer = Stopwatch()..start();
-    final UpdateFSReport updatedDevFS = await _updateDevFS(fullRestart: true);
+    UpdateFSReport updatedDevFS;
+    try {
+      updatedDevFS = await _updateDevFS(fullRestart: true);
+    } finally {
+      hotRunnerConfig.updateDevFSComplete();
+    }
     if (!updatedDevFS.success) {
       for (final FlutterDevice device in flutterDevices) {
         if (device.generator != null) {
@@ -865,8 +874,16 @@ class HotRunner extends ResidentRunner {
     }
 
     final Stopwatch reloadTimer = _stopwatchFactory.createStopwatch('reloadSources:reload')..start();
+    if (!(await hotRunnerConfig.setupHotReload())) {
+      return OperationResult(1, 'setupHotReload failed');
+    }
     final Stopwatch devFSTimer = Stopwatch()..start();
-    final UpdateFSReport updatedDevFS = await _updateDevFS();
+    UpdateFSReport updatedDevFS;
+    try {
+      updatedDevFS= await _updateDevFS();
+    } finally {
+      hotRunnerConfig.updateDevFSComplete();
+    }
     // Record time it took to synchronize to DevFS.
     bool shouldReportReloadTime = true;
     _addBenchmarkData('hotReloadDevFSSyncMilliseconds', devFSTimer.elapsed.inMilliseconds);
@@ -896,7 +913,7 @@ class HotRunner extends ResidentRunner {
     }
     reloadVMTimer.stop();
 
-    await _evictDirtyAssets();
+    await evictDirtyAssets();
 
     final Stopwatch reassembleTimer = _stopwatchFactory.createStopwatch('reloadSources:reassemble')..start();
 
@@ -997,13 +1014,31 @@ class HotRunner extends ResidentRunner {
     printDebuggerList();
   }
 
-  Future<void> _evictDirtyAssets() async {
+  @visibleForTesting
+  Future<void> evictDirtyAssets() async {
     final List<Future<Map<String, dynamic>>> futures = <Future<Map<String, dynamic>>>[];
     for (final FlutterDevice device in flutterDevices) {
       if (device.devFS.assetPathsToEvict.isEmpty) {
         continue;
       }
       final List<FlutterView> views = await device.vmService.getFlutterViews();
+
+      // If this is the first time we update the assets, make sure to call the setAssetDirectory
+      if (!device.devFS.hasSetAssetDirectory) {
+        final Uri deviceAssetsDirectoryUri = device.devFS.baseUri.resolveUri(globals.fs.path.toUri(getAssetBuildDirectory()));
+        await Future.wait<void>(views.map<Future<void>>(
+          (FlutterView view) => device.vmService.setAssetDirectory(
+            assetsDirectory: deviceAssetsDirectoryUri,
+            uiIsolateId: view.uiIsolate.id,
+            viewId: view.id,
+          )
+        ));
+        for (final FlutterView view in views) {
+          globals.printTrace('Set asset directory in $view.');
+        }
+        device.devFS.hasSetAssetDirectory = true;
+      }
+
       if (views.first.uiIsolate == null) {
         globals.printError('Application isolate not found for $device');
         continue;
@@ -1418,7 +1453,7 @@ class ProjectFileInvalidator {
       packageConfig = await _createPackageConfig(packagesPath);
       // The frontend_server might be monitoring the package_config.json file,
       // Pub should always produce both files.
-      // TODO(jonahwilliams): remove after https://github.com/flutter/flutter/issues/55249
+      // TODO(zanderso): remove after https://github.com/flutter/flutter/issues/55249
       if (_fileSystem.path.basename(packagesPath) == '.packages') {
         final File packageConfigFile = _fileSystem.file(packagesPath)
           .parent.childDirectory('.dart_tool')

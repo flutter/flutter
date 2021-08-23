@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:path/path.dart' as path;
 import '_goldens_io.dart' if (dart.library.html) '_goldens_web.dart' as _goldens;
@@ -139,7 +140,7 @@ set goldenFileComparator(GoldenFileComparator value) {
 /// fake async constraints that are normally imposed on widget tests (i.e. the
 /// need or the ability to call [WidgetTester.pump] to advance the microtask
 /// queue). Prior to the invocation, the test framework will render only the
-/// [Element] to be compared on the screen.
+/// [widgets.Element] to be compared on the screen.
 ///
 /// See also:
 ///
@@ -326,8 +327,7 @@ class ComparisonResult {
 
   /// Map containing differential images to illustrate found variants in pixel
   /// values in the execution of the pixel test.
-  // TODO(jonahwilliams): fix type signature when image is updated to support web.
-  final Map<String, Object>? diffs;
+  final Map<String, Image>? diffs;
 
   /// The calculated percentage of pixel difference between two images.
   final double diffPercent;

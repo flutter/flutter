@@ -2,11 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:io';
 
-import 'package:flutter_devicelab/common.dart';
 import 'package:flutter_devicelab/framework/apk_utils.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
@@ -18,7 +15,7 @@ Future<void> main() async {
     try {
       await runProjectTest((FlutterProject flutterProject) async {
         section('APK contains plugin classes');
-        unawaited(flutterProject.addPlugin('google_maps_flutter', value: '^1.0.10'));
+        flutterProject.addPlugin('google_maps_flutter', value: '^1.0.10');
 
         await inDirectory(flutterProject.rootPath, () async {
           await flutter('build', options: <String>[
