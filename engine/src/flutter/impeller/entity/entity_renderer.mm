@@ -30,29 +30,14 @@ bool EntityRenderer::RenderEntities(const Surface& surface,
     return false;
   }
 
-  size_t success = 0u;
-  size_t failure = 0u;
-  size_t skipped = 0u;
-
   for (const auto& entity : entities) {
-    auto result = renderer_->RenderEntity(surface, onscreen_pass, entity);
-    switch (result) {
-      case EntityRendererImpl::RenderResult::kSuccess:
-        success++;
-        break;
-      case EntityRendererImpl::RenderResult::kFailure:
-        failure++;
-        break;
-      case EntityRendererImpl::RenderResult::kSkipped:
-        skipped++;
-        break;
+    if (renderer_->RenderEntity(surface, onscreen_pass, entity) ==
+        EntityRendererImpl::RenderResult::kFailure) {
+      return false;
     }
   }
 
-  FML_LOG(ERROR) << "Success " << success << " failure " << failure
-                 << " skipped " << skipped << " total " << entities.size();
-
-  return failure == 0;
+  return true;
 }
 
 }  // namespace impeller

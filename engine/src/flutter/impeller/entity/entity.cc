@@ -58,11 +58,22 @@ bool Entity::IsClip() const {
   return is_clip_;
 }
 
+void Entity::SetContents(std::shared_ptr<Contents> contents) {
+  contents_ = std::move(contents);
+}
+
+const std::shared_ptr<Contents>& Entity::GetContents() const {
+  return contents_;
+}
+
 bool Entity::HasStroke() const {
   return stroke_size_ > 0.0 && !stroke_color_.IsTransparent();
 }
 
 bool Entity::HasContents() const {
+  if (contents_) {
+    return true;
+  }
   return !background_color_.IsTransparent();
 }
 

@@ -8,13 +8,19 @@ impeller_shaders("entity_shaders") {
   name = "entity"
 
   shaders = [
-    "path.vert",
+    "gradient_fill.frag",
+    "gradient_fill.vert",
     "solid_fill.frag",
+    "solid_fill.vert",
   ]
 }
 
 impeller_component("entity") {
   sources = [
+    "content_renderer.h",
+    "content_renderer.mm",
+    "contents.h",
+    "contents.mm",
     "entity.cc",
     "entity.h",
     "entity_renderer.h",
