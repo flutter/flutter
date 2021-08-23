@@ -42,6 +42,15 @@ class UploadResultsCommand extends Command<void> {
     final String? testStatus = argResults!['test-status'] as String?;
     final String? commitTime = argResults!['commit-time'] as String?;
 
+    final Cocoon cocoon = Cocoon(serviceAccountTokenPath: serviceAccountTokenFile);
+    await cocoon.sendResultsPath(
+      resultsPath: resultsPath,
+      isTestFlaky: testFlakyStatus == 'True',
+      gitBranch: gitBranch,
+      builderName: builderName,
+      testStatus: testStatus,
+    );
+
     print ('-------args loaded.--------');
     // Upload metrics to metrics_center from test runner when `commitTime` is specified. This
     // is mainly for testing purpose.
@@ -56,14 +65,5 @@ class UploadResultsCommand extends Command<void> {
     } on Exception catch (e, stacktrace) {
       print('Uploading metrics failure: $e\n\n$stacktrace');
     }
-
-    final Cocoon cocoon = Cocoon(serviceAccountTokenPath: serviceAccountTokenFile);
-    return cocoon.sendResultsPath(
-      resultsPath: resultsPath,
-      isTestFlaky: testFlakyStatus == 'True',
-      gitBranch: gitBranch,
-      builderName: builderName,
-      testStatus: testStatus,
-    );
   }
 }
