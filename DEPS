@@ -450,6 +450,17 @@ deps = {
   'src/third_party/pkg/when':
   Var('dart_git') + '/when.git' + '@' + '0.2.0',
 
+  'src/gradle': {
+    'packages': [
+      {
+        'version': 'version:7.0.2',
+        'package': 'flutter/gradle'
+      }
+    ],
+    'condition': 'download_android_deps',
+    'dep_type': 'cipd'
+  },
+
   'src/third_party/android_tools/ndk': {
      'packages': [
        {

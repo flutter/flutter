@@ -59,6 +59,7 @@ dependencies {
     if (project.hasProperty('flutter_jar')) {
         implementation files(project.property('flutter_jar'))
     }
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.4.21' // Override what leakcanary wants.
     implementation 'com.facebook.testing.screenshot:layout-hierarchy-common:0.12.0'
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
@@ -75,10 +76,10 @@ dependencies {
 
 tasks.register('generateLockfiles') {
     rootProject.subprojects.each { subproject ->
-        def gradlew = "${rootProject.projectDir}/gradlew"
+        def gradle = "${rootProject.projectDir}/../../../../gradle/bin/gradle"
         rootProject.exec {
             workingDir rootProject.projectDir
-            executable gradlew
+            executable gradle
             args ":${subproject.name}:dependencies", "--write-locks"
         }
     }
