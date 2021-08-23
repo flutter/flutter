@@ -899,44 +899,28 @@ void main() {
     bool resized = false;
     bool dismissed = false;
 
-    await tester.pumpWidget(Directionality(
-      textDirection: TextDirection.ltr,
-      child: StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          Widget buildDismissibleItem(int item) {
-            return Dismissible(
-              dragStartBehavior: DragStartBehavior.down,
-              key: ValueKey<int>(item),
-              direction: dismissDirection,
-              resizeDuration: null,
-              onDismissed: (DismissDirection direction) {
-                dismissed = true;
-              },
-              onResize: () {
-                resized = true;
-              },
-              child: SizedBox(
-                width: itemExtent,
-                height: itemExtent,
-                child: Text(item.toString()),
-              ),
-            );
-          }
-
-          return Container(
-            padding: const EdgeInsets.all(10.0),
-            child: ListView(
-              dragStartBehavior: DragStartBehavior.down,
-              scrollDirection: scrollDirection,
-              itemExtent: itemExtent,
-              children: <int>[0, 1, 2, 3, 4, 5, 6, 7, 8]
-                .where((int i) => !dismissedItems.contains(i))
-                .map<Widget>(buildDismissibleItem).toList(),
-            ),
-          );
-        },
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Dismissible(
+          dragStartBehavior: DragStartBehavior.down,
+          key: UniqueKey(),
+          direction: dismissDirection,
+          resizeDuration: null,
+          onDismissed: (DismissDirection direction) {
+            dismissed = true;
+          },
+          onResize: () {
+            resized = true;
+          },
+          child: const SizedBox(
+            width: itemExtent,
+            height: itemExtent,
+            child: Text('0'),
+          ),
+        ),
       ),
-    ));
+    );
 
     await dismissElement(tester, find.text('0'), gestureDirection: AxisDirection.right);
     await tester.pump();
@@ -944,7 +928,7 @@ void main() {
     expect(resized, false);
   });
 
-  testWidgets('setState that does not remove the Dismissible from tree should throws Error', (WidgetTester tester) async {
+  testWidgets('setState that does not remove the Dismissible from tree should throw Error', (WidgetTester tester) async {
     const Axis scrollDirection = Axis.vertical;
     const DismissDirection dismissDirection = DismissDirection.horizontal;
 
