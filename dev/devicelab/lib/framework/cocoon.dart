@@ -149,7 +149,7 @@ class Cocoon {
     logger.fine('Update request: $updateRequest');
 
     // Make a copy of result data because we may alter it for validation below.
-    updateRequest['ResultData'] = result.data;
+    updateRequest['ResultData'] = result.data  ?? <String, dynamic>{};
 
     final List<String> validScoreKeys = <String>[];
     if (result.benchmarkScoreKeys != null) {
