@@ -113,7 +113,7 @@ class TwoPane extends StatelessWidget {
   /// Defaults to [MediaQueryData.padding].
   final EdgeInsets padding;
 
-  TextDirection? _textDirection(BuildContext context) =>
+  TextDirection? _getTextDirection(BuildContext context) =>
       textDirection ?? Directionality.maybeOf(context);
 
   @override
@@ -127,6 +127,7 @@ class TwoPane extends StatelessWidget {
     late Widget _pane1;
     late Widget _pane2;
     late Widget _delimiter;
+    TextDirection? _textDirection = _getTextDirection(context);
     const int fractionBase = 1000000000000;
 
     if (mediaQuery == null || displayFeature == null) {
@@ -149,10 +150,10 @@ class TwoPane extends StatelessWidget {
         // Seam is tall. Panels are left and right.
         _direction = Axis.horizontal;
         _delimiter = Container(width: seam.size.width);
-        assert(textDirection != null);
+        assert(_textDirection != null);
         final int leftPane = (seam.left * fractionBase).toInt();
         final int rightPane = ((size.width - seam.right) * fractionBase).toInt();
-        if (textDirection == TextDirection.ltr) {
+        if (_textDirection == TextDirection.ltr) {
           pane1Flex = leftPane;
           pane2Flex = rightPane;
         } else {
@@ -197,9 +198,8 @@ class TwoPane extends StatelessWidget {
         child: pane2,
       );
     } else {
-      final TextDirection? textDirection = _textDirection(context);
-      assert(textDirection != null);
-      final bool pane1Left = textDirection == TextDirection.ltr;
+      assert(_textDirection != null);
+      final bool pane1Left = _textDirection == TextDirection.ltr;
       _pane1 = MediaQuery(
         data: _removeMediaQueryPaddingAndInset(
           mediaQuery: mediaQuery,
@@ -218,10 +218,6 @@ class TwoPane extends StatelessWidget {
       );
     }
 
-    // const int fractionBase = 1000000000000000000;
-    // final int pane1Flex = (fractionBase * _paneProportion).toInt();
-    // final int pane2Flex = fractionBase - pane1Flex;
-
     return Flex(
       children: <Widget>[
         if (panePriority != TwoPanePriority.pane2)
@@ -239,7 +235,7 @@ class TwoPane extends StatelessWidget {
       ],
       direction: _direction,
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      textDirection: _textDirection(context),
+      textDirection: _textDirection,
       verticalDirection: verticalDirection,
       mainAxisAlignment: panePriority != TwoPanePriority.both
           ? MainAxisAlignment.center
