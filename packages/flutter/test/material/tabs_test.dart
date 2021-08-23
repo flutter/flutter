@@ -3852,7 +3852,7 @@ void main() {
         ),
       ));
 
-    final TabController tabController = DefaultTabController.of(tester.element(find.text('A')))!;
+    TabController tabController = DefaultTabController.of(tester.element(find.text('A')))!;
 
     expect(find.text('A'), findsOneWidget);
     expect(find.text('B'), findsOneWidget);
@@ -3875,6 +3875,8 @@ void main() {
 
     pageController.jumpToPage(0);
     await tester.pumpAndSettle();
+
+    tabController = DefaultTabController.of(tester.element(find.text('A')))!;
 
     expect(tabController.index, 1);
     expect(find.text('C'), findsNothing);
