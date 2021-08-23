@@ -28,7 +28,7 @@ _android_sources = [
 gradle_task("android_lint") {
   app_name = "scenario_app"
   task = "lint"
-  gradlew_dir = rebase_path(".")
+  gradle_project_dir = rebase_path(".")
   sources = _android_sources
   outputs = [ "$root_out_dir/scenario_app/reports/lint-results.xml" ]
   deps = [ "//flutter/testing/scenario_app:scenario_app_snapshot" ]
@@ -37,7 +37,7 @@ gradle_task("android_lint") {
 gradle_task("build_apk") {
   app_name = "scenario_app"
   task = "assembleDebug"
-  gradlew_dir = rebase_path(".")
+  gradle_project_dir = rebase_path(".")
   sources = _android_sources
   outputs = [ "$root_out_dir/scenario_app/app/outputs/apk/debug/app-debug.apk" ]
 
