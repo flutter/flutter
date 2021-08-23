@@ -18,10 +18,6 @@
 #include "flutter/shell/platform/android/surface/android_surface.h"
 #include "flutter/shell/platform/android/surface/snapshot_surface_producer.h"
 
-#if SHELL_ENABLE_VULKAN
-#include "flutter/shell/platform/android/android_surface_vulkan.h"
-#endif  // SHELL_ENABLE_VULKAN
-
 #include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "flutter/shell/platform/android/platform_message_response_android.h"
@@ -43,11 +39,6 @@ std::unique_ptr<AndroidSurface> AndroidSurfaceFactoryImpl::CreateSurface() {
                                                       jni_facade_);
     case AndroidRenderingAPI::kOpenGLES:
       return std::make_unique<AndroidSurfaceGL>(android_context_, jni_facade_);
-    case AndroidRenderingAPI::kVulkan:
-#if SHELL_ENABLE_VULKAN
-      return std::make_unique<AndroidSurfaceVulkan>(android_context_,
-                                                    jni_facade_);
-#endif  // SHELL_ENABLE_VULKAN
     default:
       FML_DCHECK(false);
       return nullptr;
@@ -63,13 +54,9 @@ static std::shared_ptr<flutter::AndroidContext> CreateAndroidContext(
   if (use_software_rendering) {
     return std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
   }
-#if SHELL_ENABLE_VULKAN
-  return std::make_shared<AndroidContext>(AndroidRenderingAPI::kVulkan);
-#else   // SHELL_ENABLE_VULKAN
   return std::make_unique<AndroidContextGL>(
       AndroidRenderingAPI::kOpenGLES,
       fml::MakeRefCounted<AndroidEnvironmentGL>());
-#endif  // SHELL_ENABLE_VULKAN
 }
 
 PlatformViewAndroid::PlatformViewAndroid(

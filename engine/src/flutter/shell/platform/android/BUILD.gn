@@ -12,8 +12,8 @@ import("//flutter/shell/version/version.gni")
 
 shell_gpu_configuration("android_gpu_configuration") {
   enable_software = true
-  enable_vulkan = shell_enable_vulkan
   enable_gl = true
+  enable_vulkan = false
   enable_metal = false
 }
 
@@ -94,17 +94,6 @@ shared_library("flutter_shell_native") {
   public_configs = [ "//flutter:config" ]
 
   defines = []
-
-  if (shell_enable_vulkan) {
-    sources += [
-      "android_surface_vulkan.cc",
-      "android_surface_vulkan.h",
-    ]
-
-    deps += [ "//flutter/vulkan" ]
-
-    defines += [ "SHELL_ENABLE_VULKAN" ]
-  }
 
   libs = [
     "android",
