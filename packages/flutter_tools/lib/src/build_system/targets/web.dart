@@ -100,7 +100,7 @@ class WebEntrypointTarget extends Target {
     final String targetFile = environment.defines[kTargetFile];
     final bool hasPlugins = environment.defines[kHasWebPlugins] == 'true';
     final Uri importUri = environment.fileSystem.file(targetFile).absolute.uri;
-    // TODO(jonahwilliams): support configuration of this file.
+    // TODO(zanderso): support configuration of this file.
     const String packageFile = '.packages';
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
       environment.fileSystem.file(packageFile),

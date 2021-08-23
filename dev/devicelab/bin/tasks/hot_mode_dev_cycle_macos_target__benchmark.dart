@@ -8,7 +8,7 @@ import 'package:flutter_devicelab/tasks/hot_mode_tests.dart';
 
 Future<void> main() async {
   await task(createHotModeTest(deviceIdOverride: 'macos'));
-  // TODO(zra): https://github.com/flutter/flutter/issues/88531
+  // TODO(zanderso): https://github.com/flutter/flutter/issues/88531
   throw TaskResult.failure(
       'Tree is manuall closed https://github.com/flutter/flutter/issues/88531');
 }

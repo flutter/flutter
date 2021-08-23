@@ -182,7 +182,7 @@ class IOSPlugin extends PluginPlatform {
   });
 
   factory IOSPlugin.fromYaml(String name, YamlMap yaml) {
-    assert(validate(yaml)); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/67241
+    assert(validate(yaml)); // TODO(zanderso): https://github.com/flutter/flutter/issues/67241
     return IOSPlugin(
       name: name,
       classPrefix: '',
