@@ -30,6 +30,7 @@ platform_properties:
       caches: >-
         [
           {"name":"builder_linux_engine","path":"builder"},
+          {"name":"gradle","path":"gradle"},
           {"name":"openjdk","path":"java"}
         ]
       # CIPD flutter_internal/java/openjdk/$platform
