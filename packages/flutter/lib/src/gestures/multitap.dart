@@ -9,6 +9,7 @@ import 'arena.dart';
 import 'binding.dart';
 import 'constants.dart';
 import 'events.dart';
+import 'gesture_settings.dart';
 import 'pointer_router.dart';
 import 'recognizer.dart';
 import 'tap.dart';
@@ -60,6 +61,7 @@ class _TapTracker {
     required PointerDownEvent event,
     required this.entry,
     required Duration doubleTapMinTime,
+    required this.gestureSettings,
   }) : assert(doubleTapMinTime != null),
        assert(event != null),
        assert(event.buttons != null),
@@ -68,6 +70,7 @@ class _TapTracker {
        initialButtons = event.buttons,
        _doubleTapMinTimeCountdown = _CountdownZoned(duration: doubleTapMinTime);
 
+  final DeviceGestureSettings? gestureSettings;
   final int pointer;
   final GestureArenaEntry entry;
   final Offset _initialGlobalPosition;
@@ -244,6 +247,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
       event: event,
       entry: GestureBinding.instance!.gestureArena.add(event.pointer, this),
       doubleTapMinTime: kDoubleTapMinTime,
+      gestureSettings: gestureSettings,
     );
     _trackers[event.pointer] = tracker;
     tracker.startTrackingPointer(_handleEvent, event.transform);
@@ -380,11 +384,13 @@ class _TapGesture extends _TapTracker {
     required this.gestureRecognizer,
     required PointerEvent event,
     required Duration longTapDelay,
+    required DeviceGestureSettings? gestureSettings,
   }) : _lastPosition = OffsetPair.fromEventPosition(event),
        super(
     event: event as PointerDownEvent,
     entry: GestureBinding.instance!.gestureArena.add(event.pointer, gestureRecognizer),
     doubleTapMinTime: kDoubleTapMinTime,
+    gestureSettings: gestureSettings,
   ) {
     startTrackingPointer(handleEvent, event.transform);
     if (longTapDelay > Duration.zero) {
@@ -406,7 +412,7 @@ class _TapGesture extends _TapTracker {
   void handleEvent(PointerEvent event) {
     assert(event.pointer == pointer);
     if (event is PointerMoveEvent) {
-      if (!isWithinGlobalTolerance(event, computeHitSlop(event.kind)))
+      if (!isWithinGlobalTolerance(event, computeHitSlop(event.kind, gestureSettings)))
         cancel();
       else
         _lastPosition = OffsetPair.fromEventPosition(event);
@@ -513,6 +519,7 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
       gestureRecognizer: this,
       event: event,
       longTapDelay: longTapDelay,
+      gestureSettings: gestureSettings,
     );
     if (onTapDown != null)
       invokeCallback<void>('onTapDown', () {
@@ -879,6 +886,7 @@ class SerialTapGestureRecognizer extends GestureRecognizer {
       invokeCallback<void>('onSerialTapDown', () => onSerialTapDown!(details));
     }
     final _TapTracker tracker = _TapTracker(
+      gestureSettings: gestureSettings,
       event: event,
       entry: GestureBinding.instance!.gestureArena.add(event.pointer, this),
       doubleTapMinTime: kDoubleTapMinTime,

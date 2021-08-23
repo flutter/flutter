@@ -412,7 +412,7 @@ class _DefaultPub implements Pub {
 
   /// The command used for running pub.
   List<String> _pubCommand(List<String> arguments) {
-    // TODO(jonahwilliams): refactor to use artifacts.
+    // TODO(zanderso): refactor to use artifacts.
     final String sdkPath = _fileSystem.path.joinAll(<String>[
       Cache.flutterRoot!,
       'bin',

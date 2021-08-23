@@ -25,7 +25,7 @@ class FuchsiaKernelCompiler {
     @required String target, // E.g., lib/main.dart
     BuildInfo buildInfo = BuildInfo.debug,
   }) async {
-    // TODO(zra): Use filesystem root and scheme information from buildInfo.
+    // TODO(zanderso): Use filesystem root and scheme information from buildInfo.
     const String multiRootScheme = 'main-root';
     final String packagesFile = fuchsiaProject.project.packagesFile.path;
     final String outDir = getFuchsiaBuildDirectory();

@@ -705,7 +705,8 @@ flutter:
       legacySettingsDotGradleFiles.readAsStringSync().split(';EOF').map<String>((String body) => body.trim()),
       contains(templateSettingsDotGradle.readAsStringSync().trim()),
     );
-  }, skip: true); // TODO(jonahwilliams): This is an integration test and should be moved to the integration shard.
+    // TODO(zanderso): This is an integration test and should be moved to the integration shard.
+  }, skip: true); // https://github.com/flutter/flutter/issues/87922
 }
 
 class FakeGradleUtils extends GradleUtils {
