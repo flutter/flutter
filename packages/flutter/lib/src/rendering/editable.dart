@@ -2814,6 +2814,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
                children.elementAt(childIndex).isTagged(PlaceholderSpanIndexSemanticsTag(placeholderIndex))) {
           final SemanticsNode childNode = children.elementAt(childIndex);
           final TextParentData parentData = child!.parentData! as TextParentData;
+          assert(parentData.scale != null);
           childNode.rect = Rect.fromLTWH(
             childNode.rect.left,
             childNode.rect.top,
