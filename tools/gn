@@ -54,9 +54,6 @@ def get_out_dir(args):
     if args.target_os == 'fuchsia' and args.fuchsia_cpu is not None:
       target_dir.append(args.fuchsia_cpu)
 
-    if args.enable_vulkan:
-        target_dir.append('vulkan')
-
     # This exists for backwards compatibility of tests that are being run
     # on LUCI. This can be removed in coordination with a LUCI change:
     # https://github.com/flutter/flutter/issues/76547
@@ -122,9 +119,6 @@ def to_gn_args(args):
     if args.simulator:
         if args.target_os == 'android':
             raise Exception('--simulator is not supported on Android')
-
-    if args.target_os != 'android' and args.enable_vulkan:
-      raise Exception('--enable-vulkan is only supported on Android')
 
     runtime_mode = args.runtime_mode
 
@@ -308,12 +302,6 @@ def to_gn_args(args):
       gn_args['allow_deprecated_api_calls'] = True
       gn_args['skia_use_metal'] = True
       gn_args['shell_enable_metal'] = True
-
-    if args.enable_vulkan:
-      # Enable vulkan in the Flutter shell.
-      gn_args['shell_enable_vulkan'] = True
-      # Configure Skia for Vulkan support.
-      gn_args['skia_use_vulkan'] = True
 
     if sys.platform.startswith(('cygwin', 'win')):
       # The buildroot currently isn't set up to support Vulkan in the
