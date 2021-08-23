@@ -7,8 +7,10 @@ import 'dart:ui' as ui;
 import 'dart:ui' show Brightness;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 
 import 'basic.dart';
+import 'binding.dart';
 import 'debug.dart';
 import 'framework.dart';
 
@@ -103,6 +105,7 @@ class MediaQueryData {
     this.disableAnimations = false,
     this.boldText = false,
     this.navigationMode = NavigationMode.traditional,
+    this.gestureSettings = const DeviceGestureSettings(touchSlop: kTouchSlop),
     this.displayFeatures = const <ui.DisplayFeature>[],
   }) : assert(size != null),
        assert(devicePixelRatio != null),
@@ -119,6 +122,7 @@ class MediaQueryData {
        assert(disableAnimations != null),
        assert(boldText != null),
        assert(navigationMode != null),
+       assert(gestureSettings != null),
        assert(displayFeatures != null);
 
   /// Creates data for a media query based on the given window.
@@ -144,6 +148,7 @@ class MediaQueryData {
       highContrast = window.accessibilityFeatures.highContrast,
       alwaysUse24HourFormat = window.alwaysUse24HourFormat,
       navigationMode = NavigationMode.traditional,
+      gestureSettings = DeviceGestureSettings.fromWindow(window),
       displayFeatures = window.displayFeatures;
 
   /// The size of the media in logical pixels (e.g, the size of the screen).
@@ -367,6 +372,13 @@ class MediaQueryData {
   /// a widget subtree for those widgets sensitive to it.
   final NavigationMode navigationMode;
 
+  /// The gesture settings for the view this media query is derived from.
+  ///
+  /// This contains platform specific configuration for gesture behavior,
+  /// such as touch slop. These settings should be favored for configuring
+  /// gesture behavior over the framework constants.
+  final DeviceGestureSettings gestureSettings;
+
   /// {@macro dart.ui.ViewConfiguration.displayFeatures}
   ///
   /// See also:
@@ -422,6 +434,7 @@ class MediaQueryData {
     bool? accessibleNavigation,
     bool? boldText,
     NavigationMode? navigationMode,
+    DeviceGestureSettings? gestureSettings,
     List<ui.DisplayFeature>? displayFeatures,
   }) {
     return MediaQueryData(
@@ -440,6 +453,7 @@ class MediaQueryData {
       accessibleNavigation: accessibleNavigation ?? this.accessibleNavigation,
       boldText: boldText ?? this.boldText,
       navigationMode: navigationMode ?? this.navigationMode,
+      gestureSettings: gestureSettings ?? this.gestureSettings,
       displayFeatures: displayFeatures ?? this.displayFeatures,
     );
   }
@@ -491,6 +505,7 @@ class MediaQueryData {
       invertColors: invertColors,
       accessibleNavigation: accessibleNavigation,
       boldText: boldText,
+      gestureSettings: gestureSettings,
       displayFeatures: displayFeatures,
     );
   }
@@ -540,6 +555,7 @@ class MediaQueryData {
       invertColors: invertColors,
       accessibleNavigation: accessibleNavigation,
       boldText: boldText,
+      gestureSettings: gestureSettings,
       displayFeatures: displayFeatures,
     );
   }
@@ -589,6 +605,7 @@ class MediaQueryData {
       invertColors: invertColors,
       accessibleNavigation: accessibleNavigation,
       boldText: boldText,
+      gestureSettings: gestureSettings,
       displayFeatures: displayFeatures,
     );
   }
@@ -612,6 +629,7 @@ class MediaQueryData {
         && other.accessibleNavigation == accessibleNavigation
         && other.boldText == boldText
         && other.navigationMode == navigationMode
+        && other.gestureSettings == gestureSettings
         && other.displayFeatures == displayFeatures;
   }
 
@@ -632,6 +650,7 @@ class MediaQueryData {
       accessibleNavigation,
       boldText,
       navigationMode,
+      gestureSettings,
       hashList(displayFeatures),
     );
   }
@@ -653,6 +672,7 @@ class MediaQueryData {
       'invertColors: $invertColors',
       'boldText: $boldText',
       'navigationMode: ${describeEnum(navigationMode)}',
+      'gestureSettings: $gestureSettings',
       'displayFeatures: $displayFeatures',
     ];
     return '${objectRuntimeType(this, 'MediaQueryData')}(${properties.join(', ')})';
@@ -829,6 +849,28 @@ class MediaQuery extends InheritedWidget {
     );
   }
 
+  /// Provides a [MediaQuery] which is built and updated using the latest
+  /// [WidgetsBinding.window] values.
+  ///
+  /// The [MediaQuery] is wrapped in a separate widget to ensure that only it
+  /// and its dependents are updated when `window` changes, instead of
+  /// rebuilding the whole widget tree.
+  ///
+  /// This should be inserted into the widget tree when the [MediaQuery] view
+  /// padding is consumed by a widget in such a way that the view padding is no
+  /// longer exposed to the widget's descendants or siblings.
+  ///
+  /// The [child] argument is required and must not be null.
+  static Widget fromWindow({
+    Key? key,
+    required Widget child,
+  }) {
+    return _MediaQueryFromWindow(
+      key: key,
+      child: child,
+    );
+  }
+
   /// Contains information about the current media.
   ///
   /// For example, the [MediaQueryData.size] property contains the width and
@@ -963,4 +1005,101 @@ enum NavigationMode {
   /// controls will retain focus when disabled, and will be able to receive
   /// focus (although they remain disabled) when traversed.
   directional,
+}
+
+/// Provides a [MediaQuery] which is built and updated using the latest
+/// [WidgetsBinding.window] values.
+///
+/// Receives `window` updates by listening to [WidgetsBinding].
+///
+/// The standalone widget ensures that it rebuilds **only** [MediaQuery] and
+/// its dependents when `window` changes, instead of rebuilding the entire
+/// widget tree.
+///
+/// It is used by [WidgetsApp] if no other [MediaQuery] is available above it.
+///
+/// See also:
+///
+///  * [MediaQuery], which establishes a subtree in which media queries resolve
+///    to a [MediaQueryData].
+class _MediaQueryFromWindow extends StatefulWidget {
+  /// Creates a [_MediaQueryFromWindow] that provides a [MediaQuery] to its
+  /// descendants using the `window` to keep [MediaQueryData] up to date.
+  ///
+  /// The [child] must not be null.
+  const _MediaQueryFromWindow({
+    Key? key,
+    required this.child,
+  }) : super(key: key);
+
+  /// {@macro flutter.widgets.ProxyWidget.child}
+  final Widget child;
+
+  @override
+  State<_MediaQueryFromWindow> createState() => _MediaQueryFromWindowState();
+}
+
+class _MediaQueryFromWindowState extends State<_MediaQueryFromWindow> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance!.addObserver(this);
+  }
+
+  // ACCESSIBILITY
+
+  @override
+  void didChangeAccessibilityFeatures() {
+    setState(() {
+      // The properties of window have changed. We use them in our build
+      // function, so we need setState(), but we don't cache anything locally.
+    });
+  }
+
+  // METRICS
+
+  @override
+  void didChangeMetrics() {
+    setState(() {
+      // The properties of window have changed. We use them in our build
+      // function, so we need setState(), but we don't cache anything locally.
+    });
+  }
+
+  @override
+  void didChangeTextScaleFactor() {
+    setState(() {
+      // The textScaleFactor property of window has changed. We reference
+      // window in our build function, so we need to call setState(), but
+      // we don't need to cache anything locally.
+    });
+  }
+
+  // RENDERING
+  @override
+  void didChangePlatformBrightness() {
+    setState(() {
+      // The platformBrightness property of window has changed. We reference
+      // window in our build function, so we need to call setState(), but
+      // we don't need to cache anything locally.
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance!.window);
+    if (!kReleaseMode) {
+      data = data.copyWith(platformBrightness: debugBrightnessOverride);
+    }
+    return MediaQuery(
+      data: data,
+      child: widget.child,
+    );
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance!.removeObserver(this);
+    super.dispose();
+  }
 }

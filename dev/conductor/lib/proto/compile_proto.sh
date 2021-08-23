@@ -22,8 +22,8 @@ if ! type dart >/dev/null 2>&1; then
   exit 1
 fi
 
-# Pin protoc-gen-dart to pre-nullsafe version.
-dart pub global activate protoc_plugin 19.3.1
+# Use null-safe protoc_plugin
+dart pub global activate protoc_plugin 20.0.0
 
 protoc --dart_out="$DIR" --proto_path="$DIR" "$DIR/conductor_state.proto"
 

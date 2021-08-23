@@ -28,12 +28,12 @@ const String kFontManifestJson = 'FontManifest.json';
 /// The effect of adding `uses-material-design: true` to the pubspec is to insert
 /// the following snippet into the asset manifest:
 ///
-///```yaml
+/// ```yaml
 /// material:
 ///   - family: MaterialIcons
 ///     fonts:
 ///       - asset: fonts/MaterialIcons-Regular.otf
-///```
+/// ```
 const List<Map<String, Object>> kMaterialFonts = <Map<String, Object>>[
   <String, Object>{
     'family': 'MaterialIcons',

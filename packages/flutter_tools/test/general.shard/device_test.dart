@@ -552,7 +552,7 @@ class MockDeviceDiscovery extends Fake implements DeviceDiscovery {
   List<String> get wellKnownIds => <String>[];
 }
 
-class FakeFlutterProject extends Fake implements FlutterProject {}
+class FakeFlutterProject extends Fake implements FlutterProject { }
 
 class LongPollingDeviceDiscovery extends PollingDeviceDiscovery {
   LongPollingDeviceDiscovery() : super('forever');

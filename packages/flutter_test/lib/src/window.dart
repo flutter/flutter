@@ -368,6 +368,16 @@ class TestWindow implements ui.SingletonFlutterWindow {
   }
 
   @override
+  ui.ViewConfiguration get viewConfiguration => _viewConfiguration ?? _window.viewConfiguration;
+  ui.ViewConfiguration? _viewConfiguration;
+
+  /// Hide the real view configuration and report the provided [value] instead.
+  set viewConfigurationTestValue(ui.ViewConfiguration? value) {
+    _viewConfiguration = value;
+    onMetricsChanged?.call();
+  }
+
+  @override
   ui.VoidCallback? get onAccessibilityFeaturesChanged => platformDispatcher.onAccessibilityFeaturesChanged;
   @override
   set onAccessibilityFeaturesChanged(ui.VoidCallback? callback) {

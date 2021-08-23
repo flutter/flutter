@@ -38,7 +38,7 @@ void main() {
     expect(_flutter.hasExited, equals(false));
   });
 
-  testWithoutContext('fluter run does not terminate when a debugger is attached and pause-on-exceptions', () async {
+  testWithoutContext('flutter run does not terminate when a debugger is attached and pause-on-exceptions', () async {
     await _flutter.run(withDebugger: true, pauseOnExceptions: true);
     await Future<void>.delayed(requiredLifespan);
     expect(_flutter.hasExited, equals(false));

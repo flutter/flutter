@@ -9,6 +9,7 @@ import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
+import 'package:yaml/yaml.dart';
 
 import './git.dart';
 import './globals.dart';
@@ -25,7 +26,9 @@ class Remote {
   const Remote({
     required RemoteName name,
     required this.url,
-  }) : _name = name, assert(url != null), assert (url != '');
+  })  : _name = name,
+        assert(url != null),
+        assert(url != '');
 
   final RemoteName _name;
 
@@ -63,11 +66,20 @@ abstract class Repository {
     if (previousCheckoutLocation != null) {
       _checkoutDirectory = fileSystem.directory(previousCheckoutLocation);
       if (!_checkoutDirectory!.existsSync()) {
-        throw ConductorException('Provided previousCheckoutLocation $previousCheckoutLocation does not exist on disk!');
+        throw ConductorException(
+            'Provided previousCheckoutLocation $previousCheckoutLocation does not exist on disk!');
       }
       if (initialRef != null) {
+        assert(initialRef != '');
         git.run(
-          <String>['checkout', '${upstreamRemote.name}/$initialRef'],
+          <String>['fetch', upstreamRemote.name],
+          'Fetch ${upstreamRemote.name} to ensure we have latest refs',
+          workingDirectory: _checkoutDirectory!.path,
+        );
+        // Note: if [initialRef] is a remote ref the checkout will be left in a
+        // detached HEAD state.
+        git.run(
+          <String>['checkout', initialRef!],
           'Checking out initialRef $initialRef',
           workingDirectory: _checkoutDirectory!.path,
         );
@@ -255,11 +267,9 @@ abstract class Repository {
   /// List commits in reverse chronological order.
   List<String> revList(List<String> args) {
     return git
-        .getOutput(
-          <String>['rev-list', ...args],
-          'rev-list with args ${args.join(' ')}',
-          workingDirectory: checkoutDirectory.path
-        )
+        .getOutput(<String>['rev-list', ...args],
+            'rev-list with args ${args.join(' ')}',
+            workingDirectory: checkoutDirectory.path)
         .trim()
         .split('\n');
   }
@@ -356,22 +366,33 @@ abstract class Repository {
   }
 
   /// Push [commit] to the release channel [branch].
-  void updateChannel(
-    String commit,
-    String remote,
-    String branch, {
+  void pushRef({
+    required String fromRef,
+    required String remote,
+    required String toRef,
     bool force = false,
+    bool dryRun = false,
   }) {
-    git.run(
-      <String>[
-        'push',
-        if (force) '--force',
-        remote,
-        '$commit:$branch',
-      ],
-      'update the release branch with the commit',
-      workingDirectory: checkoutDirectory.path,
-    );
+    final List<String> args = <String>[
+      'push',
+      if (force) '--force',
+      remote,
+      '$fromRef:$toRef',
+    ];
+    final String command = <String>[
+      'git',
+      ...args,
+    ].join(' ');
+    if (dryRun) {
+      stdio.printStatus('About to execute command: `$command`');
+    } else {
+      git.run(
+        args,
+        'update the release branch with the commit',
+        workingDirectory: checkoutDirectory.path,
+      );
+      stdio.printStatus('Executed command: `$command`');
+    }
   }
 
   String commit(
@@ -379,6 +400,14 @@ abstract class Repository {
     bool addFirst = false,
   }) {
     assert(!message.contains("'"));
+    final bool hasChanges = git.getOutput(
+      <String>['status', '--porcelain'],
+      'check for uncommitted changes',
+      workingDirectory: checkoutDirectory.path,
+    ).trim().isNotEmpty;
+    if (!hasChanges) {
+      throw ConductorException('Tried to commit with message $message but no changes were present');
+    }
     if (addFirst) {
       git.run(
         <String>['add', '--all'],
@@ -471,6 +500,7 @@ class FrameworkRepository extends Repository {
   }
 
   final Checkouts checkouts;
+  late final CiYaml ciYaml = CiYaml(checkoutDirectory.childFile('.ci.yaml'));
   static const String defaultUpstream =
       'https://github.com/flutter/flutter.git';
 
@@ -566,6 +596,35 @@ class FrameworkRepository extends Repository {
     ) as Map<String, dynamic>;
     return Version.fromString(versionJson['frameworkVersion'] as String);
   }
+
+  /// Update this framework's engine version file.
+  ///
+  /// Returns [true] if the version file was updated and a commit is needed.
+  bool updateEngineRevision(
+    String newEngine, {
+    @visibleForTesting File? engineVersionFile,
+  }) {
+    assert(newEngine.isNotEmpty);
+    engineVersionFile ??= checkoutDirectory
+        .childDirectory('bin')
+        .childDirectory('internal')
+        .childFile('engine.version');
+    assert(engineVersionFile.existsSync());
+    final String oldEngine = engineVersionFile.readAsStringSync();
+    if (oldEngine.trim() == newEngine.trim()) {
+      stdio.printTrace(
+        'Tried to update the engine revision but version file is already up to date at: $newEngine',
+      );
+      return false;
+    }
+    stdio.printStatus('Updating engine revision from $oldEngine to $newEngine');
+    engineVersionFile.writeAsStringSync(
+      // Version files have trailing newlines
+      '${newEngine.trim()}\n',
+      flush: true,
+    );
+    return true;
+  }
 }
 
 /// A wrapper around the host repository that is executing the conductor.
@@ -578,14 +637,14 @@ class HostFrameworkRepository extends FrameworkRepository {
     String name = 'host-framework',
     required String upstreamPath,
   }) : super(
-    checkouts,
-    name: name,
-    upstreamRemote: Remote(
-      name: RemoteName.upstream,
-      url: 'file://$upstreamPath/',
-    ),
-    localUpstream: false,
-  ) {
+          checkouts,
+          name: name,
+          upstreamRemote: Remote(
+            name: RemoteName.upstream,
+            url: 'file://$upstreamPath/',
+          ),
+          localUpstream: false,
+        ) {
     _checkoutDirectory = checkouts.fileSystem.directory(upstreamPath);
   }
 
@@ -594,17 +653,20 @@ class HostFrameworkRepository extends FrameworkRepository {
 
   @override
   void newBranch(String branchName) {
-    throw ConductorException('newBranch not implemented for the host repository');
+    throw ConductorException(
+        'newBranch not implemented for the host repository');
   }
 
   @override
   void checkout(String ref) {
-    throw ConductorException('checkout not implemented for the host repository');
+    throw ConductorException(
+        'checkout not implemented for the host repository');
   }
 
   @override
   String cherryPick(String commit) {
-    throw ConductorException('cherryPick not implemented for the host repository');
+    throw ConductorException(
+        'cherryPick not implemented for the host repository');
   }
 
   @override
@@ -617,14 +679,15 @@ class HostFrameworkRepository extends FrameworkRepository {
     throw ConductorException('tag not implemented for the host repository');
   }
 
-  @override
   void updateChannel(
     String commit,
     String remote,
     String branch, {
     bool force = false,
+    bool dryRun = false,
   }) {
-    throw ConductorException('updateChannel not implemented for the host repository');
+    throw ConductorException(
+        'updateChannel not implemented for the host repository');
   }
 
   @override
@@ -661,6 +724,8 @@ class EngineRepository extends Repository {
 
   final Checkouts checkouts;
 
+  late final CiYaml ciYaml = CiYaml(checkoutDirectory.childFile('.ci.yaml'));
+
   static const String defaultUpstream = 'https://github.com/flutter/engine.git';
   static const String defaultBranch = 'master';
 
@@ -673,20 +738,20 @@ class EngineRepository extends Repository {
     depsFile ??= checkoutDirectory.childFile('DEPS');
     final String fileContent = depsFile.readAsStringSync();
     final RegExp dartPattern = RegExp("[ ]+'dart_revision': '([a-z0-9]{40})',");
-    final Iterable<RegExpMatch> allMatches = dartPattern.allMatches(fileContent);
+    final Iterable<RegExpMatch> allMatches =
+        dartPattern.allMatches(fileContent);
     if (allMatches.length != 1) {
       throw ConductorException(
-        'Unexpected content in the DEPS file at ${depsFile.path}\n'
-        'Expected to find pattern ${dartPattern.pattern} 1 times, but got '
-        '${allMatches.length}.'
-      );
+          'Unexpected content in the DEPS file at ${depsFile.path}\n'
+          'Expected to find pattern ${dartPattern.pattern} 1 times, but got '
+          '${allMatches.length}.');
     }
     final String updatedFileContent = fileContent.replaceFirst(
       dartPattern,
       "  'dart_revision': '$newRevision',",
     );
 
-    depsFile.writeAsStringSync(updatedFileContent);
+    depsFile.writeAsStringSync(updatedFileContent, flush: true);
   }
 
   @override
@@ -716,7 +781,7 @@ class Checkouts {
     required this.stdio,
     required Directory parentDirectory,
     String directoryName = 'flutter_conductor_checkouts',
-  })  : directory = parentDirectory.childDirectory(directoryName) {
+  }) : directory = parentDirectory.childDirectory(directoryName) {
     if (!directory.existsSync()) {
       directory.createSync(recursive: true);
     }
@@ -727,4 +792,69 @@ class Checkouts {
   final Platform platform;
   final ProcessManager processManager;
   final Stdio stdio;
+}
+
+class CiYaml {
+  CiYaml(this.file) {
+    if (!file.existsSync()) {
+      throw ConductorException('Could not find the .ci.yaml file at ${file.path}');
+    }
+  }
+
+  /// Underlying [File] that this object wraps.
+  final File file;
+
+  /// Returns the raw string contents of this file.
+  ///
+  /// This is not cached as the contents can be written to while the conductor
+  /// is running.
+  String get stringContents => file.readAsStringSync();
+
+  /// Returns the parsed contents of the file as a [YamlMap].
+  ///
+  /// This is not cached as the contents can be written to while the conductor
+  /// is running.
+  YamlMap get contents => loadYaml(stringContents) as YamlMap;
+
+  List<String> get enabledBranches {
+    final YamlList yamlList = contents['enabled_branches'] as YamlList;
+    return yamlList.map<String>((dynamic element) {
+      return element as String;
+    }).toList();
+  }
+
+  static final RegExp _enabledBranchPattern = RegExp(r'^enabled_branches:');
+
+  /// Update this .ci.yaml file with the given branch name.
+  ///
+  /// The underlying [File] is written to, but not committed to git. This method
+  /// will throw a [ConductorException] if the [branchName] is already present
+  /// in the file or if the file does not have an "enabled_branches:" field.
+  void enableBranch(String branchName) {
+    final List<String> newStrings = <String>[];
+    if (enabledBranches.contains(branchName)) {
+      throw ConductorException('${file.path} already contains the branch $branchName');
+    }
+    if (!_enabledBranchPattern.hasMatch(stringContents)) {
+      throw ConductorException(
+        'Did not find the expected string "enabled_branches:" in the file ${file.path}',
+      );
+    }
+    final List<String> lines = stringContents.split('\n');
+    bool insertedCurrentBranch = false;
+    for (final String line in lines) {
+      // Every existing line should be copied to the new Yaml
+      newStrings.add(line);
+      if (insertedCurrentBranch) {
+        continue;
+      }
+      if (_enabledBranchPattern.hasMatch(line)) {
+        insertedCurrentBranch = true;
+        // Indent two spaces
+        final String indent = ' ' * 2;
+        newStrings.add('$indent- ${branchName.trim()}');
+      }
+    }
+    file.writeAsStringSync(newStrings.join('\n'), flush: true);
+  }
 }

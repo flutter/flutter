@@ -773,6 +773,69 @@ void main() {
     expect(find.text('BottomSheet'), findsNothing);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/87592
+  testWidgets('the framework do not dispose the transitionAnimationController provided by user.', (WidgetTester tester) async {
+    const Key tapTarget = Key('tap-target');
+    final AnimationController controller = AnimationController(
+      vsync: const TestVSync(),
+      duration: const Duration(seconds: 2),
+      reverseDuration: const Duration(seconds: 2),
+    );
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return GestureDetector(
+              key: tapTarget,
+              onTap: () {
+                showModalBottomSheet<void>(
+                  context: context,
+                  // The default duration and reverseDuration is 1 second
+                  transitionAnimationController: controller,
+                  builder: (BuildContext context) {
+                    return const Text('BottomSheet');
+                  },
+                );
+              },
+              behavior: HitTestBehavior.opaque,
+              child: const SizedBox(
+                height: 100.0,
+                width: 100.0,
+              ),
+            );
+          },
+        ),
+      ),
+    ));
+
+    expect(find.text('BottomSheet'), findsNothing);
+
+    await tester.tap(find.byKey(tapTarget)); // Opening animation will start after tapping
+    await tester.pump();
+
+    expect(find.text('BottomSheet'), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 2000));
+    expect(find.text('BottomSheet'), findsOneWidget);
+
+    // Tapping above the bottom sheet to dismiss it.
+    await tester.tapAt(const Offset(20.0, 20.0)); // Closing animation will start after tapping
+    await tester.pump();
+
+    expect(find.text('BottomSheet'), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 2000));
+    // The bottom sheet should still be present at the very end of the animation.
+    expect(find.text('BottomSheet'), findsOneWidget);
+
+    await tester.pump(const Duration(milliseconds: 1));
+    // The bottom sheet should not be showing any longer.
+    expect(find.text('BottomSheet'), findsNothing);
+
+    controller.dispose();
+    // Double disposal will throw.
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Verify persistence BottomSheet use AnimationController if provided.', (WidgetTester tester) async {
     const Key tapTarget = Key('tap-target');
     const Key tapTargetToClose = Key('tap-target-to-close');

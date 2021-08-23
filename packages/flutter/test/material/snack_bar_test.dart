@@ -755,7 +755,6 @@ void main() {
       radioTheme: const RadioThemeData(),
       switchTheme: const SwitchThemeData(),
       progressIndicatorTheme: const ProgressIndicatorThemeData(),
-      fixTextFieldOutlineLabel: false,
       useTextSelectionTheme: false,
     );
 
@@ -978,9 +977,8 @@ void main() {
     final Offset snackBarTopRight = tester.getTopRight(materialFinder);
     expect(textBottomLeft.dx - snackBarBottomLeft.dx, padding);
     expect(snackBarTopRight.dx - textTopRight.dx, padding);
-    // The text is given a vertical padding of 14 already.
-    expect(snackBarBottomLeft.dy - textBottomLeft.dy, padding + 14);
-    expect(textTopRight.dy - snackBarTopRight.dy, padding + 14);
+    expect(snackBarBottomLeft.dy - textBottomLeft.dy, padding);
+    expect(textTopRight.dy - snackBarTopRight.dy, padding);
   });
 
   testWidgets('Snackbar width can be customized', (WidgetTester tester) async {

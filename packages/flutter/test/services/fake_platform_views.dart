@@ -141,6 +141,8 @@ class FakeAndroidPlatformViewsController {
 
   int? lastClearedFocusViewId;
 
+  bool synchronizeToNativeViewHierarchy = true;
+
   void registerViewType(String viewType) {
     _registeredViewTypes.add(viewType);
   }
@@ -166,6 +168,8 @@ class FakeAndroidPlatformViewsController {
         return _setDirection(call);
       case 'clearFocus':
         return _clearFocus(call);
+      case 'synchronizeToNativeViewHierarchy':
+        return _synchronizeToNativeViewHierarchy(call);
     }
     return Future<dynamic>.sync(() => null);
   }
@@ -297,6 +301,11 @@ class FakeAndroidPlatformViewsController {
       );
 
     lastClearedFocusViewId = id;
+    return Future<dynamic>.sync(() => null);
+  }
+
+  Future<dynamic> _synchronizeToNativeViewHierarchy(MethodCall call) {
+    synchronizeToNativeViewHierarchy = call.arguments as bool;
     return Future<dynamic>.sync(() => null);
   }
 }

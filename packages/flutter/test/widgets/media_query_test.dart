@@ -4,6 +4,7 @@
 
 import 'dart:ui' show Brightness, DisplayFeature, DisplayFeatureState, DisplayFeatureType;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -110,6 +111,7 @@ void main() {
     expect(data.boldText, false);
     expect(data.highContrast, false);
     expect(data.platformBrightness, Brightness.light);
+    expect(data.gestureSettings.touchSlop, null);
     expect(data.displayFeatures, isEmpty);
     expect(data.hinge, isNull);
   });
@@ -131,6 +133,7 @@ void main() {
     expect(copied.boldText, data.boldText);
     expect(copied.highContrast, data.highContrast);
     expect(copied.platformBrightness, data.platformBrightness);
+    expect(copied.gestureSettings, data.gestureSettings);
     expect(copied.displayFeatures, data.displayFeatures);
   });
 
@@ -144,6 +147,7 @@ void main() {
     const EdgeInsets customViewPadding = EdgeInsets.all(11.24031);
     const EdgeInsets customViewInsets = EdgeInsets.all(1.67262);
     const EdgeInsets customSystemGestureInsets = EdgeInsets.all(1.5556);
+    const DeviceGestureSettings gestureSettings = DeviceGestureSettings(touchSlop: 8.0);
     const List<DisplayFeature> customDisplayFeatures = <DisplayFeature>[
       DisplayFeature(
         bounds: Rect.zero,
@@ -168,6 +172,7 @@ void main() {
       boldText: true,
       highContrast: true,
       platformBrightness: Brightness.dark,
+      gestureSettings: gestureSettings,
       displayFeatures: customDisplayFeatures,
     );
     expect(copied.size, customSize);
@@ -184,6 +189,7 @@ void main() {
     expect(copied.boldText, true);
     expect(copied.highContrast, true);
     expect(copied.platformBrightness, Brightness.dark);
+    expect(copied.gestureSettings, gestureSettings);
     expect(copied.displayFeatures, customDisplayFeatures);
   });
 
@@ -692,6 +698,68 @@ void main() {
 
     expect(outsideBoldTextOverride, false);
     expect(insideBoldTextOverride, true);
+  });
+
+  testWidgets('MediaQuery.fromWindow creates a MediaQuery', (WidgetTester tester) async {
+    bool hasMediaQueryAsParentOutside = false;
+    bool hasMediaQueryAsParentInside = false;
+
+    await tester.pumpWidget(
+      Builder(
+        builder: (BuildContext context) {
+          hasMediaQueryAsParentOutside =
+              context.findAncestorWidgetOfExactType<MediaQuery>() != null;
+          return MediaQuery.fromWindow(
+            child: Builder(
+              builder: (BuildContext context) {
+                hasMediaQueryAsParentInside =
+                    context.findAncestorWidgetOfExactType<MediaQuery>() != null;
+                return const SizedBox();
+              },
+            ),
+          );
+        },
+      ),
+    );
+
+    expect(hasMediaQueryAsParentOutside, false);
+    expect(hasMediaQueryAsParentInside, true);
+  });
+
+  testWidgets('MediaQueryData.fromWindow is created using window values', (WidgetTester tester) async {
+    final MediaQueryData windowData = MediaQueryData.fromWindow(WidgetsBinding.instance!.window);
+    late MediaQueryData fromWindowData;
+
+    await tester.pumpWidget(
+      MediaQuery.fromWindow(
+        child: Builder(
+          builder: (BuildContext context) {
+            fromWindowData = MediaQuery.of(context);
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    expect(windowData, equals(fromWindowData));
+  });
+
+  test('DeviceGestureSettings has reasonable hashCode', () {
+    final DeviceGestureSettings settingsA = DeviceGestureSettings(touchSlop: nonconst(16));
+    final DeviceGestureSettings settingsB = DeviceGestureSettings(touchSlop: nonconst(8));
+    final DeviceGestureSettings settingsC = DeviceGestureSettings(touchSlop: nonconst(16));
+
+    expect(settingsA.hashCode, settingsC.hashCode);
+    expect(settingsA.hashCode, isNot(settingsB.hashCode));
+  });
+
+  test('DeviceGestureSettings has reasonable equality', () {
+    final DeviceGestureSettings settingsA = DeviceGestureSettings(touchSlop: nonconst(16));
+    final DeviceGestureSettings settingsB = DeviceGestureSettings(touchSlop: nonconst(8));
+    final DeviceGestureSettings settingsC = DeviceGestureSettings(touchSlop: nonconst(16));
+
+    expect(settingsA, equals(settingsC));
+    expect(settingsA, isNot(settingsB));
   });
 
   testWidgets('MediaQueryData.hinge returns hinge display feature', (WidgetTester tester) async {

@@ -56,7 +56,7 @@ class TestStdio extends Stdio {
 
 class FakeArgResults implements ArgResults {
   FakeArgResults({
-    required String level,
+    required String? level,
     required String candidateBranch,
     String remote = 'upstream',
     bool justPrint = false,
