@@ -53,6 +53,7 @@ TEST(FlutterMetalSurfaceManager, EnsureSizeUpdatesSizeForBackBuffer) {
   FlutterMetalSurfaceManager* surfaceManager = CreateSurfaceManager();
   CGSize size = CGSizeMake(100, 50);
   [surfaceManager ensureSurfaceSize:size];
+  [surfaceManager renderBuffer];  // make sure we have back buffer
   [surfaceManager swapBuffers];
   id<MTLTexture> texture =
       (reinterpret_cast<FlutterMetalRenderBackingStore*>([surfaceManager renderBuffer])).texture;
