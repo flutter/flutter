@@ -57,13 +57,13 @@ class UploadResultsCommand extends Command<void> {
       print('Uploading metrics failure: $e\n\n$stacktrace');
     }
 
-    // final Cocoon cocoon = Cocoon(serviceAccountTokenPath: serviceAccountTokenFile);
-    // return cocoon.sendResultsPath(
-    //   resultsPath: resultsPath,
-    //   isTestFlaky: testFlakyStatus == 'True',
-    //   gitBranch: gitBranch,
-    //   builderName: builderName,
-    //   testStatus: testStatus,
-    // );
+    final Cocoon cocoon = Cocoon(serviceAccountTokenPath: serviceAccountTokenFile);
+    return cocoon.sendResultsPath(
+      resultsPath: resultsPath,
+      isTestFlaky: testFlakyStatus == 'True',
+      gitBranch: gitBranch,
+      builderName: builderName,
+      testStatus: testStatus,
+    );
   }
 }
