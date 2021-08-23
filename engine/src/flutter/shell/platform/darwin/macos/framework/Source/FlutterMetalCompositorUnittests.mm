@@ -17,7 +17,7 @@ TEST(FlutterMetalCompositorTest, TestPresent) {
       std::make_unique<FlutterMetalCompositor>(mockViewController, nullptr);
 
   bool flag = false;
-  macos_compositor->SetPresentCallback([f = &flag]() {
+  macos_compositor->SetPresentCallback([f = &flag](bool has_flutter_content) {
     *f = true;
     return true;
   });

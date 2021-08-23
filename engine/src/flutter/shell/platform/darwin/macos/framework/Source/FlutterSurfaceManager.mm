@@ -58,6 +58,13 @@ static const double kIdleDelay = 1.0;
 }
 
 - (void)swapBuffers {
+#ifndef NDEBUG
+  // swapBuffers should not be called unless a frame was drawn
+  @synchronized(self) {
+    assert(_frameInProgress);
+  }
+#endif
+
   _contentLayer.frame = _containingLayer.bounds;
   _contentLayer.transform = _contentTransform;
   IOSurfaceRef contentIOSurface = [_ioSurfaces[kFlutterSurfaceManagerBackBuffer] ioSurface];

@@ -46,7 +46,7 @@ class FlutterCompositor {
   // Present sets frame_started_ to false.
   virtual bool Present(const FlutterLayer** layers, size_t layers_count) = 0;
 
-  using PresentCallback = std::function<bool()>;
+  using PresentCallback = std::function<bool(bool has_flutter_content)>;
 
   // PresentCallback is called at the end of the Present function.
   void SetPresentCallback(const PresentCallback& present_callback);
@@ -73,7 +73,7 @@ class FlutterCompositor {
 
   // Calls the present callback and ensures the frame status is updated
   // to frame ended, returning whether the present was successful or not.
-  bool EndFrame();
+  bool EndFrame(bool has_flutter_content);
 
   // Creates a CALayer object which is backed by the supplied IOSurface, and
   // adds it to the root CALayer for this FlutterViewController's view.
