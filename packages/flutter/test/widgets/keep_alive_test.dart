@@ -312,10 +312,11 @@ void main() {
 
       expect(tester.renderObject(find.byKey(innerKey, skipOffstage: false)).hasStaleLayout, isTrue);
       expect(tester.renderObject(find.byKey(outerKey, skipOffstage: false)).hasStaleLayout, isTrue);
+      // Does not paint even with a repaint boundary.
       expect(painter.paintCount, 0);
     });
 
-    testWidgets('reparent to a keptalive widget', (WidgetTester tester) async {
+    testWidgets('reparent to a kept alive widget', (WidgetTester tester) async {
       final ScrollController targetController = ScrollController();
 
       await tester.pumpWidget(
@@ -406,14 +407,14 @@ void main() {
       expect(painter.paintCount, 0);
     });
 
-    testWidgets('reparent to a keptalive widget while turning keepalive off', (WidgetTester tester) async {
+    testWidgets('reparent to a kept-alive widget while turning keepalive off', (WidgetTester tester) async {
       final ScrollController targetController = ScrollController();
       final _CustomPainter painter = _CustomPainter();
       final Widget nestedListViews = buildNestedListViews(
-                          child: RepaintBoundary(
-                            child: CustomPaint(painter: painter),
-                          ),
-                        );
+        child: RepaintBoundary(
+          child: CustomPaint(painter: painter),
+        ),
+      );
 
       await tester.pumpWidget(
         Directionality(
@@ -498,6 +499,144 @@ void main() {
       expect(tester.renderObject(find.byKey(outerKey, skipOffstage: false)).hasStaleLayout, isTrue);
       expect(find.byKey(innerKey, skipOffstage: false), findsNothing);
       expect(painter.paintCount, 0);
+    });
+
+    testWidgets(
+      'reparent to a kept-alive widget from another kept-alive widget',
+      (WidgetTester tester) async {
+        final ScrollController targetController = ScrollController();
+        final _CustomPainter painter = _CustomPainter();
+        final Widget nestedListViews = buildNestedListViews(
+          child: RepaintBoundary(
+            child: CustomPaint(painter: painter),
+          ),
+        );
+        final GlobalKey item1Key = GlobalKey(debugLabel: 'item1');
+        final GlobalKey item2Key = GlobalKey(debugLabel: 'item2');
+
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Column(
+              children: <Widget>[
+                Expanded(
+                  child: ListView(
+                    controller: targetController,
+                    cacheExtent: 0.0,
+                    addAutomaticKeepAlives: false,
+                    addRepaintBoundaries: false,
+                    addSemanticIndexes: false,
+                    children: <Widget>[
+                      KeepAlive(
+                        key: item1Key,
+                        keepAlive: true,
+                        child: SizedBox(
+                          height: 600,
+                          child: nestedListViews,
+                        ),
+                      ),
+                      ...filler,
+                    ],
+                  ),
+                  flex: 1,
+                ),
+                Expanded(
+                  child: ListView(
+                    controller: targetController,
+                    cacheExtent: 0.0,
+                    addAutomaticKeepAlives: false,
+                    addRepaintBoundaries: false,
+                    addSemanticIndexes: false,
+                    children: <Widget>[
+                      KeepAlive(
+                        key: item2Key,
+                        keepAlive: true,
+                        child: const SizedBox(height: 600),
+                      ),
+                      ...filler,
+                    ],
+                  ),
+                  flex: 1,
+                ),
+              ],
+            ),
+          ),
+        );
+
+        // Keep both Leaf widgets alive.
+        innerKey.currentState!.setKeepAlive(true);
+        outerKey.currentState!.setKeepAlive(true);
+        await tester.pump();
+
+        // Scroll the inner scroll views offscreen.
+        innerScrollController.jumpTo(3000);
+        await tester.pump();
+        outerScrollController.jumpTo(3000);
+        await tester.pump();
+
+        // Scroll scroll views in the column so both item1Key, item2Key go offscreen.
+        targetController.jumpTo(3000);
+        await tester.pump();
+
+        painter.paintCount = 0;
+
+        // Reparent
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Column(
+              children: <Widget>[
+                Expanded(
+                  child: ListView(
+                    controller: targetController,
+                    cacheExtent: 0.0,
+                    addAutomaticKeepAlives: false,
+                    addRepaintBoundaries: false,
+                    addSemanticIndexes: false,
+                    children: <Widget>[
+                      KeepAlive(
+                        key: item2Key,
+                        keepAlive: true,
+                        child: const SizedBox(height: 600),
+                      ),
+                      ...filler,
+                    ],
+                  ),
+                  flex: 1,
+                ),
+                Expanded(
+                  child: ListView(
+                    controller: targetController,
+                    cacheExtent: 0.0,
+                    addAutomaticKeepAlives: false,
+                    addRepaintBoundaries: false,
+                    addSemanticIndexes: false,
+                    children: <Widget>[
+                      KeepAlive(
+                        key: item1Key,
+                        keepAlive: true,
+                        child: SizedBox(
+                          height: 600,
+                          child: nestedListViews,
+                        ),
+                      ),
+                      ...filler,
+                    ],
+                  ),
+                  flex: 1,
+                ),
+              ],
+            ),
+          ),
+        );
+
+        expect(find.byKey(item1Key), findsNothing);
+        expect(find.byKey(item2Key), findsNothing);
+        expect(tester.renderObject(find.byKey(item1Key, skipOffstage: false)).hasStaleLayout, isTrue);
+        expect(tester.renderObject(find.byKey(item2Key, skipOffstage: false)).hasStaleLayout, isTrue);
+        expect(find.byKey(innerKey, skipOffstage: false), findsOneWidget);
+        expect(find.byKey(outerKey, skipOffstage: false), findsOneWidget);
+        expect(painter.paintCount, 0);
     });
   });
 
