@@ -15,7 +15,7 @@ Future<FlutterDestination> connectFlutterDestination() async {
   const String kGcpProject = 'GCP_PROJECT';
   final Map<String, String> env = Platform.environment;
   // final bool isTesting = env['IS_TESTING'] == 'true';
-  const bool isTesting = true;
+  const bool isTesting = false;
   print(env[kTokenPath]);
   print(env[kGcpProject]);
   print(File(env[kTokenPath]!).readAsStringSync().trim());
