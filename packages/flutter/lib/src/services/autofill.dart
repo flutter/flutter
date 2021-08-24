@@ -726,7 +726,10 @@ class AutofillConfiguration {
   final TextEditingValue currentEditingValue;
 
   /// The optional hint text placed on the view that typically suggests what
-  /// sort of input the field accepts.
+  /// sort of input the field accepts, for example "enter your password here".
+  ///
+  /// If the developer does not specify any [autofillHints], the [hintText] can
+  /// be a useful indication to the platform autofill service.
   final String? hintText;
 
   /// Returns a representation of this object as a JSON object.
