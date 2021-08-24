@@ -774,7 +774,7 @@ targets:
       add_recipes_cq: "true"
       caches: >-
         [
-	        {"name": "openjdk", "path": "java11"}
+          {"name": "openjdk", "path": "java11"}
         ]
       dependencies: >-
         [
@@ -803,7 +803,7 @@ targets:
       add_recipes_cq: "true"
       caches: >-
         [
-	        {"name": "openjdk", "path": "java11"}
+          {"name": "openjdk", "path": "java11"}
         ]
       dependencies: >-
         [
@@ -832,7 +832,7 @@ targets:
       add_recipes_cq: "true"
       caches: >-
         [
-	        {"name": "openjdk", "path": "java11"}
+          {"name": "openjdk", "path": "java11"}
         ]
       dependencies: >-
         [
