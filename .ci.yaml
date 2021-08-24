@@ -1684,6 +1684,8 @@ targets:
         [
           {"dependency": "android_sdk"}
         ]
+      tags: >
+        ["framework","hostonly"]
     timeout: 60
     scheduler: luci
 
