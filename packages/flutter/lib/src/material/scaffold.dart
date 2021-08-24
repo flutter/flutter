@@ -2690,7 +2690,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     ShapeBorder? shape,
     Clip? clipBehavior,
     BoxConstraints? constraints,
-    bool willDisposeAnimationController = true,
+    bool shouldDisposeAnimationController = true,
   }) {
     assert(() {
       if (widget.bottomSheet != null && isPersistent && _currentBottomSheet != null) {
@@ -2759,7 +2759,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
         }
       },
       onDispose: () {
-        if (willDisposeAnimationController) {
+        if (shouldDisposeAnimationController) {
           animationController.dispose();
         }
       },
@@ -2896,7 +2896,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
         shape: shape,
         clipBehavior: clipBehavior,
         constraints: constraints,
-        willDisposeAnimationController: transitionAnimationController == null,
+        shouldDisposeAnimationController: transitionAnimationController == null,
       );
     });
     return _currentBottomSheet! as PersistentBottomSheetController<T>;

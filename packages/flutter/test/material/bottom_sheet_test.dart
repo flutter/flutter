@@ -833,7 +833,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/87708
-  testWidgets('Each of the internal animation controller should be disposed by the framework.', (WidgetTester tester) async {
+  testWidgets('Each of the internal animation controllers should be disposed by the framework.', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey();
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
@@ -875,7 +875,8 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('the framework do not dispose the transitionAnimationController provided by user.', (WidgetTester tester) async {
+  // Regression test for https://github.com/flutter/flutter/issues/87708
+  testWidgets('The framework does not dispose of the transitionAnimationController provided by user.', (WidgetTester tester) async {
     const Key tapTarget = Key('tap-target');
     const Key tapTargetToClose = Key('tap-target-to-close');
     final AnimationController controller = AnimationController(
