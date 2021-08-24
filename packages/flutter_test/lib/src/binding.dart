@@ -863,6 +863,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     assert(debugAssertAllSchedulerVarsUnset(
       'The value of a scheduler debug variable was changed by the test.',
     ));
+    assert(debugAssertAllServicesVarsUnset(
+      'The value of a services debug variable was changed by the test.',
+    ));
   }
 
   void _verifyAutoUpdateGoldensUnset(bool valueBeforeTest) {
@@ -929,6 +932,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     // tests.
     // ignore: invalid_use_of_visible_for_testing_member
     RawKeyboard.instance.clearKeysPressed();
+    // ignore: invalid_use_of_visible_for_testing_member
+    HardwareKeyboard.instance.clearState();
+    // ignore: invalid_use_of_visible_for_testing_member
+    keyEventManager.clearState();
     assert(!RendererBinding.instance!.mouseTracker.mouseIsConnected,
         'The MouseTracker thinks that there is still a mouse connected, which indicates that a '
         'test has not removed the mouse pointer which it added. Call removePointer on the '
@@ -944,8 +951,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 /// This binding controls time, allowing tests to verify long
 /// animation sequences without having to execute them in real time.
 ///
-/// This class assumes it is always run in checked mode (since tests are always
-/// run in checked mode).
+/// This class assumes it is always run in debug mode (since tests are always
+/// run in debug mode).
 class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   void initInstances() {
@@ -1725,7 +1732,7 @@ class TestViewConfiguration extends ViewConfiguration {
   TestViewConfiguration._(Size size, ui.FlutterView window)
     : _paintMatrix = _getMatrix(size, window.devicePixelRatio, window),
       _hitTestMatrix = _getMatrix(size, 1.0, window),
-      super(size: size);
+      super(size: size, devicePixelRatio: window.devicePixelRatio);
 
   static Matrix4 _getMatrix(Size size, double devicePixelRatio, ui.FlutterView window) {
     final double inverseRatio = devicePixelRatio / window.devicePixelRatio;

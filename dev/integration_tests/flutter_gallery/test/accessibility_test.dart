@@ -560,9 +560,7 @@ void main() {
         await tester.pumpWidget(MaterialApp(theme: theme, home: const DialogDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
-      }, skip: theme == ThemeData.dark()); // Raised Button does not follow
-      // theme. https://github.com/flutter/flutter/issues/16488,
-      // https://github.com/flutter/flutter/issues/19623
+      });
 
       testWidgets('drawer_demo $themeName', (WidgetTester tester) async {
         tester.binding.addTime(const Duration(seconds: 3));
@@ -636,9 +634,7 @@ void main() {
         );
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
-      }, skip: theme == ThemeData.dark()); // Raised Button does not follow
-      // theme. https://github.com/flutter/flutter/issues/16488,
-      // https://github.com/flutter/flutter/issues/19623
+      });
 
       testWidgets('overscroll_demo', (WidgetTester tester) async {
         tester.binding.addTime(const Duration(seconds: 3));
@@ -664,9 +660,7 @@ void main() {
         );
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
-      }, skip: theme == ThemeData.dark()); // Raised Button does not follow
-      // theme. https://github.com/flutter/flutter/issues/16488,
-      // https://github.com/flutter/flutter/issues/19623
+      });
 
       testWidgets('progress_indicator_demo $themeName', (WidgetTester tester) async {
         tester.binding.addTime(const Duration(seconds: 3));
@@ -724,9 +718,7 @@ void main() {
         );
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
-      }, skip: theme == ThemeData.dark()); // Raised Button does not follow
-      // theme. https://github.com/flutter/flutter/issues/16488,
-      // https://github.com/flutter/flutter/issues/19623
+      });
 
       testWidgets('tabs_demo $themeName', (WidgetTester tester) async {
         tester.binding.addTime(const Duration(seconds: 3));

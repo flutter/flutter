@@ -226,6 +226,7 @@ void main() {
             .having((PlatformException e) => e.message, 'message', equals('sayHello failed')),
         ),
       );
+      channel.setMethodCallHandler(null);
     });
 
     test('can handle method call with other error result', () async {
@@ -245,6 +246,7 @@ void main() {
             .having((PlatformException e) => e.message, 'message', equals('Invalid argument(s): bad')),
         ),
       );
+      channel.setMethodCallHandler(null);
     });
 
     test('can check the mock handler', () async {

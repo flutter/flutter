@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=20210721"
+@Tags(<String>['no-shuffle'])
+
 import 'dart:io';
 
 import 'package:flutter/widgets.dart';
@@ -17,6 +23,11 @@ void main() {
     test('is initialized with top-level window if one is not provided', () {
       // The code below will throw without the default.
       TestViewConfiguration(size: const Size(1280.0, 800.0));
+    });
+
+    test('sets the DPR to match the window', () {
+      final TestViewConfiguration configuration = TestViewConfiguration(size: const Size(1280.0, 800.0));
+      expect(configuration.devicePixelRatio, binding.window.devicePixelRatio);
     });
   });
 

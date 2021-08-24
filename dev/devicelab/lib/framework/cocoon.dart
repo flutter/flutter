@@ -37,6 +37,7 @@ class Cocoon {
     @visibleForTesting this.fs = const LocalFileSystem(),
     @visibleForTesting this.processRunSync = Process.runSync,
     @visibleForTesting this.requestRetryLimit = 5,
+    @visibleForTesting this.requestTimeoutLimit = 30,
   }) : _httpClient = AuthenticatedCocoonClient(serviceAccountTokenPath, httpClient: httpClient, filesystem: fs);
 
   /// Client to make http requests to Cocoon.
@@ -57,6 +58,9 @@ class Cocoon {
 
   @visibleForTesting
   final int requestRetryLimit;
+
+  @visibleForTesting
+  final int requestTimeoutLimit;
 
   String get commitSha => _commitSha ?? _readCommitSha();
   String? _commitSha;
@@ -98,7 +102,14 @@ class Cocoon {
       resultsJson['NewStatus'] = testStatus;
     }
     resultsJson['TestFlaky'] = isTestFlaky ?? false;
-    await _sendUpdateTaskRequest(resultsJson);
+    const List<String> supportedBranches = <String>['master'];
+    if (supportedBranches.contains(resultsJson['CommitBranch'])) {
+      await retry(
+        () async => _sendUpdateTaskRequest(resultsJson).timeout(Duration(seconds: requestTimeoutLimit)),
+        retryIf: (Exception e) => e is SocketException || e is TimeoutException || e is ClientException,
+        maxAttempts: requestRetryLimit,
+      );
+    }
   }
 
   /// Write the given parameters into an update task request and store the JSON in [resultsPath].
@@ -156,6 +167,7 @@ class Cocoon {
   }
 
   Future<void> _sendUpdateTaskRequest(Map<String, dynamic> postBody) async {
+    logger.info('Attempting to send update task request to Cocoon.');
     final Map<String, dynamic> response = await _sendCocoonRequest('update-task-status', postBody);
     if (response['Name'] != null) {
       logger.info('Updated Cocoon with results from this task');

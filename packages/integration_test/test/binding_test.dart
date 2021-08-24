@@ -43,6 +43,38 @@ Future<void> main() async {
       integrationBinding.reportData = <String, dynamic>{'answer': 42};
     });
 
+    testWidgets('hitTesting works when using setSurfaceSize', (WidgetTester tester) async {
+      int invocations = 0;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Center(
+            child: GestureDetector(
+              onTap: () {
+                invocations++;
+              },
+              child: const Text('Test'),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(Text));
+      await tester.pump();
+      expect(invocations, 1);
+
+      await tester.binding.setSurfaceSize(const Size(200, 300));
+      await tester.pump();
+      await tester.tap(find.byType(Text));
+      await tester.pump();
+      expect(invocations, 2);
+
+      await tester.binding.setSurfaceSize(null);
+      await tester.pump();
+      await tester.tap(find.byType(Text));
+      await tester.pump();
+      expect(invocations, 3);
+    });
+
     testWidgets('setSurfaceSize works', (WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(home: Center(child: Text('Test'))));
 
@@ -94,11 +126,10 @@ Future<void> main() async {
       });
     });
 
-    // TODO(jiahaog): Remove when https://github.com/flutter/flutter/issues/66006 is fixed.
-    testWidgets('root widgets are wrapped with a RepaintBoundary', (WidgetTester tester) async {
+    testWidgets('root view reports correct dimensions', (WidgetTester tester) async {
       await tester.pumpWidget(const Placeholder());
 
-      expect(find.byType(RepaintBoundary), findsOneWidget);
+      expect(tester.binding.renderView.paintBounds, const Rect.fromLTWH(0, 0, 2400, 1800));
     });
   });
 

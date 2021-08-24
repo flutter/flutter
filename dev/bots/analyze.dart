@@ -48,6 +48,9 @@ Future<void> run(List<String> arguments) async {
   print('$clock runtimeType in toString...');
   await verifyNoRuntimeTypeInToString(flutterRoot);
 
+  print('$clock debug mode instead of checked mode...');
+  await verifyNoCheckedMode(flutterRoot);
+
   print('$clock Unexpected binaries...');
   await verifyNoBinaries(flutterRoot);
 
@@ -56,6 +59,9 @@ Future<void> run(List<String> arguments) async {
 
   print('$clock Deprecations...');
   await verifyDeprecations(flutterRoot);
+
+  print('$clock Skip test comments...');
+  await verifySkipTestComments(flutterRoot);
 
   print('$clock Licenses...');
   await verifyNoMissingLicense(flutterRoot);
@@ -70,7 +76,7 @@ Future<void> run(List<String> arguments) async {
   await verifyNoBadImportsInFlutterTools(flutterRoot);
 
   print('$clock Internationalization...');
-  await verifyInternationalizations();
+  await verifyInternationalizations(flutterRoot, dart);
 
   print('$clock Integration test timeouts...');
   await verifyIntegrationTestTimeouts(flutterRoot);
@@ -277,6 +283,38 @@ Future<void> _verifyNoMissingLicenseForExtension(String workingDirectory, String
   }
 }
 
+final RegExp _skipTestCommentPattern = RegExp(r'\bskip:.*?//(.*)');
+const Pattern _skipTestIntentionalPattern = '[intended]';
+final Pattern _skipTestTrackingBugPattern = RegExp(r'https+?://github.com/.*/issues/[0-9]+');
+
+Future<void> verifySkipTestComments(String workingDirectory) async {
+  final List<String> errors = <String>[];
+  final Stream<File> testFiles = _allFiles(workingDirectory, 'dart', minimumMatches: 1500)
+    .where((File f) => f.path.endsWith('_test.dart'));
+
+  await for (final File file in testFiles) {
+    final List<String> lines = file.readAsLinesSync();
+    for (int index = 0; index < lines.length; index++) {
+      final Match? match = _skipTestCommentPattern.firstMatch(lines[index]);
+      final String? skipComment = match?.group(1);
+      if (skipComment != null
+          && !skipComment.contains(_skipTestIntentionalPattern)
+          && !skipComment.contains(_skipTestTrackingBugPattern)) {
+        final int sourceLine = index + 1;
+        errors.add('${file.path}:$sourceLine}: skip test without a justification comment.');
+      }
+    }
+  }
+
+  // Fail if any errors
+  if (errors.isNotEmpty) {
+    exitWithError(<String>[
+      ...errors,
+      '\n${bold}See: https://github.com/flutter/flutter/wiki/Tree-hygiene#skipped-tests$reset',
+    ]);
+  }
+}
+
 final RegExp _testImportPattern = RegExp(r'''import (['"])([^'"]+_test\.dart)\1''');
 const Set<String> _exemptTestImports = <String>{
   'package:flutter_test/flutter_test.dart',
@@ -422,26 +460,26 @@ Future<void> verifyIntegrationTestTimeouts(String workingDirectory) async {
   }
 }
 
-Future<void> verifyInternationalizations() async {
+Future<void> verifyInternationalizations(String workingDirectory, String dartExecutable) async {
   final EvalResult materialGenResult = await _evalCommand(
-    dart,
+    dartExecutable,
     <String>[
       path.join('dev', 'tools', 'localization', 'bin', 'gen_localizations.dart'),
       '--material',
     ],
-    workingDirectory: flutterRoot,
+    workingDirectory: workingDirectory,
   );
   final EvalResult cupertinoGenResult = await _evalCommand(
-    dart,
+    dartExecutable,
     <String>[
       path.join('dev', 'tools', 'localization', 'bin', 'gen_localizations.dart'),
       '--cupertino',
     ],
-    workingDirectory: flutterRoot,
+    workingDirectory: workingDirectory,
   );
 
-  final String materialLocalizationsFile = path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'generated_material_localizations.dart');
-  final String cupertinoLocalizationsFile = path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'generated_cupertino_localizations.dart');
+  final String materialLocalizationsFile = path.join(workingDirectory, 'packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'generated_material_localizations.dart');
+  final String cupertinoLocalizationsFile = path.join(workingDirectory, 'packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'generated_cupertino_localizations.dart');
   final String expectedMaterialResult = await File(materialLocalizationsFile).readAsString();
   final String expectedCupertinoResult = await File(cupertinoLocalizationsFile).readAsString();
 
@@ -470,6 +508,29 @@ Future<void> verifyInternationalizations() async {
     ]);
   }
 }
+
+
+/// Verifies that all instances of "checked mode" have been migrated to "debug mode".
+Future<void> verifyNoCheckedMode(String workingDirectory) async {
+  final String flutterPackages = path.join(workingDirectory, 'packages');
+  final List<File> files = await _allFiles(flutterPackages, 'dart', minimumMatches: 400)
+      .where((File file) => path.extension(file.path) == '.dart')
+      .toList();
+  final List<String> problems = <String>[];
+  for (final File file in files) {
+    int lineCount = 0;
+    for (final String line in file.readAsLinesSync()) {
+      if (line.toLowerCase().contains('checked mode')) {
+        problems.add('${file.path}:$lineCount uses deprecated "checked mode" instead of "debug mode".');
+      }
+      lineCount += 1;
+    }
+  }
+  if (problems.isNotEmpty) {
+    exitWithError(problems);
+  }
+}
+
 
 Future<void> verifyNoRuntimeTypeInToString(String workingDirectory) async {
   final String flutterLib = path.join(workingDirectory, 'packages', 'flutter', 'lib');

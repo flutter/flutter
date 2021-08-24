@@ -1965,6 +1965,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     final TextSelection selectedLine = _getLineAtOffset(TextPosition(offset: startPoint));
     final TextSelection nextSelection = TextSelection.collapsed(
       offset: selectedLine.baseOffset,
+      affinity: TextAffinity.downstream,
     );
 
     _setSelection(nextSelection, cause);
@@ -2051,6 +2052,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     final TextSelection selectedLine = _getLineAtOffset(TextPosition(offset: startPoint));
     final TextSelection nextSelection = TextSelection.collapsed(
       offset: selectedLine.extentOffset,
+      affinity: TextAffinity.upstream,
     );
 
     _setSelection(nextSelection, cause);
@@ -2163,23 +2165,20 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   void selectAll(SelectionChangedCause cause) {
-    _setSelection(
-      selection!.copyWith(
-        baseOffset: 0,
-        extentOffset: textSelectionDelegate.textEditingValue.text.length,
-      ),
-      cause,
-    );
+    textSelectionDelegate.selectAll(cause);
   }
 
   /// Copy current [selection] to [Clipboard].
-  void copySelection() {
+  ///
+  /// {@macro flutter.rendering.RenderEditable.cause}
+  void copySelection(SelectionChangedCause cause) {
     final TextSelection selection = textSelectionDelegate.textEditingValue.selection;
-    final String text = textSelectionDelegate.textEditingValue.text;
     assert(selection != null);
-    if (!selection.isCollapsed) {
-      Clipboard.setData(ClipboardData(text: selection.textInside(text)));
+    if (selection.isCollapsed) {
+      return;
     }
+
+    textSelectionDelegate.copySelection(cause);
   }
 
   /// Cut current [selection] to Clipboard.
@@ -2190,18 +2189,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       return;
     }
     final TextSelection selection = textSelectionDelegate.textEditingValue.selection;
-    final String text = textSelectionDelegate.textEditingValue.text;
     assert(selection != null);
-    if (!selection.isCollapsed) {
-      Clipboard.setData(ClipboardData(text: selection.textInside(text)));
-      _setTextEditingValue(
-        TextEditingValue(
-          text: selection.textBefore(text) + selection.textAfter(text),
-          selection: TextSelection.collapsed(offset: math.min(selection.start, selection.end)),
-        ),
-        cause,
-      );
+    if (selection.isCollapsed) {
+      return;
     }
+
+    textSelectionDelegate.cutSelection(cause);
   }
 
   /// Paste text from [Clipboard].
@@ -2214,22 +2207,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       return;
     }
     final TextSelection selection = textSelectionDelegate.textEditingValue.selection;
-    final String text = textSelectionDelegate.textEditingValue.text;
     assert(selection != null);
-    // Snapshot the input before using `await`.
-    // See https://github.com/flutter/flutter/issues/11427
-    final ClipboardData? data = await Clipboard.getData(Clipboard.kTextPlain);
-    if (data != null && selection.isValid) {
-      _setTextEditingValue(
-          TextEditingValue(
-            text: selection.textBefore(text) + data.text! + selection.textAfter(text),
-            selection: TextSelection.collapsed(
-                offset: math.min(selection.start, selection.end) + data.text!.length,
-            ),
-          ),
-          cause,
-      );
+    if (!selection.isValid) {
+      return;
     }
+
+    textSelectionDelegate.pasteText(cause);
   }
 
   @override
@@ -2272,11 +2255,15 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// The text to display.
   InlineSpan? get text => _textPainter.text;
   final TextPainter _textPainter;
+  AttributedString? _cachedAttributedValue;
+  List<InlineSpanSemanticsInformation>? _cachedCombinedSemanticsInfos;
   set text(InlineSpan? value) {
     if (_textPainter.text == value)
       return;
     _textPainter.text = value;
     _cachedPlainText = null;
+    _cachedAttributedValue = null;
+    _cachedCombinedSemanticsInfos = null;
     _extractPlaceholderSpans(value);
     markNeedsTextLayout();
     markNeedsSemanticsUpdate();
@@ -2737,10 +2724,31 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
         ..explicitChildNodes = true;
       return;
     }
+    if (_cachedAttributedValue == null) {
+      if (obscureText) {
+        _cachedAttributedValue = AttributedString(obscuringCharacter * _plainText.length);
+      } else {
+        final StringBuffer buffer = StringBuffer();
+        int offset = 0;
+        final List<StringAttribute> attributes = <StringAttribute>[];
+        for (final InlineSpanSemanticsInformation info in _semanticsInfo!) {
+          final String label = info.semanticsLabel ?? info.text;
+          for (final StringAttribute infoAttribute in info.stringAttributes) {
+            final TextRange originalRange = infoAttribute.range;
+            attributes.add(
+              infoAttribute.copy(
+                range: TextRange(start: offset + originalRange.start, end: offset + originalRange.end),
+              ),
+            );
+          }
+          buffer.write(label);
+          offset += label.length;
+        }
+        _cachedAttributedValue = AttributedString(buffer.toString(), attributes: attributes);
+      }
+    }
     config
-      ..value = obscureText
-          ? obscuringCharacter * _plainText.length
-          : _plainText
+      ..attributedValue = _cachedAttributedValue!
       ..isObscured = obscureText
       ..isMultiline = _isMultiline
       ..textDirection = textDirection
@@ -2791,7 +2799,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     int childIndex = 0;
     RenderBox? child = firstChild;
     final Queue<SemanticsNode> newChildCache = Queue<SemanticsNode>();
-    for (final InlineSpanSemanticsInformation info in combineSemanticsInfo(_semanticsInfo!)) {
+    _cachedCombinedSemanticsInfos ??= combineSemanticsInfo(_semanticsInfo!);
+    for (final InlineSpanSemanticsInformation info in _cachedCombinedSemanticsInfos!) {
       final TextSelection selection = TextSelection(
         baseOffset: start,
         extentOffset: start + info.text.length,
@@ -2805,6 +2814,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
                children.elementAt(childIndex).isTagged(PlaceholderSpanIndexSemanticsTag(placeholderIndex))) {
           final SemanticsNode childNode = children.elementAt(childIndex);
           final TextParentData parentData = child!.parentData! as TextParentData;
+          assert(parentData.scale != null);
           childNode.rect = Rect.fromLTWH(
             childNode.rect.left,
             childNode.rect.top,
@@ -2847,7 +2857,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
         final SemanticsConfiguration configuration = SemanticsConfiguration()
           ..sortKey = OrdinalSortKey(ordinal++)
           ..textDirection = initialDirection
-          ..label = info.semanticsLabel ?? info.text;
+          ..attributedLabel = AttributedString(info.semanticsLabel ?? info.text, attributes: info.stringAttributes);
         final GestureRecognizer? recognizer = info.recognizer;
         if (recognizer != null) {
           if (recognizer is TapGestureRecognizer) {
@@ -2974,7 +2984,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   //
   // Includes newline characters from ASCII and separators from the
   // [unicode separator category](https://www.compart.com/en/unicode/category/Zs)
-  // TODO(jonahwilliams): replace when we expose this ICU information.
+  // TODO(zanderso): replace when we expose this ICU information.
   bool _onlyWhitespace(TextRange range) {
     for (int i = range.start; i < range.end; i++) {
       final int codeUnit = text!.codeUnitAt(i)!;
@@ -3088,7 +3098,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     final Offset paintOffset = _paintOffset;
 
     final List<ui.TextBox> boxes = selection.isCollapsed ?
-        <ui.TextBox>[] : _textPainter.getBoxesForSelection(selection);
+        <ui.TextBox>[] : _textPainter.getBoxesForSelection(selection, boxHeightStyle: selectionHeightStyle, boxWidthStyle: selectionWidthStyle);
     if (boxes.isEmpty) {
       // TODO(mpcomplete): This doesn't work well at an RTL/LTR boundary.
       final Offset caretOffset = _textPainter.getOffsetForCaret(selection.extent, _caretPrototype);
@@ -3119,6 +3129,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
     final List<ui.TextBox> boxes = _textPainter.getBoxesForSelection(
       TextSelection(baseOffset: range.start, extentOffset: range.end),
+      boxHeightStyle: selectionHeightStyle,
+      boxWidthStyle: selectionWidthStyle,
     );
 
     return boxes.fold(

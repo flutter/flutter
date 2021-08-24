@@ -4,7 +4,7 @@
 
 import 'dart:collection';
 import 'dart:math' as math;
-import 'dart:ui' as ui show Gradient, Shader, TextBox, PlaceholderAlignment, TextHeightBehavior;
+import 'dart:ui' as ui show Gradient, Shader, TextBox, PlaceholderAlignment, TextHeightBehavior, BoxHeightStyle, BoxWidthStyle;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -118,6 +118,8 @@ class RenderParagraph extends RenderBox
   }
 
   final TextPainter _textPainter;
+  AttributedString? _cachedAttributedLabel;
+  List<InlineSpanSemanticsInformation>? _cachedCombinedSemanticsInfos;
 
   /// The text to display.
   InlineSpan get text => _textPainter.text!;
@@ -129,6 +131,8 @@ class RenderParagraph extends RenderBox
         return;
       case RenderComparison.paint:
         _textPainter.text = value;
+        _cachedAttributedLabel = null;
+        _cachedCombinedSemanticsInfos = null;
         _extractPlaceholderSpans(value);
         markNeedsPaint();
         markNeedsSemanticsUpdate();
@@ -136,6 +140,8 @@ class RenderParagraph extends RenderBox
       case RenderComparison.layout:
         _textPainter.text = value;
         _overflowShader = null;
+        _cachedAttributedLabel = null;
+        _cachedCombinedSemanticsInfos = null;
         _extractPlaceholderSpans(value);
         markNeedsLayout();
         break;
@@ -787,15 +793,35 @@ class RenderParagraph extends RenderBox
 
   /// Returns a list of rects that bound the given selection.
   ///
-  /// A given selection might have more than one rect if this text painter
-  /// contains bidirectional text because logically contiguous text might not be
-  /// visually contiguous.
+  /// The [boxHeightStyle] and [boxWidthStyle] arguments may be used to select
+  /// the shape of the [TextBox]es. These properties default to
+  /// [ui.BoxHeightStyle.tight] and [ui.BoxWidthStyle.tight] respectively and
+  /// must not be null.
+  ///
+  /// A given selection might have more than one rect if the [RenderParagraph]
+  /// contains multiple [InlineSpan]s or bidirectional text, because logically
+  /// contiguous text might not be visually contiguous.
   ///
   /// Valid only after [layout].
-  List<ui.TextBox> getBoxesForSelection(TextSelection selection) {
+  ///
+  /// See also:
+  ///
+  ///  * [TextPainter.getBoxesForSelection], the method in TextPainter to get
+  ///    the equivalent boxes.
+  List<ui.TextBox> getBoxesForSelection(
+    TextSelection selection, {
+    ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,
+    ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
+  }) {
     assert(!debugNeedsLayout);
+    assert(boxHeightStyle != null);
+    assert(boxWidthStyle != null);
     _layoutTextWithConstraints(constraints);
-    return _textPainter.getBoxesForSelection(selection);
+    return _textPainter.getBoxesForSelection(
+      selection,
+      boxHeightStyle: boxHeightStyle,
+      boxWidthStyle: boxWidthStyle,
+    );
   }
 
   /// Returns the position within the text for the given pixel offset.
@@ -849,11 +875,27 @@ class RenderParagraph extends RenderBox
       config.explicitChildNodes = true;
       config.isSemanticBoundary = true;
     } else {
-      final StringBuffer buffer = StringBuffer();
-      for (final InlineSpanSemanticsInformation info in _semanticsInfo!) {
-        buffer.write(info.semanticsLabel ?? info.text);
+      if (_cachedAttributedLabel == null) {
+        final StringBuffer buffer = StringBuffer();
+        int offset = 0;
+        final List<StringAttribute> attributes = <StringAttribute>[];
+        for (final InlineSpanSemanticsInformation info in _semanticsInfo!) {
+          final String label = info.semanticsLabel ?? info.text;
+          for (final StringAttribute infoAttribute in info.stringAttributes) {
+            final TextRange originalRange = infoAttribute.range;
+            attributes.add(
+              infoAttribute.copy(
+                  range: TextRange(start: offset + originalRange.start,
+                      end: offset + originalRange.end)
+              ),
+            );
+          }
+          buffer.write(label);
+          offset += label.length;
+        }
+        _cachedAttributedLabel = AttributedString(buffer.toString(), attributes: attributes);
       }
-      config.label = buffer.toString();
+      config.attributedLabel = _cachedAttributedLabel!;
       config.textDirection = textDirection;
     }
   }
@@ -876,7 +918,8 @@ class RenderParagraph extends RenderBox
     int childIndex = 0;
     RenderBox? child = firstChild;
     final Queue<SemanticsNode> newChildCache = Queue<SemanticsNode>();
-    for (final InlineSpanSemanticsInformation info in combineSemanticsInfo(_semanticsInfo!)) {
+    _cachedCombinedSemanticsInfos ??= combineSemanticsInfo(_semanticsInfo!);
+    for (final InlineSpanSemanticsInformation info in _cachedCombinedSemanticsInfos!) {
       final TextSelection selection = TextSelection(
         baseOffset: start,
         extentOffset: start + info.text.length,
@@ -890,13 +933,17 @@ class RenderParagraph extends RenderBox
                children.elementAt(childIndex).isTagged(PlaceholderSpanIndexSemanticsTag(placeholderIndex))) {
           final SemanticsNode childNode = children.elementAt(childIndex);
           final TextParentData parentData = child!.parentData! as TextParentData;
-          childNode.rect = Rect.fromLTWH(
-            childNode.rect.left,
-            childNode.rect.top,
-            childNode.rect.width * parentData.scale!,
-            childNode.rect.height * parentData.scale!,
-          );
-          newChildren.add(childNode);
+          assert(parentData.scale != null || parentData.offset == Offset.zero);
+          // parentData.scale may be null if the render object is truncated.
+          if (parentData.scale != null) {
+            childNode.rect = Rect.fromLTWH(
+              childNode.rect.left,
+              childNode.rect.top,
+              childNode.rect.width * parentData.scale!,
+              childNode.rect.height * parentData.scale!,
+            );
+            newChildren.add(childNode);
+          }
           childIndex += 1;
         }
         child = childAfter(child!);
@@ -932,7 +979,7 @@ class RenderParagraph extends RenderBox
         final SemanticsConfiguration configuration = SemanticsConfiguration()
           ..sortKey = OrdinalSortKey(ordinal++)
           ..textDirection = initialDirection
-          ..label = info.semanticsLabel ?? info.text;
+          ..attributedLabel = AttributedString(info.semanticsLabel ?? info.text, attributes: info.stringAttributes);
         final GestureRecognizer? recognizer = info.recognizer;
         if (recognizer != null) {
           if (recognizer is TapGestureRecognizer) {

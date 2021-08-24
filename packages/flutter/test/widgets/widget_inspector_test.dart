@@ -3,6 +3,13 @@
 // found in the LICENSE file.
 
 @TestOn('!chrome')
+
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=456"
+@Tags(<String>['no-shuffle'])
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
@@ -135,17 +142,17 @@ class CyclicDiagnostic extends DiagnosticableTree {
 
 class _CreationLocation {
   _CreationLocation({
+    required this.id,
     required this.file,
     required this.line,
     required this.column,
-    required this.id,
-    this.name,
+    required this.name,
   });
 
+  final int id;
   final String file;
   final int line;
   final int column;
-  final int id;
   String? name;
 }
 
@@ -971,7 +978,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       // Column numbers are more stable than line numbers.
       expect(columnA, equals(15));
       expect(columnA, equals(columnB));
-    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
+    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
 
     testWidgets('test transformDebugCreator will re-order if after stack trace', (WidgetTester tester) async {
       final bool widgetTracked = WidgetInspectorService.instance.isWidgetCreationTracked();
@@ -1096,7 +1103,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(nodes[3].runtimeType, StringProperty);
       expect(nodes[3].name, 'dummy2');
       expect(nodes[4].runtimeType, DiagnosticsStackTrace);
-    }, skip: WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --no-track-widget-creation flag.
+    }, skip: WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --no-track-widget-creation flag.
 
     testWidgets('test transformDebugCreator will add DevToolsDeepLinkProperty for overflow errors', (WidgetTester tester) async {
       activeDevToolsServerAddress = 'http://127.0.0.1:9100';
@@ -1131,7 +1138,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(nodes[3].runtimeType, DevToolsDeepLinkProperty);
       expect(nodes[4].runtimeType, ErrorSpacer);
       expect(nodes[5].runtimeType, StringProperty);
-    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked());
+    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
 
     testWidgets('test transformDebugCreator will not add DevToolsDeepLinkProperty for non-overflow errors', (WidgetTester tester) async {
       activeDevToolsServerAddress = 'http://127.0.0.1:9100';
@@ -1163,7 +1170,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(nodes[1].runtimeType, DiagnosticsBlock);
       expect(nodes[2].runtimeType, ErrorSpacer);
       expect(nodes[3].runtimeType, StringProperty);
-    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked());
+    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked());  // [intended] Test requires --track-widget-creation flag.
 
     testWidgets('test transformDebugCreator will not add DevToolsDeepLinkProperty if devtoolsServerAddress is unavailable', (WidgetTester tester) async {
       activeDevToolsServerAddress = null;
@@ -1195,7 +1202,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(nodes[1].runtimeType, DiagnosticsBlock);
       expect(nodes[2].runtimeType, ErrorSpacer);
       expect(nodes[3].runtimeType, StringProperty);
-    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked());
+    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked());  // [intended] Test requires --track-widget-creation flag.
 
     testWidgets('WidgetInspectorService setPubRootDirectories', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -1274,7 +1281,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(json.decode(service.getSelectedWidget(null, 'my-group')), contains('createdByLocalProject'));
       service.setSelection(richText, 'my-group');
       expect(json.decode(service.getSelectedWidget(null, 'my-group')), contains('createdByLocalProject'));
-    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked() || isBrowser); // Test requires --track-widget-creation flag.
+    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
 
     test('ext.flutter.inspector.disposeGroup', () async {
       final Object a = Object();
@@ -1656,7 +1663,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(alternateChildrenJson.length , equals(0));
       // Tests are failing when this typo is fixed.
       expect(childJson['chidlren'], isNull);
-    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
+    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
 
     testWidgets('ext.flutter.inspector.getSelectedSummaryWidget', (WidgetTester tester) async {
       const String group = 'test-group';
@@ -1711,7 +1718,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       // the RichText object not the Text element.
       final Map<String, Object?> regularSelection = (await service.testExtension('getSelectedWidget', <String, String>{'objectGroup': 'my-group'}))! as Map<String, Object?>;
       expect(service.toObject(regularSelection['valueId']! as String), richTextDiagnostic.value);
-    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
+    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
 
     testWidgets('ext.flutter.inspector creationLocation', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -1754,7 +1761,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       // Column numbers are more stable than line numbers.
       expect(columnA, equals(15));
       expect(columnA, equals(columnB));
-    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
+    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
 
     testWidgets('ext.flutter.inspector.setPubRootDirectories', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -1833,7 +1840,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(await service.testExtension('getSelectedWidget', <String, String>{'objectGroup': 'my-group'}), contains('createdByLocalProject'));
       service.setSelection(richText, 'my-group');
       expect(await service.testExtension('getSelectedWidget', <String, String>{'objectGroup': 'my-group'}), contains('createdByLocalProject'));
-    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked() || isBrowser); // Test requires --track-widget-creation flag.
+    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
 
     testWidgets('ext.flutter.inspector.setPubRootDirectories extra args regression test', (WidgetTester tester) async {
       // Ensure that passing the isolate id as an argument won't break
@@ -1885,7 +1892,14 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       });
 
       expect(await service.testExtension('getSelectedWidget', <String, String>{'objectGroup': 'my-group'}), contains('createdByLocalProject'));
-    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked() || isBrowser); // Test requires --track-widget-creation flag.
+    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
+
+    Map<Object, Object?> removeLastEvent(List<Map<Object, Object?>> events) {
+      final Map<Object, Object?> event = events.removeLast();
+      // Verify that the event is json encodable.
+      json.encode(event);
+      return event;
+    }
 
     testWidgets('ext.flutter.inspector.trackRebuildDirtyWidgets', (WidgetTester tester) async {
       service.rebuildCount = 0;
@@ -1922,7 +1936,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       await tester.pump();
 
       expect(rebuildEvents.length, equals(1));
-      Map<Object, Object?> event = rebuildEvents.removeLast();
+      Map<Object, Object?> event = removeLastEvent(rebuildEvents);
       expect(event['startTime'], isA<int>());
       List<int> data = event['events']! as List<int>;
       expect(data.length, equals(14));
@@ -1931,20 +1945,22 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(newLocations, isNotNull);
       expect(newLocations.length, equals(1));
       expect(newLocations.keys.first, equals(file));
-      final Map<String, Map<int, String>> newLocationsNames = event['newLocationsNames']! as Map<String, Map<int, String>>;
-      expect(newLocationsNames, isNotNull);
-      expect(newLocationsNames.length, equals(1));
-      expect(newLocationsNames.keys.first, equals(file));
+      Map<String, Map<String, List<Object?>>> fileLocationsMap = event['locations']! as Map<String, Map<String, List<Object?>>>;
+      expect(fileLocationsMap, isNotNull);
+      expect(fileLocationsMap.length, equals(1));
+      expect(fileLocationsMap.keys.first, equals(file));
       final List<int> locationsForFile = newLocations[file]!;
       expect(locationsForFile.length, equals(21));
       final int numLocationEntries = locationsForFile.length ~/ 3;
       expect(numLocationEntries, equals(numDataEntries));
+      final Map<String, List<Object?>> locations = fileLocationsMap[file]!;
+      expect(locations.length, equals(4));
+      expect(locations['ids']!.length, equals(7));
 
       final Map<int, _CreationLocation> knownLocations = <int, _CreationLocation>{};
       _addToKnownLocationsMap(
         knownLocations: knownLocations,
-        newLocations: newLocations,
-        newLocationsNames: newLocationsNames,
+        newLocations: fileLocationsMap,
       );
       int totalCount = 0;
       int maxCount = 0;
@@ -1968,12 +1984,12 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       state.updateTime(); // Triggers a rebuild.
       await tester.pump();
       expect(rebuildEvents.length, equals(1));
-      event = rebuildEvents.removeLast();
+      event = removeLastEvent(rebuildEvents);
       expect(event['startTime'], isA<int>());
       data = event['events']! as List<int>;
       // No new locations were rebuilt.
       expect(event, isNot(contains('newLocations')));
-      expect(event, isNot(contains('newLocationsNames')));
+      expect(event, isNot(contains('locations')));
 
       // There were two rebuilds: one for the ClockText element itself and one
       // for its child.
@@ -1983,7 +1999,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       _CreationLocation location = knownLocations[id]!;
       expect(location.file, equals(file));
       // ClockText widget.
-      expect(location.line, equals(53));
+      expect(location.line, equals(60));
       expect(location.column, equals(9));
       expect(location.name, equals('ClockText'));
       expect(count, equals(1));
@@ -1993,7 +2009,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       location = knownLocations[id]!;
       expect(location.file, equals(file));
       // Text widget in _ClockTextState build method.
-      expect(location.line, equals(91));
+      expect(location.line, equals(98));
       expect(location.column, equals(12));
       expect(location.name, equals('Text'));
       expect(count, equals(1));
@@ -2007,12 +2023,12 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
       await tester.pump();
       expect(rebuildEvents.length, equals(1));
-      event = rebuildEvents.removeLast();
+      event = removeLastEvent(rebuildEvents);
       expect(event['startTime'], isA<int>());
       data = event['events']! as List<int>;
       // No new locations were rebuilt.
       expect(event, isNot(contains('newLocations')));
-      expect(event, isNot(contains('newLocationsNames')));
+      expect(event, isNot(contains('locations')));
 
       expect(data.length, equals(4));
       id = data[0];
@@ -2020,7 +2036,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       location = knownLocations[id]!;
       expect(location.file, equals(file));
       // ClockText widget.
-      expect(location.line, equals(53));
+      expect(location.line, equals(60));
       expect(location.column, equals(9));
       expect(location.name, equals('ClockText'));
       expect(count, equals(3)); // 3 clock widget instances rebuilt.
@@ -2030,7 +2046,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       location = knownLocations[id]!;
       expect(location.file, equals(file));
       // Text widget in _ClockTextState build method.
-      expect(location.line, equals(91));
+      expect(location.line, equals(98));
       expect(location.column, equals(12));
       expect(location.name, equals('Text'));
       expect(count, equals(3)); // 3 clock widget instances rebuilt.
@@ -2044,12 +2060,12 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
       await tester.pump();
       expect(rebuildEvents.length, equals(1));
-      event = rebuildEvents.removeLast();
+      event = removeLastEvent(rebuildEvents);
       expect(event['startTime'], isA<int>());
       data = event['events']! as List<int>;
       // No new locations were rebuilt.
       expect(event, isNot(contains('newLocations')));
-      expect(event, isNot(contains('newLocationsNames')));
+      expect(event, isNot(contains('locations')));
 
       expect(data.length, equals(4));
       id = data[0];
@@ -2062,10 +2078,11 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       state.stopClock();
       await tester.pump();
       expect(rebuildEvents.length, equals(1));
-      event = rebuildEvents.removeLast();
+      event = removeLastEvent(rebuildEvents);
       expect(event['startTime'], isA<int>());
       data = event['events']! as List<int>;
       newLocations = event['newLocations']! as Map<String, List<int>>;
+      fileLocationsMap = event['locations']! as Map<String, Map<String, List<Object?>>>;
 
       expect(data.length, equals(4));
       // The second pair in data is the previously unseen rebuild location.
@@ -2076,8 +2093,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(knownLocations, isNot(contains(id)));
       _addToKnownLocationsMap(
         knownLocations: knownLocations,
-        newLocations: newLocations,
-        newLocationsNames: newLocationsNames,
+        newLocations: fileLocationsMap,
       );
       // Verify the rebuild location was included in the newLocations data.
       expect(knownLocations, contains(id));
@@ -2092,7 +2108,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       await tester.pump();
       // Verify that rebuild events are not fired once the extension is disabled.
       expect(rebuildEvents, isEmpty);
-    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
+    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
 
     testWidgets('ext.flutter.inspector.trackRepaintWidgets', (WidgetTester tester) async {
       service.rebuildCount = 0;
@@ -2133,7 +2149,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       await tester.pump();
 
       expect(repaintEvents.length, equals(1));
-      Map<Object, Object?> event = repaintEvents.removeLast();
+      Map<Object, Object?> event = removeLastEvent(repaintEvents);
       expect(event['startTime'], isA<int>());
       List<int> data = event['events']! as List<int>;
       expect(data.length, equals(18));
@@ -2142,21 +2158,22 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(newLocations, isNotNull);
       expect(newLocations.length, equals(1));
       expect(newLocations.keys.first, equals(file));
-      final Map<String, Map<int, String>> newLocationsNames = event['newLocationsNames']! as Map<String, Map<int, String>>;
-      expect(newLocationsNames, isNotNull);
-      expect(newLocationsNames.length, equals(1));
-      expect(newLocationsNames.keys.first, equals(file));
+      final Map<String, Map<String, List<Object?>>> fileLocationsMap = event['locations']! as Map<String, Map<String, List<Object?>>>;
+      expect(fileLocationsMap, isNotNull);
+      expect(fileLocationsMap.length, equals(1));
+      expect(fileLocationsMap.keys.first, equals(file));
       final List<int> locationsForFile = newLocations[file]!;
       expect(locationsForFile.length, equals(27));
       final int numLocationEntries = locationsForFile.length ~/ 3;
       expect(numLocationEntries, equals(numDataEntries));
+      final Map<String, List<Object?>> locations = fileLocationsMap[file]!;
+      expect(locations.length, equals(4));
+      expect(locations['ids']!.length, equals(9));
 
-      final Map<int, _CreationLocation> knownLocations =
-          <int, _CreationLocation>{};
+      final Map<int, _CreationLocation> knownLocations = <int, _CreationLocation>{};
       _addToKnownLocationsMap(
         knownLocations: knownLocations,
-        newLocations: newLocations,
-        newLocationsNames: newLocationsNames,
+        newLocations: fileLocationsMap,
       );
       int totalCount = 0;
       int maxCount = 0;
@@ -2180,12 +2197,12 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       state.updateTime(); // Triggers a rebuild.
       await tester.pump();
       expect(repaintEvents.length, equals(1));
-      event = repaintEvents.removeLast();
+      event = removeLastEvent(repaintEvents);
       expect(event['startTime'], isA<int>());
       data = event['events']! as List<int>;
       // No new locations were rebuilt.
       expect(event, isNot(contains('newLocations')));
-      expect(event, isNot(contains('newLocationsNames')));
+      expect(event, isNot(contains('locations')));
 
       // Triggering a rebuild of one widget in this app causes the whole app
       // to repaint.
@@ -2204,7 +2221,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       await tester.pump();
       // Verify that repaint events are not fired once the extension is disabled.
       expect(repaintEvents, isEmpty);
-    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
+    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
 
     testWidgets('ext.flutter.inspector.show', (WidgetTester tester) async {
       final Iterable<Map<Object, Object?>> extensionChangedEvents = service.getServiceExtensionStateChangedEvents('ext.flutter.inspector.show');
@@ -2506,7 +2523,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       await expectLater(
         screenshotImage,
         matchesReferenceImage((await clipRectScreenshot)!),
-        skip: !isLinux,
       );
 
       // Test with a very visible debug paint
@@ -2882,7 +2898,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       }
       visitChildren(detailedChildren);
       expect(appBars.single, isNot(contains('children')));
-    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
+    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
 
     testWidgets('InspectorSerializationDelegate addAdditionalPropertiesCallback', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -2984,7 +3000,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
       expect(debugIsLocalCreationLocation(paddingElement), isFalse);
       expect(debugIsLocalCreationLocation(paddingElement.widget), isFalse);
-    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
+    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
 
     test('devToolsInspectorUri test', () {
       activeDevToolsServerAddress = 'http://127.0.0.1:9100';
@@ -3040,23 +3056,23 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
 void _addToKnownLocationsMap({
   required Map<int, _CreationLocation> knownLocations,
-  required Map<String, List<int>> newLocations,
-  required Map<String, Map<int, String>> newLocationsNames,
+  required Map<String, Map<String, List<Object?>>> newLocations,
 }) {
-  newLocations.forEach((String file, List<int> entries) {
-    assert(entries.length % 3 == 0);
-    for (int i = 0; i < entries.length; i += 3) {
-      final int id = entries[i];
-      final int line = entries[i + 1];
-      final int column = entries[i + 2];
-      assert(!knownLocations.containsKey(id));
-      knownLocations[id] =
-          _CreationLocation(file: file, line: line, column: column, id: id);
+  newLocations.forEach((String file, Map<String, List<Object?>> entries) {
+    final List<int> ids = entries['ids']!.cast<int>();
+    final List<int> lines = entries['lines']!.cast<int>();
+    final List<int> columns = entries['columns']!.cast<int>();
+    final List<String> names = entries['names']!.cast<String>();
+
+    for (int i = 0; i < ids.length; i++) {
+      final int id = ids[i];
+      knownLocations[id] = _CreationLocation(
+        id: id,
+        file: file,
+        line: lines[i],
+        column: columns[i],
+        name: names[i],
+      );
     }
-  });
-  newLocationsNames.forEach((String file, Map<int, String> namesInfo) {
-    namesInfo.forEach((int id, String name) {
-      knownLocations[id]!.name = name;
-    });
   });
 }

@@ -614,6 +614,7 @@ void main() {
     expect(mockCodec.numFramesAsked, 2);
     await tester.pump(const Duration(milliseconds: 200)); // emit 2nd frame.
     expect(mockCodec.numFramesAsked, 3);
+    timeDilation = 1.0; // restore time dilation, or it will affect other tests
   });
 
   testWidgets('error handlers can intercept errors', (WidgetTester tester) async {
