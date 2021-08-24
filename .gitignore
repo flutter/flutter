@@ -27,6 +27,7 @@ Thumbs.db
 # directories pulled in via deps or hooks
 /buildtools/
 /flutter/
+/gradle/
 /ios_tools/
 /out/
 
