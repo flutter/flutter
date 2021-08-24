@@ -1676,6 +1676,18 @@ targets:
       task_name: web_size__compile_test
     scheduler: luci
 
+  - name: Linux android views
+    recipe: flutter/android_views
+    bringup: true
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk"},
+          {"dependency": "android_avd", "version": "31"}
+        ]
+    timeout: 60
+    scheduler: luci
+
   - name: Mac build_aar_module_test
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -2056,7 +2068,6 @@ targets:
 
   - name: Mac module_test_ios
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       caches: >-

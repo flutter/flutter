@@ -787,7 +787,7 @@ void main() {
     ));
     expect(controller.page, 0);
     controller.jumpToPage(2);
-    expect(await tester.pumpAndSettle(const Duration(minutes: 1)), 1);
+    expect(await tester.pumpAndSettle(const Duration(minutes: 1)), 2);
     expect(controller.page, 2);
     await tester.pumpWidget(
       PageStorage(
