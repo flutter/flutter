@@ -185,6 +185,7 @@ targets:
 
   - name: Linux build_aar_module_test
     recipe: devicelab/devicelab_drone
+    bringup: true
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -200,6 +201,14 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: build_aar_module_test
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
     scheduler: luci
     runIf:
       - dev/**
@@ -209,6 +218,7 @@ targets:
   - name: Linux build_tests_1_2
     recipe: flutter/flutter_drone
     timeout: 60
+    bringup: true
     properties:
       dependencies: >-
         [
@@ -224,11 +234,20 @@ targets:
       subshard: "1_2"
       tags: >
         ["framework","hostonly","shard"]
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
     scheduler: luci
 
   - name: Linux build_tests_2_2
     recipe: flutter/flutter_drone
     timeout: 60
+    bringup: true
     properties:
       dependencies: >-
         [
@@ -244,6 +263,14 @@ targets:
       subshard: "2_2"
       tags: >
         ["framework","hostonly","shard"]
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
     scheduler: luci
 
   - name: Linux ci_yaml flutter roller
@@ -312,6 +339,7 @@ targets:
   - name: Linux firebase_abstract_method_smoke_test
     recipe: firebaselab/firebaselab
     timeout: 60
+    bringup: true
     properties:
       dependencies: >-
         [
@@ -320,11 +348,20 @@ targets:
       tags: >
         ["firebaselab"]
       task_name: abstract_method_smoke_test
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
     scheduler: luci
 
   - name: Linux firebase_android_embedding_v2_smoke_test
     recipe: firebaselab/firebaselab
     timeout: 60
+    bringup: true
     properties:
       dependencies: >-
         [
@@ -333,11 +370,20 @@ targets:
       tags: >
         ["firebaselab"]
       task_name: android_embedding_v2_smoke_test
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
     scheduler: luci
 
   - name: Linux firebase_release_smoke_test
     recipe: firebaselab/firebaselab
     timeout: 60
+    bringup: true
     properties:
       dependencies: >-
         [
@@ -346,6 +392,14 @@ targets:
       tags: >
         ["firebaselab"]
       task_name: release_smoke_test
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
     scheduler: luci
 
   - name: Linux flutter_plugins
@@ -446,6 +500,7 @@ targets:
   - name: Linux gradle_desugar_classes_test
     recipe: devicelab/devicelab_drone
     timeout: 60
+    bringup: true
     properties:
       caches: >-
         [
@@ -459,6 +514,14 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: gradle_desugar_classes_test
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
     scheduler: luci
     runIf:
       - dev/**
@@ -467,6 +530,7 @@ targets:
   - name: Linux gradle_java8_compile_test
     recipe: devicelab/devicelab_drone
     timeout: 60
+    bringup: true
     properties:
       caches: >-
         [
@@ -480,6 +544,14 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: gradle_java8_compile_test
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
     scheduler: luci
     runIf:
       - dev/**
@@ -488,6 +560,7 @@ targets:
   - name: Linux gradle_plugin_bundle_test
     recipe: devicelab/devicelab_drone
     timeout: 60
+    bringup: true
     properties:
       caches: >-
         [
@@ -501,6 +574,14 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: gradle_plugin_bundle_test
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
     scheduler: luci
     runIf:
       - dev/**
@@ -509,6 +590,7 @@ targets:
   - name: Linux gradle_plugin_fat_apk_test
     recipe: devicelab/devicelab_drone
     timeout: 60
+    bringup: true
     properties:
       caches: >-
         [
@@ -522,6 +604,14 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: gradle_plugin_fat_apk_test
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
     scheduler: luci
     runIf:
       - dev/**
@@ -530,6 +620,7 @@ targets:
   - name: Linux gradle_plugin_light_apk_test
     recipe: devicelab/devicelab_drone
     timeout: 60
+    bringup: true
     properties:
       caches: >-
         [
@@ -543,6 +634,14 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: gradle_plugin_light_apk_test
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
     scheduler: luci
     runIf:
       - dev/**
@@ -551,6 +650,7 @@ targets:
   - name: Linux module_custom_host_app_name_test
     recipe: devicelab/devicelab_drone
     timeout: 60
+    bringup: true
     properties:
       caches: >-
         [
@@ -564,6 +664,14 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: module_custom_host_app_name_test
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
     scheduler: luci
     runIf:
       - dev/**
@@ -1769,6 +1877,7 @@ targets:
   - name: Mac build_aar_module_test
     recipe: devicelab/devicelab_drone
     timeout: 60
+    bringup: true
     properties:
       add_recipes_cq: "true"
       caches: >-
@@ -1785,6 +1894,14 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: build_aar_module_test
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
     scheduler: luci
     runIf:
       - dev/**
@@ -1818,8 +1935,17 @@ targets:
   - name: Mac build_tests_1_4
     recipe: flutter/flutter_drone
     timeout: 60
+    bringup: true
     properties:
       add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
@@ -1838,8 +1964,17 @@ targets:
   - name: Mac build_tests_2_4
     recipe: flutter/flutter_drone
     timeout: 60
+    bringup: true
     properties:
       add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
@@ -1858,8 +1993,17 @@ targets:
   - name: Mac build_tests_3_4
     recipe: flutter/flutter_drone
     timeout: 60
+    bringup: true
     properties:
       add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
@@ -1878,8 +2022,17 @@ targets:
   - name: Mac build_tests_4_4
     recipe: flutter/flutter_drone
     timeout: 60
+    bringup: true
     properties:
       add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
@@ -2006,6 +2159,7 @@ targets:
   - name: Mac gradle_plugin_bundle_test
     recipe: devicelab/devicelab_drone
     timeout: 60
+    bringup: true
     properties:
       caches: >-
         [
@@ -2021,6 +2175,14 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: gradle_plugin_bundle_test
+			dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
     scheduler: luci
     runIf:
       - dev/**
@@ -2029,6 +2191,7 @@ targets:
   - name: Mac gradle_plugin_fat_apk_test
     recipe: devicelab/devicelab_drone
     timeout: 60
+    bringup: true
     properties:
       caches: >-
         [
@@ -2044,6 +2207,14 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: gradle_plugin_fat_apk_test
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
     scheduler: luci
     runIf:
       - dev/**
@@ -2052,6 +2223,7 @@ targets:
   - name: Mac gradle_plugin_light_apk_test
     recipe: devicelab/devicelab_drone
     timeout: 60
+    bringup: true
     properties:
       caches: >-
         [
@@ -2067,6 +2239,14 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: gradle_plugin_light_apk_test
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
     scheduler: luci
     runIf:
       - dev/**
@@ -2075,6 +2255,7 @@ targets:
   - name: Mac module_custom_host_app_name_test
     recipe: devicelab/devicelab_drone
     timeout: 60
+    bringup: true
     properties:
       caches: >-
         [
@@ -2090,6 +2271,14 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: module_custom_host_app_name_test
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
     scheduler: luci
     runIf:
       - dev/**
@@ -2099,6 +2288,7 @@ targets:
   - name: Mac module_host_with_custom_build_test
     recipe: devicelab/devicelab_drone
     timeout: 60
+    bringup: true
     properties:
       caches: >-
         [
@@ -2114,6 +2304,14 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: module_host_with_custom_build_test
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
     scheduler: luci
     runIf:
       - dev/**
@@ -2123,6 +2321,7 @@ targets:
   - name: Mac module_test
     recipe: devicelab/devicelab_drone
     timeout: 60
+    bringup: true
     properties:
       caches: >-
         [
@@ -2138,6 +2337,14 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: module_test
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
     scheduler: luci
     runIf:
       - dev/**
@@ -2172,6 +2379,7 @@ targets:
   - name: Mac plugin_dependencies_test
     recipe: devicelab/devicelab_drone
     timeout: 60
+    bringup: true
     properties:
       caches: >-
         [
@@ -2187,6 +2395,14 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: plugin_dependencies_test
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
     scheduler: luci
     runIf:
       - dev/**
@@ -2221,6 +2437,7 @@ targets:
   - name: Mac plugin_test
     recipe: devicelab/devicelab_drone
     timeout: 60
+    bringup: true
     properties:
       caches: >-
         [
@@ -2236,6 +2453,14 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: plugin_test
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
     scheduler: luci
     runIf:
       - dev/**
@@ -2245,8 +2470,17 @@ targets:
   - name: Mac tool_integration_tests_1_4
     recipe: flutter/flutter_drone
     timeout: 60
+    bringup: true
     properties:
       add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
@@ -2269,8 +2503,17 @@ targets:
   - name: Mac tool_integration_tests_2_4
     recipe: flutter/flutter_drone
     timeout: 60
+    bringup: true
     properties:
       add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
@@ -2293,8 +2536,17 @@ targets:
   - name: Mac tool_integration_tests_3_4
     recipe: flutter/flutter_drone
     timeout: 60
+    bringup: true
     properties:
       add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
@@ -2316,9 +2568,18 @@ targets:
 
   - name: Mac tool_integration_tests_4_4
     recipe: flutter/flutter_drone
+    bringup: true
     timeout: 60
     properties:
       add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
@@ -3487,6 +3748,7 @@ targets:
   - name: Windows build_aar_module_test
     recipe: devicelab/devicelab_drone
     timeout: 60
+    bringup: true
     properties:
       add_recipes_cq: "true"
       caches: >-
@@ -3502,6 +3764,14 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: build_aar_module_test
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
     scheduler: luci
     runIf:
       - dev/**
@@ -3511,8 +3781,17 @@ targets:
   - name: Windows build_tests_1_3
     recipe: flutter/flutter_drone
     timeout: 60
+    bringup: true
     properties:
       add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
@@ -3530,8 +3809,17 @@ targets:
   - name: Windows build_tests_2_3
     recipe: flutter/flutter_drone
     timeout: 60
+    bringup: true
     properties:
       add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
@@ -3549,8 +3837,17 @@ targets:
   - name: Windows build_tests_3_3
     recipe: flutter/flutter_drone
     timeout: 60
+    bringup: true
     properties:
       add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
@@ -3654,6 +3951,7 @@ targets:
   - name: Windows gradle_plugin_bundle_test
     recipe: devicelab/devicelab_drone
     timeout: 60
+    bringup: true
     properties:
       caches: >-
         [
@@ -3668,6 +3966,14 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: gradle_plugin_bundle_test
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
     scheduler: luci
     runIf:
       - dev/**
@@ -3696,6 +4002,7 @@ targets:
   - name: Windows gradle_plugin_light_apk_test
     recipe: devicelab/devicelab_drone
     timeout: 60
+    bringup: true
     properties:
       caches: >-
         [
@@ -3710,6 +4017,14 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: gradle_plugin_light_apk_test
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
     scheduler: luci
     runIf:
       - dev/**
@@ -3737,6 +4052,7 @@ targets:
   - name: Windows module_custom_host_app_name_test
     recipe: devicelab/devicelab_drone
     timeout: 60
+    bringup: true
     properties:
       dependencies: >-
         [
@@ -3747,6 +4063,14 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: module_custom_host_app_name_test
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
     scheduler: luci
     runIf:
       - dev/**
@@ -3756,6 +4080,7 @@ targets:
   - name: Windows module_host_with_custom_build_test
     recipe: devicelab/devicelab_drone
     timeout: 60
+    bringup: true
     properties:
       caches: >-
         [
@@ -3770,6 +4095,14 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: module_host_with_custom_build_test
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
     scheduler: luci
     runIf:
       - dev/**
@@ -3779,6 +4112,7 @@ targets:
   - name: Windows module_test
     recipe: devicelab/devicelab_drone
     timeout: 60
+    bringup: true
     properties:
       caches: >-
         [
@@ -3793,6 +4127,14 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: module_test
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
     scheduler: luci
     runIf:
       - dev/**
@@ -3802,6 +4144,7 @@ targets:
   - name: Windows plugin_dependencies_test
     recipe: devicelab/devicelab_drone
     timeout: 60
+    bringup: true
     properties:
       caches: >-
         [
@@ -3816,6 +4159,14 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: plugin_dependencies_test
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
     scheduler: luci
     runIf:
       - dev/**
@@ -3825,6 +4176,7 @@ targets:
   - name: Windows plugin_test
     recipe: devicelab/devicelab_drone
     timeout: 60
+    bringup: true
     properties:
       caches: >-
         [
@@ -3839,6 +4191,14 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: plugin_test
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
     scheduler: luci
     runIf:
       - dev/**
@@ -3848,8 +4208,17 @@ targets:
   - name: Windows tool_integration_tests_1_5
     recipe: flutter/flutter_drone
     timeout: 60
+    bringup: true
     properties:
       add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
@@ -3871,8 +4240,17 @@ targets:
   - name: Windows tool_integration_tests_2_5
     recipe: flutter/flutter_drone
     timeout: 60
+    bringup: true
     properties:
       add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
@@ -3894,8 +4272,17 @@ targets:
   - name: Windows tool_integration_tests_3_5
     recipe: flutter/flutter_drone
     timeout: 60
+    bringup: true
     properties:
       add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
