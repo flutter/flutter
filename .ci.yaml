@@ -481,7 +481,8 @@ targets:
     properties:
       caches: >-
         [
-          {"name":"gradle","path":"gradle"}
+          {"name":"gradle","path":"gradle"},
+          {"name": "openjdk", "path": "java11"}
         ]
       dependencies: >-
         [
@@ -492,10 +493,6 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: gradle_desugar_classes_test
-      caches: >-
-        [
-          {"name": "openjdk", "path": "java11"}
-        ]
     scheduler: luci
     runIf:
       - dev/**
@@ -508,7 +505,8 @@ targets:
     properties:
       caches: >-
         [
-          {"name":"gradle","path":"gradle"}
+          {"name":"gradle","path":"gradle"},
+          {"name": "openjdk", "path": "java11"}
         ]
       dependencies: >-
         [
@@ -519,10 +517,6 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: gradle_java8_compile_test
-      caches: >-
-        [
-          {"name": "openjdk", "path": "java11"}
-        ]
     scheduler: luci
     runIf:
       - dev/**
@@ -535,7 +529,8 @@ targets:
     properties:
       caches: >-
         [
-          {"name":"gradle","path":"gradle"}
+          {"name":"gradle","path":"gradle"},
+          {"name": "openjdk", "path": "java11"}
         ]
       dependencies: >-
         [
@@ -546,10 +541,6 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: gradle_plugin_bundle_test
-      caches: >-
-        [
-          {"name": "openjdk", "path": "java11"}
-        ]
     scheduler: luci
     runIf:
       - dev/**
@@ -562,7 +553,8 @@ targets:
     properties:
       caches: >-
         [
-          {"name":"gradle","path":"gradle"}
+          {"name":"gradle","path":"gradle"},
+          {"name": "openjdk", "path": "java11"}
         ]
       dependencies: >-
         [
@@ -573,10 +565,6 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: gradle_plugin_fat_apk_test
-      caches: >-
-        [
-          {"name": "openjdk", "path": "java11"}
-        ]
     scheduler: luci
     runIf:
       - dev/**
@@ -2347,10 +2335,6 @@ targets:
     bringup: true
     properties:
       add_recipes_cq: "true"
-      dependencies: >-
-        [
-          {"dependency": "open_jdk", "version": "11"}
-        ]
       caches: >-
         [
           {"name": "openjdk", "path": "java11"}
@@ -2359,7 +2343,7 @@ targets:
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver"},
-          {"dependency": "open_jdk"},
+          {"dependency": "open_jdk", "version": "11"},
           {"dependency": "xcode"},
           {"dependency": "gems"},
           {"dependency": "goldctl"}
@@ -3647,10 +3631,9 @@ targets:
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver"},
-          {"dependency": "open_jdk"},
+          {"dependency": "open_jdk", "version": "11"},
           {"dependency": "goldctl"},
           {"dependency": "vs_build"},
-          {"dependency": "open_jdk", "version": "11"}
         ]
       shard: build_tests
       subshard: "1_3"
@@ -3672,10 +3655,9 @@ targets:
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver"},
-          {"dependency": "open_jdk"},
+          {"dependency": "open_jdk", "version": "11"},
           {"dependency": "goldctl"},
           {"dependency": "vs_build"},
-          {"dependency": "open_jdk", "version": "11"}
         ]
       shard: build_tests
       subshard: "2_3"
@@ -3697,10 +3679,9 @@ targets:
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver"},
-          {"dependency": "open_jdk"},
+          {"dependency": "open_jdk", "version": "11"},
           {"dependency": "goldctl"},
           {"dependency": "vs_build"},
-          {"dependency": "open_jdk", "version": "11"}
         ]
       shard: build_tests
       subshard: "3_3"
