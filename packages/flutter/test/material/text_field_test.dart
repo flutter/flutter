@@ -9942,7 +9942,7 @@ void main() {
 
     expect(
       tester.testTextInput.setClientArgs?['autofill'],
-      containsPair('hint_text', 'placeholder text'),
+      containsPair('hintText', 'placeholder text'),
     );
   });
 }
