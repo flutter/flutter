@@ -76,7 +76,8 @@ static bool CopyToBitmap(SkBitmap* dst,
 }
 
 sk_sp<SkImage> MultiFrameCodec::State::GetNextFrameImage(
-    fml::WeakPtr<GrDirectContext> resourceContext) {
+    fml::WeakPtr<GrDirectContext> resourceContext,
+    const std::shared_ptr<const fml::SyncSwitch>& gpu_disable_sync_switch) {
   SkBitmap bitmap = SkBitmap();
   SkImageInfo info = generator_->GetInfo().makeColorType(kN32_SkColorType);
   if (info.alphaType() == kUnpremul_SkAlphaType) {
@@ -122,18 +123,30 @@ sk_sp<SkImage> MultiFrameCodec::State::GetNextFrameImage(
     lastRequiredFrame_ = std::make_unique<SkBitmap>(bitmap);
     lastRequiredFrameIndex_ = nextFrameIndex_;
   }
+  sk_sp<SkImage> result;
 
-  if (resourceContext) {
-    SkPixmap pixmap(bitmap.info(), bitmap.pixelRef()->pixels(),
-                    bitmap.pixelRef()->rowBytes());
-    return SkImage::MakeCrossContextFromPixmap(resourceContext.get(), pixmap,
-                                               true);
-  } else {
-    // Defer decoding until time of draw later on the raster thread. Can happen
-    // when GL operations are currently forbidden such as in the background
-    // on iOS.
-    return SkImage::MakeFromBitmap(bitmap);
-  }
+  gpu_disable_sync_switch->Execute(
+      fml::SyncSwitch::Handlers()
+          .SetIfTrue([&result, &bitmap] {
+            // Defer decoding until time of draw later on the raster thread. Can
+            // happen when GL operations are currently forbidden such as in the
+            // background on iOS.
+            result = SkImage::MakeFromBitmap(bitmap);
+          })
+          .SetIfFalse([&result, &resourceContext, &bitmap] {
+            if (resourceContext) {
+              SkPixmap pixmap(bitmap.info(), bitmap.pixelRef()->pixels(),
+                              bitmap.pixelRef()->rowBytes());
+              result = SkImage::MakeCrossContextFromPixmap(
+                  resourceContext.get(), pixmap, true);
+            } else {
+              // Defer decoding until time of draw later on the raster thread.
+              // Can happen when GL operations are currently forbidden such as
+              // in the background on iOS.
+              result = SkImage::MakeFromBitmap(bitmap);
+            }
+          }));
+  return result;
 }
 
 void MultiFrameCodec::State::GetNextFrameAndInvokeCallback(
@@ -141,10 +154,12 @@ void MultiFrameCodec::State::GetNextFrameAndInvokeCallback(
     fml::RefPtr<fml::TaskRunner> ui_task_runner,
     fml::WeakPtr<GrDirectContext> resourceContext,
     fml::RefPtr<flutter::SkiaUnrefQueue> unref_queue,
+    const std::shared_ptr<const fml::SyncSwitch>& gpu_disable_sync_switch,
     size_t trace_id) {
   fml::RefPtr<CanvasImage> image = nullptr;
   int duration = 0;
-  sk_sp<SkImage> skImage = GetNextFrameImage(resourceContext);
+  sk_sp<SkImage> skImage =
+      GetNextFrameImage(resourceContext, gpu_disable_sync_switch);
   if (skImage) {
     image = CanvasImage::Create();
     image->set_image({skImage, std::move(unref_queue)});
@@ -200,7 +215,7 @@ Dart_Handle MultiFrameCodec::getNextFrame(Dart_Handle callback_handle) {
         state->GetNextFrameAndInvokeCallback(
             std::move(callback), std::move(ui_task_runner),
             io_manager->GetResourceContext(), io_manager->GetSkiaUnrefQueue(),
-            trace_id);
+            io_manager->GetIsGpuDisabledSyncSwitch(), trace_id);
       }));
 
   return Dart_Null();
