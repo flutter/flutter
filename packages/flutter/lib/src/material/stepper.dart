@@ -186,6 +186,7 @@ class Stepper extends StatefulWidget {
     this.onStepCancel,
     this.controlsBuilder,
     this.elevation,
+    this.margin,
   }) : assert(steps != null),
        assert(type != null),
        assert(currentStep != null),
@@ -283,6 +284,9 @@ class Stepper extends StatefulWidget {
 
   /// The elevation of this stepper's [Material] when [type] is [StepperType.horizontal].
   final double? elevation;
+
+  /// custom margin on vertical stepper.
+  final EdgeInsetsGeometry? margin;
 
   @override
   State<Stepper> createState() => _StepperState();
@@ -611,7 +615,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         AnimatedCrossFade(
           firstChild: Container(height: 0.0),
           secondChild: Container(
-            margin: const EdgeInsetsDirectional.only(
+            margin: widget.margin ?? const EdgeInsetsDirectional.only(
               start: 60.0,
               end: 24.0,
               bottom: 24.0,

@@ -13,10 +13,10 @@ import 'logger.dart';
 
 @visibleForTesting
 Future<dds.DartDevelopmentService> Function(
-  Uri,
-  {bool enableAuthCodes,
+  Uri remoteVmServiceUri, {
+  bool enableAuthCodes,
   bool ipv6,
-  Uri serviceUri,
+  Uri? serviceUri,
 }) ddsLauncherCallback = dds.DartDevelopmentService.startDartDevelopmentService;
 
 /// Helper class to launch a [dds.DartDevelopmentService]. Allows for us to
@@ -31,19 +31,16 @@ class DartDevelopmentService {
   final Completer<void> _completer = Completer<void>();
 
   Future<void> startDartDevelopmentService(
-    Uri observatoryUri,
-    int hostPort,
-    bool ipv6,
-    bool disableServiceAuthCodes, {
+    Uri observatoryUri, {
     required Logger logger,
+    int? hostPort,
+    bool? ipv6,
+    bool? disableServiceAuthCodes,
   }) async {
     final Uri ddsUri = Uri(
       scheme: 'http',
-      host: (ipv6 ?
-        io.InternetAddress.loopbackIPv6 :
-        io.InternetAddress.loopbackIPv4
-      ).host,
-      port: hostPort,
+      host: (ipv6 == true ? io.InternetAddress.loopbackIPv6 : io.InternetAddress.loopbackIPv4).host,
+      port: hostPort ?? 0,
     );
     logger.printTrace(
       'Launching a Dart Developer Service (DDS) instance at $ddsUri, '
@@ -53,8 +50,8 @@ class DartDevelopmentService {
       _ddsInstance = await ddsLauncherCallback(
           observatoryUri,
           serviceUri: ddsUri,
-          enableAuthCodes: !disableServiceAuthCodes,
-          ipv6: ipv6,
+          enableAuthCodes: disableServiceAuthCodes != true,
+          ipv6: ipv6 == true,
         );
       unawaited(_ddsInstance?.done.whenComplete(() {
         if (!_completer.isCompleted) {

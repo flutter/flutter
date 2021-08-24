@@ -605,7 +605,7 @@ class FlutterBuildSystem extends BuildSystem {
       // Always persist the file cache to disk.
       fileCache.persist();
     }
-    // TODO(jonahwilliams): this is a bit of a hack, due to various parts of
+    // This is a bit of a hack, due to various parts of
     // the flutter tool writing these files unconditionally. Since Xcode uses
     // timestamps to track files, this leads to unnecessary rebuilds if they
     // are included. Once all the places that write these files have been
@@ -860,7 +860,7 @@ class _BuildInstance {
         ErrorHandlingFileSystem.deleteIfExists(previousFile);
       }
     } on Exception catch (exception, stackTrace) {
-      // TODO(jonahwilliams): throw specific exception for expected errors to mark
+      // TODO(zanderso): throw specific exception for expected errors to mark
       // as non-fatal. All others should be fatal.
       node.target.clearStamp(environment);
       succeeded = false;

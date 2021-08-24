@@ -267,8 +267,7 @@ bool requiresEnginePR(pb.ConductorState state) {
 /// This release will require a new Framework PR.
 ///
 /// The logic is if there was an Engine PR OR there are framework cherrypicks
-/// that have not been abandoned OR the increment level is 'm', then return
-/// true, else false.
+/// that have not been abandoned.
 bool requiresFrameworkPR(pb.ConductorState state) {
   if (requiresEnginePR(state)) {
     return true;
@@ -276,10 +275,6 @@ bool requiresFrameworkPR(pb.ConductorState state) {
   final bool hasRequiredCherrypicks =
       state.framework.cherrypicks.any((pb.Cherrypick cp) => cp.state != pb.CherrypickState.ABANDONED);
   if (hasRequiredCherrypicks) {
-    return true;
-  }
-  if (state.incrementLevel == 'm') {
-    // requires an update to .ci.yaml
     return true;
   }
   return false;

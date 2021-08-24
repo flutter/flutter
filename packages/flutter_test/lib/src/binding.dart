@@ -163,21 +163,12 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   }
   TestRestorationManager? _restorationManager;
 
-  // The configuration at the beginning of a widget test to be restored after
-  // the test.
-  //
-  // Normally this value should always be non-null during [postTest], except in
-  // rare cases [postTest] is called explicitly without [testWidgets] (so that
-  // [reset] is not called).
-  ViewConfiguration? _preTestViewConfiguration;
   /// Called by the test framework at the beginning of a widget test to
   /// prepare the binding for the next test.
   ///
   /// If [registerTestTextInput] returns true when this method is called,
   /// the [testTextInput] is configured to simulate the keyboard.
   void reset() {
-    assert(_surfaceSize == null);
-    _preTestViewConfiguration = renderView.configuration;
     _restorationManager = null;
     resetGestureBinding();
     testTextInput.reset();
@@ -951,16 +942,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         'active mouse gesture to remove the mouse pointer.');
     // ignore: invalid_use_of_visible_for_testing_member
     RendererBinding.instance!.initMouseTracker();
-    // Reset _surfaceSize and renderView.configuration.
-    //
-    // The _surfaceSize and renderView.configuration might be set within a
-    // test, but such changes should not be carried over. The
-    // renderView.configuration might also be set outside of a test, which
-    // *should* be kept between tests. Don't use [handleMetricsChanged] because
-    // it contains unwanted side effects.
-    _surfaceSize = null;
-    if (_preTestViewConfiguration != null && _preTestViewConfiguration != renderView.configuration)
-      renderView.configuration = _preTestViewConfiguration!;
   }
 }
 
@@ -1751,7 +1732,7 @@ class TestViewConfiguration extends ViewConfiguration {
   TestViewConfiguration._(Size size, ui.FlutterView window)
     : _paintMatrix = _getMatrix(size, window.devicePixelRatio, window),
       _hitTestMatrix = _getMatrix(size, 1.0, window),
-      super(size: size);
+      super(size: size, devicePixelRatio: window.devicePixelRatio);
 
   static Matrix4 _getMatrix(Size size, double devicePixelRatio, ui.FlutterView window) {
     final double inverseRatio = devicePixelRatio / window.devicePixelRatio;

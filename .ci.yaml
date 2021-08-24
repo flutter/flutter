@@ -248,7 +248,6 @@ targets:
 
   - name: Linux ci_yaml flutter roller
     recipe: infra/ci_yaml
-    bringup: true
     timeout: 30
     properties:
       tags: >
@@ -1271,6 +1270,14 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: complex_layout_android__compile
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
     scheduler: luci
 
   - name: Linux_android complex_layout_android__scroll_smoothness
@@ -1281,6 +1288,14 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: complex_layout_android__scroll_smoothness
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
     scheduler: luci
 
   - name: Linux_android complex_layout_scroll_perf__devtools_memory
@@ -1291,6 +1306,14 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: complex_layout_scroll_perf__devtools_memory
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
     scheduler: luci
 
   - name: Linux_android complex_layout_semantics_perf
@@ -1301,6 +1324,14 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: complex_layout_semantics_perf
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
     scheduler: luci
 
   - name: Linux_android cubic_bezier_perf__e2e_summary
@@ -1643,6 +1674,19 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: web_size__compile_test
+    scheduler: luci
+
+  - name: Linux android views
+    recipe: flutter/android_views
+    bringup: true
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk"}
+        ]
+      tags: >
+        ["framework","hostonly"]
+    timeout: 60
     scheduler: luci
 
   - name: Mac build_aar_module_test
@@ -2025,7 +2069,6 @@ targets:
 
   - name: Mac module_test_ios
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       caches: >-
@@ -2093,6 +2136,8 @@ targets:
     scheduler: luci
     runIf:
       - dev/**
+      - packages/flutter_tools/**
+      - packages/integration_test/**
       - bin/**
 
   - name: Mac plugin_test
@@ -2338,6 +2383,14 @@ targets:
       tags: >
         ["devicelab","android","mac"]
       task_name: complex_layout__start_up
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
     scheduler: luci
 
   - name: Mac_android complex_layout_scroll_perf__memory
@@ -2348,6 +2401,14 @@ targets:
       tags: >
         ["devicelab","android","mac"]
       task_name: complex_layout_scroll_perf__memory
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
     scheduler: luci
 
   - name: Mac_android complex_layout_scroll_perf__timeline_summary
@@ -2358,6 +2419,14 @@ targets:
       tags: >
         ["devicelab","android","mac"]
       task_name: complex_layout_scroll_perf__timeline_summary
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
     scheduler: luci
 
   - name: Mac_android cubic_bezier_perf__timeline_summary
@@ -2694,15 +2763,23 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
+    bringup: true
     properties:
       tags: >
         ["devicelab","android","mac"]
       task_name: tiles_scroll_perf__timeline_summary
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
     scheduler: luci
 
   - name: Mac_ios animation_with_microtasks_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2749,6 +2826,14 @@ targets:
       tags: >
         ["devicelab","ios","mac"]
       task_name: complex_layout_ios__compile
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
     scheduler: luci
 
   - name: Mac_ios complex_layout_ios__start_up
@@ -2759,6 +2844,14 @@ targets:
       tags: >
         ["devicelab","ios","mac"]
       task_name: complex_layout_ios__start_up
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
     scheduler: luci
 
   - name: Mac_ios complex_layout_scroll_perf_ios__timeline_summary
@@ -2769,6 +2862,14 @@ targets:
       tags: >
         ["devicelab","ios","mac"]
       task_name: complex_layout_scroll_perf_ios__timeline_summary
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
     scheduler: luci
 
   - name: Mac_ios cubic_bezier_perf_ios_sksl_warmup__timeline_summary
@@ -3384,6 +3485,10 @@ targets:
         [
           {"name":"gradle","path":"gradle"}
         ]
+      dependencies: >-
+        [
+          {"dependency": "vs_build"}
+        ]
       tags: >
         ["devicelab","hostonly"]
       task_name: hot_mode_dev_cycle_win_target__benchmark
@@ -3704,6 +3809,14 @@ targets:
       tags: >
         ["devicelab","android","windows"]
       task_name: complex_layout_win__compile
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
     scheduler: luci
 
   - name: Windows_android flavors_test_win

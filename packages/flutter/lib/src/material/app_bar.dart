@@ -1572,6 +1572,10 @@ class SliverAppBar extends StatefulWidget {
     this.shape,
     this.toolbarHeight = kToolbarHeight,
     this.leadingWidth,
+    @Deprecated(
+      'This property is obsolete and is false by default. '
+      'This feature was deprecated after v2.4.0-0.0.pre.',
+    )
     this.backwardsCompatibility,
     this.toolbarTextStyle,
     this.titleTextStyle,
@@ -1832,6 +1836,10 @@ class SliverAppBar extends StatefulWidget {
   /// {@macro flutter.material.appbar.backwardsCompatibility}
   ///
   /// This property is used to configure an [AppBar].
+  @Deprecated(
+    'This property is obsolete and is false by default. '
+    'This feature was deprecated after v2.4.0-0.0.pre.',
+  )
   final bool? backwardsCompatibility;
 
   /// {@macro flutter.material.appbar.toolbarTextStyle}

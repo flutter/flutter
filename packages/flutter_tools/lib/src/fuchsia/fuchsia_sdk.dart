@@ -144,7 +144,7 @@ class FuchsiaArtifacts {
     }
     // If FUCHSIA_BUILD_DIR is defined, then look for the ssh_config dir
     // relative to it. Next, if FUCHSIA_SSH_CONFIG is defined, then use it.
-    // TODO(zra): Consider passing the ssh config path in with a flag.
+    // TODO(zanderso): Consider passing the ssh config path in with a flag.
     File sshConfig;
     if (globals.platform.environment.containsKey(_kFuchsiaBuildDir)) {
       sshConfig = globals.fs.file(globals.fs.path.join(
