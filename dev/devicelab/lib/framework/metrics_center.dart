@@ -86,7 +86,9 @@ Future<void> uploadToMetricsCenter(String? resultsPath, String? commitTime) asyn
   }
   final File resultFile = File(resultsPath);
   Map<String, dynamic> resultsJson = <String, dynamic>{};
+  print('before reading result file: $resultFile');
   resultsJson = json.decode(await resultFile.readAsString()) as Map<String, dynamic>;
+  print('after reading result file: $resultsJson');
   final List<MetricPoint> metricPoints = parse(resultsJson);
   final FlutterDestination metricsDestination = await connectFlutterDestination();
   await metricsDestination.update(
