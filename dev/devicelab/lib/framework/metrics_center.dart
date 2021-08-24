@@ -45,11 +45,13 @@ Future<FlutterDestination> connectFlutterDestination() async {
 ///     ]
 ///   }
 List<MetricPoint> parse(Map<String, dynamic> resultsJson) {
-  final List<String> scoreKeys = (resultsJson['BenchmarkScoreKeys'] as List<dynamic>).cast<String>();
-  final Map<String, dynamic> resultData = resultsJson['ResultData'] as Map<String, dynamic>;
+  final List<String> scoreKeys =
+      (resultsJson['BenchmarkScoreKeys'] as List<dynamic>?)?.cast<String>() ?? const <String>[];
+  final Map<String, dynamic> resultData =
+      resultsJson['ResultData'] as Map<String, dynamic>? ?? const <String, dynamic>{};
   final String gitBranch = (resultsJson['CommitBranch'] as String).trim();
   final String gitSha = (resultsJson['CommitSha'] as String).trim();
-  final String builderName = resultsJson['BuilderName'] as String;
+  final String builderName = (resultsJson['BuilderName'] as String).trim();
   final List<MetricPoint> metricPoints = <MetricPoint>[];
   for (final String scoreKey in scoreKeys) {
     metricPoints.add(
