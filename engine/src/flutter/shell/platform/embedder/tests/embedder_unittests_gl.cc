@@ -2028,6 +2028,8 @@ TEST_F(EmbedderTest,
   frame_latch.Wait();
 
   ASSERT_EQ(frames_expected, frames_seen);
+
+  FlutterEngineShutdown(engine.release());
 }
 
 TEST_F(EmbedderTest,
@@ -2067,6 +2069,8 @@ TEST_F(EmbedderTest,
   frame_latch.Wait();
 
   ASSERT_EQ(frames_expected, frames_seen);
+
+  FlutterEngineShutdown(engine.release());
 }
 
 TEST_F(EmbedderTest, PlatformViewMutatorsAreValid) {
