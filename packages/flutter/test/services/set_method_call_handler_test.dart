@@ -13,9 +13,9 @@ void main() {
   test('throws assertion error if WidgetsFlutterBinding is not yet initialized', () {
     const MethodChannel methodChannel = MethodChannel('mock');
 
-    // This used to throw _CastError:<Null check operator used on a null value>
-    // before the assertion was added, which we want to avoid in order to hint
-    // callers towards how to fix the error.
+    // Verify an assertion error is thrown before the binary messenger is
+    // accessed (which would result in a _CastError due to the non-null
+    // assertion). This way we can hint the caller towards how to fix the error.
     expect(() => methodChannel.setMethodCallHandler(null), throwsAssertionError);
   });
 
