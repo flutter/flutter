@@ -11,7 +11,7 @@
 /// the SDK pins to an exact version.
 ///
 /// Before adding a new Dart Team owned dependency to this set, please clear with natebosch@
-/// or jakemac53@. For other packages please contact hixie@ or jonahwilliams@ .
+/// or jakemac53@. For other packages please contact hixie@ or zanderso@ .
 const Set<String> kCorePackageAllowList = <String>{
   'characters',
   'clock',
