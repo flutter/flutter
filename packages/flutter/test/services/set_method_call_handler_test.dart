@@ -15,7 +15,7 @@ void main() {
 
     // This used to throw _CastError:<Null check operator used on a null value>
     // before the assertion was added, which we want to avoid in order to hint
-    // callers how to fix the error.
+    // callers towards how to fix the error.
     expect(() => methodChannel.setMethodCallHandler(null), throwsAssertionError);
   });
 
