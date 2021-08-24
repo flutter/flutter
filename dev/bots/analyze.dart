@@ -283,7 +283,7 @@ Future<void> _verifyNoMissingLicenseForExtension(String workingDirectory, String
   }
 }
 
-final RegExp _skipTestCommentPattern = RegExp(r'\bskip:.*?//(.*)');
+final RegExp _skipTestCommentPattern = RegExp(r'\bskip:(.*?//(.*))?');
 const Pattern _skipTestIntentionalPattern = '[intended]';
 final Pattern _skipTestTrackingBugPattern = RegExp(r'https+?://github.com/.*/issues/[0-9]+');
 
@@ -296,12 +296,14 @@ Future<void> verifySkipTestComments(String workingDirectory) async {
     final List<String> lines = file.readAsLinesSync();
     for (int index = 0; index < lines.length; index++) {
       final Match? match = _skipTestCommentPattern.firstMatch(lines[index]);
-      final String? skipComment = match?.group(1);
-      if (skipComment != null
-          && !skipComment.contains(_skipTestIntentionalPattern)
-          && !skipComment.contains(_skipTestTrackingBugPattern)) {
-        final int sourceLine = index + 1;
-        errors.add('${file.path}:$sourceLine}: skip test without a justification comment.');
+      if (match != null) {
+        final String? skipComment = match.group(2);
+        if (skipComment == null ||
+            (!skipComment.contains(_skipTestIntentionalPattern) &&
+             !skipComment.contains(_skipTestTrackingBugPattern))) {
+          final int sourceLine = index + 1;
+          errors.add('${file.path}:$sourceLine: skip test without a justification comment.');
+        }
       }
     }
   }
