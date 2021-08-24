@@ -222,7 +222,7 @@ targets:
           {"dependency": "goldctl"},
           {"dependency": "clang"},
           {"dependency": "cmake"},
-          {"dependency": "ninja"},
+          {"dependency": "ninja"}
         ]
       shard: build_tests
       subshard: "1_2"
