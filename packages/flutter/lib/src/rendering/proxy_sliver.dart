@@ -385,11 +385,13 @@ class RenderSliverAnimatedOpacity extends RenderProxySliver with RenderAnimatedO
   RenderSliverAnimatedOpacity({
     required Animation<double> opacity,
     bool alwaysIncludeSemantics = false,
+    bool alwaysPaintChild = false,
     RenderSliver? sliver,
   }) : assert(opacity != null),
        assert(alwaysIncludeSemantics != null) {
     this.opacity = opacity;
     this.alwaysIncludeSemantics = alwaysIncludeSemantics;
+    this.alwaysPaintChild = alwaysPaintChild;
     child = sliver;
   }
 }

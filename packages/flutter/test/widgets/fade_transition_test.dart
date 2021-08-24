@@ -32,4 +32,55 @@ void main() {
     debugPrint = oldPrint;
     debugPrintBuildScope = false;
   });
+
+  testWidgets('alwaysPaintChild test', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/85944
+    final AnimationController controller = AnimationController(
+      vsync: const TestVSync(),
+      duration: const Duration(seconds: 2),
+    );
+    Widget buildFrame(Color color) {
+      return FadeTransition(
+        opacity: controller,
+        alwaysPaintChild: true,
+        child: Text(
+          'I love Flutter!',
+          textDirection: TextDirection.rtl,
+          style: TextStyle(color: color),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(const Color(0x01010101)));
+    // Changing color does not do trigger RenderParagraph layout
+    await tester.pumpWidget(buildFrame(const Color(0x01010102)));
+
+    await tester.tap(find.text('I love Flutter!'));
+    // If the child RO do not be painted will throw during hit-test.
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('alwaysPaintChild update test', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/85944
+    final AnimationController controller = AnimationController(
+      vsync: const TestVSync(),
+      duration: const Duration(seconds: 2),
+    );
+    Widget buildFrame(bool alwaysPaintChild) {
+      return FadeTransition(
+        opacity: controller,
+        alwaysPaintChild: alwaysPaintChild,
+        child: const Text(
+            'I love Flutter!',
+            textDirection: TextDirection.rtl,
+            style: TextStyle(color: Color(0x01010101))),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(false));
+    // This will trigger `markNeedsCompositingBitsUpdate` and the `paint()` will
+    // check whether the `needsCompositing` updating properly.
+    await tester.pumpWidget(buildFrame(true));
+    expect(tester.takeException(), isNull);
+  });
 }

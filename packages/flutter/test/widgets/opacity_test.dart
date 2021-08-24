@@ -191,4 +191,47 @@ void main() {
     final OffsetLayer offsetLayer = element.renderObject!.debugLayer! as OffsetLayer;
     await offsetLayer.toImage(const Rect.fromLTRB(0.0, 0.0, 1.0, 1.0));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/49857
+
+  testWidgets('alwaysPaintChild test', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/85944
+    Widget buildFrame(Color color) {
+      return Opacity(
+        opacity: 0.0,
+        alwaysPaintChild: true,
+        child: Text(
+          'I love Flutter!',
+          textDirection: TextDirection.rtl,
+          style: TextStyle(color: color),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(Colors.black));
+    // Changing color does not do trigger RenderParagraph layout
+    await tester.pumpWidget(buildFrame(Colors.red));
+
+    await tester.tap(find.text('I love Flutter!'));
+    // If the child RO do not be painted will throw during hit-test.
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('alwaysPaintChild update test', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/85944
+    Widget buildFrame(bool alwaysPaintChild) {
+      return Opacity(
+        opacity: 0.0,
+        alwaysPaintChild: alwaysPaintChild,
+        child: const Text(
+          'I love Flutter!',
+          textDirection: TextDirection.rtl,
+          style: TextStyle(color: Color(0x01010101))),
+        );
+    }
+
+    await tester.pumpWidget(buildFrame(false));
+    // This will trigger `markNeedsCompositingBitsUpdate` and the `paint()` will
+    // check whether the `needsCompositing` updating properly.
+    await tester.pumpWidget(buildFrame(true));
+    expect(tester.takeException(), isNull);
+  });
 }

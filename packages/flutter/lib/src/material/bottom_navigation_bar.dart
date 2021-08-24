@@ -823,6 +823,7 @@ class _Label extends StatelessWidget {
       // Never show any labels.
       text = Opacity(
         alwaysIncludeSemantics: true,
+        alwaysPaintChild: true,
         opacity: 0.0,
         child: text,
       );
@@ -830,6 +831,7 @@ class _Label extends StatelessWidget {
       // Fade selected labels in.
       text = FadeTransition(
         alwaysIncludeSemantics: true,
+        alwaysPaintChild: true,
         opacity: animation,
         child: text,
       );
@@ -837,6 +839,7 @@ class _Label extends StatelessWidget {
       // Fade selected labels out.
       text = FadeTransition(
         alwaysIncludeSemantics: true,
+        alwaysPaintChild: true,
         opacity: Tween<double>(begin: 1.0, end: 0.0).animate(animation),
         child: text,
       );

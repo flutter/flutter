@@ -833,17 +833,19 @@ class RenderOpacity extends RenderProxyBox {
   RenderOpacity({
     double opacity = 1.0,
     bool alwaysIncludeSemantics = false,
+    bool alwaysPaintChild = false,
     RenderBox? child,
   }) : assert(opacity != null),
        assert(opacity >= 0.0 && opacity <= 1.0),
        assert(alwaysIncludeSemantics != null),
        _opacity = opacity,
        _alwaysIncludeSemantics = alwaysIncludeSemantics,
+       _alwaysPaintChild = alwaysPaintChild,
        _alpha = ui.Color.getAlphaFromOpacity(opacity),
        super(child);
 
   @override
-  bool get alwaysNeedsCompositing => child != null && (_alpha != 0 && _alpha != 255);
+  bool get alwaysNeedsCompositing => child != null && ((_alpha != 0 || alwaysPaintChild) && _alpha != 255);
 
   int _alpha;
 
@@ -889,10 +891,28 @@ class RenderOpacity extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
+  /// Whether the child be painted regardless of the opacity.
+  ///
+  /// If false, child do not be painted when [opacity] is 0.0.
+  ///
+  /// Defaults to false.
+  bool get alwaysPaintChild => _alwaysPaintChild;
+  bool _alwaysPaintChild;
+  set alwaysPaintChild(bool value) {
+    if (value == _alwaysPaintChild)
+      return;
+    final bool didNeedCompositing = alwaysNeedsCompositing;
+    _alwaysPaintChild = value;
+    if (didNeedCompositing != alwaysNeedsCompositing) {
+      markNeedsCompositingBitsUpdate();
+    }
+    markNeedsPaint();
+  }
+
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
-      if (_alpha == 0) {
+      if (_alpha == 0 && !_alwaysPaintChild) {
         // No need to keep the layer. We'll create a new one if necessary.
         layer = null;
         return;
@@ -931,7 +951,7 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
   int? _alpha;
 
   @override
-  bool get alwaysNeedsCompositing => child != null && _currentlyNeedsCompositing!;
+  bool get alwaysNeedsCompositing => child != null && ((_alpha! > 0 && _alpha! < 255) || (_alpha! == 0 && alwaysPaintChild));
   bool? _currentlyNeedsCompositing;
 
   /// The animation that drives this render object's opacity.
@@ -975,6 +995,24 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
     markNeedsSemanticsUpdate();
   }
 
+  /// Whether the child be painted regardless of the opacity.
+  ///
+  /// If false, child do not be painted when [opacity] is 0.0.
+  ///
+  /// Defaults to false.
+  bool get alwaysPaintChild => _alwaysPaintChild!;
+  bool? _alwaysPaintChild;
+  set alwaysPaintChild(bool value) {
+    if (value == _alwaysPaintChild)
+      return;
+    final bool didNeedCompositing = alwaysNeedsCompositing;
+    _alwaysPaintChild = value;
+    if (didNeedCompositing != alwaysNeedsCompositing) {
+      markNeedsCompositingBitsUpdate();
+    }
+    markNeedsPaint();
+  }
+
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
@@ -993,8 +1031,8 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
     _alpha = ui.Color.getAlphaFromOpacity(opacity.value);
     if (oldAlpha != _alpha) {
       final bool? didNeedCompositing = _currentlyNeedsCompositing;
-      _currentlyNeedsCompositing = _alpha! > 0 && _alpha! < 255;
-      if (child != null && didNeedCompositing != _currentlyNeedsCompositing)
+      _currentlyNeedsCompositing = alwaysNeedsCompositing;
+      if (child != null && didNeedCompositing != alwaysNeedsCompositing)
         markNeedsCompositingBitsUpdate();
       markNeedsPaint();
       if (oldAlpha == 0 || _alpha == 0)
@@ -1005,7 +1043,7 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
-      if (_alpha == 0) {
+      if (_alpha == 0 && !alwaysPaintChild) {
         // No need to keep the layer. We'll create a new one if necessary.
         layer = null;
         return;
@@ -1046,10 +1084,12 @@ class RenderAnimatedOpacity extends RenderProxyBox with RenderProxyBoxMixin, Ren
   RenderAnimatedOpacity({
     required Animation<double> opacity,
     bool alwaysIncludeSemantics = false,
+    bool alwaysPaintChild = false,
     RenderBox? child,
   }) : assert(opacity != null),
        assert(alwaysIncludeSemantics != null),
        super(child) {
+    this.alwaysPaintChild = alwaysPaintChild;
     this.opacity = opacity;
     this.alwaysIncludeSemantics = alwaysIncludeSemantics;
   }

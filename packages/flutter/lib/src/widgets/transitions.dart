@@ -684,6 +684,7 @@ class FadeTransition extends SingleChildRenderObjectWidget {
     Key? key,
     required this.opacity,
     this.alwaysIncludeSemantics = false,
+    this.alwaysPaintChild = false,
     Widget? child,
   }) : assert(opacity != null),
        super(key: key, child: child);
@@ -706,17 +707,30 @@ class FadeTransition extends SingleChildRenderObjectWidget {
   /// would otherwise contribute relevant semantics.
   final bool alwaysIncludeSemantics;
 
+  /// Whether the child render object is always be painted.
+  ///
+  /// Defaults to false. The child render object do not be painted when
+  /// [opacity] is 0.0.
+  ///
+  /// When true, regardless of the opacity settings the child render object is
+  /// always be painted as if it is visible. This is useful in cases some
+  /// render object such as [RenderParagraph] could perform some layout
+  /// processes during the painting phase.
+  final bool alwaysPaintChild;
+
   @override
   RenderAnimatedOpacity createRenderObject(BuildContext context) {
     return RenderAnimatedOpacity(
       opacity: opacity,
       alwaysIncludeSemantics: alwaysIncludeSemantics,
+      alwaysPaintChild: alwaysPaintChild,
     );
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderAnimatedOpacity renderObject) {
     renderObject
+      ..alwaysPaintChild = alwaysPaintChild
       ..opacity = opacity
       ..alwaysIncludeSemantics = alwaysIncludeSemantics;
   }

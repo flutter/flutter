@@ -252,6 +252,7 @@ class Opacity extends SingleChildRenderObjectWidget {
     Key? key,
     required this.opacity,
     this.alwaysIncludeSemantics = false,
+    this.alwaysPaintChild = false,
     Widget? child,
   }) : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
        assert(alwaysIncludeSemantics != null),
@@ -279,11 +280,23 @@ class Opacity extends SingleChildRenderObjectWidget {
   /// would otherwise contribute relevant semantics.
   final bool alwaysIncludeSemantics;
 
+  /// Whether the child render object is always be painted.
+  ///
+  /// Defaults to false. The child render object do not be painted when
+  /// [opacity] is 0.0.
+  ///
+  /// When true, regardless of the opacity settings the child render object is
+  /// always be painted as if it is visible. This is useful in cases some
+  /// render object such as [RenderParagraph] could perform some layout
+  /// processes during the painting phase.
+  final bool alwaysPaintChild;
+
   @override
   RenderOpacity createRenderObject(BuildContext context) {
     return RenderOpacity(
       opacity: opacity,
       alwaysIncludeSemantics: alwaysIncludeSemantics,
+      alwaysPaintChild: alwaysPaintChild,
     );
   }
 
@@ -291,7 +304,8 @@ class Opacity extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderOpacity renderObject) {
     renderObject
       ..opacity = opacity
-      ..alwaysIncludeSemantics = alwaysIncludeSemantics;
+      ..alwaysIncludeSemantics = alwaysIncludeSemantics
+      ..alwaysPaintChild = alwaysPaintChild;
   }
 
   @override
