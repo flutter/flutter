@@ -16,9 +16,12 @@ void main() {
         'BuilderName': 'test',
         'ResultData': <String, dynamic>{
           'average_frame_build_time_millis': 0.4550425531914895,
-          '90th_percentile_frame_build_time_millis': 0.473
+          '90th_percentile_frame_build_time_millis': 0.473,
         },
-        'BenchmarkScoreKeys': <String>['average_frame_build_time_millis', '90th_percentile_frame_build_time_millis']
+        'BenchmarkScoreKeys': <String>[
+          'average_frame_build_time_millis',
+          '90th_percentile_frame_build_time_millis',
+        ],
       };
       final List<MetricPoint> metricPoints = parse(results);
 
@@ -32,7 +35,7 @@ void main() {
         'CommitSha': 'abc',
         'BuilderName': 'test',
         'ResultData': null,
-        'BenchmarkScoreKeys': null
+        'BenchmarkScoreKeys': null,
       };
       final List<MetricPoint> metricPoints = parse(results);
 
