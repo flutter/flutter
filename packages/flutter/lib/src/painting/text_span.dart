@@ -371,7 +371,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
     final bool effectiveSpellOut = spellOut ?? inheritedSpellOut;
 
     if (text != null) {
-      int textLength = semanticsLabel?.length ?? text!.length;
+      final int textLength = semanticsLabel?.length ?? text!.length;
       collector.add(InlineSpanSemanticsInformation(
         text!,
         stringAttributes: <ui.StringAttribute>[
