@@ -622,15 +622,18 @@ targets:
   - name: Linux module_host_with_custom_build_test
     recipe: devicelab/devicelab_drone
     timeout: 60
+    bringup: true
     properties:
       caches: >-
         [
-          {"name":"gradle","path":"gradle"}
+          {"name":"gradle","path":"gradle"},
+          {"name": "openjdk", "path": "java11"}
         ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
-          {"dependency": "chrome_and_driver"}
+          {"dependency": "chrome_and_driver"},
+          {"dependency": "open_jdk", "version": "11"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -644,15 +647,18 @@ targets:
   - name: Linux module_test
     recipe: devicelab/devicelab_drone
     timeout: 60
+    bringup: true
     properties:
       caches: >-
         [
-          {"name":"gradle","path":"gradle"}
+          {"name":"gradle","path":"gradle"},
+          {"name": "openjdk", "path": "java11"}
         ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
-          {"dependency": "chrome_and_driver"}
+          {"dependency": "chrome_and_driver"},
+          {"dependency": "open_jdk", "version": "11"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -666,15 +672,18 @@ targets:
   - name: Linux plugin_dependencies_test
     recipe: devicelab/devicelab_drone
     timeout: 60
+    bringup: true
     properties:
       caches: >-
         [
-          {"name":"gradle","path":"gradle"}
+          {"name":"gradle","path":"gradle"},
+          {"name": "openjdk", "path": "java11"}
         ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
-          {"dependency": "chrome_and_driver"}
+          {"dependency": "chrome_and_driver"},
+          {"dependency": "open_jdk", "version": "11"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -688,15 +697,18 @@ targets:
   - name: Linux plugin_test
     recipe: devicelab/devicelab_drone
     timeout: 60
+    bringup: true
     properties:
       caches: >-
         [
-          {"name":"gradle","path":"gradle"}
+          {"name":"gradle","path":"gradle"},
+          {"name": "openjdk", "path": "java11"}
         ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
-          {"dependency": "chrome_and_driver"}
+          {"dependency": "chrome_and_driver"},
+          {"dependency": "open_jdk", "version": "11"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -757,14 +769,19 @@ targets:
   - name: Linux tool_integration_tests_1_4
     recipe: flutter/flutter_drone
     timeout: 60
+    bringup: true
     properties:
       add_recipes_cq: "true"
+      caches: >-
+        [
+	          {"name": "openjdk", "path": "java11"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver"},
           {"dependency": "clang"},
-          {"dependency": "open_jdk"},
+          {"dependency": "open_jdk", "version": "11"},
           {"dependency": "goldctl"}
         ]
       shard: tool_integration_tests
@@ -781,14 +798,19 @@ targets:
   - name: Linux tool_integration_tests_2_4
     recipe: flutter/flutter_drone
     timeout: 60
+    bringup: true
     properties:
       add_recipes_cq: "true"
+      caches: >-
+        [
+	          {"name": "openjdk", "path": "java11"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver"},
           {"dependency": "clang"},
-          {"dependency": "open_jdk"},
+          {"dependency": "open_jdk", "version": "11"},
           {"dependency": "goldctl"}
         ]
       shard: tool_integration_tests
@@ -805,14 +827,19 @@ targets:
   - name: Linux tool_integration_tests_3_4
     recipe: flutter/flutter_drone
     timeout: 60
+    bringup: true
     properties:
       add_recipes_cq: "true"
+      caches: >-
+        [
+	          {"name": "openjdk", "path": "java11"}
+        ]
       dependencies: >-
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver"},
           {"dependency": "clang"},
-          {"dependency": "open_jdk"},
+          {"dependency": "open_jdk", "version": "11"},
           {"dependency": "goldctl"}
         ]
       shard: tool_integration_tests
