@@ -56,7 +56,7 @@ void main() {
         backgroundColor: Colors.blue,
         trailing: PopupMenuButton<String>(
           itemBuilder: (BuildContext context) {
-            return [
+            return <PopupMenuItem<String>>[
               const PopupMenuItem<String>(
                 value: 'Flutter',
                 child: Text('Working a lot harder'),
