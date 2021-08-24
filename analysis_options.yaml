@@ -97,7 +97,7 @@ linter:
     - camel_case_extensions
     - camel_case_types
     - cancel_subscriptions
-    # - cascade_invocations # not yet tested
+    - cascade_invocations
     - cast_nullable_to_non_nullable
     # - close_sinks # not reliable enough
     # - comment_references # blocked on https://github.com/dart-lang/linter/issues/1142
