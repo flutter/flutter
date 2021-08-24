@@ -1000,16 +1000,16 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
   /// If false, child do not be painted when [opacity] is 0.0.
   ///
   /// Defaults to false.
-  bool get alwaysPaintChild => _alwaysPaintChild!;
-  bool? _alwaysPaintChild;
+  bool get alwaysPaintChild => _alwaysPaintChild;
+  bool _alwaysPaintChild = false;
   set alwaysPaintChild(bool value) {
     if (value == _alwaysPaintChild)
       return;
-    final bool didNeedCompositing = alwaysNeedsCompositing;
     _alwaysPaintChild = value;
-    if (didNeedCompositing != alwaysNeedsCompositing) {
+    final bool? didNeedCompositing = _currentlyNeedsCompositing;
+    _currentlyNeedsCompositing = alwaysNeedsCompositing;
+    if (child != null && didNeedCompositing != alwaysNeedsCompositing)
       markNeedsCompositingBitsUpdate();
-    }
     markNeedsPaint();
   }
 
@@ -1089,9 +1089,9 @@ class RenderAnimatedOpacity extends RenderProxyBox with RenderProxyBoxMixin, Ren
   }) : assert(opacity != null),
        assert(alwaysIncludeSemantics != null),
        super(child) {
-    this.alwaysPaintChild = alwaysPaintChild;
     this.opacity = opacity;
     this.alwaysIncludeSemantics = alwaysIncludeSemantics;
+    this.alwaysPaintChild = alwaysPaintChild;
   }
 }
 
