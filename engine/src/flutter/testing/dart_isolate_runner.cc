@@ -59,7 +59,7 @@ void AutoIsolateShutdown::Shutdown() {
         latch.Signal();
       });
   latch.Wait();
-  return true;
+  return result;
 }
 
 std::unique_ptr<AutoIsolateShutdown> RunDartCodeInIsolateOnUITaskRunner(
