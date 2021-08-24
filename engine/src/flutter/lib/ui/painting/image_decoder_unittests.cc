@@ -731,5 +731,94 @@ TEST_F(ImageDecoderFixtureTest,
   latch.Wait();
 }
 
+TEST_F(ImageDecoderFixtureTest, MultiFrameCodecDidAccessGpuDisabledSyncSwitch) {
+  auto settings = CreateSettingsForFixture();
+  auto vm_ref = DartVMRef::Create(settings);
+  auto vm_data = vm_ref.GetVMData();
+
+  auto gif_mapping = OpenFixtureAsSkData("hello_loop_2.gif");
+
+  ASSERT_TRUE(gif_mapping);
+
+  ImageGeneratorRegistry registry;
+  std::shared_ptr<ImageGenerator> gif_generator =
+      registry.CreateCompatibleGenerator(gif_mapping);
+  ASSERT_TRUE(gif_generator);
+
+  TaskRunners runners(GetCurrentTestName(),         // label
+                      CreateNewThread("platform"),  // platform
+                      CreateNewThread("raster"),    // raster
+                      CreateNewThread("ui"),        // ui
+                      CreateNewThread("io")         // io
+  );
+
+  fml::AutoResetWaitableEvent latch;
+  std::unique_ptr<TestIOManager> io_manager;
+  fml::RefPtr<MultiFrameCodec> codec;
+
+  // Setup the IO manager.
+  runners.GetIOTaskRunner()->PostTask([&]() {
+    io_manager = std::make_unique<TestIOManager>(runners.GetIOTaskRunner());
+    latch.Signal();
+  });
+  latch.Wait();
+
+  auto isolate = RunDartCodeInIsolate(vm_ref, settings, runners, "main", {},
+                                      GetDefaultKernelFilePath(),
+                                      io_manager->GetWeakIOManager());
+
+  runners.GetUITaskRunner()->PostTask([&]() {
+    fml::AutoResetWaitableEvent isolate_latch;
+
+    EXPECT_TRUE(isolate->RunInIsolateScope([&]() -> bool {
+      Dart_Handle library = Dart_RootLibrary();
+      if (Dart_IsError(library)) {
+        isolate_latch.Signal();
+        return false;
+      }
+      Dart_Handle closure =
+          Dart_GetField(library, Dart_NewStringFromCString("frameCallback"));
+      if (Dart_IsError(closure) || !Dart_IsClosure(closure)) {
+        isolate_latch.Signal();
+        return false;
+      }
+
+      EXPECT_FALSE(io_manager->did_access_is_gpu_disabled_sync_switch_);
+      codec = fml::MakeRefCounted<MultiFrameCodec>(std::move(gif_generator));
+      codec->getNextFrame(closure);
+      isolate_latch.Signal();
+      return true;
+    }));
+    isolate_latch.Wait();
+
+    latch.Signal();
+  });
+  latch.Wait();
+
+  runners.GetIOTaskRunner()->PostTask([&]() {
+    EXPECT_TRUE(io_manager->did_access_is_gpu_disabled_sync_switch_);
+    latch.Signal();
+  });
+  latch.Wait();
+
+  // Destroy the Isolate
+  isolate = nullptr;
+
+  // Destroy the MultiFrameCodec
+  runners.GetUITaskRunner()->PostTask([&]() {
+    codec = nullptr;
+    latch.Signal();
+  });
+  latch.Wait();
+
+  // Destroy the IO manager
+  runners.GetIOTaskRunner()->PostTask([&]() {
+    io_manager.reset();
+    latch.Signal();
+  });
+
+  latch.Wait();
+}
+
 }  // namespace testing
 }  // namespace flutter
