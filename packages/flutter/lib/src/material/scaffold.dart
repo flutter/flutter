@@ -2800,6 +2800,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   /// [ModalRoute] and a back button is added to the app bar of the [Scaffold]
   /// that closes the bottom sheet.
   ///
+  /// The [transitionAnimationController] controls the bottom sheet's entrance and
+  /// exit animations. It's up to the owner of the controller to call
+  /// [AnimationController.dispose] when the controller is no longer needed.
+  ///
   /// To create a persistent bottom sheet that is not a [LocalHistoryEntry] and
   /// does not add a back button to the enclosing Scaffold's app bar, use the
   /// [Scaffold.bottomSheet] constructor parameter.

@@ -14,9 +14,20 @@ import 'framework.dart';
 /// [NotificationListener] is useful when listening scroll events
 /// in [ListView],[NestedScrollView],[GridView] or any Scrolling widgets.
 /// Used by [NotificationListener.onNotification].
-
 typedef NotificationListenerCallback<T extends Notification> = bool Function(T notification);
 
+/// A notification that can bubble up the widget tree.
+///
+/// You can determine the type of a notification using the `is` operator to
+/// check the [runtimeType] of the notification.
+///
+/// To listen for notifications in a subtree, use a [NotificationListener].
+///
+/// To send a notification, call [dispatch] on the notification you wish to
+/// send. The notification will be delivered to any [NotificationListener]
+/// widgets with the appropriate type parameters that are ancestors of the given
+/// [BuildContext].
+///
 /// {@tool dartpad --template=stateless_widget_material}
 ///
 /// This example shows a [NotificationListener] widget
@@ -89,17 +100,6 @@ typedef NotificationListenerCallback<T extends Notification> = bool Function(T n
 ///  * [ScrollEndNotification] which returns the end position of scrolling.
 ///  * [NestedScrollView] which creates a nested scroll view.
 ///
-/// A notification that can bubble up the widget tree.
-///
-/// You can determine the type of a notification using the `is` operator to
-/// check the [runtimeType] of the notification.
-///
-/// To listen for notifications in a subtree, use a [NotificationListener].
-///
-/// To send a notification, call [dispatch] on the notification you wish to
-/// send. The notification will be delivered to any [NotificationListener]
-/// widgets with the appropriate type parameters that are ancestors of the given
-/// [BuildContext].
 abstract class Notification {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -185,7 +185,7 @@ class NotificationListener<T extends Notification> extends StatelessWidget {
   /// Called when a notification of the appropriate type arrives at this
   /// location in the tree.
   ///
-  /// Return true to cancel the notification bubbling. Return false (or null) to
+  /// Return true to cancel the notification bubbling. Return false to
   /// allow the notification to continue to be dispatched to further ancestors.
   ///
   /// The notification's [Notification.visitAncestor] method is called for each

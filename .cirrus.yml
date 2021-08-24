@@ -138,7 +138,7 @@ task:
     - name: docs-linux # linux-only
       environment:
         CPU: 4
-        MEMORY: 8G
+        MEMORY: 12G
       only_if: "$CIRRUS_PR != ''"
       script:
         - ./dev/bots/docs.sh

@@ -901,7 +901,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///               return const SizedBox(
   ///                 width: 200,
   ///                 child: Padding(
-  ///                   padding: const EdgeInsets.all(8.0),
+  ///                   padding: EdgeInsets.all(8.0),
   ///                   child: TextField(
   ///                     decoration: InputDecoration(border: OutlineInputBorder()),
   ///                   ),
@@ -1868,6 +1868,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
       _primaryFocus = _markedForFocus;
       _markedForFocus = null;
     }
+    assert(_markedForFocus == null);
     if (previousFocus != _primaryFocus) {
       assert(_focusDebug('Updating focus from $previousFocus to $_primaryFocus'));
       if (previousFocus != null) {
