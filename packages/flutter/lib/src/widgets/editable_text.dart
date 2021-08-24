@@ -59,7 +59,7 @@ class DeltaTextEditingController extends TextEditingController {
   TextEditingValue applyDeltas(List<TextEditingDelta> deltas) {
     String newText = value.text;
     TextSelection newSelection = value.selection;
-    TextRange newComposingRegion = TextRange.empty;
+    TextRange newComposingRegion = value.composing;
 
     for (final TextEditingDelta delta in deltas) {
       print('Delta type: ' + delta.deltaType.toString());
