@@ -39,6 +39,9 @@ FLUTTER_ASSERT_ARC
 - (void)dealloc {
   CVPixelBufferRelease(_lastPixelBuffer);
   if (_textureCache) {
+    CVMetalTextureCacheFlush(_textureCache,  // cache
+                             0               // options (must be zero)
+    );
     CFRelease(_textureCache);
   }
 }
