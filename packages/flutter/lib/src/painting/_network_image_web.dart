@@ -12,6 +12,12 @@ import 'package:flutter/foundation.dart';
 import 'image_provider.dart' as image_provider;
 import 'image_stream.dart';
 
+typedef HttpRequestFactory = html.HttpRequest Function();
+HttpRequestFactory httpRequestFactory = () => html.HttpRequest();
+void debugRestoreHttpRequestFactory() {
+  httpRequestFactory = () => html.HttpRequest();
+}
+
 /// The dart:html implementation of [image_provider.NetworkImage].
 ///
 /// NetworkImage on the web does not support decoding to a specified size.
@@ -88,31 +94,44 @@ class NetworkImage
     final Uri resolved = Uri.base.resolve(key.url);
 
     if (key.headers?.isEmpty ?? true) {
-      final html.HttpRequest response = await html.HttpRequest.request(key.url,
-          method: 'GET',
-          requestHeaders: key.headers,
-          responseType: 'arraybuffer');
+      var completer = Completer<html.HttpRequest>();
+      final html.HttpRequest request = httpRequestFactory();
 
-      final int? status = response.status;
-      final bool accepted = status! >= 200 && status < 300;
-      final bool fileUri = status == 0; // file:// URIs have status of 0.
-      final bool notModified = status == 304;
-      final bool unknownRedirect = status > 307 && status < 400;
-      final bool success =
-          accepted || fileUri || notModified || unknownRedirect;
+      request.open('GET', key.url, async: true);
+      request.responseType = 'arraybuffer';
+      key.headers!.forEach((String header, String value) {
+        request.setRequestHeader(header, value);
+      });
 
-      if (!success) {
-        response.abort();
-        throw image_provider.NetworkImageLoadException(
-            statusCode: response.status ?? 400, uri: resolved);
-      }
+      request.onLoad.listen((e) {
+        final int? status = request.status;
+        final bool accepted = status! >= 200 && status < 300;
+        final bool fileUri = status == 0; // file:// URIs have status of 0.
+        final bool notModified = status == 304;
+        final bool unknownRedirect = status > 307 && status < 400;
+        final bool success =
+            accepted || fileUri || notModified || unknownRedirect;
 
-      final Uint8List bytes = (response.response as ByteBuffer).asUint8List();
+        if (success) {
+          completer.complete(request);
+        } else {
+          completer.completeError(e);
+          throw image_provider.NetworkImageLoadException(
+              statusCode: request.status ?? 400, uri: resolved);
+        }
+      });
+
+      request.onError.listen(completer.completeError);
+
+      request.send();
+
+      await completer.future;
+
+      final Uint8List bytes = (request.response as ByteBuffer).asUint8List();
 
       if (bytes.lengthInBytes == 0)
         throw image_provider.NetworkImageLoadException(
-            statusCode: status,
-            uri: resolved);
+            statusCode: request.status!, uri: resolved);
 
       return decode(bytes);
     } else {
