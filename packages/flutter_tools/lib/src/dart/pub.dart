@@ -234,7 +234,9 @@ class _DefaultPub implements Pub {
     final bool verbose = _logger.isVerbose;
     final List<String> args = <String>[
       if (verbose)
-        '--verbose',
+        '--verbose'
+      else
+        '--verbosity=warning',
       ...<String>[
         command,
         '--no-precompile',
@@ -417,7 +419,7 @@ class _DefaultPub implements Pub {
       'cache',
       'dart-sdk',
       'bin',
-      'dart',
+      'pub',
     ]);
     if (!_processManager.canRun(sdkPath)) {
       throwToolExit(
@@ -426,7 +428,7 @@ class _DefaultPub implements Pub {
         'permissions for the current user.'
       );
     }
-    return <String>[sdkPath, '--no-analytics', 'pub', ...arguments];
+    return <String>[sdkPath, ...arguments];
   }
 
   // Returns the environment value that should be used when running pub.
