@@ -1858,7 +1858,7 @@ targets:
           {"dependency": "android_sdk"},
           {"dependency": "gems"},
           {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode"},
+          {"dependency": "xcode"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -1910,7 +1910,7 @@ targets:
           {"dependency": "open_jdk", "version": "11"},
           {"dependency": "xcode"},
           {"dependency": "gems"},
-          {"dependency": "goldctl"},
+          {"dependency": "goldctl"}
         ]
       shard: build_tests
       subshard: "1_4"
@@ -1935,7 +1935,7 @@ targets:
           {"dependency": "open_jdk", "version": "11"},
           {"dependency": "xcode"},
           {"dependency": "gems"},
-          {"dependency": "goldctl"},
+          {"dependency": "goldctl"}
         ]
       shard: build_tests
       subshard: "2_4"
@@ -1960,7 +1960,7 @@ targets:
           {"dependency": "open_jdk", "version": "11"},
           {"dependency": "xcode"},
           {"dependency": "gems"},
-          {"dependency": "goldctl"},
+          {"dependency": "goldctl"}
         ]
       shard: build_tests
       subshard: "3_4"
@@ -1985,7 +1985,7 @@ targets:
           {"dependency": "open_jdk", "version": "11"},
           {"dependency": "xcode"},
           {"dependency": "gems"},
-          {"dependency": "goldctl"},
+          {"dependency": "goldctl"}
         ]
       shard: build_tests
       subshard: "4_4"
@@ -2116,7 +2116,7 @@ targets:
           {"dependency": "android_sdk"},
           {"dependency": "open_jdk", "version": "11"},
           {"dependency": "xcode"},
-          {"dependency": "gems"},
+          {"dependency": "gems"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -2141,7 +2141,7 @@ targets:
           {"dependency": "android_sdk"},
           {"dependency": "open_jdk", "version": "11"},
           {"dependency": "xcode"},
-          {"dependency": "gems"},
+          {"dependency": "gems"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -2166,7 +2166,7 @@ targets:
           {"dependency": "android_sdk"},
           {"dependency": "open_jdk", "version": "11"},
           {"dependency": "xcode"},
-          {"dependency": "gems"},
+          {"dependency": "gems"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -2191,7 +2191,7 @@ targets:
           {"dependency": "android_sdk"},
           {"dependency": "open_jdk", "version": "11"},
           {"dependency": "xcode"},
-          {"dependency": "gems"},
+          {"dependency": "gems"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -2217,7 +2217,7 @@ targets:
           {"dependency": "android_sdk"},
           {"dependency": "open_jdk", "version": "11"},
           {"dependency": "xcode"},
-          {"dependency": "gems"},
+          {"dependency": "gems"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -2243,7 +2243,7 @@ targets:
           {"dependency": "android_sdk"},
           {"dependency": "open_jdk", "version": "11"},
           {"dependency": "xcode"},
-          {"dependency": "gems"},
+          {"dependency": "gems"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -2294,7 +2294,7 @@ targets:
           {"dependency": "android_sdk"},
           {"dependency": "open_jdk", "version": "11"},
           {"dependency": "xcode"},
-          {"dependency": "gems"},
+          {"dependency": "gems"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -2345,7 +2345,7 @@ targets:
           {"dependency": "android_sdk"},
           {"dependency": "open_jdk", "version": "11"},
           {"dependency": "xcode"},
-          {"dependency": "gems"},
+          {"dependency": "gems"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -2402,7 +2402,7 @@ targets:
           {"dependency": "open_jdk", "version": "11"},
           {"dependency": "xcode"},
           {"dependency": "gems"},
-          {"dependency": "goldctl"},
+          {"dependency": "goldctl"}
         ]
       shard: tool_integration_tests
       subshard: "2_4"
@@ -2431,7 +2431,7 @@ targets:
           {"dependency": "open_jdk", "version": "11"},
           {"dependency": "xcode"},
           {"dependency": "gems"},
-          {"dependency": "goldctl"},
+          {"dependency": "goldctl"}
         ]
       shard: tool_integration_tests
       subshard: "3_4"
@@ -2460,7 +2460,7 @@ targets:
           {"dependency": "open_jdk", "version": "11"},
           {"dependency": "xcode"},
           {"dependency": "gems"},
-          {"dependency": "goldctl"},
+          {"dependency": "goldctl"}
         ]
       shard: tool_integration_tests
       subshard: "4_4"
@@ -3660,7 +3660,7 @@ targets:
           {"dependency": "chrome_and_driver"},
           {"dependency": "open_jdk", "version": "11"},
           {"dependency": "goldctl"},
-          {"dependency": "vs_build"},
+          {"dependency": "vs_build"}
         ]
       shard: build_tests
       subshard: "1_3"
@@ -3684,7 +3684,7 @@ targets:
           {"dependency": "chrome_and_driver"},
           {"dependency": "open_jdk", "version": "11"},
           {"dependency": "goldctl"},
-          {"dependency": "vs_build"},
+          {"dependency": "vs_build"}
         ]
       shard: build_tests
       subshard: "2_3"
@@ -3708,7 +3708,7 @@ targets:
           {"dependency": "chrome_and_driver"},
           {"dependency": "open_jdk", "version": "11"},
           {"dependency": "goldctl"},
-          {"dependency": "vs_build"},
+          {"dependency": "vs_build"}
         ]
       shard: build_tests
       subshard: "3_3"
@@ -4029,7 +4029,7 @@ targets:
           {"dependency": "chrome_and_driver"},
           {"dependency": "open_jdk", "version": "11"},
           {"dependency": "goldctl"},
-          {"dependency": "vs_build"},
+          {"dependency": "vs_build"}
         ]
       shard: tool_integration_tests
       subshard: "1_5"
