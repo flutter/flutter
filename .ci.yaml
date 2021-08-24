@@ -1685,6 +1685,8 @@ targets:
           {"dependency": "android_sdk"},
           {"dependency": "android_avd", "version": "31"}
         ]
+      tags: >
+        ["framework","hostonly"]
     timeout: 60
     scheduler: luci
 
