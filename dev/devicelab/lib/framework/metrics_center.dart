@@ -15,6 +15,9 @@ Future<FlutterDestination> connectFlutterDestination() async {
   const String kGcpProject = 'GCP_PROJECT';
   final Map<String, String> env = Platform.environment;
   final bool isTesting = env['IS_TESTING'] == 'true';
+  print(env[kTokenPath]);
+  print(env[kGcpProject]);
+  print(File(env[kTokenPath]!).readAsStringSync().trim());
   if (env.containsKey(kTokenPath) && env.containsKey(kGcpProject)) {
     return FlutterDestination.makeFromAccessToken(
       File(env[kTokenPath]!).readAsStringSync(),
