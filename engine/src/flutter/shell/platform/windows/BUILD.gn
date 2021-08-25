@@ -247,6 +247,7 @@ executable("flutter_windows_unittests") {
       "keyboard_key_embedder_handler_unittests.cc",
       "keyboard_key_handler_unittests.cc",
       "keyboard_unittests.cc",
+      "platform_handler_unittests.cc",
       "testing/flutter_window_win32_test.cc",
       "testing/flutter_window_win32_test.h",
       "testing/mock_window_binding_handler.cc",
