@@ -1749,16 +1749,17 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
     // If the lowest edge of the selection is at the start of a line, don't do
     // anything.
-    final int lowestOffset = math.min(selection!.baseOffset, selection!.extentOffset);
+    // TODO(justinmc): Support selection with multiple TextAffinities.
+    // https://github.com/flutter/flutter/issues/88135
     final TextSelection currentLine = _getLineAtOffset(TextPosition(
-      offset: lowestOffset,
+      offset: selection!.start,
+      affinity: selection!.isCollapsed ? selection!.affinity : TextAffinity.downstream,
     ));
-    if (currentLine.baseOffset == lowestOffset) {
+    if (currentLine.baseOffset == selection!.start) {
       return;
     }
 
-    final int firstOffset = math.min(selection!.baseOffset, selection!.extentOffset);
-    final int startPoint = previousCharacter(firstOffset, _plainText, false);
+    final int startPoint = previousCharacter(selection!.start, _plainText, false);
     final TextSelection selectedLine = _getLineAtOffset(TextPosition(offset: startPoint));
 
     late final TextSelection nextSelection;
@@ -1878,15 +1879,17 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     }
 
     // If greatest edge is already at the end of a line, don't do anything.
-    final TextPosition greatestPosition = selection!.baseOffset <= selection!.extentOffset
-      ? selection!.extent
-      : selection!.base;
-    final TextSelection currentLine = _getLineAtOffset(greatestPosition);
-    if (currentLine.extentOffset == greatestPosition.offset) {
+    // TODO(justinmc): Support selection with multiple TextAffinities.
+    // https://github.com/flutter/flutter/issues/88135
+    final TextSelection currentLine = _getLineAtOffset(TextPosition(
+      offset: selection!.end,
+      affinity: selection!.isCollapsed ? selection!.affinity : TextAffinity.upstream,
+    ));
+    if (currentLine.extentOffset == selection!.end) {
       return;
     }
 
-    final int startPoint = nextCharacter(greatestPosition.offset, _plainText, false);
+    final int startPoint = nextCharacter(selection!.end, _plainText, false);
     final TextSelection selectedLine = _getLineAtOffset(TextPosition(offset: startPoint));
 
     late final TextSelection nextSelection;
