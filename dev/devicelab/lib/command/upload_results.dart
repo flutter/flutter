@@ -41,10 +41,10 @@ class UploadResultsCommand extends Command<void> {
     final String? testStatus = argResults!['test-status'] as String?;
     final String? commitTime = argResults!['commit-time'] as String?;
 
-    // Upload metrics to metrics_center from test runner when `resultsPath` is specified.
+    // Upload metrics to skia perf from test runner when `resultsPath` is specified.
     if (resultsPath != null) {
-      await uploadToMetricsCenter(resultsPath, commitTime);
-      print('Successfully uploaded metrics to metrics center');
+      await uploadToSkiaPerf(resultsPath, commitTime);
+      print('Successfully uploaded metrics to skia perf');
     }
 
     final Cocoon cocoon = Cocoon(serviceAccountTokenPath: serviceAccountTokenFile);
