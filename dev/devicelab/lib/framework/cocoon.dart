@@ -111,7 +111,7 @@ class Cocoon {
     }
   }
 
-  /// Only prod builders from `master` branch is allowed to update in cocoon.
+  /// Only post-submit tests on `master` are allowed to update in cocoon.
   bool _shouldUpdateCocoon(Map<String, dynamic> resultJson) {
     const List<String> supportedBranches = <String>['master'];
     return supportedBranches.contains(resultJson['CommitBranch']) &&
