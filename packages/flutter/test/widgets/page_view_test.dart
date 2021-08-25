@@ -1052,7 +1052,7 @@ void main() {
       duration: const Duration(milliseconds: 500));
     await tester.pumpAndSettle();
     /// expect a separator widget
-    expect(find.text('separator 0'), findsOneWidget);  
+    expect(find.text('separator 0'), findsOneWidget);
   });
 
 
@@ -1088,7 +1088,7 @@ void main() {
 
     await tester.pumpWidget(build(controller));
     expect(find.text('separator 0'), findsNothing);
-    ///animates to the last page  
+    ///animates to the last page
     controller.animateToPage((kStates.length-1)*2,
       curve: Curves.easeInOut,
       duration: const Duration(milliseconds: 500));
@@ -1127,7 +1127,7 @@ void main() {
     }
 
     await tester.pumpWidget(build(controller));
-    ///animates to page at (index:50)  
+    ///animates to page at (index:50)
     controller.animateToPage((kStates.length),
       curve: Curves.easeInOut,
       duration: const Duration(milliseconds: 500));
