@@ -48,7 +48,7 @@ class UploadResultsCommand extends Command<void> {
     }
 
     final Cocoon cocoon = Cocoon(serviceAccountTokenPath: serviceAccountTokenFile);
-    return cocoon.sendResultsPath(
+    return cocoon.sendTaskStatus(
       resultsPath: resultsPath,
       isTestFlaky: testFlakyStatus == 'True',
       gitBranch: gitBranch,

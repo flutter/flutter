@@ -84,7 +84,7 @@ class Cocoon {
   ///
   /// The `resultsPath` is not available for all tests. When it doesn't show up, we
   /// need to append `CommitBranch`, `CommitSha`, and `BuilderName`.
-  Future<void> sendResultsPath({
+  Future<void> sendTaskStatus({
     String? resultsPath,
     bool? isTestFlaky,
     String? gitBranch,
