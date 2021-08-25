@@ -61,21 +61,22 @@ enum StepperType {
 /// Used by [Stepper.controlsBuilder].
 @immutable
 class ControlsDetails {
-  /// Default constructor.
+  /// Creates a set of details describing the Stepper.
   const ControlsDetails({
     required this.currentStep,
     required this.stepIndex,
     this.onStepCancel,
     this.onStepContinue,
   });
-  /// Index that is active for the surrounding Stepper widget. This may be
+  /// Index that is active for the surrounding [Stepper] widget. This may be
   /// different from [stepIndex] if the user has just changed steps and we are
   /// currently animating toward that step.
   final int currentStep;
 
   /// Index of the step for which these controls are being built. This is
   /// not necessarily the active index, if the user has just changed steps and
-  /// this step is animating away.
+  /// this step is animating away. To determine whether a given builder is building
+  /// the active step or the step being navigated away from, see [isActive].
   final int stepIndex;
 
   /// The callback called when the 'continue' button is tapped.
@@ -88,7 +89,10 @@ class ControlsDetails {
   /// If null, the 'cancel' button will be disabled.
   final VoidCallback? onStepCancel;
 
-  /// True if the indicated step is also the current active step.
+  /// True if the indicated step is also the current active step. If the user has
+  /// just activated the transition to a new step, some [Stepper.type] values will
+  /// lead to both steps being rendered for the duration of the animation shifting
+  /// between steps.
   bool get isActive => currentStep == stepIndex;
 }
 
