@@ -7,6 +7,7 @@ import static org.mockito.AdditionalMatchers.aryEq;
 import static org.mockito.AdditionalMatchers.gt;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.isNull;
 import static org.mockito.Mockito.mock;
@@ -60,10 +61,12 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
@@ -81,6 +84,12 @@ import org.robolectric.shadows.ShadowInputMethodManager;
 public class TextInputPluginTest {
   @Mock FlutterJNI mockFlutterJni;
   @Mock FlutterLoader mockFlutterLoader;
+
+  @Before
+  public void setUp() {
+    MockitoAnnotations.initMocks(this);
+    when(mockFlutterJni.isAttached()).thenReturn(true);
+  }
 
   // Verifies the method and arguments for a captured method call.
   private void verifyMethodCall(ByteBuffer buffer, String methodName, String[] expectedArgs)
@@ -1201,7 +1210,7 @@ public class TextInputPluginTest {
     imeSyncCallback.getInsetsListener().onApplyWindowInsets(testView, deferredInsets);
     imeSyncCallback.getInsetsListener().onApplyWindowInsets(testView, noneInsets);
 
-    verify(flutterRenderer).setViewportMetrics(viewportMetricsCaptor.capture());
+    verify(flutterRenderer, atLeast(1)).setViewportMetrics(viewportMetricsCaptor.capture());
     assertEquals(0, viewportMetricsCaptor.getValue().viewPaddingBottom);
     assertEquals(0, viewportMetricsCaptor.getValue().viewPaddingTop);
     assertEquals(0, viewportMetricsCaptor.getValue().viewInsetBottom);
@@ -1213,7 +1222,7 @@ public class TextInputPluginTest {
     // Only the final state call is saved, extra calls are passed on.
     imeSyncCallback.getInsetsListener().onApplyWindowInsets(testView, imeInsets2);
 
-    verify(flutterRenderer).setViewportMetrics(viewportMetricsCaptor.capture());
+    verify(flutterRenderer, atLeast(1)).setViewportMetrics(viewportMetricsCaptor.capture());
     // No change, as deferredInset is stored to be passed in onEnd()
     assertEquals(0, viewportMetricsCaptor.getValue().viewPaddingBottom);
     assertEquals(0, viewportMetricsCaptor.getValue().viewPaddingTop);
@@ -1222,23 +1231,23 @@ public class TextInputPluginTest {
 
     imeSyncCallback.getAnimationCallback().onProgress(imeInsets0, animationList);
 
-    verify(flutterRenderer).setViewportMetrics(viewportMetricsCaptor.capture());
-    assertEquals(40, viewportMetricsCaptor.getValue().viewPaddingBottom);
+    verify(flutterRenderer, atLeast(1)).setViewportMetrics(viewportMetricsCaptor.capture());
+    assertEquals(0, viewportMetricsCaptor.getValue().viewPaddingBottom);
     assertEquals(10, viewportMetricsCaptor.getValue().viewPaddingTop);
     assertEquals(60, viewportMetricsCaptor.getValue().viewInsetBottom);
     assertEquals(0, viewportMetricsCaptor.getValue().viewInsetTop);
 
     imeSyncCallback.getAnimationCallback().onProgress(imeInsets1, animationList);
 
-    verify(flutterRenderer).setViewportMetrics(viewportMetricsCaptor.capture());
-    assertEquals(40, viewportMetricsCaptor.getValue().viewPaddingBottom);
+    verify(flutterRenderer, atLeast(1)).setViewportMetrics(viewportMetricsCaptor.capture());
+    assertEquals(0, viewportMetricsCaptor.getValue().viewPaddingBottom);
     assertEquals(10, viewportMetricsCaptor.getValue().viewPaddingTop);
     assertEquals(0, viewportMetricsCaptor.getValue().viewInsetBottom); // Cannot be negative
     assertEquals(0, viewportMetricsCaptor.getValue().viewInsetTop);
 
     imeSyncCallback.getAnimationCallback().onEnd(animation);
 
-    verify(flutterRenderer).setViewportMetrics(viewportMetricsCaptor.capture());
+    verify(flutterRenderer, atLeast(1)).setViewportMetrics(viewportMetricsCaptor.capture());
     // Values should be of deferredInsets, not imeInsets2
     assertEquals(0, viewportMetricsCaptor.getValue().viewPaddingBottom);
     assertEquals(10, viewportMetricsCaptor.getValue().viewPaddingTop);

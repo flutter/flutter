@@ -294,17 +294,6 @@ def EnsureDebugUnoptSkyPackagesAreBuilt():
   assert os.path.exists(variant_out_dir), final_message
 
 
-def EnsureJavaTestsAreBuilt(android_out_dir):
-  """Builds the engine variant and the test jar containing the JUnit tests"""
-  tmp_out_dir = os.path.join(out_dir, android_out_dir)
-  message = []
-  message.append('gn --android --unoptimized --runtime-mode=debug --no-lto')
-  message.append('ninja -C %s flutter/shell/platform/android:robolectric_tests' % android_out_dir)
-  final_message = '%s doesn\'t exist. Please run the following commands: \n%s' % (
-      android_out_dir, '\n'.join(message))
-  assert os.path.exists(tmp_out_dir), final_message
-
-
 def EnsureIosTestsAreBuilt(ios_out_dir):
   """Builds the engine variant and the test dylib containing the XCTests"""
   tmp_out_dir = os.path.join(out_dir, ios_out_dir)
@@ -324,41 +313,42 @@ def AssertExpectedXcodeVersion():
   assert match, message
 
 
-def JavaBin():
+def JavaHome():
   script_path = os.path.dirname(os.path.realpath(__file__))
   if IsMac():
-    return os.path.join(script_path, '..', '..', 'third_party', 'java', 'openjdk', 'Contents', 'Home', 'bin', 'java')
-  elif IsWindows():
-    return os.path.join(script_path, '..', '..', 'third_party', 'java', 'openjdk', 'bin', 'java.exe')
-  else :
-    return os.path.join(script_path, '..', '..', 'third_party', 'java', 'openjdk', 'bin', 'java')
+    return os.path.join(script_path, '..', '..', 'third_party', 'java', 'openjdk', 'Contents', 'Home')
+  else:
+    return os.path.join(script_path, '..', '..', 'third_party', 'java', 'openjdk')
+
+
+def JavaBin():
+  return os.path.join(JavaHome(), 'bin', 'java.exe' if IsWindows() else 'java')
 
 
 def RunJavaTests(filter, android_variant='android_debug_unopt'):
   """Runs the Java JUnit unit tests for the Android embedding"""
-  android_out_dir = os.path.join(out_dir, android_variant)
-  EnsureJavaTestsAreBuilt(android_out_dir)
-
-  embedding_deps_dir = os.path.join(buildroot_dir, 'third_party', 'android_embedding_dependencies', 'lib')
-  classpath = list(map(str, [
-    os.path.join(buildroot_dir, 'third_party', 'android_tools', 'sdk', 'platforms', 'android-31', 'android.jar'),
-    os.path.join(embedding_deps_dir, '*'), # Wildcard for all jars in the directory
-    os.path.join(android_out_dir, 'flutter.jar'),
-    os.path.join(android_out_dir, 'robolectric_tests.jar')
-  ]))
+  test_runner_dir = os.path.join(buildroot_dir, 'flutter', 'shell', 'platform', 'android', 'test_runner')
+  gradle_bin = os.path.join(buildroot_dir, 'gradle', 'bin', 'gradle.bat' if IsWindows() else 'gradle')
+  flutter_jar = os.path.join(out_dir, android_variant, 'flutter.jar')
+  android_home = os.path.join(buildroot_dir, 'third_party', 'android_tools', 'sdk')
+  build_dir = os.path.join(out_dir, android_variant, 'robolectric_tests', 'build')
+  gradle_cache_dir = os.path.join(out_dir, android_variant, 'robolectric_tests', '.gradle')
 
   test_class = filter if filter else 'io.flutter.FlutterTestSuite'
   command = [
-    JavaBin(),
-    '-Drobolectric.offline=true',
-    '-Drobolectric.dependency.dir=' + embedding_deps_dir,
-    '-classpath', ':'.join(classpath),
-    '-Drobolectric.logging=stdout',
-    'org.junit.runner.JUnitCore',
-    test_class
+    gradle_bin,
+    '-Pflutter_jar=%s' % flutter_jar,
+    '-Pbuild_dir=%s' % build_dir,
+    'testDebugUnitTest',
+    '--tests=%s' % test_class,
+    '--rerun-tasks',
+    '--no-daemon',
+    '--project-cache-dir=%s' % gradle_cache_dir,
+    '--gradle-user-home=%s' % gradle_cache_dir,
   ]
 
-  RunCmd(command)
+  env = dict(os.environ, ANDROID_HOME=android_home, JAVA_HOME=JavaHome())
+  RunCmd(command, cwd=test_runner_dir, env=env)
 
 
 def RunObjcTests(ios_variant='ios_debug_sim_unopt', test_filter=None):
