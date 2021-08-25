@@ -6,7 +6,7 @@ This integration test app requires manually downloading additional assets to bui
 
 `./download_assets.sh`
 
-before running any of the test.
+before running any of the tests.
 
 ## Tests
 
