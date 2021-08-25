@@ -1030,7 +1030,7 @@ void main() {
             color: Colors.red,
             alignment: Alignment.center,
             child:
-                Text('separator $index', style: TextStyle(color: Colors.white)),
+                Text('separator $index', style: const TextStyle(color: Colors.white)),
           ),
           itemBuilder: (BuildContext context, int index) {
             return Container(
@@ -1071,7 +1071,7 @@ void main() {
             color: Colors.red,
             alignment: Alignment.center,
             child:
-                Text('separator $index', style: TextStyle(color: Colors.white)),
+                Text('separator $index', style: const TextStyle(color: Colors.white)),
           ),
           itemBuilder: (BuildContext context, int index) {
             return Container(
@@ -1111,7 +1111,7 @@ void main() {
             color: Colors.red,
             alignment: Alignment.center,
             child:
-                Text('separator $index', style: TextStyle(color: Colors.white)),
+                Text('separator $index', style:const TextStyle(color: Colors.white)),
           ),
           itemBuilder: (BuildContext context, int index) {
             return Container(
@@ -1128,7 +1128,7 @@ void main() {
 
     await tester.pumpWidget(build(controller));
     ///animates to page at (index:50)
-    controller.animateToPage((kStates.length),
+    controller.animateToPage(kStates.length,
       curve: Curves.easeInOut,
       duration: const Duration(milliseconds: 500));
     await tester.pumpAndSettle();
@@ -1138,7 +1138,7 @@ void main() {
       curve: Curves.easeInOut,
       duration: const Duration(milliseconds: 500));
     await tester.pumpAndSettle();
-    int separatorIndex = (kStates.length~/2)-1;
+    final int separatorIndex = (kStates.length~/2)-1;
     expect(find.text('separator $separatorIndex'), findsOneWidget);
   });
 }
