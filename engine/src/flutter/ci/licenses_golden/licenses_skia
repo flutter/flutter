@@ -1,4 +1,4 @@
-Signature: 55e93efc47650f0c0a05fa8bf7bb6a92
+Signature: 700a0cba349ba7128678bdd89ab15911
 
 UNUSED LICENSES:
 
@@ -3663,6 +3663,8 @@ FILE: ../../../third_party/skia/modules/canvaskit/wasm_tools/SIMD/simd_float_cap
 FILE: ../../../third_party/skia/modules/canvaskit/wasm_tools/SIMD/simd_int_capabilities.cpp
 FILE: ../../../third_party/skia/samplecode/SampleMaterialShadows.cpp
 FILE: ../../../third_party/skia/src/core/SkASAN.h
+FILE: ../../../third_party/skia/src/core/SkBlockAllocator.cpp
+FILE: ../../../third_party/skia/src/core/SkBlockAllocator.h
 FILE: ../../../third_party/skia/src/core/SkIDChangeListener.cpp
 FILE: ../../../third_party/skia/src/core/SkMatrixProvider.h
 FILE: ../../../third_party/skia/src/core/SkRuntimeEffectPriv.h
@@ -3674,8 +3676,6 @@ FILE: ../../../third_party/skia/src/gpu/GrBackendSurfaceMutableState.cpp
 FILE: ../../../third_party/skia/src/gpu/GrBackendSurfaceMutableStateImpl.h
 FILE: ../../../third_party/skia/src/gpu/GrBackendUtils.cpp
 FILE: ../../../third_party/skia/src/gpu/GrBackendUtils.h
-FILE: ../../../third_party/skia/src/gpu/GrBlockAllocator.cpp
-FILE: ../../../third_party/skia/src/gpu/GrBlockAllocator.h
 FILE: ../../../third_party/skia/src/gpu/GrDDLTask.cpp
 FILE: ../../../third_party/skia/src/gpu/GrDDLTask.h
 FILE: ../../../third_party/skia/src/gpu/GrManagedResource.cpp
@@ -6504,6 +6504,7 @@ FILE: ../../../third_party/skia/src/core/SkImageInfo.cpp
 FILE: ../../../third_party/skia/src/core/SkRasterClip.cpp
 FILE: ../../../third_party/skia/src/core/SkRasterClip.h
 FILE: ../../../third_party/skia/src/core/SkStrikeCache.h
+FILE: ../../../third_party/skia/src/core/SkTBlockList.h
 FILE: ../../../third_party/skia/src/gpu/GrBufferAllocPool.cpp
 FILE: ../../../third_party/skia/src/gpu/GrBufferAllocPool.h
 FILE: ../../../third_party/skia/src/gpu/GrClip.h
@@ -6513,7 +6514,6 @@ FILE: ../../../third_party/skia/src/gpu/GrGlyph.h
 FILE: ../../../third_party/skia/src/gpu/GrGpu.cpp
 FILE: ../../../third_party/skia/src/gpu/GrRectanizer.h
 FILE: ../../../third_party/skia/src/gpu/GrRectanizerPow2.cpp
-FILE: ../../../third_party/skia/src/gpu/GrTBlockList.h
 FILE: ../../../third_party/skia/src/gpu/GrVertexWriter.h
 FILE: ../../../third_party/skia/src/gpu/SkGr.cpp
 FILE: ../../../third_party/skia/src/gpu/geometry/GrRect.h
