@@ -5203,7 +5203,10 @@ void main() {
 
     const String expected = ' housa bige jumped over a mouse';
     expect(find.text(expected), findsOneWidget);
-  }, skip: areKeyEventsHandledByPlatform, variant: KeySimulatorTransitModeVariant.all());
+  },
+      skip: areKeyEventsHandledByPlatform, // [intended] only applies to platforms where we handle key events.
+      variant: KeySimulatorTransitModeVariant.all()
+  );
 
   testWidgets('Select all test', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();

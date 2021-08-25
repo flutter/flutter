@@ -5261,7 +5261,7 @@ void main() {
     );
     expect(controller.text, equals(testText), reason: 'on $platform');
   },
-    skip: kIsWeb,
+    skip: kIsWeb, // [intended] on web these keys are handled by the browser.
     variant: TargetPlatformVariant.all(),
   );
 
@@ -5404,7 +5404,7 @@ void main() {
     );
     expect(controller.text, equals(testText), reason: 'on $platform');
   },
-    skip: kIsWeb,
+    skip: kIsWeb, // [intended] on web these keys are handled by the browser.
     variant: TargetPlatformVariant.all(),
   );
 
