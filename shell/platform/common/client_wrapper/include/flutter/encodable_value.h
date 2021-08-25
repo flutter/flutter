@@ -63,8 +63,8 @@ class CustomEncodableValue {
   ~CustomEncodableValue() = default;
 
   // Allow implicit conversion to std::any to allow direct use of any_cast.
-  operator std::any &() { return value_; }
-  operator const std::any &() const { return value_; }
+  operator std::any&() { return value_; }
+  operator const std::any&() const { return value_; }
 
 #if defined(FLUTTER_ENABLE_RTTI) && FLUTTER_ENABLE_RTTI
   // Passthrough to std::any's type().
