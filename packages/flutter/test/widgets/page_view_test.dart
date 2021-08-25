@@ -1097,4 +1097,48 @@ void main() {
     expect(find.text('separator ${kStates.length-2}'), findsNothing);
     expect(find.text(kStates[kStates.length-1]), findsOneWidget);
   });
+
+  testWidgets('Animate to a random page and verify separator widget is built', (WidgetTester tester) async {
+    final PageController controller = PageController(initialPage: 0);
+
+    Widget build(PageController controller) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: PageView.separated(
+          controller: controller,
+          itemCount: kStates.length,
+          separatorBuilder: (BuildContext context, int index) => Container(
+            color: Colors.red,
+            alignment: Alignment.center,
+            child:
+                Text('separator $index', style: TextStyle(color: Colors.white)),
+          ),
+          itemBuilder: (BuildContext context, int index) {
+            return Container(
+              height: 200.0,
+              color: index.isEven
+                  ? const Color(0xFF0000FF)
+                  : const Color(0xFF00FF00),
+              child: Text(kStates[index]),
+            );
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(build(controller));
+    ///animates to page at (index:50)  
+    controller.animateToPage((kStates.length),
+      curve: Curves.easeInOut,
+      duration: const Duration(milliseconds: 500));
+    await tester.pumpAndSettle();
+    /// should not expect a separator widget at the last page
+    expect(find.text(kStates[kStates.length~/2]), findsOneWidget);
+    controller.previousPage(
+      curve: Curves.easeInOut,
+      duration: const Duration(milliseconds: 500));
+    await tester.pumpAndSettle();
+    int separatorIndex = (kStates.length~/2)-1;
+    expect(find.text('separator $separatorIndex'), findsOneWidget);
+  });
 }
