@@ -102,14 +102,20 @@ class Cocoon {
       resultsJson['NewStatus'] = testStatus;
     }
     resultsJson['TestFlaky'] = isTestFlaky ?? false;
-    const List<String> supportedBranches = <String>['master'];
-    if (supportedBranches.contains(resultsJson['CommitBranch'])) {
+    if (_shouldUpdateCocoon(resultsJson)) {
       await retry(
         () async => _sendUpdateTaskRequest(resultsJson).timeout(Duration(seconds: requestTimeoutLimit)),
         retryIf: (Exception e) => e is SocketException || e is TimeoutException || e is ClientException,
         maxAttempts: requestRetryLimit,
       );
     }
+  }
+
+  /// Only prod builders from `master` branch is allowed to update in cocoon.
+  bool _shouldUpdateCocoon(Map<String, dynamic> resultJson) {
+    const List<String> supportedBranches = <String>['master'];
+    return supportedBranches.contains(resultJson['CommitBranch']) &&
+        !resultJson['BuilderName'].toString().toLowerCase().contains('staging');
   }
 
   /// Write the given parameters into an update task request and store the JSON in [resultsPath].
