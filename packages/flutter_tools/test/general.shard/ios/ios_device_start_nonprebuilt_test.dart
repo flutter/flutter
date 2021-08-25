@@ -190,22 +190,22 @@ void main() {
         'build/ios/iphoneos',
       ]));
       processManager.addCommand(FakeCommand(
-          command: <String>[
-            iosDeployPath,
-            '--id',
-            '123',
-            '--bundle',
-            'build/ios/iphoneos/My Super Awesome App.app',
-            '--app_deltas',
-            'build/ios/app-delta',
-            '--no-wifi',
-            '--justlaunch',
-            '--args',
-            const <String>[
-              '--enable-dart-profiling',
-              '--disable-service-auth-codes',
-            ].join(' ')
-          ])
+        command: <String>[
+          iosDeployPath,
+          '--id',
+          '123',
+          '--bundle',
+          'build/ios/iphoneos/My Super Awesome App.app',
+          '--app_deltas',
+          'build/ios/app-delta',
+          '--no-wifi',
+          '--justlaunch',
+          '--args',
+          const <String>[
+            '--enable-dart-profiling',
+            '--disable-service-auth-codes',
+          ].join(' ')
+        ])
       );
 
       final LaunchResult launchResult = await iosDevice.startApp(
