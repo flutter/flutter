@@ -39,3 +39,11 @@ app.*.symbols
 
 # Obfuscation related
 app.*.map.json
+
+# This app must be tested in release mode
+# Do not use these testing keys for publishing
+!**/android/key.properties
+!*.jks
+
+# Deferred components test assets
+!customassets/*
