@@ -9,6 +9,7 @@
 static constexpr char kChannelName[] = "flutter/platform";
 
 static constexpr char kGetClipboardDataMethod[] = "Clipboard.getData";
+static constexpr char kHasStringsClipboardMethod[] = "Clipboard.hasStrings";
 static constexpr char kSetClipboardDataMethod[] = "Clipboard.setData";
 
 static constexpr char kTextPlainFormat[] = "text/plain";
@@ -46,6 +47,15 @@ void PlatformHandler::HandleMethodCall(
       return;
     }
     GetPlainText(std::move(result), kTextKey);
+  } else if (method.compare(kHasStringsClipboardMethod) == 0) {
+    // Only one string argument is expected.
+    const rapidjson::Value& format = method_call.arguments()[0];
+
+    if (strcmp(format.GetString(), kTextPlainFormat) != 0) {
+      result->Error(kClipboardError, kUnknownClipboardFormatMessage);
+      return;
+    }
+    GetHasStrings(std::move(result));
   } else if (method.compare(kSetClipboardDataMethod) == 0) {
     const rapidjson::Value& document = *method_call.arguments();
     rapidjson::Value::ConstMemberIterator itr = document.FindMember(kTextKey);
