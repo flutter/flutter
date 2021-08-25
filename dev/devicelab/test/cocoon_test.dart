@@ -360,7 +360,7 @@ void main() {
       fs.file(resultsPath).writeAsStringSync(updateTaskJson);
 
       // This will fail if it decided to upload results
-      await cocoon.sendTaskStatus(resultsPath: resultsPath, buildBucket: 'staging');
+      await cocoon.sendTaskStatus(resultsPath: resultsPath, builderBucket: 'staging');
     });
   });
 
