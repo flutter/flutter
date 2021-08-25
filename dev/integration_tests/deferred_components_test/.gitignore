@@ -41,7 +41,7 @@ app.*.symbols
 app.*.map.json
 
 # This app must be tested in release mode
-# Do not use these testing keys for publishing
+# Do not use this testing keys for a production app
 !**/android/key.properties
 !*.jks
 
