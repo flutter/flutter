@@ -104,7 +104,7 @@ class ControlsDetails {
 /// See also:
 ///
 ///  * [WidgetBuilder], which is similar but only takes a [BuildContext].
-typedef ControlsWidgetBuilder = Widget Function(BuildContext context, { required ControlsDetails details });
+typedef ControlsWidgetBuilder = Widget Function(BuildContext context, ControlsDetails details);
 
 const TextStyle _kStepStyle = TextStyle(
   fontSize: 12.0,
@@ -297,7 +297,7 @@ class Stepper extends StatefulWidget {
   /// Widget build(BuildContext context) {
   ///   return Stepper(
   ///     controlsBuilder:
-  ///       (BuildContext context, { required ControlsDetails details }) {
+  ///       (BuildContext context, ControlsDetails details) {
   ///          return Row(
   ///            children: <Widget>[
   ///              TextButton(
@@ -491,7 +491,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     if (widget.controlsBuilder != null)
       return widget.controlsBuilder!(
         context,
-        details: ControlsDetails(
+        ControlsDetails(
           currentStep: widget.currentStep,
           onStepContinue: widget.onStepContinue,
           onStepCancel: widget.onStepCancel,

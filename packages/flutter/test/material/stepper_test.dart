@@ -380,7 +380,7 @@ void main() {
       canceledPressed = true;
     }
 
-    Widget builder(BuildContext context, { required ControlsDetails details}) {
+    Widget builder(BuildContext context, ControlsDetails details) {
       return Container(
         margin: const EdgeInsets.only(top: 16.0),
         child: ConstrainedBox(
@@ -459,7 +459,7 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
       currentStep -= 1;
     }
 
-    Widget builder(BuildContext context, { required ControlsDetails details }) {
+    Widget builder(BuildContext context, ControlsDetails details) {
       // For the purposes of testing, only render something for the active
       // step.
       if (!details.isActive)
