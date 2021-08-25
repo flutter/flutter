@@ -608,7 +608,7 @@ deps = {
     'packages': [
       {
         'package': 'fuchsia/third_party/clang/linux-amd64',
-        'version': 'cIFYQ49spuolhk9gPdm90EtFiieA74cPwCEXcJo7X50C'
+        'version': 'dO8igrHyLDfgq8txd8Qx0mI9oJqFLswAMLcIBKLF6TYC'
       }
     ],
     'condition': 'host_os == "linux"',
