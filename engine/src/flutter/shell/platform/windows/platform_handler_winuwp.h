@@ -29,6 +29,10 @@ class PlatformHandlerWinUwp : public PlatformHandler {
                     std::string_view key) override;
 
   // |PlatformHandler|
+  void GetHasStrings(
+      std::unique_ptr<MethodResult<rapidjson::Document>> result) override;
+
+  // |PlatformHandler|
   void SetPlainText(
       const std::string& text,
       std::unique_ptr<MethodResult<rapidjson::Document>> result) override;
