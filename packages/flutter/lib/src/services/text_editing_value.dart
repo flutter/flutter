@@ -10,6 +10,7 @@ import 'package:characters/characters.dart';
 import 'package:flutter/foundation.dart';
 
 import 'text_editing.dart';
+import 'text_metrics.dart';
 
 TextAffinity? _toTextAffinity(String? affinity) {
   switch (affinity) {
@@ -66,47 +67,6 @@ class TextEditingValue {
   /// A value that corresponds to the empty string with no selection and no composing range.
   static const TextEditingValue empty = TextEditingValue();
 
-  // TODO(gspencergoog): replace when we expose this ICU information.
-  /// Check if the given code unit is a white space or separator
-  /// character.
-  ///
-  /// Includes newline characters from ASCII and separators from the
-  /// [unicode separator category](https://www.compart.com/en/unicode/category/Zs)
-  static bool isWhitespace(int codeUnit) {
-    switch (codeUnit) {
-      case 0x9: // horizontal tab
-      case 0xA: // line feed
-      case 0xB: // vertical tab
-      case 0xC: // form feed
-      case 0xD: // carriage return
-      case 0x1C: // file separator
-      case 0x1D: // group separator
-      case 0x1E: // record separator
-      case 0x1F: // unit separator
-      case 0x20: // space
-      case 0xA0: // no-break space
-      case 0x1680: // ogham space mark
-      case 0x2000: // en quad
-      case 0x2001: // em quad
-      case 0x2002: // en space
-      case 0x2003: // em space
-      case 0x2004: // three-per-em space
-      case 0x2005: // four-er-em space
-      case 0x2006: // six-per-em space
-      case 0x2007: // figure space
-      case 0x2008: // punctuation space
-      case 0x2009: // thin space
-      case 0x200A: // hair space
-      case 0x202F: // narrow no-break space
-      case 0x205F: // medium mathematical space
-      case 0x3000: // ideographic space
-        break;
-      default:
-        return false;
-    }
-    return true;
-  }
-
   /// Returns the index into the string of the next character boundary after the
   /// given index.
   ///
@@ -133,7 +93,7 @@ class TextEditingValue {
       if (includeWhitespace) {
         return false;
       }
-      return isWhitespace(currentString.codeUnitAt(0));
+      return TextMetrics.isWhitespace(currentString.codeUnitAt(0));
     });
     return string.length - remaining.toString().length;
   }
@@ -159,7 +119,7 @@ class TextEditingValue {
     int? lastNonWhitespace;
     for (final String currentString in string.characters) {
       if (!includeWhitespace &&
-          !isWhitespace(currentString.characters.first.codeUnitAt(0))) {
+          !TextMetrics.isWhitespace(currentString.characters.first.codeUnitAt(0))) {
         lastNonWhitespace = count;
       }
       if (count + currentString.length >= index) {
@@ -281,9 +241,7 @@ class TextEditingValue {
     );
   }
 
-  /// {@template flutter.services.TextEditingValue.selectAll}
-  /// Select the entire text value.
-  /// {@endtemplate}
+  /// Return a new TextSelection with the entire [text] selected.
   TextSelection selectAll() {
     return selection.copyWith(
       baseOffset: 0,

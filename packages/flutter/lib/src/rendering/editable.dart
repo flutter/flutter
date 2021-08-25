@@ -538,8 +538,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     return _textPainter.getWordBoundary(position);
   }
 
-  /// {@macro flutter.services.TextMetrics.getTextPositionVertical}
-  @override
+  /// Returns the TextPosition above or below the given offset.
   TextPosition getTextPositionVertical(TextPosition position, double verticalOffset) {
     final Offset caretOffset = _textPainter.getOffsetForCaret(position, _caretPrototype);
     final Offset caretOffsetTranslated = caretOffset.translate(0.0, verticalOffset);
@@ -1413,7 +1412,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   bool _onlyWhitespace(TextRange range) {
     for (int i = range.start; i < range.end; i++) {
       final int codeUnit = text!.codeUnitAt(i)!;
-      if (!TextEditingValue.isWhitespace(codeUnit)) {
+      if (!TextMetrics.isWhitespace(codeUnit)) {
         return false;
       }
     }
@@ -1906,7 +1905,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     // If the platform is Android and the text is read only, try to select the
     // previous word if there is one; otherwise, select the single whitespace at
     // the position.
-    } else if (TextEditingValue.isWhitespace(_plainText.codeUnitAt(position.offset))
+    } else if (TextMetrics.isWhitespace(_plainText.codeUnitAt(position.offset))
         && position.offset > 0) {
       assert(defaultTargetPlatform != null);
       final TextRange? previousWord = _getPreviousWord(word.start);

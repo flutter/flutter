@@ -156,7 +156,7 @@ abstract class TextEditingActionTarget {
     }
 
     final int startPoint = includeWhitespace ||
-            !TextEditingValue.isWhitespace(textEditingValue.text.codeUnitAt(offset))
+            !TextMetrics.isWhitespace(textEditingValue.text.codeUnitAt(offset))
         ? offset
         : TextEditingValue.nextCharacter(offset, textEditingValue.text, includeWhitespace);
     final TextRange nextWord =
@@ -459,6 +459,13 @@ abstract class TextEditingActionTarget {
     setSelection(textEditingValue.selection.expandTo(nextPosition, true), cause);
   }
 
+  /// Expand the current selection to the smallest selection that includes the
+  /// start of the line.
+  ///
+  /// The selection will never shrink. The upper offset will be expanded to the
+  /// beginning of its line, and the original order of baseOffset and
+  /// [TextSelection.extentOffset] will be preserved.
+  ///
   /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
   /// left by line.
   ///
@@ -483,6 +490,13 @@ abstract class TextEditingActionTarget {
     setSelection(textEditingValue.selection.expandTo(TextPosition(offset: selectedLine.baseOffset, affinity: textEditingValue.selection.affinity)), cause);
   }
 
+  /// Expand the current selection to the smallest selection that includes the
+  /// end of the line.
+  ///
+  /// The selection will never shrink. The lower offset will be expanded to the
+  /// end of its line and the original order of [TextSelection.baseOffset] and
+  /// [TextSelection.extentOffset] will be preserved.
+  ///
   /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
   /// right by line.
   ///
@@ -1144,15 +1158,12 @@ abstract class TextEditingActionTarget {
     setSelection(textEditingValue.selection.moveTo(TextPosition(offset: nextIndex, affinity: textEditingValue.selection.affinity)), cause);
   }
 
-  /// {@macro flutter.services.TextEditingValue.selectAll}
+  /// Select the entire text value.
   ///
   /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   void selectAll(SelectionChangedCause cause) {
     setSelection(
-      textEditingValue.selection.copyWith(
-        baseOffset: 0,
-        extentOffset: textEditingValue.text.length,
-      ),
+      textEditingValue.selectAll(),
       cause,
     );
   }

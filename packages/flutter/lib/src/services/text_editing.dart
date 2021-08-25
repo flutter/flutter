@@ -146,10 +146,11 @@ class TextSelection extends TextRange {
     );
   }
 
-  /// Return the selection expanded to the given [TextPosition].
+  /// Returns the smallest [TextSelection] that this could expand to in order to
+  /// include the given [TextPosition].
   ///
-  /// If the given [TextPosition] is inside of the selection, then returns
-  /// `this` without change.
+  /// If the given [TextPosition] is already inside of the selection, then
+  /// returns `this` without change.
   ///
   /// The returned selection will always be a strict superset of the current
   /// selection. In other words, the selection grows to include the given

@@ -1708,7 +1708,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
-  /// {@macro flutter.services.TextEditingValue.selectAll}
+  /// Select the entire text value.
   @override
   void selectAll(SelectionChangedCause cause) {
     super.selectAll(cause);
