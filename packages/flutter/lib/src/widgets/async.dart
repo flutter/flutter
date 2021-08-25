@@ -496,7 +496,7 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
   const StreamBuilder({
     Key? key,
     this.initialData,
-    Stream<T>? stream,
+    required Stream<T>? stream,
     required this.builder,
   }) : assert(builder != null),
        super(key: key, stream: stream);
