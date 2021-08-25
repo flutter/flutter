@@ -56,6 +56,9 @@ const Duration _kCursorBlinkWaitForStart = Duration(milliseconds: 150);
 const int _kObscureShowLatestCharCursorTicks = 3;
 
 class DeltaTextEditingController extends TextEditingController {
+  DeltaTextEditingController({ String? text })
+      : super.fromValue(text == null ? TextEditingValue.empty : TextEditingValue(text: text));
+
   TextEditingValue applyDeltas(List<TextEditingDelta> deltas) {
     String newText = value.text;
     TextSelection newSelection = value.selection;
