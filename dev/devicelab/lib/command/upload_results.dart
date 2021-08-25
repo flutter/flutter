@@ -23,7 +23,7 @@ class UploadResultsCommand extends Command<void> {
     argParser.addOption('luci-builder', help: '[Flutter infrastructure] Name of the LUCI builder being run on.');
     argParser.addOption('test-status', help: 'Test status: Succeeded|Failed');
     argParser.addOption('commit-time', help: 'Commit time in UNIX timestamp');
-    argParser.addOption('build-bucket', help: '[Flutter infrastructure] Luci builder bucket the test is running in.');
+    argParser.addOption('builder-bucket', help: '[Flutter infrastructure] Luci builder bucket the test is running in.');
   }
 
   @override
