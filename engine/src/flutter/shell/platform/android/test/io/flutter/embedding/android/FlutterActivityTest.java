@@ -54,6 +54,7 @@ import org.robolectric.annotation.Config;
 public class FlutterActivityTest {
   @Before
   public void setUp() {
+    FlutterInjector.reset();
     GeneratedPluginRegistrant.clearRegisteredEngines();
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     when(mockFlutterJNI.isAttached()).thenReturn(true);

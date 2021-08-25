@@ -21,7 +21,6 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.text.Emoji;
 import android.text.InputType;
 import android.text.Selection;
 import android.text.SpannableStringBuilder;
@@ -33,6 +32,8 @@ import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
+import com.ibm.icu.lang.UCharacter;
+import com.ibm.icu.lang.UProperty;
 import io.flutter.embedding.android.KeyboardManager;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.dart.DartExecutor;
@@ -1198,16 +1199,34 @@ public class InputConnectionAdaptorTest {
     when(mockFlutterJNI.nativeFlutterTextUtilsIsEmojiModifierBase(anyInt()))
         .thenAnswer((invocation) -> Emoji.isEmojiModifierBase((int) invocation.getArguments()[0]));
     when(mockFlutterJNI.nativeFlutterTextUtilsIsVariationSelector(anyInt()))
-        .thenAnswer(
-            (invocation) -> {
-              int codePoint = (int) invocation.getArguments()[0];
-              return 0xFE0E <= codePoint && codePoint <= 0xFE0F;
-            });
+        .thenAnswer((invocation) -> Emoji.isVariationSelector((int) invocation.getArguments()[0]));
     when(mockFlutterJNI.nativeFlutterTextUtilsIsRegionalIndicator(anyInt()))
         .thenAnswer(
             (invocation) -> Emoji.isRegionalIndicatorSymbol((int) invocation.getArguments()[0]));
     return new InputConnectionAdaptor(
         testView, client, textInputChannel, mockKeyboardManager, editable, null, mockFlutterJNI);
+  }
+
+  private static class Emoji {
+    public static boolean isEmoji(int codePoint) {
+      return UCharacter.hasBinaryProperty(codePoint, UProperty.EMOJI);
+    }
+
+    public static boolean isEmojiModifier(int codePoint) {
+      return UCharacter.hasBinaryProperty(codePoint, UProperty.EMOJI_MODIFIER);
+    }
+
+    public static boolean isEmojiModifierBase(int codePoint) {
+      return UCharacter.hasBinaryProperty(codePoint, UProperty.EMOJI_MODIFIER_BASE);
+    }
+
+    public static boolean isRegionalIndicatorSymbol(int codePoint) {
+      return UCharacter.hasBinaryProperty(codePoint, UProperty.REGIONAL_INDICATOR);
+    }
+
+    public static boolean isVariationSelector(int codePoint) {
+      return UCharacter.hasBinaryProperty(codePoint, UProperty.VARIATION_SELECTOR);
+    }
   }
 
   private class TestTextInputChannel extends TextInputChannel {

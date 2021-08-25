@@ -18,6 +18,7 @@ import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterEngineCache;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.loader.FlutterLoader;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
@@ -197,8 +198,14 @@ public class FlutterFragmentTest {
         .beginTransaction()
         .add(android.R.id.content, fragment)
         .commitNow();
-    OnBackPressedCallback callback = mock(OnBackPressedCallback.class);
-    when(callback.isEnabled()).thenReturn(true);
+    final AtomicBoolean onBackPressedCalled = new AtomicBoolean(false);
+    OnBackPressedCallback callback =
+        new OnBackPressedCallback(true) {
+          @Override
+          public void handleOnBackPressed() {
+            onBackPressedCalled.set(true);
+          }
+        };
     activity.getOnBackPressedDispatcher().addCallback(callback);
 
     FlutterActivityAndFragmentDelegate mockDelegate =
@@ -208,6 +215,6 @@ public class FlutterFragmentTest {
     assertTrue(fragment.popSystemNavigator());
 
     verify(mockDelegate, never()).onBackPressed();
-    verify(callback, times(1)).handleOnBackPressed();
+    assertTrue(onBackPressedCalled.get());
   }
 }

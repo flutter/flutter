@@ -470,120 +470,9 @@ action("pom_embedding") {
   ]
 }
 
-# To build and run:
-#   testing/run_tests.py [--type=java] [--java-filter=io.flutter.TestClassName]
-action("robolectric_tests") {
-  script = "//build/android/gyp/javac.py"
-  depfile = "$target_gen_dir/$target_name.d"
-
-  jar_path = "$root_out_dir/robolectric_tests.jar"
-
-  sources = [
-    "test/io/flutter/FlutterInjectorTest.java",
-    "test/io/flutter/FlutterTestSuite.java",
-    "test/io/flutter/SmokeTest.java",
-    "test/io/flutter/TestUtils.java",
-    "test/io/flutter/embedding/android/FlutterActivityAndFragmentDelegateTest.java",
-    "test/io/flutter/embedding/android/FlutterActivityTest.java",
-    "test/io/flutter/embedding/android/FlutterAndroidComponentTest.java",
-    "test/io/flutter/embedding/android/FlutterFragmentActivityTest.java",
-    "test/io/flutter/embedding/android/FlutterFragmentTest.java",
-    "test/io/flutter/embedding/android/FlutterTextureViewTest.java",
-    "test/io/flutter/embedding/android/FlutterViewTest.java",
-    "test/io/flutter/embedding/android/KeyChannelResponderTest.java",
-    "test/io/flutter/embedding/android/KeyboardManagerTest.java",
-    "test/io/flutter/embedding/android/RobolectricFlutterActivity.java",
-    "test/io/flutter/embedding/android/SplashShadowResources.java",
-    "test/io/flutter/embedding/engine/FlutterEngineCacheTest.java",
-    "test/io/flutter/embedding/engine/FlutterEngineConnectionRegistryTest.java",
-    "test/io/flutter/embedding/engine/FlutterEngineGroupComponentTest.java",
-    "test/io/flutter/embedding/engine/FlutterEngineTest.java",
-    "test/io/flutter/embedding/engine/FlutterJNITest.java",
-    "test/io/flutter/embedding/engine/FlutterShellArgsTest.java",
-    "test/io/flutter/embedding/engine/PluginComponentTest.java",
-    "test/io/flutter/embedding/engine/RenderingComponentTest.java",
-    "test/io/flutter/embedding/engine/dart/DartExecutorTest.java",
-    "test/io/flutter/embedding/engine/dart/DartMessengerTest.java",
-    "test/io/flutter/embedding/engine/deferredcomponents/PlayStoreDeferredComponentManagerTest.java",
-    "test/io/flutter/embedding/engine/loader/ApplicationInfoLoaderTest.java",
-    "test/io/flutter/embedding/engine/loader/FlutterLoaderTest.java",
-    "test/io/flutter/embedding/engine/mutatorsstack/FlutterMutatorViewTest.java",
-    "test/io/flutter/embedding/engine/plugins/shim/ShimPluginRegistryTest.java",
-    "test/io/flutter/embedding/engine/renderer/FlutterRendererTest.java",
-    "test/io/flutter/embedding/engine/systemchannels/DeferredComponentChannelTest.java",
-    "test/io/flutter/embedding/engine/systemchannels/KeyEventChannelTest.java",
-    "test/io/flutter/embedding/engine/systemchannels/PlatformChannelTest.java",
-    "test/io/flutter/embedding/engine/systemchannels/RestorationChannelTest.java",
-    "test/io/flutter/external/FlutterLaunchTests.java",
-    "test/io/flutter/plugin/common/BinaryCodecTest.java",
-    "test/io/flutter/plugin/common/StandardMessageCodecTest.java",
-    "test/io/flutter/plugin/common/StandardMethodCodecTest.java",
-    "test/io/flutter/plugin/editing/InputConnectionAdaptorTest.java",
-    "test/io/flutter/plugin/editing/ListenableEditingStateTest.java",
-    "test/io/flutter/plugin/editing/TextInputPluginTest.java",
-    "test/io/flutter/plugin/localization/LocalizationPluginTest.java",
-    "test/io/flutter/plugin/mouse/MouseCursorPluginTest.java",
-    "test/io/flutter/plugin/platform/PlatformPluginTest.java",
-    "test/io/flutter/plugin/platform/PlatformViewsControllerTest.java",
-    "test/io/flutter/plugin/platform/SingleViewPresentationTest.java",
-    "test/io/flutter/plugins/GeneratedPluginRegistrant.java",
-    "test/io/flutter/util/FakeKeyEvent.java",
-    "test/io/flutter/util/PreconditionsTest.java",
-    "test/io/flutter/util/ViewUtilsTest.java",
-    "test/io/flutter/view/AccessibilityBridgeTest.java",
-  ]
-
-  outputs = [
-    depfile,
-    jar_path,
-    jar_path + ".md5.stamp",
-  ]
-
-  additional_jar_files = [ "robolectric.properties" ]
-
-  _jar_dependencies = [
-                        android_sdk_jar,
-                        embedding_jar_path,
-                      ] + embedding_dependencies_jars
-
-  inputs = _jar_dependencies + additional_jar_files
-
-  _rebased_current_path = rebase_path(".")
-  _rebased_jar_path = rebase_path(jar_path, root_build_dir)
-  _rebased_depfile = rebase_path(depfile, root_build_dir)
-  _rebased_classpath = rebase_path(_jar_dependencies, root_build_dir)
-  _rebased_srcjars = rebase_path(_jar_dependencies, root_build_dir)
-  _rebased_additional_files = rebase_path(additional_jar_files, root_build_dir)
-
-  if (host_os == "mac") {
-    _javacbin =
-        rebase_path("//third_party/java/openjdk/Contents/Home/bin/javac")
-    _jarbin = rebase_path("//third_party/java/openjdk/Contents/Home/bin/jar")
-  } else if (host_os == "win") {
-    _javacbin = rebase_path("//third_party/java/openjdk/bin/javac.exe")
-    _jarbin = rebase_path("//third_party/java/openjdk/bin/jar.exe")
-  } else {
-    _javacbin = rebase_path("//third_party/java/openjdk/bin/javac")
-    _jarbin = rebase_path("//third_party/java/openjdk/bin/jar")
-  }
-
-  args = [
-    "--depfile=$_rebased_depfile",
-    "--jar-path=$_rebased_jar_path",
-    "--classpath=$_rebased_classpath",
-    "--jar-source-base-dir=$_rebased_current_path",
-    "--java-srcjars=$_rebased_srcjars",
-    "--additional-jar-files=$_rebased_additional_files",
-    "--jar-bin=$_jarbin",
-    "--javac-bin=$_javacbin",
-  ]
-
-  args += rebase_path(sources, root_build_dir)
-
-  deps = [
-    ":android_jar",
-    ":flutter_shell_java",
-  ]
+# TODO(jsimmons): remove this placeholder when it is no longer used by the LUCI recipes
+group("robolectric_tests") {
+  deps = [ ":android_jar" ]
 }
 
 zip_bundle("android_symbols") {
@@ -687,11 +576,5 @@ group("android") {
   ]
   if (target_cpu != "x86") {
     deps += [ ":gen_snapshot" ]
-  }
-
-  # We only run the robolectric tests for android_debug_unopt (arm CPU), and
-  # the target is relatively expensive to build.
-  if (flutter_runtime_mode == "debug" && current_cpu == "arm") {
-    deps += [ ":robolectric_tests" ]
   }
 }

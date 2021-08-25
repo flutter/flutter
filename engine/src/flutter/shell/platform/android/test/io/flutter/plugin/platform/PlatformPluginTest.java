@@ -1,6 +1,5 @@
 package io.flutter.plugin.platform;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -17,22 +16,22 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.view.View;
 import android.view.Window;
-import androidx.activity.OnBackPressedDispatcher;
+import androidx.activity.OnBackPressedCallback;
 import androidx.fragment.app.FragmentActivity;
 import io.flutter.embedding.engine.systemchannels.PlatformChannel;
+import io.flutter.embedding.engine.systemchannels.PlatformChannel.Brightness;
 import io.flutter.embedding.engine.systemchannels.PlatformChannel.ClipboardContentFormat;
 import io.flutter.embedding.engine.systemchannels.PlatformChannel.SystemChromeStyle;
 import io.flutter.plugin.platform.PlatformPlugin.PlatformPluginDelegate;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
@@ -80,21 +79,11 @@ public class PlatformPluginTest {
     assertNotNull(platformPlugin.mPlatformMessageHandler.getClipboardData(clipboardFormat));
 
     ContentResolver contentResolver = RuntimeEnvironment.application.getContentResolver();
+    when(fakeActivity.getContentResolver()).thenReturn(contentResolver);
     Uri uri = Uri.parse("content://media/external_primary/images/media/");
     clip = ClipData.newUri(contentResolver, "URI", uri);
     clipboardManager.setPrimaryClip(clip);
     assertNull(platformPlugin.mPlatformMessageHandler.getClipboardData(clipboardFormat));
-
-    uri =
-        RingtoneManager.getActualDefaultRingtoneUri(
-            RuntimeEnvironment.application.getApplicationContext(), RingtoneManager.TYPE_RINGTONE);
-    clip = ClipData.newUri(contentResolver, "URI", uri);
-    clipboardManager.setPrimaryClip(clip);
-    String uriData =
-        platformPlugin.mPlatformMessageHandler.getClipboardData(clipboardFormat).toString();
-    InputStream uriInputStream = contentResolver.openInputStream(uri);
-    InputStream dataInputStream = new ByteArrayInputStream(uriData.getBytes());
-    assertEquals(dataInputStream.read(), uriInputStream.read());
   }
 
   @Config(sdk = 28)
@@ -162,23 +151,24 @@ public class PlatformPluginTest {
     when(fakeActivity.getWindow()).thenReturn(fakeWindow);
     PlatformChannel fakePlatformChannel = mock(PlatformChannel.class);
     PlatformPlugin platformPlugin = new PlatformPlugin(fakeActivity, fakePlatformChannel);
-    // Default style test
-    SystemChromeStyle style =
-        new SystemChromeStyle(
-            0XFF000000, // statusBarColor
-            null, // statusBarIconBrightness
-            true, // systemStatusBarContrastEnforced
-            0XFFC70039, // systemNavigationBarColor
-            null, // systemNavigationBarIconBrightness
-            0XFF006DB3, // systemNavigationBarDividerColor
-            true); // systemNavigationBarContrastEnforced
 
     if (Build.VERSION.SDK_INT >= 28) {
+      // Default style test
+      SystemChromeStyle style =
+          new SystemChromeStyle(
+              0XFF000000, // statusBarColor
+              Brightness.LIGHT, // statusBarIconBrightness
+              true, // systemStatusBarContrastEnforced
+              0XFFC70039, // systemNavigationBarColor
+              Brightness.LIGHT, // systemNavigationBarIconBrightness
+              0XFF006DB3, // systemNavigationBarDividerColor
+              true); // systemNavigationBarContrastEnforced
+
       platformPlugin.mPlatformMessageHandler.setSystemUiOverlayStyle(style);
 
-      assertEquals(0XFF000000, fakeActivity.getWindow().getStatusBarColor());
-      assertEquals(0XFFC70039, fakeActivity.getWindow().getNavigationBarColor());
-      assertEquals(0XFF006DB3, fakeActivity.getWindow().getNavigationBarDividerColor());
+      verify(fakeWindow).setStatusBarColor(0xFF000000);
+      verify(fakeWindow).setNavigationBarColor(0XFFC70039);
+      verify(fakeWindow).setNavigationBarDividerColor(0XFF006DB3);
 
       // Regression test for https://github.com/flutter/flutter/issues/88431
       // A null brightness should not affect changing color settings.
@@ -194,9 +184,9 @@ public class PlatformPluginTest {
 
       platformPlugin.mPlatformMessageHandler.setSystemUiOverlayStyle(style);
 
-      assertEquals(0XFFC70039, fakeActivity.getWindow().getStatusBarColor());
-      assertEquals(0XFF000000, fakeActivity.getWindow().getNavigationBarColor());
-      assertEquals(0XFF006DB3, fakeActivity.getWindow().getNavigationBarDividerColor());
+      verify(fakeWindow).setStatusBarColor(0XFF006DB3);
+      verify(fakeWindow).setNavigationBarColor(0XFF000000);
+      verify(fakeWindow, times(2)).setNavigationBarDividerColor(0XFF006DB3);
     }
   }
 
@@ -214,43 +204,43 @@ public class PlatformPluginTest {
     if (Build.VERSION.SDK_INT >= 28) {
       platformPlugin.mPlatformMessageHandler.showSystemUiMode(
           PlatformChannel.SystemUiMode.LEAN_BACK);
-      assertEquals(
-          View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-              | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-              | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-              | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-              | View.SYSTEM_UI_FLAG_FULLSCREEN,
-          fakeActivity.getWindow().getDecorView().getSystemUiVisibility());
+      verify(fakeDecorView)
+          .setSystemUiVisibility(
+              View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                  | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                  | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                  | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                  | View.SYSTEM_UI_FLAG_FULLSCREEN);
 
       platformPlugin.mPlatformMessageHandler.showSystemUiMode(
           PlatformChannel.SystemUiMode.IMMERSIVE);
-      assertEquals(
-          View.SYSTEM_UI_FLAG_IMMERSIVE
-              | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-              | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-              | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-              | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-              | View.SYSTEM_UI_FLAG_FULLSCREEN,
-          fakeActivity.getWindow().getDecorView().getSystemUiVisibility());
+      verify(fakeDecorView)
+          .setSystemUiVisibility(
+              View.SYSTEM_UI_FLAG_IMMERSIVE
+                  | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                  | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                  | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                  | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                  | View.SYSTEM_UI_FLAG_FULLSCREEN);
 
       platformPlugin.mPlatformMessageHandler.showSystemUiMode(
           PlatformChannel.SystemUiMode.IMMERSIVE_STICKY);
-      assertEquals(
-          View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-              | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-              | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-              | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-              | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-              | View.SYSTEM_UI_FLAG_FULLSCREEN,
-          fakeActivity.getWindow().getDecorView().getSystemUiVisibility());
+      verify(fakeDecorView)
+          .setSystemUiVisibility(
+              View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                  | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                  | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                  | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                  | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                  | View.SYSTEM_UI_FLAG_FULLSCREEN);
 
       platformPlugin.mPlatformMessageHandler.showSystemUiMode(
           PlatformChannel.SystemUiMode.EDGE_TO_EDGE);
-      assertEquals(
-          View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-              | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-              | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN,
-          fakeActivity.getWindow().getDecorView().getSystemUiVisibility());
+      verify(fakeDecorView)
+          .setSystemUiVisibility(
+              View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                  | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                  | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
     }
   }
 
@@ -287,40 +277,44 @@ public class PlatformPluginTest {
 
   @Test
   public void popSystemNavigatorFlutterFragment() {
-    FragmentActivity mockFragmentActivity = mock(FragmentActivity.class);
-    OnBackPressedDispatcher onBackPressedDispatcher = mock(OnBackPressedDispatcher.class);
-    when(mockFragmentActivity.getOnBackPressedDispatcher()).thenReturn(onBackPressedDispatcher);
+    FragmentActivity activity = spy(Robolectric.setupActivity(FragmentActivity.class));
+    final AtomicBoolean onBackPressedCalled = new AtomicBoolean(false);
+    OnBackPressedCallback backCallback =
+        new OnBackPressedCallback(true) {
+          @Override
+          public void handleOnBackPressed() {
+            onBackPressedCalled.set(true);
+          }
+        };
+    activity.getOnBackPressedDispatcher().addCallback(backCallback);
+
     PlatformChannel mockPlatformChannel = mock(PlatformChannel.class);
     PlatformPluginDelegate mockPlatformPluginDelegate = mock(PlatformPluginDelegate.class);
     when(mockPlatformPluginDelegate.popSystemNavigator()).thenReturn(false);
     PlatformPlugin platformPlugin =
-        new PlatformPlugin(mockFragmentActivity, mockPlatformChannel, mockPlatformPluginDelegate);
+        new PlatformPlugin(activity, mockPlatformChannel, mockPlatformPluginDelegate);
 
     platformPlugin.mPlatformMessageHandler.popSystemNavigator();
 
-    verify(mockFragmentActivity, never()).finish();
+    verify(activity, never()).finish();
     verify(mockPlatformPluginDelegate, times(1)).popSystemNavigator();
-    verify(mockFragmentActivity, times(1)).getOnBackPressedDispatcher();
-    verify(onBackPressedDispatcher, times(1)).onBackPressed();
+    assertTrue(onBackPressedCalled.get());
   }
 
   @Test
   public void doesNotDoAnythingByDefaultIfFragmentPopSystemNavigatorOverridden() {
-    FragmentActivity mockFragmentActivity = mock(FragmentActivity.class);
-    OnBackPressedDispatcher onBackPressedDispatcher = mock(OnBackPressedDispatcher.class);
-    when(mockFragmentActivity.getOnBackPressedDispatcher()).thenReturn(onBackPressedDispatcher);
+    FragmentActivity activity = spy(Robolectric.setupActivity(FragmentActivity.class));
     PlatformChannel mockPlatformChannel = mock(PlatformChannel.class);
     PlatformPluginDelegate mockPlatformPluginDelegate = mock(PlatformPluginDelegate.class);
     when(mockPlatformPluginDelegate.popSystemNavigator()).thenReturn(true);
     PlatformPlugin platformPlugin =
-        new PlatformPlugin(mockFragmentActivity, mockPlatformChannel, mockPlatformPluginDelegate);
+        new PlatformPlugin(activity, mockPlatformChannel, mockPlatformPluginDelegate);
 
     platformPlugin.mPlatformMessageHandler.popSystemNavigator();
 
     verify(mockPlatformPluginDelegate, times(1)).popSystemNavigator();
     // No longer perform the default action when overridden.
-    verify(mockFragmentActivity, never()).finish();
-    verify(mockFragmentActivity, never()).getOnBackPressedDispatcher();
+    verify(activity, never()).finish();
   }
 
   @Test
