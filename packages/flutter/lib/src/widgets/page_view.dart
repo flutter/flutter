@@ -713,7 +713,6 @@ class PageView extends StatefulWidget {
   /// PageView.separated(
   ///   itemCount: 25,
   ///   scrollDirection: Axis.vertical,
-  ///   controller: _pageController,
   ///   separatorBuilder: (BuildContext context, int index) => Container(
   ///     color: Colors.red,
   ///     alignment: Alignment.center,
