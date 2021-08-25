@@ -56,7 +56,12 @@ class StructureErrorTestWidgetInspectorService extends TestWidgetInspectorServic
 
         // Verify structured errors are shown.
         expect(onErrorCalled, true);
-        expect(service.getEventsDispatched('Flutter.Error'), hasLength(1));
+        // Structured errors are not supported on web.
+        if (!kIsWeb) {
+          expect(service.getEventsDispatched('Flutter.Error'), hasLength(1));
+        } else {
+          expect(service.getEventsDispatched('Flutter.Error'), isEmpty);
+        }
       } finally {
         FlutterError.onError = oldHandler;
       }
