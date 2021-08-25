@@ -7924,8 +7924,8 @@ void main() {
     expect(controller.selection.baseOffset, 17);
     expect(controller.selection.extentOffset, 22);
 
-    // Multiple right arrow keys only move to the end of the line and not to the
-    // next line.
+    // Multiple expandRightByLine shortcuts only move to the end of the line and
+    // not to the next line.
     await sendKeys(
       tester,
       <LogicalKeyboardKey>[
@@ -7941,8 +7941,8 @@ void main() {
     expect(controller.selection.baseOffset, 17);
     expect(controller.selection.extentOffset, 24);
 
-    // Multiple left arrow keys only move to the start of the line and not to
-    // the previous line.
+    // Multiple expandLeftByLine shortcuts only move ot the start of the line
+    // and not to the previous line.
     await sendKeys(
       tester,
       <LogicalKeyboardKey>[
@@ -7969,6 +7969,20 @@ void main() {
     expect(controller.selection.baseOffset, 24);
     expect(controller.selection.extentOffset, 24);
 
+    // Can't expand right by line any further.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowRight,
+      ],
+      shift: true,
+      lineModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, 24);
+    expect(controller.selection.extentOffset, 24);
+
     // Can select the entire line from the end.
     await sendKeys(
       tester,
@@ -7990,6 +8004,20 @@ void main() {
       affinity: TextAffinity.upstream,
     );
     await tester.pump();
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, 15);
+    expect(controller.selection.extentOffset, 15);
+
+    // Can't expand let any further.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowLeft,
+      ],
+      shift: true,
+      lineModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
     expect(controller.selection.isCollapsed, true);
     expect(controller.selection.baseOffset, 15);
     expect(controller.selection.extentOffset, 15);
