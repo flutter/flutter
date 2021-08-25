@@ -1920,14 +1920,6 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
     _maxScrollExtent = 0.0;
     _shrinkWrapExtent = 0.0;
     _hasVisualOverflow = false;
-    switch (cacheExtentStyle) {
-      case CacheExtentStyle.pixel:
-        _calculatedCacheExtent = cacheExtent;
-        break;
-      case CacheExtentStyle.viewport:
-        _calculatedCacheExtent = mainAxisExtent * _cacheExtent;
-        break;
-    }
     return layoutChildSequence(
       child: firstChild,
       scrollOffset: math.max(0.0, correctedOffset),
@@ -1938,8 +1930,8 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
       crossAxisExtent: crossAxisExtent,
       growthDirection: GrowthDirection.forward,
       advance: childAfter,
-      remainingCacheExtent: mainAxisExtent + 2 * _calculatedCacheExtent!,
-      cacheOrigin: -_calculatedCacheExtent!,
+      remainingCacheExtent: mainAxisExtent + 2 * _cacheExtent,
+      cacheOrigin: -_cacheExtent,
     );
   }
 
