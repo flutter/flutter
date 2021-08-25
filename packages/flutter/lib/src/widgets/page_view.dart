@@ -689,19 +689,44 @@ class PageView extends StatefulWidget {
   /// Creates a scrollable list that works page by page using widgets separated
   /// by list item "separators".
   ///
-  /// This constructor is appropriate for list views with a large number of
+  /// This constructor is appropriate for page views with a large number of
   /// item and separator children because the builders are only called for
   /// the children that are actually visible.
   ///
-  /// Providing a non-null [itemCount] lets the [PageView] compute the maximum
-  /// scroll extent.
+  /// Separators only appear between list items: separator 0 appears after item
+  /// 0 and the last separator appears before the last item.
   ///
-  /// [itemBuilder] will be called only with indices greater than or equal to
-  /// zero and less than [itemCount].
+  /// The `separatorBuilder` callback will be called with indices greater than
+  /// zero and less than `itemCount - 1`.
   ///
-  /// [PageView.builder] by default does not support child reordering. If
-  /// you are planning to change child order at a later time, consider using
-  /// [PageView] or [PageView.custom].
+  /// The `itemBuilder` and `separatorBuilder` callbacks should always return a
+  /// non-null widget, and actually create widget instances when called. Avoid
+  /// using a builder that returns a previously-constructed widget; if the page
+  /// view's children are created in advance, or all at once when the [PageView]
+  /// itself is created, it is more efficient to use the [PageView] constructor.
+  ///
+  /// {@tool snippet}
+  ///
+  /// This example shows how to create [PageView] whose pages
+  /// are separated by a red [Container]s.
+  /// ```dart
+  /// PageView.separated(
+  ///   itemCount: 25,
+  ///   scrollDirection: Axis.vertical,
+  ///   controller: _pageController,
+  ///   separatorBuilder: (BuildContext context, int index) => Container(
+  ///     color: Colors.red,
+  ///     alignment: Alignment.center,
+  ///     child: Text('separator $index'),
+  ///   ),
+  ///   itemBuilder: (BuildContext context, int index) {
+  ///     return Center(
+  ///       child: Text('item $index'),
+  ///   );
+  ///  },
+  /// )
+  /// ```
+  /// {@end-tool}
   ///
   /// {@macro flutter.widgets.PageView.allowImplicitScrolling}
   PageView.separated({
