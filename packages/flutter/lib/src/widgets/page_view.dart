@@ -765,7 +765,7 @@ class PageView extends StatefulWidget {
            }
            return widget;
          },childCount: _computeActualChildCount(itemCount)),
-       super(key: key);     
+       super(key: key);
 
   /// Creates a scrollable list that works page by page with a custom child
   /// model.
