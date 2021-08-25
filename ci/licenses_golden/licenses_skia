@@ -1,4 +1,4 @@
-Signature: 8ece123c7d74db7718a154096c2f6f85
+Signature: d75bd822fdc6451db655180cac8f5cfd
 
 UNUSED LICENSES:
 
@@ -5619,8 +5619,6 @@ FILE: ../../../third_party/skia/src/gpu/GrGpuBuffer.cpp
 FILE: ../../../third_party/skia/src/gpu/GrGpuBuffer.h
 FILE: ../../../third_party/skia/src/gpu/GrImageContext.cpp
 FILE: ../../../third_party/skia/src/gpu/GrImageContextPriv.h
-FILE: ../../../third_party/skia/src/gpu/GrOpsTask.cpp
-FILE: ../../../third_party/skia/src/gpu/GrOpsTask.h
 FILE: ../../../third_party/skia/src/gpu/GrRecordingContext.cpp
 FILE: ../../../third_party/skia/src/gpu/GrRecordingContextPriv.h
 FILE: ../../../third_party/skia/src/gpu/GrSPIRVUniformHandler.cpp
@@ -5656,6 +5654,8 @@ FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlCommandBuffer.mm
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlDepthStencil.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlSemaphore.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlSemaphore.mm
+FILE: ../../../third_party/skia/src/gpu/ops/OpsTask.cpp
+FILE: ../../../third_party/skia/src/gpu/ops/OpsTask.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkSecondaryCBDrawContext.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkSecondaryCBDrawContext.h
 FILE: ../../../third_party/skia/src/image/SkSurface_GpuMtl.mm
@@ -6756,6 +6756,7 @@ ORIGIN: ../../../third_party/skia/modules/canvaskit/npm_build/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/modules/canvaskit/npm_build/example.html
 FILE: ../../../third_party/skia/modules/canvaskit/npm_build/extra.html
+FILE: ../../../third_party/skia/modules/canvaskit/npm_build/multicanvas.html
 FILE: ../../../third_party/skia/modules/canvaskit/npm_build/node.example.js
 FILE: ../../../third_party/skia/modules/canvaskit/npm_build/package-lock.json
 FILE: ../../../third_party/skia/modules/canvaskit/npm_build/package.json
