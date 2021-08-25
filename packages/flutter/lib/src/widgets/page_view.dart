@@ -686,6 +686,62 @@ class PageView extends StatefulWidget {
        childrenDelegate = SliverChildBuilderDelegate(itemBuilder, childCount: itemCount),
        super(key: key);
 
+  /// Creates a scrollable list that works page by page using widgets separated
+  /// by list item "separators".
+  ///
+  /// This constructor is appropriate for list views with a large number of
+  /// item and separator children because the builders are only called for
+  /// the children that are actually visible.
+  ///
+  /// Providing a non-null [itemCount] lets the [PageView] compute the maximum
+  /// scroll extent.
+  ///
+  /// [itemBuilder] will be called only with indices greater than or equal to
+  /// zero and less than [itemCount].
+  ///
+  /// [PageView.builder] by default does not support child reordering. If
+  /// you are planning to change child order at a later time, consider using
+  /// [PageView] or [PageView.custom].
+  ///
+  /// {@macro flutter.widgets.PageView.allowImplicitScrolling}
+  PageView.separated({
+    Key? key,
+    this.scrollDirection = Axis.horizontal,
+    this.reverse = false,
+    PageController? controller,
+    this.physics,
+    this.pageSnapping = true,
+    this.onPageChanged,
+    required IndexedWidgetBuilder itemBuilder,
+    required IndexedWidgetBuilder separatorBuilder,
+    required int itemCount,
+    this.dragStartBehavior = DragStartBehavior.start,
+    this.allowImplicitScrolling = false,
+    this.restorationId,
+    this.clipBehavior = Clip.hardEdge,
+    this.scrollBehavior,
+    this.padEnds = true
+  }) : assert(allowImplicitScrolling != null),
+       assert(clipBehavior != null),
+       controller = controller ?? _defaultPageController,
+       childrenDelegate = SliverChildBuilderDelegate((BuildContext context, int index) {
+           final int itemIndex = index ~/ 2;
+           final Widget widget;
+           if (index.isEven) {
+             widget = itemBuilder(context, itemIndex);
+           } else {
+             widget = separatorBuilder(context, itemIndex);
+             assert(() {
+               if (widget == null) {
+                 throw FlutterError('separatorBuilder cannot return null.');
+               }
+               return true;
+             }());
+           }
+           return widget;
+         },childCount: _computeActualChildCount(itemCount)),
+       super(key: key);     
+
   /// Creates a scrollable list that works page by page with a custom child
   /// model.
   ///
@@ -895,6 +951,11 @@ class PageView extends StatefulWidget {
 
   @override
   State<PageView> createState() => _PageViewState();
+
+  // Helper method to compute the actual child count for the separated constructor.
+  static int _computeActualChildCount(int itemCount) {
+    return math.max(0, itemCount * 2 - 1);
+  }
 }
 
 class _PageViewState extends State<PageView> {
