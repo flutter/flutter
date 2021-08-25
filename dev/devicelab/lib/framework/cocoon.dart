@@ -75,12 +75,12 @@ class Cocoon {
     return _commitSha = result.stdout as String;
   }
 
-  /// Upload the JSON results in [resultsPath] to Cocoon.
+  /// Update test status to Cocoon.
   ///
   /// Flutter infrastructure's workflow is:
-  /// 1. Run DeviceLab test, writing results to a known path
+  /// 1. Run DeviceLab test
   /// 2. Request service account token from luci auth (valid for at least 3 minutes)
-  /// 3. Upload results from (1) to Cocoon
+  /// 3. Update test status from (1) to Cocoon
   ///
   /// The `resultsPath` is not available for all tests. When it doesn't show up, we
   /// need to append `CommitBranch`, `CommitSha`, and `BuilderName`.

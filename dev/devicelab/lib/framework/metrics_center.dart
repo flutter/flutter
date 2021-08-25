@@ -70,7 +70,12 @@ List<MetricPoint> parse(Map<String, dynamic> resultsJson) {
   return metricPoints;
 }
 
-/// Upload test metrics to metrics center.
+/// Upload JSON results to metrics center.
+///
+/// Flutter infrastructure's workflow is:
+/// 1. Run DeviceLab test, writing results to a known path
+/// 2. Request service account token from luci auth (valid for at least 3 minutes)
+/// 3. Upload results from (1) to metrics center.
 Future<void> uploadToMetricsCenter(String? resultsPath, String? commitTime) async {
   int commitTimeSinceEpoch;
   if (resultsPath == null) {
