@@ -12,8 +12,13 @@ import 'package:flutter/foundation.dart';
 import 'image_provider.dart' as image_provider;
 import 'image_stream.dart';
 
+/// Creates a type for an overridable factory function for testing purposes
 typedef HttpRequestFactory = html.HttpRequest Function();
+
+/// Creates an overridable factory function
 HttpRequestFactory httpRequestFactory = () => html.HttpRequest();
+
+/// Restores to the default HttpRequest
 void debugRestoreHttpRequestFactory() {
   httpRequestFactory = () => html.HttpRequest();
 }
@@ -94,7 +99,8 @@ class NetworkImage
     final Uri resolved = Uri.base.resolve(key.url);
 
     if (key.headers?.isEmpty ?? true) {
-      var completer = Completer<html.HttpRequest>();
+      final Completer<html.HttpRequest> completer =
+          Completer<html.HttpRequest>();
       final html.HttpRequest request = httpRequestFactory();
 
       request.open('GET', key.url, async: true);
@@ -103,7 +109,7 @@ class NetworkImage
         request.setRequestHeader(header, value);
       });
 
-      request.onLoad.listen((e) {
+      request.onLoad.listen((html.ProgressEvent e) {
         final int? status = request.status;
         final bool accepted = status! >= 200 && status < 300;
         final bool fileUri = status == 0; // file:// URIs have status of 0.
@@ -137,7 +143,8 @@ class NetworkImage
     } else {
       // This API only exists in the web engine implementation and is not
       // contained in the analyzer summary for Flutter.
-      return ui.webOnlyInstantiateImageCodecFromUrl(// ignore: undefined_function, avoid_dynamic_calls
+      // ignore: undefined_function, avoid_dynamic_calls
+      return ui.webOnlyInstantiateImageCodecFromUrl(
         resolved,
         chunkCallback: (int bytes, int total) {
           chunkEvents.add(ImageChunkEvent(
