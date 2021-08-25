@@ -49,19 +49,9 @@ import 'theme_data.dart';
 /// [ButtonStyle.side] properties must be specified.
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold_center}
-///
 /// Here is an example of a basic [OutlinedButton].
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return OutlinedButton(
-///     onPressed: () {
-///       print('Received click');
-///     },
-///     child: const Text('Click Me'),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/outlined_button/outlined_button.0.dart **
 /// {@end-tool}
 ///
 /// The static [styleFrom] method is a convenient way to create a

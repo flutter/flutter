@@ -2336,49 +2336,7 @@ abstract class BuildContext {
 /// the layout size of the rendered tree. For some use cases, the simpler
 /// [Offstage] widget may be a better alternative to this approach.
 ///
-/// ```dart imports
-/// import 'package:flutter/rendering.dart';
-/// import 'package:flutter/widgets.dart';
-/// ```
-///
-/// ```dart
-/// void main() {
-///   WidgetsFlutterBinding.ensureInitialized();
-///   print(measureWidget(const SizedBox(width: 640, height: 480)));
-/// }
-///
-/// Size measureWidget(Widget widget) {
-///   final PipelineOwner pipelineOwner = PipelineOwner();
-///   final MeasurementView rootView = pipelineOwner.rootNode = MeasurementView();
-///   final BuildOwner buildOwner = BuildOwner(focusManager: FocusManager());
-///   final RenderObjectToWidgetElement<RenderBox> element = RenderObjectToWidgetAdapter<RenderBox>(
-///     container: rootView,
-///     debugShortDescription: '[root]',
-///     child: widget,
-///   ).attachToRenderTree(buildOwner);
-///   try {
-///     rootView.scheduleInitialLayout();
-///     pipelineOwner.flushLayout();
-///     return rootView.size;
-///   } finally {
-///     // Clean up.
-///     element.update(RenderObjectToWidgetAdapter<RenderBox>(container: rootView));
-///     buildOwner.finalizeTree();
-///   }
-/// }
-///
-/// class MeasurementView extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
-///   @override
-///   void performLayout() {
-///     assert(child != null);
-///     child!.layout(const BoxConstraints(), parentUsesSize: true);
-///     size = child!.size;
-///   }
-///
-///   @override
-///   void debugAssertDoesMeetConstraints() => true;
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/framework/build_owner.0.dart **
 /// {@end-tool}
 class BuildOwner {
   /// Creates an object that manages widgets.
@@ -4416,37 +4374,9 @@ typedef ErrorWidgetBuilder = Widget Function(FlutterErrorDetails details);
 /// It is possible to override this widget.
 ///
 /// {@tool sample --template=freeform}
-/// ```dart
-/// import 'package:flutter/material.dart';
 ///
-/// void main() {
-///   ErrorWidget.builder = (FlutterErrorDetails details) {
-///     bool inDebug = false;
-///     assert(() { inDebug = true; return true; }());
-///     // In debug mode, use the normal error widget which shows
-///     // the error message:
-///     if (inDebug) {
-///       return ErrorWidget(details.exception);
-///     }
-///     // In release builds, show a yellow-on-blue message instead:
-///     return Container(
-///       alignment: Alignment.center,
-///       child: const Text(
-///         'Error!',
-///         style: const TextStyle(color: Colors.yellow),
-///         textDirection: TextDirection.ltr,
-///       ),
-///     );
-///   };
-///   // Here we would normally runApp() the root widget, but to demonstrate
-///   // the error handling we artificially fail:
-///   return runApp(Builder(
-///     builder: (BuildContext context) {
-///       throw 'oh no, an error';
-///     },
-///   ));
-/// }
-/// ```
+///
+/// ** See code in examples/api/lib/widgets/framework/error_widget.0.dart **
 /// {@end-tool}
 ///
 /// See also:

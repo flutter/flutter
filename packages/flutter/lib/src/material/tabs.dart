@@ -591,45 +591,7 @@ class _TabBarScrollController extends ScrollController {
 /// This sample shows the implementation of [TabBar] and [TabBarView] using a [DefaultTabController].
 /// Each [Tab] corresponds to a child of the [TabBarView] in the order they are written.
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return DefaultTabController(
-///     initialIndex: 1,
-///     length: 3,
-///     child: Scaffold(
-///       appBar: AppBar(
-///         title: const Text('TabBar Widget'),
-///         bottom: const TabBar(
-///           tabs: <Widget>[
-///             Tab(
-///               icon: Icon(Icons.cloud_outlined),
-///             ),
-///             Tab(
-///               icon: Icon(Icons.beach_access_sharp),
-///             ),
-///             Tab(
-///               icon: Icon(Icons.brightness_5_sharp),
-///             ),
-///           ],
-///         ),
-///       ),
-///       body: const TabBarView(
-///         children: <Widget>[
-///           Center(
-///             child: Text("It's cloudy here"),
-///           ),
-///           Center(
-///             child: Text("It's rainy here"),
-///           ),
-///           Center(
-///             child: Text("It's sunny here"),
-///           ),
-///         ],
-///       ),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/tabs/tab_bar.0.dart **
 /// {@end-tool}
 ///
 /// {@tool dartpad --template=stateful_widget_material_ticker}
@@ -637,53 +599,7 @@ class _TabBarScrollController extends ScrollController {
 /// to control the behavior of the [TabBar] and [TabBarView]. This can be used instead of
 /// a [DefaultTabController], demonstrated below.
 ///
-/// ```dart
-///
-/// late TabController _tabController;
-///
-///  @override
-///  void initState() {
-///    super.initState();
-///    _tabController = TabController(length: 3, vsync: this);
-///  }
-///
-///  @override
-///  Widget build(BuildContext context) {
-///    return Scaffold(
-///      appBar: AppBar(
-///        title: const Text('TabBar Widget'),
-///        bottom: TabBar(
-///          controller: _tabController,
-///          tabs: const <Widget>[
-///            Tab(
-///              icon: Icon(Icons.cloud_outlined),
-///            ),
-///            Tab(
-///             icon: Icon(Icons.beach_access_sharp),
-///            ),
-///            Tab(
-///              icon: Icon(Icons.brightness_5_sharp),
-///            ),
-///          ],
-///        ),
-///      ),
-///      body: TabBarView(
-///        controller: _tabController,
-///        children: const <Widget>[
-///          Center(
-///            child: Text("It's cloudy here"),
-///          ),
-///          Center(
-///            child: Text("It's rainy here"),
-///          ),
-///          Center(
-///             child: Text("It's sunny here"),
-///          ),
-///        ],
-///      ),
-///    );
-///  }
-/// ```
+/// ** See code in examples/api/lib/material/tabs/tab_bar.1.dart **
 /// {@end-tool}
 ///
 /// See also:

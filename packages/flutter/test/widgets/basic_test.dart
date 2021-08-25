@@ -7,7 +7,7 @@
 @Tags(<String>['reduced-test-set'])
 
 import 'dart:math' as math;
-import 'dart:ui';
+import 'dart:ui' as ui;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +15,96 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  group('RawImage', () {
+    testWidgets('properties', (WidgetTester tester) async {
+      final ui.Image image1 = (await tester.runAsync<ui.Image>(() => createTestImage()))!;
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: RawImage(image: image1),
+        ),
+      );
+      final RenderImage renderObject = tester.firstRenderObject<RenderImage>(find.byType(RawImage));
+
+      // Expect default values
+      expect(renderObject.image!.isCloneOf(image1), true);
+      expect(renderObject.debugImageLabel, null);
+      expect(renderObject.width, null);
+      expect(renderObject.height, null);
+      expect(renderObject.scale, 1.0);
+      expect(renderObject.color, null);
+      expect(renderObject.opacity, null);
+      expect(renderObject.colorBlendMode, null);
+      expect(renderObject.fit, null);
+      expect(renderObject.alignment, Alignment.center);
+      expect(renderObject.repeat, ImageRepeat.noRepeat);
+      expect(renderObject.centerSlice, null);
+      expect(renderObject.matchTextDirection, false);
+      expect(renderObject.invertColors, false);
+      expect(renderObject.filterQuality, FilterQuality.low);
+      expect(renderObject.isAntiAlias, false);
+
+      final ui.Image image2 = (await tester.runAsync<ui.Image>(() => createTestImage(width: 2, height: 2)))!;
+      const String debugImageLabel = 'debugImageLabel';
+      const double width = 1;
+      const double height = 1;
+      const double scale = 2.0;
+      const Color color = Colors.black;
+      const Animation<double> opacity = AlwaysStoppedAnimation<double>(0.0);
+      const BlendMode colorBlendMode = BlendMode.difference;
+      const BoxFit fit = BoxFit.contain;
+      const AlignmentGeometry alignment = Alignment.topCenter;
+      const ImageRepeat repeat = ImageRepeat.repeat;
+      const Rect centerSlice = Rect.fromLTWH(0, 0, width, height);
+      const bool matchTextDirection = true;
+      const bool invertColors = true;
+      const FilterQuality filterQuality = FilterQuality.high;
+      const bool isAntiAlias = true;
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: RawImage(
+            image: image2,
+            debugImageLabel: debugImageLabel,
+            width: width,
+            height: height,
+            scale: scale,
+            color: color,
+            opacity: opacity,
+            colorBlendMode: colorBlendMode,
+            fit: fit,
+            alignment: alignment,
+            repeat: repeat,
+            centerSlice: centerSlice,
+            matchTextDirection: matchTextDirection,
+            invertColors: invertColors,
+            filterQuality: filterQuality,
+            isAntiAlias: isAntiAlias,
+          ),
+        ),
+      );
+
+      expect(renderObject.image!.isCloneOf(image2), true);
+      expect(renderObject.debugImageLabel, debugImageLabel);
+      expect(renderObject.width, width);
+      expect(renderObject.height, height);
+      expect(renderObject.scale, scale);
+      expect(renderObject.color, color);
+      expect(renderObject.opacity, opacity);
+      expect(renderObject.colorBlendMode, colorBlendMode);
+      expect(renderObject.fit, fit);
+      expect(renderObject.alignment, alignment);
+      expect(renderObject.repeat, repeat);
+      expect(renderObject.centerSlice, centerSlice);
+      expect(renderObject.matchTextDirection, matchTextDirection);
+      expect(renderObject.invertColors, invertColors);
+      expect(renderObject.filterQuality, filterQuality);
+      expect(renderObject.isAntiAlias, isAntiAlias);
+    });
+  });
+
   group('PhysicalShape', () {
     testWidgets('properties', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -594,7 +684,7 @@ void main() {
       expect(mockContext.offsets.single, Offset.zero);
     });
 
-    testWidgets('ColoredBox - properties', (WidgetTester tester) async {
+    testWidgets('ColoredBox - debugFillProperties', (WidgetTester tester) async {
       const ColoredBox box = ColoredBox(color: colorToPaint);
       final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();
       box.debugFillProperties(properties);

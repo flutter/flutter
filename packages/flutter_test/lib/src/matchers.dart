@@ -1843,7 +1843,6 @@ class _MatchesSemanticsData extends Matcher {
 
   @override
   bool matches(dynamic node, Map<dynamic, dynamic> matchState) {
-    // TODO(jonahwilliams): remove dynamic once we have removed getSemanticsData.
     if (node == null)
       return failWithDescription(matchState, 'No SemanticsData provided. '
         'Maybe you forgot to enable semantics?');

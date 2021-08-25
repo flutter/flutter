@@ -8,6 +8,11 @@ import 'dart:core' hide print;
 import 'dart:io' hide exit;
 import 'dart:typed_data';
 
+import 'package:analyzer/dart/analysis/features.dart';
+import 'package:analyzer/dart/analysis/results.dart';
+import 'package:analyzer/dart/analysis/utilities.dart';
+import 'package:analyzer/dart/ast/ast.dart';
+import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
@@ -63,6 +68,9 @@ Future<void> run(List<String> arguments) async {
 
   print('$clock Goldens...');
   await verifyGoldenTags(flutterPackages);
+
+  print('$clock Skip test comments...');
+  await verifySkipTestComments(flutterRoot);
 
   print('$clock Licenses...');
   await verifyNoMissingLicense(flutterRoot);
@@ -346,6 +354,79 @@ Future<void> _verifyNoMissingLicenseForExtension(String workingDirectory, String
       'The expected license header is:',
       license,
       if (trailingBlank) '...followed by a blank line.',
+    ]);
+  }
+}
+
+class _TestSkip {
+  _TestSkip(this.line, this.content);
+
+  final int line;
+  final String content;
+}
+
+Iterable<_TestSkip> _getTestSkips(File file) {
+  final ParseStringResult parseResult = parseFile(
+    featureSet: FeatureSet.latestLanguageVersion(),
+    path: file.absolute.path,
+  );
+  final _TestSkipLinesVisitor<CompilationUnit> visitor = _TestSkipLinesVisitor<CompilationUnit>(parseResult);
+  visitor.visitCompilationUnit(parseResult.unit);
+  return visitor.skips;
+}
+
+class _TestSkipLinesVisitor<T> extends RecursiveAstVisitor<T> {
+  _TestSkipLinesVisitor(this.parseResult) : skips = <_TestSkip>{};
+
+  final ParseStringResult parseResult;
+  final Set<_TestSkip> skips;
+
+  static bool isTestMethod(String name) {
+    return name.startsWith('test') || name == 'group' || name == 'expect';
+  }
+
+  @override
+  T? visitMethodInvocation(MethodInvocation node) {
+    if (isTestMethod(node.methodName.toString())) {
+      for (final Expression argument in node.argumentList.arguments) {
+        if (argument is NamedExpression && argument.name.label.name == 'skip') {
+          final int lineNumber = parseResult.lineInfo.getLocation(argument.beginToken.charOffset).lineNumber;
+          final String content = parseResult.content.substring(parseResult.lineInfo.getOffsetOfLine(lineNumber - 1),
+                                                               parseResult.lineInfo.getOffsetOfLine(lineNumber) - 1);
+          skips.add(_TestSkip(lineNumber, content));
+        }
+      }
+    }
+    return super.visitMethodInvocation(node);
+  }
+}
+
+final RegExp _skipTestCommentPattern = RegExp(r'//(.*)$');
+const Pattern _skipTestIntentionalPattern = '[intended]';
+final Pattern _skipTestTrackingBugPattern = RegExp(r'https+?://github.com/.*/issues/[0-9]+');
+
+Future<void> verifySkipTestComments(String workingDirectory) async {
+  final List<String> errors = <String>[];
+  final Stream<File> testFiles =_allFiles(workingDirectory, 'dart', minimumMatches: 1500)
+    .where((File f) => f.path.endsWith('_test.dart'));
+
+  await for (final File file in testFiles) {
+    for (final _TestSkip skip in _getTestSkips(file)) {
+      final Match? match = _skipTestCommentPattern.firstMatch(skip.content);
+      final String? skipComment = match?.group(1);
+      if (skipComment == null ||
+          !(skipComment.contains(_skipTestIntentionalPattern) ||
+            skipComment.contains(_skipTestTrackingBugPattern))) {
+        errors.add('${file.path}:${skip.line}: skip test without a justification comment.');
+      }
+    }
+  }
+
+  // Fail if any errors
+  if (errors.isNotEmpty) {
+    exitWithError(<String>[
+      ...errors,
+      '\n${bold}See: https://github.com/flutter/flutter/wiki/Tree-hygiene#skipped-tests$reset',
     ]);
   }
 }
