@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:convert';
 
@@ -25,9 +23,9 @@ const String kCertificates = '''
 
 void main() {
   group('Auto signing', () {
-    Config testConfig;
-    AnsiTerminal testTerminal;
-    BufferLogger logger;
+    late Config testConfig;
+    late AnsiTerminal testTerminal;
+    late BufferLogger logger;
 
     setUp(() async {
       logger = BufferLogger.test();
@@ -37,7 +35,7 @@ void main() {
     });
 
     testWithoutContext('No auto-sign if Xcode project settings are not available', () async {
-      final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
+      final Map<String, String>? signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
         buildSettings: null,
         processManager: FakeProcessManager.empty(),
         logger: logger,
@@ -48,7 +46,7 @@ void main() {
     });
 
     testWithoutContext('No discovery if development team specified in Xcode project', () async {
-      final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
+      final Map<String, String>? signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
         buildSettings: <String, String>{
           'DEVELOPMENT_TEAM': 'abc',
         },
@@ -71,7 +69,7 @@ void main() {
         ),
       ]);
 
-      final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
+      final Map<String, String>? signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
         buildSettings: <String, String>{
           'bogus': 'bogus',
         },
@@ -135,13 +133,13 @@ void main() {
       ]);
 
       // Verify that certifacte value is passed into openssl command.
-      String stdin;
+      String? stdin;
       controller.stream.listen((List<int> chunk) {
         stdin = utf8.decode(chunk);
         completer.complete();
       });
 
-      final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
+      final Map<String, String>? signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
         buildSettings: <String, String>{
           'bogus': 'bogus',
         },
@@ -187,13 +185,13 @@ void main() {
       ]);
 
       // Verify that certifacte value is passed into openssl command.
-      String stdin;
+      String? stdin;
       controller.stream.listen((List<int> chunk) {
         stdin = utf8.decode(chunk);
         completer.complete();
       });
 
-      final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
+      final Map<String, String>? signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
         buildSettings: <String, String>{
           'bogus': 'bogus',
         },
@@ -237,13 +235,13 @@ void main() {
       ]);
 
       // Verify that certifacte value is passed into openssl command.
-      String stdin;
+      String? stdin;
       controller.stream.listen((List<int> chunk) {
         stdin = utf8.decode(chunk);
         completer.complete();
       });
 
-      final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
+      final Map<String, String>? signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
         buildSettings: <String, String>{
           'bogus': 'bogus',
         },
@@ -295,13 +293,13 @@ void main() {
       ]);
 
       // Verify that certifacte value is passed into openssl command.
-      String stdin;
+      String? stdin;
       controller.stream.listen((List<int> chunk) {
         stdin = utf8.decode(chunk);
         completer.complete();
       });
 
-      final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
+      final Map<String, String>? signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
         buildSettings: <String, String>{
           'bogus': 'bogus',
         },
@@ -348,13 +346,13 @@ void main() {
       ]);
 
       // Verify that certifacte value is passed into openssl command.
-      String stdin;
+      String? stdin;
       controller.stream.listen((List<int> chunk) {
         stdin = utf8.decode(chunk);
         completer.complete();
       });
 
-      final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
+      final Map<String, String>? signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
         buildSettings: <String, String>{
           'bogus': 'bogus',
         },
@@ -406,13 +404,13 @@ void main() {
       ]);
 
       // Verify that certifacte value is passed into openssl command.
-      String stdin;
+      String? stdin;
       controller.stream.listen((List<int> chunk) {
         stdin = utf8.decode(chunk);
         completer.complete();
       });
 
-      final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
+      final Map<String, String>? signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
         buildSettings: <String, String>{
           'bogus': 'bogus',
         },
@@ -449,7 +447,7 @@ void main() {
         ),
       ]);
 
-      final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
+      final Map<String, String>? signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
         buildSettings: <String, String>{
           'bogus': 'bogus',
         },
@@ -481,7 +479,7 @@ void main() {
         ),
       ]);
 
-      final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
+      final Map<String, String>? signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
         buildSettings: <String, String>{
           'bogus': 'bogus',
         },
@@ -495,7 +493,7 @@ void main() {
   });
 }
 
-Stream<String> mockTerminalStdInStream;
+late Stream<String> mockTerminalStdInStream;
 
 class TestTerminal extends AnsiTerminal {
   TestTerminal() : super(stdio: globals.stdio, platform: globals.platform);
