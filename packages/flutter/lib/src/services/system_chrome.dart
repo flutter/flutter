@@ -570,45 +570,7 @@ class SystemChrome {
   /// The following example creates a widget that changes the status bar color
   /// to a random value on Android.
   ///
-  /// ```dart dartImports
-  /// import 'dart:math' as math;
-  /// ```
-  ///
-  /// ```dart imports
-  /// import 'package:flutter/services.dart';
-  /// ```
-  ///
-  /// ```dart
-  /// final math.Random _random = math.Random();
-  /// SystemUiOverlayStyle _currentStyle = SystemUiOverlayStyle.light;
-  ///
-  /// void _changeColor() {
-  ///   final Color color = Color.fromRGBO(
-  ///     _random.nextInt(255),
-  ///     _random.nextInt(255),
-  ///     _random.nextInt(255),
-  ///     1.0,
-  ///   );
-  ///   setState(() {
-  ///     _currentStyle = SystemUiOverlayStyle.dark.copyWith(
-  ///       statusBarColor: color,
-  ///     );
-  ///   });
-  /// }
-  ///
-  /// @override
-  /// Widget build(BuildContext context) {
-  ///   return AnnotatedRegion<SystemUiOverlayStyle>(
-  ///     value: _currentStyle,
-  ///     child: Center(
-  ///       child: ElevatedButton(
-  ///         child: const Text('Change Color'),
-  ///         onPressed: _changeColor,
-  ///        ),
-  ///      ),
-  ///    );
-  ///  }
-  /// ```
+  /// ** See code in examples/api/lib/services/system_chrome/system_chrome.set_system_u_i_overlay_style.1.dart **
   /// {@end-tool}
   ///
   /// See also:

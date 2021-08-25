@@ -716,64 +716,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// Alternatively, a new PrimaryScrollController could be created above one of
 /// the [ListView]s.
 ///
-/// ```dart
-/// final ScrollController _firstController = ScrollController();
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return LayoutBuilder(
-///       builder: (BuildContext context, BoxConstraints constraints) {
-///         return Row(
-///           children: <Widget>[
-///             SizedBox(
-///                 width: constraints.maxWidth / 2,
-///                 // Only one scroll position can be attached to the
-///                 // PrimaryScrollController if using Scrollbars. Providing a
-///                 // unique scroll controller to this scroll view prevents it
-///                 // from attaching to the PrimaryScrollController.
-///                 child: Scrollbar(
-///                   isAlwaysShown: true,
-///                   controller: _firstController,
-///                   child: ListView.builder(
-///                       controller: _firstController,
-///                       itemCount: 100,
-///                       itemBuilder: (BuildContext context, int index) {
-///                         return Padding(
-///                           padding: const EdgeInsets.all(8.0),
-///                           child: Text('Scrollable 1 : Index $index'),
-///                         );
-///                       }
-///                   ),
-///                 )
-///             ),
-///             SizedBox(
-///                 width: constraints.maxWidth / 2,
-///                 // This vertical scroll view has not been provided a
-///                 // ScrollController, so it is using the
-///                 // PrimaryScrollController.
-///                 child: Scrollbar(
-///                   isAlwaysShown: true,
-///                   child: ListView.builder(
-///                       itemCount: 100,
-///                       itemBuilder: (BuildContext context, int index) {
-///                         return Container(
-///                             height: 50,
-///                             color: index.isEven ? Colors.amberAccent : Colors.blueAccent,
-///                             child: Padding(
-///                               padding: const EdgeInsets.all(8.0),
-///                               child: Text('Scrollable 2 : Index $index'),
-///                             )
-///                         );
-///                       }
-///                   ),
-///                 )
-///             ),
-///           ],
-///         );
-///       }
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/scrollbar/raw_scrollbar.0.dart **
 /// {@end-tool}
 ///
 /// ### Automatic Scrollbars on Desktop Platforms
@@ -803,22 +746,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// [PrimaryScrollController] since it has an [Axis.vertical] scroll direction
 /// and has not been provided a [ScrollController].
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return RawScrollbar(
-///     child: GridView.builder(
-///       itemCount: 120,
-///       gridDelegate:
-///         const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
-///       itemBuilder: (BuildContext context, int index) {
-///         return Center(
-///           child: Text('item $index'),
-///         );
-///       },
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/scrollbar/raw_scrollbar.1.dart **
 /// {@end-tool}
 ///
 /// {@tool dartpad --template=stateful_widget_scaffold}
@@ -828,28 +756,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// Alternatively, the [PrimaryScrollController] can be used automatically so long
 /// as it is attached to the singular [ScrollPosition] associated with the GridView.
 ///
-/// ```dart
-/// final ScrollController _controllerOne = ScrollController();
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return RawScrollbar(
-///     controller: _controllerOne,
-///     isAlwaysShown: true,
-///     child: GridView.builder(
-///       controller: _controllerOne,
-///       itemCount: 120,
-///       gridDelegate:
-///         const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
-///       itemBuilder: (BuildContext context, int index) {
-///         return Center(
-///           child: Text('item $index'),
-///         );
-///       },
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/scrollbar/raw_scrollbar.2.dart **
 /// {@end-tool}
 ///
 /// See also:
