@@ -11,6 +11,7 @@ import static org.junit.Assert.assertThrows;
 
 import io.flutter.embedding.engine.deferredcomponents.PlayStoreDeferredComponentManager;
 import io.flutter.embedding.engine.loader.FlutterLoader;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,6 +31,11 @@ public class FlutterInjectorTest {
     // Since the intent is to have a convenient static class to use for production.
     FlutterInjector.reset();
     MockitoAnnotations.initMocks(this);
+  }
+
+  @After
+  public void tearDown() {
+    FlutterInjector.reset();
   }
 
   @Test

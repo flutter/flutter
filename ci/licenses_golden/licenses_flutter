@@ -936,7 +936,6 @@ FILE: ../../../flutter/shell/platform/android/platform_view_android_delegate/pla
 FILE: ../../../flutter/shell/platform/android/platform_view_android_delegate/platform_view_android_delegate_unittests.cc
 FILE: ../../../flutter/shell/platform/android/platform_view_android_jni_impl.cc
 FILE: ../../../flutter/shell/platform/android/platform_view_android_jni_impl.h
-FILE: ../../../flutter/shell/platform/android/robolectric.properties
 FILE: ../../../flutter/shell/platform/android/surface/android_native_window.cc
 FILE: ../../../flutter/shell/platform/android/surface/android_native_window.h
 FILE: ../../../flutter/shell/platform/android/surface/android_surface.cc
