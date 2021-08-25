@@ -232,7 +232,7 @@ void main() {
       '   argument.\n',
     );
   });
-  
+
   testWidgets('defaultStackFilter elides framework Element mounting stacks', (WidgetTester tester) async {
     final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     late FlutterErrorDetails errorDetails;
