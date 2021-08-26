@@ -338,6 +338,17 @@ abstract class WidgetController {
   ///
   /// The `speed` is in pixels per second in the direction given by `offset`.
   ///
+  /// The `offset` represents the motion one's finger would perform on the
+  /// screen, where a positive [Offset.dy] means the finger moves down and a
+  /// negative value means the finger moves up, i.e. flinging downwards and
+  /// upwards respectively. Accordingly, positive [Offset.dx] values mean
+  /// flinging to the right and negative values flinging to the left.
+  /// The contents of a viewport usually follow that gesture, meaning that
+  /// flinging downwards will also move the child under the pointer downwards
+  /// (e.g. dismissing a bottom sheet). However, semantically in a list view,
+  /// flinging down is considered "scrolling up" and flinging to the right
+  /// "scrolling to the left."
+  ///
   /// The `offset` and `speed` control the interval between each pointer event.
   /// For example, if the `offset` is 200 pixels down, and the `speed` is 800
   /// pixels per second, the pointer events will be sent for each increment
@@ -506,6 +517,17 @@ abstract class WidgetController {
   /// of time, consider using [timedDrag].
   ///
   /// {@template flutter.flutter_test.WidgetController.drag}
+  /// The `offset` represents the motion one's finger would perform on the
+  /// screen, where a positive [Offset.dy] means the finger moves down and a
+  /// negative value means the finger moves up, i.e. dragging downwards and
+  /// upwards respectively. Accordingly, positive [Offset.dx] values mean
+  /// dragging to the right and negative values dragging to the left.
+  /// The contents of a viewport usually follow that gesture, meaning that
+  /// dragging downwards will also move the child under the pointer downwards
+  /// (e.g. dismissing a bottom sheet). However, semantically in a list view,
+  /// dragging down is considered "scrolling up" and dragging to the right
+  /// "scrolling to the left."
+  ///
   /// By default, if the x or y component of offset is greater than
   /// [kDragSlopDefault], the gesture is broken up into two separate moves
   /// calls. Changing `touchSlopX` or `touchSlopY` will change the minimum
@@ -646,6 +668,17 @@ abstract class WidgetController {
   /// `offset/duration`.
   ///
   /// {@template flutter.flutter_test.WidgetController.timedDrag}
+  /// The `offset` represents the motion one's finger would perform on the
+  /// screen, where a positive [Offset.dy] means the finger moves down and a
+  /// negative value means the finger moves up, i.e. dragging downwards and
+  /// upwards respectively. Accordingly, positive [Offset.dx] values mean
+  /// dragging to the right and negative values dragging to the left.
+  /// The contents of a viewport usually follow that gesture, meaning that
+  /// dragging downwards will also move the child under the pointer downwards
+  /// (e.g. dismissing a bottom sheet). However, semantically in a list view,
+  /// dragging down is considered "scrolling up" and dragging to the right
+  /// "scrolling to the left."
+  ///
   /// The move events are sent at a given `frequency` in Hz (or events per
   /// second). It defaults to 60Hz.
   ///
