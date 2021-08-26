@@ -2517,6 +2517,60 @@ void main() {
       'was set by default.',
     );
   });
+
+  testWidgets(
+      'ScaffoldMessenger showSnackBar throws intuitive error message if called during build',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: SizedBox(),
+              duration: Duration(seconds: 2),
+            ));
+            return const SizedBox();
+          },
+        ),
+      ),
+    ));
+
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+
+    final ErrorSummary summary = (exception as FlutterError)
+            .diagnostics
+            .firstWhere((DiagnosticsNode element) => element is ErrorSummary)
+        as ErrorSummary;
+    expect(summary.toString(), 'Snack bars cannot be shown during build.');
+  });
+
+  testWidgets(
+      'Scaffold showSnackBar throws intuitive error message if called during build',
+          (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            Scaffold.of(context).showSnackBar(const SnackBar(
+              content: SizedBox(),
+              duration: Duration(seconds: 2),
+            ));
+            return const SizedBox();
+          },
+        ),
+      ),
+    ));
+
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+
+    final ErrorSummary summary = (exception as FlutterError)
+        .diagnostics
+        .firstWhere((DiagnosticsNode element) => element is ErrorSummary)
+    as ErrorSummary;
+    expect(summary.toString(), 'Snack bars cannot be shown during build.');
+  });
 }
 
 /// Start test for "SnackBar dismiss test".

@@ -258,6 +258,34 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   /// ** See code in examples/api/lib/material/scaffold/scaffold_messenger_state.show_snack_bar.0.dart **
   /// {@end-tool}
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBar(SnackBar snackBar) {
+    assert(() {
+      if ((context as StatefulElement).owner!.debugBuilding) {
+        final List<DiagnosticsNode> information = <DiagnosticsNode>[
+          ErrorSummary('Snack bars cannot be shown during build.'),
+          ErrorDescription(
+            'The showSnackBar() method was called during build, which is '
+            'prohibited as showing snack bars requires updating state. Updating '
+            'state is not possible during build as it requires marking the '
+            'ScaffoldMessenger as needing to build while the framework is '
+            'already in the process of building widgets.',
+          ),
+          ErrorHint(
+            'Instead of calling showSnackBar() during build, call it directly '
+            'in your on tap (and related) callbacks. If you need to immediately '
+            'show a snack bar, make the call in initState() or '
+            'didChangeDependencies() instead. Otherwise, you can also schedule a '
+            'post-frame callback using SchedulerBinding.addPostFrameCallback to '
+            'show the snack bar after the current frame.',
+          ),
+          context.describeOwnershipChain(
+            'The ownership chain for the particular ScaffoldMessenger is',
+          ),
+        ];
+        throw FlutterError.fromParts(information);
+      }
+      return true;
+    }());
+
     _snackBarController ??= SnackBar.createAnimationController(vsync: this)
       ..addStatusListener(_handleSnackBarStatusChanged);
     if (_snackBars.isEmpty) {
@@ -2040,6 +2068,34 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     'This feature was deprecated after v1.23.0-14.0.pre.',
   )
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBar(SnackBar snackbar) {
+    assert(() {
+      if ((context as StatefulElement).owner!.debugBuilding) {
+        final List<DiagnosticsNode> information = <DiagnosticsNode>[
+          ErrorSummary('Snack bars cannot be shown during build.'),
+          ErrorDescription(
+            'The showSnackBar() method was called during build, which is '
+            'prohibited as showing snack bars requires updating state. Updating '
+            'state is not possible during build as it requires marking the '
+            'ScaffoldMessenger as needing to build while the framework is '
+            'already in the process of building widgets.',
+          ),
+          ErrorHint(
+            'Instead of calling showSnackBar() during build, call it directly '
+            'in your on tap (and related) callbacks. If you need to immediately '
+            'show a snack bar, make the call in initState() or '
+            'didChangeDependencies() instead. Otherwise, you can also schedule a '
+            'post-frame callback using SchedulerBinding.addPostFrameCallback to '
+            'show the snack bar after the current frame.',
+          ),
+          context.describeOwnershipChain(
+            'The ownership chain for the particular ScaffoldMessenger is',
+          ),
+        ];
+        throw FlutterError.fromParts(information);
+      }
+      return true;
+    }());
+
     _snackBarController ??= SnackBar.createAnimationController(vsync: this)
       ..addStatusListener(_handleSnackBarStatusChange);
     if (_snackBars.isEmpty) {
