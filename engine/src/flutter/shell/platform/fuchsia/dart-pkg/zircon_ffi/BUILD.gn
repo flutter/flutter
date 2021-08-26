@@ -3,7 +3,6 @@
 # found in the LICENSE file.
 
 import("//build/fuchsia/sdk.gni")
-import("//flutter/tools/fuchsia/dart/dart_library.gni")
 
 config("zircon_ffi_config") {
   include_dirs = [ "." ]
@@ -31,10 +30,4 @@ shared_library("zircon_ffi") {
     "//flutter/fml",
     "//third_party/dart/runtime:dart_api",
   ]
-}
-
-dart_library("dart_zircon_ffi") {
-  package_name = "zircon_ffi"
-
-  sources = [ "zircon_ffi.dart" ]
 }
