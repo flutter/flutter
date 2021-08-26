@@ -124,6 +124,10 @@ class FlutterWindowWinUWP : public WindowBindingHandler {
   FlutterPointerDeviceKind GetPointerDeviceKind(
       winrt::Windows::UI::Core::PointerEventArgs const& args);
 
+  // Gets the mouse button.
+  FlutterPointerMouseButtons GetPointerMouseButton(
+      winrt::Windows::UI::Core::PointerEventArgs const& args);
+
   // Backing CoreWindow. nullptr if not set.
   winrt::Windows::UI::Core::CoreWindow window_{nullptr};
 
