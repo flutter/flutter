@@ -353,14 +353,14 @@ void main() {
       const String updateTaskJson = '{'
           '"CommitBranch":"master",'
           '"CommitSha":"$commitSha",'
-          '"BuilderName":"Linux_staging_test",'
+          '"BuilderName":"builderAbc",'
           '"NewStatus":"Succeeded",'
           '"ResultData":{"i":0.0,"j":0.0,"not_a_metric":"something"},'
           '"BenchmarkScoreKeys":["i","j"]}';
       fs.file(resultsPath).writeAsStringSync(updateTaskJson);
 
       // This will fail if it decided to upload results
-      await cocoon.sendTaskStatus(resultsPath: resultsPath);
+      await cocoon.sendTaskStatus(resultsPath: resultsPath, builderBucket: 'staging');
     });
   });
 
