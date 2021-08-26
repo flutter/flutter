@@ -2,11 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  group('image', () {
+    testWidgets('finds Image widgets', (WidgetTester tester) async {
+      await tester.pumpWidget(_boilerplate(
+          Image(image: FileImage(File('test'), scale: 1.0))
+      ));
+      expect(find.image(FileImage(File('test'), scale: 1.0)), findsOneWidget);
+    });
+  });
+
   group('text', () {
     testWidgets('finds Text widgets', (WidgetTester tester) async {
       await tester.pumpWidget(_boilerplate(
