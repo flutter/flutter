@@ -71,7 +71,7 @@ List<MetricPoint> parse(Map<String, dynamic> resultsJson) {
 }
 
 /// Upload test metrics to metrics center.
-Future<void> uploadToMetricsCenter(String? resultsPath, String? commitTime) async {
+Future<void> uploadToMetricsCenter(String? resultsPath, String? commitTime, String? taskName) async {
   int commitTimeSinceEpoch;
   if (resultsPath == null) {
     return;
@@ -92,5 +92,6 @@ Future<void> uploadToMetricsCenter(String? resultsPath, String? commitTime) asyn
       commitTimeSinceEpoch,
       isUtc: true,
     ),
+    taskName ?? 'default',
   );
 }
