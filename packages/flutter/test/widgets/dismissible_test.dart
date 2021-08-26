@@ -230,9 +230,9 @@ void main() {
   });
 
   tearDown(() {
-    // To make sure dismissDirection does not have unpredicted values when 
+    // To make sure dismissDirection does not have unpredicted values when
     // tests are being shuffled, restore it to default value after each test.
-    dismissDirection = defaultDismissDirection; 
+    dismissDirection = defaultDismissDirection;
   });
 
   testWidgets('Horizontal drag triggers dismiss scrollDirection=vertical', (WidgetTester tester) async {
