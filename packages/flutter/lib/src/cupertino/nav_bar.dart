@@ -84,22 +84,22 @@ class _PositionedAnchorTransition extends AnimatedWidget {
   const _PositionedAnchorTransition({
     Key? key,
     required this.isLTR,
-    required this.margin,
+    required this.offset,
     required this.size,
     required this.child,
-  }) : super(key: key, listenable: margin);
+  }) : super(key: key, listenable: offset);
 
   final bool isLTR;
   final Size size;
   final Widget child;
-  final Animation<Offset> margin;
+  final Animation<Offset> offset;
 
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      top: margin.value.dy,
-      left: isLTR ? margin.value.dx : null,
-      right: isLTR ? null : margin.value.dx,
+      top: offset.value.dy,
+      left: isLTR ? offset.value.dx : null,
+      right: isLTR ? null : offset.value.dx,
       width: size.width,
       height: size.height,
       child: child,
@@ -1799,7 +1799,7 @@ class _NavigationBarComponentsTransition {
 
     return _PositionedAnchorTransition(
       isLTR: isLTR,
-      margin: animation.drive(anchorMovementInTransitionBox),
+      offset: animation.drive(anchorMovementInTransitionBox),
       size: fromBox.size,
       child: child,
     );
@@ -2172,8 +2172,8 @@ class _NavigationBarComponentsTransition {
 
     final bool isLTR = forwardDirection > 0;
 
-    // Anchor is the top-leading point of toBox, in transition box's coordinate
-    // space.
+    // Anchor is the top-leading point of toBox, in transition box's top-leading
+    // coordinate space.
     final Offset toAnchorInTransitionBox = Offset(
       isLTR ? to.left : to.right,
       to.top,
@@ -2192,7 +2192,7 @@ class _NavigationBarComponentsTransition {
 
     return _PositionedAnchorTransition(
       isLTR: isLTR,
-      margin: animation.drive(anchorMovementInTransitionBox),
+      offset: animation.drive(anchorMovementInTransitionBox),
       size: toBox.size,
       child: FadeTransition(
         opacity: fadeInFrom(0.25),
