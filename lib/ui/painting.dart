@@ -404,7 +404,7 @@ class Color {
 enum BlendMode {
   // This list comes from Skia's SkXfermode.h and the values (order) should be
   // kept in sync.
-  // See: https://skia.org/user/api/skpaint#SkXfermode
+  // See: https://skia.org/docs/user/api/skpaint_overview/#SkXfermode
 
   /// Drop both the source and destination images, leaving nothing.
   ///
