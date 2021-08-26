@@ -363,7 +363,8 @@ class TransformEngineLayer extends ContainerLayer
   void preroll(PrerollContext prerollContext, Matrix4 matrix) {
     final Matrix4 childMatrix = matrix.multiplied(_transform);
     prerollContext.mutatorsStack.pushTransform(_transform);
-    final ui.Rect childPaintBounds = prerollChildren(prerollContext, childMatrix);
+    final ui.Rect childPaintBounds =
+        prerollChildren(prerollContext, childMatrix);
     paintBounds = transformRect(_transform, childPaintBounds);
     prerollContext.mutatorsStack.pop();
   }
@@ -602,7 +603,10 @@ class PlatformViewLayer extends Layer {
 
   @override
   void paint(PaintContext paintContext) {
-    final CkCanvas? canvas = paintContext.viewEmbedder!.compositeEmbeddedView(viewId);
-    paintContext.leafNodesCanvas = canvas;
+    final CkCanvas? canvas =
+        paintContext.viewEmbedder!.compositeEmbeddedView(viewId);
+    if (canvas != null) {
+      paintContext.leafNodesCanvas = canvas;
+    }
   }
 }
