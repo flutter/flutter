@@ -1097,7 +1097,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
           ErrorHint(
             'Instead of performing asynchronous work inside a call to setState(), first '
             'execute the work (without updating the widget state), and then synchronously '
-           'update the state inside a call to setState().',
+            'update the state inside a call to setState().',
           ),
         ]);
       }
@@ -4247,16 +4247,14 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
             ErrorSummary('setState() or markNeedsBuild() called during build.'),
             ErrorDescription(
               'This ${widget.runtimeType} widget cannot be marked as needing to build because the framework '
-              'is already in the process of building widgets.  A widget can be marked as '
+              'is already in the process of building widgets. A widget can be marked as '
               'needing to be built during the build phase only if one of its ancestors '
               'is currently building. This exception is allowed because the framework '
               'builds parent widgets before children, which means a dirty descendant '
               'will always be built. Otherwise, the framework might not visit this '
               'widget during this build phase.',
             ),
-            describeElement(
-              'The widget on which setState() or markNeedsBuild() was called was',
-            ),
+            describeElement('The widget on which setState() or markNeedsBuild() was called was'),
           ];
           if (owner!._debugCurrentBuildTarget != null)
             information.add(owner!._debugCurrentBuildTarget!.describeWidget('The widget which was currently being built when the offending call was made was'));
