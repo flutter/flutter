@@ -100,7 +100,7 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
                            uid:(int32_t)uid {
   self = [super initWithBridge:bridge uid:uid];
   if (self) {
-    _nativeSwitch = [[[UISwitch alloc] init] retain];
+    _nativeSwitch = [[UISwitch alloc] init];
   }
   return self;
 }
