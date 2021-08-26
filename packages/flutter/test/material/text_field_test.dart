@@ -6205,8 +6205,8 @@ void main() {
 
     semantics.dispose();
 
-    // On web (just like iOS), we don't check for pasteability because that
-    // triggers a permission dialog in the browser.
+    // On web, we don't check for pasteability because that triggers a
+    // permission dialog in the browser.
     // https://github.com/flutter/flutter/pull/57139#issuecomment-629048058
   }, skip: isBrowser); // [intended] see above.
 
@@ -9539,11 +9539,15 @@ void main() {
     bool calledHasStrings = false;
     tester.binding.defaultBinaryMessenger
       .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
-        if (methodCall.method == 'Clipboard.getData') {
-          calledGetData = true;
-        }
-        if (methodCall.method == 'Clipboard.hasStrings') {
-          calledHasStrings = true;
+        switch (methodCall.method) {
+          case 'Clipboard.getData':
+            calledGetData = true;
+            break;
+          case 'Clipboard.hasStrings':
+            calledHasStrings = true;
+            break;
+          default:
+            break;
         }
         return null;
       });

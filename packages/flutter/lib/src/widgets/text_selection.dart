@@ -1583,7 +1583,7 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
       return;
     }
 
-    late final bool hasStrings;
+    final bool hasStrings;
     try {
       hasStrings = await Clipboard.hasStrings();
     } catch (stacktrace) {
