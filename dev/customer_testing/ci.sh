@@ -31,7 +31,7 @@ pub get
 # shard, it should still pass, even if we rolled one of the tests.)
 rm -rf ../../bin/cache/pkg/tests
 git clone https://github.com/flutter/tests.git ../../bin/cache/pkg/tests
-GIT_REVISION=`dart --enable-asserts ../tools/bin/find_commit.dart ../../bin/cache/pkg/tests || "master"`
+GIT_REVISION=`dart --enable-asserts ../tools/bin/find_commit.dart ../../bin/cache/pkg/tests || echo "master"`
 git -C ../../bin/cache/pkg/tests checkout $GIT_REVISION
 
 # Finally, run the tests.
