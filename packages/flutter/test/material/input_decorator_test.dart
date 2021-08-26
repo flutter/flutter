@@ -5025,7 +5025,7 @@ void main() {
       home: Material(
         child: Center(
           child: SizedBox(
-            width: 100,
+            width: 100.0,
             child: IntrinsicHeight(
               child: Column(
                 children: <Widget>[
@@ -5053,7 +5053,7 @@ void main() {
       home: Material(
         child: Center(
           child: SizedBox(
-            width: 100,
+            width: 100.0,
             child: IntrinsicHeight(
               child: Column(
                 children: <Widget>[
@@ -5081,7 +5081,7 @@ void main() {
       home: Material(
         child: Center(
           child: SizedBox(
-            width: 100,
+            width: 100.0,
             child: IntrinsicHeight(
               child: Column(
                 children: <Widget>[
@@ -5109,7 +5109,7 @@ void main() {
       home: Material(
         child: Center(
           child: SizedBox(
-            width: 100,
+            width: 100.0,
             child: IntrinsicHeight(
               child: Column(
                 children: <Widget>[
@@ -5137,7 +5137,7 @@ void main() {
       home: Material(
         child: Center(
           child: SizedBox(
-            width: 100,
+            width: 100.0,
             child: IntrinsicHeight(
               child: Column(
                 children: <Widget>[
