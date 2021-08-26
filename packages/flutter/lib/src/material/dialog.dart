@@ -47,6 +47,7 @@ class Dialog extends StatelessWidget {
     this.insetPadding = _defaultInsetPadding,
     this.clipBehavior = Clip.none,
     this.shape,
+    this.alignment,
     this.child,
   }) : assert(clipBehavior != null),
        super(key: key);
@@ -114,6 +115,14 @@ class Dialog extends StatelessWidget {
   /// {@endtemplate}
   final ShapeBorder? shape;
 
+  /// {@template flutter.material.dialog.alignment}
+  /// How to align the [Dialog].
+  ///
+  /// If null, then [DialogTheme.alignment] is used. If that is also null, the
+  /// default is [Alignment.center].
+  /// {@endtemplate}
+  final AlignmentGeometry? alignment;
+
   /// The widget below this widget in the tree.
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
@@ -137,7 +146,8 @@ class Dialog extends StatelessWidget {
         removeRight: true,
         removeBottom: true,
         context: context,
-        child: Center(
+        child: Align(
+          alignment: alignment ?? dialogTheme.alignment ?? Alignment.center,
           child: ConstrainedBox(
             constraints: const BoxConstraints(minWidth: 280.0),
             child: Material(
@@ -260,6 +270,7 @@ class AlertDialog extends StatelessWidget {
     this.insetPadding = _defaultInsetPadding,
     this.clipBehavior = Clip.none,
     this.shape,
+    this.alignment,
     this.scrollable = false,
   }) : assert(contentPadding != null),
        assert(clipBehavior != null),
@@ -437,6 +448,9 @@ class AlertDialog extends StatelessWidget {
   /// {@macro flutter.material.dialog.shape}
   final ShapeBorder? shape;
 
+  /// {@macro flutter.material.dialog.shape}
+  final AlignmentGeometry? alignment;
+
   /// Determines whether the [title] and [content] widgets are wrapped in a
   /// scrollable.
   ///
@@ -577,6 +591,7 @@ class AlertDialog extends StatelessWidget {
       insetPadding: insetPadding,
       clipBehavior: clipBehavior,
       shape: shape,
+      alignment: alignment,
       child: dialogChild,
     );
   }
@@ -742,6 +757,7 @@ class SimpleDialog extends StatelessWidget {
     this.insetPadding = _defaultInsetPadding,
     this.clipBehavior = Clip.none,
     this.shape,
+    this.alignment,
   }) : assert(titlePadding != null),
        assert(contentPadding != null),
        super(key: key);
@@ -817,6 +833,9 @@ class SimpleDialog extends StatelessWidget {
 
   /// {@macro flutter.material.dialog.shape}
   final ShapeBorder? shape;
+
+  /// {@macro flutter.material.dialog.shape}
+  final AlignmentGeometry? alignment;
 
   @override
   Widget build(BuildContext context) {
@@ -908,6 +927,7 @@ class SimpleDialog extends StatelessWidget {
       insetPadding: insetPadding,
       clipBehavior: clipBehavior,
       shape: shape,
+      alignment: alignment,
       child: dialogChild,
     );
   }
