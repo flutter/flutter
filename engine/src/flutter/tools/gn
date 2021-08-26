@@ -493,6 +493,9 @@ def parse_args(args):
   parser.add_argument('--trace-gn', default=False, action='store_true',
                        help='Write a GN trace log (gn_trace.json) in the Chromium tracing format in the build directory.')
 
+  # Verbose output.
+  parser.add_argument('--verbose', default=False, action='store_true')
+
   return parser.parse_args(args)
 
 def main(argv):
@@ -525,6 +528,9 @@ def main(argv):
 
   if args.trace_gn:
     command.append('--tracelog=%s/gn_trace.json' % out_dir)
+
+  if args.verbose:
+    command.append('-v')
 
   print("Generating GN files in: %s" % out_dir)
   try:
