@@ -23,5 +23,5 @@ export UBSAN_OPTIONS="suppressions=${UBSAN_SUPPRESSIONS_FILE}"
 echo "Using Undefined Behavior suppressions in ${UBSAN_SUPPRESSIONS_FILE}"
 
 
-export ASAN_OPTIONS="symbolize=1:detect_leaks=0:detect_container_overflow=0"
+export ASAN_OPTIONS="symbolize=1:detect_leaks=0"
 export ASAN_SYMBOLIZER_PATH="${BUILDTOOLS_DIRECTORY}/clang/bin/llvm-symbolizer"
