@@ -16,7 +16,7 @@ template <int from_length, int to_length, int buffer_length>
 class BitConverter {
  public:
   void Append(int bits) {
-    FML_DCHECK(bits < (1 << from_length));
+    FML_DCHECK(bits >= 0 && bits < (1 << from_length));
     FML_DCHECK(CanAppend());
     lower_free_bits_ -= from_length;
     buffer_ |= (bits << lower_free_bits_);
