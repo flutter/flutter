@@ -77,7 +77,9 @@ template("dart_package_config") {
                              "visibility",
                            ])
 
-    script = "//flutter/tools/fuchsia/dart/gen_dart_package_config.py"
+    script =
+        get_label_info("//flutter/tools/fuchsia/dart:gen_dart_package_config",
+                       "target_out_dir") + "/gen_dart_package_config.pyz"
 
     inputs = [ intermediate_file ]
     outputs = [ package_config_file ]
