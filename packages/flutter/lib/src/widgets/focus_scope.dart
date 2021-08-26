@@ -16,7 +16,7 @@ import 'inherited_notifier.dart';
 ///
 /// For keyboard events, [onKey] is called if [FocusNode.hasFocus] is true for
 /// this widget's [focusNode], unless a focused descendant's [onKey] callback
-/// returns true when called.
+/// returns [KeyEventResult.handled] when called.
 ///
 /// This widget does not provide any visual indication that the focus has
 /// changed. Any desired visual changes should be made when [onFocusChange] is
@@ -53,79 +53,7 @@ import 'inherited_notifier.dart';
 /// widgets. See [FocusNode] for a similar example that doesn't use [Focus] or
 /// [FocusScope].
 ///
-/// ```dart imports
-/// import 'package:flutter/services.dart';
-/// ```
-///
-/// ```dart
-/// Color _color = Colors.white;
-///
-/// KeyEventResult _handleKeyPress(FocusNode node, RawKeyEvent event) {
-///   if (event is RawKeyDownEvent) {
-///     print('Focus node ${node.debugLabel} got key event: ${event.logicalKey}');
-///     if (event.logicalKey == LogicalKeyboardKey.keyR) {
-///       print('Changing color to red.');
-///       setState(() {
-///         _color = Colors.red;
-///       });
-///       return KeyEventResult.handled;
-///     } else if (event.logicalKey == LogicalKeyboardKey.keyG) {
-///       print('Changing color to green.');
-///       setState(() {
-///         _color = Colors.green;
-///       });
-///       return KeyEventResult.handled;
-///     } else if (event.logicalKey == LogicalKeyboardKey.keyB) {
-///       print('Changing color to blue.');
-///       setState(() {
-///         _color = Colors.blue;
-///       });
-///       return KeyEventResult.handled;
-///     }
-///   }
-///   return KeyEventResult.ignored;
-/// }
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   final TextTheme textTheme = Theme.of(context).textTheme;
-///   return FocusScope(
-///     debugLabel: 'Scope',
-///     autofocus: true,
-///     child: DefaultTextStyle(
-///       style: textTheme.headline4!,
-///       child: Focus(
-///         onKey: _handleKeyPress,
-///         debugLabel: 'Button',
-///         child: Builder(
-///           builder: (BuildContext context) {
-///             final FocusNode focusNode = Focus.of(context);
-///             final bool hasFocus = focusNode.hasFocus;
-///             return GestureDetector(
-///               onTap: () {
-///                 if (hasFocus) {
-///                   focusNode.unfocus();
-///                 } else {
-///                   focusNode.requestFocus();
-///                 }
-///               },
-///               child: Center(
-///                 child: Container(
-///                   width: 400,
-///                   height: 100,
-///                   alignment: Alignment.center,
-///                   color: hasFocus ? _color : Colors.white,
-///                   child: Text(hasFocus ? "I'm in color! Press R,G,B!" : 'Press to focus'),
-///                 ),
-///               ),
-///             );
-///           },
-///         ),
-///       ),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/focus_scope/focus.0.dart **
 /// {@end-tool}
 ///
 /// {@tool dartpad --template=stateless_widget_material}
@@ -137,56 +65,7 @@ import 'inherited_notifier.dart';
 /// consider using a [FocusableActionDetector], which combines several different
 /// widgets to provide those capabilities.
 ///
-/// ```dart preamble
-/// class FocusableText extends StatelessWidget {
-///   const FocusableText(this.data, {
-///     Key? key,
-///     required this.autofocus,
-///   }) : super(key: key);
-///
-///   /// The string to display as the text for this widget.
-///   final String data;
-///
-///   /// Whether or not to focus this widget initially if nothing else is focused.
-///   final bool autofocus;
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return Focus(
-///       autofocus: autofocus,
-///       child: Builder(builder: (BuildContext context) {
-///         // The contents of this Builder are being made focusable. It is inside
-///         // of a Builder because the builder provides the correct context
-///         // variable for Focus.of() to be able to find the Focus widget that is
-///         // the Builder's parent. Without the builder, the context variable used
-///         // would be the one given the FocusableText build function, and that
-///         // would start looking for a Focus widget ancestor of the FocusableText
-///         // instead of finding the one inside of its build function.
-///         return Container(
-///           padding: const EdgeInsets.all(8.0),
-///           // Change the color based on whether or not this Container has focus.
-///           color: Focus.of(context).hasPrimaryFocus ? Colors.black12 : null,
-///           child: Text(data),
-///         );
-///       }),
-///     );
-///   }
-/// }
-/// ```
-///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return Scaffold(
-///     body: ListView.builder(
-///       itemBuilder: (BuildContext context, int index) => FocusableText(
-///         'Item $index',
-///         autofocus: index == 0,
-///       ),
-///       itemCount: 50,
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/focus_scope/focus.1.dart **
 /// {@end-tool}
 ///
 /// {@tool dartpad --template=stateful_widget_material}
@@ -197,62 +76,7 @@ import 'inherited_notifier.dart';
 /// which it has requested focus is drawn, so it is OK to call
 /// [FocusNode.requestFocus] on a node which is not yet in the focus tree.
 ///
-/// ```dart
-/// int focusedChild = 0;
-/// List<Widget> children = <Widget>[];
-/// List<FocusNode> childFocusNodes = <FocusNode>[];
-///
-/// @override
-/// void initState() {
-///   super.initState();
-///   // Add the first child.
-///   _addChild();
-/// }
-///
-/// @override
-/// void dispose() {
-///   super.dispose();
-///   for (final FocusNode node in childFocusNodes) {
-///     node.dispose();
-///   }
-/// }
-///
-/// void _addChild() {
-///   // Calling requestFocus here creates a deferred request for focus, since the
-///   // node is not yet part of the focus tree.
-///   childFocusNodes
-///       .add(FocusNode(debugLabel: 'Child ${children.length}')..requestFocus());
-///
-///   children.add(Padding(
-///     padding: const EdgeInsets.all(2.0),
-///     child: ActionChip(
-///       focusNode: childFocusNodes.last,
-///       label: Text('CHILD ${children.length}'),
-///       onPressed: () {},
-///     ),
-///   ));
-/// }
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return Scaffold(
-///     body: Center(
-///       child: Wrap(
-///         children: children,
-///       ),
-///     ),
-///     floatingActionButton: FloatingActionButton(
-///       onPressed: () {
-///         setState(() {
-///           focusedChild = children.length;
-///           _addChild();
-///         });
-///       },
-///       child: const Icon(Icons.add),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/focus_scope/focus.2.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -316,9 +140,9 @@ class Focus extends StatefulWidget {
   /// focus.
   ///
   /// Key events are first given to the [FocusNode] that has primary focus, and
-  /// if its [onKeyEvent] method return false, then they are given to each
-  /// ancestor node up the focus hierarchy in turn. If an event reaches the root
-  /// of the hierarchy, it is discarded.
+  /// if its [onKeyEvent] method returns [KeyEventResult.ignored], then they are
+  /// given to each ancestor node up the focus hierarchy in turn. If an event
+  /// reaches the root of the hierarchy, it is discarded.
   ///
   /// This is not the way to get text input in the manner of a text field: it
   /// leaves out support for input method editors, and doesn't support soft
@@ -676,7 +500,8 @@ class _FocusState extends State<Focus> {
       focusNode.descendantsAreFocusable = widget.descendantsAreFocusable;
     } else {
       _focusAttachment!.detach();
-      focusNode.removeListener(_handleFocusChanged);
+      oldWidget.focusNode?.removeListener(_handleFocusChanged);
+      _internalNode?.removeListener(_handleAutofocus);
       _initNode();
     }
 
@@ -742,8 +567,9 @@ class _FocusState extends State<Focus> {
 /// The [onKey] argument allows specification of a key event handler that is
 /// invoked when this node or one of its children has focus. Keys are handed to
 /// the primary focused widget first, and then they propagate through the
-/// ancestors of that node, stopping if one of them returns true from [onKey],
-/// indicating that it has handled the event.
+/// ancestors of that node, stopping if one of them returns
+/// [KeyEventResult.handled] from [onKey], indicating that it has handled the
+/// event.
 ///
 /// Managing a [FocusScopeNode] means managing its lifecycle, listening for
 /// changes in focus, and re-parenting it when needed to keep the focus
@@ -768,142 +594,7 @@ class _FocusState extends State<Focus> {
 /// portion of the app. In this case, restricting focus to the visible part of a
 /// Stack.
 ///
-/// ```dart preamble
-/// /// A demonstration pane.
-/// ///
-/// /// This is just a separate widget to simplify the example.
-/// class Pane extends StatelessWidget {
-///   const Pane({
-///     Key? key,
-///     required this.focusNode,
-///     this.onPressed,
-///     required this.backgroundColor,
-///     required this.icon,
-///     this.child,
-///   }) : super(key: key);
-///
-///   final FocusNode focusNode;
-///   final VoidCallback? onPressed;
-///   final Color backgroundColor;
-///   final Widget icon;
-///   final Widget? child;
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return Material(
-///       color: backgroundColor,
-///       child: Stack(
-///         fit: StackFit.expand,
-///         children: <Widget>[
-///           Center(
-///             child: child,
-///           ),
-///           Align(
-///             alignment: Alignment.topLeft,
-///             child: IconButton(
-///               autofocus: true,
-///               focusNode: focusNode,
-///               onPressed: onPressed,
-///               icon: icon,
-///             ),
-///           ),
-///         ],
-///       ),
-///     );
-///   }
-/// }
-/// ```
-///
-/// ```dart
-///   bool backdropIsVisible = false;
-///   FocusNode backdropNode = FocusNode(debugLabel: 'Close Backdrop Button');
-///   FocusNode foregroundNode = FocusNode(debugLabel: 'Option Button');
-///
-///   @override
-///   void dispose() {
-///     super.dispose();
-///     backdropNode.dispose();
-///     foregroundNode.dispose();
-///   }
-///
-///   Widget _buildStack(BuildContext context, BoxConstraints constraints) {
-///     final Size stackSize = constraints.biggest;
-///     return Stack(
-///       fit: StackFit.expand,
-///       // The backdrop is behind the front widget in the Stack, but the widgets
-///       // would still be active and traversable without the FocusScope.
-///       children: <Widget>[
-///         // TRY THIS: Try removing this FocusScope entirely to see how it affects
-///         // the behavior. Without this FocusScope, the "ANOTHER BUTTON TO FOCUS"
-///         // button, and the IconButton in the backdrop Pane would be focusable
-///         // even when the backdrop wasn't visible.
-///         FocusScope(
-///           // TRY THIS: Try commenting out this line. Notice that the focus
-///           // starts on the backdrop and is stuck there? It seems like the app is
-///           // non-responsive, but it actually isn't. This line makes sure that
-///           // this focus scope and its children can't be focused when they're not
-///           // visible. It might help to make the background color of the
-///           // foreground pane semi-transparent to see it clearly.
-///           canRequestFocus: backdropIsVisible,
-///           child: Pane(
-///             icon: const Icon(Icons.close),
-///             focusNode: backdropNode,
-///             backgroundColor: Colors.lightBlue,
-///             onPressed: () => setState(() => backdropIsVisible = false),
-///             child: Column(
-///               mainAxisAlignment: MainAxisAlignment.center,
-///               children: <Widget>[
-///                 // This button would be not visible, but still focusable from
-///                 // the foreground pane without the FocusScope.
-///                 ElevatedButton(
-///                   onPressed: () => print('You pressed the other button!'),
-///                   child: const Text('ANOTHER BUTTON TO FOCUS'),
-///                 ),
-///                 DefaultTextStyle(
-///                     style: Theme.of(context).textTheme.headline2!,
-///                     child: const Text('BACKDROP')),
-///               ],
-///             ),
-///           ),
-///         ),
-///         AnimatedPositioned(
-///           curve: Curves.easeInOut,
-///           duration: const Duration(milliseconds: 300),
-///           top: backdropIsVisible ? stackSize.height * 0.9 : 0.0,
-///           width: stackSize.width,
-///           height: stackSize.height,
-///           onEnd: () {
-///             if (backdropIsVisible) {
-///               backdropNode.requestFocus();
-///             } else {
-///               foregroundNode.requestFocus();
-///             }
-///           },
-///           child: Pane(
-///             icon: const Icon(Icons.menu),
-///             focusNode: foregroundNode,
-///             // TRY THIS: Try changing this to Colors.green.withOpacity(0.8) to see for
-///             // yourself that the hidden components do/don't get focus.
-///             backgroundColor: Colors.green,
-///             onPressed: backdropIsVisible
-///                 ? null
-///                 : () => setState(() => backdropIsVisible = true),
-///             child: DefaultTextStyle(
-///                 style: Theme.of(context).textTheme.headline2!,
-///                 child: const Text('FOREGROUND')),
-///           ),
-///         ),
-///       ],
-///     );
-///   }
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     // Use a LayoutBuilder so that we can base the size of the stack on the size
-///     // of its parent.
-///     return LayoutBuilder(builder: _buildStack);
-///   }
-/// ```
+/// ** See code in examples/api/lib/widgets/focus_scope/focus_scope.0.dart **
 /// {@end-tool}
 ///
 /// See also:

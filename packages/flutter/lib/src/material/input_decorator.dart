@@ -2449,7 +2449,6 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 /// configuration of an [InputDecorator], which does all the heavy lifting.)
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
-///
 /// This sample shows how to style a `TextField` using an `InputDecorator`. The
 /// TextField displays a "send message" icon to the left of the input area,
 /// which is surrounded by a border an all sides. It displays the `hintText`
@@ -2458,82 +2457,37 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/input_decoration.png)
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return const TextField(
-///     decoration: InputDecoration(
-///       icon: Icon(Icons.send),
-///       hintText: 'Hint Text',
-///       helperText: 'Helper Text',
-///       counterText: '0 characters',
-///       border: const OutlineInputBorder(),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/input_decorator/input_decoration.0.dart **
 /// {@end-tool}
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
-///
 /// This sample shows how to style a "collapsed" `TextField` using an
 /// `InputDecorator`. The collapsed `TextField` surrounds the hint text and
 /// input area with a border, but does not add padding around them.
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/input_decoration_collapsed.png)
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return const TextField(
-///     decoration: InputDecoration.collapsed(
-///       hintText: 'Hint Text',
-///       border: OutlineInputBorder(),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/input_decorator/input_decoration.1.dart **
 /// {@end-tool}
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
-///
 /// This sample shows how to create a `TextField` with hint text, a red border
 /// on all sides, and an error message. To display a red border and error
 /// message, provide `errorText` to the `InputDecoration` constructor.
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/input_decoration_error.png)
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return const TextField(
-///     decoration: InputDecoration(
-///       hintText: 'Hint Text',
-///       errorText: 'Error Text',
-///       border: OutlineInputBorder(),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/input_decorator/input_decoration.2.dart **
 /// {@end-tool}
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
-///
 /// This sample shows how to style a `TextField` with a round border and
 /// additional text before and after the input area. It displays "Prefix" before
 /// the input area, and "Suffix" after the input area.
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/input_decoration_prefix_suffix.png)
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return TextFormField(
-///     initialValue: 'abc',
-///     decoration: const InputDecoration(
-///       prefix: Text('Prefix'),
-///       suffix: Text('Suffix'),
-///       border: OutlineInputBorder(),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/input_decorator/input_decoration.3.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -2696,37 +2650,10 @@ class InputDecoration {
   /// otherwise be specified using [labelText], which only takes one [TextStyle].
   ///
   /// {@tool dartpad --template=stateless_widget_scaffold}
-  ///
   /// This example shows a `TextField` with a [Text.rich] widget as the [label].
   /// The widget contains multiple [Text] widgets with different [TextStyle]'s.
   ///
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   return const Center(
-  ///     child: TextField(
-  ///       decoration: InputDecoration(
-  ///         label: Text.rich(
-  ///           TextSpan(
-  ///             children: <InlineSpan>[
-  ///               WidgetSpan(
-  ///                 child: Text(
-  ///                   'Username',
-  ///                 ),
-  ///               ),
-  ///               WidgetSpan(
-  ///                 child: Text(
-  ///                   '*',
-  ///                   style: TextStyle(color: Colors.red),
-  ///                 ),
-  ///               ),
-  ///             ],
-  ///           ),
-  ///         ),
-  ///       ),
-  ///     ),
-  ///   );
-  /// }
-  /// ```
+  /// ** See code in examples/api/lib/material/input_decorator/input_decoration.label.0.dart **
   /// {@end-tool}
   ///
   /// Only one of [label] and [labelText] can be specified.
@@ -2939,7 +2866,6 @@ class InputDecoration {
   /// 48px.
   ///
   /// {@tool dartpad --template=stateless_widget_scaffold}
-  ///
   /// This example shows the differences between two `TextField` widgets when
   /// [prefixIconConstraints] is set to the default value and when one is not.
   ///
@@ -2949,36 +2875,7 @@ class InputDecoration {
   /// If null, [BoxConstraints] with a minimum width and height of 48px is
   /// used.
   ///
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   return Padding(
-  ///     padding: const EdgeInsets.symmetric(horizontal: 8.0),
-  ///     child: Column(
-  ///       mainAxisAlignment: MainAxisAlignment.center,
-  ///       children: const <Widget>[
-  ///         TextField(
-  ///           decoration: InputDecoration(
-  ///             hintText: 'Normal Icon Constraints',
-  ///             prefixIcon: Icon(Icons.search),
-  ///           ),
-  ///         ),
-  ///         SizedBox(height: 10),
-  ///         TextField(
-  ///           decoration: InputDecoration(
-  ///             isDense: true,
-  ///             hintText:'Smaller Icon Constraints',
-  ///             prefixIcon: Icon(Icons.search),
-  ///             prefixIconConstraints: BoxConstraints(
-  ///               minHeight: 32,
-  ///               minWidth: 32,
-  ///             ),
-  ///           ),
-  ///         ),
-  ///       ],
-  ///     ),
-  ///   );
-  /// }
-  /// ```
+  /// ** See code in examples/api/lib/material/input_decorator/input_decoration.prefix_icon_constraints.0.dart **
   /// {@end-tool}
   final BoxConstraints? prefixIconConstraints;
 
@@ -3117,36 +3014,7 @@ class InputDecoration {
   /// If null, [BoxConstraints] with a minimum width and height of 48px is
   /// used.
   ///
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   return Padding(
-  ///     padding: const EdgeInsets.symmetric(horizontal: 8.0),
-  ///     child: Column(
-  ///       mainAxisAlignment: MainAxisAlignment.center,
-  ///       children: const <Widget>[
-  ///         TextField(
-  ///           decoration: InputDecoration(
-  ///             hintText: 'Normal Icon Constraints',
-  ///             suffixIcon: Icon(Icons.search),
-  ///           ),
-  ///         ),
-  ///         SizedBox(height: 10),
-  ///         TextField(
-  ///           decoration: InputDecoration(
-  ///             isDense: true,
-  ///             hintText:'Smaller Icon Constraints',
-  ///             suffixIcon: Icon(Icons.search),
-  ///             suffixIconConstraints: BoxConstraints(
-  ///               minHeight: 32,
-  ///               minWidth: 32,
-  ///             ),
-  ///           ),
-  ///         ),
-  ///       ],
-  ///     ),
-  ///   );
-  /// }
-  /// ```
+  /// ** See code in examples/api/lib/material/input_decorator/input_decoration.suffix_icon_constraints.0.dart **
   /// {@end-tool}
   final BoxConstraints? suffixIconConstraints;
 

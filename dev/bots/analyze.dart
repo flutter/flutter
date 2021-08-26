@@ -8,6 +8,11 @@ import 'dart:core' hide print;
 import 'dart:io' hide exit;
 import 'dart:typed_data';
 
+import 'package:analyzer/dart/analysis/features.dart';
+import 'package:analyzer/dart/analysis/results.dart';
+import 'package:analyzer/dart/analysis/utilities.dart';
+import 'package:analyzer/dart/ast/ast.dart';
+import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
@@ -48,6 +53,9 @@ Future<void> run(List<String> arguments) async {
   print('$clock runtimeType in toString...');
   await verifyNoRuntimeTypeInToString(flutterRoot);
 
+  print('$clock debug mode instead of checked mode...');
+  await verifyNoCheckedMode(flutterRoot);
+
   print('$clock Unexpected binaries...');
   await verifyNoBinaries(flutterRoot);
 
@@ -56,6 +64,9 @@ Future<void> run(List<String> arguments) async {
 
   print('$clock Deprecations...');
   await verifyDeprecations(flutterRoot);
+
+  print('$clock Skip test comments...');
+  await verifySkipTestComments(flutterRoot);
 
   print('$clock Licenses...');
   await verifyNoMissingLicense(flutterRoot);
@@ -277,6 +288,79 @@ Future<void> _verifyNoMissingLicenseForExtension(String workingDirectory, String
   }
 }
 
+class _TestSkip {
+  _TestSkip(this.line, this.content);
+
+  final int line;
+  final String content;
+}
+
+Iterable<_TestSkip> _getTestSkips(File file) {
+  final ParseStringResult parseResult = parseFile(
+    featureSet: FeatureSet.latestLanguageVersion(),
+    path: file.absolute.path,
+  );
+  final _TestSkipLinesVisitor<CompilationUnit> visitor = _TestSkipLinesVisitor<CompilationUnit>(parseResult);
+  visitor.visitCompilationUnit(parseResult.unit);
+  return visitor.skips;
+}
+
+class _TestSkipLinesVisitor<T> extends RecursiveAstVisitor<T> {
+  _TestSkipLinesVisitor(this.parseResult) : skips = <_TestSkip>{};
+
+  final ParseStringResult parseResult;
+  final Set<_TestSkip> skips;
+
+  static bool isTestMethod(String name) {
+    return name.startsWith('test') || name == 'group' || name == 'expect';
+  }
+
+  @override
+  T? visitMethodInvocation(MethodInvocation node) {
+    if (isTestMethod(node.methodName.toString())) {
+      for (final Expression argument in node.argumentList.arguments) {
+        if (argument is NamedExpression && argument.name.label.name == 'skip') {
+          final int lineNumber = parseResult.lineInfo.getLocation(argument.beginToken.charOffset).lineNumber;
+          final String content = parseResult.content.substring(parseResult.lineInfo.getOffsetOfLine(lineNumber - 1),
+                                                               parseResult.lineInfo.getOffsetOfLine(lineNumber) - 1);
+          skips.add(_TestSkip(lineNumber, content));
+        }
+      }
+    }
+    return super.visitMethodInvocation(node);
+  }
+}
+
+final RegExp _skipTestCommentPattern = RegExp(r'//(.*)$');
+const Pattern _skipTestIntentionalPattern = '[intended]';
+final Pattern _skipTestTrackingBugPattern = RegExp(r'https+?://github.com/.*/issues/[0-9]+');
+
+Future<void> verifySkipTestComments(String workingDirectory) async {
+  final List<String> errors = <String>[];
+  final Stream<File> testFiles =_allFiles(workingDirectory, 'dart', minimumMatches: 1500)
+    .where((File f) => f.path.endsWith('_test.dart'));
+
+  await for (final File file in testFiles) {
+    for (final _TestSkip skip in _getTestSkips(file)) {
+      final Match? match = _skipTestCommentPattern.firstMatch(skip.content);
+      final String? skipComment = match?.group(1);
+      if (skipComment == null ||
+          !(skipComment.contains(_skipTestIntentionalPattern) ||
+            skipComment.contains(_skipTestTrackingBugPattern))) {
+        errors.add('${file.path}:${skip.line}: skip test without a justification comment.');
+      }
+    }
+  }
+
+  // Fail if any errors
+  if (errors.isNotEmpty) {
+    exitWithError(<String>[
+      ...errors,
+      '\n${bold}See: https://github.com/flutter/flutter/wiki/Tree-hygiene#skipped-tests$reset',
+    ]);
+  }
+}
+
 final RegExp _testImportPattern = RegExp(r'''import (['"])([^'"]+_test\.dart)\1''');
 const Set<String> _exemptTestImports = <String>{
   'package:flutter_test/flutter_test.dart',
@@ -470,6 +554,29 @@ Future<void> verifyInternationalizations(String workingDirectory, String dartExe
     ]);
   }
 }
+
+
+/// Verifies that all instances of "checked mode" have been migrated to "debug mode".
+Future<void> verifyNoCheckedMode(String workingDirectory) async {
+  final String flutterPackages = path.join(workingDirectory, 'packages');
+  final List<File> files = await _allFiles(flutterPackages, 'dart', minimumMatches: 400)
+      .where((File file) => path.extension(file.path) == '.dart')
+      .toList();
+  final List<String> problems = <String>[];
+  for (final File file in files) {
+    int lineCount = 0;
+    for (final String line in file.readAsLinesSync()) {
+      if (line.toLowerCase().contains('checked mode')) {
+        problems.add('${file.path}:$lineCount uses deprecated "checked mode" instead of "debug mode".');
+      }
+      lineCount += 1;
+    }
+  }
+  if (problems.isNotEmpty) {
+    exitWithError(problems);
+  }
+}
+
 
 Future<void> verifyNoRuntimeTypeInToString(String workingDirectory) async {
   final String flutterLib = path.join(workingDirectory, 'packages', 'flutter', 'lib');

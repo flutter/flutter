@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/src/physics/utils.dart' show nearEqual;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -1143,6 +1144,12 @@ void main() {
   });
 
   testWidgets('RawScrollbar.isAlwaysShown asserts that a ScrollPosition is attached', (WidgetTester tester) async {
+    final FlutterExceptionHandler? handler = FlutterError.onError;
+    FlutterErrorDetails? error;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      error = details;
+    };
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1163,12 +1170,15 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    final AssertionError exception = tester.takeException() as AssertionError;
-    expect(exception, isAssertionError);
+
+    expect(error, isNotNull);
+    final AssertionError exception = error!.exception as AssertionError;
     expect(
       exception.message,
       contains("The Scrollbar's ScrollController has no ScrollPosition attached."),
     );
+
+    FlutterError.onError = handler;
   });
 
   testWidgets('Interactive scrollbars should have a valid scroll controller', (WidgetTester tester) async {
@@ -1435,6 +1445,7 @@ void main() {
         ),
     );
   });
+
   testWidgets('ScrollbarPainter asserts if scrollbarOrientation is used with wrong axisDirection', (WidgetTester tester) async {
     final ScrollbarPainter painter = ScrollbarPainter(
       color: _kScrollbarColor,
@@ -1482,6 +1493,44 @@ void main() {
         ..rect(rect: const Rect.fromLTRB(794.0, 10.0, 800.0, 358.0))
     );
   });
+
+  testWidgets('shape property of RawScrollbar can draw a BeveledRectangleBorder', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            shape: const BeveledRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(8.0))
+            ),
+            controller: scrollController,
+            isAlwaysShown: true,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: const SizedBox(height: 1000.0),
+            ),
+          ),
+        )));
+    await tester.pumpAndSettle();
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..path(
+          includes: const <Offset>[
+            Offset(797.0, 0.0),
+            Offset(797.0, 18.0),
+          ],
+          excludes: const <Offset>[
+            Offset(796.0, 0.0),
+            Offset(798.0, 0.0),
+          ],
+        ),
+    );
+  });
+
   testWidgets('minThumbLength property of RawScrollbar is respected', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
@@ -1508,6 +1557,42 @@ void main() {
           ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 21.0))); // thumb
   });
 
+  testWidgets('shape property of RawScrollbar can draw a CircleBorder', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            shape: const CircleBorder(side: BorderSide(width: 2.0)),
+            thickness: 36.0,
+            controller: scrollController,
+            isAlwaysShown: true,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: const SizedBox(height: 1000.0, width: 1000),
+            ),
+          ),
+        )));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..path(
+          includes: const <Offset>[
+            Offset(782.0, 180.0),
+            Offset(782.0, 180.0 - 18.0),
+            Offset(782.0 + 18.0, 180),
+            Offset(782.0, 180.0 + 18.0),
+            Offset(782.0 - 18.0, 180),
+          ],
+        )
+        ..circle(x: 782.0, y: 180.0, radius: 17.0, strokeWidth: 2.0)
+    );
+  });
+
   testWidgets('crossAxisMargin property of RawScrollbar is respected', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
@@ -1531,6 +1616,40 @@ void main() {
         paints
           ..rect(rect: const Rect.fromLTRB(734.0, 0.0, 800.0, 600.0))
           ..rect(rect: const Rect.fromLTRB(764.0, 0.0, 770.0, 360.0)));
+  });
+
+  testWidgets('shape property of RawScrollbar can draw a RoundedRectangleBorder', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            thickness: 20,
+            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(8))),
+            controller: scrollController,
+            isAlwaysShown: true,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: const SizedBox(height: 1000.0, width: 1000.0),
+            ),
+          ),
+        )));
+    await tester.pumpAndSettle();
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(780.0, 0.0, 800.0, 600.0))
+        ..path(
+          includes: const <Offset>[
+            Offset(800.0, 0.0),
+          ],
+          excludes: const <Offset>[
+            Offset(780.0, 0.0),
+          ],
+        ),
+    );
   });
 
   testWidgets('minOverscrollLength property of RawScrollbar is respected', (WidgetTester tester) async {
@@ -1563,6 +1682,32 @@ void main() {
         paints
           ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
           ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 8.0)));
+  });
+
+  testWidgets('not passing any shape or radius to RawScrollbar will draw the usual rectangular thumb', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            controller: scrollController,
+            isAlwaysShown: true,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: const SizedBox(height: 1000.0),
+            ),
+          ),
+        )));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 360.0))
+    );
   });
 
   testWidgets('The bar can show or hide when the viewport size change', (WidgetTester tester) async {
@@ -1636,5 +1781,99 @@ void main() {
     tester.binding.window.physicalSizeTestValue = const Size(800.0, 600.0);
     await tester.pumpAndSettle();
     expect(find.byType(RawScrollbar), isNot(paints..rect())); // Not shown.
+  });
+
+  testWidgets('Scrollbar will not flip axes based on notification is there is a scroll controller', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/87697
+    final ScrollController verticalScrollController = ScrollController();
+    final ScrollController horizontalScrollController = ScrollController();
+    Widget buildFrame() {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            isAlwaysShown: true,
+            controller: verticalScrollController,
+            // This scrollbar will receive scroll notifications from both nested
+            // scroll views of opposite axes, but should stay on the vertical
+            // axis that its scroll controller is associated with.
+            notificationPredicate: (ScrollNotification notification) => notification.depth <= 1,
+            child: SingleChildScrollView(
+              controller: verticalScrollController,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                controller: horizontalScrollController,
+                child: const SizedBox(
+                  width: 1000.0,
+                  height: 1000.0,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    await tester.pumpAndSettle();
+    expect(verticalScrollController.offset, 0.0);
+    expect(horizontalScrollController.offset, 0.0);
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 360.0),
+          color: const Color(0x66BCBCBC),
+        ),
+    );
+
+    // Move the horizontal scroll view. The vertical scrollbar should not flip.
+    horizontalScrollController.jumpTo(10.0);
+    expect(verticalScrollController.offset, 0.0);
+    expect(horizontalScrollController.offset, 10.0);
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 360.0),
+          color: const Color(0x66BCBCBC),
+        ),
+    );
+  });
+
+  testWidgets('notificationPredicate depth test.', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    final List<int> depths = <int>[];
+    Widget buildFrame() {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            notificationPredicate: (ScrollNotification notification) {
+              depths.add(notification.depth);
+              return notification.depth == 0;
+            },
+            controller: scrollController,
+            isAlwaysShown: true,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: const SingleChildScrollView(),
+            ),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildFrame());
+    await tester.pumpAndSettle();
+
+    // `notificationPredicate` should be called twice with different `depth`
+    // because there are two scrollable widgets.
+    expect(depths.length, 2);
+    expect(depths[0], 1);
+    expect(depths[1], 0);
   });
 }

@@ -429,7 +429,7 @@ enum ListTileControlAffinity {
 ///   ),
 ///   title: const Text('title'),
 ///   dense: false,
-/// ),
+/// )
 /// ```
 /// {@end-tool}
 ///
@@ -440,293 +440,22 @@ enum ListTileControlAffinity {
 /// combination of other widgets, such as [Row]s and [Column]s.
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
-///
 /// Here is an example of a custom list item that resembles a YouTube-related
 /// video list item created with [Expanded] and [Container] widgets.
 ///
 /// ![Custom list item a](https://flutter.github.io/assets-for-api-docs/assets/widgets/custom_list_item_a.png)
 ///
-/// ```dart preamble
-/// class CustomListItem extends StatelessWidget {
-///   const CustomListItem({
-///     Key? key,
-///     required this.thumbnail,
-///     required this.title,
-///     required this.user,
-///     required this.viewCount,
-///   }) : super(key: key);
-///
-///   final Widget thumbnail;
-///   final String title;
-///   final String user;
-///   final int viewCount;
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return Padding(
-///       padding: const EdgeInsets.symmetric(vertical: 5.0),
-///       child: Row(
-///         crossAxisAlignment: CrossAxisAlignment.start,
-///         children: <Widget>[
-///           Expanded(
-///             flex: 2,
-///             child: thumbnail,
-///           ),
-///           Expanded(
-///             flex: 3,
-///             child: _VideoDescription(
-///               title: title,
-///               user: user,
-///               viewCount: viewCount,
-///             ),
-///           ),
-///           const Icon(
-///             Icons.more_vert,
-///             size: 16.0,
-///           ),
-///         ],
-///       ),
-///     );
-///   }
-/// }
-///
-/// class _VideoDescription extends StatelessWidget {
-///   const _VideoDescription({
-///     Key? key,
-///     required this.title,
-///     required this.user,
-///     required this.viewCount,
-///   }) : super(key: key);
-///
-///   final String title;
-///   final String user;
-///   final int viewCount;
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return Padding(
-///       padding: const EdgeInsets.fromLTRB(5.0, 0.0, 0.0, 0.0),
-///       child: Column(
-///         crossAxisAlignment: CrossAxisAlignment.start,
-///         children: <Widget>[
-///           Text(
-///             title,
-///             style: const TextStyle(
-///               fontWeight: FontWeight.w500,
-///               fontSize: 14.0,
-///             ),
-///           ),
-///           const Padding(padding: EdgeInsets.symmetric(vertical: 2.0)),
-///           Text(
-///             user,
-///             style: const TextStyle(fontSize: 10.0),
-///           ),
-///           const Padding(padding: EdgeInsets.symmetric(vertical: 1.0)),
-///           Text(
-///             '$viewCount views',
-///             style: const TextStyle(fontSize: 10.0),
-///           ),
-///         ],
-///       ),
-///     );
-///   }
-/// }
-/// ```
-///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return ListView(
-///     padding: const EdgeInsets.all(8.0),
-///     itemExtent: 106.0,
-///     children: <CustomListItem>[
-///       CustomListItem(
-///         user: 'Flutter',
-///         viewCount: 999000,
-///         thumbnail: Container(
-///           decoration: const BoxDecoration(color: Colors.blue),
-///         ),
-///         title: 'The Flutter YouTube Channel',
-///       ),
-///       CustomListItem(
-///         user: 'Dash',
-///         viewCount: 884000,
-///         thumbnail: Container(
-///           decoration: const BoxDecoration(color: Colors.yellow),
-///         ),
-///         title: 'Announcing Flutter 1.0',
-///       ),
-///     ],
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/list_tile/list_tile.4.dart **
 /// {@end-tool}
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
-///
 /// Here is an example of an article list item with multiline titles and
 /// subtitles. It utilizes [Row]s and [Column]s, as well as [Expanded] and
 /// [AspectRatio] widgets to organize its layout.
 ///
 /// ![Custom list item b](https://flutter.github.io/assets-for-api-docs/assets/widgets/custom_list_item_b.png)
 ///
-/// ```dart preamble
-/// class _ArticleDescription extends StatelessWidget {
-///   const _ArticleDescription({
-///     Key? key,
-///     required this.title,
-///     required this.subtitle,
-///     required this.author,
-///     required this.publishDate,
-///     required this.readDuration,
-///   }) : super(key: key);
-///
-///   final String title;
-///   final String subtitle;
-///   final String author;
-///   final String publishDate;
-///   final String readDuration;
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return Column(
-///       crossAxisAlignment: CrossAxisAlignment.start,
-///       children: <Widget>[
-///         Expanded(
-///           flex: 1,
-///           child: Column(
-///             crossAxisAlignment: CrossAxisAlignment.start,
-///             children: <Widget>[
-///               Text(
-///                 title,
-///                 maxLines: 2,
-///                 overflow: TextOverflow.ellipsis,
-///                 style: const TextStyle(
-///                   fontWeight: FontWeight.bold,
-///                 ),
-///               ),
-///               const Padding(padding: EdgeInsets.only(bottom: 2.0)),
-///               Text(
-///                 subtitle,
-///                 maxLines: 2,
-///                 overflow: TextOverflow.ellipsis,
-///                 style: const TextStyle(
-///                   fontSize: 12.0,
-///                   color: Colors.black54,
-///                 ),
-///               ),
-///             ],
-///           ),
-///         ),
-///         Expanded(
-///           flex: 1,
-///           child: Column(
-///             crossAxisAlignment: CrossAxisAlignment.start,
-///             mainAxisAlignment: MainAxisAlignment.end,
-///             children: <Widget>[
-///               Text(
-///                 author,
-///                 style: const TextStyle(
-///                   fontSize: 12.0,
-///                   color: Colors.black87,
-///                 ),
-///               ),
-///               Text(
-///                 '$publishDate - $readDuration',
-///                 style: const TextStyle(
-///                   fontSize: 12.0,
-///                   color: Colors.black54,
-///                 ),
-///               ),
-///             ],
-///           ),
-///         ),
-///       ],
-///     );
-///   }
-/// }
-///
-/// class CustomListItemTwo extends StatelessWidget {
-///   const CustomListItemTwo({
-///     Key? key,
-///     required this.thumbnail,
-///     required this.title,
-///     required this.subtitle,
-///     required this.author,
-///     required this.publishDate,
-///     required this.readDuration,
-///   }) : super(key: key);
-///
-///   final Widget thumbnail;
-///   final String title;
-///   final String subtitle;
-///   final String author;
-///   final String publishDate;
-///   final String readDuration;
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return Padding(
-///       padding: const EdgeInsets.symmetric(vertical: 10.0),
-///       child: SizedBox(
-///         height: 100,
-///         child: Row(
-///           crossAxisAlignment: CrossAxisAlignment.start,
-///           children: <Widget>[
-///             AspectRatio(
-///               aspectRatio: 1.0,
-///               child: thumbnail,
-///             ),
-///             Expanded(
-///               child: Padding(
-///                 padding: const EdgeInsets.fromLTRB(20.0, 0.0, 2.0, 0.0),
-///                 child: _ArticleDescription(
-///                   title: title,
-///                   subtitle: subtitle,
-///                   author: author,
-///                   publishDate: publishDate,
-///                   readDuration: readDuration,
-///                 ),
-///               ),
-///             )
-///           ],
-///         ),
-///       ),
-///     );
-///   }
-/// }
-/// ```
-///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return ListView(
-///     padding: const EdgeInsets.all(10.0),
-///     children: <Widget>[
-///       CustomListItemTwo(
-///         thumbnail: Container(
-///           decoration: const BoxDecoration(color: Colors.pink),
-///         ),
-///         title: 'Flutter 1.0 Launch',
-///         subtitle:
-///           'Flutter continues to improve and expand its horizons. '
-///           'This text should max out at two lines and clip',
-///         author: 'Dash',
-///         publishDate: 'Dec 28',
-///         readDuration: '5 mins',
-///       ),
-///       CustomListItemTwo(
-///         thumbnail: Container(
-///           decoration: const BoxDecoration(color: Colors.blue),
-///         ),
-///         title: 'Flutter 1.2 Release - Continual updates to the framework',
-///         subtitle: 'Flutter once again improves and makes updates.',
-///         author: 'Flutter',
-///         publishDate: 'Feb 26',
-///         readDuration: '12 mins',
-///       ),
-///     ],
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/list_tile/list_tile.5.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -908,32 +637,11 @@ class ListTile extends StatelessWidget {
   /// can be overridden with a [ListTileTheme].
   ///
   /// {@tool dartpad --template=stateful_widget_scaffold}
-  ///
   /// Here is an example of using a [StatefulWidget] to keep track of the
   /// selected index, and using that to set the `selected` property on the
   /// corresponding [ListTile].
   ///
-  /// ```dart
-  ///   int _selectedIndex = 0;
-  ///
-  ///   @override
-  ///   Widget build(BuildContext context) {
-  ///     return ListView.builder(
-  ///       itemCount: 10,
-  ///       itemBuilder: (BuildContext context, int index) {
-  ///         return ListTile(
-  ///           title: Text('Item $index'),
-  ///           selected: index == _selectedIndex,
-  ///           onTap: () {
-  ///             setState(() {
-  ///               _selectedIndex = index;
-  ///             });
-  ///           },
-  ///         );
-  ///       },
-  ///     );
-  ///   }
-  /// ```
+  /// ** See code in examples/api/lib/material/list_tile/list_tile.selected.0.dart **
   /// {@end-tool}
   final bool selected;
 

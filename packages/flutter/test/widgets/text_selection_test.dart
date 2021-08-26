@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind, kSecondaryButton;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -766,19 +765,13 @@ void main() {
         TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
       });
 
-      // TODO(justinmc): See if `testWidgets` can be reverted to `test`.
-      testWidgets('Clipboard API failure is gracefully recovered from', (WidgetTester tester) async {
+      test('Clipboard API failure is gracefully recovered from', () async {
         final ClipboardStatusNotifier notifier = ClipboardStatusNotifier();
         expect(notifier.value, ClipboardStatus.unknown);
 
         await expectLater(notifier.update(), completes);
         expect(notifier.value, ClipboardStatus.unknown);
-        // TODO(justinmc): Currently on Android and iOS, ClipboardStatus.pasteable
-        //                 is always returned. Once both platforms properly use
-        //                 `hasStrings` to check whether the clipboard has any
-        //                 content, try to see if this override can be removed.
-        //                 https://github.com/flutter/flutter/issues/74139
-      }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.linux }));
+      });
     });
 
     group('when Clipboard succeeds', () {
@@ -792,8 +785,7 @@ void main() {
         TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
       });
 
-      // TODO(justinmc): See if `testWidgets` can be reverted to `test`.
-      testWidgets('update sets value based on clipboard contents', (WidgetTester tester) async {
+      test('update sets value based on clipboard contents', () async {
         final ClipboardStatusNotifier notifier = ClipboardStatusNotifier();
         expect(notifier.value, ClipboardStatus.unknown);
 
@@ -808,12 +800,7 @@ void main() {
         ));
         await expectLater(notifier.update(), completes);
         expect(notifier.value, ClipboardStatus.pasteable);
-        // TODO(justinmc): Currently on Android and iOS, ClipboardStatus.pasteable
-        //                 is always returned. Once both platforms properly use
-        //                 `hasStrings` to check whether the clipboard has any
-        //                 content, try to see if this override can be removed.
-        //                 https://github.com/flutter/flutter/issues/74139
-      }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.linux }));
+      });
     });
   });
 }

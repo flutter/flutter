@@ -162,6 +162,10 @@ void main() {
           ],
         ),
         const FakeCommand(
+          command: <String>['git', 'status', '--porcelain'],
+          stdout: 'MM path/to/DEPS',
+        ),
+        const FakeCommand(
           command: <String>['git', 'add', '--all'],
         ),
         const FakeCommand(
@@ -272,6 +276,7 @@ void main() {
         jsonDecode(stateFile.readAsStringSync()),
       );
 
+      expect(processManager.hasRemainingExpectations, false);
       expect(state.isInitialized(), true);
       expect(state.releaseChannel, releaseChannel);
       expect(state.releaseVersion, nextVersion);

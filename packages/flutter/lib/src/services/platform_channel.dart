@@ -372,6 +372,13 @@ class MethodChannel {
   /// similarly to what happens if no method call handler has been set.
   /// Any other exception results in an error envelope being sent.
   void setMethodCallHandler(Future<dynamic> Function(MethodCall call)? handler) {
+    assert(
+      _binaryMessenger != null || ServicesBinding.instance != null,
+      'Cannot set the method call handler before the binary messenger has been initialized. '
+      'This happens when you call setMethodCallHandler() before the WidgetsFlutterBinding '
+      'has been initialized. You can fix this by either calling WidgetsFlutterBinding.ensureInitialized() '
+      'before this or by passing a custom BinaryMessenger instance to MethodChannel().',
+    );
     binaryMessenger.setMessageHandler(
       name,
       handler == null

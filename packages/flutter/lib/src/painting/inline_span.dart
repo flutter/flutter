@@ -331,7 +331,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   @protected
   int? codeUnitAtVisitor(int index, Accumulator offset);
 
-  /// In checked mode, throws an exception if the object is not in a
+  /// In debug mode, throws an exception if the object is not in a
   /// valid configuration. Otherwise, returns true.
   ///
   /// This is intended to be used as follows:

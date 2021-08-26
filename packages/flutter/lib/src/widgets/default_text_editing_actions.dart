@@ -307,7 +307,7 @@ class _SelectAllTextAction extends TextEditingAction<SelectAllTextIntent> {
 class _CopySelectionTextAction extends TextEditingAction<CopySelectionTextIntent> {
   @override
   Object? invoke(CopySelectionTextIntent intent, [BuildContext? context]) {
-    textEditingActionTarget!.renderEditable.copySelection();
+    textEditingActionTarget!.renderEditable.copySelection(SelectionChangedCause.keyboard);
   }
 }
 

@@ -32,7 +32,7 @@ void main() {
 
     expect(await compute(test1Async, 0), 1);
     expect(compute(test2Async, 0), throwsException);
-  }, skip: kIsWeb);
+  }, skip: kIsWeb); // [intended] isn't supported on the web.
 
   test('compute closes all ports', () async {
     // Run a Dart script that calls compute().
@@ -46,5 +46,5 @@ void main() {
     final String scriptPath = fs.path.join(packageRoot, 'test', 'foundation', '_compute_caller.dart');
     final ProcessResult result = await Process.run(dartPath, <String>[scriptPath]);
     expect(result.exitCode, 0);
-  }, skip: kIsWeb);
+  }, skip: kIsWeb); // [intended] isn't supported on the web.
 }

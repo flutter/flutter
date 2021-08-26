@@ -194,6 +194,7 @@ class SemanticsUpdateBuilderSpy extends ui.SemanticsUpdateBuilder {
     List<ui.StringAttribute>? decreasedValueAttributes,
     required String hint,
     List<ui.StringAttribute>? hintAttributes,
+    String? tooltip,
     TextDirection? textDirection,
     required Float64List transform,
     required Int32List childrenInTraversalOrder,

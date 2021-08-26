@@ -74,45 +74,10 @@ enum _ContextMenuLocation {
 /// Photos app on iOS.
 ///
 /// {@tool dartpad --template=stateless_widget_material}
-///
 /// This sample shows a very simple CupertinoContextMenu for an empty red
 /// 100x100 Container. Simply long press on it to open.
 ///
-/// ```dart imports
-/// import 'package:flutter/cupertino.dart';
-/// ```
-///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return Scaffold(
-///     body: Center(
-///       child: SizedBox(
-///         width: 100,
-///         height: 100,
-///         child: CupertinoContextMenu(
-///           child: Container(
-///             color: Colors.red,
-///           ),
-///           actions: <Widget>[
-///             CupertinoContextMenuAction(
-///               child: const Text('Action one'),
-///               onPressed: () {
-///                 Navigator.pop(context);
-///               },
-///             ),
-///             CupertinoContextMenuAction(
-///               child: const Text('Action two'),
-///               onPressed: () {
-///                 Navigator.pop(context);
-///               },
-///             ),
-///           ],
-///         ),
-///       ),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/cupertino/context_menu/cupertino_context_menu.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -212,7 +177,7 @@ class CupertinoContextMenu extends StatefulWidget {
   ///       onPressed: () {},
   ///     ),
   ///   ],
-  /// ),
+  /// )
   /// ```
   ///
   /// {@end-tool}
