@@ -15,8 +15,13 @@ import 'image_stream.dart';
 /// Creates a type for an overridable factory function for testing purposes
 typedef HttpRequestFactory = html.HttpRequest Function();
 
+/// Default httpClient
+html.HttpRequest httpClient() {
+  return html.HttpRequest();
+}
+
 /// Creates an overridable factory function
-HttpRequestFactory httpRequestFactory = () => html.HttpRequest();
+HttpRequestFactory httpRequestFactory = httpClient;
 
 /// Restores to the default HttpRequest
 void debugRestoreHttpRequestFactory() {
