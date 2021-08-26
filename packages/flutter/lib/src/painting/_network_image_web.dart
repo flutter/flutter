@@ -98,7 +98,7 @@ class NetworkImage
 
     final Uri resolved = Uri.base.resolve(key.url);
 
-    if (key.headers?.isEmpty ?? true) {
+    if (key.headers?.isNotEmpty ?? false) {
       final Completer<html.HttpRequest> completer =
           Completer<html.HttpRequest>();
       final html.HttpRequest request = httpRequestFactory();
