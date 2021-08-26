@@ -14,7 +14,7 @@ rm -f build/app/outputs/bundle/release/run_logcat.log
 flutter build appbundle
 
 java -jar $1 build-apks --bundle=build/app/outputs/bundle/release/app-release.aab --output=build/app/outputs/bundle/release/app-release.apks --local-testing --device-spec=avd_device_config.json
-java -jar $1 install-apks --apks=build/app/outputs/bundle/release/app-release.apks --device-spec=avd_device_config.json
+java -jar $1 install-apks --apks=build/app/outputs/bundle/release/app-release.apks
 
 $2 shell "
 am start -n io.flutter.integration.deferred_components_test/.MainActivity
