@@ -463,6 +463,7 @@ executable("flutter_runner_unittests") {
     "platform_view_unittest.cc",
     "runner_unittest.cc",
     "tests/engine_unittests.cc",
+    "tests/fake_session_unittests.cc",
     "tests/flutter_runner_product_configuration_unittests.cc",
     "tests/gfx_session_connection_unittests.cc",
   ]
