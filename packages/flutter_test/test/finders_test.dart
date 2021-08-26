@@ -2,11 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  group('image', () {
+    testWidgets('finds Image widgets', (WidgetTester tester) async {
+      await tester.pumpWidget(_boilerplate(
+          Image(image: FileImage(File('test'), scale: 1.0))
+      ));
+      expect(find.image(FileImage(File('test'), scale: 1.0)), findsOneWidget);
+    });
+  });
+
   group('text', () {
     testWidgets('finds Text widgets', (WidgetTester tester) async {
       await tester.pumpWidget(_boilerplate(
@@ -26,6 +37,84 @@ void main() {
       )));
 
       expect(find.text('test'), findsOneWidget);
+    });
+
+    group('findRichText', () {
+      testWidgets('finds RichText widgets when enabled',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(_boilerplate(RichText(
+          text: const TextSpan(
+            text: 't',
+            children: <TextSpan>[
+              TextSpan(text: 'est'),
+            ],
+          ),
+        )));
+
+        expect(find.text('test', findRichText: true), findsOneWidget);
+      });
+
+      testWidgets('finds Text widgets once when enabled',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(_boilerplate(const Text('test2')));
+
+        expect(find.text('test2', findRichText: true), findsOneWidget);
+      });
+
+      testWidgets('does not find RichText widgets when disabled',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(_boilerplate(RichText(
+          text: const TextSpan(
+            text: 't',
+            children: <TextSpan>[
+              TextSpan(text: 'est'),
+            ],
+          ),
+        )));
+
+        expect(find.text('test', findRichText: false), findsNothing);
+      });
+
+      testWidgets(
+          'does not find Text and RichText separated by semantics widgets twice',
+          (WidgetTester tester) async {
+        // If rich: true found both Text and RichText, this would find two widgets.
+        await tester.pumpWidget(_boilerplate(
+          const Text('test', semanticsLabel: 'foo'),
+        ));
+
+        expect(find.text('test'), findsOneWidget);
+      });
+
+      testWidgets('finds Text.rich widgets when enabled',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(_boilerplate(const Text.rich(
+          TextSpan(
+            text: 't',
+            children: <TextSpan>[
+              TextSpan(text: 'est'),
+              TextSpan(text: '3'),
+            ],
+          ),
+        )));
+
+        expect(find.text('test3', findRichText: true), findsOneWidget);
+      });
+
+      testWidgets('finds Text.rich widgets when disabled',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(_boilerplate(const Text.rich(
+          TextSpan(
+            text: 't',
+            children: <TextSpan>[
+              TextSpan(text: 'est'),
+              TextSpan(text: '3'),
+            ],
+          ),
+        )));
+
+        expect(find.text('test3', findRichText: false), findsOneWidget);
+      });
     });
   });
 

@@ -702,7 +702,40 @@ void main() {
     expect(boxes[8], const TextBox.fromLTRBD(14.0, 28.0, 28.0, 42.0 , TextDirection.ltr));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
 
-  test('Supports gesture recognizer semantics', () {
+  test('Does not include the semantics node of truncated rendering children', () {
+    // Regression test for https://github.com/flutter/flutter/issues/88180
+    const double screenWidth = 100;
+    const String sentence = 'truncated';
+    final List<RenderBox> renderBoxes = <RenderBox>[
+      RenderParagraph(
+          const TextSpan(text: sentence), textDirection: TextDirection.ltr),
+    ];
+    final RenderParagraph paragraph = RenderParagraph(
+      const TextSpan(
+        text: 'a long line to be truncated.',
+        children: <InlineSpan>[
+          WidgetSpan(child: Text(sentence)),
+        ],
+      ),
+      overflow: TextOverflow.ellipsis,
+      textScaleFactor: 1.0,
+      children: renderBoxes,
+      textDirection: TextDirection.ltr,
+    );
+    layout(paragraph, constraints: const BoxConstraints(maxWidth: screenWidth));
+    final SemanticsNode result = SemanticsNode();
+    final SemanticsNode truncatedChild = SemanticsNode();
+    truncatedChild.tags = <SemanticsTag>{const PlaceholderSpanIndexSemanticsTag(0)};
+    paragraph.assembleSemanticsNode(result, SemanticsConfiguration(), <SemanticsNode>[truncatedChild]);
+    // It should only contain the semantics node of the TextSpan.
+    expect(result.childrenCount, 1);
+    result.visitChildren((SemanticsNode node) {
+      expect(node != truncatedChild, isTrue);
+      return true;
+    });
+  });
+
+    test('Supports gesture recognizer semantics', () {
     final RenderParagraph paragraph = RenderParagraph(
       TextSpan(text: _kText, children: <InlineSpan>[
         TextSpan(text: 'one', recognizer: TapGestureRecognizer()..onTap = () {}),
@@ -714,6 +747,18 @@ void main() {
     layout(paragraph);
 
     paragraph.assembleSemanticsNode(SemanticsNode(), SemanticsConfiguration(), <SemanticsNode>[]);
+  });
+
+  test('Supports empty text span with spell out', () {
+    final RenderParagraph paragraph = RenderParagraph(
+      const TextSpan(text: '', spellOut: true),
+      textDirection: TextDirection.rtl,
+    );
+    layout(paragraph);
+    final SemanticsNode node = SemanticsNode();
+    paragraph.assembleSemanticsNode(node, SemanticsConfiguration(), <SemanticsNode>[]);
+    expect(node.attributedLabel.string, '');
+    expect(node.attributedLabel.attributes.length, 0);
   });
 
   test('Asserts on unsupported gesture recognizer', () {

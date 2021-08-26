@@ -74,23 +74,9 @@ enum _ScaffoldSlot {
 /// ScaffoldMessenger in between the levels of nesting.
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold_center}
-///
 /// Here is an example of showing a [SnackBar] when the user presses a button.
 ///
-/// ```dart
-///   Widget build(BuildContext context) {
-///     return OutlinedButton(
-///       onPressed: () {
-///         ScaffoldMessenger.of(context).showSnackBar(
-///           const SnackBar(
-///             content: Text('A SnackBar has been shown.'),
-///           ),
-///         );
-///       },
-///       child: const Text('Show SnackBar'),
-///     );
-///   }
-/// ```
+/// ** See code in examples/api/lib/material/scaffold/scaffold_messenger.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -120,20 +106,7 @@ class ScaffoldMessenger extends StatefulWidget {
   /// Typical usage of the [ScaffoldMessenger.of] function is to call it in
   /// response to a user gesture or an application state change.
   ///
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   return ElevatedButton(
-  ///     child: const Text('SHOW A SNACKBAR'),
-  ///     onPressed: () {
-  ///       ScaffoldMessenger.of(context).showSnackBar(
-  ///         const SnackBar(
-  ///           content: Text('Have a snack!'),
-  ///         ),
-  ///       );
-  ///     },
-  ///   );
-  /// }
-  /// ```
+  /// ** See code in examples/api/lib/material/scaffold/scaffold_messenger.of.0.dart **
   /// {@end-tool}
   ///
   /// A less elegant but more expedient solution is to assign a [GlobalKey] to the
@@ -150,65 +123,7 @@ class ScaffoldMessenger extends StatefulWidget {
   /// example shows a key being used to obtain the [ScaffoldMessengerState]
   /// provided by the [MaterialApp].
   ///
-  /// ```dart imports
-  /// import 'package:flutter/material.dart';
-  /// ```
-  /// ```dart
-  /// void main() => runApp(const MyApp());
-  ///
-  /// class MyApp extends StatefulWidget {
-  ///   const MyApp({Key? key}) : super(key: key);
-  ///
-  ///   @override
-  ///  State<MyApp> createState() => _MyAppState();
-  /// }
-  ///
-  /// class _MyAppState extends State<MyApp> {
-  ///   final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
-  ///   int _counter = 0;
-  ///
-  ///   void _incrementCounter() {
-  ///     setState(() {
-  ///       _counter++;
-  ///     });
-  ///     if (_counter % 10 == 0) {
-  ///       _scaffoldMessengerKey.currentState!.showSnackBar(const SnackBar(
-  ///         content: Text('A multiple of ten!'),
-  ///       ));
-  ///     }
-  ///   }
-  ///
-  ///   @override
-  ///   Widget build(BuildContext context) {
-  ///     return MaterialApp(
-  ///       scaffoldMessengerKey: _scaffoldMessengerKey,
-  ///       home: Scaffold(
-  ///         appBar: AppBar(title: const Text('ScaffoldMessenger Demo')),
-  ///         body: Center(
-  ///           child: Column(
-  ///             mainAxisAlignment: MainAxisAlignment.center,
-  ///             children: <Widget>[
-  ///               const Text(
-  ///                 'You have pushed the button this many times:',
-  ///               ),
-  ///               Text(
-  ///                 '$_counter',
-  ///                 style: Theme.of(context).textTheme.headline4,
-  ///               ),
-  ///             ],
-  ///           ),
-  ///         ),
-  ///         floatingActionButton: FloatingActionButton(
-  ///           onPressed: _incrementCounter,
-  ///           tooltip: 'Increment',
-  ///           child: const Icon(Icons.add),
-  ///         ),
-  ///       ),
-  ///     );
-  ///   }
-  /// }
-  ///
-  /// ```
+  /// ** See code in examples/api/lib/material/scaffold/scaffold_messenger.of.1.dart **
   /// {@end-tool}
   ///
   /// If there is no [ScaffoldMessenger] in scope, then this will assert in
@@ -338,23 +253,9 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   /// [ScaffoldMessengerState].
   ///
   /// {@tool dartpad --template=stateless_widget_scaffold_center}
-  ///
   /// Here is an example of showing a [SnackBar] when the user presses a button.
   ///
-  /// ```dart
-  ///   Widget build(BuildContext context) {
-  ///     return OutlinedButton(
-  ///       onPressed: () {
-  ///         ScaffoldMessenger.of(context).showSnackBar(
-  ///           const SnackBar(
-  ///             content: Text('A SnackBar has been shown.'),
-  ///           ),
-  ///         );
-  ///       },
-  ///       child: const Text('Show SnackBar'),
-  ///     );
-  ///   }
-  /// ```
+  /// ** See code in examples/api/lib/material/scaffold/scaffold_messenger_state.show_snack_bar.0.dart **
   /// {@end-tool}
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBar(SnackBar snackBar) {
     _snackBarController ??= SnackBar.createAnimationController(vsync: this)
@@ -478,29 +379,9 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   /// [ScaffoldMessengerState].
   ///
   /// {@tool dartpad --template=stateless_widget_scaffold_center}
-  ///
   /// Here is an example of showing a [MaterialBanner] when the user presses a button.
   ///
-  /// ```dart
-  ///   Widget build(BuildContext context) {
-  ///     return OutlinedButton(
-  ///       onPressed: () {
-  ///         ScaffoldMessenger.of(context).showMaterialBanner(
-  ///           const MaterialBanner(
-  ///             content: Text('This is a MaterialBanner'),
-  ///             actions: <Widget>[
-  ///               TextButton(
-  ///                 child: Text('DISMISS'),
-  ///                 onPressed: null,
-  ///               ),
-  ///             ],
-  ///           ),
-  ///         );
-  ///       },
-  ///       child: const Text('Show MaterialBanner'),
-  ///     );
-  ///   }
-  /// ```
+  /// ** See code in examples/api/lib/material/scaffold/scaffold_messenger_state.show_material_banner.0.dart **
   /// {@end-tool}
   ScaffoldFeatureController<MaterialBanner, MaterialBannerClosedReason> showMaterialBanner(MaterialBanner materialBanner) {
     _materialBannerController ??= MaterialBanner.createAnimationController(vsync: this)
@@ -1469,26 +1350,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 ///
 /// ![The Scaffold has a white background with a blue AppBar at the top. A blue FloatingActionButton is positioned at the bottom right corner of the Scaffold.](https://flutter.github.io/assets-for-api-docs/assets/material/scaffold.png)
 ///
-/// ```dart
-/// int _count = 0;
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return Scaffold(
-///     appBar: AppBar(
-///       title: const Text('Sample Code'),
-///     ),
-///     body: Center(
-///       child: Text('You have pressed the button $_count times.')
-///     ),
-///     floatingActionButton: FloatingActionButton(
-///       onPressed: () => setState(() => _count++),
-///       tooltip: 'Increment Counter',
-///       child: const Icon(Icons.add),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/scaffold/scaffold.0.dart **
 /// {@end-tool}
 ///
 /// {@tool dartpad --template=stateful_widget_material}
@@ -1499,27 +1361,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/scaffold_background_color.png)
 ///
-/// ```dart
-/// int _count = 0;
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return Scaffold(
-///     appBar: AppBar(
-///       title: const Text('Sample Code'),
-///     ),
-///     body: Center(
-///       child: Text('You have pressed the button $_count times.')
-///     ),
-///     backgroundColor: Colors.blueGrey.shade200,
-///     floatingActionButton: FloatingActionButton(
-///       onPressed: () => setState(() => _count++),
-///       tooltip: 'Increment Counter',
-///       child: const Icon(Icons.add),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/scaffold/scaffold.1.dart **
 /// {@end-tool}
 ///
 /// {@tool dartpad --template=stateful_widget_material}
@@ -1532,33 +1374,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/scaffold_bottom_app_bar.png)
 ///
-/// ```dart
-/// int _count = 0;
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return Scaffold(
-///     appBar: AppBar(
-///       title: const Text('Sample Code'),
-///     ),
-///     body: Center(
-///       child: Text('You have pressed the button $_count times.'),
-///     ),
-///     bottomNavigationBar: BottomAppBar(
-///       shape: const CircularNotchedRectangle(),
-///       child: Container(height: 50.0),
-///     ),
-///     floatingActionButton: FloatingActionButton(
-///       onPressed: () => setState(() {
-///         _count++;
-///       }),
-///       tooltip: 'Increment Counter',
-///       child: const Icon(Icons.add),
-///     ),
-///     floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/scaffold/scaffold.2.dart **
 /// {@end-tool}
 ///
 /// ## Scaffold layout, the keyboard, and display "notches"
@@ -1771,47 +1587,7 @@ class Scaffold extends StatefulWidget {
   /// [ScaffoldState.openDrawer] to open the drawer and [Navigator.pop] to close
   /// it.
   ///
-  /// ```dart
-  /// final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  ///
-  /// void _openDrawer() {
-  ///   _scaffoldKey.currentState!.openDrawer();
-  /// }
-  ///
-  /// void _closeDrawer() {
-  ///   Navigator.of(context).pop();
-  /// }
-  ///
-  /// @override
-  /// Widget build(BuildContext context) {
-  ///   return Scaffold(
-  ///     key: _scaffoldKey,
-  ///     appBar: AppBar(title: const Text('Drawer Demo')),
-  ///     body: Center(
-  ///       child: ElevatedButton(
-  ///         onPressed: _openDrawer,
-  ///         child: const Text('Open Drawer'),
-  ///       ),
-  ///     ),
-  ///     drawer: Drawer(
-  ///       child: Center(
-  ///         child: Column(
-  ///           mainAxisAlignment: MainAxisAlignment.center,
-  ///           children: <Widget>[
-  ///             const Text('This is the Drawer'),
-  ///             ElevatedButton(
-  ///               onPressed: _closeDrawer,
-  ///               child: const Text('Close Drawer'),
-  ///             ),
-  ///           ],
-  ///         ),
-  ///       ),
-  ///     ),
-  ///     // Disable opening the drawer with a swipe gesture.
-  ///     drawerEnableOpenDragGesture: false,
-  ///   );
-  /// }
-  /// ```
+  /// ** See code in examples/api/lib/material/scaffold/scaffold.drawer.0.dart **
   /// {@end-tool}
   final Widget? drawer;
 
@@ -1834,47 +1610,7 @@ class Scaffold extends StatefulWidget {
   /// [ScaffoldState.openEndDrawer] to open the drawer and [Navigator.pop] to
   /// close it.
   ///
-  /// ```dart
-  /// final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  ///
-  /// void _openEndDrawer() {
-  ///   _scaffoldKey.currentState!.openEndDrawer();
-  /// }
-  ///
-  /// void _closeEndDrawer() {
-  ///   Navigator.of(context).pop();
-  /// }
-  ///
-  /// @override
-  /// Widget build(BuildContext context) {
-  ///   return Scaffold(
-  ///     key: _scaffoldKey,
-  ///     appBar: AppBar(title: const Text('Drawer Demo')),
-  ///     body: Center(
-  ///       child: ElevatedButton(
-  ///         onPressed: _openEndDrawer,
-  ///         child: const Text('Open End Drawer'),
-  ///       ),
-  ///     ),
-  ///     endDrawer: Drawer(
-  ///       child: Center(
-  ///         child: Column(
-  ///           mainAxisAlignment: MainAxisAlignment.center,
-  ///           children: <Widget>[
-  ///             const Text('This is the Drawer'),
-  ///             ElevatedButton(
-  ///               onPressed: _closeEndDrawer,
-  ///               child: const Text('Close Drawer'),
-  ///             ),
-  ///           ],
-  ///         ),
-  ///       ),
-  ///     ),
-  ///     // Disable opening the end drawer with a swipe gesture.
-  ///     endDrawerEnableOpenDragGesture: false,
-  ///   );
-  /// }
-  /// ```
+  /// ** See code in examples/api/lib/material/scaffold/scaffold.end_drawer.0.dart **
   /// {@end-tool}
   final Widget? endDrawer;
 
@@ -2003,75 +1739,7 @@ class Scaffold extends StatefulWidget {
   /// Typical usage of the [Scaffold.of] function is to call it from within the
   /// `build` method of a child of a [Scaffold].
   ///
-  /// ```dart imports
-  /// import 'package:flutter/material.dart';
-  /// ```
-  ///
-  /// ```dart main
-  /// void main() => runApp(const MyApp());
-  /// ```
-  ///
-  /// ```dart preamble
-  /// class MyApp extends StatelessWidget {
-  ///   const MyApp({Key? key}) : super(key: key);
-  ///
-  ///   // This widget is the root of your application.
-  ///   @override
-  ///   Widget build(BuildContext context) {
-  ///     return MaterialApp(
-  ///       title: 'Flutter Code Sample for Scaffold.of.',
-  ///       theme: ThemeData(
-  ///         primarySwatch: Colors.blue,
-  ///       ),
-  ///       home: Scaffold(
-  ///         body: const MyScaffoldBody(),
-  ///         appBar: AppBar(title: const Text('Scaffold.of Example')),
-  ///       ),
-  ///       color: Colors.white,
-  ///     );
-  ///   }
-  /// }
-  /// ```
-  ///
-  /// ```dart
-  /// class MyScaffoldBody extends StatelessWidget {
-  ///   const MyScaffoldBody({Key? key}) : super(key: key);
-  ///
-  ///   @override
-  ///   Widget build(BuildContext context) {
-  ///     return Center(
-  ///       child: ElevatedButton(
-  ///         child: const Text('SHOW BOTTOM SHEET'),
-  ///         onPressed: () {
-  ///           Scaffold.of(context).showBottomSheet<void>(
-  ///             (BuildContext context) {
-  ///               return Container(
-  ///                 alignment: Alignment.center,
-  ///                 height: 200,
-  ///                 color: Colors.amber,
-  ///                 child: Center(
-  ///                   child: Column(
-  ///                     mainAxisSize: MainAxisSize.min,
-  ///                     children: <Widget>[
-  ///                       const Text('BottomSheet'),
-  ///                       ElevatedButton(
-  ///                         child: const Text('Close BottomSheet'),
-  ///                         onPressed: () {
-  ///                           Navigator.pop(context);
-  ///                         },
-  ///                       )
-  ///                     ],
-  ///                   ),
-  ///                 ),
-  ///               );
-  ///             },
-  ///           );
-  ///         },
-  ///       ),
-  ///     );
-  ///   }
-  /// }
-  /// ```
+  /// ** See code in examples/api/lib/material/scaffold/scaffold.of.0.dart **
   /// {@end-tool}
   ///
   /// {@tool dartpad --template=stateless_widget_material}
@@ -2082,49 +1750,7 @@ class Scaffold extends StatefulWidget {
   /// to provide a new scope with a [BuildContext] that is "under" the
   /// [Scaffold]:
   ///
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   return Scaffold(
-  ///     appBar: AppBar(title: const Text('Demo')),
-  ///     body: Builder(
-  ///       // Create an inner BuildContext so that the onPressed methods
-  ///       // can refer to the Scaffold with Scaffold.of().
-  ///       builder: (BuildContext context) {
-  ///         return Center(
-  ///           child: ElevatedButton(
-  ///             child: const Text('SHOW BOTTOM SHEET'),
-  ///             onPressed: () {
-  ///               Scaffold.of(context).showBottomSheet<void>(
-  ///                 (BuildContext context) {
-  ///                   return Container(
-  ///                     alignment: Alignment.center,
-  ///                     height: 200,
-  ///                     color: Colors.amber,
-  ///                     child: Center(
-  ///                       child: Column(
-  ///                         mainAxisSize: MainAxisSize.min,
-  ///                         children: <Widget>[
-  ///                           const Text('BottomSheet'),
-  ///                           ElevatedButton(
-  ///                             child: const Text('Close BottomSheet'),
-  ///                             onPressed: () {
-  ///                               Navigator.pop(context);
-  ///                             },
-  ///                           )
-  ///                         ],
-  ///                       ),
-  ///                     ),
-  ///                   );
-  ///                 },
-  ///               );
-  ///             },
-  ///           ),
-  ///         );
-  ///       },
-  ///     ),
-  ///   );
-  /// }
-  /// ```
+  /// ** See code in examples/api/lib/material/scaffold/scaffold.of.1.dart **
   /// {@end-tool}
   ///
   /// A more efficient solution is to split your build function into several
@@ -2401,23 +2027,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   /// [ScaffoldMessengerState].
   ///
   /// {@tool dartpad --template=stateless_widget_scaffold_center}
-  ///
   /// Here is an example of showing a [SnackBar] when the user presses a button.
   ///
-  /// ```dart
-  ///   Widget build(BuildContext context) {
-  ///     return OutlinedButton(
-  ///       onPressed: () {
-  ///         ScaffoldMessenger.of(context).showSnackBar(
-  ///           const SnackBar(
-  ///             content: Text('A SnackBar has been shown.'),
-  ///           ),
-  ///         );
-  ///       },
-  ///       child: const Text('Show SnackBar'),
-  ///     );
-  ///   }
-  /// ```
+  /// ** See code in examples/api/lib/material/scaffold/scaffold_state.show_snack_bar.0.dart **
   /// {@end-tool}
   ///
   /// See also:
@@ -2690,6 +2302,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     ShapeBorder? shape,
     Clip? clipBehavior,
     BoxConstraints? constraints,
+    bool shouldDisposeAnimationController = true,
   }) {
     assert(() {
       if (widget.bottomSheet != null && isPersistent && _currentBottomSheet != null) {
@@ -2757,6 +2370,11 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
           });
         }
       },
+      onDispose: () {
+        if (shouldDisposeAnimationController) {
+          animationController.dispose();
+        }
+      },
       builder: builder,
       isPersistent: isPersistent,
       backgroundColor: backgroundColor,
@@ -2812,45 +2430,11 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   /// [showModalBottomSheet] function.
   ///
   /// {@tool dartpad --template=stateless_widget_scaffold}
-  ///
   /// This example demonstrates how to use `showBottomSheet` to display a
   /// bottom sheet when a user taps a button. It also demonstrates how to
   /// close a bottom sheet using the Navigator.
   ///
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   return Center(
-  ///     child: ElevatedButton(
-  ///       child: const Text('showBottomSheet'),
-  ///       onPressed: () {
-  ///         Scaffold.of(context).showBottomSheet<void>(
-  ///           (BuildContext context) {
-  ///             return Container(
-  ///               height: 200,
-  ///               color: Colors.amber,
-  ///               child: Center(
-  ///                 child: Column(
-  ///                   mainAxisAlignment: MainAxisAlignment.center,
-  ///                   mainAxisSize: MainAxisSize.min,
-  ///                   children: <Widget>[
-  ///                     const Text('BottomSheet'),
-  ///                     ElevatedButton(
-  ///                       child: const Text('Close BottomSheet'),
-  ///                       onPressed: () {
-  ///                         Navigator.pop(context);
-  ///                       }
-  ///                     )
-  ///                   ],
-  ///                 ),
-  ///               ),
-  ///             );
-  ///           },
-  ///         );
-  ///       },
-  ///     ),
-  ///   );
-  /// }
-  /// ```
+  /// ** See code in examples/api/lib/material/scaffold/scaffold_state.show_bottom_sheet.0.dart **
   /// {@end-tool}
   /// See also:
   ///
@@ -2894,6 +2478,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
         shape: shape,
         clipBehavior: clipBehavior,
         constraints: constraints,
+        shouldDisposeAnimationController: transitionAnimationController == null,
       );
     });
     return _currentBottomSheet! as PersistentBottomSheetController<T>;
@@ -3069,12 +2654,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     _snackBarTimer = null;
 
     _geometryNotifier.dispose();
-    for (final _StandardBottomSheet bottomSheet in _dismissedBottomSheets) {
-      bottomSheet.animationController.dispose();
-    }
-    if (_currentBottomSheet != null) {
-      _currentBottomSheet!._widget.animationController.dispose();
-    }
     _floatingActionButtonMoveController.dispose();
     _floatingActionButtonVisibilityController.dispose();
     _scaffoldMessenger?._unregister(this);
@@ -3587,12 +3166,14 @@ class _StandardBottomSheet extends StatefulWidget {
     this.shape,
     this.clipBehavior,
     this.constraints,
+    this.onDispose,
   }) : super(key: key);
 
   final AnimationController animationController; // we control it, but it must be disposed by whoever created it.
   final bool enableDrag;
   final VoidCallback? onClosing;
   final VoidCallback? onDismissed;
+  final VoidCallback? onDispose;
   final WidgetBuilder builder;
   final bool isPersistent;
   final Color? backgroundColor;
@@ -3617,6 +3198,12 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
         || widget.animationController.status == AnimationStatus.completed,
     );
     widget.animationController.addStatusListener(_handleStatusChange);
+  }
+
+  @override
+  void dispose() {
+    widget.onDispose?.call();
+    super.dispose();
   }
 
   @override
