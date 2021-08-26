@@ -27,7 +27,9 @@ class Commit {
 
   static Commit parse(String line) {
     final int space = line.indexOf(' ');
-    return Commit(line.substring(0, space), DateTime.parse(line.substring(space+1, line.length).trimRight()));
+    final String hash = line.substring(0, space);
+    final String date = line.substring(space + 1, line.length - 1);
+    return Commit(hash, DateTime.parse(date));
   }
 
   static List<Commit> parseList(String lines) {
@@ -69,7 +71,7 @@ String findCommit({
     '--max-count=1',
     secondaryBranch,
     '--',
-  ]);
+  ]).trim();
 }
 
 String git(String workingDirectory, List<String> arguments) {
