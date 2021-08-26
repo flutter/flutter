@@ -1781,8 +1781,8 @@ abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
         // TODO(a14n): remove this check to have a lot more const widget
         if (children[index] == null) {
           throw FlutterError(
-              "$runtimeType's children must not contain any null values, "
-                  'but a null value was found at index $index',
+            "$runtimeType's children must not contain any null values, "
+            'but a null value was found at index $index',
           );
         }
       }
@@ -2738,20 +2738,20 @@ class BuildOwner {
               error = FlutterError.fromParts(<DiagnosticsNode>[
                 ErrorSummary('Multiple widgets used the same GlobalKey.'),
                 ErrorDescription(
-                    'The key $key was used by multiple widgets. The parents of those widgets were:\n'
-                    '- ${older.toString()}\n'
-                    '- ${newer.toString()}\n'
-                    'A GlobalKey can only be specified on one widget at a time in the widget tree.',
+                  'The key $key was used by multiple widgets. The parents of those widgets were:\n'
+                  '- ${older.toString()}\n'
+                  '- ${newer.toString()}\n'
+                  'A GlobalKey can only be specified on one widget at a time in the widget tree.',
                 ),
               ]);
             } else {
               error = FlutterError.fromParts(<DiagnosticsNode>[
                 ErrorSummary('Multiple widgets used the same GlobalKey.'),
                 ErrorDescription(
-                    'The key $key was used by multiple widgets. The parents of those widgets were '
-                    'different widgets that both had the following description:\n'
-                    '  ${parent.toString()}\n'
-                    'A GlobalKey can only be specified on one widget at a time in the widget tree.',
+                  'The key $key was used by multiple widgets. The parents of those widgets were '
+                  'different widgets that both had the following description:\n'
+                  '  ${parent.toString()}\n'
+                  'A GlobalKey can only be specified on one widget at a time in the widget tree.',
                 ),
               ]);
             }
@@ -3949,7 +3949,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
             'this render object has not yet been through layout, which typically '
             'means that the size getter was called too early in the pipeline '
             '(e.g., during the build phase) before the framework has determined '
-           'the size and position of the render objects during layout.',
+            'the size and position of the render objects during layout.',
           ),
           describeElement('The size getter was called for the following element'),
           box.describeForError('The render object from which the size was to be obtained was'),
@@ -4828,7 +4828,7 @@ class StatefulElement extends ComponentElement {
         ErrorSummary('${state.runtimeType}.dispose failed to call super.dispose.'),
         ErrorDescription(
           'dispose() implementations must always call their superclass dispose() method, to ensure '
-         'that all the resources used by the widget are fully released.',
+          'that all the resources used by the widget are fully released.',
         ),
       ]);
     }());
