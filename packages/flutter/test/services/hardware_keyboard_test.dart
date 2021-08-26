@@ -67,6 +67,25 @@ void main() {
       equals(<KeyboardLockMode>{}));
   }, variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData());
 
+  testWidgets('KeyboardManager synthesizes modifier keys for rawKeyData', (WidgetTester tester) async {
+    final List<KeyEvent> events = <KeyEvent>[];
+    HardwareKeyboard.instance.addHandler((KeyEvent event) {
+      events.add(event);
+      return false;
+    });
+    tester.binding.keyEventManager.handleRawKeyMessage(KeyEventSimulator.getKeyData(
+      LogicalKeyboardKey.keyA,
+      platform: 'android',
+    )..['metaState'] = RawKeyEventDataAndroid.modifierLeftShift | RawKeyEventDataAndroid.modifierShift);
+    expect(events, hasLength(2));
+    expect(events[0].physicalKey, PhysicalKeyboardKey.shiftLeft);
+    expect(events[0].logicalKey, LogicalKeyboardKey.shiftLeft);
+    expect(events[0].synthesized, true);
+    expect(events[1].physicalKey, PhysicalKeyboardKey.keyA);
+    expect(events[1].logicalKey, LogicalKeyboardKey.keyA);
+    expect(events[1].synthesized, false);
+  });
+
   testWidgets('Dispatch events to all handlers', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     final List<int> logs = <int>[];
