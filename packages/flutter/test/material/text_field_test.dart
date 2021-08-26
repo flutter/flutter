@@ -3933,37 +3933,6 @@ void main() {
     feedback.dispose();
   });
 
-  testWidgets('Text field drops selection when losing focus', (WidgetTester tester) async {
-    final Key key1 = UniqueKey();
-    final TextEditingController controller1 = TextEditingController();
-    final Key key2 = UniqueKey();
-
-    await tester.pumpWidget(
-      overlay(
-        child: Column(
-          children: <Widget>[
-            TextField(
-              key: key1,
-              controller: controller1,
-            ),
-            TextField(key: key2),
-          ],
-        ),
-      ),
-    );
-
-    await tester.tap(find.byKey(key1));
-    await tester.enterText(find.byKey(key1), 'abcd');
-    await tester.pump();
-    controller1.selection = const TextSelection(baseOffset: 0, extentOffset: 3);
-    await tester.pump();
-    expect(controller1.selection, isNot(equals(TextRange.empty)));
-
-    await tester.tap(find.byKey(key2));
-    await tester.pump();
-    expect(controller1.selection, equals(TextRange.empty));
-  });
-
   testWidgets('Selection is consistent with text length', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
 
@@ -3985,9 +3954,8 @@ void main() {
         error.toStringDeep(),
         equalsIgnoringHashCodes(
           'FlutterError\n'
-          '   invalid text selection: TextSelection(baseOffset: 10,\n'
-          '   extentOffset: 10, affinity: TextAffinity.downstream,\n'
-          '   isDirectional: false)\n',
+          '   invalid text selection: TextSelection.collapsed(offset: 10,\n'
+          '   affinity: TextAffinity.downstream, isDirectional: false)\n',
         ),
       );
     }
@@ -5220,7 +5188,10 @@ void main() {
 
     const String expected = ' housa bige jumped over a mouse';
     expect(find.text(expected), findsOneWidget);
-  }, skip: areKeyEventsHandledByPlatform, variant: KeySimulatorTransitModeVariant.all());
+  },
+      skip: areKeyEventsHandledByPlatform, // [intended] only applies to platforms where we handle key events.
+      variant: KeySimulatorTransitModeVariant.all()
+  );
 
   testWidgets('Select all test', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -5494,7 +5465,7 @@ void main() {
     }
     await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
 
-    expect(c1.selection.extentOffset - c1.selection.baseOffset, 0);
+    expect(c1.selection.extentOffset - c1.selection.baseOffset, -5);
     expect(c2.selection.extentOffset - c2.selection.baseOffset, -5);
   },
     skip: areKeyEventsHandledByPlatform, // [intended] only applies to platforms where we handle key events.

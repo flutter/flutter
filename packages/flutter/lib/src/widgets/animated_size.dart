@@ -15,34 +15,7 @@ import 'ticker_provider.dart';
 /// This example makes a [Container] react to being touched, causing the child
 /// of the [AnimatedSize] widget, here a [FlutterLogo], to animate.
 ///
-/// ```dart
-/// class _MyStatefulWidgetState extends State<MyStatefulWidget> {
-///   double _size = 50.0;
-///   bool _large = false;
-///
-///   void _updateSize() {
-///     setState(() {
-///       _size = _large ? 250.0 : 100.0;
-///       _large = !_large;
-///     });
-///   }
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return GestureDetector(
-///       onTap: () => _updateSize(),
-///       child: Container(
-///         color: Colors.amberAccent,
-///         child: AnimatedSize(
-///           curve: Curves.easeIn,
-///           duration: const Duration(seconds: 1),
-///           child: FlutterLogo(size: _size),
-///         ),
-///       ),
-///     );
-///   }
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/animated_size/animated_size.0.dart **
 /// {@end-tool}
 ///
 /// See also:

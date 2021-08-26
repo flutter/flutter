@@ -58,6 +58,7 @@ class XcodeProjectInterpreter {
           processManager: processManager,
         ),
         _version = version,
+        _versionText = version?.toString(),
         _usage = usage;
 
   /// Create an [XcodeProjectInterpreter] for testing.
@@ -372,7 +373,7 @@ class XcodeProjectBuildContext {
 ///
 /// Represents the output of `xcodebuild -list`.
 class XcodeProjectInfo {
-  XcodeProjectInfo(
+  const XcodeProjectInfo(
     this.targets,
     this.buildConfigurations,
     this.schemes,

@@ -953,4 +953,42 @@ void main() {
 
      expect(material.elevation, 2.0);
    });
+
+       testWidgets('Stepper custom margin', (WidgetTester tester) async {
+
+      const EdgeInsetsGeometry margin = EdgeInsetsDirectional.only(
+        bottom: 20,
+        top: 20,
+      );
+
+     await tester.pumpWidget(
+       MaterialApp(
+         home: Material(
+           child: SizedBox(
+             width: 200,
+             height: 75,
+             child: Stepper(
+               margin: margin,
+               type: StepperType.vertical,
+               steps: const <Step>[
+                 Step(
+                   title: Text('Regular title'),
+                   content: Text('Text content')
+                 ),
+               ],
+             ),
+           ),
+         ),
+       ),
+     );
+
+     final Stepper material = tester.firstWidget<Stepper>(
+       find.descendant(
+         of: find.byType(Material),
+         matching: find.byType(Stepper),
+       ),
+     );
+
+     expect(material.margin, equals(margin));
+   });
 }
