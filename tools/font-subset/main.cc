@@ -49,6 +49,37 @@ void Usage() {
       << std::endl;
 }
 
+template <typename...>
+using void_t = void;
+template <typename T, typename = void>
+struct HarfBuzzSubset {
+  // This is the HarfBuzz 3.0 interface.
+  static HarfbuzzWrappers::HbFacePtr Make(hb_face_t* face, T input) {
+    // The prior version of harfbuzz automatically dropped layout tables,
+    // but in the new version they are kept by default. So re-add them to the
+    // drop list to retain the same behaviour.
+    hb_set_add(hb_subset_input_drop_tables_set(input),
+               HB_TAG('G', 'S', 'U', 'B'));
+    hb_set_add(hb_subset_input_drop_tables_set(input),
+               HB_TAG('G', 'P', 'O', 'S'));
+    hb_set_add(hb_subset_input_drop_tables_set(input),
+               HB_TAG('G', 'D', 'E', 'F'));
+
+    return HarfbuzzWrappers::HbFacePtr(hb_subset_or_fail(face, input));
+  }
+};
+template <typename T>
+struct HarfBuzzSubset<T,
+                      void_t<decltype(hb_subset(std::declval<hb_face_t*>(),
+                                                std::declval<T>()))>> {
+  // This is the HarfBuzz 2.0 (non-public) interface, used if it exists.
+  // This code should be removed as soon as all users are migrated to the newer
+  // API.
+  static HarfbuzzWrappers::HbFacePtr Make(hb_face_t* face, T input) {
+    return HarfbuzzWrappers::HbFacePtr(hb_subset(face, input));
+  }
+};
+
 int main(int argc, char** argv) {
   if (argc != 3) {
     Usage();
@@ -104,9 +135,10 @@ int main(int argc, char** argv) {
     }
   }
 
-  HarfbuzzWrappers::HbFacePtr new_face(hb_subset(font_face.get(), input.get()));
+  HarfbuzzWrappers::HbFacePtr new_face =
+      HarfBuzzSubset<hb_subset_input_t*>::Make(font_face.get(), input.get());
 
-  if (new_face.get() == hb_face_get_empty()) {
+  if (!new_face || new_face.get() == hb_face_get_empty()) {
     std::cerr
         << "Failed to subset font; aborting. This error normally indicates "
            "the current version of Harfbuzz is unable to process it."
