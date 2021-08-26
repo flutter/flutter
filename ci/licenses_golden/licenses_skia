@@ -1,4 +1,4 @@
-Signature: d75bd822fdc6451db655180cac8f5cfd
+Signature: fcc29d863ec1e9ef61e20ed40d5bc337
 
 UNUSED LICENSES:
 
@@ -2900,7 +2900,6 @@ FILE: ../../../third_party/skia/src/gpu/gl/GrGLTypesPriv.cpp
 FILE: ../../../third_party/skia/src/gpu/mock/GrMockCaps.cpp
 FILE: ../../../third_party/skia/src/gpu/mock/GrMockTypes.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLASTFile.h
-FILE: ../../../third_party/skia/src/sksl/SkSLASTNode.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLASTNode.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLExternalFunction.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLExternalFunctionCall.h
@@ -4076,8 +4075,8 @@ FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlFramebuffer.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlFramebuffer.mm
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlPipeline.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlRenderCommandEncoder.h
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrAtlasRenderTask.cpp
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrAtlasRenderTask.h
+FILE: ../../../third_party/skia/src/gpu/ops/AtlasRenderTask.cpp
+FILE: ../../../third_party/skia/src/gpu/ops/AtlasRenderTask.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrCullTest.h
 FILE: ../../../third_party/skia/src/shaders/SkTransformShader.cpp
 FILE: ../../../third_party/skia/src/shaders/SkTransformShader.h
