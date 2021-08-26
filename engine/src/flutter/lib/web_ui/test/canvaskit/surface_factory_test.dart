@@ -19,10 +19,10 @@ void testMain() {
   group('$SurfaceFactory', () {
     setUpCanvasKitTest();
 
-    test('cannot be created with size less than 2', () {
+    test('cannot be created with size less than 1', () {
       expect(() => SurfaceFactory(-1), throwsAssertionError);
       expect(() => SurfaceFactory(0), throwsAssertionError);
-      expect(() => SurfaceFactory(1), throwsAssertionError);
+      expect(SurfaceFactory(1), isNotNull);
       expect(SurfaceFactory(2), isNotNull);
     });
 
