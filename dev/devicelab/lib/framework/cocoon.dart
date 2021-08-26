@@ -90,7 +90,6 @@ class Cocoon {
     String? gitBranch,
     String? builderName,
     String? testStatus,
-    String? builderBucket,
   }) async {
     Map<String, dynamic> resultsJson = <String, dynamic>{};
     if (resultsPath != null) {
@@ -103,7 +102,7 @@ class Cocoon {
       resultsJson['NewStatus'] = testStatus;
     }
     resultsJson['TestFlaky'] = isTestFlaky ?? false;
-    if (_shouldUpdateCocoon(resultsJson, builderBucket: builderBucket)) {
+    if (_shouldUpdateCocoon(resultsJson)) {
       await retry(
         () async => _sendUpdateTaskRequest(resultsJson).timeout(Duration(seconds: requestTimeoutLimit)),
         retryIf: (Exception e) => e is SocketException || e is TimeoutException || e is ClientException,
@@ -113,9 +112,10 @@ class Cocoon {
   }
 
   /// Only post-submit tests on `master` are allowed to update in cocoon.
-  bool _shouldUpdateCocoon(Map<String, dynamic> resultJson, {String? builderBucket = 'prod'}) {
+  bool _shouldUpdateCocoon(Map<String, dynamic> resultJson) {
     const List<String> supportedBranches = <String>['master'];
-    return supportedBranches.contains(resultJson['CommitBranch']) && builderBucket != 'staging';
+    return supportedBranches.contains(resultJson['CommitBranch']) &&
+        !resultJson['BuilderName'].toString().toLowerCase().contains('staging');
   }
 
   /// Write the given parameters into an update task request and store the JSON in [resultsPath].
