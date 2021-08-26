@@ -23,7 +23,6 @@ class UploadResultsCommand extends Command<void> {
     argParser.addOption('luci-builder', help: '[Flutter infrastructure] Name of the LUCI builder being run on.');
     argParser.addOption('test-status', help: 'Test status: Succeeded|Failed');
     argParser.addOption('commit-time', help: 'Commit time in UNIX timestamp');
-    argParser.addOption('builder-bucket', help: '[Flutter infrastructure] Luci builder bucket the test is running in.');
   }
 
   @override
@@ -41,7 +40,6 @@ class UploadResultsCommand extends Command<void> {
     final String? builderName = argResults!['luci-builder'] as String?;
     final String? testStatus = argResults!['test-status'] as String?;
     final String? commitTime = argResults!['commit-time'] as String?;
-    final String? builderBucket = argResults!['builder-bucket'] as String?;
 
     // Upload metrics to skia perf from test runner when `resultsPath` is specified.
     if (resultsPath != null) {
@@ -56,7 +54,6 @@ class UploadResultsCommand extends Command<void> {
       gitBranch: gitBranch,
       builderName: builderName,
       testStatus: testStatus,
-      builderBucket: builderBucket,
     );
   }
 }
