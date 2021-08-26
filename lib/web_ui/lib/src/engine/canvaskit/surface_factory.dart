@@ -12,11 +12,11 @@ import 'surface.dart';
 class SurfaceFactory {
   /// The cache singleton.
   static final SurfaceFactory instance =
-      SurfaceFactory(HtmlViewEmbedder.maximumOverlaySurfaces);
+      SurfaceFactory(HtmlViewEmbedder.maximumSurfaces);
 
   SurfaceFactory(this.maximumSurfaces)
-      : assert(maximumSurfaces >= 2,
-            'The maximum number of surfaces must be at least 2');
+      : assert(maximumSurfaces >= 1,
+            'The maximum number of surfaces must be at least 1');
 
   /// The base surface to paint on. This is the default surface which will be
   /// painted to. If there are no platform views, then this surface will receive
