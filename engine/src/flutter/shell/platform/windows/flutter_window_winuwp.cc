@@ -149,10 +149,10 @@ void FlutterWindowWinUWP::OnPointerPressed(
   double x = GetPosX(args);
   double y = GetPosY(args);
   FlutterPointerDeviceKind device_kind = GetPointerDeviceKind(args);
+  FlutterPointerMouseButtons mouse_button = GetPointerMouseButton(args);
 
   binding_handler_delegate_->OnPointerDown(
-      x, y, device_kind, kDefaultPointerDeviceId,
-      FlutterPointerMouseButtons::kFlutterPointerButtonMousePrimary);
+      x, y, device_kind, kDefaultPointerDeviceId, mouse_button);
 }
 
 void FlutterWindowWinUWP::OnPointerReleased(
@@ -161,10 +161,10 @@ void FlutterWindowWinUWP::OnPointerReleased(
   double x = GetPosX(args);
   double y = GetPosY(args);
   FlutterPointerDeviceKind device_kind = GetPointerDeviceKind(args);
+  FlutterPointerMouseButtons mouse_button = GetPointerMouseButton(args);
 
-  binding_handler_delegate_->OnPointerUp(
-      x, y, device_kind, kDefaultPointerDeviceId,
-      FlutterPointerMouseButtons::kFlutterPointerButtonMousePrimary);
+  binding_handler_delegate_->OnPointerUp(x, y, device_kind,
+                                         kDefaultPointerDeviceId, mouse_button);
 }
 
 void FlutterWindowWinUWP::OnPointerMoved(
@@ -217,6 +217,30 @@ FlutterPointerDeviceKind FlutterWindowWinUWP::GetPointerDeviceKind(
       return kFlutterPointerDeviceKindTouch;
   }
   return kFlutterPointerDeviceKindMouse;
+}
+
+FlutterPointerMouseButtons FlutterWindowWinUWP::GetPointerMouseButton(
+    winrt::Windows::UI::Core::PointerEventArgs const& args) {
+  switch (args.CurrentPoint().Properties().PointerUpdateKind()) {
+    case winrt::Windows::UI::Input::PointerUpdateKind::LeftButtonPressed:
+    case winrt::Windows::UI::Input::PointerUpdateKind::LeftButtonReleased:
+      return kFlutterPointerButtonMousePrimary;
+    case winrt::Windows::UI::Input::PointerUpdateKind::RightButtonPressed:
+    case winrt::Windows::UI::Input::PointerUpdateKind::RightButtonReleased:
+      return kFlutterPointerButtonMouseSecondary;
+    case winrt::Windows::UI::Input::PointerUpdateKind::MiddleButtonPressed:
+    case winrt::Windows::UI::Input::PointerUpdateKind::MiddleButtonReleased:
+      return kFlutterPointerButtonMouseMiddle;
+    case winrt::Windows::UI::Input::PointerUpdateKind::XButton1Pressed:
+    case winrt::Windows::UI::Input::PointerUpdateKind::XButton1Released:
+      return kFlutterPointerButtonMouseBack;
+    case winrt::Windows::UI::Input::PointerUpdateKind::XButton2Pressed:
+    case winrt::Windows::UI::Input::PointerUpdateKind::XButton2Released:
+      return kFlutterPointerButtonMouseForward;
+    case winrt::Windows::UI::Input::PointerUpdateKind::Other:
+      return kFlutterPointerButtonMousePrimary;
+  }
+  return kFlutterPointerButtonMousePrimary;
 }
 
 void FlutterWindowWinUWP::OnBoundsChanged(
