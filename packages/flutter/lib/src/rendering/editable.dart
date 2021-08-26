@@ -1759,17 +1759,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       return;
     }
 
-    final int startPoint = previousCharacter(selection!.start, _plainText, false);
-    final TextSelection selectedLine = _getLineAtOffset(TextPosition(offset: startPoint));
-
     late final TextSelection nextSelection;
     if (selection!.extentOffset <= selection!.baseOffset) {
       nextSelection = selection!.copyWith(
-        extentOffset: selectedLine.baseOffset,
+        extentOffset: currentLine.baseOffset,
       );
     } else {
       nextSelection = selection!.copyWith(
-        baseOffset: selectedLine.baseOffset,
+        baseOffset: currentLine.baseOffset,
       );
     }
 
