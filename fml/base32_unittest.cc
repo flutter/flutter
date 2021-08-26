@@ -38,6 +38,12 @@ TEST(Base32Test, CanEncode) {
     ASSERT_TRUE(result.first);
     ASSERT_EQ(result.second, "NBSWYTDP");
   }
+
+  {
+    auto result = fml::Base32Encode("\xff\xfe\x7f\x80\x81");
+    ASSERT_TRUE(result.first);
+    ASSERT_EQ(result.second, "777H7AEB");
+  }
 }
 
 TEST(Base32Test, CanEncodeDecodeStrings) {
