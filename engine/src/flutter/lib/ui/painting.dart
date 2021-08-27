@@ -1577,8 +1577,13 @@ class Paint {
 enum ImageByteFormat {
   /// Raw RGBA format.
   ///
-  /// Unencoded bytes, in RGBA row-primary form, 8 bits per channel.
+  /// Unencoded bytes, in RGBA row-primary form with premultiplied alpha, 8 bits per channel.
   rawRgba,
+
+  /// Raw straight RGBA format.
+  ///
+  /// Unencoded bytes, in RGBA row-primary form with straight alpha, 8 bits per channel.
+  rawStraightRgba,
 
   /// Raw unmodified format.
   ///

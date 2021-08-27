@@ -31,6 +31,22 @@ void main() {
     expect(bytes, GrayscaleImage.bytesAsRgba);
   });
 
+  test('Image.toByteData RGBA format works with transparent image', () async {
+    final Image image = await TransparentImage.load();
+    final ByteData data = (await image.toByteData())!;
+    final Uint8List bytes = data.buffer.asUint8List();
+    expect(bytes, hasLength(64));
+    expect(bytes, TransparentImage.bytesAsPremultipliedRgba);
+  });
+
+  test('Image.toByteData Straight RGBA format works with transparent image', () async {
+    final Image image = await TransparentImage.load();
+    final ByteData data = (await image.toByteData(format: ImageByteFormat.rawStraightRgba))!;
+    final Uint8List bytes = data.buffer.asUint8List();
+    expect(bytes, hasLength(64));
+    expect(bytes, TransparentImage.bytesAsStraightRgba);
+  });
+
   test('Image.toByteData Unmodified format works with simple image', () async {
     final Image image = await Square4x4Image.image;
     final ByteData data = (await image.toByteData(format: ImageByteFormat.rawUnmodified))!;
@@ -122,6 +138,73 @@ class GrayscaleImage {
   }
 
   static List<int> get bytesUnmodified => <int>[255, 127, 127, 0];
+}
+
+class TransparentImage {
+    TransparentImage._();
+
+  static Future<Image> load() async {
+    final Uint8List bytes = await readFile('transparent_image.png');
+    final Completer<Image> completer = Completer<Image>();
+    decodeImageFromList(bytes, (Image image) => completer.complete(image));
+    return completer.future;
+  }
+
+  static List<int> get bytesAsPremultipliedRgba {
+    return <int>[
+      //First raw, solid colors
+      255, 0, 0, 255,     // red
+      0, 255, 0, 255,     // green
+      0, 0, 255, 255,     // blue
+      136, 136, 136, 255, // grey
+
+      //Second raw, 50% transparent
+      127, 0, 0, 127,     // red
+      0, 127, 0, 127,     // green
+      0, 0, 127, 127,     // blue
+      67, 67, 67, 127,    // grey
+
+      //Third raw, 25% transparent
+      63, 0, 0, 63,       // red
+      0, 63, 0, 63,       // green
+      0, 0, 63, 63,       // blue
+      33, 33, 33, 63,     // grey
+
+      //Fourth raw, transparent
+      0, 0, 0, 0,         // red
+      0, 0, 0, 0,         // green
+      0, 0, 0, 0,         // blue
+      0, 0, 0, 0,         // grey
+    ];
+  }
+
+  static List<int> get bytesAsStraightRgba {
+    return <int>[
+      //First raw, solid colors
+      255, 0, 0, 255,     // red
+      0, 255, 0, 255,     // green
+      0, 0, 255, 255,     // blue
+      136, 136, 136, 255, // grey
+
+      //Second raw, 50% transparent
+      255, 0, 0, 127,     // red
+      0, 255, 0, 127,     // green
+      0, 0, 255, 127,     // blue
+      135, 135, 135, 127, // grey
+
+      //Third raw, 25% transparent
+      255, 0, 0, 63,      // red
+      0, 255, 0, 63,      // green
+      0, 0, 255, 63,      // blue
+      134, 134, 134, 63,  // grey
+
+      //Fourth raw, transparent
+      0, 0, 0, 0,         // red
+      0, 0, 0, 0,         // green
+      0, 0, 0, 0,         // blue
+      0, 0, 0, 0,         // grey
+    ];
+  }
 }
 
 Future<Uint8List> readFile(String fileName) async {
