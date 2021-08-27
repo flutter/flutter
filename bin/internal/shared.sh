@@ -21,14 +21,14 @@ function retry_upgrade {
   local total_tries="10"
   local remaining_tries=$((total_tries - 1))
   while [[ "$remaining_tries" -gt 0 ]]; do
-    (cd "$FLUTTER_TOOLS_DIR" && "$DART" pub upgrade "$VERBOSITY" --no-precompile) && break
-    >&2 echo "Error: Unable to 'dart pub upgrade' flutter tool. Retrying in five seconds... ($remaining_tries tries left)"
+    (cd "$FLUTTER_TOOLS_DIR" && "$DART" __deprecated_pub upgrade "$VERBOSITY" --no-precompile) && break
+    >&2 echo "Error: Unable to 'pub upgrade' flutter tool. Retrying in five seconds... ($remaining_tries tries left)"
     remaining_tries=$((remaining_tries - 1))
     sleep 5
   done
 
   if [[ "$remaining_tries" == 0 ]]; then
-    >&2 echo "Command 'dart pub upgrade' still failed after $total_tries tries, giving up."
+    >&2 echo "Command 'pub upgrade' still failed after $total_tries tries, giving up."
     return 1
   fi
   return 0
