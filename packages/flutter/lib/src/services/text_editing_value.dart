@@ -182,12 +182,14 @@ class TextEditingValue {
     );
   }
 
-  /// Deletes to the given index, inclusively.
-  ///
-  /// Returns a new TextEditingValue representing the state after the deletion.
+  /// Returns a new TextEditingValue representing a deletion from the current
+  /// [selection] to the given index, inclusively.
   ///
   /// If the selection is not collapsed, deletes the selection regardless of the
   /// given index.
+  ///
+  /// The composing region, if any, will also be adjusted to remove the deleted
+  /// characters.
   TextEditingValue deleteTo(int index) {
     assert(selection != null);
 
