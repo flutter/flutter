@@ -84,7 +84,15 @@ class DeltaTextEditingController extends TextEditingController {
           break;
         case TextEditingDeltaType.deletion:
           int deletionLength = delta.deltaText.length;
-          newText = replace(newText, "", delta.deltaRange.start - deletionLength, delta.deltaRange.end);
+          if (deletionLength > 1) {
+            newText = replace(
+                newText, "", delta.deltaRange.start,
+                delta.deltaRange.end);
+          } else {
+            newText = replace(
+                newText, "", delta.deltaRange.start - deletionLength,
+                delta.deltaRange.end);
+          }
           break;
         case TextEditingDeltaType.replacement:
           newText = replace(newText, delta.deltaText, delta.deltaRange.start, delta.deltaRange.end);
