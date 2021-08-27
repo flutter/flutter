@@ -33,7 +33,8 @@ class Commit {
   }
 
   static List<Commit> parseList(String lines) {
-    return lines.split('\n').where((String line) => line.isNotEmpty).map(parse).toList().reversed.toList();
+    return lines.split('\n').where((String line) => line.isNotEmpty &&
+    !line.startsWith('commit')).map(parse).toList().reversed.toList();
   }
 }
 
