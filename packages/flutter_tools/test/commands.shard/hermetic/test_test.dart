@@ -604,6 +604,32 @@ dev_dependencies:
     ]),
   });
 
+  testUsingContext('Integration tests given flavor', () async {
+    final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+    final TestCommand testCommand = TestCommand(testRunner: testRunner);
+    final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+    await commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+      '--flavor',
+      'dev',
+      'integration_test',
+    ]);
+
+    expect(
+      testRunner.lastDebuggingOptionsValue.buildInfo.flavor,
+      contains('dev'),
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    DeviceManager: () => _FakeDeviceManager(<Device>[
+      FakeDevice('ephemeral', 'ephemeral', ephemeral: true, isSupported: true, type: PlatformType.android),
+    ]),
+  });
+
   testUsingContext('Builds the asset manifest by default', () async {
     final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
 
