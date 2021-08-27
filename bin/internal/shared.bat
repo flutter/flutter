@@ -24,7 +24,6 @@ SET engine_version_path=%FLUTTER_ROOT%\bin\internal\engine.version
 SET pub_cache_path=%FLUTTER_ROOT%\.pub-cache
 
 SET dart=%dart_sdk_path%\bin\dart.exe
-SET pub=%dart_sdk_path%\bin\pub.bat
 
 REM Detect which PowerShell executable is available on the Host
 REM PowerShell version <= 5: PowerShell.exe
@@ -139,16 +138,16 @@ GOTO :after_subroutine
       SET /A remaining_tries=%total_tries%-1
       :retry_pub_upgrade
         ECHO Running pub upgrade... 1>&2
-        CALL "%pub%" upgrade "%VERBOSITY%" --no-precompile
+        "%dart%" pub upgrade "%VERBOSITY%" --no-precompile
         IF "%ERRORLEVEL%" EQU "0" goto :upgrade_succeeded
-        ECHO Error (%ERRORLEVEL%): Unable to 'pub upgrade' flutter tool. Retrying in five seconds... (%remaining_tries% tries left) 1>&2
+        ECHO Error (%ERRORLEVEL%): Unable to 'dart pub upgrade' flutter tool. Retrying in five seconds... (%remaining_tries% tries left) 1>&2
         timeout /t 5 /nobreak 2>NUL
         SET /A remaining_tries-=1
         IF "%remaining_tries%" EQU "0" GOTO upgrade_retries_exhausted
         GOTO :retry_pub_upgrade
       :upgrade_retries_exhausted
         SET exit_code=%ERRORLEVEL%
-        ECHO Error: 'pub upgrade' still failing after %total_tries% tries. 1>&2
+        ECHO Error: 'dart pub upgrade' still failing after %total_tries% tries. 1>&2
         GOTO final_exit
       :upgrade_succeeded
     ENDLOCAL
