@@ -70,6 +70,22 @@ List<MetricPoint> parse(Map<String, dynamic> resultsJson) {
   return metricPoints;
 }
 
+Future<void> update(
+  FlutterDestination metricsDestination,
+  List<MetricPoint> metricPoints,
+  int commitTimeSinceEpoch,
+  String? taskName,
+) async {
+  await metricsDestination.update(
+    metricPoints,
+    DateTime.fromMillisecondsSinceEpoch(
+      commitTimeSinceEpoch,
+      isUtc: true,
+    ),
+    taskName ?? 'default',
+  );
+}
+
 /// Upload test metrics to metrics center.
 Future<void> uploadToMetricsCenter(String? resultsPath, String? commitTime, String? taskName) async {
   int commitTimeSinceEpoch;
@@ -86,12 +102,5 @@ Future<void> uploadToMetricsCenter(String? resultsPath, String? commitTime, Stri
   resultsJson = json.decode(await resultFile.readAsString()) as Map<String, dynamic>;
   final List<MetricPoint> metricPoints = parse(resultsJson);
   final FlutterDestination metricsDestination = await connectFlutterDestination();
-  await metricsDestination.update(
-    metricPoints,
-    DateTime.fromMillisecondsSinceEpoch(
-      commitTimeSinceEpoch,
-      isUtc: true,
-    ),
-    taskName ?? 'default',
-  );
+  await update(metricsDestination, metricPoints, commitTimeSinceEpoch, taskName);
 }
