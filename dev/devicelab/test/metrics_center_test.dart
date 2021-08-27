@@ -8,6 +8,8 @@ import 'package:metrics_center/metrics_center.dart';
 import 'common.dart';
 
 class FakeFlutterDestination implements FlutterDestination {
+  /// Overrides the skia perf `update` function, which uploads new data to gcs if there
+  /// doesn't exist the commit, otherwise updates existing data by appending new ones.
   @override
   Future<void> update(List<MetricPoint> points, DateTime commitTime, String taskName) async {
     lastUpdatedPoints = points;
