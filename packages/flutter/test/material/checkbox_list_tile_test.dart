@@ -321,12 +321,7 @@ void main() {
   });
 
   testWidgets('CheckboxListTile respects checkbox side', (WidgetTester tester) async {
-    const BorderSide side = BorderSide(
-      width: 4,
-      color: Color(0xfff44336),
-    );
-
-    Widget buildApp() {
+    Widget buildApp(BorderSide side) {
       return MaterialApp(
         home: Material(
           child: Center(
@@ -342,18 +337,29 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildApp());
-    await tester.pumpAndSettle();
+    const BorderSide side1 = BorderSide(
+      color: Color(0xfff44336),
+    );
+    await tester.pumpWidget(buildApp(side1));
 
-    expect(tester.widget<Checkbox>(find.byType(Checkbox)).side, side);
-    expect(tester.widget<CheckboxListTile>(find.byType(CheckboxListTile)).side, side);
+    expect(tester.widget<CheckboxListTile>(find.byType(CheckboxListTile)).side, side1);
+    expect(tester.widget<Checkbox>(find.byType(Checkbox)).side, side1);
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints
-        ..drrect(
-          color: const Color(0xfff44336),
-          strokeWidth: 4,
-        ),
+        ..drrect(color: const Color(0xfff44336)),
+    );
+
+    const BorderSide side2 = BorderSide(
+      color: Color(0xff424242),
+    );
+    await tester.pumpWidget(buildApp(side2));
+
+    expect(tester.widget<Checkbox>(find.byType(Checkbox)).side, side2);
+    expect(
+      Material.of(tester.element(find.byType(Checkbox))),
+      paints
+        ..drrect(color: const Color(0xff424242)),
     );
   });
 }
