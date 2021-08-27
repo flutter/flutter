@@ -12,7 +12,7 @@
 //***************************************************************************
 //* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// This sample shows how to display a [VerticalDivider] between an purple and orange box
+// This sample shows how to display a [VerticalDivider] between a purple and orange box
 // inside a [Row]. The [VerticalDivider] is 20 logical pixels in width and contains a
 // horizontally centered black line that is 1 logical pixels thick. The grey
 // line is indented by 20 logical pixels.
