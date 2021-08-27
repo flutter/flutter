@@ -886,7 +886,6 @@ class SkMaskFilterNamespace {
 //     external SkPaint SkPaint();
 @JS('window.flutterCanvasKit.Paint')
 class SkPaint {
-  // TODO(yjbanov): implement invertColors, see paint.cc
   external SkPaint();
   external void setBlendMode(SkBlendMode blendMode);
   external void setStyle(SkPaintStyle paintStyle);
@@ -917,6 +916,7 @@ class SkColorFilterNamespace {
   );
   external SkColorFilter MakeLinearToSRGBGamma();
   external SkColorFilter MakeSRGBToLinearGamma();
+  external SkColorFilter MakeCompose(SkColorFilter? outer, SkColorFilter inner);
 }
 
 @JS()
