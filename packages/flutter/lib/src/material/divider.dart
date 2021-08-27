@@ -37,6 +37,7 @@ import 'theme.dart';
 ///
 ///  * [PopupMenuDivider], which is the equivalent but for popup menus.
 ///  * [ListTile.divideTiles], another approach to dividing widgets in a list.
+///  * [VerticalDivider], which is the vertical analog of this widget.
 ///  * <https://material.io/design/components/dividers.html>
 class Divider extends StatelessWidget {
   /// Creates a material design divider.
@@ -186,7 +187,7 @@ class Divider extends StatelessWidget {
 /// padding is automatically computed from the width.
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
-/// This sample shows how to display a [VerticalDivider] between an purple and orange box
+/// This sample shows how to display a [VerticalDivider] between a purple and orange box
 /// inside a [Row]. The [VerticalDivider] is 20 logical pixels in width and contains a
 /// horizontally centered black line that is 1 logical pixels thick. The grey
 /// line is indented by 20 logical pixels.
@@ -196,6 +197,7 @@ class Divider extends StatelessWidget {
 /// See also:
 ///
 ///  * [ListView.separated], which can be used to generate vertical dividers.
+///  * [Divider], which is the horizontal analog of this widget.
 ///  * <https://material.io/design/components/dividers.html>
 class VerticalDivider extends StatelessWidget {
   /// Creates a material design vertical divider.

@@ -65,10 +65,11 @@ class MyStatelessWidget extends StatelessWidget {
             ),
           ),
           const Divider(
+            color: Colors.black,
             height: 20,
             thickness: 5,
             indent: 20,
-            endIndent: 20,
+            endIndent: 0,
           ),
           // Subheader example from Material spec.
           // https://material.io/components/dividers#types
