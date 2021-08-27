@@ -389,7 +389,10 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "goldctl"}
+          {"dependency": "goldctl"},
+          {"dependency": "clang"},
+          {"dependency": "cmake"},
+          {"dependency": "ninja"}
         ]
       shard: framework_tests
       subshard: misc
@@ -1882,7 +1885,8 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "goldctl"}
+          {"dependency": "goldctl"},
+          {"dependency": "xcode"}
         ]
       shard: framework_tests
       subshard: misc
@@ -3367,7 +3371,8 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "goldctl"}
+          {"dependency": "goldctl"},
+          {"dependency": "vs_build"}
         ]
       shard: framework_tests
       subshard: misc
