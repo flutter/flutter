@@ -301,8 +301,9 @@ class Checkbox extends StatefulWidget {
   /// compatibility.
   /// {@endtemplate}
   ///
-  /// If this property is null then [CheckboxThemeData.side] of [ThemeData.checkboxTheme]
-  /// is used. If that's null then the side will be width 2.
+  /// If this property is null, then [CheckboxThemeData.side] of
+  /// [ThemeData.checkboxTheme] is used. If that is also null, then the side
+  /// will be width 2.
   final BorderSide? side;
 
   /// The width of a checkbox widget.

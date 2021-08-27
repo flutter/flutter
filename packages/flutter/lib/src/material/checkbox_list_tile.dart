@@ -138,6 +138,7 @@ class CheckboxListTile extends StatelessWidget {
     this.tristate = false,
     this.shape,
     this.selectedTileColor,
+    this.side,
   }) : assert(tristate != null),
        assert(tristate || value != null),
        assert(isThreeLine != null),
@@ -255,6 +256,15 @@ class CheckboxListTile extends StatelessWidget {
   /// If non-null, defines the background color when [CheckboxListTile.selected] is true.
   final Color? selectedTileColor;
 
+  /// {@macro flutter.material.checkbox.side}
+  ///
+  /// The given value is passed directly to [Checkbox.side].
+  ///
+  /// If this property is null, then [CheckboxThemeData.side] of
+  /// [ThemeData.checkboxTheme] is used. If that is also null, then the side
+  /// will be width 2.
+  final BorderSide? side;
+
   void _handleValueChange() {
     assert(onChanged != null);
     switch (value) {
@@ -280,6 +290,7 @@ class CheckboxListTile extends StatelessWidget {
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       autofocus: autofocus,
       tristate: tristate,
+      side: side,
     );
     Widget? leading, trailing;
     switch (controlAffinity) {

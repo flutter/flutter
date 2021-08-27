@@ -319,4 +319,41 @@ void main() {
     await tester.pumpWidget(buildFrame(activeColor: activeColor));
     expect(textColor('title'), activeColor);
   });
+
+  testWidgets('CheckboxListTile respects checkbox side', (WidgetTester tester) async {
+    const BorderSide side = BorderSide(
+      width: 4,
+      color: Color(0xfff44336),
+    );
+
+    Widget buildApp() {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return CheckboxListTile(
+                value: false,
+                onChanged: (bool? newValue) {},
+                side: side,
+              );
+            }),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+
+    expect(tester.widget<Checkbox>(find.byType(Checkbox)).side, side);
+    expect(tester.widget<CheckboxListTile>(find.byType(CheckboxListTile)).side, side);
+    expect(
+      Material.of(tester.element(find.byType(Checkbox))),
+      paints
+        ..drrect(
+          color: const Color(0xfff44336),
+          strokeWidth: 4,
+        ),
+    );
+  });
 }
