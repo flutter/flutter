@@ -70,6 +70,10 @@ List<MetricPoint> parse(Map<String, dynamic> resultsJson) {
   return metricPoints;
 }
 
+/// Update metrics to GCS bucket used by Skia Perf.
+///
+/// Skia Perf picks up all available files under the folder, and
+/// is robust to duplicate entries.
 Future<void> update(
   FlutterDestination metricsDestination,
   List<MetricPoint> metricPoints,
