@@ -268,9 +268,7 @@ class ManifestAssetBundle implements AssetBundle {
     if (!_splitDeferredAssets || !deferredComponentsEnabled) {
       // Include the assets in the regular set of assets if not using deferred
       // components.
-      deferredComponentsAssetVariants.forEach((String componentName, Map<_Asset, List<_Asset>> variants) {
-        assetVariants.addAll(variants);
-      });
+      deferredComponentsAssetVariants.values.forEach(assetVariants.addAll);
       deferredComponentsAssetVariants.clear();
       deferredComponentsEntries.clear();
     }
