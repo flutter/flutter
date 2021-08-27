@@ -12,9 +12,21 @@ import 'run_tests.dart' hide main;
 
 const FileSystem fs = LocalFileSystem();
 
-String cmd(String executable, List<String> args, {Directory? workingDirectory,}) {
+/// Utility function to run a [Process] and return [Process.stdout].
+///
+/// Throws [ProcessException] is [Process.exitCode] is non-0.
+String cmd(
+  String executable,
+  List<String> args, {
+  Directory? workingDirectory,
+}) {
   workingDirectory ??= fs.currentDirectory;
-  final ProcessResult result = Process.runSync(executable, args, workingDirectory: workingDirectory.path,);
+  print('Executing $executable ${args.join(' ')} in ${workingDirectory.path}');
+  final ProcessResult result = Process.runSync(
+    executable,
+    args,
+    workingDirectory: workingDirectory.path,
+  );
   print(result.stdout);
 
   if (result.exitCode != 0) {
@@ -42,9 +54,13 @@ Future<void> main(List<String> args) async {
   // the tests to run on release branches without being affected by breaking changes.
   //
   // This also prevents trunk from suddenly failing when tests are revved on flutter/tests.
-  // If you rerun a passing customer_tests shard, it should still pass, even if the tests 
+  // If you rerun a passing customer_tests shard, it should still pass, even if the tests
   // are rolled to a new version.
-  final Directory testsCheckout = fs.currentDirectory.parent.parent.childDirectory('bin').childDirectory('cache').childDirectory('pkg').childDirectory('tests');
+  final Directory testsCheckout = fs.currentDirectory.parent.parent
+      .childDirectory('bin')
+      .childDirectory('cache')
+      .childDirectory('pkg')
+      .childDirectory('tests');
   if (testsCheckout.existsSync()) {
     testsCheckout.deleteSync(recursive: true);
   }
@@ -60,7 +76,12 @@ Future<void> main(List<String> args) async {
     secondaryBranch: 'master',
   );
   // Check out the relevant flutter/tests revision
-  cmd('git', <String>['-C', testsCheckout.path, 'checkout', gitRevision,]);
-  
+  cmd('git', <String>[
+    '-C',
+    testsCheckout.path,
+    'checkout',
+    gitRevision,
+  ]);
+
   await run(args);
 }
