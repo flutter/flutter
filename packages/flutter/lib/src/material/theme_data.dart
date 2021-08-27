@@ -131,25 +131,7 @@ enum MaterialTapTargetSize {
 /// The [Builder] widget separates the parent theme's [BuildContext] from the
 /// child's [BuildContext].
 ///
-/// ```dart
-/// @override
-/// Widget build(BuildContext context) {
-///   return Theme(
-///     data: ThemeData.from(
-///       colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.amber),
-///     ),
-///     child: Builder(
-///       builder: (BuildContext context) {
-///         return Container(
-///           width: 100,
-///           height: 100,
-///           color: Theme.of(context).colorScheme.primary,
-///         );
-///       },
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples\api\lib\material\theme_data\theme_data.0.dart **
 /// {@end-tool}
 ///
 /// {@tool snippet}
