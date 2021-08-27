@@ -21,6 +21,7 @@ class UploadResultsCommand extends Command<void> {
           'checkouts run in detached HEAD state, so the branch must be passed.',
     );
     argParser.addOption('luci-builder', help: '[Flutter infrastructure] Name of the LUCI builder being run on.');
+    argParser.addOption('task-name', help: '[Flutter infrastructure] Name of the task being run on.');
     argParser.addOption('test-status', help: 'Test status: Succeeded|Failed');
     argParser.addOption('commit-time', help: 'Commit time in UNIX timestamp');
   }
@@ -40,6 +41,7 @@ class UploadResultsCommand extends Command<void> {
     final String? builderName = argResults!['luci-builder'] as String?;
     final String? testStatus = argResults!['test-status'] as String?;
     final String? commitTime = argResults!['commit-time'] as String?;
+    final String? taskName = argResults!['task-name'] as String?;
 
     // Upload metrics to metrics_center from test runner when `commitTime` is specified. This
     // is mainly for testing purpose.
@@ -47,7 +49,7 @@ class UploadResultsCommand extends Command<void> {
     // TODO(keyong): remove try block to block test when this is validated to work https://github.com/flutter/flutter/issues/88484
     try {
       if (commitTime != null) {
-        await uploadToMetricsCenter(resultsPath, commitTime);
+        await uploadToMetricsCenter(resultsPath, commitTime, taskName);
         print('Successfully uploaded metrics to metrics center');
       }
     } on Exception catch (e, stacktrace) {
