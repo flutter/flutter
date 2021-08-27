@@ -73,6 +73,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     usesDartDefineOption();
     usesWebRendererOption();
     usesDeviceUserOption();
+    usesFlavorOption();
 
     argParser
       ..addMultiOption('name',
