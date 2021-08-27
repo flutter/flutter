@@ -64,8 +64,9 @@ class DevFSFileContent extends DevFSContent {
   FileStat _fileStat;
 
   File _getFile() {
-    if (_linkTarget != null) {
-      return _linkTarget;
+    final File linkTarget = _linkTarget;
+    if (linkTarget != null) {
+      return linkTarget;
     }
     if (file is Link) {
       // The link target.
@@ -138,10 +139,10 @@ class DevFSFileContent extends DevFSContent {
   }
 
   @override
-  Future<List<int>> contentsAsBytes() async => _getFile()?.readAsBytes();
+  Future<List<int>> contentsAsBytes() async => _getFile().readAsBytes();
 
   @override
-  Stream<List<int>> contentsAsStream() => _getFile()?.openRead();
+  Stream<List<int>> contentsAsStream() => _getFile().openRead();
 }
 
 /// Byte content to be copied to the device.
