@@ -218,36 +218,11 @@ class Dialog extends StatelessWidget {
 /// {@end-tool}
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold_center}
-///
 /// This demo shows a [TextButton] which when pressed, calls [showDialog]. When called, this method
 /// displays a Material dialog above the current contents of the app and returns
 /// a [Future] that completes when the dialog is dismissed.
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return TextButton(
-///     onPressed: () => showDialog<String>(
-///       context: context,
-///       builder: (BuildContext context) => AlertDialog(
-///         title: const Text('AlertDialog Title'),
-///         content: const Text('AlertDialog description'),
-///         actions: <Widget>[
-///           TextButton(
-///             onPressed: () => Navigator.pop(context, 'Cancel'),
-///             child: const Text('Cancel'),
-///           ),
-///           TextButton(
-///             onPressed: () => Navigator.pop(context, 'OK'),
-///             child: const Text('OK'),
-///           ),
-///         ],
-///       ),
-///     ),
-///     child: const Text('Show Dialog'),
-///   );
-/// }
-///
-/// ```
+/// ** See code in examples/api/lib/material/dialog/alert_dialog.1.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -999,7 +974,6 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 /// For more information about state restoration, see [RestorationManager].
 ///
 /// {@tool sample --template=stateless_widget_restoration_material}
-///
 /// This sample demonstrates how to create a restorable Material dialog. This is
 /// accomplished by enabling state restoration by specifying
 /// [MaterialApp.restorationScopeId] and using [Navigator.restorablePush] to
@@ -1007,28 +981,7 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 ///
 /// {@macro flutter.widgets.RestorationManager}
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return Scaffold(
-///     body: Center(
-///       child: OutlinedButton(
-///         onPressed: () {
-///           Navigator.of(context).restorablePush(_dialogBuilder);
-///         },
-///         child: const Text('Open Dialog'),
-///       ),
-///     ),
-///   );
-/// }
-///
-/// static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
-///   return DialogRoute<void>(
-///     context: context,
-///     builder: (BuildContext context) => const AlertDialog(title: Text('Material Alert!')),
-///   );
-/// }
-/// ```
-///
+/// ** See code in examples/api/lib/material/dialog/show_dialog.0.dart **
 /// {@end-tool}
 ///
 /// See also:

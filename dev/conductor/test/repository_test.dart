@@ -405,6 +405,8 @@ vars = {
         onRun: () {
           ciYaml.createSync(recursive: true);
           ciYaml.writeAsStringSync('''
+# Friendly note
+
 enabled_branches:
   - master
   - dev
@@ -441,6 +443,8 @@ enabled_branches:
       expect(
         framework.ciYaml.stringContents,
         '''
+# Friendly note
+
 enabled_branches:
   - foo
   - master
