@@ -1,4 +1,4 @@
-Signature: 97d60977d3defe4a9a192781c5d86776
+Signature: da44635f0f4bb49575199fe893a6cf7e
 
 UNUSED LICENSES:
 
@@ -3420,7 +3420,6 @@ FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic/lib/src/scenic_context.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic_flutter/lib/src/focus_state.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic_flutter/lib/src/fuchsia_views_service.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/metrics/camera_metrics.dart
-FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/virtual_camera.dart
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.accessibility.virtualkeyboard/virtual_keyboard.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt2/client.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt2/constants.fidl
