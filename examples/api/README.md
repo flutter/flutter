@@ -14,8 +14,7 @@ would run it like so, from this [api](.) directory:
 ```
 
 These same examples are available on the API docs site. For instance, the
-example above is available on [this
-page](https://api.flutter.dev/flutter/animation/Curve2D-class.html#animation.Curve2D.1).
+example above is available on [this page](https://api.flutter.dev/flutter/animation/Curve2D-class.html#animation.Curve2D.1).
 Most of them are available as interactive examples in Dartpad, but some just
 don't make sense on the web, and so are available as standalone examples that
 can be run here.
@@ -51,16 +50,16 @@ add the stub to the symbol documentation:
 /// {@end-tool}
 ```
 
-Then install the `extract_sample` command with:
+Then install the `snippets:extract` command with:
 
 ```
 % pub global activate snippets
 ```
 
-And run the `extract_sample` command from the Flutter repo dir:
+And run the `snippets:extract` command from the Flutter repo dir:
 
 ```
-$ pub global run extract_sample packages/flutter/lib/src/animation/curves.dart
+$ pub global run snippets:extract --input packages/flutter/lib/src/animation/curves.dart
 ```
 
 This will create a new file in the `examples/api` directory, in this case it
