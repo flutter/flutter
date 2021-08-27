@@ -25,13 +25,13 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
     @required Platform platform,
     @required ProcessManager processManager,
     @required FileSystem fileSystem,
-    @required String pubExecutable,
+    @required String dartExecutable,
     @required Logger logger,
     @required PersistentToolState persistentToolState,
     @visibleForTesting io.HttpClient httpClient,
   })  : _processManager = processManager,
         _fileSystem = fileSystem,
-        _pubExecutable = pubExecutable,
+        _dartExecutable = dartExecutable,
         _logger = logger,
         _platform = platform,
         _persistentToolState = persistentToolState,
@@ -39,7 +39,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
 
   final ProcessManager _processManager;
   final FileSystem _fileSystem;
-  final String _pubExecutable;
+  final String _dartExecutable;
   final Logger _logger;
   final Platform _platform;
   final PersistentToolState _persistentToolState;
@@ -118,7 +118,8 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
       }
 
       _devToolsProcess = await _processManager.start(<String>[
-        _pubExecutable,
+        _dartExecutable,
+        'pub',
         'global',
         'run',
         'devtools',
@@ -153,7 +154,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
   /// Check if the DevTools package is already active by running "pub global list".
   Future<bool> _checkForActiveDevTools() async {
     final io.ProcessResult _pubGlobalListProcess = await _processManager.run(
-      <String>[ _pubExecutable, 'global', 'list' ],
+      <String>[ _dartExecutable, 'global', 'list' ],
     );
     return _pubGlobalListProcess.stdout.toString().contains(_devToolsInstalledPattern);
   }
@@ -179,7 +180,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
     try {
       final io.ProcessResult _devToolsActivateProcess = await _processManager
           .run(<String>[
-        _pubExecutable,
+        _dartExecutable,
         'global',
         'activate',
         'devtools',
