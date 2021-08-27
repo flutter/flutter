@@ -8,4 +8,6 @@ REM This should match the ci.sh file in this directory.
 REM This is called from the LUCI recipes:
 REM https://flutter.googlesource.com/recipes/+/refs/heads/master/recipe_modules/adhoc_validation/resources/customer_testing.bat
 
+dart pub get
+
 dart --enable-asserts ci.dart --skip-on-fetch-failure --skip-template ..\..\bin\cache\pkg\tests\registry\*.test

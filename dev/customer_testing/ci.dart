@@ -44,7 +44,6 @@ Future<void> main(List<String> args) async {
   //
   // Only customer_testing (this directory) and tools are needed.
   final String dart = fs.currentDirectory.parent.parent.childDirectory('bin').childFile('dart').path;
-  cmd(dart, <String>['pub', 'get']);
   cmd(dart, <String>['pub', 'get'], workingDirectory: fs.currentDirectory.parent.childDirectory('tools'));
 
   // Next is updating the flutter/tests checkout

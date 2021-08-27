@@ -10,4 +10,6 @@
 
 set -ex
 
+dart pub get
+
 dart --enable-asserts ci.dart --skip-on-fetch-failure --skip-template ../../bin/cache/pkg/tests/registry/*.test
