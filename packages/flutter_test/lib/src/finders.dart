@@ -103,6 +103,19 @@ class CommonFinders {
     );
   }
 
+  /// Finds [Image] and [FadeInImage] widgets containing `image` equal to the
+  /// `image` argument.
+  ///
+  /// ## Sample code
+  ///
+  /// ```dart
+  /// expect(find.image(FileImage(File(filePath))), findsOneWidget);
+  /// ```
+  ///
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// nodes that are [Offstage] or that are from inactive [Route]s.
+  Finder image(ImageProvider image, { bool skipOffstage = true }) => _WidgetImageFinder(image, skipOffstage: skipOffstage);
+
   /// Finds widgets by searching for one with a particular [Key].
   ///
   /// ## Sample code
@@ -166,6 +179,30 @@ class CommonFinders {
   Finder widgetWithIcon(Type widgetType, IconData icon, { bool skipOffstage = true }) {
     return find.ancestor(
       of: find.byIcon(icon),
+      matching: find.byType(widgetType),
+    );
+  }
+
+  /// Looks for widgets that contain an [Image] descendant displaying [ImageProvider]
+  /// `image` in it.
+  ///
+  /// ## Sample code
+  ///
+  /// ```dart
+  /// // Suppose you have a button with image in it:
+  /// Button(
+  ///   child: Image.file(filePath)
+  /// )
+  ///
+  /// // You can find and tap on it like this:
+  /// tester.tap(find.widgetWithImage(Button, FileImage(filePath)));
+  /// ```
+  ///
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// nodes that are [Offstage] or that are from inactive [Route]s.
+  Finder widgetWithImage(Type widgetType, ImageProvider image, { bool skipOffstage = true }) {
+    return find.ancestor(
+      of: find.image(image),
       matching: find.byType(widgetType),
     );
   }
@@ -687,6 +724,26 @@ class _WidgetTypeFinder extends MatchFinder {
   @override
   bool matches(Element candidate) {
     return candidate.widget.runtimeType == widgetType;
+  }
+}
+
+class _WidgetImageFinder extends MatchFinder {
+  _WidgetImageFinder(this.image, { bool skipOffstage = true }) : super(skipOffstage: skipOffstage);
+
+  final ImageProvider image;
+
+  @override
+  String get description => 'image "$image"';
+
+  @override
+  bool matches(Element candidate) {
+    final Widget widget = candidate.widget;
+    if (widget is Image) {
+      return widget.image == image;
+    } else if (widget is FadeInImage) {
+      return widget.image == image;
+    }
+    return false;
   }
 }
 
