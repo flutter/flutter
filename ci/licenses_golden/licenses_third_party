@@ -1,4 +1,4 @@
-Signature: be11bb168f3c11303d97282da7fac18d
+Signature: a993aa03090b864a7f5c3304cbe5e4a9
 
 UNUSED LICENSES:
 
@@ -12014,9 +12014,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: dart
-ORIGIN: ../../../third_party/dart/runtime/lib/class_id.cc + ../../../third_party/dart/LICENSE
+ORIGIN: ../../../third_party/dart/runtime/lib/profiler.cc + ../../../third_party/dart/LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../third_party/dart/runtime/lib/class_id.cc
 FILE: ../../../third_party/dart/runtime/lib/profiler.cc
 FILE: ../../../third_party/dart/runtime/observatory/bin/shell.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/app.dart
@@ -12132,7 +12131,6 @@ FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/private/preambl
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/private/preambles/jsshell.js
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/linked_hash_map.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/shared/embedded_names.dart
-FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/class_id.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/convert_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/lib_prefix.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/profiler.dart
