@@ -25,7 +25,7 @@ constexpr int kScrollOffsetMultiplier = 20;
 // Returns the arrow cursor for unknown constants.
 //
 // This map must be kept in sync with Flutter framework's
-// rendering/mouse_cursor.dart.
+// services/mouse_cursor.dart.
 static HCURSOR GetCursorByName(const std::string& cursor_name) {
   static auto* cursors = new std::map<std::string, const wchar_t*>{
       {"allScroll", IDC_SIZEALL},
