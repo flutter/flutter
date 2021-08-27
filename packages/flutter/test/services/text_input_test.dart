@@ -425,9 +425,11 @@ void main() {
 }
 
 class FakeTextInputClient implements TextInputClient {
-  FakeTextInputClient(this.currentTextEditingValue);
+  FakeTextInputClient(this.currentTextEditingValue, this.enableDeltaModel);
 
   String latestMethodCall = '';
+
+  bool? enableDeltaModel;
 
   @override
   TextEditingValue currentTextEditingValue;
@@ -451,6 +453,11 @@ class FakeTextInputClient implements TextInputClient {
   }
 
   @override
+  void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas) {
+    latestMethodCall = 'updateEditingValueWithDeltas';
+  }
+
+  @override
   void updateFloatingCursor(RawFloatingCursorPoint point) {
     latestMethodCall = 'updateFloatingCursor';
   }
@@ -465,7 +472,8 @@ class FakeTextInputClient implements TextInputClient {
     latestMethodCall = 'showAutocorrectionPromptRect';
   }
 
-  TextInputConfiguration get configuration => const TextInputConfiguration();
+  TextInputConfiguration get configuration =>
+      const TextInputConfiguration(enableDeltaModel: enableDeltaModel ?? false);
 }
 
 class FakeTextChannel implements MethodChannel {

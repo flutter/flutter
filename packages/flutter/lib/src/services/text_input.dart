@@ -766,22 +766,30 @@ class TextEditingDelta {
   final String oldText;
 
   /// This value will slightly vary based on the [TextEditingDeltaType].
+  ///
   /// For a [TextEditingDeltaType.insertion] this will be the character/s being
   /// inserted.
+  ///
   /// For a [TextEditingDeltaType.deletion] this will be the character/s being
   /// deleted.
+  ///
   /// For a [TextEditingDeltaType.replacement] this will be the text that is
   /// replacing the [TextEditingDelta.deltaRange].
+  ///
   /// For a [TextEditingDeltaType.equality] this will be an empty string.
   final String deltaText;
 
   /// This value will slightly vary based on the [TextEditingDeltaType].
+  ///
   /// For a [TextEditingDeltaType.insertion] this will be a collapsed range.
+  ///
   /// For a [TextEditingDeltaType.deletion] this will be either a collapsed
   /// range for a single character deletion, or a range for the deletion of
   /// a selection.
+  ///
   /// For a [TextEditingDeltaType.replacement] this will be the range of
   /// characters that are being replaced.
+  ///
   /// For a [TextEditingDeltaType.equality] this will be a collapsed range
   /// of (-1,-1).
   final TextRange deltaRange;
@@ -1479,7 +1487,6 @@ TextInputAction _toTextInputAction(String action) {
     case 'TextInputAction.none':
       return TextInputAction.none;
     case 'TextInputAction.unspecified':
-      return TextInputAction.unspecified;
     case 'TextInputAction.go':
       return TextInputAction.go;
     case 'TextInputAction.search':
