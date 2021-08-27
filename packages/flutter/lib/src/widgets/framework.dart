@@ -4532,16 +4532,6 @@ typedef NullableIndexedWidgetBuilder = Widget? Function(BuildContext context, in
 ///  * [ValueWidgetBuilder], which is similar but takes a value and a child.
 typedef TransitionBuilder = Widget Function(BuildContext context, Widget? child);
 
-/// A builder that creates a widget given the two callbacks `onStepContinue` and
-/// `onStepCancel`.
-///
-/// Used by [Stepper.controlsBuilder].
-///
-/// See also:
-///
-///  * [WidgetBuilder], which is similar but only takes a [BuildContext].
-typedef ControlsWidgetBuilder = Widget Function(BuildContext context, { VoidCallback? onStepContinue, VoidCallback? onStepCancel });
-
 /// An [Element] that composes other [Element]s.
 ///
 /// Rather than creating a [RenderObject] directly, a [ComponentElement] creates
