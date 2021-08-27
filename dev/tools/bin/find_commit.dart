@@ -47,7 +47,7 @@ String findCommit({
   final Commit anchor;
   if (primaryBranch == primaryTrunk) {
     log('on $primaryTrunk, using last commit as anchor');
-    anchor = Commit.parse(git(primaryRepoDirectory, <String>['log', Commit.formatArgument, '--max-count=1', primaryBranch, '--']));
+    anchor = Commit.parse(git(primaryRepoDirectory, <String>['rev-list', '-g', '--all', Commit.formatArgument, '--max-count=1', primaryBranch, '--']));
   } else {
     final List<Commit> branchCommits = Commit.parseList(git(primaryRepoDirectory, <String>['log', Commit.formatArgument, primaryBranch, '--']));
     final List<Commit> trunkCommits = Commit.parseList(git(primaryRepoDirectory, <String>['log', Commit.formatArgument, primaryTrunk, '--']));

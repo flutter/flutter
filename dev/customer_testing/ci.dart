@@ -70,9 +70,9 @@ Future<void> main(List<String> args) async {
   final String gitRevision = findCommit(
     primaryRepoDirectory: fs.currentDirectory.path,
     primaryBranch: git(fs.currentDirectory.path, <String>['rev-parse', '--abbrev-ref', 'HEAD']).trim(),
-    primaryTrunk: 'origin/master',
+    primaryTrunk: 'master',
     secondaryRepoDirectory: testsCheckout.path,
-    secondaryBranch: 'origin/master',
+    secondaryBranch: 'master',
   );
   // Check out the relevant flutter/tests revision
   cmd('git', <String>[
