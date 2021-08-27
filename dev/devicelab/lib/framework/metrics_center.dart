@@ -74,7 +74,7 @@ List<MetricPoint> parse(Map<String, dynamic> resultsJson) {
 ///
 /// Skia Perf picks up all available files under the folder, and
 /// is robust to duplicate entries.
-/// 
+///
 /// Files will be named based on `taskName`, such as
 /// `complex_layout_scroll_perf__timeline_summary_values.json`.
 /// If no `taskName` is specified, data will be saved to
