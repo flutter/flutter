@@ -1,4 +1,4 @@
-Signature: 54eba78976568ea4ee4b74f0c5bb3ec3
+Signature: 64cc735b6e73df3631671fb5ba71dde4
 
 UNUSED LICENSES:
 
@@ -9955,6 +9955,7 @@ FILE: ../../../third_party/dart/benchmarks/StringPool/dart/version2.dart
 FILE: ../../../third_party/dart/benchmarks/StringPool/dart2/StringPool.dart
 FILE: ../../../third_party/dart/benchmarks/StringPool/dart2/StringPool100.dart
 FILE: ../../../third_party/dart/runtime/bin/abstract_socket_test.cc
+FILE: ../../../third_party/dart/runtime/bin/secure_socket_utils_test.cc
 FILE: ../../../third_party/dart/runtime/bin/utils.cc
 FILE: ../../../third_party/dart/runtime/bin/virtual_memory.h
 FILE: ../../../third_party/dart/runtime/bin/virtual_memory_fuchsia.cc
