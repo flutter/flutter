@@ -49,8 +49,8 @@ String findCommit({
     log('on $primaryTrunk, using last commit as anchor');
     anchor = Commit.parse(git(primaryRepoDirectory, <String>['rev-list', '-g', '--all', Commit.formatArgument, '--max-count=1', primaryBranch, '--']));
   } else {
-    final List<Commit> branchCommits = Commit.parseList(git(primaryRepoDirectory, <String>['log', Commit.formatArgument, primaryBranch, '--']));
-    final List<Commit> trunkCommits = Commit.parseList(git(primaryRepoDirectory, <String>['log', Commit.formatArgument, primaryTrunk, '--']));
+    final List<Commit> branchCommits = Commit.parseList(git(primaryRepoDirectory, <String>['rev-list', '-g', '--all', Commit.formatArgument, primaryBranch, '--']));
+    final List<Commit> trunkCommits = Commit.parseList(git(primaryRepoDirectory, <String>['rev-list', '-g', '--all', Commit.formatArgument, primaryTrunk, '--']));
     if (branchCommits.isEmpty || trunkCommits.isEmpty || branchCommits.first.hash != trunkCommits.first.hash)
       throw StateError('Branch $primaryBranch does not seem to have a common history with trunk $primaryTrunk.');
     if (branchCommits.last.hash == trunkCommits.last.hash) {
