@@ -49,16 +49,15 @@ class MyStatelessWidget extends StatelessWidget {
 
   Widget build(BuildContext context) {
     return Stepper(
-      controlsBuilder: (BuildContext context,
-          {VoidCallback? onStepContinue, VoidCallback? onStepCancel}) {
+      controlsBuilder: (BuildContext context, ControlsDetails details) {
         return Row(
           children: <Widget>[
             TextButton(
-              onPressed: onStepContinue,
+              onPressed: details.onStepContinue,
               child: const Text('NEXT'),
             ),
             TextButton(
-              onPressed: onStepCancel,
+              onPressed: details.onStepCancel,
               child: const Text('CANCEL'),
             ),
           ],
