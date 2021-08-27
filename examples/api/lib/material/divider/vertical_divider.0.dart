@@ -64,11 +64,11 @@ class MyStatelessWidget extends StatelessWidget {
             ),
           ),
           const VerticalDivider(
-            color: Colors.grey,
             width: 20,
             thickness: 1,
             indent: 20,
             endIndent: 0,
+            color: Colors.grey,
           ),
           Expanded(
             child: Container(
