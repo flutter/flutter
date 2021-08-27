@@ -163,8 +163,7 @@ class Cache {
   final Net _net;
   final FileSystemUtils _fsUtils;
 
-  ArtifactUpdater get _artifactUpdater => __artifactUpdater ??= _createUpdater();
-  ArtifactUpdater? __artifactUpdater;
+  late final ArtifactUpdater _artifactUpdater = _createUpdater();
 
   @protected
   void registerArtifact(ArtifactSet artifactSet) {

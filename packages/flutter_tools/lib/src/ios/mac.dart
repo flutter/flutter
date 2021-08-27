@@ -50,8 +50,7 @@ class IMobileDevice {
   final ProcessManager _processManager;
   final ProcessUtils _processUtils;
 
-  bool get isInstalled => _isInstalled ??= _processManager.canRun(_idevicescreenshotPath);
-  bool? _isInstalled;
+  late final bool isInstalled = _processManager.canRun(_idevicescreenshotPath);
 
   /// Starts `idevicesyslog` and returns the running process.
   Future<Process> startLogger(String deviceID) {
