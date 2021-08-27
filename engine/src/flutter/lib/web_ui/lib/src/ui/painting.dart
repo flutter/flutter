@@ -425,6 +425,7 @@ class ImageFilter {
 
 enum ImageByteFormat {
   rawRgba,
+  rawStraightRgba,
   rawUnmodified,
   png,
 }
