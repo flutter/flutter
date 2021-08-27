@@ -124,29 +124,31 @@ enum MaterialTapTargetSize {
 /// for the subtree that appears below the new [Theme], or insert a widget
 /// that creates a new BuildContext, like [Builder].
 ///
-/// {@tool snippet}
-/// In this example, the [Container] widget uses [Theme.of] to retrieve the
-/// primary color from the theme's [colorScheme] to draw an amber square.
+/// {@tool dartpad --template=stateless_widget_scaffold}
+/// This sample shows how to display a [Container] widget that uses [Theme.of]
+/// to retrieve the primary color from the theme's [colorScheme] to draw an
+/// amber square.
 /// The [Builder] widget separates the parent theme's [BuildContext] from the
 /// child's [BuildContext].
 ///
-/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/theme_data.png)
-///
 /// ```dart
-/// Theme(
-///   data: ThemeData.from(
-///     colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.amber),
-///   ),
-///   child: Builder(
-///     builder: (BuildContext context) {
-///       return Container(
-///         width: 100,
-///         height: 100,
-///         color: Theme.of(context).colorScheme.primary,
-///       );
-///     },
-///   ),
-/// )
+/// @override
+/// Widget build(BuildContext context) {
+///   return Theme(
+///     data: ThemeData.from(
+///       colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.amber),
+///     ),
+///     child: Builder(
+///       builder: (BuildContext context) {
+///         return Container(
+///           width: 100,
+///           height: 100,
+///           color: Theme.of(context).colorScheme.primary,
+///         );
+///       },
+///     ),
+///   );
+/// }
 /// ```
 /// {@end-tool}
 ///
