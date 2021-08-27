@@ -23,31 +23,7 @@ import 'theme.dart';
 /// The [CupertinoButton] is connected to a callback that increments a counter.
 /// The [backgroundColor] can be changed.
 ///
-/// ```dart
-/// int _count = 0;
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return CupertinoPageScaffold(
-///     // Uncomment to change the background color
-///     // backgroundColor: CupertinoColors.systemPink,
-///     navigationBar: const CupertinoNavigationBar(
-///       middle: Text('Sample Code'),
-///     ),
-///     child: ListView(
-///       children: <Widget>[
-///         CupertinoButton(
-///           onPressed: () => setState(() => _count++),
-///           child: const Icon(CupertinoIcons.add),
-///         ),
-///         Center(
-///           child: Text('You have pressed the button $_count times.'),
-///         ),
-///       ],
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/cupertino/page_scaffold/cupertino_page_scaffold.0.dart **
 /// {@end-tool}
 ///
 /// See also:

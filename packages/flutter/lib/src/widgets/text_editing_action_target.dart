@@ -480,14 +480,27 @@ abstract class TextEditingActionTarget {
       return moveSelectionLeftByLine(cause);
     }
 
-    final int firstOffset =
-        math.min(textEditingValue.selection.baseOffset, textEditingValue.selection.extentOffset);
-    final int startPoint =
-        TextEditingValue.previousCharacter(firstOffset, textEditingValue.text, false);
-    final TextSelection selectedLine = textMetrics.getLineAtOffset(
-        textEditingValue.text, TextPosition(offset: startPoint));
+    // If the lowest edge of the selection is at the start of a line, don't do
+    // anything.
+    // TODO(justinmc): Support selection with multiple TextAffinities.
+    // https://github.com/flutter/flutter/issues/88135
+    final TextSelection currentLine = textMetrics.getLineAtOffset(
+      textEditingValue.text,
+      TextPosition(
+        offset: textEditingValue.selection.start,
+        affinity: textEditingValue.selection.isCollapsed
+            ? textEditingValue.selection.affinity
+            : TextAffinity.downstream,
+      ),
+    );
+    if (currentLine.baseOffset == textEditingValue.selection.start) {
+      return;
+    }
 
-    setSelection(textEditingValue.selection.expandTo(TextPosition(offset: selectedLine.baseOffset, affinity: textEditingValue.selection.affinity)), cause);
+    setSelection(textEditingValue.selection.expandTo(TextPosition(
+      offset: currentLine.baseOffset,
+      affinity: textEditingValue.selection.affinity,
+    )), cause);
   }
 
   /// Expand the current selection to the smallest selection that includes the
@@ -511,14 +524,29 @@ abstract class TextEditingActionTarget {
       return moveSelectionRightByLine(cause);
     }
 
-    final int lastOffset =
-        math.max(textEditingValue.selection.baseOffset, textEditingValue.selection.extentOffset);
-    final int startPoint =
-        TextEditingValue.nextCharacter(lastOffset, textEditingValue.text, false);
-    final TextSelection selectedLine = textMetrics.getLineAtOffset(
-        textEditingValue.text, TextPosition(offset: startPoint));
+    // If greatest edge is already at the end of a line, don't do anything.
+    // TODO(justinmc): Support selection with multiple TextAffinities.
+    // https://github.com/flutter/flutter/issues/88135
+    final TextSelection currentLine = textMetrics.getLineAtOffset(
+      textEditingValue.text,
+      TextPosition(
+        offset: textEditingValue.selection.end,
+        affinity: textEditingValue.selection.isCollapsed
+            ? textEditingValue.selection.affinity
+            : TextAffinity.upstream,
+      ),
+    );
+    if (currentLine.extentOffset == textEditingValue.selection.end) {
+      return;
+    }
 
-    setSelection(textEditingValue.selection.expandTo(TextPosition(offset: selectedLine.extentOffset, affinity: textEditingValue.selection.affinity)), cause);
+    final TextSelection nextSelection = textEditingValue.selection.expandTo(
+      TextPosition(
+        offset: currentLine.extentOffset,
+        affinity: TextAffinity.upstream,
+      ),
+    );
+    setSelection(nextSelection, cause);
   }
 
   /// Keeping selection's [TextSelection.baseOffset] fixed, move the
@@ -866,12 +894,9 @@ abstract class TextEditingActionTarget {
   ///   * [moveSelectionRightByLine], which is the same but in the opposite
   ///     direction.
   void moveSelectionLeftByLine(SelectionChangedCause cause) {
-    // If the previous character is the edge of a line, don't do anything.
-    final int previousPoint = TextEditingValue.previousCharacter(
-        textEditingValue.selection.extentOffset, textEditingValue.text, true);
-    final TextSelection line = textMetrics.getLineAtOffset(
-        textEditingValue.text, TextPosition(offset: previousPoint));
-    if (line.extentOffset == previousPoint) {
+    // If already at the left edge of the line, do nothing.
+    final TextSelection currentLine = textMetrics.getLineAtOffset(textEditingValue.text, textEditingValue.selection.extent);
+    if (currentLine.baseOffset == textEditingValue.selection.extentOffset) {
       return;
     }
 
@@ -954,7 +979,12 @@ abstract class TextEditingActionTarget {
       previousExtent = TextEditingValue.previousCharacter(
           textEditingValue.selection.extentOffset, textEditingValue.text);
     }
-    final TextSelection nextSelection = textEditingValue.selection.moveTo(TextPosition(offset: previousExtent, affinity: textEditingValue.selection.affinity));
+    final TextSelection nextSelection = textEditingValue.selection.moveTo(
+      TextPosition(
+        offset: previousExtent,
+        affinity: textEditingValue.selection.affinity,
+      ),
+    );
 
     if (nextSelection == textEditingValue.selection) {
       return;
@@ -1047,9 +1077,7 @@ abstract class TextEditingActionTarget {
     // If already at the right edge of the line, do nothing.
     final TextSelection currentLine = textMetrics.getLineAtOffset(
       textEditingValue.text,
-      TextPosition(
-        offset: textEditingValue.selection.extentOffset,
-      ),
+      textEditingValue.selection.extent,
     );
     if (currentLine.extentOffset == textEditingValue.selection.extentOffset) {
       return;
@@ -1062,7 +1090,12 @@ abstract class TextEditingActionTarget {
     final int startPoint = TextEditingValue.nextCharacter(
         textEditingValue.selection.extentOffset, textEditingValue.text, false);
     final TextSelection selectedLine = textMetrics.getLineAtOffset(
-        textEditingValue.text, TextPosition(offset: startPoint));
+      textEditingValue.text,
+      TextPosition(
+        offset: startPoint,
+        affinity: TextAffinity.upstream,
+      ),
+    );
     final TextSelection nextSelection = textEditingValue.selection.moveTo(TextPosition(
       offset: selectedLine.extentOffset,
       affinity: TextAffinity.upstream,

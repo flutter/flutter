@@ -1097,7 +1097,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
           ErrorHint(
             'Instead of performing asynchronous work inside a call to setState(), first '
             'execute the work (without updating the widget state), and then synchronously '
-           'update the state inside a call to setState().',
+            'update the state inside a call to setState().',
           ),
         ]);
       }
@@ -1781,8 +1781,8 @@ abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
         // TODO(a14n): remove this check to have a lot more const widget
         if (children[index] == null) {
           throw FlutterError(
-              "$runtimeType's children must not contain any null values, "
-                  'but a null value was found at index $index',
+            "$runtimeType's children must not contain any null values, "
+            'but a null value was found at index $index',
           );
         }
       }
@@ -2336,49 +2336,7 @@ abstract class BuildContext {
 /// the layout size of the rendered tree. For some use cases, the simpler
 /// [Offstage] widget may be a better alternative to this approach.
 ///
-/// ```dart imports
-/// import 'package:flutter/rendering.dart';
-/// import 'package:flutter/widgets.dart';
-/// ```
-///
-/// ```dart
-/// void main() {
-///   WidgetsFlutterBinding.ensureInitialized();
-///   print(measureWidget(const SizedBox(width: 640, height: 480)));
-/// }
-///
-/// Size measureWidget(Widget widget) {
-///   final PipelineOwner pipelineOwner = PipelineOwner();
-///   final MeasurementView rootView = pipelineOwner.rootNode = MeasurementView();
-///   final BuildOwner buildOwner = BuildOwner(focusManager: FocusManager());
-///   final RenderObjectToWidgetElement<RenderBox> element = RenderObjectToWidgetAdapter<RenderBox>(
-///     container: rootView,
-///     debugShortDescription: '[root]',
-///     child: widget,
-///   ).attachToRenderTree(buildOwner);
-///   try {
-///     rootView.scheduleInitialLayout();
-///     pipelineOwner.flushLayout();
-///     return rootView.size;
-///   } finally {
-///     // Clean up.
-///     element.update(RenderObjectToWidgetAdapter<RenderBox>(container: rootView));
-///     buildOwner.finalizeTree();
-///   }
-/// }
-///
-/// class MeasurementView extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
-///   @override
-///   void performLayout() {
-///     assert(child != null);
-///     child!.layout(const BoxConstraints(), parentUsesSize: true);
-///     size = child!.size;
-///   }
-///
-///   @override
-///   void debugAssertDoesMeetConstraints() => true;
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/framework/build_owner.0.dart **
 /// {@end-tool}
 class BuildOwner {
   /// Creates an object that manages widgets.
@@ -2780,20 +2738,20 @@ class BuildOwner {
               error = FlutterError.fromParts(<DiagnosticsNode>[
                 ErrorSummary('Multiple widgets used the same GlobalKey.'),
                 ErrorDescription(
-                    'The key $key was used by multiple widgets. The parents of those widgets were:\n'
-                    '- ${older.toString()}\n'
-                    '- ${newer.toString()}\n'
-                    'A GlobalKey can only be specified on one widget at a time in the widget tree.',
+                  'The key $key was used by multiple widgets. The parents of those widgets were:\n'
+                  '- ${older.toString()}\n'
+                  '- ${newer.toString()}\n'
+                  'A GlobalKey can only be specified on one widget at a time in the widget tree.',
                 ),
               ]);
             } else {
               error = FlutterError.fromParts(<DiagnosticsNode>[
                 ErrorSummary('Multiple widgets used the same GlobalKey.'),
                 ErrorDescription(
-                    'The key $key was used by multiple widgets. The parents of those widgets were '
-                    'different widgets that both had the following description:\n'
-                    '  ${parent.toString()}\n'
-                    'A GlobalKey can only be specified on one widget at a time in the widget tree.',
+                  'The key $key was used by multiple widgets. The parents of those widgets were '
+                  'different widgets that both had the following description:\n'
+                  '  ${parent.toString()}\n'
+                  'A GlobalKey can only be specified on one widget at a time in the widget tree.',
                 ),
               ]);
             }
@@ -3991,7 +3949,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
             'this render object has not yet been through layout, which typically '
             'means that the size getter was called too early in the pipeline '
             '(e.g., during the build phase) before the framework has determined '
-           'the size and position of the render objects during layout.',
+            'the size and position of the render objects during layout.',
           ),
           describeElement('The size getter was called for the following element'),
           box.describeForError('The render object from which the size was to be obtained was'),
@@ -4289,16 +4247,14 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
             ErrorSummary('setState() or markNeedsBuild() called during build.'),
             ErrorDescription(
               'This ${widget.runtimeType} widget cannot be marked as needing to build because the framework '
-              'is already in the process of building widgets.  A widget can be marked as '
+              'is already in the process of building widgets. A widget can be marked as '
               'needing to be built during the build phase only if one of its ancestors '
               'is currently building. This exception is allowed because the framework '
               'builds parent widgets before children, which means a dirty descendant '
               'will always be built. Otherwise, the framework might not visit this '
               'widget during this build phase.',
             ),
-            describeElement(
-              'The widget on which setState() or markNeedsBuild() was called was',
-            ),
+            describeElement('The widget on which setState() or markNeedsBuild() was called was'),
           ];
           if (owner!._debugCurrentBuildTarget != null)
             information.add(owner!._debugCurrentBuildTarget!.describeWidget('The widget which was currently being built when the offending call was made was'));
@@ -4416,37 +4372,9 @@ typedef ErrorWidgetBuilder = Widget Function(FlutterErrorDetails details);
 /// It is possible to override this widget.
 ///
 /// {@tool sample --template=freeform}
-/// ```dart
-/// import 'package:flutter/material.dart';
 ///
-/// void main() {
-///   ErrorWidget.builder = (FlutterErrorDetails details) {
-///     bool inDebug = false;
-///     assert(() { inDebug = true; return true; }());
-///     // In debug mode, use the normal error widget which shows
-///     // the error message:
-///     if (inDebug) {
-///       return ErrorWidget(details.exception);
-///     }
-///     // In release builds, show a yellow-on-blue message instead:
-///     return Container(
-///       alignment: Alignment.center,
-///       child: const Text(
-///         'Error!',
-///         style: TextStyle(color: Colors.yellow),
-///         textDirection: TextDirection.ltr,
-///       ),
-///     );
-///   };
-///   // Here we would normally runApp() the root widget, but to demonstrate
-///   // the error handling we artificially fail:
-///   return runApp(Builder(
-///     builder: (BuildContext context) {
-///       throw 'oh no, an error';
-///     },
-///   ));
-/// }
-/// ```
+///
+/// ** See code in examples/api/lib/widgets/framework/error_widget.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -4900,7 +4828,7 @@ class StatefulElement extends ComponentElement {
         ErrorSummary('${state.runtimeType}.dispose failed to call super.dispose.'),
         ErrorDescription(
           'dispose() implementations must always call their superclass dispose() method, to ensure '
-         'that all the resources used by the widget are fully released.',
+          'that all the resources used by the widget are fully released.',
         ),
       ]);
     }());

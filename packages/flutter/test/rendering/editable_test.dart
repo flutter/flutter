@@ -379,8 +379,7 @@ void main() {
 
     // TODO(yjbanov): ahem.ttf doesn't have Chinese glyphs, making this test
     //                sensitive to browser/OS when running in web mode:
-    //                https://github.com/flutter/flutter/issues/83129
-  }, skip: kIsWeb);
+  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/83129
 
   test('text is painted above selection', () {
     final TextSelectionDelegate delegate = _FakeEditableTextState();

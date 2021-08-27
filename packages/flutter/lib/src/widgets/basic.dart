@@ -1050,44 +1050,11 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
 /// as rectangles with rounded corners.
 ///
 /// {@tool dartpad --template=stateless_widget_material}
-///
 /// This example shows how to use a [PhysicalShape] on a centered [SizedBox]
 /// to clip it to a rounded rectangle using a [ShapeBorderClipper] and give it
 /// an orange color along with a shadow.
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return Scaffold(
-///     appBar: AppBar(
-///       title: const Text('PhysicalShape Sample'),
-///     ),
-///     body: Center(
-///       child: PhysicalShape(
-///         elevation: 5.0,
-///         child: const SizedBox(
-///           child: Center(
-///             child: Text(
-///               'Hello, World!',
-///               style: TextStyle(
-///                 color: Colors.white,
-///                 fontSize: 20.0,
-///               ),
-///             ),
-///           ),
-///           height: 200.0,
-///           width: 200.0,
-///         ),
-///         clipper: ShapeBorderClipper(
-///           shape: RoundedRectangleBorder(
-///             borderRadius: BorderRadius.circular(10.0),
-///           )
-///         ),
-///         color: Colors.orange,
-///       ),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/basic/physical_shape.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -1568,24 +1535,10 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
 /// {@youtube 560 315 https://www.youtube.com/watch?v=T4Uehk3_wlY}
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold_center}
-///
 /// In this example, the image is stretched to fill the entire [Container], which would
 /// not happen normally without using FittedBox.
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return Container(
-///     height: 400,
-///     width: 300,
-///     color: Colors.red,
-///     child: FittedBox(
-///       child: Image.network('https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg'),
-///       fit: BoxFit.fill,
-///     ),
-///   );
-/// }
-/// ```
-///
+/// ** See code in examples/api/lib/widgets/basic/fitted_box.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -2744,30 +2697,11 @@ class UnconstrainedBox extends StatelessWidget {
 /// {@youtube 560 315 https://www.youtube.com/watch?v=PEsY654EGZ0}
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
-///
 /// This sample shows a [FractionallySizedBox] whose one child is 50% of
 /// the box's size per the width and height factor parameters, and centered
 /// within that box by the alignment parameter.
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return SizedBox.expand(
-///     child: FractionallySizedBox(
-///       widthFactor: 0.5,
-///       heightFactor: 0.5,
-///       alignment: FractionalOffset.center,
-///       child: DecoratedBox(
-///         decoration: BoxDecoration(
-///           border: Border.all(
-///             color: Colors.blue,
-///             width: 4,
-///           ),
-///         ),
-///       ),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/basic/fractionally_sized_box.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -3117,57 +3051,12 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 /// keeping it alive in an [Offstage] subtree.
 ///
 /// {@tool dartpad --template=stateful_widget_scaffold_center}
-///
 /// This example shows a [FlutterLogo] widget when the `_offstage` member field
 /// is false, and hides it without any room in the parent when it is true. When
 /// offstage, this app displays a button to get the logo size, which will be
 /// displayed in a [SnackBar].
 ///
-/// ```dart
-/// final GlobalKey _key = GlobalKey();
-/// bool _offstage = true;
-///
-/// Size _getFlutterLogoSize() {
-///   final RenderBox renderLogo = _key.currentContext!.findRenderObject()! as RenderBox;
-///   return renderLogo.size;
-/// }
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return Column(
-///     mainAxisAlignment: MainAxisAlignment.center,
-///     children: <Widget>[
-///       Offstage(
-///         offstage: _offstage,
-///         child: FlutterLogo(
-///           key: _key,
-///           size: 150.0,
-///         ),
-///       ),
-///       Text('Flutter logo is offstage: $_offstage'),
-///       ElevatedButton(
-///         child: const Text('Toggle Offstage Value'),
-///         onPressed: () {
-///           setState(() {
-///             _offstage = !_offstage;
-///           });
-///         },
-///       ),
-///       if (_offstage)
-///         ElevatedButton(
-///           child: const Text('Get Flutter Logo size'),
-///           onPressed: () {
-///             ScaffoldMessenger.of(context).showSnackBar(
-///               SnackBar(
-///                 content: Text('Flutter Logo size is ${_getFlutterLogoSize()}'),
-///               ),
-///             );
-///           }
-///         ),
-///     ],
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/basic/offstage.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -3241,7 +3130,6 @@ class _OffstageElement extends SingleChildRenderObjectElement {
 /// by applying the aspect ratio to the maximum height.
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
-///
 /// This examples shows how AspectRatio sets width when its parent's width
 /// constraint is infinite. Since its parent's allowed height is a fixed value,
 /// the actual width is determined via the given AspectRatio.
@@ -3249,22 +3137,7 @@ class _OffstageElement extends SingleChildRenderObjectElement {
 /// Since the height is fixed at 100.0 in this example and the aspect ratio is
 /// set to 16 / 9, the width should then be 100.0 / 9 * 16.
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return Container(
-///     color: Colors.blue,
-///     alignment: Alignment.center,
-///     width: double.infinity,
-///     height: 100.0,
-///     child: AspectRatio(
-///       aspectRatio: 16 / 9,
-///       child: Container(
-///         color: Colors.green,
-///       ),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/basic/aspect_ratio.0.dart **
 /// {@end-tool}
 ///
 /// Now consider a second example, this time with an aspect ratio of 2.0 and
@@ -3274,24 +3147,8 @@ class _OffstageElement extends SingleChildRenderObjectElement {
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return Container(
-///     color: Colors.blue,
-///     alignment: Alignment.center,
-///     width: 100.0,
-///     height: 100.0,
-///     child: AspectRatio(
-///       aspectRatio: 2.0,
-///       child: Container(
-///         width: 100.0,
-///         height: 50.0,
-///         color: Colors.green,
-///       ),
-///     ),
-///   );
-/// }
-/// ```
+///
+/// ** See code in examples/api/lib/widgets/basic/aspect_ratio.1.dart **
 /// {@end-tool}
 ///
 /// In that same situation, if the aspect ratio is 0.5, we'll also select a
@@ -3308,24 +3165,8 @@ class _OffstageElement extends SingleChildRenderObjectElement {
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return Container(
-///     color: Colors.blue,
-///     alignment: Alignment.center,
-///     width: 100.0,
-///     height: 100.0,
-///     child: AspectRatio(
-///       aspectRatio: 0.5,
-///       child: Container(
-///         width: 100.0,
-///         height: 50.0,
-///         color: Colors.green,
-///       ),
-///     ),
-///   );
-/// }
-/// ```
+///
+/// ** See code in examples/api/lib/widgets/basic/aspect_ratio.2.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -5173,37 +5014,7 @@ class Flexible extends ParentDataWidget<FlexParentData> {
 ///
 /// ![This results in two thin blue boxes with a larger amber box in between.](https://flutter.github.io/assets-for-api-docs/assets/widgets/expanded_column.png)
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return Scaffold(
-///     appBar: AppBar(
-///       title: const Text('Expanded Column Sample'),
-///     ),
-///     body: Center(
-///        child: Column(
-///         children: <Widget>[
-///           Container(
-///             color: Colors.blue,
-///             height: 100,
-///             width: 100,
-///           ),
-///           Expanded(
-///             child: Container(
-///               color: Colors.amber,
-///               width: 100,
-///             ),
-///           ),
-///           Container(
-///             color: Colors.blue,
-///             height: 100,
-///             width: 100,
-///           ),
-///         ],
-///       ),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/basic/expanded.0.dart **
 /// {@end-tool}
 ///
 /// {@tool dartpad --template=stateless_widget_material}
@@ -5212,40 +5023,7 @@ class Flexible extends ParentDataWidget<FlexParentData> {
 ///
 /// ![This results in a wide amber box, followed by a thin blue box, with a medium width amber box at the end.](https://flutter.github.io/assets-for-api-docs/assets/widgets/expanded_row.png)
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return Scaffold(
-///     appBar: AppBar(
-///       title: const Text('Expanded Row Sample'),
-///     ),
-///     body: Center(
-///       child: Row(
-///         children: <Widget>[
-///           Expanded(
-///             flex: 2,
-///             child: Container(
-///               color: Colors.amber,
-///               height: 100,
-///             ),
-///           ),
-///           Container(
-///             color: Colors.blue,
-///             height: 100,
-///             width: 50,
-///           ),
-///           Expanded(
-///             flex: 1,
-///             child: Container(
-///               color: Colors.amber,
-///               height: 100,
-///             ),
-///           ),
-///         ],
-///       ),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/basic/expanded.1.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -5558,125 +5336,11 @@ class Wrap extends MultiChildRenderObjectWidget {
 ///
 ///
 /// {@tool dartpad --template=freeform}
-///
 /// This example uses the [Flow] widget to create a menu that opens and closes
 /// as it is interacted with, shown above. The color of the button in the menu
 /// changes to indicate which one has been selected.
 ///
-/// ```dart main
-/// import 'package:flutter/material.dart';
-///
-/// void main() => runApp(const FlowApp());
-///
-/// class FlowApp extends StatelessWidget {
-///   const FlowApp({Key? key}) : super(key: key);
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return MaterialApp(
-///       home: Scaffold(
-///         appBar: AppBar(
-///           title: const Text('Flow Example'),
-///         ),
-///         body: const FlowMenu(),
-///       ),
-///     );
-///   }
-/// }
-///
-/// class FlowMenu extends StatefulWidget {
-///   const FlowMenu({Key? key}) : super(key: key);
-///
-///   @override
-///   State<FlowMenu> createState() => _FlowMenuState();
-/// }
-///
-/// class _FlowMenuState extends State<FlowMenu> with SingleTickerProviderStateMixin {
-///   late AnimationController menuAnimation;
-///   IconData lastTapped = Icons.notifications;
-///   final List<IconData> menuItems = <IconData>[
-///     Icons.home,
-///     Icons.new_releases,
-///     Icons.notifications,
-///     Icons.settings,
-///     Icons.menu,
-///   ];
-///
-///   void _updateMenu(IconData icon) {
-///     if (icon != Icons.menu) {
-///       setState(() => lastTapped = icon);
-///     }
-///   }
-///
-///   @override
-///   void initState() {
-///     super.initState();
-///     menuAnimation = AnimationController(
-///       duration: const Duration(milliseconds: 250),
-///       vsync: this,
-///     );
-///   }
-///
-///   Widget flowMenuItem(IconData icon) {
-///     final double buttonDiameter = MediaQuery.of(context).size.width / menuItems.length;
-///     return Padding(
-///       padding: const EdgeInsets.symmetric(vertical: 8.0),
-///       child: RawMaterialButton(
-///         fillColor: lastTapped == icon ? Colors.amber[700] : Colors.blue,
-///         splashColor: Colors.amber[100],
-///         shape: const CircleBorder(),
-///         constraints: BoxConstraints.tight(Size(buttonDiameter, buttonDiameter)),
-///         onPressed: () {
-///           _updateMenu(icon);
-///           menuAnimation.status == AnimationStatus.completed
-///             ? menuAnimation.reverse()
-///             : menuAnimation.forward();
-///         },
-///         child: Icon(
-///           icon,
-///           color: Colors.white,
-///           size: 45.0,
-///         ),
-///       ),
-///     );
-///   }
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return Flow(
-///       delegate: FlowMenuDelegate(menuAnimation: menuAnimation),
-///       children: menuItems.map<Widget>((IconData icon) => flowMenuItem(icon)).toList(),
-///     );
-///   }
-/// }
-///
-/// class FlowMenuDelegate extends FlowDelegate {
-///   FlowMenuDelegate({required this.menuAnimation}) : super(repaint: menuAnimation);
-///
-///   final Animation<double> menuAnimation;
-///
-///   @override
-///   bool shouldRepaint(FlowMenuDelegate oldDelegate) {
-///     return menuAnimation != oldDelegate.menuAnimation;
-///   }
-///
-///   @override
-///   void paintChildren(FlowPaintingContext context) {
-///     double dx = 0.0;
-///     for (int i = 0; i < context.childCount; ++i) {
-///       dx = context.getChildSize(i)!.width * i;
-///       context.paintChild(
-///         i,
-///         transform: Matrix4.translationValues(
-///           dx * menuAnimation.value,
-///           0,
-///           0,
-///         ),
-///       );
-///     }
-///   }
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/basic/flow.0.dart **
 /// {@end-tool}
 ///
 class Flow extends MultiChildRenderObjectWidget {
@@ -6021,7 +5685,8 @@ class RawImage extends LeafRenderObjectWidget {
   /// of an image.
   final Animation<double>? opacity;
 
-  /// Used to set the filterQuality of the image
+  /// Used to set the filterQuality of the image.
+  ///
   /// Use the "low" quality setting to scale the image, which corresponds to
   /// bilinear interpolation, rather than the default "none" which corresponds
   /// to nearest-neighbor.
@@ -6101,7 +5766,7 @@ class RawImage extends LeafRenderObjectWidget {
 
   /// Whether the colors of the image are inverted when drawn.
   ///
-  /// inverting the colors of an image applies a new color filter to the paint.
+  /// Inverting the colors of an image applies a new color filter to the paint.
   /// If there is another specified color filter, the invert will be applied
   /// after it. This is primarily used for implementing smart invert on iOS.
   ///
@@ -6139,8 +5804,8 @@ class RawImage extends LeafRenderObjectWidget {
       matchTextDirection: matchTextDirection,
       textDirection: matchTextDirection || alignment is! Alignment ? Directionality.of(context) : null,
       invertColors: invertColors,
-      filterQuality: filterQuality,
       isAntiAlias: isAntiAlias,
+      filterQuality: filterQuality,
     );
   }
 
@@ -6158,14 +5823,16 @@ class RawImage extends LeafRenderObjectWidget {
       ..height = height
       ..scale = scale
       ..color = color
+      ..opacity = opacity
       ..colorBlendMode = colorBlendMode
-      ..alignment = alignment
       ..fit = fit
+      ..alignment = alignment
       ..repeat = repeat
       ..centerSlice = centerSlice
       ..matchTextDirection = matchTextDirection
       ..textDirection = matchTextDirection || alignment is! Alignment ? Directionality.of(context) : null
       ..invertColors = invertColors
+      ..isAntiAlias = isAntiAlias
       ..filterQuality = filterQuality;
   }
 
@@ -6376,63 +6043,7 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
 /// This example makes a [Container] react to being touched, showing a count of
 /// the number of pointer downs and ups.
 ///
-/// ```dart imports
-/// import 'package:flutter/widgets.dart';
-/// ```
-///
-/// ```dart
-/// int _downCounter = 0;
-/// int _upCounter = 0;
-/// double x = 0.0;
-/// double y = 0.0;
-///
-/// void _incrementDown(PointerEvent details) {
-///   _updateLocation(details);
-///   setState(() {
-///     _downCounter++;
-///   });
-/// }
-/// void _incrementUp(PointerEvent details) {
-///   _updateLocation(details);
-///   setState(() {
-///     _upCounter++;
-///   });
-/// }
-/// void _updateLocation(PointerEvent details) {
-///   setState(() {
-///     x = details.position.dx;
-///     y = details.position.dy;
-///   });
-/// }
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return ConstrainedBox(
-///     constraints: BoxConstraints.tight(const Size(300.0, 200.0)),
-///     child: Listener(
-///       onPointerDown: _incrementDown,
-///       onPointerMove: _updateLocation,
-///       onPointerUp: _incrementUp,
-///       child: Container(
-///         color: Colors.lightBlueAccent,
-///         child: Column(
-///           mainAxisAlignment: MainAxisAlignment.center,
-///           children: <Widget>[
-///             const Text('You have pressed or released in this area this many times:'),
-///             Text(
-///               '$_downCounter presses\n$_upCounter releases',
-///               style: Theme.of(context).textTheme.headline4,
-///             ),
-///             Text(
-///               'The cursor is here: (${x.toStringAsFixed(2)}, ${y.toStringAsFixed(2)})',
-///             ),
-///           ],
-///         ),
-///       ),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/basic/listener.0.dart **
 /// {@end-tool}
 class Listener extends SingleChildRenderObjectWidget {
   /// Creates a widget that forwards point events to callbacks.
@@ -6546,61 +6157,7 @@ class Listener extends SingleChildRenderObjectWidget {
 /// This example makes a [Container] react to being entered by a mouse
 /// pointer, showing a count of the number of entries and exits.
 ///
-/// ```dart imports
-/// import 'package:flutter/widgets.dart';
-/// ```
-///
-/// ```dart
-/// int _enterCounter = 0;
-/// int _exitCounter = 0;
-/// double x = 0.0;
-/// double y = 0.0;
-///
-/// void _incrementEnter(PointerEvent details) {
-///   setState(() {
-///     _enterCounter++;
-///   });
-/// }
-/// void _incrementExit(PointerEvent details) {
-///   setState(() {
-///     _exitCounter++;
-///   });
-/// }
-/// void _updateLocation(PointerEvent details) {
-///   setState(() {
-///     x = details.position.dx;
-///     y = details.position.dy;
-///   });
-/// }
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return ConstrainedBox(
-///     constraints: BoxConstraints.tight(const Size(300.0, 200.0)),
-///     child: MouseRegion(
-///       onEnter: _incrementEnter,
-///       onHover: _updateLocation,
-///       onExit: _incrementExit,
-///       child: Container(
-///         color: Colors.lightBlueAccent,
-///         child: Column(
-///           mainAxisAlignment: MainAxisAlignment.center,
-///           children: <Widget>[
-///             const Text('You have entered or exited this box this many times:'),
-///             Text(
-///               '$_enterCounter Entries\n$_exitCounter Exits',
-///               style: Theme.of(context).textTheme.headline4,
-///             ),
-///             Text(
-///               'The cursor is here: (${x.toStringAsFixed(2)}, ${y.toStringAsFixed(2)})',
-///             ),
-///           ],
-///         ),
-///       ),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/basic/mouse_region.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -6717,26 +6274,7 @@ class MouseRegion extends StatefulWidget {
   /// that unconditionally creates the `MouseRegion`, you can ignore the
   /// aforementioned restriction.
   ///
-  /// ```dart
-  ///   bool hovered = false;
-  ///
-  ///   @override
-  ///   Widget build(BuildContext context) {
-  ///     return Container(
-  ///       height: 100,
-  ///       width: 100,
-  ///       decoration: BoxDecoration(color: hovered ? Colors.yellow : Colors.blue),
-  ///       child: MouseRegion(
-  ///         onEnter: (_) {
-  ///           setState(() { hovered = true; });
-  ///         },
-  ///         onExit: (_) {
-  ///           setState(() { hovered = false; });
-  ///         },
-  ///       ),
-  ///     );
-  ///   }
-  /// ```
+  /// ** See code in examples/api/lib/widgets/basic/mouse_region.on_exit.0.dart **
   /// {@end-tool}
   ///
   /// {@tool dartpad --template=stateful_widget_scaffold_center}
@@ -6748,89 +6286,7 @@ class MouseRegion extends StatefulWidget {
   /// the `MouseRegion`, it simply trigger the exit callback during that event
   /// as well.
   ///
-  /// ```dart preamble
-  /// // A region that hides its content one second after being hovered.
-  /// class MyTimedButton extends StatefulWidget {
-  ///   const MyTimedButton({ Key? key, required this.onEnterButton, required this.onExitButton })
-  ///     : super(key: key);
-  ///
-  ///   final VoidCallback onEnterButton;
-  ///   final VoidCallback onExitButton;
-  ///
-  ///   @override
-  ///   State<MyTimedButton> createState() => _MyTimedButton();
-  /// }
-  ///
-  /// class _MyTimedButton extends State<MyTimedButton> {
-  ///   bool regionIsHidden = false;
-  ///   bool hovered = false;
-  ///
-  ///   Future<void> startCountdown() async {
-  ///     await Future<void>.delayed(const Duration(seconds: 1));
-  ///     hideButton();
-  ///   }
-  ///
-  ///   void hideButton() {
-  ///     setState(() { regionIsHidden = true; });
-  ///     // This statement is necessary.
-  ///     if (hovered) {
-  ///       widget.onExitButton();
-  ///     }
-  ///   }
-  ///
-  ///   @override
-  ///   Widget build(BuildContext context) {
-  ///     return SizedBox(
-  ///       width: 100,
-  ///       height: 100,
-  ///       child: MouseRegion(
-  ///         child: regionIsHidden ? null : MouseRegion(
-  ///           onEnter: (_) {
-  ///             widget.onEnterButton();
-  ///             setState(() { hovered = true; });
-  ///             startCountdown();
-  ///           },
-  ///           onExit: (_) {
-  ///             setState(() { hovered = false; });
-  ///             widget.onExitButton();
-  ///           },
-  ///           child: Container(color: Colors.red),
-  ///         ),
-  ///       ),
-  ///     );
-  ///   }
-  /// }
-  /// ```
-  ///
-  /// ```dart
-  ///   Key key = UniqueKey();
-  ///   bool hovering = false;
-  ///
-  ///   @override
-  ///   Widget build(BuildContext context) {
-  ///     return Column(
-  ///       children: <Widget>[
-  ///         ElevatedButton(
-  ///           onPressed: () {
-  ///             setState(() { key = UniqueKey(); });
-  ///           },
-  ///           child: const Text('Refresh'),
-  ///         ),
-  ///         if (hovering) const Text('Hovering'),
-  ///         if (!hovering) const Text('Not hovering'),
-  ///         MyTimedButton(
-  ///           key: key,
-  ///           onEnterButton: () {
-  ///             setState(() { hovering = true; });
-  ///           },
-  ///           onExitButton: () {
-  ///             setState(() { hovering = false; });
-  ///           },
-  ///         ),
-  ///       ],
-  ///     );
-  ///   }
-  /// ```
+  /// ** See code in examples/api/lib/widgets/basic/mouse_region.on_exit.1.dart **
   /// {@end-tool}
   ///
   /// {@macro flutter.widgets.MouseRegion.onEnter.triggerTime}
@@ -7037,46 +6493,7 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
 /// not be tapped. When [ignoring] is set to `false` anything
 /// inside the `Column` can be tapped.
 ///
-/// ```dart
-/// bool ignoring = false;
-/// void setIgnoring(bool newValue) {
-///   setState(() {
-///     ignoring = newValue;
-///   });
-/// }
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return Scaffold(
-///     appBar: AppBar(
-///       centerTitle: true,
-///       title: ElevatedButton(
-///         onPressed: () {
-///           setIgnoring(!ignoring);
-///         },
-///         child: Text(
-///           ignoring ? 'Set ignoring to false' : 'Set ignoring to true',
-///         ),
-///       ),
-///     ),
-///     body: Center(
-///       child: IgnorePointer(
-///         ignoring: ignoring,
-///         child: Column(
-///           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-///           children: <Widget>[
-///             Text('Ignoring: $ignoring'),
-///             ElevatedButton(
-///               onPressed: () {},
-///               child: const Text('Click me!'),
-///             ),
-///           ],
-///         ),
-///       ),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/basic/ignore_pointer.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -7147,37 +6564,7 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
 /// top of the stack, which absorbs pointer events, preventing its child button
 /// __and__ the button below it in the stack from receiving the pointer events.
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return Stack(
-///     alignment: AlignmentDirectional.center,
-///     children: <Widget>[
-///       SizedBox(
-///         width: 200.0,
-///         height: 100.0,
-///         child: ElevatedButton(
-///           onPressed: () {},
-///           child: null,
-///         ),
-///       ),
-///       SizedBox(
-///         width: 100.0,
-///         height: 200.0,
-///         child: AbsorbPointer(
-///           absorbing: true,
-///           child: ElevatedButton(
-///             style: ElevatedButton.styleFrom(
-///               primary: Colors.blue.shade200,
-///             ),
-///             onPressed: () {},
-///             child: null,
-///           ),
-///         ),
-///       ),
-///     ],
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/basic/absorb_pointer.0.dart **
 /// {@end-tool}
 ///
 /// See also:
