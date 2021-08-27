@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -67,16 +68,25 @@ void main() {
       equals(<KeyboardLockMode>{}));
   }, variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData());
 
-  testWidgets('KeyboardManager synthesizes modifier keys for rawKeyData', (WidgetTester tester) async {
+  testWidgets('KeyboardManager synthesizes modifier keys in rawKeyData mode', (WidgetTester tester) async {
     final List<KeyEvent> events = <KeyEvent>[];
     HardwareKeyboard.instance.addHandler((KeyEvent event) {
       events.add(event);
       return false;
     });
-    tester.binding.keyEventManager.handleRawKeyMessage(KeyEventSimulator.getKeyData(
-      LogicalKeyboardKey.keyA,
-      platform: 'android',
-    )..['metaState'] = RawKeyEventDataAndroid.modifierLeftShift | RawKeyEventDataAndroid.modifierShift);
+    // While ShiftLeft is held (the event of which was skipped), press keyA.
+    final Map<String, dynamic> rawMessage = kIsWeb ? (
+      KeyEventSimulator.getKeyData(
+        LogicalKeyboardKey.keyA,
+        platform: 'web',
+      )..['metaState'] = RawKeyEventDataWeb.modifierShift
+    ) : (
+      KeyEventSimulator.getKeyData(
+        LogicalKeyboardKey.keyA,
+        platform: 'android',
+      )..['metaState'] = RawKeyEventDataAndroid.modifierLeftShift | RawKeyEventDataAndroid.modifierShift
+    );
+    tester.binding.keyEventManager.handleRawKeyMessage(rawMessage);
     expect(events, hasLength(2));
     expect(events[0].physicalKey, PhysicalKeyboardKey.shiftLeft);
     expect(events[0].logicalKey, LogicalKeyboardKey.shiftLeft);
