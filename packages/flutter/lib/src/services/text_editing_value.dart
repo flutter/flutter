@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
 import 'dart:ui' show
   TextAffinity,
   hashValues;
@@ -196,49 +197,36 @@ class TextEditingValue {
     if (!selection.isValid) {
       return this;
     }
-
     if (!selection.isCollapsed) {
       return _deleteNonEmptySelection();
     }
-
-    final String textBefore = selection.textBefore(text);
     if (index == selection.extentOffset) {
       return this;
-    } else if (index < selection.extentOffset) {
-      if (textBefore.isEmpty) {
-        return this;
-      }
-      final TextRange nextComposingRange = !composing.isValid || composing.isCollapsed
-        ? TextRange.empty
-        : TextRange(
-          start: composing.start - (composing.start - index).clamp(0, textBefore.length - index),
-          end: composing.end - (composing.end - index).clamp(0, textBefore.length - index),
-        );
-      return TextEditingValue(
-        text: text.substring(0, index) + text.substring(selection.extentOffset, text.length),
-        selection: TextSelection.collapsed(offset: index, affinity: selection.affinity),
-        composing: nextComposingRange,
-      );
     }
 
-    if (selection.textAfter(text).isEmpty) {
+    final TextRange deletion = TextRange(
+      start: math.min(index, selection.extentOffset),
+      end: math.max(index, selection.extentOffset),
+    );
+    final String deleted = deletion.textInside(text);
+    if (deletion.textInside(text).isEmpty) {
       return this;
     }
-    final String nextText = text.substring(0, selection.extentOffset) + text.substring(index, text.length);
-    final int charactersDeleted = text.length - nextText.length;
-    final int selectionToComposingStart = composing.start - selection.baseOffset;
-    final int charactersDeletedBeforeComposingStart = selectionToComposingStart.clamp(0, charactersDeleted);
-    final int selectionToComposingEnd = composing.end - selection.baseOffset;
-    final int charactersDeletedBeforeComposingEnd = selectionToComposingEnd.clamp(0, charactersDeleted);
+
+    final int charactersDeletedBeforeComposingStart =
+        (composing.start - deletion.start).clamp(0, deleted.length);
+    final int charactersDeletedBeforeComposingEnd =
+        (composing.end - deletion.start).clamp(0, deleted.length);
     final TextRange nextComposingRange = !composing.isValid || composing.isCollapsed
       ? TextRange.empty
       : TextRange(
         start: composing.start - charactersDeletedBeforeComposingStart,
         end: composing.end - charactersDeletedBeforeComposingEnd,
       );
+
     return TextEditingValue(
-      text: nextText,
-      selection: TextSelection.collapsed(offset: index - text.length + nextText.length),
+      text: deletion.textBefore(text) + deletion.textAfter(text),
+      selection: TextSelection.collapsed(offset: deletion.start),
       composing: nextComposingRange,
     );
   }
