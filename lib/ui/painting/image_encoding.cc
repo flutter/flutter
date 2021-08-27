@@ -31,6 +31,7 @@ namespace {
 // This must be kept in sync with the enum in painting.dart
 enum ImageByteFormat {
   kRawRGBA,
+  kRawStraightRGBA,
   kRawUnmodified,
   kPNG,
 };
@@ -151,7 +152,8 @@ void ConvertImageToRaster(sk_sp<SkImage> image,
 }
 
 sk_sp<SkData> CopyImageByteData(sk_sp<SkImage> raster_image,
-                                SkColorType color_type) {
+                                SkColorType color_type,
+                                SkAlphaType alpha_type) {
   FML_DCHECK(raster_image);
 
   SkPixmap pixmap;
@@ -162,14 +164,14 @@ sk_sp<SkData> CopyImageByteData(sk_sp<SkImage> raster_image,
   }
 
   // The color types already match. No need to swizzle. Return early.
-  if (pixmap.colorType() == color_type) {
+  if (pixmap.colorType() == color_type && pixmap.alphaType() == alpha_type) {
     return SkData::MakeWithCopy(pixmap.addr(), pixmap.computeByteSize());
   }
 
   // Perform swizzle if the type doesnt match the specification.
   auto surface = SkSurface::MakeRaster(
       SkImageInfo::Make(raster_image->width(), raster_image->height(),
-                        color_type, kPremul_SkAlphaType, nullptr));
+                        color_type, alpha_type, nullptr));
 
   if (!surface) {
     FML_LOG(ERROR) << "Could not set up the surface for swizzle.";
@@ -205,10 +207,16 @@ sk_sp<SkData> EncodeImage(sk_sp<SkImage> raster_image, ImageByteFormat format) {
       return png_image;
     } break;
     case kRawRGBA: {
-      return CopyImageByteData(raster_image, kRGBA_8888_SkColorType);
+      return CopyImageByteData(raster_image, kRGBA_8888_SkColorType,
+                               kPremul_SkAlphaType);
+    } break;
+    case kRawStraightRGBA: {
+      return CopyImageByteData(raster_image, kRGBA_8888_SkColorType,
+                               kUnpremul_SkAlphaType);
     } break;
     case kRawUnmodified: {
-      return CopyImageByteData(raster_image, raster_image->colorType());
+      return CopyImageByteData(raster_image, raster_image->colorType(),
+                               raster_image->alphaType());
     } break;
   }
 
