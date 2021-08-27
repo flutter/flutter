@@ -76,7 +76,7 @@ void main() {
       String? taskName;
       const int commitTimeSinceEpoch = 1629220312;
 
-      await update(flutterDestination, metricPoints, commitTimeSinceEpoch, taskName);
+      await upload(flutterDestination, metricPoints, commitTimeSinceEpoch, taskName);
 
       expect(flutterDestination.name, 'default');
     });
@@ -100,7 +100,7 @@ void main() {
       const String taskName = 'test';
       const int commitTimeSinceEpoch = 1629220312;
 
-      await update(flutterDestination, metricPoints, commitTimeSinceEpoch, taskName);
+      await upload(flutterDestination, metricPoints, commitTimeSinceEpoch, taskName);
 
       expect(flutterDestination.name, taskName);
     });

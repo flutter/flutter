@@ -70,11 +70,16 @@ List<MetricPoint> parse(Map<String, dynamic> resultsJson) {
   return metricPoints;
 }
 
-/// Update metrics to GCS bucket used by Skia Perf.
+/// Upload metrics to GCS bucket used by Skia Perf.
 ///
 /// Skia Perf picks up all available files under the folder, and
 /// is robust to duplicate entries.
-Future<void> update(
+/// 
+/// Files will be named based on `taskName`, such as
+/// `complex_layout_scroll_perf__timeline_summary_values.json`.
+/// If no `taskName` is specified, data will be saved to
+/// `default_values.json`.
+Future<void> upload(
   FlutterDestination metricsDestination,
   List<MetricPoint> metricPoints,
   int commitTimeSinceEpoch,
@@ -106,5 +111,5 @@ Future<void> uploadToMetricsCenter(String? resultsPath, String? commitTime, Stri
   resultsJson = json.decode(await resultFile.readAsString()) as Map<String, dynamic>;
   final List<MetricPoint> metricPoints = parse(resultsJson);
   final FlutterDestination metricsDestination = await connectFlutterDestination();
-  await update(metricsDestination, metricPoints, commitTimeSinceEpoch, taskName);
+  await upload(metricsDestination, metricPoints, commitTimeSinceEpoch, taskName);
 }
