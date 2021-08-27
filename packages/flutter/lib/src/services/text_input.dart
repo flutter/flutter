@@ -803,7 +803,7 @@ class TextEditingDelta {
   /// Creates an instance of this class from a JSON object by checking the
   /// deltaType sent by the engine and building the appropriate delta.
   factory TextEditingDelta.fromJSON(Map<String, dynamic> encoded) {
-    switch (encoded['delta'] as String) {
+    switch (encoded['deltaType'] as String) {
       case 'INSERTION':
         return TextEditingDeltaInsertion.fromJSON(encoded);
         break;
