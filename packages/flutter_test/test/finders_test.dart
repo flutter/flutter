@@ -16,6 +16,13 @@ void main() {
       ));
       expect(find.image(FileImage(File('test'), scale: 1.0)), findsOneWidget);
     });
+
+    testWidgets('finds Button widgets with Image', (WidgetTester tester) async {
+      await tester.pumpWidget(_boilerplate(
+          ElevatedButton(onPressed: null, child: Image(image: FileImage(File('test'), scale: 1.0)),)
+      ));
+      expect(find.widgetWithImage(ElevatedButton, FileImage(File('test'), scale: 1.0)), findsOneWidget);
+    });
   });
 
   group('text', () {
