@@ -225,11 +225,10 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
 /// overlay created by the [Navigator] in a [WidgetsApp] or a [MaterialApp]. The
 /// navigator uses its overlay to manage the visual appearance of its routes.
 ///
-/// The [Overlay] widget uses a custom stack implementation, which however is
-/// very similar to the [Stack] widget. The main use case of [Overlay] is
-/// related to navigation and being able to insert widgets on top of the pages
-/// in an app. If you are purely looking to display a stack of widgets, consider
-/// using [Stack] instead.
+/// The [Overlay] widget uses a custom stack implementation, which is very
+/// similar to the [Stack] widget. The main use case of [Overlay] is related to
+/// navigation and being able to insert widgets on top of the pages in an app.
+/// To simply display a stack of widgets, consider using [Stack] instead.
 ///
 /// See also:
 ///
@@ -237,7 +236,7 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
 ///  * [OverlayState], which is used to insert the entries into the overlay.
 ///  * [WidgetsApp], which inserts an [Overlay] widget indirectly via its [Navigator].
 ///  * [MaterialApp], which inserts an [Overlay] widget indirectly via its [Navigator].
-///  * [Stack], which allows you to directly display a stack of widgets.
+///  * [Stack], which allows directly displaying a stack of widgets.
 class Overlay extends StatefulWidget {
   /// Creates an overlay.
   ///
