@@ -80,26 +80,45 @@ class _HeroTag {
   }
 }
 
-class _PositionedAnchorTransition extends AnimatedWidget {
-  const _PositionedAnchorTransition({
+// An `AnimatedWidget` that imposes a fixed size on its child widget, and
+// shifts the child widget in the parent stack, driven by its `offsetAnimation`
+// property.
+class _FixedSizeSlidingTransition extends AnimatedWidget {
+  const _FixedSizeSlidingTransition({
     Key? key,
     required this.isLTR,
-    required this.offset,
+    required this.offsetAnimation,
     required this.size,
     required this.child,
-  }) : super(key: key, listenable: offset);
+  }) : super(key: key, listenable: offsetAnimation);
 
+  // Whether the writing direction used in the navigation bar transition is
+  // left-to-right.
   final bool isLTR;
+
+  // The fixed size to impose on `child`.
   final Size size;
+
+  // The animated offset from the top-leading corner of the stack.
+  //
+  // When `isLTR` is true, the `Offset` is the position of the child widget in
+  // the stack render box's regular coordinate space.
+  //
+  // When `isLTR` is false, the coordinate system is flipped around the
+  // horizontal axis and the origin is set to the top right corner of the render
+  // boxes. In other words, this parameter describes the offset from the top
+  // right corner of the stack, to the top right corner of the child widget, and
+  // the x-axis runs right to left.
+  final Animation<Offset> offsetAnimation;
+
   final Widget child;
-  final Animation<Offset> offset;
 
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      top: offset.value.dy,
-      left: isLTR ? offset.value.dx : null,
-      right: isLTR ? null : offset.value.dx,
+      top: offsetAnimation.value.dy,
+      left: isLTR ? offsetAnimation.value.dx : null,
+      right: isLTR ? null : offsetAnimation.value.dx,
       width: size.width,
       height: size.height,
       child: child,
@@ -1749,7 +1768,7 @@ class _NavigationBarComponentsTransition {
   // floating point operations on the size of the child widget, so that the
   // incoming constraints used for sizing the child widget will be exactly the
   // same.
-  _PositionedAnchorTransition slideFromLeadingEdge({
+  _FixedSizeSlidingTransition slideFromLeadingEdge({
     required GlobalKey fromKey,
     required RenderBox fromNavBarBox,
     required GlobalKey toKey,
@@ -1784,7 +1803,8 @@ class _NavigationBarComponentsTransition {
     // coordinates.
     final Offset translation = isLTR
       ? toAnchorInToBox - fromAnchorInFromBox
-      : Offset(toNavBarBox.size.width - toAnchorInToBox.dx, toAnchorInToBox.dy) - Offset(fromNavBarBox.size.width - fromAnchorInFromBox.dx, fromAnchorInFromBox.dy);
+      : Offset(toNavBarBox.size.width - toAnchorInToBox.dx, toAnchorInToBox.dy)
+      - Offset(fromNavBarBox.size.width - fromAnchorInFromBox.dx, fromAnchorInFromBox.dy);
 
     final RelativeRect fromBoxMargin = positionInTransitionBox(fromKey, from: fromNavBarBox);
     final Offset fromOriginInTransitionBox = Offset(
@@ -1797,9 +1817,9 @@ class _NavigationBarComponentsTransition {
       end: fromOriginInTransitionBox + translation,
     );
 
-    return _PositionedAnchorTransition(
+    return _FixedSizeSlidingTransition(
       isLTR: isLTR,
-      offset: animation.drive(anchorMovementInTransitionBox),
+      offsetAnimation: animation.drive(anchorMovementInTransitionBox),
       size: fromBox.size,
       child: child,
     );
@@ -2190,9 +2210,9 @@ class _NavigationBarComponentsTransition {
       end: toAnchorInTransitionBox,
     );
 
-    return _PositionedAnchorTransition(
+    return _FixedSizeSlidingTransition(
       isLTR: isLTR,
-      offset: animation.drive(anchorMovementInTransitionBox),
+      offsetAnimation: animation.drive(anchorMovementInTransitionBox),
       size: toBox.size,
       child: FadeTransition(
         opacity: fadeInFrom(0.25),
