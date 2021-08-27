@@ -649,6 +649,7 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 ///
 /// ** See code in examples/api/lib/material/bottom_sheet/show_modal_bottom_sheet.0.dart **
 /// {@end-tool}
+///
 /// See also:
 ///
 ///  * [BottomSheet], which becomes the parent of the widget returned by the

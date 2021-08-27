@@ -33,6 +33,7 @@ import 'theme.dart';
 ///
 /// ** See code in examples/api/lib/material/divider/divider.0.dart **
 /// {@end-tool}
+///
 /// See also:
 ///
 ///  * [PopupMenuDivider], which is the equivalent but for popup menus.
@@ -194,6 +195,7 @@ class Divider extends StatelessWidget {
 ///
 /// ** See code in examples/api/lib/material/divider/vertical_divider.0.dart **
 /// {@end-tool}
+///
 /// See also:
 ///
 ///  * [ListView.separated], which can be used to generate vertical dividers.

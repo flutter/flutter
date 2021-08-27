@@ -24,7 +24,7 @@ import 'framework.dart';
 /// ** See code in examples/api/lib/widgets/color_filter/color_filtered.0.dart **
 ///{@end-tool}
 ///
-/// See Also:
+/// See also:
 ///
 ///  * [BlendMode], describes how to blend a source image with the destination image.
 ///  * [ColorFilter], which describes a function that modify a color to a different color.
