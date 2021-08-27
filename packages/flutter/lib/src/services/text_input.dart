@@ -645,6 +645,7 @@ class TextInputConfiguration {
 
   /// Whether to enable that the engine sends text input updates to the
   /// framework as [TextEditingDelta]'s or as one [TextEditingValue].
+  /// Defaults to false. Cannot be null.
   final bool enableDeltaModel;
 
   /// Returns a representation of this object as a JSON object.
@@ -713,24 +714,49 @@ class RawFloatingCursorPoint {
   final FloatingCursorDragState state;
 }
 
-/// A [TextEditingDeltaType.insertion] singifies there has been a single/sequence
-/// character insertion.
-/// A [TextEditingDeltaType.replacement] signifies that a replacement has occured.
-/// A replacement can occur in cases such as auto-correct, suggestions, and
-/// when a selection is replaced by a single character.
-/// A [TextEditingDeltaType.deletion] signifies there has been a single/sequence
-/// character deletion.
-/// A [TextEditingDeltaType.equality] signifies no text has changed from the last
-/// [TextEditingValue].
-enum TextEditingDeltaType { insertion, deletion, replacement, equality }
+/// A way to disambiguate a [TextEditingDelta] when a delta generated for an insertion
+/// and a deletion both contain collapsed [TextEditingDelta.deltaRange]'s.
+enum TextEditingDeltaType {
+  /// {@template flutter.services.TextEditingDeltaInsertion}
+  /// The delta is inserting a single/or contigous sequence of characters.
+  /// {@endtemplate}
+  insertion,
 
-/// A model representing the changes made to a [TextEditingValue] from time T1
-/// to T2.
+  /// {@template flutter.services.TextEditingDeltaDeletion}
+  /// The delta is deleting a single/or contiguous sequence of characters.
+  /// {@endtemplate}
+  deletion,
+
+  /// {@template flutter.services.TextEditingDeltaReplacement}
+  /// The delta is replacing a range of characters with a new sequence of text.
+  /// The range that is being replaced can either grow or shrink based on the
+  /// given replacement text.
+  /// A replacement can occur in cases such as auto-correct, suggestions, and
+  /// when a selection is replaced by a single character.
+  /// {@endtemplate}
+  replacement,
+
+  /// {@template flutter.services.TextEditingDeltaEquality}
+  /// The delta is not modifying the text. There are potentially selection and
+  /// composing region updates in the delta that still need to be applied to your
+  /// text model.
+  /// A situation where this delta would be created is when dragging the selection
+  /// handles. There are no changes to the text, but there are updates to the selection
+  /// and potentially the composing region as well.
+  /// {@endtemplate}
+  equality,
+
+  /// If ever created this delta should be thrown away.
+  none
+}
+
+
+/// A structure representing a granular change that has occured to the editing
+/// state as a result of text editing.
 class TextEditingDelta {
   const TextEditingDelta({
     required this.oldText,
     required this.deltaText,
-    required this.deltaType,
     required this.deltaRange,
     required this.selection,
     required this.composing,
@@ -739,43 +765,89 @@ class TextEditingDelta {
   /// The old text state before the delta has occured.
   final String oldText;
 
-  /// The raw delta value.
+  /// This value will slightly vary based on the [TextEditingDeltaType].
+  /// For a [TextEditingDeltaType.insertion] this will be the character/s being
+  /// inserted.
+  /// For a [TextEditingDeltaType.deletion] this will be the character/s being
+  /// deleted.
+  /// For a [TextEditingDeltaType.replacement] this will be the text that is
+  /// replacing the [TextEditingDelta.deltaRange].
+  /// For a [TextEditingDeltaType.equality] this will be an empty string.
   final String deltaText;
 
-  /// The type of delta that has occured.
-  /// See [TextEditingDeltaType] for more information.
-  final TextEditingDeltaType deltaType;
-
-  /// The new [TextRange] as a result of the delta.
+  /// This value will slightly vary based on the [TextEditingDeltaType].
+  /// For a [TextEditingDeltaType.insertion] this will be a collapsed range.
+  /// For a [TextEditingDeltaType.deletion] this will be either a collapsed
+  /// range for a single character deletion, or a range for the deletion of
+  /// a selection.
+  /// For a [TextEditingDeltaType.replacement] this will be the range of
+  /// characters that are being replaced.
+  /// For a [TextEditingDeltaType.equality] this will be a collapsed range
+  /// of (-1,-1).
   final TextRange deltaRange;
 
+  /// {@template flutter.services.TextEditingDelta.deltaType}
+  /// The type of delta that has occured.
+  /// See [TextEditingDeltaType] for more information.
+  /// {@endtemplate}
+  TextEditingDeltaType? get deltaType => TextEditingDeltaType.none;
+
+  /// The range of text that is currently selected after the delta has been
+  /// applied.
   final TextSelection selection;
 
+  /// The range of text that is still being composed after the delta has been
+  /// applied.
   final TextRange composing;
 
-  /// Creates an instance of this class from a JSON object.
+  /// Creates an instance of this class from a JSON object by checking the
+  /// deltaType sent by the engine and building the appropriate delta.
   factory TextEditingDelta.fromJSON(Map<String, dynamic> encoded) {
-    TextEditingDeltaType? deltaType = null;
-
     switch (encoded['delta'] as String) {
       case 'INSERTION':
-        deltaType = TextEditingDeltaType.insertion;
+        return TextEditingDeltaInsertion.fromJSON(encoded);
         break;
       case 'DELETION':
-        deltaType = TextEditingDeltaType.deletion;
+        return TextEditingDeltaDeletion.fromJSON(encoded);
         break;
       case 'REPLACEMENT':
-        deltaType = TextEditingDeltaType.replacement;
+        return TextEditingDeltaReplacement.fromJSON(encoded);
         break;
       case 'EQUALITY':
-        deltaType = TextEditingDeltaType.equality;
+        return TextEditingDeltaEquality.fromJSON(encoded);
+        break;
+      default:
+        return TextEditingDeltaEquality.fromJSON(encoded);
         break;
     }
+  }
+}
 
-    return TextEditingDelta(
+/// {@macro flutter.services.TextEditingDeltaInsertion}
+class TextEditingDeltaInsertion extends TextEditingDelta {
+  const TextEditingDeltaInsertion({
+    required oldText,
+    required deltaText,
+    required deltaRange,
+    required selection,
+    required composing,
+  }) : super(
+      oldText: oldText,
+      deltaText: deltaText,
+      deltaRange: deltaRange,
+      selection: selection,
+      composing:composing,
+  );
+
+  /// {@macro flutter.services.TextEditingDelta.deltaType}
+  @override
+  TextEditingDeltaType? get deltaType => TextEditingDeltaType.insertion;
+
+  /// Creates an instance of this class from a JSON object.
+  factory TextEditingDeltaInsertion.fromJSON(Map<String, dynamic> encoded) {
+    return TextEditingDeltaInsertion(
       oldText: encoded['oldText'] as String,
       deltaText: encoded['deltaText'] as String,
-      deltaType: deltaType!,
       deltaRange: TextRange(
         start: encoded['deltaStart'] as int? ?? -1,
         end: encoded['deltaEnd'] as int? ?? -1,
@@ -783,7 +855,140 @@ class TextEditingDelta {
       selection: TextSelection(
         baseOffset: encoded['selectionBase'] as int? ?? -1,
         extentOffset: encoded['selectionExtent'] as int? ?? -1,
-        affinity: _toTextAffinity(encoded['selectionAffinity'] as String?) ?? TextAffinity.downstream,
+        affinity: _toTextAffinity(encoded['selectionAffinity'] as String?) ??
+            TextAffinity.downstream,
+        isDirectional: encoded['selectionIsDirectional'] as bool? ?? false,
+      ),
+      composing: TextRange(
+        start: encoded['composingBase'] as int? ?? -1,
+        end: encoded['composingExtent'] as int? ?? -1,
+      ),
+    );
+  }
+}
+
+/// {@macro flutter.services.TextEditingDeltaDeletion}
+class TextEditingDeltaDeletion extends TextEditingDelta {
+  const TextEditingDeltaDeletion({
+    required oldText,
+    required deltaText,
+    required deltaRange,
+    required selection,
+    required composing,
+  }) : super(
+    oldText: oldText,
+    deltaText: deltaText,
+    deltaRange: deltaRange,
+    selection: selection,
+    composing:composing,
+  );
+
+  /// {@macro flutter.services.TextEditingDelta.deltaType}
+  @override
+  TextEditingDeltaType? get deltaType => TextEditingDeltaType.deletion;
+
+  /// Creates an instance of this class from a JSON object.
+  factory TextEditingDeltaDeletion.fromJSON(Map<String, dynamic> encoded) {
+    return TextEditingDeltaDeletion(
+      oldText: encoded['oldText'] as String,
+      deltaText: encoded['deltaText'] as String,
+      deltaRange: TextRange(
+        start: encoded['deltaStart'] as int? ?? -1,
+        end: encoded['deltaEnd'] as int? ?? -1,
+      ),
+      selection: TextSelection(
+        baseOffset: encoded['selectionBase'] as int? ?? -1,
+        extentOffset: encoded['selectionExtent'] as int? ?? -1,
+        affinity: _toTextAffinity(encoded['selectionAffinity'] as String?) ??
+            TextAffinity.downstream,
+        isDirectional: encoded['selectionIsDirectional'] as bool? ?? false,
+      ),
+      composing: TextRange(
+        start: encoded['composingBase'] as int? ?? -1,
+        end: encoded['composingExtent'] as int? ?? -1,
+      ),
+    );
+  }
+}
+
+/// {@macro flutter.services.TextEditingDeltaReplacement}
+class TextEditingDeltaReplacement extends TextEditingDelta {
+  const TextEditingDeltaReplacement({
+    required oldText,
+    required deltaText,
+    required deltaRange,
+    required selection,
+    required composing,
+  }) : super(
+    oldText: oldText,
+    deltaText: deltaText,
+    deltaRange: deltaRange,
+    selection: selection,
+    composing:composing,
+  );
+
+  /// {@macro flutter.services.TextEditingDelta.deltaType}
+  @override
+  TextEditingDeltaType? get deltaType => TextEditingDeltaType.replacement;
+
+  /// Creates an instance of this class from a JSON object.
+  factory TextEditingDeltaReplacement.fromJSON(Map<String, dynamic> encoded) {
+    return TextEditingDeltaReplacement(
+      oldText: encoded['oldText'] as String,
+      deltaText: encoded['deltaText'] as String,
+      deltaRange: TextRange(
+        start: encoded['deltaStart'] as int? ?? -1,
+        end: encoded['deltaEnd'] as int? ?? -1,
+      ),
+      selection: TextSelection(
+        baseOffset: encoded['selectionBase'] as int? ?? -1,
+        extentOffset: encoded['selectionExtent'] as int? ?? -1,
+        affinity: _toTextAffinity(encoded['selectionAffinity'] as String?) ??
+            TextAffinity.downstream,
+        isDirectional: encoded['selectionIsDirectional'] as bool? ?? false,
+      ),
+      composing: TextRange(
+        start: encoded['composingBase'] as int? ?? -1,
+        end: encoded['composingExtent'] as int? ?? -1,
+      ),
+    );
+  }
+}
+
+/// {@macro flutter.services.TextEditingDeltaEquality}
+class TextEditingDeltaEquality extends TextEditingDelta {
+  const TextEditingDeltaEquality({
+    required oldText,
+    required deltaText,
+    required deltaRange,
+    required selection,
+    required composing,
+  }) : super(
+    oldText: oldText,
+    deltaText: deltaText,
+    deltaRange: deltaRange,
+    selection: selection,
+    composing:composing,
+  );
+
+  /// {@macro flutter.services.TextEditingDelta.deltaType}
+  @override
+  TextEditingDeltaType? get deltaType => TextEditingDeltaType.equality;
+
+  /// Creates an instance of this class from a JSON object.
+  factory TextEditingDeltaEquality.fromJSON(Map<String, dynamic> encoded) {
+    return TextEditingDeltaEquality(
+      oldText: encoded['oldText'] as String,
+      deltaText: encoded['deltaText'] as String,
+      deltaRange: TextRange(
+        start: encoded['deltaStart'] as int? ?? -1,
+        end: encoded['deltaEnd'] as int? ?? -1,
+      ),
+      selection: TextSelection(
+        baseOffset: encoded['selectionBase'] as int? ?? -1,
+        extentOffset: encoded['selectionExtent'] as int? ?? -1,
+        affinity: _toTextAffinity(encoded['selectionAffinity'] as String?) ??
+            TextAffinity.downstream,
         isDirectional: encoded['selectionIsDirectional'] as bool? ?? false,
       ),
       composing: TextRange(
@@ -1565,8 +1770,13 @@ class TextInput {
 
         Map<String, dynamic> encoded = args[1] as Map<String, dynamic>;
 
-        for (final dynamic encodedDelta in encoded['batchDeltas']) {
-          final TextEditingDelta delta = TextEditingDelta.fromJSON(encodedDelta);
+        if (encoded['batchDeltas'] != null) {
+          for (final dynamic encodedDelta in encoded['batchDeltas']) {
+            final TextEditingDelta delta = TextEditingDelta.fromJSON(encodedDelta);
+            batchDeltas.add(delta);
+          }
+        } else {
+          final TextEditingDelta delta = TextEditingDelta.fromJSON(encoded);
           batchDeltas.add(delta);
         }
 

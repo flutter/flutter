@@ -65,6 +65,7 @@ class DeltaTextEditingController extends TextEditingController {
     TextRange newComposingRegion = value.composing;
 
     for (final TextEditingDelta delta in deltas) {
+      print('Delta class type: ' + delta.runtimeType.toString());
       print('Delta type: ' + delta.deltaType.toString());
       print('Delta old text: ' + delta.oldText);
       print('Delta new text: ' + delta.deltaText);
