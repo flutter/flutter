@@ -1105,7 +1105,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
       //   setState(() => x = 3);
       return true;
     }());
-    _element!.markNeedsBuild();
+    _element?.markNeedsBuild();
   }
 
   /// Called when this object is removed from the tree.
