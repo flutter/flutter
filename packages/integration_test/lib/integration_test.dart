@@ -2,6 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// Tool for self-driving testing of Flutter code on devices and emulators.
+///
+/// It adapts `flutter_test` results into a format that is compatible with
+/// `flutter drive` and native Android instrumentation testing.
+///
+/// To use, follow the [*Integration testing* guide](https://flutter.dev/docs/testing/integration-tests).
+///
+/// See also:
+///
+///  * [Usage section in the README](https://github.com/flutter/flutter/tree/master/packages/integration_test#usage),
+///    which fully details how to use the package, how to perform Android and
+///    iOS device testing.
+library integration_test;
+
 import 'dart:async';
 import 'dart:developer' as developer;
 import 'dart:ui';
