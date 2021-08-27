@@ -3,6 +3,17 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+# Usage:
+#
+#   ./run_release_test.sh <bundletool.jar path> <adb path>
+#
+# In CI, this script currently depends on a modified version of bundletool because
+# ddmlib which bundletool depends on does not yet support detecting QEMU emulator device
+# density system properties. See https://android.googlesource.com/platform/tools/base/+/refs/heads/master/ddmlib/src/main/java/com/android/ddmlib/IDevice.java#46
+#
+# The modified bundletool which waives the density requirement is at:
+# https://chrome-infra-packages.appspot.com/p/flutter/android/bundletool/+/vFt1jA0cUeZLmUCVR5NG2JVB-SgJ18GH_pVYKMOlfUIC
+
 # Store the time to prevent capturing logs from previous runs.
 script_start_time=$($2 shell 'date +"%m-%d %H:%M:%S.0"')
 
