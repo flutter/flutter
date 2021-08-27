@@ -529,7 +529,7 @@ void main() {
       Cache.flutterRoot = '';
       processManager.addCommand(
         FakeCommand(command: const <String>[
-          '/bin/cache/dart-sdk/bin/dart', '_deprecated_pub', 'upgrade', '-h'],
+          '/bin/cache/dart-sdk/bin/dart', '__deprecated_pub', 'upgrade', '-h'],
           stdin:  IOSink(StreamController<List<int>>().sink),
         ),
       );

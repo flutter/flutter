@@ -53,6 +53,7 @@ void main() {
         const FakeCommand(command: <String>[
           'bin/cache/dart-sdk/bin/dart',
           '__deprecated_pub',
+          '--verbosity=warning',
           'get',
           '--no-precompile',
         ])
@@ -101,6 +102,7 @@ void main() {
         const FakeCommand(command: <String>[
           'bin/cache/dart-sdk/bin/dart',
           '__deprecated_pub',
+          '--verbosity=warning',
           'get',
           '--no-precompile',
         ])
@@ -149,6 +151,7 @@ void main() {
         const FakeCommand(command: <String>[
           'bin/cache/dart-sdk/bin/dart',
           '__deprecated_pub',
+          '--verbosity=warning',
           'get',
           '--no-precompile',
         ])
@@ -264,6 +267,7 @@ void main() {
       const FakeCommand(command: <String>[
           'bin/cache/dart-sdk/bin/dart',
           '__deprecated_pub',
+          '--verbosity=warning',
           'get',
           '--no-precompile',
       ])
@@ -303,6 +307,7 @@ void main() {
       const FakeCommand(command: <String>[
            'bin/cache/dart-sdk/bin/dart',
           '__deprecated_pub',
+          '--verbosity=warning',
           'get',
           '--no-precompile',
       ])
@@ -341,6 +346,7 @@ void main() {
       FakeCommand(command: const <String>[
           'bin/cache/dart-sdk/bin/dart',
           '__deprecated_pub',
+          '--verbosity=warning',
           'get',
           '--no-precompile',
       ], onRun: () {
@@ -379,6 +385,7 @@ void main() {
       const FakeCommand(command: <String>[
           'bin/cache/dart-sdk/bin/dart',
           '__deprecated_pub',
+          '--verbosity=warning',
           'get',
           '--no-precompile',
       ]),
@@ -415,6 +422,7 @@ void main() {
       const FakeCommand(command: <String>[
           'bin/cache/dart-sdk/bin/dart',
           '__deprecated_pub',
+          '--verbosity=warning',
           'get',
           '--no-precompile',
       ])
@@ -454,6 +462,7 @@ void main() {
       const FakeCommand(command: <String>[
           'bin/cache/dart-sdk/bin/dart',
           '__deprecated_pub',
+          '--verbosity=warning',
           'get',
           '--no-precompile',
       ])
@@ -497,6 +506,7 @@ void main() {
       command: <String>[
           'bin/cache/dart-sdk/bin/dart',
           '__deprecated_pub',
+          '--verbosity=warning',
           'get',
           '--no-precompile',
       ],
@@ -593,6 +603,7 @@ void main() {
         command: <String>[
           'bin/cache/dart-sdk/bin/dart',
           '__deprecated_pub',
+          '--verbosity=warning',
           'get',
           '--no-precompile',
         ],
@@ -638,6 +649,7 @@ void main() {
         command: const <String>[
           'bin/cache/dart-sdk/bin/dart',
           '__deprecated_pub',
+          '--verbosity=warning',
           'get',
           '--no-precompile',
         ],
@@ -679,6 +691,7 @@ void main() {
         command: <String>[
           'bin/cache/dart-sdk/bin/dart',
           '__deprecated_pub',
+          '--verbosity=warning',
           'get',
           '--no-precompile',
         ],
@@ -801,6 +814,7 @@ void main() {
         command: <String>[
           'bin/cache/dart-sdk/bin/dart',
           '__deprecated_pub',
+          '--verbosity=warning',
           'get',
           '--no-precompile',
         ],
@@ -842,6 +856,7 @@ void main() {
         command: <String>[
           'bin/cache/dart-sdk/bin/dart',
           '__deprecated_pub',
+          '--verbosity=warning',
           'get',
           '--no-precompile',
         ],
@@ -884,6 +899,7 @@ void main() {
         command: const <String>[
           'bin/cache/dart-sdk/bin/dart',
           '__deprecated_pub',
+          '--verbosity=warning',
           'get',
           '--no-precompile',
         ],
@@ -895,8 +911,8 @@ void main() {
       const FakeCommand(
         command: <String>[
           'bin/cache/dart-sdk/bin/dart',
-          '--no-analytics',
-          'pub',
+          '__deprecated_pub',
+          '--verbosity=warning',
           'get',
           '--no-precompile',
         ],
@@ -905,6 +921,7 @@ void main() {
         command: const <String>[
           'bin/cache/dart-sdk/bin/dart',
           '__deprecated_pub',
+          '--verbosity=warning',
           'get',
           '--no-precompile',
         ],
@@ -917,6 +934,7 @@ void main() {
         command: <String>[
           'bin/cache/dart-sdk/bin/dart',
           '__deprecated_pub',
+          '--verbosity=warning',
           'get',
           '--no-precompile',
         ],
