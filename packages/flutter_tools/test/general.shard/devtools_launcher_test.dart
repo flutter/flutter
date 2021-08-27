@@ -61,6 +61,7 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
+            'dart',
             'pub',
             'global',
             'list',
@@ -92,6 +93,7 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
+            'dart',
             'pub',
             'global',
             'list',
@@ -100,6 +102,7 @@ void main() {
         ),
         FakeCommand(
           command: const <String>[
+            'dart',
             'pub',
             'global',
             'run',
@@ -136,6 +139,7 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
+            'dart',
             'pub',
             'global',
             'list',
@@ -162,6 +166,7 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
+            'dart',
             'pub',
             'global',
             'list',
@@ -188,6 +193,7 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
+            'dart',
             'pub',
             'global',
             'list',
@@ -196,6 +202,7 @@ void main() {
         ),
         const FakeCommand(
           command: <String>[
+            'dart',
             'pub',
             'global',
             'activate',
@@ -206,6 +213,7 @@ void main() {
         ),
         FakeCommand(
           command: const <String>[
+            'dart',
             'pub',
             'global',
             'run',
@@ -235,6 +243,7 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
+            'dart',
             'pub',
             'global',
             'list',
@@ -243,6 +252,7 @@ void main() {
         ),
         const FakeCommand(
           command: <String>[
+            'dart',
             'pub',
             'global',
             'activate',
@@ -253,6 +263,7 @@ void main() {
         ),
         const FakeCommand(
           command: <String>[
+            'dart',
             'pub',
             'global',
             'list',
@@ -261,6 +272,7 @@ void main() {
         ),
         FakeCommand(
           command: const <String>[
+            'dart',
             'pub',
             'global',
             'run',
@@ -290,6 +302,7 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
+            'dart',
             'pub',
             'global',
             'list',
@@ -298,6 +311,7 @@ void main() {
         ),
         const FakeCommand(
           command: <String>[
+            'dart',
             'pub',
             'global',
             'activate',
@@ -308,6 +322,7 @@ void main() {
         ),
         FakeCommand(
           command: const <String>[
+            'dart',
             'pub',
             'global',
             'run',
@@ -342,6 +357,7 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
+            'dart',
             'pub',
             'global',
             'list',
@@ -350,6 +366,7 @@ void main() {
         ),
         const FakeCommand(
           command: <String>[
+            'dart',
             'pub',
             'global',
             'run',
@@ -369,6 +386,7 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>[
+          'dart',
           'pub',
           'global',
           'list',
@@ -377,6 +395,7 @@ void main() {
       ),
       const FakeCommand(
         command: <String>[
+          'dart',
           'pub',
           'global',
           'run',
@@ -415,6 +434,7 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
+            'dart',
             'pub',
             'global',
             'list',
@@ -423,6 +443,7 @@ void main() {
         ),
         const FakeCommand(
           command: <String>[
+            'dart',
             'pub',
             'global',
             'activate',
@@ -434,6 +455,7 @@ void main() {
         ),
         const FakeCommand(
           command: <String>[
+            'dart',
             'pub',
             'global',
             'run',
@@ -462,6 +484,7 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
+            'dart',
             'pub',
             'global',
             'list',
@@ -470,6 +493,7 @@ void main() {
         ),
         const FakeCommand(
           command: <String>[
+            'dart',
             'pub',
             'global',
             'activate',
@@ -480,6 +504,7 @@ void main() {
         ),
         const FakeCommand(
           command: <String>[
+            'dart',
             'pub',
             'global',
             'run',
@@ -514,6 +539,7 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
+            'dart',
             'pub',
             'global',
             'list',
@@ -547,6 +573,7 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
+            'dart',
             'pub',
             'global',
             'list',

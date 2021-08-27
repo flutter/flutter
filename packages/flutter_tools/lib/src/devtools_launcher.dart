@@ -154,7 +154,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
   /// Check if the DevTools package is already active by running "pub global list".
   Future<bool> _checkForActiveDevTools() async {
     final io.ProcessResult _pubGlobalListProcess = await _processManager.run(
-      <String>[ _dartExecutable, 'global', 'list' ],
+      <String>[ _dartExecutable, 'pub', 'global', 'list' ],
     );
     return _pubGlobalListProcess.stdout.toString().contains(_devToolsInstalledPattern);
   }
@@ -181,6 +181,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
       final io.ProcessResult _devToolsActivateProcess = await _processManager
           .run(<String>[
         _dartExecutable,
+        'pub',
         'global',
         'activate',
         'devtools',
