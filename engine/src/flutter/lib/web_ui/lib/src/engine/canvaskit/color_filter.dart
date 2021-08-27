@@ -44,8 +44,7 @@ class ManagedSkColorFilter extends ManagedSkiaObject<SkColorFilter> {
     if (runtimeType != other.runtimeType) {
       return false;
     }
-    return other is ManagedSkColorFilter &&
-        other.colorFilter == colorFilter;
+    return other is ManagedSkColorFilter && other.colorFilter == colorFilter;
   }
 
   @override
@@ -57,19 +56,17 @@ class ManagedSkColorFilter extends ManagedSkiaObject<SkColorFilter> {
 /// Additionally, this class provides the interface for converting itself to a
 /// [ManagedSkiaObject] that manages a skia image filter.
 abstract class CkColorFilter
-    implements
-        CkManagedSkImageFilterConvertible,
-        EngineColorFilter {
+    implements CkManagedSkImageFilterConvertible, EngineColorFilter {
   const CkColorFilter();
 
   /// Called by [ManagedSkiaObject.createDefault] and
-  /// [ManagedSkiaObject.resurrect] to create a new [SKImageFilter], when this
+  /// [ManagedSkiaObject.resurrect] to create a new [SkImageFilter], when this
   /// filter is used as an [ImageFilter].
   SkImageFilter initRawImageFilter() =>
       canvasKit.ImageFilter.MakeColorFilter(_initRawColorFilter(), null);
 
   /// Called by [ManagedSkiaObject.createDefault] and
-  /// [ManagedSkiaObject.resurrect] to create a new [SKColorFilter], when this
+  /// [ManagedSkiaObject.resurrect] to create a new [SkColorFilter], when this
   /// filter is used as a [ColorFilter].
   SkColorFilter _initRawColorFilter();
 
@@ -172,4 +169,29 @@ class CkSrgbToLinearGammaColorFilter extends CkColorFilter {
 
   @override
   String toString() => 'ColorFilter.srgbToLinearGamma()';
+}
+
+class CkComposeColorFilter extends CkColorFilter {
+  const CkComposeColorFilter(this.outer, this.inner);
+  final ManagedSkColorFilter? outer;
+  final ManagedSkColorFilter inner;
+
+  @override
+  SkColorFilter _initRawColorFilter() =>
+      canvasKit.ColorFilter.MakeCompose(outer?.skiaObject, inner.skiaObject);
+
+  @override
+  bool operator ==(Object other) {
+    if (other is! CkComposeColorFilter) {
+      return false;
+    }
+    final CkComposeColorFilter filter = other;
+    return filter.outer == outer && filter.inner == inner;
+  }
+
+  @override
+  int get hashCode => Object.hash(outer, inner);
+
+  @override
+  String toString() => 'ColorFilter.compose($outer, $inner)';
 }
