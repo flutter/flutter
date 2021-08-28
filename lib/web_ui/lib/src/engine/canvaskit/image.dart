@@ -308,10 +308,11 @@ class CkImage implements ui.Image, StackTraceDebugger {
     ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba,
   }) {
     assert(_debugCheckIsNotDisposed());
+    final SkAlphaType alphaType = format == ui.ImageByteFormat.rawStraightRgba ? canvasKit.AlphaType.Unpremul : canvasKit.AlphaType.Premul;
     final ByteData? data = _encodeImage(
       skImage: skImage,
       format: format,
-      alphaType: canvasKit.AlphaType.Premul,
+      alphaType: alphaType,
       colorType: canvasKit.ColorType.RGBA_8888,
       colorSpace: SkColorSpaceSRGB,
     );
@@ -331,7 +332,7 @@ class CkImage implements ui.Image, StackTraceDebugger {
   }) {
     Uint8List? bytes;
 
-    if (format == ui.ImageByteFormat.rawRgba) {
+    if (format == ui.ImageByteFormat.rawRgba || format == ui.ImageByteFormat.rawStraightRgba) {
       final SkImageInfo imageInfo = SkImageInfo(
         alphaType: alphaType,
         colorType: colorType,
