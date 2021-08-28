@@ -1835,6 +1835,10 @@ class TextInput {
 
         Map<String, dynamic> encoded = args[1] as Map<String, dynamic>;
 
+        // On Android there could be a situation where multiple edits done to
+        // an editing state are accumulated before being sent to the framework.
+        // This is called batch editing on Android, and on other platforms the
+        // TextInputPlugin does not adhere to this type of editing.
         if (encoded['batchDeltas'] != null) {
           for (final dynamic encodedDelta in encoded['batchDeltas']) {
             final TextEditingDelta delta = TextEditingDelta.fromJSON(encodedDelta);
