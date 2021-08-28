@@ -1855,8 +1855,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   TextEditingValue get currentTextEditingValue => _value;
 
   @override
-  void updateEditingValueWithDeltas(List<TextEditingDelta> deltas) {
-    TextEditingValue value = (widget.controller as DeltaTextEditingController).applyDeltas(deltas);
+  void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas) {
+    TextEditingValue value = _value;
+    for (final TextEditingDelta delta in textEditingDeltas) {
+      value = delta.apply(value);
+    }
     updateEditingValue(value);
   }
 

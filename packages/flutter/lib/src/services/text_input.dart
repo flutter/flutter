@@ -750,10 +750,19 @@ enum TextEditingDeltaType {
   none
 }
 
+/// TODO: DOCS
+mixin TextEditingDeltaUtils {
+  String replace(String orig, String delta, int start, int end) {
+    String textStart = orig.substring(0, start);
+    String textEnd = orig.substring(end, orig.length);
+    String newText = textStart + delta + textEnd;
+    return newText;
+  }
+}
 
 /// A structure representing a granular change that has occured to the editing
 /// state as a result of text editing.
-class TextEditingDelta {
+class TextEditingDelta with TextEditingDeltaUtils {
   const TextEditingDelta({
     required this.oldText,
     required this.deltaText,
@@ -808,6 +817,14 @@ class TextEditingDelta {
   /// applied.
   final TextRange composing;
 
+  /// {@template flutter.services.TextEditingDelta.apply}
+  /// This method will take the given [TextEditingValue] and return a new
+  /// [TextEditingValue] with that instance of [TextEditingDelta] applied to it.
+  /// {@endtemplate}
+  TextEditingValue apply(TextEditingValue value) {
+    return this.apply(value);
+  }
+
   /// Creates an instance of this class from a JSON object by checking the
   /// deltaType sent by the engine and building the appropriate delta.
   factory TextEditingDelta.fromJSON(Map<String, dynamic> encoded) {
@@ -850,6 +867,14 @@ class TextEditingDeltaInsertion extends TextEditingDelta {
   /// {@macro flutter.services.TextEditingDelta.deltaType}
   @override
   TextEditingDeltaType? get deltaType => TextEditingDeltaType.insertion;
+
+  /// {@macro flutter.services.TextEditingDelta.apply}
+  @override
+  TextEditingValue apply(TextEditingValue value) {
+    String newText = value.text;
+    newText = replace(newText, this.deltaText, this.deltaRange.start, this.deltaRange.end);
+    return value.copyWith(text: newText, selection: this.selection, composing: this.composing);
+  }
 
   /// Creates an instance of this class from a JSON object.
   factory TextEditingDeltaInsertion.fromJSON(Map<String, dynamic> encoded) {
@@ -895,6 +920,25 @@ class TextEditingDeltaDeletion extends TextEditingDelta {
   @override
   TextEditingDeltaType? get deltaType => TextEditingDeltaType.deletion;
 
+  /// {@macro flutter.services.TextEditingDelta.apply}
+  @override
+  TextEditingValue apply(TextEditingValue value) {
+    String newText = value.text;
+
+    int deletionLength = this.deltaText.length;
+    if (deletionLength > 1) {
+      newText = replace(
+          newText, "", this.deltaRange.start,
+          this.deltaRange.end);
+    } else {
+      newText = replace(
+          newText, "", this.deltaRange.start - deletionLength,
+          this.deltaRange.end);
+    }
+
+    return value.copyWith(text: newText, selection: this.selection, composing: this.composing);
+  }
+
   /// Creates an instance of this class from a JSON object.
   factory TextEditingDeltaDeletion.fromJSON(Map<String, dynamic> encoded) {
     return TextEditingDeltaDeletion(
@@ -939,6 +983,14 @@ class TextEditingDeltaReplacement extends TextEditingDelta {
   @override
   TextEditingDeltaType? get deltaType => TextEditingDeltaType.replacement;
 
+  /// {@macro flutter.services.TextEditingDelta.apply}
+  @override
+  TextEditingValue apply(TextEditingValue value) {
+    String newText = value.text;
+    newText = replace(newText, this.deltaText, this.deltaRange.start, this.deltaRange.end);
+    return value.copyWith(text: newText, selection: this.selection, composing: this.composing);
+  }
+
   /// Creates an instance of this class from a JSON object.
   factory TextEditingDeltaReplacement.fromJSON(Map<String, dynamic> encoded) {
     return TextEditingDeltaReplacement(
@@ -982,6 +1034,12 @@ class TextEditingDeltaEquality extends TextEditingDelta {
   /// {@macro flutter.services.TextEditingDelta.deltaType}
   @override
   TextEditingDeltaType? get deltaType => TextEditingDeltaType.equality;
+
+  /// {@macro flutter.services.TextEditingDelta.deltaType}
+  @override
+  TextEditingValue apply(TextEditingValue value) {
+    return value.copyWith(selection: this.selection, composing: this.composing);
+  }
 
   /// Creates an instance of this class from a JSON object.
   factory TextEditingDeltaEquality.fromJSON(Map<String, dynamic> encoded) {
@@ -1265,7 +1323,7 @@ abstract class TextInputClient {
   ///
   /// The [TextEditingDelta] is treated as a change that will be applied to the client's
   /// value.
-  void updateEditingValueWithDeltas(List<TextEditingDelta> deltas);
+  void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas);
 
   /// Requests that this client perform the given action.
   void performAction(TextInputAction action);
