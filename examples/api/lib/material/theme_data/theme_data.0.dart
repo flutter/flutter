@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Template: d:\os\flutter\flutter\dev\snippets\config\templates\stateless_widget_scaffold.tmpl
+// Template: dev/snippets/config/templates/stateless_widget_scaffold.tmpl
 //
 // Comment lines marked with "▼▼▼" and "▲▲▲" are used for authoring
 // of samples, and may be ignored if you are just exploring the sample.

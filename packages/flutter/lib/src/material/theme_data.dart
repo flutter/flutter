@@ -131,7 +131,7 @@ enum MaterialTapTargetSize {
 /// The [Builder] widget separates the parent theme's [BuildContext] from the
 /// child's [BuildContext].
 ///
-/// ** See code in examples\api\lib\material\theme_data\theme_data.0.dart **
+/// ** See code in examples/api/lib/material/theme_data/theme_data.0.dart **
 /// {@end-tool}
 ///
 /// {@tool snippet}
