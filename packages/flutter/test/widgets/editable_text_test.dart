@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert' show jsonDecode;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -6616,6 +6617,303 @@ void main() {
     expect(log.length, 0);
     // The keyboard is not be requested after a repeat value from the engine.
     expect(focusNode.hasFocus, false);
+  });
+
+  group('TextEditingDelta', () {
+    testWidgets('TextEditingDeltaInsertion verification', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(devicePixelRatio: 1.0),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Center(
+                child: Material(
+                  child: EditableText(
+                    controller: controller,
+                    focusNode: focusNode,
+                    style: textStyle,
+                    cursorColor: Colors.red,
+                    backgroundCursorColor: Colors.red,
+                    keyboardType: TextInputType.multiline,
+                    onChanged: (String value) { },
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final EditableTextState state = tester.firstState(find.byType(EditableText));
+      final String jsonDelta = '{'
+          '"oldText": "",'
+          ' "deltaText": "let there be text",'
+          ' "deltaType" : "INSERTION",'
+          ' "deltaStart": 0,'
+          ' "deltaEnd": 0,'
+          ' "selectionBase": 17,'
+          ' "selectionExtent": 17,'
+          ' "selectionAffinity" : "TextAffinity.downstream" ,'
+          ' "selectionIsDirectional": false,'
+          ' "composingBase": -1,'
+          ' "composingExtent": -1}';
+
+      final Map<String, dynamic> test = jsonDecode(jsonDelta);
+      
+      final TextEditingDelta delta = TextEditingDelta.fromJSON(test as Map<String, dynamic>);
+
+      state.updateEditingValueWithDeltas([delta]);
+      await tester.pump();
+      expect(controller.text, 'let there be text');
+      expect(controller.selection, delta.selection);
+      expect(state.currentTextEditingValue.composing, delta.composing);
+    });
+
+    testWidgets('TextEditingDeltaDeletion verification', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(text: 'let there be text');
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(devicePixelRatio: 1.0),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Center(
+                child: Material(
+                  child: EditableText(
+                    controller: controller,
+                    focusNode: focusNode,
+                    style: textStyle,
+                    cursorColor: Colors.red,
+                    backgroundCursorColor: Colors.red,
+                    keyboardType: TextInputType.multiline,
+                    onChanged: (String value) { },
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final EditableTextState state = tester.firstState(find.byType(EditableText));
+      final String jsonDelta = '{'
+          '"oldText": "let there be text",'
+          ' "deltaText": "let there be text",'
+          ' "deltaType" : "DELETION",'
+          ' "deltaStart": 0,'
+          ' "deltaEnd": 17,'
+          ' "selectionBase": 0,'
+          ' "selectionExtent": 0,'
+          ' "selectionAffinity" : "TextAffinity.downstream" ,'
+          ' "selectionIsDirectional": false,'
+          ' "composingBase": -1,'
+          ' "composingExtent": -1}';
+
+      final Map<String, dynamic> test = jsonDecode(jsonDelta);
+
+      final TextEditingDelta delta = TextEditingDelta.fromJSON(test as Map<String, dynamic>);
+
+      state.updateEditingValueWithDeltas([delta]);
+      await tester.pump();
+      expect(controller.text, '');
+      expect(controller.selection, delta.selection);
+      expect(state.currentTextEditingValue.composing, delta.composing);
+    });
+
+    testWidgets('TextEditingDeltaReplacement verification', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(text: 'let there be text');
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(devicePixelRatio: 1.0),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Center(
+                child: Material(
+                  child: EditableText(
+                    controller: controller,
+                    focusNode: focusNode,
+                    style: textStyle,
+                    cursorColor: Colors.red,
+                    backgroundCursorColor: Colors.red,
+                    keyboardType: TextInputType.multiline,
+                    onChanged: (String value) { },
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final EditableTextState state = tester.firstState(find.byType(EditableText));
+      final String jsonDelta = '{'
+          '"oldText": "let there be text",'
+          ' "deltaText": "this is your replacement text",'
+          ' "deltaType" : "REPLACEMENT",'
+          ' "deltaStart": 0,'
+          ' "deltaEnd": 17,'
+          ' "selectionBase": 0,'
+          ' "selectionExtent": 0,'
+          ' "selectionAffinity" : "TextAffinity.downstream",'
+          ' "selectionIsDirectional": false,'
+          ' "composingBase": -1,'
+          ' "composingExtent": -1}';
+
+      final Map<String, dynamic> test = jsonDecode(jsonDelta);
+
+      final TextEditingDelta delta = TextEditingDelta.fromJSON(test as Map<String, dynamic>);
+
+      state.updateEditingValueWithDeltas([delta]);
+      await tester.pump();
+      expect(controller.text, 'this is your replacement text');
+      expect(controller.selection, delta.selection);
+      expect(state.currentTextEditingValue.composing, delta.composing);
+    });
+
+    testWidgets('TextEditingDeltaEquality verification', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(text: 'let there be text');
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(devicePixelRatio: 1.0),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Center(
+                child: Material(
+                  child: EditableText(
+                    controller: controller,
+                    focusNode: focusNode,
+                    style: textStyle,
+                    cursorColor: Colors.red,
+                    backgroundCursorColor: Colors.red,
+                    keyboardType: TextInputType.multiline,
+                    onChanged: (String value) { },
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final EditableTextState state = tester.firstState(find.byType(EditableText));
+      final String jsonDelta = '{'
+          '"oldText": "let there be text",'
+          ' "deltaText": "",'
+          ' "deltaType" : "EQUALITY",'
+          ' "deltaStart": -1,'
+          ' "deltaEnd": -1,'
+          ' "selectionBase": 17,'
+          ' "selectionExtent": 17,'
+          ' "selectionAffinity" : "TextAffinity.downstream",'
+          ' "selectionIsDirectional": false,'
+          ' "composingBase": -1,'
+          ' "composingExtent": -1}';
+
+      final Map<String, dynamic> test = jsonDecode(jsonDelta);
+
+      final TextEditingDelta delta = TextEditingDelta.fromJSON(test as Map<String, dynamic>);
+
+      state.updateEditingValueWithDeltas([delta]);
+      await tester.pump();
+      expect(controller.text, 'let there be text');
+      expect(controller.selection, delta.selection);
+      expect(state.currentTextEditingValue.composing, delta.composing);
+    });
+
+    testWidgets('TextEditingDelta verify batch deltas apply', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(devicePixelRatio: 1.0),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Center(
+                child: Material(
+                  child: EditableText(
+                    controller: controller,
+                    focusNode: focusNode,
+                    style: textStyle,
+                    cursorColor: Colors.red,
+                    backgroundCursorColor: Colors.red,
+                    keyboardType: TextInputType.multiline,
+                    onChanged: (String value) { },
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final EditableTextState state = tester.firstState(find.byType(EditableText));
+      final String jsonInsertionDelta = '{'
+          '"oldText": "",'
+          ' "deltaText": "let there be text",'
+          ' "deltaType" : "INSERTION",'
+          ' "deltaStart": 0,'
+          ' "deltaEnd": 0,'
+          ' "selectionBase": 17,'
+          ' "selectionExtent": 17,'
+          ' "selectionAffinity" : "TextAffinity.downstream" ,'
+          ' "selectionIsDirectional": false,'
+          ' "composingBase": -1,'
+          ' "composingExtent": -1}';
+
+      final String jsonDeletionDelta = '{'
+          '"oldText": "let there be text",'
+          ' "deltaText": " text",'
+          ' "deltaType" : "DELETION",'
+          ' "deltaStart": 12,'
+          ' "deltaEnd": 17,'
+          ' "selectionBase": 12,'
+          ' "selectionExtent": 12,'
+          ' "selectionAffinity" : "TextAffinity.downstream" ,'
+          ' "selectionIsDirectional": false,'
+          ' "composingBase": -1,'
+          ' "composingExtent": -1}';
+
+      final String jsonReplacementDelta = '{'
+          '"oldText": "let there be",'
+          ' "deltaText": "be light",'
+          ' "deltaType" : "REPLACEMENT",'
+          ' "deltaStart": 10,'
+          ' "deltaEnd": 12,'
+          ' "selectionBase": 18,'
+          ' "selectionExtent": 18,'
+          ' "selectionAffinity" : "TextAffinity.downstream" ,'
+          ' "selectionIsDirectional": false,'
+          ' "composingBase": -1,'
+          ' "composingExtent": -1}';
+
+      final String jsonEqualityDelta = '{'
+          '"oldText": "let there be light",'
+          ' "deltaText": "",'
+          ' "deltaType" : "EQUALITY",'
+          ' "deltaStart": -1,'
+          ' "deltaEnd": -1,'
+          ' "selectionBase": 18,'
+          ' "selectionExtent": 18,'
+          ' "selectionAffinity" : "TextAffinity.downstream",'
+          ' "selectionIsDirectional": false,'
+          ' "composingBase": -1,'
+          ' "composingExtent": -1}';
+
+      final TextEditingDelta insertionDelta = TextEditingDelta.fromJSON(jsonDecode(jsonInsertionDelta) as Map<String, dynamic>);
+      final TextEditingDelta deletionDelta = TextEditingDelta.fromJSON(jsonDecode(jsonDeletionDelta) as Map<String, dynamic>);
+      final TextEditingDelta replacementDelta = TextEditingDelta.fromJSON(jsonDecode(jsonReplacementDelta) as Map<String, dynamic>);
+      final TextEditingDelta equalityDelta = TextEditingDelta.fromJSON(jsonDecode(jsonEqualityDelta) as Map<String, dynamic>);
+
+      state.updateEditingValueWithDeltas([insertionDelta, deletionDelta, replacementDelta, equalityDelta]);
+      await tester.pump();
+      expect(controller.text, 'let there be light');
+      expect(controller.selection, equalityDelta.selection);
+      expect(state.currentTextEditingValue.composing, equalityDelta.composing);
+    });
   });
 
   group('TextEditingController', () {
