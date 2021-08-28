@@ -1195,7 +1195,7 @@ void _canvasTests() {
         .beginRecording(Float32List.fromList(<double>[0, 0, 1, 1]));
     otherCanvas.drawRect(
       Float32List.fromList(<double>[0, 0, 1, 1]),
-      SkPaint(),
+      SkPaint()..setColorInt(0xAAFFFFFF),
     );
     final CkPicture picture =
         CkPicture(otherRecorder.finishRecordingAsPicture(), null, null);
@@ -1203,6 +1203,17 @@ void _canvasTests() {
     final ByteData rawData =
         await image.toByteData(format: ui.ImageByteFormat.rawRgba);
     expect(rawData.lengthInBytes, greaterThan(0));
+    expect(
+      rawData.buffer.asUint32List(),
+      <int>[0xAAAAAAAA],
+    );
+    final ByteData rawStraightData =
+        await image.toByteData(format: ui.ImageByteFormat.rawStraightRgba);
+    expect(rawStraightData.lengthInBytes, greaterThan(0));
+    expect(
+      rawStraightData.buffer.asUint32List(),
+      <int>[0xAAFFFFFF],
+    );
     final ByteData pngData =
         await image.toByteData(format: ui.ImageByteFormat.png);
     expect(pngData.lengthInBytes, greaterThan(0));
