@@ -750,7 +750,7 @@ enum TextEditingDeltaType {
   none
 }
 
-/// TODO: DOCS
+/// A mixin for manipulating a string of text.
 mixin TextEditingDeltaUtils {
   String replace(String orig, String delta, int start, int end) {
     String textStart = orig.substring(0, start);
