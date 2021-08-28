@@ -50,16 +50,16 @@ add the stub to the symbol documentation:
 /// {@end-tool}
 ```
 
-Then install the `snippets:extract` command with:
+Then install the `snippets:extract_sample` command with:
 
 ```
 % pub global activate snippets
 ```
 
-And run the `snippets:extract` command from the Flutter repo dir:
+And run the `extract_sample` command from the Flutter repo dir:
 
 ```
-$ pub global run snippets:extract --input packages/flutter/lib/src/animation/curves.dart
+$ pub global run snippets:extract_sample --input packages/flutter/lib/src/animation/curves.dart
 ```
 
 This will create a new file in the `examples/api` directory, in this case it
