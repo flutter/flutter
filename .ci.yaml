@@ -1886,7 +1886,8 @@ targets:
       dependencies: >-
         [
           {"dependency": "goldctl"},
-          {"dependency": "xcode"}
+          {"dependency": "xcode"},
+          {"dependency": "gems"}
         ]
       shard: framework_tests
       subshard: misc
