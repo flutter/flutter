@@ -807,7 +807,7 @@ class TextEditingDelta with TextEditingDeltaUtils {
   /// The type of delta that has occured.
   /// See [TextEditingDeltaType] for more information.
   /// {@endtemplate}
-  TextEditingDeltaType? get deltaType => TextEditingDeltaType.none;
+  TextEditingDeltaType get deltaType => TextEditingDeltaType.none;
 
   /// The range of text that is currently selected after the delta has been
   /// applied.
@@ -866,7 +866,7 @@ class TextEditingDeltaInsertion extends TextEditingDelta {
 
   /// {@macro flutter.services.TextEditingDelta.deltaType}
   @override
-  TextEditingDeltaType? get deltaType => TextEditingDeltaType.insertion;
+  TextEditingDeltaType get deltaType => TextEditingDeltaType.insertion;
 
   /// {@macro flutter.services.TextEditingDelta.apply}
   @override
@@ -918,7 +918,7 @@ class TextEditingDeltaDeletion extends TextEditingDelta {
 
   /// {@macro flutter.services.TextEditingDelta.deltaType}
   @override
-  TextEditingDeltaType? get deltaType => TextEditingDeltaType.deletion;
+  TextEditingDeltaType get deltaType => TextEditingDeltaType.deletion;
 
   /// {@macro flutter.services.TextEditingDelta.apply}
   @override
@@ -981,7 +981,7 @@ class TextEditingDeltaReplacement extends TextEditingDelta {
 
   /// {@macro flutter.services.TextEditingDelta.deltaType}
   @override
-  TextEditingDeltaType? get deltaType => TextEditingDeltaType.replacement;
+  TextEditingDeltaType get deltaType => TextEditingDeltaType.replacement;
 
   /// {@macro flutter.services.TextEditingDelta.apply}
   @override
@@ -1033,7 +1033,7 @@ class TextEditingDeltaEquality extends TextEditingDelta {
 
   /// {@macro flutter.services.TextEditingDelta.deltaType}
   @override
-  TextEditingDeltaType? get deltaType => TextEditingDeltaType.equality;
+  TextEditingDeltaType get deltaType => TextEditingDeltaType.equality;
 
   /// {@macro flutter.services.TextEditingDelta.deltaType}
   @override
