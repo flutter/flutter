@@ -752,10 +752,13 @@ enum TextEditingDeltaType {
 
 /// A mixin for manipulating a string of text.
 mixin TextEditingDeltaUtils {
-  String replace(String orig, String delta, int start, int end) {
-    final String textStart = orig.substring(0, start);
-    final String textEnd = orig.substring(end, orig.length);
-    final String newText = textStart + delta + textEnd;
+
+  /// Replaces a range of text in the original string with the text given in the
+  /// replacement string. 
+  String replace(String originalText, String replacementText, int start, int end) {
+    final String textStart = originalText.substring(0, start);
+    final String textEnd = originalText.substring(end, originalText.length);
+    final String newText = textStart + replacementText + textEnd;
     return newText;
   }
 }
@@ -770,6 +773,23 @@ class TextEditingDelta with TextEditingDeltaUtils {
     required this.selection,
     required this.composing,
   });
+
+  /// Creates an instance of this class from a JSON object by checking the
+  /// deltaType sent by the engine and building the appropriate delta.
+  factory TextEditingDelta.fromJSON(Map<String, dynamic> encoded) {
+    switch (encoded['deltaType'] as String) {
+      case 'INSERTION':
+        return TextEditingDeltaInsertion.fromJSON(encoded);
+      case 'DELETION':
+        return TextEditingDeltaDeletion.fromJSON(encoded);
+      case 'REPLACEMENT':
+        return TextEditingDeltaReplacement.fromJSON(encoded);
+      case 'EQUALITY':
+        return TextEditingDeltaEquality.fromJSON(encoded);
+      default:
+        return TextEditingDeltaEquality.fromJSON(encoded);
+    }
+  }
 
   /// The old text state before the delta has occured.
   final String oldText;
@@ -823,23 +843,6 @@ class TextEditingDelta with TextEditingDeltaUtils {
   /// {@endtemplate}
   TextEditingValue apply(TextEditingValue value) {
     return apply(value);
-  }
-
-  /// Creates an instance of this class from a JSON object by checking the
-  /// deltaType sent by the engine and building the appropriate delta.
-  factory TextEditingDelta.fromJSON(Map<String, dynamic> encoded) {
-    switch (encoded['deltaType'] as String) {
-      case 'INSERTION':
-        return TextEditingDeltaInsertion.fromJSON(encoded);
-      case 'DELETION':
-        return TextEditingDeltaDeletion.fromJSON(encoded);
-      case 'REPLACEMENT':
-        return TextEditingDeltaReplacement.fromJSON(encoded);
-      case 'EQUALITY':
-        return TextEditingDeltaEquality.fromJSON(encoded);
-      default:
-        return TextEditingDeltaEquality.fromJSON(encoded);
-    }
   }
 }
 

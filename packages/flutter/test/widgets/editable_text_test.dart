@@ -6647,7 +6647,7 @@ void main() {
       );
 
       final EditableTextState state = tester.firstState(find.byType(EditableText));
-      final String jsonDelta = '{'
+      const String jsonDelta = '{'
           '"oldText": "",'
           ' "deltaText": "let there be text",'
           ' "deltaType" : "INSERTION",'
@@ -6761,7 +6761,7 @@ void main() {
           ' "composingBase": -1,'
           ' "composingExtent": -1}';
 
-      final Map<String, dynamic> test = jsonDecode(jsonDelta);
+      final Map<String, dynamic> test = jsonDecode(jsonDelta) as Map<String, dynamic>;
 
       final TextEditingDelta delta = TextEditingDelta.fromJSON(test);
 
