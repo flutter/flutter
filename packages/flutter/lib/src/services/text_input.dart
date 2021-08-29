@@ -754,7 +754,7 @@ enum TextEditingDeltaType {
 mixin TextEditingDeltaUtils {
 
   /// Replaces a range of text in the original string with the text given in the
-  /// replacement string. 
+  /// replacement string.
   String replace(String originalText, String replacementText, int start, int end) {
     final String textStart = originalText.substring(0, start);
     final String textEnd = originalText.substring(end, originalText.length);
