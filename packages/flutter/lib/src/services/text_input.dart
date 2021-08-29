@@ -822,7 +822,7 @@ class TextEditingDelta with TextEditingDeltaUtils {
   /// [TextEditingValue] with that instance of [TextEditingDelta] applied to it.
   /// {@endtemplate}
   TextEditingValue apply(TextEditingValue value) {
-    return this.apply(value);
+    return apply(value);
   }
 
   /// Creates an instance of this class from a JSON object by checking the
@@ -831,19 +831,14 @@ class TextEditingDelta with TextEditingDeltaUtils {
     switch (encoded['deltaType'] as String) {
       case 'INSERTION':
         return TextEditingDeltaInsertion.fromJSON(encoded);
-        break;
       case 'DELETION':
         return TextEditingDeltaDeletion.fromJSON(encoded);
-        break;
       case 'REPLACEMENT':
         return TextEditingDeltaReplacement.fromJSON(encoded);
-        break;
       case 'EQUALITY':
         return TextEditingDeltaEquality.fromJSON(encoded);
-        break;
       default:
         return TextEditingDeltaEquality.fromJSON(encoded);
-        break;
     }
   }
 }
@@ -851,11 +846,11 @@ class TextEditingDelta with TextEditingDeltaUtils {
 /// {@macro flutter.services.TextEditingDeltaInsertion}
 class TextEditingDeltaInsertion extends TextEditingDelta {
   const TextEditingDeltaInsertion({
-    required oldText,
-    required deltaText,
-    required deltaRange,
-    required selection,
-    required composing,
+    required String oldText,
+    required String deltaText,
+    required TextRange deltaRange,
+    required TextSelection selection,
+    required TextRange composing,
   }) : super(
       oldText: oldText,
       deltaText: deltaText,
@@ -872,8 +867,8 @@ class TextEditingDeltaInsertion extends TextEditingDelta {
   @override
   TextEditingValue apply(TextEditingValue value) {
     String newText = value.text;
-    newText = replace(newText, this.deltaText, this.deltaRange.start, this.deltaRange.end);
-    return value.copyWith(text: newText, selection: this.selection, composing: this.composing);
+    newText = replace(newText, deltaText, deltaRange.start, deltaRange.end);
+    return value.copyWith(text: newText, selection: selection, composing: composing);
   }
 
   /// Creates an instance of this class from a JSON object.
@@ -903,11 +898,11 @@ class TextEditingDeltaInsertion extends TextEditingDelta {
 /// {@macro flutter.services.TextEditingDeltaDeletion}
 class TextEditingDeltaDeletion extends TextEditingDelta {
   const TextEditingDeltaDeletion({
-    required oldText,
-    required deltaText,
-    required deltaRange,
-    required selection,
-    required composing,
+    required String oldText,
+    required String deltaText,
+    required TextRange deltaRange,
+    required TextSelection selection,
+    required TextRange composing,
   }) : super(
     oldText: oldText,
     deltaText: deltaText,
@@ -925,18 +920,18 @@ class TextEditingDeltaDeletion extends TextEditingDelta {
   TextEditingValue apply(TextEditingValue value) {
     String newText = value.text;
 
-    int deletionLength = this.deltaText.length;
+    int deletionLength = deltaText.length;
     if (deletionLength > 1) {
       newText = replace(
-          newText, "", this.deltaRange.start,
-          this.deltaRange.end);
+          newText, "", deltaRange.start,
+          deltaRange.end);
     } else {
       newText = replace(
-          newText, "", this.deltaRange.start - deletionLength,
-          this.deltaRange.end);
+          newText, "", deltaRange.start - deletionLength,
+          deltaRange.end);
     }
 
-    return value.copyWith(text: newText, selection: this.selection, composing: this.composing);
+    return value.copyWith(text: newText, selection: selection, composing: composing);
   }
 
   /// Creates an instance of this class from a JSON object.
@@ -966,11 +961,11 @@ class TextEditingDeltaDeletion extends TextEditingDelta {
 /// {@macro flutter.services.TextEditingDeltaReplacement}
 class TextEditingDeltaReplacement extends TextEditingDelta {
   const TextEditingDeltaReplacement({
-    required oldText,
-    required deltaText,
-    required deltaRange,
-    required selection,
-    required composing,
+    required String oldText,
+    required String deltaText,
+    required TextRange deltaRange,
+    required TextSelection selection,
+    required TextRange composing,
   }) : super(
     oldText: oldText,
     deltaText: deltaText,
@@ -987,8 +982,8 @@ class TextEditingDeltaReplacement extends TextEditingDelta {
   @override
   TextEditingValue apply(TextEditingValue value) {
     String newText = value.text;
-    newText = replace(newText, this.deltaText, this.deltaRange.start, this.deltaRange.end);
-    return value.copyWith(text: newText, selection: this.selection, composing: this.composing);
+    newText = replace(newText, deltaText, deltaRange.start, deltaRange.end);
+    return value.copyWith(text: newText, selection: selection, composing: composing);
   }
 
   /// Creates an instance of this class from a JSON object.
@@ -1018,11 +1013,11 @@ class TextEditingDeltaReplacement extends TextEditingDelta {
 /// {@macro flutter.services.TextEditingDeltaEquality}
 class TextEditingDeltaEquality extends TextEditingDelta {
   const TextEditingDeltaEquality({
-    required oldText,
-    required deltaText,
-    required deltaRange,
-    required selection,
-    required composing,
+    required String oldText,
+    required String deltaText,
+    required TextRange deltaRange,
+    required TextSelection selection,
+    required TextRange composing,
   }) : super(
     oldText: oldText,
     deltaText: deltaText,
@@ -1038,7 +1033,7 @@ class TextEditingDeltaEquality extends TextEditingDelta {
   /// {@macro flutter.services.TextEditingDelta.deltaType}
   @override
   TextEditingValue apply(TextEditingValue value) {
-    return value.copyWith(selection: this.selection, composing: this.composing);
+    return value.copyWith(selection: selection, composing: composing);
   }
 
   /// Creates an instance of this class from a JSON object.
