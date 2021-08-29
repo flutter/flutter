@@ -452,7 +452,7 @@ class FakeTextInputClient implements TextInputClient {
   }
 
   @override
-  void updateEditingValueWithDeltas(TextEditingValue value) {
+  void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas) {
     latestMethodCall = 'updateEditingValueWithDeltas';
   }
 
