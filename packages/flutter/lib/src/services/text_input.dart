@@ -753,9 +753,9 @@ enum TextEditingDeltaType {
 /// A mixin for manipulating a string of text.
 mixin TextEditingDeltaUtils {
   String replace(String orig, String delta, int start, int end) {
-    String textStart = orig.substring(0, start);
-    String textEnd = orig.substring(end, orig.length);
-    String newText = textStart + delta + textEnd;
+    final String textStart = orig.substring(0, start);
+    final String textEnd = orig.substring(end, orig.length);
+    final String newText = textStart + delta + textEnd;
     return newText;
   }
 }
@@ -920,14 +920,14 @@ class TextEditingDeltaDeletion extends TextEditingDelta {
   TextEditingValue apply(TextEditingValue value) {
     String newText = value.text;
 
-    int deletionLength = deltaText.length;
+    final int deletionLength = deltaText.length;
     if (deletionLength > 1) {
       newText = replace(
-          newText, "", deltaRange.start,
+          newText, '', deltaRange.start,
           deltaRange.end);
     } else {
       newText = replace(
-          newText, "", deltaRange.start - deletionLength,
+          newText, '', deltaRange.start - deletionLength,
           deltaRange.end);
     }
 
@@ -1796,9 +1796,9 @@ class TextInput {
       final Map<String, dynamic> editingDelta = args[1] as Map<String, dynamic>;
       for (final String tag in editingDelta.keys) {
         final TextEditingDelta textEditingDelta = TextEditingDelta.fromJSON(
-          editingDelta[tag],
+          editingDelta[tag] as Map<String, dynamic>,
         );
-        scope?.getAutofillClient(tag)?.updateEditingValueWithDeltas([textEditingDelta]);
+        scope?.getAutofillClient(tag)?.updateEditingValueWithDeltas(<TextEditingDelta>[textEditingDelta]);
       }
 
       return;
@@ -1826,9 +1826,9 @@ class TextInput {
         _currentConnection!._client.updateEditingValue(TextEditingValue.fromJSON(args[1] as Map<String, dynamic>));
         break;
       case 'TextInputClient.updateEditingStateWithDeltas':
-        List<TextEditingDelta> batchDeltas = [];
+        final List<TextEditingDelta> batchDeltas = <TextEditingDelta>[];
 
-        Map<String, dynamic> encoded = args[1] as Map<String, dynamic>;
+        final Map<String, dynamic> encoded = args[1] as Map<String, dynamic>;
 
         // On Android there could be a situation where multiple edits done to
         // an editing state are accumulated before being sent to the framework.
@@ -1836,7 +1836,7 @@ class TextInput {
         // TextInputPlugin does not adhere to this type of editing.
         if (encoded['batchDeltas'] != null) {
           for (final dynamic encodedDelta in encoded['batchDeltas']) {
-            final TextEditingDelta delta = TextEditingDelta.fromJSON(encodedDelta);
+            final TextEditingDelta delta = TextEditingDelta.fromJSON(encodedDelta as Map<String, dynamic>);
             batchDeltas.add(delta);
           }
         } else {
