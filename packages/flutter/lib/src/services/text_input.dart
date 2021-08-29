@@ -1568,6 +1568,7 @@ TextInputAction _toTextInputAction(String action) {
     case 'TextInputAction.none':
       return TextInputAction.none;
     case 'TextInputAction.unspecified':
+      return TextInputAction.unspecified;
     case 'TextInputAction.go':
       return TextInputAction.go;
     case 'TextInputAction.search':
