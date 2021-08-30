@@ -46,5 +46,7 @@ typedef ComputeImpl = Future<R> Function<Q, R>(ComputeCallback<Q, R> callback, Q
 
 /// A function that spawns an isolate and runs a callback on that isolate.
 ///
-/// See [ComputeImpl] for usage details.
+/// See also:
+///
+///   * [ComputeImpl], for function parameters and usage details.
 const ComputeImpl compute = _isolates.compute;
