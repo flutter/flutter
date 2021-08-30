@@ -1681,7 +1681,6 @@ targets:
 
   - name: Linux android views
     recipe: flutter/android_views
-    bringup: true
     properties:
       dependencies: >-
         [
