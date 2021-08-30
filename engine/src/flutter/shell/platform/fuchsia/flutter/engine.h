@@ -90,16 +90,14 @@ class Engine final {
   const std::string thread_label_;
   flutter::ThreadHost thread_host_;
 
-  std::optional<VulkanSurfaceProducer> surface_producer_;
-
-  // Gfx specific classes.
   fuchsia::ui::views::ViewToken view_token_;
-  std::shared_ptr<GfxSessionConnection> session_connection_;
-  std::shared_ptr<FuchsiaExternalViewEmbedder> external_view_embedder_;
-
-  // Flatland specific classes.
   fuchsia::ui::views::ViewCreationToken view_creation_token_;
-  std::shared_ptr<FlatlandConnection> flatland_connection_;
+  std::shared_ptr<GfxSessionConnection>
+      session_connection_;  // Must come before surface_producer_
+  std::shared_ptr<FlatlandConnection>
+      flatland_connection_;  // Must come before surface_producer_
+  std::optional<VulkanSurfaceProducer> surface_producer_;
+  std::shared_ptr<FuchsiaExternalViewEmbedder> external_view_embedder_;
   std::shared_ptr<FlatlandExternalViewEmbedder> flatland_view_embedder_;
 
   scenic::ViewRefPair view_ref_pair_;
