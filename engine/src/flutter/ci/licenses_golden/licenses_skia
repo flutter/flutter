@@ -1,4 +1,4 @@
-Signature: ce28bd3f43cdd65a9f466726c38552f7
+Signature: b0e8ece2e7662c5d4445128bf6aa48a1
 
 UNUSED LICENSES:
 
@@ -2490,10 +2490,10 @@ FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLVarying.cpp
 FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLVarying.h
 FILE: ../../../third_party/skia/src/gpu/ops/AALinearizingConvexPathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/AALinearizingConvexPathRenderer.h
+FILE: ../../../third_party/skia/src/gpu/ops/AtlasTextOp.cpp
+FILE: ../../../third_party/skia/src/gpu/ops/AtlasTextOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/DashLinePathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/DashLinePathRenderer.h
-FILE: ../../../third_party/skia/src/gpu/ops/GrAtlasTextOp.cpp
-FILE: ../../../third_party/skia/src/gpu/ops/GrAtlasTextOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrClearOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrDrawAtlasOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrDrawAtlasOp.h
