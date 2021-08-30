@@ -575,6 +575,20 @@ void Engine::Initialize(
 
 Engine::~Engine() {
   shell_.reset();
+
+  // Destroy rendering objects on the raster thread.
+  fml::AutoResetWaitableEvent view_embedder_latch;
+  thread_host_.raster_thread->GetTaskRunner()->PostTask(
+      fml::MakeCopyable([this, &view_embedder_latch]() mutable {
+        flatland_view_embedder_.reset();
+        external_view_embedder_.reset();
+        surface_producer_.reset();
+        flatland_connection_.reset();
+        session_connection_.reset();
+
+        view_embedder_latch.Signal();
+      }));
+  view_embedder_latch.Wait();
 }
 
 std::optional<uint32_t> Engine::GetEngineReturnCode() const {
