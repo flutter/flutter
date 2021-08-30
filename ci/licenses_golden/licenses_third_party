@@ -1,4 +1,4 @@
-Signature: a993aa03090b864a7f5c3304cbe5e4a9
+Signature: c96c4cba473b1737ae46df2ad6afa687
 
 UNUSED LICENSES:
 
@@ -9799,10 +9799,6 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/backend/typed_data_aot_test.
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/yield_position_test.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/graph_intrinsifier.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/graph_intrinsifier.h
-FILE: ../../../third_party/dart/runtime/vm/compiler/graph_intrinsifier_arm.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/graph_intrinsifier_arm64.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/graph_intrinsifier_ia32.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/graph_intrinsifier_x64.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/offsets_extractor.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/recognized_methods_list.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/relocation.cc
