@@ -1,4 +1,4 @@
-Signature: 6f8bc8f6c78671d3f65dca413151c4ca
+Signature: ce28bd3f43cdd65a9f466726c38552f7
 
 UNUSED LICENSES:
 
@@ -3538,8 +3538,8 @@ FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlUtil.mm
 FILE: ../../../third_party/skia/src/gpu/ops/GrClearOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrSimpleMeshDrawOpHelper.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrSimpleMeshDrawOpHelper.h
-FILE: ../../../third_party/skia/src/gpu/ops/GrTextureOp.cpp
-FILE: ../../../third_party/skia/src/gpu/ops/GrTextureOp.h
+FILE: ../../../third_party/skia/src/gpu/ops/TextureOp.cpp
+FILE: ../../../third_party/skia/src/gpu/ops/TextureOp.h
 FILE: ../../../third_party/skia/src/gpu/v1/StencilClip.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkSemaphore.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkSemaphore.h
