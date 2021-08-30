@@ -791,13 +791,13 @@ class TextEditingDelta with TextEditingDeltaUtils {
   /// deltaType sent by the engine and building the appropriate delta.
   factory TextEditingDelta.fromJSON(Map<String, dynamic> encoded) {
     switch (encoded['deltaType'] as String) {
-      case 'INSERTION':
+      case 'TextEditingDeltaType.insertion':
         return TextEditingDeltaInsertion.fromJSON(encoded);
-      case 'DELETION':
+      case 'TextEditingDeltaType.deletion':
         return TextEditingDeltaDeletion.fromJSON(encoded);
-      case 'REPLACEMENT':
+      case 'TextEditingDeltaType.replacement':
         return TextEditingDeltaReplacement.fromJSON(encoded);
-      case 'EQUALITY':
+      case 'TextEditingDeltaType.equality':
         return TextEditingDeltaEquality.fromJSON(encoded);
       default:
         return TextEditingDeltaEquality.fromJSON(encoded);
