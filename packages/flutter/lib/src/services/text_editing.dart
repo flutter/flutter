@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
 import 'dart:ui' show hashValues, TextAffinity, TextPosition, TextRange;
 
 import 'package:flutter/foundation.dart';
@@ -166,47 +165,37 @@ class TextSelection extends TextRange {
   /// to the given [TextPosition].  It doesn't strictly grow the selection and
   /// may collapse it or flip its order.
   TextSelection expandTo(TextPosition position, [bool extentAtIndex = false]) {
-    final int upperOffset = math.min(baseOffset, extentOffset);
-    final int lowerOffset = math.max(baseOffset, extentOffset);
-    if (position.offset >= upperOffset && position.offset <= lowerOffset) {
+    // If position is already within in the selection, there's nothing to do.
+    if (position.offset >= start && position.offset <= end) {
       return this;
     }
 
-    if (baseOffset <= extentOffset) {
-      if (position.offset <= baseOffset) {
-        if (extentAtIndex) {
-          return copyWith(
-            baseOffset: extentOffset,
-            extentOffset: position.offset,
-            affinity: position.affinity,
-          );
-        }
+    final bool normalized = baseOffset <= extentOffset;
+    if (position.offset <= start) {
+      // Here the position is somewhere before the selection: ..|..[...]....
+      if (extentAtIndex) {
         return copyWith(
-          baseOffset: position.offset,
+          baseOffset: end,
+          extentOffset: position.offset,
           affinity: position.affinity,
         );
       }
       return copyWith(
-        extentOffset: position.offset,
-        affinity: position.affinity,
+        baseOffset: normalized ? position.offset : baseOffset,
+        extentOffset: normalized ? extentOffset : position.offset,
       );
     }
-    if (position.offset <= extentOffset) {
-      return copyWith(
-        extentOffset: position.offset,
-        affinity: position.affinity,
-      );
-    }
+    // Here the position is somewhere after the selection: ....[...]..|..
     if (extentAtIndex) {
       return copyWith(
-        baseOffset: extentOffset,
+        baseOffset: start,
         extentOffset: position.offset,
         affinity: position.affinity,
       );
     }
     return copyWith(
-      baseOffset: position.offset,
-      affinity: position.affinity,
+      baseOffset: normalized ? baseOffset : position.offset,
+      extentOffset: normalized ? position.offset : extentOffset,
     );
   }
 

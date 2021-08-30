@@ -57,7 +57,7 @@ abstract class TextMetrics {
   TextRange getWordBoundary(TextPosition position);
 
   /// {@template flutter.services.TextMetrics.getTextPositionAbove}
-  /// Returns the TextPosition above the given offset into _plainText.
+  /// Returns the TextPosition above the given offset into the text.
   ///
   /// If the offset is already on the first line, the given offset will be
   /// returned.
@@ -65,7 +65,7 @@ abstract class TextMetrics {
   TextPosition getTextPositionAbove(TextPosition position);
 
   /// {@template flutter.services.TextMetrics.getTextPositionBelow}
-  /// Returns the TextPosition below the given offset into _plainText.
+  /// Returns the TextPosition below the given offset into the text.
   ///
   /// If the offset is already on the last line, the given offset will be
   /// returned.
