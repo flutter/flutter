@@ -699,7 +699,6 @@ targets:
 
   - name: Linux test_ownership
     recipe: infra/test_ownership
-    bringup: true
     timeout: 60
     properties:
       tags: >
