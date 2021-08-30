@@ -1,4 +1,4 @@
-Signature: 0d95d8ac96cc25dc0f1e7e97590f283e
+Signature: 97415479d63a1143bce35e5cfc3be9f5
 
 UNUSED LICENSES:
 
@@ -1878,10 +1878,10 @@ FILE: ../../../third_party/skia/src/gpu/gl/glfw/GrGLMakeNativeInterface_glfw.cpp
 FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLColorSpaceXformHelper.h
 FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLProgramDataManager.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrPathStencilSettings.h
-FILE: ../../../third_party/skia/src/gpu/ops/GrRegionOp.cpp
-FILE: ../../../third_party/skia/src/gpu/ops/GrRegionOp.h
-FILE: ../../../third_party/skia/src/gpu/ops/GrShadowRRectOp.cpp
-FILE: ../../../third_party/skia/src/gpu/ops/GrShadowRRectOp.h
+FILE: ../../../third_party/skia/src/gpu/ops/RegionOp.cpp
+FILE: ../../../third_party/skia/src/gpu/ops/RegionOp.h
+FILE: ../../../third_party/skia/src/gpu/ops/ShadowRRectOp.cpp
+FILE: ../../../third_party/skia/src/gpu/ops/ShadowRRectOp.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkDescriptorPool.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkDescriptorPool.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkDescriptorSet.cpp
@@ -3267,8 +3267,8 @@ FILE: ../../../third_party/skia/src/gpu/ops/GrFillRectOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrFillRectOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrQuadPerEdgeAA.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrQuadPerEdgeAA.h
-FILE: ../../../third_party/skia/src/gpu/ops/GrStrokeRectOp.cpp
-FILE: ../../../third_party/skia/src/gpu/ops/GrStrokeRectOp.h
+FILE: ../../../third_party/skia/src/gpu/ops/StrokeRectOp.cpp
+FILE: ../../../third_party/skia/src/gpu/ops/StrokeRectOp.h
 FILE: ../../../third_party/skia/src/gpu/text/GrAtlasManager.cpp
 FILE: ../../../third_party/skia/src/gpu/text/GrAtlasManager.h
 FILE: ../../../third_party/skia/src/gpu/text/GrSDFMaskFilter.cpp
