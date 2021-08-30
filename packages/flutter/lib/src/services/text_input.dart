@@ -645,6 +645,13 @@ class TextInputConfiguration {
 
   /// Whether to enable that the engine sends text input updates to the
   /// framework as [TextEditingDelta]'s or as one [TextEditingValue].
+  ///
+  /// When this is enabled platform text input updates will
+  /// come through [TextInputClient.updateEditingValueWithDeltas].
+  ///
+  /// When this is disabled platform text input updates will come through
+  /// [TextInputClient.updateEditingValue].
+  ///
   /// Defaults to false. Cannot be null.
   final bool enableDeltaModel;
 
@@ -745,9 +752,6 @@ enum TextEditingDeltaType {
   /// and potentially the composing region as well.
   /// {@endtemplate}
   equality,
-
-  /// If ever created this delta should be thrown away.
-  none
 }
 
 /// A mixin for manipulating a string of text.
@@ -755,7 +759,7 @@ mixin TextEditingDeltaUtils {
 
   /// Replaces a range of text in the original string with the text given in the
   /// replacement string.
-  String replace(String originalText, String replacementText, int start, int end) {
+  static String replace(String originalText, String replacementText, int start, int end) {
     final String textStart = originalText.substring(0, start);
     final String textEnd = originalText.substring(end, originalText.length);
     final String newText = textStart + replacementText + textEnd;
@@ -768,7 +772,7 @@ mixin TextEditingDeltaUtils {
 ///
 /// This class should not be used directly, and should be extended for different
 /// types of deltas.
-class TextEditingDelta with TextEditingDeltaUtils {
+abstract class TextEditingDelta with TextEditingDeltaUtils {
   /// Creates a delta for a given change to the editing state.
   ///
   /// {@template flutter.services.TextEditingDelta}
@@ -807,6 +811,8 @@ class TextEditingDelta with TextEditingDeltaUtils {
   /// The old text state before the delta has occured.
   final String oldText;
 
+  /// The value represents the text that is being inserted/deleted by this delta.
+  ///
   /// This value will slightly vary based on the [TextEditingDeltaType].
   ///
   /// For a [TextEditingDeltaType.insertion] this will be the character/s being
@@ -821,6 +827,10 @@ class TextEditingDelta with TextEditingDeltaUtils {
   /// For a [TextEditingDeltaType.equality] this will be an empty string.
   final String deltaText;
 
+  /// This value can either represent a range of text that the delta is changing
+  /// or if is a collapsed range then it represents the point where this delta
+  /// began.
+  ///
   /// This value will slightly vary based on the [TextEditingDeltaType].
   ///
   /// For a [TextEditingDeltaType.insertion] this will be a collapsed range.
@@ -841,7 +851,7 @@ class TextEditingDelta with TextEditingDeltaUtils {
   ///
   /// See [TextEditingDeltaType] for more information.
   /// {@endtemplate}
-  TextEditingDeltaType get deltaType => TextEditingDeltaType.none;
+  TextEditingDeltaType get deltaType;
 
   /// The range of text that is currently selected after the delta has been
   /// applied.
@@ -855,9 +865,7 @@ class TextEditingDelta with TextEditingDeltaUtils {
   /// This method will take the given [TextEditingValue] and return a new
   /// [TextEditingValue] with that instance of [TextEditingDelta] applied to it.
   /// {@endtemplate}
-  TextEditingValue apply(TextEditingValue value) {
-    return apply(value);
-  }
+  TextEditingValue apply(TextEditingValue value);
 }
 
 /// {@macro flutter.services.TextEditingDeltaInsertion}
