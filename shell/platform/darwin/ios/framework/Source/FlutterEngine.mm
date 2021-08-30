@@ -956,27 +956,8 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 #pragma mark - Locale updates
 
 - (void)onLocaleUpdated:(NSNotification*)notification {
-  // [NSLocale currentLocale] provides an iOS resolved locale if the
-  // supported locales are exposed to the iOS embedder. Here, we get
-  // currentLocale and pass it to dart:ui
+  // Get and pass the user's preferred locale list to dart:ui.
   NSMutableArray<NSString*>* localeData = [[[NSMutableArray alloc] init] autorelease];
-  NSLocale* platformResolvedLocale = [NSLocale currentLocale];
-  NSString* languageCode = [platformResolvedLocale objectForKey:NSLocaleLanguageCode];
-  NSString* countryCode = [platformResolvedLocale objectForKey:NSLocaleCountryCode];
-  NSString* scriptCode = [platformResolvedLocale objectForKey:NSLocaleScriptCode];
-  NSString* variantCode = [platformResolvedLocale objectForKey:NSLocaleVariantCode];
-  if (languageCode) {
-    [localeData addObject:languageCode];
-    [localeData addObject:(countryCode ? countryCode : @"")];
-    [localeData addObject:(scriptCode ? scriptCode : @"")];
-    [localeData addObject:(variantCode ? variantCode : @"")];
-  }
-  if (localeData.count != 0) {
-    [self.localizationChannel invokeMethod:@"setPlatformResolvedLocale" arguments:localeData];
-  }
-
-  // Get and pass the user's preferred locale list to dart:ui
-  localeData = [[[NSMutableArray alloc] init] autorelease];
   NSArray<NSString*>* preferredLocales = [NSLocale preferredLanguages];
   for (NSString* localeID in preferredLocales) {
     NSLocale* locale = [[[NSLocale alloc] initWithLocaleIdentifier:localeID] autorelease];
