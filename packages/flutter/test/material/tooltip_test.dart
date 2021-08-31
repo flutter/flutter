@@ -1497,7 +1497,7 @@ void main() {
     await testGestureLongPress(tester, tooltip);
     expect(find.text(tooltipText), findsNothing);
   });
-  
+
   testWidgets('Tooltip should not be shown with empty message (with child)', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -1509,7 +1509,7 @@ void main() {
     );
     expect(find.text(tooltipText), findsOneWidget);
   });
-  
+
   testWidgets('Tooltip should not be shown with empty message (without child)', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
