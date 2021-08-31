@@ -1,5 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'com.facebook.testing.screenshot'
+apply plugin: 'kotlin-android'
 
 def leakcanary_version = '2.7'
 
@@ -59,7 +60,6 @@ dependencies {
     if (project.hasProperty('flutter_jar')) {
         implementation files(project.property('flutter_jar'))
     }
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.4.21' // Override what leakcanary wants.
     implementation 'com.facebook.testing.screenshot:layout-hierarchy-common:0.12.0'
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
@@ -82,5 +82,18 @@ tasks.register('generateLockfiles') {
             executable gradle
             args ":${subproject.name}:dependencies", "--write-locks"
         }
+    }
+}
+
+// Override the kotlin language/api version to avoid warnings from
+// usages in leakcanaary.
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+
+    kotlinOptions {
+        jvmTarget = '1.8'
+        apiVersion = '1.4'
+        languageVersion = '1.4'
     }
 }
