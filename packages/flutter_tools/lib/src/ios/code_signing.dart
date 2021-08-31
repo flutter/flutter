@@ -187,7 +187,7 @@ Future<Map<String, String>?> getCodeSigningIdentityDevelopmentTeam({
   final String opensslOutput = await utf8.decodeStream(opensslProcess.stdout);
   // Fire and forget discard of the stderr stream so we don't hold onto resources.
   // Don't care about the result.
-  unawaited(opensslProcess.stderr.drain<String>());
+  unawaited(opensslProcess.stderr.drain<String?>());
 
   if (await opensslProcess.exitCode != 0) {
     return null;

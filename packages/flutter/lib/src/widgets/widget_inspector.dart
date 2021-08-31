@@ -2937,7 +2937,7 @@ Iterable<DiagnosticsNode> debugTransformDebugCreator(Iterable<DiagnosticsNode> p
     if (!foundStackTrace && node is DiagnosticsStackTrace)
       foundStackTrace = true;
     if (_isDebugCreator(node)) {
-      yield* _parseDiagnosticsNode(node, errorSummary)!;
+      yield* _parseDiagnosticsNode(node, errorSummary);
     } else {
       if (foundStackTrace) {
         pending.add(node);
@@ -2952,15 +2952,27 @@ Iterable<DiagnosticsNode> debugTransformDebugCreator(Iterable<DiagnosticsNode> p
 /// Transform the input [DiagnosticsNode].
 ///
 /// Return null if input [DiagnosticsNode] is not applicable.
-Iterable<DiagnosticsNode>? _parseDiagnosticsNode(
+Iterable<DiagnosticsNode> _parseDiagnosticsNode(
   DiagnosticsNode node,
   ErrorSummary? errorSummary,
-) {
-  if (!_isDebugCreator(node))
-    return null;
-  final DebugCreator debugCreator = node.value! as DebugCreator;
-  final Element element = debugCreator.element;
-  return _describeRelevantUserCode(element, errorSummary);
+) sync* {
+  assert(_isDebugCreator(node));
+  try {
+    final DebugCreator debugCreator = node.value! as DebugCreator;
+    final Element element = debugCreator.element;
+    yield* _describeRelevantUserCode(element, errorSummary);
+  } catch (error, stack) {
+    scheduleMicrotask(() {
+      FlutterError.reportError(FlutterErrorDetails(
+        exception: error,
+        stack: stack,
+        library: 'widget inspector',
+        informationCollector: () sync* {
+          yield DiagnosticsNode.message('This exception was caught while trying to describe the user-relevant code of another error.');
+        }
+      ));
+    });
+  }
 }
 
 Iterable<DiagnosticsNode> _describeRelevantUserCode(

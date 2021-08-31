@@ -46,7 +46,7 @@ void main() {
 
    testWithoutContext('DevtoolsLauncher does not launch devtools if unable to reach pub.dev and there is no activated package', () async {
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
-      pubExecutable: 'pub',
+      dartExecutable: 'dart',
       fileSystem: fakefs,
       logger: logger,
       platform: platform,
@@ -61,6 +61,7 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
+            'dart',
             'pub',
             'global',
             'list',
@@ -77,7 +78,7 @@ void main() {
   testWithoutContext('DevtoolsLauncher launches devtools if unable to reach pub.dev but there is an activated package', () async {
     final Completer<void> completer = Completer<void>();
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
-      pubExecutable: 'pub',
+      dartExecutable: 'dart',
       fileSystem: fakefs,
       logger: logger,
       platform: platform,
@@ -92,6 +93,7 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
+            'dart',
             'pub',
             'global',
             'list',
@@ -100,6 +102,7 @@ void main() {
         ),
         FakeCommand(
           command: const <String>[
+            'dart',
             'pub',
             'global',
             'run',
@@ -119,7 +122,7 @@ void main() {
 
   testWithoutContext('DevtoolsLauncher pings PUB_HOSTED_URL instead of pub.dev for online check', () async {
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
-      pubExecutable: 'pub',
+      dartExecutable: 'dart',
       fileSystem: fakefs,
       logger: logger,
       platform: FakePlatform(environment: <String, String>{
@@ -136,6 +139,7 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
+            'dart',
             'pub',
             'global',
             'list',
@@ -151,7 +155,7 @@ void main() {
 
   testWithoutContext('DevtoolsLauncher handles an invalid PUB_HOSTED_URL', () async {
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
-      pubExecutable: 'pub',
+      dartExecutable: 'dart',
       fileSystem: fakefs,
       logger: logger,
       platform: FakePlatform(environment: <String, String>{
@@ -162,6 +166,7 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
+            'dart',
             'pub',
             'global',
             'list',
@@ -179,7 +184,7 @@ void main() {
   testWithoutContext('DevtoolsLauncher launches DevTools through pub and saves the URI', () async {
     final Completer<void> completer = Completer<void>();
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
-      pubExecutable: 'pub',
+      dartExecutable: 'dart',
       fileSystem: fakefs,
       logger: logger,
       platform: platform,
@@ -188,6 +193,7 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
+            'dart',
             'pub',
             'global',
             'list',
@@ -196,6 +202,7 @@ void main() {
         ),
         const FakeCommand(
           command: <String>[
+            'dart',
             'pub',
             'global',
             'activate',
@@ -206,6 +213,7 @@ void main() {
         ),
         FakeCommand(
           command: const <String>[
+            'dart',
             'pub',
             'global',
             'run',
@@ -226,7 +234,7 @@ void main() {
   testWithoutContext('DevtoolsLauncher launches DevTools in browser', () async {
     final Completer<void> completer = Completer<void>();
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
-      pubExecutable: 'pub',
+      dartExecutable: 'dart',
       fileSystem: fakefs,
       logger: logger,
       platform: platform,
@@ -235,6 +243,7 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
+            'dart',
             'pub',
             'global',
             'list',
@@ -243,6 +252,7 @@ void main() {
         ),
         const FakeCommand(
           command: <String>[
+            'dart',
             'pub',
             'global',
             'activate',
@@ -253,6 +263,7 @@ void main() {
         ),
         const FakeCommand(
           command: <String>[
+            'dart',
             'pub',
             'global',
             'list',
@@ -261,6 +272,7 @@ void main() {
         ),
         FakeCommand(
           command: const <String>[
+            'dart',
             'pub',
             'global',
             'run',
@@ -281,7 +293,7 @@ void main() {
   testWithoutContext('DevtoolsLauncher does not launch a new DevTools instance if one is already active', () async {
     final Completer<void> completer = Completer<void>();
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
-      pubExecutable: 'pub',
+      dartExecutable: 'dart',
       fileSystem: fakefs,
       logger: logger,
       platform: platform,
@@ -290,6 +302,7 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
+            'dart',
             'pub',
             'global',
             'list',
@@ -298,6 +311,7 @@ void main() {
         ),
         const FakeCommand(
           command: <String>[
+            'dart',
             'pub',
             'global',
             'activate',
@@ -308,6 +322,7 @@ void main() {
         ),
         FakeCommand(
           command: const <String>[
+            'dart',
             'pub',
             'global',
             'run',
@@ -333,7 +348,7 @@ void main() {
   testWithoutContext('DevtoolsLauncher does not activate DevTools if it was recently activated', () async {
     persistentToolState.lastDevToolsActivation = DateTime.now();
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
-      pubExecutable: 'pub',
+      dartExecutable: 'dart',
       fileSystem: fakefs,
       logger: logger,
       platform: platform,
@@ -342,6 +357,7 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
+            'dart',
             'pub',
             'global',
             'list',
@@ -350,6 +366,7 @@ void main() {
         ),
         const FakeCommand(
           command: <String>[
+            'dart',
             'pub',
             'global',
             'run',
@@ -369,6 +386,7 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>[
+          'dart',
           'pub',
           'global',
           'list',
@@ -377,6 +395,7 @@ void main() {
       ),
       const FakeCommand(
         command: <String>[
+          'dart',
           'pub',
           'global',
           'run',
@@ -389,7 +408,7 @@ void main() {
       ),
     ]);
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
-      pubExecutable: 'pub',
+      dartExecutable: 'dart',
       fileSystem: fakefs,
       logger: logger,
       platform: platform,
@@ -406,7 +425,7 @@ void main() {
 
   testWithoutContext('DevtoolsLauncher prints error if exception is thrown during activate', () async {
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
-      pubExecutable: 'pub',
+      dartExecutable: 'dart',
       fileSystem: fakefs,
       logger: logger,
       platform: platform,
@@ -415,6 +434,7 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
+            'dart',
             'pub',
             'global',
             'list',
@@ -423,6 +443,7 @@ void main() {
         ),
         const FakeCommand(
           command: <String>[
+            'dart',
             'pub',
             'global',
             'activate',
@@ -434,6 +455,7 @@ void main() {
         ),
         const FakeCommand(
           command: <String>[
+            'dart',
             'pub',
             'global',
             'run',
@@ -453,7 +475,7 @@ void main() {
 
   testWithoutContext('DevtoolsLauncher prints error if exception is thrown during launch', () async {
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
-      pubExecutable: 'pub',
+      dartExecutable: 'dart',
       fileSystem: fakefs,
       logger: logger,
       platform: platform,
@@ -462,6 +484,7 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
+            'dart',
             'pub',
             'global',
             'list',
@@ -470,6 +493,7 @@ void main() {
         ),
         const FakeCommand(
           command: <String>[
+            'dart',
             'pub',
             'global',
             'activate',
@@ -480,6 +504,7 @@ void main() {
         ),
         const FakeCommand(
           command: <String>[
+            'dart',
             'pub',
             'global',
             'run',
@@ -499,7 +524,7 @@ void main() {
 
   testWithoutContext('DevtoolsLauncher prints trace if connecting to pub.dev throws', () async {
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
-      pubExecutable: 'pub',
+      dartExecutable: 'dart',
       fileSystem: fakefs,
       logger: logger,
       platform: platform,
@@ -514,6 +539,7 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
+            'dart',
             'pub',
             'global',
             'list',
@@ -530,7 +556,7 @@ void main() {
 
   testWithoutContext('DevtoolsLauncher prints trace if connecting to pub.dev returns non-OK status code', () async {
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
-      pubExecutable: 'pub',
+      dartExecutable: 'dart',
       fileSystem: fakefs,
       logger: logger,
       platform: platform,
@@ -547,6 +573,7 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
+            'dart',
             'pub',
             'global',
             'list',

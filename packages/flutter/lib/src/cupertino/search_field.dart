@@ -97,7 +97,7 @@ class CupertinoSearchTextField extends StatefulWidget {
   // TODO(DanielEdrisian): Localize the 'Search' placeholder.
   ///
   /// The [style] and [placeholderStyle] properties allow changing the style of
-  /// the text and placeholder of the textfield. [placeholderStyle] defaults
+  /// the text and placeholder of the text field. [placeholderStyle] defaults
   /// to the gray [CupertinoColors.secondaryLabel] iOS color.
   ///
   /// To set the text field's background color and border radius, pass a
@@ -199,7 +199,7 @@ class CupertinoSearchTextField extends StatefulWidget {
   /// Defaults to 'Search' localized in each supported language.
   final String? placeholder;
 
-  /// Sets the style of the placeholder of the textfield.
+  /// Sets the style of the placeholder of the text field.
   ///
   /// Defaults to the gray [CupertinoColors.secondaryLabel] iOS color.
   final TextStyle? placeholderStyle;
