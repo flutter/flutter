@@ -8,6 +8,11 @@ import 'dart:core' hide print;
 import 'dart:io' hide exit;
 import 'dart:typed_data';
 
+import 'package:analyzer/dart/analysis/features.dart';
+import 'package:analyzer/dart/analysis/results.dart';
+import 'package:analyzer/dart/analysis/utilities.dart';
+import 'package:analyzer/dart/ast/ast.dart';
+import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
@@ -18,6 +23,7 @@ import 'utils.dart';
 
 final String flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
 final String flutter = path.join(flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
+final String flutterPackages = path.join(flutterRoot, 'packages');
 final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'dart.exe' : 'dart');
 final String pub = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'pub.bat' : 'pub');
 final String pubCache = path.join(flutterRoot, '.pub-cache');
@@ -59,6 +65,12 @@ Future<void> run(List<String> arguments) async {
 
   print('$clock Deprecations...');
   await verifyDeprecations(flutterRoot);
+
+  print('$clock Goldens...');
+  await verifyGoldenTags(flutterPackages);
+
+  print('$clock Skip test comments...');
+  await verifySkipTestComments(flutterRoot);
 
   print('$clock Licenses...');
   await verifyNoMissingLicense(flutterRoot);
@@ -137,6 +149,72 @@ Future<void> run(List<String> arguments) async {
 
 
 // TESTS
+
+final RegExp _findGoldenTestPattern = RegExp(r'matchesGoldenFile\(');
+final RegExp _findGoldenDefinitionPattern = RegExp(r'matchesGoldenFile\(Object');
+final RegExp _leadingComment = RegExp(r'\/\/');
+final RegExp _goldenTagPattern1 = RegExp(r'@Tags\(');
+final RegExp _goldenTagPattern2 = RegExp(r"'reduced-test-set'");
+
+/// Only golden file tests in the flutter package are subject to reduced testing,
+/// for example, invocations in flutter_test to validate comparator
+/// functionality do not require tagging.
+const String _ignoreGoldenTag = '// flutter_ignore: golden_tag (see analyze.dart)';
+const String _ignoreGoldenTagForFile = '// flutter_ignore_for_file: golden_tag (see analyze.dart)';
+
+Future<void> verifyGoldenTags(String workingDirectory, { int minimumMatches = 2000 }) async {
+  final List<String> errors = <String>[];
+  await for (final File file in _allFiles(workingDirectory, 'dart', minimumMatches: minimumMatches)) {
+    bool needsTag = false;
+    bool hasTagNotation = false;
+    bool hasReducedTag = false;
+    bool ignoreForFile = false;
+    final List<String> lines = file.readAsLinesSync();
+    for (final String line in lines) {
+      if (line.contains(_goldenTagPattern1)) {
+        hasTagNotation = true;
+      }
+      if (line.contains(_goldenTagPattern2)) {
+        hasReducedTag = true;
+      }
+      if (line.contains(_findGoldenTestPattern)
+          && !line.contains(_findGoldenDefinitionPattern)
+          && !line.contains(_leadingComment)
+          && !line.contains(_ignoreGoldenTag)) {
+        needsTag = true;
+      }
+      if (line.contains(_ignoreGoldenTagForFile)) {
+        ignoreForFile = true;
+      }
+      // If the file is being ignored or a reduced test tag is already accounted
+      // for, skip parsing the rest of the lines for golden file tests.
+      if (ignoreForFile || (hasTagNotation && hasReducedTag)) {
+        break;
+      }
+    }
+    // If a reduced test tag is already accounted for, move on to the next file.
+    if (ignoreForFile || (hasTagNotation && hasReducedTag)) {
+      continue;
+    }
+    // If there are golden file tests, ensure they are tagged for all reduced
+    // test environments.
+    if (needsTag) {
+      if (!hasTagNotation) {
+        errors.add('${file.path}: Files containing golden tests must be tagged using '
+            '`@Tags(...)` at the top of the file before import statements.');
+      } else if (!hasReducedTag) {
+        errors.add('${file.path}: Files containing golden tests must be tagged with '
+            "'reduced-test-set'.");
+      }
+    }
+  }
+  if (errors.isNotEmpty) {
+    exitWithError(<String>[
+      ...errors,
+      '${bold}See: https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter$reset',
+    ]);
+  }
+}
 
 final RegExp _findDeprecationPattern = RegExp(r'@[Dd]eprecated');
 final RegExp _deprecationPattern1 = RegExp(r'^( *)@Deprecated\($'); // flutter_ignore: deprecation_syntax (see analyze.dart)
@@ -276,6 +354,79 @@ Future<void> _verifyNoMissingLicenseForExtension(String workingDirectory, String
       'The expected license header is:',
       license,
       if (trailingBlank) '...followed by a blank line.',
+    ]);
+  }
+}
+
+class _TestSkip {
+  _TestSkip(this.line, this.content);
+
+  final int line;
+  final String content;
+}
+
+Iterable<_TestSkip> _getTestSkips(File file) {
+  final ParseStringResult parseResult = parseFile(
+    featureSet: FeatureSet.latestLanguageVersion(),
+    path: file.absolute.path,
+  );
+  final _TestSkipLinesVisitor<CompilationUnit> visitor = _TestSkipLinesVisitor<CompilationUnit>(parseResult);
+  visitor.visitCompilationUnit(parseResult.unit);
+  return visitor.skips;
+}
+
+class _TestSkipLinesVisitor<T> extends RecursiveAstVisitor<T> {
+  _TestSkipLinesVisitor(this.parseResult) : skips = <_TestSkip>{};
+
+  final ParseStringResult parseResult;
+  final Set<_TestSkip> skips;
+
+  static bool isTestMethod(String name) {
+    return name.startsWith('test') || name == 'group' || name == 'expect';
+  }
+
+  @override
+  T? visitMethodInvocation(MethodInvocation node) {
+    if (isTestMethod(node.methodName.toString())) {
+      for (final Expression argument in node.argumentList.arguments) {
+        if (argument is NamedExpression && argument.name.label.name == 'skip') {
+          final int lineNumber = parseResult.lineInfo.getLocation(argument.beginToken.charOffset).lineNumber;
+          final String content = parseResult.content.substring(parseResult.lineInfo.getOffsetOfLine(lineNumber - 1),
+                                                               parseResult.lineInfo.getOffsetOfLine(lineNumber) - 1);
+          skips.add(_TestSkip(lineNumber, content));
+        }
+      }
+    }
+    return super.visitMethodInvocation(node);
+  }
+}
+
+final RegExp _skipTestCommentPattern = RegExp(r'//(.*)$');
+const Pattern _skipTestIntentionalPattern = '[intended]';
+final Pattern _skipTestTrackingBugPattern = RegExp(r'https+?://github.com/.*/issues/[0-9]+');
+
+Future<void> verifySkipTestComments(String workingDirectory) async {
+  final List<String> errors = <String>[];
+  final Stream<File> testFiles =_allFiles(workingDirectory, 'dart', minimumMatches: 1500)
+    .where((File f) => f.path.endsWith('_test.dart'));
+
+  await for (final File file in testFiles) {
+    for (final _TestSkip skip in _getTestSkips(file)) {
+      final Match? match = _skipTestCommentPattern.firstMatch(skip.content);
+      final String? skipComment = match?.group(1);
+      if (skipComment == null ||
+          !(skipComment.contains(_skipTestIntentionalPattern) ||
+            skipComment.contains(_skipTestTrackingBugPattern))) {
+        errors.add('${file.path}:${skip.line}: skip test without a justification comment.');
+      }
+    }
+  }
+
+  // Fail if any errors
+  if (errors.isNotEmpty) {
+    exitWithError(<String>[
+      ...errors,
+      '\n${bold}See: https://github.com/flutter/flutter/wiki/Tree-hygiene#skipped-tests$reset',
     ]);
   }
 }

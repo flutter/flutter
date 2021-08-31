@@ -90,42 +90,7 @@ const int _kObscureShowLatestCharCursorTicks = 3;
 /// change listener forces the entered text to be lower case and keeps the
 /// cursor at the end of the input.
 ///
-/// ```dart
-/// final TextEditingController _controller = TextEditingController();
-///
-/// @override
-/// void initState() {
-///   super.initState();
-///   _controller.addListener(() {
-///     final String text = _controller.text.toLowerCase();
-///     _controller.value = _controller.value.copyWith(
-///       text: text,
-///       selection: TextSelection(baseOffset: text.length, extentOffset: text.length),
-///       composing: TextRange.empty,
-///     );
-///   });
-/// }
-///
-/// @override
-/// void dispose() {
-///   _controller.dispose();
-///   super.dispose();
-/// }
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return Scaffold(
-///     body: Container(
-///      alignment: Alignment.center,
-///       padding: const EdgeInsets.all(6),
-///       child: TextFormField(
-///         controller: _controller,
-///         decoration: const InputDecoration(border: OutlineInputBorder()),
-///       ),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/editable_text/text_editing_controller.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -955,55 +920,10 @@ class EditableText extends StatefulWidget {
   /// [TextEditingController.addListener].
   ///
   /// {@tool dartpad --template=stateful_widget_material}
-  ///
   /// This example shows how onChanged could be used to check the TextField's
   /// current value each time the user inserts or deletes a character.
   ///
-  /// ```dart
-  /// final TextEditingController _controller = TextEditingController();
-  ///
-  /// @override
-  /// void dispose() {
-  ///   _controller.dispose();
-  ///   super.dispose();
-  /// }
-  ///
-  /// @override
-  /// Widget build(BuildContext context) {
-  ///   return Scaffold(
-  ///     body: Column(
-  ///       mainAxisAlignment: MainAxisAlignment.center,
-  ///       children: <Widget>[
-  ///         const Text('What number comes next in the sequence?'),
-  ///         const Text('1, 1, 2, 3, 5, 8...?'),
-  ///         TextField(
-  ///           controller: _controller,
-  ///           onChanged: (String value) async {
-  ///             if (value != '13') {
-  ///               return;
-  ///             }
-  ///             await showDialog<void>(
-  ///               context: context,
-  ///               builder: (BuildContext context) {
-  ///                 return AlertDialog(
-  ///                   title: const Text('That is correct!'),
-  ///                   content: const Text ('13 is the right answer.'),
-  ///                   actions: <Widget>[
-  ///                     TextButton(
-  ///                       onPressed: () { Navigator.pop(context); },
-  ///                       child: const Text('OK'),
-  ///                     ),
-  ///                   ],
-  ///                 );
-  ///               },
-  ///             );
-  ///           },
-  ///         ),
-  ///       ],
-  ///     ),
-  ///   );
-  /// }
-  /// ```
+  /// ** See code in examples/api/lib/widgets/editable_text/editable_text.on_changed.0.dart **
   /// {@end-tool}
   /// {@endtemplate}
   ///
@@ -1191,6 +1111,8 @@ class EditableText extends StatefulWidget {
   /// When this is false, the text selection cannot be adjusted by
   /// the user, text cannot be copied, and the user cannot paste into
   /// the text field from the clipboard.
+  ///
+  /// Defaults to true.
   /// {@endtemplate}
   final bool enableInteractiveSelection;
 
@@ -1533,9 +1455,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   TextInputConnection? _textInputConnection;
   TextSelectionOverlay? _selectionOverlay;
 
-  ScrollController? _scrollController;
+  ScrollController? _internalScrollController;
+  ScrollController get _scrollController => widget.scrollController ?? (_internalScrollController ??= ScrollController());
 
-  late AnimationController _cursorBlinkOpacityController;
+  late final AnimationController _cursorBlinkOpacityController = AnimationController(
+    vsync: this,
+    duration: _fadeDuration,
+  )..addListener(_onCursorColorTick);
 
   final LayerLink _toolbarLayerLink = LayerLink();
   final LayerLink _startHandleLayerLink = LayerLink();
@@ -1574,7 +1500,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   // cursor position after the user has finished placing it.
   static const Duration _floatingCursorResetTime = Duration(milliseconds: 125);
 
-  late AnimationController _floatingCursorResetController;
+  late final AnimationController _floatingCursorResetController = AnimationController(
+    vsync: this,
+  )..addListener(_onFloatingCursorResetTick);
 
   @override
   bool get wantKeepAlive => widget.focusNode.hasFocus;
@@ -1608,12 +1536,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     widget.controller.addListener(_didChangeTextEditingValue);
     _focusAttachment = widget.focusNode.attach(context);
     widget.focusNode.addListener(_handleFocusChanged);
-    _scrollController = widget.scrollController ?? ScrollController();
-    _scrollController!.addListener(() { _selectionOverlay?.updateForScroll(); });
-    _cursorBlinkOpacityController = AnimationController(vsync: this, duration: _fadeDuration);
-    _cursorBlinkOpacityController.addListener(_onCursorColorTick);
-    _floatingCursorResetController = AnimationController(vsync: this);
-    _floatingCursorResetController.addListener(_onFloatingCursorResetTick);
+    _scrollController.addListener(_updateSelectionOverlayForScroll);
     _cursorVisibilityNotifier.value = widget.showCursor;
   }
 
@@ -1632,7 +1555,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (!_didAutoFocus && widget.autofocus) {
       _didAutoFocus = true;
       SchedulerBinding.instance!.addPostFrameCallback((_) {
-        if (mounted) {
+        if (mounted && renderEditable.hasSize) {
           FocusScope.of(context).autofocus(widget.focusNode);
         }
       });
@@ -1659,6 +1582,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _focusAttachment = widget.focusNode.attach(context);
       widget.focusNode.addListener(_handleFocusChanged);
       updateKeepAlive();
+    }
+
+    if (widget.scrollController != oldWidget.scrollController) {
+      (oldWidget.scrollController ?? _internalScrollController)?.removeListener(_updateSelectionOverlayForScroll);
+      _scrollController.addListener(_updateSelectionOverlayForScroll);
     }
 
     if (!_shouldCreateInputConnection) {
@@ -1694,14 +1622,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void dispose() {
+    _internalScrollController?.dispose();
     _currentAutofillScope?.unregister(autofillId);
     widget.controller.removeListener(_didChangeTextEditingValue);
-    _cursorBlinkOpacityController.removeListener(_onCursorColorTick);
-    _floatingCursorResetController.removeListener(_onFloatingCursorResetTick);
+    _floatingCursorResetController.dispose();
     _closeInputConnectionIfNeeded();
     assert(!_hasInputConnection);
-    _stopCursorTimer();
-    assert(_cursorTimer == null);
+    _cursorTimer?.cancel();
+    _cursorTimer = null;
+    _cursorBlinkOpacityController.dispose();
     _selectionOverlay?.dispose();
     _selectionOverlay = null;
     _focusAttachment!.detach();
@@ -2007,8 +1936,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   // `renderEditable.preferredLineHeight`, before the target scroll offset is
   // calculated.
   RevealedOffset _getOffsetToRevealCaret(Rect rect) {
-    if (!_scrollController!.position.allowImplicitScrolling)
-      return RevealedOffset(offset: _scrollController!.offset, rect: rect);
+    if (!_scrollController.position.allowImplicitScrolling)
+      return RevealedOffset(offset: _scrollController.offset, rect: rect);
 
     final Size editableSize = renderEditable.size;
     final double additionalOffset;
@@ -2040,13 +1969,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     // No overscrolling when encountering tall fonts/scripts that extend past
     // the ascent.
-    final double targetOffset = (additionalOffset + _scrollController!.offset)
+    final double targetOffset = (additionalOffset + _scrollController.offset)
       .clamp(
-        _scrollController!.position.minScrollExtent,
-        _scrollController!.position.maxScrollExtent,
+        _scrollController.position.minScrollExtent,
+        _scrollController.position.maxScrollExtent,
       );
 
-    final double offsetDelta = _scrollController!.offset - targetOffset;
+    final double offsetDelta = _scrollController.offset - targetOffset;
     return RevealedOffset(rect: rect.shift(unitOffset * offsetDelta), offset: targetOffset);
   }
 
@@ -2150,6 +2079,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
+  void _updateSelectionOverlayForScroll() {
+    _selectionOverlay?.updateForScroll();
+  }
+
   @pragma('vm:notify-debugger-on-exception')
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
     // We return early if the selection is not valid. This can happen when the
@@ -2227,7 +2160,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _showCaretOnScreenScheduled = true;
     SchedulerBinding.instance!.addPostFrameCallback((Duration _) {
       _showCaretOnScreenScheduled = false;
-      if (_currentCaretRect == null || !_scrollController!.hasClients) {
+      if (_currentCaretRect == null || !_scrollController.hasClients) {
         return;
       }
 
@@ -2260,7 +2193,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
       final RevealedOffset targetOffset = _getOffsetToRevealCaret(_currentCaretRect!);
 
-      _scrollController!.animateTo(
+      _scrollController.animateTo(
         targetOffset.offset,
         duration: _caretAnimationDuration,
         curve: _caretAnimationCurve,
@@ -2454,9 +2387,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
     } else {
       WidgetsBinding.instance!.removeObserver(this);
-      // Clear the selection and composition state if this widget lost focus.
-      _value = TextEditingValue(text: _value.text);
-      _currentPromptRectRange = null;
+      setState(() { _currentPromptRectRange = null; });
     }
     updateKeepAlive();
   }
@@ -2543,7 +2474,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final Rect localRect = renderEditable.getLocalRectForCaret(position);
     final RevealedOffset targetOffset = _getOffsetToRevealCaret(localRect);
 
-    _scrollController!.jumpTo(targetOffset.offset);
+    _scrollController.jumpTo(targetOffset.offset);
     renderEditable.showOnScreen(rect: targetOffset.rect);
   }
 
@@ -2754,7 +2685,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     return widget.controller.buildTextSpan(
       context: context,
       style: widget.style,
-      withComposing: !widget.readOnly,
+      withComposing: !widget.readOnly && _hasFocus,
     );
   }
 }

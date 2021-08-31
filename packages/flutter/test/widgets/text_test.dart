@@ -164,7 +164,7 @@ void main() {
       ),
     );
     expect(tester.takeException(), null);
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42086
+  });
 
   testWidgets('inline widgets hitTest works with ellipsis', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/68559
@@ -200,7 +200,7 @@ void main() {
     await tester.tap(find.byType(Text));
 
     expect(tester.takeException(), null);
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42086
+  });
 
   testWidgets('inline widgets works with textScaleFactor', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/59316
@@ -262,7 +262,7 @@ void main() {
     renderText = tester.renderObject(find.byKey(key));
     // The RichText in the widget span should wrap into three lines.
     expect(renderText.size.height, singleLineHeight * textScaleFactor * 3);
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42086
+  });
 
   testWidgets('semanticsLabel can override text label', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -714,7 +714,7 @@ void main() {
       ),
     );
     semantics.dispose();
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42086
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/62945
 
   testWidgets('inline widgets semantic nodes scale', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -794,7 +794,7 @@ void main() {
       ),
     );
     semantics.dispose();
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42086
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/62945
 
   testWidgets('Overflow is clipping correctly - short text with overflow: clip', (WidgetTester tester) async {
     await _pumpTextWidget(
@@ -817,7 +817,7 @@ void main() {
       find.byType(Text),
       paints..clipRect(rect: const Rect.fromLTWH(0, 0, 50, 50)),
     );
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33523
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87878
 
   testWidgets('Overflow is clipping correctly - short text with overflow: ellipsis', (WidgetTester tester) async {
     await _pumpTextWidget(
@@ -1045,7 +1045,7 @@ void main() {
         ),
       ],
     )));
-  }, semanticsEnabled: true, skip: isBrowser); // Browser semantics have different sizes.
+  }, semanticsEnabled: true, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
 
   // Regression test for https://github.com/flutter/flutter/issues/69787
   testWidgets('WidgetSpans with no semantic information are elided from semantics - case 2', (WidgetTester tester) async {
@@ -1091,7 +1091,7 @@ void main() {
     ignoreRect: true,
     ignoreTransform: true,
     ));
-  }, semanticsEnabled: true, skip: isBrowser); // Browser does not support widget span.
+  }, semanticsEnabled: true, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
 
   // Regression test for https://github.com/flutter/flutter/issues/69787
   testWidgets('WidgetSpans with no semantic information are elided from semantics - case 3', (WidgetTester tester) async {
@@ -1149,7 +1149,7 @@ void main() {
     ignoreRect: true,
     ignoreTransform: true,
     ));
-  }, semanticsEnabled: true, skip: isBrowser); // Browser does not support widget span.
+  }, semanticsEnabled: true, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
 
   // Regression test for https://github.com/flutter/flutter/issues/69787
   testWidgets('WidgetSpans with no semantic information are elided from semantics - case 4', (WidgetTester tester) async {
@@ -1215,7 +1215,7 @@ void main() {
     ignoreRect: true,
     ignoreTransform: true,
     ));
-  }, semanticsEnabled: true, skip: isBrowser); // Browser does not support widget span
+  }, semanticsEnabled: true, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
 
   testWidgets('RenderParagraph intrinsic width', (WidgetTester tester) async {
     await tester.pumpWidget(

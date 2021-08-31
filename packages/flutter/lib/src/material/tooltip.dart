@@ -31,24 +31,15 @@ import 'tooltip_theme.dart';
 /// {@youtube 560 315 https://www.youtube.com/watch?v=EeEfD5fI-5Q}
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold_center}
-///
 /// This example show a basic [Tooltip] which has a [Text] as child.
 /// [message] contains your label to be shown by the tooltip when
 /// the child that Tooltip wraps is hovered over on web or desktop. On mobile,
 /// the tooltip is shown when the widget is long pressed.
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return const Tooltip(
-///     message: 'I am a Tooltip',
-///     child: Text('Hover over the text to show a tooltip.'),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/tooltip/tooltip.0.dart **
 /// {@end-tool}
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold_center}
-///
 /// This example covers most of the attributes available in Tooltip.
 /// `decoration` has been used to give a gradient and borderRadius to Tooltip.
 /// `height` has been used to set a specific height of the Tooltip.
@@ -61,26 +52,7 @@ import 'tooltip_theme.dart';
 /// `waitDuration` accepts a Duration for which a mouse pointer has to hover over the child
 /// widget before the tooltip is shown.
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return Tooltip(
-///     message: 'I am a Tooltip',
-///     child: const Text('Tap this text and hold down to show a tooltip.'),
-///     decoration: BoxDecoration(
-///       borderRadius: BorderRadius.circular(25),
-///       gradient: const LinearGradient(colors: <Color>[Colors.amber, Colors.red]),
-///     ),
-///     height: 50,
-///     padding: const EdgeInsets.all(8.0),
-///     preferBelow: false,
-///     textStyle: const TextStyle(
-///       fontSize: 24,
-///     ),
-///     showDuration: const Duration(seconds: 2),
-///     waitDuration: const Duration(seconds: 1),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/tooltip/tooltip.1.dart **
 /// {@end-tool}
 ///
 /// See also:

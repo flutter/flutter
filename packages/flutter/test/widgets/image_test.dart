@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:typed_data';
@@ -1731,7 +1735,7 @@ void main() {
       await _testRotatedImage(tester, true);
       await _testRotatedImage(tester, false);
     },
-    skip: kIsWeb, // https://github.com/flutter/flutter/issues/54292.
+    skip: kIsWeb, // https://github.com/flutter/flutter/issues/87933.
   );
 
   testWidgets(
@@ -1782,7 +1786,7 @@ void main() {
         matchesGoldenFile('transparent_image.png'),
       );
     },
-    skip: kIsWeb, // https://github.com/flutter/flutter/issues/54292.
+    skip: kIsWeb, // https://github.com/flutter/flutter/issues/87933.
   );
 
   testWidgets('Reports image size when painted', (WidgetTester tester) async {
@@ -1819,7 +1823,7 @@ void main() {
       const ImageSizeInfo(
         source: 'test.png',
         imageSize: Size(100, 100),
-        displaySize: Size(50, 50),
+        displaySize: Size(150, 150),
       ),
     );
 
@@ -1865,7 +1869,7 @@ void main() {
     // Image cache listener go away and Image stream listeners go away.
     // Image is now at zero.
     expect(image.debugGetOpenHandleStackTraces()!.length, 0);
-  }, skip: kIsWeb); // Web does not care about image handle/disposal.
+  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87442
 
   testWidgets('Keeps stream alive when ticker mode is disabled',  (WidgetTester tester) async {
     imageCache!.maximumSize = 0;

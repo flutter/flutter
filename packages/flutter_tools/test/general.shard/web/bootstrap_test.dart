@@ -102,4 +102,15 @@ test('generateBootstrapScript includes loading indicator', () {
 
     expect(result, contains('test_config.testExecutable'));
   });
+
+  test('generateTestEntrypoint embeds urls correctly', () {
+    final String result = generateTestEntrypoint(
+      relativeTestPath: 'relative_path.dart',
+      absolutePath: '/test/absolute_path.dart',
+      testConfigPath: null,
+      languageVersion: LanguageVersion(2, 8),
+    );
+
+    expect(result, contains("Uri.parse('file:///test/absolute_path.dart')"));
+  });
 }

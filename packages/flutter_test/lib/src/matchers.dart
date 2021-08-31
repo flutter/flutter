@@ -363,7 +363,8 @@ Matcher coversSameAreaAs(Path expectedPath, { required Rect areaToCompare, int s
 ///    verify that two different code paths create identical images.
 ///  * [flutter_test] for a discussion of test configurations, whereby callers
 ///    may swap out the backend for this matcher.
-AsyncMatcher matchesGoldenFile(Object key, {int? version}) {
+AsyncMatcher
+matchesGoldenFile(Object key, {int? version}) {
   if (key is Uri) {
     return MatchesGoldenFile(key, version);
   } else if (key is String) {
@@ -1842,7 +1843,6 @@ class _MatchesSemanticsData extends Matcher {
 
   @override
   bool matches(dynamic node, Map<dynamic, dynamic> matchState) {
-    // TODO(jonahwilliams): remove dynamic once we have removed getSemanticsData.
     if (node == null)
       return failWithDescription(matchState, 'No SemanticsData provided. '
         'Maybe you forgot to enable semantics?');

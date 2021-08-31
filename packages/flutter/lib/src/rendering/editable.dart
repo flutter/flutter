@@ -1747,18 +1747,26 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       return moveSelectionLeftByLine(cause);
     }
 
-    final int firstOffset = math.min(selection!.baseOffset, selection!.extentOffset);
-    final int startPoint = previousCharacter(firstOffset, _plainText, false);
-    final TextSelection selectedLine = _getLineAtOffset(TextPosition(offset: startPoint));
+    // If the lowest edge of the selection is at the start of a line, don't do
+    // anything.
+    // TODO(justinmc): Support selection with multiple TextAffinities.
+    // https://github.com/flutter/flutter/issues/88135
+    final TextSelection currentLine = _getLineAtOffset(TextPosition(
+      offset: selection!.start,
+      affinity: selection!.isCollapsed ? selection!.affinity : TextAffinity.downstream,
+    ));
+    if (currentLine.baseOffset == selection!.start) {
+      return;
+    }
 
     late final TextSelection nextSelection;
     if (selection!.extentOffset <= selection!.baseOffset) {
       nextSelection = selection!.copyWith(
-        extentOffset: selectedLine.baseOffset,
+        extentOffset: currentLine.baseOffset,
       );
     } else {
       nextSelection = selection!.copyWith(
-        baseOffset: selectedLine.baseOffset,
+        baseOffset: currentLine.baseOffset,
       );
     }
 
@@ -1867,18 +1875,30 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       return moveSelectionRightByLine(cause);
     }
 
-    final int lastOffset = math.max(selection!.baseOffset, selection!.extentOffset);
-    final int startPoint = nextCharacter(lastOffset, _plainText, false);
+    // If greatest edge is already at the end of a line, don't do anything.
+    // TODO(justinmc): Support selection with multiple TextAffinities.
+    // https://github.com/flutter/flutter/issues/88135
+    final TextSelection currentLine = _getLineAtOffset(TextPosition(
+      offset: selection!.end,
+      affinity: selection!.isCollapsed ? selection!.affinity : TextAffinity.upstream,
+    ));
+    if (currentLine.extentOffset == selection!.end) {
+      return;
+    }
+
+    final int startPoint = nextCharacter(selection!.end, _plainText, false);
     final TextSelection selectedLine = _getLineAtOffset(TextPosition(offset: startPoint));
 
     late final TextSelection nextSelection;
-    if (selection!.extentOffset >= selection!.baseOffset) {
+    if (selection!.baseOffset <= selection!.extentOffset) {
       nextSelection = selection!.copyWith(
         extentOffset: selectedLine.extentOffset,
+        affinity: TextAffinity.upstream,
       );
     } else {
       nextSelection = selection!.copyWith(
         baseOffset: selectedLine.extentOffset,
+        affinity: TextAffinity.upstream,
       );
     }
 
@@ -1950,10 +1970,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   void moveSelectionLeftByLine(SelectionChangedCause cause) {
     assert(selection != null);
 
-    // If the previous character is the edge of a line, don't do anything.
-    final int previousPoint = previousCharacter(selection!.extentOffset, _plainText, true);
-    final TextSelection line = _getLineAtOffset(TextPosition(offset: previousPoint));
-    if (line.extentOffset == previousPoint) {
+    // If already at the left edge of the line, do nothing.
+    final TextSelection currentLine = _getLineAtOffset(selection!.extent);
+    if (currentLine.baseOffset == selection!.extentOffset) {
       return;
     }
 
@@ -2037,9 +2056,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     assert(selection != null);
 
     // If already at the right edge of the line, do nothing.
-    final TextSelection currentLine = _getLineAtOffset(TextPosition(
-      offset: selection!.extentOffset,
-    ));
+    final TextSelection currentLine = _getLineAtOffset(selection!.extent);
     if (currentLine.extentOffset == selection!.extentOffset) {
       return;
     }
@@ -2049,7 +2066,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     // for the line bounds, since _getLineAtOffset finds the line
     // boundaries without including whitespace (like the newline).
     final int startPoint = nextCharacter(selection!.extentOffset, _plainText, false);
-    final TextSelection selectedLine = _getLineAtOffset(TextPosition(offset: startPoint));
+    final TextSelection selectedLine = _getLineAtOffset(TextPosition(
+      offset: startPoint,
+      affinity: TextAffinity.upstream,
+    ));
     final TextSelection nextSelection = TextSelection.collapsed(
       offset: selectedLine.extentOffset,
       affinity: TextAffinity.upstream,
@@ -2165,23 +2185,20 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   void selectAll(SelectionChangedCause cause) {
-    _setSelection(
-      selection!.copyWith(
-        baseOffset: 0,
-        extentOffset: textSelectionDelegate.textEditingValue.text.length,
-      ),
-      cause,
-    );
+    textSelectionDelegate.selectAll(cause);
   }
 
   /// Copy current [selection] to [Clipboard].
-  void copySelection() {
+  ///
+  /// {@macro flutter.rendering.RenderEditable.cause}
+  void copySelection(SelectionChangedCause cause) {
     final TextSelection selection = textSelectionDelegate.textEditingValue.selection;
-    final String text = textSelectionDelegate.textEditingValue.text;
     assert(selection != null);
-    if (!selection.isCollapsed) {
-      Clipboard.setData(ClipboardData(text: selection.textInside(text)));
+    if (selection.isCollapsed) {
+      return;
     }
+
+    textSelectionDelegate.copySelection(cause);
   }
 
   /// Cut current [selection] to Clipboard.
@@ -2192,18 +2209,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       return;
     }
     final TextSelection selection = textSelectionDelegate.textEditingValue.selection;
-    final String text = textSelectionDelegate.textEditingValue.text;
     assert(selection != null);
-    if (!selection.isCollapsed) {
-      Clipboard.setData(ClipboardData(text: selection.textInside(text)));
-      _setTextEditingValue(
-        TextEditingValue(
-          text: selection.textBefore(text) + selection.textAfter(text),
-          selection: TextSelection.collapsed(offset: math.min(selection.start, selection.end)),
-        ),
-        cause,
-      );
+    if (selection.isCollapsed) {
+      return;
     }
+
+    textSelectionDelegate.cutSelection(cause);
   }
 
   /// Paste text from [Clipboard].
@@ -2216,22 +2227,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       return;
     }
     final TextSelection selection = textSelectionDelegate.textEditingValue.selection;
-    final String text = textSelectionDelegate.textEditingValue.text;
     assert(selection != null);
-    // Snapshot the input before using `await`.
-    // See https://github.com/flutter/flutter/issues/11427
-    final ClipboardData? data = await Clipboard.getData(Clipboard.kTextPlain);
-    if (data != null && selection.isValid) {
-      _setTextEditingValue(
-          TextEditingValue(
-            text: selection.textBefore(text) + data.text! + selection.textAfter(text),
-            selection: TextSelection.collapsed(
-                offset: math.min(selection.start, selection.end) + data.text!.length,
-            ),
-          ),
-          cause,
-      );
+    if (!selection.isValid) {
+      return;
     }
+
+    textSelectionDelegate.pasteText(cause);
   }
 
   @override
@@ -2833,6 +2834,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
                children.elementAt(childIndex).isTagged(PlaceholderSpanIndexSemanticsTag(placeholderIndex))) {
           final SemanticsNode childNode = children.elementAt(childIndex);
           final TextParentData parentData = child!.parentData! as TextParentData;
+          assert(parentData.scale != null);
           childNode.rect = Rect.fromLTWH(
             childNode.rect.left,
             childNode.rect.top,
@@ -3002,7 +3004,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   //
   // Includes newline characters from ASCII and separators from the
   // [unicode separator category](https://www.compart.com/en/unicode/category/Zs)
-  // TODO(jonahwilliams): replace when we expose this ICU information.
+  // TODO(zanderso): replace when we expose this ICU information.
   bool _onlyWhitespace(TextRange range) {
     for (int i = range.start; i < range.end; i++) {
       final int codeUnit = text!.codeUnitAt(i)!;
@@ -3555,8 +3557,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).',
     );
     final TextRange line = _textPainter.getLineBoundary(position);
-    if (position.offset >= line.end)
-      return TextSelection.fromPosition(position);
     // If text is obscured, the entire string should be treated as one line.
     if (obscureText) {
       return TextSelection(baseOffset: 0, extentOffset: _plainText.length);
