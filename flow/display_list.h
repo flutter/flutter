@@ -457,7 +457,7 @@ class DisplayListBuilder final : public virtual Dispatcher, public SkRefCnt {
       SkRect::MakeLTRB(-1E9F, -1E9F, 1E9F, 1E9F);
 
   template <typename T, typename... Args>
-  void* Push(size_t extra, Args&&... args);
+  void* Push(size_t extra, int op_inc, Args&&... args);
 };
 
 }  // namespace flutter

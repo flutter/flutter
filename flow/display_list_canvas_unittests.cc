@@ -653,14 +653,15 @@ class CanvasCompareTester {
         cv_renderer, dl_renderer, "Hard ClipPath Diff, inset by 15.5");
   }
 
-  static SkRect getSkBounds(CvRenderer& cv_setup, CvRenderer& cv_render) {
+  static sk_sp<SkPicture> getSkPicture(CvRenderer& cv_setup,
+                                       CvRenderer& cv_render) {
     SkPictureRecorder recorder;
     SkRTreeFactory rtree_factory;
     SkCanvas* cv = recorder.beginRecording(TestBounds, &rtree_factory);
     SkPaint p;
     cv_setup(cv, p);
     cv_render(cv, p);
-    return recorder.finishRecordingAsPicture()->cullRect();
+    return recorder.finishRecordingAsPicture();
   }
 
   static void RenderWith(CvRenderer& cv_setup,
@@ -675,7 +676,8 @@ class CanvasCompareTester {
     SkPaint paint1;
     cv_setup(ref_surface->getCanvas(), paint1);
     cv_render(ref_surface->getCanvas(), paint1);
-    SkRect ref_bounds = getSkBounds(cv_setup, cv_render);
+    sk_sp<SkPicture> ref_picture = getSkPicture(cv_setup, cv_render);
+    SkRect ref_bounds = ref_picture->cullRect();
     SkPixmap ref_pixels;
     ASSERT_TRUE(ref_surface->peekPixels(&ref_pixels)) << info;
     ASSERT_EQ(ref_pixels.width(), TestWidth) << info;
@@ -707,11 +709,16 @@ class CanvasCompareTester {
         }
       }
 #endif  // DISPLAY_LIST_BOUNDS_ACCURACY_CHECKING
+
       // This sometimes triggers, but when it triggers and I examine
       // the ref_bounds, they are always unnecessarily large and
       // since the pixel OOB tests in the compare method do not
       // trigger, we will trust the DL bounds.
       // EXPECT_TRUE(dl_bounds.contains(ref_bounds)) << info;
+
+      EXPECT_EQ(display_list->op_count(), ref_picture->approximateOpCount())
+          << info;
+
       display_list->RenderTo(test_surface->getCanvas());
       compareToReference(test_surface.get(), &ref_pixels, info + " (DL render)",
                          &dl_bounds, bg);
@@ -1364,14 +1371,48 @@ TEST(DisplayListCanvas, DrawAtlasLinear) {
       });
 }
 
-TEST(DisplayListCanvas, DrawPicture) {
+sk_sp<SkPicture> makeTestPicture() {
   SkPictureRecorder recorder;
   SkCanvas* cv = recorder.beginRecording(RenderBounds);
   SkPaint p;
   p.setStyle(SkPaint::kFill_Style);
-  p.setColor(SK_ColorBLUE);
-  cv->drawOval(RenderBounds, p);
-  sk_sp<SkPicture> picture = recorder.finishRecordingAsPicture();
+  SkScalar x_coords[] = {
+      RenderLeft,
+      RenderCenterX,
+      RenderRight,
+  };
+  SkScalar y_coords[] = {
+      RenderTop,
+      RenderCenterY,
+      RenderBottom,
+  };
+  SkColor colors[][2] = {
+      {
+          SK_ColorRED,
+          SK_ColorBLUE,
+      },
+      {
+          SK_ColorGREEN,
+          SK_ColorYELLOW,
+      },
+  };
+  for (int j = 0; j < 2; j++) {
+    for (int i = 0; i < 2; i++) {
+      SkRect rect = {
+          x_coords[i],
+          y_coords[j],
+          x_coords[i + 1],
+          y_coords[j + 1],
+      };
+      p.setColor(colors[i][j]);
+      cv->drawOval(rect, p);
+    }
+  }
+  return recorder.finishRecordingAsPicture();
+}
+
+TEST(DisplayListCanvas, DrawPicture) {
+  sk_sp<SkPicture> picture = makeTestPicture();
   CanvasCompareTester::RenderNoAttributes(
       [=](SkCanvas* canvas, SkPaint& paint) {  //
         canvas->drawPicture(picture, nullptr, nullptr);
@@ -1382,13 +1423,7 @@ TEST(DisplayListCanvas, DrawPicture) {
 }
 
 TEST(DisplayListCanvas, DrawPictureWithMatrix) {
-  SkPictureRecorder recorder;
-  SkCanvas* cv = recorder.beginRecording(RenderBounds);
-  SkPaint p;
-  p.setStyle(SkPaint::kFill_Style);
-  p.setColor(SK_ColorBLUE);
-  cv->drawOval(RenderBounds, p);
-  sk_sp<SkPicture> picture = recorder.finishRecordingAsPicture();
+  sk_sp<SkPicture> picture = makeTestPicture();
   SkMatrix matrix = SkMatrix::Scale(0.95, 0.95);
   CanvasCompareTester::RenderNoAttributes(
       [=](SkCanvas* canvas, SkPaint& paint) {  //
@@ -1400,13 +1435,7 @@ TEST(DisplayListCanvas, DrawPictureWithMatrix) {
 }
 
 TEST(DisplayListCanvas, DrawPictureWithPaint) {
-  SkPictureRecorder recorder;
-  SkCanvas* cv = recorder.beginRecording(RenderBounds);
-  SkPaint p;
-  p.setStyle(SkPaint::kFill_Style);
-  p.setColor(SK_ColorBLUE);
-  cv->drawOval(RenderBounds, p);
-  sk_sp<SkPicture> picture = recorder.finishRecordingAsPicture();
+  sk_sp<SkPicture> picture = makeTestPicture();
   CanvasCompareTester::RenderAll(
       [=](SkCanvas* canvas, SkPaint& paint) {  //
         canvas->drawPicture(picture, nullptr, &paint);
