@@ -71,13 +71,38 @@ List<MetricPoint> parse(Map<String, dynamic> resultsJson) {
   return metricPoints;
 }
 
+/// Upload metrics to GCS bucket used by Skia Perf.
+///
+/// Skia Perf picks up all available files under the folder, and
+/// is robust to duplicate entries.
+///
+/// Files will be named based on `taskName`, such as
+/// `complex_layout_scroll_perf__timeline_summary_values.json`.
+/// If no `taskName` is specified, data will be saved to
+/// `default_values.json`.
+Future<void> upload(
+  FlutterDestination metricsDestination,
+  List<MetricPoint> metricPoints,
+  int commitTimeSinceEpoch,
+  String? taskName,
+) async {
+  await metricsDestination.update(
+    metricPoints,
+    DateTime.fromMillisecondsSinceEpoch(
+      commitTimeSinceEpoch,
+      isUtc: true,
+    ),
+    taskName ?? 'default',
+  );
+}
+
 /// Upload JSON results to skia perf.
 ///
 /// Flutter infrastructure's workflow is:
 /// 1. Run DeviceLab test, writing results to a known path
 /// 2. Request service account token from luci auth (valid for at least 3 minutes)
 /// 3. Upload results from (1) to skia perf.
-Future<void> uploadToSkiaPerf(String? resultsPath, String? commitTime) async {
+Future<void> uploadToSkiaPerf(String? resultsPath, String? commitTime, String? taskName) async {
   int commitTimeSinceEpoch;
   if (resultsPath == null) {
     return;
@@ -92,11 +117,5 @@ Future<void> uploadToSkiaPerf(String? resultsPath, String? commitTime) async {
   resultsJson = json.decode(await resultFile.readAsString()) as Map<String, dynamic>;
   final List<MetricPoint> metricPoints = parse(resultsJson);
   final FlutterDestination metricsDestination = await connectFlutterDestination();
-  await metricsDestination.update(
-    metricPoints,
-    DateTime.fromMillisecondsSinceEpoch(
-      commitTimeSinceEpoch,
-      isUtc: true,
-    ),
-  );
+  await upload(metricsDestination, metricPoints, commitTimeSinceEpoch, taskName);
 }

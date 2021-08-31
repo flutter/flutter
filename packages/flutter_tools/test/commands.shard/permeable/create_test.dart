@@ -1729,7 +1729,7 @@ void main() {
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>['create', '--pub', '--offline', projectDir.path]);
-      expect(loggingProcessManager.commands.first, contains(matches(r'dart-sdk[\\/]bin[\\/]pub')));
+      expect(loggingProcessManager.commands.first, contains(matches(r'dart-sdk[\\/]bin[\\/]dart')));
       expect(loggingProcessManager.commands.first, contains('--offline'));
     },
     overrides: <Type, Generator>{
@@ -1754,7 +1754,7 @@ void main() {
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>['create', '--pub', projectDir.path]);
-      expect(loggingProcessManager.commands.first, contains(matches(r'dart-sdk[\\/]bin[\\/]pub')));
+      expect(loggingProcessManager.commands.first, contains(matches(r'dart-sdk[\\/]bin[\\/]dart')));
       expect(loggingProcessManager.commands.first, isNot(contains('--offline')));
     },
     overrides: <Type, Generator>{

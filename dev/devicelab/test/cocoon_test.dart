@@ -313,7 +313,7 @@ void main() {
       expect(() => cocoon.sendTaskStatus(resultsPath: resultsPath), throwsA(isA<ClientException>()));
     });
 
-    test('does not update on non-supported branches', () async {
+    test('does not upload results on non-supported branches', () async {
       // Any network failure would cause the upoad to fail
       mockClient = MockClient((Request request) async => Response('', 500));
 
@@ -353,14 +353,14 @@ void main() {
       const String updateTaskJson = '{'
           '"CommitBranch":"master",'
           '"CommitSha":"$commitSha",'
-          '"BuilderName":"Linux_staging_test",'
+          '"BuilderName":"builderAbc",'
           '"NewStatus":"Succeeded",'
           '"ResultData":{"i":0.0,"j":0.0,"not_a_metric":"something"},'
           '"BenchmarkScoreKeys":["i","j"]}';
       fs.file(resultsPath).writeAsStringSync(updateTaskJson);
 
       // This will fail if it decided to upload results
-      await cocoon.sendTaskStatus(resultsPath: resultsPath);
+      await cocoon.sendTaskStatus(resultsPath: resultsPath, builderBucket: 'staging');
     });
   });
 

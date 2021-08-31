@@ -34,6 +34,7 @@ class DialogTheme with Diagnosticable {
     this.backgroundColor,
     this.elevation,
     this.shape,
+    this.alignment,
     this.titleTextStyle,
     this.contentTextStyle,
   });
@@ -52,6 +53,11 @@ class DialogTheme with Diagnosticable {
   /// Default value for [Dialog.shape].
   final ShapeBorder? shape;
 
+  /// Default value for [Dialog.alignment].
+  ///
+  /// If null, the [Dialog] alignment defaults to [Alignment.center].
+  final AlignmentGeometry? alignment;
+
   /// Used to configure the [DefaultTextStyle] for the [AlertDialog.title] widget.
   ///
   /// If null, defaults to [TextTheme.headline6] of [ThemeData.textTheme].
@@ -68,6 +74,7 @@ class DialogTheme with Diagnosticable {
     Color? backgroundColor,
     double? elevation,
     ShapeBorder? shape,
+    AlignmentGeometry? alignment,
     TextStyle? titleTextStyle,
     TextStyle? contentTextStyle,
   }) {
@@ -75,6 +82,7 @@ class DialogTheme with Diagnosticable {
       backgroundColor: backgroundColor ?? this.backgroundColor,
       elevation: elevation ?? this.elevation,
       shape: shape ?? this.shape,
+      alignment: alignment ?? this.alignment,
       titleTextStyle: titleTextStyle ?? this.titleTextStyle,
       contentTextStyle: contentTextStyle ?? this.contentTextStyle,
     );
@@ -96,6 +104,7 @@ class DialogTheme with Diagnosticable {
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
+      alignment: AlignmentGeometry.lerp(a?.alignment, b?.alignment, t),
       titleTextStyle: TextStyle.lerp(a?.titleTextStyle, b?.titleTextStyle, t),
       contentTextStyle: TextStyle.lerp(a?.contentTextStyle, b?.contentTextStyle, t),
     );
@@ -114,6 +123,7 @@ class DialogTheme with Diagnosticable {
         && other.backgroundColor == backgroundColor
         && other.elevation == elevation
         && other.shape == shape
+        && other.alignment == alignment
         && other.titleTextStyle == titleTextStyle
         && other.contentTextStyle == contentTextStyle;
   }
@@ -122,8 +132,9 @@ class DialogTheme with Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(ColorProperty('backgroundColor', backgroundColor));
-    properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DoubleProperty('elevation', elevation));
+    properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
+    properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('titleTextStyle', titleTextStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('contentTextStyle', contentTextStyle, defaultValue: null));
   }

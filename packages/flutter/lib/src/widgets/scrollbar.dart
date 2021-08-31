@@ -85,10 +85,12 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     double mainAxisMargin = 0.0,
     double crossAxisMargin = 0.0,
     Radius? radius,
+    OutlinedBorder? shape,
     double minLength = _kMinThumbExtent,
     double? minOverscrollLength,
     ScrollbarOrientation? scrollbarOrientation,
   }) : assert(color != null),
+       assert(radius == null || shape == null),
        assert(thickness != null),
        assert(fadeoutOpacityAnimation != null),
        assert(mainAxisMargin != null),
@@ -103,6 +105,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
        _textDirection = textDirection,
        _thickness = thickness,
        _radius = radius,
+       _shape = shape,
        _padding = padding,
        _mainAxisMargin = mainAxisMargin,
        _crossAxisMargin = crossAxisMargin,
@@ -217,6 +220,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   Radius? get radius => _radius;
   Radius? _radius;
   set radius(Radius? value) {
+    assert(shape == null || value == null);
     if (radius == value)
       return;
 
@@ -224,6 +228,26 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     notifyListeners();
   }
 
+  /// The [OutlinedBorder] of the scrollbar's thumb.
+  ///
+  /// Only one of [radius] and [shape] may be specified. For a rounded rectangle,
+  /// it's simplest to just specify [radius]. By default, the scrollbar thumb's
+  /// shape is a simple rectangle.
+  ///
+  /// If [shape] is specified, the thumb will take the shape of the passed
+  /// [OutlinedBorder] and fill itself with [color] (or grey if it
+  /// is unspecified).
+  ///
+  OutlinedBorder? get shape => _shape;
+  OutlinedBorder? _shape;
+  set shape(OutlinedBorder? value){
+    assert(radius == null || value == null);
+    if(shape == value)
+      return;
+
+    _shape = value;
+    notifyListeners();
+  }
   /// The amount of space by which to inset the scrollbar's start and end, as
   /// well as its side to the nearest edge, in logical pixels.
   ///
@@ -447,10 +471,20 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     );
 
     _thumbRect = Offset(x, y) & thumbSize;
-    if (radius == null)
-      canvas.drawRect(_thumbRect!, _paintThumb);
-    else
+
+    if (radius != null) {
       canvas.drawRRect(RRect.fromRectAndRadius(_thumbRect!, radius!), _paintThumb);
+      return;
+    }
+
+    if (shape == null) {
+      canvas.drawRect(_thumbRect!, _paintThumb);
+      return;
+    }
+
+    final Path outerPath = shape!.getOuterPath(_thumbRect!);
+    canvas.drawPath(outerPath, _paintThumb);
+    shape!.paint(canvas, _thumbRect!);
   }
 
   double _thumbExtent() {
@@ -776,6 +810,7 @@ class RawScrollbar extends StatefulWidget {
     required this.child,
     this.controller,
     this.isAlwaysShown,
+    this.shape,
     this.radius,
     this.thickness,
     this.thumbColor,
@@ -795,6 +830,7 @@ class RawScrollbar extends StatefulWidget {
        assert(minOverscrollLength == null || minOverscrollLength <= minThumbLength),
        assert(minOverscrollLength == null || minOverscrollLength >= 0),
        assert(fadeDuration != null),
+       assert(radius == null || shape == null),
        assert(timeToFade != null),
        assert(pressDuration != null),
        assert(mainAxisMargin != null),
@@ -943,6 +979,39 @@ class RawScrollbar extends StatefulWidget {
   ///     a subtree.
   /// {@endtemplate}
   final bool? isAlwaysShown;
+
+  /// The [OutlinedBorder] of the scrollbar's thumb.
+  ///
+  /// Only one of [radius] and [shape] may be specified. For a rounded rectangle,
+  /// it's simplest to just specify [radius]. By default, the scrollbar thumb's
+  /// shape is a simple rectangle.
+  ///
+  /// If [shape] is specified, the thumb will take the shape of the passed
+  /// [OutlinedBorder] and fill itself with [thumbColor] (or grey if it
+  /// is unspecified).
+  ///
+  /// Here is an example of using a [StadiumBorder] for drawing the [shape] of the
+  /// thumb in a [RawScrollbar]:
+  ///
+  /// {@tool dartpad --template=stateless_widget_material}
+  /// ```dart
+  /// Widget build(BuildContext context) {
+  ///   return Scaffold(
+  ///     body: RawScrollbar(
+  ///       child: ListView(
+  ///         children: List<Text>.generate(100, (int index) => Text((index * index).toString())),
+  ///         physics: const BouncingScrollPhysics(),
+  ///       ),
+  ///       shape: const StadiumBorder(side: BorderSide(color: Colors.brown, width: 3.0)),
+  ///       thickness: 15.0,
+  ///       thumbColor: Colors.blue,
+  ///       isAlwaysShown: true,
+  ///     ),
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
+  final OutlinedBorder? shape;
 
   /// The [Radius] of the scrollbar thumb's rounded rectangle corners.
   ///
@@ -1124,6 +1193,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       fadeoutOpacityAnimation: _fadeoutOpacityAnimation,
       scrollbarOrientation: widget.scrollbarOrientation,
       mainAxisMargin: widget.mainAxisMargin,
+      shape: widget.shape,
       crossAxisMargin: widget.crossAxisMargin
     );
   }
@@ -1253,6 +1323,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       ..padding = MediaQuery.of(context).padding
       ..scrollbarOrientation = widget.scrollbarOrientation
       ..mainAxisMargin = widget.mainAxisMargin
+      ..shape = widget.shape
       ..crossAxisMargin = widget.crossAxisMargin
       ..minLength = widget.minThumbLength
       ..minOverscrollLength = widget.minOverscrollLength ?? widget.minThumbLength;

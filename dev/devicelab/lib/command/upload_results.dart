@@ -21,8 +21,10 @@ class UploadResultsCommand extends Command<void> {
           'checkouts run in detached HEAD state, so the branch must be passed.',
     );
     argParser.addOption('luci-builder', help: '[Flutter infrastructure] Name of the LUCI builder being run on.');
+    argParser.addOption('task-name', help: '[Flutter infrastructure] Name of the task being run on.');
     argParser.addOption('test-status', help: 'Test status: Succeeded|Failed');
     argParser.addOption('commit-time', help: 'Commit time in UNIX timestamp');
+    argParser.addOption('builder-bucket', help: '[Flutter infrastructure] Luci builder bucket the test is running in.');
   }
 
   @override
@@ -40,10 +42,12 @@ class UploadResultsCommand extends Command<void> {
     final String? builderName = argResults!['luci-builder'] as String?;
     final String? testStatus = argResults!['test-status'] as String?;
     final String? commitTime = argResults!['commit-time'] as String?;
+    final String? taskName = argResults!['task-name'] as String?;
+    final String? builderBucket = argResults!['builder-bucket'] as String?;
 
     // Upload metrics to skia perf from test runner when `resultsPath` is specified.
     if (resultsPath != null) {
-      await uploadToSkiaPerf(resultsPath, commitTime);
+      await uploadToSkiaPerf(resultsPath, commitTime, taskName);
       print('Successfully uploaded metrics to skia perf');
     }
 
@@ -54,6 +58,7 @@ class UploadResultsCommand extends Command<void> {
       gitBranch: gitBranch,
       builderName: builderName,
       testStatus: testStatus,
+      builderBucket: builderBucket,
     );
   }
 }

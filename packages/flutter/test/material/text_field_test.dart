@@ -2,11 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=3890307731"
-@Tags(<String>['no-shuffle'])
+// no-shuffle:
+//   //TODO(gspencergoog): Remove this tag once this test's state leaks/test
+//   dependencies have been fixed.
+//   https://github.com/flutter/flutter/issues/85160
+//   Fails with "flutter test --test-randomize-ordering-seed=456"
+// reduced-test-set:
+//   This file is run as part of a reduced test set in CI on Mac and Windows
+//   machines.
+@Tags(<String>['reduced-test-set', 'no-shuffle'])
 
 import 'dart:math' as math;
 import 'dart:ui' as ui show window, BoxHeightStyle, BoxWidthStyle, WindowPadding;
@@ -19,6 +23,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart' show findRenderEditable, globalize, textOffsetToPosition;
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
@@ -30,22 +35,6 @@ final bool isContextMenuProvidedByPlatform = isBrowser;
 
 // On web, key events in text fields are handled by the browser.
 final bool areKeyEventsHandledByPlatform = isBrowser;
-
-class MockClipboard {
-  Object _clipboardData = <String, dynamic>{
-    'text': null,
-  };
-
-  Future<dynamic> handleMethodCall(MethodCall methodCall) async {
-    switch (methodCall.method) {
-      case 'Clipboard.getData':
-        return _clipboardData;
-      case 'Clipboard.setData':
-        _clipboardData = methodCall.arguments as Object;
-        break;
-    }
-  }
-}
 
 class MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
   @override
@@ -6220,8 +6209,8 @@ void main() {
 
     semantics.dispose();
 
-    // On web (just like iOS), we don't check for pasteability because that
-    // triggers a permission dialog in the browser.
+    // On web, we don't check for pasteability because that triggers a
+    // permission dialog in the browser.
     // https://github.com/flutter/flutter/pull/57139#issuecomment-629048058
   }, skip: isBrowser); // [intended] see above.
 
@@ -9550,11 +9539,19 @@ void main() {
       ),
     );
 
-    bool triedToReadClipboard = false;
+    bool calledGetData = false;
+    bool calledHasStrings = false;
     tester.binding.defaultBinaryMessenger
       .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
-        if (methodCall.method == 'Clipboard.getData') {
-          triedToReadClipboard = true;
+        switch (methodCall.method) {
+          case 'Clipboard.getData':
+            calledGetData = true;
+            break;
+          case 'Clipboard.hasStrings':
+            calledHasStrings = true;
+            break;
+          default:
+            break;
         }
         return null;
       });
@@ -9567,14 +9564,16 @@ void main() {
     await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
     await tester.pump();
 
+    // getData is not called unless something is pasted.  hasStrings is used to
+    // check the status of the clipboard.
+    expect(calledGetData, false);
     if (kIsWeb) {
-      // The clipboard is not checked because it requires user permissions and
-      // web doesn't show a custom text selection menu.
-      expect(triedToReadClipboard, false);
+      // hasStrings is not checked because web doesn't show a custom text
+      // selection menu.
+      expect(calledHasStrings, false);
     } else {
-      // The clipboard is checked in order to decide if the content can be
-      // pasted.
-      expect(triedToReadClipboard, true);
+      // hasStrings is checked in order to decide if the content can be pasted.
+      expect(calledHasStrings, true);
     }
   });
 
