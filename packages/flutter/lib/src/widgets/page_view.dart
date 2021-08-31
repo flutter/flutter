@@ -193,6 +193,11 @@ class PageController extends ScrollController {
     required Curve curve,
   }) {
     final _PagePosition position = this.position as _PagePosition;
+    if (position._cachedPage != null) {
+      position._cachedPage = page.toDouble();
+      return Future<void>.value();
+    }
+
     return position.animateTo(
       position.getPixelsFromPage(page.toDouble()),
       duration: duration,
@@ -206,6 +211,11 @@ class PageController extends ScrollController {
   /// without animation, and without checking if the new value is in range.
   void jumpToPage(int page) {
     final _PagePosition position = this.position as _PagePosition;
+    if (position._cachedPage != null) {
+      position._cachedPage = page.toDouble();
+      return;
+    }
+
     position.jumpTo(position.getPixelsFromPage(page.toDouble()));
   }
 
@@ -326,7 +336,7 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   final int initialPage;
   double _pageToUseOnStartup;
   // When the viewport has a zero-size, the `page` can not
-  // be got by `getPageFromPixels`, so we need to cache the page
+  // be retrieved by `getPageFromPixels`, so we need to cache the page
   // for use when resizing the viewport to non-zero next time.
   double? _cachedPage;
 
@@ -374,7 +384,8 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   double get _initialPageOffset => math.max(0, viewportDimension * (viewportFraction - 1) / 2);
 
   double getPageFromPixels(double pixels, double viewportDimension) {
-    final double actual = math.max(0.0, pixels - _initialPageOffset) / math.max(1.0, viewportDimension * viewportFraction);
+    assert(viewportDimension > 0.0);
+    final double actual = math.max(0.0, pixels - _initialPageOffset) / (viewportDimension * viewportFraction);
     final double round = actual.roundToDouble();
     if ((actual - round).abs() < precisionErrorTolerance) {
       return round;
@@ -394,12 +405,12 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
     );
     return !hasPixels || !hasContentDimensions
       ? null
-      : getPageFromPixels(pixels.clamp(minScrollExtent, maxScrollExtent), viewportDimension);
+      : _cachedPage ?? getPageFromPixels(pixels.clamp(minScrollExtent, maxScrollExtent), viewportDimension);
   }
 
   @override
   void saveScrollOffset() {
-    PageStorage.of(context.storageContext)?.writeState(context.storageContext, getPageFromPixels(pixels, viewportDimension));
+    PageStorage.of(context.storageContext)?.writeState(context.storageContext, _cachedPage ?? getPageFromPixels(pixels, viewportDimension));
   }
 
   @override
@@ -413,7 +424,7 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
 
   @override
   void saveOffset() {
-    context.saveOffset(getPageFromPixels(pixels, viewportDimension));
+    context.saveOffset(_cachedPage ?? getPageFromPixels(pixels, viewportDimension));
   }
 
   @override
@@ -440,15 +451,14 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
       page = _pageToUseOnStartup;
     } else if (oldViewportDimensions == 0.0) {
       // If resize from zero, we should use the _cachedPage to recover the state.
-      assert(_cachedPage != null);
       page = _cachedPage!;
     } else {
       page = getPageFromPixels(oldPixels, oldViewportDimensions!);
     }
     final double newPixels = getPixelsFromPage(page);
 
-    // Cache the page when resize the viewport to zero.
-    // For use when resizing the viewport to non-zero next time.
+    // If the viewportDimension is zero, cache the page
+    // in case the viewport is resized to be non-zero.
     _cachedPage = (viewportDimension == 0.0) ? page : null;
 
     if (newPixels != oldPixels) {

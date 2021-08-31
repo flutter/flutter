@@ -59,6 +59,46 @@ void main() {
     expect(find.text('Iowa'), findsOneWidget);
   });
 
+  testWidgets('Change the page through the controller when zero-size viewport', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/88956
+    final PageController controller = PageController(
+      initialPage: 1,
+    );
+
+    Widget build(Size size) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.fromSize(
+            size: size,
+            child: PageView(
+              children: kStates.map<Widget>((String state) => Text(state)).toList(),
+              controller: controller,
+              onPageChanged: (int page) { },
+            ),
+          ),
+        ),
+      );
+    }
+
+    // The pageView have a zero viewport, so nothing display.
+    await tester.pumpWidget(build(Size.zero));
+    expect(find.text('Alabama'), findsNothing);
+    expect(find.text('Alabama', skipOffstage: false), findsOneWidget);
+
+    // Change the page through the page controller when zero viewport
+    controller.animateToPage(kStates.indexOf('Iowa'), duration: kTabScrollDuration, curve: Curves.ease);
+    expect(controller.page, kStates.indexOf('Iowa'));
+
+    controller.jumpToPage(kStates.indexOf('Illinois'));
+    expect(controller.page, kStates.indexOf('Illinois'));
+
+    // Resize from zero viewport to non-zero, the latest state should not lost.
+    await tester.pumpWidget(build(const Size(200.0, 200.0)));
+    expect(controller.page, kStates.indexOf('Illinois'));
+    expect(find.text('Illinois'), findsOneWidget);
+  });
+
   testWidgets('PageController cannot return page while unattached',
       (WidgetTester tester) async {
     final PageController controller = PageController();
