@@ -31,6 +31,7 @@ import io.flutter.embedding.engine.systemchannels.DeferredComponentChannelTest;
 import io.flutter.embedding.engine.systemchannels.KeyEventChannelTest;
 import io.flutter.embedding.engine.systemchannels.PlatformChannelTest;
 import io.flutter.embedding.engine.systemchannels.RestorationChannelTest;
+import io.flutter.embedding.engine.systemchannels.TextInputChannelTest;
 import io.flutter.external.FlutterLaunchTests;
 import io.flutter.plugin.common.BinaryCodecTest;
 import io.flutter.plugin.common.StandardMessageCodecTest;
@@ -98,6 +99,7 @@ import test.io.flutter.embedding.engine.PluginComponentTest;
   SmokeTest.class,
   StandardMessageCodecTest.class,
   StandardMethodCodecTest.class,
+  TextInputChannelTest.class,
   TextInputPluginTest.class,
 })
 /** Runs all of the unit tests listed in the {@code @SuiteClasses} annotation. */
