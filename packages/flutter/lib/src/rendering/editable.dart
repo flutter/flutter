@@ -516,6 +516,13 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   ValueListenable<bool> get selectionEndInViewport => _selectionEndInViewport;
   final ValueNotifier<bool> _selectionEndInViewport = ValueNotifier<bool>(true);
 
+  /// Returns the TextPosition above or below the given offset.
+  TextPosition _getTextPositionVertical(TextPosition position, double verticalOffset) {
+    final Offset caretOffset = _textPainter.getOffsetForCaret(position, _caretPrototype);
+    final Offset caretOffsetTranslated = caretOffset.translate(0.0, verticalOffset);
+    return _textPainter.getPositionForOffset(caretOffsetTranslated);
+  }
+
   // Start TextMetrics.
 
   /// {@macro flutter.services.TextMetrics.getLineAtOffset}
@@ -536,13 +543,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     return _textPainter.getWordBoundary(position);
   }
 
-  /// Returns the TextPosition above or below the given offset.
-  TextPosition getTextPositionVertical(TextPosition position, double verticalOffset) {
-    final Offset caretOffset = _textPainter.getOffsetForCaret(position, _caretPrototype);
-    final Offset caretOffsetTranslated = caretOffset.translate(0.0, verticalOffset);
-    return _textPainter.getPositionForOffset(caretOffsetTranslated);
-  }
-
   /// {@macro flutter.services.TextMetrics.getTextPositionAbove}
   @override
   TextPosition getTextPositionAbove(TextPosition position) {
@@ -551,7 +551,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     // point and the line below is 1.5 lines below that point.
     final double preferredLineHeight = _textPainter.preferredLineHeight;
     final double verticalOffset = -0.5 * preferredLineHeight;
-    return getTextPositionVertical(position, verticalOffset);
+    return _getTextPositionVertical(position, verticalOffset);
   }
 
   /// {@macro flutter.services.TextMetrics.getTextPositionBelow}
@@ -562,7 +562,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     // point and the line below is 1.5 lines below that point.
     final double preferredLineHeight = _textPainter.preferredLineHeight;
     final double verticalOffset = 1.5 * preferredLineHeight;
-    return getTextPositionVertical(position, verticalOffset);
+    return _getTextPositionVertical(position, verticalOffset);
   }
 
   // End TextMetrics.
