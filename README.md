@@ -68,7 +68,7 @@ Flutter is a fully open-source project, and we welcome contributions.
 Information on how to get started can be found in our
 [contributor guide](CONTRIBUTING.md).
 
-[Flutter logo]: https://raw.githubusercontent.com/flutter/website/master/src/_assets/image/flutter-lockup-bg.jpg
+[Flutter logo]: https://raw.githubusercontent.com/flutter/website/archived-master/src/_assets/image/flutter-lockup-bg.jpg
 [flutter.dev]: https://flutter.dev
 [Build Status - Cirrus]: https://api.cirrus-ci.com/github/flutter/flutter.svg
 [Build status]: https://cirrus-ci.com/github/flutter/flutter/master
@@ -78,11 +78,11 @@ Information on how to get started can be found in our
 [Twitter badge]: https://twitter.com/intent/follow?screen_name=flutterdev
 [layered architecture]: https://flutter.dev/docs/resources/inside-flutter
 [widget catalog]: https://flutter.dev/widgets/
-[Reflectly hero image]: https://github.com/flutter/website/blob/master/src/images/homepage/reflectly-hero-600px.png
+[Reflectly hero image]: https://github.com/flutter/website/blob/main/src/assets/images/docs/homepage/reflectly-hero-600px.png?raw=true
 [Skia]: https://skia.org/
 [Dart platform]: https://dart.dev/
-[Dart platform diagram]: https://github.com/flutter/website/blob/master/src/images/homepage/dart-diagram-small.png
-[Hot reload animation]: https://raw.githubusercontent.com/flutter/website/master/src/_assets/image/tools/android-studio/hot-reload.gif
+[Dart platform diagram]: https://github.com/flutter/website/blob/main/src/assets/images/docs/homepage/dart-diagram-small.png?raw=true
+[Hot reload animation]: https://raw.githubusercontent.com/flutter/website/main/src/assets/images/docs/tools/android-studio/hot-reload.gif
 [Hot reload]: https://flutter.dev/docs/development/tools/hot-reload
 [Visual Studio Code]: https://marketplace.visualstudio.com/items?itemName=Dart-Code.flutter
 [IntelliJ / Android Studio]: https://plugins.jetbrains.com/plugin/9212-flutter
