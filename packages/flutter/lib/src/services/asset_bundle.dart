@@ -64,10 +64,10 @@ abstract class AssetBundle {
   /// caller is going to be doing its own caching. (It might not be cached if
   /// it's set to true either, depending on the asset bundle implementation.)
   ///
-  /// The function expects the stored string to be UTF-8-encoded.
-  /// [Utf8Codec] will be used for decoding the string and the decoding process
-  /// is delegated to an isolate for strings larger than 50 KB to avoid jank on
-  /// the main thread.
+  /// The function expects the stored string to be UTF-8-encoded as
+  /// [Utf8Codec] will be used for decoding the string. If the string is
+  /// larger than 50 KB, the decoding process is delegated to an
+  /// isolate to avoid jank on the main thread.
   Future<String> loadString(String key, { bool cache = true }) async {
     final ByteData data = await load(key);
     if (data == null)
