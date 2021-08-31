@@ -1501,7 +1501,7 @@ void main() {
   testWidgets('Tooltip should not be shown with empty message (with child)', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        home: Tooltip(
+        home: const Tooltip(
           message: tooltipText,
           child: Text(tooltipText),
         ),
@@ -1513,7 +1513,7 @@ void main() {
   testWidgets('Tooltip should not be shown with empty message (without child)', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        home: Tooltip(
+        home: const Tooltip(
           message: tooltipText,
         ),
       ),
