@@ -1,4 +1,4 @@
-Signature: f616af8488cfaf22350b8e6583156668
+Signature: 28243d9900c22a0c91f8454bace76390
 
 UNUSED LICENSES:
 
@@ -3639,9 +3639,8 @@ FILE: ../../../third_party/skia/include/gpu/GrBackendSurfaceMutableState.h
 FILE: ../../../third_party/skia/include/gpu/GrYUVABackendTextures.h
 FILE: ../../../third_party/skia/include/gpu/d3d/GrD3DBackendContext.h
 FILE: ../../../third_party/skia/include/gpu/d3d/GrD3DTypes.h
-FILE: ../../../third_party/skia/include/gpu/d3d/GrD3DTypesMinimal.h
 FILE: ../../../third_party/skia/include/ports/SkImageGeneratorNDK.h
-FILE: ../../../third_party/skia/include/private/GrD3DTypesPriv.h
+FILE: ../../../third_party/skia/include/private/GrD3DTypesMinimal.h
 FILE: ../../../third_party/skia/include/private/SkIDChangeListener.h
 FILE: ../../../third_party/skia/include/private/SkSLSampleUsage.h
 FILE: ../../../third_party/skia/include/sksl/DSL.h
@@ -3727,7 +3726,7 @@ FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DTextureRenderTarget.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DTextureRenderTarget.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DTextureResource.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DTextureResource.h
-FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DTypesPriv.cpp
+FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DTypesMinimal.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DUtil.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DUtil.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrMatrixEffect.cpp
