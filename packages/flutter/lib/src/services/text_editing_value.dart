@@ -191,7 +191,7 @@ class TextEditingValue {
   ///
   /// The composing region, if any, will also be adjusted to remove the deleted
   /// characters.
-  TextEditingValue deleteTo(int index) {
+  TextEditingValue deleteTo(TextPosition position) {
     assert(selection != null);
 
     if (!selection.isValid) {
@@ -200,13 +200,13 @@ class TextEditingValue {
     if (!selection.isCollapsed) {
       return _deleteNonEmptySelection();
     }
-    if (index == selection.extentOffset) {
+    if (position.offset == selection.extentOffset) {
       return this;
     }
 
     final TextRange deletion = TextRange(
-      start: math.min(index, selection.extentOffset),
-      end: math.max(index, selection.extentOffset),
+      start: math.min(position.offset, selection.extentOffset),
+      end: math.max(position.offset, selection.extentOffset),
     );
     final String deleted = deletion.textInside(text);
     if (deletion.textInside(text).isEmpty) {
@@ -226,7 +226,10 @@ class TextEditingValue {
 
     return TextEditingValue(
       text: deletion.textBefore(text) + deletion.textAfter(text),
-      selection: TextSelection.collapsed(offset: deletion.start),
+      selection: TextSelection.collapsed(
+        offset: deletion.start,
+        affinity: position.affinity,
+      ),
       composing: nextComposingRange,
     );
   }

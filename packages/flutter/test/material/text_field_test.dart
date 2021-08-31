@@ -638,7 +638,7 @@ void main() {
       actualNewValue,
       const TextEditingValue(
         text: '12',
-        selection: TextSelection.collapsed(offset: 2, affinity: TextAffinity.upstream),
+        selection: TextSelection.collapsed(offset: 2, affinity: TextAffinity.downstream),
       ),
     );
   }, skip: areKeyEventsHandledByPlatform); // [intended] only applies to platforms where we handle key events.
