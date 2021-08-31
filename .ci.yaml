@@ -389,7 +389,10 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "goldctl"}
+          {"dependency": "goldctl"},
+          {"dependency": "clang"},
+          {"dependency": "cmake"},
+          {"dependency": "ninja"}
         ]
       shard: framework_tests
       subshard: misc
@@ -696,7 +699,6 @@ targets:
 
   - name: Linux test_ownership
     recipe: infra/test_ownership
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -1676,6 +1678,19 @@ targets:
       task_name: web_size__compile_test
     scheduler: luci
 
+  - name: Linux android views
+    recipe: flutter/android_views
+    bringup: true
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk"}
+        ]
+      tags: >
+        ["framework","hostonly"]
+    timeout: 60
+    scheduler: luci
+
   - name: Mac build_aar_module_test
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -1869,7 +1884,9 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "goldctl"}
+          {"dependency": "goldctl"},
+          {"dependency": "xcode"},
+          {"dependency": "gems"}
         ]
       shard: framework_tests
       subshard: misc
@@ -2056,7 +2073,6 @@ targets:
 
   - name: Mac module_test_ios
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       caches: >-
@@ -3355,7 +3371,8 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "goldctl"}
+          {"dependency": "goldctl"},
+          {"dependency": "vs_build"}
         ]
       shard: framework_tests
       subshard: misc

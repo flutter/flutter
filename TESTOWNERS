@@ -199,6 +199,8 @@
 /dev/integration_tests/web_e2e_tests @yjbanov @flutter/web
 # Linux web_smoke_test
 /examples/hello_world/test_driver/smoke_web_engine.dart @yjbanov @flutter/web
+# Linux android views
+/dev/integration_tests/android_views @garyqian @flutter/android
 
 ## Firebase tests
 /dev/integration_tests/abstract_method_smoke_test @blasten @flutter/android

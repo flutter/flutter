@@ -2139,7 +2139,6 @@ class DisplayFeatureSubScreen extends StatelessWidget {
 /// For more information about state restoration, see [RestorationManager].
 ///
 /// {@tool sample --template=stateless_widget_restoration_material}
-///
 /// This sample demonstrates how to create a restorable dialog. This is
 /// accomplished by enabling state restoration by specifying
 /// [WidgetsApp.restorationScopeId] and using [Navigator.restorablePush] to
@@ -2147,33 +2146,7 @@ class DisplayFeatureSubScreen extends StatelessWidget {
 ///
 /// {@macro flutter.widgets.RestorationManager}
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return Scaffold(
-///     body: Center(
-///       child: OutlinedButton(
-///         onPressed: () {
-///           Navigator.of(context).restorablePush(_dialogBuilder);
-///         },
-///         child: const Text('Open Dialog'),
-///       ),
-///     ),
-///   );
-/// }
-///
-/// static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
-///   return RawDialogRoute<void>(
-///     pageBuilder: (
-///       BuildContext context,
-///       Animation<double> animation,
-///       Animation<double> secondaryAnimation,
-///     ) {
-///       return const AlertDialog(title: Text('Alert!'));
-///     },
-///   );
-/// }
-/// ```
-///
+/// ** See code in examples/api/lib/widgets/routes/show_general_dialog.0.dart **
 /// {@end-tool}
 ///
 /// See also:
