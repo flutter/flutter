@@ -4,9 +4,14 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.robolectric.Shadows.shadowOf;
 
+import android.os.Looper;
 import android.view.Surface;
 import io.flutter.embedding.engine.FlutterJNI;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -115,5 +120,79 @@ public class FlutterRendererTest {
 
     // Verify behavior under test.
     verify(fakeFlutterJNI, times(0)).markTextureFrameAvailable(eq(entry.id()));
+  }
+
+  @Test
+  public void itUnregistersTextureWhenSurfaceTextureFinalized() {
+    // Setup the test.
+    FlutterJNI fakeFlutterJNI = mock(FlutterJNI.class);
+    when(fakeFlutterJNI.isAttached()).thenReturn(true);
+    FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI);
+
+    fakeFlutterJNI.detachFromNativeAndReleaseResources();
+
+    FlutterRenderer.SurfaceTextureRegistryEntry entry =
+        (FlutterRenderer.SurfaceTextureRegistryEntry) flutterRenderer.createSurfaceTexture();
+    long id = entry.id();
+
+    flutterRenderer.startRenderingToSurface(fakeSurface);
+
+    // Execute the behavior under test.
+    runFinalization(entry);
+
+    shadowOf(Looper.getMainLooper()).idle();
+
+    flutterRenderer.stopRenderingToSurface();
+
+    // Verify behavior under test.
+    verify(fakeFlutterJNI, times(1)).unregisterTexture(eq(id));
+  }
+
+  @Test
+  public void itStopsUnregisteringTextureWhenDetached() {
+    // Setup the test.
+    FlutterJNI fakeFlutterJNI = mock(FlutterJNI.class);
+    when(fakeFlutterJNI.isAttached()).thenReturn(false);
+    FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI);
+
+    fakeFlutterJNI.detachFromNativeAndReleaseResources();
+
+    FlutterRenderer.SurfaceTextureRegistryEntry entry =
+        (FlutterRenderer.SurfaceTextureRegistryEntry) flutterRenderer.createSurfaceTexture();
+    long id = entry.id();
+
+    flutterRenderer.startRenderingToSurface(fakeSurface);
+
+    flutterRenderer.stopRenderingToSurface();
+
+    // Execute the behavior under test.
+    runFinalization(entry);
+
+    shadowOf(Looper.getMainLooper()).idle();
+
+    // Verify behavior under test.
+    verify(fakeFlutterJNI, times(0)).unregisterTexture(eq(id));
+  }
+
+  void runFinalization(FlutterRenderer.SurfaceTextureRegistryEntry entry) {
+    CountDownLatch latch = new CountDownLatch(1);
+    Thread fakeFinalizer =
+        new Thread(
+            new Runnable() {
+              public void run() {
+                try {
+                  entry.finalize();
+                  latch.countDown();
+                } catch (Throwable e) {
+                  // do nothing
+                }
+              }
+            });
+    fakeFinalizer.start();
+    try {
+      latch.await(5L, TimeUnit.SECONDS);
+    } catch (Throwable e) {
+      // do nothing
+    }
   }
 }

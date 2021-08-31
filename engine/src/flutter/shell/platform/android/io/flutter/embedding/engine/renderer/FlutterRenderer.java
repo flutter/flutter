@@ -39,6 +39,7 @@ public class FlutterRenderer implements TextureRegistry {
   @NonNull private final AtomicLong nextTextureId = new AtomicLong(0L);
   @Nullable private Surface surface;
   private boolean isDisplayingFlutterUi = false;
+  private Handler handler = new Handler();
 
   @NonNull
   private final FlutterUiDisplayListener flutterUiDisplayListener =
@@ -167,6 +168,38 @@ public class FlutterRenderer implements TextureRegistry {
       textureWrapper.release();
       unregisterTexture(id);
       released = true;
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+      try {
+        if (released) {
+          return;
+        }
+
+        handler.post(new SurfaceTextureFinalizerRunnable(id, flutterJNI));
+      } finally {
+        super.finalize();
+      }
+    }
+  }
+
+  static final class SurfaceTextureFinalizerRunnable implements Runnable {
+    private final long id;
+    private final FlutterJNI flutterJNI;
+
+    SurfaceTextureFinalizerRunnable(long id, @NonNull FlutterJNI flutterJNI) {
+      this.id = id;
+      this.flutterJNI = flutterJNI;
+    }
+
+    @Override
+    public void run() {
+      if (!flutterJNI.isAttached()) {
+        return;
+      }
+      Log.v(TAG, "Releasing a SurfaceTexture (" + id + ").");
+      flutterJNI.unregisterTexture(id);
     }
   }
   // ------ END TextureRegistry IMPLEMENTATION ----
