@@ -51,7 +51,7 @@ abstract class TextMetrics {
   /// {@template flutter.services.TextMetrics.getLineAtOffset}
   /// Return a [TextSelection] containing the line of the given [TextPosition].
   /// {@endtemplate}
-  TextSelection getLineAtOffset(String text, TextPosition position);
+  TextSelection getLineAtOffset(TextPosition position);
 
   /// {@macro flutter.painting.TextPainter.getWordBoundary}
   TextRange getWordBoundary(TextPosition position);

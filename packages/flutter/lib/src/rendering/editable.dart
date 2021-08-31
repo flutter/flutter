@@ -527,12 +527,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   /// {@macro flutter.services.TextMetrics.getLineAtOffset}
   @override
-  TextSelection getLineAtOffset(String text, TextPosition position) {
+  TextSelection getLineAtOffset(TextPosition position) {
     debugAssertLayoutUpToDate();
     final TextRange line = _textPainter.getLineBoundary(position);
     // If text is obscured, the entire string should be treated as one line.
     if (obscureText) {
-      return TextSelection(baseOffset: 0, extentOffset: text.length);
+      return TextSelection(baseOffset: 0, extentOffset: _plainText.length);
     }
     return TextSelection(baseOffset: line.start, extentOffset: line.end);
   }

@@ -275,7 +275,7 @@ abstract class TextEditingActionTarget {
     }
 
     final TextSelection line = textMetrics.getLineAtOffset(
-      textEditingValue.text, TextPosition(offset: textBefore.length - 1),
+      TextPosition(offset: textBefore.length - 1),
     );
 
     setTextEditingValue(textEditingValue.deleteTo(TextPosition(offset: line.start)), cause);
@@ -376,7 +376,9 @@ abstract class TextEditingActionTarget {
     }
 
     final String textBefore = textEditingValue.selection.textBefore(textEditingValue.text);
-    final TextSelection line = textMetrics.getLineAtOffset(textEditingValue.text, TextPosition(offset: textBefore.length));
+    final TextSelection line = textMetrics.getLineAtOffset(
+      TextPosition(offset: textBefore.length),
+    );
 
     setTextEditingValue(textEditingValue.deleteTo(TextPosition(offset: line.end)), cause);
   }
@@ -486,7 +488,6 @@ abstract class TextEditingActionTarget {
     // TODO(justinmc): Support selection with multiple TextAffinities.
     // https://github.com/flutter/flutter/issues/88135
     final TextSelection currentLine = textMetrics.getLineAtOffset(
-      textEditingValue.text,
       TextPosition(
         offset: textEditingValue.selection.start,
         affinity: textEditingValue.selection.isCollapsed
@@ -529,7 +530,6 @@ abstract class TextEditingActionTarget {
     // TODO(justinmc): Support selection with multiple TextAffinities.
     // https://github.com/flutter/flutter/issues/88135
     final TextSelection currentLine = textMetrics.getLineAtOffset(
-      textEditingValue.text,
       TextPosition(
         offset: textEditingValue.selection.end,
         affinity: textEditingValue.selection.isCollapsed
@@ -651,7 +651,8 @@ abstract class TextEditingActionTarget {
     final int startPoint = TextEditingValue.previousCharacter(
         textEditingValue.selection.extentOffset, textEditingValue.text, false);
     final TextSelection selectedLine = textMetrics.getLineAtOffset(
-        textEditingValue.text, TextPosition(offset: startPoint));
+      TextPosition(offset: startPoint),
+    );
 
     late final TextSelection nextSelection;
     // If the extent and base offsets would reverse order, then instead the
@@ -724,7 +725,8 @@ abstract class TextEditingActionTarget {
     final int startPoint = TextEditingValue.nextCharacter(
         textEditingValue.selection.extentOffset, textEditingValue.text, false);
     final TextSelection selectedLine = textMetrics.getLineAtOffset(
-        textEditingValue.text, TextPosition(offset: startPoint));
+      TextPosition(offset: startPoint),
+    );
 
     // If the extent and base offsets would reverse order, then instead the
     // selection collapses.
@@ -898,7 +900,9 @@ abstract class TextEditingActionTarget {
   ///     direction.
   void moveSelectionLeftByLine(SelectionChangedCause cause) {
     // If already at the left edge of the line, do nothing.
-    final TextSelection currentLine = textMetrics.getLineAtOffset(textEditingValue.text, textEditingValue.selection.extent);
+    final TextSelection currentLine = textMetrics.getLineAtOffset(
+      textEditingValue.selection.extent,
+    );
     if (currentLine.baseOffset == textEditingValue.selection.extentOffset) {
       return;
     }
@@ -910,7 +914,6 @@ abstract class TextEditingActionTarget {
     final int startPoint = TextEditingValue.previousCharacter(
         textEditingValue.selection.extentOffset, textEditingValue.text, false);
     final TextSelection selectedLine = textMetrics.getLineAtOffset(
-      textEditingValue.text,
       TextPosition(offset: startPoint),
     );
     final TextSelection nextSelection = TextSelection.fromPosition(TextPosition(
@@ -1079,7 +1082,6 @@ abstract class TextEditingActionTarget {
   void moveSelectionRightByLine(SelectionChangedCause cause) {
     // If already at the right edge of the line, do nothing.
     final TextSelection currentLine = textMetrics.getLineAtOffset(
-      textEditingValue.text,
       textEditingValue.selection.extent,
     );
     if (currentLine.extentOffset == textEditingValue.selection.extentOffset) {
@@ -1093,7 +1095,6 @@ abstract class TextEditingActionTarget {
     final int startPoint = TextEditingValue.nextCharacter(
         textEditingValue.selection.extentOffset, textEditingValue.text, false);
     final TextSelection selectedLine = textMetrics.getLineAtOffset(
-      textEditingValue.text,
       TextPosition(
         offset: startPoint,
         affinity: TextAffinity.upstream,
