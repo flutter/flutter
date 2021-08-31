@@ -78,7 +78,7 @@ Information on how to get started can be found in our
 [Twitter badge]: https://twitter.com/intent/follow?screen_name=flutterdev
 [layered architecture]: https://flutter.dev/docs/resources/inside-flutter
 [widget catalog]: https://flutter.dev/widgets/
-[Reflectly hero image]: https://github.com/flutter/website/blob/master/src/images/homepage/reflectly-hero-600px.png
+[Reflectly hero image]: https://github.com/flutter/website/blob/main/src/images/homepage/reflectly-hero-600px.png
 [Skia]: https://skia.org/
 [Dart platform]: https://dart.dev/
 [Dart platform diagram]: https://github.com/flutter/website/blob/main/src/images/homepage/dart-diagram-small.png
