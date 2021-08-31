@@ -871,27 +871,27 @@ class _TextSelectionHandleOverlayState
 
 /// Delegate interface for the [TextSelectionGestureDetectorBuilder].
 ///
-/// The interface is usually implemented by textfield implementations wrapping
+/// The interface is usually implemented by text field implementations wrapping
 /// [EditableText], that use a [TextSelectionGestureDetectorBuilder] to build a
 /// [TextSelectionGestureDetector] for their [EditableText]. The delegate provides
-/// the builder with information about the current state of the textfield.
+/// the builder with information about the current state of the text field.
 /// Based on these information, the builder adds the correct gesture handlers
 /// to the gesture detector.
 ///
 /// See also:
 ///
-///  * [TextField], which implements this delegate for the Material textfield.
+///  * [TextField], which implements this delegate for the Material text field.
 ///  * [CupertinoTextField], which implements this delegate for the Cupertino
-///    textfield.
+///    text field.
 abstract class TextSelectionGestureDetectorBuilderDelegate {
   /// [GlobalKey] to the [EditableText] for which the
   /// [TextSelectionGestureDetectorBuilder] will build a [TextSelectionGestureDetector].
   GlobalKey<EditableTextState> get editableTextKey;
 
-  /// Whether the textfield should respond to force presses.
+  /// Whether the text field should respond to force presses.
   bool get forcePressEnabled;
 
-  /// Whether the user may select text in the textfield.
+  /// Whether the user may select text in the text field.
   bool get selectionEnabled;
 }
 
@@ -924,7 +924,7 @@ class TextSelectionGestureDetectorBuilder {
   /// The delegate for this [TextSelectionGestureDetectorBuilder].
   ///
   /// The delegate provides the builder with information about what actions can
-  /// currently be performed on the textfield. Based on this, the builder adds
+  /// currently be performed on the text field. Based on this, the builder adds
   /// the correct gesture handlers to the gesture detector.
   @protected
   final TextSelectionGestureDetectorBuilderDelegate delegate;
