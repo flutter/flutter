@@ -20,22 +20,36 @@ void main() {
   });
 
   test('simple shader renders correctly', () async {
-    final Uint8List shaderBytes = await spvFile('general_shaders', 'simple.spv').readAsBytes();
-    _expectShaderRendersGreen(shaderBytes.buffer.asUint32List());
+    final Uint8List shaderBytes = await spvFile('general_shaders', 'functions.spv').readAsBytes();
+    final FragmentShader shader = FragmentShader(
+      spirv: shaderBytes.buffer,
+      floatUniforms: Float32List.fromList(<double>[1]),
+    );
+    _expectShaderRendersGreen(shader);
+  });
+
+  test('shader with functions renders green', () {
+    final ByteBuffer spirv = spvFile('general_shaders', 'functions.spv').readAsBytesSync().buffer;
+    final FragmentShader shader = FragmentShader(
+      spirv: spirv,
+      floatUniforms: Float32List.fromList(<double>[1]),
+    );
+    _expectShaderRendersGreen(shader);
   });
 
   test('shader with uniforms renders and updates correctly', () async {
     final Uint8List shaderBytes = await spvFile('general_shaders', 'uniforms.spv').readAsBytes();
     final FragmentShader shader = FragmentShader(spirv: shaderBytes.buffer);
 
-    shader.update(floatUniforms: Float32List.fromList(<double>[
-      0.0,  // iFloatUniform
+    shader.update(
+        floatUniforms: Float32List.fromList(<double>[
+      0.0, // iFloatUniform
       0.25, // iVec2Uniform.x
       0.75, // iVec2Uniform.y
-      0.0,    // iMat2Uniform[0][0]
-      0.0,    // iMat2Uniform[0][1]
-      0.0,    // iMat2Uniform[1][0]
-      1.0,    // iMat2Uniform[1][1]
+      0.0, // iMat2Uniform[0][0]
+      0.0, // iMat2Uniform[0][1]
+      0.0, // iMat2Uniform[1][0]
+      1.0, // iMat2Uniform[1][1]
     ]));
 
     final ByteData renderedBytes = (await _imageByteDataFromShader(
@@ -49,15 +63,15 @@ void main() {
   });
 
   // Test all supported GLSL ops. See lib/spirv/lib/src/constants.dart
-  final Map<String, Uint32List> supportedGLSLOpShaders =
-    _loadSpv('supported_glsl_op_shaders');
+  final Map<String, ByteBuffer> supportedGLSLOpShaders =
+      _loadSpv('supported_glsl_op_shaders');
   expect(supportedGLSLOpShaders.isNotEmpty, true);
   _expectShadersRenderGreen(supportedGLSLOpShaders);
   _expectShadersHaveOp(supportedGLSLOpShaders, true /* glsl ops */);
 
   // Test all supported instructions. See lib/spirv/lib/src/constants.dart
-  final Map<String, Uint32List> supportedOpShaders =
-    _loadSpv('supported_op_shaders');
+  final Map<String, ByteBuffer> supportedOpShaders =
+      _loadSpv('supported_op_shaders');
   expect(supportedOpShaders.isNotEmpty, true);
   _expectShadersRenderGreen(supportedOpShaders);
   _expectShadersHaveOp(supportedOpShaders, false /* glsl ops */);
@@ -66,15 +80,19 @@ void main() {
 // Expect that all of the spirv shaders in this folder render green.
 // Keeping the outer loop of the test synchronous allows for easy printing
 // of the file name within the test case.
-void _expectShadersRenderGreen(Map<String, Uint32List> shaders) {
+void _expectShadersRenderGreen(Map<String, ByteBuffer> shaders) {
   for (final String key in shaders.keys) {
     test('$key renders green', () {
-      _expectShaderRendersGreen(shaders[key]!);
+      final FragmentShader shader = FragmentShader(
+        spirv: shaders[key]!,
+        floatUniforms: Float32List.fromList(<double>[1]),
+      );
+      _expectShaderRendersGreen(shader);
     });
   }
 }
 
-void _expectShadersHaveOp(Map<String, Uint32List> shaders, bool glsl) {
+void _expectShadersHaveOp(Map<String, ByteBuffer> shaders, bool glsl) {
   for (final String key in shaders.keys) {
     test('$key contains opcode', () {
       _expectShaderHasOp(shaders[key]!, key, glsl);
@@ -85,7 +103,8 @@ void _expectShadersHaveOp(Map<String, Uint32List> shaders, bool glsl) {
 const int _opExtInst = 12;
 
 // Expects that a spirv shader has the op code identified by its file name.
-void _expectShaderHasOp(Uint32List words, String filename, bool glsl) {
+void _expectShaderHasOp(ByteBuffer spirv, String filename, bool glsl) {
+  final Uint32List words = spirv.asUint32List();
   final List<String> sections = filename.split('_');
   expect(sections.length, greaterThan(1));
   final int op = int.parse(sections.first);
@@ -98,7 +117,7 @@ void _expectShaderHasOp(Uint32List words, String filename, bool glsl) {
     final int word = words[position];
     final int currentOpCode = word & 0xFFFF;
     if (glsl) {
-      if (currentOpCode == _opExtInst && words[position+4] == op) {
+      if (currentOpCode == _opExtInst && words[position + 4] == op) {
         found = true;
         break;
       }
@@ -119,11 +138,7 @@ void _expectShaderHasOp(Uint32List words, String filename, bool glsl) {
 }
 
 // Expects that a spirv shader only outputs the color green.
-Future<void> _expectShaderRendersGreen(Uint32List spirv) async {
-  final FragmentShader shader = FragmentShader(
-    spirv: spirv.buffer,
-    floatUniforms: Float32List.fromList(<double>[1]),
-  );
+Future<void> _expectShaderRendersGreen(FragmentShader shader) async {
   final ByteData renderedBytes = (await _imageByteDataFromShader(
     shader: shader,
     imageDimension: _shaderImageDimension,
@@ -153,23 +168,23 @@ Future<ByteData?> _imageByteDataFromShader({
 // $FLUTTER_BUILD_DIRECTORY/gen/flutter/lib/spirv/test/$leafFolderName
 // This is synchronous so that tests can be inside of a loop with
 // the proper test name.
-Map<String, Uint32List> _loadSpv(String leafFolderName) {
-  final Map<String, Uint32List> out = SplayTreeMap<String, Uint32List>();
+Map<String, ByteBuffer> _loadSpv(String leafFolderName) {
+  final Map<String, ByteBuffer> out = SplayTreeMap<String, ByteBuffer>();
 
   final Directory directory = spvDirectory(leafFolderName);
   if (!directory.existsSync()) {
     return out;
   }
 
-  directory.listSync()
-    .where((FileSystemEntity entry) => path.extension(entry.path) == '.spv')
-    .forEach((FileSystemEntity entry) {
-      final String key = path.basenameWithoutExtension(entry.path);
-      out[key] = (entry as File).readAsBytesSync().buffer.asUint32List();
-    });
+  directory
+      .listSync()
+      .where((FileSystemEntity entry) => path.extension(entry.path) == '.spv')
+      .forEach((FileSystemEntity entry) {
+    final String key = path.basenameWithoutExtension(entry.path);
+    out[key] = (entry as File).readAsBytesSync().buffer;
+  });
   return out;
 }
-
 
 // Arbitrary, but needs to be greater than 1 for frag coord tests.
 const int _shaderImageDimension = 4;
