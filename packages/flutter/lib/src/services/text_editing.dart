@@ -222,19 +222,4 @@ class TextSelection extends TextRange {
       affinity: position.affinity,
     );
   }
-
-  /// Return the selection collapsed and moved to the given [TextPosition].
-  TextSelection moveTo(TextPosition position) {
-    // If the selection is collapsed at the position already, then nothing
-    // happens.
-    if (isCollapsed && extentOffset == position.offset) {
-      return this;
-    }
-
-    return copyWith(
-      baseOffset: position.offset,
-      extentOffset: position.offset,
-      affinity: position.affinity,
-    );
-  }
 }
