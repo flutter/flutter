@@ -45,6 +45,7 @@ Future<FlutterDestination> connectFlutterDestination() async {
 ///     ]
 ///   }
 List<MetricPoint> parse(Map<String, dynamic> resultsJson) {
+  print('Results to upload to skia perf: $resultsJson');
   final List<String> scoreKeys =
       (resultsJson['BenchmarkScoreKeys'] as List<dynamic>?)?.cast<String>() ?? const <String>[];
   final Map<String, dynamic> resultData =
@@ -95,8 +96,13 @@ Future<void> upload(
   );
 }
 
-/// Upload test metrics to metrics center.
-Future<void> uploadToMetricsCenter(String? resultsPath, String? commitTime, String? taskName) async {
+/// Upload JSON results to skia perf.
+///
+/// Flutter infrastructure's workflow is:
+/// 1. Run DeviceLab test, writing results to a known path
+/// 2. Request service account token from luci auth (valid for at least 3 minutes)
+/// 3. Upload results from (1) to skia perf.
+Future<void> uploadToSkiaPerf(String? resultsPath, String? commitTime, String? taskName) async {
   int commitTimeSinceEpoch;
   if (resultsPath == null) {
     return;

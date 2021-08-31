@@ -508,9 +508,7 @@ void main() {
         logging: false,
       );
       expect(result.exitCode, 0);
-      // TODO(sigurdm): Remove the filter when
-      // https://github.com/flutter/flutter/pull/88792 is relanded.
-      expect(result.stdout.where((String line) => !line.startsWith('"The top level `pub.bat` command is deprecated.')), <Object>[
+      expect(result.stdout, <Object>[
         startsWith('Performing hot reload...'),
         '',
         '══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════',
