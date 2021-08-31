@@ -482,39 +482,44 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
               Expanded(
                 child: Align(
                   alignment: Alignment(0, groupAlignment),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      for (int i = 0; i < widget.destinations.length; i += 1)
-                        _RailDestination(
-                          minWidth: minWidth,
-                          minExtendedWidth: minExtendedWidth,
-                          extendedTransitionAnimation: _extendedAnimation,
-                          selected: widget.selectedIndex == i,
-                          icon: widget.selectedIndex == i ? widget.destinations[i].selectedIcon : widget.destinations[i].icon,
-                          label: widget.destinations[i].label,
-                          destinationAnimation: _destinationAnimations[i],
-                          labelType: labelType,
-                          iconTheme: widget.selectedIndex == i ? selectedIconTheme : unselectedIconTheme,
-                          labelTextStyle: widget.selectedIndex == i ? selectedLabelTextStyle : unselectedLabelTextStyle,
-                          padding: widget.destinations[i].padding,
-                          onTap: () {
-                            if (widget.onDestinationSelected != null)
-                              widget.onDestinationSelected!(i);
-                          },
-                          indexLabel: localizations.tabLabel(
-                            tabIndex: i + 1,
-                            tabCount: widget.destinations.length,
-                          ),
-                        ),
-                      if (widget.trailing != null)
-                        ConstrainedBox(
-                          constraints: BoxConstraints(
-                            minWidth: lerpDouble(minWidth, minExtendedWidth, _extendedAnimation.value)!,
-                          ),
-                          child: widget.trailing,
-                        ),
-                    ],
+                  child: ScrollConfiguration(
+                    behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          for (int i = 0; i < widget.destinations.length; i += 1)
+                            _RailDestination(
+                              minWidth: minWidth,
+                              minExtendedWidth: minExtendedWidth,
+                              extendedTransitionAnimation: _extendedAnimation,
+                              selected: widget.selectedIndex == i,
+                              icon: widget.selectedIndex == i ? widget.destinations[i].selectedIcon : widget.destinations[i].icon,
+                              label: widget.destinations[i].label,
+                              destinationAnimation: _destinationAnimations[i],
+                              labelType: labelType,
+                              iconTheme: widget.selectedIndex == i ? selectedIconTheme : unselectedIconTheme,
+                              labelTextStyle: widget.selectedIndex == i ? selectedLabelTextStyle : unselectedLabelTextStyle,
+                              padding: widget.destinations[i].padding,
+                              onTap: () {
+                                if (widget.onDestinationSelected != null)
+                                  widget.onDestinationSelected!(i);
+                              },
+                              indexLabel: localizations.tabLabel(
+                                tabIndex: i + 1,
+                                tabCount: widget.destinations.length,
+                              ),
+                            ),
+                          if (widget.trailing != null)
+                            ConstrainedBox(
+                              constraints: BoxConstraints(
+                                minWidth: lerpDouble(minWidth, minExtendedWidth, _extendedAnimation.value)!,
+                              ),
+                              child: widget.trailing,
+                            ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ),
