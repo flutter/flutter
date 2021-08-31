@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import io.flutter.Log;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.plugin.common.JSONMethodCodec;
@@ -41,7 +42,8 @@ public class TextInputChannel {
   @NonNull public final MethodChannel channel;
   @Nullable private TextInputMethodHandler textInputMethodHandler;
 
-  private final MethodChannel.MethodCallHandler parsingMethodHandler =
+  @NonNull @VisibleForTesting
+  final MethodChannel.MethodCallHandler parsingMethodHandler =
       new MethodChannel.MethodCallHandler() {
         @Override
         public void onMethodCall(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
@@ -114,6 +116,7 @@ public class TextInputChannel {
                 }
 
                 textInputMethodHandler.setEditableSizeAndTransform(width, height, matrix);
+                result.success(null);
               } catch (JSONException exception) {
                 result.error("error", exception.getMessage(), null);
               }

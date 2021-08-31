@@ -36,6 +36,7 @@
     <src file="../../../flutter/shell/platform/android/test/io/flutter/embedding/engine/loader/FlutterLoaderTest.java" />
     <src file="../../../flutter/shell/platform/android/test/io/flutter/embedding/engine/loader/ApplicationInfoLoaderTest.java" />
     <src file="../../../flutter/shell/platform/android/test/io/flutter/embedding/engine/FlutterEngineGroupComponentTest.java" />
+    <src file="../../../flutter/shell/platform/android/test/io/flutter/embedding/engine/systemchannels/TextInputChannelTest.java" />
     <src file="../../../flutter/shell/platform/android/test/io/flutter/embedding/engine/systemchannels/DeferredComponentChannelTest.java" />
     <src file="../../../flutter/shell/platform/android/test/io/flutter/embedding/engine/systemchannels/PlatformChannelTest.java" />
     <src file="../../../flutter/shell/platform/android/test/io/flutter/embedding/engine/systemchannels/KeyEventChannelTest.java" />
