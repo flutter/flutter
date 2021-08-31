@@ -10,6 +10,7 @@ if (enable_unittests) {
     tool = "//flutter/lib/spirv/test:glsl_to_spirv"
 
     sources = [
+      "functions.glsl",
       "simple.glsl",
       "uniforms.glsl",
     ]

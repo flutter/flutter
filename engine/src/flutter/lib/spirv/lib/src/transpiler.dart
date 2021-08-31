@@ -193,12 +193,11 @@ class _Transpiler {
   String resolveName(int id) {
     if (alias.containsKey(id)) {
       return resolveName(alias[id]!);
-    }
-    if (constantTrue > 0 && id == constantTrue) {
+    } else if (constantTrue > 0 && id == constantTrue) {
       return 'true';
     } else if (constantFalse > 0 && id == constantFalse) {
       return 'false';
-    } if (id == colorOutput) {
+    } else if (id == colorOutput) {
       if (target == TargetLanguage.glslES) {
         return _glslESColorName;
       } else {
@@ -664,19 +663,16 @@ class _Transpiler {
   void opFunctionParameter() {
     if (declaredParams > 0) {
       out.write(', ');
-      src.write(', ');
     }
 
     final int type = readWord();
     final int id = readWord();
     final String decl = resolveType(type) + ' ' + resolveName(id);
     out.write(decl);
-    src.write(decl);
     declaredParams++;
 
     if (declaredParams == currentFunctionType?.params.length) {
       out.write(') ');
-      src.writeln(');');
     }
   }
 
