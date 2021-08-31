@@ -152,7 +152,7 @@ class Drawer extends StatelessWidget {
   /// contents.
   ///
   /// If this is null, then [DrawerThemeData.backgroundColor] is used. If that
-  /// is also null, then it falls back to [Material]'s default.
+  /// is also null, then it defaults to [ColorScheme.surface].
   final Color? backgroundColor;
 
   /// The z-coordinate at which to place this drawer relative to its parent.
@@ -213,7 +213,9 @@ class Drawer extends StatelessWidget {
       child: ConstrainedBox(
         constraints: const BoxConstraints.expand(width: _kWidth),
         child: Material(
-          color: backgroundColor ?? drawerTheme.backgroundColor,
+          color: backgroundColor
+              ?? drawerTheme.backgroundColor
+              ?? Theme.of(context).colorScheme.surface,
           elevation: elevation ?? drawerTheme.elevation ?? 16.0,
           shape: shape ?? drawerTheme.shape,
           child: child,
@@ -301,7 +303,8 @@ class DrawerController extends StatefulWidget {
   /// The color to use for the scrim that obscures primary content while a drawer is open.
   ///
   /// If this is null, then [DrawerThemeData.scrimColor] is used. If that
-  /// is also null, then it defaults to [Colors.black54].
+  /// is also null, then it defaults to [ColorScheme.onSurface] with 0.32
+  /// opacity..
   final Color? scrimColor;
 
   /// Determines if the [Drawer] can be opened with a drag gesture.
@@ -522,7 +525,9 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     final DrawerThemeData drawerTheme = DrawerTheme.of(context);
     return ColorTween(
       begin: Colors.transparent,
-      end: widget.scrimColor ?? drawerTheme.scrimColor ?? Colors.black54,
+      end: widget.scrimColor
+          ?? drawerTheme.scrimColor
+          ?? Colors.black54,
     );
   }
 
