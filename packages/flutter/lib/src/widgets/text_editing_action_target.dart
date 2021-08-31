@@ -404,7 +404,7 @@ abstract class TextEditingActionTarget {
   void deleteToStart(SelectionChangedCause cause) {
     assert(textEditingValue.selection.isCollapsed);
 
-    setTextEditingValue(textEditingValue.deleteTo(TextPosition(offset: 0)), cause);
+    setTextEditingValue(textEditingValue.deleteTo(const TextPosition(offset: 0)), cause);
   }
 
   /// Expand the current selection to the end of the field.
