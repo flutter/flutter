@@ -516,7 +516,10 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   // selected item is aligned with the button's vertical center, as far as
   // that's possible given availableHeight.
   _MenuLimits getMenuLimits(Rect buttonRect, double availableHeight, int index) {
-    final double maxMenuHeight = availableHeight - 2.0 * _kMenuItemHeight;
+    double maxMenuHeight = availableHeight - 2.0 * _kMenuItemHeight;
+    if (menuMaxHeight != null) {
+      maxMenuHeight = math.min(maxMenuHeight, menuMaxHeight!);
+    }
     final double buttonTop = buttonRect.top;
     final double buttonBottom = math.min(buttonRect.bottom, availableHeight);
     final double selectedItemOffset = getItemOffset(index);
@@ -543,11 +546,18 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     // than the button height and the button is at the very bottom or top of the
     // screen, the menu will be aligned with the bottom or top of the button
     // respectively.
-    if (menuTop < topLimit)
+    if (menuTop < topLimit) {
       menuTop = math.min(buttonTop, topLimit);
+      menuBottom = menuTop + menuHeight;
+    }
 
     if (menuBottom > bottomLimit) {
       menuBottom = math.max(buttonBottom, bottomLimit);
+      menuTop = menuBottom - menuHeight;
+    }
+
+    if (menuBottom - itemHeights[selectedIndex] / 2.0 < buttonBottom - buttonRect.height / 2.0) {
+      menuBottom = buttonBottom - buttonRect.height / 2.0 + itemHeights[selectedIndex] / 2.0;
       menuTop = menuBottom - menuHeight;
     }
 
@@ -567,6 +577,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
       scrollOffset = math.min(scrollOffset, preferredMenuHeight - menuHeight);
     }
 
+    assert(menuHeight == menuBottom - menuTop);
     return _MenuLimits(menuTop, menuBottom, menuHeight, scrollOffset);
   }
 }

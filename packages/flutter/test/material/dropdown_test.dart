@@ -3123,6 +3123,29 @@ void main() {
     expect(menuHeight, defaultMenuHeight);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/89029
+  testWidgets('menu position test with `menuMaxHeight`', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+    await tester.pumpWidget(buildFrame(
+      buttonKey: buttonKey,
+      value: '6',
+      items: List<String>.generate(/*length=*/64, (int index) => index.toString()),
+      onChanged: onChanged,
+      menuMaxHeight: 2 * kMinInteractiveDimension,
+    ));
+
+    await tester.tap(find.text('6'));
+    await tester.pumpAndSettle();
+
+    final RenderBox menuBox = tester.renderObject(find.byType(ListView));
+    final RenderBox buttonBox = tester.renderObject(find.byKey(buttonKey));
+    // The menu's bottom should align with the drop-button's bottom.
+    expect(
+      menuBox.localToGlobal(menuBox.paintBounds.bottomCenter).dy,
+      buttonBox.localToGlobal(buttonBox.paintBounds.bottomCenter).dy,
+    );
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/76614
   testWidgets('Do not crash if used in very short screen', (WidgetTester tester) async {
     // The default item height is 48.0 pixels and needs two items padding since
