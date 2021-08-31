@@ -994,7 +994,7 @@ static void CopyV(void* dst, const S* src, int n, Rest&&... rest) {
 }
 
 template <typename T, typename... Args>
-void* DisplayListBuilder::Push(size_t pod, Args&&... args) {
+void* DisplayListBuilder::Push(size_t pod, int op_inc, Args&&... args) {
   size_t size = SkAlignPtr(sizeof(T) + pod);
   FML_DCHECK(size < (1 << 24));
   if (used_ + size > allocated_) {
@@ -1012,7 +1012,7 @@ void* DisplayListBuilder::Push(size_t pod, Args&&... args) {
   new (op) T{std::forward<Args>(args)...};
   op->type = T::kType;
   op->size = size;
-  op_count_++;
+  op_count_ += op_inc;
   return op + 1;
 }
 
@@ -1038,108 +1038,108 @@ DisplayListBuilder::~DisplayListBuilder() {
 }
 
 void DisplayListBuilder::setAA(bool aa) {
-  Push<SetAAOp>(0, aa);
+  Push<SetAAOp>(0, 0, aa);
 }
 void DisplayListBuilder::setDither(bool dither) {
-  Push<SetDitherOp>(0, dither);
+  Push<SetDitherOp>(0, 0, dither);
 }
 void DisplayListBuilder::setInvertColors(bool invert) {
-  Push<SetInvertColorsOp>(0, invert);
+  Push<SetInvertColorsOp>(0, 0, invert);
 }
 void DisplayListBuilder::setCaps(SkPaint::Cap cap) {
-  Push<SetCapsOp>(0, cap);
+  Push<SetCapsOp>(0, 0, cap);
 }
 void DisplayListBuilder::setJoins(SkPaint::Join join) {
-  Push<SetJoinsOp>(0, join);
+  Push<SetJoinsOp>(0, 0, join);
 }
 void DisplayListBuilder::setDrawStyle(SkPaint::Style style) {
-  Push<SetDrawStyleOp>(0, style);
+  Push<SetDrawStyleOp>(0, 0, style);
 }
 void DisplayListBuilder::setStrokeWidth(SkScalar width) {
-  Push<SetStrokeWidthOp>(0, width);
+  Push<SetStrokeWidthOp>(0, 0, width);
 }
 void DisplayListBuilder::setMiterLimit(SkScalar limit) {
-  Push<SetMiterLimitOp>(0, limit);
+  Push<SetMiterLimitOp>(0, 0, limit);
 }
 void DisplayListBuilder::setColor(SkColor color) {
-  Push<SetColorOp>(0, color);
+  Push<SetColorOp>(0, 0, color);
 }
 void DisplayListBuilder::setBlendMode(SkBlendMode mode) {
-  Push<SetBlendModeOp>(0, mode);
+  Push<SetBlendModeOp>(0, 0, mode);
 }
 void DisplayListBuilder::setBlender(sk_sp<SkBlender> blender) {
   blender  //
-      ? Push<SetBlenderOp>(0, std::move(blender))
-      : Push<ClearBlenderOp>(0);
+      ? Push<SetBlenderOp>(0, 0, std::move(blender))
+      : Push<ClearBlenderOp>(0, 0);
 }
 void DisplayListBuilder::setShader(sk_sp<SkShader> shader) {
   shader  //
-      ? Push<SetShaderOp>(0, std::move(shader))
-      : Push<ClearShaderOp>(0);
+      ? Push<SetShaderOp>(0, 0, std::move(shader))
+      : Push<ClearShaderOp>(0, 0);
 }
 void DisplayListBuilder::setImageFilter(sk_sp<SkImageFilter> filter) {
   filter  //
-      ? Push<SetImageFilterOp>(0, std::move(filter))
-      : Push<ClearImageFilterOp>(0);
+      ? Push<SetImageFilterOp>(0, 0, std::move(filter))
+      : Push<ClearImageFilterOp>(0, 0);
 }
 void DisplayListBuilder::setColorFilter(sk_sp<SkColorFilter> filter) {
   filter  //
-      ? Push<SetColorFilterOp>(0, std::move(filter))
-      : Push<ClearColorFilterOp>(0);
+      ? Push<SetColorFilterOp>(0, 0, std::move(filter))
+      : Push<ClearColorFilterOp>(0, 0);
 }
 void DisplayListBuilder::setPathEffect(sk_sp<SkPathEffect> effect) {
   effect  //
-      ? Push<SetPathEffectOp>(0, std::move(effect))
-      : Push<ClearPathEffectOp>(0);
+      ? Push<SetPathEffectOp>(0, 0, std::move(effect))
+      : Push<ClearPathEffectOp>(0, 0);
 }
 void DisplayListBuilder::setMaskFilter(sk_sp<SkMaskFilter> filter) {
-  Push<SetMaskFilterOp>(0, std::move(filter));
+  Push<SetMaskFilterOp>(0, 0, std::move(filter));
 }
 void DisplayListBuilder::setMaskBlurFilter(SkBlurStyle style, SkScalar sigma) {
   switch (style) {
     case kNormal_SkBlurStyle:
-      Push<SetMaskBlurFilterNormalOp>(0, sigma);
+      Push<SetMaskBlurFilterNormalOp>(0, 0, sigma);
       break;
     case kSolid_SkBlurStyle:
-      Push<SetMaskBlurFilterSolidOp>(0, sigma);
+      Push<SetMaskBlurFilterSolidOp>(0, 0, sigma);
       break;
     case kOuter_SkBlurStyle:
-      Push<SetMaskBlurFilterOuterOp>(0, sigma);
+      Push<SetMaskBlurFilterOuterOp>(0, 0, sigma);
       break;
     case kInner_SkBlurStyle:
-      Push<SetMaskBlurFilterInnerOp>(0, sigma);
+      Push<SetMaskBlurFilterInnerOp>(0, 0, sigma);
       break;
   }
 }
 
 void DisplayListBuilder::save() {
   save_level_++;
-  Push<SaveOp>(0);
+  Push<SaveOp>(0, 1);
 }
 void DisplayListBuilder::restore() {
   if (save_level_ > 0) {
-    Push<RestoreOp>(0);
+    Push<RestoreOp>(0, 1);
     save_level_--;
   }
 }
 void DisplayListBuilder::saveLayer(const SkRect* bounds, bool with_paint) {
   save_level_++;
   bounds  //
-      ? Push<SaveLayerBoundsOp>(0, *bounds, with_paint)
-      : Push<SaveLayerOp>(0, with_paint);
+      ? Push<SaveLayerBoundsOp>(0, 1, *bounds, with_paint)
+      : Push<SaveLayerOp>(0, 1, with_paint);
 }
 
 void DisplayListBuilder::translate(SkScalar tx, SkScalar ty) {
-  Push<TranslateOp>(0, tx, ty);
+  Push<TranslateOp>(0, 1, tx, ty);
 }
 void DisplayListBuilder::scale(SkScalar sx, SkScalar sy) {
-  Push<ScaleOp>(0, sx, sy);
+  Push<ScaleOp>(0, 1, sx, sy);
 }
 void DisplayListBuilder::rotate(SkScalar degrees) {
-  Push<RotateOp>(0, degrees);
+  Push<RotateOp>(0, 1, degrees);
 }
 void DisplayListBuilder::skew(SkScalar sx, SkScalar sy) {
-  Push<SkewOp>(0, sx, sy);
+  Push<SkewOp>(0, 1, sx, sy);
 }
 void DisplayListBuilder::transform2x3(SkScalar mxx,
                                       SkScalar mxy,
@@ -1147,7 +1147,7 @@ void DisplayListBuilder::transform2x3(SkScalar mxx,
                                       SkScalar myx,
                                       SkScalar myy,
                                       SkScalar myt) {
-  Push<Transform2x3Op>(0, mxx, mxy, mxt, myx, myy, myt);
+  Push<Transform2x3Op>(0, 1, mxx, mxy, mxt, myx, myy, myt);
 }
 void DisplayListBuilder::transform3x3(SkScalar mxx,
                                       SkScalar mxy,
@@ -1158,15 +1158,15 @@ void DisplayListBuilder::transform3x3(SkScalar mxx,
                                       SkScalar px,
                                       SkScalar py,
                                       SkScalar pt) {
-  Push<Transform3x3Op>(0, mxx, mxy, mxt, myx, myy, myt, px, py, pt);
+  Push<Transform3x3Op>(0, 1, mxx, mxy, mxt, myx, myy, myt, px, py, pt);
 }
 
 void DisplayListBuilder::clipRect(const SkRect& rect,
                                   bool is_aa,
                                   SkClipOp clip_op) {
   clip_op == SkClipOp::kIntersect  //
-      ? Push<ClipIntersectRectOp>(0, rect, is_aa)
-      : Push<ClipDifferenceRectOp>(0, rect, is_aa);
+      ? Push<ClipIntersectRectOp>(0, 1, rect, is_aa)
+      : Push<ClipDifferenceRectOp>(0, 1, rect, is_aa);
 }
 void DisplayListBuilder::clipRRect(const SkRRect& rrect,
                                    bool is_aa,
@@ -1175,8 +1175,8 @@ void DisplayListBuilder::clipRRect(const SkRRect& rrect,
     clipRect(rrect.rect(), is_aa, clip_op);
   } else {
     clip_op == SkClipOp::kIntersect  //
-        ? Push<ClipIntersectRRectOp>(0, rrect, is_aa)
-        : Push<ClipDifferenceRRectOp>(0, rrect, is_aa);
+        ? Push<ClipIntersectRRectOp>(0, 1, rrect, is_aa)
+        : Push<ClipDifferenceRRectOp>(0, 1, rrect, is_aa);
   }
 }
 void DisplayListBuilder::clipPath(const SkPath& path,
@@ -1200,27 +1200,27 @@ void DisplayListBuilder::clipPath(const SkPath& path,
     }
   }
   clip_op == SkClipOp::kIntersect  //
-      ? Push<ClipIntersectPathOp>(0, path, is_aa)
-      : Push<ClipDifferencePathOp>(0, path, is_aa);
+      ? Push<ClipIntersectPathOp>(0, 1, path, is_aa)
+      : Push<ClipDifferencePathOp>(0, 1, path, is_aa);
 }
 
 void DisplayListBuilder::drawPaint() {
-  Push<DrawPaintOp>(0);
+  Push<DrawPaintOp>(0, 1);
 }
 void DisplayListBuilder::drawColor(SkColor color, SkBlendMode mode) {
-  Push<DrawColorOp>(0, color, mode);
+  Push<DrawColorOp>(0, 1, color, mode);
 }
 void DisplayListBuilder::drawLine(const SkPoint& p0, const SkPoint& p1) {
-  Push<DrawLineOp>(0, p0, p1);
+  Push<DrawLineOp>(0, 1, p0, p1);
 }
 void DisplayListBuilder::drawRect(const SkRect& rect) {
-  Push<DrawRectOp>(0, rect);
+  Push<DrawRectOp>(0, 1, rect);
 }
 void DisplayListBuilder::drawOval(const SkRect& bounds) {
-  Push<DrawOvalOp>(0, bounds);
+  Push<DrawOvalOp>(0, 1, bounds);
 }
 void DisplayListBuilder::drawCircle(const SkPoint& center, SkScalar radius) {
-  Push<DrawCircleOp>(0, center, radius);
+  Push<DrawCircleOp>(0, 1, center, radius);
 }
 void DisplayListBuilder::drawRRect(const SkRRect& rrect) {
   if (rrect.isRect()) {
@@ -1228,22 +1228,22 @@ void DisplayListBuilder::drawRRect(const SkRRect& rrect) {
   } else if (rrect.isOval()) {
     drawOval(rrect.rect());
   } else {
-    Push<DrawRRectOp>(0, rrect);
+    Push<DrawRRectOp>(0, 1, rrect);
   }
 }
 void DisplayListBuilder::drawDRRect(const SkRRect& outer,
                                     const SkRRect& inner) {
-  Push<DrawDRRectOp>(0, outer, inner);
+  Push<DrawDRRectOp>(0, 1, outer, inner);
 }
 void DisplayListBuilder::drawPath(const SkPath& path) {
-  Push<DrawPathOp>(0, path);
+  Push<DrawPathOp>(0, 1, path);
 }
 
 void DisplayListBuilder::drawArc(const SkRect& bounds,
                                  SkScalar start,
                                  SkScalar sweep,
                                  bool useCenter) {
-  Push<DrawArcOp>(0, bounds, start, sweep, useCenter);
+  Push<DrawArcOp>(0, 1, bounds, start, sweep, useCenter);
 }
 void DisplayListBuilder::drawPoints(SkCanvas::PointMode mode,
                                     uint32_t count,
@@ -1253,13 +1253,13 @@ void DisplayListBuilder::drawPoints(SkCanvas::PointMode mode,
   int bytes = count * sizeof(SkPoint);
   switch (mode) {
     case SkCanvas::PointMode::kPoints_PointMode:
-      data_ptr = Push<DrawPointsOp>(bytes, count);
+      data_ptr = Push<DrawPointsOp>(bytes, 1, count);
       break;
     case SkCanvas::PointMode::kLines_PointMode:
-      data_ptr = Push<DrawLinesOp>(bytes, count);
+      data_ptr = Push<DrawLinesOp>(bytes, 1, count);
       break;
     case SkCanvas::PointMode::kPolygon_PointMode:
-      data_ptr = Push<DrawPolygonOp>(bytes, count);
+      data_ptr = Push<DrawPolygonOp>(bytes, 1, count);
       break;
     default:
       FML_DCHECK(false);
@@ -1269,13 +1269,13 @@ void DisplayListBuilder::drawPoints(SkCanvas::PointMode mode,
 }
 void DisplayListBuilder::drawVertices(const sk_sp<SkVertices> vertices,
                                       SkBlendMode mode) {
-  Push<DrawVerticesOp>(0, std::move(vertices), mode);
+  Push<DrawVerticesOp>(0, 1, std::move(vertices), mode);
 }
 
 void DisplayListBuilder::drawImage(const sk_sp<SkImage> image,
                                    const SkPoint point,
                                    const SkSamplingOptions& sampling) {
-  Push<DrawImageOp>(0, std::move(image), point, sampling);
+  Push<DrawImageOp>(0, 1, std::move(image), point, sampling);
 }
 void DisplayListBuilder::drawImageRect(const sk_sp<SkImage> image,
                                        const SkRect& src,
@@ -1283,14 +1283,14 @@ void DisplayListBuilder::drawImageRect(const sk_sp<SkImage> image,
                                        const SkSamplingOptions& sampling,
                                        SkCanvas::SrcRectConstraint constraint) {
   constraint == SkCanvas::kFast_SrcRectConstraint  //
-      ? Push<DrawImageRectFastOp>(0, std::move(image), src, dst, sampling)
-      : Push<DrawImageRectStrictOp>(0, std::move(image), src, dst, sampling);
+      ? Push<DrawImageRectFastOp>(0, 1, std::move(image), src, dst, sampling)
+      : Push<DrawImageRectStrictOp>(0, 1, std::move(image), src, dst, sampling);
 }
 void DisplayListBuilder::drawImageNine(const sk_sp<SkImage> image,
                                        const SkIRect& center,
                                        const SkRect& dst,
                                        SkFilterMode filter) {
-  Push<DrawImageNineOp>(0, std::move(image), center, dst, filter);
+  Push<DrawImageNineOp>(0, 1, std::move(image), center, dst, filter);
 }
 void DisplayListBuilder::drawImageLattice(const sk_sp<SkImage> image,
                                           const SkCanvas::Lattice& lattice,
@@ -1307,9 +1307,9 @@ void DisplayListBuilder::drawImageLattice(const sk_sp<SkImage> image,
       (xDivCount + yDivCount) * sizeof(int) +
       cellCount * (sizeof(SkColor) + sizeof(SkCanvas::Lattice::RectType));
   SkIRect src = lattice.fBounds ? *lattice.fBounds : image->bounds();
-  void* pod = this->Push<DrawImageLatticeOp>(bytes, std::move(image), xDivCount,
-                                             yDivCount, cellCount, src, dst,
-                                             filter, with_paint);
+  void* pod = this->Push<DrawImageLatticeOp>(bytes, 1, std::move(image),
+                                             xDivCount, yDivCount, cellCount,
+                                             src, dst, filter, with_paint);
   CopyV(pod, lattice.fXDivs, xDivCount, lattice.fYDivs, yDivCount,
         lattice.fColors, cellCount, lattice.fRectTypes, cellCount);
 }
@@ -1326,20 +1326,20 @@ void DisplayListBuilder::drawAtlas(const sk_sp<SkImage> atlas,
   if (colors) {
     bytes += count * sizeof(SkColor);
     if (cullRect) {
-      data_ptr = Push<DrawAtlasColoredCulledOp>(bytes, std::move(atlas), count,
-                                                mode, sampling, *cullRect);
+      data_ptr = Push<DrawAtlasColoredCulledOp>(
+          bytes, 1, std::move(atlas), count, mode, sampling, *cullRect);
     } else {
-      data_ptr = Push<DrawAtlasColoredOp>(bytes, std::move(atlas), count, mode,
-                                          sampling);
+      data_ptr = Push<DrawAtlasColoredOp>(bytes, 1, std::move(atlas), count,
+                                          mode, sampling);
     }
     CopyV(data_ptr, xform, count, tex, count, colors, count);
   } else {
     if (cullRect) {
-      data_ptr = Push<DrawAtlasCulledOp>(bytes, std::move(atlas), count, mode,
-                                         sampling, *cullRect);
+      data_ptr = Push<DrawAtlasCulledOp>(bytes, 1, std::move(atlas), count,
+                                         mode, sampling, *cullRect);
     } else {
       data_ptr =
-          Push<DrawAtlasOp>(bytes, std::move(atlas), count, mode, sampling);
+          Push<DrawAtlasOp>(bytes, 1, std::move(atlas), count, mode, sampling);
     }
     CopyV(data_ptr, xform, count, tex, count);
   }
@@ -1349,17 +1349,18 @@ void DisplayListBuilder::drawPicture(const sk_sp<SkPicture> picture,
                                      const SkMatrix* matrix,
                                      bool with_layer) {
   matrix  //
-      ? Push<DrawSkPictureMatrixOp>(0, std::move(picture), *matrix, with_layer)
-      : Push<DrawSkPictureOp>(0, std::move(picture), with_layer);
+      ? Push<DrawSkPictureMatrixOp>(0, 1, std::move(picture), *matrix,
+                                    with_layer)
+      : Push<DrawSkPictureOp>(0, 1, std::move(picture), with_layer);
 }
 void DisplayListBuilder::drawDisplayList(
     const sk_sp<DisplayList> display_list) {
-  Push<DrawDisplayListOp>(0, std::move(display_list));
+  Push<DrawDisplayListOp>(0, 1, std::move(display_list));
 }
 void DisplayListBuilder::drawTextBlob(const sk_sp<SkTextBlob> blob,
                                       SkScalar x,
                                       SkScalar y) {
-  Push<DrawTextBlobOp>(0, std::move(blob), x, y);
+  Push<DrawTextBlobOp>(0, 1, std::move(blob), x, y);
 }
 void DisplayListBuilder::drawShadow(const SkPath& path,
                                     const SkColor color,
@@ -1367,8 +1368,8 @@ void DisplayListBuilder::drawShadow(const SkPath& path,
                                     bool occludes,
                                     SkScalar dpr) {
   occludes  //
-      ? Push<DrawShadowOccludesOp>(0, path, color, elevation, dpr)
-      : Push<DrawShadowOp>(0, path, color, elevation, dpr);
+      ? Push<DrawShadowOccludesOp>(0, 1, path, color, elevation, dpr)
+      : Push<DrawShadowOp>(0, 1, path, color, elevation, dpr);
 }
 
 }  // namespace flutter
