@@ -43,7 +43,7 @@ class MyApp extends StatelessWidget {
 }
 
 /// This is the stateful widget that the main application instantiates.
-class MyStatefulWidget extends StatefulWidget {
+class MyStatefulWidget extends StatefulWidget with SingleTickerProviderStateMixin {
   const MyStatefulWidget({Key? key}) : super(key: key);
 
   @override
@@ -75,6 +75,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
           curve: Curves.easeIn,
           duration: const Duration(seconds: 1),
           child: FlutterLogo(size: _size),
+          vsync: this,
         ),
       ),
     );
