@@ -65,6 +65,7 @@ export 'src/material/divider.dart';
 export 'src/material/divider_theme.dart';
 export 'src/material/drawer.dart';
 export 'src/material/drawer_header.dart';
+export 'src/material/drawer_theme.dart';
 export 'src/material/dropdown.dart';
 export 'src/material/elevated_button.dart';
 export 'src/material/elevated_button_theme.dart';
