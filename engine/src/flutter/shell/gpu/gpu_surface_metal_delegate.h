@@ -89,6 +89,11 @@ class GPUSurfaceMetalDelegate {
   ///
   virtual bool PresentTexture(GPUMTLTextureInfo texture) const = 0;
 
+  //------------------------------------------------------------------------------
+  /// @brief Whether to allow drawing to the surface when the GPU is disabled
+  ///
+  virtual bool AllowsDrawingWhenGpuDisabled() const;
+
   MTLRenderTargetType GetRenderTargetType();
 
  private:

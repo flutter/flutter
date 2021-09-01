@@ -16,4 +16,8 @@ MTLRenderTargetType GPUSurfaceMetalDelegate::GetRenderTargetType() {
   return render_target_type_;
 }
 
+bool GPUSurfaceMetalDelegate::AllowsDrawingWhenGpuDisabled() const {
+  return true;
+}
+
 }  // namespace flutter

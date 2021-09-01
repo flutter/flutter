@@ -53,9 +53,7 @@ class MockExternalViewEmbedder : public flutter::ExternalViewEmbedder {
       double device_pixel_ratio,
       fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) override {}
   void SubmitFrame(GrDirectContext* context,
-                   std::unique_ptr<flutter::SurfaceFrame> frame,
-                   const std::shared_ptr<const fml::SyncSwitch>&
-                       gpu_disable_sync_switch) override {
+                   std::unique_ptr<flutter::SurfaceFrame> frame) override {
     return;
   }
 

@@ -86,9 +86,7 @@ class FlatlandExternalViewEmbedder final
 
   // |ExternalViewEmbedder|
   void SubmitFrame(GrDirectContext* context,
-                   std::unique_ptr<flutter::SurfaceFrame> frame,
-                   const std::shared_ptr<const fml::SyncSwitch>&
-                       gpu_disable_sync_switch) override;
+                   std::unique_ptr<flutter::SurfaceFrame> frame) override;
 
   // |ExternalViewEmbedder|
   void CancelFrame() override { Reset(); }

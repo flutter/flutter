@@ -334,7 +334,7 @@ TEST(AndroidExternalViewEmbedder, SubmitFrame) {
           return true;
         });
 
-    embedder->SubmitFrame(gr_context.get(), std::move(surface_frame), nullptr);
+    embedder->SubmitFrame(gr_context.get(), std::move(surface_frame));
     // Submits frame if no Android view in the current frame.
     EXPECT_TRUE(did_submit_frame);
     // Doesn't resubmit frame.
@@ -401,7 +401,7 @@ TEST(AndroidExternalViewEmbedder, SubmitFrame) {
           return true;
         });
 
-    embedder->SubmitFrame(gr_context.get(), std::move(surface_frame), nullptr);
+    embedder->SubmitFrame(gr_context.get(), std::move(surface_frame));
     // Doesn't submit frame if there aren't Android views in the previous frame.
     EXPECT_FALSE(did_submit_frame);
     // Resubmits frame.
@@ -465,7 +465,7 @@ TEST(AndroidExternalViewEmbedder, SubmitFrame) {
           }
           return true;
         });
-    embedder->SubmitFrame(gr_context.get(), std::move(surface_frame), nullptr);
+    embedder->SubmitFrame(gr_context.get(), std::move(surface_frame));
     // Submits frame if there are Android views in the previous frame.
     EXPECT_TRUE(did_submit_frame);
     // Doesn't resubmit frame.
@@ -573,7 +573,7 @@ TEST(AndroidExternalViewEmbedder, SubmitFrame__overlayComposition) {
         return true;
       });
 
-  embedder->SubmitFrame(gr_context.get(), std::move(surface_frame), nullptr);
+  embedder->SubmitFrame(gr_context.get(), std::move(surface_frame));
 
   EXPECT_CALL(*jni_mock, FlutterViewEndFrame());
   embedder->EndFrame(/*should_resubmit_frame=*/false, raster_thread_merger);
@@ -640,7 +640,7 @@ TEST(AndroidExternalViewEmbedder, SubmitFrame__platformViewWithoutAnyOverlay) {
         return true;
       });
 
-  embedder->SubmitFrame(gr_context.get(), std::move(surface_frame), nullptr);
+  embedder->SubmitFrame(gr_context.get(), std::move(surface_frame));
 
   EXPECT_CALL(*jni_mock, FlutterViewEndFrame());
   embedder->EndFrame(/*should_resubmit_frame=*/false, raster_thread_merger);
@@ -734,7 +734,7 @@ TEST(AndroidExternalViewEmbedder, DestroyOverlayLayersOnSizeChange) {
         std::make_unique<SurfaceFrame>(SkSurface::MakeNull(1000, 1000), false,
                                        [](const SurfaceFrame& surface_frame,
                                           SkCanvas* canvas) { return true; });
-    embedder->SubmitFrame(gr_context.get(), std::move(surface_frame), nullptr);
+    embedder->SubmitFrame(gr_context.get(), std::move(surface_frame));
 
     EXPECT_CALL(*jni_mock, FlutterViewEndFrame());
     embedder->EndFrame(/*should_resubmit_frame=*/false, raster_thread_merger);
@@ -816,7 +816,7 @@ TEST(AndroidExternalViewEmbedder, DoesNotDestroyOverlayLayersOnSizeChange) {
         std::make_unique<SurfaceFrame>(SkSurface::MakeNull(1000, 1000), false,
                                        [](const SurfaceFrame& surface_frame,
                                           SkCanvas* canvas) { return true; });
-    embedder->SubmitFrame(gr_context.get(), std::move(surface_frame), nullptr);
+    embedder->SubmitFrame(gr_context.get(), std::move(surface_frame));
 
     EXPECT_CALL(*jni_mock, FlutterViewEndFrame());
     embedder->EndFrame(/*should_resubmit_frame=*/false, raster_thread_merger);

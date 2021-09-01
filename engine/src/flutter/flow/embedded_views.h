@@ -10,7 +10,6 @@
 #include "flutter/flow/surface_frame.h"
 #include "flutter/fml/memory/ref_counted.h"
 #include "flutter/fml/raster_thread_merger.h"
-#include "flutter/fml/synchronization/sync_switch.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPath.h"
 #include "third_party/skia/include/core/SkPoint.h"
@@ -313,10 +312,8 @@ class ExternalViewEmbedder {
   // This method can mutate the root Skia canvas before submitting the frame.
   //
   // It can also allocate frames for overlay surfaces to compose hybrid views.
-  virtual void SubmitFrame(
-      GrDirectContext* context,
-      std::unique_ptr<SurfaceFrame> frame,
-      const std::shared_ptr<const fml::SyncSwitch>& gpu_disable_sync_switch);
+  virtual void SubmitFrame(GrDirectContext* context,
+                           std::unique_ptr<SurfaceFrame> frame);
 
   // This method provides the embedder a way to do additional tasks after
   // |SubmitFrame|. For example, merge task runners if `should_resubmit_frame`
