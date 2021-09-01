@@ -186,27 +186,16 @@ class RasterCache {
 
   size_t GetPictureCachedEntriesCount() const;
 
-  size_t GetDisplayListCachedEntriesCount() const;
-
   /**
    * @brief Estimate how much memory is used by picture raster cache entries in
-   * bytes.
+   * bytes, including cache entries in the SkPicture cache and the DisplayList
+   * cache.
    *
    * Only SkImage's memory usage is counted as other objects are often much
    * smaller compared to SkImage. SkImageInfo::computeMinByteSize is used to
    * estimate the SkImage memory usage.
    */
   size_t EstimatePictureCacheByteSize() const;
-
-  /**
-   * @brief Estimate how much memory is used by display list raster cache
-   * entries in bytes.
-   *
-   * Only SkImage's memory usage is counted as other objects are often much
-   * smaller compared to SkImage. SkImageInfo::computeMinByteSize is used to
-   * estimate the SkImage memory usage.
-   */
-  size_t EstimateDisplayListCacheByteSize() const;
 
   /**
    * @brief Estimate how much memory is used by layer raster cache entries in
