@@ -127,7 +127,7 @@ abstract class TextEditingActionTarget {
 
     range.dropLast();
     if (!includeWhitespace) {
-      while (range.currentCharacters.length > 0
+      while (range.currentCharacters.isNotEmpty
           && TextMetrics.isWhitespace(range.charactersAfter.first.codeUnitAt(0))) {
         range.dropLast();
       }
