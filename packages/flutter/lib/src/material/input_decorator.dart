@@ -1280,6 +1280,9 @@ class _RenderDecoration extends RenderBox {
     final double iconHeight = _lineHeight(width, <RenderBox?>[icon]);
     final double iconWidth = _lineWidth(iconHeight, <RenderBox?>[icon]);
 
+    final double counterHeight = _lineHeight(width, <RenderBox?>[counter]);
+    final double counterWidth = _lineWidth(counterHeight, <RenderBox?>[counter]);
+
     width = math.max(width - iconWidth, 0.0);
 
     final double prefixIconHeight = _lineHeight(width, <RenderBox?>[prefixIcon]);
@@ -1289,9 +1292,6 @@ class _RenderDecoration extends RenderBox {
     final double suffixIconWidth = _lineWidth(suffixIconHeight, <RenderBox?>[suffixIcon]);
 
     width = math.max(width - contentPadding.horizontal, 0.0);
-
-    final double counterHeight = _lineHeight(width, <RenderBox?>[counter]);
-    final double counterWidth = _lineWidth(counterHeight, <RenderBox?>[counter]);
 
     final double helperErrorAvailableWidth = math.max(width - counterWidth, 0.0);
     final double helperErrorHeight = _lineHeight(helperErrorAvailableWidth, <RenderBox?>[helperError]);
