@@ -462,22 +462,9 @@ SkRect FlutterPlatformViewsController::GetPlatformViewRect(int view_id) {
   );
 }
 
-bool FlutterPlatformViewsController::SubmitFrame(
-    GrDirectContext* gr_context,
-    std::shared_ptr<IOSContext> ios_context,
-    std::unique_ptr<SurfaceFrame> frame,
-    const std::shared_ptr<const fml::SyncSwitch>& gpu_disable_sync_switch) {
-  bool result = false;
-  gpu_disable_sync_switch->Execute(
-      fml::SyncSwitch::Handlers().SetIfTrue([&] { result = false; }).SetIfFalse([&] {
-        result = SubmitFrameGpuSafe(gr_context, ios_context, std::move(frame));
-      }));
-  return result;
-}
-
-bool FlutterPlatformViewsController::SubmitFrameGpuSafe(GrDirectContext* gr_context,
-                                                        std::shared_ptr<IOSContext> ios_context,
-                                                        std::unique_ptr<SurfaceFrame> frame) {
+bool FlutterPlatformViewsController::SubmitFrame(GrDirectContext* gr_context,
+                                                 std::shared_ptr<IOSContext> ios_context,
+                                                 std::unique_ptr<SurfaceFrame> frame) {
   // Any UIKit related code has to run on main thread.
   FML_DCHECK([[NSThread currentThread] isMainThread]);
   if (flutter_view_ == nullptr) {

@@ -244,8 +244,7 @@ void FuchsiaExternalViewEmbedder::EndFrame(
 
 void FuchsiaExternalViewEmbedder::SubmitFrame(
     GrDirectContext* context,
-    std::unique_ptr<flutter::SurfaceFrame> frame,
-    const std::shared_ptr<const fml::SyncSwitch>& gpu_disable_sync_switch) {
+    std::unique_ptr<flutter::SurfaceFrame> frame) {
   TRACE_EVENT0("flutter", "FuchsiaExternalViewEmbedder::SubmitFrame");
   std::vector<std::unique_ptr<SurfaceProducerSurface>> frame_surfaces;
   std::unordered_map<EmbedderLayerId, size_t> frame_surface_indices;

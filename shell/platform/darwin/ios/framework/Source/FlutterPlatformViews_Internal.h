@@ -173,8 +173,7 @@ class FlutterPlatformViewsController {
 
   bool SubmitFrame(GrDirectContext* gr_context,
                    std::shared_ptr<IOSContext> ios_context,
-                   std::unique_ptr<SurfaceFrame> frame,
-                   const std::shared_ptr<const fml::SyncSwitch>& gpu_disable_sync_switch);
+                   std::unique_ptr<SurfaceFrame> frame);
 
   void OnMethodCall(FlutterMethodCall* call, FlutterResult& result);
 
@@ -299,10 +298,6 @@ class FlutterPlatformViewsController {
 
   // Commit a CATransaction if |BeginCATransaction| has been called during the frame.
   void CommitCATransactionIfNeeded();
-
-  bool SubmitFrameGpuSafe(GrDirectContext* gr_context,
-                          std::shared_ptr<IOSContext> ios_context,
-                          std::unique_ptr<SurfaceFrame> frame);
 
   // Resets the state of the frame.
   void ResetFrameState();
