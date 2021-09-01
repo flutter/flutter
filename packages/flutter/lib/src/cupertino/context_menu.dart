@@ -354,7 +354,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
         );
       },
     );
-    Overlay.of(context)!.insert(_lastOverlayEntry!);
+    Overlay.of(context, rootOverlay: true)!.insert(_lastOverlayEntry!);
     _openController.forward();
   }
 
