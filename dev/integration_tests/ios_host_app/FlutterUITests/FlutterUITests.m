@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 @import XCTest;
+@import OSLog;
 
 static const CGFloat kStandardTimeout = 120.0;
 
@@ -24,42 +25,43 @@ static const CGFloat kStandardTimeout = 120.0;
 - (void)testFullScreenColdPop {
     XCUIApplication *app = self.app;
     [self waitForAndTapElement:app.buttons[@"Full Screen (Cold)"]];
-    XCTAssertTrue([app.staticTexts[@"Button tapped 0 times."] waitForExistenceWithTimeout:kStandardTimeout]);
+    [self waitAndAssertExistOrLogError:app.staticTexts[@"Button tapped 0 times."]];
 
     [self waitForAndTapElement:app.otherElements[@"Increment via Flutter"]];
-    XCTAssertTrue([app.staticTexts[@"Button tapped 1 time."] waitForExistenceWithTimeout:kStandardTimeout]);
+    [self waitAndAssertExistOrLogError:app.staticTexts[@"Button tapped 1 time."]];
+
 
     // Back navigation.
     [app.buttons[@"POP"] tap];
-    XCTAssertTrue([app.navigationBars[@"Flutter iOS Demos Home"] waitForExistenceWithTimeout:kStandardTimeout]);
+    [self waitAndAssertExistOrLogError:app.navigationBars[@"Flutter iOS Demos Home"]];
 }
 
 - (void)testFullScreenWarm {
     XCUIApplication *app = self.app;
 
     [self waitForAndTapElement:app.buttons[@"Full Screen (Warm)"]];
-    XCTAssertTrue([app.staticTexts[@"Button tapped 0 times."] waitForExistenceWithTimeout:kStandardTimeout]);
+    [self waitAndAssertExistOrLogError:app.staticTexts[@"Button tapped 0 times."]];
 
     [self waitForAndTapElement:app.otherElements[@"Increment via Flutter"]];
-    XCTAssertTrue([app.staticTexts[@"Button tapped 1 time."] waitForExistenceWithTimeout:kStandardTimeout]);
+    [self waitAndAssertExistOrLogError:app.staticTexts[@"Button tapped 1 time."]];
 
     // Back navigation.
     [app.buttons[@"POP"] tap];
-    XCTAssertTrue([app.navigationBars[@"Flutter iOS Demos Home"] waitForExistenceWithTimeout:kStandardTimeout]);
+    [self waitAndAssertExistOrLogError:app.navigationBars[@"Flutter iOS Demos Home"]];
 }
 
 - (void)testFlutterViewWarm {
     XCUIApplication *app = self.app;
 
     [self waitForAndTapElement:app.buttons[@"Flutter View (Warm)"]];
-    XCTAssertTrue([app.staticTexts[@"Button tapped 0 times."] waitForExistenceWithTimeout:kStandardTimeout]);
+    [self waitAndAssertExistOrLogError:app.staticTexts[@"Button tapped 0 times."]];
 
     [self waitForAndTapElement:app.otherElements[@"Increment via Flutter"]];
-    XCTAssertTrue([app.staticTexts[@"Button tapped 1 time."] waitForExistenceWithTimeout:kStandardTimeout]);
+    [self waitAndAssertExistOrLogError:app.staticTexts[@"Button tapped 1 time."]];
 
     // Back navigation.
     [app.buttons[@"POP"] tap];
-    XCTAssertTrue([app.navigationBars[@"Flutter iOS Demos Home"] waitForExistenceWithTimeout:kStandardTimeout]);
+    [self waitAndAssertExistOrLogError:app.navigationBars[@"Flutter iOS Demos Home"]];
 }
 
 - (void)testHybridViewWarm {
@@ -67,20 +69,20 @@ static const CGFloat kStandardTimeout = 120.0;
 
     [self waitForAndTapElement:app.buttons[@"Hybrid View (Warm)"]];
 
-    XCTAssertTrue([app.staticTexts[@"Flutter button tapped 0 times."] waitForExistenceWithTimeout:kStandardTimeout]);
+   [self waitAndAssertExistOrLogError:app.staticTexts[@"Flutter button tapped 0 times."]];
     XCTAssertTrue(app.staticTexts[@"Platform button tapped 0 times."].exists);
 
     [self waitForAndTapElement:app.otherElements[@"Increment via Flutter"]];
-    XCTAssertTrue([app.staticTexts[@"Flutter button tapped 1 time."] waitForExistenceWithTimeout:kStandardTimeout]);
+    [self waitAndAssertExistOrLogError:app.staticTexts[@"Flutter button tapped 1 time."]];
     XCTAssertTrue(app.staticTexts[@"Platform button tapped 0 times."].exists);
 
     [app.buttons[@"Increment via iOS"] tap];
-    XCTAssertTrue([app.staticTexts[@"Flutter button tapped 1 time."] waitForExistenceWithTimeout:kStandardTimeout]);
+    [self waitAndAssertExistOrLogError:app.staticTexts[@"Flutter button tapped 1 time."]];
     XCTAssertTrue(app.staticTexts[@"Platform button tapped 1 time."].exists);
 
     // Back navigation.
     [app.navigationBars[@"Hybrid Flutter/Native"].buttons[@"Flutter iOS Demos Home"] tap];
-    XCTAssertTrue([app.navigationBars[@"Flutter iOS Demos Home"] waitForExistenceWithTimeout:kStandardTimeout]);
+    [self waitAndAssertExistOrLogError:app.navigationBars[@"Flutter iOS Demos Home"]];
 }
 
 - (void)testDualCold {
@@ -91,18 +93,35 @@ static const CGFloat kStandardTimeout = 120.0;
     // There are two marquees.
     XCUIElementQuery *marqueeQuery = [app.staticTexts matchingIdentifier:@"This is Marquee"];
     [self expectationForPredicate:[NSPredicate predicateWithFormat:@"count = 2"] evaluatedWithObject:marqueeQuery handler:nil];
-    [self waitForExpectationsWithTimeout:kStandardTimeout handler:nil];
+    [self waitForExpectationsOrLogError];
 
     // Back navigation.
     [app.navigationBars[@"Dual Flutter Views"].buttons[@"Flutter iOS Demos Home"] tap];
-    XCTAssertTrue([app.navigationBars[@"Flutter iOS Demos Home"] waitForExistenceWithTimeout:kStandardTimeout]);
+    [self waitAndAssertExistOrLogError:app.navigationBars[@"Flutter iOS Demos Home"]];
 }
 
 - (void)waitForAndTapElement:(XCUIElement *)element {
     NSPredicate *hittable = [NSPredicate predicateWithFormat:@"exists == YES AND hittable == YES"];
     [self expectationForPredicate:hittable evaluatedWithObject:element handler:nil];
-    [self waitForExpectationsWithTimeout:kStandardTimeout handler:nil];
+    [self waitForExpectationsOrLogError];
     [element tap];
+}
+
+- (void)waitAndAssertExistOrLogError:(XCUIElement *)element {
+  BOOL exist = [element waitForExistenceWithTimeout:kStandardTimeout];
+  XCTAssertTrue(exist);
+  if (!exist) {
+    os_log_error(OS_LOG_DEFAULT, "Current app state: %@", self.app.debugDescription);
+  }
+}
+
+- (void)waitForExpectationsOrLogError {
+  [self waitForExpectationsWithTimeout:kStandardTimeout handler:^(NSError * _Nullable error) {
+    if (!error) {
+      return;
+    }
+    os_log_error(OS_LOG_DEFAULT, "Current app state: %@", self.app.debugDescription);
+  }];
 }
 
 @end
