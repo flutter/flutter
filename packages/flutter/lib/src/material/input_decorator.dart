@@ -1265,45 +1265,35 @@ class _RenderDecoration extends RenderBox {
     // See https://github.com/flutter/flutter/issues/13715
   }
 
-  double _lineWidth(double height, List<RenderBox?> boxes) {
-    double width = 0.0;
-    for (final RenderBox? box in boxes) {
-      if (box == null)
-        continue;
-      width = math.max(_minWidth(box, height), width);
-    }
-    return width;
-  }
-
   @override
   double computeMinIntrinsicHeight(double width) {
-    final double iconHeight = _lineHeight(width, <RenderBox?>[icon]);
-    final double iconWidth = _lineWidth(iconHeight, <RenderBox?>[icon]);
+    final double iconHeight = _minHeight(icon, width);
+    final double iconWidth = _minWidth(icon, iconHeight);
 
-    final double counterHeight = _lineHeight(width, <RenderBox?>[counter]);
-    final double counterWidth = _lineWidth(counterHeight, <RenderBox?>[counter]);
+    final double counterHeight = _minHeight(counter, width);
+    final double counterWidth = _minWidth(counter, counterHeight);
 
     width = math.max(width - iconWidth, 0.0);
 
-    final double prefixIconHeight = _lineHeight(width, <RenderBox?>[prefixIcon]);
-    final double prefixIconWidth = _lineWidth(prefixIconHeight, <RenderBox?>[prefixIcon]);
+    final double prefixIconHeight = _minHeight(prefixIcon, width);
+    final double prefixIconWidth = _minWidth(prefixIcon, prefixIconHeight);
 
-    final double suffixIconHeight = _lineHeight(width, <RenderBox?>[suffixIcon]);
-    final double suffixIconWidth = _lineWidth(suffixIconHeight, <RenderBox?>[suffixIcon]);
+    final double suffixIconHeight = _minHeight(suffixIcon, width);
+    final double suffixIconWidth = _minWidth(suffixIcon, suffixIconHeight);
 
     width = math.max(width - contentPadding.horizontal, 0.0);
 
     final double helperErrorAvailableWidth = math.max(width - counterWidth, 0.0);
-    final double helperErrorHeight = _lineHeight(helperErrorAvailableWidth, <RenderBox?>[helperError]);
+    final double helperErrorHeight = _minHeight(helperError, helperErrorAvailableWidth);
     double subtextHeight = math.max(counterHeight, helperErrorHeight);
     if (subtextHeight > 0.0)
       subtextHeight += subtextGap;
 
-    final double prefixHeight = _lineHeight(width, <RenderBox?>[prefix]);
-    final double prefixWidth = _lineWidth(prefixHeight, <RenderBox?>[prefix]);
+    final double prefixHeight = _minHeight(prefix, width);
+    final double prefixWidth = _minWidth(prefix, prefixHeight);
 
-    final double suffixHeight = _lineHeight(width, <RenderBox?>[suffix]);
-    final double suffixWidth = _lineWidth(suffixHeight, <RenderBox?>[suffix]);
+    final double suffixHeight = _minHeight(suffix, width);
+    final double suffixWidth = _minWidth(suffix, suffixHeight);
 
     final double availableInputWidth = math.max(width - prefixWidth - suffixWidth - prefixIconWidth - suffixIconWidth, 0.0);
     final double inputHeight = _lineHeight(availableInputWidth, <RenderBox?>[input, hint]);
