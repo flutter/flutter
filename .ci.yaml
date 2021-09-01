@@ -389,7 +389,10 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "goldctl"}
+          {"dependency": "goldctl"},
+          {"dependency": "clang"},
+          {"dependency": "cmake"},
+          {"dependency": "ninja"}
         ]
       shard: framework_tests
       subshard: misc
@@ -696,7 +699,6 @@ targets:
 
   - name: Linux test_ownership
     recipe: infra/test_ownership
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -1882,7 +1884,9 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "goldctl"}
+          {"dependency": "goldctl"},
+          {"dependency": "xcode"},
+          {"dependency": "gems"}
         ]
       shard: framework_tests
       subshard: misc
@@ -2068,6 +2072,7 @@ targets:
       - bin/**
 
   - name: Mac module_test_ios
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/89175
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -2763,7 +2768,6 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
-    bringup: true
     properties:
       tags: >
         ["devicelab","android","mac"]
@@ -3367,7 +3371,8 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "goldctl"}
+          {"dependency": "goldctl"},
+          {"dependency": "vs_build"}
         ]
       shard: framework_tests
       subshard: misc

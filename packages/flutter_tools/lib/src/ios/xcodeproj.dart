@@ -373,7 +373,7 @@ class XcodeProjectBuildContext {
 ///
 /// Represents the output of `xcodebuild -list`.
 class XcodeProjectInfo {
-  XcodeProjectInfo(
+  const XcodeProjectInfo(
     this.targets,
     this.buildConfigurations,
     this.schemes,

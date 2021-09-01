@@ -101,9 +101,6 @@ enum HostArtifact {
   iproxy,
   /// The root of the sky_engine package.
   skyEnginePath,
-
-  /// The pub or pub.bat executable
-  pubExecutable,
 }
 
 // TODO(knopp): Remove once darwin artifacts are universal and moved out of darwin-x64
@@ -263,11 +260,6 @@ String _hostArtifactToFileName(HostArtifact artifact, bool windows) {
     case HostArtifact.webPrecompiledCanvaskitSoundSdkSourcemaps:
     case HostArtifact.webPrecompiledCanvaskitAndHtmlSoundSdkSourcemaps:
       return 'dart_sdk.js.map';
-    case HostArtifact.pubExecutable:
-      if (windows) {
-        return 'pub.bat';
-      }
-      return 'pub';
   }
 }
 
@@ -405,9 +397,6 @@ class CachedArtifacts implements Artifacts {
         final Directory dartPackageDirectory = _cache.getCacheDir('pkg');
         final String path = _fileSystem.path.join(dartPackageDirectory.path,  _hostArtifactToFileName(artifact, _platform.isWindows));
         return _fileSystem.directory(path);
-      case HostArtifact.pubExecutable:
-        final String path = _fileSystem.path.join(_dartSdkPath(_fileSystem), 'bin',  _hostArtifactToFileName(artifact, _platform.isWindows));
-        return _fileSystem.file(path);
       case HostArtifact.dart2jsSnapshot:
       case HostArtifact.dartdevcSnapshot:
       case HostArtifact.kernelWorkerSnapshot:
@@ -791,9 +780,6 @@ class CachedLocalEngineArtifacts implements LocalEngineArtifacts {
         final Directory dartPackageDirectory = _cache.getCacheDir('pkg');
         final String path = _fileSystem.path.join(dartPackageDirectory.path,  _hostArtifactToFileName(artifact, _platform.isWindows));
         return _fileSystem.directory(path);
-      case HostArtifact.pubExecutable:
-        final String path = _fileSystem.path.join(_hostEngineOutPath, 'dart-sdk', 'bin',  _hostArtifactToFileName(artifact, _platform.isWindows));
-        return _fileSystem.file(path);
       case HostArtifact.iosDeploy:
         final String artifactFileName = _hostArtifactToFileName(artifact, _platform.isWindows);
         return _cache.getArtifactDirectory('ios-deploy').childFile(artifactFileName);
