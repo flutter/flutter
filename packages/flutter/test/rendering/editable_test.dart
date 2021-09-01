@@ -911,53 +911,6 @@ void main() {
     expect(endpoints[0].point.dx, 0);
   });
 
-  group('nextCharacter', () {
-    test('handles normal strings correctly', () {
-      expect(TextEditingValue.nextCharacter(0, '01234567'), 1);
-      expect(TextEditingValue.nextCharacter(3, '01234567'), 4);
-      expect(TextEditingValue.nextCharacter(7, '01234567'), 8);
-      expect(TextEditingValue.nextCharacter(8, '01234567'), 8);
-    });
-
-    test('throws for invalid indices', () {
-      expect(() => TextEditingValue.nextCharacter(-1, '01234567'), throwsAssertionError);
-      expect(() => TextEditingValue.nextCharacter(9, '01234567'), throwsAssertionError);
-    });
-
-    test('skips spaces in normal strings when includeWhitespace is false', () {
-      expect(TextEditingValue.nextCharacter(3, '0123 5678', false), 5);
-      expect(TextEditingValue.nextCharacter(4, '0123 5678', false), 5);
-      expect(TextEditingValue.nextCharacter(3, '0123      0123', false), 10);
-      expect(TextEditingValue.nextCharacter(2, '0123      0123', false), 3);
-      expect(TextEditingValue.nextCharacter(4, '0123      0123', false), 10);
-      expect(TextEditingValue.nextCharacter(9, '0123      0123', false), 10);
-      expect(TextEditingValue.nextCharacter(10, '0123      0123', false), 11);
-      // If the subsequent characters are all whitespace, it returns the length
-      // of the string.
-      expect(TextEditingValue.nextCharacter(5, '0123      ', false), 10);
-    });
-
-    test('handles surrogate pairs correctly', () {
-      expect(TextEditingValue.nextCharacter(3, '0123👨👩👦0123'), 4);
-      expect(TextEditingValue.nextCharacter(4, '0123👨👩👦0123'), 6);
-      expect(TextEditingValue.nextCharacter(5, '0123👨👩👦0123'), 6);
-      expect(TextEditingValue.nextCharacter(6, '0123👨👩👦0123'), 8);
-      expect(TextEditingValue.nextCharacter(7, '0123👨👩👦0123'), 8);
-      expect(TextEditingValue.nextCharacter(8, '0123👨👩👦0123'), 10);
-      expect(TextEditingValue.nextCharacter(9, '0123👨👩👦0123'), 10);
-      expect(TextEditingValue.nextCharacter(10, '0123👨👩👦0123'), 11);
-    });
-
-    test('handles extended grapheme clusters correctly', () {
-      expect(TextEditingValue.nextCharacter(3, '0123👨‍👩‍👦2345'), 4);
-      expect(TextEditingValue.nextCharacter(4, '0123👨‍👩‍👦2345'), 12);
-      // Even when extent falls within an extended grapheme cluster, it still
-      // identifies the whole grapheme cluster.
-      expect(TextEditingValue.nextCharacter(5, '0123👨‍👩‍👦2345'), 12);
-      expect(TextEditingValue.nextCharacter(12, '0123👨‍👩‍👦2345'), 13);
-    });
-  });
-
   group('getRectForComposingRange', () {
     const TextSpan emptyTextSpan = TextSpan(text: '\u200e');
     final TextSelectionDelegate delegate = _FakeEditableTextState();
@@ -1010,53 +963,6 @@ void main() {
       // as wide as the entire paragraph (give or take 1 character).
       expect(composingRect.width, greaterThan(200 - 10));
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/66089
-  });
-
-  group('previousCharacter', () {
-    test('handles normal strings correctly', () {
-      expect(TextEditingValue.previousCharacter(8, '01234567'), 7);
-      expect(TextEditingValue.previousCharacter(0, '01234567'), 0);
-      expect(TextEditingValue.previousCharacter(1, '01234567'), 0);
-      expect(TextEditingValue.previousCharacter(5, '01234567'), 4);
-      expect(TextEditingValue.previousCharacter(8, '01234567'), 7);
-    });
-
-    test('throws for invalid indices', () {
-      expect(() => TextEditingValue.previousCharacter(-1, '01234567'), throwsAssertionError);
-      expect(() => TextEditingValue.previousCharacter(9, '01234567'), throwsAssertionError);
-    });
-
-    test('skips spaces in normal strings when includeWhitespace is false', () {
-      expect(TextEditingValue.previousCharacter(10, '0123      0123', false), 3);
-      expect(TextEditingValue.previousCharacter(11, '0123      0123', false), 10);
-      expect(TextEditingValue.previousCharacter(9, '0123      0123', false), 3);
-      expect(TextEditingValue.previousCharacter(4, '0123      0123', false), 3);
-      expect(TextEditingValue.previousCharacter(3, '0123      0123', false), 2);
-      // If the previous characters are all whitespace, it returns zero.
-      expect(TextEditingValue.previousCharacter(3, '          0123', false), 0);
-    });
-
-    test('handles surrogate pairs correctly', () {
-      expect(TextEditingValue.previousCharacter(11, '0123👨👩👦0123'), 10);
-      expect(TextEditingValue.previousCharacter(10, '0123👨👩👦0123'), 8);
-      expect(TextEditingValue.previousCharacter(9, '0123👨👩👦0123'), 8);
-      expect(TextEditingValue.previousCharacter(8, '0123👨👩👦0123'), 6);
-      expect(TextEditingValue.previousCharacter(7, '0123👨👩👦0123'), 6);
-      expect(TextEditingValue.previousCharacter(6, '0123👨👩👦0123'), 4);
-      expect(TextEditingValue.previousCharacter(5, '0123👨👩👦0123'), 4);
-      expect(TextEditingValue.previousCharacter(4, '0123👨👩👦0123'), 3);
-      expect(TextEditingValue.previousCharacter(3, '0123👨👩👦0123'), 2);
-    });
-
-    test('handles extended grapheme clusters correctly', () {
-      expect(TextEditingValue.previousCharacter(13, '0123👨‍👩‍👦2345'), 12);
-      // Even when extent falls within an extended grapheme cluster, it still
-      // identifies the whole grapheme cluster.
-      expect(TextEditingValue.previousCharacter(12, '0123👨‍👩‍👦2345'), 4);
-      expect(TextEditingValue.previousCharacter(11, '0123👨‍👩‍👦2345'), 4);
-      expect(TextEditingValue.previousCharacter(5, '0123👨‍👩‍👦2345'), 4);
-      expect(TextEditingValue.previousCharacter(4, '0123👨‍👩‍👦2345'), 3);
-    });
   });
 
   group('custom painters', () {

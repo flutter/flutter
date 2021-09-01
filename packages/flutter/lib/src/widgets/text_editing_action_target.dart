@@ -5,6 +5,8 @@
 import 'dart:math' as math;
 import 'dart:ui' show TextAffinity, TextPosition;
 
+import 'package:characters/characters.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart'
     show Clipboard, ClipboardData, TextMetrics, TextRange;
 
@@ -62,6 +64,76 @@ abstract class TextEditingActionTarget {
   ///
   /// Can be overridden to assert that this is a valid assumption.
   void debugAssertLayoutUpToDate();
+
+  /// Returns the index into the string of the next character boundary after the
+  /// given index.
+  ///
+  /// The character boundary is determined by the characters package, so
+  /// surrogate pairs and extended grapheme clusters are considered.
+  ///
+  /// The index must be between 0 and string.length, inclusive. If given
+  /// string.length, string.length is returned.
+  ///
+  /// Setting includeWhitespace to false will only return the index of non-space
+  /// characters.
+  @visibleForTesting
+  static int nextCharacter(int index, String string, [bool includeWhitespace = true]) {
+    assert(index >= 0 && index <= string.length);
+    if (index == string.length) {
+      return string.length;
+    }
+
+    final CharacterRange range = CharacterRange.at(string, 0, index);
+    // If index is not on a character boundary, return the next character
+    // boundary.
+    if (range.current.length != index) {
+      return range.current.length;
+    }
+
+    range.expandNext();
+    if (!includeWhitespace) {
+      range.expandWhile((String character) {
+        return TextMetrics.isWhitespace(character.codeUnitAt(0));
+      });
+    }
+    return range.current.length;
+  }
+
+  /// Returns the index into the string of the previous character boundary
+  /// before the given index.
+  ///
+  /// The character boundary is determined by the characters package, so
+  /// surrogate pairs and extended grapheme clusters are considered.
+  ///
+  /// The index must be between 0 and string.length, inclusive. If index is 0,
+  /// 0 will be returned.
+  ///
+  /// Setting includeWhitespace to false will only return the index of non-space
+  /// characters.
+  @visibleForTesting
+  static int previousCharacter(int index, String string, [bool includeWhitespace = true]) {
+    assert(index >= 0 && index <= string.length);
+    if (index == 0) {
+      return 0;
+    }
+
+    final CharacterRange range = CharacterRange.at(string, 0, index);
+    // If index is not on a character boundary, return the previous character
+    // boundary.
+    if (range.current.length != index) {
+      range.dropLast();
+      return range.current.length;
+    }
+
+    range.dropLast();
+    if (!includeWhitespace) {
+      while (range.currentCharacters.length > 0
+          && TextMetrics.isWhitespace(range.charactersAfter.first.codeUnitAt(0))) {
+        range.dropLast();
+      }
+    }
+    return range.current.length;
+  }
 
   /// {@template flutter.widgets.TextEditingActionTarget.setSelection}
   /// Called to update the [TextSelection] in the current [TextEditingValue].
@@ -122,8 +194,8 @@ abstract class TextEditingActionTarget {
     )), cause);
   }
 
-  /// Return the offset at the start of the nearest word to the left of the
-  /// given offset.
+  // Return the offset at the start of the nearest word to the left of the
+  // given offset.
   int _getLeftByWord(int offset, [bool includeWhitespace = true]) {
     // If the offset is already all the way left, there is nothing to do.
     if (offset <= 0) {
@@ -135,7 +207,7 @@ abstract class TextEditingActionTarget {
       return 0;
     }
 
-    final int startPoint = TextEditingValue.previousCharacter(
+    final int startPoint = previousCharacter(
         offset, textEditingValue.text, includeWhitespace);
     final TextRange word =
         textMetrics.getWordBoundary(TextPosition(offset: startPoint, affinity: textEditingValue.selection.affinity));
@@ -158,7 +230,7 @@ abstract class TextEditingActionTarget {
     final int startPoint = includeWhitespace ||
             !TextMetrics.isWhitespace(textEditingValue.text.codeUnitAt(offset))
         ? offset
-        : TextEditingValue.nextCharacter(offset, textEditingValue.text, includeWhitespace);
+        : nextCharacter(offset, textEditingValue.text, includeWhitespace);
     final TextRange nextWord =
         textMetrics.getWordBoundary(TextPosition(offset: startPoint, affinity: textEditingValue.selection.affinity));
     return nextWord.end;
@@ -191,7 +263,7 @@ abstract class TextEditingActionTarget {
     // deleting without having to layout the text. For this reason, we can
     // directly delete the character before the caret in the controller.
     final String textBefore = textEditingValue.selection.textBefore(textEditingValue.text);
-    final int characterBoundary = TextEditingValue.previousCharacter(
+    final int characterBoundary = previousCharacter(
       textBefore.length,
       textBefore,
     );
@@ -301,7 +373,7 @@ abstract class TextEditingActionTarget {
     }
 
     final String textAfter = textEditingValue.selection.textAfter(textEditingValue.text);
-    final int characterBoundary = TextEditingValue.nextCharacter(0, textAfter);
+    final int characterBoundary = nextCharacter(0, textAfter);
     setTextEditingValue(textEditingValue.deleteTo(TextPosition(offset: textEditingValue.selection.end + characterBoundary)), cause);
   }
 
@@ -611,7 +683,7 @@ abstract class TextEditingActionTarget {
       return;
     }
 
-    final int previousExtent = TextEditingValue.previousCharacter(
+    final int previousExtent = previousCharacter(
       textEditingValue.selection.extentOffset,
       textEditingValue.text,
     );
@@ -648,7 +720,7 @@ abstract class TextEditingActionTarget {
     // so we go back to the first non-whitespace before asking for the line
     // bounds, since getLineAtOffset finds the line boundaries without
     // including whitespace (like the newline).
-    final int startPoint = TextEditingValue.previousCharacter(
+    final int startPoint = previousCharacter(
         textEditingValue.selection.extentOffset, textEditingValue.text, false);
     final TextSelection selectedLine = textMetrics.getLineAtOffset(
       TextPosition(offset: startPoint),
@@ -691,7 +763,7 @@ abstract class TextEditingActionTarget {
     if (textEditingValue.selection.extentOffset >= textEditingValue.text.length) {
       return;
     }
-    final int nextExtent = TextEditingValue.nextCharacter(
+    final int nextExtent = nextCharacter(
         textEditingValue.selection.extentOffset, textEditingValue.text);
 
     final int distance = nextExtent - textEditingValue.selection.extentOffset;
@@ -722,7 +794,7 @@ abstract class TextEditingActionTarget {
       return moveSelectionRightByLine(cause);
     }
 
-    final int startPoint = TextEditingValue.nextCharacter(
+    final int startPoint = nextCharacter(
         textEditingValue.selection.extentOffset, textEditingValue.text, false);
     final TextSelection selectedLine = textMetrics.getLineAtOffset(
       TextPosition(offset: startPoint),
@@ -911,7 +983,7 @@ abstract class TextEditingActionTarget {
     // so we go back to the first non-whitespace before asking for the line
     // bounds, since getLineAtOffset finds the line boundaries without
     // including whitespace (like the newline).
-    final int startPoint = TextEditingValue.previousCharacter(
+    final int startPoint = previousCharacter(
         textEditingValue.selection.extentOffset, textEditingValue.text, false);
     final TextSelection selectedLine = textMetrics.getLineAtOffset(
       TextPosition(offset: startPoint),
@@ -982,7 +1054,7 @@ abstract class TextEditingActionTarget {
     if (textEditingValue.selection.start != textEditingValue.selection.end) {
       previousExtent = textEditingValue.selection.start;
     } else {
-      previousExtent = TextEditingValue.previousCharacter(
+      previousExtent = previousCharacter(
           textEditingValue.selection.extentOffset, textEditingValue.text);
     }
     final TextSelection nextSelection = TextSelection.fromPosition(
@@ -1056,7 +1128,7 @@ abstract class TextEditingActionTarget {
     if (textEditingValue.selection.start != textEditingValue.selection.end) {
       nextExtent = textEditingValue.selection.end;
     } else {
-      nextExtent = TextEditingValue.nextCharacter(
+      nextExtent = nextCharacter(
           textEditingValue.selection.extentOffset, textEditingValue.text);
     }
     final TextSelection nextSelection = TextSelection.fromPosition(TextPosition(
@@ -1092,7 +1164,7 @@ abstract class TextEditingActionTarget {
     // so we go forward to the first non-whitespace character before asking
     // for the line bounds, since getLineAtOffset finds the line
     // boundaries without including whitespace (like the newline).
-    final int startPoint = TextEditingValue.nextCharacter(
+    final int startPoint = nextCharacter(
         textEditingValue.selection.extentOffset, textEditingValue.text, false);
     final TextSelection selectedLine = textMetrics.getLineAtOffset(
       TextPosition(

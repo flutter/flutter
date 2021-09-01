@@ -68,69 +68,6 @@ class TextEditingValue {
   /// A value that corresponds to the empty string with no selection and no composing range.
   static const TextEditingValue empty = TextEditingValue();
 
-  /// Returns the index into the string of the next character boundary after the
-  /// given index.
-  ///
-  /// The character boundary is determined by the characters package, so
-  /// surrogate pairs and extended grapheme clusters are considered.
-  ///
-  /// The index must be between 0 and string.length, inclusive. If given
-  /// string.length, string.length is returned.
-  ///
-  /// Setting includeWhitespace to false will only return the index of non-space
-  /// characters.
-  static int nextCharacter(int index, String string, [bool includeWhitespace = true]) {
-    assert(index >= 0 && index <= string.length);
-    if (index == string.length) {
-      return string.length;
-    }
-
-    int count = 0;
-    final Characters remaining = string.characters.skipWhile((String currentString) {
-      if (count <= index) {
-        count += currentString.length;
-        return true;
-      }
-      if (includeWhitespace) {
-        return false;
-      }
-      return TextMetrics.isWhitespace(currentString.codeUnitAt(0));
-    });
-    return string.length - remaining.toString().length;
-  }
-
-  /// Returns the index into the string of the previous character boundary
-  /// before the given index.
-  ///
-  /// The character boundary is determined by the characters package, so
-  /// surrogate pairs and extended grapheme clusters are considered.
-  ///
-  /// The index must be between 0 and string.length, inclusive. If index is 0,
-  /// 0 will be returned.
-  ///
-  /// Setting includeWhitespace to false will only return the index of non-space
-  /// characters.
-  static int previousCharacter(int index, String string, [bool includeWhitespace = true]) {
-    assert(index >= 0 && index <= string.length);
-    if (index == 0) {
-      return 0;
-    }
-
-    int count = 0;
-    int? lastNonWhitespace;
-    for (final String currentString in string.characters) {
-      if (!includeWhitespace &&
-          !TextMetrics.isWhitespace(currentString.characters.first.codeUnitAt(0))) {
-        lastNonWhitespace = count;
-      }
-      if (count + currentString.length >= index) {
-        return includeWhitespace ? count : lastNonWhitespace ?? 0;
-      }
-      count += currentString.length;
-    }
-    return 0;
-  }
-
   /// Creates a copy of this value but with the given fields replaced with the new values.
   TextEditingValue copyWith({
     String? text,
