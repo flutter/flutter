@@ -1741,7 +1741,7 @@ class TransformLayer extends OffsetLayer {
 ///
 /// Try to avoid an [OpacityLayer] with no children. Remove that layer if
 /// possible to save some tree walks.
-class OpacityLayer extends ContainerLayer {
+class OpacityLayer extends OffsetLayer {
   /// Creates an opacity layer.
   ///
   /// The [alpha] property must be non-null before the compositing phase of
@@ -1750,7 +1750,7 @@ class OpacityLayer extends ContainerLayer {
     int? alpha,
     Offset offset = Offset.zero,
   }) : _alpha = alpha,
-       _offset = offset;
+       super(offset: offset);
 
   /// The amount to multiply into the alpha channel.
   ///
@@ -1769,23 +1769,6 @@ class OpacityLayer extends ContainerLayer {
     }
   }
 
-  /// Offset from parent in the parent's coordinate system.
-  Offset? get offset => _offset;
-  Offset? _offset;
-  set offset(Offset? value) {
-    if (value != _offset) {
-      _offset = value;
-      markNeedsAddToScene();
-    }
-  }
-
-  @override
-  void applyTransform(Layer? child, Matrix4 transform) {
-    assert(child != null);
-    assert(transform != null);
-    transform.translate(offset!.dx, offset!.dy);
-  }
-
   @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     assert(alpha != null);
@@ -1794,25 +1777,37 @@ class OpacityLayer extends ContainerLayer {
       enabled = enabled && !debugDisableOpacityLayers;
       return true;
     }());
-
-    if (enabled)
+enabled = false;
+    final int realizedAlpha = alpha!;
+    if (enabled && realizedAlpha < 255) {
+      ui.OpacityEngineLayer? oldLayer;
+      if (_engineLayer is ui.OpacityEngineLayer?) {
+        oldLayer = _engineLayer as ui.OpacityEngineLayer?;
+      }
       engineLayer = builder.pushOpacity(
-        alpha!,
-        offset: offset! + layerOffset,
-        oldLayer: _engineLayer as ui.OpacityEngineLayer?,
+        realizedAlpha,
+        offset: offset + layerOffset,
+        oldLayer: oldLayer,
       );
-    else
-      engineLayer = null;
+    } else {
+      ui.OffsetEngineLayer? oldLayer;
+      if (_engineLayer is ui.OffsetEngineLayer?) {
+        oldLayer = _engineLayer as ui.OffsetEngineLayer?;
+      }
+      engineLayer = builder.pushOffset(
+        layerOffset.dx + offset.dx,
+        layerOffset.dy + offset.dy,
+        oldLayer: oldLayer,
+      );
+    }
     addChildrenToScene(builder);
-    if (enabled)
-      builder.pop();
+    builder.pop();
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(IntProperty('alpha', alpha));
-    properties.add(DiagnosticsProperty<Offset>('offset', offset));
   }
 }
 
