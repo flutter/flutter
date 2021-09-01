@@ -23,11 +23,14 @@ import 'theme.dart';
 ///
 /// See also:
 ///
+///  * [DrawerTheme], an [InheritedWidget] that propagates the theme down its
+///    subtree.
 ///  * [ThemeData], which describes the overall theme information for the
-///    application.
+///    application and can customize a drawer using [ThemeData.drawerTheme].
 @immutable
 class DrawerThemeData with Diagnosticable {
-  /// Creates a theme that can be used for [ThemeData.drawerTheme].
+  /// Creates a theme that can be used for [ThemeData.drawerTheme] and
+  /// [DrawerTheme].
   const DrawerThemeData({
     this.backgroundColor,
     this.scrimColor,
@@ -35,16 +38,16 @@ class DrawerThemeData with Diagnosticable {
     this.shape,
   });
 
-  /// Color to be used for the [Drawer]'s background.
+  /// Overrides the default value of [Drawer.backgroundColor].
   final Color? backgroundColor;
 
-  /// Color to be used for the [Drawer]'s scrim when the drawer is open.
+  /// Overrides the default value of [DrawerController.scrimColor].
   final Color? scrimColor;
 
-  /// The z-coordinate to be used for the [Drawer]'s elevation.
+  /// Overrides the default value of [Drawer.elevation].
   final double? elevation;
 
-  /// Shape to be used for the [Drawer].
+  /// Overrides the default value of [Drawer.shape].
   final ShapeBorder? shape;
 
   /// Creates a copy of this object with the given fields replaced with the
@@ -118,11 +121,11 @@ class DrawerThemeData with Diagnosticable {
 ///
 /// Values specified here are used for [Drawer] properties that are not
 /// given an explicit non-null value.
+///
+/// Using this would allow you to override the [ThemeData.drawerTheme].
 class DrawerTheme extends InheritedTheme {
-  /// Creates a drawe theme that controls the [DrawerThemeData] properties for a
+  /// Creates a theme that defines the [DrawerThemeData] properties for a
   /// [Drawer].
-  ///
-  /// The data argument must not be null.
   const DrawerTheme({
     Key? key,
     required this.data,

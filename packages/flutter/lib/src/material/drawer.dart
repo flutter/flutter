@@ -152,7 +152,7 @@ class Drawer extends StatelessWidget {
   /// contents.
   ///
   /// If this is null, then [DrawerThemeData.backgroundColor] is used. If that
-  /// is also null, then it defaults to [ColorScheme.surface].
+  /// is also null, then it falls back to [Material]'s default.
   final Color? backgroundColor;
 
   /// The z-coordinate at which to place this drawer relative to its parent.
@@ -213,9 +213,7 @@ class Drawer extends StatelessWidget {
       child: ConstrainedBox(
         constraints: const BoxConstraints.expand(width: _kWidth),
         child: Material(
-          color: backgroundColor
-              ?? drawerTheme.backgroundColor
-              ?? Theme.of(context).colorScheme.surface,
+          color: backgroundColor ?? drawerTheme.backgroundColor,
           elevation: elevation ?? drawerTheme.elevation ?? 16.0,
           shape: shape ?? drawerTheme.shape,
           child: child,
@@ -300,11 +298,11 @@ class DrawerController extends StatefulWidget {
   /// {@endtemplate}
   final DragStartBehavior dragStartBehavior;
 
-  /// The color to use for the scrim that obscures primary content while a drawer is open.
+  /// The color to use for the scrim that obscures the underlying content while
+  /// a drawer is open.
   ///
   /// If this is null, then [DrawerThemeData.scrimColor] is used. If that
-  /// is also null, then it defaults to [ColorScheme.onSurface] with 0.32
-  /// opacity.
+  /// is also null, then it defaults to [Colors.black54].
   final Color? scrimColor;
 
   /// Determines if the [Drawer] can be opened with a drag gesture.
@@ -522,12 +520,11 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   final GlobalKey _gestureDetectorKey = GlobalKey();
 
   ColorTween _buildScrimColorTween() {
-    final DrawerThemeData drawerTheme = DrawerTheme.of(context);
     return ColorTween(
       begin: Colors.transparent,
       end: widget.scrimColor
-          ?? drawerTheme.scrimColor
-          ?? Theme.of(context).colorScheme.onSurface.withOpacity(0.32),
+          ?? DrawerTheme.of(context).scrimColor
+          ?? Colors.black54,
     );
   }
 
