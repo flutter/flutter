@@ -517,7 +517,7 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
 
   @override
   void addInkFeature(InkFeature feature) {
-    assert(!feature._debugDisposed);
+    assert(!feature._disposed);
     assert(feature._controller == this);
     _inkFeatures ??= <InkFeature>[];
     assert(!_inkFeatures!.contains(feature));
@@ -528,7 +528,8 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
   void _removeFeature(InkFeature feature) {
     assert(_inkFeatures != null);
     _inkFeatures!.remove(feature);
-    markNeedsPaint();
+    if (!feature._disposed)
+      markNeedsPaint();
   }
 
   void _didChangeLayout() {
@@ -559,6 +560,7 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
     // [InkFeature.dispose] will eventually call [_inkFeatures!.remove].
     while (_inkFeatures?.isNotEmpty == true)
       _inkFeatures!.first.dispose();
+    super.dispose();
   }
 }
 
@@ -595,11 +597,6 @@ class _InkFeatures extends SingleChildRenderObjectWidget {
                 ..absorbHitTest = absorbHitTest;
     assert(vsync == renderObject.vsync);
   }
-
-  @override
-  void didUnmountRenderObject(_RenderInkFeatures renderObject) {
-    renderObject.dispose();
-  }
 }
 
 /// A visual reaction on a piece of [Material].
@@ -630,7 +627,7 @@ abstract class InkFeature {
   /// Called when the ink feature is no longer visible on the material.
   final VoidCallback? onRemoved;
 
-  bool _debugDisposed = false;
+  bool _disposed = false;
 
   /// Whether or not visual reaction is activated.
   ///
@@ -644,9 +641,9 @@ abstract class InkFeature {
   /// Free up the resources associated with this ink feature.
   @mustCallSuper
   void dispose() {
-    assert(!_debugDisposed);
+    assert(!_disposed);
     assert(() {
-      _debugDisposed = true;
+      _disposed = true;
       return true;
     }());
     _controller._removeFeature(this);
@@ -655,11 +652,13 @@ abstract class InkFeature {
 
   void _paint(Canvas canvas) {
     assert(referenceBox.attached);
-    assert(!_debugDisposed);
+    assert(!_disposed);
     // find the chain of renderers from us to the feature's referenceBox
     final List<RenderObject> descendants = <RenderObject>[referenceBox];
     RenderObject node = referenceBox;
     while (node != _controller) {
+      // if (node.parent == null)
+      //   return;
       node = node.parent! as RenderObject;
       descendants.add(node);
     }
