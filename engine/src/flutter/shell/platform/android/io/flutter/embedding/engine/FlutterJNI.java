@@ -1071,7 +1071,7 @@ public class FlutterJNI {
   /** Invoked by native to obtain the results of Android's locale resolution algorithm. */
   @SuppressWarnings("unused")
   @VisibleForTesting
-  String[] computePlatformResolvedLocale(@NonNull String[] strings) {
+  public String[] computePlatformResolvedLocale(@NonNull String[] strings) {
     if (localizationPlugin == null) {
       return new String[0];
     }
