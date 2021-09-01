@@ -64,6 +64,7 @@ void main() {
         const TextEditingValue(text: 'Int* the W*ds'),
       );
 
+      // "Into the Wo|ods|"
       const TextEditingValue selectedIntoTheWoods = TextEditingValue(text: 'Into the Woods', selection: TextSelection(baseOffset: 11, extentOffset: 14));
       expect(
         FilteringTextInputFormatter('o', allow: true, replacementString: '*').formatEditUpdate(testOldValue, selectedIntoTheWoods),
@@ -79,7 +80,7 @@ void main() {
       );
       expect(
         FilteringTextInputFormatter(RegExp('o+'), allow: false, replacementString: '*').formatEditUpdate(testOldValue, selectedIntoTheWoods),
-        const TextEditingValue(text: 'Int* the W**ds', selection: TextSelection(baseOffset: 11, extentOffset: 14)),
+        const TextEditingValue(text: 'Int* the W*ds', selection: TextSelection(baseOffset: 11, extentOffset: 13)),
       );
     });
 
@@ -623,5 +624,240 @@ void main() {
 
     // cursor must be now at fourth position (right after the number 9)
     expect(formatted.selection.baseOffset, equals(4));
+  });
+
+
+  test('FilteringTextInputFormatter should filter independent of selection', () {
+    // Regression test for https://github.com/flutter/flutter/issues/80842.
+
+    final TextInputFormatter formatter = FilteringTextInputFormatter.deny('abc', replacementString: '*');
+
+    const TextEditingValue oldValue = TextEditingValue.empty;
+    const TextEditingValue newValue = TextEditingValue(text: 'abcabcabc');
+
+    final String filteredText = formatter.formatEditUpdate(oldValue, newValue).text;
+
+    for (int i = 0; i < newValue.text.length; i += 1) {
+      final String text = formatter.formatEditUpdate(
+        oldValue,
+        newValue.copyWith(selection: TextSelection.collapsed(offset: i)),
+      ).text;
+      expect(filteredText, text);
+    }
+  });
+
+  test('FilteringTextInputFormatter should filter independent of composingRegion', () {
+    final TextInputFormatter formatter = FilteringTextInputFormatter.deny('abc', replacementString: '*');
+
+    const TextEditingValue oldValue = TextEditingValue.empty;
+    const TextEditingValue newValue = TextEditingValue(text: 'abcabcabc');
+
+    final String filteredText = formatter.formatEditUpdate(oldValue, newValue).text;
+
+    for (int i = 0; i < newValue.text.length; i += 1) {
+      final String text = formatter.formatEditUpdate(
+        oldValue,
+        newValue.copyWith(composing: TextRange.collapsed(i)),
+      ).text;
+      expect(filteredText, text);
+    }
+  });
+
+  group('FilteringTextInputFormatter default strategy', () {
+    const TextEditingValue oldValue = TextEditingValue.empty;
+
+    test('Preserves selection region', () {
+      const TextEditingValue newValue = TextEditingValue(text: 'AAABBBCCC');
+
+      // AAA | BBB | CCC => AAA | **** | CCC
+      expect(
+        FilteringTextInputFormatter.deny('BBB', replacementString: '****').formatEditUpdate(
+          oldValue,
+          newValue.copyWith(
+            selection: const TextSelection(baseOffset: 6, extentOffset: 3),
+          ),
+        ).selection,
+        const TextSelection(baseOffset: 7, extentOffset: 3),
+      );
+
+      // AAA | BBB CCC | => AAA | **** CCC |
+      expect(
+        FilteringTextInputFormatter.deny('BBB', replacementString: '****').formatEditUpdate(
+          oldValue,
+          newValue.copyWith(
+            selection: const TextSelection(baseOffset: 9, extentOffset: 3),
+          ),
+        ).selection,
+        const TextSelection(baseOffset: 10, extentOffset: 3),
+      );
+
+      // AAA BBB | CCC | => AAA **** | CCC |
+      expect(
+        FilteringTextInputFormatter.deny('BBB', replacementString: '****').formatEditUpdate(
+          oldValue,
+          newValue.copyWith(
+            selection: const TextSelection(baseOffset: 9, extentOffset: 6),
+          ),
+        ).selection,
+        const TextSelection(baseOffset: 10, extentOffset: 7),
+      );
+
+      // AAAB | B | BCCC => AAA***|CCC
+      // Same length replacement, still move the selection to the end of the
+      // replacement if the entire selection is replaced.
+      expect(
+        FilteringTextInputFormatter.deny('BBB', replacementString: '***').formatEditUpdate(
+          oldValue,
+          newValue.copyWith(
+            selection: const TextSelection(baseOffset: 5, extentOffset: 4),
+          ),
+        ).selection,
+        const TextSelection(baseOffset: 6, extentOffset: 6),
+      );
+
+      // AAA | BBB | CCC => AAA | CCC
+      expect(
+        FilteringTextInputFormatter.deny('BBB', replacementString: '').formatEditUpdate(
+          oldValue,
+          newValue.copyWith(
+            selection: const TextSelection(baseOffset: 6, extentOffset: 3),
+          ),
+        ).selection,
+        const TextSelection(baseOffset: 3, extentOffset: 3),
+      );
+
+      expect(
+        FilteringTextInputFormatter.deny('BBB', replacementString: '').formatEditUpdate(
+          oldValue,
+          newValue.copyWith(
+            selection: const TextSelection(baseOffset: 6, extentOffset: 3),
+          ),
+        ).selection,
+        const TextSelection(baseOffset: 3, extentOffset: 3),
+      );
+
+      // The unfortunate case, we don't know for sure where to put the selection
+      // so put it after the replacement string.
+      // AAAB|B|BCCC => AAA****|CCC
+      expect(
+        FilteringTextInputFormatter.deny('BBB', replacementString: '****').formatEditUpdate(
+          oldValue,
+          newValue.copyWith(
+            selection: const TextSelection(baseOffset: 5, extentOffset: 4),
+          ),
+        ).selection,
+        const TextSelection(baseOffset: 7, extentOffset: 7),
+      );
+    });
+
+    test('Preserves selection region, allow', () {
+      const TextEditingValue newValue = TextEditingValue(text: 'AAABBBCCC');
+
+      // AAA | BBB | CCC => **** | BBB | ****
+      expect(
+        FilteringTextInputFormatter.allow('BBB', replacementString: '****').formatEditUpdate(
+          oldValue,
+          newValue.copyWith(
+            selection: const TextSelection(baseOffset: 6, extentOffset: 3),
+          ),
+        ).selection,
+        const TextSelection(baseOffset: 7, extentOffset: 4),
+      );
+
+      // | AAABBBCCC | => | ****BBB**** |
+      expect(
+        FilteringTextInputFormatter.allow('BBB', replacementString: '****').formatEditUpdate(
+          oldValue,
+          newValue.copyWith(
+            selection: const TextSelection(baseOffset: 9, extentOffset: 0),
+          ),
+        ).selection,
+        const TextSelection(baseOffset: 11, extentOffset: 0),
+      );
+
+      // AAABBB | CCC | => ****BBB | **** |
+      expect(
+        FilteringTextInputFormatter.allow('BBB', replacementString: '****').formatEditUpdate(
+          oldValue,
+          newValue.copyWith(
+            selection: const TextSelection(baseOffset: 9, extentOffset: 6),
+          ),
+        ).selection,
+        const TextSelection(baseOffset: 11, extentOffset: 7),
+      );
+
+      // Overlapping matches: AAA | BBBBB | CCC => | BBB |
+      expect(
+        FilteringTextInputFormatter.allow('BBB', replacementString: '').formatEditUpdate(
+          oldValue,
+          const TextEditingValue(
+            text: 'AAABBBBBCCC',
+            selection: TextSelection(baseOffset: 8, extentOffset: 3),
+          ),
+        ).selection,
+        const TextSelection(baseOffset: 3, extentOffset: 0),
+      );
+    });
+
+    test('Preserves composing region', () {
+      const TextEditingValue newValue = TextEditingValue(text: 'AAABBBCCC');
+
+      // AAA | BBB | CCC => AAA | **** | CCC
+      expect(
+        FilteringTextInputFormatter.deny('BBB', replacementString: '****').formatEditUpdate(
+          oldValue,
+          newValue.copyWith(
+            composing: const TextRange(start: 3, end: 6),
+          ),
+        ).composing,
+        const TextRange(start: 3, end: 7),
+      );
+
+      // AAA | BBB CCC | => AAA | **** CCC |
+      expect(
+        FilteringTextInputFormatter.deny('BBB', replacementString: '****').formatEditUpdate(
+          oldValue,
+          newValue.copyWith(
+            composing: const TextRange(start: 3, end: 9),
+          ),
+        ).composing,
+        const TextRange(start: 3, end: 10),
+      );
+
+      // AAA BBB | CCC | => AAA **** | CCC |
+      expect(
+        FilteringTextInputFormatter.deny('BBB', replacementString: '****').formatEditUpdate(
+          oldValue,
+          newValue.copyWith(
+            composing: const TextRange(start: 6, end: 9),
+          ),
+        ).composing,
+        const TextRange(start: 7, end: 10),
+      );
+
+      // AAAB | B | BCCC => AAA*** | CCC
+      // Same length replacement, still move the selection to the end of the
+      // replacement if the entire selection is replaced.
+      expect(
+        FilteringTextInputFormatter.deny('BBB', replacementString: '***').formatEditUpdate(
+          oldValue,
+          newValue.copyWith(
+            composing: const TextRange(start: 4, end: 5),
+          ),
+        ).composing,
+        TextRange.empty,
+      );
+
+      // AAA | BBB | CCC => | AAA CCC
+      expect(
+        FilteringTextInputFormatter.deny('BBB', replacementString: '').formatEditUpdate(
+          oldValue,
+          newValue.copyWith(
+            composing: const TextRange(start: 3, end: 6),
+          ),
+        ).composing,
+        TextRange.empty,
+      );
+    });
   });
 }
