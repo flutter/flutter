@@ -1764,6 +1764,9 @@ class OpacityLayer extends OffsetLayer {
   set alpha(int? value) {
     assert(value != null);
     if (value != _alpha) {
+      if (value == 255 || alpha == 255) {
+        engineLayer = null;
+      }
       _alpha = value;
       markNeedsAddToScene();
     }
@@ -1777,27 +1780,23 @@ class OpacityLayer extends OffsetLayer {
       enabled = enabled && !debugDisableOpacityLayers;
       return true;
     }());
-enabled = false;
+
     final int realizedAlpha = alpha!;
+    // The type assertions work because the [alpha] setter nulls out the
+    // engineLayer if it would ahve changed type (i.e. changed to or from 255).
     if (enabled && realizedAlpha < 255) {
-      ui.OpacityEngineLayer? oldLayer;
-      if (_engineLayer is ui.OpacityEngineLayer?) {
-        oldLayer = _engineLayer as ui.OpacityEngineLayer?;
-      }
+      assert(_engineLayer is ui.OpacityEngineLayer?);
       engineLayer = builder.pushOpacity(
         realizedAlpha,
         offset: offset + layerOffset,
-        oldLayer: oldLayer,
+        oldLayer: _engineLayer as ui.OpacityEngineLayer?,
       );
     } else {
-      ui.OffsetEngineLayer? oldLayer;
-      if (_engineLayer is ui.OffsetEngineLayer?) {
-        oldLayer = _engineLayer as ui.OffsetEngineLayer?;
-      }
+      assert(_engineLayer is ui.OffsetEngineLayer?);
       engineLayer = builder.pushOffset(
         layerOffset.dx + offset.dx,
         layerOffset.dy + offset.dy,
-        oldLayer: oldLayer,
+        oldLayer: _engineLayer as ui.OffsetEngineLayer?,
       );
     }
     addChildrenToScene(builder);
