@@ -1632,6 +1632,26 @@ void main() {
     expect(item1Height, 30.0);
     expect(item2Height, 30.0);
   });
+
+  // Test the case where an item contains an InkWell.
+  //
+  // This is a regression test to an issue where lifting such an item might lead
+  // to a crash, due to the InkFeature's controller no longer being the
+  // InkWell's ancestor.
+  testWidgets('Items might contain InkWells', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: _SwitchListView(),
+        ),
+      ),
+    );
+
+    await tester.startGesture(tester.getCenter(find.byKey(const Key('1'))));
+    await tester.pumpAndSettle(const Duration(seconds: 2));
+
+    // If it passes it works.
+  });
 }
 
 Future<void> longPressDrag(WidgetTester tester, Offset start, Offset end) async {
@@ -1665,6 +1685,44 @@ class _StatefulState extends State<_Stateful> {
           onChanged: (bool? newValue) => checked = newValue,
         ),
       ),
+    );
+  }
+}
+
+class _SwitchListView extends StatefulWidget {
+  const _SwitchListView({Key? key}) : super(key: key);
+
+  @override
+  State<_SwitchListView> createState() => _SwitchListViewState();
+}
+
+class _SwitchListViewState extends State<_SwitchListView> {
+  final List<int> _items = List<int>.generate(50, (int index) => index);
+
+  @override
+  Widget build(BuildContext context) {
+    return ReorderableListView(
+      padding: const EdgeInsets.symmetric(horizontal: 40),
+      children: <Widget>[
+        for (int index = 0; index < _items.length; index++)
+          Container(
+            key: Key('$index'),
+            child: SwitchListTile.adaptive(
+              title: Text('Item ${_items[index]}'),
+              value: true,
+              onChanged: (bool _) {},
+            ),
+          ),
+      ],
+      onReorder: (int oldIndex, int newIndex) {
+        setState(() {
+          if (oldIndex < newIndex) {
+            newIndex -= 1;
+          }
+          final int item = _items.removeAt(oldIndex);
+          _items.insert(newIndex, item);
+        });
+      },
     );
   }
 }
