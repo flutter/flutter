@@ -1058,7 +1058,6 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
         home: Scaffold(
           body: Center(
             // Must break this out into its own widget purely to be able to call `setState()`
-            // child: StatefulStepper(),
             child: StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
                 return Stepper(
