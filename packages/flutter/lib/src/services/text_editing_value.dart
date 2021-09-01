@@ -169,14 +169,6 @@ class TextEditingValue {
     );
   }
 
-  /// Return a new TextSelection with the entire [text] selected.
-  TextSelection selectAll() {
-    return selection.copyWith(
-      baseOffset: 0,
-      extentOffset: text.length,
-    );
-  }
-
   /// Returns a representation of this object as a JSON object.
   Map<String, dynamic> toJSON() {
     return <String, dynamic>{

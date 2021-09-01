@@ -1272,7 +1272,10 @@ abstract class TextEditingActionTarget {
   /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   void selectAll(SelectionChangedCause cause) {
     setSelection(
-      textEditingValue.selectAll(),
+      textEditingValue.selection.copyWith(
+        baseOffset: 0,
+        extentOffset: textEditingValue.text.length,
+      ),
       cause,
     );
   }
