@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+
 @TestOn('!chrome')
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -82,6 +86,8 @@ void main() {
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.getData')
         return const <String, dynamic>{'text': clipboardContent};
+      if (methodCall.method == 'Clipboard.hasStrings')
+        return <String, dynamic>{'value': clipboardContent.isNotEmpty};
       return null;
     });
 
@@ -134,6 +140,8 @@ void main() {
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.getData')
         return const <String, dynamic>{'text': clipboardContent};
+      if (methodCall.method == 'Clipboard.hasStrings')
+        return <String, dynamic>{'value': clipboardContent.isNotEmpty};
       return null;
     });
 
@@ -860,6 +868,8 @@ void main() {
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.getData')
         return const <String, dynamic>{'text': clipboardContent};
+      if (methodCall.method == 'Clipboard.hasStrings')
+        return <String, dynamic>{'value': clipboardContent.isNotEmpty};
       return null;
     });
 
@@ -918,6 +928,8 @@ void main() {
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.getData')
         return const <String, dynamic>{'text': clipboardContent};
+      if (methodCall.method == 'Clipboard.hasStrings')
+        return <String, dynamic>{'value': clipboardContent.isNotEmpty};
       return null;
     });
 

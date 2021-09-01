@@ -48,7 +48,7 @@ class PrebuiltFuchsiaApp extends FuchsiaApp {
   PrebuiltFuchsiaApp({
     required String farArchive,
   }) : _farArchive = farArchive,
-       // TODO(zra): Extract the archive and extract the id from meta/package.
+       // TODO(zanderso): Extract the archive and extract the id from meta/package.
        super(projectBundleId: farArchive);
 
   final String _farArchive;
@@ -68,7 +68,7 @@ class BuildableFuchsiaApp extends FuchsiaApp {
 
   @override
   File farArchive(BuildMode buildMode) {
-    // TODO(zra): Distinguish among build modes.
+    // TODO(zanderso): Distinguish among build modes.
     final String outDir = getFuchsiaBuildDirectory();
     final String pkgDir = globals.fs.path.join(outDir, 'pkg');
     final String appName = project.project.manifest.appName;

@@ -2,11 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=123"
-@Tags(<String>['no-shuffle'])
+// no-shuffle:
+//   //TODO(gspencergoog): Remove this tag once this test's state leaks/test
+//   dependencies have been fixed.
+//   https://github.com/flutter/flutter/issues/85160
+//   Fails with "flutter test --test-randomize-ordering-seed=456"
+// reduced-test-set:
+//   This file is run as part of a reduced test set in CI on Mac and Windows
+//   machines.
+@Tags(<String>['reduced-test-set', 'no-shuffle'])
 
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, Color;
 
@@ -18,26 +22,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
+import '../widgets/clipboard_utils.dart';
 import '../widgets/semantics_tester.dart';
 
 // On web, the context menu (aka toolbar) is provided by the browser.
 final bool isContextMenuProvidedByPlatform = isBrowser;
-
-class MockClipboard {
-  Object _clipboardData = <String, dynamic>{
-    'text': null,
-  };
-
-  Future<dynamic> handleMethodCall(MethodCall methodCall) async {
-    switch (methodCall.method) {
-      case 'Clipboard.getData':
-        return _clipboardData;
-      case 'Clipboard.setData':
-        _clipboardData = methodCall.arguments! as Object;
-        break;
-    }
-  }
-}
 
 class MockTextSelectionControls extends TextSelectionControls {
   @override
@@ -1639,9 +1628,9 @@ void main() {
         ),
       );
 
-      final Offset textfieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
+      final Offset textFieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
 
-      await tester.tapAt(textfieldStart + const Offset(50.0, 5.0));
+      await tester.tapAt(textFieldStart + const Offset(50.0, 5.0));
       await tester.pump();
 
       // We moved the cursor.
@@ -1671,11 +1660,11 @@ void main() {
         ),
       );
 
-      final Offset textfieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
+      final Offset textFieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
 
-      await tester.tapAt(textfieldStart + const Offset(50.0, 5.0));
+      await tester.tapAt(textFieldStart + const Offset(50.0, 5.0));
       await tester.pump(const Duration(milliseconds: 500));
-      await tester.tapAt(textfieldStart + const Offset(50.0, 5.0));
+      await tester.tapAt(textFieldStart + const Offset(50.0, 5.0));
       await tester.pump();
 
       // Plain collapsed selection.
@@ -1764,19 +1753,19 @@ void main() {
         ),
       );
 
-      final Offset textfieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
+      final Offset textFieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
 
-      await tester.tapAt(textfieldStart + const Offset(50.0, 5.0));
+      await tester.tapAt(textFieldStart + const Offset(50.0, 5.0));
       await tester.pump(const Duration(milliseconds: 500));
 
-      await tester.tapAt(textfieldStart + const Offset(150.0, 5.0));
+      await tester.tapAt(textFieldStart + const Offset(150.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
       // First tap moved the cursor.
       expect(
         controller.selection,
         const TextSelection.collapsed(offset: 8, affinity: TextAffinity.downstream),
       );
-      await tester.tapAt(textfieldStart + const Offset(150.0, 5.0));
+      await tester.tapAt(textFieldStart + const Offset(150.0, 5.0));
       await tester.pumpAndSettle();
 
       // Second tap selects the word around the cursor.
@@ -1806,12 +1795,12 @@ void main() {
         ),
       );
 
-      final Offset textfieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
+      final Offset textFieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
 
-      await tester.tapAt(textfieldStart + const Offset(150.0, 5.0));
+      await tester.tapAt(textFieldStart + const Offset(150.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
       final TestGesture gesture =
-         await tester.startGesture(textfieldStart + const Offset(150.0, 5.0));
+         await tester.startGesture(textFieldStart + const Offset(150.0, 5.0));
       // Hold the press.
       await tester.pumpAndSettle();
 
@@ -1851,19 +1840,19 @@ void main() {
         ),
       );
 
-      final Offset textfieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
+      final Offset textFieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
 
-      await tester.tapAt(textfieldStart + const Offset(150.0, 5.0));
+      await tester.tapAt(textFieldStart + const Offset(150.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
       // First tap moved the cursor.
       expect(
         controller.selection,
         const TextSelection.collapsed(offset: 8, affinity: TextAffinity.downstream),
       );
-      await tester.tapAt(textfieldStart + const Offset(150.0, 5.0));
+      await tester.tapAt(textFieldStart + const Offset(150.0, 5.0));
       await tester.pump(const Duration(milliseconds: 500));
 
-      await tester.tapAt(textfieldStart + const Offset(100.0, 5.0));
+      await tester.tapAt(textFieldStart + const Offset(100.0, 5.0));
       await tester.pump();
 
       // Plain collapsed selection at the edge of first word. In iOS 12, the
@@ -2086,12 +2075,12 @@ void main() {
         ),
       );
 
-      final Offset textfieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
+      final Offset textFieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
 
-      await tester.tapAt(textfieldStart + const Offset(150.0, 5.0));
+      await tester.tapAt(textFieldStart + const Offset(150.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
       final TestGesture gesture =
-         await tester.startGesture(textfieldStart + const Offset(150.0, 5.0));
+         await tester.startGesture(textFieldStart + const Offset(150.0, 5.0));
       // Hold the press.
       await tester.pump(const Duration(milliseconds: 500));
 
@@ -2133,12 +2122,12 @@ void main() {
         ),
       );
 
-      final Offset textfieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
+      final Offset textFieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
 
-      await tester.tapAt(textfieldStart + const Offset(150.0, 5.0));
+      await tester.tapAt(textFieldStart + const Offset(150.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
       final TestGesture gesture =
-         await tester.startGesture(textfieldStart + const Offset(150.0, 5.0));
+         await tester.startGesture(textFieldStart + const Offset(150.0, 5.0));
       // Hold the press.
       await tester.pumpAndSettle();
 
@@ -2179,11 +2168,11 @@ void main() {
       ),
     );
 
-    final Offset textfieldStart = tester.getCenter(find.byType(CupertinoTextField));
+    final Offset textFieldStart = tester.getCenter(find.byType(CupertinoTextField));
 
-    await tester.tapAt(textfieldStart + const Offset(150.0, 5.0));
+    await tester.tapAt(textFieldStart + const Offset(150.0, 5.0));
     await tester.pump(const Duration(milliseconds: 50));
-    await tester.longPressAt(textfieldStart + const Offset(150.0, 5.0));
+    await tester.longPressAt(textFieldStart + const Offset(150.0, 5.0));
     await tester.pump();
 
     // Should only have paste option when whole obscure text is selected.
@@ -2193,11 +2182,11 @@ void main() {
     expect(find.text('Select All'), findsNothing);
 
     // Tap to cancel selection.
-    final Offset textfieldEnd = tester.getTopRight(find.byType(CupertinoTextField));
-    await tester.tapAt(textfieldEnd + const Offset(-10.0, 5.0));
+    final Offset textFieldEnd = tester.getTopRight(find.byType(CupertinoTextField));
+    await tester.tapAt(textFieldEnd + const Offset(-10.0, 5.0));
     await tester.pump(const Duration(milliseconds: 50));
     // Long tap at the end.
-    await tester.longPressAt(textfieldEnd + const Offset(-10.0, 5.0));
+    await tester.longPressAt(textFieldEnd + const Offset(-10.0, 5.0));
     await tester.pump();
 
     // Should have paste and select all options when collapse.
@@ -2223,9 +2212,9 @@ void main() {
         ),
       );
 
-      final Offset textfieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
+      final Offset textFieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
 
-      await tester.longPressAt(textfieldStart + const Offset(50.0, 5.0));
+      await tester.longPressAt(textFieldStart + const Offset(50.0, 5.0));
       await tester.pumpAndSettle();
 
       // Collapsed cursor for iOS long press.
@@ -2255,12 +2244,12 @@ void main() {
         ),
       );
 
-      final Offset textfieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
+      final Offset textFieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
 
-      await tester.longPressAt(textfieldStart + const Offset(50.0, 5.0));
+      await tester.longPressAt(textFieldStart + const Offset(50.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
 
-      await tester.tapAt(textfieldStart + const Offset(50.0, 5.0));
+      await tester.tapAt(textFieldStart + const Offset(50.0, 5.0));
       await tester.pump();
 
       // We ended up moving the cursor to the edge of the same word and dismissed
@@ -2291,10 +2280,10 @@ void main() {
         ),
       );
 
-      final Offset textfieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
+      final Offset textFieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
 
       final TestGesture gesture =
-          await tester.startGesture(textfieldStart + const Offset(50.0, 5.0));
+          await tester.startGesture(textFieldStart + const Offset(50.0, 5.0));
       await tester.pump(const Duration(milliseconds: 500));
 
       // Long press on iOS shows collapsed selection cursor.
@@ -2366,10 +2355,10 @@ void main() {
     // the right side of the screen.
     expect(lastCharEndpoint[0].point.dx, moreOrLessEquals(1094.73, epsilon: 0.25));
 
-    final Offset textfieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
+    final Offset textFieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
 
     final TestGesture gesture =
-        await tester.startGesture(textfieldStart + const Offset(300, 5));
+        await tester.startGesture(textFieldStart + const Offset(300, 5));
     await tester.pump(const Duration(milliseconds: 500));
 
     expect(
@@ -2443,19 +2432,19 @@ void main() {
         ),
       );
 
-      final Offset textfieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
+      final Offset textFieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
 
-      await tester.tapAt(textfieldStart + const Offset(150.0, 5.0));
+      await tester.tapAt(textFieldStart + const Offset(150.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
       // First tap moved the cursor to the beginning of the second word.
       expect(
         controller.selection,
         const TextSelection.collapsed(offset: 8, affinity: TextAffinity.downstream),
       );
-      await tester.tapAt(textfieldStart + const Offset(150.0, 5.0));
+      await tester.tapAt(textFieldStart + const Offset(150.0, 5.0));
       await tester.pump(const Duration(milliseconds: 500));
 
-      await tester.longPressAt(textfieldStart + const Offset(100.0, 5.0));
+      await tester.longPressAt(textFieldStart + const Offset(100.0, 5.0));
       await tester.pumpAndSettle();
 
       // Plain collapsed selection at the exact tap position.
@@ -2485,19 +2474,19 @@ void main() {
         ),
       );
 
-      final Offset textfieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
+      final Offset textFieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
 
-      await tester.longPressAt(textfieldStart + const Offset(50.0, 5.0));
+      await tester.longPressAt(textFieldStart + const Offset(50.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
 
-      await tester.tapAt(textfieldStart + const Offset(150.0, 5.0));
+      await tester.tapAt(textFieldStart + const Offset(150.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
       // First tap moved the cursor.
       expect(
         controller.selection,
         const TextSelection.collapsed(offset: 8, affinity: TextAffinity.downstream),
       );
-      await tester.tapAt(textfieldStart + const Offset(150.0, 5.0));
+      await tester.tapAt(textFieldStart + const Offset(150.0, 5.0));
       await tester.pumpAndSettle();
 
       // Double tap selection.
@@ -2526,15 +2515,15 @@ void main() {
         ),
       );
 
-      final Offset textfieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
+      final Offset textFieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
 
-      await tester.tapAt(textfieldStart + const Offset(50.0, 5.0));
+      await tester.tapAt(textFieldStart + const Offset(50.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
       expect(
         controller.selection,
         const TextSelection.collapsed(offset: 7, affinity: TextAffinity.upstream),
       );
-      await tester.tapAt(textfieldStart + const Offset(50.0, 5.0));
+      await tester.tapAt(textFieldStart + const Offset(50.0, 5.0));
       await tester.pumpAndSettle();
       expect(
         controller.selection,
@@ -2543,14 +2532,14 @@ void main() {
       expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
 
       // Double tap selecting the same word somewhere else is fine.
-      await tester.tapAt(textfieldStart + const Offset(100.0, 5.0));
+      await tester.tapAt(textFieldStart + const Offset(100.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
       // First tap moved the cursor.
       expect(
         controller.selection,
         const TextSelection.collapsed(offset: 7, affinity: TextAffinity.upstream),
       );
-      await tester.tapAt(textfieldStart + const Offset(100.0, 5.0));
+      await tester.tapAt(textFieldStart + const Offset(100.0, 5.0));
       await tester.pumpAndSettle();
       expect(
         controller.selection,
@@ -2558,14 +2547,14 @@ void main() {
       );
       expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
 
-      await tester.tapAt(textfieldStart + const Offset(150.0, 5.0));
+      await tester.tapAt(textFieldStart + const Offset(150.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
       // First tap moved the cursor.
       expect(
         controller.selection,
         const TextSelection.collapsed(offset: 8, affinity: TextAffinity.downstream),
       );
-      await tester.tapAt(textfieldStart + const Offset(150.0, 5.0));
+      await tester.tapAt(textFieldStart + const Offset(150.0, 5.0));
       await tester.pumpAndSettle();
       expect(
         controller.selection,
@@ -2589,15 +2578,15 @@ void main() {
       ),
     );
 
-    final Offset textfieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
+    final Offset textFieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
 
     final int pointerValue = tester.nextPointer;
     final TestGesture gesture = await tester.createGesture();
     await gesture.downWithCustomEvent(
-      textfieldStart + const Offset(150.0, 5.0),
+      textFieldStart + const Offset(150.0, 5.0),
       PointerDownEvent(
         pointer: pointerValue,
-        position: textfieldStart + const Offset(150.0, 5.0),
+        position: textFieldStart + const Offset(150.0, 5.0),
         pressure: 3.0,
         pressureMax: 6.0,
         pressureMin: 0.0,
@@ -2629,15 +2618,15 @@ void main() {
       ),
     );
 
-    final Offset textfieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
+    final Offset textFieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
 
     final int pointerValue = tester.nextPointer;
     final TestGesture gesture = await tester.createGesture();
     await gesture.downWithCustomEvent(
-      textfieldStart + const Offset(150.0, 5.0),
+      textFieldStart + const Offset(150.0, 5.0),
       PointerDownEvent(
         pointer: pointerValue,
-        position: textfieldStart + const Offset(150.0, 5.0),
+        position: textFieldStart + const Offset(150.0, 5.0),
         // iPhone 6 and below report 0 across the board.
         pressure: 0,
         pressureMax: 0,
@@ -4474,12 +4463,12 @@ void main() {
       ),
     );
 
-    final Offset textfieldStart = tester.getTopLeft(find.byKey(const Key('field0')));
+    final Offset textFieldStart = tester.getTopLeft(find.byKey(const Key('field0')));
 
-    await tester.longPressAt(textfieldStart + const Offset(50.0, 2.0));
+    await tester.longPressAt(textFieldStart + const Offset(50.0, 2.0));
     await tester.pump(const Duration(milliseconds: 150));
     // Tap the Select All button.
-    await tester.tapAt(textfieldStart + const Offset(20.0, 100.0));
+    await tester.tapAt(textFieldStart + const Offset(20.0, 100.0));
     await tester.pump(const Duration(milliseconds: 300));
 
     await expectLater(
@@ -4521,12 +4510,12 @@ void main() {
       ),
     );
 
-    final Offset textfieldStart = tester.getTopLeft(find.byKey(const Key('field0')));
+    final Offset textFieldStart = tester.getTopLeft(find.byKey(const Key('field0')));
 
-    await tester.longPressAt(textfieldStart + const Offset(50.0, 2.0));
+    await tester.longPressAt(textFieldStart + const Offset(50.0, 2.0));
     await tester.pump(const Duration(milliseconds: 150));
     // Tap the Select All button.
-    await tester.tapAt(textfieldStart + const Offset(20.0, 100.0));
+    await tester.tapAt(textFieldStart + const Offset(20.0, 100.0));
     await tester.pump(const Duration(milliseconds: 300));
 
     await expectLater(

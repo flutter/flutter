@@ -11,6 +11,7 @@ void main() {
   macroPerfTest(
     'fullscreen_textfield_perf',
     kFullscreenTextRouteName,
+    pageDelay: const Duration(milliseconds: 50),
     driverOps: (FlutterDriver driver) async {
       final SerializableFinder textfield = find.byValueKey('fullscreen-textfield');
       driver.tap(textfield);
