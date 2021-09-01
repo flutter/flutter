@@ -455,9 +455,6 @@ Future<void> _runBuildTests() async {
 Future<void> _runExampleProjectBuildTests(Directory exampleDirectory, [File? mainFile]) async {
   // Only verify caching with flutter gallery.
   final bool verifyCaching = exampleDirectory.path.contains('flutter_gallery');
-  if (exampleDirectory is! Directory) {
-    return;
-  }
   final String examplePath = exampleDirectory.path;
   final bool hasNullSafety = File(path.join(examplePath, 'null_safety')).existsSync();
   final List<String> additionalArgs = <String>[
