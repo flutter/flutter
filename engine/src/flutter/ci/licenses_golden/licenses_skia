@@ -1,4 +1,4 @@
-Signature: f2cdfdb40c84d99ed52935fcf38d8ea6
+Signature: 910bacb8289114d5a629dabf41511e05
 
 UNUSED LICENSES:
 
@@ -2490,12 +2490,12 @@ FILE: ../../../third_party/skia/src/gpu/ops/AtlasTextOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/AtlasTextOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/DashLinePathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/DashLinePathRenderer.h
+FILE: ../../../third_party/skia/src/gpu/ops/DrawAtlasOp.cpp
+FILE: ../../../third_party/skia/src/gpu/ops/DrawAtlasOp.h
+FILE: ../../../third_party/skia/src/gpu/ops/DrawVerticesOp.cpp
+FILE: ../../../third_party/skia/src/gpu/ops/DrawVerticesOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrClearOp.h
-FILE: ../../../third_party/skia/src/gpu/ops/GrDrawAtlasOp.cpp
-FILE: ../../../third_party/skia/src/gpu/ops/GrDrawAtlasOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrDrawOp.h
-FILE: ../../../third_party/skia/src/gpu/ops/GrDrawVerticesOp.cpp
-FILE: ../../../third_party/skia/src/gpu/ops/GrDrawVerticesOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrLatticeOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrLatticeOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrMeshDrawOp.cpp
@@ -3255,8 +3255,8 @@ FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlUniformHandler.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlUniformHandler.mm
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlVaryingHandler.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlVaryingHandler.mm
-FILE: ../../../third_party/skia/src/gpu/ops/GrDrawableOp.cpp
-FILE: ../../../third_party/skia/src/gpu/ops/GrDrawableOp.h
+FILE: ../../../third_party/skia/src/gpu/ops/DrawableOp.cpp
+FILE: ../../../third_party/skia/src/gpu/ops/DrawableOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrFillRRectOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrFillRRectOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrFillRectOp.cpp
