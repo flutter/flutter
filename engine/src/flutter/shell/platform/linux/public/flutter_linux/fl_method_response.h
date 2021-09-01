@@ -85,7 +85,7 @@ G_DECLARE_FINAL_TYPE(FlMethodNotImplementedResponse,
  *                   fl_method_error_response_get_message (error_response),
  *                   fl_method_error_response_get_details (error_response));
  *   }
- *   else if (FL_IS_METHOD_ERROR_RESPONSE (response)) {
+ *   else if (FL_IS_METHOD_NOT_IMPLEMENTED_RESPONSE (response)) {
  *     handle_not_implemented ();
  *   }
  * }
