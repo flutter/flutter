@@ -184,6 +184,10 @@ std::unique_ptr<GLContextResult> GPUSurfaceMetal::MakeRenderContextCurrent() {
   return std::make_unique<GLContextDefaultResult>(true);
 }
 
+bool GPUSurfaceMetal::AllowsDrawingWhenGpuDisabled() const {
+  return delegate_->AllowsDrawingWhenGpuDisabled();
+}
+
 void GPUSurfaceMetal::ReleaseUnusedDrawableIfNecessary() {
   // If the previous surface frame was not submitted before  a new one is acquired, the old drawable
   // needs to be released. An RAII wrapper may not be used because this needs to interoperate with

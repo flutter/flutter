@@ -49,6 +49,9 @@ class SK_API_AVAILABLE_CA_METAL_LAYER IOSSurfaceMetal final : public IOSSurface,
   // |GPUSurfaceMetalDelegate|
   bool PresentTexture(GPUMTLTextureInfo texture) const override;
 
+  // |GPUSurfaceMetalDelegate|
+  bool AllowsDrawingWhenGpuDisabled() const override;
+
   FML_DISALLOW_COPY_AND_ASSIGN(IOSSurfaceMetal);
 };
 

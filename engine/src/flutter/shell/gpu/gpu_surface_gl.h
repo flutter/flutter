@@ -50,6 +50,9 @@ class GPUSurfaceGL : public Surface {
   // |Surface|
   bool ClearRenderContext() override;
 
+  // |Surface|
+  bool AllowsDrawingWhenGpuDisabled() const override;
+
  private:
   GPUSurfaceGLDelegate* delegate_;
   sk_sp<GrDirectContext> context_;
