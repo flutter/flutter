@@ -832,11 +832,11 @@ abstract class TextEditingDelta with TextEditingDeltaUtils {
   ///
   /// This value will slightly vary based on the [TextEditingDeltaType].
   ///
-  /// For a [TextEditingDeltaType.insertion] this will be a collapsed range.
+  /// For a [TextEditingDeltaType.insertion] this will be a collapsed range
+  /// representing the cursor position where the insertion began.
   ///
-  /// For a [TextEditingDeltaType.deletion] this will be either a collapsed
-  /// range for a single character deletion, or a range for the deletion of
-  /// a selection.
+  /// For a [TextEditingDeltaType.deletion] this will be the range of text
+  /// that was deleted.
   ///
   /// For a [TextEditingDeltaType.replacement] this will be the range of
   /// characters that are being replaced.
@@ -972,17 +972,10 @@ class TextEditingDeltaDeletion extends TextEditingDelta {
   @override
   TextEditingValue apply(TextEditingValue value) {
     String newText = value.text;
-
-    final int deletionLength = deltaText.length;
-    if (deletionLength > 1) {
-      newText = replace(
-          newText, '', deltaRange.start,
-          deltaRange.end);
-    } else {
-      newText = replace(
-          newText, '', deltaRange.start - deletionLength,
-          deltaRange.end);
-    }
+    
+    newText = replace(
+        newText, '', deltaRange.start,
+        deltaRange.end);
 
     return value.copyWith(text: newText, selection: selection, composing: composing);
   }
