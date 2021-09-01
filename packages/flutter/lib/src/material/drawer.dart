@@ -304,7 +304,7 @@ class DrawerController extends StatefulWidget {
   ///
   /// If this is null, then [DrawerThemeData.scrimColor] is used. If that
   /// is also null, then it defaults to [ColorScheme.onSurface] with 0.32
-  /// opacity..
+  /// opacity.
   final Color? scrimColor;
 
   /// Determines if the [Drawer] can be opened with a drag gesture.
@@ -527,7 +527,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       begin: Colors.transparent,
       end: widget.scrimColor
           ?? drawerTheme.scrimColor
-          ?? Colors.black54,
+          ?? Theme.of(context).colorScheme.onSurface.withOpacity(0.32),
     );
   }
 
