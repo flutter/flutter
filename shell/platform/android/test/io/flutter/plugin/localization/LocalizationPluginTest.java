@@ -1,5 +1,4 @@
-// Part of the embedding.engine package to allow access to FlutterJNI methods.
-package io.flutter.embedding.engine;
+package io.flutter.plugin.localization;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.any;
@@ -13,11 +12,11 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.LocaleList;
 import io.flutter.TestUtils;
+import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.systemchannels.LocalizationChannel;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
-import io.flutter.plugin.localization.LocalizationPlugin;
 import java.util.Locale;
 import org.json.JSONException;
 import org.json.JSONObject;
