@@ -1,4 +1,4 @@
-Signature: 19530daee0d4bb3d4a1f040a57397999
+Signature: 9cf11c97ded5bf9c01850e5af8e56693
 
 UNUSED LICENSES:
 
@@ -3189,6 +3189,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.recovery/factory_reset.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.scenic.scheduling/prediction_info.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/accessibility.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/audio.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/device.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/display.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/do_not_disturb.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/intl.fidl
