@@ -13,6 +13,7 @@ import 'package:flutter/semantics.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'binding.dart';
+import 'box.dart';
 import 'debug.dart';
 import 'layer.dart';
 
@@ -1093,6 +1094,92 @@ class PipelineOwner {
   }
 }
 
+/// Visit method for [Selectable].
+///
+/// Used in [Selectable.visitSelectables].
+///
+/// Return true will abort the walk.
+typedef SelectableVisitor = bool Function(Selectable);
+
+/// The result of updating the selection.
+enum SelectionResult {
+  /// There is nothing left to select forward, and further selection should
+  /// extends to the next selectable
+  next,
+  /// Selection should does not reach this selectable, should look previous selectable
+  previous,
+  /// Part of the selectable may or may not be selected, but there are still
+  /// content to select forward.
+  end,
+}
+
+/// Something that can be selected by the [SelectionArea] widget, normally a render object.
+abstract class Selectable  {
+  /// Clear the selection from the [Selectable].
+  void clear();
+
+  /// Copy the data from the selectable, returning `null` if nothing is selected.
+  Object? copy();
+
+  /// Update the selection area given the [rect] in the local coordinate.
+  ///
+  /// Returns true if this Selectable consume the selection edge.
+  SelectionResult updateSelection(Offset start, Offset end);
+
+  /// Visit all the selectable under the root in the order of [visitChildrenForSelection]
+  static void visitSelectables(RenderObject root, SelectableVisitor visitor) {
+    bool _abort = false;
+    void visitSelectablesRecursively(RenderObject object) {
+      if (_abort)
+        return;
+
+      if (object is Selectable) {
+        if (visitor(object as Selectable)) {
+          _abort = true;
+        }
+        return;
+      }
+      object.visitChildrenForSelection(visitSelectablesRecursively);
+    }
+    root.visitChildrenForSelection(visitSelectablesRecursively);
+  }
+
+  static SelectionResult selectionBasedOnRect(Rect targetRect, Offset start, Offset end) {
+    if (targetRect.contains(end))
+      return SelectionResult.end;
+    if (end.dy < targetRect.top)
+      return SelectionResult.previous;
+    if (end.dy > targetRect.bottom)
+      return SelectionResult.next;
+    final Rect selectionRect = Rect.fromPoints(start, end);
+    if (selectionRect.overlaps(targetRect))
+      return SelectionResult.end;
+    return end.dx < targetRect.left ? SelectionResult.previous : SelectionResult.next;
+  }
+
+  /// Set selection at [root].
+  static SelectionResult updateSelectionAt(RenderObject root, Offset start, Offset end) {
+    if (root is Selectable) {
+      return (root as Selectable).updateSelection(start, end);
+    }
+    SelectionResult? selectionResult;
+    visitSelectables(root, (Selectable selectable) {
+      final Matrix4 transform = (selectable as RenderObject).getTransformTo(root);
+      transform.invert();
+      selectionResult = selectable.updateSelection(
+        MatrixUtils.transformPoint(transform, start),
+        MatrixUtils.transformPoint(transform, end)
+      );
+      return selectionResult != SelectionResult.next;
+    });
+    if (selectionResult != null)
+      return selectionResult!;
+
+    final RenderBox rootBox = root as RenderBox;
+    return selectionBasedOnRect(Rect.fromLTRB(0, 0, rootBox.size.width, rootBox.size.height), start, end);
+  }
+}
+
 /// An object in the render tree.
 ///
 /// The [RenderObject] class hierarchy is the core of the rendering
@@ -1359,6 +1446,14 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///
   /// Override in subclasses with children and call the visitor for each child.
   void visitChildren(RenderObjectVisitor visitor) { }
+
+  /// Calls visitor for each immediate child to collect [Selectable] of this
+  /// render object.
+  ///
+  /// Override in subclasses with children and call the visitor for each child.
+  ///
+  /// Defaults to call [visitChildren].
+  void visitChildrenForSelection(RenderObjectVisitor visitor) => visitChildren(visitor);
 
   /// The object responsible for creating this render object.
   ///
@@ -3173,7 +3268,7 @@ mixin ContainerParentDataMixin<ChildType extends RenderObject> on ParentData {
 /// parent data.
 ///
 /// Moreover, this is a required mixin for render objects returned to [MultiChildRenderObjectWidget].
-mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType extends ContainerParentDataMixin<ChildType>> on RenderObject {
+mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType extends ContainerParentDataMixin<ChildType>> on RenderObject implements Selectable {
   bool _debugUltimatePreviousSiblingOf(ChildType child, { ChildType? equals }) {
     ParentDataType childParentData = child.parentData! as ParentDataType;
     while (childParentData.previousSibling != null) {
@@ -3453,6 +3548,202 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
       }
     }
     return children;
+  }
+
+  RenderBox? _currentSelectionChild;
+
+  @override
+  void clear() {
+    Selectable.visitSelectables(this, (Selectable child) {
+      child.clear();
+      return false;
+    });
+    _currentSelectionChild = null;
+  }
+
+  @override
+  Object? copy() {
+    final List<Object> selections = <Object>[];
+    Selectable.visitSelectables(this, (Selectable child) {
+      final Object? object = child.copy();
+      if (object != null) {
+        selections.add(object);
+      }
+      return false;
+    });
+    if (selections.isEmpty) {
+      return null;
+    }
+    return selections.join(' ');
+  }
+
+  @mustCallSuper
+  SelectionResult updateChildSelection(RenderBox child, Offset start, Offset end) {
+    final SelectionResult result = Selectable.updateSelectionAt(child,
+      start,
+      end,
+    );
+    print('$this update $child, from $start, to $end, result is $result');
+    if (result != SelectionResult.previous)
+      _currentSelectionChild = child;
+    return result;
+  }
+
+  SelectionResult? _initSelection(Offset start, Offset end) {
+    // TODO(chunhtai): handle inverted selection.
+    bool abort = false;
+    SelectionResult? overallResult;
+    visitChildrenForSelection((RenderObject child) {
+      if (abort)
+        return;
+      SelectionResult result;
+      print('init');
+      result = _updateChildSelectionInParentCoodinate(
+        child as RenderBox,
+        start,
+        end
+      );
+      if (overallResult == null) {
+        overallResult = result;
+      } else {
+        overallResult = result == SelectionResult.next ? SelectionResult.next : SelectionResult.end;
+      }
+      abort = result != SelectionResult.next;
+    });
+    return overallResult;
+  }
+
+  SelectionResult _updateChildSelectionInParentCoodinate(RenderBox child, Offset start, Offset end) {
+    final Matrix4 transform = child.getTransformTo(this);
+    transform.invert();
+    final SelectionResult result = updateChildSelection(
+      child,
+      MatrixUtils.transformPoint(transform, start),
+      MatrixUtils.transformPoint(transform, end)
+    );
+    return result;
+  }
+
+  SelectionResult _adjustSelection(Offset start, Offset end) {
+    // TODO(chunhtai): handle inverted selection.
+    final List<RenderObject> childrenInSelectionOrder = <RenderObject>[];
+    int selectionIndex = -1;
+    int walker = 0;
+    visitChildrenForSelection((RenderObject child) {
+      if (_currentSelectionChild == child)
+        selectionIndex = walker;
+      childrenInSelectionOrder.add(child);
+      walker += 1;
+    });
+    assert(selectionIndex != -1 && selectionIndex < childrenInSelectionOrder.length);
+    print('adjust');
+    final SelectionResult result = _updateChildSelectionInParentCoodinate(
+      _currentSelectionChild!,
+      start,
+      end
+    );
+    switch (result) {
+      case SelectionResult.end:
+        return result;
+      case SelectionResult.next:
+        {
+          SelectionResult nextResult = result;
+          selectionIndex += 1;
+          while(nextResult == SelectionResult.next && selectionIndex < childrenInSelectionOrder.length) {
+            print('adjust');
+            nextResult = _updateChildSelectionInParentCoodinate(
+              childrenInSelectionOrder[selectionIndex] as RenderBox,
+              start,
+              end
+            );
+            selectionIndex += 1;
+          }
+          return nextResult == SelectionResult.next ? SelectionResult.next : SelectionResult.end;
+        }
+      case SelectionResult.previous:
+        {
+          SelectionResult previousResult = result;
+          selectionIndex -= 1;
+          while(previousResult == SelectionResult.previous && selectionIndex >= 0) {
+            print('adjust');
+            previousResult = _updateChildSelectionInParentCoodinate(childrenInSelectionOrder[selectionIndex] as RenderBox, start, end);
+            selectionIndex -= 1;
+          }
+          return previousResult == SelectionResult.previous ? SelectionResult.previous : SelectionResult.end;
+        }
+    }
+  }
+
+  @override
+  SelectionResult updateSelection(Offset start, Offset end) {
+    Size size = Size.zero;
+    if (this is RenderBox) {
+      size = (this as RenderBox).size;
+    }
+    final Rect rect = Rect.fromLTRB(0, 0, size.width, size.height);
+    if (!rect.overlaps(Rect.fromPoints(start, end))) {
+      return Selectable.selectionBasedOnRect(rect, start, end);
+    }
+    final SelectionResult? result;
+    if (_currentSelectionChild == null || !_currentSelectionChild!.attached || _currentSelectionChild!.parent != this) {
+      _currentSelectionChild = null;
+      result = _initSelection(start, end);
+    } else {
+      result = _adjustSelection(start, end);
+    }
+    if (result != null)
+      return result;
+    return Selectable.selectionBasedOnRect(rect, start, end);
+  }
+}
+
+/// Mixin that applies correct child selection transform
+mixin LinearLayoutContainerSelectableMixin<ChildType extends RenderObject, ParentDataType extends ContainerParentDataMixin<ChildType>> on ContainerRenderObjectMixin<ChildType, ParentDataType> {
+  /// The direction of the layout.
+  Axis get direction;
+
+  @override
+  SelectionResult updateChildSelection(RenderBox child, Offset start, Offset end) {
+    switch (direction) {
+      case Axis.vertical: {
+        final Rect childRect = Rect.fromLTRB(0, 0, child.size.width, child.size.height);
+        if (!childRect.contains(start)) {
+          if (start.dy < childRect.top) {
+            start = childRect.topLeft;
+          } else {
+            start = childRect.bottomRight;
+          }
+        }
+
+        if (!childRect.contains(end)) {
+          if (end.dy > childRect.bottom) {
+            end = childRect.bottomRight;
+          } else {
+            end = childRect.topLeft;
+          }
+        }
+        return super.updateChildSelection(child, start, end);
+      }
+      case Axis.horizontal: {
+        final Rect childRect = Rect.fromLTRB(0, 0, child.size.width, child.size.height);
+        if (!childRect.contains(start)) {
+          if (start.dy < childRect.top || (start.dy > childRect.bottom && start.dx < childRect.left)) {
+            start = childRect.topLeft;
+          } else {
+            start = childRect.bottomRight;
+          }
+        }
+
+        if (!childRect.contains(end)) {
+          if (end.dy > childRect.bottom || (end.dy > childRect.top && end.dx > childRect.right)) {
+            end = childRect.bottomRight;
+          } else {
+            end = childRect.topLeft;
+          }
+        }
+        return super.updateChildSelection(child, start, end);
+      }
+    }
   }
 }
 

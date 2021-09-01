@@ -136,8 +136,8 @@ typedef GestureTapCancelCallback = void Function();
 ///    any buttons.
 abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// Creates a tap gesture recognizer.
-  BaseTapGestureRecognizer({ Object? debugOwner })
-    : super(deadline: kPressTimeout , debugOwner: debugOwner);
+  BaseTapGestureRecognizer({ Object? debugOwner, Set<PointerDeviceKind>? supportedDevices })
+      : super(deadline: kPressTimeout , debugOwner: debugOwner, supportedDevices: supportedDevices);
 
   bool _sentTapDown = false;
   bool _wonArenaForPrimaryPointer = false;
@@ -346,7 +346,8 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
 ///  * [MultiTapGestureRecognizer]
 class TapGestureRecognizer extends BaseTapGestureRecognizer {
   /// Creates a tap gesture recognizer.
-  TapGestureRecognizer({ Object? debugOwner }) : super(debugOwner: debugOwner);
+  TapGestureRecognizer({ Object? debugOwner, Set<PointerDeviceKind>? supportedDevices })
+      : super(debugOwner: debugOwner, supportedDevices: supportedDevices);
 
   /// A pointer has contacted the screen at a particular location with a primary
   /// button, which might be the start of a tap.

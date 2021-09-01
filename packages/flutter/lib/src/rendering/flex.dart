@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';
 import 'debug_overflow_indicator.dart';
@@ -273,6 +274,7 @@ typedef _ChildSizingFunction = double Function(RenderBox child, double extent);
 ///  * [Flex], the widget equivalent.
 ///  * [Row] and [Column], direction-specific variants of [Flex].
 class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, FlexParentData>,
+                                        LinearLayoutContainerSelectableMixin<RenderBox, FlexParentData>,
                                         RenderBoxContainerDefaultsMixin<RenderBox, FlexParentData>,
                                         DebugOverflowIndicatorMixin {
   /// Creates a flex render object.
@@ -306,6 +308,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   }
 
   /// The direction to use as the main axis.
+  @override
   Axis get direction => _direction;
   Axis _direction;
   set direction(Axis value) {

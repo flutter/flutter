@@ -64,7 +64,7 @@ class PlaceholderSpanIndexSemanticsTag extends SemanticsTag {
 class RenderParagraph extends RenderBox
     with ContainerRenderObjectMixin<RenderBox, TextParentData>,
              RenderBoxContainerDefaultsMixin<RenderBox, TextParentData>,
-                  RelayoutWhenSystemFontsChangeMixin {
+                  RelayoutWhenSystemFontsChangeMixin implements Selectable {
   /// Creates a paragraph render object.
   ///
   /// The [text], [textAlign], [textDirection], [overflow], [softWrap], and
@@ -296,6 +296,86 @@ class RenderParagraph extends RenderBox
     _textPainter.textHeightBehavior = value;
     _overflowShader = null;
     markNeedsLayout();
+  }
+
+  TextSelection? _textSelection;
+
+  /// Clear the current text selection, but only mark for a paint if it has
+  /// been set to a non-null value.
+  void _clearSelection() {
+    if (_textSelection != null)
+      markNeedsPaint();
+    _textSelection = null;
+  }
+
+  @override
+  String? copy() {
+    final TextSelection? textSelection = _textSelection;
+    if (textSelection == null)
+      return null;
+
+    final String plainText = text.toPlainText(includePlaceholders: true, includeSemanticsLabels: false);
+    return plainText.substring(textSelection.start, textSelection.end);
+  }
+
+  @override
+  void clear() {
+    if (_textSelection == null)
+      return;
+
+    _textSelection = null;
+    markNeedsPaint();
+  }
+
+  @override
+  SelectionResult updateSelection(Offset start, Offset end) {
+    print('render paragraph "${text.toPlainText(includePlaceholders: true, includeSemanticsLabels: false)}" update from $start to $end');
+    if (!hasSize) {
+      return SelectionResult.previous;
+    }
+    final Rect boundingRect = Rect.fromLTWH(0, 0, size.width, size.height);
+    // This RO has not been laid out yet, it can't be selected.
+    if (boundingRect.isEmpty) {
+      _clearSelection();
+      return Selectable.selectionBasedOnRect(boundingRect, start, end);
+    }
+    final Rect selectionRect = Rect.fromPoints(start, end);
+    if (selectionRect.isInfinite) {
+      _textSelection = TextSelection(baseOffset: 0, extentOffset: getPositionForOffset(Offset.infinite).offset);
+      markNeedsPaint();
+      return SelectionResult.next;
+    }
+    final Rect intersection = boundingRect.intersect(selectionRect);
+    // If width or height are negative, there is no overlap between
+    // the selection rect and the estimated bounds of this RO.
+    if (intersection.width < 0 || intersection.height < 0) {
+      _clearSelection();
+      return Selectable.selectionBasedOnRect(boundingRect, start, end);
+    }
+    TextPosition startText;
+    TextPosition endText;
+    switch (textDirection) {
+      case TextDirection.rtl:
+        startText = getPositionForOffset(end);
+        endText = getPositionForOffset(start);
+        break;
+      case TextDirection.ltr:
+        startText = getPositionForOffset(start);
+        endText = getPositionForOffset(end);
+        break;
+    }
+    if (startText != endText) {
+      _textSelection = TextSelection(baseOffset: startText.offset, extentOffset: endText.offset);
+      markNeedsPaint();
+    }
+    final int textLength = text.toPlainText(includePlaceholders: true, includeSemanticsLabels: false).length;
+    if (endText.offset >= textLength) {
+      return SelectionResult.next;
+    }
+    if (endText.offset <= 0) {
+      return SelectionResult.previous;
+    }
+    return SelectionResult.end;
   }
 
   @override
@@ -701,6 +781,10 @@ class RenderParagraph extends RenderBox
     }
   }
 
+  static final Paint _selectionPaint = Paint()
+    ..style = PaintingStyle.fill
+    ..color = const Color(0xAF6694e8);
+
   @override
   void paint(PaintingContext context, Offset offset) {
     // Ideally we could compute the min/max intrinsic width/height with a
@@ -770,6 +854,13 @@ class RenderParagraph extends RenderBox
         context.canvas.drawRect(Offset.zero & size, paint);
       }
       context.canvas.restore();
+    }
+    final TextSelection? textSelection = _textSelection;
+    if (textSelection != null) {
+      for (final TextBox textBox in getBoxesForSelection(textSelection)) {
+        context.canvas.drawRect(
+            textBox.toRect().shift(offset), _selectionPaint);
+      }
     }
   }
 
