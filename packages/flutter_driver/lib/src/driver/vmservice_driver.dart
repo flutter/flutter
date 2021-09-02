@@ -290,10 +290,10 @@ class VMServiceFlutterDriver extends FlutterDriver {
   /// Whether to log communication between host and app to `flutter_driver_commands.log`.
   final bool _logCommunicationToFile;
 
-  /// Logs are written here if _logCommunicationToFile is true.
+  /// Logs are written here when _logCommunicationToFile is true.
   late final String _logFilePathName;
 
-  /// Getter for file pathname where logs are written if _logCommunicationToFile is true.
+  /// Getter for file pathname where logs are written when _logCommunicationToFile is true.
   String get logFilePathName => _logFilePathName;
 
 
@@ -330,6 +330,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
     if (_printCommunication)
       _log(message);
     if (_logCommunicationToFile) {
+      assert(_logFilePathName != null);
       final f.File file = fs.file(_logFilePathName);
       file.createSync(recursive: true); // no-op if file exists
       file.writeAsStringSync('${DateTime.now()} $message\n', mode: f.FileMode.append, flush: true);

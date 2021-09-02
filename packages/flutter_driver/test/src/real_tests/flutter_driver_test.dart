@@ -80,6 +80,11 @@ void main() {
         final bool exists = logFile.existsSync();
         expect(exists, false, reason: 'because ${logFile.path} exists');
       });
+
+      test('logFilePathName was set when a new driver was created', () {
+        driver = VMServiceFlutterDriver.connectedTo(fakeClient, fakeIsolate, logCommunicationToFile: true);
+        expect(driver.logFilePathName, endsWith('.log'));
+      });
     });
   });
 
