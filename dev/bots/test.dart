@@ -455,9 +455,6 @@ Future<void> _runBuildTests() async {
 Future<void> _runExampleProjectBuildTests(Directory exampleDirectory, [File? mainFile]) async {
   // Only verify caching with flutter gallery.
   final bool verifyCaching = exampleDirectory.path.contains('flutter_gallery');
-  if (exampleDirectory is! Directory) {
-    return;
-  }
   final String examplePath = exampleDirectory.path;
   final bool hasNullSafety = File(path.join(examplePath, 'null_safety')).existsSync();
   final List<String> additionalArgs = <String>[
@@ -1565,10 +1562,18 @@ Future<void> _runFlutterTest(String workingDirectory, {
 }) async {
   assert(!printOutput || outputChecker == null, 'Output either can be printed or checked but not both');
 
+  final List<String> tags = <String>[];
+  // Recipe configured reduced test shards will only execute tests with the
+  // appropriate tag.
+  if ((Platform.environment['REDUCED_TEST_SET'] ?? 'False') == 'True') {
+    tags.addAll(<String>['-t', 'reduced-test-set']);
+  }
+
   final List<String> args = <String>[
     'test',
     if (shuffleTests) '--test-randomize-ordering-seed=$shuffleSeed',
     ...options,
+    ...tags,
     ...flutterTestArgs,
   ];
 
