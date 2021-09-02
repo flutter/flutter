@@ -1,4 +1,4 @@
-Signature: 910bacb8289114d5a629dabf41511e05
+Signature: 427ae13700cf858f760c3f53590e7432
 
 UNUSED LICENSES:
 
@@ -1570,8 +1570,8 @@ FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLFragmentShaderBuilder.cpp
 FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLFragmentShaderBuilder.h
 FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLShaderBuilder.cpp
 FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLShaderBuilder.h
-FILE: ../../../third_party/skia/src/gpu/ops/GrDashOp.cpp
-FILE: ../../../third_party/skia/src/gpu/ops/GrDashOp.h
+FILE: ../../../third_party/skia/src/gpu/ops/DashOp.cpp
+FILE: ../../../third_party/skia/src/gpu/ops/DashOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/SmallPathRenderer.h
 FILE: ../../../third_party/skia/src/image/SkReadPixelsRec.h
 FILE: ../../../third_party/skia/src/image/SkSurface_Gpu.h
@@ -2488,13 +2488,13 @@ FILE: ../../../third_party/skia/src/gpu/ops/AALinearizingConvexPathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/AALinearizingConvexPathRenderer.h
 FILE: ../../../third_party/skia/src/gpu/ops/AtlasTextOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/AtlasTextOp.h
+FILE: ../../../third_party/skia/src/gpu/ops/ClearOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/DashLinePathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/DashLinePathRenderer.h
 FILE: ../../../third_party/skia/src/gpu/ops/DrawAtlasOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/DrawAtlasOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/DrawVerticesOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/DrawVerticesOp.h
-FILE: ../../../third_party/skia/src/gpu/ops/GrClearOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrDrawOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrLatticeOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrLatticeOp.h
@@ -3531,7 +3531,7 @@ FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlTrampoline.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlTrampoline.mm
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlUtil.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlUtil.mm
-FILE: ../../../third_party/skia/src/gpu/ops/GrClearOp.cpp
+FILE: ../../../third_party/skia/src/gpu/ops/ClearOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrSimpleMeshDrawOpHelper.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrSimpleMeshDrawOpHelper.h
 FILE: ../../../third_party/skia/src/gpu/ops/TextureOp.cpp
