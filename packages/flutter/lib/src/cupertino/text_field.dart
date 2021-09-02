@@ -257,7 +257,7 @@ class CupertinoTextField extends StatefulWidget {
     this.autofocus = false,
     this.obscuringCharacter = '•',
     @Deprecated(
-      'Use obscureTextBehavior instead.'
+      'Use obscureTextBehavior instead. '
       'This feature was deprecated after v2.3.0.',
     )
     this.obscureText = false,
@@ -427,7 +427,7 @@ class CupertinoTextField extends StatefulWidget {
     this.autofocus = false,
     this.obscuringCharacter = '•',
     @Deprecated(
-      'Use obscureTextBehavior instead.'
+      'Use obscureTextBehavior instead. '
       'This feature was deprecated after v2.3.0.',
     )
     this.obscureText = false,
@@ -655,7 +655,7 @@ class CupertinoTextField extends StatefulWidget {
   final String obscuringCharacter;
 
   @Deprecated(
-    'Use obscureTextBehavior instead.'
+    'Use obscureTextBehavior instead. '
     'This feature was deprecated after v2.3.0.',
   )
   /// {@macro flutter.widgets.editableText.obscureText}

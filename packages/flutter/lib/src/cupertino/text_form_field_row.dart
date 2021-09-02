@@ -152,7 +152,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
     bool? showCursor,
     String obscuringCharacter = '•',
     @Deprecated(
-      'Use obscureTextBehavior instead.'
+      'Use obscureTextBehavior instead. '
       'This feature was deprecated after v2.3.0.',
     )
     bool obscureText = false,

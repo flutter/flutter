@@ -185,7 +185,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
     String obscuringCharacter = '•',
     @Deprecated(
-      'Use obscureTextBehavior instead.'
+      'Use obscureTextBehavior instead. '
       'This feature was deprecated after v2.3.0.',
     )
     bool obscureText = false,

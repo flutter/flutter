@@ -437,7 +437,7 @@ class EditableText extends StatefulWidget {
     this.readOnly = false,
     this.obscuringCharacter = '•',
     @Deprecated(
-      'Use obscureTextBehavior instead.'
+      'Use obscureTextBehavior instead. '
       'This feature was deprecated after v2.3.0.',
     )
     this.obscureText = false,
@@ -583,7 +583,7 @@ class EditableText extends StatefulWidget {
   final String obscuringCharacter;
 
   @Deprecated(
-    'Use obscureTextBehavior instead.'
+    'Use obscureTextBehavior instead. '
     'This feature was deprecated after v2.3.0.',
   )
   /// {@template flutter.widgets.editableText.obscureText}
@@ -2819,7 +2819,7 @@ class _Editable extends MultiChildRenderObjectWidget {
     this.locale,
     required this.obscuringCharacter,
     @Deprecated(
-      'Use obscureTextBehavior instead.'
+      'Use obscureTextBehavior instead. '
       'This feature was deprecated after v2.3.0.',
     )
     this.obscureText,
