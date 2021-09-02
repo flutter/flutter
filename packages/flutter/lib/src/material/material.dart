@@ -556,6 +556,7 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
     super.paint(context, offset);
   }
 
+  @override
   void dispose() {
     // [InkFeature.dispose] will eventually call [_inkFeatures!.remove].
     while (_inkFeatures?.isNotEmpty == true)
@@ -657,8 +658,8 @@ abstract class InkFeature {
     final List<RenderObject> descendants = <RenderObject>[referenceBox];
     RenderObject node = referenceBox;
     while (node != _controller) {
-      // if (node.parent == null)
-      //   return;
+      if (node.parent == null)
+        return;
       node = node.parent! as RenderObject;
       descendants.add(node);
     }
