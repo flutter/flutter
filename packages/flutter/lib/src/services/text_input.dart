@@ -466,8 +466,8 @@ class TextInputConfiguration {
     this.inputType = TextInputType.text,
     this.readOnly = false,
     @Deprecated(
-        'use obscureTextBehavior instead.'
-        'This feature was deprecated after v2.3.0.',
+      'Use obscureTextBehavior instead.'
+      'This feature was deprecated after v2.3.0.',
     )
     this.obscureText = false,
     this.obscureTextBehavior = ObscureTextBehavior.none,
