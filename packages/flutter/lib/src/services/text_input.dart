@@ -467,7 +467,7 @@ class TextInputConfiguration {
     this.readOnly = false,
     @Deprecated(
       'Use obscureTextBehavior instead. '
-      'This feature was deprecated after v2.3.0.',
+      'This feature was deprecated after v2.6.0-0.0.pre.',
     )
     this.obscureText = false,
     this.obscureTextBehavior = ObscureTextBehavior.none,
@@ -503,7 +503,7 @@ class TextInputConfiguration {
 
   @Deprecated(
     'Use obscureTextBehavior instead. '
-    'This feature was deprecated after v2.3.0.',
+    'This feature was deprecated after v2.6.0-0.0.pre.',
   )
   /// Whether to hide the text being edited (e.g., for passwords).
   ///

@@ -438,7 +438,7 @@ class EditableText extends StatefulWidget {
     this.obscuringCharacter = '•',
     @Deprecated(
       'Use obscureTextBehavior instead. '
-      'This feature was deprecated after v2.3.0.',
+      'This feature was deprecated after v2.6.0-0.0.pre.',
     )
     this.obscureText = false,
     this.obscureTextBehavior = ObscureTextBehavior.none,
@@ -584,7 +584,7 @@ class EditableText extends StatefulWidget {
 
   @Deprecated(
     'Use obscureTextBehavior instead. '
-    'This feature was deprecated after v2.3.0.',
+    'This feature was deprecated after v2.6.0-0.0.pre.',
   )
   /// {@template flutter.widgets.editableText.obscureText}
   /// Whether to hide the text being edited (e.g., for passwords).
@@ -2820,7 +2820,7 @@ class _Editable extends MultiChildRenderObjectWidget {
     required this.obscuringCharacter,
     @Deprecated(
       'Use obscureTextBehavior instead. '
-      'This feature was deprecated after v2.3.0.',
+      'This feature was deprecated after v2.6.0-0.0.pre.',
     )
     this.obscureText,
     required this.obscureTextBehavior,

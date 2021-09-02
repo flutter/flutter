@@ -154,7 +154,7 @@ class TextFormField extends FormField<String> {
     String obscuringCharacter = '•',
     @Deprecated(
       'Use obscureTextBehavior instead. '
-      'This feature was deprecated after v2.3.0.',
+      'This feature was deprecated after v2.6.0-0.0.pre.',
     )
     bool obscureText = false,
     ObscureTextBehavior obscureTextBehavior = ObscureTextBehavior.none,

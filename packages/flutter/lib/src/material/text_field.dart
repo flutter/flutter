@@ -353,7 +353,7 @@ class TextField extends StatefulWidget {
     this.obscuringCharacter = '•',
     @Deprecated(
       'Use obscureTextBehavior instead. '
-      'This feature was deprecated after v2.3.0.',
+      'This feature was deprecated after v2.6.0-0.0.pre.',
     )
     this.obscureText = false,
     this.obscureTextBehavior = ObscureTextBehavior.none,
@@ -553,7 +553,7 @@ class TextField extends StatefulWidget {
 
   @Deprecated(
     'Use obscureTextBehavior instead. '
-    'This feature was deprecated after v2.3.0.',
+    'This feature was deprecated after v2.6.0-0.0.pre.',
   )
   /// {@macro flutter.widgets.editableText.obscureText}
   final bool obscureText;
