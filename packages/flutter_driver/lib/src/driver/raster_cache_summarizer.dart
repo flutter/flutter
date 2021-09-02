@@ -40,10 +40,10 @@ class RasterCacheSummarizer {
   /// The raster cache events.
   final List<TimelineEvent> rasterCacheEvents;
 
-  late final List<double> _layerCounts = rasterCacheEvents.map((e) => _getValue(e, _kLayerCount)).toList();
-  late final List<double> _layerMemories = rasterCacheEvents.map((e) => _getValue(e, _kLayerMemory)).toList();
-  late final List<double> _pictureCounts = rasterCacheEvents.map((e) => _getValue(e, _kPictureCount)).toList();
-  late final List<double> _pictureMemories = rasterCacheEvents.map((e) => _getValue(e, _kPictureMemory)).toList();
+  late final List<double> _layerCounts = _extractValues(_kLayerCount);
+  late final List<double> _layerMemories = _extractValues(_kLayerMemory);
+  late final List<double> _pictureCounts = _extractValues(_kPictureCount);
+  late final List<double> _pictureMemories = _extractValues(_kPictureMemory);
 
   /// Computes the average of the `LayerCount` values over the cache events.
   double computeAverageLayerCount() => _computeAverage(_layerCounts);
@@ -106,6 +106,9 @@ class RasterCacheSummarizer {
     values.sort();
     return values.last;
   }
+
+  List<double> _extractValues(String name) =>
+      rasterCacheEvents.map((TimelineEvent e) => _getValue(e, name)).toList();
 
   double _getValue(TimelineEvent e, String name) {
     assert(e.name == kRasterCacheEvent);
