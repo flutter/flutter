@@ -11,12 +11,14 @@
 
 #include "flutter/fml/base32.h"
 #include "flutter/fml/file.h"
+#include "flutter/fml/hex_codec.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/paths.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/shell/version/version.h"
+#include "openssl/sha.h"
 #include "rapidjson/document.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 #include "third_party/skia/include/utils/SkBase64.h"
@@ -30,21 +32,17 @@ std::shared_ptr<AssetManager> PersistentCache::asset_manager_;
 std::mutex PersistentCache::instance_mutex_;
 std::unique_ptr<PersistentCache> PersistentCache::gPersistentCache;
 
-std::string PersistentCache::SkKeyToFilePath(const SkData& data) {
-  if (data.data() == nullptr || data.size() == 0) {
+std::string PersistentCache::SkKeyToFilePath(const SkData& key) {
+  if (key.data() == nullptr || key.size() == 0) {
     return "";
   }
 
-  std::string_view view(reinterpret_cast<const char*>(data.data()),
-                        data.size());
+  uint8_t sha_digest[SHA_DIGEST_LENGTH];
+  SHA1(static_cast<const uint8_t*>(key.data()), key.size(), sha_digest);
 
-  auto encode_result = fml::Base32Encode(view);
-
-  if (!encode_result.first) {
-    return "";
-  }
-
-  return encode_result.second;
+  std::string_view view(reinterpret_cast<const char*>(sha_digest),
+                        SHA_DIGEST_LENGTH);
+  return fml::HexEncode(view);
 }
 
 bool PersistentCache::gIsReadOnly = false;
@@ -205,7 +203,7 @@ size_t PersistentCache::PrecompileKnownSkSLs(GrDirectContext* context) const {
   size_t precompiled_count = 0;
   for (const auto& sksl : known_sksls) {
     TRACE_EVENT0("flutter", "PrecompilingSkSL");
-    if (context->precompileShader(*sksl.first, *sksl.second)) {
+    if (context->precompileShader(*sksl.key, *sksl.value)) {
       precompiled_count++;
     }
   }
@@ -221,10 +219,9 @@ std::vector<PersistentCache::SkSLCache> PersistentCache::LoadSkSLs() const {
   std::vector<PersistentCache::SkSLCache> result;
   fml::FileVisitor visitor = [&result](const fml::UniqueFD& directory,
                                        const std::string& filename) {
-    sk_sp<SkData> key = ParseBase32(filename);
-    sk_sp<SkData> data = LoadFile(directory, filename);
-    if (key != nullptr && data != nullptr) {
-      result.push_back({key, data});
+    SkSLCache cache = LoadFile(directory, filename, true);
+    if (cache.key != nullptr && cache.value != nullptr) {
+      result.push_back(cache);
     } else {
       FML_LOG(ERROR) << "Failed to load: " << filename;
     }
@@ -291,17 +288,38 @@ bool PersistentCache::IsValid() const {
   return cache_directory_ && cache_directory_->is_valid();
 }
 
-sk_sp<SkData> PersistentCache::LoadFile(const fml::UniqueFD& dir,
-                                        const std::string& file_name) {
+PersistentCache::SkSLCache PersistentCache::LoadFile(
+    const fml::UniqueFD& dir,
+    const std::string& file_name,
+    bool need_key) {
+  SkSLCache result;
   auto file = fml::OpenFileReadOnly(dir, file_name.c_str());
   if (!file.is_valid()) {
-    return nullptr;
+    return result;
   }
   auto mapping = std::make_unique<fml::FileMapping>(file);
-  if (mapping->GetSize() == 0) {
-    return nullptr;
+  if (mapping->GetSize() < sizeof(CacheObjectHeader)) {
+    return result;
   }
-  return SkData::MakeWithCopy(mapping->GetMapping(), mapping->GetSize());
+  const CacheObjectHeader* header =
+      reinterpret_cast<const CacheObjectHeader*>(mapping->GetMapping());
+  if (header->signature != CacheObjectHeader::kSignature ||
+      header->version != CacheObjectHeader::kVersion1) {
+    FML_LOG(INFO) << "Persistent cache header is corrupt: " << file_name;
+    return result;
+  }
+  if (mapping->GetSize() < sizeof(CacheObjectHeader) + header->key_size) {
+    FML_LOG(INFO) << "Persistent cache size is corrupt: " << file_name;
+    return result;
+  }
+  if (need_key) {
+    result.key = SkData::MakeWithCopy(
+        mapping->GetMapping() + sizeof(CacheObjectHeader), header->key_size);
+  }
+  size_t value_offset = sizeof(CacheObjectHeader) + header->key_size;
+  result.value = SkData::MakeWithCopy(mapping->GetMapping() + value_offset,
+                                      mapping->GetSize() - value_offset);
+  return result;
 }
 
 // |GrContextOptions::PersistentCache|
@@ -314,7 +332,8 @@ sk_sp<SkData> PersistentCache::load(const SkData& key) {
   if (file_name.size() == 0) {
     return nullptr;
   }
-  auto result = PersistentCache::LoadFile(*cache_directory_, file_name);
+  auto result =
+      PersistentCache::LoadFile(*cache_directory_, file_name, false).value;
   if (result != nullptr) {
     TRACE_EVENT0("flutter", "PersistentCacheLoadHit");
   }
@@ -349,6 +368,26 @@ static void PersistentCacheStore(fml::RefPtr<fml::TaskRunner> worker,
   }
 }
 
+std::unique_ptr<fml::MallocMapping> PersistentCache::BuildCacheObject(
+    const SkData& key,
+    const SkData& data) {
+  size_t total_size = sizeof(CacheObjectHeader) + key.size() + data.size();
+  uint8_t* mapping_buf = reinterpret_cast<uint8_t*>(malloc(total_size));
+  if (!mapping_buf) {
+    return nullptr;
+  }
+  auto mapping = std::make_unique<fml::MallocMapping>(mapping_buf, total_size);
+
+  CacheObjectHeader header(key.size());
+  memcpy(mapping_buf, &header, sizeof(CacheObjectHeader));
+  mapping_buf += sizeof(CacheObjectHeader);
+  memcpy(mapping_buf, key.data(), key.size());
+  mapping_buf += key.size();
+  memcpy(mapping_buf, data.data(), data.size());
+
+  return mapping;
+}
+
 // |GrContextOptions::PersistentCache|
 void PersistentCache::store(const SkData& key, const SkData& data) {
   stored_new_shaders_ = true;
@@ -367,10 +406,8 @@ void PersistentCache::store(const SkData& key, const SkData& data) {
     return;
   }
 
-  auto mapping = std::make_unique<fml::DataMapping>(
-      std::vector<uint8_t>{data.bytes(), data.bytes() + data.size()});
-
-  if (mapping == nullptr || mapping->GetSize() == 0) {
+  std::unique_ptr<fml::MallocMapping> mapping = BuildCacheObject(key, data);
+  if (!mapping) {
     return;
   }
 
