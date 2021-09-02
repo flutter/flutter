@@ -3422,7 +3422,7 @@ void main() {
     expect(tester.widget<Text>(find.text('suffix')).style!.color, suffixStyle.color);
     expect(tester.widget<Text>(find.text('helper')).style!.color, helperStyle.color);
     expect(tester.widget<Text>(find.text('counter')).style!.color, counterStyle.color);
-    expect(getLabelStyle(tester).color, labelStyle.color);
+    expect(getLabelStyle(tester).color, hintStyle.color);
   });
 
   testWidgets('InputDecorationTheme style overrides (focused)', (WidgetTester tester) async {
