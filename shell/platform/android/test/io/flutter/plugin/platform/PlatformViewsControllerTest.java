@@ -849,6 +849,11 @@ public class PlatformViewsControllerTest {
 
           @Override
           public SurfaceTextureEntry createSurfaceTexture() {
+            return registerSurfaceTexture(mock(SurfaceTexture.class));
+          }
+
+          @Override
+          public SurfaceTextureEntry registerSurfaceTexture(SurfaceTexture surfaceTexture) {
             return new SurfaceTextureEntry() {
               @Override
               public SurfaceTexture surfaceTexture() {

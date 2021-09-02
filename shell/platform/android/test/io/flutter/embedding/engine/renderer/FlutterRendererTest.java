@@ -1,5 +1,6 @@
 package io.flutter.embedding.engine.renderer;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -7,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.robolectric.Shadows.shadowOf;
 
+import android.graphics.SurfaceTexture;
 import android.os.Looper;
 import android.view.Surface;
 import io.flutter.embedding.engine.FlutterJNI;
@@ -120,6 +122,28 @@ public class FlutterRendererTest {
 
     // Verify behavior under test.
     verify(fakeFlutterJNI, times(0)).markTextureFrameAvailable(eq(entry.id()));
+  }
+
+  @Test
+  public void itRegistersExistingSurfaceTexture() {
+    // Setup the test.
+    FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI);
+
+    fakeFlutterJNI.detachFromNativeAndReleaseResources();
+
+    SurfaceTexture surfaceTexture = new SurfaceTexture(0);
+
+    // Execute the behavior under test.
+    FlutterRenderer.SurfaceTextureRegistryEntry entry =
+        (FlutterRenderer.SurfaceTextureRegistryEntry)
+            flutterRenderer.registerSurfaceTexture(surfaceTexture);
+
+    flutterRenderer.startRenderingToSurface(fakeSurface);
+
+    // Verify behavior under test.
+    assertEquals(surfaceTexture, entry.surfaceTexture());
+
+    verify(fakeFlutterJNI, times(1)).registerTexture(eq(entry.id()), eq(entry.textureWrapper()));
   }
 
   @Test
