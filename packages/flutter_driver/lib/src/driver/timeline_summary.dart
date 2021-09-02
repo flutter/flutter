@@ -11,6 +11,7 @@ import 'package:path/path.dart' as path;
 import 'common.dart';
 import 'percentile_utils.dart';
 import 'profiling_summarizer.dart';
+import 'raster_cache_summarizer.dart';
 import 'scene_display_lag_summarizer.dart';
 import 'timeline.dart';
 import 'vsync_frame_lag_summarizer.dart';
@@ -171,11 +172,15 @@ class TimelineSummary {
   /// * "90th_percentile_vsync_frame_lag" and "99th_percentile_vsync_frame_lag":
   ///   The 90/99-th percentile delay between platform vsync signal and engine
   ///   frame process start time.
+  /// * "[average/[90/99]th_percentile/worst]_[layer/picture]_cache_[count/memory]":
+  ///   The statistics for the count and memory consumption in megabytes of the
+  ///   engine Layer and Picture caches.
   ///   See [VsyncFrameLagSummarizer.computePercentileVsyncFrameLag].
   Map<String, dynamic> get summaryJson {
     final SceneDisplayLagSummarizer sceneDisplayLagSummarizer = _sceneDisplayLagSummarizer();
     final VsyncFrameLagSummarizer vsyncFrameLagSummarizer = _vsyncFrameLagSummarizer();
     final Map<String, dynamic> profilingSummary = _profilingSummarizer().summarize();
+    final RasterCacheSummarizer rasterCacheSummarizer = _rasterCacheSummarizer();
 
     final Map<String, dynamic> timelineSummary = <String, dynamic>{
       'average_frame_build_time_millis': computeAverageFrameBuildTimeMillis(),
@@ -210,6 +215,22 @@ class TimelineSummary {
       'average_vsync_frame_lag': vsyncFrameLagSummarizer.computeAverageVsyncFrameLag(),
       '90th_percentile_vsync_frame_lag': vsyncFrameLagSummarizer.computePercentileVsyncFrameLag(90.0),
       '99th_percentile_vsync_frame_lag': vsyncFrameLagSummarizer.computePercentileVsyncFrameLag(99.0),
+      'average_layer_cache_count': rasterCacheSummarizer.computeAverageLayerCount(),
+      '90th_percentile_layer_cache_count': rasterCacheSummarizer.computePercentileLayerCount(90.0),
+      '99th_percentile_layer_cache_count': rasterCacheSummarizer.computePercentileLayerCount(99.0),
+      'worst_layer_cache_count': rasterCacheSummarizer.computeWorstLayerCount(),
+      'average_layer_cache_memory': rasterCacheSummarizer.computeAverageLayerMemory(),
+      '90th_percentile_layer_cache_memory': rasterCacheSummarizer.computePercentileLayerMemory(90.0),
+      '99th_percentile_layer_cache_memory': rasterCacheSummarizer.computePercentileLayerMemory(99.0),
+      'worst_layer_cache_memory': rasterCacheSummarizer.computeWorstLayerMemory(),
+      'average_picture_cache_count': rasterCacheSummarizer.computeAveragePictureCount(),
+      '90th_percentile_picture_cache_count': rasterCacheSummarizer.computePercentilePictureCount(90.0),
+      '99th_percentile_picture_cache_count': rasterCacheSummarizer.computePercentilePictureCount(99.0),
+      'worst_picture_cache_count': rasterCacheSummarizer.computeWorstPictureCount(),
+      'average_picture_cache_memory': rasterCacheSummarizer.computeAveragePictureMemory(),
+      '90th_percentile_picture_cache_memory': rasterCacheSummarizer.computePercentilePictureMemory(90.0),
+      '99th_percentile_picture_cache_memory': rasterCacheSummarizer.computePercentilePictureMemory(99.0),
+      'worst_picture_cache_memory': rasterCacheSummarizer.computeWorstPictureMemory(),
     };
 
     timelineSummary.addAll(profilingSummary);
@@ -372,4 +393,6 @@ class TimelineSummary {
   List<Duration> _extractFrameDurations() => _extractBeginEndEvents(kBuildFrameEventName);
 
   VsyncFrameLagSummarizer _vsyncFrameLagSummarizer() => VsyncFrameLagSummarizer(_extractEventsWithNames(kVsyncTimelineEventNames));
+
+  RasterCacheSummarizer _rasterCacheSummarizer() => RasterCacheSummarizer(_extractNamedEvents(kRasterCacheEvent));
 }
