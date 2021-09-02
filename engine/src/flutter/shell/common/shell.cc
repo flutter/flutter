@@ -11,6 +11,7 @@
 
 #include "flutter/assets/directory_asset_bundle.h"
 #include "flutter/common/graphics/persistent_cache.h"
+#include "flutter/fml/base32.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/icu_util.h"
 #include "flutter/fml/log_settings.h"
@@ -1679,14 +1680,19 @@ bool Shell::OnServiceProtocolGetSkSLs(
   std::vector<PersistentCache::SkSLCache> sksls = persistent_cache->LoadSkSLs();
   for (const auto& sksl : sksls) {
     size_t b64_size =
-        SkBase64::Encode(sksl.second->data(), sksl.second->size(), nullptr);
+        SkBase64::Encode(sksl.value->data(), sksl.value->size(), nullptr);
     sk_sp<SkData> b64_data = SkData::MakeUninitialized(b64_size + 1);
     char* b64_char = static_cast<char*>(b64_data->writable_data());
-    SkBase64::Encode(sksl.second->data(), sksl.second->size(), b64_char);
+    SkBase64::Encode(sksl.value->data(), sksl.value->size(), b64_char);
     b64_char[b64_size] = 0;  // make it null terminated for printing
     rapidjson::Value shader_value(b64_char, response->GetAllocator());
-    rapidjson::Value shader_key(PersistentCache::SkKeyToFilePath(*sksl.first),
-                                response->GetAllocator());
+    std::string_view key_view(reinterpret_cast<const char*>(sksl.key->data()),
+                              sksl.key->size());
+    auto encode_result = fml::Base32Encode(key_view);
+    if (!encode_result.first) {
+      continue;
+    }
+    rapidjson::Value shader_key(encode_result.second, response->GetAllocator());
     shaders_json.AddMember(shader_key, shader_value, response->GetAllocator());
   }
   response->AddMember("SkSLs", shaders_json, response->GetAllocator());
