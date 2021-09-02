@@ -73,6 +73,51 @@ void main() {
     );
   });
 
+  test('analyze.dart - verifyGoldenTags', () async {
+    final String result = await capture(() => verifyGoldenTags(testRootPath, minimumMatches: 6), exitCode: 1);
+    const String noTag = 'Files containing golden tests must be '
+        'tagged using `@Tags(...)` at the top of the file before import statements.';
+    const String missingTag = 'Files containing golden tests must be '
+        "tagged with 'reduced-test-set'.";
+    String lines = <String>[
+        'test/analyze-test-input/root/packages/foo/golden_missing_tag.dart: $missingTag',
+        'test/analyze-test-input/root/packages/foo/golden_no_tag.dart: $noTag',
+      ]
+      .map((String line) {
+        return line
+          .replaceAll('/', Platform.isWindows ? r'\' : '/');
+      })
+      .join('\n');
+
+    try {
+      expect(
+        result,
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+        '$lines\n'
+        'See: https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter\n'
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+      );
+    } catch (_) {
+      // This list of files may come up in one order or the other.
+      lines = <String>[
+        'test/analyze-test-input/root/packages/foo/golden_no_tag.dart: $noTag',
+        'test/analyze-test-input/root/packages/foo/golden_missing_tag.dart: $missingTag',
+      ]
+      .map((String line) {
+        return line
+          .replaceAll('/', Platform.isWindows ? r'\' : '/');
+      })
+      .join('\n');
+      expect(
+        result,
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+        '$lines\n'
+        'See: https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter\n'
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+      );
+    }
+  });
+
   test('analyze.dart - verifyNoMissingLicense', () async {
     final String result = await capture(() => verifyNoMissingLicense(testRootPath, checkMinimums: false), exitCode: 1);
     final String lines = 'test/analyze-test-input/root/packages/foo/foo.dart'
