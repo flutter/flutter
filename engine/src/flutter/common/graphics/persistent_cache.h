@@ -45,7 +45,26 @@ class PersistentCache : public GrContextOptions::PersistentCache {
   //
   // This is used to specify persistent cache filenames and service protocol
   // json keys.
-  static std::string SkKeyToFilePath(const SkData& data);
+  static std::string SkKeyToFilePath(const SkData& key);
+
+  // Allocate a MallocMapping containing the given key and value in the file
+  // format used by the cache.
+  static std::unique_ptr<fml::MallocMapping> BuildCacheObject(
+      const SkData& key,
+      const SkData& data);
+
+  // Header written into the files used to store cached Skia objects.
+  struct CacheObjectHeader {
+    // A prefix used to identify the cache object file format.
+    static const uint32_t kSignature = 0xA869593F;
+    static const uint32_t kVersion1 = 1;
+
+    CacheObjectHeader(uint32_t p_key_size) : key_size(p_key_size) {}
+
+    uint32_t signature = kSignature;
+    uint32_t version = kVersion1;
+    uint32_t key_size;
+  };
 
   ~PersistentCache() override;
 
@@ -69,7 +88,10 @@ class PersistentCache : public GrContextOptions::PersistentCache {
   // |GrContextOptions::PersistentCache|
   sk_sp<SkData> load(const SkData& key) override;
 
-  using SkSLCache = std::pair<sk_sp<SkData>, sk_sp<SkData>>;
+  struct SkSLCache {
+    sk_sp<SkData> key;
+    sk_sp<SkData> value;
+  };
 
   /// Load all the SkSL shader caches in the right directory.
   std::vector<SkSLCache> LoadSkSLs() const;
@@ -135,8 +157,9 @@ class PersistentCache : public GrContextOptions::PersistentCache {
   bool stored_new_shaders_ = false;
   bool is_dumping_skp_ = false;
 
-  static sk_sp<SkData> LoadFile(const fml::UniqueFD& dir,
-                                const std::string& filen_ame);
+  static SkSLCache LoadFile(const fml::UniqueFD& dir,
+                            const std::string& file_name,
+                            bool need_key);
 
   bool IsValid() const;
 

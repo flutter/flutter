@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "assets/directory_asset_bundle.h"
+#include "common/graphics/persistent_cache.h"
 #include "flutter/common/graphics/persistent_cache.h"
 #include "flutter/flow/layers/layer_tree.h"
 #include "flutter/flow/layers/picture_layer.h"
@@ -2012,14 +2013,24 @@ TEST_F(ShellTest, OnServiceProtocolGetSkSLsWorks) {
       PersistentCache::kSkSLSubdirName};
   auto sksl_dir = fml::CreateDirectory(base_dir.fd(), components,
                                        fml::FilePermission::kReadWrite);
-  const std::string x = "x";
-  const std::string y = "y";
-  auto x_data = std::make_unique<fml::DataMapping>(
-      std::vector<uint8_t>{x.begin(), x.end()});
-  auto y_data = std::make_unique<fml::DataMapping>(
-      std::vector<uint8_t>{y.begin(), y.end()});
-  ASSERT_TRUE(fml::WriteAtomically(sksl_dir, "IE", *x_data));
-  ASSERT_TRUE(fml::WriteAtomically(sksl_dir, "II", *y_data));
+  const std::string x_key_str = "A";
+  const std::string x_value_str = "x";
+  sk_sp<SkData> x_key =
+      SkData::MakeWithCopy(x_key_str.data(), x_key_str.size());
+  sk_sp<SkData> x_value =
+      SkData::MakeWithCopy(x_value_str.data(), x_value_str.size());
+  auto x_data = PersistentCache::BuildCacheObject(*x_key, *x_value);
+
+  const std::string y_key_str = "B";
+  const std::string y_value_str = "y";
+  sk_sp<SkData> y_key =
+      SkData::MakeWithCopy(y_key_str.data(), y_key_str.size());
+  sk_sp<SkData> y_value =
+      SkData::MakeWithCopy(y_value_str.data(), y_value_str.size());
+  auto y_data = PersistentCache::BuildCacheObject(*y_key, *y_value);
+
+  ASSERT_TRUE(fml::WriteAtomically(sksl_dir, "x_cache", *x_data));
+  ASSERT_TRUE(fml::WriteAtomically(sksl_dir, "y_cache", *y_data));
 
   Settings settings = CreateSettingsForFixture();
   std::unique_ptr<Shell> shell = CreateShell(settings);

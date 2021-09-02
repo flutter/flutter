@@ -253,14 +253,14 @@ TEST_F(PersistentCacheTest, CanLoadSkSLsFromAsset) {
 
     // Make sure that the 2 shaders are sorted by their keys. Their keys should
     // be "A" and "B" (decoded from "II" and "IE").
-    if (shaders[0].first->bytes()[0] == 'B') {
+    if (shaders[0].key->bytes()[0] == 'B') {
       std::swap(shaders[0], shaders[1]);
     }
 
-    CheckTextSkData(shaders[0].first, "A");
-    CheckTextSkData(shaders[1].first, "B");
-    CheckTextSkData(shaders[0].second, "x");
-    CheckTextSkData(shaders[1].second, "y");
+    CheckTextSkData(shaders[0].key, "A");
+    CheckTextSkData(shaders[1].key, "B");
+    CheckTextSkData(shaders[0].value, "x");
+    CheckTextSkData(shaders[1].value, "y");
   }
 
   // Cleanup.

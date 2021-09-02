@@ -162,6 +162,9 @@ FILE: ../../../flutter/fml/file.h
 FILE: ../../../flutter/fml/file_unittest.cc
 FILE: ../../../flutter/fml/hash_combine.h
 FILE: ../../../flutter/fml/hash_combine_unittests.cc
+FILE: ../../../flutter/fml/hex_codec.cc
+FILE: ../../../flutter/fml/hex_codec.h
+FILE: ../../../flutter/fml/hex_codec_unittest.cc
 FILE: ../../../flutter/fml/icu_util.cc
 FILE: ../../../flutter/fml/icu_util.h
 FILE: ../../../flutter/fml/log_level.h
