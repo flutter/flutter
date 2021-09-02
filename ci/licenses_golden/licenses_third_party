@@ -1,4 +1,4 @@
-Signature: 09c666f60c928db6718370c3b72658b8
+Signature: 49d206cc09999152e46c3d1c00fe186a
 
 UNUSED LICENSES:
 
@@ -9738,8 +9738,7 @@ FILE: ../../../third_party/dart/benchmarks/SoundSplayTreeSieve/dart2/SoundSplayT
 FILE: ../../../third_party/dart/benchmarks/SoundSplayTreeSieve/dart2/sound_splay_tree.dart
 FILE: ../../../third_party/dart/runtime/bin/elf_loader.cc
 FILE: ../../../third_party/dart/runtime/bin/elf_loader.h
-FILE: ../../../third_party/dart/runtime/bin/entrypoints_verification_test_extension.cc
-FILE: ../../../third_party/dart/runtime/bin/entrypoints_verification_test_extension_dllmain_win.cc
+FILE: ../../../third_party/dart/runtime/bin/entrypoints_verification_test.cc
 FILE: ../../../third_party/dart/runtime/bin/ffi_test/ffi_test_dynamic_library.cc
 FILE: ../../../third_party/dart/runtime/bin/ffi_test/ffi_test_functions.cc
 FILE: ../../../third_party/dart/runtime/bin/ffi_test/ffi_test_functions_vmspecific.cc
@@ -10222,12 +10221,6 @@ FILE: ../../../third_party/dart/runtime/bin/eventhandler_macos.cc
 FILE: ../../../third_party/dart/runtime/bin/eventhandler_macos.h
 FILE: ../../../third_party/dart/runtime/bin/eventhandler_test.cc
 FILE: ../../../third_party/dart/runtime/bin/eventhandler_win.h
-FILE: ../../../third_party/dart/runtime/bin/extensions.cc
-FILE: ../../../third_party/dart/runtime/bin/extensions.h
-FILE: ../../../third_party/dart/runtime/bin/extensions_android.cc
-FILE: ../../../third_party/dart/runtime/bin/extensions_linux.cc
-FILE: ../../../third_party/dart/runtime/bin/extensions_macos.cc
-FILE: ../../../third_party/dart/runtime/bin/extensions_win.cc
 FILE: ../../../third_party/dart/runtime/bin/fdutils.h
 FILE: ../../../third_party/dart/runtime/bin/fdutils_android.cc
 FILE: ../../../third_party/dart/runtime/bin/fdutils_fuchsia.cc
@@ -10263,8 +10256,6 @@ FILE: ../../../third_party/dart/runtime/bin/socket_base_android.h
 FILE: ../../../third_party/dart/runtime/bin/socket_base_linux.h
 FILE: ../../../third_party/dart/runtime/bin/socket_base_macos.h
 FILE: ../../../third_party/dart/runtime/bin/socket_base_win.h
-FILE: ../../../third_party/dart/runtime/bin/test_extension.c
-FILE: ../../../third_party/dart/runtime/bin/test_extension_dllmain_win.cc
 FILE: ../../../third_party/dart/runtime/bin/thread.h
 FILE: ../../../third_party/dart/runtime/bin/thread_android.cc
 FILE: ../../../third_party/dart/runtime/bin/thread_android.h
@@ -10493,19 +10484,7 @@ FILE: ../../../third_party/dart/runtime/vm/virtual_memory_win.cc
 FILE: ../../../third_party/dart/runtime/vm/zone.cc
 FILE: ../../../third_party/dart/runtime/vm/zone.h
 FILE: ../../../third_party/dart/runtime/vm/zone_test.cc
-FILE: ../../../third_party/dart/samples/sample_extension/sample_asynchronous_extension.dart
-FILE: ../../../third_party/dart/samples/sample_extension/sample_extension.cc
-FILE: ../../../third_party/dart/samples/sample_extension/sample_extension_dllmain_win.cc
-FILE: ../../../third_party/dart/samples/sample_extension/sample_synchronous_extension.dart
-FILE: ../../../third_party/dart/samples/sample_extension/test_sample_asynchronous_extension.dart
-FILE: ../../../third_party/dart/samples/sample_extension/test_sample_synchronous_extension.dart
 FILE: ../../../third_party/dart/samples/samples.status
-FILE: ../../../third_party/dart/samples_2/sample_extension/sample_asynchronous_extension.dart
-FILE: ../../../third_party/dart/samples_2/sample_extension/sample_extension.cc
-FILE: ../../../third_party/dart/samples_2/sample_extension/sample_extension_dllmain_win.cc
-FILE: ../../../third_party/dart/samples_2/sample_extension/sample_synchronous_extension.dart
-FILE: ../../../third_party/dart/samples_2/sample_extension/test_sample_asynchronous_extension.dart
-FILE: ../../../third_party/dart/samples_2/sample_extension/test_sample_synchronous_extension.dart
 FILE: ../../../third_party/dart/samples_2/samples_2.status
 FILE: ../../../third_party/dart/sdk/lib/_http/crypto.dart
 FILE: ../../../third_party/dart/sdk/lib/_http/http_date.dart
@@ -11116,7 +11095,6 @@ FILE: ../../../third_party/dart/runtime/bin/directory_fuchsia.cc
 FILE: ../../../third_party/dart/runtime/bin/directory_test.cc
 FILE: ../../../third_party/dart/runtime/bin/eventhandler_fuchsia.cc
 FILE: ../../../third_party/dart/runtime/bin/eventhandler_fuchsia.h
-FILE: ../../../third_party/dart/runtime/bin/extensions_fuchsia.cc
 FILE: ../../../third_party/dart/runtime/bin/file_fuchsia.cc
 FILE: ../../../third_party/dart/runtime/bin/file_support.cc
 FILE: ../../../third_party/dart/runtime/bin/file_system_watcher_fuchsia.cc
