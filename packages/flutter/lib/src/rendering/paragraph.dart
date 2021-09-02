@@ -325,6 +325,7 @@ class RenderParagraph extends RenderBox
     _textSelection = null;
     late final SelectionResult result;
     result = _updateTextSelection(start, end);
+    print('render paragraph $this update selection from $start to $end, _textSelection $_textSelection, result $result');
     if (existingSelection != _textSelection) {
       markNeedsPaint();
     }

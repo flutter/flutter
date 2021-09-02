@@ -307,14 +307,13 @@ abstract class MultiChildLayoutDelegate {
       final RenderBox childA = idToChild[a]!;
       final RenderBox childB = idToChild[b]!;
       final Offset bottomRightA = (childA.parentData! as MultiChildLayoutParentData)
-          .offset + Offset(childA.size.width, childA.size.height);
+          .offset + Offset(childA.size.width, childA.size.height)/2;
       final Offset bottomRightB = (childB.parentData! as MultiChildLayoutParentData)
-          .offset + Offset(childB.size.width, childB.size.height);
+          .offset + Offset(childB.size.width, childB.size.height)/2;
       if (bottomRightA.dy != bottomRightB.dy)
         return (bottomRightA.dy - bottomRightB.dy).truncate();
       return (bottomRightA.dx - bottomRightB.dx).truncate();
     });
-    print('the $this  !!!!!!  _sortedChildren $children');
     return children;
   }
 

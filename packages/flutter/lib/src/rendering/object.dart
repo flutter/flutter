@@ -3616,7 +3616,9 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
   SelectionResult _initSelection(Offset start, Offset end) {
     SelectionResult overallResult = SelectionResult.none;
     SelectionResult onGoingResult = SelectionResult.none;
-    for (final RenderBox child in _selectionChildren) {
+    final bool forwardSelection = start.dy == end.dy ? start.dx <= end.dx : start.dy < end.dy;
+    final SelectionResult continuingCondition = forwardSelection ? SelectionResult.next : SelectionResult.previous;
+    for (final RenderBox child in forwardSelection ? _selectionChildren : _selectionChildren.reversed) {
       onGoingResult = _updateChildSelectionInParentCoodinate(child, start, end, onGoingResult);
       assert(
         overallResult == SelectionResult.none || onGoingResult != SelectionResult.none,
@@ -3625,9 +3627,9 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
       if (overallResult == SelectionResult.none) {
         overallResult = onGoingResult;
       } else {
-        overallResult = onGoingResult == SelectionResult.next ? SelectionResult.next : SelectionResult.end;
+        overallResult = onGoingResult == continuingCondition ? continuingCondition : SelectionResult.end;
       }
-      if (onGoingResult != SelectionResult.next && onGoingResult != SelectionResult.none) {
+      if (onGoingResult != continuingCondition && onGoingResult != SelectionResult.none) {
         break;
       }
     }
