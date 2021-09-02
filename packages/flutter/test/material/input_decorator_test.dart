@@ -5023,6 +5023,146 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('min intrinsic height for TextField with prefix icon', (WidgetTester tester) async {
+    // Regression test for: https://github.com/flutter/flutter/issues/87403
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Center(
+          child: SizedBox(
+            width: 100.0,
+            child: IntrinsicHeight(
+              child: Column(
+                children: <Widget>[
+                  TextField(
+                    controller: TextEditingController(text: 'input'),
+                    maxLines: null,
+                    decoration: const InputDecoration(
+                      prefixIcon: Icon(Icons.search),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('min intrinsic height for TextField with suffix icon', (WidgetTester tester) async {
+    // Regression test for: https://github.com/flutter/flutter/issues/87403
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Center(
+          child: SizedBox(
+            width: 100.0,
+            child: IntrinsicHeight(
+              child: Column(
+                children: <Widget>[
+                  TextField(
+                    controller: TextEditingController(text: 'input'),
+                    maxLines: null,
+                    decoration: const InputDecoration(
+                      suffixIcon: Icon(Icons.search),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('min intrinsic height for TextField with prefix', (WidgetTester tester) async {
+    // Regression test for: https://github.com/flutter/flutter/issues/87403
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Center(
+          child: SizedBox(
+            width: 100.0,
+            child: IntrinsicHeight(
+              child: Column(
+                children: <Widget>[
+                  TextField(
+                    controller: TextEditingController(text: 'input'),
+                    maxLines: null,
+                    decoration: const InputDecoration(
+                      prefix: Text('prefix'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('min intrinsic height for TextField with suffix', (WidgetTester tester) async {
+    // Regression test for: https://github.com/flutter/flutter/issues/87403
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Center(
+          child: SizedBox(
+            width: 100.0,
+            child: IntrinsicHeight(
+              child: Column(
+                children: <Widget>[
+                  TextField(
+                    controller: TextEditingController(text: 'input'),
+                    maxLines: null,
+                    decoration: const InputDecoration(
+                      suffix: Text('suffix'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('min intrinsic height for TextField with icon', (WidgetTester tester) async {
+    // Regression test for: https://github.com/flutter/flutter/issues/87403
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Center(
+          child: SizedBox(
+            width: 100.0,
+            child: IntrinsicHeight(
+              child: Column(
+                children: <Widget>[
+                  TextField(
+                    controller: TextEditingController(text: 'input'),
+                    maxLines: null,
+                    decoration: const InputDecoration(
+                      icon: Icon(Icons.search),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('InputDecorationTheme floatingLabelStyle overrides label widget styles when the widget is a text widget (focused)', (WidgetTester tester) async {
     const TextStyle style16 = TextStyle(fontFamily: 'Ahem', fontSize: 16.0);
     final TextStyle floatingLabelStyle = style16.merge(const TextStyle(color: Colors.indigo));
