@@ -5104,4 +5104,37 @@ void main() {
     // Verify that the styles were passed along
     expect(getLabelStyle(tester).color, labelStyle.color);
   });
+
+  testWidgets('InputDecoration hintStyle is used for labelText when labelText is on top of the input field', (WidgetTester tester) async {
+    const TextStyle style16 = TextStyle(fontFamily: 'Ahem', fontSize: 16.0);
+    final TextStyle labelStyle = style16.merge(const TextStyle(color: Colors.purple));
+    final TextStyle hintStyle = style16.merge(const TextStyle(color: Colors.red));
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isEmpty: true,
+        isFocused: false, // Label appears inline, on top of the input field.
+        decoration: InputDecoration(
+          labelText: 'label',
+          labelStyle: labelStyle,
+          hintStyle: hintStyle,
+        ),
+      ),
+    );
+
+    // Overall height for this InputDecorator is 56dps:
+    //   12 - top padding
+    //   12 - floating label (ahem font size 16dps * 0.75 = 12)
+    //    4 - floating label / input text gap
+    //   16 - input text (ahem font size 16dps)
+    //   12 - bottom padding
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
+    expect(tester.getTopLeft(find.text('label')).dy, 20.0);
+    expect(tester.getBottomLeft(find.text('label')).dy, 36.0);
+    expect(getBorderBottom(tester), 56.0);
+    expect(getBorderWeight(tester), 1.0);
+
+    // Verify that the hintStyle was used
+    expect(getLabelStyle(tester).color, hintStyle.color);
+  });
 }
