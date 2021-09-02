@@ -216,14 +216,14 @@ class _BottomSheetState extends State<BottomSheet> {
 
   void _handleDragUpdate(DragUpdateDetails details) {
     assert(widget.enableDrag);
-    if (_dismissUnderway)
+    if (widget.animationController == null || _dismissUnderway)
       return;
     widget.animationController!.value -= details.primaryDelta! / _childHeight;
   }
 
   void _handleDragEnd(DragEndDetails details) {
     assert(widget.enableDrag);
-    if (_dismissUnderway)
+    if (widget.animationController == null || _dismissUnderway)
       return;
     bool isClosing = false;
     if (details.velocity.pixelsPerSecond.dy > _minFlingVelocity) {

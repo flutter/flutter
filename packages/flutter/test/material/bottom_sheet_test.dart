@@ -23,6 +23,26 @@ void main() {
     expect(dyDelta1, isNot(moreOrLessEquals(dyDelta2, epsilon: 0.1)));
   }
 
+  testWidgets('Do not crash when using BottomSheet directly', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/89168
+    await tester.pumpWidget(
+      MaterialApp(
+        home: BottomSheet(
+          onClosing: () {},
+          builder: (_) => Container(
+            height: 200,
+            color: Colors.red,
+            child: const Text('BottomSheet'),
+          ),
+        ),
+      ),
+    );
+
+    await tester.drag(find.text('BottomSheet'), const Offset(0.0, 150.0));
+
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Tapping on a modal BottomSheet should not dismiss it', (WidgetTester tester) async {
     late BuildContext savedContext;
 
