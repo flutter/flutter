@@ -2250,11 +2250,6 @@ void main() {
       ),
     );
 
-    final EditableText editableTextWidget = tester.widget(find
-        .byType(EditableText)
-        .first);
-    final TextEditingController controller = editableTextWidget.controller;
-
     expect(semantics, hasSemantics(TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
