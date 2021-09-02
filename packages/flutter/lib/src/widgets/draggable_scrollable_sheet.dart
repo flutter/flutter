@@ -468,10 +468,8 @@ class _DraggableScrollableSheetScrollPosition
 
   @override
   void dispose() {
-    if (_ballisticCancelCallback != null) {
-      // Stop the animation before dispose.
-      _ballisticCancelCallback!.call();
-    }
+    // Stop the animation before dispose.
+    _ballisticCancelCallback?.call();
     super.dispose();
   }
 
