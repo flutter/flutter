@@ -972,10 +972,14 @@ class _RenderDecoration extends RenderBox {
 
     // Layout all the widgets used by InputDecorator
     boxToBaseline[icon] = _layoutLineBox(icon, boxConstraints);
-    final BoxConstraints containerConstraints = boxConstraints.copyWith(maxWidth: boxConstraints.maxWidth - _boxSize(icon).width);
+    final BoxConstraints containerConstraints = boxConstraints.copyWith(
+      maxWidth: boxConstraints.maxWidth - _boxSize(icon).width,
+    );
     boxToBaseline[prefixIcon] = _layoutLineBox(prefixIcon, containerConstraints);
     boxToBaseline[suffixIcon] = _layoutLineBox(suffixIcon, containerConstraints);
-    final BoxConstraints contentConstraints = containerConstraints.copyWith(maxWidth: containerConstraints.maxWidth - contentPadding.horizontal);
+    final BoxConstraints contentConstraints = containerConstraints.copyWith(
+      maxWidth: containerConstraints.maxWidth - contentPadding.horizontal,
+    );
     boxToBaseline[prefix] = _layoutLineBox(prefix, contentConstraints);
     boxToBaseline[suffix] = _layoutLineBox(suffix, contentConstraints);
 
@@ -1013,18 +1017,14 @@ class _RenderDecoration extends RenderBox {
       hint,
       boxConstraints.copyWith(minWidth: inputWidth, maxWidth: inputWidth),
     );
-    boxToBaseline[counter] = _layoutLineBox(counter, boxConstraints);
+    boxToBaseline[counter] = _layoutLineBox(counter, contentConstraints);
 
     // The helper or error text can occupy the full width less the space
     // occupied by the icon and counter.
     boxToBaseline[helperError] = _layoutLineBox(
       helperError,
-      boxConstraints.copyWith(
-        maxWidth: math.max(0.0, boxConstraints.maxWidth
-          - _boxSize(icon).width
-          - _boxSize(counter).width
-          - contentPadding.horizontal,
-        ),
+      contentConstraints.copyWith(
+        maxWidth: math.max(0.0, contentConstraints.maxWidth - _boxSize(counter).width),
       ),
     );
 
@@ -1272,9 +1272,6 @@ class _RenderDecoration extends RenderBox {
     final double iconHeight = _minHeight(icon, width);
     final double iconWidth = _minWidth(icon, iconHeight);
 
-    final double counterHeight = _minHeight(counter, width);
-    final double counterWidth = _minWidth(counter, counterHeight);
-
     width = math.max(width - iconWidth, 0.0);
 
     final double prefixIconHeight = _minHeight(prefixIcon, width);
@@ -1284,6 +1281,9 @@ class _RenderDecoration extends RenderBox {
     final double suffixIconWidth = _minWidth(suffixIcon, suffixIconHeight);
 
     width = math.max(width - contentPadding.horizontal, 0.0);
+
+    final double counterHeight = _minHeight(counter, width);
+    final double counterWidth = _minWidth(counter, counterHeight);
 
     final double helperErrorAvailableWidth = math.max(width - counterWidth, 0.0);
     final double helperErrorHeight = _minHeight(helperError, helperErrorAvailableWidth);
