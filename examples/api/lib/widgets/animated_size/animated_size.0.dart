@@ -43,7 +43,7 @@ class MyApp extends StatelessWidget {
 }
 
 /// This is the stateful widget that the main application instantiates.
-class MyStatefulWidget extends StatefulWidget with SingleTickerProviderStateMixin {
+class MyStatefulWidget extends StatefulWidget {
   const MyStatefulWidget({Key? key}) : super(key: key);
 
   @override
@@ -54,7 +54,7 @@ class MyStatefulWidget extends StatefulWidget with SingleTickerProviderStateMixi
 //********************************************************************
 //* ▼▼▼▼▼▼▼▼ code ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _MyStatefulWidgetState extends State<MyStatefulWidget> with SingleTickerProviderStateMixin {
   double _size = 50.0;
   bool _large = false;
 
