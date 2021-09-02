@@ -300,14 +300,6 @@ class RenderParagraph extends RenderBox
 
   TextSelection? _textSelection;
 
-  /// Clear the current text selection, but only mark for a paint if it has
-  /// been set to a non-null value.
-  void _clearSelection() {
-    if (_textSelection != null)
-      markNeedsPaint();
-    _textSelection = null;
-  }
-
   @override
   String? copy() {
     final TextSelection? textSelection = _textSelection;
@@ -329,27 +321,34 @@ class RenderParagraph extends RenderBox
 
   @override
   SelectionResult updateSelection(Offset start, Offset end) {
-    print('render paragraph "${text.toPlainText(includePlaceholders: true, includeSemanticsLabels: false)}" update from $start to $end');
+    final TextSelection? existingSelection = _textSelection;
+    _textSelection = null;
+    late final SelectionResult result;
+    result = _updateTextSelection(start, end);
+    if (existingSelection != _textSelection) {
+      markNeedsPaint();
+    }
+    return result;
+  }
+
+  SelectionResult _updateTextSelection(Offset start, Offset end) {
     if (!hasSize) {
       return SelectionResult.previous;
     }
     final Rect boundingRect = Rect.fromLTWH(0, 0, size.width, size.height);
     // This RO has not been laid out yet, it can't be selected.
     if (boundingRect.isEmpty) {
-      _clearSelection();
       return Selectable.selectionBasedOnRect(boundingRect, start, end);
     }
     final Rect selectionRect = Rect.fromPoints(start, end);
     if (selectionRect.isInfinite) {
       _textSelection = TextSelection(baseOffset: 0, extentOffset: getPositionForOffset(Offset.infinite).offset);
-      markNeedsPaint();
       return SelectionResult.next;
     }
     final Rect intersection = boundingRect.intersect(selectionRect);
     // If width or height are negative, there is no overlap between
     // the selection rect and the estimated bounds of this RO.
     if (intersection.width < 0 || intersection.height < 0) {
-      _clearSelection();
       return Selectable.selectionBasedOnRect(boundingRect, start, end);
     }
     TextPosition startText;
@@ -366,7 +365,6 @@ class RenderParagraph extends RenderBox
     }
     if (startText != endText) {
       _textSelection = TextSelection(baseOffset: startText.offset, extentOffset: endText.offset);
-      markNeedsPaint();
     }
     final int textLength = text.toPlainText(includePlaceholders: true, includeSemanticsLabels: false).length;
     if (endText.offset >= textLength) {

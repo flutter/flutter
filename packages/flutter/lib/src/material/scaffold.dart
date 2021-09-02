@@ -1123,6 +1123,36 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
         || oldDelegate.extendBody != extendBody
         || oldDelegate.extendBodyBehindAppBar != extendBodyBehindAppBar;
   }
+
+  @override
+  List<Object> getChildrenSelectionOrder(Map<Object, RenderBox> idToChild) {
+    // Drawers and sheets will overlap the scaffold and confuse the global
+    // selection. Disable the selection on scaffold if any of them is present.
+    if (idToChild.containsKey(_ScaffoldSlot.drawer) || idToChild.containsKey(_ScaffoldSlot.endDrawer)) {
+      return <Object>[
+        if (idToChild.containsKey(_ScaffoldSlot.drawer))
+          _ScaffoldSlot.drawer,
+        if (idToChild.containsKey(_ScaffoldSlot.endDrawer))
+          _ScaffoldSlot.endDrawer,
+      ];
+    }
+    if (idToChild.containsKey(_ScaffoldSlot.bottomSheet)) {
+      return <Object>[
+        _ScaffoldSlot.bottomSheet,
+      ];
+    }
+
+    return <Object>[
+      if (idToChild.containsKey(_ScaffoldSlot.appBar))
+        _ScaffoldSlot.appBar,
+      if (idToChild.containsKey(_ScaffoldSlot.body))
+        _ScaffoldSlot.body,
+      if (idToChild.containsKey(_ScaffoldSlot.persistentFooter))
+        _ScaffoldSlot.persistentFooter,
+      if (idToChild.containsKey(_ScaffoldSlot.bottomNavigationBar))
+        _ScaffoldSlot.bottomNavigationBar,
+    ];
+  }
 }
 
 /// Handler for scale and rotation animations in the [FloatingActionButton].

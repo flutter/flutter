@@ -1111,6 +1111,8 @@ enum SelectionResult {
   /// Part of the selectable may or may not be selected, but there are still
   /// content to select forward.
   end,
+  /// There is no selectable in the subtree to provide a result
+  none,
 }
 
 /// Something that can be selected by the [SelectionArea] widget, normally a render object.
@@ -1144,17 +1146,26 @@ abstract class Selectable  {
     root.visitChildrenForSelection(visitSelectablesRecursively);
   }
 
+  // static SelectionResult selectionBasedOnRect(Rect targetRect, Offset start, Offset end) {
+  //   if (targetRect.contains(end))
+  //     return SelectionResult.end;
+  //   if (end.dy < targetRect.top)
+  //     return SelectionResult.previous;
+  //   if (end.dy > targetRect.bottom)
+  //     return SelectionResult.next;
+  //   final Rect selectionRect = Rect.fromPoints(start, end);
+  //   if (selectionRect.overlaps(targetRect))
+  //     return SelectionResult.end;
+  //   return end.dx < targetRect.left ? SelectionResult.previous : SelectionResult.next;
+  // }
+
   static SelectionResult selectionBasedOnRect(Rect targetRect, Offset start, Offset end) {
-    if (targetRect.contains(end))
-      return SelectionResult.end;
+    print('selectionBasedOnRect , targetRect $targetRect, $start to $end');
     if (end.dy < targetRect.top)
       return SelectionResult.previous;
     if (end.dy > targetRect.bottom)
       return SelectionResult.next;
-    final Rect selectionRect = Rect.fromPoints(start, end);
-    if (selectionRect.overlaps(targetRect))
-      return SelectionResult.end;
-    return end.dx < targetRect.left ? SelectionResult.previous : SelectionResult.next;
+    return end.dx >= targetRect.right ? SelectionResult.next : SelectionResult.previous;
   }
 
   /// Set selection at [root].
@@ -1162,7 +1173,7 @@ abstract class Selectable  {
     if (root is Selectable) {
       return (root as Selectable).updateSelection(start, end);
     }
-    SelectionResult? selectionResult;
+    SelectionResult selectionResult = SelectionResult.none;
     visitSelectables(root, (Selectable selectable) {
       final Matrix4 transform = (selectable as RenderObject).getTransformTo(root);
       transform.invert();
@@ -1172,11 +1183,7 @@ abstract class Selectable  {
       );
       return selectionResult != SelectionResult.next;
     });
-    if (selectionResult != null)
-      return selectionResult!;
-
-    final RenderBox rootBox = root as RenderBox;
-    return selectionBasedOnRect(Rect.fromLTRB(0, 0, rootBox.size.width, rootBox.size.height), start, end);
+    return selectionResult;
   }
 }
 
@@ -3578,83 +3585,97 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
   }
 
   @mustCallSuper
-  SelectionResult updateChildSelection(RenderBox child, Offset start, Offset end) {
+  SelectionResult updateChildSelection(RenderBox child, Offset start, Offset end, SelectionResult onGoingResult) {
+    assert(onGoingResult != SelectionResult.end);
     final SelectionResult result = Selectable.updateSelectionAt(child,
       start,
       end,
     );
-    print('$this update $child, from $start, to $end, result is $result');
-    if (result != SelectionResult.previous)
+    print('updateChildSelection $this update $child, from $start, to $end, result is $result');
+    if (result != SelectionResult.previous && result != SelectionResult.none)
       _currentSelectionChild = child;
-    return result;
+    return result == SelectionResult.none ? onGoingResult : result;
+  }
+  List<RenderBox>? _cachedSelectionChildren;
+  List<RenderBox> get _selectionChildren {
+    if (_cachedSelectionChildren == null) {
+      _cachedSelectionChildren = <RenderBox>[];
+      visitChildrenForSelection((RenderObject child) {
+        _cachedSelectionChildren!.add(child as RenderBox);
+      });
+    }
+    return _cachedSelectionChildren!;
   }
 
-  SelectionResult? _initSelection(Offset start, Offset end) {
-    // TODO(chunhtai): handle inverted selection.
-    bool abort = false;
-    SelectionResult? overallResult;
-    visitChildrenForSelection((RenderObject child) {
-      if (abort)
-        return;
-      SelectionResult result;
-      print('init');
-      result = _updateChildSelectionInParentCoodinate(
-        child as RenderBox,
-        start,
-        end
+  @override
+  void markNeedsLayout() {
+    _cachedSelectionChildren = null;
+    super.markNeedsLayout();
+  }
+
+  SelectionResult _initSelection(Offset start, Offset end) {
+    SelectionResult overallResult = SelectionResult.none;
+    SelectionResult onGoingResult = SelectionResult.none;
+    for (final RenderBox child in _selectionChildren) {
+      onGoingResult = _updateChildSelectionInParentCoodinate(child, start, end, onGoingResult);
+      assert(
+        overallResult == SelectionResult.none || onGoingResult != SelectionResult.none,
+       'updateChildSelection must not returned SelectionResult.none if onGoingResult is not SelectionResult.none'
       );
-      if (overallResult == null) {
-        overallResult = result;
+      if (overallResult == SelectionResult.none) {
+        overallResult = onGoingResult;
       } else {
-        overallResult = result == SelectionResult.next ? SelectionResult.next : SelectionResult.end;
+        overallResult = onGoingResult == SelectionResult.next ? SelectionResult.next : SelectionResult.end;
       }
-      abort = result != SelectionResult.next;
-    });
+      if (onGoingResult != SelectionResult.next && onGoingResult != SelectionResult.none) {
+        break;
+      }
+    }
     return overallResult;
   }
 
-  SelectionResult _updateChildSelectionInParentCoodinate(RenderBox child, Offset start, Offset end) {
+  SelectionResult _updateChildSelectionInParentCoodinate(RenderBox child, Offset start, Offset end, SelectionResult onGoingResult) {
     final Matrix4 transform = child.getTransformTo(this);
     transform.invert();
+    // print('apply transform for $child, from ($start to $end) to (${MatrixUtils.transformPoint(transform, start)} to  ${MatrixUtils.transformPoint(transform, end)})');
     final SelectionResult result = updateChildSelection(
       child,
       MatrixUtils.transformPoint(transform, start),
-      MatrixUtils.transformPoint(transform, end)
+      MatrixUtils.transformPoint(transform, end),
+      onGoingResult
     );
     return result;
   }
 
   SelectionResult _adjustSelection(Offset start, Offset end) {
     // TODO(chunhtai): handle inverted selection.
-    final List<RenderObject> childrenInSelectionOrder = <RenderObject>[];
-    int selectionIndex = -1;
-    int walker = 0;
-    visitChildrenForSelection((RenderObject child) {
-      if (_currentSelectionChild == child)
-        selectionIndex = walker;
-      childrenInSelectionOrder.add(child);
-      walker += 1;
-    });
-    assert(selectionIndex != -1 && selectionIndex < childrenInSelectionOrder.length);
+    int selectionIndex = _selectionChildren.indexOf(_currentSelectionChild!);
+    assert(selectionIndex != -1);
     print('adjust');
     final SelectionResult result = _updateChildSelectionInParentCoodinate(
       _currentSelectionChild!,
       start,
-      end
+      end,
+      SelectionResult.none,
     );
     switch (result) {
+      case SelectionResult.none:
+        // The selectable under _currentSelectionChild may be removed or updated.
+        assert(false);
+        return SelectionResult.none;
       case SelectionResult.end:
         return result;
       case SelectionResult.next:
         {
           SelectionResult nextResult = result;
           selectionIndex += 1;
-          while(nextResult == SelectionResult.next && selectionIndex < childrenInSelectionOrder.length) {
+          while(nextResult == SelectionResult.next && selectionIndex < _selectionChildren.length) {
             print('adjust');
             nextResult = _updateChildSelectionInParentCoodinate(
-              childrenInSelectionOrder[selectionIndex] as RenderBox,
+              _selectionChildren[selectionIndex],
               start,
-              end
+              end,
+              SelectionResult.next,
             );
             selectionIndex += 1;
           }
@@ -3666,7 +3687,7 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
           selectionIndex -= 1;
           while(previousResult == SelectionResult.previous && selectionIndex >= 0) {
             print('adjust');
-            previousResult = _updateChildSelectionInParentCoodinate(childrenInSelectionOrder[selectionIndex] as RenderBox, start, end);
+            previousResult = _updateChildSelectionInParentCoodinate(_selectionChildren[selectionIndex], start, end, SelectionResult.previous);
             selectionIndex -= 1;
           }
           return previousResult == SelectionResult.previous ? SelectionResult.previous : SelectionResult.end;
@@ -3681,19 +3702,24 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
       size = (this as RenderBox).size;
     }
     final Rect rect = Rect.fromLTRB(0, 0, size.width, size.height);
+    print('updateSelection $this, $start to $end, $rect, _currentSelectionChild = $_currentSelectionChild, has overlap? ${rect.overlaps(Rect.fromPoints(start, end))}');
     if (!rect.overlaps(Rect.fromPoints(start, end))) {
-      return Selectable.selectionBasedOnRect(rect, start, end);
+      clear();
+      if (end.dy <= rect.top)
+        return SelectionResult.previous;
+      if (end.dy >= rect.bottom)
+        return SelectionResult.next;
+      return end.dx > rect.right ? SelectionResult.next : SelectionResult.previous;
     }
-    final SelectionResult? result;
+    late final SelectionResult result;
     if (_currentSelectionChild == null || !_currentSelectionChild!.attached || _currentSelectionChild!.parent != this) {
       _currentSelectionChild = null;
       result = _initSelection(start, end);
     } else {
       result = _adjustSelection(start, end);
+      assert(result != SelectionResult.none);
     }
-    if (result != null)
-      return result;
-    return Selectable.selectionBasedOnRect(rect, start, end);
+    return result;
   }
 }
 
@@ -3702,46 +3728,83 @@ mixin LinearLayoutContainerSelectableMixin<ChildType extends RenderObject, Paren
   /// The direction of the layout.
   Axis get direction;
 
+  Offset _getEffectivePointForVerticalLayout(RenderBox child, Offset point) {
+    // For a widget in vertical layout, we can consider different areas as shown
+    // below:
+    //
+    //                Area 1
+    //
+    //  - - - - - +============+ - - - - - - - -
+    //     Area 2 | Some widget|
+    //  - - - - - +============+
+    //                            Area 3
+    //
+    // For points inside the widget:
+    //  Their effective locations are unchanged.
+    //
+    // For points in Area 1:
+    //   We can treat them as they are at top-left corner of the widget.
+    //
+    // For points in Area 2:
+    //   We can project them horizontally to left bound.
+    //
+    // For Points in Area 3:
+    //   We can treat them to as they are at bottom-right corner of the widget.
+    final Rect childRect = Rect.fromLTRB(0, 0, child.size.width, child.size.height);
+    if (childRect.contains(point))
+      return point;
+    if (point.dy <= childRect.top) {
+      return childRect.topLeft;
+    } else if (point.dy <= childRect.bottom && point.dx <= childRect.left) {
+      return Offset(childRect.left, point.dy);
+    } else {
+      return childRect.bottomRight;
+    }
+  }
+
+  Offset _getEffectivePointForHorizontalLayout(RenderBox child, Offset point) {
+    // For a widget in vertical layout, we can consider different areas as shown
+    // below:
+    //            |
+    //            |    Area 1
+    //            |
+    //            +============+
+    //     Area 2 | Some widget|
+    //  - - - - - +============+
+    //                            Area 3
+    //
+    final Rect childRect = Rect.fromLTRB(0, 0, child.size.width, child.size.height);
+    if (childRect.contains(point))
+      return point;
+    if (point.dy <= childRect.top) {
+      return Offset(point.dx.clamp(childRect.left, childRect.right), childRect.top);
+    } else if (point.dy >= childRect.bottom) {
+      return Offset(point.dx.clamp(childRect.left, childRect.right), childRect.bottom);
+    } else if (point.dx < childRect.left) {
+      return child == _selectionChildren.first ? Offset(childRect.left, point.dy) : childRect.topLeft;
+    } else {
+      return child == _selectionChildren.last ? Offset(childRect.right, point.dy) : childRect.bottomRight;
+    }
+  }
+
   @override
-  SelectionResult updateChildSelection(RenderBox child, Offset start, Offset end) {
+  SelectionResult updateChildSelection(RenderBox child, Offset start, Offset end, SelectionResult onGoingResult) {
     switch (direction) {
       case Axis.vertical: {
-        final Rect childRect = Rect.fromLTRB(0, 0, child.size.width, child.size.height);
-        if (!childRect.contains(start)) {
-          if (start.dy < childRect.top) {
-            start = childRect.topLeft;
-          } else {
-            start = childRect.bottomRight;
-          }
-        }
-
-        if (!childRect.contains(end)) {
-          if (end.dy > childRect.bottom) {
-            end = childRect.bottomRight;
-          } else {
-            end = childRect.topLeft;
-          }
-        }
-        return super.updateChildSelection(child, start, end);
+        var oldstart = start;
+        var oldend = end;
+        start = _getEffectivePointForVerticalLayout(child, start);
+        end = _getEffectivePointForVerticalLayout(child, end);
+        print('column $this for child $child ( $oldstart to $oldend) to ( $start to $end )');
+        return super.updateChildSelection(child, start, end, onGoingResult);
       }
       case Axis.horizontal: {
-        final Rect childRect = Rect.fromLTRB(0, 0, child.size.width, child.size.height);
-        if (!childRect.contains(start)) {
-          if (start.dy < childRect.top || (start.dy > childRect.bottom && start.dx < childRect.left)) {
-            start = childRect.topLeft;
-          } else {
-            start = childRect.bottomRight;
-          }
-        }
-
-        if (!childRect.contains(end)) {
-          if (end.dy > childRect.bottom || (end.dy > childRect.top && end.dx > childRect.right)) {
-            end = childRect.bottomRight;
-          } else {
-            end = childRect.topLeft;
-          }
-        }
-        return super.updateChildSelection(child, start, end);
+        var oldstart = start;
+        var oldend = end;
+        start = _getEffectivePointForHorizontalLayout(child, start);
+        end = _getEffectivePointForHorizontalLayout(child, end);
+        print('row $this for child $child ( $oldstart to $oldend) to ( $start to $end )');
+        return super.updateChildSelection(child, start, end, onGoingResult);
       }
     }
   }

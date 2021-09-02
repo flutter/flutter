@@ -123,6 +123,7 @@ abstract class MultiChildLayoutDelegate {
   final Listenable? _relayout;
 
   Map<Object, RenderBox>? _idToChild;
+  RenderCustomMultiChildLayoutBox? _currentDelegator;
   Set<RenderBox>? _debugChildrenNeedingLayout;
 
   /// True if a non-null LayoutChild was provided for the specified id.
@@ -144,13 +145,13 @@ abstract class MultiChildLayoutDelegate {
       if (child == null) {
         throw FlutterError(
           'The $this custom multichild layout delegate tried to lay out a non-existent child.\n'
-          'There is no child with the id "$childId".',
+              'There is no child with the id "$childId".',
         );
       }
       if (!_debugChildrenNeedingLayout!.remove(child)) {
         throw FlutterError(
           'The $this custom multichild layout delegate tried to lay out the child with id "$childId" more than once.\n'
-          'Each child must be laid out exactly once.',
+              'Each child must be laid out exactly once.',
         );
       }
       try {
@@ -161,8 +162,8 @@ abstract class MultiChildLayoutDelegate {
           DiagnosticsProperty<AssertionError>('Exception', exception, showName: false),
           ErrorDescription(
             'The minimum width and height must be greater than or equal to zero.\n'
-            'The maximum width must be greater than or equal to the minimum width.\n'
-            'The maximum height must be greater than or equal to the minimum height.',
+                'The maximum width must be greater than or equal to the minimum width.\n'
+                'The maximum height must be greater than or equal to the minimum height.',
           ),
         ]);
       }
@@ -184,7 +185,7 @@ abstract class MultiChildLayoutDelegate {
       if (child == null) {
         throw FlutterError(
           'The $this custom multichild layout delegate tried to position out a non-existent child:\n'
-          'There is no child with the id "$childId".',
+              'There is no child with the id "$childId".',
         );
       }
       if (offset == null) {
@@ -241,12 +242,12 @@ abstract class MultiChildLayoutDelegate {
       assert(() {
         if (_debugChildrenNeedingLayout!.isNotEmpty) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('Each child must be laid out exactly once.'),
+            ErrorSummary('Each child must be laid out exactly once.'),
             DiagnosticsBlock(
               name:
-                'The $this custom multichild layout delegate forgot '
-                'to lay out the following '
-                '${_debugChildrenNeedingLayout!.length > 1 ? 'children' : 'child'}',
+              'The $this custom multichild layout delegate forgot '
+                  'to lay out the following '
+                  '${_debugChildrenNeedingLayout!.length > 1 ? 'children' : 'child'}',
               properties: _debugChildrenNeedingLayout!.map<DiagnosticsNode>(_debugDescribeChild).toList(),
               style: DiagnosticsTreeStyle.whitespace,
             ),
@@ -281,6 +282,42 @@ abstract class MultiChildLayoutDelegate {
   /// the final position of each child with [positionChild].
   void performLayout(Size size);
 
+  void _callVisitChildrenForSelection(RenderObjectVisitor visitor, RenderBox? firstChild) {
+    final Map<Object, RenderBox> idToChild = <Object, RenderBox>{};
+    RenderBox? child = firstChild;
+    while (child != null) {
+      final MultiChildLayoutParentData childParentData = child.parentData! as MultiChildLayoutParentData;
+      idToChild[childParentData.id!] = child;
+      child = childParentData.nextSibling;
+    }
+    for (final Object id in getChildrenSelectionOrder(idToChild)) {
+      visitor(idToChild[id]!);
+    }
+  }
+  /// Override this method to change the selection order.
+  ///
+  /// The default implementation uses screen order as the selection order, which
+  /// works well if the children are not overlapped. If your layout overlays
+  /// the children, override this method to change or remove certain children
+  /// from the screen.
+  List<Object> getChildrenSelectionOrder(Map<Object, RenderBox> idToChild) {
+    final List<Object> children = idToChild.keys.toList();
+
+    children.sort((Object a, Object b) {
+      final RenderBox childA = idToChild[a]!;
+      final RenderBox childB = idToChild[b]!;
+      final Offset bottomRightA = (childA.parentData! as MultiChildLayoutParentData)
+          .offset + Offset(childA.size.width, childA.size.height);
+      final Offset bottomRightB = (childB.parentData! as MultiChildLayoutParentData)
+          .offset + Offset(childB.size.width, childB.size.height);
+      if (bottomRightA.dy != bottomRightB.dy)
+        return (bottomRightA.dy - bottomRightB.dy).truncate();
+      return (bottomRightA.dx - bottomRightB.dx).truncate();
+    });
+    print('the $this  !!!!!!  _sortedChildren $children');
+    return children;
+  }
+
   /// Override this method to return true when the children need to be
   /// laid out.
   ///
@@ -305,6 +342,7 @@ abstract class MultiChildLayoutDelegate {
 /// the children.
 class RenderCustomMultiChildLayoutBox extends RenderBox
   with ContainerRenderObjectMixin<RenderBox, MultiChildLayoutParentData>,
+       LinearLayoutContainerSelectableMixin<RenderBox, MultiChildLayoutParentData>,
        RenderBoxContainerDefaultsMixin<RenderBox, MultiChildLayoutParentData> {
   /// Creates a render object that customizes the layout of multiple children.
   ///
@@ -316,6 +354,9 @@ class RenderCustomMultiChildLayoutBox extends RenderBox
        _delegate = delegate {
     addAll(children);
   }
+
+  @override
+  Axis get direction => Axis.vertical;
 
   @override
   void setupParentData(RenderBox child) {
@@ -412,5 +453,10 @@ class RenderCustomMultiChildLayoutBox extends RenderBox
   @override
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     return defaultHitTestChildren(result, position: position);
+  }
+
+  @override
+  void visitChildrenForSelection(RenderObjectVisitor visitor) {
+    delegate._callVisitChildrenForSelection(visitor, firstChild);
   }
 }
