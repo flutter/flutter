@@ -240,7 +240,7 @@ class OutlinedButton extends ButtonStyleButton {
   /// * `side` - BorderSide(width: 1, color: Theme.colorScheme.onSurface(0.12))
   /// * `shape` - RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))
   /// * `mouseCursor`
-  ///   * disabled - SystemMouseCursors.forbidden
+  ///   * disabled - SystemMouseCursors.basic
   ///   * others - SystemMouseCursors.click
   /// * `visualDensity` - theme.visualDensity
   /// * `tapTargetSize` - theme.materialTapTargetSize
@@ -275,7 +275,7 @@ class OutlinedButton extends ButtonStyleButton {
       ),
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
       enabledMouseCursor: SystemMouseCursors.click,
-      disabledMouseCursor: SystemMouseCursors.forbidden,
+      disabledMouseCursor: SystemMouseCursors.basic,
       visualDensity: theme.visualDensity,
       tapTargetSize: theme.materialTapTargetSize,
       animationDuration: kThemeChangeDuration,
