@@ -866,6 +866,11 @@ bool PlatformView::HandleFlutterPlatformViewsChannelPlatformMessage(
     on_update_view_callback_(
         view_id->value.GetUint64(), view_occlusion_hint_raw,
         hit_testable->value.GetBool(), focusable->value.GetBool());
+    if (message->response()) {
+      message->response()->Complete(std::make_unique<fml::DataMapping>(
+          std::vector<uint8_t>({'[', '0', ']'})));
+      return true;
+    }
   } else if (method == "View.dispose") {
     auto args_it = root.FindMember("args");
     if (args_it == root.MemberEnd() || !args_it->value.IsObject()) {
@@ -898,6 +903,11 @@ bool PlatformView::HandleFlutterPlatformViewsChannelPlatformMessage(
           });
         };
     on_destroy_view_callback_(view_id_raw, std::move(on_view_unbound));
+    if (message->response()) {
+      message->response()->Complete(std::make_unique<fml::DataMapping>(
+          std::vector<uint8_t>({'[', '0', ']'})));
+      return true;
+    }
   } else if (method.rfind("View.focus", 0) == 0) {
     return focus_delegate_->HandlePlatformMessage(root, message->response());
   } else {
