@@ -172,10 +172,47 @@ class TimelineSummary {
   /// * "90th_percentile_vsync_frame_lag" and "99th_percentile_vsync_frame_lag":
   ///   The 90/99-th percentile delay between platform vsync signal and engine
   ///   frame process start time.
-  /// * "[average/[90/99]th_percentile/worst]_[layer/picture]_cache_[count/memory]":
-  ///   The statistics for the count and memory consumption in megabytes of the
-  ///   engine Layer and Picture caches.
   ///   See [VsyncFrameLagSummarizer.computePercentileVsyncFrameLag].
+  /// * "average_layer_cache_count": The average of the values seen for the
+  ///   count of the engine layer cache entries.
+  ///   See [RasterCacheSummarizer.computeAverageLayerCount].
+  /// * "90th_percentile_layer_cache_count" and
+  ///   "99th_percentile_layer_cache_count": The 90/99-th percentile values seen
+  ///   for the count of the engine layer cache entries.
+  ///   See [RasterCacheSummarizer.computePercentileLayerCount].
+  /// * "worst_layer_cache_count": The worst (highest) value seen for the
+  ///   count of the engine layer cache entries.
+  ///   See [RasterCacheSummarizer.computeWorstLayerCount].
+  /// * "average_layer_cache_memory": The average of the values seen for the
+  ///   memory used for the engine layer cache entries, in megabytes.
+  ///   See [RasterCacheSummarizer.computeAverageLayerMemory].
+  /// * "90th_percentile_layer_cache_memory" and
+  ///   "99th_percentile_layer_cache_memory": The 90/99-th percentile values seen
+  ///   for the memory used for the engine layer cache entries.
+  ///   See [RasterCacheSummarizer.computePercentileLayerMemory].
+  /// * "worst_layer_cache_memory": The worst (highest) value seen for the
+  ///   memory used for the engine layer cache entries.
+  ///   See [RasterCacheSummarizer.computeWorstLayerMemory].
+  /// * "average_picture_cache_count": The average of the values seen for the
+  ///   count of the engine picture cache entries.
+  ///   See [RasterCacheSummarizer.computeAveragePictureCount].
+  /// * "90th_percentile_picture_cache_count" and
+  ///   "99th_percentile_picture_cache_count": The 90/99-th percentile values seen
+  ///   for the count of the engine picture cache entries.
+  ///   See [RasterCacheSummarizer.computePercentilePictureCount].
+  /// * "worst_picture_cache_count": The worst (highest) value seen for the
+  ///   count of the engine picture cache entries.
+  ///   See [RasterCacheSummarizer.computeWorstPictureCount].
+  /// * "average_picture_cache_memory": The average of the values seen for the
+  ///   memory used for the engine picture cache entries, in megabytes.
+  ///   See [RasterCacheSummarizer.computeAveragePictureMemory].
+  /// * "90th_percentile_picture_cache_memory" and
+  ///   "99th_percentile_picture_cache_memory": The 90/99-th percentile values seen
+  ///   for the memory used for the engine picture cache entries.
+  ///   See [RasterCacheSummarizer.computePercentilePictureMemory].
+  /// * "worst_picture_cache_memory": The worst (highest) value seen for the
+  ///   memory used for the engine picture cache entries.
+  ///   See [RasterCacheSummarizer.computeWorstPictureMemory].
   Map<String, dynamic> get summaryJson {
     final SceneDisplayLagSummarizer sceneDisplayLagSummarizer = _sceneDisplayLagSummarizer();
     final VsyncFrameLagSummarizer vsyncFrameLagSummarizer = _vsyncFrameLagSummarizer();
