@@ -107,7 +107,6 @@ List<ManifestTask> _validateAndParseTasks(dynamic tasksYaml) {
 }
 
 ManifestTask _validateAndParseTask(String taskName, dynamic taskYaml) {
-  _checkType(taskName is String, taskName, 'Task name', 'string');
   _checkType(taskYaml is YamlMap, taskYaml, 'Value of task "$taskName"', 'dictionary');
   _checkKeys(taskYaml as YamlMap, 'Value of task "$taskName"', const <String>[
     'description',
