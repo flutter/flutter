@@ -134,6 +134,9 @@ class RadioListTile<T> extends StatelessWidget {
     this.shape,
     this.tileColor,
     this.selectedTileColor,
+    this.visualDensity,
+    this.focusNode,
+    this.enableFeedback,
   }) : assert(toggleable != null),
        assert(isThreeLine != null),
        assert(!isThreeLine || subtitle != null),
@@ -275,6 +278,17 @@ class RadioListTile<T> extends StatelessWidget {
   /// If non-null, defines the background color when [RadioListTile.selected] is true.
   final Color? selectedTileColor;
 
+  /// Defines how compact the list tile's layout will be.
+  ///
+  /// {@macro flutter.material.themedata.visualDensity}
+  final VisualDensity? visualDensity;
+
+  /// {@macro flutter.widgets.Focus.focusNode}
+  final FocusNode? focusNode;
+
+  /// If specified, defines the feedback property for `RadioListTile`.
+  final bool? enableFeedback;
+
   @override
   Widget build(BuildContext context) {
     final Widget control = Radio<T>(
@@ -324,6 +338,9 @@ class RadioListTile<T> extends StatelessWidget {
           selected: selected,
           autofocus: autofocus,
           contentPadding: contentPadding,
+          visualDensity: visualDensity,
+          focusNode: focusNode,
+          enableFeedback: enableFeedback,
         ),
       ),
     );

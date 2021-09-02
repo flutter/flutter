@@ -143,6 +143,9 @@ class SwitchListTile extends StatelessWidget {
     this.controlAffinity = ListTileControlAffinity.platform,
     this.shape,
     this.selectedTileColor,
+    this.visualDensity,
+    this.focusNode,
+    this.enableFeedback,
   }) : _switchListTileType = _SwitchListTileType.material,
        assert(value != null),
        assert(isThreeLine != null),
@@ -185,6 +188,9 @@ class SwitchListTile extends StatelessWidget {
     this.controlAffinity = ListTileControlAffinity.platform,
     this.shape,
     this.selectedTileColor,
+    this.visualDensity,
+    this.focusNode,
+    this.enableFeedback,
   }) : _switchListTileType = _SwitchListTileType.adaptive,
        assert(value != null),
        assert(isThreeLine != null),
@@ -321,6 +327,17 @@ class SwitchListTile extends StatelessWidget {
   /// If non-null, defines the background color when [SwitchListTile.selected] is true.
   final Color? selectedTileColor;
 
+  /// Defines how compact the list tile's layout will be.
+  ///
+  /// {@macro flutter.material.themedata.visualDensity}
+  final VisualDensity? visualDensity;
+
+  /// {@macro flutter.widgets.Focus.focusNode}
+  final FocusNode? focusNode;
+
+  /// If specified, defines the feedback property for `SwitchListTile`.
+  final bool? enableFeedback;
+
   @override
   Widget build(BuildContext context) {
     final Widget control;
@@ -386,6 +403,9 @@ class SwitchListTile extends StatelessWidget {
           autofocus: autofocus,
           shape: shape,
           tileColor: tileColor,
+          visualDensity: visualDensity,
+          focusNode: focusNode,
+          enableFeedback: enableFeedback,
         ),
       ),
     );

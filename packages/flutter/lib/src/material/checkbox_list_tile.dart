@@ -138,6 +138,9 @@ class CheckboxListTile extends StatelessWidget {
     this.tristate = false,
     this.shape,
     this.selectedTileColor,
+    this.visualDensity,
+    this.focusNode,
+    this.enableFeedback,
   }) : assert(tristate != null),
        assert(tristate || value != null),
        assert(isThreeLine != null),
@@ -255,6 +258,17 @@ class CheckboxListTile extends StatelessWidget {
   /// If non-null, defines the background color when [CheckboxListTile.selected] is true.
   final Color? selectedTileColor;
 
+  /// Defines how compact the list tile's layout will be.
+  ///
+  /// {@macro flutter.material.themedata.visualDensity}
+  final VisualDensity? visualDensity;
+
+  /// {@macro flutter.widgets.Focus.focusNode}
+  final FocusNode? focusNode;
+
+  /// If specified, defines the feedback property for `CheckboxListTile`.
+  final bool? enableFeedback;
+
   void _handleValueChange() {
     assert(onChanged != null);
     switch (value) {
@@ -311,6 +325,9 @@ class CheckboxListTile extends StatelessWidget {
           shape: shape,
           selectedTileColor: selectedTileColor,
           tileColor: tileColor,
+          visualDensity: visualDensity,
+          focusNode: focusNode,
+          enableFeedback: enableFeedback,
         ),
       ),
     );
