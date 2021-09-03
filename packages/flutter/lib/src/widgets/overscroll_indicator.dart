@@ -709,31 +709,25 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
   }
 
   AlignmentDirectional _getAlignmentForAxisDirection(double overscroll) {
-    late final AlignmentDirectional alignment;
     // Accounts for reversed scrollables by checking the AxisDirection
     switch (widget.axisDirection) {
       case AxisDirection.up:
-        alignment = overscroll > 0
+        return overscroll > 0
             ? AlignmentDirectional.topCenter
             : AlignmentDirectional.bottomCenter;
-        break;
       case AxisDirection.right:
-        alignment = overscroll > 0
+        return overscroll > 0
             ? AlignmentDirectional.centerEnd
             : AlignmentDirectional.centerStart;
-        break;
       case AxisDirection.down:
-        alignment = overscroll > 0
+        return overscroll > 0
             ? AlignmentDirectional.bottomCenter
             : AlignmentDirectional.topCenter;
-        break;
       case AxisDirection.left:
-        alignment = overscroll > 0
+        return overscroll > 0
             ? AlignmentDirectional.centerStart
             : AlignmentDirectional.centerEnd;
-        break;
     }
-    return alignment;
   }
 
   @override
@@ -752,7 +746,6 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
           final double stretch = _stretchController.value;
           double x = 1.0;
           double y = 1.0;
-          late final AlignmentDirectional alignment;
 
           switch (widget.axis) {
             case Axis.horizontal:
@@ -763,7 +756,9 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
               break;
           }
 
-          alignment = _getAlignmentForAxisDirection(_lastOverscrollNotification?.overscroll ?? 0.0);
+          final AlignmentDirectional alignment = _getAlignmentForAxisDirection(
+            _lastOverscrollNotification?.overscroll ?? 0.0
+          );
 
           return Transform(
             alignment: alignment,

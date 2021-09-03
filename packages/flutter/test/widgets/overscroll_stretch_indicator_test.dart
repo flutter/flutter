@@ -19,7 +19,7 @@ void main() {
     Axis axis = Axis.vertical,
     bool reverse = false,
   }) {
-    late final AxisDirection axisDirection;
+    final AxisDirection axisDirection;
     switch (axis) {
       case Axis.horizontal:
         axisDirection = reverse ? AxisDirection.left : AxisDirection.right;
