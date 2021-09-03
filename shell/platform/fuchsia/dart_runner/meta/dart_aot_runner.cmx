@@ -12,7 +12,6 @@
             "fuchsia.feedback.CrashReporter",
             "fuchsia.intl.PropertyProvider",
             "fuchsia.logger.LogSink",
-            "fuchsia.net.NameLookup",
             "fuchsia.net.name.Lookup",
             "fuchsia.posix.socket.Provider",
             "fuchsia.tracing.provider.Registry"
