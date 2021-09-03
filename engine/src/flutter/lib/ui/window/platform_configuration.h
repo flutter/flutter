@@ -390,12 +390,13 @@ class PlatformConfiguration final {
   ///
   /// @see        `FrameTiming`
   ///
-  /// @param[in]  timings  Collection of `FrameTiming::kCount` * `n` timestamps
-  ///                      for `n` frames whose timings have not been reported
-  ///                      yet. A collection of integers is reported here for
-  ///                      easier conversions to Dart objects. The timestamps
-  ///                      are measured against the system monotonic clock
-  ///                      measured in microseconds.
+  /// @param[in]  timings  Collection of `FrameTiming::kStatisticsCount` * 'n'
+  ///                      values for `n` frames whose timings have not been
+  ///                      reported yet. Many of the values are timestamps, but
+  ///                      a collection of integers is reported here for easier
+  ///                      conversions to Dart objects. The timestamps are
+  ///                      measured against the system monotonic clock measured
+  ///                      in microseconds.
   ///
   void ReportTimings(std::vector<int64_t> timings);
 
