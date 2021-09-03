@@ -15,8 +15,7 @@ import 'theme.dart';
 import 'tooltip_theme.dart';
 
 /// The signature of the [TooltipWidgetBuilder] builder function.
-typedef TooltipWidgetBuilder = Widget Function(
-    BuildContext context, String message);
+typedef TooltipWidgetBuilder = Widget Function(BuildContext context, String message);
 
 /// A material design tooltip.
 ///
@@ -152,8 +151,8 @@ class Tooltip extends StatefulWidget {
     this.child,
     this.triggerMode,
     this.enableFeedback,
-  })  : assert(message != null, 'A non-null String must be provided in message to a Tooltip widget.'),
-        super(key: key);
+  }) : assert(message != null),
+       super(key: key);
 
   /// The text to display in the tooltip. [message] is used to show a text
   /// tooltips which is general use cases.
@@ -304,12 +303,12 @@ class Tooltip extends StatefulWidget {
     properties.add(DoubleProperty('height', height, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('margin', margin, defaultValue: null));
-    properties.add( DoubleProperty('vertical offset', verticalOffset, defaultValue: null));
+    properties.add(DoubleProperty('vertical offset', verticalOffset, defaultValue: null));
     properties.add(FlagProperty('position', value: preferBelow, ifTrue: 'below', ifFalse: 'above', showName: true, defaultValue: null));
     properties.add(FlagProperty('semantics', value: excludeFromSemantics, ifTrue: 'excluded', showName: true, defaultValue: null));
     properties.add(DiagnosticsProperty<Duration>('wait duration', waitDuration, defaultValue: null));
     properties.add(DiagnosticsProperty<Duration>('show duration', showDuration, defaultValue: null));
-    properties.add(DiagnosticsProperty<TooltipTriggerMode>( 'triggerMode', triggerMode, defaultValue: null));
+    properties.add(DiagnosticsProperty<TooltipTriggerMode>('triggerMode', triggerMode, defaultValue: null));
     properties.add(FlagProperty('enableFeedback', value: enableFeedback, ifTrue: 'true', showName: true, defaultValue: null));
   }
 }
@@ -356,7 +355,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       reverseDuration: _fadeOutDuration,
       vsync: this,
     )
-     ..addStatusListener(_handleStatusChanged);
+      ..addStatusListener(_handleStatusChanged);
     // Listen to see when a mouse is added.
     RendererBinding.instance!.mouseTracker.addListener(_handleMouseTrackerChange);
     // Listen to global pointer events so that we can hide a tooltip immediately
@@ -420,7 +419,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     }
   }
 
-  void _hideTooltip({bool immediately = false}) {
+  void _hideTooltip({ bool immediately = false }) {
     _showTimer?.cancel();
     _showTimer = null;
     if (immediately) {
@@ -435,7 +434,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     _pressActivated = false;
   }
 
-  void _showTooltip({bool immediately = false}) {
+  void _showTooltip({ bool immediately = false }) {
     _hideTimer?.cancel();
     _hideTimer = null;
     if (immediately) {
@@ -636,9 +635,9 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
     required this.target,
     required this.verticalOffset,
     required this.preferBelow,
-  })  : assert(target != null),
-        assert(verticalOffset != null),
-        assert(preferBelow != null);
+  }) : assert(target != null),
+       assert(verticalOffset != null),
+       assert(preferBelow != null);
 
   /// The offset of the target the tooltip is positioned near in the global
   /// coordinate system.
@@ -707,7 +706,7 @@ class _TooltipOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget result = IgnorePointer(
-        child: FadeTransition(
+      child: FadeTransition(
         opacity: animation,
         child: ConstrainedBox(
           constraints: BoxConstraints(minHeight: height),
