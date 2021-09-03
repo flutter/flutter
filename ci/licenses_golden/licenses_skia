@@ -1,4 +1,4 @@
-Signature: 090234ae27264065a3bdcb5f5d659e5c
+Signature: 54144fd28ad58c0d5cb9812d87d14e72
 
 UNUSED LICENSES:
 
@@ -3028,6 +3028,7 @@ FILE: ../../../third_party/skia/src/sksl/ir/SkSLFunctionCall.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLFunctionDefinition.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLIfStatement.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLIndexExpression.cpp
+FILE: ../../../third_party/skia/src/sksl/ir/SkSLMethodReference.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLPostfixExpression.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLSwitchStatement.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLSwizzle.cpp
