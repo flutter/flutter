@@ -176,9 +176,9 @@ class Tooltip extends StatefulWidget {
   /// if tooltipBuilder is provided, default text tooltip will be ignored and
   /// the returned widget will be displayed as a tooltip. [message] will be only
   /// used for semantics if excludeSemantics is not true.
-  /// 
+  ///
   /// ** NOTE **
-  /// When tooltipBuilder is used, returned widget will not use the [TooltipTheme.of]. 
+  /// When tooltipBuilder is used, returned widget will not use the [TooltipTheme.of].
   final TooltipWidgetBuilder? tooltipBuilder;
 
   /// The height of the tooltip's [child].
