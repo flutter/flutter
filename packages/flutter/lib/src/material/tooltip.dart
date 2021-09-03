@@ -99,7 +99,7 @@ typedef TooltipWidgetBuilder = Widget Function(
 /// ```dart
 /// Widget build(BuildContext context) {
 ///     return Tooltip(
-///       message: "Custom "
+///       message: "Custom ",
 ///       tooltipBuilder: (BuildContext context, String message) {
 ///         return RichText(
 ///           text: TextSpan(
