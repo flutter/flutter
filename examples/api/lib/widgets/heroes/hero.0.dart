@@ -54,7 +54,8 @@ class MyStatelessWidget extends StatelessWidget {
 //* ▼▼▼▼▼▼▼▼ code ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
   Widget build(BuildContext context) {
-    return Column(
+    return Scaffold(
+        body: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         const SizedBox(
@@ -70,7 +71,7 @@ class MyStatelessWidget extends StatelessWidget {
               const Text('Tap on the icon to view hero animation transition.'),
         ),
       ],
-    );
+    ));
   }
 
   Widget _blueRectangle(Size size) {
