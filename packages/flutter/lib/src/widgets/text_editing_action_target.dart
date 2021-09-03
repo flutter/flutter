@@ -236,6 +236,85 @@ abstract class TextEditingActionTarget {
     return nextWord.end;
   }
 
+  // Deletes the current non-empty selection.
+  //
+  // If the selection is currently non-empty, this method deletes the selected
+  // text. Otherwise this method does nothing.
+  TextEditingValue _deleteNonEmptySelection() {
+    assert(textEditingValue.selection.isValid);
+    assert(!textEditingValue.selection.isCollapsed);
+
+    final String textBefore = textEditingValue.selection.textBefore(textEditingValue.text);
+    final String textAfter = textEditingValue.selection.textAfter(textEditingValue.text);
+    final TextSelection newSelection = TextSelection.collapsed(
+      offset: textEditingValue.selection.start,
+      affinity: textEditingValue.selection.affinity,
+    );
+    final TextRange newComposingRange = !textEditingValue.composing.isValid || textEditingValue.composing.isCollapsed
+      ? TextRange.empty
+      : TextRange(
+        start: textEditingValue.composing.start - (textEditingValue.composing.start - textEditingValue.selection.start).clamp(0, textEditingValue.selection.end - textEditingValue.selection.start),
+        end: textEditingValue.composing.end - (textEditingValue.composing.end - textEditingValue.selection.start).clamp(0, textEditingValue.selection.end - textEditingValue.selection.start),
+      );
+
+    return TextEditingValue(
+      text: textBefore + textAfter,
+      selection: newSelection,
+      composing: newComposingRange,
+    );
+  }
+
+  /// Returns a new TextEditingValue representing a deletion from the current
+  /// [selection] to the given index, inclusively.
+  ///
+  /// If the selection is not collapsed, deletes the selection regardless of the
+  /// given index.
+  ///
+  /// The composing region, if any, will also be adjusted to remove the deleted
+  /// characters.
+  TextEditingValue _deleteTo(TextPosition position) {
+    assert(textEditingValue.selection != null);
+
+    if (!textEditingValue.selection.isValid) {
+      return textEditingValue;
+    }
+    if (!textEditingValue.selection.isCollapsed) {
+      return _deleteNonEmptySelection();
+    }
+    if (position.offset == textEditingValue.selection.extentOffset) {
+      return textEditingValue;
+    }
+
+    final TextRange deletion = TextRange(
+      start: math.min(position.offset, textEditingValue.selection.extentOffset),
+      end: math.max(position.offset, textEditingValue.selection.extentOffset),
+    );
+    final String deleted = deletion.textInside(textEditingValue.text);
+    if (deletion.textInside(textEditingValue.text).isEmpty) {
+      return textEditingValue;
+    }
+
+    final int charactersDeletedBeforeComposingStart =
+        (textEditingValue.composing.start - deletion.start).clamp(0, deleted.length);
+    final int charactersDeletedBeforeComposingEnd =
+        (textEditingValue.composing.end - deletion.start).clamp(0, deleted.length);
+    final TextRange nextComposingRange = !textEditingValue.composing.isValid || textEditingValue.composing.isCollapsed
+      ? TextRange.empty
+      : TextRange(
+        start: textEditingValue.composing.start - charactersDeletedBeforeComposingStart,
+        end: textEditingValue.composing.end - charactersDeletedBeforeComposingEnd,
+      );
+
+    return TextEditingValue(
+      text: deletion.textBefore(textEditingValue.text) + deletion.textAfter(textEditingValue.text),
+      selection: TextSelection.collapsed(
+        offset: deletion.start,
+        affinity: position.affinity,
+      ),
+      composing: nextComposingRange,
+    );
+  }
+
   /// Deletes backwards from the current selection.
   ///
   /// If the selection is collapsed, deletes a single character before the
@@ -268,7 +347,7 @@ abstract class TextEditingActionTarget {
       textBefore,
     );
     final TextPosition position = TextPosition(offset: characterBoundary);
-    setTextEditingValue(textEditingValue.deleteTo(position), cause);
+    setTextEditingValue(_deleteTo(position), cause);
   }
 
   /// Deletes a word backwards from the current selection.
@@ -307,7 +386,7 @@ abstract class TextEditingActionTarget {
     final String textBefore = textEditingValue.selection.textBefore(textEditingValue.text);
     final int characterBoundary =
         _getLeftByWord(textBefore.length, includeWhitespace);
-    final TextEditingValue nextValue = textEditingValue.deleteTo(TextPosition(offset: characterBoundary));
+    final TextEditingValue nextValue = _deleteTo(TextPosition(offset: characterBoundary));
 
     setTextEditingValue(nextValue, cause);
   }
@@ -350,7 +429,7 @@ abstract class TextEditingActionTarget {
       TextPosition(offset: textBefore.length - 1),
     );
 
-    setTextEditingValue(textEditingValue.deleteTo(TextPosition(offset: line.start)), cause);
+    setTextEditingValue(_deleteTo(TextPosition(offset: line.start)), cause);
   }
 
   /// Deletes in the forward direction.
@@ -374,7 +453,7 @@ abstract class TextEditingActionTarget {
 
     final String textAfter = textEditingValue.selection.textAfter(textEditingValue.text);
     final int characterBoundary = nextCharacter(0, textAfter);
-    setTextEditingValue(textEditingValue.deleteTo(TextPosition(offset: textEditingValue.selection.end + characterBoundary)), cause);
+    setTextEditingValue(_deleteTo(TextPosition(offset: textEditingValue.selection.end + characterBoundary)), cause);
   }
 
   /// Deletes a word in the forward direction from the current selection.
@@ -408,7 +487,7 @@ abstract class TextEditingActionTarget {
 
     final String textBefore = textEditingValue.selection.textBefore(textEditingValue.text);
     final int characterBoundary = _getRightByWord(textBefore.length, includeWhitespace);
-    final TextEditingValue nextValue = textEditingValue.deleteTo(TextPosition(offset: characterBoundary));
+    final TextEditingValue nextValue = _deleteTo(TextPosition(offset: characterBoundary));
 
     setTextEditingValue(nextValue, cause);
   }
@@ -452,7 +531,7 @@ abstract class TextEditingActionTarget {
       TextPosition(offset: textBefore.length),
     );
 
-    setTextEditingValue(textEditingValue.deleteTo(TextPosition(offset: line.end)), cause);
+    setTextEditingValue(_deleteTo(TextPosition(offset: line.end)), cause);
   }
 
   /// Deletes the from the current collapsed selection to the end of the field.
@@ -465,7 +544,7 @@ abstract class TextEditingActionTarget {
   void deleteToEnd(SelectionChangedCause cause) {
     assert(textEditingValue.selection.isCollapsed);
 
-    setTextEditingValue(textEditingValue.deleteTo(TextPosition(offset: textEditingValue.text.length)), cause);
+    setTextEditingValue(_deleteTo(TextPosition(offset: textEditingValue.text.length)), cause);
   }
 
   /// Deletes the from the current collapsed selection to the start of the field.
@@ -478,7 +557,7 @@ abstract class TextEditingActionTarget {
   void deleteToStart(SelectionChangedCause cause) {
     assert(textEditingValue.selection.isCollapsed);
 
-    setTextEditingValue(textEditingValue.deleteTo(const TextPosition(offset: 0)), cause);
+    setTextEditingValue(_deleteTo(const TextPosition(offset: 0)), cause);
   }
 
   /// Expand the current selection to the end of the field.
