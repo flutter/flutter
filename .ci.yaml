@@ -1684,7 +1684,23 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk"}
+          {"dependency": "android_sdk"},
+          {"dependency": "android_virtual_device", "version": "31"}
+        ]
+      tags: >
+        ["framework","hostonly"]
+    timeout: 60
+    scheduler: luci
+
+  - name: Linux deferred components
+    recipe: flutter/deferred_components
+    bringup: true
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk"},
+          {"dependency": "android_virtual_device", "version": "31"},
+          {"dependency": "curl"}
         ]
       tags: >
         ["framework","hostonly"]
