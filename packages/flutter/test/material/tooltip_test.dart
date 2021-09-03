@@ -1514,7 +1514,7 @@ void main() {
         width: 100.0,
         child: Text(tooltipText),
       );
-      await setCustomTooltip(tester, key, sizedBoxTooltip);
+      await setCustomTooltip(tester, key, 'message', sizedBoxTooltip);
 
       final RenderBox tipBox = tester.renderObject(
         _findCustomTooltipParent(tooltipText, SizedBox),
@@ -1535,7 +1535,7 @@ void main() {
         color: Colors.red,
         child: const Text(tooltipText),
       );
-      await setCustomTooltip(tester, key, containerTooltip);
+      await setCustomTooltip(tester, key, 'message', containerTooltip);
 
       final RenderBox tipContainer = tester.renderObject(
         find.ancestor(
@@ -1552,7 +1552,7 @@ void main() {
     });
   });
 
-  group('Tooltip.custom tests', () {
+  group('Widget tooltip tests:', () {
     testWidgets('Does tooltip end up in the right place - center', (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
       await tester.pumpWidget(
@@ -1567,12 +1567,15 @@ void main() {
                       Positioned(
                         left: 300.0,
                         top: 0.0,
-                        child: Tooltip.custom(
+                        child: Tooltip(
                           key: key,
-                          tooltip: ConstrainedBox(
-                            constraints: const BoxConstraints(minHeight: 0),
-                            child: const Text(tooltipText),
-                          ),
+                          message: tooltipText,
+                          tooltipBuilder: (BuildContext context, String message) {
+                            return ConstrainedBox(
+                              constraints: const BoxConstraints(minHeight: 0),
+                              child: Text(message),
+                            );
+                          },
                           height: 20.0,
                           padding: const EdgeInsets.all(5.0),
                           verticalOffset: 20.0,
@@ -1629,12 +1632,15 @@ void main() {
                         Positioned(
                           left: 300.0,
                           top: 0.0,
-                          child: Tooltip.custom(
+                          child: Tooltip(
                             key: key,
-                            tooltip: ConstrainedBox(
-                              constraints: const BoxConstraints(minHeight: 0),
-                              child: const Text(tooltipText),
-                            ),
+                            message:tooltipText,
+                            tooltipBuilder: (BuildContext context, String message) {
+                              return ConstrainedBox(
+                                constraints: const BoxConstraints(minHeight: 0),
+                                child: Text(message),
+                              );
+                            },
                             height: 20.0,
                             padding: const EdgeInsets.all(5.0),
                             verticalOffset: 20.0,
@@ -1692,12 +1698,15 @@ void main() {
                       Positioned(
                         left: 0.0,
                         top: 0.0,
-                        child: Tooltip.custom(
+                        child: Tooltip(
                           key: key,
-                          tooltip: ConstrainedBox(
-                            constraints: const BoxConstraints(minHeight: 0),
-                            child: const Text(tooltipText),
-                          ),
+                          message: tooltipText,
+                          tooltipBuilder: (BuildContext context, String message) {
+                            return ConstrainedBox(
+                              constraints: const BoxConstraints(minHeight: 0),
+                              child: Text(message),
+                            );
+                          },
                           height: 20.0,
                           padding: const EdgeInsets.all(5.0),
                           verticalOffset: 20.0,
@@ -1749,12 +1758,15 @@ void main() {
                       Positioned(
                         left: 400.0,
                         top: 300.0,
-                        child: Tooltip.custom(
+                        child: Tooltip(
                           key: key,
-                          tooltip: ConstrainedBox(
-                            constraints: const BoxConstraints(minHeight: 0),
-                            child: const Text(tooltipText),
-                          ),
+                          message: tooltipText,
+                          tooltipBuilder: (BuildContext context, String message) {
+                            return ConstrainedBox(
+                              constraints: const BoxConstraints(minHeight: 0),
+                              child: Text(message),
+                            );
+                          },
                           height: 100.0,
                           padding: EdgeInsets.zero,
                           verticalOffset: 100.0,
@@ -1808,12 +1820,15 @@ void main() {
                       Positioned(
                         left: 400.0,
                         top: 299.0,
-                        child: Tooltip.custom(
+                        child: Tooltip(
                           key: key,
-                          tooltip: ConstrainedBox(
-                            constraints: const BoxConstraints(minHeight: 0),
-                            child: const Text(tooltipText),
-                          ),
+                          message: tooltipText,
+                          tooltipBuilder: (BuildContext context, String message) {
+                            return ConstrainedBox(
+                              constraints: const BoxConstraints(minHeight: 0),
+                              child: Text(message),
+                            );
+                          },
                           height: 190.0,
                           padding: EdgeInsets.zero,
                           verticalOffset: 100.0,
@@ -1878,12 +1893,15 @@ void main() {
                       Positioned(
                         left: 400.0,
                         top: 300.0,
-                        child: Tooltip.custom(
+                        child: Tooltip(
                           key: key,
-                          tooltip: ConstrainedBox(
-                            constraints: const BoxConstraints(minHeight: 0),
-                            child: const Text(tooltipText),
-                          ),
+                          message: tooltipText,
+                          tooltipBuilder: (BuildContext context, String message) {
+                            return ConstrainedBox(
+                              constraints: const BoxConstraints(minHeight: 0),
+                              child: Text(message),
+                            );
+                          },
                           height: 190.0,
                           padding: EdgeInsets.zero,
                           verticalOffset: 100.0,
@@ -1937,12 +1955,15 @@ void main() {
                       Positioned(
                         left: 1600.0,
                         top: 300.0,
-                        child: Tooltip.custom(
+                        child: Tooltip(
                           key: key,
-                          tooltip: ConstrainedBox(
-                            constraints: const BoxConstraints(minHeight: 0),
-                            child: const Text(tooltipText),
-                          ),
+                          message: tooltipText,
+                          tooltipBuilder: (BuildContext context, String message) {
+                            return ConstrainedBox(
+                              constraints: const BoxConstraints(minHeight: 0),
+                              child: Text(message),
+                            );
+                          },
                           height: 10.0,
                           padding: EdgeInsets.zero,
                           verticalOffset: 10.0,
@@ -1997,12 +2018,15 @@ void main() {
                       Positioned(
                         left: 780.0,
                         top: 300.0,
-                        child: Tooltip.custom(
+                        child: Tooltip(
                           key: key,
-                          tooltip: ConstrainedBox(
-                            constraints: const BoxConstraints(minHeight: 0),
-                            child: const Text(tooltipText),
-                          ),
+                          message: tooltipText,
+                          tooltipBuilder: (BuildContext context, String message) {
+                            return ConstrainedBox(
+                              constraints: const BoxConstraints(minHeight: 0),
+                              child: Text(message),
+                            );
+                          },
                           height: 10.0,
                           padding: EdgeInsets.zero,
                           verticalOffset: 10.0,
@@ -2053,12 +2077,15 @@ void main() {
             initialEntries: <OverlayEntry>[
               OverlayEntry(
                 builder: (BuildContext context) {
-                  return Tooltip.custom(
+                  return Tooltip(
                     key: key,
-                    tooltip: ConstrainedBox(
-                      constraints: const BoxConstraints(minHeight: 0),
-                      child: const Text(tooltipText),
-                    ),
+                    message: tooltipText,
+                    tooltipBuilder: (BuildContext context, String message) {
+                      return ConstrainedBox(
+                        constraints: const BoxConstraints(minHeight: 0),
+                        child: Text(message),
+                      );
+                    },
                     padding: EdgeInsets.zero,
                     margin: const EdgeInsets.all(_customMarginValue),
                     child: const SizedBox(
@@ -2107,12 +2134,15 @@ void main() {
     testWidgets('Default tooltip message textStyle should be null', (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
       await tester.pumpWidget(MaterialApp(
-        home: Tooltip.custom(
+        home: Tooltip(
           key: key,
-          tooltip: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 0),
-            child: const Text(tooltipText),
-          ),
+          message: tooltipText,
+          tooltipBuilder: (BuildContext context, String message) {
+            return ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 0),
+              child: Text(message),
+            );
+          },
           child: Container(
             width: 100.0,
             height: 100.0,
@@ -2136,11 +2166,14 @@ void main() {
           home: Directionality(
             textDirection: textDirection,
             child: Center(
-              child: Tooltip.custom(
-                tooltip: ConstrainedBox(
-                  constraints: const BoxConstraints(minHeight: 0),
-                  child: const Text(tooltipText),
-                ),
+              child: Tooltip(
+                message: tooltipText,
+                tooltipBuilder: (BuildContext context, String message) {
+                  return ConstrainedBox(
+                    constraints: const BoxConstraints(minHeight: 0),
+                    child: Text(message),
+                  );
+                },
                 child: Container(
                   width: 100.0,
                   height: 100.0,
@@ -2171,12 +2204,15 @@ void main() {
       // does not have a Material ancestor.
       final GlobalKey key = GlobalKey();
       await tester.pumpWidget(MaterialApp(
-        home: Tooltip.custom(
+        home: Tooltip(
           key: key,
-          tooltip: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 0),
-            child: const Text(tooltipText),
-          ),
+          message: tooltipText,
+          tooltipBuilder: (BuildContext context, String message) {
+            return ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 0),
+              child: Text(message),
+            );
+          },
           child: Container(
             width: 100.0,
             height: 100.0,
@@ -2210,12 +2246,15 @@ void main() {
             initialEntries: <OverlayEntry>[
               OverlayEntry(
                 builder: (BuildContext context) {
-                  return Tooltip.custom(
+                  return Tooltip(
                     key: key,
-                    tooltip: ConstrainedBox(
-                      constraints: const BoxConstraints(minHeight: 0),
-                      child: const Text(tooltipText),
-                    ),
+                    message: tooltipText,
+                    tooltipBuilder: (BuildContext context, String message) {
+                      return ConstrainedBox(
+                        constraints: const BoxConstraints(minHeight: 0),
+                        child: Text(message),
+                      );
+                    },
                     child: const SizedBox(
                       width: 0.0,
                       height: 0.0,
@@ -2246,9 +2285,12 @@ void main() {
       final GlobalKey key = GlobalKey();
       await tester.pumpWidget(
         MaterialApp(
-          home: Tooltip.custom(
+          home: Tooltip(
             key: key,
-            tooltip: const Text(tooltipText),
+            message: tooltipText,
+            tooltipBuilder: (BuildContext context, String message) {
+              return Text(message);
+            },
             child: const SizedBox(
               width: 0.0,
               height: 0.0,
@@ -2296,13 +2338,16 @@ void main() {
             initialEntries: <OverlayEntry>[
               OverlayEntry(
                 builder: (BuildContext context) {
-                  return Tooltip.custom(
+                  return Tooltip(
                     key: key,
                     decoration: customDecoration,
-                    tooltip: ConstrainedBox(
-                      constraints: const BoxConstraints(minHeight: 0),
-                      child: const Text(tooltipText),
-                    ),
+                    message: tooltipText,
+                    tooltipBuilder: (BuildContext context, String message) {
+                      return ConstrainedBox(
+                        constraints: const BoxConstraints(minHeight: 0),
+                        child: Text(message),
+                      );
+                    },
                     child: const SizedBox(
                       width: 0.0,
                       height: 0.0,
@@ -2331,11 +2376,14 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Center(
-            child: Tooltip.custom(
-              tooltip: ConstrainedBox(
-                constraints: const BoxConstraints(minHeight: 0),
-                child: const Text(tooltipText),
-              ),
+            child: Tooltip(
+              message: tooltipText,
+              tooltipBuilder: (BuildContext context, String message) {
+                return ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 0),
+                  child: Text(message),
+                );
+              },
               child: Container(
                 width: 100.0,
                 height: 100.0,
@@ -2392,11 +2440,14 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Center(
-            child: Tooltip.custom(
-              tooltip: ConstrainedBox(
-                constraints: const BoxConstraints(minHeight: 0),
-                child: const Text(tooltipText),
-              ),
+            child: Tooltip(
+              message: tooltipText,
+              tooltipBuilder: (BuildContext context, String message) {
+                return ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 0),
+                  child: Text(message),
+                );
+              },
               waitDuration: waitDuration,
               child: const SizedBox(
                 width: 100.0,
@@ -2447,11 +2498,14 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Center(
-            child: Tooltip.custom(
-              tooltip: ConstrainedBox(
-                constraints: const BoxConstraints(minHeight: 0),
-                child: const Text(tooltipText),
-              ),
+            child: Tooltip(
+              message: tooltipText,
+              tooltipBuilder: (BuildContext context, String message) {
+                return ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 0),
+                  child: Text(message),
+                );
+              },
               waitDuration: waitDuration,
               child: const Text('I am tool tip'),
             ),
@@ -2505,11 +2559,14 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Center(
-            child: Tooltip.custom(
-              tooltip: ConstrainedBox(
-                constraints: const BoxConstraints(minHeight: 0),
-                child: const Text(tooltipText),
-              ),
+            child: Tooltip(
+              message: tooltipText,
+              tooltipBuilder: (BuildContext context, String message) {
+                return ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 0),
+                  child: Text(message),
+                );
+              },
               waitDuration: waitDuration,
               child: const Text('I am tool tip'),
             ),
@@ -2554,21 +2611,27 @@ void main() {
           home: Center(
             child: Column(
               children: <Widget>[
-                Tooltip.custom(
-                  tooltip: ConstrainedBox(
-                    constraints: const BoxConstraints(minHeight: 0),
-                    child: const Text('message1'),
-                  ),
+                Tooltip(
+                  message: 'message1',
+                  tooltipBuilder: (BuildContext context, String message) {
+                    return ConstrainedBox(
+                      constraints: const BoxConstraints(minHeight: 0),
+                      child: Text(message),
+                    );
+                  },
                   waitDuration: waitDuration,
                   showDuration: const Duration(days: 1),
                   child: const Text('tooltip1'),
                 ),
                 const Spacer(flex: 2),
-                Tooltip.custom(
-                  tooltip: ConstrainedBox(
-                    constraints: const BoxConstraints(minHeight: 0),
-                    child: const Text('message2'),
-                  ),
+                Tooltip(
+                  message: 'message2',
+                  tooltipBuilder: (BuildContext context, String message) {
+                    return ConstrainedBox(
+                      constraints: const BoxConstraints(minHeight: 0),
+                      child: Text(message),
+                    );
+                  },
                   waitDuration: waitDuration,
                   showDuration: const Duration(days: 1),
                   child: const Text('tooltip2'),
@@ -2600,7 +2663,9 @@ void main() {
       await gesture.moveTo(tester.getCenter(secondTooltip));
       await tester.pump();
       await tester.pump(waitDuration);
-
+      // Make sure both messages are on the screen.
+      expect(find.text('message1'), findsOneWidget);
+      expect(find.text('message2'), findsOneWidget);
 
       final Finder thirdTooltip = find.text('tooltip3');
       await gesture.moveTo(Offset.zero);
@@ -2608,7 +2673,7 @@ void main() {
       await gesture.moveTo(tester.getCenter(thirdTooltip));
       await tester.pump();
       await tester.pump(waitDuration);
-      // Make sure both messages are on the screen.
+      // Make sure three messages are on the screen.
       expect(find.text('message1'), findsOneWidget);
       expect(find.text('message2'), findsOneWidget);
       expect(find.text('message3'), findsOneWidget);
@@ -2642,11 +2707,14 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Center(
-            child: Tooltip.custom(
-              tooltip: ConstrainedBox(
-                constraints: const BoxConstraints(minHeight: 0),
-                child: const Text('message2'),
-              ),
+            child: Tooltip(
+              message: 'message2',
+              tooltipBuilder: (BuildContext context, String message) {
+                  return ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 0),
+                  child: Text(message),
+                );
+              },
               waitDuration: waitDuration,
               child: const SizedBox(
                 width: 100.0,
@@ -2692,13 +2760,15 @@ void main() {
                       Positioned(
                         left: 780.0,
                         top: 300.0,
-                        child: Tooltip.custom(
+                        child: Tooltip(
                           key: key,
-                          tooltip: ConstrainedBox(
-                            constraints: const BoxConstraints(minHeight: 0),
-                            child: const Text('message'),
-                          ),
-                          semanticsLabel: 'message',
+                          message: 'message',
+                          tooltipBuilder: (BuildContext context, String message) {
+                            return ConstrainedBox(
+                              constraints: const BoxConstraints(minHeight: 0),
+                              child: Text(message),
+                            );
+                          },
                           child: const SizedBox(width: 10.0, height: 10.0),
                         ),
                       ),
@@ -2737,11 +2807,14 @@ void main() {
       Widget buildApp(String text) {
         return MaterialApp(
           home: Center(
-            child: Tooltip.custom(
-              tooltip: ConstrainedBox(
-                constraints: const BoxConstraints(minHeight: 0),
-                child: Text(text),
-              ),
+            child: Tooltip(
+              message: text,
+              tooltipBuilder: (BuildContext context, String message) {
+                return ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 0),
+                  child: Text(message),
+                );
+              },
               child: Container(
                 width: 100.0,
                 height: 100.0,
@@ -2776,11 +2849,14 @@ void main() {
                 return MaterialPageRoute<void>(
                   builder: (BuildContext context) {
                     return Center(
-                      child: Tooltip.custom(
-                        tooltip: ConstrainedBox(
-                          constraints: const BoxConstraints(minHeight: 0),
-                          child: Text(text),
-                        ),
+                      child: Tooltip(
+                        message: text,
+                          tooltipBuilder: (BuildContext context, String message) {
+                            return ConstrainedBox(
+                              constraints: const BoxConstraints(minHeight: 0),
+                              child: Text(message),
+                          );
+                        },
                         child: Container(
                           width: 100.0,
                           height: 100.0,
@@ -2820,11 +2896,14 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Center(
-            child: Tooltip.custom(
-              tooltip: ConstrainedBox(
-                constraints: const BoxConstraints(minHeight: 0),
-                child: const Text('Foo'),
-              ),
+            child: Tooltip(
+              message: 'Foo',
+              tooltipBuilder: (BuildContext context, String message) {
+                return ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 0),
+                  child: Text(message),
+                );
+              },
               child: Container(
                 width: 100.0,
                 height: 100.0,
@@ -2846,12 +2925,14 @@ void main() {
       final SemanticsTester semantics = SemanticsTester(tester);
 
       await tester.pumpWidget(
-        const MaterialApp(
+        MaterialApp(
           home: Center(
-            child: Tooltip.custom(
-              tooltip: Text('Foo'),
-              semanticsLabel: 'Foo',
-              child: Text('Bar'),
+            child: Tooltip(
+              message: 'Foo',
+              tooltipBuilder: (BuildContext context, String message) {
+                return Text(message);
+              },
+              child: const Text('Bar'),
             ),
           ),
         ),
@@ -2892,11 +2973,15 @@ void main() {
       final SemanticsTester semantics = SemanticsTester(tester);
 
       await tester.pumpWidget(
-        const MaterialApp(
+        MaterialApp(
           home: Center(
-            child: Tooltip.custom(
-              tooltip: Text('Foo'),
-              child: Text('Bar'),
+            child: Tooltip(
+              message: 'Foo',
+              tooltipBuilder: (BuildContext context, String message) {
+                return Text(message);
+              },
+              excludeFromSemantics: true,
+              child: const Text('Bar'),
             ),
           ),
         ),
@@ -2944,9 +3029,11 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Center(
-            child: Tooltip.custom(
-              tooltip: const Text('Foo'),
-              semanticsLabel: 'Foo',
+            child: Tooltip(
+              message: 'Foo',
+              tooltipBuilder: (BuildContext context, String message) {
+                return Text(message);
+              },
               child: Container(
                 width: 100.0,
                 height: 100.0,
@@ -2983,16 +3070,18 @@ void main() {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
       // Not checking controller, inputFormatters, focusNode
-      const Tooltip.custom(
-        key: ValueKey<String>('foo'),
-        tooltip: Text('message'),
-        decoration: BoxDecoration(),
-        waitDuration: Duration(seconds: 1),
-        showDuration: Duration(seconds: 2),
+      Tooltip(
+        key: const ValueKey<String>('foo'),
+        message: 'message',
+        tooltipBuilder: (BuildContext context, String message) {
+          return Text(message);
+        },
+        decoration: const BoxDecoration(),
+        waitDuration: const Duration(seconds: 1),
+        showDuration: const Duration(seconds: 2),
         padding: EdgeInsets.zero,
-        margin: EdgeInsets.all(5.0),
+        margin: const EdgeInsets.all(5.0),
         height: 100.0,
-        semanticsLabel: 'message',
         preferBelow: false,
         verticalOffset: 50.0,
         triggerMode: TooltipTriggerMode.manual,
@@ -3005,18 +3094,16 @@ void main() {
           .toList();
 
       expect(description, <String>[
-        'null',
+        '"message"',
         'height: 100.0',
         'padding: EdgeInsets.zero',
         'margin: EdgeInsets.all(5.0)',
         'vertical offset: 50.0',
         'position: above',
-        'semantics: excluded',
         'wait duration: 0:00:01.000000',
         'show duration: 0:00:02.000000',
         'triggerMode: TooltipTriggerMode.manual',
         'enableFeedback: true',
-        'semanticsLabel: "message"',
       ]);
     });
 
@@ -3074,16 +3161,19 @@ Future<void> setWidgetForTooltipMode(WidgetTester tester, TooltipTriggerMode tri
 
   if(!isCustomTooltip){
     tooltip =  Tooltip(
-        message: tooltipText,
-        triggerMode: triggerMode,
-        child: const SizedBox(width: 100.0, height: 100.0),
-      );
+      message: tooltipText,
+      triggerMode: triggerMode,
+      child: const SizedBox(width: 100.0, height: 100.0),
+    );
   } else{
-    tooltip =  Tooltip.custom(
-        tooltip: const Text(tooltipText),
-        triggerMode: triggerMode,
-        child: const SizedBox(width: 100.0, height: 100.0),
-      );
+    tooltip =  Tooltip(
+      message: tooltipText,
+      tooltipBuilder: (BuildContext context, String message) {
+          return Text(message);
+      },
+      triggerMode: triggerMode,
+      child: const SizedBox(width: 100.0, height: 100.0),
+    );
   }
 
   await tester.pumpWidget(
@@ -3112,12 +3202,15 @@ SemanticsNode findDebugSemantics(RenderObject object) {
   return findDebugSemantics(object.parent! as RenderObject);
 }
 
-Future<void> setCustomTooltip(WidgetTester tester, GlobalKey key, Widget widget) async {
+Future<void> setCustomTooltip(WidgetTester tester, GlobalKey key, String message, Widget widget) async {
   await tester.pumpWidget(
     MaterialApp(
-      home: Tooltip.custom(
+      home: Tooltip(
         key: key,
-        tooltip: widget
+        message: message,
+        tooltipBuilder: (BuildContext context, String message) {
+          return widget;
+        },
       ),
     ),
   );
