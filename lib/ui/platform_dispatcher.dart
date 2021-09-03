@@ -447,10 +447,10 @@ class PlatformDispatcher {
 
   // Called from the engine, via hooks.dart
   void _reportTimings(List<int> timings) {
-    assert(timings.length % (FramePhase.values.length + 1) == 0);
+    assert(timings.length % FrameTiming._dataLength == 0);
     final List<FrameTiming> frameTimings = <FrameTiming>[];
-    for (int i = 0; i < timings.length; i += FramePhase.values.length + 1) {
-      frameTimings.add(FrameTiming._(timings.sublist(i, i + FramePhase.values.length + 1)));
+    for (int i = 0; i < timings.length; i += FrameTiming._dataLength) {
+      frameTimings.add(FrameTiming._(timings.sublist(i, i + FrameTiming._dataLength)));
     }
     _invoke1(onReportTimings, _onReportTimingsZone, frameTimings);
   }
@@ -1180,6 +1180,23 @@ enum FramePhase {
   rasterFinishWallTime,
 }
 
+enum _FrameTimingInfo {
+  /// The number of engine layers cached in the raster cache during the frame.
+  layerCacheCount,
+
+  /// The number of bytes used to cache engine layers during the frame.
+  layerCacheBytes,
+
+  /// The number of picture layers cached in the raster cache during the frame.
+  pictureCacheCount,
+
+  /// The number of bytes used to cache pictures during the frame.
+  pictureCacheBytes,
+
+  /// The frame number of the frame.
+  frameNumber,
+}
+
 /// Time-related performance metrics of a frame.
 ///
 /// If you're using the whole Flutter framework, please use
@@ -1207,6 +1224,10 @@ class FrameTiming {
     required int rasterStart,
     required int rasterFinish,
     required int rasterFinishWallTime,
+    int layerCacheCount = 0,
+    int layerCacheBytes = 0,
+    int pictureCacheCount = 0,
+    int pictureCacheBytes = 0,
     int frameNumber = -1,
   }) {
     return FrameTiming._(<int>[
@@ -1216,9 +1237,15 @@ class FrameTiming {
       rasterStart,
       rasterFinish,
       rasterFinishWallTime,
+      layerCacheCount,
+      layerCacheBytes,
+      pictureCacheCount,
+      pictureCacheBytes,
       frameNumber,
     ]);
   }
+
+  static final int _dataLength = FramePhase.values.length + _FrameTimingInfo.values.length;
 
   /// Construct [FrameTiming] with raw timestamps in microseconds.
   ///
@@ -1227,14 +1254,16 @@ class FrameTiming {
   ///
   /// This constructor is usually only called by the Flutter engine, or a test.
   /// To get the [FrameTiming] of your app, see [PlatformDispatcher.onReportTimings].
-  FrameTiming._(this._timestamps)
-      : assert(_timestamps.length == FramePhase.values.length + 1);
+  FrameTiming._(this._data)
+      : assert(_data.length == _dataLength);
 
   /// This is a raw timestamp in microseconds from some epoch. The epoch in all
   /// [FrameTiming] is the same, but it may not match [DateTime]'s epoch.
-  int timestampInMicroseconds(FramePhase phase) => _timestamps[phase.index];
+  int timestampInMicroseconds(FramePhase phase) => _data[phase.index];
 
-  Duration _rawDuration(FramePhase phase) => Duration(microseconds: _timestamps[phase.index]);
+  Duration _rawDuration(FramePhase phase) => Duration(microseconds: _data[phase.index]);
+
+  int _rawInfo(_FrameTimingInfo info) => _data[FramePhase.values.length + info.index];
 
   /// The duration to build the frame on the UI thread.
   ///
@@ -1273,16 +1302,54 @@ class FrameTiming {
   /// See also [vsyncOverhead], [buildDuration] and [rasterDuration].
   Duration get totalSpan => _rawDuration(FramePhase.rasterFinish) - _rawDuration(FramePhase.vsyncStart);
 
-  /// The frame key associated with this frame measurement.
-  int get frameNumber => _timestamps.last;
+  /// The number of layers stored in the raster cache during the frame.
+  ///
+  /// See also [layerCacheBytes], [pictureCacheCount] and [pictureCacheBytes].
+  int get layerCacheCount => _rawInfo(_FrameTimingInfo.layerCacheCount);
 
-  final List<int> _timestamps;  // in microseconds
+  /// The number of bytes of image data used to cache layers during the frame.
+  ///
+  /// See also [layerCacheCount], [layerCacheMegabytes], [pictureCacheCount] and [pictureCacheBytes].
+  int get layerCacheBytes => _rawInfo(_FrameTimingInfo.layerCacheBytes);
+
+  /// The number of megabytes of image data used to cache layers during the frame.
+  ///
+  /// See also [layerCacheCount], [layerCacheBytes], [pictureCacheCount] and [pictureCacheBytes].
+  double get layerCacheMegabytes => layerCacheBytes / 1024.0 / 1024.0;
+
+  /// The number of pictures stored in the raster cache during the frame.
+  ///
+  /// See also [layerCacheCount], [layerCacheBytes] and [pictureCacheBytes].
+  int get pictureCacheCount => _rawInfo(_FrameTimingInfo.pictureCacheCount);
+
+  /// The number of bytes of image data used to cache pictures during the frame.
+  ///
+  /// See also [layerCacheCount], [layerCacheBytes], [pictureCacheCount] and [pictureCacheMegabytes].
+  int get pictureCacheBytes => _rawInfo(_FrameTimingInfo.pictureCacheBytes);
+
+  /// The number of megabytes of image data used to cache pictures during the frame.
+  ///
+  /// See also [layerCacheCount], [layerCacheBytes], [pictureCacheCount] and [pictureCacheBytes].
+  double get pictureCacheMegabytes => pictureCacheBytes / 1024.0 / 1024.0;
+
+  /// The frame key associated with this frame measurement.
+  int get frameNumber => _data.last;
+
+  final List<int> _data;  // some elements in microseconds, some in bytes, some are counts
 
   String _formatMS(Duration duration) => '${duration.inMicroseconds * 0.001}ms';
 
   @override
   String toString() {
-    return '$runtimeType(buildDuration: ${_formatMS(buildDuration)}, rasterDuration: ${_formatMS(rasterDuration)}, vsyncOverhead: ${_formatMS(vsyncOverhead)}, totalSpan: ${_formatMS(totalSpan)}, frameNumber: ${_timestamps.last})';
+    return '$runtimeType(buildDuration: ${_formatMS(buildDuration)}, '
+        'rasterDuration: ${_formatMS(rasterDuration)}, '
+        'vsyncOverhead: ${_formatMS(vsyncOverhead)}, '
+        'totalSpan: ${_formatMS(totalSpan)}, '
+        'layerCacheCount: $layerCacheCount, '
+        'layerCacheBytes: $layerCacheBytes, '
+        'pictureCacheCount: $pictureCacheCount, '
+        'pictureCacheBytes: $pictureCacheBytes, '
+        'frameNumber: ${_data.last})';
   }
 }
 

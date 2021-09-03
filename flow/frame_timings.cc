@@ -79,6 +79,34 @@ fml::TimeDelta FrameTimingsRecorder::GetBuildDuration() const {
   return build_end_ - build_start_;
 }
 
+/// Count of the layer cache entries
+size_t FrameTimingsRecorder::GetLayerCacheCount() const {
+  std::scoped_lock state_lock(state_mutex_);
+  FML_DCHECK(state_ >= State::kRasterEnd);
+  return layer_cache_count_;
+}
+
+/// Total bytes in all layer cache entries
+size_t FrameTimingsRecorder::GetLayerCacheBytes() const {
+  std::scoped_lock state_lock(state_mutex_);
+  FML_DCHECK(state_ >= State::kRasterEnd);
+  return layer_cache_bytes_;
+}
+
+/// Count of the picture cache entries
+size_t FrameTimingsRecorder::GetPictureCacheCount() const {
+  std::scoped_lock state_lock(state_mutex_);
+  FML_DCHECK(state_ >= State::kRasterEnd);
+  return picture_cache_count_;
+}
+
+/// Total bytes in all picture cache entries
+size_t FrameTimingsRecorder::GetPictureCacheBytes() const {
+  std::scoped_lock state_lock(state_mutex_);
+  FML_DCHECK(state_ >= State::kRasterEnd);
+  return picture_cache_bytes_;
+}
+
 void FrameTimingsRecorder::RecordVsync(fml::TimePoint vsync_start,
                                        fml::TimePoint vsync_target) {
   std::scoped_lock state_lock(state_mutex_);
@@ -102,19 +130,32 @@ void FrameTimingsRecorder::RecordBuildEnd(fml::TimePoint build_end) {
   build_end_ = build_end;
 }
 
-void FrameTimingsRecorder::RecordRasterStart(fml::TimePoint raster_start) {
+void FrameTimingsRecorder::RecordRasterStart(fml::TimePoint raster_start,
+                                             const RasterCache* cache) {
   std::scoped_lock state_lock(state_mutex_);
   FML_DCHECK(state_ == State::kBuildEnd);
   state_ = State::kRasterStart;
   raster_start_ = raster_start;
+  sweep_count_at_raster_start_ = cache ? cache->sweep_count() : -1;
 }
 
-FrameTiming FrameTimingsRecorder::RecordRasterEnd() {
+FrameTiming FrameTimingsRecorder::RecordRasterEnd(const RasterCache* cache) {
   std::scoped_lock state_lock(state_mutex_);
   FML_DCHECK(state_ == State::kRasterStart);
+  FML_DCHECK(sweep_count_at_raster_start_ ==
+             (cache ? cache->sweep_count() : -1));
   state_ = State::kRasterEnd;
   raster_end_ = fml::TimePoint::Now();
   raster_end_wall_time_ = fml::TimePoint::CurrentWallTime();
+  if (cache) {
+    layer_cache_count_ = cache->GetLayerCachedEntriesCount();
+    layer_cache_bytes_ = cache->EstimateLayerCacheByteSize();
+    picture_cache_count_ = cache->GetPictureCachedEntriesCount();
+    picture_cache_bytes_ = cache->EstimatePictureCacheByteSize();
+  } else {
+    layer_cache_count_ = layer_cache_bytes_ = picture_cache_count_ =
+        picture_cache_bytes_ = 0;
+  }
   timing_.Set(FrameTiming::kVsyncStart, vsync_start_);
   timing_.Set(FrameTiming::kBuildStart, build_start_);
   timing_.Set(FrameTiming::kBuildFinish, build_end_);
@@ -122,6 +163,8 @@ FrameTiming FrameTimingsRecorder::RecordRasterEnd() {
   timing_.Set(FrameTiming::kRasterFinish, raster_end_);
   timing_.Set(FrameTiming::kRasterFinishWallTime, raster_end_wall_time_);
   timing_.SetFrameNumber(GetFrameNumber());
+  timing_.SetRasterCacheStatistics(layer_cache_count_, layer_cache_bytes_,
+                                   picture_cache_count_, picture_cache_bytes_);
   return timing_;
 }
 
@@ -154,11 +197,16 @@ std::unique_ptr<FrameTimingsRecorder> FrameTimingsRecorder::CloneUntil(
 
   if (state >= State::kRasterStart) {
     recorder->raster_start_ = raster_start_;
+    recorder->sweep_count_at_raster_start_ = sweep_count_at_raster_start_;
   }
 
   if (state >= State::kRasterEnd) {
     recorder->raster_end_ = raster_end_;
     recorder->raster_end_wall_time_ = raster_end_wall_time_;
+    recorder->layer_cache_count_ = layer_cache_count_;
+    recorder->layer_cache_bytes_ = layer_cache_bytes_;
+    recorder->picture_cache_count_ = picture_cache_count_;
+    recorder->picture_cache_bytes_ = picture_cache_bytes_;
   }
 
   return recorder;

@@ -41,5 +41,9 @@ Future<void> runFrameTimingsTest() async {
     expect(timing.buildDuration, greaterThanOrEqualTo(Duration.zero));
     expect(timing.rasterDuration, greaterThanOrEqualTo(Duration.zero));
     expect(timing.totalSpan, greaterThanOrEqualTo(Duration.zero));
+    expect(timing.layerCacheCount, equals(0));
+    expect(timing.layerCacheBytes, equals(0));
+    expect(timing.pictureCacheCount, equals(0));
+    expect(timing.pictureCacheBytes, equals(0));
   }
 }

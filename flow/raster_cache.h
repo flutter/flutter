@@ -207,6 +207,25 @@ class RasterCache {
    */
   size_t EstimateLayerCacheByteSize() const;
 
+  /**
+   * @brief Return the count of cache sweeps that have occured.
+   *
+   * The sweep count will help to determine if a sweep of the cache may have
+   * removed expired entries since the last time the method was called.
+   * The count will increment even if the sweep performs no evictions.
+   */
+  int sweep_count() const { return sweep_count_; }
+
+  /**
+   * @brief Return the number of frames that a picture must be prepared
+   * before it will be cached. If the number is 0, then no picture will
+   * ever be cached.
+   *
+   * If the number is one, then it must be prepared and drawn on 1 frame
+   * and it will then be cached on the next frame if it is prepared.
+   */
+  int access_threshold() const { return access_threshold_; }
+
  private:
   struct Entry {
     bool used_this_frame = false;
@@ -234,6 +253,7 @@ class RasterCache {
   const size_t access_threshold_;
   const size_t picture_cache_limit_per_frame_;
   size_t picture_cached_this_frame_ = 0;
+  int sweep_count_ = 0;
   mutable PictureRasterCacheKey::Map<Entry> picture_cache_;
   mutable DisplayListRasterCacheKey::Map<Entry> display_list_cache_;
   mutable LayerRasterCacheKey::Map<Entry> layer_cache_;
