@@ -201,6 +201,8 @@
 /examples/hello_world/test_driver/smoke_web_engine.dart @yjbanov @flutter/web
 # Linux android views
 /dev/integration_tests/android_views @garyqian @flutter/android
+# Linux deferred components
+/dev/integration_tests/deferred_components_test @garyqian @flutter/android
 
 ## Firebase tests
 /dev/integration_tests/abstract_method_smoke_test @blasten @flutter/android
