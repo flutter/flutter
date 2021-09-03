@@ -3,6 +3,10 @@
 // found in the LICENSE file.
 
 #include "flutter/flow/frame_timings.h"
+#include "flutter/flow/testing/layer_test.h"
+#include "flutter/flow/testing/mock_layer.h"
+#include "flutter/flow/testing/mock_raster_cache.h"
+#include "third_party/skia/include/core/SkPictureRecorder.h"
 
 #include <thread>
 
@@ -66,11 +70,84 @@ TEST(FrameTimingsRecorderTest, RecordRasterTimes) {
   ASSERT_GT(recorder->GetRasterEndWallTime(), before_raster_end_wall_time);
   ASSERT_LT(recorder->GetRasterEndWallTime(), after_raster_end_wall_time);
   ASSERT_EQ(recorder->GetFrameNumber(), timing.GetFrameNumber());
+  ASSERT_EQ(recorder->GetLayerCacheCount(), 0u);
+  ASSERT_EQ(recorder->GetLayerCacheBytes(), 0u);
+  ASSERT_EQ(recorder->GetPictureCacheCount(), 0u);
+  ASSERT_EQ(recorder->GetPictureCacheBytes(), 0u);
+}
+
+TEST(FrameTimingsRecorderTest, RecordRasterTimesWithCache) {
+  auto recorder = std::make_unique<FrameTimingsRecorder>();
+
+  const auto st = fml::TimePoint::Now();
+  const auto en = st + fml::TimeDelta::FromMillisecondsF(16);
+  recorder->RecordVsync(st, en);
+
+  const auto build_start = fml::TimePoint::Now();
+  const auto build_end = build_start + fml::TimeDelta::FromMillisecondsF(16);
+  recorder->RecordBuildStart(build_start);
+  recorder->RecordBuildEnd(build_end);
+
+  using namespace std::chrono_literals;
+
+  MockRasterCache cache(1, 10);
+  cache.SweepAfterFrame();
+
+  const auto raster_start = fml::TimePoint::Now();
+  recorder->RecordRasterStart(raster_start, &cache);
+
+  cache.AddMockLayer(100, 100);
+  size_t layer_bytes = cache.EstimateLayerCacheByteSize();
+  EXPECT_GT(layer_bytes, 0u);
+  cache.AddMockPicture(100, 100);
+  size_t picture_bytes = cache.EstimatePictureCacheByteSize();
+  EXPECT_GT(picture_bytes, 0u);
+
+  const auto before_raster_end_wall_time = fml::TimePoint::CurrentWallTime();
+  std::this_thread::sleep_for(1ms);
+  const auto timing = recorder->RecordRasterEnd(&cache);
+  std::this_thread::sleep_for(1ms);
+  const auto after_raster_end_wall_time = fml::TimePoint::CurrentWallTime();
+
+  ASSERT_EQ(raster_start, recorder->GetRasterStartTime());
+  ASSERT_GT(recorder->GetRasterEndWallTime(), before_raster_end_wall_time);
+  ASSERT_LT(recorder->GetRasterEndWallTime(), after_raster_end_wall_time);
+  ASSERT_EQ(recorder->GetFrameNumber(), timing.GetFrameNumber());
+  ASSERT_EQ(recorder->GetLayerCacheCount(), 1u);
+  ASSERT_EQ(recorder->GetLayerCacheBytes(), layer_bytes);
+  ASSERT_EQ(recorder->GetPictureCacheCount(), 1u);
+  ASSERT_EQ(recorder->GetPictureCacheBytes(), picture_bytes);
 }
 
 // Windows and Fuchsia don't allow testing with killed by signal.
 #if !defined(OS_FUCHSIA) && !defined(OS_WIN) && \
     (FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG)
+
+TEST(FrameTimingsRecorderTest, ThrowAfterUnexpectedCacheSweep) {
+  auto recorder = std::make_unique<FrameTimingsRecorder>();
+
+  const auto st = fml::TimePoint::Now();
+  const auto en = st + fml::TimeDelta::FromMillisecondsF(16);
+  recorder->RecordVsync(st, en);
+
+  const auto build_start = fml::TimePoint::Now();
+  const auto build_end = build_start + fml::TimeDelta::FromMillisecondsF(16);
+  recorder->RecordBuildStart(build_start);
+  recorder->RecordBuildEnd(build_end);
+
+  using namespace std::chrono_literals;
+
+  MockRasterCache cache;
+
+  const auto raster_start = fml::TimePoint::Now();
+  recorder->RecordRasterStart(raster_start, &cache);
+  std::this_thread::sleep_for(1ms);
+  cache.SweepAfterFrame();
+  EXPECT_EXIT(recorder->RecordRasterEnd(&cache),
+              ::testing::KilledBySignal(SIGABRT),
+              "Check failed: sweep_count_at_raster_start_ == \\(cache \\? "
+              "cache->sweep_count\\(\\) : -1\\).");
+}
 
 TEST(FrameTimingsRecorderTest, ThrowWhenRecordBuildBeforeVsync) {
   auto recorder = std::make_unique<FrameTimingsRecorder>();
@@ -190,6 +267,45 @@ TEST(FrameTimingsRecorderTest, ClonedHasSameRasterEnd) {
   ASSERT_EQ(recorder->GetRasterStartTime(), cloned->GetRasterStartTime());
   ASSERT_EQ(recorder->GetRasterEndTime(), cloned->GetRasterEndTime());
   ASSERT_EQ(recorder->GetRasterEndWallTime(), cloned->GetRasterEndWallTime());
+  ASSERT_EQ(recorder->GetLayerCacheCount(), cloned->GetLayerCacheCount());
+  ASSERT_EQ(recorder->GetLayerCacheBytes(), cloned->GetLayerCacheBytes());
+  ASSERT_EQ(recorder->GetPictureCacheCount(), cloned->GetPictureCacheCount());
+  ASSERT_EQ(recorder->GetPictureCacheBytes(), cloned->GetPictureCacheBytes());
+}
+
+TEST(FrameTimingsRecorderTest, ClonedHasSameRasterEndWithCache) {
+  auto recorder = std::make_unique<FrameTimingsRecorder>();
+  MockRasterCache cache(1, 10);
+  cache.SweepAfterFrame();
+
+  const auto now = fml::TimePoint::Now();
+  recorder->RecordVsync(now, now + fml::TimeDelta::FromMilliseconds(16));
+  recorder->RecordBuildStart(fml::TimePoint::Now());
+  recorder->RecordBuildEnd(fml::TimePoint::Now());
+  recorder->RecordRasterStart(fml::TimePoint::Now(), &cache);
+
+  cache.AddMockLayer(100, 100);
+  size_t layer_bytes = cache.EstimateLayerCacheByteSize();
+  EXPECT_GT(layer_bytes, 0u);
+  cache.AddMockPicture(100, 100);
+  size_t picture_bytes = cache.EstimatePictureCacheByteSize();
+  EXPECT_GT(picture_bytes, 0u);
+
+  recorder->RecordRasterEnd(&cache);
+
+  auto cloned = recorder->CloneUntil(FrameTimingsRecorder::State::kRasterEnd);
+  ASSERT_EQ(recorder->GetFrameNumber(), cloned->GetFrameNumber());
+  ASSERT_EQ(recorder->GetVsyncStartTime(), cloned->GetVsyncStartTime());
+  ASSERT_EQ(recorder->GetVsyncTargetTime(), cloned->GetVsyncTargetTime());
+  ASSERT_EQ(recorder->GetBuildStartTime(), cloned->GetBuildStartTime());
+  ASSERT_EQ(recorder->GetBuildEndTime(), cloned->GetBuildEndTime());
+  ASSERT_EQ(recorder->GetRasterStartTime(), cloned->GetRasterStartTime());
+  ASSERT_EQ(recorder->GetRasterEndTime(), cloned->GetRasterEndTime());
+  ASSERT_EQ(recorder->GetRasterEndWallTime(), cloned->GetRasterEndWallTime());
+  ASSERT_EQ(recorder->GetLayerCacheCount(), cloned->GetLayerCacheCount());
+  ASSERT_EQ(recorder->GetLayerCacheBytes(), cloned->GetLayerCacheBytes());
+  ASSERT_EQ(recorder->GetPictureCacheCount(), cloned->GetPictureCacheCount());
+  ASSERT_EQ(recorder->GetPictureCacheBytes(), cloned->GetPictureCacheBytes());
 }
 
 TEST(FrameTimingsRecorderTest, FrameNumberTraceArgIsValid) {

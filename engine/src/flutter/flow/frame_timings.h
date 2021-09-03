@@ -8,6 +8,7 @@
 #include <mutex>
 
 #include "flutter/common/settings.h"
+#include "flutter/flow/raster_cache.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/time/time_delta.h"
 #include "flutter/fml/time/time_point.h"
@@ -70,6 +71,18 @@ class FrameTimingsRecorder {
   /// Duration of the frame build time.
   fml::TimeDelta GetBuildDuration() const;
 
+  /// Count of the layer cache entries
+  size_t GetLayerCacheCount() const;
+
+  /// Total Bytes in all layer cache entries
+  size_t GetLayerCacheBytes() const;
+
+  /// Count of the picture cache entries
+  size_t GetPictureCacheCount() const;
+
+  /// Total Bytes in all picture cache entries
+  size_t GetPictureCacheBytes() const;
+
   /// Records a vsync event.
   void RecordVsync(fml::TimePoint vsync_start, fml::TimePoint vsync_target);
 
@@ -80,14 +93,15 @@ class FrameTimingsRecorder {
   void RecordBuildEnd(fml::TimePoint build_end);
 
   /// Records a raster start event.
-  void RecordRasterStart(fml::TimePoint raster_start);
+  void RecordRasterStart(fml::TimePoint raster_start,
+                         const RasterCache* cache = nullptr);
 
   /// Clones the recorder until (and including) the specified state.
   std::unique_ptr<FrameTimingsRecorder> CloneUntil(State state);
 
   /// Records a raster end event, and builds a `FrameTiming` that summarizes all
   /// the events. This summary is sent to the framework.
-  FrameTiming RecordRasterEnd();
+  FrameTiming RecordRasterEnd(const RasterCache* cache = nullptr);
 
   /// Returns the frame number. Frame number is unique per frame and a frame
   /// built earlier will have a frame number less than a frame that has been
@@ -116,6 +130,12 @@ class FrameTimingsRecorder {
   fml::TimePoint raster_start_;
   fml::TimePoint raster_end_;
   fml::TimePoint raster_end_wall_time_;
+
+  int sweep_count_at_raster_start_;
+  size_t layer_cache_count_;
+  size_t layer_cache_bytes_;
+  size_t picture_cache_count_;
+  size_t picture_cache_bytes_;
 
   // Set when `RecordRasterEnd` is called. Cannot be reset once set.
   FrameTiming timing_;
