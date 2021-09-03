@@ -42,7 +42,6 @@ android {
   dependencies {
     embedding "androidx.annotation:annotation:1.1.0"
     embedding "androidx.fragment:fragment:1.1.0"
-    embedding "androidx.window:window-java:1.0.0-beta01"
 
     def lifecycle_version = "2.2.0"
     embedding "androidx.lifecycle:lifecycle-runtime:$lifecycle_version"
