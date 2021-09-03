@@ -64,28 +64,22 @@ void Window::UpdateWindowMetrics(const ViewportMetrics& metrics) {
   tonic::DartState::Scope scope(dart_state);
   tonic::LogIfError(tonic::DartInvokeField(
       library_.value(), "_updateWindowMetrics",
-      {
-          tonic::ToDart(window_id_),
-          tonic::ToDart(metrics.device_pixel_ratio),
-          tonic::ToDart(metrics.physical_width),
-          tonic::ToDart(metrics.physical_height),
-          tonic::ToDart(metrics.physical_padding_top),
-          tonic::ToDart(metrics.physical_padding_right),
-          tonic::ToDart(metrics.physical_padding_bottom),
-          tonic::ToDart(metrics.physical_padding_left),
-          tonic::ToDart(metrics.physical_view_inset_top),
-          tonic::ToDart(metrics.physical_view_inset_right),
-          tonic::ToDart(metrics.physical_view_inset_bottom),
-          tonic::ToDart(metrics.physical_view_inset_left),
-          tonic::ToDart(metrics.physical_system_gesture_inset_top),
-          tonic::ToDart(metrics.physical_system_gesture_inset_right),
-          tonic::ToDart(metrics.physical_system_gesture_inset_bottom),
-          tonic::ToDart(metrics.physical_system_gesture_inset_left),
-          tonic::ToDart(metrics.physical_touch_slop),
-          tonic::ToDart(metrics.physical_display_features_bounds),
-          tonic::ToDart(metrics.physical_display_features_type),
-          tonic::ToDart(metrics.physical_display_features_state),
-      }));
+      {tonic::ToDart(window_id_), tonic::ToDart(metrics.device_pixel_ratio),
+       tonic::ToDart(metrics.physical_width),
+       tonic::ToDart(metrics.physical_height),
+       tonic::ToDart(metrics.physical_padding_top),
+       tonic::ToDart(metrics.physical_padding_right),
+       tonic::ToDart(metrics.physical_padding_bottom),
+       tonic::ToDart(metrics.physical_padding_left),
+       tonic::ToDart(metrics.physical_view_inset_top),
+       tonic::ToDart(metrics.physical_view_inset_right),
+       tonic::ToDart(metrics.physical_view_inset_bottom),
+       tonic::ToDart(metrics.physical_view_inset_left),
+       tonic::ToDart(metrics.physical_system_gesture_inset_top),
+       tonic::ToDart(metrics.physical_system_gesture_inset_right),
+       tonic::ToDart(metrics.physical_system_gesture_inset_bottom),
+       tonic::ToDart(metrics.physical_system_gesture_inset_left),
+       tonic::ToDart(metrics.physical_touch_slop)}));
 }
 
 }  // namespace flutter
