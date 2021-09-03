@@ -102,17 +102,17 @@ typedef TooltipWidgetBuilder = Widget Function(
 ///       message: "Custom "
 ///       tooltipBuilder: (BuildContext context, String message) {
 ///         return RichText(
-///           text: const TextSpan(
+///           text: TextSpan(
 ///             text: message,
-///             style: TextStyle(color: Colors.red),
-///             children: [
+///             style: const TextStyle(color: Colors.red),
+///             children: const [
 ///               TextSpan(
 ///                 text: "Test Tooltip",
 ///                 style: TextStyle(color: Colors.white70),
 ///               ),
 ///             ],
 ///           ),
-///         ),
+///         );
 ///       },
 ///       child: const Text('Hover over the text to show a custom tooltip.'),
 ///    );
