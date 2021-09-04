@@ -15,8 +15,8 @@
 FROM debian:bullseye
 MAINTAINER Flutter Developers <flutter-dev@googlegroups.com>
 
-RUN apt-get update -y
-RUN apt-get upgrade -y
+RUN apt-get update -y && \
+  apt-get upgrade -y
 
 # Install basics
 RUN apt-get install -y --no-install-recommends \
@@ -64,9 +64,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   nodejs \
   npm \
   ruby \
-  ruby-dev
+  ruby-dev && \
+  apt-get clean
 
-RUN apt-get upgrade -y --no-install-recommends
 ENV JAVA_HOME="/usr/lib/jvm/adoptopenjdk-8-hotspot-amd64"
 
 # Install the Android SDK Dependency.
@@ -131,7 +131,9 @@ RUN apt-get install -y --no-install-recommends \
   cmake \
   libgtk-3-dev \
   ninja-build \
-  pkg-config
+  pkg-config && \
+  apt-get upgrade -y --no-install-recommends && \
+  apt-get clean
 
 RUN bundle config set system 'true' && \
   bundle install --system
