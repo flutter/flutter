@@ -83,7 +83,8 @@ void main() {
 
       test('logFilePathName was set when a new driver was created', () {
         driver = VMServiceFlutterDriver.connectedTo(fakeClient, fakeIsolate, logCommunicationToFile: true);
-        expect(driver.logFilePathName, endsWith('.log'));
+        logFile = File(driver.logFilePathName);
+        expect(logFile.path, endsWith('.log'));
       });
     });
   });
