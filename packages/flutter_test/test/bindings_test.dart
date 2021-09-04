@@ -24,11 +24,6 @@ void main() {
       // The code below will throw without the default.
       TestViewConfiguration(size: const Size(1280.0, 800.0));
     });
-
-    test('sets the DPR to match the window', () {
-      final TestViewConfiguration configuration = TestViewConfiguration(size: const Size(1280.0, 800.0));
-      expect(configuration.devicePixelRatio, binding.window.devicePixelRatio);
-    });
   });
 
   group(AutomatedTestWidgetsFlutterBinding, () {

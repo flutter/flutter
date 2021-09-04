@@ -4,11 +4,11 @@ set(CMAKE_SYSTEM_VERSION 10.0)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED YES)
 
-project(runner LANGUAGES CXX)
+project({{projectName}} LANGUAGES CXX)
 
 cmake_policy(SET CMP0079 NEW)
 
-set(BINARY_NAME "app")
+set(BINARY_NAME "{{projectName}}")
 
 # Configure build options.
 get_property(IS_MULTICONFIG GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)

@@ -499,7 +499,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// If `source` is [TestBindingEventSource.test], then the `event` is based
   /// in the local coordinate space and the event is likely triggered by
-  /// programatically simulated pointer events, such as:
+  /// programmatically simulated pointer events, such as:
   ///
   ///  * [WidgetController.tap] and alike methods, as well as directly using
   ///    [TestGesture]. They are usually used in
@@ -1732,7 +1732,7 @@ class TestViewConfiguration extends ViewConfiguration {
   TestViewConfiguration._(Size size, ui.FlutterView window)
     : _paintMatrix = _getMatrix(size, window.devicePixelRatio, window),
       _hitTestMatrix = _getMatrix(size, 1.0, window),
-      super(size: size, devicePixelRatio: window.devicePixelRatio);
+      super(size: size);
 
   static Matrix4 _getMatrix(Size size, double devicePixelRatio, ui.FlutterView window) {
     final double inverseRatio = devicePixelRatio / window.devicePixelRatio;

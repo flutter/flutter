@@ -142,7 +142,7 @@
         "templates/app_shared/windows.tmpl/runner/utils.h",
         "templates/app_shared/windows.tmpl/runner/win32_window.cpp",
         "templates/app_shared/windows.tmpl/runner/win32_window.h",
-        "templates/app_shared/winuwp.tmpl/CMakeLists.txt",
+        "templates/app_shared/winuwp.tmpl/CMakeLists.txt.tmpl",
         "templates/app_shared/winuwp.tmpl/flutter/CMakeLists.txt",
         "templates/app_shared/winuwp.tmpl/project_version",
         "templates/app_shared/winuwp.tmpl/runner_uwp/appxmanifest.in",

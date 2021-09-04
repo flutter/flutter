@@ -197,53 +197,10 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 /// the user finishes editing.
 ///
 /// {@tool dartpad --template=stateful_widget_material}
-///
 /// This sample shows how to get a value from a TextField via the [onSubmitted]
 /// callback.
 ///
-/// ```dart
-/// late TextEditingController _controller;
-///
-/// @override
-/// void initState() {
-///   super.initState();
-///   _controller = TextEditingController();
-/// }
-///
-/// @override
-/// void dispose() {
-///   _controller.dispose();
-///   super.dispose();
-/// }
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return Scaffold(
-///     body: Center(
-///       child: TextField(
-///         controller: _controller,
-///         onSubmitted: (String value) async {
-///           await showDialog<void>(
-///             context: context,
-///             builder: (BuildContext context) {
-///               return AlertDialog(
-///                 title: const Text('Thanks!'),
-///                 content: Text ('You typed "$value", which has length ${value.characters.length}.'),
-///                 actions: <Widget>[
-///                   TextButton(
-///                     onPressed: () { Navigator.pop(context); },
-///                     child: const Text('OK'),
-///                   ),
-///                 ],
-///               );
-///             },
-///           );
-///         },
-///       ),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/text_field/text_field.1.dart **
 /// {@end-tool}
 ///
 /// For most applications the [onSubmitted] callback will be sufficient for

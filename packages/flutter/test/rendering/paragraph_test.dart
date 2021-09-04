@@ -749,6 +749,18 @@ void main() {
     paragraph.assembleSemanticsNode(SemanticsNode(), SemanticsConfiguration(), <SemanticsNode>[]);
   });
 
+  test('Supports empty text span with spell out', () {
+    final RenderParagraph paragraph = RenderParagraph(
+      const TextSpan(text: '', spellOut: true),
+      textDirection: TextDirection.rtl,
+    );
+    layout(paragraph);
+    final SemanticsNode node = SemanticsNode();
+    paragraph.assembleSemanticsNode(node, SemanticsConfiguration(), <SemanticsNode>[]);
+    expect(node.attributedLabel.string, '');
+    expect(node.attributedLabel.attributes.length, 0);
+  });
+
   test('Asserts on unsupported gesture recognizer', () {
     final RenderParagraph paragraph = RenderParagraph(
       TextSpan(text: _kText, children: <InlineSpan>[

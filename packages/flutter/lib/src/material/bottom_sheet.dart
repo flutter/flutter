@@ -642,45 +642,12 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 /// [Navigator.pop] when the modal bottom sheet was closed.
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
-///
 /// This example demonstrates how to use `showModalBottomSheet` to display a
 /// bottom sheet that obscures the content behind it when a user taps a button.
 /// It also demonstrates how to close the bottom sheet using the [Navigator]
 /// when a user taps on a button inside the bottom sheet.
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return Center(
-///     child: ElevatedButton(
-///       child: const Text('showModalBottomSheet'),
-///       onPressed: () {
-///         showModalBottomSheet<void>(
-///           context: context,
-///           builder: (BuildContext context) {
-///             return Container(
-///               height: 200,
-///               color: Colors.amber,
-///               child: Center(
-///                 child: Column(
-///                   mainAxisAlignment: MainAxisAlignment.center,
-///                   mainAxisSize: MainAxisSize.min,
-///                   children: <Widget>[
-///                     const Text('Modal BottomSheet'),
-///                     ElevatedButton(
-///                       child: const Text('Close BottomSheet'),
-///                       onPressed: () => Navigator.pop(context),
-///                     )
-///                   ],
-///                 ),
-///               ),
-///             );
-///           },
-///         );
-///       },
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/bottom_sheet/show_modal_bottom_sheet.0.dart **
 /// {@end-tool}
 /// See also:
 ///
