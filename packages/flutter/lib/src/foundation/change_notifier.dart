@@ -281,7 +281,6 @@ class ChangeNotifier implements Listenable {
   /// Surprising behavior can result when reentrantly removing a listener (e.g.
   /// in response to a notification) that has been registered multiple times.
   /// See the discussion at [removeListener].
-  @visibleForTesting
   @pragma('vm:notify-debugger-on-exception')
   void notifyListeners() {
     assert(_debugAssertNotDisposed());
