@@ -160,7 +160,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// imply that it has been removed from its parent.
   final LayerHandle<Layer> _parentHandle = LayerHandle<Layer>();
 
-  /// Incremeneted by [LayerHandle].
+  /// Incremented by [LayerHandle].
   int _refCount = 0;
 
   /// Called by [LayerHandle].

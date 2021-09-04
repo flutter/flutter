@@ -699,7 +699,6 @@ targets:
 
   - name: Linux test_ownership
     recipe: infra/test_ownership
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -1685,7 +1684,23 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk"}
+          {"dependency": "android_sdk"},
+          {"dependency": "android_virtual_device", "version": "31"}
+        ]
+      tags: >
+        ["framework","hostonly"]
+    timeout: 60
+    scheduler: luci
+
+  - name: Linux deferred components
+    recipe: flutter/deferred_components
+    bringup: true
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk"},
+          {"dependency": "android_virtual_device", "version": "31"},
+          {"dependency": "curl"}
         ]
       tags: >
         ["framework","hostonly"]
@@ -1886,7 +1901,8 @@ targets:
       dependencies: >-
         [
           {"dependency": "goldctl"},
-          {"dependency": "xcode"}
+          {"dependency": "xcode"},
+          {"dependency": "gems"}
         ]
       shard: framework_tests
       subshard: misc
@@ -2072,6 +2088,7 @@ targets:
       - bin/**
 
   - name: Mac module_test_ios
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/89175
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -2767,7 +2784,6 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
-    bringup: true
     properties:
       tags: >
         ["devicelab","android","mac"]
@@ -2906,16 +2922,6 @@ targets:
       task_name: flavors_test_ios
     scheduler: luci
 
-  - name: Mac_ios flutter_gallery__transition_perf_e2e_ios
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","ios","mac"]
-      task_name: flutter_gallery__transition_perf_e2e_ios
-    scheduler: luci
-
   - name: Mac_ios flutter_gallery_ios__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -2934,26 +2940,6 @@ targets:
       tags: >
         ["devicelab","ios","mac"]
       task_name: flutter_gallery_ios__start_up
-    scheduler: luci
-
-  - name: Mac_ios flutter_gallery_ios__transition_perf
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","ios","mac"]
-      task_name: flutter_gallery_ios__transition_perf
-    scheduler: luci
-
-  - name: Mac_ios flutter_gallery_ios_sksl_warmup__transition_perf
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","ios","mac"]
-      task_name: flutter_gallery_ios_sksl_warmup__transition_perf
     scheduler: luci
 
   - name: Mac_ios flutter_view_ios__start_up

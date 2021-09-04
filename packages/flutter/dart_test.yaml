@@ -1,4 +1,7 @@
 tags:
+  # This tag tells the test framework to run these tagged files as part of a
+  # reduced test set.
+  reduced-test-set:
   # This tag tells the test framework to not shuffle the test order according to
   # the --test-randomize-ordering-seed for the suites that have this tag.
   no-shuffle:

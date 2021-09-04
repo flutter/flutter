@@ -1619,7 +1619,8 @@ class Scaffold extends StatefulWidget {
 
   /// The color to use for the scrim that obscures primary content while a drawer is open.
   ///
-  /// By default, the color is [Colors.black54]
+  /// If this is null, then [DrawerThemeData.scrimColor] is used. If that
+  /// is also null, then it defaults to [Colors.black54].
   final Color? drawerScrimColor;
 
   /// The color of the [Material] widget that underlies the entire Scaffold.

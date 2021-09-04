@@ -728,6 +728,17 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
       ],
     ];
 
+    final List<Widget> stepPanels = <Widget>[];
+    for (int i = 0; i < widget.steps.length; i += 1) {
+      stepPanels.add(
+        Visibility(
+          maintainState: true,
+          visible: i == widget.currentStep,
+          child: widget.steps[i].content,
+        ),
+      );
+    }
+
     return Column(
       children: <Widget>[
         Material(
@@ -747,7 +758,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
               AnimatedSize(
                 curve: Curves.fastOutSlowIn,
                 duration: kThemeAnimationDuration,
-                child: widget.steps[widget.currentStep].content,
+                child: Column(children: stepPanels, crossAxisAlignment: CrossAxisAlignment.stretch),
               ),
               _buildVerticalControls(widget.currentStep),
             ],
