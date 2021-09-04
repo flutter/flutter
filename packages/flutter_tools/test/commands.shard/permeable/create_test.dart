@@ -727,25 +727,6 @@ void main() {
     );
   });
 
-  testUsingContext('androidx is used by default in a plugin project', () async {
-    Cache.flutterRoot = '../..';
-
-    final CreateCommand command = CreateCommand();
-    final CommandRunner<void> runner = createTestCommandRunner(command);
-
-    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platform', 'android', projectDir.path]);
-
-    void expectExists(String relPath) {
-      expect(globals.fs.isFileSync('${projectDir.path}/$relPath'), true);
-    }
-
-    expectExists('android/gradle.properties');
-
-    final String actualContents = await globals.fs.file('${projectDir.path}/android/gradle.properties').readAsString();
-
-    expect(actualContents.contains('useAndroidX'), true);
-  });
-
   testUsingContext('creating a new project should create v2 embedding and never show an Android v1 deprecation warning', () async {
     Cache.flutterRoot = '../..';
 
