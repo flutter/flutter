@@ -658,7 +658,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
   //
   // ### Keep the AFM updated
   //
-  // The autofill session connected to The AFM keeps a copy of the current state for each reported
+  // The autofill session connected to the AFM keeps a copy of the current state for each reported
   // field in "AutofillVirtualStructure" (instead of holding a reference to those fields), so the
   // AFM needs to be notified when text changes if the client was part of the
   // "AutofillVirtualStructure" previously reported to the AFM. This step is essential for
@@ -761,6 +761,9 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
       child.setAutofillHints(autofill.hints);
       child.setAutofillType(View.AUTOFILL_TYPE_TEXT);
       child.setVisibility(View.VISIBLE);
+      if (autofill.hintText != null) {
+        child.setHint(autofill.hintText);
+      }
 
       // For some autofill services, only visible input fields are eligible for autofill.
       // Reports the real size of the child if it's the current client, or 1x1 if we don't
