@@ -159,8 +159,9 @@ static UIReturnKeyType ToUIReturnKeyType(NSString* inputType) {
 }
 
 static UITextContentType ToUITextContentType(NSArray<NSString*>* hints) {
-  if (hints == nil || hints.count == 0) {
-    return @"";
+  if (!hints || hints.count == 0) {
+    // If no hints are specified, use the default content type nil.
+    return nil;
   }
 
   NSString* hint = hints[0];
@@ -286,18 +287,55 @@ static NSString* autofillIdFromDictionary(NSDictionary* dictionary) {
   return [dictionary[kSecureTextEntry] boolValue] ? @"password" : nil;
 }
 
-// There're 2 types of autofills on native iOS:
-// - Regular autofill, includes contact information autofill and
-//   one-time-code autofill, takes place in the form of predictive
-//   text in the quick type bar. This type of autofill does not save
-//   user input.
+// # Autofill Implementation Notes:
+//
+// Currently there're 2 types of autofills on iOS:
+// - Regular autofill, including contact information and one-time-code,
+//   takes place in the form of predictive text in the quick type bar.
+//   This type of autofill does not save user input, and the keyboard
+//   currently only populates the focused field when a predictive text entry
+//   is selected by the user.
+//
 // - Password autofill, includes automatic strong password and regular
 //   password autofill. The former happens automatically when a
-//   "new password" field is detected, and only that password field
-//   will be populated. The latter appears in the quick type bar when
-//   an eligible input field becomes the first responder, and may
+//   "new password" field is detected and focused, and only that password
+//   field will be populated. The latter appears in the quick type bar when
+//   an eligible input field (which either has a UITextContentTypePassword
+//   contentType, or is a secure text entry) becomes the first responder, and may
 //   fill both the username and the password fields. iOS will attempt
-//   to save user input for both kinds of password fields.
+//   to save user input for both kinds of password fields. It's relatively
+//   tricky to deal with password autofill since it can autofill more than one
+//   field at a time and may employ heuristics based on what other text fields
+//   are in the same view controller.
+//
+// When a flutter text field is focused, and autofill is not explicitly disabled
+// for it ("autofillable"), the framework collects its attributes and checks if
+// it's in an AutofillGroup, and collects the attributes of other autofillable
+// text fields in the same AutofillGroup if so. The attributes are sent to the
+// text input plugin via a "TextInput.setClient" platform channel message. If
+// autofill is disabled for a text field, its "autofill" field will be nil in
+// the configuration json.
+//
+// The text input plugin then tries to determine which kind of autofill the text
+// field needs. If the AutofillGroup the text field belongs to contains an
+// autofillable text field that's password related, this text 's autofill type
+// will be FlutterAutofillTypePassword. If autofill is disabled for a text field,
+// then its type will be FlutterAutofillTypeNone. Otherwise the text field will
+// have an autofill type of FlutterAutofillTypeRegular.
+//
+// The text input plugin creates a new UIView for every FlutterAutofillTypeNone
+// text field. The UIView instance is never reused for other flutter text fields
+// since the software keyboard often uses the identity of a UIView to distinguish
+// different views and provides the same predictive text suggestions or restore
+// the composing region if a UIView is reused for a different flutter text field.
+//
+// The text input plugin creates a new "autofill context" if the text field has
+// the type of FlutterAutofillTypePassword, to represent the AutofillGroup of
+// the text field, and creates one FlutterTextInputView for every text field in
+// the AutofillGroup.
+//
+// The text input plugin will try to reuse a UIView if a flutter text field's
+// type is FlutterAutofillTypeRegular, and has the same autofill id.
 typedef NS_ENUM(NSInteger, FlutterAutofillType) {
   // The field does not have autofillable content. Additionally if
   // the field is currently in the autofill context, it will be
@@ -309,13 +347,15 @@ typedef NS_ENUM(NSInteger, FlutterAutofillType) {
 
 static BOOL isFieldPasswordRelated(NSDictionary* configuration) {
   if (@available(iOS 10.0, *)) {
+    // Autofill is explicitly disabled if the id isn't present.
+    if (!autofillIdFromDictionary(configuration)) {
+      return NO;
+    }
+
     BOOL isSecureTextEntry = [configuration[kSecureTextEntry] boolValue];
     if (isSecureTextEntry)
       return YES;
 
-    if (!autofillIdFromDictionary(configuration)) {
-      return NO;
-    }
     NSDictionary* autofill = configuration[kAutofillProperties];
     UITextContentType contentType = ToUITextContentType(autofill[kAutofillHints]);
 
@@ -349,7 +389,8 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
   if (@available(iOS 10.0, *)) {
     NSDictionary* autofill = configuration[kAutofillProperties];
     UITextContentType contentType = ToUITextContentType(autofill[kAutofillHints]);
-    return [contentType isEqualToString:@""] ? FlutterAutofillTypeNone : FlutterAutofillTypeRegular;
+    return !autofill || [contentType isEqualToString:@""] ? FlutterAutofillTypeNone
+                                                          : FlutterAutofillTypeRegular;
   }
 
   return FlutterAutofillTypeNone;
@@ -1659,13 +1700,11 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
 }
 
 // Creates and shows an input field that is not password related and has no autofill
-// hints. This method returns a new FlutterTextInputView instance when called, since
+// info. This method returns a new FlutterTextInputView instance when called, since
 // UIKit uses the identity of `UITextInput` instances (or the identity of the input
 // views) to decide whether the IME's internal states should be reset. See:
 // https://github.com/flutter/flutter/issues/79031 .
 - (FlutterTextInputView*)createInputViewWith:(NSDictionary*)configuration {
-  // It's possible that the configuration of this non-autofillable input view has
-  // an autofill configuration without hints. If it does, remove it from the context.
   NSString* autofillId = autofillIdFromDictionary(configuration);
   if (autofillId) {
     [_autofillContext removeObjectForKey:autofillId];
@@ -1715,7 +1754,7 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
                                                : [self getOrCreateAutofillableView:field
                                                                 isPasswordAutofill:isPassword];
     } else {
-      // Mark for deletion;
+      // Mark for deletion.
       [_autofillContext removeObjectForKey:autofillId];
     }
   }

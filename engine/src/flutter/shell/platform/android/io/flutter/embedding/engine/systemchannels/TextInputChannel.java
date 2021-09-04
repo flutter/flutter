@@ -468,18 +468,21 @@ public class TextInputChannel {
           throws JSONException, NoSuchFieldException {
         final String uniqueIdentifier = json.getString("uniqueIdentifier");
         final JSONArray hints = json.getJSONArray("hints");
+        final String hintText = json.isNull("hintText") ? null : json.getString("hintText");
         final JSONObject editingState = json.getJSONObject("editingValue");
-        final String[] hintList = new String[hints.length()];
+        final String[] autofillHints = new String[hints.length()];
 
-        for (int i = 0; i < hintList.length; i++) {
-          hintList[i] = translateAutofillHint(hints.getString(i));
+        for (int i = 0; i < hints.length(); i++) {
+          autofillHints[i] = translateAutofillHint(hints.getString(i));
         }
-        return new Autofill(uniqueIdentifier, hintList, TextEditState.fromJson(editingState));
+        return new Autofill(
+            uniqueIdentifier, autofillHints, hintText, TextEditState.fromJson(editingState));
       }
 
       public final String uniqueIdentifier;
       public final String[] hints;
       public final TextEditState editState;
+      public final String hintText;
 
       @NonNull
       private static String translateAutofillHint(@NonNull String hint) {
@@ -567,9 +570,11 @@ public class TextInputChannel {
       public Autofill(
           @NonNull String uniqueIdentifier,
           @NonNull String[] hints,
+          @Nullable String hintText,
           @NonNull TextEditState editingState) {
         this.uniqueIdentifier = uniqueIdentifier;
         this.hints = hints;
+        this.hintText = hintText;
         this.editState = editingState;
       }
     }
