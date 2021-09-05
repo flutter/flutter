@@ -899,4 +899,23 @@ void main() {
     await dismissItem(tester, 0, gestureDirection: AxisDirection.up);
     expect(controller.offset, 99.9);
   });
+
+  testWidgets('DismissibleState dismiss method works as expected', (WidgetTester tester) async {
+    final GlobalKey<DismissibleState> key = GlobalKey();
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Dismissible(
+          key: key,
+          child: const Text('dismissible'),
+        )
+      )
+    );
+
+    expect(find.text('dismissible'), findsOneWidget);
+    key.currentState!.dismiss();
+    await tester.pumpAndSettle();
+    expect(find.text('dismissible'), findsNothing);
+  });
 }

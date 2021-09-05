@@ -204,7 +204,7 @@ class Dismissible extends StatefulWidget {
   final HitTestBehavior behavior;
 
   @override
-  State<Dismissible> createState() => _DismissibleState();
+  State<Dismissible> createState() => DismissibleState();
 }
 
 class _DismissibleClipper extends CustomClipper<Rect> {
@@ -247,7 +247,8 @@ class _DismissibleClipper extends CustomClipper<Rect> {
 
 enum _FlingGestureKind { none, forward, reverse }
 
-class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
+/// State for a [Dismissible].
+class DismissibleState extends State<Dismissible> with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   @override
   void initState() {
     super.initState();
@@ -519,6 +520,11 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
     } else {
       widget.onResize?.call();
     }
+  }
+
+  /// Dimiss a dismissible.
+  void dismiss() {
+    _moveController!.forward();
   }
 
   @override
