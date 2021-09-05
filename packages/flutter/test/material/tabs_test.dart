@@ -3812,6 +3812,74 @@ void main() {
     final Tab firstTab = tester.widget(find.widgetWithIcon(Tab, Icons.check));
     expect(firstTab.height, 85);
   });
+
+  testWidgets('Change of custom tab controller should update TabBarView', (WidgetTester tester) async {
+    final List<Widget> children = <Widget>[const Center(child: Text('0')), const Center(child: Text('1')), const Center(child: Text('2'))];
+
+    TabController tabController = TabController(
+      vsync: const TestVSync(),
+      length: children.length,
+    );
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: SizedBox.expand(
+        child: Center(
+          child: SizedBox(
+            width: 400.0,
+            height: 400.0,
+            child: TabBarView(
+              controller: tabController,
+              children: children,
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    PageView pageView = tester.widget(find.byType(PageView));
+    PageController pageController = pageView.controller;
+
+    expect(tabController.index, 0);
+    expect(find.text('0'), findsOneWidget);
+    expect(find.text('2'), findsNothing);
+    expect(pageController.page, 0.0);
+
+    // Remove first Tab
+    children.removeAt(0);
+
+    tabController = TabController(
+      vsync: const TestVSync(),
+      length: children.length,
+      initialIndex: children.length - 1, // last Tab
+    );
+
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: SizedBox.expand(
+        child: Center(
+          child: SizedBox(
+            width: 400.0,
+            height: 400.0,
+            child: TabBarView(
+              controller: tabController,
+              children: children,
+            ),
+          ),
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    pageView = tester.widget(find.byType(PageView));
+    pageController = pageView.controller;
+
+    expect(tabController.index, 1);
+    expect(find.text('0'), findsNothing);
+    expect(find.text('2'), findsOneWidget);
+    expect(pageController.page, 1.0);
+  });
 }
 
 class KeepAliveInk extends StatefulWidget {
