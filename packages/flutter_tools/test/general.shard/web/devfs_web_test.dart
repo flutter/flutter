@@ -569,7 +569,7 @@ void main() {
     expect((await response.read().toList()).first, source.readAsBytesSync());
   }));
 
-  test('serves valid etag header for asset files with non-ascii chracters', () => testbed.run(() async {
+  test('serves valid etag header for asset files with non-ascii characters', () => testbed.run(() async {
     globals.fs.file(globals.fs.path.join('build', 'flutter_assets', 'fooπ'))
       ..createSync(recursive: true)
       ..writeAsBytesSync(<int>[1, 2, 3]);

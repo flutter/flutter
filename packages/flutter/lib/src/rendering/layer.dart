@@ -574,7 +574,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
 /// A handle to prevent a [Layer]'s platform graphics resources from being
 /// disposed.
 ///
-/// [Layer] objects retain native resourses such as [EngineLayer]s and [Picture]
+/// [Layer] objects retain native resources such as [EngineLayer]s and [Picture]
 /// objects. These objects may in turn retain large chunks of texture memory,
 /// either directly or indirectly.
 ///

@@ -974,7 +974,7 @@ void main() {
         expect(driver.waitUntilFirstFrameRasterized(), throwsUnimplementedError);
       });
 
-      test('appIsoloate', () async {
+      test('appIsolate', () async {
         expect(() => driver.appIsolate.extensionRPCs, throwsUnsupportedError);
       });
 
