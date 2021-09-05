@@ -9924,4 +9924,27 @@ void main() {
     expect(prefixTapCount, 1);
     expect(suffixTapCount, 1);
   });
+
+  testWidgets('autofill info has hint text', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
+              decoration: InputDecoration(
+                hintText: 'placeholder text'
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(TextField));
+
+    expect(
+      tester.testTextInput.setClientArgs?['autofill'],
+      containsPair('hintText', 'placeholder text'),
+    );
+  });
 }

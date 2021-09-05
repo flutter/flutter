@@ -4776,6 +4776,22 @@ void main() {
     },
   );
 
+  testWidgets('autofill info has placeholder text', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CupertinoTextField(
+          placeholder: 'placeholder text',
+        ),
+      ),
+    );
+    await tester.tap(find.byType(CupertinoTextField));
+
+    expect(
+      tester.testTextInput.setClientArgs?['autofill'],
+      containsPair('hintText', 'placeholder text'),
+    );
+  });
+
   testWidgets('textDirection is passed to EditableText', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
