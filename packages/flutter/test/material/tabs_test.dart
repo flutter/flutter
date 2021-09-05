@@ -3813,7 +3813,7 @@ void main() {
     expect(firstTab.height, 85);
   });
 
-  testWidgets('Change of custom tab controller should update TabBarView', (WidgetTester tester) async {
+  testWidgets('Removing a child from a TabBarView children should update TabBarView', (WidgetTester tester) async {
     final List<Widget> children = <Widget>[const Center(child: Text('0')), const Center(child: Text('1')), const Center(child: Text('2'))];
 
     TabController tabController = TabController(
