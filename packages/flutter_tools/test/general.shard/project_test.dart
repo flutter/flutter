@@ -957,7 +957,7 @@ String gradleFileWithApplicationId(String id) {
   return '''
 apply plugin: 'com.android.application'
 android {
-    compileSdkVersion 30
+    compileSdkVersion 31
 
     defaultConfig {
         applicationId '$id'
@@ -974,7 +974,7 @@ version '1.0-SNAPSHOT'
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 31
 }
 ''';
 }

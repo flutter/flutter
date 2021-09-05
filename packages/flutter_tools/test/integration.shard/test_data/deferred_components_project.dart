@@ -175,7 +175,7 @@ class BasicDeferredComponentsConfig extends DeferredComponentsConfig {
   apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
   android {
-      compileSdkVersion 30
+      compileSdkVersion 31
 
       sourceSets {
           main.java.srcDirs += 'src/main/kotlin'
@@ -189,7 +189,7 @@ class BasicDeferredComponentsConfig extends DeferredComponentsConfig {
           // Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
           applicationId "ninja.qian.splitaottest1"
           minSdkVersion 16
-          targetSdkVersion 30
+          targetSdkVersion 31
           versionCode flutterVersionCode.toInteger()
           versionName flutterVersionName
       }

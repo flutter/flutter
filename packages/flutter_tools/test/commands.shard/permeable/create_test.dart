@@ -2350,7 +2350,7 @@ void main() {
     expect(env['flutter'].allows(Version(1, 19, 0)), false);
   });
 
-  testUsingContext('default app uses Android SDK 30', () async {
+  testUsingContext('default app uses Android SDK 31', () async {
     Cache.flutterRoot = '../..';
 
     final CreateCommand command = CreateCommand();
@@ -2362,8 +2362,8 @@ void main() {
 
     final String buildContent = await globals.fs.file('${projectDir.path}/android/app/build.gradle').readAsString();
 
-    expect(buildContent.contains('compileSdkVersion 30'), true);
-    expect(buildContent.contains('targetSdkVersion 30'), true);
+    expect(buildContent.contains('compileSdkVersion 31'), true);
+    expect(buildContent.contains('targetSdkVersion 31'), true);
   });
 
   testUsingContext('Linux plugins handle partially camel-case project names correctly', () async {
