@@ -143,7 +143,7 @@ void main() {
     await forwarder.unforward(ForwardedPort(456, 23));
   });
 
-  testWithoutContext('failures to unforward port print error but are non-fatral', () async {
+  testWithoutContext('failures to unforward port print error but are non-fatal', () async {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>['adb', '-s', '1', 'forward', '--remove', 'tcp:456'],

@@ -7,7 +7,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 class ExampleDragTarget extends StatefulWidget {
-  const ExampleDragTarget({Key key}) : super(key: key);
+  const ExampleDragTarget({Key? key}) : super(key: key);
 
   @override
   ExampleDragTargetState createState() => ExampleDragTargetState();
@@ -26,7 +26,7 @@ class ExampleDragTargetState extends State<ExampleDragTarget> {
   Widget build(BuildContext context) {
     return DragTarget<Color>(
       onAccept: _handleAccept,
-      builder: (BuildContext context, List<Color> data, List<dynamic> rejectedData) {
+      builder: (BuildContext context, List<Color?> data, List<dynamic> rejectedData) {
         return Container(
           height: 100.0,
           margin: const EdgeInsets.all(10.0),
@@ -44,11 +44,11 @@ class ExampleDragTargetState extends State<ExampleDragTarget> {
 }
 
 class Dot extends StatefulWidget {
-  const Dot({ Key key, this.color, this.size, this.child, this.tappable = false }) : super(key: key);
+  const Dot({ Key? key, this.color, this.size, this.child, this.tappable = false }) : super(key: key);
 
-  final Color color;
-  final double size;
-  final Widget child;
+  final Color? color;
+  final double? size;
+  final Widget? child;
   final bool tappable;
 
   @override
@@ -77,17 +77,17 @@ class DotState extends State<Dot> {
 
 class ExampleDragSource extends StatelessWidget {
   const ExampleDragSource({
-    Key key,
+    Key? key,
     this.color,
     this.heavy = false,
     this.under = true,
     this.child,
   }) : super(key: key);
 
-  final Color color;
+  final Color? color;
   final bool heavy;
   final bool under;
-  final Widget child;
+  final Widget? child;
 
   static const double kDotSize = 50.0;
   static const double kHeavyMultiplier = 1.5;
@@ -100,7 +100,7 @@ class ExampleDragSource extends StatelessWidget {
       size *= kHeavyMultiplier;
 
     final Widget contents = DefaultTextStyle(
-      style: Theme.of(context).textTheme.bodyText2,
+      style: Theme.of(context).textTheme.bodyText2!,
       textAlign: TextAlign.center,
       child: Dot(
         color: color,
@@ -176,7 +176,7 @@ class DashOutlineCirclePainter extends CustomPainter {
 }
 
 class MovableBall extends StatelessWidget {
-  const MovableBall(this.position, this.ballPosition, this.callback, {Key key}) : super(key: key);
+  const MovableBall(this.position, this.ballPosition, this.callback, {Key? key}) : super(key: key);
 
   final int position;
   final int ballPosition;
@@ -188,7 +188,7 @@ class MovableBall extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Widget ball = DefaultTextStyle(
-      style: Theme.of(context).primaryTextTheme.bodyText2,
+      style: Theme.of(context).primaryTextTheme.bodyText2!,
       textAlign: TextAlign.center,
       child: Dot(
         key: kBallKey,
@@ -216,7 +216,7 @@ class MovableBall extends StatelessWidget {
     } else {
       return DragTarget<bool>(
         onAccept: (bool data) { callback(position); },
-        builder: (BuildContext context, List<bool> accepted, List<dynamic> rejected) {
+        builder: (BuildContext context, List<bool?> accepted, List<dynamic> rejected) {
           return dashedBall;
         },
       );
@@ -225,7 +225,7 @@ class MovableBall extends StatelessWidget {
 }
 
 class DragAndDropApp extends StatefulWidget {
-  const DragAndDropApp({Key key}) : super(key: key);
+  const DragAndDropApp({Key? key}) : super(key: key);
 
   @override
   DragAndDropAppState createState() => DragAndDropAppState();

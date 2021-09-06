@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 
 import '../artifacts.dart';
@@ -31,11 +28,11 @@ import '../dart/package_map.dart';
 /// For more information on local engines, see CONTRIBUTING.md.
 class LocalEngineLocator {
   LocalEngineLocator({
-    @required Platform platform,
-    @required Logger logger,
-    @required FileSystem fileSystem,
-    @required String flutterRoot,
-    @required UserMessages userMessages,
+    required Platform platform,
+    required Logger logger,
+    required FileSystem fileSystem,
+    required String flutterRoot,
+    required UserMessages userMessages,
   }) : _platform = platform,
        _logger = logger,
        _fileSystem = fileSystem,
@@ -49,7 +46,7 @@ class LocalEngineLocator {
   final UserMessages _userMessages;
 
   /// Returns the engine build path of a local engine if one is located, otherwise `null`.
-  Future<EngineBuildPaths> findEnginePath(String engineSourcePath, String localEngine, String packagePath) async {
+  Future<EngineBuildPaths?> findEnginePath(String? engineSourcePath, String? localEngine, String? packagePath) async {
     engineSourcePath ??= _platform.environment[kFlutterEngineEnvironmentVariableName];
 
     if (engineSourcePath == null && localEngine != null) {
@@ -89,15 +86,15 @@ class LocalEngineLocator {
     return null;
   }
 
-  String _findEngineSourceByLocalEngine(String localEngine) {
+  String? _findEngineSourceByLocalEngine(String localEngine) {
     // When the local engine is an absolute path to a variant inside the
     // out directory, parse the engine source.
     // --local-engine /path/to/cache/builder/src/out/host_debug_unopt
     if (_fileSystem.path.isAbsolute(localEngine)) {
       final Directory localEngineDirectory = _fileSystem.directory(localEngine);
-      final Directory outDirectory = localEngineDirectory?.parent;
-      final Directory srcDirectory = outDirectory?.parent;
-      if (localEngineDirectory.existsSync() && outDirectory?.basename == 'out' && srcDirectory?.basename == 'src') {
+      final Directory outDirectory = localEngineDirectory.parent;
+      final Directory srcDirectory = outDirectory.parent;
+      if (localEngineDirectory.existsSync() && outDirectory.basename == 'out' && srcDirectory.basename == 'src') {
         _logger.printTrace('Parsed engine source from local engine as ${srcDirectory.path}.');
         return srcDirectory.path;
       }
@@ -105,17 +102,17 @@ class LocalEngineLocator {
     return null;
   }
 
-  Future<String> _findEngineSourceByPackageConfig(String packagePath) async {
+  Future<String?> _findEngineSourceByPackageConfig(String? packagePath) async {
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
       _fileSystem.file(
-        // TODO(jonahwilliams): update to package_config
+        // TODO(zanderso): update to package_config
         packagePath ?? _fileSystem.path.join('.packages'),
       ),
       logger: _logger,
       throwOnError: false,
     );
     // Skip if sky_engine is the version in bin/cache.
-    Uri engineUri = packageConfig[kFlutterEnginePackageName]?.packageUriRoot;
+    Uri? engineUri = packageConfig[kFlutterEnginePackageName]?.packageUriRoot;
     final String cachedPath = _fileSystem.path.join(_flutterRoot, 'bin', 'cache', 'pkg', kFlutterEnginePackageName, 'lib');
     if (engineUri != null && _fileSystem.identicalSync(cachedPath, engineUri.path)) {
       _logger.printTrace('Local engine auto-detection sky_engine in $packagePath is the same version in bin/cache.');
@@ -125,16 +122,17 @@ class LocalEngineLocator {
     // determine the engineSourcePath by sky_engine setting. A typical engine Uri
     // looks like:
     // file://flutter-engine-local-path/src/out/host_debug_unopt/gen/dart-pkg/sky_engine/lib/
-    String engineSourcePath;
-    if (engineUri?.path != null) {
-      engineSourcePath = _fileSystem.directory(engineUri.path)
-        ?.parent
-        ?.parent
-        ?.parent
-        ?.parent
-        ?.parent
-        ?.parent
-        ?.path;
+    String? engineSourcePath;
+    final String? engineUriPath = engineUri?.path;
+    if (engineUriPath != null) {
+      engineSourcePath = _fileSystem.directory(engineUriPath)
+        .parent
+        .parent
+        .parent
+        .parent
+        .parent
+        .parent
+        .path;
       if (engineSourcePath != null && (engineSourcePath == _fileSystem.path.dirname(engineSourcePath) || engineSourcePath.isEmpty)) {
         engineSourcePath = null;
         throwToolExit(
@@ -163,10 +161,10 @@ class LocalEngineLocator {
     for (final String suffix in suffixes) {
       tmpBasename = tmpBasename.replaceFirst(RegExp('$suffix\$'), '');
     }
-    return 'host_' + tmpBasename;
+    return 'host_$tmpBasename';
   }
 
-  EngineBuildPaths _findEngineBuildPath(String localEngine, String enginePath) {
+  EngineBuildPaths _findEngineBuildPath(String? localEngine, String enginePath) {
     if (localEngine == null) {
       throwToolExit(_userMessages.runnerLocalEngineRequired, exitCode: 2);
     }
@@ -188,7 +186,7 @@ class LocalEngineLocator {
     return EngineBuildPaths(targetEngine: engineBuildPath, hostEngine: engineHostBuildPath);
   }
 
-  String _tryEnginePath(String enginePath) {
+  String? _tryEnginePath(String enginePath) {
     if (_fileSystem.isDirectorySync(_fileSystem.path.join(enginePath, 'out'))) {
       return enginePath;
     }

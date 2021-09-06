@@ -61,8 +61,8 @@ class Registrar extends BinaryMessenger {
   /// the [dart:ui] library. That function is only available when
   /// compiling for the web.
   void registerMessageHandler() {
-    // The function below is only defined in the Web dart:ui.
-    // ignore: undefined_function
+    // The `ui.webOnlySetPluginHandler` function below is only defined in the Web dart:ui.
+    // ignore: undefined_function, avoid_dynamic_calls
     ui.webOnlySetPluginHandler(handleFrameworkMessage);
   }
 
@@ -141,7 +141,7 @@ class Registrar extends BinaryMessenger {
   @override
   Future<ByteData?> send(String channel, ByteData? message) {
     final Completer<ByteData?> completer = Completer<ByteData?>();
-    ui.window.onPlatformMessage!(channel, message, (ByteData? reply) {
+    ui.channelBuffers.push(channel, message, (ByteData? reply) {
       try {
         completer.complete(reply);
       } catch (exception, stack) {
@@ -162,26 +162,6 @@ class Registrar extends BinaryMessenger {
       _handlers.remove(channel);
     else
       _handlers[channel] = handler;
-  }
-
-  @override
-  bool checkMessageHandler(String channel, MessageHandler? handler) => _handlers[channel] == handler;
-
-  @override
-  void setMockMessageHandler(
-    String channel,
-    MessageHandler? handler,
-  ) {
-    throw FlutterError(
-      'Setting mock handlers is not supported on the platform side.',
-    );
-  }
-
-  @override
-  bool checkMockMessageHandler(String channel, MessageHandler? handler) {
-    throw FlutterError(
-      'Setting mock handlers is not supported on the platform side.',
-    );
   }
 }
 

@@ -10,7 +10,7 @@ import '../base/common.dart';
 import '../build_info.dart';
 import '../build_system/targets/web.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart'
     show DevelopmentArtifact, FlutterCommandResult;
@@ -98,6 +98,9 @@ class BuildWebCommand extends BuildSubCommand {
     }
     if (stringArg('base-href') != null && !(stringArg('base-href').startsWith('/') && stringArg('base-href').endsWith('/'))) {
       throwToolExit('base-href should start and end with /');
+    }
+    if (!flutterProject.web.existsSync()) {
+      throwToolExit('Missing index.html.');
     }
     if (!globals.fs.currentDirectory
         .childDirectory('web')

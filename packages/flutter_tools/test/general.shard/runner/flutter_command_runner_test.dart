@@ -156,7 +156,7 @@ void main() {
         OutputPreferences: () => OutputPreferences.test(),
       });
 
-    testUsingContext('Doesnt crash on invalid .packages file', () async {
+    testUsingContext("Doesn't crash on invalid .packages file", () async {
       final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
       fileSystem.file('pubspec.yaml').createSync();
       fileSystem.file('.packages')

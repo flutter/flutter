@@ -138,16 +138,15 @@ class ProgressIndicatorThemeData with Diagnosticable {
 /// {@tool snippet}
 ///
 /// Here is an example of a progress indicator theme that applies a red indicator
-/// color with a slightly transparent red for the background track color.
+/// color.
 ///
 /// ```dart
-/// ProgressIndicatorTheme(
+/// const ProgressIndicatorTheme(
 ///   data: ProgressIndicatorThemeData(
 ///     color: Colors.red,
-///     backgroundColor: Colors.red.withOpacity(0.25),
 ///   ),
 ///   child: LinearProgressIndicator()
-/// ),
+/// )
 /// ```
 /// {@end-tool}
 class ProgressIndicatorTheme extends InheritedTheme {

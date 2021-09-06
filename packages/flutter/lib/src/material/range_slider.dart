@@ -34,7 +34,6 @@ typedef PaintRangeValueIndicator = void Function(PaintingContext context, Offset
 /// {@youtube 560 315 https://www.youtube.com/watch?v=ufb4gIPDmEs}
 ///
 /// {@tool dartpad --template=stateful_widget_scaffold}
-///
 /// ![A range slider widget, consisting of 5 divisions and showing the default
 /// value indicator.](https://flutter.github.io/assets-for-api-docs/assets/material/range_slider.png)
 ///
@@ -42,28 +41,7 @@ typedef PaintRangeValueIndicator = void Function(PaintingContext context, Offset
 /// divisions, from 0 to 100. This means are values are split between 0, 20, 40,
 /// 60, 80, and 100. The range values are initialized with 40 and 80 in this demo.
 ///
-/// ```dart
-/// RangeValues _currentRangeValues = const RangeValues(40, 80);
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return RangeSlider(
-///     values: _currentRangeValues,
-///     min: 0,
-///     max: 100,
-///     divisions: 5,
-///     labels: RangeLabels(
-///       _currentRangeValues.start.round().toString(),
-///       _currentRangeValues.end.round().toString(),
-///     ),
-///     onChanged: (RangeValues values) {
-///       setState(() {
-///         _currentRangeValues = values;
-///       });
-///     },
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/range_slider/range_slider.0.dart **
 /// {@end-tool}
 ///
 /// A range slider can be used to select from either a continuous or a discrete
@@ -150,8 +128,8 @@ class RangeSlider extends StatefulWidget {
   /// appearance is achieved using a [SliderThemeData].
   ///
   /// The [values], [min], [max] must not be null. The [min] must be less than
-  /// or equal to the [max]. [values.start] must be less than or equal to
-  /// [values.end]. [values.start] and [values.end] must be greater than or
+  /// or equal to the [max]. [values].start must be less than or equal to
+  /// [values].end. [values].start and [values].end must be greater than or
   /// equal to the [min] and less than or equal to the [max]. The [divisions]
   /// must be null or greater than 0.
   RangeSlider({
@@ -1513,12 +1491,12 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
 
   // Create the semantics configuration for a single value.
   SemanticsConfiguration _createSemanticsConfiguration(
-      double value,
-      double increasedValue,
-      double decreasedValue,
-      String? label,
-      VoidCallback increaseAction,
-      VoidCallback decreaseAction,
+    double value,
+    double increasedValue,
+    double decreasedValue,
+    String? label,
+    VoidCallback increaseAction,
+    VoidCallback decreaseAction,
   ) {
     final SemanticsConfiguration config = SemanticsConfiguration();
     config.isEnabled = isEnabled;
@@ -1544,9 +1522,9 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
 
   @override
   void assembleSemanticsNode(
-      SemanticsNode node,
-      SemanticsConfiguration config,
-      Iterable<SemanticsNode> children,
+    SemanticsNode node,
+    SemanticsConfiguration config,
+    Iterable<SemanticsNode> children,
   ) {
     assert(children.isEmpty);
 
@@ -1609,7 +1587,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
 
   void _increaseStartAction() {
     if (isEnabled) {
-        onChanged!(RangeValues(_increasedStartValue, values.end));
+      onChanged!(RangeValues(_increasedStartValue, values.end));
     }
   }
 

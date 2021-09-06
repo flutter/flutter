@@ -45,7 +45,7 @@ It's also possible that a previously installed app with the same Bundle\u0020
 Identifier was signed with a different certificate.
 
 For more information, please visit:
-  https://flutter.dev/setup/#deploy-to-ios-devices
+  https://flutter.dev/docs/get-started/install/macos#deploy-to-ios-devices
 
 Or run on an iOS simulator without code signing
 ════════════════════════════════════════════════════════════════════════════════''';
@@ -59,7 +59,7 @@ Provisioning Profile. Please ensure that a Development Team is selected by:
 $fixWithDevelopmentTeamInstruction
 
 For more information, please visit:
-  https://flutter.dev/setup/#deploy-to-ios-devices
+  https://flutter.dev/docs/get-started/install/macos#deploy-to-ios-devices
 
 Or run on an iOS simulator without code signing
 ════════════════════════════════════════════════════════════════════════════════''';
@@ -187,7 +187,7 @@ Future<Map<String, String>?> getCodeSigningIdentityDevelopmentTeam({
   final String opensslOutput = await utf8.decodeStream(opensslProcess.stdout);
   // Fire and forget discard of the stderr stream so we don't hold onto resources.
   // Don't care about the result.
-  unawaited(opensslProcess.stderr.drain<String>());
+  unawaited(opensslProcess.stderr.drain<String?>());
 
   if (await opensslProcess.exitCode != 0) {
     return null;

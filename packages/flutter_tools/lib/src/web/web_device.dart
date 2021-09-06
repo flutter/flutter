@@ -57,8 +57,8 @@ abstract class ChromiumDevice extends Device {
   /// The active chrome instance.
   Chromium _chrome;
 
-  // TODO(jonahwilliams): this is technically false, but requires some refactoring
-  // to allow hot mode restart only devices.
+  // This device does not actually support hot reload, but the current implementation of the resident runner
+  // requires both supportsHotReload and supportsHotRestart to be true in order to allow hot restart.
   @override
   bool get supportsHotReload => true;
 
@@ -217,7 +217,7 @@ class GoogleChromeDevice extends ChromiumDevice {
         if (result.exitCode == 0) {
           final List<String> parts = (result.stdout as String).split(RegExp(r'\s+'));
           if (parts.length > 2) {
-            version = 'Google Chrome ' + parts[parts.length - 2];
+            version = 'Google Chrome ${parts[parts.length - 2]}';
           }
         }
       }
@@ -278,7 +278,7 @@ class MicrosoftEdgeDevice extends ChromiumDevice {
       if (result.exitCode == 0) {
         final List<String> parts = (result.stdout as String).split(RegExp(r'\s+'));
         if (parts.length > 2) {
-          return 'Microsoft Edge ' + parts[parts.length - 2];
+          return 'Microsoft Edge ${parts[parts.length - 2]}';
         }
       }
     }
@@ -362,6 +362,9 @@ class WebDevices extends PollingDeviceDiscovery {
 
   @override
   bool get supportsPlatform =>  _featureFlags.isWebEnabled;
+
+  @override
+  List<String> get wellKnownIds => const <String>['chrome', 'web-server', 'edge'];
 }
 
 @visibleForTesting

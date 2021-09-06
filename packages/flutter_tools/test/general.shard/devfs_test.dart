@@ -425,6 +425,51 @@ void main() {
       Uri.parse('goodbye'): DevFSFileContent(file),
     }, Uri.parse('/foo/bar/devfs/')), throwsA(isA<DevFSException>()));
   });
+
+  testWithoutContext('DevFS correctly records the elapsed time', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    // final FakeDevFSWriter writer = FakeDevFSWriter();
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[createDevFSRequest],
+      httpAddress: Uri.parse('http://localhost'),
+    );
+
+    final DevFS devFS = DevFS(
+      fakeVmServiceHost.vmService,
+      'test',
+      fileSystem.currentDirectory,
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+      httpClient: FakeHttpClient.any(),
+      stopwatchFactory: FakeStopwatchFactory(stopwatches: <String, Stopwatch>{
+        'compile': FakeStopwatch()..elapsed = const Duration(seconds: 3),
+        'transfer': FakeStopwatch()..elapsed = const Duration(seconds: 5),
+      }),
+    );
+
+    await devFS.create();
+
+    final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
+    residentCompiler.onRecompile = (Uri mainUri, List<Uri> invalidatedFiles) async {
+      fileSystem.file('lib/foo.txt.dill').createSync(recursive: true);
+      return const CompilerOutput('lib/foo.txt.dill', 0, <Uri>[]);
+    };
+
+    final UpdateFSReport report = await devFS.update(
+      mainUri: Uri.parse('lib/main.dart'),
+      generator: residentCompiler,
+      dillOutputPath: 'lib/foo.dill',
+      pathToReload: 'lib/foo.txt.dill',
+      trackWidgetCreation: false,
+      invalidatedFiles: <Uri>[],
+      packageConfig: PackageConfig.empty,
+    );
+
+    expect(report.success, true);
+    expect(report.compileDuration, const Duration(seconds: 3));
+    expect(report.transferDuration, const Duration(seconds: 5));
+  });
 }
 
 class FakeResidentCompiler extends Fake implements ResidentCompiler {

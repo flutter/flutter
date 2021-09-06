@@ -82,7 +82,7 @@ void main() {
       }), throwsStateError);
     });
 
-    test('Doesnt throw a StateError if Timer is left cleaned up', () async {
+    test("Doesn't throw a StateError if Timer is left cleaned up", () async {
       final Testbed testbed = Testbed();
 
       await testbed.run(() async {
@@ -101,6 +101,6 @@ void main() {
   });
 }
 
-class A {}
+class A { }
 
-class B extends A {}
+class B extends A { }

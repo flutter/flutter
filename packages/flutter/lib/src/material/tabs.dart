@@ -58,7 +58,7 @@ enum TabBarIndicatorSize {
 ///  * [TabBarView], which displays a widget for the currently selected tab.
 ///  * [TabController], which coordinates tab selection between a [TabBar] and a [TabBarView].
 ///  * <https://material.io/design/components/tabs.html>
-class Tab extends StatelessWidget implements PreferredSizeWidget{
+class Tab extends StatelessWidget implements PreferredSizeWidget {
   /// Creates a material design [TabBar] tab.
   ///
   /// At least one of [text], [icon], and [child] must be non-null. The [text]
@@ -70,6 +70,7 @@ class Tab extends StatelessWidget implements PreferredSizeWidget{
     this.text,
     this.icon,
     this.iconMargin = const EdgeInsets.only(bottom: 10.0),
+    this.height,
     this.child,
   }) : assert(text != null || child != null || icon != null),
        assert(text == null || child == null),
@@ -96,6 +97,13 @@ class Tab extends StatelessWidget implements PreferredSizeWidget{
   /// [text] or [child] is non-null.
   final EdgeInsetsGeometry iconMargin;
 
+  /// The height of the [Tab].
+  ///
+  /// If null, the height will be calculated based on the content of the [Tab].  When `icon` is not
+  /// null along with `child` or `text`, the default height is 72.0 pixels. Without an `icon`, the
+  /// height is 46.0 pixels.
+  final double? height;
+
   Widget _buildLabelText() {
     return child ?? Text(text!, softWrap: false, overflow: TextOverflow.fade);
   }
@@ -104,16 +112,16 @@ class Tab extends StatelessWidget implements PreferredSizeWidget{
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
 
-    final double height;
+    final double calculatedHeight;
     final Widget label;
     if (icon == null) {
-      height = _kTabHeight;
+      calculatedHeight = _kTabHeight;
       label = _buildLabelText();
     } else if (text == null && child == null) {
-      height = _kTabHeight;
+      calculatedHeight = _kTabHeight;
       label = icon!;
     } else {
-      height = _kTextAndIconTabHeight;
+      calculatedHeight = _kTextAndIconTabHeight;
       label = Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -128,7 +136,7 @@ class Tab extends StatelessWidget implements PreferredSizeWidget{
     }
 
     return SizedBox(
-      height: height,
+      height: height ?? calculatedHeight,
       child: Center(
         widthFactor: 1.0,
         child: label,
@@ -145,7 +153,9 @@ class Tab extends StatelessWidget implements PreferredSizeWidget{
 
   @override
   Size get preferredSize {
-    if ((text != null || child != null) && icon != null)
+    if (height != null)
+      return Size.fromHeight(height!);
+    else if ((text != null || child != null) && icon != null)
       return const Size.fromHeight(_kTextAndIconTabHeight);
     else
       return const Size.fromHeight(_kTabHeight);
@@ -581,99 +591,15 @@ class _TabBarScrollController extends ScrollController {
 /// This sample shows the implementation of [TabBar] and [TabBarView] using a [DefaultTabController].
 /// Each [Tab] corresponds to a child of the [TabBarView] in the order they are written.
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return DefaultTabController(
-///     initialIndex: 1,
-///     length: 3,
-///     child: Scaffold(
-///       appBar: AppBar(
-///         title: const Text('TabBar Widget'),
-///         bottom: const TabBar(
-///           tabs: <Widget>[
-///             Tab(
-///               icon: Icon(Icons.cloud_outlined),
-///             ),
-///             Tab(
-///               icon: Icon(Icons.beach_access_sharp),
-///             ),
-///             Tab(
-///               icon: Icon(Icons.brightness_5_sharp),
-///             ),
-///           ],
-///         ),
-///       ),
-///       body: const TabBarView(
-///         children: <Widget>[
-///           Center(
-///             child: Text("It's cloudy here"),
-///           ),
-///           Center(
-///             child: Text("It's rainy here"),
-///           ),
-///           Center(
-///             child: Text("It's sunny here"),
-///           ),
-///         ],
-///       ),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/tabs/tab_bar.0.dart **
 /// {@end-tool}
 ///
 /// {@tool dartpad --template=stateful_widget_material_ticker}
-/// [TabBar] can also be implmented by using a [TabController] which provides more options
+/// [TabBar] can also be implemented by using a [TabController] which provides more options
 /// to control the behavior of the [TabBar] and [TabBarView]. This can be used instead of
 /// a [DefaultTabController], demonstrated below.
 ///
-/// ```dart
-///
-/// late TabController _tabController;
-///
-///  @override
-///  void initState() {
-///    super.initState();
-///    _tabController = TabController(length: 3, vsync: this);
-///  }
-///
-///  @override
-///  Widget build(BuildContext context) {
-///    return Scaffold(
-///      appBar: AppBar(
-///        title: const Text('TabBar Widget'),
-///        bottom: TabBar(
-///          controller: _tabController,
-///          tabs: const <Widget>[
-///            Tab(
-///              icon: Icon(Icons.cloud_outlined),
-///            ),
-///            Tab(
-///             icon: Icon(Icons.beach_access_sharp),
-///            ),
-///            Tab(
-///              icon: Icon(Icons.brightness_5_sharp),
-///            ),
-///          ],
-///        ),
-///      ),
-///      body: TabBarView(
-///        controller: _tabController,
-///        children: const <Widget>[
-///          Center(
-///            child: Text("It's cloudy here"),
-///          ),
-///          Center(
-///            child: Text("It's rainy here"),
-///          ),
-///          Center(
-///             child: Text("It's sunny here"),
-///          ),
-///        ],
-///      ),
-///    );
-///  }
-/// ```
+/// ** See code in examples/api/lib/material/tabs/tab_bar.1.dart **
 /// {@end-tool}
 ///
 /// See also:

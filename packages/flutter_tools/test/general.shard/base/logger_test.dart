@@ -244,7 +244,7 @@ void main() {
       );
       final VerboseLogger verboseLogger = VerboseLogger(
         mockLogger,
-        stopwatchFactory: FakeStopwatchFactory(fakeStopWatch),
+        stopwatchFactory: FakeStopwatchFactory(stopwatch: fakeStopWatch),
       );
 
       verboseLogger.printStatus('Hey Hey Hey Hey');
@@ -266,7 +266,7 @@ void main() {
         outputPreferences: OutputPreferences.test(showColor: true),
       );
       final VerboseLogger verboseLogger = VerboseLogger(
-        mockLogger, stopwatchFactory: FakeStopwatchFactory(fakeStopWatch),
+        mockLogger, stopwatchFactory: FakeStopwatchFactory(stopwatch: fakeStopWatch),
       );
 
       verboseLogger.printStatus('Hey Hey Hey Hey');
@@ -377,7 +377,7 @@ void main() {
       mockStopwatch = FakeStopwatch();
       mockStdio = FakeStdio();
       called = 0;
-      stopwatchFactory = FakeStopwatchFactory(mockStopwatch);
+      stopwatchFactory = FakeStopwatchFactory(stopwatch: mockStopwatch);
     });
 
     List<String> outputStdout() => mockStdio.writtenToStdout.join('').split('\n');
@@ -938,7 +938,7 @@ void main() {
         ),
         stdio: fakeStdio,
         outputPreferences: OutputPreferences.test(showColor: false),
-        stopwatchFactory: FakeStopwatchFactory(fakeStopwatch),
+        stopwatchFactory: FakeStopwatchFactory(stopwatch: fakeStopwatch),
       );
       final Status status = logger.startProgress(
         'Hello',
@@ -1060,53 +1060,6 @@ void main() {
       expect(logger.statusText, 'AAA\nBBB\n');
     });
   });
-}
-
-class FakeStopwatch implements Stopwatch {
-  @override
-  bool get isRunning => _isRunning;
-  bool _isRunning = false;
-
-  @override
-  void start() => _isRunning = true;
-
-  @override
-  void stop() => _isRunning = false;
-
-  @override
-  Duration elapsed = Duration.zero;
-
-  @override
-  int get elapsedMicroseconds => elapsed.inMicroseconds;
-
-  @override
-  int get elapsedMilliseconds => elapsed.inMilliseconds;
-
-  @override
-  int get elapsedTicks => elapsed.inMilliseconds;
-
-  @override
-  int get frequency => 1000;
-
-  @override
-  void reset() {
-    _isRunning = false;
-    elapsed = Duration.zero;
-  }
-
-  @override
-  String toString() => '$runtimeType $elapsed $isRunning';
-}
-
-class FakeStopwatchFactory implements StopwatchFactory {
-  FakeStopwatchFactory([this.stopwatch]);
-
-  Stopwatch stopwatch;
-
-  @override
-  Stopwatch createStopwatch() {
-    return stopwatch ?? FakeStopwatch();
-  }
 }
 
 /// A fake [Logger] that throws the [Invocation] for any method call.

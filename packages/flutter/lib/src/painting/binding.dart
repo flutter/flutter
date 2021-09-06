@@ -31,17 +31,17 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
 
   /// [ShaderWarmUp] instance to be executed during [initInstances].
   ///
-  /// Defaults to an instance of [DefaultShaderWarmUp].
+  /// Defaults to `null`, meaning no shader warm-up is done. Some platforms may
+  /// not support shader warm-up before at least one frame has been displayed.
   ///
   /// If the application has scenes that require the compilation of complex
-  /// shaders that are not covered by [DefaultShaderWarmUp], it may cause jank
-  /// in the middle of an animation or interaction. In that case, setting
-  /// [shaderWarmUp] to a custom [ShaderWarmUp] before creating the binding
-  /// (usually before [runApp] for normal Flutter apps, and before
-  /// [enableFlutterDriverExtension] for Flutter driver tests) may help if that
-  /// object paints the difficult scene in its [ShaderWarmUp.warmUpOnCanvas]
-  /// method, as this allows Flutter to pre-compile and cache the required
-  /// shaders during startup.
+  /// shaders, it may cause jank in the middle of an animation or interaction.
+  /// In that case, setting [shaderWarmUp] to a custom [ShaderWarmUp] before
+  /// creating the binding (usually before [runApp] for normal Flutter apps, and
+  /// before [enableFlutterDriverExtension] for Flutter driver tests) may help
+  /// if that object paints the difficult scene in its
+  /// [ShaderWarmUp.warmUpOnCanvas] method, as this allows Flutter to
+  /// pre-compile and cache the required shaders during startup.
   ///
   /// Currently the warm-up happens synchronously on the raster thread which
   /// means the rendering of the first frame on the raster thread will be
@@ -58,7 +58,7 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   ///
   ///  * [ShaderWarmUp], the interface for implementing custom warm-up scenes.
   ///  * <https://flutter.dev/docs/perf/rendering/shader>
-  static ShaderWarmUp? shaderWarmUp = const DefaultShaderWarmUp();
+  static ShaderWarmUp? shaderWarmUp;
 
   /// The singleton that implements the Flutter framework's image cache.
   ///
@@ -94,7 +94,8 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   /// unnecessary memory usage for images. Callers that wish to display an image
   /// above its native resolution should prefer scaling the canvas the image is
   /// drawn into.
-  Future<ui.Codec> instantiateImageCodec(Uint8List bytes, {
+  Future<ui.Codec> instantiateImageCodec(
+    Uint8List bytes, {
     int? cacheWidth,
     int? cacheHeight,
     bool allowUpscaling = false,

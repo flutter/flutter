@@ -66,40 +66,11 @@ enum DismissDirection {
 /// {@youtube 560 315 https://www.youtube.com/watch?v=iEMgjrfuc58}
 ///
 /// {@tool dartpad --template=stateful_widget_scaffold}
-///
 /// This sample shows how you can use the [Dismissible] widget to
 /// remove list items using swipe gestures. Swipe any of the list
 /// tiles to the left or right to dismiss them from the [ListView].
 ///
-/// ```dart
-/// List<int> items = List<int>.generate(100, (int index) => index);
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return ListView.builder(
-///     itemCount: items.length,
-///     padding: const EdgeInsets.symmetric(vertical: 16),
-///     itemBuilder: (BuildContext context, int index) {
-///       return Dismissible(
-///         child: ListTile(
-///           title: Text(
-///             'Item ${items[index]}',
-///           ),
-///         ),
-///         background: Container(
-///           color: Colors.green,
-///         ),
-///         key: ValueKey<int>(items[index]),
-///         onDismissed: (DismissDirection direction) {
-///           setState(() {
-///             items.removeAt(index);
-///           });
-///         },
-///       );
-///     },
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/dismissible/dismissible.0.dart **
 /// {@end-tool}
 ///
 /// Backgrounds can be used to implement the "leave-behind" idiom. If a background
@@ -610,6 +581,12 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
         content,
       ]);
     }
+
+    // If the DismissDirection is none, we do not add drag gestures because the content
+    // cannot be dragged.
+    if (widget.direction == DismissDirection.none)
+      return content;
+
     // We are not resizing but we may be being dragging in widget.direction.
     return GestureDetector(
       onHorizontalDragStart: _directionIsXAxis ? _handleDragStart : null,

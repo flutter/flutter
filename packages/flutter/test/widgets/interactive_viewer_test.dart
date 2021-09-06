@@ -635,15 +635,15 @@ void main() {
             body: Center(
               child: InteractiveViewer(
                 transformationController: transformationController,
-                onInteractionStart: (ScaleStartDetails details){
+                onInteractionStart: (ScaleStartDetails details) {
                   calledStart = true;
                 },
-                onInteractionUpdate: (ScaleUpdateDetails details){
+                onInteractionUpdate: (ScaleUpdateDetails details) {
                   scaleChange = details.scale;
                   focalPoint = details.focalPoint;
                   localFocalPoint = details.localFocalPoint;
                 },
-                onInteractionEnd: (ScaleEndDetails details){
+                onInteractionEnd: (ScaleEndDetails details) {
                   currentVelocity = details.velocity;
                 },
                 child: const SizedBox(width: 200.0, height: 200.0),

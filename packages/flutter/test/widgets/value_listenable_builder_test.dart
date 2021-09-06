@@ -74,7 +74,7 @@ void main() {
     expect(find.text('Hendricks'), findsOneWidget);
   });
 
-  testWidgets('Stops listening to old listenable after chainging listenable', (WidgetTester tester) async {
+  testWidgets('Stops listening to old listenable after changing listenable', (WidgetTester tester) async {
     await tester.pumpWidget(textBuilderUnderTest);
 
     valueListenable.value = 'Gilfoyle';

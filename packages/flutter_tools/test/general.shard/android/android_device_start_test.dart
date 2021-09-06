@@ -191,8 +191,6 @@ void main() {
     processManager.addCommand(const FakeCommand(
       command: <String>['adb', '-s', '1234', 'shell', 'pm', 'list', 'packages', '--user', '10', 'FlutterApp'],
     ));
-    // TODO(jonahwilliams): investigate why this doesn't work.
-    // This doesn't work with the current Android log reader implementation.
     processManager.addCommand(const FakeCommand(
       command: <String>[
         'adb',
@@ -240,7 +238,8 @@ void main() {
         '--ez', 'enable-software-rendering', 'true',
         '--ez', 'skia-deterministic-rendering', 'true',
         '--ez', 'trace-skia', 'true',
-        '--ez', 'trace-allowlist', 'bar,baz',
+        '--es', 'trace-allowlist', 'bar,baz',
+        '--es', 'trace-skia-allowlist', 'skia.a,skia.b',
         '--ez', 'trace-systrace', 'true',
         '--ez', 'endless-trace-buffer', 'true',
         '--ez', 'dump-skp-on-shader-compilation', 'true',
@@ -270,6 +269,7 @@ void main() {
         skiaDeterministicRendering: true,
         traceSkia: true,
         traceAllowlist: 'bar,baz',
+        traceSkiaAllowlist: 'skia.a,skia.b',
         traceSystrace: true,
         endlessTraceBuffer: true,
         dumpSkpOnShaderCompilation: true,

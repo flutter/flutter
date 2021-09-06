@@ -368,7 +368,7 @@ class SkiaGoldClient {
     };
     if (platform.environment[_kTestBrowserKey] != null) {
       keys['Browser'] = platform.environment[_kTestBrowserKey];
-      keys['Platform'] = keys['Platform'] + '-browser';
+      keys['Platform'] = '${keys['Platform']}-browser';
     }
     return json.encode(keys);
   }
@@ -428,4 +428,4 @@ class SkiaGoldClient {
 }
 
 /// Used to make HttpRequests during testing.
-class SkiaGoldHttpOverrides extends io.HttpOverrides {}
+class SkiaGoldHttpOverrides extends io.HttpOverrides { }

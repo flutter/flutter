@@ -101,7 +101,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
       future: _waitForRootIsolate(),
       timeout: kUnusuallyLongTimeout,
       message: isolateNumber == null
-        ? 'The root isolate is taking an unuusally long time to start.'
+        ? 'The root isolate is taking an unusually long time to start.'
         : 'Isolate $isolateNumber is taking an unusually long time to start.',
     ))!;
     _log('Isolate found with number: ${isolateRef.number}');
@@ -483,18 +483,6 @@ class VMServiceFlutterDriver extends FlutterDriver {
         stackTrace,
       );
     }
-  }
-
-  @override
-  Future<T> runUnsynchronized<T>(Future<T> Function() action, { Duration? timeout }) async {
-    await sendCommand(SetFrameSync(false, timeout: timeout));
-    T result;
-    try {
-      result = await action();
-    } finally {
-      await sendCommand(SetFrameSync(true, timeout: timeout));
-    }
-    return result;
   }
 
   @override

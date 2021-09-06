@@ -7,30 +7,18 @@ import 'dart:js_util' as js_util;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:web_e2e_tests/common.dart';
 import 'package:web_e2e_tests/text_editing_main.dart' as app;
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  /// Locate elements in the correct root of the application, whether it is
-  /// `document` or the new `shadowRoot` of `flt-class-pane`.
-  List<Node> findElements(String selector) {
-    final ShadowRoot? shadowRoot = document.querySelector('flt-glass-pane')?.shadowRoot;
-    return (shadowRoot != null) ?
-      shadowRoot.querySelectorAll(selector):
-      document.querySelectorAll(selector);
-  }
-
   testWidgets('Focused text field creates a native input element',
       (WidgetTester tester) async {
     app.main();
     await tester.pumpAndSettle();
-
-    // TODO(nurhan): https://github.com/flutter/flutter/issues/51885
-    SystemChannels.textInput.setMockMethodCallHandler(null);
 
     // Focus on a TextFormField.
     final Finder finder = find.byKey(const Key('input'));
@@ -56,9 +44,6 @@ void main() {
     app.main();
     await tester.pumpAndSettle();
 
-    // TODO(nurhan): https://github.com/flutter/flutter/issues/51885
-    SystemChannels.textInput.setMockMethodCallHandler(null);
-
     // Focus on a TextFormField.
     final Finder finder = find.byKey(const Key('empty-input'));
     expect(finder, findsOneWidget);
@@ -83,9 +68,6 @@ void main() {
     app.main();
     await tester.pumpAndSettle();
 
-    // TODO(nurhan): https://github.com/flutter/flutter/issues/51885
-    SystemChannels.textInput.setMockMethodCallHandler(null);
-
     // This text will show no-enter initially. It will have 'enter-pressed'
     // after `onFieldSubmitted` of TextField is triggered.
     final Finder textFinder = find.byKey(const Key('text'));
@@ -94,8 +76,8 @@ void main() {
     expect(text.data, 'no-enter');
 
     // Focus on a TextFormField.
-    final Finder textFormFielsFinder = find.byKey(const Key('input2'));
-    expect(textFormFielsFinder, findsOneWidget);
+    final Finder textFormFieldsFinder = find.byKey(const Key('input2'));
+    expect(textFormFieldsFinder, findsOneWidget);
     await tester.tap(find.byKey(const Key('input2')));
 
     // // Press Tab. This should trigger `onFieldSubmitted` of TextField.
@@ -117,9 +99,6 @@ void main() {
       (WidgetTester tester) async {
     app.main();
     await tester.pumpAndSettle();
-
-    // TODO(nurhan): https://github.com/flutter/flutter/issues/51885
-    SystemChannels.textInput.setMockMethodCallHandler(null);
 
     // Focus on a TextFormField.
     final Finder finder = find.byKey(const Key('input'));
@@ -151,9 +130,6 @@ void main() {
   testWidgets('Jump between TextFormFields with tab key after CapsLock is activated', (WidgetTester tester) async {
     app.main();
     await tester.pumpAndSettle();
-
-    // TODO(nurhan): https://github.com/flutter/flutter/issues/51885
-    SystemChannels.textInput.setMockMethodCallHandler(null);
 
     // Focus on a TextFormField.
     final Finder finder = find.byKey(const Key('input'));
@@ -202,9 +178,6 @@ void main() {
     const String text = 'Lorem ipsum dolor sit amet';
     app.main();
     await tester.pumpAndSettle();
-
-    // TODO(nurhan): https://github.com/flutter/flutter/issues/51885
-    SystemChannels.textInput.setMockMethodCallHandler(null);
 
     // Select something from the selectable text.
     final Finder finder = find.byKey(const Key('selectable'));

@@ -115,6 +115,9 @@ abstract class Terminal {
 
   /// Return keystrokes from the console.
   ///
+  /// This is a single-subscription stream. This stream may be closed before
+  /// the application exits.
+  ///
   /// Useful when the console is in [singleCharMode].
   Stream<String> get keystrokes;
 

@@ -12,7 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:test_api/src/frontend/async_matcher.dart' show AsyncMatcher;
+import 'package:test_api/src/expect/async_matcher.dart'; // ignore: implementation_imports
 // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' as test_package;
 
@@ -40,7 +40,7 @@ void main() {
 
     testWidgets('respects the skip flag', (WidgetTester tester) async {
       final Completer<void> completer = Completer<void>();
-      final Future<void> future = expectLater(null, FakeMatcher(completer), skip: 'testing skip');
+      final Future<void> future = expectLater(null, FakeMatcher(completer), skip: 'testing skip'); // [intended] API testing
       bool completed = false;
       future.then<void>((_) {
         completed = true;
@@ -55,7 +55,7 @@ void main() {
     testWidgets('should be skipped', (WidgetTester tester) async {
       expect(false, true);
     });
-  }, skip: true);
+  }, skip: true); // [intended] API testing
 
   group('findsOneWidget', () {
     testWidgets('finds exactly one widget', (WidgetTester tester) async {
@@ -697,7 +697,10 @@ void main() {
       if (debugDefaultTargetPlatformOverride == null) {
         expect(tester.testDescription, equals('variant tests have descriptions with details'));
       } else {
-        expect(tester.testDescription, equals('variant tests have descriptions with details ($debugDefaultTargetPlatformOverride)'));
+        expect(
+          tester.testDescription,
+          equals('variant tests have descriptions with details (variant: $debugDefaultTargetPlatformOverride)'),
+        );
       }
     }, variant: TargetPlatformVariant(TargetPlatform.values.toSet()));
   });
@@ -706,11 +709,11 @@ void main() {
     int numberOfVariationsRun = 0;
     TargetPlatform? origTargetPlatform;
 
-    setUpAll((){
+    setUpAll(() {
       origTargetPlatform = debugDefaultTargetPlatformOverride;
     });
 
-    tearDownAll((){
+    tearDownAll(() {
       expect(debugDefaultTargetPlatformOverride, equals(origTargetPlatform));
     });
 
@@ -759,6 +762,8 @@ void main() {
 
       expect(flutterErrorDetails.exception, isA<AssertionError>());
       expect((flutterErrorDetails.exception as AssertionError).message, 'A Timer is still pending even after the widget tree was disposed.');
+      expect(binding.inTest, true);
+      binding.postTest();
     });
   });
 }

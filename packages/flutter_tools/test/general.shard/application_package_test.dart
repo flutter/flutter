@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -122,12 +123,14 @@ void main() {
     testWithoutContext('returns null when failed to extract manifest', () async {
       final AndroidSdkVersion sdkVersion = FakeAndroidSdkVersion();
       sdk.latestVersion = sdkVersion;
+      final Logger logger = BufferLogger.test();
       final AndroidApk androidApk = AndroidApk.fromApk(
         null,
         processManager: fakeProcessManager,
-        logger: BufferLogger.test(),
+        logger: logger,
         userMessages: UserMessages(),
         androidSdk: sdk,
+        processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
       );
 
       expect(androidApk, isNull);
@@ -375,6 +378,17 @@ void main() {
       globals.fs.file('ios/Runner.xcodeproj').createSync(recursive: true);
       final BuildableIOSApp iosApp = await IOSApp.fromIosProject(
         FlutterProject.fromDirectory(globals.fs.currentDirectory).ios, null) as BuildableIOSApp;
+
+      expect(iosApp, null);
+    }, overrides: overrides);
+
+    testUsingContext('returns null when there with no product identifier', () async {
+      globals.fs.file('pubspec.yaml').createSync();
+      globals.fs.file('.packages').createSync();
+      final Directory project = globals.fs.directory('ios/Runner.xcodeproj')..createSync(recursive: true);
+      project.childFile('project.pbxproj').createSync();
+      final BuildableIOSApp iosApp = await IOSApp.fromIosProject(
+          FlutterProject.fromDirectory(globals.fs.currentDirectory).ios, null) as BuildableIOSApp;
 
       expect(iosApp, null);
     }, overrides: overrides);

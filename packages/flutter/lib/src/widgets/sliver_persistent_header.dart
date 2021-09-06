@@ -268,8 +268,8 @@ class _SliverPersistentHeaderElement extends RenderObjectElement {
 
   @override
   void unmount() {
-    super.unmount();
     renderObject._element = null;
+    super.unmount();
   }
 
   @override

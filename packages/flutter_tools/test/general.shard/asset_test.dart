@@ -54,6 +54,7 @@ void main() {
           packagesPath,
           globals.fs.path.join(dataPath, 'font', 'pubspec.yaml'),
           manifestPath,
+          globals.fs.path.join(dataPath, 'font', 'test_font_file'),
         ],
       );
     });

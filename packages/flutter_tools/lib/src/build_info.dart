@@ -36,11 +36,12 @@ class BuildInfo {
     List<String>? dartExperiments,
     required this.treeShakeIcons,
     this.performanceMeasurementFile,
-    this.packagesPath = '.packages', // TODO(jonahwilliams): make this required and remove the default.
+    this.packagesPath = '.packages', // TODO(zanderso): make this required and remove the default.
     this.nullSafetyMode = NullSafetyMode.sound,
     this.codeSizeDirectory,
     this.androidGradleDaemon = true,
     this.packageConfig = PackageConfig.empty,
+    this.initializeFromDill,
   }) : extraFrontEndOptions = extraFrontEndOptions ?? const <String>[],
        extraGenSnapshotOptions = extraGenSnapshotOptions ?? const <String>[],
        fileSystemRoots = fileSystemRoots ?? const <String>[],
@@ -152,6 +153,11 @@ class BuildInfo {
   /// This is captured once during startup, but the actual package configuration
   /// may change during a 'flutter run` workflow.
   final PackageConfig packageConfig;
+
+  /// The kernel file that the resident compiler will be initialized with.
+  ///
+  /// If this is null, it will be initialized from the default cached location.
+  final String? initializeFromDill;
 
   static const BuildInfo debug = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
   static const BuildInfo profile = BuildInfo(BuildMode.profile, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
@@ -397,7 +403,7 @@ enum EnvironmentType {
   simulator,
 }
 
-String? validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String buildNumber, Logger logger) {
+String? validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String? buildNumber, Logger logger) {
   if (buildNumber == null) {
     return null;
   }
@@ -444,7 +450,7 @@ String? validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String bu
   return buildNumber;
 }
 
-String? validatedBuildNameForPlatform(TargetPlatform targetPlatform, String buildName, Logger logger) {
+String? validatedBuildNameForPlatform(TargetPlatform targetPlatform, String? buildName, Logger logger) {
   if (buildName == null) {
     return null;
   }
@@ -528,7 +534,7 @@ enum DarwinArch {
   x86_64,
 }
 
-// TODO(jonahwilliams): replace all android TargetPlatform usage with AndroidArch.
+// TODO(zanderso): replace all android TargetPlatform usage with AndroidArch.
 enum AndroidArch {
   armeabi_v7a,
   arm64_v8a,
@@ -541,8 +547,8 @@ List<DarwinArch> defaultIOSArchsForEnvironment(
     EnvironmentType environmentType) {
   if (environmentType == EnvironmentType.simulator) {
     return <DarwinArch>[
-      // Apple Silicon ARM simulators not yet supported.
       DarwinArch.x86_64,
+      DarwinArch.arm64,
     ];
   }
   return <DarwinArch>[
@@ -792,7 +798,7 @@ String getLinuxBuildDirectory([TargetPlatform? targetPlatform]) {
   final String arch = (targetPlatform == null) ?
       _getCurrentHostPlatformArchName() :
       getNameForTargetPlatformArch(targetPlatform);
-  final String subDirs = 'linux/' + arch;
+  final String subDirs = 'linux/$arch';
   return globals.fs.path.join(getBuildDirectory(), subDirs);
 }
 
@@ -870,7 +876,7 @@ const String kIosArchs = 'IosArchs';
 /// The define to control what macOS architectures are built for.
 ///
 /// This is expected to be a space-delimited list of architectures. If not
-/// provided, defautls to x86_64.
+/// provided, defaults to x86_64.
 ///
 /// Supported values are x86_64 and arm64.
 const String kDarwinArchs = 'DarwinArchs';

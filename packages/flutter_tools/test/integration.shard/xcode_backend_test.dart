@@ -35,7 +35,7 @@ const Map<String, String> localEngineDebugBuildModeRelease = <String, String>{
 };
 
 // Can't use a debug build with a profile engine.
-const Map<String, String> localEngineProfileBuildeModeRelease = <String, String>{
+const Map<String, String> localEngineProfileBuildModeRelease = <String, String>{
   'SOURCE_ROOT': '../examples/hello_world',
   'FLUTTER_ROOT': '../..',
   'LOCAL_ENGINE': '/engine/src/out/ios_profile',
@@ -65,14 +65,14 @@ void main() {
     );
     expect(result.stderr, startsWith('error: Your Xcode project is incompatible with this version of Flutter.'));
     expect(result.exitCode, isNot(0));
-  }, skip: !io.Platform.isMacOS);
+  }, skip: !io.Platform.isMacOS); // [intended] requires macos toolchain.
 
   test('Xcode backend fails for on unsupported configuration combinations', () async {
     await expectXcodeBackendFails(unknownConfiguration);
     await expectXcodeBackendFails(unknownFlutterBuildMode);
     await expectXcodeBackendFails(localEngineDebugBuildModeRelease);
-    await expectXcodeBackendFails(localEngineProfileBuildeModeRelease);
-  }, skip: !io.Platform.isMacOS);
+    await expectXcodeBackendFails(localEngineProfileBuildModeRelease);
+  }, skip: !io.Platform.isMacOS); // [intended] requires macos toolchain.
 
   test('Xcode backend warns archiving a non-release build.', () async {
     final ProcessResult result = await Process.run(
@@ -85,7 +85,7 @@ void main() {
     );
     expect(result.stdout, contains('warning: Flutter archive not built in Release mode.'));
     expect(result.exitCode, isNot(0));
-  }, skip: !io.Platform.isMacOS);
+  }, skip: !io.Platform.isMacOS); // [intended] requires macos toolchain.
 
   group('observatory Bonjour service keys', () {
     Directory buildDirectory;
@@ -204,5 +204,5 @@ void main() {
 ''');
       expect(result.exitCode, 0);
     });
-  }, skip: !io.Platform.isMacOS);
+  }, skip: !io.Platform.isMacOS); // [intended] requires macos toolchain.
 }

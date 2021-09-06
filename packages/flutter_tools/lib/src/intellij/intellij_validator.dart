@@ -229,9 +229,9 @@ class IntelliJValidatorOnWindows extends IntelliJValidator {
           }
           if (installPath != null && fileSystem.isDirectorySync(installPath)) {
             String pluginsPath;
-            if (fileSystem.isDirectorySync(installPath + '.plugins')) {
+            if (fileSystem.isDirectorySync('$installPath.plugins')) {
               // IntelliJ 2020.3
-              pluginsPath = installPath + '.plugins';
+              pluginsPath = '$installPath.plugins';
               addValidator(title, version, installPath, pluginsPath);
             } else if (platform.environment.containsKey('APPDATA')) {
               final String pluginsPathInAppData = fileSystem.path.join(
@@ -340,7 +340,7 @@ class IntelliJValidatorOnLinux extends IntelliJValidator {
                 name);
             if (installPath.contains(fileSystem.path.join('JetBrains','Toolbox','apps'))) {
               // via JetBrains ToolBox app
-              final String pluginsPathInInstallDir = installPath + '.plugins';
+              final String pluginsPathInInstallDir = '$installPath.plugins';
               if (fileSystem.isDirectorySync(pluginsPathInUserHomeDir)) {
                 // after 2020.2.x
                 final String pluginsPath = pluginsPathInUserHomeDir;
@@ -517,7 +517,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
       .getValueFromFile(plistFile, 'JetBrainsToolboxApp');
 
     if (altLocation != null) {
-      _pluginsPath = altLocation + '.plugins';
+      _pluginsPath = '$altLocation.plugins';
       return _pluginsPath!;
     }
 

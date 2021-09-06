@@ -185,7 +185,7 @@ Future<vm_service.VmService> setUpVmService(
   vm_service.VmService vmService
 ) async {
   // Each service registration requires a request to the attached VM service. Since the
-  // order of these requests does not mattter, store each future in a list and await
+  // order of these requests does not matter, store each future in a list and await
   // all at the end of this method.
   final List<Future<vm_service.Success>> registrationRequests = <Future<vm_service.Success>>[];
   if (reloadSources != null) {
@@ -613,10 +613,6 @@ class FlutterVmService {
     @required String isolateId,
   }) => _flutterToggle('debugPaint', isolateId: isolateId);
 
-  Future<Map<String, dynamic>> flutterToggleDebugCheckElevationsEnabled({
-    @required String isolateId,
-  }) => _flutterToggle('debugCheckElevationsEnabled', isolateId: isolateId);
-
   Future<Map<String, dynamic>> flutterTogglePerformanceOverlayOverride({
     @required String isolateId,
   }) => _flutterToggle('showPerformanceOverlay', isolateId: isolateId);
@@ -955,7 +951,7 @@ class FlutterVmService {
 }
 
 /// Thrown when the VM Service disappears while calls are being made to it.
-class VmServiceDisappearedException implements Exception {}
+class VmServiceDisappearedException implements Exception { }
 
 /// Whether the event attached to an [Isolate.pauseEvent] should be considered
 /// a "pause" event.

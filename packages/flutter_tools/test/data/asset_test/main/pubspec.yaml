@@ -2,7 +2,7 @@ name: main
 description: A test project that has a package with a font as a dependency.
 
 environment:
-  sdk: ">=2.0.0-dev.68.0 <3.0.0"
+  sdk: ">=2.12.0 <3.0.0"
 
 dependencies:
   font:

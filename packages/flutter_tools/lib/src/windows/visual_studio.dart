@@ -56,7 +56,7 @@ class VisualStudio {
     if (_bestVisualStudioDetails[_catalogKey] == null) {
       return null;
     }
-    return _bestVisualStudioDetails[_catalogKey][_catalogDisplayVersionKey] as String?;
+    return (_bestVisualStudioDetails[_catalogKey] as Map<String, dynamic>)[_catalogDisplayVersionKey] as String?;
   }
 
   /// The directory where Visual Studio is installed.
@@ -91,7 +91,7 @@ class VisualStudio {
     return _bestVisualStudioDetails[_isLaunchableKey] as bool? ?? true;
   }
 
-    /// True if the Visual Studio installation is as pre-release version.
+  /// True if the Visual Studio installation is as pre-release version.
   bool get isPrerelease => _bestVisualStudioDetails[_isPrereleaseKey] as bool? ?? false;
 
   /// True if a reboot is required to complete the Visual Studio installation.
@@ -348,11 +348,7 @@ class VisualStudio {
   ///
   /// If no installation is found, the cached VS details are set to an empty map
   /// to avoid repeating vswhere queries that have already not found an installation.
-  Map<String, dynamic>? _cachedUsableVisualStudioDetails;
-  Map<String, dynamic> get _usableVisualStudioDetails {
-    if (_cachedUsableVisualStudioDetails != null) {
-      return _cachedUsableVisualStudioDetails!;
-    }
+  late final Map<String, dynamic> _usableVisualStudioDetails = (){
     final List<String> minimumVersionArguments = <String>[
       _vswhereMinVersionArgument,
       _minimumSupportedVersion.toString(),
@@ -370,16 +366,16 @@ class VisualStudio {
       }
     }
 
+    Map<String, dynamic>? usableVisualStudioDetails;
     if (visualStudioDetails != null) {
       if (installationHasIssues(visualStudioDetails)) {
         _cachedAnyVisualStudioDetails = visualStudioDetails;
       } else {
-        _cachedUsableVisualStudioDetails = visualStudioDetails;
+        usableVisualStudioDetails = visualStudioDetails;
       }
     }
-    _cachedUsableVisualStudioDetails ??= <String, dynamic>{};
-    return _cachedUsableVisualStudioDetails!;
-  }
+    return usableVisualStudioDetails ?? <String, dynamic>{};
+  }();
 
   /// Returns the details dictionary of the latest version of Visual Studio,
   /// regardless of components and version, or {} if no such installation is

@@ -107,7 +107,7 @@ abstract class InteractiveInkFeature extends InkFeature {
     ShapeBorder? customBorder,
     BorderRadius borderRadius = BorderRadius.zero,
     RectCallback? clipCallback,
-    }) {
+  }) {
     assert(canvas != null);
     assert(transform != null);
     assert(paint != null);
@@ -781,7 +781,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     super.didUpdateWidget(oldWidget);
     if (_isWidgetEnabled(widget) != _isWidgetEnabled(oldWidget)) {
       if (enabled) {
-        // Don't call wigdet.onHover because many wigets, including the button
+        // Don't call widget.onHover because many widgets, including the button
         // widgets, apply setState to an ancestor context from onHover.
         updateHighlight(_HighlightType.hover, value: _hovering, callOnHover: false);
       }
@@ -1167,33 +1167,10 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 /// An example of this situation is as follows:
 ///
 /// {@tool dartpad --template=stateful_widget_scaffold_center}
-///
 /// Tap the container to cause it to grow. Then, tap it again and hold before
 /// the widget reaches its maximum size to observe the clipped ink splash.
 ///
-/// ```dart
-/// double sideLength = 50;
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return AnimatedContainer(
-///     height: sideLength,
-///     width: sideLength,
-///     duration: const Duration(seconds: 2),
-///     curve: Curves.easeIn,
-///     child: Material(
-///       color: Colors.yellow,
-///       child: InkWell(
-///         onTap: () {
-///           setState(() {
-///             sideLength == 50 ? sideLength = 100 : sideLength = 50;
-///           });
-///         },
-///       ),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/ink_well/ink_well.0.dart **
 /// {@end-tool}
 ///
 /// An InkWell's splashes will not properly update to conform to changes if the

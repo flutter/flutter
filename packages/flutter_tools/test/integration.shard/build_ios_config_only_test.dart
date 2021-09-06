@@ -50,5 +50,5 @@ void main() {
       fileSystem.path.join(woringDirectory, 'build', 'ios', 'iphoneos', 'Runner.app', 'AppFrameworkInfo.plist'));
 
     expect(frameworkPlist, isNot(exists));
-  }, skip: !platform.isMacOS);
+  }, skip: !platform.isMacOS); // [intended] iOS builds only work on macos.
 }

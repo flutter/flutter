@@ -7,6 +7,7 @@
 import '../base/common.dart';
 import '../build_info.dart';
 import '../bundle.dart';
+import '../bundle_builder.dart';
 import '../features.dart';
 import '../globals_null_migrated.dart' as globals;
 import '../project.dart';
@@ -45,7 +46,7 @@ class BuildBundleCommand extends BuildSubCommand {
       )
       ..addOption('asset-dir',
         defaultsTo: getAssetBuildDirectory(),
-        help: 'The output directory for the kernel_blob.bin file, the native snapshet, the assets, etc. '
+        help: 'The output directory for the kernel_blob.bin file, the native snapshot, the assets, etc. '
               'Can be used to redirect the output when driving the Flutter toolchain from another build system.',
       )
       ..addFlag(

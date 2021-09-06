@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter_driver/flutter_driver.dart';
-import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
+import 'package:test/test.dart';
 import 'package:webdriver/async_io.dart';
 
 // TODO(web): Migrate this test to a normal integration_test with a WidgetTester.
@@ -35,6 +35,7 @@ void main() {
     test('enable accessibility', () async {
       await driver.setSemantics(true);
 
+      // TODO(ianh): this delay violates our style guide. We should instead wait for a triggering event.
       await Future<void>.delayed(const Duration(seconds: 2));
 
       // A flutter web app may be rendered directly on the body of the page, or

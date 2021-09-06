@@ -160,6 +160,6 @@ class NoDevicesManager extends DeviceManager {
   Future<List<Device>> refreshAllConnectedDevices({Duration timeout}) =>
     getAllConnectedDevices();
 
-@override
+  @override
   List<DeviceDiscovery> get deviceDiscoverers => <DeviceDiscovery>[];
 }

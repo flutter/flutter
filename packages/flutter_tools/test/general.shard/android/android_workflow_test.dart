@@ -73,6 +73,55 @@ void main() {
     );
 
     expect(androidWorkflow.appliesToHostPlatform, false);
+    expect(androidWorkflow.canLaunchDevices, false);
+    expect(androidWorkflow.canListDevices, false);
+    expect(androidWorkflow.canListEmulators, false);
+  });
+
+  testWithoutContext('AndroidWorkflow is disabled if feature is disabled', () {
+    final FakeAndroidSdk androidSdk = FakeAndroidSdk();
+    androidSdk.adbPath = 'path/to/adb';
+    final AndroidWorkflow androidWorkflow = AndroidWorkflow(
+      featureFlags: TestFeatureFlags(isAndroidEnabled: false),
+      androidSdk: androidSdk,
+      operatingSystemUtils: FakeOperatingSystemUtils(),
+    );
+
+    expect(androidWorkflow.appliesToHostPlatform, false);
+    expect(androidWorkflow.canLaunchDevices, false);
+    expect(androidWorkflow.canListDevices, false);
+    expect(androidWorkflow.canListEmulators, false);
+  });
+
+  testWithoutContext('AndroidWorkflow cannot list emulators if emulatorPath is null', () {
+    final FakeAndroidSdk androidSdk = FakeAndroidSdk();
+    androidSdk.adbPath = 'path/to/adb';
+    final AndroidWorkflow androidWorkflow = AndroidWorkflow(
+      featureFlags: TestFeatureFlags(),
+      androidSdk: androidSdk,
+      operatingSystemUtils: FakeOperatingSystemUtils(),
+    );
+
+    expect(androidWorkflow.appliesToHostPlatform, true);
+    expect(androidWorkflow.canLaunchDevices, true);
+    expect(androidWorkflow.canListDevices, true);
+    expect(androidWorkflow.canListEmulators, false);
+  });
+
+  testWithoutContext('AndroidWorkflow can list emulators', () {
+    final FakeAndroidSdk androidSdk = FakeAndroidSdk();
+    androidSdk.adbPath = 'path/to/adb';
+    androidSdk.emulatorPath = 'path/to/emulator';
+    final AndroidWorkflow androidWorkflow = AndroidWorkflow(
+      featureFlags: TestFeatureFlags(),
+      androidSdk: androidSdk,
+      operatingSystemUtils: FakeOperatingSystemUtils(),
+    );
+
+    expect(androidWorkflow.appliesToHostPlatform, true);
+    expect(androidWorkflow.canLaunchDevices, true);
+    expect(androidWorkflow.canListDevices, true);
+    expect(androidWorkflow.canListEmulators, true);
   });
 
   testWithoutContext('licensesAccepted returns LicensesAccepted.unknown if cannot find sdkmanager', () async {
@@ -289,9 +338,12 @@ Review licenses that have not been accepted (y/N)?
     expect(licenseValidator.runLicenseManager(), throwsToolExit());
   });
 
-  testWithoutContext('detects license-only SDK installation', () async {
-    sdk.licensesAvailable = true;
-    sdk.platformToolsAvailable = false;
+  testWithoutContext('detects license-only SDK installation with cmdline-tools', () async {
+    sdk
+      ..licensesAvailable = true
+      ..platformToolsAvailable = false
+      ..cmdlineToolsAvailable = true
+      ..directory = fileSystem.directory('/foo/bar');
     final ValidationResult validationResult = await AndroidValidator(
       androidStudio: null,
       androidSdk: sdk,
@@ -303,10 +355,14 @@ Review licenses that have not been accepted (y/N)?
     ).validate();
 
     expect(validationResult.type, ValidationType.partial);
-    expect(
-      validationResult.messages.last.message,
-      UserMessages().androidSdkLicenseOnly(kAndroidHome),
-    );
+
+    final ValidationMessage sdkMessage = validationResult.messages.first;
+    expect(sdkMessage.type, ValidationMessageType.information);
+    expect(sdkMessage.message, 'Android SDK at /foo/bar');
+
+    final ValidationMessage licenseMessage = validationResult.messages.last;
+    expect(licenseMessage.type, ValidationMessageType.hint);
+    expect(licenseMessage.message, UserMessages().androidSdkLicenseOnly(kAndroidHome));
   });
 
   testWithoutContext('detects minimum required SDK and buildtools', () async {
@@ -323,6 +379,7 @@ Review licenses that have not been accepted (y/N)?
     sdk
       ..licensesAvailable = true
       ..platformToolsAvailable = true
+      ..cmdlineToolsAvailable = true
     // Test with invalid SDK and build tools
       ..directory = fileSystem.directory('/foo/bar')
       ..sdkManagerPath = '/foo/bar/sdkmanager'
@@ -364,7 +421,7 @@ Review licenses that have not been accepted (y/N)?
     );
 
     // Test with valid SDK and valid build tools
-    // Will still be partial because AnroidSdk.findJavaBinary is static :(
+    // Will still be partial because AndroidSdk.findJavaBinary is static :(
     sdkVersion.sdkLevel = kAndroidSdkMinVersion;
     sdkVersion.buildToolsVersion = kAndroidSdkBuildToolsMinVersion;
 
@@ -374,6 +431,37 @@ Review licenses that have not been accepted (y/N)?
       validationResult.messages.any((ValidationMessage message) => message.message == errorMessage),
       isFalse,
     );
+  });
+
+  testWithoutContext('detects missing cmdline tools', () async {
+    sdk
+      ..licensesAvailable = true
+      ..platformToolsAvailable = true
+      ..cmdlineToolsAvailable = false
+      ..directory = fileSystem.directory('/foo/bar');
+
+    final AndroidValidator androidValidator = AndroidValidator(
+      androidStudio: null,
+      androidSdk: sdk,
+      fileSystem: fileSystem,
+      logger: logger,
+      processManager: processManager,
+      platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
+      userMessages: UserMessages(),
+    );
+
+    final String errorMessage = UserMessages().androidMissingCmdTools;
+
+    final ValidationResult validationResult = await androidValidator.validate();
+    expect(validationResult.type, ValidationType.missing);
+
+    final ValidationMessage sdkMessage = validationResult.messages.first;
+    expect(sdkMessage.type, ValidationMessageType.information);
+    expect(sdkMessage.message, 'Android SDK at /foo/bar');
+
+    final ValidationMessage cmdlineMessage = validationResult.messages.last;
+    expect(cmdlineMessage.type, ValidationMessageType.error);
+    expect(cmdlineMessage.message, errorMessage);
   });
 
   testWithoutContext('detects minimum required java version', () async {
@@ -393,6 +481,7 @@ Review licenses that have not been accepted (y/N)?
     sdk
       ..licensesAvailable = true
       ..platformToolsAvailable = true
+      ..cmdlineToolsAvailable = true
       ..directory = fileSystem.directory('/foo/bar')
       ..sdkManagerPath = '/foo/bar/sdkmanager';
     sdk.latestVersion = sdkVersion;
@@ -458,10 +547,16 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
   bool platformToolsAvailable;
 
   @override
+  bool cmdlineToolsAvailable;
+
+  @override
   Directory directory;
 
   @override
   AndroidSdkVersion latestVersion;
+
+  @override
+  String emulatorPath;
 
   @override
   List<String> validateSdkWellFormed() => <String>[];

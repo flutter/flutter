@@ -4,12 +4,14 @@
 
 // @dart = 2.8
 
+import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
+import 'package:flutter_tools/src/commands/build_ios.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 
@@ -109,6 +111,8 @@ void main() {
       'xcrun',
       'xcodebuild',
       '-exportArchive',
+      '-allowProvisioningDeviceRegistration',
+      '-allowProvisioningUpdates',
       '-archivePath',
       '/build/ios/archive/Runner.xcarchive',
       '-exportPath',
@@ -153,9 +157,10 @@ void main() {
     fileSystem.file(fileSystem.path.join('lib', 'main.dart'))
       .createSync(recursive: true);
 
+    final bool supported = BuildIOSArchiveCommand(verboseHelp: false).supported;
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'ipa', '--no-pub']
-    ), throwsToolExit());
+    ), supported ? throwsToolExit() : throwsA(isA<UsageException>()));
   }, overrides: <Type, Generator>{
     Platform: () => notMacosPlatform,
     FileSystem: () => fileSystem,

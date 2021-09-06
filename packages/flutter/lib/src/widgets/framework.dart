@@ -376,7 +376,7 @@ abstract class Widget extends DiagnosticableTree {
     return widget is StatefulWidget ? 1 :
            widget is StatelessWidget ? 2 :
            0;
-    }
+  }
 }
 
 /// A widget that does not require mutable state.
@@ -1097,7 +1097,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
           ErrorHint(
             'Instead of performing asynchronous work inside a call to setState(), first '
             'execute the work (without updating the widget state), and then synchronously '
-           'update the state inside a call to setState().',
+            'update the state inside a call to setState().',
           ),
         ]);
       }
@@ -1781,8 +1781,8 @@ abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
         // TODO(a14n): remove this check to have a lot more const widget
         if (children[index] == null) {
           throw FlutterError(
-              "$runtimeType's children must not contain any null values, "
-                  'but a null value was found at index $index',
+            "$runtimeType's children must not contain any null values, "
+            'but a null value was found at index $index',
           );
         }
       }
@@ -2056,7 +2056,8 @@ abstract class BuildContext {
   /// This method will only return a valid result after the build phase is
   /// complete. It is therefore not valid to call this from a build method.
   /// It should only be called from interaction event handlers (e.g.
-  /// gesture callbacks) or layout or paint callbacks.
+  /// gesture callbacks) or layout or paint callbacks. It is also not valid to
+  /// call if [State.mounted] returns false.
   ///
   /// If the render object is a [RenderBox], which is the common case, then the
   /// size of the render object can be obtained from the [size] getter. This is
@@ -2086,7 +2087,7 @@ abstract class BuildContext {
   /// This getter will only return a valid result if [findRenderObject] actually
   /// returns a [RenderBox]. If [findRenderObject] returns a render object that
   /// is not a subtype of [RenderBox] (e.g., [RenderView]), this getter will
-  /// throw an exception in checked mode and will return null in release mode.
+  /// throw an exception in debug mode and will return null in release mode.
   ///
   /// Calling this getter is theoretically relatively expensive (O(N) in the
   /// depth of the tree), but in practice is usually cheap because the tree
@@ -2335,49 +2336,7 @@ abstract class BuildContext {
 /// the layout size of the rendered tree. For some use cases, the simpler
 /// [Offstage] widget may be a better alternative to this approach.
 ///
-/// ```dart imports
-/// import 'package:flutter/rendering.dart';
-/// import 'package:flutter/widgets.dart';
-/// ```
-///
-/// ```dart
-/// void main() {
-///   WidgetsFlutterBinding.ensureInitialized();
-///   print(measureWidget(const SizedBox(width: 640, height: 480)));
-/// }
-///
-/// Size measureWidget(Widget widget) {
-///   final PipelineOwner pipelineOwner = PipelineOwner();
-///   final MeasurementView rootView = pipelineOwner.rootNode = MeasurementView();
-///   final BuildOwner buildOwner = BuildOwner(focusManager: FocusManager());
-///   final RenderObjectToWidgetElement<RenderBox> element = RenderObjectToWidgetAdapter<RenderBox>(
-///     container: rootView,
-///     debugShortDescription: '[root]',
-///     child: widget,
-///   ).attachToRenderTree(buildOwner);
-///   try {
-///     rootView.scheduleInitialLayout();
-///     pipelineOwner.flushLayout();
-///     return rootView.size;
-///   } finally {
-///     // Clean up.
-///     element.update(RenderObjectToWidgetAdapter<RenderBox>(container: rootView));
-///     buildOwner.finalizeTree();
-///   }
-/// }
-///
-/// class MeasurementView extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
-///   @override
-///   void performLayout() {
-///     assert(child != null);
-///     child!.layout(const BoxConstraints(), parentUsesSize: true);
-///     size = child!.size;
-///   }
-///
-///   @override
-///   void debugAssertDoesMeetConstraints() => true;
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/framework/build_owner.0.dart **
 /// {@end-tool}
 class BuildOwner {
   /// Creates an object that manages widgets.
@@ -2779,20 +2738,20 @@ class BuildOwner {
               error = FlutterError.fromParts(<DiagnosticsNode>[
                 ErrorSummary('Multiple widgets used the same GlobalKey.'),
                 ErrorDescription(
-                    'The key $key was used by multiple widgets. The parents of those widgets were:\n'
-                    '- ${older.toString()}\n'
-                    '- ${newer.toString()}\n'
-                    'A GlobalKey can only be specified on one widget at a time in the widget tree.',
+                  'The key $key was used by multiple widgets. The parents of those widgets were:\n'
+                  '- ${older.toString()}\n'
+                  '- ${newer.toString()}\n'
+                  'A GlobalKey can only be specified on one widget at a time in the widget tree.',
                 ),
               ]);
             } else {
               error = FlutterError.fromParts(<DiagnosticsNode>[
                 ErrorSummary('Multiple widgets used the same GlobalKey.'),
                 ErrorDescription(
-                    'The key $key was used by multiple widgets. The parents of those widgets were '
-                    'different widgets that both had the following description:\n'
-                    '  ${parent.toString()}\n'
-                    'A GlobalKey can only be specified on one widget at a time in the widget tree.',
+                  'The key $key was used by multiple widgets. The parents of those widgets were '
+                  'different widgets that both had the following description:\n'
+                  '  ${parent.toString()}\n'
+                  'A GlobalKey can only be specified on one widget at a time in the widget tree.',
                 ),
               ]);
             }
@@ -2977,11 +2936,12 @@ class BuildOwner {
   /// changed implementations.
   ///
   /// This is expensive and should not be called except during development.
-  void reassemble(Element root) {
+  void reassemble(Element root, DebugReassembleConfig? reassembleConfig) {
     Timeline.startSync('Dirty Element Tree');
     try {
       assert(root._parent == null);
       assert(root.owner == this);
+      root._debugReassembleConfig = reassembleConfig;
       root.reassemble();
     } finally {
       Timeline.finishSync();
@@ -3048,6 +3008,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       _widget = widget;
 
   Element? _parent;
+  DebugReassembleConfig? _debugReassembleConfig;
 
   // Custom implementation of `operator ==` optimized for the ".of" pattern
   // used with `InheritedWidgets`.
@@ -3174,10 +3135,15 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   @mustCallSuper
   @protected
   void reassemble() {
-    markNeedsBuild();
+    if (_debugShouldReassemble(_debugReassembleConfig, _widget)) {
+      markNeedsBuild();
+      _debugReassembleConfig = null;
+    }
     visitChildren((Element child) {
+      child._debugReassembleConfig = _debugReassembleConfig;
       child.reassemble();
     });
+    _debugReassembleConfig = null;
   }
 
   bool _debugIsInScope(Element target) {
@@ -3199,10 +3165,13 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     RenderObject? result;
     void visit(Element element) {
       assert(result == null); // this verifies that there's only one child
-      if (element is RenderObjectElement)
+      if (element._lifecycleState == _ElementLifecycle.defunct) {
+        return;
+      } else if (element is RenderObjectElement) {
         result = element.renderObject;
-      else
+      } else {
         element.visitChildren(visit);
+      }
     }
     visit(this);
     return result;
@@ -3841,6 +3810,10 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// After this function is called, the element will not be incorporated into
   /// the tree again.
   ///
+  /// Any resources this element holds should be released at this point. For
+  /// example, [RenderObjectElement.unmount] calls [RenderObject.dispose] and
+  /// nulls out its reference to the render object.
+  ///
   /// See the lifecycle documentation for [Element] for additional information.
   ///
   /// Implementations of this method should end with a call to the inherited
@@ -3864,7 +3837,25 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   @override
-  RenderObject? findRenderObject() => renderObject;
+  RenderObject? findRenderObject() {
+    assert(() {
+      if (_lifecycleState != _ElementLifecycle.active) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('Cannot get renderObject of inactive element.'),
+          ErrorDescription(
+            'In order for an element to have a valid renderObject, it must be '
+            'active, which means it is part of the tree.\n'
+            'Instead, this element is in the $_lifecycleState state.\n'
+            'If you called this method from a State object, consider guarding '
+            'it with State.mounted.',
+          ),
+          describeElement('The findRenderObject() method was called for the following element'),
+        ]);
+      }
+      return true;
+    }());
+    return renderObject;
+  }
 
   @override
   Size? get size {
@@ -3958,7 +3949,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
             'this render object has not yet been through layout, which typically '
             'means that the size getter was called too early in the pipeline '
             '(e.g., during the build phase) before the framework has determined '
-           'the size and position of the render objects during layout.',
+            'the size and position of the render objects during layout.',
           ),
           describeElement('The size getter was called for the following element'),
           box.describeForError('The render object from which the size was to be obtained was'),
@@ -4256,16 +4247,14 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
             ErrorSummary('setState() or markNeedsBuild() called during build.'),
             ErrorDescription(
               'This ${widget.runtimeType} widget cannot be marked as needing to build because the framework '
-              'is already in the process of building widgets.  A widget can be marked as '
+              'is already in the process of building widgets. A widget can be marked as '
               'needing to be built during the build phase only if one of its ancestors '
               'is currently building. This exception is allowed because the framework '
               'builds parent widgets before children, which means a dirty descendant '
               'will always be built. Otherwise, the framework might not visit this '
               'widget during this build phase.',
             ),
-            describeElement(
-              'The widget on which setState() or markNeedsBuild() was called was',
-            ),
+            describeElement('The widget on which setState() or markNeedsBuild() was called was'),
           ];
           if (owner!._debugCurrentBuildTarget != null)
             information.add(owner!._debugCurrentBuildTarget!.describeWidget('The widget which was currently being built when the offending call was made was'));
@@ -4383,37 +4372,9 @@ typedef ErrorWidgetBuilder = Widget Function(FlutterErrorDetails details);
 /// It is possible to override this widget.
 ///
 /// {@tool sample --template=freeform}
-/// ```dart
-/// import 'package:flutter/material.dart';
 ///
-/// void main() {
-///   ErrorWidget.builder = (FlutterErrorDetails details) {
-///     bool inDebug = false;
-///     assert(() { inDebug = true; return true; }());
-///     // In debug mode, use the normal error widget which shows
-///     // the error message:
-///     if (inDebug) {
-///       return ErrorWidget(details.exception);
-///     }
-///     // In release builds, show a yellow-on-blue message instead:
-///     return Container(
-///       alignment: Alignment.center,
-///       child: const Text(
-///         'Error!',
-///         style: const TextStyle(color: Colors.yellow),
-///         textDirection: TextDirection.ltr,
-///       ),
-///     );
-///   };
-///   // Here we would normally runApp() the root widget, but to demonstrate
-///   // the error handling we artificially fail:
-///   return runApp(Builder(
-///     builder: (BuildContext context) {
-///       throw 'oh no, an error';
-///     },
-///   ));
-/// }
-/// ```
+///
+/// ** See code in examples/api/lib/widgets/framework/error_widget.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -4479,7 +4440,7 @@ class ErrorWidget extends LeafRenderObjectWidget {
   static Widget _defaultErrorWidgetBuilder(FlutterErrorDetails details) {
     String message = '';
     assert(() {
-      message = _stringify(details.exception) + '\nSee also: https://flutter.dev/docs/testing/errors';
+      message = '${_stringify(details.exception)}\nSee also: https://flutter.dev/docs/testing/errors';
       return true;
     }());
     final Object exception = details.exception;
@@ -4570,16 +4531,6 @@ typedef NullableIndexedWidgetBuilder = Widget? Function(BuildContext context, in
 ///  * [IndexedWidgetBuilder], which is similar but also takes an index.
 ///  * [ValueWidgetBuilder], which is similar but takes a value and a child.
 typedef TransitionBuilder = Widget Function(BuildContext context, Widget? child);
-
-/// A builder that creates a widget given the two callbacks `onStepContinue` and
-/// `onStepCancel`.
-///
-/// Used by [Stepper.controlsBuilder].
-///
-/// See also:
-///
-///  * [WidgetBuilder], which is similar but only takes a [BuildContext].
-typedef ControlsWidgetBuilder = Widget Function(BuildContext context, { VoidCallback? onStepContinue, VoidCallback? onStepCancel });
 
 /// An [Element] that composes other [Element]s.
 ///
@@ -4758,7 +4709,9 @@ class StatefulElement extends ComponentElement {
 
   @override
   void reassemble() {
-    state.reassemble();
+    if (_debugShouldReassemble(_debugReassembleConfig, _widget)) {
+      state.reassemble();
+    }
     super.reassemble();
   }
 
@@ -4865,7 +4818,7 @@ class StatefulElement extends ComponentElement {
         ErrorSummary('${state.runtimeType}.dispose failed to call super.dispose.'),
         ErrorDescription(
           'dispose() implementations must always call their superclass dispose() method, to ensure '
-         'that all the resources used by the widget are fully released.',
+          'that all the resources used by the widget are fully released.',
         ),
       ]);
     }());
@@ -5422,8 +5375,13 @@ abstract class RenderObjectElement extends Element {
   RenderObjectWidget get widget => super.widget as RenderObjectWidget;
 
   /// The underlying [RenderObject] for this element.
+  ///
+  /// If this element has been [unmount]ed, this getter will throw.
   @override
-  RenderObject get renderObject => _renderObject!;
+  RenderObject get renderObject {
+    assert(_renderObject != null, '$runtimeType unmounted');
+    return _renderObject!;
+  }
   RenderObject? _renderObject;
 
   bool _debugDoingBuild = false;
@@ -5491,6 +5449,7 @@ abstract class RenderObjectElement extends Element {
       return true;
     }());
     _renderObject = widget.createRenderObject(this);
+    assert(!_renderObject!.debugDisposed!);
     assert(() {
       _debugDoingBuild = false;
       return true;
@@ -5768,6 +5727,11 @@ abstract class RenderObjectElement extends Element {
 
   @override
   void unmount() {
+    assert(
+      !renderObject.debugDisposed!,
+      'A RenderObject was disposed prior to its owning element being unmounted: '
+      '$renderObject',
+    );
     final RenderObjectWidget oldWidget = widget;
     super.unmount();
     assert(
@@ -5776,6 +5740,8 @@ abstract class RenderObjectElement extends Element {
       'RenderObjectElement: $renderObject',
     );
     oldWidget.didUnmountRenderObject(renderObject);
+    _renderObject!.dispose();
+    _renderObject = null;
   }
 
   void _updateParentData(ParentDataWidget<ParentData> parentDataWidget) {
@@ -6356,7 +6322,7 @@ FlutterErrorDetails _debugReportException(
 ///  * [RenderObjectElement.updateChildren], which discusses why this class is
 ///    used as slot values for the children of a [MultiChildRenderObjectElement].
 @immutable
-class IndexedSlot<T> {
+class IndexedSlot<T extends Element?> {
   /// Creates an [IndexedSlot] with the provided [index] and slot [value].
   const IndexedSlot(this.index, this.value);
 
@@ -6395,4 +6361,10 @@ class _NullElement extends Element {
 class _NullWidget extends Widget {
   @override
   Element createElement() => throw UnimplementedError();
+}
+
+// Whether a [DebugReassembleConfig] indicates that an element holding [widget] can skip
+// a reassemble.
+bool _debugShouldReassemble(DebugReassembleConfig? config, Widget? widget) {
+  return config == null || config.widgetName == null || widget?.runtimeType.toString() == config.widgetName;
 }

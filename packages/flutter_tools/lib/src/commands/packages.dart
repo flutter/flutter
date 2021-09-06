@@ -14,7 +14,7 @@ import '../cache.dart';
 import '../dart/generate_synthetic_packages.dart';
 import '../dart/pub.dart';
 import '../flutter_plugins.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../plugins.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
@@ -139,6 +139,7 @@ class PackagesGetCommand extends FlutterCommand {
         context: PubContext.pubGet,
         directory: directory,
         upgrade: upgrade,
+        shouldSkipThirdPartyGenerator: false,
         offline: boolArg('offline'),
         generateSyntheticPackage: flutterProject.manifest.generateSyntheticPackage,
       );
@@ -162,8 +163,8 @@ class PackagesGetCommand extends FlutterCommand {
     final String target = findProjectRoot(globals.fs, workingDirectory);
     if (target == null) {
       throwToolExit(
-       'Expected to find project root in '
-       '${ workingDirectory ?? "current working directory" }.'
+        'Expected to find project root in '
+        '${ workingDirectory ?? "current working directory" }.'
       );
     }
     final FlutterProject rootProject = FlutterProject.fromDirectory(globals.fs.directory(target));
@@ -249,9 +250,8 @@ class PackagesForwardCommand extends FlutterCommand {
 }
 
 class PackagesPassthroughCommand extends FlutterCommand {
-  PackagesPassthroughCommand() {
-    requiresPubspecYaml();
-  }
+  @override
+  ArgParser argParser = ArgParser.allowAnything();
 
   @override
   String get name => 'pub';

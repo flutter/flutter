@@ -27,8 +27,7 @@ Future<void> main() async {
     expect(image.size.width, equals(25.0));
     expect(image.size.height, equals(25.0));
 
-    // TODO(dnfield): https://github.com/flutter/flutter/issues/66289
-    expect(image, hasAGoodToStringDeep, skip: kIsWeb);
+    expect(image, hasAGoodToStringDeep);
     expect(
       image.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
@@ -175,7 +174,7 @@ Future<void> main() async {
     expect(image.colorBlendMode, BlendMode.color);
   });
 
-  test('Render image disposes its image', () async {
+  test('RenderImage disposes its image', () async {
     final ui.Image image = await createTestImage(width: 10, height: 10, cache: false);
     expect(image.debugGetOpenHandleStackTraces()!.length, 1);
 
@@ -190,9 +189,9 @@ Future<void> main() async {
 
     image.dispose();
     expect(image.debugGetOpenHandleStackTraces()!.length, 0);
-  }, skip: kIsWeb); // Web doesn't track open image handles.
+  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87442
 
-  test('Render image does not dispose its image if setting the same image twice', () async {
+  test('RenderImage does not dispose its image if setting the same image twice', () async {
     final ui.Image image = await createTestImage(width: 10, height: 10, cache: false);
     expect(image.debugGetOpenHandleStackTraces()!.length, 1);
 
@@ -207,5 +206,20 @@ Future<void> main() async {
 
     image.dispose();
     expect(image.debugGetOpenHandleStackTraces()!.length, 0);
-  }, skip: kIsWeb); // Web doesn't track open image handles.
+  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87442
+
+  test('Render image disposes its image when it is disposed', () async {
+    final ui.Image image = await createTestImage(width: 10, height: 10, cache: false);
+    expect(image.debugGetOpenHandleStackTraces()!.length, 1);
+
+    final RenderImage renderImage = RenderImage(image: image.clone());
+    expect(image.debugGetOpenHandleStackTraces()!.length, 2);
+
+    renderImage.dispose();
+    expect(image.debugGetOpenHandleStackTraces()!.length, 1);
+    expect(renderImage.image, null);
+
+    image.dispose();
+    expect(image.debugGetOpenHandleStackTraces()!.length, 0);
+  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87442
 }

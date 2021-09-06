@@ -14,6 +14,7 @@ import 'binding.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'events.dart';
+import 'gesture_settings.dart';
 import 'pointer_router.dart';
 import 'team.dart';
 
@@ -80,6 +81,10 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// This is used in the [toString] serialization to report the object for which
   /// this gesture recognizer was created, to aid in debugging.
   final Object? debugOwner;
+
+  /// Optional device specific configuration for device gestures that will
+  /// take precedence over framework defaults.
+  DeviceGestureSettings? gestureSettings;
 
   /// The kind of devices that are allowed to be recognized as provided by
   /// `supportedDevices` in the constructor, or the currently deprecated `kind`.
@@ -185,7 +190,7 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
           final String? report = debugReport != null ? debugReport() : null;
           // The 19 in the line below is the width of the prefix used by
           // _debugLogDiagnostic in arena.dart.
-          final String prefix = debugPrintGestureArenaDiagnostics ? ' ' * 19 + '❙ ' : '';
+          final String prefix = debugPrintGestureArenaDiagnostics ? '${' ' * 19}❙ ' : '';
           debugPrint('$prefix$this calling $name callback.${ report?.isNotEmpty == true ? " $report" : "" }');
         }
         return true;

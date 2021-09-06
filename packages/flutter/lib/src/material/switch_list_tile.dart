@@ -50,25 +50,12 @@ enum _SwitchListTileType { material, adaptive }
 /// callback.
 ///
 /// {@tool dartpad --template=stateful_widget_scaffold_center}
-///
 /// ![SwitchListTile sample](https://flutter.github.io/assets-for-api-docs/assets/material/switch_list_tile.png)
 ///
 /// This widget shows a switch that, when toggled, changes the state of a [bool]
 /// member field called `_lights`.
 ///
-/// ```dart
-/// bool _lights = false;
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return SwitchListTile(
-///     title: const Text('Lights'),
-///     value: _lights,
-///     onChanged: (bool value) { setState(() { _lights = value; }); },
-///     secondary: const Icon(Icons.lightbulb_outline),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/switch_list_tile/switch_list_tile.0.dart **
 /// {@end-tool}
 ///
 /// ## Semantics in SwitchListTile
@@ -89,81 +76,13 @@ enum _SwitchListTileType { material, adaptive }
 /// widget to accommodate similar use cases.
 ///
 /// {@tool dartpad --template=stateful_widget_scaffold_center}
-///
 /// ![Switch list tile semantics sample](https://flutter.github.io/assets-for-api-docs/assets/material/switch_list_tile_semantics.png)
 ///
 /// Here is an example of a custom labeled radio widget, called
 /// LinkedLabelRadio, that includes an interactive [RichText] widget that
 /// handles tap gestures.
 ///
-/// ```dart imports
-/// import 'package:flutter/gestures.dart';
-/// ```
-/// ```dart preamble
-/// class LinkedLabelSwitch extends StatelessWidget {
-///   const LinkedLabelSwitch({
-///     Key? key,
-///     required this.label,
-///     required this.padding,
-///     required this.value,
-///     required this.onChanged,
-///   }) : super(key: key);
-///
-///   final String label;
-///   final EdgeInsets padding;
-///   final bool value;
-///   final Function onChanged;
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return Padding(
-///       padding: padding,
-///       child: Row(
-///         children: <Widget>[
-///           Expanded(
-///             child: RichText(
-///               text: TextSpan(
-///                 text: label,
-///                 style: const TextStyle(
-///                   color: Colors.blueAccent,
-///                   decoration: TextDecoration.underline,
-///                 ),
-///                 recognizer: TapGestureRecognizer()
-///                   ..onTap = () {
-///                   print('Label has been tapped.');
-///                 },
-///               ),
-///             ),
-///           ),
-///           Switch(
-///             value: value,
-///             onChanged: (bool newValue) {
-///               onChanged(newValue);
-///             },
-///           ),
-///         ],
-///       ),
-///     );
-///   }
-/// }
-/// ```
-/// ```dart
-/// bool _isSelected = false;
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return LinkedLabelSwitch(
-///     label: 'Linked, tappable label text',
-///     padding: const EdgeInsets.symmetric(horizontal: 20.0),
-///     value: _isSelected,
-///     onChanged: (bool newValue) {
-///       setState(() {
-///         _isSelected = newValue;
-///       });
-///     },
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/switch_list_tile/switch_list_tile.1.dart **
 /// {@end-tool}
 ///
 /// ## SwitchListTile isn't exactly what I want
@@ -174,68 +93,12 @@ enum _SwitchListTileType { material, adaptive }
 /// [InkWell].
 ///
 /// {@tool dartpad --template=stateful_widget_scaffold_center}
-///
 /// ![Custom switch list tile sample](https://flutter.github.io/assets-for-api-docs/assets/material/switch_list_tile_custom.png)
 ///
 /// Here is an example of a custom LabeledSwitch widget, but you can easily
 /// make your own configurable widget.
 ///
-/// ```dart preamble
-/// class LabeledSwitch extends StatelessWidget {
-///   const LabeledSwitch({
-///     Key? key,
-///     required this.label,
-///     required this.padding,
-///     required this.value,
-///     required this.onChanged,
-///   }) : super(key: key);
-///
-///   final String label;
-///   final EdgeInsets padding;
-///   final bool value;
-///   final Function onChanged;
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return InkWell(
-///       onTap: () {
-///         onChanged(!value);
-///       },
-///       child: Padding(
-///         padding: padding,
-///         child: Row(
-///           children: <Widget>[
-///             Expanded(child: Text(label)),
-///             Switch(
-///               value: value,
-///               onChanged: (bool newValue) {
-///                 onChanged(newValue);
-///               },
-///             ),
-///           ],
-///         ),
-///       ),
-///     );
-///   }
-/// }
-/// ```
-/// ```dart
-/// bool _isSelected = false;
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return LabeledSwitch(
-///     label: 'This is the label text',
-///     padding: const EdgeInsets.symmetric(horizontal: 20.0),
-///     value: _isSelected,
-///     onChanged: (bool newValue) {
-///       setState(() {
-///         _isSelected = newValue;
-///       });
-///     },
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/switch_list_tile/switch_list_tile.2.dart **
 /// {@end-tool}
 ///
 /// See also:

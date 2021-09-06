@@ -264,6 +264,40 @@ void main() {
         expect(find.text('Item 70'), findsNothing);
       }, variant: TargetPlatformVariant.all());
 
+      testWidgets('Ballistic animation on fling can be interrupted', (WidgetTester tester) async {
+        int taps = 0;
+        await tester.pumpWidget(_boilerplate(() => taps++));
+
+        expect(find.text('TapHere'), findsOneWidget);
+        await tester.tap(find.text('TapHere'));
+        expect(taps, 1);
+        expect(find.text('Item 1'), findsOneWidget);
+        expect(find.text('Item 31'), findsNothing);
+        expect(find.text('Item 70'), findsNothing);
+
+        await tester.fling(find.text('Item 1'), const Offset(0, -200), 2000);
+        // Don't pump and settle because we want to interrupt the ballistic scrolling animation.
+        expect(find.text('TapHere'), findsOneWidget);
+        await tester.tap(find.text('TapHere'), warnIfMissed: false);
+        expect(taps, 2);
+        expect(find.text('Item 1'), findsOneWidget);
+        expect(find.text('Item 31'), findsOneWidget);
+        expect(find.text('Item 70'), findsNothing);
+
+        // Use `dragFrom` here because calling `drag` on a list item without
+        // first calling `pumpAndSettle` fails with a hit test error.
+        await tester.dragFrom(const Offset(0, 200), const Offset(0, 200));
+        await tester.pumpAndSettle();
+
+        // Verify that the ballistic animation has canceled and the sheet has
+        // returned to it's original position.
+        await tester.tap(find.text('TapHere'));
+        expect(taps, 3);
+        expect(find.text('Item 1'), findsOneWidget);
+        expect(find.text('Item 31'), findsNothing);
+        expect(find.text('Item 70'), findsNothing);
+      }, variant: TargetPlatformVariant.all());
+
       debugDefaultTargetPlatformOverride = null;
     });
 

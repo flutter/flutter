@@ -37,7 +37,7 @@ Future<Archive?> fetchArchive(String url, int maxTries) async {
 
     // On failure print a short snipped from the body in case it's helpful.
     final int bodyLength = min(1024, response.body.length);
-    stderr.writeln('Response status code ${response.statusCode}. Body: ' + response.body.substring(0, bodyLength));
+    stderr.writeln('Response status code ${response.statusCode}. Body: ${response.body.substring(0, bodyLength)}');
     sleep(const Duration(seconds: 1));
   }
   return responseBytes == null ? null : ZipDecoder().decodeBytes(responseBytes);

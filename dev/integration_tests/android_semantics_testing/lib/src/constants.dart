@@ -172,7 +172,7 @@ class AndroidSemanticsAction {
     }
   }
 
-  static const Map<int, AndroidSemanticsAction> _kactionById = <int, AndroidSemanticsAction>{
+  static const Map<int, AndroidSemanticsAction> _kActionById = <int, AndroidSemanticsAction>{
     _kFocusIndex: focus,
     _kClearFocusIndex: clearFocus,
     _kSelectIndex: select,
@@ -211,6 +211,6 @@ class AndroidSemanticsAction {
   ///
   /// Returns `null` if the id is not a known Android accessibility action.
   static AndroidSemanticsAction deserialize(int value) {
-    return _kactionById[value];
+    return _kActionById[value];
   }
 }

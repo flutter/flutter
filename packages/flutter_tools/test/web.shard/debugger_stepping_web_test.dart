@@ -27,11 +27,9 @@ void main() {
 
     await flutter.run(
       withDebugger: true, startPaused: true, chrome: true,
-      additionalCommandArgs: <String>['--verbose']);
+      additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
     await flutter.addBreakpoint(_project.breakpointUri, _project.breakpointLine);
-    await flutter.resume();
-    await flutter.waitForPause(); // Now we should be on the breakpoint.
-
+    await flutter.resume(waitForNextPause: true); // Now we should be on the breakpoint.
     expect((await flutter.getSourceLocation()).line, equals(_project.breakpointLine));
 
     // Issue 5 steps, ensuring that we end up on the annotated lines each time.

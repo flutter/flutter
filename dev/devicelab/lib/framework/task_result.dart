@@ -7,8 +7,8 @@ import 'dart:io';
 
 /// A result of running a single task.
 class TaskResult {
-   TaskResult.buildOnly()
-       : succeeded = true,
+  TaskResult.buildOnly()
+      : succeeded = true,
         data = null,
         detailFiles = null,
         benchmarkScoreKeys = null,
@@ -23,13 +23,13 @@ class TaskResult {
       : succeeded = true {
     const JsonEncoder prettyJson = JsonEncoder.withIndent('  ');
     if (benchmarkScoreKeys != null) {
-      for (final String key in benchmarkScoreKeys) {
-        if (!data.containsKey(key)) {
+      for (final String key in benchmarkScoreKeys!) {
+        if (!data!.containsKey(key)) {
           throw 'Invalid benchmark score key "$key". It does not exist in task '
               'result data ${prettyJson.convert(data)}';
-        } else if (data[key] is! num) {
+        } else if (data![key] is! num) {
           throw 'Invalid benchmark score for key "$key". It is expected to be a num '
-              'but was ${data[key].runtimeType}: ${prettyJson.convert(data[key])}';
+              'but was ${(data![key] as Object).runtimeType}: ${prettyJson.convert(data![key])}';
         }
       }
     }
@@ -41,7 +41,7 @@ class TaskResult {
     List<String> detailFiles = const <String>[],
   }) {
     return TaskResult.success(
-      json.decode(file.readAsStringSync()) as Map<String, dynamic>,
+      json.decode(file.readAsStringSync()) as Map<String, dynamic>?,
       benchmarkScoreKeys: benchmarkScoreKeys,
       detailFiles: detailFiles,
     );
@@ -51,16 +51,16 @@ class TaskResult {
   factory TaskResult.fromJson(Map<String, dynamic> json) {
     final bool success = json['success'] as bool;
     if (success) {
-      final List<String> benchmarkScoreKeys = (json['benchmarkScoreKeys'] as List<dynamic> ?? <String>[]).cast<String>();
-      final List<String> detailFiles = (json['detailFiles'] as List<dynamic> ?? <String>[]).cast<String>();
-      return TaskResult.success(json['data'] as Map<String, dynamic>,
+      final List<String> benchmarkScoreKeys = (json['benchmarkScoreKeys'] as List<dynamic>? ?? <String>[]).cast<String>();
+      final List<String> detailFiles = (json['detailFiles'] as List<dynamic>? ?? <String>[]).cast<String>();
+      return TaskResult.success(json['data'] as Map<String, dynamic>?,
         benchmarkScoreKeys: benchmarkScoreKeys,
         detailFiles: detailFiles,
-        message: json['reason'] as String,
+        message: json['reason'] as String?,
       );
     }
 
-    return TaskResult.failure(json['reason'] as String);
+    return TaskResult.failure(json['reason'] as String?);
   }
 
   /// Constructs an unsuccessful result.
@@ -74,21 +74,21 @@ class TaskResult {
   final bool succeeded;
 
   /// Task-specific JSON data
-  final Map<String, dynamic> data;
+  final Map<String, dynamic>? data;
 
   /// Files containing detail on the run (e.g. timeline trace files)
-  final List<String> detailFiles;
+  final List<String>? detailFiles;
 
   /// Keys in [data] that store scores that will be submitted to Cocoon.
   ///
   /// Each key is also part of a benchmark's name tracked by Cocoon.
-  final List<String> benchmarkScoreKeys;
+  final List<String>? benchmarkScoreKeys;
 
   /// Whether the task failed.
   bool get failed => !succeeded;
 
   /// Explains the result in a human-readable format.
-  final String message;
+  final String? message;
 
   /// Serializes this task result to JSON format.
   ///
@@ -124,7 +124,7 @@ class TaskResult {
   }
 
   @override
-  String toString() => message;
+  String toString() => message ?? '';
 }
 
 class TaskResultCheckProcesses extends TaskResult {

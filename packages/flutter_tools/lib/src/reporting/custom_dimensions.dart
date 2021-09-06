@@ -61,6 +61,11 @@ class CustomDimensions {
     this.fastReassemble,
     this.nullSafeMigratedLibraries,
     this.nullSafeTotalLibraries,
+    this.hotEventCompileTimeInMs,
+    this.hotEventFindInvalidatedTimeInMs,
+    this.hotEventScannedSourcesCount,
+    this.hotEventReassembleTimeInMs,
+    this.hotEventReloadVMTimeInMs,
   });
 
   final String? sessionHostOsDetails;  // cd1
@@ -113,6 +118,11 @@ class CustomDimensions {
   final bool? fastReassemble;  // cd48
   final int? nullSafeMigratedLibraries;  // cd49
   final int? nullSafeTotalLibraries;  // cd50
+  final int? hotEventCompileTimeInMs;  // cd 51
+  final int? hotEventFindInvalidatedTimeInMs;  // cd 52
+  final int? hotEventScannedSourcesCount;  // cd 53
+  final int? hotEventReassembleTimeInMs;  // cd 54
+  final int? hotEventReloadVMTimeInMs;  // cd 55
 
   /// Convert to a map that will be used to upload to the analytics backend.
   Map<String, String> toMap() => <String, String>{
@@ -166,6 +176,11 @@ class CustomDimensions {
       if (fastReassemble != null) cdKey(CustomDimensionsEnum.fastReassemble): fastReassemble.toString(),
       if (nullSafeMigratedLibraries != null) cdKey(CustomDimensionsEnum.nullSafeMigratedLibraries): nullSafeMigratedLibraries.toString(),
       if (nullSafeTotalLibraries != null) cdKey(CustomDimensionsEnum.nullSafeTotalLibraries): nullSafeTotalLibraries.toString(),
+      if (hotEventCompileTimeInMs != null) cdKey(CustomDimensionsEnum.hotEventCompileTimeInMs): hotEventCompileTimeInMs.toString(),
+      if (hotEventFindInvalidatedTimeInMs != null) cdKey(CustomDimensionsEnum.hotEventFindInvalidatedTimeInMs): hotEventFindInvalidatedTimeInMs.toString(),
+      if (hotEventScannedSourcesCount != null) cdKey(CustomDimensionsEnum.hotEventScannedSourcesCount): hotEventScannedSourcesCount.toString(),
+      if (hotEventReassembleTimeInMs != null) cdKey(CustomDimensionsEnum.hotEventReassembleTimeInMs): hotEventReassembleTimeInMs.toString(),
+      if (hotEventReloadVMTimeInMs != null) cdKey(CustomDimensionsEnum.hotEventReloadVMTimeInMs): hotEventReloadVMTimeInMs.toString(),
     };
 
   /// Merge the values of two [CustomDimensions] into one. If a value is defined
@@ -226,6 +241,11 @@ class CustomDimensions {
       fastReassemble: other.fastReassemble ?? fastReassemble,
       nullSafeMigratedLibraries: other.nullSafeMigratedLibraries ?? nullSafeMigratedLibraries,
       nullSafeTotalLibraries: other.nullSafeTotalLibraries ?? nullSafeTotalLibraries,
+      hotEventCompileTimeInMs: other.hotEventCompileTimeInMs ?? hotEventCompileTimeInMs,
+      hotEventFindInvalidatedTimeInMs: other.hotEventFindInvalidatedTimeInMs ?? hotEventFindInvalidatedTimeInMs,
+      hotEventScannedSourcesCount: other.hotEventScannedSourcesCount ?? hotEventScannedSourcesCount,
+      hotEventReassembleTimeInMs: other.hotEventReassembleTimeInMs ?? hotEventReassembleTimeInMs,
+      hotEventReloadVMTimeInMs: other.hotEventReloadVMTimeInMs ?? hotEventReloadVMTimeInMs,
     );
   }
 
@@ -280,6 +300,11 @@ class CustomDimensions {
       fastReassemble: _extractBool(map, CustomDimensionsEnum.fastReassemble),
       nullSafeMigratedLibraries: _extractInt(map, CustomDimensionsEnum.nullSafeMigratedLibraries),
       nullSafeTotalLibraries: _extractInt(map, CustomDimensionsEnum.nullSafeTotalLibraries),
+      hotEventCompileTimeInMs: _extractInt(map, CustomDimensionsEnum.hotEventCompileTimeInMs),
+      hotEventFindInvalidatedTimeInMs: _extractInt(map, CustomDimensionsEnum.hotEventFindInvalidatedTimeInMs),
+      hotEventScannedSourcesCount: _extractInt(map, CustomDimensionsEnum.hotEventScannedSourcesCount),
+      hotEventReassembleTimeInMs: _extractInt(map, CustomDimensionsEnum.hotEventReassembleTimeInMs),
+      hotEventReloadVMTimeInMs: _extractInt(map, CustomDimensionsEnum.hotEventReloadVMTimeInMs),
     );
 
   static bool? _extractBool(Map<String, String> map, CustomDimensionsEnum field) =>
@@ -301,12 +326,7 @@ class CustomDimensions {
   }
 
   @override
-  int get hashCode =>
-    toMap()
-      .values
-      .where((String element) => element != null)
-      .fold(Object().hashCode,
-            (int value, String element) => value ^ element.hashCode);
+  int get hashCode => Object.hashAll(toMap().values);
 }
 
 /// List of all fields used in CustomDimensions.
@@ -365,6 +385,11 @@ enum CustomDimensionsEnum {
   fastReassemble,  // cd48
   nullSafeMigratedLibraries,  // cd49
   nullSafeTotalLibraries,  // cd50
+  hotEventCompileTimeInMs,  // cd51
+  hotEventFindInvalidatedTimeInMs,  // cd52
+  hotEventScannedSourcesCount,  // cd53
+  hotEventReassembleTimeInMs,  // cd54
+  hotEventReloadVMTimeInMs,  // cd55
 }
 
 String cdKey(CustomDimensionsEnum cd) => 'cd${cd.index + 1}';

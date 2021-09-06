@@ -35,7 +35,7 @@ void main() {
     artifacts = Artifacts.test();
   });
 
-  testWithoutContext('Android AOT targets has analyicsName', () {
+  testWithoutContext('Android AOT targets has analyticsName', () {
     expect(androidArmProfile.analyticsName, 'android_aot');
   });
 

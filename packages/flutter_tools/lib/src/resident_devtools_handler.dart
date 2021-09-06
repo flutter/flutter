@@ -82,6 +82,10 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
       _served = true;
     }
     await _devToolsLauncher.ready;
+    // Do not attempt to print debugger list if the connection has failed.
+    if (_devToolsLauncher.activeDevToolsServer == null) {
+      return;
+    }
     final List<FlutterDevice> devicesWithExtension = await _devicesWithExtensions(flutterDevices);
     await _maybeCallDevToolsUriServiceExtension(devicesWithExtension);
     await _callConnectedVmServiceUriExtension(devicesWithExtension);
@@ -283,4 +287,14 @@ class NoOpDevtoolsHandler implements ResidentDevtoolsHandler {
     wasShutdown = true;
     return;
   }
+}
+
+/// Convert a [URI] with query parameters into a display format instead
+/// of the default URI encoding.
+String urlToDisplayString(Uri uri) {
+  final StringBuffer base = StringBuffer(uri.replace(
+    queryParameters: <String, String>{},
+  ).toString());
+  base.write(uri.queryParameters.keys.map((String key) => '$key=${uri.queryParameters[key]}').join('&'));
+  return base.toString();
 }

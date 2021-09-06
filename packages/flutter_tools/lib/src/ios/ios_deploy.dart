@@ -19,7 +19,7 @@ import '../base/process.dart';
 import '../cache.dart';
 import '../convert.dart';
 import 'code_signing.dart';
-import 'devices.dart';
+import 'iproxy.dart';
 
 // Error message patterns from ios-deploy output
 const String noProvisioningProfileErrorOne = 'Error 0xe8008015';
@@ -91,7 +91,7 @@ class IOSDeploy {
     @required String bundlePath,
     @required Directory appDeltaDirectory,
     @required List<String>launchArguments,
-    @required IOSDeviceInterface interfaceType,
+    @required IOSDeviceConnectionInterface interfaceType,
   }) async {
     appDeltaDirectory?.createSync(recursive: true);
     final List<String> launchCommand = <String>[
@@ -104,7 +104,7 @@ class IOSDeploy {
         '--app_deltas',
         appDeltaDirectory.path,
       ],
-      if (interfaceType != IOSDeviceInterface.network)
+      if (interfaceType != IOSDeviceConnectionInterface.network)
         '--no-wifi',
       if (launchArguments.isNotEmpty) ...<String>[
         '--args',
@@ -129,7 +129,7 @@ class IOSDeploy {
     @required String bundlePath,
     @required Directory appDeltaDirectory,
     @required List<String> launchArguments,
-    @required IOSDeviceInterface interfaceType,
+    @required IOSDeviceConnectionInterface interfaceType,
   }) {
     appDeltaDirectory?.createSync(recursive: true);
     // Interactive debug session to support sending the lldb detach command.
@@ -148,7 +148,7 @@ class IOSDeploy {
         appDeltaDirectory.path,
       ],
       '--debug',
-      if (interfaceType != IOSDeviceInterface.network)
+      if (interfaceType != IOSDeviceConnectionInterface.network)
         '--no-wifi',
       if (launchArguments.isNotEmpty) ...<String>[
         '--args',
@@ -171,7 +171,7 @@ class IOSDeploy {
     @required String bundlePath,
     @required Directory appDeltaDirectory,
     @required List<String> launchArguments,
-    @required IOSDeviceInterface interfaceType,
+    @required IOSDeviceConnectionInterface interfaceType,
   }) async {
     appDeltaDirectory?.createSync(recursive: true);
     final List<String> launchCommand = <String>[
@@ -184,7 +184,7 @@ class IOSDeploy {
         '--app_deltas',
         appDeltaDirectory.path,
       ],
-      if (interfaceType != IOSDeviceInterface.network)
+      if (interfaceType != IOSDeviceConnectionInterface.network)
         '--no-wifi',
       '--justlaunch',
       if (launchArguments.isNotEmpty) ...<String>[

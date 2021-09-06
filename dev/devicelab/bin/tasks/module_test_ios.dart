@@ -18,7 +18,7 @@ import 'package:path/path.dart' as path;
 /// adding Flutter to an existing iOS app.
 Future<void> main() async {
   await task(() async {
-    String simulatorDeviceId;
+    late String simulatorDeviceId;
     section('Create Flutter module project');
 
     final Directory tempDir = Directory.systemTemp.createTempSync('flutter_module_test.');
@@ -57,6 +57,8 @@ Future<void> main() async {
         );
       });
 
+      checkDirectoryExists(path.join(projectDir.path, '.ios', 'Flutter', 'engine', 'Flutter.xcframework'));
+
       final Directory ephemeralIOSHostApp = Directory(path.join(
         projectDir.path,
         'build',
@@ -89,6 +91,8 @@ Future<void> main() async {
           options: <String>['ios', '--no-codesign', '--profile'],
         );
       });
+
+      checkDirectoryExists(path.join(projectDir.path, '.ios', 'Flutter', 'engine', 'Flutter.xcframework'));
 
       if (!exists(ephemeralIOSHostApp)) {
         return TaskResult.failure('Failed to build ephemeral host .app');
@@ -126,6 +130,7 @@ Future<void> main() async {
       if (!exists(ephemeralSimulatorHostApp)) {
         return TaskResult.failure('Failed to build ephemeral host .app');
       }
+      checkFileExists(path.join(ephemeralSimulatorHostApp.path, 'Frameworks', 'Flutter.framework', 'Flutter'));
 
       if (!exists(File(path.join(
         ephemeralSimulatorHostApp.path,
@@ -170,6 +175,7 @@ Future<void> main() async {
           options: <String>['ios', '--no-codesign', '-v'],
         );
       });
+      checkDirectoryExists(path.join(projectDir.path, '.ios', 'Flutter', 'engine', 'Flutter.xcframework'));
 
       final bool ephemeralHostAppWithCocoaPodsBuilt = exists(ephemeralIOSHostApp);
 
@@ -189,6 +195,7 @@ Future<void> main() async {
       }
 
       checkFileExists(path.join(ephemeralIOSHostApp.path, 'Frameworks', 'device_info.framework', 'device_info'));
+      checkFileExists(path.join(ephemeralIOSHostApp.path, 'Frameworks', 'Flutter.framework', 'Flutter'));
 
       // Static, no embedded framework.
       checkDirectoryNotExists(path.join(ephemeralIOSHostApp.path, 'Frameworks', 'google_sign_in.framework'));
@@ -351,21 +358,24 @@ Future<void> main() async {
         );
 
         if (testResultExit != 0) {
-          // Zip the test results to the artifacts directory for upload.
-          await inDirectory(resultBundleTemp, () {
-            final String zipPath = path.join(hostAgent.dumpDirectory.path,
-                'module_test_ios-objc-${DateTime.now().toLocal().toIso8601String()}.zip');
-            return exec(
-              'zip',
-              <String>[
-                '-r',
-                '-9',
-                zipPath,
-                'result.xcresult',
-              ],
-              canFail: true, // Best effort to get the logs.
-            );
-          });
+          final Directory? dumpDirectory = hostAgent.dumpDirectory;
+          if (dumpDirectory != null) {
+            // Zip the test results to the artifacts directory for upload.
+            await inDirectory(resultBundleTemp, () {
+              final String zipPath = path.join(dumpDirectory.path,
+                  'module_test_ios-objc-${DateTime.now().toLocal().toIso8601String()}.zip');
+              return exec(
+                'zip',
+                <String>[
+                  '-r',
+                  '-9',
+                  zipPath,
+                  'result.xcresult',
+                ],
+                canFail: true, // Best effort to get the logs.
+              );
+            });
+          }
 
           throw TaskResult.failure('Platform unit tests failed');
         }

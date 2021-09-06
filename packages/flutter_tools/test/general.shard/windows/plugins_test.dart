@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -35,7 +33,7 @@ const String kPluginDependencies = r'''
 
 void main() {
 
-  testWithoutContext('injects Win32 plugins', () async {
+  testWithoutContext('Win32 injects Win32 plugins', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     setUpProject(fileSystem);
     final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
@@ -46,7 +44,12 @@ void main() {
         path: 'foo',
         defaultPackagePlatforms: const <String, String>{},
         pluginDartClassPlatforms: const <String, String>{},
-        platforms: const <String, PluginPlatform>{WindowsPlugin.kConfigKey: WindowsPlugin(name: 'test', pluginClass: 'Foo')},
+        platforms: const <String, PluginPlatform>{
+          WindowsPlugin.kConfigKey: WindowsPlugin(
+            name: 'test',
+            pluginClass: 'Foo',
+            variants: <PluginPlatformVariant>{PluginPlatformVariant.win32},
+          )},
         dependencies: <String>[],
         isDirectDependency: true,
       ),
@@ -61,7 +64,7 @@ void main() {
     );
   });
 
-  testWithoutContext('UWP injects Win32 plugins', () async {
+  testWithoutContext('UWP injects plugins marked as UWP-compatible', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     setUpProject(fileSystem);
     final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
@@ -72,7 +75,12 @@ void main() {
         path: 'foo',
         defaultPackagePlatforms: const <String, String>{},
         pluginDartClassPlatforms: const <String, String>{},
-        platforms: const <String, PluginPlatform>{WindowsPlugin.kConfigKey: WindowsPlugin(name: 'test', pluginClass: 'Foo')},
+        platforms: const <String, PluginPlatform>{
+          WindowsPlugin.kConfigKey: WindowsPlugin(
+            name: 'test',
+            pluginClass: 'Foo',
+            variants: <PluginPlatformVariant>{PluginPlatformVariant.winuwp},
+          )},
         dependencies: <String>[],
         isDirectDependency: true,
       ),
@@ -84,6 +92,37 @@ void main() {
     expect(
       managed.childFile('generated_plugin_registrant.cc').readAsStringSync(),
       contains('#include <test/foo.h>'),
+    );
+  });
+
+  testWithoutContext('UWP does not inject Win32-only plugins', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    setUpProject(fileSystem);
+    final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+
+    await writeWindowsUwpPluginFiles(flutterProject, <Plugin>[
+      Plugin(
+        name: 'test',
+        path: 'foo',
+        defaultPackagePlatforms: const <String, String>{},
+        pluginDartClassPlatforms: const <String, String>{},
+        platforms: const <String, PluginPlatform>{
+          WindowsPlugin.kConfigKey: WindowsPlugin(
+            name: 'test',
+            pluginClass: 'Foo',
+            variants: <PluginPlatformVariant>{PluginPlatformVariant.win32},
+          )},
+        dependencies: <String>[],
+        isDirectDependency: true,
+      ),
+    ], renderer);
+
+    final Directory managed = flutterProject.windowsUwp.managedDirectory;
+    expect(flutterProject.windowsUwp.generatedPluginCmakeFile, exists);
+    expect(managed.childFile('generated_plugin_registrant.h'), exists);
+    expect(
+      managed.childFile('generated_plugin_registrant.cc').readAsStringSync(),
+      isNot(contains('#include <test/foo.h>')),
     );
   });
 

@@ -175,6 +175,9 @@ class FakePollingDeviceDiscovery extends PollingDeviceDiscovery {
 
   @override
   Stream<Device> get onRemoved => _onRemovedController.stream;
+
+  @override
+  List<String> wellKnownIds = <String>[];
 }
 
 /// A fake implementation of the [DeviceLogReader].

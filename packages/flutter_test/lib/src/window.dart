@@ -354,6 +354,16 @@ class TestWindow implements ui.SingletonFlutterWindow {
   }
 
   @override
+  ui.ViewConfiguration get viewConfiguration => _viewConfiguration ?? _window.viewConfiguration;
+  ui.ViewConfiguration? _viewConfiguration;
+
+  /// Hide the real view configuration and report the provided [value] instead.
+  set viewConfigurationTestValue(ui.ViewConfiguration? value) {
+    _viewConfiguration = value;
+    onMetricsChanged?.call();
+  }
+
+  @override
   ui.VoidCallback? get onAccessibilityFeaturesChanged => platformDispatcher.onAccessibilityFeaturesChanged;
   @override
   set onAccessibilityFeaturesChanged(ui.VoidCallback? callback) {
@@ -379,8 +389,16 @@ class TestWindow implements ui.SingletonFlutterWindow {
     platformDispatcher.sendPlatformMessage(name, data, callback);
   }
 
+  @Deprecated(
+    'Instead of calling this callback, use ServicesBinding.instance.channelBuffers.push. '
+    'This feature was deprecated after v2.1.0-10.0.pre.'
+  )
   @override
   ui.PlatformMessageCallback? get onPlatformMessage => platformDispatcher.onPlatformMessage;
+  @Deprecated(
+    'Instead of setting this callback, use ServicesBinding.instance.defaultBinaryMessenger.setMessageHandler. '
+    'This feature was deprecated after v2.1.0-10.0.pre.'
+  )
   @override
   set onPlatformMessage(ui.PlatformMessageCallback? callback) {
     platformDispatcher.onPlatformMessage = callback;

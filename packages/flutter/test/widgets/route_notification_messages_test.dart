@@ -55,7 +55,7 @@ void main() {
 
     final List<MethodCall> log = <MethodCall>[];
 
-    SystemChannels.navigation.setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (MethodCall methodCall) async {
       log.add(methodCall);
     });
 
@@ -69,6 +69,7 @@ void main() {
         arguments: <String, dynamic>{
           'location': '/',
           'state': null,
+          'replace': false,
         },
       ),
     ]);
@@ -86,6 +87,7 @@ void main() {
         arguments: <String, dynamic>{
           'location': '/A',
           'state': null,
+          'replace': false,
         },
       ),
     );
@@ -103,6 +105,7 @@ void main() {
         arguments: <String, dynamic>{
           'location': '/',
           'state': null,
+          'replace': false,
         },
       ),
     );
@@ -110,7 +113,7 @@ void main() {
 
   testWidgets('Navigator does not report route name by default', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
-    SystemChannels.navigation.setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (MethodCall methodCall) async {
       log.add(methodCall);
     });
 
@@ -160,7 +163,7 @@ void main() {
 
     final List<MethodCall> log = <MethodCall>[];
 
-    SystemChannels.navigation.setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (MethodCall methodCall) async {
       log.add(methodCall);
     });
 
@@ -174,6 +177,7 @@ void main() {
         arguments: <String, dynamic>{
           'location': '/',
           'state': null,
+          'replace': false,
         },
       ),
     ]);
@@ -191,6 +195,7 @@ void main() {
         arguments: <String, dynamic>{
           'location': '/A',
           'state': null,
+          'replace': false,
         },
       ),
     );
@@ -208,6 +213,7 @@ void main() {
         arguments: <String, dynamic>{
           'location': '/B',
           'state': null,
+          'replace': false,
         },
       ),
     );
@@ -215,7 +221,7 @@ void main() {
 
   testWidgets('Nameless routes should send platform messages', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
-    SystemChannels.navigation.setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (MethodCall methodCall) async {
       log.add(methodCall);
     });
 
@@ -243,6 +249,7 @@ void main() {
         arguments: <String, dynamic>{
           'location': '/home',
           'state': null,
+          'replace': false,
         },
       ),
     ]);
@@ -257,7 +264,7 @@ void main() {
 
   testWidgets('PlatformRouteInformationProvider reports URL', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
-    SystemChannels.navigation.setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (MethodCall methodCall) async {
       log.add(methodCall);
     });
 
@@ -279,6 +286,15 @@ void main() {
       routerDelegate: delegate,
     ));
     expect(find.text('initial'), findsOneWidget);
+    expect(log, <Object>[
+      isMethodCall('selectMultiEntryHistory', arguments: null),
+      isMethodCall('routeInformationUpdated', arguments: <String, dynamic>{
+        'location': 'initial',
+        'state': null,
+        'replace': false,
+      }),
+    ]);
+    log.clear();
 
     // Triggers a router rebuild and verify the route information is reported
     // to the web engine.
@@ -294,6 +310,7 @@ void main() {
       isMethodCall('routeInformationUpdated', arguments: <String, dynamic>{
         'location': 'update',
         'state': 'state',
+        'replace': false,
       }),
     ]);
   });

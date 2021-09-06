@@ -166,7 +166,6 @@ class RestorationManager extends ChangeNotifier {
   /// that communications channel, or to set it up differently, as necessary.
   @protected
   void initChannels() {
-    assert(!SystemChannels.restoration.checkMethodCallHandler(_methodHandler));
     SystemChannels.restoration.setMethodCallHandler(_methodHandler);
   }
 

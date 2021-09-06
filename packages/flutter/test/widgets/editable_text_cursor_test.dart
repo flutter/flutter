@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+
 @TestOn('!chrome')
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -79,9 +83,11 @@ void main() {
 
     // Populate a fake clipboard.
     const String clipboardContent = ' ';
-    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.getData')
         return const <String, dynamic>{'text': clipboardContent};
+      if (methodCall.method == 'Clipboard.hasStrings')
+        return <String, dynamic>{'value': clipboardContent.isNotEmpty};
       return null;
     });
 
@@ -131,9 +137,11 @@ void main() {
 
     // Populate a fake clipboard.
     const String clipboardContent = ' ';
-    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.getData')
         return const <String, dynamic>{'text': clipboardContent};
+      if (methodCall.method == 'Clipboard.hasStrings')
+        return <String, dynamic>{'value': clipboardContent.isNotEmpty};
       return null;
     });
 
@@ -328,6 +336,8 @@ void main() {
   });
 
   testWidgets('Cursor animation restarts when it is moved using keys on desktop', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+
     const String testText = 'Some text long enough to move the cursor around';
     final TextEditingController controller = TextEditingController(text: testText);
     final Widget widget = MaterialApp(
@@ -400,7 +410,9 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1));
     expect(renderEditable.cursorColor!.alpha, 0);
     expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS }));
+
+    debugDefaultTargetPlatformOverride = null;
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Cursor does not show when showCursor set to false', (WidgetTester tester) async {
     const Widget widget = MaterialApp(
@@ -853,9 +865,11 @@ void main() {
 
     // Populate a fake clipboard.
     const String clipboardContent = 'Hello world!';
-    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.getData')
         return const <String, dynamic>{'text': clipboardContent};
+      if (methodCall.method == 'Clipboard.hasStrings')
+        return <String, dynamic>{'value': clipboardContent.isNotEmpty};
       return null;
     });
 
@@ -911,9 +925,11 @@ void main() {
 
     // Populate a fake clipboard.
     const String clipboardContent = 'Hello world!';
-    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.getData')
         return const <String, dynamic>{'text': clipboardContent};
+      if (methodCall.method == 'Clipboard.hasStrings')
+        return <String, dynamic>{'value': clipboardContent.isNotEmpty};
       return null;
     });
 

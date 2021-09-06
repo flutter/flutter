@@ -86,7 +86,7 @@ void main() {
 
   testWidgets('Validator sets the error text only when validate is called', (WidgetTester tester) async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-    String? errorText(String? value) => (value ?? '') + '/error';
+    String? errorText(String? value) => '${value ?? ''}/error';
 
     Widget builder(AutovalidateMode autovalidateMode) {
       return MaterialApp(
@@ -274,7 +274,7 @@ void main() {
       await tester.pump();
 
       // Check for a new Text widget with our error text.
-      expect(find.text(testValue + '/error'), findsOneWidget);
+      expect(find.text('$testValue/error'), findsOneWidget);
       return;
     }
 

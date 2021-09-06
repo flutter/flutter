@@ -55,6 +55,6 @@ void main() {
       await driver.runUnsynchronized(() async {
         await testScrollPerf('platform-views-scroll', 'platform_views_scroll_perf');
       });
-    });
+    }, timeout: Timeout.none);
   });
 }

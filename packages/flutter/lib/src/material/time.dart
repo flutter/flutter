@@ -92,7 +92,9 @@ class TimeOfDay {
   DayPeriod get period => hour < hoursPerPeriod ? DayPeriod.am : DayPeriod.pm;
 
   /// Which hour of the current period (e.g., am or pm) this time is.
-  int get hourOfPeriod => hour - periodOffset;
+  ///
+  /// For 12AM (midnight) and 12PM (noon) this returns 12.
+  int get hourOfPeriod => hour == 0 || hour == 12 ? 12 : hour - periodOffset;
 
   /// The hour at which the current period starts.
   int get periodOffset => period == DayPeriod.am ? 0 : hoursPerPeriod;

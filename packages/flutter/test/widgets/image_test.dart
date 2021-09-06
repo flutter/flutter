@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:typed_data';
@@ -751,6 +755,19 @@ void main() {
     final RenderImage renderer = tester.renderObject<RenderImage>(find.byType(Image));
     expect(renderer.color, const Color(0xFF00FF00));
     expect(renderer.colorBlendMode, BlendMode.clear);
+  });
+
+  testWidgets('Image opacity parameter', (WidgetTester tester) async {
+    const Animation<double> opacity = AlwaysStoppedAnimation<double>(0.5);
+    await tester.pumpWidget(
+      Image(
+        excludeFromSemantics: true,
+        image: _TestImageProvider(),
+        opacity: opacity,
+      ),
+    );
+    final RenderImage renderer = tester.renderObject<RenderImage>(find.byType(Image));
+    expect(renderer.opacity, opacity);
   });
 
   testWidgets('Precache', (WidgetTester tester) async {
@@ -1718,7 +1735,58 @@ void main() {
       await _testRotatedImage(tester, true);
       await _testRotatedImage(tester, false);
     },
-    skip: kIsWeb, // https://github.com/flutter/flutter/issues/54292.
+    skip: kIsWeb, // https://github.com/flutter/flutter/issues/87933.
+  );
+
+  testWidgets(
+    'Image opacity',
+    (WidgetTester tester) async {
+      final Key key = UniqueKey();
+      await tester.pumpWidget(RepaintBoundary(
+        key: key,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          textDirection: TextDirection.ltr,
+          children: <Widget>[
+            Image.memory(
+              Uint8List.fromList(kBlueRectPng),
+              opacity: const AlwaysStoppedAnimation<double>(0.25),
+            ),
+            Image.memory(
+              Uint8List.fromList(kBlueRectPng),
+              opacity: const AlwaysStoppedAnimation<double>(0.5),
+            ),
+            Image.memory(
+              Uint8List.fromList(kBlueRectPng),
+              opacity: const AlwaysStoppedAnimation<double>(0.75),
+            ),
+            Image.memory(
+              Uint8List.fromList(kBlueRectPng),
+              opacity: const AlwaysStoppedAnimation<double>(1.0),
+            ),
+          ],
+        ),
+      ));
+
+      // precacheImage is needed, or the image in the golden file will be empty.
+      if (!kIsWeb) {
+        final Finder allImages = find.byType(Image);
+        for (final Element e in allImages.evaluate()) {
+          await tester.runAsync(() async {
+            final Image image = e.widget as Image;
+            await precacheImage(image.image, e);
+          });
+        }
+        await tester.pumpAndSettle();
+      }
+
+      await expectLater(
+        find.byKey(key),
+        matchesGoldenFile('transparent_image.png'),
+      );
+    },
+    skip: kIsWeb, // https://github.com/flutter/flutter/issues/87933.
   );
 
   testWidgets('Reports image size when painted', (WidgetTester tester) async {
@@ -1755,7 +1823,7 @@ void main() {
       const ImageSizeInfo(
         source: 'test.png',
         imageSize: Size(100, 100),
-        displaySize: Size(50, 50),
+        displaySize: Size(150, 150),
       ),
     );
 
@@ -1801,7 +1869,7 @@ void main() {
     // Image cache listener go away and Image stream listeners go away.
     // Image is now at zero.
     expect(image.debugGetOpenHandleStackTraces()!.length, 0);
-  }, skip: kIsWeb); // Web does not care about image handle/disposal.
+  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87442
 
   testWidgets('Keeps stream alive when ticker mode is disabled',  (WidgetTester tester) async {
     imageCache!.maximumSize = 0;
