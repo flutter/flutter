@@ -676,7 +676,7 @@ class ListTile extends StatelessWidget {
   ///
   /// For example, on Android a tap will produce a clicking sound and a
   /// long-press will produce a short vibration, when feedback is enabled.
-  /// 
+  ///
   /// When null, the default value is true.
   ///
   /// See also:
