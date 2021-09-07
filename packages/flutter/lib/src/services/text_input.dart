@@ -743,7 +743,7 @@ enum TextEditingDeltaType {
   /// {@endtemplate}
   replacement,
 
-  /// {@template flutter.services.TextEditingDeltaEquality}
+  /// {@template flutter.services.TextEditingDeltaNonTextUpdate}
   /// The delta is not modifying the text. There are potentially selection and
   /// composing region updates in the delta that still need to be applied to your
   /// text model.
@@ -751,7 +751,7 @@ enum TextEditingDeltaType {
   /// handles. There are no changes to the text, but there are updates to the selection
   /// and potentially the composing region as well.
   /// {@endtemplate}
-  equality,
+  nonTextUpdate,
 }
 
 /// A mixin for manipulating a string of text.
@@ -780,8 +780,8 @@ abstract class TextEditingDelta with TextEditingDeltaUtils {
   /// {@endtemplate}
   const TextEditingDelta({
     required this.oldText,
-    required this.deltaText,
-    required this.deltaRange,
+    this.deltaText = '',
+    this.deltaRange = const TextRange.collapsed(-1),
     required this.selection,
     required this.composing,
   }) : assert(oldText != null),
@@ -800,14 +800,16 @@ abstract class TextEditingDelta with TextEditingDeltaUtils {
         return TextEditingDeltaDeletion.fromJSON(encoded);
       case 'TextEditingDeltaType.replacement':
         return TextEditingDeltaReplacement.fromJSON(encoded);
-      case 'TextEditingDeltaType.equality':
-        return TextEditingDeltaEquality.fromJSON(encoded);
+      case 'TextEditingDeltaType.nonTextUpdate':
+        return TextEditingDeltaNonTextUpdate.fromJSON(encoded);
       default:
-        return TextEditingDeltaEquality.fromJSON(encoded);
+        // Default clause should not be reachable.
+        assert(false);
+        return TextEditingDeltaNonTextUpdate.fromJSON(encoded);
     }
   }
 
-  /// The old text state before the delta has occured.
+  /// The old text state before the delta has occurred.
   final String oldText;
 
   /// The value represents the text that is being inserted/deleted by this delta.
@@ -823,7 +825,7 @@ abstract class TextEditingDelta with TextEditingDeltaUtils {
   /// For a [TextEditingDeltaType.replacement] this will be the text that is
   /// replacing the [TextEditingDelta.deltaRange].
   ///
-  /// For a [TextEditingDeltaType.equality] this will be an empty string.
+  /// For a [TextEditingDeltaType.nonTextUpdate] this will be an empty string.
   final String deltaText;
 
   /// This value can either represent a range of text that the delta is changing
@@ -841,7 +843,7 @@ abstract class TextEditingDelta with TextEditingDeltaUtils {
   /// For a [TextEditingDeltaType.replacement] this will be the range of
   /// characters that are being replaced.
   ///
-  /// For a [TextEditingDeltaType.equality] this will be a collapsed range
+  /// For a [TextEditingDeltaType.nonTextUpdate] this will be a collapsed range
   /// of (-1,-1).
   final TextRange deltaRange;
 
@@ -864,7 +866,15 @@ abstract class TextEditingDelta with TextEditingDeltaUtils {
   /// This method will take the given [TextEditingValue] and return a new
   /// [TextEditingValue] with that instance of [TextEditingDelta] applied to it.
   /// {@endtemplate}
-  TextEditingValue apply(TextEditingValue value);
+  TextEditingValue apply(TextEditingValue value) {
+    // Verify that the delta we are applying is applicable to the given
+    // editing state. If not then we return the original value.
+    if (value.text != oldText) {
+      return value;
+    }
+
+    return apply(value);
+  }
 }
 
 /// {@macro flutter.services.TextEditingDeltaInsertion}
@@ -1032,34 +1042,27 @@ class TextEditingDeltaReplacement extends TextEditingDelta {
   }
 }
 
-/// {@macro flutter.services.TextEditingDeltaEquality}
-class TextEditingDeltaEquality extends TextEditingDelta {
-  /// Creates an equality delta for a given change to the editing state.
+/// {@macro flutter.services.TextEditingDeltaNonTextUpdate}
+class TextEditingDeltaNonTextUpdate extends TextEditingDelta {
+  /// Creates a delta representing no changes to the text value of the current
+  /// editing state. This delta includes updates to the selection and/or composing
+  /// regions.
   ///
   /// {@macro flutter.services.TextEditingDelta}
-  const TextEditingDeltaEquality({
+  const TextEditingDeltaNonTextUpdate({
     required String oldText,
-    required String deltaText,
-    required TextRange deltaRange,
     required TextSelection selection,
     required TextRange composing,
   }) : super(
     oldText: oldText,
-    deltaText: deltaText,
-    deltaRange: deltaRange,
     selection: selection,
     composing:composing,
   );
 
   /// Creates an instance of this class from a JSON object.
-  factory TextEditingDeltaEquality.fromJSON(Map<String, dynamic> encoded) {
-    return TextEditingDeltaEquality(
+  factory TextEditingDeltaNonTextUpdate.fromJSON(Map<String, dynamic> encoded) {
+    return TextEditingDeltaNonTextUpdate(
       oldText: encoded['oldText'] as String,
-      deltaText: encoded['deltaText'] as String,
-      deltaRange: TextRange(
-        start: encoded['deltaStart'] as int? ?? -1,
-        end: encoded['deltaEnd'] as int? ?? -1,
-      ),
       selection: TextSelection(
         baseOffset: encoded['selectionBase'] as int? ?? -1,
         extentOffset: encoded['selectionExtent'] as int? ?? -1,
@@ -1076,7 +1079,7 @@ class TextEditingDeltaEquality extends TextEditingDelta {
 
   /// {@macro flutter.services.TextEditingDelta.deltaType}
   @override
-  TextEditingDeltaType get deltaType => TextEditingDeltaType.equality;
+  TextEditingDeltaType get deltaType => TextEditingDeltaType.nonTextUpdate;
 
   /// {@macro flutter.services.TextEditingDelta.deltaType}
   @override
@@ -1810,21 +1813,6 @@ class TextInput {
         if (client != null && client.textInputConfiguration.autofillConfiguration.enabled) {
           client.autofill(textEditingValue);
         }
-      }
-
-      return;
-    }
-
-    if (method == 'TextInputClient.updateEditingStateWithDeltasWithTag') {
-      assert(_currentConnection!._client != null);
-      final TextInputClient client = _currentConnection!._client;
-      final AutofillScope? scope = client.currentAutofillScope;
-      final Map<String, dynamic> editingDelta = args[1] as Map<String, dynamic>;
-      for (final String tag in editingDelta.keys) {
-        final TextEditingDelta textEditingDelta = TextEditingDelta.fromJSON(
-          editingDelta[tag] as Map<String, dynamic>,
-        );
-        scope?.getAutofillClient(tag)?.updateEditingValueWithDeltas(<TextEditingDelta>[textEditingDelta]);
       }
 
       return;

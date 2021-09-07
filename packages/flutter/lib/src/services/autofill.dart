@@ -763,10 +763,6 @@ abstract class AutofillClient {
   /// Requests this [AutofillClient] update its [TextEditingValue] to the given
   /// value.
   void autofill(TextEditingValue newEditingValue);
-
-  /// Requests this [AutofillClient] update its [TextEditingValue] using the
-  /// given [TextEditingDelta]'s.
-  void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas);
 }
 
 /// An ordered group within which [AutofillClient]s are logically connected.
