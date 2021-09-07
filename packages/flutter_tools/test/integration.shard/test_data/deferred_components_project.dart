@@ -109,7 +109,7 @@ class BasicDeferredComponentsConfig extends DeferredComponentsConfig {
   @override
   String get androidBuild => r'''
   buildscript {
-      ext.kotlin_version = '1.3.50'
+      ext.kotlin_version = '1.4.32'
       repositories {
           google()
           mavenCentral()
