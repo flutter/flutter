@@ -6878,23 +6878,23 @@ void main() {
 
       const String jsonReplacementDelta = '{'
           '"oldText": "let there be",'
-          ' "deltaText": "be light",'
+          ' "deltaText": "b light",'
           ' "deltaStart": 10,'
           ' "deltaEnd": 12,'
-          ' "selectionBase": 18,'
-          ' "selectionExtent": 18,'
+          ' "selectionBase": 17,'
+          ' "selectionExtent": 17,'
           ' "selectionAffinity" : "TextAffinity.downstream" ,'
           ' "selectionIsDirectional": false,'
           ' "composingBase": -1,'
           ' "composingExtent": -1}';
 
       const String jsonNonTextUpdateDelta = '{'
-          '"oldText": "let there be light",'
+          '"oldText": "let there b light",'
           ' "deltaText": "",'
           ' "deltaStart": -1,'
           ' "deltaEnd": -1,'
-          ' "selectionBase": 18,'
-          ' "selectionExtent": 18,'
+          ' "selectionBase": 17,'
+          ' "selectionExtent": 17,'
           ' "selectionAffinity" : "TextAffinity.downstream",'
           ' "selectionIsDirectional": false,'
           ' "composingBase": -1,'
@@ -6911,7 +6911,7 @@ void main() {
 
       state.updateEditingValueWithDeltas(<TextEditingDelta>[insertionDelta, deletionDelta, replacementDelta, nonTextUpdateDelta]);
       await tester.pump();
-      expect(controller.text, 'let there be light');
+      expect(controller.text, 'let there b light');
       expect(controller.selection, nonTextUpdateDelta.selection);
       expect(state.currentTextEditingValue.composing, nonTextUpdateDelta.composing);
     });
