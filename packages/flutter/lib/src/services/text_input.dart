@@ -797,7 +797,7 @@ abstract class TextEditingDelta with TextEditingDeltaUtils {
     final int start = encoded['deltaStart'] as int;
     final int end = encoded['deltaEnd'] as int;
     final String tb = encoded['deltaText'] as String;
-    final int tbStart = 0;
+    const int tbStart = 0;
     final int tbEnd = tb.length;
 
     // This delta is explicitly a non text update.
