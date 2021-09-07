@@ -1809,13 +1809,6 @@ class TextInput {
 
     String newComposingText;
     String originalComposingText;
-    print('isDeletionGreaterThanOne: ' + isDeletionGreaterThanOne.toString());
-    print('isDeletingByReplacingWithEmpty: ' + isDeletingByReplacingWithEmpty.toString());
-    print('isReplacedByShorter: ' + isReplacedByShorter.toString());
-    print('isReplacedBylonger: ' + isReplacedByLonger.toString());
-    print('isReplacedBySame: ' + isReplacedBySame.toString());
-    print('isInsertedInsideMarkedText: ' + isInsertingInsideComposingRegion.toString());
-    print('isDeletingInsideMarkedText: ' + isDeletingInsideComposingRegion.toString());
 
     if (isDeletingByReplacingWithEmpty || isDeletingInsideComposingRegion || isReplacedByShorter) {
       newComposingText = tb.substring(tbStart, tbEnd);
@@ -1824,22 +1817,15 @@ class TextInput {
       newComposingText = tb.substring(tbStart, tbStart + (end - start));
       originalComposingText = oldText.substring(start, end);
     }
-    print('newComposingText: ' + newComposingText);
-    print('originalComposingText: ' + originalComposingText);
 
     final bool isOriginalComposingRegionTextChanged = !(originalComposingText == newComposingText);
-    print('isOriginalComposingRegiontextChanged: ' + isOriginalComposingRegionTextChanged.toString());
-
     final bool isReplaced = isOriginalComposingRegionTextChanged ||
         (isReplacedByLonger || isReplacedByShorter || isReplacedBySame);
-
-    print('isReplaced: ' + isReplaced.toString());
 
     if (isEqual) {
       jsonEncoded.putIfAbsent('deltaType', () => 'TextEditingDeltaType.nonTextUpdate');
     } else if ((isDeletingByReplacingWithEmpty || isDeletingInsideComposingRegion) &&
         !isOriginalComposingRegionTextChanged) {  // Deletion.
-      print('isDeleting');
       int actualStart = start;
 
       if (!isDeletionGreaterThanOne) {
@@ -1852,14 +1838,11 @@ class TextInput {
       jsonEncoded.update('deltaText', (value) => '');
     } else if ((start == end || isInsertingInsideComposingRegion) &&
         !isOriginalComposingRegionTextChanged) {  // Insertion.
-      print('insertion');
-      // [text substringWithRange:NSMakeRange(end - start, text.length - (end - start))]
       jsonEncoded.putIfAbsent('deltaType', () => 'TextEditingDeltaType.insertion');
       jsonEncoded.update('deltaStart', (value) => end);
       jsonEncoded.update('deltaEnd', (value) => end);
       jsonEncoded.update('deltaText', (value) => tb.substring(end - start, (end - start) + (tb.length - (end - start))));
     } else if (isReplaced) {  // Replacement.
-      print('replacement');
       jsonEncoded.putIfAbsent('deltaType', () => 'TextEditingDeltaType.replacement');
       jsonEncoded.update('deltaStart', (value) => start);
       jsonEncoded.update('deltaEnd', (value) => end);
