@@ -335,7 +335,7 @@ class SwitchListTile extends StatelessWidget {
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
 
-  /// If specified, defines the feedback property for `SwitchListTile`.
+  /// {@macro flutter.material.ListTile.enableFeedback}
   final bool? enableFeedback;
 
   @override

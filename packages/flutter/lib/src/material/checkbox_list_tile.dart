@@ -266,7 +266,7 @@ class CheckboxListTile extends StatelessWidget {
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
 
-  /// If specified, defines the feedback property for `CheckboxListTile`.
+  /// {@macro flutter.material.ListTile.enableFeedback}
   final bool? enableFeedback;
 
   void _handleValueChange() {

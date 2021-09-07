@@ -286,7 +286,7 @@ class RadioListTile<T> extends StatelessWidget {
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
 
-  /// If specified, defines the feedback property for `RadioListTile`.
+  /// {@macro flutter.material.ListTile.enableFeedback}
   final bool? enableFeedback;
 
   @override
