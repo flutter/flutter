@@ -1436,16 +1436,6 @@ targets:
       task_name: flutter_gallery__start_up
     scheduler: luci
 
-  - name: Linux_android flutter_gallery__transition_perf
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","linux"]
-      task_name: flutter_gallery__transition_perf
-    scheduler: luci
-
   - name: Linux_android flutter_gallery_android__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
