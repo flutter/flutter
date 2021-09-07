@@ -790,23 +790,125 @@ abstract class TextEditingDelta with TextEditingDeltaUtils {
        assert(selection != null),
        assert(composing != null);
 
-  /// Creates an instance of this class from a JSON object by checking the
-  /// deltaType sent by the engine and building the appropriate delta.
+  /// Creates an instance of this class from a JSON object by inferring the
+  /// type of delta based on values sent from the engine.
   factory TextEditingDelta.fromJSON(Map<String, dynamic> encoded) {
-    switch (encoded['deltaType'] as String) {
-      case 'TextEditingDeltaType.insertion':
-        return TextEditingDeltaInsertion.fromJSON(encoded);
-      case 'TextEditingDeltaType.deletion':
-        return TextEditingDeltaDeletion.fromJSON(encoded);
-      case 'TextEditingDeltaType.replacement':
-        return TextEditingDeltaReplacement.fromJSON(encoded);
-      case 'TextEditingDeltaType.nonTextUpdate':
-        return TextEditingDeltaNonTextUpdate.fromJSON(encoded);
-      default:
-        // Default clause should not be reachable.
-        assert(false);
-        return TextEditingDeltaNonTextUpdate.fromJSON(encoded);
+    String oldText = encoded['oldText'] as String;
+    int start = encoded['deltaStart'] as int;
+    int end = encoded['deltaEnd'] as int;
+    String tb = encoded['deltaText'] as String;
+    int tbStart = 0;
+    int tbEnd = tb.length;
+
+    // This delta is explicitly a non text update.
+    bool isNonTextUpdate = start == -1 && start == end;
+    final TextRange newComposing = TextRange( 
+      start: encoded['composingBase'] as int? ?? -1,
+      end: encoded['composingExtent'] as int? ?? -1,
+    );
+    final TextSelection newSelection = TextSelection(
+      baseOffset: encoded['selectionBase'] as int? ?? -1,
+      extentOffset: encoded['selectionExtent'] as int? ?? -1,
+      affinity: _toTextAffinity(encoded['selectionAffinity'] as String?) ??
+          TextAffinity.downstream,
+      isDirectional: encoded['selectionIsDirectional'] as bool? ?? false,
+    );
+
+    if (isNonTextUpdate) {
+      return TextEditingDeltaNonTextUpdate(
+        oldText: oldText,
+        selection: newSelection,
+        composing: newComposing,
+      );
     }
+
+    final String textStart = oldText.substring(0, start);
+    final String textEnd = oldText.substring(end, oldText.length);
+    final String newText = textStart + tb + textEnd;
+
+    final bool isEqual = oldText == newText;
+
+    final bool isDeletionGreaterThanOne = (end - start) - (tbEnd - tbStart) > 1;
+    final bool isDeletingByReplacingWithEmpty = tb.length == 0 && tbStart == 0 && tbStart == tbEnd;
+
+    final bool isReplacedByShorter = isDeletionGreaterThanOne && (tbEnd - tbStart < end - start);
+    final bool isReplacedByLonger = tbEnd - tbStart > end - start;
+    final bool isReplacedBySame = tbEnd - tbStart == end - start;
+
+    final bool isInsertingInsideComposingRegion = start + tbEnd > end;
+    final bool isDeletingInsideComposingRegion =
+        !isReplacedByShorter && !isDeletingByReplacingWithEmpty && start + tbEnd < end;
+
+    String newComposingText;
+    String originalComposingText;
+
+    if (isDeletingByReplacingWithEmpty || isDeletingInsideComposingRegion || isReplacedByShorter) {
+      newComposingText = tb.substring(tbStart, tbEnd);
+      originalComposingText = oldText.substring(start, start + tbEnd);
+    } else {
+      newComposingText = tb.substring(tbStart, tbStart + (end - start));
+      originalComposingText = oldText.substring(start, end);
+    }
+
+    final bool isOriginalComposingRegionTextChanged = !(originalComposingText == newComposingText);
+    final bool isReplaced = isOriginalComposingRegionTextChanged ||
+        (isReplacedByLonger || isReplacedByShorter || isReplacedBySame);
+
+    if (isEqual) {
+      return TextEditingDeltaNonTextUpdate(
+        oldText: oldText,
+        selection: newSelection,
+        composing: newComposing,
+      );
+    } else if ((isDeletingByReplacingWithEmpty || isDeletingInsideComposingRegion) &&
+        !isOriginalComposingRegionTextChanged) {  // Deletion.
+      int actualStart = start;
+
+      if (!isDeletionGreaterThanOne) {
+        actualStart = end - 1;
+      }
+
+      return TextEditingDeltaDeletion(
+        oldText: oldText,
+        deltaText: tb,
+        deltaRange: TextRange(
+          start: actualStart,
+          end: end,
+        ),
+        selection: newSelection,
+        composing: newComposing,
+      );
+    } else if ((start == end || isInsertingInsideComposingRegion) &&
+        !isOriginalComposingRegionTextChanged) {  // Insertion.
+      return TextEditingDeltaInsertion(
+        oldText: oldText,
+        deltaText: tb.substring(end - start, (end - start) + (tb.length - (end - start))),
+        deltaRange: TextRange(
+          start: end,
+          end: end,
+        ),
+        selection: newSelection,
+        composing: newComposing,
+      );
+    } else if (isReplaced) {  // Replacement.
+      return TextEditingDeltaReplacement(
+        oldText: oldText,
+        deltaText: tb,
+        deltaRange: TextRange(
+          start: start,
+          end: end,
+        ),
+        selection: newSelection,
+        composing: newComposing,
+      );
+    }
+
+    assert(false);
+    return TextEditingDeltaNonTextUpdate(
+      oldText: oldText,
+      selection: newSelection,
+      composing: newComposing,
+    );
   }
 
   /// The old text state before the delta has occurred.
@@ -895,29 +997,6 @@ class TextEditingDeltaInsertion extends TextEditingDelta {
       composing:composing,
   );
 
-  /// Creates an instance of this class from a JSON object.
-  factory TextEditingDeltaInsertion.fromJSON(Map<String, dynamic> encoded) {
-    return TextEditingDeltaInsertion(
-      oldText: encoded['oldText'] as String,
-      deltaText: encoded['deltaText'] as String,
-      deltaRange: TextRange(
-        start: encoded['deltaStart'] as int? ?? -1,
-        end: encoded['deltaEnd'] as int? ?? -1,
-      ),
-      selection: TextSelection(
-        baseOffset: encoded['selectionBase'] as int? ?? -1,
-        extentOffset: encoded['selectionExtent'] as int? ?? -1,
-        affinity: _toTextAffinity(encoded['selectionAffinity'] as String?) ??
-            TextAffinity.downstream,
-        isDirectional: encoded['selectionIsDirectional'] as bool? ?? false,
-      ),
-      composing: TextRange(
-        start: encoded['composingBase'] as int? ?? -1,
-        end: encoded['composingExtent'] as int? ?? -1,
-      ),
-    );
-  }
-
   /// {@macro flutter.services.TextEditingDelta.deltaType}
   @override
   TextEditingDeltaType get deltaType => TextEditingDeltaType.insertion;
@@ -949,29 +1028,6 @@ class TextEditingDeltaDeletion extends TextEditingDelta {
     selection: selection,
     composing:composing,
   );
-
-  /// Creates an instance of this class from a JSON object.
-  factory TextEditingDeltaDeletion.fromJSON(Map<String, dynamic> encoded) {
-    return TextEditingDeltaDeletion(
-      oldText: encoded['oldText'] as String,
-      deltaText: encoded['deltaText'] as String,
-      deltaRange: TextRange(
-        start: encoded['deltaStart'] as int? ?? -1,
-        end: encoded['deltaEnd'] as int? ?? -1,
-      ),
-      selection: TextSelection(
-        baseOffset: encoded['selectionBase'] as int? ?? -1,
-        extentOffset: encoded['selectionExtent'] as int? ?? -1,
-        affinity: _toTextAffinity(encoded['selectionAffinity'] as String?) ??
-            TextAffinity.downstream,
-        isDirectional: encoded['selectionIsDirectional'] as bool? ?? false,
-      ),
-      composing: TextRange(
-        start: encoded['composingBase'] as int? ?? -1,
-        end: encoded['composingExtent'] as int? ?? -1,
-      ),
-    );
-  }
 
   /// {@macro flutter.services.TextEditingDelta.deltaType}
   @override
@@ -1005,29 +1061,6 @@ class TextEditingDeltaReplacement extends TextEditingDelta {
     composing:composing,
   );
 
-  /// Creates an instance of this class from a JSON object.
-  factory TextEditingDeltaReplacement.fromJSON(Map<String, dynamic> encoded) {
-    return TextEditingDeltaReplacement(
-      oldText: encoded['oldText'] as String,
-      deltaText: encoded['deltaText'] as String,
-      deltaRange: TextRange(
-        start: encoded['deltaStart'] as int? ?? -1,
-        end: encoded['deltaEnd'] as int? ?? -1,
-      ),
-      selection: TextSelection(
-        baseOffset: encoded['selectionBase'] as int? ?? -1,
-        extentOffset: encoded['selectionExtent'] as int? ?? -1,
-        affinity: _toTextAffinity(encoded['selectionAffinity'] as String?) ??
-            TextAffinity.downstream,
-        isDirectional: encoded['selectionIsDirectional'] as bool? ?? false,
-      ),
-      composing: TextRange(
-        start: encoded['composingBase'] as int? ?? -1,
-        end: encoded['composingExtent'] as int? ?? -1,
-      ),
-    );
-  }
-
   /// {@macro flutter.services.TextEditingDelta.deltaType}
   @override
   TextEditingDeltaType get deltaType => TextEditingDeltaType.replacement;
@@ -1057,24 +1090,6 @@ class TextEditingDeltaNonTextUpdate extends TextEditingDelta {
     selection: selection,
     composing:composing,
   );
-
-  /// Creates an instance of this class from a JSON object.
-  factory TextEditingDeltaNonTextUpdate.fromJSON(Map<String, dynamic> encoded) {
-    return TextEditingDeltaNonTextUpdate(
-      oldText: encoded['oldText'] as String,
-      selection: TextSelection(
-        baseOffset: encoded['selectionBase'] as int? ?? -1,
-        extentOffset: encoded['selectionExtent'] as int? ?? -1,
-        affinity: _toTextAffinity(encoded['selectionAffinity'] as String?) ??
-            TextAffinity.downstream,
-        isDirectional: encoded['selectionIsDirectional'] as bool? ?? false,
-      ),
-      composing: TextRange(
-        start: encoded['composingBase'] as int? ?? -1,
-        end: encoded['composingExtent'] as int? ?? -1,
-      ),
-    );
-  }
 
   /// {@macro flutter.services.TextEditingDelta.deltaType}
   @override
@@ -1773,85 +1788,6 @@ class TextInput {
     return true;
   }
 
-  TextEditingDelta _inferDeltas(Map<String, dynamic> rawDeltas) {
-    String oldText = rawDeltas['oldText'] as String;
-    int start = rawDeltas['deltaStart'] as int;
-    int end = rawDeltas['deltaEnd'] as int;
-    String tb = rawDeltas['deltaText'] as String;
-    int tbStart = 0;
-    int tbEnd = tb.length;
-    Map<String, dynamic> jsonEncoded = rawDeltas as Map<String, dynamic>;
-
-    // This delta is explicitly a non text update.
-    bool isNonTextUpdate = start == -1 && start == end;
-
-    if (isNonTextUpdate) {
-      jsonEncoded.putIfAbsent('deltaType', () => 'TextEditingDeltaType.nonTextUpdate');
-      return TextEditingDelta.fromJSON(jsonEncoded);
-    }
-
-    final String textStart = oldText.substring(0, start);
-    final String textEnd = oldText.substring(end, oldText.length);
-    final String newText = textStart + tb + textEnd;
-
-    final bool isEqual = oldText == newText;
-
-    final bool isDeletionGreaterThanOne = (end - start) - (tbEnd - tbStart) > 1;
-    final bool isDeletingByReplacingWithEmpty = tb.length == 0 && tbStart == 0 && tbStart == tbEnd;
-
-    final bool isReplacedByShorter = isDeletionGreaterThanOne && (tbEnd - tbStart < end - start);
-    final bool isReplacedByLonger = tbEnd - tbStart > end - start;
-    final bool isReplacedBySame = tbEnd - tbStart == end - start;
-
-    final bool isInsertingInsideComposingRegion = start + tbEnd > end;
-    final bool isDeletingInsideComposingRegion =
-        !isReplacedByShorter && !isDeletingByReplacingWithEmpty && start + tbEnd < end;
-
-    String newComposingText;
-    String originalComposingText;
-
-    if (isDeletingByReplacingWithEmpty || isDeletingInsideComposingRegion || isReplacedByShorter) {
-      newComposingText = tb.substring(tbStart, tbEnd);
-      originalComposingText = oldText.substring(start, start + tbEnd);
-    } else {
-      newComposingText = tb.substring(tbStart, tbStart + (end - start));
-      originalComposingText = oldText.substring(start, end);
-    }
-
-    final bool isOriginalComposingRegionTextChanged = !(originalComposingText == newComposingText);
-    final bool isReplaced = isOriginalComposingRegionTextChanged ||
-        (isReplacedByLonger || isReplacedByShorter || isReplacedBySame);
-
-    if (isEqual) {
-      jsonEncoded.putIfAbsent('deltaType', () => 'TextEditingDeltaType.nonTextUpdate');
-    } else if ((isDeletingByReplacingWithEmpty || isDeletingInsideComposingRegion) &&
-        !isOriginalComposingRegionTextChanged) {  // Deletion.
-      int actualStart = start;
-
-      if (!isDeletionGreaterThanOne) {
-        actualStart = end - 1;
-      }
-
-      jsonEncoded.putIfAbsent('deltaType', () => 'TextEditingDeltaType.deletion');
-      jsonEncoded.update('deltaStart', (value) => actualStart);
-      jsonEncoded.update('deltaEnd', (value) => end);
-      jsonEncoded.update('deltaText', (value) => '');
-    } else if ((start == end || isInsertingInsideComposingRegion) &&
-        !isOriginalComposingRegionTextChanged) {  // Insertion.
-      jsonEncoded.putIfAbsent('deltaType', () => 'TextEditingDeltaType.insertion');
-      jsonEncoded.update('deltaStart', (value) => end);
-      jsonEncoded.update('deltaEnd', (value) => end);
-      jsonEncoded.update('deltaText', (value) => tb.substring(end - start, (end - start) + (tb.length - (end - start))));
-    } else if (isReplaced) {  // Replacement.
-      jsonEncoded.putIfAbsent('deltaType', () => 'TextEditingDeltaType.replacement');
-      jsonEncoded.update('deltaStart', (value) => start);
-      jsonEncoded.update('deltaEnd', (value) => end);
-      jsonEncoded.update('deltaText', (value) => tb);
-    }
-
-    return TextEditingDelta.fromJSON(jsonEncoded);
-  }
-
   late MethodChannel _channel;
 
   TextInputConnection? _currentConnection;
@@ -1928,11 +1864,11 @@ class TextInput {
         // TextInputPlugin does not adhere to this type of editing.
         if (encoded['batchDeltas'] != null) {
           for (final dynamic encodedDelta in encoded['batchDeltas']) {
-            final TextEditingDelta delta = _inferDeltas(encodedDelta as Map<String, dynamic>);
+            final TextEditingDelta delta = TextEditingDelta.fromJSON(encodedDelta as Map<String, dynamic>);
             batchDeltas.add(delta);
           }
         } else {
-          final TextEditingDelta delta = _inferDeltas(encoded);
+          final TextEditingDelta delta = TextEditingDelta.fromJSON(encoded);
           batchDeltas.add(delta);
         }
 
