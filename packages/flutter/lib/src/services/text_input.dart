@@ -793,12 +793,12 @@ abstract class TextEditingDelta with TextEditingDeltaUtils {
   /// Creates an instance of this class from a JSON object by inferring the
   /// type of delta based on values sent from the engine.
   factory TextEditingDelta.fromJSON(Map<String, dynamic> encoded) {
-    String oldText = encoded['oldText'] as String;
-    int start = encoded['deltaStart'] as int;
-    int end = encoded['deltaEnd'] as int;
-    String tb = encoded['deltaText'] as String;
-    int tbStart = 0;
-    int tbEnd = tb.length;
+    final String oldText = encoded['oldText'] as String;
+    final int start = encoded['deltaStart'] as int;
+    final int end = encoded['deltaEnd'] as int;
+    final String tb = encoded['deltaText'] as String;
+    final int tbStart = 0;
+    final int tbEnd = tb.length;
 
     // This delta is explicitly a non text update.
     bool isNonTextUpdate = start == -1 && start == end;
@@ -829,7 +829,7 @@ abstract class TextEditingDelta with TextEditingDeltaUtils {
     final bool isEqual = oldText == newText;
 
     final bool isDeletionGreaterThanOne = (end - start) - (tbEnd - tbStart) > 1;
-    final bool isDeletingByReplacingWithEmpty = tb.length == 0 && tbStart == 0 && tbStart == tbEnd;
+    final bool isDeletingByReplacingWithEmpty = tb.isEmpty && tbStart == 0 && tbStart == tbEnd;
 
     final bool isReplacedByShorter = isDeletionGreaterThanOne && (tbEnd - tbStart < end - start);
     final bool isReplacedByLonger = tbEnd - tbStart > end - start;
