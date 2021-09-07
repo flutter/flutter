@@ -54,7 +54,7 @@ class DartDevelopmentService {
           enableAuthCodes: disableServiceAuthCodes != true,
           ipv6: ipv6 == true,
           // Enables caching of CPU samples collected during application startup.
-          cachedUserTags: const [ 'AppStartUp' ],
+          cachedUserTags: const <String>['AppStartUp'],
         );
       unawaited(_ddsInstance?.done.whenComplete(() {
         if (!_completer.isCompleted) {

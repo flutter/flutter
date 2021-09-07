@@ -1859,7 +1859,7 @@ void main() {
       expect(enableAuthCodes, isFalse);
       expect(ipv6, isTrue);
       expect(serviceUri, Uri(scheme: 'http', host: '::1', port: 0));
-      expect(cachedUserTags, ['AppStartUp']);
+      expect(cachedUserTags, <String>['AppStartUp']);
       done.complete();
       return null;
     };
@@ -1891,7 +1891,7 @@ void main() {
       expect(enableAuthCodes, isTrue);
       expect(ipv6, isFalse);
       expect(serviceUri, Uri(scheme: 'http', host: '127.0.0.1', port: 0));
-      expect(cachedUserTags, ['AppStartUp']);
+      expect(cachedUserTags, <String>['AppStartUp']);
       throw FakeDartDevelopmentServiceException(message: 'No URI');
     };
     final TestFlutterDevice flutterDevice = TestFlutterDevice(
