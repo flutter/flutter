@@ -15,8 +15,7 @@
 # https://chrome-infra-packages.appspot.com/p/flutter/android/bundletool/+/vFt1jA0cUeZLmUCVR5NG2JVB-SgJ18GH_pVYKMOlfUIC
 
 bundletool_jar_path=$1
-adb_path='adb'
-[ -z "$2" ] && adb_path=$2
+adb_path=$2
 
 # Store the time to prevent capturing logs from previous runs.
 script_start_time=$($adb_path shell 'date +"%m-%d %H:%M:%S.0"')
