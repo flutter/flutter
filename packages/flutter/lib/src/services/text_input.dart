@@ -801,7 +801,7 @@ abstract class TextEditingDelta with TextEditingDeltaUtils {
     final int tbEnd = tb.length;
 
     // This delta is explicitly a non text update.
-    bool isNonTextUpdate = start == -1 && start == end;
+    final bool isNonTextUpdate = start == -1 && start == end;
     final TextRange newComposing = TextRange(
       start: encoded['composingBase'] as int? ?? -1,
       end: encoded['composingExtent'] as int? ?? -1,
