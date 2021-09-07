@@ -206,6 +206,41 @@ void main() {
     );
   });
 
+  test('Theme operator == returns correct value for simple cases', () {
+    expect(const CupertinoThemeData(), equals(const CupertinoThemeData()));
+
+    expect(const CupertinoThemeData(brightness: Brightness.light),
+        isNot(equals(const CupertinoThemeData(brightness: Brightness.dark))));
+
+    expect(
+        const CupertinoThemeData(
+            textTheme: CupertinoTextThemeData(
+                primaryColor: CupertinoColors.activeGreen)),
+        isNot(equals(const CupertinoThemeData(
+            textTheme: CupertinoTextThemeData(
+                primaryColor: CupertinoColors.activeOrange)))));
+  });
+
+  test('hashCode behaves correctly for simple cases', () {
+    expect(const CupertinoThemeData().hashCode,
+        equals(const CupertinoThemeData().hashCode));
+
+    expect(
+        const CupertinoThemeData(brightness: Brightness.light).hashCode,
+        isNot(equals(const CupertinoThemeData(brightness: Brightness.dark))
+            .hashCode));
+
+    expect(
+        const CupertinoThemeData(
+                textTheme: CupertinoTextThemeData(
+                    primaryColor: CupertinoColors.activeGreen))
+            .hashCode,
+        isNot(equals(const CupertinoThemeData(
+                textTheme: CupertinoTextThemeData(
+                    primaryColor: CupertinoColors.activeOrange))
+            .hashCode)));
+  });
+
   late Brightness currentBrightness;
   void colorMatches(Color? componentColor, CupertinoDynamicColor expectedDynamicColor) {
     switch (currentBrightness) {
