@@ -678,11 +678,11 @@ class ListTile extends StatelessWidget {
   /// long-press will produce a short vibration, when feedback is enabled.
   ///
   /// When null, the default value is true.
+  /// {@endtemplate}
   ///
   /// See also:
   ///
   ///  * [Feedback] for providing platform-specific feedback to certain actions.
-  /// {@endtemplate}
   final bool? enableFeedback;
 
   /// The horizontal gap between the titles and the leading/trailing widgets.
