@@ -305,7 +305,7 @@ class IOSDeployDebugger {
         environment: _iosDeployEnv,
       );
       String? lastLineFromDebugger;
-      final StreamSubscription<String>? stdoutSubscription = _iosDeployProcess?.stdout
+      final StreamSubscription<String> stdoutSubscription = _iosDeployProcess!.stdout
           .transform<String>(utf8.decoder)
           .transform<String>(const LineSplitter())
           .listen((String line) {
@@ -354,18 +354,18 @@ class IOSDeployDebugger {
         }
         lastLineFromDebugger = line;
       });
-      final StreamSubscription<String>? stderrSubscription = _iosDeployProcess?.stderr
+      final StreamSubscription<String> stderrSubscription = _iosDeployProcess!.stderr
           .transform<String>(utf8.decoder)
           .transform<String>(const LineSplitter())
           .listen((String line) {
         _monitorIOSDeployFailure(line, _logger);
         _logger.printTrace(line);
       });
-      unawaited(_iosDeployProcess?.exitCode.then((int status) {
+      unawaited(_iosDeployProcess!.exitCode.then((int status) {
         _logger.printTrace('ios-deploy exited with code $exitCode');
         _debuggerState = _IOSDeployDebuggerState.detached;
-        unawaited(stdoutSubscription?.cancel());
-        unawaited(stderrSubscription?.cancel());
+        unawaited(stdoutSubscription.cancel());
+        unawaited(stderrSubscription.cancel());
       }).whenComplete(() async {
         if (_debuggerOutput.hasListener) {
           // Tell listeners the process died.
