@@ -819,8 +819,7 @@ abstract class TextEditingDelta with TextEditingDeltaUtils {
   /// For a [TextEditingDeltaType.insertion] this will be the character/s being
   /// inserted.
   ///
-  /// For a [TextEditingDeltaType.deletion] this will be the character/s being
-  /// deleted.
+  /// For a [TextEditingDeltaType.deletion] this will be an empty string.
   ///
   /// For a [TextEditingDeltaType.replacement] this will be the text that is
   /// replacing the [TextEditingDelta.deltaRange].
