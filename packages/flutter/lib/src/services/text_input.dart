@@ -1773,6 +1773,102 @@ class TextInput {
     return true;
   }
 
+  TextEditingDelta _inferDeltas(Map<String, dynamic> rawDeltas) {
+    String oldText = rawDeltas['oldText'] as String;
+    int start = rawDeltas['deltaStart'] as int;
+    int end = rawDeltas['deltaEnd'] as int;
+    String tb = rawDeltas['deltaText'] as String;
+    int tbStart = 0;
+    int tbEnd = tb.length;
+    Map<String, dynamic> jsonEncoded = rawDeltas as Map<String, dynamic>;
+
+    // This delta is explicitly a non text update.
+    bool isNonTextUpdate = start == -1 && start == end;
+
+    if (isNonTextUpdate) {
+      jsonEncoded.putIfAbsent('deltaType', () => 'TextEditingDeltaType.nonTextUpdate');
+      return TextEditingDelta.fromJSON(jsonEncoded);
+    }
+
+    final String textStart = oldText.substring(0, start);
+    final String textEnd = oldText.substring(end, oldText.length);
+    final String newText = textStart + tb + textEnd;
+
+    final bool isEqual = oldText == newText;
+
+    final bool isDeletionGreaterThanOne = (end - start) - (tbEnd - tbStart) > 1;
+    final bool isDeletingByReplacingWithEmpty = tb.length == 0 && tbStart == 0 && tbStart == tbEnd;
+
+    final bool isReplacedByShorter = isDeletionGreaterThanOne && (tbEnd - tbStart < end - start);
+    final bool isReplacedByLonger = tbEnd - tbStart > end - start;
+    final bool isReplacedBySame = tbEnd - tbStart == end - start;
+
+    final bool isInsertingInsideComposingRegion = start + tbEnd > end;
+    final bool isDeletingInsideComposingRegion =
+        !isReplacedByShorter && !isDeletingByReplacingWithEmpty && start + tbEnd < end;
+
+    String newComposingText;
+    String originalComposingText;
+    print('isDeletionGreaterThanOne: ' + isDeletionGreaterThanOne.toString());
+    print('isDeletingByReplacingWithEmpty: ' + isDeletingByReplacingWithEmpty.toString());
+    print('isReplacedByShorter: ' + isReplacedByShorter.toString());
+    print('isReplacedBylonger: ' + isReplacedByLonger.toString());
+    print('isReplacedBySame: ' + isReplacedBySame.toString());
+    print('isInsertedInsideMarkedText: ' + isInsertingInsideComposingRegion.toString());
+    print('isDeletingInsideMarkedText: ' + isDeletingInsideComposingRegion.toString());
+
+    if (isDeletingByReplacingWithEmpty || isDeletingInsideComposingRegion || isReplacedByShorter) {
+      newComposingText = tb.substring(tbStart, tbEnd);
+      originalComposingText = oldText.substring(start, start + tbEnd);
+    } else {
+      newComposingText = tb.substring(tbStart, tbStart + (end - start));
+      originalComposingText = oldText.substring(start, end);
+    }
+    print('newComposingText: ' + newComposingText);
+    print('originalComposingText: ' + originalComposingText);
+
+    final bool isOriginalComposingRegionTextChanged = !(originalComposingText == newComposingText);
+    print('isOriginalComposingRegiontextChanged: ' + isOriginalComposingRegionTextChanged.toString());
+
+    final bool isReplaced = isOriginalComposingRegionTextChanged ||
+        (isReplacedByLonger || isReplacedByShorter || isReplacedBySame);
+
+    print('isReplaced: ' + isReplaced.toString());
+
+    if (isEqual) {
+      jsonEncoded.putIfAbsent('deltaType', () => 'TextEditingDeltaType.nonTextUpdate');
+    } else if ((isDeletingByReplacingWithEmpty || isDeletingInsideComposingRegion) &&
+        !isOriginalComposingRegionTextChanged) {  // Deletion.
+      print('isDeleting');
+      int actualStart = start;
+
+      if (!isDeletionGreaterThanOne) {
+        actualStart = end - 1;
+      }
+
+      jsonEncoded.putIfAbsent('deltaType', () => 'TextEditingDeltaType.deletion');
+      jsonEncoded.update('deltaStart', (value) => actualStart);
+      jsonEncoded.update('deltaEnd', (value) => end);
+      jsonEncoded.update('deltaText', (value) => '');
+    } else if ((start == end || isInsertingInsideComposingRegion) &&
+        !isOriginalComposingRegionTextChanged) {  // Insertion.
+      print('insertion');
+      // [text substringWithRange:NSMakeRange(end - start, text.length - (end - start))]
+      jsonEncoded.putIfAbsent('deltaType', () => 'TextEditingDeltaType.insertion');
+      jsonEncoded.update('deltaStart', (value) => end);
+      jsonEncoded.update('deltaEnd', (value) => end);
+      jsonEncoded.update('deltaText', (value) => tb.substring(end - start, (end - start) + (tb.length - (end - start))));
+    } else if (isReplaced) {  // Replacement.
+      print('replacement');
+      jsonEncoded.putIfAbsent('deltaType', () => 'TextEditingDeltaType.replacement');
+      jsonEncoded.update('deltaStart', (value) => start);
+      jsonEncoded.update('deltaEnd', (value) => end);
+      jsonEncoded.update('deltaText', (value) => tb);
+    }
+
+    return TextEditingDelta.fromJSON(jsonEncoded);
+  }
+
   late MethodChannel _channel;
 
   TextInputConnection? _currentConnection;
@@ -1843,17 +1939,19 @@ class TextInput {
 
         final Map<String, dynamic> encoded = args[1] as Map<String, dynamic>;
 
+        print(encoded);
+
         // On Android there could be a situation where multiple edits done to
         // an editing state are accumulated before being sent to the framework.
         // This is called batch editing on Android, and on other platforms the
         // TextInputPlugin does not adhere to this type of editing.
         if (encoded['batchDeltas'] != null) {
           for (final dynamic encodedDelta in encoded['batchDeltas']) {
-            final TextEditingDelta delta = TextEditingDelta.fromJSON(encodedDelta as Map<String, dynamic>);
+            final TextEditingDelta delta = _inferDeltas(encodedDelta as Map<String, dynamic>);
             batchDeltas.add(delta);
           }
         } else {
-          final TextEditingDelta delta = TextEditingDelta.fromJSON(encoded);
+          final TextEditingDelta delta = _inferDeltas(encoded);
           batchDeltas.add(delta);
         }
 
