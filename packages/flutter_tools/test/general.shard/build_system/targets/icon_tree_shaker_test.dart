@@ -549,7 +549,7 @@ const String validFontManifestJson = '''
 
 const String invalidFontManifestJson = '''
 {
-  "family": "MaterialIcons",
+  "famly": "MaterialIcons",
   "fonts": [
     {
       "asset": "fonts/MaterialIcons-Regular.otf"
