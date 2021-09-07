@@ -346,6 +346,7 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
 ///
 ///  * [CupertinoThemeData], which uses reasonable default values for
 ///    unspecified theme properties.
+@immutable
 class NoDefaultCupertinoThemeData {
   /// Creates a [NoDefaultCupertinoThemeData] styling specification.
   ///
