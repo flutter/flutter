@@ -71,7 +71,7 @@ class _FakeEditableTextState with TextSelectionDelegate, TextEditingActionTarget
   bool get selectionEnabled => true;
 
   @override
-  TextMetrics get textMetrics => renderEditable;
+  TextLayoutMetrics get textLayoutMetrics => renderEditable;
 
   @override
   void setSelection(TextSelection selection, SelectionChangedCause cause) {

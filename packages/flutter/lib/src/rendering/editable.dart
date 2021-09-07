@@ -97,7 +97,7 @@ class TextSelectionPoint {
 /// Keyboard handling, IME handling, scrolling, toggling the [showCursor] value
 /// to actually blink the cursor, and other features not mentioned above are the
 /// responsibility of higher layers and not handled by this object.
-class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, ContainerRenderObjectMixin<RenderBox, TextParentData>, RenderBoxContainerDefaultsMixin<RenderBox, TextParentData> implements TextMetrics {
+class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, ContainerRenderObjectMixin<RenderBox, TextParentData>, RenderBoxContainerDefaultsMixin<RenderBox, TextParentData> implements TextLayoutMetrics {
   /// Creates a render object that implements the visual aspects of a text field.
   ///
   /// The [textAlign] argument must not be null. It defaults to [TextAlign.start].
@@ -523,9 +523,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     return _textPainter.getPositionForOffset(caretOffsetTranslated);
   }
 
-  // Start TextMetrics.
+  // Start TextLayoutMetrics.
 
-  /// {@macro flutter.services.TextMetrics.getLineAtOffset}
+  /// {@macro flutter.services.TextLayoutMetrics.getLineAtOffset}
   @override
   TextSelection getLineAtOffset(TextPosition position) {
     debugAssertLayoutUpToDate();
@@ -543,7 +543,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     return _textPainter.getWordBoundary(position);
   }
 
-  /// {@macro flutter.services.TextMetrics.getTextPositionAbove}
+  /// {@macro flutter.services.TextLayoutMetrics.getTextPositionAbove}
   @override
   TextPosition getTextPositionAbove(TextPosition position) {
     // The caret offset gives a location in the upper left hand corner of
@@ -554,7 +554,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     return _getTextPositionVertical(position, verticalOffset);
   }
 
-  /// {@macro flutter.services.TextMetrics.getTextPositionBelow}
+  /// {@macro flutter.services.TextLayoutMetrics.getTextPositionBelow}
   @override
   TextPosition getTextPositionBelow(TextPosition position) {
     // The caret offset gives a location in the upper left hand corner of
@@ -565,7 +565,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     return _getTextPositionVertical(position, verticalOffset);
   }
 
-  // End TextMetrics.
+  // End TextLayoutMetrics.
 
   void _updateSelectionExtentsVisibility(Offset effectiveOffset) {
     assert(selection != null);
@@ -1411,7 +1411,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   bool _onlyWhitespace(TextRange range) {
     for (int i = range.start; i < range.end; i++) {
       final int codeUnit = text!.codeUnitAt(i)!;
-      if (!TextMetrics.isWhitespace(codeUnit)) {
+      if (!TextLayoutMetrics.isWhitespace(codeUnit)) {
         return false;
       }
     }
@@ -1904,7 +1904,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     // If the platform is Android and the text is read only, try to select the
     // previous word if there is one; otherwise, select the single whitespace at
     // the position.
-    } else if (TextMetrics.isWhitespace(_plainText.codeUnitAt(position.offset))
+    } else if (TextLayoutMetrics.isWhitespace(_plainText.codeUnitAt(position.offset))
         && position.offset > 0) {
       assert(defaultTargetPlatform != null);
       final TextRange? previousWord = _getPreviousWord(word.start);

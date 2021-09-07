@@ -8,7 +8,7 @@ import 'dart:ui' show TextAffinity, TextPosition;
 import 'package:characters/characters.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart'
-    show Clipboard, ClipboardData, TextMetrics, TextRange;
+    show Clipboard, ClipboardData, TextLayoutMetrics, TextRange;
 
 import 'editable_text.dart';
 
@@ -40,7 +40,7 @@ abstract class TextEditingActionTarget {
   /// See also:
   ///
   /// * [EditableTextState.renderEditable], which overrides this.
-  TextMetrics get textMetrics;
+  TextLayoutMetrics get textLayoutMetrics;
 
   /// The [TextEditingValue] expressed in this field.
   TextEditingValue get textEditingValue;
@@ -93,7 +93,7 @@ abstract class TextEditingActionTarget {
     range.expandNext();
     if (!includeWhitespace) {
       range.expandWhile((String character) {
-        return TextMetrics.isWhitespace(character.codeUnitAt(0));
+        return TextLayoutMetrics.isWhitespace(character.codeUnitAt(0));
       });
     }
     return range.current.length;
@@ -128,7 +128,7 @@ abstract class TextEditingActionTarget {
     range.dropLast();
     if (!includeWhitespace) {
       while (range.currentCharacters.isNotEmpty
-          && TextMetrics.isWhitespace(range.charactersAfter.first.codeUnitAt(0))) {
+          && TextLayoutMetrics.isWhitespace(range.charactersAfter.first.codeUnitAt(0))) {
         range.dropLast();
       }
     }
@@ -210,7 +210,7 @@ abstract class TextEditingActionTarget {
     final int startPoint = previousCharacter(
         offset, textEditingValue.text, includeWhitespace);
     final TextRange word =
-        textMetrics.getWordBoundary(TextPosition(offset: startPoint, affinity: textEditingValue.selection.affinity));
+        textLayoutMetrics.getWordBoundary(TextPosition(offset: startPoint, affinity: textEditingValue.selection.affinity));
     return word.start;
   }
 
@@ -228,11 +228,11 @@ abstract class TextEditingActionTarget {
     }
 
     final int startPoint = includeWhitespace ||
-            !TextMetrics.isWhitespace(textEditingValue.text.codeUnitAt(offset))
+            !TextLayoutMetrics.isWhitespace(textEditingValue.text.codeUnitAt(offset))
         ? offset
         : nextCharacter(offset, textEditingValue.text, includeWhitespace);
     final TextRange nextWord =
-        textMetrics.getWordBoundary(TextPosition(offset: startPoint, affinity: textEditingValue.selection.affinity));
+        textLayoutMetrics.getWordBoundary(TextPosition(offset: startPoint, affinity: textEditingValue.selection.affinity));
     return nextWord.end;
   }
 
@@ -425,7 +425,7 @@ abstract class TextEditingActionTarget {
       return deleteToStart(cause);
     }
 
-    final TextSelection line = textMetrics.getLineAtOffset(
+    final TextSelection line = textLayoutMetrics.getLineAtOffset(
       TextPosition(offset: textBefore.length - 1),
     );
 
@@ -527,7 +527,7 @@ abstract class TextEditingActionTarget {
     }
 
     final String textBefore = textEditingValue.selection.textBefore(textEditingValue.text);
-    final TextSelection line = textMetrics.getLineAtOffset(
+    final TextSelection line = textLayoutMetrics.getLineAtOffset(
       TextPosition(offset: textBefore.length),
     );
 
@@ -638,7 +638,7 @@ abstract class TextEditingActionTarget {
     // anything.
     // TODO(justinmc): Support selection with multiple TextAffinities.
     // https://github.com/flutter/flutter/issues/88135
-    final TextSelection currentLine = textMetrics.getLineAtOffset(
+    final TextSelection currentLine = textLayoutMetrics.getLineAtOffset(
       TextPosition(
         offset: textEditingValue.selection.start,
         affinity: textEditingValue.selection.isCollapsed
@@ -680,7 +680,7 @@ abstract class TextEditingActionTarget {
     // If greatest edge is already at the end of a line, don't do anything.
     // TODO(justinmc): Support selection with multiple TextAffinities.
     // https://github.com/flutter/flutter/issues/88135
-    final TextSelection currentLine = textMetrics.getLineAtOffset(
+    final TextSelection currentLine = textLayoutMetrics.getLineAtOffset(
       TextPosition(
         offset: textEditingValue.selection.end,
         affinity: textEditingValue.selection.isCollapsed
@@ -725,7 +725,7 @@ abstract class TextEditingActionTarget {
     }
 
     int index =
-        textMetrics.getTextPositionBelow(textEditingValue.selection.extent).offset;
+        textLayoutMetrics.getTextPositionBelow(textEditingValue.selection.extent).offset;
 
     if (index == textEditingValue.selection.extentOffset) {
       index = textEditingValue.text.length;
@@ -801,7 +801,7 @@ abstract class TextEditingActionTarget {
     // including whitespace (like the newline).
     final int startPoint = previousCharacter(
         textEditingValue.selection.extentOffset, textEditingValue.text, false);
-    final TextSelection selectedLine = textMetrics.getLineAtOffset(
+    final TextSelection selectedLine = textLayoutMetrics.getLineAtOffset(
       TextPosition(offset: startPoint),
     );
 
@@ -875,7 +875,7 @@ abstract class TextEditingActionTarget {
 
     final int startPoint = nextCharacter(
         textEditingValue.selection.extentOffset, textEditingValue.text, false);
-    final TextSelection selectedLine = textMetrics.getLineAtOffset(
+    final TextSelection selectedLine = textLayoutMetrics.getLineAtOffset(
       TextPosition(offset: startPoint),
     );
 
@@ -1015,7 +1015,7 @@ abstract class TextEditingActionTarget {
     }
 
     final TextPosition positionAbove =
-        textMetrics.getTextPositionAbove(textEditingValue.selection.extent);
+        textLayoutMetrics.getTextPositionAbove(textEditingValue.selection.extent);
     late final TextSelection nextSelection;
     if (positionAbove.offset == textEditingValue.selection.extentOffset) {
       nextSelection = textEditingValue.selection.copyWith(
@@ -1051,7 +1051,7 @@ abstract class TextEditingActionTarget {
   ///     direction.
   void moveSelectionLeftByLine(SelectionChangedCause cause) {
     // If already at the left edge of the line, do nothing.
-    final TextSelection currentLine = textMetrics.getLineAtOffset(
+    final TextSelection currentLine = textLayoutMetrics.getLineAtOffset(
       textEditingValue.selection.extent,
     );
     if (currentLine.baseOffset == textEditingValue.selection.extentOffset) {
@@ -1064,7 +1064,7 @@ abstract class TextEditingActionTarget {
     // including whitespace (like the newline).
     final int startPoint = previousCharacter(
         textEditingValue.selection.extentOffset, textEditingValue.text, false);
-    final TextSelection selectedLine = textMetrics.getLineAtOffset(
+    final TextSelection selectedLine = textLayoutMetrics.getLineAtOffset(
       TextPosition(offset: startPoint),
     );
     final TextSelection nextSelection = TextSelection.fromPosition(TextPosition(
@@ -1093,7 +1093,7 @@ abstract class TextEditingActionTarget {
     }
 
     final TextPosition positionBelow =
-        textMetrics.getTextPositionBelow(textEditingValue.selection.extent);
+        textLayoutMetrics.getTextPositionBelow(textEditingValue.selection.extent);
 
     late final TextSelection nextSelection;
     if (positionBelow.offset == textEditingValue.selection.extentOffset) {
@@ -1232,7 +1232,7 @@ abstract class TextEditingActionTarget {
   ///     direction.
   void moveSelectionRightByLine(SelectionChangedCause cause) {
     // If already at the right edge of the line, do nothing.
-    final TextSelection currentLine = textMetrics.getLineAtOffset(
+    final TextSelection currentLine = textLayoutMetrics.getLineAtOffset(
       textEditingValue.selection.extent,
     );
     if (currentLine.extentOffset == textEditingValue.selection.extentOffset) {
@@ -1245,7 +1245,7 @@ abstract class TextEditingActionTarget {
     // boundaries without including whitespace (like the newline).
     final int startPoint = nextCharacter(
         textEditingValue.selection.extentOffset, textEditingValue.text, false);
-    final TextSelection selectedLine = textMetrics.getLineAtOffset(
+    final TextSelection selectedLine = textLayoutMetrics.getLineAtOffset(
       TextPosition(
         offset: startPoint,
         affinity: TextAffinity.upstream,
@@ -1335,7 +1335,7 @@ abstract class TextEditingActionTarget {
   ///   * [moveSelectionDown], which is the same but in the opposite direction.
   void moveSelectionUp(SelectionChangedCause cause) {
     final int nextIndex =
-        textMetrics.getTextPositionAbove(textEditingValue.selection.extent).offset;
+        textLayoutMetrics.getTextPositionAbove(textEditingValue.selection.extent).offset;
 
     if (nextIndex == textEditingValue.selection.extentOffset) {
       _wasSelectingVerticallyWithKeyboard = false;

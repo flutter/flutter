@@ -6,7 +6,7 @@ import 'text_editing.dart';
 
 /// A read-only interface for accessing visual information about the
 /// implementing text.
-abstract class TextMetrics {
+abstract class TextLayoutMetrics {
   // TODO(gspencergoog): replace when we expose this ICU information.
   /// Check if the given code unit is a white space or separator
   /// character.
@@ -48,7 +48,7 @@ abstract class TextMetrics {
     return true;
   }
 
-  /// {@template flutter.services.TextMetrics.getLineAtOffset}
+  /// {@template flutter.services.TextLayoutMetrics.getLineAtOffset}
   /// Return a [TextSelection] containing the line of the given [TextPosition].
   /// {@endtemplate}
   TextSelection getLineAtOffset(TextPosition position);
@@ -56,7 +56,7 @@ abstract class TextMetrics {
   /// {@macro flutter.painting.TextPainter.getWordBoundary}
   TextRange getWordBoundary(TextPosition position);
 
-  /// {@template flutter.services.TextMetrics.getTextPositionAbove}
+  /// {@template flutter.services.TextLayoutMetrics.getTextPositionAbove}
   /// Returns the TextPosition above the given offset into the text.
   ///
   /// If the offset is already on the first line, the given offset will be
@@ -64,7 +64,7 @@ abstract class TextMetrics {
   /// {@endtemplate}
   TextPosition getTextPositionAbove(TextPosition position);
 
-  /// {@template flutter.services.TextMetrics.getTextPositionBelow}
+  /// {@template flutter.services.TextLayoutMetrics.getTextPositionBelow}
   /// Returns the TextPosition below the given offset into the text.
   ///
   /// If the offset is already on the last line, the given offset will be

@@ -1530,7 +1530,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   // Start TextEditingActionTarget.
 
   @override
-  TextMetrics get textMetrics => renderEditable;
+  TextLayoutMetrics get textLayoutMetrics => renderEditable;
 
   @override
   bool get readOnly => widget.readOnly;
