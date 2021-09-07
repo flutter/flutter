@@ -1922,8 +1922,6 @@ class TextInput {
 
         final Map<String, dynamic> encoded = args[1] as Map<String, dynamic>;
 
-        print(encoded);
-
         // On Android there could be a situation where multiple edits done to
         // an editing state are accumulated before being sent to the framework.
         // This is called batch editing on Android, and on other platforms the
