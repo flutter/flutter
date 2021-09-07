@@ -6661,7 +6661,7 @@ void main() {
 
       final Map<String, dynamic> test = jsonDecode(jsonDelta) as Map<String, dynamic>;
       final TextEditingDelta delta = TextEditingDelta.fromJSON(test);
-      expect(delta.deltaType, 'TextEditingDeltaType.insertion');
+      expect(delta.deltaType, TextEditingDeltaType.insertion);
 
       state.updateEditingValueWithDeltas(<TextEditingDelta>[delta]);
       await tester.pump();
@@ -6713,7 +6713,7 @@ void main() {
       final Map<String, dynamic> test = jsonDecode(jsonDelta) as Map<String, dynamic>;
 
       final TextEditingDelta delta = TextEditingDelta.fromJSON(test);
-      expect(delta.deltaType, 'TextEditingDeltaType.deletion');
+      expect(delta.deltaType, TextEditingDeltaType.deletion);
 
       state.updateEditingValueWithDeltas(<TextEditingDelta>[delta]);
       await tester.pump();
@@ -6764,7 +6764,7 @@ void main() {
       final Map<String, dynamic> test = jsonDecode(jsonDelta) as Map<String, dynamic>;
 
       final TextEditingDelta delta = TextEditingDelta.fromJSON(test);
-      expect(delta.deltaType, 'TextEditingDeltaType.replacement');
+      expect(delta.deltaType, TextEditingDeltaType.replacement);
 
       state.updateEditingValueWithDeltas(<TextEditingDelta>[delta]);
       await tester.pump();
@@ -6815,7 +6815,7 @@ void main() {
       final Map<String, dynamic> test = jsonDecode(jsonDelta)  as Map<String, dynamic>;
 
       final TextEditingDelta delta = TextEditingDelta.fromJSON(test);
-      expect(delta.deltaType, 'TextEditingDeltaType.nonTextUpdate');
+      expect(delta.deltaType, TextEditingDeltaType.nonTextUpdate);
 
       state.updateEditingValueWithDeltas(<TextEditingDelta>[delta]);
       await tester.pump();
@@ -6904,10 +6904,10 @@ void main() {
       final TextEditingDelta deletionDelta = TextEditingDelta.fromJSON(jsonDecode(jsonDeletionDelta) as Map<String, dynamic>);
       final TextEditingDelta replacementDelta = TextEditingDelta.fromJSON(jsonDecode(jsonReplacementDelta) as Map<String, dynamic>);
       final TextEditingDelta nonTextUpdateDelta = TextEditingDelta.fromJSON(jsonDecode(jsonNonTextUpdateDelta) as Map<String, dynamic>);
-      expect(insertionDelta.deltaType, 'TextEditingDeltaType.insertion');
-      expect(deletionDelta.deltaType, 'TextEditingDeltaType.deletion');
-      expect(replacementDelta.deltaType, 'TextEditingDeltaType.replacement');
-      expect(nonTextUpdateDelta.deltaType, 'TextEditingDeltaType.nonTextUpdate');
+      expect(insertionDelta.deltaType, TextEditingDeltaType.insertion);
+      expect(deletionDelta.deltaType, TextEditingDeltaType.deletion);
+      expect(replacementDelta.deltaType, TextEditingDeltaType.replacement);
+      expect(nonTextUpdateDelta.deltaType, TextEditingDeltaType.nonTextUpdate);
 
       state.updateEditingValueWithDeltas(<TextEditingDelta>[insertionDelta, deletionDelta, replacementDelta, nonTextUpdateDelta]);
       await tester.pump();
