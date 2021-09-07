@@ -6772,7 +6772,7 @@ void main() {
       expect(state.currentTextEditingValue.composing, delta.composing);
     });
 
-    testWidgets('TextEditingDeltaEquality verification', (WidgetTester tester) async {
+    testWidgets('TextEditingDeltaNonTextUpdate verification', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(text: 'let there be text');
       await tester.pumpWidget(
         MaterialApp(
@@ -6802,7 +6802,7 @@ void main() {
       const String jsonDelta = '{'
           '"oldText": "let there be text",'
           ' "deltaText": "",'
-          ' "deltaType" : "TextEditingDeltaType.equality",'
+          ' "deltaType" : "TextEditingDeltaType.nonTextUpdate",'
           ' "deltaStart": -1,'
           ' "deltaEnd": -1,'
           ' "selectionBase": 17,'
@@ -6889,10 +6889,10 @@ void main() {
           ' "composingBase": -1,'
           ' "composingExtent": -1}';
 
-      const String jsonEqualityDelta = '{'
+      const String jsonNonTextUpdateDelta = '{'
           '"oldText": "let there be light",'
           ' "deltaText": "",'
-          ' "deltaType" : "TextEditingDeltaType.equality",'
+          ' "deltaType" : "TextEditingDeltaType.nonTextUpdate",'
           ' "deltaStart": -1,'
           ' "deltaEnd": -1,'
           ' "selectionBase": 18,'
@@ -6905,13 +6905,13 @@ void main() {
       final TextEditingDelta insertionDelta = TextEditingDelta.fromJSON(jsonDecode(jsonInsertionDelta) as Map<String, dynamic>);
       final TextEditingDelta deletionDelta = TextEditingDelta.fromJSON(jsonDecode(jsonDeletionDelta) as Map<String, dynamic>);
       final TextEditingDelta replacementDelta = TextEditingDelta.fromJSON(jsonDecode(jsonReplacementDelta) as Map<String, dynamic>);
-      final TextEditingDelta equalityDelta = TextEditingDelta.fromJSON(jsonDecode(jsonEqualityDelta) as Map<String, dynamic>);
+      final TextEditingDelta nonTextUpdateDelta = TextEditingDelta.fromJSON(jsonDecode(jsonNonTextUpdateDelta) as Map<String, dynamic>);
 
-      state.updateEditingValueWithDeltas(<TextEditingDelta>[insertionDelta, deletionDelta, replacementDelta, equalityDelta]);
+      state.updateEditingValueWithDeltas(<TextEditingDelta>[insertionDelta, deletionDelta, replacementDelta, nonTextUpdateDelta]);
       await tester.pump();
       expect(controller.text, 'let there be light');
-      expect(controller.selection, equalityDelta.selection);
-      expect(state.currentTextEditingValue.composing, equalityDelta.composing);
+      expect(controller.selection, nonTextUpdateDelta.selection);
+      expect(state.currentTextEditingValue.composing, nonTextUpdateDelta.composing);
     });
   });
 

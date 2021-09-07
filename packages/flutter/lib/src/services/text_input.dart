@@ -781,7 +781,7 @@ abstract class TextEditingDelta with TextEditingDeltaUtils {
   const TextEditingDelta({
     required this.oldText,
     this.deltaText = '',
-    this.deltaRange = const TextRange.collapsed(-1),
+    this.deltaRange = TextRange.empty,
     required this.selection,
     required this.composing,
   }) : assert(oldText != null),
