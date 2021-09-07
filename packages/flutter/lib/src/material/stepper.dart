@@ -56,7 +56,7 @@ enum StepperType {
 }
 
 /// Container for all the information necessary to build a Stepper widget's
-/// foward and backward controls for any given step.
+/// forward and backward controls for any given step.
 ///
 /// Used by [Stepper.controlsBuilder].
 @immutable
