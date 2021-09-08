@@ -67,10 +67,10 @@ enum _ScaffoldSlot {
 /// To display one of these notifications, obtain the [ScaffoldMessengerState]
 /// for the current [BuildContext] via [ScaffoldMessenger.of] and use the
 /// [ScaffoldMessengerState.showSnackBar] or the
-/// [ScaffoldMessengerState.showMaterialBanner] function.
+/// [ScaffoldMessengerState.showMaterialBanner] functions.
 ///
 /// When the [ScaffoldMessenger] has nested [Scaffold] descendants, the
-/// ScaffoldMessenger will only present a the notification to the root Scaffold of
+/// ScaffoldMessenger will only present the notification to the root Scaffold of
 /// the subtree of Scaffolds. In order to show notifications for the inner, nested
 /// Scaffolds, set a new scope by instantiating a new ScaffoldMessenger in
 /// between the levels of nesting.
