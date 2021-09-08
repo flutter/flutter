@@ -736,8 +736,10 @@ enum TextEditingDeltaType {
 
   /// {@template flutter.services.TextEditingDeltaReplacement}
   /// The delta is replacing a range of characters with a new sequence of text.
+  ///
   /// The range that is being replaced can either grow or shrink based on the
   /// given replacement text.
+  ///
   /// A replacement can occur in cases such as auto-correct, suggestions, and
   /// when a selection is replaced by a single character.
   /// {@endtemplate}
@@ -747,6 +749,7 @@ enum TextEditingDeltaType {
   /// The delta is not modifying the text. There are potentially selection and
   /// composing region updates in the delta that still need to be applied to your
   /// text model.
+  ///
   /// A situation where this delta would be created is when dragging the selection
   /// handles. There are no changes to the text, but there are updates to the selection
   /// and potentially the composing region as well.
@@ -766,11 +769,8 @@ mixin TextEditingDeltaUtils {
   }
 }
 
-/// A structure representing a granular change that has occured to the editing
+/// A structure representing a granular change that has occurred to the editing
 /// state as a result of text editing.
-///
-/// This class should not be used directly, and should be extended for different
-/// types of deltas.
 abstract class TextEditingDelta with TextEditingDeltaUtils {
   /// Creates a delta for a given change to the editing state.
   ///
@@ -994,7 +994,7 @@ class TextEditingDeltaInsertion extends TextEditingDelta {
       deltaText: deltaText,
       deltaRange: deltaRange,
       selection: selection,
-      composing:composing,
+      composing: composing,
   );
 
   /// {@macro flutter.services.TextEditingDelta.deltaType}
@@ -1026,7 +1026,7 @@ class TextEditingDeltaDeletion extends TextEditingDelta {
     deltaText: deltaText,
     deltaRange: deltaRange,
     selection: selection,
-    composing:composing,
+    composing: composing,
   );
 
   /// {@macro flutter.services.TextEditingDelta.deltaType}
@@ -1058,7 +1058,7 @@ class TextEditingDeltaReplacement extends TextEditingDelta {
     deltaText: deltaText,
     deltaRange: deltaRange,
     selection: selection,
-    composing:composing,
+    composing: composing,
   );
 
   /// {@macro flutter.services.TextEditingDelta.deltaType}
@@ -1088,7 +1088,7 @@ class TextEditingDeltaNonTextUpdate extends TextEditingDelta {
   }) : super(
     oldText: oldText,
     selection: selection,
-    composing:composing,
+    composing: composing,
   );
 
   /// {@macro flutter.services.TextEditingDelta.deltaType}
