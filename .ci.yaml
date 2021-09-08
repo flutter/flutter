@@ -3162,7 +3162,7 @@ targets:
       task_name: flutter_gallery__transition_perf_e2e_ios32
     scheduler: luci
 
-  - name: Mac_ios32 native_ui_tests_ios32
+  - name: Mac_ios32 native_ui_tests_ios
     recipe: devicelab/devicelab_drone
     bringup: true
     presubmit: false
