@@ -29,6 +29,12 @@ class SurfaceFactory {
   /// The maximum number of surfaces which can be live at once.
   final int maximumSurfaces;
 
+  /// The maximum number of assignable overlays.
+  ///
+  /// This is just `maximumSurfaces - 2` (the maximum number of surfaces minus
+  /// the base surface and backup surface).
+  int get maximumOverlays => maximumSurfaces - 2;
+
   /// Surfaces created by this factory which are currently in use.
   final List<Surface> _liveSurfaces = <Surface>[];
 
@@ -38,6 +44,11 @@ class SurfaceFactory {
 
   /// The number of surfaces which have been created by this factory.
   int get _surfaceCount => _liveSurfaces.length + _cache.length + 2;
+
+  /// The number of available overlay surfaces.
+  ///
+  /// This does not include the base surface or backup surface.
+  int get numAvailableOverlays => maximumOverlays - _liveSurfaces.length;
 
   /// The number of surfaces created by this factory. Used for testing.
   @visibleForTesting
@@ -52,15 +63,9 @@ class SurfaceFactory {
   /// surfaces.
   bool _warnedAboutTooManySurfaces = false;
 
-  /// Gets a [Surface] which is ready to paint to.
-  ///
-  /// If there are available surfaces in the cache, then this will return one of
-  /// them. If this factory hasn't yet created [maximumSurfaces] surfaces, then a
-  /// new one will be created. If this factory has already created [maximumSurfaces]
-  /// surfaces, then this will return a backup surface which will be returned by
-  /// all subsequent calls to [getSurface] until some surfaces have been
-  /// released with [releaseSurface].
-  Surface getSurface() {
+  /// Gets an overlay surface from the cache or creates a new one if it wouldn't
+  /// exceed the maximum. If there are no available surfaces, returns `null`.
+  Surface? getOverlay() {
     if (_cache.isNotEmpty) {
       final Surface surface = _cache.removeLast();
       _liveSurfaces.add(surface);
@@ -70,15 +75,31 @@ class SurfaceFactory {
       _liveSurfaces.add(surface);
       return surface;
     } else {
-      if (!_warnedAboutTooManySurfaces) {
-        _warnedAboutTooManySurfaces = true;
-        printWarning('Flutter was unable to create enough overlay surfaces. '
-            'This is usually caused by too many platform views being '
-            'displayed at once. '
-            'You may experience incorrect rendering.');
-      }
-      return backupSurface;
+      return null;
     }
+  }
+
+  /// Gets a [Surface] which is ready to paint to.
+  ///
+  /// If there are available surfaces in the cache, then this will return one of
+  /// them. If this factory hasn't yet created [maximumSurfaces] surfaces, then a
+  /// new one will be created. If this factory has already created [maximumSurfaces]
+  /// surfaces, then this will return a backup surface which will be returned by
+  /// all subsequent calls to [getSurface] until some surfaces have been
+  /// released with [releaseSurface].
+  Surface getSurface() {
+    final Surface? surface = getOverlay();
+    if (surface != null) {
+      return surface;
+    }
+    if (!_warnedAboutTooManySurfaces) {
+      _warnedAboutTooManySurfaces = true;
+      printWarning('Flutter was unable to create enough overlay surfaces. '
+          'This is usually caused by too many platform views being '
+          'displayed at once. '
+          'You may experience incorrect rendering.');
+    }
+    return backupSurface;
   }
 
   /// Releases all surfaces so they can be reused in the next frame.
