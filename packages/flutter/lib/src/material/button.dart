@@ -74,7 +74,7 @@ class RawMaterialButton extends StatefulWidget {
     this.focusNode,
     this.autofocus = false,
     MaterialTapTargetSize? materialTapTargetSize,
-    this.child,
+    required this.child,
     this.enableFeedback = true,
   }) : materialTapTargetSize = materialTapTargetSize ?? MaterialTapTargetSize.padded,
        assert(shape != null),
