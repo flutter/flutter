@@ -1618,6 +1618,7 @@ targets:
 
   - name: Linux android views
     recipe: flutter/android_views
+    presubmit: false
     properties:
       dependencies: >-
         [
