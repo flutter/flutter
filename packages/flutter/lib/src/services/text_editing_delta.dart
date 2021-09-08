@@ -161,7 +161,7 @@ abstract class TextEditingDelta {
 
       return TextEditingDeltaDeletion(
         oldText: oldText,
-        deltaText: tb,
+        deltaText: '',
         deltaRange: TextRange(
           start: actualStart,
           end: end,
