@@ -90,8 +90,6 @@ source_set("fixture_test") {
   testonly = true
 
   sources = [
-    "dart_fixture.cc",
-    "dart_fixture.h",
     "fixture_test.cc",
     "fixture_test.h",
   ]
