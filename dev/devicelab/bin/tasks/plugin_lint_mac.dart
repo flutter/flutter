@@ -5,6 +5,7 @@
 import 'dart:io';
 
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/host_agent.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
@@ -25,7 +26,7 @@ Future<void> main() async {
         final String integrationTestPackage = path.join(flutterRoot, 'packages', 'integration_test');
         final String iosintegrationTestPodspec = path.join(integrationTestPackage, 'ios', 'integration_test.podspec');
 
-        await exec(
+        final int lintResult = await exec(
           'pod',
           <String>[
             'lib',
@@ -34,11 +35,43 @@ Future<void> main() async {
             '--configuration=Debug', // Release targets unsupported arm64 simulators. Use Debug to only build against targeted x86_64 simulator devices.
             '--use-libraries',
             '--verbose',
+            '--no-clean',
           ],
           environment: <String, String>{
             'LANG': 'en_US.UTF-8',
           },
+          canFail: true,
         );
+        // https://github.com/flutter/flutter/issues/89626
+        if (lintResult != 0) {
+          final Directory systemTemp = Directory.systemTemp;
+          print('Found temp directory ${systemTemp.path}');
+          final Iterable<Directory> lintDirectories = Directory.systemTemp
+              .listSync()
+              .whereType<Directory>()
+              .where((Directory tempDirectory) => path.basename(tempDirectory.path).contains('CocoaPods-Lint'));
+          if (lintDirectories.isNotEmpty) {
+            final Directory lintDirectory = lintDirectories.first;
+            print('Found lint directory ${lintDirectory.path}');
+            final Directory? dumpDirectory = hostAgent.dumpDirectory;
+            if (dumpDirectory != null) {
+              final String zipPath = path.join(dumpDirectory.path,
+                  'lint-${DateTime.now().toLocal().toIso8601String()}.zip');
+              return exec(
+                'zip',
+                <String>[
+                  '-r',
+                  '-9',
+                  zipPath,
+                  lintDirectory.path,
+                ],
+                canFail: true, // Best effort to get the logs.
+              );
+            }
+          }
+
+          throw TaskResult.failure('Lint failed');
+        }
 
         final String macosintegrationTestPodspec = path.join(integrationTestPackage, 'integration_test_macos', 'macos', 'integration_test_macos.podspec');
         await exec(
