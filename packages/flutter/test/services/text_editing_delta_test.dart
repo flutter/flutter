@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-import 'dart:convert' show utf8;
 import 'dart:convert' show jsonDecode;
 
 import 'package:flutter/services.dart';
@@ -26,9 +24,9 @@ void main() {
           ' "composingBase": -1,'
           ' "composingExtent": -1}';
       final TextEditingDelta delta = TextEditingDelta.fromJSON(jsonDecode(jsonInsertionDelta) as Map<String, dynamic>);
-      final TextRange expectedComposing = TextRange.empty;
-      final TextRange expectedDeltaRange = TextRange.collapsed(0);
-      final TextSelection expectedSelection = TextSelection.collapsed(offset: 17);
+      const TextRange expectedComposing = TextRange.empty;
+      const TextRange expectedDeltaRange = TextRange.collapsed(0);
+      const TextSelection expectedSelection = TextSelection.collapsed(offset: 17);
 
       expect(delta.oldText, '');
       expect(delta.deltaText, 'let there be text');
@@ -52,9 +50,9 @@ void main() {
           ' "composingExtent": 11}';
 
       final TextEditingDelta delta = TextEditingDelta.fromJSON(jsonDecode(jsonInsertionDelta) as Map<String, dynamic>);
-      final TextRange expectedComposing = TextRange(start: 6, end: 11);
-      final TextRange expectedDeltaRange = TextRange.collapsed(10);
-      final TextSelection expectedSelection = TextSelection.collapsed(offset: 11);
+      const TextRange expectedComposing = TextRange(start: 6, end: 11);
+      const TextRange expectedDeltaRange = TextRange.collapsed(10);
+      const TextSelection expectedSelection = TextSelection.collapsed(offset: 11);
 
       expect(delta.oldText, 'hello worl');
       expect(delta.deltaText, 'd');
@@ -80,9 +78,9 @@ void main() {
           ' "composingExtent": -1}';
 
       final TextEditingDelta delta = TextEditingDelta.fromJSON(jsonDecode(jsonDeletionDelta) as Map<String, dynamic>);
-      final TextRange expectedComposing = TextRange.empty;
-      final TextRange expectedDeltaRange = TextRange(start: 1, end: 2);
-      final TextSelection expectedSelection = TextSelection.collapsed(offset: 1);
+      const TextRange expectedComposing = TextRange.empty;
+      const TextRange expectedDeltaRange = TextRange(start: 1, end: 2);
+      const TextSelection expectedSelection = TextSelection.collapsed(offset: 1);
 
       expect(delta.oldText, 'let there be text.');
       expect(delta.deltaText, '');
@@ -106,9 +104,9 @@ void main() {
           ' "composingExtent": 10}';
 
       final TextEditingDelta delta = TextEditingDelta.fromJSON(jsonDecode(jsonDeletionDelta) as Map<String, dynamic>);
-      final TextRange expectedComposing = TextRange(start: 6, end: 10);
-      final TextRange expectedDeltaRange = TextRange(start: 10, end: 11);
-      final TextSelection expectedSelection = TextSelection.collapsed(offset: 10);
+      const TextRange expectedComposing = TextRange(start: 6, end: 10);
+      const TextRange expectedDeltaRange = TextRange(start: 10, end: 11);
+      const TextSelection expectedSelection = TextSelection.collapsed(offset: 10);
 
       expect(delta.oldText, 'hello world');
       expect(delta.deltaText, '');
@@ -134,9 +132,9 @@ void main() {
           ' "composingExtent": 13}';
 
       final TextEditingDelta delta = TextEditingDelta.fromJSON(jsonDecode(jsonReplacementDelta) as Map<String, dynamic>);
-      final TextRange expectedComposing = TextRange(start: 6, end: 13);
-      final TextRange expectedDeltaRange = TextRange(start: 6, end: 11);
-      final TextSelection expectedSelection = TextSelection.collapsed(offset: 13);
+      const TextRange expectedComposing = TextRange(start: 6, end: 13);
+      const TextRange expectedDeltaRange = TextRange(start: 6, end: 11);
+      const TextSelection expectedSelection = TextSelection.collapsed(offset: 13);
 
       expect(delta.oldText, 'hello worfi');
       expect(delta.deltaText, 'working');
@@ -160,9 +158,9 @@ void main() {
           ' "composingExtent": 7}';
 
       final TextEditingDelta delta = TextEditingDelta.fromJSON(jsonDecode(jsonReplacementDelta) as Map<String, dynamic>);
-      final TextRange expectedComposing = TextRange(start: 6, end: 7);
-      final TextRange expectedDeltaRange = TextRange(start: 6, end: 11);
-      final TextSelection expectedSelection = TextSelection.collapsed(offset: 7);
+      const TextRange expectedComposing = TextRange(start: 6, end: 7);
+      const TextRange expectedDeltaRange = TextRange(start: 6, end: 11);
+      const TextSelection expectedSelection = TextSelection.collapsed(offset: 7);
 
       expect(delta.oldText, 'hello world');
       expect(delta.deltaText, 'h');
@@ -186,9 +184,9 @@ void main() {
           ' "composingExtent": 11}';
 
       final TextEditingDelta delta = TextEditingDelta.fromJSON(jsonDecode(jsonReplacementDelta) as Map<String, dynamic>);
-      final TextRange expectedComposing = TextRange(start: 6, end: 11);
-      final TextRange expectedDeltaRange = TextRange(start: 6, end: 11);
-      final TextSelection expectedSelection = TextSelection.collapsed(offset: 11);
+      const TextRange expectedComposing = TextRange(start: 6, end: 11);
+      const TextRange expectedDeltaRange = TextRange(start: 6, end: 11);
+      const TextSelection expectedSelection = TextSelection.collapsed(offset: 11);
 
       expect(delta.oldText, 'hello world');
       expect(delta.deltaText, 'words');
@@ -214,9 +212,9 @@ void main() {
           ' "composingExtent": 11}';
 
       final TextEditingDelta delta = TextEditingDelta.fromJSON(jsonDecode(jsonNonTextUpdateDelta) as Map<String, dynamic>);
-      final TextRange expectedComposing = TextRange(start: 6, end: 11);
-      final TextRange expectedDeltaRange = TextRange.empty;
-      final TextSelection expectedSelection = TextSelection.collapsed(offset: 10);
+      const TextRange expectedComposing = TextRange(start: 6, end: 11);
+      const TextRange expectedDeltaRange = TextRange.empty;
+      const TextSelection expectedSelection = TextSelection.collapsed(offset: 10);
 
       expect(delta.oldText, 'hello world');
       expect(delta.deltaText, '');

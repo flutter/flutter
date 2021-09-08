@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
+
 import 'text_editing.dart';
 import 'text_input.dart' show TextEditingValue;
 
@@ -270,6 +272,7 @@ abstract class TextEditingDelta {
 }
 
 /// {@macro flutter.services.TextEditingDeltaInsertion}
+@immutable
 class TextEditingDeltaInsertion extends TextEditingDelta {
   /// Creates an insertion delta for a given change to the editing state.
   ///
@@ -302,6 +305,7 @@ class TextEditingDeltaInsertion extends TextEditingDelta {
 }
 
 /// {@macro flutter.services.TextEditingDeltaDeletion}
+@immutable
 class TextEditingDeltaDeletion extends TextEditingDelta {
   /// Creates a deletion delta for a given change to the editing state.
   ///
@@ -334,6 +338,7 @@ class TextEditingDeltaDeletion extends TextEditingDelta {
 }
 
 /// {@macro flutter.services.TextEditingDeltaReplacement}
+@immutable
 class TextEditingDeltaReplacement extends TextEditingDelta {
   /// Creates a replacement delta for a given change to the editing state.
   ///
@@ -366,6 +371,7 @@ class TextEditingDeltaReplacement extends TextEditingDelta {
 }
 
 /// {@macro flutter.services.TextEditingDeltaNonTextUpdate}
+@immutable
 class TextEditingDeltaNonTextUpdate extends TextEditingDelta {
   /// Creates a delta representing no changes to the text value of the current
   /// editing state. This delta includes updates to the selection and/or composing
