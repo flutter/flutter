@@ -290,14 +290,14 @@ void main() {
       expect(state.incrementLevel, incrementLevel);
     });
 
-    test('creates state file if provided correct inputs', () async {
+    test('can convert from dev style version to stable version', () async {
       const String revision2 = 'def789';
       const String revision3 = '123abc';
       const String previousDartRevision = '171876a4e6cf56ee6da1f97d203926bd7afda7ef';
       const String nextDartRevision = 'f6c91128be6b77aef8351e1e3a9d07c85bc2e46e';
       const String previousVersion = '1.2.0-1.0.pre';
-      const String nextVersion = '1.2.0-3.0.pre';
-      const String incrementLevel = 'm';
+      const String nextVersion = '1.2.0';
+      const String incrementLevel = 'z';
 
       final Directory engine = fileSystem.directory(checkoutsParentDirectory)
           .childDirectory('flutter_conductor_checkouts')
