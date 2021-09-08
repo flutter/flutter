@@ -916,35 +916,35 @@ abstract class TextEditingDelta with TextEditingDeltaUtils {
 
   /// The value represents the text that is being inserted/deleted by this delta.
   ///
-  /// This value will slightly vary based on the [TextEditingDeltaType].
+  /// This value will slightly vary based on the [TextEditingDeltaType]:
   ///
-  /// For a [TextEditingDeltaType.insertion] this will be the character/s being
+  ///  * For a [TextEditingDeltaType.insertion] this will be the character/s being
   /// inserted.
   ///
-  /// For a [TextEditingDeltaType.deletion] this will be an empty string.
+  ///  * For a [TextEditingDeltaType.deletion] this will be an empty string.
   ///
-  /// For a [TextEditingDeltaType.replacement] this will be the text that is
+  ///  * For a [TextEditingDeltaType.replacement] this will be the text that is
   /// replacing the [TextEditingDelta.deltaRange].
   ///
-  /// For a [TextEditingDeltaType.nonTextUpdate] this will be an empty string.
+  ///  * For a [TextEditingDeltaType.nonTextUpdate] this will be an empty string.
   final String deltaText;
 
   /// This value can either represent a range of text that the delta is changing
   /// or if is a collapsed range then it represents the point where this delta
   /// began.
   ///
-  /// This value will slightly vary based on the [TextEditingDeltaType].
+  /// This value will slightly vary based on the [TextEditingDeltaType]:
   ///
-  /// For a [TextEditingDeltaType.insertion] this will be a collapsed range
+  ///  * For a [TextEditingDeltaType.insertion] this will be a collapsed range
   /// representing the cursor position where the insertion began.
   ///
-  /// For a [TextEditingDeltaType.deletion] this will be the range of text
+  ///  * For a [TextEditingDeltaType.deletion] this will be the range of text
   /// that was deleted.
   ///
-  /// For a [TextEditingDeltaType.replacement] this will be the range of
+  ///  * For a [TextEditingDeltaType.replacement] this will be the range of
   /// characters that are being replaced.
   ///
-  /// For a [TextEditingDeltaType.nonTextUpdate] this will be a collapsed range
+  ///  * For a [TextEditingDeltaType.nonTextUpdate] this will be a collapsed range
   /// of (-1,-1).
   final TextRange deltaRange;
 
