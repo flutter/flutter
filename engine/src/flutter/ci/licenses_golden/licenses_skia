@@ -1,4 +1,4 @@
-Signature: 87fc0f22eabb71e700b4e15467d5c76d
+Signature: a6a93d1fdc96d4bda1548ea6ce5a714c
 
 UNUSED LICENSES:
 
@@ -2496,12 +2496,12 @@ FILE: ../../../third_party/skia/src/gpu/ops/DrawAtlasOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/DrawVerticesOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/DrawVerticesOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrDrawOp.h
-FILE: ../../../third_party/skia/src/gpu/ops/GrLatticeOp.cpp
-FILE: ../../../third_party/skia/src/gpu/ops/GrLatticeOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrMeshDrawOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrMeshDrawOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrOp.h
+FILE: ../../../third_party/skia/src/gpu/ops/LatticeOp.cpp
+FILE: ../../../third_party/skia/src/gpu/ops/LatticeOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/TriangulatingPathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/TriangulatingPathRenderer.h
 FILE: ../../../third_party/skia/src/gpu/text/GrDistanceFieldAdjustTable.cpp
@@ -3959,8 +3959,8 @@ FILE: ../../../third_party/skia/src/gpu/geometry/GrAATriangulator.cpp
 FILE: ../../../third_party/skia/src/gpu/geometry/GrAATriangulator.h
 FILE: ../../../third_party/skia/src/gpu/geometry/GrWangsFormula.h
 FILE: ../../../third_party/skia/src/gpu/mock/GrMockOpTarget.h
-FILE: ../../../third_party/skia/src/gpu/ops/GrDrawAtlasPathOp.cpp
-FILE: ../../../third_party/skia/src/gpu/ops/GrDrawAtlasPathOp.h
+FILE: ../../../third_party/skia/src/gpu/ops/DrawAtlasPathOp.cpp
+FILE: ../../../third_party/skia/src/gpu/ops/DrawAtlasPathOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrSimpleMeshDrawOpHelperWithStencil.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrSimpleMeshDrawOpHelperWithStencil.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrSmallPathAtlasMgr.cpp
