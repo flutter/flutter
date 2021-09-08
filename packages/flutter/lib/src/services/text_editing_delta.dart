@@ -2,16 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show
-  TextAffinity,
-  TextAlign,
-  TextDirection;
-
-import 'package:flutter/foundation.dart';
 import 'text_editing.dart';
-import 'text_input.dart';
-
-export 'dart:ui' show TextAffinity;
+import 'text_input.dart' show TextEditingValue;
 
 TextAffinity? _toTextAffinity(String? affinity) {
   switch (affinity) {
@@ -21,6 +13,15 @@ TextAffinity? _toTextAffinity(String? affinity) {
       return TextAffinity.upstream;
   }
   return null;
+}
+
+/// Replaces a range of text in the original string with the text given in the
+/// replacement string.
+String _replace(String originalText, String replacementText, int start, int end) {
+  final String textStart = originalText.substring(0, start);
+  final String textEnd = originalText.substring(end, originalText.length);
+  final String newText = textStart + replacementText + textEnd;
+  return newText;
 }
 
 /// A way to disambiguate a [TextEditingDelta] when a delta generated for an insertion
@@ -59,21 +60,9 @@ enum TextEditingDeltaType {
   nonTextUpdate,
 }
 
-/// A mixin for manipulating a string of text.
-mixin TextEditingDeltaUtils {
-  /// Replaces a range of text in the original string with the text given in the
-  /// replacement string.
-  String replace(String originalText, String replacementText, int start, int end) {
-    final String textStart = originalText.substring(0, start);
-    final String textEnd = originalText.substring(end, originalText.length);
-    final String newText = textStart + replacementText + textEnd;
-    return newText;
-  }
-}
-
 /// A structure representing a granular change that has occurred to the editing
 /// state as a result of text editing.
-abstract class TextEditingDelta with TextEditingDeltaUtils {
+abstract class TextEditingDelta {
   /// Creates a delta for a given change to the editing state.
   ///
   /// {@template flutter.services.TextEditingDelta}
@@ -307,7 +296,7 @@ class TextEditingDeltaInsertion extends TextEditingDelta {
   @override
   TextEditingValue apply(TextEditingValue value) {
     String newText = value.text;
-    newText = replace(newText, deltaText, deltaRange.start, deltaRange.end);
+    newText = _replace(newText, deltaText, deltaRange.start, deltaRange.end);
     return value.copyWith(text: newText, selection: selection, composing: composing);
   }
 }
@@ -339,7 +328,7 @@ class TextEditingDeltaDeletion extends TextEditingDelta {
   @override
   TextEditingValue apply(TextEditingValue value) {
     String newText = value.text;
-    newText = replace(newText, '', deltaRange.start, deltaRange.end);
+    newText = _replace(newText, '', deltaRange.start, deltaRange.end);
     return value.copyWith(text: newText, selection: selection, composing: composing);
   }
 }
@@ -371,7 +360,7 @@ class TextEditingDeltaReplacement extends TextEditingDelta {
   @override
   TextEditingValue apply(TextEditingValue value) {
     String newText = value.text;
-    newText = replace(newText, deltaText, deltaRange.start, deltaRange.end);
+    newText = _replace(newText, deltaText, deltaRange.start, deltaRange.end);
     return value.copyWith(text: newText, selection: selection, composing: composing);
   }
 }
