@@ -248,6 +248,44 @@ class CupertinoTextThemeData with Diagnosticable {
   }
 
   @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+
+    // Warning: make sure these properties are in the exact same order as in
+    // hashValues() and in the raw constructor and in the order of fields in
+    // the class and in the lerp() method.
+    return other is CupertinoTextThemeData &&
+        other.textStyle == textStyle &&
+        other.actionTextStyle == actionTextStyle &&
+        other.tabLabelTextStyle == tabLabelTextStyle &&
+        other.navTitleTextStyle == navTitleTextStyle &&
+        other.navLargeTitleTextStyle == navLargeTitleTextStyle &&
+        other.navActionTextStyle == navActionTextStyle &&
+        other.pickerTextStyle == pickerTextStyle &&
+        other.dateTimePickerTextStyle == dateTimePickerTextStyle;
+  }
+
+  @override
+  int get hashCode {
+    // Warning: For the sanity of the reader, please make sure these properties
+    // are in the exact same order as in operator == and in the raw constructor
+    // and in the order of fields in the class and in the lerp() method.
+    final List<Object?> values = <Object?>[
+      textStyle,
+      actionTextStyle,
+      tabLabelTextStyle,
+      navTitleTextStyle,
+      navLargeTitleTextStyle,
+      navActionTextStyle,
+      pickerTextStyle,
+      dateTimePickerTextStyle,
+    ];
+    return hashList(values);
+  }
+
+  @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     const CupertinoTextThemeData defaultData = CupertinoTextThemeData();

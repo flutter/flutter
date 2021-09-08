@@ -291,6 +291,38 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
   }
 
   @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    // Warning: make sure these properties are in the exact same order as in
+    // hashValues() and in the raw constructor and in the order of fields in
+    // the class and in the lerp() method.
+    return other is CupertinoThemeData &&
+        other.brightness == brightness &&
+        other.primaryColor == primaryColor &&
+        other.primaryContrastingColor == primaryContrastingColor &&
+        other.textTheme == textTheme &&
+        other.barBackgroundColor == barBackgroundColor &&
+        other.scaffoldBackgroundColor == scaffoldBackgroundColor;
+  }
+
+  @override
+  int get hashCode {
+    // Warning: For the sanity of the reader, please make sure these properties
+    // are in the exact same order as in operator == and in the raw constructor
+    // and in the order of fields in the class and in the lerp() method.
+    final List<Object?> values = <Object?>[
+      brightness,
+      primaryColor,
+      primaryContrastingColor,
+      textTheme,
+      barBackgroundColor,
+      scaffoldBackgroundColor,
+    ];
+    return hashList(values);
+  }
+
+  @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     const CupertinoThemeData defaultData = CupertinoThemeData();
@@ -315,6 +347,7 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
 ///
 ///  * [CupertinoThemeData], which uses reasonable default values for
 ///    unspecified theme properties.
+@immutable
 class NoDefaultCupertinoThemeData {
   /// Creates a [NoDefaultCupertinoThemeData] styling specification.
   ///
@@ -441,6 +474,38 @@ class NoDefaultCupertinoThemeData {
       barBackgroundColor: barBackgroundColor ?? this.barBackgroundColor,
       scaffoldBackgroundColor: scaffoldBackgroundColor ?? this.scaffoldBackgroundColor,
     );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    // Warning: make sure these properties are in the exact same order as in
+    // hashValues() and in the raw constructor and in the order of fields in
+    // the class and in the lerp() method.
+    return other is NoDefaultCupertinoThemeData &&
+        other.brightness == brightness &&
+        other.primaryColor == primaryColor &&
+        other.primaryContrastingColor == primaryContrastingColor &&
+        other.textTheme == textTheme &&
+        other.barBackgroundColor == barBackgroundColor &&
+        other.scaffoldBackgroundColor == scaffoldBackgroundColor;
+  }
+
+  @override
+  int get hashCode {
+    // Warning: For the sanity of the reader, please make sure these properties
+    // are in the exact same order as in operator == and in the raw constructor
+    // and in the order of fields in the class and in the lerp() method.
+    final List<Object?> values = <Object?>[
+      brightness,
+      primaryColor,
+      primaryContrastingColor,
+      textTheme,
+      barBackgroundColor,
+      scaffoldBackgroundColor,
+    ];
+    return hashList(values);
   }
 }
 
