@@ -1,4 +1,4 @@
-Signature: 8b6865b6bedfbfafa87793170ceb0096
+Signature: 441b768215bf3f229521bbb95a7f057f
 
 UNUSED LICENSES:
 
@@ -2936,6 +2936,7 @@ ORIGIN: ../../../third_party/skia/bench/CanvasSaveRestoreBench.cpp + ../../../th
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/bench/CanvasSaveRestoreBench.cpp
 FILE: ../../../third_party/skia/bench/TriangulatorBench.cpp
+FILE: ../../../third_party/skia/experimental/lowp-basic/lowp_experiments.cpp
 FILE: ../../../third_party/skia/experimental/tskit/bindings/bindings.h
 FILE: ../../../third_party/skia/experimental/tskit/bindings/core.cpp
 FILE: ../../../third_party/skia/experimental/tskit/bindings/extension.cpp
