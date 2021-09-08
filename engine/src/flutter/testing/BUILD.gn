@@ -17,6 +17,8 @@ source_set("testing_lib") {
 
   sources = [
     "assertions.h",
+    "post_task_sync.cc",
+    "post_task_sync.h",
     "testing.cc",
     "testing.h",
     "thread_test.cc",

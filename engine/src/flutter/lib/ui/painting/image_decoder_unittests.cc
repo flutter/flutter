@@ -13,6 +13,7 @@
 #include "flutter/testing/dart_isolate_runner.h"
 #include "flutter/testing/elf_loader.h"
 #include "flutter/testing/fixture_test.h"
+#include "flutter/testing/post_task_sync.h"
 #include "flutter/testing/test_dart_native_resolver.h"
 #include "flutter/testing/test_gl_surface.h"
 #include "flutter/testing/testing.h"
@@ -134,14 +135,11 @@ TEST_F(ImageDecoderFixtureTest, CanCreateImageDecoder) {
 
   );
 
-  fml::AutoResetWaitableEvent latch;
-  runners.GetIOTaskRunner()->PostTask([&]() {
+  PostTaskSync(runners.GetIOTaskRunner(), [&]() {
     TestIOManager manager(runners.GetIOTaskRunner());
     ImageDecoder decoder(std::move(runners), loop->GetTaskRunner(),
                          manager.GetWeakIOManager());
-    latch.Signal();
   });
-  latch.Wait();
 }
 
 /// An Image generator that pretends it can't recognize the data it was given.
@@ -401,20 +399,15 @@ TEST_F(ImageDecoderFixtureTest, CanDecodeWithResizes) {
   std::unique_ptr<ImageDecoder> image_decoder;
 
   // Setup the IO manager.
-  runners.GetIOTaskRunner()->PostTask([&]() {
+  PostTaskSync(runners.GetIOTaskRunner(), [&]() {
     io_manager = std::make_unique<TestIOManager>(runners.GetIOTaskRunner());
-    latch.Signal();
   });
-  latch.Wait();
 
   // Setup the image decoder.
-  runners.GetUITaskRunner()->PostTask([&]() {
+  PostTaskSync(runners.GetUITaskRunner(), [&]() {
     image_decoder = std::make_unique<ImageDecoder>(
         runners, loop->GetTaskRunner(), io_manager->GetWeakIOManager());
-
-    latch.Signal();
   });
-  latch.Wait();
 
   // Setup a generic decoding utility that gives us the final decoded size.
   auto decoded_size = [&](uint32_t target_width,
@@ -451,18 +444,10 @@ TEST_F(ImageDecoderFixtureTest, CanDecodeWithResizes) {
   ASSERT_EQ(decoded_size(100, 100), SkISize::Make(100, 100));
 
   // Destroy the IO manager
-  runners.GetIOTaskRunner()->PostTask([&]() {
-    io_manager.reset();
-    latch.Signal();
-  });
-  latch.Wait();
+  PostTaskSync(runners.GetIOTaskRunner(), [&]() { io_manager.reset(); });
 
   // Destroy the image decoder
-  runners.GetUITaskRunner()->PostTask([&]() {
-    image_decoder.reset();
-    latch.Signal();
-  });
-  latch.Wait();
+  PostTaskSync(runners.GetUITaskRunner(), [&]() { image_decoder.reset(); });
 }
 
 // TODO(https://github.com/flutter/flutter/issues/81232) - disabled due to
@@ -506,20 +491,15 @@ TEST_F(ImageDecoderFixtureTest, DISABLED_CanResizeWithoutDecode) {
   std::unique_ptr<ImageDecoder> image_decoder;
 
   // Setup the IO manager.
-  runners.GetIOTaskRunner()->PostTask([&]() {
+  PostTaskSync(runners.GetIOTaskRunner(), [&]() {
     io_manager = std::make_unique<TestIOManager>(runners.GetIOTaskRunner());
-    latch.Signal();
   });
-  latch.Wait();
 
   // Setup the image decoder.
-  runners.GetUITaskRunner()->PostTask([&]() {
+  PostTaskSync(runners.GetUITaskRunner(), [&]() {
     image_decoder = std::make_unique<ImageDecoder>(
         runners, loop->GetTaskRunner(), io_manager->GetWeakIOManager());
-
-    latch.Signal();
   });
-  latch.Wait();
 
   // Setup a generic decoding utility that gives us the final decoded size.
   auto decoded_size = [&](uint32_t target_width,
@@ -549,18 +529,10 @@ TEST_F(ImageDecoderFixtureTest, DISABLED_CanResizeWithoutDecode) {
   ASSERT_EQ(decoded_size(100, 100), SkISize::Make(100, 100));
 
   // Destroy the IO manager
-  runners.GetIOTaskRunner()->PostTask([&]() {
-    io_manager.reset();
-    latch.Signal();
-  });
-  latch.Wait();
+  PostTaskSync(runners.GetIOTaskRunner(), [&]() { io_manager.reset(); });
 
   // Destroy the image decoder
-  runners.GetUITaskRunner()->PostTask([&]() {
-    image_decoder.reset();
-    latch.Signal();
-  });
-  latch.Wait();
+  PostTaskSync(runners.GetUITaskRunner(), [&]() { image_decoder.reset(); });
 }
 
 // Verifies https://skia-review.googlesource.com/c/skia/+/259161 is present in
@@ -673,16 +645,13 @@ TEST_F(ImageDecoderFixtureTest,
                       CreateNewThread("io")         // io
   );
 
-  fml::AutoResetWaitableEvent latch;
   fml::AutoResetWaitableEvent io_latch;
   std::unique_ptr<TestIOManager> io_manager;
 
   // Setup the IO manager.
-  runners.GetIOTaskRunner()->PostTask([&]() {
+  PostTaskSync(runners.GetIOTaskRunner(), [&]() {
     io_manager = std::make_unique<TestIOManager>(runners.GetIOTaskRunner());
-    latch.Signal();
   });
-  latch.Wait();
 
   auto isolate = RunDartCodeInIsolate(vm_ref, settings, runners, "main", {},
                                       GetDefaultKernelFilePath(),
@@ -691,7 +660,7 @@ TEST_F(ImageDecoderFixtureTest,
   // Latch the IO task runner.
   runners.GetIOTaskRunner()->PostTask([&]() { io_latch.Wait(); });
 
-  runners.GetUITaskRunner()->PostTask([&]() {
+  PostTaskSync(runners.GetUITaskRunner(), [&]() {
     fml::AutoResetWaitableEvent isolate_latch;
     fml::RefPtr<MultiFrameCodec> codec;
     EXPECT_TRUE(isolate->RunInIsolateScope([&]() -> bool {
@@ -718,17 +687,10 @@ TEST_F(ImageDecoderFixtureTest,
     EXPECT_FALSE(codec);
 
     io_latch.Signal();
-
-    latch.Signal();
   });
-  latch.Wait();
 
   // Destroy the IO manager
-  runners.GetIOTaskRunner()->PostTask([&]() {
-    io_manager.reset();
-    latch.Signal();
-  });
-  latch.Wait();
+  PostTaskSync(runners.GetIOTaskRunner(), [&]() { io_manager.reset(); });
 }
 
 TEST_F(ImageDecoderFixtureTest, MultiFrameCodecDidAccessGpuDisabledSyncSwitch) {
@@ -752,22 +714,19 @@ TEST_F(ImageDecoderFixtureTest, MultiFrameCodecDidAccessGpuDisabledSyncSwitch) {
                       CreateNewThread("io")         // io
   );
 
-  fml::AutoResetWaitableEvent latch;
   std::unique_ptr<TestIOManager> io_manager;
   fml::RefPtr<MultiFrameCodec> codec;
 
   // Setup the IO manager.
-  runners.GetIOTaskRunner()->PostTask([&]() {
+  PostTaskSync(runners.GetIOTaskRunner(), [&]() {
     io_manager = std::make_unique<TestIOManager>(runners.GetIOTaskRunner());
-    latch.Signal();
   });
-  latch.Wait();
 
   auto isolate = RunDartCodeInIsolate(vm_ref, settings, runners, "main", {},
                                       GetDefaultKernelFilePath(),
                                       io_manager->GetWeakIOManager());
 
-  runners.GetUITaskRunner()->PostTask([&]() {
+  PostTaskSync(runners.GetUITaskRunner(), [&]() {
     fml::AutoResetWaitableEvent isolate_latch;
 
     EXPECT_TRUE(isolate->RunInIsolateScope([&]() -> bool {
@@ -790,34 +749,20 @@ TEST_F(ImageDecoderFixtureTest, MultiFrameCodecDidAccessGpuDisabledSyncSwitch) {
       return true;
     }));
     isolate_latch.Wait();
-
-    latch.Signal();
   });
-  latch.Wait();
 
-  runners.GetIOTaskRunner()->PostTask([&]() {
+  PostTaskSync(runners.GetIOTaskRunner(), [&]() {
     EXPECT_TRUE(io_manager->did_access_is_gpu_disabled_sync_switch_);
-    latch.Signal();
   });
-  latch.Wait();
 
   // Destroy the Isolate
   isolate = nullptr;
 
   // Destroy the MultiFrameCodec
-  runners.GetUITaskRunner()->PostTask([&]() {
-    codec = nullptr;
-    latch.Signal();
-  });
-  latch.Wait();
+  PostTaskSync(runners.GetUITaskRunner(), [&]() { codec = nullptr; });
 
   // Destroy the IO manager
-  runners.GetIOTaskRunner()->PostTask([&]() {
-    io_manager.reset();
-    latch.Signal();
-  });
-
-  latch.Wait();
+  PostTaskSync(runners.GetIOTaskRunner(), [&]() { io_manager.reset(); });
 }
 
 }  // namespace testing
