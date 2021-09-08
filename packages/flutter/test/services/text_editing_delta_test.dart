@@ -25,7 +25,6 @@ void main() {
           ' "selectionIsDirectional": false,'
           ' "composingBase": -1,'
           ' "composingExtent": -1}';
-      
       final TextEditingDelta delta = TextEditingDelta.fromJSON(jsonDecode(jsonInsertionDelta) as Map<String, dynamic>);
       final TextRange expectedComposing = TextRange.empty;
       final TextRange expectedDeltaRange = TextRange.collapsed(0);
@@ -228,4 +227,3 @@ void main() {
     });
   });
 }
-
