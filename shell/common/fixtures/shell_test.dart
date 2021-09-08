@@ -75,6 +75,13 @@ void sayHiFromFixturesAreFunctionalMain() native 'SayHiFromFixturesAreFunctional
 
 void notifyNative() native 'NotifyNative';
 
+@pragma('vm:entry-point')
+void thousandCallsToNative() {
+  for (int i = 0; i < 1000; i++) {
+    notifyNative();
+  }
+}
+
 void secondaryIsolateMain(String message) {
   print('Secondary isolate got message: ' + message);
   notifyNative();
