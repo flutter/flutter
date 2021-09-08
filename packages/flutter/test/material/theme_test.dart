@@ -591,8 +591,7 @@ void main() {
           ),
         ));
 
-        // Widget does not rebuild as theme color remains overriden.
-        expect(buildCount, 1);
+        expect(buildCount, 2);
         expect(theme.primaryColor, CupertinoColors.activeOrange);
       },
     );
