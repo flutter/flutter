@@ -158,13 +158,17 @@ if (enable_unittests) {
   }
 
   shell_host_executable("shell_benchmarks") {
-    sources = [ "shell_benchmarks.cc" ]
+    sources = [
+      "dart_native_benchmarks.cc",
+      "shell_benchmarks.cc",
+    ]
 
     deps = [
       ":shell_unittests_fixtures",
       "//flutter/benchmarking",
       "//flutter/flow",
       "//flutter/testing:dart",
+      "//flutter/testing:fixture_test",
       "//flutter/testing:testing_lib",
     ]
   }
