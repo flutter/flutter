@@ -31,7 +31,6 @@ Future<void> main() async {
             'lib',
             'lint',
             iosintegrationTestPodspec,
-            '--configuration=Debug', // Release targets unsupported arm64 simulators. Use Debug to only build against targeted x86_64 simulator devices.
             '--use-libraries',
             '--verbose',
           ],
@@ -84,7 +83,6 @@ Future<void> main() async {
             'lib',
             'lint',
             objcPodspecPath,
-            '--configuration=Debug', // Release targets unsupported arm64 simulators. Use Debug to only build against targeted x86_64 simulator devices.
             '--allow-warnings',
             '--verbose',
           ],
@@ -103,7 +101,6 @@ Future<void> main() async {
             'lib',
             'lint',
             objcPodspecPath,
-            '--configuration=Debug', // Release targets unsupported arm64 simulators. Use Debug to only build against targeted x86_64 simulator devices.
             '--allow-warnings',
             '--use-libraries',
             '--verbose',
@@ -141,7 +138,6 @@ Future<void> main() async {
           <String>[
             'lib',
             'lint',
-            '--configuration=Debug', // Release targets unsupported arm64 simulators. Use Debug to only build against targeted x86_64 simulator devices.
             swiftPodspecPath,
             '--allow-warnings',
             '--verbose',
@@ -161,7 +157,6 @@ Future<void> main() async {
             'lib',
             'lint',
             swiftPodspecPath,
-            '--configuration=Debug', // Release targets unsupported arm64 simulators. Use Debug to only build against targeted x86_64 simulator devices.
             '--allow-warnings',
             '--use-libraries',
             '--verbose',
