@@ -7,8 +7,6 @@
 // initialize a binding, which rendering_tester will attempt to re-initialize
 // (or vice versa).
 
-import 'dart:ui' as ui;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -781,12 +779,6 @@ void main() {
     }
 
     testWidgets('Reverse List showOnScreen', (WidgetTester tester) async {
-      final ui.Size originalScreenSize = tester.binding.window.physicalSize;
-      final double originalDevicePixelRatio = tester.binding.window.devicePixelRatio;
-      addTearDown(() {
-        tester.binding.window.devicePixelRatioTestValue = originalDevicePixelRatio;
-        tester.binding.window.physicalSizeTestValue = originalScreenSize;
-      });
       const double screenHeight = 400.0;
       const double screenWidth = 400.0;
       const double itemHeight = screenHeight / 10.0;
