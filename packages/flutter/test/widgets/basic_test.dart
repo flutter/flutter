@@ -863,6 +863,41 @@ void main() {
     expect(logs, <String>['exit3']);
     logs.clear();
   });
+
+  testWidgets('Wrap implements debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    Wrap(
+      spacing: 8.0, // gap between adjacent Text widget
+      runSpacing: 4.0, // gap between lines
+      direction: Axis.horizontal,
+      alignment: WrapAlignment.start,
+      runAlignment: WrapAlignment.start,
+      crossAxisAlignment: WrapCrossAlignment.start,
+      textDirection: TextDirection.ltr,
+      verticalDirection: VerticalDirection.up,
+      children: const <Widget>[
+        Text('Hamilton'),
+        Text('Lafayette'),
+        Text('Mulligan'),
+      ],
+    ).debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
+
+    expect(description, unorderedMatches(<dynamic>[
+      contains('direction: horizontal'),
+      contains('alignment: start'),
+      contains('spacing: 8.0'),
+      contains('runAlignment: start'),
+      contains('runSpacing: 4.0'),
+      contains('crossAxisAlignment: start'),
+      contains('textDirection: ltr'),
+      contains('verticalDirection: up'),
+    ]));
+  });
 }
 
 HitsRenderBox hits(RenderBox renderBox) => HitsRenderBox(renderBox);
