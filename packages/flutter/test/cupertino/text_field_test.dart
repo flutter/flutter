@@ -262,7 +262,7 @@ void main() {
     await tester.tap(find.text('Paste'));
     await tester.pumpAndSettle();
     expect(controller.text, 'blah1 blah2blah1');
-    expect(controller.selection, const TextSelection(baseOffset: 16, extentOffset: 16));
+    expect(controller.selection, const TextSelection(baseOffset: 16, extentOffset: 16, affinity: TextAffinity.upstream));
 
     // Cut the first word.
     await gesture.down(midBlah1);
@@ -4775,6 +4775,22 @@ void main() {
       expect(disabledColor, isSameColorAs(const Color(0xFFFAFAFA)));
     },
   );
+
+  testWidgets('autofill info has placeholder text', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CupertinoTextField(
+          placeholder: 'placeholder text',
+        ),
+      ),
+    );
+    await tester.tap(find.byType(CupertinoTextField));
+
+    expect(
+      tester.testTextInput.setClientArgs?['autofill'],
+      containsPair('hintText', 'placeholder text'),
+    );
+  });
 
   testWidgets('textDirection is passed to EditableText', (WidgetTester tester) async {
     await tester.pumpWidget(

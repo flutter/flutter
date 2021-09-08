@@ -829,7 +829,7 @@ void main() {
     const int kUserMappedSectionOpened = 1224;
     const int kUserPermissionDenied = 5;
 
-    testWithoutContext('when PackageProcess throws an exception containg non-executable bits', () {
+    testWithoutContext('when PackageProcess throws an exception containing non-executable bits', () {
       final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(command: <String>['foo'], exception: ProcessPackageExecutableNotFoundException('', candidates: <String>['not-empty'])),
         const FakeCommand(command: <String>['foo'], exception: ProcessPackageExecutableNotFoundException('', candidates: <String>['not-empty'])),
