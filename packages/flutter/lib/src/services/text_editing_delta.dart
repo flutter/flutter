@@ -64,6 +64,17 @@ enum TextEditingDeltaType {
 
 /// A structure representing a granular change that has occurred to the editing
 /// state as a result of text editing.
+///
+/// See also:
+///
+///  * [TextEditingDeltaInsertion], a delta representing an insertion.
+///  * [TextEditingDeltaDeletion], a delta representing a deletion.
+///  * [TextEditingDeltaReplacement], a delta representing a replacement.
+///  * [TextEditingDeltaNonTextUpdate], a delta representing an update to the
+///  selection and/or composing region.
+///  * [TextInputConfiguration], to opt-in your [TextInputClient] to receive
+///  [TextEditingDelta]'s you must set [TextInputConfiguration.enableDeltaModel]
+///  to true.
 abstract class TextEditingDelta {
   /// Creates a delta for a given change to the editing state.
   ///
@@ -86,15 +97,56 @@ abstract class TextEditingDelta {
   /// Creates an instance of this class from a JSON object by inferring the
   /// type of delta based on values sent from the engine.
   factory TextEditingDelta.fromJSON(Map<String, dynamic> encoded) {
+    /// An insertion delta is one where [deltaRange] is collapsed.
+    ///
+    /// A deletion delta is one where the [deltaText] is empty.
+    ///
+    /// An insertion/deletion can still occur when the [deltaRange] is not
+    /// collapsed, or the [deltaText] is not empty.
+    ///
+    /// On native platforms when composing text, the entire composing region is
+    /// replaced on input, rather than reporting character by character
+    /// insertion/deletion. In these cases we can detect if there was an
+    /// insertion/deletion by checking if the text inside the original composing
+    /// region was modified by the replacement. If the text is the same then we have
+    /// an insertion/deletion. If the text is different then we can say we have
+    /// a replacement.
+    ///
+    /// For example say we are currently composing the word: 'world'.
+    /// Our current state is 'worl|' with the cursor at the end of 'l'. If we
+    /// input the character 'd', the platform will tell us 'worl' was replaced
+    /// with 'world' at range (0,4). Here we can check if the text found in the
+    /// composing region (0,4) has been modified. We see that it hasn't because
+    /// 'worl' == 'worl', so this means that the text in
+    /// 'world'{replacementDestinationEnd, replacementDestinationStart + replacementSourceEnd}
+    /// can be considered an insertion. In this case we inserted 'd'.
+    ///
+    /// Similarly for a a deletion, say we are currently composing the word: 'worl'.
+    /// Our current state is 'world|' with the cursor at the end of 'd'. If we
+    /// press backspace to delete the character 'd', the platform will tell us 'world'
+    /// was replaced with 'worl' at range (0,5). Here we can check if the text found
+    /// in the new composing region, is the same as the replacement text. We can do this
+    /// by using oldText{replacementDestinationStart, replacementDestinationStart + replacementSourceEnd}
+    /// which in this case is 'worl'. We then compare 'worl' with 'worl' and
+    /// verify that they are the same. This means that the text in
+    /// 'world'{replacementDestinationEnd, replacementDestinationStart + replacementSourceEnd} was deleted.
+    /// In this case the character 'd' was deleted.
+    ///
+    /// A replacement delta occurs when the original composing region has been
+    /// modified.
+    ///
+    /// A non text update delta occurs when the selection and/or composing region
+    /// has been changed by the platform, and there have been no changes to the
+    /// text value.
     final String oldText = encoded['oldText'] as String;
-    final int start = encoded['deltaStart'] as int;
-    final int end = encoded['deltaEnd'] as int;
-    final String tb = encoded['deltaText'] as String;
-    const int tbStart = 0;
-    final int tbEnd = tb.length;
+    final int replacementDestinationStart = encoded['deltaStart'] as int;
+    final int replacementDestinationEnd = encoded['deltaEnd'] as int;
+    final String replacementSource = encoded['deltaText'] as String;
+    const int replacementSourceStart = 0;
+    final int replacementSourceEnd = replacementSource.length;
 
     // This delta is explicitly a non text update.
-    final bool isNonTextUpdate = start == -1 && start == end;
+    final bool isNonTextUpdate = replacementDestinationStart == -1 && replacementDestinationStart == replacementDestinationEnd;
     final TextRange newComposing = TextRange(
       start: encoded['composingBase'] as int? ?? -1,
       end: encoded['composingExtent'] as int? ?? -1,
@@ -115,32 +167,29 @@ abstract class TextEditingDelta {
       );
     }
 
-    final String textStart = oldText.substring(0, start);
-    final String textEnd = oldText.substring(end, oldText.length);
-    final String newText = textStart + tb + textEnd;
-
+    final String newText = _replace(oldText, replacementText, replacementDestinationStart, replacementDestinationEnd);
     final bool isEqual = oldText == newText;
 
-    final bool isDeletionGreaterThanOne = (end - start) - (tbEnd - tbStart) > 1;
-    final bool isDeletingByReplacingWithEmpty = tb.isEmpty && tbStart == 0 && tbStart == tbEnd;
+    final bool isDeletionGreaterThanOne = (replacementDestinationEnd - replacementDestinationStart) - (replacementSourceEnd - replacementSourceStart) > 1;
+    final bool isDeletingByReplacingWithEmpty = replacementSource.isEmpty && replacementSourceStart == 0 && replacementSourceStart == replacementSourceEnd;
 
-    final bool isReplacedByShorter = isDeletionGreaterThanOne && (tbEnd - tbStart < end - start);
-    final bool isReplacedByLonger = tbEnd - tbStart > end - start;
-    final bool isReplacedBySame = tbEnd - tbStart == end - start;
+    final bool isReplacedByShorter = isDeletionGreaterThanOne && (replacementSourceEnd - replacementSourceStart < replacementDestinationEnd - replacementDestinationStart);
+    final bool isReplacedByLonger = replacementSourceEnd - replacementSourceStart > replacementDestinationEnd - replacementDestinationStart;
+    final bool isReplacedBySame = replacementSourceEnd - replacementSourceStart == replacementDestinationEnd - replacementDestinationStart;
 
-    final bool isInsertingInsideComposingRegion = start + tbEnd > end;
+    final bool isInsertingInsideComposingRegion = replacementDestinationStart + replacementSourceEnd > replacementDestinationEnd;
     final bool isDeletingInsideComposingRegion =
-        !isReplacedByShorter && !isDeletingByReplacingWithEmpty && start + tbEnd < end;
+        !isReplacedByShorter && !isDeletingByReplacingWithEmpty && replacementDestinationStart + replacementSourceEnd < replacementDestinationEnd;
 
     String newComposingText;
     String originalComposingText;
 
     if (isDeletingByReplacingWithEmpty || isDeletingInsideComposingRegion || isReplacedByShorter) {
-      newComposingText = tb.substring(tbStart, tbEnd);
-      originalComposingText = oldText.substring(start, start + tbEnd);
+      newComposingText = replacementSource.substring(replacementSourceStart, replacementSourceEnd);
+      originalComposingText = oldText.substring(replacementDestinationStart, replacementDestinationStart + replacementSourceEnd);
     } else {
-      newComposingText = tb.substring(tbStart, tbStart + (end - start));
-      originalComposingText = oldText.substring(start, end);
+      newComposingText = replacementSource.substring(replacementSourceStart, replacementSourceStart + (replacementDestinationEnd - replacementDestinationStart));
+      originalComposingText = oldText.substring(replacementDestinationStart, replacementDestinationEnd);
     }
 
     final bool isOriginalComposingRegionTextChanged = !(originalComposingText == newComposingText);
@@ -155,10 +204,10 @@ abstract class TextEditingDelta {
       );
     } else if ((isDeletingByReplacingWithEmpty || isDeletingInsideComposingRegion) &&
         !isOriginalComposingRegionTextChanged) {  // Deletion.
-      int actualStart = start;
+      int actualStart = replacementDestinationStart;
 
       if (!isDeletionGreaterThanOne) {
-        actualStart = end - 1;
+        actualStart = replacementDestinationEnd - 1;
       }
 
       return TextEditingDeltaDeletion(
@@ -166,19 +215,19 @@ abstract class TextEditingDelta {
         deltaText: '',
         deltaRange: TextRange(
           start: actualStart,
-          end: end,
+          end: replacementDestinationEnd,
         ),
         selection: newSelection,
         composing: newComposing,
       );
-    } else if ((start == end || isInsertingInsideComposingRegion) &&
+    } else if ((replacementDestinationStart == replacementDestinationEnd || isInsertingInsideComposingRegion) &&
         !isOriginalComposingRegionTextChanged) {  // Insertion.
       return TextEditingDeltaInsertion(
         oldText: oldText,
-        deltaText: tb.substring(end - start, (end - start) + (tb.length - (end - start))),
+        deltaText: replacementSource.substring(replacementDestinationEnd - replacementDestinationStart, (replacementDestinationEnd - replacementDestinationStart) + (replacementSource.length - (replacementDestinationEnd - replacementDestinationStart))),
         deltaRange: TextRange(
-          start: end,
-          end: end,
+          start: replacementDestinationEnd,
+          end: replacementDestinationEnd,
         ),
         selection: newSelection,
         composing: newComposing,
@@ -186,16 +235,16 @@ abstract class TextEditingDelta {
     } else if (isReplaced) {  // Replacement.
       return TextEditingDeltaReplacement(
         oldText: oldText,
-        deltaText: tb,
+        deltaText: replacementSource,
         deltaRange: TextRange(
-          start: start,
-          end: end,
+          start: replacementDestinationStart,
+          end: replacementDestinationEnd,
         ),
         selection: newSelection,
         composing: newComposing,
       );
     }
-
+    
     assert(false);
     return TextEditingDeltaNonTextUpdate(
       oldText: oldText,

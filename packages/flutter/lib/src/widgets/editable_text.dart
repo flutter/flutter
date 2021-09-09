@@ -1799,6 +1799,19 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas) {
     TextEditingValue value = _value;
     for (final TextEditingDelta delta in textEditingDeltas) {
+      print('Delta class type: ' + delta.runtimeType.toString());
+      print('Delta type: ' + delta.deltaType.toString());
+      print('Delta old text: ' + delta.oldText);
+      print('Delta new text: ' + delta.deltaText);
+      print(
+          'Delta beginning of new range: ' + delta.deltaRange.start.toString());
+      print('Delta end of new range: ' + delta.deltaRange.end.toString());
+      print('Delta beginning of new selection: ' +
+          delta.selection.start.toString());
+      print('Delta end of new selection: ' + delta.selection.end.toString());
+      print('Delta beginning of new composing: ' +
+          delta.composing.start.toString());
+      print('Delta end of new composing: ' + delta.composing.end.toString());
       value = delta.apply(value);
     }
     updateEditingValue(value);
@@ -2696,6 +2709,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       keyboardAppearance: widget.keyboardAppearance,
       autofillConfiguration: autofillConfiguration,
       enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
+      enableDeltaModel: true,
     );
   }
 
