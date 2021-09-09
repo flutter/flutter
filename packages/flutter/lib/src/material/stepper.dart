@@ -203,8 +203,7 @@ class Stepper extends StatefulWidget {
     this.backgroundHeaderColor,
     this.headerRadius,
     this.lineColor,
-    this.activeCircleColor,
-    this.inActiveCircleColor,
+    this.circleColor,
     this.activeCircleTextColor,
     this.inactiveTextColor,
     this.iconCheckColor,
@@ -246,8 +245,7 @@ class Stepper extends StatefulWidget {
   final Color? backgroundHeaderColor;
   final BorderRadiusGeometry? headerRadius;
   final Color? activeCircleTextColor;
-  final Color? activeCircleColor;
-  final Color? inActiveCircleColor;
+  final Color? circleColor;
   final Color? lineColor;
   final Color? inactiveTextColor;
   final Color? iconCheckColor;
@@ -415,15 +413,11 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     if (!_isDark()) {
       return widget.steps[index].isActive
-          ? _isCurrent(index)
-              ? widget.activeCircleColor ?? Colors.grey
-              : widget.inActiveCircleColor ?? Colors.grey.withOpacity(30)
+          ? widget.circleColor ?? Colors.grey
           : colorScheme.onSurface.withOpacity(0.38);
     } else {
       return widget.steps[index].isActive
-          ? _isCurrent(index)
-              ? widget.activeCircleColor ?? Colors.grey
-              : widget.inActiveCircleColor ?? Colors.grey.withOpacity(30)
+          ? widget.circleColor ?? Colors.grey
           : colorScheme.background;
     }
   }
