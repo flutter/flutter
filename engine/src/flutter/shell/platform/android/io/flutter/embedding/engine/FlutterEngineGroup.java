@@ -15,10 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class is available experimentally and the API may change. Use at your own risk.
- *
- * <p>Represents a collection of {@link io.flutter.embedding.engine.FlutterEngine}s who share
- * resources to allow them to be created faster and with less memory than calling the {@link
+ * Represents a collection of {@link io.flutter.embedding.engine.FlutterEngine}s who share resources
+ * to allow them to be created faster and with less memory than calling the {@link
  * io.flutter.embedding.engine.FlutterEngine}'s constructor multiple times.
  *
  * <p>When creating or recreating the first {@link io.flutter.embedding.engine.FlutterEngine} in the
@@ -38,7 +36,13 @@ public class FlutterEngineGroup {
 
   /* package */ @VisibleForTesting final List<FlutterEngine> activeEngines = new ArrayList<>();
 
-  /** Create a FlutterEngineGroup whose child engines will share resources. */
+  /**
+   * Create a FlutterEngineGroup whose child engines will share resources.
+   *
+   * <p>Since the FlutterEngineGroup is likely to have a longer lifecycle than any individual
+   * Android component, it's more semantically correct to pass in an application context rather than
+   * the individual Android component's context to minimize the chances of leaks.
+   */
   public FlutterEngineGroup(@NonNull Context context) {
     this(context, null);
   }
@@ -46,12 +50,16 @@ public class FlutterEngineGroup {
   /**
    * Create a FlutterEngineGroup whose child engines will share resources. Use {@code dartVmArgs} to
    * pass flags to the Dart VM during initialization.
+   *
+   * <p>Since the FlutterEngineGroup is likely to have a longer lifecycle than any individual
+   * Android component, it's more semantically correct to pass in an application context rather than
+   * the individual Android component's context to minimize the chances of leaks.
    */
   public FlutterEngineGroup(@NonNull Context context, @Nullable String[] dartVmArgs) {
     FlutterLoader loader = FlutterInjector.instance().flutterLoader();
     if (!loader.initialized()) {
       loader.startInitialization(context.getApplicationContext());
-      loader.ensureInitializationComplete(context, dartVmArgs);
+      loader.ensureInitializationComplete(context.getApplicationContext(), dartVmArgs);
     }
   }
 
