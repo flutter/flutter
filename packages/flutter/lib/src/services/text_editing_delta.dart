@@ -167,7 +167,7 @@ abstract class TextEditingDelta {
       );
     }
 
-    final String newText = _replace(oldText, replacementText, replacementDestinationStart, replacementDestinationEnd);
+    final String newText = _replace(oldText, replacementSource, replacementDestinationStart, replacementDestinationEnd);
     final bool isEqual = oldText == newText;
 
     final bool isDeletionGreaterThanOne = (replacementDestinationEnd - replacementDestinationStart) - (replacementSourceEnd - replacementSourceStart) > 1;
@@ -244,7 +244,6 @@ abstract class TextEditingDelta {
         composing: newComposing,
       );
     }
-    
     assert(false);
     return TextEditingDeltaNonTextUpdate(
       oldText: oldText,
