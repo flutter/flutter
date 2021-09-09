@@ -519,11 +519,6 @@ void main() {
       pubGetCommand,
       pubGetCommand,
       pubGetCommand,
-      pubGetCommand,
-      pubGetCommand,
-      pubGetCommand,
-      pubGetCommand,
-      pubGetCommand,
     ]);
     final BufferLogger logger = BufferLogger.test();
     final FileSystem fileSystem = MemoryFileSystem.test();
@@ -570,27 +565,10 @@ void main() {
         'pub get failed (server unavailable) -- attempting retry 2 in 2 seconds...\n'
         'pub get failed (server unavailable) -- attempting retry 3 in 4 seconds...\n' // at t=1
         'pub get failed (server unavailable) -- attempting retry 4 in 8 seconds...\n' // at t=5
-        'pub get failed (server unavailable) -- attempting retry 5 in 16 seconds...\n' // at t=13
-        'pub get failed (server unavailable) -- attempting retry 6 in 32 seconds...\n' // at t=29
-        'pub get failed (server unavailable) -- attempting retry 7 in 64 seconds...\n', // at t=61
-      );
-      time.elapse(const Duration(seconds: 200)); // from t=0 to t=200
-      expect(logger.statusText,
-        'Running "flutter pub get" in /...\n'
-        'pub get failed (server unavailable) -- attempting retry 1 in 1 second...\n'
-        'pub get failed (server unavailable) -- attempting retry 2 in 2 seconds...\n'
-        'pub get failed (server unavailable) -- attempting retry 3 in 4 seconds...\n'
-        'pub get failed (server unavailable) -- attempting retry 4 in 8 seconds...\n'
-        'pub get failed (server unavailable) -- attempting retry 5 in 16 seconds...\n'
-        'pub get failed (server unavailable) -- attempting retry 6 in 32 seconds...\n'
-        'pub get failed (server unavailable) -- attempting retry 7 in 64 seconds...\n'
-        'pub get failed (server unavailable) -- attempting retry 8 in 64 seconds...\n' // at t=39
-        'pub get failed (server unavailable) -- attempting retry 9 in 64 seconds...\n' // at t=103
-        'pub get failed (server unavailable) -- attempting retry 10 in 64 seconds...\n', // at t=167
       );
     });
     expect(logger.errorText, isEmpty);
-    expect(error, isNull);
+    expect(error, 'test failed unexpectedly: Exception: pub get failed (69; no message)');
     expect(processManager, hasNoRemainingExpectations);
   });
 
