@@ -365,9 +365,9 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
     for (int index = 0; index < (widget.snapSizes?.length ?? 0); index += 1) {
       final double snapSize = widget.snapSizes![index];
       assert(snapSize >= widget.minChildSize && snapSize <= widget.maxChildSize,
-        'Snap sizes must be between `minChildSize` and `maxChildSize`. Invalid size: $snapSize');
+        '${_snapSizeErrorMessage(index)}\nSnap sizes must be between `minChildSize` and `maxChildSize`. ');
       assert(index == 0 || snapSize > widget.snapSizes![index - 1],
-        'Snap sizes must be in ascending order. Invalid size: $snapSize');
+        '${_snapSizeErrorMessage(index)}\nSnap sizes must be in ascending order. ');
     }
     widget.snapSizes?.asMap().forEach((int index, double snapSize) {
     });
@@ -430,6 +430,20 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
   void dispose() {
     _scrollController.dispose();
     super.dispose();
+  }
+
+  String _snapSizeErrorMessage(int invalidIndex) {
+    final List<String> snapSizesWithIndicator = widget.snapSizes!.asMap().keys.map(
+          (int index) {
+        final String snapSizeString = widget.snapSizes![index].toString();
+        if (index == invalidIndex) {
+          return '>>> $snapSizeString <<<';
+        }
+        return snapSizeString;
+      },
+    ).toList();
+    return "Invalid snapSize '${widget.snapSizes![invalidIndex]}' at index $invalidIndex of:\n"
+        '  $snapSizesWithIndicator';
   }
 }
 
