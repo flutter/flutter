@@ -3,4 +3,4 @@ source 'https://rubygems.org'
 
 # Don't pin cocoapods so we can catch breakages from upstream changes, e.g.
 # https://github.com/flutter/flutter/issues/41144
-gem 'cocoapods', :git => 'https://github.com/CocoaPods/CocoaPods.git', :ref => '2bba585'
+gem 'cocoapods', :git => 'https://github.com/CocoaPods/CocoaPods.git', :ref => '48973f'
