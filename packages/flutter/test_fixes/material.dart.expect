@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   // Generic reference variables.
@@ -359,4 +360,68 @@ void main() {
   listWheelViewport = ListWheelViewport(clipBehavior: Clip.hardEdge);
   listWheelViewport = ListWheelViewport(clipBehavior: Clip.none);
   listWheelViewport.clipBehavior;
+
+  // Changes made in https://github.com/flutter/flutter/pull/87281
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData();
+  themeData = ThemeData.raw();
+  themeData = themeData.copyWith();
+  themeData.fixTextFieldOutlineLabel; // Removing field reference not supported.
+
+  // Changes made in https://github.com/flutter/flutter/pull/87839
+  final OverscrollIndicatorNotification notification = OverscrollIndicatorNotification(leading: true);
+  notification.disallowIndicator();
+
+  // Changes made in https://github.com/flutter/flutter/pull/86198
+  AppBar appBar = AppBar();
+  appBar = AppBar(systemOverlayStyle: SystemUiOverlayStyle.dark);
+  appBar = AppBar(systemOverlayStyle: SystemUiOverlayStyle.light);
+  appBar.systemOverlayStyle;
+
+  SliverAppBar sliverAppBar = SliverAppBar();
+  sliverAppBar = SliverAppBar(systemOverlayStyle: SystemUiOverlayStyle.dark);
+  sliverAppBar = SliverAppBar(systemOverlayStyle: SystemUiOverlayStyle.light);
+  sliverAppBar.systemOverlayStyle;
+
+  AppBarTheme appBarTheme = AppBarTheme();
+  appBarTheme = AppBarTheme(systemOverlayStyle: SystemUiOverlayStyle.dark);
+  appBarTheme = AppBarTheme(systemOverlayStyle: SystemUiOverlayStyle.light);
+  appBarTheme = appBarTheme.copyWith(systemOverlayStyle: SystemUiOverlayStyle.dark);
+  appBarTheme = appBarTheme.copyWith(systemOverlayStyle: SystemUiOverlayStyle.light);
+  appBarTheme.systemOverlayStyle;
+
+  TextTheme myTextTheme = TextTheme();
+  AppBar appBar = AppBar();
+  appBar = AppBar(toolbarTextStyle: myTextTheme.bodyText2, titleTextStyle: myTextTheme.headline6);
+  appBar = AppBar(toolbarTextStyle: myTextTheme.bodyText2, titleTextStyle: myTextTheme.headline6);
+
+  SliverAppBar sliverAppBar = SliverAppBar();
+  sliverAppBar = SliverAppBar(toolbarTextStyle: myTextTheme.bodyText2, titleTextStyle: myTextTheme.headline6);
+  sliverAppBar = SliverAppBar(toolbarTextStyle: myTextTheme.bodyText2, titleTextStyle: myTextTheme.headline6);
+
+  AppBarTheme appBarTheme = AppBarTheme();
+  appBarTheme = AppBarTheme(toolbarTextStyle: myTextTheme.bodyText2, titleTextStyle: myTextTheme.headline6);
+  appBarTheme = AppBarTheme(toolbarTextStyle: myTextTheme.bodyText2, titleTextStyle: myTextTheme.headline6);
+  appBarTheme = appBarTheme.copyWith(toolbarTextStyle: myTextTheme.bodyText2, titleTextStyle: myTextTheme.headline6);
+  appBarTheme = appBarTheme.copyWith(toolbarTextStyle: myTextTheme.bodyText2, titleTextStyle: myTextTheme.headline6);
+
+  AppBar appBar = AppBar();
+  appBar = AppBar();
+  appBar = AppBar());
+  appBar.backwardsCompatibility; // Removing field reference not supported.
+
+  SliverAppBar sliverAppBar = SliverAppBar();
+  sliverAppBar = SliverAppBar();
+  sliverAppBar = SliverAppBar();
+  sliverAppBar.backwardsCompatibility; // Removing field reference not supported.
+
+  AppBarTheme appBarTheme = AppBarTheme();
+  appBarTheme = AppBarTheme();
+  appBarTheme = AppBarTheme();
+  appBarTheme = appBarTheme.copyWith();
+  appBarTheme = appBarTheme.copyWith();
+  appBarTheme.backwardsCompatibility; // Removing field reference not supported.
+
+  AppBarTheme appBarTheme = AppBarTheme();
+  appBarTheme.backgroundColor;
 }

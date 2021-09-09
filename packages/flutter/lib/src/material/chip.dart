@@ -219,66 +219,10 @@ abstract class DeletableChipAttributes {
   /// have to do something similar to the following sample:
   ///
   /// {@tool dartpad --template=stateful_widget_scaffold_center}
-  ///
   /// This sample shows how to use [onDeleted] to remove an entry when the
   /// delete button is tapped.
   ///
-  /// ```dart preamble
-  /// class Actor {
-  ///   const Actor(this.name, this.initials);
-  ///   final String name;
-  ///   final String initials;
-  /// }
-  ///
-  /// class CastList extends StatefulWidget {
-  ///   const CastList({Key? key}) : super(key: key);
-  ///
-  ///   @override
-  ///   State createState() => CastListState();
-  /// }
-  ///
-  /// class CastListState extends State<CastList> {
-  ///   final List<Actor> _cast = <Actor>[
-  ///     const Actor('Aaron Burr', 'AB'),
-  ///     const Actor('Alexander Hamilton', 'AH'),
-  ///     const Actor('Eliza Hamilton', 'EH'),
-  ///     const Actor('James Madison', 'JM'),
-  ///   ];
-  ///
-  ///   Iterable<Widget> get actorWidgets sync* {
-  ///     for (final Actor actor in _cast) {
-  ///       yield Padding(
-  ///         padding: const EdgeInsets.all(4.0),
-  ///         child: Chip(
-  ///           avatar: CircleAvatar(child: Text(actor.initials)),
-  ///           label: Text(actor.name),
-  ///           onDeleted: () {
-  ///             setState(() {
-  ///               _cast.removeWhere((Actor entry) {
-  ///                 return entry.name == actor.name;
-  ///               });
-  ///             });
-  ///           },
-  ///         ),
-  ///       );
-  ///     }
-  ///   }
-  ///
-  ///   @override
-  ///   Widget build(BuildContext context) {
-  ///     return Wrap(
-  ///       children: actorWidgets.toList(),
-  ///     );
-  ///   }
-  /// }
-  /// ```
-  ///
-  /// ```dart
-  /// @override
-  /// Widget build(BuildContext context) {
-  ///   return const CastList();
-  /// }
-  /// ```
+  /// ** See code in examples/api/lib/material/chip/deletable_chip_attributes.on_deleted.0.dart **
   /// {@end-tool}
   VoidCallback? get onDeleted;
 

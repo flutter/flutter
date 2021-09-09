@@ -613,10 +613,6 @@ class FlutterVmService {
     @required String isolateId,
   }) => _flutterToggle('debugPaint', isolateId: isolateId);
 
-  Future<Map<String, dynamic>> flutterToggleDebugCheckElevationsEnabled({
-    @required String isolateId,
-  }) => _flutterToggle('debugCheckElevationsEnabled', isolateId: isolateId);
-
   Future<Map<String, dynamic>> flutterTogglePerformanceOverlayOverride({
     @required String isolateId,
   }) => _flutterToggle('showPerformanceOverlay', isolateId: isolateId);

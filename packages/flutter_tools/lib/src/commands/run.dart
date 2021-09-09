@@ -324,7 +324,7 @@ class RunCommand extends RunCommandBase {
               'results out to "refresh_benchmark.json", and exit. This flag is '
               'intended for use in generating automated flutter benchmarks.',
       )
-      // TODO(jonahwilliams): Off by default with investigating whether this
+      // TODO(zanderso): Off by default with investigating whether this
       // is slower for certain use cases.
       // See: https://github.com/flutter/flutter/issues/49499
       ..addFlag('fast-start',
@@ -616,8 +616,6 @@ class RunCommand extends RunCommandBase {
       for (final Device device in devices)
         await FlutterDevice.create(
           device,
-          fileSystemRoots: fileSystemRoots,
-          fileSystemScheme: fileSystemScheme,
           experimentalFlags: expFlags,
           target: targetFile,
           buildInfo: buildInfo,

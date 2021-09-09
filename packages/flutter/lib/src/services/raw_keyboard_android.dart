@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show hashValues;
 
 import 'package:flutter/foundation.dart';
 
@@ -286,6 +287,42 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
     }
   }
 
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<int>('flags', flags));
+    properties.add(DiagnosticsProperty<int>('codePoint', codePoint));
+    properties.add(DiagnosticsProperty<int>('plainCodePoint', plainCodePoint));
+    properties.add(DiagnosticsProperty<int>('keyCode', keyCode));
+    properties.add(DiagnosticsProperty<int>('scanCode', scanCode));
+    properties.add(DiagnosticsProperty<int>('metaState', metaState));
+  }
+
+  @override
+  bool operator==(Object other) {
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is RawKeyEventDataAndroid
+        && other.flags == flags
+        && other.codePoint == codePoint
+        && other.plainCodePoint == plainCodePoint
+        && other.keyCode == keyCode
+        && other.scanCode == scanCode
+        && other.metaState == metaState;
+  }
+
+  @override
+  int get hashCode => hashValues(
+    flags,
+    codePoint,
+    plainCodePoint,
+    keyCode,
+    scanCode,
+    metaState,
+  );
+
   // Modifier key masks.
 
   /// No modifier keys are pressed in the [metaState] field.
@@ -430,11 +467,4 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
   /// it's much easier to use [isModifierPressed] if you just want to know if
   /// a modifier is pressed.
   static const int modifierScrollLock = 0x400000;
-
-  @override
-  String toString() {
-    return '${objectRuntimeType(this, 'RawKeyEventDataAndroid')}(keyLabel: $keyLabel flags: $flags, codePoint: $codePoint, '
-      'keyCode: $keyCode, scanCode: $scanCode, metaState: $metaState, '
-      'modifiers down: $modifiersPressed)';
-  }
 }

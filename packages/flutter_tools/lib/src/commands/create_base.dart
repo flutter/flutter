@@ -151,6 +151,7 @@ abstract class CreateBase extends FlutterCommand {
   void addPlatformsOptions({String customHelp}) {
     argParser.addMultiOption('platforms',
       help: customHelp ?? _kDefaultPlatformArgumentHelp,
+      aliases: <String>[ 'platform' ],
       defaultsTo: <String>[
         ..._kAvailablePlatforms,
         if (featureFlags.isWindowsUwpEnabled)
@@ -370,9 +371,7 @@ abstract class CreateBase extends FlutterCommand {
       'pluginClassSnakeCase': pluginClassSnakeCase,
       'pluginClassCapitalSnakeCase': pluginClassCapitalSnakeCase,
       'pluginDartClass': pluginDartClass,
-      // TODO(jonahwilliams): update after google3 uuid is updated.
-      // ignore: prefer_const_constructors
-      'pluginProjectUUID': Uuid().v4().toUpperCase(),
+      'pluginProjectUUID': const Uuid().v4().toUpperCase(),
       'withPluginHook': withPluginHook,
       'androidLanguage': androidLanguage,
       'iosLanguage': iosLanguage,

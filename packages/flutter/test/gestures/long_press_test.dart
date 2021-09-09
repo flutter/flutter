@@ -300,6 +300,7 @@ void main() {
         position: Offset(15, 15),
       ));
       expect(recognized, const <String>['down', 'start', 'move']);
+      gesture.dispose();
     });
   });
 

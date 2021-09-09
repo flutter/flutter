@@ -115,10 +115,10 @@ task:
         MEMORY: 10G
         SHOULD_UPDATE_PACKAGES: "FALSE"
       script:
-        - (cd packages/flutter_tools; pub get)
-        - (cd packages/flutter_tools/test/data/asset_test/main; pub get)
-        - (cd packages/flutter_tools/test/data/asset_test/font; pub get)
-        - (cd dev/bots; pub get)
+        - (cd packages/flutter_tools; dart __deprecated_pub get)
+        - (cd packages/flutter_tools/test/data/asset_test/main; dart __deprecated_pub get)
+        - (cd packages/flutter_tools/test/data/asset_test/font; dart __deprecated_pub get)
+        - (cd dev/bots; dart __deprecated_pub get)
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: tool_tests-commands-linux
@@ -131,14 +131,14 @@ task:
         MEMORY: 10G
         SHOULD_UPDATE_PACKAGES: "FALSE"
       script:
-        - (cd packages/flutter_tools; pub get)
-        - (cd dev/bots; pub get)
+        - (cd packages/flutter_tools; dart __deprecated_pub get)
+        - (cd dev/bots; dart __deprecated_pub get)
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: docs-linux # linux-only
       environment:
         CPU: 4
-        MEMORY: 8G
+        MEMORY: 12G
       only_if: "$CIRRUS_PR != ''"
       script:
         - ./dev/bots/docs.sh
@@ -168,7 +168,7 @@ task:
         - flutter config --enable-web
         - git clone https://github.com/flutter/web_installers.git
         - cd web_installers/packages/web_drivers/
-        - pub get
+        - dart __deprecated_pub get
         - dart lib/web_driver_installer.dart chromedriver --install-only
         - chromedriver/chromedriver --port=4444 &
         - sleep 1

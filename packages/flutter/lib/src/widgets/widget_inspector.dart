@@ -2122,6 +2122,7 @@ class _ElementLocationStatsTracker {
       'events': events,
     };
 
+    // Encode the new locations using the older encoding.
     if (newLocations.isNotEmpty) {
       // Add all newly used location ids to the JSON.
       final Map<String, List<int>> locationsJson = <String, List<int>>{};
@@ -2136,21 +2137,26 @@ class _ElementLocationStatsTracker {
       json['newLocations'] = locationsJson;
     }
 
-    // Add in a data structure for the location names.
+    // Encode the new locations using the newer encoding (as of v2.4.0).
     if (newLocations.isNotEmpty) {
-      final Map<String, Map<int, String>> namesJson = <String, Map<int, String>>{};
+      final Map<String, Map<String, List<Object?>>> fileLocationsMap = <String, Map<String, List<Object?>>>{};
       for (final _LocationCount entry in newLocations) {
         final _Location location = entry.location;
-        final Map<int, String> jsonForFile = namesJson.putIfAbsent(
-          location.file,
-              () => <int, String>{},
+        final Map<String, List<Object?>> locations = fileLocationsMap.putIfAbsent(
+          location.file, () => <String, List<Object?>>{
+            'ids': <int>[],
+            'lines': <int>[],
+            'columns': <int>[],
+            'names': <String?>[],
+          },
         );
-        final String? name = location.name;
-        if (name != null) {
-          jsonForFile[entry.id] = name;
-        }
+
+        locations['ids']!.add(entry.id);
+        locations['lines']!.add(location.line);
+        locations['columns']!.add(location.column);
+        locations['names']!.add(location.name);
       }
-      json['newLocationsNames'] = namesJson;
+      json['locations'] = fileLocationsMap;
     }
 
     resetCounts();
@@ -2931,7 +2937,7 @@ Iterable<DiagnosticsNode> debugTransformDebugCreator(Iterable<DiagnosticsNode> p
     if (!foundStackTrace && node is DiagnosticsStackTrace)
       foundStackTrace = true;
     if (_isDebugCreator(node)) {
-      yield* _parseDiagnosticsNode(node, errorSummary)!;
+      yield* _parseDiagnosticsNode(node, errorSummary);
     } else {
       if (foundStackTrace) {
         pending.add(node);
@@ -2946,15 +2952,27 @@ Iterable<DiagnosticsNode> debugTransformDebugCreator(Iterable<DiagnosticsNode> p
 /// Transform the input [DiagnosticsNode].
 ///
 /// Return null if input [DiagnosticsNode] is not applicable.
-Iterable<DiagnosticsNode>? _parseDiagnosticsNode(
+Iterable<DiagnosticsNode> _parseDiagnosticsNode(
   DiagnosticsNode node,
   ErrorSummary? errorSummary,
-) {
-  if (!_isDebugCreator(node))
-    return null;
-  final DebugCreator debugCreator = node.value! as DebugCreator;
-  final Element element = debugCreator.element;
-  return _describeRelevantUserCode(element, errorSummary);
+) sync* {
+  assert(_isDebugCreator(node));
+  try {
+    final DebugCreator debugCreator = node.value! as DebugCreator;
+    final Element element = debugCreator.element;
+    yield* _describeRelevantUserCode(element, errorSummary);
+  } catch (error, stack) {
+    scheduleMicrotask(() {
+      FlutterError.reportError(FlutterErrorDetails(
+        exception: error,
+        stack: stack,
+        library: 'widget inspector',
+        informationCollector: () sync* {
+          yield DiagnosticsNode.message('This exception was caught while trying to describe the user-relevant code of another error.');
+        }
+      ));
+    });
+  }
 }
 
 Iterable<DiagnosticsNode> _describeRelevantUserCode(

@@ -267,5 +267,6 @@ void main() {
         '   The value of a widget debug variable was changed by the test.\n',
       );
     }
+    debugHighlightDeprecatedWidgets = false;
   });
 }

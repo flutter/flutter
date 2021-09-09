@@ -39,6 +39,8 @@ void main() {
       final String symbol = await driver.getText(stockOption);
 
       expect(symbol, 'AAPL');
-    }, skip: 'Needs to be fixed on Fuchsia.', timeout: Timeout.none);
+    },
+    skip: 'Needs to be fixed on Fuchsia.', // https://github.com/flutter/flutter/issues/87069
+    timeout: Timeout.none);
   });
 }

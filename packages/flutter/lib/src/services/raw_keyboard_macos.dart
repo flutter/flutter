@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show hashValues;
 
 import 'package:flutter/foundation.dart';
 
@@ -216,6 +217,36 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
     return logicalKey != LogicalKeyboardKey.fn;
   }
 
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<String>('characters', characters));
+    properties.add(DiagnosticsProperty<String>('charactersIgnoringModifiers', charactersIgnoringModifiers));
+    properties.add(DiagnosticsProperty<int>('keyCode', keyCode));
+    properties.add(DiagnosticsProperty<int>('modifiers', modifiers));
+  }
+
+  @override
+  bool operator==(Object other) {
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is RawKeyEventDataMacOs
+        && other.characters == characters
+        && other.charactersIgnoringModifiers == charactersIgnoringModifiers
+        && other.keyCode == keyCode
+        && other.modifiers == modifiers;
+  }
+
+  @override
+  int get hashCode => hashValues(
+    characters,
+    charactersIgnoringModifiers,
+    keyCode,
+    modifiers,
+  );
+
   /// Returns true if the given label represents an unprintable key.
   ///
   /// Examples of unprintable keys are "NSUpArrowFunctionKey = 0xF700"
@@ -341,11 +372,4 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
   /// applications to mask off the device-dependent modifier flags, including
   /// event coalescing information.
   static const int deviceIndependentMask = 0xffff0000;
-
-  @override
-  String toString() {
-    return '${objectRuntimeType(this, 'RawKeyEventDataMacOs')}(keyLabel: $keyLabel, keyCode: $keyCode, characters: $characters,'
-        ' unmodifiedCharacters: $charactersIgnoringModifiers, modifiers: $modifiers, '
-        'modifiers down: $modifiersPressed)';
-  }
 }
