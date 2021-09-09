@@ -521,6 +521,8 @@ def main(argv):
     # On Windows, generate a Visual Studio project.
     command.append('--ide=vs')
 
+  command.append('--export-compile-commands=default')
+
   gn_args = to_command_line(to_gn_args(args))
   out_dir = get_out_dir(args)
   command.append(out_dir)

@@ -13,10 +13,14 @@ its provided libraries or its third_party packages.
 
 import argparse
 import json
-import yaml
 import os
 import sys
 import pkg_resources
+
+THIS_DIR = os.path.abspath(os.path.dirname(__file__))
+sys.path += [os.path.join(
+    THIS_DIR, '..', '..', '..', '..', 'third_party', 'pyyaml', 'lib3')]
+import yaml
 
 
 def find_package(root, local_paths, package, version):

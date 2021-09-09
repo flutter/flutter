@@ -6,7 +6,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:test/test.dart';
+import 'package:litetest/litetest.dart';
+
 import 'package:zircon/zircon.dart';
 
 /// Helper method to turn a [String] into a [ByteData] containing the
