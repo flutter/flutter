@@ -246,8 +246,8 @@ class WeakPtrFactory {
     flag_->Invalidate();
   }
 
-  // Gets a new weak pointer, which will be valid until either
-  // |InvalidateWeakPtrs()| is called or this object is destroyed.
+  // Gets a new weak pointer, which will be valid until this object is
+  // destroyed.
   WeakPtr<T> GetWeakPtr() const {
     return WeakPtr<T>(ptr_, flag_.Clone(), checker_);
   }
@@ -282,8 +282,8 @@ class TaskRunnerAffineWeakPtrFactory {
     flag_->Invalidate();
   }
 
-  // Gets a new weak pointer, which will be valid until either
-  // |InvalidateWeakPtrs()| is called or this object is destroyed.
+  // Gets a new weak pointer, which will be valid until this object is
+  // destroyed.
   TaskRunnerAffineWeakPtr<T> GetWeakPtr() const {
     return TaskRunnerAffineWeakPtr<T>(ptr_, flag_.Clone(), checker_);
   }
