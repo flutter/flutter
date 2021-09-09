@@ -91,7 +91,9 @@ bool RasterThreadMerger::IsOnPlatformThread() const {
   return MessageLoop::GetCurrentTaskQueueId() == platform_queue_id_;
 }
 
-bool RasterThreadMerger::IsOnRasterizingThread() const {
+bool RasterThreadMerger::IsOnRasterizingThread() {
+  std::scoped_lock lock(mutex_);
+
   if (IsMergedUnSafe()) {
     return IsOnPlatformThread();
   } else {
