@@ -27,6 +27,10 @@ const String _kPubEnvironmentKey = 'PUB_ENVIRONMENT';
 /// The console environment key used by the pub tool to find the cache directory.
 const String _kPubCacheEnvironmentKey = 'PUB_CACHE';
 
+/// The UNAVAILABLE exit code returned by the pub tool.
+/// (see https://github.com/dart-lang/pub/blob/master/lib/src/exit_codes.dart)
+const int _kPubExitCodeUnavailable = 69;
+
 typedef MessageFilter = String Function(String message);
 
 /// Represents Flutter-specific data that is added to the `PUB_ENVIRONMENT`
@@ -250,7 +254,7 @@ class _DefaultPub implements Pub {
         context: context,
         directory: directory,
         failureMessage: 'pub $command failed',
-        retry: true,
+        retry: !offline,
         flutterRootOverride: flutterRootOverride,
       );
       status.stop();
@@ -303,7 +307,7 @@ class _DefaultPub implements Pub {
     int attempts = 0;
     int duration = 1;
     int code;
-    loop: while (true) {
+    while (true) {
       attempts += 1;
       code = await _processUtils.stream(
         _pubCommand(arguments),
@@ -311,15 +315,15 @@ class _DefaultPub implements Pub {
         mapFunction: filterWrapper, // may set versionSolvingFailed, lastPubMessage
         environment: await _createPubEnvironment(context, flutterRootOverride),
       );
-      String message;
-      switch (code) {
-        case 69: // UNAVAILABLE in https://github.com/dart-lang/pub/blob/master/lib/src/exit_codes.dart
+      String? message;
+      if (retry) {
+        if (code == _kPubExitCodeUnavailable) {
           message = 'server unavailable';
-          break;
-        default:
-          break loop;
+        }
       }
-      assert(message != null);
+      if (message == null) {
+        break;
+      }
       versionSolvingFailed = false;
       _logger.printStatus(
         '$failureMessage ($message) -- attempting retry $attempts in $duration '
