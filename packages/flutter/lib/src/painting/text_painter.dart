@@ -187,10 +187,16 @@ class TextPainter {
 
   // _paragraph being null means the text needs layout because of style changes.
   // Setting _paragraph to null invalidates all the layout cache.
+  //
+  // The TextPainter class should not aggressively invalidate the layout as long
+  // as `markNeedsLayout` is not called (i.e., the layout cache is still valid).
+  // See: https://github.com/flutter/flutter/issues/85108
   ui.Paragraph? _paragraph;
   // Whether _paragraph contains outdated paint information and needs to be
-  // rebuilt.
-  bool _needsPaint = true;
+  // rebuilt before painting.
+  bool _rebuildParagraphForPaint = true;
+
+  bool get _debugNeedsLayout => _paragraph == null;
 
   /// Marks this text painter's layout information as dirty and removes cached
   /// information.
@@ -200,7 +206,6 @@ class TextPainter {
   /// in framework will automatically invoke this method.
   void markNeedsLayout() {
     _paragraph = null;
-    _needsPaint = true;
     _previousCaretPosition = null;
     _previousCaretPrototype = null;
   }
@@ -235,7 +240,7 @@ class TextPainter {
     } else if (comparison.index >= RenderComparison.paint.index) {
       // Don't clear the _paragraph instance variable just yet. It still
       // contains valid layout information.
-      _needsPaint = true;
+      _rebuildParagraphForPaint = true;
     }
     // Neither relayout or repaint is needed.
   }
@@ -511,7 +516,7 @@ class TextPainter {
   ///
   /// Valid only after [layout] has been called.
   double get minIntrinsicWidth {
-    assert(_paragraph != null);
+    assert(!_debugNeedsLayout);
     return _applyFloatingPointHack(_paragraph!.minIntrinsicWidth);
   }
 
@@ -519,7 +524,7 @@ class TextPainter {
   ///
   /// Valid only after [layout] has been called.
   double get maxIntrinsicWidth {
-    assert(_paragraph != null);
+    assert(!_debugNeedsLayout);
     return _applyFloatingPointHack(_paragraph!.maxIntrinsicWidth);
   }
 
@@ -527,7 +532,7 @@ class TextPainter {
   ///
   /// Valid only after [layout] has been called.
   double get width {
-    assert(_paragraph != null);
+    assert(!_debugNeedsLayout);
     return _applyFloatingPointHack(
       textWidthBasis == TextWidthBasis.longestLine ? _paragraph!.longestLine : _paragraph!.width,
     );
@@ -537,7 +542,7 @@ class TextPainter {
   ///
   /// Valid only after [layout] has been called.
   double get height {
-    assert(_paragraph != null);
+    assert(!_debugNeedsLayout);
     return _applyFloatingPointHack(_paragraph!.height);
   }
 
@@ -545,7 +550,7 @@ class TextPainter {
   ///
   /// Valid only after [layout] has been called.
   Size get size {
-    assert(_paragraph != null);
+    assert(!_debugNeedsLayout);
     return Size(width, height);
   }
 
@@ -554,7 +559,7 @@ class TextPainter {
   ///
   /// Valid only after [layout] has been called.
   double computeDistanceToActualBaseline(TextBaseline baseline) {
-    assert(_paragraph != null);
+    assert(!_debugNeedsLayout);
     assert(baseline != null);
     switch (baseline) {
       case TextBaseline.alphabetic:
@@ -576,7 +581,7 @@ class TextPainter {
   ///
   /// Valid only after [layout] has been called.
   bool get didExceedMaxLines {
-    assert(_paragraph != null);
+    assert(!_debugNeedsLayout);
     return _paragraph!.didExceedMaxLines;
   }
 
@@ -586,7 +591,7 @@ class TextPainter {
   // Creates a ui.Paragraph using the current configurations in this class and
   // assign it to _paragraph.
   void _createParagraph() {
-    assert(_paragraph == null || _needsPaint);
+    assert(_paragraph == null || _rebuildParagraphForPaint);
     final InlineSpan? text = this.text;
     if (text == null) {
       throw StateError('TextPainter.text must be set to a non-null value before using the TextPainter.');
@@ -595,7 +600,7 @@ class TextPainter {
     text.build(builder, textScaleFactor: textScaleFactor, dimensions: _placeholderDimensions);
     _inlinePlaceholderScales = builder.placeholderScales;
     _paragraph = builder.build();
-    _needsPaint = false;
+    _rebuildParagraphForPaint = false;
   }
 
   void _layoutParagraph(double minWidth, double maxWidth) {
@@ -638,7 +643,7 @@ class TextPainter {
     if (_paragraph != null && minWidth == _lastMinWidth && maxWidth == _lastMaxWidth)
       return;
 
-    if (_needsPaint || _paragraph == null)
+    if (_rebuildParagraphForPaint || _paragraph == null)
       _createParagraph();
     _lastMinWidth = minWidth;
     _lastMaxWidth = maxWidth;
@@ -671,13 +676,20 @@ class TextPainter {
       );
     }
 
-    if (_needsPaint) {
+    if (_rebuildParagraphForPaint) {
+      Size? debugSize;
+      assert(() {
+        debugSize = size;
+        return true;
+      }());
+
       _createParagraph();
       // Unfortunately we have to redo the layout using the same constraints,
       // since we've created a new ui.Paragraph. But there's no extra work being
       // done: if _needsPaint is true and _paragraph is not null, the previous
       // `layout` call didn't invoke _layoutParagraph.
       _layoutParagraph(minWidth, maxWidth);
+      assert(debugSize == size);
     }
     canvas.drawParagraph(_paragraph!, offset);
   }
@@ -815,7 +827,7 @@ class TextPainter {
   }
 
   Offset get _emptyOffset {
-    assert(_paragraph != null); // implies textDirection is non-null
+    assert(!_debugNeedsLayout); // implies textDirection is non-null
     assert(textAlign != null);
     switch (textAlign) {
       case TextAlign.left:
@@ -876,7 +888,7 @@ class TextPainter {
   // Checks if the [position] and [caretPrototype] have changed from the cached
   // version and recomputes the metrics required to position the caret.
   void _computeCaretMetrics(TextPosition position, Rect caretPrototype) {
-    assert(_paragraph != null);
+    assert(!_debugNeedsLayout);
     if (position == _previousCaretPosition && caretPrototype == _previousCaretPrototype)
       return;
     final int offset = position.offset;
@@ -924,7 +936,7 @@ class TextPainter {
     ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,
     ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
   }) {
-    assert(_paragraph != null);
+    assert(!_debugNeedsLayout);
     assert(boxHeightStyle != null);
     assert(boxWidthStyle != null);
     return _paragraph!.getBoxesForRange(
@@ -937,7 +949,7 @@ class TextPainter {
 
   /// Returns the position within the text for the given pixel offset.
   TextPosition getPositionForOffset(Offset offset) {
-    assert(_paragraph != null);
+    assert(!_debugNeedsLayout);
     return _paragraph!.getPositionForOffset(offset);
   }
 
@@ -949,7 +961,7 @@ class TextPainter {
   /// Word boundaries are defined more precisely in Unicode Standard Annex #29
   /// <http://www.unicode.org/reports/tr29/#Word_Boundaries>.
   TextRange getWordBoundary(TextPosition position) {
-    assert(_paragraph != null);
+    assert(!_debugNeedsLayout);
     return _paragraph!.getWordBoundary(position);
   }
 
@@ -957,7 +969,7 @@ class TextPainter {
   ///
   /// The newline (if any) is not returned as part of the range.
   TextRange getLineBoundary(TextPosition position) {
-    assert(_paragraph != null);
+    assert(!_debugNeedsLayout);
     return _paragraph!.getLineBoundary(position);
   }
 
@@ -977,7 +989,7 @@ class TextPainter {
   /// to repeatedly call this. Instead, cache the results. The cached results
   /// should be invalidated upon the next successful [layout].
   List<ui.LineMetrics> computeLineMetrics() {
-    assert(_paragraph != null);
+    assert(!_debugNeedsLayout);
     return _paragraph!.computeLineMetrics();
   }
 }
