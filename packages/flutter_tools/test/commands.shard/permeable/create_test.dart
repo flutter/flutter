@@ -1702,13 +1702,20 @@ void main() {
   });
 
   testUsingContext(
-    'invokes pub offline when requested',
+    'invokes pub in online and offline modes',
     () async {
       Cache.flutterRoot = '../..';
 
       final CreateCommand command = CreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
+      // Run pub online first in order to populate the pub cache.
+      await runner.run(<String>['create', '--pub', projectDir.path]);
+      expect(loggingProcessManager.commands.first, contains(matches(r'dart-sdk[\\/]bin[\\/]dart')));
+      expect(loggingProcessManager.commands.first, isNot(contains('--offline')));
+
+      // Run pub offline.
+      loggingProcessManager.clear();
       await runner.run(<String>['create', '--pub', '--offline', projectDir.path]);
       expect(loggingProcessManager.commands.first, contains(matches(r'dart-sdk[\\/]bin[\\/]dart')));
       expect(loggingProcessManager.commands.first, contains('--offline'));
@@ -2819,5 +2826,9 @@ class LoggingProcessManager extends LocalProcessManager {
       runInShell: runInShell,
       mode: mode,
     );
+  }
+
+  void clear() {
+    commands.clear();
   }
 }
