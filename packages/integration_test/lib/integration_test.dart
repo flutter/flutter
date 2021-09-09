@@ -91,6 +91,11 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   @override
   bool get overrideHttpClient => false;
 
+  /// In Integration Tests, avoid setting up mock handlers for text input.
+  ///
+  /// When assertions are disabled (when not in debug mode), calling
+  /// [TestTextInput.register] is required prior to calling
+  /// [WidgetTester.enterText], or the text will be silently dropped.
   @override
   bool get registerTestTextInput => false;
 
