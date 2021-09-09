@@ -1,7 +1,7 @@
 GIT
   remote: https://github.com/CocoaPods/CocoaPods.git
   revision: 48973fbb6b8d0e600bc9e43c798fd25af86e92a1
-  ref: 48973f
+  branch: info_plist_fix
   specs:
     cocoapods (1.11.0)
       addressable (~> 2.8)
