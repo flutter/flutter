@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 @TestOn('!chrome')
+
 import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui';
@@ -1185,6 +1186,10 @@ void main() {
 
     testWidgets('clip is handled correctly during resizing', (WidgetTester tester) async {
       // Regressing test for https://github.com/flutter/flutter/issues/67343
+
+      final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
+      viewsController.registerViewType('webview');
+
       Widget buildView(double width, double height, Clip clipBehavior) {
         return Center(
           child: SizedBox(

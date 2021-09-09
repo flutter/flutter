@@ -37,6 +37,40 @@ void main() {
       );
     });
 
+    testWidgets('Create HTML view with PlatformViewCreatedCallback', (WidgetTester tester) async {
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      final FakeHtmlPlatformViewsController viewsController = FakeHtmlPlatformViewsController();
+      viewsController.registerViewType('webview');
+
+      bool hasPlatformViewCreated = false;
+      void onPlatformViewCreatedCallBack(int id) {
+        hasPlatformViewCreated = true;
+      }
+
+      await tester.pumpWidget(
+        Center(
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: HtmlElementView(
+              viewType: 'webview',
+              onPlatformViewCreated: onPlatformViewCreatedCallBack,
+            ),
+          ),
+        ),
+      );
+
+      // Check the onPlatformViewCreatedCallBack has been called.
+      expect(hasPlatformViewCreated, true);
+
+      expect(
+        viewsController.views,
+        unorderedEquals(<FakeHtmlPlatformView>[
+          FakeHtmlPlatformView(currentViewId + 1, 'webview'),
+        ]),
+      );
+    });
+
     testWidgets('Resize HTML view', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeHtmlPlatformViewsController viewsController = FakeHtmlPlatformViewsController();

@@ -10,6 +10,7 @@ import 'framework.dart';
 import 'inherited_notifier.dart';
 import 'layout_builder.dart';
 import 'notification_listener.dart';
+import 'scroll_activity.dart';
 import 'scroll_context.dart';
 import 'scroll_controller.dart';
 import 'scroll_notification.dart';
@@ -431,8 +432,16 @@ class _DraggableScrollableSheetScrollPosition
         );
 
   VoidCallback? _dragCancelCallback;
+  VoidCallback? _ballisticCancelCallback;
   final _DraggableSheetExtent extent;
   bool get listShouldScroll => pixels > 0.0;
+
+  @override
+  void beginActivity(ScrollActivity? newActivity) {
+    // Cancel the running ballistic simulation, if there is one.
+    _ballisticCancelCallback?.call();
+    super.beginActivity(newActivity);
+  }
 
   @override
   bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
@@ -455,6 +464,13 @@ class _DraggableScrollableSheetScrollPosition
     } else {
       super.applyUserOffset(delta);
     }
+  }
+
+  @override
+  void dispose() {
+    // Stop the animation before dispose.
+    _ballisticCancelCallback?.call();
+    super.dispose();
   }
 
   @override
@@ -481,6 +497,9 @@ class _DraggableScrollableSheetScrollPosition
       debugLabel: objectRuntimeType(this, '_DraggableScrollableSheetPosition'),
       vsync: context.vsync,
     );
+    // Stop the ballistic animation if a new activity starts.
+    // See: [beginActivity].
+    _ballisticCancelCallback = ballisticController.stop;
     double lastDelta = 0;
     void _tick() {
       final double delta = ballisticController.value - lastDelta;
@@ -501,7 +520,10 @@ class _DraggableScrollableSheetScrollPosition
     ballisticController
       ..addListener(_tick)
       ..animateWith(simulation).whenCompleteOrCancel(
-        ballisticController.dispose,
+        () {
+          _ballisticCancelCallback = null;
+          ballisticController.dispose();
+        },
       );
   }
 

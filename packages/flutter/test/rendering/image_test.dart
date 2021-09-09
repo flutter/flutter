@@ -189,7 +189,7 @@ Future<void> main() async {
 
     image.dispose();
     expect(image.debugGetOpenHandleStackTraces()!.length, 0);
-  }, skip: kIsWeb); // Web doesn't track open image handles.
+  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87442
 
   test('RenderImage does not dispose its image if setting the same image twice', () async {
     final ui.Image image = await createTestImage(width: 10, height: 10, cache: false);
@@ -206,7 +206,7 @@ Future<void> main() async {
 
     image.dispose();
     expect(image.debugGetOpenHandleStackTraces()!.length, 0);
-  }, skip: kIsWeb); // Web doesn't track open image handles.
+  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87442
 
   test('Render image disposes its image when it is disposed', () async {
     final ui.Image image = await createTestImage(width: 10, height: 10, cache: false);
@@ -221,5 +221,5 @@ Future<void> main() async {
 
     image.dispose();
     expect(image.debugGetOpenHandleStackTraces()!.length, 0);
-  }, skip: kIsWeb); // Web doesn't track open image handles.
+  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87442
 }

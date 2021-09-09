@@ -2,10 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@import UIKit;
+
 #import "IntegrationTestPlugin.h"
 
 static NSString *const kIntegrationTestPluginChannel = @"plugins.flutter.io/integration_test";
 static NSString *const kMethodTestFinished = @"allTestsFinished";
+static NSString *const kMethodScreenshot = @"captureScreenshot";
+static NSString *const kMethodConvertSurfaceToImage = @"convertFlutterSurfaceToImage";
+static NSString *const kMethodRevertImage = @"revertFlutterImage";
 
 @interface IntegrationTestPlugin ()
 
@@ -39,20 +44,55 @@ static NSString *const kMethodTestFinished = @"allTestsFinished";
 
 - (void)setupChannels:(id<FlutterBinaryMessenger>)binaryMessenger {
   FlutterMethodChannel *channel =
-      [FlutterMethodChannel methodChannelWithName:kIntegrationTestPluginChannel
-                                  binaryMessenger:binaryMessenger];
+  [FlutterMethodChannel methodChannelWithName:kIntegrationTestPluginChannel
+                              binaryMessenger:binaryMessenger];
   [channel setMethodCallHandler:^(FlutterMethodCall *call, FlutterResult result) {
     [self handleMethodCall:call result:result];
   }];
 }
 
 - (void)handleMethodCall:(FlutterMethodCall *)call result:(FlutterResult)result {
-  if ([kMethodTestFinished isEqual:call.method]) {
+  if ([call.method isEqualToString:kMethodTestFinished]) {
     self.testResults = call.arguments[@"results"];
+    result(nil);
+  } else if ([call.method isEqualToString:kMethodScreenshot]) {
+    // If running as a native Xcode test, attach to test.
+    UIImage *screenshot = [self capturePngScreenshot];
+    NSString *name = call.arguments[@"name"];
+    [self.screenshotDelegate didTakeScreenshot:screenshot attachmentName:name];
+
+    // Also pass back along the channel for the driver to handle.
+    NSData *pngData = UIImagePNGRepresentation(screenshot);
+    result([FlutterStandardTypedData typedDataWithBytes:pngData]);
+  } else if ([call.method isEqualToString:kMethodConvertSurfaceToImage]
+             || [call.method isEqualToString:kMethodRevertImage]) {
+    // Android only, no-op on iOS.
     result(nil);
   } else {
     result(FlutterMethodNotImplemented);
   }
+}
+
+- (UIImage *)capturePngScreenshot {
+  UIWindow *window = [UIApplication.sharedApplication.windows
+                      filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"keyWindow = YES"]].firstObject;
+  CGRect screenshotBounds = window.bounds;
+  UIImage *image;
+
+  if (@available(iOS 10, *)) {
+    UIGraphicsImageRenderer *renderer = [[UIGraphicsImageRenderer alloc] initWithBounds:screenshotBounds];
+
+    image = [renderer imageWithActions:^(UIGraphicsImageRendererContext *rendererContext) {
+      [window drawViewHierarchyInRect:screenshotBounds afterScreenUpdates:YES];
+    }];
+  } else {
+    UIGraphicsBeginImageContextWithOptions(screenshotBounds.size, NO, UIScreen.mainScreen.scale);
+    [window drawViewHierarchyInRect:screenshotBounds afterScreenUpdates:YES];
+    image = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+  }
+
+  return image;
 }
 
 @end

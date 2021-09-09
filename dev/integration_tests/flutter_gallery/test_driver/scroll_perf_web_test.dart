@@ -35,6 +35,6 @@ void main() {
         await driver.scroll(demoList, 0.0, 300.0, const Duration(milliseconds: 300));
         await Future<void>.delayed(const Duration(milliseconds: 500));
       }
-    });
+    }, timeout: Timeout.none);
   });
 }

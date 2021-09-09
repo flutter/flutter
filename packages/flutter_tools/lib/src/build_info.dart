@@ -36,7 +36,7 @@ class BuildInfo {
     List<String>? dartExperiments,
     required this.treeShakeIcons,
     this.performanceMeasurementFile,
-    this.packagesPath = '.packages', // TODO(jonahwilliams): make this required and remove the default.
+    this.packagesPath = '.packages', // TODO(zanderso): make this required and remove the default.
     this.nullSafetyMode = NullSafetyMode.sound,
     this.codeSizeDirectory,
     this.androidGradleDaemon = true,
@@ -534,7 +534,7 @@ enum DarwinArch {
   x86_64,
 }
 
-// TODO(jonahwilliams): replace all android TargetPlatform usage with AndroidArch.
+// TODO(zanderso): replace all android TargetPlatform usage with AndroidArch.
 enum AndroidArch {
   armeabi_v7a,
   arm64_v8a,
@@ -547,8 +547,8 @@ List<DarwinArch> defaultIOSArchsForEnvironment(
     EnvironmentType environmentType) {
   if (environmentType == EnvironmentType.simulator) {
     return <DarwinArch>[
-      // Apple Silicon ARM simulators not yet supported.
       DarwinArch.x86_64,
+      DarwinArch.arm64,
     ];
   }
   return <DarwinArch>[
@@ -876,7 +876,7 @@ const String kIosArchs = 'IosArchs';
 /// The define to control what macOS architectures are built for.
 ///
 /// This is expected to be a space-delimited list of architectures. If not
-/// provided, defautls to x86_64.
+/// provided, defaults to x86_64.
 ///
 /// Supported values are x86_64 and arm64.
 const String kDarwinArchs = 'DarwinArchs';

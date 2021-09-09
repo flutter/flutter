@@ -31,10 +31,10 @@ class BenchUpdateManyChildLayers extends SceneBuilderRecorder {
   /// is correctly pumping frames.
   double wobbleCounter = 0;
 
-  List<Picture> _pictures;
-  Size windowSize;
-  Size cellSize;
-  Size rectSize;
+  late List<Picture> _pictures;
+  late Size windowSize;
+  late Size cellSize;
+  late Size rectSize;
 
   @override
   Future<void> setUpAll() async {
@@ -55,7 +55,7 @@ class BenchUpdateManyChildLayers extends SceneBuilderRecorder {
     }
   }
 
-  OffsetEngineLayer _rootLayer;
+  OffsetEngineLayer? _rootLayer;
   final Map<int, OffsetEngineLayer> _layers = <int, OffsetEngineLayer>{};
 
   @override
@@ -64,7 +64,7 @@ class BenchUpdateManyChildLayers extends SceneBuilderRecorder {
     for (int row = 0; row < kRows; row++) {
       for (int col = 0; col < kColumns; col++) {
         final int layerId = 1000000 * row + col;
-        final OffsetEngineLayer oldLayer = _layers[layerId];
+        final OffsetEngineLayer? oldLayer = _layers[layerId];
         final double wobbleOffsetX = col * cellSize.width + (wobbleCounter - 5).abs();
         final double offsetY = row * cellSize.height;
         // Retain every other layer, so we exercise the update path 50% of the

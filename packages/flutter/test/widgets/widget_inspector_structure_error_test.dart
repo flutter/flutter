@@ -47,6 +47,7 @@ class StructureErrorTestWidgetInspectorService extends Object with WidgetInspect
     expect(extensions, contains(name));
     // Encode and decode to JSON to match behavior using a real service
     // extension where only JSON is allowed.
+    // ignore: avoid_dynamic_calls
     return json.decode(json.encode(await extensions[name]!(arguments)))['enabled'] as String;
   }
 

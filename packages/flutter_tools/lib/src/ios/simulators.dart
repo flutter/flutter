@@ -48,6 +48,9 @@ class IOSSimulators extends PollingDeviceDiscovery {
 
   @override
   Future<List<Device>> pollingGetDevices({ Duration timeout }) async => _iosSimulatorUtils.getAttachedDevices();
+
+  @override
+  List<String> get wellKnownIds => const <String>[];
 }
 
 class IOSSimulatorUtils {
@@ -526,7 +529,7 @@ class IOSSimulator extends Device {
       app: app,
       buildInfo: buildInfo,
       targetOverride: mainPath,
-      buildForDevice: false,
+      environmentType: EnvironmentType.simulator,
       deviceID: id,
     );
     if (!buildResult.success) {

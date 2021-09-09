@@ -293,12 +293,21 @@ class XCDevice {
           }
         }
 
-        final IOSDeviceInterface interface = _interfaceType(device);
+        final IOSDeviceConnectionInterface interface = _interfaceType(device);
 
         // Only support USB devices, skip "network" interface (Xcode > Window > Devices and Simulators > Connect via network).
         // TODO(jmagman): Remove this check once wirelessly detected devices can be observed and attached, https://github.com/flutter/flutter/issues/15072.
-        if (interface != IOSDeviceInterface.usb) {
+        if (interface != IOSDeviceConnectionInterface.usb) {
           continue;
+        }
+
+        String sdkVersion = _sdkVersion(device);
+
+        if (sdkVersion != null) {
+          final String buildVersion = _buildVersion(device);
+          if (buildVersion != null) {
+            sdkVersion = '$sdkVersion $buildVersion';
+          }
         }
 
         devices.add(IOSDevice(
@@ -306,7 +315,7 @@ class XCDevice {
           name: device['name'] as String,
           cpuArchitecture: _cpuArchitecture(device),
           interfaceType: interface,
-          sdkVersion: _sdkVersion(device),
+          sdkVersion: sdkVersion,
           iProxy: _iProxy,
           fileSystem: globals.fs,
           logger: _logger,
@@ -317,6 +326,7 @@ class XCDevice {
       }
     }
     return devices;
+
   }
 
   /// Despite the name, com.apple.platform.iphoneos includes iPhone, iPads, and all iOS devices.
@@ -343,18 +353,18 @@ class XCDevice {
     return null;
   }
 
-  static IOSDeviceInterface _interfaceType(Map<String, dynamic> deviceProperties) {
+  static IOSDeviceConnectionInterface _interfaceType(Map<String, dynamic> deviceProperties) {
     // Interface can be "usb", "network", or "none" for simulators
     // and unknown future interfaces.
     if (deviceProperties.containsKey('interface')) {
       if ((deviceProperties['interface'] as String).toLowerCase() == 'network') {
-        return IOSDeviceInterface.network;
+        return IOSDeviceConnectionInterface.network;
       } else {
-        return IOSDeviceInterface.usb;
+        return IOSDeviceConnectionInterface.usb;
       }
     }
 
-    return IOSDeviceInterface.none;
+    return IOSDeviceConnectionInterface.none;
   }
 
   static String _sdkVersion(Map<String, dynamic> deviceProperties) {
@@ -363,7 +373,20 @@ class XCDevice {
       // "13.3 (17C54)"
       final RegExp operatingSystemRegex = RegExp(r'(.*) \(.*\)$');
       final String operatingSystemVersion = deviceProperties['operatingSystemVersion'] as String;
-      return operatingSystemRegex.firstMatch(operatingSystemVersion.trim())?.group(1);
+      if(operatingSystemRegex.hasMatch(operatingSystemVersion.trim())) {
+        return operatingSystemRegex.firstMatch(operatingSystemVersion.trim())?.group(1);
+      }
+      return operatingSystemVersion;
+    }
+    return null;
+  }
+
+  static String _buildVersion(Map<String, dynamic> deviceProperties) {
+    if (deviceProperties.containsKey('operatingSystemVersion')) {
+      // Parse out the build version, for example 17C54 from "13.3 (17C54)".
+      final RegExp buildVersionRegex = RegExp(r'\(.*\)$');
+      final String operatingSystemVersion = deviceProperties['operatingSystemVersion'] as String;
+      return buildVersionRegex.firstMatch(operatingSystemVersion)?.group(0)?.replaceAll(RegExp('[()]'), '');
     }
     return null;
   }

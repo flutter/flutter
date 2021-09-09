@@ -32,62 +32,16 @@ import 'theme.dart';
 /// Adaptive layouts can build different instances of the [Scaffold] in order to
 /// have a navigation rail for more horizontal layouts and a bottom navigation
 /// bar for more vertical layouts. See
-/// [https://github.com/flutter/samples/blob/master/experimental/web_dashboard/lib/src/widgets/third_party/adaptive_scaffold.dart]
+/// [the adaptive_scaffold.dart sample](https://github.com/flutter/samples/blob/master/experimental/web_dashboard/lib/src/widgets/third_party/adaptive_scaffold.dart)
 /// for an example.
 ///
 /// {@tool dartpad --template=stateful_widget_material}
-///
 /// This example shows a [NavigationRail] used within a Scaffold with 3
 /// [NavigationRailDestination]s. The main content is separated by a divider
 /// (although elevation on the navigation rail can be used instead). The
 /// `_selectedIndex` is updated by the `onDestinationSelected` callback.
 ///
-/// ```dart
-/// int _selectedIndex = 0;
-///
-///  @override
-///  Widget build(BuildContext context) {
-///    return Scaffold(
-///      body: Row(
-///        children: <Widget>[
-///          NavigationRail(
-///            selectedIndex: _selectedIndex,
-///            onDestinationSelected: (int index) {
-///              setState(() {
-///                _selectedIndex = index;
-///              });
-///            },
-///            labelType: NavigationRailLabelType.selected,
-///            destinations: const <NavigationRailDestination>[
-///              NavigationRailDestination(
-///                icon: Icon(Icons.favorite_border),
-///                selectedIcon: Icon(Icons.favorite),
-///                label: Text('First'),
-///              ),
-///              NavigationRailDestination(
-///                icon: Icon(Icons.bookmark_border),
-///                selectedIcon: Icon(Icons.book),
-///                label: Text('Second'),
-///              ),
-///              NavigationRailDestination(
-///                icon: Icon(Icons.star_border),
-///                selectedIcon: Icon(Icons.star),
-///                label: Text('Third'),
-///              ),
-///            ],
-///          ),
-///          const VerticalDivider(thickness: 1, width: 1),
-///          // This is the main content.
-///          Expanded(
-///            child: Center(
-///              child: Text('selectedIndex: $_selectedIndex'),
-///            ),
-///          )
-///        ],
-///      ),
-///    );
-///  }
-/// ```
+/// ** See code in examples/api/lib/material/navigation_rail/navigation_rail.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -98,7 +52,7 @@ import 'theme.dart';
 ///    destinations in the navigation rail.
 ///  * [BottomNavigationBar], which is a similar navigation widget that's laid
 ///     out horizontally.
-///  * [https://material.io/components/navigation-rail/]
+///  * https://material.io/components/navigation-rail/
 class NavigationRail extends StatefulWidget {
   /// Creates a material design navigation rail.
   ///
@@ -215,8 +169,9 @@ class NavigationRail extends StatefulWidget {
 
   /// The rail's elevation or z-coordinate.
   ///
-  /// If [Directionality] is [TextDirection.LTR], the inner side is the right
-  /// side, and if [Directionality] is [TextDirection.RTL], it is the left side.
+  /// If [Directionality] is [intl.TextDirection.LTR], the inner side is the
+  /// right side, and if [Directionality] is [intl.TextDirection.RTL], it is
+  /// the left side.
   ///
   /// The default value is 0.
   final double? elevation;
@@ -330,7 +285,6 @@ class NavigationRail extends StatefulWidget {
   /// widget, such as an animated menu or a [FloatingActionButton] animation.
   ///
   /// {@tool dartpad --template=stateless_widget_material}
-  ///
   /// This example shows how to use this animation to create a
   /// [FloatingActionButton] that animates itself between the normal and
   /// extended states of the [NavigationRail].
@@ -338,45 +292,7 @@ class NavigationRail extends StatefulWidget {
   /// An instance of `ExtendableFab` would be created for
   /// [NavigationRail.leading].
   ///
-  /// ```dart dartImports
-  /// import 'dart:ui';
-  /// ```
-  ///
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   final Animation<double> animation = NavigationRail.extendedAnimation(context);
-  ///   return AnimatedBuilder(
-  ///     animation: animation,
-  ///     builder: (BuildContext context, Widget? child) {
-  ///       // The extended fab has a shorter height than the regular fab.
-  ///       return Container(
-  ///         height: 56,
-  ///         padding: EdgeInsets.symmetric(
-  ///           vertical: lerpDouble(0, 6, animation.value)!,
-  ///         ),
-  ///         child: animation.value == 0
-  ///           ? FloatingActionButton(
-  ///               child: const Icon(Icons.add),
-  ///               onPressed: () {},
-  ///             )
-  ///           : Align(
-  ///               alignment: AlignmentDirectional.centerStart,
-  ///               widthFactor: animation.value,
-  ///               child: Padding(
-  ///                 padding: const EdgeInsetsDirectional.only(start: 8),
-  ///                 child: FloatingActionButton.extended(
-  ///                   icon: const Icon(Icons.add),
-  ///                   label: const Text('CREATE'),
-  ///                   onPressed: () {},
-  ///                 ),
-  ///               ),
-  ///             ),
-  ///       );
-  ///     },
-  ///   );
-  /// }
-  /// ```
-  ///
+  /// ** See code in examples/api/lib/material/navigation_rail/navigation_rail.extended_animation.0.dart **
   /// {@end-tool}
   static Animation<double> extendedAnimation(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<_ExtendedNavigationRailAnimation>()!.animation;
@@ -498,7 +414,8 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
                           labelTextStyle: widget.selectedIndex == i ? selectedLabelTextStyle : unselectedLabelTextStyle,
                           padding: widget.destinations[i].padding,
                           onTap: () {
-                            widget.onDestinationSelected!(i);
+                            if (widget.onDestinationSelected != null)
+                              widget.onDestinationSelected!(i);
                           },
                           indexLabel: localizations.tabLabel(
                             tabIndex: i + 1,

@@ -246,7 +246,7 @@ class Tween<T extends Object?> extends Animatable<T> {
 
   /// Returns the value this variable has at the given animation clock value.
   ///
-  /// The default implementation of this method uses the [+], [-], and [*]
+  /// The default implementation of this method uses the `+`, `-`, and `*`
   /// operators on `T`. The [begin] and [end] properties must therefore be
   /// non-null by the time this method is called.
   ///

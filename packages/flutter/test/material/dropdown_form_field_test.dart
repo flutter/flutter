@@ -149,6 +149,248 @@ void verifyPaintedShadow(Finder customPaint, int elevation) {
 }
 
 void main() {
+  // Regression test for https://github.com/flutter/flutter/issues/87102
+  testWidgets('label position test - show hint', (WidgetTester tester) async {
+    int? value;
+
+    await tester.pumpWidget(
+      TestApp(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: DropdownButtonFormField<int?>(
+            decoration: const InputDecoration(
+              labelText: 'labelText',
+            ),
+            value: value,
+            hint: const Text('Hint'),
+            onChanged: (int? newValue) {
+              value = newValue;
+            },
+            items: const <DropdownMenuItem<int?>>[
+              DropdownMenuItem<int?>(
+                value: 1,
+                child: Text('One'),
+              ),
+              DropdownMenuItem<int?>(
+                value: 2,
+                child: Text('Two'),
+              ),
+              DropdownMenuItem<int?>(
+                value: 3,
+                child: Text('Three'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(value, null);
+    final Offset hintEmptyLabel = tester.getTopLeft(find.text('labelText'));
+
+    // Select a item.
+    await tester.tap(find.text('Hint'), warnIfMissed: false);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('One').last);
+    await tester.pumpAndSettle();
+
+    expect(value, 1);
+    final Offset oneValueLabel = tester.getTopLeft(find.text('labelText'));
+
+    // The position of the label does not change.
+    expect(hintEmptyLabel, oneValueLabel);
+  });
+
+  testWidgets('label position test - show disabledHint: disable', (WidgetTester tester) async {
+    int? value;
+
+    await tester.pumpWidget(
+      TestApp(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: DropdownButtonFormField<int?>(
+            decoration: const InputDecoration(
+              labelText: 'labelText',
+            ),
+            value: value,
+            disabledHint: const Text('disabledHint'),
+            onChanged: null, // disable the menu to show the disabledHint.
+            items: const <DropdownMenuItem<int?>>[
+              DropdownMenuItem<int?>(
+                value: 1,
+                child: Text('One'),
+              ),
+              DropdownMenuItem<int?>(
+                value: 2,
+                child: Text('Two'),
+              ),
+              DropdownMenuItem<int?>(
+                value: 3,
+                child: Text('Three'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(value, null); // disabledHint shown.
+    final Offset hintEmptyLabel = tester.getTopLeft(find.text('labelText'));
+    expect(hintEmptyLabel, const Offset(0.0, 12.0));
+  });
+
+  testWidgets('label position test - show disabledHint: enable + null item', (WidgetTester tester) async {
+    int? value;
+
+    await tester.pumpWidget(
+      TestApp(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: DropdownButtonFormField<int?>(
+            decoration: const InputDecoration(
+              labelText: 'labelText',
+            ),
+            value: value,
+            disabledHint: const Text('disabledHint'),
+            onChanged: (_) {},
+            items: null,
+          ),
+        ),
+      ),
+    );
+
+    expect(value, null); // disabledHint shown.
+    final Offset hintEmptyLabel = tester.getTopLeft(find.text('labelText'));
+    expect(hintEmptyLabel, const Offset(0.0, 12.0));
+  });
+
+  testWidgets('label position test - show disabledHint: enable + empty item', (WidgetTester tester) async {
+    int? value;
+
+    await tester.pumpWidget(
+      TestApp(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: DropdownButtonFormField<int?>(
+            decoration: const InputDecoration(
+              labelText: 'labelText',
+            ),
+            value: value,
+            disabledHint: const Text('disabledHint'),
+            onChanged: (_) {},
+            items: const <DropdownMenuItem<int?>>[],
+          ),
+        ),
+      ),
+    );
+
+    expect(value, null); // disabledHint shown.
+    final Offset hintEmptyLabel = tester.getTopLeft(find.text('labelText'));
+    expect(hintEmptyLabel, const Offset(0.0, 12.0));
+  });
+
+  testWidgets('label position test - show hint: enable + empty item', (WidgetTester tester) async {
+    int? value;
+
+    await tester.pumpWidget(
+      TestApp(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: DropdownButtonFormField<int?>(
+            decoration: const InputDecoration(
+              labelText: 'labelText',
+            ),
+            value: value,
+            hint: const Text('hint'),
+            onChanged: (_) {},
+            items: const <DropdownMenuItem<int?>>[],
+          ),
+        ),
+      ),
+    );
+
+    expect(value, null); // hint shown.
+    final Offset hintEmptyLabel = tester.getTopLeft(find.text('labelText'));
+    expect(hintEmptyLabel, const Offset(0.0, 12.0));
+  });
+
+  testWidgets('label position test - no hint shown: enable + no selected + disabledHint', (WidgetTester tester) async {
+    int? value;
+
+    await tester.pumpWidget(
+      TestApp(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: DropdownButtonFormField<int?>(
+            decoration: const InputDecoration(
+              labelText: 'labelText',
+            ),
+            value: value,
+            disabledHint: const Text('disabledHint'),
+            onChanged: (_) {},
+            items: const <DropdownMenuItem<int?>>[
+              DropdownMenuItem<int?>(
+                value: 1,
+                child: Text('One'),
+              ),
+              DropdownMenuItem<int?>(
+                value: 2,
+                child: Text('Two'),
+              ),
+              DropdownMenuItem<int?>(
+                value: 3,
+                child: Text('Three'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(value, null);
+    final Offset hintEmptyLabel = tester.getTopLeft(find.text('labelText'));
+    expect(hintEmptyLabel, const Offset(0.0, 24.0));
+  });
+
+  testWidgets('label position test - show selected item: disabled + hint + disabledHint', (WidgetTester tester) async {
+    const int value = 1;
+
+    await tester.pumpWidget(
+      TestApp(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: DropdownButtonFormField<int?>(
+            decoration: const InputDecoration(
+              labelText: 'labelText',
+            ),
+            value: value,
+            hint: const Text('hint'),
+            disabledHint: const Text('disabledHint'),
+            onChanged: null, // disabled
+            items: const <DropdownMenuItem<int?>>[
+              DropdownMenuItem<int?>(
+                value: 1,
+                child: Text('One'),
+              ),
+              DropdownMenuItem<int?>(
+                value: 2,
+                child: Text('Two'),
+              ),
+              DropdownMenuItem<int?>(
+                value: 3,
+                child: Text('Three'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(value, 1);
+    final Offset hintEmptyLabel = tester.getTopLeft(find.text('labelText'));
+    expect(hintEmptyLabel, const Offset(0.0, 12.0));
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/82910
   testWidgets('null value test', (WidgetTester tester) async {
     int? value = 1;
@@ -181,7 +423,7 @@ void main() {
               DropdownMenuItem<int?>(
                 value: 3,
                 child: Text('Three'),
-              )
+              ),
             ],
           ),
         ),
@@ -400,7 +642,7 @@ void main() {
   testWidgets('DropdownButtonFormField - disabledHint displays when the items list is empty, when items is null', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
-    Widget build({ List<String>? items }){
+    Widget build({ List<String>? items }) {
       return buildFormFrame(
         items: items,
         buttonKey: buttonKey,
@@ -426,7 +668,7 @@ void main() {
     (WidgetTester tester) async {
       final Key buttonKey = UniqueKey();
 
-      Widget build({ List<String>? items }){
+      Widget build({ List<String>? items }) {
         return buildFormFrame(
           items: items,
           buttonKey: buttonKey,
@@ -448,7 +690,7 @@ void main() {
   testWidgets('DropdownButtonFormField - disabledHint is null by default', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
-    Widget build({ List<String>? items }){
+    Widget build({ List<String>? items }) {
       return buildFormFrame(
         items: items,
         buttonKey: buttonKey,
@@ -468,7 +710,7 @@ void main() {
   testWidgets('DropdownButtonFormField - disabledHint is null by default', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
-    Widget build({ List<String>? items }){
+    Widget build({ List<String>? items }) {
       return buildFormFrame(
         items: items,
         buttonKey: buttonKey,
@@ -488,7 +730,7 @@ void main() {
   testWidgets('DropdownButtonFormField - disabledHint displays when onChanged is null', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
-    Widget build({ List<String>? items, ValueChanged<String?>? onChanged }){
+    Widget build({ List<String>? items, ValueChanged<String?>? onChanged }) {
       return buildFormFrame(
         items: items,
         buttonKey: buttonKey,
@@ -506,7 +748,7 @@ void main() {
   testWidgets('DropdownButtonFormField - disabled hint should be of same size as enabled hint', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
-    Widget build({ List<String>? items}){
+    Widget build({ List<String>? items}) {
       return buildFormFrame(
         items: items,
         buttonKey: buttonKey,

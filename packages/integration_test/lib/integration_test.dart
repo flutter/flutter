@@ -17,6 +17,7 @@ import 'package:vm_service/vm_service_io.dart' as vm_io;
 import '_callback_io.dart' if (dart.library.html) '_callback_web.dart' as driver_actions;
 import '_extension_io.dart' if (dart.library.html) '_extension_web.dart';
 import 'common.dart';
+import 'src/channel.dart';
 
 const String _success = 'success';
 
@@ -51,7 +52,7 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
       }
 
       try {
-        await _channel.invokeMethod<void>(
+        await integrationTestChannel.invokeMethod<void>(
           'allTestsFinished',
           <String, dynamic>{
             'results': results.map<String, dynamic>((String name, Object result) {
@@ -144,9 +145,6 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
     return WidgetsBinding.instance!;
   }
 
-  static const MethodChannel _channel =
-      MethodChannel('plugins.flutter.io/integration_test');
-
   /// Test results that will be populated after the tests have completed.
   ///
   /// Keys are the test descriptions, and values are either [_success] or
@@ -167,11 +165,29 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   /// side.
   final CallbackManager callbackManager = driver_actions.callbackManager;
 
-  /// Taking a screenshot.
+  /// Takes a screenshot.
   ///
-  /// Called by test methods. Implementation differs for each platform.
-  Future<void> takeScreenshot(String screenshotName) async {
-    await callbackManager.takeScreenshot(screenshotName);
+  /// On Android, you need to call `convertFlutterSurfaceToImage()`, and
+  /// pump a frame before taking a screenshot.
+  Future<List<int>> takeScreenshot(String screenshotName) async {
+    reportData ??= <String, dynamic>{};
+    reportData!['screenshots'] ??= <dynamic>[];
+    final Map<String, dynamic> data = await callbackManager.takeScreenshot(screenshotName);
+    assert(data.containsKey('bytes'));
+
+    (reportData!['screenshots']! as List<dynamic>).add(data);
+    return data['bytes']! as List<int>;
+  }
+
+  /// Android only. Converts the Flutter surface to an image view.
+  /// Be aware that if you are conducting a perf test, you may not want to call
+  /// this method since the this is an expensive operation that affects the
+  /// rendering of a Flutter app.
+  ///
+  /// Once the screenshot is taken, call `revertFlutterImage()` to restore
+  /// the original Flutter surface.
+  Future<void> convertFlutterSurfaceToImage() async {
+    await callbackManager.convertFlutterSurfaceToImage();
   }
 
   /// The callback function to response the driver side input.
@@ -266,8 +282,8 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
     );
   }
 
-  /// This is a convenience wrap of [traceTimeline] and send the result back to
-  /// the host for the [flutter_driver] style tests.
+  /// This is a convenience method that calls [traceTimeline] and sends the
+  /// result back to the host for the [flutter_driver] style tests.
   ///
   /// This records the timeline during `action` and adds the result to
   /// [reportData] with `reportKey`. The [reportData] contains extra information
@@ -277,7 +293,30 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   /// to `build/integration_response_data.json` with the key `timeline`.
   ///
   /// For tests with multiple calls of this method, `reportKey` needs to be a
-  /// unique key, otherwise the later result will override earlier one.
+  /// unique key, otherwise the later result will override earlier one. Tests
+  /// that call this multiple times must also provide a custom
+  /// [ResponseDataCallback] to decide where and how to write the output
+  /// timelines. For example,
+  ///
+  /// ```dart
+  /// import 'package:integration_test/integration_test_driver.dart';
+  ///
+  /// Future<void> main() {
+  ///   return integrationDriver(
+  ///     responseDataCallback: (data) async {
+  ///       if (data != null) {
+  ///         for (var entry in data.entries) {
+  ///           print('Writing ${entry.key} to the disk.');
+  ///           await writeResponseData(
+  ///             entry.value as Map<String, dynamic>,
+  ///             testOutputFilename: entry.key,
+  ///           );
+  ///         }
+  ///       }
+  ///     },
+  ///   );
+  /// }
+  /// ```
   ///
   /// The `streams` and `retainPriorEvents` parameters are passed as-is to
   /// [traceTimeline].

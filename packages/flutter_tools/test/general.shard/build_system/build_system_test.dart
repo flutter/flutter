@@ -597,7 +597,7 @@ void main() {
     expect(testEnvironmentProfile.outputDir.childFile('.last_build_id').readAsStringSync(),
       'c20b3747fb2aa148cc4fd39bfbbd894f');
 
-    // Verify debug output removeds
+    // Verify debug output removed
     expect(fileSystem.file('output/debug'), isNot(exists));
     expect(fileSystem.file('output/release'), exists);
   });

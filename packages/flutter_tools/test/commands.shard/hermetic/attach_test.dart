@@ -197,8 +197,8 @@ void main() {
         // output dill, filesystem scheme, and filesystem root.
         final FlutterDevice flutterDevice = hotRunnerFactory.devices.first;
 
-        expect(flutterDevice.fileSystemScheme, filesystemScheme);
-        expect(flutterDevice.fileSystemRoots, const <String>[filesystemRoot]);
+        expect(flutterDevice.buildInfo.fileSystemScheme, filesystemScheme);
+        expect(flutterDevice.buildInfo.fileSystemRoots, const <String>[filesystemRoot]);
       }, overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
         ProcessManager: () => FakeProcessManager.any(),
@@ -767,11 +767,11 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
 
   @override
   Future<void> startDartDevelopmentService(
-    Uri observatoryUri,
+    Uri observatoryUri, {
+    @required Logger logger,
     int hostPort,
     bool ipv6,
-    bool disableServiceAuthCodes, {
-    @required Logger logger,
+    bool disableServiceAuthCodes,
   }) async {}
 
   @override

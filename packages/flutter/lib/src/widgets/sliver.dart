@@ -209,7 +209,7 @@ abstract class SliverChildDelegate {
   }
 }
 
-class _SaltedValueKey extends ValueKey<Key>{
+class _SaltedValueKey extends ValueKey<Key> {
   const _SaltedValueKey(Key key): assert(key != null), super(key);
 }
 
