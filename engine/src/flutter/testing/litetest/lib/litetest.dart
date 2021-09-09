@@ -10,7 +10,7 @@ import 'package:expect/expect.dart'; // ignore: unused_import
 import 'src/matchers.dart'; // ignore: unused_import
 import 'src/test_suite.dart';
 
-export 'package:async_helper/async_minitest.dart' hide group, test;
+export 'package:async_helper/async_minitest.dart' hide test;
 export 'package:expect/expect.dart';
 export 'src/matchers.dart';
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.8
+#!/usr/bin/env python3
 # Copyright 2013 The Flutter Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -12,23 +12,25 @@ import json
 import os
 import sys
 
-Entry = collections.namedtuple('Entry', ['source', 'destination'])
+Entry = collections.namedtuple('Entry', ['source', 'dest'])
 
 
-def collect(lines):
+def collect(path_prefix, lines):
     '''Reads the kernel manifest and creates an array of Entry objects.
     - lines: a list of lines from the manifest
     '''
     entries = []
     for line in lines:
         values = line.split("=", 1)
-        entries.append(Entry(source=values[1], destination=values[0]))
+        entries.append(Entry(source=path_prefix + values[1], dest=values[0]))
 
     return entries
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        '--path_prefix', help='Directory path containing the manifest entry sources', required=True)
     parser.add_argument(
         '--input', help='Path to original manifest', required=True)
     parser.add_argument(
@@ -38,7 +40,7 @@ def main():
     with open(args.input, 'r') as input_file:
         contents = input_file.read().splitlines()
 
-    entries = collect(contents)
+    entries = collect(args.path_prefix, contents)
 
     if entries is None:
         return 1

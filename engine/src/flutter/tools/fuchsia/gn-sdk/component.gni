@@ -183,6 +183,7 @@ template("fuchsia_component") {
                              "deps",
                              "data_deps",
                              "resources",
+                             "resources_in_json_files",
                              "testonly",
                              "visibility",
                            ])
@@ -198,6 +199,13 @@ template("fuchsia_component") {
       resources = []
     }
 
+    # TODO(richkadel): Changed from the Fuchsia GN SDK to add
+    # `resources_in_json_files, so additional resources could be computed at
+    # compile time (in this case, compiled Dart libraries).
+    if (!defined(resources_in_json_files)) {
+      resources_in_json_files = []
+    }
+
     if (!defined(deps)) {
       deps = []
     }
@@ -208,7 +216,7 @@ template("fuchsia_component") {
     component_contents = [
       {
         type = "manifest"
-        source = rebase_path(_manifest_source)
+        source = rebase_path(get_path_info(_manifest_source, "abspath"))
         output_name = manifest_output_name
         manifest_version = _manifest_version
       },
@@ -220,6 +228,15 @@ template("fuchsia_component") {
           type = "resource"
           source = rebase_path(resource.path)
           dest = resource.dest
+        },
+      ]
+    }
+    foreach(file, resources_in_json_files) {
+      data += [ file ]
+      component_contents += [
+        {
+          type = "json_of_resources"
+          source = file
         },
       ]
     }

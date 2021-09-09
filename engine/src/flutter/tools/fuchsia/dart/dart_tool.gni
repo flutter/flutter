@@ -6,8 +6,6 @@ import("//flutter/tools/fuchsia/dart/dart_library.gni")
 import("//flutter/tools/fuchsia/dart/dart_package_config.gni")
 import("//flutter/tools/fuchsia/dart/toolchain.gni")
 
-import("//flutter/tools/python/python3_action.gni")
-
 # Wraps a dart snapshot in a script to be invoked by dart
 #
 # Parameters
@@ -35,7 +33,7 @@ template("_dart_snapshot_invocation") {
   }
 
   # Builds a convenience script to invoke the app.
-  python3_action(target_name) {
+  action(target_name) {
     forward_variables_from(invoker,
                            [
                              "testonly",

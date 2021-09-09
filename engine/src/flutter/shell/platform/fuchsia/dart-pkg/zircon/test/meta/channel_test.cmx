@@ -1,0 +1,10 @@
+{
+    "program": {
+        "data": "data/channel_test"
+    },
+    "sandbox": {
+        "services": [
+    	    "fuchsia.sys.Environment"
+        ]
+    }
+}

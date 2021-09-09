@@ -17,40 +17,43 @@ flutter_debug_build_cfg = {
   enable_asserts = true
 }
 
-# Builds the component in a non-product AOT build. This will
-# launch the vm service in the runner.
-# This configuration is not compatible with a --release build since the
-# profile aot runner is built without asserts.
-flutter_aot_debug_build_cfg = {
-  runtime_meta = "//flutter/shell/platform/fuchsia/flutter/meta/aot_runtime"
-  runner_dep = "//flutter/shell/platform/fuchsia/flutter:aot"
-  platform_name = "flutter_runner"
-  is_aot = true
-  is_product = false
-  enable_asserts = true
-}
+# TODO(richkadel): Don't confuse these settings with those in dart_build_config.gni,
+# in fact, do I really need both? Can we just use the settings in dart_build_config.gni?
 
-# Builds the component in a non-product AOT build. This will
-# launch the vm service in the runner.
-flutter_profile_build_cfg = {
-  runtime_meta =
-      "//flutter/shell/platform/fuchsia/flutter/meta/aot_runtime"  # profile
-                                                                   # runner
-  runner_dep = "//flutter/shell/platform/fuchsia/flutter:aot"
-  platform_name = "flutter_runner"
-  is_aot = true
-  is_product = false
-  enable_asserts = false
-}
+# # Builds the component in a non-product AOT build. This will
+# # launch the vm service in the runner.
+# # This configuration is not compatible with a --release build since the
+# # profile aot runner is built without asserts.
+# flutter_aot_debug_build_cfg = {
+#   runtime_meta = "//flutter/shell/platform/fuchsia/flutter/meta/aot_runtime"
+#   runner_dep = "//flutter/shell/platform/fuchsia/flutter:aot"
+#   platform_name = "flutter_runner"
+#   is_aot = true
+#   is_product = false
+#   enable_asserts = true
+# }
 
-# Builds the component in a product AOT build. This will
-# not launch the vm service in the runner.
-flutter_release_build_cfg = {
-  runtime_meta =
-      "//flutter/shell/platform/fuchsia/flutter/meta/aot_product_runtime"
-  runner_dep = "//flutter/shell/platform/fuchsia/flutter:aot_product"
-  platform_name = "flutter_runner"
-  is_aot = true
-  is_product = true
-  enable_asserts = false
-}
+# # Builds the component in a non-product AOT build. This will
+# # launch the vm service in the runner.
+# flutter_profile_build_cfg = {
+#   runtime_meta =
+#       "//flutter/shell/platform/fuchsia/flutter/meta/aot_runtime"  # profile
+#                                                                    # runner
+#   runner_dep = "//flutter/shell/platform/fuchsia/flutter:aot"
+#   platform_name = "flutter_runner"
+#   is_aot = true
+#   is_product = false
+#   enable_asserts = false
+# }
+
+# # Builds the component in a product AOT build. This will
+# # not launch the vm service in the runner.
+# flutter_release_build_cfg = {
+#   runtime_meta =
+#       "//flutter/shell/platform/fuchsia/flutter/meta/aot_product_runtime"
+#   runner_dep = "//flutter/shell/platform/fuchsia/flutter:aot_product"
+#   platform_name = "flutter_runner"
+#   is_aot = true
+#   is_product = true
+#   enable_asserts = false
+# }

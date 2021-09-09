@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//flutter/tools/fuchsia/dart/dart_library.gni")
 import("//third_party/dart/build/dart/dart_action.gni")
 import("//third_party/dart/utils/application_snapshot.gni")
 import("//third_party/dart/utils/compile_platform.gni")
@@ -46,5 +47,70 @@ application_snapshot("list_libraries") {
     rebase_path(
         root_gen_dir +
         "/flutter/shell/platform/fuchsia/dart/list_libraries.dart.dill"),
+  ]
+}
+
+dart_library("async_helper") {
+  package_root = "//third_party/dart/pkg/async_helper"
+  package_name = "async_helper"
+
+  language_version = "2.12"
+
+  deps = []
+
+  sources = [
+    "async_helper.dart",
+    "async_minitest.dart",
+  ]
+}
+
+dart_library("expect") {
+  package_root = "//third_party/dart/pkg/expect"
+  package_name = "expect"
+
+  language_version = "2.12"
+
+  deps = [ ":meta" ]
+
+  sources = [
+    "expect.dart",
+    "minitest.dart",
+  ]
+}
+
+dart_library("litetest") {
+  package_root = "//flutter/testing/litetest"
+  package_name = "litetest"
+
+  language_version = "2.12"
+
+  source_dir = "lib"
+
+  deps = [
+    ":async_helper",
+    ":expect",
+    ":meta",
+  ]
+
+  sources = [
+    "litetest.dart",
+    "src/matchers.dart",
+    "src/test.dart",
+    "src/test_suite.dart",
+  ]
+}
+
+dart_library("meta") {
+  package_root = "//third_party/dart/pkg/meta"
+  package_name = "meta"
+
+  language_version = "2.12"
+
+  deps = []
+
+  sources = [
+    "dart2js.dart",
+    "meta.dart",
+    "meta_meta.dart",
   ]
 }

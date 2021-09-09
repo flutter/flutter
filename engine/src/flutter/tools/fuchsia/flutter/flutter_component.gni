@@ -100,12 +100,16 @@ template("flutter_component") {
     _build_cfg = flutter_default_build_cfg
   }
 
+  if (defined(invoker.component_name)) {
+    _component_name = invoker.component_name
+  } else {
+    _component_name = target_name
+  }
+
   if (defined(invoker.main_package)) {
     _main_package = invoker.main_package
-  } else if (defined(invoker.component_name)) {
-    _main_package = string_replace(invoker.component_name, "-", "_")
   } else {
-    _main_package = string_replace(target_name, "-", "_")
+    _main_package = string_replace(_component_name, "-", "_")
   }
 
   if (defined(invoker.main_dart)) {
@@ -126,11 +130,13 @@ template("flutter_component") {
                              "deps",
                              "main_dart",
                              "main_package",
+                             "component_name",
                            ])
     deps = _component_deps
 
     main_dart = _main_dart
     main_package = _main_package
+    component_name = _component_name
 
     build_cfg = _build_cfg
   }

@@ -35,3 +35,8 @@ source_set("zircon") {
     "//flutter/third_party/tonic",
   ]
 }
+
+source_set("test") {
+  testonly = true
+  deps = [ "test" ]
+}
