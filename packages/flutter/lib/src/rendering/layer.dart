@@ -1764,7 +1764,7 @@ class OpacityLayer extends OffsetLayer {
   set alpha(int? value) {
     assert(value != null);
     if (value != _alpha) {
-      if (value == 255 || alpha == 255) {
+      if (value == 255 || _alpha == 255) {
         engineLayer = null;
       }
       _alpha = value;
@@ -1783,7 +1783,7 @@ class OpacityLayer extends OffsetLayer {
 
     final int realizedAlpha = alpha!;
     // The type assertions work because the [alpha] setter nulls out the
-    // engineLayer if it would ahve changed type (i.e. changed to or from 255).
+    // engineLayer if it would have changed type (i.e. changed to or from 255).
     if (enabled && realizedAlpha < 255) {
       assert(_engineLayer is ui.OpacityEngineLayer?);
       engineLayer = builder.pushOpacity(
