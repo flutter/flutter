@@ -242,12 +242,25 @@ class Stepper extends StatefulWidget {
   /// The index into [steps] of the current step whose content is displayed.
   final int currentStep;
 
+  /// give background color to header
   final Color? backgroundHeaderColor;
+
+  /// set the BoderRadius to header
   final BorderRadiusGeometry? headerRadius;
+
+  /// set the color to text of active step
   final Color? activeCircleTextColor;
+
+  /// set the background color to step
   final Color? circleColor;
+
+  /// set the underline color
   final Color? lineColor;
+
+  /// set the color of the text to inactive step
   final Color? inactiveTextColor;
+
+  /// set the color to check icon
   final Color? iconCheckColor;
 
   /// The callback called when a step is tapped, with its index passed as
@@ -380,7 +393,6 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   Widget _buildCircleChild(int index, bool oldState) {
     final StepState state =
         oldState ? _oldStates[index]! : widget.steps[index].state;
-    final bool isDarkActive = _isDark() && widget.steps[index].isActive;
     assert(state != null);
     switch (state) {
       case StepState.indexed:
