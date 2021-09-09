@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.8
+#!/usr/bin/env python3
 # Copyright 2013 The Flutter Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -12,6 +12,10 @@ import json
 import os
 import re
 import sys
+
+THIS_DIR = os.path.abspath(os.path.dirname(__file__))
+sys.path += [os.path.join(
+    THIS_DIR, '..', '..', '..', '..', 'third_party', 'pyyaml', 'lib3')]
 import yaml
 
 DEFAULT_LANGUAGE_VERSION = '2.8'

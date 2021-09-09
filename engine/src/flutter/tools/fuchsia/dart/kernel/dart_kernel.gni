@@ -26,8 +26,6 @@ import("//flutter/tools/fuchsia/dart/config.gni")
 import("//flutter/tools/fuchsia/dart/dart_library.gni")
 import("//flutter/tools/fuchsia/dart/toolchain.gni")
 
-import("//flutter/tools/python/python3_action.gni")
-
 _gen_kernel_label =
     "//flutter/tools/fuchsia/dart/kernel:gen_kernel($host_toolchain)"
 _gen_kernel_path =
@@ -46,7 +44,7 @@ flutter_platform_name = "flutter_runner"
 template("_convert_kernel_manifest") {
   assert(defined(invoker.manifest), "dart_kernel() requires a manifest")
 
-  python3_action(target_name) {
+  action(target_name) {
     forward_variables_from(invoker,
                            [
                              "deps",
@@ -58,6 +56,8 @@ template("_convert_kernel_manifest") {
 
     script = "//flutter/tools/fuchsia/dart/kernel/convert_manifest_to_json.py"
     args = [
+      "--path_prefix",
+      rebase_path(root_out_dir) + "/",
       "--input",
       rebase_path(invoker.manifest, root_build_dir),
       "--output",
@@ -157,12 +157,16 @@ template("dart_kernel") {
     _kernel_deps += invoker.deps
   }
 
+  # TODO(richkadel): The manifest is currently used by flutter_dart_component, to populate the file
+  # it calls `_convert_kernel_manifest_file`, so I can't make this conditional, right? Or is it
+  # possible to build Dart AOT Fuchsia packages/components without the data in this file (in which
+  # case I should make it conditional there as well)?
   _generate_manifest = false
   if (invoker.is_aot) {
     not_needed(invoker, [ "generate_manifest" ])
   } else {
-    if (defined(invoker.generate_manifest) && invoker.generate_manifest) {
-      _generate_manifest = true
+    if (defined(invoker.generate_manifest)) {
+      _generate_manifest = invoker.generate_manifest
     }
   }
 
@@ -185,7 +189,7 @@ template("dart_kernel") {
     _group_deps += [ ":$_convert_target_name" ]
   }
 
-  python3_action(_kernel_target_name) {
+  action(_kernel_target_name) {
     forward_variables_from(invoker,
                            [
                              "testonly",
@@ -271,6 +275,14 @@ template("dart_kernel") {
       rebase_path(_kernel_path, root_build_dir),
     ]
 
+    # TODO(richkadel): It should be possible to remove all of the build rules
+    # related to `generate_manifest`. Without the following two flags, the
+    # `gen_kernel` step will produce one large `.dil` file, instead of multiple
+    # `.dilp` files with a `.dilplist`. But the Fuchsia flutter runner
+    # _currently_ only looks for a `.dilplist`. If the runner is changed to
+    # support loading a single `.dil` for the Dart Fuchsia component code, then
+    # consider removing all code supporting `generate_manifest` (and remove
+    # `convert_manifest_to_json.py`).
     if (_generate_manifest) {
       args += [
         "--split-output-by-packages",
@@ -279,11 +291,17 @@ template("dart_kernel") {
       ]
     }
 
-    if (is_debug) {
-      args += [ "--embed-sources" ]
-    } else {
-      args += [ "--no-embed-sources" ]
-    }
+    # TODO(richkadel): NEED TO VALIDATE AND/OR CLEAN UP `is_debug` and `is_aot`.
+    # `is_debug` is set by the flutter `gn` script to true if --unoptimized,
+    # but `--unoptimized` is broken for Fuchsia, according to an open bug in
+    # github flutter/flutter issues. But I have a feeling `is_debug` from
+    # Fuchsia scripts may have a different meaning for dart/flutter at least.
+    # if (is_debug) {
+    args += [ "--embed-sources" ]
+
+    # } else {
+    #   args += [ "--no-embed-sources" ]
+    # }
 
     if (invoker.is_aot) {
       args += [
@@ -302,10 +320,12 @@ template("dart_kernel") {
       # This define excludes debugging and profiling code from Flutter.
       args += [ "-Ddart.vm.product=true" ]
     } else {
-      if (!is_debug) {
-        # The following define excludes debugging code from Flutter.
-        args += [ "-Ddart.vm.profile=true" ]
-      }
+      # TODO(richkadel): I'm pretty sure we want to assume is_debug even if that's
+      # not what's set by gn flags (--unoptimized = false because true is currentlyh broken for Fuchsia?)
+      #       if (!is_debug) {
+      #         # The following define excludes debugging code from Flutter.
+      #         args += [ "-Ddart.vm.profile=true" ]
+      #       }
     }
 
     if (defined(invoker.main_dart)) {
@@ -324,6 +344,6 @@ template("dart_kernel") {
                              "testonly",
                              "visibility",
                            ])
-    deps = _group_deps
+    public_deps = _group_deps
   }
 }

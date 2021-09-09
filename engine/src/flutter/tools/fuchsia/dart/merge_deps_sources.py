@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.8
+#!/usr/bin/env python3
 """Merges sources of a Dart target and its dependencies"""
 
 # Copyright 2013 The Flutter Authors. All rights reserved.

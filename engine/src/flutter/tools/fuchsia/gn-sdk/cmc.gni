@@ -223,6 +223,15 @@ template("cmc_merge") {
                              "visibility",
                            ])
     if (!defined(output_name)) {
+      # TODO(richkadel): THE GN SDK VERSION OF CMC.GNI IS INCONSISTENT WITH fuchsia.git!
+      # The default name should be `target_name`, which should already include the
+      # extension... Or change fuchsia.git to add the extension, and fix calls that
+      # append .cmx to the target name, like flutter_dart_component.gni.
+      # With the target_name representing the base of the CMC filename results
+      # in a "Duplicate definition" error in GN, because "flutter_component()"
+      # typically has the same target name. My current workaround is to
+      # redundantly assign `output_name` to the same value as the `target_name`,
+      # which includes the `.cmx` extension.
       output_name = "${target_name}.cmx"
     }
 

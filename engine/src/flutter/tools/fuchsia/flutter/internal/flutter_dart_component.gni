@@ -8,8 +8,8 @@ import("//flutter/tools/fuchsia/dart/dart.gni")
 import("//flutter/tools/fuchsia/dart/dart_package_config.gni")
 import("//flutter/tools/fuchsia/dart/kernel/dart_kernel.gni")
 import("//flutter/tools/fuchsia/dist/resource.gni")
-import("//flutter/tools/fuchsia/sdk/cmc.gni")
-import("//flutter/tools/fuchsia/sdk/component.gni")
+import("//flutter/tools/fuchsia/gn-sdk/cmc.gni")
+import("//flutter/tools/fuchsia/gn-sdk/component.gni")
 
 # Defines a component which will run in a flutter_runner or dart_runner
 #
@@ -71,27 +71,41 @@ template("flutter_dart_component") {
     _component_name = target_name
   }
 
-  # merge the runner cmx into this one which allows us to switch runners based
-  # on compilation modes
-  _merged_target_name = "${target_name}_merged.cmx"
+  # Flutter and Dart components need to run inside the runner which matches how
+  # they were compiled, for example, a JIT component must run in the JIT runner.
+  # We need to be able to dynamically convert the manifest files to include the
+  # runner requirements so that we can switch based on build modes.
+  _manifest_extension = get_path_info(invoker.manifest, "extension")
+  if (_manifest_extension == "cmx") {
+    # This is a v1 component, merge with the runtime_meta
+    _merged_target_name = "${target_name}_merged.cmx"
 
-  cmc_merge(_merged_target_name) {
-    forward_variables_from(invoker,
-                           [
-                             "testonly",
-                             "visibility",
-                           ])
-    sources = [
-      invoker.manifest,
-      rebase_path(build_cfg.runtime_meta, "."),
-    ]
+    cmc_merge(_merged_target_name) {
+      forward_variables_from(invoker,
+                             [
+                               "testonly",
+                               "visibility",
+                             ])
+      output_name = _merged_target_name
+      sources = [
+        invoker.manifest,
+        rebase_path(build_cfg.runtime_meta, "."),
+      ]
+    }
+
+    _merged_outputs = []
+    _merged_outputs += get_target_outputs(":$_merged_target_name")
+    _manifest = _merged_outputs[0]
+    _manifest_output_name = "meta/" + _component_name + ".cmx"
+
+    _component_deps += [ ":$_merged_target_name" ]
+  } else {
+    # This is a v2 component.
+    # The v2 runners have not been implemented yet so we just leave the manifest
+    # as is to avoid breaking the build.
+    _manifest = invoker.manifest
+    _manifest_output_name = "meta/" + _component_name + ".cm"
   }
-
-  _merged_outputs = []
-  _merged_outputs += get_target_outputs(":$_merged_target_name")
-  _merged_manifest = _merged_outputs[0]
-
-  _component_deps += [ ":$_merged_target_name" ]
 
   _dart_package_config_target_name = "${target_name}_dart_package"
   dart_package_config(_dart_package_config_target_name) {
@@ -139,6 +153,11 @@ template("flutter_dart_component") {
     # always generate a manifest for fuchsia builds. If this is an aot build
     # the kernel will ignore this variable.
     generate_manifest = true
+
+    # TODO(richkadel): verify the above statement about aot is true (AOT builds,
+    # using these new scripts derived from Fuchsia, have not been tested yet);
+    # because as of now, the Fuchsia package/component appears to require data
+    # from `_convert_kernel_manifest`.
 
     platform_name = build_cfg.platform_name
     product = build_cfg.is_product
@@ -220,6 +239,9 @@ template("flutter_dart_component") {
 
     # copy the snapshot as a resource
     _snapshot_resource_target_name = "${target_name}_snapshot_resource"
+
+    # TODO(richkadel): It looks like this is the _ONLY_ place resource() is used
+    # and maybe that logic should simply be embedded here, directly?
     resource(_snapshot_resource_target_name) {
       sources = [ _snapshot_path ]
       outputs = [ "data/${_component_name}/app_aot_snapshot.so" ]
@@ -231,14 +253,35 @@ template("flutter_dart_component") {
     ]
   }
 
-  fuchsia_component(target_name) {
+  fuchsia_component(_component_name) {
     forward_variables_from(invoker,
                            [
                              "testonly",
                              "visibility",
-                             "component_name",
                            ])
     deps = _component_deps
-    manifest = _merged_manifest
+    manifest = _manifest
+    manifest_output_name = _manifest_output_name
+
+    _convert_kernel_target_name =
+        "${_kernel_target_name}_convert_kernel_manifest"
+    _convert_kernel_manifest_file =
+        # TODO(richkadel): This is prefixed by "dartlang/", which is not found.
+        # Is the current toolchain set incorrectly somewhere?
+        string_replace(
+            "${target_gen_dir}/${_convert_kernel_target_name}_kernel_manifest.json",
+            "dartlang/",
+            "")
+
+    resources_in_json_files = [ rebase_path(_convert_kernel_manifest_file) ]
+  }
+
+  group(target_name) {
+    forward_variables_from(invoker,
+                           [
+                             "testonly",
+                             "visibility",
+                           ])
+    deps = [ ":" + _component_name ]
   }
 }

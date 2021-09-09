@@ -5,7 +5,6 @@
 import("//flutter/tools/fuchsia/dart/dart.gni")
 import("//flutter/tools/fuchsia/dart/dart_package_config.gni")
 import("//flutter/tools/fuchsia/dart/toolchain.gni")
-import("//flutter/tools/python/python3_action.gni")
 
 # Defines a Dart library
 #
@@ -248,7 +247,7 @@ if (current_toolchain == dart_toolchain) {
     # Also warn if nonexistent files are included in sources.
     if (!disable_source_verification) {
       source_verification_target_name = "${target_name}_source_verification"
-      python3_action(source_verification_target_name) {
+      action(source_verification_target_name) {
         script = "//flutter/tools/fuchsia/dart/verify_sources.py"
         output_file = "$target_gen_dir/$target_name.missing"
 
@@ -293,7 +292,7 @@ if (current_toolchain == dart_toolchain) {
     # analyzer, which recursively reads all sources.
     _all_deps_sources_target = "${target_name}.all_deps_sources"
     _all_deps_sources_file = "${target_gen_dir}/${target_name}.all_deps_sources"
-    python3_action(_all_deps_sources_target) {
+    action(_all_deps_sources_target) {
       forward_variables_from(invoker, [ "testonly" ])
 
       script = "//flutter/tools/fuchsia/dart/merge_deps_sources.py"
