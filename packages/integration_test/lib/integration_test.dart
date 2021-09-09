@@ -256,7 +256,7 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   /// The `streams` parameter limits the recorded timeline event streams to only
   /// the ones listed. By default, all streams are recorded.
   /// See `timeline_streams` in
-  /// [Dart-SDK/runtime/vm/timeline.cc](https://github.com/dart-lang/sdk/blob/master/runtime/vm/timeline.cc)
+  /// [Dart-SDK/runtime/vm/timeline.cc](https://github.com/dart-lang/sdk/blob/main/runtime/vm/timeline.cc)
   ///
   /// If [retainPriorEvents] is true, retains events recorded prior to calling
   /// [action]. Otherwise, prior events are cleared before calling [action]. By
