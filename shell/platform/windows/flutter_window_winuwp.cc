@@ -16,7 +16,7 @@ static constexpr double kControllerScrollMultiplier = 3;
 // touch. See https://github.com/flutter/flutter/issues/70201
 static constexpr int32_t kDefaultPointerDeviceId = 0;
 
-// Maps a Flutter cursor name to an CoreCursor.
+// Maps a Flutter cursor name to a CoreCursor.
 //
 // Returns the arrow cursor for unknown constants.
 //
