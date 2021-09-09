@@ -42,6 +42,7 @@ source_set("ui") {
     "painting/image_descriptor.h",
     "painting/image_encoding.cc",
     "painting/image_encoding.h",
+    "painting/image_encoding_impl.h",
     "painting/image_filter.cc",
     "painting/image_filter.h",
     "painting/image_generator.cc",
