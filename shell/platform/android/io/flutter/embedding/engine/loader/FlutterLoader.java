@@ -25,7 +25,7 @@ import io.flutter.view.VsyncWaiter;
 import java.io.File;
 import java.util.*;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 /** Finds Flutter resources in an application APK and also loads Flutter's native library. */
@@ -70,9 +70,22 @@ public class FlutterLoader {
     return instance;
   }
 
-  /** Creates a {@code FlutterLoader} that uses a default constructed {@link FlutterJNI}. */
+  /**
+   * Creates a {@code FlutterLoader} that uses a default constructed {@link FlutterJNI} and {@link
+   * ExecutorService}.
+   */
   public FlutterLoader() {
     this(FlutterInjector.instance().getFlutterJNIFactory().provideFlutterJNI());
+  }
+
+  /**
+   * Creates a {@code FlutterLoader} that uses a default constructed {@link ExecutorService}.
+   *
+   * @param flutterJNI The {@link FlutterJNI} instance to use for loading the libflutter.so C++
+   *     library, setting up the font manager, and calling into C++ initialization.
+   */
+  public FlutterLoader(@NonNull FlutterJNI flutterJNI) {
+    this(flutterJNI, FlutterInjector.instance().executorService());
   }
 
   /**
@@ -80,9 +93,11 @@ public class FlutterLoader {
    *
    * @param flutterJNI The {@link FlutterJNI} instance to use for loading the libflutter.so C++
    *     library, setting up the font manager, and calling into C++ initialization.
+   * @param executorService The {@link ExecutorService} to use when creating new threads.
    */
-  public FlutterLoader(@NonNull FlutterJNI flutterJNI) {
+  public FlutterLoader(@NonNull FlutterJNI flutterJNI, @NonNull ExecutorService executorService) {
     this.flutterJNI = flutterJNI;
+    this.executorService = executorService;
   }
 
   private boolean initialized = false;
@@ -90,6 +105,8 @@ public class FlutterLoader {
   private long initStartTimestampMillis;
   private FlutterApplicationInfo flutterApplicationInfo;
   private FlutterJNI flutterJNI;
+  private ExecutorService executorService;
+  private WindowManager windowManager;
 
   private static class InitResult {
     final String appStoragePath;
@@ -155,14 +172,7 @@ public class FlutterLoader {
 
             // Prefetch the default font manager as soon as possible on a background thread.
             // It helps to reduce time cost of engine setup that blocks the platform thread.
-            Executors.newSingleThreadExecutor()
-                .execute(
-                    new Runnable() {
-                      @Override
-                      public void run() {
-                        flutterJNI.prefetchDefaultFontManager();
-                      }
-                    });
+            executorService.execute(() -> flutterJNI.prefetchDefaultFontManager());
 
             if (resourceExtractor != null) {
               resourceExtractor.waitForCompletion();
@@ -174,7 +184,7 @@ public class FlutterLoader {
                 PathUtils.getDataDirectory(appContext));
           }
         };
-    initResultFuture = Executors.newSingleThreadExecutor().submit(initTask);
+    initResultFuture = executorService.submit(initTask);
   }
 
   /**
@@ -307,30 +317,22 @@ public class FlutterLoader {
       callbackHandler.post(callback);
       return;
     }
-    Executors.newSingleThreadExecutor()
-        .execute(
-            new Runnable() {
-              @Override
-              public void run() {
-                InitResult result;
-                try {
-                  result = initResultFuture.get();
-                } catch (Exception e) {
-                  Log.e(TAG, "Flutter initialization failed.", e);
-                  throw new RuntimeException(e);
-                }
-                new Handler(Looper.getMainLooper())
-                    .post(
-                        new Runnable() {
-                          @Override
-                          public void run() {
-                            ensureInitializationComplete(
-                                applicationContext.getApplicationContext(), args);
-                            callbackHandler.post(callback);
-                          }
-                        });
-              }
-            });
+    executorService.execute(
+        () -> {
+          InitResult result;
+          try {
+            result = initResultFuture.get();
+          } catch (Exception e) {
+            Log.e(TAG, "Flutter initialization failed.", e);
+            throw new RuntimeException(e);
+          }
+          new Handler(Looper.getMainLooper())
+              .post(
+                  () -> {
+                    ensureInitializationComplete(applicationContext.getApplicationContext(), args);
+                    callbackHandler.post(callback);
+                  });
+        });
   }
 
   /** Returns whether the FlutterLoader has finished loading the native library. */
