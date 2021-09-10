@@ -210,7 +210,7 @@ class FlutterView {
 /// This is a wrapper class for the `@Isolate` RPC object.
 ///
 /// See:
-/// https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#isolate
+/// https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/service.md#isolate
 ///
 /// This class contains information about the Isolate like its name and ID, as
 /// well as a reference to the parent DartVM on which it is running.

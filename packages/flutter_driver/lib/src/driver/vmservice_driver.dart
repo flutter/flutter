@@ -580,7 +580,7 @@ Future<vms.VmService> _waitAndConnect(String url, Map<String, dynamic>? headers)
 const Duration _kPauseBetweenReconnectAttempts = Duration(seconds: 1);
 
 // See `timeline_streams` in
-// https://github.com/dart-lang/sdk/blob/master/runtime/vm/timeline.cc
+// https://github.com/dart-lang/sdk/blob/main/runtime/vm/timeline.cc
 List<String> _timelineStreamsToString(List<TimelineStream> streams) {
   return streams.map<String>((TimelineStream stream) {
     switch (stream) {
