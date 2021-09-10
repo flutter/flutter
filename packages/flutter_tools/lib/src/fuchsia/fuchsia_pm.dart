@@ -104,6 +104,8 @@ class FuchsiaPM {
       repoPath,
       '-l',
       '$host:$port',
+      '-c',
+      '2',
     ];
     final Process process = await globals.processUtils.start(command);
     process.stdout
@@ -165,14 +167,15 @@ class FuchsiaPM {
 ///   server.stop();
 /// }
 class FuchsiaPackageServer {
-  factory FuchsiaPackageServer(String repo, String name, String host, int port) {
+  factory FuchsiaPackageServer(
+      String repo, String name, String host, int port) {
     return FuchsiaPackageServer._(repo, name, host, port);
   }
 
   FuchsiaPackageServer._(this._repo, this.name, this._host, this._port);
 
   static const String deviceHost = 'fuchsia.com';
-  static const String toolHost = 'flutter_tool';
+  static const String toolHost = 'flutter-tool';
 
   final String _repo;
   final String _host;

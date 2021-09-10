@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
@@ -22,7 +24,7 @@ import 'shortcuts.dart';
 /// See also:
 ///
 ///   * [RawAutocomplete.optionsBuilder], which is of this type.
-typedef AutocompleteOptionsBuilder<T extends Object> = Iterable<T> Function(TextEditingValue textEditingValue);
+typedef AutocompleteOptionsBuilder<T extends Object> = FutureOr<Iterable<T>> Function(TextEditingValue textEditingValue);
 
 /// The type of the callback used by the [RawAutocomplete] widget to indicate
 /// that the user has selected an option.
@@ -293,8 +295,8 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   }
 
   // Called when _textEditingController changes.
-  void _onChangedField() {
-    final Iterable<T> options = widget.optionsBuilder(
+  Future<void> _onChangedField() async {
+    final Iterable<T> options = await widget.optionsBuilder(
       _textEditingController.value,
     );
     _options = options;

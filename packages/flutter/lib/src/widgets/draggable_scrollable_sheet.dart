@@ -467,6 +467,13 @@ class _DraggableScrollableSheetScrollPosition
   }
 
   @override
+  void dispose() {
+    // Stop the animation before dispose.
+    _ballisticCancelCallback?.call();
+    super.dispose();
+  }
+
+  @override
   void goBallistic(double velocity) {
     if (velocity == 0.0 ||
        (velocity < 0.0 && listShouldScroll) ||
