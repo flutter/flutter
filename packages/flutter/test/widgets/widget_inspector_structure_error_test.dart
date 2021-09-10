@@ -20,6 +20,12 @@ class StructureErrorTestWidgetInspectorService extends TestWidgetInspectorServic
     test('ext.flutter.inspector.structuredErrors - custom FlutterError.onError', () async {
       // Regression test for https://github.com/flutter/flutter/issues/41540
 
+      // Ensures that
+      //  * structured errors are enabled by default
+      //  * FlutterError.onError without FlutterError.presentError doesn't present structured errors
+      //  * FlutterError.onError with FlutterError.presentError does present structured errors
+      //  * disabling structured errors sets the default FlutterError.presentError
+
       final FlutterExceptionHandler? oldHandler = FlutterError.onError;
 
       try {
@@ -62,6 +68,19 @@ class StructureErrorTestWidgetInspectorService extends TestWidgetInspectorServic
         } else {
           expect(service.getEventsDispatched('Flutter.Error'), isEmpty);
         }
+
+        // Verify disabling structured errors sets the default FlutterError.presentError
+        expect(
+          await service.testBoolExtension('structuredErrors', <String, String>{'enabled': 'true'}),
+          equals('true'),
+        );
+        expect(FlutterError.presentError, isNot(equals(oldHandler)));
+
+        expect(
+          await service.testBoolExtension('structuredErrors', <String, String>{'enabled': 'false'}),
+          equals('false'),
+        );
+        expect(FlutterError.presentError, equals(oldHandler));
       } finally {
         FlutterError.onError = oldHandler;
       }
