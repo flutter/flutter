@@ -27,13 +27,13 @@ Future<void> main() async {
         final String integrationTestPackage = path.join(flutterRoot, 'packages', 'integration_test');
         final String iosintegrationTestPodspec = path.join(integrationTestPackage, 'ios', 'integration_test.podspec');
         await exec(
-          '/opt/s/w/ir/x/w/gems/bin/bundle',
+          '/opt/s/w/ir/x/w/gems/bin/bundler',
           <String>[
             '--version',
           ],
         );
         await exec(
-          '/opt/s/w/ir/x/w/gems/bin/bundle',
+          '/opt/s/w/ir/x/w/gems/bin/bundler',
           <String>[
             'exec',
             'pod',
@@ -52,7 +52,7 @@ Future<void> main() async {
 
         final String macosintegrationTestPodspec = path.join(integrationTestPackage, 'integration_test_macos', 'macos', 'integration_test_macos.podspec');
         await exec(
-          '/opt/s/w/ir/x/w/gems/bin/bundle',
+          '/opt/s/w/ir/x/w/gems/bin/bundler',
           <String>[
             'exec',
             'pod',
