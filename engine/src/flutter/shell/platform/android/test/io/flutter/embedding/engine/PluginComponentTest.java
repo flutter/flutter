@@ -10,12 +10,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import androidx.annotation.NonNull;
-import io.flutter.FlutterInjector;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.loader.FlutterLoader;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -27,17 +25,10 @@ import org.robolectric.annotation.Config;
 public class PluginComponentTest {
   boolean jniAttached;
 
-  @Before
-  public void setUp() {
-    FlutterInjector.reset();
-  }
-
   @Test
   public void pluginsCanAccessFlutterAssetPaths() {
     // Setup test.
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
-    FlutterInjector.setInstance(
-        new FlutterInjector.Builder().setFlutterLoader(new FlutterLoader(mockFlutterJNI)).build());
     FlutterJNI flutterJNI = mock(FlutterJNI.class);
     jniAttached = false;
     when(flutterJNI.isAttached()).thenAnswer(invocation -> jniAttached);
@@ -63,7 +54,6 @@ public class PluginComponentTest {
     assertEquals(
         "flutter_assets/packages/fakepackage/some/path/fake_asset.jpg",
         plugin.getAssetPathBasedOnSubpathAndPackage());
-    FlutterInjector.reset();
   }
 
   private static class PluginThatAccessesAssets implements FlutterPlugin {
