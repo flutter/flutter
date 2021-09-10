@@ -91,12 +91,12 @@ abstract class TextEditingDelta {
   /// Creates an instance of this class from a JSON object by inferring the
   /// type of delta based on values sent from the engine.
   factory TextEditingDelta.fromJSON(Map<String, dynamic> encoded) {
-    // An insertion delta is one where [deltaRange] is collapsed.
+    // An insertion delta is one where replacement destination is collapsed.
     //
-    // A deletion delta is one where the [deltaText] is empty.
+    // A deletion delta is one where the replacement source is empty.
     //
-    // An insertion/deletion can still occur when the [deltaRange] is not
-    // collapsed, or the [deltaText] is not empty.
+    // An insertion/deletion can still occur when the replacement destination is not
+    // collapsed, or the replacement source is not empty.
     //
     // On native platforms when composing text, the entire composing region is
     // replaced on input, rather than reporting character by character
