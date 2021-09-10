@@ -26,8 +26,7 @@ String _replace(String originalText, String replacementText, int start, int end)
   return newText;
 }
 
-/// A way to disambiguate a [TextEditingDelta] when a delta generated for an insertion
-/// and a deletion both contain collapsed [TextEditingDelta.deltaRange]'s.
+/// A way to disambiguate a [TextEditingDelta].
 enum TextEditingDeltaType {
   /// {@template flutter.services.TextEditingDeltaInsertion}
   /// The delta is inserting a single/or contigous sequence of characters.
