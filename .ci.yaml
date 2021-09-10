@@ -3162,7 +3162,7 @@ targets:
       task_name: flutter_gallery__transition_perf_e2e_ios32
     scheduler: luci
 
-  - name: Mac_ios32 native_ui_tests_ios32
+  - name: Mac_ios32 native_ui_tests_ios
     recipe: devicelab/devicelab_drone
     bringup: true
     presubmit: false
@@ -3170,7 +3170,18 @@ targets:
     properties:
       tags: >
         ["devicelab","ios32","mac"]
-      task_name: native_ui_tests_ios32
+      task_name: native_ui_tests_ios
+    scheduler: luci
+
+  - name: Mac_ios native_ui_tests_ios
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","ios","mac"]
+      task_name: native_ui_tests_ios
     scheduler: luci
 
   - name: Windows build_aar_module_test
