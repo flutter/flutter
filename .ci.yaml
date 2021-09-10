@@ -349,6 +349,7 @@ targets:
     scheduler: luci
 
   - name: Linux flutter_plugins
+    bringup: true # https://github.com/flutter/flutter/issues/89805
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
