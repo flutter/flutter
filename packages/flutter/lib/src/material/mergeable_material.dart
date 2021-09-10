@@ -695,12 +695,14 @@ class _RenderMergeableMaterialListBody extends RenderListBody {
 
   void _paintShadows(Canvas canvas, Rect rect) {
     // TODO(ianh): We should interpolate the border radii of the shadows the same way we do those of the visible Material slices.
-    canvas.drawShadow(
-      Path()..addRRect(kMaterialEdges[MaterialType.card]!.toRRect(rect)),
-      Colors.black,
-      elevation,
-      true, // occluding object is not (necessarily) opaque
-    );
+    if (elevation != 0) {
+      canvas.drawShadow(
+        Path()..addRRect(kMaterialEdges[MaterialType.card]!.toRRect(rect)),
+        Colors.black,
+        elevation,
+        true, // occluding object is not (necessarily) opaque
+      );
+    }
   }
 
   @override
