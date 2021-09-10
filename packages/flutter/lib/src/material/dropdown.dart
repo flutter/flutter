@@ -175,6 +175,7 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
     }
     Widget child = Container(
       padding: widget.padding,
+      height: widget.route.itemHeight,
       child: widget.route.items[widget.itemIndex],
     );
     final BorderRadius itemBorderRadius;
@@ -832,6 +833,7 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 ///
 /// See also:
 ///
+///  * [DropdownButtonFormField], which integrates with the [Form] widget.
 ///  * [DropdownMenuItem], the class used to represent the [items].
 ///  * [DropdownButtonHideUnderline], which prevents its descendant dropdown buttons
 ///    from displaying their underlines.
@@ -1485,7 +1487,20 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   }
 }
 
-/// A convenience widget that makes a [DropdownButton] into a [FormField].
+/// A [FormField] that contains a [DropdownButton].
+///
+/// This is a convenience widget that wraps a [DropdownButton] widget in a
+/// [FormField].
+///
+/// A [Form] ancestor is not required. The [Form] simply makes it easier to
+/// save, reset, or validate multiple fields at once. To use without a [Form],
+/// pass a [GlobalKey] to the constructor and use [GlobalKey.currentState] to
+/// save or reset the form field.
+///
+/// See also:
+///
+///  * [DropdownButton], which is the underlying text field without the [Form]
+///    integration.
 class DropdownButtonFormField<T> extends FormField<T> {
   /// Creates a [DropdownButton] widget that is a [FormField], wrapped in an
   /// [InputDecorator].

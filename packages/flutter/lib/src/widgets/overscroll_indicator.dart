@@ -708,6 +708,28 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
     return false;
   }
 
+  AlignmentDirectional _getAlignmentForAxisDirection(double overscroll) {
+    // Accounts for reversed scrollables by checking the AxisDirection
+    switch (widget.axisDirection) {
+      case AxisDirection.up:
+        return overscroll > 0
+            ? AlignmentDirectional.topCenter
+            : AlignmentDirectional.bottomCenter;
+      case AxisDirection.right:
+        return overscroll > 0
+            ? AlignmentDirectional.centerEnd
+            : AlignmentDirectional.centerStart;
+      case AxisDirection.down:
+        return overscroll > 0
+            ? AlignmentDirectional.bottomCenter
+            : AlignmentDirectional.topCenter;
+      case AxisDirection.left:
+        return overscroll > 0
+            ? AlignmentDirectional.centerStart
+            : AlignmentDirectional.centerEnd;
+    }
+  }
+
   @override
   void dispose() {
     _stretchController.dispose();
@@ -724,22 +746,19 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
           final double stretch = _stretchController.value;
           double x = 1.0;
           double y = 1.0;
-          final AlignmentDirectional alignment;
 
           switch (widget.axis) {
             case Axis.horizontal:
               x += stretch;
-              alignment = (_lastOverscrollNotification?.overscroll ?? 0) > 0
-                  ? AlignmentDirectional.centerEnd
-                  : AlignmentDirectional.centerStart;
               break;
             case Axis.vertical:
               y += stretch;
-              alignment = (_lastOverscrollNotification?.overscroll ?? 0) > 0
-                  ? AlignmentDirectional.bottomCenter
-                  : AlignmentDirectional.topCenter;
               break;
           }
+
+          final AlignmentDirectional alignment = _getAlignmentForAxisDirection(
+            _lastOverscrollNotification?.overscroll ?? 0.0
+          );
 
           return Transform(
             alignment: alignment,

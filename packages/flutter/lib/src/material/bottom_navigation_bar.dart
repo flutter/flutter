@@ -357,7 +357,7 @@ class BottomNavigationBar extends StatefulWidget {
   ///    bottom navigation bar defaults for an entire application.
   ///  * [BottomNavigationBarTheme] - which can be used to specify
   ///    bottom navigation bar defaults for a widget subtree.
-  ///  * [MediaQuery.of] - which can be used to determing the current
+  ///  * [MediaQuery.of] - which can be used to determine the current
   ///    orientation.
   final BottomNavigationBarLandscapeLayout? landscapeLayout;
 
@@ -555,7 +555,7 @@ class _BottomNavigationTile extends StatelessWidget {
 }
 
 
-// If the orientaion is landscape and layout is
+// If the orientation is landscape and layout is
 // BottomNavigationBarLandscapeLayout.linear then return a
 // icon-space-label row, where space is 8 pixels. Otherwise return a
 // icon-label column.

@@ -148,7 +148,7 @@ Future<io.WebSocket> _defaultOpenChannel(String url, {
   while (socket == null) {
     attempts += 1;
     try {
-      socket = await constructor(url, compression: compression);
+      socket = await constructor(url, compression: compression, logger: logger);
     } on io.WebSocketException catch (e) {
       await handleError(e);
     } on io.SocketException catch (e) {
@@ -758,7 +758,7 @@ class FlutterVmService {
         : <String, String>{},
     );
     if (result != null && result['value'] is String) {
-      return (result['value'] as String) == 'Brightness.light'
+      return result['value'] == 'Brightness.light'
         ? Brightness.light
         : Brightness.dark;
     }
@@ -821,8 +821,9 @@ class FlutterVmService {
       }
       final List<Object> rawViews = response.json['views'] as List<Object>;
       final List<FlutterView> views = <FlutterView>[
-        for (final Object rawView in rawViews)
-          FlutterView.parse(rawView as Map<String, Object>)
+        if (rawViews != null)
+          for (final Object rawView in rawViews)
+            FlutterView.parse(rawView as Map<String, Object>)
       ];
       if (views.isNotEmpty || returnEarly) {
         return views;
@@ -853,7 +854,7 @@ class FlutterVmService {
     isolateEvents = service.onIsolateEvent.listen((vm_service.Event event) {
       if (event.kind == vm_service.EventKind.kServiceExtensionAdded
           && event.extensionRPC == extensionName) {
-        isolateEvents.cancel();
+        isolateEvents?.cancel();
         extensionAdded.complete(event.isolate);
       }
     });
@@ -862,7 +863,7 @@ class FlutterVmService {
       final List<vm_service.IsolateRef> refs = await _getIsolateRefs();
       for (final vm_service.IsolateRef ref in refs) {
         final vm_service.Isolate isolate = await getIsolateOrNull(ref.id);
-        if (isolate != null && isolate.extensionRPCs.contains(extensionName)) {
+        if (isolate != null && isolate.extensionRPCs?.contains(extensionName) == true) {
           return ref;
         }
       }
@@ -885,8 +886,9 @@ class FlutterVmService {
 
     final List<vm_service.IsolateRef> refs = <vm_service.IsolateRef>[];
     for (final FlutterView flutterView in flutterViews) {
-      if (flutterView.uiIsolate != null) {
-        refs.add(flutterView.uiIsolate);
+      final vm_service.IsolateRef uiIsolate = flutterView.uiIsolate;
+      if (uiIsolate != null) {
+        refs.add(uiIsolate);
       }
     }
     return refs;
@@ -894,7 +896,7 @@ class FlutterVmService {
 
   /// Attempt to retrieve the isolate with id [isolateId], or `null` if it has
   /// been collected.
-  Future<vm_service.Isolate> getIsolateOrNull(String isolateId) {
+  Future<vm_service.Isolate> getIsolateOrNull(String isolateId) async {
     return service.getIsolate(isolateId)
       .catchError((dynamic error, StackTrace stackTrace) {
         return null;

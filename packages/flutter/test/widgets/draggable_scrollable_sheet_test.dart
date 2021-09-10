@@ -344,5 +344,23 @@ void main() {
       ];
       expect(notificationTypes, types);
     });
+
+    testWidgets('Do not crash when remove the tree during animation.', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/89214
+      await tester.pumpWidget(_boilerplate(
+        null,
+        onScrollNotification: (ScrollNotification notification) {
+          return false;
+        },
+      ));
+
+      await tester.flingFrom(const Offset(0, 325), const Offset(0, 325), 200);
+
+      // The animation is running.
+
+      await tester.pumpWidget(const SizedBox.shrink());
+
+      expect(tester.takeException(), isNull);
+    });
   }
 }

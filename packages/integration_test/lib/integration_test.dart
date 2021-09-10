@@ -282,8 +282,8 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
     );
   }
 
-  /// This is a convenience wrap of [traceTimeline] and send the result back to
-  /// the host for the [flutter_driver] style tests.
+  /// This is a convenience method that calls [traceTimeline] and sends the
+  /// result back to the host for the [flutter_driver] style tests.
   ///
   /// This records the timeline during `action` and adds the result to
   /// [reportData] with `reportKey`. The [reportData] contains extra information
@@ -293,7 +293,30 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   /// to `build/integration_response_data.json` with the key `timeline`.
   ///
   /// For tests with multiple calls of this method, `reportKey` needs to be a
-  /// unique key, otherwise the later result will override earlier one.
+  /// unique key, otherwise the later result will override earlier one. Tests
+  /// that call this multiple times must also provide a custom
+  /// [ResponseDataCallback] to decide where and how to write the output
+  /// timelines. For example,
+  ///
+  /// ```dart
+  /// import 'package:integration_test/integration_test_driver.dart';
+  ///
+  /// Future<void> main() {
+  ///   return integrationDriver(
+  ///     responseDataCallback: (data) async {
+  ///       if (data != null) {
+  ///         for (var entry in data.entries) {
+  ///           print('Writing ${entry.key} to the disk.');
+  ///           await writeResponseData(
+  ///             entry.value as Map<String, dynamic>,
+  ///             testOutputFilename: entry.key,
+  ///           );
+  ///         }
+  ///       }
+  ///     },
+  ///   );
+  /// }
+  /// ```
   ///
   /// The `streams` and `retainPriorEvents` parameters are passed as-is to
   /// [traceTimeline].
