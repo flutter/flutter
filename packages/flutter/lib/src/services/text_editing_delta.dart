@@ -79,18 +79,13 @@ abstract class TextEditingDelta {
   /// Creates a delta for a given change to the editing state.
   ///
   /// {@template flutter.services.TextEditingDelta}
-  /// The [oldText], [deltaText], [deltaRange], [selection], and [composing]
-  /// arguments must not be null.
+  /// The [oldText], [selection], and [composing] arguments must not be null.
   /// {@endtemplate}
   const TextEditingDelta({
     required this.oldText,
-    this.deltaText = '',
-    this.deltaRange = TextRange.empty,
     required this.selection,
     required this.composing,
   }) : assert(oldText != null),
-       assert(deltaText != null),
-       assert(deltaRange != null),
        assert(selection != null),
        assert(composing != null);
 
@@ -212,8 +207,7 @@ abstract class TextEditingDelta {
 
       return TextEditingDeltaDeletion(
         oldText: oldText,
-        deltaText: '',
-        deltaRange: TextRange(
+        deletedRange: TextRange(
           start: actualStart,
           end: replacementDestinationEnd,
         ),
@@ -224,19 +218,16 @@ abstract class TextEditingDelta {
         !isOriginalComposingRegionTextChanged) {  // Insertion.
       return TextEditingDeltaInsertion(
         oldText: oldText,
-        deltaText: replacementSource.substring(replacementDestinationEnd - replacementDestinationStart, (replacementDestinationEnd - replacementDestinationStart) + (replacementSource.length - (replacementDestinationEnd - replacementDestinationStart))),
-        deltaRange: TextRange(
-          start: replacementDestinationEnd,
-          end: replacementDestinationEnd,
-        ),
+        textInserted: replacementSource.substring(replacementDestinationEnd - replacementDestinationStart, (replacementDestinationEnd - replacementDestinationStart) + (replacementSource.length - (replacementDestinationEnd - replacementDestinationStart))),
+        insertionOffset: replacementDestinationEnd,
         selection: newSelection,
         composing: newComposing,
       );
     } else if (isReplaced) {  // Replacement.
       return TextEditingDeltaReplacement(
         oldText: oldText,
-        deltaText: replacementSource,
-        deltaRange: TextRange(
+        replacementText: replacementSource,
+        replacedRange: TextRange(
           start: replacementDestinationStart,
           end: replacementDestinationEnd,
         ),
@@ -254,40 +245,6 @@ abstract class TextEditingDelta {
 
   /// The old text state before the delta has occurred.
   final String oldText;
-
-  /// The value represents the text that is being inserted/deleted by this delta.
-  ///
-  /// This value will slightly vary based on the [TextEditingDeltaType]:
-  ///
-  ///  * For a [TextEditingDeltaType.insertion] this will be the character/s being
-  /// inserted.
-  ///
-  ///  * For a [TextEditingDeltaType.deletion] this will be an empty string.
-  ///
-  ///  * For a [TextEditingDeltaType.replacement] this will be the text that is
-  /// replacing the [TextEditingDelta.deltaRange].
-  ///
-  ///  * For a [TextEditingDeltaType.nonTextUpdate] this will be an empty string.
-  final String deltaText;
-
-  /// This value can either represent a range of text that the delta is changing
-  /// or if is a collapsed range then it represents the point where this delta
-  /// began.
-  ///
-  /// This value will slightly vary based on the [TextEditingDeltaType]:
-  ///
-  ///  * For a [TextEditingDeltaType.insertion] this will be a collapsed range
-  /// representing the cursor position where the insertion began.
-  ///
-  ///  * For a [TextEditingDeltaType.deletion] this will be the range of text
-  /// that was deleted.
-  ///
-  ///  * For a [TextEditingDeltaType.replacement] this will be the range of
-  /// characters that are being replaced.
-  ///
-  ///  * For a [TextEditingDeltaType.nonTextUpdate] this will be a collapsed range
-  /// of (-1,-1).
-  final TextRange deltaRange;
 
   /// {@template flutter.services.TextEditingDelta.deltaType}
   /// The type of delta that has occured.
@@ -319,17 +276,21 @@ class TextEditingDeltaInsertion extends TextEditingDelta {
   /// {@macro flutter.services.TextEditingDelta}
   const TextEditingDeltaInsertion({
     required String oldText,
-    required String deltaText,
-    required TextRange deltaRange,
+    required this.textInserted,
+    required this.insertionOffset,
     required TextSelection selection,
     required TextRange composing,
   }) : super(
       oldText: oldText,
-      deltaText: deltaText,
-      deltaRange: deltaRange,
       selection: selection,
       composing: composing,
   );
+
+  /// The text that is being inserted into [oldText].
+  final String textInserted;
+
+  /// The offset in the [oldText] where the insertion begins.
+  final int insertionOffset;
 
   /// {@macro flutter.services.TextEditingDelta.deltaType}
   @override
@@ -342,7 +303,7 @@ class TextEditingDeltaInsertion extends TextEditingDelta {
     // policy and apply the delta to the oldText. This is due to the asyncronous
     // nature of the connection between the framework and platform text input plugins.
     String newText = oldText;
-    newText = _replace(newText, deltaText, deltaRange.start, deltaRange.end);
+    newText = _replace(newText, textInserted, insertionOffset, insertionOffset);
     return value.copyWith(text: newText, selection: selection, composing: composing);
   }
 }
@@ -355,17 +316,20 @@ class TextEditingDeltaDeletion extends TextEditingDelta {
   /// {@macro flutter.services.TextEditingDelta}
   const TextEditingDeltaDeletion({
     required String oldText,
-    required String deltaText,
-    required TextRange deltaRange,
+    required this.deletedRange,
     required TextSelection selection,
     required TextRange composing,
   }) : super(
     oldText: oldText,
-    deltaText: deltaText,
-    deltaRange: deltaRange,
     selection: selection,
     composing: composing,
   );
+
+  /// The range in [oldText] that is being deleted.
+  final TextRange deletedRange;
+
+  /// The text from [oldText] that is being deleted.
+  String get textDeleted => oldText.substring(deletedRange.start, deletedRange.end);
 
   /// {@macro flutter.services.TextEditingDelta.deltaType}
   @override
@@ -378,7 +342,7 @@ class TextEditingDeltaDeletion extends TextEditingDelta {
     // policy and apply the delta to the oldText. This is due to the asyncronous
     // nature of the connection between the framework and platform text input plugins.
     String newText = oldText;
-    newText = _replace(newText, deltaText, deltaRange.start, deltaRange.end);
+    newText = _replace(newText, '', deletedRange.start, deletedRange.end);
     return value.copyWith(text: newText, selection: selection, composing: composing);
   }
 }
@@ -391,17 +355,24 @@ class TextEditingDeltaReplacement extends TextEditingDelta {
   /// {@macro flutter.services.TextEditingDelta}
   const TextEditingDeltaReplacement({
     required String oldText,
-    required String deltaText,
-    required TextRange deltaRange,
+    required this.replacementText,
+    required this.replacedRange,
     required TextSelection selection,
     required TextRange composing,
   }) : super(
     oldText: oldText,
-    deltaText: deltaText,
-    deltaRange: deltaRange,
     selection: selection,
     composing: composing,
   );
+
+  /// The new text that is replacing [replacedRange] in [oldText].
+  final String replacementText;
+
+  /// The range in [oldText] that is being replaced.
+  final TextRange replacedRange;
+
+  /// The original text that is being replaced in [oldText].
+  String get textReplaced => oldText.substring(replacedRange.start, replacedRange.end);
 
   /// {@macro flutter.services.TextEditingDelta.deltaType}
   @override
@@ -414,7 +385,7 @@ class TextEditingDeltaReplacement extends TextEditingDelta {
     // policy and apply the delta to the oldText. This is due to the asyncronous
     // nature of the connection between the framework and platform text input plugins.
     String newText = oldText;
-    newText = _replace(newText, deltaText, deltaRange.start, deltaRange.end);
+    newText = _replace(newText, replacementText, replacedRange.start, replacedRange.end);
     return value.copyWith(text: newText, selection: selection, composing: composing);
   }
 }

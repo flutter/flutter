@@ -21,15 +21,15 @@ void main() {
           ' "selectionIsDirectional": false,'
           ' "composingBase": -1,'
           ' "composingExtent": -1}';
-      final TextEditingDelta delta = TextEditingDelta.fromJSON(jsonDecode(jsonInsertionDelta) as Map<String, dynamic>);
+      final TextEditingDeltaInsertion delta = TextEditingDelta.fromJSON(jsonDecode(jsonInsertionDelta) as Map<String, dynamic>) as TextEditingDeltaInsertion;
       const TextRange expectedComposing = TextRange.empty;
-      const TextRange expectedDeltaRange = TextRange.collapsed(0);
+      final int expectedInsertionOffset = 0;
       const TextSelection expectedSelection = TextSelection.collapsed(offset: 17);
 
       expect(delta.oldText, '');
-      expect(delta.deltaText, 'let there be text');
+      expect(delta.textInserted, 'let there be text');
       expect(delta.deltaType, TextEditingDeltaType.insertion);
-      expect(delta.deltaRange, expectedDeltaRange);
+      expect(delta.insertionOffset, expectedInsertionOffset);
       expect(delta.selection, expectedSelection);
       expect(delta.composing, expectedComposing);
     });
@@ -47,15 +47,15 @@ void main() {
           ' "composingBase": 6,'
           ' "composingExtent": 11}';
 
-      final TextEditingDelta delta = TextEditingDelta.fromJSON(jsonDecode(jsonInsertionDelta) as Map<String, dynamic>);
+      final TextEditingDeltaInsertion delta = TextEditingDelta.fromJSON(jsonDecode(jsonInsertionDelta) as Map<String, dynamic>) as TextEditingDeltaInsertion;
       const TextRange expectedComposing = TextRange(start: 6, end: 11);
-      const TextRange expectedDeltaRange = TextRange.collapsed(10);
+      final int expectedInsertionOffset = 10;
       const TextSelection expectedSelection = TextSelection.collapsed(offset: 11);
 
       expect(delta.oldText, 'hello worl');
-      expect(delta.deltaText, 'd');
+      expect(delta.textInserted, 'd');
       expect(delta.deltaType, TextEditingDeltaType.insertion);
-      expect(delta.deltaRange, expectedDeltaRange);
+      expect(delta.insertionOffset, expectedInsertionOffset);
       expect(delta.selection, expectedSelection);
       expect(delta.composing, expectedComposing);
     });
@@ -75,15 +75,15 @@ void main() {
           ' "composingBase": -1,'
           ' "composingExtent": -1}';
 
-      final TextEditingDelta delta = TextEditingDelta.fromJSON(jsonDecode(jsonDeletionDelta) as Map<String, dynamic>);
+      final TextEditingDeltaDeletion delta = TextEditingDelta.fromJSON(jsonDecode(jsonDeletionDelta) as Map<String, dynamic>) as TextEditingDeltaDeletion;
       const TextRange expectedComposing = TextRange.empty;
-      const TextRange expectedDeltaRange = TextRange(start: 1, end: 2);
+      const TextRange expectedDeletedRange = TextRange(start: 1, end: 2);
       const TextSelection expectedSelection = TextSelection.collapsed(offset: 1);
 
       expect(delta.oldText, 'let there be text.');
-      expect(delta.deltaText, '');
+      expect(delta.textDeleted, 'e');
       expect(delta.deltaType, TextEditingDeltaType.deletion);
-      expect(delta.deltaRange, expectedDeltaRange);
+      expect(delta.deletedRange, expectedDeletedRange);
       expect(delta.selection, expectedSelection);
       expect(delta.composing, expectedComposing);
     });
@@ -101,15 +101,15 @@ void main() {
           ' "composingBase": 6,'
           ' "composingExtent": 10}';
 
-      final TextEditingDelta delta = TextEditingDelta.fromJSON(jsonDecode(jsonDeletionDelta) as Map<String, dynamic>);
+      final TextEditingDeltaDeletion delta = TextEditingDelta.fromJSON(jsonDecode(jsonDeletionDelta) as Map<String, dynamic>) as TextEditingDeltaDeletion;
       const TextRange expectedComposing = TextRange(start: 6, end: 10);
-      const TextRange expectedDeltaRange = TextRange(start: 10, end: 11);
+      const TextRange expectedDeletedRange = TextRange(start: 10, end: 11);
       const TextSelection expectedSelection = TextSelection.collapsed(offset: 10);
 
       expect(delta.oldText, 'hello world');
-      expect(delta.deltaText, '');
+      expect(delta.textDeleted, 'd');
       expect(delta.deltaType, TextEditingDeltaType.deletion);
-      expect(delta.deltaRange, expectedDeltaRange);
+      expect(delta.deletedRange, expectedDeletedRange);
       expect(delta.selection, expectedSelection);
       expect(delta.composing, expectedComposing);
     });
@@ -129,15 +129,16 @@ void main() {
           ' "composingBase": 6,'
           ' "composingExtent": 13}';
 
-      final TextEditingDelta delta = TextEditingDelta.fromJSON(jsonDecode(jsonReplacementDelta) as Map<String, dynamic>);
+      final TextEditingDeltaReplacement delta = TextEditingDelta.fromJSON(jsonDecode(jsonReplacementDelta) as Map<String, dynamic>) as TextEditingDeltaReplacement;
       const TextRange expectedComposing = TextRange(start: 6, end: 13);
-      const TextRange expectedDeltaRange = TextRange(start: 6, end: 11);
+      const TextRange expectedReplacedRange = TextRange(start: 6, end: 11);
       const TextSelection expectedSelection = TextSelection.collapsed(offset: 13);
 
       expect(delta.oldText, 'hello worfi');
-      expect(delta.deltaText, 'working');
+      expect(delta.textReplaced, 'worfi');
+      expect(delta.replacementText, 'working');
       expect(delta.deltaType, TextEditingDeltaType.replacement);
-      expect(delta.deltaRange, expectedDeltaRange);
+      expect(delta.replacedRange, expectedReplacedRange);
       expect(delta.selection, expectedSelection);
       expect(delta.composing, expectedComposing);
     });
@@ -155,15 +156,16 @@ void main() {
           ' "composingBase": 6,'
           ' "composingExtent": 7}';
 
-      final TextEditingDelta delta = TextEditingDelta.fromJSON(jsonDecode(jsonReplacementDelta) as Map<String, dynamic>);
+      final TextEditingDeltaReplacement delta = TextEditingDelta.fromJSON(jsonDecode(jsonReplacementDelta) as Map<String, dynamic>) as TextEditingDeltaReplacement;
       const TextRange expectedComposing = TextRange(start: 6, end: 7);
-      const TextRange expectedDeltaRange = TextRange(start: 6, end: 11);
+      const TextRange expectedReplacedRange = TextRange(start: 6, end: 11);
       const TextSelection expectedSelection = TextSelection.collapsed(offset: 7);
 
       expect(delta.oldText, 'hello world');
-      expect(delta.deltaText, 'h');
+      expect(delta.textReplaced, 'world');
+      expect(delta.replacementText, 'h');
       expect(delta.deltaType, TextEditingDeltaType.replacement);
-      expect(delta.deltaRange, expectedDeltaRange);
+      expect(delta.replacedRange, expectedReplacedRange);
       expect(delta.selection, expectedSelection);
       expect(delta.composing, expectedComposing);
     });
@@ -181,15 +183,16 @@ void main() {
           ' "composingBase": 6,'
           ' "composingExtent": 11}';
 
-      final TextEditingDelta delta = TextEditingDelta.fromJSON(jsonDecode(jsonReplacementDelta) as Map<String, dynamic>);
+      final TextEditingDeltaReplacement delta = TextEditingDelta.fromJSON(jsonDecode(jsonReplacementDelta) as Map<String, dynamic>) as TextEditingDeltaReplacement;
       const TextRange expectedComposing = TextRange(start: 6, end: 11);
-      const TextRange expectedDeltaRange = TextRange(start: 6, end: 11);
+      const TextRange expectedReplacedRange = TextRange(start: 6, end: 11);
       const TextSelection expectedSelection = TextSelection.collapsed(offset: 11);
 
       expect(delta.oldText, 'hello world');
-      expect(delta.deltaText, 'words');
+      expect(delta.textReplaced, 'world');
+      expect(delta.replacementText, 'words');
       expect(delta.deltaType, TextEditingDeltaType.replacement);
-      expect(delta.deltaRange, expectedDeltaRange);
+      expect(delta.replacedRange, expectedReplacedRange);
       expect(delta.selection, expectedSelection);
       expect(delta.composing, expectedComposing);
     });
@@ -209,15 +212,12 @@ void main() {
           ' "composingBase": 6,'
           ' "composingExtent": 11}';
 
-      final TextEditingDelta delta = TextEditingDelta.fromJSON(jsonDecode(jsonNonTextUpdateDelta) as Map<String, dynamic>);
+      final TextEditingDeltaNonTextUpdate delta = TextEditingDelta.fromJSON(jsonDecode(jsonNonTextUpdateDelta) as Map<String, dynamic>) as TextEditingDeltaNonTextUpdate;
       const TextRange expectedComposing = TextRange(start: 6, end: 11);
-      const TextRange expectedDeltaRange = TextRange.empty;
       const TextSelection expectedSelection = TextSelection.collapsed(offset: 10);
 
       expect(delta.oldText, 'hello world');
-      expect(delta.deltaText, '');
       expect(delta.deltaType, TextEditingDeltaType.nonTextUpdate);
-      expect(delta.deltaRange, expectedDeltaRange);
       expect(delta.selection, expectedSelection);
       expect(delta.composing, expectedComposing);
     });
