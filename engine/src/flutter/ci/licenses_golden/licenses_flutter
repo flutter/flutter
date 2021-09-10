@@ -1104,6 +1104,8 @@ FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterPluginA
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterRestorationPlugin.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterRestorationPlugin.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterRestorationPluginTest.mm
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterSemanticsScrollView.h
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterSemanticsScrollView.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputDelegate.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.mm
