@@ -35,7 +35,11 @@ class WebFlutterDriver extends FlutterDriver {
   })  : _printCommunication = printCommunication,
         _logCommunicationToFile = logCommunicationToFile,
         _startTime = DateTime.now(),
-        _driverId = _nextDriverId++;
+        _driverId = _nextDriverId++
+    {
+      _logFilePathName = path.join(testOutputsDirectory, 'flutter_driver_commands_$_driverId.log');
+    }
+
 
   final FlutterWebConnection _connection;
   DateTime _startTime;
@@ -62,6 +66,12 @@ class WebFlutterDriver extends FlutterDriver {
 
   /// Whether to log communication between host and app to `flutter_driver_commands.log`.
   final bool _logCommunicationToFile;
+
+  /// Logs are written here when _logCommunicationToFile is true.
+  late final String _logFilePathName;
+
+  /// Getter for file pathname where logs are written when _logCommunicationToFile is true
+  String get logFilePathName => _logFilePathName;
 
   /// Creates a driver that uses a connection provided by the given
   /// [hostUrl] which would fallback to environment variable VM_SERVICE_URL.
@@ -128,7 +138,8 @@ class WebFlutterDriver extends FlutterDriver {
       driverLog('WebFlutterDriver', message);
     }
     if (_logCommunicationToFile) {
-      final File file = fs.file(path.join(testOutputsDirectory, 'flutter_driver_commands_$_driverId.log'));
+      assert(_logFilePathName != null);
+      final File file = fs.file(_logFilePathName);
       file.createSync(recursive: true); // no-op if file exists
       file.writeAsStringSync('${DateTime.now()} $message\n', mode: FileMode.append, flush: true);
     }
