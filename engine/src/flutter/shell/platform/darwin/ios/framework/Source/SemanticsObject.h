@@ -67,6 +67,15 @@ constexpr float kScrollExtentMaxForInf = 1000;
 @property(strong, nonatomic) FlutterPlatformViewSemanticsContainer* platformViewSemanticsContainer;
 
 /**
+ * The UIAccessibility that represents this object.
+ *
+ * By default, this return self. Subclasses can override to return different
+ * objects to represent them. For example, FlutterScrollableSemanticsObject[s]
+ * maintain UIScrollView[s] to represent their UIAccessibility[s].
+ */
+@property(nonatomic, readonly) id nativeAccessibility;
+
+/**
  * Due to the fact that VoiceOver may hold onto SemanticObjects even after it shuts down,
  * there can be situations where the AccessibilityBridge is shutdown, but the SemanticObject
  * will still be alive. If VoiceOver is turned on again, it may try to access this orphaned
@@ -171,13 +180,7 @@ constexpr float kScrollExtentMaxForInf = 1000;
 
 /// The semantics object for scrollable. This class creates an UIScrollView to interact with the
 /// iOS.
-@interface FlutterScrollableSemanticsObject : UIScrollView
-
-- (instancetype)init NS_UNAVAILABLE;
-- (instancetype)initWithFrame:(CGRect)frame NS_UNAVAILABLE;
-- (instancetype)initWithCoder:(NSCoder*)coder NS_UNAVAILABLE;
-- (instancetype)initWithSemanticsObject:(SemanticsObject*)semanticsObject NS_DESIGNATED_INITIALIZER;
-- (void)accessibilityBridgeDidFinishUpdate;
+@interface FlutterScrollableSemanticsObject : SemanticsObject
 
 @end
 
