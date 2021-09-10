@@ -308,15 +308,7 @@ abstract class TextEditingDelta {
   /// This method will take the given [TextEditingValue] and return a new
   /// [TextEditingValue] with that instance of [TextEditingDelta] applied to it.
   /// {@endtemplate}
-  TextEditingValue apply(TextEditingValue value) {
-    // Verify that the delta we are applying is applicable to the given
-    // editing state. If not then we return the original value.
-    if (value.text != oldText) {
-      return value;
-    }
-
-    return apply(value);
-  }
+  TextEditingValue apply(TextEditingValue value);
 }
 
 /// {@macro flutter.services.TextEditingDeltaInsertion}
@@ -346,7 +338,10 @@ class TextEditingDeltaInsertion extends TextEditingDelta {
   /// {@macro flutter.services.TextEditingDelta.apply}
   @override
   TextEditingValue apply(TextEditingValue value) {
-    String newText = value.text;
+    // To stay inline with the plain text model we should follow a last write wins
+    // policy and apply the delta to the oldText. This is due to the asyncronous
+    // nature of the connection between the framework and platform text input plugins.
+    String newText = oldText;
     newText = _replace(newText, deltaText, deltaRange.start, deltaRange.end);
     return value.copyWith(text: newText, selection: selection, composing: composing);
   }
@@ -379,8 +374,11 @@ class TextEditingDeltaDeletion extends TextEditingDelta {
   /// {@macro flutter.services.TextEditingDelta.apply}
   @override
   TextEditingValue apply(TextEditingValue value) {
-    String newText = value.text;
-    newText = _replace(newText, '', deltaRange.start, deltaRange.end);
+    // To stay inline with the plain text model we should follow a last write wins
+    // policy and apply the delta to the oldText. This is due to the asyncronous
+    // nature of the connection between the framework and platform text input plugins.
+    String newText = oldText;
+    newText = _replace(newText, deltaText, deltaRange.start, deltaRange.end);
     return value.copyWith(text: newText, selection: selection, composing: composing);
   }
 }
@@ -412,7 +410,10 @@ class TextEditingDeltaReplacement extends TextEditingDelta {
   /// {@macro flutter.services.TextEditingDelta.apply}
   @override
   TextEditingValue apply(TextEditingValue value) {
-    String newText = value.text;
+    // To stay inline with the plain text model we should follow a last write wins
+    // policy and apply the delta to the oldText. This is due to the asyncronous
+    // nature of the connection between the framework and platform text input plugins.
+    String newText = oldText;
     newText = _replace(newText, deltaText, deltaRange.start, deltaRange.end);
     return value.copyWith(text: newText, selection: selection, composing: composing);
   }
@@ -443,6 +444,9 @@ class TextEditingDeltaNonTextUpdate extends TextEditingDelta {
   /// {@macro flutter.services.TextEditingDelta.deltaType}
   @override
   TextEditingValue apply(TextEditingValue value) {
-    return value.copyWith(selection: selection, composing: composing);
+    // To stay inline with the plain text model we should follow a last write wins
+    // policy and apply the delta to the oldText. This is due to the asyncronous
+    // nature of the connection between the framework and platform text input plugins.
+    return TextEditingValue(text: oldText, selection: selection, composing: composing);
   }
 }
