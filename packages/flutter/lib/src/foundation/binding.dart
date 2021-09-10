@@ -649,7 +649,7 @@ class DebugReassembleConfig {
     this.widgetName,
   }) {
     if (!kDebugMode) {
-      throw FlutterError('Cannot instaniate DebugReassembleConfig in profile or release mode.');
+      throw FlutterError('Cannot instantiate DebugReassembleConfig in profile or release mode.');
     }
   }
 
