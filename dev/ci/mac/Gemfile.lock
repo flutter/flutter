@@ -1,7 +1,7 @@
 GIT
   remote: https://github.com/CocoaPods/CocoaPods.git
-  revision: 48973fbb6b8d0e600bc9e43c798fd25af86e92a1
-  branch: info_plist_fix
+  revision: e83d3264d4960d53dcb0cc921b0468f768dd3ed4
+  branch: master
   specs:
     cocoapods (1.11.0)
       addressable (~> 2.8)
@@ -153,7 +153,7 @@ GEM
     zeitwerk (2.4.2)
 
 PLATFORMS
-  universal-darwin-20
+  ruby
 
 DEPENDENCIES
   cocoapods!
