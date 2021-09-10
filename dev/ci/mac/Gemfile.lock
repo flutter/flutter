@@ -153,7 +153,7 @@ GEM
     zeitwerk (2.4.2)
 
 PLATFORMS
-  ruby
+  universal-darwin-20
 
 DEPENDENCIES
   cocoapods!
@@ -169,4 +169,4 @@ DEPENDENCIES
   xcodeproj!
 
 BUNDLED WITH
-   2.1.4
+   2.2.27
