@@ -23,7 +23,7 @@ void main() {
           ' "composingExtent": -1}';
       final TextEditingDeltaInsertion delta = TextEditingDelta.fromJSON(jsonDecode(jsonInsertionDelta) as Map<String, dynamic>) as TextEditingDeltaInsertion;
       const TextRange expectedComposing = TextRange.empty;
-      final int expectedInsertionOffset = 0;
+      const int expectedInsertionOffset = 0;
       const TextSelection expectedSelection = TextSelection.collapsed(offset: 17);
 
       expect(delta.oldText, '');
@@ -49,7 +49,7 @@ void main() {
 
       final TextEditingDeltaInsertion delta = TextEditingDelta.fromJSON(jsonDecode(jsonInsertionDelta) as Map<String, dynamic>) as TextEditingDeltaInsertion;
       const TextRange expectedComposing = TextRange(start: 6, end: 11);
-      final int expectedInsertionOffset = 10;
+      const int expectedInsertionOffset = 10;
       const TextSelection expectedSelection = TextSelection.collapsed(offset: 11);
 
       expect(delta.oldText, 'hello worl');
