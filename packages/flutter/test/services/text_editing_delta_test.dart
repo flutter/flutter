@@ -8,8 +8,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
-
   group('TextEditingDeltaInsertion', () {
     test('Verify creation of insertion delta when inserting at a collapsed selection.', () {
       const String jsonInsertionDelta = '{'
