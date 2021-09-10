@@ -2277,6 +2277,92 @@ TEST_F(ShellTest, DiscardLayerTreeOnResize) {
   DestroyShell(std::move(shell));
 }
 
+TEST_F(ShellTest, DiscardResubmittedLayerTreeOnResize) {
+  auto settings = CreateSettingsForFixture();
+
+  SkISize origin_size = SkISize::Make(400, 100);
+  SkISize new_size = SkISize::Make(400, 200);
+
+  fml::AutoResetWaitableEvent end_frame_latch;
+
+  fml::AutoResetWaitableEvent resize_latch;
+
+  std::shared_ptr<ShellTestExternalViewEmbedder> external_view_embedder;
+  fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger_ref;
+  auto end_frame_callback =
+      [&](bool should_merge_thread,
+          fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
+        if (!raster_thread_merger_ref) {
+          raster_thread_merger_ref = raster_thread_merger;
+        }
+        if (should_merge_thread) {
+          raster_thread_merger->MergeWithLease(10);
+          external_view_embedder->UpdatePostPrerollResult(
+              PostPrerollResult::kSuccess);
+        }
+        end_frame_latch.Signal();
+
+        if (should_merge_thread) {
+          resize_latch.Wait();
+        }
+      };
+
+  external_view_embedder = std::make_shared<ShellTestExternalViewEmbedder>(
+      std::move(end_frame_callback), PostPrerollResult::kResubmitFrame, true);
+
+  std::unique_ptr<Shell> shell = CreateShell(
+      settings, GetTaskRunnersForFixture(), false, external_view_embedder);
+
+  // Create the surface needed by rasterizer
+  PlatformViewNotifyCreated(shell.get());
+
+  fml::TaskRunner::RunNowOrPostTask(
+      shell->GetTaskRunners().GetPlatformTaskRunner(),
+      [&shell, &origin_size]() {
+        shell->GetPlatformView()->SetViewportMetrics(
+            {1.0, static_cast<double>(origin_size.width()),
+             static_cast<double>(origin_size.height()), 22});
+      });
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("emptyMain");
+
+  RunEngine(shell.get(), std::move(configuration));
+
+  PumpOneFrame(shell.get(), static_cast<double>(origin_size.width()),
+               static_cast<double>(origin_size.height()));
+
+  end_frame_latch.Wait();
+  ASSERT_EQ(0, external_view_embedder->GetSubmittedFrameCount());
+
+  fml::TaskRunner::RunNowOrPostTask(
+      shell->GetTaskRunners().GetPlatformTaskRunner(),
+      [&shell, &new_size, &resize_latch]() {
+        shell->GetPlatformView()->SetViewportMetrics(
+            {1.0, static_cast<double>(new_size.width()),
+             static_cast<double>(new_size.height()), 22});
+        resize_latch.Signal();
+      });
+
+  end_frame_latch.Wait();
+
+  // The frame resubmitted with origin size should be discarded after the
+  // viewport metrics changed.
+  ASSERT_EQ(0, external_view_embedder->GetSubmittedFrameCount());
+
+  // Threads will be merged at the end of this frame.
+  PumpOneFrame(shell.get(), static_cast<double>(new_size.width()),
+               static_cast<double>(new_size.height()));
+
+  end_frame_latch.Wait();
+  ASSERT_TRUE(raster_thread_merger_ref->IsMerged());
+  ASSERT_EQ(1, external_view_embedder->GetSubmittedFrameCount());
+  ASSERT_EQ(new_size, external_view_embedder->GetLastSubmittedFrameSize());
+
+  PlatformViewNotifyDestroyed(shell.get());
+  DestroyShell(std::move(shell));
+}
+
 TEST_F(ShellTest, IgnoresInvalidMetrics) {
   fml::AutoResetWaitableEvent latch;
   double last_device_pixel_ratio;
