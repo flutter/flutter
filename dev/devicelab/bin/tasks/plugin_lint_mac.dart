@@ -28,7 +28,7 @@ Future<void> main() async {
         final String iosintegrationTestPodspec = path.join(integrationTestPackage, 'ios', 'integration_test.podspec');
 
         await exec(
-          'bundle',
+          '/opt/s/w/ir/x/w/gems/bin/bundle',
           <String>[
             'exec',
             'pod',
@@ -47,7 +47,7 @@ Future<void> main() async {
 
         final String macosintegrationTestPodspec = path.join(integrationTestPackage, 'integration_test_macos', 'macos', 'integration_test_macos.podspec');
         await exec(
-          'bundle',
+          '/opt/s/w/ir/x/w/gems/bin/bundle',
           <String>[
             'exec',
             'pod',
