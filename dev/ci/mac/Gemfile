@@ -4,14 +4,3 @@ source 'https://rubygems.org'
 # Don't pin cocoapods so we can catch breakages from upstream changes, e.g.
 # https://github.com/flutter/flutter/issues/41144
 gem 'cocoapods', :git => 'https://github.com/CocoaPods/CocoaPods.git', :branch => 'master'
-
-gem 'cocoapods-core', :git => 'https://github.com/CocoaPods/Core.git', :branch => 'master'
-gem 'cocoapods-deintegrate', :git => 'https://github.com/CocoaPods/cocoapods-deintegrate.git', :branch => 'master'
-gem 'cocoapods-downloader', :git => 'https://github.com/CocoaPods/cocoapods-downloader.git', :branch => 'master'
-gem 'cocoapods-plugins', :git => 'https://github.com/CocoaPods/cocoapods-plugins.git', :branch => 'master'
-gem 'cocoapods-search', :git => 'https://github.com/CocoaPods/cocoapods-search.git', :branch => 'master'
-gem 'cocoapods-trunk', :git => 'https://github.com/CocoaPods/cocoapods-trunk.git', :branch => 'master'
-gem 'cocoapods-try', :git => 'https://github.com/CocoaPods/cocoapods-try.git', :branch => 'master'
-gem 'molinillo', :git => 'https://github.com/CocoaPods/Molinillo.git', :branch => 'master'
-gem 'nanaimo', :git => 'https://github.com/CocoaPods/Nanaimo.git', :branch => 'master'
-gem 'xcodeproj', :git => 'https://github.com/CocoaPods/Xcodeproj.git', :branch => 'master'
