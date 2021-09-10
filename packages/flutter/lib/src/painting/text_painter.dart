@@ -953,6 +953,7 @@ class TextPainter {
     return _paragraph!.getPositionForOffset(offset);
   }
 
+  /// {@template flutter.painting.TextPainter.getWordBoundary}
   /// Returns the text range of the word at the given offset. Characters not
   /// part of a word, such as spaces, symbols, and punctuation, have word breaks
   /// on both sides. In such cases, this method will return a text range that
@@ -960,6 +961,7 @@ class TextPainter {
   ///
   /// Word boundaries are defined more precisely in Unicode Standard Annex #29
   /// <http://www.unicode.org/reports/tr29/#Word_Boundaries>.
+  /// {@endtemplate}
   TextRange getWordBoundary(TextPosition position) {
     assert(!_debugNeedsLayout);
     return _paragraph!.getWordBoundary(position);
