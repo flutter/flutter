@@ -97,47 +97,47 @@ abstract class TextEditingDelta {
   /// Creates an instance of this class from a JSON object by inferring the
   /// type of delta based on values sent from the engine.
   factory TextEditingDelta.fromJSON(Map<String, dynamic> encoded) {
-    /// An insertion delta is one where [deltaRange] is collapsed.
-    ///
-    /// A deletion delta is one where the [deltaText] is empty.
-    ///
-    /// An insertion/deletion can still occur when the [deltaRange] is not
-    /// collapsed, or the [deltaText] is not empty.
-    ///
-    /// On native platforms when composing text, the entire composing region is
-    /// replaced on input, rather than reporting character by character
-    /// insertion/deletion. In these cases we can detect if there was an
-    /// insertion/deletion by checking if the text inside the original composing
-    /// region was modified by the replacement. If the text is the same then we have
-    /// an insertion/deletion. If the text is different then we can say we have
-    /// a replacement.
-    ///
-    /// For example say we are currently composing the word: 'world'.
-    /// Our current state is 'worl|' with the cursor at the end of 'l'. If we
-    /// input the character 'd', the platform will tell us 'worl' was replaced
-    /// with 'world' at range (0,4). Here we can check if the text found in the
-    /// composing region (0,4) has been modified. We see that it hasn't because
-    /// 'worl' == 'worl', so this means that the text in
-    /// 'world'{replacementDestinationEnd, replacementDestinationStart + replacementSourceEnd}
-    /// can be considered an insertion. In this case we inserted 'd'.
-    ///
-    /// Similarly for a a deletion, say we are currently composing the word: 'worl'.
-    /// Our current state is 'world|' with the cursor at the end of 'd'. If we
-    /// press backspace to delete the character 'd', the platform will tell us 'world'
-    /// was replaced with 'worl' at range (0,5). Here we can check if the text found
-    /// in the new composing region, is the same as the replacement text. We can do this
-    /// by using oldText{replacementDestinationStart, replacementDestinationStart + replacementSourceEnd}
-    /// which in this case is 'worl'. We then compare 'worl' with 'worl' and
-    /// verify that they are the same. This means that the text in
-    /// 'world'{replacementDestinationEnd, replacementDestinationStart + replacementSourceEnd} was deleted.
-    /// In this case the character 'd' was deleted.
-    ///
-    /// A replacement delta occurs when the original composing region has been
-    /// modified.
-    ///
-    /// A non text update delta occurs when the selection and/or composing region
-    /// has been changed by the platform, and there have been no changes to the
-    /// text value.
+    // An insertion delta is one where [deltaRange] is collapsed.
+    //
+    // A deletion delta is one where the [deltaText] is empty.
+    //
+    // An insertion/deletion can still occur when the [deltaRange] is not
+    // collapsed, or the [deltaText] is not empty.
+    //
+    // On native platforms when composing text, the entire composing region is
+    // replaced on input, rather than reporting character by character
+    // insertion/deletion. In these cases we can detect if there was an
+    // insertion/deletion by checking if the text inside the original composing
+    // region was modified by the replacement. If the text is the same then we have
+    // an insertion/deletion. If the text is different then we can say we have
+    // a replacement.
+    //
+    // For example say we are currently composing the word: 'world'.
+    // Our current state is 'worl|' with the cursor at the end of 'l'. If we
+    // input the character 'd', the platform will tell us 'worl' was replaced
+    // with 'world' at range (0,4). Here we can check if the text found in the
+    // composing region (0,4) has been modified. We see that it hasn't because
+    // 'worl' == 'worl', so this means that the text in
+    // 'world'{replacementDestinationEnd, replacementDestinationStart + replacementSourceEnd}
+    // can be considered an insertion. In this case we inserted 'd'.
+    //
+    // Similarly for a a deletion, say we are currently composing the word: 'worl'.
+    // Our current state is 'world|' with the cursor at the end of 'd'. If we
+    // press backspace to delete the character 'd', the platform will tell us 'world'
+    // was replaced with 'worl' at range (0,5). Here we can check if the text found
+    // in the new composing region, is the same as the replacement text. We can do this
+    // by using oldText{replacementDestinationStart, replacementDestinationStart + replacementSourceEnd}
+    // which in this case is 'worl'. We then compare 'worl' with 'worl' and
+    // verify that they are the same. This means that the text in
+    // 'world'{replacementDestinationEnd, replacementDestinationStart + replacementSourceEnd} was deleted.
+    // In this case the character 'd' was deleted.
+    //
+    // A replacement delta occurs when the original composing region has been
+    // modified.
+    //
+    // A non text update delta occurs when the selection and/or composing region
+    // has been changed by the platform, and there have been no changes to the
+    // text value.
     final String oldText = encoded['oldText'] as String;
     final int replacementDestinationStart = encoded['deltaStart'] as int;
     final int replacementDestinationEnd = encoded['deltaEnd'] as int;
