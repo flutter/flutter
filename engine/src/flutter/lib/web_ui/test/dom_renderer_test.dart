@@ -169,6 +169,28 @@ void testMain() {
     renderer.removeResource(resource);
     expect(resourceRoot.childNodes.length, 0);
   });
+
+  test('hide placeholder text for textfield', () {
+    final DomRenderer renderer = DomRenderer();
+    final html.InputElement regularTextField = html.InputElement();
+    regularTextField.placeholder = 'Now you see me';
+    renderer.addResource(regularTextField);
+
+    renderer.focus(regularTextField);
+    html.CssStyleDeclaration? style = renderer.glassPaneShadow?.querySelector('input')?.getComputedStyle('::placeholder');
+    expect(style, isNotNull);
+    expect(style?.opacity, isNot('0'));
+
+    final html.InputElement textField = html.InputElement();
+    textField.placeholder = 'Now you dont';
+    renderer.addElementClass(textField, 'flt-text-editing');
+    renderer.addResource(textField);
+
+    renderer.focus(textField);
+    style = renderer.glassPaneShadow?.querySelector('input.flt-text-editing')?.getComputedStyle('::placeholder');
+    expect(style, isNotNull);
+    expect(style?.opacity, '0');
+  }, skip: browserEngine != BrowserEngine.firefox);
 }
 
 @JS('Element.prototype.attachShadow')

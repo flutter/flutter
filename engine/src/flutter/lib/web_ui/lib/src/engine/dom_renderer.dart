@@ -703,18 +703,22 @@ void applyGlobalCssRulesToSheet(
 
   // This undoes browser's default painting and layout attributes of range
   // input, which is used in semantics.
-  sheet.insertRule('''
-flt-semantics input[type=range] {
-appearance: none;
--webkit-appearance: none;
-width: 100%;
-position: absolute;
-border: none;
-top: 0;
-right: 0;
-bottom: 0;
-left: 0;
-}''', sheet.cssRules.length);
+  sheet.insertRule(
+    '''
+    flt-semantics input[type=range] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 100%;
+      position: absolute;
+      border: none;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+    }
+    ''',
+    sheet.cssRules.length,
+  );
 
   if (isWebKit) {
     sheet.insertRule(
@@ -751,35 +755,45 @@ left: 0;
         sheet.cssRules.length);
   }
   sheet.insertRule('''
-flt-semantics input,
-flt-semantics textarea,
-flt-semantics [contentEditable="true"] {
-caret-color: transparent;
-}
-''', sheet.cssRules.length);
+    flt-semantics input,
+    flt-semantics textarea,
+    flt-semantics [contentEditable="true"] {
+    caret-color: transparent;
+  }
+  ''', sheet.cssRules.length);
 
   // By default on iOS, Safari would highlight the element that's being tapped
   // on using gray background. This CSS rule disables that.
   if (isWebKit) {
     sheet.insertRule('''
-$glassPaneTagName * {
--webkit-tap-highlight-color: transparent;
-}
-''', sheet.cssRules.length);
+      $glassPaneTagName * {
+      -webkit-tap-highlight-color: transparent;
+    }
+    ''', sheet.cssRules.length);
   }
+
+  // Hide placeholder text
+  sheet.insertRule(
+    '''
+    .flt-text-editing::placeholder {
+      opacity: 0;
+    }
+    ''',
+    sheet.cssRules.length,
+  );
 
   // This css prevents an autofill overlay brought by the browser during
   // text field autofill by delaying the transition effect.
   // See: https://github.com/flutter/flutter/issues/61132.
   if (browserHasAutofillOverlay()) {
     sheet.insertRule('''
-.transparentTextEditing:-webkit-autofill,
-.transparentTextEditing:-webkit-autofill:hover,
-.transparentTextEditing:-webkit-autofill:focus,
-.transparentTextEditing:-webkit-autofill:active {
-  -webkit-transition-delay: 99999s;
-}
-''', sheet.cssRules.length);
+      .transparentTextEditing:-webkit-autofill,
+      .transparentTextEditing:-webkit-autofill:hover,
+      .transparentTextEditing:-webkit-autofill:focus,
+      .transparentTextEditing:-webkit-autofill:active {
+        -webkit-transition-delay: 99999s;
+      }
+    ''', sheet.cssRules.length);
   }
 }
 
