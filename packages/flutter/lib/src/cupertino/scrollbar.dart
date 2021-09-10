@@ -45,29 +45,7 @@ const double _kScrollbarCrossAxisMargin = 3.0;
 /// when it is dragged by the user. The `radius` of the scrollbar thumb corners will animate from 34
 /// to the `radiusWhileDragging` of 0 when the scrollbar is being dragged by the user.
 ///
-/// ```dart imports
-/// import 'package:flutter/cupertino.dart';
-/// ```
-///
-/// ```dart
-/// @override
-/// Widget build(BuildContext context) {
-///   return CupertinoScrollbar(
-///     thickness: 6.0,
-///     thicknessWhileDragging: 10.0,
-///     radius: const Radius.circular(34.0),
-///     radiusWhileDragging: Radius.zero,
-///     child: ListView.builder(
-///       itemCount: 120,
-///       itemBuilder: (BuildContext context, int index) {
-///         return Center(
-///           child: Text('item $index'),
-///         );
-///       },
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/cupertino/scrollbar/cupertino_scrollbar.0.dart **
 /// {@end-tool}
 ///
 /// {@tool dartpad --template=stateful_widget_scaffold}
@@ -75,34 +53,7 @@ const double _kScrollbarCrossAxisMargin = 3.0;
 /// fade animation. This requires that a [ScrollController] is provided to controller,
 /// or that the [PrimaryScrollController] is available.
 ///
-/// ```dart imports
-/// import 'package:flutter/cupertino.dart';
-/// ```
-///
-/// ```dart
-/// final ScrollController _controllerOne = ScrollController();
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return CupertinoScrollbar(
-///     thickness: 6.0,
-///     thicknessWhileDragging: 10.0,
-///     radius: const Radius.circular(34.0),
-///     radiusWhileDragging: Radius.zero,
-///     controller: _controllerOne,
-///     isAlwaysShown: true,
-///     child: ListView.builder(
-///       controller: _controllerOne,
-///       itemCount: 120,
-///       itemBuilder: (BuildContext context, int index) {
-///         return Center(
-///           child: Text('item $index'),
-///         );
-///       },
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/cupertino/scrollbar/cupertino_scrollbar.1.dart **
 /// {@end-tool}
 ///
 /// See also:

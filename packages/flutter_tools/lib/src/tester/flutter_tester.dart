@@ -54,9 +54,6 @@ class FlutterTesterDevice extends Device {
     @required ProcessManager processManager,
     @required FlutterVersion flutterVersion,
     @required Logger logger,
-    // TODO(jonahwilliams): remove once g3 rolls.
-    // ignore: avoid_unused_constructor_parameters
-    String buildDirectory,
     @required FileSystem fileSystem,
     @required Artifacts artifacts,
     @required OperatingSystemUtils operatingSystemUtils,

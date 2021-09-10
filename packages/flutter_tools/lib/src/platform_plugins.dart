@@ -106,10 +106,8 @@ class AndroidPlugin extends PluginPlatform {
     };
   }
 
-  Set<String>? _cachedEmbeddingVersion;
-
   /// Returns the version of the Android embedding.
-  Set<String> get _supportedEmbeddings => _cachedEmbeddingVersion ??= _getSupportedEmbeddings();
+  late final Set<String> _supportedEmbeddings = _getSupportedEmbeddings();
 
   Set<String> _getSupportedEmbeddings() {
     assert(pluginPath != null);
@@ -182,7 +180,7 @@ class IOSPlugin extends PluginPlatform {
   });
 
   factory IOSPlugin.fromYaml(String name, YamlMap yaml) {
-    assert(validate(yaml)); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/67241
+    assert(validate(yaml)); // TODO(zanderso): https://github.com/flutter/flutter/issues/67241
     return IOSPlugin(
       name: name,
       classPrefix: '',

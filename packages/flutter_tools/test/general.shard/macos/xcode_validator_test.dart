@@ -23,6 +23,7 @@ void main() {
       final XcodeValidator validator = XcodeValidator(xcode: xcode, userMessages: UserMessages());
       final ValidationResult result = await validator.validate();
       expect(result.type, ValidationType.missing);
+      expect(result.statusInfo, isNull);
       expect(result.messages.last.type, ValidationMessageType.error);
       expect(result.messages.last.message, contains('Xcode not installed'));
     });
@@ -182,6 +183,11 @@ void main() {
       final XcodeValidator validator = XcodeValidator(xcode: xcode, userMessages: UserMessages());
       final ValidationResult result = await validator.validate();
       expect(result.type, ValidationType.installed);
+      expect(result.messages.length, 1);
+      final ValidationMessage firstMessage = result.messages.first;
+      expect(firstMessage.type, ValidationMessageType.information);
+      expect(firstMessage.message, 'Xcode at /Library/Developer/CommandLineTools');
+      expect(result.statusInfo, '1000.0.0');
     });
   });
 }

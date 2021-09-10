@@ -175,6 +175,7 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
     }
     Widget child = Container(
       padding: widget.padding,
+      height: widget.route.itemHeight,
       child: widget.route.items[widget.itemIndex],
     );
     final BorderRadius itemBorderRadius;
@@ -801,46 +802,13 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 /// dropdown with the new value.
 ///
 /// {@tool dartpad --template=stateful_widget_scaffold_center}
-///
 /// This sample shows a `DropdownButton` with a large arrow icon,
 /// purple text style, and bold purple underline, whose value is one of "One",
 /// "Two", "Free", or "Four".
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/dropdown_button.png)
 ///
-/// ```dart
-/// String dropdownValue = 'One';
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return DropdownButton<String>(
-///     value: dropdownValue,
-///     icon: const Icon(Icons.arrow_downward),
-///     iconSize: 24,
-///     elevation: 16,
-///     style: const TextStyle(
-///       color: Colors.deepPurple
-///     ),
-///     underline: Container(
-///       height: 2,
-///       color: Colors.deepPurpleAccent,
-///     ),
-///     onChanged: (String? newValue) {
-///       setState(() {
-///         dropdownValue = newValue!;
-///       });
-///     },
-///     items: <String>['One', 'Two', 'Free', 'Four']
-///       .map<DropdownMenuItem<String>>((String value) {
-///         return DropdownMenuItem<String>(
-///           value: value,
-///           child: Text(value),
-///         );
-///       })
-///       .toList(),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/dropdown/dropdown_button.0.dart **
 /// {@end-tool}
 ///
 /// If the [onChanged] callback is null or the list of [items] is null
@@ -854,6 +822,7 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 ///
 /// See also:
 ///
+///  * [DropdownButtonFormField], which integrates with the [Form] widget.
 ///  * [DropdownMenuItem], the class used to represent the [items].
 ///  * [DropdownButtonHideUnderline], which prevents its descendant dropdown buttons
 ///    from displaying their underlines.
@@ -989,36 +958,10 @@ class DropdownButton<T> extends StatefulWidget {
   /// in [items].
   ///
   /// {@tool dartpad --template=stateful_widget_scaffold}
-  ///
   /// This sample shows a `DropdownButton` with a button with [Text] that
   /// corresponds to but is unique from [DropdownMenuItem].
   ///
-  /// ```dart
-  /// final List<String> items = <String>['1','2','3'];
-  /// String selectedItem = '1';
-  ///
-  /// @override
-  /// Widget build(BuildContext context) {
-  ///   return Padding(
-  ///     padding: const EdgeInsets.symmetric(horizontal: 12.0),
-  ///     child: DropdownButton<String>(
-  ///       value: selectedItem,
-  ///       onChanged: (String? string) => setState(() => selectedItem = string!),
-  ///       selectedItemBuilder: (BuildContext context) {
-  ///         return items.map<Widget>((String item) {
-  ///           return Text(item);
-  ///         }).toList();
-  ///       },
-  ///       items: items.map((String item) {
-  ///         return DropdownMenuItem<String>(
-  ///           child: Text('Log $item'),
-  ///           value: item,
-  ///         );
-  ///       }).toList(),
-  ///     ),
-  ///   );
-  /// }
-  /// ```
+  /// ** See code in examples/api/lib/material/dropdown/dropdown_button.selected_item_builder.0.dart **
   /// {@end-tool}
   ///
   /// If this callback is null, the [DropdownMenuItem] from [items]
@@ -1040,45 +983,10 @@ class DropdownButton<T> extends StatefulWidget {
   /// the dropdown button, consider using [selectedItemBuilder].
   ///
   /// {@tool dartpad --template=stateful_widget_scaffold}
-  ///
   /// This sample shows a `DropdownButton` with a dropdown button text style
   /// that is different than its menu items.
   ///
-  /// ```dart
-  /// List<String> options = <String>['One', 'Two', 'Free', 'Four'];
-  /// String dropdownValue = 'One';
-  ///
-  /// @override
-  /// Widget build(BuildContext context) {
-  ///   return Container(
-  ///     alignment: Alignment.center,
-  ///     color: Colors.blue,
-  ///     child: DropdownButton<String>(
-  ///       value: dropdownValue,
-  ///       onChanged: (String? newValue) {
-  ///         setState(() {
-  ///           dropdownValue = newValue!;
-  ///         });
-  ///       },
-  ///       style: const TextStyle(color: Colors.blue),
-  ///       selectedItemBuilder: (BuildContext context) {
-  ///         return options.map((String value) {
-  ///           return Text(
-  ///             dropdownValue,
-  ///             style: const TextStyle(color: Colors.white),
-  ///           );
-  ///         }).toList();
-  ///       },
-  ///       items: options.map<DropdownMenuItem<String>>((String value) {
-  ///         return DropdownMenuItem<String>(
-  ///           value: value,
-  ///           child: Text(value),
-  ///         );
-  ///       }).toList(),
-  ///     ),
-  ///   );
-  /// }
-  /// ```
+  /// ** See code in examples/api/lib/material/dropdown/dropdown_button.style.0.dart **
   /// {@end-tool}
   ///
   /// Defaults to the [TextTheme.subtitle1] value of the current
@@ -1568,7 +1476,20 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   }
 }
 
-/// A convenience widget that makes a [DropdownButton] into a [FormField].
+/// A [FormField] that contains a [DropdownButton].
+///
+/// This is a convenience widget that wraps a [DropdownButton] widget in a
+/// [FormField].
+///
+/// A [Form] ancestor is not required. The [Form] simply makes it easier to
+/// save, reset, or validate multiple fields at once. To use without a [Form],
+/// pass a [GlobalKey] to the constructor and use [GlobalKey.currentState] to
+/// save or reset the form field.
+///
+/// See also:
+///
+///  * [DropdownButton], which is the underlying text field without the [Form]
+///    integration.
 class DropdownButtonFormField<T> extends FormField<T> {
   /// Creates a [DropdownButton] widget that is a [FormField], wrapped in an
   /// [InputDecorator].

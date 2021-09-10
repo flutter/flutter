@@ -2,19 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=456"
-@Tags(<String>['no-shuffle'])
-
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const double itemExtent = 100.0;
-Axis scrollDirection = Axis.vertical;
-DismissDirection dismissDirection = DismissDirection.horizontal;
+const Axis defaultScrollDirection = Axis.vertical;
+Axis scrollDirection = defaultScrollDirection;
+const DismissDirection defaultDismissDirection = DismissDirection.horizontal;
+DismissDirection dismissDirection = defaultDismissDirection;
 late DismissDirection reportedDismissDirection;
 List<int> dismissedItems = <int>[];
 Widget? background;
@@ -232,6 +228,13 @@ void main() {
   setUp(() {
     dismissedItems = <int>[];
     background = null;
+  });
+
+  tearDown(() {
+    // Restore the default values of dismissDirection and scrollDirection
+    // in order to ensure consistency when the test order is randomized.
+    dismissDirection = defaultDismissDirection;
+    scrollDirection = defaultScrollDirection;
   });
 
   testWidgets('Horizontal drag triggers dismiss scrollDirection=vertical', (WidgetTester tester) async {
