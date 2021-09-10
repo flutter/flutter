@@ -26,7 +26,12 @@ Future<void> main() async {
         print(gemDirectory);
         final String integrationTestPackage = path.join(flutterRoot, 'packages', 'integration_test');
         final String iosintegrationTestPodspec = path.join(integrationTestPackage, 'ios', 'integration_test.podspec');
-
+        await exec(
+          '/opt/s/w/ir/x/w/gems/bin/bundle',
+          <String>[
+            '--version',
+          ],
+        );
         await exec(
           '/opt/s/w/ir/x/w/gems/bin/bundle',
           <String>[
