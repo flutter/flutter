@@ -6,21 +6,20 @@ import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const double itemExtent = 100.0;
-const Axis defaultScrollDirection = Axis.vertical;
-Axis scrollDirection = defaultScrollDirection;
 const DismissDirection defaultDismissDirection = DismissDirection.horizontal;
-DismissDirection dismissDirection = defaultDismissDirection;
-late DismissDirection reportedDismissDirection;
-List<int> dismissedItems = <int>[];
-Widget? background;
 const double crossAxisEndOffset = 0.5;
 
+DismissDirection reportedDismissDirection = DismissDirection.horizontal;
+List<int> dismissedItems = <int>[];
+
 Widget buildTest({
+  Axis scrollDirection = Axis.vertical,
+  DismissDirection dismissDirection = defaultDismissDirection,
   double? startToEndThreshold,
   TextDirection textDirection = TextDirection.ltr,
   Future<bool?> Function(BuildContext context, DismissDirection direction)? confirmDismiss,
   ScrollController? controller,
+  Widget? background,
 }) {
   return Directionality(
     textDirection: textDirection,
@@ -50,8 +49,8 @@ Widget buildTest({
                 : <DismissDirection, double>{DismissDirection.startToEnd: startToEndThreshold},
             crossAxisEndOffset: crossAxisEndOffset,
             child: SizedBox(
-              width: itemExtent,
-              height: itemExtent,
+              width: 100.0,
+              height: 100.0,
               child: Text(item.toString()),
             ),
           );
@@ -63,7 +62,7 @@ Widget buildTest({
             controller: controller,
             dragStartBehavior: DragStartBehavior.down,
             scrollDirection: scrollDirection,
-            itemExtent: itemExtent,
+            itemExtent: 100.0,
             children: <int>[0, 1, 2, 3, 4, 5, 6, 7, 8]
               .where((int i) => !dismissedItems.contains(i))
               .map<Widget>(buildDismissibleItem).toList(),
@@ -226,22 +225,18 @@ class Test1215DismissibleWidget extends StatelessWidget {
 
 void main() {
   setUp(() {
+    // Reset "results" variables.
+    reportedDismissDirection = defaultDismissDirection;
     dismissedItems = <int>[];
-    background = null;
-  });
-
-  tearDown(() {
-    // Restore the default values of dismissDirection and scrollDirection
-    // in order to ensure consistency when the test order is randomized.
-    dismissDirection = defaultDismissDirection;
-    scrollDirection = defaultScrollDirection;
   });
 
   testWidgets('Horizontal drag triggers dismiss scrollDirection=vertical', (WidgetTester tester) async {
-    scrollDirection = Axis.vertical;
-    dismissDirection = DismissDirection.horizontal;
-
-    await tester.pumpWidget(buildTest());
+    await tester.pumpWidget(
+      buildTest(
+        scrollDirection: Axis.vertical,
+        dismissDirection: DismissDirection.horizontal,
+      ),
+    );
     expect(dismissedItems, isEmpty);
 
     await dismissItem(tester, 0, gestureDirection: AxisDirection.right);
@@ -256,10 +251,12 @@ void main() {
   });
 
   testWidgets('Horizontal fling triggers dismiss scrollDirection=vertical', (WidgetTester tester) async {
-    scrollDirection = Axis.vertical;
-    dismissDirection = DismissDirection.horizontal;
-
-    await tester.pumpWidget(buildTest());
+    await tester.pumpWidget(
+      buildTest(
+        scrollDirection: Axis.vertical,
+        dismissDirection: DismissDirection.horizontal,
+      ),
+    );
     expect(dismissedItems, isEmpty);
 
     await dismissItem(tester, 0, gestureDirection: AxisDirection.right, mechanism: flingElement);
@@ -274,10 +271,13 @@ void main() {
   });
 
   testWidgets('Horizontal fling does not trigger at zero offset, but does otherwise', (WidgetTester tester) async {
-    scrollDirection = Axis.vertical;
-    dismissDirection = DismissDirection.horizontal;
-
-    await tester.pumpWidget(buildTest(startToEndThreshold: 0.95));
+    await tester.pumpWidget(
+      buildTest(
+        startToEndThreshold: 0.95,
+        scrollDirection: Axis.vertical,
+        dismissDirection: DismissDirection.horizontal,
+      ),
+    );
     expect(dismissedItems, isEmpty);
 
     await dismissItem(tester, 0, gestureDirection: AxisDirection.right, mechanism: flingElementFromZero);
@@ -300,10 +300,12 @@ void main() {
   });
 
   testWidgets('Vertical drag triggers dismiss scrollDirection=horizontal', (WidgetTester tester) async {
-    scrollDirection = Axis.horizontal;
-    dismissDirection = DismissDirection.vertical;
-
-    await tester.pumpWidget(buildTest());
+    await tester.pumpWidget(
+      buildTest(
+        scrollDirection: Axis.horizontal,
+        dismissDirection: DismissDirection.vertical,
+      ),
+    );
     expect(dismissedItems, isEmpty);
 
     await dismissItem(tester, 0, gestureDirection: AxisDirection.up);
@@ -318,10 +320,12 @@ void main() {
   });
 
   testWidgets('drag-left with DismissDirection.endToStart triggers dismiss (LTR)', (WidgetTester tester) async {
-    scrollDirection = Axis.vertical;
-    dismissDirection = DismissDirection.endToStart;
-
-    await tester.pumpWidget(buildTest());
+    await tester.pumpWidget(
+      buildTest(
+        scrollDirection: Axis.vertical,
+        dismissDirection: DismissDirection.endToStart,
+      ),
+    );
     expect(dismissedItems, isEmpty);
 
     await dismissItem(tester, 0, gestureDirection: AxisDirection.right);
@@ -336,10 +340,12 @@ void main() {
   });
 
   testWidgets('drag-right with DismissDirection.startToEnd triggers dismiss (LTR)', (WidgetTester tester) async {
-    scrollDirection = Axis.vertical;
-    dismissDirection = DismissDirection.startToEnd;
-
-    await tester.pumpWidget(buildTest());
+    await tester.pumpWidget(
+      buildTest(
+        scrollDirection: Axis.vertical,
+        dismissDirection: DismissDirection.startToEnd,
+      ),
+    );
     expect(dismissedItems, isEmpty);
 
     await dismissItem(tester, 0, gestureDirection: AxisDirection.left);
@@ -352,10 +358,14 @@ void main() {
   });
 
   testWidgets('drag-right with DismissDirection.endToStart triggers dismiss (RTL)', (WidgetTester tester) async {
-    scrollDirection = Axis.vertical;
-    dismissDirection = DismissDirection.endToStart;
+    await tester.pumpWidget(
+      buildTest(
+        textDirection: TextDirection.rtl,
+        scrollDirection: Axis.vertical,
+        dismissDirection: DismissDirection.endToStart,
+      ),
+    );
 
-    await tester.pumpWidget(buildTest(textDirection: TextDirection.rtl));
     expect(dismissedItems, isEmpty);
 
     await dismissItem(tester, 0, gestureDirection: AxisDirection.left);
@@ -368,10 +378,13 @@ void main() {
   });
 
   testWidgets('drag-left with DismissDirection.startToEnd triggers dismiss (RTL)', (WidgetTester tester) async {
-    scrollDirection = Axis.vertical;
-    dismissDirection = DismissDirection.startToEnd;
-
-    await tester.pumpWidget(buildTest(textDirection: TextDirection.rtl));
+    await tester.pumpWidget(
+      buildTest(
+        textDirection: TextDirection.rtl,
+        scrollDirection: Axis.vertical,
+        dismissDirection: DismissDirection.startToEnd,
+      ),
+    );
     expect(dismissedItems, isEmpty);
 
     await dismissItem(tester, 0, gestureDirection: AxisDirection.right);
@@ -386,10 +399,12 @@ void main() {
   });
 
   testWidgets('fling-left with DismissDirection.endToStart triggers dismiss (LTR)', (WidgetTester tester) async {
-    scrollDirection = Axis.vertical;
-    dismissDirection = DismissDirection.endToStart;
-
-    await tester.pumpWidget(buildTest());
+    await tester.pumpWidget(
+      buildTest(
+        scrollDirection: Axis.vertical,
+        dismissDirection: DismissDirection.endToStart,
+      ),
+    );
     expect(dismissedItems, isEmpty);
 
     await dismissItem(tester, 0, gestureDirection: AxisDirection.right);
@@ -404,10 +419,13 @@ void main() {
   });
 
   testWidgets('fling-right with DismissDirection.startToEnd triggers dismiss (LTR)', (WidgetTester tester) async {
-    scrollDirection = Axis.vertical;
-    dismissDirection = DismissDirection.startToEnd;
+    await tester.pumpWidget(
+      buildTest(
+        scrollDirection: Axis.vertical,
+        dismissDirection: DismissDirection.startToEnd,
+      ),
+    );
 
-    await tester.pumpWidget(buildTest());
     expect(dismissedItems, isEmpty);
 
     await dismissItem(tester, 0, mechanism: flingElement, gestureDirection: AxisDirection.left);
@@ -420,10 +438,13 @@ void main() {
   });
 
   testWidgets('fling-right with DismissDirection.endToStart triggers dismiss (RTL)', (WidgetTester tester) async {
-    scrollDirection = Axis.vertical;
-    dismissDirection = DismissDirection.endToStart;
-
-    await tester.pumpWidget(buildTest(textDirection: TextDirection.rtl));
+    await tester.pumpWidget(
+      buildTest(
+        textDirection: TextDirection.rtl,
+        scrollDirection: Axis.vertical,
+        dismissDirection: DismissDirection.endToStart,
+      ),
+    );
     expect(dismissedItems, isEmpty);
 
     await dismissItem(tester, 0, mechanism: flingElement, gestureDirection: AxisDirection.left);
@@ -436,10 +457,13 @@ void main() {
   });
 
   testWidgets('fling-left with DismissDirection.startToEnd triggers dismiss (RTL)', (WidgetTester tester) async {
-    scrollDirection = Axis.vertical;
-    dismissDirection = DismissDirection.startToEnd;
-
-    await tester.pumpWidget(buildTest(textDirection: TextDirection.rtl));
+    await tester.pumpWidget(
+      buildTest(
+        textDirection: TextDirection.rtl,
+        scrollDirection: Axis.vertical,
+        dismissDirection: DismissDirection.startToEnd,
+      ),
+    );
     expect(dismissedItems, isEmpty);
 
     await dismissItem(tester, 0, mechanism: flingElement, gestureDirection: AxisDirection.right);
@@ -454,10 +478,12 @@ void main() {
   });
 
   testWidgets('drag-up with DismissDirection.up triggers dismiss', (WidgetTester tester) async {
-    scrollDirection = Axis.horizontal;
-    dismissDirection = DismissDirection.up;
-
-    await tester.pumpWidget(buildTest());
+    await tester.pumpWidget(
+      buildTest(
+        scrollDirection: Axis.horizontal,
+        dismissDirection: DismissDirection.up,
+      ),
+    );
     expect(dismissedItems, isEmpty);
 
     await dismissItem(tester, 0, gestureDirection: AxisDirection.down);
@@ -470,10 +496,12 @@ void main() {
   });
 
   testWidgets('drag-down with DismissDirection.down triggers dismiss', (WidgetTester tester) async {
-    scrollDirection = Axis.horizontal;
-    dismissDirection = DismissDirection.down;
-
-    await tester.pumpWidget(buildTest());
+    await tester.pumpWidget(
+      buildTest(
+        scrollDirection: Axis.horizontal,
+        dismissDirection: DismissDirection.down,
+      ),
+    );
     expect(dismissedItems, isEmpty);
 
     await dismissItem(tester, 0, gestureDirection: AxisDirection.up);
@@ -486,10 +514,12 @@ void main() {
   });
 
   testWidgets('fling-up with DismissDirection.up triggers dismiss', (WidgetTester tester) async {
-    scrollDirection = Axis.horizontal;
-    dismissDirection = DismissDirection.up;
-
-    await tester.pumpWidget(buildTest());
+    await tester.pumpWidget(
+      buildTest(
+        scrollDirection: Axis.horizontal,
+        dismissDirection: DismissDirection.up,
+      ),
+    );
     expect(dismissedItems, isEmpty);
 
     await dismissItem(tester, 0, mechanism: flingElement, gestureDirection: AxisDirection.down);
@@ -502,10 +532,12 @@ void main() {
   });
 
   testWidgets('fling-down with DismissDirection.down triggers dismiss', (WidgetTester tester) async {
-    scrollDirection = Axis.horizontal;
-    dismissDirection = DismissDirection.down;
-
-    await tester.pumpWidget(buildTest());
+    await tester.pumpWidget(
+      buildTest(
+        scrollDirection: Axis.horizontal,
+        dismissDirection: DismissDirection.down,
+      ),
+    );
     expect(dismissedItems, isEmpty);
 
     await dismissItem(tester, 0, mechanism: flingElement, gestureDirection: AxisDirection.up);
@@ -518,10 +550,13 @@ void main() {
   });
 
   testWidgets('drag-left has no effect on dismissible with a high dismiss threshold', (WidgetTester tester) async {
-    scrollDirection = Axis.vertical;
-    dismissDirection = DismissDirection.horizontal;
-
-    await tester.pumpWidget(buildTest(startToEndThreshold: 1.0));
+    await tester.pumpWidget(
+      buildTest(
+        startToEndThreshold: 1.0,
+        scrollDirection: Axis.vertical,
+        dismissDirection: DismissDirection.horizontal,
+      ),
+    );
     expect(dismissedItems, isEmpty);
 
     await dismissItem(tester, 0, gestureDirection: AxisDirection.right);
@@ -534,10 +569,13 @@ void main() {
   });
 
   testWidgets('fling-left has no effect on dismissible with a high dismiss threshold', (WidgetTester tester) async {
-    scrollDirection = Axis.vertical;
-    dismissDirection = DismissDirection.horizontal;
-
-    await tester.pumpWidget(buildTest(startToEndThreshold: 1.0));
+    await tester.pumpWidget(
+      buildTest(
+        startToEndThreshold: 1.0,
+        scrollDirection: Axis.vertical,
+        dismissDirection: DismissDirection.horizontal,
+      ),
+    );
     expect(dismissedItems, isEmpty);
 
     await dismissItem(tester, 0, mechanism: flingElement, gestureDirection: AxisDirection.right);
@@ -556,10 +594,12 @@ void main() {
   // https://github.com/flutter/engine/pull/1134 at the time, and later made
   // irrelevant by fn3, but just in case...
   testWidgets('Verify that drag-move events do not assert', (WidgetTester tester) async {
-    scrollDirection = Axis.horizontal;
-    dismissDirection = DismissDirection.down;
-
-    await tester.pumpWidget(buildTest());
+    await tester.pumpWidget(
+      buildTest(
+        scrollDirection: Axis.horizontal,
+        dismissDirection: DismissDirection.down,
+      ),
+    );
     final Offset location = tester.getTopLeft(find.text('0'));
     const Offset offset = Offset(0.0, 5.0);
     final TestGesture gesture = await tester.startGesture(location, pointer: 5);
@@ -613,11 +653,13 @@ void main() {
   });
 
   testWidgets('Dismissible starts from the full size when collapsing', (WidgetTester tester) async {
-    scrollDirection = Axis.vertical;
-    dismissDirection = DismissDirection.horizontal;
-    background = const Text('background');
-
-    await tester.pumpWidget(buildTest());
+    await tester.pumpWidget(
+      buildTest(
+        background: const Text('background'),
+        scrollDirection: Axis.vertical,
+        dismissDirection: DismissDirection.horizontal,
+      ),
+    );
     expect(dismissedItems, isEmpty);
 
     final Finder itemFinder = find.text('0');
@@ -653,8 +695,7 @@ void main() {
   });
 
   testWidgets('Horizontal fling less than threshold', (WidgetTester tester) async {
-    scrollDirection = Axis.horizontal;
-    await tester.pumpWidget(buildTest());
+    await tester.pumpWidget(buildTest(scrollDirection: Axis.horizontal));
     expect(dismissedItems, isEmpty);
 
     await checkFlingItemAfterMovement(tester, 0, gestureDirection: AxisDirection.left, mechanism: rollbackElement);
@@ -667,8 +708,7 @@ void main() {
   });
 
   testWidgets('Vertical fling less than threshold', (WidgetTester tester) async {
-    scrollDirection = Axis.vertical;
-    await tester.pumpWidget(buildTest());
+    await tester.pumpWidget(buildTest(scrollDirection: Axis.vertical));
     expect(dismissedItems, isEmpty);
 
     await checkFlingItemAfterMovement(tester, 0, gestureDirection: AxisDirection.left, mechanism: rollbackElement);
@@ -681,13 +721,13 @@ void main() {
   });
 
   testWidgets('confirmDismiss returns values: true, false, null', (WidgetTester tester) async {
-    scrollDirection = Axis.vertical;
-    dismissDirection = DismissDirection.horizontal;
     late DismissDirection confirmDismissDirection;
 
     Widget buildFrame(bool? confirmDismissValue) {
       return buildTest(
-        confirmDismiss: (BuildContext context, DismissDirection dismissDirection) {
+          scrollDirection: Axis.vertical,
+          dismissDirection: DismissDirection.horizontal,
+          confirmDismiss: (BuildContext context, DismissDirection dismissDirection) {
           confirmDismissDirection = dismissDirection;
           return Future<bool?>.value(confirmDismissValue);
         },
@@ -740,8 +780,8 @@ void main() {
   });
 
   testWidgets('setState that does not remove the Dismissible from tree should throws Error', (WidgetTester tester) async {
-    scrollDirection = Axis.vertical;
-    dismissDirection = DismissDirection.horizontal;
+    const Axis scrollDirection = Axis.vertical;
+    const DismissDirection dismissDirection = DismissDirection.horizontal;
 
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -750,7 +790,7 @@ void main() {
           return ListView(
             dragStartBehavior: DragStartBehavior.down,
             scrollDirection: scrollDirection,
-            itemExtent: itemExtent,
+            itemExtent: 100.0,
             children: <Widget>[
               Dismissible(
                 dragStartBehavior: DragStartBehavior.down,
@@ -763,12 +803,11 @@ void main() {
                     dismissedItems.add(1);
                   });
                 },
-                background: background,
                 dismissThresholds: const <DismissDirection, double>{},
                 crossAxisEndOffset: crossAxisEndOffset,
                 child: SizedBox(
-                  width: itemExtent,
-                  height: itemExtent,
+                  width: 100.0,
+                  height: 100.0,
                   child: Text(1.toString()),
                 ),
               ),
@@ -873,9 +912,7 @@ void main() {
   });
 
   testWidgets('DismissDirection.none does not trigger dismiss', (WidgetTester tester) async {
-    dismissDirection = DismissDirection.none;
-
-    await tester.pumpWidget(buildTest());
+    await tester.pumpWidget(buildTest(dismissDirection: DismissDirection.none));
     expect(dismissedItems, isEmpty);
 
     await dismissItem(tester, 0, gestureDirection: AxisDirection.left);
@@ -886,10 +923,14 @@ void main() {
   });
 
   testWidgets('DismissDirection.none does not prevent scrolling', (WidgetTester tester) async {
-    dismissDirection = DismissDirection.none;
     final ScrollController controller = ScrollController();
 
-    await tester.pumpWidget(buildTest(controller: controller));
+    await tester.pumpWidget(
+      buildTest(
+        controller: controller,
+        dismissDirection: DismissDirection.none,
+      ),
+    );
     expect(dismissedItems, isEmpty);
     expect(controller.offset, 0.0);
 
@@ -901,5 +942,6 @@ void main() {
     expect(controller.offset, 0.0);
     await dismissItem(tester, 0, gestureDirection: AxisDirection.up);
     expect(controller.offset, 99.9);
+    controller.dispose();
   });
 }
