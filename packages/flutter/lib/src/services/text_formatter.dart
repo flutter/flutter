@@ -330,7 +330,7 @@ class FilteringTextInputFormatter extends TextInputFormatter {
   /// The filter may adjust the selection and the composing region of the text
   /// after applying the text replacement, such that they still cover the same
   /// text. For instance, if the pattern was `o+` and the last character "s" was
-  /// selected: "Into The Wood|s|", then the result will be "Into The W*|s|",
+  /// selected: "Into The Wood|s|", then the result will be "Into The W*d|s|",
   /// with the selection still around the same character "s" despite that it is
   /// now the 12th character.
   ///
@@ -375,33 +375,32 @@ class FilteringTextInputFormatter extends TextInputFormatter {
   }
 
   void _processRegion(bool isBannedRegion, int regionStart, int regionEnd, _TextEditingValueAccumulator state) {
-    if (isBannedRegion) {
-      final TextRange bannedRange = TextRange(start: regionStart, end: regionEnd);
-      final String replacementString = bannedRange.isCollapsed ? '' : this.replacementString;
-      final TextSelection? selection = state.inputValue.selection.isValid ? state.inputValue.selection : null;
-      final TextRange? composition = state.inputValue.composing.isValid ? state.inputValue.composing : null;
+    final String replacementString = isBannedRegion
+      ? (regionStart == regionEnd ? '' : this.replacementString)
+      : state.inputValue.text.substring(regionStart, regionEnd);
 
-      int adjustIndex(int? originalIndex) {
-        if (originalIndex == null) {
-          return 0;
-        }
-        // Add to the index the length of the replacement if needed.
-        // The condition of the ternary operator is chosen such that the index
-        // will be placed **after** the replacement text, if the index was
-        // strictly inside the banned pattern.
-        final int replacedLength = bannedRange.start >= originalIndex ? 0 : replacementString.length;
-        // Subtract from the index the length of the banned pattern before the index.
-        return replacedLength - (originalIndex.clamp(bannedRange.start, bannedRange.end) - bannedRange.start);
-      }
+    state.stringBuffer.write(replacementString);
 
-      state.stringBuffer.write(replacementString);
-      state.selection?.base += adjustIndex(selection?.baseOffset);
-      state.selection?.extent += adjustIndex(selection?.extentOffset);
-      state.composingRegion?.base += adjustIndex(composition?.start);
-      state.composingRegion?.extent += adjustIndex(composition?.end);
-    } else {
-      state.stringBuffer.write(state.inputValue.text.substring(regionStart, regionEnd));
+    if (replacementString.length == regionEnd - regionStart) {
+      // We don't have to adjust the indices if the replaced string and the
+      // replacement has the same length.
+      return;
     }
+
+    int adjustIndex(int originalIndex) {
+      // Add to the index the length of the replacement if needed.
+      // The condition of the ternary operator is chosen such that the index
+      // will be placed **after** the replacement text, if the index was
+      // strictly inside the banned pattern.
+      final int replacedLength = regionStart >= originalIndex ? 0 : replacementString.length;
+      // Subtract from the index the length of the banned pattern before the index.
+      return replacedLength - (originalIndex.clamp(regionStart, regionEnd) - regionStart);
+    }
+
+    state.selection?.base += adjustIndex(state.inputValue.selection.baseOffset);
+    state.selection?.extent += adjustIndex(state.inputValue.selection.extentOffset);
+    state.composingRegion?.base += adjustIndex(state.inputValue.composing.start);
+    state.composingRegion?.extent += adjustIndex(state.inputValue.composing.end);
   }
 
   /// A [TextInputFormatter] that forces input to be a single line.

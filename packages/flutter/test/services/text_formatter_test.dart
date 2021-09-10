@@ -703,8 +703,7 @@ void main() {
       );
 
       // AAAB | B | BCCC => AAA***|CCC
-      // Same length replacement, still move the selection to the end of the
-      // replacement if the entire selection is replaced.
+      // Same length replacement, keep the selection at where it is.
       expect(
         FilteringTextInputFormatter.deny('BBB', replacementString: '***').formatEditUpdate(
           oldValue,
@@ -712,7 +711,7 @@ void main() {
             selection: const TextSelection(baseOffset: 5, extentOffset: 4),
           ),
         ).selection,
-        const TextSelection(baseOffset: 6, extentOffset: 6),
+        const TextSelection(baseOffset: 5, extentOffset: 4),
       );
 
       // AAA | BBB | CCC => AAA | CCC
@@ -836,8 +835,7 @@ void main() {
       );
 
       // AAAB | B | BCCC => AAA*** | CCC
-      // Same length replacement, still move the selection to the end of the
-      // replacement if the entire selection is replaced.
+      // Same length replacement, don't move the composing region.
       expect(
         FilteringTextInputFormatter.deny('BBB', replacementString: '***').formatEditUpdate(
           oldValue,
@@ -845,7 +843,7 @@ void main() {
             composing: const TextRange(start: 4, end: 5),
           ),
         ).composing,
-        TextRange.empty,
+        const TextRange(start: 4, end: 5),
       );
 
       // AAA | BBB | CCC => | AAA CCC
