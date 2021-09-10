@@ -28,7 +28,6 @@ void main() {
 
       expect(delta.oldText, '');
       expect(delta.textInserted, 'let there be text');
-      expect(delta.deltaType, TextEditingDeltaType.insertion);
       expect(delta.insertionOffset, expectedInsertionOffset);
       expect(delta.selection, expectedSelection);
       expect(delta.composing, expectedComposing);
@@ -54,7 +53,6 @@ void main() {
 
       expect(delta.oldText, 'hello worl');
       expect(delta.textInserted, 'd');
-      expect(delta.deltaType, TextEditingDeltaType.insertion);
       expect(delta.insertionOffset, expectedInsertionOffset);
       expect(delta.selection, expectedSelection);
       expect(delta.composing, expectedComposing);
@@ -82,7 +80,6 @@ void main() {
 
       expect(delta.oldText, 'let there be text.');
       expect(delta.textDeleted, 'e');
-      expect(delta.deltaType, TextEditingDeltaType.deletion);
       expect(delta.deletedRange, expectedDeletedRange);
       expect(delta.selection, expectedSelection);
       expect(delta.composing, expectedComposing);
@@ -108,7 +105,6 @@ void main() {
 
       expect(delta.oldText, 'hello world');
       expect(delta.textDeleted, 'd');
-      expect(delta.deltaType, TextEditingDeltaType.deletion);
       expect(delta.deletedRange, expectedDeletedRange);
       expect(delta.selection, expectedSelection);
       expect(delta.composing, expectedComposing);
@@ -137,7 +133,6 @@ void main() {
       expect(delta.oldText, 'hello worfi');
       expect(delta.textReplaced, 'worfi');
       expect(delta.replacementText, 'working');
-      expect(delta.deltaType, TextEditingDeltaType.replacement);
       expect(delta.replacedRange, expectedReplacedRange);
       expect(delta.selection, expectedSelection);
       expect(delta.composing, expectedComposing);
@@ -164,7 +159,6 @@ void main() {
       expect(delta.oldText, 'hello world');
       expect(delta.textReplaced, 'world');
       expect(delta.replacementText, 'h');
-      expect(delta.deltaType, TextEditingDeltaType.replacement);
       expect(delta.replacedRange, expectedReplacedRange);
       expect(delta.selection, expectedSelection);
       expect(delta.composing, expectedComposing);
@@ -191,7 +185,6 @@ void main() {
       expect(delta.oldText, 'hello world');
       expect(delta.textReplaced, 'world');
       expect(delta.replacementText, 'words');
-      expect(delta.deltaType, TextEditingDeltaType.replacement);
       expect(delta.replacedRange, expectedReplacedRange);
       expect(delta.selection, expectedSelection);
       expect(delta.composing, expectedComposing);
@@ -217,7 +210,6 @@ void main() {
       const TextSelection expectedSelection = TextSelection.collapsed(offset: 10);
 
       expect(delta.oldText, 'hello world');
-      expect(delta.deltaType, TextEditingDeltaType.nonTextUpdate);
       expect(delta.selection, expectedSelection);
       expect(delta.composing, expectedComposing);
     });

@@ -26,41 +26,6 @@ String _replace(String originalText, String replacementText, int start, int end)
   return newText;
 }
 
-/// A way to disambiguate a [TextEditingDelta].
-enum TextEditingDeltaType {
-  /// {@template flutter.services.TextEditingDeltaInsertion}
-  /// The delta is inserting a single/or contigous sequence of characters.
-  /// {@endtemplate}
-  insertion,
-
-  /// {@template flutter.services.TextEditingDeltaDeletion}
-  /// The delta is deleting a single/or contiguous sequence of characters.
-  /// {@endtemplate}
-  deletion,
-
-  /// {@template flutter.services.TextEditingDeltaReplacement}
-  /// The delta is replacing a range of characters with a new sequence of text.
-  ///
-  /// The range that is being replaced can either grow or shrink based on the
-  /// given replacement text.
-  ///
-  /// A replacement can occur in cases such as auto-correct, suggestions, and
-  /// when a selection is replaced by a single character.
-  /// {@endtemplate}
-  replacement,
-
-  /// {@template flutter.services.TextEditingDeltaNonTextUpdate}
-  /// The delta is not modifying the text. There are potentially selection and
-  /// composing region updates in the delta that still need to be applied to your
-  /// text model.
-  ///
-  /// A situation where this delta would be created is when dragging the selection
-  /// handles. There are no changes to the text, but there are updates to the selection
-  /// and potentially the composing region as well.
-  /// {@endtemplate}
-  nonTextUpdate,
-}
-
 /// A structure representing a granular change that has occurred to the editing
 /// state as a result of text editing.
 ///
@@ -245,13 +210,6 @@ abstract class TextEditingDelta {
   /// The old text state before the delta has occurred.
   final String oldText;
 
-  /// {@template flutter.services.TextEditingDelta.deltaType}
-  /// The type of delta that has occured.
-  ///
-  /// See [TextEditingDeltaType] for more information.
-  /// {@endtemplate}
-  TextEditingDeltaType get deltaType;
-
   /// The range of text that is currently selected after the delta has been
   /// applied.
   final TextSelection selection;
@@ -267,7 +225,7 @@ abstract class TextEditingDelta {
   TextEditingValue apply(TextEditingValue value);
 }
 
-/// {@macro flutter.services.TextEditingDeltaInsertion}
+/// The delta is inserting a single/or contigous sequence of characters.
 @immutable
 class TextEditingDeltaInsertion extends TextEditingDelta {
   /// Creates an insertion delta for a given change to the editing state.
@@ -291,10 +249,6 @@ class TextEditingDeltaInsertion extends TextEditingDelta {
   /// The offset in the [oldText] where the insertion begins.
   final int insertionOffset;
 
-  /// {@macro flutter.services.TextEditingDelta.deltaType}
-  @override
-  TextEditingDeltaType get deltaType => TextEditingDeltaType.insertion;
-
   /// {@macro flutter.services.TextEditingDelta.apply}
   @override
   TextEditingValue apply(TextEditingValue value) {
@@ -307,7 +261,7 @@ class TextEditingDeltaInsertion extends TextEditingDelta {
   }
 }
 
-/// {@macro flutter.services.TextEditingDeltaDeletion}
+/// The delta is deleting a single/or contiguous sequence of characters.
 @immutable
 class TextEditingDeltaDeletion extends TextEditingDelta {
   /// Creates a deletion delta for a given change to the editing state.
@@ -330,10 +284,6 @@ class TextEditingDeltaDeletion extends TextEditingDelta {
   /// The text from [oldText] that is being deleted.
   String get textDeleted => oldText.substring(deletedRange.start, deletedRange.end);
 
-  /// {@macro flutter.services.TextEditingDelta.deltaType}
-  @override
-  TextEditingDeltaType get deltaType => TextEditingDeltaType.deletion;
-
   /// {@macro flutter.services.TextEditingDelta.apply}
   @override
   TextEditingValue apply(TextEditingValue value) {
@@ -346,7 +296,13 @@ class TextEditingDeltaDeletion extends TextEditingDelta {
   }
 }
 
-/// {@macro flutter.services.TextEditingDeltaReplacement}
+/// The delta is replacing a range of characters with a new sequence of text.
+///
+/// The range that is being replaced can either grow or shrink based on the
+/// given replacement text.
+///
+/// A replacement can occur in cases such as auto-correct, suggestions, and
+/// when a selection is replaced by a single character.
 @immutable
 class TextEditingDeltaReplacement extends TextEditingDelta {
   /// Creates a replacement delta for a given change to the editing state.
@@ -373,10 +329,6 @@ class TextEditingDeltaReplacement extends TextEditingDelta {
   /// The original text that is being replaced in [oldText].
   String get textReplaced => oldText.substring(replacedRange.start, replacedRange.end);
 
-  /// {@macro flutter.services.TextEditingDelta.deltaType}
-  @override
-  TextEditingDeltaType get deltaType => TextEditingDeltaType.replacement;
-
   /// {@macro flutter.services.TextEditingDelta.apply}
   @override
   TextEditingValue apply(TextEditingValue value) {
@@ -389,7 +341,13 @@ class TextEditingDeltaReplacement extends TextEditingDelta {
   }
 }
 
-/// {@macro flutter.services.TextEditingDeltaNonTextUpdate}
+/// The delta is not modifying the text. There are potentially selection and
+/// composing region updates in the delta that still need to be applied to your
+/// text model.
+///
+/// A situation where this delta would be created is when dragging the selection
+/// handles. There are no changes to the text, but there are updates to the selection
+/// and potentially the composing region as well.
 @immutable
 class TextEditingDeltaNonTextUpdate extends TextEditingDelta {
   /// Creates a delta representing no changes to the text value of the current
@@ -407,11 +365,7 @@ class TextEditingDeltaNonTextUpdate extends TextEditingDelta {
     composing: composing,
   );
 
-  /// {@macro flutter.services.TextEditingDelta.deltaType}
-  @override
-  TextEditingDeltaType get deltaType => TextEditingDeltaType.nonTextUpdate;
-
-  /// {@macro flutter.services.TextEditingDelta.deltaType}
+  /// {@macro flutter.services.TextEditingDelta.apply}
   @override
   TextEditingValue apply(TextEditingValue value) {
     // To stay inline with the plain text model we should follow a last write wins
