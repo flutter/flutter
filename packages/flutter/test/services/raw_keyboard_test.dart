@@ -1899,7 +1899,7 @@ void main() {
                 expect(
                   data.isModifierPressed(key, side: modifierTests[modifier]!.side),
                   isFalse,
-                  reason: "${isLeft ? 'left' : 'right'} $key should not be pressed with metaState $modifier, wwhen key is ${isDown ? 'down' : 'up'}, but is.",
+                  reason: "${isLeft ? 'left' : 'right'} $key should not be pressed with metaState $modifier, when key is ${isDown ? 'down' : 'up'}, but is.",
                 );
               }
             }
@@ -2131,7 +2131,7 @@ void main() {
                 expect(
                   data.isModifierPressed(key, side: modifierTests[modifier]!.side),
                   isFalse,
-                  reason: "${isLeft ? 'left' : 'right'} $key should not be pressed with metaState $modifier, wwhen key is ${isDown ? 'down' : 'up'}, but is.",
+                  reason: "${isLeft ? 'left' : 'right'} $key should not be pressed with metaState $modifier, when key is ${isDown ? 'down' : 'up'}, but is.",
                 );
               }
             }

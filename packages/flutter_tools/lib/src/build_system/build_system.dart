@@ -860,7 +860,7 @@ class _BuildInstance {
         ErrorHandlingFileSystem.deleteIfExists(previousFile);
       }
     } on Exception catch (exception, stackTrace) {
-      // TODO(jonahwilliams): throw specific exception for expected errors to mark
+      // TODO(zanderso): throw specific exception for expected errors to mark
       // as non-fatal. All others should be fatal.
       node.target.clearStamp(environment);
       succeeded = false;

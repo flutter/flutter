@@ -55,69 +55,16 @@ enum MaterialBannerClosedReason {
 /// interact with them at any time.
 ///
 /// {@tool dartpad --template=stateless_widget_material}
-///
 /// Banners placed directly into the widget tree are static.
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return Scaffold(
-///     appBar: AppBar(
-///       title: const Text('The MaterialBanner is below'),
-///     ),
-///     body: const MaterialBanner(
-///       padding: EdgeInsets.all(20),
-///       content: Text('Hello, I am a Material Banner'),
-///       leading: Icon(Icons.agriculture_outlined),
-///       backgroundColor: Color(0xFFE0E0E0),
-///       actions: <Widget>[
-///         TextButton(
-///           child: Text('OPEN'),
-///           onPressed: null,
-///         ),
-///         TextButton(
-///           child: Text('DISMISS'),
-///           onPressed: null,
-///         ),
-///       ],
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/banner/material_banner.0.dart **
 /// {@end-tool}
 ///
 /// {@tool dartpad --template=stateless_widget_material}
-///
 /// MaterialBanner's can also be presented through a [ScaffoldMessenger].
 /// Here is an example where ScaffoldMessengerState.showMaterialBanner() is used to show the MaterialBanner.
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return Scaffold(
-///     appBar: AppBar(
-///       title: const Text('The MaterialBanner is below'),
-///     ),
-///     body: Center(
-///       child: ElevatedButton(
-///         child: const Text('Show MaterialBanner'),
-///         onPressed: () => ScaffoldMessenger.of(context).showMaterialBanner(
-///           const MaterialBanner(
-///             padding: EdgeInsets.all(20),
-///             content: Text('Hello, I am a Material Banner'),
-///             leading: Icon(Icons.agriculture_outlined),
-///             backgroundColor: Colors.green,
-///             actions: <Widget>[
-///               TextButton(
-///                 child: Text('DISMISS'),
-///                 onPressed: null,
-///               ),
-///             ],
-///           ),
-///         ),
-///       ),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/banner/material_banner.1.dart **
 /// {@end-tool}
 ///
 /// The [actions] will be placed beside the [content] if there is only one.
