@@ -22,12 +22,16 @@ Future<void> main() async {
         // Relative to this script.
         final String flutterRoot = path.dirname(path.dirname(path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))))));
         print('Flutter root at $flutterRoot');
+        final String gemDirectory = path.join(flutterRoot, 'dev', 'ci', 'mac');
+        print(gemDirectory);
         final String integrationTestPackage = path.join(flutterRoot, 'packages', 'integration_test');
         final String iosintegrationTestPodspec = path.join(integrationTestPackage, 'ios', 'integration_test.podspec');
 
         await exec(
-          'pod',
+          'bundle',
           <String>[
+            'exec',
+            'pod',
             'lib',
             'lint',
             iosintegrationTestPodspec,
@@ -38,12 +42,15 @@ Future<void> main() async {
           environment: <String, String>{
             'LANG': 'en_US.UTF-8',
           },
+          workingDirectory: gemDirectory,
         );
 
         final String macosintegrationTestPodspec = path.join(integrationTestPackage, 'integration_test_macos', 'macos', 'integration_test_macos.podspec');
         await exec(
-          'pod',
+          'bundle',
           <String>[
+            'exec',
+            'pod',
             'lib',
             'lint',
             macosintegrationTestPodspec,
@@ -53,6 +60,7 @@ Future<void> main() async {
           environment: <String, String>{
             'LANG': 'en_US.UTF-8',
           },
+          workingDirectory: gemDirectory,
         );
       });
 
