@@ -663,7 +663,7 @@ void main() {
     }
   });
 
-  group('FilteringTextInputFormatter default strategy', () {
+  group('FilteringTextInputFormatter region', () {
     const TextEditingValue oldValue = TextEditingValue.empty;
 
     test('Preserves selection region', () {

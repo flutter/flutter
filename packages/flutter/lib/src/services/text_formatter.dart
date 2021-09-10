@@ -383,7 +383,7 @@ class FilteringTextInputFormatter extends TextInputFormatter {
 
     if (replacementString.length == regionEnd - regionStart) {
       // We don't have to adjust the indices if the replaced string and the
-      // replacement has the same length.
+      // replacement string have the same length.
       return;
     }
 
