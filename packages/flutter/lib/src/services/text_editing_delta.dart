@@ -255,6 +255,18 @@ class TextEditingDeltaInsertion extends TextEditingDelta {
     // To stay inline with the plain text model we should follow a last write wins
     // policy and apply the delta to the oldText. This is due to the asyncronous
     // nature of the connection between the framework and platform text input plugins.
+    try {
+      if (oldText != value.text) {
+        throw FlutterError('The editing state is out of sync between the framework and the engine.');
+      }
+    } catch (exception, stack) {
+      FlutterError.reportError(FlutterErrorDetails(
+        exception: exception,
+        stack: stack,
+        library: 'services',
+        context: ErrorDescription('oldText != value.text'),
+      ));
+    }
     String newText = oldText;
     newText = _replace(newText, textInserted, insertionOffset, insertionOffset);
     return value.copyWith(text: newText, selection: selection, composing: composing);
@@ -290,6 +302,18 @@ class TextEditingDeltaDeletion extends TextEditingDelta {
     // To stay inline with the plain text model we should follow a last write wins
     // policy and apply the delta to the oldText. This is due to the asyncronous
     // nature of the connection between the framework and platform text input plugins.
+    try {
+      if (oldText != value.text) {
+        throw FlutterError('The editing state is out of sync between the framework and the engine.');
+      }
+    } catch (exception, stack) {
+      FlutterError.reportError(FlutterErrorDetails(
+        exception: exception,
+        stack: stack,
+        library: 'services',
+        context: ErrorDescription('oldText != value.text'),
+      ));
+    }
     String newText = oldText;
     newText = _replace(newText, '', deletedRange.start, deletedRange.end);
     return value.copyWith(text: newText, selection: selection, composing: composing);
@@ -335,6 +359,18 @@ class TextEditingDeltaReplacement extends TextEditingDelta {
     // To stay inline with the plain text model we should follow a last write wins
     // policy and apply the delta to the oldText. This is due to the asyncronous
     // nature of the connection between the framework and platform text input plugins.
+    try {
+      if (oldText != value.text) {
+        throw FlutterError('The editing state is out of sync between the framework and the engine.');
+      }
+    } catch (exception, stack) {
+      FlutterError.reportError(FlutterErrorDetails(
+        exception: exception,
+        stack: stack,
+        library: 'services',
+        context: ErrorDescription('oldText != value.text'),
+      ));
+    }
     String newText = oldText;
     newText = _replace(newText, replacementText, replacedRange.start, replacedRange.end);
     return value.copyWith(text: newText, selection: selection, composing: composing);
@@ -371,6 +407,18 @@ class TextEditingDeltaNonTextUpdate extends TextEditingDelta {
     // To stay inline with the plain text model we should follow a last write wins
     // policy and apply the delta to the oldText. This is due to the asyncronous
     // nature of the connection between the framework and platform text input plugins.
+    try {
+      if (oldText != value.text) {
+        throw FlutterError('The editing state is out of sync between the framework and the engine.');
+      }
+    } catch (exception, stack) {
+      FlutterError.reportError(FlutterErrorDetails(
+        exception: exception,
+        stack: stack,
+        library: 'services',
+        context: ErrorDescription('oldText != value.text'),
+      ));
+    }
     return TextEditingValue(text: oldText, selection: selection, composing: composing);
   }
 }

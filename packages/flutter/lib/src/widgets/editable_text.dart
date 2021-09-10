@@ -1799,6 +1799,30 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas) {
     TextEditingValue value = _value;
     for (final TextEditingDelta delta in textEditingDeltas) {
+      print('Delta class type: ' + delta.runtimeType.toString());
+      print('Delta old text: ' + delta.oldText);
+      if (delta is TextEditingDeltaInsertion) {
+        print('inserted text: ' + (delta as TextEditingDeltaInsertion).textInserted);
+        print('insertion offset: ' + (delta as TextEditingDeltaInsertion).insertionOffset.toString());
+      } else if (delta is TextEditingDeltaDeletion) {
+        print('Deleted text: ' + (delta as TextEditingDeltaDeletion).textDeleted);
+        print(
+            'Beginning of deleted range: ' + (delta as TextEditingDeltaDeletion).deletedRange.start.toString());
+        print('End of deleted range: ' + (delta as TextEditingDeltaDeletion).deletedRange.end.toString());
+
+      } else if (delta is TextEditingDeltaReplacement) {
+        print('text being replaced: ' + (delta as TextEditingDeltaReplacement).textReplaced);
+        print('replacement source: ' + (delta as TextEditingDeltaReplacement).replacementText);
+        print(
+            'beginning of replaced range: ' + (delta as TextEditingDeltaReplacement).replacedRange.start.toString());
+        print('end of replaced range: ' + (delta as TextEditingDeltaReplacement).replacedRange.end.toString());
+      }
+      print('Delta beginning of new selection: ' +
+          delta.selection.start.toString());
+      print('Delta end of new selection: ' + delta.selection.end.toString());
+      print('Delta beginning of new composing: ' +
+          delta.composing.start.toString());
+      print('Delta end of new composing: ' + delta.composing.end.toString());
       value = delta.apply(value);
     }
     updateEditingValue(value);
@@ -2696,6 +2720,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       keyboardAppearance: widget.keyboardAppearance,
       autofillConfiguration: autofillConfiguration,
       enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
+      enableDeltaModel: true,
     );
   }
 
