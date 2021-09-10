@@ -108,6 +108,12 @@ class ChangeNotifier implements Listenable {
   int _reentrantlyRemovedListeners = 0;
   bool _debugDisposed = false;
 
+  /// Whether or not this change notifier has been disposed.
+  ///
+  /// If a change notifier has been disposed, any calls to it's other public
+  /// methods will throw.
+  bool get isDisposed => _debugDisposed;
+
   bool _debugAssertNotDisposed() {
     assert(() {
       if (_debugDisposed) {
