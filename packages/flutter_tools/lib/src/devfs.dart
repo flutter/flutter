@@ -73,7 +73,7 @@ class DevFSFileContent extends DevFSContent {
   }
 
   void _stat() {
-    final File linkTarget = _linkTarget;
+    final File? linkTarget = _linkTarget;
     if (linkTarget != null) {
       // Stat the cached symlink target.
       final FileStat fileStat = linkTarget.statSync();
