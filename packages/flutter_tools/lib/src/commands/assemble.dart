@@ -22,7 +22,7 @@ import '../build_system/targets/web.dart';
 import '../build_system/targets/windows.dart';
 import '../cache.dart';
 import '../convert.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
@@ -85,11 +85,6 @@ List<Target> _kDefaultTargets = <Target>[
   const ReleaseBundleWindowsAssetsUwp(),
 ];
 
-// TODO(ianh): https://github.com/dart-lang/args/issues/181 will allow us to remove useLegacyNames
-// and just switch to arguments that use the regular style, which still supporting the old names.
-// When fixing this, remove the hack in test/general.shard/args_test.dart that ignores these names.
-const bool useLegacyNames = true;
-
 /// Assemble provides a low level API to interact with the flutter tool build
 /// system.
 class AssembleCommand extends FlutterCommand {
@@ -128,8 +123,8 @@ class AssembleCommand extends FlutterCommand {
         'files will be written. Must be either absolute or relative from the '
         'root of the current Flutter project.',
     );
-    usesExtraDartFlagOptions(verboseHelp: verboseHelp, useLegacyNames: useLegacyNames);
-    usesDartDefineOption(useLegacyNames: useLegacyNames);
+    usesExtraDartFlagOptions(verboseHelp: verboseHelp);
+    usesDartDefineOption();
     argParser.addOption(
       'resource-pool-size',
       help: 'The maximum number of concurrent tasks the build system will run.',
@@ -145,20 +140,20 @@ class AssembleCommand extends FlutterCommand {
   String get name => 'assemble';
 
   @override
-  Future<Map<CustomDimensions, String>> get usageValues async {
+  Future<CustomDimensions> get usageValues async {
     final FlutterProject flutterProject = FlutterProject.current();
     if (flutterProject == null) {
-      return const <CustomDimensions, String>{};
+      return const CustomDimensions();
     }
     try {
-      return <CustomDimensions, String>{
-        CustomDimensions.commandBuildBundleTargetPlatform: environment.defines[kTargetPlatform],
-        CustomDimensions.commandBuildBundleIsModule: '${flutterProject.isModule}',
-      };
+      return CustomDimensions(
+        commandBuildBundleTargetPlatform: environment.defines[kTargetPlatform],
+        commandBuildBundleIsModule: flutterProject.isModule,
+      );
     } on Exception {
       // We've failed to send usage.
     }
-    return const <CustomDimensions, String>{};
+    return const CustomDimensions();
   }
 
   @override
@@ -246,7 +241,8 @@ class AssembleCommand extends FlutterCommand {
       platform: globals.platform,
       engineVersion: globals.artifacts.isLocalEngine
         ? null
-        : globals.flutterVersion.engineRevision
+        : globals.flutterVersion.engineRevision,
+      generateDartPluginRegistry: true,
     );
     return result;
   }
@@ -262,18 +258,18 @@ class AssembleCommand extends FlutterCommand {
       final String value = chunk.substring(indexEquals + 1);
       results[key] = value;
     }
-    if (argResults.wasParsed(useLegacyNames ? kExtraGenSnapshotOptions : FlutterOptions.kExtraGenSnapshotOptions)) {
-      results[kExtraGenSnapshotOptions] = (argResults[useLegacyNames ? kExtraGenSnapshotOptions : FlutterOptions.kExtraGenSnapshotOptions] as List<String>).join(',');
+    if (argResults.wasParsed(FlutterOptions.kExtraGenSnapshotOptions)) {
+      results[kExtraGenSnapshotOptions] = (argResults[FlutterOptions.kExtraGenSnapshotOptions] as List<String>).join(',');
     }
-    if (argResults.wasParsed(useLegacyNames ? kDartDefines : FlutterOptions.kDartDefinesOption)) {
-      results[kDartDefines] = (argResults[useLegacyNames ? kDartDefines : FlutterOptions.kDartDefinesOption] as List<String>).join(',');
+    if (argResults.wasParsed(FlutterOptions.kDartDefinesOption)) {
+      results[kDartDefines] = (argResults[FlutterOptions.kDartDefinesOption] as List<String>).join(',');
     }
     results[kDeferredComponents] = 'false';
     if (FlutterProject.current().manifest.deferredComponents != null && isDeferredComponentsTargets() && !isDebug()) {
       results[kDeferredComponents] = 'true';
     }
-    if (argResults.wasParsed(useLegacyNames ? kExtraFrontEndOptions : FlutterOptions.kExtraFrontEndOptions)) {
-      results[kExtraFrontEndOptions] = (argResults[useLegacyNames ? kExtraFrontEndOptions : FlutterOptions.kExtraFrontEndOptions] as List<String>).join(',');
+    if (argResults.wasParsed(FlutterOptions.kExtraFrontEndOptions)) {
+      results[kExtraFrontEndOptions] = (argResults[FlutterOptions.kExtraFrontEndOptions] as List<String>).join(',');
     }
     return results;
   }

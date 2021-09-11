@@ -469,7 +469,7 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
   }
 
   @override
-  _CupertinoSliverRefreshControlState createState() => _CupertinoSliverRefreshControlState();
+  State<CupertinoSliverRefreshControl> createState() => _CupertinoSliverRefreshControlState();
 }
 
 class _CupertinoSliverRefreshControlState extends State<CupertinoSliverRefreshControl> {

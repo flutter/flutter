@@ -68,9 +68,9 @@ void main() {
       expect(frames.contains(StackFrame.stackOverFlowElision), true);
     }
     expect(overflowed, true);
-  }, skip: isBrowser); // The VM test harness can handle a stack overflow, but
-  // the browser cannot - running this test in a browser will cause it to become
-  // unresponsive.
+  }, skip: isBrowser); // [intended] The VM test harness can handle a
+  // stack overflow, but the browser cannot - running this test in a browser
+  // will cause it to become unresponsive.
 
   test('Traces from package:stack_trace throw assertion', () {
     try {
@@ -279,7 +279,7 @@ package:dart-sdk/lib/async/schedule_microtask.dart 52:5                         
 package:dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 168:15           <fn>''';
 
 const List<StackFrame> webStackTraceFrames = <StackFrame>[
-  StackFrame(number: -1, className: '<unknown>', method: 'throw_',                packageScheme: 'package',   package: 'dart-sdk',   packagePath: 'lib/_intenral/js_dev_runtime/private/ddc_runtime/errors.dart', line: 196,  column: 49, source: 'package:dart-sdk/lib/_internal/js_dev_runtime/private/ddc_runtime/errors.dart 196:49  throw_'),
+  StackFrame(number: -1, className: '<unknown>', method: 'throw_',                packageScheme: 'package',   package: 'dart-sdk',   packagePath: 'lib/_internal/js_dev_runtime/private/ddc_runtime/errors.dart', line: 196,  column: 49, source: 'package:dart-sdk/lib/_internal/js_dev_runtime/private/ddc_runtime/errors.dart 196:49  throw_'),
   StackFrame(number: -1, className: '<unknown>', method: 'blah',                  packageScheme: 'package',   package: 'assertions', packagePath: 'main.dart',                                                    line: 4,    column: 3, source: 'package:assertions/main.dart 4:3                                                      blah'),
   StackFrame(number: -1, className: '<unknown>', method: r'main$',                packageScheme: 'package',   package: 'assertions', packagePath: 'main.dart',                                                    line: 8,    column: 5, source: r'package:assertions/main.dart 8:5                                                      main$'),
   StackFrame(number: -1, className: '<unknown>', method: r'main$',                packageScheme: 'package',   package: 'assertions', packagePath: 'main_web_entrypoint.dart',                                     line: 9,    column: 3, source: r'package:assertions/main_web_entrypoint.dart 9:3                                       main$'),

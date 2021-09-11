@@ -124,6 +124,15 @@ Future<void> expectToolExitLater(Future<dynamic> future, Matcher messageMatcher)
   }
 }
 
+Future<void> expectReturnsNormallyLater(Future<dynamic> future) async {
+  try {
+    await future;
+  // Catch all exceptions to give a better test failure message.
+  } catch (e, trace) { // ignore: avoid_catches_without_on_clauses
+    fail('Expected to run with no exceptions, got $e\n$trace');
+  }
+}
+
 Matcher containsIgnoringWhitespace(String toSearch) {
   return predicate(
     (String source) {
@@ -164,7 +173,7 @@ void test(String description, FutureOr<void> Function() body, {
 
 /// Executes a test body in zone that does not allow context-based injection.
 ///
-/// For classes which have been refactored to excluded context-based injection
+/// For classes which have been refactored to exclude context-based injection
 /// or globals like [fs] or [platform], prefer using this test method as it
 /// will prevent accidentally including these context getters in future code
 /// changes.
@@ -244,6 +253,8 @@ class _NoContext implements AppContext {
 /// ```
 class FileExceptionHandler {
   final Map<String, Map<FileSystemOp, FileSystemException>> _contextErrors = <String, Map<FileSystemOp, FileSystemException>>{};
+  final Map<FileSystemOp, FileSystemException> _tempErrors = <FileSystemOp, FileSystemException>{};
+  static final RegExp _tempDirectoryEnd = RegExp('rand[0-9]+');
 
   /// Add an exception that will be thrown whenever the file system attached to this
   /// handler performs the [operation] on the [entity].
@@ -253,8 +264,18 @@ class FileExceptionHandler {
     _contextErrors[path]![operation] = exception;
   }
 
-  // Tear-off this method and pass it to the memory filesystem `opHandle` parameter.
+  void addTempError(FileSystemOp operation, FileSystemException exception) {
+    _tempErrors[operation] = exception;
+  }
+
+  /// Tear-off this method and pass it to the memory filesystem `opHandle` parameter.
   void opHandle(String path, FileSystemOp operation) {
+    if (path.startsWith('.tmp_') || _tempDirectoryEnd.firstMatch(path) != null) {
+      final FileSystemException? exception = _tempErrors[operation];
+      if (exception != null) {
+        throw exception;
+      }
+    }
     final Map<FileSystemOp, FileSystemException>? exceptions = _contextErrors[path];
     if (exceptions == null) {
       return;

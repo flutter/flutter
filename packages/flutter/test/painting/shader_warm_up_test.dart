@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -32,4 +35,27 @@ void main() {
 
     expect(hasDrawRectAfterClipRRect, true);
   });
+
+  test('ShaderWarmUp.execute disposes the image and picture', () async {
+    const DefaultShaderWarmUp shaderWarmUp = DefaultShaderWarmUp();
+    late ui.Picture capturedPicture;
+    late ui.Image capturedImage;
+    debugCaptureShaderWarmUpPicture = (ui.Picture picture) {
+      capturedPicture = picture;
+      expect(picture.approximateBytesUsed, greaterThan(0));
+      return true;
+    };
+    debugCaptureShaderWarmUpImage = (ui.Image image) {
+      capturedImage = image;
+      expect(image.width, 100);
+      expect(image.height, 100);
+      return true;
+    };
+    await shaderWarmUp.execute();
+    expect(
+      () => capturedPicture.approximateBytesUsed,
+      throwsA(isA<String>().having((String message) => message, 'message', 'Object has been disposed.')),
+    );
+    expect(capturedImage.debugDisposed, true);
+  }, skip: kIsWeb); // [intended] Browser doesn't support approximateBytesUsed and doesn't rasterize the picture at this time.
 }

@@ -7,11 +7,10 @@
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
-import 'package:flutter_tools/src/build_system/targets/assets.dart';
 import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/linux.dart';
 import 'package:flutter_tools/src/convert.dart';
@@ -145,7 +144,7 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testWithoutContext('DebugBundleLinuxAssets\'s name depends on target platforms', () async {
+  testWithoutContext("DebugBundleLinuxAssets' name depends on target platforms", () async {
     expect(const DebugBundleLinuxAssets(TargetPlatform.linux_x64).name, 'debug_bundle_linux-x64_assets');
     expect(const DebugBundleLinuxAssets(TargetPlatform.linux_arm64).name, 'debug_bundle_linux-arm64_assets');
   });
@@ -184,7 +183,7 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testWithoutContext('ProfileBundleLinuxAssets\'s name depends on target platforms', () async {
+  testWithoutContext("ProfileBundleLinuxAssets' name depends on target platforms", () async {
     expect(const ProfileBundleLinuxAssets(TargetPlatform.linux_x64).name, 'profile_bundle_linux-x64_assets');
     expect(const ProfileBundleLinuxAssets(TargetPlatform.linux_arm64).name, 'profile_bundle_linux-arm64_assets');
   });
@@ -223,7 +222,7 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testWithoutContext('ReleaseBundleLinuxAssets\'s name depends on target platforms', () async {
+  testWithoutContext("ReleaseBundleLinuxAssets' name depends on target platforms", () async {
     expect(const ReleaseBundleLinuxAssets(TargetPlatform.linux_x64).name, 'release_bundle_linux-x64_assets');
     expect(const ReleaseBundleLinuxAssets(TargetPlatform.linux_arm64).name, 'release_bundle_linux-arm64_assets');
   });

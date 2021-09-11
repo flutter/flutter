@@ -338,8 +338,8 @@ class SingleChildScrollView extends StatelessWidget {
         return _SingleChildViewport(
           axisDirection: axisDirection,
           offset: offset,
-          child: contents,
           clipBehavior: clipBehavior,
+          child: contents,
         );
       },
     );
@@ -620,22 +620,28 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
       }
 
       if (_shouldClipAtPaintOffset(paintOffset) && clipBehavior != Clip.none) {
-        _clipRectLayer = context.pushClipRect(
+        _clipRectLayer.layer = context.pushClipRect(
           needsCompositing,
           offset,
           Offset.zero & size,
           paintContents,
           clipBehavior: clipBehavior,
-          oldLayer: _clipRectLayer,
+          oldLayer: _clipRectLayer.layer,
         );
       } else {
-        _clipRectLayer = null;
+        _clipRectLayer.layer = null;
         paintContents(context, offset);
       }
     }
   }
 
-  ClipRectLayer? _clipRectLayer;
+  final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();
+
+  @override
+  void dispose() {
+    _clipRectLayer.layer = null;
+    super.dispose();
+  }
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {

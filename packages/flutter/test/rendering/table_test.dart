@@ -10,7 +10,7 @@ import 'rendering_tester.dart';
 
 RenderBox sizedBox(double width, double height) {
   return RenderConstrainedBox(
-    additionalConstraints: BoxConstraints.tight(Size(width, height))
+    additionalConstraints: BoxConstraints.tight(Size(width, height)),
   );
 }
 
@@ -253,4 +253,26 @@ void main() {
     layout(table, constraints: BoxConstraints.tight(const Size(800.0, 600.0)));
     expect(table.hasSize, true);
   });
+
+  test('Table paints a borderRadius', () {
+    final RenderTable table = RenderTable(
+      textDirection: TextDirection.ltr,
+      border: TableBorder.all(borderRadius: BorderRadius.circular(8.0)),
+    );
+    layout(table);
+    table.setFlatChildren(2, <RenderBox>[
+      RenderPositionedBox(), RenderPositionedBox(),
+      RenderPositionedBox(), RenderPositionedBox(),
+    ]);
+    pumpFrame();
+    expect(table, paints
+      ..path()
+      ..path()
+      ..drrect(
+        outer: RRect.fromLTRBR(0.0, 0.0, 800.0, 0.0, const Radius.circular(8.0)),
+        inner: RRect.fromLTRBR(1.0, 1.0, 799.0, -1.0, const Radius.circular(7.0)),
+      )
+    );
+  });
+
 }

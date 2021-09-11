@@ -18,7 +18,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/dart/analysis.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
@@ -91,7 +91,7 @@ void main() {
       );
 
       server = AnalysisServer(
-        globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+        globals.artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path,
         <String>[tempDir.path],
         fileSystem: fileSystem,
         platform: platform,
@@ -129,7 +129,7 @@ void main() {
     );
 
       server = AnalysisServer(
-        globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+        globals.artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path,
         <String>[tempDir.path],
         fileSystem: fileSystem,
         platform: platform,
@@ -154,7 +154,7 @@ void main() {
     const String contents = "StringBuffer bar = StringBuffer('baz');";
     tempDir.childFile('main.dart').writeAsStringSync(contents);
     server = AnalysisServer(
-      globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+      globals.artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path,
       <String>[tempDir.path],
       fileSystem: fileSystem,
       platform: platform,
@@ -180,13 +180,13 @@ void main() {
       <FakeCommand>[
         FakeCommand(
           command: const <String>[
-            'Artifact.engineDartSdkPath/bin/dart',
+            'HostArtifact.engineDartSdkPath/bin/dart',
             '--disable-dart-dev',
-            'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
+            'HostArtifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
             '--disable-server-feature-completion',
             '--disable-server-feature-search',
             '--sdk',
-            'Artifact.engineDartSdkPath',
+            'HostArtifact.engineDartSdkPath',
           ],
           completer: completer,
           stdin: IOSink(stdin.sink),
@@ -218,13 +218,13 @@ void main() {
       <FakeCommand>[
         FakeCommand(
           command: const <String>[
-            'Artifact.engineDartSdkPath/bin/dart',
+            'HostArtifact.engineDartSdkPath/bin/dart',
             '--disable-dart-dev',
-            'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
+            'HostArtifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
             '--disable-server-feature-completion',
             '--disable-server-feature-search',
             '--sdk',
-            'Artifact.engineDartSdkPath',
+            'HostArtifact.engineDartSdkPath',
           ],
           completer: completer,
           stdin: IOSink(stdin.sink),

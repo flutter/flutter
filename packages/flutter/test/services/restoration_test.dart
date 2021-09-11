@@ -18,7 +18,7 @@ void main() {
     testWidgets('root bucket retrieval', (WidgetTester tester) async {
       final List<MethodCall> callsToEngine = <MethodCall>[];
       final Completer<Map<dynamic, dynamic>> result = Completer<Map<dynamic, dynamic>>();
-      SystemChannels.restoration.setMockMethodCallHandler((MethodCall call) {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (MethodCall call) {
         callsToEngine.add(call);
         return result.future;
       });
@@ -64,7 +64,7 @@ void main() {
     testWidgets('root bucket received from engine before retrieval', (WidgetTester tester) async {
       SystemChannels.restoration.setMethodCallHandler(null);
       final List<MethodCall> callsToEngine = <MethodCall>[];
-      SystemChannels.restoration.setMockMethodCallHandler((MethodCall call) async {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (MethodCall call) async {
         callsToEngine.add(call);
       });
       final RestorationManager manager = RestorationManager();
@@ -83,7 +83,7 @@ void main() {
       SystemChannels.restoration.setMethodCallHandler(null);
       final List<MethodCall> callsToEngine = <MethodCall>[];
       final Completer<Map<dynamic, dynamic>> result = Completer<Map<dynamic, dynamic>>();
-      SystemChannels.restoration.setMockMethodCallHandler((MethodCall call) {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (MethodCall call) {
         callsToEngine.add(call);
         return result.future;
       });
@@ -110,7 +110,7 @@ void main() {
     });
 
     testWidgets('root bucket is properly replaced when new data is available', (WidgetTester tester) async {
-      SystemChannels.restoration.setMockMethodCallHandler((MethodCall call) async {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (MethodCall call) async {
         return _createEncodedRestorationData1();
       });
       final RestorationManager manager = RestorationManager();
@@ -152,7 +152,7 @@ void main() {
     testWidgets('returns null as root bucket when restoration is disabled', (WidgetTester tester) async {
       final List<MethodCall> callsToEngine = <MethodCall>[];
       final Completer<Map<dynamic, dynamic>> result = Completer<Map<dynamic, dynamic>>();
-      SystemChannels.restoration.setMockMethodCallHandler((MethodCall call)  {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (MethodCall call)  {
         callsToEngine.add(call);
         return result.future;
       });
@@ -195,7 +195,7 @@ void main() {
     testWidgets('flushData', (WidgetTester tester) async {
       final List<MethodCall> callsToEngine = <MethodCall>[];
       final Completer<Map<dynamic, dynamic>> result = Completer<Map<dynamic, dynamic>>();
-      SystemChannels.restoration.setMockMethodCallHandler((MethodCall call) {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (MethodCall call) {
         callsToEngine.add(call);
         return result.future;
       });
@@ -230,7 +230,7 @@ void main() {
 
     testWidgets('isReplacing', (WidgetTester tester) async {
       final Completer<Map<dynamic, dynamic>> result = Completer<Map<dynamic, dynamic>>();
-      SystemChannels.restoration.setMockMethodCallHandler((MethodCall call) {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (MethodCall call) {
         return result.future;
       });
 
@@ -257,7 +257,7 @@ void main() {
         rootBucket2 = bucket;
       });
       expect(rootBucket2, isNotNull);
-      expect(rootBucket2!, isNot(same(rootBucket)));
+      expect(rootBucket2, isNot(same(rootBucket)));
       expect(manager.isReplacing, isTrue);
       expect(rootBucket2!.isReplacing, isTrue);
       await tester.idle();
@@ -322,7 +322,7 @@ Map<dynamic, dynamic> _createEncodedRestorationData1() {
       'child1' : <String, dynamic>{
         valuesMapKey : <String, dynamic>{
           'another value': 22,
-        }
+        },
       },
     },
   };
@@ -338,7 +338,7 @@ Map<dynamic, dynamic> _createEncodedRestorationData2() {
       'childFoo' : <String, dynamic>{
         valuesMapKey : <String, dynamic>{
           'bar': 'Hello',
-        }
+        },
       },
     },
   };

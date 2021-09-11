@@ -5,6 +5,14 @@
 #import "AppDelegate.h"
 #import "MainViewController.h"
 
+@implementation GREYHostApplicationDistantObject (AppDelegate)
+
+- (NSNotificationCenter *)notificationCenter {
+  return [NSNotificationCenter defaultCenter];
+}
+
+@end
+
 @interface AppDelegate ()
 
 @property(nonatomic, strong, readwrite) FlutterEngine* engine;

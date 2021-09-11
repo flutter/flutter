@@ -22,7 +22,7 @@ Future<void> main() async {
 
     section('Find Java');
 
-    final String javaHome = await findJavaHome();
+    final String? javaHome = await findJavaHome();
     if (javaHome == null)
       return TaskResult.failure('Could not find Java');
     print('\nUsing JAVA_HOME=$javaHome');
@@ -48,7 +48,7 @@ Future<void> main() async {
         );
       });
 
-      section('Create plugin that doesn\'t support android project');
+      section("Create plugin that doesn't support android project");
 
       await inDirectory(tempDir, () async {
         await flutter(
@@ -262,7 +262,7 @@ Future<void> main() async {
     } catch (e) {
       return TaskResult.failure(e.toString());
     } finally {
-      rmTree(tempDir);
+      // rmTree(tempDir);
     }
   });
 }

@@ -39,7 +39,7 @@ void main() {
     setUp(() {
       fakeCommandRunner = FakeUpgradeCommandRunner();
       realCommandRunner = UpgradeCommandRunner();
-      processManager = FakeProcessManager.list(<FakeCommand>[]);
+      processManager = FakeProcessManager.empty();
       fakeCommandRunner.willHaveUncommittedChanges = false;
       fakePlatform = FakePlatform()..environment = Map<String, String>.unmodifiable(<String, String>{
         'ENV1': 'irrelevant',
@@ -199,8 +199,12 @@ void main() {
       ]);
 
       await expectLater(
-            () async => realCommandRunner.fetchLatestVersion(),
-        throwsToolExit(message: 'You are not currently on a release branch.'),
+        () async => realCommandRunner.fetchLatestVersion(),
+        throwsToolExit(message: 'Unable to upgrade Flutter: Your Flutter checkout '
+          'is currently not on a release branch.\n'
+          'Use "flutter channel" to switch to an official channel, and retry. '
+          'Alternatively, re-install Flutter by going to https://flutter.dev/docs/get-started/install.'
+        ),
       );
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
@@ -208,7 +212,7 @@ void main() {
       Platform: () => fakePlatform,
     });
 
-    testUsingContext('fetchRemoteRevision throws toolExit if no upstream configured', () async {
+    testUsingContext('fetchLatestVersion throws toolExit if no upstream configured', () async {
       processManager.addCommands(const <FakeCommand>[
         FakeCommand(command: <String>[
           'git', 'fetch', '--tags'
@@ -224,9 +228,10 @@ void main() {
       ]);
 
       await expectLater(
-            () async => realCommandRunner.fetchLatestVersion(),
-        throwsToolExit(
-          message: 'Unable to upgrade Flutter: no origin repository configured.',
+        () async => realCommandRunner.fetchLatestVersion(),
+        throwsToolExit(message: 'Unable to upgrade Flutter: The current Flutter '
+          'branch/channel is not tracking any remote repository.\n'
+          'Re-install Flutter by going to https://flutter.dev/docs/get-started/install.'
         ),
       );
       expect(processManager, hasNoRemainingExpectations);

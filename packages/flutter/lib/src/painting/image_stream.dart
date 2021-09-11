@@ -614,6 +614,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
 
   /// Calls all the registered listeners to notify them of a new image.
   @protected
+  @pragma('vm:notify-debugger-on-exception')
   void setImage(ImageInfo image) {
     _checkDisposed();
     _currentImage?.dispose();
@@ -667,7 +668,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
   /// messages, but errors during development will still be reported.
   ///
   /// See [FlutterErrorDetails] for further details on these values.
-  @protected
+  @pragma('vm:notify-debugger-on-exception')
   void reportError({
     DiagnosticsNode? context,
     required Object exception,
@@ -717,7 +718,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
   /// [ImageStreamListener.onChunk] specified) to notify them of a new
   /// [ImageChunkEvent].
   @protected
-  void reportImageChunkEvent(ImageChunkEvent event){
+  void reportImageChunkEvent(ImageChunkEvent event) {
     _checkDisposed();
     if (hasListeners) {
       // Make a copy to allow for concurrent modification.
@@ -973,7 +974,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
 
   @override
   void addListener(ImageStreamListener listener) {
-    if (!hasListeners && _codec != null)
+    if (!hasListeners && _codec != null && (_currentImage == null || _codec!.frameCount > 1))
       _decodeNextFrameAndSchedule();
     super.addListener(listener);
   }

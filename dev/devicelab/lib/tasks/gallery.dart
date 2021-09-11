@@ -6,9 +6,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 
-import '../framework/adb.dart';
+import '../framework/devices.dart';
 import '../framework/framework.dart';
-import '../framework/host_agent.dart';
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
@@ -54,9 +53,9 @@ class GalleryTransitionTest {
   final bool needFullTimeline;
   final String testFile;
   final String timelineSummaryFile;
-  final String timelineTraceFile;
-  final String transitionDurationFile;
-  final String driverFile;
+  final String? timelineTraceFile;
+  final String? transitionDurationFile;
+  final String? driverFile;
 
   Future<TaskResult> call() async {
     final Device device = await devices.workingDevice;
@@ -64,7 +63,7 @@ class GalleryTransitionTest {
     final String deviceId = device.deviceId;
     final Directory galleryDirectory = dir('${flutterDirectory.path}/dev/integration_tests/flutter_gallery');
     await inDirectory<void>(galleryDirectory, () async {
-      String applicationBinaryPath;
+      String? applicationBinaryPath;
       if (deviceOperatingSystem == DeviceOperatingSystem.android) {
         section('BUILDING APPLICATION');
         await flutter(
@@ -87,6 +86,7 @@ class GalleryTransitionTest {
           : '${testFile}_test');
       section('DRIVE START');
       await flutter('drive', options: <String>[
+        '--no-dds',
         '--profile',
         if (needFullTimeline)
           '--trace-startup',
@@ -101,8 +101,6 @@ class GalleryTransitionTest {
         'test_driver/$testDriver.dart',
         '-d',
         deviceId,
-        '--screenshot',
-        hostAgent.dumpDirectory.path,
       ]);
     });
 

@@ -71,7 +71,7 @@ class RecipeGridPage extends StatefulWidget {
   final List<Recipe?>? recipes;
 
   @override
-  _RecipeGridPageState createState() => _RecipeGridPageState();
+  State<RecipeGridPage> createState() => _RecipeGridPageState();
 }
 
 class _RecipeGridPageState extends State<RecipeGridPage> {
@@ -195,7 +195,7 @@ class PestoLogo extends StatefulWidget {
   final double? t;
 
   @override
-  _PestoLogoState createState() => _PestoLogoState();
+  State<PestoLogo> createState() => _PestoLogoState();
 }
 
 class _PestoLogoState extends State<PestoLogo> {
@@ -319,7 +319,7 @@ class RecipePage extends StatefulWidget {
   final Recipe? recipe;
 
   @override
-  _RecipePageState createState() => _RecipePageState();
+  State<RecipePage> createState() => _RecipePageState();
 }
 
 class _RecipePageState extends State<RecipePage> {

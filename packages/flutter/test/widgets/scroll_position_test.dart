@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 ScrollController _controller = ScrollController(
   initialScrollOffset: 110.0,
@@ -137,7 +137,7 @@ Future<void> performTest(WidgetTester tester, bool maintainState) async {
 }
 
 void main() {
-  testWidgets('ScrollPosition jumpTo() doesn\'t call notifyListeners twice', (WidgetTester tester) async {
+  testWidgets("ScrollPosition jumpTo() doesn't call notifyListeners twice", (WidgetTester tester) async {
     int count = 0;
     await tester.pumpWidget(MaterialApp(
       home: ListView.builder(

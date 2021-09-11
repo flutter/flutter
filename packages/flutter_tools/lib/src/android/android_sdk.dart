@@ -47,13 +47,19 @@ class AndroidSdk {
   List<AndroidSdkVersion> _sdkVersions = <AndroidSdkVersion>[];
   AndroidSdkVersion? _latestVersion;
 
+  /// Whether the `cmdline-tools` directory exists in the Android SDK.
+  ///
+  /// This is required to use the newest SDK manager which only works with
+  /// the newer JDK.
+  bool get cmdlineToolsAvailable => directory.childDirectory('cmdline-tools').existsSync();
+
   /// Whether the `platform-tools` or `cmdline-tools` directory exists in the Android SDK.
   ///
   /// It is possible to have an Android SDK folder that is missing this with
   /// the expectation that it will be downloaded later, e.g. by gradle or the
   /// sdkmanager. The [licensesAvailable] property should be used to determine
   /// whether the licenses are at least possibly accepted.
-  bool get platformToolsAvailable => directory.childDirectory('cmdline-tools').existsSync()
+  bool get platformToolsAvailable => cmdlineToolsAvailable
      || directory.childDirectory('platform-tools').existsSync();
 
   /// Whether the `licenses` directory exists in the Android SDK.
@@ -262,7 +268,7 @@ class AndroidSdk {
     return null;
   }
 
-  String? getCmdlineToolsPath(String binaryName) {
+  String? getCmdlineToolsPath(String binaryName, {bool skipOldTools = false}) {
     // First look for the latest version of the command-line tools
     final File cmdlineToolsLatestBinary = directory
       .childDirectory('cmdline-tools')
@@ -300,6 +306,9 @@ class AndroidSdk {
           return cmdlineToolsBinary.path;
         }
       }
+    }
+    if (skipOldTools) {
+      return null;
     }
 
     // Finally fallback to the old SDK tools
@@ -386,23 +395,15 @@ class AndroidSdk {
   }
 
   /// Returns the filesystem path of the Android SDK manager tool.
-  ///
-  /// The sdkmanager was previously in the tools directory but this component
-  /// was marked as obsolete in 3.6.
-  String get sdkManagerPath {
+  String? get sdkManagerPath {
     final String executable = globals.platform.isWindows
       ? 'sdkmanager.bat'
       : 'sdkmanager';
-    final String? path = getCmdlineToolsPath(executable);
+    final String? path = getCmdlineToolsPath(executable, skipOldTools: true);
     if (path != null) {
       return path;
     }
-    // If no binary was found, return the default location
-    return directory
-      .childDirectory('tools')
-      .childDirectory('bin')
-      .childFile(executable)
-      .path;
+    return null;
   }
 
   /// First try Java bundled with Android Studio, then sniff JAVA_HOME, then fallback to PATH.
@@ -468,11 +469,14 @@ class AndroidSdk {
 
   /// Returns the version of the Android SDK manager tool or null if not found.
   String? get sdkManagerVersion {
-    if (!globals.processManager.canRun(sdkManagerPath)) {
-      throwToolExit('Android sdkmanager not found. Update to the latest Android SDK to resolve this.');
+    if (sdkManagerPath == null || !globals.processManager.canRun(sdkManagerPath)) {
+      throwToolExit(
+        'Android sdkmanager not found. Update to the latest Android SDK and ensure that '
+        'the cmdline-tools are installed to resolve this.'
+      );
     }
     final RunResult result = globals.processUtils.runSync(
-      <String>[sdkManagerPath, '--version'],
+      <String>[sdkManagerPath!, '--version'],
       environment: sdkManagerEnv,
     );
     if (result.exitCode != 0) {
@@ -536,7 +540,7 @@ class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
   }
 
   String getBuildToolsPath(String binaryName) {
-   return sdk.directory.childDirectory('build-tools').childDirectory(buildToolsVersionName).childFile(binaryName).path;
+    return sdk.directory.childDirectory('build-tools').childDirectory(buildToolsVersionName).childFile(binaryName).path;
   }
 
   @override

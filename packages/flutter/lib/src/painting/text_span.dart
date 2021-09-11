@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show ParagraphBuilder;
+import 'dart:ui' as ui show ParagraphBuilder, Locale, StringAttribute, LocaleStringAttribute, SpellOutStringAttribute;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -74,6 +74,8 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
     this.onEnter,
     this.onExit,
     this.semanticsLabel,
+    this.locale,
+    this.spellOut,
   }) : mouseCursor = mouseCursor ??
          (recognizer == null ? MouseCursor.defer : SystemMouseCursors.click),
        assert(!(text == null && semanticsLabel != null)),
@@ -127,7 +129,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
   ///   const BuzzingText({Key? key}) : super(key: key);
   ///
   ///   @override
-  ///   _BuzzingTextState createState() => _BuzzingTextState();
+  ///   State<BuzzingText> createState() => _BuzzingTextState();
   /// }
   ///
   /// class _BuzzingTextState extends State<BuzzingText> {
@@ -218,6 +220,32 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
   /// ```
   final String? semanticsLabel;
 
+  /// The language of the text in this span and its span children.
+  ///
+  /// Setting the locale of this text span affects the way that assistive
+  /// technologies, such as VoiceOver or TalkBack, pronounce the text.
+  ///
+  /// If this span contains other text span children, they also inherit the
+  /// locale from this span unless explicitly set to different locales.
+  final ui.Locale? locale;
+
+  /// Whether the assistive technologies should spell out this text character
+  /// by character.
+  ///
+  /// If the text is 'hello world', setting this to true causes the assistive
+  /// technologies, such as VoiceOver or TalkBack, to pronounce
+  /// 'h-e-l-l-o-space-w-o-r-l-d' instead of complete words. This is useful for
+  /// texts, such as passwords or verification codes.
+  ///
+  /// If this span contains other text span children, they also inherit the
+  /// property from this span unless explicitly set.
+  ///
+  /// If the property is not set, this text span inherits the spell out setting
+  /// from its parent. If this text span does not have a parent or the parent
+  /// does not have a spell out setting, this text span does not spell out the
+  /// text by default.
+  final bool? spellOut;
+
   @override
   bool get validForMouseTracker => true;
 
@@ -244,8 +272,20 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
     final bool hasStyle = style != null;
     if (hasStyle)
       builder.pushStyle(style!.getTextStyle(textScaleFactor: textScaleFactor));
-    if (text != null)
-      builder.addText(text!);
+    if (text != null) {
+      try {
+        builder.addText(text!);
+      } on ArgumentError catch (exception, stack) {
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'painting library',
+          context: ErrorDescription('while building a TextSpan'),
+        ));
+        // Use a Unicode replacement character as a substitute for invalid text.
+        builder.addText('\uFFFD');
+      }
+    }
     if (children != null) {
       for (final InlineSpan child in children!) {
         assert(child != null);
@@ -321,18 +361,39 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
   }
 
   @override
-  void computeSemanticsInformation(List<InlineSpanSemanticsInformation> collector) {
+  void computeSemanticsInformation(
+    List<InlineSpanSemanticsInformation> collector, {
+    ui.Locale? inheritedLocale,
+    bool inheritedSpellOut = false,
+  }) {
     assert(debugAssertIsValid());
+    final ui.Locale? effectiveLocale = locale ?? inheritedLocale;
+    final bool effectiveSpellOut = spellOut ?? inheritedSpellOut;
+
     if (text != null) {
       collector.add(InlineSpanSemanticsInformation(
         text!,
+        stringAttributes: <ui.StringAttribute>[
+          if (effectiveSpellOut)
+            ui.SpellOutStringAttribute(range: TextRange(start: 0, end: semanticsLabel?.length ?? text!.length)),
+          if (effectiveLocale != null)
+            ui.LocaleStringAttribute(locale: effectiveLocale, range: TextRange(start: 0, end: semanticsLabel?.length ?? text!.length)),
+        ],
         semanticsLabel: semanticsLabel,
         recognizer: recognizer,
       ));
     }
     if (children != null) {
       for (final InlineSpan child in children!) {
-        child.computeSemanticsInformation(collector);
+        if (child is TextSpan) {
+          child.computeSemanticsInformation(
+            collector,
+            inheritedLocale: effectiveLocale,
+            inheritedSpellOut: effectiveSpellOut,
+          );
+        } else {
+          child.computeSemanticsInformation(collector);
+        }
       }
     }
   }
@@ -371,7 +432,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
     offset.increment(text != null ? text!.length : 0);
   }
 
-  /// In checked mode, throws an exception if the object is not in a valid
+  /// In debug mode, throws an exception if the object is not in a valid
   /// configuration. Otherwise, returns true.
   ///
   /// This is intended to be used as follows:

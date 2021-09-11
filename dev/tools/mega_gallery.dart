@@ -162,7 +162,7 @@ class SourceStats {
   String toString() => '${_comma(files).padLeft(3)} files, ${_comma(lines).padLeft(6)} lines';
 }
 
-SourceStats getStatsFor(Directory dir, [SourceStats stats]) {
+SourceStats getStatsFor(Directory dir, [SourceStats? stats]) {
   stats ??= SourceStats();
 
   for (final FileSystemEntity entity in dir.listSync(recursive: false, followLinks: false)) {
@@ -190,6 +190,6 @@ int _lineCount(File file) {
 String _comma(int count) {
   final String str = count.toString();
   if (str.length > 3)
-    return str.substring(0, str.length - 3) + ',' + str.substring(str.length - 3);
+    return '${str.substring(0, str.length - 3)},${str.substring(str.length - 3)}';
   return str;
 }

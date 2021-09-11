@@ -12,19 +12,19 @@ void main() {
 }
 
 class Flavor extends StatefulWidget {
-  const Flavor({Key key}) : super(key: key);
+  const Flavor({Key? key}) : super(key: key);
 
   @override
-  _FlavorState createState() => _FlavorState();
+  State<Flavor> createState() => _FlavorState();
 }
 
 class _FlavorState extends State<Flavor> {
-  String _flavor;
+  String? _flavor;
 
   @override
   void initState() {
     super.initState();
-    const MethodChannel('flavor').invokeMethod<String>('getFlavor').then((String flavor) {
+    const MethodChannel('flavor').invokeMethod<String>('getFlavor').then((String? flavor) {
       setState(() {
         _flavor = flavor;
       });
@@ -37,7 +37,7 @@ class _FlavorState extends State<Flavor> {
       textDirection: TextDirection.ltr,
       child: _flavor == null
         ? const Text('Awaiting flavor...')
-        : Text(_flavor, key: const ValueKey<String>('flavor')),
+        : Text(_flavor!, key: const ValueKey<String>('flavor')),
     );
   }
 }

@@ -333,7 +333,7 @@ class IOSScrollViewFlingVelocityTracker extends VelocityTracker {
 
   @override
   VelocityEstimate getVelocityEstimate() {
-    // The velocity estimated using this expression is an aproximation of the
+    // The velocity estimated using this expression is an approximation of the
     // scroll velocity of an iOS scroll view at the moment the user touch was
     // released, not the final velocity of the iOS pan gesture recognizer
     // installed on the scroll view would report. Typically in an iOS scroll

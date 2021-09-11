@@ -17,9 +17,13 @@ Future<void> pumpTest(
   bool scrollable = true,
   bool reverse = false,
   ScrollController? controller,
+  bool enableMouseDrag = true,
 }) async {
   await tester.pumpWidget(MaterialApp(
-    scrollBehavior: const NoScrollbarBehavior(),
+    scrollBehavior: const NoScrollbarBehavior().copyWith(dragDevices: enableMouseDrag
+      ? <ui.PointerDeviceKind>{...ui.PointerDeviceKind.values}
+      : null,
+    ),
     theme: ThemeData(
       platform: platform,
     ),
@@ -516,7 +520,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)));
-  });
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Vertical scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
@@ -567,7 +571,7 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.pageUp);
     await tester.pumpAndSettle();
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)));
-  });
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Horizontal scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
@@ -613,7 +617,7 @@ void main() {
       await tester.sendKeyUpEvent(modifierKey);
     await tester.pumpAndSettle();
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 0.0, 50.0, 600.0)));
-  });
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Horizontal scrollables are scrolled the correct direction in RTL locales.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
@@ -662,7 +666,7 @@ void main() {
       await tester.sendKeyUpEvent(modifierKey);
     await tester.pumpAndSettle();
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(750.0, 0.0, 800.0, 600.0)));
-  });
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Reversed vertical scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
@@ -716,7 +720,7 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.pageDown);
     await tester.pumpAndSettle();
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 550.0, 800.0, 600.0)));
-  });
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Reversed horizontal scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
@@ -764,7 +768,7 @@ void main() {
     if (!kIsWeb)
       await tester.sendKeyUpEvent(modifierKey);
     await tester.pumpAndSettle();
-  });
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Custom scrollables with a center sliver are scrolled when activated via keyboard.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
@@ -824,7 +828,7 @@ void main() {
     // Goes up two past "center" where it started, so negative.
     expect(controller.position.pixels, equals(-100.0));
     expect(tester.getRect(find.byKey(const ValueKey<String>('Item 10'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 100.0, 800.0, 200.0)));
-  });
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Can recommendDeferredLoadingForContext - animation', (WidgetTester tester) async {
     final List<String> widgetTracker = <String>[];
@@ -1039,13 +1043,13 @@ void main() {
                           width: 200,
                           height: 10,
                         ),
-                      ]
+                      ],
                     );
-                  }
+                  },
                 ),
               );
-            }
-          )
+            },
+          ),
         ),
       ),
     );
@@ -1126,13 +1130,13 @@ void main() {
                           width: 200,
                           height: 10,
                         ),
-                      ]
+                      ],
                     );
-                  }
+                  },
                 ),
               );
-            }
-          )
+            },
+          ),
         ),
       ),
     );
@@ -1189,7 +1193,7 @@ void main() {
                 children: <Widget>[
                   for (int i = 0; i < 100; i++)
                     Text('SingleChildScrollView $i'),
-                ]
+                ],
               ),
               SizedBox(
                 height: 3000,
@@ -1201,11 +1205,11 @@ void main() {
                   itemBuilder: (BuildContext context, int index) {
                     return Text('Nested NeverScrollable ListView $index');
                   },
-                )
+                ),
               ),
-            ]
-          )
-        )
+            ],
+          ),
+        ),
       ),
     ));
     expect(outerController.position.pixels, 0.0);
@@ -1235,17 +1239,17 @@ void main() {
     Widget build(double height) {
       return MaterialApp(
         home: Scaffold(
-            body: SizedBox(
-              width: double.infinity,
-              height: height,
-              child: SingleChildScrollView(
-                controller: controller,
-                child: const SizedBox(
-                  width: double.infinity,
-                  height: 300.0,
-                ),
+          body: SizedBox(
+            width: double.infinity,
+            height: height,
+            child: SingleChildScrollView(
+              controller: controller,
+              child: const SizedBox(
+                width: double.infinity,
+                height: 300.0,
               ),
-            )
+            ),
+          ),
         ),
       );
     }
@@ -1269,6 +1273,46 @@ void main() {
 
     expect(tester.takeException(), null);
   });
+
+  testWidgets('Does not scroll with mouse pointer drag when behavior is configured to ignore them', (WidgetTester tester) async {
+    await pumpTest(tester, debugDefaultTargetPlatformOverride, enableMouseDrag: false);
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Scrollable), warnIfMissed: true), kind: ui.PointerDeviceKind.mouse);
+
+    await gesture.moveBy(const Offset(0.0, -200));
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    expect(getScrollOffset(tester), 0.0);
+
+    await gesture.moveBy(const Offset(0.0, 200));
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    expect(getScrollOffset(tester), 0.0);
+
+    await gesture.removePointer();
+    await tester.pump();
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS, TargetPlatform.android }));
+
+  testWidgets('Does scroll with mouse pointer drag when behavior is not configured to ignore them', (WidgetTester tester) async {
+    await pumpTest(tester, debugDefaultTargetPlatformOverride, enableMouseDrag: true);
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Scrollable), warnIfMissed: true), kind: ui.PointerDeviceKind.mouse);
+
+    await gesture.moveBy(const Offset(0.0, -200));
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    expect(getScrollOffset(tester), 200.0);
+
+    await gesture.moveBy(const Offset(0.0, 200));
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    expect(getScrollOffset(tester), 0.0);
+
+    await gesture.removePointer();
+    await tester.pump();
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS, TargetPlatform.android }));
 }
 
 // ignore: must_be_immutable

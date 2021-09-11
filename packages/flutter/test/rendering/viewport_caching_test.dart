@@ -62,14 +62,15 @@ void main() {
   });
 
   test('Cache extent - nullx viewport', () async {
-    await expectLater(() => RenderViewport(
+    await expectLater(
+      () => RenderViewport(
         crossAxisDirection: AxisDirection.left,
         offset: ViewportOffset.zero(),
         cacheExtent: null,
         cacheExtentStyle: CacheExtentStyle.viewport,
         children: children,
       ),
-      throwsAssertionError
+      throwsAssertionError,
     );
   });
 

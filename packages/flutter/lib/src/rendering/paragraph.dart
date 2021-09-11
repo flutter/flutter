@@ -4,7 +4,7 @@
 
 import 'dart:collection';
 import 'dart:math' as math;
-import 'dart:ui' as ui show Gradient, Shader, TextBox, PlaceholderAlignment, TextHeightBehavior;
+import 'dart:ui' as ui show Gradient, Shader, TextBox, PlaceholderAlignment, TextHeightBehavior, BoxHeightStyle, BoxWidthStyle;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -16,27 +16,9 @@ import 'box.dart';
 import 'debug.dart';
 import 'object.dart';
 
-/// How overflowing text should be handled.
-///
-/// A [TextOverflow] can be passed to [Text] and [RichText] via their
-/// [Text.overflow] and [RichText.overflow] properties respectively.
-enum TextOverflow {
-  /// Clip the overflowing text to fix its container.
-  clip,
-
-  /// Fade the overflowing text to transparent.
-  fade,
-
-  /// Use an ellipsis to indicate that the text has overflowed.
-  ellipsis,
-
-  /// Render overflowing text outside of its container.
-  visible,
-}
-
 const String _kEllipsis = '\u2026';
 
-/// Parent data for use with [RenderParagraph].
+/// Parent data for use with [RenderParagraph] and [RenderEditable].
 class TextParentData extends ContainerBoxParentData<RenderBox> {
   /// The scaling of the text.
   double? scale;
@@ -136,6 +118,8 @@ class RenderParagraph extends RenderBox
   }
 
   final TextPainter _textPainter;
+  AttributedString? _cachedAttributedLabel;
+  List<InlineSpanSemanticsInformation>? _cachedCombinedSemanticsInfos;
 
   /// The text to display.
   InlineSpan get text => _textPainter.text!;
@@ -147,6 +131,8 @@ class RenderParagraph extends RenderBox
         return;
       case RenderComparison.paint:
         _textPainter.text = value;
+        _cachedAttributedLabel = null;
+        _cachedCombinedSemanticsInfos = null;
         _extractPlaceholderSpans(value);
         markNeedsPaint();
         markNeedsSemanticsUpdate();
@@ -154,6 +140,8 @@ class RenderParagraph extends RenderBox
       case RenderComparison.layout:
         _textPainter.text = value;
         _overflowShader = null;
+        _cachedAttributedLabel = null;
+        _cachedCombinedSemanticsInfos = null;
         _extractPlaceholderSpans(value);
         markNeedsLayout();
         break;
@@ -452,14 +440,12 @@ class RenderParagraph extends RenderBox
   @override
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     // Hit test text spans.
-    late final bool hitText;
+    bool hitText = false;
     final TextPosition textPosition = _textPainter.getPositionForOffset(position);
     final InlineSpan? span = _textPainter.text!.getSpanForPosition(textPosition);
     if (span != null && span is HitTestTarget) {
       result.add(HitTestEntry(span as HitTestTarget));
       hitText = true;
-    } else {
-      hitText = false;
     }
 
     // Hit test render object children
@@ -563,16 +549,14 @@ class RenderParagraph extends RenderBox
         );
         childSize = child.size;
         switch (_placeholderSpans[childIndex].alignment) {
-          case ui.PlaceholderAlignment.baseline: {
+          case ui.PlaceholderAlignment.baseline:
             baselineOffset = child.getDistanceToBaseline(
               _placeholderSpans[childIndex].baseline!,
             );
             break;
-          }
-          default: {
+          default:
             baselineOffset = null;
             break;
-          }
         }
       } else {
         assert(_placeholderSpans[childIndex].alignment != ui.PlaceholderAlignment.baseline);
@@ -615,14 +599,12 @@ class RenderParagraph extends RenderBox
       switch (span.alignment) {
         case ui.PlaceholderAlignment.baseline:
         case ui.PlaceholderAlignment.aboveBaseline:
-        case ui.PlaceholderAlignment.belowBaseline: {
+        case ui.PlaceholderAlignment.belowBaseline:
           return false;
-        }
         case ui.PlaceholderAlignment.top:
         case ui.PlaceholderAlignment.middle:
-        case ui.PlaceholderAlignment.bottom: {
+        case ui.PlaceholderAlignment.bottom:
           continue;
-        }
       }
     }
     return true;
@@ -811,15 +793,35 @@ class RenderParagraph extends RenderBox
 
   /// Returns a list of rects that bound the given selection.
   ///
-  /// A given selection might have more than one rect if this text painter
-  /// contains bidirectional text because logically contiguous text might not be
-  /// visually contiguous.
+  /// The [boxHeightStyle] and [boxWidthStyle] arguments may be used to select
+  /// the shape of the [TextBox]es. These properties default to
+  /// [ui.BoxHeightStyle.tight] and [ui.BoxWidthStyle.tight] respectively and
+  /// must not be null.
+  ///
+  /// A given selection might have more than one rect if the [RenderParagraph]
+  /// contains multiple [InlineSpan]s or bidirectional text, because logically
+  /// contiguous text might not be visually contiguous.
   ///
   /// Valid only after [layout].
-  List<ui.TextBox> getBoxesForSelection(TextSelection selection) {
+  ///
+  /// See also:
+  ///
+  ///  * [TextPainter.getBoxesForSelection], the method in TextPainter to get
+  ///    the equivalent boxes.
+  List<ui.TextBox> getBoxesForSelection(
+    TextSelection selection, {
+    ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,
+    ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
+  }) {
     assert(!debugNeedsLayout);
+    assert(boxHeightStyle != null);
+    assert(boxWidthStyle != null);
     _layoutTextWithConstraints(constraints);
-    return _textPainter.getBoxesForSelection(selection);
+    return _textPainter.getBoxesForSelection(
+      selection,
+      boxHeightStyle: boxHeightStyle,
+      boxWidthStyle: boxWidthStyle,
+    );
   }
 
   /// Returns the position within the text for the given pixel offset.
@@ -873,11 +875,27 @@ class RenderParagraph extends RenderBox
       config.explicitChildNodes = true;
       config.isSemanticBoundary = true;
     } else {
-      final StringBuffer buffer = StringBuffer();
-      for (final InlineSpanSemanticsInformation info in _semanticsInfo!) {
-        buffer.write(info.semanticsLabel ?? info.text);
+      if (_cachedAttributedLabel == null) {
+        final StringBuffer buffer = StringBuffer();
+        int offset = 0;
+        final List<StringAttribute> attributes = <StringAttribute>[];
+        for (final InlineSpanSemanticsInformation info in _semanticsInfo!) {
+          final String label = info.semanticsLabel ?? info.text;
+          for (final StringAttribute infoAttribute in info.stringAttributes) {
+            final TextRange originalRange = infoAttribute.range;
+            attributes.add(
+              infoAttribute.copy(
+                  range: TextRange(start: offset + originalRange.start,
+                      end: offset + originalRange.end)
+              ),
+            );
+          }
+          buffer.write(label);
+          offset += label.length;
+        }
+        _cachedAttributedLabel = AttributedString(buffer.toString(), attributes: attributes);
       }
-      config.label = buffer.toString();
+      config.attributedLabel = _cachedAttributedLabel!;
       config.textDirection = textDirection;
     }
   }
@@ -900,7 +918,8 @@ class RenderParagraph extends RenderBox
     int childIndex = 0;
     RenderBox? child = firstChild;
     final Queue<SemanticsNode> newChildCache = Queue<SemanticsNode>();
-    for (final InlineSpanSemanticsInformation info in combineSemanticsInfo(_semanticsInfo!)) {
+    _cachedCombinedSemanticsInfos ??= combineSemanticsInfo(_semanticsInfo!);
+    for (final InlineSpanSemanticsInformation info in _cachedCombinedSemanticsInfos!) {
       final TextSelection selection = TextSelection(
         baseOffset: start,
         extentOffset: start + info.text.length,
@@ -956,7 +975,7 @@ class RenderParagraph extends RenderBox
         final SemanticsConfiguration configuration = SemanticsConfiguration()
           ..sortKey = OrdinalSortKey(ordinal++)
           ..textDirection = initialDirection
-          ..label = info.semanticsLabel ?? info.text;
+          ..attributedLabel = AttributedString(info.semanticsLabel ?? info.text, attributes: info.stringAttributes);
         final GestureRecognizer? recognizer = info.recognizer;
         if (recognizer != null) {
           if (recognizer is TapGestureRecognizer) {

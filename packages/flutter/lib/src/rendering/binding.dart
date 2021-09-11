@@ -100,17 +100,6 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
           return Future<void>.value();
         },
       );
-      registerBoolServiceExtension(
-        name: 'debugCheckElevationsEnabled',
-        getter: () async => debugCheckElevationsEnabled,
-        setter: (bool value) {
-          if (debugCheckElevationsEnabled == value) {
-            return Future<void>.value();
-          }
-          debugCheckElevationsEnabled = value;
-          return _forceRepaint();
-        },
-      );
       registerServiceExtension(
         name: 'debugDumpLayerTree',
         callback: (Map<String, String> parameters) async {
@@ -278,12 +267,14 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
 
   @override // from GestureBinding
   void dispatchEvent(PointerEvent event, HitTestResult? hitTestResult) {
-    if (hitTestResult != null ||
-        event is PointerAddedEvent ||
-        event is PointerRemovedEvent) {
-      assert(event.position != null);
-      _mouseTracker!.updateWithEvent(event, () => hitTestResult ?? renderView.hitTestMouseTrackers(event.position));
-    }
+    _mouseTracker!.updateWithEvent(
+      event,
+      // Enter and exit events should be triggered with or without buttons
+      // pressed. When the button is pressed, normal hit test uses a cached
+      // result, but MouseTracker requires that the hit test is re-executed to
+      // update the hovering events.
+      () => (hitTestResult == null || event is PointerMoveEvent) ? renderView.hitTestMouseTrackers(event.position) : hitTestResult,
+    );
     super.dispatchEvent(event, hitTestResult);
   }
 
@@ -472,11 +463,13 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   @override
   Future<void> performReassemble() async {
     await super.performReassemble();
-    Timeline.startSync('Dirty Render Tree', arguments: timelineArgumentsIndicatingLandmarkEvent);
-    try {
-      renderView.reassemble();
-    } finally {
-      Timeline.finishSync();
+    if (BindingBase.debugReassembleConfig?.widgetName == null) {
+      Timeline.startSync('Dirty Render Tree', arguments: timelineArgumentsIndicatingLandmarkEvent);
+      try {
+        renderView.reassemble();
+      } finally {
+        Timeline.finishSync();
+      }
     }
     scheduleWarmUpFrame();
     await endOfFrame;
@@ -534,6 +527,9 @@ class RenderingFlutterBinding extends BindingBase with GestureBinding, Scheduler
   ///
   /// The `root` render box is attached directly to the [renderView] and is
   /// given constraints that require it to fill the window.
+  ///
+  /// This binding does not automatically schedule any frames. Callers are
+  /// responsible for deciding when to first call [scheduleFrame].
   RenderingFlutterBinding({ RenderBox? root }) {
     assert(renderView != null);
     renderView.child = root;

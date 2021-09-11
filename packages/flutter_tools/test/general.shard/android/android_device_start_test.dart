@@ -47,7 +47,7 @@ void main() {
   AndroidSdk androidSdk;
 
   setUp(() {
-    processManager = FakeProcessManager.list(<FakeCommand>[]);
+    processManager = FakeProcessManager.empty();
     fileSystem = MemoryFileSystem.test();
     androidSdk = FakeAndroidSdk();
   });
@@ -240,7 +240,8 @@ void main() {
         '--ez', 'enable-software-rendering', 'true',
         '--ez', 'skia-deterministic-rendering', 'true',
         '--ez', 'trace-skia', 'true',
-        '--ez', 'trace-allowlist', 'bar,baz',
+        '--es', 'trace-allowlist', 'bar,baz',
+        '--es', 'trace-skia-allowlist', 'skia.a,skia.b',
         '--ez', 'trace-systrace', 'true',
         '--ez', 'endless-trace-buffer', 'true',
         '--ez', 'dump-skp-on-shader-compilation', 'true',
@@ -270,6 +271,7 @@ void main() {
         skiaDeterministicRendering: true,
         traceSkia: true,
         traceAllowlist: 'bar,baz',
+        traceSkiaAllowlist: 'skia.a,skia.b',
         traceSystrace: true,
         endlessTraceBuffer: true,
         dumpSkpOnShaderCompilation: true,

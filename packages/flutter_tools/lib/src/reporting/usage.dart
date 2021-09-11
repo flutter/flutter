@@ -2,99 +2,36 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 part of reporting;
 
 const String _kFlutterUA = 'UA-67589403-6';
-
-/// The collection of custom dimensions understood by the analytics backend.
-/// When adding to this list, first ensure that the custom dimension is
-/// defined in the backend, or will be defined shortly after the relevant PR
-/// lands.
-enum CustomDimensions {
-  sessionHostOsDetails,  // cd1
-  sessionChannelName,  // cd2
-  commandRunIsEmulator, // cd3
-  commandRunTargetName, // cd4
-  hotEventReason,  // cd5
-  hotEventFinalLibraryCount,  // cd6
-  hotEventSyncedLibraryCount,  // cd7
-  hotEventSyncedClassesCount,  // cd8
-  hotEventSyncedProceduresCount,  // cd9
-  hotEventSyncedBytes,  // cd10
-  hotEventInvalidatedSourcesCount,  // cd11
-  hotEventTransferTimeInMs,  // cd12
-  hotEventOverallTimeInMs,  // cd13
-  commandRunProjectType,  // cd14
-  commandRunProjectHostLanguage,  // cd15
-  commandCreateAndroidLanguage,  // cd16
-  commandCreateIosLanguage,  // cd17
-  commandRunProjectModule,  // cd18
-  commandCreateProjectType,  // cd19
-  commandPackagesNumberPlugins,  // cd20
-  commandPackagesProjectModule,  // cd21
-  commandRunTargetOsVersion,  // cd22
-  commandRunModeName,  // cd23
-  commandBuildBundleTargetPlatform,  // cd24
-  commandBuildBundleIsModule,  // cd25
-  commandResult,  // cd26
-  hotEventTargetPlatform,  // cd27
-  hotEventSdkName,  // cd28
-  hotEventEmulator,  // cd29
-  hotEventFullRestart,  // cd30
-  commandHasTerminal,  // cd31
-  enabledFlutterFeatures,  // cd32
-  localTime,  // cd33
-  commandBuildAarTargetPlatform,  // cd34
-  commandBuildAarProjectType,  // cd35
-  buildEventCommand,  // cd36
-  buildEventSettings,  // cd37
-  commandBuildApkTargetPlatform, // cd38
-  commandBuildApkBuildMode, // cd39
-  commandBuildApkSplitPerAbi, // cd40
-  commandBuildAppBundleTargetPlatform, // cd41
-  commandBuildAppBundleBuildMode, // cd42
-  buildEventError,  // cd43
-  commandResultEventMaxRss,  // cd44
-  commandRunAndroidEmbeddingVersion, // cd45
-  commandPackagesAndroidEmbeddingVersion, // cd46
-  nullSafety, // cd47
-  fastReassemble, // cd48
-  nullSafeMigratedLibraries, // cd49
-  nullSafeTotalLibraries, // cd 50
-}
-
-String cdKey(CustomDimensions cd) => 'cd${cd.index + 1}';
-
-Map<String, String> _useCdKeys(Map<CustomDimensions, Object> parameters) {
-  return parameters.map((CustomDimensions k, Object v) =>
-      MapEntry<String, String>(cdKey(k), v.toString()));
-}
 
 abstract class Usage {
   /// Create a new Usage instance; [versionOverride], [configDirOverride], and
   /// [logFile] are used for testing.
   factory Usage({
     String settingsName = 'flutter',
-    String versionOverride,
-    String configDirOverride,
-    String logFile,
-    AnalyticsFactory analyticsIOFactory,
-    FirstRunMessenger firstRunMessenger,
-    @required bool runningOnBot,
-  }) => _DefaultUsage(settingsName: settingsName,
-                      versionOverride: versionOverride,
-                      configDirOverride: configDirOverride,
-                      logFile: logFile,
-                      analyticsIOFactory: analyticsIOFactory,
-                      runningOnBot: runningOnBot,
-                      firstRunMessenger: firstRunMessenger);
+    String? versionOverride,
+    String? configDirOverride,
+    String? logFile,
+    AnalyticsFactory? analyticsIOFactory,
+    FirstRunMessenger? firstRunMessenger,
+    required bool runningOnBot,
+  }) =>
+      _DefaultUsage.initialize(
+        settingsName: settingsName,
+        versionOverride: versionOverride,
+        configDirOverride: configDirOverride,
+        logFile: logFile,
+        analyticsIOFactory: analyticsIOFactory,
+        runningOnBot: runningOnBot,
+        firstRunMessenger: firstRunMessenger,
+      );
 
   /// Uses the global [Usage] instance to send a 'command' to analytics.
   static void command(String command, {
-    Map<CustomDimensions, Object> parameters,
-  }) => globals.flutterUsage.sendCommand(command, parameters: _useCdKeys(parameters));
+    CustomDimensions? parameters,
+  }) => globals.flutterUsage.sendCommand(command, parameters: parameters);
 
   /// Whether analytics reporting should be suppressed.
   bool get suppressAnalytics;
@@ -118,7 +55,7 @@ abstract class Usage {
   /// keys are well-defined in [CustomDimensions] above.
   void sendCommand(
     String command, {
-    Map<String, String> parameters,
+    CustomDimensions? parameters,
   });
 
   /// Sends an 'event' to the underlying analytics implementation.
@@ -130,9 +67,9 @@ abstract class Usage {
   void sendEvent(
     String category,
     String parameter, {
-    String label,
-    int value,
-    Map<String, String> parameters,
+    String? label,
+    int? value,
+    CustomDimensions? parameters,
   });
 
   /// Sends timing information to the underlying analytics implementation.
@@ -140,7 +77,7 @@ abstract class Usage {
     String category,
     String variableName,
     Duration duration, {
-    String label,
+    String? label,
   });
 
   /// Sends an exception to the underlying analytics implementation.
@@ -164,15 +101,15 @@ typedef AnalyticsFactory = Analytics Function(
   String applicationName,
   String applicationVersion, {
   String analyticsUrl,
-  Directory documentDirectory,
+  Directory? documentDirectory,
 });
 
 Analytics _defaultAnalyticsIOFactory(
   String trackingId,
   String applicationName,
   String applicationVersion, {
-  String analyticsUrl,
-  Directory documentDirectory,
+  String? analyticsUrl,
+  Directory? documentDirectory,
 }) {
   return AnalyticsIO(
     trackingId,
@@ -184,24 +121,34 @@ Analytics _defaultAnalyticsIOFactory(
 }
 
 class _DefaultUsage implements Usage {
-  _DefaultUsage({
+  _DefaultUsage._({
+    required bool suppressAnalytics,
+    required Analytics analytics,
+    required this.firstRunMessenger,
+    required SystemClock clock,
+  })  : _suppressAnalytics = suppressAnalytics,
+        _analytics = analytics,
+        _clock = clock;
+
+  static _DefaultUsage initialize({
     String settingsName = 'flutter',
-    String versionOverride,
-    String configDirOverride,
-    String logFile,
-    AnalyticsFactory analyticsIOFactory,
-    @required this.firstRunMessenger,
-    @required bool runningOnBot,
+    String? versionOverride,
+    String? configDirOverride,
+    String? logFile,
+    AnalyticsFactory? analyticsIOFactory,
+    required FirstRunMessenger? firstRunMessenger,
+    required bool runningOnBot,
   }) {
     final FlutterVersion flutterVersion = globals.flutterVersion;
     final String version = versionOverride ?? flutterVersion.getVersionString(redactUnknownBranches: true);
     final bool suppressEnvFlag = globals.platform.environment['FLUTTER_SUPPRESS_ANALYTICS'] == 'true';
-    final String logFilePath = logFile ?? globals.platform.environment['FLUTTER_ANALYTICS_LOG_FILE'];
+    final String? logFilePath = logFile ?? globals.platform.environment['FLUTTER_ANALYTICS_LOG_FILE'];
     final bool usingLogFile = logFilePath != null && logFilePath.isNotEmpty;
 
-    analyticsIOFactory ??= _defaultAnalyticsIOFactory;
-    _clock = globals.systemClock;
-
+    final AnalyticsFactory analyticsFactory = analyticsIOFactory ?? _defaultAnalyticsIOFactory;
+    bool suppressAnalytics = false;
+    bool skipAnalyticsSessionSetup = false;
+    Analytics? setupAnalytics;
     if (// To support testing, only allow other signals to suppress analytics
         // when analytics are not being shunted to a file.
         !usingLogFile && (
@@ -213,73 +160,81 @@ class _DefaultUsage implements Usage {
         runningOnBot ||
         // Ignore when suppressed by FLUTTER_SUPPRESS_ANALYTICS.
         suppressEnvFlag
-      )) {
+    )) {
       // If we think we're running on a CI system, suppress sending analytics.
       suppressAnalytics = true;
-      _analytics = AnalyticsMock();
-      return;
+      setupAnalytics = AnalyticsMock();
+      skipAnalyticsSessionSetup = true;
     }
-
     if (usingLogFile) {
-      _analytics = LogToFileAnalytics(logFilePath);
+      setupAnalytics ??= LogToFileAnalytics(logFilePath);
     } else {
       try {
         ErrorHandlingFileSystem.noExitOnFailure(() {
-          _analytics = analyticsIOFactory(
+          setupAnalytics = analyticsFactory(
             _kFlutterUA,
             settingsName,
             version,
             documentDirectory: configDirOverride != null
-              ? globals.fs.directory(configDirOverride)
-              : null,
+                ? globals.fs.directory(configDirOverride)
+                : null,
           );
         });
       } on Exception catch (e) {
         globals.printTrace('Failed to initialize analytics reporting: $e');
         suppressAnalytics = true;
-        _analytics = AnalyticsMock();
-        return;
+        setupAnalytics ??= AnalyticsMock();
+        skipAnalyticsSessionSetup = true;
       }
     }
-    assert(_analytics != null);
 
-    // Report a more detailed OS version string than package:usage does by default.
-    _analytics.setSessionValue(
-      cdKey(CustomDimensions.sessionHostOsDetails),
-      globals.os.name,
-    );
-    // Send the branch name as the "channel".
-    _analytics.setSessionValue(
-      cdKey(CustomDimensions.sessionChannelName),
-      flutterVersion.getBranchName(redactUnknownBranches: true),
-    );
-    // For each flutter experimental feature, record a session value in a comma
-    // separated list.
-    final String enabledFeatures = allFeatures
-      .where((Feature feature) {
-        return feature.configSetting != null &&
-               globals.config.getValue(feature.configSetting) == true;
+    final Analytics analytics = setupAnalytics!;
+    if (!skipAnalyticsSessionSetup) {
+      // Report a more detailed OS version string than package:usage does by default.
+      analytics.setSessionValue(
+        cdKey(CustomDimensionsEnum.sessionHostOsDetails),
+        globals.os.name,
+      );
+      // Send the branch name as the "channel".
+      analytics.setSessionValue(
+        cdKey(CustomDimensionsEnum.sessionChannelName),
+        flutterVersion.getBranchName(redactUnknownBranches: true),
+      );
+      // For each flutter experimental feature, record a session value in a comma
+      // separated list.
+      final String enabledFeatures = allFeatures
+          .where((Feature feature) {
+        final String? configSetting = feature.configSetting;
+        return configSetting != null && globals.config.getValue(configSetting) == true;
       })
-      .map((Feature feature) => feature.configSetting)
-      .join(',');
-    _analytics.setSessionValue(
-      cdKey(CustomDimensions.enabledFlutterFeatures),
-      enabledFeatures,
-    );
+          .map((Feature feature) => feature.configSetting)
+          .join(',');
+      analytics.setSessionValue(
+        cdKey(CustomDimensionsEnum.enabledFlutterFeatures),
+        enabledFeatures,
+      );
 
-    // Record the host as the application installer ID - the context that flutter_tools is running in.
-    if (globals.platform.environment.containsKey('FLUTTER_HOST')) {
-      _analytics.setSessionValue('aiid', globals.platform.environment['FLUTTER_HOST']);
+      // Record the host as the application installer ID - the context that flutter_tools is running in.
+      if (globals.platform.environment.containsKey('FLUTTER_HOST')) {
+        analytics.setSessionValue('aiid', globals.platform.environment['FLUTTER_HOST']);
+      }
+      analytics.analyticsOpt = AnalyticsOpt.optOut;
     }
-    _analytics.analyticsOpt = AnalyticsOpt.optOut;
+
+    return _DefaultUsage._(
+      suppressAnalytics: suppressAnalytics,
+      analytics: analytics,
+      firstRunMessenger: firstRunMessenger,
+      clock: globals.systemClock,
+    );
   }
 
-  Analytics _analytics;
-  final FirstRunMessenger firstRunMessenger;
+  final Analytics _analytics;
+  final FirstRunMessenger? firstRunMessenger;
 
   bool _printedWelcome = false;
   bool _suppressAnalytics = false;
-  SystemClock _clock;
+  final SystemClock _clock;
 
   @override
   bool get suppressAnalytics => _suppressAnalytics || _analytics.firstRun;
@@ -301,41 +256,39 @@ class _DefaultUsage implements Usage {
   String get clientId => _analytics.clientId;
 
   @override
-  void sendCommand(String command, { Map<String, String> parameters }) {
+  void sendCommand(String command, { CustomDimensions? parameters }) {
     if (suppressAnalytics) {
       return;
     }
 
-    final Map<String, String> paramsWithLocalTime = <String, String>{
-      ...?parameters,
-      cdKey(CustomDimensions.localTime): formatDateTime(_clock.now()),
-    };
-    _analytics.sendScreenView(command, parameters: paramsWithLocalTime);
+    _analytics.sendScreenView(
+      command,
+      parameters: CustomDimensions(localTime: formatDateTime(_clock.now()))
+          .merge(parameters)
+          .toMap(),
+    );
   }
 
   @override
   void sendEvent(
     String category,
     String parameter, {
-    String label,
-    int value,
-    Map<String, String> parameters,
+    String? label,
+    int? value,
+    CustomDimensions? parameters,
   }) {
     if (suppressAnalytics) {
       return;
     }
-
-    final Map<String, String> paramsWithLocalTime = <String, String>{
-      ...?parameters,
-      cdKey(CustomDimensions.localTime): formatDateTime(_clock.now()),
-    };
 
     _analytics.sendEvent(
       category,
       parameter,
       label: label,
       value: value,
-      parameters: paramsWithLocalTime,
+      parameters: CustomDimensions(localTime: formatDateTime(_clock.now()))
+          .merge(parameters)
+          .toMap(),
     );
   }
 
@@ -344,7 +297,7 @@ class _DefaultUsage implements Usage {
     String category,
     String variableName,
     Duration duration, {
-    String label,
+    String? label,
   }) {
     if (suppressAnalytics) {
       return;
@@ -384,11 +337,12 @@ class _DefaultUsage implements Usage {
     }
     // Display the welcome message if this is the first run of the tool or if
     // the license terms have changed since it was last displayed.
-    if (firstRunMessenger != null && firstRunMessenger.shouldDisplayLicenseTerms() ?? true) {
+    final FirstRunMessenger? messenger = firstRunMessenger;
+    if (messenger != null && messenger.shouldDisplayLicenseTerms()) {
       globals.printStatus('');
-      globals.printStatus(firstRunMessenger.licenseTerms, emphasis: true);
+      globals.printStatus(messenger.licenseTerms, emphasis: true);
       _printedWelcome = true;
-      firstRunMessenger.confirmLicenseTermsDisplayed();
+      messenger.confirmLicenseTermsDisplayed();
     }
   }
 }
@@ -412,7 +366,7 @@ class LogToFileAnalytics extends AnalyticsMock {
 
   @override
   Future<void> sendScreenView(String viewName, {
-    Map<String, String> parameters,
+    Map<String, String>? parameters,
   }) {
     if (!enabled) {
       return Future<void>.value(null);
@@ -427,7 +381,7 @@ class LogToFileAnalytics extends AnalyticsMock {
 
   @override
   Future<void> sendEvent(String category, String action,
-      {String label, int value, Map<String, String> parameters}) {
+      {String? label, int? value, Map<String, String>? parameters}) {
     if (!enabled) {
       return Future<void>.value(null);
     }
@@ -441,7 +395,7 @@ class LogToFileAnalytics extends AnalyticsMock {
 
   @override
   Future<void> sendTiming(String variableName, int time,
-      {String category, String label}) {
+      {String? category, String? label}) {
     if (!enabled) {
       return Future<void>.value(null);
     }
@@ -496,12 +450,12 @@ class TestUsage implements Usage {
   void printWelcome() { }
 
   @override
-  void sendCommand(String command, {Map<String, String> parameters}) {
+  void sendCommand(String command, {CustomDimensions? parameters}) {
     commands.add(TestUsageCommand(command, parameters: parameters));
   }
 
   @override
-  void sendEvent(String category, String parameter, {String label, int value, Map<String, String> parameters}) {
+  void sendEvent(String category, String parameter, {String? label, int? value, CustomDimensions? parameters}) {
     events.add(TestUsageEvent(category, parameter, label: label, value: value, parameters: parameters));
   }
 
@@ -511,7 +465,7 @@ class TestUsage implements Usage {
   }
 
   @override
-  void sendTiming(String category, String variableName, Duration duration, {String label}) {
+  void sendTiming(String category, String variableName, Duration duration, {String? label}) {
     timings.add(TestTimingEvent(category, variableName, duration, label: label));
   }
 }
@@ -522,17 +476,17 @@ class TestUsageCommand {
   const TestUsageCommand(this.command, {this.parameters});
 
   final String command;
-  final Map<String, String> parameters;
+  final CustomDimensions? parameters;
 
   @override
   bool operator ==(Object other) {
     return other is TestUsageCommand &&
       other.command == command &&
-      _mapsEqual(other.parameters, parameters);
+      other.parameters == parameters;
   }
 
   @override
-  int get hashCode => command.hashCode ^ parameters.hashCode;
+  int get hashCode => Object.hash(command, parameters);
 
   @override
   String toString() => 'TestUsageCommand($command, parameters:$parameters)';
@@ -545,9 +499,9 @@ class TestUsageEvent {
 
   final String category;
   final String parameter;
-  final String label;
-  final int value;
-  final Map<String, String> parameters;
+  final String? label;
+  final int? value;
+  final CustomDimensions? parameters;
 
   @override
   bool operator ==(Object other) {
@@ -556,15 +510,11 @@ class TestUsageEvent {
       other.parameter == parameter &&
       other.label == label &&
       other.value == value &&
-      _mapsEqual(other.parameters, parameters);
+      other.parameters == parameters;
   }
 
   @override
-  int get hashCode => category.hashCode ^
-    parameter.hashCode ^
-    label.hashCode ^
-    value.hashCode ^
-    parameters.hashCode;
+  int get hashCode => Object.hash(category, parameter, label, value, parameters);
 
   @override
   String toString() => 'TestUsageEvent($category, $parameter, label:$label, value:$value, parameters:$parameters)';
@@ -578,7 +528,7 @@ class TestTimingEvent {
   final String category;
   final String variableName;
   final Duration duration;
-  final String label;
+  final String? label;
 
   @override
   bool operator ==(Object other) {
@@ -590,16 +540,13 @@ class TestTimingEvent {
   }
 
   @override
-  int get hashCode => category.hashCode ^
-    variableName.hashCode ^
-    duration.hashCode ^
-    label.hashCode;
+  int get hashCode => Object.hash(category, variableName, duration, label);
 
   @override
   String toString() => 'TestTimingEvent($category, $variableName, $duration, label:$label)';
 }
 
-bool _mapsEqual(Map<dynamic, dynamic> a, Map<dynamic, dynamic> b) {
+bool _mapsEqual(Map<dynamic, dynamic>? a, Map<dynamic, dynamic>? b) {
   if (a == b) {
     return true;
   }

@@ -41,7 +41,7 @@ class IntegrationTestTestDevice implements TestDevice {
 
   /// Starts the device.
   ///
-  /// [entrypointPath] must be a path to an uncompiled source file.
+  /// [entrypointPath] must be a path to an un-compiled source file.
   @override
   Future<StreamChannel<String>> start(String entrypointPath) async {
     final TargetPlatform targetPlatform = await device.targetPlatform;
@@ -76,7 +76,9 @@ class IntegrationTestTestDevice implements TestDevice {
     );
 
     globals.printTrace('test $id: Finding the correct isolate with the integration test service extension');
-    final vm_service.IsolateRef isolateRef = await vmService.findExtensionIsolate(kIntegrationTestMethod);
+    final vm_service.IsolateRef isolateRef = await vmService.findExtensionIsolate(
+      kIntegrationTestMethod,
+    );
 
     await vmService.service.streamListen(vm_service.EventStreams.kExtension);
     final Stream<String> remoteMessages = vmService.service.onExtensionEvent

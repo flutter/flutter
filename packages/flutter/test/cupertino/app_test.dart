@@ -2,35 +2,30 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Heroes work', (WidgetTester tester) async {
     await tester.pumpWidget(CupertinoApp(
-      home:
-        ListView(
-          children: <Widget>[
-            const Hero(tag: 'a', child: Text('foo')),
-            Builder(builder: (BuildContext context) {
-              return CupertinoButton(
-                child: const Text('next'),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    CupertinoPageRoute<void>(
-                      builder: (BuildContext context) {
-                        return const Hero(tag: 'a', child: Text('foo'));
-                      }
-                    ),
-                  );
-                },
+      home: ListView(children: <Widget>[
+        const Hero(tag: 'a', child: Text('foo')),
+        Builder(builder: (BuildContext context) {
+          return CupertinoButton(
+            child: const Text('next'),
+            onPressed: () {
+              Navigator.push(
+                context,
+                CupertinoPageRoute<void>(builder: (BuildContext context) {
+                  return const Hero(tag: 'a', child: Text('foo'));
+                }),
               );
-            }),
-          ],
-        ),
+            },
+          );
+        }),
+      ]),
     ));
 
     await tester.tap(find.text('next'));
@@ -99,17 +94,19 @@ void main() {
               pageBuilder: (
                 BuildContext context,
                 Animation<double> animation,
-                Animation<double> secondaryAnimation) {
+                Animation<double> secondaryAnimation,
+              ) {
                 return const Text('non-regular page one');
-              }
+              },
             ),
             PageRouteBuilder<void>(
               pageBuilder: (
                 BuildContext context,
                 Animation<double> animation,
-                Animation<double> secondaryAnimation) {
+                Animation<double> secondaryAnimation,
+              ) {
                 return const Text('non-regular page two');
-              }
+              },
             ),
           ];
         },
@@ -118,7 +115,7 @@ void main() {
           '/': (BuildContext context) => const Text('regular page one'),
           '/abc': (BuildContext context) => const Text('regular page two'),
         },
-      )
+      ),
     );
     expect(find.text('non-regular page two'), findsOneWidget);
     expect(find.text('non-regular page one'), findsNothing);
@@ -163,7 +160,7 @@ void main() {
           location: 'popped',
         );
         return route.didPop(result);
-      }
+      },
     );
     await tester.pumpWidget(CupertinoApp.router(
       routeInformationProvider: provider,
@@ -210,6 +207,26 @@ void main() {
     final ScrollBehavior scrollBehavior = ScrollConfiguration.of(capturedContext);
     expect(scrollBehavior.runtimeType, MockScrollBehavior);
     expect(scrollBehavior.getScrollPhysics(capturedContext).runtimeType, NeverScrollableScrollPhysics);
+  });
+
+  testWidgets('When `useInheritedMediaQuery` is true an existing MediaQuery is used if one is available', (WidgetTester tester) async {
+    late BuildContext capturedContext;
+    final UniqueKey uniqueKey = UniqueKey();
+    await tester.pumpWidget(
+      MediaQuery(
+        key: uniqueKey,
+        data: const MediaQueryData(),
+        child: CupertinoApp(
+          useInheritedMediaQuery: true,
+          builder: (BuildContext context, Widget? child) {
+            capturedContext = context;
+            return const Placeholder();
+          },
+          color: const Color(0xFF123456),
+        ),
+      ),
+    );
+    expect(capturedContext.dependOnInheritedWidgetOfExactType<MediaQuery>()?.key, uniqueKey);
   });
 }
 
@@ -280,7 +297,7 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> wit
         CupertinoPage<void>(
           key: ValueKey<String?>(routeInformation.location),
           child: builder(context, routeInformation),
-        )
+        ),
       ],
     );
   }

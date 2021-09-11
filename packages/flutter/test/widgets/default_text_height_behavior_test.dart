@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Text widget parameter takes precedence over DefaultTextHeightBehavior', (WidgetTester tester) async {
@@ -109,21 +109,24 @@ void main() {
     expect(text.textHeightBehavior, behavior2);
   });
 
-  testWidgets('DefaultTextHeightBehavior.of(context) returns null if no '
-      'DefaultTextHeightBehavior widget in tree', (WidgetTester tester) async {
-    const Text textWidget = Text('Hello', textDirection: TextDirection.ltr);
-    TextHeightBehavior? textHeightBehavior;
+  testWidgets(
+    'DefaultTextHeightBehavior.of(context) returns null if no '
+    'DefaultTextHeightBehavior widget in tree',
+    (WidgetTester tester) async {
+      const Text textWidget = Text('Hello', textDirection: TextDirection.ltr);
+      TextHeightBehavior? textHeightBehavior;
 
-    await tester.pumpWidget(Builder(
-      builder: (BuildContext context) {
-        textHeightBehavior = DefaultTextHeightBehavior.of(context);
-        return textWidget;
-      },
-    ));
+      await tester.pumpWidget(Builder(
+        builder: (BuildContext context) {
+          textHeightBehavior = DefaultTextHeightBehavior.of(context);
+          return textWidget;
+        },
+      ));
 
-    expect(textHeightBehavior, isNull);
-    final RichText text = tester.firstWidget(find.byType(RichText));
-    expect(text, isNotNull);
-    expect(text.textHeightBehavior, isNull);
-  });
+      expect(textHeightBehavior, isNull);
+      final RichText text = tester.firstWidget(find.byType(RichText));
+      expect(text, isNotNull);
+      expect(text.textHeightBehavior, isNull);
+    },
+  );
 }

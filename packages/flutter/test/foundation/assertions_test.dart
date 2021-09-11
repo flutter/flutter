@@ -71,7 +71,7 @@ void main() {
       'The null value was thrown CONTEXTING.\n'
       '\n'
       'INFO\n'
-      '═════════════════════════════════════════════════════════════════\n'
+      '═════════════════════════════════════════════════════════════════\n',
     );
     expect(
       FlutterErrorDetails(
@@ -116,7 +116,7 @@ void main() {
       FlutterErrorDetails(exception: NullThrownError()).toString(),
       '══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞══════════════════════\n'
       'The null value was thrown.\n'
-      '═════════════════════════════════════════════════════════════════\n'
+      '═════════════════════════════════════════════════════════════════\n',
     );
   });
 
@@ -138,7 +138,7 @@ void main() {
     FlutterError error = FlutterError(
       'My Error Summary.\n'
       'My first description.\n'
-      'My second description.'
+      'My second description.',
     );
     expect(error.diagnostics.length, equals(3));
     expect(error.diagnostics[0].level, DiagnosticLevel.summary);
@@ -159,7 +159,7 @@ void main() {
       'My Error Summary.\n'
       'My first description.\n'
       'My second description.\n'
-      '\n'
+      '\n',
     );
 
     expect(error.diagnostics.length, equals(5));
@@ -185,7 +185,7 @@ void main() {
       'My Error Summary.\n'
       'My first description.\n'
       '\n'
-      'My second description.'
+      'My second description.',
     );
     expect(error.diagnostics.length, equals(4));
     expect(error.diagnostics[0].level, DiagnosticLevel.summary);
@@ -238,7 +238,8 @@ void main() {
       final AssertionError error;
       try {
         throw FlutterError.fromParts(<DiagnosticsNode>[
-          (ErrorDescription('Error description without a summary'))]);
+          ErrorDescription('Error description without a summary'),
+        ]);
       } on AssertionError catch (e) {
         error = e;
       }

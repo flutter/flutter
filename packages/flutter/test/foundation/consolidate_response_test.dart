@@ -147,7 +147,7 @@ void main() {
         ]);
       });
     });
-  }, skip: kIsWeb);
+  });
 }
 
 class MockHttpClientResponse extends Fake implements HttpClientResponse {
@@ -166,16 +166,14 @@ class MockHttpClientResponse extends Fake implements HttpClientResponse {
   @override
   StreamSubscription<List<int>> listen(void Function(List<int> event)? onData, {Function? onError, void Function()? onDone, bool? cancelOnError}) {
     if (error != null) {
-      return Stream<List<int>>.fromFuture(
-        Future<List<int>>.error(error as Object)).listen(
+      return Stream<List<int>>.fromFuture(Future<List<int>>.error(error as Object)).listen(
           onData,
           onDone: onDone,
           onError: onError,
           cancelOnError: cancelOnError,
         );
     }
-    return Stream<List<int>>.fromIterable(
-        <List<int>>[chunkOne, chunkTwo]).listen(
+    return Stream<List<int>>.fromIterable(<List<int>>[chunkOne, chunkTwo]).listen(
       onData,
       onDone: onDone,
       onError: onError,

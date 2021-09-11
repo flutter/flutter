@@ -16,25 +16,23 @@ import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/tracing.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:meta/meta.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
-  testUsingContext('Exits with code 2 when when HttpException is thrown '
+  testUsingContext('Exits with code 2 when HttpException is thrown '
     'during VM service connection', () async {
     final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
-    final MockDevice mockDevice = MockDevice();
-    when(mockDevice.supportsHotReload).thenReturn(true);
-    when(mockDevice.supportsHotRestart).thenReturn(false);
-    when(mockDevice.targetPlatform).thenAnswer((Invocation _) async => TargetPlatform.tester);
-    when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation _) async => 'Android 10');
+    final FakeDevice device = FakeDevice()
+      ..supportsHotReload = true
+      ..supportsHotRestart = false;
 
     final List<FlutterDevice> devices = <FlutterDevice>[
       TestFlutterDevice(
-        device: mockDevice,
+        device: device,
         generator: residentCompiler,
         exception: const HttpException('Connection closed before full header was received, '
             'uri = http://127.0.0.1:63394/5ZmLv8A59xY=/ws'),
@@ -51,29 +49,23 @@ void main() {
   });
 
   group('cleanupAtFinish()', () {
-    MockFlutterDevice mockFlutterDeviceFactory(Device device) {
-      final MockFlutterDevice mockFlutterDevice = MockFlutterDevice();
-      when(mockFlutterDevice.device).thenReturn(device);
-      return mockFlutterDevice;
-    }
-
     testUsingContext('disposes each device', () async {
-      final MockDevice mockDevice1 = MockDevice();
-      final MockDevice mockDevice2 = MockDevice();
-      final MockFlutterDevice mockFlutterDevice1 = mockFlutterDeviceFactory(mockDevice1);
-      final MockFlutterDevice mockFlutterDevice2 = mockFlutterDeviceFactory(mockDevice2);
+      final FakeDevice device1 = FakeDevice();
+      final FakeDevice device2 = FakeDevice();
+      final FakeFlutterDevice flutterDevice1 = FakeFlutterDevice(device1);
+      final FakeFlutterDevice flutterDevice2 = FakeFlutterDevice(device2);
 
-      final List<FlutterDevice> devices = <FlutterDevice>[mockFlutterDevice1, mockFlutterDevice2];
+      final List<FlutterDevice> devices = <FlutterDevice>[flutterDevice1, flutterDevice2];
 
       await ColdRunner(devices,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'main.dart',
       ).cleanupAtFinish();
 
-      verify(mockDevice1.dispose());
-      expect(mockFlutterDevice1.stopEchoingDeviceLogCount, 1);
-      verify(mockDevice2.dispose());
-      expect(mockFlutterDevice2.stopEchoingDeviceLogCount, 1);
+      expect(flutterDevice1.stopEchoingDeviceLogCount, 1);
+      expect(flutterDevice2.stopEchoingDeviceLogCount, 1);
+      expect(device2.wasDisposed, true);
+      expect(device1.wasDisposed, true);
     });
   });
 
@@ -86,14 +78,10 @@ void main() {
     });
 
     testUsingContext('calls runCold on attached device', () async {
-      final MockDevice mockDevice = MockDevice();
-      final MockFlutterDevice mockFlutterDevice = MockFlutterDevice();
-      when(mockFlutterDevice.device).thenReturn(mockDevice);
-      when(mockFlutterDevice.runCold(
-          coldRunner: anyNamed('coldRunner'),
-          route: anyNamed('route')
-      )).thenAnswer((Invocation invocation) => Future<int>.value(1));
-      final List<FlutterDevice> devices = <FlutterDevice>[mockFlutterDevice];
+      final FakeDevice device = FakeDevice();
+      final FakeFlutterDevice flutterDevice = FakeFlutterDevice(device)
+        ..runColdCode = 1;
+      final List<FlutterDevice> devices = <FlutterDevice>[flutterDevice];
       final File applicationBinary = MemoryFileSystem.test().file('binary');
       final int result = await ColdRunner(
         devices,
@@ -105,21 +93,12 @@ void main() {
       );
 
       expect(result, 1);
-      verify(mockFlutterDevice.runCold(
-          coldRunner: anyNamed('coldRunner'),
-          route: anyNamed('route'),
-      ));
     });
 
     testUsingContext('with traceStartup, no env variable', () async {
-      final MockDevice mockDevice = MockDevice();
-      final MockFlutterDevice mockFlutterDevice = MockFlutterDevice();
-      when(mockFlutterDevice.device).thenReturn(mockDevice);
-      when(mockFlutterDevice.runCold(
-          coldRunner: anyNamed('coldRunner'),
-          route: anyNamed('route')
-      )).thenAnswer((Invocation invocation) => Future<int>.value(0));
-      final List<FlutterDevice> devices = <FlutterDevice>[mockFlutterDevice];
+      final FakeDevice device = FakeDevice();
+      final FakeFlutterDevice flutterDevice = FakeFlutterDevice(device);
+      final List<FlutterDevice> devices = <FlutterDevice>[flutterDevice];
       final File applicationBinary = MemoryFileSystem.test().file('binary');
       final int result = await ColdRunner(
         devices,
@@ -142,14 +121,9 @@ void main() {
     testUsingContext('with traceStartup, env variable', () async {
       fakePlatform.environment[kFlutterTestOutputsDirEnvName] = 'test_output_dir';
 
-      final MockDevice mockDevice = MockDevice();
-      final MockFlutterDevice mockFlutterDevice = MockFlutterDevice();
-      when(mockFlutterDevice.device).thenReturn(mockDevice);
-      when(mockFlutterDevice.runCold(
-          coldRunner: anyNamed('coldRunner'),
-          route: anyNamed('route')
-      )).thenAnswer((Invocation invocation) => Future<int>.value(0));
-      final List<FlutterDevice> devices = <FlutterDevice>[mockFlutterDevice];
+      final FakeDevice device = FakeDevice();
+      final FakeFlutterDevice flutterDevice = FakeFlutterDevice(device);
+      final List<FlutterDevice> devices = <FlutterDevice>[flutterDevice];
       final File applicationBinary = MemoryFileSystem.test().file('binary');
       final int result = await ColdRunner(
         devices,
@@ -171,7 +145,15 @@ void main() {
   });
 }
 
-class MockFlutterDevice extends Mock implements FlutterDevice {
+class FakeFlutterDevice extends Fake implements FlutterDevice {
+  FakeFlutterDevice(this.device);
+
+  @override
+  Stream<Uri> get observatoryUris => const Stream<Uri>.empty();
+
+  @override
+  final Device device;
+
   int stopEchoingDeviceLogCount = 0;
 
   @override
@@ -181,10 +163,42 @@ class MockFlutterDevice extends Mock implements FlutterDevice {
 
   @override
   FlutterVmService get vmService => FakeFlutterVmService();
+
+  int runColdCode = 0;
+
+  @override
+  Future<int> runCold({ColdRunner coldRunner, String route}) async {
+    return runColdCode;
+  }
+
+  @override
+  Future<void> initLogReader() async { }
 }
-class MockDevice extends Mock implements Device {
-  MockDevice() {
-    when(isSupported()).thenReturn(true);
+
+class FakeDevice extends Fake implements Device {
+  @override
+  bool isSupported() => true;
+
+  @override
+  bool supportsHotReload;
+
+  @override
+  bool supportsHotRestart;
+
+  @override
+  Future<String> get sdkNameAndVersion async => 'Android 10';
+
+  @override
+  String get name => 'test';
+
+  @override
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.tester;
+
+  bool wasDisposed = false;
+
+  @override
+  Future<void> dispose() async {
+    wasDisposed = true;
   }
 }
 
@@ -206,7 +220,7 @@ class TestFlutterDevice extends FlutterDevice {
     CompileExpression compileExpression,
     GetSkSLMethod getSkSLMethod,
     PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
-    bool disableDds = false,
+    bool enableDds = true,
     bool disableServiceAuthCodes = false,
     int hostVmServicePort,
     int ddsPort,
@@ -217,7 +231,7 @@ class TestFlutterDevice extends FlutterDevice {
   }
 }
 
-class FakeResidentCompiler extends Fake implements ResidentCompiler {}
+class FakeResidentCompiler extends Fake implements ResidentCompiler { }
 
 class FakeFlutterVmService extends Fake implements FlutterVmService {
   @override

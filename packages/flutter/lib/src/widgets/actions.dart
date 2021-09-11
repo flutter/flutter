@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import 'basic.dart';
@@ -198,6 +198,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// See the discussion at [removeActionListener].
   @protected
   @visibleForTesting
+  @pragma('vm:notify-debugger-on-exception')
   void notifyActionListeners() {
     if (_listeners.isEmpty) {
       return;
@@ -256,7 +257,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
 ///   const ActionListenerExample({Key? key}) : super(key: key);
 ///
 ///   @override
-///   _ActionListenerExampleState createState() => _ActionListenerExampleState();
+///   State<ActionListenerExample> createState() => _ActionListenerExampleState();
 /// }
 ///
 /// class _ActionListenerExampleState extends State<ActionListenerExample> {
@@ -374,7 +375,7 @@ class ActionListener extends StatefulWidget {
   final Widget child;
 
   @override
-  _ActionListenerState createState() => _ActionListenerState();
+  State<ActionListener> createState() => _ActionListenerState();
 }
 
 class _ActionListenerState extends State<ActionListener> {
@@ -604,7 +605,7 @@ class ActionDispatcher with Diagnosticable {
 ///   final ValueNotifier<bool> valueNotifier;
 ///
 ///   @override
-///   _SaveButtonState createState() => _SaveButtonState();
+///   State<SaveButton> createState() => _SaveButtonState();
 /// }
 ///
 /// class _SaveButtonState extends State<SaveButton> {
@@ -1128,15 +1129,17 @@ class _ActionsMarker extends InheritedWidget {
 ///   final Widget child;
 ///
 ///   @override
-///   _FadButtonState createState() => _FadButtonState();
+///   State<FadButton> createState() => _FadButtonState();
 /// }
 ///
 /// class _FadButtonState extends State<FadButton> {
 ///   bool _focused = false;
 ///   bool _hovering = false;
 ///   bool _on = false;
-///   late Map<Type, Action<Intent>> _actionMap;
-///   late Map<LogicalKeySet, Intent> _shortcutMap;
+///   late final Map<Type, Action<Intent>> _actionMap;
+///   final Map<ShortcutActivator, Intent> _shortcutMap = const <ShortcutActivator, Intent>{
+///     SingleActivator(LogicalKeyboardKey.keyX): ActivateIntent(),
+///   };
 ///
 ///   @override
 ///   void initState() {
@@ -1145,9 +1148,6 @@ class _ActionsMarker extends InheritedWidget {
 ///       ActivateIntent: CallbackAction<Intent>(
 ///         onInvoke: (Intent intent) => _toggleState(),
 ///       ),
-///     };
-///     _shortcutMap = <LogicalKeySet, Intent>{
-///       LogicalKeySet(LogicalKeyboardKey.keyX): const ActivateIntent(),
 ///     };
 ///   }
 ///
@@ -1286,7 +1286,7 @@ class FocusableActionDetector extends StatefulWidget {
   final Map<Type, Action<Intent>>? actions;
 
   /// {@macro flutter.widgets.shortcuts.shortcuts}
-  final Map<LogicalKeySet, Intent>? shortcuts;
+  final Map<ShortcutActivator, Intent>? shortcuts;
 
   /// A function that will be called when the focus highlight should be shown or
   /// hidden.
@@ -1317,7 +1317,7 @@ class FocusableActionDetector extends StatefulWidget {
   final Widget child;
 
   @override
-  _FocusableActionDetectorState createState() => _FocusableActionDetectorState();
+  State<FocusableActionDetector> createState() => _FocusableActionDetectorState();
 }
 
 class _FocusableActionDetectorState extends State<FocusableActionDetector> {
@@ -1604,16 +1604,16 @@ class ButtonActivateIntent extends Intent {
 /// activate a control. By default, is bound to [LogicalKeyboardKey.enter],
 /// [LogicalKeyboardKey.gameButtonA], and [LogicalKeyboardKey.space] in the
 /// default keyboard map in [WidgetsApp].
-abstract class ActivateAction extends Action<ActivateIntent> {}
+abstract class ActivateAction extends Action<ActivateIntent> { }
 
 /// An intent that selects the currently focused control.
-class SelectIntent extends Intent {}
+class SelectIntent extends Intent { }
 
 /// An action that selects the currently focused control.
 ///
 /// This is an abstract class that serves as a base class for actions that
 /// select something. It is not bound to any key by default.
-abstract class SelectAction extends Action<SelectIntent> {}
+abstract class SelectAction extends Action<SelectIntent> { }
 
 /// An [Intent] that dismisses the currently focused widget.
 ///
@@ -1631,7 +1631,7 @@ class DismissIntent extends Intent {
 /// An action that dismisses the focused widget.
 ///
 /// This is an abstract class that serves as a base class for dismiss actions.
-abstract class DismissAction extends Action<DismissIntent> {}
+abstract class DismissAction extends Action<DismissIntent> { }
 
 /// An [Intent] that evaluates a series of specified [orderedIntents] for
 /// execution.

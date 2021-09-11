@@ -7,16 +7,13 @@
 import 'dart:async';
 
 import 'package:flutter_tools/src/android/android_emulator.dart';
-import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:mockito/mockito.dart';
-import 'package:fake_async/fake_async.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
-import '../../src/mocks.dart' show MockAndroidSdk;
 
 const String emulatorID = 'i1234';
 const String errorText = '[Android emulator test error]';
@@ -33,7 +30,7 @@ void main() {
         emulatorID,
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.any(),
-        androidSdk: MockAndroidSdk(),
+        androidSdk: FakeAndroidSdk(),
       );
       expect(emulator.id, emulatorID);
       expect(emulator.hasConfig, false);
@@ -46,7 +43,7 @@ void main() {
         properties: const <String, String>{'name': 'test'},
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.any(),
-        androidSdk: MockAndroidSdk(),
+        androidSdk: FakeAndroidSdk(),
       );
 
       expect(emulator.id, emulatorID);
@@ -66,7 +63,7 @@ void main() {
         properties: properties,
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.any(),
-        androidSdk: MockAndroidSdk(),
+        androidSdk: FakeAndroidSdk(),
       );
 
       expect(emulator.id, emulatorID);
@@ -87,7 +84,7 @@ void main() {
         properties: properties,
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.any(),
-        androidSdk: MockAndroidSdk(),
+        androidSdk: FakeAndroidSdk(),
       );
 
       expect(emulator.name, displayName);
@@ -105,7 +102,7 @@ void main() {
         properties: properties,
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.any(),
-        androidSdk: MockAndroidSdk(),
+        androidSdk: FakeAndroidSdk(),
       );
 
       expect(emulator.name, 'This is my ID');
@@ -128,11 +125,11 @@ void main() {
   });
 
   group('Android emulator launch ', () {
-    MockAndroidSdk mockSdk;
+    FakeAndroidSdk mockSdk;
 
     setUp(() {
-      mockSdk = MockAndroidSdk();
-      when(mockSdk.emulatorPath).thenReturn('emulator');
+      mockSdk = FakeAndroidSdk();
+      mockSdk.emulatorPath = 'emulator';
     });
 
     testWithoutContext('succeeds', () async {
@@ -144,13 +141,23 @@ void main() {
         logger: BufferLogger.test(),
       );
 
-      final Completer<void> completer = Completer<void>();
-      FakeAsync().run((FakeAsync time) {
-        unawaited(emulator.launch().whenComplete(completer.complete));
-        time.elapse(const Duration(seconds: 5));
-        time.flushMicrotasks();
-      });
-      await completer.future;
+      await emulator.launch(startupDuration: Duration.zero);
+    });
+
+    testWithoutContext('succeeds with coldboot launch', () async {
+      final List<String> kEmulatorLaunchColdBootCommand = <String>[
+        ...kEmulatorLaunchCommand,
+        '-no-snapshot-load'
+      ];
+      final AndroidEmulator emulator = AndroidEmulator(emulatorID,
+        processManager: FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(command: kEmulatorLaunchColdBootCommand),
+        ]),
+        androidSdk: mockSdk,
+        logger: BufferLogger.test(),
+      );
+
+      await emulator.launch(startupDuration: Duration.zero, coldBoot: true);
     });
 
     testWithoutContext('prints error on failure', () async {
@@ -162,20 +169,13 @@ void main() {
             exitCode: 1,
             stderr: errorText,
             stdout: 'dummy text',
-            duration: Duration(seconds: 1),
           ),
         ]),
         androidSdk: mockSdk,
         logger: logger,
       );
 
-      final Completer<void> completer = Completer<void>();
-      FakeAsync().run((FakeAsync time) {
-        unawaited(emulator.launch().whenComplete(completer.complete));
-        time.elapse(const Duration(seconds: 5));
-        time.flushMicrotasks();
-      });
-      await completer.future;
+      await emulator.launch(startupDuration: Duration.zero);
 
       expect(logger.errorText, contains(errorText));
     });
@@ -184,26 +184,25 @@ void main() {
       final BufferLogger logger =  BufferLogger.test();
       final AndroidEmulator emulator = AndroidEmulator(emulatorID,
         processManager: FakeProcessManager.list(<FakeCommand>[
-          const FakeCommand(
+          FakeCommand(
             command: kEmulatorLaunchCommand,
             exitCode: 1,
             stderr: '',
             stdout: 'dummy text',
-            duration: Duration(seconds: 4),
+            completer: Completer<void>(),
           ),
         ]),
         androidSdk: mockSdk,
         logger: logger,
       );
-      final Completer<void> completer = Completer<void>();
-      await FakeAsync().run((FakeAsync time) async {
-        unawaited(emulator.launch().whenComplete(completer.complete));
-        time.elapse(const Duration(seconds: 5));
-        time.flushMicrotasks();
-      });
-      await completer.future;
+      await emulator.launch(startupDuration: Duration.zero);
 
       expect(logger.errorText, isEmpty);
-    }, skip: true); // TODO(jonahwilliams): clean up with https://github.com/flutter/flutter/issues/60675
+    });
   });
+}
+
+class FakeAndroidSdk extends Fake implements AndroidSdk {
+  @override
+  String emulatorPath;
 }

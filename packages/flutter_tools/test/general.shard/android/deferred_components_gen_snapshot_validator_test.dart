@@ -2,25 +2,24 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/deferred_components_gen_snapshot_validator.dart';
 import 'package:flutter_tools/src/android/deferred_components_validator.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/deferred_component.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
-import 'package:flutter_tools/src/build_system/targets/common.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
+import '../../src/fake_process_manager.dart';
 
 void main() {
-  FileSystem fileSystem;
-  BufferLogger logger;
-  Environment env;
+  late FileSystem fileSystem;
+  late BufferLogger logger;
+  late Environment env;
 
   Environment createEnvironment() {
     final Map<String, String> defines = <String, String>{ kDeferredComponents: 'true' };
@@ -32,12 +31,13 @@ void main() {
       inputs: <String, String>{},
       cacheDir: fileSystem.directory('/cache'),
       flutterRootDir: fileSystem.directory('/flutter_root'),
-      artifacts: globals.artifacts,
+      artifacts: Artifacts.test(),
       fileSystem: fileSystem,
       logger: logger,
-      processManager: globals.processManager,
+      processManager: FakeProcessManager.any(),
       platform: FakePlatform(),
       engineVersion: 'invalidEngineVersion',
+      generateDartPluginRegistry: false,
     );
     return result;
   }
@@ -227,7 +227,7 @@ loading-units-spelled-wrong:
     validator.attemptToolExit();
 
     expect(logger.statusText, contains('Errors checking the following files:'));
-    expect(logger.statusText, contains('Invalid loading units yaml file, \'loading-units\' entry did not exist.'));
+    expect(logger.statusText, contains("Invalid loading units yaml file, 'loading-units' entry did not exist."));
 
     expect(logger.statusText.contains('Previously existing loading units no longer exist:\n\n  LoadingUnit 2\n    Libraries:\n    - lib1\n'), false);
   });
@@ -252,7 +252,7 @@ loading-units: hello
     validator.attemptToolExit();
 
     expect(logger.statusText, contains('Errors checking the following files:'));
-    expect(logger.statusText, contains('Invalid loading units yaml file, \'loading-units\' is not a list.'));
+    expect(logger.statusText, contains("Invalid loading units yaml file, 'loading-units' is not a list."));
   });
 
   testWithoutContext('loadingUnitCache validator detects malformed file: not a list', () async {
@@ -277,7 +277,7 @@ loading-units:
     validator.attemptToolExit();
 
     expect(logger.statusText, contains('Errors checking the following files:'));
-    expect(logger.statusText, contains('Invalid loading units yaml file, \'loading-units\' is not a list of maps.'));
+    expect(logger.statusText, contains("Invalid loading units yaml file, 'loading-units' is not a list of maps."));
   });
 
   testWithoutContext('loadingUnitCache validator detects malformed file: missing id', () async {
@@ -306,7 +306,7 @@ loading-units:
     validator.attemptToolExit();
 
     expect(logger.statusText, contains('Errors checking the following files:'));
-    expect(logger.statusText, contains('Invalid loading units yaml file, all loading units must have an \'id\''));
+    expect(logger.statusText, contains("Invalid loading units yaml file, all loading units must have an 'id'"));
   });
 
   testWithoutContext('loadingUnitCache validator detects malformed file: libraries is list', () async {
@@ -334,7 +334,7 @@ loading-units:
     validator.attemptToolExit();
 
     expect(logger.statusText, contains('Errors checking the following files:'));
-    expect(logger.statusText, contains('Invalid loading units yaml file, \'libraries\' is not a list.'));
+    expect(logger.statusText, contains("Invalid loading units yaml file, 'libraries' is not a list."));
   });
 
   testWithoutContext('loadingUnitCache validator detects malformed file: libraries is list of strings', () async {
@@ -364,7 +364,7 @@ loading-units:
     validator.attemptToolExit();
 
     expect(logger.statusText, contains('Errors checking the following files:'));
-    expect(logger.statusText, contains('Invalid loading units yaml file, \'libraries\' is not a list of strings.'));
+    expect(logger.statusText, contains("Invalid loading units yaml file, 'libraries' is not a list of strings."));
   });
 
   testWithoutContext('loadingUnitCache validator detects malformed file: empty libraries allowed', () async {
@@ -459,7 +459,7 @@ loading-units:
     expect(manifestOutput.existsSync(), true);
     expect(manifestOutput.readAsStringSync().contains('<meta-data android:name="io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager.loadingUnitMapping" android:value="3:component1,2:component2,4:component2"/>'), true);
     expect(manifestOutput.readAsStringSync().contains('android:value="invalidmapping"'), false);
-    expect(manifestOutput.readAsStringSync().contains('<!-- Don\'t delete the meta-data below.'), true);
+    expect(manifestOutput.readAsStringSync().contains("<!-- Don't delete the meta-data below."), true);
   });
 
   testWithoutContext('androidStringMapping adds mapping when no existing mapping', () async {
@@ -517,7 +517,7 @@ loading-units:
       .childFile('AndroidManifest.xml');
     expect(manifestOutput.existsSync(), true);
     expect(manifestOutput.readAsStringSync(), contains('<meta-data android:name="io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager.loadingUnitMapping" android:value="3:component1,2:component2,4:component2"/>'));
-    expect(manifestOutput.readAsStringSync(), contains('<!-- Don\'t delete the meta-data below.'));
+    expect(manifestOutput.readAsStringSync(), contains("<!-- Don't delete the meta-data below."));
   });
 
   // The mapping is incorrectly placed in the activity instead of application.
@@ -578,7 +578,7 @@ loading-units:
       .childFile('AndroidManifest.xml');
     expect(manifestOutput.existsSync(), true);
     expect(manifestOutput.readAsStringSync(), contains('<meta-data android:name="io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager.loadingUnitMapping" android:value="3:component1,2:component2,4:component2"/>'));
-    expect(manifestOutput.readAsStringSync(), contains('<!-- Don\'t delete the meta-data below.'));
+    expect(manifestOutput.readAsStringSync(), contains("<!-- Don't delete the meta-data below."));
   });
 
   testWithoutContext('androidStringMapping generates base module loading unit mapping', () async {
@@ -639,7 +639,7 @@ loading-units:
       .childFile('AndroidManifest.xml');
     expect(manifestOutput.existsSync(), true);
     expect(manifestOutput.readAsStringSync(), contains('<meta-data android:name="io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager.loadingUnitMapping" android:value="3:component1,2:component2,4:component2,5:,6:"/>'));
-    expect(manifestOutput.readAsStringSync(), contains('<!-- Don\'t delete the meta-data below.'));
+    expect(manifestOutput.readAsStringSync(), contains("<!-- Don't delete the meta-data below."));
   });
 
   // Tests if all of the regexp whitespace detection is working.
@@ -706,6 +706,6 @@ loading-units:
     expect(manifestOutput.existsSync(), true);
     expect(manifestOutput.readAsStringSync().contains('<meta-data android:name="io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager.loadingUnitMapping" android:value="3:component1,2:component2,4:component2"/>'), true);
     expect(manifestOutput.readAsStringSync().contains(RegExp(r'android:value[\s\n]*=[\s\n]*"invalidmapping"')), false);
-    expect(manifestOutput.readAsStringSync().contains('<!-- Don\'t delete the meta-data below.'), true);
+    expect(manifestOutput.readAsStringSync().contains("<!-- Don't delete the meta-data below."), true);
   });
 }

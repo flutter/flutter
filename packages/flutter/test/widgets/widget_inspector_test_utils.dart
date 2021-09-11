@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -42,14 +41,14 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
     expect(extensions, contains(name));
     // Encode and decode to JSON to match behavior using a real service
     // extension where only JSON is allowed.
-    return json.decode(json.encode(await extensions[name]!(arguments)))['result'];
+    return (json.decode(json.encode(await extensions[name]!(arguments))) as Map<String, dynamic>)['result'];
   }
 
   Future<String> testBoolExtension(String name, Map<String, String> arguments) async {
     expect(extensions, contains(name));
     // Encode and decode to JSON to match behavior using a real service
     // extension where only JSON is allowed.
-    return json.decode(json.encode(await extensions[name]!(arguments)))['enabled'] as String;
+    return (json.decode(json.encode(await extensions[name]!(arguments))) as Map<String, dynamic>)['enabled'] as String;
   }
 
   int rebuildCount = 0;
@@ -60,7 +59,14 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
     final WidgetsBinding binding = WidgetsBinding.instance!;
 
     if (binding.renderViewElement != null) {
-      binding.buildOwner!.reassemble(binding.renderViewElement!);
+      binding.buildOwner!.reassemble(binding.renderViewElement!, null);
     }
+  }
+
+  @override
+  void resetAllState() {
+    super.resetAllState();
+    eventsDispatched.clear();
+    rebuildCount = 0;
   }
 }

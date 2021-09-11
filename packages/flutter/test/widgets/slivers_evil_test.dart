@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 class TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
   TestSliverPersistentHeaderDelegate(this._maxExtent);
@@ -37,9 +37,9 @@ class TestBehavior extends ScrollBehavior {
   @override
   Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
     return GlowingOverscrollIndicator(
-      child: child,
       axisDirection: details.direction,
       color: const Color(0xFFFFFFFF),
+      child: child,
     );
   }
 }

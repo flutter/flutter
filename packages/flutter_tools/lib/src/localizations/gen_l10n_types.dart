@@ -187,7 +187,7 @@ class OptionalParameter {
 // }
 //
 class Placeholder {
-  Placeholder(this.resourceId, this.name, Map<String, dynamic> attributes)
+  Placeholder(this.resourceId, this.name, Map<String, Object?> attributes)
     : assert(resourceId != null),
       assert(name != null),
       example = _stringAttribute(resourceId, name, attributes, 'example'),
@@ -202,7 +202,7 @@ class Placeholder {
   final String? format;
   final List<OptionalParameter> optionalParameters;
 
-  bool get requiresFormatting => <String>['DateTime', 'double', 'int', 'num'].contains(type);
+  bool get requiresFormatting => <String>['DateTime', 'double', 'num'].contains(type) || (type == 'int' && format != null);
   bool get isNumber => <String>['double', 'int', 'num'].contains(type);
   bool get hasValidNumberFormat => _validNumberFormats.contains(format);
   bool get hasNumberFormatWithParameters => _numberFormatsWithNamedParameters.contains(format);
@@ -212,10 +212,10 @@ class Placeholder {
   static String? _stringAttribute(
     String resourceId,
     String name,
-    Map<String, dynamic> attributes,
+    Map<String, Object?> attributes,
     String attributeName,
   ) {
-    final dynamic value = attributes[attributeName];
+    final Object? value = attributes[attributeName];
     if (value == null) {
       return null;
     }
@@ -231,9 +231,9 @@ class Placeholder {
   static List<OptionalParameter> _optionalParameters(
     String resourceId,
     String name,
-    Map<String, dynamic> attributes
+    Map<String, Object?> attributes
   ) {
-    final dynamic value = attributes['optionalParameters'];
+    final Object? value = attributes['optionalParameters'];
     if (value == null) {
       return <OptionalParameter>[];
     }
@@ -267,23 +267,27 @@ class Placeholder {
 // localized string to be shown for the template ARB file's locale.
 // The docs for the Placeholder explain how placeholder entries are defined.
 class Message {
-  Message(Map<String, dynamic> bundle, this.resourceId, bool isResourceAttributeRequired)
+  Message(Map<String, Object?> bundle, this.resourceId, bool isResourceAttributeRequired)
     : assert(bundle != null),
       assert(resourceId != null && resourceId.isNotEmpty),
       value = _value(bundle, resourceId),
       description = _description(bundle, resourceId, isResourceAttributeRequired),
       placeholders = _placeholders(bundle, resourceId, isResourceAttributeRequired),
-      _pluralMatch = _pluralRE.firstMatch(_value(bundle, resourceId));
+      _pluralMatch = _pluralRE.firstMatch(_value(bundle, resourceId)),
+      _selectMatch = _selectRE.firstMatch(_value(bundle, resourceId));
 
   static final RegExp _pluralRE = RegExp(r'\s*\{([\w\s,]*),\s*plural\s*,');
+  static final RegExp _selectRE = RegExp(r'\s*\{([\w\s,]*),\s*select\s*,');
 
   final String resourceId;
   final String value;
   final String? description;
   final List<Placeholder> placeholders;
   final RegExpMatch? _pluralMatch;
+  final RegExpMatch? _selectMatch;
 
   bool get isPlural => _pluralMatch != null && _pluralMatch!.groupCount == 1;
+  bool get isSelect => _selectMatch != null && _selectMatch!.groupCount == 1;
 
   bool get placeholdersRequireFormatting => placeholders.any((Placeholder p) => p.requiresFormatting);
 
@@ -298,23 +302,23 @@ class Message {
     );
   }
 
-  static String _value(Map<String, dynamic> bundle, String resourceId) {
-    final dynamic value = bundle[resourceId];
+  static String _value(Map<String, Object?> bundle, String resourceId) {
+    final Object? value = bundle[resourceId];
     if (value == null) {
       throw L10nException('A value for resource "$resourceId" was not found.');
     }
     if (value is! String) {
       throw L10nException('The value of "$resourceId" is not a string.');
     }
-    return bundle[resourceId] as String;
+    return value;
   }
 
-  static Map<String, dynamic> _attributes(
-    Map<String, dynamic> bundle,
+  static Map<String, Object?>? _attributes(
+    Map<String, Object?> bundle,
     String resourceId,
     bool isResourceAttributeRequired,
   ) {
-    final dynamic attributes = bundle['@$resourceId'];
+    final Object? attributes = bundle['@$resourceId'];
     if (isResourceAttributeRequired) {
       if (attributes == null) {
         throw L10nException(
@@ -324,36 +328,44 @@ class Message {
       }
     }
 
-    if (attributes != null && attributes is! Map<String, dynamic>) {
+    if (attributes != null && attributes is! Map<String, Object?>) {
       throw L10nException(
         'The resource attribute "@$resourceId" is not a properly formatted Map. '
         'Ensure that it is a map with keys that are strings.'
       );
     }
 
-    final RegExpMatch? pluralRegExp = _pluralRE.firstMatch(_value(bundle, resourceId));
-    final bool isPlural = pluralRegExp != null && pluralRegExp.groupCount == 1;
-    if (attributes == null && isPlural) {
-      throw L10nException(
-        'Resource attribute "@$resourceId" was not found. Please '
-        'ensure that plural resources have a corresponding @resource.'
-      );
+    if (attributes == null) {
+
+      void _throwEmptyAttributes(final RegExp regExp, final String type) {
+        final RegExpMatch? match = regExp.firstMatch(_value(bundle, resourceId));
+        final bool isMatch = match != null && match.groupCount == 1;
+        if (isMatch) {
+          throw L10nException(
+            'Resource attribute "@$resourceId" was not found. Please '
+            'ensure that $type resources have a corresponding @resource.'
+          );
+        }
+      }
+
+      _throwEmptyAttributes(_pluralRE, 'plural');
+      _throwEmptyAttributes(_selectRE, 'select');
     }
 
-    return attributes as Map<String, dynamic>;
+    return attributes as Map<String, Object?>?;
   }
 
   static String? _description(
-    Map<String, dynamic> bundle,
+    Map<String, Object?> bundle,
     String resourceId,
     bool isResourceAttributeRequired,
   ) {
-    final Map<String, dynamic> resourceAttributes = _attributes(bundle, resourceId, isResourceAttributeRequired);
+    final Map<String, Object?>? resourceAttributes = _attributes(bundle, resourceId, isResourceAttributeRequired);
     if (resourceAttributes == null) {
       return null;
     }
 
-    final dynamic value = resourceAttributes['description'];
+    final Object? value = resourceAttributes['description'];
     if (value == null) {
       return null;
     }
@@ -366,27 +378,27 @@ class Message {
   }
 
   static List<Placeholder> _placeholders(
-    Map<String, dynamic> bundle,
+    Map<String, Object?> bundle,
     String resourceId,
     bool isResourceAttributeRequired,
   ) {
-    final Map<String, dynamic> resourceAttributes = _attributes(bundle, resourceId, isResourceAttributeRequired);
+    final Map<String, Object?>? resourceAttributes = _attributes(bundle, resourceId, isResourceAttributeRequired);
     if (resourceAttributes == null) {
       return <Placeholder>[];
     }
-    final dynamic allPlaceholdersMap = resourceAttributes['placeholders'];
+    final Object? allPlaceholdersMap = resourceAttributes['placeholders'];
     if (allPlaceholdersMap == null) {
       return <Placeholder>[];
     }
-    if (allPlaceholdersMap is! Map<String, dynamic>) {
+    if (allPlaceholdersMap is! Map<String, Object?>) {
       throw L10nException(
         'The "placeholders" attribute for message $resourceId, is not '
         'properly formatted. Ensure that it is a map with string valued keys.'
       );
     }
     return allPlaceholdersMap.keys.map<Placeholder>((String placeholderName) {
-      final dynamic value = allPlaceholdersMap[placeholderName];
-      if (value is! Map<String, dynamic>) {
+      final Object? value = allPlaceholdersMap[placeholderName];
+      if (value is! Map<String, Object?>) {
         throw L10nException(
           'The value of the "$placeholderName" placeholder attribute for message '
           '"$resourceId", is not properly formatted. Ensure that it is a map '
@@ -403,9 +415,9 @@ class AppResourceBundle {
   factory AppResourceBundle(File file) {
     assert(file != null);
     // Assuming that the caller has verified that the file exists and is readable.
-    Map<String, dynamic> resources;
+    Map<String, Object?> resources;
     try {
-      resources = json.decode(file.readAsStringSync()) as Map<String, dynamic>;
+      resources = json.decode(file.readAsStringSync()) as Map<String, Object?>;
     } on FormatException catch (e) {
       throw L10nException(
         'The arb file ${file.path} has the following formatting issue: \n'
@@ -413,7 +425,7 @@ class AppResourceBundle {
       );
     }
 
-    String localeString = resources['@@locale'] as String;
+    String? localeString = resources['@@locale'] as String?;
 
     // Look for the first instance of an ISO 639-1 language code, matching exactly.
     final String fileName = file.fileSystem.path.basenameWithoutExtension(file.path);
@@ -470,10 +482,10 @@ class AppResourceBundle {
 
   final File file;
   final LocaleInfo locale;
-  final Map<String, dynamic> resources;
+  final Map<String, Object?> resources;
   final Iterable<String> resourceIds;
 
-  String translationFor(Message message) => resources[message.resourceId] as String;
+  String? translationFor(Message message) => resources[message.resourceId] as String?;
 
   @override
   String toString() {

@@ -9,7 +9,6 @@ import 'dart:async';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -20,6 +19,7 @@ import 'package:flutter_tools/src/tester/flutter_tester.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
+import '../../src/test_build_system.dart';
 
 void main() {
   MemoryFileSystem fileSystem;
@@ -91,7 +91,7 @@ void main() {
 
     setUp(() {
       buildSystem = TestBuildSystem.all(BuildResult(success: true));
-      fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+      fakeProcessManager = FakeProcessManager.empty();
       device = FlutterTesterDevice('flutter-tester',
         fileSystem: fileSystem,
         processManager: fakeProcessManager,
@@ -150,8 +150,8 @@ void main() {
           '--non-interactive',
           '--enable-dart-profiling',
           '--packages=.packages',
-          '--flutter-assets-dir=/.tmp_rand0/flutter-testerrand0',
-          '/.tmp_rand0/flutter-testerrand0/flutter-tester-app.dill',
+          '--flutter-assets-dir=/.tmp_rand0/flutter_tester.rand0',
+          '/.tmp_rand0/flutter_tester.rand0/flutter-tester-app.dill',
         ],
         completer: completer,
         stdout:
@@ -180,7 +180,6 @@ FlutterTesterDevices setUpFlutterTesterDevices() {
     artifacts: Artifacts.test(),
     processManager: FakeProcessManager.any(),
     fileSystem: MemoryFileSystem.test(),
-    config: Config.test(),
     flutterVersion: FakeFlutterVersion(),
     operatingSystemUtils: FakeOperatingSystemUtils(),
   );

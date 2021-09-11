@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import '../../base/file_system.dart';
 import '../../convert.dart';
 import '../../localizations/gen_l10n.dart';
@@ -63,21 +61,25 @@ class GenerateLocalizationsTarget extends Target {
       options: options,
       projectDir: environment.projectDir,
       dependenciesDir: environment.buildDir,
-      localizationsGenerator: LocalizationsGenerator(environment.fileSystem),
+      fileSystem: environment.fileSystem,
     );
 
     final Map<String, Object> dependencies = json.decode(
       environment.buildDir.childFile(_kDependenciesFileName).readAsStringSync()
     ) as Map<String, Object>;
+    final List<Object?>? inputs = dependencies['inputs'] as List<Object?>?;
+    final List<Object?>? outputs = dependencies['outputs'] as List<Object?>?;
     final Depfile depfile = Depfile(
       <File>[
         configFile,
-        for (dynamic inputFile in dependencies['inputs'] as List<dynamic>)
-          environment.fileSystem.file(inputFile)
+        if (inputs != null)
+          for (Object inputFile in inputs.whereType<Object>())
+            environment.fileSystem.file(inputFile)
       ],
       <File>[
-        for (dynamic outputFile in dependencies['outputs'] as List<dynamic>)
-          environment.fileSystem.file(outputFile)
+        if (outputs != null)
+          for (Object outputFile in outputs.whereType<Object>())
+            environment.fileSystem.file(outputFile)
       ],
     );
     depfileService.writeToFile(

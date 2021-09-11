@@ -203,6 +203,61 @@ class DevFSStringContent extends DevFSByteContent {
   }
 }
 
+/// A string compressing DevFSContent.
+///
+/// A specialized DevFSContent similar to DevFSByteContent where the contents
+/// are the compressed bytes of a string. Its difference is that the original
+/// uncompressed string can be compared with directly without the indirection
+/// of a compute-expensive uncompress/decode and compress/encode to compare
+/// the strings.
+///
+/// The `hintString` parameter is a zlib dictionary hinting mechanism to suggest
+/// the most common string occurrences to potentially assist with compression.
+class DevFSStringCompressingBytesContent extends DevFSContent {
+  DevFSStringCompressingBytesContent(this._string, { String hintString })
+    : _compressor = ZLibEncoder(
+      dictionary: hintString == null
+          ? null
+          : utf8.encode(hintString),
+      gzip: true,
+      level: 9,
+    );
+
+  final String _string;
+  final ZLibEncoder _compressor;
+  final DateTime _modificationTime = DateTime.now();
+
+  List<int> _bytes;
+  bool _isModified = true;
+
+  List<int> get bytes => _bytes ??= _compressor.convert(utf8.encode(_string));
+
+  /// Return true only once so that the content is written to the device only once.
+  @override
+  bool get isModified {
+    final bool modified = _isModified;
+    _isModified = false;
+    return modified;
+  }
+
+  @override
+  bool isModifiedAfter(DateTime time) {
+    return time == null || _modificationTime.isAfter(time);
+  }
+
+  @override
+  int get size => bytes.length;
+
+  @override
+  Future<List<int>> contentsAsBytes() async => bytes;
+
+  @override
+  Stream<List<int>> contentsAsStream() => Stream<List<int>>.value(bytes);
+
+  /// This checks the source string with another string.
+  bool equals(String string) => _string == string;
+}
+
 class DevFSException implements Exception {
   DevFSException(this.message, [this.error, this.stackTrace]);
   final String message;
@@ -344,18 +399,34 @@ class UpdateFSReport {
     int invalidatedSourcesCount = 0,
     int syncedBytes = 0,
     this.fastReassembleClassName,
+    int scannedSourcesCount = 0,
+    Duration compileDuration = Duration.zero,
+    Duration transferDuration = Duration.zero,
+    Duration findInvalidatedDuration = Duration.zero,
   }) : _success = success,
        _invalidatedSourcesCount = invalidatedSourcesCount,
-       _syncedBytes = syncedBytes;
+       _syncedBytes = syncedBytes,
+       _scannedSourcesCount = scannedSourcesCount,
+       _compileDuration = compileDuration,
+       _transferDuration = transferDuration,
+       _findInvalidatedDuration = findInvalidatedDuration;
 
   bool get success => _success;
   int get invalidatedSourcesCount => _invalidatedSourcesCount;
   int get syncedBytes => _syncedBytes;
+  int get scannedSourcesCount => _scannedSourcesCount;
+  Duration get compileDuration => _compileDuration;
+  Duration get transferDuration => _transferDuration;
+  Duration get findInvalidatedDuration => _findInvalidatedDuration;
 
   bool _success;
   String fastReassembleClassName;
   int _invalidatedSourcesCount;
   int _syncedBytes;
+  int _scannedSourcesCount;
+  Duration _compileDuration;
+  Duration _transferDuration;
+  Duration _findInvalidatedDuration;
 
   void incorporateResults(UpdateFSReport report) {
     if (!report._success) {
@@ -364,6 +435,10 @@ class UpdateFSReport {
     fastReassembleClassName ??= report.fastReassembleClassName;
     _invalidatedSourcesCount += report._invalidatedSourcesCount;
     _syncedBytes += report._syncedBytes;
+    _scannedSourcesCount += report._scannedSourcesCount;
+    _compileDuration += report._compileDuration;
+    _transferDuration += report._transferDuration;
+    _findInvalidatedDuration += report._findInvalidatedDuration;
   }
 }
 
@@ -380,6 +455,7 @@ class DevFS {
     @required FileSystem fileSystem,
     HttpClient httpClient,
     Duration uploadRetryThrottle,
+    StopwatchFactory stopwatchFactory = const StopwatchFactory(),
   }) : _vmService = serviceProtocol,
        _logger = logger,
        _fileSystem = fileSystem,
@@ -391,17 +467,21 @@ class DevFS {
         uploadRetryThrottle: uploadRetryThrottle,
         httpClient: httpClient ?? ((context.get<HttpClientFactory>() == null)
           ? HttpClient()
-          : context.get<HttpClientFactory>()())
-      );
+          : context.get<HttpClientFactory>()())),
+       _stopwatchFactory = stopwatchFactory;
 
   final FlutterVmService _vmService;
   final _DevFSHttpWriter _httpWriter;
   final Logger _logger;
   final FileSystem _fileSystem;
+  final StopwatchFactory _stopwatchFactory;
 
   final String fsName;
   final Directory rootDirectory;
   final Set<String> assetPathsToEvict = <String>{};
+
+  // A flag to indicate whether we have called `setAssetDirectory` on the target device.
+  bool hasSetAssetDirectory = false;
 
   List<Uri> sources = <Uri>[];
   DateTime lastCompiled;
@@ -520,12 +600,19 @@ class DevFS {
 
     // Await the compiler response after checking if the bundle is updated. This allows the file
     // stating to be done while waiting for the frontend_server response.
+    final Stopwatch compileTimer = _stopwatchFactory.createStopwatch('compile')..start();
     final Future<CompilerOutput> pendingCompilerOutput = generator.recompile(
       mainUri,
       invalidatedFiles,
       outputPath: dillOutputPath,
+      fs: _fileSystem,
+      projectRootPath: projectRootPath,
       packageConfig: packageConfig,
-    );
+    ).then((CompilerOutput result) {
+      compileTimer.stop();
+      return result;
+    });
+
     if (bundle != null) {
       // The tool writes the assets into the AssetBundle working dir so that they
       // are in the same location in DevFS and the iOS simulator.
@@ -570,20 +657,24 @@ class DevFS {
       }
     }
     _logger.printTrace('Updating files.');
+    final Stopwatch transferTimer = _stopwatchFactory.createStopwatch('transfer')..start();
     if (dirtyEntries.isNotEmpty) {
       await (devFSWriter ?? _httpWriter).write(dirtyEntries, _baseUri, _httpWriter);
     }
+    transferTimer.stop();
     _logger.printTrace('DevFS: Sync finished');
     return UpdateFSReport(
       success: true,
       syncedBytes: syncedBytes,
       invalidatedSourcesCount: invalidatedFiles.length,
       fastReassembleClassName: _checkIfSingleWidgetReloadApplied(),
+      compileDuration: compileTimer.elapsed,
+      transferDuration: transferTimer.elapsed,
     );
   }
 
   /// Converts a platform-specific file path to a platform-independent URL path.
-  String _asUriPath(String filePath) => _fileSystem.path.toUri(filePath).path + '/';
+  String _asUriPath(String filePath) => '${_fileSystem.path.toUri(filePath).path}/';
 }
 
 /// An implementation of a devFS writer which copies physical files for devices

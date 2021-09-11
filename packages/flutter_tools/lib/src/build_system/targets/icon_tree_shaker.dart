@@ -5,22 +5,18 @@
 // @dart = 2.8
 
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 import 'package:mime/mime.dart' as mime;
+import 'package:process/process.dart';
 
 import '../../artifacts.dart';
 import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/logger.dart';
+import '../../build_info.dart';
 import '../../convert.dart';
 import '../../devfs.dart';
 import '../build_system.dart';
-import 'common.dart';
-
-/// The build define controlling whether icon fonts should be stripped down to
-/// only the glyphs used by the application.
-const String kIconTreeShakerFlag = 'TreeShakeIcons';
 
 List<Map<String, dynamic>> _getList(dynamic object, String errorMessage) {
   if (object is List<dynamic>) {
@@ -113,7 +109,7 @@ class IconTreeShaker {
       _artifacts.getArtifactPath(Artifact.constFinder),
     );
     final File dart = _fs.file(
-      _artifacts.getArtifactPath(Artifact.engineDartBinary),
+      _artifacts.getHostArtifact(HostArtifact.engineDartBinary),
     );
 
     final Map<String, List<int>> iconData = await _findConstants(

@@ -17,6 +17,7 @@ import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
 import 'material_state.dart';
+import 'material_state_mixin.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 import 'tooltip.dart';
@@ -919,7 +920,7 @@ class InputChip extends StatelessWidget
 ///   const MyThreeOptions({Key? key}) : super(key: key);
 ///
 ///   @override
-///   _MyThreeOptionsState createState() => _MyThreeOptionsState();
+///   State<MyThreeOptions> createState() => _MyThreeOptionsState();
 /// }
 ///
 /// class _MyThreeOptionsState extends State<MyThreeOptions> {
@@ -1628,10 +1629,10 @@ class RawChip extends StatefulWidget
   final bool tapEnabled;
 
   @override
-  _RawChipState createState() => _RawChipState();
+  State<RawChip> createState() => _RawChipState();
 }
 
-class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip> {
+class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProviderStateMixin<RawChip> {
   static const Duration pressedAnimationDuration = Duration(milliseconds: 75);
 
   late AnimationController selectController;
@@ -1643,8 +1644,6 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
   late Animation<double> deleteDrawerAnimation;
   late Animation<double> enableAnimation;
   late Animation<double> selectionFade;
-
-  final Set<MaterialState> _states = <MaterialState>{};
 
   final GlobalKey deleteIconKey = GlobalKey();
 
@@ -1664,8 +1663,8 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
   void initState() {
     assert(widget.onSelected == null || widget.onPressed == null);
     super.initState();
-    _updateState(MaterialState.disabled, !widget.isEnabled);
-    _updateState(MaterialState.selected, widget.selected);
+    setMaterialState(MaterialState.disabled, !widget.isEnabled);
+    setMaterialState(MaterialState.selected, widget.selected);
     selectController = AnimationController(
       duration: _kSelectDuration,
       value: widget.selected == true ? 1.0 : 0.0,
@@ -1736,17 +1735,13 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     super.dispose();
   }
 
-  void _updateState(MaterialState state, bool value) {
-    value ? _states.add(state) : _states.remove(state);
-  }
-
   void _handleTapDown(TapDownDetails details) {
     if (!canTap) {
       return;
     }
+    setMaterialState(MaterialState.pressed, true);
     setState(() {
       _isTapping = true;
-      _updateState(MaterialState.pressed, true);
     });
   }
 
@@ -1754,9 +1749,9 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     if (!canTap) {
       return;
     }
+    setMaterialState(MaterialState.pressed, false);
     setState(() {
       _isTapping = false;
-      _updateState(MaterialState.pressed, false);
     });
   }
 
@@ -1764,32 +1759,20 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     if (!canTap) {
       return;
     }
+    setMaterialState(MaterialState.pressed, false);
     setState(() {
       _isTapping = false;
-      _updateState(MaterialState.pressed, false);
     });
     // Only one of these can be set, so only one will be called.
     widget.onSelected?.call(!widget.selected);
     widget.onPressed?.call();
   }
 
-  void _handleFocus(bool isFocused) {
-    setState(() {
-      _updateState(MaterialState.focused, isFocused);
-    });
-  }
-
-  void _handleHover(bool isHovered) {
-    setState(() {
-      _updateState(MaterialState.hovered, isHovered);
-    });
-  }
-
   OutlinedBorder _getShape(ChipThemeData theme) {
-    final BorderSide? resolvedSide = MaterialStateProperty.resolveAs<BorderSide?>(widget.side, _states)
-      ?? MaterialStateProperty.resolveAs<BorderSide?>(theme.side, _states);
-    final OutlinedBorder resolvedShape = MaterialStateProperty.resolveAs<OutlinedBorder?>(widget.shape, _states)
-      ?? MaterialStateProperty.resolveAs<OutlinedBorder?>(theme.shape, _states)
+    final BorderSide? resolvedSide = MaterialStateProperty.resolveAs<BorderSide?>(widget.side, materialStates)
+      ?? MaterialStateProperty.resolveAs<BorderSide?>(theme.side, materialStates);
+    final OutlinedBorder resolvedShape = MaterialStateProperty.resolveAs<OutlinedBorder?>(widget.shape, materialStates)
+      ?? MaterialStateProperty.resolveAs<OutlinedBorder?>(theme.shape, materialStates)
       ?? const StadiumBorder();
     return resolvedShape.copyWith(side: resolvedSide);
   }
@@ -1813,7 +1796,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     super.didUpdateWidget(oldWidget);
     if (oldWidget.isEnabled != widget.isEnabled) {
       setState(() {
-        _updateState(MaterialState.disabled, !widget.isEnabled);
+        setMaterialState(MaterialState.disabled, !widget.isEnabled);
         if (widget.isEnabled) {
           enableController.forward();
         } else {
@@ -1832,7 +1815,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     }
     if (oldWidget.selected != widget.selected) {
       setState(() {
-        _updateState(MaterialState.selected, widget.selected);
+        setMaterialState(MaterialState.selected, widget.selected);
         if (widget.selected == true) {
           selectController.forward();
         } else {
@@ -1852,7 +1835,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
   }
 
   Widget? _wrapWithTooltip(String? tooltip, VoidCallback? callback, Widget? child) {
-    if(!widget.useDeleteButtonTooltip){
+    if(!widget.useDeleteButtonTooltip) {
       return child;
     }
     if (child == null || callback == null || tooltip == null) {
@@ -1886,7 +1869,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
             ? () {
                 Feedback.forTap(context);
                 widget.onDeleted!();
-            }
+              }
             : null,
           child: IconTheme(
             data: theme.iconTheme.copyWith(
@@ -1932,7 +1915,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     final bool showCheckmark = widget.showCheckmark ?? chipTheme.showCheckmark ?? true;
 
     final TextStyle effectiveLabelStyle = chipTheme.labelStyle.merge(widget.labelStyle);
-    final Color? resolvedLabelColor = MaterialStateProperty.resolveAs<Color?>(effectiveLabelStyle.color, _states);
+    final Color? resolvedLabelColor = MaterialStateProperty.resolveAs<Color?>(effectiveLabelStyle.color, materialStates);
     final TextStyle resolvedLabelStyle = effectiveLabelStyle.copyWith(color: resolvedLabelColor);
     final EdgeInsetsGeometry labelPadding = widget.labelPadding ?? chipTheme.labelPadding ?? _defaultLabelPadding;
 
@@ -1943,14 +1926,14 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
       shape: resolvedShape,
       clipBehavior: widget.clipBehavior,
       child: InkWell(
-        onFocusChange: _handleFocus,
+        onFocusChange: updateMaterialState(MaterialState.focused),
         focusNode: widget.focusNode,
         autofocus: widget.autofocus,
         canRequestFocus: widget.isEnabled,
         onTap: canTap ? _handleTap : null,
         onTapDown: canTap ? _handleTapDown : null,
         onTapCancel: canTap ? _handleTapCancel : null,
-        onHover: canTap ? _handleHover : null,
+        onHover: canTap ? updateMaterialState(MaterialState.hovered) : null,
         splashFactory: _LocationAwareInkRippleFactory(
             hasDeleteButton,
             context,
@@ -1982,14 +1965,14 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
                   child: widget.label,
                 ),
                 avatar: AnimatedSwitcher(
-                  child: widget.avatar,
                   duration: _kDrawerDuration,
                   switchInCurve: Curves.fastOutSlowIn,
+                  child: widget.avatar,
                 ),
                 deleteIcon: AnimatedSwitcher(
-                  child: _buildDeleteIcon(context, theme, chipTheme, deleteIconKey),
                   duration: _kDrawerDuration,
                   switchInCurve: Curves.fastOutSlowIn,
+                  child: _buildDeleteIcon(context, theme, chipTheme, deleteIconKey),
                 ),
                 brightness: chipTheme.brightness,
                 padding: (widget.padding ?? chipTheme.padding).resolve(textDirection),
@@ -2028,9 +2011,9 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     result = _ChipRedirectingHitDetectionWidget(
       constraints: constraints,
       child: Center(
-        child: result,
         widthFactor: 1.0,
         heightFactor: 1.0,
+        child: result,
       ),
     );
     return Semantics(

@@ -5,10 +5,9 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-
-import 'package:integration_test/integration_test.dart';
-import 'package:integration_test/common.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:integration_test/common.dart';
+import 'package:integration_test/integration_test.dart';
 import 'package:vm_service/vm_service.dart' as vm;
 
 vm.Timeline _kTimelines = vm.Timeline(
@@ -44,6 +43,38 @@ Future<void> main() async {
       integrationBinding.reportData = <String, dynamic>{'answer': 42};
     });
 
+    testWidgets('hitTesting works when using setSurfaceSize', (WidgetTester tester) async {
+      int invocations = 0;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Center(
+            child: GestureDetector(
+              onTap: () {
+                invocations++;
+              },
+              child: const Text('Test'),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(Text));
+      await tester.pump();
+      expect(invocations, 1);
+
+      await tester.binding.setSurfaceSize(const Size(200, 300));
+      await tester.pump();
+      await tester.tap(find.byType(Text));
+      await tester.pump();
+      expect(invocations, 2);
+
+      await tester.binding.setSurfaceSize(null);
+      await tester.pump();
+      await tester.tap(find.byType(Text));
+      await tester.pump();
+      expect(invocations, 3);
+    });
+
     testWidgets('setSurfaceSize works', (WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(home: Center(child: Text('Test'))));
 
@@ -73,6 +104,7 @@ Future<void> main() async {
     testWidgets('Test traceAction', (WidgetTester tester) async {
       await integrationBinding.enableTimeline(vmService: fakeVM);
       await integrationBinding.traceAction(() async {});
+      print(integrationBinding.reportData);
       expect(integrationBinding.reportData, isNotNull);
       expect(integrationBinding.reportData!.containsKey('timeline'), true);
       expect(
@@ -103,7 +135,7 @@ Future<void> main() async {
   });
 
   tearDownAll(() async {
-    // This part is outside the group so that `request` has been compeleted as
+    // This part is outside the group so that `request` has been completed as
     // part of the `tearDownAll` registered in the group during
     // `IntegrationTestWidgetsFlutterBinding` initialization.
     final Map<String, dynamic> response =

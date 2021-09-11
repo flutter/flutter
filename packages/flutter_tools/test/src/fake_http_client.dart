@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:convert';
 
 import 'dart:io';
+
+import 'package:collection/collection.dart';
 
 /// The HTTP verb for a [FakeRequest].
 enum HttpMethod {
@@ -54,8 +54,6 @@ String _toMethodString(HttpMethod method) {
     case HttpMethod.head:
       return 'HEAD';
   }
-  assert(false);
-  return null;
 }
 
 /// Override the creation of all [HttpClient] objects with a zone injection.
@@ -73,7 +71,7 @@ class _FakeHttpClientOverrides extends HttpOverrides {
   final FakeHttpClient httpClient;
 
   @override
-  HttpClient createHttpClient(SecurityContext context) {
+  HttpClient createHttpClient(SecurityContext? context) {
     return httpClient;
   }
 }
@@ -89,12 +87,14 @@ class FakeRequest {
     this.method = HttpMethod.get,
     this.response = FakeResponse.empty,
     this.responseError,
+    this.body,
   });
 
   final Uri uri;
   final HttpMethod method;
   final FakeResponse response;
-  final dynamic responseError;
+  final Object? responseError;
+  final List<int>? body;
 
   @override
   String toString() => 'Request{${_toMethodString(method)}, $uri}';
@@ -136,19 +136,19 @@ class FakeHttpClient implements HttpClient {
   final List<FakeRequest> _requests;
 
   @override
-  bool autoUncompress;
+  bool autoUncompress = true;
 
   @override
-  Duration connectionTimeout;
+  Duration? connectionTimeout;
 
   @override
-  Duration idleTimeout;
+  Duration idleTimeout = Duration.zero;
 
   @override
-  int maxConnectionsPerHost;
+  int? maxConnectionsPerHost;
 
   @override
-  String userAgent;
+  String? userAgent;
 
   @override
   void addCredentials(Uri url, String realm, HttpClientCredentials credentials) {
@@ -161,17 +161,17 @@ class FakeHttpClient implements HttpClient {
   }
 
   @override
-  set authenticate(Future<bool> Function(Uri url, String scheme, String realm) f) {
+  set authenticate(Future<bool> Function(Uri url, String scheme, String realm)? f) {
     throw UnimplementedError();
   }
 
   @override
-  set authenticateProxy(Future<bool> Function(String host, int port, String scheme, String realm) f) {
+  set authenticateProxy(Future<bool> Function(String host, int port, String scheme, String realm)? f) {
     throw UnimplementedError();
   }
 
   @override
-  set badCertificateCallback(bool Function(X509Certificate cert, String host, int port) callback) {
+  set badCertificateCallback(bool Function(X509Certificate cert, String host, int port)? callback) {
     throw UnimplementedError();
   }
 
@@ -186,11 +186,11 @@ class FakeHttpClient implements HttpClient {
 
   @override
   Future<HttpClientRequest> deleteUrl(Uri url) async {
-    return _findRequest(HttpMethod.delete, url);
+    return _findRequest(HttpMethod.delete, url, StackTrace.current);
   }
 
   @override
-  set findProxy(String Function(Uri url) f) { }
+  set findProxy(String Function(Uri url)? f) { }
 
   @override
   Future<HttpClientRequest> get(String host, int port, String path) {
@@ -200,7 +200,7 @@ class FakeHttpClient implements HttpClient {
 
   @override
   Future<HttpClientRequest> getUrl(Uri url) async {
-    return _findRequest(HttpMethod.get, url);
+    return _findRequest(HttpMethod.get, url, StackTrace.current);
   }
 
   @override
@@ -211,7 +211,7 @@ class FakeHttpClient implements HttpClient {
 
   @override
   Future<HttpClientRequest> headUrl(Uri url) async {
-    return _findRequest(HttpMethod.head, url);
+    return _findRequest(HttpMethod.head, url, StackTrace.current);
   }
 
   @override
@@ -222,7 +222,7 @@ class FakeHttpClient implements HttpClient {
 
   @override
   Future<HttpClientRequest> openUrl(String method, Uri url) async {
-    return _findRequest(_fromMethodString(method), url);
+    return _findRequest(_fromMethodString(method), url, StackTrace.current);
   }
 
   @override
@@ -233,7 +233,7 @@ class FakeHttpClient implements HttpClient {
 
   @override
   Future<HttpClientRequest> patchUrl(Uri url) async {
-    return _findRequest(HttpMethod.patch, url);
+    return _findRequest(HttpMethod.patch, url, StackTrace.current);
   }
 
   @override
@@ -244,7 +244,7 @@ class FakeHttpClient implements HttpClient {
 
   @override
   Future<HttpClientRequest> postUrl(Uri url) async {
-    return _findRequest(HttpMethod.post, url);
+    return _findRequest(HttpMethod.post, url, StackTrace.current);
   }
 
   @override
@@ -255,12 +255,12 @@ class FakeHttpClient implements HttpClient {
 
   @override
   Future<HttpClientRequest> putUrl(Uri url) async {
-    return _findRequest(HttpMethod.put, url);
+    return _findRequest(HttpMethod.put, url, StackTrace.current);
   }
 
   int _requestCount = 0;
 
-  _FakeHttpClientRequest _findRequest(HttpMethod method, Uri uri) {
+  _FakeHttpClientRequest _findRequest(HttpMethod method, Uri uri, StackTrace stackTrace) {
     // Ensure the fake client throws similar errors to the real client.
     if (uri.host.isEmpty) {
       throw ArgumentError('No host specified in URI $uri');
@@ -274,9 +274,11 @@ class FakeHttpClient implements HttpClient {
         uri,
         methodString,
         null,
+        null,
+        stackTrace,
       );
     }
-    FakeRequest matchedRequest;
+    FakeRequest? matchedRequest;
     for (final FakeRequest request in _requests) {
       if (request.method == method && request.uri.toString() == uri.toString()) {
         matchedRequest = request;
@@ -296,54 +298,76 @@ class FakeHttpClient implements HttpClient {
       uri,
       methodString,
       matchedRequest.responseError,
+      matchedRequest.body,
+      stackTrace,
     );
   }
 }
 
 class _FakeHttpClientRequest implements HttpClientRequest {
-  _FakeHttpClientRequest(this._response, this._uri, this._method, this._responseError);
+  _FakeHttpClientRequest(this._response, this._uri, this._method, this._responseError, this._expectedBody, this._stackTrace);
 
   final FakeResponse _response;
   final String _method;
   final Uri _uri;
-  final dynamic _responseError;
+  final Object? _responseError;
+  final List<int> _body = <int>[];
+  final List<int>? _expectedBody;
+  final StackTrace _stackTrace;
 
   @override
-  bool bufferOutput;
+  bool bufferOutput = true;
 
   @override
   int contentLength = 0;
 
   @override
-  Encoding encoding;
+  late Encoding encoding;
 
   @override
-  bool followRedirects;
+  bool followRedirects = true;
 
   @override
-  int maxRedirects;
+  int maxRedirects = 5;
 
   @override
-  bool persistentConnection;
+  bool persistentConnection = true;
 
   @override
-  void abort([Object exception, StackTrace stackTrace]) {
+  void abort([Object? exception, StackTrace? stackTrace]) {
     throw UnimplementedError();
   }
 
   @override
-  void add(List<int> data) { }
+  void add(List<int> data) {
+    _body.addAll(data);
+  }
 
   @override
-  void addError(Object error, [StackTrace stackTrace]) { }
+  void addError(Object error, [StackTrace? stackTrace]) { }
 
   @override
-  Future<void> addStream(Stream<List<int>> stream) async { }
+  Future<void> addStream(Stream<List<int>> stream) async {
+    final Completer<void> completer = Completer<void>();
+    stream.listen(_body.addAll, onDone: completer.complete);
+    await completer.future;
+  }
 
   @override
   Future<HttpClientResponse> close() async {
+    final Completer<void> completer = Completer<void>();
+    Timer.run(() {
+      if (_expectedBody != null && !const ListEquality<int>().equals(_expectedBody, _body)) {
+        completer.completeError(StateError(
+          'Expected a request with the following body:\n$_expectedBody\n but found:\n$_body'
+        ), _stackTrace);
+      } else {
+        completer.complete();
+      }
+    });
+    await completer.future;
     if (_responseError != null) {
-      return Future<HttpClientResponse>.error(_responseError);
+      return Future<HttpClientResponse>.error(_responseError!);
     }
     return _FakeHttpClientResponse(_response);
   }
@@ -370,16 +394,24 @@ class _FakeHttpClientRequest implements HttpClientRequest {
   Uri get uri => _uri;
 
   @override
-  void write(Object object) { }
+  void write(Object? object) {
+    _body.addAll(utf8.encode(object.toString()));
+  }
 
   @override
-  void writeAll(Iterable<dynamic> objects, [String separator = '']) { }
+  void writeAll(Iterable<dynamic> objects, [String separator = '']) {
+    _body.addAll(utf8.encode(objects.join(separator)));
+  }
 
   @override
-  void writeCharCode(int charCode) { }
+  void writeCharCode(int charCode) {
+    _body.add(charCode);
+  }
 
   @override
-  void writeln([Object object = '']) { }
+  void writeln([Object? object = '']) {
+    _body.addAll(utf8.encode('$object\n'));
+  }
 }
 
 class _FakeHttpClientResponse extends Stream<List<int>> implements HttpClientResponse {
@@ -416,10 +448,10 @@ class _FakeHttpClientResponse extends Stream<List<int>> implements HttpClientRes
 
   @override
   StreamSubscription<List<int>> listen(
-    void Function(List<int> event) onData, {
-    Function onError,
-    void Function() onDone,
-    bool cancelOnError,
+    void Function(List<int> event)? onData, {
+    Function? onError,
+    void Function()? onDone,
+    bool? cancelOnError,
   }) {
     final Stream<List<int>> response = Stream<List<int>>.fromIterable(<List<int>>[
       _response.body,
@@ -434,7 +466,7 @@ class _FakeHttpClientResponse extends Stream<List<int>> implements HttpClientRes
   String get reasonPhrase => 'OK';
 
   @override
-  Future<HttpClientResponse> redirect([String method, Uri url, bool followLoops]) {
+  Future<HttpClientResponse> redirect([String? method, Uri? url, bool? followLoops]) {
     throw UnimplementedError();
   }
 
@@ -451,12 +483,12 @@ class _FakeHttpHeaders extends HttpHeaders {
   final Map<String, List<String>> _backingData;
 
   @override
-  List<String> operator [](String name) => _backingData[name];
+  List<String>? operator [](String name) => _backingData[name];
 
   @override
   void add(String name, Object value, {bool preserveHeaderCase = false}) {
     _backingData[name] ??= <String>[];
-    _backingData[name].add(value.toString());
+    _backingData[name]!.add(value.toString());
   }
 
   @override
@@ -486,7 +518,7 @@ class _FakeHttpHeaders extends HttpHeaders {
   }
 
   @override
-  String value(String name) {
+  String? value(String name) {
     return _backingData[name]?.join('; ');
   }
 }

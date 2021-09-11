@@ -158,7 +158,7 @@ abstract class EdgeInsetsGeometry {
     );
   }
 
-  /// Returns the a new [EdgeInsetsGeometry] object with all values greater than
+  /// Returns a new [EdgeInsetsGeometry] object with all values greater than
   /// or equal to `min`, and less than or equal to `max`.
   EdgeInsetsGeometry clamp(EdgeInsetsGeometry min, EdgeInsetsGeometry max) {
     return _MixedEdgeInsets.fromLRSETB(

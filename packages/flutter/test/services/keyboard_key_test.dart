@@ -29,15 +29,16 @@ void main() {
   group(LogicalKeyboardKey, () {
     test('Various classes of keys can be looked up by code', () async {
       // Check a letter key
-      expect(LogicalKeyboardKey.findKeyByKeyId(0x0000000061), equals(LogicalKeyboardKey.keyA));
+      expect(LogicalKeyboardKey.findKeyByKeyId(LogicalKeyboardKey.keyA.keyId), equals(LogicalKeyboardKey.keyA));
       // Check a control key
-      expect(LogicalKeyboardKey.findKeyByKeyId(0x0100070029), equals(LogicalKeyboardKey.escape));
+      expect(LogicalKeyboardKey.findKeyByKeyId(LogicalKeyboardKey.escape.keyId), equals(LogicalKeyboardKey.escape));
       // Check a modifier key
-      expect(LogicalKeyboardKey.findKeyByKeyId(0x01000700e1), equals(LogicalKeyboardKey.shiftLeft));
+      expect(LogicalKeyboardKey.findKeyByKeyId(LogicalKeyboardKey.shiftLeft.keyId), equals(LogicalKeyboardKey.shiftLeft));
     });
     test('Control characters are recognized as such', () async {
       // Check some common control characters
       expect(LogicalKeyboardKey.isControlCharacter('\x08'), isTrue); // BACKSPACE
+      expect(LogicalKeyboardKey.isControlCharacter('\x09'), isTrue); // TAB
       expect(LogicalKeyboardKey.isControlCharacter('\x0a'), isTrue); // LINE FEED
       expect(LogicalKeyboardKey.isControlCharacter('\x0d'), isTrue); // RETURN
       expect(LogicalKeyboardKey.isControlCharacter('\x1b'), isTrue); // ESC
@@ -47,6 +48,15 @@ void main() {
       expect(LogicalKeyboardKey.isControlCharacter(' '), isFalse);
       expect(LogicalKeyboardKey.isControlCharacter('~'), isFalse);
       expect(LogicalKeyboardKey.isControlCharacter('\xa0'), isFalse); // NO-BREAK SPACE
+    });
+    test('Control characters are not using incorrect values', () async {
+      // Check some common control characters to make sure they're using
+      // their char code values, and not something else.
+      expect(LogicalKeyboardKey.backspace.keyId, equals(LogicalKeyboardKey.unprintablePlane + 0x08));
+      expect(LogicalKeyboardKey.tab.keyId, equals(LogicalKeyboardKey.unprintablePlane + 0x09));
+      expect(LogicalKeyboardKey.enter.keyId, equals(LogicalKeyboardKey.unprintablePlane + 0x0d));
+      expect(LogicalKeyboardKey.escape.keyId, equals(LogicalKeyboardKey.unprintablePlane + 0x1b));
+      expect(LogicalKeyboardKey.delete.keyId, equals(LogicalKeyboardKey.unprintablePlane + 0x7f));
     });
     test('Basic synonyms can be looked up.', () async {
       expect(LogicalKeyboardKey.shiftLeft.synonyms.first, equals(LogicalKeyboardKey.shift));
@@ -61,48 +71,51 @@ void main() {
     test('Synonyms get collapsed properly.', () async {
       expect(LogicalKeyboardKey.collapseSynonyms(<LogicalKeyboardKey>{}), isEmpty);
       expect(
-          LogicalKeyboardKey.collapseSynonyms(<LogicalKeyboardKey>{
-            LogicalKeyboardKey.shiftLeft,
-            LogicalKeyboardKey.controlLeft,
-            LogicalKeyboardKey.altLeft,
-            LogicalKeyboardKey.metaLeft,
-          }),
-          equals(<LogicalKeyboardKey>{
-            LogicalKeyboardKey.shift,
-            LogicalKeyboardKey.control,
-            LogicalKeyboardKey.alt,
-            LogicalKeyboardKey.meta,
-          }));
+        LogicalKeyboardKey.collapseSynonyms(<LogicalKeyboardKey>{
+          LogicalKeyboardKey.shiftLeft,
+          LogicalKeyboardKey.controlLeft,
+          LogicalKeyboardKey.altLeft,
+          LogicalKeyboardKey.metaLeft,
+        }),
+        equals(<LogicalKeyboardKey>{
+          LogicalKeyboardKey.shift,
+          LogicalKeyboardKey.control,
+          LogicalKeyboardKey.alt,
+          LogicalKeyboardKey.meta,
+        }),
+      );
       expect(
-          LogicalKeyboardKey.collapseSynonyms(<LogicalKeyboardKey>{
-            LogicalKeyboardKey.shiftRight,
-            LogicalKeyboardKey.controlRight,
-            LogicalKeyboardKey.altRight,
-            LogicalKeyboardKey.metaRight,
-          }),
-          equals(<LogicalKeyboardKey>{
-            LogicalKeyboardKey.shift,
-            LogicalKeyboardKey.control,
-            LogicalKeyboardKey.alt,
-            LogicalKeyboardKey.meta,
-          }));
+        LogicalKeyboardKey.collapseSynonyms(<LogicalKeyboardKey>{
+          LogicalKeyboardKey.shiftRight,
+          LogicalKeyboardKey.controlRight,
+          LogicalKeyboardKey.altRight,
+          LogicalKeyboardKey.metaRight,
+        }),
+        equals(<LogicalKeyboardKey>{
+          LogicalKeyboardKey.shift,
+          LogicalKeyboardKey.control,
+          LogicalKeyboardKey.alt,
+          LogicalKeyboardKey.meta,
+        }),
+      );
       expect(
-          LogicalKeyboardKey.collapseSynonyms(<LogicalKeyboardKey>{
-            LogicalKeyboardKey.shiftLeft,
-            LogicalKeyboardKey.controlLeft,
-            LogicalKeyboardKey.altLeft,
-            LogicalKeyboardKey.metaLeft,
-            LogicalKeyboardKey.shiftRight,
-            LogicalKeyboardKey.controlRight,
-            LogicalKeyboardKey.altRight,
-            LogicalKeyboardKey.metaRight,
-          }),
-          equals(<LogicalKeyboardKey>{
-            LogicalKeyboardKey.shift,
-            LogicalKeyboardKey.control,
-            LogicalKeyboardKey.alt,
-            LogicalKeyboardKey.meta,
-          }));
+        LogicalKeyboardKey.collapseSynonyms(<LogicalKeyboardKey>{
+          LogicalKeyboardKey.shiftLeft,
+          LogicalKeyboardKey.controlLeft,
+          LogicalKeyboardKey.altLeft,
+          LogicalKeyboardKey.metaLeft,
+          LogicalKeyboardKey.shiftRight,
+          LogicalKeyboardKey.controlRight,
+          LogicalKeyboardKey.altRight,
+          LogicalKeyboardKey.metaRight,
+        }),
+        equals(<LogicalKeyboardKey>{
+          LogicalKeyboardKey.shift,
+          LogicalKeyboardKey.control,
+          LogicalKeyboardKey.alt,
+          LogicalKeyboardKey.meta,
+        }),
+      );
     });
     test('Values are equal', () async {
       expect(LogicalKeyboardKey.keyA == LogicalKeyboardKey(LogicalKeyboardKey.keyA.keyId), true);

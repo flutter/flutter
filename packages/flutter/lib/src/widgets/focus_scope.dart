@@ -16,7 +16,7 @@ import 'inherited_notifier.dart';
 ///
 /// For keyboard events, [onKey] is called if [FocusNode.hasFocus] is true for
 /// this widget's [focusNode], unless a focused descendant's [onKey] callback
-/// returns true when called.
+/// returns [KeyEventResult.handled] when called.
 ///
 /// This widget does not provide any visual indication that the focus has
 /// changed. Any desired visual changes should be made when [onFocusChange] is
@@ -283,6 +283,7 @@ class Focus extends StatefulWidget {
     this.autofocus = false,
     this.onFocusChange,
     this.onKey,
+    this.onKeyEvent,
     this.debugLabel,
     this.canRequestFocus,
     this.descendantsAreFocusable = true,
@@ -313,6 +314,24 @@ class Focus extends StatefulWidget {
 
   /// Handler for keys pressed when this object or one of its children has
   /// focus.
+  ///
+  /// Key events are first given to the [FocusNode] that has primary focus, and
+  /// if its [onKeyEvent] method returns [KeyEventResult.ignored], then they are
+  /// given to each ancestor node up the focus hierarchy in turn. If an event
+  /// reaches the root of the hierarchy, it is discarded.
+  ///
+  /// This is not the way to get text input in the manner of a text field: it
+  /// leaves out support for input method editors, and doesn't support soft
+  /// keyboards in general. For text input, consider [TextField],
+  /// [EditableText], or [CupertinoTextField] instead, which do support these
+  /// things.
+  final FocusOnKeyEventCallback? onKeyEvent;
+
+  /// Handler for keys pressed when this object or one of its children has
+  /// focus.
+  ///
+  /// This is a legacy API based on [RawKeyEvent] and will be deprecated in the
+  /// future. Prefer [onKeyEvent] instead.
   ///
   /// Key events are first given to the [FocusNode] that has primary focus, and
   /// if its [onKey] method return false, then they are given to each ancestor
@@ -540,7 +559,7 @@ class Focus extends StatefulWidget {
   }
 
   @override
-  _FocusState createState() => _FocusState();
+  State<Focus> createState() => _FocusState();
 }
 
 class _FocusState extends State<Focus> {
@@ -575,7 +594,7 @@ class _FocusState extends State<Focus> {
     _canRequestFocus = focusNode.canRequestFocus;
     _descendantsAreFocusable = focusNode.descendantsAreFocusable;
     _hasPrimaryFocus = focusNode.hasPrimaryFocus;
-    _focusAttachment = focusNode.attach(context, onKey: widget.onKey);
+    _focusAttachment = focusNode.attach(context, onKeyEvent: widget.onKeyEvent, onKey: widget.onKey);
 
     // Add listener even if the _internalNode existed before, since it should
     // not be listening now if we're re-using a previous one because it should
@@ -657,7 +676,8 @@ class _FocusState extends State<Focus> {
       focusNode.descendantsAreFocusable = widget.descendantsAreFocusable;
     } else {
       _focusAttachment!.detach();
-      focusNode.removeListener(_handleFocusChanged);
+      oldWidget.focusNode?.removeListener(_handleFocusChanged);
+      _internalNode?.removeListener(_handleAutofocus);
       _initNode();
     }
 
@@ -723,8 +743,9 @@ class _FocusState extends State<Focus> {
 /// The [onKey] argument allows specification of a key event handler that is
 /// invoked when this node or one of its children has focus. Keys are handed to
 /// the primary focused widget first, and then they propagate through the
-/// ancestors of that node, stopping if one of them returns true from [onKey],
-/// indicating that it has handled the event.
+/// ancestors of that node, stopping if one of them returns
+/// [KeyEventResult.handled] from [onKey], indicating that it has handled the
+/// event.
 ///
 /// Managing a [FocusScopeNode] means managing its lifecycle, listening for
 /// changes in focus, and re-parenting it when needed to keep the focus
@@ -914,6 +935,7 @@ class FocusScope extends Focus {
     ValueChanged<bool>? onFocusChange,
     bool? canRequestFocus,
     bool? skipTraversal,
+    FocusOnKeyEventCallback? onKeyEvent,
     FocusOnKeyCallback? onKey,
     String? debugLabel,
   })  : assert(child != null),
@@ -926,6 +948,7 @@ class FocusScope extends Focus {
           onFocusChange: onFocusChange,
           canRequestFocus: canRequestFocus,
           skipTraversal: skipTraversal,
+          onKeyEvent: onKeyEvent,
           onKey: onKey,
           debugLabel: debugLabel,
         );
@@ -944,7 +967,7 @@ class FocusScope extends Focus {
   }
 
   @override
-  _FocusScopeState createState() => _FocusScopeState();
+  State<Focus> createState() => _FocusScopeState();
 }
 
 class _FocusScopeState extends _FocusState {

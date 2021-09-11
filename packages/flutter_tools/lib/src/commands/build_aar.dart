@@ -3,12 +3,13 @@
 // found in the LICENSE file.
 
 // @dart = 2.8
-
 import 'package:meta/meta.dart';
 
 import '../android/android_builder.dart';
 import '../android/gradle_utils.dart';
 import '../base/common.dart';
+
+import '../base/file_system.dart';
 import '../base/os.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -74,21 +75,25 @@ class BuildAarCommand extends BuildSubCommand {
   };
 
   @override
-  Future<Map<CustomDimensions, String>> get usageValues async {
-    final Map<CustomDimensions, String> usage = <CustomDimensions, String>{};
+  Future<CustomDimensions> get usageValues async {
     final FlutterProject flutterProject = _getProject();
     if (flutterProject == null) {
-      return usage;
+      return const CustomDimensions();
     }
+
+    String projectType;
     if (flutterProject.manifest.isModule) {
-      usage[CustomDimensions.commandBuildAarProjectType] = 'module';
+      projectType = 'module';
     } else if (flutterProject.manifest.isPlugin) {
-      usage[CustomDimensions.commandBuildAarProjectType] = 'plugin';
+      projectType = 'plugin';
     } else {
-      usage[CustomDimensions.commandBuildAarProjectType] = 'app';
+      projectType = 'app';
     }
-    usage[CustomDimensions.commandBuildAarTargetPlatform] = stringsArg('target-platform').join(',');
-    return usage;
+
+    return CustomDimensions(
+      commandBuildAarProjectType: projectType,
+      commandBuildAarTargetPlatform: stringsArg('target-platform').join(','),
+    );
   }
 
   @override
@@ -96,7 +101,9 @@ class BuildAarCommand extends BuildSubCommand {
       'By default, AARs are built for `release`, `debug` and `profile`.\n'
       'The POM file is used to include the dependencies that the AAR was compiled against.\n'
       'To learn more about how to use these artifacts, see '
-      'https://flutter.dev/go/build-aar';
+      'https://flutter.dev/go/build-aar\n'
+      'Note: this command builds applications assuming that the entrypoint is lib/main.dart. '
+      'This cannot currently be configured.';
 
   @override
   Future<FlutterCommandResult> runCommand() async {
@@ -114,11 +121,15 @@ class BuildAarCommand extends BuildSubCommand {
       ? stringArg('build-number')
       : '1.0';
 
+    final File targetFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'));
     for (final String buildMode in const <String>['debug', 'profile', 'release']) {
       if (boolArg(buildMode)) {
         androidBuildInfo.add(
           AndroidBuildInfo(
-            await getBuildInfo(forcedBuildMode: BuildMode.fromName(buildMode)),
+            await getBuildInfo(
+              forcedBuildMode: BuildMode.fromName(buildMode),
+              forcedTargetFile: targetFile,
+            ),
             targetArchs: targetArchitectures,
           )
         );
@@ -131,7 +142,7 @@ class BuildAarCommand extends BuildSubCommand {
     displayNullSafetyMode(androidBuildInfo.first.buildInfo);
     await androidBuilder.buildAar(
       project: _getProject(),
-      target: '', // Not needed because this command only builds Android's code.
+      target: targetFile.path,
       androidBuildInfo: androidBuildInfo,
       outputDirectoryPath: stringArg('output-dir'),
       buildNumber: buildNumber,

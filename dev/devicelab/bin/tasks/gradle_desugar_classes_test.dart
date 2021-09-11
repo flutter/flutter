@@ -25,7 +25,7 @@ Future<void> main() async {
           ]);
           final File apk = File('${flutterProject.rootPath}/build/app/outputs/flutter-apk/app-debug.apk');
           if (!apk.existsSync()) {
-            throw TaskResult.failure('Expected ${apk.path} to exist, but it doesn\'t');
+            throw TaskResult.failure("Expected ${apk.path} to exist, but it doesn't");
           }
           // https://github.com/flutter/flutter/issues/72185
           await checkApkContainsMethods(apk, <String>[

@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart' show CupertinoPageRoute;
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -65,7 +66,10 @@ void main() {
 
     expect(find.text('Page 1'), isOnstage);
     expect(find.text('Page 2'), findsNothing);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+  },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+    skip: kIsWeb, // [intended] no default transitions on the web.
+  );
 
   testWidgets('test page transition', (WidgetTester tester) async {
     final Key page2Key = UniqueKey();
@@ -146,7 +150,10 @@ void main() {
 
     // Page 1 is back where it started.
     expect(widget1InitialTopLeft == widget1TransientTopLeft, true);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
+  },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    skip: kIsWeb, // [intended] no default transitions on the web.
+  );
 
   testWidgets('test fullscreen dialog transition', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -206,7 +213,10 @@ void main() {
 
     // Page 1 is back where it started.
     expect(widget1InitialTopLeft == widget1TransientTopLeft, true);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
+  },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    skip: kIsWeb, // [intended] no default transitions on the web.
+  );
 
   testWidgets('test no back gesture on Android', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -236,7 +246,10 @@ void main() {
 
     // Page 2 didn't move
     expect(tester.getTopLeft(find.text('Page 2')), Offset.zero);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+  },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+    skip: kIsWeb, // [intended] no default transitions on the web.
+  );
 
   testWidgets('test back gesture', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -277,7 +290,10 @@ void main() {
     await tester.pump();
 
     expect(tester.getTopLeft(find.text('Page 2')), const Offset(100.0, 0.0));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
+  },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    skip: kIsWeb, // [intended] no default transitions on the web.
+  );
 
   testWidgets('back gesture while OS changes', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
@@ -362,13 +378,13 @@ void main() {
     expect(find.text('PUSH'), findsNothing);
     expect(find.text('HELLO'), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 20));
-    expect(find.text('PUSH'), findsOneWidget);
+    // As no transitions are specified for macOS the drag should do nothing
+    expect(find.text('PUSH'), findsNothing);
     expect(find.text('HELLO'), findsOneWidget);
     final Offset helloPosition6 = tester.getCenter(find.text('HELLO'));
-    expect(helloPosition5.dx, lessThan(helloPosition6.dx));
-    expect(helloPosition5.dy, helloPosition6.dy);
+    expect(helloPosition5, helloPosition6);
     expect(Theme.of(tester.element(find.text('HELLO'))).platform, TargetPlatform.macOS);
-  });
+  }, skip: kIsWeb); // [intended] doesn't apply to the web.
 
   testWidgets('test no back gesture on fullscreen dialogs', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -479,7 +495,10 @@ void main() {
 
     // Page 1 is back where it started.
     expect(widget1InitialTopLeft == widget1TransientTopLeft, true);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    skip: kIsWeb, // [intended] no default transitions on the web.
+  );
 
   testWidgets('test edge swipe then drop back at starting point works', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -547,7 +566,10 @@ void main() {
 
     expect(find.text('Page 1'), isOnstage);
     expect(find.text('Page 2'), findsNothing);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    skip: kIsWeb, // [intended] no default transitions on the web.
+  );
 
   testWidgets('Back swipe dismiss interrupted by route push', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/28728
@@ -642,7 +664,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('route'), findsOneWidget);
     expect(find.text('push'), findsNothing);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    skip: kIsWeb, // [intended] no default transitions on the web.
+  );
 
   testWidgets('During back swipe the route ignores input', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/39989
@@ -659,7 +684,7 @@ void main() {
           body: GestureDetector(
             onTap: () {
               homeTapCount += 1;
-            }
+            },
           ),
         ),
       ),
@@ -679,7 +704,7 @@ void main() {
             child: GestureDetector(
               onTap: () {
                 pageTapCount += 1;
-              }
+              },
             ),
           ),
         );
@@ -712,7 +737,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.getTopLeft(find.byKey(pageScaffoldKey)), const Offset(400, 0));
     expect(tester.getTopLeft(find.byKey(homeScaffoldKey)).dx, lessThan(0));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    skip: kIsWeb, // [intended] no default transitions on the web.
+  );
 
   testWidgets('After a pop caused by a back-swipe, input reaches the exposed route', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/41024
@@ -729,7 +757,7 @@ void main() {
           body: GestureDetector(
             onTap: () {
               homeTapCount += 1;
-            }
+            },
           ),
         ),
       ),
@@ -752,7 +780,7 @@ void main() {
             child: GestureDetector(
               onTap: () {
                 pageTapCount += 1;
-              }
+              },
             ),
           ),
         );
@@ -783,7 +811,10 @@ void main() {
     await tester.tap(find.byKey(homeScaffoldKey));
     expect(homeTapCount, 2);
     expect(pageTapCount, 1);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    skip: kIsWeb, // [intended] no default transitions on the web.
+  );
 
   testWidgets('A MaterialPageRoute should slide out with CupertinoPageTransition when a compatible PageRoute is pushed on top of it', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/44864.
@@ -811,7 +842,10 @@ void main() {
     // Title of the first route slides to the left.
     expect(titleInitialTopLeft.dy, equals(titleTransientTopLeft.dy));
     expect(titleInitialTopLeft.dx, greaterThan(titleTransientTopLeft.dx));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    skip: kIsWeb, // [intended] no default transitions on the web.
+  );
 
   testWidgets('MaterialPage works', (WidgetTester tester) async {
     final LocalKey pageKey = UniqueKey();
@@ -827,7 +861,7 @@ void main() {
           return true;
         },
         transitionDelegate: detector,
-      )
+      ),
     );
 
     expect(detector.hasTransition, isFalse);
@@ -845,7 +879,7 @@ void main() {
           return true;
         },
         transitionDelegate: detector,
-      )
+      ),
     );
     // There should be no transition because the page has the same key.
     expect(detector.hasTransition, isFalse);
@@ -870,7 +904,7 @@ void main() {
           return true;
         },
         transitionDelegate: detector,
-      )
+      ),
     );
 
     expect(detector.hasTransition, isFalse);
@@ -891,7 +925,7 @@ void main() {
           return true;
         },
         transitionDelegate: detector,
-      )
+      ),
     );
     // There should be no transition because the page has the same key.
     expect(detector.hasTransition, isFalse);
@@ -980,13 +1014,13 @@ class TransitionDetector extends DefaultTransitionDelegate<void> {
   Iterable<RouteTransitionRecord> resolve({
     required List<RouteTransitionRecord> newPageRouteHistory,
     required Map<RouteTransitionRecord?, RouteTransitionRecord> locationToExitingPageRoute,
-    required Map<RouteTransitionRecord?, List<RouteTransitionRecord>> pageRouteToPagelessRoutes
+    required Map<RouteTransitionRecord?, List<RouteTransitionRecord>> pageRouteToPagelessRoutes,
   }) {
     hasTransition = true;
     return super.resolve(
       newPageRouteHistory: newPageRouteHistory,
       locationToExitingPageRoute: locationToExitingPageRoute,
-      pageRouteToPagelessRoutes: pageRouteToPagelessRoutes
+      pageRouteToPagelessRoutes: pageRouteToPagelessRoutes,
     );
   }
 }
@@ -995,7 +1029,7 @@ Widget buildNavigator({
   required List<Page<dynamic>> pages,
   required PopPageCallback onPopPage,
   GlobalKey<NavigatorState>? key,
-  TransitionDelegate<dynamic>? transitionDelegate
+  TransitionDelegate<dynamic>? transitionDelegate,
 }) {
   return MediaQuery(
     data: MediaQueryData.fromWindow(WidgetsBinding.instance!.window),
@@ -1003,7 +1037,7 @@ Widget buildNavigator({
       locale: const Locale('en', 'US'),
       delegates: const <LocalizationsDelegate<dynamic>>[
         DefaultMaterialLocalizations.delegate,
-        DefaultWidgetsLocalizations.delegate
+        DefaultWidgetsLocalizations.delegate,
       ],
       child: Directionality(
         textDirection: TextDirection.ltr,

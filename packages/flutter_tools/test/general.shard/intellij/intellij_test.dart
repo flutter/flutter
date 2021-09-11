@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:convert';
 
 import 'package:archive/archive.dart';
@@ -16,7 +14,7 @@ import 'package:flutter_tools/src/intellij/intellij.dart';
 import '../../src/common.dart';
 
 void main() {
-  FileSystem fileSystem;
+  late FileSystem fileSystem;
 
   void writeFileCreatingDirectories(String path, List<int> bytes) {
     final File file = fileSystem.file(path);
@@ -40,7 +38,7 @@ void main() {
 ''');
     writeFileCreatingDirectories(
       fileSystem.path.join(_kPluginsPath, 'Dart', 'lib', 'Dart.jar'),
-      ZipEncoder().encode(dartJarArchive),
+      ZipEncoder().encode(dartJarArchive)!,
     );
 
     final Archive flutterJarArchive = buildSingleFileArchive('META-INF/plugin.xml', r'''
@@ -51,7 +49,7 @@ void main() {
 ''');
     writeFileCreatingDirectories(
       fileSystem.path.join(_kPluginsPath, 'flutter-intellij.jar'),
-      ZipEncoder().encode(flutterJarArchive),
+      ZipEncoder().encode(flutterJarArchive)!,
     );
 
     final List<ValidationMessage> messages = <ValidationMessage>[];
@@ -82,14 +80,14 @@ void main() {
 ''');
     writeFileCreatingDirectories(
       fileSystem.path.join(_kPluginsPath, 'flutter-intellij', 'lib', 'flutter-idea-50.0.jar'),
-      ZipEncoder().encode(flutterIdeaJarArchive),
+      ZipEncoder().encode(flutterIdeaJarArchive)!,
     );
     final Archive flutterIntellijJarArchive = buildSingleFileArchive('META-INF/MANIFEST.MF', r'''
 Manifest-Version: 1.0
 ''');
     writeFileCreatingDirectories(
       fileSystem.path.join(_kPluginsPath, 'flutter-intellij', 'lib', 'flutter-intellij-50.0.jar'),
-      ZipEncoder().encode(flutterIntellijJarArchive),
+      ZipEncoder().encode(flutterIntellijJarArchive)!,
     );
 
     final List<ValidationMessage> messages = <ValidationMessage>[];
@@ -118,7 +116,7 @@ Manifest-Version: 1.0
 ''');
     writeFileCreatingDirectories(
       fileSystem.path.join(_kPluginsPath, 'flutter-intellij', 'lib', 'flutter-idea-50.0.jar'),
-      ZipEncoder().encode(flutterIdeaJarArchive),
+      ZipEncoder().encode(flutterIdeaJarArchive)!,
     );
     final Archive flutterIntellijJarArchive = buildSingleFileArchive('META-INF/plugin.xml', r'''
 <idea-plugin version="2">
@@ -128,7 +126,7 @@ Manifest-Version: 1.0
 ''');
     writeFileCreatingDirectories(
       fileSystem.path.join(_kPluginsPath, 'flutter-intellij', 'lib', 'flutter-intellij-50.0.jar'),
-      ZipEncoder().encode(flutterIntellijJarArchive),
+      ZipEncoder().encode(flutterIntellijJarArchive)!,
     );
 
     final List<ValidationMessage> messages = <ValidationMessage>[];
@@ -176,7 +174,7 @@ Manifest-Version: 1.0
 ''');
     writeFileCreatingDirectories(
       fileSystem.path.join(_kPluginsPath, 'Dart', 'lib', 'Other.jar'),
-      ZipEncoder().encode(dartJarArchive),
+      ZipEncoder().encode(dartJarArchive)!,
     );
 
     expect(

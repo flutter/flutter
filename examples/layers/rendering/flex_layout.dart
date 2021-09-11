@@ -86,5 +86,5 @@ void main() {
     child: RenderPadding(child: table, padding: const EdgeInsets.symmetric(vertical: 50.0)),
   );
 
-  RenderingFlutterBinding(root: root);
+  RenderingFlutterBinding(root: root).scheduleFrame();
 }

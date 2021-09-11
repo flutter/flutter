@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show debugDumpRenderTree, debugDumpLayerTree, debugDumpSemanticsTree, DebugSemanticsDumpOrder;
 import 'package:flutter/scheduler.dart' show timeDilation;
-import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import 'i18n/stock_strings.dart';
 import 'stock_data.dart';
@@ -310,9 +310,9 @@ class StockHomeState extends State<StockHome> {
   Widget buildFloatingActionButton() {
     return FloatingActionButton(
       tooltip: 'Create company',
-      child: const Icon(Icons.add),
       backgroundColor: Theme.of(context).colorScheme.secondary,
       onPressed: _handleCreateCompany,
+      child: const Icon(Icons.add),
     );
   }
 

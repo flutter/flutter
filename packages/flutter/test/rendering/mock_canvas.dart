@@ -608,7 +608,7 @@ class _TestRecordingCanvasPaintsNothingMatcher extends _TestRecordingCanvasMatch
       return true;
     description.write(
       'painted something, the first call having the following stack:\n'
-      '${paintingCalls.first.stackToString(indent: "  ")}\n'
+      '${paintingCalls.first.stackToString(indent: "  ")}\n',
     );
     return false;
   }
@@ -621,7 +621,7 @@ class _TestRecordingCanvasPaintsNothingMatcher extends _TestRecordingCanvasMatch
   // Filters out canvas calls that are not painting anything.
   static Iterable<RecordedInvocation> _filterCanvasCalls(Iterable<RecordedInvocation> canvasCalls) {
     return canvasCalls.where((RecordedInvocation canvasCall) =>
-      !_nonPaintingOperations.contains(canvasCall.invocation.memberName)
+      !_nonPaintingOperations.contains(canvasCall.invocation.memberName),
     );
   }
 }
@@ -813,7 +813,7 @@ class _TestRecordingCanvasPatternMatcher extends _TestRecordingCanvasMatcher imp
     if (_predicates.isEmpty) {
       description.writeln(
         'It painted something, but you must now add a pattern to the paints matcher '
-        'in the test to verify that it matches the important parts of the following.'
+        'in the test to verify that it matches the important parts of the following.',
       );
       return false;
     }
@@ -949,8 +949,16 @@ class _OneParameterPaintPredicate<T> extends _DrawCommandPaintPredicate {
     required double? strokeWidth,
     required bool? hasMaskFilter,
     required PaintingStyle? style,
-  }) : super(
-    symbol, name, 2, 1, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style);
+  })  : super(
+          symbol,
+          name,
+          2,
+          1,
+          color: color,
+          strokeWidth: strokeWidth,
+          hasMaskFilter: hasMaskFilter,
+          style: style,
+        );
 
   final T? expected;
 
@@ -985,8 +993,16 @@ class _TwoParameterPaintPredicate<T1, T2> extends _DrawCommandPaintPredicate {
     required double? strokeWidth,
     required bool? hasMaskFilter,
     required PaintingStyle? style,
-  }) : super(
-    symbol, name, 3, 2, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style);
+  })  : super(
+          symbol,
+          name,
+          3,
+          2,
+          color: color,
+          strokeWidth: strokeWidth,
+          hasMaskFilter: hasMaskFilter,
+          style: style,
+        );
 
   final T1? expected1;
 

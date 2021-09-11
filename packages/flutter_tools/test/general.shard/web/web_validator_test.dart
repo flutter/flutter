@@ -2,11 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
@@ -16,15 +15,15 @@ import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 
 void main() {
-  Platform platform;
-  FakeProcessManager fakeProcessManager;
-  ChromiumLauncher chromeLauncher;
-  FileSystem fileSystem;
-  ChromiumValidator webValidator;
+  late Platform platform;
+  late FakeProcessManager fakeProcessManager;
+  late ChromiumLauncher chromeLauncher;
+  late FileSystem fileSystem;
+  late ChromiumValidator webValidator;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
-    fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+    fakeProcessManager = FakeProcessManager.empty();
     platform = FakePlatform(
       operatingSystem: 'macos',
       environment: <String, String>{},
@@ -33,7 +32,12 @@ void main() {
       fileSystem: fileSystem,
       platform: platform,
       processManager: fakeProcessManager,
-      operatingSystemUtils: null,
+      operatingSystemUtils: OperatingSystemUtils(
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        platform: platform,
+        processManager: fakeProcessManager,
+      ),
       browserFinder: findChromeExecutable,
       logger: BufferLogger.test(),
     );

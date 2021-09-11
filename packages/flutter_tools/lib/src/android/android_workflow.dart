@@ -57,18 +57,16 @@ class AndroidWorkflow implements Workflow {
     && _operatingSystemUtils.hostPlatform != HostPlatform.linux_arm64;
 
   @override
-  bool get canListDevices => _androidSdk != null
+  bool get canListDevices => appliesToHostPlatform && _androidSdk != null
     && _androidSdk?.adbPath != null;
 
   @override
-  bool get canLaunchDevices => _androidSdk != null
+  bool get canLaunchDevices => appliesToHostPlatform && _androidSdk != null
     && _androidSdk?.adbPath != null
     && _androidSdk?.validateSdkWellFormed().isEmpty == true;
 
   @override
-  bool get canListEmulators => _androidSdk != null
-    && _androidSdk?.adbPath != null
-    && _androidSdk?.emulatorPath != null;
+  bool get canListEmulators => canListDevices && _androidSdk?.emulatorPath != null;
 }
 
 /// A validator that checks if the Android SDK and Java SDK are available and
@@ -120,7 +118,7 @@ class AndroidValidator extends DoctorValidator {
 
   /// `java -version` response is not only a number, but also includes other
   /// information eg. `openjdk version "1.7.0_212"`.
-  /// This method extracts only the semantic version from from that response.
+  /// This method extracts only the semantic version from that response.
   static String? _extractJavaVersion(String? text) {
     if (text == null || text.isEmpty) {
       return null;
@@ -186,12 +184,17 @@ class AndroidValidator extends DoctorValidator {
       return ValidationResult(ValidationType.missing, messages);
     }
 
+    messages.add(ValidationMessage(_userMessages.androidSdkLocation(androidSdk.directory.path)));
+
+    if (!androidSdk.cmdlineToolsAvailable) {
+      messages.add(ValidationMessage.error(_userMessages.androidMissingCmdTools));
+      return ValidationResult(ValidationType.missing, messages);
+    }
+
     if (androidSdk.licensesAvailable && !androidSdk.platformToolsAvailable) {
       messages.add(ValidationMessage.hint(_userMessages.androidSdkLicenseOnly(kAndroidHome)));
       return ValidationResult(ValidationType.partial, messages);
     }
-
-    messages.add(ValidationMessage(_userMessages.androidSdkLocation(androidSdk.directory.path)));
 
     String? sdkVersionText;
     final AndroidSdkVersion? androidSdkLatestVersion = androidSdk.latestVersion;
@@ -199,7 +202,7 @@ class AndroidValidator extends DoctorValidator {
       if (androidSdkLatestVersion.sdkLevel < kAndroidSdkMinVersion || androidSdkLatestVersion.buildToolsVersion < kAndroidSdkBuildToolsMinVersion) {
         messages.add(ValidationMessage.error(
           _userMessages.androidSdkBuildToolsOutdated(
-            _androidSdk!.sdkManagerPath,
+            _androidSdk!.sdkManagerPath!,
             kAndroidSdkMinVersion,
             kAndroidSdkBuildToolsMinVersion.toString(),
             _platform,
@@ -250,7 +253,7 @@ class AndroidValidator extends DoctorValidator {
     messages.add(ValidationMessage(_userMessages.androidJdkLocation(javaBinary)));
 
     // Check JDK version.
-    if (! await _checkJavaVersion(javaBinary, messages)) {
+    if (!await _checkJavaVersion(javaBinary, messages)) {
       return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
     }
 
@@ -384,7 +387,7 @@ class AndroidLicenseValidator extends DoctorValidator {
 
     try {
       final Process process = await _processManager.start(
-        <String>[_androidSdk.sdkManagerPath, '--licenses'],
+        <String>[_androidSdk.sdkManagerPath!, '--licenses'],
         environment: _androidSdk.sdkManagerEnv,
       );
       process.stdin.write('n\n');
@@ -416,12 +419,15 @@ class AndroidLicenseValidator extends DoctorValidator {
     }
 
     if (!_canRunSdkManager()) {
-      throwToolExit(_userMessages.androidMissingSdkManager(_androidSdk.sdkManagerPath, _platform));
+      throwToolExit(
+        'Android sdkmanager not found. Update to the latest Android SDK and ensure that '
+        'the cmdline-tools are installed to resolve this.'
+      );
     }
 
     try {
       final Process process = await _processManager.start(
-        <String>[_androidSdk.sdkManagerPath, '--licenses'],
+        <String>[_androidSdk.sdkManagerPath!, '--licenses'],
         environment: _androidSdk.sdkManagerEnv,
       );
 
@@ -452,7 +458,7 @@ class AndroidLicenseValidator extends DoctorValidator {
       return exitCode == 0;
     } on ProcessException catch (e) {
       throwToolExit(_userMessages.androidCannotRunSdkManager(
-        _androidSdk.sdkManagerPath,
+        _androidSdk.sdkManagerPath!,
         e.toString(),
         _platform,
       ));
@@ -460,7 +466,10 @@ class AndroidLicenseValidator extends DoctorValidator {
   }
 
   bool _canRunSdkManager() {
-    final String sdkManagerPath = _androidSdk.sdkManagerPath;
+    final String? sdkManagerPath = _androidSdk.sdkManagerPath;
+    if (sdkManagerPath == null) {
+      return false;
+    }
     return _processManager.canRun(sdkManagerPath);
   }
 }

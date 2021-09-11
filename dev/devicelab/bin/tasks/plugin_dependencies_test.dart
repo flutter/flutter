@@ -22,7 +22,7 @@ Future<void> main() async {
 
     section('Find Java');
 
-    final String javaHome = await findJavaHome();
+    final String? javaHome = await findJavaHome();
     if (javaHome == null) {
       return TaskResult.failure('Could not find Java');
     }

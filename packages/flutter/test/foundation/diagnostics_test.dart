@@ -491,7 +491,8 @@ void main() {
       ' │ │\n'
       ' │ └─child node B3: TestTree#00000\n'
       ' │     <leaf node>\n'
-      ' │     foo: 42\n'
+      ' │     foo:\n'
+      ' │       42\n'
       ' │\n'
       ' └─child node C: TestTree#00000\n'
       '     foo:\n'
@@ -905,8 +906,8 @@ void main() {
       throwsA(isAssertionError.having(
         (AssertionError e) => e.message,
         'message',
-        'The provided object "Hello World" is not an enum.'),
-      ),
+        'The provided object "Hello World" is not an enum.',
+      )),
     );
   });
 
@@ -1882,7 +1883,7 @@ void main() {
     final StackTrace stack = StackTrace.fromString(
       '#0      someMethod  (file:///diagnostics_test.dart:42:19)\n'
       '#1      someMethod2  (file:///diagnostics_test.dart:12:3)\n'
-      '#2      someMethod3  (file:///foo.dart:4:1)\n'
+      '#2      someMethod3  (file:///foo.dart:4:1)\n',
     );
 
     expect(
@@ -1891,7 +1892,7 @@ void main() {
         'Stack trace:\n'
         '#0      someMethod  (file:///diagnostics_test.dart:42:19)\n'
         '#1      someMethod2  (file:///diagnostics_test.dart:12:3)\n'
-        '#2      someMethod3  (file:///foo.dart:4:1)\n'
+        '#2      someMethod3  (file:///foo.dart:4:1)\n',
       ),
     );
 
@@ -1901,7 +1902,7 @@ void main() {
         '-- callback 2 --\n'
         '#0      someMethod  (file:///diagnostics_test.dart:42:19)\n'
         '#1      someMethod2  (file:///diagnostics_test.dart:12:3)\n'
-        '#2      someMethod3  (file:///foo.dart:4:1)\n'
+        '#2      someMethod3  (file:///foo.dart:4:1)\n',
       ),
     );
   });
@@ -2164,83 +2165,83 @@ void main() {
         '   [1.0, 0.0, 0.0, 1.0]\n'
         '   --- example property at max length --\n'
         '   diagnosis: insufficient data to draw\n'
-        '   conclusion (less than five repaints)\n'
+        '   conclusion (less than five repaints)\n',
       ),
     );
 
     // This case matches the styles that should generally be used for error
     // messages
     expect(
-        renderer.render(createTreeWithWrappingNodes(
-          rootStyle: DiagnosticsTreeStyle.error,
-          propertyStyle: DiagnosticsTreeStyle.errorProperty,
-        )),
-        equalsIgnoringHashCodes(
-          '══╡ TESTTREE#00000 ╞════════════════════\n'
-          '--- example property at max length --\n'
-          'This is a very long message that must\n'
-          'wrap as it cannot fit on one line. This\n'
-          'is a very long message that must wrap as\n'
-          'it cannot fit on one line. This is a\n'
-          'very long message that must wrap as it\n'
-          'cannot fit on one line.\n'
-          '--- example property at max length --\n'
-          'Message that is not allowed to wrap even though it is very long. Message that is not allowed to wrap even though it is very long. Message that is not allowed to wrap even though it is very long. Message that is not allowed to wrap.\n'
-          '--- example property at max length --\n'
-          'This property has a very long property\n'
-          'name that will be allowed to wrap unlike\n'
-          'most property names. This property has a\n'
-          'very long property name that will be\n'
-          'allowed to wrap unlike most property\n'
-          'names:\n'
-          '  http://someverylongurl.com/that-might-be-tempting-to-wrap-even-though-it-is-a-url-so-should-not-wrap.html\n'
-          'This property has a very long property\n'
-          'name that will be allowed to wrap unlike\n'
-          'most property names. This property has a\n'
-          'very long property name that will be\n'
-          'allowed to wrap unlike most property\n'
-          'names:\n'
-          '  https://goo.gl/\n'
-          'Click on the following url:\n'
-          '  http://someverylongurl.com/that-might-be-tempting-to-wrap-even-though-it-is-a-url-so-should-not-wrap.html\n'
-          'Click on the following url\n'
-          '  https://goo.gl/\n'
-          '--- example property at max length --\n'
-          'multi-line value:\n'
-          '  [1.0, 0.0, 0.0, 0.0]\n'
-          '  [1.0, 1.0, 0.0, 0.0]\n'
-          '  [1.0, 0.0, 1.0, 0.0]\n'
-          '  [1.0, 0.0, 0.0, 1.0]\n'
-          '--- example property at max length --\n'
-          'This property has a very long property\n'
-          'name that will be allowed to wrap unlike\n'
-          'most property names. This property has a\n'
-          'very long property name that will be\n'
-          'allowed to wrap unlike most property\n'
-          'names:\n'
-          '  This is a very long message that must\n'
-          '  wrap as it cannot fit on one line.\n'
-          '  This is a very long message that must\n'
-          '  wrap as it cannot fit on one line.\n'
-          '  This is a very long message that must\n'
-          '  wrap as it cannot fit on one line.\n'
-          '--- example property at max length --\n'
-          'This property has a very long property\n'
-          'name that will be allowed to wrap unlike\n'
-          'most property names. This property has a\n'
-          'very long property name that will be\n'
-          'allowed to wrap unlike most property\n'
-          'names:\n'
-          '  [1.0, 0.0, 0.0, 0.0]\n'
-          '  [1.0, 1.0, 0.0, 0.0]\n'
-          '  [1.0, 0.0, 1.0, 0.0]\n'
-          '  [1.0, 0.0, 0.0, 1.0]\n'
-          '--- example property at max length --\n'
-          'diagnosis:\n'
-          '  insufficient data to draw conclusion\n'
-          '  (less than five repaints)\n'
-          '════════════════════════════════════════\n'
-        ),
+      renderer.render(createTreeWithWrappingNodes(
+        rootStyle: DiagnosticsTreeStyle.error,
+        propertyStyle: DiagnosticsTreeStyle.errorProperty,
+      )),
+      equalsIgnoringHashCodes(
+        '══╡ TESTTREE#00000 ╞════════════════════\n'
+        '--- example property at max length --\n'
+        'This is a very long message that must\n'
+        'wrap as it cannot fit on one line. This\n'
+        'is a very long message that must wrap as\n'
+        'it cannot fit on one line. This is a\n'
+        'very long message that must wrap as it\n'
+        'cannot fit on one line.\n'
+        '--- example property at max length --\n'
+        'Message that is not allowed to wrap even though it is very long. Message that is not allowed to wrap even though it is very long. Message that is not allowed to wrap even though it is very long. Message that is not allowed to wrap.\n'
+        '--- example property at max length --\n'
+        'This property has a very long property\n'
+        'name that will be allowed to wrap unlike\n'
+        'most property names. This property has a\n'
+        'very long property name that will be\n'
+        'allowed to wrap unlike most property\n'
+        'names:\n'
+        '  http://someverylongurl.com/that-might-be-tempting-to-wrap-even-though-it-is-a-url-so-should-not-wrap.html\n'
+        'This property has a very long property\n'
+        'name that will be allowed to wrap unlike\n'
+        'most property names. This property has a\n'
+        'very long property name that will be\n'
+        'allowed to wrap unlike most property\n'
+        'names:\n'
+        '  https://goo.gl/\n'
+        'Click on the following url:\n'
+        '  http://someverylongurl.com/that-might-be-tempting-to-wrap-even-though-it-is-a-url-so-should-not-wrap.html\n'
+        'Click on the following url\n'
+        '  https://goo.gl/\n'
+        '--- example property at max length --\n'
+        'multi-line value:\n'
+        '  [1.0, 0.0, 0.0, 0.0]\n'
+        '  [1.0, 1.0, 0.0, 0.0]\n'
+        '  [1.0, 0.0, 1.0, 0.0]\n'
+        '  [1.0, 0.0, 0.0, 1.0]\n'
+        '--- example property at max length --\n'
+        'This property has a very long property\n'
+        'name that will be allowed to wrap unlike\n'
+        'most property names. This property has a\n'
+        'very long property name that will be\n'
+        'allowed to wrap unlike most property\n'
+        'names:\n'
+        '  This is a very long message that must\n'
+        '  wrap as it cannot fit on one line.\n'
+        '  This is a very long message that must\n'
+        '  wrap as it cannot fit on one line.\n'
+        '  This is a very long message that must\n'
+        '  wrap as it cannot fit on one line.\n'
+        '--- example property at max length --\n'
+        'This property has a very long property\n'
+        'name that will be allowed to wrap unlike\n'
+        'most property names. This property has a\n'
+        'very long property name that will be\n'
+        'allowed to wrap unlike most property\n'
+        'names:\n'
+        '  [1.0, 0.0, 0.0, 0.0]\n'
+        '  [1.0, 1.0, 0.0, 0.0]\n'
+        '  [1.0, 0.0, 1.0, 0.0]\n'
+        '  [1.0, 0.0, 0.0, 1.0]\n'
+        '--- example property at max length --\n'
+        'diagnosis:\n'
+        '  insufficient data to draw conclusion\n'
+        '  (less than five repaints)\n'
+        '════════════════════════════════════════\n',
+      ),
     );
   });
 
@@ -2279,5 +2280,23 @@ void main() {
     json = simulateJsonSerialization(stringProperty);
     expect(json['name'], 'string2');
     expect(json['value'], 'world');
+  });
+
+  test('IntProperty arguments passed to super', () {
+    final DiagnosticsProperty<num> property = IntProperty(
+      'Example',
+      0,
+      ifNull: 'is null',
+      showName: false,
+      defaultValue: 1,
+      style: DiagnosticsTreeStyle.none,
+      level: DiagnosticLevel.off,
+    );
+    expect(property.value, equals(0));
+    expect(property.ifNull, equals('is null'));
+    expect(property.showName, equals(false));
+    expect(property.defaultValue, equals(1));
+    expect(property.style, equals(DiagnosticsTreeStyle.none));
+    expect(property.level, equals(DiagnosticLevel.off));
   });
 }

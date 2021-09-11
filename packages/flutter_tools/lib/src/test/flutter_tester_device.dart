@@ -98,7 +98,7 @@ class FlutterTesterTestDevice extends TestDevice {
         //
         // I mention this only so that you won't be tempted, as I was, to apply
         // the obvious simplification to this code and remove this entire feature.
-        '--observatory-port=${debuggingOptions.disableDds ? debuggingOptions.hostVmServicePort: 0}',
+        '--observatory-port=${debuggingOptions.enableDds ? 0 : debuggingOptions.hostVmServicePort }',
         if (debuggingOptions.startPaused) '--start-paused',
         if (debuggingOptions.disableServiceAuthCodes) '--disable-service-auth-codes',
       ]
@@ -158,7 +158,7 @@ class FlutterTesterTestDevice extends TestDevice {
             debuggingOptions.hostVmServicePort == detectedUri.port);
 
         Uri forwardingUri;
-        if (!debuggingOptions.disableDds) {
+        if (debuggingOptions.enableDds) {
           logger.printTrace('test $id: Starting Dart Development Service');
           final DartDevelopmentService dds = await startDds(detectedUri);
           forwardingUri = dds.uri;

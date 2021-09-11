@@ -17,7 +17,6 @@ import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../cache.dart';
-import '../dart/analysis.dart';
 import '../globals_null_migrated.dart' as globals;
 
 /// Common behavior for `flutter analyze` and `flutter analyze --watch`
@@ -71,46 +70,20 @@ abstract class AnalyzeBase {
     }
   }
 
-  void writeBenchmark(Stopwatch stopwatch, int errorCount, int membersMissingDocumentation) {
+  void writeBenchmark(Stopwatch stopwatch, int errorCount) {
     const String benchmarkOut = 'analysis_benchmark.json';
     final Map<String, dynamic> data = <String, dynamic>{
       'time': stopwatch.elapsedMilliseconds / 1000.0,
       'issues': errorCount,
-      'missingDartDocs': membersMissingDocumentation,
     };
     fileSystem.file(benchmarkOut).writeAsStringSync(toPrettyJson(data));
     logger.printStatus('Analysis benchmark written to $benchmarkOut ($data).');
   }
 
   bool get isFlutterRepo => argResults['flutter-repo'] as bool;
-  String get sdkPath => argResults['dart-sdk'] as String ?? artifacts.getArtifactPath(Artifact.engineDartSdkPath);
+  String get sdkPath => argResults['dart-sdk'] as String ?? artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path;
   bool get isBenchmarking => argResults['benchmark'] as bool;
-  bool get isDartDocs => argResults['dartdocs'] as bool;
   String get protocolTrafficLog => argResults['protocol-traffic-log'] as String;
-
-  static int countMissingDartDocs(List<AnalysisError> errors) {
-    return errors.where((AnalysisError error) {
-      return error.code == 'public_member_api_docs';
-    }).length;
-  }
-
-  static String generateDartDocMessage(int undocumentedMembers) {
-    String dartDocMessage;
-
-    assert(undocumentedMembers >= 0);
-    switch (undocumentedMembers) {
-      case 0:
-        dartDocMessage = 'all public member have documentation';
-        break;
-      case 1:
-        dartDocMessage = 'one public member lacks documentation';
-        break;
-      default:
-        dartDocMessage = '$undocumentedMembers public members lack documentation';
-    }
-
-    return dartDocMessage;
-  }
 
   /// Generate an analysis summary for both [AnalyzeOnce], [AnalyzeContinuously].
   static String generateErrorsMessage({
@@ -118,8 +91,6 @@ abstract class AnalyzeBase {
     int issueDiff,
     int files,
     @required String seconds,
-    int undocumentedMembers = 0,
-    String dartDocMessage = '',
   }) {
     final StringBuffer errorsMessage = StringBuffer(issueCount > 0
       ? '$issueCount ${pluralize('issue', issueCount)} found.'
@@ -138,12 +109,7 @@ abstract class AnalyzeBase {
     if (files != null) {
       errorsMessage.write(' • analyzed $files ${pluralize('file', files)}');
     }
-
-    if (undocumentedMembers > 0) {
-      errorsMessage.write(' (ran in ${seconds}s; $dartDocMessage)');
-    } else {
-      errorsMessage.write(' (ran in ${seconds}s)');
-    }
+    errorsMessage.write(' (ran in ${seconds}s)');
     return errorsMessage.toString();
   }
 }

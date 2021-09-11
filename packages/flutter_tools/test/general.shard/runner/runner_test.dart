@@ -16,9 +16,9 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
-import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -179,9 +179,9 @@ void main() {
       expect(logContents, contains('String: an exception % --'));
       expect(logContents, contains('CrashingFlutterCommand.runCommand'));
       expect(logContents, contains('[✓] Flutter'));
+      print(globals.crashReporter.runtimeType);
 
-      final VerificationResult argVerification = verify(globals.crashReporter.informUser(captureAny, any));
-      final CrashDetails sentDetails = argVerification.captured.first as CrashDetails;
+      final CrashDetails sentDetails = (globals.crashReporter as WaitingCrashReporter)._details;
       expect(sentDetails.command, 'flutter crash');
       expect(sentDetails.error, 'an exception % --');
       expect(sentDetails.stackTrace.toString(), contains('CrashingFlutterCommand.runCommand'));
@@ -198,6 +198,7 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
       UserMessages: () => CustomBugInstructions(),
       Artifacts: () => Artifacts.test(),
+      CrashReporter: () => WaitingCrashReporter(Future<void>.value())
     });
   });
 }
@@ -281,7 +282,7 @@ class CrashingUsage implements Usage {
   String get clientId => _impl.clientId;
 
   @override
-  void sendCommand(String command, {Map<String, String> parameters}) =>
+  void sendCommand(String command, {CustomDimensions parameters}) =>
       _impl.sendCommand(command, parameters: parameters);
 
   @override
@@ -290,7 +291,7 @@ class CrashingUsage implements Usage {
     String parameter, {
     String label,
     int value,
-    Map<String, String> parameters,
+    CustomDimensions parameters,
   }) => _impl.sendEvent(
     category,
     parameter,
@@ -330,7 +331,11 @@ class WaitingCrashReporter implements CrashReporter {
   WaitingCrashReporter(Future<void> future) : _future = future;
 
   final Future<void> _future;
+  CrashDetails _details;
 
   @override
-  Future<void> informUser(CrashDetails details, File crashFile) => _future;
+  Future<void> informUser(CrashDetails details, File crashFile) {
+    _details = details;
+    return _future;
+  }
 }

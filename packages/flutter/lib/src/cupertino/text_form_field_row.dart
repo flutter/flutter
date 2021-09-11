@@ -144,6 +144,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
     TextInputAction? textInputAction,
     TextStyle? style,
     StrutStyle? strutStyle,
+    TextDirection? textDirection,
     TextAlign textAlign = TextAlign.start,
     TextAlignVertical? textAlignVertical,
     bool autofocus = false,
@@ -238,6 +239,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
                 textAlign: textAlign,
                 textAlignVertical: textAlignVertical,
                 textCapitalization: textCapitalization,
+                textDirection: textDirection,
                 autofocus: autofocus,
                 toolbarOptions: toolbarOptions,
                 readOnly: readOnly,
@@ -298,8 +300,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
   final TextEditingController? controller;
 
   @override
-  _CupertinoTextFormFieldRowState createState() =>
-      _CupertinoTextFormFieldRowState();
+  FormFieldState<String> createState() => _CupertinoTextFormFieldRowState();
 }
 
 class _CupertinoTextFormFieldRowState extends FormFieldState<String> {

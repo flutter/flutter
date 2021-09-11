@@ -23,21 +23,21 @@ class FileStorage {
       throw Exception('File storage format invalid');
     }
     final int version = json['version'] as int;
-    final List<Map<String, Object>> rawCachedFiles = (json['files'] as List<dynamic>).cast<Map<String, Object>>();
-    final List<_FileHash> cachedFiles = <_FileHash>[
-      for (final Map<String, Object> rawFile in rawCachedFiles) _FileHash._fromJson(rawFile),
+    final List<Map<String, dynamic>> rawCachedFiles = (json['files'] as List<dynamic>).cast<Map<String, dynamic>>();
+    final List<FileHash> cachedFiles = <FileHash>[
+      for (final Map<String, dynamic> rawFile in rawCachedFiles) FileHash._fromJson(rawFile),
     ];
     return FileStorage(version, cachedFiles);
   }
 
   final int version;
-  final List<_FileHash> files;
+  final List<FileHash> files;
 
   List<int> toBuffer() {
     final Map<String, Object> json = <String, Object>{
       'version': version,
       'files': <Object>[
-        for (final _FileHash file in files) file.toJson(),
+        for (final FileHash file in files) file.toJson(),
       ],
     };
     return utf8.encode(jsonEncode(json));
@@ -45,14 +45,14 @@ class FileStorage {
 }
 
 /// A stored file hash and path.
-class _FileHash {
-  _FileHash(this.path, this.hash);
+class FileHash {
+  FileHash(this.path, this.hash);
 
-  factory _FileHash._fromJson(Map<String, Object> json) {
+  factory FileHash._fromJson(Map<String, dynamic> json) {
     if (!json.containsKey('path') || !json.containsKey('hash')) {
       throw Exception('File storage format invalid');
     }
-    return _FileHash(json['path']! as String, json['hash']! as String);
+    return FileHash(json['path']! as String, json['hash']! as String);
   }
 
   final String path;
@@ -142,7 +142,7 @@ class FileStore {
       _cacheFile.deleteSync();
       return;
     }
-    for (final _FileHash fileHash in fileStorage.files) {
+    for (final FileHash fileHash in fileStorage.files) {
       previousAssetKeys[fileHash.path] = fileHash.hash;
     }
     _logger.printTrace('Done initializing file store');
@@ -154,9 +154,9 @@ class FileStore {
     if (!_cacheFile.existsSync()) {
       _cacheFile.createSync(recursive: true);
     }
-    final List<_FileHash> fileHashes = <_FileHash>[];
+    final List<FileHash> fileHashes = <FileHash>[];
     for (final MapEntry<String, String> entry in currentAssetKeys.entries) {
-      fileHashes.add(_FileHash(entry.key, entry.value));
+      fileHashes.add(FileHash(entry.key, entry.value));
     }
     final FileStorage fileStorage = FileStorage(
       _kVersion,

@@ -5,8 +5,8 @@
 import 'dart:ui' as ui;
 import 'dart:ui' show PointerChange;
 
-import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -56,14 +56,14 @@ void main() {
 
   setUp(() {
     _binding.postFrameCallbacks.clear();
-    SystemChannels.mouseCursor.setMockMethodCallHandler((MethodCall call) async {
+    _binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.mouseCursor, (MethodCall call) async {
       if (_methodCallHandler != null)
         return _methodCallHandler!(call);
     });
   });
 
   tearDown(() {
-    SystemChannels.mouseCursor.setMockMethodCallHandler(null);
+    _binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.mouseCursor, null);
   });
 
   test('Should work on platforms that does not support mouse cursor', () async {
@@ -119,8 +119,7 @@ void main() {
       _pointerData(PointerChange.hover, const Offset(10.0, 0.0)),
     ]));
 
-    expect(logCursors, <_CursorUpdateDetails>[
-    ]);
+    expect(logCursors, <_CursorUpdateDetails>[]);
     logCursors.clear();
 
     // Pointer moves out of the annotation
@@ -139,8 +138,7 @@ void main() {
       _pointerData(PointerChange.remove, Offset.zero),
     ]));
 
-    expect(logCursors, const <_CursorUpdateDetails>[
-    ]);
+    expect(logCursors, const <_CursorUpdateDetails>[]);
   });
 
   test('pointer is added and removed in an annotation', () {
@@ -179,8 +177,7 @@ void main() {
       _pointerData(PointerChange.hover, const Offset(10.0, 0.0)),
     ]));
 
-    expect(logCursors, <_CursorUpdateDetails>[
-    ]);
+    expect(logCursors, <_CursorUpdateDetails>[]);
     logCursors.clear();
 
     // Pointer moves back into the annotation
@@ -199,8 +196,7 @@ void main() {
       _pointerData(PointerChange.remove, Offset.zero),
     ]));
 
-    expect(logCursors, <_CursorUpdateDetails>[
-    ]);
+    expect(logCursors, <_CursorUpdateDetails>[]);
   });
 
   test('pointer change caused by new frames', () {
@@ -235,8 +231,7 @@ void main() {
     annotation = const TestAnnotationTarget(cursor: SystemMouseCursors.grabbing);
     _binding.scheduleMouseTrackerPostFrameCheck();
 
-    expect(logCursors, <_CursorUpdateDetails>[
-    ]);
+    expect(logCursors, <_CursorUpdateDetails>[]);
     logCursors.clear();
 
     // Pointer is removed outside of the annotation.
@@ -244,8 +239,7 @@ void main() {
       _pointerData(PointerChange.remove, Offset.zero),
     ]));
 
-    expect(logCursors, <_CursorUpdateDetails>[
-    ]);
+    expect(logCursors, <_CursorUpdateDetails>[]);
   });
 
   test('The first annotation with non-deferring cursor is used', () {
@@ -328,8 +322,7 @@ void main() {
       _pointerData(PointerChange.hover, const Offset(5.0, 0.0)),
     ]));
 
-    expect(logCursors, <_CursorUpdateDetails>[
-    ]);
+    expect(logCursors, <_CursorUpdateDetails>[]);
     logCursors.clear();
 
     // Pointer moved to no annotations
@@ -338,8 +331,7 @@ void main() {
       _pointerData(PointerChange.hover, Offset.zero),
     ]));
 
-    expect(logCursors, <_CursorUpdateDetails>[
-    ]);
+    expect(logCursors, <_CursorUpdateDetails>[]);
     logCursors.clear();
 
     // Remove

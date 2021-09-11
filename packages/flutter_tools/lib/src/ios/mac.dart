@@ -18,7 +18,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../flutter_manifest.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../macos/cocoapod_utils.dart';
 import '../macos/xcode.dart';
 import '../project.dart';
@@ -26,10 +26,12 @@ import '../reporting/reporting.dart';
 import 'application_package.dart';
 import 'code_signing.dart';
 import 'devices.dart';
+import 'migrations/deployment_target_migration.dart';
 import 'migrations/project_base_configuration_migration.dart';
 import 'migrations/project_build_location_migration.dart';
 import 'migrations/remove_framework_link_and_embedding_migration.dart';
 import 'migrations/xcode_build_system_migration.dart';
+import 'xcode_build_settings.dart';
 import 'xcodeproj.dart';
 
 class IMobileDevice {
@@ -38,8 +40,8 @@ class IMobileDevice {
     @required Cache cache,
     @required ProcessManager processManager,
     @required Logger logger,
-  }) : _idevicesyslogPath = artifacts.getArtifactPath(Artifact.idevicesyslog, platform: TargetPlatform.ios),
-      _idevicescreenshotPath = artifacts.getArtifactPath(Artifact.idevicescreenshot, platform: TargetPlatform.ios),
+  }) : _idevicesyslogPath = artifacts.getHostArtifact(HostArtifact.idevicesyslog).path,
+      _idevicescreenshotPath = artifacts.getHostArtifact(HostArtifact.idevicescreenshot).path,
       _dyLdLibEntry = cache.dyLdLibEntry,
       _processUtils = ProcessUtils(logger: logger, processManager: processManager),
       _processManager = processManager;
@@ -94,7 +96,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   BuildableIOSApp app,
   BuildInfo buildInfo,
   String targetOverride,
-  bool buildForDevice,
+  EnvironmentType environmentType = EnvironmentType.physical,
   DarwinArch activeArch,
   bool codesign = true,
   String deviceID,
@@ -110,6 +112,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     XcodeBuildSystemMigration(app.project, globals.logger),
     ProjectBaseConfigurationMigration(app.project, globals.logger),
     ProjectBuildLocationMigration(app.project, globals.logger),
+    DeploymentTargetMigration(app.project, globals.logger),
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
@@ -175,9 +178,15 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 
   Map<String, String> autoSigningConfigs;
-  if (codesign && buildForDevice) {
+
+  final Map<String, String> buildSettings = await app.project.buildSettingsForBuildInfo(
+        buildInfo,
+        environmentType: environmentType
+      ) ?? <String, String>{};
+
+  if (codesign && environmentType == EnvironmentType.physical) {
     autoSigningConfigs = await getCodeSigningIdentityDevelopmentTeam(
-      buildSettings: await app.project.buildSettingsForBuildInfo(buildInfo),
+      buildSettings: buildSettings,
       processManager: globals.processManager,
       logger: globals.logger,
       config: globals.config,
@@ -242,18 +251,18 @@ Future<XcodeBuildResult> buildXcodeProject({
     // The -sdk argument has to be omitted if a watchOS companion app exists.
     // Otherwise the build will fail as WatchKit dependencies cannot be build using the iOS SDK.
     globals.printStatus('Watch companion app found. Adjusting build settings.');
-    if (!buildForDevice && (deviceID == null || deviceID == '')) {
+    if (environmentType == EnvironmentType.simulator && (deviceID == null || deviceID == '')) {
       globals.printError('No simulator device ID has been set.');
       globals.printError('A device ID is required to build an app with a watchOS companion app.');
       globals.printError('Please run "flutter devices" to get a list of available device IDs');
       globals.printError('and specify one using the -d, --device-id flag.');
       return XcodeBuildResult(success: false);
     }
-    if (!buildForDevice) {
+    if (environmentType == EnvironmentType.simulator) {
       buildCommands.addAll(<String>['-destination', 'id=$deviceID']);
     }
   } else {
-    if (buildForDevice) {
+    if (environmentType == EnvironmentType.physical) {
       buildCommands.addAll(<String>['-sdk', 'iphoneos']);
     } else {
       buildCommands.addAll(<String>['-sdk', 'iphonesimulator']);
@@ -352,44 +361,6 @@ Future<XcodeBuildResult> buildXcodeProject({
   );
   globals.flutterUsage.sendTiming(xcodeBuildActionToString(buildAction), 'xcode-ios', Duration(milliseconds: sw.elapsedMilliseconds));
 
-  // Run -showBuildSettings again but with the exact same parameters as the
-  // build. showBuildSettings is reported to occasionally timeout. Here, we give
-  // it a lot of wiggle room (locally on Flutter Gallery, this takes ~1s).
-  // When there is a timeout, we retry once. See issue #35988.
-  final List<String> showBuildSettingsCommand = (List<String>
-      .of(buildCommands)
-      ..add('-showBuildSettings'))
-      // Undocumented behavior: xcodebuild craps out if -showBuildSettings
-      // is used together with -allowProvisioningUpdates or
-      // -allowProvisioningDeviceRegistration and freezes forever.
-      .where((String buildCommand) {
-        return !const <String>[
-          '-allowProvisioningUpdates',
-          '-allowProvisioningDeviceRegistration',
-        ].contains(buildCommand);
-      }).toList();
-  const Duration showBuildSettingsTimeout = Duration(minutes: 1);
-  Map<String, String> buildSettings;
-  try {
-    final RunResult showBuildSettingsResult = await globals.processUtils.run(
-      showBuildSettingsCommand,
-      throwOnError: true,
-      workingDirectory: app.project.hostAppRoot.path,
-      timeout: showBuildSettingsTimeout,
-      timeoutRetries: 1,
-    );
-    final String showBuildSettings = showBuildSettingsResult.stdout.trim();
-    buildSettings = parseXcodeBuildSettings(showBuildSettings);
-  } on ProcessException catch (e) {
-    if (e.toString().contains('timed out')) {
-      BuildEvent('xcode-show-build-settings-timeout',
-        command: showBuildSettingsCommand.join(' '),
-        flutterUsage: globals.flutterUsage,
-      ).send();
-    }
-    rethrow;
-  }
-
   if (buildResult.exitCode != 0) {
     globals.printStatus('Failed to build iOS app');
     if (buildResult.stderr.isNotEmpty) {
@@ -407,7 +378,7 @@ Future<XcodeBuildResult> buildXcodeProject({
       xcodeBuildExecution: XcodeBuildExecution(
         buildCommands: buildCommands,
         appDirectory: app.project.hostAppRoot.path,
-        buildForPhysicalDevice: buildForDevice,
+        environmentType: environmentType,
         buildSettings: buildSettings,
       ),
     );
@@ -419,13 +390,14 @@ Future<XcodeBuildResult> buildXcodeProject({
       // actual directory will end with 'iphonesimulator' for simulator builds.
       // The value of TARGET_BUILD_DIR is adjusted to accommodate for this effect.
       String targetBuildDir = buildSettings['TARGET_BUILD_DIR'];
-      if (hasWatchCompanion && !buildForDevice) {
+      if (hasWatchCompanion && environmentType == EnvironmentType.simulator) {
         globals.printTrace('Replacing iphoneos with iphonesimulator in TARGET_BUILD_DIR.');
         targetBuildDir = targetBuildDir.replaceFirst('iphoneos', 'iphonesimulator');
       }
+      final String appBundle = buildSettings['WRAPPER_NAME'];
       final String expectedOutputDirectory = globals.fs.path.join(
         targetBuildDir,
-        buildSettings['WRAPPER_NAME'],
+        appBundle,
       );
       if (globals.fs.directory(expectedOutputDirectory).existsSync()) {
         // Copy app folder to a place where other tools can find it without knowing
@@ -446,6 +418,10 @@ Future<XcodeBuildResult> buildXcodeProject({
           ],
           throwOnError: true,
         );
+        outputDir = globals.fs.path.join(
+          outputDir,
+          appBundle,
+        );
       } else {
         globals.printError('Build succeeded but the expected app at $expectedOutputDirectory not found');
       }
@@ -461,7 +437,7 @@ Future<XcodeBuildResult> buildXcodeProject({
         xcodeBuildExecution: XcodeBuildExecution(
           buildCommands: buildCommands,
           appDirectory: app.project.hostAppRoot.path,
-          buildForPhysicalDevice: buildForDevice,
+          environmentType: environmentType,
           buildSettings: buildSettings,
       ),
     );
@@ -532,9 +508,10 @@ return result.exitCode != 0 &&
 
 Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result, Usage flutterUsage, Logger logger) async {
   if (result.xcodeBuildExecution != null &&
-      result.xcodeBuildExecution.buildForPhysicalDevice &&
+      result.xcodeBuildExecution.environmentType == EnvironmentType.physical &&
       result.stdout?.toUpperCase()?.contains('BITCODE') == true) {
     BuildEvent('xcode-bitcode-failure',
+      type: 'ios',
       command: result.xcodeBuildExecution.buildCommands.toString(),
       settings: result.xcodeBuildExecution.buildSettings.toString(),
       flutterUsage: flutterUsage,
@@ -556,7 +533,7 @@ Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result, Usage flutterUsa
   }
 
   if (result.xcodeBuildExecution != null &&
-      result.xcodeBuildExecution.buildForPhysicalDevice &&
+      result.xcodeBuildExecution.environmentType == EnvironmentType.physical &&
       result.stdout?.contains('BCEROR') == true &&
       // May need updating if Xcode changes its outputs.
       result.stdout?.contains("Xcode couldn't find a provisioning profile matching") == true) {
@@ -567,14 +544,14 @@ Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result, Usage flutterUsa
   // * DEVELOPMENT_TEAM (automatic signing)
   // * PROVISIONING_PROFILE (manual signing)
   if (result.xcodeBuildExecution != null &&
-      result.xcodeBuildExecution.buildForPhysicalDevice &&
+      result.xcodeBuildExecution.environmentType == EnvironmentType.physical &&
       !<String>['DEVELOPMENT_TEAM', 'PROVISIONING_PROFILE'].any(
         result.xcodeBuildExecution.buildSettings.containsKey)) {
     logger.printError(noDevelopmentTeamInstruction, emphasis: true);
     return;
   }
   if (result.xcodeBuildExecution != null &&
-      result.xcodeBuildExecution.buildForPhysicalDevice &&
+      result.xcodeBuildExecution.environmentType == EnvironmentType.physical &&
       result.xcodeBuildExecution.buildSettings['PRODUCT_BUNDLE_IDENTIFIER']?.contains('com.example') == true) {
     logger.printError('');
     logger.printError('It appears that your application still contains the default signing identifier.');
@@ -632,14 +609,14 @@ class XcodeBuildExecution {
   XcodeBuildExecution({
     @required this.buildCommands,
     @required this.appDirectory,
-    @required this.buildForPhysicalDevice,
+    @required this.environmentType,
     @required this.buildSettings,
   });
 
   /// The original list of Xcode build commands used to produce this build result.
   final List<String> buildCommands;
   final String appDirectory;
-  final bool buildForPhysicalDevice;
+  final EnvironmentType environmentType;
   /// The build settings corresponding to the [buildCommands] invocation.
   final Map<String, String> buildSettings;
 }

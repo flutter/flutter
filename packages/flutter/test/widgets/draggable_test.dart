@@ -2,11 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/semantics.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/material.dart';
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=123"
+@Tags(<String>['no-shuffle'])
+
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
 
@@ -86,8 +92,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/76825
-  testWidgets('Drag and drop - onLeave callback fires correctly with generic parameter',
-      (WidgetTester tester) async {
+  testWidgets('Drag and drop - onLeave callback fires correctly with generic parameter', (WidgetTester tester) async {
     final Map<String,int> leftBehind = <String,int>{
       'Target 1': 0,
       'Target 2': 0,
@@ -238,8 +243,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/76825
-  testWidgets('Drag and drop - onMove callback fires correctly with generic parameter',
-      (WidgetTester tester) async {
+  testWidgets('Drag and drop - onMove callback fires correctly with generic parameter', (WidgetTester tester) async {
     final Map<String,int> targetMoveCount = <String,int>{
       'Target 1': 0,
       'Target 2': 0,
@@ -1315,8 +1319,8 @@ void main() {
           onAccept: accepted.add,
           onAcceptWithDetails: acceptedDetails.add,
         ),
-      ],
-    )));
+      ]),
+    ));
 
     expect(accepted, isEmpty);
     expect(acceptedDetails, isEmpty);
@@ -1410,9 +1414,10 @@ void main() {
     expect(onDragEndDraggableDetails, isNotNull);
     expect(onDragEndDraggableDetails.wasAccepted, isFalse);
     expect(onDragEndDraggableDetails.velocity, equals(Velocity.zero));
-    expect(onDragEndDraggableDetails.offset,
-        equals(
-            Offset(secondLocation.dx, secondLocation.dy - firstLocation.dy)));
+    expect(
+      onDragEndDraggableDetails.offset,
+      equals(Offset(secondLocation.dx, secondLocation.dy - firstLocation.dy)),
+    );
   });
 
   testWidgets('Drag and drop - DragTarget rebuilds with and without rejected data when a rejected draggable enters and leaves', (WidgetTester tester) async {
@@ -2730,17 +2735,19 @@ void main() {
       // Expect that the feedback widget is a descendant of the root overlay,
       // but not a descendant of the child overlay.
       expect(
-          find.descendant(
-            of: find.byType(Overlay).first,
-            matching: find.text('Dragging'),
-          ),
-          findsOneWidget);
+        find.descendant(
+          of: find.byType(Overlay).first,
+          matching: find.text('Dragging'),
+        ),
+        findsOneWidget,
+      );
       expect(
-          find.descendant(
-            of: find.byType(Overlay).last,
-            matching: find.text('Dragging'),
-          ),
-          findsNothing);
+        find.descendant(
+          of: find.byType(Overlay).last,
+          matching: find.text('Dragging'),
+        ),
+        findsNothing,
+      );
     });
 
   // Regression test for https://github.com/flutter/flutter/issues/72483
@@ -2954,7 +2961,10 @@ void main() {
             ],
           ),
         ],
-    ), ignoreTransform: true, ignoreRect: true));
+      ),
+      ignoreTransform: true,
+      ignoreRect: true,
+    ));
 
     final Offset firstLocation = tester.getTopLeft(find.text('N'));
     final Offset secondLocation = firstLocation + const Offset(300.0, 300.0);
@@ -3014,7 +3024,10 @@ void main() {
             ],
           ),
         ],
-    ), ignoreTransform: true, ignoreRect: true));
+      ),
+      ignoreTransform: true,
+      ignoreRect: true,
+    ));
     semantics.dispose();
   });
 
@@ -3029,9 +3042,9 @@ void main() {
             feedback: const Text('Feedback'),
             dragAnchorStrategy: (Draggable<Object> widget, BuildContext context, Offset position) {
               dragAnchorStrategyCalled = true;
-              return const Offset(0, 0);
-            }
-          )
+              return Offset.zero;
+            },
+          ),
         ],
       ),
     ));
@@ -3071,8 +3084,7 @@ void main() {
           children: <Widget>[
             DragTarget<int>(
               hitTestBehavior: hitTestBehavior,
-              builder: (BuildContext context, List<int?> data,
-                  List<dynamic> rejects) {
+              builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
                 return const SizedBox(height: 100.0, child: Text('Target'));
               },
             ),
@@ -3101,7 +3113,7 @@ Future<void> _testLongPressDraggableHapticFeedback({ required WidgetTester teste
   bool onDragStartedCalled = false;
 
   int hapticFeedbackCalls = 0;
-  SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+  tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
     if (methodCall.method == 'HapticFeedback.vibrate') {
       hapticFeedbackCalls++;
     }

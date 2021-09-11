@@ -40,7 +40,7 @@ class Calculator {
         if (key is int && i++ % _NOTIFY_INTERVAL == 0)
           onProgressListener(i.toDouble(), _NUM_ITEMS.toDouble());
         return value;
-      }
+      },
     );
     try {
       final List<dynamic> result = decoder.convert(_data) as List<dynamic>;
@@ -210,21 +210,14 @@ class IsolateExampleState extends State<StatefulWidget> with SingleTickerProvide
   String _label = 'Start';
   String _result = ' ';
   double _progress = 0.0;
-  late AnimationController _animation;
-  late CalculationManager _calculationManager;
-
-  @override
-  void initState() {
-    super.initState();
-    _animation = AnimationController(
-      duration: const Duration(milliseconds: 3600),
-      vsync: this,
-    )..repeat();
-    _calculationManager = CalculationManager(
-      onProgressListener: _handleProgressUpdate,
-      onResultListener: _handleResult,
-    );
-  }
+  late final AnimationController _animation = AnimationController(
+    duration: const Duration(milliseconds: 3600),
+    vsync: this,
+  )..repeat();
+  late final CalculationManager _calculationManager = CalculationManager(
+    onProgressListener: _handleProgressUpdate,
+    onResultListener: _handleResult,
+  );
 
   @override
   void dispose() {
@@ -249,14 +242,14 @@ class IsolateExampleState extends State<StatefulWidget> with SingleTickerProvide
           Opacity(
             opacity: _calculationManager.isRunning ? 1.0 : 0.0,
             child: CircularProgressIndicator(
-              value: _progress
+              value: _progress,
             ),
           ),
           Text(_status),
           Center(
             child: ElevatedButton(
-              child: Text(_label),
               onPressed: _handleButtonPressed,
+              child: Text(_label),
             ),
           ),
           Text(_result),

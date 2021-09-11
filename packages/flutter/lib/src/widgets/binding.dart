@@ -43,7 +43,7 @@ export 'dart:ui' show AppLifecycleState, Locale;
 ///   const AppLifecycleReactor({ Key? key }) : super(key: key);
 ///
 ///   @override
-///   _AppLifecycleReactorState createState() => _AppLifecycleReactorState();
+///   State<AppLifecycleReactor> createState() => _AppLifecycleReactorState();
 /// }
 ///
 /// class _AppLifecycleReactorState extends State<AppLifecycleReactor> with WidgetsBindingObserver {
@@ -138,7 +138,7 @@ abstract class WidgetsBindingObserver {
   ///   const MetricsReactor({ Key? key }) : super(key: key);
   ///
   ///   @override
-  ///   _MetricsReactorState createState() => _MetricsReactorState();
+  ///   State<MetricsReactor> createState() => _MetricsReactorState();
   /// }
   ///
   /// class _MetricsReactorState extends State<MetricsReactor> with WidgetsBindingObserver {
@@ -196,7 +196,7 @@ abstract class WidgetsBindingObserver {
   ///   const TextScaleFactorReactor({ Key? key }) : super(key: key);
   ///
   ///   @override
-  ///   _TextScaleFactorReactorState createState() => _TextScaleFactorReactorState();
+  ///   State<TextScaleFactorReactor> createState() => _TextScaleFactorReactorState();
   /// }
   ///
   /// class _TextScaleFactorReactorState extends State<TextScaleFactorReactor> with WidgetsBindingObserver {
@@ -290,7 +290,10 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     window.onLocaleChanged = handleLocaleChanged;
     window.onAccessibilityFeaturesChanged = handleAccessibilityFeaturesChanged;
     SystemChannels.navigation.setMethodCallHandler(_handleNavigationInvocation);
-    FlutterErrorDetails.propertiesTransformers.add(transformDebugCreator);
+    assert(() {
+      FlutterErrorDetails.propertiesTransformers.add(debugTransformDebugCreator);
+      return true;
+    }());
   }
 
   void _debugAddStackFilters() {
@@ -440,17 +443,16 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       registerServiceExtension(
         name: 'fastReassemble',
         callback: (Map<String, Object> params) async {
+          // This mirrors the implementation of the 'reassemble' callback registration
+          // in lib/src/foundation/binding.dart, but with the extra binding config used
+          // to skip some reassemble work.
           final String? className = params['className'] as String?;
-          void markElementsDirty(Element element) {
-            if (element.widget.runtimeType.toString() == className) {
-              element.markNeedsBuild();
-            }
-            element.visitChildElements(markElementsDirty);
+          BindingBase.debugReassembleConfig = DebugReassembleConfig(widgetName: className);
+          try {
+            await reassembleApplication();
+          } finally {
+            BindingBase.debugReassembleConfig = null;
           }
-          if (renderViewElement != null) {
-            markElementsDirty(renderViewElement!);
-          }
-          await endOfFrame;
           return <String, String>{'type': 'Success'};
         },
       );
@@ -499,7 +501,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 
   Future<void> _forceRebuild() {
     if (renderViewElement != null) {
-      buildOwner!.reassemble(renderViewElement!);
+      buildOwner!.reassemble(renderViewElement!, null);
       return endOfFrame;
     }
     return Future<void>.value();
@@ -857,6 +859,11 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       firstFrameCallback = (List<FrameTiming> timings) {
         assert(sendFramesToEngine);
         if (!kReleaseMode) {
+          // Change the current user tag back to the default tag. At this point,
+          // the user tag should be set to "AppStartUp" (originally set in the
+          // engine), so we need to change it back to the default tag to mark
+          // the end of app start up for CPU profiles.
+          developer.UserTag.defaultTag.makeCurrent();
           developer.Timeline.instantSync('Rasterized first useful frame');
           developer.postEvent('Flutter.FirstFrame', <String, dynamic>{});
         }
@@ -953,8 +960,9 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       return true;
     }());
 
-    if (renderViewElement != null)
-      buildOwner!.reassemble(renderViewElement!);
+    if (renderViewElement != null) {
+      buildOwner!.reassemble(renderViewElement!, BindingBase.debugReassembleConfig);
+    }
     return super.performReassemble();
   }
 
@@ -1184,6 +1192,7 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
     assert(_newWidget == null);
   }
 
+  @pragma('vm:notify-debugger-on-exception')
   void _rebuild() {
     try {
       _child = updateChild(_child, widget.child, _rootChildSlot);

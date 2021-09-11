@@ -5,7 +5,6 @@
 // @dart = 2.8
 
 import 'package:args/command_runner.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 
 import '../../src/common.dart';
@@ -20,7 +19,7 @@ void main() {
     expect(() => commandRunner.run(<String>[
       'build',
       '--obfuscate',
-    ]), throwsA(isA<ToolExit>()));
+    ]), throwsToolExit());
   });
 }
 

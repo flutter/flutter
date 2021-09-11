@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
@@ -10,6 +12,7 @@ import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
 import 'framework.dart';
+import 'notification_listener.dart';
 import 'page_storage.dart';
 import 'scroll_activity.dart';
 import 'scroll_context.dart';
@@ -254,7 +257,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// If there is any overscroll, it is reported using [didOverscrollBy].
   double setPixels(double newPixels) {
     assert(hasPixels);
-    assert(SchedulerBinding.instance!.schedulerPhase != SchedulerPhase.persistentCallbacks, 'A scrollable\'s position should not change during the build, layout, and paint phases, otherwise the rendering will be confused.');
+    assert(SchedulerBinding.instance!.schedulerPhase != SchedulerPhase.persistentCallbacks, "A scrollable's position should not change during the build, layout, and paint phases, otherwise the rendering will be confused.");
     if (newPixels != pixels) {
       final double overscroll = applyBoundaryConditions(newPixels);
       assert(() {
@@ -506,6 +509,20 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
 
   bool _pendingDimensions = false;
   ScrollMetrics? _lastMetrics;
+  // True indicates that there is an ScrollMetrics update notificaton pending.
+  bool _haveScheduledUpdateNotification = false;
+  Axis? _lastAxis;
+
+  bool _isMetricsChanged() {
+    assert(haveDimensions);
+    final ScrollMetrics currentMetrics = copyWith();
+
+    return _lastMetrics == null ||
+      !(currentMetrics.extentBefore == _lastMetrics!.extentBefore
+      && currentMetrics.extentInside == _lastMetrics!.extentInside
+      && currentMetrics.extentAfter == _lastMetrics!.extentAfter
+      && currentMetrics.axisDirection == _lastMetrics!.axisDirection);
+  }
 
   @override
   bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
@@ -514,12 +531,14 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     assert(haveDimensions == (_lastMetrics != null));
     if (!nearEqual(_minScrollExtent, minScrollExtent, Tolerance.defaultTolerance.distance) ||
         !nearEqual(_maxScrollExtent, maxScrollExtent, Tolerance.defaultTolerance.distance) ||
-        _didChangeViewportDimensionOrReceiveCorrection) {
+        _didChangeViewportDimensionOrReceiveCorrection ||
+        _lastAxis != axis) {
       assert(minScrollExtent != null);
       assert(maxScrollExtent != null);
       assert(minScrollExtent <= maxScrollExtent);
       _minScrollExtent = minScrollExtent;
       _maxScrollExtent = maxScrollExtent;
+      _lastAxis = axis;
       final ScrollMetrics? currentMetrics = haveDimensions ? copyWith() : null;
       _didChangeViewportDimensionOrReceiveCorrection = false;
       _pendingDimensions = true;
@@ -534,7 +553,17 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       _pendingDimensions = false;
     }
     assert(!_didChangeViewportDimensionOrReceiveCorrection, 'Use correctForNewDimensions() (and return true) to change the scroll offset during applyContentDimensions().');
-    _lastMetrics = copyWith();
+
+    if (_isMetricsChanged()) {
+      // It isn't safe to trigger the ScrollMetricsNotification if we are in
+      // the middle of rendering the frame, the developer is likely to schedule
+      // a new frame(build scheduled during frame is illegal).
+      if (_lastMetrics != null && !_haveScheduledUpdateNotification) {
+        scheduleMicrotask(didUpdateScrollMetrics);
+        _haveScheduledUpdateNotification = true;
+      }
+      _lastMetrics = copyWith();
+    }
     return true;
   }
 
@@ -895,6 +924,15 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     UserScrollNotification(metrics: copyWith(), context: context.notificationContext!, direction: direction).dispatch(context.notificationContext);
   }
 
+  /// Dispatches a notification that the [ScrollMetrics] have changed.
+  void didUpdateScrollMetrics() {
+    assert(SchedulerBinding.instance!.schedulerPhase != SchedulerPhase.persistentCallbacks);
+    assert(_haveScheduledUpdateNotification);
+    _haveScheduledUpdateNotification = false;
+    if (context.notificationContext != null)
+      ScrollMetricsNotification(metrics: copyWith(), context: context.notificationContext!).dispatch(context.notificationContext);
+  }
+
   /// Provides a heuristic to determine if expensive frame-bound tasks should be
   /// deferred.
   ///
@@ -937,5 +975,101 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     super.debugFillDescription(description);
     description.add('range: ${_minScrollExtent?.toStringAsFixed(1)}..${_maxScrollExtent?.toStringAsFixed(1)}');
     description.add('viewport: ${_viewportDimension?.toStringAsFixed(1)}');
+  }
+}
+
+/// A notification that a scrollable widget's [ScrollMetrics] have changed.
+///
+/// For example, when the content of a scrollable is altered, making it larger
+/// or smaller, this notification will be dispatched. Similarly, if the size
+/// of the window or parent changes, the scrollable can notify of these
+/// changes in dimensions.
+///
+/// The above behaviors usually do not trigger [ScrollNotification] events,
+/// so this is useful for listening to [ScrollMetrics] changes that are not
+/// caused by the user scrolling.
+///
+/// {@tool dartpad --template=freeform}
+/// This sample shows how a [ScrollMetricsNotification] is dispatched when
+/// the `windowSize` is changed. Press the floating action button to increase
+/// the scrollable window's size.
+///
+/// ```dart main
+/// import 'package:flutter/material.dart';
+///
+/// void main() => runApp(const ScrollMetricsDemo());
+///
+/// class ScrollMetricsDemo extends StatefulWidget {
+///   const ScrollMetricsDemo({Key? key}) : super(key: key);
+///
+///   @override
+///   State<ScrollMetricsDemo> createState() => ScrollMetricsDemoState();
+/// }
+///
+/// class ScrollMetricsDemoState extends State<ScrollMetricsDemo> {
+///   double windowSize = 200.0;
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return MaterialApp(
+///       home: Scaffold(
+///         appBar: AppBar(
+///           title: const Text('ScrollMetrics Demo'),
+///         ),
+///         floatingActionButton: FloatingActionButton(
+///           child: const Icon(Icons.add),
+///           onPressed: () => setState(() {
+///             windowSize += 10.0;
+///           }),
+///         ),
+///         body: NotificationListener<ScrollMetricsNotification>(
+///           onNotification: (ScrollMetricsNotification notification) {
+///             ScaffoldMessenger.of(notification.context).showSnackBar(
+///               const SnackBar(
+///                 content: Text('Scroll metrics changed!'),
+///               ),
+///             );
+///             return false;
+///           },
+///           child: Scrollbar(
+///             isAlwaysShown: true,
+///             child: SizedBox(
+///               height: windowSize,
+///               width: double.infinity,
+///               child: const SingleChildScrollView(
+///                 child: FlutterLogo(
+///                   size: 300.0,
+///                 ),
+///               ),
+///             ),
+///           ),
+///         ),
+///       ),
+///     );
+///   }
+/// }
+/// ```
+/// {@end-tool}
+class ScrollMetricsNotification extends Notification with ViewportNotificationMixin {
+  /// Creates a notification that the scrollable widget's [ScrollMetrics] have
+  /// changed.
+  ScrollMetricsNotification({
+    required this.metrics,
+    required this.context,
+  });
+
+  /// Description of a scrollable widget's [ScrollMetrics].
+  final ScrollMetrics metrics;
+
+  /// The build context of the widget that fired this notification.
+  ///
+  /// This can be used to find the scrollable widget's render objects to
+  /// determine the size of the viewport, for instance.
+  final BuildContext context;
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('$metrics');
   }
 }

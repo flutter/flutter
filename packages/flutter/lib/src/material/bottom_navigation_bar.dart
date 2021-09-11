@@ -34,6 +34,31 @@ enum BottomNavigationBarType {
   shifting,
 }
 
+/// Refines the layout of a [BottomNavigationBar] when the enclosing
+/// [MediaQueryData.orientation] is [Orientation.landscape].
+enum BottomNavigationBarLandscapeLayout {
+  /// If the enclosing [MediaQueryData.orientation] is
+  /// [Orientation.landscape] then the navigation bar's items are
+  /// evenly spaced and spread out across the available width. Each
+  /// item's label and icon are arranged in a column.
+  spread,
+
+  /// If the enclosing [MediaQueryData.orientation] is
+  /// [Orientation.landscape] then the navigation bar's items are
+  /// evenly spaced in a row but only consume as much width as they
+  /// would in portrait orientation. The row of items is centered within
+  /// the available width. Each item's label and icon are arranged
+  /// in a column.
+  centered,
+
+  /// If the enclosing [MediaQueryData.orientation] is
+  /// [Orientation.landscape] then the navigation bar's items are
+  /// evenly spaced and each item's icon and label are lined up in a
+  /// row instead of a column.
+  linear,
+}
+
+
 /// A material widget that's displayed at the bottom of an app for selecting
 /// among a small number of views, typically between three and five.
 ///
@@ -231,7 +256,7 @@ class BottomNavigationBar extends StatefulWidget {
   /// The [iconSize], [selectedFontSize], [unselectedFontSize], and [elevation]
   /// arguments must be non-null and non-negative.
   ///
-  /// If [selectedLabelStyle.color] and [unselectedLabelStyle.color] values
+  /// If [selectedLabelStyle].color and [unselectedLabelStyle].color values
   /// are non-null, they will be used instead of [selectedItemColor] and
   /// [unselectedItemColor].
   ///
@@ -239,8 +264,8 @@ class BottomNavigationBar extends StatefulWidget {
   /// [selectedIconTheme] and [unselectedIconTheme], and both
   /// [IconThemeData.color] and [IconThemeData.size] must be set.
   ///
-  /// If both [selectedLabelStyle.fontSize] and [selectedFontSize] are set,
-  /// [selectedLabelStyle.fontSize] will be used.
+  /// If both [selectedLabelStyle].fontSize and [selectedFontSize] are set,
+  /// [selectedLabelStyle].fontSize will be used.
   ///
   /// Only one of [selectedItemColor] and [fixedColor] can be specified. The
   /// former is preferred, [fixedColor] only exists for the sake of
@@ -277,6 +302,7 @@ class BottomNavigationBar extends StatefulWidget {
     this.showUnselectedLabels,
     this.mouseCursor,
     this.enableFeedback,
+    this.landscapeLayout,
   }) : assert(items != null),
        assert(items.length >= 2),
        assert(
@@ -422,8 +448,42 @@ class BottomNavigationBar extends StatefulWidget {
   ///  * [Feedback] for providing platform-specific feedback to certain actions.
   final bool? enableFeedback;
 
+  /// The arrangement of the bar's [items] when the enclosing
+  /// [MediaQueryData.orientation] is [Orientation.landscape].
+  ///
+  /// The following alternatives are supported:
+  ///
+  /// * [BottomNavigationBarLandscapeLayout.spread] - the items are
+  ///   evenly spaced and spread out across the available width. Each
+  ///   item's label and icon are arranged in a column.
+  /// * [BottomNavigationBarLandscapeLayout.centered] - the items are
+  ///   evenly spaced in a row but only consume as much width as they
+  ///   would in portrait orientation. The row of items is centered within
+  ///   the available width. Each item's label and icon are arranged
+  ///   in a column.
+  /// * [BottomNavigationBarLandscapeLayout.linear] - the items are
+  ///   evenly spaced and each item's icon and label are lined up in a
+  ///   row instead of a column.
+  ///
+  /// If this property is null, then the value of the enclosing
+  /// [BottomNavigationBarThemeData.landscapeLayout is used. If that
+  /// property is also null, then
+  /// [BottomNavigationBarLandscapeLayout.spread] is used.
+  ///
+  /// This property is null by default.
+  ///
+  /// See also:
+  ///
+  ///  * [ThemeData.bottomNavigationBarTheme] - which can be used to specify
+  ///    bottom navigation bar defaults for an entire application.
+  ///  * [BottomNavigationBarTheme] - which can be used to specify
+  ///    bottom navigation bar defaults for a widget subtree.
+  ///  * [MediaQuery.of] - which can be used to determing the current
+  ///    orientation.
+  final BottomNavigationBarLandscapeLayout? landscapeLayout;
+
   @override
-  _BottomNavigationBarState createState() => _BottomNavigationBarState();
+  State<BottomNavigationBar> createState() => _BottomNavigationBarState();
 }
 
 // This represents a single tile in the bottom navigation bar. It is intended
@@ -447,13 +507,14 @@ class _BottomNavigationTile extends StatelessWidget {
     this.indexLabel,
     required this.mouseCursor,
     required this.enableFeedback,
-    }) : assert(type != null),
-         assert(item != null),
-         assert(animation != null),
-         assert(selected != null),
-         assert(selectedLabelStyle != null),
-         assert(unselectedLabelStyle != null),
-         assert(mouseCursor != null);
+    required this.layout,
+  }) : assert(type != null),
+       assert(item != null),
+       assert(animation != null),
+       assert(selected != null),
+       assert(selectedLabelStyle != null),
+       assert(unselectedLabelStyle != null),
+       assert(mouseCursor != null);
 
   final BottomNavigationBarType type;
   final BottomNavigationBarItem item;
@@ -472,6 +533,7 @@ class _BottomNavigationTile extends StatelessWidget {
   final bool showUnselectedLabels;
   final MouseCursor mouseCursor;
   final bool enableFeedback;
+  final BottomNavigationBarLandscapeLayout layout;
 
   @override
   Widget build(BuildContext context) {
@@ -559,30 +621,26 @@ class _BottomNavigationTile extends StatelessWidget {
       enableFeedback: enableFeedback,
       child: Padding(
         padding: EdgeInsets.only(top: topPadding, bottom: bottomPadding),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            _TileIcon(
-              colorTween: colorTween!,
-              animation: animation,
-              iconSize: iconSize,
-              selected: selected,
-              item: item,
-              selectedIconTheme: selectedIconTheme,
-              unselectedIconTheme: unselectedIconTheme,
-            ),
-            _Label(
-              colorTween: colorTween!,
-              animation: animation,
-              item: item,
-              selectedLabelStyle: selectedLabelStyle,
-              unselectedLabelStyle: unselectedLabelStyle,
-              showSelectedLabels: showSelectedLabels,
-              showUnselectedLabels: showUnselectedLabels,
-            ),
-          ],
+        child: _Tile(
+          layout: layout,
+          icon: _TileIcon(
+            colorTween: colorTween!,
+            animation: animation,
+            iconSize: iconSize,
+            selected: selected,
+            item: item,
+            selectedIconTheme: selectedIconTheme,
+            unselectedIconTheme: unselectedIconTheme,
+          ),
+          label: _Label(
+            colorTween: colorTween!,
+            animation: animation,
+            item: item,
+            selectedLabelStyle: selectedLabelStyle,
+            unselectedLabelStyle: unselectedLabelStyle,
+            showSelectedLabels: showSelectedLabels,
+            showUnselectedLabels: showUnselectedLabels,
+          ),
         ),
       ),
     );
@@ -617,6 +675,44 @@ class _BottomNavigationTile extends StatelessWidget {
   }
 }
 
+
+// If the orientaion is landscape and layout is
+// BottomNavigationBarLandscapeLayout.linear then return a
+// icon-space-label row, where space is 8 pixels. Otherwise return a
+// icon-label column.
+class _Tile extends StatelessWidget {
+ const  _Tile({
+    Key? key,
+    required this.layout,
+    required this.icon,
+    required this.label
+  }) : super(key: key);
+
+  final BottomNavigationBarLandscapeLayout layout;
+  final Widget icon;
+  final Widget label;
+
+  @override
+  Widget build(BuildContext context) {
+    final MediaQueryData data = MediaQuery.of(context);
+    if (data.orientation == Orientation.landscape && layout == BottomNavigationBarLandscapeLayout.linear) {
+      return Align(
+        heightFactor: 1,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[icon, const SizedBox(width: 8), label],
+        ),
+      );
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[icon, label],
+    );
+  }
+}
 
 class _TileIcon extends StatelessWidget {
   const _TileIcon({
@@ -917,7 +1013,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     return textStyle.fontSize == null ? textStyle.copyWith(fontSize: fontSize) : textStyle;
   }
 
-  List<Widget> _createTiles() {
+  List<Widget> _createTiles(BottomNavigationBarLandscapeLayout layout) {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     assert(localizations != null);
 
@@ -993,19 +1089,10 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         showUnselectedLabels: widget.showUnselectedLabels ?? bottomTheme.showUnselectedLabels ?? _defaultShowUnselected,
         indexLabel: localizations.tabLabel(tabIndex: i + 1, tabCount: widget.items.length),
         mouseCursor: effectiveMouseCursor,
+        layout: layout,
       ));
     }
     return tiles;
-  }
-
-  Widget _createContainer(List<Widget> tiles) {
-    return DefaultTextStyle.merge(
-      overflow: TextOverflow.ellipsis,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: tiles,
-      ),
-    );
   }
 
   @override
@@ -1016,7 +1103,11 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     assert(Overlay.of(context, debugRequiredFor: widget) != null);
 
     final BottomNavigationBarThemeData bottomTheme = BottomNavigationBarTheme.of(context);
+    final BottomNavigationBarLandscapeLayout layout = widget.landscapeLayout
+      ?? bottomTheme.landscapeLayout
+      ?? BottomNavigationBarLandscapeLayout.spread;
     final double additionalBottomPadding = MediaQuery.of(context).padding.bottom;
+
     Color? backgroundColor;
     switch (_effectiveType) {
       case BottomNavigationBarType.fixed:
@@ -1026,9 +1117,11 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         backgroundColor = _backgroundColor;
         break;
     }
+
     return Semantics(
       explicitChildNodes: true,
-      child: Material(
+      child: _Bar(
+        layout: layout,
         elevation: widget.elevation ?? bottomTheme.elevation ?? 8.0,
         color: backgroundColor,
         child: ConstrainedBox(
@@ -1045,13 +1138,57 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
                 child: MediaQuery.removePadding(
                   context: context,
                   removeBottom: true,
-                  child: _createContainer(_createTiles()),
+                  child: DefaultTextStyle.merge(
+                    overflow: TextOverflow.ellipsis,
+                    child:  Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: _createTiles(layout),
+                    ),
+                  ),
                 ),
               ),
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+// Optionally center a Material child for landscape layouts when layout is
+// BottomNavigationBarLandscapeLayout.centered
+class _Bar extends StatelessWidget {
+  const _Bar({
+    Key? key,
+    required this.child,
+    required this.layout,
+    required this.elevation,
+    required this.color,
+  }) : super(key: key);
+
+  final Widget child;
+  final BottomNavigationBarLandscapeLayout layout;
+  final double elevation;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    final MediaQueryData data = MediaQuery.of(context);
+    Widget alignedChild = child;
+    if (data.orientation == Orientation.landscape && layout == BottomNavigationBarLandscapeLayout.centered) {
+      alignedChild = Align(
+        alignment: Alignment.bottomCenter,
+        heightFactor: 1,
+        child: SizedBox(
+          width: data.size.height,
+          child: child,
+        ),
+      );
+    }
+    return Material(
+      elevation: elevation,
+      color: color,
+      child: alignedChild,
     );
   }
 }

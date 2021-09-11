@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:typed_data';
 
@@ -26,8 +24,8 @@ import 'convert.dart';
 class TargetModel {
   /// Parse a [TargetModel] from a raw string.
   ///
-  /// Throws an [AssertionError] if passed a value other than 'flutter' or
-  /// 'flutter_runner'.
+  /// Throws an exception if passed a value other than 'flutter',
+  /// 'flutter_runner', 'vm', or 'dartdevc'.
   factory TargetModel(String rawValue) {
     switch (rawValue) {
       case 'flutter':
@@ -39,8 +37,7 @@ class TargetModel {
       case 'dartdevc':
         return dartdevc;
     }
-    assert(false);
-    return null;
+    throw Exception('Unexpected target model $rawValue');
   }
 
   const TargetModel._(this._value);
@@ -71,7 +68,7 @@ class CompilerOutput {
   final List<Uri> sources;
 
   /// This field is only non-null for expression compilation requests.
-  final Uint8List expressionData;
+  final Uint8List? expressionData;
 }
 
 enum StdoutState { CollectDiagnostic, CollectDependencies }
@@ -79,8 +76,8 @@ enum StdoutState { CollectDiagnostic, CollectDependencies }
 /// Handles stdin/stdout communication with the frontend server.
 class StdoutHandler {
   StdoutHandler({
-    @required Logger logger,
-    @required FileSystem fileSystem,
+    required Logger logger,
+    required FileSystem fileSystem,
   }) : _logger = logger,
        _fileSystem = fileSystem {
     reset();
@@ -89,14 +86,14 @@ class StdoutHandler {
   final Logger _logger;
   final FileSystem _fileSystem;
 
-  String boundaryKey;
+  String? boundaryKey;
   StdoutState state = StdoutState.CollectDiagnostic;
-  Completer<CompilerOutput> compilerOutput;
+  Completer<CompilerOutput?>? compilerOutput;
   final List<Uri> sources = <Uri>[];
 
-  bool _suppressCompilerMessages;
-  bool _expectSources;
-  bool _readFile;
+  bool _suppressCompilerMessages = false;
+  bool _expectSources = true;
+  bool _readFile = false;
 
   void handler(String message) {
     const String kResultPrefix = 'result ';
@@ -104,21 +101,22 @@ class StdoutHandler {
       boundaryKey = message.substring(kResultPrefix.length);
       return;
     }
-    if (message.startsWith(boundaryKey)) {
+    final String? messageBoundaryKey = boundaryKey;
+    if (messageBoundaryKey != null && message.startsWith(messageBoundaryKey)) {
       if (_expectSources) {
         if (state == StdoutState.CollectDiagnostic) {
           state = StdoutState.CollectDependencies;
           return;
         }
       }
-      if (message.length <= boundaryKey.length) {
-        compilerOutput.complete(null);
+      if (message.length <= messageBoundaryKey.length) {
+        compilerOutput?.complete(null);
         return;
       }
       final int spaceDelimiter = message.lastIndexOf(' ');
-      final String fileName = message.substring(boundaryKey.length + 1, spaceDelimiter);
+      final String fileName = message.substring(messageBoundaryKey.length + 1, spaceDelimiter);
       final int errorCount = int.parse(message.substring(spaceDelimiter + 1).trim());
-      Uint8List expressionData;
+      Uint8List? expressionData;
       if (_readFile) {
         expressionData = _fileSystem.file(fileName).readAsBytesSync();
       }
@@ -128,7 +126,7 @@ class StdoutHandler {
         sources,
         expressionData: expressionData,
       );
-      compilerOutput.complete(output);
+      compilerOutput?.complete(output);
       return;
     }
     if (state == StdoutState.CollectDiagnostic) {
@@ -156,7 +154,7 @@ class StdoutHandler {
   // with its own boundary key and new completer.
   void reset({ bool suppressCompilerMessages = false, bool expectSources = true, bool readFile = false }) {
     boundaryKey = null;
-    compilerOutput = Completer<CompilerOutput>();
+    compilerOutput = Completer<CompilerOutput?>();
     _suppressCompilerMessages = suppressCompilerMessages;
     _expectSources = expectSources;
     _readFile = readFile;
@@ -193,13 +191,13 @@ List<String> buildModeOptions(BuildMode mode, List<String> dartDefines) {
 /// A compiler interface for producing single (non-incremental) kernel files.
 class KernelCompiler {
   KernelCompiler({
-    @required FileSystem fileSystem,
-    @required Logger logger,
-    @required ProcessManager processManager,
-    @required Artifacts artifacts,
-    @required List<String> fileSystemRoots,
-    @required String fileSystemScheme,
-    @visibleForTesting StdoutHandler stdoutHandler,
+    required FileSystem fileSystem,
+    required Logger logger,
+    required ProcessManager processManager,
+    required Artifacts artifacts,
+    required List<String> fileSystemRoots,
+    required String fileSystemScheme,
+    @visibleForTesting StdoutHandler? stdoutHandler,
   }) : _logger = logger,
        _fileSystem = fileSystem,
        _artifacts = artifacts,
@@ -216,24 +214,26 @@ class KernelCompiler {
   final List<String> _fileSystemRoots;
   final StdoutHandler _stdoutHandler;
 
-  Future<CompilerOutput> compile({
-    String sdkRoot,
-    String mainPath,
-    String outputFilePath,
-    String depFilePath,
+  Future<CompilerOutput?> compile({
+    required String sdkRoot,
+    String? mainPath,
+    String? outputFilePath,
+    String? depFilePath,
     TargetModel targetModel = TargetModel.flutter,
     bool linkPlatformKernelIn = false,
     bool aot = false,
-    List<String> extraFrontEndOptions,
-    List<String> fileSystemRoots,
-    String fileSystemScheme,
-    String initializeFromDill,
-    String platformDill,
-    @required String packagesPath,
-    @required BuildMode buildMode,
-    @required bool trackWidgetCreation,
-    @required List<String> dartDefines,
-    @required PackageConfig packageConfig,
+    List<String>? extraFrontEndOptions,
+    List<String>? fileSystemRoots,
+    String? fileSystemScheme,
+    String? initializeFromDill,
+    String? platformDill,
+    Directory? buildDir,
+    bool checkDartPluginRegistry = false,
+    required String? packagesPath,
+    required BuildMode buildMode,
+    required bool trackWidgetCreation,
+    required List<String> dartDefines,
+    required PackageConfig packageConfig,
   }) async {
     final String frontendServer = _artifacts.getArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk
@@ -242,12 +242,13 @@ class KernelCompiler {
     if (!sdkRoot.endsWith('/')) {
       sdkRoot = '$sdkRoot/';
     }
-    final String engineDartPath = _artifacts.getArtifactPath(Artifact.engineDartBinary);
+    final String engineDartPath = _artifacts.getHostArtifact(HostArtifact.engineDartBinary).path;
     if (!_processManager.canRun(engineDartPath)) {
       throwToolExit('Unable to find Dart binary at $engineDartPath');
     }
-    String mainUri;
-    final Uri mainFileUri = _fileSystem.file(mainPath).uri;
+    String? mainUri;
+    final File mainFile = _fileSystem.file(mainPath);
+    final Uri mainFileUri = mainFile.uri;
     if (packagesPath != null) {
       mainUri = packageConfig.toPackageUri(mainFileUri)?.toString();
     }
@@ -255,6 +256,15 @@ class KernelCompiler {
     if (outputFilePath != null && !_fileSystem.isFileSync(outputFilePath)) {
       _fileSystem.file(outputFilePath).createSync(recursive: true);
     }
+    if (buildDir != null && checkDartPluginRegistry) {
+      // Check if there's a Dart plugin registrant.
+      // This is contained in the file `generated_main.dart` under `.dart_tools/flutter_build/`.
+      final File newMainDart = buildDir.parent.childFile('generated_main.dart');
+      if (newMainDart.existsSync()) {
+        mainUri = newMainDart.path;
+      }
+    }
+
     final List<String> command = <String>[
       engineDartPath,
       '--disable-dart-dev',
@@ -302,7 +312,7 @@ class KernelCompiler {
         platformDill,
       ],
       ...?extraFrontEndOptions,
-      mainUri ?? mainPath,
+      mainUri,
     ];
 
     _logger.printTrace(command.join(' '));
@@ -317,7 +327,7 @@ class KernelCompiler {
       .listen(_stdoutHandler.handler);
     final int exitCode = await server.exitCode;
     if (exitCode == 0) {
-      return _stdoutHandler.compilerOutput.future;
+      return _stdoutHandler.compilerOutput?.future;
     }
     return null;
   }
@@ -327,9 +337,9 @@ class KernelCompiler {
 abstract class _CompilationRequest {
   _CompilationRequest(this.completer);
 
-  Completer<CompilerOutput> completer;
+  Completer<CompilerOutput?> completer;
 
-  Future<CompilerOutput> _run(DefaultResidentCompiler compiler);
+  Future<CompilerOutput?> _run(DefaultResidentCompiler compiler);
 
   Future<void> run(DefaultResidentCompiler compiler) async {
     completer.complete(await _run(compiler));
@@ -338,7 +348,7 @@ abstract class _CompilationRequest {
 
 class _RecompileRequest extends _CompilationRequest {
   _RecompileRequest(
-    Completer<CompilerOutput> completer,
+    Completer<CompilerOutput?> completer,
     this.mainUri,
     this.invalidatedFiles,
     this.outputPath,
@@ -347,19 +357,19 @@ class _RecompileRequest extends _CompilationRequest {
   ) : super(completer);
 
   Uri mainUri;
-  List<Uri> invalidatedFiles;
+  List<Uri>? invalidatedFiles;
   String outputPath;
   PackageConfig packageConfig;
   bool suppressErrors;
 
   @override
-  Future<CompilerOutput> _run(DefaultResidentCompiler compiler) async =>
+  Future<CompilerOutput?> _run(DefaultResidentCompiler compiler) async =>
       compiler._recompile(this);
 }
 
 class _CompileExpressionRequest extends _CompilationRequest {
   _CompileExpressionRequest(
-    Completer<CompilerOutput> completer,
+    Completer<CompilerOutput?> completer,
     this.expression,
     this.definitions,
     this.typeDefinitions,
@@ -369,20 +379,20 @@ class _CompileExpressionRequest extends _CompilationRequest {
   ) : super(completer);
 
   String expression;
-  List<String> definitions;
-  List<String> typeDefinitions;
-  String libraryUri;
-  String klass;
+  List<String>? definitions;
+  List<String>? typeDefinitions;
+  String? libraryUri;
+  String? klass;
   bool isStatic;
 
   @override
-  Future<CompilerOutput> _run(DefaultResidentCompiler compiler) async =>
+  Future<CompilerOutput?> _run(DefaultResidentCompiler compiler) async =>
       compiler._compileExpression(this);
 }
 
 class _CompileExpressionToJsRequest extends _CompilationRequest {
   _CompileExpressionToJsRequest(
-    Completer<CompilerOutput> completer,
+    Completer<CompilerOutput?> completer,
     this.libraryUri,
     this.line,
     this.column,
@@ -392,24 +402,24 @@ class _CompileExpressionToJsRequest extends _CompilationRequest {
     this.expression,
   ) : super(completer);
 
-  final String libraryUri;
+  final String? libraryUri;
   final int line;
   final int column;
-  final Map<String, String> jsModules;
-  final Map<String, String> jsFrameValues;
-  final String moduleName;
-  final String expression;
+  final Map<String, String>? jsModules;
+  final Map<String, String>? jsFrameValues;
+  final String? moduleName;
+  final String? expression;
 
   @override
-  Future<CompilerOutput> _run(DefaultResidentCompiler compiler) async =>
+  Future<CompilerOutput?> _run(DefaultResidentCompiler compiler) async =>
       compiler._compileExpressionToJs(this);
 }
 
 class _RejectRequest extends _CompilationRequest {
-  _RejectRequest(Completer<CompilerOutput> completer) : super(completer);
+  _RejectRequest(Completer<CompilerOutput?> completer) : super(completer);
 
   @override
-  Future<CompilerOutput> _run(DefaultResidentCompiler compiler) async =>
+  Future<CompilerOutput?> _run(DefaultResidentCompiler compiler) async =>
       compiler._reject();
 }
 
@@ -420,23 +430,23 @@ class _RejectRequest extends _CompilationRequest {
 /// restarts the Flutter app.
 abstract class ResidentCompiler {
   factory ResidentCompiler(String sdkRoot, {
-    @required BuildMode buildMode,
-    @required Logger logger,
-    @required ProcessManager processManager,
-    @required Artifacts artifacts,
-    @required Platform platform,
-    @required FileSystem fileSystem,
+    required BuildMode buildMode,
+    required Logger logger,
+    required ProcessManager processManager,
+    required Artifacts artifacts,
+    required Platform platform,
+    required FileSystem fileSystem,
     bool testCompilation,
     bool trackWidgetCreation,
     String packagesPath,
     List<String> fileSystemRoots,
-    String fileSystemScheme,
+    String? fileSystemScheme,
     String initializeFromDill,
     TargetModel targetModel,
     bool unsafePackageSerialization,
     List<String> extraFrontEndOptions,
     String platformDill,
-    List<String> dartDefines,
+    List<String>? dartDefines,
     String librariesSpec,
   }) = DefaultResidentCompiler;
 
@@ -452,20 +462,22 @@ abstract class ResidentCompiler {
   /// point that is used for recompilation.
   /// Binary file name is returned if compilation was successful, otherwise
   /// null is returned.
-  Future<CompilerOutput> recompile(
+  Future<CompilerOutput?> recompile(
     Uri mainUri,
-    List<Uri> invalidatedFiles, {
-    @required String outputPath,
-    @required PackageConfig packageConfig,
+    List<Uri>? invalidatedFiles, {
+    required String outputPath,
+    required PackageConfig packageConfig,
+    required String projectRootPath,
+    required FileSystem fs,
     bool suppressErrors = false,
   });
 
-  Future<CompilerOutput> compileExpression(
+  Future<CompilerOutput?> compileExpression(
     String expression,
-    List<String> definitions,
-    List<String> typeDefinitions,
-    String libraryUri,
-    String klass,
+    List<String>? definitions,
+    List<String>? typeDefinitions,
+    String? libraryUri,
+    String? klass,
     bool isStatic,
   );
 
@@ -489,7 +501,7 @@ abstract class ResidentCompiler {
   /// { 'dart':'dart_sdk', 'main': '/packages/hello_world_main.dart' }
   /// Returns a [CompilerOutput] including the name of the file containing the
   /// compilation result and a number of errors.
-  Future<CompilerOutput> compileExpressionToJs(
+  Future<CompilerOutput?> compileExpressionToJs(
     String libraryUri,
     int line,
     int column,
@@ -507,39 +519,39 @@ abstract class ResidentCompiler {
   /// Should be invoked when results of compilation are rejected by the client.
   ///
   /// Either [accept] or [reject] should be called after every [recompile] call.
-  Future<CompilerOutput> reject();
+  Future<CompilerOutput?> reject();
 
   /// Should be invoked when frontend server compiler should forget what was
   /// accepted previously so that next call to [recompile] produces complete
   /// kernel file.
   void reset();
 
-  Future<dynamic> shutdown();
+  Future<Object> shutdown();
 }
 
 @visibleForTesting
 class DefaultResidentCompiler implements ResidentCompiler {
   DefaultResidentCompiler(
     String sdkRoot, {
-    @required this.buildMode,
-    @required Logger logger,
-    @required ProcessManager processManager,
-    @required Artifacts artifacts,
-    @required Platform platform,
-    @required FileSystem fileSystem,
+    required this.buildMode,
+    required Logger logger,
+    required ProcessManager processManager,
+    required Artifacts artifacts,
+    required Platform platform,
+    required FileSystem fileSystem,
     this.testCompilation = false,
     this.trackWidgetCreation = true,
     this.packagesPath,
-    this.fileSystemRoots,
+    List<String> fileSystemRoots = const <String>[],
     this.fileSystemScheme,
     this.initializeFromDill,
     this.targetModel = TargetModel.flutter,
-    this.unsafePackageSerialization,
+    this.unsafePackageSerialization = false,
     this.extraFrontEndOptions,
     this.platformDill,
-    List<String> dartDefines,
+    List<String>? dartDefines,
     this.librariesSpec,
-    @visibleForTesting StdoutHandler stdoutHandler,
+    @visibleForTesting StdoutHandler? stdoutHandler,
   }) : assert(sdkRoot != null),
        _logger = logger,
        _processManager = processManager,
@@ -548,7 +560,9 @@ class DefaultResidentCompiler implements ResidentCompiler {
        _platform = platform,
        dartDefines = dartDefines ?? const <String>[],
        // This is a URI, not a file path, so the forward slash is correct even on Windows.
-       sdkRoot = sdkRoot.endsWith('/') ? sdkRoot : '$sdkRoot/';
+       sdkRoot = sdkRoot.endsWith('/') ? sdkRoot : '$sdkRoot/',
+       // Make a copy, we might need to modify it later.
+       fileSystemRoots = List<String>.from(fileSystemRoots);
 
   final Logger _logger;
   final ProcessManager _processManager;
@@ -558,15 +572,15 @@ class DefaultResidentCompiler implements ResidentCompiler {
   final bool testCompilation;
   final BuildMode buildMode;
   final bool trackWidgetCreation;
-  final String packagesPath;
+  final String? packagesPath;
   final TargetModel targetModel;
   final List<String> fileSystemRoots;
-  final String fileSystemScheme;
-  final String initializeFromDill;
+  final String? fileSystemScheme;
+  final String? initializeFromDill;
   final bool unsafePackageSerialization;
-  final List<String> extraFrontEndOptions;
+  final List<String>? extraFrontEndOptions;
   final List<String> dartDefines;
-  final String librariesSpec;
+  final String? librariesSpec;
 
   @override
   void addFileSystemRoot(String root) {
@@ -581,35 +595,50 @@ class DefaultResidentCompiler implements ResidentCompiler {
   /// The path to the platform dill file.
   ///
   /// This does not need to be provided for the normal Flutter workflow.
-  final String platformDill;
+  final String? platformDill;
 
-  Process _server;
+  Process? _server;
   final StdoutHandler _stdoutHandler;
   bool _compileRequestNeedsConfirmation = false;
 
   final StreamController<_CompilationRequest> _controller = StreamController<_CompilationRequest>();
 
   @override
-  Future<CompilerOutput> recompile(
+  Future<CompilerOutput?> recompile(
     Uri mainUri,
-    List<Uri> invalidatedFiles, {
-    @required String outputPath,
-    @required PackageConfig packageConfig,
+    List<Uri>? invalidatedFiles, {
+    required String outputPath,
+    required PackageConfig packageConfig,
     bool suppressErrors = false,
+    String? projectRootPath,
+    FileSystem? fs,
   }) async {
     assert(outputPath != null);
     if (!_controller.hasListener) {
       _controller.stream.listen(_handleCompilationRequest);
     }
-
-    final Completer<CompilerOutput> completer = Completer<CompilerOutput>();
+    // `generated_main.dart` contains the Dart plugin registry.
+    if (projectRootPath != null && fs != null) {
+      final File generatedMainDart = fs.file(
+        fs.path.join(
+          projectRootPath,
+          '.dart_tool',
+          'flutter_build',
+          'generated_main.dart',
+        ),
+      );
+      if (generatedMainDart != null && generatedMainDart.existsSync()) {
+        mainUri = generatedMainDart.uri;
+      }
+    }
+    final Completer<CompilerOutput?> completer = Completer<CompilerOutput?>();
     _controller.add(
       _RecompileRequest(completer, mainUri, invalidatedFiles, outputPath, packageConfig, suppressErrors)
     );
     return completer.future;
   }
 
-  Future<CompilerOutput> _recompile(_RecompileRequest request) async {
+  Future<CompilerOutput?> _recompile(_RecompileRequest request) async {
     _stdoutHandler.reset();
     _compileRequestNeedsConfirmation = true;
     _stdoutHandler._suppressCompilerMessages = request.suppressErrors;
@@ -617,28 +646,32 @@ class DefaultResidentCompiler implements ResidentCompiler {
     final String mainUri = request.packageConfig.toPackageUri(request.mainUri)?.toString() ??
       toMultiRootPath(request.mainUri, fileSystemScheme, fileSystemRoots, _platform.isWindows);
 
-    if (_server == null) {
+    final Process? server = _server;
+    if (server == null) {
       return _compile(mainUri, request.outputPath);
     }
     final String inputKey = Uuid().generateV4();
 
-    _server.stdin.writeln('recompile $mainUri $inputKey');
+    server.stdin.writeln('recompile $mainUri $inputKey');
     _logger.printTrace('<- recompile $mainUri $inputKey');
-    for (final Uri fileUri in request.invalidatedFiles) {
-      String message;
-      if (fileUri.scheme == 'package') {
-        message = fileUri.toString();
-      } else {
-        message = request.packageConfig.toPackageUri(fileUri)?.toString() ??
-          toMultiRootPath(fileUri, fileSystemScheme, fileSystemRoots, _platform.isWindows);
+    final List<Uri>? invalidatedFiles = request.invalidatedFiles;
+    if (invalidatedFiles != null) {
+      for (final Uri fileUri in invalidatedFiles) {
+        String message;
+        if (fileUri.scheme == 'package') {
+          message = fileUri.toString();
+        } else {
+          message = request.packageConfig.toPackageUri(fileUri)?.toString() ??
+              toMultiRootPath(fileUri, fileSystemScheme, fileSystemRoots, _platform.isWindows);
+        }
+        server.stdin.writeln(message);
+        _logger.printTrace(message);
       }
-      _server.stdin.writeln(message);
-      _logger.printTrace(message.toString());
     }
-    _server.stdin.writeln(inputKey);
+    server.stdin.writeln(inputKey);
     _logger.printTrace('<- $inputKey');
 
-    return _stdoutHandler.compilerOutput.future;
+    return _stdoutHandler.compilerOutput?.future;
   }
 
   final List<_CompilationRequest> _compilationQueue = <_CompilationRequest>[];
@@ -658,15 +691,15 @@ class DefaultResidentCompiler implements ResidentCompiler {
     }
   }
 
-  Future<CompilerOutput> _compile(
+  Future<CompilerOutput?> _compile(
     String scriptUri,
-    String outputPath,
+    String? outputPath,
   ) async {
     final String frontendServer = _artifacts.getArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk
     );
     final List<String> command = <String>[
-      _artifacts.getArtifactPath(Artifact.engineDartBinary),
+      _artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
       '--disable-dart-dev',
       frontendServer,
       '--sdk-root',
@@ -691,11 +724,11 @@ class DefaultResidentCompiler implements ResidentCompiler {
       ],
       if (librariesSpec != null) ...<String>[
         '--libraries-spec',
-        librariesSpec,
+        librariesSpec!,
       ],
       if (packagesPath != null) ...<String>[
         '--packages',
-        packagesPath,
+        packagesPath!,
       ],
       ...buildModeOptions(buildMode, dartDefines),
       if (trackWidgetCreation) '--track-widget-creation',
@@ -706,22 +739,22 @@ class DefaultResidentCompiler implements ResidentCompiler {
         ],
       if (fileSystemScheme != null) ...<String>[
         '--filesystem-scheme',
-        fileSystemScheme,
+        fileSystemScheme!,
       ],
       if (initializeFromDill != null) ...<String>[
         '--initialize-from-dill',
-        initializeFromDill,
+        initializeFromDill!,
       ],
       if (platformDill != null) ...<String>[
         '--platform',
-        platformDill,
+        platformDill!,
       ],
       if (unsafePackageSerialization == true) '--unsafe-package-serialization',
       ...?extraFrontEndOptions,
     ];
     _logger.printTrace(command.join(' '));
     _server = await _processManager.start(command);
-    _server.stdout
+    _server?.stdout
       .transform<String>(utf8.decoder)
       .transform<String>(const LineSplitter())
       .listen(
@@ -729,76 +762,77 @@ class DefaultResidentCompiler implements ResidentCompiler {
         onDone: () {
           // when outputFilename future is not completed, but stdout is closed
           // process has died unexpectedly.
-          if (!_stdoutHandler.compilerOutput.isCompleted) {
-            _stdoutHandler.compilerOutput.complete(null);
+          if (_stdoutHandler.compilerOutput?.isCompleted == false) {
+            _stdoutHandler.compilerOutput?.complete(null);
             throwToolExit('the Dart compiler exited unexpectedly.');
           }
         });
 
-    _server.stderr
+    _server?.stderr
       .transform<String>(utf8.decoder)
       .transform<String>(const LineSplitter())
       .listen(_logger.printError);
 
-    unawaited(_server.exitCode.then((int code) {
+    unawaited(_server?.exitCode.then((int code) {
       if (code != 0) {
         throwToolExit('the Dart compiler exited unexpectedly.');
       }
     }));
 
-    _server.stdin.writeln('compile $scriptUri');
+    _server?.stdin.writeln('compile $scriptUri');
     _logger.printTrace('<- compile $scriptUri');
 
-    return _stdoutHandler.compilerOutput.future;
+    return _stdoutHandler.compilerOutput?.future;
   }
 
   @override
-  Future<CompilerOutput> compileExpression(
+  Future<CompilerOutput?> compileExpression(
     String expression,
-    List<String> definitions,
-    List<String> typeDefinitions,
-    String libraryUri,
-    String klass,
+    List<String>? definitions,
+    List<String>? typeDefinitions,
+    String? libraryUri,
+    String? klass,
     bool isStatic,
   ) async {
     if (!_controller.hasListener) {
       _controller.stream.listen(_handleCompilationRequest);
     }
 
-    final Completer<CompilerOutput> completer = Completer<CompilerOutput>();
+    final Completer<CompilerOutput?> completer = Completer<CompilerOutput?>();
     final _CompileExpressionRequest request =  _CompileExpressionRequest(
         completer, expression, definitions, typeDefinitions, libraryUri, klass, isStatic);
     _controller.add(request);
     return completer.future;
   }
 
-  Future<CompilerOutput> _compileExpression(_CompileExpressionRequest request) async {
+  Future<CompilerOutput?> _compileExpression(_CompileExpressionRequest request) async {
     _stdoutHandler.reset(suppressCompilerMessages: true, expectSources: false, readFile: true);
 
     // 'compile-expression' should be invoked after compiler has been started,
     // program was compiled.
-    if (_server == null) {
+    final Process? server = _server;
+    if (server == null) {
       return null;
     }
 
     final String inputKey = Uuid().generateV4();
-    _server.stdin
+    server.stdin
       ..writeln('compile-expression $inputKey')
       ..writeln(request.expression);
-    request.definitions?.forEach(_server.stdin.writeln);
-    _server.stdin.writeln(inputKey);
-    request.typeDefinitions?.forEach(_server.stdin.writeln);
-    _server.stdin
+    request.definitions?.forEach(server.stdin.writeln);
+    server.stdin.writeln(inputKey);
+    request.typeDefinitions?.forEach(server.stdin.writeln);
+    server.stdin
       ..writeln(inputKey)
       ..writeln(request.libraryUri ?? '')
       ..writeln(request.klass ?? '')
-      ..writeln(request.isStatic ?? false);
+      ..writeln(request.isStatic);
 
-    return _stdoutHandler.compilerOutput.future;
+    return _stdoutHandler.compilerOutput?.future;
   }
 
   @override
-  Future<CompilerOutput> compileExpressionToJs(
+  Future<CompilerOutput?> compileExpressionToJs(
     String libraryUri,
     int line,
     int column,
@@ -811,7 +845,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
       _controller.stream.listen(_handleCompilationRequest);
     }
 
-    final Completer<CompilerOutput> completer = Completer<CompilerOutput>();
+    final Completer<CompilerOutput?> completer = Completer<CompilerOutput?>();
     _controller.add(
         _CompileExpressionToJsRequest(
             completer, libraryUri, line, column, jsModules, jsFrameValues, moduleName, expression)
@@ -819,92 +853,94 @@ class DefaultResidentCompiler implements ResidentCompiler {
     return completer.future;
   }
 
-  Future<CompilerOutput> _compileExpressionToJs(_CompileExpressionToJsRequest request) async {
+  Future<CompilerOutput?> _compileExpressionToJs(_CompileExpressionToJsRequest request) async {
     _stdoutHandler.reset(suppressCompilerMessages: true, expectSources: false);
 
     // 'compile-expression-to-js' should be invoked after compiler has been started,
     // program was compiled.
-    if (_server == null) {
+    final Process? server = _server;
+    if (server == null) {
       return null;
     }
 
     final String inputKey = Uuid().generateV4();
-    _server.stdin
+    server.stdin
       ..writeln('compile-expression-to-js $inputKey')
       ..writeln(request.libraryUri ?? '')
       ..writeln(request.line)
       ..writeln(request.column);
-    request.jsModules?.forEach((String k, String v) { _server.stdin.writeln('$k:$v'); });
-    _server.stdin.writeln(inputKey);
-    request.jsFrameValues?.forEach((String k, String v) { _server.stdin.writeln('$k:$v'); });
-    _server.stdin
+    request.jsModules?.forEach((String k, String v) { server.stdin.writeln('$k:$v'); });
+    server.stdin.writeln(inputKey);
+    request.jsFrameValues?.forEach((String k, String v) { server.stdin.writeln('$k:$v'); });
+    server.stdin
       ..writeln(inputKey)
       ..writeln(request.moduleName ?? '')
       ..writeln(request.expression ?? '');
 
-    return _stdoutHandler.compilerOutput.future;
+    return _stdoutHandler.compilerOutput?.future;
   }
 
   @override
   void accept() {
     if (_compileRequestNeedsConfirmation) {
-      _server.stdin.writeln('accept');
+      _server?.stdin.writeln('accept');
       _logger.printTrace('<- accept');
     }
     _compileRequestNeedsConfirmation = false;
   }
 
   @override
-  Future<CompilerOutput> reject() {
+  Future<CompilerOutput?> reject() {
     if (!_controller.hasListener) {
       _controller.stream.listen(_handleCompilationRequest);
     }
 
-    final Completer<CompilerOutput> completer = Completer<CompilerOutput>();
+    final Completer<CompilerOutput?> completer = Completer<CompilerOutput?>();
     _controller.add(_RejectRequest(completer));
     return completer.future;
   }
 
-  Future<CompilerOutput> _reject() {
+  Future<CompilerOutput?> _reject() async {
     if (!_compileRequestNeedsConfirmation) {
-      return Future<CompilerOutput>.value(null);
+      return Future<CompilerOutput?>.value(null);
     }
     _stdoutHandler.reset(expectSources: false);
-    _server.stdin.writeln('reject');
+    _server?.stdin.writeln('reject');
     _logger.printTrace('<- reject');
     _compileRequestNeedsConfirmation = false;
-    return _stdoutHandler.compilerOutput.future;
+    return _stdoutHandler.compilerOutput?.future;
   }
 
   @override
   void reset() {
-    _server?.stdin?.writeln('reset');
+    _server?.stdin.writeln('reset');
     _logger.printTrace('<- reset');
   }
 
   @override
-  Future<dynamic> shutdown() async {
+  Future<Object> shutdown() async {
     // Server was never successfully created.
-    if (_server == null) {
+    final Process? server = _server;
+    if (server == null) {
       return 0;
     }
-    _logger.printTrace('killing pid ${_server.pid}');
-    _server.kill();
-    return _server.exitCode;
+    _logger.printTrace('killing pid ${server.pid}');
+    server.kill();
+    return server.exitCode;
   }
 }
 
 /// Convert a file URI into a multi-root scheme URI if provided, otherwise
 /// return unmodified.
 @visibleForTesting
-String toMultiRootPath(Uri fileUri, String scheme, List<String> fileSystemRoots, bool windows) {
+String toMultiRootPath(Uri fileUri, String? scheme, List<String> fileSystemRoots, bool windows) {
   if (scheme == null || fileSystemRoots.isEmpty || fileUri.scheme != 'file') {
     return fileUri.toString();
   }
   final String filePath = fileUri.toFilePath(windows: windows);
   for (final String fileSystemRoot in fileSystemRoots) {
     if (filePath.startsWith(fileSystemRoot)) {
-      return scheme + '://' + filePath.substring(fileSystemRoot.length);
+      return '$scheme://${filePath.substring(fileSystemRoot.length)}';
     }
   }
   return fileUri.toString();

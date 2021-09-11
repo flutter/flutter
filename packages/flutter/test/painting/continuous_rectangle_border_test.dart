@@ -19,9 +19,16 @@ void main() {
     expect(const ContinuousRectangleBorder().hashCode, const ContinuousRectangleBorder().copyWith().hashCode);
     const BorderSide side = BorderSide(width: 10.0, color: Color(0xff123456));
     const BorderRadius radius = BorderRadius.all(Radius.circular(16.0));
+    const BorderRadiusDirectional directionalRadius = BorderRadiusDirectional.all(Radius.circular(16.0));
+
     expect(
       const ContinuousRectangleBorder().copyWith(side: side, borderRadius: radius),
       const ContinuousRectangleBorder(side: side, borderRadius: radius),
+    );
+
+    expect(
+      const ContinuousRectangleBorder().copyWith(side: side, borderRadius: directionalRadius),
+      const ContinuousRectangleBorder(side: side, borderRadius: directionalRadius),
     );
   });
 
@@ -67,10 +74,35 @@ void main() {
       excludes: const <Offset>[ Offset(10.0, 20.0), Offset(30.0, 40.0) ],
     );
     const ContinuousRectangleBorder border = ContinuousRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(5.0))
+      borderRadius: BorderRadius.all(Radius.circular(5.0)),
     );
     expect(border.getOuterPath(rect), looksLikeRect);
     expect(border.getInnerPath(rect), looksLikeRect);
+  });
+
+  test('ContinuousRectangleBorder non-zero BorderRadiusDirectional', () {
+    const Rect rect = Rect.fromLTRB(10.0, 20.0, 30.0, 40.0);
+    final Matcher looksLikeRectLtr = isPathThat(
+      includes: const <Offset>[Offset(15.0, 25.0), Offset(20.0, 30.0)],
+      excludes: const <Offset>[Offset(10.0, 20.0), Offset(10.0, 40.0)],
+    );
+    const ContinuousRectangleBorder border = ContinuousRectangleBorder(
+      borderRadius: BorderRadiusDirectional.only(
+        topStart: Radius.circular(5.0),
+        bottomStart: Radius.circular(5.0),
+      ),
+    );
+
+    expect(border.getOuterPath(rect,textDirection: TextDirection.ltr), looksLikeRectLtr);
+    expect(border.getInnerPath(rect,textDirection: TextDirection.ltr), looksLikeRectLtr);
+
+    final Matcher looksLikeRectRtl = isPathThat(
+      includes: const <Offset>[Offset(25.0, 35.0), Offset(25.0, 25.0)],
+      excludes: const <Offset>[Offset(30.0, 20.0), Offset(30.0, 40.0)],
+    );
+
+    expect(border.getOuterPath(rect,textDirection: TextDirection.rtl), looksLikeRectRtl);
+    expect(border.getInnerPath(rect,textDirection: TextDirection.rtl), looksLikeRectRtl);
   });
 
   testWidgets('Golden test even radii', (WidgetTester tester) async {

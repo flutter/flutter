@@ -7,7 +7,9 @@ import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:intl/intl.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
+import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
 import 'dartdoc_checker.dart';
@@ -54,7 +56,6 @@ Future<void> main(List<String> arguments) async {
   final StringBuffer buf = StringBuffer();
   buf.writeln('name: $kDummyPackageName');
   buf.writeln('homepage: https://flutter.dev');
-  // TODO(dnfield): Re-factor for proper versioning, https://github.com/flutter/flutter/issues/55409
   buf.writeln('version: 0.0.0');
   buf.writeln('environment:');
   buf.writeln("  sdk: '>=2.10.0 <3.0.0'");
@@ -253,13 +254,26 @@ ArgParser _createArgsParser() {
 
 final RegExp gitBranchRegexp = RegExp(r'^## (.*)');
 
-String getBranchName() {
-  final ProcessResult gitResult = Process.runSync('git', <String>['status', '-b', '--porcelain']);
+/// Get the name of the release branch.
+///
+/// On LUCI builds, the git HEAD is detached, so first check for the env
+/// variable "LUCI_BRANCH"; if it is not set, fall back to calling git.
+String getBranchName({
+  @visibleForTesting
+  Platform platform = const LocalPlatform(),
+  @visibleForTesting
+  ProcessManager processManager = const LocalProcessManager(),
+}) {
+  final String? luciBranch = platform.environment['LUCI_BRANCH'];
+  if (luciBranch != null && luciBranch.trim().isNotEmpty) {
+    return luciBranch.trim();
+  }
+  final ProcessResult gitResult = processManager.runSync(<String>['git', 'status', '-b', '--porcelain']);
   if (gitResult.exitCode != 0)
     throw 'git status exit with non-zero exit code: ${gitResult.exitCode}';
-  final Match gitBranchMatch = gitBranchRegexp.firstMatch(
+  final RegExpMatch? gitBranchMatch = gitBranchRegexp.firstMatch(
       (gitResult.stdout as String).trim().split('\n').first);
-  return gitBranchMatch == null ? '' : gitBranchMatch.group(1).split('...').first;
+  return gitBranchMatch == null ? '' : gitBranchMatch.group(1)!.split('...').first;
 }
 
 String gitRevision() {
@@ -313,7 +327,7 @@ void createSearchMetadata(String templatePath, String metadataPath) {
 /// specified, for each source/destination file pair.
 ///
 /// Creates `destDir` if needed.
-void copyDirectorySync(Directory srcDir, Directory destDir, [void Function(File srcFile, File destFile) onFileCopied]) {
+void copyDirectorySync(Directory srcDir, Directory destDir, [void Function(File srcFile, File destFile)? onFileCopied]) {
   if (!srcDir.existsSync())
     throw Exception('Source directory "${srcDir.path}" does not exist, nothing to copy');
 

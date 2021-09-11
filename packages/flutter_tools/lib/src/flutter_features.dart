@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:meta/meta.dart';
-
 import 'base/config.dart';
 import 'base/platform.dart';
 import 'features.dart';
@@ -13,9 +9,9 @@ import 'version.dart';
 
 class FlutterFeatureFlags implements FeatureFlags {
   FlutterFeatureFlags({
-    @required FlutterVersion flutterVersion,
-    @required Config config,
-    @required Platform platform,
+    required FlutterVersion flutterVersion,
+    required Config config,
+    required Platform platform,
   }) : _flutterVersion = flutterVersion,
        _config = config,
        _platform = platform;
@@ -52,9 +48,6 @@ class FlutterFeatureFlags implements FeatureFlags {
   bool get isSingleWidgetReloadEnabled => isEnabled(singleWidgetReload);
 
   @override
-  bool get isExperimentalInvalidationStrategyEnabled => isEnabled(experimentalInvalidationStrategy);
-
-  @override
   bool get isWindowsUwpEnabled => isEnabled(windowsUwpEmbedding);
 
   @override
@@ -66,7 +59,7 @@ class FlutterFeatureFlags implements FeatureFlags {
     }
     bool isEnabled = featureSetting.enabledByDefault;
     if (feature.configSetting != null) {
-      final bool configOverride = _config.getValue(feature.configSetting) as bool;
+      final bool? configOverride = _config.getValue(feature.configSetting!) as bool?;
       if (configOverride != null) {
         isEnabled = configOverride;
       }

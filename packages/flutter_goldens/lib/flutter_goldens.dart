@@ -4,16 +4,15 @@
 
 import 'dart:async' show FutureOr;
 import 'dart:io' as io show OSError, SocketException;
-import 'dart:math' as math show Random;
 import 'dart:typed_data' show Uint8List;
 
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_goldens_client/skia_client.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:platform/platform.dart';
 
-import 'package:flutter_goldens_client/skia_client.dart';
 export 'package:flutter_goldens_client/skia_client.dart';
 
 // If you are here trying to figure out how to use golden files in the Flutter
@@ -131,17 +130,14 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
   static Directory getBaseDirectory(
     LocalFileComparator defaultComparator,
     Platform platform, {
-    String suffix = '',
-    bool local = false,
+    String? suffix,
   }) {
     const FileSystem fs = LocalFileSystem();
     final Directory flutterRoot = fs.directory(platform.environment[_kFlutterRootKey]);
     Directory comparisonRoot;
 
-    if (!local) {
-      comparisonRoot = fs.systemTempDirectory.childDirectory(
-        'skia_goldens_$suffix'
-      );
+    if (suffix != null) {
+      comparisonRoot = fs.systemTempDirectory.createTempSync(suffix);
     } else {
       comparisonRoot = flutterRoot.childDirectory(
         fs.path.join(
@@ -172,7 +168,7 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
   /// test.
   Uri _addPrefix(Uri golden) {
     final String prefix = basedir.pathSegments[basedir.pathSegments.length - 2];
-    return Uri.parse(prefix + '.' + golden.toString());
+    return Uri.parse('$prefix.$golden');
   }
 }
 
@@ -225,7 +221,7 @@ class FlutterPostSubmitFileComparator extends FlutterGoldenFileComparator {
     final Directory baseDirectory = FlutterGoldenFileComparator.getBaseDirectory(
       defaultComparator,
       platform,
-      suffix: '${math.Random().nextInt(10000)}',
+      suffix: 'flutter_goldens_postsubmit.',
     );
     baseDirectory.createSync(recursive: true);
 
@@ -304,7 +300,7 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
     final Directory baseDirectory = testBasedir ?? FlutterGoldenFileComparator.getBaseDirectory(
       defaultComparator,
       platform,
-      suffix: '${math.Random().nextInt(10000)}',
+      suffix: 'flutter_goldens_presubmit.',
     );
 
     if (!baseDirectory.existsSync())
@@ -469,7 +465,6 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
     baseDirectory ??= FlutterGoldenFileComparator.getBaseDirectory(
       defaultComparator,
       platform,
-      local: true,
     );
 
     if(!baseDirectory.existsSync()) {

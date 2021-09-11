@@ -7,6 +7,9 @@ import 'package:flutter/material.dart';
 void main() {
   // Generic reference variables.
   BuildContext context;
+  RenderObjectWidget renderObjectWidget;
+  RenderObject renderObject;
+  Object object;
 
   // Changes made in https://github.com/flutter/flutter/pull/26259
   const Scaffold scaffold = Scaffold(resizeToAvoidBottomInset: true);
@@ -194,6 +197,9 @@ void main() {
   InputDecorationTheme(floatingLabelBehavior: FloatingLabelBehavior.never);
   InputDecorationTheme();
   inputDecorationTheme.floatingLabelBehavior;
+  inputDecorationTheme.copyWith(floatingLabelBehavior: FloatingLabelBehavior.never);
+  inputDecorationTheme.copyWith(floatingLabelBehavior: FloatingLabelBehavior.auto);
+  inputDecorationTheme.copyWith();
 
   // Changes made in https://github.com/flutter/flutter/pull/66482
   ThemeData(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red));
@@ -258,4 +264,106 @@ void main() {
   ThemeData.raw(
     textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue, selectionColor: Colors.red, selectionHandleColor: Colors.yellow,),
   );
+
+  // Changes made in https://github.com/flutter/flutter/pull/79160
+  Draggable draggable = Draggable();
+  draggable = Draggable(dragAnchorStrategy: childDragAnchorStrategy);
+  draggable = Draggable(dragAnchorStrategy: pointerDragAnchorStrategy);
+  draggable.dragAnchorStrategy;
+
+  // Changes made in https://github.com/flutter/flutter/pull/79160
+  LongPressDraggable longPressDraggable = LongPressDraggable();
+  longPressDraggable = LongPressDraggable(dragAnchorStrategy: childDragAnchorStrategy);
+  longPressDraggable = LongPressDraggable(dragAnchorStrategy: pointerDragAnchorStrategy);
+  longPressDraggable.dragAnchorStrategy;
+
+  // Changes made in https://github.com/flutter/flutter/pull/64254
+  final LeafRenderObjectElement leafElement = LeafRenderObjectElement();
+  leafElement.insertRenderObjectChild(renderObject, object);
+  leafElement.moveRenderObjectChild(renderObject, object);
+  leafElement.removeRenderObjectChild(renderObject);
+  final ListWheelElement listWheelElement = ListWheelElement();
+  listWheelElement.insertRenderObjectChild(renderObject, object);
+  listWheelElement.moveRenderObjectChild(renderObject, object);
+  listWheelElement.removeRenderObjectChild(renderObject);
+  final MultiChildRenderObjectElement multiChildRenderObjectElement = MultiChildRenderObjectElement();
+  multiChildRenderObjectElement.insertRenderObjectChild(renderObject, object);
+  multiChildRenderObjectElement.moveRenderObjectChild(renderObject, object);
+  multiChildRenderObjectElement.removeRenderObjectChild(renderObject);
+  final SingleChildRenderObjectElement singleChildRenderObjectElement = SingleChildRenderObjectElement();
+  singleChildRenderObjectElement.insertRenderObjectChild(renderObject, object);
+  singleChildRenderObjectElement.moveRenderObjectChild(renderObject, object);
+  singleChildRenderObjectElement.removeRenderObjectChild(renderObject);
+  final SliverMultiBoxAdaptorElement sliverMultiBoxAdaptorElement = SliverMultiBoxAdaptorElement();
+  sliverMultiBoxAdaptorElement.insertRenderObjectChild(renderObject, object);
+  sliverMultiBoxAdaptorElement.moveRenderObjectChild(renderObject, object);
+  sliverMultiBoxAdaptorElement.removeRenderObjectChild(renderObject);
+  final RenderObjectToWidgetElement renderObjectToWidgetElement = RenderObjectToWidgetElement(widget);
+  renderObjectToWidgetElement.insertRenderObjectChild(renderObject, object);
+  renderObjectToWidgetElement.moveRenderObjectChild(renderObject, object);
+  renderObjectToWidgetElement.removeRenderObjectChild(renderObject);
+
+  // Changes made in https://github.com/flutter/flutter/pull/81336
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData(colorScheme: ColorScheme.fromSwatch().copyWith(secondary: Colors.red));
+  themeData = ThemeData(colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue).copyWith(secondary: Colors.red));
+  themeData = ThemeData(colorScheme: ColorScheme.light().copyWith(secondary: Colors.red));
+  themeData = ThemeData(colorScheme: ColorScheme.light().copyWith(primarySwatch: Colors.blue, secondary: Colors.red));
+  themeData = ThemeData.raw(colorScheme: ColorScheme.fromSwatch().copyWith(secondary: Colors.red));
+  themeData = ThemeData.raw(colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue).copyWith(secondary: Colors.red));
+  themeData = ThemeData.raw(colorScheme: ColorScheme.light().copyWith(secondary: Colors.red));
+  themeData = ThemeData.raw(colorScheme: ColorScheme.light().copyWith(primarySwatch: Colors.blue, secondary: Colors.red));
+  themeData = themeData.copyWith(colorScheme: ColorScheme.fromSwatch().copyWith(secondary: Colors.red));
+  themeData = themeData.copyWith(colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue).copyWith(secondary: Colors.red));
+  themeData = themeData.copyWith(colorScheme: ColorScheme.light().copyWith(secondary: Colors.red));
+  themeData = themeData.copyWith(colorScheme: ColorScheme.light().copyWith(primarySwatch: Colors.blue, secondary: Colors.red));
+  themeData.colorScheme.secondary;
+
+  // Changes made in https://github.com/flutter/flutter/pull/81336
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData();
+  themeData = ThemeData.raw();
+  themeData = themeData.copyWith();
+  themeData.accentColorBrightness; // Removing field reference not supported.
+
+  // Changes made in https://github.com/flutter/flutter/pull/81336
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData();
+  themeData = ThemeData.raw();
+  themeData = themeData.copyWith();
+  themeData.accentTextTheme; // Removing field reference not supported.
+
+  // Changes made in https://github.com/flutter/flutter/pull/81336
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData();
+  themeData = ThemeData.raw();
+  themeData = themeData.copyWith();
+  themeData.accentIconTheme; // Removing field reference not supported.
+
+  // Changes made in https://github.com/flutter/flutter/pull/81336
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData();
+  themeData = ThemeData.raw();
+  themeData = themeData.copyWith();
+  themeData.buttonColor; // Removing field reference not supported.
+
+  // Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  ListWheelScrollView listWheelScrollView = ListWheelScrollView();
+  listWheelScrollView = ListWheelScrollView(clipBehavior: Clip.hardEdge);
+  listWheelScrollView = ListWheelScrollView(clipBehavior: Clip.none);
+  listWheelScrollView = ListWheelScrollView.useDelegate();
+  listWheelScrollView = ListWheelScrollView.useDelegate(clipBehavior: Clip.hardEdge);
+  listWheelScrollView = ListWheelScrollView.useDelegate(clipBehavior: Clip.none);
+  listWheelScrollView.clipBehavior;
+  ListWheelViewport listWheelViewport = ListWheelViewport();
+  listWheelViewport = ListWheelViewport(clipBehavior: Clip.hardEdge);
+  listWheelViewport = ListWheelViewport(clipBehavior: Clip.none);
+  listWheelViewport.clipBehavior;
+
+  // Changes made in https://github.com/flutter/flutter/pull/87281
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData();
+  themeData = ThemeData.raw();
+  themeData = themeData.copyWith();
+  themeData.fixTextFieldOutlineLabel; // Removing field reference not supported.
 }

@@ -15,13 +15,11 @@ import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
-import '../build_system/targets/common.dart';
-import '../build_system/targets/icon_tree_shaker.dart';
 import '../build_system/targets/ios.dart';
 import '../cache.dart';
-import '../globals.dart' as globals;
+import '../flutter_plugins.dart';
+import '../globals_null_migrated.dart' as globals;
 import '../macos/cocoapod_utils.dart';
-import '../plugins.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
 import '../version.dart';
@@ -144,10 +142,13 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
   }
 
   @override
+  bool get supported => _platform.isMacOS;
+
+  @override
   Future<void> validateCommand() async {
     await super.validateCommand();
     _project = FlutterProject.current();
-    if (!_platform.isMacOS) {
+    if (!supported) {
       throwToolExit('Building frameworks for iOS is only supported on the Mac.');
     }
 
@@ -274,21 +275,21 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
 Pod::Spec.new do |s|
   s.name                  = 'Flutter'
   s.version               = '${gitTagVersion.x}.${gitTagVersion.y}.$minorHotfixVersion' # ${_flutterVersion.frameworkVersion}
-  s.summary               = 'Flutter Engine Framework'
+  s.summary               = 'A UI toolkit for beautiful and fast apps.'
   s.description           = <<-DESC
-Flutter is Google’s UI toolkit for building beautiful, natively compiled applications for mobile, web, and desktop from a single codebase.
+Flutter is Google's UI toolkit for building beautiful, fast apps for mobile, web, desktop, and embedded devices from a single codebase.
 This pod vends the iOS Flutter engine framework. It is compatible with application frameworks created with this version of the engine and tools.
 The pod version matches Flutter version major.minor.(patch * 100) + hotfix.
 DESC
   s.homepage              = 'https://flutter.dev'
-  s.license               = { :type => 'MIT', :text => <<-LICENSE
+  s.license               = { :type => 'BSD', :text => <<-LICENSE
 $licenseSource
 LICENSE
   }
   s.author                = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
   s.source                = { :http => '${_cache.storageBaseUrl}/flutter_infra_release/flutter/${_cache.engineRevision}/$artifactsMode/artifacts.zip' }
   s.documentation_url     = 'https://flutter.dev/docs'
-  s.platform              = :ios, '8.0'
+  s.platform              = :ios, '9.0'
   s.vendored_frameworks   = 'Flutter.xcframework'
 end
 ''';
@@ -362,20 +363,13 @@ end
           flutterRootDir: globals.fs.directory(Cache.flutterRoot),
           defines: <String, String>{
             kTargetFile: targetFile,
-            kBuildMode: getNameForBuildMode(buildInfo.mode),
             kTargetPlatform: getNameForTargetPlatform(TargetPlatform.ios),
-            kIconTreeShakerFlag: buildInfo.treeShakeIcons.toString(),
-            kDartDefines: encodeDartDefines(buildInfo.dartDefines),
             kBitcodeFlag: 'true',
-            if (buildInfo?.extraGenSnapshotOptions?.isNotEmpty ?? false)
-              kExtraGenSnapshotOptions:
-                  buildInfo.extraGenSnapshotOptions.join(','),
-            if (buildInfo?.extraFrontEndOptions?.isNotEmpty ?? false)
-              kExtraFrontEndOptions: buildInfo.extraFrontEndOptions.join(','),
             kIosArchs: defaultIOSArchsForEnvironment(sdkType)
                 .map(getNameForDarwinArch)
                 .join(' '),
             kSdkRoot: await globals.xcode.sdkLocation(sdkType),
+            ...buildInfo.toBuildSystemEnvironment(),
           },
           artifacts: globals.artifacts,
           fileSystem: globals.fs,
@@ -385,6 +379,7 @@ end
           engineVersion: globals.artifacts.isLocalEngine
               ? null
               : globals.flutterVersion.engineRevision,
+          generateDartPluginRegistry: true,
         );
         Target target;
         // Always build debug for simulator.
@@ -462,7 +457,6 @@ end
         simulatorConfiguration,
         'SYMROOT=${simulatorBuildOutput.path}',
         'ENABLE_BITCODE=YES', // Support host apps with bitcode enabled.
-        'ARCHS=x86_64',
         'ONLY_ACTIVE_ARCH=NO', // No device targeted, so build all valid architectures.
         'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
       ];
@@ -525,7 +519,15 @@ end
       '-create-xcframework',
       for (Directory framework in frameworks) ...<String>[
         '-framework',
-        framework.path
+        framework.path,
+        ...framework.parent
+            .listSync()
+            .where((FileSystemEntity entity) =>
+                entity.basename.endsWith('bcsymbolmap') ||
+                entity.basename.endsWith('dSYM'))
+            .map((FileSystemEntity entity) =>
+                <String>['-debug-symbols', entity.path])
+            .expand<String>((List<String> parameter) => parameter)
       ],
       '-output',
       outputDirectory.childDirectory('$frameworkBinaryName.xcframework').path

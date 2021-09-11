@@ -10,16 +10,18 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
 
-dynamic getRenderSegmentedControl(WidgetTester tester) {
+RenderBox getRenderSegmentedControl(WidgetTester tester) {
   return tester.allRenderObjects.firstWhere(
     (RenderObject currentObject) {
       return currentObject.toStringShort().contains('_RenderSegmentedControl');
     },
-  );
+  ) as RenderBox;
 }
 
 Rect currentUnscaledThumbRect(WidgetTester tester, { bool useGlobalCoordinate = false }) {
   final dynamic renderSegmentedControl = getRenderSegmentedControl(tester);
+  // Using dynamic to access private class in test.
+  // ignore: avoid_dynamic_calls
   final Rect local = renderSegmentedControl.currentThumbRect as Rect;
   if (!useGlobalCoordinate)
     return local;
@@ -28,7 +30,23 @@ Rect currentUnscaledThumbRect(WidgetTester tester, { bool useGlobalCoordinate = 
   return local.shift(segmentedControl.localToGlobal(Offset.zero));
 }
 
-double currentThumbScale(WidgetTester tester) => getRenderSegmentedControl(tester).thumbScale as double;
+int? getHighlightedIndex(WidgetTester tester) {
+  // Using dynamic to access private class in test.
+  // ignore: avoid_dynamic_calls
+  return (getRenderSegmentedControl(tester) as dynamic).highlightedIndex as int?;
+}
+
+Color getThumbColor(WidgetTester tester) {
+  // Using dynamic to access private class in test.
+  // ignore: avoid_dynamic_calls
+  return (getRenderSegmentedControl(tester) as dynamic).thumbColor as Color;
+}
+
+double currentThumbScale(WidgetTester tester) {
+  // Using dynamic to access private class in test.
+  // ignore: avoid_dynamic_calls
+  return (getRenderSegmentedControl(tester) as dynamic).thumbScale as double;
+}
 
 Widget setupSimpleSegmentedControl() {
   const Map<int, Widget> children = <int, Widget>{
@@ -73,50 +91,56 @@ void main() {
   });
 
   testWidgets('Need at least 2 children', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{};
     groupValue = null;
-    try {
-      await tester.pumpWidget(
+    await expectLater(
+      () => tester.pumpWidget(
         CupertinoSlidingSegmentedControl<int>(
-          children: children,
+          children: const <int, Widget>{},
           groupValue: groupValue,
           onValueChanged: defaultCallback,
         ),
-      );
-      fail('Should not be possible to create a segmented control with no children');
-    } on AssertionError catch (e) {
-      expect(e.toString(), contains('children.length'));
-    }
-    try {
-      children[0] = const Text('Child 1');
+      ),
+      throwsA(isAssertionError.having(
+        (AssertionError error) => error.toString(),
+        '.toString()',
+        contains('children.length'),
+      )),
+    );
 
-      await tester.pumpWidget(
+    await expectLater(
+      () => tester.pumpWidget(
         CupertinoSlidingSegmentedControl<int>(
-          children: children,
+          children: const <int, Widget>{0: Text('Child 1')},
           groupValue: groupValue,
           onValueChanged: defaultCallback,
         ),
-      );
-      fail('Should not be possible to create a segmented control with just one child');
-    } on AssertionError catch (e) {
-      expect(e.toString(), contains('children.length'));
-    }
+      ),
+      throwsA(isAssertionError.having(
+        (AssertionError error) => error.toString(),
+        '.toString()',
+        contains('children.length'),
+      )),
+    );
 
     groupValue = -1;
-    try {
-      children[1] = const Text('Child 2');
-      children[2] = const Text('Child 3');
-      await tester.pumpWidget(
+    await expectLater(
+      () => tester.pumpWidget(
         CupertinoSlidingSegmentedControl<int>(
-          children: children,
+          children: const <int, Widget>{
+            0: Text('Child 1'),
+            1: Text('Child 2'),
+            2: Text('Child 3'),
+          },
           groupValue: groupValue,
           onValueChanged: defaultCallback,
         ),
-      );
-      fail('Should not be possible to create a segmented control with a groupValue pointing to a non-existent child');
-    } on AssertionError catch (e) {
-      expect(e.toString(), contains('groupValue must be either null or one of the keys in the children map'));
-    }
+      ),
+      throwsA(isAssertionError.having(
+        (AssertionError error) => error.toString(),
+        '.toString()',
+        contains('groupValue must be either null or one of the keys in the children map'),
+      )),
+    );
   });
 
   testWidgets('Padding works', (WidgetTester tester) async {
@@ -302,7 +326,7 @@ void main() {
       matching: find.byType(Container),
     )).decoration! as BoxDecoration;
 
-    expect(getRenderSegmentedControl(tester).thumbColor.value, CupertinoColors.systemGreen.color.value);
+    expect(getThumbColor(tester).value, CupertinoColors.systemGreen.color.value);
     expect(decoration.color!.value, CupertinoColors.systemRed.color.value);
 
     setState(() { brightness = Brightness.dark; });
@@ -314,7 +338,7 @@ void main() {
     )).decoration! as BoxDecoration;
 
 
-    expect(getRenderSegmentedControl(tester).thumbColor.value, CupertinoColors.systemGreen.darkColor.value);
+    expect(getThumbColor(tester).value, CupertinoColors.systemGreen.darkColor.value);
     expect(decorationDark.color!.value, CupertinoColors.systemRed.darkColor.value);
   });
 
@@ -345,7 +369,7 @@ void main() {
   testWidgets('Passed in value is child initially selected', (WidgetTester tester) async {
     await tester.pumpWidget(setupSimpleSegmentedControl());
 
-    expect(getRenderSegmentedControl(tester).highlightedIndex, 0);
+    expect(getHighlightedIndex(tester), 0);
   });
 
   testWidgets('Null input for value results in no child initially selected', (WidgetTester tester) async {
@@ -371,7 +395,7 @@ void main() {
       ),
     );
 
-    expect(getRenderSegmentedControl(tester).highlightedIndex, null);
+    expect(getHighlightedIndex(tester), null);
   });
 
   testWidgets('Long press not-selected child interactions', (WidgetTester tester) async {
@@ -573,8 +597,7 @@ void main() {
       ),
     );
 
-    expect(tester.getTopRight(find.text('Child 1')).dx >
-        tester.getTopRight(find.text('Child 2')).dx, isTrue);
+    expect(tester.getTopRight(find.text('Child 1')).dx > tester.getTopRight(find.text('Child 2')).dx, isTrue);
   });
 
   testWidgets('Correct initial selection and toggling behavior - RTL', (WidgetTester tester) async {
@@ -601,17 +624,17 @@ void main() {
     );
 
     // highlightedIndex is 1 instead of 0 because of RTL.
-    expect(getRenderSegmentedControl(tester).highlightedIndex, 1);
+    expect(getHighlightedIndex(tester), 1);
 
     await tester.tap(find.text('Child 2'));
     await tester.pump();
 
-    expect(getRenderSegmentedControl(tester).highlightedIndex, 0);
+    expect(getHighlightedIndex(tester), 0);
 
     await tester.tap(find.text('Child 2'));
     await tester.pump();
 
-    expect(getRenderSegmentedControl(tester).highlightedIndex, 0);
+    expect(getHighlightedIndex(tester), 0);
   });
 
   testWidgets('Segmented control semantics', (WidgetTester tester) async {
@@ -701,7 +724,8 @@ void main() {
         ignoreId: true,
         ignoreRect: true,
         ignoreTransform: true,
-    ));
+      ),
+    );
 
     semantics.dispose();
   });
@@ -888,7 +912,7 @@ void main() {
         },
       ));
 
-      final RenderBox renderSegmentedControl = getRenderSegmentedControl(tester) as RenderBox;
+      final RenderBox renderSegmentedControl = getRenderSegmentedControl(tester);
       final Offset segmentedControlOrigin = renderSegmentedControl.localToGlobal(Offset.zero);
 
       // Expect the segmented control to be much narrower.
@@ -901,7 +925,8 @@ void main() {
       // are to account for the thumb's vertical EdgeInsets.
       expect(segmentedControlOrigin.dx - 1, lessThanOrEqualTo(thumbRect.left));
       expect(segmentedControlOrigin.dx + renderSegmentedControl.size.width + 1, greaterThanOrEqualTo(thumbRect.right));
-  });
+    },
+  );
 
   testWidgets('Transition is triggered while a transition is already occurring', (WidgetTester tester) async {
     const Map<int, Widget> children = <int, Widget>{
@@ -1178,7 +1203,7 @@ void main() {
       ),
     );
 
-    final RenderBox renderBox = getRenderSegmentedControl(tester) as RenderBox;
+    final RenderBox renderBox = getRenderSegmentedControl(tester);
 
     final Size size = renderBox.getDryLayout(const BoxConstraints());
     expect(size.width, greaterThan(10));
@@ -1207,7 +1232,7 @@ void main() {
       ),
     );
 
-    final RenderBox renderBox = getRenderSegmentedControl(tester) as RenderBox;
+    final RenderBox renderBox = getRenderSegmentedControl(tester);
     final Size size = renderBox.size;
 
     for (final int value in children.keys) {

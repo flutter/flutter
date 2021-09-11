@@ -82,23 +82,24 @@ class BuildAppBundleCommand extends BuildSubCommand {
       'suitable for deploying to app stores. \n app bundle improves your app size';
 
   @override
-  Future<Map<CustomDimensions, String>> get usageValues async {
-    final Map<CustomDimensions, String> usage = <CustomDimensions, String>{};
-
-    usage[CustomDimensions.commandBuildAppBundleTargetPlatform] =
-        stringsArg('target-platform').join(',');
+  Future<CustomDimensions> get usageValues async {
+    String buildMode;
 
     if (boolArg('release')) {
-      usage[CustomDimensions.commandBuildAppBundleBuildMode] = 'release';
+      buildMode = 'release';
     } else if (boolArg('debug')) {
-      usage[CustomDimensions.commandBuildAppBundleBuildMode] = 'debug';
+      buildMode = 'debug';
     } else if (boolArg('profile')) {
-      usage[CustomDimensions.commandBuildAppBundleBuildMode] = 'profile';
+      buildMode = 'profile';
     } else {
       // The build defaults to release.
-      usage[CustomDimensions.commandBuildAppBundleBuildMode] = 'release';
+      buildMode = 'release';
     }
-    return usage;
+
+    return CustomDimensions(
+      commandBuildAppBundleTargetPlatform: stringsArg('target-platform').join(','),
+      commandBuildAppBundleBuildMode: buildMode,
+    );
   }
 
   @override

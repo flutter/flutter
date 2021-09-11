@@ -6,6 +6,7 @@
 import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 
 import 'message_codec.dart';
@@ -178,6 +179,24 @@ class PlatformViewsService {
     return controller;
   }
 
+  /// Whether the render surface of the Android `FlutterView` should be converted to a `FlutterImageView`.
+  ///
+  /// When adding platform views using
+  /// [Hybrid Composition](https://flutter.dev/docs/development/platform-integration/platform-views),
+  /// the engine converts the render surface to a `FlutterImageView` to improve
+  /// animation synchronization between Flutter widgets and the Android platform
+  /// views. On Android versions < 10, this can have some performance issues.
+  /// This flag allows disabling this conversion.
+  ///
+  /// Defaults to true.
+  static Future<void> synchronizeToNativeViewHierarchy(bool yes) {
+    assert(defaultTargetPlatform == TargetPlatform.android);
+    return SystemChannels.platform_views.invokeMethod<void>(
+      'synchronizeToNativeViewHierarchy',
+      yes,
+    );
+  }
+
   // TODO(amirh): reference the iOS plugin API for registering a UIView factory once it lands.
   /// This is work in progress, not yet ready to be used, and requires a custom engine build. Creates a controller for a new iOS UIView.
   ///
@@ -258,7 +277,7 @@ class AndroidPointerProperties {
 
   @override
   String toString() {
-    return 'AndroidPointerProperties(id: $id, toolType: $toolType)';
+    return '${objectRuntimeType(this, 'AndroidPointerProperties')}(id: $id, toolType: $toolType)';
   }
 }
 
@@ -342,7 +361,7 @@ class AndroidPointerCoords {
 
   @override
   String toString() {
-    return 'AndroidPointerCoords(orientation: $orientation, pressure: $pressure, size: $size, toolMajor: $toolMajor, toolMinor: $toolMinor, touchMajor: $touchMajor, touchMinor: $touchMinor, x: $x, y: $y)';
+    return '${objectRuntimeType(this, 'AndroidPointerCoords')}(orientation: $orientation, pressure: $pressure, size: $size, toolMajor: $toolMajor, toolMinor: $toolMinor, touchMajor: $touchMajor, touchMinor: $touchMinor, x: $x, y: $y)';
   }
 }
 
@@ -482,7 +501,7 @@ class AndroidMotionEvent {
 
   @override
   String toString() {
-    return 'AndroidPointerEvent(downTime: $downTime, eventTime: $eventTime, action: $action, pointerCount: $pointerCount, pointerProperties: $pointerProperties, pointerCoords: $pointerCoords, metaState: $metaState, buttonState: $buttonState, xPrecision: $xPrecision, yPrecision: $yPrecision, deviceId: $deviceId, edgeFlags: $edgeFlags, source: $source, flags: $flags)';
+    return 'AndroidPointerEvent(downTime: $downTime, eventTime: $eventTime, action: $action, pointerCount: $pointerCount, pointerProperties: $pointerProperties, pointerCoords: $pointerCoords, metaState: $metaState, buttonState: $buttonState, xPrecision: $xPrecision, yPrecision: $yPrecision, deviceId: $deviceId, edgeFlags: $edgeFlags, source: $source, flags: $flags, motionEventId: $motionEventId)';
   }
 }
 
@@ -539,20 +558,24 @@ class _AndroidMotionEventConverter {
     );
   }
 
-  void handlePointerUpEvent(PointerUpEvent event) {
-    pointerPositions.remove(event.pointer);
-    usedAndroidPointerIds.remove(pointerProperties[event.pointer]!.id);
-    pointerProperties.remove(event.pointer);
+  void _remove(int pointer) {
+    pointerPositions.remove(pointer);
+    usedAndroidPointerIds.remove(pointerProperties[pointer]!.id);
+    pointerProperties.remove(pointer);
     if (pointerProperties.isEmpty) {
       downTimeMillis = null;
     }
   }
 
+  void handlePointerUpEvent(PointerUpEvent event) {
+    _remove(event.pointer);
+  }
+
   void handlePointerCancelEvent(PointerCancelEvent event) {
-    pointerPositions.clear();
-    pointerProperties.clear();
-    usedAndroidPointerIds.clear();
-    downTimeMillis = null;
+    // The pointer cancel event is handled like pointer up. Normally,
+    // the difference is that pointer cancel doesn't perform any action,
+    // but in this case neither up or cancel perform any action.
+    _remove(event.pointer);
   }
 
   AndroidMotionEvent? toAndroidMotionEvent(PointerEvent event) {

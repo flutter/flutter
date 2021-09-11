@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('AnimatedContainer.debugFillProperties', (WidgetTester tester) async {
@@ -294,9 +294,9 @@ void main() {
           textDirection: TextDirection.ltr,
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
-            child: SizedBox(key: target, width: 100.0, height: 200.0),
             transform: Matrix4.diagonal3Values(0.5, 0.5, 1),
             transformAlignment: Alignment.topLeft,
+            child: SizedBox(key: target, width: 100.0, height: 200.0),
           ),
         ),
       ),
@@ -311,9 +311,9 @@ void main() {
           textDirection: TextDirection.ltr,
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
-            child: SizedBox(key: target, width: 100.0, height: 200.0),
             transform: Matrix4.diagonal3Values(0.5, 0.5, 1),
             transformAlignment: Alignment.bottomRight,
+            child: SizedBox(key: target, width: 100.0, height: 200.0),
           ),
         ),
       ),
@@ -340,7 +340,7 @@ void main() {
           color: Color(0xFFED1D7F),
         ),
         duration: const Duration(milliseconds: 200),
-      )
+      ),
     );
     expect(tester.firstWidget<Container>(find.byType(Container)).clipBehavior, Clip.none);
     await tester.pumpWidget(
@@ -350,7 +350,7 @@ void main() {
         ),
         duration: const Duration(milliseconds: 200),
         clipBehavior: Clip.antiAlias,
-      )
+      ),
     );
     expect(tester.firstWidget<Container>(find.byType(Container)).clipBehavior, Clip.antiAlias);
   });

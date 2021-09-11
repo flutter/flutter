@@ -21,7 +21,7 @@ class ToolExit implements Exception {
   final int? exitCode;
 
   @override
-  String toString() => 'Exception: $message';
+  String toString() => 'Exception: $message'; // TODO(ianh): Really this should say "Error".
 }
 
 /// Indicates to the linter that the given future is intentionally not awaited.
@@ -33,4 +33,4 @@ class ToolExit implements Exception {
 /// the flutter_tools package. However, there are times where one or more
 /// futures are intentionally not awaited. This function may be used to ignore a
 /// particular future. It silences the unawaited_futures lint.
-void unawaited(Future<void> future) { }
+void unawaited(Future<void>? future) { }

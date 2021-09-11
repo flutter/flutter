@@ -356,7 +356,7 @@ class Radio<T> extends StatefulWidget {
   bool get _selected => value == groupValue;
 
   @override
-  _RadioState<T> createState() => _RadioState<T>();
+  State<Radio<T>> createState() => _RadioState<T>();
 }
 
 class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin, ToggleableStateMixin {

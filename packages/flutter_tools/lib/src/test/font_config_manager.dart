@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import '../base/file_system.dart';
@@ -11,14 +9,14 @@ import '../globals_null_migrated.dart' as globals;
 
 /// Manages a Font configuration that can be shared across multiple tests.
 class FontConfigManager {
-  Directory _fontsDirectory;
-  File _cachedFontConfig;
+  Directory? _fontsDirectory;
+  File? _cachedFontConfig;
 
   /// Returns a Font configuration that limits font fallback to the artifact
   /// cache directory.
   File get fontConfigFile {
     if (_cachedFontConfig != null) {
-      return _cachedFontConfig;
+      return _cachedFontConfig!;
     }
 
     final StringBuffer sb = StringBuffer();
@@ -29,19 +27,19 @@ class FontConfigManager {
 
     if (_fontsDirectory == null) {
       _fontsDirectory = globals.fs.systemTempDirectory.createTempSync('flutter_test_fonts.');
-      globals.printTrace('Using this directory for fonts configuration: ${_fontsDirectory.path}');
+      globals.printTrace('Using this directory for fonts configuration: ${_fontsDirectory!.path}');
     }
 
-    _cachedFontConfig = globals.fs.file('${_fontsDirectory.path}/fonts.conf');
-    _cachedFontConfig.createSync();
-    _cachedFontConfig.writeAsStringSync(sb.toString());
-    return _cachedFontConfig;
+    _cachedFontConfig = globals.fs.file('${_fontsDirectory!.path}/fonts.conf');
+    _cachedFontConfig!.createSync();
+    _cachedFontConfig!.writeAsStringSync(sb.toString());
+    return _cachedFontConfig!;
   }
 
   Future<void> dispose() async {
     if (_fontsDirectory != null) {
-      globals.printTrace('Deleting ${_fontsDirectory.path}...');
-      await _fontsDirectory.delete(recursive: true);
+      globals.printTrace('Deleting ${_fontsDirectory!.path}...');
+      await _fontsDirectory!.delete(recursive: true);
       _fontsDirectory = null;
     }
   }

@@ -79,7 +79,7 @@ void main() {
               },
               child: const Text('X'),
             );
-          }
+          },
         ),
       ),
     ));
@@ -106,18 +106,18 @@ void main() {
       theme: ThemeData(snackBarTheme: snackBarTheme),
       home: Scaffold(
         body: Builder(
-            builder: (BuildContext context) {
-              return GestureDetector(
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: const Text(text),
-                    duration: const Duration(seconds: 2),
-                    action: SnackBarAction(label: action, onPressed: () {}),
-                  ));
-                },
-                child: const Text('X'),
-              );
-            }
+          builder: (BuildContext context) {
+            return GestureDetector(
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: const Text(text),
+                  duration: const Duration(seconds: 2),
+                  action: SnackBarAction(label: action, onPressed: () {}),
+                ));
+              },
+              child: const Text('X'),
+            );
+          },
         ),
       ),
     ));
@@ -150,25 +150,25 @@ void main() {
       theme: ThemeData(snackBarTheme: _snackBarTheme()),
       home: Scaffold(
         body: Builder(
-            builder: (BuildContext context) {
-              return GestureDetector(
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    backgroundColor: backgroundColor,
-                    elevation: elevation,
-                    shape: shape,
-                    content: const Text('I am a snack bar.'),
-                    duration: const Duration(seconds: 2),
-                    action: SnackBarAction(
-                      textColor: textColor,
-                      label: action,
-                      onPressed: () {},
-                    ),
-                  ));
-                },
-                child: const Text('X'),
-              );
-            }
+          builder: (BuildContext context) {
+            return GestureDetector(
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  backgroundColor: backgroundColor,
+                  elevation: elevation,
+                  shape: shape,
+                  content: const Text('I am a snack bar.'),
+                  duration: const Duration(seconds: 2),
+                  action: SnackBarAction(
+                    textColor: textColor,
+                    label: action,
+                    onPressed: () {},
+                  ),
+                ));
+              },
+              child: const Text('X'),
+            );
+          },
         ),
       ),
     ));
@@ -189,7 +189,7 @@ void main() {
   testWidgets('SnackBar theme behavior is correct for floating', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
-        snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating)
+        snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating),
       ),
       home: Scaffold(
         floatingActionButton: FloatingActionButton(
@@ -231,7 +231,7 @@ void main() {
   testWidgets('SnackBar theme behavior is correct for fixed', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
-        snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.fixed)
+        snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.fixed),
       ),
       home: Scaffold(
         floatingActionButton: FloatingActionButton(
@@ -270,6 +270,97 @@ void main() {
 
     expect(floatingActionButtonOriginBottomCenter.dy > floatingActionButtonBottomCenter.dy, true);
     expect(snackBarTopCenter.dy > floatingActionButtonBottomCenter.dy, true);
+  });
+
+  Widget _buildApp({
+    required SnackBarBehavior themedBehavior,
+    EdgeInsetsGeometry? margin,
+    double? width,
+  }) {
+    return MaterialApp(
+      theme: ThemeData(
+        snackBarTheme: SnackBarThemeData(behavior: themedBehavior),
+      ),
+      home: Scaffold(
+        floatingActionButton: FloatingActionButton(
+          child: const Icon(Icons.send),
+          onPressed: () {},
+        ),
+        body: Builder(
+          builder: (BuildContext context) {
+            return GestureDetector(
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  margin: margin,
+                  width: width,
+                  content: const Text('I am a snack bar.'),
+                  duration: const Duration(seconds: 2),
+                  action: SnackBarAction(label: 'ACTION', onPressed: () {}),
+                ));
+              },
+              child: const Text('X'),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  testWidgets('SnackBar theme behavior will assert properly for margin use', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/84935
+    // SnackBarBehavior.floating set in theme does not assert with margin
+    await tester.pumpWidget(_buildApp(
+      themedBehavior: SnackBarBehavior.floating,
+      margin: const EdgeInsets.all(8.0),
+    ));
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 750));
+    AssertionError? exception = tester.takeException() as AssertionError?;
+    expect(exception, isNull);
+
+    // SnackBarBehavior.fixed set in theme will still assert with margin
+    await tester.pumpWidget(_buildApp(
+      themedBehavior: SnackBarBehavior.fixed,
+      margin: const EdgeInsets.all(8.0),
+    ));
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 750));
+    exception = tester.takeException() as AssertionError;
+    expect(
+      exception.message,
+      'Margin can only be used with floating behavior. SnackBarBehavior.fixed '
+          'was set by the inherited SnackBarThemeData.',
+    );
+  });
+
+  testWidgets('SnackBar theme behavior will assert properly for width use', (WidgetTester tester) async {
+    // SnackBarBehavior.floating set in theme does not assert with width
+    await tester.pumpWidget(_buildApp(
+      themedBehavior: SnackBarBehavior.floating,
+      width: 5.0,
+    ));
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 750));
+    AssertionError? exception = tester.takeException() as AssertionError?;
+    expect(exception, isNull);
+
+    // SnackBarBehavior.fixed set in theme will still assert with width
+    await tester.pumpWidget(_buildApp(
+      themedBehavior: SnackBarBehavior.fixed,
+      width: 5.0,
+    ));
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 750));
+    exception = tester.takeException() as AssertionError;
+    expect(
+      exception.message,
+      'Width can only be used with floating behavior. SnackBarBehavior.fixed '
+      'was set by the inherited SnackBarThemeData.',
+    );
   });
 }
 

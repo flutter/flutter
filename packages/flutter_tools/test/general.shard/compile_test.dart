@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -19,10 +17,10 @@ void main() {
     expect(stdoutHandler.boundaryKey, '12345');
     stdoutHandler.handler('12345');
     stdoutHandler.handler('12345 message 0');
-    final CompilerOutput output = await stdoutHandler.compilerOutput.future;
-    expect(output.errorCount, 0);
-    expect(output.outputFilename, 'message');
-    expect(output.expressionData, null);
+    final CompilerOutput? output = await stdoutHandler.compilerOutput?.future;
+    expect(output?.errorCount, 0);
+    expect(output?.outputFilename, 'message');
+    expect(output?.expressionData, null);
   });
 
   testWithoutContext('StdoutHandler can read output bytes', () async {
@@ -35,11 +33,11 @@ void main() {
     expect(stdoutHandler.boundaryKey, '12345');
     stdoutHandler.handler('12345');
     stdoutHandler.handler('12345 message 0');
-    final CompilerOutput output = await stdoutHandler.compilerOutput.future;
+    final CompilerOutput? output = await stdoutHandler.compilerOutput?.future;
 
-    expect(output.errorCount, 0);
-    expect(output.outputFilename, 'message');
-    expect(output.expressionData, <int>[1, 2, 3, 4]);
+    expect(output?.errorCount, 0);
+    expect(output?.outputFilename, 'message');
+    expect(output?.expressionData, <int>[1, 2, 3, 4]);
   });
 
   testWithoutContext('StdoutHandler reads output bytes if errorCount > 0', () async {
@@ -52,11 +50,11 @@ void main() {
     expect(stdoutHandler.boundaryKey, '12345');
     stdoutHandler.handler('12345');
     stdoutHandler.handler('12345 message 1');
-    final CompilerOutput output = await stdoutHandler.compilerOutput.future;
+    final CompilerOutput? output = await stdoutHandler.compilerOutput?.future;
 
-    expect(output.errorCount, 1);
-    expect(output.outputFilename, 'message');
-    expect(output.expressionData, <int>[1, 2, 3, 4]);
+    expect(output?.errorCount, 1);
+    expect(output?.outputFilename, 'message');
+    expect(output?.expressionData, <int>[1, 2, 3, 4]);
   });
 
   testWithoutContext('TargetModel values', () {
@@ -72,7 +70,7 @@ void main() {
     expect(TargetModel('dartdevc'), TargetModel.dartdevc);
     expect(TargetModel.dartdevc.toString(), 'dartdevc');
 
-    expect(() => TargetModel('foobar'), throwsAssertionError);
+    expect(() => TargetModel('foobar'), throwsException);
   });
 
   testWithoutContext('toMultiRootPath maps different URIs', () async {

@@ -325,11 +325,11 @@ class Banner extends StatelessWidget {
   }
 }
 
-/// Displays a [Banner] saying "DEBUG" when running in checked mode.
+/// Displays a [Banner] saying "DEBUG" when running in debug mode.
 /// [MaterialApp] builds one of these by default.
 /// Does nothing in release mode.
 class CheckedModeBanner extends StatelessWidget {
-  /// Creates a const checked mode banner.
+  /// Creates a const debug mode banner.
   const CheckedModeBanner({
     Key? key,
     required this.child,
@@ -345,10 +345,10 @@ class CheckedModeBanner extends StatelessWidget {
     Widget result = child;
     assert(() {
       result = Banner(
-        child: result,
         message: 'DEBUG',
         textDirection: TextDirection.ltr,
         location: BannerLocation.topEnd,
+        child: result,
       );
       return true;
     }());

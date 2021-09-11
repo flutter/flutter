@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 class TestTransition extends AnimatedWidget {
   const TestTransition({
@@ -112,8 +112,8 @@ void main() {
             case '/4': return TestRoute<void>(settings: settings, child: const Text('G'));
           }
           return null;
-        }
-      )
+        },
+      ),
     );
 
     final NavigatorState navigator = insideKey.currentContext!.findAncestorStateOfType<NavigatorState>()!;
@@ -197,8 +197,8 @@ void main() {
             case '/1': return TestRoute<void>(settings: settings, barrierColor: const Color(0xFFFFFF00), child: const Text('B'));
           }
           return null;
-        }
-      )
+        },
+      ),
     );
     expect(find.byType(ModalBarrier), findsOneWidget);
 

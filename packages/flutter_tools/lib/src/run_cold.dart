@@ -10,6 +10,7 @@ import 'package:meta/meta.dart';
 
 import 'base/common.dart';
 import 'base/file_system.dart';
+import 'base/logger.dart';
 import 'build_info.dart';
 import 'device.dart';
 import 'globals_null_migrated.dart' as globals;
@@ -51,7 +52,10 @@ class ColdRunner extends ResidentRunner {
   bool get canHotReload => false;
 
   @override
-  bool get canHotRestart => false;
+  Logger get logger => globals.logger;
+
+  @override
+  FileSystem get fileSystem => globals.fs;
 
   @override
   Future<int> run({
@@ -200,6 +204,7 @@ class ColdRunner extends ResidentRunner {
       await flutterDevice.device.dispose();
     }
 
+    await residentDevtoolsHandler.shutdown();
     await stopEchoingDeviceLog();
   }
 
@@ -208,8 +213,10 @@ class ColdRunner extends ResidentRunner {
     globals.printStatus('Flutter run key commands.');
     if (details) {
       printHelpDetails();
+      commandHelp.hWithDetails.print();
+    } else {
+      commandHelp.hWithoutDetails.print();
     }
-    commandHelp.h.print(); // TODO(ianh): print different message if details is false
     if (_didAttach) {
       commandHelp.d.print();
     }

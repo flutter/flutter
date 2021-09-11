@@ -11,9 +11,9 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/flutter_plugins.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/cocoapods.dart';
-import 'package:flutter_tools/src/plugins.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:test/fake.dart';
@@ -68,7 +68,7 @@ void main() {
   setUp(() async {
     Cache.flutterRoot = 'flutter';
     fileSystem = MemoryFileSystem.test();
-    fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+    fakeProcessManager = FakeProcessManager.empty();
     logger = BufferLogger.test();
     usage = TestUsage();
     cocoaPodsUnderTest = CocoaPods(
@@ -372,7 +372,7 @@ void main() {
       final FlutterProject projectUnderTest = setupProjectUnderTest();
       fileSystem.file(fileSystem.path.join('project', 'ios', 'Podfile'))
         ..createSync()
-        ..writeAsStringSync('plugin_pods = parse_KV_file(\'../.flutter-plugins\')');
+        ..writeAsStringSync("plugin_pods = parse_KV_file('../.flutter-plugins')");
 
       await expectLater(cocoaPodsUnderTest.processPods(
         xcodeProject: projectUnderTest.ios,
@@ -396,7 +396,7 @@ void main() {
 
       projectUnderTest.macos.podfile
         ..createSync()
-        ..writeAsStringSync('plugin_pods = parse_KV_file(\'../.flutter-plugins\')');
+        ..writeAsStringSync("plugin_pods = parse_KV_file('../.flutter-plugins')");
       projectUnderTest.macos.podfileLock
         ..createSync()
         ..writeAsStringSync('Existing lock file.');
@@ -794,7 +794,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   @override
   Future<Map<String, String>> getBuildSettings(
     String projectPath, {
-    String scheme,
+    XcodeProjectBuildContext buildContext,
     Duration timeout = const Duration(minutes: 1),
   }) async => buildSettings;
 

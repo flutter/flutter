@@ -13,6 +13,7 @@ import 'constants.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_state.dart';
+import 'material_state_mixin.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
@@ -29,7 +30,7 @@ import 'theme_data.dart';
 /// TextButton, ElevatedButton, and OutlinedButton respectively.
 /// ButtonTheme has been replaced by TextButtonTheme,
 /// ElevatedButtonTheme, and OutlinedButtonTheme. The original classes
-/// will be deprecated soon, please migrate code that uses them.
+/// have been deprecated, please migrate code that uses them.
 /// There's a detailed migration guide for the new button and button
 /// theme classes in
 /// [flutter.dev/go/material-button-migration-guide](https://flutter.dev/go/material-button-migration-guide).
@@ -311,78 +312,43 @@ class RawMaterialButton extends StatefulWidget {
   final bool enableFeedback;
 
   @override
-  _RawMaterialButtonState createState() => _RawMaterialButtonState();
+  State<RawMaterialButton> createState() => _RawMaterialButtonState();
 }
 
-class _RawMaterialButtonState extends State<RawMaterialButton> {
-  final Set<MaterialState> _states = <MaterialState>{};
-
-  bool get _hovered => _states.contains(MaterialState.hovered);
-  bool get _focused => _states.contains(MaterialState.focused);
-  bool get _pressed => _states.contains(MaterialState.pressed);
-  bool get _disabled => _states.contains(MaterialState.disabled);
-
-  void _updateState(MaterialState state, bool value) {
-    value ? _states.add(state) : _states.remove(state);
-  }
-
-  void _handleHighlightChanged(bool value) {
-    if (_pressed != value) {
-      setState(() {
-        _updateState(MaterialState.pressed, value);
-        widget.onHighlightChanged?.call(value);
-      });
-    }
-  }
-
-  void _handleHoveredChanged(bool value) {
-    if (_hovered != value) {
-      setState(() {
-        _updateState(MaterialState.hovered, value);
-      });
-    }
-  }
-
-  void _handleFocusedChanged(bool value) {
-    if (_focused != value) {
-      setState(() {
-        _updateState(MaterialState.focused, value);
-      });
-    }
-  }
+class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStateMixin {
 
   @override
   void initState() {
     super.initState();
-    _updateState(MaterialState.disabled, !widget.enabled);
+    setMaterialState(MaterialState.disabled, !widget.enabled);
   }
 
   @override
   void didUpdateWidget(RawMaterialButton oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _updateState(MaterialState.disabled, !widget.enabled);
+    setMaterialState(MaterialState.disabled, !widget.enabled);
     // If the button is disabled while a press gesture is currently ongoing,
     // InkWell makes a call to handleHighlightChanged. This causes an exception
     // because it calls setState in the middle of a build. To preempt this, we
     // manually update pressed to false when this situation occurs.
-    if (_disabled && _pressed) {
-      _handleHighlightChanged(false);
+    if (isDisabled && isPressed) {
+      removeMaterialState(MaterialState.pressed);
     }
   }
 
   double get _effectiveElevation {
     // These conditionals are in order of precedence, so be careful about
     // reorganizing them.
-    if (_disabled) {
+    if (isDisabled) {
       return widget.disabledElevation;
     }
-    if (_pressed) {
+    if (isPressed) {
       return widget.highlightElevation;
     }
-    if (_hovered) {
+    if (isHovered) {
       return widget.hoverElevation;
     }
-    if (_focused) {
+    if (isFocused) {
       return widget.focusElevation;
     }
     return widget.elevation;
@@ -390,13 +356,13 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
 
   @override
   Widget build(BuildContext context) {
-    final Color? effectiveTextColor = MaterialStateProperty.resolveAs<Color?>(widget.textStyle?.color, _states);
-    final ShapeBorder? effectiveShape =  MaterialStateProperty.resolveAs<ShapeBorder?>(widget.shape, _states);
+    final Color? effectiveTextColor = MaterialStateProperty.resolveAs<Color?>(widget.textStyle?.color, materialStates);
+    final ShapeBorder? effectiveShape =  MaterialStateProperty.resolveAs<ShapeBorder?>(widget.shape, materialStates);
     final Offset densityAdjustment = widget.visualDensity.baseSizeAdjustment;
     final BoxConstraints effectiveConstraints = widget.visualDensity.effectiveConstraints(widget.constraints);
     final MouseCursor? effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(
       widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
-      _states,
+      materialStates,
     );
     final EdgeInsetsGeometry padding = widget.padding.add(
       EdgeInsets.only(
@@ -421,14 +387,14 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
         child: InkWell(
           focusNode: widget.focusNode,
           canRequestFocus: widget.enabled,
-          onFocusChange: _handleFocusedChanged,
+          onFocusChange: updateMaterialState(MaterialState.focused),
           autofocus: widget.autofocus,
-          onHighlightChanged: _handleHighlightChanged,
+          onHighlightChanged: updateMaterialState(MaterialState.pressed, onChanged: widget.onHighlightChanged),
           splashColor: widget.splashColor,
           highlightColor: widget.highlightColor,
           focusColor: widget.focusColor,
           hoverColor: widget.hoverColor,
-          onHover: _handleHoveredChanged,
+          onHover: updateMaterialState(MaterialState.hovered),
           onTap: widget.onPressed,
           onLongPress: widget.onLongPress,
           enableFeedback: widget.enableFeedback,

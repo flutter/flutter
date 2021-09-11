@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 class TestStatefulWidget extends StatefulWidget {
   const TestStatefulWidget({ Key? key }) : super(key: key);
@@ -92,7 +91,7 @@ void main() {
       children: const <TableRow>[
         TableRow(
           decoration: BoxDecoration(
-              color: Colors.yellow
+              color: Colors.yellow,
           ),
           children: <Widget>[Placeholder()],
         ),
@@ -112,7 +111,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Center(
           child: Center(
-            child: table
+            child: table,
           ),
         ),
       ),
@@ -898,7 +897,7 @@ void main() {
         '├Text("H")\n'
         '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "H", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
         '└Text("III")\n'
-        ' └RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "III", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
+        ' └RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "III", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n',
       ),
     );
   });
@@ -962,7 +961,8 @@ void main() {
         expect(error, isNotNull);
         expect(error!.toStringDeep(), contains('The children property of TableRow must not be null.'));
       }
-  });
+    },
+  );
 
   testWidgets('Can replace child with a different RenderObject type', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/69395.
@@ -998,6 +998,39 @@ void main() {
 
     // The RenderObject got replaced by a different type.
     expect(table.column(2).last.runtimeType, isNot(toBeReplaced));
+  });
+
+  testWidgets('Do not crash if a child that has not been layed out in a previous build is removed', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/60488.
+    Widget buildTable(Key key) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Table(
+          children: <TableRow>[
+            TableRow(
+              children: <Widget>[
+                KeyedSubtree(
+                  key: key,
+                  child: const Text('Hello'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+
+    await tester.pumpWidget(
+      buildTable(const ValueKey<int>(1)),
+      null, EnginePhase.build, // Children are not layed out!
+    );
+
+    await tester.pumpWidget(
+      buildTable(const ValueKey<int>(2)),
+    );
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('Hello'), findsOneWidget);
   });
 
   // TODO(ianh): Test handling of TableCell object

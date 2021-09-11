@@ -212,14 +212,14 @@ class CupertinoContextMenu extends StatefulWidget {
   ///       onPressed: () {},
   ///     ),
   ///   ],
-  /// ),
+  /// )
   /// ```
   ///
   /// {@end-tool}
   final ContextMenuPreviewBuilder? previewBuilder;
 
   @override
-  _CupertinoContextMenuState createState() => _CupertinoContextMenuState();
+  State<CupertinoContextMenu> createState() => _CupertinoContextMenuState();
 }
 
 class _CupertinoContextMenuState extends State<CupertinoContextMenu> with TickerProviderStateMixin {
@@ -383,9 +383,9 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
       builder: (BuildContext context) {
         return _DecoyChild(
           beginRect: childRect,
-          child: widget.child,
           controller: _openController,
           endRect: _decoyChildEndRect,
+          child: widget.child,
         );
       },
     );
@@ -820,12 +820,12 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
         // in the final position.
         return _ContextMenuRouteStatic(
           actions: _actions,
-          child: _builder!(context, animation),
           childGlobalKey: _childGlobalKey,
           contextMenuLocation: _contextMenuLocation,
           onDismiss: _onDismiss,
           orientation: orientation,
           sheetGlobalKey: _sheetGlobalKey,
+          child: _builder!(context, animation),
         );
       },
     );

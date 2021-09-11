@@ -288,7 +288,7 @@ class _AllSectionsView extends AnimatedWidget {
   Widget _build(BuildContext context, BoxConstraints constraints) {
     final Size size = constraints.biggest;
 
-    // The layout's progress from from a column to a row. Its value is
+    // The layout's progress from a column to a row. Its value is
     // 0.0 when size.height equals the maxHeight, 1.0 when the size.height
     // equals the midHeight.
     final double tColumnToRow =
@@ -296,7 +296,7 @@ class _AllSectionsView extends AnimatedWidget {
              (maxHeight! - midHeight!)).clamp(0.0, 1.0);
 
 
-    // The layout's progress from from the midHeight row layout to
+    // The layout's progress from the midHeight row layout to
     // a minHeight row layout. Its value is 0.0 when size.height equals
     // midHeight and 1.0 when size.height equals minHeight.
     final double tCollapsed =
@@ -420,7 +420,7 @@ class AnimationDemoHome extends StatefulWidget {
   static const String routeName = '/animation';
 
   @override
-  _AnimationDemoHomeState createState() => _AnimationDemoHomeState();
+  State<AnimationDemoHome> createState() => _AnimationDemoHomeState();
 }
 
 class _AnimationDemoHomeState extends State<AnimationDemoHome> {

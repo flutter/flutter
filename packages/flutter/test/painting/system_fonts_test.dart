@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -75,6 +75,7 @@ void main() {
       ),
     );
     final dynamic state = tester.state(find.byType(CupertinoDatePicker));
+    // ignore: avoid_dynamic_calls
     final Map<int, double> cache = state.estimatedColumnWidths as Map<int, double>;
     expect(cache.isNotEmpty, isTrue);
     const Map<String, dynamic> data = <String, dynamic>{
@@ -101,6 +102,7 @@ void main() {
       ),
     );
     final dynamic state = tester.state(find.byType(CupertinoDatePicker));
+    // ignore: avoid_dynamic_calls
     final Map<int, double> cache = state.estimatedColumnWidths as Map<int, double>;
     // Simulates font missing.
     cache.clear();
@@ -128,8 +130,11 @@ void main() {
     );
     final dynamic state = tester.state(find.byType(CupertinoTimerPicker));
     // Simulates wrong metrics due to font missing.
+    // ignore: avoid_dynamic_calls
     state.numberLabelWidth = 0.0;
+    // ignore: avoid_dynamic_calls
     state.numberLabelHeight = 0.0;
+    // ignore: avoid_dynamic_calls
     state.numberLabelBaseline = 0.0;
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
@@ -140,8 +145,11 @@ void main() {
         (ByteData? data) { },
     );
     // Metrics should be refreshed
+    // ignore: avoid_dynamic_calls
     expect(state.numberLabelWidth - 46.0 < precisionErrorTolerance, isTrue);
+    // ignore: avoid_dynamic_calls
     expect(state.numberLabelHeight - 23.0 < precisionErrorTolerance, isTrue);
+    // ignore: avoid_dynamic_calls
     expect(state.numberLabelBaseline - 18.400070190429688 < precisionErrorTolerance, isTrue);
     final Element element = tester.element(find.byType(CupertinoTimerPicker));
     expect(element.dirty, isTrue);

@@ -13,16 +13,14 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/process.dart';
-
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
-import 'package:process/process.dart';
 
 import 'context.dart';
 import 'fake_http_client.dart';
@@ -38,7 +36,7 @@ final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
   FileSystem: () => MemoryFileSystem(style: globals.platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix),
   ProcessManager: () => FakeProcessManager.any(),
   Logger: () => BufferLogger(
-    terminal: AnsiTerminal(stdio: globals.stdio, platform: globals.platform),  // Danger, using real stdio.
+    terminal: AnsiTerminal(stdio: globals.stdio, platform: globals.platform), // Danger, using real stdio.
     outputPreferences: OutputPreferences.test(),
   ), // Allows reading logs and prevents stdout.
   OperatingSystemUtils: () => FakeOperatingSystemUtils(),
@@ -52,7 +50,7 @@ final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
 /// Manages interaction with the tool injection and runner system.
 ///
 /// The Testbed automatically injects reasonable defaults through the context
-/// DI system such as a [BufferLogger] and a [MemoryFileSytem].
+/// DI system such as a [BufferLogger] and a [MemoryFileSystem].
 ///
 /// Example:
 ///

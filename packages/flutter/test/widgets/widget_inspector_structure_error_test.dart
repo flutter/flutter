@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -48,6 +47,7 @@ class StructureErrorTestWidgetInspectorService extends Object with WidgetInspect
     expect(extensions, contains(name));
     // Encode and decode to JSON to match behavior using a real service
     // extension where only JSON is allowed.
+    // ignore: avoid_dynamic_calls
     return json.decode(json.encode(await extensions[name]!(arguments)))['enabled'] as String;
   }
 
@@ -69,9 +69,10 @@ class StructureErrorTestWidgetInspectorService extends Object with WidgetInspect
       WidgetsFlutterBinding.ensureInitialized();
       try {
         // Enables structured errors.
-        expect(await service.testBoolExtension(
-          'structuredErrors', <String, String>{'enabled': 'true'}),
-          equals('true'));
+        expect(
+          await service.testBoolExtension('structuredErrors', <String, String>{'enabled': 'true'}),
+          equals('true'),
+        );
 
         // Creates an error.
         final FlutterErrorDetails expectedError = FlutterErrorDetails(

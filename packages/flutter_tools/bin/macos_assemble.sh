@@ -22,20 +22,10 @@ BuildApp() {
   local project_path="${SOURCE_ROOT}/.."
   RunCommand pushd "${project_path}" > /dev/null
 
-  # Set the verbose flag.
-  local verbose_flag=""
-  if [[ -n "$VERBOSE_SCRIPT_LOGGING" ]]; then
-      verbose_flag="--verbose"
-  fi
-
   # Set the target file.
   local target_path="lib/main.dart"
   if [[ -n "$FLUTTER_TARGET" ]]; then
       target_path="${FLUTTER_TARGET}"
-  fi
-
-  if [[ -n "$FLUTTER_ENGINE" ]]; then
-    flutter_engine_flag="--local-engine-src-path=${FLUTTER_ENGINE}"
   fi
 
   # Set the build mode
@@ -54,7 +44,6 @@ BuildApp() {
       EchoError "========================================================================"
       exit -1
     fi
-    local_engine_flag="--local-engine=${LOCAL_ENGINE}"
   fi
 
   # The path where the input/output xcfilelists are stored. These are used by xcode
@@ -63,44 +52,50 @@ BuildApp() {
   local build_inputs_path="${ephemeral_dir}/FlutterInputs.xcfilelist"
   local build_outputs_path="${ephemeral_dir}/FlutterOutputs.xcfilelist"
 
-  local performance_measurement_option=""
+  # Construct the "flutter assemble" argument array. Arguments should be added
+  # as quoted string elements of the flutter_args array, otherwise an argument
+  # (like a path) with spaces in it might be interpreted as two separate
+  # arguments.
+  local flutter_args=("${FLUTTER_ROOT}/bin/flutter")
+  if [[ -n "$VERBOSE_SCRIPT_LOGGING" ]]; then
+    flutter_args+=('--verbose')
+  fi
+  if [[ -n "$FLUTTER_ENGINE" ]]; then
+    flutter_args+=("--local-engine-src-path=${FLUTTER_ENGINE}")
+  fi
+  if [[ -n "$LOCAL_ENGINE" ]]; then
+    flutter_args+=("--local-engine=${LOCAL_ENGINE}")
+  fi
+  flutter_args+=(
+    "assemble"
+    "--no-version-check"
+    "-dTargetPlatform=darwin"
+    "-dDarwinArchs=x86_64"
+    "-dTargetFile=${target_path}"
+    "-dBuildMode=${build_mode}"
+    "-dTreeShakeIcons=${TREE_SHAKE_ICONS}"
+    "-dDartObfuscation=${DART_OBFUSCATION}"
+    "-dSplitDebugInfo=${SPLIT_DEBUG_INFO}"
+    "-dTrackWidgetCreation=${TRACK_WIDGET_CREATION}"
+    "--DartDefines=${DART_DEFINES}"
+    "--ExtraGenSnapshotOptions=${EXTRA_GEN_SNAPSHOT_OPTIONS}"
+    "--ExtraFrontEndOptions=${EXTRA_FRONT_END_OPTIONS}"
+    "--build-inputs=${build_inputs_path}"
+    "--build-outputs=${build_outputs_path}"
+    "--output=${BUILT_PRODUCTS_DIR}"
+  )
   if [[ -n "$PERFORMANCE_MEASUREMENT_FILE" ]]; then
-    performance_measurement_option="--performance-measurement-file=${PERFORMANCE_MEASUREMENT_FILE}"
+    flutter_args+=("--performance-measurement-file=${PERFORMANCE_MEASUREMENT_FILE}")
   fi
-
-  local bundle_sksl_path=""
   if [[ -n "$BUNDLE_SKSL_PATH" ]]; then
-    bundle_sksl_path="-iBundleSkSLPath=${BUNDLE_SKSL_PATH}"
+    flutter_args+=("-dBundleSkSLPath=${BUNDLE_SKSL_PATH}")
   fi
-
-  local code_size_directory=""
   if [[ -n "$CODE_SIZE_DIRECTORY" ]]; then
-    code_size_directory="-dCodeSizeDirectory=${CODE_SIZE_DIRECTORY}"
+    flutter_args+=("-dCodeSizeDirectory=${CODE_SIZE_DIRECTORY}")
   fi
+  flutter_args+=("${build_mode}_macos_bundle_flutter_assets")
 
-  RunCommand "${FLUTTER_ROOT}/bin/flutter"                                    \
-      ${verbose_flag}                                                         \
-      ${flutter_engine_flag}                                                  \
-      ${local_engine_flag}                                                    \
-      assemble                                                                \
-      --no-version-check                                                      \
-      ${performance_measurement_option}                                       \
-      -dTargetPlatform=darwin-x64                                             \
-      -dTargetFile="${target_path}"                                           \
-      -dBuildMode="${build_mode}"                                             \
-      -dTreeShakeIcons="${TREE_SHAKE_ICONS}"                                  \
-      -dDartObfuscation="${DART_OBFUSCATION}"                                 \
-      -dSplitDebugInfo="${SPLIT_DEBUG_INFO}"                                  \
-      -dTrackWidgetCreation="${TRACK_WIDGET_CREATION}"                        \
-      ${bundle_sksl_path}                                                     \
-      ${code_size_directory}                                                  \
-      --DartDefines="${DART_DEFINES}"                                         \
-      --ExtraGenSnapshotOptions="${EXTRA_GEN_SNAPSHOT_OPTIONS}"               \
-      --ExtraFrontEndOptions="${EXTRA_FRONT_END_OPTIONS}"                     \
-      --build-inputs="${build_inputs_path}"                                   \
-      --build-outputs="${build_outputs_path}"                                 \
-      --output="${BUILT_PRODUCTS_DIR}"                                        \
-     "${build_mode}_macos_bundle_flutter_assets"
+  RunCommand "${flutter_args[@]}"
 }
 
 # Adds the App.framework as an embedded binary and the flutter_assets as

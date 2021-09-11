@@ -14,7 +14,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -126,7 +126,7 @@ Future<void> _ensureFlutterToolsSnapshot() async {
 
   final File snapshotFile = globals.fs.file(flutterToolsSnapshotPath);
   if (snapshotFile.existsSync()) {
-    snapshotFile.renameSync(flutterToolsSnapshotPath + '.bak');
+    snapshotFile.renameSync('$flutterToolsSnapshotPath.bak');
   }
 
   final List<String> snapshotArgs = <String>[
@@ -157,7 +157,7 @@ Future<void> _restoreFlutterToolsSnapshot() async {
   );
 
   final File snapshotBackup =
-      globals.fs.file(flutterToolsSnapshotPath + '.bak');
+      globals.fs.file('$flutterToolsSnapshotPath.bak');
   if (!snapshotBackup.existsSync()) {
     // No backup to restore.
     return;
@@ -233,7 +233,7 @@ Future<void> _analyzeProject(Directory workingDir) async {
   ];
 
   final ProcessResult exec = await Process.run(
-    globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+    globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
     args,
     workingDirectory: workingDir.path,
   );

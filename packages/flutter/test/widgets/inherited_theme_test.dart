@@ -63,7 +63,7 @@ void main() {
                               TestRoute(
                                 useCaptureAll
                                   ? InheritedTheme.captureAll(context, const IconTextBox('Hello'))
-                                  : const IconTextBox('Hello')
+                                  : const IconTextBox('Hello'),
                               ),
                             );
                           },
