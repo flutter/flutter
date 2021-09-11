@@ -1733,6 +1733,19 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
   final Map<R, Set<RouteAware>> _listeners = <R, Set<RouteAware>>{};
 
+  /// Whether this observer is managing changes for the specified route.
+  ///
+  /// If asserts are disabled, this method will throw an exception.
+  @visibleForTesting
+  bool debugObservingRoute(R route) {
+    late bool contained;
+    assert(() {
+      contained = _listeners.containsKey(route);
+      return true;
+    }());
+    return contained;
+  }
+
   /// Subscribe [routeAware] to be informed about changes to [route].
   ///
   /// Going forward, [routeAware] will be informed about qualifying changes
@@ -1753,9 +1766,15 @@ class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
   /// subscribed to multiple types, this will unregister it (once) from each type.
   void unsubscribe(RouteAware routeAware) {
     assert(routeAware != null);
-    for (final R route in _listeners.keys) {
+    final List<R> routes = _listeners.keys.toList();
+    for (final R route in routes) {
       final Set<RouteAware>? subscribers = _listeners[route];
-      subscribers?.remove(routeAware);
+      if (subscribers != null) {
+        subscribers.remove(routeAware);
+        if (subscribers.isEmpty) {
+          _listeners.remove(route);
+        }
+      }
     }
   }
 
@@ -1963,7 +1982,6 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 /// For more information about state restoration, see [RestorationManager].
 ///
 /// {@tool sample --template=stateless_widget_restoration_material}
-///
 /// This sample demonstrates how to create a restorable dialog. This is
 /// accomplished by enabling state restoration by specifying
 /// [WidgetsApp.restorationScopeId] and using [Navigator.restorablePush] to
@@ -1971,33 +1989,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 ///
 /// {@macro flutter.widgets.RestorationManager}
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return Scaffold(
-///     body: Center(
-///       child: OutlinedButton(
-///         onPressed: () {
-///           Navigator.of(context).restorablePush(_dialogBuilder);
-///         },
-///         child: const Text('Open Dialog'),
-///       ),
-///     ),
-///   );
-/// }
-///
-/// static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
-///   return RawDialogRoute<void>(
-///     pageBuilder: (
-///       BuildContext context,
-///       Animation<double> animation,
-///       Animation<double> secondaryAnimation,
-///     ) {
-///       return const AlertDialog(title: Text('Alert!'));
-///     },
-///   );
-/// }
-/// ```
-///
+/// ** See code in examples/api/lib/widgets/routes/show_general_dialog.0.dart **
 /// {@end-tool}
 ///
 /// See also:

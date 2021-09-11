@@ -385,10 +385,12 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   @override
   double? get page {
     assert(
-      !hasPixels || (minScrollExtent != null && maxScrollExtent != null),
+      !hasPixels || hasContentDimensions,
       'Page value is only available after content dimensions are established.',
     );
-    return !hasPixels ? null : getPageFromPixels(pixels.clamp(minScrollExtent, maxScrollExtent), viewportDimension);
+    return !hasPixels || !hasContentDimensions
+      ? null
+      : getPageFromPixels(pixels.clamp(minScrollExtent, maxScrollExtent), viewportDimension);
   }
 
   @override
@@ -568,32 +570,10 @@ const PageScrollPhysics _kPagePhysics = PageScrollPhysics();
 /// {@youtube 560 315 https://www.youtube.com/watch?v=J1gE9xvph-A}
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
-///
 /// Here is an example of [PageView]. It creates a centered [Text] in each of the three pages
 /// which scroll horizontally.
 ///
-/// ```dart
-///  Widget build(BuildContext context) {
-///    final PageController controller = PageController(initialPage: 0);
-///    return PageView(
-///      /// [PageView.scrollDirection] defaults to [Axis.horizontal].
-///      /// Use [Axis.vertical] to scroll vertically.
-///      scrollDirection: Axis.horizontal,
-///      controller: controller,
-///      children: const <Widget>[
-///        Center(
-///          child: Text('First Page'),
-///        ),
-///        Center(
-///          child: Text('Second Page'),
-///        ),
-///        Center(
-///          child: Text('Third Page'),
-///        )
-///      ],
-///    );
-///  }
-/// ```
+/// ** See code in examples/api/lib/widgets/page_view/page_view.0.dart **
 /// {@end-tool}
 ///
 /// See also:

@@ -189,7 +189,7 @@ Future<ProcessTestResult> runFlutter(
   List<Transition> transitions, {
   bool debug = false,
   bool logging = true,
-  Duration expectedMaxDuration = const Duration(seconds: 25), // must be less than test timeout of 30 seconds!
+  Duration expectedMaxDuration = const Duration(minutes: 10), // must be less than test timeout of 15 minutes!
 }) async {
   final Stopwatch clock = Stopwatch()..start();
   final Process process = await processManager.start(
@@ -271,7 +271,7 @@ Future<ProcessTestResult> runFlutter(
       }
       nextTransition += 1;
       timeout?.cancel();
-      timeout = Timer(expectedMaxDuration ~/ 5, processTimeout);
+      timeout = Timer(expectedMaxDuration ~/ 5, processTimeout); // This is not a failure timeout, just when to start logging verbosely to help debugging.
     }
   }
   void processStderr(String line) {
@@ -284,11 +284,11 @@ Future<ProcessTestResult> runFlutter(
   if (debug) {
     processTimeout();
   } else {
-    timeout = Timer(expectedMaxDuration ~/ 2, processTimeout);
+    timeout = Timer(expectedMaxDuration ~/ 2, processTimeout); // This is not a failure timeout, just when to start logging verbosely to help debugging.
   }
   process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(processStdout);
   process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(processStderr);
-  unawaited(process.exitCode.timeout(expectedMaxDuration, onTimeout: () {
+  unawaited(process.exitCode.timeout(expectedMaxDuration, onTimeout: () { // This is a failure timeout, must not be short.
     print('${stamp()} (process is not quitting, trying to send a "q" just in case that helps)');
     print('(a functional test should never reach this point)');
     final LogLine inLog = LogLine('stdin', stamp(), 'q');
@@ -298,7 +298,7 @@ Future<ProcessTestResult> runFlutter(
     }
     process.stdin.write('q');
     return -1; // discarded
-  }).catchError((Object error) { /* ignore the error here, it'll be reported on the next line */ }));
+  }).catchError((Object error) { /* ignore errors here, they will be reported on the next line */ }));
   final int exitCode = await process.exitCode;
   if (streamingLogs) {
     print('${stamp()} (process terminated with exit code $exitCode)');
@@ -622,5 +622,5 @@ void main() {
       '',
       'Application finished.',
     ]);
-  }, skip: Platform.isWindows); // TODO(jonahwilliams): Re-enable when this test is reliable on device lab, https://github.com/flutter/flutter/issues/81556
+  }, skip: Platform.isWindows); // TODO(zanderso): Re-enable when this test is reliable on device lab, https://github.com/flutter/flutter/issues/81556
 }

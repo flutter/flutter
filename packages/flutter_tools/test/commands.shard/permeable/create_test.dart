@@ -727,25 +727,6 @@ void main() {
     );
   });
 
-  testUsingContext('androidx is used by default in a plugin project', () async {
-    Cache.flutterRoot = '../..';
-
-    final CreateCommand command = CreateCommand();
-    final CommandRunner<void> runner = createTestCommandRunner(command);
-
-    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platform', 'android', projectDir.path]);
-
-    void expectExists(String relPath) {
-      expect(globals.fs.isFileSync('${projectDir.path}/$relPath'), true);
-    }
-
-    expectExists('android/gradle.properties');
-
-    final String actualContents = await globals.fs.file('${projectDir.path}/android/gradle.properties').readAsString();
-
-    expect(actualContents.contains('useAndroidX'), true);
-  });
-
   testUsingContext('creating a new project should create v2 embedding and never show an Android v1 deprecation warning', () async {
     Cache.flutterRoot = '../..';
 
@@ -1721,15 +1702,22 @@ void main() {
   });
 
   testUsingContext(
-    'invokes pub offline when requested',
+    'invokes pub in online and offline modes',
     () async {
       Cache.flutterRoot = '../..';
 
       final CreateCommand command = CreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
+      // Run pub online first in order to populate the pub cache.
+      await runner.run(<String>['create', '--pub', projectDir.path]);
+      expect(loggingProcessManager.commands.first, contains(matches(r'dart-sdk[\\/]bin[\\/]dart')));
+      expect(loggingProcessManager.commands.first, isNot(contains('--offline')));
+
+      // Run pub offline.
+      loggingProcessManager.clear();
       await runner.run(<String>['create', '--pub', '--offline', projectDir.path]);
-      expect(loggingProcessManager.commands.first, contains(matches(r'dart-sdk[\\/]bin[\\/]pub')));
+      expect(loggingProcessManager.commands.first, contains(matches(r'dart-sdk[\\/]bin[\\/]dart')));
       expect(loggingProcessManager.commands.first, contains('--offline'));
     },
     overrides: <Type, Generator>{
@@ -1754,7 +1742,7 @@ void main() {
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>['create', '--pub', projectDir.path]);
-      expect(loggingProcessManager.commands.first, contains(matches(r'dart-sdk[\\/]bin[\\/]pub')));
+      expect(loggingProcessManager.commands.first, contains(matches(r'dart-sdk[\\/]bin[\\/]dart')));
       expect(loggingProcessManager.commands.first, isNot(contains('--offline')));
     },
     overrides: <Type, Generator>{
@@ -2838,5 +2826,9 @@ class LoggingProcessManager extends LocalProcessManager {
       runInShell: runInShell,
       mode: mode,
     );
+  }
+
+  void clear() {
+    commands.clear();
   }
 }

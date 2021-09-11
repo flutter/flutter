@@ -305,7 +305,6 @@ class DataCell {
 /// multiple pages.
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
-///
 /// This sample shows how to display a [DataTable] with three columns: name, age, and
 /// role. The columns are defined by three [DataColumn] objects. The table
 /// contains three rows of data for three example users, the data for which
@@ -313,105 +312,15 @@ class DataCell {
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/data_table.png)
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return DataTable(
-///     columns: const <DataColumn>[
-///       DataColumn(
-///         label: Text(
-///           'Name',
-///           style: TextStyle(fontStyle: FontStyle.italic),
-///         ),
-///       ),
-///       DataColumn(
-///         label: Text(
-///           'Age',
-///           style: TextStyle(fontStyle: FontStyle.italic),
-///         ),
-///       ),
-///       DataColumn(
-///         label: Text(
-///           'Role',
-///           style: TextStyle(fontStyle: FontStyle.italic),
-///         ),
-///       ),
-///     ],
-///     rows: const <DataRow>[
-///       DataRow(
-///         cells: <DataCell>[
-///           DataCell(Text('Sarah')),
-///           DataCell(Text('19')),
-///           DataCell(Text('Student')),
-///         ],
-///       ),
-///       DataRow(
-///         cells: <DataCell>[
-///           DataCell(Text('Janine')),
-///           DataCell(Text('43')),
-///           DataCell(Text('Professor')),
-///         ],
-///       ),
-///       DataRow(
-///         cells: <DataCell>[
-///           DataCell(Text('William')),
-///           DataCell(Text('27')),
-///           DataCell(Text('Associate Professor')),
-///         ],
-///       ),
-///     ],
-///   );
-/// }
-/// ```
-///
+/// ** See code in examples/api/lib/material/data_table/data_table.0.dart **
 /// {@end-tool}
 ///
 ///
 /// {@tool dartpad --template=stateful_widget_scaffold}
-///
 /// This sample shows how to display a [DataTable] with alternate colors per
 /// row, and a custom color for when the row is selected.
 ///
-/// ```dart
-/// static const int numItems = 10;
-/// List<bool> selected = List<bool>.generate(numItems, (int index) => false);
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return SizedBox(
-///     width: double.infinity,
-///     child: DataTable(
-///       columns: const <DataColumn>[
-///         DataColumn(
-///           label: Text('Number'),
-///         ),
-///       ],
-///       rows: List<DataRow>.generate(
-///         numItems,
-///         (int index) => DataRow(
-///           color: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-///             // All rows will have the same selected color.
-///             if (states.contains(MaterialState.selected)) {
-///               return Theme.of(context).colorScheme.primary.withOpacity(0.08);
-///             }
-///             // Even rows will have a grey color.
-///             if (index.isEven) {
-///               return Colors.grey.withOpacity(0.3);
-///             }
-///             return null;  // Use default value for other states and odd rows.
-///           }),
-///           cells: <DataCell>[ DataCell(Text('Row $index')) ],
-///           selected: selected[index],
-///           onSelectChanged: (bool? value) {
-///             setState(() {
-///               selected[index] = value!;
-///             });
-///           },
-///         ),
-///       ),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/data_table/data_table.1.dart **
 /// {@end-tool}
 ///
 /// [DataTable] can be sorted on the basis of any column in [columns] in

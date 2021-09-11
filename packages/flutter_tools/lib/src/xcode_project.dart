@@ -328,8 +328,8 @@ class IosProject extends XcodeBasedProject {
         if (fromPlist != null && fromPlist.contains(r'$')) {
           final Map<String, String>? allBuildSettings = await buildSettingsForBuildInfo(buildInfo);
           if (allBuildSettings != null) {
-            final String substituedVariable = substituteXcodeVariables(fromPlist, allBuildSettings);
-            if (substituedVariable == bundleIdentifier) {
+            final String substitutedVariable = substituteXcodeVariables(fromPlist, allBuildSettings);
+            if (substitutedVariable == bundleIdentifier) {
               return true;
             }
           }

@@ -114,8 +114,8 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
     final StringBuffer result = StringBuffer();
     for (final SynonymKeyInfo synonymInfo in synonyms.values) {
       for (final LogicalKeyEntry key in synonymInfo.keys) {
-        final LogicalKeyEntry synonnym = logicalData.entryByName(synonymInfo.name);
-        result.writeln('    ${key.constantName}: ${synonnym.constantName},');
+        final LogicalKeyEntry synonym = logicalData.entryByName(synonymInfo.name);
+        result.writeln('    ${key.constantName}: ${synonym.constantName},');
       }
     }
     return result.toString();

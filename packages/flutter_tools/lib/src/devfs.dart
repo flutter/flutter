@@ -61,8 +61,9 @@ class DevFSFileContent extends DevFSContent {
   FileStat? _fileStat;
 
   File _getFile() {
-    if (_linkTarget != null) {
-      return _linkTarget!;
+    final File? linkTarget = _linkTarget;
+    if (linkTarget != null) {
+      return linkTarget;
     }
     if (file is Link) {
       // The link target.
@@ -72,9 +73,10 @@ class DevFSFileContent extends DevFSContent {
   }
 
   void _stat() {
-    if (_linkTarget != null) {
+    final File linkTarget = _linkTarget;
+    if (linkTarget != null) {
       // Stat the cached symlink target.
-      final FileStat fileStat = _linkTarget!.statSync();
+      final FileStat fileStat = linkTarget.statSync();
       if (fileStat.type == FileSystemEntityType.notFound) {
         _linkTarget = null;
       } else {
@@ -84,7 +86,7 @@ class DevFSFileContent extends DevFSContent {
     }
     final FileStat fileStat = file.statSync();
     _fileStat = fileStat.type == FileSystemEntityType.notFound ? null : fileStat;
-    if (_fileStat != null && _fileStat!.type == FileSystemEntityType.link) {
+    if (_fileStat != null && _fileStat?.type == FileSystemEntityType.link) {
       // Resolve, stat, and maybe cache the symlink target.
       final String resolved = file.resolveSymbolicLinksSync();
       final File linkTarget = file.fileSystem.file(resolved);
@@ -93,7 +95,7 @@ class DevFSFileContent extends DevFSContent {
       if (fileStat.type == FileSystemEntityType.notFound) {
         _fileStat = null;
         _linkTarget = null;
-      } else if (devFSConfig!.cacheSymlinks) {
+      } else if (devFSConfig?.cacheSymlinks == true) {
         _linkTarget = linkTarget;
       }
     }
@@ -101,25 +103,27 @@ class DevFSFileContent extends DevFSContent {
 
   @override
   bool get isModified {
-    final FileStat? _oldFileStat = _fileStat;
+    final FileStat? oldFileStat = _fileStat;
     _stat();
-    if (_oldFileStat == null && _fileStat == null) {
+    final FileStat? newFileStat = _fileStat;
+    if (oldFileStat == null && newFileStat == null) {
       return false;
     }
-    return _oldFileStat == null || _fileStat == null || _fileStat!.modified.isAfter(_oldFileStat.modified);
+    return oldFileStat == null || newFileStat == null || newFileStat.modified.isAfter(oldFileStat.modified);
   }
 
   @override
   bool isModifiedAfter(DateTime time) {
-    final FileStat? _oldFileStat = _fileStat;
+    final FileStat? oldFileStat = _fileStat;
     _stat();
-    if (_oldFileStat == null && _fileStat == null) {
+    final FileStat? newFileStat = _fileStat;
+    if (oldFileStat == null && newFileStat == null) {
       return false;
     }
     return time == null
-        || _oldFileStat == null
-        || _fileStat == null
-        || _fileStat!.modified.isAfter(time);
+        || oldFileStat == null
+        || newFileStat == null
+        || newFileStat.modified.isAfter(time);
   }
 
   @override
@@ -132,7 +136,7 @@ class DevFSFileContent extends DevFSContent {
   }
 
   @override
-  Future<List<int>> contentsAsBytes() => _getFile().readAsBytes();
+  Future<List<int>> contentsAsBytes() async => _getFile().readAsBytes();
 
   @override
   Stream<List<int>> contentsAsStream() => _getFile().openRead();
@@ -549,8 +553,9 @@ class DevFS {
   /// If any other changes were made, or there is an error scanning the file,
   /// return `null`.
   String? _checkIfSingleWidgetReloadApplied() {
-    if (_widgetCacheOutputFile != null && _widgetCacheOutputFile!.existsSync()) {
-      final String widget = _widgetCacheOutputFile!.readAsStringSync().trim();
+    final File? widgetCacheOutputFile = _widgetCacheOutputFile;
+    if (widgetCacheOutputFile != null && widgetCacheOutputFile.existsSync()) {
+      final String widget = widgetCacheOutputFile.readAsStringSync().trim();
       if (widget.isNotEmpty) {
         return widget;
       }

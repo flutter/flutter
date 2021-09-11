@@ -408,15 +408,17 @@ Future<void> runForbiddenFromReleaseTests() async {
   );
 }
 
-/// Verifies that APK, and IPA (if on macOS) builds the examples apps
-/// without crashing. It does not actually launch the apps. That happens later
-/// in the devicelab. This is just a smoke-test. In particular, this will verify
-/// we can build when there are spaces in the path name for the Flutter SDK and
-/// target app.
+/// Verifies that APK, and IPA (if on macOS), and native desktop builds the
+/// examples apps without crashing. It does not actually launch the apps. That
+/// happens later in the devicelab. This is just a smoke-test. In particular,
+/// this will verify we can build when there are spaces in the path name for the
+/// Flutter SDK and target app.
 ///
 /// Also does some checking about types included in hello_world.
 Future<void> _runBuildTests() async {
-  final List<FileSystemEntity> exampleDirectories = Directory(path.join(flutterRoot, 'examples')).listSync()
+  final List<Directory> exampleDirectories = Directory(path.join(flutterRoot, 'examples')).listSync()
+    // API example builds will be tested in a separate shard.
+    .where((FileSystemEntity entity) => entity is Directory && path.basename(entity.path) != 'api').cast<Directory>().toList()
     ..add(Directory(path.join(flutterRoot, 'packages', 'integration_test', 'example')))
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing')))
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'android_views')))
@@ -430,7 +432,7 @@ Future<void> _runBuildTests() async {
   // The tests are randomly distributed into subshards so as to get a uniform
   // distribution of costs, but the seed is fixed so that issues are reproducible.
   final List<ShardRunner> tests = <ShardRunner>[
-    for (final FileSystemEntity exampleDirectory in exampleDirectories)
+    for (final Directory exampleDirectory in exampleDirectories)
       () => _runExampleProjectBuildTests(exampleDirectory),
     ...<ShardRunner>[
       // Web compilation tests.
@@ -450,17 +452,15 @@ Future<void> _runBuildTests() async {
   await _runShardRunnerIndexOfTotalSubshard(tests);
 }
 
-Future<void> _runExampleProjectBuildTests(FileSystemEntity exampleDirectory) async {
+Future<void> _runExampleProjectBuildTests(Directory exampleDirectory, [File? mainFile]) async {
   // Only verify caching with flutter gallery.
   final bool verifyCaching = exampleDirectory.path.contains('flutter_gallery');
-  if (exampleDirectory is! Directory) {
-    return;
-  }
   final String examplePath = exampleDirectory.path;
   final bool hasNullSafety = File(path.join(examplePath, 'null_safety')).existsSync();
-  final List<String> additionalArgs = hasNullSafety
-    ? <String>['--no-sound-null-safety']
-    : <String>[];
+  final List<String> additionalArgs = <String>[
+    if (hasNullSafety) '--no-sound-null-safety',
+    if (mainFile != null) path.relative(mainFile.path, from: exampleDirectory.absolute.path),
+  ];
   if (Directory(path.join(examplePath, 'android')).existsSync()) {
     await _flutterBuildApk(examplePath, release: false, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
     await _flutterBuildApk(examplePath, release: true, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
@@ -1562,10 +1562,18 @@ Future<void> _runFlutterTest(String workingDirectory, {
 }) async {
   assert(!printOutput || outputChecker == null, 'Output either can be printed or checked but not both');
 
+  final List<String> tags = <String>[];
+  // Recipe configured reduced test shards will only execute tests with the
+  // appropriate tag.
+  if ((Platform.environment['REDUCED_TEST_SET'] ?? 'False') == 'True') {
+    tags.addAll(<String>['-t', 'reduced-test-set']);
+  }
+
   final List<String> args = <String>[
     'test',
     if (shuffleTests) '--test-randomize-ordering-seed=$shuffleSeed',
     ...options,
+    ...tags,
     ...flutterTestArgs,
   ];
 

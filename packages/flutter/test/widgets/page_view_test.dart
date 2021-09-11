@@ -14,6 +14,12 @@ import 'states.dart';
 const Duration _frameDuration = Duration(milliseconds: 100);
 
 void main() {
+  testWidgets('PageController cannot return page while unattached',
+      (WidgetTester tester) async {
+    final PageController controller = PageController();
+    expect(() => controller.page, throwsAssertionError);
+  });
+
   testWidgets('PageView control test', (WidgetTester tester) async {
     final List<String> log = <String>[];
 
@@ -781,7 +787,7 @@ void main() {
     ));
     expect(controller.page, 0);
     controller.jumpToPage(2);
-    expect(await tester.pumpAndSettle(const Duration(minutes: 1)), 1);
+    expect(await tester.pumpAndSettle(const Duration(minutes: 1)), 2);
     expect(controller.page, 2);
     await tester.pumpWidget(
       PageStorage(
