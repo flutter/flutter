@@ -18,6 +18,17 @@ Future<void> main() async {
     try {
       section('Lint integration_test');
 
+      await exec(
+        'pod',
+        <String>[
+          'repo',
+          'update',
+        ],
+        environment: <String, String>{
+          'LANG': 'en_US.UTF-8',
+        },
+      );
+
       await inDirectory(tempDir, () async {
         // Relative to this script.
         final String flutterRoot = path.dirname(path.dirname(path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))))));
