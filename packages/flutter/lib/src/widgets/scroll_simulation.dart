@@ -197,7 +197,7 @@ class ClampingScrollSimulation extends Simulation {
     final double l = _splineDeceleration(velocity);
     final double decelMinusOne = _kDecelerationRate - 1.0;
     return friction *
-        _decelerationForFriction(0.84) *
+        _decelerationForFriction(0.779) *
         math.exp(_kDecelerationRate / decelMinusOne * l);
   }
 
