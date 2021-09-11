@@ -114,8 +114,6 @@ const TextStyle _kStepStyle = TextStyle(
 );
 const Color _kErrorLight = Colors.red;
 final Color _kErrorDark = Colors.red.shade400;
-const Color _kCircleActiveLight = Colors.white;
-const Color _kCircleActiveDark = Colors.black87;
 const Color _kDisabledLight = Colors.black38;
 const Color _kDisabledDark = Colors.white38;
 const double _kStepSize = 24.0;
