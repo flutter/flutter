@@ -32,7 +32,7 @@ typedef ConfirmDismissCallback = Future<bool?> Function(DismissDirection directi
 
 /// Signature used by [Dismissible] to indicate whether the dismiss threshold has
 /// been reached, was previously reached
-/// Used by [Dismissible.DismissUpdateCallback].
+/// Used by [Dismissible.onDismissUpdate].
 typedef DismissUpdateCallback = void Function(DismissDirection direction, DismissUpdate dismissUpdate);
 
 /// The direction in which a [Dismissible] can be dismissed.
