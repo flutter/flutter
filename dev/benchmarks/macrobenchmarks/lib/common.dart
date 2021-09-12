@@ -17,6 +17,7 @@ const String kColorFilterAndFadeRouteName = '/color_filter_and_fade';
 const String kFadingChildAnimationRouteName = '/fading_child_animation';
 const String kImageFilteredTransformAnimationRouteName = '/imagefiltered_transform_animation';
 const String kMultiWidgetConstructionRouteName = '/multi_widget_construction';
+const String kPartialRepaintRouteName = '/partial_repaint';
 const String kHeavyGridViewRouteName = '/heavy_gridview';
 const String kSimpleScrollRouteName = '/simple_scroll';
 const String kStackSizeRouteName = '/stack_size';

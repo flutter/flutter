@@ -19,6 +19,7 @@ import 'src/heavy_grid_view.dart';
 import 'src/large_image_changer.dart';
 import 'src/large_images.dart';
 import 'src/multi_widget_construction.dart';
+import 'src/partial_repaint.dart';
 import 'src/picture_cache.dart';
 import 'src/post_backdrop_filter.dart';
 import 'src/simple_animation.dart';
@@ -55,6 +56,7 @@ class MacrobenchmarksApp extends StatelessWidget {
         kFadingChildAnimationRouteName: (BuildContext context) => const FilteredChildAnimationPage(FilterType.opacity),
         kImageFilteredTransformAnimationRouteName: (BuildContext context) => const FilteredChildAnimationPage(FilterType.rotateFilter),
         kMultiWidgetConstructionRouteName: (BuildContext context) => const MultiWidgetConstructTable(10, 20),
+        kPartialRepaintRouteName: (BuildContext context) => const PartialRepaintPage(),
         kHeavyGridViewRouteName: (BuildContext context) => const HeavyGridViewPage(),
         kSimpleScrollRouteName: (BuildContext context) => const SimpleScroll(),
         kStackSizeRouteName: (BuildContext context) => const StackSizePage(),
@@ -175,6 +177,12 @@ class HomePage extends StatelessWidget {
               Navigator.pushNamed(context, kMultiWidgetConstructionRouteName);
             },
           ),
+          ElevatedButton(
+              key: const Key(kPartialRepaintRouteName),
+              onPressed: () {
+                Navigator.pushNamed(context, kPartialRepaintRouteName);
+              },
+              child: const Text('Partial Repaint')),
           ElevatedButton(
             key: const Key(kHeavyGridViewRouteName),
             child: const Text('Heavy Grid View'),
