@@ -3,16 +3,9 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-class PartialRepaintPage extends StatefulWidget {
+class PartialRepaintPage extends StatelessWidget {
   const PartialRepaintPage({Key? key}) : super(key: key);
 
-  @override
-  State<StatefulWidget> createState() {
-    return _PageState();
-  }
-}
-
-class _PageState extends State<PartialRepaintPage> {
   @override
   Widget build(BuildContext context) {
     return CupertinoApp(
