@@ -1008,7 +1008,7 @@ class DataTable extends StatelessWidget {
           onTapDown: cell.onTapDown,
           onSelectChanged: row.onSelectChanged == null ? null : () => row.onSelectChanged?.call(!row.selected),
           overlayColor: row.color ?? effectiveDataRowColor,
-          onRowLongPress: row.onLongPress == null ? null : () => row.onLongPress?.call(),
+          onRowLongPress: row.onLongPress,
         );
         rowIndex += 1;
       }
