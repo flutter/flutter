@@ -811,10 +811,10 @@ abstract class TransitionDelegate<T> {
       final Set<RouteTransitionRecord> exitingPageRoutes = locationToExitingPageRoute.values.toSet();
       // Firstly, verifies all exiting routes have been marked.
       for (final RouteTransitionRecord exitingPageRoute in exitingPageRoutes) {
-        assert(!exitingPageRoute.isWaitingForExitingDecision);
+        assert((exitingPageRoute as _RouteEntry).pendingDecision != null);
         if (pageRouteToPagelessRoutes.containsKey(exitingPageRoute)) {
           for (final RouteTransitionRecord pagelessRoute in pageRouteToPagelessRoutes[exitingPageRoute]!) {
-            assert(!pagelessRoute.isWaitingForExitingDecision);
+            assert((pagelessRoute as _RouteEntry).pendingDecision != null);
           }
         }
       }
@@ -824,7 +824,8 @@ abstract class TransitionDelegate<T> {
 
       for (final _RouteEntry routeEntry in resultsToVerify.cast<_RouteEntry>()) {
         assert(routeEntry != null);
-        assert(!routeEntry.isWaitingForEnteringDecision && !routeEntry.isWaitingForExitingDecision);
+        assert((!routeEntry.isWaitingForEnteringDecision && !routeEntry.isWaitingForExitingDecision) ||
+               routeEntry.pendingDecision != null);
         if (
           indexOfNextRouteInNewHistory >= newPageRouteHistory.length ||
           routeEntry != newPageRouteHistory[indexOfNextRouteInNewHistory]
@@ -2698,6 +2699,14 @@ enum _RouteLifecycle {
   disposed, // we have disposed the route
 }
 
+enum _TransitionDecision {
+  pop,
+  remove,
+  complete,
+  add,
+  push,
+}
+
 typedef _RouteEntryPredicate = bool Function(_RouteEntry entry);
 
 class _NotAnnounced extends Route<void> {
@@ -2859,7 +2868,7 @@ class _RouteEntry extends RouteTransitionRecord {
   void pop<T>(T? result) {
     assert(isPresent);
     doingPop = true;
-    if (route.didPop(result) && doingPop) {
+    if (route.didPop(result) && willBePresent) {
       currentState = _RouteLifecycle.pop;
     }
     doingPop = false;
@@ -2986,6 +2995,9 @@ class _RouteEntry extends RouteTransitionRecord {
 
   void markNeedsExitingDecision() => _isWaitingForExitingDecision = true;
 
+  _TransitionDecision? pendingDecision;
+  Object? pendingResult;
+
   @override
   void markForPush() {
     assert(
@@ -2993,7 +3005,7 @@ class _RouteEntry extends RouteTransitionRecord {
       'This route cannot be marked for push. Either a decision has already been '
       'made or it does not require an explicit decision on how to transition in.',
     );
-    currentState = _RouteLifecycle.push;
+    pendingDecision = _TransitionDecision.push;
   }
 
   @override
@@ -3003,30 +3015,30 @@ class _RouteEntry extends RouteTransitionRecord {
       'This route cannot be marked for add. Either a decision has already been '
       'made or it does not require an explicit decision on how to transition in.',
     );
-    currentState = _RouteLifecycle.add;
+    pendingDecision = _TransitionDecision.add;
   }
 
   @override
-  void markForPop([dynamic result]) {
+  void markForPop([Object? result]) {
     assert(
       !isWaitingForEnteringDecision && isWaitingForExitingDecision && isPresent,
       'This route cannot be marked for pop. Either a decision has already been '
       'made or it does not require an explicit decision on how to transition out.',
     );
-    pop<dynamic>(result);
-    _isWaitingForExitingDecision = false;
+    pendingDecision = _TransitionDecision.pop;
+    pendingResult = result;
   }
 
   @override
-  void markForComplete([dynamic result]) {
+  void markForComplete([Object? result]) {
     assert(
       !isWaitingForEnteringDecision && isWaitingForExitingDecision && isPresent,
       'This route cannot be marked for complete. Either a decision has already '
       'been made or it does not require an explicit decision on how to transition '
       'out.',
     );
-    complete<dynamic>(result);
-    _isWaitingForExitingDecision = false;
+    pendingDecision = _TransitionDecision.complete;
+    pendingResult = result;
   }
 
   @override
@@ -3037,8 +3049,35 @@ class _RouteEntry extends RouteTransitionRecord {
       'been made or it does not require an explicit decision on how to transition '
       'out.',
     );
-    remove();
+    pendingDecision = _TransitionDecision.remove;
+  }
+
+  void flushPendingDecision() {
+    assert(pendingDecision != null);
+    // This method may be called again as a result of flushing the pending
+    // decision. Clear the pending decision before flushing them.
+    final _TransitionDecision decision = pendingDecision!;
+    final Object? result = pendingResult;
+    pendingDecision = null;
+    pendingResult = null;
     _isWaitingForExitingDecision = false;
+    switch(decision) {
+      case _TransitionDecision.add:
+        currentState = _RouteLifecycle.add;
+        break;
+      case _TransitionDecision.push:
+        currentState = _RouteLifecycle.push;
+        break;
+      case _TransitionDecision.complete:
+        complete<dynamic>(result);
+        break;
+      case _TransitionDecision.pop:
+        pop<dynamic>(result);
+        break;
+      case _TransitionDecision.remove:
+        remove();
+        break;
+    }
   }
 
   bool get restorationEnabled => route.restorationScopeId.value != null;
@@ -3732,7 +3771,16 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     bool seenTopActiveRoute = false; // Whether we've seen the route that would get didPopNext.
     final List<_RouteEntry> toBeDisposed = <_RouteEntry>[];
     while (index >= 0) {
-      switch (entry!.currentState) {
+      if (entry!.pendingDecision != null) {
+        entry.flushPendingDecision();
+        assert(entry.pendingDecision == null && entry.currentState != _RouteLifecycle.staging);
+        if (entry.currentState == _RouteLifecycle.disposed){
+          // The route is exited synchronously, and the history has finished
+          // updated along with it. No need to walk the list again.
+          return;
+        }
+      }
+      switch (entry.currentState) {
         case _RouteLifecycle.add:
           assert(rearrangeOverlay);
           entry.handleAdd(
