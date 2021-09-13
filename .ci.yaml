@@ -142,6 +142,16 @@ targets:
     presubmit: false
     properties:
       build_host: "true"
+      upload_metrics: "true"
+    timeout: 60
+    scheduler: luci
+
+  - name: Linux Benchmarks (no-upload)
+    bringup: true
+    recipe: engine/engine_metrics
+    properties:
+      build_host: "true"
+      upload_metrics: "false"
     timeout: 60
     scheduler: luci
 

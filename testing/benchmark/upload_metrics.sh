@@ -37,10 +37,10 @@ DART="${DART_SDK_DIR}/bin/dart"
 
 cd "$SCRIPT_DIR"
 "$DART" --disable-dart-dev bin/parse_and_send.dart \
-  ../../../out/host_release/txt_benchmarks.json
+  --json ../../../out/host_release/txt_benchmarks.json "$@"
 "$DART" --disable-dart-dev bin/parse_and_send.dart \
-  ../../../out/host_release/fml_benchmarks.json
+  --json ../../../out/host_release/fml_benchmarks.json "$@"
 "$DART" --disable-dart-dev bin/parse_and_send.dart \
-  ../../../out/host_release/shell_benchmarks.json
+  --json ../../../out/host_release/shell_benchmarks.json "$@"
 "$DART" --disable-dart-dev bin/parse_and_send.dart \
-  ../../../out/host_release/ui_benchmarks.json
+  --json ../../../out/host_release/ui_benchmarks.json "$@"
