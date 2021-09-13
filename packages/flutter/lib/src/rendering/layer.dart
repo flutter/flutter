@@ -275,6 +275,9 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     }
 
     _needsAddToScene = true;
+    if (parent != null && !parent!.alwaysNeedsAddToScene) {
+      parent!.markNeedsAddToScene();
+    }
   }
 
   /// Mark that this layer is in sync with engine.
@@ -296,9 +299,9 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// Whether this or any descendant layer in the subtree needs [addToScene].
   ///
   /// This is for debug and test purpose only. It only becomes valid after
-  /// calling [updateSubtreeNeedsAddToScene].
+  /// calling [markNeedsAddToScene].
   @visibleForTesting
-  bool? get debugSubtreeNeedsAddToScene {
+  bool? get debugNeedsAddToScene {
     bool? result;
     assert(() {
       result = _needsAddToScene;
@@ -363,21 +366,6 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     }
   }
   ui.EngineLayer? _engineLayer;
-
-  /// Traverses the layer subtree starting from this layer and determines whether it needs [addToScene].
-  ///
-  /// A layer needs [addToScene] if any of the following is true:
-  ///
-  /// - [alwaysNeedsAddToScene] is true.
-  /// - [markNeedsAddToScene] has been called.
-  /// - Any of its descendants need [addToScene].
-  ///
-  /// [ContainerLayer] overrides this method to recursively call it on its children.
-  @protected
-  @visibleForTesting
-  void updateSubtreeNeedsAddToScene() {
-    _needsAddToScene = _needsAddToScene || alwaysNeedsAddToScene;
-  }
 
   /// This layer's next sibling in the parent layer's child list.
   Layer? get nextSibling => _nextSibling;
@@ -568,6 +556,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
       properties.add(DiagnosticsProperty<String>('engine layer', describeIdentity(_engineLayer)));
     }
     properties.add(DiagnosticsProperty<int>('handles', debugHandleCount));
+    properties.add(DiagnosticsProperty<bool>('needsAddToScene', _needsAddToScene));
   }
 }
 
@@ -937,7 +926,6 @@ class ContainerLayer extends Layer {
   // both to render the whole layer tree (e.g. a normal application frame) and
   // to render a subtree (e.g. `OffsetLayer.toImage`).
   ui.Scene buildScene(ui.SceneBuilder builder) {
-    updateSubtreeNeedsAddToScene();
     addToScene(builder);
     // Clearing the flag _after_ calling `addToScene`, not _before_. This is
     // because `addToScene` calls children's `addToScene` methods, which may
@@ -971,17 +959,6 @@ class ContainerLayer extends Layer {
   void dispose() {
     removeAllChildren();
     super.dispose();
-  }
-
-  @override
-  void updateSubtreeNeedsAddToScene() {
-    super.updateSubtreeNeedsAddToScene();
-    Layer? child = firstChild;
-    while (child != null) {
-      child.updateSubtreeNeedsAddToScene();
-      _needsAddToScene = _needsAddToScene || child._needsAddToScene;
-      child = child.nextSibling;
-    }
   }
 
   @override
@@ -1104,6 +1081,7 @@ class ContainerLayer extends Layer {
   /// their children using [addChildrenToScene], then reverse the aforementioned
   /// effects before returning from [addToScene].
   void addChildrenToScene(ui.SceneBuilder builder, [ Offset childOffset = Offset.zero ]) {
+    // assert(firstChild != null);
     Layer? child = firstChild;
     while (child != null) {
       if (childOffset == Offset.zero) {

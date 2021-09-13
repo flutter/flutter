@@ -95,7 +95,7 @@ void _renderElement(ui.FlutterView window, RenderObject renderObject) {
     sceneBuilder.pushOffset(-layer.offset.dx, -layer.offset.dy);
   }
   // ignore: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member
-  layer.updateSubtreeNeedsAddToScene();
+  layer.markNeedsAddToScene();
   // ignore: invalid_use_of_protected_member
   layer.addToScene(sceneBuilder);
   sceneBuilder.pop();
