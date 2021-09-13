@@ -453,8 +453,8 @@ class ManifestAssetBundle implements AssetBundle {
       entries[key] = content;
       return;
     }
-    final DevFSStringContent oldContent = entries[key]! as DevFSStringContent;
-    if (oldContent.string != content.string) {
+    final DevFSStringContent? oldContent = entries[key] as DevFSStringContent?;
+    if (oldContent?.string != content.string) {
       entries[key] = content;
     }
   }
@@ -476,8 +476,8 @@ class ManifestAssetBundle implements AssetBundle {
     // the uncompressed strings to not incur decompression/decoding while making
     // the comparison.
     if (!entries.containsKey(_kNoticeZippedFile) ||
-        (entries[_kNoticeZippedFile]! as DevFSStringCompressingBytesContent)
-            .equals(combinedLicenses) != true) {
+        (entries[_kNoticeZippedFile] as DevFSStringCompressingBytesContent?)
+            ?.equals(combinedLicenses) != true) {
       entries[_kNoticeZippedFile] = DevFSStringCompressingBytesContent(
         combinedLicenses,
         // A zlib dictionary is a hinting string sequence with the most
