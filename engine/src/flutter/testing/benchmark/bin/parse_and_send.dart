@@ -7,6 +7,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:args/args.dart';
 import 'package:metrics_center/metrics_center.dart';
 import 'package:path/path.dart' as p;
 
@@ -81,11 +82,32 @@ Future<FlutterDestination> connectFlutterDestination() async {
   );
 }
 
+ArgParser _serupOptions() {
+  final ArgParser parser = ArgParser();
+  parser.addOption(
+    'json',
+    mandatory: true,
+    help: 'Path to the benchmarks json file.',
+  );
+  parser.addFlag(
+    'no-upload',
+    help: 'Upload the parsed benchmarks.',
+    defaultsTo: false,
+  );
+  return parser;
+}
+
 Future<void> main(List<String> args) async {
-  if (args.length != 1) {
-    throw 'Must have one argument: <benchmark_json_file>';
+  final ArgParser parser = _serupOptions();
+  final ArgResults options = parser.parse(args);
+
+  final String json = options['json'] as String;
+  final PointsAndDate pointsAndDate = await parse(json);
+
+  final bool noUpload = options['no-upload'] as bool;
+  if (noUpload) {
+    return;
   }
-  final PointsAndDate pointsAndDate = await parse(args[0]);
 
   // The data will be sent to the Datastore of the GCP project specified through
   // environment variable BENCHMARK_GCP_CREDENTIALS, or TOKEN_PATH/GCP_PROJECT.
