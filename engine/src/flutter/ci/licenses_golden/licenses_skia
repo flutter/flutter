@@ -1,4 +1,4 @@
-Signature: 3bcc64ae53024ed51c3691b4e3858832
+Signature: 1bd3585822c39d2e9a0d095575669534
 
 UNUSED LICENSES:
 
@@ -1952,7 +1952,6 @@ FILE: ../../../third_party/skia/src/sksl/codegen/SkSLSPIRVCodeGenerator.cpp
 FILE: ../../../third_party/skia/src/sksl/codegen/SkSLSPIRVCodeGenerator.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLBinaryExpression.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLBlock.h
-FILE: ../../../third_party/skia/src/sksl/ir/SkSLBoolLiteral.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLBreakStatement.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLConstructor.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLContinueStatement.h
@@ -1963,7 +1962,6 @@ FILE: ../../../third_party/skia/src/sksl/ir/SkSLExpressionStatement.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLExtension.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLField.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLFieldAccess.h
-FILE: ../../../third_party/skia/src/sksl/ir/SkSLFloatLiteral.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLForStatement.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLFunctionCall.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLFunctionDeclaration.h
@@ -1971,8 +1969,8 @@ FILE: ../../../third_party/skia/src/sksl/ir/SkSLFunctionDefinition.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLFunctionReference.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLIfStatement.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLIndexExpression.h
-FILE: ../../../third_party/skia/src/sksl/ir/SkSLIntLiteral.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLInterfaceBlock.h
+FILE: ../../../third_party/skia/src/sksl/ir/SkSLLiteral.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLModifiersDeclaration.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLNop.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLPostfixExpression.h
