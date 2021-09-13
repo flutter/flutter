@@ -19,4 +19,8 @@ path = './' + sys.argv[1]
 # The rest of the arguements are passed directly to the executable.
 args = [path] + sys.argv[2:]
 
-sys.exit(subprocess.call(args))
+try:
+  subprocess.check_output(args, stderr=subprocess.STDOUT, text=True)
+except subprocess.CalledProcessError as ex:
+  print(ex.output)
+  sys.exit(ex.returncode)
