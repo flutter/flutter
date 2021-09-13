@@ -159,14 +159,12 @@ Future<bool> rollDev({
     return false;
   }
 
-  final bool isCommitTagged = await repository.isCommitTagged(commit);
-  if (skipTagging && !isCommitTagged) {
+  if (skipTagging && !(await repository.isCommitTagged(commit))) {
     throw Exception(
         'The $kSkipTagging flag is only supported for tagged commits.');
   }
 
-  final bool isCommitAncestor = await repository.isAncestor(commit, lastVersion.toString());
-  if (!force && !isCommitAncestor) {
+  if (!force && !(await repository.isAncestor(commit, lastVersion.toString()))) {
     throw Exception(
         'The previous dev tag $lastVersion is not a direct ancestor of $commit.\n'
         'The flag "$kForce" is required to force push a new release past a cherry-pick.');
