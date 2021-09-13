@@ -5,7 +5,7 @@
 name: flutter_engine_benchmark
 publish_to: none
 environment:
-  sdk: ">=2.2.2 <3.0.0"
+  sdk: '>=2.12.0-0 <3.0.0'
 
 # Do not add any dependencies that require more than what is provided in
 # //third_party/pkg, //third_party/dart/pkg, or
@@ -17,6 +17,7 @@ environment:
 # relative to this directory into //third_party/dart
 
 dependencies:
+  args: any
   metrics_center: any
   path: any
 
@@ -26,6 +27,8 @@ dev_dependencies:
 dependency_overrides:
   _discoveryapis_commons:
     path: ../../../third_party/pkg/googleapis/discoveryapis_commons
+  args:
+    path: ../../../third_party/dart/third_party/pkg/args
   async_helper:
     path: ../../../third_party/dart/pkg/async_helper
   async:
