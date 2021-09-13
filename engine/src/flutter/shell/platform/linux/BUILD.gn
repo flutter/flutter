@@ -220,6 +220,8 @@ executable("flutter_linux_unittests") {
 shared_library("flutter_linux_gtk") {
   deps = [ ":flutter_linux" ]
 
+  ldflags = [ "-Wl,-rpath,\$ORIGIN" ]
+
   public_configs = [ "//flutter:config" ]
 }
 
