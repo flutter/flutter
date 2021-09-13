@@ -811,10 +811,10 @@ abstract class TransitionDelegate<T> {
       final Set<RouteTransitionRecord> exitingPageRoutes = locationToExitingPageRoute.values.toSet();
       // Firstly, verifies all exiting routes have been marked.
       for (final RouteTransitionRecord exitingPageRoute in exitingPageRoutes) {
-        assert((exitingPageRoute as _RouteEntry).pendingDecision != null);
+        assert(!exitingPageRoute.isWaitingForExitingDecision || (exitingPageRoute as _RouteEntry).pendingDecision != null);
         if (pageRouteToPagelessRoutes.containsKey(exitingPageRoute)) {
           for (final RouteTransitionRecord pagelessRoute in pageRouteToPagelessRoutes[exitingPageRoute]!) {
-            assert((pagelessRoute as _RouteEntry).pendingDecision != null);
+            assert(!pagelessRoute.isWaitingForExitingDecision || (pagelessRoute as _RouteEntry).pendingDecision != null);
           }
         }
       }
