@@ -126,8 +126,7 @@ Future<bool> rollDev({
 
   final String remoteUrl = await repository.remoteUrl(remoteName);
 
-  final bool isCheckoutClean = await repository.gitCheckoutClean();
-  if (!isCheckoutClean) {
+  if (!(await repository.gitCheckoutClean())) {
     throw Exception(
         'Your git repository is not clean. Try running "git clean -fd". Warning, '
         'this will delete files! Run with -n to find out which ones.');
@@ -148,8 +147,7 @@ Future<bool> rollDev({
       skipTagging ? lastVersion : Version.fromCandidateBranch(candidateBranch);
   final String tagName = version.toString();
 
-  final String revisionHash = await repository.reverseParse(lastVersion.toString());
-  if (revisionHash.contains(commit.trim())) {
+  if ((await repository.reverseParse(lastVersion.toString())).contains(commit.trim())) {
     throw Exception(
         'Commit $commit is already on the dev branch as $lastVersion.');
   }

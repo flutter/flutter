@@ -252,13 +252,10 @@ void main() {
           ),
         ...codesignCheckCommands,
       ]);
-      await runner
-          .run(<String>['codesign', '--$kVerify', '--$kRevision', revision]);
+      await runner.run(<String>['codesign', '--$kVerify', '--$kRevision', revision]);
       expect(processManager.hasRemainingExpectations, false);
-      expect(
-          stdio.stdout,
-          contains(
-              'Verified that binaries for commit $revision are codesigned and have expected entitlements'));
+      expect(stdio.stdout,contains(
+        'Verified that binaries for commit $revision are codesigned and have expected entitlements'));
     });
 
     test('fails if a single binary is not codesigned', () async {

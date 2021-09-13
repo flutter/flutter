@@ -204,8 +204,7 @@ class CodesignCommand extends Command<void> {
   @visibleForTesting
   Future<void> verifyExist() async {
     final Set<String> foundFiles = <String>{};
-    final List<String> binaryPaths = await findBinaryPaths(await framework.cacheDirectory);
-    for (final String binaryPath in binaryPaths) {
+    for (final String binaryPath in await findBinaryPaths(await framework.cacheDirectory)) {
       if ((await binariesWithEntitlements).contains(binaryPath)) {
         foundFiles.add(binaryPath);
       } else if ((await binariesWithoutEntitlements).contains(binaryPath)) {
@@ -244,8 +243,7 @@ class CodesignCommand extends Command<void> {
     final List<String> unsignedBinaries = <String>[];
     final List<String> wrongEntitlementBinaries = <String>[];
     final List<String> unexpectedBinaries = <String>[];
-    final List<String> binaryPaths = await findBinaryPaths(await framework.cacheDirectory);
-    for (final String binaryPath in binaryPaths) {
+    for (final String binaryPath in await findBinaryPaths(await framework.cacheDirectory)) {
       bool verifySignature = false;
       bool verifyEntitlements = false;
       if ((await binariesWithEntitlements).contains(binaryPath)) {
@@ -278,8 +276,7 @@ class CodesignCommand extends Command<void> {
       }
       if (verifyEntitlements) {
         stdio.printTrace('Verifying entitlements of $binaryPath');
-        final bool pathHasExpectedEntitlements = await hasExpectedEntitlements(binaryPath);
-        if (!pathHasExpectedEntitlements) {
+        if (!(await hasExpectedEntitlements(binaryPath))) {
           wrongEntitlementBinaries.add(binaryPath);
         }
       }
@@ -352,8 +349,7 @@ class CodesignCommand extends Command<void> {
         .toList();
     
     await Future.forEach(allFiles, (String filePath) async {
-      final bool fileIsBinary = await isBinary(filePath);
-      if (fileIsBinary) {
+      if (await isBinary(filePath)) {
         _allBinaryPaths.add(filePath);
       }
     });

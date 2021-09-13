@@ -261,13 +261,12 @@ class StartCommand extends Command<void> {
       }
     }
     final String engineHead = await engine.reverseParse('HEAD');
-    final Directory engineCheckoutDirectory = await engine.checkoutDirectory;
     state.engine = pb.Repository(
       candidateBranch: candidateBranch,
       workingBranch: workingBranchName,
       startingGitHead: engineHead,
       currentGitHead: engineHead,
-      checkoutPath: engineCheckoutDirectory.path,
+      checkoutPath: (await engine.checkoutDirectory).path,
       cherrypicks: engineCherrypicks,
       dartRevision: dartRevision,
       upstream: pb.Remote(name: 'upstream', url: engine.upstreamRemote.url),
@@ -311,10 +310,9 @@ class StartCommand extends Command<void> {
     }
 
     // Get framework version
-    final String fullTag = await framework.getFullTag(
+    final Version lastVersion = Version.fromString(await framework.getFullTag(
         framework.upstreamRemote.name, candidateBranch,
-        exact: false);
-    final Version lastVersion = Version.fromString(fullTag);
+        exact: false));
     Version nextVersion;
     if (incrementLetter == 'm') {
       nextVersion = Version.fromCandidateBranch(candidateBranch);
@@ -338,13 +336,12 @@ class StartCommand extends Command<void> {
     state.releaseVersion = nextVersion.toString();
 
     final String frameworkHead = await framework.reverseParse('HEAD');
-    final Directory frameworkCheckoutDirectory = await framework.checkoutDirectory;
     state.framework = pb.Repository(
       candidateBranch: candidateBranch,
       workingBranch: workingBranchName,
       startingGitHead: frameworkHead,
       currentGitHead: frameworkHead,
-      checkoutPath: frameworkCheckoutDirectory.path,
+      checkoutPath: (await framework.checkoutDirectory).path,
       cherrypicks: frameworkCherrypicks,
       upstream: pb.Remote(name: 'upstream', url: framework.upstreamRemote.url),
       mirror: pb.Remote(name: 'mirror', url: framework.mirrorRemote!.url),
