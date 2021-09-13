@@ -218,10 +218,8 @@ abstract class TextEditingDelta {
   /// applied.
   final TextRange composing;
 
-  /// {@template flutter.services.TextEditingDelta.apply}
   /// This method will take the given [TextEditingValue] and return a new
   /// [TextEditingValue] with that instance of [TextEditingDelta] applied to it.
-  /// {@endtemplate}
   TextEditingValue apply(TextEditingValue value);
 }
 
@@ -249,7 +247,6 @@ class TextEditingDeltaInsertion extends TextEditingDelta {
   /// The offset in the [oldText] where the insertion begins.
   final int insertionOffset;
 
-  /// {@macro flutter.services.TextEditingDelta.apply}
   @override
   TextEditingValue apply(TextEditingValue value) {
     // To stay inline with the plain text model we should follow a last write wins
@@ -284,7 +281,6 @@ class TextEditingDeltaDeletion extends TextEditingDelta {
   /// The text from [oldText] that is being deleted.
   String get textDeleted => oldText.substring(deletedRange.start, deletedRange.end);
 
-  /// {@macro flutter.services.TextEditingDelta.apply}
   @override
   TextEditingValue apply(TextEditingValue value) {
     // To stay inline with the plain text model we should follow a last write wins
@@ -329,7 +325,6 @@ class TextEditingDeltaReplacement extends TextEditingDelta {
   /// The original text that is being replaced in [oldText].
   String get textReplaced => oldText.substring(replacedRange.start, replacedRange.end);
 
-  /// {@macro flutter.services.TextEditingDelta.apply}
   @override
   TextEditingValue apply(TextEditingValue value) {
     // To stay inline with the plain text model we should follow a last write wins
@@ -365,7 +360,6 @@ class TextEditingDeltaNonTextUpdate extends TextEditingDelta {
     composing: composing,
   );
 
-  /// {@macro flutter.services.TextEditingDelta.apply}
   @override
   TextEditingValue apply(TextEditingValue value) {
     // To stay inline with the plain text model we should follow a last write wins
