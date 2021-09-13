@@ -688,9 +688,9 @@ class _WidgetInspectorService = Object with WidgetInspectorService;
 ///
 /// Calls to this object are typically made from GUI tools such as the [Flutter
 /// IntelliJ Plugin](https://github.com/flutter/flutter-intellij/blob/master/README.md)
-/// using the [Dart VM Service protocol](https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md).
+/// using the [Dart VM Service protocol](https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/service.md).
 /// This class uses its own object id and manages object lifecycles itself
-/// instead of depending on the [object ids](https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#getobject)
+/// instead of depending on the [object ids](https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/service.md#getobject)
 /// specified by the VM Service Protocol because the VM Service Protocol ids
 /// expire unpredictably. Object references are tracked in groups so that tools
 /// that clients can use dereference all objects in a group with a single
@@ -977,7 +977,7 @@ mixin WidgetInspectorService {
   ///
   /// See also:
   ///
-  ///  * <https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#rpcs-requests-and-responses>
+  ///  * <https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/service.md#rpcs-requests-and-responses>
   ///  * [BindingBase.initServiceExtensions], which explains when service
   ///    extensions can be used.
   void initServiceExtensions(RegisterServiceExtensionCallback registerServiceExtensionCallback) {

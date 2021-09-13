@@ -79,5 +79,26 @@ void main() {
       expect(response.json['value'], 'Brightness.light');
     }
     timer.cancel();
+
+    // Verify that all duration events on the timeline are properly nested.
+    final Response response = await vmService.callServiceExtension('getVMTimeline');
+    final List<TimelineEvent> events = (response as Timeline).traceEvents;
+    final Map<int, List<String>> threadDurationEventStack = <int, List<String>>{};
+    for (final TimelineEvent e in events) {
+      final Map<String, dynamic> event = e.json;
+      final String phase = event['ph'] as String;
+      final int tid = event['tid'] as int;
+      final String name = event['name'] as String;
+      final List<String> stack = threadDurationEventStack.putIfAbsent(tid, () => <String>[]);
+      if (phase == 'B') {
+        stack.add(name);
+      } else if (phase == 'E') {
+        // The downloaded part of the timeline may contain an end event whose
+        // corresponding begin event happened before the start of the timeline.
+        if (stack.isNotEmpty) {
+          expect(stack.removeLast(), name);
+        }
+      }
+    }
   });
 }

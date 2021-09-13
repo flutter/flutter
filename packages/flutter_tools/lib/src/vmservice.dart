@@ -146,7 +146,7 @@ Future<io.WebSocket> _defaultOpenChannel(String url, {
   while (socket == null) {
     attempts += 1;
     try {
-      socket = await constructor(url, compression: compression);
+      socket = await constructor(url, compression: compression, logger: logger);
     } on io.WebSocketException catch (e) {
       await handleError(e);
     } on io.SocketException catch (e) {
@@ -770,7 +770,7 @@ class FlutterVmService {
         : <String, String>{},
     );
     if (result != null && result['value'] is String) {
-      return (result['value'] as String) == 'Brightness.light'
+      return result['value'] == 'Brightness.light'
         ? Brightness.light
         : Brightness.dark;
     }
@@ -831,10 +831,11 @@ class FlutterVmService {
         // with cleaning up.
         return <FlutterView>[];
       }
-      final List<Object> rawViews = response.json!['views'] as List<Object>;
+      final List<Object>? rawViews = response.json!['views'] as List<Object>?;
       final List<FlutterView> views = <FlutterView>[
-        for (final Object rawView in rawViews)
-          FlutterView.parse(rawView as Map<String, Object>)
+        if (rawViews != null)
+          for (final Object rawView in rawViews)
+            FlutterView.parse(rawView as Map<String, Object>)
       ];
       if (views.isNotEmpty || returnEarly) {
         return views;
@@ -874,7 +875,7 @@ class FlutterVmService {
       final List<vm_service.IsolateRef> refs = await _getIsolateRefs();
       for (final vm_service.IsolateRef ref in refs) {
         final vm_service.Isolate? isolate = await getIsolateOrNull(ref.id!);
-        if (isolate != null && isolate.extensionRPCs!.contains(extensionName)) {
+        if (isolate != null && isolate.extensionRPCs?.contains(extensionName) == true) {
           return ref;
         }
       }

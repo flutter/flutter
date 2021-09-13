@@ -175,6 +175,7 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
     }
     Widget child = Container(
       padding: widget.padding,
+      height: widget.route.itemHeight,
       child: widget.route.items[widget.itemIndex],
     );
     final BorderRadius itemBorderRadius;
@@ -516,7 +517,10 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   // selected item is aligned with the button's vertical center, as far as
   // that's possible given availableHeight.
   _MenuLimits getMenuLimits(Rect buttonRect, double availableHeight, int index) {
-    final double maxMenuHeight = availableHeight - 2.0 * _kMenuItemHeight;
+    double computedMaxHeight = availableHeight - 2.0 * _kMenuItemHeight;
+    if (menuMaxHeight != null) {
+      computedMaxHeight = math.min(computedMaxHeight, menuMaxHeight!);
+    }
     final double buttonTop = buttonRect.top;
     final double buttonBottom = math.min(buttonRect.bottom, availableHeight);
     final double selectedItemOffset = getItemOffset(index);
@@ -534,8 +538,8 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
       preferredMenuHeight += itemHeights.reduce((double total, double height) => total + height);
 
     // If there are too many elements in the menu, we need to shrink it down
-    // so it is at most the maxMenuHeight.
-    final double menuHeight = math.min(maxMenuHeight, preferredMenuHeight);
+    // so it is at most the computedMaxHeight.
+    final double menuHeight = math.min(computedMaxHeight, preferredMenuHeight);
     double menuBottom = menuTop + menuHeight;
 
     // If the computed top or bottom of the menu are outside of the range
@@ -543,11 +547,18 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     // than the button height and the button is at the very bottom or top of the
     // screen, the menu will be aligned with the bottom or top of the button
     // respectively.
-    if (menuTop < topLimit)
+    if (menuTop < topLimit) {
       menuTop = math.min(buttonTop, topLimit);
+      menuBottom = menuTop + menuHeight;
+    }
 
     if (menuBottom > bottomLimit) {
       menuBottom = math.max(buttonBottom, bottomLimit);
+      menuTop = menuBottom - menuHeight;
+    }
+
+    if (menuBottom - itemHeights[selectedIndex] / 2.0 < buttonBottom - buttonRect.height / 2.0) {
+      menuBottom = buttonBottom - buttonRect.height / 2.0 + itemHeights[selectedIndex] / 2.0;
       menuTop = menuBottom - menuHeight;
     }
 
@@ -558,7 +569,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     // shown - subsequently we leave the scroll offset where the user left
     // it. This scroll offset is only accurate for fixed height menu items
     // (the default).
-    if (preferredMenuHeight > maxMenuHeight) {
+    if (preferredMenuHeight > computedMaxHeight) {
       // The offset should be zero if the selected item is in view at the beginning
       // of the menu. Otherwise, the scroll offset should center the item if possible.
       scrollOffset = math.max(0.0, selectedItemOffset - (buttonTop - menuTop));
@@ -567,6 +578,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
       scrollOffset = math.min(scrollOffset, preferredMenuHeight - menuHeight);
     }
 
+    assert(menuHeight == menuBottom - menuTop);
     return _MenuLimits(menuTop, menuBottom, menuHeight, scrollOffset);
   }
 }
@@ -821,6 +833,7 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 ///
 /// See also:
 ///
+///  * [DropdownButtonFormField], which integrates with the [Form] widget.
 ///  * [DropdownMenuItem], the class used to represent the [items].
 ///  * [DropdownButtonHideUnderline], which prevents its descendant dropdown buttons
 ///    from displaying their underlines.
@@ -1474,7 +1487,20 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   }
 }
 
-/// A convenience widget that makes a [DropdownButton] into a [FormField].
+/// A [FormField] that contains a [DropdownButton].
+///
+/// This is a convenience widget that wraps a [DropdownButton] widget in a
+/// [FormField].
+///
+/// A [Form] ancestor is not required. The [Form] simply makes it easier to
+/// save, reset, or validate multiple fields at once. To use without a [Form],
+/// pass a [GlobalKey] to the constructor and use [GlobalKey.currentState] to
+/// save or reset the form field.
+///
+/// See also:
+///
+///  * [DropdownButton], which is the underlying text field without the [Form]
+///    integration.
 class DropdownButtonFormField<T> extends FormField<T> {
   /// Creates a [DropdownButton] widget that is a [FormField], wrapped in an
   /// [InputDecorator].
