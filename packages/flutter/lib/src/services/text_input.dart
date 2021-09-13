@@ -975,11 +975,12 @@ abstract class TextInputClient {
   /// formatting.
   void updateEditingValue(TextEditingValue value);
 
-  /// Requests that this client update its editing state by applying the delta
+  /// Requests that this client update its editing state by applying the deltas
   /// received from the engine.
   ///
-  /// The [TextEditingDelta] is treated as a change that will be applied to the client's
-  /// value.
+  /// The list of [TextEditingDelta]'s are treated as changes that will be applied
+  /// to the client's editing state. A change is any mutation to the raw text
+  /// value, or any updates to the selection and/or composing region.
   void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas);
 
   /// Requests that this client perform the given action.
