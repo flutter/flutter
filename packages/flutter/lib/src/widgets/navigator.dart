@@ -3060,7 +3060,6 @@ class _RouteEntry extends RouteTransitionRecord {
     final Object? result = pendingResult;
     pendingDecision = null;
     pendingResult = null;
-    _isWaitingForExitingDecision = false;
     switch(decision) {
       case _TransitionDecision.add:
         currentState = _RouteLifecycle.add;
@@ -3078,6 +3077,7 @@ class _RouteEntry extends RouteTransitionRecord {
         remove();
         break;
     }
+    _isWaitingForExitingDecision = false;
   }
 
   bool get restorationEnabled => route.restorationScopeId.value != null;
