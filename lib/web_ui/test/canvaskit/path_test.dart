@@ -85,6 +85,21 @@ void testMain() {
       expect(path.contains(const ui.Offset(5, 5)), isFalse);
     });
 
+    test('CkPath.shift creates a shifted copy of the path', () {
+      const ui.Rect testRect = ui.Rect.fromLTRB(0, 0, 10, 10);
+      final CkPath path = CkPath();
+      path.addRect(testRect);
+      expect(path.getBounds(), testRect);
+
+      expect(
+        path.shift(const ui.Offset(20, 20)).getBounds(),
+        testRect.shift(const ui.Offset(20, 20)),
+      );
+
+      // Make sure the original path wasn't mutated.
+      expect(path.getBounds(), testRect);
+    });
+
     test('CkPath resurrection', () {
       const ui.Rect rect = ui.Rect.fromLTRB(0, 0, 10, 10);
       final CkPath path = CkPath();
