@@ -90,8 +90,8 @@ class RollDevCommand extends Command<void> {
       'For publishing a dev release without cherry picks.';
 
   @override
-  void run() {
-    rollDev(
+  Future<void> run() async {
+    await rollDev(
       argResults: argResults!,
       repository: FrameworkRepository(checkouts),
       stdio: stdio,

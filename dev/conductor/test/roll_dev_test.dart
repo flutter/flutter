@@ -51,7 +51,7 @@ void main() {
         remote: remote,
       );
       expect(
-        () => rollDev(
+        () async => rollDev(
           argResults: fakeArgResults,
           repository: repo,
           stdio: stdio,
@@ -95,7 +95,7 @@ void main() {
         remote: remote,
       );
       expect(
-        () => rollDev(
+        () async => rollDev(
           argResults: fakeArgResults,
           repository: repo,
           stdio: stdio,
@@ -249,7 +249,7 @@ void main() {
         skipTagging: true,
       );
       expect(
-        () => rollDev(
+        () async => rollDev(
           usage: usage,
           argResults: fakeArgResults,
           repository: repo,
@@ -320,7 +320,7 @@ void main() {
         justPrint: true,
       );
       expect(
-        () => rollDev(
+        () async => rollDev(
           usage: usage,
           argResults: fakeArgResults,
           repository: repo,
@@ -403,7 +403,7 @@ void main() {
       const String errorMessage = 'The previous dev tag $lastVersion is not a '
           'direct ancestor of $commit.';
       expect(
-        () => rollDev(
+        () async => rollDev(
           argResults: fakeArgResults,
           repository: repo,
           stdio: stdio,
