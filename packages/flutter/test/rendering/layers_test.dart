@@ -76,11 +76,11 @@ void main() {
     expect(a.debugNeedsAddToScene, false);
     expect(b.debugNeedsAddToScene, false);
     expect(c.debugNeedsAddToScene, false);
-    expect(d.debugNeedsAddToScene, false);
+    expect(d.debugNeedsAddToScene, true);
     expect(e.debugNeedsAddToScene, false);
     expect(f.debugNeedsAddToScene, false);
 
-    a.markNeedsAddToScene();
+    d.markNeedsAddToScene();
 
     expect(a.debugNeedsAddToScene, true);
     expect(b.debugNeedsAddToScene, true);
@@ -159,8 +159,8 @@ void main() {
     final FollowerLayer followerLayer = FollowerLayer(link: link);
     leaderLayer.debugMarkClean();
     followerLayer.debugMarkClean();
-    leaderLayer.markNeedsAddToScene();
-    followerLayer.markNeedsAddToScene();
+    // leaderLayer.markNeedsAddToScene();
+    // followerLayer.markNeedsAddToScene();
     expect(leaderLayer.debugNeedsAddToScene, true);
     expect(followerLayer.debugNeedsAddToScene, true);
   });

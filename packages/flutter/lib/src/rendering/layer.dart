@@ -262,20 +262,9 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   @protected
   @visibleForTesting
   void markNeedsAddToScene() {
-    assert(
-      !alwaysNeedsAddToScene,
-      '$runtimeType with alwaysNeedsAddToScene set called markNeedsAddToScene.\n'
-      "The layer's alwaysNeedsAddToScene is set to true, and therefore it should not call markNeedsAddToScene.",
-    );
     assert(!_debugDisposed);
-
-    // Already marked. Short-circuit.
-    if (_needsAddToScene) {
-      return;
-    }
-
     _needsAddToScene = true;
-    if (parent != null && !parent!.alwaysNeedsAddToScene) {
+    if (parent != null) {
       parent!.markNeedsAddToScene();
     }
   }
@@ -287,7 +276,8 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   @visibleForTesting
   void debugMarkClean() {
     assert(() {
-      _needsAddToScene = false;
+      if (!alwaysNeedsAddToScene)
+        _needsAddToScene = false;
       return true;
     }());
   }
@@ -360,7 +350,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
       // `addToScene`, but the parent does not clear the flag until some future
       // frame decides to render it, at which point the parent knows that it
       // cannot retain its engine layer and will call `addToScene` again.
-      if (parent != null && !parent!.alwaysNeedsAddToScene) {
+      if (parent != null) {
         parent!.markNeedsAddToScene();
       }
     }
@@ -377,17 +367,13 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
 
   @override
   void dropChild(AbstractNode child) {
-    if (!alwaysNeedsAddToScene) {
-      markNeedsAddToScene();
-    }
+    markNeedsAddToScene();
     super.dropChild(child);
   }
 
   @override
   void adoptChild(AbstractNode child) {
-    if (!alwaysNeedsAddToScene) {
-      markNeedsAddToScene();
-    }
+    markNeedsAddToScene();
     super.adoptChild(child);
   }
 
@@ -528,6 +514,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     // changed so A's _needsAddToScene is true. This contradicts
     // _needsAddToScene being false.
     if (!_needsAddToScene && _engineLayer != null) {
+      assert(!alwaysNeedsAddToScene);
       builder.addRetained(_engineLayer!);
       return;
     }
@@ -535,7 +522,8 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     // Clearing the flag _after_ calling `addToScene`, not _before_. This is
     // because `addToScene` calls children's `addToScene` methods, which may
     // mark this layer as dirty.
-    _needsAddToScene = false;
+    if (!alwaysNeedsAddToScene)
+      _needsAddToScene = false;
   }
 
   /// The object responsible for creating this layer.
@@ -930,7 +918,8 @@ class ContainerLayer extends Layer {
     // Clearing the flag _after_ calling `addToScene`, not _before_. This is
     // because `addToScene` calls children's `addToScene` methods, which may
     // mark this layer as dirty.
-    _needsAddToScene = false;
+    if (!alwaysNeedsAddToScene)
+      _needsAddToScene = false;
     final ui.Scene scene = builder.build();
     return scene;
   }
