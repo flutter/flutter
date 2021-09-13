@@ -333,7 +333,8 @@ void main() {
     testWidgets('Does not snap away from initial child on build', (WidgetTester tester) async {
       const Key containerKey = ValueKey<String>('container');
       const Key stackKey = ValueKey<String>('stack');
-      await tester.pumpWidget(_boilerplate(null,
+      await tester.pumpWidget(_boilerplate(
+        null,
         snap: true,
         initialChildSize: .7,
         containerKey: containerKey,
@@ -352,7 +353,8 @@ void main() {
     testWidgets('Does not snap away from initial child on reset', (WidgetTester tester) async {
       const Key containerKey = ValueKey<String>('container');
       const Key stackKey = ValueKey<String>('stack');
-      await tester.pumpWidget(_boilerplate(null,
+      await tester.pumpWidget(_boilerplate(
+        null,
         snap: true,
         containerKey: containerKey,
         stackKey: stackKey,
@@ -380,7 +382,8 @@ void main() {
     testWidgets('Zero velocity drag snaps to nearest snap target', (WidgetTester tester) async {
       const Key stackKey = ValueKey<String>('stack');
       const Key containerKey = ValueKey<String>('container');
-      await tester.pumpWidget(_boilerplate(null,
+      await tester.pumpWidget(_boilerplate(
+        null,
         snap: true,
         stackKey: stackKey,
         containerKey: containerKey,
@@ -434,7 +437,8 @@ void main() {
       testWidgets('Setting snapSizes to $snapSizes resolves to min and max', (WidgetTester tester) async {
         const Key stackKey = ValueKey<String>('stack');
         const Key containerKey = ValueKey<String>('container');
-          await tester.pumpWidget(_boilerplate(null,
+          await tester.pumpWidget(_boilerplate(
+            null,
             snap: true,
             stackKey: stackKey,
             containerKey: containerKey,
@@ -462,7 +466,8 @@ void main() {
     testWidgets('Min and max are implicitly added to snapSizes.', (WidgetTester tester) async {
       const Key stackKey = ValueKey<String>('stack');
       const Key containerKey = ValueKey<String>('container');
-      await tester.pumpWidget(_boilerplate(null,
+      await tester.pumpWidget(_boilerplate(
+        null,
         snap: true,
         stackKey: stackKey,
         containerKey: containerKey,
@@ -489,7 +494,8 @@ void main() {
     testWidgets('Fling snaps in direction of momentum', (WidgetTester tester) async {
       const Key stackKey = ValueKey<String>('stack');
       const Key containerKey = ValueKey<String>('container');
-      await tester.pumpWidget(_boilerplate(null,
+      await tester.pumpWidget(_boilerplate(
+        null,
         snap: true,
         stackKey: stackKey,
         containerKey: containerKey,
@@ -512,6 +518,121 @@ void main() {
         closeTo(.25, precisionErrorTolerance),
       );
 
+    }, variant: TargetPlatformVariant.all());
+
+    testWidgets('Changes to widget parameters are propagated', (WidgetTester tester) async {
+      const Key stackKey = ValueKey<String>('stack');
+      const Key containerKey = ValueKey<String>('container');
+      await tester.pumpWidget(_boilerplate(
+        null,
+        stackKey: stackKey,
+        containerKey: containerKey,
+      ));
+      await tester.pumpAndSettle();
+      final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
+
+      await tester.drag(find.text('Item 1'), Offset(0, -.4 * screenHeight));
+      await tester.pumpAndSettle();
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(1.0, precisionErrorTolerance),
+      );
+
+      // Pump the same widget but with a new max child size.
+      await tester.pumpWidget(_boilerplate(
+        null,
+        stackKey: stackKey,
+        containerKey: containerKey,
+        maxChildSize: .8,
+      ));
+      await tester.pumpAndSettle();
+
+      // The max child size has been reduced, we should be rebuilt at the new
+      // max of .8.
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(.8, precisionErrorTolerance),
+      );
+
+      // Pump the same widget but with snapping enabled.
+      await tester.pumpWidget(_boilerplate(
+        null,
+        snap: true,
+        stackKey: stackKey,
+        containerKey: containerKey,
+        maxChildSize: .8,
+        snapSizes: <double>[.5],
+      ));
+      await tester.pumpAndSettle();
+
+      await tester.drag(find.text('Item 1'), Offset(0, .2 * screenHeight));
+      await tester.pumpAndSettle();
+
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(.5, precisionErrorTolerance),
+      );
+
+      // Change the snap sizes.
+      await tester.pumpWidget(_boilerplate(
+        null,
+        snap: true,
+        stackKey: stackKey,
+        containerKey: containerKey,
+        maxChildSize: .8,
+        snapSizes: <double>[.6],
+      ));
+      await tester.pumpAndSettle();
+
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(.6, precisionErrorTolerance),
+      );
+    }, variant: TargetPlatformVariant.all());
+
+    testWidgets('Asserts throw on new invalid widget parameters', (WidgetTester tester) async {
+      await tester.pumpWidget(_boilerplate(
+        null,
+        initialChildSize: .7,
+      ));
+      await tester.pumpAndSettle();
+
+      await tester.pumpWidget(_boilerplate(
+        null,
+        initialChildSize: .7,
+        maxChildSize: .6,
+      ));
+      expect(tester.takeException(), isAssertionError);
+
+      await tester.pumpWidget(_boilerplate(
+        null,
+        snap: true,
+        snapSizes: <double>[.7]
+      ));
+      await tester.pumpAndSettle();
+
+      await tester.pumpWidget(_boilerplate(
+        null,
+        snap: true,
+        snapSizes: <double>[.7],
+        maxChildSize: .6,
+      ));
+      expect(tester.takeException(), isAssertionError);
+
+      await tester.pumpWidget(_boilerplate(
+          null,
+          snap: true,
+          snapSizes: <double>[.7],
+          maxChildSize: .8,
+      ));
+      await tester.pumpAndSettle();
+
+      await tester.pumpWidget(_boilerplate(
+        null,
+        snap: true,
+        snapSizes: <double>[.7, .9],
+      ));
+      expect(tester.takeException(), isAssertionError);
     }, variant: TargetPlatformVariant.all());
 
     testWidgets('ScrollNotification correctly dispatched when flung without covering its container', (WidgetTester tester) async {
