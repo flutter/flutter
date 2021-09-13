@@ -105,7 +105,7 @@ void main() {
       );
     });
 
-    test('does not reset or tag if --just-print is specified', () {
+    test('does not reset or tag if --just-print is specified', () async {
       processManager.addCommands(<FakeCommand>[
         const FakeCommand(command: <String>[
           'git',
@@ -166,7 +166,7 @@ void main() {
         justPrint: true,
       );
       expect(
-        rollDev(
+        await rollDev(
           usage: usage,
           argResults: fakeArgResults,
           repository: repo,
@@ -413,7 +413,7 @@ void main() {
       );
     });
 
-    test('does not tag but updates branch if --skip-tagging provided', () {
+    test('does not tag but updates branch if --skip-tagging provided', () async {
       processManager.addCommands(<FakeCommand>[
         const FakeCommand(command: <String>[
           'git',
@@ -498,7 +498,7 @@ void main() {
         skipTagging: true,
       );
       expect(
-        rollDev(
+        await rollDev(
           usage: usage,
           argResults: fakeArgResults,
           repository: repo,
@@ -508,7 +508,7 @@ void main() {
       );
     });
 
-    test('successfully tags and publishes release', () {
+    test('successfully tags and publishes release', () async {
       processManager.addCommands(<FakeCommand>[
         const FakeCommand(command: <String>[
           'git',
@@ -597,7 +597,7 @@ void main() {
         remote: remote,
       );
       expect(
-        rollDev(
+        await rollDev(
           usage: usage,
           argResults: fakeArgResults,
           repository: repo,
@@ -607,7 +607,7 @@ void main() {
       );
     });
 
-    test('successfully publishes release with --force', () {
+    test('successfully publishes release with --force', () async {
       processManager.addCommands(<FakeCommand>[
         const FakeCommand(command: <String>[
           'git',
@@ -692,7 +692,7 @@ void main() {
         force: true,
       );
       expect(
-        rollDev(
+        await rollDev(
           argResults: fakeArgResults,
           repository: repo,
           stdio: stdio,

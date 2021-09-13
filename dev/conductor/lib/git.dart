@@ -14,34 +14,34 @@ class Git {
 
   final ProcessManager processManager;
 
-  String getOutput(
+  Future<String> getOutput(
     List<String> args,
     String explanation, {
     required String workingDirectory,
     bool allowFailures = false,
-  }) {
-    final ProcessResult result = _run(args, workingDirectory);
+  }) async {
+    final ProcessResult result = await _run(args, workingDirectory);
     if (result.exitCode == 0) {
       return stdoutToString(result.stdout);
     }
     _reportFailureAndExit(args, workingDirectory, result, explanation);
   }
 
-  int run(
+  Future<int> run(
     List<String> args,
     String explanation, {
     bool allowNonZeroExitCode = false,
     required String workingDirectory,
-  }) {
-    final ProcessResult result = _run(args, workingDirectory);
+  }) async {
+    final ProcessResult result = await _run(args, workingDirectory);
     if (result.exitCode != 0 && !allowNonZeroExitCode) {
       _reportFailureAndExit(args, workingDirectory, result, explanation);
     }
     return result.exitCode;
   }
 
-  ProcessResult _run(List<String> args, String workingDirectory) {
-    return processManager.runSync(
+  Future<ProcessResult> _run(List<String> args, String workingDirectory) async {
+    return processManager.run(
       <String>['git', ...args],
       workingDirectory: workingDirectory,
       environment: <String, String>{'GIT_TRACE': '1'},
