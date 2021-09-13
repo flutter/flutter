@@ -17,11 +17,21 @@
 
 G_BEGIN_DECLS
 
-G_DECLARE_FINAL_TYPE(FlPluginRegistrar,
-                     fl_plugin_registrar,
-                     FL,
-                     PLUGIN_REGISTRAR,
-                     GObject)
+G_DECLARE_INTERFACE(FlPluginRegistrar,
+                    fl_plugin_registrar,
+                    FL,
+                    PLUGIN_REGISTRAR,
+                    GObject)
+
+struct _FlPluginRegistrarInterface {
+  GTypeInterface parent_iface;
+
+  FlBinaryMessenger* (*get_messenger)(FlPluginRegistrar* registrar);
+
+  FlTextureRegistrar* (*get_texture_registrar)(FlPluginRegistrar* registrar);
+
+  FlView* (*get_view)(FlPluginRegistrar* registrar);
+};
 
 /**
  * FlPluginRegistrar:
