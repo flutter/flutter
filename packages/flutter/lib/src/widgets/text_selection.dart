@@ -239,6 +239,7 @@ abstract class TextSelectionControls {
   /// by the user.
   void handleSelectAll(TextSelectionDelegate delegate) {
     delegate.selectAll(SelectionChangedCause.toolbar);
+    delegate.bringIntoView(delegate.textEditingValue.selection.extent);
   }
 }
 

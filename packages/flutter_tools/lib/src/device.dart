@@ -860,7 +860,7 @@ class DebuggingOptions {
   /// Additional null runtime checks inserted for web applications.
   ///
   /// See also:
-  ///   * https://github.com/dart-lang/sdk/blob/master/sdk/lib/html/doc/NATIVE_NULL_ASSERTIONS.md
+  ///   * https://github.com/dart-lang/sdk/blob/main/sdk/lib/html/doc/NATIVE_NULL_ASSERTIONS.md
   final bool nativeNullAssertions;
 
   bool get hasObservatoryPort => hostVmServicePort != null;

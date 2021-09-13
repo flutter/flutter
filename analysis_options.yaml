@@ -5,7 +5,7 @@
 #
 # For a list of lints, see: http://dart-lang.github.io/linter/lints/
 # See the configuration guide for more
-# https://github.com/dart-lang/sdk/tree/master/pkg/analyzer#configuring-the-analyzer
+# https://github.com/dart-lang/sdk/tree/main/pkg/analyzer#configuring-the-analyzer
 #
 # There are other similar analysis options files in the flutter repos,
 # which should be kept in sync with this file:

@@ -59,7 +59,7 @@ export 'package:test_api/test_api.dart' hide
 /// Signature for callback to [testWidgets] and [benchmarkWidgets].
 typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 
-// Return the last element that satisifes `test`, or return null if not found.
+// Return the last element that satisfies `test`, or return null if not found.
 E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
   late E result;
   bool foundMatching = false;

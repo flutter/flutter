@@ -1621,7 +1621,7 @@ void main() {
     expect(states, <String>['deactivate', 'dispose']);
   });
 
-  testWidgets('RenderObjectElement.unmount dispsoes of its renderObject', (WidgetTester tester) async {
+  testWidgets('RenderObjectElement.unmount disposes of its renderObject', (WidgetTester tester) async {
     await tester.pumpWidget(const Placeholder());
     final RenderObjectElement element = tester.allElements.whereType<RenderObjectElement>().first;
     final RenderObject renderObject = element.renderObject;

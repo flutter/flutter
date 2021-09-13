@@ -162,7 +162,7 @@ abstract class BindingBase {
   ///
   /// See also:
   ///
-  ///  * <https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#rpcs-requests-and-responses>
+  ///  * <https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/service.md#rpcs-requests-and-responses>
   @protected
   @mustCallSuper
   void initServiceExtensions() {
@@ -298,7 +298,7 @@ abstract class BindingBase {
   /// The [Future] returned by the `callback` argument is returned by [lockEvents].
   @protected
   Future<void> lockEvents(Future<void> Function() callback) {
-    developer.Timeline.startSync('Lock events');
+    final developer.TimelineTask timelineTask = developer.TimelineTask()..start('Lock events');
 
     assert(callback != null);
     _lockCount += 1;
@@ -307,7 +307,7 @@ abstract class BindingBase {
     future.whenComplete(() {
       _lockCount -= 1;
       if (!locked) {
-        developer.Timeline.finishSync();
+        timelineTask.finish();
         unlocked();
       }
     });
@@ -649,7 +649,7 @@ class DebugReassembleConfig {
     this.widgetName,
   }) {
     if (!kDebugMode) {
-      throw FlutterError('Cannot instaniate DebugReassembleConfig in profile or release mode.');
+      throw FlutterError('Cannot instantiate DebugReassembleConfig in profile or release mode.');
     }
   }
 
