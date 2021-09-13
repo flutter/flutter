@@ -2700,11 +2700,11 @@ enum _RouteLifecycle {
 }
 
 enum _TransitionDecision {
+  add,
+  push,
   pop,
   remove,
   complete,
-  add,
-  push,
 }
 
 typedef _RouteEntryPredicate = bool Function(_RouteEntry entry);
@@ -2946,13 +2946,18 @@ class _RouteEntry extends RouteTransitionRecord {
   }
 
   bool get willBePresent {
+    if (pendingDecision != null) {
+      return pendingDecision!.index <= _TransitionDecision.push.index;
+    }
     return currentState.index <= _RouteLifecycle.idle.index &&
            currentState.index >= _RouteLifecycle.add.index;
   }
 
   bool get isPresent {
     return currentState.index <= _RouteLifecycle.remove.index &&
-           currentState.index >= _RouteLifecycle.add.index;
+           // If there is pending exiting decision, it is still considered
+           // present until the decision is executed.
+           (currentState.index >= _RouteLifecycle.add.index || pendingDecision != null);
   }
 
   bool get isPresentForRestoration => currentState.index <= _RouteLifecycle.idle.index;

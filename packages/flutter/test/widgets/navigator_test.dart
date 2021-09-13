@@ -3553,6 +3553,7 @@ void main() {
       );
 
       await tester.pumpAndSettle();
+
       expect(observations.length, 8);
       // Initial routes are pushed.
       expect(observations[0].operation, 'push');
@@ -3801,6 +3802,8 @@ class NavigatorObservation {
   final String? previous;
   final String? current;
   final String operation;
+  @override
+  String toString() => '$operation(previous = $previous, current $current)';
 }
 
 class BuilderPage extends Page<void> {
