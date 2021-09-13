@@ -515,6 +515,10 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     // Boundaries that are partially infinite are not allowed because Matrix4's
     // rotation and translation methods don't handle infinites well.
     assert(
+      !boundaryRect.isEmpty,
+      "InteractiveViewer's child must have nonzero dimensions.",
+    );
+    assert(
       boundaryRect.isFinite ||
         (boundaryRect.left.isInfinite
         && boundaryRect.top.isInfinite
