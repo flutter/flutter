@@ -499,7 +499,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// If `source` is [TestBindingEventSource.test], then the `event` is based
   /// in the local coordinate space and the event is likely triggered by
-  /// programatically simulated pointer events, such as:
+  /// programmatically simulated pointer events, such as:
   ///
   ///  * [WidgetController.tap] and alike methods, as well as directly using
   ///    [TestGesture]. They are usually used in

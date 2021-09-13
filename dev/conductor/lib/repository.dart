@@ -823,7 +823,7 @@ class CiYaml {
     }).toList();
   }
 
-  static final RegExp _enabledBranchPattern = RegExp(r'^enabled_branches:');
+  static final RegExp _enabledBranchPattern = RegExp(r'enabled_branches:');
 
   /// Update this .ci.yaml file with the given branch name.
   ///

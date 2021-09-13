@@ -32,7 +32,7 @@ enum AndroidOverscrollIndicator {
   stretch,
 
   /// Utilizes a [GlowingOverscrollIndicator], painting a glowing semi circle on
-  /// top of the [ScrollView] in response to oversfcrolling.
+  /// top of the [ScrollView] in response to overscrolling.
   glow,
 }
 

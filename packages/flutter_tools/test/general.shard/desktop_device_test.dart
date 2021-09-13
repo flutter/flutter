@@ -275,7 +275,7 @@ void main() {
     expect(result.started, true);
   });
 
-  testWithoutContext('Device logger captues all output', () async {
+  testWithoutContext('Device logger captures all output', () async {
     final Completer<void> exitCompleter = Completer<void>();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(

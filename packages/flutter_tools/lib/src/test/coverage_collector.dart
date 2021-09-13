@@ -324,7 +324,7 @@ void _buildCoverageMap(
 
 // Binary search the token position table for the line and column which
 // corresponds to each token position.
-// The format of this table is described in https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#script
+// The format of this table is described in https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/service.md#script
 List<int> _lineAndColumn(int position, List<dynamic> tokenPositions) {
   int min = 0;
   int max = tokenPositions.length;

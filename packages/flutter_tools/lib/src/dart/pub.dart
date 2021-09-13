@@ -419,7 +419,7 @@ class _DefaultPub implements Pub {
       'cache',
       'dart-sdk',
       'bin',
-      'pub',
+      'dart',
     ]);
     if (!_processManager.canRun(sdkPath)) {
       throwToolExit(
@@ -428,7 +428,7 @@ class _DefaultPub implements Pub {
         'permissions for the current user.'
       );
     }
-    return <String>[sdkPath, ...arguments];
+    return <String>[sdkPath, '__deprecated_pub', ...arguments];
   }
 
   // Returns the environment value that should be used when running pub.

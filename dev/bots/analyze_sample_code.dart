@@ -26,13 +26,6 @@ final String _defaultFlutterPackage = path.join(_flutterRoot, 'packages', 'flutt
 final String _defaultDartUiLocation = path.join(_flutterRoot, 'bin', 'cache', 'pkg', 'sky_engine', 'lib', 'ui');
 final String _flutter = path.join(_flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
 
-/// Finds the location of the pub executable, with the assumption that it is
-/// in the same location as the Dart executable used to run this script.
-String get _pubExecutable {
-  final File dartExecutable = File(Platform.resolvedExecutable);
-  return path.join(path.dirname(dartExecutable.absolute.path), Platform.isWindows ? 'pub.exe' : 'pub');
-}
-
 Future<void> main(List<String> arguments) async {
   final ArgParser argParser = ArgParser();
   argParser.addOption(
@@ -129,8 +122,9 @@ Future<void> main(List<String> arguments) async {
   if (parsedArguments['global-activate-snippets']! as bool) {
     try {
       Process.runSync(
-        _pubExecutable,
+        Platform.resolvedExecutable,
         <String>[
+          'pub',
           'global',
           'activate',
           'snippets',
@@ -449,8 +443,9 @@ class SampleChecker {
       _flutterVersion = versionResult.stdout as String? ?? '';
     }
     return Process.run(
-      _pubExecutable,
+      Platform.resolvedExecutable,
       <String>[
+        'pub',
         'global',
         'run',
         'snippets',
