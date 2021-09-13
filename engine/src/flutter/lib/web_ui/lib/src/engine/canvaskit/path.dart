@@ -257,12 +257,16 @@ class CkPath extends ManagedSkiaObject<SkPath> implements ui.Path {
   }
 
   @override
-  ui.Path shift(ui.Offset offset) {
-    // Since CanvasKit does not expose `SkPath.offset`, create a copy of this
-    // path and call `transform` on it.
-    final SkPath newPath = skiaObject.copy();
-    newPath.transform(1.0, 0.0, offset.dx, 0.0, 1.0, offset.dy, 0.0, 0.0, 0.0);
-    return CkPath.fromSkPath(newPath, _fillType);
+  CkPath shift(ui.Offset offset) {
+    // `SkPath.transform` mutates the existing path, so create a copy and call
+    // `transform` on the copy.
+    final SkPath shiftedPath = skiaObject.copy();
+    shiftedPath.transform(
+      1.0, 0.0, offset.dx,
+      0.0, 1.0, offset.dy,
+      0.0, 0.0, 1.0,
+    );
+    return CkPath.fromSkPath(shiftedPath, _fillType);
   }
 
   static CkPath combine(
