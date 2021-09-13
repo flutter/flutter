@@ -1482,13 +1482,8 @@ class TextInput {
         // an editing state are accumulated before being sent to the framework.
         // This is called batch editing on Android, and on other platforms the
         // TextInputPlugin does not adhere to this type of editing.
-        if (encoded['batchDeltas'] != null) {
-          for (final dynamic encodedDelta in encoded['batchDeltas']) {
-            final TextEditingDelta delta = TextEditingDelta.fromJSON(encodedDelta as Map<String, dynamic>);
-            batchDeltas.add(delta);
-          }
-        } else {
-          final TextEditingDelta delta = TextEditingDelta.fromJSON(encoded);
+        for (final dynamic encodedDelta in encoded['batchDeltas']) {
+          final TextEditingDelta delta = TextEditingDelta.fromJSON(encodedDelta as Map<String, dynamic>);
           batchDeltas.add(delta);
         }
 
