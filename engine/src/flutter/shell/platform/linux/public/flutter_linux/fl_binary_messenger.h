@@ -29,30 +29,17 @@ typedef enum {
 
 GQuark fl_binary_messenger_codec_error_quark(void) G_GNUC_CONST;
 
-G_DECLARE_FINAL_TYPE(FlBinaryMessenger,
-                     fl_binary_messenger,
-                     FL,
-                     BINARY_MESSENGER,
-                     GObject)
+G_DECLARE_INTERFACE(FlBinaryMessenger,
+                    fl_binary_messenger,
+                    FL,
+                    BINARY_MESSENGER,
+                    GObject)
 
-G_DECLARE_FINAL_TYPE(FlBinaryMessengerResponseHandle,
-                     fl_binary_messenger_response_handle,
-                     FL,
-                     BINARY_MESSENGER_RESPONSE_HANDLE,
-                     GObject)
-
-/**
- * FlBinaryMessenger:
- *
- * #FlBinaryMessenger is an object that allows sending and receiving of platform
- * messages with an #FlEngine.
- */
-
-/**
- * FlBinaryMessengerResponseHandle:
- *
- * #FlBinaryMessengerResponseHandle is an object used to send responses with.
- */
+G_DECLARE_DERIVABLE_TYPE(FlBinaryMessengerResponseHandle,
+                         fl_binary_messenger_response_handle,
+                         FL,
+                         BINARY_MESSENGER_RESPONSE_HANDLE,
+                         GObject)
 
 /**
  * FlBinaryMessengerMessageHandler:
@@ -75,6 +62,50 @@ typedef void (*FlBinaryMessengerMessageHandler)(
     GBytes* message,
     FlBinaryMessengerResponseHandle* response_handle,
     gpointer user_data);
+
+struct _FlBinaryMessengerInterface {
+  GTypeInterface parent_iface;
+
+  void (*set_message_handler_on_channel)(
+      FlBinaryMessenger* messenger,
+      const gchar* channel,
+      FlBinaryMessengerMessageHandler handler,
+      gpointer user_data,
+      GDestroyNotify destroy_notify);
+
+  gboolean (*send_response)(FlBinaryMessenger* messenger,
+                            FlBinaryMessengerResponseHandle* response_handle,
+                            GBytes* response,
+                            GError** error);
+
+  void (*send_on_channel)(FlBinaryMessenger* messenger,
+                          const gchar* channel,
+                          GBytes* message,
+                          GCancellable* cancellable,
+                          GAsyncReadyCallback callback,
+                          gpointer user_data);
+
+  GBytes* (*send_on_channel_finish)(FlBinaryMessenger* messenger,
+                                    GAsyncResult* result,
+                                    GError** error);
+};
+
+struct _FlBinaryMessengerResponseHandleClass {
+  GObjectClass parent_class;
+};
+
+/**
+ * FlBinaryMessenger:
+ *
+ * #FlBinaryMessenger is an object that allows sending and receiving of platform
+ * messages with an #FlEngine.
+ */
+
+/**
+ * FlBinaryMessengerResponseHandle:
+ *
+ * #FlBinaryMessengerResponseHandle is an object used to send responses with.
+ */
 
 /**
  * fl_binary_messenger_set_platform_message_handler:
