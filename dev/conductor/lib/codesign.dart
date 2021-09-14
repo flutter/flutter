@@ -115,7 +115,9 @@ class CodesignCommand extends Command<void> {
       revision = ((await processManager.run(
         <String>['git', 'rev-parse', 'HEAD'],
         workingDirectory: (await framework.checkoutDirectory).path,
-      )).stdout as String).trim();
+      ))
+              .stdout as String)
+          .trim();
       assert(revision.isNotEmpty);
     }
 
@@ -136,7 +138,8 @@ class CodesignCommand extends Command<void> {
   /// This list should be kept in sync with the actual contents of Flutter's
   /// cache.
   Future<List<String>> get binariesWithEntitlements async {
-    final List<String> binaryPaths = <String>[
+    final String frameworkCacheDirectory = await framework.cacheDirectory;
+    return <String>[
       'artifacts/engine/android-arm-profile/darwin-x64/gen_snapshot',
       'artifacts/engine/android-arm-release/darwin-x64/gen_snapshot',
       'artifacts/engine/android-arm64-profile/darwin-x64/gen_snapshot',
@@ -164,12 +167,10 @@ class CodesignCommand extends Command<void> {
       'dart-sdk/bin/dart',
       'dart-sdk/bin/dartaotruntime',
       'dart-sdk/bin/utils/gen_snapshot',
-    ];
-    final List<String> processedPath = <String>[];
-    for (final String relativePath in binaryPaths) {
-      processedPath.add(fileSystem.path.join(await framework.cacheDirectory, relativePath));
-    }
-    return processedPath;
+    ]
+        .map((String relativePath) =>
+            fileSystem.path.join(frameworkCacheDirectory, relativePath))
+        .toList();
   }
 
   /// Binaries that are only expected to be codesigned.
@@ -177,7 +178,8 @@ class CodesignCommand extends Command<void> {
   /// This list should be kept in sync with the actual contents of Flutter's
   /// cache.
   Future<List<String>> get binariesWithoutEntitlements async {
-    final List<String> binaryPaths = <String>[
+    final String frameworkCacheDirectory = await framework.cacheDirectory;
+    return <String>[
       'artifacts/engine/darwin-x64-profile/FlutterMacOS.framework/Versions/A/FlutterMacOS',
       'artifacts/engine/darwin-x64-release/FlutterMacOS.framework/Versions/A/FlutterMacOS',
       'artifacts/engine/darwin-x64/FlutterMacOS.framework/Versions/A/FlutterMacOS',
@@ -189,12 +191,10 @@ class CodesignCommand extends Command<void> {
       'artifacts/engine/ios/Flutter.xcframework/ios-arm64_armv7/Flutter.framework/Flutter',
       'artifacts/engine/ios/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
       'artifacts/ios-deploy/ios-deploy',
-    ];
-    final List<String> processedPath = <String>[];
-    for (final String relativePath in binaryPaths) {
-      processedPath.add(fileSystem.path.join(await framework.cacheDirectory, relativePath));
-    }
-    return processedPath;
+    ]
+        .map((String relativePath) =>
+            fileSystem.path.join(frameworkCacheDirectory, relativePath))
+        .toList();
   }
 
   /// Verify the existence of all expected binaries in cache.
@@ -207,7 +207,8 @@ class CodesignCommand extends Command<void> {
   @visibleForTesting
   Future<void> verifyExist() async {
     final Set<String> foundFiles = <String>{};
-    for (final String binaryPath in await findBinaryPaths(await framework.cacheDirectory)) {
+    for (final String binaryPath
+        in await findBinaryPaths(await framework.cacheDirectory)) {
       if ((await binariesWithEntitlements).contains(binaryPath)) {
         foundFiles.add(binaryPath);
       } else if ((await binariesWithoutEntitlements).contains(binaryPath)) {
