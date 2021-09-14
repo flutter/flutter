@@ -10,7 +10,6 @@ jobs:
   lock:
     permissions:
       issues: write
-      pull-requests: write
     runs-on: ubuntu-latest
     if: ${{ github.repository == 'flutter/flutter' }}
     steps:
