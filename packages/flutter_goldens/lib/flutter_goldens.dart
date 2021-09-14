@@ -499,7 +499,6 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
     golden = _addPrefix(golden);
     final String testName = skiaClient.cleanTestName(golden.path);
     late String? testExpectation;
-
     testExpectation = await skiaClient.getExpectationForTest(testName);
 
     if (testExpectation == null || testExpectation.isEmpty) {

@@ -691,10 +691,10 @@ void main() {
       ),
     );
 
-//    await expectLater(
-//      find.byKey(switchKey),
-//      matchesGoldenFile('switch.tap.off.png'),
-//    );
+    await expectLater(
+      find.byKey(switchKey),
+      matchesGoldenFile('switch.tap.off.png'),
+    );
 
     await tester.tap(find.byKey(switchKey));
     expect(value, isTrue);
@@ -702,10 +702,10 @@ void main() {
     // Kick off animation, then advance to intermediate frame.
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 60));
-//    await expectLater(
-//      find.byKey(switchKey),
-//      matchesGoldenFile('switch.tap.turningOn.png'),
-//    );
+    await expectLater(
+      find.byKey(switchKey),
+      matchesGoldenFile('switch.tap.turningOn.png'),
+    );
 
     await tester.pumpAndSettle();
     await expectLater(
@@ -744,18 +744,18 @@ void main() {
       ),
     );
 
-//    await expectLater(
-//      find.byKey(switchKey),
-//      matchesGoldenFile('switch.tap.off.dark.png'),
-//    );
+    await expectLater(
+      find.byKey(switchKey),
+      matchesGoldenFile('switch.tap.off.dark.png'),
+    );
 
     await tester.tap(find.byKey(switchKey));
     expect(value, isTrue);
 
     await tester.pumpAndSettle();
-//    await expectLater(
-//      find.byKey(switchKey),
-//      matchesGoldenFile('switch.tap.on.dark.png'),
-//    );
+    await expectLater(
+      find.byKey(switchKey),
+      matchesGoldenFile('switch.tap.on.dark.png'),
+    );
   });
 }
