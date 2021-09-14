@@ -93,6 +93,9 @@ class _FakeEditableTextState with TextSelectionDelegate, TextEditingActionTarget
 }
 
 void main() {
+  // Ensure that all TestRenderingFlutterBinding bindings are initialized.
+  renderer;
+
   test('moveSelectionLeft/RightByLine stays on the current line', () async {
     const String text = 'one two three\n\nfour five six';
     final _FakeEditableTextState editableTextState = _FakeEditableTextState(

@@ -8,11 +8,14 @@ on:
 
 jobs:
   lock:
+    permissions:
+      issues: write
     runs-on: ubuntu-latest
     if: ${{ github.repository == 'flutter/flutter' }}
     steps:
       - uses: dessant/lock-threads@486f7380c15596f92b724e4260e4981c68d6bde6
         with:
+          process-only: 'issues'
           github-token: ${{ github.token }}
           # Number of days of inactivity before a closed issue is locked.
           issue-lock-inactive-days: '14'
