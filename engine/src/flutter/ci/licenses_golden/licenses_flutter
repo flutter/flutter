@@ -1370,6 +1370,8 @@ FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/builtin_libraries.cc
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/builtin_libraries.h
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/dart_component_controller.cc
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/dart_component_controller.h
+FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/dart_component_controller_v2.cc
+FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/dart_component_controller_v2.h
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/dart_runner.cc
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/dart_runner.h
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/embedder/builtin.dart

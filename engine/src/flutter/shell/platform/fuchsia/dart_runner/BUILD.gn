@@ -38,6 +38,8 @@ template("runner") {
       "builtin_libraries.h",
       "dart_component_controller.cc",
       "dart_component_controller.h",
+      "dart_component_controller_v2.cc",
+      "dart_component_controller_v2.h",
       "dart_runner.cc",
       "dart_runner.h",
       "logging.h",
@@ -69,6 +71,7 @@ template("runner") {
              "//flutter/fml",
              "//flutter/shell/platform/fuchsia/dart-pkg/fuchsia",
              "//flutter/shell/platform/fuchsia/dart-pkg/zircon",
+             "$fuchsia_sdk_root/fidl:fuchsia.component.runner",
              "$fuchsia_sdk_root/pkg:async",
              "$fuchsia_sdk_root/pkg:async-cpp",
              "$fuchsia_sdk_root/pkg:async-default",
@@ -160,6 +163,7 @@ template("aot_runner_package") {
     binary = "dart_aot${product_suffix}_runner"
 
     cmx_file = rebase_path("meta/dart_aot${product_suffix}_runner.cmx")
+    cml_file = rebase_path("meta/dart_aot${product_suffix}_runner.cml")
 
     libraries = _common_runner_libs
 
@@ -220,6 +224,7 @@ template("jit_runner_package") {
     binary = "dart_jit${product_suffix}_runner"
 
     cmx_file = rebase_path("meta/dart_jit${product_suffix}_runner.cmx")
+    cml_file = rebase_path("meta/dart_jit${product_suffix}_runner.cml")
 
     libraries = _common_runner_libs
 
