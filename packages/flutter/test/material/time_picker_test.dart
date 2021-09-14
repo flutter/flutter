@@ -3,8 +3,6 @@
 // found in the LICENSE file.
 
 @TestOn('!chrome')
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';

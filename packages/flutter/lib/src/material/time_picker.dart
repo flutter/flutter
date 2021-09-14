@@ -1954,7 +1954,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
   final RestorableBoolN _autofocusMinute = RestorableBoolN(null);
   final RestorableBool _announcedInitialTime = RestorableBool(false);
 
-  void Function()? _entryModeListener;
+  late final VoidCallback _entryModeListener;
 
   @override
   void didChangeDependencies() {
@@ -1967,10 +1967,8 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
   @override
   void initState() {
     super.initState();
-    if (widget.onEntryModeChanged != null) {
-      _entryModeListener = () => widget.onEntryModeChanged!(_entryMode.value);
-      _entryMode.addListener(_entryModeListener!);
-    }
+    _entryModeListener = () => widget.onEntryModeChanged?.call(_entryMode.value);
+    _entryMode.addListener(_entryModeListener);
   }
 
   @override
@@ -2306,9 +2304,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
   void dispose() {
     _vibrateTimer?.cancel();
     _vibrateTimer = null;
-    if (_entryModeListener != null) {
-      _entryMode.removeListener(_entryModeListener!);
-    }
+    _entryMode.removeListener(_entryModeListener);
     super.dispose();
   }
 }
