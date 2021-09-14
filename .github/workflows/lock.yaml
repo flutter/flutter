@@ -8,6 +8,8 @@ on:
 
 jobs:
   lock:
+    permissions:
+      issues: write
     runs-on: ubuntu-latest
     if: ${{ github.repository == 'flutter/flutter' }}
     steps:
