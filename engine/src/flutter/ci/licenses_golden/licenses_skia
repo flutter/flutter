@@ -1,4 +1,4 @@
-Signature: 8814e84071209940f8e04a59b68f4713
+Signature: 36e1f69973ddc6bc735ea28d97ae27b8
 
 UNUSED LICENSES:
 
@@ -2935,6 +2935,7 @@ TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/bench/CanvasSaveRestoreBench.cpp
 FILE: ../../../third_party/skia/bench/TriangulatorBench.cpp
 FILE: ../../../third_party/skia/experimental/lowp-basic/QMath.h
+FILE: ../../../third_party/skia/experimental/lowp-basic/bilerp-study.cpp
 FILE: ../../../third_party/skia/experimental/lowp-basic/lerp-study.cpp
 FILE: ../../../third_party/skia/experimental/lowp-basic/lowp_experiments.cpp
 FILE: ../../../third_party/skia/experimental/tskit/bindings/bindings.h
