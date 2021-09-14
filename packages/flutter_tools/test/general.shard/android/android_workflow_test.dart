@@ -338,6 +338,30 @@ Review licenses that have not been accepted (y/N)?
     expect(licenseValidator.runLicenseManager(), throwsToolExit());
   });
 
+  testWithoutContext('AndroidValidator handles a null Android sdkManagerPath', () async {
+    final AndroidSdkVersion sdkVersion = FakeAndroidSdkVersion()
+        ..sdkLevel = 28
+        ..buildToolsVersion = Version(26, 0, 3);
+    sdk
+      ..sdkManagerPath = null
+      ..latestVersion = sdkVersion
+      ..directory = fileSystem.directory('/foo/bar')
+      ..cmdlineToolsAvailable = true
+      ..licensesAvailable = false;
+
+    final ValidationResult result = await AndroidValidator(
+      androidStudio: null,
+      androidSdk: sdk,
+      fileSystem: fileSystem,
+      logger: logger,
+      platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
+      processManager: processManager,
+      userMessages: UserMessages(),
+    ).validate();
+
+    expect(result.type, ValidationType.missing);
+  });
+
   testWithoutContext('detects license-only SDK installation with cmdline-tools', () async {
     sdk
       ..licensesAvailable = true

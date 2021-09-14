@@ -202,7 +202,7 @@ class AndroidValidator extends DoctorValidator {
       if (androidSdkLatestVersion.sdkLevel < kAndroidSdkMinVersion || androidSdkLatestVersion.buildToolsVersion < kAndroidSdkBuildToolsMinVersion) {
         messages.add(ValidationMessage.error(
           _userMessages.androidSdkBuildToolsOutdated(
-            _androidSdk!.sdkManagerPath!,
+            _androidSdk!.sdkManagerPath,
             kAndroidSdkMinVersion,
             kAndroidSdkBuildToolsMinVersion.toString(),
             _platform,
