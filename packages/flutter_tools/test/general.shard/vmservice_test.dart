@@ -697,7 +697,7 @@ void main() {
           args: <String, Object>{
             'streamId': 'Isolate',
           },
-          // Stream already subscribed - https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#streamlisten
+          // Stream already subscribed - https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/service.md#streamlisten
           errorCode: 103,
         ),
         listViewsRequest,
