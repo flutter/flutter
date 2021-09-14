@@ -247,8 +247,21 @@ def Main():
   if architectures == None:
     return fail_loudly
 
+  # Work around a bug in Python.
+  #
+  # The multiprocessing package relies on the win32 WaitForMultipleObjects()
+  # call, which supports waiting on a maximum of MAXIMUM_WAIT_OBJECTS (defined
+  # by Windows to be 64) handles, processes in this case. To avoid hitting
+  # this, we limit ourselves to 60 handles (since there are a couple extra
+  # processes launched for the queue reader and thread wakeup reader).
+  #
+  # See: https://bugs.python.org/issue26903
+  max_processes = os.cpu_count()
+  if sys.platform.startswith(('cygwin', 'win')) and max_processes > 60:
+    max_processes = 60
+
   # Download and extract variants in parallel
-  pool = multiprocessing.Pool()
+  pool = multiprocessing.Pool(processes=max_processes)
   tasks = [(channel, semantic_version, os_name, arch, verbose) for arch in architectures]
   async_results = [pool.apply_async(DownloadAndExtract, t) for t in tasks]
   success = True
