@@ -653,6 +653,10 @@ class TextInputConfiguration {
   /// When this is disabled platform text input updates will come through
   /// [TextInputClient.updateEditingValue].
   ///
+  /// Enabling this flag results in granular text updates being received from the
+  /// platforms text input control rather than a single new bulk editing state
+  /// given by [TextInputClient.updateEditingValue].
+  ///
   /// Defaults to false. Cannot be null.
   final bool enableDeltaModel;
 
@@ -981,6 +985,8 @@ abstract class TextInputClient {
   /// The list of [TextEditingDelta]'s are treated as changes that will be applied
   /// to the client's editing state. A change is any mutation to the raw text
   /// value, or any updates to the selection and/or composing region.
+  ///
+  /// {@macro flutter.services.TextEditingDelta.optIn}
   void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas);
 
   /// Requests that this client perform the given action.

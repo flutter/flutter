@@ -223,10 +223,19 @@ abstract class TextEditingDelta {
   TextEditingValue apply(TextEditingValue value);
 }
 
-/// The delta is inserting a single/or contigous sequence of characters.
+/// A structure representing an insertion of a single/or contigous sequence of
+/// characters at some offset of an editing state.
 @immutable
 class TextEditingDeltaInsertion extends TextEditingDelta {
   /// Creates an insertion delta for a given change to the editing state.
+  ///
+  /// {@template flutter.services.TextEditingDelta.optIn}
+  /// See also:
+  ///
+  ///  * [TextInputConfiguration], to opt-in your [TextInputClient] to receive
+  ///  [TextEditingDelta]'s you must set [TextInputConfiguration.enableDeltaModel]
+  ///  to true.
+  /// {@endtemplate}
   ///
   /// {@macro flutter.services.TextEditingDelta}
   const TextEditingDeltaInsertion({
@@ -258,10 +267,13 @@ class TextEditingDeltaInsertion extends TextEditingDelta {
   }
 }
 
-/// The delta is deleting a single/or contiguous sequence of characters.
+/// A structure representing the deletion of a single/or contiguous sequence of
+/// characters in an editing state.
 @immutable
 class TextEditingDeltaDeletion extends TextEditingDelta {
   /// Creates a deletion delta for a given change to the editing state.
+  ///
+  /// {@macro flutter.services.TextEditingDelta.optIn}
   ///
   /// {@macro flutter.services.TextEditingDelta}
   const TextEditingDeltaDeletion({
@@ -292,16 +304,19 @@ class TextEditingDeltaDeletion extends TextEditingDelta {
   }
 }
 
-/// The delta is replacing a range of characters with a new sequence of text.
-///
-/// The range that is being replaced can either grow or shrink based on the
-/// given replacement text.
-///
-/// A replacement can occur in cases such as auto-correct, suggestions, and
-/// when a selection is replaced by a single character.
+/// A structure representing a replacement of a range of characters with a
+/// new sequence of text.
 @immutable
 class TextEditingDeltaReplacement extends TextEditingDelta {
   /// Creates a replacement delta for a given change to the editing state.
+  ///
+  /// The range that is being replaced can either grow or shrink based on the
+  /// given replacement text.
+  ///
+  /// A replacement can occur in cases such as auto-correct, suggestions, and
+  /// when a selection is replaced by a single character.
+  ///
+  /// {@macro flutter.services.TextEditingDelta.optIn}
   ///
   /// {@macro flutter.services.TextEditingDelta}
   const TextEditingDeltaReplacement({
@@ -336,18 +351,19 @@ class TextEditingDeltaReplacement extends TextEditingDelta {
   }
 }
 
-/// The delta is not modifying the text. There are potentially selection and
-/// composing region updates in the delta that still need to be applied to your
-/// text model.
-///
-/// A situation where this delta would be created is when dragging the selection
-/// handles. There are no changes to the text, but there are updates to the selection
-/// and potentially the composing region as well.
+/// A structure representing changes to the selection and/or composing regions
+/// of an editing state and no changes to the text value.
 @immutable
 class TextEditingDeltaNonTextUpdate extends TextEditingDelta {
-  /// Creates a delta representing no changes to the text value of the current
+  /// Creates a delta representing no updates to the text value of the current
   /// editing state. This delta includes updates to the selection and/or composing
   /// regions.
+  ///
+  /// A situation where this delta would be created is when dragging the selection
+  /// handles. There are no changes to the text, but there are updates to the selection
+  /// and potentially the composing region as well.
+  ///
+  /// {@macro flutter.services.TextEditingDelta.optIn}
   ///
   /// {@macro flutter.services.TextEditingDelta}
   const TextEditingDeltaNonTextUpdate({
