@@ -874,7 +874,7 @@ void main() {
     expect(dartSdkVersionFormat.allMatches(currentDartSdkVersion).length, 1,);
   });
 
-    group('AndroidMavenArtifacts', () {
+  group('AndroidMavenArtifacts', () {
     MemoryFileSystem memoryFileSystem;
     Cache cache;
     FakeAndroidSdk fakeAndroidSdk;
