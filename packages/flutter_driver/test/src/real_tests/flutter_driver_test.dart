@@ -11,10 +11,8 @@ import 'package:flutter_driver/src/common/error.dart';
 import 'package:flutter_driver/src/common/health.dart';
 import 'package:flutter_driver/src/common/layer_tree.dart';
 import 'package:flutter_driver/src/common/wait.dart';
-import 'package:flutter_driver/src/driver/common.dart';
 import 'package:flutter_driver/src/driver/driver.dart';
 import 'package:flutter_driver/src/driver/timeline.dart';
-import 'package:path/path.dart' as path;
 import 'package:vm_service/vm_service.dart' as vms;
 
 import '../../common.dart';
@@ -38,15 +36,12 @@ void main() {
     late FakeIsolate fakeIsolate;
     late VMServiceFlutterDriver driver;
     late File logFile;
-    int driverId = -1;
 
     setUp(() {
       fakeIsolate = FakeIsolate();
       fakeVM = FakeVM(fakeIsolate);
       fakeClient = FakeVmService(fakeVM);
       fakeClient.responses['waitFor'] = makeFakeResponse(<String, dynamic>{'status':'ok'});
-      driverId += 1;
-      logFile = File(path.join(testOutputsDirectory, 'flutter_driver_commands_$driverId.log'));
     });
 
     tearDown(() {
@@ -58,6 +53,7 @@ void main() {
     group('logCommunicationToFile', () {
       test('logCommunicationToFile = true', () async {
         driver = VMServiceFlutterDriver.connectedTo(fakeClient, fakeIsolate);
+        logFile = File(driver.logFilePathName);
 
         await driver.waitFor(find.byTooltip('foo'), timeout: _kTestTimeout);
 
@@ -74,11 +70,21 @@ void main() {
 
       test('logCommunicationToFile = false', () async {
         driver = VMServiceFlutterDriver.connectedTo(fakeClient, fakeIsolate, logCommunicationToFile: false);
-
+        logFile = File(driver.logFilePathName);
+        // clear log file if left in filetree from previous run
+        if (logFile.existsSync()) {
+          logFile.deleteSync();
+        }
         await driver.waitFor(find.byTooltip('foo'), timeout: _kTestTimeout);
 
         final bool exists = logFile.existsSync();
         expect(exists, false, reason: 'because ${logFile.path} exists');
+      });
+
+      test('logFilePathName was set when a new driver was created', () {
+        driver = VMServiceFlutterDriver.connectedTo(fakeClient, fakeIsolate, logCommunicationToFile: true);
+        logFile = File(driver.logFilePathName);
+        expect(logFile.path, endsWith('.log'));
       });
     });
   });
@@ -660,6 +666,23 @@ void main() {
     test('VMServiceFlutterDriver does not support webDriver', () async {
       expect(() => driver.webDriver, throwsUnsupportedError);
     });
+
+    group('runUnsynchronized', () {
+      test('wrap waitFor with runUnsynchronized', () async {
+        fakeClient.responses['waitFor'] = makeFakeResponse(<String, dynamic>{});
+        fakeClient.responses['set_frame_sync'] = makeFakeResponse(<String, dynamic>{});
+
+        await driver.runUnsynchronized(() async  {
+          await driver.waitFor(find.byTooltip('foo'), timeout: _kTestTimeout);
+        });
+
+        expect(fakeClient.commandLog, <String>[
+          'ext.flutter.driver {command: set_frame_sync, enabled: false}',
+          'ext.flutter.driver {command: waitFor, timeout: $_kSerializedTestTimeout, finderType: ByTooltipMessage, text: foo}',
+          'ext.flutter.driver {command: set_frame_sync, enabled: true}'
+        ]);
+      });
+    });
   });
 
   group('VMServiceFlutterDriver with custom timeout', () {
@@ -697,14 +720,11 @@ void main() {
     late FakeFlutterWebConnection fakeConnection;
     late WebFlutterDriver driver;
     late File logFile;
-    int driverId = -1;
 
     setUp(() {
       fakeConnection = FakeFlutterWebConnection();
       fakeConnection.supportsTimelineAction = true;
       fakeConnection.responses['waitFor'] = jsonEncode(makeFakeResponse(<String, dynamic>{'status': 'ok'}));
-      driverId += 1;
-      logFile = File(path.join(testOutputsDirectory, 'flutter_driver_commands_$driverId.log'));
     });
 
     tearDown(() {
@@ -715,6 +735,7 @@ void main() {
 
     test('logCommunicationToFile = true', () async {
       driver = WebFlutterDriver.connectedTo(fakeConnection);
+      logFile = File(driver.logFilePathName);
       await driver.waitFor(find.byTooltip('logCommunicationToFile test'), timeout: _kTestTimeout);
 
       final bool exists = logFile.existsSync();
@@ -730,6 +751,11 @@ void main() {
 
     test('logCommunicationToFile = false', () async {
       driver = WebFlutterDriver.connectedTo(fakeConnection, logCommunicationToFile: false);
+      logFile = File(driver.logFilePathName);
+      // clear log file if left in filetree from previous run
+      if (logFile.existsSync()) {
+        logFile.deleteSync();
+      }
       await driver.waitFor(find.byTooltip('logCommunicationToFile test'), timeout: _kTestTimeout);
       final bool exists = logFile.existsSync();
       expect(exists, false, reason: 'because ${logFile.path} exists');
@@ -951,12 +977,29 @@ void main() {
         expect(driver.waitUntilFirstFrameRasterized(), throwsUnimplementedError);
       });
 
-      test('appIsoloate', () async {
+      test('appIsolate', () async {
         expect(() => driver.appIsolate.extensionRPCs, throwsUnsupportedError);
       });
 
       test('serviceClient', () async {
         expect(() => driver.serviceClient.getVM(), throwsUnsupportedError);
+      });
+    });
+
+    group('runUnsynchronized', () {
+      test('wrap waitFor with runUnsynchronized', () async {
+        fakeConnection.responses['waitFor'] = jsonEncode(makeFakeResponse(<String, dynamic>{'text': 'hello'}));
+        fakeConnection.responses['set_frame_sync'] = jsonEncode(makeFakeResponse(<String, dynamic>{}));
+
+        await driver.runUnsynchronized(() async {
+          await driver.waitFor(find.byTooltip('foo'), timeout: _kTestTimeout);
+        });
+
+        expect(fakeConnection.commandLog, <String>[
+          r'''window.$flutterDriver('{"command":"set_frame_sync","enabled":"false"}') null''',
+          r'''window.$flutterDriver('{"command":"waitFor","timeout":"1234","finderType":"ByTooltipMessage","text":"foo"}') 0:00:01.234000''',
+          r'''window.$flutterDriver('{"command":"set_frame_sync","enabled":"true"}') null''',
+        ]);
       });
     });
   });

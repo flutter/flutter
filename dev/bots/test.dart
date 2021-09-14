@@ -85,6 +85,22 @@ const List<String> kWebTestFileKnownFailures = <String>[
 const String kSmokeTestShardName = 'smoke_tests';
 const List<String> _kAllBuildModes = <String>['debug', 'profile', 'release'];
 
+// The seed used to shuffle tests.  If not passed with
+// --test-randomize-ordering-seed=<seed> on the command line, it will be set the
+// first time it is accessed. Pass zero to turn off shuffling.
+String? _shuffleSeed;
+String get shuffleSeed {
+  if (_shuffleSeed == null) {
+    // Change the seed at 7am, UTC.
+    final DateTime seedTime = DateTime.now().toUtc().subtract(const Duration(hours: 7));
+    // Generates YYYYMMDD as the seed, so that testing continues to fail for a
+    // day after the seed changes, and on other days the seed can be used to
+    // replicate failures.
+    _shuffleSeed = '${seedTime.year * 10000 + seedTime.month * 100 + seedTime.day}';
+  }
+  return _shuffleSeed!;
+}
+
 /// When you call this, you can pass additional arguments to pass custom
 /// arguments to flutter test. For example, you might want to call this
 /// script with the parameter --local-engine=host_debug_unopt to
@@ -99,12 +115,20 @@ Future<void> main(List<String> args) async {
   print('$clock STARTING ANALYSIS');
   try {
     flutterTestArgs.addAll(args);
+    final Set<String> removeArgs = <String>{};
     for (final String arg in args) {
-      if (arg.startsWith('--local-engine='))
+      if (arg.startsWith('--local-engine=')) {
         localEngineEnv['FLUTTER_LOCAL_ENGINE'] = arg.substring('--local-engine='.length);
-      if (arg.startsWith('--local-engine-src-path='))
+      }
+      if (arg.startsWith('--local-engine-src-path=')) {
         localEngineEnv['FLUTTER_LOCAL_ENGINE_SRC_PATH'] = arg.substring('--local-engine-src-path='.length);
+      }
+      if (arg.startsWith('--test-randomize-ordering-seed=')) {
+        _shuffleSeed = arg.substring('--test-randomize-ordering-seed='.length);
+        removeArgs.add(arg);
+      }
     }
+    flutterTestArgs.removeWhere((String arg) => removeArgs.contains(arg));
     if (Platform.environment.containsKey(CIRRUS_TASK_NAME))
       print('Running task: ${Platform.environment[CIRRUS_TASK_NAME]}');
     print('═' * 80);
@@ -116,7 +140,8 @@ Future<void> main(List<String> args) async {
       'framework_coverage': _runFrameworkCoverage,
       'framework_tests': _runFrameworkTests,
       'tool_tests': _runToolTests,
-      'web_tool_tests': _runToolTests,
+      // web_tool_tests is also used by HHH: https://dart.googlesource.com/recipes/+/refs/heads/master/recipes/dart/flutter_engine.py
+      'web_tool_tests': _runWebToolTests,
       'tool_integration_tests': _runIntegrationToolTests,
       // All the unit/widget tests run using `flutter test --platform=chrome`
       'web_tests': _runWebUnitTests,
@@ -331,7 +356,6 @@ Future<void> _runToolTests() async {
   await selectSubshard(<String, ShardRunner>{
     'general': _runGeneralToolTests,
     'commands': _runCommandsToolTests,
-    'web': _runWebToolTests,
   });
 }
 
@@ -384,15 +408,17 @@ Future<void> runForbiddenFromReleaseTests() async {
   );
 }
 
-/// Verifies that APK, and IPA (if on macOS) builds the examples apps
-/// without crashing. It does not actually launch the apps. That happens later
-/// in the devicelab. This is just a smoke-test. In particular, this will verify
-/// we can build when there are spaces in the path name for the Flutter SDK and
-/// target app.
+/// Verifies that APK, and IPA (if on macOS), and native desktop builds the
+/// examples apps without crashing. It does not actually launch the apps. That
+/// happens later in the devicelab. This is just a smoke-test. In particular,
+/// this will verify we can build when there are spaces in the path name for the
+/// Flutter SDK and target app.
 ///
 /// Also does some checking about types included in hello_world.
 Future<void> _runBuildTests() async {
-  final List<FileSystemEntity> exampleDirectories = Directory(path.join(flutterRoot, 'examples')).listSync()
+  final List<Directory> exampleDirectories = Directory(path.join(flutterRoot, 'examples')).listSync()
+    // API example builds will be tested in a separate shard.
+    .where((FileSystemEntity entity) => entity is Directory && path.basename(entity.path) != 'api').cast<Directory>().toList()
     ..add(Directory(path.join(flutterRoot, 'packages', 'integration_test', 'example')))
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing')))
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'android_views')))
@@ -406,7 +432,7 @@ Future<void> _runBuildTests() async {
   // The tests are randomly distributed into subshards so as to get a uniform
   // distribution of costs, but the seed is fixed so that issues are reproducible.
   final List<ShardRunner> tests = <ShardRunner>[
-    for (final FileSystemEntity exampleDirectory in exampleDirectories)
+    for (final Directory exampleDirectory in exampleDirectories)
       () => _runExampleProjectBuildTests(exampleDirectory),
     ...<ShardRunner>[
       // Web compilation tests.
@@ -426,17 +452,15 @@ Future<void> _runBuildTests() async {
   await _runShardRunnerIndexOfTotalSubshard(tests);
 }
 
-Future<void> _runExampleProjectBuildTests(FileSystemEntity exampleDirectory) async {
+Future<void> _runExampleProjectBuildTests(Directory exampleDirectory, [File? mainFile]) async {
   // Only verify caching with flutter gallery.
   final bool verifyCaching = exampleDirectory.path.contains('flutter_gallery');
-  if (exampleDirectory is! Directory) {
-    return;
-  }
   final String examplePath = exampleDirectory.path;
   final bool hasNullSafety = File(path.join(examplePath, 'null_safety')).existsSync();
-  final List<String> additionalArgs = hasNullSafety
-    ? <String>['--no-sound-null-safety']
-    : <String>[];
+  final List<String> additionalArgs = <String>[
+    if (hasNullSafety) '--no-sound-null-safety',
+    if (mainFile != null) path.relative(mainFile.path, from: exampleDirectory.absolute.path),
+  ];
   if (Directory(path.join(examplePath, 'android')).existsSync()) {
     await _flutterBuildApk(examplePath, release: false, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
     await _flutterBuildApk(examplePath, release: true, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
@@ -722,7 +746,6 @@ Future<void> _runFrameworkTests() async {
     print('${green}Running package tests$reset for directories other than packages/flutter');
     await _pubRunTest(path.join(flutterRoot, 'dev', 'bots'));
     await _pubRunTest(path.join(flutterRoot, 'dev', 'devicelab'), ensurePrecompiledTool: false); // See https://github.com/flutter/flutter/issues/86209
-    await _pubRunTest(path.join(flutterRoot, 'dev', 'snippets'));
     // TODO(fujino): Move this to its own test shard
     await _pubRunTest(path.join(flutterRoot, 'dev', 'conductor'), forceSingleCore: true);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'));
@@ -1117,15 +1140,30 @@ Future<void> _runFlutterPluginsTests() async {
       ],
       workingDirectory: checkout.path,
     );
+    // Prep the repository tooling.
+    // This test does not use tool_runner.sh because in this context the test
+    // should always run on the entire plugins repo, while tool_runner.sh
+    // is designed for flutter/plugins CI and only analyzes changed repository
+    // files when run for anything but master.
+    final String toolDir = path.join(checkout.path, 'script', 'tool');
     await runCommand(
-      './script/tool_runner.sh',
+      'dart',
       <String>[
+        'pub',
+        'get',
+      ],
+      workingDirectory: toolDir,
+    );
+    final String toolScript = path.join(toolDir, 'bin', 'flutter_plugin_tools.dart');
+    await runCommand(
+      'dart',
+      <String>[
+        'run',
+        toolScript,
         'analyze',
+        '--custom-analysis=script/configs/custom_analysis.yaml',
       ],
       workingDirectory: checkout.path,
-      environment: <String, String>{
-        'BRANCH_NAME': 'master',
-      },
     );
   }
   await selectSubshard(<String, ShardRunner>{
@@ -1437,6 +1475,7 @@ Future<void> _pubRunTest(String workingDirectory, {
   Duration? perTestTimeout,
   bool includeLocalEngineEnv = false,
   bool ensurePrecompiledTool = true,
+  bool shuffleTests = true,
 }) async {
   int? cpus;
   final String? cpuVariable = Platform.environment['CPU']; // CPU is set in cirrus.yml
@@ -1459,6 +1498,7 @@ Future<void> _pubRunTest(String workingDirectory, {
   final List<String> args = <String>[
     'run',
     'test',
+    if (shuffleTests) '--test-randomize-ordering-seed=$shuffleSeed',
     if (useFlutterTestFormatter)
       '-rjson'
     else
@@ -1532,12 +1572,22 @@ Future<void> _runFlutterTest(String workingDirectory, {
   List<String> options = const <String>[],
   Map<String, String>? environment,
   List<String> tests = const <String>[],
+  bool shuffleTests = true,
 }) async {
   assert(!printOutput || outputChecker == null, 'Output either can be printed or checked but not both');
 
+  final List<String> tags = <String>[];
+  // Recipe configured reduced test shards will only execute tests with the
+  // appropriate tag.
+  if ((Platform.environment['REDUCED_TEST_SET'] ?? 'False') == 'True') {
+    tags.addAll(<String>['-t', 'reduced-test-set']);
+  }
+
   final List<String> args = <String>[
     'test',
+    if (shuffleTests) '--test-randomize-ordering-seed=$shuffleSeed',
     ...options,
+    ...tags,
     ...flutterTestArgs,
   ];
 

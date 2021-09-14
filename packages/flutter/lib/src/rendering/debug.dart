@@ -36,7 +36,7 @@ bool debugPaintLayerBordersEnabled = false;
 /// [RenderBox.debugHandleEvent].
 bool debugPaintPointersEnabled = false;
 
-/// Overlay a rotating set of colors when repainting layers in checked mode.
+/// Overlay a rotating set of colors when repainting layers in debug mode.
 ///
 /// See also:
 ///
@@ -44,7 +44,7 @@ bool debugPaintPointersEnabled = false;
 ///    areas are being excessively repainted.
 bool debugRepaintRainbowEnabled = false;
 
-/// Overlay a rotating set of colors when repainting text in checked mode.
+/// Overlay a rotating set of colors when repainting text in debug mode.
 bool debugRepaintTextRainbowEnabled = false;
 
 /// The current color to overlay when repainting a layer.

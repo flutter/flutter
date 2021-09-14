@@ -115,6 +115,7 @@ void main() {
       const String nextDartRevision = 'f6c91128be6b77aef8351e1e3a9d07c85bc2e46e';
       const String previousVersion = '1.2.0-1.0.pre';
       const String nextVersion = '1.2.0-3.0.pre';
+      const String incrementLevel = 'm';
 
       final Directory engine = fileSystem.directory(checkoutsParentDirectory)
           .childDirectory('flutter_conductor_checkouts')
@@ -159,6 +160,10 @@ void main() {
             '-b',
             'cherrypicks-$candidateBranch',
           ],
+        ),
+        const FakeCommand(
+          command: <String>['git', 'status', '--porcelain'],
+          stdout: 'MM path/to/DEPS',
         ),
         const FakeCommand(
           command: <String>['git', 'add', '--all'],
@@ -261,7 +266,7 @@ void main() {
         '--$kDartRevisionOption',
         nextDartRevision,
         '--$kIncrementOption',
-        'm',
+        incrementLevel,
       ]);
 
       final File stateFile = fileSystem.file(stateFilePath);
@@ -271,6 +276,7 @@ void main() {
         jsonDecode(stateFile.readAsStringSync()),
       );
 
+      expect(processManager.hasRemainingExpectations, false);
       expect(state.isInitialized(), true);
       expect(state.releaseChannel, releaseChannel);
       expect(state.releaseVersion, nextVersion);
@@ -281,6 +287,7 @@ void main() {
       expect(state.framework.startingGitHead, revision3);
       expect(state.currentPhase, ReleasePhase.APPLY_ENGINE_CHERRYPICKS);
       expect(state.conductorVersion, revision);
+      expect(state.incrementLevel, incrementLevel);
     });
   }, onPlatform: <String, dynamic>{
     'windows': const Skip('Flutter Conductor only supported on macos/linux'),

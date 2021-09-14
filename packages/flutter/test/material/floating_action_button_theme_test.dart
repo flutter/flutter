@@ -176,17 +176,21 @@ void main() {
     expect(_getRawMaterialButton(tester).constraints, constraints);
   });
 
-  testWidgets('FloatingActionButton.extended uses custom constraints and spacing when specified in the theme', (WidgetTester tester) async {
+  testWidgets('FloatingActionButton.extended uses custom properties when specified in the theme', (WidgetTester tester) async {
     const Key iconKey = Key('icon');
     const Key labelKey = Key('label');
     const BoxConstraints constraints = BoxConstraints.tightFor(height: 100.0);
-    const double spacing = 33.0;
+    const double iconLabelSpacing = 33.0;
+    const EdgeInsetsDirectional padding = EdgeInsetsDirectional.only(start: 5.0, end: 6.0);
+    const TextStyle textStyle = TextStyle(letterSpacing: 2.0);
 
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData().copyWith(
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
           extendedSizeConstraints: constraints,
-          extendedIconLabelSpacing: spacing,
+          extendedIconLabelSpacing: iconLabelSpacing,
+          extendedPadding: padding,
+          extendedTextStyle: textStyle,
         ),
       ),
       home: Scaffold(
@@ -199,18 +203,26 @@ void main() {
     ));
 
     expect(_getRawMaterialButton(tester).constraints, constraints);
-    expect(tester.getTopLeft(find.byKey(labelKey)).dx - tester.getTopRight(find.byKey(iconKey)).dx, spacing);
+    expect(tester.getTopLeft(find.byKey(labelKey)).dx - tester.getTopRight(find.byKey(iconKey)).dx, iconLabelSpacing);
+    expect(tester.getTopLeft(find.byKey(iconKey)).dx - tester.getTopLeft(find.byType(FloatingActionButton)).dx, padding.start);
+    expect(tester.getTopRight(find.byType(FloatingActionButton)).dx - tester.getTopRight(find.byKey(labelKey)).dx, padding.end);
+    // The color comes from the default color scheme's onSecondary value.
+    expect(_getRawMaterialButton(tester).textStyle, textStyle.copyWith(color: const Color(0xffffffff)));
   });
 
-  testWidgets('FloatingActionButton.extended spacing takes priority over FloatingActionButtonThemeData spacing', (WidgetTester tester) async {
+  testWidgets('FloatingActionButton.extended custom properties takes priority over FloatingActionButtonThemeData spacing', (WidgetTester tester) async {
     const Key iconKey = Key('icon');
     const Key labelKey = Key('label');
-    const double spacing = 33.0;
+    const double iconLabelSpacing = 33.0;
+    const EdgeInsetsDirectional padding = EdgeInsetsDirectional.only(start: 5.0, end: 6.0);
+    const TextStyle textStyle = TextStyle(letterSpacing: 2.0);
 
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData().copyWith(
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
           extendedIconLabelSpacing: 25.0,
+          extendedPadding: EdgeInsetsDirectional.only(start: 7.0, end: 8.0),
+          extendedTextStyle: TextStyle(letterSpacing: 3.0),
         ),
       ),
       home: Scaffold(
@@ -218,12 +230,18 @@ void main() {
           onPressed: () { },
           label: const Text('Extended', key: labelKey),
           icon: const Icon(Icons.add, key: iconKey),
-          extendedIconLabelSpacing: spacing,
+          extendedIconLabelSpacing: iconLabelSpacing,
+          extendedPadding: padding,
+          extendedTextStyle: textStyle,
         ),
       ),
     ));
 
-    expect(tester.getTopLeft(find.byKey(labelKey)).dx - tester.getTopRight(find.byKey(iconKey)).dx, spacing);
+    expect(tester.getTopLeft(find.byKey(labelKey)).dx - tester.getTopRight(find.byKey(iconKey)).dx, iconLabelSpacing);
+    expect(tester.getTopLeft(find.byKey(iconKey)).dx - tester.getTopLeft(find.byType(FloatingActionButton)).dx, padding.start);
+    expect(tester.getTopRight(find.byType(FloatingActionButton)).dx - tester.getTopRight(find.byKey(labelKey)).dx, padding.end);
+    // The color comes from the default color scheme's onSecondary value.
+    expect(_getRawMaterialButton(tester).textStyle, textStyle.copyWith(color: const Color(0xffffffff)));
   });
 
   testWidgets('default FloatingActionButton debugFillProperties', (WidgetTester tester) async {
@@ -258,6 +276,8 @@ void main() {
       largeSizeConstraints: BoxConstraints.tightFor(width: 102.0, height: 102.0),
       extendedSizeConstraints: BoxConstraints(minHeight: 103.0, maxHeight: 103.0),
       extendedIconLabelSpacing: 12,
+      extendedPadding: EdgeInsetsDirectional.only(start: 7.0, end: 8.0),
+      extendedTextStyle: TextStyle(letterSpacing: 2.0),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -282,7 +302,9 @@ void main() {
       'smallSizeConstraints: BoxConstraints(w=101.0, h=101.0)',
       'largeSizeConstraints: BoxConstraints(w=102.0, h=102.0)',
       'extendedSizeConstraints: BoxConstraints(0.0<=w<=Infinity, h=103.0)',
-      'extendedIconLabelSpacing: 12.0'
+      'extendedIconLabelSpacing: 12.0',
+      'extendedPadding: EdgeInsetsDirectional(7.0, 0.0, 8.0, 0.0)',
+      'extendedTextStyle: TextStyle(inherit: true, letterSpacing: 2.0)',
     ]);
   });
 }

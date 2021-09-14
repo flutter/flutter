@@ -114,10 +114,7 @@ void testUsingContext(
           HttpClient: () => FakeHttpClient.any(),
           IOSSimulatorUtils: () => const NoopIOSSimulatorUtils(),
           OutputPreferences: () => OutputPreferences.test(),
-          Logger: () => BufferLogger(
-            terminal: globals.terminal,
-            outputPreferences: globals.outputPreferences,
-          ),
+          Logger: () => BufferLogger.test(),
           OperatingSystemUtils: () => FakeOperatingSystemUtils(),
           PersistentToolState: () => buildPersistentToolState(globals.fs),
           Usage: () => TestUsage(),
@@ -304,6 +301,14 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
     Duration timeout = const Duration(minutes: 1),
   }) async {
     return <String, String>{};
+  }
+
+  @override
+  Future<String> pluginsBuildSettingsOutput(
+      Directory podXcodeProject, {
+        Duration timeout = const Duration(minutes: 1),
+      }) async {
+    return null;
   }
 
   @override

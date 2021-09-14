@@ -111,17 +111,25 @@ String generateDateFormattingLogic(Message message) {
           'date formats.'
         );
       }
-      if (!placeholder.hasValidDateFormat) {
+      final bool? isCustomDateFormat = placeholder.isCustomDateFormat;
+      if (!placeholder.hasValidDateFormat
+          && (isCustomDateFormat == null || !isCustomDateFormat)) {
         throw L10nException(
           'Date format "$placeholderFormat" for placeholder '
           '${placeholder.name} does not have a corresponding DateFormat '
           "constructor\n. Check the intl library's DateFormat class "
-          'constructors for allowed date formats.'
+          'constructors for allowed date formats, or set "isCustomDateFormat" attribute '
+          'to "true".'
         );
       }
-      return dateFormatTemplate
+      if (placeholder.hasValidDateFormat) {
+        return dateFormatTemplate
+          .replaceAll('@(placeholder)', placeholder.name)
+          .replaceAll('@(format)', placeholderFormat);
+      }
+      return dateFormatCustomTemplate
         .replaceAll('@(placeholder)', placeholder.name)
-        .replaceAll('@(format)', placeholderFormat);
+        .replaceAll('@(format)', generateString(placeholderFormat));
     });
 
   return formatStatements.isEmpty ? '@(none)' : formatStatements.join('');
@@ -202,21 +210,16 @@ String _generatePluralMethod(Message message, String translationForMessage) {
     if (match != null && match.groupCount == 2) {
       String argValue = generateString(match.group(2)!);
       for (final Placeholder placeholder in message.placeholders) {
-        if (placeholder != countPlaceholder && placeholder.requiresFormatting) {
-          argValue = argValue.replaceAll(
-            '#${placeholder.name}#',
-            _needsCurlyBracketStringInterpolation(argValue, placeholder.name)
-              ? '\${${placeholder.name}String}'
-              : '\$${placeholder.name}String'
-          );
-        } else {
-          argValue = argValue.replaceAll(
-            '#${placeholder.name}#',
-            _needsCurlyBracketStringInterpolation(argValue, placeholder.name)
-              ? '\${${placeholder.name}}'
-              : '\$${placeholder.name}'
-          );
+        String variable = placeholder.name;
+        if (placeholder.requiresFormatting) {
+          variable += 'String';
         }
+        argValue = argValue.replaceAll(
+          '#${placeholder.name}#',
+          _needsCurlyBracketStringInterpolation(argValue, placeholder.name)
+            ? '\${$variable}'
+            : '\$$variable'
+        );
       }
       pluralLogicArgs.add('      ${pluralIds[pluralKey]}: $argValue');
     }
@@ -368,21 +371,16 @@ String _generateMethod(Message message, String translationForMessage) {
   String generateMessage() {
     String messageValue = generateString(translationForMessage);
     for (final Placeholder placeholder in message.placeholders) {
+      String variable = placeholder.name;
       if (placeholder.requiresFormatting) {
-        messageValue = messageValue.replaceAll(
-          '{${placeholder.name}}',
-          _needsCurlyBracketStringInterpolation(messageValue, placeholder.name)
-            ? '\${${placeholder.name}String}'
-            : '\$${placeholder.name}String'
-        );
-      } else {
-        messageValue = messageValue.replaceAll(
-          '{${placeholder.name}}',
-          _needsCurlyBracketStringInterpolation(messageValue, placeholder.name)
-            ? '\${${placeholder.name}}'
-            : '\$${placeholder.name}'
-        );
+        variable += 'String';
       }
+      messageValue = messageValue.replaceAll(
+        '{${placeholder.name}}',
+        _needsCurlyBracketStringInterpolation(messageValue, placeholder.name)
+          ? '\${$variable}'
+          : '\$$variable'
+      );
     }
 
     return messageValue;
