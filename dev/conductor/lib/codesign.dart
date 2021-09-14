@@ -115,14 +115,17 @@ class CodesignCommand extends Command<void> {
       revision = ((await processManager.run(
         <String>['git', 'rev-parse', 'HEAD'],
         workingDirectory: (await framework.checkoutDirectory).path,
-      )).stdout as String).trim();
+      ))
+              .stdout as String)
+          .trim();
       assert(revision.isNotEmpty);
     }
 
     await framework.checkout(revision);
 
     // Ensure artifacts present
-    await framework.runFlutter(<String>['precache', '--android', '--ios', '--macos']);
+    await framework
+        .runFlutter(<String>['precache', '--android', '--ios', '--macos']);
 
     await verifyExist();
     if (argResults![kSignatures] as bool) {
@@ -135,8 +138,7 @@ class CodesignCommand extends Command<void> {
   /// This list should be kept in sync with the actual contents of Flutter's
   /// cache.
   Future<List<String>> get binariesWithEntitlements async {
-    final String frameworkCacheDirectory = await framework.cacheDirectory;
-    return <String>[
+    final List<String> binaryPaths = <String>[
       'artifacts/engine/android-arm-profile/darwin-x64/gen_snapshot',
       'artifacts/engine/android-arm-release/darwin-x64/gen_snapshot',
       'artifacts/engine/android-arm64-profile/darwin-x64/gen_snapshot',
@@ -164,10 +166,12 @@ class CodesignCommand extends Command<void> {
       'dart-sdk/bin/dart',
       'dart-sdk/bin/dartaotruntime',
       'dart-sdk/bin/utils/gen_snapshot',
-    ]
-        .map((String relativePath) =>
-            fileSystem.path.join(frameworkCacheDirectory, relativePath))
-        .toList();
+    ];
+    final List<String> processedPath = <String>[];
+    for (final String relativePath in binaryPaths) {
+      processedPath.add(fileSystem.path.join(await framework.cacheDirectory, relativePath));
+    }
+    return processedPath;
   }
 
   /// Binaries that are only expected to be codesigned.
@@ -243,7 +247,8 @@ class CodesignCommand extends Command<void> {
     final List<String> unsignedBinaries = <String>[];
     final List<String> wrongEntitlementBinaries = <String>[];
     final List<String> unexpectedBinaries = <String>[];
-    for (final String binaryPath in await findBinaryPaths(await framework.cacheDirectory)) {
+    for (final String binaryPath
+        in await findBinaryPaths(await framework.cacheDirectory)) {
       bool verifySignature = false;
       bool verifyEntitlements = false;
       if ((await binariesWithEntitlements).contains(binaryPath)) {
@@ -328,7 +333,7 @@ class CodesignCommand extends Command<void> {
     }
   }
 
-  late final List<String> _allBinaryPaths = [];
+  late final List<String> _allBinaryPaths = <String>[];
 
   /// Find every binary file in the given [rootDirectory].
   Future<List<String>> findBinaryPaths(String rootDirectory) async {
@@ -347,13 +352,12 @@ class CodesignCommand extends Command<void> {
         .split('\n')
         .where((String s) => s.isNotEmpty)
         .toList();
-    
+
     await Future.forEach(allFiles, (String filePath) async {
       if (await isBinary(filePath)) {
         _allBinaryPaths.add(filePath);
       }
     });
-
     return _allBinaryPaths;
   }
 
