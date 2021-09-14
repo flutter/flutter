@@ -234,7 +234,7 @@ void main() {
       await gesture.up();
       await tester.pumpAndSettle();
       expect(transformationController.value, equals(Matrix4.identity()));
-      expect(tester.takeException(), isFlutterError);
+      expect(tester.takeException(), isAssertionError);
     });
 
     testWidgets('no boundary', (WidgetTester tester) async {
