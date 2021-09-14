@@ -290,13 +290,12 @@ public class PlatformPlugin {
               | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
               | View.SYSTEM_UI_FLAG_FULLSCREEN;
     } else if (systemUiMode == PlatformChannel.SystemUiMode.EDGE_TO_EDGE
-        && Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+        && Build.VERSION.SDK_INT >= 29) {
       // EDGE TO EDGE
-      // Available starting at 16
+      // Available starting at 29
       // SDK 29 and up will apply a translucent body scrim behind 2/3 button navigation bars
-      // to ensure contrast with buttons on the nav bar.
-      // SDK 28 and lower will support a transparent 2/3 button navigation bar.
-      // Overlays should be included and not removed.
+      // to ensure contrast with buttons on the nav and status bars, unless the contrast is not
+      // enforced in the overlay styling.
       enabledOverlays =
           View.SYSTEM_UI_FLAG_LAYOUT_STABLE
               | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
