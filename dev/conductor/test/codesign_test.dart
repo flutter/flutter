@@ -326,8 +326,8 @@ void main() {
           ),
         ...codesignCheckCommands,
       ]);
-      expect(
-        () async => runner.run(<String>['codesign', '--$kVerify', '--$kRevision', revision]),
+      await expectLater(
+        () => runner.run(<String>['codesign', '--$kVerify', '--$kRevision', revision]),
         throwsExceptionWith('Test failed because unsigned binaries detected.'),
       );
       expect(processManager.hasRemainingExpectations, false);
@@ -413,8 +413,8 @@ void main() {
           ),
         ...codesignCheckCommands,
       ]);
-      expect(
-        () async => runner.run(<String>['codesign', '--$kVerify', '--$kRevision', revision]),
+      await expectLater(
+        () => runner.run(<String>['codesign', '--$kVerify', '--$kRevision', revision]),
         throwsExceptionWith('Test failed because files found with the wrong entitlements'),
       );
       expect(processManager.hasRemainingExpectations, false);
