@@ -434,7 +434,11 @@ class FlutterView {
 
 /// Flutter specific VM Service functionality.
 class FlutterVmService {
-  FlutterVmService(this.service, {this.wsAddress, this.httpAddress});
+  FlutterVmService(
+    this.service, {
+    required this.wsAddress,
+    required this.httpAddress,
+  });
 
   final vm_service.VmService service;
   final Uri? wsAddress;
