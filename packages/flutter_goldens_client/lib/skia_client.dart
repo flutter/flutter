@@ -5,6 +5,7 @@
 import 'dart:convert';
 import 'dart:io' as io;
 
+import 'package:convert/convert.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:path/path.dart' as path;
@@ -285,11 +286,12 @@ class SkiaGoldClient {
   /// Gold at head.
   Future<String?> getExpectationForTest(String testName) async {
     late String? expectation;
-    final String traceID = getTraceID(testName);
+    final String traceID = await getTraceID(testName);
     await io.HttpOverrides.runWithHttpOverrides<Future<void>>(() async {
       final Uri requestForExpectations = Uri.parse(
-        'https://flutter-gold.skia.org/json/v1/latestpositivedigest/$traceID'
+        'https://flutter-gold.skia.org/json/v2/latestpositivedigest/$traceID'
       );
+      print(requestForExpectations);
       late String rawResponse;
       try {
         final io.HttpClientRequest request = await httpClient.getUrl(requestForExpectations);
@@ -418,12 +420,19 @@ class SkiaGoldClient {
   ///
   /// Example TraceID for Flutter Gold:
   ///   ',CI=cirrus,Platform=linux,name=cupertino.activityIndicator.inprogress.1.0,source_type=flutter,'
-  String getTraceID(String testName) {
-    return '${platform.environment[_kTestBrowserKey] == null ? ',' : ',Browser=${platform.environment[_kTestBrowserKey]},'}'
+  Future<String> getTraceID(String testName) async {
+    final String trace = '${platform.environment[_kTestBrowserKey] == null ? ',' : ',Browser=${platform.environment[_kTestBrowserKey]},'}'
       'CI=luci,'
       'Platform=${platform.operatingSystem},'
       'name=$testName,'
       'source_type=flutter,';
+    print(trace);
+    final io.ProcessResult md5Result = await process.run(<String>['md5', '-s', trace]);
+    final String md5Sum = md5Result.stdout.toString().split(' ').last.trim();
+    print('md5Sum: $md5Sum');
+    final String hexTrace = hex.encode(utf8.encode(md5Sum));
+    print('hexTrace: $hexTrace');
+    return hexTrace;
   }
 }
 

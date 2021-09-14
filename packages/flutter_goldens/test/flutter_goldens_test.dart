@@ -210,7 +210,7 @@ void main() {
       );
     });
 
-    test('Creates traceID correctly', () {
+    test('Creates traceID correctly', () async {
       String traceID;
       platform = FakePlatform(
         environment: <String, String>{
@@ -231,7 +231,7 @@ void main() {
         httpClient: fakeHttpClient,
       );
 
-      traceID = skiaClient.getTraceID('flutter.golden.1');
+      traceID = await skiaClient.getTraceID('flutter.golden.1');
 
       expect(
         traceID,
@@ -259,7 +259,7 @@ void main() {
         httpClient: fakeHttpClient,
       );
 
-      traceID = skiaClient.getTraceID('flutter.golden.1');
+      traceID = await skiaClient.getTraceID('flutter.golden.1');
 
       expect(
         traceID,
@@ -282,7 +282,7 @@ void main() {
         httpClient: fakeHttpClient,
       );
 
-      traceID = skiaClient.getTraceID('flutter.golden.1');
+      traceID = await skiaClient.getTraceID('flutter.golden.1');
 
       expect(
         traceID,
