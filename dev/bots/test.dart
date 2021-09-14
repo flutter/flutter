@@ -1140,16 +1140,30 @@ Future<void> _runFlutterPluginsTests() async {
       ],
       workingDirectory: checkout.path,
     );
+    // Prep the repository tooling.
+    // This test does not use tool_runner.sh because in this context the test
+    // should always run on the entire plugins repo, while tool_runner.sh
+    // is designed for flutter/plugins CI and only analyzes changed repository
+    // files when run for anything but master.
+    final String toolDir = path.join(checkout.path, 'script', 'tool');
     await runCommand(
-      './script/tool_runner.sh',
+      'dart',
       <String>[
+        'pub',
+        'get',
+      ],
+      workingDirectory: toolDir,
+    );
+    final String toolScript = path.join(toolDir, 'bin', 'flutter_plugin_tools.dart');
+    await runCommand(
+      'dart',
+      <String>[
+        'run',
+        toolScript,
         'analyze',
         '--custom-analysis=script/configs/custom_analysis.yaml',
       ],
       workingDirectory: checkout.path,
-      environment: <String, String>{
-        'BRANCH_NAME': 'master',
-      },
     );
   }
   await selectSubshard(<String, ShardRunner>{
