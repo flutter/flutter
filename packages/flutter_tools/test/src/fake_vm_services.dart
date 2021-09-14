@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:flutter_tools/src/base/common.dart';
@@ -19,7 +17,7 @@ export 'package:test_api/test_api.dart' hide test, isInstanceOf; // ignore: depr
 /// and response structure.
 class FakeVmServiceHost {
   FakeVmServiceHost({
-    @required List<VmServiceExpectation> requests,
+    required List<VmServiceExpectation> requests,
     Uri httpAddress,
     Uri wsAddress,
   }) : _requests = requests {
