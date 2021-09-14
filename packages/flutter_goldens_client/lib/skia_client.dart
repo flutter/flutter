@@ -410,14 +410,8 @@ class SkiaGoldClient {
   }
 
   /// Returns a trace id based on the current testing environment to lookup
-  /// the latest positive digest on Flutter Gold.
-  ///
-  /// Trace IDs are case sensitive and should be in alphabetical order for the
-  /// keys, followed by the rest of the paramset, also in alphabetical order.
-  /// There should also be leading and trailing commas.
-  ///
-  /// Example TraceID for Flutter Gold:
-  ///   ',CI=cirrus,Platform=linux,name=cupertino.activityIndicator.inprogress.1.0,source_type=flutter,'
+  /// the latest positive digest on Flutter Gold with a hex-encoded md5 hash of
+  /// the image keys.
   Future<String> getTraceID(String testName) async {
     final Map<String, dynamic> keys = <String, dynamic>{
       if (platform.environment[_kTestBrowserKey] != null) 'Browser' : platform.environment[_kTestBrowserKey],
