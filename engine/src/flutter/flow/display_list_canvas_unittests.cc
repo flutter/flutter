@@ -334,17 +334,33 @@ class CanvasCompareTester {
       sk_sp<SkMaskFilter> filter =
           SkMaskFilter::MakeBlur(kNormal_SkBlurStyle, 5.0);
       {
-        RenderWith([=](SkCanvas*, SkPaint& p) { p.setMaskFilter(filter); },
-                   [=](DisplayListBuilder& b) { b.setMaskFilter(filter); },
-                   cv_renderer, dl_renderer, "MaskFilter == Blur 5");
+        RenderWith(
+            [=](SkCanvas*, SkPaint& p) {
+              // Provide some non-trivial stroke size to get blurred
+              p.setStrokeWidth(3.0);
+              p.setMaskFilter(filter);
+            },
+            [=](DisplayListBuilder& b) {
+              // Provide some non-trivial stroke size to get blurred
+              b.setStrokeWidth(3.0);
+              b.setMaskFilter(filter);
+            },
+            cv_renderer, dl_renderer, "MaskFilter == Blur 5");
       }
       ASSERT_TRUE(filter->unique()) << "MaskFilter Cleanup";
       {
-        RenderWith([=](SkCanvas*, SkPaint& p) { p.setMaskFilter(filter); },
-                   [=](DisplayListBuilder& b) {
-                     b.setMaskBlurFilter(kNormal_SkBlurStyle, 5.0);
-                   },
-                   cv_renderer, dl_renderer, "MaskFilter == Blur(Normal, 5.0)");
+        RenderWith(
+            [=](SkCanvas*, SkPaint& p) {
+              // Provide some non-trivial stroke size to get blurred
+              p.setStrokeWidth(3.0);
+              p.setMaskFilter(filter);
+            },
+            [=](DisplayListBuilder& b) {
+              // Provide some non-trivial stroke size to get blurred
+              b.setStrokeWidth(3.0);
+              b.setMaskBlurFilter(kNormal_SkBlurStyle, 5.0);
+            },
+            cv_renderer, dl_renderer, "MaskFilter == Blur(Normal, 5.0)");
       }
       ASSERT_TRUE(filter->unique()) << "MaskFilter Cleanup";
     }
