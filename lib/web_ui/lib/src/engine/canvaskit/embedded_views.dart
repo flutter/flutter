@@ -381,10 +381,11 @@ class HtmlViewEmbedder {
   }
 
   void submitFrame() {
-    final ViewListDiffResult? diffResult =
-        (_activeCompositionOrder.isEmpty || _compositionOrder.isEmpty)
-            ? null
-            : diffViewList(_activeCompositionOrder, _compositionOrder);
+    final ViewListDiffResult? diffResult = (_activeCompositionOrder.isEmpty ||
+            _compositionOrder.isEmpty ||
+            disableOverlays)
+        ? null
+        : diffViewList(_activeCompositionOrder, _compositionOrder);
     final Map<int, int>? insertBeforeMap = _updateOverlays(diffResult);
 
     bool _didPaintBackupSurface = false;
@@ -543,6 +544,8 @@ class HtmlViewEmbedder {
   //
   // [_compositionOrder] and [_activeComposition] order should contain the
   // composition order of the current and previous frame, respectively.
+  //
+  // TODO(hterkelsen): Test this more thoroughly.
   Map<int, int>? _updateOverlays(ViewListDiffResult? diffResult) {
     if (_viewsUsingBackupSurface.isEmpty) {
       SurfaceFactory.instance
