@@ -114,10 +114,7 @@ void testUsingContext(
           HttpClient: () => FakeHttpClient.any(),
           IOSSimulatorUtils: () => const NoopIOSSimulatorUtils(),
           OutputPreferences: () => OutputPreferences.test(),
-          Logger: () => BufferLogger(
-            terminal: globals.terminal,
-            outputPreferences: globals.outputPreferences,
-          ),
+          Logger: () => BufferLogger.test(),
           OperatingSystemUtils: () => FakeOperatingSystemUtils(),
           PersistentToolState: () => buildPersistentToolState(globals.fs),
           Usage: () => TestUsage(),

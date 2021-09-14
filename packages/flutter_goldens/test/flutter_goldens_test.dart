@@ -210,7 +210,7 @@ void main() {
       );
     });
 
-    test('Creates traceID correctly', () {
+    test('Creates traceID correctly', () async {
       String traceID;
       platform = FakePlatform(
         environment: <String, String>{
@@ -231,11 +231,19 @@ void main() {
         httpClient: fakeHttpClient,
       );
 
-      traceID = skiaClient.getTraceID('flutter.golden.1');
-
+      RunInvocation md5 = const RunInvocation(
+        <String>[
+          'md5',
+          '-s',
+          '{"CI":"luci","Platform":"linux","name":"flutter.golden.1","source_type":"flutter"}',
+        ],
+        null,
+      );
+      process.processResults[md5] = ProcessResult(12345678, 0, '12345678', '');
+      traceID = await skiaClient.getTraceID('flutter.golden.1');
       expect(
         traceID,
-        equals(',CI=luci,Platform=linux,name=flutter.golden.1,source_type=flutter,'),
+        equals('12345678'),
       );
 
       // Browser
@@ -258,12 +266,19 @@ void main() {
         platform: platform,
         httpClient: fakeHttpClient,
       );
-
-      traceID = skiaClient.getTraceID('flutter.golden.1');
-
+      md5 = const RunInvocation(
+        <String>[
+          'md5',
+          '-s',
+          '{"Browser":"chrome","CI":"luci","Platform":"linux","name":"flutter.golden.1","source_type":"flutter"}',
+        ],
+        null,
+      );
+      process.processResults[md5] = ProcessResult(12345678, 0, '12345678', '');
+      traceID = await skiaClient.getTraceID('flutter.golden.1');
       expect(
         traceID,
-        equals(',Browser=chrome,CI=luci,Platform=linux,name=flutter.golden.1,source_type=flutter,'),
+        equals('12345678'),
       );
 
       // Locally - should defer to luci traceID
@@ -281,12 +296,19 @@ void main() {
         platform: platform,
         httpClient: fakeHttpClient,
       );
-
-      traceID = skiaClient.getTraceID('flutter.golden.1');
-
+      md5 = const RunInvocation(
+        <String>[
+          'md5',
+          '-s',
+          '{"CI":"luci","Platform":"macos","name":"flutter.golden.1","source_type":"flutter"}',
+        ],
+        null,
+      );
+      process.processResults[md5] = ProcessResult(12345678, 0, '12345678', '');
+      traceID = await skiaClient.getTraceID('flutter.golden.1');
       expect(
         traceID,
-        equals(',CI=luci,Platform=macos,name=flutter.golden.1,source_type=flutter,'),
+        equals('12345678'),
       );
     });
 
