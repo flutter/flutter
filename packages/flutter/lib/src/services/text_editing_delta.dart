@@ -229,6 +229,8 @@ abstract class TextEditingDelta {
 class TextEditingDeltaInsertion extends TextEditingDelta {
   /// Creates an insertion delta for a given change to the editing state.
   ///
+  /// {@macro flutter.services.TextEditingDelta}
+  ///
   /// {@template flutter.services.TextEditingDelta.optIn}
   /// See also:
   ///
@@ -236,8 +238,6 @@ class TextEditingDeltaInsertion extends TextEditingDelta {
   ///  [TextEditingDelta]'s you must set [TextInputConfiguration.enableDeltaModel]
   ///  to true.
   /// {@endtemplate}
-  ///
-  /// {@macro flutter.services.TextEditingDelta}
   const TextEditingDeltaInsertion({
     required String oldText,
     required this.textInserted,
@@ -273,9 +273,9 @@ class TextEditingDeltaInsertion extends TextEditingDelta {
 class TextEditingDeltaDeletion extends TextEditingDelta {
   /// Creates a deletion delta for a given change to the editing state.
   ///
-  /// {@macro flutter.services.TextEditingDelta.optIn}
-  ///
   /// {@macro flutter.services.TextEditingDelta}
+  ///
+  /// {@macro flutter.services.TextEditingDelta.optIn}
   const TextEditingDeltaDeletion({
     required String oldText,
     required this.deletedRange,
@@ -316,9 +316,9 @@ class TextEditingDeltaReplacement extends TextEditingDelta {
   /// A replacement can occur in cases such as auto-correct, suggestions, and
   /// when a selection is replaced by a single character.
   ///
-  /// {@macro flutter.services.TextEditingDelta.optIn}
-  ///
   /// {@macro flutter.services.TextEditingDelta}
+  ///
+  /// {@macro flutter.services.TextEditingDelta.optIn}
   const TextEditingDeltaReplacement({
     required String oldText,
     required this.replacementText,
@@ -363,9 +363,9 @@ class TextEditingDeltaNonTextUpdate extends TextEditingDelta {
   /// handles. There are no changes to the text, but there are updates to the selection
   /// and potentially the composing region as well.
   ///
-  /// {@macro flutter.services.TextEditingDelta.optIn}
-  ///
   /// {@macro flutter.services.TextEditingDelta}
+  ///
+  /// {@macro flutter.services.TextEditingDelta.optIn}
   const TextEditingDeltaNonTextUpdate({
     required String oldText,
     required TextSelection selection,
