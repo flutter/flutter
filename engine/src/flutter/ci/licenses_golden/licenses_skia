@@ -1,4 +1,4 @@
-Signature: 22a1b31abe2f0573425989cb54d52973
+Signature: 0956003514bf6fe4aa45f1499ee92057
 
 UNUSED LICENSES:
 
@@ -2513,8 +2513,6 @@ FILE: ../../../third_party/skia/src/gpu/text/GrTextBlobCache.h
 FILE: ../../../third_party/skia/src/gpu/v1/Device_drawTexture.cpp
 FILE: ../../../third_party/skia/src/gpu/v1/SurfaceDrawContext.cpp
 FILE: ../../../third_party/skia/src/gpu/v1/SurfaceDrawContext_v1.h
-FILE: ../../../third_party/skia/src/gpu/vk/GrVkAttachment.cpp
-FILE: ../../../third_party/skia/src/gpu/vk/GrVkAttachment.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkCaps.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkCaps.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkCommandBuffer.cpp
