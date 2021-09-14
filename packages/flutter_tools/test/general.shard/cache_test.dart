@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/flutter_cache.dart';
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
 
@@ -862,6 +863,15 @@ void main() {
     await pubDependencies.update(FakeArtifactUpdater(), logger, fileSystem, FakeOperatingSystemUtils());
 
     expect(pub.calledGet, 1);
+  });
+
+  // Check that the build number matches the format documented here:
+  // https://dart.dev/get-dart#release-channels
+  testUsingContext('Check current Dart SDK build number', () async {
+    final String currentDartSdkVersion = globals.cache.dartSdkBuild;
+    final RegExp dartSdkVersionFormat = RegExp(r'\d+\.\d+\.\d+(?:-\S+)?');
+
+    expect(dartSdkVersionFormat.allMatches(currentDartSdkVersion).length, 1,);
   });
 
   group('AndroidMavenArtifacts', () {

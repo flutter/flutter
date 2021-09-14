@@ -2,12 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=20210721"
-@Tags(<String>['no-shuffle'])
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -17,10 +11,8 @@ import 'package:flutter_driver/src/common/error.dart';
 import 'package:flutter_driver/src/common/health.dart';
 import 'package:flutter_driver/src/common/layer_tree.dart';
 import 'package:flutter_driver/src/common/wait.dart';
-import 'package:flutter_driver/src/driver/common.dart';
 import 'package:flutter_driver/src/driver/driver.dart';
 import 'package:flutter_driver/src/driver/timeline.dart';
-import 'package:path/path.dart' as path;
 import 'package:vm_service/vm_service.dart' as vms;
 
 import '../../common.dart';
@@ -44,15 +36,12 @@ void main() {
     late FakeIsolate fakeIsolate;
     late VMServiceFlutterDriver driver;
     late File logFile;
-    int driverId = -1;
 
     setUp(() {
       fakeIsolate = FakeIsolate();
       fakeVM = FakeVM(fakeIsolate);
       fakeClient = FakeVmService(fakeVM);
       fakeClient.responses['waitFor'] = makeFakeResponse(<String, dynamic>{'status':'ok'});
-      driverId += 1;
-      logFile = File(path.join(testOutputsDirectory, 'flutter_driver_commands_$driverId.log'));
     });
 
     tearDown(() {
@@ -64,6 +53,7 @@ void main() {
     group('logCommunicationToFile', () {
       test('logCommunicationToFile = true', () async {
         driver = VMServiceFlutterDriver.connectedTo(fakeClient, fakeIsolate);
+        logFile = File(driver.logFilePathName);
 
         await driver.waitFor(find.byTooltip('foo'), timeout: _kTestTimeout);
 
@@ -80,11 +70,21 @@ void main() {
 
       test('logCommunicationToFile = false', () async {
         driver = VMServiceFlutterDriver.connectedTo(fakeClient, fakeIsolate, logCommunicationToFile: false);
-
+        logFile = File(driver.logFilePathName);
+        // clear log file if left in filetree from previous run
+        if (logFile.existsSync()) {
+          logFile.deleteSync();
+        }
         await driver.waitFor(find.byTooltip('foo'), timeout: _kTestTimeout);
 
         final bool exists = logFile.existsSync();
         expect(exists, false, reason: 'because ${logFile.path} exists');
+      });
+
+      test('logFilePathName was set when a new driver was created', () {
+        driver = VMServiceFlutterDriver.connectedTo(fakeClient, fakeIsolate, logCommunicationToFile: true);
+        logFile = File(driver.logFilePathName);
+        expect(logFile.path, endsWith('.log'));
       });
     });
   });
@@ -720,14 +720,11 @@ void main() {
     late FakeFlutterWebConnection fakeConnection;
     late WebFlutterDriver driver;
     late File logFile;
-    int driverId = -1;
 
     setUp(() {
       fakeConnection = FakeFlutterWebConnection();
       fakeConnection.supportsTimelineAction = true;
       fakeConnection.responses['waitFor'] = jsonEncode(makeFakeResponse(<String, dynamic>{'status': 'ok'}));
-      driverId += 1;
-      logFile = File(path.join(testOutputsDirectory, 'flutter_driver_commands_$driverId.log'));
     });
 
     tearDown(() {
@@ -738,6 +735,7 @@ void main() {
 
     test('logCommunicationToFile = true', () async {
       driver = WebFlutterDriver.connectedTo(fakeConnection);
+      logFile = File(driver.logFilePathName);
       await driver.waitFor(find.byTooltip('logCommunicationToFile test'), timeout: _kTestTimeout);
 
       final bool exists = logFile.existsSync();
@@ -753,6 +751,11 @@ void main() {
 
     test('logCommunicationToFile = false', () async {
       driver = WebFlutterDriver.connectedTo(fakeConnection, logCommunicationToFile: false);
+      logFile = File(driver.logFilePathName);
+      // clear log file if left in filetree from previous run
+      if (logFile.existsSync()) {
+        logFile.deleteSync();
+      }
       await driver.waitFor(find.byTooltip('logCommunicationToFile test'), timeout: _kTestTimeout);
       final bool exists = logFile.existsSync();
       expect(exists, false, reason: 'because ${logFile.path} exists');

@@ -759,7 +759,7 @@ abstract class FlutterCommand extends Command<void> {
       FlutterOptions.kEnableExperiment,
       help:
         'The name of an experimental Dart feature to enable. For more information see: '
-        'https://github.com/dart-lang/sdk/blob/master/docs/process/experimental-flags.md',
+        'https://github.com/dart-lang/sdk/blob/main/docs/process/experimental-flags.md',
       hide: hide,
     );
   }
