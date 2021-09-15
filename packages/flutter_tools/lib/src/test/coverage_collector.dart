@@ -289,7 +289,7 @@ void _buildCoverageMap(
   bool reportLines,
 ) {
   final Map<String, Map<int, int>> hitMaps = <String, Map<int, int>>{};
-  for (final String scriptId in scripts.keys) {
+  for (final String scriptId in sourceReports.keys) {
     final vm_service.SourceReport sourceReport = sourceReports[scriptId];
     for (final vm_service.SourceReportRange range in sourceReport.ranges) {
       final vm_service.SourceReportCoverage coverage = range.coverage;
@@ -304,7 +304,7 @@ void _buildCoverageMap(
       final Map<int, int> hitMap = hitMaps[uri];
       final List<int> hits = coverage.hits;
       final List<int> misses = coverage.misses;
-      final List<dynamic> tokenPositions = scripts[scriptRef.id].tokenPosTable;
+      final List<dynamic> tokenPositions = scripts[scriptRef.id]?.tokenPosTable;
       // The token positions can be null if the script has no lines that may be
       // covered. It will also be null if reportLines is true.
       if (tokenPositions == null && !reportLines) {
