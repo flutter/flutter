@@ -37,6 +37,7 @@ import io.flutter.plugin.common.StandardMessageCodecTest;
 import io.flutter.plugin.common.StandardMethodCodecTest;
 import io.flutter.plugin.editing.InputConnectionAdaptorTest;
 import io.flutter.plugin.editing.ListenableEditingStateTest;
+import io.flutter.plugin.editing.TextEditingDeltaTest;
 import io.flutter.plugin.editing.TextInputPluginTest;
 import io.flutter.plugin.localization.LocalizationPluginTest;
 import io.flutter.plugin.mouse.MouseCursorPluginTest;
@@ -99,6 +100,7 @@ import test.io.flutter.embedding.engine.PluginComponentTest;
   SmokeTest.class,
   StandardMessageCodecTest.class,
   StandardMethodCodecTest.class,
+  TextEditingDeltaTest.class,
   TextInputChannelTest.class,
   TextInputPluginTest.class,
 })
