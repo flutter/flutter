@@ -1510,20 +1510,16 @@ class TextInput {
         _currentConnection!._client.updateEditingValue(TextEditingValue.fromJSON(args[1] as Map<String, dynamic>));
         break;
       case 'TextInputClient.updateEditingStateWithDeltas':
-        final List<TextEditingDelta> batchDeltas = <TextEditingDelta>[];
+        final List<TextEditingDelta> deltas = <TextEditingDelta>[];
 
         final Map<String, dynamic> encoded = args[1] as Map<String, dynamic>;
 
-        // On Android there could be a situation where multiple edits done to
-        // an editing state are accumulated before being sent to the framework.
-        // This is called batch editing on Android, and on other platforms the
-        // TextInputPlugin does not adhere to this type of editing.
-        for (final dynamic encodedDelta in encoded['batchDeltas']) {
+        for (final dynamic encodedDelta in encoded['deltas']) {
           final TextEditingDelta delta = TextEditingDelta.fromJSON(encodedDelta as Map<String, dynamic>);
-          batchDeltas.add(delta);
+          deltas.add(delta);
         }
 
-        _currentConnection!._client.updateEditingValueWithDeltas(batchDeltas);
+        _currentConnection!._client.updateEditingValueWithDeltas(deltas);
         break;
       case 'TextInputClient.performAction':
         _currentConnection!._client.performAction(_toTextInputAction(args[1] as String));
