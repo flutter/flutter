@@ -1,4 +1,4 @@
-Signature: ef7a746753f856d9ca69b564a601a8a7
+Signature: 3cc1f613fa433540961bfe7de21e8e07
 
 UNUSED LICENSES:
 
@@ -683,19 +683,16 @@ FILE: ../../../third_party/skia/experimental/sktext/editor/Selection.cpp
 FILE: ../../../third_party/skia/experimental/sktext/editor/Selection.h
 FILE: ../../../third_party/skia/experimental/sktext/editor/Texts.cpp
 FILE: ../../../third_party/skia/experimental/sktext/editor/Texts.h
-FILE: ../../../third_party/skia/experimental/sktext/include/Interface.h
 FILE: ../../../third_party/skia/experimental/sktext/include/Text.h
 FILE: ../../../third_party/skia/experimental/sktext/include/Types.h
 FILE: ../../../third_party/skia/experimental/sktext/samples/Text.cpp
 FILE: ../../../third_party/skia/experimental/sktext/src/Line.cpp
 FILE: ../../../third_party/skia/experimental/sktext/src/Line.h
-FILE: ../../../third_party/skia/experimental/sktext/src/LogicalRun.cpp
-FILE: ../../../third_party/skia/experimental/sktext/src/LogicalRun.h
 FILE: ../../../third_party/skia/experimental/sktext/src/Paint.cpp
 FILE: ../../../third_party/skia/experimental/sktext/src/Paint.h
 FILE: ../../../third_party/skia/experimental/sktext/src/Text.cpp
-FILE: ../../../third_party/skia/experimental/sktext/src/VisualRun.cpp
-FILE: ../../../third_party/skia/experimental/sktext/src/VisualRun.h
+FILE: ../../../third_party/skia/experimental/sktext/src/TextRun.cpp
+FILE: ../../../third_party/skia/experimental/sktext/src/TextRun.h
 FILE: ../../../third_party/skia/experimental/tskit/.eslintignore
 FILE: ../../../third_party/skia/experimental/tskit/.eslintrc.js
 FILE: ../../../third_party/skia/experimental/tskit/bindings/core.d.ts
