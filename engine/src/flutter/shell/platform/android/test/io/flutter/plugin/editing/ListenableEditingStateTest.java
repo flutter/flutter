@@ -228,6 +228,31 @@ public class ListenableEditingStateTest {
     assertEquals(editingState.length(), editingState.getComposingEnd());
   }
 
+  @Test
+  public void testClearBatchDeltas() {
+    final ListenableEditingState editingState =
+        new ListenableEditingState(null, new View(RuntimeEnvironment.application));
+    editingState.replace(0, editingState.length(), "text");
+    editingState.delete(0, 1);
+    editingState.insert(0, "This is t");
+    editingState.clearBatchDeltas();
+    assertEquals(0, editingState.extractBatchTextEditingDeltas().size());
+  }
+
+  @Test
+  public void testExtractBatchTextEditingDeltas() {
+    final ListenableEditingState editingState =
+        new ListenableEditingState(null, new View(RuntimeEnvironment.application));
+
+    // Creating some deltas.
+    editingState.replace(0, editingState.length(), "test");
+    editingState.delete(0, 1);
+    editingState.insert(0, "This is a t");
+
+    ArrayList<TextEditingDelta> batchDeltas = editingState.extractBatchTextEditingDeltas();
+    assertEquals(3, batchDeltas.size());
+  }
+
   // -------- Start: Test InputMethods actions   -------
   @Test
   public void inputMethod_batchEditingBeginAndEnd() {

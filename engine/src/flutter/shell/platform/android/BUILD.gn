@@ -233,6 +233,7 @@ android_java_sources = [
   "io/flutter/plugin/editing/ImeSyncDeferringInsetsCallback.java",
   "io/flutter/plugin/editing/InputConnectionAdaptor.java",
   "io/flutter/plugin/editing/ListenableEditingState.java",
+  "io/flutter/plugin/editing/TextEditingDelta.java",
   "io/flutter/plugin/editing/TextInputPlugin.java",
   "io/flutter/plugin/localization/LocalizationPlugin.java",
   "io/flutter/plugin/mouse/MouseCursorPlugin.java",

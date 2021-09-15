@@ -157,6 +157,7 @@ public class TextInputPluginTest {
             false,
             true,
             true,
+            false,
             TextInputChannel.TextCapitalization.NONE,
             null,
             null,
@@ -178,6 +179,628 @@ public class TextInputPluginTest {
     assertTrue(textInputPlugin.getEditable().toString().equals("more update from the framework"));
     verify(textInputChannel, times(0))
         .updateEditingState(anyInt(), any(), anyInt(), anyInt(), anyInt(), anyInt());
+  }
+
+  @Test
+  public void setTextInputEditingState_doesNotInvokeUpdateEditingStateWithDeltas() {
+    // Initialize a general TextInputPlugin.
+    InputMethodSubtype inputMethodSubtype = mock(InputMethodSubtype.class);
+    TestImm testImm =
+        Shadow.extract(
+            RuntimeEnvironment.application.getSystemService(Context.INPUT_METHOD_SERVICE));
+    testImm.setCurrentInputMethodSubtype(inputMethodSubtype);
+    View testView = new View(RuntimeEnvironment.application);
+    TextInputChannel textInputChannel = spy(new TextInputChannel(mock(DartExecutor.class)));
+    TextInputPlugin textInputPlugin =
+        new TextInputPlugin(testView, textInputChannel, mock(PlatformViewsController.class));
+    textInputPlugin.setTextInputClient(
+        0,
+        new TextInputChannel.Configuration(
+            false,
+            false,
+            true,
+            true,
+            true, // Enable delta model.
+            TextInputChannel.TextCapitalization.NONE,
+            null,
+            null,
+            null,
+            null,
+            null));
+
+    textInputPlugin.setTextInputEditingState(
+        testView,
+        new TextInputChannel.TextEditState("receiving initial input from framework", 0, 0, -1, -1));
+    assertTrue(
+        textInputPlugin.getEditable().toString().equals("receiving initial input from framework"));
+
+    verify(textInputChannel, times(0)).updateEditingStateWithDeltas(anyInt(), any());
+
+    textInputPlugin.setTextInputEditingState(
+        testView,
+        new TextInputChannel.TextEditState(
+            "receiving more updates from the framework", 1, 2, -1, -1));
+
+    assertTrue(
+        textInputPlugin
+            .getEditable()
+            .toString()
+            .equals("receiving more updates from the framework"));
+    verify(textInputChannel, times(0)).updateEditingStateWithDeltas(anyInt(), any());
+  }
+
+  @Test
+  public void textEditingDelta_TestUpdateEditingValueWithDeltasIsNotInvokedWhenDeltaModelDisabled()
+      throws NullPointerException {
+    // Initialize a general TextInputPlugin.
+    InputMethodSubtype inputMethodSubtype = mock(InputMethodSubtype.class);
+    TestImm testImm =
+        Shadow.extract(
+            RuntimeEnvironment.application.getSystemService(Context.INPUT_METHOD_SERVICE));
+    testImm.setCurrentInputMethodSubtype(inputMethodSubtype);
+    View testView = new View(RuntimeEnvironment.application);
+    EditorInfo outAttrs = new EditorInfo();
+    outAttrs.inputType = InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE;
+    TextInputChannel textInputChannel = spy(new TextInputChannel(mock(DartExecutor.class)));
+    TextInputPlugin textInputPlugin =
+        new TextInputPlugin(testView, textInputChannel, mock(PlatformViewsController.class));
+    CharSequence newText = "I do not fear computers. I fear the lack of them.";
+
+    // Change InputTarget to FRAMEWORK_CLIENT.
+    textInputPlugin.setTextInputClient(
+        0,
+        new TextInputChannel.Configuration(
+            false,
+            false,
+            true,
+            true,
+            false, // Delta model is disabled.
+            TextInputChannel.TextCapitalization.NONE,
+            new TextInputChannel.InputType(TextInputChannel.TextInputType.TEXT, false, false),
+            null,
+            null,
+            null,
+            null));
+
+    // There's a pending restart since we initialized the text input client. Flush that now.
+    textInputPlugin.setTextInputEditingState(
+        testView, new TextInputChannel.TextEditState("", 0, 0, -1, -1));
+    verify(textInputChannel, times(0)).updateEditingStateWithDeltas(anyInt(), any());
+    verify(textInputChannel, times(0))
+        .updateEditingState(anyInt(), any(), anyInt(), anyInt(), anyInt(), anyInt());
+    assertEquals(
+        0,
+        ((ListenableEditingState) textInputPlugin.getEditable())
+            .extractBatchTextEditingDeltas()
+            .size());
+
+    InputConnection inputConnection =
+        textInputPlugin.createInputConnection(testView, mock(KeyboardManager.class), outAttrs);
+
+    inputConnection.beginBatchEdit();
+    verify(textInputChannel, times(0)).updateEditingStateWithDeltas(anyInt(), any());
+    verify(textInputChannel, times(0))
+        .updateEditingState(anyInt(), any(), anyInt(), anyInt(), anyInt(), anyInt());
+    inputConnection.setComposingText(newText, newText.length());
+    verify(textInputChannel, times(0)).updateEditingStateWithDeltas(anyInt(), any());
+    verify(textInputChannel, times(0))
+        .updateEditingState(anyInt(), any(), anyInt(), anyInt(), anyInt(), anyInt());
+    inputConnection.endBatchEdit();
+
+    assertEquals(
+        0,
+        ((ListenableEditingState) textInputPlugin.getEditable())
+            .extractBatchTextEditingDeltas()
+            .size());
+
+    verify(textInputChannel, times(0)).updateEditingStateWithDeltas(anyInt(), any());
+    verify(textInputChannel, times(1))
+        .updateEditingState(anyInt(), any(), anyInt(), anyInt(), anyInt(), anyInt());
+
+    inputConnection.beginBatchEdit();
+
+    verify(textInputChannel, times(0)).updateEditingStateWithDeltas(anyInt(), any());
+    verify(textInputChannel, times(1))
+        .updateEditingState(anyInt(), any(), anyInt(), anyInt(), anyInt(), anyInt());
+
+    inputConnection.endBatchEdit();
+
+    assertEquals(
+        0,
+        ((ListenableEditingState) textInputPlugin.getEditable())
+            .extractBatchTextEditingDeltas()
+            .size());
+
+    verify(textInputChannel, times(0)).updateEditingStateWithDeltas(anyInt(), any());
+    verify(textInputChannel, times(1))
+        .updateEditingState(anyInt(), any(), anyInt(), anyInt(), anyInt(), anyInt());
+
+    inputConnection.beginBatchEdit();
+
+    verify(textInputChannel, times(0)).updateEditingStateWithDeltas(anyInt(), any());
+    verify(textInputChannel, times(1))
+        .updateEditingState(anyInt(), any(), anyInt(), anyInt(), anyInt(), anyInt());
+
+    // Selection changes so this will trigger an update to the framework through
+    // updateEditingStateWithDeltas after the batch edit has completed and notified all listeners
+    // of the editing state.
+    inputConnection.setSelection(3, 4);
+    assertEquals(Selection.getSelectionStart(textInputPlugin.getEditable()), 3);
+    assertEquals(Selection.getSelectionEnd(textInputPlugin.getEditable()), 4);
+
+    verify(textInputChannel, times(0)).updateEditingStateWithDeltas(anyInt(), any());
+    verify(textInputChannel, times(1))
+        .updateEditingState(anyInt(), any(), anyInt(), anyInt(), anyInt(), anyInt());
+
+    verify(textInputChannel, times(0)).updateEditingStateWithDeltas(anyInt(), any());
+    verify(textInputChannel, times(1))
+        .updateEditingState(anyInt(), any(), anyInt(), anyInt(), anyInt(), anyInt());
+
+    inputConnection.endBatchEdit();
+
+    verify(textInputChannel, times(0)).updateEditingStateWithDeltas(anyInt(), any());
+    verify(textInputChannel, times(2))
+        .updateEditingState(anyInt(), any(), anyInt(), anyInt(), anyInt(), anyInt());
+  }
+
+  @Test
+  public void textEditingDelta_TestUpdateEditingValueIsNotInvokedWhenDeltaModelEnabled()
+      throws NullPointerException {
+    // Initialize a general TextInputPlugin.
+    InputMethodSubtype inputMethodSubtype = mock(InputMethodSubtype.class);
+    TestImm testImm =
+        Shadow.extract(
+            RuntimeEnvironment.application.getSystemService(Context.INPUT_METHOD_SERVICE));
+    testImm.setCurrentInputMethodSubtype(inputMethodSubtype);
+    View testView = new View(RuntimeEnvironment.application);
+    EditorInfo outAttrs = new EditorInfo();
+    outAttrs.inputType = InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE;
+    TextInputChannel textInputChannel = spy(new TextInputChannel(mock(DartExecutor.class)));
+    TextInputPlugin textInputPlugin =
+        new TextInputPlugin(testView, textInputChannel, mock(PlatformViewsController.class));
+    CharSequence newText = "I do not fear computers. I fear the lack of them.";
+    final TextEditingDelta expectedDelta =
+        new TextEditingDelta("", 0, 0, newText, newText.length(), newText.length(), 0, 49);
+
+    // Change InputTarget to FRAMEWORK_CLIENT.
+    textInputPlugin.setTextInputClient(
+        0,
+        new TextInputChannel.Configuration(
+            false,
+            false,
+            true,
+            true,
+            true, // Enable delta model.
+            TextInputChannel.TextCapitalization.NONE,
+            new TextInputChannel.InputType(TextInputChannel.TextInputType.TEXT, false, false),
+            null,
+            null,
+            null,
+            null));
+
+    // There's a pending restart since we initialized the text input client. Flush that now.
+    textInputPlugin.setTextInputEditingState(
+        testView, new TextInputChannel.TextEditState("", 0, 0, -1, -1));
+    verify(textInputChannel, times(0)).updateEditingStateWithDeltas(anyInt(), any());
+    verify(textInputChannel, times(0))
+        .updateEditingState(anyInt(), any(), anyInt(), anyInt(), anyInt(), anyInt());
+    assertEquals(
+        0,
+        ((ListenableEditingState) textInputPlugin.getEditable())
+            .extractBatchTextEditingDeltas()
+            .size());
+
+    InputConnection inputConnection =
+        textInputPlugin.createInputConnection(testView, mock(KeyboardManager.class), outAttrs);
+
+    inputConnection.beginBatchEdit();
+    verify(textInputChannel, times(0)).updateEditingStateWithDeltas(anyInt(), any());
+    verify(textInputChannel, times(0))
+        .updateEditingState(anyInt(), any(), anyInt(), anyInt(), anyInt(), anyInt());
+    inputConnection.setComposingText(newText, newText.length());
+    final ArrayList<TextEditingDelta> actualDeltas =
+        ((ListenableEditingState) textInputPlugin.getEditable()).extractBatchTextEditingDeltas();
+    assertEquals(2, actualDeltas.size());
+    final TextEditingDelta delta = actualDeltas.get(1);
+    verify(textInputChannel, times(0)).updateEditingStateWithDeltas(anyInt(), any());
+    verify(textInputChannel, times(0))
+        .updateEditingState(anyInt(), any(), anyInt(), anyInt(), anyInt(), anyInt());
+    inputConnection.endBatchEdit();
+
+    assertEquals(
+        0,
+        ((ListenableEditingState) textInputPlugin.getEditable())
+            .extractBatchTextEditingDeltas()
+            .size());
+
+    // Verify delta is what we expect.
+    assertEquals(expectedDelta.getOldText(), delta.getOldText());
+    assertEquals(expectedDelta.getDeltaText(), delta.getDeltaText());
+    assertEquals(expectedDelta.getDeltaStart(), delta.getDeltaStart());
+    assertEquals(expectedDelta.getDeltaEnd(), delta.getDeltaEnd());
+    assertEquals(expectedDelta.getNewSelectionStart(), delta.getNewSelectionStart());
+    assertEquals(expectedDelta.getNewSelectionEnd(), delta.getNewSelectionEnd());
+    assertEquals(expectedDelta.getNewComposingStart(), delta.getNewComposingStart());
+    assertEquals(expectedDelta.getNewComposingEnd(), delta.getNewComposingEnd());
+
+    verify(textInputChannel, times(1)).updateEditingStateWithDeltas(anyInt(), any());
+    verify(textInputChannel, times(0))
+        .updateEditingState(anyInt(), any(), anyInt(), anyInt(), anyInt(), anyInt());
+
+    inputConnection.beginBatchEdit();
+
+    verify(textInputChannel, times(1)).updateEditingStateWithDeltas(anyInt(), any());
+    verify(textInputChannel, times(0))
+        .updateEditingState(anyInt(), any(), anyInt(), anyInt(), anyInt(), anyInt());
+
+    inputConnection.endBatchEdit();
+
+    assertEquals(
+        0,
+        ((ListenableEditingState) textInputPlugin.getEditable())
+            .extractBatchTextEditingDeltas()
+            .size());
+
+    verify(textInputChannel, times(1)).updateEditingStateWithDeltas(anyInt(), any());
+    verify(textInputChannel, times(0))
+        .updateEditingState(anyInt(), any(), anyInt(), anyInt(), anyInt(), anyInt());
+
+    inputConnection.beginBatchEdit();
+
+    verify(textInputChannel, times(1)).updateEditingStateWithDeltas(anyInt(), any());
+    verify(textInputChannel, times(0))
+        .updateEditingState(anyInt(), any(), anyInt(), anyInt(), anyInt(), anyInt());
+
+    // Selection changes so this will trigger an update to the framework through
+    // updateEditingStateWithDeltas after the batch edit has completed and notified all listeners
+    // of the editing state.
+    inputConnection.setSelection(3, 4);
+    assertEquals(Selection.getSelectionStart(textInputPlugin.getEditable()), 3);
+    assertEquals(Selection.getSelectionEnd(textInputPlugin.getEditable()), 4);
+
+    verify(textInputChannel, times(1)).updateEditingStateWithDeltas(anyInt(), any());
+    verify(textInputChannel, times(0))
+        .updateEditingState(anyInt(), any(), anyInt(), anyInt(), anyInt(), anyInt());
+
+    verify(textInputChannel, times(1)).updateEditingStateWithDeltas(anyInt(), any());
+    verify(textInputChannel, times(0))
+        .updateEditingState(anyInt(), any(), anyInt(), anyInt(), anyInt(), anyInt());
+
+    inputConnection.endBatchEdit();
+
+    verify(textInputChannel, times(2)).updateEditingStateWithDeltas(anyInt(), any());
+    verify(textInputChannel, times(0))
+        .updateEditingState(anyInt(), any(), anyInt(), anyInt(), anyInt(), anyInt());
+  }
+
+  @Test
+  public void textEditingDelta_TestDeltaIsCreatedWhenComposingTextSetIsInserting()
+      throws NullPointerException {
+    // Initialize a general TextInputPlugin.
+    InputMethodSubtype inputMethodSubtype = mock(InputMethodSubtype.class);
+    TestImm testImm =
+        Shadow.extract(
+            RuntimeEnvironment.application.getSystemService(Context.INPUT_METHOD_SERVICE));
+    testImm.setCurrentInputMethodSubtype(inputMethodSubtype);
+    View testView = new View(RuntimeEnvironment.application);
+    EditorInfo outAttrs = new EditorInfo();
+    outAttrs.inputType = InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE;
+    TextInputChannel textInputChannel = spy(new TextInputChannel(mock(DartExecutor.class)));
+    TextInputPlugin textInputPlugin =
+        new TextInputPlugin(testView, textInputChannel, mock(PlatformViewsController.class));
+    CharSequence newText = "I do not fear computers. I fear the lack of them.";
+    final TextEditingDelta expectedDelta =
+        new TextEditingDelta("", 0, 0, newText, newText.length(), newText.length(), 0, 49);
+
+    // Change InputTarget to FRAMEWORK_CLIENT.
+    textInputPlugin.setTextInputClient(
+        0,
+        new TextInputChannel.Configuration(
+            false,
+            false,
+            true,
+            true,
+            true, // Enable delta model.
+            TextInputChannel.TextCapitalization.NONE,
+            new TextInputChannel.InputType(TextInputChannel.TextInputType.TEXT, false, false),
+            null,
+            null,
+            null,
+            null));
+
+    // There's a pending restart since we initialized the text input client. Flush that now.
+    textInputPlugin.setTextInputEditingState(
+        testView, new TextInputChannel.TextEditState("", 0, 0, -1, -1));
+    verify(textInputChannel, times(0)).updateEditingStateWithDeltas(anyInt(), any());
+    assertEquals(
+        0,
+        ((ListenableEditingState) textInputPlugin.getEditable())
+            .extractBatchTextEditingDeltas()
+            .size());
+
+    InputConnection inputConnection =
+        textInputPlugin.createInputConnection(testView, mock(KeyboardManager.class), outAttrs);
+
+    inputConnection.beginBatchEdit();
+    verify(textInputChannel, times(0)).updateEditingStateWithDeltas(anyInt(), any());
+    inputConnection.setComposingText(newText, newText.length());
+    final ArrayList<TextEditingDelta> actualDeltas =
+        ((ListenableEditingState) textInputPlugin.getEditable()).extractBatchTextEditingDeltas();
+    assertEquals(2, actualDeltas.size());
+    final TextEditingDelta delta = actualDeltas.get(1);
+    verify(textInputChannel, times(0)).updateEditingStateWithDeltas(anyInt(), any());
+    inputConnection.endBatchEdit();
+
+    assertEquals(
+        0,
+        ((ListenableEditingState) textInputPlugin.getEditable())
+            .extractBatchTextEditingDeltas()
+            .size());
+
+    // Verify delta is what we expect.
+    assertEquals(expectedDelta.getOldText(), delta.getOldText());
+    assertEquals(expectedDelta.getDeltaText(), delta.getDeltaText());
+    assertEquals(expectedDelta.getDeltaStart(), delta.getDeltaStart());
+    assertEquals(expectedDelta.getDeltaEnd(), delta.getDeltaEnd());
+    assertEquals(expectedDelta.getNewSelectionStart(), delta.getNewSelectionStart());
+    assertEquals(expectedDelta.getNewSelectionEnd(), delta.getNewSelectionEnd());
+    assertEquals(expectedDelta.getNewComposingStart(), delta.getNewComposingStart());
+    assertEquals(expectedDelta.getNewComposingEnd(), delta.getNewComposingEnd());
+
+    verify(textInputChannel, times(1)).updateEditingStateWithDeltas(anyInt(), any());
+
+    inputConnection.beginBatchEdit();
+
+    verify(textInputChannel, times(1)).updateEditingStateWithDeltas(anyInt(), any());
+
+    inputConnection.endBatchEdit();
+
+    assertEquals(
+        0,
+        ((ListenableEditingState) textInputPlugin.getEditable())
+            .extractBatchTextEditingDeltas()
+            .size());
+
+    verify(textInputChannel, times(1)).updateEditingStateWithDeltas(anyInt(), any());
+
+    inputConnection.beginBatchEdit();
+
+    verify(textInputChannel, times(1)).updateEditingStateWithDeltas(anyInt(), any());
+
+    // Selection changes so this will trigger an update to the framework through
+    // updateEditingStateWithDeltas after the batch edit has completed and notified all listeners
+    // of the editing state.
+    inputConnection.setSelection(3, 4);
+    assertEquals(Selection.getSelectionStart(textInputPlugin.getEditable()), 3);
+    assertEquals(Selection.getSelectionEnd(textInputPlugin.getEditable()), 4);
+
+    verify(textInputChannel, times(1)).updateEditingStateWithDeltas(anyInt(), any());
+
+    verify(textInputChannel, times(1)).updateEditingStateWithDeltas(anyInt(), any());
+
+    inputConnection.endBatchEdit();
+
+    verify(textInputChannel, times(2)).updateEditingStateWithDeltas(anyInt(), any());
+  }
+
+  @Test
+  public void textEditingDelta_TestDeltaIsCreatedWhenComposingTextSetIsDeleting()
+      throws NullPointerException {
+    // Initialize a general TextInputPlugin.
+    InputMethodSubtype inputMethodSubtype = mock(InputMethodSubtype.class);
+    TestImm testImm =
+        Shadow.extract(
+            RuntimeEnvironment.application.getSystemService(Context.INPUT_METHOD_SERVICE));
+    testImm.setCurrentInputMethodSubtype(inputMethodSubtype);
+    View testView = new View(RuntimeEnvironment.application);
+    EditorInfo outAttrs = new EditorInfo();
+    outAttrs.inputType = InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE;
+    TextInputChannel textInputChannel = spy(new TextInputChannel(mock(DartExecutor.class)));
+    TextInputPlugin textInputPlugin =
+        new TextInputPlugin(testView, textInputChannel, mock(PlatformViewsController.class));
+    CharSequence newText = "I do not fear computers. I fear the lack of them.";
+    final TextEditingDelta expectedDelta =
+        new TextEditingDelta(
+            newText, 0, 49, "I do not fear computers. I fear the lack of them", 48, 48, 0, 48);
+
+    // Change InputTarget to FRAMEWORK_CLIENT.
+    textInputPlugin.setTextInputClient(
+        0,
+        new TextInputChannel.Configuration(
+            false,
+            false,
+            true,
+            true,
+            true, // Enable delta model.
+            TextInputChannel.TextCapitalization.NONE,
+            new TextInputChannel.InputType(TextInputChannel.TextInputType.TEXT, false, false),
+            null,
+            null,
+            null,
+            null));
+
+    // There's a pending restart since we initialized the text input client. Flush that now.
+    textInputPlugin.setTextInputEditingState(
+        testView, new TextInputChannel.TextEditState(newText.toString(), 49, 49, 0, 49));
+    verify(textInputChannel, times(0)).updateEditingStateWithDeltas(anyInt(), any());
+    assertEquals(
+        0,
+        ((ListenableEditingState) textInputPlugin.getEditable())
+            .extractBatchTextEditingDeltas()
+            .size());
+
+    InputConnection inputConnection =
+        textInputPlugin.createInputConnection(testView, mock(KeyboardManager.class), outAttrs);
+
+    inputConnection.beginBatchEdit();
+    verify(textInputChannel, times(0)).updateEditingStateWithDeltas(anyInt(), any());
+    inputConnection.setComposingText("I do not fear computers. I fear the lack of them", 48);
+    final ArrayList<TextEditingDelta> actualDeltas =
+        ((ListenableEditingState) textInputPlugin.getEditable()).extractBatchTextEditingDeltas();
+    final TextEditingDelta delta = actualDeltas.get(1);
+    System.out.println(delta.getDeltaText());
+    verify(textInputChannel, times(0)).updateEditingStateWithDeltas(anyInt(), any());
+    inputConnection.endBatchEdit();
+
+    assertEquals(
+        0,
+        ((ListenableEditingState) textInputPlugin.getEditable())
+            .extractBatchTextEditingDeltas()
+            .size());
+
+    // Verify delta is what we expect.
+    assertEquals(expectedDelta.getOldText(), delta.getOldText());
+    assertEquals(expectedDelta.getDeltaText(), delta.getDeltaText());
+    assertEquals(expectedDelta.getDeltaStart(), delta.getDeltaStart());
+    assertEquals(expectedDelta.getDeltaEnd(), delta.getDeltaEnd());
+    assertEquals(expectedDelta.getNewSelectionStart(), delta.getNewSelectionStart());
+    assertEquals(expectedDelta.getNewSelectionEnd(), delta.getNewSelectionEnd());
+    assertEquals(expectedDelta.getNewComposingStart(), delta.getNewComposingStart());
+    assertEquals(expectedDelta.getNewComposingEnd(), delta.getNewComposingEnd());
+
+    verify(textInputChannel, times(1)).updateEditingStateWithDeltas(anyInt(), any());
+
+    inputConnection.beginBatchEdit();
+
+    verify(textInputChannel, times(1)).updateEditingStateWithDeltas(anyInt(), any());
+
+    inputConnection.endBatchEdit();
+
+    assertEquals(
+        0,
+        ((ListenableEditingState) textInputPlugin.getEditable())
+            .extractBatchTextEditingDeltas()
+            .size());
+
+    verify(textInputChannel, times(1)).updateEditingStateWithDeltas(anyInt(), any());
+
+    inputConnection.beginBatchEdit();
+
+    verify(textInputChannel, times(1)).updateEditingStateWithDeltas(anyInt(), any());
+
+    // Selection changes so this will trigger an update to the framework through
+    // updateEditingStateWithDeltas after the batch edit has completed and notified all listeners
+    // of the editing state.
+    inputConnection.setSelection(3, 4);
+    assertEquals(Selection.getSelectionStart(textInputPlugin.getEditable()), 3);
+    assertEquals(Selection.getSelectionEnd(textInputPlugin.getEditable()), 4);
+
+    verify(textInputChannel, times(1)).updateEditingStateWithDeltas(anyInt(), any());
+
+    verify(textInputChannel, times(1)).updateEditingStateWithDeltas(anyInt(), any());
+
+    inputConnection.endBatchEdit();
+
+    verify(textInputChannel, times(2)).updateEditingStateWithDeltas(anyInt(), any());
+  }
+
+  @Test
+  public void textEditingDelta_TestDeltaIsCreatedWhenComposingTextSetIsReplacing()
+      throws NullPointerException {
+    // Initialize a general TextInputPlugin.
+    InputMethodSubtype inputMethodSubtype = mock(InputMethodSubtype.class);
+    TestImm testImm =
+        Shadow.extract(
+            RuntimeEnvironment.application.getSystemService(Context.INPUT_METHOD_SERVICE));
+    testImm.setCurrentInputMethodSubtype(inputMethodSubtype);
+    View testView = new View(RuntimeEnvironment.application);
+    EditorInfo outAttrs = new EditorInfo();
+    outAttrs.inputType = InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE;
+    TextInputChannel textInputChannel = spy(new TextInputChannel(mock(DartExecutor.class)));
+    TextInputPlugin textInputPlugin =
+        new TextInputPlugin(testView, textInputChannel, mock(PlatformViewsController.class));
+    CharSequence newText = "helfo";
+    final TextEditingDelta expectedDelta = new TextEditingDelta(newText, 0, 5, "hello", 5, 5, 0, 5);
+
+    // Change InputTarget to FRAMEWORK_CLIENT.
+    textInputPlugin.setTextInputClient(
+        0,
+        new TextInputChannel.Configuration(
+            false,
+            false,
+            true,
+            true,
+            true, // Enable delta model.
+            TextInputChannel.TextCapitalization.NONE,
+            new TextInputChannel.InputType(TextInputChannel.TextInputType.TEXT, false, false),
+            null,
+            null,
+            null,
+            null));
+
+    // There's a pending restart since we initialized the text input client. Flush that now.
+    textInputPlugin.setTextInputEditingState(
+        testView, new TextInputChannel.TextEditState(newText.toString(), 5, 5, 0, 5));
+    verify(textInputChannel, times(0)).updateEditingStateWithDeltas(anyInt(), any());
+    assertEquals(
+        0,
+        ((ListenableEditingState) textInputPlugin.getEditable())
+            .extractBatchTextEditingDeltas()
+            .size());
+
+    InputConnection inputConnection =
+        textInputPlugin.createInputConnection(testView, mock(KeyboardManager.class), outAttrs);
+
+    inputConnection.beginBatchEdit();
+    verify(textInputChannel, times(0)).updateEditingStateWithDeltas(anyInt(), any());
+    inputConnection.setComposingText("hello", 5);
+    final ArrayList<TextEditingDelta> actualDeltas =
+        ((ListenableEditingState) textInputPlugin.getEditable()).extractBatchTextEditingDeltas();
+    final TextEditingDelta delta = actualDeltas.get(1);
+    System.out.println(delta.getDeltaText());
+    verify(textInputChannel, times(0)).updateEditingStateWithDeltas(anyInt(), any());
+    inputConnection.endBatchEdit();
+
+    assertEquals(
+        0,
+        ((ListenableEditingState) textInputPlugin.getEditable())
+            .extractBatchTextEditingDeltas()
+            .size());
+
+    // Verify delta is what we expect.
+    assertEquals(expectedDelta.getOldText(), delta.getOldText());
+    assertEquals(expectedDelta.getDeltaText(), delta.getDeltaText());
+    assertEquals(expectedDelta.getDeltaStart(), delta.getDeltaStart());
+    assertEquals(expectedDelta.getDeltaEnd(), delta.getDeltaEnd());
+    assertEquals(expectedDelta.getNewSelectionStart(), delta.getNewSelectionStart());
+    assertEquals(expectedDelta.getNewSelectionEnd(), delta.getNewSelectionEnd());
+    assertEquals(expectedDelta.getNewComposingStart(), delta.getNewComposingStart());
+    assertEquals(expectedDelta.getNewComposingEnd(), delta.getNewComposingEnd());
+
+    verify(textInputChannel, times(1)).updateEditingStateWithDeltas(anyInt(), any());
+
+    inputConnection.beginBatchEdit();
+
+    verify(textInputChannel, times(1)).updateEditingStateWithDeltas(anyInt(), any());
+
+    inputConnection.endBatchEdit();
+
+    assertEquals(
+        0,
+        ((ListenableEditingState) textInputPlugin.getEditable())
+            .extractBatchTextEditingDeltas()
+            .size());
+
+    verify(textInputChannel, times(1)).updateEditingStateWithDeltas(anyInt(), any());
+
+    inputConnection.beginBatchEdit();
+
+    verify(textInputChannel, times(1)).updateEditingStateWithDeltas(anyInt(), any());
+
+    // Selection changes so this will trigger an update to the framework through
+    // updateEditingStateWithDeltas after the batch edit has completed and notified all listeners
+    // of the editing state.
+    inputConnection.setSelection(3, 4);
+    assertEquals(Selection.getSelectionStart(textInputPlugin.getEditable()), 3);
+    assertEquals(Selection.getSelectionEnd(textInputPlugin.getEditable()), 4);
+
+    verify(textInputChannel, times(1)).updateEditingStateWithDeltas(anyInt(), any());
+
+    verify(textInputChannel, times(1)).updateEditingStateWithDeltas(anyInt(), any());
+
+    inputConnection.endBatchEdit();
+
+    verify(textInputChannel, times(2)).updateEditingStateWithDeltas(anyInt(), any());
   }
 
   @Test
@@ -203,6 +826,7 @@ public class TextInputPluginTest {
             false,
             true,
             true,
+            false,
             TextInputChannel.TextCapitalization.NONE,
             new TextInputChannel.InputType(TextInputChannel.TextInputType.TEXT, false, false),
             null,
@@ -292,6 +916,7 @@ public class TextInputPluginTest {
             false,
             true,
             true,
+            false,
             TextInputChannel.TextCapitalization.NONE,
             null,
             null,
@@ -330,6 +955,7 @@ public class TextInputPluginTest {
             false,
             true,
             true,
+            false,
             TextInputChannel.TextCapitalization.NONE,
             null,
             null,
@@ -377,6 +1003,7 @@ public class TextInputPluginTest {
             false,
             true,
             true,
+            false,
             TextInputChannel.TextCapitalization.NONE,
             new TextInputChannel.InputType(TextInputChannel.TextInputType.TEXT, false, false),
             null,
@@ -478,6 +1105,7 @@ public class TextInputPluginTest {
             false,
             true,
             true,
+            false,
             TextInputChannel.TextCapitalization.NONE,
             null,
             null,
@@ -521,6 +1149,7 @@ public class TextInputPluginTest {
             false,
             true,
             true,
+            false,
             TextInputChannel.TextCapitalization.NONE,
             new TextInputChannel.InputType(TextInputChannel.TextInputType.TEXT, false, false),
             null,
@@ -588,6 +1217,7 @@ public class TextInputPluginTest {
             false,
             true,
             true,
+            false,
             TextInputChannel.TextCapitalization.NONE,
             new TextInputChannel.InputType(TextInputChannel.TextInputType.TEXT, false, false),
             null,
@@ -624,6 +1254,7 @@ public class TextInputPluginTest {
             false,
             true,
             true,
+            false,
             TextInputChannel.TextCapitalization.NONE,
             new TextInputChannel.InputType(TextInputChannel.TextInputType.NONE, false, false),
             null,
@@ -654,6 +1285,7 @@ public class TextInputPluginTest {
             false,
             true,
             true,
+            false,
             TextInputChannel.TextCapitalization.NONE,
             new TextInputChannel.InputType(TextInputChannel.TextInputType.NONE, false, false),
             null,
@@ -685,6 +1317,7 @@ public class TextInputPluginTest {
             false,
             true,
             true,
+            false,
             TextInputChannel.TextCapitalization.NONE,
             null,
             null,
@@ -699,6 +1332,7 @@ public class TextInputPluginTest {
             false,
             true,
             true,
+            false,
             TextInputChannel.TextCapitalization.NONE,
             null,
             null,
@@ -740,6 +1374,7 @@ public class TextInputPluginTest {
             false,
             true,
             true,
+            false,
             TextInputChannel.TextCapitalization.NONE,
             null,
             null,
@@ -778,6 +1413,7 @@ public class TextInputPluginTest {
             false,
             true,
             true,
+            false,
             TextInputChannel.TextCapitalization.NONE,
             null,
             null,
@@ -826,6 +1462,7 @@ public class TextInputPluginTest {
             false,
             true,
             true,
+            false,
             TextInputChannel.TextCapitalization.NONE,
             null,
             null,
@@ -838,6 +1475,7 @@ public class TextInputPluginTest {
             false,
             true,
             true,
+            false,
             TextInputChannel.TextCapitalization.NONE,
             null,
             null,
@@ -852,6 +1490,7 @@ public class TextInputPluginTest {
             false,
             true,
             true,
+            false,
             TextInputChannel.TextCapitalization.NONE,
             null,
             null,
@@ -906,6 +1545,7 @@ public class TextInputPluginTest {
             false,
             true,
             true,
+            false,
             TextInputChannel.TextCapitalization.NONE,
             null,
             null,
@@ -963,6 +1603,7 @@ public class TextInputPluginTest {
             false,
             true,
             true,
+            false,
             TextInputChannel.TextCapitalization.NONE,
             null,
             null,
@@ -975,6 +1616,7 @@ public class TextInputPluginTest {
             false,
             true,
             true,
+            false,
             TextInputChannel.TextCapitalization.NONE,
             null,
             null,
@@ -990,6 +1632,7 @@ public class TextInputPluginTest {
             false,
             true,
             true,
+            false,
             TextInputChannel.TextCapitalization.NONE,
             null,
             null,
@@ -1033,6 +1676,7 @@ public class TextInputPluginTest {
             false,
             true,
             true,
+            false,
             TextInputChannel.TextCapitalization.NONE,
             null,
             null,
@@ -1090,6 +1734,7 @@ public class TextInputPluginTest {
             false,
             true,
             true,
+            false,
             TextInputChannel.TextCapitalization.NONE,
             null,
             null,
@@ -1102,6 +1747,7 @@ public class TextInputPluginTest {
             false,
             true,
             true,
+            false,
             TextInputChannel.TextCapitalization.NONE,
             null,
             null,
@@ -1115,6 +1761,7 @@ public class TextInputPluginTest {
             false,
             true,
             true,
+            false,
             TextInputChannel.TextCapitalization.NONE,
             null,
             null,
@@ -1182,6 +1829,7 @@ public class TextInputPluginTest {
             false,
             true,
             true,
+            false,
             TextInputChannel.TextCapitalization.NONE,
             null,
             null,
@@ -1194,6 +1842,7 @@ public class TextInputPluginTest {
             false,
             true,
             true,
+            false,
             TextInputChannel.TextCapitalization.NONE,
             null,
             null,
@@ -1207,6 +1856,7 @@ public class TextInputPluginTest {
             false,
             true,
             true,
+            false,
             TextInputChannel.TextCapitalization.NONE,
             null,
             null,

@@ -52,6 +52,7 @@
     <src file="../../../flutter/shell/platform/android/test/io/flutter/plugin/common/StandardMethodCodecTest.java" />
     <src file="../../../flutter/shell/platform/android/test/io/flutter/plugin/editing/ListenableEditingStateTest.java" />
     <src file="../../../flutter/shell/platform/android/test/io/flutter/plugin/editing/TextInputPluginTest.java" />
+    <src file="../../../flutter/shell/platform/android/test/io/flutter/plugin/editing/TextEditingDeltaTest.java" />
     <src file="../../../flutter/shell/platform/android/test/io/flutter/plugin/editing/InputConnectionAdaptorTest.java" />
     <src file="../../../flutter/shell/platform/android/test/io/flutter/plugin/localization/LocalizationPluginTest.java" />
     <src file="../../../flutter/shell/platform/android/test/io/flutter/view/AccessibilityBridgeTest.java" />
@@ -172,6 +173,7 @@
     <src file="../../../flutter/shell/platform/android/io/flutter/plugin/common/MethodCall.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/plugin/common/EventChannel.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/plugin/common/MethodChannel.java" />
+    <src file="../../../flutter/shell/platform/android/io/flutter/plugin/editing/TextEditingDelta.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/plugin/editing/TextInputPlugin.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/plugin/editing/ListenableEditingState.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/plugin/editing/InputConnectionAdaptor.java" />

@@ -41,6 +41,7 @@ class ListenableEditingState extends SpannableStringBuilder {
   private int mChangeNotificationDepth = 0;
   private ArrayList<EditingStateWatcher> mListeners = new ArrayList<>();
   private ArrayList<EditingStateWatcher> mPendingListeners = new ArrayList<>();
+  private ArrayList<TextEditingDelta> mBatchTextEditingDeltas = new ArrayList<>();
 
   private String mToStringCache;
 
@@ -68,6 +69,17 @@ class ListenableEditingState extends SpannableStringBuilder {
             return self;
           }
         };
+  }
+
+  public ArrayList<TextEditingDelta> extractBatchTextEditingDeltas() {
+    ArrayList<TextEditingDelta> currentBatchDeltas =
+        new ArrayList<TextEditingDelta>(mBatchTextEditingDeltas);
+    mBatchTextEditingDeltas.clear();
+    return currentBatchDeltas;
+  }
+
+  public void clearBatchDeltas() {
+    mBatchTextEditingDeltas.clear();
   }
 
   /// Starts a new batch edit during which change notifications will be put on hold until all batch
@@ -142,7 +154,13 @@ class ListenableEditingState extends SpannableStringBuilder {
     } else {
       Selection.removeSelection(this);
     }
+
     setComposingRange(newState.composingStart, newState.composingEnd);
+
+    // Updates from the framework should not have a delta created for it as they have already been
+    // applied on the framework side.
+    clearBatchDeltas();
+
     endBatchEdit();
   }
 
@@ -179,6 +197,8 @@ class ListenableEditingState extends SpannableStringBuilder {
       Log.e(TAG, "editing state should not be changed in a listener callback");
     }
 
+    final CharSequence oldText = toString();
+
     boolean textChanged = end - start != tbend - tbstart;
     for (int i = 0; i < end - start && !textChanged; i++) {
       textChanged |= charAt(start + i) != tb.charAt(tbstart + i);
@@ -193,6 +213,17 @@ class ListenableEditingState extends SpannableStringBuilder {
     final int composingEnd = getComposingEnd();
 
     final SpannableStringBuilder editable = super.replace(start, end, tb, tbstart, tbend);
+    mBatchTextEditingDeltas.add(
+        new TextEditingDelta(
+            oldText,
+            start,
+            end,
+            tb,
+            getSelectionStart(),
+            getSelectionEnd(),
+            getComposingStart(),
+            getComposingEnd()));
+
     if (mBatchEditNestDepth > 0) {
       return editable;
     }
@@ -238,6 +269,20 @@ class ListenableEditingState extends SpannableStringBuilder {
 
   public final int getComposingEnd() {
     return BaseInputConnection.getComposingSpanEnd(this);
+  }
+
+  @Override
+  public void setSpan(Object what, int start, int end, int flags) {
+    super.setSpan(what, start, end, flags);
+    // Setting a span does not involve mutating the text value in the editing state. Here we create
+    // a non text update delta with any updated selection and composing regions.
+    mBatchTextEditingDeltas.add(
+        new TextEditingDelta(
+            toString(),
+            getSelectionStart(),
+            getSelectionEnd(),
+            getComposingStart(),
+            getComposingEnd()));
   }
 
   @Override
