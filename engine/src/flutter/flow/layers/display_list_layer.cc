@@ -91,14 +91,8 @@ void DisplayListLayer::Preroll(PrerollContext* context,
 
   if (auto* cache = context->raster_cache) {
     TRACE_EVENT0("flutter", "DisplayListLayer::RasterCache (Preroll)");
-
-    SkMatrix ctm = matrix;
-    ctm.preTranslate(offset_.x(), offset_.y());
-#ifndef SUPPORT_FRACTIONAL_TRANSLATION
-    ctm = RasterCache::GetIntegralTransCTM(ctm);
-#endif
-    cache->Prepare(context->gr_context, disp_list, ctm,
-                   context->dst_color_space, is_complex_, will_change_);
+    cache->Prepare(context, disp_list, is_complex_, will_change_, matrix,
+                   offset_);
   }
 
   SkRect bounds = disp_list->bounds().makeOffset(offset_.x(), offset_.y());
