@@ -18,7 +18,7 @@ class CandidatesCommand extends Command<void> {
   CandidatesCommand({
     required this.flutterRoot,
     required this.checkouts,
-  })  : git = Git(checkouts.processManager), stdio = checkouts.stdio {
+  }) : git = Git(checkouts.processManager), stdio = checkouts.stdio {
     argParser.addOption(
       kRemote,
       help: 'Which remote name to query for branches.',

@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This timeout is explicitly for this test, and it should not be used for other tests without strong reasons.
+// In this case, the test below is running asynchronously. The default timer is 30s of inactivity. The test below
+// normally takes 1min30 to execute, and the async function is being awaited more than 30s. Thus extending the timer to
+// more than 30s make the async function pass.
 @Timeout(Duration(seconds: 300))
 
 import 'package:args/command_runner.dart';

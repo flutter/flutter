@@ -333,7 +333,7 @@ class CodesignCommand extends Command<void> {
     }
   }
 
-  late final List<String> _allBinaryPaths = <String>[];
+  final List<String> _allBinaryPaths = <String>[];
 
   /// Find every binary file in the given [rootDirectory].
   Future<List<String>> findBinaryPaths(String rootDirectory) async {
