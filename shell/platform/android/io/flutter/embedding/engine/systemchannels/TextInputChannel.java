@@ -12,6 +12,8 @@ import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.plugin.common.JSONMethodCodec;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
+import io.flutter.plugin.editing.TextEditingDelta;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -186,6 +188,18 @@ public class TextInputChannel {
     state.put("composingExtent", composingEnd);
     return state;
   }
+
+  private static HashMap<Object, Object> createEditingDeltaJSON(
+      ArrayList<TextEditingDelta> batchDeltas) {
+    HashMap<Object, Object> state = new HashMap<>();
+
+    JSONArray deltas = new JSONArray();
+    for (TextEditingDelta delta : batchDeltas) {
+      deltas.put(delta.toJSON());
+    }
+    state.put("deltas", deltas);
+    return state;
+  }
   /**
    * Instructs Flutter to update its text input editing state to reflect the given configuration.
    */
@@ -218,6 +232,21 @@ public class TextInputChannel {
         createEditingStateJSON(text, selectionStart, selectionEnd, composingStart, composingEnd);
 
     channel.invokeMethod("TextInputClient.updateEditingState", Arrays.asList(inputClientId, state));
+  }
+
+  public void updateEditingStateWithDeltas(
+      int inputClientId, ArrayList<TextEditingDelta> batchDeltas) {
+
+    Log.v(
+        TAG,
+        "Sending message to update editing state with deltas: \n"
+            + "Number of deltas: "
+            + batchDeltas.size());
+
+    final HashMap<Object, Object> state = createEditingDeltaJSON(batchDeltas);
+
+    channel.invokeMethod(
+        "TextInputClient.updateEditingStateWithDeltas", Arrays.asList(inputClientId, state));
   }
 
   public void updateEditingStateWithTag(
@@ -428,6 +457,7 @@ public class TextInputChannel {
           json.optBoolean("autocorrect", true),
           json.optBoolean("enableSuggestions"),
           json.optBoolean("enableIMEPersonalizedLearning"),
+          json.optBoolean("enableDeltaModel"),
           TextCapitalization.fromValue(json.getString("textCapitalization")),
           InputType.fromJson(json.getJSONObject("inputType")),
           inputAction,
@@ -583,6 +613,7 @@ public class TextInputChannel {
     public final boolean autocorrect;
     public final boolean enableSuggestions;
     public final boolean enableIMEPersonalizedLearning;
+    public final boolean enableDeltaModel;
     @NonNull public final TextCapitalization textCapitalization;
     @NonNull public final InputType inputType;
     @Nullable public final Integer inputAction;
@@ -595,6 +626,7 @@ public class TextInputChannel {
         boolean autocorrect,
         boolean enableSuggestions,
         boolean enableIMEPersonalizedLearning,
+        boolean enableDeltaModel,
         @NonNull TextCapitalization textCapitalization,
         @NonNull InputType inputType,
         @Nullable Integer inputAction,
@@ -605,6 +637,7 @@ public class TextInputChannel {
       this.autocorrect = autocorrect;
       this.enableSuggestions = enableSuggestions;
       this.enableIMEPersonalizedLearning = enableIMEPersonalizedLearning;
+      this.enableDeltaModel = enableDeltaModel;
       this.textCapitalization = textCapitalization;
       this.inputType = inputType;
       this.inputAction = inputAction;
