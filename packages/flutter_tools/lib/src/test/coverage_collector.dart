@@ -224,7 +224,7 @@ Future<Map<String, dynamic>> _getAllCoverage(
   bool forceSequential,
 ) async {
   final vm_service.Version version = await service.getVersion();
-  final bool reportLines = version.major == 3 && version.minor >= 51;
+  final bool reportLines = (version.major == 3 && version.minor >= 51) || version.major > 3;
   final vm_service.VM vm = await service.getVM();
   final List<Map<String, dynamic>> coverage = <Map<String, dynamic>>[];
   for (final vm_service.IsolateRef isolateRef in vm.isolates) {
