@@ -2963,6 +2963,82 @@ void main() {
     expect(tester.getTopRight(find.text('hint')).dx, 760.0);
   });
 
+  testWidgets('InputDecorator centerFloatingLabel layout', (WidgetTester tester) async {
+    // LTR with icon
+    await tester.pumpWidget(
+      buildInputDecorator(
+        // isEmpty: false (default)
+        // isFocused: false (default)
+        textDirection: TextDirection.ltr,
+        decoration: const InputDecoration(
+          contentPadding: EdgeInsetsDirectional.only(start: 40.0, top: 12.0, bottom: 12.0),
+          centerFloatingLabel: true,
+          icon: Icon(Icons.insert_link),
+          labelText: 'label',
+          hintText: 'hint',
+          filled: true,
+        ),
+      ),
+    );
+    // icon (40) + (decorator (800) - icon (40)) / 2
+    expect(tester.getCenter(find.text('label')).dx, 420.0);
+
+    // LTR without icon
+    await tester.pumpWidget(
+      buildInputDecorator(
+        // isEmpty: false (default)
+        // isFocused: false (default)
+        textDirection: TextDirection.ltr,
+        decoration: const InputDecoration(
+          contentPadding: EdgeInsetsDirectional.only(start: 40.0, top: 12.0, bottom: 12.0),
+          centerFloatingLabel: true,
+          labelText: 'label',
+          hintText: 'hint',
+          filled: true,
+        ),
+      ),
+    );
+    // decorator (800) / 2
+    expect(tester.getCenter(find.text('label')).dx, 400.0);
+
+    // RTL with icon
+    await tester.pumpWidget(
+      buildInputDecorator(
+        // isEmpty: false (default)
+        // isFocused: false (default)
+        textDirection: TextDirection.rtl,
+        decoration: const InputDecoration(
+          contentPadding: EdgeInsetsDirectional.only(start: 40.0, top: 12.0, bottom: 12.0),
+          centerFloatingLabel: true,
+          icon: Icon(Icons.insert_link),
+          labelText: 'label',
+          hintText: 'hint',
+          filled: true,
+        ),
+      ),
+    );
+    // (decorator (800) / icon (40)) / 2
+    expect(tester.getCenter(find.text('label')).dx, 380.0);
+
+    // RTL without icon
+    await tester.pumpWidget(
+      buildInputDecorator(
+        // isEmpty: false (default)
+        // isFocused: false (default)
+        textDirection: TextDirection.rtl,
+        decoration: const InputDecoration(
+          contentPadding: EdgeInsetsDirectional.only(start: 40.0, top: 12.0, bottom: 12.0),
+          centerFloatingLabel: true,
+          labelText: 'label',
+          hintText: 'hint',
+          filled: true,
+        ),
+      ),
+    );
+    // decorator (800) / 2
+    expect(tester.getCenter(find.text('label')).dx, 400.0);
+  });
+
   testWidgets('InputDecorator prefix/suffix dense layout', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildInputDecorator(
@@ -3879,6 +3955,93 @@ void main() {
       await expectLater(
         find.byType(InputDecorator),
         matchesGoldenFile('input_decorator.outline_icon_label.rtl.png'),
+      );
+    },
+  );
+
+  testWidgets(
+    'InputDecorator OutlineBorder focused center floating label with icon',
+    (WidgetTester tester) async {
+      Widget buildFrame(TextDirection textDirection) {
+        return MaterialApp(
+          home: Scaffold(
+            body: Container(
+              padding: const EdgeInsets.all(16.0),
+              alignment: Alignment.center,
+              child: Directionality(
+                textDirection: textDirection,
+                child: const RepaintBoundary(
+                  child: InputDecorator(
+                    isFocused: true,
+                    isEmpty: true,
+                    decoration: InputDecoration(
+                      icon: Icon(Icons.insert_link),
+                      centerFloatingLabel: true,
+                      labelText: 'primaryLink',
+                      hintText: 'Primary link to story',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildFrame(TextDirection.ltr));
+      await expectLater(
+        find.byType(InputDecorator),
+        matchesGoldenFile('input_decorator.outline_icon_center_floating_label.ltr.png'),
+      );
+
+      await tester.pumpWidget(buildFrame(TextDirection.rtl));
+      await expectLater(
+        find.byType(InputDecorator),
+        matchesGoldenFile('input_decorator.outline_icon_center_floating_label.rtl.png'),
+      );
+    },
+  );
+
+  testWidgets(
+    'InputDecorator OutlineBorder focused center floating label',
+    (WidgetTester tester) async {
+      Widget buildFrame(TextDirection textDirection) {
+        return MaterialApp(
+          home: Scaffold(
+            body: Container(
+              padding: const EdgeInsets.all(16.0),
+              alignment: Alignment.center,
+              child: Directionality(
+                textDirection: textDirection,
+                child: const RepaintBoundary(
+                  child: InputDecorator(
+                    isFocused: true,
+                    isEmpty: true,
+                    decoration: InputDecoration(
+                      centerFloatingLabel: true,
+                      labelText: 'primaryLink',
+                      hintText: 'Primary link to story',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildFrame(TextDirection.ltr));
+      await expectLater(
+        find.byType(InputDecorator),
+        matchesGoldenFile('input_decorator.outline_center_floating_label.ltr.png'),
+      );
+
+      await tester.pumpWidget(buildFrame(TextDirection.rtl));
+      await expectLater(
+        find.byType(InputDecorator),
+        matchesGoldenFile('input_decorator.outline_center_floating_label.rtl.png'),
       );
     },
   );
