@@ -1766,6 +1766,39 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
           )),
         );
       });
+
+      testWithoutContext('should not fail attempting to generate a plural message with an incorrect message', () {
+        const String selectMessageWithoutPlaceholdersAttribute = '''
+{
+  "wrongPlural": "{count, plural,}",
+  "@wrongPlural": {
+    "placeholders": {
+      "count": {}
+    }
+  }
+}''';
+
+        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+          ..createSync(recursive: true);
+        l10nDirectory.childFile(defaultTemplateArbFileName)
+          .writeAsStringSync(selectMessageWithoutPlaceholdersAttribute);
+
+        LocalizationsGenerator(
+          fileSystem: fs,
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        )
+          ..loadResources()
+          ..writeOutputFiles(BufferLogger.test());
+
+        final File localizationsFile = fs.file(
+          fs.path.join(syntheticL10nPackagePath, defaultOutputFileString),
+        );
+        expect(localizationsFile.existsSync(), isTrue);
+      });
     });
 
     group('select messages', () {
