@@ -657,6 +657,10 @@ class TextInputConfiguration {
   /// platforms text input control rather than a single new bulk editing state
   /// given by [TextInputClient.updateEditingValue].
   ///
+  /// If the platform does not currently support the delta model then updates
+  /// for the editing state will continue to come through the
+  /// [TextInputClient.updateEditingValue] channel.
+  ///
   /// Defaults to false. Cannot be null.
   final bool enableDeltaModel;
 
