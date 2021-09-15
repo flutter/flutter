@@ -385,7 +385,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   }
 
   /// Throws an exception saying that the object does not support returning
-  /// intrinsic dimensions if, in checked mode, we are not in the
+  /// intrinsic dimensions if, in debug mode, we are not in the
   /// [RenderObject.debugCheckingIntrinsics] mode.
   ///
   /// This is used by [computeMinIntrinsicWidth] et al because viewports do not
@@ -1920,18 +1920,26 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
     _maxScrollExtent = 0.0;
     _shrinkWrapExtent = 0.0;
     _hasVisualOverflow = false;
+    switch (cacheExtentStyle) {
+      case CacheExtentStyle.pixel:
+        _calculatedCacheExtent = cacheExtent;
+        break;
+      case CacheExtentStyle.viewport:
+        _calculatedCacheExtent = mainAxisExtent * _cacheExtent;
+        break;
+    }
     return layoutChildSequence(
       child: firstChild,
       scrollOffset: math.max(0.0, correctedOffset),
       overlap: math.min(0.0, correctedOffset),
-      layoutOffset: 0.0,
+      layoutOffset: math.max(0.0, -correctedOffset),
       remainingPaintExtent: mainAxisExtent,
       mainAxisExtent: mainAxisExtent,
       crossAxisExtent: crossAxisExtent,
       growthDirection: GrowthDirection.forward,
       advance: childAfter,
-      remainingCacheExtent: mainAxisExtent + 2 * _cacheExtent,
-      cacheOrigin: -_cacheExtent,
+      remainingCacheExtent: mainAxisExtent + 2 * _calculatedCacheExtent!,
+      cacheOrigin: -_calculatedCacheExtent!,
     );
   }
 

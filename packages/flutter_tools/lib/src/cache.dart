@@ -17,6 +17,7 @@ import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart' show OperatingSystemUtils;
 import 'base/platform.dart';
+import 'base/terminal.dart';
 import 'base/user_messages.dart';
 import 'build_info.dart';
 import 'convert.dart';
@@ -162,8 +163,7 @@ class Cache {
   final Net _net;
   final FileSystemUtils _fsUtils;
 
-  ArtifactUpdater get _artifactUpdater => __artifactUpdater ??= _createUpdater();
-  ArtifactUpdater? __artifactUpdater;
+  late final ArtifactUpdater _artifactUpdater = _createUpdater();
 
   @protected
   void registerArtifact(ArtifactSet artifactSet) {
@@ -320,7 +320,13 @@ class Cache {
       } on FileSystemException {
         if (!printed) {
           _logger.printTrace('Waiting to be able to obtain lock of Flutter binary artifacts directory: ${_lock!.path}');
-          _logger.printStatus('Waiting for another flutter command to release the startup lock...');
+          // This needs to go to stderr to avoid cluttering up stdout if a parent
+          // process is collecting stdout. It's not really an "error" though,
+          // so print it in grey.
+          _logger.printError(
+            'Waiting for another flutter command to release the startup lock...',
+            color: TerminalColor.grey,
+          );
           printed = true;
         }
         await Future<void>.delayed(const Duration(milliseconds: 50));
@@ -364,6 +370,22 @@ class Cache {
     return _dartSdkVersion!;
   }
   String? _dartSdkVersion;
+
+  /// The current version of Dart used to build Flutter and run the tool.
+  String get dartSdkBuild {
+    if (_dartSdkBuild == null) {
+      // Make the version string more customer-friendly.
+      // Changes '2.1.0-dev.8.0.flutter-4312ae32' to '2.1.0 (build 2.1.0-dev.8.0 4312ae32)'
+      final String justVersion = _platform.version.split(' ')[0];
+      _dartSdkBuild = justVersion.replaceFirstMapped(RegExp(r'(\d+\.\d+\.\d+)(.+)'), (Match match) {
+        final String noFlutter = match[2]!.replaceAll('.flutter-', ' ');
+        return '${match[1]}$noFlutter';
+      });
+    }
+    return _dartSdkBuild!;
+  }
+  String? _dartSdkBuild;
+
 
   /// The current version of the Flutter engine the flutter tool will download.
   String get engineRevision {

@@ -24,6 +24,16 @@ bool _isAsciiLetter(String? char) {
       || (charCode >= charLowerA && charCode <= charLowerZ);
 }
 
+bool _isDigit(String? char) {
+  if (char == null)
+    return false;
+  final int charDigit0 = '0'.codeUnitAt(0);
+  final int charDigit9 = '9'.codeUnitAt(0);
+  assert(char.length == 1);
+  final int charCode = char.codeUnitAt(0);
+  return charCode >= charDigit0 && charCode <= charDigit9;
+}
+
 /// Generates the keyboard_maps.dart files, based on the information in the key
 /// data structure given to it.
 class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
@@ -53,7 +63,8 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   String get _glfwNumpadMap {
     final OutputLines<int> lines = OutputLines<int>('GLFW numpad map');
     for (final PhysicalKeyEntry entry in _numpadKeyData) {
-      for (final int code in entry.glfwKeyCodes) {
+      final LogicalKeyEntry logicalKey = logicalData.entryByName(entry.name);
+      for (final int code in logicalKey.glfwValues) {
         lines.add(code, '  $code: LogicalKeyboardKey.${entry.constantName},');
       }
     }
@@ -63,9 +74,9 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   /// This generates the map of GLFW key codes to logical keys.
   String get _glfwKeyCodeMap {
     final OutputLines<int> lines = OutputLines<int>('GLFW key code map');
-    for (final PhysicalKeyEntry entry in keyData.entries) {
-      for (final int code in entry.glfwKeyCodes) {
-        lines.add(code, '  $code: LogicalKeyboardKey.${entry.constantName},');
+    for (final LogicalKeyEntry entry in logicalData.entries) {
+      for (final int value in entry.glfwValues) {
+        lines.add(value, '  $value: LogicalKeyboardKey.${entry.constantName},');
       }
     }
     return lines.sortedJoin().trimRight();
@@ -170,7 +181,9 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
       // because they are not used by the embedding. Add them manually.
       final List<int>? keyCodes = entry.windowsValues.isNotEmpty
         ? entry.windowsValues
-        : (_isAsciiLetter(entry.keyLabel) ? <int>[entry.keyLabel!.toUpperCase().codeUnitAt(0)] : null);
+        : (_isAsciiLetter(entry.keyLabel) ? <int>[entry.keyLabel!.toUpperCase().codeUnitAt(0)] :
+           _isDigit(entry.keyLabel)       ? <int>[entry.keyLabel!.toUpperCase().codeUnitAt(0)] :
+           null);
       if (keyCodes != null) {
         for (final int code in keyCodes) {
           lines.add(code, '  $code: LogicalKeyboardKey.${entry.constantName},');

@@ -6,7 +6,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -14,7 +13,9 @@ import 'package:flutter/scheduler.dart';
 
 import 'asset_bundle.dart';
 import 'binary_messenger.dart';
+import 'hardware_keyboard.dart';
 import 'message_codec.dart';
+import 'raw_keyboard.dart';
 import 'restoration.dart';
 import 'system_channels.dart';
 
@@ -31,6 +32,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     _instance = this;
     _defaultBinaryMessenger = createBinaryMessenger();
     _restorationManager = createRestorationManager();
+    _initKeyboard();
     initLicenses();
     SystemChannels.system.setMessageHandler((dynamic message) => handleSystemMessage(message as Object));
     SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
@@ -42,13 +44,33 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   static ServicesBinding? get instance => _instance;
   static ServicesBinding? _instance;
 
+  /// The global singleton instance of [HardwareKeyboard], which can be used to
+  /// query keyboard states.
+  HardwareKeyboard get keyboard => _keyboard;
+  late final HardwareKeyboard _keyboard;
+
+  /// The global singleton instance of [KeyEventManager], which is used
+  /// internally to dispatch key messages.
+  KeyEventManager get keyEventManager => _keyEventManager;
+  late final KeyEventManager _keyEventManager;
+
+  void _initKeyboard() {
+    _keyboard = HardwareKeyboard();
+    _keyEventManager = KeyEventManager(_keyboard, RawKeyboard.instance);
+    window.onKeyData = _keyEventManager.handleKeyData;
+    SystemChannels.keyEvent.setMessageHandler(_keyEventManager.handleRawKeyMessage);
+  }
+
   /// The default instance of [BinaryMessenger].
   ///
   /// This is used to send messages from the application to the platform, and
   /// keeps track of which handlers have been registered on each channel so
   /// it may dispatch incoming messages to the registered handler.
+  ///
+  /// The default implementation returns a [BinaryMessenger] that delivers the
+  /// messages in the same order in which they are sent.
   BinaryMessenger get defaultBinaryMessenger => _defaultBinaryMessenger;
-  late BinaryMessenger _defaultBinaryMessenger;
+  late final BinaryMessenger _defaultBinaryMessenger;
 
   /// The low level buffering and dispatch mechanism for messages sent by
   /// plugins on the engine side to their corresponding plugin code on
@@ -74,6 +96,11 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
 
   /// Creates a default [BinaryMessenger] instance that can be used for sending
   /// platform messages.
+  ///
+  /// Many Flutter framework components that communicate with the platform
+  /// assume messages are received by the platform in the same order in which
+  /// they are sent. When overriding this method, be sure the [BinaryMessenger]
+  /// implementation guarantees FIFO delivery.
   @protected
   BinaryMessenger createBinaryMessenger() {
     return const _DefaultBinaryMessenger._();
