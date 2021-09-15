@@ -2090,7 +2090,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   // hint would.
   bool get _hasInlineLabel {
     return !widget._labelShouldWithdraw
-        && decoration!.labelText != null
+        && (decoration!.labelText != null || decoration!.label != null)
         && decoration!.floatingLabelBehavior != FloatingLabelBehavior.always;
   }
 
@@ -2205,7 +2205,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final TextStyle inlineLabelStyle = themeData.fixTextFieldOutlineLabel
       ? inlineStyle.merge(decoration!.labelStyle).copyWith(height: 1)
       : inlineStyle.merge(decoration!.labelStyle);
-    final Widget? label = decoration!.labelText == null ? null : _Shaker(
+    final Widget? label = decoration!.labelText == null && decoration!.label == null ? null : _Shaker(
       animation: _shakingLabelController.view,
       child: AnimatedOpacity(
         duration: _kTransitionDuration,
@@ -2217,7 +2217,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
           style: widget._labelShouldWithdraw
             ? _getFloatingLabelStyle(themeData)
             : inlineLabelStyle,
-          child: Text(
+          child: decoration!.label ?? Text(
             decoration!.labelText!,
             overflow: TextOverflow.ellipsis,
             textAlign: textAlign,
@@ -2409,7 +2409,6 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 /// configuration of an [InputDecorator], which does all the heavy lifting.)
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
-///
 /// This sample shows how to style a `TextField` using an `InputDecorator`. The
 /// TextField displays a "send message" icon to the left of the input area,
 /// which is surrounded by a border an all sides. It displays the `hintText`
@@ -2418,82 +2417,37 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/input_decoration.png)
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return const TextField(
-///     decoration: InputDecoration(
-///       icon: Icon(Icons.send),
-///       hintText: 'Hint Text',
-///       helperText: 'Helper Text',
-///       counterText: '0 characters',
-///       border: const OutlineInputBorder(),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/input_decorator/input_decoration.0.dart **
 /// {@end-tool}
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
-///
 /// This sample shows how to style a "collapsed" `TextField` using an
 /// `InputDecorator`. The collapsed `TextField` surrounds the hint text and
 /// input area with a border, but does not add padding around them.
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/input_decoration_collapsed.png)
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return const TextField(
-///     decoration: InputDecoration.collapsed(
-///       hintText: 'Hint Text',
-///       border: OutlineInputBorder(),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/input_decorator/input_decoration.1.dart **
 /// {@end-tool}
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
-///
 /// This sample shows how to create a `TextField` with hint text, a red border
 /// on all sides, and an error message. To display a red border and error
 /// message, provide `errorText` to the `InputDecoration` constructor.
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/input_decoration_error.png)
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return const TextField(
-///     decoration: InputDecoration(
-///       hintText: 'Hint Text',
-///       errorText: 'Error Text',
-///       border: OutlineInputBorder(),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/input_decorator/input_decoration.2.dart **
 /// {@end-tool}
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
-///
 /// This sample shows how to style a `TextField` with a round border and
 /// additional text before and after the input area. It displays "Prefix" before
 /// the input area, and "Suffix" after the input area.
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/input_decoration_prefix_suffix.png)
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return TextFormField(
-///     initialValue: 'abc',
-///     decoration: const InputDecoration(
-///       prefix: Text('Prefix'),
-///       suffix: Text('Suffix'),
-///       border: OutlineInputBorder(),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/input_decorator/input_decoration.3.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -2521,6 +2475,7 @@ class InputDecoration {
   /// Similarly, only one of [suffix] and [suffixText] can be specified.
   const InputDecoration({
     this.icon,
+    this.label,
     this.labelText,
     this.labelStyle,
     this.floatingLabelStyle,
@@ -2566,6 +2521,7 @@ class InputDecoration {
     this.alignLabelWithHint,
     this.constraints,
   }) : assert(enabled != null),
+       assert(!(label != null && labelText != null), 'Declaring both label and labelText is not supported.'),
        assert(!(prefix != null && prefixText != null), 'Declaring both prefix and prefixText is not supported.'),
        assert(!(suffix != null && suffixText != null), 'Declaring both suffix and suffixText is not supported.');
 
@@ -2587,6 +2543,7 @@ class InputDecoration {
     this.enabled = true,
   }) : assert(enabled != null),
        icon = null,
+       label = null,
        labelText = null,
        labelStyle = null,
        floatingLabelStyle = null,
@@ -2639,13 +2596,35 @@ class InputDecoration {
   /// See [Icon], [ImageIcon].
   final Widget? icon;
 
-  /// Text that describes the input field.
+  /// Optional widget that describes the input field.
   ///
+  /// {@template flutter.material.inputDecoration.label}
   /// When the input field is empty and unfocused, the label is displayed on
   /// top of the input field (i.e., at the same location on the screen where
   /// text may be entered in the input field). When the input field receives
   /// focus (or if the field is non-empty), the label moves above (i.e.,
   /// vertically adjacent to) the input field.
+  /// {@endtemplate}
+  ///
+  /// This can be used, for example, to add multiple [TextStyle]'s to a label that would
+  /// otherwise be specified using [labelText], which only takes one [TextStyle].
+  ///
+  /// {@tool dartpad --template=stateless_widget_scaffold}
+  /// This example shows a `TextField` with a [Text.rich] widget as the [label].
+  /// The widget contains multiple [Text] widgets with different [TextStyle]'s.
+  ///
+  /// ** See code in examples/api/lib/material/input_decorator/input_decoration.label.0.dart **
+  /// {@end-tool}
+  ///
+  /// Only one of [label] and [labelText] can be specified.
+  final Widget? label;
+
+  /// Optional text that describes the input field.
+  ///
+  /// {@macro flutter.material.inputDecoration.label}
+  ///
+  /// If a more elaborate label is required, consider using [label] instead.
+  /// Only one of [label] and [labelText] can be specified.
   final String? labelText;
 
   /// The style to use for the [labelText] when the label is on top of the
@@ -2847,7 +2826,6 @@ class InputDecoration {
   /// 48px.
   ///
   /// {@tool dartpad --template=stateless_widget_scaffold}
-  ///
   /// This example shows the differences between two `TextField` widgets when
   /// [prefixIconConstraints] is set to the default value and when one is not.
   ///
@@ -2857,36 +2835,7 @@ class InputDecoration {
   /// If null, [BoxConstraints] with a minimum width and height of 48px is
   /// used.
   ///
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   return Padding(
-  ///     padding: const EdgeInsets.symmetric(horizontal: 8.0),
-  ///     child: Column(
-  ///       mainAxisAlignment: MainAxisAlignment.center,
-  ///       children: const <Widget>[
-  ///         TextField(
-  ///           decoration: InputDecoration(
-  ///             hintText: 'Normal Icon Constraints',
-  ///             prefixIcon: Icon(Icons.search),
-  ///           ),
-  ///         ),
-  ///         SizedBox(height: 10),
-  ///         TextField(
-  ///           decoration: InputDecoration(
-  ///             isDense: true,
-  ///             hintText:'Smaller Icon Constraints',
-  ///             prefixIcon: Icon(Icons.search),
-  ///             prefixIconConstraints: BoxConstraints(
-  ///               minHeight: 32,
-  ///               minWidth: 32,
-  ///             ),
-  ///           ),
-  ///         ),
-  ///       ],
-  ///     ),
-  ///   );
-  /// }
-  /// ```
+  /// ** See code in examples/api/lib/material/input_decorator/input_decoration.prefix_icon_constraints.0.dart **
   /// {@end-tool}
   final BoxConstraints? prefixIconConstraints;
 
@@ -3025,36 +2974,7 @@ class InputDecoration {
   /// If null, [BoxConstraints] with a minimum width and height of 48px is
   /// used.
   ///
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   return Padding(
-  ///     padding: const EdgeInsets.symmetric(horizontal: 8.0),
-  ///     child: Column(
-  ///       mainAxisAlignment: MainAxisAlignment.center,
-  ///       children: const <Widget>[
-  ///         TextField(
-  ///           decoration: InputDecoration(
-  ///             hintText: 'Normal Icon Constraints',
-  ///             suffixIcon: Icon(Icons.search),
-  ///           ),
-  ///         ),
-  ///         SizedBox(height: 10),
-  ///         TextField(
-  ///           decoration: InputDecoration(
-  ///             isDense: true,
-  ///             hintText:'Smaller Icon Constraints',
-  ///             suffixIcon: Icon(Icons.search),
-  ///             suffixIconConstraints: BoxConstraints(
-  ///               minHeight: 32,
-  ///               minWidth: 32,
-  ///             ),
-  ///           ),
-  ///         ),
-  ///       ],
-  ///     ),
-  ///   );
-  /// }
-  /// ```
+  /// ** See code in examples/api/lib/material/input_decorator/input_decoration.suffix_icon_constraints.0.dart **
   /// {@end-tool}
   final BoxConstraints? suffixIconConstraints;
 
@@ -3324,6 +3244,7 @@ class InputDecoration {
   /// by the new values.
   InputDecoration copyWith({
     Widget? icon,
+    Widget? label,
     String? labelText,
     TextStyle? labelStyle,
     TextStyle? floatingLabelStyle,
@@ -3371,6 +3292,7 @@ class InputDecoration {
   }) {
     return InputDecoration(
       icon: icon ?? this.icon,
+      label: label ?? this.label,
       labelText: labelText ?? this.labelText,
       labelStyle: labelStyle ?? this.labelStyle,
       floatingLabelStyle: floatingLabelStyle ?? this.floatingLabelStyle,
@@ -3462,6 +3384,7 @@ class InputDecoration {
       return false;
     return other is InputDecoration
         && other.icon == icon
+        && other.label == label
         && other.labelText == labelText
         && other.labelStyle == labelStyle
         && other.floatingLabelStyle == floatingLabelStyle
@@ -3512,6 +3435,7 @@ class InputDecoration {
   int get hashCode {
     final List<Object?> values = <Object?>[
       icon,
+      label,
       labelText,
       floatingLabelStyle,
       labelStyle,
@@ -3566,6 +3490,7 @@ class InputDecoration {
   String toString() {
     final List<String> description = <String>[
       if (icon != null) 'icon: $icon',
+      if (label != null) 'label: $label',
       if (labelText != null) 'labelText: "$labelText"',
       if (floatingLabelStyle != null) 'floatingLabelStyle: "$floatingLabelStyle"',
       if (helperText != null) 'helperText: "$helperText"',

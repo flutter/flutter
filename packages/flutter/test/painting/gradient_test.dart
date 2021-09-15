@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
@@ -816,7 +820,7 @@ void main() {
       for (final Gradient gradient in gradients45) {
         testWidgets('$gradient', (WidgetTester tester) async {
           await runTest(tester, gradient, 45);
-        }, skip: isBrowser); // https://github.com/flutter/flutter/issues/41389
+        });
       }
     });
 
@@ -824,7 +828,7 @@ void main() {
       for (final Gradient gradient in gradients90) {
         testWidgets('$gradient', (WidgetTester tester) async {
           await runTest(tester, gradient, 90);
-        }, skip: isBrowser); // https://github.com/flutter/flutter/issues/41389
+        });
       }
     });
   });

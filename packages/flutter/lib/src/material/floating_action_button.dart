@@ -73,25 +73,7 @@ enum _FloatingActionButtonType {
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button.png)
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return Scaffold(
-///     appBar: AppBar(
-///       title: const Text('Floating Action Button'),
-///     ),
-///     body: const Center(
-///       child: Text('Press the button below!')
-///     ),
-///     floatingActionButton: FloatingActionButton(
-///       onPressed: () {
-///         // Add your onPressed code here!
-///       },
-///       child: const Icon(Icons.navigation),
-///       backgroundColor: Colors.green,
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/floating_action_button/floating_action_button.0.dart **
 /// {@end-tool}
 ///
 /// {@tool dartpad --template=stateless_widget_material}
@@ -101,26 +83,7 @@ enum _FloatingActionButtonType {
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button_label.png)
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return Scaffold(
-///     appBar: AppBar(
-///       title: const Text('Floating Action Button Label'),
-///     ),
-///     body: const Center(
-///       child: Text('Press the button with a label below!'),
-///     ),
-///     floatingActionButton: FloatingActionButton.extended(
-///       onPressed: () {
-///         // Add your onPressed code here!
-///       },
-///       label: const Text('Approve'),
-///       icon: const Icon(Icons.thumb_up),
-///       backgroundColor: Colors.pink,
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/floating_action_button/floating_action_button.1.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -171,6 +134,8 @@ class FloatingActionButton extends StatelessWidget {
        _floatingActionButtonType = mini ? _FloatingActionButtonType.small : _FloatingActionButtonType.regular,
        _extendedLabel = null,
        extendedIconLabelSpacing = null,
+       extendedPadding = null,
+       extendedTextStyle = null,
        super(key: key);
 
   /// Creates a small circular floating action button.
@@ -217,6 +182,8 @@ class FloatingActionButton extends StatelessWidget {
        isExtended = false,
        _extendedLabel = null,
        extendedIconLabelSpacing = null,
+       extendedPadding = null,
+       extendedTextStyle = null,
        super(key: key);
 
   /// Creates a large circular floating action button.
@@ -263,6 +230,8 @@ class FloatingActionButton extends StatelessWidget {
        isExtended = false,
        _extendedLabel = null,
        extendedIconLabelSpacing = null,
+       extendedPadding = null,
+       extendedTextStyle = null,
        super(key: key);
 
   /// Creates a wider [StadiumBorder]-shaped floating action button with
@@ -294,6 +263,8 @@ class FloatingActionButton extends StatelessWidget {
     this.focusNode,
     this.autofocus = false,
     this.extendedIconLabelSpacing,
+    this.extendedPadding,
+    this.extendedTextStyle,
     Widget? icon,
     required Widget label,
     this.enableFeedback,
@@ -518,6 +489,21 @@ class FloatingActionButton extends StatelessWidget {
   /// If that is also null, the default is 8.0.
   final double? extendedIconLabelSpacing;
 
+  /// The padding for an extended [FloatingActionButton]'s content.
+  ///
+  /// If null, [FloatingActionButtonThemeData.extendedPadding] is used. If that
+  /// is also null, the default is
+  /// `EdgeInsetsDirectional.only(start: 16.0, end: 20.0)` if an icon is
+  /// provided, and `EdgeInsetsDirectional.only(start: 20.0, end: 20.0)` if not.
+  final EdgeInsetsGeometry? extendedPadding;
+
+  /// The text style for an extended [FloatingActionButton]'s label.
+  ///
+  /// If null, [FloatingActionButtonThemeData.extendedTextStyle] is used. If
+  /// that is also null, then [TextTheme.button] with a letter spacing of 1.2
+  /// is used.
+  final TextStyle? extendedTextStyle;
+
   final _FloatingActionButtonType _floatingActionButtonType;
 
   final Widget? _extendedLabel;
@@ -568,10 +554,9 @@ class FloatingActionButton extends StatelessWidget {
       ?? theme.materialTapTargetSize;
     final bool enableFeedback = this.enableFeedback
       ?? floatingActionButtonTheme.enableFeedback ?? true;
-    final TextStyle textStyle = theme.textTheme.button!.copyWith(
-      color: foregroundColor,
-      letterSpacing: 1.2,
-    );
+    final TextStyle extendedTextStyle = (this.extendedTextStyle
+        ?? floatingActionButtonTheme.extendedTextStyle
+        ?? theme.textTheme.button!.copyWith(letterSpacing: 1.2)).copyWith(color: foregroundColor);
     final ShapeBorder shape = this.shape
       ?? floatingActionButtonTheme.shape
       ?? (isExtended ? _defaultExtendedShape : _defaultShape);
@@ -596,16 +581,23 @@ class FloatingActionButton extends StatelessWidget {
       case _FloatingActionButtonType.extended:
         sizeConstraints = floatingActionButtonTheme.extendedSizeConstraints ?? _kExtendedSizeConstraints;
         final double iconLabelSpacing = extendedIconLabelSpacing ?? floatingActionButtonTheme.extendedIconLabelSpacing ?? 8.0;
-        const Widget width20 = SizedBox(width: 20.0);
-        const Widget width16 = SizedBox(width: 16.0);
+        final EdgeInsetsGeometry padding = extendedPadding
+            ?? floatingActionButtonTheme.extendedPadding
+            ?? EdgeInsetsDirectional.only(start: child != null && isExtended ? 16.0 : 20.0, end: 20.0);
         resolvedChild = _ChildOverflowBox(
-          child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: child == null
-                  ? <Widget>[width20, _extendedLabel!, width20]
-                  : isExtended
-                      ? <Widget>[width16, child!, SizedBox(width: iconLabelSpacing), _extendedLabel!, width20]
-                      : <Widget>[width20, child!, width20],
+          child: Padding(
+            padding: padding,
+            child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  if (child != null)
+                    child!,
+                  if (child != null && isExtended)
+                    SizedBox(width: iconLabelSpacing),
+                  if (isExtended)
+                    _extendedLabel!,
+                ],
+            ),
           ),
         );
         break;
@@ -625,7 +617,7 @@ class FloatingActionButton extends StatelessWidget {
       focusColor: focusColor,
       hoverColor: hoverColor,
       splashColor: splashColor,
-      textStyle: textStyle,
+      textStyle: extendedTextStyle,
       shape: shape,
       clipBehavior: clipBehavior,
       focusNode: focusNode,

@@ -29,15 +29,17 @@ void main() {
         'flutter',
       );
 
-      processManager.runSync(<String>[
+      final ProcessResult createResult = processManager.runSync(<String>[
         flutterBin,
         ...getLocalEngineArguments(),
         'create',
+        '--verbose',
         '--platforms=ios',
         '-i',
         'objc',
         'hello',
       ], workingDirectory: tempDir.path);
+      print(createResult.stdout);
 
       projectRoot = tempDir.childDirectory('hello').path;
     });
@@ -57,7 +59,7 @@ void main() {
         File outputAppFrameworkBinary;
 
         setUpAll(() {
-          processManager.runSync(<String>[
+          final ProcessResult buildResult = processManager.runSync(<String>[
             flutterBin,
             ...getLocalEngineArguments(),
             'build',
@@ -68,6 +70,7 @@ void main() {
             '--obfuscate',
             '--split-debug-info=foo debug info/',
           ], workingDirectory: projectRoot);
+          print(buildResult.stdout);
 
           buildPath = fileSystem.directory(fileSystem.path.join(
             projectRoot,
@@ -122,6 +125,7 @@ void main() {
               infoPlistPath,
             ],
           );
+          print(bonjourServices.stdout);
           final bool bonjourServicesFound = (bonjourServices.stdout as String).contains('_dartobservatory._tcp');
           expect(bonjourServicesFound, buildMode == BuildMode.debug);
 
@@ -136,6 +140,7 @@ void main() {
               infoPlistPath,
             ],
           );
+          print(localNetworkUsage.stdout);
           final bool localNetworkUsageFound = localNetworkUsage.exitCode == 0;
           expect(localNetworkUsageFound, buildMode == BuildMode.debug);
         });
@@ -150,6 +155,7 @@ void main() {
               'arm64',
             ],
           );
+          print(symbols.stdout);
           final bool aotSymbolsFound = (symbols.stdout as String).contains('_kDartVmSnapshot');
           expect(aotSymbolsFound, buildMode != BuildMode.debug);
         });
@@ -191,11 +197,12 @@ void main() {
               // Skip bitcode stripping since we just checked that above.
             },
           );
+          print(xcodeBackendResult.stdout);
 
           expect(xcodeBackendResult.exitCode, 0);
           expect(outputFlutterFrameworkBinary.existsSync(), isTrue);
           expect(outputAppFrameworkBinary.existsSync(), isTrue);
-        }, skip: !platform.isMacOS || buildMode != BuildMode.release);
+        }, skip: !platform.isMacOS || buildMode != BuildMode.release); // [intended] only makes sense on macos.
 
         testWithoutContext('validate obfuscation', () {
           final ProcessResult grepResult = processManager.runSync(<String>[
@@ -204,6 +211,7 @@ void main() {
             'hello',
             outputAppFrameworkBinary.path,
           ]);
+          print(grepResult.stdout);
           expect(grepResult.stdout, isNot(contains('matches')));
         });
       });
@@ -225,7 +233,8 @@ void main() {
           'FLUTTER_XCODE_ONLY_ACTIVE_ARCH': 'NO',
         },
       );
-      // This test case would fail if arm64 or i386 were not excluded.
+      print(buildSimulator.stdout);
+      // This test case would fail if arm64 or x86_64 simulators could not build.
       expect(buildSimulator.exitCode, 0);
 
       final File simulatorAppFrameworkBinary = fileSystem.file(fileSystem.path.join(
@@ -242,8 +251,11 @@ void main() {
       final ProcessResult archs = processManager.runSync(
         <String>['file', simulatorAppFrameworkBinary.path],
       );
+      print(archs.stdout);
       expect(archs.stdout, contains('Mach-O 64-bit dynamically linked shared library x86_64'));
+      expect(archs.stdout, contains('Mach-O 64-bit dynamically linked shared library arm64'));
     });
-  }, skip: !platform.isMacOS, timeout: const Timeout(Duration(minutes: 5))
+  }, skip: !platform.isMacOS, // [intended] only makes sense for macos platform.
+     timeout: const Timeout(Duration(minutes: 5))
   );
 }

@@ -7,6 +7,59 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets('ScrollMetricsNotification test', (WidgetTester tester) async {
+    final List<Notification> events = <Notification>[];
+    Widget buildFrame(double height) {
+      return NotificationListener<Notification>(
+        onNotification: (Notification value) {
+          events.add(value);
+          return false;
+        },
+        child: SingleChildScrollView(
+          child: SizedBox(height: height),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildFrame(1200.0));
+    expect(events.length, 1);
+
+    events.clear();
+    await tester.pumpWidget(buildFrame(1000.0));
+    // Change the content dimensions will trigger a new event.
+    expect(events.length, 1);
+    ScrollMetricsNotification event = events[0] as ScrollMetricsNotification;
+    expect(event.metrics.extentBefore, 0.0);
+    expect(event.metrics.extentInside, 600.0);
+    expect(event.metrics.extentAfter, 400.0);
+
+    events.clear();
+    final TestGesture gesture = await tester.startGesture(const Offset(100.0, 100.0));
+    expect(events.length, 1);
+    // user scroll do not trigger the ScrollContentMetricsNotification.
+    expect(events[0] is ScrollStartNotification, true);
+
+    events.clear();
+    await gesture.moveBy(const Offset(-10.0, -10.0));
+    expect(events.length, 2);
+    // User scroll do not trigger the ScrollContentMetricsNotification.
+    expect(events[0] is UserScrollNotification, true);
+    expect(events[1] is ScrollUpdateNotification, true);
+
+    events.clear();
+    // Change the content dimensions again.
+    await tester.pumpWidget(buildFrame(500.0));
+    expect(events.length, 1);
+    event = events[0] as ScrollMetricsNotification;
+    expect(event.metrics.extentBefore, 10.0);
+    expect(event.metrics.extentInside, 590.0);
+    expect(event.metrics.extentAfter, 0.0);
+
+    events.clear();
+    // The content dimensions does not change.
+    await tester.pumpWidget(buildFrame(500.0));
+    expect(events.length, 0);
+  });
+
   testWidgets('Scroll notification basics', (WidgetTester tester) async {
     late ScrollNotification notification;
 

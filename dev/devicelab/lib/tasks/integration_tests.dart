@@ -71,13 +71,6 @@ TaskFunction createAndroidSemanticsIntegrationTest() {
   );
 }
 
-TaskFunction createCodegenerationIntegrationTest() {
-  return DriverTest(
-    '${flutterDirectory.path}/dev/integration_tests/codegen',
-    'lib/main.dart',
-  );
-}
-
 TaskFunction createIOSPlatformViewTests() {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/ios_platform_view_tests',
@@ -142,14 +135,12 @@ class DriverTest {
     this.testDirectory,
     this.testTarget, {
       this.extraOptions = const <String>[],
-      this.environment =  const <String, String>{},
     }
   );
 
   final String testDirectory;
   final String testTarget;
   final List<String> extraOptions;
-  final Map<String, String> environment;
 
   Future<TaskResult> call() {
     return inDirectory<TaskResult>(testDirectory, () async {
@@ -167,7 +158,7 @@ class DriverTest {
         deviceId,
         ...extraOptions,
       ];
-      await flutter('drive', options: options, environment: Map<String, String>.from(environment));
+      await flutter('drive', options: options);
 
       return TaskResult.success(null);
     });

@@ -224,7 +224,7 @@ vars = {
       );
     });
 
-    test('commit() passes correct commit message', () {
+    test('commit() throws if there are no local changes to commit', () {
       const String commit1 = 'abc123';
       const String commit2 = 'def456';
       const String message = 'This is a commit message.';
@@ -253,6 +253,69 @@ vars = {
         ], stdout: commit1),
         const FakeCommand(command: <String>[
           'git',
+          'status',
+          '--porcelain',
+        ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'commit',
+          "--message='$message'",
+        ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'rev-parse',
+          'HEAD',
+        ], stdout: commit2),
+      ]);
+
+      final Checkouts checkouts = Checkouts(
+        fileSystem: fileSystem,
+        parentDirectory: fileSystem.directory(rootDir),
+        platform: platform,
+        processManager: processManager,
+        stdio: stdio,
+      );
+
+      final EngineRepository repo = EngineRepository(checkouts);
+      expect(
+        () => repo.commit(message),
+        throwsExceptionWith('Tried to commit with message $message but no changes were present'),
+      );
+    });
+
+    test('commit() passes correct commit message', () {
+      const String commit1 = 'abc123';
+      const String commit2 = 'def456';
+      const String message = 'This is a commit message.';
+      final TestStdio stdio = TestStdio();
+      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(command: <String>[
+          'git',
+          'clone',
+          '--origin',
+          'upstream',
+          '--',
+          EngineRepository.defaultUpstream,
+          fileSystem.path
+              .join(rootDir, 'flutter_conductor_checkouts', 'engine'),
+        ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'checkout',
+          'upstream/master',
+        ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'rev-parse',
+          'HEAD',
+        ], stdout: commit1),
+        const FakeCommand(
+          command: <String>['git', 'status', '--porcelain'],
+          stdout: 'MM path/to/file.txt',
+        ),
+        const FakeCommand(command: <String>[
+          'git',
           'commit',
           "--message='$message'",
         ]),
@@ -273,6 +336,171 @@ vars = {
 
       final EngineRepository repo = EngineRepository(checkouts);
       repo.commit(message);
+    });
+
+    test('updateEngineRevision() returns false if newCommit is the same as version file', () {
+      const String commit1 = 'abc123';
+      const String commit2 = 'def456';
+      final TestStdio stdio = TestStdio();
+      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+      final File engineVersionFile = fileSystem.file('/engine.version')..writeAsStringSync(commit2);
+      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(command: <String>[
+          'git',
+          'clone',
+          '--origin',
+          'upstream',
+          '--',
+          FrameworkRepository.defaultUpstream,
+          fileSystem.path
+              .join(rootDir, 'flutter_conductor_checkouts', 'framework'),
+        ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'rev-parse',
+          'HEAD',
+        ], stdout: commit1),
+      ]);
+
+      final Checkouts checkouts = Checkouts(
+        fileSystem: fileSystem,
+        parentDirectory: fileSystem.directory(rootDir),
+        platform: platform,
+        processManager: processManager,
+        stdio: stdio,
+      );
+
+      final FrameworkRepository repo = FrameworkRepository(checkouts);
+      final bool didUpdate = repo.updateEngineRevision(commit2, engineVersionFile: engineVersionFile);
+      expect(didUpdate, false);
+    });
+
+    test('CiYaml(file) will throw if file does not exist', () {
+      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+      final File file = fileSystem.file('/non/existent/file.txt');
+
+      expect(
+        () => CiYaml(file),
+        throwsExceptionWith('Could not find the .ci.yaml file at /non/existent/file.txt'),
+      );
+    });
+
+    test('ciYaml.enableBranch() will prepend the given branch to the yaml list of enabled_branches', () {
+      const String commit1 = 'abc123';
+      final TestStdio stdio = TestStdio();
+      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+      final File ciYaml = fileSystem.file('/flutter_conductor_checkouts/framework/.ci.yaml');
+      final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+            command: <String>[
+          'git',
+          'clone',
+          '--origin',
+          'upstream',
+          '--',
+          FrameworkRepository.defaultUpstream,
+          fileSystem.path
+              .join(rootDir, 'flutter_conductor_checkouts', 'framework'),
+        ],
+        onRun: () {
+          ciYaml.createSync(recursive: true);
+          ciYaml.writeAsStringSync('''
+# Friendly note
+
+enabled_branches:
+  - master
+  - dev
+  - beta
+  - stable
+''');
+        }),
+        const FakeCommand(command: <String>[
+          'git',
+          'rev-parse',
+          'HEAD',
+        ], stdout: commit1),
+      ]);
+      final Checkouts checkouts = Checkouts(
+        fileSystem: fileSystem,
+        parentDirectory: fileSystem.directory(rootDir),
+        platform: platform,
+        processManager: processManager,
+        stdio: stdio,
+      );
+
+      final FrameworkRepository framework = FrameworkRepository(checkouts);
+      expect(
+        framework.ciYaml.enabledBranches,
+        <String>['master', 'dev', 'beta', 'stable'],
+      );
+
+      framework.ciYaml.enableBranch('foo');
+      expect(
+        framework.ciYaml.enabledBranches,
+        <String>['foo', 'master', 'dev', 'beta', 'stable'],
+      );
+
+      expect(
+        framework.ciYaml.stringContents,
+        '''
+# Friendly note
+
+enabled_branches:
+  - foo
+  - master
+  - dev
+  - beta
+  - stable
+'''
+      );
+    });
+
+    test('ciYaml.enableBranch() will throw if the input branch is already present in the yaml file', () {
+      const String commit1 = 'abc123';
+      final TestStdio stdio = TestStdio();
+      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+      final File ciYaml = fileSystem.file('/flutter_conductor_checkouts/framework/.ci.yaml');
+      final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+            command: <String>[
+          'git',
+          'clone',
+          '--origin',
+          'upstream',
+          '--',
+          FrameworkRepository.defaultUpstream,
+          fileSystem.path
+              .join(rootDir, 'flutter_conductor_checkouts', 'framework'),
+        ],
+        onRun: () {
+          ciYaml.createSync(recursive: true);
+          ciYaml.writeAsStringSync('''
+enabled_branches:
+  - master
+  - dev
+  - beta
+  - stable
+''');
+        }),
+        const FakeCommand(command: <String>[
+          'git',
+          'rev-parse',
+          'HEAD',
+        ], stdout: commit1),
+      ]);
+      final Checkouts checkouts = Checkouts(
+        fileSystem: fileSystem,
+        parentDirectory: fileSystem.directory(rootDir),
+        platform: platform,
+        processManager: processManager,
+        stdio: stdio,
+      );
+
+      final FrameworkRepository framework = FrameworkRepository(checkouts);
+      expect(
+        () => framework.ciYaml.enableBranch('master'),
+        throwsExceptionWith('.ci.yaml already contains the branch master'),
+      );
     });
   });
 }

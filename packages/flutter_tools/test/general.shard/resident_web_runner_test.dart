@@ -942,12 +942,14 @@ void main() {
   });
 
   testUsingContext('Successfully turns WebSocketException into ToolExit', () async {
-    final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
+    final BufferLogger logger = BufferLogger.test();
+    final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice, logger: logger);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     _setupMocks();
     webDevFS.exception = const WebSocketException();
 
     await expectLater(residentWebRunner.run, throwsToolExit());
+    expect(logger.errorText, contains('WebSocketException'));
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
