@@ -5,6 +5,7 @@
 import 'dart:convert';
 import 'dart:io' as io;
 
+import 'package:crypto/crypto.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:path/path.dart' as path;
@@ -285,7 +286,7 @@ class SkiaGoldClient {
   /// Gold at head.
   Future<String?> getExpectationForTest(String testName) async {
     late String? expectation;
-    final String traceID = await getTraceID(testName);
+    final String traceID = getTraceID(testName);
     await io.HttpOverrides.runWithHttpOverrides<Future<void>>(() async {
       final Uri requestForExpectations = Uri.parse(
         'https://flutter-gold.skia.org/json/v2/latestpositivedigest/$traceID'
@@ -412,7 +413,7 @@ class SkiaGoldClient {
   /// Returns a trace id based on the current testing environment to lookup
   /// the latest positive digest on Flutter Gold with a hex-encoded md5 hash of
   /// the image keys.
-  Future<String> getTraceID(String testName) async {
+  String getTraceID(String testName) {
     final Map<String, dynamic> keys = <String, dynamic>{
       if (platform.environment[_kTestBrowserKey] != null) 'Browser' : platform.environment[_kTestBrowserKey],
       'CI' : 'luci',
@@ -421,8 +422,7 @@ class SkiaGoldClient {
       'source_type' : 'flutter',
     };
     final String jsonTrace = json.encode(keys);
-    final io.ProcessResult md5Result = await process.run(<String>['md5', '-s', jsonTrace]);
-    final String md5Sum = md5Result.stdout.toString().split(' ').last.trim();
+    final String md5Sum = md5.convert(utf8.encode(jsonTrace)).toString();
     return md5Sum;
   }
 }
