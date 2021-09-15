@@ -903,6 +903,34 @@ void _testsInput() {
     expect(find.byType(TextField), findsNothing);
   });
 
+  testWidgets('Switching to dial entry mode triggers entry callback', (WidgetTester tester) async {
+    bool triggeredCallback = false;
+
+    await mediaQueryBoilerplate(tester, true, entryMode: TimePickerEntryMode.input, onEntryModeChange: (TimePickerEntryMode mode) {
+      if (mode == TimePickerEntryMode.dial) {
+        triggeredCallback = true;
+      }
+    });
+
+    await tester.tap(find.byIcon(Icons.access_time));
+    await tester.pumpAndSettle();
+    expect(triggeredCallback, true);
+  });
+
+  testWidgets('Switching to input entry mode triggers entry callback', (WidgetTester tester) async {
+    bool triggeredCallback = false;
+
+    await mediaQueryBoilerplate(tester, true, entryMode: TimePickerEntryMode.dial, onEntryModeChange: (TimePickerEntryMode mode) {
+      if (mode == TimePickerEntryMode.input) {
+        triggeredCallback = true;
+      }
+    });
+
+    await tester.tap(find.byIcon(Icons.keyboard));
+    await tester.pumpAndSettle();
+    expect(triggeredCallback, true);
+  });
+
   testWidgets('Can double tap hours (when selected) to enter input mode', (WidgetTester tester) async {
     await mediaQueryBoilerplate(tester, false, entryMode: TimePickerEntryMode.dial);
     final Finder hourFinder = find.ancestor(
@@ -1163,6 +1191,7 @@ Future<void> mediaQueryBoilerplate(
   String? minuteLabelText,
   String? errorInvalidText,
   bool accessibleNavigation = false,
+  EntryModeChangeCallback? onEntryModeChange,
 }) async {
   await tester.pumpWidget(
     Localizations(
@@ -1192,7 +1221,8 @@ Future<void> mediaQueryBoilerplate(
                         helpText: helpText,
                         hourLabelText: hourLabelText,
                         minuteLabelText: minuteLabelText,
-                        errorInvalidText: errorInvalidText
+                        errorInvalidText: errorInvalidText,
+                        onEntryModeChanged: onEntryModeChange,
                       );
                     },
                     child: const Text('X'),
