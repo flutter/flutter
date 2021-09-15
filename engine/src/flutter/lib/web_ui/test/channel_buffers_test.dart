@@ -23,7 +23,7 @@ void main() {
 
 ByteData _makeByteData(String str) {
   final Uint8List list = utf8.encode(str) as Uint8List;
-  final ByteBuffer buffer = list is Uint8List ? list.buffer : Uint8List.fromList(list).buffer;
+  final ByteBuffer buffer = list.buffer;
   return ByteData.view(buffer);
 }
 
