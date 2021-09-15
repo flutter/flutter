@@ -1199,6 +1199,148 @@ void main() {
     });
   });
 
+
+  group('Autofocus', () {
+    testWidgets(
+      'works when the previous focused node is detached',
+      (WidgetTester tester) async {
+        final FocusNode node1 = FocusNode();
+        final FocusNode node2 = FocusNode();
+
+        await tester.pumpWidget(
+          FocusScope(
+            child: Focus(autofocus: true, focusNode: node1, child: const Placeholder()),
+          ),
+        );
+        await tester.pump();
+        expect(node1.hasPrimaryFocus, isTrue);
+
+        await tester.pumpWidget(
+          FocusScope(
+            child: SizedBox(
+              child: Focus(autofocus: true, focusNode: node2, child: const Placeholder()),
+            ),
+          ),
+        );
+        await tester.pump();
+        expect(node2.hasPrimaryFocus, isTrue);
+    });
+
+    testWidgets(
+      'node detached before autofocus is applied',
+      (WidgetTester tester) async {
+        final FocusScopeNode scopeNode = FocusScopeNode();
+        final FocusNode node1 = FocusNode();
+
+        await tester.pumpWidget(
+          FocusScope(
+            node: scopeNode,
+            child: Focus(
+              autofocus: true,
+              focusNode: node1,
+              child: const Placeholder(),
+            ),
+          ),
+        );
+        await tester.pumpWidget(
+          FocusScope(
+            node: scopeNode,
+            child: const Focus(child: Placeholder()),
+          ),
+        );
+
+        await tester.pump();
+        expect(node1.hasPrimaryFocus, isFalse);
+        expect(scopeNode.hasPrimaryFocus, isTrue);
+    });
+
+    testWidgets('autofocus the first candidate', (WidgetTester tester) async {
+      final FocusNode node1 = FocusNode();
+      final FocusNode node2 = FocusNode();
+      final FocusNode node3 = FocusNode();
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Column(
+            children: <Focus>[
+              Focus(
+                autofocus: true,
+                focusNode: node1,
+                child: const SizedBox(),
+              ),
+              Focus(
+                autofocus: true,
+                focusNode: node2,
+                child: const SizedBox(),
+              ),
+              Focus(
+                autofocus: true,
+                focusNode: node3,
+                child: const SizedBox(),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(node1.hasPrimaryFocus, isTrue);
+    });
+
+    testWidgets('Autofocus works with global key reparenting', (WidgetTester tester) async {
+      final FocusNode node = FocusNode();
+      final FocusScopeNode scope1 = FocusScopeNode(debugLabel: 'scope1');
+      final FocusScopeNode scope2 = FocusScopeNode(debugLabel: 'scope2');
+      final GlobalKey key = GlobalKey();
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Column(
+            children: <Focus>[
+              FocusScope(
+                node: scope1,
+                child: Focus(
+                  key: key,
+                  focusNode: node,
+                  child: const SizedBox(),
+                ),
+              ),
+              FocusScope(node: scope2, child: const SizedBox()),
+            ],
+          ),
+        ),
+      );
+
+      // _applyFocusChange will be called before persistentCallbacks,
+      // guaranteeing the focus changes are applied before the BuildContext
+      // `node` attaches to gets reparented.
+      scope1.autofocus(node);
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Column(
+            children: <Focus>[
+              FocusScope(node: scope1, child: const SizedBox()),
+              FocusScope(
+                node: scope2,
+                child: Focus(
+                  key: key,
+                  focusNode: node,
+                  child: const SizedBox(),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(node.hasPrimaryFocus, isTrue);
+      expect(scope2.hasFocus, isTrue);
+    });
+  });
+
   testWidgets("Doesn't lose focused child when reparenting if the nearestScope doesn't change.", (WidgetTester tester) async {
     final BuildContext context = await setupWidget(tester);
     final FocusScopeNode parent1 = FocusScopeNode(debugLabel: 'parent1');

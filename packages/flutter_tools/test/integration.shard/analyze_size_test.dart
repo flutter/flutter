@@ -88,7 +88,7 @@ void main() {
     expect(codeSizeDir.existsSync(), true);
     expect(result.exitCode, 0);
     tempDir.deleteSync(recursive: true);
-  }, skip: !platform.isMacOS);
+  }, skip: !platform.isMacOS); // [intended] iOS can only be built on macos.
 
   testWithoutContext('--analyze-size flag produces expected output on hello_world for macOS', () async {
     final String workingDirectory = fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
@@ -134,7 +134,7 @@ void main() {
     expect(codeSizeDir.existsSync(), true);
     expect(result.exitCode, 0);
     tempDir.deleteSync(recursive: true);
-  }, skip: !platform.isMacOS);
+  }, skip: !platform.isMacOS); // [intended] this is a macos only test.
 
   testWithoutContext('--analyze-size is only supported in release mode', () async {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');

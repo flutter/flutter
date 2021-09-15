@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert' show jsonDecode, jsonEncode;
+import 'dart:convert' show JsonEncoder, jsonDecode;
 
 import 'package:file/file.dart' show File;
 import 'package:platform/platform.dart';
@@ -230,10 +230,13 @@ ReleasePhase getNextPhase(ReleasePhase currentPhase) {
   return nextPhase;
 }
 
+// Indent two spaces.
+const JsonEncoder _encoder = JsonEncoder.withIndent('  ');
+
 void writeStateToFile(File file, pb.ConductorState state, List<String> logs) {
   state.logs.addAll(logs);
   file.writeAsStringSync(
-    jsonEncode(state.toProto3Json()),
+    _encoder.convert(state.toProto3Json()),
     flush: true,
   );
 }
@@ -264,8 +267,7 @@ bool requiresEnginePR(pb.ConductorState state) {
 /// This release will require a new Framework PR.
 ///
 /// The logic is if there was an Engine PR OR there are framework cherrypicks
-/// that have not been abandoned OR the increment level is 'm', then return
-/// true, else false.
+/// that have not been abandoned.
 bool requiresFrameworkPR(pb.ConductorState state) {
   if (requiresEnginePR(state)) {
     return true;
@@ -273,10 +275,6 @@ bool requiresFrameworkPR(pb.ConductorState state) {
   final bool hasRequiredCherrypicks =
       state.framework.cherrypicks.any((pb.Cherrypick cp) => cp.state != pb.CherrypickState.ABANDONED);
   if (hasRequiredCherrypicks) {
-    return true;
-  }
-  if (state.incrementLevel == 'm') {
-    // requires an update to .ci.yaml
     return true;
   }
   return false;

@@ -44,3 +44,4 @@ export 'src/services/system_sound.dart';
 export 'src/services/text_editing.dart';
 export 'src/services/text_formatter.dart';
 export 'src/services/text_input.dart';
+export 'src/services/text_layout_metrics.dart';

@@ -6,6 +6,7 @@ import 'package:flutter/rendering.dart';
 
 import 'animated_size.dart';
 import 'basic.dart';
+import 'focus_scope.dart';
 import 'framework.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
@@ -343,9 +344,11 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
       enabled: _isTransitioning,
       child: ExcludeSemantics(
         excluding: true, // Always exclude the semantics of the widget that's fading out.
-        child: FadeTransition(
-          opacity: bottomAnimation,
-          child: bottomChild,
+        child: ExcludeFocus(
+          child: FadeTransition(
+            opacity: bottomAnimation,
+            child: bottomChild,
+          ),
         ),
       ),
     );
@@ -354,9 +357,12 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
       enabled: true, // Top widget always has its animations enabled.
       child: ExcludeSemantics(
         excluding: false, // Always publish semantics for the widget that's fading in.
-        child: FadeTransition(
-          opacity: topAnimation,
-          child: topChild,
+        child: ExcludeFocus(
+          excluding: false,
+          child: FadeTransition(
+            opacity: topAnimation,
+            child: topChild,
+          ),
         ),
       ),
     );

@@ -36,58 +36,12 @@ import 'theme.dart';
 /// for an example.
 ///
 /// {@tool dartpad --template=stateful_widget_material}
-///
 /// This example shows a [NavigationRail] used within a Scaffold with 3
 /// [NavigationRailDestination]s. The main content is separated by a divider
 /// (although elevation on the navigation rail can be used instead). The
 /// `_selectedIndex` is updated by the `onDestinationSelected` callback.
 ///
-/// ```dart
-/// int _selectedIndex = 0;
-///
-///  @override
-///  Widget build(BuildContext context) {
-///    return Scaffold(
-///      body: Row(
-///        children: <Widget>[
-///          NavigationRail(
-///            selectedIndex: _selectedIndex,
-///            onDestinationSelected: (int index) {
-///              setState(() {
-///                _selectedIndex = index;
-///              });
-///            },
-///            labelType: NavigationRailLabelType.selected,
-///            destinations: const <NavigationRailDestination>[
-///              NavigationRailDestination(
-///                icon: Icon(Icons.favorite_border),
-///                selectedIcon: Icon(Icons.favorite),
-///                label: Text('First'),
-///              ),
-///              NavigationRailDestination(
-///                icon: Icon(Icons.bookmark_border),
-///                selectedIcon: Icon(Icons.book),
-///                label: Text('Second'),
-///              ),
-///              NavigationRailDestination(
-///                icon: Icon(Icons.star_border),
-///                selectedIcon: Icon(Icons.star),
-///                label: Text('Third'),
-///              ),
-///            ],
-///          ),
-///          const VerticalDivider(thickness: 1, width: 1),
-///          // This is the main content.
-///          Expanded(
-///            child: Center(
-///              child: Text('selectedIndex: $_selectedIndex'),
-///            ),
-///          )
-///        ],
-///      ),
-///    );
-///  }
-/// ```
+/// ** See code in examples/api/lib/material/navigation_rail/navigation_rail.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -331,7 +285,6 @@ class NavigationRail extends StatefulWidget {
   /// widget, such as an animated menu or a [FloatingActionButton] animation.
   ///
   /// {@tool dartpad --template=stateless_widget_material}
-  ///
   /// This example shows how to use this animation to create a
   /// [FloatingActionButton] that animates itself between the normal and
   /// extended states of the [NavigationRail].
@@ -339,45 +292,7 @@ class NavigationRail extends StatefulWidget {
   /// An instance of `ExtendableFab` would be created for
   /// [NavigationRail.leading].
   ///
-  /// ```dart dartImports
-  /// import 'dart:ui';
-  /// ```
-  ///
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   final Animation<double> animation = NavigationRail.extendedAnimation(context);
-  ///   return AnimatedBuilder(
-  ///     animation: animation,
-  ///     builder: (BuildContext context, Widget? child) {
-  ///       // The extended fab has a shorter height than the regular fab.
-  ///       return Container(
-  ///         height: 56,
-  ///         padding: EdgeInsets.symmetric(
-  ///           vertical: lerpDouble(0, 6, animation.value)!,
-  ///         ),
-  ///         child: animation.value == 0
-  ///           ? FloatingActionButton(
-  ///               child: const Icon(Icons.add),
-  ///               onPressed: () {},
-  ///             )
-  ///           : Align(
-  ///               alignment: AlignmentDirectional.centerStart,
-  ///               widthFactor: animation.value,
-  ///               child: Padding(
-  ///                 padding: const EdgeInsetsDirectional.only(start: 8),
-  ///                 child: FloatingActionButton.extended(
-  ///                   icon: const Icon(Icons.add),
-  ///                   label: const Text('CREATE'),
-  ///                   onPressed: () {},
-  ///                 ),
-  ///               ),
-  ///             ),
-  ///       );
-  ///     },
-  ///   );
-  /// }
-  /// ```
-  ///
+  /// ** See code in examples/api/lib/material/navigation_rail/navigation_rail.extended_animation.0.dart **
   /// {@end-tool}
   static Animation<double> extendedAnimation(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<_ExtendedNavigationRailAnimation>()!.animation;

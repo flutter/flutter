@@ -96,6 +96,36 @@ typedef FocusOnKeyCallback = KeyEventResult Function(FocusNode node, RawKeyEvent
 /// was handled.
 typedef FocusOnKeyEventCallback = KeyEventResult Function(FocusNode node, KeyEvent event);
 
+// Represents a pending autofocus request.
+@immutable
+class _Autofocus {
+  const _Autofocus({ required this.scope, required this.autofocusNode });
+
+  final FocusScopeNode scope;
+  final FocusNode autofocusNode;
+
+  // Applies the autofocus request, if the node is still attached to the
+  // original scope and the scope has no focused child.
+  //
+  // The widget tree is responsible for calling reparent/detach on attached
+  // nodes to keep their parent/manager information up-to-date, so here we can
+  // safely check if the scope/node involved in each autofocus request is
+  // still attached, and discard the ones are no longer attached to the
+  // original manager.
+  void applyIfValid(FocusManager manager) {
+    final bool shouldApply  = (scope.parent != null || identical(scope, manager.rootScope))
+                           && identical(scope._manager, manager)
+                           && scope.focusedChild == null
+                           && autofocusNode.ancestors.contains(scope);
+    if (shouldApply) {
+      assert(_focusDebug('Applying autofocus: $autofocusNode'));
+      autofocusNode._doRequestFocus(findFirstFocus: true);
+    } else {
+      assert(_focusDebug('Autofocus request discarded for node: $autofocusNode.'));
+    }
+  }
+}
+
 /// An attachment point for a [FocusNode].
 ///
 /// Using a [FocusAttachment] is rarely needed, unless you are building
@@ -309,11 +339,12 @@ enum UnfocusDisposition {
 /// The [FocusManager] receives key events from [RawKeyboard] and
 /// [HardwareKeyboard] and will pass them to the focused nodes. It starts with
 /// the node with the primary focus, and will call the [onKey] or [onKeyEvent]
-/// callback for that node. If the callback returns false, indicating that it did
-/// not handle the event, the [FocusManager] will move to the parent of that node
-/// and call its [onKey] or [onKeyEvent]. If that [onKey] or [onKeyEvent] returns
-/// true, then it will stop propagating the event. If it reaches the root
-/// [FocusScopeNode], [FocusManager.rootScope], the event is discarded.
+/// callback for that node. If the callback returns [KeyEventResult.ignored],
+/// indicating that it did not handle the event, the [FocusManager] will move
+/// to the parent of that node and call its [onKey] or [onKeyEvent]. If that
+/// [onKey] or [onKeyEvent] returns [KeyEventResult.handled], then it will stop
+/// propagating the event. If it reaches the root [FocusScopeNode],
+/// [FocusManager.rootScope], the event is discarded.
 /// {@endtemplate}
 ///
 /// ## Focus Traversal
@@ -347,109 +378,7 @@ enum UnfocusDisposition {
 /// [Focus] or [FocusScope] widgets. See the [Focus] widget for a similar
 /// example using [Focus] and [FocusScope] widgets.
 ///
-/// ```dart imports
-/// import 'package:flutter/services.dart';
-/// ```
-///
-/// ```dart preamble
-/// class ColorfulButton extends StatefulWidget {
-///   const ColorfulButton({Key? key}) : super(key: key);
-///
-///   @override
-///   State<ColorfulButton> createState() => _ColorfulButtonState();
-/// }
-///
-/// class _ColorfulButtonState extends State<ColorfulButton> {
-///   late FocusNode _node;
-///   bool _focused = false;
-///   late FocusAttachment _nodeAttachment;
-///   Color _color = Colors.white;
-///
-///   @override
-///   void initState() {
-///     super.initState();
-///     _node = FocusNode(debugLabel: 'Button');
-///     _node.addListener(_handleFocusChange);
-///     _nodeAttachment = _node.attach(context, onKey: _handleKeyPress);
-///   }
-///
-///   void _handleFocusChange() {
-///     if (_node.hasFocus != _focused) {
-///       setState(() {
-///         _focused = _node.hasFocus;
-///       });
-///     }
-///   }
-///
-///   KeyEventResult _handleKeyPress(FocusNode node, RawKeyEvent event) {
-///     if (event is RawKeyDownEvent) {
-///       print('Focus node ${node.debugLabel} got key event: ${event.logicalKey}');
-///       if (event.logicalKey == LogicalKeyboardKey.keyR) {
-///         print('Changing color to red.');
-///         setState(() {
-///           _color = Colors.red;
-///         });
-///         return KeyEventResult.handled;
-///       } else if (event.logicalKey == LogicalKeyboardKey.keyG) {
-///         print('Changing color to green.');
-///         setState(() {
-///           _color = Colors.green;
-///         });
-///         return KeyEventResult.handled;
-///       } else if (event.logicalKey == LogicalKeyboardKey.keyB) {
-///         print('Changing color to blue.');
-///         setState(() {
-///           _color = Colors.blue;
-///         });
-///         return KeyEventResult.handled;
-///       }
-///     }
-///     return KeyEventResult.ignored;
-///   }
-///
-///   @override
-///   void dispose() {
-///     _node.removeListener(_handleFocusChange);
-///     // The attachment will automatically be detached in dispose().
-///     _node.dispose();
-///     super.dispose();
-///   }
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     _nodeAttachment.reparent();
-///     return GestureDetector(
-///       onTap: () {
-///         if (_focused) {
-///             _node.unfocus();
-///         } else {
-///            _node.requestFocus();
-///         }
-///       },
-///       child: Center(
-///         child: Container(
-///           width: 400,
-///           height: 100,
-///           color: _focused ? _color : Colors.white,
-///           alignment: Alignment.center,
-///           child: Text(
-///               _focused ? "I'm in color! Press R,G,B!" : 'Press to focus'),
-///         ),
-///       ),
-///     );
-///   }
-/// }
-/// ```
-///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   final TextTheme textTheme = Theme.of(context).textTheme;
-///   return DefaultTextStyle(
-///     style: textTheme.headline4!,
-///     child: const ColorfulButton(),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/focus_manager/focus_node.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -850,73 +779,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// Try pressing the TAB key after unfocusing to see what the next widget
   /// chosen is.
   ///
-  /// ```dart imports
-  /// import 'package:flutter/foundation.dart';
-  /// ```
-  ///
-  /// ```dart
-  /// UnfocusDisposition disposition = UnfocusDisposition.scope;
-  ///
-  /// @override
-  /// Widget build(BuildContext context) {
-  ///   return Material(
-  ///     child: Container(
-  ///       color: Colors.white,
-  ///       child: Column(
-  ///         mainAxisAlignment: MainAxisAlignment.center,
-  ///         children: <Widget>[
-  ///           Wrap(
-  ///             children: List<Widget>.generate(4, (int index) {
-  ///               return const SizedBox(
-  ///                 width: 200,
-  ///                 child: Padding(
-  ///                   padding: const EdgeInsets.all(8.0),
-  ///                   child: TextField(
-  ///                     decoration: InputDecoration(border: OutlineInputBorder()),
-  ///                   ),
-  ///                 ),
-  ///               );
-  ///             }),
-  ///           ),
-  ///           Row(
-  ///             mainAxisAlignment: MainAxisAlignment.spaceAround,
-  ///             children: <Widget>[
-  ///               ...List<Widget>.generate(UnfocusDisposition.values.length,
-  ///                   (int index) {
-  ///                 return Row(
-  ///                   mainAxisSize: MainAxisSize.min,
-  ///                   children: <Widget>[
-  ///                     Radio<UnfocusDisposition>(
-  ///                       groupValue: disposition,
-  ///                       onChanged: (UnfocusDisposition? value) {
-  ///                         setState(() {
-  ///                           if (value != null) {
-  ///                             disposition = value;
-  ///                           }
-  ///                         });
-  ///                       },
-  ///                       value: UnfocusDisposition.values[index],
-  ///                     ),
-  ///                     Text(describeEnum(UnfocusDisposition.values[index])),
-  ///                   ],
-  ///                 );
-  ///               }),
-  ///               OutlinedButton(
-  ///                 child: const Text('UNFOCUS'),
-  ///                 onPressed: () {
-  ///                   setState(() {
-  ///                     primaryFocus!.unfocus(disposition: disposition);
-  ///                   });
-  ///                 },
-  ///               ),
-  ///             ],
-  ///           ),
-  ///         ],
-  ///       ),
-  ///     ),
-  ///   );
-  /// }
-  /// ```
+  /// ** See code in examples/api/lib/widgets/focus_manager/focus_node.unfocus.0.dart **
   /// {@end-tool}
   void unfocus({
     UnfocusDisposition disposition = UnfocusDisposition.scope,
@@ -1352,14 +1215,16 @@ class FocusScopeNode extends FocusNode {
   /// The node is notified that it has received the primary focus in a
   /// microtask, so notification may lag the request by up to one frame.
   void autofocus(FocusNode node) {
-    assert(_focusDebug('Node autofocusing: $node'));
-    if (focusedChild == null) {
-      if (node._parent == null) {
-        _reparent(node);
-      }
-      assert(node.ancestors.contains(this), 'Autofocus was requested for a node that is not a descendant of the scope from which it was requested.');
-      node._doRequestFocus(findFirstFocus: true);
+    // Attach the node to the tree first, so in _applyFocusChange if the node
+    // is detached we don't add it back to the tree.
+    if (node._parent == null) {
+      _reparent(node);
     }
+
+    assert(_manager != null);
+    assert(_focusDebug('Autofocus scheduled for $node: scope $this'));
+    _manager?._pendingAutofocuses.add(_Autofocus(scope: this, autofocusNode: node));
+    _manager?._markNeedsUpdate();
   }
 
   @override
@@ -1367,13 +1232,14 @@ class FocusScopeNode extends FocusNode {
     assert(findFirstFocus != null);
 
     // It is possible that a previously focused child is no longer focusable.
-    while (focusedChild != null && !focusedChild!.canRequestFocus)
+    while (this.focusedChild != null && !this.focusedChild!.canRequestFocus)
       _focusedChildren.removeLast();
 
+    final FocusNode? focusedChild = this.focusedChild;
     // If findFirstFocus is false, then the request is to make this scope the
     // focus instead of looking for the ultimate first focus for this scope and
     // its descendants.
-    if (!findFirstFocus) {
+    if (!findFirstFocus || focusedChild == null) {
       if (canRequestFocus) {
         _setAsFocusedChildForScope();
         _markNextFocus(this);
@@ -1381,28 +1247,7 @@ class FocusScopeNode extends FocusNode {
       return;
     }
 
-    // Start with the primary focus as the focused child of this scope, if there
-    // is one. Otherwise start with this node itself.
-    FocusNode primaryFocus = focusedChild ?? this;
-    // Keep going down through scopes until the ultimately focusable item is
-    // found, a scope doesn't have a focusedChild, or a non-scope is
-    // encountered.
-    while (primaryFocus is FocusScopeNode && primaryFocus.focusedChild != null) {
-      primaryFocus = primaryFocus.focusedChild!;
-    }
-    if (identical(primaryFocus, this)) {
-      // We didn't find a FocusNode at the leaf, so we're focusing the scope, if
-      // allowed.
-      if (primaryFocus.canRequestFocus) {
-        _setAsFocusedChildForScope();
-        _markNextFocus(this);
-      }
-    } else {
-      // We found a FocusScopeNode at the leaf, so ask it to focus itself
-      // instead of this scope. That will cause this scope to return true from
-      // hasFocus, but false from hasPrimaryFocus.
-      primaryFocus._doRequestFocus(findFirstFocus: findFirstFocus);
-    }
+    focusedChild._doRequestFocus(findFirstFocus: true);
   }
 
   @override
@@ -1810,6 +1655,9 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     }
   }
 
+  // The list of autofocus requests made since the last _appyFocusChange call.
+  final List<_Autofocus> _pendingAutofocuses = <_Autofocus>[];
+
   // True indicates that there is an update pending.
   bool _haveScheduledUpdate = false;
 
@@ -1827,6 +1675,12 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   void _applyFocusChange() {
     _haveScheduledUpdate = false;
     final FocusNode? previousFocus = _primaryFocus;
+
+    for (final _Autofocus autofocus in _pendingAutofocuses) {
+      autofocus.applyIfValid(this);
+    }
+    _pendingAutofocuses.clear();
+
     if (_primaryFocus == null && _markedForFocus == null) {
       // If we don't have any current focus, and nobody has asked to focus yet,
       // then revert to the root scope.
@@ -1846,6 +1700,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
       _primaryFocus = _markedForFocus;
       _markedForFocus = null;
     }
+    assert(_markedForFocus == null);
     if (previousFocus != _primaryFocus) {
       assert(_focusDebug('Updating focus from $previousFocus to $_primaryFocus'));
       if (previousFocus != null) {
