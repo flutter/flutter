@@ -115,7 +115,7 @@ abstract class Repository {
           <String>['checkout', initialRef!],
           'Checking out initialRef $initialRef',
           workingDirectory: _checkoutDirectory!.path,
-        );        
+        );
       }
       return _checkoutDirectory!;
     }

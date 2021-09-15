@@ -54,7 +54,7 @@ class RollDevCommand extends Command<void> {
     argParser.addFlag(
       kJustPrint,
       negatable: false,
-      help: 
+      help:
           "Don't actually roll the dev channel; "
           'just print the would-be version and quit.',
     );
