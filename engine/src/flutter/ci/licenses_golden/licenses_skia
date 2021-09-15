@@ -1,4 +1,4 @@
-Signature: 616b368d1d771aeb3590fa33fd452176
+Signature: 7d8368284b5e433e058cdfb4ab3e34dc
 
 UNUSED LICENSES:
 
@@ -3962,10 +3962,10 @@ FILE: ../../../third_party/skia/src/gpu/ops/DrawAtlasPathOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/DrawAtlasPathOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrSimpleMeshDrawOpHelperWithStencil.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrSimpleMeshDrawOpHelperWithStencil.h
-FILE: ../../../third_party/skia/src/gpu/ops/GrSmallPathAtlasMgr.cpp
-FILE: ../../../third_party/skia/src/gpu/ops/GrSmallPathAtlasMgr.h
-FILE: ../../../third_party/skia/src/gpu/ops/GrSmallPathShapeData.cpp
-FILE: ../../../third_party/skia/src/gpu/ops/GrSmallPathShapeData.h
+FILE: ../../../third_party/skia/src/gpu/ops/SmallPathAtlasMgr.cpp
+FILE: ../../../third_party/skia/src/gpu/ops/SmallPathAtlasMgr.h
+FILE: ../../../third_party/skia/src/gpu/ops/SmallPathShapeData.cpp
+FILE: ../../../third_party/skia/src/gpu/ops/SmallPathShapeData.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrMiddleOutPolygonTriangulator.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeIterator.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrVectorXform.h
