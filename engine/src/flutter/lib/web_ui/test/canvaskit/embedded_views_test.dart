@@ -554,6 +554,30 @@ void testMain() {
       result = diffViewList(<int>[3, 4], <int>[1, 2, 3, 4, 5, 6]);
       expect(result, isNull);
     });
+
+    test('does not crash when a prerolled platform view is not composited',
+        () async {
+      ui.platformViewRegistry.registerViewFactory(
+        'test-platform-view',
+        (int viewId) => html.DivElement()..id = 'view-0',
+      );
+      await _createPlatformView(0, 'test-platform-view');
+
+      final EnginePlatformDispatcher dispatcher =
+          ui.window.platformDispatcher as EnginePlatformDispatcher;
+
+      final LayerSceneBuilder sb = LayerSceneBuilder();
+      sb.pushOffset(0, 0);
+      sb.pushClipRect(ui.Rect.zero);
+      sb.addPlatformView(0, width: 10, height: 10);
+      sb.pop();
+      // The below line should not throw an error.
+      dispatcher.rasterizer!.draw(sb.build().layerTree);
+      expect(
+          domRenderer.glassPaneElement!
+              .querySelectorAll('flt-platform-view-slot'),
+          isEmpty);
+    });
     // TODO(dit): https://github.com/flutter/flutter/issues/60040
   }, skip: isIosSafari);
 }

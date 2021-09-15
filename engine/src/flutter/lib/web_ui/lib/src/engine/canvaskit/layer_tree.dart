@@ -49,7 +49,7 @@ class LayerTree {
     final CkNWayCanvas internalNodesCanvas = CkNWayCanvas();
     internalNodesCanvas.addCanvas(frame.canvas);
     final List<CkCanvas> overlayCanvases =
-        frame.viewEmbedder!.getCurrentCanvases();
+        frame.viewEmbedder!.getOverlayCanvases();
     for (int i = 0; i < overlayCanvases.length; i++) {
       internalNodesCanvas.addCanvas(overlayCanvases[i]);
     }

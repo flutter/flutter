@@ -40,12 +40,19 @@ class HtmlViewEmbedder {
   /// platform views.
   static const bool disableOverlays = maximumSurfaces <= 1;
 
+  /// The set of platform views using the backup surface.
+  final Set<int> _viewsUsingBackupSurface = <int>{};
+
+  /// Picture recorders which were created during the preroll phase.
+  ///
+  /// These picture recorders will be "claimed" in the paint phase by platform
+  /// views being composited into the scene.
+  final List<CkPictureRecorder> _pictureRecordersCreatedDuringPreroll =
+      <CkPictureRecorder>[];
+
   /// The picture recorder shared by all platform views which paint to the
   /// backup surface.
   CkPictureRecorder? _backupPictureRecorder;
-
-  /// The set of platform views using the backup surface.
-  final Set<int> _viewsUsingBackupSurface = <int>{};
 
   /// A picture recorder associated with a view id.
   ///
@@ -93,16 +100,28 @@ class HtmlViewEmbedder {
     _frameSize = size;
   }
 
-  List<CkCanvas> getCurrentCanvases() {
+  /// Returns a list of canvases which will be overlaid on top of the "base"
+  /// canvas after a platform view is composited into the scene.
+  ///
+  /// The engine asks for the overlay canvases immediately before the paint
+  /// phase, after the preroll phase. In the preroll phase we must be
+  /// conservative and assume that every platform view which is prerolled is
+  /// also composited, and therefore requires an overlay canvas. However, not
+  /// every platform view which is prerolled ends up being composited (it may be
+  /// clipped out and not actually drawn). This means that we may end up
+  /// overallocating canvases. This isn't a problem in practice, however, as
+  /// unused recording canvases are simply deleted at the end of the frame.
+  List<CkCanvas> getOverlayCanvases() {
     if (disableOverlays) {
       return const <CkCanvas>[];
     }
-    final Set<CkCanvas> canvases = <CkCanvas>{};
-    for (int i = 0; i < _compositionOrder.length; i++) {
-      final int viewId = _compositionOrder[i];
-      canvases.add(_pictureRecorders[viewId]!.recordingCanvas!);
+    final List<CkCanvas> overlayCanvases = _pictureRecordersCreatedDuringPreroll
+        .map((CkPictureRecorder r) => r.recordingCanvas!)
+        .toList();
+    if (_backupPictureRecorder != null) {
+      overlayCanvases.add(_backupPictureRecorder!.recordingCanvas!);
     }
-    return canvases.toList();
+    return overlayCanvases;
   }
 
   void prerollCompositeEmbeddedView(int viewId, EmbeddedViewParams params) {
@@ -110,11 +129,12 @@ class HtmlViewEmbedder {
       // We must decide in the preroll phase if a platform view will use the
       // backup overlay, so that draw commands after the platform view will
       // correctly paint to the backup surface.
-      _viewsUsingBackupSurface.remove(viewId);
-      if (_compositionOrder.length >= SurfaceFactory.instance.maximumOverlays) {
-        _viewsUsingBackupSurface.add(viewId);
+      bool needBackupSurface = false;
+      if (_pictureRecordersCreatedDuringPreroll.length >=
+          SurfaceFactory.instance.maximumOverlays) {
+        needBackupSurface = true;
       }
-      if (_viewsUsingBackupSurface.contains(viewId)) {
+      if (needBackupSurface) {
         if (_backupPictureRecorder == null) {
           // Only initialize the picture recorder for the backup surface once.
           final CkPictureRecorder pictureRecorder = CkPictureRecorder();
@@ -122,18 +142,21 @@ class HtmlViewEmbedder {
           pictureRecorder.recordingCanvas!.clear(const ui.Color(0x00000000));
           _backupPictureRecorder = pictureRecorder;
         }
-        _pictureRecorders[viewId] = _backupPictureRecorder!;
       } else {
         final CkPictureRecorder pictureRecorder = CkPictureRecorder();
         pictureRecorder.beginRecording(ui.Offset.zero & _frameSize);
         pictureRecorder.recordingCanvas!.clear(const ui.Color(0x00000000));
-        _pictureRecorders[viewId] = pictureRecorder;
+        _pictureRecordersCreatedDuringPreroll.add(pictureRecorder);
       }
     }
-    _compositionOrder.add(viewId);
 
     // Do nothing if the params didn't change.
     if (_currentCompositionParams[viewId] == params) {
+      // If the view was prerolled but not composited, then it needs to be
+      // recomposited.
+      if (!_activeCompositionOrder.contains(viewId)) {
+        _viewsToRecomposite.add(viewId);
+      }
       return;
     }
     _currentCompositionParams[viewId] = params;
@@ -145,6 +168,16 @@ class HtmlViewEmbedder {
   /// If this returns a [CkCanvas], then that canvas should be the new leaf
   /// node. Otherwise, keep the same leaf node.
   CkCanvas? compositeEmbeddedView(int viewId) {
+    final int compositedViewCount = _compositionOrder.length;
+    _compositionOrder.add(viewId);
+    if (compositedViewCount < _pictureRecordersCreatedDuringPreroll.length) {
+      _pictureRecorders[viewId] =
+          _pictureRecordersCreatedDuringPreroll[compositedViewCount];
+    } else {
+      _viewsUsingBackupSurface.add(viewId);
+      _pictureRecorders[viewId] = _backupPictureRecorder!;
+    }
+
     // Do nothing if this view doesn't need to be composited.
     if (!_viewsToRecomposite.contains(viewId)) {
       if (!disableOverlays) {
@@ -414,6 +447,7 @@ class HtmlViewEmbedder {
         }
       }
     }
+    _pictureRecordersCreatedDuringPreroll.clear();
     _pictureRecorders.clear();
     _viewsUsingBackupSurface.clear();
     if (listEquals(_compositionOrder, _activeCompositionOrder)) {
@@ -680,6 +714,7 @@ class HtmlViewEmbedder {
     _backupPictureRecorder?.endRecording();
     _backupPictureRecorder = null;
     _viewsUsingBackupSurface.clear();
+    _pictureRecordersCreatedDuringPreroll.clear();
     _pictureRecorders.clear();
     _currentCompositionParams.clear();
     debugCleanupSvgClipPaths();
