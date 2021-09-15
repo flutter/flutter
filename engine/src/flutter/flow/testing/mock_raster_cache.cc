@@ -4,7 +4,6 @@
 
 #include "flutter/flow/testing/mock_raster_cache.h"
 
-#include "flutter/flow/layers/layer.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 
 namespace flutter {
@@ -57,11 +56,37 @@ void MockRasterCache::AddMockPicture(int width, int height) {
       SkRect::MakeLTRB(0, 0, 200 + width, 200 + height), &rtree_factory);
   recorder_canvas->drawPath(path, SkPaint());
   sk_sp<SkPicture> picture = skp_recorder.finishRecordingAsPicture();
+  PrerollContextHolder holder = GetSamplePrerollContextHolder();
+  holder.preroll_context.dst_color_space = color_space_;
   for (int i = 0; i < access_threshold(); i++) {
-    Prepare(nullptr, picture.get(), ctm, color_space_, true, false);
+    Prepare(&holder.preroll_context, picture.get(), true, false, ctm);
     Draw(*picture, mock_canvas_);
   }
-  Prepare(nullptr, picture.get(), ctm, color_space_, true, false);
+  Prepare(&holder.preroll_context, picture.get(), true, false, ctm);
+}
+
+PrerollContextHolder GetSamplePrerollContextHolder() {
+  Stopwatch raster_time;
+  Stopwatch ui_time;
+  MutatorsStack mutators_stack;
+  TextureRegistry texture_registry;
+  sk_sp<SkColorSpace> srgb = SkColorSpace::MakeSRGB();
+  PrerollContextHolder holder = {
+      {
+          nullptr,                    /* raster_cache */
+          nullptr,                    /* gr_context */
+          nullptr,                    /* external_view_embedder */
+          mutators_stack, srgb.get(), /* color_space */
+          kGiantRect,                 /* cull_rect */
+          false,                      /* layer reads from surface */
+          raster_time, ui_time, texture_registry,
+          false, /* checkerboard_offscreen_layers */
+          1.0f,  /* frame_device_pixel_ratio */
+          false, /* has_platform_view */
+      },
+      srgb};
+
+  return holder;
 }
 
 }  // namespace testing

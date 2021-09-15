@@ -2146,23 +2146,7 @@ TEST_F(ShellTest, OnServiceProtocolEstimateRasterCacheMemoryWorks) {
       [&shell, &rasterized, &picture, &picture_layer] {
         auto* compositor_context = shell->GetRasterizer()->compositor_context();
         auto& raster_cache = compositor_context->raster_cache();
-        // 2.1. Rasterize the picture. Call Draw multiple times to pass the
-        // access threshold (default to 3) so a cache can be generated.
-        SkCanvas dummy_canvas;
-        bool picture_cache_generated;
-        for (int i = 0; i < 4; i += 1) {
-          picture_cache_generated =
-              raster_cache.Prepare(nullptr,  // GrDirectContext
-                                   picture.get(), SkMatrix::I(),
-                                   nullptr,  // SkColorSpace
-                                   true,     // isComplex
-                                   false     // willChange
-              );
-          raster_cache.Draw(*picture, dummy_canvas);
-        }
-        ASSERT_TRUE(picture_cache_generated);
 
-        // 2.2. Rasterize the picture layer.
         Stopwatch raster_time;
         Stopwatch ui_time;
         MutatorsStack mutators_stack;
@@ -2179,6 +2163,21 @@ TEST_F(ShellTest, OnServiceProtocolEstimateRasterCacheMemoryWorks) {
             1.0f,  /* frame_device_pixel_ratio */
             false, /* has_platform_view */
         };
+
+        // 2.1. Rasterize the picture. Call Draw multiple times to pass the
+        // access threshold (default to 3) so a cache can be generated.
+        SkCanvas dummy_canvas;
+        bool picture_cache_generated;
+        for (int i = 0; i < 4; i += 1) {
+          SkMatrix matrix = SkMatrix::I();
+
+          picture_cache_generated = raster_cache.Prepare(
+              &preroll_context, picture.get(), true, false, matrix);
+          raster_cache.Draw(*picture, dummy_canvas);
+        }
+        ASSERT_TRUE(picture_cache_generated);
+
+        // 2.2. Rasterize the picture layer.
         raster_cache.Prepare(&preroll_context, picture_layer.get(),
                              SkMatrix::I());
         rasterized.set_value(true);
