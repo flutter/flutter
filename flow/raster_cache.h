@@ -42,15 +42,15 @@ struct PrerollContext;
 
 class RasterCache {
  public:
-  // The default max number of picture raster caches to be generated per frame.
-  // Generating too many caches in one frame may cause jank on that frame. This
-  // limit allows us to throttle the cache and distribute the work across
-  // multiple frames.
-  static constexpr int kDefaultPictureCacheLimitPerFrame = 3;
+  // The default max number of picture and display list raster caches to be
+  // generated per frame. Generating too many caches in one frame may cause jank
+  // on that frame. This limit allows us to throttle the cache and distribute
+  // the work across multiple frames.
+  static constexpr int kDefaultPictureAndDispLayListCacheLimitPerFrame = 3;
 
-  explicit RasterCache(
-      size_t access_threshold = 3,
-      size_t picture_cache_limit_per_frame = kDefaultPictureCacheLimitPerFrame);
+  explicit RasterCache(size_t access_threshold = 3,
+                       size_t picture_and_display_list_cache_limit_per_frame =
+                           kDefaultPictureAndDispLayListCacheLimitPerFrame);
 
   virtual ~RasterCache() = default;
 
@@ -134,23 +134,23 @@ class RasterCache {
   // Return true if the cache is generated.
   //
   // We may return false and not generate the cache if
-  // 1. The picture is not worth rasterizing
-  // 2. The matrix is singular
-  // 3. The picture is accessed too few times
-  // 4. There are too many pictures to be cached in the current frame.
-  //    (See also kDefaultPictureCacheLimitPerFrame.)
-  bool Prepare(GrDirectContext* context,
+  // 1. There are too many pictures to be cached in the current frame.
+  //    (See also kDefaultPictureAndDispLayListCacheLimitPerFrame.)
+  // 2. The picture is not worth rasterizing
+  // 3. The matrix is singular
+  // 4. The picture is accessed too few times
+  bool Prepare(PrerollContext* context,
                SkPicture* picture,
-               const SkMatrix& transformation_matrix,
-               SkColorSpace* dst_color_space,
                bool is_complex,
-               bool will_change);
-  bool Prepare(GrDirectContext* context,
+               bool will_change,
+               const SkMatrix& untranslated_matrix,
+               const SkPoint& offset = SkPoint());
+  bool Prepare(PrerollContext* context,
                DisplayList* display_list,
-               const SkMatrix& transformation_matrix,
-               SkColorSpace* dst_color_space,
                bool is_complex,
-               bool will_change);
+               bool will_change,
+               const SkMatrix& untranslated_matrix,
+               const SkPoint& offset = SkPoint());
 
   void Prepare(PrerollContext* context, Layer* layer, const SkMatrix& ctm);
 
@@ -250,9 +250,17 @@ class RasterCache {
     }
   }
 
+  bool GenerateNewCacheInThisFrame() const {
+    // Disabling caching when access_threshold is zero is historic behavior.
+    return access_threshold_ != 0 &&
+           picture_cached_this_frame_ + display_list_cached_this_frame_ <
+               picture_and_display_list_cache_limit_per_frame_;
+  }
+
   const size_t access_threshold_;
-  const size_t picture_cache_limit_per_frame_;
+  const size_t picture_and_display_list_cache_limit_per_frame_;
   size_t picture_cached_this_frame_ = 0;
+  size_t display_list_cached_this_frame_ = 0;
   int sweep_count_ = 0;
   mutable PictureRasterCacheKey::Map<Entry> picture_cache_;
   mutable DisplayListRasterCacheKey::Map<Entry> display_list_cache_;
