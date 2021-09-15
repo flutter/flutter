@@ -285,10 +285,10 @@ class SkiaGoldClient {
   /// Gold at head.
   Future<String?> getExpectationForTest(String testName) async {
     late String? expectation;
-    final String traceID = getTraceID(testName);
+    final String traceID = await getTraceID(testName);
     await io.HttpOverrides.runWithHttpOverrides<Future<void>>(() async {
       final Uri requestForExpectations = Uri.parse(
-        'https://flutter-gold.skia.org/json/v1/latestpositivedigest/$traceID'
+        'https://flutter-gold.skia.org/json/v2/latestpositivedigest/$traceID'
       );
       late String rawResponse;
       try {
@@ -410,20 +410,20 @@ class SkiaGoldClient {
   }
 
   /// Returns a trace id based on the current testing environment to lookup
-  /// the latest positive digest on Flutter Gold.
-  ///
-  /// Trace IDs are case sensitive and should be in alphabetical order for the
-  /// keys, followed by the rest of the paramset, also in alphabetical order.
-  /// There should also be leading and trailing commas.
-  ///
-  /// Example TraceID for Flutter Gold:
-  ///   ',CI=cirrus,Platform=linux,name=cupertino.activityIndicator.inprogress.1.0,source_type=flutter,'
-  String getTraceID(String testName) {
-    return '${platform.environment[_kTestBrowserKey] == null ? ',' : ',Browser=${platform.environment[_kTestBrowserKey]},'}'
-      'CI=luci,'
-      'Platform=${platform.operatingSystem},'
-      'name=$testName,'
-      'source_type=flutter,';
+  /// the latest positive digest on Flutter Gold with a hex-encoded md5 hash of
+  /// the image keys.
+  Future<String> getTraceID(String testName) async {
+    final Map<String, dynamic> keys = <String, dynamic>{
+      if (platform.environment[_kTestBrowserKey] != null) 'Browser' : platform.environment[_kTestBrowserKey],
+      'CI' : 'luci',
+      'Platform' : platform.operatingSystem,
+      'name' : testName,
+      'source_type' : 'flutter',
+    };
+    final String jsonTrace = json.encode(keys);
+    final io.ProcessResult md5Result = await process.run(<String>['md5', '-s', jsonTrace]);
+    final String md5Sum = md5Result.stdout.toString().split(' ').last.trim();
+    return md5Sum;
   }
 }
 
