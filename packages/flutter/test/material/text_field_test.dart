@@ -267,7 +267,7 @@ void main() {
     await tester.tap(find.text('Paste'));
     await tester.pumpAndSettle();
     expect(controller.text, 'blah1 blah2blah1');
-    expect(controller.selection, const TextSelection(baseOffset: 16, extentOffset: 16));
+    expect(controller.selection, const TextSelection(baseOffset: 16, extentOffset: 16, affinity: TextAffinity.upstream));
 
     // Cut the first word.
     await gesture.down(midBlah1);
@@ -642,7 +642,7 @@ void main() {
       actualNewValue,
       const TextEditingValue(
         text: '12',
-        selection: TextSelection.collapsed(offset: 2),
+        selection: TextSelection.collapsed(offset: 2, affinity: TextAffinity.downstream),
       ),
     );
   }, skip: areKeyEventsHandledByPlatform); // [intended] only applies to platforms where we handle key events.
@@ -1266,7 +1266,6 @@ void main() {
     expect(handle.opacity.value, equals(1.0));
   });
 
-
   testWidgets('Long pressing a field with selection 0,0 shows the selection menu', (WidgetTester tester) async {
     await tester.pumpWidget(overlay(
       child: TextField(
@@ -1480,13 +1479,13 @@ void main() {
     // Wait for context menu to be built.
     await tester.pumpAndSettle();
     final RenderBox container = tester.renderObject(find.descendant(
-      of: find.byType(Overlay),
+      of: find.byType(FadeTransition),
       matching: find.byType(SizedBox),
     ).first);
     expect(container.size, Size.zero);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }));
 
-  testWidgets('Swapping controllers should update selection', (WidgetTester tester) async {
+  testWidgets('Sawping controllers should update selection', (WidgetTester tester) async {
     TextEditingController controller = TextEditingController(text: 'readonly');
     final OverlayEntry entry = OverlayEntry(
       builder: (BuildContext context) {
@@ -9923,5 +9922,28 @@ void main() {
     expect(textFieldTapCount, 0);
     expect(prefixTapCount, 1);
     expect(suffixTapCount, 1);
+  });
+
+  testWidgets('autofill info has hint text', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
+              decoration: InputDecoration(
+                hintText: 'placeholder text'
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(TextField));
+
+    expect(
+      tester.testTextInput.setClientArgs?['autofill'],
+      containsPair('hintText', 'placeholder text'),
+    );
   });
 }

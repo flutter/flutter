@@ -568,9 +568,9 @@ Future<void> verifyIntegrationTestTimeouts(String workingDirectory) async {
   if (errors.isNotEmpty) {
     exitWithError(<String>[
       if (errors.length == 1)
-        '${bold}An error was detected when looking at import dependencies within the flutter_tools package:$reset'
+        '${bold}An error was detected when looking at integration test timeouts:$reset'
       else
-        '${bold}Multiple errors were detected when looking at import dependencies within the flutter_tools package:$reset',
+        '${bold}Multiple errors were detected when looking at integration test timeouts:$reset',
       ...errors.map((String paragraph) => '$paragraph\n'),
     ]);
   }

@@ -293,7 +293,7 @@ class CupertinoTextField extends StatefulWidget {
     this.onTap,
     this.scrollController,
     this.scrollPhysics,
-    this.autofillHints,
+    this.autofillHints = const <String>[],
     this.restorationId,
     this.enableIMEPersonalizedLearning = true,
   }) : assert(textAlign != null),
@@ -449,7 +449,7 @@ class CupertinoTextField extends StatefulWidget {
     this.onTap,
     this.scrollController,
     this.scrollPhysics,
-    this.autofillHints,
+    this.autofillHints = const <String>[],
     this.restorationId,
     this.enableIMEPersonalizedLearning = true,
   }) : assert(textAlign != null),
@@ -837,7 +837,7 @@ class CupertinoTextField extends StatefulWidget {
   }
 }
 
-class _CupertinoTextFieldState extends State<CupertinoTextField> with RestorationMixin, AutomaticKeepAliveClientMixin<CupertinoTextField> implements TextSelectionGestureDetectorBuilderDelegate {
+class _CupertinoTextFieldState extends State<CupertinoTextField> with RestorationMixin, AutomaticKeepAliveClientMixin<CupertinoTextField> implements TextSelectionGestureDetectorBuilderDelegate, AutofillClient {
   final GlobalKey _clearGlobalKey = GlobalKey();
 
   RestorableTextEditingController? _controller;
@@ -1098,6 +1098,28 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
       },
     );
   }
+  // AutofillClient implementation start.
+  @override
+  String get autofillId => _editableText.autofillId;
+
+  @override
+  void autofill(TextEditingValue newEditingValue) => _editableText.autofill(newEditingValue);
+
+  @override
+  TextInputConfiguration get textInputConfiguration {
+    final List<String>? autofillHints = widget.autofillHints?.toList(growable: false);
+    final AutofillConfiguration autofillConfiguration = autofillHints != null
+      ? AutofillConfiguration(
+          uniqueIdentifier: autofillId,
+          autofillHints: autofillHints,
+          currentEditingValue: _effectiveController.value,
+          hintText: widget.placeholder,
+        )
+      : AutofillConfiguration.disabled;
+
+    return _editableText.textInputConfiguration.copyWith(autofillConfiguration: autofillConfiguration);
+  }
+  // AutofillClient implementation end.
 
   @override
   Widget build(BuildContext context) {
@@ -1242,7 +1264,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             scrollController: widget.scrollController,
             scrollPhysics: widget.scrollPhysics,
             enableInteractiveSelection: widget.enableInteractiveSelection,
-            autofillHints: widget.autofillHints,
+            autofillClient: this,
             restorationId: 'editable',
             enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
           ),

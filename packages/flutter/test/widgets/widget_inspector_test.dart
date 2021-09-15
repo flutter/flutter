@@ -2522,7 +2522,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final ui.Codec codec = await ui.instantiateImageCodec(base64.decode(base64Screenshot));
         final ui.FrameInfo frame = await codec.getNextFrame();
         return frame.image;
-      }, additionalTime: const Duration(seconds: 11)))!;
+      }))!;
 
       await expectLater(
         screenshotImage,
