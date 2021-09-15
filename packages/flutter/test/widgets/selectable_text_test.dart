@@ -2235,6 +2235,40 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('SelectableText semantics, with semanticsLabel', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final Key key = UniqueKey();
+
+    await tester.pumpWidget(
+      overlay(
+        child: SelectableText(
+          'Guten Tag',
+          semanticsLabel: 'German greeting for good day',
+          key: key,
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          id: 1,
+          textDirection: TextDirection.ltr,
+          label: 'German greeting for good day',
+          value: 'Guten Tag',
+          actions: <SemanticsAction>[
+            SemanticsAction.longPress,
+          ],
+          flags: <SemanticsFlag>[
+            SemanticsFlag.isTextField,
+            SemanticsFlag.isReadOnly,
+            SemanticsFlag.isMultiline,
+          ],
+        ),
+      ],
+    ), ignoreTransform: true, ignoreRect: true));
+  });
+
   testWidgets('SelectableText semantics, enableInteractiveSelection = false', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final Key key = UniqueKey();
@@ -3850,6 +3884,7 @@ void main() {
       cursorRadius: Radius.zero,
       cursorColor: Color(0xff00ff00),
       scrollPhysics: ClampingScrollPhysics(),
+      semanticsLabel: 'something else',
       enableInteractiveSelection: false,
     ).debugFillProperties(builder);
 
@@ -3859,6 +3894,7 @@ void main() {
 
     expect(description, <String>[
       'data: something',
+      'semanticsLabel: something else',
       'style: TextStyle(inherit: true, color: Color(0xff00ff00))',
       'autofocus: true',
       'showCursor: true',
