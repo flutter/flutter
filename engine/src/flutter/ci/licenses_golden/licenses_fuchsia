@@ -1,4 +1,4 @@
-Signature: 85bc32fc4ae990987770afe920d8e974
+Signature: 8e67ada05cf607853f9575b8a1c3ab72
 
 UNUSED LICENSES:
 
@@ -3145,6 +3145,9 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input.report/touch.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input.report/units.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.inspect/tree.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.intl/property_provider.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/connection-info.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/connection-options.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/node-attributes.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/connection-info.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/connection-options.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/connector.fidl
@@ -3438,6 +3441,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/port.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input.virtualkeyboard/virtual_keyboard.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.intl/calendar.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.intl/time_zones.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/rights-abilities.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/inotify.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.power.profile/profile.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.composition/allocator.fidl
