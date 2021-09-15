@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 // TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependency have been fixed.
+// dependencies have been fixed.
 // https://github.com/flutter/flutter/issues/85160
 // Fails with "flutter test --test-randomize-ordering-seed=123"
 @Tags(<String>['no-shuffle'])
@@ -1837,7 +1837,7 @@ void main() {
     expect(onDragCompletedCalled, isTrue);
   });
 
-  testWidgets('Drag and drop - allow pass thru of unaccepted data test', (WidgetTester tester) async {
+  testWidgets('Drag and drop - allow pass through of unaccepted data test', (WidgetTester tester) async {
     final List<int> acceptedInts = <int>[];
     final List<DragTargetDetails<int>> acceptedIntsDetails = <DragTargetDetails<int>>[];
     final List<double> acceptedDoubles = <double>[];
@@ -1971,7 +1971,7 @@ void main() {
     expect(find.text('DoubleDragging'), findsNothing);
   });
 
-  testWidgets('Drag and drop - allow pass thru of unaccepted data twice test', (WidgetTester tester) async {
+  testWidgets('Drag and drop - allow pass through of unaccepted data twice test', (WidgetTester tester) async {
     final List<DragTargetData> acceptedDragTargetDatas = <DragTargetData>[];
     final List<DragTargetDetails<DragTargetData>> acceptedDragTargetDataDetails = <DragTargetDetails<DragTargetData>>[];
     final List<ExtendedDragTargetData> acceptedExtendedDragTargetDatas = <ExtendedDragTargetData>[];

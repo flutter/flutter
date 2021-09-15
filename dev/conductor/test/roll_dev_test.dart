@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:conductor/globals.dart';
 import 'package:conductor/repository.dart';
 import 'package:conductor/roll_dev.dart';
@@ -23,13 +21,13 @@ void main() {
     const String nextVersion = '1.2.0-2.0.pre';
     const String candidateBranch = 'flutter-1.2-candidate.2';
     const String checkoutsParentDirectory = '/path/to/directory/';
-    FakeArgResults fakeArgResults;
-    MemoryFileSystem fileSystem;
-    TestStdio stdio;
-    FrameworkRepository repo;
-    Checkouts checkouts;
-    FakePlatform platform;
-    FakeProcessManager processManager;
+    late FakeArgResults fakeArgResults;
+    late MemoryFileSystem fileSystem;
+    late TestStdio stdio;
+    late FrameworkRepository repo;
+    late Checkouts checkouts;
+    late FakePlatform platform;
+    late FakeProcessManager processManager;
 
     setUp(() {
       stdio = TestStdio();

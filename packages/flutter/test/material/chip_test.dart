@@ -197,7 +197,7 @@ Widget _chipWithOptionalDeleteButton({
   required bool deletable,
   TextDirection textDirection = TextDirection.ltr,
   bool hasDeleteButtonTooltip = true,
-}){
+}) {
   return _wrapForChip(
     textDirection: textDirection,
     child: Wrap(

@@ -140,7 +140,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       )
       ..addFlag('update-goldens',
         negatable: false,
-        help: 'Whether "matchesGoldenFile()" calls within your test methods should '
+        help: 'Whether "matchesGoldenFile()" calls within your test methods should ' // flutter_ignore: golden_tag (see analyze.dart)
               'update the golden files rather than test for an existing match.',
       )
       ..addOption('concurrency',
@@ -373,7 +373,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       collector = CoverageCollector(
         verbose: !machine,
         libraryPredicate: (String libraryName) => libraryName.contains(projectName),
-        // TODO(jonahwilliams): file bug for incorrect URI handling on windows
         packagesPath: globals.fs.file(buildInfo.packagesPath)
           .parent.parent.childFile('.packages').path
       );

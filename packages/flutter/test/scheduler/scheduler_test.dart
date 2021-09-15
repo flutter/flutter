@@ -2,12 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependency have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=123"
-@Tags(<String>['no-shuffle'])
-
 import 'dart:async';
 import 'dart:ui' show window;
 
@@ -140,6 +134,10 @@ void main() {
     for (final VoidCallback timer in timerQueueTasks) {
       timer();
     }
+
+    // As events are locked, make scheduleTask execute after the test or it
+    // will execute during following tests and risk failure.
+    addTearDown(() => scheduler.handleEventLoopCallback());
   });
 
   test('Flutter.Frame event fired', () async {
@@ -149,6 +147,7 @@ void main() {
       buildFinish: 15000,
       rasterStart: 16000,
       rasterFinish: 20000,
+      rasterFinishWallTime: 20010,
       frameNumber: 1991
     )]);
 

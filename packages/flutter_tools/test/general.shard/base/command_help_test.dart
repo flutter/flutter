@@ -72,7 +72,6 @@ void _testMessageLength({
   expect(commandHelp.s.toString().length, lessThanOrEqualTo(expectedWidth));
   expect(commandHelp.t.toString().length, lessThanOrEqualTo(expectedWidth));
   expect(commandHelp.w.toString().length, lessThanOrEqualTo(expectedWidth));
-  expect(commandHelp.z.toString().length, lessThanOrEqualTo(expectedWidth));
 }
 
 void main() {
@@ -123,7 +122,6 @@ void main() {
         expect(commandHelp.s.toString(), startsWith('\x1B[1ms\x1B[22m'));
         expect(commandHelp.t.toString(), startsWith('\x1B[1mt\x1B[22m'));
         expect(commandHelp.w.toString(), startsWith('\x1B[1mw\x1B[22m'));
-        expect(commandHelp.z.toString(), startsWith('\x1B[1mz\x1B[22m'));
       });
 
       testWithoutContext('commands that should have a grey bolden parenthetical text', () {
@@ -144,7 +142,6 @@ void main() {
         expect(commandHelp.p.toString(), endsWith('\x1B[90m(debugPaintSizeEnabled)\x1B[39m\x1B[22m'));
         expect(commandHelp.t.toString(), endsWith('\x1B[90m(debugDumpRenderTree)\x1B[39m\x1B[22m'));
         expect(commandHelp.w.toString(), endsWith('\x1B[90m(debugDumpApp)\x1B[39m\x1B[22m'));
-        expect(commandHelp.z.toString(), endsWith('\x1B[90m(debugCheckElevationsEnabled)\x1B[39m\x1B[22m'));
       });
 
       testWithoutContext('should not create a help text longer than maxLineWidth without ansi support', () {
@@ -208,7 +205,6 @@ void main() {
         expect(commandHelp.t.toString(), equals('\x1B[1mt\x1B[22m Dump rendering tree to the console.                          \x1B[90m(debugDumpRenderTree)\x1B[39m\x1B[22m'));
         expect(commandHelp.v.toString(), equals('\x1B[1mv\x1B[22m Open Flutter DevTools.'));
         expect(commandHelp.w.toString(), equals('\x1B[1mw\x1B[22m Dump widget hierarchy to the console.                               \x1B[90m(debugDumpApp)\x1B[39m\x1B[22m'));
-        expect(commandHelp.z.toString(), equals('\x1B[1mz\x1B[22m Toggle elevation checker.                            \x1B[90m(debugCheckElevationsEnabled)\x1B[39m\x1B[22m'));
       });
 
       testWithoutContext('should create the correct help text without ansi support', () {
@@ -240,7 +236,6 @@ void main() {
         expect(commandHelp.t.toString(), equals('t Dump rendering tree to the console.                          (debugDumpRenderTree)'));
         expect(commandHelp.v.toString(), equals('v Open Flutter DevTools.'));
         expect(commandHelp.w.toString(), equals('w Dump widget hierarchy to the console.                               (debugDumpApp)'));
-        expect(commandHelp.z.toString(), equals('z Toggle elevation checker.                            (debugCheckElevationsEnabled)'));
       });
     });
   });

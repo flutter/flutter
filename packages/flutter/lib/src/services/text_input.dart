@@ -9,7 +9,6 @@ import 'dart:ui' show
   Offset,
   Size,
   Rect,
-  TextAffinity,
   TextAlign,
   TextDirection,
   hashValues;
@@ -17,6 +16,7 @@ import 'dart:ui' show
 import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
+import '../../services.dart' show Clipboard;
 import 'autofill.dart';
 import 'message_codec.dart';
 import 'platform_channel.dart';
@@ -479,7 +479,8 @@ class TextInputConfiguration {
     this.inputAction = TextInputAction.done,
     this.keyboardAppearance = Brightness.light,
     this.textCapitalization = TextCapitalization.none,
-    this.autofillConfiguration,
+    this.autofillConfiguration = AutofillConfiguration.disabled,
+    this.enableIMEPersonalizedLearning = true,
   }) : assert(inputType != null),
 
         assert((obscureText != null && obscureTextBehavior == null) || (obscureText == null && obscureTextBehavior != null)),
@@ -491,7 +492,8 @@ class TextInputConfiguration {
        assert(enableSuggestions != null),
        assert(keyboardAppearance != null),
        assert(inputAction != null),
-       assert(textCapitalization != null);
+       assert(textCapitalization != null),
+       assert(enableIMEPersonalizedLearning != null);
 
   /// The type of information for which to optimize the text input control.
   final TextInputType inputType;
@@ -535,7 +537,7 @@ class TextInputConfiguration {
   /// to the platform. This will prevent the corresponding input field from
   /// participating in autofills triggered by other fields. Additionally, on
   /// Android and web, setting [autofillConfiguration] to null disables autofill.
-  final AutofillConfiguration? autofillConfiguration;
+  final AutofillConfiguration autofillConfiguration;
 
   /// {@template flutter.services.TextInputConfiguration.smartDashesType}
   /// Whether to allow the platform to automatically format dashes.
@@ -625,8 +627,55 @@ class TextInputConfiguration {
   /// Defaults to [Brightness.light].
   final Brightness keyboardAppearance;
 
+  /// {@template flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
+  /// Whether to enable that the IME update personalized data such as typing
+  /// history and user dictionary data.
+  ///
+  /// This flag only affects Android. On iOS, there is no equivalent flag.
+  ///
+  /// Defaults to true. Cannot be null.
+  ///
+  /// See also:
+  ///
+  ///  * <https://developer.android.com/reference/android/view/inputmethod/EditorInfo#IME_FLAG_NO_PERSONALIZED_LEARNING>
+  /// {@endtemplate}
+  final bool enableIMEPersonalizedLearning;
+
+  /// Creates a copy of this [TextInputConfiguration] with the given fields
+  /// replaced with new values.
+  TextInputConfiguration copyWith({
+    TextInputType? inputType,
+    bool? readOnly,
+    bool? obscureText,
+    bool? autocorrect,
+    SmartDashesType? smartDashesType,
+    SmartQuotesType? smartQuotesType,
+    bool? enableSuggestions,
+    String? actionLabel,
+    TextInputAction? inputAction,
+    Brightness? keyboardAppearance,
+    TextCapitalization? textCapitalization,
+    bool? enableIMEPersonalizedLearning,
+    AutofillConfiguration? autofillConfiguration,
+  }) {
+    return TextInputConfiguration(
+      inputType: inputType ?? this.inputType,
+      readOnly: readOnly ?? this.readOnly,
+      obscureText: obscureText ?? this.obscureText,
+      autocorrect: autocorrect ?? this.autocorrect,
+      smartDashesType: smartDashesType ?? this.smartDashesType,
+      smartQuotesType: smartQuotesType ?? this.smartQuotesType,
+      enableSuggestions: enableSuggestions ?? this.enableSuggestions,
+      inputAction: inputAction ?? this.inputAction,
+      textCapitalization: textCapitalization ?? this.textCapitalization,
+      keyboardAppearance: keyboardAppearance ?? this.keyboardAppearance,
+      enableIMEPersonalizedLearning: enableIMEPersonalizedLearning?? this.enableIMEPersonalizedLearning,
+      autofillConfiguration: autofillConfiguration ?? this.autofillConfiguration,
+    );
+  }
   /// Returns a representation of this object as a JSON object.
   Map<String, dynamic> toJson() {
+    final Map<String, dynamic>? autofill = autofillConfiguration.toJson();
     return <String, dynamic>{
       'inputType': inputType.toJson(),
       'readOnly': readOnly,
@@ -640,7 +689,8 @@ class TextInputConfiguration {
       'inputAction': inputAction.toString(),
       'textCapitalization': textCapitalization.toString(),
       'keyboardAppearance': keyboardAppearance.toString(),
-      if (autofillConfiguration != null) 'autofill': autofillConfiguration!.toJson(),
+      'enableIMEPersonalizedLearning': enableIMEPersonalizedLearning,
+      if (autofill != null) 'autofill': autofill,
     };
   }
 }
@@ -723,26 +773,42 @@ class TextEditingValue {
     );
   }
 
-  /// Returns a representation of this object as a JSON object.
-  Map<String, dynamic> toJSON() {
-    return <String, dynamic>{
-      'text': text,
-      'selectionBase': selection.baseOffset,
-      'selectionExtent': selection.extentOffset,
-      'selectionAffinity': selection.affinity.toString(),
-      'selectionIsDirectional': selection.isDirectional,
-      'composingBase': composing.start,
-      'composingExtent': composing.end,
-    };
-  }
-
   /// The current text being edited.
   final String text;
 
   /// The range of text that is currently selected.
+  ///
+  /// When [selection] is a [TextSelection] that has the same non-negative
+  /// `baseOffset` and `extentOffset`, the [selection] property represents the
+  /// caret position.
+  ///
+  /// If the current [selection] has a negative `baseOffset` or `extentOffset`,
+  /// then the text currently does not have a selection or a caret location, and
+  /// most text editing operations that rely on the current selection (for
+  /// instance, insert a character at the caret location) will do nothing.
   final TextSelection selection;
 
   /// The range of text that is still being composed.
+  ///
+  /// Composing regions are created by input methods (IMEs) to indicate the text
+  /// within a certain range is provisional. For instance, the Android Gboard
+  /// app's English keyboard puts the current word under the caret into a
+  /// composing region to indicate the word is subject to autocorrect or
+  /// prediction changes.
+  ///
+  /// Composing regions can also be used for performing multistage input, which
+  /// is typically used by IMEs designed for phoetic keyboard to enter
+  /// ideographic symbols. As an example, many CJK keyboards require the user to
+  /// enter a latin alphabet sequence and then convert it to CJK characters. On
+  /// iOS, the default software keyboards do not have a dedicated view to show
+  /// the unfinished latin sequence, so it's displayed directly in the text
+  /// field, inside of a composing region.
+  ///
+  /// The composing region should typically only be changed by the IME, or the
+  /// user via interacting with the IME.
+  ///
+  /// If the range represented by this property is [TextRange.empty], then the
+  /// text is not currently being composed.
   final TextRange composing;
 
   /// A value that corresponds to the empty string with no selection and no composing range.
@@ -771,6 +837,19 @@ class TextEditingValue {
   /// it usually indicates the current [composing] range is invalid because of a
   /// programming error.
   bool get isComposingRangeValid => composing.isValid && composing.isNormalized && composing.end <= text.length;
+
+  /// Returns a representation of this object as a JSON object.
+  Map<String, dynamic> toJSON() {
+    return <String, dynamic>{
+      'text': text,
+      'selectionBase': selection.baseOffset,
+      'selectionExtent': selection.extentOffset,
+      'selectionAffinity': selection.affinity.toString(),
+      'selectionIsDirectional': selection.isDirectional,
+      'composingBase': composing.start,
+      'composingExtent': composing.end,
+    };
+  }
 
   @override
   String toString() => '${objectRuntimeType(this, 'TextEditingValue')}(text: \u2524$text\u251C, selection: $selection, composing: $composing)';
@@ -823,15 +902,15 @@ enum SelectionChangedCause {
   /// location of the cursor.
   ///
   /// An example is when the user taps on select all in the tool bar.
-  toolBar,
+  toolbar,
 
   /// The user used the mouse to change the selection by dragging over a piece
   /// of text.
   drag,
 }
 
-/// A mixin for manipulating the selection, to be used by the implementer
-/// of the toolbar widget.
+/// A mixin for manipulating the selection, provided for toolbar or shortcut
+/// keys.
 mixin TextSelectionDelegate {
   /// Gets the current text input.
   TextEditingValue get textEditingValue;
@@ -882,6 +961,32 @@ mixin TextSelectionDelegate {
 
   /// Whether select all is enabled, must not be null.
   bool get selectAllEnabled => true;
+
+  /// Cut current selection to [Clipboard].
+  ///
+  /// If and only if [cause] is [SelectionChangedCause.toolbar], the toolbar
+  /// will be hidden and the current selection will be scrolled into view.
+  void cutSelection(SelectionChangedCause cause);
+
+  /// Paste text from [Clipboard].
+  ///
+  /// If there is currently a selection, it will be replaced.
+  ///
+  /// If and only if [cause] is [SelectionChangedCause.toolbar], the toolbar
+  /// will be hidden and the current selection will be scrolled into view.
+  Future<void> pasteText(SelectionChangedCause cause);
+
+  /// Set the current selection to contain the entire text value.
+  ///
+  /// If and only if [cause] is [SelectionChangedCause.toolbar], the selection
+  /// will be scrolled into view.
+  void selectAll(SelectionChangedCause cause);
+
+  /// Copy current selection to [Clipboard].
+  ///
+  /// If [cause] is [SelectionChangedCause.toolbar], the position of
+  /// [bringIntoView] to selection will be called and hide toolbar.
+  void copySelection(SelectionChangedCause cause);
 }
 
 /// An interface to receive information from [TextInput].
@@ -1377,7 +1482,10 @@ class TextInput {
         final TextEditingValue textEditingValue = TextEditingValue.fromJSON(
           editingValue[tag] as Map<String, dynamic>,
         );
-        scope?.getAutofillClient(tag)?.updateEditingValue(textEditingValue);
+        final AutofillClient? client = scope?.getAutofillClient(tag);
+        if (client != null && client.textInputConfiguration.autofillConfiguration.enabled) {
+          client.autofill(textEditingValue);
+        }
       }
 
       return;

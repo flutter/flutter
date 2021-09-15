@@ -172,6 +172,11 @@ Future<T> runInContext<T>(
         logger: globals.logger,
         platform: globals.platform,
       ),
+      CustomDevicesConfig: () => CustomDevicesConfig(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        platform: globals.platform
+      ),
       CrashReporter: () => CrashReporter(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -201,11 +206,7 @@ Future<T> runInContext<T>(
         ),
         operatingSystemUtils: globals.os,
         terminal: globals.terminal,
-        customDevicesConfig: CustomDevicesConfig(
-          fileSystem: globals.fs,
-          logger: globals.logger,
-          platform: globals.platform
-        ),
+        customDevicesConfig: globals.customDevicesConfig,
         uwptool: UwpTool(
           artifacts: globals.artifacts,
           logger: globals.logger,
@@ -214,7 +215,8 @@ Future<T> runInContext<T>(
       ),
       DevtoolsLauncher: () => DevtoolsServerLauncher(
         processManager: globals.processManager,
-        pubExecutable: globals.artifacts.getHostArtifact(HostArtifact.pubExecutable).path,
+        fileSystem: globals.fs,
+        dartExecutable: globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
         logger: globals.logger,
         platform: globals.platform,
         persistentToolState: globals.persistentToolState,

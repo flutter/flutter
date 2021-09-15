@@ -5,7 +5,7 @@
 #
 # For a list of lints, see: http://dart-lang.github.io/linter/lints/
 # See the configuration guide for more
-# https://github.com/dart-lang/sdk/tree/master/pkg/analyzer#configuring-the-analyzer
+# https://github.com/dart-lang/sdk/tree/main/pkg/analyzer#configuring-the-analyzer
 #
 # There are other similar analysis options files in the flutter repos,
 # which should be kept in sync with this file:
@@ -36,6 +36,9 @@ analyzer:
     # Stream and not importing dart:async
     # Please see https://github.com/flutter/flutter/pull/24528 for details.
     sdk_version_async_exported_from_core: ignore
+    # TODO(https://github.com/flutter/flutter/issues/74381):
+    # Clean up existing unnecessary imports, and remove line to ignore.
+    unnecessary_import: ignore
     # Turned off until null-safe rollout is complete.
     unnecessary_null_comparison: ignore
   exclude:

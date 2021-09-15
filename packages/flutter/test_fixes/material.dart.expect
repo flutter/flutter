@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   // Generic reference variables.
@@ -302,4 +303,125 @@ void main() {
   renderObjectToWidgetElement.insertRenderObjectChild(renderObject, object);
   renderObjectToWidgetElement.moveRenderObjectChild(renderObject, object);
   renderObjectToWidgetElement.removeRenderObjectChild(renderObject);
+
+  // Changes made in https://github.com/flutter/flutter/pull/81336
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData(colorScheme: ColorScheme.fromSwatch().copyWith(secondary: Colors.red));
+  themeData = ThemeData(colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue).copyWith(secondary: Colors.red));
+  themeData = ThemeData(colorScheme: ColorScheme.light().copyWith(secondary: Colors.red));
+  themeData = ThemeData(colorScheme: ColorScheme.light().copyWith(primarySwatch: Colors.blue, secondary: Colors.red));
+  themeData = ThemeData.raw(colorScheme: ColorScheme.fromSwatch().copyWith(secondary: Colors.red));
+  themeData = ThemeData.raw(colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue).copyWith(secondary: Colors.red));
+  themeData = ThemeData.raw(colorScheme: ColorScheme.light().copyWith(secondary: Colors.red));
+  themeData = ThemeData.raw(colorScheme: ColorScheme.light().copyWith(primarySwatch: Colors.blue, secondary: Colors.red));
+  themeData = themeData.copyWith(colorScheme: ColorScheme.fromSwatch().copyWith(secondary: Colors.red));
+  themeData = themeData.copyWith(colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue).copyWith(secondary: Colors.red));
+  themeData = themeData.copyWith(colorScheme: ColorScheme.light().copyWith(secondary: Colors.red));
+  themeData = themeData.copyWith(colorScheme: ColorScheme.light().copyWith(primarySwatch: Colors.blue, secondary: Colors.red));
+  themeData.colorScheme.secondary;
+
+  // Changes made in https://github.com/flutter/flutter/pull/81336
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData();
+  themeData = ThemeData.raw();
+  themeData = themeData.copyWith();
+  themeData.accentColorBrightness; // Removing field reference not supported.
+
+  // Changes made in https://github.com/flutter/flutter/pull/81336
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData();
+  themeData = ThemeData.raw();
+  themeData = themeData.copyWith();
+  themeData.accentTextTheme; // Removing field reference not supported.
+
+  // Changes made in https://github.com/flutter/flutter/pull/81336
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData();
+  themeData = ThemeData.raw();
+  themeData = themeData.copyWith();
+  themeData.accentIconTheme; // Removing field reference not supported.
+
+  // Changes made in https://github.com/flutter/flutter/pull/81336
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData();
+  themeData = ThemeData.raw();
+  themeData = themeData.copyWith();
+  themeData.buttonColor; // Removing field reference not supported.
+
+  // Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  ListWheelScrollView listWheelScrollView = ListWheelScrollView();
+  listWheelScrollView = ListWheelScrollView(clipBehavior: Clip.hardEdge);
+  listWheelScrollView = ListWheelScrollView(clipBehavior: Clip.none);
+  listWheelScrollView = ListWheelScrollView.useDelegate();
+  listWheelScrollView = ListWheelScrollView.useDelegate(clipBehavior: Clip.hardEdge);
+  listWheelScrollView = ListWheelScrollView.useDelegate(clipBehavior: Clip.none);
+  listWheelScrollView.clipBehavior;
+  ListWheelViewport listWheelViewport = ListWheelViewport();
+  listWheelViewport = ListWheelViewport(clipBehavior: Clip.hardEdge);
+  listWheelViewport = ListWheelViewport(clipBehavior: Clip.none);
+  listWheelViewport.clipBehavior;
+
+  // Changes made in https://github.com/flutter/flutter/pull/87281
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData();
+  themeData = ThemeData.raw();
+  themeData = themeData.copyWith();
+  themeData.fixTextFieldOutlineLabel; // Removing field reference not supported.
+
+  // Changes made in https://github.com/flutter/flutter/pull/87839
+  final OverscrollIndicatorNotification notification = OverscrollIndicatorNotification(leading: true);
+  notification.disallowIndicator();
+
+  // Changes made in https://github.com/flutter/flutter/pull/86198
+  AppBar appBar = AppBar();
+  appBar = AppBar(systemOverlayStyle: SystemUiOverlayStyle.dark);
+  appBar = AppBar(systemOverlayStyle: SystemUiOverlayStyle.light);
+  appBar.systemOverlayStyle;
+
+  SliverAppBar sliverAppBar = SliverAppBar();
+  sliverAppBar = SliverAppBar(systemOverlayStyle: SystemUiOverlayStyle.dark);
+  sliverAppBar = SliverAppBar(systemOverlayStyle: SystemUiOverlayStyle.light);
+  sliverAppBar.systemOverlayStyle;
+
+  AppBarTheme appBarTheme = AppBarTheme();
+  appBarTheme = AppBarTheme(systemOverlayStyle: SystemUiOverlayStyle.dark);
+  appBarTheme = AppBarTheme(systemOverlayStyle: SystemUiOverlayStyle.light);
+  appBarTheme = appBarTheme.copyWith(systemOverlayStyle: SystemUiOverlayStyle.dark);
+  appBarTheme = appBarTheme.copyWith(systemOverlayStyle: SystemUiOverlayStyle.light);
+  appBarTheme.systemOverlayStyle;
+
+  TextTheme myTextTheme = TextTheme();
+  AppBar appBar = AppBar();
+  appBar = AppBar(toolbarTextStyle: myTextTheme.bodyText2, titleTextStyle: myTextTheme.headline6);
+  appBar = AppBar(toolbarTextStyle: myTextTheme.bodyText2, titleTextStyle: myTextTheme.headline6);
+
+  SliverAppBar sliverAppBar = SliverAppBar();
+  sliverAppBar = SliverAppBar(toolbarTextStyle: myTextTheme.bodyText2, titleTextStyle: myTextTheme.headline6);
+  sliverAppBar = SliverAppBar(toolbarTextStyle: myTextTheme.bodyText2, titleTextStyle: myTextTheme.headline6);
+
+  AppBarTheme appBarTheme = AppBarTheme();
+  appBarTheme = AppBarTheme(toolbarTextStyle: myTextTheme.bodyText2, titleTextStyle: myTextTheme.headline6);
+  appBarTheme = AppBarTheme(toolbarTextStyle: myTextTheme.bodyText2, titleTextStyle: myTextTheme.headline6);
+  appBarTheme = appBarTheme.copyWith(toolbarTextStyle: myTextTheme.bodyText2, titleTextStyle: myTextTheme.headline6);
+  appBarTheme = appBarTheme.copyWith(toolbarTextStyle: myTextTheme.bodyText2, titleTextStyle: myTextTheme.headline6);
+
+  AppBar appBar = AppBar();
+  appBar = AppBar();
+  appBar = AppBar());
+  appBar.backwardsCompatibility; // Removing field reference not supported.
+
+  SliverAppBar sliverAppBar = SliverAppBar();
+  sliverAppBar = SliverAppBar();
+  sliverAppBar = SliverAppBar();
+  sliverAppBar.backwardsCompatibility; // Removing field reference not supported.
+
+  AppBarTheme appBarTheme = AppBarTheme();
+  appBarTheme = AppBarTheme();
+  appBarTheme = AppBarTheme();
+  appBarTheme = appBarTheme.copyWith();
+  appBarTheme = appBarTheme.copyWith();
+  appBarTheme.backwardsCompatibility; // Removing field reference not supported.
+
+  AppBarTheme appBarTheme = AppBarTheme();
+  appBarTheme.backgroundColor;
 }

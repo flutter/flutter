@@ -247,4 +247,19 @@ void main() {
       'A crash report has been written to',
     ));
   });
+
+  testWithoutContext('flutter supports trailing args', () async {
+    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final String helloWorld = fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
+    final ProcessResult result = await processManager.run(<String>[
+      flutterBin,
+      'test',
+      'test/hello_test.dart',
+      '-r',
+      'json',
+    ], workingDirectory: helloWorld);
+
+    expect(result.exitCode, 0);
+    expect(result.stderr, isEmpty);
+  });
 }

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:args/command_runner.dart';
 import 'package:conductor/clean.dart';
 import 'package:conductor/repository.dart';
@@ -19,32 +17,19 @@ void main() {
     const String flutterRoot = '/flutter';
     const String checkoutsParentDirectory = '$flutterRoot/dev/tools/';
 
-    MemoryFileSystem fileSystem;
-    FakePlatform platform;
-    TestStdio stdio;
-    FakeProcessManager processManager;
+    late MemoryFileSystem fileSystem;
+    late FakePlatform platform;
+    late TestStdio stdio;
+    late FakeProcessManager processManager;
+    late CommandRunner<void> runner;
 
     setUp(() {
       stdio = TestStdio();
       fileSystem = MemoryFileSystem.test();
-    });
-
-    tearDown(() {
-      // Ensure these don't get re-used between tests
-      stdio = null;
-      fileSystem = null;
-      processManager = null;
-      platform = null;
-    });
-
-    CommandRunner<void> createRunner({
-      List<FakeCommand> commands,
-      String operatingSystem,
-    }) {
-      operatingSystem ??= const LocalPlatform().operatingSystem;
+      final String operatingSystem = const LocalPlatform().operatingSystem;
       final String pathSeparator = operatingSystem == 'windows' ? r'\' : '/';
 
-      processManager = FakeProcessManager.list(commands ?? <FakeCommand>[]);
+      processManager = FakeProcessManager.empty();
       platform = FakePlatform(
         environment: <String, String>{'HOME': '/path/to/user/home'},
         pathSeparator: pathSeparator,
@@ -59,11 +44,10 @@ void main() {
       final CleanCommand command = CleanCommand(
         checkouts: checkouts,
       );
-      return CommandRunner<void>('clean-test', '')..addCommand(command);
-    }
+      runner = CommandRunner<void>('clean-test', '')..addCommand(command);
+    });
 
     test('throws if no state file found', () async {
-      final CommandRunner<void> runner = createRunner();
       const String stateFile = '/state-file.json';
 
       await expectLater(
@@ -80,7 +64,6 @@ void main() {
     });
 
     test('deletes state file', () async {
-      final CommandRunner<void> runner = createRunner();
       final File stateFile = fileSystem.file('/state-file.json');
       stateFile.writeAsStringSync('{}');
 

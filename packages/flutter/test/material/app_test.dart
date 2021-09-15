@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 // TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependency have been fixed.
+// dependencies have been fixed.
 // https://github.com/flutter/flutter/issues/85160
 // Fails with "flutter test --test-randomize-ordering-seed=123"
 @Tags(<String>['no-shuffle'])
@@ -1068,6 +1068,101 @@ void main() {
     final ScrollBehavior scrollBehavior = ScrollConfiguration.of(capturedContext);
     expect(scrollBehavior.runtimeType, MockScrollBehavior);
     expect(scrollBehavior.getScrollPhysics(capturedContext).runtimeType, NeverScrollableScrollPhysics);
+  });
+
+  testWidgets('ScrollBehavior default android overscroll indicator', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      scrollBehavior: const MaterialScrollBehavior(),
+      home: ListView(
+        children: const <Widget>[
+          SizedBox(
+            height: 1000.0,
+            width: 1000.0,
+            child: Text('Test'),
+          )
+        ]
+      )
+    ));
+
+    expect(find.byType(StretchingOverscrollIndicator), findsNothing);
+    expect(find.byType(GlowingOverscrollIndicator), findsOneWidget);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+  testWidgets('ScrollBehavior stretch android overscroll indicator', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      scrollBehavior: const MaterialScrollBehavior(androidOverscrollIndicator: AndroidOverscrollIndicator.stretch),
+      home: ListView(
+        children: const <Widget>[
+          SizedBox(
+            height: 1000.0,
+            width: 1000.0,
+            child: Text('Test'),
+          )
+        ]
+      )
+    ));
+
+    expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
+    expect(find.byType(GlowingOverscrollIndicator), findsNothing);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+  testWidgets('Overscroll indicator can be set by theme', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      // The current default is glowing, setting via the theme should override.
+      theme: ThemeData().copyWith(androidOverscrollIndicator: AndroidOverscrollIndicator.stretch),
+      home: ListView(
+        children: const <Widget>[
+          SizedBox(
+            height: 1000.0,
+            width: 1000.0,
+            child: Text('Test'),
+          )
+        ]
+      )
+    ));
+
+    expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
+    expect(find.byType(GlowingOverscrollIndicator), findsNothing);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+  testWidgets('Overscroll indicator in MaterialScrollBehavior takes precedence over theme', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      // MaterialScrollBehavior.androidOverscrollIndicator takes precedence over theme.
+      scrollBehavior: const MaterialScrollBehavior(androidOverscrollIndicator: AndroidOverscrollIndicator.stretch),
+      theme: ThemeData().copyWith(androidOverscrollIndicator: AndroidOverscrollIndicator.glow),
+      home: ListView(
+        children: const <Widget>[
+          SizedBox(
+            height: 1000.0,
+            width: 1000.0,
+            child: Text('Test'),
+          )
+        ]
+      )
+    ));
+
+    expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
+    expect(find.byType(GlowingOverscrollIndicator), findsNothing);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+  testWidgets('When `useInheritedMediaQuery` is true an existing MediaQuery is used if one is available', (WidgetTester tester) async {
+    late BuildContext capturedContext;
+    final UniqueKey uniqueKey = UniqueKey();
+    await tester.pumpWidget(
+      MediaQuery(
+        key: uniqueKey,
+        data: const MediaQueryData(),
+        child: MaterialApp(
+          useInheritedMediaQuery: true,
+          builder: (BuildContext context, Widget? child) {
+            capturedContext = context;
+            return const Placeholder();
+          },
+          color: const Color(0xFF123456),
+        ),
+      ),
+    );
+    expect(capturedContext.dependOnInheritedWidgetOfExactType<MediaQuery>()?.key, uniqueKey);
   });
 }
 

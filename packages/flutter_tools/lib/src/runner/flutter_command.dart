@@ -159,7 +159,6 @@ abstract class FlutterCommand extends Command<void> {
   @override
   ArgParser get argParser => _argParser;
   final ArgParser _argParser = ArgParser(
-    allowTrailingOptions: false,
     usageLineLength: globals.outputPreferences.wrapText ? globals.outputPreferences.wrapColumn : null,
   );
 
@@ -760,7 +759,7 @@ abstract class FlutterCommand extends Command<void> {
       FlutterOptions.kEnableExperiment,
       help:
         'The name of an experimental Dart feature to enable. For more information see: '
-        'https://github.com/dart-lang/sdk/blob/master/docs/process/experimental-flags.md',
+        'https://github.com/dart-lang/sdk/blob/main/docs/process/experimental-flags.md',
       hide: hide,
     );
   }

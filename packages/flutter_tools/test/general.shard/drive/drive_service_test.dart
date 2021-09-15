@@ -460,6 +460,7 @@ void main() {
   testWithoutContext('WebDriver error message includes link to documentation', () async {
     const String link = 'https://flutter.dev/docs/testing/integration-tests#running-in-a-browser';
     final DriverService driverService = WebDriverService(
+      logger: BufferLogger.test(),
       dartSdkPath: 'dart',
       processUtils: ProcessUtils(
         processManager: FakeProcessManager.empty(),
@@ -528,7 +529,7 @@ class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFa
   }) async => applicationPackage;
 }
 
-class FakeApplicationPackage extends Fake implements ApplicationPackage {}
+class FakeApplicationPackage extends Fake implements ApplicationPackage { }
 
 class FakeDevice extends Fake implements Device {
   FakeDevice(this.result, {this.supportsFlutterExit = true});
@@ -604,11 +605,11 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
 
   @override
   Future<void> startDartDevelopmentService(
-    Uri observatoryUri,
+    Uri observatoryUri, {
+    @required Logger logger,
     int hostPort,
     bool ipv6,
-    bool disableServiceAuthCodes, {
-    @required Logger logger,
+    bool disableServiceAuthCodes,
   }) async {
     started = true;
   }

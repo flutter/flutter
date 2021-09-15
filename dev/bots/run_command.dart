@@ -19,19 +19,17 @@ import 'utils.dart';
 /// code fails the test immediately by exiting the test process with exit code
 /// 1.
 Stream<String> runAndGetStdout(String executable, List<String> arguments, {
-  String workingDirectory,
-  Map<String, String> environment,
+  String? workingDirectory,
+  Map<String, String>? environment,
   bool expectNonZeroExit = false,
-  bool expectNoTests = false,
 }) async* {
   final StreamController<String> output = StreamController<String>();
-  final Future<CommandResult> command = runCommand(
+  final Future<CommandResult?> command = runCommand(
     executable,
     arguments,
     workingDirectory: workingDirectory,
     environment: environment,
     expectNonZeroExit: expectNonZeroExit,
-    expectNoTests: expectNoTests,
     // Capture the output so it's not printed to the console by default.
     outputMode: OutputMode.capture,
     outputListener: (String line, io.Process process) {
@@ -54,8 +52,8 @@ class Command {
   final io.Process process;
 
   final Stopwatch _time;
-  final Future<List<List<int>>> _savedStdout;
-  final Future<List<List<int>>> _savedStderr;
+  final Future<List<List<int>>>? _savedStdout;
+  final Future<List<List<int>>>? _savedStderr;
 
   /// Evaluates when the [process] exits.
   ///
@@ -65,8 +63,8 @@ class Command {
     _time.stop();
 
     // Saved output is null when OutputMode.print is used.
-    final String flattenedStdout = _savedStdout != null ? _flattenToString(await _savedStdout) : null;
-    final String flattenedStderr = _savedStderr != null ? _flattenToString(await _savedStderr) : null;
+    final String? flattenedStdout = _savedStdout != null ? _flattenToString((await _savedStdout)!) : null;
+    final String? flattenedStderr = _savedStderr != null ? _flattenToString((await _savedStderr)!) : null;
     return CommandResult._(exitCode, _time.elapsed, flattenedStdout, flattenedStderr);
   }
 }
@@ -82,10 +80,10 @@ class CommandResult {
   final Duration elapsedTime;
 
   /// Standard output decoded as a string using UTF8 decoder.
-  final String flattenedStdout;
+  final String? flattenedStdout;
 
   /// Standard error output decoded as a string using UTF8 decoder.
-  final String flattenedStderr;
+  final String? flattenedStderr;
 }
 
 /// Starts the `executable` and returns a command object representing the
@@ -99,11 +97,11 @@ class CommandResult {
 /// `outputMode` controls where the standard output from the command process
 /// goes. See [OutputMode].
 Future<Command> startCommand(String executable, List<String> arguments, {
-  String workingDirectory,
-  Map<String, String> environment,
+  String? workingDirectory,
+  Map<String, String>? environment,
   OutputMode outputMode = OutputMode.print,
-  bool Function(String) removeLine,
-  void Function(String, io.Process) outputListener,
+  bool Function(String)? removeLine,
+  void Function(String, io.Process)? outputListener,
 }) async {
   final String commandDescription = '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
   final String relativeWorkingDir = path.relative(workingDirectory ?? io.Directory.current.path);
@@ -136,7 +134,7 @@ Future<Command> startCommand(String executable, List<String> arguments, {
         savedStdout.then((List<List<int>> list) => list.add(output));
       });
       process.stderr.listen((List<int> output) {
-        io.stderr.add(output);
+        io.stdout.add(output);
         savedStdout.then((List<List<int>> list) => list.add(output));
       });
       break;
@@ -159,28 +157,22 @@ Future<Command> startCommand(String executable, List<String> arguments, {
 /// an indefinitely running process, for example, by waiting until the process
 /// emits certain output.
 ///
-/// Returns the result of the finished process, or null if `skip` is true.
+/// Returns the result of the finished process.
 ///
 /// `outputMode` controls where the standard output from the command process
 /// goes. See [OutputMode].
 Future<CommandResult> runCommand(String executable, List<String> arguments, {
-  String workingDirectory,
-  Map<String, String> environment,
+  String? workingDirectory,
+  Map<String, String>? environment,
   bool expectNonZeroExit = false,
-  bool expectNoTests = false,
-  int expectedExitCode,
-  String failureMessage,
+  int? expectedExitCode,
+  String? failureMessage,
   OutputMode outputMode = OutputMode.print,
-  bool skip = false,
-  bool Function(String) removeLine,
-  void Function(String, io.Process) outputListener,
+  bool Function(String)? removeLine,
+  void Function(String, io.Process)? outputListener,
 }) async {
   final String commandDescription = '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
   final String relativeWorkingDir = path.relative(workingDirectory ?? io.Directory.current.path);
-  if (skip) {
-    printProgress('SKIPPING', relativeWorkingDir, commandDescription);
-    return null;
-  }
 
   final Command command = await startCommand(executable, arguments,
     workingDirectory: workingDirectory,
@@ -192,21 +184,7 @@ Future<CommandResult> runCommand(String executable, List<String> arguments, {
 
   final CommandResult result = await command.onExit;
 
-  // Currently, the test infrastructure fails if it doesn't find any tests to
-  // run, but in the case of tests tagged as "no-shuffle", there might either be
-  // none that can be shuffled, or none that shouldn't be shuffled, and since
-  // we're running it twice to get all the tests in either category, it
-  // shouldn't fail if no tests are run.
-  //
-  // TODO(gspencergoog): This is a workaround until
-  // https://github.com/dart-lang/test/issues/1546 is addressed. Remove the
-  // workaround (parsing the test output) when/if that issue is fixed.
-  final bool skipErrorExit = expectNoTests &&
-      result != null &&
-      result.flattenedStdout != null &&
-      result.flattenedStdout.trimRight().endsWith('No tests ran.');
-
-  if (!skipErrorExit && ((result.exitCode == 0) == expectNonZeroExit || (expectedExitCode != null && result.exitCode != expectedExitCode))) {
+  if ((result.exitCode == 0) == expectNonZeroExit || (expectedExitCode != null && result.exitCode != expectedExitCode)) {
     // Print the output when we get unexpected results (unless output was
     // printed already).
     switch (outputMode) {
@@ -214,7 +192,7 @@ Future<CommandResult> runCommand(String executable, List<String> arguments, {
         break;
       case OutputMode.capture:
         io.stdout.writeln(result.flattenedStdout);
-        io.stderr.writeln(result.flattenedStderr);
+        io.stdout.writeln(result.flattenedStderr);
         break;
     }
     exitWithError(<String>[
@@ -237,7 +215,7 @@ String _flattenToString(List<List<int>> chunks) =>
 /// Specifies what to do with the command output from [runCommand] and [startCommand].
 enum OutputMode {
   /// Forwards standard output and standard error streams to the test process'
-  /// respective standard streams.
+  /// standard output stream (i.e. stderr is redirected to stdout).
   ///
   /// Use this mode if all you want is print the output of the command to the
   /// console. The output is no longer available after the process exits.

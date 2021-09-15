@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+
 import 'package:flutter/foundation.dart' show FlutterExceptionHandler;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -755,7 +759,6 @@ void main() {
       radioTheme: const RadioThemeData(),
       switchTheme: const SwitchThemeData(),
       progressIndicatorTheme: const ProgressIndicatorThemeData(),
-      fixTextFieldOutlineLabel: false,
       useTextSelectionTheme: false,
     );
 
@@ -978,9 +981,8 @@ void main() {
     final Offset snackBarTopRight = tester.getTopRight(materialFinder);
     expect(textBottomLeft.dx - snackBarBottomLeft.dx, padding);
     expect(snackBarTopRight.dx - textTopRight.dx, padding);
-    // The text is given a vertical padding of 14 already.
-    expect(snackBarBottomLeft.dy - textBottomLeft.dy, padding + 14);
-    expect(textTopRight.dy - snackBarTopRight.dy, padding + 14);
+    expect(snackBarBottomLeft.dy - textBottomLeft.dy, padding);
+    expect(textTopRight.dy - snackBarTopRight.dy, padding);
   });
 
   testWidgets('Snackbar width can be customized', (WidgetTester tester) async {

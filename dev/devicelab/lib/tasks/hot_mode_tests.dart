@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -20,7 +18,7 @@ final Directory flutterGalleryDir = dir(path.join(flutterDirectory.path, 'dev/in
 const String kSourceLine = 'fontSize: (orientation == Orientation.portrait) ? 32.0 : 24.0';
 const String kReplacementLine = 'fontSize: (orientation == Orientation.portrait) ? 34.0 : 24.0';
 
-TaskFunction createHotModeTest({String deviceIdOverride, Map<String, String> environment}) {
+TaskFunction createHotModeTest({String? deviceIdOverride, Map<String, String>? environment}) {
   // This file is modified during the test and needs to be restored at the end.
   final File flutterFrameworkSource = file(path.join(
     flutterDirectory.path, 'packages/flutter/lib/src/widgets/framework.dart',
@@ -35,13 +33,13 @@ TaskFunction createHotModeTest({String deviceIdOverride, Map<String, String> env
     final File benchmarkFile = file(path.join(_editedFlutterGalleryDir.path, 'hot_benchmark.json'));
     rm(benchmarkFile);
     final List<String> options = <String>[
-      '--hot', '-d', deviceIdOverride, '--benchmark', '--resident',  '--no-android-gradle-daemon', '--no-publish-port', '--verbose',
+      '--hot', '-d', deviceIdOverride!, '--benchmark', '--resident',  '--no-android-gradle-daemon', '--no-publish-port', '--verbose',
     ];
     int hotReloadCount = 0;
-    Map<String, dynamic> smallReloadData;
-    Map<String, dynamic> mediumReloadData;
-    Map<String, dynamic> largeReloadData;
-    Map<String, dynamic> freshRestartReloadsData;
+    late Map<String, dynamic> smallReloadData;
+    late Map<String, dynamic> mediumReloadData;
+    late Map<String, dynamic> largeReloadData;
+    late Map<String, dynamic> freshRestartReloadsData;
 
 
     await inDirectory<void>(flutterDirectory, () async {
@@ -215,9 +213,9 @@ TaskFunction createHotModeTest({String deviceIdOverride, Map<String, String> env
   };
 }
 
-Future<Map<String, Object>> captureReloadData(
+Future<Map<String, dynamic>> captureReloadData(
   List<String> options,
-  Map<String, String> environment,
+  Map<String, String>? environment,
   File benchmarkFile,
   void Function(String, Process) onLine,
 ) async {

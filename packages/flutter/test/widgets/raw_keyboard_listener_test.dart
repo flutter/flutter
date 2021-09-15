@@ -44,7 +44,7 @@ void main() {
 
     await tester.pumpWidget(Container());
     focusNode.dispose();
-  }, skip: isBrowser); // This is a Fuchsia-specific test.
+  }, skip: isBrowser); // [intended] This is a Fuchsia-specific test.
 
   testWidgets('Web key event', (WidgetTester tester) async {
     final List<RawKeyEvent> events = <RawKeyEvent>[];

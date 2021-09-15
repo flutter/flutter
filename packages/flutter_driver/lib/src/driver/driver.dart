@@ -625,7 +625,7 @@ abstract class FlutterDriver {
   ///       ...
   ///     ]
   ///
-  /// [getFlagList]: https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#getflaglist
+  /// [getFlagList]: https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/service.md#getflaglist
   ///
   /// Throws [UnimplementedError] on [WebFlutterDriver] instances.
   Future<List<Map<String, dynamic>>> getVmFlags() async {
@@ -742,7 +742,8 @@ abstract class FlutterDriver {
 class CommonFinders {
   const CommonFinders._();
 
-  /// Finds [Text] and [EditableText] widgets containing string equal to [text].
+  /// Finds [widgets.Text] and [widgets.EditableText] widgets containing string
+  /// equal to [text].
   SerializableFinder text(String text) => ByText(text);
 
   /// Finds widgets by [key]. Only [String] and [int] values can be used.

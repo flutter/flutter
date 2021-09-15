@@ -113,6 +113,11 @@ void main() {
     expect(materialWidget.color, Colors.grey[800]);
     expect(materialWidget.shape, _defaultDialogShape);
     expect(materialWidget.elevation, 24.0);
+
+    final Offset bottomLeft = tester.getBottomLeft(
+      find.descendant(of: find.byType(Dialog), matching: find.byType(Material)),
+    );
+    expect(bottomLeft.dy, 360.0);
   });
 
   testWidgets('Custom dialog elevation', (WidgetTester tester) async {
@@ -235,6 +240,23 @@ void main() {
 
     final Material materialWidget = _getMaterialFromDialog(tester);
     expect(materialWidget.shape, customBorder);
+  });
+
+  testWidgets('Custom dialog alignment', (WidgetTester tester) async {
+    const AlertDialog dialog = AlertDialog(
+      actions: <Widget>[ ],
+      alignment: Alignment.bottomLeft,
+    );
+    await tester.pumpWidget(_buildAppWithDialog(dialog));
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final Offset bottomLeft = tester.getBottomLeft(
+      find.descendant(of: find.byType(Dialog), matching: find.byType(Material)),
+    );
+    expect(bottomLeft.dx, 40.0);
+    expect(bottomLeft.dy, 576.0);
   });
 
   testWidgets('Simple dialog control test', (WidgetTester tester) async {

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -359,6 +360,30 @@ void main() {
     );
     expect(find.text('BBB'), findsOneWidget);
     expect(find.text('AAA'), findsNothing);
+  });
+
+  testWidgets('AnimatedCrossFade test focus', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: AnimatedCrossFade(
+          firstChild: TextButton(onPressed: () {}, child: const Text('AAA')),
+          secondChild: TextButton(onPressed: () {}, child: const Text('BBB')),
+          crossFadeState: CrossFadeState.showFirst,
+          duration: const Duration(milliseconds: 50),
+        ),
+      ),
+    );
+
+    final FocusNode visibleNode = Focus.of(tester.element(find.text('AAA')), scopeOk: true);
+    visibleNode.requestFocus();
+    await tester.pump();
+    expect(visibleNode.hasPrimaryFocus, isTrue);
+
+    final FocusNode hiddenNode = Focus.of(tester.element(find.text('BBB')), scopeOk: true);
+    hiddenNode.requestFocus();
+    await tester.pump();
+    expect(hiddenNode.hasPrimaryFocus, isFalse);
   });
 }
 

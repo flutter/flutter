@@ -24,7 +24,6 @@ import 'package:test/fake.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/fake_process_manager.dart';
 
 void main() {
   testWithoutContext('PreviewDevice defaults', () async {
@@ -85,8 +84,8 @@ void main() {
   });
 }
 
-class FakeFlutterProject extends Fake implements FlutterProject {}
-class FakeApplicationPackage extends Fake implements ApplicationPackage {}
+class FakeFlutterProject extends Fake implements FlutterProject { }
+class FakeApplicationPackage extends Fake implements ApplicationPackage { }
 class FakeBundleBuilder extends Fake implements BundleBuilder {
   FakeBundleBuilder(this.fileSystem);
 
