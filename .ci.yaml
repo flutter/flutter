@@ -10,6 +10,7 @@ enabled_branches:
   - dev
   - beta
   - stable
+  - flutter-2.6-candidate.10
 
 platform_properties:
   linux:
