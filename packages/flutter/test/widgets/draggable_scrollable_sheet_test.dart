@@ -12,8 +12,11 @@ void main() {
     double initialChildSize = .5,
     double maxChildSize = 1.0,
     double minChildSize = .25,
+    bool snap = false,
+    List<double>? snapSizes,
     double? itemExtent,
     Key? containerKey,
+    Key? stackKey,
     NotificationListenerCallback<ScrollNotification>? onScrollNotification,
   }) {
     return Directionality(
@@ -21,30 +24,35 @@ void main() {
       child: MediaQuery(
         data: const MediaQueryData(),
         child: Stack(
+          key: stackKey,
           children: <Widget>[
             TextButton(
               onPressed: onButtonPressed,
               child: const Text('TapHere'),
             ),
-            DraggableScrollableSheet(
-              maxChildSize: maxChildSize,
-              minChildSize: minChildSize,
-              initialChildSize: initialChildSize,
-              builder: (BuildContext context, ScrollController scrollController) {
-                return NotificationListener<ScrollNotification>(
-                  onNotification: onScrollNotification,
-                  child: Container(
-                    key: containerKey,
-                    color: const Color(0xFFABCDEF),
-                    child: ListView.builder(
-                      controller: scrollController,
-                      itemExtent: itemExtent,
-                      itemCount: itemCount,
-                      itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+            DraggableScrollableActuator(
+              child: DraggableScrollableSheet(
+                maxChildSize: maxChildSize,
+                minChildSize: minChildSize,
+                initialChildSize: initialChildSize,
+                snap: snap,
+                snapSizes: snapSizes,
+                builder: (BuildContext context, ScrollController scrollController) {
+                  return NotificationListener<ScrollNotification>(
+                    onNotification: onScrollNotification,
+                    child: Container(
+                      key: containerKey,
+                      color: const Color(0xFFABCDEF),
+                      child: ListView.builder(
+                        controller: scrollController,
+                        itemExtent: itemExtent,
+                        itemCount: itemCount,
+                        itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+                      ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           ],
         ),
@@ -82,6 +90,27 @@ void main() {
     await tester.drag(find.text('Item 5'), const Offset(0, -125));
     await tester.pumpAndSettle();
     expect(tester.getRect(find.byKey(key)), const Rect.fromLTRB(0.0, 325.0, 800.0, 600.0));
+  });
+
+  testWidgets('Invalid snap targets throw assertion errors.', (WidgetTester tester) async {
+    await tester.pumpWidget(_boilerplate(
+      null,
+      maxChildSize: .8,
+      snapSizes: <double>[.9],
+    ));
+    expect(tester.takeException(), isAssertionError);
+
+    await tester.pumpWidget(_boilerplate(
+      null,
+      snapSizes: <double>[.1],
+    ));
+    expect(tester.takeException(), isAssertionError);
+
+    await tester.pumpWidget(_boilerplate(
+      null,
+      snapSizes: <double>[.6, .6, .9],
+    ));
+    expect(tester.takeException(), isAssertionError);
   });
 
   for (final TargetPlatform platform in TargetPlatform.values) {
@@ -300,6 +329,190 @@ void main() {
 
       debugDefaultTargetPlatformOverride = null;
     });
+
+    testWidgets('Does not snap away from initial child on build', (WidgetTester tester) async {
+      const Key containerKey = ValueKey<String>('container');
+      const Key stackKey = ValueKey<String>('stack');
+      await tester.pumpWidget(_boilerplate(null,
+        snap: true,
+        initialChildSize: .7,
+        containerKey: containerKey,
+        stackKey: stackKey,
+      ));
+      await tester.pumpAndSettle();
+      final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
+
+      // The sheet should not have snapped.
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(.7, precisionErrorTolerance,
+      ));
+    }, variant: TargetPlatformVariant.all());
+
+    testWidgets('Does not snap away from initial child on reset', (WidgetTester tester) async {
+      const Key containerKey = ValueKey<String>('container');
+      const Key stackKey = ValueKey<String>('stack');
+      await tester.pumpWidget(_boilerplate(null,
+        snap: true,
+        containerKey: containerKey,
+        stackKey: stackKey,
+      ));
+      await tester.pumpAndSettle();
+      final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
+
+      await tester.drag(find.text('Item 1'), Offset(0, -.4 * screenHeight));
+      await tester.pumpAndSettle();
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(1.0, precisionErrorTolerance),
+      );
+
+      DraggableScrollableActuator.reset(tester.element(find.byKey(containerKey)));
+      await tester.pumpAndSettle();
+
+      // The sheet should have reset without snapping away from initial child.
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(.5, precisionErrorTolerance),
+      );
+    }, variant: TargetPlatformVariant.all());
+
+    testWidgets('Zero velocity drag snaps to nearest snap target', (WidgetTester tester) async {
+      const Key stackKey = ValueKey<String>('stack');
+      const Key containerKey = ValueKey<String>('container');
+      await tester.pumpWidget(_boilerplate(null,
+        snap: true,
+        stackKey: stackKey,
+        containerKey: containerKey,
+        snapSizes: <double>[.25, .5, .75, 1.0],
+      ));
+      await tester.pumpAndSettle();
+      final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
+
+      // We are dragging up, but we'll snap down because we're closer to .75 than 1.
+      await tester.drag(find.text('Item 1'), Offset(0, -.35 * screenHeight));
+      await tester.pumpAndSettle();
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(.75, precisionErrorTolerance),
+      );
+
+      // Drag up and snap up.
+      await tester.drag(find.text('Item 1'), Offset(0, -.2 * screenHeight));
+      await tester.pumpAndSettle();
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(1.0, precisionErrorTolerance),
+      );
+
+      // Drag down and snap up.
+      await tester.drag(find.text('Item 1'), Offset(0, .1 * screenHeight));
+      await tester.pumpAndSettle();
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(1.0, precisionErrorTolerance),
+      );
+
+      // Drag down and snap down.
+      await tester.drag(find.text('Item 1'), Offset(0, .45 * screenHeight));
+      await tester.pumpAndSettle();
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(.5, precisionErrorTolerance),
+      );
+
+      // Fling up with negligible velocity and snap down.
+      await tester.fling(find.text('Item 1'), Offset(0, .1 * screenHeight), 1);
+      await tester.pumpAndSettle();
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(.5, precisionErrorTolerance),
+      );
+    }, variant: TargetPlatformVariant.all());
+
+    for (final List<double>? snapSizes in <List<double>?>[null, <double>[]]) {
+      testWidgets('Setting snapSizes to $snapSizes resolves to min and max', (WidgetTester tester) async {
+        const Key stackKey = ValueKey<String>('stack');
+        const Key containerKey = ValueKey<String>('container');
+          await tester.pumpWidget(_boilerplate(null,
+            snap: true,
+            stackKey: stackKey,
+            containerKey: containerKey,
+            snapSizes: snapSizes,
+          ));
+          await tester.pumpAndSettle();
+          final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
+
+          await tester.drag(find.text('Item 1'), Offset(0, -.4 * screenHeight));
+          await tester.pumpAndSettle();
+          expect(
+            tester.getSize(find.byKey(containerKey)).height / screenHeight,
+            closeTo(1.0, precisionErrorTolerance,
+          ));
+
+          await tester.drag(find.text('Item 1'), Offset(0, .7 * screenHeight));
+          await tester.pumpAndSettle();
+          expect(
+            tester.getSize(find.byKey(containerKey)).height / screenHeight,
+            closeTo(.25, precisionErrorTolerance),
+          );
+      }, variant: TargetPlatformVariant.all());
+    }
+
+    testWidgets('Min and max are implicitly added to snapSizes.', (WidgetTester tester) async {
+      const Key stackKey = ValueKey<String>('stack');
+      const Key containerKey = ValueKey<String>('container');
+      await tester.pumpWidget(_boilerplate(null,
+        snap: true,
+        stackKey: stackKey,
+        containerKey: containerKey,
+        snapSizes: <double>[.5],
+      ));
+      await tester.pumpAndSettle();
+      final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
+
+      await tester.drag(find.text('Item 1'), Offset(0, -.4 * screenHeight));
+      await tester.pumpAndSettle();
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(1.0, precisionErrorTolerance),
+      );
+
+      await tester.drag(find.text('Item 1'), Offset(0, .7 * screenHeight));
+      await tester.pumpAndSettle();
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(.25, precisionErrorTolerance),
+      );
+    }, variant: TargetPlatformVariant.all());
+
+    testWidgets('Fling snaps in direction of momentum', (WidgetTester tester) async {
+      const Key stackKey = ValueKey<String>('stack');
+      const Key containerKey = ValueKey<String>('container');
+      await tester.pumpWidget(_boilerplate(null,
+        snap: true,
+        stackKey: stackKey,
+        containerKey: containerKey,
+        snapSizes: <double>[.5, .75],
+      ));
+      await tester.pumpAndSettle();
+      final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
+
+      await tester.fling(find.text('Item 1'), Offset(0, -.1 * screenHeight), 1000);
+      await tester.pumpAndSettle();
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(.75, precisionErrorTolerance),
+      );
+
+      await tester.fling(find.text('Item 1'), Offset(0, .3 * screenHeight), 1000);
+      await tester.pumpAndSettle();
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(.25, precisionErrorTolerance),
+      );
+
+    }, variant: TargetPlatformVariant.all());
 
     testWidgets('ScrollNotification correctly dispatched when flung without covering its container', (WidgetTester tester) async {
       final List<Type> notificationTypes = <Type>[];
