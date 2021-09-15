@@ -49,9 +49,7 @@ class ShellLauncher {
 
   ShellLauncher(this.shellExecutablePath, this.mainDartPath, this.startPaused,
       List<String> extraArgs) {
-    if (extraArgs is List) {
-      args.addAll(extraArgs);
-    }
+    args.addAll(extraArgs);
     args.add(mainDartPath);
   }
 
