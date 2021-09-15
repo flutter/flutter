@@ -1645,8 +1645,8 @@ class Navigator extends StatefulWidget {
   /// Defaults to false.
   final bool reportsRouteUpdateToEngine;
 
-  /// Whether or not the navigator and it's page routes should request focus
-  /// when the navigator stack changes.
+  /// Whether or not the navigator and it's new topmost route should request focus
+  /// when the new route is pushed onto the navigator.
   ///
   /// Defaults to true.
   final bool takeFocus;
