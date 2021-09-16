@@ -2,17 +2,15 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//flutter/build/dart/rules.gni")
 import("//flutter/tools/fuchsia/dart/dart_library.gni")
-import("//third_party/dart/build/dart/dart_action.gni")
-import("//third_party/dart/utils/application_snapshot.gni")
-import("//third_party/dart/utils/compile_platform.gni")
 
 application_snapshot("kernel_compiler") {
   main_dart = "compiler.dart"
 
   deps = [ "../flutter/kernel:kernel_platform_files($host_toolchain)" ]
 
-  dot_packages =
+  package_config =
       rebase_path("//third_party/dart/.dart_tool/package_config.json")
 
   training_args = [
@@ -39,14 +37,24 @@ application_snapshot("kernel_compiler") {
   inputs = kernel_compiler_files
 }
 
-application_snapshot("list_libraries") {
+application_snapshot("_list_libraries_kernel") {
+  visibility = [ ":*" ]
+  snapshot_kind = "kernel"
   main_dart = "//third_party/dart/pkg/vm/bin/list_libraries.dart"
+  package_config =
+      rebase_path("//third_party/dart/.dart_tool/package_config.json")
+  training_args = []
+  output = "$target_gen_dir/list_libraries.dart.dill"
+}
+
+application_snapshot("list_libraries") {
+  deps = [ ":_list_libraries_kernel" ]
+  main_dart = "//third_party/dart/pkg/vm/bin/list_libraries.dart"
+  package_config =
+      rebase_path("//third_party/dart/.dart_tool/package_config.json")
   training_args = [
-    # train against the dill file which is generated for this snapshot. If this build file
-    # changes location this path will need to be updated.
-    rebase_path(
-        root_gen_dir +
-        "/flutter/shell/platform/fuchsia/dart/list_libraries.dart.dill"),
+    # train against the dill file which is generated for this snapshot.
+    rebase_path("$target_gen_dir/list_libraries.dart.dill"),
   ]
 }
 

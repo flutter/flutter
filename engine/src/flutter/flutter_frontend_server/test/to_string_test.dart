@@ -8,22 +8,23 @@ import 'package:litetest/litetest.dart';
 import 'package:path/path.dart' as path;
 
 Future<void> main(List<String> args) async {
-  if (args.length != 2) {
-    stderr.writeln('The first argument must be the path to the frontend server dill.');
-    stderr.writeln('The second argument must be the path to the flutter_patched_sdk');
+  if (args.length != 3) {
+    stderr.writeln('The first argument must be the path to the build output.');
+    stderr.writeln('The second argument must be the path to the frontend server dill.');
+    stderr.writeln('The third argument must be the path to the flutter_patched_sdk');
     exit(-1);
   }
 
   final String dart = Platform.resolvedExecutable;
-  final String frontendServer = args[0];
-  final String sdkRoot = args[1];
+  final String buildDir = args[0];
+  final String frontendServer = args[1];
+  final String sdkRoot = args[2];
   final String basePath = path.canonicalize(path.join(path.dirname(Platform.script.path), '..'));
   final String fixtures = path.join(basePath, 'test', 'fixtures');
   final String mainDart = path.join(fixtures, 'lib', 'main.dart');
   final String packageConfig = path.join(fixtures, '.dart_tool', 'package_config.json');
   final String regularDill = path.join(fixtures, 'toString.dill');
   final String transformedDill = path.join(fixtures, 'toStringTransformed.dill');
-
 
   void _checkProcessResult(ProcessResult result) {
     if (result.exitCode != 0) {
@@ -45,7 +46,7 @@ Future<void> main(List<String> args) async {
     final ProcessResult runResult = Process.runSync(dart, <String>[regularDill]);
     _checkProcessResult(runResult);
     String paintString = '"Paint.toString":"Paint(Color(0xffffffff))"';
-    if (const bool.fromEnvironment('dart.vm.product', defaultValue: false)) {
+    if (buildDir.contains('release')) {
       paintString = '"Paint.toString":"Instance of \'Paint\'"';
     }
 

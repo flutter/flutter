@@ -7,7 +7,7 @@ import("//flutter/testing/rules/runtime_mode.gni")
 
 assert(is_android)
 
-dart_snapshot("android_background_image_snapshot") {
+flutter_snapshot("android_background_image_snapshot") {
   main_dart = "lib/main.dart"
   package_config = ".dart_tool/package_config.json"
 }
