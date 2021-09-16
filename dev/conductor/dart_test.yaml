@@ -1,0 +1,3 @@
+# multiply the default test timeout by 10.
+
+timeout: 10x
