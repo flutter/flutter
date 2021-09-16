@@ -647,19 +647,24 @@ class TextInputConfiguration {
   /// Whether to enable that the engine sends text input updates to the
   /// framework as [TextEditingDelta]'s or as one [TextEditingValue].
   ///
-  /// When this is enabled platform text input updates will
-  /// come through [TextInputClient.updateEditingValueWithDeltas].
-  ///
-  /// When this is disabled platform text input updates will come through
-  /// [TextInputClient.updateEditingValue].
-  ///
   /// Enabling this flag results in granular text updates being received from the
-  /// platforms text input control rather than a single new bulk editing state
-  /// given by [TextInputClient.updateEditingValue].
+  /// platform's text input control.
   ///
-  /// If the platform does not currently support the delta model then updates
-  /// for the editing state will continue to come through the
-  /// [TextInputClient.updateEditingValue] channel.
+  /// When this is enabled:
+  ///  * You should implement [DeltaTextInputClient] and not [TextInputClient] to
+  ///  receive granular updates from the platform's text input.
+  ///  * Platform text input updates will come through
+  ///  [DeltaTextInputClient.updateEditingValueWithDeltas].
+  ///  * If you are implementing [TextInputClient] with this property enabled then
+  ///  you will experience unexpected behavior as [TextInputClient] does not implement
+  ///  a delta channel.
+  ///
+  /// When this is disabled:
+  ///  * If you are implementing [DeltaTextInputClient] then updates for the
+  ///  editing state will continue to come through the
+  ///  [DeltaTextInputClient.updateEditingValue] channel.
+  ///  * If you are implementing [TextInputClient] then updates for the editing
+  ///  state will come through [TextInputClient.updateEditingValue].
   ///
   /// Defaults to false. Cannot be null.
   final bool enableDeltaModel;
