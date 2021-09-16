@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/src/material/material.dart';
 import 'package:flutter/widgets.dart';
 
 import 'banner_theme.dart';
@@ -84,12 +85,14 @@ class MaterialBanner extends StatefulWidget {
   /// Creates a [MaterialBanner].
   ///
   /// The [actions], [content], and [forceActionsBelow] must be non-null.
-  /// The [actions].length must be greater than 0.
+  /// The [actions].length must be greater than 0. The [elevation] must be null or
+  /// non-negative.
   const MaterialBanner({
     Key? key,
     required this.content,
     this.contentTextStyle,
     required this.actions,
+    this.elevation,
     this.leading,
     this.backgroundColor,
     this.padding,
@@ -98,7 +101,8 @@ class MaterialBanner extends StatefulWidget {
     this.overflowAlignment = OverflowBarAlignment.end,
     this.animation,
     this.onVisible
-  }) : assert(content != null),
+  }) : assert(elevation == null || elevation >= 0.0),
+       assert(content != null),
        assert(actions != null),
        assert(forceActionsBelow != null),
        super(key: key);
@@ -119,6 +123,13 @@ class MaterialBanner extends StatefulWidget {
   ///
   /// Typically this is a list of [TextButton] widgets.
   final List<Widget> actions;
+
+  /// The z-coordinate at which to place the material banner. This controls the size of the shadow below the material banner.
+  //
+  // Defines the banner's [Material.elevation].
+  //
+  // If this property is null, then [MaterialBannerThemeData.elevation] of [ThemeData.materialBannerTheme] is used, if that is also null, the default value is 0.
+  final double? elevation;
 
   /// The (optional) leading widget of the [MaterialBanner].
   ///
@@ -188,6 +199,7 @@ class MaterialBanner extends StatefulWidget {
       content: content,
       contentTextStyle: contentTextStyle,
       actions: actions,
+      elevation: elevation,
       leading: leading,
       backgroundColor: backgroundColor,
       padding: padding,
@@ -270,6 +282,7 @@ class _MaterialBannerState extends State<MaterialBanner> {
       ),
     );
 
+    final double elevation = widget.elevation ?? bannerTheme.elevation ?? 0.0;
     final Color backgroundColor = widget.backgroundColor
         ?? bannerTheme.backgroundColor
         ?? theme.colorScheme.surface;
@@ -277,35 +290,39 @@ class _MaterialBannerState extends State<MaterialBanner> {
         ?? bannerTheme.contentTextStyle
         ?? theme.textTheme.bodyText2;
 
-    Widget materialBanner = Container(
-      color: backgroundColor,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Padding(
-            padding: padding,
-            child: Row(
-              children: <Widget>[
-                if (widget.leading != null)
-                  Padding(
-                    padding: leadingPadding,
-                    child: widget.leading,
+    Widget materialBanner = SafeArea(
+      top: true,
+      child: Material(
+        elevation: elevation,
+        color: backgroundColor,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Padding(
+              padding: padding,
+              child: Row(
+                children: <Widget>[
+                  if (widget.leading != null)
+                    Padding(
+                      padding: leadingPadding,
+                      child: widget.leading,
+                    ),
+                  Expanded(
+                    child: DefaultTextStyle(
+                      style: textStyle!,
+                      child: widget.content,
+                    ),
                   ),
-                Expanded(
-                  child: DefaultTextStyle(
-                    style: textStyle!,
-                    child: widget.content,
-                  ),
-                ),
-                if (isSingleRow)
-                  buttonBar,
-              ],
+                  if (isSingleRow)
+                    buttonBar,
+                ],
+              ),
             ),
-          ),
-          if (!isSingleRow)
-            buttonBar,
-          const Divider(height: 0),
-        ],
+            if (!isSingleRow)
+              buttonBar,
+            const Divider(height: 0),
+          ],
+        ),
       ),
     );
 
