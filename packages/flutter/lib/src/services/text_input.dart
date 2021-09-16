@@ -1504,7 +1504,7 @@ class TextInput {
         _currentConnection!._client.updateEditingValue(TextEditingValue.fromJSON(args[1] as Map<String, dynamic>));
         break;
       case 'TextInputClient.updateEditingStateWithDeltas':
-        assert(_currentConnection!._client is DeltaTextInputClient, 'You are not using a DeltaTextInputClient!');
+        assert(_currentConnection!._client is DeltaTextInputClient, 'You should be using a DeltaTextInputClient if you have TextInputConfiguration.enableDeltaModel set to true');
         final List<TextEditingDelta> deltas = <TextEditingDelta>[];
 
         final Map<String, dynamic> encoded = args[1] as Map<String, dynamic>;
