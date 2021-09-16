@@ -63,6 +63,7 @@ cd "${FLUTTER_ENGINE_SRC_DIR}" || exit
 "${FLUTTER_ENGINE_FUCHSIA_SDK_DIR}/tools/pm" serve -vt \
   -repo "${FLUTTER_ENGINE_FUCHSIA_SDK_DIR}/${out}/tuf" \
   -l ":${port}" \
+  -c 2 \
   -p "${FLUTTER_ENGINE_SRC_DIR}/flutter/tools/fuchsia/all_packages.list"&
 serve_pid=$!
 
@@ -174,9 +175,9 @@ while true; do
     fi
 
     config_url="http://${addr}:${port}/config.json"
-    run_ssh_command amberctl add_src \
+    run_ssh_command pkgctl add \
       -n "engine" \
-      -f "${config_url}"
+      "${config_url}"
     err=$?
 
     if [[ $err -ne 0 ]]; then
