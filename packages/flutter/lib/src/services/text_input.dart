@@ -23,6 +23,7 @@ import 'platform_channel.dart';
 import 'system_channels.dart';
 import 'system_chrome.dart';
 import 'text_editing.dart';
+import 'text_editing_delta.dart';
 
 export 'dart:ui' show TextAffinity;
 
@@ -467,6 +468,7 @@ class TextInputConfiguration {
     this.textCapitalization = TextCapitalization.none,
     this.autofillConfiguration = AutofillConfiguration.disabled,
     this.enableIMEPersonalizedLearning = true,
+    this.enableDeltaModel = false,
   }) : assert(inputType != null),
        assert(obscureText != null),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
@@ -476,7 +478,8 @@ class TextInputConfiguration {
        assert(keyboardAppearance != null),
        assert(inputAction != null),
        assert(textCapitalization != null),
-       assert(enableIMEPersonalizedLearning != null);
+       assert(enableIMEPersonalizedLearning != null),
+       assert(enableDeltaModel != null);
 
   /// The type of information for which to optimize the text input control.
   final TextInputType inputType;
@@ -622,6 +625,7 @@ class TextInputConfiguration {
     TextCapitalization? textCapitalization,
     bool? enableIMEPersonalizedLearning,
     AutofillConfiguration? autofillConfiguration,
+    bool? enableDeltaModel,
   }) {
     return TextInputConfiguration(
       inputType: inputType ?? this.inputType,
@@ -636,8 +640,30 @@ class TextInputConfiguration {
       keyboardAppearance: keyboardAppearance ?? this.keyboardAppearance,
       enableIMEPersonalizedLearning: enableIMEPersonalizedLearning?? this.enableIMEPersonalizedLearning,
       autofillConfiguration: autofillConfiguration ?? this.autofillConfiguration,
+      enableDeltaModel: enableDeltaModel ?? this.enableDeltaModel,
     );
   }
+
+  /// Whether to enable that the engine sends text input updates to the
+  /// framework as [TextEditingDelta]'s or as one [TextEditingValue].
+  ///
+  /// When this is enabled platform text input updates will
+  /// come through [TextInputClient.updateEditingValueWithDeltas].
+  ///
+  /// When this is disabled platform text input updates will come through
+  /// [TextInputClient.updateEditingValue].
+  ///
+  /// Enabling this flag results in granular text updates being received from the
+  /// platforms text input control rather than a single new bulk editing state
+  /// given by [TextInputClient.updateEditingValue].
+  ///
+  /// If the platform does not currently support the delta model then updates
+  /// for the editing state will continue to come through the
+  /// [TextInputClient.updateEditingValue] channel.
+  ///
+  /// Defaults to false. Cannot be null.
+  final bool enableDeltaModel;
+
   /// Returns a representation of this object as a JSON object.
   Map<String, dynamic> toJson() {
     final Map<String, dynamic>? autofill = autofillConfiguration.toJson();
@@ -655,6 +681,7 @@ class TextInputConfiguration {
       'keyboardAppearance': keyboardAppearance.toString(),
       'enableIMEPersonalizedLearning': enableIMEPersonalizedLearning,
       if (autofill != null) 'autofill': autofill,
+      'enableDeltaModel' : enableDeltaModel,
     };
   }
 }
@@ -955,6 +982,16 @@ abstract class TextInputClient {
   /// The new [value] is treated as user input and thus may subject to input
   /// formatting.
   void updateEditingValue(TextEditingValue value);
+
+  /// Requests that this client update its editing state by applying the deltas
+  /// received from the engine.
+  ///
+  /// The list of [TextEditingDelta]'s are treated as changes that will be applied
+  /// to the client's editing state. A change is any mutation to the raw text
+  /// value, or any updates to the selection and/or composing region.
+  ///
+  /// {@macro flutter.services.TextEditingDelta.optIn}
+  void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas);
 
   /// Requests that this client perform the given action.
   void performAction(TextInputAction action);
@@ -1446,6 +1483,18 @@ class TextInput {
     switch (method) {
       case 'TextInputClient.updateEditingState':
         _currentConnection!._client.updateEditingValue(TextEditingValue.fromJSON(args[1] as Map<String, dynamic>));
+        break;
+      case 'TextInputClient.updateEditingStateWithDeltas':
+        final List<TextEditingDelta> deltas = <TextEditingDelta>[];
+
+        final Map<String, dynamic> encoded = args[1] as Map<String, dynamic>;
+
+        for (final dynamic encodedDelta in encoded['deltas']) {
+          final TextEditingDelta delta = TextEditingDelta.fromJSON(encodedDelta as Map<String, dynamic>);
+          deltas.add(delta);
+        }
+
+        _currentConnection!._client.updateEditingValueWithDeltas(deltas);
         break;
       case 'TextInputClient.performAction':
         _currentConnection!._client.performAction(_toTextInputAction(args[1] as String));

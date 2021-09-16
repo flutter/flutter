@@ -119,6 +119,7 @@ void main() {
       expect(configuration.inputType, TextInputType.text);
       expect(configuration.readOnly, false);
       expect(configuration.obscureText, false);
+      expect(configuration.enableDeltaModel, false);
       expect(configuration.autocorrect, true);
       expect(configuration.actionLabel, null);
       expect(configuration.textCapitalization, TextCapitalization.none);
@@ -448,6 +449,11 @@ class FakeTextInputClient implements TextInputClient {
   @override
   void updateEditingValue(TextEditingValue value) {
     latestMethodCall = 'updateEditingValue';
+  }
+
+  @override
+  void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas) {
+    latestMethodCall = 'updateEditingValueWithDeltas';
   }
 
   @override
