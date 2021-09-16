@@ -1043,7 +1043,7 @@ abstract class DeltaTextInputClient extends TextInputClient {
   /// value, or any updates to the selection and/or composing region.
   ///
   /// Here is an example of what implementation of this method could look like:
-  ///
+  /// {@tool snippet}
   /// @override
   /// void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas) {
   ///   TextEditingValue newValue = _previousValue;
@@ -1052,6 +1052,7 @@ abstract class DeltaTextInputClient extends TextInputClient {
   ///   }
   ///   _localValue = newValue;
   /// }
+  /// {@end-tool}
   void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas);
 }
 
