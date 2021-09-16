@@ -651,19 +651,19 @@ class TextInputConfiguration {
   /// platform's text input control.
   ///
   /// When this is enabled:
-  ///  * You should implement [DeltaTextInputClient] and not [TextInputClient] to
+  ///  * You must implement [DeltaTextInputClient] and not [TextInputClient] to
   ///  receive granular updates from the platform's text input.
   ///  * Platform text input updates will come through
   ///  [DeltaTextInputClient.updateEditingValueWithDeltas].
-  ///  * If you are implementing [TextInputClient] with this property enabled then
+  ///  * If [TextInputClient] is implemented with this property enabled then
   ///  you will experience unexpected behavior as [TextInputClient] does not implement
   ///  a delta channel.
   ///
   /// When this is disabled:
-  ///  * If you are implementing [DeltaTextInputClient] then updates for the
+  ///  * If [DeltaTextInputClient] is implemented then updates for the
   ///  editing state will continue to come through the
   ///  [DeltaTextInputClient.updateEditingValue] channel.
-  ///  * If you are implementing [TextInputClient] then updates for the editing
+  ///  * If [TextInputClient] is implemented then updates for the editing
   ///  state will come through [TextInputClient.updateEditingValue].
   ///
   /// Defaults to false. Cannot be null.
@@ -958,8 +958,8 @@ mixin TextSelectionDelegate {
 
 /// An interface to receive information from [TextInput].
 ///
-/// If [TextInputConfiguration.enableDeltaModel] is set to true you should
-/// implement [DeltaTextInputClient] instead of this class.
+/// If [TextInputConfiguration.enableDeltaModel] is set to true,
+/// [DeltaTextInputClient] must be implemented instead of this class.
 ///
 /// See also:
 ///
@@ -1514,7 +1514,7 @@ class TextInput {
         _currentConnection!._client.updateEditingValue(TextEditingValue.fromJSON(args[1] as Map<String, dynamic>));
         break;
       case 'TextInputClient.updateEditingStateWithDeltas':
-        assert(_currentConnection!._client is DeltaTextInputClient, 'You should be using a DeltaTextInputClient if you have TextInputConfiguration.enableDeltaModel set to true');
+        assert(_currentConnection!._client is DeltaTextInputClient, 'You must be using a DeltaTextInputClient if TextInputConfiguration.enableDeltaModel is set to true');
         final List<TextEditingDelta> deltas = <TextEditingDelta>[];
 
         final Map<String, dynamic> encoded = args[1] as Map<String, dynamic>;
