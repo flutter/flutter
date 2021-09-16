@@ -231,19 +231,10 @@ void main() {
         httpClient: fakeHttpClient,
       );
 
-      RunInvocation md5 = const RunInvocation(
-        <String>[
-          'md5',
-          '-s',
-          '{"CI":"luci","Platform":"linux","name":"flutter.golden.1","source_type":"flutter"}',
-        ],
-        null,
-      );
-      process.processResults[md5] = ProcessResult(12345678, 0, '12345678', '');
-      traceID = await skiaClient.getTraceID('flutter.golden.1');
+      traceID = skiaClient.getTraceID('flutter.golden.1');
       expect(
         traceID,
-        equals('12345678'),
+        equals('ae18c7a6aa48e0685525dfe8fdf79003'),
       );
 
       // Browser
@@ -266,19 +257,11 @@ void main() {
         platform: platform,
         httpClient: fakeHttpClient,
       );
-      md5 = const RunInvocation(
-        <String>[
-          'md5',
-          '-s',
-          '{"Browser":"chrome","CI":"luci","Platform":"linux","name":"flutter.golden.1","source_type":"flutter"}',
-        ],
-        null,
-      );
-      process.processResults[md5] = ProcessResult(12345678, 0, '12345678', '');
-      traceID = await skiaClient.getTraceID('flutter.golden.1');
+
+      traceID = skiaClient.getTraceID('flutter.golden.1');
       expect(
         traceID,
-        equals('12345678'),
+        equals('e9d5c296c48e7126808520e9cc191243'),
       );
 
       // Locally - should defer to luci traceID
@@ -296,19 +279,11 @@ void main() {
         platform: platform,
         httpClient: fakeHttpClient,
       );
-      md5 = const RunInvocation(
-        <String>[
-          'md5',
-          '-s',
-          '{"CI":"luci","Platform":"macos","name":"flutter.golden.1","source_type":"flutter"}',
-        ],
-        null,
-      );
-      process.processResults[md5] = ProcessResult(12345678, 0, '12345678', '');
-      traceID = await skiaClient.getTraceID('flutter.golden.1');
+
+      traceID = skiaClient.getTraceID('flutter.golden.1');
       expect(
         traceID,
-        equals('12345678'),
+        equals('9968695b9ae78cdb77cbb2be621ca2d6'),
       );
     });
 
