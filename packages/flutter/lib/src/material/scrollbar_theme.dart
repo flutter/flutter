@@ -32,6 +32,7 @@ class ScrollbarThemeData with Diagnosticable {
   /// Creates a theme that can be used for [ThemeData.scrollbarTheme].
   const ScrollbarThemeData({
     this.thickness,
+    this.showTrack,
     this.showTrackOnHover,
     this.isAlwaysShown,
     this.radius,
@@ -50,6 +51,10 @@ class ScrollbarThemeData with Diagnosticable {
   /// Resolves in the following states:
   ///  * [MaterialState.hovered] on web and desktop platforms.
   final MaterialStateProperty<double?>? thickness;
+
+  /// Overrides the default value of [Scrollbar.showTrack] in all
+  /// descendant [Scrollbar] widgets.
+  final bool? showTrack;
 
   /// Overrides the default value of [Scrollbar.showTrackOnHover] in all
   /// descendant [Scrollbar] widgets.

@@ -437,38 +437,55 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         trackSize = Size(thickness + 2 * crossAxisMargin, _trackExtent);
         x = crossAxisMargin + padding.left;
         y = _thumbOffset;
-        trackOffset = Offset(x - crossAxisMargin, 0.0);
+        trackOffset = Offset(x - crossAxisMargin, mainAxisMargin);
         break;
       case ScrollbarOrientation.right:
         thumbSize = Size(thickness, thumbExtent);
         trackSize = Size(thickness + 2 * crossAxisMargin, _trackExtent);
         x = size.width - thickness - crossAxisMargin - padding.right;
         y = _thumbOffset;
-        trackOffset = Offset(x - crossAxisMargin, 0.0);
+        trackOffset = Offset(x - crossAxisMargin, mainAxisMargin);
         break;
       case ScrollbarOrientation.top:
         thumbSize = Size(thumbExtent, thickness);
         trackSize = Size(_trackExtent, thickness + 2 * crossAxisMargin);
         x = _thumbOffset;
         y = crossAxisMargin + padding.top;
-        trackOffset = Offset(0.0, y - crossAxisMargin);
+        trackOffset = Offset(mainAxisMargin, y - crossAxisMargin);
         break;
       case ScrollbarOrientation.bottom:
         thumbSize = Size(thumbExtent, thickness);
         trackSize = Size(_trackExtent, thickness + 2 * crossAxisMargin);
         x = _thumbOffset;
         y = size.height - thickness - crossAxisMargin - padding.bottom;
-        trackOffset = Offset(0.0, y - crossAxisMargin);
+        trackOffset = Offset(mainAxisMargin, y - crossAxisMargin);
         break;
     }
 
     _trackRect = trackOffset & trackSize;
+    Offset borderStart;
+    Offset borderEnd;
+    switch(resolvedOrientation) {
+      case ScrollbarOrientation.left:
+        borderStart = trackOffset + Offset(trackSize.width, 0.0);
+        borderEnd = Offset(trackOffset.dx + trackSize.width, trackOffset.dy + _trackExtent);
+        break;
+      case ScrollbarOrientation.right:
+        borderStart = trackOffset;
+        borderEnd = Offset(trackOffset.dx, trackOffset.dy + _trackExtent);
+        break;
+      case ScrollbarOrientation.top:
+        borderStart = trackOffset + Offset(0.0, trackSize.height);
+        borderEnd = Offset(trackOffset.dx + _trackExtent, trackOffset.dy + trackSize.height);
+        break;
+      case ScrollbarOrientation.bottom:
+        borderStart = trackOffset;
+        borderEnd = Offset(trackOffset.dx + _trackExtent, trackOffset.dy);
+        break;
+    }
+
     canvas.drawRect(_trackRect!, _paintTrack());
-    canvas.drawLine(
-      trackOffset,
-      Offset(trackOffset.dx, trackOffset.dy + _trackExtent),
-      _paintTrack(isBorder: true),
-    );
+    canvas.drawLine(borderStart, borderEnd, _paintTrack(isBorder: true));
 
     _thumbRect = Offset(x, y) & thumbSize;
 

@@ -77,6 +77,7 @@ class Scrollbar extends StatelessWidget {
     required this.child,
     this.controller,
     this.isAlwaysShown,
+    this.showTrack,
     this.showTrackOnHover,
     this.hoverThickness,
     this.thickness,
@@ -95,7 +96,16 @@ class Scrollbar extends StatelessWidget {
   /// {@macro flutter.widgets.Scrollbar.isAlwaysShown}
   final bool? isAlwaysShown;
 
+  /// Controls if the track will show.
+  ///
+  /// If this property is null, then [ScrollbarThemeData.showTrack] of
+  /// [ThemeData.scrollbarTheme] is used. If that is also null, the default value
+  /// is false.
+  final bool? showTrack;
+
   /// Controls if the track will show on hover and remain, including during drag.
+  ///
+  /// This only works when [showTrack] is false.
   ///
   /// If this property is null, then [ScrollbarThemeData.showTrackOnHover] of
   /// [ThemeData.scrollbarTheme] is used. If that is also null, the default value
@@ -153,6 +163,7 @@ class Scrollbar extends StatelessWidget {
     return _MaterialScrollbar(
       controller: controller,
       isAlwaysShown: isAlwaysShown,
+      showTrack: showTrack,
       showTrackOnHover: showTrackOnHover,
       hoverThickness: hoverThickness,
       thickness: thickness,
@@ -171,6 +182,7 @@ class _MaterialScrollbar extends RawScrollbar {
     required Widget child,
     ScrollController? controller,
     bool? isAlwaysShown,
+    this.showTrack,
     this.showTrackOnHover,
     this.hoverThickness,
     double? thickness,
@@ -193,6 +205,7 @@ class _MaterialScrollbar extends RawScrollbar {
          scrollbarOrientation: scrollbarOrientation,
        );
 
+  final bool? showTrack;
   final bool? showTrackOnHover;
   final double? hoverThickness;
 
@@ -214,6 +227,8 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
 
   @override
   bool get enableGestures => widget.interactive ?? _scrollbarTheme.interactive ?? !_useAndroidScrollbar;
+
+  bool get _showTrack => widget.showTrack ?? _scrollbarTheme.showTrack ?? false;
 
   bool get _showTrackOnHover => widget.showTrackOnHover ?? _scrollbarTheme.showTrackOnHover ?? false;
 
@@ -266,7 +281,7 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
     final Color onSurface = _colorScheme.onSurface;
     final Brightness brightness = _colorScheme.brightness;
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.hovered) && _showTrackOnHover) {
+      if (_showTrack || (states.contains(MaterialState.hovered) && _showTrackOnHover)) {
         return _scrollbarTheme.trackColor?.resolve(states)
           ?? (brightness == Brightness.light
             ? onSurface.withOpacity(0.03)
@@ -280,7 +295,7 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
     final Color onSurface = _colorScheme.onSurface;
     final Brightness brightness = _colorScheme.brightness;
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.hovered) && _showTrackOnHover) {
+      if (_showTrack || (states.contains(MaterialState.hovered) && _showTrackOnHover)) {
         return _scrollbarTheme.trackBorderColor?.resolve(states)
           ?? (brightness == Brightness.light
             ? onSurface.withOpacity(0.1)
