@@ -953,10 +953,15 @@ mixin TextSelectionDelegate {
 
 /// An interface to receive information from [TextInput].
 ///
+/// If [TextInputConfiguration.enableDeltaModel] is set to true you should
+/// implement [DeltaTextInputClient] instead of this class.
+///
 /// See also:
 ///
 ///  * [TextInput.attach]
 ///  * [EditableText], a [TextInputClient] implementation.
+///  * [DeltaTextInputClient], a [TextInputClient] extension that receives
+///  granular information from the platform's text input.
 abstract class TextInputClient {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
