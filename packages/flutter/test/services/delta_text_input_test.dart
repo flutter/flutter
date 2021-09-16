@@ -53,7 +53,7 @@ void main() {
             1,
             jsonDecode('{"deltas": [$jsonDelta]}'),
           ],
-          'method': 'TextInputClient.updateEditingValueWithDeltas',
+          'method': 'TextInputClient.updateEditingStateWithDeltas',
         });
         await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
           'flutter/textinput',
