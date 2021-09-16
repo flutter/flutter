@@ -1021,6 +1021,9 @@ abstract class TextInputClient {
 /// See also:
 ///
 ///  * [TextInput.attach]
+///  * [TextInputConfiguration], to opt-in to receive [TextEditingDelta]'s from
+///  the platforms [TextInput] you must set [TextInputConfiguration.enableDeltaModel]
+///  to true.
 abstract class DeltaTextInputClient extends TextInputClient {
   /// Requests that this client update its editing state by applying the deltas
   /// received from the engine.
@@ -1039,8 +1042,6 @@ abstract class DeltaTextInputClient extends TextInputClient {
   ///   }
   ///   _localValue = newValue;
   /// }
-  ///
-  /// {@macro flutter.services.TextEditingDelta.optIn}
   void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas);
 }
 
