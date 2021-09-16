@@ -115,17 +115,14 @@ class CodesignCommand extends Command<void> {
       revision = ((await processManager.run(
         <String>['git', 'rev-parse', 'HEAD'],
         workingDirectory: (await framework.checkoutDirectory).path,
-      ))
-              .stdout as String)
-          .trim();
+      )).stdout as String).trim();
       assert(revision.isNotEmpty);
     }
 
     await framework.checkout(revision);
 
     // Ensure artifacts present
-    await framework
-        .runFlutter(<String>['precache', '--android', '--ios', '--macos']);
+    await framework.runFlutter(<String>['precache', '--android', '--ios', '--macos']);
 
     await verifyExist();
     if (argResults![kSignatures] as bool) {
@@ -333,13 +330,14 @@ class CodesignCommand extends Command<void> {
     }
   }
 
-  final List<String> _allBinaryPaths = <String>[];
+  List<String>? _allBinaryPaths;  
 
   /// Find every binary file in the given [rootDirectory].
   Future<List<String>> findBinaryPaths(String rootDirectory) async {
-    if (_allBinaryPaths.isNotEmpty) {
-      return _allBinaryPaths;
+    if (_allBinaryPaths != null) {
+      return _allBinaryPaths!;
     }
+    final List<String> allBinaryPaths = <String>[];
     final io.ProcessResult result = await processManager.run(
       <String>[
         'find',
@@ -355,10 +353,11 @@ class CodesignCommand extends Command<void> {
 
     await Future.forEach(allFiles, (String filePath) async {
       if (await isBinary(filePath)) {
-        _allBinaryPaths.add(filePath);
+        allBinaryPaths.add(filePath);
       }
     });
-    return _allBinaryPaths;
+    _allBinaryPaths = allBinaryPaths;
+    return _allBinaryPaths!;
   }
 
   /// Check mime-type of file at [filePath] to determine if it is binary.
