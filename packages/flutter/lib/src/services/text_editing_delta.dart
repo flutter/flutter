@@ -35,10 +35,10 @@ String _replace(String originalText, String replacementText, int start, int end)
 ///  * [TextEditingDeltaDeletion], a delta representing a deletion.
 ///  * [TextEditingDeltaReplacement], a delta representing a replacement.
 ///  * [TextEditingDeltaNonTextUpdate], a delta representing an update to the
-///  selection and/or composing region.
+///    selection and/or composing region.
 ///  * [TextInputConfiguration], to opt-in your [DeltaTextInputClient] to receive
-///  [TextEditingDelta]'s you must set [TextInputConfiguration.enableDeltaModel]
-///  to true.
+///    [TextEditingDelta]'s you must set [TextInputConfiguration.enableDeltaModel]
+///    to true.
 abstract class TextEditingDelta {
   /// Creates a delta for a given change to the editing state.
   ///
@@ -235,8 +235,8 @@ class TextEditingDeltaInsertion extends TextEditingDelta {
   /// See also:
   ///
   ///  * [TextInputConfiguration], to opt-in your [DeltaTextInputClient] to receive
-  ///  [TextEditingDelta]'s you must set [TextInputConfiguration.enableDeltaModel]
-  ///  to true.
+  ///    [TextEditingDelta]'s you must set [TextInputConfiguration.enableDeltaModel]
+  ///    to true.
   /// {@endtemplate}
   const TextEditingDeltaInsertion({
     required String oldText,

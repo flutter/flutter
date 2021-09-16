@@ -652,19 +652,19 @@ class TextInputConfiguration {
   ///
   /// When this is enabled:
   ///  * You must implement [DeltaTextInputClient] and not [TextInputClient] to
-  ///  receive granular updates from the platform's text input.
+  ///    receive granular updates from the platform's text input.
   ///  * Platform text input updates will come through
-  ///  [DeltaTextInputClient.updateEditingValueWithDeltas].
+  ///    [DeltaTextInputClient.updateEditingValueWithDeltas].
   ///  * If [TextInputClient] is implemented with this property enabled then
-  ///  you will experience unexpected behavior as [TextInputClient] does not implement
-  ///  a delta channel.
+  ///    you will experience unexpected behavior as [TextInputClient] does not implement
+  ///    a delta channel.
   ///
   /// When this is disabled:
   ///  * If [DeltaTextInputClient] is implemented then updates for the
-  ///  editing state will continue to come through the
-  ///  [DeltaTextInputClient.updateEditingValue] channel.
+  ///    editing state will continue to come through the
+  ///    [DeltaTextInputClient.updateEditingValue] channel.
   ///  * If [TextInputClient] is implemented then updates for the editing
-  ///  state will come through [TextInputClient.updateEditingValue].
+  ///    state will come through [TextInputClient.updateEditingValue].
   ///
   /// Defaults to false. Cannot be null.
   final bool enableDeltaModel;
@@ -966,7 +966,7 @@ mixin TextSelectionDelegate {
 ///  * [TextInput.attach]
 ///  * [EditableText], a [TextInputClient] implementation.
 ///  * [DeltaTextInputClient], a [TextInputClient] extension that receives
-///  granular information from the platform's text input.
+///    granular information from the platform's text input.
 abstract class TextInputClient {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -1032,8 +1032,8 @@ abstract class TextInputClient {
 ///
 ///  * [TextInput.attach]
 ///  * [TextInputConfiguration], to opt-in to receive [TextEditingDelta]'s from
-///  the platforms [TextInput] you must set [TextInputConfiguration.enableDeltaModel]
-///  to true.
+///    the platforms [TextInput] you must set [TextInputConfiguration.enableDeltaModel]
+///    to true.
 abstract class DeltaTextInputClient extends TextInputClient {
   /// Requests that this client update its editing state by applying the deltas
   /// received from the engine.
