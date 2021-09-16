@@ -983,16 +983,6 @@ abstract class TextInputClient {
   /// formatting.
   void updateEditingValue(TextEditingValue value);
 
-  /// Requests that this client update its editing state by applying the deltas
-  /// received from the engine.
-  ///
-  /// The list of [TextEditingDelta]'s are treated as changes that will be applied
-  /// to the client's editing state. A change is any mutation to the raw text
-  /// value, or any updates to the selection and/or composing region.
-  ///
-  /// {@macro flutter.services.TextEditingDelta.optIn}
-  void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas);
-
   /// Requests that this client perform the given action.
   void performAction(TextInputAction action);
 
@@ -1024,6 +1014,18 @@ abstract class TextInputClient {
   ///
   /// [TextInputClient] should cleanup its connection and finalize editing.
   void connectionClosed();
+}
+
+abstract class DeltaTextInputClient extends TextInputClient {
+  /// Requests that this client update its editing state by applying the deltas
+  /// received from the engine.
+  ///
+  /// The list of [TextEditingDelta]'s are treated as changes that will be applied
+  /// to the client's editing state. A change is any mutation to the raw text
+  /// value, or any updates to the selection and/or composing region.
+  ///
+  /// {@macro flutter.services.TextEditingDelta.optIn}
+  void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas);
 }
 
 /// An interface for interacting with a text input control.
@@ -1494,7 +1496,7 @@ class TextInput {
           deltas.add(delta);
         }
 
-        _currentConnection!._client.updateEditingValueWithDeltas(deltas);
+        (_currentConnection!._client as DeltaTextInputClient).updateEditingValueWithDeltas(deltas);
         break;
       case 'TextInputClient.performAction':
         _currentConnection!._client.performAction(_toTextInputAction(args[1] as String));
