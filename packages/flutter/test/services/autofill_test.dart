@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  group('TextInput message channels', () {
+  group('AutofillClient', () {
     late FakeTextChannel fakeTextChannel;
     final FakeAutofillScope scope = FakeAutofillScope();
 
@@ -25,21 +25,19 @@ void main() {
       TextInput.setChannel(SystemChannels.textInput);
     });
 
-    test('throws if the hint list is empty', () async {
-      Map<String, dynamic>? json;
+    test('Does not throw if the hint list is empty', () async {
+      Object? exception;
       try {
-        const AutofillConfiguration config = AutofillConfiguration(
+        const AutofillConfiguration(
           uniqueIdentifier: 'id',
           autofillHints: <String>[],
           currentEditingValue: TextEditingValue.empty,
         );
-
-        json = config.toJson();
       } catch (e) {
-        expect(e.toString(), contains('isNotEmpty'));
+        exception = e;
       }
 
-      expect(json, isNull);
+      expect(exception, isNull);
     });
 
     test(
@@ -109,6 +107,19 @@ class FakeAutofillClient implements TextInputClient, AutofillClient {
   }
 
   @override
+  void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas) {
+    TextEditingValue newEditingValue = currentTextEditingValue;
+
+    for (final TextEditingDelta delta in textEditingDeltas) {
+      newEditingValue = delta.apply(newEditingValue);
+    }
+
+    currentTextEditingValue = newEditingValue;
+
+    latestMethodCall = 'updateEditingValueWithDeltas';
+  }
+
+  @override
   AutofillScope? currentAutofillScope;
 
   String latestMethodCall = '';
@@ -140,6 +151,9 @@ class FakeAutofillClient implements TextInputClient, AutofillClient {
   void showAutocorrectionPromptRect(int start, int end) {
     latestMethodCall = 'showAutocorrectionPromptRect';
   }
+
+  @override
+  void autofill(TextEditingValue newEditingValue) => updateEditingValue(newEditingValue);
 }
 
 class FakeAutofillScope with AutofillScopeMixin implements AutofillScope {

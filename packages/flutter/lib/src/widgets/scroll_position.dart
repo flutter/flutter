@@ -509,7 +509,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
 
   bool _pendingDimensions = false;
   ScrollMetrics? _lastMetrics;
-  // True indicates that there is an ScrollMetrics update notificaton pending.
+  // True indicates that there is a ScrollMetrics update notification pending.
   bool _haveScheduledUpdateNotification = false;
   Axis? _lastAxis;
 
@@ -558,7 +558,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       // It isn't safe to trigger the ScrollMetricsNotification if we are in
       // the middle of rendering the frame, the developer is likely to schedule
       // a new frame(build scheduled during frame is illegal).
-      if (_lastMetrics != null && !_haveScheduledUpdateNotification) {
+      if (!_haveScheduledUpdateNotification) {
         scheduleMicrotask(didUpdateScrollMetrics);
         _haveScheduledUpdateNotification = true;
       }
@@ -994,61 +994,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
 /// the `windowSize` is changed. Press the floating action button to increase
 /// the scrollable window's size.
 ///
-/// ```dart main
-/// import 'package:flutter/material.dart';
-///
-/// void main() => runApp(const ScrollMetricsDemo());
-///
-/// class ScrollMetricsDemo extends StatefulWidget {
-///   const ScrollMetricsDemo({Key? key}) : super(key: key);
-///
-///   @override
-///   State<ScrollMetricsDemo> createState() => ScrollMetricsDemoState();
-/// }
-///
-/// class ScrollMetricsDemoState extends State<ScrollMetricsDemo> {
-///   double windowSize = 200.0;
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return MaterialApp(
-///       home: Scaffold(
-///         appBar: AppBar(
-///           title: const Text('ScrollMetrics Demo'),
-///         ),
-///         floatingActionButton: FloatingActionButton(
-///           child: const Icon(Icons.add),
-///           onPressed: () => setState(() {
-///             windowSize += 10.0;
-///           }),
-///         ),
-///         body: NotificationListener<ScrollMetricsNotification>(
-///           onNotification: (ScrollMetricsNotification notification) {
-///             ScaffoldMessenger.of(notification.context).showSnackBar(
-///               const SnackBar(
-///                 content: Text('Scroll metrics changed!'),
-///               ),
-///             );
-///             return false;
-///           },
-///           child: Scrollbar(
-///             isAlwaysShown: true,
-///             child: SizedBox(
-///               height: windowSize,
-///               width: double.infinity,
-///               child: const SingleChildScrollView(
-///                 child: FlutterLogo(
-///                   size: 300.0,
-///                 ),
-///               ),
-///             ),
-///           ),
-///         ),
-///       ),
-///     );
-///   }
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/scroll_position/scroll_metrics_notification.0.dart **
 /// {@end-tool}
 class ScrollMetricsNotification extends Notification with ViewportNotificationMixin {
   /// Creates a notification that the scrollable widget's [ScrollMetrics] have

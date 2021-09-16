@@ -12,6 +12,39 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  group('TextSelection', () {
+    test('The invalid selection is a singleton', () {
+      const TextSelection invalidSelection1 = TextSelection(
+        baseOffset: -1,
+        extentOffset: 0,
+        affinity: TextAffinity.downstream,
+        isDirectional: true,
+      );
+      const TextSelection invalidSelection2 = TextSelection(baseOffset: 123,
+        extentOffset: -1,
+        affinity: TextAffinity.upstream,
+        isDirectional: false,
+      );
+      expect(invalidSelection1, invalidSelection2);
+      expect(invalidSelection1.hashCode, invalidSelection2.hashCode);
+    });
+
+    test('TextAffinity does not affect equivalence when the selection is not collapsed', () {
+      const TextSelection selection1 = TextSelection(
+        baseOffset: 1,
+        extentOffset: 2,
+        affinity: TextAffinity.downstream,
+      );
+      const TextSelection selection2 = TextSelection(
+        baseOffset: 1,
+        extentOffset: 2,
+        affinity: TextAffinity.upstream,
+      );
+      expect(selection1, selection2);
+      expect(selection1.hashCode, selection2.hashCode);
+    });
+  });
+
   group('TextInput message channels', () {
     late FakeTextChannel fakeTextChannel;
 
@@ -86,6 +119,7 @@ void main() {
       expect(configuration.inputType, TextInputType.text);
       expect(configuration.readOnly, false);
       expect(configuration.obscureText, false);
+      expect(configuration.enableDeltaModel, false);
       expect(configuration.autocorrect, true);
       expect(configuration.actionLabel, null);
       expect(configuration.textCapitalization, TextCapitalization.none);
@@ -415,6 +449,11 @@ class FakeTextInputClient implements TextInputClient {
   @override
   void updateEditingValue(TextEditingValue value) {
     latestMethodCall = 'updateEditingValue';
+  }
+
+  @override
+  void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas) {
+    latestMethodCall = 'updateEditingValueWithDeltas';
   }
 
   @override

@@ -4,6 +4,7 @@
 
 import 'dart:ui' show Brightness;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -110,6 +111,7 @@ void main() {
     expect(data.boldText, false);
     expect(data.highContrast, false);
     expect(data.platformBrightness, Brightness.light);
+    expect(data.gestureSettings.touchSlop, null);
   });
 
   testWidgets('MediaQueryData.copyWith defaults to source', (WidgetTester tester) async {
@@ -129,6 +131,7 @@ void main() {
     expect(copied.boldText, data.boldText);
     expect(copied.highContrast, data.highContrast);
     expect(copied.platformBrightness, data.platformBrightness);
+    expect(copied.gestureSettings, data.gestureSettings);
   });
 
   testWidgets('MediaQuery.copyWith copies specified values', (WidgetTester tester) async {
@@ -141,6 +144,7 @@ void main() {
     const EdgeInsets customViewPadding = EdgeInsets.all(11.24031);
     const EdgeInsets customViewInsets = EdgeInsets.all(1.67262);
     const EdgeInsets customSystemGestureInsets = EdgeInsets.all(1.5556);
+    const DeviceGestureSettings gestureSettings = DeviceGestureSettings(touchSlop: 8.0);
 
     final MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance!.window);
     final MediaQueryData copied = data.copyWith(
@@ -158,6 +162,7 @@ void main() {
       boldText: true,
       highContrast: true,
       platformBrightness: Brightness.dark,
+      gestureSettings: gestureSettings,
     );
     expect(copied.size, customSize);
     expect(copied.devicePixelRatio, customDevicePixelRatio);
@@ -173,6 +178,7 @@ void main() {
     expect(copied.boldText, true);
     expect(copied.highContrast, true);
     expect(copied.platformBrightness, Brightness.dark);
+    expect(copied.gestureSettings, gestureSettings);
   });
 
   testWidgets('MediaQuery.removePadding removes specified padding', (WidgetTester tester) async {
@@ -654,8 +660,7 @@ void main() {
     expect(hasMediaQueryAsParentInside, true);
   });
 
-  testWidgets('MediaQueryData.fromWindow is created using window values', (WidgetTester tester)
-  async {
+  testWidgets('MediaQueryData.fromWindow is created using window values', (WidgetTester tester) async {
     final MediaQueryData windowData = MediaQueryData.fromWindow(WidgetsBinding.instance!.window);
     late MediaQueryData fromWindowData;
 
@@ -671,5 +676,23 @@ void main() {
     );
 
     expect(windowData, equals(fromWindowData));
+  });
+
+  test('DeviceGestureSettings has reasonable hashCode', () {
+    final DeviceGestureSettings settingsA = DeviceGestureSettings(touchSlop: nonconst(16));
+    final DeviceGestureSettings settingsB = DeviceGestureSettings(touchSlop: nonconst(8));
+    final DeviceGestureSettings settingsC = DeviceGestureSettings(touchSlop: nonconst(16));
+
+    expect(settingsA.hashCode, settingsC.hashCode);
+    expect(settingsA.hashCode, isNot(settingsB.hashCode));
+  });
+
+  test('DeviceGestureSettings has reasonable equality', () {
+    final DeviceGestureSettings settingsA = DeviceGestureSettings(touchSlop: nonconst(16));
+    final DeviceGestureSettings settingsB = DeviceGestureSettings(touchSlop: nonconst(8));
+    final DeviceGestureSettings settingsC = DeviceGestureSettings(touchSlop: nonconst(16));
+
+    expect(settingsA, equals(settingsC));
+    expect(settingsA, isNot(settingsB));
   });
 }

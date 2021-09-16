@@ -22,6 +22,7 @@ import 'colors.dart';
 import 'data_table_theme.dart';
 import 'dialog_theme.dart';
 import 'divider_theme.dart';
+import 'drawer_theme.dart';
 import 'elevated_button_theme.dart';
 import 'floating_action_button_theme.dart';
 import 'ink_splash.dart';
@@ -336,6 +337,7 @@ class ThemeData with Diagnosticable {
     RadioThemeData? radioTheme,
     SwitchThemeData? switchTheme,
     ProgressIndicatorThemeData? progressIndicatorTheme,
+    DrawerThemeData? drawerTheme,
     @Deprecated(
       'This "fix" is now enabled by default. '
       'This feature was deprecated after v2.5.0-1.0.pre.',
@@ -346,6 +348,7 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v1.23.0-4.0.pre.',
     )
     bool? useTextSelectionTheme,
+    AndroidOverscrollIndicator? androidOverscrollIndicator,
   }) {
     assert(colorScheme?.brightness == null || brightness == null || colorScheme!.brightness == brightness);
     final Brightness _brightness = brightness ?? colorScheme?.brightness ?? Brightness.light;
@@ -478,6 +481,7 @@ class ThemeData with Diagnosticable {
     radioTheme ??= const RadioThemeData();
     switchTheme ??= const SwitchThemeData();
     progressIndicatorTheme ??= const ProgressIndicatorThemeData();
+    drawerTheme ??= const DrawerThemeData();
 
     fixTextFieldOutlineLabel ??= true;
     useTextSelectionTheme ??= true;
@@ -559,8 +563,10 @@ class ThemeData with Diagnosticable {
       radioTheme: radioTheme,
       switchTheme: switchTheme,
       progressIndicatorTheme: progressIndicatorTheme,
+      drawerTheme: drawerTheme,
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel,
       useTextSelectionTheme: useTextSelectionTheme,
+      androidOverscrollIndicator: androidOverscrollIndicator,
     );
   }
 
@@ -691,6 +697,7 @@ class ThemeData with Diagnosticable {
     required this.radioTheme,
     required this.switchTheme,
     required this.progressIndicatorTheme,
+    required this.drawerTheme,
     @Deprecated(
       'This "fix" is now enabled by default. '
       'This feature was deprecated after v2.5.0-1.0.pre.',
@@ -701,6 +708,7 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v1.23.0-4.0.pre.',
     )
     required this.useTextSelectionTheme,
+    required this.androidOverscrollIndicator,
   }) : assert(visualDensity != null),
        assert(primaryColor != null),
        assert(primaryColorBrightness != null),
@@ -774,6 +782,7 @@ class ThemeData with Diagnosticable {
        assert(radioTheme != null),
        assert(switchTheme != null),
        assert(progressIndicatorTheme != null),
+       assert(drawerTheme != null),
        assert(fixTextFieldOutlineLabel != null),
        assert(useTextSelectionTheme != null);
 
@@ -1334,6 +1343,9 @@ class ThemeData with Diagnosticable {
   /// A theme for customizing the appearance and layout of [ProgressIndicator] widgets.
   final ProgressIndicatorThemeData progressIndicatorTheme;
 
+  /// A theme for customizing the appearance and layout of [Drawer] widgets.
+  final DrawerThemeData drawerTheme;
+
   /// An obsolete flag to allow apps to opt-out of a
   /// [small fix](https://github.com/flutter/flutter/issues/54028) for the Y
   /// coordinate of the floating label in a [TextField] [OutlineInputBorder].
@@ -1357,6 +1369,20 @@ class ThemeData with Diagnosticable {
     'This feature was deprecated after v1.23.0-4.0.pre.',
   )
   final bool useTextSelectionTheme;
+
+  /// Specifies which overscroll indicator to use on [TargetPlatform.android].
+  ///
+  /// When null, the default value of
+  /// [MaterialScrollBehavior.androidOverscrollIndicator] is
+  /// [AndroidOverscrollIndicator.glow].
+  ///
+  /// See also:
+  ///
+  ///   * [StretchingOverscrollIndicator], a material design edge effect
+  ///     that transforms the contents of a scrollable when overscrolled.
+  ///   * [GlowingOverscrollIndicator], an edge effect that paints a glow
+  ///     over the contents of a scrollable when overscrolled.
+  final AndroidOverscrollIndicator? androidOverscrollIndicator;
 
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ///
@@ -1479,6 +1505,7 @@ class ThemeData with Diagnosticable {
     RadioThemeData? radioTheme,
     SwitchThemeData? switchTheme,
     ProgressIndicatorThemeData? progressIndicatorTheme,
+    DrawerThemeData? drawerTheme,
     @Deprecated(
       'This "fix" is now enabled by default. '
       'This feature was deprecated after v2.5.0-1.0.pre.',
@@ -1489,6 +1516,7 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v1.23.0-4.0.pre.',
     )
     bool? useTextSelectionTheme,
+    AndroidOverscrollIndicator? androidOverscrollIndicator,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     return ThemeData.raw(
@@ -1568,8 +1596,10 @@ class ThemeData with Diagnosticable {
       radioTheme: radioTheme ?? this.radioTheme,
       switchTheme: switchTheme ?? this.switchTheme,
       progressIndicatorTheme: progressIndicatorTheme ?? this.progressIndicatorTheme,
+      drawerTheme: drawerTheme ?? this.drawerTheme,
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel ?? this.fixTextFieldOutlineLabel,
       useTextSelectionTheme: useTextSelectionTheme ?? this.useTextSelectionTheme,
+      androidOverscrollIndicator: androidOverscrollIndicator ?? this.androidOverscrollIndicator,
     );
   }
 
@@ -1727,8 +1757,10 @@ class ThemeData with Diagnosticable {
       radioTheme: RadioThemeData.lerp(a.radioTheme, b.radioTheme, t),
       switchTheme: SwitchThemeData.lerp(a.switchTheme, b.switchTheme, t),
       progressIndicatorTheme: ProgressIndicatorThemeData.lerp(a.progressIndicatorTheme, b.progressIndicatorTheme, t)!,
+      drawerTheme: DrawerThemeData.lerp(a.drawerTheme, b.drawerTheme, t)!,
       fixTextFieldOutlineLabel: t < 0.5 ? a.fixTextFieldOutlineLabel : b.fixTextFieldOutlineLabel,
       useTextSelectionTheme: t < 0.5 ? a.useTextSelectionTheme : b.useTextSelectionTheme,
+      androidOverscrollIndicator: t < 0.5 ? a.androidOverscrollIndicator : b.androidOverscrollIndicator,
     );
   }
 
@@ -1814,8 +1846,10 @@ class ThemeData with Diagnosticable {
         && other.radioTheme == radioTheme
         && other.switchTheme == switchTheme
         && other.progressIndicatorTheme == progressIndicatorTheme
+        && other.drawerTheme == drawerTheme
         && other.fixTextFieldOutlineLabel == fixTextFieldOutlineLabel
-        && other.useTextSelectionTheme == useTextSelectionTheme;
+        && other.useTextSelectionTheme == useTextSelectionTheme
+        && other.androidOverscrollIndicator == androidOverscrollIndicator;
   }
 
   @override
@@ -1900,8 +1934,10 @@ class ThemeData with Diagnosticable {
       radioTheme,
       switchTheme,
       progressIndicatorTheme,
+      drawerTheme,
       fixTextFieldOutlineLabel,
       useTextSelectionTheme,
+      androidOverscrollIndicator,
     ];
     return hashList(values);
   }
@@ -1984,6 +2020,8 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<RadioThemeData>('radioTheme', radioTheme, defaultValue: defaultData.radioTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<SwitchThemeData>('switchTheme', switchTheme, defaultValue: defaultData.switchTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ProgressIndicatorThemeData>('progressIndicatorTheme', progressIndicatorTheme, defaultValue: defaultData.progressIndicatorTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<DrawerThemeData>('drawerTheme', drawerTheme, defaultValue: defaultData.drawerTheme, level: DiagnosticLevel.debug));
+    properties.add(EnumProperty<AndroidOverscrollIndicator>('androidOverscrollIndicator', androidOverscrollIndicator, defaultValue: null, level: DiagnosticLevel.debug));
   }
 }
 
