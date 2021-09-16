@@ -3537,7 +3537,9 @@ TEST_F(EmbedderTest, CreateInvalidBackingstoreOpenGLTexture) {
         backing_store_out->open_gl.texture.target = 0;
         backing_store_out->open_gl.texture.name = 0;
         backing_store_out->open_gl.texture.format = 0;
-        backing_store_out->open_gl.texture.user_data = new TestCollectOnce();
+        static TestCollectOnce collect_once_user_data;
+        collect_once_user_data = {};
+        backing_store_out->open_gl.texture.user_data = &collect_once_user_data;
         backing_store_out->open_gl.texture.destruction_callback =
             [](void* user_data) {
               reinterpret_cast<TestCollectOnce*>(user_data)->Collect();
@@ -3597,8 +3599,10 @@ TEST_F(EmbedderTest, CreateInvalidBackingstoreOpenGLFramebuffer) {
         backing_store_out->open_gl.type = kFlutterOpenGLTargetTypeFramebuffer;
         backing_store_out->open_gl.framebuffer.target = 0;
         backing_store_out->open_gl.framebuffer.name = 0;
+        static TestCollectOnce collect_once_user_data;
+        collect_once_user_data = {};
         backing_store_out->open_gl.framebuffer.user_data =
-            new TestCollectOnce();
+            &collect_once_user_data;
         backing_store_out->open_gl.framebuffer.destruction_callback =
             [](void* user_data) {
               reinterpret_cast<TestCollectOnce*>(user_data)->Collect();
