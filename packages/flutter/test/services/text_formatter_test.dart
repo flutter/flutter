@@ -663,6 +663,16 @@ void main() {
     }
   });
 
+  test('FilteringTextInputFormatter basic filtering test', () {
+    final RegExp filter = RegExp('[A-Za-z0-9.@-]*');
+    final TextInputFormatter formatter = FilteringTextInputFormatter.allow(filter);
+
+    const TextEditingValue oldValue = TextEditingValue.empty;
+    const TextEditingValue newValue = TextEditingValue(text: 'ab&&ca@bcabc');
+
+    expect(formatter.formatEditUpdate(oldValue, newValue).text, 'abca@bcabc');
+  });
+
   group('FilteringTextInputFormatter region', () {
     const TextEditingValue oldValue = TextEditingValue.empty;
 

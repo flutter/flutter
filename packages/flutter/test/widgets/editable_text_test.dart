@@ -8047,6 +8047,37 @@ void main() {
       expect(error, isFlutterError);
       expect(error.toString(), contains(errorText));
     });
+
+    testWidgets('input formatters can thorw errors', (WidgetTester tester) async {
+      final TextInputFormatter badFormatter = TextInputFormatter.withFunction(
+        (TextEditingValue oldValue, TextEditingValue newValue) => throw FlutterError(errorText),
+      );
+      await tester.pumpWidget(MaterialApp(
+        home: EditableText(
+          showSelectionHandles: true,
+          maxLines: 2,
+          controller: TextEditingController(
+            text: 'flutter is the best!',
+          ),
+          inputFormatters: <TextInputFormatter>[badFormatter],
+          focusNode: FocusNode(),
+          cursorColor: Colors.red,
+          backgroundCursorColor: Colors.blue,
+          style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!.copyWith(fontFamily: 'Roboto'),
+          keyboardType: TextInputType.text,
+        ),
+      ));
+
+      // Interact with the field to establish the input connection.
+      await tester.tap(find.byType(EditableText));
+      await tester.pump();
+
+      await tester.enterText(find.byType(EditableText), 'text');
+
+      final dynamic error = tester.takeException();
+      expect(error, isFlutterError);
+      expect(error.toString(), contains(errorText));
+    });
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/72400.

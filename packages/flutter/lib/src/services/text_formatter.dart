@@ -352,7 +352,7 @@ class FilteringTextInputFormatter extends TextInputFormatter {
     final Iterable<Match> matches = filterPattern.allMatches(newValue.text);
     Match? previousMatch;
     for (final Match match in matches) {
-      assert(match.end > match.start);
+      assert(match.end >= match.start);
       // Compute the non-match region between this `Match` and the previous
       // `Match`. Depending on the value of `allow`, either the match region or
       // the non-match region is the banned pattern.
