@@ -751,7 +751,7 @@ void main() {
         );
         expect(
           stdio.stdout,
-          contains('There were 1 cherrypicks that were not auto-applied'),
+          contains('There was 1 cherrypick that was not auto-applied'),
         );
         expect(
           stdio.stdout,
