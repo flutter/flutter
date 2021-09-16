@@ -951,12 +951,14 @@ mixin TextSelectionDelegate {
   void copySelection(SelectionChangedCause cause);
 }
 
+/// {@template flutter.services.TextInputClient}
 /// An interface to receive information from [TextInput].
 ///
 /// See also:
 ///
 ///  * [TextInput.attach]
 ///  * [EditableText], a [TextInputClient] implementation.
+/// {@endtemplate}
 abstract class TextInputClient {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -1016,6 +1018,7 @@ abstract class TextInputClient {
   void connectionClosed();
 }
 
+/// {@macro flutter.services.TextInputClient}
 abstract class DeltaTextInputClient extends TextInputClient {
   /// Requests that this client update its editing state by applying the deltas
   /// received from the engine.

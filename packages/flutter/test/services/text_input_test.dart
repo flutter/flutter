@@ -452,11 +452,6 @@ class FakeTextInputClient implements TextInputClient {
   }
 
   @override
-  void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas) {
-    latestMethodCall = 'updateEditingValueWithDeltas';
-  }
-
-  @override
   void updateFloatingCursor(RawFloatingCursorPoint point) {
     latestMethodCall = 'updateFloatingCursor';
   }
