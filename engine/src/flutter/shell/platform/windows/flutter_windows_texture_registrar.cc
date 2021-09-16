@@ -12,11 +12,16 @@
 namespace flutter {
 
 FlutterWindowsTextureRegistrar::FlutterWindowsTextureRegistrar(
-    FlutterWindowsEngine* engine)
-    : engine_(engine) {}
+    FlutterWindowsEngine* engine,
+    const GlProcs& gl_procs)
+    : engine_(engine), gl_procs_(gl_procs) {}
 
 int64_t FlutterWindowsTextureRegistrar::RegisterTexture(
     const FlutterDesktopTextureInfo* texture_info) {
+  if (!gl_procs_.valid) {
+    return -1;
+  }
+
   if (texture_info->type != kFlutterDesktopPixelBufferTexture) {
     std::cerr << "Attempted to register texture of unsupport type."
               << std::endl;
@@ -30,7 +35,7 @@ int64_t FlutterWindowsTextureRegistrar::RegisterTexture(
 
   auto texture_gl = std::make_unique<flutter::ExternalTextureGL>(
       texture_info->pixel_buffer_config.callback,
-      texture_info->pixel_buffer_config.user_data);
+      texture_info->pixel_buffer_config.user_data, gl_procs_);
   int64_t texture_id = texture_gl->texture_id();
 
   {
@@ -84,6 +89,23 @@ bool FlutterWindowsTextureRegistrar::PopulateTexture(
     texture = it->second.get();
   }
   return texture->PopulateTexture(width, height, opengl_texture);
+}
+
+void FlutterWindowsTextureRegistrar::ResolveGlFunctions(GlProcs& procs) {
+  procs.glGenTextures =
+      reinterpret_cast<glGenTexturesProc>(eglGetProcAddress("glGenTextures"));
+  procs.glDeleteTextures = reinterpret_cast<glDeleteTexturesProc>(
+      eglGetProcAddress("glDeleteTextures"));
+  procs.glBindTexture =
+      reinterpret_cast<glBindTextureProc>(eglGetProcAddress("glBindTexture"));
+  procs.glTexParameteri = reinterpret_cast<glTexParameteriProc>(
+      eglGetProcAddress("glTexParameteri"));
+  procs.glTexImage2D =
+      reinterpret_cast<glTexImage2DProc>(eglGetProcAddress("glTexImage2D"));
+
+  procs.valid = procs.glGenTextures && procs.glDeleteTextures &&
+                procs.glBindTexture && procs.glTexParameteri &&
+                procs.glTexImage2D;
 }
 
 };  // namespace flutter

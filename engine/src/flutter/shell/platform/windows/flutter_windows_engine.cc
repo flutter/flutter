@@ -164,7 +164,10 @@ FlutterWindowsEngine::FlutterWindowsEngine(const FlutterProjectBundle& project)
   messenger_wrapper_ = std::make_unique<BinaryMessengerImpl>(messenger_.get());
   message_dispatcher_ =
       std::make_unique<IncomingMessageDispatcher>(messenger_.get());
-  texture_registrar_ = std::make_unique<FlutterWindowsTextureRegistrar>(this);
+
+  FlutterWindowsTextureRegistrar::ResolveGlFunctions(gl_procs_);
+  texture_registrar_ =
+      std::make_unique<FlutterWindowsTextureRegistrar>(this, gl_procs_);
   surface_manager_ = AngleSurfaceManager::Create();
 #ifndef WINUWP
   window_proc_delegate_manager_ =

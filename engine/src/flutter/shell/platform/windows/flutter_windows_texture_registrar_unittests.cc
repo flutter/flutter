@@ -8,6 +8,7 @@
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
 #include "flutter/shell/platform/windows/flutter_windows_texture_registrar.h"
 #include "flutter/shell/platform/windows/testing/engine_modifier.h"
+#include "flutter/shell/platform/windows/testing/mock_gl_functions.h"
 #include "gtest/gtest.h"
 
 namespace flutter {
@@ -27,8 +28,9 @@ std::unique_ptr<FlutterWindowsEngine> GetTestEngine() {
 
 TEST(FlutterWindowsTextureRegistrarTest, CreateDestroy) {
   std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
+  std::unique_ptr<MockGlFunctions> gl = std::make_unique<MockGlFunctions>();
 
-  FlutterWindowsTextureRegistrar registrar(engine.get());
+  FlutterWindowsTextureRegistrar registrar(engine.get(), gl->gl_procs());
 
   EXPECT_TRUE(true);
 }
@@ -36,8 +38,9 @@ TEST(FlutterWindowsTextureRegistrarTest, CreateDestroy) {
 TEST(FlutterWindowsTextureRegistrarTest, RegisterUnregisterTexture) {
   std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
   EngineModifier modifier(engine.get());
+  std::unique_ptr<MockGlFunctions> gl = std::make_unique<MockGlFunctions>();
 
-  FlutterWindowsTextureRegistrar registrar(engine.get());
+  FlutterWindowsTextureRegistrar registrar(engine.get(), gl->gl_procs());
 
   FlutterDesktopTextureInfo texture_info = {};
   texture_info.type = kFlutterDesktopPixelBufferTexture;
@@ -90,9 +93,9 @@ TEST(FlutterWindowsTextureRegistrarTest, RegisterUnregisterTexture) {
 
 TEST(FlutterWindowsTextureRegistrarTest, RegisterUnknownTextureType) {
   std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
-  EngineModifier modifier(engine.get());
+  std::unique_ptr<MockGlFunctions> gl = std::make_unique<MockGlFunctions>();
 
-  FlutterWindowsTextureRegistrar registrar(engine.get());
+  FlutterWindowsTextureRegistrar registrar(engine.get(), gl->gl_procs());
 
   FlutterDesktopTextureInfo texture_info = {};
   texture_info.type = static_cast<FlutterDesktopTextureType>(1234);
@@ -102,17 +105,62 @@ TEST(FlutterWindowsTextureRegistrarTest, RegisterUnknownTextureType) {
   EXPECT_EQ(texture_id, -1);
 }
 
+TEST(FlutterWindowsTextureRegistrarTest, PopulatePixelBufferTexture) {
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
+  EngineModifier modifier(engine.get());
+  std::unique_ptr<MockGlFunctions> gl = std::make_unique<MockGlFunctions>();
+
+  FlutterWindowsTextureRegistrar registrar(engine.get(), gl->gl_procs());
+
+  bool release_callback_called = false;
+  size_t width = 100;
+  size_t height = 100;
+  std::unique_ptr<uint8_t[]> pixels(new uint8_t[width * height * 4]);
+  FlutterDesktopPixelBuffer pixel_buffer = {};
+  pixel_buffer.width = width;
+  pixel_buffer.height = height;
+  pixel_buffer.buffer = pixels.get();
+  pixel_buffer.release_context = &release_callback_called;
+  pixel_buffer.release_callback = [](void* release_context) {
+    bool* called = reinterpret_cast<bool*>(release_context);
+    *called = true;
+  };
+
+  FlutterDesktopTextureInfo texture_info = {};
+  texture_info.type = kFlutterDesktopPixelBufferTexture;
+  texture_info.pixel_buffer_config.user_data = &pixel_buffer;
+  texture_info.pixel_buffer_config.callback =
+      [](size_t width, size_t height,
+         void* user_data) -> const FlutterDesktopPixelBuffer* {
+    return reinterpret_cast<const FlutterDesktopPixelBuffer*>(user_data);
+  };
+
+  modifier.embedder_api().RegisterExternalTexture =
+      MOCK_ENGINE_PROC(RegisterExternalTexture,
+                       ([](auto engine, auto texture_id) { return kSuccess; }));
+
+  FlutterOpenGLTexture flutter_texture = {};
+  auto texture_id = registrar.RegisterTexture(&texture_info);
+  EXPECT_NE(texture_id, -1);
+
+  auto result =
+      registrar.PopulateTexture(texture_id, 640, 480, &flutter_texture);
+  EXPECT_TRUE(result);
+  EXPECT_EQ(flutter_texture.width, width);
+  EXPECT_EQ(flutter_texture.height, height);
+  EXPECT_EQ(flutter_texture.target, GL_TEXTURE_2D);
+  EXPECT_TRUE(release_callback_called);
+}
+
 TEST(FlutterWindowsTextureRegistrarTest, PopulateInvalidTexture) {
   std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
+  std::unique_ptr<MockGlFunctions> gl = std::make_unique<MockGlFunctions>();
 
-  FlutterWindowsTextureRegistrar registrar(engine.get());
+  FlutterWindowsTextureRegistrar registrar(engine.get(), gl->gl_procs());
 
   auto result = registrar.PopulateTexture(1, 640, 480, nullptr);
   EXPECT_FALSE(result);
 }
-
-// TODO Add additional tests for PopulateTexture() once we've mocked gl*
-// functions used by ExternalTextureGL
 
 }  // namespace testing
 }  // namespace flutter

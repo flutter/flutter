@@ -34,6 +34,10 @@ typedef struct {
   size_t width;
   // Height of the pixel buffer.
   size_t height;
+  // An optional callback that gets invoked when the |buffer| can be released.
+  void (*release_callback)(void* release_context);
+  // Opaque data passed to |release_callback|.
+  void* release_context;
 } FlutterDesktopPixelBuffer;
 
 // The pixel buffer copy callback definition provided to
