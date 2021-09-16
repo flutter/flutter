@@ -727,25 +727,6 @@ void main() {
     );
   });
 
-  testUsingContext('androidx is used by default in a plugin project', () async {
-    Cache.flutterRoot = '../..';
-
-    final CreateCommand command = CreateCommand();
-    final CommandRunner<void> runner = createTestCommandRunner(command);
-
-    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platform', 'android', projectDir.path]);
-
-    void expectExists(String relPath) {
-      expect(globals.fs.isFileSync('${projectDir.path}/$relPath'), true);
-    }
-
-    expectExists('android/gradle.properties');
-
-    final String actualContents = await globals.fs.file('${projectDir.path}/android/gradle.properties').readAsString();
-
-    expect(actualContents.contains('useAndroidX'), true);
-  });
-
   testUsingContext('creating a new project should create v2 embedding and never show an Android v1 deprecation warning', () async {
     Cache.flutterRoot = '../..';
 
@@ -1721,41 +1702,23 @@ void main() {
   });
 
   testUsingContext(
-    'invokes pub offline when requested',
+    'invokes pub in online and offline modes',
     () async {
       Cache.flutterRoot = '../..';
 
       final CreateCommand command = CreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
-      await runner.run(<String>['create', '--pub', '--offline', projectDir.path]);
-      expect(loggingProcessManager.commands.first, contains(matches(r'dart-sdk[\\/]bin[\\/]dart')));
-      expect(loggingProcessManager.commands.first, contains('--offline'));
-    },
-    overrides: <Type, Generator>{
-      ProcessManager: () => loggingProcessManager,
-      Pub: () => Pub(
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        usage: globals.flutterUsage,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
-      ),
-    },
-  );
-
-  testUsingContext(
-    'invokes pub online when offline not requested',
-    () async {
-      Cache.flutterRoot = '../..';
-
-      final CreateCommand command = CreateCommand();
-      final CommandRunner<void> runner = createTestCommandRunner(command);
-
+      // Run pub online first in order to populate the pub cache.
       await runner.run(<String>['create', '--pub', projectDir.path]);
       expect(loggingProcessManager.commands.first, contains(matches(r'dart-sdk[\\/]bin[\\/]dart')));
       expect(loggingProcessManager.commands.first, isNot(contains('--offline')));
+
+      // Run pub offline.
+      loggingProcessManager.clear();
+      await runner.run(<String>['create', '--pub', '--offline', projectDir.path]);
+      expect(loggingProcessManager.commands.first, contains(matches(r'dart-sdk[\\/]bin[\\/]dart')));
+      expect(loggingProcessManager.commands.first, contains('--offline'));
     },
     overrides: <Type, Generator>{
       ProcessManager: () => loggingProcessManager,
@@ -2337,7 +2300,7 @@ void main() {
     Logger: () => logger,
   });
 
-  testUsingContext('newly created plugin has min flutter sdk version as 1.20.0', () async {
+  testUsingContext('newly created plugin has min flutter sdk version as 2.5.0', () async {
     Cache.flutterRoot = '../..';
 
     final CreateCommand command = CreateCommand();
@@ -2346,8 +2309,8 @@ void main() {
     final String rawPubspec = await projectDir.childFile('pubspec.yaml').readAsString();
     final Pubspec pubspec = Pubspec.parse(rawPubspec);
     final Map<String, VersionConstraint> env = pubspec.environment;
-    expect(env['flutter'].allows(Version(1, 20, 0)), true);
-    expect(env['flutter'].allows(Version(1, 19, 0)), false);
+    expect(env['flutter'].allows(Version(2, 5, 0)), true);
+    expect(env['flutter'].allows(Version(2, 4, 9)), false);
   });
 
   testUsingContext('default app uses Android SDK 30', () async {
@@ -2838,5 +2801,9 @@ class LoggingProcessManager extends LocalProcessManager {
       runInShell: runInShell,
       mode: mode,
     );
+  }
+
+  void clear() {
+    commands.clear();
   }
 }

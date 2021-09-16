@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert' show jsonDecode;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -4693,7 +4694,7 @@ void main() {
       equals(
         const TextSelection.collapsed(
           offset: 0,
-          affinity: TextAffinity.downstream,
+          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',
@@ -4764,7 +4765,7 @@ void main() {
         const TextSelection(
           baseOffset: testText.length,
           extentOffset: 0,
-          affinity: TextAffinity.downstream,
+          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',
@@ -4786,7 +4787,7 @@ void main() {
       equals(
         const TextSelection.collapsed(
           offset: 0,
-          affinity: TextAffinity.downstream,
+          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',
@@ -4810,7 +4811,7 @@ void main() {
         const TextSelection(
           baseOffset: 10,
           extentOffset: 10,
-          affinity: TextAffinity.downstream,
+          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',
@@ -4834,7 +4835,7 @@ void main() {
         const TextSelection(
           baseOffset: 10,
           extentOffset: 7,
-          affinity: TextAffinity.downstream,
+          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',
@@ -4857,7 +4858,7 @@ void main() {
         const TextSelection(
           baseOffset: 10,
           extentOffset: 4,
-          affinity: TextAffinity.downstream,
+          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',
@@ -4880,7 +4881,7 @@ void main() {
         const TextSelection(
           baseOffset: 4,
           extentOffset: 4,
-          affinity: TextAffinity.downstream,
+          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',
@@ -4917,7 +4918,7 @@ void main() {
         const TextSelection(
           baseOffset: 10,
           extentOffset: 10,
-          affinity: TextAffinity.downstream,
+          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',
@@ -4941,7 +4942,7 @@ void main() {
         const TextSelection(
           baseOffset: 0,
           extentOffset: testText.length,
-          affinity: TextAffinity.downstream,
+          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',
@@ -4963,7 +4964,7 @@ void main() {
         const TextSelection(
           baseOffset: 0,
           extentOffset: 0,
-          affinity: TextAffinity.downstream,
+          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',
@@ -5372,43 +5373,8 @@ void main() {
       targetPlatform: defaultTargetPlatform,
     );
 
-    late final int afterHomeOffset;
-    late final int afterEndOffset;
-    switch (defaultTargetPlatform) {
-      // These platforms don't handle shift + home/end at all.
-      case TargetPlatform.android:
-      case TargetPlatform.iOS:
-      case TargetPlatform.fuchsia:
-        afterHomeOffset = 23;
-        afterEndOffset = 23;
-        break;
-
-      // These platforms go to the line start/end.
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        afterHomeOffset = 20;
-        afterEndOffset = 35;
-        break;
-
-      // Mac goes to the start/end of the document.
-      case TargetPlatform.macOS:
-        afterHomeOffset = 0;
-        afterEndOffset = 72;
-        break;
-    }
-
-    expect(
-      selection,
-      equals(
-        TextSelection(
-          baseOffset: 23,
-          extentOffset: afterHomeOffset,
-          affinity: TextAffinity.downstream,
-        ),
-      ),
-      reason: 'on $platform',
-    );
     expect(controller.text, equals(testText), reason: 'on $platform');
+    final TextSelection selectionAfterHome = selection;
 
     // Move back to position 23.
     controller.selection = const TextSelection.collapsed(
@@ -5426,18 +5392,116 @@ void main() {
       targetPlatform: defaultTargetPlatform,
     );
 
-    expect(
-      selection,
-      equals(
-        TextSelection(
-          baseOffset: 23,
-          extentOffset: afterEndOffset,
-          affinity: TextAffinity.downstream,
-        ),
-      ),
-      reason: 'on $platform',
-    );
     expect(controller.text, equals(testText), reason: 'on $platform');
+    final TextSelection selectionAfterEnd = selection;
+
+    switch (defaultTargetPlatform) {
+      // These platforms don't handle shift + home/end at all.
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+        expect(
+          selectionAfterHome,
+          equals(
+            const TextSelection(
+              baseOffset: 23,
+              extentOffset: 23,
+              affinity: TextAffinity.downstream,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+        expect(
+          selectionAfterEnd,
+          equals(
+            const TextSelection(
+              baseOffset: 23,
+              extentOffset: 23,
+              affinity: TextAffinity.downstream,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+        break;
+
+      // Linux extends to the line start/end.
+      case TargetPlatform.linux:
+        expect(
+          selectionAfterHome,
+          equals(
+            const TextSelection(
+              baseOffset: 23,
+              extentOffset: 20,
+              affinity: TextAffinity.downstream,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+        expect(
+          selectionAfterEnd,
+          equals(
+            const TextSelection(
+              baseOffset: 23,
+              extentOffset: 35,
+              affinity: TextAffinity.upstream,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+        break;
+
+      // Windows expands to the line start/end.
+      case TargetPlatform.windows:
+        expect(
+          selectionAfterHome,
+          equals(
+            const TextSelection(
+              baseOffset: 23,
+              extentOffset: 20,
+              affinity: TextAffinity.downstream,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+        expect(
+          selectionAfterEnd,
+          equals(
+            const TextSelection(
+              baseOffset: 23,
+              extentOffset: 35,
+              affinity: TextAffinity.downstream,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+        break;
+
+      // Mac goes to the start/end of the document.
+      case TargetPlatform.macOS:
+        expect(
+          selectionAfterHome,
+          equals(
+            const TextSelection(
+              baseOffset: 23,
+              extentOffset: 0,
+              affinity: TextAffinity.upstream,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+        expect(
+          selectionAfterEnd,
+          equals(
+            const TextSelection(
+              baseOffset: 23,
+              extentOffset: 72,
+              affinity: TextAffinity.downstream,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+        break;
+    }
   },
     skip: kIsWeb, // [intended] on web these keys are handled by the browser.
     variant: TargetPlatformVariant.all(),
@@ -6553,6 +6617,302 @@ void main() {
     expect(log.length, 0);
     // The keyboard is not be requested after a repeat value from the engine.
     expect(focusNode.hasFocus, false);
+  });
+
+  group('TextEditingDelta', () {
+    testWidgets('TextEditingDeltaInsertion verification', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(devicePixelRatio: 1.0),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Center(
+                child: Material(
+                  child: EditableText(
+                    controller: controller,
+                    focusNode: focusNode,
+                    style: textStyle,
+                    cursorColor: Colors.red,
+                    backgroundCursorColor: Colors.red,
+                    keyboardType: TextInputType.multiline,
+                    onChanged: (String value) { },
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final EditableTextState state = tester.firstState(find.byType(EditableText));
+      const String jsonDelta = '{'
+          '"oldText": "",'
+          ' "deltaText": "let there be text",'
+          ' "deltaStart": 0,'
+          ' "deltaEnd": 0,'
+          ' "selectionBase": 17,'
+          ' "selectionExtent": 17,'
+          ' "selectionAffinity" : "TextAffinity.downstream" ,'
+          ' "selectionIsDirectional": false,'
+          ' "composingBase": -1,'
+          ' "composingExtent": -1}';
+
+      final Map<String, dynamic> test = jsonDecode(jsonDelta) as Map<String, dynamic>;
+      final TextEditingDelta delta = TextEditingDelta.fromJSON(test);
+      expect(delta.runtimeType, TextEditingDeltaInsertion);
+
+      state.updateEditingValueWithDeltas(<TextEditingDelta>[delta]);
+      await tester.pump();
+      expect(controller.text, 'let there be text');
+      expect(controller.selection, delta.selection);
+      expect(state.currentTextEditingValue.composing, delta.composing);
+    });
+
+    testWidgets('TextEditingDeltaDeletion verification', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(text: 'let there be text');
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(devicePixelRatio: 1.0),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Center(
+                child: Material(
+                  child: EditableText(
+                    controller: controller,
+                    focusNode: focusNode,
+                    style: textStyle,
+                    cursorColor: Colors.red,
+                    backgroundCursorColor: Colors.red,
+                    keyboardType: TextInputType.multiline,
+                    onChanged: (String value) { },
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final EditableTextState state = tester.firstState(find.byType(EditableText));
+      const String jsonDelta = '{'
+          '"oldText": "let there be text",'
+          ' "deltaText": "",'
+          ' "deltaStart": 0,'
+          ' "deltaEnd": 17,'
+          ' "selectionBase": 0,'
+          ' "selectionExtent": 0,'
+          ' "selectionAffinity" : "TextAffinity.downstream" ,'
+          ' "selectionIsDirectional": false,'
+          ' "composingBase": -1,'
+          ' "composingExtent": -1}';
+
+      final Map<String, dynamic> test = jsonDecode(jsonDelta) as Map<String, dynamic>;
+
+      final TextEditingDelta delta = TextEditingDelta.fromJSON(test);
+      expect(delta.runtimeType, TextEditingDeltaDeletion);
+
+      state.updateEditingValueWithDeltas(<TextEditingDelta>[delta]);
+      await tester.pump();
+      expect(controller.text, '');
+      expect(controller.selection, delta.selection);
+      expect(state.currentTextEditingValue.composing, delta.composing);
+    });
+
+    testWidgets('TextEditingDeltaReplacement verification', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(text: 'let there be text');
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(devicePixelRatio: 1.0),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Center(
+                child: Material(
+                  child: EditableText(
+                    controller: controller,
+                    focusNode: focusNode,
+                    style: textStyle,
+                    cursorColor: Colors.red,
+                    backgroundCursorColor: Colors.red,
+                    keyboardType: TextInputType.multiline,
+                    onChanged: (String value) { },
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final EditableTextState state = tester.firstState(find.byType(EditableText));
+      const String jsonDelta = '{'
+          '"oldText": "let there be text",'
+          ' "deltaText": "this is your replacement text",'
+          ' "deltaStart": 0,'
+          ' "deltaEnd": 17,'
+          ' "selectionBase": 0,'
+          ' "selectionExtent": 0,'
+          ' "selectionAffinity" : "TextAffinity.downstream",'
+          ' "selectionIsDirectional": false,'
+          ' "composingBase": -1,'
+          ' "composingExtent": -1}';
+
+      final Map<String, dynamic> test = jsonDecode(jsonDelta) as Map<String, dynamic>;
+
+      final TextEditingDelta delta = TextEditingDelta.fromJSON(test);
+      expect(delta.runtimeType, TextEditingDeltaReplacement);
+
+      state.updateEditingValueWithDeltas(<TextEditingDelta>[delta]);
+      await tester.pump();
+      expect(controller.text, 'this is your replacement text');
+      expect(controller.selection, delta.selection);
+      expect(state.currentTextEditingValue.composing, delta.composing);
+    });
+
+    testWidgets('TextEditingDeltaNonTextUpdate verification', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(text: 'let there be text');
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(devicePixelRatio: 1.0),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Center(
+                child: Material(
+                  child: EditableText(
+                    controller: controller,
+                    focusNode: focusNode,
+                    style: textStyle,
+                    cursorColor: Colors.red,
+                    backgroundCursorColor: Colors.red,
+                    keyboardType: TextInputType.multiline,
+                    onChanged: (String value) { },
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final EditableTextState state = tester.firstState(find.byType(EditableText));
+      const String jsonDelta = '{'
+          '"oldText": "let there be text",'
+          ' "deltaText": "",'
+          ' "deltaStart": -1,'
+          ' "deltaEnd": -1,'
+          ' "selectionBase": 17,'
+          ' "selectionExtent": 17,'
+          ' "selectionAffinity" : "TextAffinity.downstream",'
+          ' "selectionIsDirectional": false,'
+          ' "composingBase": -1,'
+          ' "composingExtent": -1}';
+
+      final Map<String, dynamic> test = jsonDecode(jsonDelta)  as Map<String, dynamic>;
+
+      final TextEditingDelta delta = TextEditingDelta.fromJSON(test);
+      expect(delta.runtimeType, TextEditingDeltaNonTextUpdate);
+
+      state.updateEditingValueWithDeltas(<TextEditingDelta>[delta]);
+      await tester.pump();
+      expect(controller.text, 'let there be text');
+      expect(controller.selection, delta.selection);
+      expect(state.currentTextEditingValue.composing, delta.composing);
+    });
+
+    testWidgets('TextEditingDelta verify batch deltas apply', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(devicePixelRatio: 1.0),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Center(
+                child: Material(
+                  child: EditableText(
+                    controller: controller,
+                    focusNode: focusNode,
+                    style: textStyle,
+                    cursorColor: Colors.red,
+                    backgroundCursorColor: Colors.red,
+                    keyboardType: TextInputType.multiline,
+                    onChanged: (String value) { },
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final EditableTextState state = tester.firstState(find.byType(EditableText));
+      const String jsonInsertionDelta = '{'
+          '"oldText": "",'
+          ' "deltaText": "let there be text",'
+          ' "deltaStart": 0,'
+          ' "deltaEnd": 0,'
+          ' "selectionBase": 17,'
+          ' "selectionExtent": 17,'
+          ' "selectionAffinity" : "TextAffinity.downstream" ,'
+          ' "selectionIsDirectional": false,'
+          ' "composingBase": -1,'
+          ' "composingExtent": -1}';
+
+      const String jsonDeletionDelta = '{'
+          '"oldText": "let there be text",'
+          ' "deltaText": "",'
+          ' "deltaStart": 12,'
+          ' "deltaEnd": 17,'
+          ' "selectionBase": 12,'
+          ' "selectionExtent": 12,'
+          ' "selectionAffinity" : "TextAffinity.downstream" ,'
+          ' "selectionIsDirectional": false,'
+          ' "composingBase": -1,'
+          ' "composingExtent": -1}';
+
+      const String jsonReplacementDelta = '{'
+          '"oldText": "let there be",'
+          ' "deltaText": "b light",'
+          ' "deltaStart": 10,'
+          ' "deltaEnd": 12,'
+          ' "selectionBase": 17,'
+          ' "selectionExtent": 17,'
+          ' "selectionAffinity" : "TextAffinity.downstream" ,'
+          ' "selectionIsDirectional": false,'
+          ' "composingBase": -1,'
+          ' "composingExtent": -1}';
+
+      const String jsonNonTextUpdateDelta = '{'
+          '"oldText": "let there b light",'
+          ' "deltaText": "",'
+          ' "deltaStart": -1,'
+          ' "deltaEnd": -1,'
+          ' "selectionBase": 17,'
+          ' "selectionExtent": 17,'
+          ' "selectionAffinity" : "TextAffinity.downstream",'
+          ' "selectionIsDirectional": false,'
+          ' "composingBase": -1,'
+          ' "composingExtent": -1}';
+
+      final TextEditingDelta insertionDelta = TextEditingDelta.fromJSON(jsonDecode(jsonInsertionDelta) as Map<String, dynamic>);
+      final TextEditingDelta deletionDelta = TextEditingDelta.fromJSON(jsonDecode(jsonDeletionDelta) as Map<String, dynamic>);
+      final TextEditingDelta replacementDelta = TextEditingDelta.fromJSON(jsonDecode(jsonReplacementDelta) as Map<String, dynamic>);
+      final TextEditingDelta nonTextUpdateDelta = TextEditingDelta.fromJSON(jsonDecode(jsonNonTextUpdateDelta) as Map<String, dynamic>);
+      expect(insertionDelta.runtimeType, TextEditingDeltaInsertion);
+      expect(deletionDelta.runtimeType, TextEditingDeltaDeletion);
+      expect(replacementDelta.runtimeType, TextEditingDeltaReplacement);
+      expect(nonTextUpdateDelta.runtimeType, TextEditingDeltaNonTextUpdate);
+
+      state.updateEditingValueWithDeltas(<TextEditingDelta>[insertionDelta, deletionDelta, replacementDelta, nonTextUpdateDelta]);
+      await tester.pump();
+      expect(controller.text, 'let there b light');
+      expect(controller.selection, nonTextUpdateDelta.selection);
+      expect(state.currentTextEditingValue.composing, nonTextUpdateDelta.composing);
+    });
   });
 
   group('TextEditingController', () {
@@ -8029,8 +8389,8 @@ void main() {
       targetPlatform: defaultTargetPlatform,
     );
     expect(controller.selection.isCollapsed, false);
-    expect(controller.selection.baseOffset, 24);
-    expect(controller.selection.extentOffset, 15);
+    expect(controller.selection.baseOffset, 15);
+    expect(controller.selection.extentOffset, 24);
 
     // Set the caret to the start of a line.
     controller.selection = const TextSelection(
@@ -8125,7 +8485,7 @@ void main() {
         const TextSelection(
           baseOffset: 9,
           extentOffset: 0,
-          affinity: TextAffinity.downstream,
+          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',
@@ -8148,7 +8508,7 @@ void main() {
         const TextSelection(
           baseOffset: 9,
           extentOffset: 0,
-          affinity: TextAffinity.downstream,
+          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',
@@ -8729,7 +9089,7 @@ class _MyMoveSelectionRightTextAction extends TextEditingAction<Intent> {
 
   @override
   Object? invoke(Intent intent, [BuildContext? context]) {
-    textEditingActionTarget!.renderEditable.moveSelectionRight(SelectionChangedCause.keyboard);
+    textEditingActionTarget!.moveSelectionRight(SelectionChangedCause.keyboard);
     onInvoke();
   }
 }

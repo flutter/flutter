@@ -107,6 +107,19 @@ class FakeAutofillClient implements TextInputClient, AutofillClient {
   }
 
   @override
+  void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas) {
+    TextEditingValue newEditingValue = currentTextEditingValue;
+
+    for (final TextEditingDelta delta in textEditingDeltas) {
+      newEditingValue = delta.apply(newEditingValue);
+    }
+
+    currentTextEditingValue = newEditingValue;
+
+    latestMethodCall = 'updateEditingValueWithDeltas';
+  }
+
+  @override
   AutofillScope? currentAutofillScope;
 
   String latestMethodCall = '';

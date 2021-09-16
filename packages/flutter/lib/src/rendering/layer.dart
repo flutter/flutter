@@ -574,7 +574,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
 /// A handle to prevent a [Layer]'s platform graphics resources from being
 /// disposed.
 ///
-/// [Layer] objects retain native resourses such as [EngineLayer]s and [Picture]
+/// [Layer] objects retain native resources such as [EngineLayer]s and [Picture]
 /// objects. These objects may in turn retain large chunks of texture memory,
 /// either directly or indirectly.
 ///
@@ -1741,7 +1741,7 @@ class TransformLayer extends OffsetLayer {
 ///
 /// Try to avoid an [OpacityLayer] with no children. Remove that layer if
 /// possible to save some tree walks.
-class OpacityLayer extends ContainerLayer {
+class OpacityLayer extends OffsetLayer {
   /// Creates an opacity layer.
   ///
   /// The [alpha] property must be non-null before the compositing phase of
@@ -1750,7 +1750,7 @@ class OpacityLayer extends ContainerLayer {
     int? alpha,
     Offset offset = Offset.zero,
   }) : _alpha = alpha,
-       _offset = offset;
+       super(offset: offset);
 
   /// The amount to multiply into the alpha channel.
   ///
@@ -1764,55 +1764,53 @@ class OpacityLayer extends ContainerLayer {
   set alpha(int? value) {
     assert(value != null);
     if (value != _alpha) {
+      if (value == 255 || _alpha == 255) {
+        engineLayer = null;
+      }
       _alpha = value;
       markNeedsAddToScene();
     }
-  }
-
-  /// Offset from parent in the parent's coordinate system.
-  Offset? get offset => _offset;
-  Offset? _offset;
-  set offset(Offset? value) {
-    if (value != _offset) {
-      _offset = value;
-      markNeedsAddToScene();
-    }
-  }
-
-  @override
-  void applyTransform(Layer? child, Matrix4 transform) {
-    assert(child != null);
-    assert(transform != null);
-    transform.translate(offset!.dx, offset!.dy);
   }
 
   @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     assert(alpha != null);
     bool enabled = firstChild != null;  // don't add this layer if there's no child
+    if (!enabled) {
+      // TODO(dnfield): Remove this if/when we can fix https://github.com/flutter/flutter/issues/90004
+      return;
+    }
     assert(() {
       enabled = enabled && !debugDisableOpacityLayers;
       return true;
     }());
 
-    if (enabled)
+    final int realizedAlpha = alpha!;
+    // The type assertions work because the [alpha] setter nulls out the
+    // engineLayer if it would have changed type (i.e. changed to or from 255).
+    if (enabled && realizedAlpha < 255) {
+      assert(_engineLayer is ui.OpacityEngineLayer?);
       engineLayer = builder.pushOpacity(
-        alpha!,
-        offset: offset! + layerOffset,
+        realizedAlpha,
+        offset: offset + layerOffset,
         oldLayer: _engineLayer as ui.OpacityEngineLayer?,
       );
-    else
-      engineLayer = null;
+    } else {
+      assert(_engineLayer is ui.OffsetEngineLayer?);
+      engineLayer = builder.pushOffset(
+        layerOffset.dx + offset.dx,
+        layerOffset.dy + offset.dy,
+        oldLayer: _engineLayer as ui.OffsetEngineLayer?,
+      );
+    }
     addChildrenToScene(builder);
-    if (enabled)
-      builder.pop();
+    builder.pop();
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(IntProperty('alpha', alpha));
-    properties.add(DiagnosticsProperty<Offset>('offset', offset));
   }
 }
 
