@@ -1,4 +1,4 @@
-Signature: 4726c6545e5ef8ed4f53c9144b3979e5
+Signature: 815485991942e21f2a016b0a47936fc4
 
 UNUSED LICENSES:
 
@@ -11404,9 +11404,9 @@ FILE: ../../../third_party/dart/runtime/observatory_2/web/timeline_message_handl
 FILE: ../../../third_party/dart/runtime/platform/syslog_fuchsia.cc
 FILE: ../../../third_party/dart/runtime/platform/utils_fuchsia.cc
 FILE: ../../../third_party/dart/runtime/platform/utils_fuchsia.h
+FILE: ../../../third_party/dart/runtime/vm/app_snapshot.cc
+FILE: ../../../third_party/dart/runtime/vm/app_snapshot.h
 FILE: ../../../third_party/dart/runtime/vm/canonical_tables.h
-FILE: ../../../third_party/dart/runtime/vm/clustered_snapshot.cc
-FILE: ../../../third_party/dart/runtime/vm/clustered_snapshot.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/branch_optimizer.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/branch_optimizer.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/redundancy_elimination.cc
