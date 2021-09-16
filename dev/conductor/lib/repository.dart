@@ -735,8 +735,7 @@ class EngineRepository extends Repository {
   final Checkouts checkouts;
 
   Future<CiYaml> get ciYaml async {
-    final CiYaml ciYaml =
-        CiYaml((await checkoutDirectory).childFile('.ci.yaml'));
+    final CiYaml ciYaml = CiYaml((await checkoutDirectory).childFile('.ci.yaml'));
     return ciYaml;
   }
 

@@ -106,8 +106,9 @@ Future<void> runNext({
         previousCheckoutLocation: state.engine.checkoutPath,
       );
       // check if the candidate branch is enabled in .ci.yaml
-      if (!(await engine.ciYaml).enabledBranches.contains(state.engine.candidateBranch)) {
-        (await engine.ciYaml).enableBranch(state.engine.candidateBranch);
+      final CiYaml engineCiYaml = await engine.ciYaml;
+      if (!engineCiYaml.enabledBranches.contains(state.engine.candidateBranch)) {
+        engineCiYaml.enableBranch(state.engine.candidateBranch);
         // commit
         final String revision = await engine.commit(
           'add branch ${state.engine.candidateBranch} to enabled_branches in .ci.yaml',
