@@ -51,6 +51,7 @@ static NSString* const kSecureTextEntry = @"obscureText";
 static NSString* const kKeyboardType = @"inputType";
 static NSString* const kKeyboardAppearance = @"keyboardAppearance";
 static NSString* const kInputAction = @"inputAction";
+static NSString* const kEnableDeltaModel = @"enableDeltaModel";
 
 static NSString* const kSmartDashesType = @"smartDashesType";
 static NSString* const kSmartQuotesType = @"smartQuotesType";
@@ -617,6 +618,7 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
     _keyboardType = UIKeyboardTypeDefault;
     _returnKeyType = UIReturnKeyDone;
     _secureTextEntry = NO;
+    _enableDeltaModel = NO;
     _accessibilityEnabled = NO;
     _decommissioned = NO;
     if (@available(iOS 11.0, *)) {
@@ -645,6 +647,7 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
   NSDictionary* autofill = configuration[kAutofillProperties];
 
   self.secureTextEntry = [configuration[kSecureTextEntry] boolValue];
+  self.enableDeltaModel = [configuration[kEnableDeltaModel] boolValue];
 
   _isSystemKeyboardEnabled = shouldShowSystemKeyboard(inputType);
   self.keyboardType = ToUIKeyboardType(inputType);
@@ -923,7 +926,12 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
 
 - (void)setSelectedTextRange:(UITextRange*)selectedTextRange {
   [self setSelectedTextRangeLocal:selectedTextRange];
-  [self updateEditingState];
+
+  if (_enableDeltaModel) {
+    [self updateEditingStateWithDelta:[FlutterTextEditingDelta deltaWithNonText:self.text]];
+  } else {
+    [self updateEditingState];
+  }
 }
 
 - (id)insertDictationResultPlaceholder {
@@ -972,9 +980,18 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
 }
 
 - (void)replaceRange:(UITextRange*)range withText:(NSString*)text {
+  NSString* textBeforeChange = [[self.text copy] autorelease];
   NSRange replaceRange = ((FlutterTextRange*)range).range;
   [self replaceRangeLocal:replaceRange withText:text];
-  [self updateEditingState];
+  if (_enableDeltaModel) {
+    [self updateEditingStateWithDelta:[FlutterTextEditingDelta
+                                          textEditingDelta:textBeforeChange
+                                             replacedRange:[self clampSelection:replaceRange
+                                                                        forText:textBeforeChange]
+                                               updatedText:text]];
+  } else {
+    [self updateEditingState];
+  }
 }
 
 - (BOOL)shouldChangeTextInRange:(UITextRange*)range replacementText:(NSString*)text {
@@ -1029,8 +1046,10 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
 }
 
 - (void)setMarkedText:(NSString*)markedText selectedRange:(NSRange)markedSelectedRange {
+  NSString* textBeforeChange = [[self.text copy] autorelease];
   NSRange selectedRange = _selectedTextRange.range;
   NSRange markedTextRange = ((FlutterTextRange*)self.markedTextRange).range;
+  NSRange actualReplacedRange;
 
   if (markedText == nil)
     markedText = @"";
@@ -1038,9 +1057,11 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
   if (markedTextRange.length > 0) {
     // Replace text in the marked range with the new text.
     [self replaceRangeLocal:markedTextRange withText:markedText];
+    actualReplacedRange = markedTextRange;
     markedTextRange.length = markedText.length;
   } else {
     // Replace text in the selected range with the new text.
+    actualReplacedRange = selectedRange;
     [self replaceRangeLocal:selectedRange withText:markedText];
     markedTextRange = NSMakeRange(selectedRange.location, markedText.length);
   }
@@ -1053,14 +1074,26 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
   [self setSelectedTextRangeLocal:[FlutterTextRange
                                       rangeWithNSRange:[self clampSelection:selectedRange
                                                                     forText:self.text]]];
-  [self updateEditingState];
+  if (_enableDeltaModel) {
+    [self updateEditingStateWithDelta:[FlutterTextEditingDelta
+                                          textEditingDelta:textBeforeChange
+                                             replacedRange:[self clampSelection:actualReplacedRange
+                                                                        forText:textBeforeChange]
+                                               updatedText:markedText]];
+  } else {
+    [self updateEditingState];
+  }
 }
 
 - (void)unmarkText {
   if (!self.markedTextRange)
     return;
   self.markedTextRange = nil;
-  [self updateEditingState];
+  if (_enableDeltaModel) {
+    [self updateEditingStateWithDelta:[FlutterTextEditingDelta deltaWithNonText:self.text]];
+  } else {
+    [self updateEditingState];
+  }
 }
 
 - (UITextRange*)textRangeFromPosition:(UITextPosition*)fromPosition
@@ -1390,6 +1423,38 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
   } else {
     [self.textInputDelegate updateEditingClient:_textInputClient withState:state];
   }
+}
+
+- (void)updateEditingStateWithDelta:(FlutterTextEditingDelta*)delta {
+  NSUInteger selectionBase = ((FlutterTextPosition*)_selectedTextRange.start).index;
+  NSUInteger selectionExtent = ((FlutterTextPosition*)_selectedTextRange.end).index;
+
+  // Empty compositing range is represented by the framework's TextRange.empty.
+  NSInteger composingBase = -1;
+  NSInteger composingExtent = -1;
+  if (self.markedTextRange != nil) {
+    composingBase = ((FlutterTextPosition*)self.markedTextRange.start).index;
+    composingExtent = ((FlutterTextPosition*)self.markedTextRange.end).index;
+  }
+
+  NSDictionary* deltaToFramework = @{
+    @"oldText" : delta.oldText,
+    @"deltaText" : delta.deltaText,
+    @"deltaStart" : @(delta.deltaStart),
+    @"deltaEnd" : @(delta.deltaEnd),
+    @"selectionBase" : @(selectionBase),
+    @"selectionExtent" : @(selectionExtent),
+    @"selectionAffinity" : @(_selectionAffinity),
+    @"selectionIsDirectional" : @(false),
+    @"composingBase" : @(composingBase),
+    @"composingExtent" : @(composingExtent),
+  };
+
+  NSDictionary* deltas = @{
+    @"deltas" : @[ deltaToFramework ],
+  };
+
+  [self.textInputDelegate updateEditingClient:_textInputClient withDelta:deltas];
 }
 
 - (BOOL)hasText {
