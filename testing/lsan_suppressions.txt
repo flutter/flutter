@@ -40,3 +40,26 @@ leak:flutter::Engine::Run(flutter::RunConfiguration)
 leak:txt::FontCollection::CreateMinikinFontFamily
 leak:CGFontCreateFontsWithURL
 leak:txt::GetDefaultFontFamily
+
+# The RefCounted DebugChecks tests intentionally fail to wrap and manage heap
+# allocated objects.
+leak:RefCountedTest_DebugChecks_Test::TestBody
+
+# Objects allocated by this mock API are intentionally not collected and are
+# instead marked as released in order to explicitly assert double free attempts
+# and allow some tests to inspect contents.
+leak:*flutter/shell/platform/linux/testing/mock_engine.cc
+
+# TODO(bdero): Fix FL leaks: https://github.com/flutter/flutter/issues/90155
+leak:*flutter/shell/platform/linux/fl_keyboard_manager_test.cc*
+leak:*flutter/shell/platform/linux/fl_key_channel_responder_test.cc*
+leak:*flutter/shell/platform/linux/fl_basic_message_channel_test.cc*
+leak:fl_message_codec_decode_message
+
+# TODO(bdero): https://github.com/flutter/flutter/issues/90156
+# Unfortunately, realloc calls originating from g_realloc effectively obscure
+# the trace of the original allocation. Deeper investigation is required to
+# identify the original allocation source for these.
+# At the time of writing, this only amounts to 4 allocations totaling 512 bytes
+# worth of leaks.
+leak:g_realloc
