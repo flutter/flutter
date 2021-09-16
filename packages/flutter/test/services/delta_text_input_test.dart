@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert' show utf8;
+import 'dart:convert' show jsonDecode;
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -11,13 +12,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('DeltaTextInputClient', () {
-    // Assemble a TextInputConnection so we can verify its change in state.
     late FakeTextChannel fakeTextChannel;
-    final FakeDeltaTextInputClient client = FakeDeltaTextInputClient(TextEditingValue.empty);
-    const TextInputConfiguration configuration = TextInputConfiguration();
-    TextInput.attach(client, configuration);
-
-    expect(client.latestMethodCall, isEmpty);
 
     setUp(() {
       fakeTextChannel = FakeTextChannel((MethodCall call) async {});
@@ -32,7 +27,41 @@ void main() {
     test(
       'DeltaTextInputClient send the correct configuration to the platform and responds to updateEditingValueWithDeltas method correctly',
       () async {
+        // Assemble a TextInputConnection so we can verify its change in state.
+        final FakeDeltaTextInputClient client = FakeDeltaTextInputClient(TextEditingValue.empty);
+        const TextInputConfiguration configuration = TextInputConfiguration(enableDeltaModel: true);
+        TextInput.attach(client, configuration);
+        expect(client.configuration.enableDeltaModel, true);
 
+        expect(client.latestMethodCall, isEmpty);
+
+        const String jsonDelta = '{'
+            '"oldText": "",'
+            ' "deltaText": "let there be text",'
+            ' "deltaStart": 0,'
+            ' "deltaEnd": 0,'
+            ' "selectionBase": 17,'
+            ' "selectionExtent": 17,'
+            ' "selectionAffinity" : "TextAffinity.downstream" ,'
+            ' "selectionIsDirectional": false,'
+            ' "composingBase": -1,'
+            ' "composingExtent": -1}';
+
+        // Send updateEditingValueWithDeltas message.
+        final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+          'args': <dynamic>[
+            1,
+            jsonDecode('{"deltas": [$jsonDelta]}'),
+          ],
+          'method': 'TextInputClient.updateEditingValueWithDeltas',
+        });
+        await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+          'flutter/textinput',
+          messageBytes,
+              (ByteData? _) {},
+        );
+
+        expect(client.latestMethodCall, 'updateEditingValueWithDeltas');
       },
     );
   });
@@ -84,7 +113,7 @@ class FakeDeltaTextInputClient implements DeltaTextInputClient {
     latestMethodCall = 'showAutocorrectionPromptRect';
   }
 
-  TextInputConfiguration get configuration => const TextInputConfiguration();
+  TextInputConfiguration get configuration => const TextInputConfiguration(enableDeltaModel: true);
 }
 
 class FakeTextChannel implements MethodChannel {
