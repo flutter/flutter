@@ -428,11 +428,12 @@ def RunFrontEndServerTests(build_dir):
     opts = [
       '--disable-dart-dev',
       dart_test_file,
+      build_dir,
       os.path.join(build_dir, 'gen', 'frontend_server.dart.snapshot'),
       os.path.join(build_dir, 'flutter_patched_sdk')]
     RunEngineExecutable(
       build_dir,
-      'dart',
+      os.path.join('dart-sdk', 'bin', 'dart'),
       None,
       flags=opts,
       cwd=test_dir)
@@ -445,7 +446,12 @@ def RunConstFinderTests(build_dir):
     os.path.join(test_dir, 'const_finder_test.dart'),
     os.path.join(build_dir, 'gen', 'frontend_server.dart.snapshot'),
     os.path.join(build_dir, 'flutter_patched_sdk')]
-  RunEngineExecutable(build_dir, 'dart', None, flags=opts, cwd=test_dir)
+  RunEngineExecutable(
+    build_dir,
+    os.path.join('dart-sdk', 'bin', 'dart'),
+    None,
+    flags=opts,
+    cwd=test_dir)
 
 
 def RunLitetestTests(build_dir):
@@ -457,7 +463,7 @@ def RunLitetestTests(build_dir):
       dart_test_file]
     RunEngineExecutable(
       build_dir,
-      'dart',
+      os.path.join('dart-sdk', 'bin', 'dart'),
       None,
       flags=opts,
       cwd=test_dir)
@@ -472,7 +478,7 @@ def RunBenchmarkTests(build_dir):
       dart_test_file]
     RunEngineExecutable(
       build_dir,
-      'dart',
+      os.path.join('dart-sdk', 'bin', 'dart'),
       None,
       flags=opts,
       cwd=test_dir)
@@ -487,7 +493,7 @@ def RunGithooksTests(build_dir):
       dart_test_file]
     RunEngineExecutable(
       build_dir,
-      'dart',
+      os.path.join('dart-sdk', 'bin', 'dart'),
       None,
       flags=opts,
       cwd=test_dir)
@@ -504,7 +510,7 @@ def RunClangTidyTests(build_dir):
       os.path.join(buildroot_dir, 'flutter')]
     RunEngineExecutable(
       build_dir,
-      'dart',
+      os.path.join('dart-sdk', 'bin', 'dart'),
       None,
       flags=opts,
       cwd=test_dir)
