@@ -1033,11 +1033,11 @@ abstract class DeltaTextInputClient extends TextInputClient {
   ///
   /// @override
   /// void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas) {
-  ///   TextEditingValue value = _value;
+  ///   TextEditingValue newValue = _previousValue;
   ///   for (final TextEditingDelta delta in textEditingDeltas) {
-  ///     value = delta.apply(value);
+  ///     newValue = delta.apply(newValue);
   ///   }
-  ///   updateEditingValue(value);
+  ///   _localValue = newValue;
   /// }
   ///
   /// {@macro flutter.services.TextEditingDelta.optIn}
