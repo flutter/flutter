@@ -456,7 +456,8 @@ public class FlutterActivityTest {
           "reportFullyDrawn isn't used in API level " + version, flutterActivity.isFullyDrawn());
     }
 
-    for (int version = Build.VERSION_CODES.Q; version < Build.VERSION_CODES.S; version++) {
+    final int versionCodeS = 31;
+    for (int version = Build.VERSION_CODES.Q; version < versionCodeS; version++) {
       TestUtils.setApiVersion(version);
       flutterActivity.onFlutterUiDisplayed();
       assertTrue(
