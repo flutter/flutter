@@ -951,14 +951,12 @@ mixin TextSelectionDelegate {
   void copySelection(SelectionChangedCause cause);
 }
 
-/// {@template flutter.services.TextInputClient}
 /// An interface to receive information from [TextInput].
 ///
 /// See also:
 ///
 ///  * [TextInput.attach]
 ///  * [EditableText], a [TextInputClient] implementation.
-/// {@endtemplate}
 abstract class TextInputClient {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -1018,7 +1016,11 @@ abstract class TextInputClient {
   void connectionClosed();
 }
 
-/// {@macro flutter.services.TextInputClient}
+/// An interface to receive granular information from [TextInput].
+///
+/// See also:
+///
+///  * [TextInput.attach]
 abstract class DeltaTextInputClient extends TextInputClient {
   /// Requests that this client update its editing state by applying the deltas
   /// received from the engine.
@@ -1026,6 +1028,17 @@ abstract class DeltaTextInputClient extends TextInputClient {
   /// The list of [TextEditingDelta]'s are treated as changes that will be applied
   /// to the client's editing state. A change is any mutation to the raw text
   /// value, or any updates to the selection and/or composing region.
+  ///
+  /// Here is an example of what implementation of this method could look like:
+  ///
+  /// @override
+  /// void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas) {
+  ///   TextEditingValue value = _value;
+  ///   for (final TextEditingDelta delta in textEditingDeltas) {
+  ///     value = delta.apply(value);
+  ///   }
+  ///   updateEditingValue(value);
+  /// }
   ///
   /// {@macro flutter.services.TextEditingDelta.optIn}
   void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas);
