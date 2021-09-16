@@ -1029,7 +1029,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     if (!_isEnabled)
       return false;
 
-    if (cause == SelectionChangedCause.longPress)
+    if (cause == SelectionChangedCause.longPress || cause == SelectionChangedCause.scribble)
       return true;
 
     if (_effectiveController.text.isNotEmpty)
