@@ -2892,9 +2892,9 @@ class InputDecoration {
   /// {@template flutter.material.inputDecoration.centerFloatingLabel}
   /// Defines where the floating label should be displayed.
   ///
-  /// When [true], the label will float to the top center of the field.
+  /// When true, the label will float to the top center of the field.
   ///
-  /// When [false], the label will float to the top (vertically adjacent)
+  /// When false, the label will float to the top (vertically adjacent)
   /// of the field
   ///
   /// Defaults to false.
