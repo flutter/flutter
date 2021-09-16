@@ -25,6 +25,8 @@ void main() {
       find.byType(ColorFiltered),
       matchesGoldenFile('color_filter_red.png'),
     );
+
+    
   });
 
   testWidgets('Color filter - sepia', (WidgetTester tester) async {
