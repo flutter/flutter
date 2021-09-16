@@ -304,6 +304,204 @@ FLUTTER_ASSERT_ARC
   }
 }
 
+#pragma mark - TextEditingDelta tests
+- (void)testTextEditingDeltasAreGeneratedOnTextInput {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] init];
+  inputView.textInputDelegate = engine;
+  inputView.enableDeltaModel = YES;
+
+  __block int updateCount = 0;
+  OCMStub([engine updateEditingClient:0 withDelta:[OCMArg isNotNil]])
+      .andDo(^(NSInvocation* invocation) {
+        updateCount++;
+      });
+
+  [inputView insertText:@"text to insert"];
+  // Update the framework exactly once.
+  XCTAssertEqual(updateCount, 1);
+
+  // Verify correct delta is generated.
+  OCMVerify([engine
+      updateEditingClient:0
+                withDelta:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
+                  return ([[state[@"deltas"] objectAtIndex:0][@"oldText"] isEqualToString:@""]) &&
+                         ([[state[@"deltas"] objectAtIndex:0][@"deltaText"]
+                             isEqualToString:@"text to insert"]) &&
+                         ([[state[@"deltas"] objectAtIndex:0][@"deltaStart"] intValue] == 0) &&
+                         ([[state[@"deltas"] objectAtIndex:0][@"deltaEnd"] intValue] == 0);
+                }]]);
+
+  [inputView deleteBackward];
+  XCTAssertEqual(updateCount, 2);
+
+  OCMVerify([engine
+      updateEditingClient:0
+                withDelta:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
+                  return ([[state[@"deltas"] objectAtIndex:0][@"oldText"]
+                             isEqualToString:@"text to insert"]) &&
+                         ([[state[@"deltas"] objectAtIndex:0][@"deltaText"] isEqualToString:@""]) &&
+                         ([[state[@"deltas"] objectAtIndex:0][@"deltaStart"] intValue] == 13) &&
+                         ([[state[@"deltas"] objectAtIndex:0][@"deltaEnd"] intValue] == 14);
+                }]]);
+
+  inputView.selectedTextRange = [FlutterTextRange rangeWithNSRange:NSMakeRange(0, 1)];
+  XCTAssertEqual(updateCount, 3);
+
+  OCMVerify([engine
+      updateEditingClient:0
+                withDelta:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
+                  return ([[state[@"deltas"] objectAtIndex:0][@"oldText"]
+                             isEqualToString:@"text to inser"]) &&
+                         ([[state[@"deltas"] objectAtIndex:0][@"deltaText"] isEqualToString:@""]) &&
+                         ([[state[@"deltas"] objectAtIndex:0][@"deltaStart"] intValue] == -1) &&
+                         ([[state[@"deltas"] objectAtIndex:0][@"deltaEnd"] intValue] == -1);
+                }]]);
+
+  [inputView replaceRange:[FlutterTextRange rangeWithNSRange:NSMakeRange(0, 1)]
+                 withText:@"replace text"];
+  XCTAssertEqual(updateCount, 4);
+
+  OCMVerify([engine
+      updateEditingClient:0
+                withDelta:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
+                  return ([[state[@"deltas"] objectAtIndex:0][@"oldText"]
+                             isEqualToString:@"text to inser"]) &&
+                         ([[state[@"deltas"] objectAtIndex:0][@"deltaText"]
+                             isEqualToString:@"replace text"]) &&
+                         ([[state[@"deltas"] objectAtIndex:0][@"deltaStart"] intValue] == 0) &&
+                         ([[state[@"deltas"] objectAtIndex:0][@"deltaEnd"] intValue] == 1);
+                }]]);
+
+  [inputView setMarkedText:@"marked text" selectedRange:NSMakeRange(0, 1)];
+  XCTAssertEqual(updateCount, 5);
+
+  OCMVerify([engine
+      updateEditingClient:0
+                withDelta:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
+                  return ([[state[@"deltas"] objectAtIndex:0][@"oldText"]
+                             isEqualToString:@"replace textext to inser"]) &&
+                         ([[state[@"deltas"] objectAtIndex:0][@"deltaText"]
+                             isEqualToString:@"marked text"]) &&
+                         ([[state[@"deltas"] objectAtIndex:0][@"deltaStart"] intValue] == 12) &&
+                         ([[state[@"deltas"] objectAtIndex:0][@"deltaEnd"] intValue] == 12);
+                }]]);
+
+  [inputView unmarkText];
+  XCTAssertEqual(updateCount, 6);
+
+  OCMVerify([engine
+      updateEditingClient:0
+                withDelta:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
+                  return ([[state[@"deltas"] objectAtIndex:0][@"oldText"]
+                             isEqualToString:@"replace textmarked textext to inser"]) &&
+                         ([[state[@"deltas"] objectAtIndex:0][@"deltaText"] isEqualToString:@""]) &&
+                         ([[state[@"deltas"] objectAtIndex:0][@"deltaStart"] intValue] == -1) &&
+                         ([[state[@"deltas"] objectAtIndex:0][@"deltaEnd"] intValue] == -1);
+                }]]);
+}
+
+- (void)testTextEditingDeltasAreGeneratedOnSetMarkedTextReplacement {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] init];
+  inputView.textInputDelegate = engine;
+  inputView.enableDeltaModel = YES;
+
+  __block int updateCount = 0;
+  OCMStub([engine updateEditingClient:0 withDelta:[OCMArg isNotNil]])
+      .andDo(^(NSInvocation* invocation) {
+        updateCount++;
+      });
+
+  [inputView.text setString:@"Some initial text"];
+  XCTAssertEqual(updateCount, 0);
+
+  UITextRange* range = [FlutterTextRange rangeWithNSRange:NSMakeRange(13, 4)];
+  inputView.markedTextRange = range;
+  inputView.selectedTextRange = nil;
+  XCTAssertEqual(updateCount, 1);
+
+  [inputView setMarkedText:@"new marked text." selectedRange:NSMakeRange(0, 1)];
+  XCTAssertEqual(updateCount, 2);
+
+  OCMVerify([engine
+      updateEditingClient:0
+                withDelta:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
+                  return ([[state[@"deltas"] objectAtIndex:0][@"oldText"]
+                             isEqualToString:@"Some initial text"]) &&
+                         ([[state[@"deltas"] objectAtIndex:0][@"deltaText"]
+                             isEqualToString:@"new marked text."]) &&
+                         ([[state[@"deltas"] objectAtIndex:0][@"deltaStart"] intValue] == 13) &&
+                         ([[state[@"deltas"] objectAtIndex:0][@"deltaEnd"] intValue] == 17);
+                }]]);
+}
+
+- (void)testTextEditingDeltasAreGeneratedOnSetMarkedTextInsertion {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] init];
+  inputView.textInputDelegate = engine;
+  inputView.enableDeltaModel = YES;
+
+  __block int updateCount = 0;
+  OCMStub([engine updateEditingClient:0 withDelta:[OCMArg isNotNil]])
+      .andDo(^(NSInvocation* invocation) {
+        updateCount++;
+      });
+
+  [inputView.text setString:@"Some initial text"];
+  XCTAssertEqual(updateCount, 0);
+
+  UITextRange* range = [FlutterTextRange rangeWithNSRange:NSMakeRange(13, 4)];
+  inputView.markedTextRange = range;
+  inputView.selectedTextRange = nil;
+  XCTAssertEqual(updateCount, 1);
+
+  [inputView setMarkedText:@"text." selectedRange:NSMakeRange(0, 1)];
+  XCTAssertEqual(updateCount, 2);
+
+  OCMVerify([engine
+      updateEditingClient:0
+                withDelta:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
+                  return ([[state[@"deltas"] objectAtIndex:0][@"oldText"]
+                             isEqualToString:@"Some initial text"]) &&
+                         ([[state[@"deltas"] objectAtIndex:0][@"deltaText"]
+                             isEqualToString:@"text."]) &&
+                         ([[state[@"deltas"] objectAtIndex:0][@"deltaStart"] intValue] == 13) &&
+                         ([[state[@"deltas"] objectAtIndex:0][@"deltaEnd"] intValue] == 17);
+                }]]);
+}
+
+- (void)testTextEditingDeltasAreGeneratedOnSetMarkedTextDeletion {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] init];
+  inputView.textInputDelegate = engine;
+  inputView.enableDeltaModel = YES;
+
+  __block int updateCount = 0;
+  OCMStub([engine updateEditingClient:0 withDelta:[OCMArg isNotNil]])
+      .andDo(^(NSInvocation* invocation) {
+        updateCount++;
+      });
+
+  [inputView.text setString:@"Some initial text"];
+  XCTAssertEqual(updateCount, 0);
+
+  UITextRange* range = [FlutterTextRange rangeWithNSRange:NSMakeRange(13, 4)];
+  inputView.markedTextRange = range;
+  inputView.selectedTextRange = nil;
+  XCTAssertEqual(updateCount, 1);
+
+  [inputView setMarkedText:@"tex" selectedRange:NSMakeRange(0, 1)];
+  XCTAssertEqual(updateCount, 2);
+
+  OCMVerify([engine
+      updateEditingClient:0
+                withDelta:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
+                  return ([[state[@"deltas"] objectAtIndex:0][@"oldText"]
+                             isEqualToString:@"Some initial text"]) &&
+                         ([[state[@"deltas"] objectAtIndex:0][@"deltaText"]
+                             isEqualToString:@"tex"]) &&
+                         ([[state[@"deltas"] objectAtIndex:0][@"deltaStart"] intValue] == 13) &&
+                         ([[state[@"deltas"] objectAtIndex:0][@"deltaEnd"] intValue] == 17);
+                }]]);
+}
+
 #pragma mark - EditingState tests
 
 - (void)testUITextInputCallsUpdateEditingStateOnce {
@@ -337,12 +535,86 @@ FLUTTER_ASSERT_ARC
   XCTAssertEqual(updateCount, 6);
 }
 
+- (void)testUITextInputCallsUpdateEditingStateWithDeltaOnce {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] init];
+  inputView.textInputDelegate = engine;
+  inputView.enableDeltaModel = YES;
+
+  __block int updateCount = 0;
+  OCMStub([engine updateEditingClient:0 withDelta:[OCMArg isNotNil]])
+      .andDo(^(NSInvocation* invocation) {
+        updateCount++;
+      });
+
+  [inputView insertText:@"text to insert"];
+  // Update the framework exactly once.
+  XCTAssertEqual(updateCount, 1);
+
+  [inputView deleteBackward];
+  XCTAssertEqual(updateCount, 2);
+
+  inputView.selectedTextRange = [FlutterTextRange rangeWithNSRange:NSMakeRange(0, 1)];
+  XCTAssertEqual(updateCount, 3);
+
+  [inputView replaceRange:[FlutterTextRange rangeWithNSRange:NSMakeRange(0, 1)]
+                 withText:@"replace text"];
+  XCTAssertEqual(updateCount, 4);
+
+  [inputView setMarkedText:@"marked text" selectedRange:NSMakeRange(0, 1)];
+  XCTAssertEqual(updateCount, 5);
+
+  [inputView unmarkText];
+  XCTAssertEqual(updateCount, 6);
+}
+
 - (void)testTextChangesDoNotTriggerUpdateEditingClient {
   FlutterTextInputView* inputView = [[FlutterTextInputView alloc] init];
   inputView.textInputDelegate = engine;
 
   __block int updateCount = 0;
   OCMStub([engine updateEditingClient:0 withState:[OCMArg isNotNil]])
+      .andDo(^(NSInvocation* invocation) {
+        updateCount++;
+      });
+
+  [inputView.text setString:@"BEFORE"];
+  XCTAssertEqual(updateCount, 0);
+
+  inputView.markedTextRange = nil;
+  inputView.selectedTextRange = nil;
+  XCTAssertEqual(updateCount, 1);
+
+  // Text changes don't trigger an update.
+  XCTAssertEqual(updateCount, 1);
+  [inputView setTextInputState:@{@"text" : @"AFTER"}];
+  XCTAssertEqual(updateCount, 1);
+  [inputView setTextInputState:@{@"text" : @"AFTER"}];
+  XCTAssertEqual(updateCount, 1);
+
+  // Selection changes don't trigger an update.
+  [inputView
+      setTextInputState:@{@"text" : @"SELECTION", @"selectionBase" : @0, @"selectionExtent" : @3}];
+  XCTAssertEqual(updateCount, 1);
+  [inputView
+      setTextInputState:@{@"text" : @"SELECTION", @"selectionBase" : @1, @"selectionExtent" : @3}];
+  XCTAssertEqual(updateCount, 1);
+
+  // Composing region changes don't trigger an update.
+  [inputView
+      setTextInputState:@{@"text" : @"COMPOSING", @"composingBase" : @1, @"composingExtent" : @2}];
+  XCTAssertEqual(updateCount, 1);
+  [inputView
+      setTextInputState:@{@"text" : @"COMPOSING", @"composingBase" : @1, @"composingExtent" : @3}];
+  XCTAssertEqual(updateCount, 1);
+}
+
+- (void)testTextChangesDoNotTriggerUpdateEditingClientWithDelta {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] init];
+  inputView.textInputDelegate = engine;
+  inputView.enableDeltaModel = YES;
+
+  __block int updateCount = 0;
+  OCMStub([engine updateEditingClient:0 withDelta:[OCMArg isNotNil]])
       .andDo(^(NSInvocation* invocation) {
         updateCount++;
       });
