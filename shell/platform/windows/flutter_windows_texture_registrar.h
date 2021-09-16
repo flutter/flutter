@@ -19,7 +19,8 @@ class FlutterWindowsEngine;
 // Thread safety: All member methods are thread safe.
 class FlutterWindowsTextureRegistrar {
  public:
-  explicit FlutterWindowsTextureRegistrar(FlutterWindowsEngine* engine);
+  explicit FlutterWindowsTextureRegistrar(FlutterWindowsEngine* engine,
+                                          const GlProcs& gl_procs);
 
   // Registers a texture described by the given |texture_info| object.
   // Returns the non-zero, positive texture id or -1 on error.
@@ -41,8 +42,12 @@ class FlutterWindowsTextureRegistrar {
                        size_t height,
                        FlutterOpenGLTexture* texture);
 
+  // Populates the OpenGL function pointers in |gl_procs|.
+  static void ResolveGlFunctions(GlProcs& gl_procs);
+
  private:
   FlutterWindowsEngine* engine_ = nullptr;
+  const GlProcs& gl_procs_;
 
   // All registered textures, keyed by their IDs.
   std::unordered_map<int64_t, std::unique_ptr<flutter::ExternalTextureGL>>
