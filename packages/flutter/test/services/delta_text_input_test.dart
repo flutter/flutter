@@ -22,7 +22,6 @@ void main() {
     setUp(() {
       fakeTextChannel = FakeTextChannel((MethodCall call) async {});
       TextInput.setChannel(fakeTextChannel);
-      scope.clients.clear();
     });
 
     tearDown(() {
@@ -33,6 +32,7 @@ void main() {
     test(
       'DeltaTextInputClient send the correct configuration to the platform and responds to updateEditingValueWithDeltas method correctly',
       () async {
+
       },
     );
   });
