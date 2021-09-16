@@ -1,4 +1,4 @@
-Signature: 9466cfc13c5d6f811e9a4a910c40c2bb
+Signature: f04478bceb016b814c60fdd0991d4d83
 
 UNUSED LICENSES:
 
@@ -3265,8 +3265,8 @@ FILE: ../../../third_party/skia/src/gpu/ops/FillRRectOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/FillRRectOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/FillRectOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/FillRectOp.h
-FILE: ../../../third_party/skia/src/gpu/ops/GrQuadPerEdgeAA.cpp
-FILE: ../../../third_party/skia/src/gpu/ops/GrQuadPerEdgeAA.h
+FILE: ../../../third_party/skia/src/gpu/ops/QuadPerEdgeAA.cpp
+FILE: ../../../third_party/skia/src/gpu/ops/QuadPerEdgeAA.h
 FILE: ../../../third_party/skia/src/gpu/ops/StrokeRectOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/StrokeRectOp.h
 FILE: ../../../third_party/skia/src/gpu/text/GrAtlasManager.cpp
@@ -5456,7 +5456,7 @@ FILE: ../../../third_party/skia/gm/gpu_blur_utils.cpp
 FILE: ../../../third_party/skia/src/gpu/GrFinishCallbacks.cpp
 FILE: ../../../third_party/skia/src/gpu/GrFinishCallbacks.h
 FILE: ../../../third_party/skia/src/gpu/GrVx.h
-FILE: ../../../third_party/skia/src/gpu/ops/GrAtlasInstancedHelper.cpp
+FILE: ../../../third_party/skia/src/gpu/ops/AtlasInstancedHelper.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/StrokeTessellateOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/StrokeTessellateOp.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeHardwareTessellator.cpp
@@ -5726,7 +5726,7 @@ FILE: ../../../third_party/skia/src/gpu/GrVertexChunkArray.cpp
 FILE: ../../../third_party/skia/src/gpu/GrVertexChunkArray.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrModulateAtlasCoverageEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrModulateAtlasCoverageEffect.h
-FILE: ../../../third_party/skia/src/gpu/ops/GrAtlasInstancedHelper.h
+FILE: ../../../third_party/skia/src/gpu/ops/AtlasInstancedHelper.h
 FILE: ../../../third_party/skia/src/gpu/ops/PathStencilCoverOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/PathStencilCoverOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/PathTessellateOp.cpp
