@@ -9,11 +9,11 @@
 namespace flutter {
 
 DisplayListLayer::DisplayListLayer(const SkPoint& offset,
-                                   sk_sp<DisplayList> display_list,
+                                   SkiaGPUObject<DisplayList> display_list,
                                    bool is_complex,
                                    bool will_change)
     : offset_(offset),
-      display_list_(display_list),
+      display_list_(std::move(display_list)),
       is_complex_(is_complex),
       will_change_(will_change) {}
 
@@ -42,15 +42,15 @@ void DisplayListLayer::Diff(DiffContext* context, const Layer* old_layer) {
 #endif
   }
   context->PushTransform(SkMatrix::Translate(offset_.x(), offset_.y()));
-  context->AddLayerBounds(display_list_->bounds());
+  context->AddLayerBounds(display_list()->bounds());
   context->SetLayerPaintRegion(this, context->CurrentSubtreeRegion());
 }
 
 bool DisplayListLayer::Compare(DiffContext::Statistics& statistics,
                                const DisplayListLayer* l1,
                                const DisplayListLayer* l2) {
-  const auto& dl1 = l1->display_list_;
-  const auto& dl2 = l2->display_list_;
+  const auto& dl1 = l1->display_list_.skia_object();
+  const auto& dl2 = l2->display_list_.skia_object();
   if (dl1.get() == dl2.get()) {
     statistics.AddSameInstancePicture();
     return true;
@@ -101,7 +101,7 @@ void DisplayListLayer::Preroll(PrerollContext* context,
 
 void DisplayListLayer::Paint(PaintContext& context) const {
   TRACE_EVENT0("flutter", "DisplayListLayer::Paint");
-  FML_DCHECK(display_list_.get());
+  FML_DCHECK(display_list_.skia_object());
   FML_DCHECK(needs_painting(context));
 
   SkAutoCanvasRestore save(context.leaf_nodes_canvas, true);

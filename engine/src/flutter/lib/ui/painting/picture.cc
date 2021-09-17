@@ -37,8 +37,9 @@ fml::RefPtr<Picture> Picture::Create(
   return canvas_picture;
 }
 
-fml::RefPtr<Picture> Picture::Create(Dart_Handle dart_handle,
-                                     sk_sp<DisplayList> display_list) {
+fml::RefPtr<Picture> Picture::Create(
+    Dart_Handle dart_handle,
+    flutter::SkiaGPUObject<DisplayList> display_list) {
   auto canvas_picture = fml::MakeRefCounted<Picture>(std::move(display_list));
 
   canvas_picture->AssociateWithDartWrapper(dart_handle);
@@ -48,7 +49,7 @@ fml::RefPtr<Picture> Picture::Create(Dart_Handle dart_handle,
 Picture::Picture(flutter::SkiaGPUObject<SkPicture> picture)
     : picture_(std::move(picture)) {}
 
-Picture::Picture(sk_sp<DisplayList> display_list)
+Picture::Picture(flutter::SkiaGPUObject<DisplayList> display_list)
     : display_list_(std::move(display_list)) {}
 
 Picture::~Picture() = default;
@@ -56,9 +57,9 @@ Picture::~Picture() = default;
 Dart_Handle Picture::toImage(uint32_t width,
                              uint32_t height,
                              Dart_Handle raw_image_callback) {
-  if (display_list_) {
+  if (display_list_.skia_object()) {
     return RasterizeToImage(
-        [display_list = display_list_](SkCanvas* canvas) {
+        [display_list = display_list_.skia_object()](SkCanvas* canvas) {
           display_list->RenderTo(canvas);
         },
         width, height, raw_image_callback);
@@ -80,8 +81,8 @@ void Picture::dispose() {
 size_t Picture::GetAllocationSize() const {
   if (auto picture = picture_.skia_object()) {
     return picture->approximateBytesUsed() + sizeof(Picture);
-  } else if (display_list_) {
-    return display_list_->bytes() + sizeof(Picture);
+  } else if (auto display_list = display_list_.skia_object()) {
+    return display_list->bytes() + sizeof(Picture);
   } else {
     return sizeof(Picture);
   }

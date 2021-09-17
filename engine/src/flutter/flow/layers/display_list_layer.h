@@ -7,6 +7,7 @@
 
 #include "flutter/flow/display_list.h"
 #include "flutter/flow/layers/layer.h"
+#include "flutter/flow/skia_gpu_object.h"
 
 namespace flutter {
 
@@ -15,11 +16,13 @@ class DisplayListLayer : public Layer {
   static constexpr size_t kMaxBytesToCompare = 10000;
 
   DisplayListLayer(const SkPoint& offset,
-                   sk_sp<DisplayList> display_list,
+                   SkiaGPUObject<DisplayList> display_list,
                    bool is_complex,
                    bool will_change);
 
-  DisplayList* display_list() const { return display_list_.get(); }
+  DisplayList* display_list() const {
+    return display_list_.skia_object().get();
+  }
 
 #ifdef FLUTTER_ENABLE_DIFF_CONTEXT
 
@@ -39,14 +42,12 @@ class DisplayListLayer : public Layer {
 
  private:
   SkPoint offset_;
-  sk_sp<DisplayList> display_list_;
+  flutter::SkiaGPUObject<DisplayList> display_list_;
   bool is_complex_ = false;
   bool will_change_ = false;
 
 #ifdef FLUTTER_ENABLE_DIFF_CONTEXT
 
-  sk_sp<SkData> SerializedPicture() const;
-  mutable sk_sp<SkData> cached_serialized_picture_;
   static bool Compare(DiffContext::Statistics& statistics,
                       const DisplayListLayer* l1,
                       const DisplayListLayer* l2);
