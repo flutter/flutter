@@ -12,7 +12,7 @@ import 'theme.dart';
 
 const Duration _materialBannerTransitionDuration = Duration(milliseconds: 250);
 const Curve _materialBannerHeightCurve = Curves.fastOutSlowIn;
-const Curve _materialBannerFadeOutCurve = Interval(0.72, 1.0, curve: Curves.fastOutSlowIn);
+const Curve _materialBannerSlideOutCurve = Interval(0.72, 1.0, curve: Curves.fastOutSlowIn);
 
 /// Specify how a [MaterialBanner] was closed.
 ///
@@ -331,11 +331,14 @@ class _MaterialBannerState extends State<MaterialBanner> {
       return materialBanner;
 
     final CurvedAnimation heightAnimation = CurvedAnimation(parent: widget.animation!, curve: _materialBannerHeightCurve);
-    final CurvedAnimation fadeOutAnimation = CurvedAnimation(
+    final Animation<Offset> slideOutAnimation = Tween<Offset>(
+      begin: const Offset(0.0, -1.0),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
       parent: widget.animation!,
-      curve: _materialBannerFadeOutCurve,
+      curve: _materialBannerSlideOutCurve,
       reverseCurve: const Threshold(0.0),
-    );
+    ));
 
     materialBanner = Semantics(
       container: true,
@@ -345,8 +348,8 @@ class _MaterialBannerState extends State<MaterialBanner> {
       },
       child: mediaQueryData.accessibleNavigation
           ? materialBanner
-          : FadeTransition(
-        opacity: fadeOutAnimation,
+          : SlideTransition(
+        position: slideOutAnimation,
         child: materialBanner,
       ),
     );
