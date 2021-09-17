@@ -148,7 +148,7 @@ namespace flutter {
   V(DrawTextBlob)                   \
                                     \
   V(DrawShadow)                     \
-  V(DrawShadowOccludes)
+  V(DrawNonOccludingShadow)
 
 #define DL_OP_TO_ENUM_VALUE(name) k##name,
 enum class DisplayListOpType { FOR_EACH_DISPLAY_LIST_OP(DL_OP_TO_ENUM_VALUE) };
@@ -245,8 +245,8 @@ class Dispatcher {
   virtual void setMaskBlurFilter(SkBlurStyle style, SkScalar sigma) = 0;
 
   virtual void save() = 0;
-  virtual void restore() = 0;
   virtual void saveLayer(const SkRect* bounds, bool restoreWithPaint) = 0;
+  virtual void restore() = 0;
 
   virtual void translate(SkScalar tx, SkScalar ty) = 0;
   virtual void scale(SkScalar sx, SkScalar sy) = 0;
@@ -325,7 +325,7 @@ class Dispatcher {
   virtual void drawShadow(const SkPath& path,
                           const SkColor color,
                           const SkScalar elevation,
-                          bool occludes,
+                          bool transparentOccluder,
                           SkScalar dpr) = 0;
 };
 
@@ -358,8 +358,8 @@ class DisplayListBuilder final : public virtual Dispatcher, public SkRefCnt {
   void setMaskBlurFilter(SkBlurStyle style, SkScalar sigma) override;
 
   void save() override;
-  void restore() override;
   void saveLayer(const SkRect* bounds, bool restoreWithPaint) override;
+  void restore() override;
 
   void translate(SkScalar tx, SkScalar ty) override;
   void scale(SkScalar sx, SkScalar sy) override;
@@ -440,7 +440,7 @@ class DisplayListBuilder final : public virtual Dispatcher, public SkRefCnt {
   void drawShadow(const SkPath& path,
                   const SkColor color,
                   const SkScalar elevation,
-                  bool occludes,
+                  bool transparentOccluder,
                   SkScalar dpr) override;
 
   sk_sp<DisplayList> Build();

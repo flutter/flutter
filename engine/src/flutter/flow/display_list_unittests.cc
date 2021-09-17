@@ -888,6 +888,7 @@ TEST(DisplayList, DisplayListSaveLayerBoundsWithAlphaFilter) {
       SkColorFilters::Matrix(alpha_matrix);
 
   {
+    // No tricky stuff, just verifying drawing a rect produces rect bounds
     DisplayListBuilder builder(build_bounds);
     builder.saveLayer(&save_bounds, true);
     builder.drawRect(rect);
@@ -897,6 +898,7 @@ TEST(DisplayList, DisplayListSaveLayerBoundsWithAlphaFilter) {
   }
 
   {
+    // Now checking that a normal color filter still produces rect bounds
     DisplayListBuilder builder(build_bounds);
     builder.setColorFilter(base_color_filter);
     builder.saveLayer(&save_bounds, true);
@@ -908,6 +910,26 @@ TEST(DisplayList, DisplayListSaveLayerBoundsWithAlphaFilter) {
   }
 
   {
+    // Now checking how SkPictureRecorder deals with a color filter
+    // that modifies alpha channels (save layer bounds are meaningless
+    // under those circumstances)
+    SkPictureRecorder recorder;
+    SkCanvas* canvas = recorder.beginRecording(build_bounds);
+    SkPaint p1;
+    p1.setColorFilter(alpha_color_filter);
+    canvas->saveLayer(save_bounds, &p1);
+    SkPaint p2;
+    canvas->drawRect(rect, p2);
+    canvas->restore();
+    sk_sp<SkPicture> picture = recorder.finishRecordingAsPicture();
+    ASSERT_EQ(picture->cullRect(), build_bounds);
+  }
+
+  {
+    // Now checking that DisplayList has the same behavior that we
+    // saw in the SkPictureRecorder example above - returning the
+    // cull rect of the DisplayListBuilder when it encounters a
+    // save layer that modifies an unbounded region
     DisplayListBuilder builder(build_bounds);
     builder.setColorFilter(alpha_color_filter);
     builder.saveLayer(&save_bounds, true);
@@ -915,10 +937,12 @@ TEST(DisplayList, DisplayListSaveLayerBoundsWithAlphaFilter) {
     builder.drawRect(rect);
     builder.restore();
     sk_sp<DisplayList> display_list = builder.Build();
-    ASSERT_EQ(display_list->bounds(), save_bounds);
+    ASSERT_EQ(display_list->bounds(), build_bounds);
   }
 
   {
+    // Verifying that the save layer bounds are not relevant
+    // to the behavior in the previous example
     DisplayListBuilder builder(build_bounds);
     builder.setColorFilter(alpha_color_filter);
     builder.saveLayer(nullptr, true);
@@ -930,6 +954,8 @@ TEST(DisplayList, DisplayListSaveLayerBoundsWithAlphaFilter) {
   }
 
   {
+    // Making sure hiding a ColorFilter as an ImageFilter will
+    // generate the same behavior as setting it as a ColorFilter
     DisplayListBuilder builder(build_bounds);
     builder.setImageFilter(
         SkImageFilters::ColorFilter(base_color_filter, nullptr));
@@ -942,6 +968,8 @@ TEST(DisplayList, DisplayListSaveLayerBoundsWithAlphaFilter) {
   }
 
   {
+    // Making sure hiding a problematic ColorFilter as an ImageFilter
+    // will generate the same behavior as setting it as a ColorFilter
     DisplayListBuilder builder(build_bounds);
     builder.setImageFilter(
         SkImageFilters::ColorFilter(alpha_color_filter, nullptr));
@@ -950,10 +978,11 @@ TEST(DisplayList, DisplayListSaveLayerBoundsWithAlphaFilter) {
     builder.drawRect(rect);
     builder.restore();
     sk_sp<DisplayList> display_list = builder.Build();
-    ASSERT_EQ(display_list->bounds(), save_bounds);
+    ASSERT_EQ(display_list->bounds(), build_bounds);
   }
 
   {
+    // Same as above (ImageFilter hiding ColorFilter) with no save bounds
     DisplayListBuilder builder(build_bounds);
     builder.setImageFilter(
         SkImageFilters::ColorFilter(alpha_color_filter, nullptr));
@@ -966,6 +995,7 @@ TEST(DisplayList, DisplayListSaveLayerBoundsWithAlphaFilter) {
   }
 
   {
+    // Testing behavior with an unboundable blend mode
     DisplayListBuilder builder(build_bounds);
     builder.setBlendMode(SkBlendMode::kClear);
     builder.saveLayer(&save_bounds, true);
@@ -973,10 +1003,11 @@ TEST(DisplayList, DisplayListSaveLayerBoundsWithAlphaFilter) {
     builder.drawRect(rect);
     builder.restore();
     sk_sp<DisplayList> display_list = builder.Build();
-    ASSERT_EQ(display_list->bounds(), save_bounds);
+    ASSERT_EQ(display_list->bounds(), build_bounds);
   }
 
   {
+    // Same as previous with no save bounds
     DisplayListBuilder builder(build_bounds);
     builder.setBlendMode(SkBlendMode::kClear);
     builder.saveLayer(nullptr, true);

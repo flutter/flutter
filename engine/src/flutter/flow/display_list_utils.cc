@@ -137,101 +137,210 @@ void SkMatrixDispatchHelper::reset() {
 }
 
 void ClipBoundsDispatchHelper::clipRect(const SkRect& rect,
-                                        bool isAA,
+                                        bool is_aa,
                                         SkClipOp clip_op) {
   if (clip_op == SkClipOp::kIntersect) {
-    intersect(rect);
+    intersect(rect, is_aa);
   }
 }
 void ClipBoundsDispatchHelper::clipRRect(const SkRRect& rrect,
-                                         bool isAA,
+                                         bool is_aa,
                                          SkClipOp clip_op) {
   if (clip_op == SkClipOp::kIntersect) {
-    intersect(rrect.getBounds());
+    intersect(rrect.getBounds(), is_aa);
   }
 }
 void ClipBoundsDispatchHelper::clipPath(const SkPath& path,
-                                        bool isAA,
+                                        bool is_aa,
                                         SkClipOp clip_op) {
   if (clip_op == SkClipOp::kIntersect) {
-    intersect(path.getBounds());
+    intersect(path.getBounds(), is_aa);
   }
 }
-void ClipBoundsDispatchHelper::intersect(const SkRect& rect) {
+void ClipBoundsDispatchHelper::intersect(const SkRect& rect, bool is_aa) {
   SkRect devClipBounds = matrix().mapRect(rect);
-  if (!bounds_.intersect(devClipBounds)) {
-    bounds_.setEmpty();
+  if (is_aa) {
+    devClipBounds.roundOut(&devClipBounds);
+  }
+  if (has_clip_) {
+    if (!bounds_.intersect(devClipBounds)) {
+      bounds_.setEmpty();
+    }
+  } else {
+    has_clip_ = true;
+    if (devClipBounds.isEmpty()) {
+      bounds_.setEmpty();
+    } else {
+      bounds_ = devClipBounds;
+    }
   }
 }
 void ClipBoundsDispatchHelper::save() {
-  saved_.push_back(bounds_);
+  if (!has_clip_) {
+    saved_.push_back(SkRect::MakeLTRB(0, 0, -1, -1));
+  } else if (bounds_.isEmpty()) {
+    saved_.push_back(SkRect::MakeEmpty());
+  } else {
+    saved_.push_back(bounds_);
+  }
 }
 void ClipBoundsDispatchHelper::restore() {
   bounds_ = saved_.back();
   saved_.pop_back();
+  has_clip_ = (bounds_.fLeft <= bounds_.fRight &&  //
+               bounds_.fTop <= bounds_.fBottom);
+  if (!has_clip_) {
+    bounds_.setEmpty();
+  }
+}
+void ClipBoundsDispatchHelper::reset(const SkRect* cull_rect) {
+  if ((has_clip_ = ((bool)cull_rect)) && !cull_rect->isEmpty()) {
+    bounds_ = *cull_rect;
+  } else {
+    bounds_.setEmpty();
+  }
 }
 
-void DisplayListBoundsCalculator::saveLayer(const SkRect* bounds,
-                                            bool with_paint) {
-  SkMatrixDispatchHelper::save();
-  ClipBoundsDispatchHelper::save();
-  saved_infos_.emplace_back(
-      with_paint ? std::make_unique<SaveLayerWithPaintInfo>(
-                       this, accumulator_, matrix(), bounds, paint())
-                 : std::make_unique<SaveLayerInfo>(accumulator_, matrix()));
-  accumulator_ = saved_infos_.back()->save();
-  SkMatrixDispatchHelper::reset();
+DisplayListBoundsCalculator::DisplayListBoundsCalculator(
+    const SkRect* cull_rect)
+    : ClipBoundsDispatchHelper(cull_rect) {
+  layer_infos_.emplace_back(std::make_unique<RootLayerData>());
+  accumulator_ = layer_infos_.back()->accumulatorForLayer();
+}
+void DisplayListBoundsCalculator::setCaps(SkPaint::Cap cap) {
+  cap_is_square_ = (cap == SkPaint::kSquare_Cap);
+}
+void DisplayListBoundsCalculator::setJoins(SkPaint::Join join) {
+  join_is_miter_ = (join == SkPaint::kMiter_Join);
+}
+void DisplayListBoundsCalculator::setDrawStyle(SkPaint::Style style) {
+  style_flag_ = (style == SkPaint::kFill_Style) ? kIsFilledGeometry  //
+                                                : kIsStrokedGeometry;
+}
+void DisplayListBoundsCalculator::setStrokeWidth(SkScalar width) {
+  half_stroke_width_ = std::max(width * 0.5f, kMinStrokeWidth);
+}
+void DisplayListBoundsCalculator::setMiterLimit(SkScalar limit) {
+  miter_limit_ = std::max(limit, 1.0f);
+}
+void DisplayListBoundsCalculator::setBlendMode(SkBlendMode mode) {
+  blend_mode_ = mode;
+}
+void DisplayListBoundsCalculator::setBlender(sk_sp<SkBlender> blender) {
+  SkPaint paint;
+  paint.setBlender(std::move(blender));
+  blend_mode_ = paint.asBlendMode();
+}
+void DisplayListBoundsCalculator::setImageFilter(sk_sp<SkImageFilter> filter) {
+  image_filter_ = std::move(filter);
+}
+void DisplayListBoundsCalculator::setColorFilter(sk_sp<SkColorFilter> filter) {
+  color_filter_ = std::move(filter);
+}
+void DisplayListBoundsCalculator::setPathEffect(sk_sp<SkPathEffect> effect) {
+  path_effect_ = std::move(effect);
+}
+void DisplayListBoundsCalculator::setMaskFilter(sk_sp<SkMaskFilter> filter) {
+  mask_filter_ = std::move(filter);
+  mask_sigma_pad_ = 0.0f;
+}
+void DisplayListBoundsCalculator::setMaskBlurFilter(SkBlurStyle style,
+                                                    SkScalar sigma) {
+  mask_sigma_pad_ = std::max(3.0f * sigma, 0.0f);
+  mask_filter_ = nullptr;
 }
 void DisplayListBoundsCalculator::save() {
   SkMatrixDispatchHelper::save();
   ClipBoundsDispatchHelper::save();
-  saved_infos_.emplace_back(std::make_unique<SaveInfo>(accumulator_));
-  accumulator_ = saved_infos_.back()->save();
+  layer_infos_.emplace_back(std::make_unique<SaveData>(accumulator_));
+  accumulator_ = layer_infos_.back()->accumulatorForLayer();
+}
+void DisplayListBoundsCalculator::saveLayer(const SkRect* bounds,
+                                            bool with_paint) {
+  SkMatrixDispatchHelper::save();
+  ClipBoundsDispatchHelper::save();
+  if (with_paint) {
+    layer_infos_.emplace_back(std::make_unique<SaveLayerData>(
+        accumulator_, image_filter_, paintNopsOnTransparenBlack()));
+  } else {
+    layer_infos_.emplace_back(
+        std::make_unique<SaveLayerData>(accumulator_, nullptr, true));
+  }
+  accumulator_ = layer_infos_.back()->accumulatorForLayer();
+  // Accumulate the layer in its own coordinate system and then
+  // filter and transform its bounds on restore.
+  SkMatrixDispatchHelper::reset();
+  ClipBoundsDispatchHelper::reset(bounds);
 }
 void DisplayListBoundsCalculator::restore() {
-  if (!saved_infos_.empty()) {
+  if (layer_infos_.size() > 1) {
     SkMatrixDispatchHelper::restore();
     ClipBoundsDispatchHelper::restore();
-    accumulator_ = saved_infos_.back()->restore();
-    saved_infos_.pop_back();
+    accumulator_ = layer_infos_.back()->accumulatorForRestore();
+    SkRect layer_bounds = layer_infos_.back()->getLayerBounds();
+    // Must read unbounded state after layer_bounds
+    bool layer_unbounded = layer_infos_.back()->is_unbounded();
+    layer_infos_.pop_back();
+
+    // We accumulate the bounds even if the layer was unbounded because
+    // the unbounded state may be contained at a higher level, so we at
+    // least accumulate our best estimate about what we have.
+    if (!layer_bounds.isEmpty()) {
+      // kUnfiltered because the layer already applied all bounds
+      // modifications based on the attributes that were in place
+      // when it was instantiated. Modifying it further base on the
+      // current attributes would mix attribute states.
+      accumulateRect(layer_bounds, kIsUnfiltered);
+    }
+    if (layer_unbounded) {
+      accumulateUnbounded();
+    }
   }
 }
 
 void DisplayListBoundsCalculator::drawPaint() {
-  if (!bounds_cull_.isEmpty()) {
-    root_accumulator_.accumulate(bounds_cull_);
-  }
+  accumulateUnbounded();
 }
 void DisplayListBoundsCalculator::drawColor(SkColor color, SkBlendMode mode) {
-  if (!bounds_cull_.isEmpty()) {
-    root_accumulator_.accumulate(bounds_cull_);
-  }
+  accumulateUnbounded();
 }
 void DisplayListBoundsCalculator::drawLine(const SkPoint& p0,
                                            const SkPoint& p1) {
   SkRect bounds = SkRect::MakeLTRB(p0.fX, p0.fY, p1.fX, p1.fY).makeSorted();
-  accumulateRect(bounds, true);
+  int cap_flag = kIsStrokedGeometry;
+  if (bounds.width() > 0.0f && bounds.height() > 0.0f) {
+    cap_flag |= kGeometryMayHaveDiagonalEndCaps;
+  }
+  accumulateRect(bounds, cap_flag);
 }
 void DisplayListBoundsCalculator::drawRect(const SkRect& rect) {
-  accumulateRect(rect);
+  accumulateRect(rect, kIsDrawnGeometry);
 }
 void DisplayListBoundsCalculator::drawOval(const SkRect& bounds) {
-  accumulateRect(bounds);
+  accumulateRect(bounds, kIsDrawnGeometry);
 }
 void DisplayListBoundsCalculator::drawCircle(const SkPoint& center,
                                              SkScalar radius) {
   accumulateRect(SkRect::MakeLTRB(center.fX - radius, center.fY - radius,
-                                  center.fX + radius, center.fY + radius));
+                                  center.fX + radius, center.fY + radius),
+                 kIsDrawnGeometry);
 }
 void DisplayListBoundsCalculator::drawRRect(const SkRRect& rrect) {
-  accumulateRect(rrect.getBounds());
+  accumulateRect(rrect.getBounds(), kIsDrawnGeometry);
 }
 void DisplayListBoundsCalculator::drawDRRect(const SkRRect& outer,
                                              const SkRRect& inner) {
-  accumulateRect(outer.getBounds());
+  accumulateRect(outer.getBounds(), kIsDrawnGeometry);
 }
 void DisplayListBoundsCalculator::drawPath(const SkPath& path) {
-  accumulateRect(path.getBounds());
+  if (path.isInverseFillType()) {
+    accumulateUnbounded();
+  } else {
+    accumulateRect(path.getBounds(),                   //
+                   (kIsDrawnGeometry |                 //
+                    kGeometryMayHaveDiagonalEndCaps |  //
+                    kGeometryMayHaveProblematicJoins));
+  }
 }
 void DisplayListBoundsCalculator::drawArc(const SkRect& bounds,
                                           SkScalar start,
@@ -240,7 +349,7 @@ void DisplayListBoundsCalculator::drawArc(const SkRect& bounds,
   // This could be tighter if we compute where the start and end
   // angles are and then also consider the quadrants swept and
   // the center if specified.
-  accumulateRect(bounds);
+  accumulateRect(bounds, kIsDrawnGeometry | kGeometryMayHaveDiagonalEndCaps);
 }
 void DisplayListBoundsCalculator::drawPoints(SkCanvas::PointMode mode,
                                              uint32_t count,
@@ -250,19 +359,24 @@ void DisplayListBoundsCalculator::drawPoints(SkCanvas::PointMode mode,
     for (size_t i = 0; i < count; i++) {
       ptBounds.accumulate(pts[i]);
     }
-    accumulateRect(ptBounds.getBounds(), true);
+    int flags = kIsStrokedGeometry;
+    if (mode != SkCanvas::kPoints_PointMode) {
+      flags |= kGeometryMayHaveDiagonalEndCaps;
+      // Even Polygon mode just draws (count-1) separate lines, no joins
+    }
+    accumulateRect(ptBounds.getBounds(), flags);
   }
 }
 void DisplayListBoundsCalculator::drawVertices(const sk_sp<SkVertices> vertices,
                                                SkBlendMode mode) {
-  accumulateRect(vertices->bounds());
+  accumulateRect(vertices->bounds(), kIsNonGeometric);
 }
 void DisplayListBoundsCalculator::drawImage(const sk_sp<SkImage> image,
                                             const SkPoint point,
                                             const SkSamplingOptions& sampling) {
-  SkRect bounds = SkRect::Make(image->bounds());
-  bounds.offset(point);
-  accumulateRect(bounds);
+  SkRect bounds = SkRect::MakeXYWH(point.fX, point.fY,  //
+                                   image->width(), image->height());
+  accumulateRect(bounds, kIsNonGeometric | kApplyMaskFilter);
 }
 void DisplayListBoundsCalculator::drawImageRect(
     const sk_sp<SkImage> image,
@@ -270,13 +384,13 @@ void DisplayListBoundsCalculator::drawImageRect(
     const SkRect& dst,
     const SkSamplingOptions& sampling,
     SkCanvas::SrcRectConstraint constraint) {
-  accumulateRect(dst);
+  accumulateRect(dst, kIsNonGeometric | kApplyMaskFilter);
 }
 void DisplayListBoundsCalculator::drawImageNine(const sk_sp<SkImage> image,
                                                 const SkIRect& center,
                                                 const SkRect& dst,
                                                 SkFilterMode filter) {
-  accumulateRect(dst);
+  accumulateRect(dst, kIsNonGeometric);
 }
 void DisplayListBoundsCalculator::drawImageLattice(
     const sk_sp<SkImage> image,
@@ -284,7 +398,7 @@ void DisplayListBoundsCalculator::drawImageLattice(
     const SkRect& dst,
     SkFilterMode filter,
     bool with_paint) {
-  accumulateRect(dst);
+  accumulateRect(dst, kIsNonGeometric | kApplyMaskFilter);
 }
 void DisplayListBoundsCalculator::drawAtlas(const sk_sp<SkImage> atlas,
                                             const SkRSXform xform[],
@@ -304,7 +418,7 @@ void DisplayListBoundsCalculator::drawAtlas(const sk_sp<SkImage> atlas,
     }
   }
   if (atlasBounds.isNotEmpty()) {
-    accumulateRect(atlasBounds.getBounds());
+    accumulateRect(atlasBounds.getBounds(), kIsNonGeometric);
   }
 }
 void DisplayListBoundsCalculator::drawPicture(const sk_sp<SkPicture> picture,
@@ -317,118 +431,150 @@ void DisplayListBoundsCalculator::drawPicture(const sk_sp<SkPicture> picture,
   if (pic_matrix) {
     pic_matrix->mapRect(&bounds);
   }
-  if (with_save_layer) {
-    accumulateRect(bounds);
-  } else {
-    matrix().mapRect(&bounds);
-    accumulator_->accumulate(bounds);
-  }
+  accumulateRect(bounds, with_save_layer ? kIsNonGeometric : kIsUnfiltered);
 }
 void DisplayListBoundsCalculator::drawDisplayList(
     const sk_sp<DisplayList> display_list) {
-  accumulateRect(display_list->bounds());
+  accumulateRect(display_list->bounds(), kIsUnfiltered);
 }
 void DisplayListBoundsCalculator::drawTextBlob(const sk_sp<SkTextBlob> blob,
                                                SkScalar x,
                                                SkScalar y) {
-  accumulateRect(blob->bounds().makeOffset(x, y));
+  accumulateRect(blob->bounds().makeOffset(x, y), kIsFilledGeometry);
 }
 void DisplayListBoundsCalculator::drawShadow(const SkPath& path,
                                              const SkColor color,
                                              const SkScalar elevation,
-                                             bool occludes,
+                                             bool transparentOccluder,
                                              SkScalar dpr) {
-  accumulateRect(
-      PhysicalShapeLayer::ComputeShadowBounds(path, elevation, dpr, matrix()));
+  SkRect shadow_bounds =
+      PhysicalShapeLayer::ComputeShadowBounds(path, elevation, dpr, matrix());
+  accumulateRect(shadow_bounds, kIsUnfiltered);
 }
 
-void DisplayListBoundsCalculator::accumulateRect(const SkRect& rect,
-                                                 bool forceStroke) {
-  SkRect dstRect = rect;
-  const SkPaint& p = paint();
-  if (forceStroke) {
-    if (p.getStyle() == SkPaint::kFill_Style) {
-      setDrawStyle(SkPaint::kStroke_Style);
+bool DisplayListBoundsCalculator::getFilteredBounds(SkRect& bounds,
+                                                    SkImageFilter* filter) {
+  if (filter) {
+    if (!filter->canComputeFastBounds()) {
+      return false;
+    }
+    bounds = filter->computeFastBounds(bounds);
+  }
+  return true;
+}
+
+bool DisplayListBoundsCalculator::adjustBoundsForPaint(SkRect& bounds,
+                                                       int flags) {
+  if ((flags & kIsUnfiltered) != 0) {
+    FML_DCHECK(flags == kIsUnfiltered);
+    return true;
+  }
+
+  if ((flags & kIsAnyGeometryMask) != 0) {
+    if ((flags & kIsDrawnGeometry) != 0) {
+      FML_DCHECK((flags & (kIsFilledGeometry | kIsStrokedGeometry)) == 0);
+      flags |= style_flag_;
+    }
+
+    // Path effect occurs before stroking...
+    if (path_effect_) {
+      SkPathEffect::DashInfo info;
+      if (path_effect_->asADash(&info) == SkPathEffect::kDash_DashType) {
+        // A dash effect has a very simple impact. It cannot introduce any
+        // miter joins that weren't already present in the original path
+        // and it does not grow the bounds of the path, but it can add
+        // end caps to areas that might not have had them before so all
+        // we need to do is to indicate the potential for diagonal
+        // end caps and move on.
+        flags |= kGeometryMayHaveDiagonalEndCaps;
+      } else {
+        SkPaint p;
+        p.setPathEffect(path_effect_);
+        if (!p.canComputeFastBounds()) {
+          return false;
+        }
+        bounds = p.computeFastBounds(bounds, &bounds);
+        flags |= (kGeometryMayHaveDiagonalEndCaps |
+                  kGeometryMayHaveProblematicJoins);
+      }
+    }
+
+    if ((flags & kIsStrokedGeometry) != 0) {
+      FML_DCHECK((flags & kIsFilledGeometry) == 0);
+      // Determine the max multiplier to the stroke width first.
+      SkScalar pad = 1.0f;
+      if (join_is_miter_ && (flags & kGeometryMayHaveProblematicJoins) != 0) {
+        pad = std::max(pad, miter_limit_);
+      }
+      if (cap_is_square_ && (flags & kGeometryMayHaveDiagonalEndCaps) != 0) {
+        pad = std::max(pad, SK_ScalarSqrt2);
+      }
+      pad *= half_stroke_width_;
+      bounds.outset(pad, pad);
     } else {
-      forceStroke = false;
+      FML_DCHECK((flags & kIsStrokedGeometry) == 0);
+    }
+    flags |= kApplyMaskFilter;
+  } else {
+    FML_DCHECK((flags & (kGeometryMayHaveDiagonalEndCaps |
+                         kGeometryMayHaveProblematicJoins)) == 0);
+  }
+
+  if ((flags & kApplyMaskFilter) != 0) {
+    if (mask_filter_) {
+      SkPaint p;
+      p.setMaskFilter(mask_filter_);
+      if (!p.canComputeFastBounds()) {
+        return false;
+      }
+      bounds = p.computeFastBounds(bounds, &bounds);
+    }
+    if (mask_sigma_pad_ > 0.0f) {
+      bounds.outset(mask_sigma_pad_, mask_sigma_pad_);
     }
   }
-  if (p.canComputeFastBounds()) {
-    dstRect = p.computeFastBounds(rect, &dstRect);
-    matrix().mapRect(&dstRect);
-    accumulator_->accumulate(dstRect);
+
+  return getFilteredBounds(bounds, image_filter_.get());
+}
+
+void DisplayListBoundsCalculator::accumulateUnbounded() {
+  if (has_clip()) {
+    accumulator_->accumulate(getClipBounds());
   } else {
-    root_accumulator_.accumulate(bounds_cull_);
-  }
-  if (forceStroke) {
-    setDrawStyle(SkPaint::kFill_Style);
+    layer_infos_.back()->set_unbounded();
   }
 }
-
-DisplayListBoundsCalculator::SaveInfo::SaveInfo(BoundsAccumulator* accumulator)
-    : saved_accumulator_(accumulator) {}
-BoundsAccumulator* DisplayListBoundsCalculator::SaveInfo::save() {
-  // No need to swap out the accumulator for a normal save
-  return saved_accumulator_;
-}
-BoundsAccumulator* DisplayListBoundsCalculator::SaveInfo::restore() {
-  return saved_accumulator_;
-}
-
-DisplayListBoundsCalculator::SaveLayerInfo::SaveLayerInfo(
-    BoundsAccumulator* accumulator,
-    const SkMatrix& matrix)
-    : SaveInfo(accumulator), matrix_(matrix) {}
-BoundsAccumulator* DisplayListBoundsCalculator::SaveLayerInfo::save() {
-  // Use the local layerAccumulator until restore is called and
-  // then transform (and adjust with paint if necessary) on restore()
-  return &layer_accumulator_;
-}
-BoundsAccumulator* DisplayListBoundsCalculator::SaveLayerInfo::restore() {
-  SkRect layer_bounds = layer_accumulator_.getBounds();
-  layer_bounds.roundOut(&layer_bounds);
-  matrix_.mapRect(&layer_bounds);
-  saved_accumulator_->accumulate(layer_bounds);
-  return saved_accumulator_;
-}
-
-DisplayListBoundsCalculator::SaveLayerWithPaintInfo::SaveLayerWithPaintInfo(
-    DisplayListBoundsCalculator* calculator,
-    BoundsAccumulator* accumulator,
-    const SkMatrix& saveMatrix,
-    const SkRect* saveBounds,
-    const SkPaint& savePaint)
-    : SaveLayerInfo(accumulator, saveMatrix),
-      calculator_(calculator),
-      paint_(savePaint) {
-  if (saveBounds) {
-    bounds_.emplace(*saveBounds);
+void DisplayListBoundsCalculator::accumulateRect(SkRect& rect, int flags) {
+  if (adjustBoundsForPaint(rect, flags)) {
+    matrix().mapRect(&rect);
+    if (!has_clip() || rect.intersect(getClipBounds())) {
+      accumulator_->accumulate(rect);
+    }
+  } else {
+    accumulateUnbounded();
   }
 }
 
-static bool PaintNopsOnTransparenBlack(const SkPaint& paint) {
-  SkImageFilter* image_filter = paint.getImageFilter();
+bool DisplayListBoundsCalculator::paintNopsOnTransparenBlack() {
   // SkImageFilter::canComputeFastBounds tests for transparency behavior
   // This test assumes that the blend mode checked down below will
   // NOP on transparent black.
-  if (image_filter && !image_filter->canComputeFastBounds()) {
+  if (image_filter_ && !image_filter_->canComputeFastBounds()) {
     return false;
   }
 
-  SkColorFilter* color_filter = paint.getColorFilter();
   // We filter the transparent black that is used for the background of a
   // saveLayer and make sure it returns transparent black. If it does, then
   // the color filter will leave all area surrounding the contents of the
   // save layer untouched out to the edge of the output surface.
   // This test assumes that the blend mode checked down below will
   // NOP on transparent black.
-  if (color_filter &&
-      color_filter->filterColor(SK_ColorTRANSPARENT) != SK_ColorTRANSPARENT) {
+  if (color_filter_ &&
+      color_filter_->filterColor(SK_ColorTRANSPARENT) != SK_ColorTRANSPARENT) {
     return false;
   }
 
-  const auto blend_mode = paint.asBlendMode();
-  if (!blend_mode) {
+  if (!blend_mode_) {
     return false;  // can we query other blenders for this?
   }
   // Unusual blendmodes require us to process a saved layer
@@ -436,7 +582,7 @@ static bool PaintNopsOnTransparenBlack(const SkPaint& paint) {
   // For example, DstIn is used by masking layers.
   // https://code.google.com/p/skia/issues/detail?id=1291
   // https://crbug.com/401593
-  switch (blend_mode.value()) {
+  switch (blend_mode_.value()) {
     // For each of the following transfer modes, if the source
     // alpha is zero (our transparent black), the resulting
     // blended pixel is not necessarily equal to the original
@@ -483,32 +629,6 @@ static bool PaintNopsOnTransparenBlack(const SkPaint& paint) {
       return true;
       break;
   }
-}
-
-BoundsAccumulator*
-DisplayListBoundsCalculator::SaveLayerWithPaintInfo::restore() {
-  SkRect layer_bounds;
-  if (paint_.canComputeFastBounds() && PaintNopsOnTransparenBlack(paint_)) {
-    // The ideal situation. The paint can compute the bounds AND the
-    // surrounding transparent pixels will not affect the destination.
-    layer_bounds = layer_accumulator_.getBounds();
-    layer_bounds = paint_.computeFastBounds(layer_bounds, &layer_bounds);
-  } else if (bounds_.has_value()) {
-    // Bounds were provided by the save layer, the operation will affect
-    // all of those bounds.
-    layer_bounds = bounds_.value();
-  } else {
-    // Bounds were not provided for the save layer. We will fill to the
-    // cull bounds provided to the original DisplayList.
-    calculator_->root_accumulator_.accumulate(calculator_->bounds_cull_);
-    // There is no need to process the layer bounds further as we just
-    // expanded bounds to the cull rect of the DisplayList.
-    return saved_accumulator_;
-  }
-  layer_bounds.roundOut(&layer_bounds);
-  matrix_.mapRect(&layer_bounds);
-  saved_accumulator_->accumulate(layer_bounds);
-  return saved_accumulator_;
 }
 
 }  // namespace flutter
