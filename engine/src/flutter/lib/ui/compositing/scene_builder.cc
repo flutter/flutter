@@ -273,7 +273,8 @@ void SceneBuilder::addPicture(double dx,
     AddLayer(std::move(layer));
   } else {
     auto layer = std::make_unique<flutter::DisplayListLayer>(
-        SkPoint::Make(dx, dy), picture->display_list(), !!(hints & 1),
+        SkPoint::Make(dx, dy),
+        UIDartState::CreateGPUObject(picture->display_list()), !!(hints & 1),
         !!(hints & 2));
     AddLayer(std::move(layer));
   }

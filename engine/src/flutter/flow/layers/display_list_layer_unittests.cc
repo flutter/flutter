@@ -7,6 +7,7 @@
 #include "flutter/flow/layers/display_list_layer.h"
 
 #include "flutter/flow/testing/diff_context_test.h"
+#include "flutter/flow/testing/skia_gpu_object_layer_test.h"
 #include "flutter/fml/macros.h"
 #include "flutter/testing/mock_canvas.h"
 
@@ -17,22 +18,27 @@
 namespace flutter {
 namespace testing {
 
-using DisplayListLayerTest = LayerTest;
+using DisplayListLayerTest = SkiaGPUObjectLayerTest;
 
 #ifndef NDEBUG
 TEST_F(DisplayListLayerTest, PaintBeforePrerollInvalidDisplayListDies) {
   const SkPoint layer_offset = SkPoint::Make(0.0f, 0.0f);
   auto layer = std::make_shared<DisplayListLayer>(
-      layer_offset, sk_ref_sp<DisplayList>(nullptr), false, false);
+      layer_offset, SkiaGPUObject<DisplayList>(), false, false);
 
   EXPECT_DEATH_IF_SUPPORTED(layer->Paint(paint_context()),
-                            "display_list_\\.get\\(\\)");
+                            "display_list_\\.skia_object\\(\\)");
 }
 
 TEST_F(DisplayListLayerTest, PaintBeforePrerollDies) {
   const SkPoint layer_offset = SkPoint::Make(0.0f, 0.0f);
+  const SkRect picture_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 20.5f, 21.5f);
+  DisplayListBuilder builder;
+  builder.drawRect(picture_bounds);
+  auto display_list = builder.Build();
   auto layer = std::make_shared<DisplayListLayer>(
-      layer_offset, sk_make_sp<DisplayList>(), false, false);
+      layer_offset, SkiaGPUObject<DisplayList>(display_list, unref_queue()),
+      false, false);
 
   EXPECT_EQ(layer->paint_bounds(), SkRect::MakeEmpty());
   EXPECT_DEATH_IF_SUPPORTED(layer->Paint(paint_context()),
@@ -41,8 +47,13 @@ TEST_F(DisplayListLayerTest, PaintBeforePrerollDies) {
 
 TEST_F(DisplayListLayerTest, PaintingEmptyLayerDies) {
   const SkPoint layer_offset = SkPoint::Make(0.0f, 0.0f);
+  const SkRect picture_bounds = SkRect::MakeEmpty();
+  DisplayListBuilder builder;
+  builder.drawRect(picture_bounds);
+  auto display_list = builder.Build();
   auto layer = std::make_shared<DisplayListLayer>(
-      layer_offset, sk_make_sp<DisplayList>(), false, false);
+      layer_offset, SkiaGPUObject<DisplayList>(display_list, unref_queue()),
+      false, false);
 
   layer->Preroll(preroll_context(), SkMatrix());
   EXPECT_EQ(layer->paint_bounds(), SkRect::MakeEmpty());
@@ -55,7 +66,7 @@ TEST_F(DisplayListLayerTest, PaintingEmptyLayerDies) {
 TEST_F(DisplayListLayerTest, InvalidDisplayListDies) {
   const SkPoint layer_offset = SkPoint::Make(0.0f, 0.0f);
   auto layer = std::make_shared<DisplayListLayer>(
-      layer_offset, sk_ref_sp<DisplayList>(nullptr), false, false);
+      layer_offset, SkiaGPUObject<DisplayList>(), false, false);
 
   // Crashes reading a nullptr.
   EXPECT_DEATH_IF_SUPPORTED(layer->Preroll(preroll_context(), SkMatrix()), "");
@@ -70,8 +81,8 @@ TEST_F(DisplayListLayerTest, SimpleDisplayList) {
   DisplayListBuilder builder;
   builder.drawRect(picture_bounds);
   auto display_list = builder.Build();
-  auto layer = std::make_shared<DisplayListLayer>(layer_offset, display_list,
-                                                  false, false);
+  auto layer = std::make_shared<DisplayListLayer>(
+      layer_offset, SkiaGPUObject(display_list, unref_queue()), false, false);
 
   layer->Preroll(preroll_context(), SkMatrix());
   EXPECT_EQ(layer->paint_bounds(),
