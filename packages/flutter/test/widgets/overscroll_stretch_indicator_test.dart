@@ -348,7 +348,7 @@ void main() {
     expect(tester.getCenter(find.text('Index 1')).dy, 51.0);
 
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Index 1')));
-    // Overscroll the start
+    // Overscroll the start.
     await gesture.moveBy(const Offset(0.0, 200.0));
     await tester.pumpAndSettle();
     expect(find.text('Index 1'), findsOneWidget);
