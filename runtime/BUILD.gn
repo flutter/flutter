@@ -75,7 +75,10 @@ source_set("runtime") {
     sources += [ "ptrace_check.cc" ]
   }
 
-  public_deps = [ "//third_party/rapidjson" ]
+  public_deps = [
+    "//flutter/lib/ui",
+    "//third_party/rapidjson",
+  ]
 
   public_configs = [ "//flutter:config" ]
 
@@ -86,7 +89,6 @@ source_set("runtime") {
     "//flutter/flow",
     "//flutter/fml",
     "//flutter/lib/io",
-    "//flutter/lib/ui",
     "//flutter/third_party/tonic",
     "//flutter/third_party/txt",
     "//third_party/dart/runtime:dart_api",
