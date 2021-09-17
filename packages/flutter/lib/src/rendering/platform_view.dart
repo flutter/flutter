@@ -298,7 +298,9 @@ class RenderUiKitView extends _RenderGestureRecognitionPlatformView<UiKitViewCon
              gestureRecognizers: gestureRecognizers);
 
   @override
-  _UiKitViewGestureRecognizer _createGestureRecognizer(UiKitViewController viewController, Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers) {
+  _UiKitViewGestureRecognizer _createGestureRecognizer(
+    UiKitViewController viewController,
+    Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers) {
     return _UiKitViewGestureRecognizer(viewController, gestureRecognizers);
   }
 }
@@ -365,7 +367,9 @@ abstract class _RenderGestureRecognitionPlatformView<ViewController extends Gest
   }
 
   @protected
-  _BypassPlatformViewGestureRecognizer _createGestureRecognizer(ViewController viewController, Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers);
+  _BypassPlatformViewGestureRecognizer _createGestureRecognizer(
+    ViewController viewController,
+    Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers);
 
   @override
   bool get sizedByParent => true;
@@ -540,7 +544,7 @@ abstract class _BypassPlatformViewGestureRecognizer extends OneSequenceGestureRe
   }
 }
 
-/// A render object for an Linux GtkWidget.
+/// A render object for a Linux GtkWidget.
 ///
 /// {@template flutter.rendering.RenderGtkView}
 /// Embedding GtkWidgets is still preview-quality.
@@ -574,13 +578,15 @@ class RenderGtkView extends _RenderGestureRecognitionPlatformView<GtkViewControl
              gestureRecognizers: gestureRecognizers);
 
   @override
-  _GtkViewGestureRecognizer _createGestureRecognizer(GtkViewController viewController, Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers) {
+  _GtkViewGestureRecognizer _createGestureRecognizer(
+    GtkViewController viewController,
+    Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers) {
     return _GtkViewGestureRecognizer(viewController, gestureRecognizers);
   }
 }
 
 // This recognizer constructs gesture recognizers from a set of gesture recognizer factories
-// it was give, adds all of them to a gesture arena team with the _GtkViewGestureRecognizer
+// it was given, adds all of them to a gesture arena team with the _GtkViewGestureRecognizer
 // as the team captain.
 // When the team wins a gesture the recognizer notifies the engine that it should release
 // the touch sequence to the embedded GtkWidget.

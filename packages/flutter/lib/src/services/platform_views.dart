@@ -1190,7 +1190,7 @@ class UiKitViewController extends GestureRecognitionPlatformViewController {
   }
 }
 
-/// Controls an Linux GtkWidget.
+/// Controls a Linux GtkWidget.
 ///
 /// Typically created with [PlatformViewsService.initGtkView].
 class GtkViewController extends GestureRecognitionPlatformViewController {
@@ -1243,7 +1243,7 @@ class GtkViewController extends GestureRecognitionPlatformViewController {
     return SystemChannels.platform_views.invokeMethod('setDirection', args);
   }
 
-  /// Accept an active gesture.
+  /// Accepts an active gesture.
   ///
   /// When a touch sequence is happening on the embedded GtkWidget all touch events are delayed.
   /// Calling this method releases the delayed events to the embedded UIView and makes it consume
@@ -1276,7 +1276,7 @@ class GtkViewController extends GestureRecognitionPlatformViewController {
     await SystemChannels.platform_views.invokeMethod<void>('dispose', id);
   }
 
-  /// Notify that a mouse pointer has entered into the embedded GtkWidget.
+  /// Notifies that a mouse pointer has entered into the embedded GtkWidget.
   ///
   /// Calling this method to distribute following motion events to the embedded GtkWidget.
   Future<void> enter() {
@@ -1284,7 +1284,7 @@ class GtkViewController extends GestureRecognitionPlatformViewController {
     return SystemChannels.platform_views.invokeMethod('enter', args);
   }
 
-  /// Notify that a mouse pointer has exited from the embedded GtkWidget.
+  /// Notifies that a mouse pointer has exited from the embedded GtkWidget.
   ///
   /// Calling this method to stop distributing motion events to the embedded GtkWidget.
   Future<void> exit() {
@@ -1299,8 +1299,6 @@ class GtkViewController extends GestureRecognitionPlatformViewController {
 abstract class PlatformViewController {
 
   /// The viewId associated with this controller.
-  ///
-  /// The viewId should always be unique and non-negative. And it must not be null.
   ///
   /// See also:
   ///
@@ -1335,7 +1333,7 @@ abstract class GestureRecognitionPlatformViewController {
   /// Sets the layout direction for the platform view.
   Future<void> setLayoutDirection(TextDirection layoutDirection);
 
-  /// Accept an active gesture.
+  /// Accepts an active gesture.
   ///
   /// When a touch sequence is happening on the embedded platform view, all touch
   /// events are delayed. Calling this method releases the delayed events to the
