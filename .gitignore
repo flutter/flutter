@@ -18,6 +18,7 @@
 .pub
 .pydevproject
 .vscode
+.cache
 compile_commands.json
 cscope.*
 Session.vim
