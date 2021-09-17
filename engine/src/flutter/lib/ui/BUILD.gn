@@ -128,12 +128,14 @@ source_set("ui") {
 
   public_configs = [ "//flutter:config" ]
 
-  public_deps = [ "//flutter/third_party/txt" ]
+  public_deps = [
+    "//flutter/flow",
+    "//flutter/third_party/txt",
+  ]
 
   deps = [
     "//flutter/assets",
     "//flutter/common",
-    "//flutter/flow",
     "//flutter/fml",
     "//flutter/runtime:test_font",
     "//flutter/third_party/tonic",

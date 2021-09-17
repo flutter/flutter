@@ -396,9 +396,13 @@ deps = {
   'src/third_party/pyyaml':
    Var('fuchsia_git') + '/third_party/pyyaml.git' + '@' + '25e97546488eee166b1abb229a27856cecd8b7ac',
 
-   # Headers for Vulkan 1.1
+   # Upstream Khronos Vulkan Headers (v1.1.91)
    'src/third_party/vulkan':
    Var('github_git') + '/KhronosGroup/Vulkan-Docs.git' + '@' + 'v1.1.91',
+
+   # Downstream Fuchsia Vulkan Headers (v1.2.148)
+  'src/third_party/fuchsia-vulkan':
+   Var('fuchsia_git') + '/third_party/Vulkan-Headers.git' + '@' + '651810b2fb877d819feaa00273035bfa16dec94b',
 
    'src/third_party/swiftshader':
    Var('swiftshader_git') + '/SwiftShader.git' + '@' + '5d1e8540407c138f47028d64684f3da599430aa4',

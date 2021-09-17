@@ -8,7 +8,7 @@ config("vulkan_config") {
   include_dirs = []
   defines = []
   if (is_fuchsia) {
-    include_dirs += [ "$fuchsia_sdk_root/vulkan/include" ]
+    include_dirs += [ "//third_party/fuchsia-vulkan/include" ]
     defines += [ "VK_USE_PLATFORM_FUCHSIA=1" ]
   } else {
     include_dirs += [
