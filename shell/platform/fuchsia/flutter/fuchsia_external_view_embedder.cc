@@ -17,12 +17,6 @@
 namespace flutter_runner {
 namespace {
 
-// Layer separation is as infinitesimal as possible without introducing
-// Z-fighting.
-constexpr float kScenicZElevationBetweenLayers = 0.0001f;
-constexpr float kScenicZElevationForPlatformView = 100.f;
-constexpr float kScenicElevationForInputInterceptor = 500.f;
-
 ViewMutators ParseMutatorStack(const flutter::MutatorsStack& mutators_stack) {
   ViewMutators mutators;
   SkMatrix total_transform = SkMatrix::I();
@@ -110,7 +104,7 @@ FuchsiaExternalViewEmbedder::FuchsiaExternalViewEmbedder(
     fuchsia::ui::views::ViewToken view_token,
     scenic::ViewRefPair view_ref_pair,
     GfxSessionConnection& session,
-    VulkanSurfaceProducer& surface_producer,
+    SurfaceProducer& surface_producer,
     bool intercept_all_input)
     : session_(session),
       surface_producer_(surface_producer),
@@ -491,7 +485,7 @@ void FuchsiaExternalViewEmbedder::SubmitFrame(
         // This does not cause visual problems in practice, but probably has
         // performance implications.
         const SkAlpha layer_opacity =
-            first_layer ? SK_AlphaOPAQUE : SK_AlphaOPAQUE - 1;
+            first_layer ? kBackgroundLayerOpacity : kOverlayLayerOpacity;
         const float layer_elevation =
             kScenicZElevationBetweenLayers * scenic_layer_index +
             embedded_views_height;
@@ -569,7 +563,7 @@ void FuchsiaExternalViewEmbedder::SubmitFrame(
   {
     TRACE_EVENT0("flutter", "PresentSurfaces");
 
-    surface_producer_.OnSurfacesPresented(std::move(frame_surfaces));
+    surface_producer_.SubmitSurfaces(std::move(frame_surfaces));
   }
 
   // Submit the underlying render-backend-specific frame for processing.

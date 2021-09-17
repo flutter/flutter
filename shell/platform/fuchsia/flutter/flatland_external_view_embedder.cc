@@ -17,7 +17,7 @@ FlatlandExternalViewEmbedder::FlatlandExternalViewEmbedder(
     fidl::InterfaceRequest<fuchsia::ui::composition::ParentViewportWatcher>
         parent_viewport_watcher_request,
     FlatlandConnection& flatland,
-    VulkanSurfaceProducer& surface_producer,
+    SurfaceProducer& surface_producer,
     bool intercept_all_input)
     : flatland_(flatland), surface_producer_(surface_producer) {
   flatland_.flatland()->CreateView(std::move(view_creation_token),
@@ -309,7 +309,7 @@ void FlatlandExternalViewEmbedder::SubmitFrame(
   {
     TRACE_EVENT0("flutter", "PresentSurfaces");
 
-    surface_producer_.OnSurfacesPresented(std::move(frame_surfaces));
+    surface_producer_.SubmitSurfaces(std::move(frame_surfaces));
   }
 
   // Submit the underlying render-backend-specific frame for processing.

@@ -85,8 +85,25 @@ Matcher<FakeSceneGraph> IsEmptySceneGraph() {
   return FieldsAre(IsEmpty(), IsEmpty(), IsEmpty(), kInvalidFakeResourceId);
 }
 
+MATCHER_P2(IsEntityNodeSceneGraph, node_label, node_id, "") {
+  static_assert(std::is_same_v<FakeSceneGraph, std::decay_t<decltype(arg)>>);
+  static_assert(
+      std::is_constructible_v<std::string, std::decay_t<decltype(node_label)>>);
+  static_assert(
+      std::is_same_v<FakeResourceId, std::decay_t<decltype(node_id)>>);
+
+  return ExplainMatchResult(
+      FieldsAre(
+          IsEmpty(),
+          AllOf(SizeIs(1u),
+                Contains(Pair(node_id, Pointee(IsEntityNode(node_id, node_label,
+                                                            IsEmpty()))))),
+          _, kInvalidFakeResourceId),
+      arg, result_listener);
+}
+
 MATCHER_P5(IsBasicSceneGraph,
-           debug_label,
+           view_label,
            node_label,
            view_holder_koid,
            view_ref_control_koid,
@@ -94,9 +111,9 @@ MATCHER_P5(IsBasicSceneGraph,
            "") {
   static_assert(std::is_same_v<FakeSceneGraph, std::decay_t<decltype(arg)>>);
   static_assert(
-      std::is_same_v<std::string, std::decay_t<decltype(debug_label)>>);
+      std::is_constructible_v<std::string, std::decay_t<decltype(view_label)>>);
   static_assert(
-      std::is_same_v<std::string, std::decay_t<decltype(node_label)>>);
+      std::is_constructible_v<std::string, std::decay_t<decltype(node_label)>>);
   static_assert(
       std::is_same_v<zx_koid_t, std::decay_t<decltype(view_holder_koid)>>);
   static_assert(
@@ -114,7 +131,7 @@ MATCHER_P5(IsBasicSceneGraph,
                                   FakeResource::kDefaultEmptyEventMask,
                                   VariantWith<FakeView>(FieldsAre(
                                       view_holder_koid, view_ref_control_koid,
-                                      view_ref_koid, debug_label,
+                                      view_ref_koid, view_label,
                                       ElementsAre(Pointee(IsEntityNode(
                                           _, node_label, IsEmpty()))),
                                       FakeView::kDebugBoundsDisbaled))))))),
@@ -148,11 +165,11 @@ class FakeSessionTest : public ::testing::Test,
 
  private:
   // |fuchsia::ui::scenic::SessionListener|
-  void OnScenicError(std::string error) override { FML_CHECK(false); }
+  void OnScenicError(std::string error) override { FAIL(); }
 
   // |fuchsia::ui::scenic::SessionListener|
   void OnScenicEvent(std::vector<fuchsia::ui::scenic::Event> events) override {
-    FML_CHECK(false);
+    FAIL();
   }
 
   async::TestLoop loop_;  // Must come before FIDL bindings.
@@ -177,95 +194,82 @@ TEST_F(FakeSessionTest, Initialization) {
 }
 
 TEST_F(FakeSessionTest, DebugLabel) {
-  const std::string debug_label = GetCurrentTestName();
   scenic::Session session = CreateSession();
 
   // Set the session's debug name.  The `SetDebugName` hasn't been processed
   // yet, so the session's view of the debug name is still empty.
-  session.SetDebugName(debug_label);
+  const std::string kDebugLabel = GetCurrentTestName();
+  session.SetDebugName(kDebugLabel);
+  session.Flush();  // Bypass local command caching.
   EXPECT_EQ(fake_session().debug_name(), "");
 
   // Pump the loop; the contents of the initial `SetDebugName` should be
   // processed.
   loop().RunUntilIdle();
-  EXPECT_EQ(fake_session().debug_name(), debug_label);
+  EXPECT_EQ(fake_session().debug_name(), kDebugLabel);
 }
 
-TEST_F(FakeSessionTest, SimpleResourceLifecycle) {
-  const std::string node_label = "EntityNode";
+TEST_F(FakeSessionTest, CommandQueueInvariants) {
   scenic::Session session = CreateSession();
+
+  // The scene graph is initially empty.
+  EXPECT_THAT(fake_session().SceneGraph(), IsEmptySceneGraph());
 
   // Create entity node for testing; no creation commands have been processed
   // yet, so the session's view of the scene graph is empty.
   std::optional<scenic::EntityNode> node(&session);
+  session.Flush();  // Bypass local command caching.
   EXPECT_EQ(fake_session().command_queue().size(), 0u);
   EXPECT_THAT(fake_session().SceneGraph(), IsEmptySceneGraph());
 
   // Pump the loop; the initial creation command should be enqueued but still
   // not processed yet, so the session's view of the scene graph is empty.
   loop().RunUntilIdle();
-  EXPECT_GE(fake_session().command_queue().size(), 0u);
+  EXPECT_GT(fake_session().command_queue().size(), 0u);
   EXPECT_THAT(fake_session().SceneGraph(), IsEmptySceneGraph());
 
   // Present initial scene graph.  The `Present` hasn't been processed yet, so
   // the session's view of the scene graph is still empty.
   session.Present2(0u, 0u, [](auto...) {});
-  EXPECT_GE(fake_session().command_queue().size(), 0u);
+  EXPECT_GT(fake_session().command_queue().size(), 0u);
   EXPECT_THAT(fake_session().SceneGraph(), IsEmptySceneGraph());
 
   // Pump the loop; the contents of the initial `Present` should be processed.
   loop().RunUntilIdle();
   EXPECT_EQ(fake_session().command_queue().size(), 0u);
-  {
-    auto scene_graph = fake_session().SceneGraph();
-    EXPECT_EQ(scene_graph.root_view_id, kInvalidFakeResourceId);
-    EXPECT_EQ(scene_graph.buffer_collection_map.size(), 0u);
-    EXPECT_EQ(scene_graph.resource_map.size(), 1u);
-    EXPECT_EQ(scene_graph.labels_map.size(), 1u);
-    ASSERT_EQ(scene_graph.labels_map.count(""), 1u);
+  EXPECT_THAT(fake_session().SceneGraph(),
+              IsEntityNodeSceneGraph("", node->id()));
+}
 
-    const auto first_resource_it = scene_graph.resource_map.begin();
-    const auto null_label_resources = scene_graph.labels_map[""];
-    EXPECT_EQ(null_label_resources.size(), 1u);
-    EXPECT_FALSE(null_label_resources[0].expired());
-    EXPECT_EQ(null_label_resources[0].lock(), first_resource_it->second);
-    EXPECT_THAT(first_resource_it->second,
-                Pointee(IsEntityNode(_, "", IsEmpty())));
-  }
+TEST_F(FakeSessionTest, SimpleResourceLifecycle) {
+  scenic::Session session = CreateSession();
 
-  // Present a simple property update on the test entity node.
-  node->SetLabel(node_label);
+  // The scene graph is initially empty.
+  EXPECT_THAT(fake_session().SceneGraph(), IsEmptySceneGraph());
+
+  // Present an initial entity node, pumping the loop to process commands.
+  std::optional<scenic::EntityNode> node(&session);
   session.Present2(0u, 0u, [](auto...) {});
   loop().RunUntilIdle();
-  EXPECT_EQ(fake_session().command_queue().size(), 0u);
-  {
-    auto scene_graph = fake_session().SceneGraph();
-    EXPECT_EQ(scene_graph.root_view_id, kInvalidFakeResourceId);
-    EXPECT_EQ(scene_graph.buffer_collection_map.size(), 0u);
-    EXPECT_EQ(scene_graph.resource_map.size(), 1u);
-    EXPECT_EQ(scene_graph.labels_map.size(), 1u);
-    ASSERT_EQ(scene_graph.labels_map.count(""), 0u);
-    ASSERT_EQ(scene_graph.labels_map.count(node_label), 1u);
+  EXPECT_THAT(fake_session().SceneGraph(),
+              IsEntityNodeSceneGraph("", node->id()));
 
-    const auto first_resource_it = scene_graph.resource_map.begin();
-    const auto node_label_resources = scene_graph.labels_map[node_label];
-    EXPECT_EQ(node_label_resources.size(), 1u);
-    EXPECT_FALSE(node_label_resources[0].expired());
-    EXPECT_EQ(node_label_resources[0].lock(), first_resource_it->second);
-    EXPECT_THAT(first_resource_it->second,
-                Pointee(IsEntityNode(_, node_label, IsEmpty())));
-  }
+  // Present a simple property update on the test entity node.
+  const std::string kNodeLabel = "EntityNode";
+  node->SetLabel(kNodeLabel);
+  session.Present2(0u, 0u, [](auto...) {});
+  loop().RunUntilIdle();
+  EXPECT_THAT(fake_session().SceneGraph(),
+              IsEntityNodeSceneGraph(kNodeLabel, node->id()));
 
   // Present the destruction of the entity node.
   node.reset();
   session.Present2(0u, 0u, [](auto...) {});
   loop().RunUntilIdle();
-  EXPECT_EQ(fake_session().command_queue().size(), 0u);
   EXPECT_THAT(fake_session().SceneGraph(), IsEmptySceneGraph());
 }
 
 TEST_F(FakeSessionTest, ResourceReferenceCounting) {
-  const std::string node_label = "EntityNode";
   scenic::Session session = CreateSession();
 
   // Present a chain of 4 entity nodes for testing.
@@ -274,8 +278,9 @@ TEST_F(FakeSessionTest, ResourceReferenceCounting) {
       std::optional<scenic::EntityNode>(&session),
       std::optional<scenic::EntityNode>(&session),
       std::optional<scenic::EntityNode>(&session)};
+  const std::string kNodeLabel = "EntityNode";
   for (size_t i = 0; i < 4; i++) {
-    nodes[i]->SetLabel(node_label + std::string(1, '0' + i));
+    nodes[i]->SetLabel(kNodeLabel + std::string(1, '0' + i));
     if (i < 3) {
       nodes[i]->AddChild(*nodes[i + 1]);
     }
@@ -287,14 +292,14 @@ TEST_F(FakeSessionTest, ResourceReferenceCounting) {
     EXPECT_EQ(scene_graph.root_view_id, kInvalidFakeResourceId);
     EXPECT_EQ(scene_graph.buffer_collection_map.size(), 0u);
     EXPECT_EQ(scene_graph.resource_map.size(), 4u);
-    EXPECT_EQ(scene_graph.labels_map.size(), 4u);
+    EXPECT_EQ(scene_graph.label_map.size(), 4u);
     for (size_t i = 0; i < 4; i++) {
-      const std::string node_i_label = node_label + std::string(1, '0' + i);
+      const std::string node_i_label = kNodeLabel + std::string(1, '0' + i);
       ASSERT_EQ(scene_graph.resource_map.count(nodes[i]->id()), 1u);
-      ASSERT_EQ(scene_graph.labels_map.count(node_i_label), 1u);
+      ASSERT_EQ(scene_graph.label_map.count(node_i_label), 1u);
 
       const auto node_i = scene_graph.resource_map[nodes[i]->id()];
-      const auto node_i_label_resources = scene_graph.labels_map[node_i_label];
+      const auto node_i_label_resources = scene_graph.label_map[node_i_label];
       EXPECT_EQ(node_i_label_resources.size(), 1u);
       EXPECT_FALSE(node_i_label_resources[0].expired());
       EXPECT_EQ(node_i_label_resources[0].lock(), node_i);
@@ -303,13 +308,13 @@ TEST_F(FakeSessionTest, ResourceReferenceCounting) {
     EXPECT_THAT(
         scene_graph.resource_map[nodes[0]->id()],
         Pointee(IsEntityNode(
-            nodes[0]->id(), node_label + std::string(1, '0'),
+            nodes[0]->id(), kNodeLabel + std::string(1, '0'),
             ElementsAre(Pointee(IsEntityNode(
-                nodes[1]->id(), node_label + std::string(1, '1'),
+                nodes[1]->id(), kNodeLabel + std::string(1, '1'),
                 ElementsAre(Pointee(IsEntityNode(
-                    nodes[2]->id(), node_label + std::string(1, '2'),
+                    nodes[2]->id(), kNodeLabel + std::string(1, '2'),
                     ElementsAre(Pointee(IsEntityNode(
-                        nodes[3]->id(), node_label + std::string(1, '3'),
+                        nodes[3]->id(), kNodeLabel + std::string(1, '3'),
                         IsEmpty()))))))))))));
   }
 
@@ -322,14 +327,14 @@ TEST_F(FakeSessionTest, ResourceReferenceCounting) {
     EXPECT_EQ(scene_graph.root_view_id, kInvalidFakeResourceId);
     EXPECT_EQ(scene_graph.buffer_collection_map.size(), 0u);
     EXPECT_EQ(scene_graph.resource_map.size(), 3u);
-    EXPECT_EQ(scene_graph.labels_map.size(), 3u);
+    EXPECT_EQ(scene_graph.label_map.size(), 3u);
     for (size_t i = 1; i < 4; i++) {
-      const std::string node_i_label = node_label + std::string(1, '0' + i);
+      const std::string node_i_label = kNodeLabel + std::string(1, '0' + i);
       ASSERT_EQ(scene_graph.resource_map.count(nodes[i]->id()), 1u);
-      ASSERT_EQ(scene_graph.labels_map.count(node_i_label), 1u);
+      ASSERT_EQ(scene_graph.label_map.count(node_i_label), 1u);
 
       const auto node_i = scene_graph.resource_map[nodes[i]->id()];
-      const auto node_i_label_resources = scene_graph.labels_map[node_i_label];
+      const auto node_i_label_resources = scene_graph.label_map[node_i_label];
       EXPECT_EQ(node_i_label_resources.size(), 1u);
       EXPECT_FALSE(node_i_label_resources[0].expired());
       EXPECT_EQ(node_i_label_resources[0].lock(), node_i);
@@ -338,11 +343,11 @@ TEST_F(FakeSessionTest, ResourceReferenceCounting) {
     EXPECT_EQ(scene_graph.resource_map.count(nodes[0]->id()), 0u);
     EXPECT_THAT(scene_graph.resource_map[nodes[1]->id()],
                 Pointee(IsEntityNode(
-                    nodes[1]->id(), node_label + std::string(1, '1'),
+                    nodes[1]->id(), kNodeLabel + std::string(1, '1'),
                     ElementsAre(Pointee(IsEntityNode(
-                        nodes[2]->id(), node_label + std::string(1, '2'),
+                        nodes[2]->id(), kNodeLabel + std::string(1, '2'),
                         ElementsAre(Pointee(IsEntityNode(
-                            nodes[3]->id(), node_label + std::string(1, '3'),
+                            nodes[3]->id(), kNodeLabel + std::string(1, '3'),
                             IsEmpty())))))))));
   }
 
@@ -356,14 +361,14 @@ TEST_F(FakeSessionTest, ResourceReferenceCounting) {
     EXPECT_EQ(scene_graph.root_view_id, kInvalidFakeResourceId);
     EXPECT_EQ(scene_graph.buffer_collection_map.size(), 0u);
     EXPECT_EQ(scene_graph.resource_map.size(), 2u);
-    EXPECT_EQ(scene_graph.labels_map.size(), 3u);
+    EXPECT_EQ(scene_graph.label_map.size(), 3u);
     for (size_t i = 1; i < 4; i++) {
-      const std::string node_i_label = node_label + std::string(1, '0' + i);
-      ASSERT_EQ(scene_graph.labels_map.count(node_i_label), 1u);
+      const std::string node_i_label = kNodeLabel + std::string(1, '0' + i);
+      ASSERT_EQ(scene_graph.label_map.count(node_i_label), 1u);
       ASSERT_EQ(scene_graph.resource_map.count(nodes[i]->id()),
                 i != 2 ? 1u : 0u);
 
-      const auto node_i_label_resources = scene_graph.labels_map[node_i_label];
+      const auto node_i_label_resources = scene_graph.label_map[node_i_label];
       EXPECT_EQ(node_i_label_resources.size(), 1u);
       EXPECT_FALSE(node_i_label_resources[0].expired());
 
@@ -377,11 +382,11 @@ TEST_F(FakeSessionTest, ResourceReferenceCounting) {
 
     EXPECT_THAT(scene_graph.resource_map[nodes[1]->id()],
                 Pointee(IsEntityNode(
-                    nodes[1]->id(), node_label + std::string(1, '1'),
+                    nodes[1]->id(), kNodeLabel + std::string(1, '1'),
                     ElementsAre(Pointee(IsEntityNode(
-                        nodes[2]->id(), node_label + std::string(1, '2'),
+                        nodes[2]->id(), kNodeLabel + std::string(1, '2'),
                         ElementsAre(Pointee(IsEntityNode(
-                            nodes[3]->id(), node_label + std::string(1, '3'),
+                            nodes[3]->id(), kNodeLabel + std::string(1, '3'),
                             IsEmpty())))))))));
   }
 
@@ -395,14 +400,14 @@ TEST_F(FakeSessionTest, ResourceReferenceCounting) {
     EXPECT_EQ(scene_graph.root_view_id, kInvalidFakeResourceId);
     EXPECT_EQ(scene_graph.buffer_collection_map.size(), 0u);
     EXPECT_EQ(scene_graph.resource_map.size(), 1u);
-    EXPECT_EQ(scene_graph.labels_map.size(), 3u);
+    EXPECT_EQ(scene_graph.label_map.size(), 3u);
     for (size_t i = 1; i < 4; i++) {
-      const std::string node_i_label = node_label + std::string(1, '0' + i);
-      ASSERT_EQ(scene_graph.labels_map.count(node_i_label), 1u);
+      const std::string node_i_label = kNodeLabel + std::string(1, '0' + i);
+      ASSERT_EQ(scene_graph.label_map.count(node_i_label), 1u);
       ASSERT_EQ(scene_graph.resource_map.count(nodes[i]->id()),
                 i < 2 ? 1u : 0u);
 
-      const auto node_i_label_resources = scene_graph.labels_map[node_i_label];
+      const auto node_i_label_resources = scene_graph.label_map[node_i_label];
       EXPECT_EQ(node_i_label_resources.size(), 1u);
       EXPECT_FALSE(node_i_label_resources[0].expired());
 
@@ -416,41 +421,38 @@ TEST_F(FakeSessionTest, ResourceReferenceCounting) {
 
     EXPECT_THAT(scene_graph.resource_map[nodes[1]->id()],
                 Pointee(IsEntityNode(
-                    nodes[1]->id(), node_label + std::string(1, '1'),
+                    nodes[1]->id(), kNodeLabel + std::string(1, '1'),
                     ElementsAre(Pointee(IsEntityNode(
-                        nodes[2]->id(), node_label + std::string(1, '2'),
+                        nodes[2]->id(), kNodeLabel + std::string(1, '2'),
                         ElementsAre(Pointee(IsEntityNode(
-                            nodes[3]->id(), node_label + std::string(1, '3'),
+                            nodes[3]->id(), kNodeLabel + std::string(1, '3'),
                             IsEmpty())))))))));
   }
 }
 
 TEST_F(FakeSessionTest, BasicSceneGraph) {
-  const std::string debug_label = GetCurrentTestName();
-  const std::string node_label = "ChildNode";
   scenic::Session session = CreateSession();
 
-  // Create and present initial scene graph.  The `Present` hasn't been
-  // processed yet, so the session's view of the scene graph is still empty.
+  // The scene graph is initially empty.
+  EXPECT_THAT(fake_session().SceneGraph(), IsEmptySceneGraph());
+
+  // Create and present initial scene graph.
+  const std::string kViewDebugString = GetCurrentTestName();
+  const std::string kNodeLabel = "ChildNode";
   fuchsia::ui::views::ViewRef view_ref;
   auto [view_token, view_holder_token] = scenic::ViewTokenPair::New();
   auto view_ref_pair = scenic::ViewRefPair::New();
   view_ref_pair.view_ref.Clone(&view_ref);
   scenic::View root_view(&session, std::move(view_token),
                          std::move(view_ref_pair.control_ref),
-                         std::move(view_ref_pair.view_ref), debug_label);
+                         std::move(view_ref_pair.view_ref), kViewDebugString);
   scenic::EntityNode child_node(&session);
-  child_node.SetLabel(node_label);
+  child_node.SetLabel(kNodeLabel);
   root_view.AddChild(child_node);
   session.Present2(0u, 0u, [](auto...) {});
-  EXPECT_GE(fake_session().command_queue().size(), 0u);
-  EXPECT_THAT(fake_session().SceneGraph(), IsEmptySceneGraph());
-
-  // Pump the loop; the contents of the initial `Present` should be processed.
   loop().RunUntilIdle();
-  EXPECT_EQ(fake_session().command_queue().size(), 0u);
   EXPECT_THAT(fake_session().SceneGraph(),
-              IsBasicSceneGraph(debug_label, node_label,
+              IsBasicSceneGraph(kViewDebugString, kNodeLabel,
                                 GetPeerKoid(view_holder_token.value.get()),
                                 GetPeerKoid(view_ref.reference.get()),
                                 GetKoid(view_ref.reference.get())));

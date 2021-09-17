@@ -28,7 +28,7 @@
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 
 #include "gfx_session_connection.h"
-#include "vulkan_surface_producer.h"
+#include "surface_producer.h"
 
 namespace flutter_runner {
 
@@ -64,11 +64,19 @@ struct ViewMutators {
 // correctly in a unified scene.
 class FuchsiaExternalViewEmbedder final : public flutter::ExternalViewEmbedder {
  public:
+  // Layer separation is as infinitesimal as possible without introducing
+  // Z-fighting.
+  constexpr static float kScenicZElevationBetweenLayers = 0.0001f;
+  constexpr static float kScenicZElevationForPlatformView = 100.f;
+  constexpr static float kScenicElevationForInputInterceptor = 500.f;
+  constexpr static SkAlpha kBackgroundLayerOpacity = SK_AlphaOPAQUE;
+  constexpr static SkAlpha kOverlayLayerOpacity = SK_AlphaOPAQUE - 1;
+
   FuchsiaExternalViewEmbedder(std::string debug_label,
                               fuchsia::ui::views::ViewToken view_token,
                               scenic::ViewRefPair view_ref_pair,
                               GfxSessionConnection& session,
-                              VulkanSurfaceProducer& surface_producer,
+                              SurfaceProducer& surface_producer,
                               bool intercept_all_input = false);
   ~FuchsiaExternalViewEmbedder();
 
@@ -170,7 +178,7 @@ class FuchsiaExternalViewEmbedder final : public flutter::ExternalViewEmbedder {
   };
 
   GfxSessionConnection& session_;
-  VulkanSurfaceProducer& surface_producer_;
+  SurfaceProducer& surface_producer_;
 
   scenic::View root_view_;
   scenic::EntityNode metrics_node_;

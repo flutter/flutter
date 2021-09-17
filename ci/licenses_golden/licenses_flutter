@@ -1462,6 +1462,7 @@ FILE: ../../../flutter/shell/platform/fuchsia/flutter/runner_tzdata_unittest.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/runner_unittest.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/surface.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/surface.h
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/surface_producer.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/task_runner_adapter.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/task_runner_adapter.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/unique_fdio_ns.h
