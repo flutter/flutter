@@ -249,11 +249,9 @@ GfxSessionConnection::GfxSessionConnection(
         // Scenic retired a given number of frames, so mark them as completed.
         // Inspect updates must run on the inspect dispatcher.
         async::PostTask(
-            inspect_dispatcher_,
-            [this, num_presents_handled,
-             now = fml::TimePoint::Now().ToEpochDelta().ToNanoseconds()]() {
+            inspect_dispatcher_, [this, now = Now(), num_presents_handled]() {
               presents_completed_.Add(num_presents_handled);
-              last_frame_completed_.Set(now);
+              last_frame_completed_.Set(now.ToEpochDelta().ToNanoseconds());
             });
 
         if (fire_callback_request_pending_) {
@@ -300,17 +298,15 @@ void GfxSessionConnection::Present() {
                    next_present_session_trace_id_);
   ++next_present_session_trace_id_;
 
-  auto now = fml::TimePoint::Now();
+  auto now = Now();
   present_requested_time_ = now;
 
   // Flutter is requesting a frame here, so mark it as such.
   // Inspect updates must run on the inspect dispatcher.
-  async::PostTask(
-      inspect_dispatcher_,
-      [this, now = fml::TimePoint::Now().ToEpochDelta().ToNanoseconds()]() {
-        presents_requested_.Add(1);
-        last_frame_requested_.Set(now);
-      });
+  async::PostTask(inspect_dispatcher_, [this, now]() {
+    presents_requested_.Add(1);
+    last_frame_requested_.Set(now.ToEpochDelta().ToNanoseconds());
+  });
 
   // Throttle frame submission to Scenic if we already have the maximum amount
   // of frames in flight. This allows the paint tasks for this frame to execute
@@ -333,12 +329,10 @@ void GfxSessionConnection::AwaitVsync(FireCallbackCallback callback) {
 
   // Flutter is requesting a vsync here, so mark it as such.
   // Inspect updates must run on the inspect dispatcher.
-  async::PostTask(
-      inspect_dispatcher_,
-      [this, now = fml::TimePoint::Now().ToEpochDelta().ToNanoseconds()]() {
-        vsyncs_requested_.Add(1);
-        last_vsync_requested_.Set(now);
-      });
+  async::PostTask(inspect_dispatcher_, [this, now = Now()]() {
+    vsyncs_requested_.Add(1);
+    last_vsync_requested_.Set(now.ToEpochDelta().ToNanoseconds());
+  });
 
   FireCallbackMaybe();
 }
@@ -352,12 +346,10 @@ void GfxSessionConnection::AwaitVsyncForSecondaryCallback(
 
   // Flutter is requesting a secondary vsync here, so mark it as such.
   // Inspect updates must run on the inspect dispatcher.
-  async::PostTask(
-      inspect_dispatcher_,
-      [this, now = fml::TimePoint::Now().ToEpochDelta().ToNanoseconds()]() {
-        secondary_vsyncs_completed_.Add(1);
-        last_secondary_vsync_completed_.Set(now);
-      });
+  async::PostTask(inspect_dispatcher_, [this, now = Now()]() {
+    secondary_vsyncs_completed_.Add(1);
+    last_secondary_vsync_completed_.Set(now.ToEpochDelta().ToNanoseconds());
+  });
 
   FlutterFrameTimes times = GetTargetTimesHelper(/*secondary_callback=*/true);
   fire_callback_(times.frame_start, times.frame_target);
@@ -391,12 +383,10 @@ void GfxSessionConnection::PresentSession() {
 
   // Flutter is presenting a frame here, so mark it as such.
   // Inspect updates must run on the inspect dispatcher.
-  async::PostTask(
-      inspect_dispatcher_,
-      [this, now = fml::TimePoint::Now().ToEpochDelta().ToNanoseconds()]() {
-        presents_submitted_.Add(1);
-        last_frame_presented_.Set(now);
-      });
+  async::PostTask(inspect_dispatcher_, [this, now = Now()]() {
+    presents_submitted_.Add(1);
+    last_frame_presented_.Set(now.ToEpochDelta().ToNanoseconds());
+  });
 
   session_wrapper_.Present2(
       /*requested_presentation_time=*/next_latch_point.ToEpochDelta()
@@ -441,12 +431,10 @@ void GfxSessionConnection::FireCallbackMaybe() {
 
     // Scenic completed a vsync here, so mark it as such.
     // Inspect updates must run on the inspect dispatcher.
-    async::PostTask(
-        inspect_dispatcher_,
-        [this, now = fml::TimePoint::Now().ToEpochDelta().ToNanoseconds()]() {
-          vsyncs_completed_.Add(1);
-          last_vsync_completed_.Set(now);
-        });
+    async::PostTask(inspect_dispatcher_, [this, now = Now()]() {
+      vsyncs_completed_.Add(1);
+      last_vsync_completed_.Set(now.ToEpochDelta().ToNanoseconds());
+    });
 
     fire_callback_(times.frame_start, times.frame_target);
   } else {

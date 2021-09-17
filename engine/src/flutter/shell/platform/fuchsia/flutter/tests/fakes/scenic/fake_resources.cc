@@ -290,9 +290,9 @@ FakeSceneGraph SceneGraphFromState(const FakeSceneGraphState& state) {
   }
 
   // Snapshot labels in the map.
-  for (auto& label_resources : state.labels_map) {
+  for (auto& label_resources : state.label_map) {
     auto [label_iter, label_success] =
-        scene_graph.labels_map.emplace(std::make_pair(
+        scene_graph.label_map.emplace(std::make_pair(
             label_resources.first, std::vector<std::weak_ptr<FakeResource>>()));
     FML_CHECK(label_success);
     auto& snapshot_label_resources = label_iter->second;

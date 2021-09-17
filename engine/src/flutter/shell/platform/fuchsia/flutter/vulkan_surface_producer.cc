@@ -157,9 +157,9 @@ bool VulkanSurfaceProducer::Initialize(scenic::Session* scenic_session) {
   return true;
 }
 
-void VulkanSurfaceProducer::OnSurfacesPresented(
+void VulkanSurfaceProducer::SubmitSurfaces(
     std::vector<std::unique_ptr<SurfaceProducerSurface>> surfaces) {
-  TRACE_EVENT0("flutter", "VulkanSurfaceProducer::OnSurfacesPresented");
+  TRACE_EVENT0("flutter", "VulkanSurfaceProducer::SubmitSurfaces");
 
   // Do a single flush for all canvases derived from the context.
   {

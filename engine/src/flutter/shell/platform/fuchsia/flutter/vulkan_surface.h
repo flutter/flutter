@@ -13,7 +13,6 @@
 #include <cstdint>
 #include <memory>
 
-#include "flutter/flow/raster_cache_key.h"
 #include "flutter/fml/macros.h"
 #include "flutter/vulkan/vulkan_command_buffer.h"
 #include "flutter/vulkan/vulkan_handle.h"
@@ -21,52 +20,9 @@
 #include "flutter/vulkan/vulkan_provider.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
+#include "surface_producer.h"
+
 namespace flutter_runner {
-
-using ReleaseImageCallback = std::function<void()>;
-
-class SurfaceProducerSurface {
- public:
-  virtual ~SurfaceProducerSurface() = default;
-
-  virtual size_t AdvanceAndGetAge() = 0;
-
-  virtual bool FlushSessionAcquireAndReleaseEvents() = 0;
-
-  virtual bool IsValid() const = 0;
-
-  virtual SkISize GetSize() const = 0;
-
-  virtual void SignalWritesFinished(
-      const std::function<void(void)>& on_writes_committed) = 0;
-
-  virtual void SetImageId(uint32_t image_id) = 0;
-
-  virtual uint32_t GetImageId() = 0;
-
-  virtual sk_sp<SkSurface> GetSkiaSurface() const = 0;
-
-  virtual fuchsia::ui::composition::BufferCollectionImportToken
-  GetBufferCollectionImportToken() = 0;
-
-  virtual zx::event GetAcquireFence() = 0;
-
-  virtual zx::event GetReleaseFence() = 0;
-
-  virtual void SetReleaseImageCallback(
-      ReleaseImageCallback release_image_callback) = 0;
-};
-
-class SurfaceProducer {
- public:
-  virtual ~SurfaceProducer() = default;
-
-  virtual std::unique_ptr<SurfaceProducerSurface> ProduceSurface(
-      const SkISize& size) = 0;
-
-  virtual void SubmitSurface(
-      std::unique_ptr<SurfaceProducerSurface> surface) = 0;
-};
 
 // A |VkImage| and its relevant metadata.
 struct VulkanImage {

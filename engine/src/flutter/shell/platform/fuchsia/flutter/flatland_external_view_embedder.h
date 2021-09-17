@@ -25,11 +25,8 @@
 #include "third_party/skia/include/core/SkSize.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 
-#include "flutter/flow/embedded_views.h"
-#include "flutter/fml/macros.h"
-
 #include "flatland_connection.h"
-#include "vulkan_surface_producer.h"
+#include "surface_producer.h"
 
 namespace flutter_runner {
 
@@ -50,7 +47,7 @@ class FlatlandExternalViewEmbedder final
       fidl::InterfaceRequest<fuchsia::ui::composition::ParentViewportWatcher>
           parent_viewport_watcher_request,
       FlatlandConnection& flatland,
-      VulkanSurfaceProducer& surface_producer,
+      SurfaceProducer& surface_producer,
       bool intercept_all_input = false);
   ~FlatlandExternalViewEmbedder();
 
@@ -167,7 +164,7 @@ class FlatlandExternalViewEmbedder final
   };
 
   FlatlandConnection& flatland_;
-  VulkanSurfaceProducer& surface_producer_;
+  SurfaceProducer& surface_producer_;
   fuchsia::ui::composition::ParentViewportWatcherPtr parent_viewport_watcher_;
 
   fuchsia::ui::composition::TransformId root_transform_id_;

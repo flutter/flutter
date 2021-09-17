@@ -90,6 +90,7 @@ template("runner_sources") {
       "runner.h",
       "surface.cc",
       "surface.h",
+      "surface_producer.h",
       "task_runner_adapter.cc",
       "task_runner_adapter.h",
       "unique_fdio_ns.h",
@@ -465,6 +466,7 @@ executable("flutter_runner_unittests") {
     "tests/engine_unittests.cc",
     "tests/fake_session_unittests.cc",
     "tests/flutter_runner_product_configuration_unittests.cc",
+    "tests/fuchsia_external_view_embedder_unittests.cc",
     "tests/gfx_session_connection_unittests.cc",
   ]
 

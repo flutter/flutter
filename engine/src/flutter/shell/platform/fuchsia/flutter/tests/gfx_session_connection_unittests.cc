@@ -8,12 +8,12 @@
 #include <fuchsia/ui/scenic/cpp/fidl.h>
 #include <lib/async-testing/test_loop.h>
 #include <lib/inspect/cpp/inspect.h>
-#include <lib/sys/cpp/component_context.h>
 
 #include <functional>
 #include <string>
 #include <vector>
 
+#include "flutter/fml/logging.h"
 #include "flutter/fml/time/time_delta.h"
 #include "flutter/fml/time/time_point.h"
 #include "gtest/gtest.h"
@@ -89,11 +89,11 @@ class GfxSessionConnectionTest : public ::testing::Test,
  protected:
   GfxSessionConnectionTest()
       : session_listener_(this), session_subloop_(loop_.StartNewLoop()) {
-    FakeSession::SessionAndListenerClientPair session_and_listener =
+    auto [session, session_listener] =
         fake_session().Bind(session_subloop_->dispatcher());
 
-    session_ = std::move(session_and_listener.first);
-    session_listener_.Bind(std::move(session_and_listener.second));
+    session_ = std::move(session);
+    session_listener_.Bind(std::move(session_listener));
   }
   ~GfxSessionConnectionTest() override = default;
 
@@ -110,38 +110,13 @@ class GfxSessionConnectionTest : public ::testing::Test,
     return std::move(session_);
   }
 
-  void SetUpSessionStubs(
-      FakeSession::RequestPresentationTimesHandler
-          request_presentation_times_handler = nullptr,
-      FakeSession::Present2Handler present_handler = nullptr) {
-    auto non_null_request_presentation_times_handler =
-        request_presentation_times_handler ? request_presentation_times_handler
-                                           : [](auto...) -> auto {
-      return FuturePresentationTimes{
-          .future_presentations = {},
-          .remaining_presents_in_flight_allowed = 1,
-      };
-    };
-    fake_session().SetRequestPresentationTimesHandler(
-        std::move(non_null_request_presentation_times_handler));
-
-    auto non_null_present_handler =
-        present_handler ? present_handler : [](auto...) -> auto {
-      return FuturePresentationTimes{
-          .future_presentations = {},
-          .remaining_presents_in_flight_allowed = 1,
-      };
-    };
-    fake_session().SetPresent2Handler(std::move(non_null_present_handler));
-  }
-
  private:
   // |fuchsia::ui::scenic::SessionListener|
-  void OnScenicError(std::string error) override { FML_CHECK(false); }
+  void OnScenicError(std::string error) override { FAIL(); }
 
   // |fuchsia::ui::scenic::SessionListener|
   void OnScenicEvent(std::vector<fuchsia::ui::scenic::Event> events) override {
-    FML_CHECK(false);
+    FAIL();
   }
 
   async::TestLoop loop_;
@@ -156,15 +131,12 @@ class GfxSessionConnectionTest : public ::testing::Test,
 };
 
 TEST_F(GfxSessionConnectionTest, Initialization) {
-  SetUpSessionStubs();  // So we don't CHECK
-
   // Create the GfxSessionConnection but don't pump the loop.  No FIDL calls are
   // completed yet.
   const std::string debug_name = GetCurrentTestName();
   flutter_runner::GfxSessionConnection session_connection(
-      debug_name, GetInspectNode(), TakeSessionHandle(),
-      []() { FML_CHECK(false); }, [](auto...) { FML_CHECK(false); }, 1,
-      fml::TimeDelta::Zero());
+      debug_name, GetInspectNode(), TakeSessionHandle(), []() { FAIL(); },
+      [](auto...) { FAIL(); }, 1, fml::TimeDelta::Zero());
   EXPECT_EQ(fake_session().debug_name(), "");
   EXPECT_TRUE(fake_session().command_queue().empty());
 
@@ -182,8 +154,6 @@ TEST_F(GfxSessionConnectionTest, Initialization) {
 }
 
 TEST_F(GfxSessionConnectionTest, SessionDisconnect) {
-  SetUpSessionStubs();  // So we don't CHECK
-
   // Set up a callback which allows sensing of the session error state.
   bool session_error_fired = false;
   fml::closure on_session_error = [&session_error_fired]() {
@@ -194,7 +164,7 @@ TEST_F(GfxSessionConnectionTest, SessionDisconnect) {
   // completed yet.
   flutter_runner::GfxSessionConnection session_connection(
       GetCurrentTestName(), GetInspectNode(), TakeSessionHandle(),
-      std::move(on_session_error), [](auto...) { FML_CHECK(false); }, 1,
+      std::move(on_session_error), [](auto...) { FAIL(); }, 1,
       fml::TimeDelta::Zero());
   EXPECT_FALSE(session_error_fired);
 
@@ -210,21 +180,21 @@ TEST_F(GfxSessionConnectionTest, BasicPresent) {
   // (`RequestPresentationTimes` or `Present` calls) were handled.
   size_t request_times_called = 0u;
   size_t presents_called = 0u;
-  SetUpSessionStubs(
-      [&request_times_called](auto...) -> auto {
-        request_times_called++;
-        return FuturePresentationTimes{
-            .future_presentations = {},
-            .remaining_presents_in_flight_allowed = 1,
-        };
-      },
-      [&presents_called](auto...) -> auto {
-        presents_called++;
-        return FuturePresentationTimes{
-            .future_presentations = {},
-            .remaining_presents_in_flight_allowed = 1,
-        };
-      });
+  fake_session().SetRequestPresentationTimesHandler([&request_times_called](
+                                                        auto...) -> auto {
+    request_times_called++;
+    return FuturePresentationTimes{
+        .future_presentations = {},
+        .remaining_presents_in_flight_allowed = 1,
+    };
+  });
+  fake_session().SetPresent2Handler([&presents_called](auto...) -> auto {
+    presents_called++;
+    return FuturePresentationTimes{
+        .future_presentations = {},
+        .remaining_presents_in_flight_allowed = 1,
+    };
+  });
 
   // Set up a callback which allows sensing of how many vsync's
   // (`OnFramePresented` events) were handled.
@@ -237,7 +207,7 @@ TEST_F(GfxSessionConnectionTest, BasicPresent) {
   // completed yet.
   flutter_runner::GfxSessionConnection session_connection(
       GetCurrentTestName(), GetInspectNode(), TakeSessionHandle(),
-      []() { FML_CHECK(false); }, std::move(on_frame_presented), 1,
+      []() { FAIL(); }, std::move(on_frame_presented), 1,
       fml::TimeDelta::Zero());
   EXPECT_TRUE(fake_session().command_queue().empty());
   EXPECT_EQ(request_times_called, 0u);
@@ -303,15 +273,13 @@ TEST_F(GfxSessionConnectionTest, AwaitVsyncBackpressure) {
   // Set up a callback which allows sensing of how many presents
   // (`Present` calls) were handled.
   size_t presents_called = 0u;
-  SetUpSessionStubs(
-      nullptr /* request_presentation_times_handler */,
-      [&presents_called](auto...) -> auto {
-        presents_called++;
-        return FuturePresentationTimes{
-            .future_presentations = {},
-            .remaining_presents_in_flight_allowed = 1,
-        };
-      });
+  fake_session().SetPresent2Handler([&presents_called](auto...) -> auto {
+    presents_called++;
+    return FuturePresentationTimes{
+        .future_presentations = {},
+        .remaining_presents_in_flight_allowed = 1,
+    };
+  });
 
   // Set up a callback which allows sensing of how many vsync's
   // (`OnFramePresented` events) were handled.
@@ -324,7 +292,7 @@ TEST_F(GfxSessionConnectionTest, AwaitVsyncBackpressure) {
   // completed yet.
   flutter_runner::GfxSessionConnection session_connection(
       GetCurrentTestName(), GetInspectNode(), TakeSessionHandle(),
-      []() { FML_CHECK(false); }, std::move(on_frame_presented), 1,
+      []() { FAIL(); }, std::move(on_frame_presented), 1,
       fml::TimeDelta::Zero());
   EXPECT_EQ(presents_called, 0u);
   EXPECT_EQ(vsyncs_handled, 0u);
@@ -389,15 +357,13 @@ TEST_F(GfxSessionConnectionTest, PresentBackpressure) {
   // Set up a callback which allows sensing of how many presents
   // (`Present` calls) were handled.
   size_t presents_called = 0u;
-  SetUpSessionStubs(
-      nullptr /* request_presentation_times_handler */,
-      [&presents_called](auto...) -> auto {
-        presents_called++;
-        return FuturePresentationTimes{
-            .future_presentations = {},
-            .remaining_presents_in_flight_allowed = 1,
-        };
-      });
+  fake_session().SetPresent2Handler([&presents_called](auto...) -> auto {
+    presents_called++;
+    return FuturePresentationTimes{
+        .future_presentations = {},
+        .remaining_presents_in_flight_allowed = 1,
+    };
+  });
 
   // Set up a callback which allows sensing of how many vsync's
   // (`OnFramePresented` events) were handled.
@@ -410,7 +376,7 @@ TEST_F(GfxSessionConnectionTest, PresentBackpressure) {
   // completed yet.
   flutter_runner::GfxSessionConnection session_connection(
       GetCurrentTestName(), GetInspectNode(), TakeSessionHandle(),
-      []() { FML_CHECK(false); }, std::move(on_frame_presented), 1,
+      []() { FAIL(); }, std::move(on_frame_presented), 1,
       fml::TimeDelta::Zero());
   EXPECT_EQ(presents_called, 0u);
   EXPECT_EQ(vsyncs_handled, 0u);
