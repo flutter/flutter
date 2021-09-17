@@ -45,7 +45,7 @@ bool VulkanSurface::CreateVulkanImage(vulkan::VulkanProvider& vulkan_provider,
   FML_CHECK(out_vulkan_image != nullptr);
 
   out_vulkan_image->vk_collection_image_create_info = {
-      .sType = VK_STRUCTURE_TYPE_BUFFER_COLLECTION_IMAGE_CREATE_INFO_FUCHSIA,
+      .sType = VK_STRUCTURE_TYPE_BUFFER_COLLECTION_IMAGE_CREATE_INFO_FUCHSIAX,
       .pNext = nullptr,
       .collection = collection_,
       .index = 0,
@@ -71,7 +71,7 @@ bool VulkanSurface::CreateVulkanImage(vulkan::VulkanProvider& vulkan_provider,
   };
 
   if (VK_CALL_LOG_ERROR(
-          vulkan_provider.vk().SetBufferCollectionConstraintsFUCHSIA(
+          vulkan_provider.vk().SetBufferCollectionConstraintsFUCHSIAX(
               vulkan_provider.vk_device(), collection_,
               &out_vulkan_image->vk_image_create_info)) != VK_SUCCESS) {
     return false;
@@ -186,13 +186,11 @@ vulkan::VulkanHandle<VkSemaphore> VulkanSurface::SemaphoreFromEvent(
   }
 
   VkImportSemaphoreZirconHandleInfoFUCHSIA import_info = {
-      .sType =
-          VK_STRUCTURE_TYPE_TEMP_IMPORT_SEMAPHORE_ZIRCON_HANDLE_INFO_FUCHSIA,
+      .sType = VK_STRUCTURE_TYPE_IMPORT_SEMAPHORE_ZIRCON_HANDLE_INFO_FUCHSIA,
       .pNext = nullptr,
       .semaphore = semaphore,
-      .handleType =
-          VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_TEMP_ZIRCON_EVENT_BIT_FUCHSIA,
-      .handle = static_cast<uint32_t>(semaphore_event.release())};
+      .handleType = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_ZIRCON_EVENT_BIT_FUCHSIA,
+      .zirconHandle = static_cast<uint32_t>(semaphore_event.release())};
 
   result = VK_CALL_LOG_ERROR(
       vulkan_provider_.vk().ImportSemaphoreZirconHandleFUCHSIA(
@@ -280,18 +278,21 @@ bool VulkanSurface::AllocateDeviceMemory(
         });
   }
 
-  VkBufferCollectionCreateInfoFUCHSIA import_info;
-  import_info.collectionToken = vulkan_token.Unbind().TakeChannel().release();
-  VkBufferCollectionFUCHSIA collection;
-  if (VK_CALL_LOG_ERROR(vulkan_provider_.vk().CreateBufferCollectionFUCHSIA(
+  VkBufferCollectionCreateInfoFUCHSIAX import_info{
+      .sType = VK_STRUCTURE_TYPE_BUFFER_COLLECTION_CREATE_INFO_FUCHSIAX,
+      .pNext = nullptr,
+      .collectionToken = vulkan_token.Unbind().TakeChannel().release(),
+  };
+  VkBufferCollectionFUCHSIAX collection;
+  if (VK_CALL_LOG_ERROR(vulkan_provider_.vk().CreateBufferCollectionFUCHSIAX(
           vulkan_provider_.vk_device(), &import_info, nullptr, &collection)) !=
       VK_SUCCESS) {
     return false;
   }
 
   collection_ = {collection, [&vulkan_provider = vulkan_provider_](
-                                 VkBufferCollectionFUCHSIA collection) {
-                   vulkan_provider.vk().DestroyBufferCollectionFUCHSIA(
+                                 VkBufferCollectionFUCHSIAX collection) {
+                   vulkan_provider.vk().DestroyBufferCollectionFUCHSIAX(
                        vulkan_provider.vk_device(), collection, nullptr);
                  }};
 
@@ -304,17 +305,17 @@ bool VulkanSurface::AllocateDeviceMemory(
       vulkan_image_.vk_memory_requirements;
   VkImageCreateInfo& image_create_info = vulkan_image_.vk_image_create_info;
 
-  VkBufferCollectionPropertiesFUCHSIA properties = {
-      .sType = VK_STRUCTURE_TYPE_BUFFER_COLLECTION_PROPERTIES_FUCHSIA};
+  VkBufferCollectionPropertiesFUCHSIAX properties{
+      .sType = VK_STRUCTURE_TYPE_BUFFER_COLLECTION_PROPERTIES_FUCHSIAX};
   if (VK_CALL_LOG_ERROR(
-          vulkan_provider_.vk().GetBufferCollectionPropertiesFUCHSIA(
+          vulkan_provider_.vk().GetBufferCollectionPropertiesFUCHSIAX(
               vulkan_provider_.vk_device(), collection_, &properties)) !=
       VK_SUCCESS) {
     return false;
   }
 
-  VkImportMemoryBufferCollectionFUCHSIA import_memory_info = {
-      .sType = VK_STRUCTURE_TYPE_IMPORT_MEMORY_BUFFER_COLLECTION_FUCHSIA,
+  VkImportMemoryBufferCollectionFUCHSIAX import_memory_info = {
+      .sType = VK_STRUCTURE_TYPE_IMPORT_MEMORY_BUFFER_COLLECTION_FUCHSIAX,
       .pNext = nullptr,
       .collection = collection_,
       .index = 0,
