@@ -199,10 +199,6 @@ template("_fuchsia_cc_prebuilt_library") {
   meta_json_include_dir = meta_json.include_dir
   _include_dirs += [ "$_fuchsia_sdk_path/$meta_json_include_dir" ]
 
-  if (target_name == "vulkan") {
-    _include_dirs += [ "//build/fuchsia/vulkan/include" ]
-  }
-
   foreach(dep, meta_json.deps) {
     _deps += [ ":$dep" ]
   }
