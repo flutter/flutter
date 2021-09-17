@@ -53,7 +53,8 @@ sk_sp<DisplayList> DiffContextTest::CreateDisplayList(const SkRect& bounds,
 std::shared_ptr<DisplayListLayer> DiffContextTest::CreateDisplayListLayer(
     sk_sp<DisplayList> display_list,
     const SkPoint& offset) {
-  return std::make_shared<DisplayListLayer>(offset, display_list, false, false);
+  return std::make_shared<DisplayListLayer>(
+      offset, SkiaGPUObject(display_list, unref_queue()), false, false);
 }
 
 std::shared_ptr<ContainerLayer> DiffContextTest::CreateContainerLayer(
