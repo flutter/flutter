@@ -109,6 +109,22 @@ public class FlutterViewTest {
   }
 
   @Test
+  public void detachFromFlutterEngine_revertImageView() {
+    FlutterView flutterView = new FlutterView(RuntimeEnvironment.application);
+    FlutterEngine flutterEngine =
+        spy(new FlutterEngine(RuntimeEnvironment.application, mockFlutterLoader, mockFlutterJni));
+
+    flutterView.attachToFlutterEngine(flutterEngine);
+    assertFalse(flutterView.renderSurface instanceof FlutterImageView);
+
+    flutterView.convertToImageView();
+    assertTrue(flutterView.renderSurface instanceof FlutterImageView);
+
+    flutterView.detachFromFlutterEngine();
+    assertFalse(flutterView.renderSurface instanceof FlutterImageView);
+  }
+
+  @Test
   public void onConfigurationChanged_fizzlesWhenNullEngine() {
     FlutterView flutterView = new FlutterView(RuntimeEnvironment.application);
     FlutterEngine flutterEngine =
