@@ -214,9 +214,9 @@ void FakeSession::AddResource(FakeResourceState&& resource) {
   }
 
   // Add to initial spot in labels map.
-  auto empty_label_it = scene_graph_.labels_map.find("");
-  if (empty_label_it == scene_graph_.labels_map.end()) {
-    auto [emplace_it, empty_label_success] = scene_graph_.labels_map.emplace(
+  auto empty_label_it = scene_graph_.label_map.find("");
+  if (empty_label_it == scene_graph_.label_map.end()) {
+    auto [emplace_it, empty_label_success] = scene_graph_.label_map.emplace(
         std::make_pair("", std::vector<std::weak_ptr<FakeResourceState>>()));
     FML_CHECK(empty_label_success);
     empty_label_it = emplace_it;
@@ -274,7 +274,7 @@ void FakeSession::DetachResourceFromParent(
 }
 
 void FakeSession::PruneDeletedResourceRefs() {
-  // Remove expired resurces from the parents map.
+  // Remove expired resources from the parents map.
   for (auto parent_it = parents_map_.begin(), parent_end = parents_map_.end();
        parent_it != parent_end;) {
     if (parent_it->second.first.expired()) {
@@ -285,8 +285,8 @@ void FakeSession::PruneDeletedResourceRefs() {
   }
 
   // Remove expired resurces from the labels map.
-  for (auto scene_it = scene_graph_.labels_map.begin(),
-            scene_end = scene_graph_.labels_map.end();
+  for (auto scene_it = scene_graph_.label_map.begin(),
+            scene_end = scene_graph_.label_map.end();
        scene_it != scene_end;) {
     auto erase_it = std::remove_if(
         scene_it->second.begin(), scene_it->second.end(),
@@ -296,7 +296,7 @@ void FakeSession::PruneDeletedResourceRefs() {
     }
 
     if (scene_it->second.empty()) {
-      scene_it = scene_graph_.labels_map.erase(scene_it);
+      scene_it = scene_graph_.label_map.erase(scene_it);
     } else {
       ++scene_it;
     }
@@ -905,8 +905,8 @@ void FakeSession::ApplySetLabelCmd(fuchsia::ui::gfx::SetLabelCmd command) {
   auto resource_ptr = GetResource(command.id);
 
   // Erase from old spot in the labels map.
-  auto current_label_it = scene_graph_.labels_map.find(resource_ptr->label);
-  FML_CHECK(current_label_it != scene_graph_.labels_map.end());
+  auto current_label_it = scene_graph_.label_map.find(resource_ptr->label);
+  FML_CHECK(current_label_it != scene_graph_.label_map.end());
   auto current_erase_it = std::remove_if(
       current_label_it->second.begin(), current_label_it->second.end(),
       [&resource_ptr](const auto& weak_resource) {
@@ -916,10 +916,10 @@ void FakeSession::ApplySetLabelCmd(fuchsia::ui::gfx::SetLabelCmd command) {
   current_label_it->second.erase(current_erase_it);
 
   // Add to new spot in labels map.
-  auto new_label_it = scene_graph_.labels_map.find(command.label);
-  if (new_label_it == scene_graph_.labels_map.end()) {
+  auto new_label_it = scene_graph_.label_map.find(command.label);
+  if (new_label_it == scene_graph_.label_map.end()) {
     auto [emplace_it, current_label_success] =
-        scene_graph_.labels_map.emplace(std::make_pair(
+        scene_graph_.label_map.emplace(std::make_pair(
             command.label, std::vector<std::weak_ptr<FakeResourceState>>()));
     FML_CHECK(current_label_success);
     new_label_it = emplace_it;

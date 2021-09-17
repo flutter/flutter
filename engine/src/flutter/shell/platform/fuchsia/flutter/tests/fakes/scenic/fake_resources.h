@@ -70,8 +70,8 @@ struct StateT {
 
   template <typename T>
   struct HandleT {
-    T value;
-    zx_koid_t koid;
+    T value{};
+    zx_koid_t koid{ZX_KOID_INVALID};
   };
 
   template <typename T>
@@ -82,7 +82,7 @@ struct StateT {
 };
 
 // Tag type for a Resource "snapshot".  The Resource snapshot only stores koids
-// for any handles assocaites with the resource; in this way it doesn't have any
+// for any handles associated with the resource; in this way it doesn't have any
 // control over the underlying handle lifetime.
 //
 // "snapshot" Resources are generated from "state" Resources during
@@ -386,7 +386,7 @@ struct FakeSceneGraphT {
   std::unordered_map<FakeResourceId, std::shared_ptr<FakeResourceT<S>>>
       resource_map;
   std::unordered_map<std::string, std::vector<std::weak_ptr<FakeResourceT<S>>>>
-      labels_map;
+      label_map;
   FakeResourceId root_view_id{kInvalidFakeResourceId};
 };
 using FakeSceneGraphState = FakeSceneGraphT<StateT>;
