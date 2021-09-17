@@ -797,33 +797,33 @@ struct DrawTextBlobOp final : DLOp {
 };
 
 // 4 byte header + 28 byte payload packs evenly into 32 bytes
-#define DEFINE_DRAW_SHADOW_OP(name, occludes)                         \
-  struct Draw##name##Op final : DLOp {                                \
-    static const auto kType = DisplayListOpType::kDraw##name;         \
-                                                                      \
-    Draw##name##Op(const SkPath& path,                                \
-                   SkColor color,                                     \
-                   SkScalar elevation,                                \
-                   SkScalar dpr)                                      \
-        : color(color), elevation(elevation), dpr(dpr), path(path) {} \
-                                                                      \
-    const SkColor color;                                              \
-    const SkScalar elevation;                                         \
-    const SkScalar dpr;                                               \
-    const SkPath path;                                                \
-                                                                      \
-    void dispatch(Dispatcher& dispatcher) const {                     \
-      dispatcher.drawShadow(path, color, elevation, occludes, dpr);   \
-    }                                                                 \
+#define DEFINE_DRAW_SHADOW_OP(name, nonoccluding)                       \
+  struct Draw##name##Op final : DLOp {                                  \
+    static const auto kType = DisplayListOpType::kDraw##name;           \
+                                                                        \
+    Draw##name##Op(const SkPath& path,                                  \
+                   SkColor color,                                       \
+                   SkScalar elevation,                                  \
+                   SkScalar dpr)                                        \
+        : color(color), elevation(elevation), dpr(dpr), path(path) {}   \
+                                                                        \
+    const SkColor color;                                                \
+    const SkScalar elevation;                                           \
+    const SkScalar dpr;                                                 \
+    const SkPath path;                                                  \
+                                                                        \
+    void dispatch(Dispatcher& dispatcher) const {                       \
+      dispatcher.drawShadow(path, color, elevation, nonoccluding, dpr); \
+    }                                                                   \
   };
 DEFINE_DRAW_SHADOW_OP(Shadow, false)
-DEFINE_DRAW_SHADOW_OP(ShadowOccludes, true)
+DEFINE_DRAW_SHADOW_OP(NonOccludingShadow, true)
 #undef DEFINE_DRAW_SHADOW_OP
 
 #pragma pack(pop, DLOp_Alignment)
 
 void DisplayList::ComputeBounds() {
-  DisplayListBoundsCalculator calculator(bounds_cull_);
+  DisplayListBoundsCalculator calculator(&bounds_cull_);
   Dispatch(calculator);
   bounds_ = calculator.getBounds();
 }
@@ -1365,10 +1365,10 @@ void DisplayListBuilder::drawTextBlob(const sk_sp<SkTextBlob> blob,
 void DisplayListBuilder::drawShadow(const SkPath& path,
                                     const SkColor color,
                                     const SkScalar elevation,
-                                    bool occludes,
+                                    bool transparentOccluder,
                                     SkScalar dpr) {
-  occludes  //
-      ? Push<DrawShadowOccludesOp>(0, 1, path, color, elevation, dpr)
+  transparentOccluder  //
+      ? Push<DrawNonOccludingShadowOp>(0, 1, path, color, elevation, dpr)
       : Push<DrawShadowOp>(0, 1, path, color, elevation, dpr);
 }
 
