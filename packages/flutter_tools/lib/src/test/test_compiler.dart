@@ -13,6 +13,7 @@ import '../base/file_system.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../compile.dart';
+import '../flutter_plugins.dart';
 import '../globals_null_migrated.dart' as globals;
 import '../project.dart';
 
@@ -143,12 +144,25 @@ class TestCompiler {
         compiler = await createCompiler();
         firstCompile = true;
       }
+
+      // Update the generated registrant to use the test target's main.
+      final String mainUriString = buildInfo.packageConfig.toPackageUri(request.mainUri)?.toString()
+        ?? request.mainUri.toString();
+      await generateMainDartWithPluginRegistrant(
+        flutterProject,
+        buildInfo.packageConfig,
+        mainUriString,
+        globals.fs.file(request.mainUri),
+        throwOnPluginPubspecError: false,
+      );
+
       final CompilerOutput compilerOutput = await compiler.recompile(
         request.mainUri,
-        <Uri>[request.mainUri],
+        <Uri>[request.mainUri, flutterProject.dartPluginRegistrant.absolute.uri],
         outputPath: outputDill.path,
         packageConfig: buildInfo.packageConfig,
         projectRootPath: flutterProject?.directory?.absolute?.path,
+        checkDartPluginRegistry: true,
         fs: globals.fs,
       );
       final String outputPath = compilerOutput?.outputFilename;

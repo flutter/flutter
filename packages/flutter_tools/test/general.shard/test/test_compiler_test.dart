@@ -40,6 +40,7 @@ void main() {
     fileSystem = MemoryFileSystem.test();
     fileSystem.file('pubspec.yaml').createSync();
     fileSystem.file('test/foo.dart').createSync(recursive: true);
+    fileSystem.file('.packages').createSync();
     residentCompiler = FakeResidentCompiler(fileSystem);
   });
 
@@ -150,6 +151,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
     String projectRootPath,
     FileSystem fs,
     bool suppressErrors = false,
+    bool checkDartPluginRegistry = false,
   }) async {
     if (compilerOutput != null) {
       fileSystem.file(compilerOutput.outputFilename).createSync(recursive: true);

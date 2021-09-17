@@ -33,7 +33,8 @@ void main() {
         ..manifest = flutterManifest
         ..directory = directory
         ..flutterPluginsFile = directory.childFile('.flutter-plugins')
-        ..flutterPluginsDependenciesFile = directory.childFile('.flutter-plugins-dependencies');
+        ..flutterPluginsDependenciesFile = directory.childFile('.flutter-plugins-dependencies')
+        ..dartPluginRegistrant = directory.childFile('generated_main.dart');
       flutterProject.directory.childFile('.packages').createSync(recursive: true);
     });
 
@@ -610,7 +611,6 @@ void main() {
 void main() {
 }
 ''');
-        final File generatedMainFile = flutterProject.directory.childFile('generated_main.dart');
         final PackageConfig packageConfig = await loadPackageConfigWithLogging(
           flutterProject.directory.childDirectory('.dart_tool').childFile('package_config.json'),
           logger: globals.logger,
@@ -620,11 +620,10 @@ void main() {
           flutterProject,
           packageConfig,
           'package:app/main.dart',
-          generatedMainFile,
           mainFile,
           throwOnPluginPubspecError: true,
         );
-        expect(generatedMainFile.readAsStringSync(),
+        expect(flutterProject.dartPluginRegistrant.readAsStringSync(),
           '//\n'
           '// Generated file. Do not edit.\n'
           '// This file is generated from template in file `flutter_tools/lib/src/flutter_plugins.dart`.\n'
@@ -730,7 +729,6 @@ void main() {
         libDir.createSync(recursive: true);
 
         final File mainFile = libDir.childFile('main.dart')..writeAsStringSync('');
-        final File generatedMainFile = flutterProject.directory.childFile('generated_main.dart');
         final PackageConfig packageConfig = await loadPackageConfigWithLogging(
           flutterProject.directory.childDirectory('.dart_tool').childFile('package_config.json'),
           logger: globals.logger,
@@ -741,7 +739,6 @@ void main() {
             flutterProject,
             packageConfig,
             'package:app/main.dart',
-            generatedMainFile,
             mainFile,
             throwOnPluginPubspecError: true,
           ), throwsToolExit(message:
@@ -773,7 +770,6 @@ void main() {
         libDir.createSync(recursive: true);
 
         final File mainFile = libDir.childFile('main.dart')..writeAsStringSync('');
-        final File generatedMainFile = flutterProject.directory.childFile('generated_main.dart');
         final PackageConfig packageConfig = await loadPackageConfigWithLogging(
           flutterProject.directory.childDirectory('.dart_tool').childFile('package_config.json'),
           logger: globals.logger,
@@ -784,7 +780,6 @@ void main() {
             flutterProject,
             packageConfig,
             'package:app/main.dart',
-            generatedMainFile,
             mainFile,
             throwOnPluginPubspecError: true,
           ), throwsToolExit(message:
@@ -834,7 +829,6 @@ void main() {
         libDir.createSync(recursive: true);
 
         final File mainFile = libDir.childFile('main.dart')..writeAsStringSync('');
-        final File generatedMainFile = flutterProject.directory.childFile('generated_main.dart');
         final PackageConfig packageConfig = await loadPackageConfigWithLogging(
           flutterProject.directory.childDirectory('.dart_tool').childFile('package_config.json'),
           logger: globals.logger,
@@ -844,11 +838,10 @@ void main() {
           flutterProject,
           packageConfig,
           'package:app/main.dart',
-          generatedMainFile,
           mainFile,
           throwOnPluginPubspecError: true,
         );
-        expect(generatedMainFile.existsSync(), isFalse);
+        expect(flutterProject.dartPluginRegistrant.existsSync(), isFalse);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -876,7 +869,6 @@ void main() {
         libDir.createSync(recursive: true);
 
         final File mainFile = libDir.childFile('main.dart')..writeAsStringSync('');
-        final File generatedMainFile = flutterProject.directory.childFile('generated_main.dart');
         final PackageConfig packageConfig = await loadPackageConfigWithLogging(
           flutterProject.directory.childDirectory('.dart_tool').childFile('package_config.json'),
           logger: globals.logger,
@@ -886,11 +878,10 @@ void main() {
           flutterProject,
           packageConfig,
           'package:app/main.dart',
-          generatedMainFile,
           mainFile,
           throwOnPluginPubspecError: true,
         );
-        expect(generatedMainFile.existsSync(), isTrue);
+        expect(flutterProject.dartPluginRegistrant.existsSync(), isTrue);
 
         // No plugins.
         createFakeDartPlugins(
@@ -903,11 +894,10 @@ void main() {
           flutterProject,
           packageConfig,
           'package:app/main.dart',
-          generatedMainFile,
           mainFile,
           throwOnPluginPubspecError: true,
         );
-        expect(generatedMainFile.existsSync(), isFalse);
+        expect(flutterProject.dartPluginRegistrant.existsSync(), isFalse);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -961,6 +951,9 @@ class FakeFlutterProject extends Fake implements FlutterProject {
 
   @override
   File flutterPluginsDependenciesFile;
+
+  @override
+  File dartPluginRegistrant;
 
   @override
   IosProject ios;
