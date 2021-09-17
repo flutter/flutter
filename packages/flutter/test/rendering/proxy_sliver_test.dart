@@ -29,7 +29,7 @@ void main() {
     expect(renderSliverOpacity.needsCompositing, false);
   });
 
-  test('RenderSliverOpacity does not composite if it is opaque', () {
+  test('RenderSliverOpacity does composite if it is opaque', () {
     final RenderSliverOpacity renderSliverOpacity = RenderSliverOpacity(
       opacity: 1.0,
       sliver: RenderSliverToBoxAdapter(
@@ -46,7 +46,7 @@ void main() {
     );
 
     layout(root, phase: EnginePhase.composite);
-    expect(renderSliverOpacity.needsCompositing, false);
+    expect(renderSliverOpacity.needsCompositing, true);
   });
   test('RenderSliverOpacity reuses its layer', () {
     final RenderSliverOpacity renderSliverOpacity = RenderSliverOpacity(
@@ -102,7 +102,7 @@ void main() {
     expect(renderSliverAnimatedOpacity.needsCompositing, false);
   });
 
-  test('RenderSliverAnimatedOpacity does not composite if it is opaque', () {
+  test('RenderSliverAnimatedOpacity does composite if it is opaque', () {
     final Animation<double> opacityAnimation = AnimationController(
       vsync: FakeTickerProvider(),
     )..value = 1.0;
@@ -124,7 +124,7 @@ void main() {
     );
 
     layout(root, phase: EnginePhase.composite);
-    expect(renderSliverAnimatedOpacity.needsCompositing, false);
+    expect(renderSliverAnimatedOpacity.needsCompositing, true);
   });
 
   test('RenderSliverAnimatedOpacity reuses its layer', () {
