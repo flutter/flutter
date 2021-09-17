@@ -16,6 +16,7 @@ import 'basic.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
+import 'gesture_detector.dart';
 import 'modal_barrier.dart';
 import 'navigator.dart';
 import 'overlay.dart';
@@ -747,6 +748,8 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
   final FocusScopeNode focusScopeNode = FocusScopeNode(debugLabel: '$_ModalScopeState Focus Scope');
   final ScrollController primaryScrollController = ScrollController();
 
+  late final FocusNode routeFocusNode = FocusNode();
+
   @override
   void initState() {
     super.initState();
@@ -830,44 +833,62 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                     controller: primaryScrollController,
                     child: FocusScope(
                       node: focusScopeNode, // immutable
-                      child: FocusTrap(
-                        focusScopeNode: focusScopeNode,
-                        child: RepaintBoundary(
-                          child: AnimatedBuilder(
-                            animation: _listenable, // immutable
-                            builder: (BuildContext context, Widget? child) {
-                              return widget.route.buildTransitions(
-                                context,
-                                widget.route.animation!,
-                                widget.route.secondaryAnimation!,
-                                // This additional AnimatedBuilder is include because if the
-                                // value of the userGestureInProgressNotifier changes, it's
-                                // only necessary to rebuild the IgnorePointer widget and set
-                                // the focus node's ability to focus.
-                                AnimatedBuilder(
-                                  animation: widget.route.navigator?.userGestureInProgressNotifier ?? ValueNotifier<bool>(false),
-                                  builder: (BuildContext context, Widget? child) {
-                                    final bool ignoreEvents = _shouldIgnoreFocusRequest;
-                                    focusScopeNode.canRequestFocus = !ignoreEvents;
-                                    return IgnorePointer(
-                                      ignoring: ignoreEvents,
-                                      child: child,
+                      child: GestureDetector(
+                        onTap: () {
+                          routeFocusNode.requestFocus();
+                        },
+                        // TODO(justinmc): Only remove focus when clicking out
+                        // for web.
+                        child: Focus(
+                          focusNode: routeFocusNode,
+                          skipTraversal: true,
+                          onKeyEvent: (FocusNode focusNode, KeyEvent event) {
+                            if (focusNode.hasPrimaryFocus
+                                && event is KeyDownEvent
+                                && event.logicalKey == LogicalKeyboardKey.tab) {
+                              focusNode.unfocus();
+                              focusScopeNode.nextFocus();
+                              return KeyEventResult.handled;
+                            }
+                            return KeyEventResult.ignored;
+                          },
+                          child: RepaintBoundary(
+                            child: AnimatedBuilder(
+                              animation: _listenable, // immutable
+                              builder: (BuildContext context, Widget? child) {
+                                return widget.route.buildTransitions(
+                                  context,
+                                  widget.route.animation!,
+                                  widget.route.secondaryAnimation!,
+                                  // This additional AnimatedBuilder is include because if the
+                                  // value of the userGestureInProgressNotifier changes, it's
+                                  // only necessary to rebuild the IgnorePointer widget and set
+                                  // the focus node's ability to focus.
+                                  AnimatedBuilder(
+                                    animation: widget.route.navigator?.userGestureInProgressNotifier ?? ValueNotifier<bool>(false),
+                                    builder: (BuildContext context, Widget? child) {
+                                      final bool ignoreEvents = _shouldIgnoreFocusRequest;
+                                      focusScopeNode.canRequestFocus = !ignoreEvents;
+                                      return IgnorePointer(
+                                        ignoring: ignoreEvents,
+                                        child: child,
+                                      );
+                                    },
+                                    child: child,
+                                  ),
+                                );
+                              },
+                              child: _page ??= RepaintBoundary(
+                                key: widget.route._subtreeKey, // immutable
+                                child: Builder(
+                                  builder: (BuildContext context) {
+                                    return widget.route.buildPage(
+                                      context,
+                                      widget.route.animation!,
+                                      widget.route.secondaryAnimation!,
                                     );
                                   },
-                                  child: child,
                                 ),
-                              );
-                            },
-                            child: _page ??= RepaintBoundary(
-                              key: widget.route._subtreeKey, // immutable
-                              child: Builder(
-                                builder: (BuildContext context) {
-                                  return widget.route.buildPage(
-                                    context,
-                                    widget.route.animation!,
-                                    widget.route.secondaryAnimation!,
-                                  );
-                                },
                               ),
                             ),
                           ),
