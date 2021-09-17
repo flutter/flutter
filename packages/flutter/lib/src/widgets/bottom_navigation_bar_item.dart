@@ -24,17 +24,12 @@ class BottomNavigationBarItem {
   /// The argument [icon] should not be null and the argument [label] should not be null when used in a Material Design's [BottomNavigationBar].
   const BottomNavigationBarItem({
     required this.icon,
-    @Deprecated(
-      'Use "label" instead, as it allows for an improved text-scaling experience. '
-      'This feature was deprecated after v1.19.0.',
-    )
-    this.title,
-    this.label,
+    required this.label,
     Widget? activeIcon,
     this.backgroundColor,
     this.tooltip,
   }) : activeIcon = activeIcon ?? icon,
-       assert(label == null || title == null),
+       assert(label != null),
        assert(icon != null);
 
   /// The icon of the item.
@@ -67,19 +62,10 @@ class BottomNavigationBarItem {
   ///  * [BottomNavigationBarItem.icon], for a description of how to pair icons.
   final Widget activeIcon;
 
-  /// The title of the item. If the title is not provided only the icon will be shown when not used in a Material Design [BottomNavigationBar].
-  ///
-  /// This field is deprecated, use [label] instead.
-  @Deprecated(
-    'Use "label" instead, as it allows for an improved text-scaling experience. '
-    'This feature was deprecated after v1.19.0.',
-  )
-  final Widget? title;
-
   /// The text label for this [BottomNavigationBarItem].
   ///
   /// This will be used to create a [Text] widget to put in the bottom navigation bar.
-  final String? label;
+  final String label;
 
   /// The color of the background radial animation for material [BottomNavigationBar].
   ///
