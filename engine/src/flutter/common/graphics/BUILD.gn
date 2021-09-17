@@ -27,5 +27,8 @@ source_set("graphics") {
     "//third_party/skia",
   ]
 
-  public_configs = [ "//flutter:config" ]
+  public_configs = [
+    "//flutter:config",
+    "//flutter/vulkan:vulkan_config",
+  ]
 }
