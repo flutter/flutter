@@ -52,13 +52,7 @@ std::unique_ptr<Surface> AndroidSurfaceGL::CreateGPUSurface(
   if (gr_context) {
     return std::make_unique<GPUSurfaceGL>(sk_ref_sp(gr_context), this, true);
   } else {
-    sk_sp<GrDirectContext> main_skia_context =
-        GLContextPtr()->GetMainSkiaContext();
-    if (!main_skia_context) {
-      main_skia_context = GPUSurfaceGL::MakeGLContext(this);
-      GLContextPtr()->SetMainSkiaContext(main_skia_context);
-    }
-    return std::make_unique<GPUSurfaceGL>(main_skia_context, this, true);
+    return std::make_unique<GPUSurfaceGL>(this, true);
   }
 }
 
@@ -177,14 +171,7 @@ AndroidContextGL* AndroidSurfaceGL::GLContextPtr() const {
 
 std::unique_ptr<Surface> AndroidSurfaceGL::CreatePbufferSurface() {
   onscreen_surface_ = GLContextPtr()->CreatePbufferSurface();
-  sk_sp<GrDirectContext> main_skia_context =
-      GLContextPtr()->GetMainSkiaContext();
-  if (!main_skia_context) {
-    main_skia_context = GPUSurfaceGL::MakeGLContext(this);
-    GLContextPtr()->SetMainSkiaContext(main_skia_context);
-  }
-
-  return std::make_unique<GPUSurfaceGL>(main_skia_context, this, true);
+  return std::make_unique<GPUSurfaceGL>(this, true);
 }
 
 }  // namespace flutter
