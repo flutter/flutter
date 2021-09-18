@@ -1,4 +1,4 @@
-Signature: 81fab8af5e88db4571cc772601493442
+Signature: e6f6141254da5c4543ae400b30a40bff
 
 UNUSED LICENSES:
 
@@ -2952,8 +2952,11 @@ FILE: ../../../third_party/skia/gm/particles.cpp
 FILE: ../../../third_party/skia/gm/runtimeeffectimage.cpp
 FILE: ../../../third_party/skia/include/core/SkBlender.h
 FILE: ../../../third_party/skia/include/effects/SkBlenders.h
+FILE: ../../../third_party/skia/include/gpu/GrSurfaceInfo.h
 FILE: ../../../third_party/skia/include/gpu/gl/egl/GrGLMakeEGLInterface.h
 FILE: ../../../third_party/skia/include/gpu/gl/glx/GrGLMakeGLXInterface.h
+FILE: ../../../third_party/skia/include/private/GrDawnTypesPriv.h
+FILE: ../../../third_party/skia/include/private/GrMockTypesPriv.h
 FILE: ../../../third_party/skia/include/sksl/DSLSymbols.h
 FILE: ../../../third_party/skia/modules/canvaskit/paragraph_bindings_gen.cpp
 FILE: ../../../third_party/skia/src/core/SkBlendModeBlender.cpp
@@ -2976,6 +2979,7 @@ FILE: ../../../third_party/skia/src/gpu/GrOpsTypes.h
 FILE: ../../../third_party/skia/src/gpu/GrPersistentCacheUtils.cpp
 FILE: ../../../third_party/skia/src/gpu/GrSubRunAllocator.cpp
 FILE: ../../../third_party/skia/src/gpu/GrSubRunAllocator.h
+FILE: ../../../third_party/skia/src/gpu/GrSurfaceInfo.cpp
 FILE: ../../../third_party/skia/src/gpu/GrUniformAggregator.cpp
 FILE: ../../../third_party/skia/src/gpu/GrUniformAggregator.h
 FILE: ../../../third_party/skia/src/gpu/GrWritePixelsRenderTask.cpp
@@ -2984,9 +2988,12 @@ FILE: ../../../third_party/skia/src/gpu/GrYUVATextureProxies.cpp
 FILE: ../../../third_party/skia/src/gpu/GrYUVATextureProxies.h
 FILE: ../../../third_party/skia/src/gpu/SurfaceFillContext.cpp
 FILE: ../../../third_party/skia/src/gpu/SurfaceFillContext.h
+FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DTypesPriv.cpp
+FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnTypesPriv.cpp
 FILE: ../../../third_party/skia/src/gpu/geometry/GrInnerFanTriangulator.h
 FILE: ../../../third_party/skia/src/gpu/gl/egl/GrGLMakeNativeInterface_egl.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/glx/GrGLMakeNativeInterface_glx.cpp
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlTypesPriv.mm
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrTessTypes.h
 FILE: ../../../third_party/skia/src/gpu/v2/Device.cpp
 FILE: ../../../third_party/skia/src/gpu/v2/Device_v2.h
@@ -3733,6 +3740,7 @@ FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DTextureRenderTarget.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DTextureResource.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DTextureResource.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DTypesMinimal.cpp
+FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DTypesPriv.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DUtil.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DUtil.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrMatrixEffect.cpp
