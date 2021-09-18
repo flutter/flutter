@@ -360,7 +360,6 @@ class ThemeData with Diagnosticable {
     primaryColorLight ??= isDark ? Colors.grey[500]! : primarySwatch[100]!;
     primaryColorDark ??= isDark ? Colors.black : primarySwatch[700]!;
     final bool primaryIsDark = primaryColorBrightness == Brightness.dark;
-    toggleableActiveColor ??= isDark ? Colors.tealAccent[200]! : (accentColor ?? primarySwatch[600]!);
     accentColor ??= isDark ? Colors.tealAccent[200]! : primarySwatch[500]!;
     accentColorBrightness ??= estimateBrightnessForColor(accentColor);
     final bool accentIsDark = accentColorBrightness == Brightness.dark;
@@ -383,6 +382,7 @@ class ThemeData with Diagnosticable {
       brightness: _brightness,
     );
 
+    toggleableActiveColor ??= isDark ? Colors.tealAccent[200]! : (colorScheme.secondary ?? accentColor ?? primarySwatch[600]!);
     splashFactory ??= InkSplash.splashFactory;
     selectedRowColor ??= Colors.grey[100]!;
     unselectedWidgetColor ??= isDark ? Colors.white70 : Colors.black54;
