@@ -55,7 +55,7 @@ void main() {
         },
         <String, dynamic>{
           'name': 'listener',
-          'args': <String, dynamic>{'parentId': '0', 'isolateId': isolateId}
+          'args': <String, dynamic>{'isolateId': isolateId}
         },
         <String, dynamic>{
           'name': 'ImageCache.clear',

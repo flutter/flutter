@@ -223,6 +223,8 @@ Future<Map<String, dynamic>> _getAllCoverage(
   bool Function(String) libraryPredicate,
   bool forceSequential,
 ) async {
+  final vm_service.Version version = await service.getVersion();
+  final bool reportLines = (version.major == 3 && version.minor >= 51) || version.major > 3;
   final vm_service.VM vm = await service.getVM();
   final List<Map<String, dynamic>> coverage = <Map<String, dynamic>>[];
   for (final vm_service.IsolateRef isolateRef in vm.isolates) {
@@ -253,6 +255,7 @@ Future<Map<String, dynamic>> _getAllCoverage(
         <String>['Coverage'],
         scriptId: scriptId,
         forceCompile: true,
+        reportLines: reportLines ? true : null,
       )
       .then((vm_service.SourceReport report) {
         sourceReports[scriptId] = report;
@@ -260,17 +263,20 @@ Future<Map<String, dynamic>> _getAllCoverage(
       if (forceSequential) {
         await null;
       }
+      futures.add(getSourceReport);
+      if (reportLines) {
+        continue;
+      }
       final Future<void> getObject = service
         .getObject(isolateRef.id, scriptId)
         .then((vm_service.Obj response) {
           final vm_service.Script script = response as vm_service.Script;
           scripts[scriptId] = script;
         });
-      futures.add(getSourceReport);
       futures.add(getObject);
     }
     await Future.wait(futures);
-    _buildCoverageMap(scripts, sourceReports, coverage);
+    _buildCoverageMap(scripts, sourceReports, coverage, reportLines);
   }
   return <String, dynamic>{'type': 'CodeCoverage', 'coverage': coverage};
 }
@@ -280,9 +286,10 @@ void _buildCoverageMap(
   Map<String, vm_service.Script> scripts,
   Map<String, vm_service.SourceReport> sourceReports,
   List<Map<String, dynamic>> coverage,
+  bool reportLines,
 ) {
   final Map<String, Map<int, int>> hitMaps = <String, Map<int, int>>{};
-  for (final String scriptId in scripts.keys) {
+  for (final String scriptId in sourceReports.keys) {
     final vm_service.SourceReport sourceReport = sourceReports[scriptId];
     for (final vm_service.SourceReportRange range in sourceReport.ranges) {
       final vm_service.SourceReportCoverage coverage = range.coverage;
@@ -297,21 +304,24 @@ void _buildCoverageMap(
       final Map<int, int> hitMap = hitMaps[uri];
       final List<int> hits = coverage.hits;
       final List<int> misses = coverage.misses;
-      final List<dynamic> tokenPositions = scripts[scriptRef.id].tokenPosTable;
-      // The token positions can be null if the script has no lines that may be covered.
-      if (tokenPositions == null) {
+      final List<dynamic> tokenPositions = scripts[scriptRef.id]?.tokenPosTable;
+      // The token positions can be null if the script has no lines that may be
+      // covered. It will also be null if reportLines is true.
+      if (tokenPositions == null && !reportLines) {
         continue;
       }
       if (hits != null) {
         for (final int hit in hits) {
-          final int line = _lineAndColumn(hit, tokenPositions)[0];
+          final int line =
+              reportLines ? hit : _lineAndColumn(hit, tokenPositions)[0];
           final int current = hitMap[line] ?? 0;
           hitMap[line] = current + 1;
         }
       }
       if (misses != null) {
         for (final int miss in misses) {
-          final int line = _lineAndColumn(miss, tokenPositions)[0];
+          final int line =
+              reportLines ? miss : _lineAndColumn(miss, tokenPositions)[0];
           hitMap[line] ??= 0;
         }
       }

@@ -315,7 +315,21 @@ class StartCommand extends Command<void> {
     if (incrementLetter == 'm') {
       nextVersion = Version.fromCandidateBranch(candidateBranch);
     } else {
-      nextVersion = Version.increment(lastVersion, incrementLetter);
+      if (incrementLetter == 'z') {
+        if (lastVersion.type == VersionType.stable) {
+          nextVersion = Version.increment(lastVersion, incrementLetter);
+        } else {
+          // This is the first stable release, so hardcode the z as 0
+          nextVersion = Version(
+            x: lastVersion.x,
+            y: lastVersion.y,
+            z: 0,
+            type: VersionType.stable,
+          );
+        }
+      } else {
+        nextVersion = Version.increment(lastVersion, incrementLetter);
+      }
     }
     state.releaseVersion = nextVersion.toString();
 
