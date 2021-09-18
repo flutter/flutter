@@ -293,8 +293,7 @@ std::unique_ptr<Surface> PlatformViewAndroid::CreateRenderingSurface() {
   if (!android_surface_) {
     return nullptr;
   }
-  return android_surface_->CreateGPUSurface(
-      android_context_->GetMainSkiaContext().get());
+  return android_surface_->CreateGPUSurface();
 }
 
 // |PlatformView|
