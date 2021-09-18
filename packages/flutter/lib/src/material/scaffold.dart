@@ -969,9 +969,11 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     Size materialBannerSize = Size.zero;
     if (hasChild(_ScaffoldSlot.materialBanner)) {
       materialBannerSize = layoutChild(_ScaffoldSlot.materialBanner, fullWidthConstraints);
+      positionChild(_ScaffoldSlot.materialBanner, Offset(0.0, appBarHeight));
+
       // Push content down only if elevation is 0 instead of using extendBody
       // TODO(Calamity210): use a new extendBodyBehindBanner prop and add tests to scaffold_test.dart
-      if (extendBodyBehindAppBar) {
+      if (extendBody) {
         contentTop += materialBannerSize.height;
       }
     }
@@ -1096,17 +1098,6 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
       final double xOffset = hasCustomWidth ? (size.width - snackBarWidth!) / 2 : 0.0;
       positionChild(_ScaffoldSlot.snackBar, Offset(xOffset, snackBarYOffsetBase - snackBarSize.height));
-    }
-
-    if (hasChild(_ScaffoldSlot.materialBanner)) {
-      if (materialBannerSize == Size.zero) {
-        materialBannerSize = layoutChild(
-          _ScaffoldSlot.materialBanner,
-          fullWidthConstraints,
-        );
-      }
-
-      positionChild(_ScaffoldSlot.materialBanner, Offset(0.0, appBarHeight));
     }
 
     if (hasChild(_ScaffoldSlot.statusBar)) {

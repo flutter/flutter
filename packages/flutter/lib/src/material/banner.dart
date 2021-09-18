@@ -336,8 +336,7 @@ class _MaterialBannerState extends State<MaterialBanner> {
       end: Offset.zero,
     ).animate(CurvedAnimation(
       parent: widget.animation!,
-      curve: _materialBannerSlideOutCurve,
-      reverseCurve: const Threshold(0.0),
+      curve: const Threshold(0.0),
     ));
 
     materialBanner = Semantics(
