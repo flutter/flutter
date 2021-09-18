@@ -63,10 +63,12 @@ class Git {
     } else {
       message.writeln('Command "git ${args.join(' ')}" failed to $explanation.');
     }
-    if ((result.stdout as String).isNotEmpty)
+    if ((result.stdout as String).isNotEmpty) {
       message.writeln('stdout from git:\n${result.stdout}\n');
-    if ((result.stderr as String).isNotEmpty)
+    }
+    if ((result.stderr as String).isNotEmpty) {
       message.writeln('stderr from git:\n${result.stderr}\n');
+    }
     throw GitException(message.toString());
   }
 }

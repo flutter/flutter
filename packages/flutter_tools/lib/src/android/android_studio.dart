@@ -37,20 +37,16 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     this.studioAppName = 'AndroidStudio',
     this.presetPluginsPath,
   }) : version = version ?? Version.unknown {
-    _init();
+    _init(version: version);
   }
 
-  factory AndroidStudio.fromMacOSBundle(String bundlePath) {
-    String studioPath = globals.fs.path.join(bundlePath, 'Contents');
-    String plistFile = globals.fs.path.join(studioPath, 'Info.plist');
-    Map<String, dynamic> plistValues = globals.plistParser.parseFile(plistFile);
-    // As AndroidStudio managed by JetBrainsToolbox could have a wrapper pointing to the real Android Studio.
-    // Check if we've found a JetBrainsToolbox wrapper and deal with it properly.
-    final String? jetBrainsToolboxAppBundlePath = plistValues['JetBrainsToolboxApp'] as String?;
-    if (jetBrainsToolboxAppBundlePath != null) {
-      studioPath = globals.fs.path.join(jetBrainsToolboxAppBundlePath, 'Contents');
-      plistFile = globals.fs.path.join(studioPath, 'Info.plist');
-      plistValues = globals.plistParser.parseFile(plistFile);
+  static AndroidStudio? fromMacOSBundle(String bundlePath) {
+    final String studioPath = globals.fs.path.join(bundlePath, 'Contents');
+    final String plistFile = globals.fs.path.join(studioPath, 'Info.plist');
+    final Map<String, dynamic> plistValues = globals.plistParser.parseFile(plistFile);
+    // If we've found a JetBrainsToolbox wrapper, ignore it.
+    if (plistValues.containsKey('JetBrainsToolboxApp')) {
+      return null;
     }
 
     final String versionString = plistValues[PlistParser.kCFBundleShortVersionStringKey] as String;
@@ -317,7 +313,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     }
 
     return candidatePaths
-        .map<AndroidStudio>((FileSystemEntity e) => AndroidStudio.fromMacOSBundle(e.path))
+        .map<AndroidStudio?>((FileSystemEntity e) => AndroidStudio.fromMacOSBundle(e.path))
         .whereType<AndroidStudio>()
         .toList();
   }
@@ -435,7 +431,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     return keyMatcher.stringMatch(plistValue)?.split('=').last.trim().replaceAll('"', '');
   }
 
-  void _init() {
+  void _init({Version? version}) {
     _isValid = false;
     _validationMessages.clear();
 
@@ -449,6 +445,8 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     }
 
     final String javaPath = globals.platform.isMacOS ?
+        version != null && version.major >= 2020 ?
+        globals.fs.path.join(directory, 'jre', 'Contents', 'Home') :
         globals.fs.path.join(directory, 'jre', 'jdk', 'Contents', 'Home') :
         globals.fs.path.join(directory, 'jre');
     final String javaExecutable = globals.fs.path.join(javaPath, 'bin', 'java');

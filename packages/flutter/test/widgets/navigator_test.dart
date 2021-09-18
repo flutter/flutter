@@ -306,11 +306,11 @@ void main() {
      await tester.pumpWidget(MaterialApp(routes: routes));
      final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('right')), pointer: 23);
      expect(log, isEmpty);
-     await tester.tap(find.text('left'));
+     await tester.tap(find.text('left'), pointer: 1);
      expect(log, equals(<String>['left']));
      await gesture.up();
      expect(log, equals(<String>['left']));
-   }, skip: true); // https://github.com/flutter/flutter/issues/4771
+   });
 
   testWidgets('popAndPushNamed', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{

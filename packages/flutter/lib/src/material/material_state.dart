@@ -191,37 +191,10 @@ class _MaterialStateColor extends MaterialStateColor {
 /// [MaterialStateMouseCursor] and implement the abstract `resolve` method.
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold_center}
-///
 /// This example defines a mouse cursor that resolves to
 /// [SystemMouseCursors.forbidden] when its widget is disabled.
 ///
-/// ```dart imports
-/// import 'package:flutter/rendering.dart';
-/// ```
-///
-/// ```dart preamble
-/// class ListTileCursor extends MaterialStateMouseCursor {
-///   @override
-///   MouseCursor resolve(Set<MaterialState> states) {
-///     if (states.contains(MaterialState.disabled)) {
-///       return SystemMouseCursors.forbidden;
-///     }
-///     return SystemMouseCursors.click;
-///   }
-///   @override
-///   String get debugDescription => 'ListTileCursor()';
-/// }
-/// ```
-///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return ListTile(
-///     title: const Text('Disabled ListTile'),
-///     enabled: false,
-///     mouseCursor: ListTileCursor(),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/material_state/material_state_mouse_cursor.0.dart **
 /// {@end-tool}
 ///
 /// This class should only be used for parameters which are documented to take
@@ -312,32 +285,10 @@ class _EnabledAndDisabledMouseCursor extends MaterialStateMouseCursor {
 /// their support, like [ActionChip.side].
 ///
 /// {@tool dartpad --template=stateful_widget_material}
-///
 /// This example defines a subclass of [MaterialStateBorderSide], that resolves
 /// to a red border side when its widget is selected.
 ///
-/// ```dart
-/// bool isSelected = true;
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return FilterChip(
-///     label: const Text('Select chip'),
-///     selected: isSelected,
-///     onSelected: (bool value) {
-///       setState(() {
-///         isSelected = value;
-///       });
-///     },
-///     side: MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
-///       if (states.contains(MaterialState.selected)) {
-///         return const BorderSide(width: 1, color: Colors.red);
-///       }
-///       return null;  // Defer to default value on the theme or widget.
-///     }),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/material_state/material_state_border_side.0.dart **
 /// {@end-tool}
 ///
 /// This class should only be used for parameters which are documented to take
@@ -415,42 +366,11 @@ class _MaterialStateBorderSide extends MaterialStateBorderSide {
 /// `resolve` method.
 ///
 /// {@tool dartpad --template=stateful_widget_material}
-///
 /// This example defines a subclass of [RoundedRectangleBorder] and an
 /// implementation of [MaterialStateOutlinedBorder], that resolves to
 /// [RoundedRectangleBorder] when its widget is selected.
 ///
-/// ```dart preamble
-/// class SelectedBorder extends RoundedRectangleBorder implements MaterialStateOutlinedBorder {
-///   @override
-///   OutlinedBorder? resolve(Set<MaterialState> states) {
-///     if (states.contains(MaterialState.selected)) {
-///       return const RoundedRectangleBorder();
-///     }
-///     return null;  // Defer to default value on the theme or widget.
-///   }
-/// }
-/// ```
-///
-/// ```dart
-/// bool isSelected = true;
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return Material(
-///     child: FilterChip(
-///       label: const Text('Select chip'),
-///       selected: isSelected,
-///       onSelected: (bool value) {
-///         setState(() {
-///           isSelected = value;
-///         });
-///       },
-///       shape: SelectedBorder(),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/material_state/material_state_outlined_border.0.dart **
 /// {@end-tool}
 ///
 /// This class should only be used for parameters which are documented to take
@@ -490,35 +410,13 @@ abstract class MaterialStateOutlinedBorder extends OutlinedBorder implements Mat
 /// material state properties when their value is needed.
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold_center}
-///
 /// This example shows how you can override the default text and icon
 /// color (the "foreground color") of a [TextButton] with a
 /// [MaterialStateProperty]. In this example, the button's text color
 /// will be `Colors.blue` when the button is being pressed, hovered,
 /// or focused. Otherwise, the text color will be `Colors.red`.
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   Color getColor(Set<MaterialState> states) {
-///     const Set<MaterialState> interactiveStates = <MaterialState>{
-///       MaterialState.pressed,
-///       MaterialState.hovered,
-///       MaterialState.focused,
-///     };
-///     if (states.any(interactiveStates.contains)) {
-///       return Colors.blue;
-///     }
-///     return Colors.red;
-///   }
-///   return TextButton(
-///     style: ButtonStyle(
-///       foregroundColor: MaterialStateProperty.resolveWith(getColor),
-///     ),
-///     onPressed: () {},
-///     child: const Text('TextButton'),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/material_state/material_state_property.0.dart **
 /// {@end-tool}
 ///
 /// See also:

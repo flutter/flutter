@@ -333,8 +333,7 @@ void main() {
     testWidgets('Does not snap away from initial child on build', (WidgetTester tester) async {
       const Key containerKey = ValueKey<String>('container');
       const Key stackKey = ValueKey<String>('stack');
-      await tester.pumpWidget(_boilerplate(
-        null,
+      await tester.pumpWidget(_boilerplate(null,
         snap: true,
         initialChildSize: .7,
         containerKey: containerKey,
@@ -345,16 +344,15 @@ void main() {
 
       // The sheet should not have snapped.
       expect(
-        tester.getSize(find.byKey(containerKey)).height / screenHeight,
-        closeTo(.7, precisionErrorTolerance,
-      ));
+          tester.getSize(find.byKey(containerKey)).height / screenHeight,
+          closeTo(.7, precisionErrorTolerance,
+          ));
     }, variant: TargetPlatformVariant.all());
 
     testWidgets('Does not snap away from initial child on reset', (WidgetTester tester) async {
       const Key containerKey = ValueKey<String>('container');
       const Key stackKey = ValueKey<String>('stack');
-      await tester.pumpWidget(_boilerplate(
-        null,
+      await tester.pumpWidget(_boilerplate(null,
         snap: true,
         containerKey: containerKey,
         stackKey: stackKey,
@@ -382,8 +380,7 @@ void main() {
     testWidgets('Zero velocity drag snaps to nearest snap target', (WidgetTester tester) async {
       const Key stackKey = ValueKey<String>('stack');
       const Key containerKey = ValueKey<String>('container');
-      await tester.pumpWidget(_boilerplate(
-        null,
+      await tester.pumpWidget(_boilerplate(null,
         snap: true,
         stackKey: stackKey,
         containerKey: containerKey,
@@ -437,37 +434,35 @@ void main() {
       testWidgets('Setting snapSizes to $snapSizes resolves to min and max', (WidgetTester tester) async {
         const Key stackKey = ValueKey<String>('stack');
         const Key containerKey = ValueKey<String>('container');
-          await tester.pumpWidget(_boilerplate(
-            null,
-            snap: true,
-            stackKey: stackKey,
-            containerKey: containerKey,
-            snapSizes: snapSizes,
-          ));
-          await tester.pumpAndSettle();
-          final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
+        await tester.pumpWidget(_boilerplate(null,
+          snap: true,
+          stackKey: stackKey,
+          containerKey: containerKey,
+          snapSizes: snapSizes,
+        ));
+        await tester.pumpAndSettle();
+        final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
 
-          await tester.drag(find.text('Item 1'), Offset(0, -.4 * screenHeight));
-          await tester.pumpAndSettle();
-          expect(
+        await tester.drag(find.text('Item 1'), Offset(0, -.4 * screenHeight));
+        await tester.pumpAndSettle();
+        expect(
             tester.getSize(find.byKey(containerKey)).height / screenHeight,
             closeTo(1.0, precisionErrorTolerance,
-          ));
+            ));
 
-          await tester.drag(find.text('Item 1'), Offset(0, .7 * screenHeight));
-          await tester.pumpAndSettle();
-          expect(
-            tester.getSize(find.byKey(containerKey)).height / screenHeight,
-            closeTo(.25, precisionErrorTolerance),
-          );
+        await tester.drag(find.text('Item 1'), Offset(0, .7 * screenHeight));
+        await tester.pumpAndSettle();
+        expect(
+          tester.getSize(find.byKey(containerKey)).height / screenHeight,
+          closeTo(.25, precisionErrorTolerance),
+        );
       }, variant: TargetPlatformVariant.all());
     }
 
     testWidgets('Min and max are implicitly added to snapSizes.', (WidgetTester tester) async {
       const Key stackKey = ValueKey<String>('stack');
       const Key containerKey = ValueKey<String>('container');
-      await tester.pumpWidget(_boilerplate(
-        null,
+      await tester.pumpWidget(_boilerplate(null,
         snap: true,
         stackKey: stackKey,
         containerKey: containerKey,
@@ -489,35 +484,6 @@ void main() {
         tester.getSize(find.byKey(containerKey)).height / screenHeight,
         closeTo(.25, precisionErrorTolerance),
       );
-    }, variant: TargetPlatformVariant.all());
-
-    testWidgets('Fling snaps in direction of momentum', (WidgetTester tester) async {
-      const Key stackKey = ValueKey<String>('stack');
-      const Key containerKey = ValueKey<String>('container');
-      await tester.pumpWidget(_boilerplate(
-        null,
-        snap: true,
-        stackKey: stackKey,
-        containerKey: containerKey,
-        snapSizes: <double>[.5, .75],
-      ));
-      await tester.pumpAndSettle();
-      final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
-
-      await tester.fling(find.text('Item 1'), Offset(0, -.1 * screenHeight), 1000);
-      await tester.pumpAndSettle();
-      expect(
-        tester.getSize(find.byKey(containerKey)).height / screenHeight,
-        closeTo(.75, precisionErrorTolerance),
-      );
-
-      await tester.fling(find.text('Item 1'), Offset(0, .3 * screenHeight), 1000);
-      await tester.pumpAndSettle();
-      expect(
-        tester.getSize(find.byKey(containerKey)).height / screenHeight,
-        closeTo(.25, precisionErrorTolerance),
-      );
-
     }, variant: TargetPlatformVariant.all());
 
     testWidgets('Changes to widget parameters are propagated', (WidgetTester tester) async {
@@ -605,9 +571,9 @@ void main() {
       expect(tester.takeException(), isAssertionError);
 
       await tester.pumpWidget(_boilerplate(
-        null,
-        snap: true,
-        snapSizes: <double>[.7]
+          null,
+          snap: true,
+          snapSizes: <double>[.7]
       ));
       await tester.pumpAndSettle();
 
@@ -620,10 +586,10 @@ void main() {
       expect(tester.takeException(), isAssertionError);
 
       await tester.pumpWidget(_boilerplate(
-          null,
-          snap: true,
-          snapSizes: <double>[.7],
-          maxChildSize: .8,
+        null,
+        snap: true,
+        snapSizes: <double>[.7],
+        maxChildSize: .8,
       ));
       await tester.pumpAndSettle();
 
@@ -633,6 +599,34 @@ void main() {
         snapSizes: <double>[.7, .9],
       ));
       expect(tester.takeException(), isAssertionError);
+    }, variant: TargetPlatformVariant.all());
+
+    testWidgets('Fling snaps in direction of momentum', (WidgetTester tester) async {
+      const Key stackKey = ValueKey<String>('stack');
+      const Key containerKey = ValueKey<String>('container');
+      await tester.pumpWidget(_boilerplate(null,
+        snap: true,
+        stackKey: stackKey,
+        containerKey: containerKey,
+        snapSizes: <double>[.5, .75],
+      ));
+      await tester.pumpAndSettle();
+      final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
+
+      await tester.fling(find.text('Item 1'), Offset(0, -.1 * screenHeight), 1000);
+      await tester.pumpAndSettle();
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(.75, precisionErrorTolerance),
+      );
+
+      await tester.fling(find.text('Item 1'), Offset(0, .3 * screenHeight), 1000);
+      await tester.pumpAndSettle();
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(.25, precisionErrorTolerance),
+      );
+
     }, variant: TargetPlatformVariant.all());
 
     testWidgets('ScrollNotification correctly dispatched when flung without covering its container', (WidgetTester tester) async {
@@ -677,6 +671,24 @@ void main() {
         UserScrollNotification,
       ];
       expect(notificationTypes, types);
+    });
+
+    testWidgets('Do not crash when remove the tree during animation.', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/89214
+      await tester.pumpWidget(_boilerplate(
+        null,
+        onScrollNotification: (ScrollNotification notification) {
+          return false;
+        },
+      ));
+
+      await tester.flingFrom(const Offset(0, 325), const Offset(0, 325), 200);
+
+      // The animation is running.
+
+      await tester.pumpWidget(const SizedBox.shrink());
+
+      expect(tester.takeException(), isNull);
     });
   }
 }

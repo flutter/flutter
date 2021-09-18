@@ -418,172 +418,6 @@ void main() {
     });
   });
 
-  group('PhysicalModelLayer checks elevations', () {
-    /// Adds the layers to a container where A paints before B.
-    ///
-    /// Expects there to be `expectedErrorCount` errors.  Checking elevations is
-    /// enabled by default.
-    void _testConflicts(
-      PhysicalModelLayer layerA,
-      PhysicalModelLayer layerB, {
-      required int expectedErrorCount,
-      bool enableCheck = true,
-    }) {
-      assert(expectedErrorCount != null);
-      assert(enableCheck || expectedErrorCount == 0, 'Cannot disable check and expect non-zero error count.');
-      final OffsetLayer container = OffsetLayer();
-      container.append(layerA);
-      container.append(layerB);
-      debugCheckElevationsEnabled = enableCheck;
-      debugDisableShadows = false;
-      int errors = 0;
-      if (enableCheck) {
-        FlutterError.onError = (FlutterErrorDetails details) {
-          errors++;
-        };
-      }
-      container.buildScene(SceneBuilder());
-      expect(errors, expectedErrorCount);
-      debugCheckElevationsEnabled = false;
-    }
-
-    // Tests:
-    //
-    //  ─────────────                    (LayerA, paints first)
-    //      │     ─────────────          (LayerB, paints second)
-    //      │          │
-    // ───────────────────────────
-    test('Overlapping layers at wrong elevation', () {
-      final PhysicalModelLayer layerA = PhysicalModelLayer(
-        clipPath: Path()..addRect(const Rect.fromLTWH(0, 0, 20, 20)),
-        elevation: 3.0,
-        color: const Color(0x00000000),
-        shadowColor: const Color(0x00000000),
-      );
-      final PhysicalModelLayer layerB =PhysicalModelLayer(
-        clipPath: Path()..addRect(const Rect.fromLTWH(10, 10, 20, 20)),
-        elevation: 2.0,
-        color: const Color(0x00000000),
-        shadowColor: const Color(0x00000000),
-      );
-      _testConflicts(layerA, layerB, expectedErrorCount: 1);
-    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44572
-
-    // Tests:
-    //
-    //  ─────────────                    (LayerA, paints first)
-    //      │     ─────────────          (LayerB, paints second)
-    //      │         │
-    // ───────────────────────────
-    //
-    // Causes no error if check is disabled.
-    test('Overlapping layers at wrong elevation, check disabled', () {
-      final PhysicalModelLayer layerA = PhysicalModelLayer(
-        clipPath: Path()..addRect(const Rect.fromLTWH(0, 0, 20, 20)),
-        elevation: 3.0,
-        color: const Color(0x00000000),
-        shadowColor: const Color(0x00000000),
-      );
-      final PhysicalModelLayer layerB =PhysicalModelLayer(
-        clipPath: Path()..addRect(const Rect.fromLTWH(10, 10, 20, 20)),
-        elevation: 2.0,
-        color: const Color(0x00000000),
-        shadowColor: const Color(0x00000000),
-      );
-      _testConflicts(layerA, layerB, expectedErrorCount: 0, enableCheck: false);
-    });
-
-    // Tests:
-    //
-    //   ──────────                      (LayerA, paints first)
-    //        │       ───────────        (LayerB, paints second)
-    //        │            │
-    // ────────────────────────────
-    test('Non-overlapping layers at wrong elevation', () {
-      final PhysicalModelLayer layerA = PhysicalModelLayer(
-        clipPath: Path()..addRect(const Rect.fromLTWH(0, 0, 20, 20)),
-        elevation: 3.0,
-        color: const Color(0x00000000),
-        shadowColor: const Color(0x00000000),
-      );
-      final PhysicalModelLayer layerB =PhysicalModelLayer(
-        clipPath: Path()..addRect(const Rect.fromLTWH(20, 20, 20, 20)),
-        elevation: 2.0,
-        color: const Color(0x00000000),
-        shadowColor: const Color(0x00000000),
-      );
-      _testConflicts(layerA, layerB, expectedErrorCount: 0);
-    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44572
-
-    // Tests:
-    //
-    //     ───────                       (Child of A, paints second)
-    //        │
-    //   ───────────                     (LayerA, paints first)
-    //        │       ────────────       (LayerB, paints third)
-    //        │             │
-    // ────────────────────────────
-    test('Non-overlapping layers at wrong elevation, child at lower elevation', () {
-      final PhysicalModelLayer layerA = PhysicalModelLayer(
-        clipPath: Path()..addRect(const Rect.fromLTWH(0, 0, 20, 20)),
-        elevation: 3.0,
-        color: const Color(0x00000000),
-        shadowColor: const Color(0x00000000),
-      );
-
-      layerA.append(PhysicalModelLayer(
-        clipPath: Path()..addRect(const Rect.fromLTWH(2, 2, 10, 10)),
-        elevation: 1.0,
-        color: const Color(0x00000000),
-        shadowColor: const Color(0x00000000),
-      ));
-
-      final PhysicalModelLayer layerB =PhysicalModelLayer(
-        clipPath: Path()..addRect(const Rect.fromLTWH(20, 20, 20, 20)),
-        elevation: 2.0,
-        color: const Color(0x00000000),
-        shadowColor: const Color(0x00000000),
-      );
-      _testConflicts(layerA, layerB, expectedErrorCount: 0);
-    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44572
-
-    // Tests:
-    //
-    //        ───────────                (Child of A, paints second, overflows)
-    //           │    ────────────       (LayerB, paints third)
-    //   ───────────       │             (LayerA, paints first)
-    //         │           │
-    //         │           │
-    // ────────────────────────────
-    //
-    // Which fails because the overflowing child overlaps something that paints
-    // after it at a lower elevation.
-    test('Child overflows parent and overlaps another physical layer', () {
-      final PhysicalModelLayer layerA = PhysicalModelLayer(
-        clipPath: Path()..addRect(const Rect.fromLTWH(0, 0, 20, 20)),
-        elevation: 3.0,
-        color: const Color(0x00000000),
-        shadowColor: const Color(0x00000000),
-      );
-
-      layerA.append(PhysicalModelLayer(
-        clipPath: Path()..addRect(const Rect.fromLTWH(15, 15, 25, 25)),
-        elevation: 2.0,
-        color: const Color(0x00000000),
-        shadowColor: const Color(0x00000000),
-      ));
-
-      final PhysicalModelLayer layerB =PhysicalModelLayer(
-        clipPath: Path()..addRect(const Rect.fromLTWH(20, 20, 20, 20)),
-        elevation: 4.0,
-        color: const Color(0x00000000),
-        shadowColor: const Color(0x00000000),
-      );
-
-      _testConflicts(layerA, layerB, expectedErrorCount: 1);
-    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44572
-  });
-
   test('ContainerLayer.toImage can render interior layer', () {
     final OffsetLayer parent = OffsetLayer();
     final OffsetLayer child = OffsetLayer();
@@ -600,7 +434,7 @@ void main() {
     // Ensure we can render the same scene again after rendering an interior
     // layer.
     parent.buildScene(SceneBuilder());
-  }, skip: isBrowser); // TODO(yjbanov): `toImage` doesn't work on the Web: https://github.com/flutter/flutter/issues/42767
+  }, skip: isBrowser); // TODO(yjbanov): `toImage` doesn't work on the Web: https://github.com/flutter/flutter/issues/49857
 
   test('PictureLayer does not let you call dispose unless refcount is 0', () {
     PictureLayer layer = PictureLayer(Rect.zero);
@@ -703,6 +537,53 @@ void main() {
 
     expect(() => holder.layer = layer, throwsAssertionError);
   });
+
+  test('OpacityLayer does not push an OffsetLayer if there are no children', () {
+    final OpacityLayer layer = OpacityLayer(alpha: 128);
+    final FakeSceneBuilder builder = FakeSceneBuilder();
+    layer.addToScene(builder);
+    expect(builder.pushedOpacity, false);
+    expect(builder.pushedOffset, false);
+    expect(builder.addedPicture, false);
+    expect(layer.engineLayer, null);
+
+    layer.append(PictureLayer(Rect.largest)..picture = FakePicture());
+
+    builder.reset();
+    layer.addToScene(builder);
+
+    expect(builder.pushedOpacity, true);
+    expect(builder.pushedOffset, false);
+    expect(builder.addedPicture, true);
+    expect(layer.engineLayer, isA<FakeOpacityEngineLayer>());
+
+    builder.reset();
+
+    layer.alpha = 200;
+    expect(layer.engineLayer, isA<FakeOpacityEngineLayer>());
+
+    layer.alpha = 255;
+    expect(layer.engineLayer, null);
+
+    builder.reset();
+    layer.addToScene(builder);
+
+    expect(builder.pushedOpacity, false);
+    expect(builder.pushedOffset, true);
+    expect(builder.addedPicture, true);
+    expect(layer.engineLayer, isA<FakeOffsetEngineLayer>());
+
+    layer.alpha = 200;
+    expect(layer.engineLayer, null);
+
+    builder.reset();
+    layer.addToScene(builder);
+
+    expect(builder.pushedOpacity, true);
+    expect(builder.pushedOffset, false);
+    expect(builder.addedPicture, true);
+    expect(layer.engineLayer, isA<FakeOpacityEngineLayer>());
+  });
 }
 
 class FakeEngineLayer extends Fake implements EngineLayer {
@@ -734,3 +615,38 @@ class _TestAlwaysNeedsAddToSceneLayer extends ContainerLayer {
   @override
   bool get alwaysNeedsAddToScene => true;
 }
+
+class FakeSceneBuilder extends Fake implements SceneBuilder {
+  void reset() {
+    pushedOpacity = false;
+    pushedOffset = false;
+    addedPicture = false;
+  }
+
+  bool pushedOpacity = false;
+  @override
+  OpacityEngineLayer pushOpacity(int alpha, {Offset? offset = Offset.zero, OpacityEngineLayer? oldLayer}) {
+    pushedOpacity = true;
+    return FakeOpacityEngineLayer();
+  }
+
+  bool pushedOffset = false;
+  @override
+  OffsetEngineLayer pushOffset(double x, double y, {OffsetEngineLayer? oldLayer}) {
+    pushedOffset = true;
+    return FakeOffsetEngineLayer();
+  }
+
+  bool addedPicture = false;
+  @override
+  void addPicture(Offset offset, Picture picture, {bool isComplexHint = false, bool willChangeHint = false}) {
+    addedPicture = true;
+  }
+
+  @override
+  void pop() {}
+}
+
+class FakeOpacityEngineLayer extends FakeEngineLayer implements OpacityEngineLayer {}
+
+class FakeOffsetEngineLayer extends FakeEngineLayer implements OffsetEngineLayer {}

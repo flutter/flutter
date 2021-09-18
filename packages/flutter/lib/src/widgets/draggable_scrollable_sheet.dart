@@ -572,6 +572,13 @@ class _DraggableScrollableSheetScrollPosition
   bool get _shouldSnap => extent.snap && extent.hasChanged && !_isAtSnapSize;
 
   @override
+  void dispose() {
+    // Stop the animation before dispose.
+    _ballisticCancelCallback?.call();
+    super.dispose();
+  }
+
+  @override
   void goBallistic(double velocity) {
     if ((velocity == 0.0 && !_shouldSnap) ||
         (velocity < 0.0 && listShouldScroll) ||

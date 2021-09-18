@@ -282,14 +282,14 @@ void main() {
             contains('The binary $binPath was not codesigned!'),
           )),
         );
-      }, skip: !platform.isMacOS);
+      }, skip: !platform.isMacOS); // [intended] codesign is only available on macOS
     });
 
     group('ArchivePublisher for $platformName', () {
       late FakeProcessManager processManager;
       late Directory tempDir;
       final String gsutilCall = platform.isWindows
-          ? 'python ${path.join("D:", "depot_tools", "gsutil.py")}'
+          ? 'python3 ${path.join("D:", "depot_tools", "gsutil.py")}'
           : 'gsutil.py';
       final String releasesName = 'releases_$platformName.json';
       final String archiveName = platform.isLinux ? 'archive.tar.xz' : 'archive.zip';

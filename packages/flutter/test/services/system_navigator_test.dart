@@ -43,11 +43,15 @@ void main() {
     ]);
 
     await verify(() => SystemNavigator.routeInformationUpdated(location: 'a'), <Object>[
-      isMethodCall('routeInformationUpdated', arguments: <String, dynamic>{ 'location': 'a', 'state': null }),
+      isMethodCall('routeInformationUpdated', arguments: <String, dynamic>{ 'location': 'a', 'state': null, 'replace': false }),
     ]);
 
     await verify(() => SystemNavigator.routeInformationUpdated(location: 'a', state: true), <Object>[
-      isMethodCall('routeInformationUpdated', arguments: <String, dynamic>{ 'location': 'a', 'state': true }),
+      isMethodCall('routeInformationUpdated', arguments: <String, dynamic>{ 'location': 'a', 'state': true, 'replace': false }),
+    ]);
+
+    await verify(() => SystemNavigator.routeInformationUpdated(location: 'a', state: true, replace: true), <Object>[
+      isMethodCall('routeInformationUpdated', arguments: <String, dynamic>{ 'location': 'a', 'state': true, 'replace': true }),
     ]);
 
     await verify(() => SystemNavigator.routeUpdated(routeName: 'a', previousRouteName: 'b'), <Object>[

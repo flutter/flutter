@@ -26,7 +26,7 @@ import '../src/context.dart';
 import '../src/fakes.dart';
 
 void main() {
-  // TODO(jonahwilliams): remove once FlutterProject is fully refactored.
+  // TODO(zanderso): remove once FlutterProject is fully refactored.
   // this is safe since no tests have expectations on the test logger.
   final BufferLogger logger = BufferLogger.test();
 

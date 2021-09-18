@@ -118,14 +118,25 @@ Future<void> main(List<String> arguments) async {
     'dartdoc',
   ];
 
-  // Verify which version of dartdoc we're using.
-  final ProcessResult result = Process.runSync(
+  // Verify which version of snippets and dartdoc we're using.
+  final ProcessResult snippetsResult = Process.runSync(
     pubExecutable,
-    <String>[...dartdocBaseArgs, '--version'],
+    <String>[
+      'global',
+      'list',
+    ],
     workingDirectory: kDocsRoot,
     environment: pubEnvironment,
+    stdoutEncoding: utf8,
   );
-  print('\n${result.stdout}flutter version: $version\n');
+  print('');
+  final Iterable<RegExpMatch> versionMatches = RegExp(r'^(?<name>snippets|dartdoc) (?<version>[^\s]+)', multiLine: true)
+      .allMatches(snippetsResult.stdout as String);
+  for (final RegExpMatch match in versionMatches) {
+    print('${match.namedGroup('name')} version: ${match.namedGroup('version')}');
+  }
+
+  print('flutter version: $version\n');
 
   // Dartdoc warnings and errors in these packages are considered fatal.
   // All packages owned by flutter should be in the list.
