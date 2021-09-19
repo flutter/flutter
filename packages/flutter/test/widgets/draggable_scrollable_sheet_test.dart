@@ -346,7 +346,7 @@ void main() {
       expect(
           tester.getSize(find.byKey(containerKey)).height / screenHeight,
           closeTo(.7, precisionErrorTolerance,
-          ));
+      ));
     }, variant: TargetPlatformVariant.all());
 
     testWidgets('Does not snap away from initial child on reset', (WidgetTester tester) async {
@@ -459,7 +459,7 @@ void main() {
       }, variant: TargetPlatformVariant.all());
     }
 
-    testWidgets('Min and max are implicitly added to snapSizes.', (WidgetTester tester) async {
+    testWidgets('Min and max are implicitly added to snapSizes', (WidgetTester tester) async {
       const Key stackKey = ValueKey<String>('stack');
       const Key containerKey = ValueKey<String>('container');
       await tester.pumpWidget(_boilerplate(null,
@@ -496,12 +496,24 @@ void main() {
       ));
       await tester.pumpAndSettle();
       final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
-
-      await tester.drag(find.text('Item 1'), Offset(0, -.4 * screenHeight));
-      await tester.pumpAndSettle();
       expect(
         tester.getSize(find.byKey(containerKey)).height / screenHeight,
-        closeTo(1.0, precisionErrorTolerance),
+        closeTo(.5, precisionErrorTolerance),
+      );
+
+      // Pump the same widget but with a new initial child size.
+      await tester.pumpWidget(_boilerplate(
+        null,
+        stackKey: stackKey,
+        containerKey: containerKey,
+        initialChildSize: .6,
+      ));
+      await tester.pumpAndSettle();
+
+      // We jump to the new initial size because the sheet hasn't changed yet.
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(.6, precisionErrorTolerance),
       );
 
       // Pump the same widget but with a new max child size.
@@ -509,16 +521,42 @@ void main() {
         null,
         stackKey: stackKey,
         containerKey: containerKey,
+        initialChildSize: .6,
+        maxChildSize: .9
+      ));
+      await tester.pumpAndSettle();
+
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(.6, precisionErrorTolerance),
+      );
+
+      await tester.drag(find.text('Item 1'), Offset(0, -.6 * screenHeight));
+      await tester.pumpAndSettle();
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(.9, precisionErrorTolerance),
+      );
+
+      // Pump the same widget but with a new max child size and initial size.
+      await tester.pumpWidget(_boilerplate(
+        null,
+        stackKey: stackKey,
+        containerKey: containerKey,
         maxChildSize: .8,
+        initialChildSize: .7,
       ));
       await tester.pumpAndSettle();
 
       // The max child size has been reduced, we should be rebuilt at the new
-      // max of .8.
+      // max of .8. We changed the initial size again, but the sheet has already
+      // been changed so the new initial is ignored.
       expect(
         tester.getSize(find.byKey(containerKey)).height / screenHeight,
         closeTo(.8, precisionErrorTolerance),
       );
+
+      await tester.drag(find.text('Item 1'), Offset(0, .2 * screenHeight));
 
       // Pump the same widget but with snapping enabled.
       await tester.pumpWidget(_boilerplate(
@@ -531,13 +569,13 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      await tester.drag(find.text('Item 1'), Offset(0, .2 * screenHeight));
-      await tester.pumpAndSettle();
-
+      // Sheet snaps immediately on a change to snap.
       expect(
         tester.getSize(find.byKey(containerKey)).height / screenHeight,
         closeTo(.5, precisionErrorTolerance),
       );
+
+      final List<double> snapSizes = <double>[.6];
 
       // Change the snap sizes.
       await tester.pumpWidget(_boilerplate(
@@ -546,7 +584,7 @@ void main() {
         stackKey: stackKey,
         containerKey: containerKey,
         maxChildSize: .8,
-        snapSizes: <double>[.6],
+        snapSizes: snapSizes,
       ));
       await tester.pumpAndSettle();
 
@@ -554,51 +592,6 @@ void main() {
         tester.getSize(find.byKey(containerKey)).height / screenHeight,
         closeTo(.6, precisionErrorTolerance),
       );
-    }, variant: TargetPlatformVariant.all());
-
-    testWidgets('Asserts throw on new invalid widget parameters', (WidgetTester tester) async {
-      await tester.pumpWidget(_boilerplate(
-        null,
-        initialChildSize: .7,
-      ));
-      await tester.pumpAndSettle();
-
-      await tester.pumpWidget(_boilerplate(
-        null,
-        initialChildSize: .7,
-        maxChildSize: .6,
-      ));
-      expect(tester.takeException(), isAssertionError);
-
-      await tester.pumpWidget(_boilerplate(
-          null,
-          snap: true,
-          snapSizes: <double>[.7]
-      ));
-      await tester.pumpAndSettle();
-
-      await tester.pumpWidget(_boilerplate(
-        null,
-        snap: true,
-        snapSizes: <double>[.7],
-        maxChildSize: .6,
-      ));
-      expect(tester.takeException(), isAssertionError);
-
-      await tester.pumpWidget(_boilerplate(
-        null,
-        snap: true,
-        snapSizes: <double>[.7],
-        maxChildSize: .8,
-      ));
-      await tester.pumpAndSettle();
-
-      await tester.pumpWidget(_boilerplate(
-        null,
-        snap: true,
-        snapSizes: <double>[.7, .9],
-      ));
-      expect(tester.takeException(), isAssertionError);
     }, variant: TargetPlatformVariant.all());
 
     testWidgets('Fling snaps in direction of momentum', (WidgetTester tester) async {
