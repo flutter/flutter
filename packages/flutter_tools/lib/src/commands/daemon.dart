@@ -51,7 +51,7 @@ class DaemonCommand extends FlutterCommand {
 
   @override
   final String category = FlutterCommandCategories.tools;
-  
+
   @override
   final bool hidden;
 
