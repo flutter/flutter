@@ -497,8 +497,8 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
       initialExtent: widget.initialChildSize,
       onExtentChanged: _setExtent,
     );
-    // Modify the existing scroll controller instead of replacing it so that we
-    // retain a valid reference to `position`.
+    // Modify the existing scroll controller instead of replacing it so that
+    // developers listening to the controller do not have to rebuild their listeners.
     _scrollController.extent = _extent;
     if (widget.snap) {
       // Trigger a snap in case snap or snapSizes has changed. We put this in a

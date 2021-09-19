@@ -18,6 +18,7 @@ void main() {
     Key? containerKey,
     Key? stackKey,
     NotificationListenerCallback<ScrollNotification>? onScrollNotification,
+    bool ignoreController = false,
   }) {
     return Directionality(
       textDirection: TextDirection.ltr,
@@ -44,7 +45,7 @@ void main() {
                       key: containerKey,
                       color: const Color(0xFFABCDEF),
                       child: ListView.builder(
-                        controller: scrollController,
+                        controller: ignoreController ? null : scrollController,
                         itemExtent: itemExtent,
                         itemCount: itemCount,
                         itemBuilder: (BuildContext context, int index) => Text('Item $index'),
@@ -620,6 +621,21 @@ void main() {
         closeTo(.25, precisionErrorTolerance),
       );
 
+    }, variant: TargetPlatformVariant.all());
+
+    testWidgets("Changing parameters with an un-listened controller doesn't throw", (WidgetTester tester) async {
+      await tester.pumpWidget(_boilerplate(
+        null,
+        snap: true,
+        // Will prevent the sheet's child from listening to the controller.
+        ignoreController: true,
+      ));
+      await tester.pumpAndSettle();
+      await tester.pumpWidget(_boilerplate(
+        null,
+        snap: true,
+      ));
+      await tester.pumpAndSettle();
     }, variant: TargetPlatformVariant.all());
 
     testWidgets('ScrollNotification correctly dispatched when flung without covering its container', (WidgetTester tester) async {
