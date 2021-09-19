@@ -600,14 +600,14 @@ class _DraggableScrollableSheetScrollPosition
     ScrollPosition? oldPosition,
     String? debugLabel,
     required this.controller,
-  }) : super(
-         physics: physics,
-         context: context,
-         initialPixels: initialPixels,
-         keepScrollOffset: keepScrollOffset,
-         oldPosition: oldPosition,
-         debugLabel: debugLabel,
-       );
+  })  : super(
+          physics: physics,
+          context: context,
+          initialPixels: initialPixels,
+          keepScrollOffset: keepScrollOffset,
+          oldPosition: oldPosition,
+          debugLabel: debugLabel,
+        );
 
   VoidCallback? _dragCancelCallback;
   VoidCallback? _ballisticCancelCallback;
