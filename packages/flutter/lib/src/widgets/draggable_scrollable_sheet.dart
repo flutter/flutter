@@ -440,30 +440,6 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
     _replaceExtent();
   }
 
-  void _replaceExtent() {
-    _extent.dispose();
-    _extent = _extent.copyWith(
-      minExtent: widget.minChildSize,
-      maxExtent: widget.maxChildSize,
-      snap: widget.snap,
-      snapSizes: _impliedSnapSizes(),
-      initialExtent: widget.initialChildSize,
-      onExtentChanged: _setExtent,
-    );
-    // Modify the existing scroll controller instead of replacing it so that we
-    // retain a valid reference to `position`.
-    _scrollController.extent = _extent;
-    if (widget.snap) {
-      // Trigger a snap in case snap or snapSizes has changed. We put this in a
-      // post frame callback so that `build` can update `_extent.availablePixels`
-      // before this runs-we can't use the previous extent's available pixels as
-      // it may have changed when the widget was updated.
-      WidgetsBinding.instance!.addPostFrameCallback((Duration timeStamp) {
-        _scrollController.position.goBallistic(0);
-      });
-    }
-  }
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -509,6 +485,30 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
     _scrollController.dispose();
     _extent.dispose();
     super.dispose();
+  }
+
+  void _replaceExtent() {
+    _extent.dispose();
+    _extent = _extent.copyWith(
+      minExtent: widget.minChildSize,
+      maxExtent: widget.maxChildSize,
+      snap: widget.snap,
+      snapSizes: _impliedSnapSizes(),
+      initialExtent: widget.initialChildSize,
+      onExtentChanged: _setExtent,
+    );
+    // Modify the existing scroll controller instead of replacing it so that we
+    // retain a valid reference to `position`.
+    _scrollController.extent = _extent;
+    if (widget.snap) {
+      // Trigger a snap in case snap or snapSizes has changed. We put this in a
+      // post frame callback so that `build` can update `_extent.availablePixels`
+      // before this runs-we can't use the previous extent's available pixels as
+      // it may have changed when the widget was updated.
+      WidgetsBinding.instance!.addPostFrameCallback((Duration timeStamp) {
+        _scrollController.position.goBallistic(0);
+      });
+    }
   }
 
   String _snapSizeErrorMessage(int invalidIndex) {
