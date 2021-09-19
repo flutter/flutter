@@ -7,8 +7,8 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 
-import '../../widgets.dart';
 import 'basic.dart';
+import 'binding.dart';
 import 'framework.dart';
 import 'inherited_notifier.dart';
 import 'layout_builder.dart';
