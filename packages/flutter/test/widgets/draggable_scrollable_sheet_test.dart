@@ -342,8 +342,8 @@ void main() {
 
     // The sheet should not have snapped.
     expect(
-        tester.getSize(find.byKey(containerKey)).height / screenHeight,
-        closeTo(.7, precisionErrorTolerance,
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(.7, precisionErrorTolerance,
     ));
   }, variant: TargetPlatformVariant.all());
 
