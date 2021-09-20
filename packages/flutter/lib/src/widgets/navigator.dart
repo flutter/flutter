@@ -214,7 +214,7 @@ abstract class Route<T> {
   @mustCallSuper
   TickerFuture didPush() {
     return TickerFuture.complete()..then<void>((void _) {
-      if (navigator?.widget?.takeFocus == true) {
+      if (navigator?.widget.requestFocus == true) {
         navigator!.focusScopeNode.requestFocus();
       }
     });
@@ -230,7 +230,7 @@ abstract class Route<T> {
   @protected
   @mustCallSuper
   void didAdd() {
-    if (navigator != null && navigator!.widget.takeFocus) {
+    if (navigator != null && navigator!.widget.requestFocus) {
       // This TickerFuture serves two purposes. First, we want to make sure
       // that animations triggered by other operations will finish before focusing the
       // navigator. Second, navigator.focusScopeNode might acquire more focused
@@ -1313,7 +1313,7 @@ class Navigator extends StatefulWidget {
     this.transitionDelegate = const DefaultTransitionDelegate<dynamic>(),
     this.reportsRouteUpdateToEngine = false,
     this.observers = const <NavigatorObserver>[],
-    this.takeFocus = true,
+    this.requestFocus = true,
     this.restorationScopeId,
   }) : assert(pages != null),
        assert(onGenerateInitialRoutes != null),
@@ -1482,7 +1482,7 @@ class Navigator extends StatefulWidget {
   /// when the new route is pushed onto the navigator.
   ///
   /// Defaults to true.
-  final bool takeFocus;
+  final bool requestFocus;
 
   /// Push a named route onto the navigator that most tightly encloses the given
   /// context.

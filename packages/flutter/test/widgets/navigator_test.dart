@@ -3595,7 +3595,7 @@ void main() {
     expect(observer.navigator, tester.state<NavigatorState>(find.byType(Navigator)));
   });
 
-  testWidgets('Navigator takes focus if takeFocus is true', (WidgetTester tester) async {
+  testWidgets('Navigator requests focus if requestFocus is true', (WidgetTester tester) async {
     final GlobalKey navigatorKey = GlobalKey();
     final GlobalKey innerKey = GlobalKey();
     final Map<String, Widget> routes = <String, Widget>{
@@ -3626,7 +3626,7 @@ void main() {
         ),
       ],
     ));
-    expect(navigator.widget.takeFocus, true);
+    expect(navigator.widget.requestFocus, true);
     expect(find.text('A'), findsOneWidget);
     expect(find.text('B', skipOffstage: false), findsNothing);
     expect(focusNode.hasFocus, false);
@@ -3670,7 +3670,7 @@ void main() {
     expect(focusNode.hasFocus, true);
   });
 
-  testWidgets('Navigator does not take focus if takeFocus is false',
+  testWidgets('Navigator does not request focus if requestFocus is false',
           (WidgetTester tester) async {
         final GlobalKey navigatorKey = GlobalKey();
         final GlobalKey innerKey = GlobalKey();
@@ -3698,7 +3698,7 @@ void main() {
                       },
                     );
                   },
-                  takeFocus: false,
+                  requestFocus: false,
                 ),
               ),
             ),
