@@ -153,6 +153,30 @@ class PathPointsMatcher extends Matcher {
   }
 }
 
+// Simple controller that builds a WidgetSpan with 100 height.
+class OverflowWidgetTextEditingController extends TextEditingController {
+  @override
+  TextSpan buildTextSpan({
+    required BuildContext context,
+    TextStyle? style,
+    required bool withComposing,
+  }) {
+    return TextSpan(
+      style: style,
+      children: <InlineSpan>[
+        TextSpan(text: 'Hi'),
+        WidgetSpan(
+          alignment: PlaceholderAlignment.bottom,
+          child: Container(
+            color: Colors.redAccent,
+            height: 100,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -4818,5 +4842,38 @@ void main() {
 
     final EditableText rtlWidget = tester.widget(find.byType(EditableText));
     expect(rtlWidget.textDirection, TextDirection.rtl);
+  });
+
+  testWidgets('clipBehavior has expected defaults', (WidgetTester tester) async {
+    await tester.pumpWidget(
+        overlay(
+          child: const TextField(
+          ),
+        ),
+    );
+
+    final TextField textField = tester.firstWidget(find.byType(TextField));
+    expect(textField.clipBehavior, Clip.hardEdge);
+  });
+
+  testWidgets('Overflow clipBehavior none golden', (WidgetTester tester) async {
+    final Widget widget = overlay(
+      child: const RepaintBoundary(
+        key: ValueKey<int>(1),
+        child: TextField(
+          controller: OverflowWidgetTextEditingController()
+          clipBehavior: Clip.none,
+        ),
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    final TextField textField = tester.firstWidget(find.byType(TextField));
+    expect(textField.clipBehavior, Clip.none);
+
+    await expectLater(
+      find.byKey(const ValueKey<int>(1)),
+      matchesGoldenFile('overflow_clipbehavior_none.cupertino.0.png'),
+    );
   });
 }

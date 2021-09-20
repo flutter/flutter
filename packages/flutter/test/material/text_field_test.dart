@@ -58,6 +58,30 @@ class WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocaliza
   bool shouldReload(WidgetsLocalizationsDelegate old) => false;
 }
 
+// Simple controller that builds a WidgetSpan with 100 height.
+class OverflowWidgetTextEditingController extends TextEditingController {
+  @override
+  TextSpan buildTextSpan({
+    required BuildContext context,
+    TextStyle? style,
+    required bool withComposing,
+  }) {
+    return TextSpan(
+      style: style,
+      children: <InlineSpan>[
+        TextSpan(text: 'Hi'),
+        WidgetSpan(
+          alignment: PlaceholderAlignment.bottom,
+          child: Container(
+            color: Colors.redAccent,
+            height: 100,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 Widget overlay({ required Widget child }) {
   final OverlayEntry entry = OverlayEntry(
     builder: (BuildContext context) {
@@ -550,6 +574,39 @@ void main() {
     final TextField textField = tester.firstWidget(find.byType(TextField));
     expect(textField.cursorWidth, 2.0);
     expect(textField.cursorRadius, const Radius.circular(3.0));
+  });
+
+  testWidgets('clipBehavior has expected defaults', (WidgetTester tester) async {
+    await tester.pumpWidget(
+        overlay(
+          child: const TextField(
+          ),
+        ),
+    );
+
+    final TextField textField = tester.firstWidget(find.byType(TextField));
+    expect(textField.clipBehavior, Clip.hardEdge);
+  });
+
+  testWidgets('Overflow clipBehavior none golden', (WidgetTester tester) async {
+    final Widget widget = overlay(
+      child: const RepaintBoundary(
+        key: ValueKey<int>(1),
+        child: TextField(
+          controller: OverflowWidgetTextEditingController()
+          clipBehavior: Clip.none,
+        ),
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    final TextField textField = tester.firstWidget(find.byType(TextField));
+    expect(textField.clipBehavior, Clip.none);
+
+    await expectLater(
+      find.byKey(const ValueKey<int>(1)),
+      matchesGoldenFile('overflow_clipbehavior_none.material.0.png'),
+    );
   });
 
   testWidgets('Material cursor android golden', (WidgetTester tester) async {
