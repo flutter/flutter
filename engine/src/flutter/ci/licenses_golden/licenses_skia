@@ -1,4 +1,4 @@
-Signature: a6ae203371af8df9b7ab9245f73f7be7
+Signature: a4e2030120876d1219f5a4499f8c21ae
 
 UNUSED LICENSES:
 
@@ -2976,8 +2976,6 @@ FILE: ../../../third_party/skia/src/gpu/GrOpsTypes.h
 FILE: ../../../third_party/skia/src/gpu/GrPersistentCacheUtils.cpp
 FILE: ../../../third_party/skia/src/gpu/GrSubRunAllocator.cpp
 FILE: ../../../third_party/skia/src/gpu/GrSubRunAllocator.h
-FILE: ../../../third_party/skia/src/gpu/GrUniformAggregator.cpp
-FILE: ../../../third_party/skia/src/gpu/GrUniformAggregator.h
 FILE: ../../../third_party/skia/src/gpu/GrWritePixelsRenderTask.cpp
 FILE: ../../../third_party/skia/src/gpu/GrWritePixelsRenderTask.h
 FILE: ../../../third_party/skia/src/gpu/GrYUVATextureProxies.cpp
