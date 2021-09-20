@@ -294,7 +294,7 @@ class CupertinoTextField extends StatefulWidget {
     this.scrollController,
     this.scrollPhysics,
     this.autofillHints = const <String>[],
-
+    this.clipBehavior = Clip.hardEdge,
     this.restorationId,
     this.enableIMEPersonalizedLearning = true,
   }) : assert(textAlign != null),
